@@ -20,6 +20,10 @@ ifeq ($(HOST_OS),windows)
   MY_CFLAGS += -DWINVER=0x500
 endif
 
+ifeq ($(HOST_OS),freebsd)
+  MY_CFLAGS += -Wa,--32 -I/usr/local/include
+endif
+
 # We're going to use a specific version of gcc (3.4.6) if it is available
 # from the prebuilt directory.  This prevents many nasty emulator problems
 # due to the way QEMU works
@@ -268,8 +272,10 @@ LOCAL_CFLAGS    += -I$(LOCAL_PATH)/telephony
 #   ./android-rebuild.sh
 #   distrib/update-audio.sh
 #
+ifneq ($(HOST_OS),freebsd)
 QEMU_AUDIO_LIB := $(wildcard \
 	prebuilt/$(HOST_PREBUILT_TAG)/emulator/libqemu-audio.a)
+endif
 
 ifeq ($(QEMU_AUDIO_LIB),)
   AUDIO_SOURCES := audio.c noaudio.c wavaudio.c sdlaudio.c wavcapture.c mixeng.c
@@ -288,6 +294,11 @@ ifeq ($(QEMU_AUDIO_LIB),)
   ifeq ($(HOST_OS),linux)
     AUDIO_SOURCES += esdaudio.c alsaaudio.c audio_pt_int.c
     LOCAL_CFLAGS  += -DCONFIG_ESD -DCONFIG_ALSA
+  endif
+  
+  ifeq ($(HOST_OS),freebsd)
+    AUDIO_SOURCES += ossaudio.c
+    LOCAL_CFLAGS  += -DCONFIG_OSS
   endif
 
   LOCAL_SRC_FILES += $(AUDIO_SOURCES:%=audio/%)
@@ -352,7 +363,7 @@ LOCAL_CFLAGS    += -I$(LOCAL_PATH)/skins
 
 ifeq ($(HOST_ARCH),x86)
 # enable MMX code for our skin scaler
-LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx
+LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx -msse2
 endif
 
 # include other sources
@@ -396,6 +407,10 @@ endif
 ifeq ($(HOST_OS),windows)
   VL_SOURCES   += tap-win32.c
   LOCAL_LDLIBS += -mno-cygwin -mwindows -mconsole
+endif
+
+ifeq ($(HOST_OS),freebsd)
+    LOCAL_LDLIBS += -L/usr/local/lib -lpthread -lX11
 endif
 
 LOCAL_SRC_FILES += $(VL_SOURCES)
