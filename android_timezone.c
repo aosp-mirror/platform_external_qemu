@@ -95,7 +95,7 @@ bufprint_zoneinfo_timezone( char*  p, char*  end )
 /* on OS X, the timezone directory is always /usr/share/zoneinfo
  * this makes things easy.
  */
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(_BSD)
 
 #include <unistd.h>
 #include <limits.h>

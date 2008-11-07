@@ -23,7 +23,7 @@ typedef  mmx_t  argb_t;
 static inline mmx_t
 mmx_load8888( unsigned  value, mmx_t  zero )
 {
-    return _mm_unpacklo_pi8( _mm_cvtsi32_si64 (value), zero);
+    return _mm_unpacklo_pi8( _mm_cvtsi32_si64 ((uint32_t)value), zero);
 }
 
 static inline unsigned

@@ -37,6 +37,7 @@ extern const char*  socket_strerr(void);
  */
 #include <errno.h>
 #ifndef SLIRP_COMPILATION
+#include <sys/param.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
