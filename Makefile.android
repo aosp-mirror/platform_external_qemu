@@ -42,6 +42,12 @@ ifeq ($(HOST_ARCH),ppc)
     MY_CFLAGS += -D__powerpc__
 endif
 
+ifeq ($(HOST_OS),freebsd)
+  MY_CFLAGS += -Wa,--32 -I/usr/local/include
+endif
+
+#MY_CC :=
+
 ifeq ($(HOST_OS),darwin)
     MY_CFLAGS += -mdynamic-no-pic
 
@@ -436,7 +442,7 @@ LOCAL_SRC_FILES += $(SKIN_SOURCES:%=android/skin/%)
 
 ifeq ($(HOST_ARCH),x86)
 # enable MMX code for our skin scaler
-LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx
+LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx -msse2
 endif
 
 # include other sources
@@ -508,6 +514,10 @@ endif
 ifeq ($(HOST_OS),windows)
   #VL_SOURCES   += tap-win32.c
   LOCAL_LDLIBS += -mno-cygwin -mwindows -mconsole
+endif
+
+ifeq ($(HOST_OS),freebsd)
+    LOCAL_LDLIBS += -L/usr/local/lib -lpthread -lX11
 endif
 
 LOCAL_SRC_FILES += $(VL_SOURCES)
