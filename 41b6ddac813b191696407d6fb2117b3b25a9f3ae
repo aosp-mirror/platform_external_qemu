@@ -33,6 +33,23 @@
       "revId": "41b6ddac813b191696407d6fb2117b3b25a9f3ae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "za57d2d440f3b149f7da75966659d6633",
+        "filename": "skins/skin_argb.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1001302
+      },
+      "writtenOn": "2008-12-03T16:11:37Z",
+      "side": 1,
+      "message": "see amended change: http://review.source.android.com/1986\n\nProblem with compilation of this fragment is solved there in makefile by adding -msse2 switch to CFLAGS.",
+      "revId": "41b6ddac813b191696407d6fb2117b3b25a9f3ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
