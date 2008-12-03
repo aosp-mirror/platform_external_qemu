@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "zd3e839cbbac32b612ad046de0baee2e8",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1001302
+      },
+      "writtenOn": "2008-12-03T16:11:36Z",
+      "side": 1,
+      "message": "On 2008/11/11 10:36:11, David Turner wrote:\n\u003e I wonder why this is needed. does HOST_PREBUILT_TAG equal Linux on FreeBSD ?\n\nInitially, I\u0027ve made prebuilt/freebsd-x86 as symlink to prebuilt/linux-x86 to use linux prebuilts and there was problem with libraries in Linux compatibility mode. Now it\u0027s useless as I\u0027ve native prebuilded binaries for all execpt arm-eabi and emulator compiles successfully without ifneq FreeBSD. It\u0027s my mistake, I\u0027ll remove this condition.\n\nBy the way, distrib/update-audio.sh mentioned a little bit higher in this makefile uses perforce to submit library to depot. As publicly available sources of Android are in git-repository, this file seems obsolete and even confusing (especially, if you have set P4* environment variables for unrelated to Android depot)",
+      "revId": "41b6ddac813b191696407d6fb2117b3b25a9f3ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
