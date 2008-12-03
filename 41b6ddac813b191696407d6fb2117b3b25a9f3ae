@@ -16,6 +16,23 @@
       "revId": "41b6ddac813b191696407d6fb2117b3b25a9f3ae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ze5395e019f15334c7ca85fec30f91c6e",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2008-12-03T16:11:36Z",
+      "side": 1,
+      "message": "I wonder why this is needed. does HOST_PREBUILT_TAG equal Linux on FreeBSD ?",
+      "revId": "41b6ddac813b191696407d6fb2117b3b25a9f3ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
