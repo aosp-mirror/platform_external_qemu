@@ -346,4 +346,14 @@ int  socket_mcast_inet_drop_membership( int  s, uint32_t  ip );
 int  socket_mcast_inet_set_loop( int  s, int  enabled );
 int  socket_mcast_inet_set_ttl( int  s, int  ttl );
 
+/*
+ * IPPROTO_ICMP is used in slirp, but is not defined anywhere in
+ * included files sockets.h ip_icmp.h slirp.h
+ */
+#ifdef _BSD
+#ifndef IPPROTO_ICMP
+#include <netinet/in.h>
+#endif
+#endif
+
 #endif /* QEMU_SOCKET_H */
