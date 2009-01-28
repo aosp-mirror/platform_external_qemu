@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAABn////k\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2009-01-28T19:14:46Z",
+      "side": 1,
+      "message": "I don\u0027t think that -msse2 is needed anymore. Are you sure you can\u0027t build the emulator without it ?",
+      "revId": "f2c5666574e22c4515f78a8a75180de079881681",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
