@@ -15,7 +15,7 @@
  * the flags
  */
 
-#include <slirp.h>
+#include "slirp.h"
 
 static int      mbuf_alloced = 0;
 static MBufRec  m_freelist, m_usedlist;

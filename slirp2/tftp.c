@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#include <slirp.h>
+#include "slirp.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 

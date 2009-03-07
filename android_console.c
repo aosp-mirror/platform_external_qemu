@@ -24,7 +24,6 @@
 #include "sockets.h"
 #include "vl.h"
 #include "android.h"
-#include "sockets.h"
 #include "hw/goldfish_device.h"
 #include "hw/power_supply.h"
 #include "shaper.h"

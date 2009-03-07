@@ -6,7 +6,7 @@
  */
 
 #define WANT_SYS_IOCTL_H
-#include <slirp.h>
+#include "slirp.h"
 #include "ip_icmp.h"
 #include "main.h"
 #ifdef __sun__
