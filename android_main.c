@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (6ea48c Fixing emulator crash on Win32.)
 /* Copyright (C) 2006-2008 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
@@ -2862,3 +2863,5 @@ void  android_emulation_setup( void )
 void  android_emulation_teardown( void )
 {
 }
+=======
+>>>>>>> BRANCH (b3ee93 auto import from //branches/cupcake_rel/...@138607)
