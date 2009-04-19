@@ -4113,12 +4113,10 @@ int parse_host_port(SockAddress  *saddr, const char *str)
     if (r == p)
         return -1;
 
-    if (buf[0] == '\0') {
-        sock_address_init_inet( saddr, SOCK_ADDRESS_INET_ANY, port );
-    } else {
-        if (sock_address_init_resolve( saddr, buf, port, 0 ) < 0)
-            return -1;
-    }
+    if (buf[0] == '\0' && sock_address_init_resolve( saddr, buf, port, 0 ) == 0)
+        return 0;
+
+    sock_address_init_inet( saddr, SOCK_ADDRESS_INET_ANY, port );
     return 0;
 }
 

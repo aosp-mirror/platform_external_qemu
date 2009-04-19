@@ -624,7 +624,7 @@ sock_address_init_resolve( SockAddress*  a, const char*  hostname, uint16_t  por
     memset(hints, 0, sizeof(hints));
     hints->ai_family   = preferIn6 ? AF_INET6 : AF_UNSPEC;
 
-    if (getaddrinfo(hostname, NULL, hints, &res) < 0) {
+    if (getaddrinfo(hostname, NULL, hints, &res) != 0) {
         return _fix_errno();
     }
 
