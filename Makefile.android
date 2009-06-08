@@ -255,6 +255,10 @@ ifeq ($(HOST_OS),windows)
   CONFIG_WINAUDIO ?= yes
 endif
 
+ifeq ($(HOST_OS),freebsd)
+  CONFIG_OSS ?= yes
+endif
+
 ifeq ($(HOST_OS),linux)
   CONFIG_OSS  ?= yes
   CONFIG_ALSA ?= yes
@@ -442,7 +446,7 @@ LOCAL_SRC_FILES += $(SKIN_SOURCES:%=android/skin/%)
 
 ifeq ($(HOST_ARCH),x86)
 # enable MMX code for our skin scaler
-LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx -msse2
+LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx
 endif
 
 # include other sources
