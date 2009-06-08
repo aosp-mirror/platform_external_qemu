@@ -10,12 +10,13 @@
 ** GNU General Public License for more details.
 */
 #include "sockets.h"
-#include "vl.h"
+#include "qemu-common.h"
 #include <fcntl.h>
-#include "android_debug.h"
+#include <stddef.h>
+#include "qemu_debug.h"
 #include <stdlib.h>
 #include <string.h>
-#include "android_utils.h"
+#include "android/utils/path.h"
 
 #ifdef _WIN32
 #  define xxWIN32_LEAN_AND_MEAN
@@ -60,6 +61,7 @@ static int  winsock_error;
     EE(WSA_NOT_ENOUGH_MEMORY,ENOMEM,"not enough memory") \
     EE(WSA_INVALID_PARAMETER,EINVAL,"invalid parameter") \
     EE(WSAEINTR,EINTR,"interrupted function call") \
+	EE(WSAEALREADY,EALREADY,"operation already in progress") \
     EE(WSAEBADF,EBADF,"bad file descriptor") \
     EE(WSAEACCES,EACCES,"permission denied") \
     EE(WSAEFAULT,EFAULT,"bad address") \
@@ -404,6 +406,30 @@ sock_address_get_port( const SockAddress*  a )
     }
 }
 
+void
+sock_address_set_port( SockAddress*  a, uint16_t  port )
+{
+    switch (a->family) {
+    case SOCKET_INET:
+        a->u.inet.port = port;
+        break;
+    case SOCKET_IN6:
+        a->u.in6.port = port;
+        break;
+    default:
+        ;
+    }
+}
+
+const char*
+sock_address_get_path( const SockAddress*  a )
+{
+    if (a->family == SOCKET_UNIX)
+        return a->u._unix.path;
+    else
+        return NULL;
+}
+
 int
 sock_address_get_ip( const SockAddress*  a )
 {
@@ -598,8 +624,31 @@ sock_address_init_resolve( SockAddress*  a, const char*  hostname, uint16_t  por
     memset(hints, 0, sizeof(hints));
     hints->ai_family   = preferIn6 ? AF_INET6 : AF_UNSPEC;
 
-    if (getaddrinfo(hostname, NULL, hints, &res) < 0) {
-        return _fix_errno();
+    ret = getaddrinfo(hostname, NULL, hints, &res);
+    if (ret != 0) {
+        int  err;
+
+        switch (ret) {
+        case EAI_AGAIN:  /* server is down */
+        case EAI_FAIL:   /* server is sick */
+            err = EHOSTDOWN;
+            break;
+
+#ifdef EAI_NODATA
+        case EAI_NODATA:
+#endif
+        case EAI_NONAME:
+            err = ENOENT;
+            break;
+
+        case EAI_MEMORY:
+            err = ENOMEM;
+            break;
+
+        default:
+            err = EINVAL;
+        }
+        return _set_errno(err);
     }
 
     ret = sock_address_from_bsd( a, res->ai_addr, res->ai_addrlen );
@@ -858,7 +907,7 @@ int socket_set_oobinline(int  fd)
 }
 
 
-int  socket_set_lowlatency(int  fd)
+int  socket_set_nodelay(int  fd)
 {
     return socket_setoption(fd, IPPROTO_TCP, TCP_NODELAY, 1);
 }
