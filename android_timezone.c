@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (3a9f15 Removed not needed anymore sse2 option, updated to be compil)
 /* Copyright (C) 2007-2008 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
@@ -718,3 +719,5 @@ Exit:
 
 #endif /* _WIN32 */
 
+=======
+>>>>>>> BRANCH (2b8ea2 Fix build for platforms where deprecated symbol EAI_NODATA i)

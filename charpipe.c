@@ -9,9 +9,9 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "vl.h"
+#include "qemu-char.h"
 #include "cbuffer.h"
-#include "android_debug.h"
+#include "qemu_debug.h"
 
 #define  xxDEBUG
 
@@ -73,9 +73,6 @@ typedef struct CharPipeHalf {
     BipBuffer*            bip_first;
     BipBuffer*            bip_last;
     struct CharPipeHalf*  peer;         /* NULL if closed */
-    IOCanRWHandler*       fd_can_read;
-    IOReadHandler*        fd_read;
-    void*                 fd_opaque;
 } CharPipeHalf;
 
 
@@ -91,25 +88,7 @@ charpipehalf_close( CharDriverState*  cs )
         bip_buffer_free(bip);
     }
     ph->bip_last    = NULL;
-
     ph->peer        = NULL;
-    ph->fd_can_read = NULL;
-    ph->fd_read     = NULL;
-    ph->fd_opaque   = NULL;
-}
-
-
-static void
-charpipehalf_add_read_handler( CharDriverState*  cs,
-                               IOCanRWHandler*   fd_can_read,
-                               IOReadHandler*    fd_read,
-                               void*             fd_opaque )
-{
-    CharPipeHalf*  ph = cs->opaque;
-
-    ph->fd_can_read = fd_can_read;
-    ph->fd_read     = fd_read;
-    ph->fd_opaque   = fd_opaque;
 }
 
 
@@ -124,13 +103,13 @@ charpipehalf_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
     D("%s: writing %d bytes to %p: '%s'", __FUNCTION__,
       len, ph, quote_bytes( buf, len ));
 
-    if (bip == NULL && peer != NULL && peer->fd_read != NULL) {
+    if (bip == NULL && peer != NULL && peer->cs->chr_read != NULL) {
         /* no buffered data, try to write directly to the peer */
         while (len > 0) {
             int  size;
 
-            if (peer->fd_can_read) {
-                size = peer->fd_can_read( peer->fd_opaque );
+            if (peer->cs->chr_can_read) {
+                size = qemu_chr_can_read( peer->cs );
                 if (size == 0)
                     break;
 
@@ -139,7 +118,7 @@ charpipehalf_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
             } else
                 size = len;
 
-            peer->fd_read( peer->fd_opaque, buf, size );
+            qemu_chr_read( peer->cs, (uint8_t*)buf, size );
             buf += size;
             len -= size;
             ret += size;
@@ -179,7 +158,7 @@ charpipehalf_poll( CharPipeHalf*  ph )
     CharPipeHalf*   peer = ph->peer;
     int             size;
 
-    if (peer == NULL || peer->fd_read == NULL)
+    if (peer == NULL || peer->cs->chr_read == NULL)
         return;
 
     while (1) {
@@ -199,8 +178,8 @@ charpipehalf_poll( CharPipeHalf*  ph )
             continue;
         }
 
-        if (ph->fd_can_read) {
-            int  size2 = peer->fd_can_read( peer->fd_opaque );
+        if (ph->cs->chr_can_read) {
+            int  size2 = qemu_chr_can_read(peer->cs);
 
             if (size2 == 0)
                 break;
@@ -215,7 +194,7 @@ charpipehalf_poll( CharPipeHalf*  ph )
         D("%s: sending %d bytes from %p: '%s'", __FUNCTION__,
             avail, ph, quote_bytes( base, avail ));
 
-        peer->fd_read( peer->fd_opaque, base, avail );
+        qemu_chr_read( peer->cs, base, avail );
         cbuffer_read_step( bip->cb, avail );
     }
 }
@@ -229,12 +208,8 @@ charpipehalf_init( CharPipeHalf*  ph, CharPipeHalf*  peer )
     ph->bip_first   = NULL;
     ph->bip_last    = NULL;
     ph->peer        = peer;
-    ph->fd_can_read = NULL;
-    ph->fd_read     = NULL;
-    ph->fd_opaque   = NULL;
 
     cs->chr_write            = charpipehalf_write;
-    cs->chr_add_read_handler = charpipehalf_add_read_handler;
     cs->chr_ioctl            = NULL;
     cs->chr_send_event       = NULL;
     cs->chr_close            = charpipehalf_close;
@@ -278,12 +253,202 @@ qemu_chr_open_charpipe( CharDriverState*  *pfirst, CharDriverState*  *psecond )
     return 0;
 }
 
+/** This models a charbuffer, an object used to buffer
+ ** the data that is sent to a given endpoint CharDriverState
+ ** object.
+ **
+ ** On the other hand, any can_read() / read() request performed
+ ** by the endpoint will be passed to the CharBuffer's corresponding
+ ** handlers.
+ **/
+
+typedef struct CharBuffer {
+    CharDriverState  cs[1];
+    BipBuffer*       bip_first;
+    BipBuffer*       bip_last;
+    CharDriverState* endpoint;  /* NULL if closed */
+    char             closing;
+} CharBuffer;
+
+
+static void
+charbuffer_close( CharDriverState*  cs )
+{
+    CharBuffer*  cbuf = cs->opaque;
+
+    while (cbuf->bip_first) {
+        BipBuffer*  bip = cbuf->bip_first;
+        cbuf->bip_first = bip->next;
+        bip_buffer_free(bip);
+    }
+    cbuf->bip_last = NULL;
+    cbuf->endpoint = NULL;
+
+    if (cbuf->endpoint != NULL) {
+        qemu_chr_close(cbuf->endpoint);
+        cbuf->endpoint = NULL;
+    }
+}
+
+static int
+charbuffer_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
+{
+    CharBuffer*       cbuf = cs->opaque;
+    CharDriverState*  peer = cbuf->endpoint;
+    BipBuffer*        bip  = cbuf->bip_last;
+    int               ret  = 0;
+
+    D("%s: writing %d bytes to %p: '%s'", __FUNCTION__,
+      len, cbuf, quote_bytes( buf, len ));
+
+    if (bip == NULL && peer != NULL) {
+        /* no buffered data, try to write directly to the peer */
+        int  size = qemu_chr_write(peer, buf, len);
+
+        if (size < 0)  /* just to be safe */
+            size = 0;
+        else if (size > len)
+            size = len;
+
+        buf += size;
+        ret += size;
+        len -= size;
+    }
+
+    if (len == 0)
+        return ret;
+
+    /* buffer the remaining data */
+    if (bip == NULL) {
+        bip = bip_buffer_alloc();
+        cbuf->bip_first = cbuf->bip_last = bip;
+    }
+
+    while (len > 0) {
+        int  len2 = cbuffer_write( bip->cb, buf, len );
+
+        buf += len2;
+        ret += len2;
+        len -= len2;
+        if (len == 0)
+            break;
+
+        /* ok, we need another buffer */
+        cbuf->bip_last = bip_buffer_alloc();
+        bip->next = cbuf->bip_last;
+        bip       = cbuf->bip_last;
+    }
+    return  ret;
+}
+
+
+static void
+charbuffer_poll( CharBuffer*  cbuf )
+{
+    CharDriverState*  peer = cbuf->endpoint;
+
+    if (peer == NULL)
+        return;
+
+    while (1) {
+        BipBuffer*  bip = cbuf->bip_first;
+        uint8_t*    base;
+        int         avail;
+        int         size;
+
+        if (bip == NULL)
+            break;
+
+        avail = cbuffer_read_peek( bip->cb, &base );
+        if (avail == 0) {
+            cbuf->bip_first = bip->next;
+            if (cbuf->bip_first == NULL)
+                cbuf->bip_last = NULL;
+            bip_buffer_free(bip);
+            continue;
+        }
+
+        size = qemu_chr_write( peer, base, avail );
+
+        if (size < 0)  /* just to be safe */
+            size = 0;
+        else if (size > avail)
+            size = avail;
+
+        cbuffer_read_step( bip->cb, size );
+
+        if (size < avail)
+            break;
+    }
+}
+
+
+static void
+charbuffer_update_handlers( CharDriverState*  cs )
+{
+    CharBuffer*  cbuf = cs->opaque;
+
+    qemu_chr_add_handlers( cbuf->endpoint,
+                           cs->chr_can_read,
+                           cs->chr_read,
+                           cs->chr_event,
+                           cs->handler_opaque );
+}
+
+
+static void
+charbuffer_init( CharBuffer*  cbuf, CharDriverState*  endpoint )
+{
+    CharDriverState*  cs = cbuf->cs;
+
+    cbuf->bip_first   = NULL;
+    cbuf->bip_last    = NULL;
+    cbuf->endpoint    = endpoint;
+
+    cs->chr_write               = charbuffer_write;
+    cs->chr_ioctl               = NULL;
+    cs->chr_send_event          = NULL;
+    cs->chr_close               = charbuffer_close;
+    cs->chr_update_read_handler = charbuffer_update_handlers;
+    cs->opaque                  = cbuf;
+}
+
+#define MAX_CHAR_BUFFERS  8
+
+static CharBuffer  _s_charbuffers[ MAX_CHAR_BUFFERS ];
+
+CharDriverState*
+qemu_chr_open_buffer( CharDriverState*  endpoint )
+{
+    CharBuffer*  cbuf     = _s_charbuffers;
+    CharBuffer*  cbuf_end = cbuf + MAX_CHAR_BUFFERS;
+
+    if (endpoint == NULL)
+        return NULL;
+
+    for ( ; cbuf < cbuf_end; cbuf++ ) {
+        if (cbuf->endpoint == NULL)
+            break;
+    }
+
+    if (cbuf == cbuf_end)
+        return NULL;
+
+    charbuffer_init(cbuf, endpoint);
+    return cbuf->cs;
+}
+
+
 void
 charpipe_poll( void )
 {
     CharPipeState*  cp     = _s_charpipes;
     CharPipeState*  cp_end = cp + MAX_CHAR_PIPES;
 
+    CharBuffer*     cb     = _s_charbuffers;
+    CharBuffer*     cb_end = cb + MAX_CHAR_BUFFERS;
+
+    /* poll the charpipes */
     for ( ; cp < cp_end; cp++ ) {
         CharPipeHalf*  half;
 
@@ -294,5 +459,11 @@ charpipe_poll( void )
         half = cp->b;
         if (half->peer != NULL)
             charpipehalf_poll(half);
+    }
+
+    /* poll the charbuffers */
+    for ( ; cb < cb_end; cb++ ) {
+        if (cb->endpoint != NULL)
+            charbuffer_poll(cb);
     }
 }
