@@ -495,7 +495,7 @@ ifeq ($(HOST_OS),windows)
 endif
 
 ifeq ($(HOST_OS),freebsd)
-    LOCAL_LDLIBS += -L/usr/local/lib -lpthread -lX11
+    LOCAL_LDLIBS += -L/usr/local/lib -lpthread -lX11 -lutil
 endif
 
 LOCAL_SRC_FILES += $(VL_SOURCES)
