@@ -46,8 +46,6 @@ ifeq ($(HOST_OS),freebsd)
   MY_CFLAGS += -Wa,--32 -I/usr/local/include
 endif
 
-#MY_CC :=
-
 ifeq ($(HOST_OS),darwin)
     MY_CFLAGS += -mdynamic-no-pic
 
@@ -521,7 +519,7 @@ ifeq ($(HOST_OS),windows)
 endif
 
 ifeq ($(HOST_OS),freebsd)
-    LOCAL_LDLIBS += -L/usr/local/lib -lpthread -lX11 -lutil
+    LOCAL_LDLIBS += -L/usr/local/lib -lpthread -lX11 -lutil -lvga -lvgl -lusbhid
 endif
 
 LOCAL_SRC_FILES += $(VL_SOURCES)
