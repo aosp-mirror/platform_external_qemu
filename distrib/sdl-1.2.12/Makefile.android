@@ -4,6 +4,7 @@ CONFIG_DIRS     := \
     $(LOCAL_PATH)/objs \
     $(LOCAL_PATH)/include \
     $(LOCAL_PATH) \
+    /usr/local/include
 
 CONFIG_INCLUDES := $(CONFIG_DIRS:%=-I%)
 
