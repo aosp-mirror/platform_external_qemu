@@ -143,6 +143,9 @@ case "$OS" in
     windows)
         BUILD_CFLAGS="-D_GNU_SOURCE=1"
         ;;
+    freebsd-*)
+	BUILD_CFLAGS="-D_GNU_SOURCE=1 -fvisibility=hidden"
+	;;
     *)
         BUILD_CFLAGS=
 esac
