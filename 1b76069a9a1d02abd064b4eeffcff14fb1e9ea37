@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAi3////Y\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1001302
+      },
+      "writtenOn": "2009-08-31T16:30:46Z",
+      "side": 1,
+      "message": "this line was removed later in 11127",
+      "parentUuid": "AAAAin///oI\u003d",
+      "revId": "1b76069a9a1d02abd064b4eeffcff14fb1e9ea37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAin///oM\u003d",
         "filename": "Makefile.android",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2009-08-28T16:50:54Z",
       "side": 1,
       "message": "I believe the -msse2 is not necessary with the current sources. Are you sure it is needed?\n\nIf so, which exact compiler are you using?",
+      "revId": "1b76069a9a1d02abd064b4eeffcff14fb1e9ea37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAi3////U\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1001302
+      },
+      "writtenOn": "2009-08-31T16:30:46Z",
+      "side": 1,
+      "message": "Yes, it is not needed anymore (-msse2 it was added in November, 2008 and was removed in later change 11127).",
+      "parentUuid": "AAAAin///oM\u003d",
       "revId": "1b76069a9a1d02abd064b4eeffcff14fb1e9ea37",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
