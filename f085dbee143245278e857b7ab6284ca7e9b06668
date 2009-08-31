@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAi3////g\u003d",
+        "filename": "sockets.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1001302
+      },
+      "writtenOn": "2009-08-31T16:31:37Z",
+      "side": 1,
+      "message": "I\u0027ll move this definition to slirp.h",
+      "revId": "f085dbee143245278e857b7ab6284ca7e9b06668",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
