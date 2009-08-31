@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAi3////c\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1001302
+      },
+      "writtenOn": "2009-08-31T16:32:55Z",
+      "side": 1,
+      "message": "libutil is needed due openpty(). It\u0027s the same as in Linux related section in line 530. vl.c uses system openpty() on all systems except Solaris.",
+      "revId": "e9b3157c63da95ace95f94c90628c700d466a4c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
