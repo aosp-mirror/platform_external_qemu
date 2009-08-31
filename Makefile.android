@@ -30,10 +30,6 @@ ifeq ($(HOST_OS)-$(HOST_ARCH),linux-x86)
   MY_CFLAGS += -Wa,--32
 endif
 
-ifeq ($(HOST_OS),freebsd)
-  MY_CFLAGS += -Wa,--32 -I /usr/local/include
-endif
-
 ifeq ($(HOST_OS),windows)
   MY_CFLAGS += -D_WIN32 -mno-cygwin
   # we need Win32 features  that are available since Windows 2000 Professional/Server (NT 5.0)
@@ -42,6 +38,10 @@ endif
 
 ifeq ($(HOST_ARCH),ppc)
     MY_CFLAGS += -D__powerpc__
+endif
+
+ifeq ($(HOST_OS),freebsd)
+  MY_CFLAGS += -Wa,--32 -I/usr/local/include
 endif
 
 ifeq ($(HOST_OS),darwin)
