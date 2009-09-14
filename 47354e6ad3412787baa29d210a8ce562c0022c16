@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAm3////E\u003d",
+        "filename": "distrib/sdl-1.2.12/Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2009-09-14T12:50:08Z",
+      "side": 1,
+      "message": "It would be better if this was added with a HOST_OS check instead",
+      "revId": "47354e6ad3412787baa29d210a8ce562c0022c16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
