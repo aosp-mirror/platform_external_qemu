@@ -70,6 +70,13 @@ MY_CC := $(HOST_CC)
 #
 ifneq ($(BUILD_STANDALONE_EMULATOR),true)
 
+  ifeq ($(HOST_OS),darwin)
+    DARWIN_VERSION := $(strip $(shell sw_vers -productVersion))
+    ifneq ($(filter 10.6 10.6.%,$(DARWIN_VERSION)),)
+      MY_CC := gcc-4.0
+    endif
+  endif
+
   ifneq ($(USE_CCACHE),)
     MY_CC := prebuilt/$(HOST_PREBUILT_TAG)/ccache/ccache $(MY_CC)
   endif
