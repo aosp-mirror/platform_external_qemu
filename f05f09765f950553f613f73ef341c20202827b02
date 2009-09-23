@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAm3///B4\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2009-09-23T23:56:58Z",
+      "side": 1,
+      "message": "this should definitely go into the block that starts at line 45.\nAlso, it is better to filter negatively for the future, i.e. put something like\n\nifeq ($(filter 10.5 10.5.%,$(DARWIN_VERSION)),)\n  # we\u0027re on 10.6 or higher\n  MY_CC :\u003d gcc-4.0\nendif",
+      "revId": "f05f09765f950553f613f73ef341c20202827b02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
