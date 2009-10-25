@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # this script is used to rebuild all QEMU binaries for the host
 # platforms.

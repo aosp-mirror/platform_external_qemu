@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # this script is used to update the prebuilt libqemu-audio.a file in the Android source tree
 # we use a prebuilt package because we don't want to force the installation of the ALSA / EsounD / Whatever

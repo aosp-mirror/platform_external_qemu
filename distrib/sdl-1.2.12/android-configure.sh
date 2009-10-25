@@ -143,6 +143,9 @@ case "$OS" in
     windows)
         BUILD_CFLAGS="-D_GNU_SOURCE=1"
         ;;
+    freebsd-*)
+	BUILD_CFLAGS="-I/usr/local/include -D_GNU_SOURCE=1 -D_THREAD_SAFE"
+	;;
     *)
         BUILD_CFLAGS=
 esac
@@ -163,6 +166,10 @@ case "$HOST_OS" in
         SDL_CFLAGS="-D_GNU_SOURCE=1 -Dmain=SDL_main"
         SDL_STATIC_LIBS="-luser32 -lgdi32 -lwinmm"
         ;;
+    freebsd)
+	SDL_CFLAGS="-D_GNU_SOURCE=1 -D_THREAD_SAFE -I/usr/local/include"
+	SDL_STATIC_LIBS="-lm -lpthread"
+	;;
     *)
         SDL_CFLAGS=
         SDL_STATIC_LIBS=

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # this script is used to build a source distribution package for the Android emulator
 # the package includes:

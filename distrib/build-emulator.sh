@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #  this script is used to build a static version of the Android emulator
 #  from our distribution package.
