@@ -568,6 +568,15 @@ help_data(stralloc_t*  out)
 }
 
 static void
+help_kernel_params(stralloc_t* out)
+{
+    PRINTF(
+    "  use '-kernel_params <kernel_params>' to insert a customer kernel param"
+    " setting before the emulator default kernel command line.\n\n"
+    );
+}
+
+static void
 help_wipe_data(stralloc_t*  out)
 {
     PRINTF(
