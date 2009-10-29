@@ -2516,6 +2516,10 @@ int main(int argc, char **argv)
 
         p = bufprint(p, end, "qemu=1 console=ttyS0" );
 
+        if (opts->kcmdline) {
+            p = bufprint(p, end, " %s", opts->kcmdline );
+        }
+
         if (opts->shell || opts->logcat) {
             p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );
         }

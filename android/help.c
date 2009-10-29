@@ -568,6 +568,15 @@ help_data(stralloc_t*  out)
 }
 
 static void
+help_kcmdline(stralloc_t* out)
+{
+    PRINTF(
+    "  use '-kcmdline <k_cmdline>' to insert a customer kernel cmdline"
+    " setting before the emulator default kernel command line.\n\n"
+    );
+}
+
+static void
 help_wipe_data(stralloc_t*  out)
 {
     PRINTF(
