@@ -573,10 +573,12 @@ qemud_client_recv( void*  opaque, uint8_t*  msg, int  msglen )
 #endif
 
     while (msglen > 0) {
+	uint8_t*  data;
+	
+	data = NULL;
         /* read the header */
         if (c->need_header) {
             int       frame_size;
-            uint8_t*  data;
 
             if (!qemud_sink_fill(c->header, (const uint8_t**)&msg, &msglen))
                 break;
@@ -603,13 +605,13 @@ qemud_client_recv( void*  opaque, uint8_t*  msg, int  msglen )
             break;
 
         c->payload->buff[c->payload->size] = 0;
-
+        c->need_header = 1;
 
         if (c->clie_recv)
             c->clie_recv( c->clie_opaque, c->payload->buff, c->payload->size, c );
 
-        AFREE(c->payload->buff);
-        c->need_header = 1;
+	if(data)
+	    AFREE(data);
     }
 }
 
