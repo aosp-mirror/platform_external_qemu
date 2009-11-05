@@ -33,6 +33,24 @@
       "revId": "e30a61ffa14b9c61ac54db70f5071a25d902d90c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAo3///tQ\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000660
+      },
+      "writtenOn": "2009-11-05T22:55:03Z",
+      "side": 1,
+      "message": "Doh. Never mind.",
+      "parentUuid": "AAAAo3///tU\u003d",
+      "revId": "e30a61ffa14b9c61ac54db70f5071a25d902d90c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
