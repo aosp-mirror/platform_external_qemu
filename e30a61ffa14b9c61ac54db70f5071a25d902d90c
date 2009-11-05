@@ -16,6 +16,23 @@
       "revId": "e30a61ffa14b9c61ac54db70f5071a25d902d90c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAo3///tU\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2009-11-05T22:50:50Z",
+      "side": 1,
+      "message": "10.4 is already filtered out here (on line 56).\nthe purpose of this line is to filter out 10.5, which means we\u0027re on 10.6 or above",
+      "revId": "e30a61ffa14b9c61ac54db70f5071a25d902d90c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
