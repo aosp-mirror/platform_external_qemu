@@ -764,8 +764,11 @@ sock_address_list_create( const char*  hostname,
         switch (ret) {
 #ifdef EAI_ADDRFAMILY		
         case EAI_ADDRFAMILY: 
-#endif		
+#endif
+	case EAI_NONAME:
+#if defined(EAI_NODATA) && (EAI_NODATA != EAI_NONAME)
         case EAI_NODATA:
+#endif
             _set_errno(ENOENT);
             break;
         case EAI_FAMILY:
