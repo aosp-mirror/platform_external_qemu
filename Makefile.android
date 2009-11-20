@@ -41,7 +41,7 @@ ifeq ($(HOST_ARCH),ppc)
 endif
 
 ifeq ($(HOST_OS),freebsd)
-  MY_CFLAGS += -Wa,--32 -I/usr/local/include
+  MY_CFLAGS += -Wa,--32 -I/usr/local/include -DHOST_BSD
 endif
 
 ifeq ($(HOST_OS),darwin)
@@ -268,6 +268,7 @@ endif
 
 ifeq ($(HOST_OS),freebsd)
   CONFIG_OSS ?= yes
+  AUDIO_CFLAGS += -DHOST_BSD=1
 endif
 
 ifeq ($(CONFIG_COREAUDIO),yes)
