@@ -66,6 +66,7 @@
 
 #include "android/globals.h"
 #include "tcpdump.h"
+#include "qemulator.h"
 
 /* in vl.c */
 extern void  qemu_help(int  code);
@@ -294,25 +295,8 @@ void send_key_event(unsigned code, unsigned down)
 
 
 
-typedef struct {
-    AConfig*       aconfig;
-    SkinFile*      layout_file;
-    SkinLayout*    layout;
-    SkinKeyboard*  keyboard;
-    SkinWindow*    window;
-    int            win_x;
-    int            win_y;
-    int            show_trackball;
-    SkinTrackBall* trackball;
-    int            lcd_brightness;
-    SkinImage*     onion;
-    SkinRotation   onion_rotation;
-    int            onion_alpha;
 
-    AndroidOptions  opts[1];  /* copy of options */
-} QEmulator;
-
-static QEmulator   qemulator[1];
+QEmulator   qemulator[1];
 
 static void
 qemulator_done( QEmulator*  emulator )
