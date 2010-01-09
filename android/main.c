@@ -2236,6 +2236,9 @@ int main(int argc, char **argv)
         qemu_cpu_delay = (int) delay;
     }
 
+    if (!opts->my_ip)
+      opts->my_ip = "10.0.2.15";
+
     emulator_config_init();
     init_skinned_ui(opts->skindir, opts->skin, opts);
 
@@ -2656,7 +2659,7 @@ int main(int argc, char **argv)
         static char  params[1024];
         char        *p = params, *end = p + sizeof(params);
 
-        p = bufprint(p, end, "qemu=1 console=ttyS0" );
+        p = bufprint(p, end, "qemu=1 console=ttyS0 android.my_ip=%s", opts->my_ip );
 
         if (opts->shell || opts->logcat) {
             p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );
@@ -2760,7 +2763,7 @@ void  android_emulation_setup( void )
 
     AndroidOptions*  opts = qemulator->opts;
 
-    inet_strtoip("10.0.2.15", &guest_ip);
+    inet_strtoip(opts->my_ip, &guest_ip);
 
 #if 0
     if (opts->adb_port) {

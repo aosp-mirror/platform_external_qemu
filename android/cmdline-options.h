@@ -139,6 +139,8 @@ OPT_LIST(  prop, "<name>=<value>", "set system property on boot")
 OPT_PARAM( nand_limits, "<nlimits>", "enforce NAND/Flash read/write thresholds" )
 #endif
 
+OPT_PARAM( my_ip, "<ip address>", "set an IP address (default: 10.0.2.15)")
+
 
 #undef CFG_FLAG
 #undef CFG_PARAM
