@@ -121,6 +121,7 @@
 #include "audio/audio.h"
 #include "qemu_socket.h"
 #include "qemu-log.h"
+#include "qemulator.h"
 
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"
@@ -932,7 +933,7 @@ static void slirp_redirection(Monitor *mon, const char *redir_str)
         goto fail_syntax;
     }
     if (buf[0] == '\0') {
-        pstrcpy(buf, sizeof(buf), "10.0.2.15");
+        pstrcpy(buf, sizeof(buf), qemulator->opts->my_ip);
     }
     if (inet_strtoip(buf, &guest_addr) < 0) {
         goto fail_syntax;

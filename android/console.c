@@ -47,6 +47,7 @@
 #include <fcntl.h>
 #include "android/hw-events.h"
 #include "android/skin/keyboard.h"
+#include "qemulator.h"
 
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"
@@ -911,8 +912,8 @@ do_redir_add( ControlClient  client, char*  args )
         return -1;
     }
 
-    if (inet_strtoip("10.0.2.15", &guest_ip) < 0) {
-        control_write( client, "KO: unexpected internal failure when resolving 10.0.2.15\r\n" );
+    if (inet_strtoip(qemulator->opts->my_ip, &guest_ip) < 0) {
+        control_write( client, "KO: unexpected internal failure when resolving %s\r\n", qemulator->opts->my_ip );
         return -1;
     }
 
