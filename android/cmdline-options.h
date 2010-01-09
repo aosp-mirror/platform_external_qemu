@@ -143,6 +143,8 @@ OPT_PARAM( nand_limits, "<nlimits>", "enforce NAND/Flash read/write thresholds" 
 OPT_PARAM( memcheck, "<flags>", "enable memory access checking" )
 #endif  // CONFIG_MEMCHECK
 
+OPT_PARAM( my_ip, "<ip address>", "set an IP address (default: 10.0.2.15)")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

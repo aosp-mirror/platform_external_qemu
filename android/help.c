@@ -1348,6 +1348,17 @@ help_prop(stralloc_t  *out)
     );
 }
 
+static void
+help_my_ip(stralloc_t*  out)
+{
+    PRINTF(
+    "  By default, the network interface for the simulator is bound to 10.0.2.15.\n"
+    "  In most cases, this default is good. However, in some cases you might want a\n"
+    "  different IP address.\n"
+    "  Use '-my-ip 10.0.2.X option' to set an alternative IP address for the \n"
+    "  network interface.\n\n"
+    );
+}
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
