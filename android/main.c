@@ -2220,8 +2220,16 @@ int main(int argc, char **argv)
         qemu_cpu_delay = (int) delay;
     }
 
-    if (!opts->my_ip)
+    if (opts->my_ip) {
+      uint32_t dummy_ip;
+      if (strncmp("10.0.2.", opts->my_ip, 7) != 0
+          || inet_strtoip(opts->my_ip, &dummy_ip) < 0) {
+        fprintf(stderr, "invalid -my-ip parameter '%s', must be an IP address in the 10.0.2.x range\n", opts->my_ip);
+        emulator_help();
+      }
+    } else {
       opts->my_ip = "10.0.2.15";
+    }
 
     emulator_config_init();
     init_skinned_ui(opts->skindir, opts->skin, opts);
