@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAr3////w\u003d",
+        "filename": "android/cmdline-options.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-01-12T01:10:25Z",
+      "side": 1,
+      "message": "the description is too long and will make the formatting of emulator -help-options wrap around. Can you shorten it slightly, for example with something like:\n\nOPT_PARAM( kernel_params, \"\u003cparams\u003e\", \"insert custom kernel parameters\" )",
+      "revId": "c4e64d78d029a89028611b91c6528f21067d9e62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAr3////s\u003d",
+        "filename": "android/help.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-01-12T01:10:25Z",
+      "side": 1,
+      "message": "it\u0027s actually -kernel-params, the underscores in option variable names are translated into dashes by the parser.",
+      "revId": "c4e64d78d029a89028611b91c6528f21067d9e62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
