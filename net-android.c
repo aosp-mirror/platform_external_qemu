@@ -1584,6 +1584,9 @@ static ssize_t net_socket_receive(VLANClientState *vc, const uint8_t *buf, size_
     uint32_t len;
     len = htonl(size);
 
+    if (qemu_tcpdump_active)
+        qemu_tcpdump_packet(buf, size);
+
     socket_send(s->fd, (const uint8_t *)&len, sizeof(len));
     return socket_send(s->fd, buf, size);
 }
@@ -1592,8 +1595,10 @@ static ssize_t net_socket_receive_dgram(VLANClientState *vc, const uint8_t *buf,
 {
     NetSocketState *s = vc->opaque;
 
-    return sendto(s->fd, (const void *)buf, size, 0,
-                  (struct sockaddr *)&s->dgram_dst, sizeof(s->dgram_dst));
+    if (qemu_tcpdump_active)
+        qemu_tcpdump_packet(buf, size);
+
+    return socket_sendto(s->fd, (const void *)buf, size, &s->dgram_dst);
 }
 
 static void net_socket_send(void *opaque)
@@ -1652,6 +1657,9 @@ static void net_socket_send(void *opaque)
             buf += l;
             size -= l;
             if (s->index >= s->packet_len) {
+                if (qemu_tcpdump_active)
+                    qemu_tcpdump_packet(s->buf, s->packet_len);
+
                 qemu_send_packet(s->vc, s->buf, s->packet_len);
                 s->index = 0;
                 s->state = 0;
@@ -1674,6 +1682,10 @@ static void net_socket_send_dgram(void *opaque)
         qemu_set_fd_handler(s->fd, NULL, NULL, NULL);
         return;
     }
+
+    if (qemu_tcpdump_active)
+        qemu_tcpdump_packet(s->buf, size);
+
     qemu_send_packet(s->vc, s->buf, size);
 }
 
