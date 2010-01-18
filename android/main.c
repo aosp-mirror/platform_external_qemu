@@ -2243,6 +2243,16 @@ int main(int argc, char **argv)
         qemu_cpu_delay = (int) delay;
     }
 
+    if (opts->my_ip) {
+      uint32_t dummy_ip;
+      if (strncmp("10.1.2.", opts->my_ip, 7) != 0
+        || inet_strtoip(opts->my_ip, &dummy_ip) < 0) {
+          fprintf(stderr, "invalid -my-ip parameter '%s', "
+                  "must be an IP address in the 10.1.2.x range\n", opts->my_ip);
+        emulator_help();
+      }
+    }
+
     emulator_config_init();
     init_skinned_ui(opts->skindir, opts->skin, opts);
 
@@ -2674,6 +2684,9 @@ int main(int argc, char **argv)
 
         p = bufprint(p, end, "qemu=1 console=ttyS0" );
 
+        if (opts->my_ip)
+            p = bufprint(p, end, " android.my_ip=%s", opts->my_ip );
+
         if (opts->shell || opts->logcat) {
             p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );
         }
@@ -2755,6 +2768,24 @@ int main(int argc, char **argv)
     args[n++] = "-clock";
     args[n++] = "unix";
 #endif
+
+    if (opts->my_ip) {
+
+        char nic[50];
+        uint32_t my_ip;
+        inet_strtoip(opts->my_ip, &my_ip);
+        args[n++] = "-net";
+        sprintf(nic, "nic,vlan=1,macaddr=52:54:00:12:34:%02x", my_ip & 255);
+        args[n++] = nic;
+        args[n++] = "-net";
+        args[n++] = "socket,vlan=1,mcast=230.0.0.10:1234";
+
+        args[n++] = "-net";
+        args[n++] = "nic,vlan=0";
+        args[n++] = "-net";
+        args[n++] = "user,vlan=0";
+
+    }
 
     while(argc-- > 0) {
         args[n++] = *argv++;
