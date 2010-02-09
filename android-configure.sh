@@ -1,17 +1,30 @@
 #!/bin/sh
 #
-# this script is used to rebuild the Android emulator from sources
+# This script is used to rebuild the Android emulator from sources
 # in the current directory. It also contains logic to speed up the
-# rebuild if it detects that you're using the Android build system
+# rebuild if it detects that you're using the Android build system.
 #
-# in this case, it will use prebuilt binaries for the compiler,
+# In this case, it will use prebuilt binaries for the compiler,
 # the audio library and the SDL library. You can disable this
 # by using the --no-prebuilt-libs and --cc=<compiler> options
 #
+# If you are not using the android build system you will want to use
+# the Android prebuilt SDL library. You can get it from git:
 #
-# here's the list of environment variables you can define before
-# calling this script to control it (besides options):
+#  git clone --depth=1 git://android.git.kernel.org/platform/prebuilt.git
 #
+# You can configure with:
+#
+# ./android-config.sh --sdl-config=<prebuilt-path>/<os-arch>/sdl/bin/sdl-config
+#
+# If you prefer to compile SDL from source it can be obtained from:
+#
+#   http://android.git.kernel.org/pub/sdl-1.2.12-android-20080919.tar.gz
+#
+# If you are building on OS X 10.6, you want to explicitly use gcc-4.0
+# whe configuring to avoid errors. E.g:
+#
+# CC=gcc-4.0 ./android-config.sh
 #
 
 # first, let's see which system we're running this on
