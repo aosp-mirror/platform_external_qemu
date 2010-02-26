@@ -328,6 +328,7 @@ static int tcg_target_const_match(tcg_target_long val,
 #define MULLI  OPCD( 7)
 #define CMPLI  OPCD(10)
 #define CMPI   OPCD(11)
+#define SUBFIC OPCD( 8)
 
 #define LWZU   OPCD(33)
 #define STWU   OPCD(37)
@@ -1588,7 +1589,7 @@ static void tcg_out_op(TCGContext *s, int opc, const TCGArg *args,
             }
         }
         else {
-            tcg_out32 (s, ADDI | RT (0) | RA (args[2]) | 0xffe0);
+            tcg_out32 (s, SUBFIC | RT (0) | RA (args[2]) | 32);
             tcg_out32 (s, RLWNM
                        | RA (args[0])
                        | RS (args[1])
@@ -1641,7 +1642,7 @@ static void tcg_out_op(TCGContext *s, int opc, const TCGArg *args,
         break;
 
     case INDEX_op_not_i32:
-        tcg_out32 (s, NOR | SAB (args[1], args[0], args[0]));
+        tcg_out32 (s, NOR | SAB (args[1], args[0], args[1]));
         break;
 
     case INDEX_op_qemu_ld8u:
