@@ -43,6 +43,7 @@ OTHER:
   in order to build a completely static executable. This is required to run
   the emulator in restricted environments. No audio and graphics in this mode
   so using '-no-window' is required.
+- Removed sdlaudio.c to remove audio stack SDL dependency.
 
 ==============================================================================
 Changes between 5.0 and 1.13
