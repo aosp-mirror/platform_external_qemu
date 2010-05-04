@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAx3///PA\u003d",
+        "filename": "CHANGES.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-05-04T17:44:39Z",
+      "side": 1,
+      "message": "a line space is missing above this. Also, this should probably go into a \"Changes between 7.0 and 6.0\" section at that point.",
+      "revId": "fd126e5c26d36ce2e0614c0918c0b68a2fb4000a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
