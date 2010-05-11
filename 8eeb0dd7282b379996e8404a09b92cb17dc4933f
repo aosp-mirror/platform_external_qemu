@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAyn///4k\u003d",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 612,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-05-11T17:34:38Z",
+      "side": 1,
+      "message": "Thanks for doing this. There is still a small memory leak under certain conditions. For example, if it takes two recv() calls to fill the payload, the value of \u0027data\u0027 will be NULL on the second call when clie_recv is called, and the data is never freed.\n\none way to avoid that is simply to reload data before the clie_recv call(), with data \u003d c-\u003epayload-\u003ebuff.\n\nThis way, you ensure that the buffer is always freed after the call.\n\nCan I ask you to fix this as well ?",
+      "revId": "8eeb0dd7282b379996e8404a09b92cb17dc4933f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
