@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAyn///wU\u003d",
+        "filename": "android/qemulator.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-05-11T21:26:30Z",
+      "side": 1,
+      "message": "I would strongly prefer that we provide functions that operate on a QEmulator* pointer. Even if there is only a single QEmulator instance, it is better to hide that detail against a single qemulator_get() function instead of the API.\n\nThis ensures that we don\u0027t use hidden global variables that may byte us in the future during maintenance / debugging.",
+      "revId": "22b6abccdad62a1ba7c109c3487c80efc16dcf02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAyn///wQ\u003d",
+        "filename": "android/qemulator.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-05-11T21:26:30Z",
+      "side": 1,
+      "message": "same here, this should act on a QEmulator*",
+      "revId": "22b6abccdad62a1ba7c109c3487c80efc16dcf02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAyn///wM\u003d",
+        "filename": "android/qemulator.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-05-11T21:26:30Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "22b6abccdad62a1ba7c109c3487c80efc16dcf02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAyn///wI\u003d",
+        "filename": "android/qemulator.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-05-11T21:26:30Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "22b6abccdad62a1ba7c109c3487c80efc16dcf02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
