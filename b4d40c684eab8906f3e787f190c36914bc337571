@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAzH///zQ\u003d",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-05-14T19:11:15Z",
+      "side": 1,
+      "message": "there is a compiler warning when parsing this line: bufprint_app_dir() is undeclared, and by default an int result is selected instead of a pointer. A include is probably missing at the top of the source.\n\nApart from that, LGTM",
+      "revId": "b4d40c684eab8906f3e787f190c36914bc337571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
