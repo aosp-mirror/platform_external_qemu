@@ -1758,6 +1758,17 @@ int main(int argc, char **argv)
         qemu_cpu_delay = (int) delay;
     }
 
+    if (opts->shared_net_id) {
+        char*  end;
+        long   shared_net_id = strtol(opts->shared_net_id, &end, 0);
+        if (end == NULL || *end || shared_net_id < 1 || shared_net_id > 255) {
+            fprintf(stderr, "option -shared-net-id must be an integer between 1 and 255\n");
+            exit(1);
+        }
+    }
+
+
+
     emulator_config_init();
     init_skinned_ui(opts->skindir, opts->skin, opts);
 
@@ -2190,7 +2201,7 @@ int main(int argc, char **argv)
         p = bufprint(p, end, "qemu=1 console=ttyS0" );
 
         if (opts->shell || opts->logcat) {
-            p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );
+/*            p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );*/
         }
 
         if (opts->trace) {
@@ -2270,6 +2281,26 @@ int main(int argc, char **argv)
     args[n++] = "-clock";
     args[n++] = "unix";
 #endif
+
+    /* Set up the interfaces and boot properties for inter-emulator networking */
+    if (opts->shared_net_id) {
+        unsigned int shared_net_id = atoi(opts->shared_net_id);
+        char ip[11];
+        snprintf(ip, 11, "10.1.2.%d", shared_net_id);
+        boot_property_add("net.shared_net_ip",ip);
+
+        char nic[50];
+        args[n++] = "-net";
+        sprintf(nic, "nic,vlan=1,macaddr=52:54:00:12:34:%02x", shared_net_id);
+        args[n++] = nic;
+        args[n++] = "-net";
+        args[n++] = "socket,vlan=1,mcast=230.0.0.10:1234";
+
+        args[n++] = "-net";
+        args[n++] = "nic,vlan=0";
+        args[n++] = "-net";
+        args[n++] = "user,vlan=0";
+    }
 
     while(argc-- > 0) {
         args[n++] = *argv++;
