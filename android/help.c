@@ -1348,6 +1348,21 @@ help_prop(stralloc_t  *out)
     );
 }
 
+static void
+help_my_ip(stralloc_t*  out)
+{
+    PRINTF(
+    "  By default, the emulator only has one network interface bound to 10.0.2.15.\n"
+    "  In most cases, this is good enough. However, sometimes you might \n"
+    "  want to connect different VMs together.\n"
+    "  Use '-my-ip 10.1.2.X option' to add another network card to the \n"
+    "  emulator and bind it to the 10.1.2.X address.\n"
+    "  This will allow it to communicate directly with other running emulators\n"
+    "  using the VM interconnection network. \n\n"
+    );
+}
+
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
