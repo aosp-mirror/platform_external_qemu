@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAzH///pk\u003d",
+        "filename": "android/cmdline-options.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-05-16T04:20:47Z",
+      "side": 1,
+      "message": "This really, really lacks clarity:\n\n\"-my-ip\" is ambiguous because it can lead a candid user to think that the option is used to set the main IP, which is not the case.\n\nIf the IP prefix is always 10.1.2., there is little reason to expose that in the parameter.\n\n\"VM interconnection\" is an ambiguous term, what you really mean is that a virtual lan is being used to connect several emulated systems.\n\nI would suggest using a different name and description, for example:\n\n-shared-net-id \u003cnumber\u003e   \"Activate shared vlan access, using IP address 10.1.2.\u003cnumber\u003e\"",
+      "revId": "9700ba6271a939bc9ba81be1b2d5da655d522af8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAzH///pg\u003d",
+        "filename": "android/help.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1357,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-05-16T04:20:47Z",
+      "side": 1,
+      "message": "using empty lines in the text output for spacing purpose would be appreciated.\n\nIt would be nice if the documentation tried to explain what the option does. For example that this is really about connecting several emulators directly on a same emulated LAN (instead of having to go through two NAT proxies with redirections in the default case), that each emulator must have a distinct id/ip, or things will not work properly at all, etc...",
+      "revId": "9700ba6271a939bc9ba81be1b2d5da655d522af8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAzH///pc\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2263,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-05-16T04:20:47Z",
+      "side": 1,
+      "message": "it would probably be better to use a boot property to pass this value, instead of a kernel parameter. Look at android/boot-properties.h or even this file for details and usage example.",
+      "revId": "9700ba6271a939bc9ba81be1b2d5da655d522af8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
