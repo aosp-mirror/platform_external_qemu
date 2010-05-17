@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAzH///mE\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2204,
+      "author": {
+        "id": 1000660
+      },
+      "writtenOn": "2010-05-17T16:20:41Z",
+      "side": 1,
+      "message": "Was this commented out intentionally?",
+      "revId": "5083da47a10064dbd908383677c0c30b6c087c94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAzH///mA\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2295,
+      "author": {
+        "id": 1000660
+      },
+      "writtenOn": "2010-05-17T16:20:41Z",
+      "side": 1,
+      "message": "This doesn\u0027t look good - keeping a pointer to a local variable after it goes out of scope is a source of nasty surprises.",
+      "revId": "5083da47a10064dbd908383677c0c30b6c087c94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
