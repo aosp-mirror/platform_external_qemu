@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAzH///fc\u003d",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 1000660
+      },
+      "writtenOn": "2010-05-17T22:40:23Z",
+      "side": 1,
+      "message": "Please use spaces to match the style of the surrounding code, and avoid trailing spaces.",
+      "revId": "8eeb0dd7282b379996e8404a09b92cb17dc4933f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAyn///4k\u003d",
         "filename": "android/hw-qemud.c",
         "patchSetId": 2
