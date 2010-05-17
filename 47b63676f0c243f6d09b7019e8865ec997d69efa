@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAzH///h8\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2292,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-05-17T19:53:54Z",
+      "side": 1,
+      "message": "please use snprintf instead of sprintf",
+      "revId": "47b63676f0c243f6d09b7019e8865ec997d69efa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
