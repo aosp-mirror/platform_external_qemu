@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAzH///ec\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2292,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-05-17T23:23:39Z",
+      "side": 1,
+      "message": "generally speaking, I would prefer you use sizeof(nic) here, but that\u0027s ok. The patch is technically correct as-is. Please consider using this technique later (it reduces the potential for bugs in the future).",
+      "revId": "40beab42ecdc4e2a79714b54c401feb0fb33b6d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
