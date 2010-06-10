@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAzX//+2I\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 619,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-06-10T17:55:03Z",
+      "side": 1,
+      "message": "this is good. For your next patch, I recommend to define EMULATOR_CORE_CFLAGS / EMULATOR_CORE_LDLIBS in the emulator-core declaration, and use that here.\n\nNo need to delay this patch for this though.",
+      "revId": "a05284df475307e9a73e6d44ca077aa72371ef34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
