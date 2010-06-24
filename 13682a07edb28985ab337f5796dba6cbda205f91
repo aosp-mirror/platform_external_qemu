@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA0n///xc\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 641,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-06-24T05:13:27Z",
+      "side": 1,
+      "message": "ideally hw-lcd should go to the core sources, but it\u0027s probably ok to keep it in the UI for now.",
+      "revId": "13682a07edb28985ab337f5796dba6cbda205f91",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
