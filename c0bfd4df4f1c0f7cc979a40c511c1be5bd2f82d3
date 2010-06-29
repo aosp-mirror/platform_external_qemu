@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA0n///Vk\u003d",
+        "filename": "android/ui_core_protocol.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-06-29T05:11:52Z",
+      "side": 1,
+      "message": "I would prefer if you could use the android_ prefix here, as in android_core_get_hw_lcd_density().\n\nAlso, a small comment explaining the purpose of this header would be nice.",
+      "revId": "c0bfd4df4f1c0f7cc979a40c511c1be5bd2f82d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
