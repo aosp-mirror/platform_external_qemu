@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA0n//+pQ\u003d",
+        "filename": "android/keycode_array.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-07T23:28:09Z",
+      "side": 1,
+      "message": "I would prefer if you use the foo-bar.h convention, instead of foo_bar.h, like the rest of the sources.\n\n(same applies to ui_core_common.h by the way)",
+      "revId": "5153d02e64e80a4364f5a0488456059b2f74c8aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA0n//+pM\u003d",
+        "filename": "android/keycode_array.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-07T23:28:09Z",
+      "side": 1,
+      "message": "Can you rename this to something a bit smaller and more descriptive, e.g. AKeycodeBuffer ?",
+      "revId": "5153d02e64e80a4364f5a0488456059b2f74c8aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
