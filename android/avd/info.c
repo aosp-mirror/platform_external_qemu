@@ -557,7 +557,7 @@ imageLoader_empty( ImageLoader*  l, unsigned  flags )
 }
 
 
-/* copy image file from a given source 
+/* copy image file from a given source
  * assumes locking is needed.
  */
 static void
@@ -605,7 +605,7 @@ imageLoader_load( ImageLoader*    l,
 
     /* set image state */
     l->pState[0] = (flags & IMAGE_DONT_LOCK) == 0
-                 ? IMAGE_STATE_MUSTLOCK 
+                 ? IMAGE_STATE_MUSTLOCK
                  : IMAGE_STATE_READONLY;
 
     /* check user-provided path */
@@ -650,7 +650,7 @@ imageLoader_load( ImageLoader*    l,
         if (flags & IMAGE_REQUIRED) {
             AvdInfo*  i = l->info;
 
-            derror("could not find required %s image (%s).", 
+            derror("could not find required %s image (%s).",
                    l->imageText, l->imageFile);
 
             if (i->inAndroidBuild) {
@@ -783,7 +783,7 @@ _getImagePaths(AvdInfo*  i, AvdInfoParams*  params )
                             IMAGE_IGNORE_IF_LOCKED);
 
         /* if the file was not found, ignore it */
-        if (l->pPath[0] && !path_exists(l->pPath[0])) 
+        if (l->pPath[0] && !path_exists(l->pPath[0]))
         {
             D("ignoring non-existing %s at %s: %s",
               l->imageText, l->pPath[0], strerror(errno));
@@ -1251,7 +1251,7 @@ _getBuildImagePaths( AvdInfo*  i, AvdInfoParams*  params )
 
         /* if the user provided one cache image, lock & use it */
         if ( params->forcePaths[l->id] != NULL ) {
-            imageLoader_load(l, IMAGE_REQUIRED | 
+            imageLoader_load(l, IMAGE_REQUIRED |
                                 IMAGE_IGNORE_IF_LOCKED);
         }
     }
@@ -1457,7 +1457,7 @@ avdInfo_getHwConfig( AvdInfo*  i, AndroidHwConfig*  hw )
     if (ret == 0 && i->hardwareIni != NULL) {
         ret = androidHwConfig_read(hw, i->hardwareIni);
     }
-
+#if 0
     /* special product-specific hardware configuration */
     if (i->androidOut != NULL)
     {
@@ -1468,7 +1468,7 @@ avdInfo_getHwConfig( AvdInfo*  i, AndroidHwConfig*  hw )
             }
         }
     }
-
+#endif
     return ret;
 }
 
