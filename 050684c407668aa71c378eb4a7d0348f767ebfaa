@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA0n//+Ys\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 661,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-09T17:10:17Z",
+      "side": 1,
+      "message": "I think monitor.c and readline.c should definitely be part of the core. Where are they used in the UI ?",
+      "revId": "050684c407668aa71c378eb4a7d0348f767ebfaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA0n//+Yo\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 664,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-09T17:10:17Z",
+      "side": 1,
+      "message": "qemu-char-android.c should also be part of the core. I guess it is there for now because android/hw-qemud.c depends on it for now. To keep in mind for the future.",
+      "revId": "050684c407668aa71c378eb4a7d0348f767ebfaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
