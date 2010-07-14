@@ -41,6 +41,10 @@ OTHER:
 
 - Fix net shaping regression: -netspeed and -netdelay did not work anymore.
 
+- The phone number is now derived from the console port, i.e. 1555521554 if the
+  port is 5554.  Also it is now possible to call using 15555215554, 5555215554 
+  and 5215554 in addition of 5554.
+
 ==============================================================================
 Changes between 6.0 and 5.0
 
