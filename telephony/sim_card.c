@@ -12,6 +12,7 @@
 #include "sim_card.h"
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 
 /* set ENABLE_DYNAMIC_RECORDS to 1 to enable dynamic records
  * for now, this is an experimental feature that needs more testing
@@ -29,19 +30,21 @@ typedef struct ASimCardRec_ {
 
     char        out_buff[ 256 ];
     int         out_size;
+    char        msisdn[ 78 ];
 
 } ASimCardRec;
 
 static ASimCardRec  _s_card[1];
 
 ASimCard
-asimcard_create( void )
+asimcard_create(int port)
 {
     ASimCard  card    = _s_card;
     card->status      = A_SIM_STATUS_READY;
     card->pin_retries = 0;
     strncpy( card->pin, "0000", sizeof(card->pin) );
     strncpy( card->puk, "12345678", sizeof(card->puk) );
+    sprintf( card->msisdn, "+CRSM: 144,0,ffffffffffffffffffffffffffffffffffff0781515525%d1%d%df%dffffffffffff", (port / 1000) % 10, (port / 10) % 10, (port / 100) % 10, port % 10);
     return card;
 }
 
@@ -428,6 +431,9 @@ asimcard_io( ASimCard  sim, const char*  cmd )
         }
     }
 #endif
+
+    if (!strcmp("+CRSM=178,28480,1,4,32", cmd))
+        return sim->msisdn;
 
     for (nn = 0; answers[nn].cmd != NULL; nn++) {
         if ( !strcmp( answers[nn].cmd, cmd ) ) {

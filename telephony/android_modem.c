@@ -357,7 +357,7 @@ amodem_create( int  base_port, AModemUnsolFunc  unsol_func, void*  unsol_opaque 
     modem->unsol_func   = unsol_func;
     modem->unsol_opaque = unsol_opaque;
 
-    modem->sim = asimcard_create();
+    modem->sim = asimcard_create(base_port);
 
     return  modem;
 }
@@ -1533,8 +1533,22 @@ handleDial( const char*  cmd, AModem  modem )
     if (len >= sizeof(call->number))
         len = sizeof(call->number)-1;
 
-    memcpy( call->number, cmd, len );
-    call->number[len] = 0;
+    if (len == 10 && !strncmp(cmd, "555521", 6)) {
+        memcpy( call->number, "1", 1 );
+        memcpy( call->number+1, cmd, len );
+        call->number[len + 1] = 0;
+    } else if (len == 7 && !strncmp(cmd, "521", 3)) {
+        memcpy( call->number, "1555", 4 );
+        memcpy( call->number+4, cmd, len );
+        call->number[len + 4] = 0;
+    } else if (len == 4) {
+        memcpy( call->number, "1555521", 7 );
+        memcpy( call->number+7, cmd, len );
+        call->number[len + 7] = 0;
+    } else {
+        memcpy( call->number, cmd, len );
+        call->number[len] = 0;
+    }
 
     vcall->is_remote = (remote_number_string_to_port(call->number) > 0);
 
