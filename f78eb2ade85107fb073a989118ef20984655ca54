@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA3H///xI\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1536,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-21T21:28:13Z",
+      "side": 1,
+      "message": "I would prefer that you use constant macros here instead. Hard-coding numbers in strings is often not a very good idea.\n\nAlso, a little comment explaining what\u0027s happening here would be welcomed.",
+      "revId": "f78eb2ade85107fb073a989118ef20984655ca54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3H///xE\u003d",
+        "filename": "telephony/remote_call.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-21T21:28:13Z",
+      "side": 1,
+      "message": "better use memcmp() here. Also, avoid hard-coded numbers and use a constant macro instead.",
+      "revId": "f78eb2ade85107fb073a989118ef20984655ca54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3H///xA\u003d",
+        "filename": "telephony/sim_card.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-21T21:28:13Z",
+      "side": 1,
+      "message": "never use sprintf. Instead, use snprintf() and specify the target buffer size.\n\nIt probably is better to only store in this field the actual port number or substring, and make the concatenation with the +CRSM... prefix explicit in the code that uses it below.",
+      "revId": "f78eb2ade85107fb073a989118ef20984655ca54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3H///w8\u003d",
+        "filename": "telephony/sim_card.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 435,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-21T21:28:13Z",
+      "side": 1,
+      "message": "see comment above about the msisdn field.",
+      "revId": "f78eb2ade85107fb073a989118ef20984655ca54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
