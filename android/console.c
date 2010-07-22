@@ -1000,6 +1000,65 @@ static const CommandDefRec  redir_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
+/*****                          C D M A   M O D E M                                    ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static const struct {
+    const char *            name;
+    const char *            display;
+    ACdmaSubscriptionSource source;
+} _cdma_subscription_sources[] = {
+    { "nv",            "Read subscription from non-volatile RAM", A_SUBSCRIPTION_NVRAM },
+    { "ruim",          "Read subscription from RUIM", A_SUBSCRIPTION_RUIM },
+    { NULL, NULL, A_SUBSCRIPTION_UNKNOWN },
+};
+
+static int
+do_cdma_ssource( ControlClient  client, char*  args )
+{
+    int nn;
+    if (!args) {
+        control_write( client, "KO: missing argument, try 'cdma ssource <source>\r\n" );
+        return -1;
+    }
+
+    for (nn = 0; ; nn++) {
+        const char*         name    = _cdma_subscription_sources[nn].name;
+        ACdmaSubscriptionSource ssource = _cdma_subscription_sources[nn].source;
+
+        if (!name)
+            break;
+
+        if (!strcmp( args, name )) {
+            amodem_set_cdma_subscription_source( android_modem, ssource );
+            return 0;
+        }
+    }
+    control_write( client, "KO: Don't know source %s\r\n", args );
+    return -1;
+}
+
+static int
+do_cdma_prl_version( ControlClient client, char * args )
+{
+    int version = 0;
+    char *endptr;
+
+    if (!args) {
+        control_write( client, "KO: missing argument, try 'cdma prl_version <version>'\r\n");
+        return -1;
+    }
+
+    version = strtol(args, &endptr, 0);
+    if (endptr != args) {
+        amodem_set_cdma_prl_version( android_modem, version );
+    }
+}
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
 /*****                           G S M   M O D E M                                     ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -1341,6 +1400,13 @@ static const CommandDefRec  gsm_in_commands[] =
 };
 #endif
 
+
+static const CommandDefRec  cdma_commands[] =
+{
+    { "ssource", "Set the current subscription source",
+      "'cdma ssource' allows setting of the subscription source to either RUIM or NV\r\n", NULL,
+      do_cdma_ssource, NULL },
+};
 
 static const CommandDefRec  gsm_commands[] =
 {
@@ -2178,6 +2244,10 @@ static const CommandDefRec   main_commands[] =
     { "gsm", "GSM related commands",
       "allows you to change GSM-related settings, or to make a new inbound phone call\r\n", NULL,
       NULL, gsm_commands },
+
+    { "cdma", "CDMA related commands",
+      "allows you to change CDMA-related settings\r\n", NULL,
+      NULL, cdma_commands },
 
     { "kill", "kill the emulator instance", NULL, NULL,
 	  do_kill, NULL },

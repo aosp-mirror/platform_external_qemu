@@ -60,12 +60,29 @@ typedef enum {
 } ARegistrationState;
 
 typedef enum {
-    A_GPRS_NETWORK_UNKNOWN = 0,
-    A_GPRS_NETWORK_GPRS,
-    A_GPRS_NETWORK_EDGE,
-    A_GPRS_NETWORK_UMTS
+    A_DATA_NETWORK_UNKNOWN = 0,
+    A_DATA_NETWORK_GPRS,
+    A_DATA_NETWORK_EDGE,
+    A_DATA_NETWORK_UMTS,
+    A_DATA_NETWORK_LTE,
+    A_DATA_NETWORK_CDMA1X,
+    A_DATA_NETWORK_EVDO, // TODO: Should REV0, REVA and REVB be added?
 } AGprsNetworkType;
+// TODO: Merge the usage of these two structs and rename AGprsNetworkType
+typedef enum {
+    A_TECH_GSM = 0,
+    A_TECH_WCDMA,
+    A_TECH_CDMA,
+    A_TECH_EVDO,
+    A_TECH_LTE,
+    A_TECH_UNKNOWN // This must always be the last value in the enum
+} AModemTech;
 
+typedef enum {
+    A_SUBSCRIPTION_NVRAM = 0,
+    A_SUBSCRIPTION_RUIM,
+    A_SUBSCRIPTION_UNKNOWN // This must always be the last value in the enum
+} ACdmaSubscriptionSource;
 extern ARegistrationState  amodem_get_voice_registration( AModem  modem );
 extern void                amodem_set_voice_registration( AModem  modem, ARegistrationState    state );
 
@@ -74,6 +91,8 @@ extern void                amodem_set_data_registration( AModem  modem, ARegistr
 extern void                amodem_set_data_network_type( AModem  modem, AGprsNetworkType   type );
 
 extern AGprsNetworkType    android_parse_network_type( const char*  speed );
+extern AModemTech          android_parse_modem_tech( const char*  tech );
+extern void                amodem_set_cdma_subscription_source( AModem modem, ACdmaSubscriptionSource ssource );
 
 
 /** OPERATOR NAMES
