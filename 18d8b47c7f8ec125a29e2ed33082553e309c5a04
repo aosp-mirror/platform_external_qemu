@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA3H///uA\u003d",
+        "filename": "CHANGES.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-22T00:51:52Z",
+      "side": 1,
+      "message": "Can you make this a bit clearer (also, the first number has only two 5\u0027s before the final 4), as in:\n\nThe phone can now be called with additional numbers. Using the 1-555-521 prefix. I.e. you can now use all of the following numbers to call/sms an emulator that runs on console port 5554:\n\n- 5554\n- 521 5554\n- 555 521 5554\n- 1 555 521 5554",
+      "revId": "18d8b47c7f8ec125a29e2ed33082553e309c5a04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
