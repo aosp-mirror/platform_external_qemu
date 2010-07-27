@@ -15,7 +15,7 @@
 #include "android/charmap.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
-#include "android/hw-sensors.h"
+#include "android/ui-core-protocol.h"
 #include <SDL_syswm.h>
 #include "user-events.h"
 #include <math.h>
