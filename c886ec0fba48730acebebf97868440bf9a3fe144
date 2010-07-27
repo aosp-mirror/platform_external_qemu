@@ -16,6 +16,24 @@
       "revId": "c886ec0fba48730acebebf97868440bf9a3fe144",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3X///xo\u003d",
+        "filename": "android/display.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-27T19:18:22Z",
+      "side": 1,
+      "message": "Ah, display.c should really be part of the core, not the UI.\nI\u0027ll fix this in Makefile.android.",
+      "parentUuid": "AAAA3X///yU\u003d",
+      "revId": "c886ec0fba48730acebebf97868440bf9a3fe144",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
