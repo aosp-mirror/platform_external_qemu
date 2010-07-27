@@ -692,6 +692,7 @@ UI_SOURCES = loadpng.c \
              android/qemulator.c \
              android/keycode.c \
              android/help.c \
+             android/display.c \
 
 ##############################################################################
 # lists of source files used by both, emulator UI and emulator core
