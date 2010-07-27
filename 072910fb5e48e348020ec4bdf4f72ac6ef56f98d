@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA3X///wA\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 967,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-27T21:44:45Z",
+      "side": 1,
+      "message": "You probably want to factor that into MY_CFLAGS or something like that, instead of repeating it into two module declarations.",
+      "revId": "072910fb5e48e348020ec4bdf4f72ac6ef56f98d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3X///v8\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 970,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-27T21:44:45Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "072910fb5e48e348020ec4bdf4f72ac6ef56f98d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3X///v4\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 981,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-27T21:44:45Z",
+      "side": 1,
+      "message": "this could probably moved to UI_AND_CORE",
+      "revId": "072910fb5e48e348020ec4bdf4f72ac6ef56f98d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3X///v0\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 986,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-27T21:44:45Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "072910fb5e48e348020ec4bdf4f72ac6ef56f98d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3X///vw\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 1012,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-27T21:44:45Z",
+      "side": 1,
+      "message": "The mmx stuff is only used by the UI part, as far as I understand (to optimized window scaling)",
+      "revId": "072910fb5e48e348020ec4bdf4f72ac6ef56f98d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3X///vs\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-27T21:44:45Z",
+      "side": 1,
+      "message": "It would be nice to collect them into something like QEMU_SYSTEM_LDLIBS / QEMU_SYTEM_CFLAGS and reuse these instead.",
+      "revId": "072910fb5e48e348020ec4bdf4f72ac6ef56f98d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3X///vo\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 1046,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-27T21:44:45Z",
+      "side": 1,
+      "message": "windres is used to embed the icon into the executable. I\u0027m pretty sure this is not needed for the core executable.",
+      "revId": "072910fb5e48e348020ec4bdf4f72ac6ef56f98d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3X///vk\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 1067,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-27T21:44:45Z",
+      "side": 1,
+      "message": "this header file is used by both executables, it probably only needs to be generated once, in the UI_AND_CORE stuff, I assume.\n\nUltimately, this will only be used by the code.",
+      "revId": "072910fb5e48e348020ec4bdf4f72ac6ef56f98d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3X///vg\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 1081,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-27T21:44:45Z",
+      "side": 1,
+      "message": "same as above.",
+      "revId": "072910fb5e48e348020ec4bdf4f72ac6ef56f98d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3X///vc\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 1096,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-27T21:44:45Z",
+      "side": 1,
+      "message": "another generated source file that don\u0027t need to be re-generated.",
+      "revId": "072910fb5e48e348020ec4bdf4f72ac6ef56f98d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA3X///vY\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 1138,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-27T21:44:45Z",
+      "side": 1,
+      "message": "the following below should probably be part of QEMU_SYSTEM_CFLAGS/LDLIBS",
+      "revId": "072910fb5e48e348020ec4bdf4f72ac6ef56f98d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
