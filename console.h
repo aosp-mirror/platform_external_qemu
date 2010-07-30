@@ -119,8 +119,9 @@ struct DisplayChangeListener {
 };
 
 struct DisplayAllocator {
-    DisplaySurface* (*create_displaysurface)(int width, int height);
-    DisplaySurface* (*resize_displaysurface)(DisplaySurface *surface, int width, int height);
+    DisplaySurface* (*create_displaysurface)(int width, int height, int bpp);
+    DisplaySurface* (*resize_displaysurface)(DisplaySurface *surface, int width,
+                     int height, int bpp);
     void (*free_displaysurface)(DisplaySurface *surface);
 };
 
@@ -148,18 +149,21 @@ PixelFormat qemu_default_pixelformat(int bpp);
 
 extern struct DisplayAllocator default_allocator;
 DisplayAllocator *register_displayallocator(DisplayState *ds, DisplayAllocator *da);
-DisplaySurface* defaultallocator_create_displaysurface(int width, int height);
-DisplaySurface* defaultallocator_resize_displaysurface(DisplaySurface *surface, int width, int height);
+DisplaySurface* defaultallocator_create_displaysurface(int width, int height, int bpp);
+DisplaySurface* defaultallocator_resize_displaysurface(DisplaySurface *surface,
+                                                       int width, int height, int bpp);
 void defaultallocator_free_displaysurface(DisplaySurface *surface);
 
-static inline DisplaySurface* qemu_create_displaysurface(DisplayState *ds, int width, int height)
+static inline DisplaySurface* qemu_create_displaysurface(DisplayState *ds, int width, int height, int bbp)
 {
-    return ds->allocator->create_displaysurface(width, height);    
+    return ds->allocator->create_displaysurface(width, height, bbp);
 }
 
-static inline DisplaySurface* qemu_resize_displaysurface(DisplayState *ds, int width, int height)
+static inline DisplaySurface* qemu_resize_displaysurface(DisplayState *ds,
+                                                         int width, int height,
+                                                         int bpp)
 {
-    return ds->allocator->resize_displaysurface(ds->surface, width, height);
+    return ds->allocator->resize_displaysurface(ds->surface, width, height, bpp);
 }
 
 static inline void qemu_free_displaysurface(DisplayState *ds)

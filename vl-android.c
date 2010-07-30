@@ -337,6 +337,9 @@ extern char* op_http_proxy;
 // Path to the file containing specific key character map.
 char* op_charmap_file = NULL;
 
+/* Framebuffer dimensions, passed with -android-gui option. */
+char* android_op_gui = NULL;
+
 extern void  dprint( const char* format, ... );
 
 #define TFR(expr) do { if ((expr) != -1) break; } while (errno == EINTR)
@@ -421,6 +424,41 @@ static void default_ioport_writel(void *opaque, uint32_t address, uint32_t data)
 #ifdef DEBUG_UNUSED_IOPORT
     fprintf(stderr, "unused outl: port=0x%04x data=0x%02x\n", address, data);
 #endif
+}
+
+/* Parses -android-gui command line option, extracting width, height and bits
+ * per pixel parameters for the GUI console used in this session of the
+ * emulator. -android-gui option contains exactly three comma-separated positive
+ * integer numbers in strict order: width goes first, width goes next, and bits
+ * per pixel goes third. This routine verifies that format and return 0 if all
+ * three numbers were extracted, or -1 if string format was incorrect for that
+ * option. Note that this routine does not verify that extracted values are
+ * correct!
+ */
+static int
+parse_androig_gui_option(const char* op, int* width, int* height, int* bpp)
+{
+    char* next_token;
+
+    *width = strtol((char*)op, &next_token, 0);
+    if (next_token == NULL || *next_token != ',') {
+        fprintf(stderr, "option -android-gui must be followed by three comma "
+                        "separated positive integer numbers\n");
+        return -1;
+    }
+    *height = strtol(next_token+1, &next_token, 0);
+    if (next_token == NULL || *next_token != ',') {
+        fprintf(stderr, "option -android-gui must be followed by three comma "
+                        "separated positive integer numbers\n");
+        return -1;
+    }
+    *bpp = strtol(next_token+1, &next_token, 0);
+    if (next_token == NULL || *next_token) {
+        fprintf(stderr, "option -android-gui must be followed by three comma "
+                        "separated positive integer numbers\n");
+        return -1;
+    }
+    return 0;
 }
 
 /***********************************************************/
@@ -2855,7 +2893,16 @@ static void dumb_display_init(void)
 {
     DisplayState *ds = qemu_mallocz(sizeof(DisplayState));
     ds->allocator = &default_allocator;
-    ds->surface = qemu_create_displaysurface(ds, 640, 480);
+    ds->surface = qemu_create_displaysurface(ds, 640, 480, 32);
+    register_displaystate(ds);
+}
+
+static void
+android_display_init_from(int width, int height, int rotation, int bpp)
+{
+    DisplayState *ds = qemu_mallocz(sizeof(DisplayState));
+    ds->allocator = &default_allocator;
+    ds->surface = qemu_create_displaysurface(ds, width, height, bpp);
     register_displaystate(ds);
 }
 
@@ -5746,6 +5793,10 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_charmap:
                 op_charmap_file = (char*)optarg;
                 break;
+
+            case QEMU_OPTION_android_gui:
+                android_op_gui = (char*)optarg;
+                break;
             }
         }
     }
@@ -6169,8 +6220,26 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
-    if (!display_state)
-        dumb_display_init();
+    if (!display_state) {
+        if (android_op_gui) {
+            /* Initialize display from the command line parameters. */
+            int width, height, bpp;
+            if (parse_androig_gui_option(android_op_gui, &width, &height, &bpp)) {
+                exit(1);
+            }
+            android_display_init_from(width, height, 0, bpp);
+        } else {
+            dumb_display_init();
+        }
+    } else if (android_op_gui) {
+        /* Resize display from the command line parameters. */
+        int width, height, bpp;
+        if (parse_androig_gui_option(android_op_gui, &width, &height, &bpp)) {
+            exit(1);
+        }
+        display_state->surface = qemu_resize_displaysurface(display_state, width, height, bpp);
+    }
+
     /* just use the first displaystate for the moment */
     ds = display_state;
 
