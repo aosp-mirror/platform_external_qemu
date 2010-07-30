@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA33///4E\u003d",
+        "filename": "console.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-30T18:42:01Z",
+      "side": 1,
+      "message": "technically, this forks the code compared to upstream. I would prefer if we could do that without changing the signature of these callbacks. Can we try that with a custom allocator instead ? or by simply changing the default from 32 to 16 ?",
+      "revId": "63a204d54a0610f9306f8c4980b7b6eeba6f1898",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA33///4A\u003d",
+        "filename": "qemu-options.hx",
+        "patchSetId": 1
+      },
+      "lineNbr": 1626,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-30T18:42:01Z",
+      "side": 1,
+      "message": "I would prefer if we could use something like width\u003d\u003cwidth\u003e,height\u003d\u003cheight\u003e,bpp\u003d\u003cbpp\u003e\n\nthis is more similar to most other qemu options, and allows for more flexibility (and makes debugging a bit easier).",
+      "revId": "63a204d54a0610f9306f8c4980b7b6eeba6f1898",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
