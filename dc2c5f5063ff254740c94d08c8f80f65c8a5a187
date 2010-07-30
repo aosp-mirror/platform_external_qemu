@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA33///yo\u003d",
+        "filename": "console.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-30T23:33:45Z",
+      "side": 1,
+      "message": "can you restore these files to the original version, since only spacing changes are not worth submitting here.",
+      "revId": "dc2c5f5063ff254740c94d08c8f80f65c8a5a187",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA33///yk\u003d",
+        "filename": "qemu-options.hx",
+        "patchSetId": 2
+      },
+      "lineNbr": 1627,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-07-30T23:33:45Z",
+      "side": 1,
+      "message": "I think it should be width\u003d\u003cwidth\u003e,height\u003d\u003cheight\u003e,bpp\u003d\u003cbits per pixel\u003e",
+      "revId": "dc2c5f5063ff254740c94d08c8f80f65c8a5a187",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
