@@ -17,7 +17,7 @@
 #ifdef _WIN32
 #include <process.h>
 #endif
-#include "libslirp.h"
+
 #include "sockets.h"
 
 #include "android/android.h"
@@ -32,8 +32,10 @@
 #include "math.h"
 
 #include "android/charmap.h"
+#if !defined(CONFIG_STANDALONE_UI)
 #include "modem_driver.h"
 #include "proxy_http.h"
+#endif  // CONFIG_STANDALONE_UI
 
 #include "android/utils/debug.h"
 #include "android/resource.h"
@@ -69,7 +71,7 @@
 #include "android/qemulator.h"
 #include "android/display.h"
 
-/* in vl.c */
+/* in qemu-help.c */
 extern void  qemu_help(int  code);
 
 #include "framebuffer.h"
@@ -702,29 +704,6 @@ void emulator_help( void )
     exit(1);
 }
 
-static int
-add_dns_server( const char*  server_name )
-{
-    SockAddress   addr;
-
-    if (sock_address_init_resolve( &addr, server_name, 55, 0 ) < 0) {
-        fprintf(stderr,
-                "### WARNING: can't resolve DNS server name '%s'\n",
-                server_name );
-        return -1;
-    }
-
-    D( "DNS server name '%s' resolved to %s", server_name, sock_address_to_string(&addr) );
-
-    if ( slirp_add_dns_server( &addr ) < 0 ) {
-        fprintf(stderr,
-                "### WARNING: could not add DNS server '%s' to the network stack\n", server_name);
-        return -1;
-    }
-    return 0;
-}
-
-
 /* this function is used to perform auto-detection of the
  * system directory in the case of a SDK installation.
  *
@@ -892,7 +871,6 @@ int main(int argc, char **argv)
     int    radio_serial = 0;
     int    qemud_serial = 0;
     int    shell_serial = 0;
-    int    dns_count = 0;
     unsigned  cachePartitionSize = 0;
     unsigned  systemPartitionSize = 0;
     unsigned  dataPartitionSize = 0;
@@ -1401,41 +1379,6 @@ int main(int argc, char **argv)
     if (opts->no_cache)
         opts->cache = 0;
 
-    if (opts->dns_server) {
-        char*  x = strchr(opts->dns_server, ',');
-        dns_count = 0;
-        if (x == NULL)
-        {
-            if ( add_dns_server( opts->dns_server ) == 0 )
-                dns_count = 1;
-        }
-        else
-        {
-            x = strdup(opts->dns_server);
-            while (*x) {
-                char*  y = strchr(x, ',');
-
-                if (y != NULL)
-                    *y = 0;
-
-                if (y == NULL || y > x) {
-                    if ( add_dns_server( x ) == 0 )
-                        dns_count += 1;
-                }
-
-                if (y == NULL)
-                    break;
-
-                x = y+1;
-            }
-        }
-        if (dns_count == 0)
-            fprintf( stderr, "### WARNING: will use system default DNS server\n" );
-    }
-
-    if (dns_count == 0)
-        dns_count = slirp_get_system_dns_servers();
-
     n = 1;
     /* generate arguments for the underlying qemu main() */
     {
@@ -1462,6 +1405,11 @@ int main(int argc, char **argv)
             args[n++] = "-cpu";
             args[n++] = "cortex-a8";
          }
+    }
+
+    if (opts->dns_server) {
+        args[n++] = "-dns-server";
+        args[n++] = opts->dns_server;
     }
 
     args[n++] = "-initrd";
@@ -1778,14 +1726,6 @@ int main(int argc, char **argv)
             p = bufprint(p, end, " android.tracing=1");
         }
 
-#ifdef CONFIG_MEMCHECK
-        if (opts->memcheck) {
-            /* This will set ro.kernel.memcheck system property
-             * to memcheck's tracing flags. */
-            p = bufprint(p, end, " memcheck=%s", opts->memcheck);
-        }
-#endif  // CONFIG_MEMCHECK
-
         if (!opts->no_jni) {
             p = bufprint(p, end, " android.checkjni=1");
         }
@@ -1821,10 +1761,6 @@ int main(int argc, char **argv)
         else
         {
             p = bufprint(p, end, " android.qemud=ttyS%d", qemud_serial);
-        }
-
-        if (dns_count > 0) {
-            p = bufprint(p, end, " android.ndns=%d", dns_count);
         }
 
         if (opts->bootchart) {

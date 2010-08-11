@@ -719,6 +719,7 @@ UI_AND_CORE_SOURCES = osdep.c \
                       sockets.c \
                       keymaps.c \
                       qemu-malloc.c \
+                      qemu-help.c \
                       android/keycode-array.c \
                       android/charmap.c \
                       android/hw-qemud.c \

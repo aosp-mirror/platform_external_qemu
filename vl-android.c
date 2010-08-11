@@ -211,6 +211,10 @@ unsigned long   android_verbose;
 #include "libslirp.h"
 #endif
 
+/* in qemu-help.c */
+extern void  qemu_help(int  code);
+extern void version(void);
+
 //#define DEBUG_UNUSED_IOPORT
 //#define DEBUG_IOPORT
 //#define DEBUG_NET
@@ -350,6 +354,9 @@ char* android_op_hwini = NULL;
 
 /* Memory checker options. */
 char* android_op_memcheck = NULL;
+
+/* -dns-server option value. */
+char* android_op_dns_server = NULL;
 
 extern int android_display_width;
 extern int android_display_height;
@@ -4546,44 +4553,6 @@ static void main_loop(void)
     pause_all_vcpus();
 }
 
-static void version(void)
-{
-    printf("QEMU PC emulator version " QEMU_VERSION QEMU_PKGVERSION ", Copyright (c) 2003-2008 Fabrice Bellard\n");
-}
-
-void qemu_help(int exitcode)
-{
-    version();
-    printf("usage: %s [options] [disk_image]\n"
-           "\n"
-           "'disk_image' is a raw hard image image for IDE hard disk 0\n"
-           "\n"
-#define DEF(option, opt_arg, opt_enum, opt_help)        \
-           opt_help
-#define DEFHEADING(text) stringify(text) "\n"
-#include "qemu-options.h"
-#undef DEF
-#undef DEFHEADING
-#undef GEN_DOCS
-           "\n"
-           "During emulation, the following keys are useful:\n"
-           "ctrl-alt-f      toggle full screen\n"
-           "ctrl-alt-n      switch to virtual console 'n'\n"
-           "ctrl-alt        toggle mouse and keyboard grab\n"
-           "\n"
-           "When using -nographic, press 'ctrl-a h' to get some help.\n"
-           ,
-           "qemu",
-           DEFAULT_RAM_SIZE,
-#ifndef _WIN32
-           DEFAULT_NETWORK_SCRIPT,
-           DEFAULT_NETWORK_DOWN_SCRIPT,
-#endif
-           DEFAULT_GDBSTUB_PORT,
-           "/tmp/qemu.log");
-    exit(exitcode);
-}
-
 #define HAS_ARG 0x0001
 
 enum {
@@ -4975,6 +4944,46 @@ char *qemu_find_file(int type, const char *name)
     return buf;
 }
 
+static int
+add_dns_server( const char*  server_name )
+{
+    SockAddress   addr;
+
+    if (sock_address_init_resolve( &addr, server_name, 55, 0 ) < 0) {
+        fprintf(stderr,
+                "### WARNING: can't resolve DNS server name '%s'\n",
+                server_name );
+        return -1;
+    }
+
+    fprintf(stderr,
+            "DNS server name '%s' resolved to %s\n", server_name, sock_address_to_string(&addr) );
+
+    if ( slirp_add_dns_server( &addr ) < 0 ) {
+        fprintf(stderr,
+                "### WARNING: could not add DNS server '%s' to the network stack\n", server_name);
+        return -1;
+    }
+    return 0;
+}
+
+/* Appends a parameter to a string of parameters separated with space.
+ * Pararm:
+ *  param_str String containing parameters separated with space.
+ *  param Parameter to append to the string.
+ *  size - Size (in characters) of the buffer addressed by param_str.
+ */
+static void
+append_param(char* param_str, const char* arg, int size)
+{
+    if (*param_str) {
+        strncat(param_str, " ", size);
+        strncat(param_str, arg, size);
+    } else {
+        strncpy(param_str, arg, size);
+    }
+}
+
 int main(int argc, char **argv, char **envp)
 {
     const char *gdbstub_dev = NULL;
@@ -5024,6 +5033,14 @@ int main(int argc, char **argv, char **envp)
 #ifdef CONFIG_STANDALONE_CORE
     IniFile*  hw_ini = NULL;
 #endif  // CONFIG_STANDALONE_CORE
+    /* Container for the kernel initialization parameters collected in this
+     * routine. */
+    char kernel_cmdline_append[1024];
+    /* Combines kernel initialization parameters passed from the UI with
+     * the parameters collected in this routine. */
+    char kernel_cmdline_full[1024];
+    char tmp_str[1024];
+    int    dns_count = 0;
 
     init_clocks();
 
@@ -5068,6 +5085,8 @@ int main(int argc, char **argv, char **envp)
     snapshot = 0;
     kernel_filename = NULL;
     kernel_cmdline = "";
+    kernel_cmdline_append[0] = '\0';
+    kernel_cmdline_full[0] = '\0';
     cyls = heads = secs = 0;
     translation = BIOS_ATA_TRANSLATION_AUTO;
     monitor_device = "vc:80Cx24C";
@@ -5820,9 +5839,17 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_android_hw:
                 android_op_hwini = (char*)optarg;
                 break;
+            case QEMU_OPTION_dns_server:
+                android_op_dns_server = (char*)optarg;
+                break;
+
 #ifdef CONFIG_MEMCHECK
             case QEMU_OPTION_android_memcheck:
                 android_op_memcheck = (char*)optarg;
+                sprintf(tmp_str, "memcheck=%s", android_op_memcheck);
+                /* This will set ro.kernel.memcheck system property
+                 * to memcheck's tracing flags. */
+                append_param(kernel_cmdline_append, tmp_str, sizeof(kernel_cmdline_append));
                 break;
 #endif // CONFIG_MEMCHECK
             }
@@ -5867,6 +5894,45 @@ int main(int argc, char **argv, char **envp)
     androidHwConfig_read(android_hw, hw_ini);
     iniFile_free(hw_ini);
 #endif  // CONFIG_STANDALONE_CORE
+
+    if (android_op_dns_server) {
+        char*  x = strchr(android_op_dns_server, ',');
+        dns_count = 0;
+        if (x == NULL)
+        {
+            if ( add_dns_server( android_op_dns_server ) == 0 )
+                dns_count = 1;
+        }
+        else
+        {
+            x = strdup(android_op_dns_server);
+            while (*x) {
+                char*  y = strchr(x, ',');
+
+                if (y != NULL)
+                    *y = 0;
+
+                if (y == NULL || y > x) {
+                    if ( add_dns_server( x ) == 0 )
+                        dns_count += 1;
+                }
+
+                if (y == NULL)
+                    break;
+
+                x = y+1;
+            }
+        }
+        if (dns_count == 0)
+            fprintf( stderr, "### WARNING: will use system default DNS server\n" );
+    }
+
+    if (dns_count == 0)
+        dns_count = slirp_get_system_dns_servers();
+    if (dns_count) {
+        sprintf(tmp_str, "android.ndns=%d", dns_count);
+        append_param(kernel_cmdline_append, tmp_str, sizeof(kernel_cmdline_append));
+    }
 
 #ifdef CONFIG_MEMCHECK
     if (android_op_memcheck) {
@@ -6235,8 +6301,22 @@ int main(int argc, char **argv, char **envp)
     }
 #endif
 
+    /* Combine kernel command line passed from the UI with parameters
+     * collected during initialization. */
+    if (*kernel_cmdline) {
+        if (kernel_cmdline_append[0]) {
+            snprintf(kernel_cmdline_full, sizeof(kernel_cmdline_full), "%s %s",
+                     kernel_cmdline, kernel_cmdline_append);
+        } else {
+            strncpy(kernel_cmdline_full, kernel_cmdline, sizeof(kernel_cmdline_full));
+        }
+    } else if (kernel_cmdline_append[0]) {
+        strncpy(kernel_cmdline_full, kernel_cmdline_append, sizeof(kernel_cmdline_full));
+    }
+
+    printf("*********** %s\n", kernel_cmdline_full);
     machine->init(ram_size, boot_devices,
-                  kernel_filename, kernel_cmdline, initrd_filename, cpu_model);
+                  kernel_filename, kernel_cmdline_full, initrd_filename, cpu_model);
 
 
     for (env = first_cpu; env != NULL; env = env->next_cpu) {
