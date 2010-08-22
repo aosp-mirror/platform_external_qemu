@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA5n////k\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 940,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-22T04:05:03Z",
+      "side": 1,
+      "message": "we can most certainly remove this special case, this will avoid moving qemu_help in its own file.",
+      "revId": "0fb79146a0604c595ef216dec0fd744dcc5f67c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA5n////0\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4959,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-22T04:05:03Z",
+      "side": 1,
+      "message": "you probably don\u0027t want to print that on stderr if this is not an error.",
+      "revId": "0fb79146a0604c595ef216dec0fd744dcc5f67c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA5n////s\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4980,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-22T04:05:03Z",
+      "side": 1,
+      "message": "Please do _not_ naively use strncat and strncpy since these functions will not properly zero-terminate the target buffer in case of overflow, leading to the risk of using/sending non-terminated strings in the program (which leads to security and hard to find bugs).\n\nquick fix is to use \u0027size-1\u0027 when calling these functions, and then always do a param_str[size-1] \u003d 0 before exiting.",
+      "revId": "0fb79146a0604c595ef216dec0fd744dcc5f67c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA5n////8\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5849,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-22T04:05:03Z",
+      "side": 1,
+      "message": "please use snprintf instead of sprintf",
+      "revId": "0fb79146a0604c595ef216dec0fd744dcc5f67c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA5n////w\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5901,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-22T04:05:03Z",
+      "side": 1,
+      "message": "this is a bit too complex, and it leaks the strdup-ed strings anyway. You can modify the android_op_dns_server inplace instead to replace the commas by a 0, this will make for easier code. Example:\n\nwhile (*x) {\n  y \u003d strchr(x, \u0027,\u0027);\n  if (y !\u003d NULL) {\n    *y++ \u003d 0;\n  } else {\n    y \u003d x + strlen(x);\n  }\n  if (y \u003e x \u0026\u0026 add_dns_server(x) \u003d\u003d 0)\n    dns_count +\u003d 1;\n  x \u003d y;\n}",
+      "revId": "0fb79146a0604c595ef216dec0fd744dcc5f67c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA5n////4\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5933,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-22T04:05:03Z",
+      "side": 1,
+      "message": "same here,no sprintf please.",
+      "revId": "0fb79146a0604c595ef216dec0fd744dcc5f67c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA5n////o\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 6311,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-22T04:05:03Z",
+      "side": 1,
+      "message": "again, naive use of strncpy can lead to problems in the future.",
+      "revId": "0fb79146a0604c595ef216dec0fd744dcc5f67c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
