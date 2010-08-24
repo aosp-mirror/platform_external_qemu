@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA6H///qk\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-24T14:15:12Z",
+      "side": 1,
+      "message": "probably not needed anymore, but that\u0027s ok.",
+      "revId": "7b3a811871b816c8855a4ae56b533de2fbb435c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA6H///qg\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 5019,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-24T14:15:12Z",
+      "side": 1,
+      "message": "technically, this is not needed because strncat will stop at the end of the buffer anyway.",
+      "revId": "7b3a811871b816c8855a4ae56b533de2fbb435c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA6H///qc\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 5975,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-24T14:15:12Z",
+      "side": 1,
+      "message": "actually, snprintf will zero-terminate the output properly. Ain\u0027t the C library fun ?",
+      "revId": "7b3a811871b816c8855a4ae56b533de2fbb435c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
