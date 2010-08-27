@@ -2680,3 +2680,114 @@ void HELPER(on_ret)(void* ret) {
     memcheck_on_ret((target_ulong)ret);
 }
 #endif  // CONFIG_MEMCHECK
+
+#ifdef CONFIG_TRACE_BB
+typedef struct {
+    uint32_t  start;
+    uint32_t  end;
+} StartRange;
+
+typedef struct {
+    int          inited;
+    int          enabled;
+    int          numRanges;
+    StartRange*  ranges;
+} EnterBBState;
+
+/* Add a new start range to the EnterBBState
+ * start: range start address
+ * end:   range end address (inclusive)
+ */
+static void
+add_bb_range(EnterBBState*  s, uint32_t start, uint32_t end)
+{
+    s->ranges = realloc(s->ranges, (s->numRanges+1)*sizeof(StartRange));
+    s->ranges[s->numRanges].start = start;
+    s->ranges[s->numRanges].end   = end;
+    s->numRanges += 1;
+}
+
+/* Initialize EnterBBState by reading the values of start ranges
+ * from the environment.
+ */
+static void
+init_enter_bb_state(EnterBBState*  s)
+{
+    char*       buf;
+    const char* env = getenv("QEMU_START_BB_RANGES");
+    s->inited = 1;
+
+    if (env == NULL || env[0] == '\0')
+        return;
+
+    /* format is <range1>,<range2>,<range3>,...
+     * where each range can be:
+     *   <hexaddress>
+     *   <starthexaddress>:<endhexaddress>
+     */
+    {
+        char*  env2 = strdup(env);
+        char*  p = env2;
+
+        while (*p) {
+            /* locate next comma, replace by '\0' */
+            uint32_t start, end;
+            char* q = strchr(p, ',');
+            if (q == NULL) {
+                q = p + strlen(p);
+            } else {
+                *q++ = '\0';
+            }
+            if (sscanf(p, "%x:%x", &start, &end) == 2) {
+                add_bb_range(s, start, end);
+            }
+            else if (sscanf(p, "%x", &start) == 1) {
+                add_bb_range(s, start, start);
+            }
+            else {
+                fprintf(stderr, "warning: invalid BB range value ignored: '%s'\n", p);
+            }
+            p = q;
+        }
+        free(env2);
+    }
+}
+
+/* Returns 1 if pc is in one of the recorded start ranges,
+ * 0 otherwise.
+ */
+static int
+find_in_bb_ranges(EnterBBState*  s, uint32_t  pc)
+{
+    int  nn;
+    for (nn = 0; nn < s->numRanges; nn++) {
+        if (pc >= s->ranges[nn].start &&
+            pc <= s->ranges[nn].end) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void HELPER(enterBB)(uint32_t pc)
+{
+    static EnterBBState  state[1];
+
+    /* lower bit is not part of the address, but indicates thumb mode when set to 1 */
+    int thumb = (pc & 1) != 0;
+    pc &= ~1;
+
+
+    if (!state->inited)
+        init_enter_bb_state(state);
+
+    if (!state->enabled) {
+        if (!find_in_bb_ranges(state, pc))
+            return;
+        state->enabled = 1;
+    }
+
+    /* if tracing is enabled, print the address with a thumb/ARM flag */
+    printf( "%c %08x\n", thumb ? 't' : 'A', pc);
+}
+#endif

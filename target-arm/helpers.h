@@ -26,6 +26,15 @@ DEF_HELPER_2(traceBB64, void, i64, i64)
 #endif
 #endif
 
+/* CONFIG_TRACE_BB is a special mode used to
+ * debug the emulator by tracing the execution
+ * of basic blocks, without recording stuff like
+ * CONFIG_TRACE
+ */
+#if CONFIG_TRACE_BB
+DEF_HELPER_1(enterBB, void, i32)
+#endif
+
 #define PAS_OP(pfx)  \
     DEF_HELPER_3(pfx ## add8, i32, i32, i32, ptr) \
     DEF_HELPER_3(pfx ## sub8, i32, i32, i32, ptr) \

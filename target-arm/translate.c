@@ -5794,6 +5794,17 @@ gen_traceBB( uint64_t  bbNum, target_phys_addr_t  tb )
 }
 #endif /* CONFIG_TRACE */
 
+#ifdef CONFIG_TRACE_BB
+static void
+gen_enterBB( uint32_t  pc )
+{
+    TCGv  tmp = tcg_temp_new_i32();
+    tcg_gen_movi_i32(tmp, pc);
+    gen_helper_enterBB(tmp);
+    tcg_temp_free_i32(tmp);
+}
+#endif
+
 static void disas_arm_insn(CPUState * env, DisasContext *s)
 {
     unsigned int cond, insn, val, op1, i, shift, rm, rs, rn, rd, sh;
@@ -8913,7 +8924,9 @@ static inline void gen_intermediate_code_internal(CPUState *env,
         trace_bb_start(dc->pc);
     }
 #endif
-
+#ifdef CONFIG_TRACE_BB
+    gen_enterBB(dc->pc);
+#endif
     do {
 #ifdef CONFIG_USER_ONLY
         /* Intercept jump to the magic kernel page.  */

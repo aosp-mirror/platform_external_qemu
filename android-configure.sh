@@ -25,6 +25,7 @@ OPTION_HELP=no
 OPTION_DEBUG=no
 OPTION_STATIC=no
 OPTION_MINGW=no
+OPTION_TRACE_BB=yes
 
 if [ -z "$CC" ] ; then
   CC=gcc
@@ -64,6 +65,8 @@ for opt do
   ;;
   --static) OPTION_STATIC=yes
   ;;
+  --trace-bb) OPTION_TRACE_BB=yes
+  ;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -92,6 +95,7 @@ EOF
     echo "  --static                 build a completely static executable"
     echo "  --verbose                verbose configuration"
     echo "  --debug                  build debug version of the emulator"
+    echo "  --trace-bb               enable basic-block tracing (experimental/debug)"
     echo ""
     exit 1
 fi
@@ -412,6 +416,10 @@ echo "#define CONFIG_GDBSTUB  1" >> $config_h
 echo "#define CONFIG_SLIRP    1" >> $config_h
 echo "#define CONFIG_SKINS    1" >> $config_h
 echo "#define CONFIG_TRACE    1" >> $config_h
+
+if [ "$OPTION_TRACE_BB" = "yes" ] ; then
+    echo "#define CONFIG_TRACE_BB 1" >> $config_h
+fi
 
 # only Linux has fdatasync()
 case "$TARGET_OS" in
