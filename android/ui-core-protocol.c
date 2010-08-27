@@ -23,8 +23,11 @@
 #include "android/globals.h"
 #include "android/hw-control.h"
 #include "android/ui-core-protocol.h"
+#if !defined(CONFIG_STANDALONE_UI)
 #include "telephony/modem_driver.h"
 #include "trace.h"
+#include "audio/audio.h"
+#endif  // CONFIG_STANDALONE_UI
 
 int
 android_core_get_hw_lcd_density(void)
@@ -39,38 +42,104 @@ android_core_set_brightness_change_callback(AndroidHwLightBrightnessCallback cal
     AndroidHwControlFuncs  funcs;
 
     funcs.light_brightness = callback;
+#if !defined(CONFIG_STANDALONE_UI)
     android_hw_control_init( opaque, &funcs );
+#endif  // CONFIG_STANDALONE_UI
 }
 
 int
 android_core_get_base_port(void)
 {
+#if !defined(CONFIG_STANDALONE_UI)
     return android_base_port;
+#else
+    return 5554;
+#endif  // CONFIG_STANDALONE_UI
 }
 
 void
 android_core_sensors_set_coarse_orientation( AndroidCoarseOrientation  orient )
 {
+#if !defined(CONFIG_STANDALONE_UI)
     android_sensors_set_coarse_orientation(orient);
+#endif  // CONFIG_STANDALONE_UI
 }
 
 void
 android_core_set_network_enabled(int enabled)
 {
+#if !defined(CONFIG_STANDALONE_UI)
     if (android_modem) {
         amodem_set_data_registration(
                 android_modem,
         qemu_net_disable ? A_REGISTRATION_UNREGISTERED
             : A_REGISTRATION_HOME);
     }
+#endif  // CONFIG_STANDALONE_UI
 }
 
 void android_core_tracing_start(void)
 {
+#if !defined(CONFIG_STANDALONE_UI)
     start_tracing();
+#endif  // CONFIG_STANDALONE_UI
 }
 
 void android_core_tracing_stop(void)
 {
+#if !defined(CONFIG_STANDALONE_UI)
     stop_tracing();
+#endif  // CONFIG_STANDALONE_UI
+}
+
+int
+android_core_get_android_netspeed(int index, NetworkSpeed* netspeed) {
+#if !defined(CONFIG_STANDALONE_UI)
+    if (index >= android_netspeeds_count ||
+        android_netspeeds[index].name == NULL) {
+        return -1;
+    }
+    *netspeed = android_netspeeds[index];
+    return 0;
+#else
+    return -1;
+#endif  // !CONFIG_STANDALONE_UI
+}
+
+int
+android_core_get_android_netdelay(int index, NetworkLatency* delay) {
+#if !defined(CONFIG_STANDALONE_UI)
+    if (index >= android_netdelays_count ||
+        android_netdelays[index].name == NULL) {
+        return -1;
+    }
+    *delay = android_netdelays[index];
+    return 0;
+#else
+    return -1;
+#endif  // !CONFIG_STANDALONE_UI
+}
+
+int
+android_core_audio_get_backend_name(int is_input, int index,
+                                    char* name, size_t name_buf_size,
+                                    char* descr, size_t descr_buf_size) {
+#if !defined(CONFIG_STANDALONE_UI)
+    const char* descr_ptr = NULL;
+    const char* name_ptr = audio_get_backend_name(is_input, index, &descr_ptr);
+    if (name_ptr == NULL) {
+        return -1;
+    }
+    if (name != NULL && name_buf_size) {
+        strncpy(name, name_ptr, name_buf_size);
+        name[name_buf_size - 1] = '\0';
+    }
+    if (descr != NULL && descr_buf_size && descr_ptr != NULL) {
+        strncpy(descr, descr_ptr, descr_buf_size);
+        descr[descr_buf_size - 1] = '\0';
+    }
+    return 0;
+#else
+    return -1;
+#endif  // !CONFIG_STANDALONE_UI
 }
