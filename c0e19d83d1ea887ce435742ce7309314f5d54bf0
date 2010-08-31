@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA7H///3k\u003d",
+        "filename": "android/ui-core-protocol.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-31T21:54:56Z",
+      "side": 1,
+      "message": "note: since this function is called from the help stuff, which will probably be invoked without launching the core program at all in the end, it will likely be the same code for both core and UI anyway.\n\nAs such, there probably isn\u0027t a need to put a #if !defined() here. A comment to explain why would be appreciated though.",
+      "revId": "c0e19d83d1ea887ce435742ce7309314f5d54bf0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7H///3g\u003d",
+        "filename": "android/ui-core-protocol.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-31T21:54:56Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "c0e19d83d1ea887ce435742ce7309314f5d54bf0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7H///3c\u003d",
+        "filename": "android/ui-core-protocol.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-08-31T21:54:56Z",
+      "side": 1,
+      "message": "and probably here.",
+      "revId": "c0e19d83d1ea887ce435742ce7309314f5d54bf0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
