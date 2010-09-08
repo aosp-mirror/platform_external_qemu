@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA7X///x4\u003d",
+        "filename": "hw/smc91c111.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-08T12:56:29Z",
+      "side": 1,
+      "message": "You can replace the 4 by \"sizeof(int)\" to make this more portable. Also, \"sizeof(tx-\u003efifo)\" will work just as well as \"NUM_PACKETS*sizeof(int)\".",
+      "revId": "403104324cb9fe922a6f121400d4ba89449307d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7X///x0\u003d",
+        "filename": "hw/smc91c111.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-08T12:56:29Z",
+      "side": 1,
+      "message": "same here, you can simply use sizeof(s-\u003edata)",
+      "revId": "403104324cb9fe922a6f121400d4ba89449307d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
