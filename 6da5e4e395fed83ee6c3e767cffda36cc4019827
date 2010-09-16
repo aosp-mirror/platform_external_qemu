@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA7n///4E\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-16T09:06:16Z",
+      "side": 1,
+      "message": "it would be nice to check for errors here.",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///4c\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-16T09:06:16Z",
+      "side": 1,
+      "message": "it would be nice if you could check for errors here (i.e. -1)\nand report them to the caller (or at least print a warning that describe why this is not working). I can imagine a couple of reasons why this could fail (all unlikely but possible).",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///4Y\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-16T09:06:16Z",
+      "side": 1,
+      "message": "similarly, is there a way to check that all writes happened succesfully. You don\u0027t want to have a write fail (e.g. not enough space on the target filesystem) and only have a partial snapshot that would result in horrible results when trying to load it.",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///4M\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-16T09:06:16Z",
+      "side": 1,
+      "message": "suggestion: use XLOG(\"%s: message\", __FUNCTION__, other params..) to make it easier to rename the function in the future without touching these messages.",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///4A\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-16T09:06:16Z",
+      "side": 1,
+      "message": "please check for errors.",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///38\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-16T09:06:16Z",
+      "side": 1,
+      "message": "here too.",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///34\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-16T09:06:16Z",
+      "side": 1,
+      "message": "to avoid integer addition overflows, you probably want to test\nif (size \u003e dev-\u003emax_size - addr)\n\n(which is ok, since you\u0027re already sure that dev-\u003emax_size is \u003e addr)",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///30\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-16T09:06:16Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///3w\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-16T09:06:16Z",
+      "side": 1,
+      "message": "and here",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
