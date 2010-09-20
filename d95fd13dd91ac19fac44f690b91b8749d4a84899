@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA7n///lo\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 1107,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-09-20T15:22:57Z",
+      "side": 0,
+      "message": "This might be an issue. The thing is that when target \u0027emulator\u0027 is built, local generated files are going to \u0027emulator\u0027 output directory, while when \u0027qemu-androd\u0027 target is built, generated files are going to \u0027qemu-android\u0027 output directory. So, if we remove these lines then \u0027qemu-android\u0027 build will be unable to locate files generated for \u0027emulator\u0027 build.",
+      "revId": "d95fd13dd91ac19fac44f690b91b8749d4a84899",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
