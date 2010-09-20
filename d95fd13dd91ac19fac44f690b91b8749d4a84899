@@ -16,6 +16,24 @@
       "revId": "d95fd13dd91ac19fac44f690b91b8749d4a84899",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///k8\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 1107,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-20T18:39:54Z",
+      "side": 0,
+      "message": "Actually, the file is under external/qemu/anbdroid/avd/hw-config-defs.h, and not under the \"intermediates\" directory (e.g. objs/intermediates/emulator/...) like the other generated files in this Makefile, so the problem will not arise.\n\nI checked this with both the Android and standalone builds.",
+      "parentUuid": "AAAA7n///lo\u003d",
+      "revId": "d95fd13dd91ac19fac44f690b91b8749d4a84899",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
