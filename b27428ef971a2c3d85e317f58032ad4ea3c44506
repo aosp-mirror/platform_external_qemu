@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA7n///l8\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-20T10:18:04Z",
+      "side": 1,
+      "message": "(Regarding overall checks on write-sanity)\n\nWhen the snapshot is flushed to file, a check is done whether it was successful (savevm.c::qemu_fflush). If it fails, an error flag is set, which is checked again in the functions iterating over the devices during save and load (savevm.c::qemu_loadvm_state and savevm.c::qemu_savevm_state_*). These then signal I/O errors and abort the entire save/load process.",
+      "revId": "b27428ef971a2c3d85e317f58032ad4ea3c44506",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
