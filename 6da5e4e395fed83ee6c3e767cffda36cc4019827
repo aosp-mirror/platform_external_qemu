@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///3M\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-20T10:12:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7n///4E\u003d",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7n///4c\u003d",
         "filename": "hw/goldfish_nand.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2010-09-16T09:06:16Z",
       "side": 1,
       "message": "it would be nice if you could check for errors here (i.e. -1)\nand report them to the caller (or at least print a warning that describe why this is not working). I can imagine a couple of reasons why this could fail (all unlikely but possible).",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///3I\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-20T10:12:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7n///4c\u003d",
       "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///3E\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-20T10:12:18Z",
+      "side": 1,
+      "message": "When the snapshot is flushed to file, a check is done whether it was successful (savevm.c::qemu_fflush). If it fails, an error flag is set, which is checked again in the functions iterating over the devices during save and load (savevm.c::qemu_loadvm_state and savevm.c::qemu_savevm_state_*). These then signal I/O errors and abort the entire save/load process.",
+      "parentUuid": "AAAA7n///4Y\u003d",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7n///4M\u003d",
         "filename": "hw/goldfish_nand.c",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2010-09-16T09:06:16Z",
       "side": 1,
       "message": "suggestion: use XLOG(\"%s: message\", __FUNCTION__, other params..) to make it easier to rename the function in the future without touching these messages.",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///mI\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-20T10:12:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7n///4M\u003d",
       "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///mQ\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-20T10:12:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7n///4A\u003d",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7n///38\u003d",
         "filename": "hw/goldfish_nand.c",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2010-09-16T09:06:16Z",
       "side": 1,
       "message": "here too.",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///mM\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-20T10:12:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7n///38\u003d",
       "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///28\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-20T10:12:18Z",
+      "side": 1,
+      "message": "Done (note that this was initially only a rename from dev-\u003esize to dev-\u003emax_size)",
+      "parentUuid": "AAAA7n///34\u003d",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7n///30\u003d",
         "filename": "hw/goldfish_nand.c",
         "patchSetId": 1
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///24\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-20T10:12:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7n///30\u003d",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7n///3w\u003d",
         "filename": "hw/goldfish_nand.c",
         "patchSetId": 1
@@ -149,6 +293,24 @@
       "writtenOn": "2010-09-16T09:06:16Z",
       "side": 1,
       "message": "and here",
+      "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///20\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-20T10:12:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7n///3w\u003d",
       "revId": "6da5e4e395fed83ee6c3e767cffda36cc4019827",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
