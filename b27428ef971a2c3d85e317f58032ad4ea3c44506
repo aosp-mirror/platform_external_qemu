@@ -16,6 +16,41 @@
       "revId": "b27428ef971a2c3d85e317f58032ad4ea3c44506",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///iA\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-21T19:46:52Z",
+      "side": 1,
+      "message": "Nice, feel free to later write a small document under docs/VM-SUSPEND.TXT to explain all the things you learnt like that :-)",
+      "parentUuid": "AAAA7n///l8\u003d",
+      "revId": "b27428ef971a2c3d85e317f58032ad4ea3c44506",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///iE\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-09-21T19:46:52Z",
+      "side": 1,
+      "message": "can you handle EINTR here?",
+      "revId": "b27428ef971a2c3d85e317f58032ad4ea3c44506",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
