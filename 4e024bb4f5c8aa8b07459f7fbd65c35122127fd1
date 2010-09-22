@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA7n///gg\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-22T13:55:20Z",
+      "side": 1,
+      "message": "You\u0027re also adding a lot of error checking, perhaps mention that too?",
+      "revId": "4e024bb4f5c8aa8b07459f7fbd65c35122127fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///gs\u003d",
+        "filename": "block/qcow2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 654,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-22T13:55:20Z",
+      "side": 1,
+      "message": "Inline equivalents of this function seem to be used fairly often in this changeset, and other code could do with more error checking as well. Do you think it would be worth it to extract them to a separate file, say \"checked_io.c/h\", for ease of (future) reuse?",
+      "revId": "4e024bb4f5c8aa8b07459f7fbd65c35122127fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///go\u003d",
+        "filename": "block/qcow2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 667,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-22T13:55:20Z",
+      "side": 1,
+      "message": "If this function is to be lifted into a separate file, perhaps we should mirror the contract of write() and return the number of bytes written (i.e. bufsize) rather than zero.",
+      "revId": "4e024bb4f5c8aa8b07459f7fbd65c35122127fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///gk\u003d",
+        "filename": "block/qcow2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 670,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-22T13:55:20Z",
+      "side": 1,
+      "message": "This might be a candidate for extraction as well.",
+      "revId": "4e024bb4f5c8aa8b07459f7fbd65c35122127fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///g0\u003d",
+        "filename": "target-arm/op_helper.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-09-22T13:55:20Z",
+      "side": 1,
+      "message": "Out of interest, why use this rather than\n\n#ifdef ALIGNED_ONLY\n\n?",
+      "revId": "4e024bb4f5c8aa8b07459f7fbd65c35122127fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
