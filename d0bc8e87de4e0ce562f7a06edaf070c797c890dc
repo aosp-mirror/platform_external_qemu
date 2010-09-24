@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///Zo\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1407,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///rE\u003d",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7X///qo\u003d",
         "filename": "telephony/android_modem.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2010-09-13T07:43:07Z",
       "side": 1,
       "message": "Why not use ACdmaSubscriptionSource values directly here ?",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///rA\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///qo\u003d",
       "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///q8\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///qk\u003d",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7X///rA\u003d",
         "filename": "telephony/android_modem.c",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2010-09-13T07:43:07Z",
       "side": 1,
       "message": "Please add a small comment here. Also, add a cdma_ prefix for everything that is strictly related to CDMA (e.g. subscription_source, roaming_pref)",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///q4\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///rA\u003d",
       "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///q0\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///qY\u003d",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7X///qU\u003d",
         "filename": "telephony/android_modem.c",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2010-09-13T07:43:07Z",
       "side": 1,
       "message": "and this nvram_config_filename",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///qw\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///qU\u003d",
       "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///qs\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///qQ\u003d",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7X///qg\u003d",
         "filename": "telephony/android_modem.c",
         "patchSetId": 1
@@ -132,6 +258,24 @@
       "writtenOn": "2010-09-13T07:43:07Z",
       "side": 1,
       "message": "Why use an int instead of an ACdmaSubscriptionSource here?",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///a8\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///qg\u003d",
       "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///Xk\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///qc\u003d",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7X///qI\u003d",
         "filename": "telephony/android_modem.c",
         "patchSetId": 1
@@ -166,6 +328,24 @@
       "writtenOn": "2010-09-13T07:43:07Z",
       "side": 1,
       "message": "You are introducing a new configuration file format. That\u0027s great but please  document it under docs/ANDROID-NVRAM-CONFIG.TXT or something similar. Try to explain the meaning and acceptable values of each (name,value) pair.",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///a4\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Will do in a follow up patch",
+      "parentUuid": "AAAA7X///qI\u003d",
       "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///a0\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///qM\u003d",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7X///qE\u003d",
         "filename": "telephony/android_modem.c",
         "patchSetId": 1
@@ -200,6 +398,24 @@
       "writtenOn": "2010-09-13T07:43:07Z",
       "side": 1,
       "message": "this doesn\u0027t read anything, I suggest changing the name of this function to something meaningful, e.g. amodem_nvram_set_int()",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///aw\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///qE\u003d",
       "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///aI\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///p8\u003d",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7X///p4\u003d",
         "filename": "telephony/android_modem.c",
         "patchSetId": 1
@@ -234,6 +468,24 @@
       "writtenOn": "2010-09-13T07:43:07Z",
       "side": 1,
       "message": "I\u0027d prefer amodem_nvram_set()",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///aE\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///p4\u003d",
       "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///Z8\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 906,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///p0\u003d",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7X///pw\u003d",
         "filename": "telephony/android_modem.c",
         "patchSetId": 1
@@ -268,6 +538,24 @@
       "writtenOn": "2010-09-13T07:43:07Z",
       "side": 1,
       "message": "please use amodem_set_cdma_prl_version()",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///Z4\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 991,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///pw\u003d",
       "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///Z0\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1012,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///ps\u003d",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7X///pU\u003d",
         "filename": "telephony/android_modem.c",
         "patchSetId": 1
@@ -302,6 +608,24 @@
       "writtenOn": "2010-09-13T07:43:07Z",
       "side": 1,
       "message": "please always use snprintf() instead of sprintf()",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///Zw\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1018,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///pU\u003d",
       "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -325,6 +649,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA7n///Zs\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1983,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///XA\u003d",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA7X///q0\u003d",
         "filename": "telephony/android_modem.h",
         "patchSetId": 1
@@ -336,6 +678,24 @@
       "writtenOn": "2010-09-13T07:43:07Z",
       "side": 1,
       "message": "I would suggest changing this to ADataNetworkType as well.",
+      "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n///Ws\u003d",
+        "filename": "telephony/android_modem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-09-24T00:14:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAA7X///q0\u003d",
       "revId": "d0bc8e87de4e0ce562f7a06edaf070c797c890dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
