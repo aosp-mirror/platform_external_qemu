@@ -668,6 +668,7 @@ CORE_MISC_SOURCES = vl-android.c \
                     bt-vhci.c \
                     module.c \
                     qemu-timer.c \
+                    cache-utils.c \
                     android/boot-properties.c \
                     android/display.c \
                     android/hw-kmsg.c \
