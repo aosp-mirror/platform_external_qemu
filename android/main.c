@@ -84,7 +84,7 @@ extern void  stop_tracing(void);
 
 unsigned long   android_verbose;
 
-int qemu_main(int argc, char **argv);
+int qemu_main(int argc, char **argv, char **envp);
 
 /* this function dumps the QEMU help */
 extern void  help( void );
@@ -154,8 +154,14 @@ _adjustPartitionSize( const char*  description,
     return convertMBToBytes(imageMB);
 }
 
+#if defined(__APPLE__) || defined(main)
 int main(int argc, char **argv)
 {
+    char** envp = NULL;
+#else
+int main(int argc, char **argv, char **envp)
+{
+#endif
     char   tmp[MAX_PATH];
     char*  tmpend = tmp + sizeof(tmp);
     char*  args[128];
@@ -1105,5 +1111,5 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    return qemu_main(n, args);
+    return qemu_main(n, args, envp);
 }
