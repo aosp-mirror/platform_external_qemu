@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA7n//+h8\u003d",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 883,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-10-01T14:08:27Z",
+      "side": 1,
+      "message": "fixed possible memory leak",
+      "revId": "ca13397bb31b6e12970c6ac715c965015ff8662f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n//+hs\u003d",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1039,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-10-01T14:08:27Z",
+      "side": 1,
+      "message": "fixed possible memory leak",
+      "revId": "ca13397bb31b6e12970c6ac715c965015ff8662f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n//+hw\u003d",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1041,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-10-01T14:08:27Z",
+      "side": 1,
+      "message": "Added check for NULL-termination",
+      "revId": "ca13397bb31b6e12970c6ac715c965015ff8662f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n//+h4\u003d",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1472,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-10-01T14:08:27Z",
+      "side": 1,
+      "message": "comment moved to docs/ANDROID_QEMUD.TXT",
+      "revId": "ca13397bb31b6e12970c6ac715c965015ff8662f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
