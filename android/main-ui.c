@@ -492,7 +492,7 @@ found_a_skin:
     }
 }
 
-int qemu_main(int argc, char **argv);
+int qemu_main(int argc, char **argv, char **envp);
 
 /* this function dumps the QEMU help */
 extern void  help( void );
@@ -932,8 +932,14 @@ attach_to_core(AndroidOptions* opts) {
     return 0;
 }
 
+#if defined(__APPLE__) || defined(main)
 int main(int argc, char **argv)
 {
+    char** envp = NULL;
+#else
+int main(int argc, char **argv, char **envp)
+{
+#endif
     char   tmp[MAX_PATH];
     char*  tmpend = tmp + sizeof(tmp);
     char*  args[128];
@@ -1957,5 +1963,5 @@ int main(int argc, char **argv)
         }
         printf("\n");
     }
-    return qemu_main(n, args);
+    return qemu_main(n, args, envp);
 }
