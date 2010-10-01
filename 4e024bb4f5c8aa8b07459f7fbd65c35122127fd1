@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA7n//+jI\u003d",
+        "filename": "savevm.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1108,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-10-01T09:22:25Z",
+      "side": 0,
+      "message": "Merged identical functions, moved to block.c (where they are in mainline QEMU).",
+      "revId": "4e024bb4f5c8aa8b07459f7fbd65c35122127fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
