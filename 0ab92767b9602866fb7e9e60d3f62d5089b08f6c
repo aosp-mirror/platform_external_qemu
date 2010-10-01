@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA7n//+10\u003d",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1040,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-01T12:02:56Z",
+      "side": 1,
+      "message": "It\u0027s be nice to ensure that the read buffer is zero-terminated, just in case.",
+      "revId": "0ab92767b9602866fb7e9e60d3f62d5089b08f6c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA7n//+1w\u003d",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1485,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-01T12:02:56Z",
+      "side": 1,
+      "message": "Can you put this under docs/ANDROID-QEMUD.TXT?",
+      "revId": "0ab92767b9602866fb7e9e60d3f62d5089b08f6c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
