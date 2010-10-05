@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA73///v8\u003d",
+        "filename": "android/boot-properties.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-10-05T16:52:35Z",
+      "side": 1,
+      "message": "This will probably conflict with changes from the qemud patch, which puts NULLs here. Just override them with these functions.",
+      "revId": "69005c124c47417f7b87cd98c43bfbfc8e0bbff3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
