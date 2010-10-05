@@ -166,6 +166,9 @@ help_disk_images( stralloc_t*  out )
     "    system-qemu.img    an *optional* persistent system image\n"
     "    cache.img          an *optional* cache partition image\n"
     "    sdcard.img         an *optional* SD Card partition image\n\n"
+#if CONFIG_ANDROID_SNAPSHOTS
+    "    snapshots.img      an *optional* state snapshots image\n\n"
+#endif
 
     "  If you use a virtual device, its content directory should store\n"
     "  all writable images, and read-only ones will be found from the\n"
@@ -181,7 +184,11 @@ help_disk_images( stralloc_t*  out )
     "  can still run the emulator by explicitely providing the paths to\n"
     "  *all* required disk images through a combination of the following\n"
     "  options: -sysdir, -datadir, -kernel, -ramdisk, -system, -data, -cache\n"
-    "  and -sdcard\n\n"
+#if CONFIG_ANDROID_SNAPSHOTS
+    "  -sdcard and -snapshots.\n\n"
+#else
+    "  and -sdcard.\n\n"
+#endif
 
     "  The actual logic being that the emulator should be able to find all\n"
     "  images from the options you give it.\n\n"
@@ -190,13 +197,18 @@ help_disk_images( stralloc_t*  out )
 
     "  Other related options are:\n\n"
 
-    "      -init-data   Specify an alernative *initial* user data image\n\n"
+    "      -init-data     Specify an alernative *initial* user data image\n\n"
 
-    "      -wipe-data   Copy the content of the *initial* user data image\n"
-    "                   (userdata.img) into the writable one (userdata-qemu.img)\n\n"
+    "      -wipe-data     Copy the content of the *initial* user data image\n"
+    "                     (userdata.img) into the writable one (userdata-qemu.img)\n\n"
 
-    "      -no-cache    do not use a cache partition, even if one is\n"
-    "                   available.\n\n"
+    "      -no-cache      do not use a cache partition, even if one is\n"
+    "                     available.\n\n"
+
+#if CONFIG_ANDROID_SNAPSHOTS
+    "      -no-snapshots  do not use a state snapshot image, even if one is\n"
+    "                     available.\n\n"
+#endif
     ,
     datadir );
 }
@@ -619,6 +631,71 @@ help_sdcard(stralloc_t*  out)
     "  see '-help-disk-images' for more information about disk image files\n\n"
     );
 }
+
+#if CONFIG_ANDROID_SNAPSHOTS
+static void
+help_snapshots(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-snapshots <file>' to specify a state snapshot image file that will\n"
+    "  be attached to the emulator. By default, the 'snapshots.img' file is\n"
+    "  searched in the data directory.\n\n"
+
+    "  if the file does not exist, the emulator will still start, but without\n"
+    "  support for saving or loading state snapshots.\n\n"
+
+    "  see '-help-disk-images' for more information about disk image files\n"
+    "  see '-help-load-snapshot' for more information about snapshots\n\n"
+    );
+}
+
+static void
+help_load_snapshot(stralloc_t*  out)
+{
+    PRINTF(
+    "  Rather than executing a full boot sequence, the Android emulator can\n"
+    "  resume execution from an earlier state snapshot (which is usually\n"
+    "  significantly faster). When the parameter '-load-snapshot <name>' is given,\n"
+    "  the emulator loads the snapshot of that name from the snapshot image.\n\n"
+
+    "  WARNING: In the process of loading, all contents of the system, userdata\n"
+    "           and SD card images will be OVERWRITTEN with the contents they\n"
+    "           held when the snapshot was made. Unless saved in a different"
+    "           snapshot, any changes since will be lost!\n\n"
+
+    "  If you want to create a snapshot, connect to the emulator console:\n\n"
+
+    "      telnet localhost <port>\n\n"
+
+    "  Then execute the command 'avd save <name>'. See '-help-port' for\n"
+    "  information on obtaining <port>.\n\n"
+    );
+}
+
+static void
+help_no_snapshots(stralloc_t*  out)
+{
+    PRINTF(
+    "  This starts the emulator without mounting a file to store or load state\n"
+    "  snapshots, forcing a full boot and disabling state snapshot functionality.\n\n"
+    ""
+    "  This command overrides the configuration specified by the parameters\n"
+    "  '-snapshots' and '-load-snapshots'. A warning will be raised if either\n"
+    "  of those parameters was specified anyway.\n\n"
+    );
+}
+
+static void
+help_full_boot(stralloc_t*  out)
+{
+    PRINTF(
+    "  This forces the emulator to perform a full boot sequence, rather than\n"
+    "  loading the default snapshot. It overrides the '-load-snapshot' parameter.\n"
+    "  If '-load-snapshot' was specified anyway, a warning is raised.\n\n"
+    );
+}
+
+#endif
 
 static void
 help_skindir(stralloc_t*  out)
