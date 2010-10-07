@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA73///lg\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1516,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T13:30:02Z",
+      "side": 1,
+      "message": "Please don\u0027t, the emulated system depends on these exact kernel parameters (even if the kernel itself complains about not supporting them). Removing the android. prefix is going to break emulated features.",
+      "revId": "d818c2a2d978902b17602c73787818da835a0c9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///lk\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T13:30:02Z",
+      "side": 1,
+      "message": "It might be better to rename this as PANIC, and make it a function instead.\n\nWhy not make the core_init_failure function accepts formatted string parameters?\n\nDepending on whether CONFIG_ANDROID is defined, you would call exit() or android_core_init_fallure()",
+      "revId": "d818c2a2d978902b17602c73787818da835a0c9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///lo\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T13:30:02Z",
+      "side": 1,
+      "message": "Can you move these functions into their own source file (and header) under android/ ?\n\nAlso please use android_core_ as a prefix to show that this is Android-specific.\n\nFinally, rename CORE_INIT_FAILURE with PANIC() and have the macro definition differ if CONFIG_ANDROID is defined or not.",
+      "revId": "d818c2a2d978902b17602c73787818da835a0c9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///lw\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 545,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T13:30:02Z",
+      "side": 1,
+      "message": "qemu_malloc() never returns NULL",
+      "revId": "d818c2a2d978902b17602c73787818da835a0c9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///ls\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T13:30:02Z",
+      "side": 1,
+      "message": "I would prefer snprintf (even if you correctly sized the buffer above, it helps reduce errors when maitaining the code)",
+      "revId": "d818c2a2d978902b17602c73787818da835a0c9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
