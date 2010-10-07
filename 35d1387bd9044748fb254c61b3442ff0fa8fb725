@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA73///mg\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1994,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T12:44:14Z",
+      "side": 1,
+      "message": "I would prefer if these were sub-commands of the top-level \"avd\" command, e.g.:\n\navd snapshot list\navd snapshot load\navd snapshot save\navd snapshot del",
+      "revId": "35d1387bd9044748fb254c61b3442ff0fa8fb725",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
