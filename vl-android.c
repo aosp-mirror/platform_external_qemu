@@ -378,6 +378,16 @@ char* android_op_tcpdump = NULL;
 /* -lcd-density option value. */
 char* android_op_lcd_density = NULL;
 
+/* -ui-port option value. This port will be used to report the core
+ * initialization completion.
+ */
+char* android_op_ui_port = NULL;
+
+/* -ui-settings option value. This value will be passed to the UI when new UI
+ * process is attaching to the core.
+ */
+char* android_op_ui_settings = NULL;
+
 extern int android_display_width;
 extern int android_display_height;
 extern int android_display_bpp;
@@ -385,6 +395,20 @@ extern int android_display_bpp;
 extern void  dprint( const char* format, ... );
 
 #define TFR(expr) do { if ((expr) != -1) break; } while (errno == EINTR)
+
+/* Reports thr core initialization failure to the error stdout and to the UI
+ * socket before exiting the application.
+ * Parameters that are passed to this macro are used to format the error
+ * mesage using sprintf routine.
+ */
+#define  CORE_INIT_FAILURE(...)                             \
+    do {                                                    \
+        char msg_buf[4096];                                 \
+        snprintf(msg_buf, sizeof(msg_buf), __VA_ARGS__);    \
+        fprintf(stderr, "%s\n", msg_buf);                   \
+        core_init_failure(msg_buf);                         \
+    } while (0)
+
 
 /***********************************************************/
 /* x86 ISA bus support */
@@ -466,6 +490,80 @@ static void default_ioport_writel(void *opaque, uint32_t address, uint32_t data)
 #ifdef DEBUG_UNUSED_IOPORT
     fprintf(stderr, "unused outl: port=0x%04x data=0x%02x\n", address, data);
 #endif
+}
+/* Sends core initialization status message back to the UI that started this
+ * core process.
+ * Param:
+ *  msg - Message to send. On success, message must begin with "ok:", followed
+ *      by "port=<console port number>". On initialization failure, message must
+ *      begin with "ko:", followed by a string describing the reason of failure.
+ */
+static void
+send_init_response(const char* msg)
+{
+    int fd;
+    int ui_port;
+
+    if (android_op_ui_port == NULL) {
+        // No socket - no reply.
+        return;
+    }
+
+    ui_port = atoi(android_op_ui_port);
+    // At this point UI always starts the core on the same workstation.
+    fd = socket_loopback_client(ui_port, SOCKET_STREAM);
+    if (fd == -1) {
+        fprintf(stderr, "Unable to create UI socket client for port %s: %s\n",
+                android_op_ui_port, errno_str);
+        return;
+    }
+    socket_send(fd, msg, strlen(msg) + 1);
+    socket_close(fd);
+}
+
+/* Formats and sends back to the UI message indicating successful completion
+ * of the core initialization.
+ */
+static void
+core_init_completed(void)
+{
+    char msg[32];
+    sprintf(msg, "ok:port=%d", android_base_port);
+    send_init_response(msg);
+}
+
+/* Builds and sends initialization failure message back to the UI that started
+ * the core. After that exits the process.
+ * Param:
+ *  message - Message describing the reason for initialization failure.
+ */
+static void
+core_init_failure(const char* message)
+{
+    // Alloc buffer that would fit "ko:" + message
+    char* failure_str = qemu_malloc(strlen(message) + 4);
+    if (failure_str != NULL) {
+        // Build failure message and send it back to the UI.
+        sprintf(failure_str, "ko:%s", message);
+        send_init_response(failure_str);
+        qemu_free(failure_str);
+    }
+    exit(1);
+}
+
+/* Sends successfule initialization completion message back to the UI, and exits
+ * the application.
+ * Param:
+ *  exit_status Exit status, that will be passed to the "exit" routine.
+ */
+static void
+core_init_exit(int exit_status)
+{
+    char msg[32];
+    // Build "ok" message with the exit status, and send it back to the UI.
+    sprintf(msg, "ok:status=%d", exit_status);
+    send_init_response(msg);
+    exit(exit_status);
 }
 
 /* Parses -android-gui command line option, extracting width, height and bits
@@ -3279,7 +3377,7 @@ void qemu_help(int exitcode)
 #endif
            DEFAULT_GDBSTUB_PORT,
            "/tmp/qemu.log");
-    exit(exitcode);
+    core_init_exit(exitcode);
 }
 
 #define HAS_ARG 0x0001
@@ -3406,7 +3504,11 @@ static void select_soundhw (const char *optarg)
             printf ("%-11s %s\n", c->name, c->descr);
         }
         printf ("\n-soundhw all will enable all of the above\n");
-        exit (*optarg != '?');
+        if (*optarg != '?') {
+            CORE_INIT_FAILURE("Unknown sound card name: %s", optarg);
+        } else {
+            core_init_exit(0);
+        }
     }
     else {
         size_t l;
@@ -3434,14 +3536,6 @@ static void select_soundhw (const char *optarg)
             }
 
             if (!c->name) {
-                if (l > 80) {
-                    fprintf (stderr,
-                             "Unknown sound card name (too big to show)\n");
-                }
-                else {
-                    fprintf (stderr, "Unknown sound card name `%.*s'\n",
-                             (int) l, p);
-                }
                 bad_card = 1;
             }
             p += l + (e != NULL);
@@ -3471,8 +3565,7 @@ static void select_vgahw (const char *p)
         xenfb_enabled = 1;
     } else if (!strstart(p, "none", &opts)) {
     invalid_vga:
-        fprintf(stderr, "Unknown vga type: %s\n", p);
-        exit(1);
+        CORE_INIT_FAILURE("Unknown vga type: %s", p);
     }
     while (*opts) {
         const char *nextopt;
@@ -3773,6 +3866,12 @@ int main(int argc, char **argv, char **envp)
     char tmp_str[1024];
     int    dns_count = 0;
 
+    /* Initialize sockets before anything else, so we can properly report
+     * initialization failures back to the UI. */
+#ifdef _WIN32
+    socket_init();
+#endif
+
     init_clocks();
 
     qemu_cache_utils_init(envp);
@@ -3877,9 +3976,8 @@ int main(int argc, char **argv, char **envp)
             popt = qemu_options;
             for(;;) {
                 if (!popt->name) {
-                    fprintf(stderr, "%s: invalid option -- '%s'\n",
-                            argv[0], r);
-                    exit(1);
+                    CORE_INIT_FAILURE("%s: invalid option -- '%s'",
+                                      argv[0], r);
                 }
                 if (!strcmp(popt->name, r + 1))
                     break;
@@ -3887,9 +3985,8 @@ int main(int argc, char **argv, char **envp)
             }
             if (popt->flags & HAS_ARG) {
                 if (optind >= argc) {
-                    fprintf(stderr, "%s: option '%s' requires an argument\n",
-                            argv[0], r);
-                    exit(1);
+                    CORE_INIT_FAILURE("%s: option '%s' requires an argument",
+                                      argv[0], r);
                 }
                 optarg = argv[optind++];
             } else {
@@ -3907,7 +4004,12 @@ int main(int argc, char **argv, char **envp)
                                m->name, m->desc,
                                m->is_default ? " (default)" : "");
                     }
-                    exit(*optarg != '?');
+                    if (*optarg != '?') {
+                        CORE_INIT_FAILURE("Invalid machine parameter: %s",
+                                          optarg);
+                    } else {
+                        core_init_exit(0);
+                    }
                 }
                 break;
             case QEMU_OPTION_cpu:
@@ -3917,7 +4019,7 @@ int main(int argc, char **argv, char **envp)
 #if defined(cpu_list)
                     cpu_list(stdout, &fprintf);
 #endif
-                    exit(0);
+                    core_init_exit(0);
                 } else {
                     cpu_model = optarg;
                 }
@@ -3988,8 +4090,7 @@ int main(int argc, char **argv, char **envp)
                             goto chs_fail;
                     } else if (*p != '\0') {
                     chs_fail:
-                        fprintf(stderr, "qemu: invalid physical CHS format\n");
-                        exit(1);
+                        CORE_INIT_FAILURE("qemu: invalid physical CHS format");
                     }
 		    if (hda_index != -1)
                         snprintf(drives_opt[hda_index].opt,
@@ -4004,8 +4105,7 @@ int main(int argc, char **argv, char **envp)
                 break;
             case QEMU_OPTION_numa:
                 if (nb_numa_nodes >= MAX_NODES) {
-                    fprintf(stderr, "qemu: too many NUMA nodes\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("qemu: too many NUMA nodes");
                 }
                 numa_add(optarg);
                 break;
@@ -4048,13 +4148,11 @@ int main(int argc, char **argv, char **envp)
                          * implementation and firmware features.
                          */
                         if (*p < 'a' || *p > 'q') {
-                            fprintf(stderr, "Invalid boot device '%c'\n", *p);
-                            exit(1);
+                            CORE_INIT_FAILURE("Invalid boot device '%c'", *p);
                         }
                         if (boot_devices_bitmap & (1 << (*p - 'a'))) {
-                            fprintf(stderr,
-                                    "Boot device '%c' was given twice\n",*p);
-                            exit(1);
+                            CORE_INIT_FAILURE(
+                                    "Boot device '%c' was given twice",*p);
                         }
                         boot_devices_bitmap |= 1 << (*p - 'a');
                     }
@@ -4071,8 +4169,7 @@ int main(int argc, char **argv, char **envp)
 #endif
             case QEMU_OPTION_net:
                 if (nb_net_clients >= MAX_NET_CLIENTS) {
-                    fprintf(stderr, "qemu: too many network clients\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("qemu: too many network clients");
                 }
                 net_clients[nb_net_clients] = optarg;
                 nb_net_clients++;
@@ -4097,15 +4194,14 @@ int main(int argc, char **argv, char **envp)
 #endif
             case QEMU_OPTION_bt:
                 if (nb_bt_opts >= MAX_BT_CMDLINE) {
-                    fprintf(stderr, "qemu: too many bluetooth options\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("qemu: too many bluetooth options");
                 }
                 bt_opts[nb_bt_opts++] = optarg;
                 break;
 #ifdef HAS_AUDIO
             case QEMU_OPTION_audio_help:
                 AUD_help ();
-                exit (0);
+                core_init_exit(0);
                 break;
             case QEMU_OPTION_soundhw:
                 select_soundhw (optarg);
@@ -4116,7 +4212,7 @@ int main(int argc, char **argv, char **envp)
                 break;
             case QEMU_OPTION_version:
                 version();
-                exit(0);
+                core_init_exit(0);
                 break;
             case QEMU_OPTION_m: {
                 uint64_t value;
@@ -4131,8 +4227,7 @@ int main(int argc, char **argv, char **envp)
                     value <<= 30;
                     break;
                 default:
-                    fprintf(stderr, "qemu: invalid ram size: %s\n", optarg);
-                    exit(1);
+                    CORE_INIT_FAILURE("qemu: invalid ram size: %s", optarg);
                 }
 
                 /* On 32-bit hosts, QEMU is limited by virtual address space */
@@ -4141,12 +4236,10 @@ int main(int argc, char **argv, char **envp)
                     && HOST_LONG_BITS == 32
 #endif
                     ) {
-                    fprintf(stderr, "qemu: at most 2047 MB RAM can be simulated\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("qemu: at most 2047 MB RAM can be simulated");
                 }
                 if (value != (uint64_t)(ram_addr_t)value) {
-                    fprintf(stderr, "qemu: ram size too large\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("qemu: ram size too large");
                 }
                 ram_size = value;
                 break;
@@ -4159,10 +4252,10 @@ int main(int argc, char **argv, char **envp)
                     mask = cpu_str_to_log_mask(optarg);
                     if (!mask) {
                         printf("Log items (comma separated):\n");
-                    for(item = cpu_log_items; item->mask != 0; item++) {
-                        printf("%-10s %s\n", item->name, item->help);
-                    }
-                    exit(1);
+                        for(item = cpu_log_items; item->mask != 0; item++) {
+                            printf("%-10s %s\n", item->name, item->help);
+                        }
+                        CORE_INIT_FAILURE("Invalid parameter -d=%s", optarg);
                     }
                     cpu_set_log(mask);
                 }
@@ -4184,8 +4277,7 @@ int main(int argc, char **argv, char **envp)
                 break;
             case QEMU_OPTION_S:
 #if 0  /* ANDROID */
-                fprintf(stderr, "Sorry, stopped launch is not supported in the Android emulator\n" );
-                exit(1);
+                CORE_INIT_FAILURE("Sorry, stopped launch is not supported in the Android emulator" );
 #endif
                 autostart = 0;
                 break;
@@ -4209,8 +4301,7 @@ int main(int argc, char **argv, char **envp)
                     w = strtol(p, (char **)&p, 10);
                     if (w <= 0) {
                     graphic_error:
-                        fprintf(stderr, "qemu: invalid resolution or depth\n");
-                        exit(1);
+                        CORE_INIT_FAILURE("qemu: invalid resolution or depth");
                     }
                     if (*p != 'x')
                         goto graphic_error;
@@ -4249,35 +4340,37 @@ int main(int argc, char **argv, char **envp)
                 break;
             case QEMU_OPTION_serial:
                 if (serial_device_index >= MAX_SERIAL_PORTS) {
-                    fprintf(stderr, "qemu: too many serial ports\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("qemu: too many serial ports");
                 }
                 serial_devices[serial_device_index] = optarg;
                 serial_device_index++;
                 break;
             case QEMU_OPTION_watchdog:
                 i = select_watchdog(optarg);
-                if (i > 0)
-                    exit (i == 1 ? 1 : 0);
+                if (i > 0) {
+                    if (i == 1) {
+                        CORE_INIT_FAILURE("Invalid watchdog parameter: %s",
+                                          optarg);
+                    } else {
+                        core_init_exit(0);
+                    }
+                }
                 break;
             case QEMU_OPTION_watchdog_action:
                 if (select_watchdog_action(optarg) == -1) {
-                    fprintf(stderr, "Unknown -watchdog-action parameter\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("Unknown -watchdog-action parameter");
                 }
                 break;
             case QEMU_OPTION_virtiocon:
                 if (virtio_console_index >= MAX_VIRTIO_CONSOLES) {
-                    fprintf(stderr, "qemu: too many virtio consoles\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("qemu: too many virtio consoles");
                 }
                 virtio_consoles[virtio_console_index] = optarg;
                 virtio_console_index++;
                 break;
             case QEMU_OPTION_parallel:
                 if (parallel_device_index >= MAX_PARALLEL_PORTS) {
-                    fprintf(stderr, "qemu: too many parallel ports\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("qemu: too many parallel ports");
                 }
                 parallel_devices[parallel_device_index] = optarg;
                 parallel_device_index++;
@@ -4314,14 +4407,12 @@ int main(int argc, char **argv, char **envp)
                 break;
             case QEMU_OPTION_acpitable:
                 if(acpi_table_add(optarg) < 0) {
-                    fprintf(stderr, "Wrong acpi table provided\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("Wrong acpi table provided");
                 }
                 break;
             case QEMU_OPTION_smbios:
                 if(smbios_entry_add(optarg) < 0) {
-                    fprintf(stderr, "Wrong smbios provided\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("Wrong smbios provided");
                 }
                 break;
 #endif
@@ -4347,8 +4438,7 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_usbdevice:
                 usb_enabled = 1;
                 if (usb_devices_index >= MAX_USB_CMDLINE) {
-                    fprintf(stderr, "Too many USB devices\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("Too many USB devices");
                 }
                 usb_devices[usb_devices_index] = optarg;
                 usb_devices_index++;
@@ -4356,8 +4446,7 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_smp:
                 smp_cpus = atoi(optarg);
                 if (smp_cpus < 1) {
-                    fprintf(stderr, "Invalid number of CPUs\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("Invalid number of CPUs");
                 }
                 break;
 	    case QEMU_OPTION_vnc:
@@ -4386,9 +4475,7 @@ int main(int argc, char **argv, char **envp)
                 break;
             case QEMU_OPTION_uuid:
                 if(qemu_uuid_parse(optarg, qemu_uuid) < 0) {
-                    fprintf(stderr, "Fail to parse UUID string."
-                            " Wrong format.\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("Fail to parse UUID string. Wrong format.");
                 }
                 break;
 #ifndef _WIN32
@@ -4398,8 +4485,7 @@ int main(int argc, char **argv, char **envp)
 #endif
 	    case QEMU_OPTION_option_rom:
 		if (nb_option_roms >= MAX_OPTION_ROMS) {
-		    fprintf(stderr, "Too many option ROMs\n");
-		    exit(1);
+		    CORE_INIT_FAILURE("Too many option ROMs");
 		}
 		option_rom[nb_option_roms] = optarg;
 		nb_option_roms++;
@@ -4415,8 +4501,7 @@ int main(int argc, char **argv, char **envp)
 #if defined(TARGET_SPARC) || defined(TARGET_PPC)
             case QEMU_OPTION_prom_env:
                 if (nb_prom_envs >= MAX_PROM_ENVS) {
-                    fprintf(stderr, "Too many prom variables\n");
-                    exit(1);
+                    CORE_INIT_FAILURE("Too many prom variables");
                 }
                 prom_envs[nb_prom_envs] = optarg;
                 nb_prom_envs++;
@@ -4460,9 +4545,8 @@ int main(int argc, char **argv, char **envp)
                         rtc_start_date = mktimegm(&tm);
                         if (rtc_start_date == -1) {
                         date_fail:
-                            fprintf(stderr, "Invalid date format. Valid format are:\n"
-                                    "'now' or '2006-06-17T16:01:21' or '2006-06-17'\n");
-                            exit(1);
+                            CORE_INIT_FAILURE("Invalid date format. Valid format are:\n"
+                                    "'now' or '2006-06-17T16:01:21' or '2006-06-17'");
                         }
                         rtc_date_offset = time(NULL) - rtc_start_date;
                     }
@@ -4522,9 +4606,8 @@ int main(int argc, char **argv, char **envp)
                 else if (strcmp(optarg, "on") == 0 && trace_filename)
                     tracing = 1;
                 else {
-                    fprintf(stderr, "Unexpected option to -tracing ('%s')\n",
+                    CORE_INIT_FAILURE("Unexpected option to -tracing ('%s')",
                             optarg);
-                    exit(1);
                 }
                 break;
 #if 0
@@ -4631,6 +4714,14 @@ int main(int argc, char **argv, char **envp)
                 android_op_lcd_density = (char*)optarg;
                 break;
 
+            case QEMU_OPTION_ui_port:
+                android_op_ui_port = (char*)optarg;
+                break;
+
+            case QEMU_OPTION_ui_settings:
+                android_op_ui_settings = (char*)optarg;
+                break;
+
 #ifdef CONFIG_MEMCHECK
             case QEMU_OPTION_android_memcheck:
                 android_op_memcheck = (char*)optarg;
@@ -4649,14 +4740,13 @@ int main(int argc, char **argv, char **envp)
     /* Initialize character map. */
     if (android_charmap_setup(op_charmap_file)) {
         if (op_charmap_file) {
-            fprintf(stderr,
-                    "Unable to initialize character map from file %s.\n",
+            CORE_INIT_FAILURE(
+                    "Unable to initialize character map from file %s.",
                     op_charmap_file);
         } else {
-            fprintf(stderr,
-                    "Unable to initialize default character map.\n");
+            CORE_INIT_FAILURE(
+                    "Unable to initialize default character map.");
         }
-        exit(1);
     }
 
     /* If no data_dir is specified then try to find it relative to the
@@ -4674,8 +4764,7 @@ int main(int argc, char **argv, char **envp)
     if (android_op_hwini) {
       hw_ini = iniFile_newFromFile(android_op_hwini);
       if (hw_ini == NULL) {
-        fprintf(stderr, "Could not find %s file.\n", android_op_hwini);
-        exit(1);
+        CORE_INIT_FAILURE("Could not find %s file.", android_op_hwini);
       }
     } else {
       hw_ini = iniFile_newFromMemory("", 0);
@@ -4701,15 +4790,13 @@ int main(int argc, char **argv, char **envp)
 
     /* Initialize net speed and delays stuff. */
     if (android_parse_network_speed(android_op_netspeed) < 0 ) {
-        fprintf(stderr, "invalid -netspeed parameter '%s'\n",
+        CORE_INIT_FAILURE("invalid -netspeed parameter '%s'",
                 android_op_netspeed);
-        exit(1);
     }
 
     if ( android_parse_network_latency(android_op_netdelay) < 0 ) {
-        fprintf(stderr, "invalid -netdelay parameter '%s'\n",
+        CORE_INIT_FAILURE("invalid -netdelay parameter '%s'",
                 android_op_netdelay);
-        exit(1);
     }
 
     if (android_op_netfast) {
@@ -4724,8 +4811,7 @@ int main(int argc, char **argv, char **envp)
         char*   end;
         long density = strtol(android_op_lcd_density, &end, 0);
         if (end == NULL || *end || density < 0) {
-            fprintf(stderr, "option -lcd-density must be a positive integer\n" );
-            exit(1);
+            CORE_INIT_FAILURE("option -lcd-density must be a positive integer");
         }
         hwLcd_setBootProperty(density);
     }
@@ -4741,16 +4827,14 @@ int main(int argc, char **argv, char **envp)
     if (android_op_radio) {
         CharDriverState*  cs = qemu_chr_open("radio", android_op_radio, NULL);
         if (cs == NULL) {
-            fprintf(stderr, "unsupported character device specification: %s\n"
-                            "used -help-char-devices for list of available formats\n",
+            CORE_INIT_FAILURE("unsupported character device specification: %s\n"
+                        "used -help-char-devices for list of available formats",
                     android_op_radio);
-            exit(1);
         }
         android_qemud_set_channel( ANDROID_QEMUD_GSM, cs);
     } else if (android_hw->hw_gsmModem != 0 ) {
         if ( android_qemud_get_channel( ANDROID_QEMUD_GSM, &android_modem_cs ) < 0 ) {
-            fprintf(stderr, "could not initialize qemud 'gsm' channel");
-            exit(1);
+            CORE_INIT_FAILURE("could not initialize qemud 'gsm' channel");
         }
     }
 
@@ -4758,29 +4842,25 @@ int main(int argc, char **argv, char **envp)
     if (android_op_gps) {
         CharDriverState*  cs = qemu_chr_open("gps", android_op_gps, NULL);
         if (cs == NULL) {
-            fprintf(stderr, "unsupported character device specification: %s\n"
-                            "used -help-char-devices for list of available formats\n",
+            CORE_INIT_FAILURE("unsupported character device specification: %s\n"
+                        "used -help-char-devices for list of available formats",
                     android_op_gps);
-            exit(1);
         }
         android_qemud_set_channel( ANDROID_QEMUD_GPS, cs);
     } else if (android_hw->hw_gps != 0) {
         if ( android_qemud_get_channel( "gps", &android_gps_cs ) < 0 ) {
-            fprintf(stderr, "could not initialize qemud 'gps' channel" );
-            exit(1);
+            CORE_INIT_FAILURE("could not initialize qemud 'gps' channel");
         }
     }
 
     /* Initialize audio. */
     if (android_op_audio) {
         if (android_op_audio_in || android_op_audio_out) {
-            fprintf(stderr, "you can't use -audio with -audio-in or -audio-out\n" );
-            exit(1);
+            CORE_INIT_FAILURE("you can't use -audio with -audio-in or -audio-out");
         }
         if ( !audio_check_backend_name( 0, android_op_audio ) ) {
-            fprintf(stderr, "'%s' is not a valid audio output backend. see -help-audio-out\n",
+            CORE_INIT_FAILURE("'%s' is not a valid audio output backend. see -help-audio-out",
                     android_op_audio);
-            exit(1);
         }
         android_op_audio_out = android_op_audio;
         android_op_audio_in  = android_op_audio;
@@ -4796,9 +4876,8 @@ int main(int argc, char **argv, char **envp)
     if (android_op_audio_in) {
         static char  env[64]; /* note: putenv needs a static unique string buffer */
         if ( !audio_check_backend_name( 1, android_op_audio_in ) ) {
-            fprintf(stderr, "'%s' is not a valid audio input backend. see -help-audio-in\n",
+            CORE_INIT_FAILURE("'%s' is not a valid audio input backend. see -help-audio-in",
                     android_op_audio_in);
-            exit(1);
         }
         bufprint( env, env+sizeof(env), "QEMU_AUDIO_IN_DRV=%s", android_op_audio_in );
         putenv( env );
@@ -4810,9 +4889,8 @@ int main(int argc, char **argv, char **envp)
     if (android_op_audio_out) {
         static char  env[64]; /* note: putenv needs a static unique string buffer */
         if ( !audio_check_backend_name( 0, android_op_audio_out ) ) {
-            fprintf(stderr, "'%s' is not a valid audio output backend. see -help-audio-out\n",
+            CORE_INIT_FAILURE("'%s' is not a valid audio output backend. see -help-audio-out",
                     android_op_audio_out);
-            exit(1);
         }
         bufprint( env, env+sizeof(env), "QEMU_AUDIO_OUT_DRV=%s", android_op_audio_out );
         putenv( env );
@@ -4825,8 +4903,7 @@ int main(int argc, char **argv, char **envp)
         char*   end;
         long    delay = strtol(android_op_cpu_delay, &end, 0);
         if (end == NULL || *end || delay < 0 || delay > 1000 ) {
-            fprintf(stderr, "option -cpu-delay must be an integer between 0 and 1000\n" );
-            exit(1);
+            CORE_INIT_FAILURE("option -cpu-delay must be an integer between 0 and 1000" );
         }
         if (delay > 0)
             delay = (1000-delay);
@@ -4868,7 +4945,7 @@ int main(int argc, char **argv, char **envp)
     if (dns_count == 0)
         dns_count = slirp_get_system_dns_servers();
     if (dns_count) {
-        snprintf(tmp_str, sizeof(tmp_str), "android.ndns=%d", dns_count);
+        snprintf(tmp_str, sizeof(tmp_str), "ndns=%d", dns_count);
         append_param(kernel_cmdline_append, tmp_str, sizeof(kernel_cmdline_append));
     }
 
@@ -4880,18 +4957,16 @@ int main(int argc, char **argv, char **envp)
 
 #if defined(CONFIG_KVM) && defined(CONFIG_KQEMU)
     if (kvm_allowed && kqemu_allowed) {
-        fprintf(stderr,
-                "You can not enable both KVM and kqemu at the same time\n");
-        exit(1);
+        CORE_INIT_FAILURE(
+                "You can not enable both KVM and kqemu at the same time");
     }
 #endif
 
     machine->max_cpus = machine->max_cpus ?: 1; /* Default to UP */
     if (smp_cpus > machine->max_cpus) {
-        fprintf(stderr, "Number of SMP cpus requested (%d), exceeds max cpus "
-                "supported by machine `%s' (%d)\n", smp_cpus,  machine->name,
+        CORE_INIT_FAILURE("Number of SMP cpus requested (%d), exceeds max cpus "
+                "supported by machine `%s' (%d)", smp_cpus,  machine->name,
                 machine->max_cpus);
-        exit(1);
     }
 
     if (display_type == DT_NOGRAPHIC) {
@@ -4907,8 +4982,9 @@ int main(int argc, char **argv, char **envp)
     if (daemonize) {
 	pid_t pid;
 
-	if (pipe(fds) == -1)
-	    exit(1);
+	if (pipe(fds) == -1) {
+	    CORE_INIT_FAILURE("Unable to aquire pidfile");
+	}
 
 	pid = fork();
 	if (pid > 0) {
@@ -4922,23 +4998,26 @@ int main(int argc, char **argv, char **envp)
             if (len == -1 && (errno == EINTR))
                 goto again;
 
-            if (len != 1)
-                exit(1);
+            if (len != 1) {
+                CORE_INIT_FAILURE("Error when aquiring pidfile");
+            }
             else if (status == 1) {
-                fprintf(stderr, "Could not acquire pidfile\n");
-                exit(1);
-            } else
-                exit(0);
-	} else if (pid < 0)
-            exit(1);
+                CORE_INIT_FAILURE("Could not acquire pidfile");
+            } else {
+                core_init_exit(0);
+            }
+	} else if (pid < 0) {
+        CORE_INIT_FAILURE("Unable to daemonize");
+	}
 
 	setsid();
 
 	pid = fork();
-	if (pid > 0)
-	    exit(0);
-	else if (pid < 0)
-	    exit(1);
+	if (pid > 0) {
+	    core_init_exit(0);
+	} else if (pid < 0) {
+         CORE_INIT_FAILURE("Could not acquire pid file");
+	}
 
 	umask(027);
 
@@ -4954,9 +5033,10 @@ int main(int argc, char **argv, char **envp)
             do {
                 ret = write(fds[1], &status, 1);
             } while (ret < 0 && errno == EINTR);
-        } else
-            fprintf(stderr, "Could not acquire pid file\n");
-        exit(1);
+            CORE_INIT_FAILURE("Could not acquire pid file");
+        } else {
+            CORE_INIT_FAILURE("Could not acquire pid file");
+        }
     }
 #endif
 
@@ -4965,20 +5045,17 @@ int main(int argc, char **argv, char **envp)
         kqemu_allowed = 0;
 #endif
     if (qemu_init_main_loop()) {
-        fprintf(stderr, "qemu_init_main_loop failed\n");
-        exit(1);
+        CORE_INIT_FAILURE("qemu_init_main_loop failed");
     }
     linux_boot = (kernel_filename != NULL);
     net_boot = (boot_devices_bitmap >> ('n' - 'a')) & 0xF;
 
     if (!linux_boot && *kernel_cmdline != '\0') {
-        fprintf(stderr, "-append only allowed with -kernel option\n");
-        exit(1);
+        CORE_INIT_FAILURE("-append only allowed with -kernel option");
     }
 
     if (!linux_boot && initrd_filename != NULL) {
-        fprintf(stderr, "-initrd only allowed with -kernel option\n");
-        exit(1);
+        CORE_INIT_FAILURE("-initrd only allowed with -kernel option");
     }
 
     /* boot to floppy or the default cd if no hard disk defined yet */
@@ -4988,14 +5065,9 @@ int main(int argc, char **argv, char **envp)
     setvbuf(stdout, NULL, _IOLBF, 0);
 
     if (init_timer_alarm() < 0) {
-        fprintf(stderr, "could not initialize alarm timer\n");
-        exit(1);
+        CORE_INIT_FAILURE("could not initialize alarm timer");
     }
     configure_icount(icount_option);
-
-#ifdef _WIN32
-    socket_init();
-#endif
 
     /* init network clients */
     if (nb_net_clients == 0) {
@@ -5007,8 +5079,9 @@ int main(int argc, char **argv, char **envp)
     }
 
     for(i = 0;i < nb_net_clients; i++) {
-        if (net_client_parse(net_clients[i]) < 0)
-            exit(1);
+        if (net_client_parse(net_clients[i]) < 0) {
+            CORE_INIT_FAILURE("Unable to parse net clients");
+        }
     }
     net_client_check();
 
@@ -5027,8 +5100,7 @@ int main(int argc, char **argv, char **envp)
                 filename = qemu_find_file(QEMU_FILE_TYPE_BIOS, buf);
                 if (filename && get_image_size(filename) > 0) {
                     if (nb_option_roms >= MAX_OPTION_ROMS) {
-                        fprintf(stderr, "Too many option ROMs\n");
-                        exit(1);
+                        CORE_INIT_FAILURE("Too many option ROMs");
                     }
                     option_rom[nb_option_roms] = qemu_strdup(buf);
                     nb_option_roms++;
@@ -5040,16 +5112,16 @@ int main(int argc, char **argv, char **envp)
             }
 	}
 	if (netroms == 0) {
-	    fprintf(stderr, "No valid PXE rom found for network device\n");
-	    exit(1);
+	    CORE_INIT_FAILURE("No valid PXE rom found for network device");
 	}
     }
 #endif
 
     /* init the bluetooth world */
     for (i = 0; i < nb_bt_opts; i++)
-        if (bt_parse(bt_opts[i]))
-            exit(1);
+        if (bt_parse(bt_opts[i])) {
+            CORE_INIT_FAILURE("Unable to parse bluetooth options");
+        }
 
     /* init the memory */
     if (ram_size == 0)
@@ -5062,8 +5134,7 @@ int main(int argc, char **argv, char **envp)
         kqemu_phys_ram_size = ram_size + 8 * 1024 * 1024 + 4 * 1024 * 1024;
         kqemu_phys_ram_base = qemu_vmalloc(kqemu_phys_ram_size);
         if (!kqemu_phys_ram_base) {
-            fprintf(stderr, "Could not allocate physical memory\n");
-            exit(1);
+            CORE_INIT_FAILURE("Could not allocate physical memory");
         }
     }
 #endif
@@ -5091,8 +5162,9 @@ int main(int argc, char **argv, char **envp)
     /* open the virtual block devices */
 
     for(i = 0; i < nb_drives_opt; i++)
-        if (drive_init(&drives_opt[i], snapshot, machine) == -1)
-	    exit(1);
+        if (drive_init(&drives_opt[i], snapshot, machine) == -1) {
+            CORE_INIT_FAILURE("Could not open the virtual block devices");
+        }
 
     //register_savevm("timer", 0, 2, timer_save, timer_load, &timers_state);
     register_savevm_live("ram", 0, 3, ram_save_live, NULL, ram_load, NULL);
@@ -5164,16 +5236,15 @@ int main(int argc, char **argv, char **envp)
 
         ret = kvm_init(smp_cpus);
         if (ret < 0) {
-            fprintf(stderr, "failed to initialize KVM\n");
-            exit(1);
+            CORE_INIT_FAILURE("failed to initialize KVM");
         }
     }
 
     if (monitor_device) {
         monitor_hd = qemu_chr_open("monitor", monitor_device, NULL);
         if (!monitor_hd) {
-            fprintf(stderr, "qemu: could not open monitor device '%s'\n", monitor_device);
-            exit(1);
+            CORE_INIT_FAILURE("qemu: could not open monitor device '%s'",
+                              monitor_device);
         }
     }
 
@@ -5184,9 +5255,8 @@ int main(int argc, char **argv, char **envp)
             snprintf(label, sizeof(label), "serial%d", i);
             serial_hds[i] = qemu_chr_open(label, devname, NULL);
             if (!serial_hds[i]) {
-                fprintf(stderr, "qemu: could not open serial device '%s'\n",
+                CORE_INIT_FAILURE("qemu: could not open serial device '%s'",
                         devname);
-                exit(1);
             }
         }
     }
@@ -5198,9 +5268,8 @@ int main(int argc, char **argv, char **envp)
             snprintf(label, sizeof(label), "parallel%d", i);
             parallel_hds[i] = qemu_chr_open(label, devname, NULL);
             if (!parallel_hds[i]) {
-                fprintf(stderr, "qemu: could not open parallel device '%s'\n",
+                CORE_INIT_FAILURE("qemu: could not open parallel device '%s'",
                         devname);
-                exit(1);
             }
         }
     }
@@ -5212,9 +5281,8 @@ int main(int argc, char **argv, char **envp)
             snprintf(label, sizeof(label), "virtcon%d", i);
             virtcon_hds[i] = qemu_chr_open(label, devname, NULL);
             if (!virtcon_hds[i]) {
-                fprintf(stderr, "qemu: could not open virtio console '%s'\n",
+                CORE_INIT_FAILURE("qemu: could not open virtio console '%s'",
                         devname);
-                exit(1);
             }
         }
     }
@@ -5270,8 +5338,7 @@ int main(int argc, char **argv, char **envp)
 
         ret = kvm_sync_vcpus();
         if (ret < 0) {
-            fprintf(stderr, "failed to initialize vcpus\n");
-            exit(1);
+            CORE_INIT_FAILURE("failed to initialize vcpus");
         }
     }
 
@@ -5292,7 +5359,8 @@ int main(int argc, char **argv, char **envp)
                                          &android_display_width,
                                          &android_display_height,
                                          &android_display_bpp)) {
-                exit(1);
+                CORE_INIT_FAILURE("Unable to parse -android-gui parameter: %s",
+                                  android_op_gui);
             }
             android_display_init_from(android_display_width,
                                       android_display_height, 0,
@@ -5306,7 +5374,8 @@ int main(int argc, char **argv, char **envp)
                                      &android_display_width,
                                      &android_display_height,
                                      &android_display_bpp)) {
-            exit(1);
+            CORE_INIT_FAILURE("Unable to parse -android-gui parameter: %s",
+                              android_op_gui);
         }
         display_state->surface = qemu_resize_displaysurface(display_state,
                                                             android_display_width,
@@ -5346,8 +5415,9 @@ int main(int argc, char **argv, char **envp)
 #endif
     case DT_VNC:
         vnc_display_init(ds);
-        if (vnc_display_open(ds, vnc_display) < 0)
-            exit(1);
+        if (vnc_display_open(ds, vnc_display) < 0) {
+            CORE_INIT_FAILURE("Unable to initialize VNC display");
+        }
 
         if (show_vnc_port) {
             printf("VNC server running on `%s'\n", vnc_display_local_addr(ds));
@@ -5403,9 +5473,8 @@ int main(int argc, char **argv, char **envp)
     }
 
     if (gdbstub_dev && gdbserver_start(gdbstub_dev) < 0) {
-        fprintf(stderr, "qemu: could not open gdbserver on device '%s'\n",
+        CORE_INIT_FAILURE("qemu: could not open gdbserver on device '%s'",
                 gdbstub_dev);
-        exit(1);
     }
 
     if (loadvm)
@@ -5432,49 +5501,45 @@ int main(int argc, char **argv, char **envp)
 	if (len == -1 && (errno == EINTR))
 	    goto again1;
 
-	if (len != 1)
-	    exit(1);
+	if (len != 1) {
+	    CORE_INIT_FAILURE("Unable to daemonize");
+	}
 
         if (chdir("/")) {
             perror("not able to chdir to /");
-            exit(1);
+            CORE_INIT_FAILURE("not able to chdir to /");
         }
 	TFR(fd = open("/dev/null", O_RDWR));
 	if (fd == -1)
-	    exit(1);
+	    CORE_INIT_FAILURE("open(\"/dev/null\") failed: %s", errno_str);
     }
 
     if (run_as) {
         pwd = getpwnam(run_as);
         if (!pwd) {
-            fprintf(stderr, "User \"%s\" doesn't exist\n", run_as);
-            exit(1);
+            CORE_INIT_FAILURE("User \"%s\" doesn't exist", run_as);
         }
     }
 
     if (chroot_dir) {
         if (chroot(chroot_dir) < 0) {
-            fprintf(stderr, "chroot failed\n");
-            exit(1);
+            CORE_INIT_FAILURE("chroot failed");
         }
         if (chdir("/")) {
             perror("not able to chdir to /");
-            exit(1);
+            CORE_INIT_FAILURE("not able to chdir to /");
         }
     }
 
     if (run_as) {
         if (setgid(pwd->pw_gid) < 0) {
-            fprintf(stderr, "Failed to setgid(%d)\n", pwd->pw_gid);
-            exit(1);
+            CORE_INIT_FAILURE("Failed to setgid(%d)", pwd->pw_gid);
         }
         if (setuid(pwd->pw_uid) < 0) {
-            fprintf(stderr, "Failed to setuid(%d)\n", pwd->pw_uid);
-            exit(1);
+            CORE_INIT_FAILURE("Failed to setuid(%d)", pwd->pw_uid);
         }
         if (setuid(0) != -1) {
-            fprintf(stderr, "Dropping privileges failed\n");
-            exit(1);
+            CORE_INIT_FAILURE("Dropping privileges failed");
         }
     }
 
@@ -5486,6 +5551,9 @@ int main(int argc, char **argv, char **envp)
         close(fd);
     }
 #endif
+
+    // This will notify the UI that the core is successfuly initialized
+    core_init_completed();
 
     main_loop();
     quit_timers();

@@ -1513,23 +1513,23 @@ int main(int argc, char **argv)
         p = bufprint(p, end, "qemu=1 console=ttyS0" );
 
         if (opts->shell || opts->logcat) {
-            p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );
+            p = bufprint(p, end, " console=ttyS%d", shell_serial );
         }
 
         if (opts->trace) {
-            p = bufprint(p, end, " android.tracing=1");
+            p = bufprint(p, end, " tracing=1");
         }
 
         if (!opts->no_jni) {
-            p = bufprint(p, end, " android.checkjni=1");
+            p = bufprint(p, end, " checkjni=1");
         }
 
         if (opts->no_boot_anim) {
-            p = bufprint( p, end, " android.bootanim=0" );
+            p = bufprint( p, end, " bootanim=0" );
         }
 
         if (opts->logcat) {
-            char*  q = bufprint(p, end, " androidboot.logcat=%s", opts->logcat);
+            char*  q = bufprint(p, end, " logcat=%s", opts->logcat);
 
             if (q < end) {
                 /* replace any space by a comma ! */
@@ -1546,15 +1546,15 @@ int main(int argc, char **argv)
 
         if (opts->old_system)
         {
-            p = bufprint(p, end, " android.ril=ttyS%d", radio_serial);
+            p = bufprint(p, end, " ril=ttyS%d", radio_serial);
 
             if (opts->gps) {
-                p = bufprint(p, end, " android.gps=ttyS%d", gps_serial);
+                p = bufprint(p, end, " gps=ttyS%d", gps_serial);
             }
         }
         else
         {
-            p = bufprint(p, end, " android.qemud=ttyS%d", qemud_serial);
+            p = bufprint(p, end, " qemud=ttyS%d", qemud_serial);
         }
 
         if (opts->bootchart) {
