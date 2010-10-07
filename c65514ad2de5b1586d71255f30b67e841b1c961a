@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA73///lE\u003d",
+        "filename": "android/core-init-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T14:31:47Z",
+      "side": 1,
+      "message": "do you want to check the validity of the port, i.e. not take negative number or 0 here.",
+      "revId": "c65514ad2de5b1586d71255f30b67e841b1c961a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///lI\u003d",
+        "filename": "android/core-init-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T14:31:47Z",
+      "side": 1,
+      "message": "snprintf, please.",
+      "revId": "c65514ad2de5b1586d71255f30b67e841b1c961a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///lA\u003d",
+        "filename": "android/core-init-utils.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T14:31:47Z",
+      "side": 1,
+      "message": "this is inefficient (it\u0027s going to write 4093 zeros in the buffer).\nuse snprintf(msg, sizeof msg, \"ko:\"); instead.",
+      "revId": "c65514ad2de5b1586d71255f30b67e841b1c961a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///kc\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T14:31:47Z",
+      "side": 1,
+      "message": "You should call fprintf(stderr, __VA_ARGS__) first...",
+      "revId": "c65514ad2de5b1586d71255f30b67e841b1c961a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///k4\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3462,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T14:31:47Z",
+      "side": 1,
+      "message": "It would be better to put that in a #ifndef CONFIG_ANDROID ... #endif block to ease future integrations.",
+      "revId": "c65514ad2de5b1586d71255f30b67e841b1c961a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///k0\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3792,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T14:31:47Z",
+      "side": 1,
+      "message": "#ifdef CONFIG_ANDROID .. #endif missing here.",
+      "revId": "c65514ad2de5b1586d71255f30b67e841b1c961a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///kw\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3946,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T14:31:47Z",
+      "side": 1,
+      "message": "#if CONFIG_ANDROID .. #else .. #endif missing here.",
+      "revId": "c65514ad2de5b1586d71255f30b67e841b1c961a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///ko\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4128,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T14:31:47Z",
+      "side": 1,
+      "message": "same here, or you could define a macro (e.g. QEMU_EXIT())",
+      "revId": "c65514ad2de5b1586d71255f30b67e841b1c961a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///kk\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4931,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T14:31:47Z",
+      "side": 1,
+      "message": "Use QEMU_EXIT() instead.",
+      "revId": "c65514ad2de5b1586d71255f30b67e841b1c961a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73///kg\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5478,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-07T14:31:47Z",
+      "side": 1,
+      "message": "missing #ifdef CONFIG_ANDROID .. #endif",
+      "revId": "c65514ad2de5b1586d71255f30b67e841b1c961a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
