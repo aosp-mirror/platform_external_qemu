@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA73///Q0\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1940,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-08T08:18:10Z",
+      "side": 1,
+      "message": "missing space between snapshot and load here :)",
+      "revId": "3a2f9cb1a0a73136684ed253d0b28a11d671ea72",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
