@@ -1,0 +1,78 @@
+Android Modem NVRAM Config File:
+================================
+
+The emulated modem uses a configuration file to emulate a non-volatile RAM to
+store configuration preferences. Every emulator instance will use a different
+file depending on the port it is listening to. This file will typically be
+~/.android/modem-nv-ram-5554
+for an emulator listening on the default port 5554
+
+Currently supported values:
+---------------------------
+
+modem_technology:
+   Either "cdma" or "gsm". This is the technology the modem will start up with
+preferred_mode:
+   A 32 bit integer divided into four 8-bit masks.
+
+   Each of the four bit masks has a priority value from 0 to three, that
+   corresponds to the byte order of the respective mask. 
+
+   Byte order (priority): 3  2  1  0
+   Mask:                 DD CC BB AA
+
+   Each bit within every mask represents a different Radio Access Technology
+   (RAT) that is preferred with a priority matching that of its containing
+   mask if the bit has a value of 1.
+
+   All the currently available technologies are represented in the following
+   diagram:
+
+   7 6 5 4   3 2 1 0
+   | | | |   | | | |
+   | | | |   | | | +--GSM
+   | | | |   | | +----WCDMA
+   | | | |   | +------CDMA
+   | | | |   +--------EvDo
+   | | | +------------LTE
+   | | |
+   +-+-+--------------Unused
+
+cdma_subscription_source:
+   This value specifies where to take the subscription information from while
+   in CDMA mode.
+   It can be either 0 (Subscription from RUIM card) or 1 (Subscription from
+   NVRAM)
+
+cdma_roaming_pref:
+   Specifies whether it's ok to select a roaming system or only a home system.
+
+in_ecbm:
+   Whether to start in Emergency callback mode
+
+emergency_number_%d:
+   A series of numbers to be used as emergency numbers. These will be used to
+   enter emergency callback mode. The '%d' must be substituted by an ordinal
+   number from 1 to 15.
+
+prl_version:
+   Specifies the Preferred Roaming List version (CDMA)
+
+
+Other Values (undocumented)
+--------------------------
+oper_name_index
+oper_index
+selection_mode
+oper_count
+
+
+Limitations / BUGS
+------------------
+
+The initial implementation uses qemu android's aconfig_ apis, which are not well
+suited for an actual NVRAM implementation, since those apis appear to have been
+optimized for one time read at startup. Because of this, values are not really
+persistent, but may be manually set in the file prior to execution of the
+emulator.
+
