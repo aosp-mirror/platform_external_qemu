@@ -143,6 +143,9 @@ const NetworkSpeed  android_netspeeds[] = {
     { "edge", "EDGE/EGPRS", 118400, 236800 },
     { "umts", "UMTS/3G", 128000, 1920000 },
     { "hsdpa", "HSDPA", 348000, 14400000 },
+    { "cdma", "CDMA 1x", 153000, 153000 },
+    { "evdo", "EvDo", 153000, 2457000 },
+    { "lte", "LTE", 58000000, 173000000 },
     { "full", "no limit", 0, 0 },
     { NULL, NULL, 0, 0 }
 };
