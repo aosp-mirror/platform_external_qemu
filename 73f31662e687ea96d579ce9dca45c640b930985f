@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA73//+f0\u003d",
+        "filename": "android/ui-core-protocol.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-10-13T15:56:57Z",
+      "side": 1,
+      "message": "Causes a build warning: \"implicit declaration of function ‘qemu_system_shutdown_request’\". Perhaps include sysemu.h to avoid, or factor out a separate header?",
+      "revId": "73f31662e687ea96d579ce9dca45c640b930985f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
