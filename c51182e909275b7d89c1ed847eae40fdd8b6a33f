@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA73//+hA\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1004208
+      },
+      "writtenOn": "2010-10-13T14:47:56Z",
+      "side": 1,
+      "message": "merged uint8_t* vs char*",
+      "revId": "c51182e909275b7d89c1ed847eae40fdd8b6a33f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
