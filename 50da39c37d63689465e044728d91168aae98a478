@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA8H///+8\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-10-14T16:54:49Z",
+      "side": 1,
+      "message": "The idea is that you might want to have different instances (probably of the same AVD) boot up using different technologies, which I assume wouldn\u0027t be possible when placing the configuration file in the AVD content directory. Any other way to doing this?. Also, this file should ideally be maintenance free, but can be tweaked by the user.",
+      "parentUuid": "AAAA73//+Us\u003d",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA73//+Uc\u003d",
         "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA8H///+0\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-10-14T16:54:49Z",
+      "side": 1,
+      "message": "Because of my comment above, all the values are optional. I agree that I may have to add comments with regards to the defaults",
+      "parentUuid": "AAAA73//+Uc\u003d",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA73//+Uo\u003d",
         "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2010-10-14T13:09:48Z",
       "side": 1,
       "message": "so, is it a boolean (\"true\"/\"false\"), a \"yes\"/\"no\", a decimal value?",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA8H///+w\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-10-14T16:54:49Z",
+      "side": 1,
+      "message": "Will do. But let us first come to an agreement as to the way the file will work (first comment)",
+      "parentUuid": "AAAA73//+Uo\u003d",
       "revId": "50da39c37d63689465e044728d91168aae98a478",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -132,6 +186,24 @@
       "writtenOn": "2010-10-14T13:09:48Z",
       "side": 1,
       "message": "The AConfig files are hierarchical, and you don\u0027t mention anything about that here. Also what is the plan for versioning these files if you plan to change this later?\n\nCan you use an .ini file instead (see android/utils/ini.h)",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA8H///+o\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1003956
+      },
+      "writtenOn": "2010-10-14T16:54:49Z",
+      "side": 1,
+      "message": "Will try",
+      "parentUuid": "AAAA73//+UQ\u003d",
       "revId": "50da39c37d63689465e044728d91168aae98a478",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
