@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA73//+Us\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-14T13:09:48Z",
+      "side": 1,
+      "message": "what? no way, the file should be stored in the AVD\u0027s content directory, not in a global user configuration directory! And its naming should be totally independent of the port number (which is essentially allocated in non-predictable ways)\n\nSorry if I missed that in the implementation, please fix it.",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73//+Uc\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-14T13:09:48Z",
+      "side": 1,
+      "message": "Describing the values is not enough, you should also indicate which are mandatory, which are optional. For the optional ones, what the defaults are.",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73//+Uo\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-14T13:09:48Z",
+      "side": 1,
+      "message": "so, is it a boolean (\"true\"/\"false\"), a \"yes\"/\"no\", a decimal value?",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73//+Uk\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-14T13:09:48Z",
+      "side": 1,
+      "message": "again, please specify type of value and acceptable content",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73//+Ug\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-14T13:09:48Z",
+      "side": 1,
+      "message": "Please specify that these are \"phone numbers\". Also specify if it is ok to use special characters in the formatting (e.g. \"-\" as a separator, or \"#\" or \",\" as special control characters).\n\nAny special constraints/ordering on the numbering (e.g. can I declare emergency_number_3 + emergency_number_14 only)",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73//+UY\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-14T13:09:48Z",
+      "side": 1,
+      "message": "List of acceptable values?",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73//+UU\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-14T13:09:48Z",
+      "side": 1,
+      "message": "Please document them",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA73//+UQ\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-14T13:09:48Z",
+      "side": 1,
+      "message": "The AConfig files are hierarchical, and you don\u0027t mention anything about that here. Also what is the plan for versioning these files if you plan to change this later?\n\nCan you use an .ini file instead (see android/utils/ini.h)",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
