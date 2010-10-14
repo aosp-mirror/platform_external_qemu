@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA8H///+Q\u003d",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1001100
+      },
+      "writtenOn": "2010-10-14T17:16:48Z",
+      "side": 1,
+      "message": "nitpick: TARGET_EXE_EXT would be more readable (and HOST_EXE_EXT)",
+      "revId": "81f7429f25a555ae2d37d14c5c3843dd3621c22f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
