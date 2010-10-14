@@ -16,6 +16,24 @@
       "revId": "81f7429f25a555ae2d37d14c5c3843dd3621c22f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA8H///8k\u003d",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-14T20:19:15Z",
+      "side": 1,
+      "message": "true, but will change that in a future patch. I need this one right now",
+      "parentUuid": "AAAA8H///+Q\u003d",
+      "revId": "81f7429f25a555ae2d37d14c5c3843dd3621c22f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
