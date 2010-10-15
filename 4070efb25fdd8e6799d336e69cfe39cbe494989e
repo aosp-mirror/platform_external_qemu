@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA8H///t4\u003d",
+        "filename": "qemu-timer-ui.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 980,
+      "author": {
+        "id": 1001100
+      },
+      "writtenOn": "2010-10-15T16:59:52Z",
+      "side": 1,
+      "message": "nitpick/style: tabs on these 2 lines",
+      "revId": "4070efb25fdd8e6799d336e69cfe39cbe494989e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
