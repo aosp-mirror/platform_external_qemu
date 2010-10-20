@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA8H///Gc\u003d",
+        "filename": "hw/goldfish_events_device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1001100
+      },
+      "writtenOn": "2010-10-20T19:14:28Z",
+      "side": 1,
+      "message": "style: tabs in file, if you care. Also at line 196.",
+      "revId": "80bc5c8c7b9c50e8f302c22c2fba42dd6e8aa2df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
