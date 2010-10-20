@@ -16,6 +16,24 @@
       "revId": "80bc5c8c7b9c50e8f302c22c2fba42dd6e8aa2df",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA8H///Bg\u003d",
+        "filename": "hw/goldfish_events_device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-20T23:53:45Z",
+      "side": 1,
+      "message": "ok, will be fixed in another patch (I also need to check my editor). Thanks",
+      "parentUuid": "AAAA8H///Gc\u003d",
+      "revId": "80bc5c8c7b9c50e8f302c22c2fba42dd6e8aa2df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
