@@ -64,16 +64,6 @@ typedef struct {
                               * file may be smaller. */
 } nand_dev;
 
-#define  QFIELD_STRUCT  nand_dev
-QFIELD_BEGIN(nand_dev_fields)
-    QFIELD_INT32(flags),
-    QFIELD_INT32(page_size),
-    QFIELD_INT32(extra_size),
-    QFIELD_INT32(erase_size),
-    QFIELD_INT32(max_size),
-QFIELD_END
-
-
 nand_threshold    android_nand_write_threshold;
 nand_threshold    android_nand_read_threshold;
 
@@ -142,7 +132,7 @@ typedef struct {
 /* update this everytime you change the nand_dev_controller_state structure
  * 1: initial version, saving only nand_dev_controller_state fields
  * 2: saving actual disk contents as well
- * 3: saving 'temporary' buffer and more state, not padding on save.
+ * 3: using truncate instead of padding.
  */
 #define  NAND_DEV_STATE_SAVE_VERSION  3
 
@@ -193,28 +183,6 @@ static void  nand_dev_save_disk_state(QEMUFile *f, nand_dev *dev)
     int ret;
     uint64_t total_copied = 0;
 
-    /* Store the per-device flags for sanity-compare or restore */
-
-    const uint64_t total_size = dev->max_size;
-
-    qemu_put_struct(f, nand_dev_fields, dev);
-
-    /* Store the buffer data. Probably overkill, but NAND_CMD_READ/WRITE has an odd final clause. */
-
-    qemu_put_buffer(f, dev->data, dev->erase_size);
-
-    /* Record the current file position.
-     * TODO Work out whether to use lseek64 here. */
-
-    ret = lseek(dev->fd, 0, SEEK_CUR);
-    if (ret < 0) {
-      XLOG("%s POS seek failed: %s\n", __FUNCTION__, strerror(errno));
-      qemu_file_set_error(f);
-      return;
-    }
-    const uint64_t file_pos = ret;
-    qemu_put_be64(f, file_pos);
-
     /* Record the current file size.
      * TODO Work out whether to use lseek64 here. */
 
@@ -224,8 +192,8 @@ static void  nand_dev_save_disk_state(QEMUFile *f, nand_dev *dev)
       qemu_file_set_error(f);
       return;
     }
-    const uint64_t file_len = ret;
-    qemu_put_be64(f, file_len);
+    const uint64_t file_size = ret;
+    qemu_put_be64(f, file_size);
 
     /* copy all data from the stream to the stored image */
     ret = lseek(dev->fd, 0, SEEK_SET);
@@ -245,9 +213,9 @@ static void  nand_dev_save_disk_state(QEMUFile *f, nand_dev *dev)
 
         total_copied += ret;
     }
-    while (ret == buf_size && total_copied < total_size);
+    while (ret == buf_size && total_copied < dev->max_size);
 
-    /* File is allowed to be shorter than the buffer. */
+    /* TODO Maybe check that we've written file_size bytes */
 }
 
 
@@ -272,25 +240,8 @@ static int  nand_dev_load_disk_state(QEMUFile *f, nand_dev *dev)
     uint8_t buffer[NAND_DEV_SAVE_DISK_BUF_SIZE] = {0};
     int ret;
 
-    /* Fetch the per-device flags for sanity-compare or restore */
-
-    nand_dev file_dev;
-
-    qemu_get_struct(f, nand_dev_fields, &file_dev);
-
-    if (file_dev.erase_size != dev->erase_size) {
-      XLOG("%s, restore failed: erase_size stored (%lld) differs from session (%lld)\n",
-           __FUNCTION__, file_dev.erase_size, dev->erase_size);
-      return -EIO;
-    }
-
-    /* Restore the unflushed buffer data */
-
-    qemu_get_buffer(f, dev->data, dev->erase_size);
-
     /* Recall the file position and size */
 
-    uint64_t file_pos = qemu_get_be64(f);
     uint64_t file_size = qemu_get_be64(f);
 
     if (file_size > dev->max_size) {
@@ -331,11 +282,6 @@ static int  nand_dev_load_disk_state(QEMUFile *f, nand_dev *dev)
     ret = ftruncate(dev->fd, file_size);
     if (ret < 0) {
         XLOG("%s ftruncate failed: %s\n", __FUNCTION__, strerror(errno));
-        return -EIO;
-    }
-    ret = lseek(dev->fd, file_pos, SEEK_SET);
-    if (ret < 0) {
-        XLOG("%s POS seek failed: %s\n", __FUNCTION__, strerror(errno));
         return -EIO;
     }
 
