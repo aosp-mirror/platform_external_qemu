@@ -16,6 +16,24 @@
       "revId": "bd762dc609d58990e466009790ff8c71d8e76181",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA8H///BU\u003d",
+        "filename": "android/utils/system.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-20T23:54:25Z",
+      "side": 1,
+      "message": "Aarf, will fix, thanks.",
+      "parentUuid": "AAAA8H///GU\u003d",
+      "revId": "bd762dc609d58990e466009790ff8c71d8e76181",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
