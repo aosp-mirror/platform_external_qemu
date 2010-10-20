@@ -132,8 +132,9 @@ typedef struct {
 /* update this everytime you change the nand_dev_controller_state structure
  * 1: initial version, saving only nand_dev_controller_state fields
  * 2: saving actual disk contents as well
+ * 3: use the correct data length and truncate to avoid padding.
  */
-#define  NAND_DEV_STATE_SAVE_VERSION  2
+#define  NAND_DEV_STATE_SAVE_VERSION  3
 
 #define  QFIELD_STRUCT  nand_dev_controller_state
 QFIELD_BEGIN(nand_dev_controller_state_fields)
@@ -182,10 +183,16 @@ static void  nand_dev_save_disk_state(QEMUFile *f, nand_dev *dev)
     int ret;
     uint64_t total_copied = 0;
 
-    /* Put the size up front, since otherwise we don't know how much to read
-     * when restoring.
-     */
-    const uint64_t total_size = dev->max_size;
+    /* Size of file to restore, hence size of data block following.
+     * TODO Work out whether to use lseek64 here. */
+
+    ret = lseek(dev->fd, 0, SEEK_END);
+    if (ret < 0) {
+      XLOG("%s EOF seek failed: %s\n", __FUNCTION__, strerror(errno));
+      qemu_file_set_error(f);
+      return;
+    }
+    const uint64_t total_size = ret;
     qemu_put_be64(f, total_size);
 
     /* copy all data from the stream to the stored image */
@@ -206,24 +213,9 @@ static void  nand_dev_save_disk_state(QEMUFile *f, nand_dev *dev)
 
         total_copied += ret;
     }
-    while (ret == buf_size && total_copied < total_size);
+    while (ret == buf_size && total_copied < dev->max_size);
 
-    /* The file may be smaller than the device size. Pad with 0xff (pattern for
-     * erased data) until we have filled the snapshot buffer we declared earlier.
-     * TODO avoid padding. Unfortunately, attempts to use the actual size of the
-     *      underlying image instead result in broken restores. This also happens
-     *      when limited padding is inserted so the image size is a multiple of
-     *      page_size or erase_size.
-     */
-    memset(buffer, 0xff, NAND_DEV_SAVE_DISK_BUF_SIZE);
-    while (total_copied < total_size) {
-        /* adjust buffer size for last part of the image */
-        if (total_size - total_copied < buf_size) {
-            buf_size = total_size - total_copied;
-        }
-        qemu_put_buffer(f, buffer, buf_size);
-        total_copied += buf_size;
-    }
+    /* TODO Maybe check that we've written total_size bytes */
 }
 
 
@@ -248,7 +240,7 @@ static int  nand_dev_load_disk_state(QEMUFile *f, nand_dev *dev)
     uint8_t buffer[NAND_DEV_SAVE_DISK_BUF_SIZE] = {0};
     int ret;
 
-    /* number of bytes to restore */
+    /* File size for restore and truncate */
     uint64_t total_size = qemu_get_be64(f);
     if (total_size > dev->max_size) {
         XLOG("%s, restore failed: size required (%lld) exceeds device limit (%lld)\n",
@@ -258,9 +250,7 @@ static int  nand_dev_load_disk_state(QEMUFile *f, nand_dev *dev)
 
     /* overwrite disk contents with snapshot contents */
     uint64_t next_offset = 0;
-    do {
-        ret = lseek(dev->fd, 0, SEEK_SET);
-    } while (ret < 0 && errno == EINTR);
+    ret = lseek(dev->fd, 0, SEEK_SET);
     if (ret < 0) {
         XLOG("%s seek failed: %s\n", __FUNCTION__, strerror(errno));
         return -EIO;
@@ -285,6 +275,12 @@ static int  nand_dev_load_disk_state(QEMUFile *f, nand_dev *dev)
         }
 
         next_offset += buf_size;
+    }
+
+    ret = ftruncate(dev->fd, total_size);
+    if (ret < 0) {
+        XLOG("%s ftruncate failed: %s\n", __FUNCTION__, strerror(errno));
+        return -EIO;
     }
 
     return 0;
