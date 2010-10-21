@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA8H//+6E\u003d",
+        "filename": "android/avd/info.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 689,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-21T15:00:42Z",
+      "side": 1,
+      "message": "I\u0027d prefer you keep the same naming convention that the rest of the file, e.g. use imageLoader_loadOptional() instead.",
+      "revId": "c62dc286c664caaeed11c54fd13729dd9d73343a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
