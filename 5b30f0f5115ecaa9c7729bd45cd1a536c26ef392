@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA8H//+40\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-21T15:35:59Z",
+      "side": 1,
+      "message": "mmm, I don\u0027t think ftruncate is availble on Mingw, so this may break the Windows build. Can you try with ./android-configure.sh --mingw to see if this is the case?",
+      "revId": "5b30f0f5115ecaa9c7729bd45cd1a536c26ef392",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
