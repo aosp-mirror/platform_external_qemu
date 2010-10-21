@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA8H//+5Q\u003d",
+        "filename": "outputchannel.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-21T15:21:40Z",
+      "side": 1,
+      "message": "You probably want to handle the case where ret is negative here (e.g. by ignoring it instead of incrementing).",
+      "revId": "d3cc63a817d18d6cc5604429086ef0fd56fd1921",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
