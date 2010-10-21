@@ -132,7 +132,7 @@ typedef struct {
 /* update this everytime you change the nand_dev_controller_state structure
  * 1: initial version, saving only nand_dev_controller_state fields
  * 2: saving actual disk contents as well
- * 3: using truncate instead of padding.
+ * 3: use the correct data length and truncate to avoid padding.
  */
 #define  NAND_DEV_STATE_SAVE_VERSION  3
 
@@ -183,7 +183,7 @@ static void  nand_dev_save_disk_state(QEMUFile *f, nand_dev *dev)
     int ret;
     uint64_t total_copied = 0;
 
-    /* Record the current file size.
+    /* Size of file to restore, hence size of data block following.
      * TODO Work out whether to use lseek64 here. */
 
     ret = lseek(dev->fd, 0, SEEK_END);
@@ -192,8 +192,8 @@ static void  nand_dev_save_disk_state(QEMUFile *f, nand_dev *dev)
       qemu_file_set_error(f);
       return;
     }
-    const uint64_t file_size = ret;
-    qemu_put_be64(f, file_size);
+    const uint64_t total_size = ret;
+    qemu_put_be64(f, total_size);
 
     /* copy all data from the stream to the stored image */
     ret = lseek(dev->fd, 0, SEEK_SET);
@@ -215,7 +215,7 @@ static void  nand_dev_save_disk_state(QEMUFile *f, nand_dev *dev)
     }
     while (ret == buf_size && total_copied < dev->max_size);
 
-    /* TODO Maybe check that we've written file_size bytes */
+    /* TODO Maybe check that we've written total_size bytes */
 }
 
 
@@ -240,13 +240,11 @@ static int  nand_dev_load_disk_state(QEMUFile *f, nand_dev *dev)
     uint8_t buffer[NAND_DEV_SAVE_DISK_BUF_SIZE] = {0};
     int ret;
 
-    /* Recall the file position and size */
-
-    uint64_t file_size = qemu_get_be64(f);
-
-    if (file_size > dev->max_size) {
+    /* File size for restore and truncate */
+    uint64_t total_size = qemu_get_be64(f);
+    if (total_size > dev->max_size) {
         XLOG("%s, restore failed: size required (%lld) exceeds device limit (%lld)\n",
-             __FUNCTION__, file_size, dev->max_size);
+             __FUNCTION__, total_size, dev->max_size);
         return -EIO;
     }
 
@@ -257,11 +255,11 @@ static int  nand_dev_load_disk_state(QEMUFile *f, nand_dev *dev)
         XLOG("%s seek failed: %s\n", __FUNCTION__, strerror(errno));
         return -EIO;
     }
-    while (next_offset < file_size) {
+    while (next_offset < total_size) {
         /* snapshot buffer may not be an exact multiple of buf_size
          * if necessary, adjust buffer size for last copy operation */
-        if (file_size - next_offset < buf_size) {
-            buf_size = file_size - next_offset;
+        if (total_size - next_offset < buf_size) {
+            buf_size = total_size - next_offset;
         }
 
         ret = qemu_get_buffer(f, buffer, buf_size);
@@ -279,7 +277,7 @@ static int  nand_dev_load_disk_state(QEMUFile *f, nand_dev *dev)
         next_offset += buf_size;
     }
 
-    ret = ftruncate(dev->fd, file_size);
+    ret = ftruncate(dev->fd, total_size);
     if (ret < 0) {
         XLOG("%s ftruncate failed: %s\n", __FUNCTION__, strerror(errno));
         return -EIO;
