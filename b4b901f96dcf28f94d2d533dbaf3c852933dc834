@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA8H///BM\u003d",
+        "filename": "android/snapshot.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-21T01:19:18Z",
+      "side": 1,
+      "message": "I would prefer if you could use a feature-based macro (e.g. HAVE_LOCALTIME_R) and a probe being performed in android-configure.sh.\n\nBesides, we\u0027re not going to use this function in multiple threads, so it\u0027s probably ok to only use localtime() here.",
+      "revId": "b4b901f96dcf28f94d2d533dbaf3c852933dc834",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
