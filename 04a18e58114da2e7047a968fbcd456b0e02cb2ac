@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA8H//+0A\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1001100
+      },
+      "writtenOn": "2010-10-23T01:12:21Z",
+      "side": 1,
+      "message": "Do you need to wrap it in a $(strip ...shell...) ?",
+      "revId": "04a18e58114da2e7047a968fbcd456b0e02cb2ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
