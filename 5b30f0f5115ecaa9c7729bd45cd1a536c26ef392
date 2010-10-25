@@ -16,6 +16,24 @@
       "revId": "5b30f0f5115ecaa9c7729bd45cd1a536c26ef392",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA8H//+ws\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1004857
+      },
+      "writtenOn": "2010-10-25T13:20:03Z",
+      "side": 1,
+      "message": "Done\n\nIt compiles happily enough after a clean and a reconfigure. I almost caught it working on Wine until it got itself tangled up with lock files. Additionally, there\u0027s a page here that says ftruncate should work with mingw - http://www.mail-archive.com/bug-gnulib@gnu.org/msg17845.html",
+      "parentUuid": "AAAA8H//+40\u003d",
+      "revId": "5b30f0f5115ecaa9c7729bd45cd1a536c26ef392",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
