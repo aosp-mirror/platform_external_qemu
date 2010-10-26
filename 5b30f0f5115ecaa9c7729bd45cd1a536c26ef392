@@ -34,6 +34,24 @@
       "revId": "5b30f0f5115ecaa9c7729bd45cd1a536c26ef392",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA8H//+as\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-10-26T19:11:49Z",
+      "side": 1,
+      "message": "ok thanks, I had seen another page that said that mingw didn\u0027t support it, maybe it is outdated.",
+      "parentUuid": "AAAA8H//+ws\u003d",
+      "revId": "5b30f0f5115ecaa9c7729bd45cd1a536c26ef392",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
