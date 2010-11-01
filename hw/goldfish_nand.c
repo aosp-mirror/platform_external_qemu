@@ -708,13 +708,13 @@ void nand_add_dev(const char *arg)
         TempFile*    tmp = tempfile_create();
 
         if (tmp == NULL) {
-            XLOG("could not create temp file for %.*s NAND disk image: %s",
+            XLOG("could not create temp file for %.*s NAND disk image: %s\n",
                   devname_len, devname, strerror(errno));
             exit(1);
         }
         rwfilename = (char*) tempfile_path(tmp);
         if (VERBOSE_CHECK(init))
-            dprint( "mapping '%.*s' NAND image to %s", devname_len, devname, rwfilename);
+            dprint( "mapping '%.*s' NAND image to %s\n", devname_len, devname, rwfilename);
     }
 
     if(rwfilename) {
