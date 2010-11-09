@@ -1010,6 +1010,18 @@ help_memcheck(stralloc_t*  out)
 }
 #endif  // CONFIG_MEMCHECK
 
+#ifdef CONFIG_STANDALONE_UI
+static void
+help_list_cores(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-list-cores localhost to list emulator core processes running on this machine.\n"
+    "  use '-list-cores ip:<ip address> to list emulator core processes running on a remote\n"
+    "  machine, addressed by the give IP address.\n"
+    );
+}
+#endif  // CONFIG_STANDALONE_UI
+
 static void
 help_show_kernel(stralloc_t*  out)
 {

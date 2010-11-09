@@ -1187,6 +1187,8 @@ VL_SOURCES := framebuffer.c \
               qemu-timer-ui.c \
               vl-android-ui.c \
 	          console-ui.c \
+	          iolooper-select.c \
+	          qemu-malloc.c \
 
 # Add common system libraries
 #

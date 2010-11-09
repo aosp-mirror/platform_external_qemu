@@ -62,6 +62,7 @@
 #include "android/snapshot.h"
 
 #include "framebuffer.h"
+#include "iolooper.h"
 
 AndroidRotation  android_framebuffer_rotation;
 
@@ -734,6 +735,81 @@ _adjustPartitionSize( const char*  description,
     return convertMBToBytes(imageMB);
 }
 
+#ifdef CONFIG_STANDALONE_UI
+/* List emulator core processes running on the given machine.
+ * This routine is called from main() if -list-cores parameter is set in the
+ * command line.
+ * Param:
+ *  host Value passed with -list-core parameter. Must be either "localhost", or
+ *  an IP address of a machine where core processes must be enumerated.
+ */
+static void
+list_running_cores(const char* host)
+{
+    uint32_t ip_address;
+    int port_num;
+    int found_cores = 0;
+
+    if (!strncmp(host, "ip:", 3)) {
+        // Obtain IP address of the machine where to list the cores.
+        ip_address = inet_network(host + 3);
+        if (ip_address == -1) {
+            fprintf(stderr, "IP address %s is invalid.\n", host + 3);
+            return;
+        }
+    } else if(!strcmp(host, "localhost")) {
+        ip_address = SOCK_ADDRESS_INET_LOOPBACK;
+    } else {
+        fprintf(stderr, "Invalid -list-cores option value: %s\n", host);
+        return;
+    }
+
+    /* List running core processes. To enum core processes we will loop
+     * through socket ports 5554-5584, where we assume that successful
+     * conection to a socket means that there is a core process running
+     * at the other end of that socket. In order to make sure that it's
+     * emulator console at the other end of that socket, we will read from
+     * the socket, expecting "Android Console" string at the beginning of
+     * the data read from the socket. */
+    for (port_num = 5554; port_num <= 5584; port_num += 2) {
+        SockAddress sockaddr;
+        char buf[512];
+        int fd;
+
+        fd = socket_create_inet(SOCKET_STREAM);
+        if (fd < 0) {
+            return;
+        }
+
+        sock_address_init_inet(&sockaddr, ip_address, port_num);
+        socket_set_xreuseaddr(fd);
+        // TODO: How to make connection fail on time out?????
+        if (socket_connect(fd, &sockaddr) >= 0) {
+            IoLooper*  looper = iolooper_new();
+            iolooper_add_read(looper, fd);
+            if (iolooper_wait(looper, 1000) && iolooper_is_read(looper, fd)) {
+                int read_bytes = read(fd, buf, sizeof(buf));
+                if (read_bytes > 15 && !strncmp(buf, "Android Console", 15)) {
+                    // This is a core process at the other end of the socket.
+                    found_cores++;
+                    if (found_cores == 1) {
+                        fprintf(stdout, "Running emulator core processes:\n");
+                    }
+                    fprintf(stdout, "Emulator console port %d\n", port_num);
+                }
+            }
+            iolooper_free(looper);
+        }
+
+        socket_close( fd );
+    }
+
+    if (!found_cores) {
+       fprintf(stdout, "There were no running emulator core processes found.\n");
+    }
+}
+#endif  // CONFIG_STANDALONE_UI
+
 int main(int argc, char **argv)
 {
     char   tmp[MAX_PATH];
@@ -819,6 +895,14 @@ int main(int argc, char **argv)
         fprintf(stderr, "please use -help for more information\n");
         exit(1);
     }
+
+#ifdef CONFIG_STANDALONE_UI
+    // Lets see if user just wants to list core process.
+    if (opts->list_cores) {
+        list_running_cores(opts->list_cores);
+        exit(0);
+    }
+#endif  // CONFIG_STANDALONE_UI
 
     if (android_charmap_setup(opts->charmap)) {
         exit(1);
