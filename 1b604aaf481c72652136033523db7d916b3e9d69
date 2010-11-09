@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA8n///+0\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 1191,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-09T10:49:38Z",
+      "side": 1,
+      "message": "Arrf, we should change iolooper-select.c to not depend on qemu_malloc() / qemu_free()",
+      "revId": "1b604aaf481c72652136033523db7d916b3e9d69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA8n////E\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 753,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-09T10:49:38Z",
+      "side": 1,
+      "message": "I suggest using socket_address_list_create(host, NULL, 0) to convert the parameter to a list of SockAddresses that you will be able to test sequentially. This will allow you to specify any hostname (not only \"localhost\" + IP address). \n\nSee \"sockets.h\" for the function declaration. Note that this is really a portable wrapper around getaddrinfo() (http://linux.die.net/man/3/getaddrinfo)",
+      "revId": "1b604aaf481c72652136033523db7d916b3e9d69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA8n////A\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 774,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-09T10:49:38Z",
+      "side": 1,
+      "message": "I would prefer if you would use some sort of constant definition here, as in:\n\nfor (core \u003d 0; core \u003c MAX_CORES; core++) {\n  int  port \u003d BASE_PORT + core*2;\n  ...\n}",
+      "revId": "1b604aaf481c72652136033523db7d916b3e9d69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA8n///+4\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 786,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-09T10:49:38Z",
+      "side": 1,
+      "message": "Here\u0027s how to do it:\n\n1/ Call socket_set_nonblock(fd)\n\n2/ Call socket_connect(fd, \u0026sockaddr). It it returns \u003e\u003d 0, you\u0027re connected, goto step 6\n\n3/ If it returns -1, and errno is not EINPROGRESS then an error occured, exit\n\n4/ Otherwise, you need to wait for the connection to occur with the iolooper. iolooper_add_write(looper, fd) + iolooper_wait(looper, timeout).\n\n5/ in case of success (i.e. no timeout), call iolooper_del_write(fd), don\u0027t write anything to the socket. You also don\u0027t need to call getsockopt() to get the connection status: if it failed before the timeout, the later read() will fail anyway. (or more info, see the description of EINPROGRESS at the following page: http://linux.die.net/man/2/connect)\n\n6/ call iolooper_del_write(fd) + iolooper_add_read(looper,fd) + try to read the data as it arrives with iolooper_wait(looper,...)",
+      "revId": "1b604aaf481c72652136033523db7d916b3e9d69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA8n///+8\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 788,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-09T10:49:38Z",
+      "side": 1,
+      "message": "I would suggest creating a single iolooper at the start of the loop.",
+      "revId": "1b604aaf481c72652136033523db7d916b3e9d69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
