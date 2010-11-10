@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA83///3o\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T15:41:56Z",
+      "side": 1,
+      "message": "small typo here: \"TIMEOIT\" instead of \"TIMEOUT\"",
+      "revId": "b4bf26c64fdda1dde4072b90ae04ae9f3cc6e5cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///3k\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 816,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T15:41:56Z",
+      "side": 1,
+      "message": "It\u0027s probably better to use \"derror()\" here and use a text like \"Unable to resolve hostname: %s: %s\", host, etc..",
+      "revId": "b4bf26c64fdda1dde4072b90ae04ae9f3cc6e5cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///3g\u003d",
+        "filename": "iolooper-select.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T15:41:56Z",
+      "side": 1,
+      "message": "uhh, I\u0027m so sorry.",
+      "revId": "b4bf26c64fdda1dde4072b90ae04ae9f3cc6e5cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
