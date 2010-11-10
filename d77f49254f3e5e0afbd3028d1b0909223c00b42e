@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA83///0o\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T22:34:21Z",
+      "side": 1,
+      "message": "it might be better to call this \"console_address\" to avoid confusion",
+      "revId": "d77f49254f3e5e0afbd3028d1b0909223c00b42e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///0Q\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T22:34:21Z",
+      "side": 1,
+      "message": "I\u0027m pretty sure it will always be \"OK:\" and \"KO:\", so the strncasecmp is not needed (and !memcmp is better)",
+      "revId": "d77f49254f3e5e0afbd3028d1b0909223c00b42e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///0Y\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T22:34:21Z",
+      "side": 1,
+      "message": "for the sake of simplicity, it\u0027s probably ok to simply panic if you can\u0027t allocate the client here",
+      "revId": "d77f49254f3e5e0afbd3028d1b0909223c00b42e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///0U\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T22:34:21Z",
+      "side": 1,
+      "message": "desc-\u003econsole_socket \u003d console_socket[0] should work too.",
+      "revId": "d77f49254f3e5e0afbd3028d1b0909223c00b42e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///0I\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T22:34:21Z",
+      "side": 1,
+      "message": "what if handshake_len is sizeof(buf), maybe use sizeof(buf)-1 for the _read above then.",
+      "revId": "d77f49254f3e5e0afbd3028d1b0909223c00b42e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///0E\u003d",
+        "filename": "android/console-client.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T22:34:21Z",
+      "side": 1,
+      "message": "Maybe specify that this will return in at most N milliseconds...",
+      "revId": "d77f49254f3e5e0afbd3028d1b0909223c00b42e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///0A\u003d",
+        "filename": "android/console-client.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T22:34:21Z",
+      "side": 1,
+      "message": "Specify there is a timeout here.",
+      "revId": "d77f49254f3e5e0afbd3028d1b0909223c00b42e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///z8\u003d",
+        "filename": "android/console-client.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T22:34:21Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "d77f49254f3e5e0afbd3028d1b0909223c00b42e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///z4\u003d",
+        "filename": "android/help.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1032,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T22:34:21Z",
+      "side": 1,
+      "message": "hmm \u003cport\u003e can never be resolved into an IP address. I guess you mean \u003chost\u003e instead?",
+      "revId": "d77f49254f3e5e0afbd3028d1b0909223c00b42e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///0k\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 848,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T22:34:21Z",
+      "side": 1,
+      "message": "maybe check that there is something after the column?",
+      "revId": "d77f49254f3e5e0afbd3028d1b0909223c00b42e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///0g\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 862,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T22:34:21Z",
+      "side": 1,
+      "message": "Be careful, because something like \"localhost\" can return either an [ inet, in6 ] list or [ in6, inet ] depending on system configuration, and it\u0027s likely that the core will only listen on a inet address. In the second case, you\u0027re going to test for an in6 address and always fail.\n\nThe correct behaviour is probably to try each address in succession instead.",
+      "revId": "d77f49254f3e5e0afbd3028d1b0909223c00b42e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA83///0c\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 996,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T22:34:21Z",
+      "side": 1,
+      "message": "ok, I assume the exit() is temporary. It would be nice if you would put a big comment here, with \"XXX: TODO: blah blah\" or something.",
+      "revId": "d77f49254f3e5e0afbd3028d1b0909223c00b42e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
