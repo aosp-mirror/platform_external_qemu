@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA83///3Y\u003d",
+        "filename": "android/utils/bufprint.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-10T15:43:14Z",
+      "side": 1,
+      "message": "I would prefer if you could use ANDROID_TMP instead, otherwise LGTM",
+      "revId": "1dad0f3bdcafbd6a2b3baea82c41bfcd9ebe0300",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
