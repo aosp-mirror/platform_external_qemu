@@ -1,0 +1,327 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9H///8g\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "Since this is a static (internal) function, I would recommend naming it more simply with something lie \"_is_reply_ok\" here.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///8c\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "and _is_reply_ko() here",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///8Y\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "The name \"android_console_open\" nearly implies that this is a method on an \"AndroidConsole\" object, I would prefer if you use something like android_\u003cverb\u003e_\u003csubject\u003e instead since this is not the case, e.g. \"android_open_console_fd()\" or \"android_connect_to_console()\"",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///80\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "I think it would be clearer if the code could be written in a more \"linear\" fashion. It\u0027s hard to understand what\u0027s going on there. Also, please add debug messages in case of errors, we\u0027re likely going to see very weird network setups and these will be helpful to understand why connections can\u0027t be made properly. E.g.:\n\ndo {\n  // Try to connect, with a timeout\n  status \u003d socket_connect(fd, sockaddr);\n  if (status \u003c 0) {\n    if (errno !\u003d EINPROGRESS) {\n      D(\"%s: Could not connect %s\", __FUNCTION__, errno_str);\n      break;\n    }\n    iolooper_add_write(looper, fd);\n    status \u003d iolooper_wait(loop,er CORE_PORT_TIMEOUT_MS);\n    if (status \u003c\u003d 0) {\n        D(\"%s: Could not connect: %s\", __FUNCTION__, errno_str);\n        break;\n    }\n    iolooper_del_write(iolooper, fd);\n  }\n\n  // Read the handshake message, with a timeout\n  iolooper_add_read(looper, fd);\n  status \u003d iolooper_wait(looper, CORE_PORT_TEIMOUT_MS);\n  if (status \u003c\u003d 0) {\n    D(\"%s: Could not read console handshake: %s\",\n        __FUNCTION__, errno_str);\n    break;\n  }\n  if (!iolooper_is_read(looper, fd)) {\n    D(\"%s: Internal error, iolooper_is_read() not set!\", __FUNCTION__);\n    break;\n  }\n\n  /* Read first line and check content */\n  int read_bytes \u003d read(fd, buf, sizeof(buf));\n  if (read_bytes \u003c 0) {\n    D(\"%s: Could not read console handshake: %s\\n\", __FUNCTION__, errno_str);\n    break;\n  }\n  if (read_bytes \u003c 15 || memcmp(buf, \"Android Console\", 15)) {\n    D(\"%s: Bad Android console handshake: \u0027%.*s\u0027\", __FUNCTION__, read_bytes, buf);\n    break;\n  }\n  ...\n\n  // Success\n  iolooper_free(looper);\n  return fd;\n\n} while (0)\n\n// Failure.\niolooper_free(looper);\nclose(fd);\nreturn -1;",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///8w\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "doubling the timeout value for te connect + read + optional second read is not elegant. It might be better to introduce new functions in iolooper.h, e.g.:\n\nint64_t iolooper_now(); which returns the current time in millseconds as an int64_t (obtained with gettimeofday())\n\nint iolooper_wait_absolute(iolooper_t, int64_t), which waits with an absolute time.\n\nThen the code would do something like:\n\nint64_t deadline \u003d iolooper_now() + CORE_PORT_TIMEOUT_MS;\n\nand all waits would be:\n\niolooper_wait_absolute(looper, deadline);\nA return value of 0 would be interpreted as a time-out (we could even set errno to ETIMEDOUT in this case).\n\nWe could also introduce a function to read a line char-by-char terminated by \\r\\n (or simply \\n) from the socket with an absolute deadline into a fixed-size buffer (with a loop), then simply perform two reads. That would make the code more robust.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///8s\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "I would suggest parentheses around \"tmp !\u003d -1\" for the sake of readability.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///8o\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "Here is another place that would benefit from the char-by-char read line with timeout implementation.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///8k\u003d",
+        "filename": "android/console-client.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "This could be handled by the read_line function as well.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///8U\u003d",
+        "filename": "android/console-client.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "It\u0027d be nice to have a small description of what the AndroidConsoleClient does. E.g.\"\n\nAn AndroidConsoleClient object models a network connection to an Android console running on a QEMU emulator core. Use \"android_console_client_open()\" to connect, then use \"android_console_client_read/write\" to exchange messages with the core\u0027s console.\n\nThe main difference between an AndroidConsoleClient and a bare socket file descriptor is that all connect/read/write operations are performed with a timeout and can\u0027t block infinitely.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///8Q\u003d",
+        "filename": "android/console-client.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "As pointed out in a different comment, I would suggest a different name here to avoid confusion.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///8I\u003d",
+        "filename": "android/console-client.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "what, really? I though you had to send \"quit\\r\\n\" at a minimum.\nIf a simple \"\\r\\n\" quits the console, I would consider this a bug. I\u0027m a bit puzzled here?\n\nAlso, don\u0027t write \"will destroy the console client\", but \"will disconnect the console connection\", which is clearer.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///8A\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2387,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "Ah, that\u0027s one part of the console protocol that I should have documented better. In case of success, the answer should always be \"OK\\r\\n\", and nothing more. The only exception is for the \"kill\" command which kills the emulator.\n\nI would prefer if you keep it that way.\n\nIf you need to send information back, dump it with lines ending with \"\\r\\n\", then dump \"OK\\r\\n\"",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///8E\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2390,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "again, I would prefer \"OK\\r\\n\" here.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///78\u003d",
+        "filename": "android/help.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1028,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "I think I would prefer \u0027[host:]port\u0027 to \u0027\u003cconsole socket\u003e\u0027 in the option abstract and description.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///74\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "You probably want to move this to a core-specific file. For now android/main.c is used by both core and UI so this location is not optimal.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///70\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "For the same reasons, might be better defined in a ui-specific source file.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///7w\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 833,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "Again, the code below should go into a UI-specific source file instead.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///7s\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 849,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "I would recommend putting this code into a function that translates the [host:]port into a list of SockAddress instead. It might turn useful in the future, and easier to review on its own merits.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///7o\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 857,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T11:11:14Z",
+      "side": 1,
+      "message": "For the record, the convention \":\u003cport\u003e\" is used by many programs as an alias to \"localhost:\u003cport\u003e\", it might be useful to support this too.",
+      "revId": "42fe6c709273d6b62e31e1a0d7bde9e9124f9b45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
