@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9H///5U\u003d",
+        "filename": "iolooper-select.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T19:15:20Z",
+      "side": 1,
+      "message": "I recommend we set errno to ETIMEDOUT in case of timeout (i.e. ret \u003d\u003d 0 after thje select()), this will simplify error handling in client code. Also let\u0027s document this. Can be done in a later patch, no worry.",
+      "revId": "a49944b93531c8f4bb1211487438ca26e63870a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///5M\u003d",
+        "filename": "iolooper-select.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T19:15:20Z",
+      "side": 1,
+      "message": "that\u0027s not a good return value, use \"(int64_t)time_now.sec*1000LL + time_now.tv_usec/1000\" instead, or you\u0027re going to see bad wrapping issues during usage!",
+      "revId": "a49944b93531c8f4bb1211487438ca26e63870a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///5Q\u003d",
+        "filename": "iolooper-select.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T19:15:20Z",
+      "side": 1,
+      "message": "Minor nitpick: I think you would want to poll the file descriptors for the case where timeout \u003d\u003d 0, since this is what iolooper_wait() is going to do.",
+      "revId": "a49944b93531c8f4bb1211487438ca26e63870a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9H///5g\u003d",
+        "filename": "iolooper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T19:15:20Z",
+      "side": 1,
+      "message": "I\u0027m not sure we have to deal with errors here. Just return 0 in this case.",
+      "revId": "a49944b93531c8f4bb1211487438ca26e63870a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
