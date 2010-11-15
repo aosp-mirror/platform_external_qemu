@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9X////M\u003d",
+        "filename": "iolooper-select.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T21:14:38Z",
+      "side": 1,
+      "message": "typo",
+      "revId": "5e14339a68cbcb6d78e1069a550881159894cc58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9X////Q\u003d",
+        "filename": "iolooper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T21:14:38Z",
+      "side": 1,
+      "message": "oops, small typo here, should be \"absolute\"",
+      "revId": "5e14339a68cbcb6d78e1069a550881159894cc58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
