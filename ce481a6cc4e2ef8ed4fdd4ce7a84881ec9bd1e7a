@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9H///7M\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 717,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-15T16:09:48Z",
+      "side": 1,
+      "message": "for the record, dprint() always appends a \\n, but XLOG() doesn\u0027t. Yes, stupid I know, your patch is ok :)",
+      "revId": "ce481a6cc4e2ef8ed4fdd4ce7a84881ec9bd1e7a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
