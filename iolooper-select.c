@@ -189,3 +189,17 @@ iolooper_has_operations( IoLooper* iol )
 {
     return iolooper_fd_count(iol) > 0;
 }
+
+int64_t
+iolooper_now(void)
+{
+    struct timeval time_now;
+    return gettimeofday(&time_now, NULL) ? -1 : time_now.tv_usec / 1000;
+}
+
+int
+iolooper_wait_absoulte(IoLooper* iol, int64_t deadline)
+{
+    int64_t timeout = deadline - iolooper_now();
+    return (timeout > 0) ? iolooper_wait(iol, timeout) : 0;
+}
