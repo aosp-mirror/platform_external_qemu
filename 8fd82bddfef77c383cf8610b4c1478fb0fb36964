@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9n///14\u003d",
+        "filename": "android/looper-generic.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T20:35:19Z",
+      "side": 1,
+      "message": "What about timeout_ms \u003d DURATION_INFINITE_IDLE?",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///1w\u003d",
+        "filename": "android/looper-generic.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T20:35:19Z",
+      "side": 1,
+      "message": "Maybe I\u0027m wrong, but shouldn\u0027t it be \u0026\u003d ~wanted here?",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///0c\u003d",
+        "filename": "android/looper-qemu.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T20:35:19Z",
+      "side": 1,
+      "message": "What about DURATION_INFINITE_IDEL?",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///0Y\u003d",
+        "filename": "android/looper-qemu.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T20:35:19Z",
+      "side": 1,
+      "message": "What about DURATION_INFINITE_IDLE?",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///2o\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T20:35:19Z",
+      "side": 1,
+      "message": "Still a typo here: nor -\u003e no",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///2k\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T20:35:19Z",
+      "side": 1,
+      "message": "You meant looper_newGeneric()",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///2g\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T20:35:19Z",
+      "side": 1,
+      "message": "You meant looper_newCore()",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///2c\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T20:35:19Z",
+      "side": 1,
+      "message": "I think it would be better to implement the Generic, and the Core loopers in separate files. The generic can be included into UI, wjile the core can be included into the core builds.",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///2Y\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T20:35:19Z",
+      "side": 1,
+      "message": "typo: of -\u003e or",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
