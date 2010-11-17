@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA9n///0Q\u003d",
+        "filename": "android/looper-generic.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-17T20:52:03Z",
+      "side": 1,
+      "message": "DURATION_INFINITE_IDLE is obsolete. I should have removed it. As said previously, this code comes from a slightly different pet project :)",
+      "parentUuid": "AAAA9n///14\u003d",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA9n///1w\u003d",
         "filename": "android/looper-generic.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2010-11-17T20:35:19Z",
       "side": 1,
       "message": "Maybe I\u0027m wrong, but shouldn\u0027t it be \u0026\u003d ~wanted here?",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///0M\u003d",
+        "filename": "android/looper-generic.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-17T20:52:03Z",
+      "side": 1,
+      "message": "You want to only keep the ready bits corresponding to what is wanted, so it\u0027s a AND operation.\n\nI.e. let\u0027s say that READY \u003d\u003d READ+WRITE, so the LoopIo is pending and its callback hasn\u0027t been called yet.\n\nThis function is called by another callback, which decides that it wants to disable READ for this LoopIo (for some reason), so you will have WANTED \u003d\u003d READ\n\nYou don\u0027t want to keep the WRITE bit in READY then.",
+      "parentUuid": "AAAA9n///1w\u003d",
       "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -104,6 +140,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA9n///0I\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-17T20:52:03Z",
+      "side": 1,
+      "message": "yes :)",
+      "parentUuid": "AAAA9n///2k\u003d",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA9n///2g\u003d",
         "filename": "android/looper.h",
         "patchSetId": 2
@@ -121,6 +175,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA9n///0E\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-17T20:52:03Z",
+      "side": 1,
+      "message": "yes",
+      "parentUuid": "AAAA9n///2g\u003d",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA9n///2c\u003d",
         "filename": "android/looper.h",
         "patchSetId": 2
@@ -132,6 +204,24 @@
       "writtenOn": "2010-11-17T20:35:19Z",
       "side": 1,
       "message": "I think it would be better to implement the Generic, and the Core loopers in separate files. The generic can be included into UI, wjile the core can be included into the core builds.",
+      "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///0A\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-17T20:52:03Z",
+      "side": 1,
+      "message": "well, they are implemented in separate files. In the UI program, looper_newCore() will simply not be implemented  because looper-qemu.c will not be compiled in, so this will create a link error.\n\nI think it\u0027s enough. We could move the declarations to looper-qemu.h and looper-generic.h otherwise if you prefer.",
+      "parentUuid": "AAAA9n///2c\u003d",
       "revId": "8fd82bddfef77c383cf8610b4c1478fb0fb36964",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
