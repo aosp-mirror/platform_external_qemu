@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA9n///3c\u003d",
+        "filename": "android/looper-qemu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-17T17:37:30Z",
+      "side": 1,
+      "message": "Yes, that\u0027s right!",
+      "parentUuid": "AAAA9n///4M\u003d",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA9n///4I\u003d",
         "filename": "android/looper-qemu.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2010-11-17T17:34:52Z",
       "side": 1,
       "message": "DURATION_INFINITE?",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///3Y\u003d",
+        "filename": "android/looper-qemu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-17T17:37:30Z",
+      "side": 1,
+      "message": "same here, will fix.",
+      "parentUuid": "AAAA9n///4I\u003d",
       "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -64,6 +100,24 @@
       "writtenOn": "2010-11-17T17:34:52Z",
       "side": 1,
       "message": "Seems like an endless loop, or needs a comment on hoe looper-\u003eio_list gets changed",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///3U\u003d",
+        "filename": "android/looper-qemu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-17T17:37:30Z",
+      "side": 1,
+      "message": "qloopio_free() removes the io from the list, will add a comment.",
+      "parentUuid": "AAAA9n///3k\u003d",
       "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -149,6 +203,24 @@
       "writtenOn": "2010-11-17T17:34:52Z",
       "side": 1,
       "message": "I\u0027d prefer separate values for connect, and accept. If it\u0027s too hard to have them in enum, use #define. This will make core more readable.",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///3Q\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-17T17:37:30Z",
+      "side": 1,
+      "message": "unfortunately, that\u0027s not possible, but I can document proper usage though!",
+      "parentUuid": "AAAA9n///4Q\u003d",
       "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
