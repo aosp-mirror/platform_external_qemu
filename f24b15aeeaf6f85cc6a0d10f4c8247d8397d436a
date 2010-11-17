@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9n///4M\u003d",
+        "filename": "android/looper-qemu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T17:34:52Z",
+      "side": 1,
+      "message": "Shouldn\u0027t you be checking for DURATION_INFINTE_XXX here?",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///4I\u003d",
+        "filename": "android/looper-qemu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T17:34:52Z",
+      "side": 1,
+      "message": "DURATION_INFINITE?",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///38\u003d",
+        "filename": "android/looper-qemu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T17:34:52Z",
+      "side": 1,
+      "message": "typo: our",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///3k\u003d",
+        "filename": "android/looper-qemu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T17:34:52Z",
+      "side": 1,
+      "message": "Seems like an endless loop, or needs a comment on hoe looper-\u003eio_list gets changed",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///4g\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T17:34:52Z",
+      "side": 1,
+      "message": "typo: \"no more watchers\"",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///4Y\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T17:34:52Z",
+      "side": 1,
+      "message": "did you mean looper_newGeneric()?",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///4c\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T17:34:52Z",
+      "side": 1,
+      "message": "typo: \"a Looper pointer\".\nAlso, did you mean looper_newCore()?",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///4U\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T17:34:52Z",
+      "side": 1,
+      "message": "typo: \"a LoopTimer\"",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///4Q\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-17T17:34:52Z",
+      "side": 1,
+      "message": "I\u0027d prefer separate values for connect, and accept. If it\u0027s too hard to have them in enum, use #define. This will make core more readable.",
+      "revId": "f24b15aeeaf6f85cc6a0d10f4c8247d8397d436a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
