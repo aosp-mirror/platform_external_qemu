@@ -1,0 +1,268 @@
+#include "android/async-utils.h"
+#include "unistd.h"
+
+void
+asyncReader_init(AsyncReader* ar,
+                 void*        buffer,
+                 size_t       buffsize,
+                 LoopIo*      io)
+{
+    ar->buffer   = buffer;
+    ar->buffsize = buffsize;
+    ar->pos      = 0;
+    if (buffsize > 0)
+        loopIo_wantRead(io);
+}
+
+AsyncStatus
+asyncReader_read(AsyncReader*  ar,
+                 LoopIo*       io,
+                 unsigned      events)
+{
+    int  ret;
+
+    if (ar->pos >= ar->buffsize) {
+        return ASYNC_COMPLETE;
+    }
+
+    if ((events & LOOP_IO_READ) == 0)
+        return ASYNC_NEED_MORE;
+
+    do {
+        ret = read(io->fd, ar->buffer + ar->pos, ar->buffsize - ar->pos);
+        if (ret == 0) {
+            /* disconnection ! */
+            errno = ECONNRESET;
+            return ASYNC_ERROR;
+        }
+        if (ret < 0) {
+            if (errno == EINTR) /* loop on EINTR */
+                continue;
+            if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                loopIo_wantRead(io);
+                return ASYNC_NEED_MORE;
+            }
+            return ASYNC_ERROR;
+        }
+        ar->pos += ret;
+
+    } while (ar->pos < ar->buffsize);
+
+    loopIo_dontWantRead(io);
+    return ASYNC_COMPLETE;
+}
+
+void
+asyncWriter_init(AsyncWriter*  aw,
+                 const void*   buffer,
+                 size_t        buffsize,
+                 LoopIo*       io)
+{
+    aw->buffer   = buffer;
+    aw->buffsize = buffsize;
+    aw->pos      = 0;
+    if (buffsize > 0)
+        loopIo_wantWrite(io);
+}
+
+AsyncStatus
+asyncWriter_write(AsyncWriter* aw,
+                  LoopIo*      io,
+                  unsigned     events)
+{
+    int  ret;
+
+    if (aw->pos >= aw->buffsize) {
+        return ASYNC_COMPLETE;
+    }
+
+    if ((events & LOOP_IO_WRITE) == 0)
+        return ASYNC_NEED_MORE;
+
+    do {
+        ret = write(io->fd, aw->buffer + aw->pos, aw->buffsize - aw->pos);
+        if (ret == 0) {
+            /* disconnection ! */
+            errno = ECONNRESET;
+            return ASYNC_ERROR;
+        }
+        if (ret < 0) {
+            if (errno == EINTR) /* loop on EINTR */
+                continue;
+            if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                return ASYNC_NEED_MORE;
+            }
+            return ASYNC_ERROR;
+        }
+        aw->pos += ret;
+
+    } while (aw->pos < aw->buffsize);
+
+    loopIo_dontWantWrite(io);
+    return ASYNC_COMPLETE;
+}
+
+
+void
+asyncLineReader_init(AsyncLineReader* alr,
+                     void*            buffer,
+                     size_t           buffsize,
+                     LoopIo*          io)
+{
+    alr->buffer   = buffer;
+    alr->buffsize = buffsize;
+    alr->pos      = 0;
+    if (buffsize > 0)
+        loopIo_wantRead(io);
+}
+
+AsyncStatus
+asyncLineReader_read(AsyncLineReader* alr,
+                     LoopIo*          io,
+                     unsigned         events)
+{
+    int  ret;
+
+    if (alr->pos >= alr->buffsize) {
+        errno = ENOMEM;
+        return ASYNC_ERROR;
+    }
+
+    /* only when read events are available */
+    if ((events & LOOP_IO_READ) == 0)
+        return ASYNC_NEED_MORE;
+
+    do {
+        char ch;
+        ret = read(io->fd, &ch, 1);
+        if (ret == 0) {
+            /* disconnection ! */
+            errno = ECONNRESET;
+            return ASYNC_ERROR;
+        }
+        if (ret < 0) {
+            if (errno == EINTR) /* loop on EINTR */
+                continue;
+            if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                loopIo_wantRead(io);
+                return ASYNC_NEED_MORE;
+            }
+            return ASYNC_ERROR;
+        }
+        alr->buffer[alr->pos++] = (uint8_t)ch;
+        if (ch == '\n') {
+            loopIo_dontWantRead(io);
+            return ASYNC_COMPLETE;
+        }
+    } while (alr->pos < alr->buffsize);
+
+    /* Not enough room in the input buffer!*/
+    loopIo_dontWantRead(io);
+    errno = ENOMEM;
+    return ASYNC_ERROR;
+}
+
+const char*
+asyncLineReader_getLineRaw(AsyncLineReader* alr, int *pLength)
+{
+    if (alr->pos == 0 || alr->pos > alr->buffsize)
+        return NULL;
+
+    if (pLength != 0)
+        *pLength = alr->pos;
+
+    return (const char*) alr->buffer;
+}
+
+const char*
+asyncLineReader_getLine(AsyncLineReader* alr)
+{
+    /* Strip trailing \n if any */
+    size_t  pos = alr->pos;
+    char*   buffer = (char*) alr->buffer;
+
+    if (pos == 0 || pos > alr->buffsize)
+        return NULL;
+
+    pos--;
+
+    /* Check that we have a proper terminator, and replace it with 0 */
+    if (buffer[pos] != '\n')
+        return NULL;
+
+    buffer[pos] = '\0';
+
+    /* Also strip \r\n */
+    if (pos > 0 && buffer[--pos] == '\r') {
+        buffer[pos] = '\0';
+    }
+
+    return (const char*) buffer;
+}
+
+
+enum {
+    CONNECT_ERROR = 0,
+    CONNECT_CONNECTING,
+    CONNECT_COMPLETED
+};
+
+AsyncStatus
+asyncConnector_init(AsyncConnector*    ac,
+                    const SockAddress* address,
+                    LoopIo*            io)
+{
+    int ret;
+    ac->error = 0;
+    ret = socket_connect(io->fd, address);
+    if (ret == 0) {
+        ac->state = CONNECT_COMPLETED;
+        return ASYNC_COMPLETE;
+    }
+    if (errno == EINPROGRESS || errno == EWOULDBLOCK || errno == EAGAIN) {
+        ac->state = CONNECT_CONNECTING;
+        /* The socket will be marked writable for select() when the
+         * connection is established, or when it is definitely
+         * refused / timed-out, for any reason. */
+        loopIo_wantWrite(io);
+        return ASYNC_NEED_MORE;
+    }
+    ac->error = errno;
+    ac->state = CONNECT_ERROR;
+    return ASYNC_ERROR;
+}
+
+AsyncStatus
+asyncConnector_run(AsyncConnector* ac, LoopIo* io, unsigned events)
+{
+    switch (ac->state) {
+    case CONNECT_ERROR:
+        errno = ac->error;
+        return ASYNC_ERROR;
+
+    case CONNECT_CONNECTING:
+        loopIo_dontWantWrite(io);
+        if ((events & LOOP_IO_WRITE) != 0) {
+            /* We need to read the socket error to determine if
+             * the connection was really succesful or not. This
+             * is optional, because in case of error a future
+             * read() or write() will fail anyway, but this
+             * allows us to get a better error value as soon as
+             * possible.
+             */
+            ac->error = socket_get_error(io->fd);
+            if (ac->error == 0) {
+                ac->state = CONNECT_COMPLETED;
+                return ASYNC_COMPLETE;
+            }
+            ac->state = CONNECT_ERROR;
+            errno = ac->error;
+            return ASYNC_ERROR;
+        }
+        break;
+
+    default:
+        return ASYNC_COMPLETE;
+    }
+    return ASYNC_NEED_MORE;
+}
