@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9n///s0\u003d",
+        "filename": "android/looper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2010-11-18T16:20:08Z",
+      "side": 1,
+      "message": "Infinite timeout check here?",
+      "revId": "3921bb2546c6635516404042fbbd519e46384219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
