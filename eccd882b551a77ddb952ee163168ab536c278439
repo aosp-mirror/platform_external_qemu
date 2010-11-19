@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA9n///g8\u003d",
+        "filename": "android/async-console.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-19T14:00:47Z",
+      "side": 1,
+      "message": "Yes, will fix, thanks.",
+      "parentUuid": "AAAA9n///sU\u003d",
+      "revId": "eccd882b551a77ddb952ee163168ab536c278439",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA9n///so\u003d",
         "filename": "android/async-utils.c",
         "patchSetId": 1
@@ -64,6 +82,24 @@
       "writtenOn": "2010-11-18T16:41:01Z",
       "side": 1,
       "message": "I\u0027m not sure this would work well. I would imagine this routine reading whatever is readable and exit, regardless of how many bytes left in the buffer. If I don\u0027t know ahead of time how much data I would expect to read, I would call this routine with something like 4K buffer.",
+      "revId": "eccd882b551a77ddb952ee163168ab536c278439",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///hA\u003d",
+        "filename": "android/async-utils.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-19T14:00:47Z",
+      "side": 1,
+      "message": "that\u0027s what the routine does! I case of EWOULDBLOCK or EAGAIN, it will exit with ASYNC_NEED_MORE.\n\nYou still need a loop because you could have several succesful consecutive read()s though.",
+      "parentUuid": "AAAA9n///sc\u003d",
       "revId": "eccd882b551a77ddb952ee163168ab536c278439",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
