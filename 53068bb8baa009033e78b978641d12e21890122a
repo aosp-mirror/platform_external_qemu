@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9n///Is\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-11-23T15:14:41Z",
+      "side": 1,
+      "message": "I would prefer if you could guard against EINTR, QEMU uses a SIGALRM timer internally, so these can happen semi-randomly.",
+      "revId": "53068bb8baa009033e78b978641d12e21890122a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
