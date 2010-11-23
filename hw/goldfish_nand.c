@@ -167,6 +167,16 @@ static int  do_write(int  fd, const void*  buf, size_t  size)
     return ret;
 }
 
+static int  do_ftruncate(int  fd, size_t  size)
+{
+    int  ret;
+    do {
+        ret = ftruncate(fd, size);
+    } while (ret < 0 && errno == EINTR);
+
+    return ret;
+}
+
 #define NAND_DEV_SAVE_DISK_BUF_SIZE 2048
 
 
@@ -277,7 +287,7 @@ static int  nand_dev_load_disk_state(QEMUFile *f, nand_dev *dev)
         next_offset += buf_size;
     }
 
-    ret = ftruncate(dev->fd, total_size);
+    ret = do_ftruncate(dev->fd, total_size);
     if (ret < 0) {
         XLOG("%s ftruncate failed: %s\n", __FUNCTION__, strerror(errno));
         return -EIO;
