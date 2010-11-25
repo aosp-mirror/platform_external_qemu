@@ -1600,6 +1600,14 @@ DEF("nand", HAS_ARG, QEMU_OPTION_nand, \
 
 #if 1 /* ANDROID */
 
+DEF("savevm_on_exit", HAS_ARG, QEMU_OPTION_savevm_on_exit, \
+    "savevm_on_exit [tag|id]\n" \
+    "                save state automatically on exit\n")
+STEXI
+@item -savevm_on_exit @var{file}
+Save state automatically on exit (as @code{savevm} in monitor)
+ETEXI
+
 DEF("mic", HAS_ARG, QEMU_OPTION_mic, \
     "-mic <file>     read audio input from wav file\n")
 
