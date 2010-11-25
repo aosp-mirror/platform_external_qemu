@@ -2138,10 +2138,10 @@ do_geo_nmea( ControlClient  client, char*  args )
 static int
 do_geo_fix( ControlClient  client, char*  args )
 {
-#define  MAX_GEO_PARAMS  5
+    enum { GEO_LONG = 0, GEO_LAT, GEO_ALT, GEO_SAT, NUM_GEO_PARAMS };
     char*   p = args;
-    int     n_params = 0;
-    double  params[ MAX_GEO_PARAMS ];
+    int     top_param = -1;
+    double  params[ NUM_GEO_PARAMS ];
     int     n_satellites = 1;
 
     static  int     last_time = 0;
@@ -2160,8 +2160,8 @@ do_geo_fix( ControlClient  client, char*  args )
             return -1;
         }
 
-        params[n_params++] = val;
-        if (n_params >= MAX_GEO_PARAMS)
+        params[++top_param] = val;
+        if (top_param + 1 == NUM_GEO_PARAMS)
             break;
 
         p = end;
@@ -2170,15 +2170,16 @@ do_geo_fix( ControlClient  client, char*  args )
     }
 
     /* sanity check */
-    if (n_params < 2) {
+    if (top_param < GEO_LAT) {
         control_write( client, "KO: not enough arguments: see 'help geo fix' for details\r\n" );
         return -1;
     }
 
-    /* check number of satellites, must be between 1 and 12 */
-    if (n_params >= 4) {
-        n_satellites = (int) params[4];
-        if (n_satellites != params[4] || n_satellites < 1 || n_satellites > 12) {
+    /* check number of satellites, must be integer between 1 and 12 */
+    if (top_param >= GEO_SAT) {
+        n_satellites = (int) params[GEO_SAT];
+        if (n_satellites != params[GEO_SAT]
+            || n_satellites < 1 || n_satellites > 12) {
             control_write( client, "KO: invalid number of satellites. Must be an integer between 1 and 12\r\n");
             return -1;
         }
@@ -2214,7 +2215,7 @@ do_geo_fix( ControlClient  client, char*  args )
 
         /* then the latitude */
         hemi = 'N';
-        val  = params[1];
+        val  = params[GEO_LAT];
         if (val < 0) {
             hemi = 'S';
             val  = -val;
@@ -2227,7 +2228,7 @@ do_geo_fix( ControlClient  client, char*  args )
 
         /* the longitude */
         hemi = 'E';
-        val  = params[0];
+        val  = params[GEO_LONG];
         if (val < 0) {
             hemi = 'W';
             val  = -val;
@@ -2242,9 +2243,9 @@ do_geo_fix( ControlClient  client, char*  args )
         stralloc_add_format( s, ",1,%02d,", n_satellites );
 
         /* optional altitude + bogus diff */
-        if (n_params >= 3) {
-            stralloc_add_format( s, ",%.1g,M,0.,M", params[2] );
-            last_altitude = params[2];
+        if (top_param >= GEO_ALT) {
+            stralloc_add_format( s, ",%.1g,M,0.,M", params[GEO_ALT] );
+            last_altitude = params[GEO_ALT];
         } else {
             stralloc_add_str( s, ",,,," );
         }
@@ -2267,8 +2268,9 @@ static const CommandDefRec  geo_commands[] =
     NULL, do_geo_nmea, NULL },
 
     { "fix", "send a simple GPS fix",
-    "'geo fix <longitude> <latitude> [<altitude> [<satellites>]]' allows you to send a\r\n"
-    "simple GPS fix to the emulated system. the parameters are:\r\n\r\n"
+    "'geo fix <longitude> <latitude> [<altitude> [<satellites>]]'\r\n"
+    " allows you to send a simple GPS fix to the emulated system.\r\n"
+    " The parameters are:\r\n\r\n"
     "  <longitude>   longitude, in decimal degrees\r\n"
     "  <latitude>    latitude, in decimal degrees\r\n"
     "  <altitude>    optional altitude in meters\r\n"
