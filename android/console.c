@@ -2267,11 +2267,13 @@ static const CommandDefRec  geo_commands[] =
     NULL, do_geo_nmea, NULL },
 
     { "fix", "send a simple GPS fix",
-    "'geo fix <longitude> <latitude> [<altitude> [<satellites>]]' allows you to send a\r\n"
-    "simple GPS fix to the emulated system. the parameters are:\r\n\r\n"
+    "'geo fix <longitude> <latitude> [<altitude> [<unused> <satellites>]]'\r\n"
+    " allows you to send a simple GPS fix to the emulated system.\r\n"
+    " The parameters are:\r\n\r\n"
     "  <longitude>   longitude, in decimal degrees\r\n"
     "  <latitude>    latitude, in decimal degrees\r\n"
     "  <altitude>    optional altitude in meters\r\n"
+    "  <unused>      unused number, set to 0\r\n"
     "  <satellites>  number of satellites being tracked (1-12)\r\n"
     "\r\n",
     NULL, do_geo_fix, NULL },
