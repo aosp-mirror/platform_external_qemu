@@ -701,6 +701,16 @@ help_no_snapshot(stralloc_t*  out)
 }
 
 static void
+help_no_snapshot_save(stralloc_t*  out)
+{
+    PRINTF(
+    "  This prevents the emulator from trying to preserve the state of the\n"
+    "  emulator on exit; otherwise, if the emulator tried to restore at\n"
+    "  start-up, it will auto-save to the same image name.\n\n"
+    );
+}
+
+static void
 help_snapshot_list(stralloc_t*  out)
 {
     PRINTF(
