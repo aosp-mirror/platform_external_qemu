@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9n//+DY\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2141,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-01T12:36:06Z",
+      "side": 1,
+      "message": "It would be nice if you could explain in the comment what the bug is, that would help explain the code below, for maintenance purpose.",
+      "revId": "18921a345c3b5da55039ea72b876ec9aa2b46f43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
