@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9n//+DM\u003d",
+        "filename": "android/cmdline-options.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-01T12:39:49Z",
+      "side": 1,
+      "message": "typo, extra \"to\"",
+      "revId": "e4b6ad5110fdd725c9e5b0750555f14287e55e42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n//+DI\u003d",
+        "filename": "android/help.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-01T12:39:49Z",
+      "side": 1,
+      "message": "I find this wording a bit confusing. Can you say something simpler like \"Prevents the emulator from saving the AVD\u0027s state to the snapshot storage on exit. All changes will then be lost.\"",
+      "revId": "e4b6ad5110fdd725c9e5b0750555f14287e55e42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n//+cs\u003d",
+        "filename": "qemu-options.hx",
+        "patchSetId": 2
+      },
+      "lineNbr": 1603,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-01T12:39:49Z",
+      "side": 1,
+      "message": "Please, no underscores on options, it\u0027s just fugly *and* confusing",
+      "revId": "e4b6ad5110fdd725c9e5b0750555f14287e55e42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n//+DQ\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-01T12:39:49Z",
+      "side": 1,
+      "message": "I would prefer #if since one way to disable the feature is to define the macro to 0 (like it was done previously)",
+      "revId": "e4b6ad5110fdd725c9e5b0750555f14287e55e42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
