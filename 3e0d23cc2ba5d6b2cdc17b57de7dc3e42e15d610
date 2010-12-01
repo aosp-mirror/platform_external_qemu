@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9n//+Do\u003d",
+        "filename": "android/sync-utils.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-01T12:34:32Z",
+      "side": 1,
+      "message": "can you remove the tabs, they make the code hard to review?",
+      "revId": "3e0d23cc2ba5d6b2cdc17b57de7dc3e42e15d610",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n//+Dk\u003d",
+        "filename": "android/sync-utils.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-01T12:34:32Z",
+      "side": 1,
+      "message": "Unfortunately, experience shows that you must also test for EWOULDBLOCK and EAGAIN here :-(",
+      "revId": "3e0d23cc2ba5d6b2cdc17b57de7dc3e42e15d610",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n//+Dg\u003d",
+        "filename": "android/sync-utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-01T12:34:32Z",
+      "side": 1,
+      "message": "Regarding the naming convention, I know we aren\u0027t totally consistent in the emulator, but I would prefer that you use either one of the following:\n\nobjectname_action_name()\n\nor\n\nobjectName_actionName()\n\nCan I ask you to select one and change the function names?",
+      "revId": "3e0d23cc2ba5d6b2cdc17b57de7dc3e42e15d610",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
