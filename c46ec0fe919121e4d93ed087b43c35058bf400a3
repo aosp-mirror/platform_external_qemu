@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9n//92s\u003d",
+        "filename": "android/sync-utils.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-02T15:13:37Z",
+      "side": 1,
+      "message": "typo, should be \"absolute\"",
+      "revId": "c46ec0fe919121e4d93ed087b43c35058bf400a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
