@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9n//9sQ\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-03T13:50:14Z",
+      "side": 1,
+      "message": "can you remove these tabs?",
+      "revId": "83525b2d79c114a1eea3ce42671c8497d279987f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n//9sM\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2392,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-03T13:50:14Z",
+      "side": 1,
+      "message": "tab here",
+      "revId": "83525b2d79c114a1eea3ce42671c8497d279987f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n//9sE\u003d",
+        "filename": "android/core-connection.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-03T13:50:14Z",
+      "side": 1,
+      "message": "Hint: You could use sock_address_get_family() + socket_create() instead to let the caller select the kind of socket you want.",
+      "revId": "83525b2d79c114a1eea3ce42671c8497d279987f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n//9sA\u003d",
+        "filename": "android/core-connection.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-03T13:50:14Z",
+      "side": 1,
+      "message": "you probably want to close the fd here",
+      "revId": "83525b2d79c114a1eea3ce42671c8497d279987f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n//9rs\u003d",
+        "filename": "android/core-connection.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-03T13:50:14Z",
+      "side": 1,
+      "message": "Why don\u0027t you call it simply core_connection_create()?\nsame thing for other functions here (core_connection_free, core_connection_open, etc...)",
+      "revId": "83525b2d79c114a1eea3ce42671c8497d279987f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n//9r0\u003d",
+        "filename": "android/core-connection.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-03T13:50:14Z",
+      "side": 1,
+      "message": "I recommend using the Android helper macros, e.g.:\n\nCoreConnection* desc;\nANEW0(desc);\ndesc-\u003econsole_address \u003d ...\n...",
+      "revId": "83525b2d79c114a1eea3ce42671c8497d279987f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n//9rk\u003d",
+        "filename": "android/sync-utils.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-03T13:50:14Z",
+      "side": 1,
+      "message": "I would recommend putting iolooper_wait_absolute() before the loop itself.",
+      "revId": "83525b2d79c114a1eea3ce42671c8497d279987f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n//9ro\u003d",
+        "filename": "android/sync-utils.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-03T13:50:14Z",
+      "side": 1,
+      "message": "EINPROGRESS should only be returned by connect(), I think you can leave it from this check.",
+      "revId": "83525b2d79c114a1eea3ce42671c8497d279987f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
