@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9n//9ic\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 513,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-06T17:42:02Z",
+      "side": 1,
+      "message": "btw, socket_recv() will never return EINTR (this is handled by the implementation).",
+      "revId": "aeefab810c6331e2f96e81f20e4408b39dd3a2ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
