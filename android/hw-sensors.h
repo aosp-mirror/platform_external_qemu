@@ -17,6 +17,13 @@
 /* initialize sensor emulation */
 extern void  android_hw_sensors_init( void );
 
+/* Error definition */
+typedef enum{
+    SENSOR_NO_SERVICE = -3,
+    SENSOR_DISABLED   = -2,
+    SENSOR_UNKNOWN    = -1,
+} SensorConsoleReturns;
+
 /* NOTE: this list must be the same that the one defined in
  *       the sensors_qemu.c source of the libsensors.goldfish.so
  *       library.
@@ -44,5 +51,20 @@ typedef enum {
 
 /* change the coarse orientation value */
 extern void  android_sensors_set_coarse_orientation( AndroidCoarseOrientation  orient );
+
+/* get sensor values */
+extern void android_sensors_get( int sensor_id, float* x, float* y, float* z );
+
+/* set sensor values */
+extern void  android_sensors_set( int sensor_id, float x, float y, float z );
+
+/* Get sensor id from sensor name */
+extern int get_id_from_sensor_name( char* sensorname );
+
+/* Get sensor name from sensor id */
+extern const char* get_sensor_name_from_id( int sensor_id );
+
+/* Get sensor from sensor id */
+extern int android_sensors_get_sensor_status( int sensor_id );
 
 #endif /* _android_gps_h */

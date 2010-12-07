@@ -61,6 +61,20 @@ _sensorIdFromName( const char*  name )
     return -1;
 }
 
+static char*
+_sensorNameFromId( int  id )
+{
+    int  nn;
+    for (nn = 0; nn < MAX_SENSORS; nn++)
+        if (id == _sSensors[nn].id)
+            return _sSensors[nn].name;
+    return NULL;
+}
+
+/* For common Sensor Value struct */
+typedef struct {
+    float x, y, z;
+} SensorValues;
 
 typedef struct {
     float   x, y, z;
@@ -87,6 +101,7 @@ typedef struct {
 typedef struct {
     uint8_t  enabled;
     union {
+        SensorValues   value;
         Acceleration   acceleration;
         MagneticField  magnetic;
         Orientation    orientation;
@@ -449,14 +464,13 @@ _hwSensors_connect( void*  opaque, QemudService*  service, int  channel )
     return client;
 }
 
-/* change the value of the emulated acceleration vector */
+/* change the value of the emulated sensor vector */
 static void
-_hwSensors_setAcceleration( HwSensors*  h, float x, float y, float z )
-{
-    Sensor*  s = &h->sensors[ANDROID_SENSOR_ACCELERATION];
-    s->u.acceleration.x = x;
-    s->u.acceleration.y = y;
-    s->u.acceleration.z = z;
+_hwSensors_setSensorValue( HwSensors*  h, int sensor_id, float x, float y, float z ){
+    Sensor*  s = &h->sensors[sensor_id];
+    s->u.value.x = x;
+    s->u.value.y = y;
+    s->u.value.z = z;
 }
 
 /* Saves available sensors to allow checking availability when loaded.
@@ -552,36 +566,6 @@ _hwSensors_load( QEMUFile*  f, QemudService*  s, void*  opaque)
 }
 
 
-#if 0  /* not used yet */
-/* change the value of the emulated magnetic vector */
-static void
-_hwSensors_setMagneticField( HwSensors*  h, float x, float y, float z )
-{
-    Sensor*  s = &h->sensors[ANDROID_SENSOR_MAGNETIC_FIELD];
-    s->u.magnetic.x = x;
-    s->u.magnetic.y = y;
-    s->u.magnetic.z = z;
-}
-
-/* change the values of the emulated orientation */
-static void
-_hwSensors_setOrientation( HwSensors*  h, float azimuth, float pitch, float roll )
-{
-    Sensor*  s = &h->sensors[ANDROID_SENSOR_ORIENTATION];
-    s->u.orientation.azimuth = azimuth;
-    s->u.orientation.pitch   = pitch;
-    s->u.orientation.roll    = roll;
-}
-
-/* change the emulated temperature */
-static void
-_hwSensors_setTemperature( HwSensors*  h, float celsius )
-{
-    Sensor*  s = &h->sensors[ANDROID_SENSOR_TEMPERATURE];
-    s->u.temperature.celsius = celsius;
-}
-#endif
-
 /* change the coarse orientation (landscape/portrait) of the emulated device */
 static void
 _hwSensors_setCoarseOrientation( HwSensors*  h, AndroidCoarseOrientation  orient )
@@ -604,11 +588,11 @@ _hwSensors_setCoarseOrientation( HwSensors*  h, AndroidCoarseOrientation  orient
 
     switch (orient) {
     case ANDROID_COARSE_PORTRAIT:
-        _hwSensors_setAcceleration( h, 0., g*cos_30, g*sin_30 );
+        _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, 0., g*cos_30, g*sin_30 );
         break;
 
     case ANDROID_COARSE_LANDSCAPE:
-        _hwSensors_setAcceleration( h, g*cos_30, 0., g*sin_30 );
+        _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, g*cos_30, 0., g*sin_30 );
         break;
     default:
         ;
@@ -653,3 +637,76 @@ android_sensors_set_coarse_orientation( AndroidCoarseOrientation  orient )
     _hwSensors_setCoarseOrientation(_sensorsState, orient);
 }
 
+/* Get sensor name from sensor id */
+extern const char*
+get_sensor_name_from_id( int sensor_id ){
+    if ((sensor_id < 0) || (sensor_id>=MAX_SENSORS))
+        return NULL;
+
+    return (const char*)_sensorNameFromId(sensor_id);
+}
+
+/* Get sensor id from sensor name */
+extern int
+get_id_from_sensor_name( char* sensorname ){
+    HwSensors *hw = _sensorsState;
+
+    if (! sensorname)
+        return SENSOR_UNKNOWN;
+
+    int id = _sensorIdFromName(sensorname);
+
+    if ((id < 0) || (id>=MAX_SENSORS))
+        return SENSOR_UNKNOWN;
+
+    if (hw->service != NULL) {
+        if (! hw->sensors[id].enabled)
+            return SENSOR_DISABLED;
+    } else
+        return SENSOR_NO_SERVICE;
+
+    return id;
+}
+
+/* Interface of reading the data for all sensors */
+extern void
+android_sensors_get( int sensor_id, float* x, float* y, float* z )
+{
+    HwSensors *hw = _sensorsState;
+    Sensor* sensor = &hw->sensors[sensor_id];
+
+    if (! ( ((sensor_id>=0)&&(sensor_id<MAX_SENSORS))&&
+            (hw->service)&&
+            (sensor->enabled) )) {
+        return;
+    }
+
+    *x = sensor->u.value.x;
+    *y = sensor->u.value.y;
+    *z = sensor->u.value.z;
+}
+
+/* Interface of setting the data for all sensors */
+extern void
+android_sensors_set( int sensor_id, float x, float y, float z )
+{
+    HwSensors *hw = _sensorsState;
+
+    if (! ( ((sensor_id>=0)&&(sensor_id<MAX_SENSORS))&&
+            (hw->service)&&
+            (hw->sensors[sensor_id].enabled) ))
+        return;
+
+    _hwSensors_setSensorValue(hw, sensor_id, x, y, z);
+}
+
+/* Get Sensor from sensor id */
+extern int
+android_sensors_get_sensor_status( int sensor_id ){
+    HwSensors *hw = _sensorsState;
+
+    if ((sensor_id<0) || (sensor_id>=MAX_SENSORS))
+        return NULL;
+
+    return (int)hw->sensors[sensor_id].enabled;
+}
