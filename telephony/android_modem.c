@@ -12,6 +12,7 @@
 #include "android/android.h"
 #include "android_modem.h"
 #include "android/config.h"
+#include "android/config/config.h"
 #include "android/utils/debug.h"
 #include "android/utils/timezone.h"
 #include "android/utils/system.h"
@@ -1803,8 +1804,8 @@ handleListCurrentCalls( const char*  cmd, AModem  modem )
  * separator, so use a column (:) instead, the Java parsing code won't see a difference
  *
  */
-static const char*
-handleEndOfInit( const char*  cmd, AModem  modem )
+static void
+amodem_add_UnsolicitedTimeUpdate( AModem  modem )
 {
     time_t       now = time(NULL);
     struct tm    utc, local;
@@ -1854,11 +1855,20 @@ handleEndOfInit( const char*  cmd, AModem  modem )
     * and deal with this case (since it normally relied on the operator's country code
     * which is hard to simulate on a general-purpose computer
     */
-    return amodem_printf( modem, "%%CTZV: %02d/%02d/%02d:%02d:%02d:%02d%c%d:%d:%s",
+    // This doesn't use unsol_func?
+    amodem_add_line( modem, "%%CTZV: %02d/%02d/%02d:%02d:%02d:%02d%c%d:%d:%s\r\n",
              (utc.tm_year + 1900) % 100, utc.tm_mon + 1, utc.tm_mday, utc.tm_hour, utc.tm_min, utc.tm_sec,
              (tzdiff >= 0) ? '+' : '-', (tzdiff >= 0 ? tzdiff : -tzdiff) / 15,
              (local.tm_isdst > 0),
              tzname );
+}
+
+static const char*
+handleEndOfInit( const char*  cmd, AModem  modem )
+{
+    amodem_begin_line( modem );
+    amodem_add_UnsolicitedTimeUpdate( modem );
+    return amodem_end_line( modem );
 }
 
 
@@ -2114,6 +2124,32 @@ handleAnswer( const char*  cmd, AModem  modem )
     return NULL;
 }
 
+#if CONFIG_ANDROID_SNAPSHOTS
+int snapshot_update_time = 1;
+int snapshot_update_time_request = 0;
+#endif
+
+static const char*
+handleSignalStrength( const char*  cmd, AModem  modem )
+{
+   /* XXX: TODO: implement variable signal strength and error rates */
+    amodem_begin_line( modem );
+#if CONFIG_ANDROID_SNAPSHOTS
+    /* Sneak time updates into the SignalStrength request, because it's periodic.
+     * Ideally, we'd be able to prod the guest into asking immediately on restore
+     * from snapshot, but that'd require a driver.
+     */
+    if ( snapshot_update_time && snapshot_update_time_request ) {
+      amodem_add_UnsolicitedTimeUpdate( modem );
+      snapshot_update_time_request = 0;
+    }
+#endif
+    // rssi = 0 (<-113dBm) 1 (<-111) 2-30 (<-109--53) 31 (>=-51) 99 (?!)
+    // ber (bit error rate) - always 99 (unknown), apparently.
+    amodem_add_line( modem, "+CSQ: %i,99\r\n", 27 );
+    return amodem_end_line( modem );
+}
+
 static const char*
 handleHangup( const char*  cmd, AModem  modem )
 {
@@ -2282,7 +2318,7 @@ static const struct {
     { "!+CHLD=", NULL, handleHangup },
 
     /* see requestSignalStrength() */
-    { "+CSQ", "+CSQ: 7,99", NULL },  /* XXX: TODO: implement variable signal strength and error rates */
+    { "+CSQ", NULL, handleSignalStrength },
 
     /* see requestRegistrationState() */
     { "!+CREG", NULL, handleNetworkRegistration },

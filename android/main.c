@@ -735,6 +735,10 @@ _adjustPartitionSize( const char*  description,
     return convertMBToBytes(imageMB);
 }
 
+#if CONFIG_ANDROID_SNAPSHOTS
+extern int snapshot_update_time;
+#endif
+
 int main(int argc, char **argv)
 {
     char   tmp[MAX_PATH];
@@ -1424,6 +1428,9 @@ int main(int argc, char **argv)
             dwarning("option '-no-snapshot' overrides '-snapshot', continuing with boot sequence");
         } else if (opts->no_snapshot_load || opts->no_snapshot_save) {
             D("ignoring redundant option(s) '-no-snapshot-load' and/or '-no-snapshot-save' implied by '-no-snapshot'");
+        }
+        if (opts->no_snapshot_update_time) {
+            snapshot_update_time = 0;
         }
     } else if (opts->snapshot || opts->snapstorage) {
         dwarning("option '-no-snapstorage' overrides '-snapshot' and '-snapstorage', "

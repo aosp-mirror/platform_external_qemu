@@ -1283,6 +1283,8 @@ void do_savevm_oc(OutputChannel *err, const char *name)
 void do_loadvm(Monitor *mon, const char *name)
 {
     OutputChannel *oc = output_channel_alloc(mon, monitor_output_channel_cb);
+    extern int snapshot_update_time_request;
+    snapshot_update_time_request = 1;
     do_loadvm_oc(oc, name);
     output_channel_free(oc);
 }
