@@ -1,0 +1,293 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+n///8g\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2425,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "I don\u0027t like the fact that this modifies the start address for the string (a.k.a. *str). In this specific code it is ok because the args value is a local for do_sensors_get() but I\u0027d prefer if the function\u0027s interface returned the address of the new start instead.\n\nThis way, if the caller ever ends up using a malloc-ed string pointer, it won\u0027t blindly lose the memory block address if there is a leading space.",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///8c\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2436,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "why do you check for len here? An string entirely made of spaces should return the empty string.",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///8Y\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2456,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "no need for parens here.",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///78\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2482,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "Please rewrite this implementation completely with something simpler, see comments below.",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///8U\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2484,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "nested function definitions are not legal C99, please don\u0027t use them.",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///8E\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2495,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "unbounded modification of a bounded string is not secure, please don\u0027t do that!",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///8Q\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2522,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "(char*) cast is not needed, sizeof(char) is 1 by definition.",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///8A\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2528,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "memory leak here!",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///8I\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2532,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "unbounded %s with a bounded buffer is bad!\nI think you\u0027d better write a real parser here than trying to hack with sscanf / _trim / strchr et al..",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///8M\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2533,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "this loses the malloc pointer if value begins with a space, this is bad!",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///74\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2535,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "why use \":\" instead of \",\" as the list separator exactly?",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///8k\u003d",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "How is the caller supposed to know there was an error here (e.g. if the sensor is disabled). Could you at least set *x, *y, *z to 0, otherwise the caller might rely on the stack-allocated random values.",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///8o\u003d",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "Should it be SENSOR_UNKNOWN or 0 instead of NULL?",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///8w\u003d",
+        "filename": "android/hw-sensors.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "Please document when/where these values are returned.",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///8s\u003d",
+        "filename": "android/hw-sensors.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "Generally speaking, you would call the enum something like SensorStatus and name the macros SENSOR_STATUS_XXXX for consistency.",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///88\u003d",
+        "filename": "android/hw-sensors.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "for the sake of consistency, I would prefer android_sensors_get_id_from_name()",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///84\u003d",
+        "filename": "android/hw-sensors.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:57:45Z",
+      "side": 1,
+      "message": "and here android_sensors_get_name_from_id()",
+      "revId": "b531365545d69100d6e6ea149edaea3854f310d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
