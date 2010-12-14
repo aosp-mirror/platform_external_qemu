@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+n///9Q\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 739,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:34:55Z",
+      "side": 1,
+      "message": "Please move to its own header (e.g. \"android/snapshot.h\"), and use an android_ prefix for the global variable.",
+      "revId": "e3270919e2c5a5dbabe3d4b1abde24f830c4e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///9U\u003d",
+        "filename": "savevm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1286,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:34:55Z",
+      "side": 1,
+      "message": "this declaration should go into its own header. Also I would prefer that you use an android_ prefix here since this is clearly an Android-specific feature. This will make later upstream integrations lightly easier.",
+      "revId": "e3270919e2c5a5dbabe3d4b1abde24f830c4e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///9M\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1808,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:34:55Z",
+      "side": 1,
+      "message": "hmm, for the sake of consistency, it might be better to use either one of:\namodem_addUnsolicitedTimeUpdate\nor\namodem_add_unsolicited_time_update",
+      "revId": "e3270919e2c5a5dbabe3d4b1abde24f830c4e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+n///9I\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1858,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-14T14:34:55Z",
+      "side": 1,
+      "message": "then maybe name the functon amodem_addTimeUpdate instead for clarity?",
+      "revId": "e3270919e2c5a5dbabe3d4b1abde24f830c4e78c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
