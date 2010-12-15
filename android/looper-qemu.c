@@ -312,7 +312,7 @@ qlooper_addPendingIo(QLooper* looper, QLoopIo* io)
         qemu_bh_schedule(looper->io_bh);
     }
     io->pendingNext    = looper->io_pending;
-    looper->io_pending = io->pendingNext;
+    looper->io_pending = io;
 }
 
 static void

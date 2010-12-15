@@ -205,6 +205,8 @@ extern void  dprint( const char* format, ... );
 
 /* Instance of the "attach UI" Emulator's core console client. */
 extern CoreConnection*   attach_client;
+/* Instance of the "framebuffer" console client. */
+extern CoreConnection*  framebuffer_client;
 
 #define TFR(expr) do { if ((expr) != -1) break; } while (errno == EINTR)
 
@@ -598,6 +600,12 @@ int main(int argc, char **argv, char **envp)
         core_connection_detach(attach_client);
         core_connection_close(attach_client);
         core_connection_free(attach_client);
+    }
+
+    if (framebuffer_client != NULL) {
+        core_connection_detach(framebuffer_client);
+        core_connection_close(framebuffer_client);
+        core_connection_free(framebuffer_client);
     }
 
     quit_timers();

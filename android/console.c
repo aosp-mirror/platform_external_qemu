@@ -25,7 +25,6 @@
 #include "qemu-char.h"
 #include "sysemu.h"
 #include "android/android.h"
-#include "sockets.h"
 #include "cpu.h"
 #include "hw/goldfish_device.h"
 #include "hw/power_supply.h"
@@ -52,6 +51,8 @@
 #include "android/keycode-array.h"
 #include "android/charmap.h"
 #include "android/core-ui-protocol.h"
+#include "android/display-core.h"
+#include "android/framebuffer-core.h"
 
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"
@@ -112,8 +113,13 @@ typedef struct ControlGlobalRec_
 
 } ControlGlobalRec;
 
+#ifdef CONFIG_STANDALONE_CORE
 /* UI client currently attached to the core. */
 ControlClient attached_ui_client = NULL;
+
+/* Core framebuffer service client. */
+ControlClient framebuffer_client = NULL;
+#endif  // CONFIG_STANDALONE_CORE
 
 static int
 control_global_add_redir( ControlGlobal  global,
@@ -214,9 +220,20 @@ control_client_destroy( ControlClient  client )
 
     D(( "destroying control client %p\n", client ));
 
+#ifdef CONFIG_STANDALONE_CORE
     if (client == attached_ui_client) {
         attached_ui_client = NULL;
     }
+
+    if (client == framebuffer_client) {
+        CoreFramebuffer* core_fb = coredisplay_detach_fb_service();
+        if (core_fb != NULL) {
+            corefb_destroy(core_fb);
+            AFREE(core_fb);
+        }
+        framebuffer_client = NULL;
+    }
+#endif  // CONFIG_STANDALONE_CORE
 
     sock = control_client_detach( client );
     if (sock >= 0)
@@ -2371,6 +2388,7 @@ do_qemu_monitor( ControlClient client, char* args )
     return 0;
 }
 
+#ifdef CONFIG_STANDALONE_CORE
 /* UI settings, passed to the core via -ui-settings command line parameter. */
 extern char* android_op_ui_settings;
 
@@ -2398,15 +2416,50 @@ do_attach_ui( ControlClient client, char* args )
     return 0;
 }
 
+/* Core display instance. */
+extern CoreDisplay core_display;
+
+static int
+do_create_framebuffer_service( ControlClient client, char* args )
+{
+    CoreFramebuffer* core_fb;
+
+    // Make sure that there are no framebuffer client already existing.
+    if (framebuffer_client != NULL) {
+        control_write( client, "KO: Another framebuffer service is already existing!\r\n" );
+        control_client_destroy(client);
+        return -1;
+    }
+
+    core_fb = corefb_create(client->sock);
+    if (!coredisplay_attach_fb_service(core_fb)) {
+        framebuffer_client = client;
+        control_write( client, "OK\r\n");
+    } else {
+        control_write( client, "KO\r\n" );
+        control_client_destroy(client);
+        return -1;
+    }
+
+    return 0;
+}
+#endif  // CONFIG_STANDALONE_CORE
+
 static const CommandDefRec  qemu_commands[] =
 {
     { "monitor", "enter QEMU monitor",
     "Enter the QEMU virtual machine monitor\r\n",
     NULL, do_qemu_monitor, NULL },
 
+#ifdef CONFIG_STANDALONE_CORE
     { "attach UI", "attach UI to the core",
     "Attach UI to the core\r\n",
     NULL, do_attach_ui, NULL },
+
+    { "framebuffer", "create framebuffer service",
+    "Create framebuffer service\r\n",
+    NULL, do_create_framebuffer_service, NULL },
+#endif  // CONFIG_STANDALONE_CORE
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
