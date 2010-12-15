@@ -103,6 +103,9 @@ unsigned long   android_verbose;
 /* Instance of the "attach UI" Emulator's core console client. */
 CoreConnection*   attach_client = NULL;
 
+/* Instance of the "framebuffer" console client. */
+CoreConnection* framebuffer_client = NULL;
+
 /* -ui-settings parameters received from the core on UI attachment. */
 char* core_ui_settings = "";
 
@@ -208,7 +211,7 @@ sdl_set_window_icon( void )
             SDL_FreeSurface(icon);
             free( icon_pixels );
         }
-#endif	/* !_WIN32 */
+#endif  /* !_WIN32 */
     }
 }
 
@@ -921,7 +924,6 @@ attach_to_core(AndroidOptions* opts) {
                     fprintf(stdout, "UI setting for the core%s:\n",
                             core_ui_settings);
                 }
-                return 0;
             } else {
                 derror("Unable to attach to the core %s: %s\n",
                        sock_address_to_string(&console_socket),
@@ -939,6 +941,38 @@ attach_to_core(AndroidOptions* opts) {
     } else {
         return -1;
     }
+
+    framebuffer_client = core_connection_create(&console_socket);
+    if (framebuffer_client != NULL) {
+        if (!core_connection_open(framebuffer_client)) {
+            char* connect_message = NULL;
+            if (!core_connection_switch_stream(framebuffer_client,
+                                               "framebuffer -raw",
+                                               &connect_message)) {
+                fprintf(stdout, "Framebuffer is now attached to the core %s\n",
+                        sock_address_to_string(&console_socket));
+            } else {
+                derror("Unable to attach to the framebuffer %s: %s\n",
+                       sock_address_to_string(&console_socket),
+                       connect_message ? connect_message : "");
+                if (connect_message != NULL) {
+                    free(connect_message);
+                }
+                core_connection_close(framebuffer_client);
+                core_connection_free(framebuffer_client);
+                framebuffer_client = NULL;
+                return -1;
+            }
+        } else {
+            core_connection_free(framebuffer_client);
+            framebuffer_client = NULL;
+            return -1;
+        }
+    } else {
+        return -1;
+    }
+
+    return 0;
 }
 
 int main(int argc, char **argv)
