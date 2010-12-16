@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3///4A\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T22:32:56Z",
+      "side": 1,
+      "message": "This should really be a field of the CoreFrameBuffer structure, not a global variable.",
+      "revId": "ac362c6399388f2a3c85a2d1555ec94112747e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///3c\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T22:32:56Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "ac362c6399388f2a3c85a2d1555ec94112747e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///3s\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T22:32:56Z",
+      "side": 1,
+      "message": "no, you\u0027re over-counting many pixels here\nrect_size is simply h*w*fd-\u003ebytes_per_pixel\n\nyou then have to copy the pixels from the fb to the malloced buffer manually since they have different pitches (bytes per line)",
+      "revId": "ac362c6399388f2a3c85a2d1555ec94112747e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///38\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T22:32:56Z",
+      "side": 1,
+      "message": "You didn\u0027t update fb_update_tail here!",
+      "revId": "ac362c6399388f2a3c85a2d1555ec94112747e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///3Y\u003d",
+        "filename": "android/looper-qemu.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T22:32:56Z",
+      "side": 1,
+      "message": "please remove the tab",
+      "revId": "ac362c6399388f2a3c85a2d1555ec94112747e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///3U\u003d",
+        "filename": "framebuffer.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T22:32:56Z",
+      "side": 1,
+      "message": "please no tabs here",
+      "revId": "ac362c6399388f2a3c85a2d1555ec94112747e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///3Q\u003d",
+        "filename": "framebuffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T22:32:56Z",
+      "side": 1,
+      "message": "tabs",
+      "revId": "ac362c6399388f2a3c85a2d1555ec94112747e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
