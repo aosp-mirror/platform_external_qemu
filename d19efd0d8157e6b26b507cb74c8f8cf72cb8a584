@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3///7U\u003d",
+        "filename": "android/async-utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T12:35:49Z",
+      "side": 1,
+      "message": "Good catch. I propose to also change \"read\" to \"write\" in the rest of the comments",
+      "revId": "d19efd0d8157e6b26b507cb74c8f8cf72cb8a584",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///7s\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T12:35:49Z",
+      "side": 1,
+      "message": "You may want to use unsigned 16-bit values here, because I doubt we\u0027re going to support framebuffers  larger/taller than 65536 pixels.",
+      "revId": "d19efd0d8157e6b26b507cb74c8f8cf72cb8a584",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///7w\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T12:35:49Z",
+      "side": 1,
+      "message": "I\u0027m pretty sure this isn\u0027t the best way to implement this. Instead, you should have a queue of pending FBUpdateMessage to send to a single AsyncWriter (you can\u0027t assume that each update message is sent to the client before another one comes in, so a queue is necessary).\n\nThe corefb_io_func() should simply try to called asyncWriter_write() as long as there are queue update messages.\n\nWhenever you add a new update message to an empty queue, simply call asyncWriter_init() + asyncWriter_write().\n\nBonus points if you can merge updates in the queue when they overlap (but this is stricly optional)",
+      "revId": "d19efd0d8157e6b26b507cb74c8f8cf72cb8a584",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///7o\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T12:35:49Z",
+      "side": 1,
+      "message": "you probably mean \"const uint8_t*\" here to avoid a compiler warning,",
+      "revId": "d19efd0d8157e6b26b507cb74c8f8cf72cb8a584",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///+Q\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T12:35:49Z",
+      "side": 1,
+      "message": "I\u0027m pretty sure there is no way you want to divide y by fb-\u003ewidth here!",
+      "revId": "d19efd0d8157e6b26b507cb74c8f8cf72cb8a584",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///+M\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T12:35:49Z",
+      "side": 1,
+      "message": "It\u0027d be much better if you didn\u0027t need to reference a DisplayState at all in this code, isn\u0027t this available from the QFrameBuffer in some way or another? It not, it\u0027d be a good idea to add that to the QFrameBuffer methods.",
+      "revId": "d19efd0d8157e6b26b507cb74c8f8cf72cb8a584",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///7k\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T12:35:49Z",
+      "side": 1,
+      "message": "this should probably enqueue the update to a singly-linked list, and only call asyncWriter_init() if the queue was empty before.",
+      "revId": "d19efd0d8157e6b26b507cb74c8f8cf72cb8a584",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///7Q\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T12:35:49Z",
+      "side": 1,
+      "message": "For the record, you might want to introduce some sort of versioning support in the protocol. This is only a first implementation, we may want to switch to another one that uses a shared memory segment (when the UI and core run on the same host) instead, so there must be a way to check/mention this.",
+      "revId": "d19efd0d8157e6b26b507cb74c8f8cf72cb8a584",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///7g\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T12:35:49Z",
+      "side": 1,
+      "message": "I\u0027m concerned that you don\u0027t keep a list of FBUpdateNotify* objects here and have no way to remove them if needed.",
+      "revId": "d19efd0d8157e6b26b507cb74c8f8cf72cb8a584",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///7c\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T12:35:49Z",
+      "side": 1,
+      "message": ":-)",
+      "revId": "d19efd0d8157e6b26b507cb74c8f8cf72cb8a584",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///7Y\u003d",
+        "filename": "android/looper-qemu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-16T12:35:49Z",
+      "side": 1,
+      "message": "Nice catch! Sorry about that.",
+      "revId": "d19efd0d8157e6b26b507cb74c8f8cf72cb8a584",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
