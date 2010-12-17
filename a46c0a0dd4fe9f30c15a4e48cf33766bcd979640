@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3///0I\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-17T14:30:57Z",
+      "side": 1,
+      "message": "You still need to make fb_update_writer a member of CoreFrameBuffer, this will eventually allow you to have two clients listening to the same framebuffer at the same time.\nAnd more importantly, all related state should be kept together, not in random global variables.",
+      "revId": "a46c0a0dd4fe9f30c15a4e48cf33766bcd979640",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///0U\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-17T14:30:57Z",
+      "side": 1,
+      "message": "No, it\u0027s rect +\u003d w * fb-\u003ebytes_per_pixel !",
+      "revId": "a46c0a0dd4fe9f30c15a4e48cf33766bcd979640",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///0A\u003d",
+        "filename": "android/framebuffer-core.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-17T14:30:57Z",
+      "side": 1,
+      "message": "typo: \"pending\" instead of \"peding\"",
+      "revId": "a46c0a0dd4fe9f30c15a4e48cf33766bcd979640",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
