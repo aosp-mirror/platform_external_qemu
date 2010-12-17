@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3///0g\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-17T14:23:52Z",
+      "side": 1,
+      "message": "I would prefer hw.sensors.proximity for the name.",
+      "revId": "6f14ea5d60beb0384b006ec36e1784c187291390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
