@@ -16,6 +16,24 @@
       "revId": "8acf4e2237c2969647f47008344e44918bb30acb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3///jo\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2526,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-21T16:13:52Z",
+      "side": 1,
+      "message": "ok, I forgot that a single OK\\r\\n will be added by the caller if the function returns 0. So no need to change this then.",
+      "parentUuid": "AAAA+3///jw\u003d",
+      "revId": "8acf4e2237c2969647f47008344e44918bb30acb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
