@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3///jw\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2526,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-21T15:21:08Z",
+      "side": 1,
+      "message": "The current console protocol is that succesful message should end with a single \"OK\\r\\n\" line, and  their content should come before.\n\nI would appreciate if you could follow something similar here, i.e. change this to \"bitsperpixel:%d\\r\\nOK\\r\\n\" instead then?",
+      "revId": "8acf4e2237c2969647f47008344e44918bb30acb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
