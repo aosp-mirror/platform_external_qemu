@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3///a8\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 533,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2010-12-22T17:08:13Z",
+      "side": 1,
+      "message": "There is no need to restore then, imho",
+      "revId": "85776ccdbf1e6d1aa5a055d85432e3ca81d63342",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
