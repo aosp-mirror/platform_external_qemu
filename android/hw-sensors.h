@@ -17,6 +17,20 @@
 /* initialize sensor emulation */
 extern void  android_hw_sensors_init( void );
 
+/* NOTE: Sensor status Error definition, It will be used in the Sensors Command
+ *       part in android/console.c. Details:
+ *       SENSOR_STATUS_NO_SERVICE: "sensors" qemud service is not available/initiated.
+ *       SENSOR_STATUS_DISABLED: sensor is disabled.
+ *       SENSOR_STATUS_UNKNOWN: wrong sensor name.
+ *       SENSOR_STATUS_OK: Everything is OK to the current sensor.
+ * */
+typedef enum{
+    SENSOR_STATUS_NO_SERVICE = -3,
+    SENSOR_STATUS_DISABLED   = -2,
+    SENSOR_STATUS_UNKNOWN    = -1,
+    SENSOR_STATUS_OK         = 0,
+} SensorStatus;
+
 /* NOTE: this list must be the same that the one defined in
  *       the sensors_qemu.c source of the libsensors.goldfish.so
  *       library.
@@ -47,6 +61,21 @@ typedef enum {
 } AndroidCoarseOrientation;
 
 /* change the coarse orientation value */
-extern void  android_sensors_set_coarse_orientation( AndroidCoarseOrientation  orient );
+extern void android_sensors_set_coarse_orientation( AndroidCoarseOrientation  orient );
+
+/* get sensor values */
+extern int android_sensors_get( int sensor_id, float* a, float* b, float* c );
+
+/* set sensor values */
+extern int android_sensors_set( int sensor_id, float a, float b, float c );
+
+/* Get sensor id from sensor name */
+extern int android_sensors_get_id_from_name( char* sensorname );
+
+/* Get sensor name from sensor id */
+extern const char* android_sensors_get_name_from_id( int sensor_id );
+
+/* Get sensor from sensor id */
+extern uint8_t android_sensors_get_sensor_status( int sensor_id );
 
 #endif /* _android_gps_h */
