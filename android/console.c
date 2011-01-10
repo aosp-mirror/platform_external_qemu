@@ -48,6 +48,7 @@
 #include <fcntl.h>
 #include "android/hw-events.h"
 #include "user-events.h"
+#include "android/hw-sensors.h"
 #include "android/keycode-array.h"
 #include "android/charmap.h"
 #include "android/display-core.h"
@@ -2410,6 +2411,200 @@ static const CommandDefRec  geo_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
+/*****                        S E N S O R S  C O M M A N D S                           ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+/* For sensors user prompt string size.*/
+#define SENSORS_INFO_SIZE 150
+
+/* Get sensor data - (a,b,c) from sensor name */
+static int
+do_sensors_get( ControlClient client, char* args )
+{
+    if (! args) {
+        control_write( client, "KO: Usage: \"get <sensorname>\"\n" );
+        return -1;
+    }
+
+    int status = SENSOR_STATUS_UNKNOWN;
+    char sensor[strlen(args) + 1];
+    if (1 != sscanf( args, "%s", &sensor[0] ))
+        goto SENSOR_STATUS_ERROR;
+
+    int sensor_id = android_sensors_get_id_from_name( sensor );
+    char buffer[SENSORS_INFO_SIZE] = { 0 };
+    float a, b, c;
+
+    if (sensor_id < 0) {
+        status = sensor_id;
+        goto SENSOR_STATUS_ERROR;
+    } else {
+        status = android_sensors_get( sensor_id, &a, &b, &c );
+        if (status != SENSOR_STATUS_OK)
+            goto SENSOR_STATUS_ERROR;
+        snprintf( buffer, sizeof(buffer),
+                "%s = %g:%g:%g\r\n", sensor, a, b, c );
+        do_control_write( client, buffer );
+        return 0;
+    }
+
+SENSOR_STATUS_ERROR:
+    switch(status) {
+    case SENSOR_STATUS_NO_SERVICE:
+        snprintf( buffer, sizeof(buffer), "KO: No sensor service found!\r\n" );
+        break;
+    case SENSOR_STATUS_DISABLED:
+        snprintf( buffer, sizeof(buffer), "KO: '%s' sensor is disabled.\r\n", sensor );
+        break;
+    case SENSOR_STATUS_UNKNOWN:
+        snprintf( buffer, sizeof(buffer),
+                "KO: unknown sensor name: %s, run 'sensor status' to get available sensors.\r\n", sensor );
+        break;
+    default:
+        snprintf( buffer, sizeof(buffer), "KO: '%s' sensor: exception happens.\r\n", sensor );
+    }
+    do_control_write( client, buffer );
+    return -1;
+}
+
+/* set sensor data - (a,b,c) from sensor name */
+static int
+do_sensors_set( ControlClient client, char* args )
+{
+    if (! args) {
+        control_write( client, "KO: Usage: \"set <sensorname> <value-a>[:<value-b>[:<value-c>]]\"\n" );
+        return -1;
+    }
+
+    int status;
+    char* sensor;
+    char* value;
+    char* args_dup = strdup( args );
+    if (args_dup == NULL) {
+        control_write( client, "KO: Memory allocation failed.\n" );
+        return -1;
+    }
+    char* p = args_dup;
+
+    /* Parsing the args to get sensor name string */
+    while (*p && isspace(*p)) p++;
+    if (*p == 0)
+        goto INPUT_ERROR;
+    sensor = p;
+
+    /* Parsing the args to get value string */
+    while (*p && (! isspace(*p))) p++;
+    if (*p == 0 || *(p + 1) == 0/* make sure value isn't NULL */)
+        goto INPUT_ERROR;
+    *p = 0;
+    value = p + 1;
+
+    if (! (strlen(sensor) && strlen(value)))
+        goto INPUT_ERROR;
+
+    int sensor_id = android_sensors_get_id_from_name( sensor );
+    char buffer[SENSORS_INFO_SIZE] = { 0 };
+
+    if (sensor_id < 0) {
+        status = sensor_id;
+        goto SENSOR_STATUS_ERROR;
+    } else {
+        float fvalues[3];
+        status = android_sensors_get( sensor_id, &fvalues[0], &fvalues[1], &fvalues[2] );
+        if (status != SENSOR_STATUS_OK)
+            goto SENSOR_STATUS_ERROR;
+
+        /* Parsing the value part to get the sensor values(a, b, c) */
+        int i;
+        char* pnext;
+        char* pend = value + strlen(value);
+        for (i = 0; i < 3; i++, value = pnext + 1) {
+            pnext=strchr( value, ':' );
+            if (pnext) {
+                *pnext = 0;
+            } else {
+                pnext = pend;
+            }
+
+            if (pnext > value) {
+                if (1 != sscanf( value,"%g", &fvalues[i] ))
+                    goto INPUT_ERROR;
+            }
+        }
+
+        status = android_sensors_set( sensor_id, fvalues[0], fvalues[1], fvalues[2] );
+        if (status != SENSOR_STATUS_OK)
+            goto SENSOR_STATUS_ERROR;
+
+        free( args_dup );
+        return 0;
+    }
+
+SENSOR_STATUS_ERROR:
+    switch(status) {
+    case SENSOR_STATUS_NO_SERVICE:
+        snprintf( buffer, sizeof(buffer), "KO: No sensor service found!\r\n" );
+        break;
+    case SENSOR_STATUS_DISABLED:
+        snprintf( buffer, sizeof(buffer), "KO: '%s' sensor is disabled.\r\n", sensor );
+        break;
+    case SENSOR_STATUS_UNKNOWN:
+        snprintf( buffer, sizeof(buffer),
+                "KO: unknown sensor name: %s, run 'sensor status' to get available sensors.\r\n", sensor );
+        break;
+    default:
+        snprintf( buffer, sizeof(buffer), "KO: '%s' sensor: exception happens.\r\n", sensor );
+    }
+    do_control_write( client, buffer );
+    free( args_dup );
+    return -1;
+
+INPUT_ERROR:
+    control_write( client, "KO: Usage: \"set <sensorname> <value-a>[:<value-b>[:<value-c>]]\"\n" );
+    free( args_dup );
+    return -1;
+}
+
+/* get all available sensor names and enable status respectively. */
+static int
+do_sensors_status( ControlClient client, char* args )
+{
+    uint8_t id, status;
+    char buffer[SENSORS_INFO_SIZE] = { 0 };
+
+    for(id = 0; id < MAX_SENSORS; id++) {
+        status = android_sensors_get_sensor_status( id );
+        snprintf( buffer, sizeof(buffer), "%s: %s\n",
+                android_sensors_get_name_from_id(id), (status ? "enabled.":"disabled.") );
+        control_write( client, buffer );
+    }
+
+    return 0;
+}
+
+/* Sensor commands for get/set sensor values and get available sensor names. */
+static const CommandDefRec sensor_commands[] =
+{
+    { "status", "list all sensors and their status.",
+      "'status': list all sensors and their status.\r\n",
+      NULL, do_sensors_status, NULL },
+
+    { "get", "get sensor values",
+      "'get <sensorname>' returns the values of a given sensor.\r\n",
+      NULL, do_sensors_get, NULL },
+
+    { "set", "set sensor values",
+      "'set <sensorname> <value-a>[:<value-b>[:<value-c>]]' set the values of a given sensor.\r\n",
+      NULL, do_sensors_set, NULL },
+
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
 /*****                           M A I N   C O M M A N D S                             ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -2783,6 +2978,10 @@ static const CommandDefRec   main_commands[] =
     { "qemu", "QEMU-specific commands",
     "allows to connect to the QEMU virtual machine monitor\r\n", NULL,
     NULL, qemu_commands },
+
+    { "sensor", "manage emulator sensors",
+      "allows you to request the emulator sensors\r\n", NULL,
+      NULL, sensor_commands },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
