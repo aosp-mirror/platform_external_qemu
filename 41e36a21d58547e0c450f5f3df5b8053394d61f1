@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//8yY\u003d",
+        "filename": "android/framebuffer-ui.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-01-13T13:01:03Z",
+      "side": 1,
+      "message": "I would prefer something like w*((bits_per_pixel+7)/8) just to be on the safe side :-)",
+      "revId": "41e36a21d58547e0c450f5f3df5b8053394d61f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//8yc\u003d",
+        "filename": "android/qemulator.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-01-13T13:01:03Z",
+      "side": 1,
+      "message": "can you remove these tabs?",
+      "revId": "41e36a21d58547e0c450f5f3df5b8053394d61f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
