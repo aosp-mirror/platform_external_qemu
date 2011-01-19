@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//8Bs\u003d",
+        "filename": "hw/goldfish_events_device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1003957
+      },
+      "writtenOn": "2011-01-19T19:35:22Z",
+      "side": 1,
+      "message": "Ah!  This is the cause of b/2869884.\n\nThis causes all key bits to be set include KEY_DOWN, KEY_UP, KEY_LEFT, KEY_RIGHT, and KEY_CENTER which should only be set if config-\u003ehw_dPad is true.",
+      "revId": "0158ea3220978ecc0fa1738e4a0bdae83fa36175",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
