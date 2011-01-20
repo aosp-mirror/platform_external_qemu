@@ -2379,7 +2379,7 @@ CharDriverState *qemu_chr_open(const char *label, const char *filename, void (*i
 #endif
     if (!strcmp(filename, "android-modem")) {
         CharDriverState*  cs;
-        qemu_chr_open_charpipe( &cs, &android_modem_cs );
+        qemu_chr_open_charpipe( &cs, &android_modem_cs[0] );
         return cs;
     } else if (!strcmp(filename, "android-gps")) {
         CharDriverState*  cs;

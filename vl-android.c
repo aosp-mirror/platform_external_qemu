@@ -4708,9 +4708,13 @@ int main(int argc, char **argv, char **envp)
         }
         android_qemud_set_channel( ANDROID_QEMUD_GSM, cs);
     } else if (android_hw->hw_gsmModem != 0 ) {
-        if ( android_qemud_get_channel( ANDROID_QEMUD_GSM, &android_modem_cs ) < 0 ) {
-            PANIC("could not initialize qemud 'gsm' channel");
+        if ( android_qemud_get_channel( "gsm1", &android_modem_cs[0] ) < 0 ) {
+            PANIC("could not initialize qemud 'gsm1' channel");
         }
+        if ( android_qemud_get_channel( "gsm2", &android_modem_cs[1] ) < 0 ) {
+            PANIC("could not initialize qemud 'gsm2' channel");
+        }
+
     }
 
     /* Initialize GPS */
