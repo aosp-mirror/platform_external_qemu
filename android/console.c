@@ -2677,6 +2677,15 @@ destroy_core_ui_ctl_client(void)
         control_client_destroy(core_ui_ctl_client);
     }
 }
+
+void
+destroy_uicmd_proxy(void)
+{
+    if (core_ui_ctl_client != NULL) {
+        control_client_destroy(core_ui_ctl_client);
+    }
+}
+
 #endif  // CONFIG_STANDALONE_CORE
 
 static const CommandDefRec  qemu_commands[] =

@@ -1060,6 +1060,7 @@ VL_SOURCES := framebuffer.c \
               android/framebuffer-core.c \
               android/user-events-core.c \
               android/ui-ctl-core.c \
+              android/protocol/ui-commands-proxy.c \
 
 # Add common system libraries
 #
