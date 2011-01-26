@@ -316,6 +316,35 @@ core_connection_switch_stream(CoreConnection* desc,
     }
 }
 
+CoreConnection*
+core_connection_create_and_switch(SockAddress* console_socket,
+                                  const char* stream_name,
+                                  char** handshake)
+{
+    char switch_cmd[256];
+    CoreConnection* connection = NULL;
+
+    // Connect to the console service.
+    connection = core_connection_create(console_socket);
+    if (connection == NULL) {
+        return NULL;
+    }
+    if (core_connection_open(connection)) {
+        core_connection_free(connection);
+        return NULL;
+    }
+
+    // Perform the switch.
+    snprintf(switch_cmd, sizeof(switch_cmd), "%s", stream_name);
+    if (core_connection_switch_stream(connection, switch_cmd, handshake)) {
+        core_connection_close(connection);
+        core_connection_free(connection);
+        return NULL;
+    }
+
+    return connection;
+}
+
 void
 core_connection_detach(CoreConnection* desc)
 {
