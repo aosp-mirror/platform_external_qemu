@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//7PU\u003d",
+        "filename": "android/core-connection.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-01-28T17:10:05Z",
+      "side": 1,
+      "message": "It\u0027d be nice if you updated the comment as well, or this is going to be confusing later when other people read this.",
+      "revId": "e071686491f2237718f0298c5e827660eb5a80ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
