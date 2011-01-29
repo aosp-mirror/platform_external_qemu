@@ -149,7 +149,13 @@ static unsigned dequeue_event(events_state *s)
     if(s->first == s->last) {
         qemu_irq_lower(s->irq);
     }
-
+#ifdef TARGET_I386
+    else if (((s->first + 2) & (MAX_EVENTS - 1)) < s->last ||
+               (s->first & (MAX_EVENTS - 1)) > s->last) {
+        qemu_irq_lower(s->irq);
+        qemu_irq_raise(s->irq);
+    }
+#endif
     return n;
 }
 
