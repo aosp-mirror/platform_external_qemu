@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//68U\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-01-31T11:00:34Z",
+      "side": 1,
+      "message": "Can I ask you to use underscores instead of DASHES here (i.e. EMULATOR_TARGET_CPU instead of EMULATOR-TARGET-CPU)?",
+      "revId": "696044525bac07baef684cefb207a771f69470ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//68Q\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-01-31T11:00:34Z",
+      "side": 1,
+      "message": "there is a trailing tab here",
+      "revId": "696044525bac07baef684cefb207a771f69470ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//68M\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-01-31T11:00:34Z",
+      "side": 1,
+      "message": "I\u0027d prefer if you would tabs only to define commands in Makefiles",
+      "revId": "696044525bac07baef684cefb207a771f69470ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//68c\u003d",
+        "filename": "android/config/config.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-01-31T11:00:34Z",
+      "side": 1,
+      "message": "I\u0027d prefer if you would only separate the arch-specific definitions in the #ifndef .. #else .. #endif blocks. These would be:\n\nTARGET_ARCH\nTARGET_ARM\nTARGET_I386\n\nThanks",
+      "revId": "696044525bac07baef684cefb207a771f69470ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//68Y\u003d",
+        "filename": "hw/goldfish_events_device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-01-31T11:00:34Z",
+      "side": 1,
+      "message": "Oh my, I don\u0027t know why this is needed but I think a comment would do wonder to explain this here. It doesn\u0027t look like something too obvious.",
+      "revId": "696044525bac07baef684cefb207a771f69470ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
