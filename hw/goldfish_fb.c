@@ -406,7 +406,7 @@ compute_fb_update_rect_linear(FbUpdateState*  fbs,
                 spix = ((spix << 8) & 0xff00ff00) | ((spix >> 8) & 0x00ff00ff);
                 dst[xx] = spix;
                 xx++;
-            })
+            });
 #else
             memcpy( dst+xx1, src+xx1, (xx2-xx1+1)*4 );
 #endif
