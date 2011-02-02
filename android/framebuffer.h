@@ -188,6 +188,9 @@ qframebuffer_done( QFrameBuffer*   qfbuff );
 extern void
 qframebuffer_check_updates( void );
 
+extern void
+qframebuffer_pulse( void );
+
 /* this is called by the emulator. for each registered framebuffer, call
  * its producer's Invalidate method, if any
  */
