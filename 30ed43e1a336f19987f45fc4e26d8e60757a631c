@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//6bY\u003d",
+        "filename": "android/protocol/fb-updates-proxy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2011-02-02T17:34:25Z",
+      "side": 1,
+      "message": "Change comment too",
+      "revId": "30ed43e1a336f19987f45fc4e26d8e60757a631c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
