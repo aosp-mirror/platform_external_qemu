@@ -65,6 +65,11 @@
 #include "framebuffer.h"
 #include "iolooper.h"
 
+#ifdef TARGET_I386
+nand_threshold android_nand_read_threshold;
+nand_threshold android_nand_write_threshold;
+#endif
+
 AndroidRotation  android_framebuffer_rotation;
 
 #define  STRINGIFY(x)   _STRINGIFY(x)
@@ -1595,6 +1600,9 @@ int main(int argc, char **argv)
         char        *p = params, *end = p + sizeof(params);
 
         p = bufprint(p, end, "qemu=1 console=ttyS0" );
+#ifdef TARGET_I386
+        p = bufprint(p, end, " androidboot.hardware=goldfish");
+#endif
 
         if (opts->shell || opts->logcat) {
             p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );
