@@ -98,7 +98,7 @@ core_connection_open_socket(SockAddress* sockaddr)
     // Create sync connection to the console.
     ssocket = syncsocket_connect(fd, sockaddr, CORE_PORT_TIMEOUT_MS);
     if (ssocket == NULL) {
-        derror("syncsocket_connect has failed: %s\n", errno_str);
+        derror("syncsocket_connect has failed: %s\n", strerror(errno));
         socket_close(fd);
         return NULL;
     }

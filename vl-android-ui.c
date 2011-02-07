@@ -27,7 +27,14 @@
 #define _GNU_SOURCE 1
 #endif
 
+#ifndef _WIN32
 #include <sys/wait.h>
+#endif  // _WIN32
+
+#ifdef _WIN32
+#include <windows.h>
+#include <sys/timeb.h>
+#endif
 
 #include "qemu-common.h"
 #include "net.h"
@@ -50,6 +57,73 @@
 #include "android/protocol/core-commands-proxy.h"
 #include "android/protocol/ui-commands-impl.h"
 #include "android/qemulator.h"
+
+/***********************************************************/
+/* I/O handling */
+
+typedef struct IOHandlerRecord {
+    int fd;
+    IOCanReadHandler *fd_read_poll;
+    IOHandler *fd_read;
+    IOHandler *fd_write;
+    int deleted;
+    void *opaque;
+    /* temporary data */
+    struct pollfd *ufd;
+    struct IOHandlerRecord *next;
+} IOHandlerRecord;
+
+static IOHandlerRecord *first_io_handler;
+
+/* XXX: fd_read_poll should be suppressed, but an API change is
+   necessary in the character devices to suppress fd_can_read(). */
+int qemu_set_fd_handler2(int fd,
+                         IOCanReadHandler *fd_read_poll,
+                         IOHandler *fd_read,
+                         IOHandler *fd_write,
+                         void *opaque)
+{
+    IOHandlerRecord **pioh, *ioh;
+
+    if (!fd_read && !fd_write) {
+        pioh = &first_io_handler;
+        for(;;) {
+            ioh = *pioh;
+            if (ioh == NULL)
+                break;
+            if (ioh->fd == fd) {
+                ioh->deleted = 1;
+                break;
+            }
+            pioh = &ioh->next;
+        }
+    } else {
+        for(ioh = first_io_handler; ioh != NULL; ioh = ioh->next) {
+            if (ioh->fd == fd)
+                goto found;
+        }
+        ioh = malloc(sizeof(IOHandlerRecord));
+        memset(ioh, 0, sizeof(IOHandlerRecord));
+        ioh->next = first_io_handler;
+        first_io_handler = ioh;
+    found:
+        ioh->fd = fd;
+        ioh->fd_read_poll = fd_read_poll;
+        ioh->fd_read = fd_read;
+        ioh->fd_write = fd_write;
+        ioh->opaque = opaque;
+        ioh->deleted = 0;
+    }
+    return 0;
+}
+
+int qemu_set_fd_handler(int fd,
+                        IOHandler *fd_read,
+                        IOHandler *fd_write,
+                        void *opaque)
+{
+    return qemu_set_fd_handler2(fd, NULL, fd_read, fd_write, opaque);
+}
 
 static Looper*  mainLooper;
 
