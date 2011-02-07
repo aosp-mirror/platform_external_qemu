@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//5rs\u003d",
+        "filename": "android/protocol/core-connection.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-07T22:23:57Z",
+      "side": 1,
+      "message": "nope, you need to use errno_str here, because strerror(errno) is not going to work on socket errors (thank you Winsock)",
+      "revId": "c1fda0c64dd60602ce89af81f1044c235e164fb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//5ro\u003d",
+        "filename": "android/sync-utils.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-07T22:23:57Z",
+      "side": 1,
+      "message": "ah ah, thanks",
+      "revId": "c1fda0c64dd60602ce89af81f1044c235e164fb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//5rk\u003d",
+        "filename": "vl-android-ui.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-07T22:23:57Z",
+      "side": 1,
+      "message": "oh, this implementation is essentially a no-op because the IOHandlerRecord list is not used in the event list at all.\n\nAs a consequence, sockets will never be properly closed on Windows. mmm.\n\nCan you try grabbing the previous implementation that was used just before these functions were removed in this file?",
+      "revId": "c1fda0c64dd60602ce89af81f1044c235e164fb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
