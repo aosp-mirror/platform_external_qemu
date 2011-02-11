@@ -136,6 +136,13 @@ HWCFG_BOOL(
   "Cache partition support",
   "Whether we use a /cache partition on the device.")
 
+HWCFG_STRING(
+  disk_cachePartition_path,
+  "disk.cachePartition.path",
+  "",
+  "Cache partition",
+  "Cache partition to use on the device. Ignored if disk.cachePartition is not 'yes'.")
+
 HWCFG_DISKSIZE(
   disk_cachePartition_size,
   "disk.cachePartition.size",
@@ -184,6 +191,83 @@ HWCFG_BOOL(
   "yes",
   "Proximity support",
   "Whether there is an proximity in the device.")
+
+HWCFG_STRING(
+  disk_kernel_path,
+  "disk.kernel.path",
+  "",
+  "Path to the kernel image",
+  "Path to the kernel image.")
+
+HWCFG_STRING(
+  disk_ramDisk_path,
+  "disk.ramDisk.path",
+  "",
+  "Path to the ramdisk image",
+  "Path to the ramdisk image.")
+
+HWCFG_STRING(
+  disk_systemParition_path,
+  "disk.systemParition.path",
+  "<init>",
+  "Path to system partition image",
+  "Path to system partition image (to be locked), special value '<init>' means copying the data from .initPath below into a temporary file.")
+
+HWCFG_STRING(
+  disk_systemParition_initPath,
+  "disk.systemParition.initPath",
+  "",
+  "Initial system partition image",
+  "If disk.systemParition.path is <init>, provide initial system partition image.")
+
+HWCFG_DISKSIZE(
+  disk_systemParition_size,
+  "disk.systemParition.size",
+  "0",
+  "Ideal size of system partition",
+  "Allows the system partition to grow up to this size. Ignored if the system image file size is already larger than that.")
+
+HWCFG_STRING(
+  disk_initData_path,
+  "disk.initData.path",
+  "",
+  "????",
+  "????")
+
+HWCFG_STRING(
+  disk_userSystem_path,
+  "disk.userSystem.path",
+  "",
+  "????",
+  "????")
+
+HWCFG_STRING(
+  disk_userData_path,
+  "disk.userData.path",
+  "",
+  "????",
+  "????")
+
+HWCFG_DISKSIZE(
+  disk_userData_size,
+  "disk.userData.size",
+  "0",
+  "????",
+  "????")
+
+HWCFG_STRING(
+  disk_snapshots_path,
+  "disk.snapshots.path",
+  "",
+  "Path to snapshots",
+  "Path to snapshots.")
+
+HWCFG_STRING(
+  disk_sdCard_path,
+  "disk.sdCard.path",
+  "",
+  "Path to SD Card image file",
+  "Path to SD Card image file. Ignored if disk.sdCard is not set to 'yes'.")
 
 #undef HWCFG_INT
 #undef HWCFG_BOOL
