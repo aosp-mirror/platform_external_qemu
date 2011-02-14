@@ -192,6 +192,7 @@ HW_SOURCES := \
     goldfish_mmc.c   \
     goldfish_memlog.c \
     goldfish_nand.c \
+    goldfish_audio.c \
     goldfish_tty.c \
     msmouse.c \
     pci.c \
@@ -209,7 +210,6 @@ ifeq ($(TARGET_ARCH),arm)
 HW_SOURCES += android_arm.c \
     arm_pic.c \
     smc91c111.c \
-    goldfish_audio.c \
     goldfish_interrupt.c \
     goldfish_switch.c \
     goldfish_timer.c \
