@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//41U\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-14T23:38:07Z",
+      "side": 1,
+      "message": "It would be nice if you could extend this comment to explain how the following properties are used, i.e.:\n\n.path \u003d path to read/write system partition image during emulation. If special value \"\u003cinit\u003e\" is used, a temporary file will be created, populated with the content of .initPath\n\n.size \u003d ideal size of system partition. Ignored if smaller than the size of .path (or .initPath). Otherwise, gives the maximum size the partition is allowed to grow dynamically.\n\n.initPath \u003d only used if .path is \"\u003cinit\u003e\", path to an initial system image that will be copied into the temporary system image file before launch.",
+      "revId": "cfde66945cfd26f00c328154d8502b60f76221e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//41s\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-14T23:38:07Z",
+      "side": 1,
+      "message": "typo here: should be systemPartition ! :-)",
+      "revId": "cfde66945cfd26f00c328154d8502b60f76221e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//41o\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-14T23:38:07Z",
+      "side": 1,
+      "message": "same typo here",
+      "revId": "cfde66945cfd26f00c328154d8502b60f76221e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//41k\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-14T23:38:07Z",
+      "side": 1,
+      "message": "and here",
+      "revId": "cfde66945cfd26f00c328154d8502b60f76221e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//41Y\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-14T23:38:07Z",
+      "side": 1,
+      "message": "I would prefer that you use something like:\n\n.path  -\u003e path to data partition file. Cannot be empty (and no special value like \u003cinit\u003e)\n\n.size  -\u003e ideal partition size (ignored if smaller than the size of .path, or .initPath)\n\n.initPath -\u003e if not empty, this file will be copied to .path before launch (implements -wipe-data)",
+      "revId": "cfde66945cfd26f00c328154d8502b60f76221e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//41g\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-14T23:38:07Z",
+      "side": 1,
+      "message": "what is this exactly? Doesn\u0027t seem necessary.",
+      "revId": "cfde66945cfd26f00c328154d8502b60f76221e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//41Q\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-14T23:38:07Z",
+      "side": 1,
+      "message": "Please explain that this is the path to a \"snapshot storage\" file. I.e. all snapshots are stored in it, including the default snapshot.",
+      "revId": "cfde66945cfd26f00c328154d8502b60f76221e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//41A\u003d",
+        "filename": "android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 950,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-14T23:38:07Z",
+      "side": 1,
+      "message": "should be strcmp, not strncmp here.",
+      "revId": "cfde66945cfd26f00c328154d8502b60f76221e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//41I\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-14T23:38:07Z",
+      "side": 1,
+      "message": "At this point, you shoudn\u0027t need to use the AvdInfo object, only the hardware properties. So the code below should look like:\n\nconst char* filepath \u003d hw-\u003edisk_systemPartition_path;\n\nif (!strcmp(filepath, \"\u003cinit\u003e\")) {\n    ... /* Create temporary file */\n    ... /* Copy hw-\u003edisk_systemPartition_initPath into it */\n    filepath \u003d \u003cpath-to-temp-file\u003e;\n}\n\nAlso, the reason to do that is to perform these operations in the core, not in android/main.c",
+      "revId": "cfde66945cfd26f00c328154d8502b60f76221e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
