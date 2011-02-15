@@ -104,6 +104,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA+3//4tE\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2011-02-15T15:27:20Z",
+      "side": 1,
+      "message": "There is a USERSYSTEM, and USERDATA paths (system-qemu.img, and userdata-qemu.img respectively) in AvdInfo. I\u0027m not sure what these paths are for, but decided to have them in hw.ini just because they are in AVD.",
+      "parentUuid": "AAAA+3//41g\u003d",
+      "revId": "cfde66945cfd26f00c328154d8502b60f76221e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA+3//41Q\u003d",
         "filename": "android/avd/hardware-properties.ini",
         "patchSetId": 1
@@ -149,6 +167,24 @@
       "writtenOn": "2011-02-14T23:38:07Z",
       "side": 1,
       "message": "At this point, you shoudn\u0027t need to use the AvdInfo object, only the hardware properties. So the code below should look like:\n\nconst char* filepath \u003d hw-\u003edisk_systemPartition_path;\n\nif (!strcmp(filepath, \"\u003cinit\u003e\")) {\n    ... /* Create temporary file */\n    ... /* Copy hw-\u003edisk_systemPartition_initPath into it */\n    filepath \u003d \u003cpath-to-temp-file\u003e;\n}\n\nAlso, the reason to do that is to perform these operations in the core, not in android/main.c",
+      "revId": "cfde66945cfd26f00c328154d8502b60f76221e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//4s8\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2011-02-15T15:27:20Z",
+      "side": 1,
+      "message": "Can I leave it as it is for now (just put TODO)? The reason is that I want to have a separate CL for the related core changes.",
+      "parentUuid": "AAAA+3//41I\u003d",
       "revId": "cfde66945cfd26f00c328154d8502b60f76221e6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
