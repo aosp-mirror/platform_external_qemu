@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//4gw\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3653,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2011-02-16T22:59:57Z",
+      "side": 1,
+      "message": "I think, this should be for \"high\"",
+      "revId": "4cf8c8508db3e156a373a8f447d12e900ecc4019",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//4gs\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3654,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2011-02-16T22:59:57Z",
+      "side": 1,
+      "message": "... and this for \"low\"",
+      "revId": "4cf8c8508db3e156a373a8f447d12e900ecc4019",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
