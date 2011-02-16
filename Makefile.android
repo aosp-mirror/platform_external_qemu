@@ -1234,12 +1234,12 @@ ifeq ($(BUILD_STANDALONE_EMULATOR),true)
   LOCAL_CFLAGS += -I$(intermediates)
 endif
 
+LOCAL_LDLIBS += $(QEMU_AUDIO_LIB)
+
 # other flags
 ifneq ($(HOST_OS),windows)
     LOCAL_LDLIBS += -ldl
 endif
-
-LOCAL_LDLIBS += $(QEMU_AUDIO_LIB)
 
 ifeq ($(HOST_OS),darwin)
     FRAMEWORKS := OpenGL Cocoa QuickTime ApplicationServices Carbon IOKit
