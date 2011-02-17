@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA+3//4fg\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3653,
+      "author": {
+        "id": 1001134
+      },
+      "writtenOn": "2011-02-17T00:16:51Z",
+      "side": 1,
+      "message": "The code correct. \"low\" is the value on the left.",
+      "parentUuid": "AAAA+3//4gw\u003d",
+      "revId": "4cf8c8508db3e156a373a8f447d12e900ecc4019",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA+3//4gs\u003d",
         "filename": "vl-android.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2011-02-16T22:59:57Z",
       "side": 1,
       "message": "... and this for \"low\"",
+      "revId": "4cf8c8508db3e156a373a8f447d12e900ecc4019",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//4fc\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3654,
+      "author": {
+        "id": 1001134
+      },
+      "writtenOn": "2011-02-17T00:16:51Z",
+      "side": 1,
+      "message": "Thanks for pointing this out. The code is incorrect and should be:\n\nhigh \u003d atoi(strtok(NULL,\"-\"));\n\nI\u0027m uploading a patch now.\n\nExample:\n\n#include \u003cstdio.h\u003e\n\n#include \u003cstring.h\u003e\n\nint main () {\n  char str[] \u003d \"123-456\";\n  char str1[] \u003d \"123-456\";\n  char *p;\n  unsigned int low, high;\n\n  printf(\"using original code... \\n\");\n\n  p \u003d str;\n\n  low \u003d atoi(strtok(p,\"-\"));\n  high \u003d atoi(p);\n\n  printf(\"low\u003d%d, high\u003d%d\\n\", low, high);\n\n  printf(\"other implementation...\\n\");\n\n  p \u003d str1;\n\n  low \u003d atoi(strtok(p,\"-\"));\n  high \u003d atoi(strtok(NULL,\"-\"));\n\n  printf(\"low\u003d%d, high\u003d%d\\n\", low, high);\n\n  return 0;\n}",
+      "parentUuid": "AAAA+3//4gs\u003d",
       "revId": "4cf8c8508db3e156a373a8f447d12e900ecc4019",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
