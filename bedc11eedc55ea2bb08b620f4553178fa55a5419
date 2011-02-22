@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//4AE\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-22T16:31:56Z",
+      "side": 1,
+      "message": "still a typo here :-/ I should have been clearer then:\n\nIt should be disk.systemPartition.path\nnot disk.systemParition.path, nor systemParition.path\n\nParition !\u003d Partition",
+      "revId": "bedc11eedc55ea2bb08b620f4553178fa55a5419",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//4AA\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 2
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-22T16:31:56Z",
+      "side": 1,
+      "message": "and here",
+      "revId": "bedc11eedc55ea2bb08b620f4553178fa55a5419",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
