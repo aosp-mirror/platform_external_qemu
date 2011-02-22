@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//3+k\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-22T19:15:13Z",
+      "side": 1,
+      "message": "This should be called disk.dataPartition.path instead.\nIts value cannot be empty. Special value \"\u003ctemp\u003e\" means using a temporary file.\n\nAnd you should also define disk.dataPartition.initPath, if not empty, its content will be copied to the disk.dataPartition.path file at boot-time.\n\nSimilarly disk.dataPartition.size for the \"ideal\" size.",
+      "revId": "271982c3943913e2df57bf11113afdcf5d8fde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3+g\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 3
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-22T19:15:13Z",
+      "side": 1,
+      "message": "no, this is already what disk.systemPartition.path points to.",
+      "revId": "271982c3943913e2df57bf11113afdcf5d8fde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3+Y\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 3
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-22T19:15:13Z",
+      "side": 1,
+      "message": "disk.dataPartition.path instead (see above)",
+      "revId": "271982c3943913e2df57bf11113afdcf5d8fde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3+c\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 3
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-22T19:15:13Z",
+      "side": 1,
+      "message": "disk.dataPartition.size instead (see above comment)",
+      "revId": "271982c3943913e2df57bf11113afdcf5d8fde6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
