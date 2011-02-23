@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//3s8\u003d",
+        "filename": "Makefile.common",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2011-02-23T18:27:37Z",
+      "side": 1,
+      "message": "nit: tabs here and in some other places",
+      "revId": "3653897e466dad9717057c68c31b853fe6653940",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
