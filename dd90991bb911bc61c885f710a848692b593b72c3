@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//3uE\u003d",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1447,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2011-02-23T17:28:24Z",
+      "side": 1,
+      "message": "Seems like you\u0027re missing () in \"sizeof temp\"",
+      "revId": "dd90991bb911bc61c885f710a848692b593b72c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3uI\u003d",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1449,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2011-02-23T17:28:24Z",
+      "side": 1,
+      "message": ".. and here too",
+      "revId": "dd90991bb911bc61c885f710a848692b593b72c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
