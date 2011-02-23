@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA+3//3tw\u003d",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1447,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-23T17:33:28Z",
+      "side": 1,
+      "message": "It\u0027s actually optional with the sizeof operator. \"sizeof x\" is equivalent to \"sizeof(x)\" if x is a variable, though parentheses are necessary is x is a type. See http://en.wikipedia.org/wiki/Sizeof",
+      "parentUuid": "AAAA+3//3uE\u003d",
+      "revId": "dd90991bb911bc61c885f710a848692b593b72c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA+3//3uI\u003d",
         "filename": "android/avd/info.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2011-02-23T17:28:24Z",
       "side": 1,
       "message": ".. and here too",
+      "revId": "dd90991bb911bc61c885f710a848692b593b72c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3ts\u003d",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1449,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-23T17:33:28Z",
+      "side": 1,
+      "message": "Same thing. I guarantee you that the code builds and runs fine :-)",
+      "parentUuid": "AAAA+3//3uI\u003d",
       "revId": "dd90991bb911bc61c885f710a848692b593b72c3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
