@@ -3483,9 +3483,11 @@ static char *find_datadir(const char *argv0)
 
 /* Find a likely location for support files using the location of the binary.
    For installed binaries this will be "$bindir/../share/qemu".  When
-   running from the build tree this will be "$bindir/../pc-bios".  */
+   running from the build tree this will be "$bindir/../pc-bios".
+   The emulator running from the SDK will find the support files in $bindir/lib/pc-bios. */
 #define SHARE_SUFFIX "/share/qemu"
 #define BUILD_SUFFIX "/pc-bios"
+#define SDK_SUFFIX "/lib/pc-bios"
 static char *find_datadir(const char *argv0)
 {
     char *dir;
@@ -3527,18 +3529,22 @@ static char *find_datadir(const char *argv0)
         }
     }
     dir = dirname(p);
-    dir = dirname(dir);
-
     max_len = strlen(dir) +
-        MAX(strlen(SHARE_SUFFIX), strlen(BUILD_SUFFIX)) + 1;
+        MAX(strlen(SDK_SUFFIX), MAX(strlen(SHARE_SUFFIX), strlen(BUILD_SUFFIX))) + 1;
     res = qemu_mallocz(max_len);
-    snprintf(res, max_len, "%s%s", dir, SHARE_SUFFIX);
+
+    snprintf(res, max_len, "%s%s", dir, SDK_SUFFIX);
     if (access(res, R_OK)) {
-        snprintf(res, max_len, "%s%s", dir, BUILD_SUFFIX);
-        if (access(res, R_OK)) {
-            qemu_free(res);
-            res = NULL;
-        }
+      dir = dirname(dir);
+
+      snprintf(res, max_len, "%s%s", dir, SHARE_SUFFIX);
+      if (access(res, R_OK)) {
+          snprintf(res, max_len, "%s%s", dir, BUILD_SUFFIX);
+          if (access(res, R_OK)) {
+              qemu_free(res);
+              res = NULL;
+          }
+      }
     }
 #ifndef PATH_MAX
     free(p);
