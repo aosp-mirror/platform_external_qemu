@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA+3//3bw\u003d",
+        "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-02-25T13:07:36Z",
+      "side": 1,
+      "message": "We don\u0027t support several instances of the same AVD running concurrently. If a developer wants to do this, he will need to create several AVDs, each with its own configuration.\n\nThis configuration file should definitely be part of the AVD\u0027s content/configuration directory (bufprint_config_path() should help).",
+      "parentUuid": "AAAA8H///+8\u003d",
+      "revId": "50da39c37d63689465e044728d91168aae98a478",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA73//+Uc\u003d",
         "filename": "docs/ANDROID-NVRAM-CONFIG.txt",
         "patchSetId": 1
