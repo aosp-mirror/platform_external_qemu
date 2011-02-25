@@ -41,6 +41,7 @@ extern uint32_t alias_addr_ip;
 extern uint32_t our_addr_ip;
 extern uint32_t loopback_addr_ip;
 extern uint32_t dns_addr[DNS_ADDR_MAX];
+extern uint32_t dns_port[DNS_ADDR_MAX];  // corresponding to every dns address, there is a port
 extern int      dns_addr_count;
 extern char *username;
 extern char *socket_path;

@@ -45,6 +45,7 @@ static void slirp_net_forward_init(void);
 uint32_t our_addr_ip;
 /* host dns address */
 uint32_t dns_addr[DNS_ADDR_MAX];
+uint32_t dns_port[DNS_ADDR_MAX];
 int      dns_addr_count;
 
 /* host loopback address */
@@ -81,16 +82,22 @@ char slirp_hostname[33];
 
 int slirp_add_dns_server(const SockAddress*  new_dns_addr)
 {
-    int   dns_ip;
-
+    int ip;
+    int port;
     if (dns_addr_count >= DNS_ADDR_MAX)
         return -1;
 
-    dns_ip = sock_address_get_ip(new_dns_addr);
-    if (dns_ip == -1)
-        return -1;
+    ip = sock_address_get_ip(new_dns_addr);
+    port = sock_address_get_port(new_dns_addr);
 
-    dns_addr[dns_addr_count++] = dns_ip;
+    if (ip == -1)
+      return -1;
+    if (port < 0)
+        port = 53;
+
+    dns_addr[dns_addr_count] = ip;
+    dns_port[dns_addr_count] = port;
+    ++dns_addr_count;
     return 0;
 }
 
@@ -135,8 +142,11 @@ int slirp_get_system_dns_servers(void)
         if (inet_strtoip(pIPAddr->IpAddress.String, &ip) == 0) {
             if (ip == loopback_addr_ip)
                 ip = our_addr_ip;
-            if (dns_addr_count < DNS_ADDR_MAX)
-                dns_addr[dns_addr_count++] = ip;
+            if (dns_addr_count < DNS_ADDR_MAX) {
+                dns_addr[dns_addr_count] = ip;
+                dns_port[dns_addr_count] = 53;
+                ++dns_addr_count;
+            }
         }
         pIPAddr = pIPAddr->Next;
     }
@@ -187,7 +197,9 @@ int slirp_get_system_dns_servers(void)
             if (tmp_ip == loopback_addr_ip)
                 tmp_ip = our_addr_ip;
             if (dns_addr_count < DNS_ADDR_MAX) {
-                dns_addr[dns_addr_count++] = tmp_ip;
+                dns_addr[dns_addr_count] = tmp_ip;
+                dns_port[dns_addr_count] = 53;
+                ++dns_addr_count;
                 if (dns_addr_count > 1)
                     DN(", ");
                 DN("%s", inet_iptostr(tmp_ip));
@@ -254,7 +266,8 @@ void slirp_init(int restricted, const char *special_ip)
 
     if (dns_addr_count == 0) {
         if (slirp_get_system_dns_servers() < 0) {
-            dns_addr[0]    = loopback_addr_ip;
+            dns_addr[0] = loopback_addr_ip;
+            dns_port[0] = 53;
             dns_addr_count = 1;
             fprintf (stderr, "Warning: No DNS servers found\n");
         }

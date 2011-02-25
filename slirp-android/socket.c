@@ -533,6 +533,23 @@ sorecvfrom(struct socket *so)
 	     *		}
 	     */
 
+            /* If this packet is a DNS response from one of the DNS server specified
+             * by -dns-server parameters, we fake the UDP source port and
+             * set it (back) to 53.  This is necessary for Linux since it
+             * expects DNS responses to originate from port 53.
+             */
+
+              if (addr.family == SOCKET_INET) {
+                int i;
+                for (i=0;i<dns_addr_count;i++)
+                  if (addr.u.inet.port == dns_port[i] &&
+                    addr.u.inet.address == dns_addr[i]) {
+                    addr.u.inet.port = 53;
+                }
+              }
+              // do nothing if its not an IPv4 address.
+              // since (currently) only IPv4 dns servers are supported.
+
 	    /*
 	     * If this packet was destined for CTL_ADDR,
 	     * make it look like that's where it came from, done by udp_output
@@ -549,9 +566,9 @@ int
 sosendto(struct socket *so, struct mbuf *m)
 {
 	int ret;
-    SockAddress   addr;
-    uint32_t      addr_ip;
-    uint16_t      addr_port;
+        SockAddress   addr;
+        uint32_t      addr_ip;
+        uint16_t      addr_port;
 
 	DEBUG_CALL("sosendto");
 	DEBUG_ARG("so = %lx", (long)so);
@@ -559,14 +576,21 @@ sosendto(struct socket *so, struct mbuf *m)
 
 	if ((so->so_faddr_ip & 0xffffff00) == special_addr_ip) {
         /* It's an alias */
-      	int  low = so->so_faddr_ip & 0xff;
+          int  low = so->so_faddr_ip & 0xff;
 
-        if ( CTL_IS_DNS(low) )
+          if ( CTL_IS_DNS(low) ) {
             addr_ip = dns_addr[low - CTL_DNS];
-        else
-            addr_ip = loopback_addr_ip;
-	} else
-	    addr_ip = so->so_faddr_ip;
+            addr_port = dns_port[low - CTL_DNS];
+            fprintf(stderr, "line %d: ip:%d  port:%d\n", (int)__LINE__, addr_ip, addr_port);
+          }
+          else {
+              addr_ip = loopback_addr_ip;
+	      addr_port = so->so_faddr_port;
+          }
+	} else {
+	      addr_ip = so->so_faddr_ip;
+              addr_port = so->so_faddr_port;
+        }
 
 	addr_port = so->so_faddr_port;
 

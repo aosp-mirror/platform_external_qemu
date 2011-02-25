@@ -3585,7 +3585,18 @@ add_dns_server( const char*  server_name )
 {
     SockAddress   addr;
 
-    if (sock_address_init_resolve( &addr, server_name, 55, 0 ) < 0) {
+    char *colon = strchr(server_name, ':');
+    int port = 53;
+    if (colon != NULL) {
+      port = atoi(colon+1);
+      if (port <= 0) {
+        fprintf(stdout, "### Warning: could not add DNS server %s to the network stack (Port number must be a positive integer\n", server_name);
+        return -1;
+      }
+      *colon = '\0';  // this converts ip:port to ip
+    }
+
+    if (sock_address_init_resolve( &addr, server_name, port, 0 ) < 0) {
         fprintf(stdout,
                 "### WARNING: can't resolve DNS server name '%s'\n",
                 server_name );
@@ -3596,6 +3607,7 @@ add_dns_server( const char*  server_name )
             "DNS server name '%s' resolved to %s\n", server_name, sock_address_to_string(&addr) );
 
     if ( slirp_add_dns_server( &addr ) < 0 ) {
+        fprintf(stderr, "### Returned value is %d", slirp_add_dns_server( &addr ));
         fprintf(stderr,
                 "### WARNING: could not add DNS server '%s' to the network stack\n", server_name);
         return -1;
