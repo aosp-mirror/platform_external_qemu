@@ -166,8 +166,16 @@ LOCAL_SRC_FILES += \
     target-i386/helper.c \
     target-i386/translate.c \
     target-i386/machine.c \
-
 LOCAL_SRC_FILES += fpu/softfloat-native.c
+endif
+
+# compiple KVM only if target is x86 on x86 Linux 
+ifeq ($(HOST_OS)-$(HOST_ARCH)-$(EMULATOR_TARGET_ARCH),linux-x86-x86)
+# the following is to include linux/kvm.h
+LOCAL_CFLAGS += -I /usr/include
+LOCAL_SRC_FILES += \
+    target-i386/kvm.c \
+    kvm-all.c
 endif
 
 ##############################################################################
