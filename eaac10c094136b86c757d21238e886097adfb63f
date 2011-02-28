@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//3Uk\u003d",
+        "filename": "hw/goldfish_device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1005562
+      },
+      "writtenOn": "2011-02-28T16:59:33Z",
+      "side": 1,
+      "message": "I\u0027ll submit changes to this part because we miss the if(s-\u003ecurrent) for the cpu_memory_rw_debug().",
+      "revId": "eaac10c094136b86c757d21238e886097adfb63f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
