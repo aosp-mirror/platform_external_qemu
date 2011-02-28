@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA+3//3TU\u003d",
+        "filename": "slirp-android/libslirp.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2011-02-28T20:36:57Z",
+      "side": 1,
+      "message": "I\u0027m not sure I understand this comment.  \"dns_port\" isn\u0027t defined anywhere in this file, and \"dns_addr\" is passed in as an argument to this method.  However, this method also says it takes the \"ip, port\" from SockAddress , which I presume is \"dns_addr\".\n\nThis documentation, to me, doesn\u0027t make a lot of sense...  Can we rewrite it?",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3TQ\u003d",
+        "filename": "slirp-android/main.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2011-02-28T20:36:57Z",
+      "side": 1,
+      "message": "If these are always paired, wouldn\u0027t it be better to combine them into a struct?\n\nMy c isn\u0027t the best, but something like:\n\n  struct dns_rec {\n    uint32_t addr;\n    uint32_t port;\n  };\n\n  dns_req dns[DNS_ADDR_MAX];\n\n(sorry if this doesn\u0027t even compile, but hopefully you get the idea...)",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3Ss\u003d",
+        "filename": "slirp-android/socket.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 544,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2011-02-28T20:36:57Z",
+      "side": 1,
+      "message": "space after semi-colon.",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3So\u003d",
+        "filename": "slirp-android/socket.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2011-02-28T20:36:57Z",
+      "side": 1,
+      "message": "shouldn\u0027t we use \"getservbyname\" here, rather than hardcoding 53?",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3TM\u003d",
+        "filename": "slirp-android/socket.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 579,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2011-02-28T20:36:57Z",
+      "side": 1,
+      "message": "inconsistent indentation.\n\nextra space between \"int\" and \"low\"",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3TE\u003d",
+        "filename": "slirp-android/socket.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 584,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2011-02-28T20:36:57Z",
+      "side": 1,
+      "message": "remove unnecessary debugging information?",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3Sk\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3589,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2011-02-28T20:36:57Z",
+      "side": 1,
+      "message": "getservbyname?\n\nAlso, shouldn\u0027t port be a uint16_t, as in the previous code?",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3Sg\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3591,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2011-02-28T20:36:57Z",
+      "side": 1,
+      "message": "I thought strtol was preferred for new code, as atoi doesn\u0027t do any error checking...",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA+3//3Sc\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3610,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2011-02-28T20:36:57Z",
+      "side": 1,
+      "message": "shouldn\u0027t this be combined with the next line?",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
