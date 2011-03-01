@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA/H///2c\u003d",
+        "filename": "android/utils/stralloc.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2011-03-01T15:07:35Z",
+      "side": 1,
+      "message": "nit: ... and tabulation",
+      "revId": "5d9763b512cec8177b58b9102cd93342ad4db90f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
