@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA/H///3g\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 641,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2011-03-01T14:52:27Z",
+      "side": 1,
+      "message": "A leftover?",
+      "revId": "c480cca8d2007f5df62a7431beda310911b963e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
