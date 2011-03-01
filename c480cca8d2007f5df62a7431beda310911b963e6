@@ -16,6 +16,24 @@
       "revId": "c480cca8d2007f5df62a7431beda310911b963e6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///20\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 641,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-01T14:56:29Z",
+      "side": 1,
+      "message": "Actually no, it\u0027s pretty convenient to see what is really being mounted as NAND flash with the -verbose option.",
+      "parentUuid": "AAAA/H///3g\u003d",
+      "revId": "c480cca8d2007f5df62a7431beda310911b963e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
