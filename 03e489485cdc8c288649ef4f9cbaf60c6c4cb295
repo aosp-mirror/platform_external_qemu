@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA/H///r0\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3533,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:30:19Z",
+      "side": 1,
+      "message": "wow, that\u0027s going to end up in many calls to strlen() :-)\nI would prefer if you could use the following macro:\n\n#define STRLEN_CONST(str)  (sizeof(str)-1)\n\nWhich works for constant string literals and returns a constant instead.",
+      "revId": "03e489485cdc8c288649ef4f9cbaf60c6c4cb295",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
