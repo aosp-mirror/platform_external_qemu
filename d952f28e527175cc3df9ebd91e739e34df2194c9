@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA/H///uE\u003d",
+        "filename": "slirp-android/tcp_subr.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T11:41:56Z",
+      "side": 1,
+      "message": "wow, what a terrible failure, indeed! thanks.",
+      "revId": "d952f28e527175cc3df9ebd91e739e34df2194c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
