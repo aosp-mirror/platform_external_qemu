@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA/H///so\u003d",
+        "filename": "slirp-android/libslirp.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:26:57Z",
+      "side": 1,
+      "message": "I don\u0027t think this comment should be here at all, it describes an implementation detail.",
+      "parentUuid": "AAAA+3//3TU\u003d",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA+3//3TQ\u003d",
         "filename": "slirp-android/main.h",
         "patchSetId": 1
@@ -30,6 +48,41 @@
       "writtenOn": "2011-02-28T20:36:57Z",
       "side": 1,
       "message": "If these are always paired, wouldn\u0027t it be better to combine them into a struct?\n\nMy c isn\u0027t the best, but something like:\n\n  struct dns_rec {\n    uint32_t addr;\n    uint32_t port;\n  };\n\n  dns_req dns[DNS_ADDR_MAX];\n\n(sorry if this doesn\u0027t even compile, but hopefully you get the idea...)",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///sk\u003d",
+        "filename": "slirp-android/main.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:26:57Z",
+      "side": 1,
+      "message": "I\u0027m ok with using two parallel arrays, but rich, do as you want.",
+      "parentUuid": "AAAA+3//3TQ\u003d",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///sY\u003d",
+        "filename": "slirp-android/socket.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:26:57Z",
+      "side": 1,
+      "message": "I\u0027d really prefer if you could use the abstraction functions like sock_address_get_ip / _get_port. _get_ip() returns -1 if this is not a SOCKET_INET address, so you could use this too.",
       "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -70,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA/H///sQ\u003d",
+        "filename": "slirp-android/socket.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:26:57Z",
+      "side": 1,
+      "message": "I think had-coding 53 is pretty ok here. It\u0027s not going to change anytime soon. We could still use a DNS_PORT constant though, to make the code clearer about its intent.",
+      "parentUuid": "AAAA+3//3So\u003d",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA+3//3TM\u003d",
         "filename": "slirp-android/socket.c",
         "patchSetId": 1
@@ -81,6 +152,23 @@
       "writtenOn": "2011-02-28T20:36:57Z",
       "side": 1,
       "message": "inconsistent indentation.\n\nextra space between \"int\" and \"low\"",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///sM\u003d",
+        "filename": "slirp-android/socket.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 583,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:26:57Z",
+      "side": 1,
+      "message": "Interestingly, you\u0027re now redirecting any port connection from the guest to the server to the configured dns_port? Is this intentional? If so, a comment would be welcomed because it changes the semantics of emulation.\n\nOtherwise, I would recommend testing for addr_port \u003d\u003d 53 as well before deciding on changing addr_port.",
       "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -138,6 +226,24 @@
     },
     {
       "key": {
+        "uuid": "AAAA/H///sI\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3591,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:26:57Z",
+      "side": 1,
+      "message": "I\u0027d recomment using strtol() too, but I don\u0027t really see a security problem with using atoi() in this context.",
+      "parentUuid": "AAAA+3//3Sg\u003d",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA+3//3Sc\u003d",
         "filename": "vl-android.c",
         "patchSetId": 1
@@ -149,6 +255,24 @@
       "writtenOn": "2011-02-28T20:36:57Z",
       "side": 1,
       "message": "shouldn\u0027t this be combined with the next line?",
+      "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///sE\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3610,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:26:57Z",
+      "side": 1,
+      "message": "Agreed.",
+      "parentUuid": "AAAA+3//3Sc\u003d",
       "revId": "c41555ba83d0122f0c54199489d71add28cc06fd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
