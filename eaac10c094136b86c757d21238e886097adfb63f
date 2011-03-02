@@ -2,6 +2,74 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAA/H///tU\u003d",
+        "filename": "Makefile.target",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:19:08Z",
+      "side": 1,
+      "message": "a small typo here: compiple instead of compile.\n+ can you get rid of the trailing space?",
+      "revId": "eaac10c094136b86c757d21238e886097adfb63f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///tM\u003d",
+        "filename": "Makefile.target",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:19:08Z",
+      "side": 1,
+      "message": "I would recommend using $(QEMU_HOST_TAG)-$(EMULATOR_TARGET_ARCH),linux-x86-x86 instead.\n\nQEMU_HOST_TAG will be defined to \"windows\" when cross-compiling the Windows emulator binary on Linux, while HOST_TAG will still be \"linux\".\n\nOtherwise, this change is likely to break the Windows emulator build for the SDK. (You can test this with \"mm USE_MINGW\u003d1\" I believe)",
+      "revId": "eaac10c094136b86c757d21238e886097adfb63f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///tQ\u003d",
+        "filename": "Makefile.target",
+        "patchSetId": 1
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:19:08Z",
+      "side": 1,
+      "message": "My understanding is that this is necessary because on Linux, the i686-linux-glibc2.7-4.4.3 toolchain doesn\u0027t come with this header in sysroot.\n\nI\u0027ll have to update it then. Until then the change is good.",
+      "revId": "eaac10c094136b86c757d21238e886097adfb63f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///tA\u003d",
+        "filename": "hw/goldfish_device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:19:08Z",
+      "side": 1,
+      "message": "Please do not use leading tabs if possible, and respect the original 4-space identation.",
+      "revId": "eaac10c094136b86c757d21238e886097adfb63f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAA+3//3Uk\u003d",
         "filename": "hw/goldfish_device.c",
         "patchSetId": 1
@@ -13,6 +81,74 @@
       "writtenOn": "2011-02-28T16:59:33Z",
       "side": 1,
       "message": "I\u0027ll submit changes to this part because we miss the if(s-\u003ecurrent) for the cpu_memory_rw_debug().",
+      "revId": "eaac10c094136b86c757d21238e886097adfb63f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///s8\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:19:08Z",
+      "side": 1,
+      "message": "No tabs please, and 4-spaces indents.",
+      "revId": "eaac10c094136b86c757d21238e886097adfb63f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///s4\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:19:08Z",
+      "side": 1,
+      "message": "4-space indents please.",
+      "revId": "eaac10c094136b86c757d21238e886097adfb63f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///s0\u003d",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:19:08Z",
+      "side": 1,
+      "message": "same here (and below)",
+      "revId": "eaac10c094136b86c757d21238e886097adfb63f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///sw\u003d",
+        "filename": "hw/goldfish_tty.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-02T12:19:08Z",
+      "side": 1,
+      "message": "no tabs, please.",
       "revId": "eaac10c094136b86c757d21238e886097adfb63f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
