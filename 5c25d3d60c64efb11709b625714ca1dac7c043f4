@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA/H///WM\u003d",
+        "filename": "distrib/build-kernel.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1003360
+      },
+      "writtenOn": "2011-03-04T23:39:37Z",
+      "side": 1,
+      "message": "When building a 32-bit kernel on a 64-bit machine, I generally have to run this with\n\n: i386 make ARCH\u003dx86 \u003ccommand\u003e\n\nThis might not be required with the cross tool-chain.... not sure.",
+      "revId": "5c25d3d60c64efb11709b625714ca1dac7c043f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
