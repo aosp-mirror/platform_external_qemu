@@ -16,6 +16,24 @@
       "revId": "5c25d3d60c64efb11709b625714ca1dac7c043f4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA/H///HY\u003d",
+        "filename": "distrib/build-kernel.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-03-08T12:53:08Z",
+      "side": 1,
+      "message": "Apparently, this is not needed on Ubuntu 64-bit, so I just submitted the change. If you find a problem with this, let me know asap. Thanks",
+      "parentUuid": "AAAA/H///WM\u003d",
+      "revId": "5c25d3d60c64efb11709b625714ca1dac7c043f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
