@@ -1,4 +1,5 @@
 images/android_icon.o
 objs/*
 *.*~
+distrib/sdl-1.2.12/objs/*
 
