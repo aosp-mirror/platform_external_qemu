@@ -106,7 +106,7 @@ eventList_findCodeByName( EventList    list,
     if (namelen <= 0)
         return -1;
 
-    for ( ; list != NULL; list += 1 ) {
+    for ( ; list != NULL && list->name != NULL; list += 1 ) {
         if ( !memcmp(name, list->name, namelen) &&
              list->name[namelen] == 0 )
         {
