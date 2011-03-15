@@ -159,7 +159,12 @@ if [ $? != 0 ] ; then
             BUILD_TOP=$(cd $BUILD_TOP && pwd)
         fi
     fi
+    if [ x"$CROSSTOOLCHAIN" = x"arm-eabi-4.4.3" ]; then
+	# Google still has not managed to rebuild the toolchain so it works on Kubuntu 8.04 *sigh*
+	$BUILD_TOP/prebuilt/$HOST_TAG/toolchain/$CROSSTOOLCHAIN/bin/${CROSSPREFIX}gcc -v >/dev/null 2>&1 || CROSSTOOLCHAIN=arm-eabi-4.4.0
+    fi
     CROSSPREFIX=$BUILD_TOP/prebuilt/$HOST_TAG/toolchain/$CROSSTOOLCHAIN/bin/$CROSSPREFIX
+
     if [ "$BUILD_TOP" -a -f ${CROSSPREFIX}gcc ]; then
         echo "Auto-config: --cross=$CROSSPREFIX"
     else
