@@ -101,13 +101,15 @@ EOF
 fi
 
 # On Linux, try to use our 32-bit prebuilt toolchain to generate binaries
-# that are compatible with Ubuntu 8.04
+# that are compatible with Ubuntu 8.04, except if the toolchain isn't...
 if [ -z "$CC" -a -z "$OPTION_CC" -a "$HOST_OS" = linux -a "$OPTION_TRY_64" != "yes" ] ; then
+  if prebuilt/linux-x86/toolchain/i686-linux-glibc2.7-4.4.3/bin/i686-linux-gcc -v >/dev/null 2>&1; then
     HOST_CC=`dirname $0`/../../prebuilt/linux-x86/toolchain/i686-linux-glibc2.7-4.4.3/bin/i686-linux-gcc
     if [ -f "$HOST_CC" ] ; then
         echo "Using prebuilt 32-bit toolchain: $HOST_CC"
         CC="$HOST_CC"
     fi
+  fi
 fi
 
 echo "OPTION_CC='$OPTION_CC'"

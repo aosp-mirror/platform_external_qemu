@@ -94,6 +94,9 @@ ifneq ($(BUILD_STANDALONE_EMULATOR),true)
   # relevant headers and 32-bit libraries for audio (The host 64-bit Lucid
   # doesn't provide these anymore, only their 64-bit versions).
   ifeq ($(HOST_OS),linux)
+   ifneq (,$(findstring borken,$(shell prebuilt/linux-x86/toolchain/i686-linux-glibc2.7-4.4.3/bin/i686-linux-gcc -v >/dev/null 2>&1 || echo borken)))
+    # The nice custom toolchain itself doesn't run on Hardy!
+   else
     HOST_SDK_TOOLCHAIN_PREFIX := prebuilt/linux-x86/toolchain/i686-linux-glibc2.7-4.4.3/bin/i686-linux
     # Don't do anything if the toolchain is not there
     ifneq (,$(strip $(wildcard $(HOST_SDK_TOOLCHAIN_PREFIX)-gcc)))
@@ -101,6 +104,7 @@ ifneq ($(BUILD_STANDALONE_EMULATOR),true)
       MY_CXX := $(HOST_SDK_TOOLCHAIN_PREFIX)-g++
       MY_AR  := $(HOST_SDK_TOOLCHAIN_PREFIX)-ar
     endif # $(HOST_SDK_TOOLCHAIN_PREFIX)-gcc exists
+   endif # $(HOST_SDK_TOOLCHAIN_PREFIX)-gcc is usable
   endif # HOST_OS == linux
 
   ifneq ($(USE_CCACHE),)
