@@ -76,6 +76,7 @@ LOCAL_SRC_FILES += \
 	android/utils/dirscanner.c \
 	android/utils/filelock.c \
 	android/utils/ini.c \
+	android/utils/intmap.c \
 	android/utils/mapfile.c \
 	android/utils/misc.c \
 	android/utils/panic.c \
