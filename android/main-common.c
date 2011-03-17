@@ -972,7 +972,7 @@ coreconsole_io_func(void* opaque, int fd, unsigned events)
 {
     CoreConsole* cc = opaque;
     AsyncStatus  status;
-    status = asyncConsoleConnector_run(cc->connector, cc->io);
+    status = asyncConsoleConnector_run(cc->connector);
     if (status == ASYNC_COMPLETE) {
         cc->ok = 1;
     }

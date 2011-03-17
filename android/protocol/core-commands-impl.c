@@ -345,7 +345,7 @@ _coreCmdImpl_io_func(void* opaque, int fd, unsigned events)
     corecmd = (CoreCmdImpl*)opaque;
 
     // Read whatever is expected from the socket.
-    status = asyncReader_read(&corecmd->async_reader, &corecmd->io);
+    status = asyncReader_read(&corecmd->async_reader);
     switch (status) {
         case ASYNC_COMPLETE:
             switch (corecmd->cmd_state) {

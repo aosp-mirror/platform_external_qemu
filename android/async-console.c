@@ -45,10 +45,10 @@ enum {
 
 /* A helper function to prepare the line reader and switch to a new state */
 static AsyncStatus
-_acc_prepareLineReader(AsyncConsoleConnector* acc, LoopIo* io, int newState)
+_acc_prepareLineReader(AsyncConsoleConnector* acc, int newState)
 {
     acc->state = newState;
-    asyncLineReader_init(acc->lreader, acc->lbuff, sizeof(acc->lbuff), io);
+    asyncLineReader_init(acc->lreader, acc->lbuff, sizeof(acc->lbuff), acc->io);
     return ASYNC_NEED_MORE;
 }
 
@@ -59,13 +59,13 @@ asyncConsoleConnector_connect(AsyncConsoleConnector* acc,
 {
     acc->state = STATE_INITIAL;
     acc->address = address[0];
-    return asyncConsoleConnector_run(acc, io);
+    acc->io = io;
+    return asyncConsoleConnector_run(acc);
 }
 
 
 AsyncStatus
-asyncConsoleConnector_run(AsyncConsoleConnector* acc,
-                          LoopIo*                io)
+asyncConsoleConnector_run(AsyncConsoleConnector* acc)
 {
     AsyncStatus  status = ASYNC_NEED_MORE;
 
@@ -78,29 +78,29 @@ asyncConsoleConnector_run(AsyncConsoleConnector* acc,
 
         case STATE_INITIAL: /* initial connection attempt */
             acc->state = STATE_CONNECTING;
-            status = asyncConnector_init(acc->connector, &acc->address, io);
+            status = asyncConnector_init(acc->connector, &acc->address, acc->io);
             if (status == ASYNC_ERROR)
                 goto SET_ERROR;
 
             if (status == ASYNC_COMPLETE) { /* immediate connection */
-                _acc_prepareLineReader(acc, io, STATE_READ_BANNER_1);
+                _acc_prepareLineReader(acc, STATE_READ_BANNER_1);
                 continue;
             }
             break;
 
         case STATE_CONNECTING: /* still trying to connect */
-            status = asyncConnector_run(acc->connector, io);
+            status = asyncConnector_run(acc->connector);
             if (status == ASYNC_ERROR)
                 goto SET_ERROR;
 
             if (status == ASYNC_COMPLETE) {
-                _acc_prepareLineReader(acc, io, STATE_READ_BANNER_1);
+                _acc_prepareLineReader(acc, STATE_READ_BANNER_1);
                 continue;
             }
             break;
 
         case STATE_READ_BANNER_1: /* reading the first banner line */
-            status = asyncLineReader_read(acc->lreader, io);
+            status = asyncLineReader_read(acc->lreader);
             if (status == ASYNC_ERROR)
                 goto SET_ERROR;
 
@@ -112,13 +112,13 @@ asyncConsoleConnector_run(AsyncConsoleConnector* acc,
                     goto BAD_BANNER;
                 }
                 /* ok, fine, prepare for the next banner line then */
-                _acc_prepareLineReader(acc, io, STATE_READ_BANNER_2);
+                _acc_prepareLineReader(acc, STATE_READ_BANNER_2);
                 continue;
             }
             break;
 
         case STATE_READ_BANNER_2: /* reading the second banner line */
-            status = asyncLineReader_read(acc->lreader, io);
+            status = asyncLineReader_read(acc->lreader);
             if (status == ASYNC_ERROR)
                 goto SET_ERROR;
 

@@ -32,6 +32,13 @@ typedef enum {
     ASYNC_NEED_MORE       /* more data is needed, try again later */
 } AsyncStatus;
 
+/**************************************************************************
+ **************************************************************************
+ *****
+ *****  A S Y N C   R E A D E R
+ *****
+ *****/
+
 /* An AsyncReader makes it easier to read a given number of bytes into
  * a target buffer asynchronously. Usage is the following:
  *
@@ -44,6 +51,7 @@ typedef struct {
     uint8_t*  buffer;
     size_t    buffsize;
     size_t    pos;
+    LoopIo*   io;
 } AsyncReader;
 
 /* Setup an ASyncReader, by giving the address of the read buffer,
@@ -68,8 +76,14 @@ void asyncReader_init(AsyncReader* ar,
  *    ASYNC_NEED_MORE: If there was not enough incoming data to complete
  *                     the read (or if 'events' doesn't contain LOOP_IO_READ).
  */
-AsyncStatus  asyncReader_read(AsyncReader*  ar,
-                              LoopIo*       io);
+AsyncStatus  asyncReader_read(AsyncReader*  ar);
+
+/**************************************************************************
+ **************************************************************************
+ *****
+ *****  A S Y N C   W R I T E R
+ *****
+ *****/
 
 /* An AsyncWriter is the counterpart of an AsyncReader, but for writing
  * data to a file descriptor asynchronously.
@@ -78,6 +92,7 @@ typedef struct {
     const uint8_t* buffer;
     size_t         buffsize;
     size_t         pos;
+    LoopIo*        io;
 } AsyncWriter;
 
 /* Setup an ASyncWriter, by giving the address of the write buffer,
@@ -102,9 +117,15 @@ void asyncWriter_init(AsyncWriter*  aw,
  *    ASYNC_NEED_MORE: If not all bytes could be sent yet (or if 'events'
  *                     doesn't contain LOOP_IO_WRITE).
  */
-AsyncStatus asyncWriter_write(AsyncWriter* aw,
-                              LoopIo*      io);
+AsyncStatus asyncWriter_write(AsyncWriter* aw);
 
+
+/**************************************************************************
+ **************************************************************************
+ *****
+ *****  A S Y N C   L I N E   R E A D E R
+ *****
+ *****/
 
 /* An AsyncLineReader allows you to read one line of text asynchronously.
  * The biggest difference with AsyncReader is that you don't know the line
@@ -115,6 +136,7 @@ typedef struct {
     uint8_t*  buffer;
     size_t    buffsize;
     size_t    pos;
+    LoopIo*   io;
 } AsyncLineReader;
 
 /* Setup an AsyncLineReader to read at most 'buffsize' characters (bytes)
@@ -148,8 +170,7 @@ void asyncLineReader_init(AsyncLineReader* alr,
  *    ASYNC_NEED_MORE: If there was not enough incoming data (or events
  *                     does not contain LOOP_IO_READ).
  */
-AsyncStatus asyncLineReader_read(AsyncLineReader* alr,
-                                 LoopIo*          io);
+AsyncStatus asyncLineReader_read(AsyncLineReader* alr);
 
 /* Return a pointer to the NON-ZERO-TERMINATED line characters, if any.
  * If 'pLength" is not NULL, the function sets '*pLength' to the length
@@ -169,11 +190,19 @@ const char* asyncLineReader_getLineRaw(AsyncLineReader* alr, int *pLength);
  */
 const char* asyncLineReader_getLine(AsyncLineReader* alr);
 
+/**************************************************************************
+ **************************************************************************
+ *****
+ *****  A S Y N C   C O N N E C T O R
+ *****
+ *****/
+
 /* Asynchronous connection to a socket
  */
 typedef struct {
-    int  error;
-    int  state;
+    int     error;
+    int     state;
+    LoopIo* io;
 } AsyncConnector;
 
 AsyncStatus
@@ -182,6 +211,6 @@ asyncConnector_init(AsyncConnector*    ac,
                     LoopIo*            io);
 
 AsyncStatus
-asyncConnector_run(AsyncConnector* ac, LoopIo* io);
+asyncConnector_run(AsyncConnector* ac);
 
 #endif /* ANDROID_ASYNC_UTILS_H */

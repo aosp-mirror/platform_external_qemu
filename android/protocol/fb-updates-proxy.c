@@ -156,7 +156,7 @@ _proxyFb_io_write(ProxyFramebuffer* proxy_fb)
         FBUpdateNotify* current_update = proxy_fb->fb_update_head;
         // Lets continue writing of the current notification.
         const AsyncStatus status =
-            asyncWriter_write(&proxy_fb->fb_update_writer, &proxy_fb->io);
+            asyncWriter_write(&proxy_fb->fb_update_writer);
         switch (status) {
             case ASYNC_COMPLETE:
                 // Done with the current update. Move on to the next one.
@@ -202,7 +202,7 @@ _proxyFb_io_read(ProxyFramebuffer* proxy_fb)
     // Read the request header.
     DisplaySurface* dsu;
     const AsyncStatus status =
-        asyncReader_read(&proxy_fb->fb_req_reader, &proxy_fb->io);
+        asyncReader_read(&proxy_fb->fb_req_reader);
     switch (status) {
         case ASYNC_COMPLETE:
             // Request header is received
@@ -320,7 +320,7 @@ proxyFb_update(void* opaque, int x, int y, int w, int h)
     asyncWriter_init(&proxy_fb->fb_update_writer,
                      &proxy_fb->fb_update_head->message,
                      proxy_fb->fb_update_head->message_size, &proxy_fb->io);
-    status = asyncWriter_write(&proxy_fb->fb_update_writer, &proxy_fb->io);
+    status = asyncWriter_write(&proxy_fb->fb_update_writer);
     switch (status) {
         case ASYNC_COMPLETE:
             fbupdatenotify_delete(descr);

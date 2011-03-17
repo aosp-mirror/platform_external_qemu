@@ -90,7 +90,7 @@ _userEventsImpl_io_func(void* opaque, int fd, unsigned events)
 
     ueimpl = (UserEventsImpl*)opaque;
     // Read whatever is expected from the socket.
-    status = asyncReader_read(&ueimpl->user_events_reader, &ueimpl->io);
+    status = asyncReader_read(&ueimpl->user_events_reader);
 
 
     switch (status) {
