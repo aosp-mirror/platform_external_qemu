@@ -532,7 +532,7 @@ qemud_serial_send( QemudSerial*    s,
     }
 
     /* packetize the payload for the serial MTU */
-    while (len > 0) 
+    while (len > 0)
     {
         avail = len;
         if (avail > MAX_SERIAL_PAYLOAD)
@@ -600,6 +600,7 @@ struct QemudClient {
     /* framing support */
     int               framing;
     ABool             need_header;
+    ABool             closing;
     QemudSink         header[1];
     uint8_t           header0[FRAME_HEADER_SIZE];
     QemudSink         payload[1];
@@ -661,7 +662,7 @@ qemud_client_recv( void*  opaque, uint8_t*  msg, int  msglen )
 
         if (len >= 0 && msglen == len + FRAME_HEADER_SIZE) {
             if (c->clie_recv)
-                c->clie_recv( c->clie_opaque, 
+                c->clie_recv( c->clie_opaque,
                               msg+FRAME_HEADER_SIZE,
                               msglen-FRAME_HEADER_SIZE, c );
             return;
@@ -723,6 +724,11 @@ static void
 qemud_client_disconnect( void*  opaque )
 {
     QemudClient*  c = opaque;
+
+    if (c->closing) {  /* recursive call, exit immediately */
+        return;
+    }
+    c->closing = 1;
 
     /* remove from current list */
     qemud_client_remove(c);

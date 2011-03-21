@@ -90,12 +90,12 @@ typedef int (*QemudClientLoad) ( QEMUFile*  f, QemudClient*  client, void*  opaq
  * (see below).
  */
 extern QemudClient*  qemud_client_new( QemudService*     service,
-                                       int               channel_id,
-                                       void*             clie_opaque,
-                                       QemudClientRecv   clie_recv,
-                                       QemudClientClose  clie_close,
-                                       QemudClientSave   clie_save,
-                                       QemudClientLoad   clie_load );
+                                        int               channel_id,
+                                        void*             clie_opaque,
+                                        QemudClientRecv   clie_recv,
+                                        QemudClientClose  clie_close,
+                                        QemudClientSave   clie_save,
+                                        QemudClientLoad   clie_load );
 
 /* Enable framing on a given client channel.
  */
