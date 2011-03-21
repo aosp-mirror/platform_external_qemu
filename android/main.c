@@ -1296,5 +1296,21 @@ int main(int argc, char **argv)
     /* Setup SDL UI just before calling the code */
     init_sdl_ui(skinConfig, skinPath, opts);
 
+    /* HACK: Do not merge this back to master, the following should
+     *        only be used for the tools_r11 emulator binary.
+     */
+#ifndef CONFIG_STANDALONE_CORE
+    {
+        char temp[64];
+
+        snprintf(temp, sizeof temp, "width=%d,height=%d,bpp=16",
+                qemulator_get_lcd_width(),
+                qemulator_get_lcd_height());
+
+        args[n++] = "-android-gui";
+        args[n++] = strdup(temp);
+    }
+#endif
+
     return qemu_main(n, args);
 }
