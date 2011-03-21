@@ -69,6 +69,7 @@ HW_SOURCES := \
     goldfish_mmc.c   \
     goldfish_memlog.c \
     goldfish_nand.c \
+    goldfish_pipe.c \
     goldfish_tty.c \
     msmouse.c \
     pci.c \
