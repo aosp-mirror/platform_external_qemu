@@ -35,6 +35,7 @@ struct kvm_run;
 
 /* external API */
 
+void try_kvm();
 int kvm_init(int smp_cpus);
 
 int kvm_init_vcpu(CPUState *env);

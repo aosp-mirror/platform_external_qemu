@@ -50,7 +50,7 @@ typedef struct KVMSlot
 
 typedef struct kvm_dirty_log KVMDirtyLog;
 
-int kvm_allowed = 0;
+int kvm_allowed = 1;
 
 struct KVMState
 {
@@ -400,6 +400,20 @@ int kvm_check_extension(KVMState *s, unsigned int extension)
 static void kvm_reset_vcpus(void *opaque)
 {
     kvm_sync_vcpus();
+}
+
+void try_kvm()
+{
+    int fd = open("/dev/kvm", O_RDWR);
+    if (fd == -1) {
+        fprintf(stderr,"Could not access KVM kernel module: %m\n");
+        kvm_allowed = 0;
+    } else {
+        close(fd);
+#ifdef CONFIG_KQEMU
+        kqemu_allowed = 0;
+#endif
+    }
 }
 
 int kvm_init(int smp_cpus)

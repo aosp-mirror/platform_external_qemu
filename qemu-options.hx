@@ -1348,13 +1348,13 @@ KQEMU support is enabled when compiling.
 ETEXI
 
 #ifdef CONFIG_KVM
-DEF("enable-kvm", 0, QEMU_OPTION_enable_kvm, \
-    "-enable-kvm     enable KVM full virtualization support\n")
+DEF("disable-kvm", 0, QEMU_OPTION_disable_kvm, \
+    "-disable-kvm     disable KVM full virtualization support\n")
 #endif
 STEXI
-@item -enable-kvm
-Enable KVM full virtualization support. This option is only available
-if KVM support is enabled when compiling.
+@item -disable-kvm
+Disable KVM full virtualization support. This option is only to disable
+KVM support when compiling.
 ETEXI
 
 #ifdef CONFIG_XEN

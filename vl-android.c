@@ -4522,11 +4522,8 @@ int main(int argc, char **argv, char **envp)
 #endif
 #ifdef TARGET_I386
 #ifdef CONFIG_KVM
-            case QEMU_OPTION_enable_kvm:
-                kvm_allowed = 1;
-#ifdef CONFIG_KQEMU
-                kqemu_allowed = 0;
-#endif
+            case QEMU_OPTION_disable_kvm:
+                kvm_allowed = 0;
                 break;
 #endif
 #endif  /* TARGET_I386 */
@@ -4923,6 +4920,11 @@ int main(int argc, char **argv, char **envp)
             }
         }
     }
+
+#ifdef CONFIG_KVM
+    if (kvm_allowed)
+        try_kvm();
+#endif
 
     /* Initialize character map. */
     if (android_charmap_setup(op_charmap_file)) {
@@ -5560,7 +5562,8 @@ int main(int argc, char **argv, char **envp)
 
         ret = kvm_init(smp_cpus);
         if (ret < 0) {
-            PANIC("failed to initialize KVM");
+            fprintf(stderr,
+                    "failed to initialize KVM and fallback to software virtualization\n");
         }
     }
 
