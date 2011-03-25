@@ -202,6 +202,19 @@ include $(LOCAL_PATH)/Makefile.target
 ##############################################################################
 ##############################################################################
 ###
+###  emulator: LAUNCHER FOR TARGET-SPECIFIC EMULATOR
+###
+###
+$(call start-emulator-program, emulator)
+
+LOCAL_SRC_FILES := android/main-emulator.c
+LOCAL_STATIC_LIBRARIES := emulator-common
+
+$(call end-emulator-program)
+
+##############################################################################
+##############################################################################
+###
 ###  emulator-ui: UI FRONT-END PROGRAM
 ###
 ###

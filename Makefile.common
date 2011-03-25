@@ -69,6 +69,7 @@ LOCAL_SRC_FILES += \
 	android/keycode-array.c \
 	android/avd/hw-config.c \
 	android/avd/info.c \
+	android/avd/util.c \
 	android/sync-utils.c \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
