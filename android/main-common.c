@@ -446,9 +446,9 @@ FOUND_SKIN:
     if (n == NULL) {
         n = aconfig_find(root, "parts");
         if (n != NULL) {
-            n = aconfig_find(root, "device");
+            n = aconfig_find(n, "device");
             if (n != NULL) {
-                n = aconfig_find(root, "display");
+                n = aconfig_find(n, "display");
             }
         }
     }
