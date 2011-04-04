@@ -888,6 +888,13 @@ amodem_find_call( AModem  modem, int  id )
     return NULL;
 }
 
+int
+amodem_send_stk_unsol_proactive_command( AModem  modem, const char* stkCmdID )
+{
+   amodem_unsol( modem, "+STK: %s\r",
+                          stkCmdID);
+}
+
 static void
 amodem_send_calls_update( AModem  modem )
 {

@@ -1278,6 +1278,17 @@ gsm_check_number( char*  args )
 }
 
 static int
+do_send_stkCmd( ControlClient  client, char*  args  )
+{
+    if (!args) {
+        control_write( client, "KO: missing argument, try 'STK CMD <cmdID>'\r\n" );
+        return -1;
+    }
+    amodem_send_stk_unsol_proactive_command( android_modem, args );
+    return 0;
+}
+
+static int
 do_gsm_call( ControlClient  client, char*  args )
 {
     /* check that we have a phone number made of digits */
@@ -1560,6 +1571,10 @@ static const CommandDefRec  gsm_commands[] =
     "rssi range is 0..31 and 99 for unknown\r\n"
     "ber range is 0..7 percent and 99 for unknown\r\n",
     NULL, do_gsm_signal, NULL },
+
+    { "stk", "issue stk proactive command",
+    "'send stkcmd' send stk proactive command through GSM emulation\r\n", NULL,
+    do_send_stkCmd, NULL },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };

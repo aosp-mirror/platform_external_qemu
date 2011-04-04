@@ -163,6 +163,7 @@ extern ACall  amodem_find_call_by_number( AModem  modem, const char*  number );
 extern int    amodem_add_inbound_call( AModem  modem, const char*  number );
 extern int    amodem_update_call( AModem  modem, const char*  number, ACallState  state );
 extern int    amodem_disconnect_call( AModem  modem, const char*  number );
+extern int    amodem_send_stk_unsol_proactive_command( AModem  modem, const char*  number );
 
 /**/
 
