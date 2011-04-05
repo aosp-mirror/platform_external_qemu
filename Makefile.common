@@ -375,6 +375,7 @@ CORE_MISC_SOURCES = \
     android/hw-control.c \
     android/hw-sensors.c \
     android/hw-qemud.c \
+    android/hw-qemud-pipe-net.c \
     android/looper-qemu.c \
     android/qemu-setup.c \
     android/snapshot.c \
