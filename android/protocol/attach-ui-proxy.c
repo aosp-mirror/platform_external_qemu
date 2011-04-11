@@ -67,7 +67,7 @@ _attachUiProxy_io_func(void* opaque, int fd, unsigned events)
 
     // Try to read
     asyncReader_init(&reader, read_buf, sizeof(read_buf), &uicmd->io);
-    status = asyncReader_read(&reader, &uicmd->io);
+    status = asyncReader_read(&reader);
     // We expect only error status here.
     if (status != ASYNC_ERROR) {
         derror("Unexpected read status %d in _attachUiProxy_io_func\n", status);

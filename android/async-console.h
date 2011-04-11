@@ -56,8 +56,7 @@ asyncConsoleConnector_connect(AsyncConsoleConnector* acc,
  *     Not enough data was exchanged, call this function later.
  */
 AsyncStatus
-asyncConsoleConnector_run(AsyncConsoleConnector* acc,
-                          LoopIo*                io);
+asyncConsoleConnector_run(AsyncConsoleConnector* acc);
 
 
 #endif /* ANDROID_ASYNC_CONSOLE_H */

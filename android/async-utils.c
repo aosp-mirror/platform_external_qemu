@@ -30,8 +30,7 @@ asyncReader_init(AsyncReader* ar,
 }
 
 AsyncStatus
-asyncReader_read(AsyncReader*  ar,
-                 LoopIo*       io)
+asyncReader_read(AsyncReader*  ar)
 {
     int  ret;
 
@@ -40,7 +39,7 @@ asyncReader_read(AsyncReader*  ar,
     }
 
     do {
-        ret = socket_recv(io->fd, ar->buffer + ar->pos, ar->buffsize - ar->pos);
+        ret = socket_recv(ar->io->fd, ar->buffer + ar->pos, ar->buffsize - ar->pos);
         if (ret == 0) {
             /* disconnection ! */
             errno = ECONNRESET;
@@ -50,7 +49,7 @@ asyncReader_read(AsyncReader*  ar,
             if (errno == EINTR) /* loop on EINTR */
                 continue;
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
-                loopIo_wantRead(io);
+                loopIo_wantRead(ar->io);
                 return ASYNC_NEED_MORE;
             }
             return ASYNC_ERROR;
@@ -59,7 +58,7 @@ asyncReader_read(AsyncReader*  ar,
 
     } while (ar->pos < ar->buffsize);
 
-    loopIo_dontWantRead(io);
+    loopIo_dontWantRead(ar->io);
     return ASYNC_COMPLETE;
 }
 
@@ -77,8 +76,7 @@ asyncWriter_init(AsyncWriter*  aw,
 }
 
 AsyncStatus
-asyncWriter_write(AsyncWriter* aw,
-                  LoopIo*      io)
+asyncWriter_write(AsyncWriter* aw)
 {
     int  ret;
 
@@ -87,7 +85,7 @@ asyncWriter_write(AsyncWriter* aw,
     }
 
     do {
-        ret = socket_send(io->fd, aw->buffer + aw->pos, aw->buffsize - aw->pos);
+        ret = socket_send(aw->io->fd, aw->buffer + aw->pos, aw->buffsize - aw->pos);
         if (ret == 0) {
             /* disconnection ! */
             errno = ECONNRESET;
@@ -105,7 +103,7 @@ asyncWriter_write(AsyncWriter* aw,
 
     } while (aw->pos < aw->buffsize);
 
-    loopIo_dontWantWrite(io);
+    loopIo_dontWantWrite(aw->io);
     return ASYNC_COMPLETE;
 }
 
@@ -119,13 +117,13 @@ asyncLineReader_init(AsyncLineReader* alr,
     alr->buffer   = buffer;
     alr->buffsize = buffsize;
     alr->pos      = 0;
+    alr->io       = io;
     if (buffsize > 0)
         loopIo_wantRead(io);
 }
 
 AsyncStatus
-asyncLineReader_read(AsyncLineReader* alr,
-                     LoopIo*          io)
+asyncLineReader_read(AsyncLineReader* alr)
 {
     int  ret;
 
@@ -136,7 +134,7 @@ asyncLineReader_read(AsyncLineReader* alr,
 
     do {
         char ch;
-        ret = socket_recv(io->fd, &ch, 1);
+        ret = socket_recv(alr->io->fd, &ch, 1);
         if (ret == 0) {
             /* disconnection ! */
             errno = ECONNRESET;
@@ -146,20 +144,20 @@ asyncLineReader_read(AsyncLineReader* alr,
             if (errno == EINTR) /* loop on EINTR */
                 continue;
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
-                loopIo_wantRead(io);
+                loopIo_wantRead(alr->io);
                 return ASYNC_NEED_MORE;
             }
             return ASYNC_ERROR;
         }
         alr->buffer[alr->pos++] = (uint8_t)ch;
         if (ch == '\n') {
-            loopIo_dontWantRead(io);
+            loopIo_dontWantRead(alr->io);
             return ASYNC_COMPLETE;
         }
     } while (alr->pos < alr->buffsize);
 
     /* Not enough room in the input buffer!*/
-    loopIo_dontWantRead(io);
+    loopIo_dontWantRead(alr->io);
     errno = ENOMEM;
     return ASYNC_ERROR;
 }
@@ -216,6 +214,7 @@ asyncConnector_init(AsyncConnector*    ac,
 {
     int ret;
     ac->error = 0;
+    ac->io    = io;
     ret = socket_connect(io->fd, address);
     if (ret == 0) {
         ac->state = CONNECT_COMPLETED;
@@ -235,7 +234,7 @@ asyncConnector_init(AsyncConnector*    ac,
 }
 
 AsyncStatus
-asyncConnector_run(AsyncConnector* ac, LoopIo* io)
+asyncConnector_run(AsyncConnector* ac)
 {
     switch (ac->state) {
     case CONNECT_ERROR:
@@ -243,7 +242,7 @@ asyncConnector_run(AsyncConnector* ac, LoopIo* io)
         return ASYNC_ERROR;
 
     case CONNECT_CONNECTING:
-        loopIo_dontWantWrite(io);
+        loopIo_dontWantWrite(ac->io);
         /* We need to read the socket error to determine if
             * the connection was really succesful or not. This
             * is optional, because in case of error a future
@@ -251,7 +250,7 @@ asyncConnector_run(AsyncConnector* ac, LoopIo* io)
             * allows us to get a better error value as soon as
             * possible.
             */
-        ac->error = socket_get_error(io->fd);
+        ac->error = socket_get_error(ac->io->fd);
         if (ac->error == 0) {
             ac->state = CONNECT_COMPLETED;
             return ASYNC_COMPLETE;
