@@ -52,6 +52,7 @@
 #include "modem_driver.h"
 #include "android/gps.h"
 #include "android/hw-qemud.h"
+#include "android/hw-qemud-pipe.h"
 #include "android/hw-kmsg.h"
 #include "android/charmap.h"
 #include "android/globals.h"
@@ -5170,6 +5171,9 @@ int main(int argc, char **argv, char **envp)
                     android_op_audio);
         }
     }
+
+    /* Initialize OpenGLES emulation */
+    android_hw_opengles_init();
 
     if (android_op_cpu_delay) {
         char*   end;
