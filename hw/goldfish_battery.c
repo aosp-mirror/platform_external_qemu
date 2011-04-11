@@ -203,8 +203,8 @@ void goldfish_battery_set_prop(int ac, int property, int value)
 
 void goldfish_battery_display(void (* callback)(void *data, const char* string), void *data)
 {
-    char    buffer[100];
-    char*   value;
+    char          buffer[100];
+    const char*   value;
 
     sprintf(buffer, "AC: %s\r\n", (battery_state->ac_online ? "online" : "offline"));
     callback(data, buffer);
