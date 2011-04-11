@@ -21,11 +21,13 @@
 #include "arm-misc.h"
 #include "console.h"
 #include "blockdev.h"
+#include "goldfish_pipe.h"
 #ifdef CONFIG_MEMCHECK
 #include "memcheck/memcheck_api.h"
 #endif  // CONFIG_MEMCHECK
 
 #include "android/utils/debug.h"
+#include "android/hw-qemud-pipe.h"
 
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 
@@ -156,6 +158,8 @@ static void android_arm_init_(ram_addr_t ram_size,
         D("Trace file name is not set\n");
     }
 #endif
+
+    init_qemud_pipes();
 
 #if TEST_SWITCH
     {
