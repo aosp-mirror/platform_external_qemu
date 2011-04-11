@@ -146,6 +146,7 @@ static void android_arm_init_(ram_addr_t ram_size,
 #ifdef CONFIG_MEMCHECK
         || memcheck_enabled
 #endif  // CONFIG_MEMCHECK
+        || 1  /* XXX: ALWAYS AVAILABLE FOR QEMUD PIPES */
        ) {
         trace_dev_init();
     }
