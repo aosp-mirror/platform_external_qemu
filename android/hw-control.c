@@ -23,6 +23,7 @@
 #include "android/hw-control.h"
 #include "cbuffer.h"
 #include "android/hw-qemud.h"
+#include "android/globals.h"
 #include "android/utils/misc.h"
 #include "android/utils/debug.h"
 #include "qemu-char.h"
@@ -98,7 +99,7 @@ hw_control_do_query( HwControl*  h,
 
     q = if_starts_with( query, querylen, "power:light:brightness:" );
     if (q != NULL) {
-        if (h->client_funcs.light_brightness) {
+        if (h->client_funcs.light_brightness && android_hw->hw_lcd_backlight) {
             char*  qq = strchr((const char*)q, ':');
             int    value;
             if (qq == NULL) {

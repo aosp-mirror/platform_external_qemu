@@ -185,6 +185,13 @@ HWCFG_INT(
   "Abstracted LCD density",
   "Must be one of 120, 160 or 240. A value used to roughly describe the density of the LCD screen for automatic resource/asset selection.")
 
+HWCFG_BOOL(
+  hw_lcd_backlight,
+  "hw.lcd.backlight",
+  "yes",
+  "LCD backlight",
+  "Enable/Disable LCD backlight simulation,yes-enabled,no-disabled.")
+
 HWCFG_INT(
   vm_heapSize,
   "vm.heapSize",
