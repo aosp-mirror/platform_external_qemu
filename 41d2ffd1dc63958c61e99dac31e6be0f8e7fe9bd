@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA/n//+iA\u003d",
+        "filename": "android/avd/hardware-properties.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-04-14T15:57:18Z",
+      "side": 1,
+      "message": "I would prefer if we keep \"yes\" as the default, since this is the current behaviour.",
+      "revId": "41d2ffd1dc63958c61e99dac31e6be0f8e7fe9bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
