@@ -3522,6 +3522,7 @@ static void sighandler_setup(void)
 #endif
 
 #ifdef _WIN32
+#define SDK_SUFFIX "/lib/pc-bios"
 /* Look for support files in the same directory as the executable.  */
 static char *find_datadir(const char *argv0)
 {
@@ -3539,6 +3540,7 @@ static char *find_datadir(const char *argv0)
     while (p != buf && *p != '\\')
         p--;
     *p = 0;
+    strcat(buf, SDK_SUFFIX);
     if (access(buf, R_OK) == 0) {
         return qemu_strdup(buf);
     }
