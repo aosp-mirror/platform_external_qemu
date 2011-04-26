@@ -27,7 +27,6 @@
 #endif  // CONFIG_MEMCHECK
 
 #include "android/utils/debug.h"
-#include "android/hw-qemud-pipe.h"
 
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 
@@ -148,7 +147,6 @@ static void android_arm_init_(ram_addr_t ram_size,
 #ifdef CONFIG_MEMCHECK
         || memcheck_enabled
 #endif  // CONFIG_MEMCHECK
-        || 1  /* XXX: ALWAYS AVAILABLE FOR QEMUD PIPES */
        ) {
         trace_dev_init();
     }
@@ -159,7 +157,7 @@ static void android_arm_init_(ram_addr_t ram_size,
     }
 #endif
 
-    init_qemud_pipes();
+    pipe_dev_init();
 
 #if TEST_SWITCH
     {
