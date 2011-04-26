@@ -13,65 +13,44 @@
 #define _HW_GOLDFISH_PIPE_H
 
 #include <stdint.h>
-#include "android/hw-qemud.h"
+#include "hw/hw.h"
 
-/* The following functions should called from hw/goldfish_trace.c and are
- * used to implement QEMUD 'fast-pipes' in the Android emulator.
+/* TECHNICAL NOTE:
+ *
+ * A goldfish pipe is a very fast communication channel between the guest
+ * system and the emulator program.
+ *
+ * To open a new pipe to the emulator, a guest client will do the following:
+ *
+ *     fd = open("/dev/qemu_pipe", O_RDWR);
+ *     char  invite[64];
+ *     snprintf(invite, sizeof invite, "%s", pipeName);
+ *     ret = write(fd, invite, strlen(invite));
+ *
+ *     if (ret < 0) {
+ *         // something bad happened, see errno
+ *     }
+ *
+ *     now read()/write() to communicate with <pipeName> service in the
+ *     emulator.
+ *
+ * This header provides the interface used by pipe services in the emulator
+ * to receive new client connection and deal with them.
+ *
+ *
+ * 1/ Call goldfish_pipe_add_type() to register a new pipe service by name.
+ *    This must provide a pointer to a series of functions that will be called
+ *    during normal pipe operations.
+ *
+ * 2/ When a client connects to the service, the 'init' callback will be called
+ *    to create a new service-specific client identifier (which must returned
+ *    by the function).
+ *
+ * 3/ Call goldfish_pipe_close() to force the closure of a given pipe.
+ *
+ * 4/ Call goldfish_pipe_signal() to signal a change of state to the pipe.
+ *
  */
-extern void      goldfish_pipe_thread_death(int  tid);
-extern void      goldfish_pipe_write(int tid, int offset, uint32_t value);
-extern uint32_t  goldfish_pipe_read(int tid, int offset);
-
-/* The following definitions are used to define a "pipe handler" type.
- * Each pipe handler manages a given, named pipe type, and must provide
- * a few callbacks that will be used at appropriate times:
- *
- * - init ::
- *       is called when a guest client has connected to a given
- *       pipe. The function should return an opaque pointer that
- *       will be passed as the first parameter to other callbacks.
- *
- *       Note: pipeOpaque is the value that was passed to
- *             goldfish_pipe_add_type() to register the pipe handler.
- *
- * - close ::
- *       is called when the pipe is closed.(either from the guest, or
- *       when the handler itself calls qemud_client_close() on the
- *       corresponding QemudClient object passed to init()).
- *
- * - sendBuffers ::
- *       is called when the guest is sending data through the pipe. This
- *       callback receives a list of buffer descriptors that indicate
- *       where the data is located in memory.
- *
- *       Must return 0 on success, or -1 on failure, with errno of:
- *
- *           ENOMEM -> indicates that the message is too large
- *           EAGAIN -> indicates that the handler is not ready
- *                     to accept the message yet.
- *
- * - recvBuffers ::
- *       Is called when the guest wants to receive data from the pipe.
- *       The caller provides a list of memory buffers to put the data into.
- *
- *       Must return the size of the incoming data on success, or -1
- *       on error, with errno of:
- *
- *           ENOMEM -> buffer too small to receive the message
- *           EAGAIN -> no incoming data yet
- *
- * - wakeOn ::
- *       is called to indicate that the guest wants to be waked when the
- *       pipe becomes able to either receive data from the guest, or send it
- *       new incoming data. It is the responsability of the pipe handler to
- *       signal the corresponding events by sending a single byte containing
- *       QEMUD_PIPE_WAKE_XXX bit flags through qemud_client_send() to do so.
- */
-
-enum {
-    QEMUD_PIPE_WAKE_ON_SEND = (1 << 0),
-    QEMUD_PIPE_WAKE_ON_RECV = (1 << 1),
-};
 
 /* Buffer descriptor for sendBuffers() and recvBuffers() callbacks */
 typedef struct GoldfishPipeBuffer {
@@ -81,18 +60,112 @@ typedef struct GoldfishPipeBuffer {
 
 /* Pipe handler funcs */
 typedef struct {
-    void*        (*init)( QemudClient*  client, void* pipeOpaque );
-    void         (*close)( void* opaque );
-    int          (*sendBuffers)( void* opaque, const GoldfishPipeBuffer*  buffers, int numBuffers );
-    int          (*recvBuffers)( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers );
+    /* Create new client connection, 'hwpipe' must be passed to other
+     * goldfish_pipe_xxx functions, while the returned value will be passed
+     * to other callbacks (e.g. close). 'pipeOpaque' is the value passed
+     * to goldfish_pipe_add_type() when registering a given pipe service.
+     */
+    void*        (*init)( void* hwpipe, void* pipeOpaque, const char* args );
+
+    /* Called when the guest kernel has finally closed a pipe connection.
+     * This is the only place where you can release/free the client connection.
+     * You should never invoke this callback directly. Call goldfish_pipe_close()
+     * instead.
+     */
+    void         (*close)( void* pipe );
+
+    /* Called when the guest is write()-ing to the pipe. Should return the
+     * number of bytes transfered, 0 for EOF status, or a negative error
+     * value otherwise, including PIPE_ERROR_AGAIN to indicate that the
+     * emulator is not ready to receive data yet.
+     */
+    int          (*sendBuffers)( void* pipe, const GoldfishPipeBuffer*  buffers, int numBuffers );
+
+    /* Same as sendBuffers when the guest is read()-ing from the pipe. */
+    int          (*recvBuffers)( void* pipe, GoldfishPipeBuffer* buffers, int numBuffers );
+
+    /* Called when guest wants to poll the read/write status for the pipe.
+     * Should return a combination of PIPE_WAKE_XXX flags.
+     */
+    unsigned     (*poll)( void* pipe );
+
+    /* Called to signal that the guest wants to be woken when the set of
+     * PIPE_WAKE_XXX bit-flags in 'flags' occur. When the condition occurs,
+     * then the pipe implementation shall call goldfish_pipe_wake().
+     */
     void         (*wakeOn)( void* opaque, int flags );
-} QemudPipeHandlerFuncs;
+} GoldfishPipeFuncs;
 
 /* Register a new pipe handler type. 'pipeOpaque' is passed directly
  * to 'init() when a new pipe is connected to.
  */
-extern void  goldfish_pipe_add_type(const char*                   pipeName,
-                                     void*                         pipeOpaque,
-                                     const QemudPipeHandlerFuncs*  pipeFuncs );
+extern void  goldfish_pipe_add_type(const char*               pipeName,
+                                     void*                     pipeOpaque,
+                                     const GoldfishPipeFuncs*  pipeFuncs );
+
+/* This tells the guest system that we want to close the pipe and that
+ * further attempts to read or write to it will fail. This will not
+ * necessarily call the 'close' callback immediately though.
+ *
+ * This will also wake-up any blocked guest threads waiting for i/o.
+ */
+extern void goldfish_pipe_close( void* hwpipe );
+
+/* Signal that the pipe can be woken up. 'flags' must be a combination of
+ * PIPE_WAKE_READ and PIPE_WAKE_WRITE.
+ */
+extern void goldfish_pipe_wake( void* hwpipe, unsigned flags );
+
+/* The following definitions must match those under:
+ *
+ *    $KERNEL/drivers/misc/qemupipe/qemu_pipe.c
+ *
+ * Where $KERNEL points to the android-goldfish-2.6.xx branch on:
+ *
+ *     android.git.kernel.org/kernel/qemu.git.
+ */
+
+/* pipe device registers */
+#define PIPE_REG_COMMAND            0x00  /* write: value = command */
+#define PIPE_REG_STATUS             0x04  /* read */
+#define PIPE_REG_CHANNEL            0x08  /* read/write: channel id */
+#define PIPE_REG_SIZE               0x0c  /* read/write: buffer size */
+#define PIPE_REG_ADDRESS            0x10  /* write: physical address */
+#define PIPE_REG_WAKES              0x14  /* read: wake flags */
+
+/* list of commands for PIPE_REG_COMMAND */
+#define PIPE_CMD_OPEN               1  /* open new channel */
+#define PIPE_CMD_CLOSE              2  /* close channel (from guest) */
+#define PIPE_CMD_POLL               3  /* poll read/write status */
+
+/* List of bitflags returned in status of CMD_POLL command */
+#define PIPE_POLL_IN   (1 << 0)
+#define PIPE_POLL_OUT  (1 << 1)
+#define PIPE_POLL_HUP  (1 << 2)
+
+/* The following commands are related to write operations */
+#define PIPE_CMD_WRITE_BUFFER       4  /* send a user buffer to the emulator */
+#define PIPE_CMD_WAKE_ON_WRITE      5  /* tell the emulator to wake us when writing is possible */
+
+/* The following commands are related to read operations, they must be
+ * listed in the same order than the corresponding write ones, since we
+ * will use (CMD_READ_BUFFER - CMD_WRITE_BUFFER) as a special offset
+ * in qemu_pipe_read_write() below.
+ */
+#define PIPE_CMD_READ_BUFFER        6  /* receive a page-contained buffer from the emulator */
+#define PIPE_CMD_WAKE_ON_READ       7  /* tell the emulator to wake us when reading is possible */
+
+/* Possible status values used to signal errors - see qemu_pipe_error_convert */
+#define PIPE_ERROR_INVAL       -1
+#define PIPE_ERROR_AGAIN       -2
+#define PIPE_ERROR_NOMEM       -3
+#define PIPE_ERROR_IO          -4
+
+/* Bit-flags used to signal events from the emulator */
+#define PIPE_WAKE_CLOSED       (1 << 0)  /* emulator closed pipe */
+#define PIPE_WAKE_READ         (1 << 1)  /* pipe can now be read from */
+#define PIPE_WAKE_WRITE        (1 << 2)  /* pipe can now be written to */
+
+void pipe_dev_init(void);
 
 #endif /* _HW_GOLDFISH_PIPE_H */

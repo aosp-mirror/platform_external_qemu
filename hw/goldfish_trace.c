@@ -15,7 +15,6 @@
  */
 #include "qemu_file.h"
 #include "goldfish_trace.h"
-#include "goldfish_pipe.h"
 #include "sysemu.h"
 #include "trace.h"
 #ifdef CONFIG_MEMCHECK
@@ -177,7 +176,6 @@ static void trace_dev_write(void *opaque, target_phys_addr_t offset, uint32_t va
             memcheck_exit(value);
         }
 #endif  // CONFIG_MEMCHECK
-        goldfish_pipe_thread_death((int)tid);
         break;
     case TRACE_DEV_REG_NAME:            // record thread name
         vstrcpy(value, exec_path, CLIENT_PAGE_SIZE);
@@ -350,13 +348,6 @@ static void trace_dev_write(void *opaque, target_phys_addr_t offset, uint32_t va
         break;
 #endif // CONFIG_MEMCHECK
 
-    case TRACE_DEV_PIPE_COMMAND:
-    case TRACE_DEV_PIPE_ADDRESS:
-    case TRACE_DEV_PIPE_SIZE:
-    case TRACE_DEV_PIPE_CHANNEL:
-        goldfish_pipe_write(tid, ((offset >> 2) - TRACE_DEV_PIPE_BASE), value);
-        break;
-
     default:
         if (offset < 4096) {
             cpu_abort(cpu_single_env, "trace_dev_write: Bad offset %x\n", offset);
@@ -378,12 +369,6 @@ static uint32_t trace_dev_read(void *opaque, target_phys_addr_t offset)
     switch (offset >> 2) {
     case TRACE_DEV_REG_ENABLE:          // tracing enable
         return tracing;
-
-    case TRACE_DEV_PIPE_COMMAND:
-    case TRACE_DEV_PIPE_ADDRESS:
-    case TRACE_DEV_PIPE_SIZE:
-    case TRACE_DEV_PIPE_CHANNEL:
-        return goldfish_pipe_read(tid, (offset >> 2) - TRACE_DEV_PIPE_BASE);
 
     default:
         if (offset < 4096) {

@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _ANDROID_HW_QEMUD_PIPE_H
-#define _ANDROID_HW_QEMUD_PIPE_H
 
-void init_qemud_pipes(void);
-void android_hw_opengles_init(void);
+#ifndef ANDROID_PIPE_NET_H
+#define ANDROID_PIPE_NET_H
 
-#endif /* _ANDROID_HW_QEMUD_PIPE_H */
+void android_net_pipes_init(void);
+
+#endif /* ANDROID_PIPE_NET_H */
