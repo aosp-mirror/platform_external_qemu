@@ -35,6 +35,6 @@ uicmd_set_brightness_change_callback(AndroidHwLightBrightnessCallback callback,
 {
     AndroidHwControlFuncs  funcs;
     funcs.light_brightness = callback;
-    android_hw_control_init(opaque, &funcs);
+    android_hw_control_set(opaque, &funcs);
     return 0;
 }

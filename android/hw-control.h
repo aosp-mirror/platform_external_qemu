@@ -32,7 +32,10 @@ typedef struct {
 } AndroidHwControlFuncs;
 
 /* used to initialize the hardware control support */
-extern void  android_hw_control_init( void*                         opaque,
+extern void  android_hw_control_init( void );
+
+/* used to register a new hw-control back-end */
+extern void  android_hw_control_set( void*                         opaque,
                                       const AndroidHwControlFuncs*  funcs );
 
 #endif /* _android_hw_control_h */

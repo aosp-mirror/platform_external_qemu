@@ -177,7 +177,7 @@ uiCmdProxy_create(int fd)
         // the UI about the event.
         AndroidHwControlFuncs  funcs;
         funcs.light_brightness = _uiCmdProxy_brightness_change_callback;
-        android_hw_control_init(&_uiCmdProxy, &funcs);
+        android_hw_control_set(&_uiCmdProxy, &funcs);
     }
     return 0;
 }

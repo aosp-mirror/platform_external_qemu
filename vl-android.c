@@ -198,6 +198,7 @@
 #include "balloon.h"
 #include "android/hw-lcd.h"
 #include "android/boot-properties.h"
+#include "android/hw-control.h"
 #include "android/core-init-utils.h"
 #include "android/audio-test.h"
 
@@ -4043,6 +4044,7 @@ int main(int argc, char **argv, char **envp)
 
     /* Initialize boot properties. */
     boot_property_init_service();
+    android_hw_control_init();
 
     optind = 1;
     for(;;) {
