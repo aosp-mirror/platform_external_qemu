@@ -215,6 +215,7 @@ struct LoopIoClass {
     void (*wantWrite)(void* impl);
     void (*dontWantRead)(void* impl);
     void (*dontWantWrite)(void* impl);
+    unsigned (*poll)(void* impl);
     void (*done)(void* impl);
 };
 
@@ -254,6 +255,11 @@ AINLINED void
 loopIo_dontWantWrite(LoopIo* io)
 {
     io->clazz->dontWantWrite(io->impl);
+}
+AINLINED unsigned
+loopIo_poll(LoopIo* io)
+{
+    return io->clazz->poll(io->impl);
 }
 
 /**********************************************************************

@@ -203,6 +203,13 @@ gloopio_dontWantWrite(void* impl)
     gloopio_modify(io, io->wanted & ~LOOP_IO_WRITE);
 }
 
+static unsigned
+gloopio_poll(void* impl)
+{
+    GLoopIo* io = impl;
+    return io->ready;
+}
+
 static void
 gloopio_free(void* impl)
 {
@@ -219,6 +226,7 @@ static LoopIoClass  gloopio_class = {
     gloopio_wantWrite,
     gloopio_dontWantRead,
     gloopio_dontWantWrite,
+    gloopio_poll,
     gloopio_free
 };
 
