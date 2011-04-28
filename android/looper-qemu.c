@@ -254,11 +254,19 @@ qloopio_free(void* impl)
     qemu_free(io);
 }
 
+static unsigned
+qloopio_poll(void* impl)
+{
+    QLoopIo* io = impl;
+    return io->ready;
+}
+
 static const LoopIoClass  qlooper_io_class = {
     qloopio_wantRead,
     qloopio_wantWrite,
     qloopio_dontWantRead,
     qloopio_dontWantWrite,
+    qloopio_poll,
     qloopio_free
 };
 
