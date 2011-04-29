@@ -9,14 +9,16 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android/utils/intmap.h"
 #include "android/utils/panic.h"
-#include "android/utils/reflist.h"
 #include "android/utils/system.h"
-#include "android/hw-qemud.h"
 #include "hw/goldfish_pipe.h"
+#include "hw/goldfish_device.h"
+#include "qemu-timer.h"
 
-#define  DEBUG 0
+#define  DEBUG 1
+
+/* Set to 1 to debug i/o register reads/writes */
+#define DEBUG_REGS  0
 
 #if DEBUG >= 1
 #  define D(...)  fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
@@ -30,711 +32,1035 @@
 #  define DD(...)  (void)0
 #endif
 
+#if DEBUG_REGS >= 1
+#  define DR(...)   D(__VA_ARGS__)
+#else
+#  define DR(...)   (void)0
+#endif
+
 #define E(...)  fprintf(stderr, "ERROR:" __VA_ARGS__), fprintf(stderr, "\n")
 
-/* Must match hw/goldfish_trace.h */
-#define  SLOT_COMMAND   0
-#define  SLOT_STATUS    0
-#define  SLOT_ADDRESS   1
-#define  SLOT_SIZE      2
-#define  SLOT_CHANNEL   3
+/* Set to 1 to enable the 'zero' pipe type, useful for debugging */
+#define DEBUG_ZERO_PIPE  1
 
-#define   QEMUD_PIPE_CMD_CLOSE              1
-#define   QEMUD_PIPE_CMD_SEND               2
-#define   QEMUD_PIPE_CMD_RECV               3
-#define   QEMUD_PIPE_CMD_WAKE_ON_SEND       4
-#define   QEMUD_PIPE_CMD_WAKE_ON_RECV       5
+/* Set to 1 to enable the 'pingpong' pipe type, useful for debugging */
+#define DEBUG_PINGPONG_PIPE 1
 
-#define   QEMUD_PIPE_ERROR_INVAL            22   /* EINVAL */
-#define   QEMUD_PIPE_ERROR_AGAIN            11   /* EAGAIN */
-#define   QEMUD_PIPE_ERROR_CONNRESET       104   /* ECONNRESET */
-#define   QEMUD_PIPE_ERROR_NOMEM            12   /* ENOMEM */
+/* Set to 1 to enable the 'throttle' pipe type, useful for debugging */
+#define DEBUG_THROTTLE_PIPE 1
 
-/**********************************************************************
- **********************************************************************
- **
- **  TECHNICAL NOTE ON THE FOLLOWING IMPLEMENTATION:
- **
- **    PipeService ::
- **       The global state for the QEMUD fast pipes service.
- **       Holds a tid -> ThreadState map. Registers as a Qemud
- **       service named "fast-pipes" which creates PipeClient
- **       objects on connection.
- **
- **    PipeClient ::
- **       The state of each QEMUD pipe. This handles the initial
- **       connection, message exchanges and signalling.
- **
- **    ThreadState ::
- **       Hold the thread-specific state corresponding to each guest
- **       thread that has created a least one qemud pipe. Stores the
- **       state of our 4 I/O Registers, and a map of localId -> PipeState
- **
- **
- **  The following graphics is an example corresponding to the following
- **  situation:
- **
- **     - two guest threads have opened pipe connections
- **     - the first thread has opened two different pipes
- **     - the second thread has opened only one pipe
- **
- **
- **     QEMUD-SERVICE
- **       |     |
- **       |     |________________________________________
- **       |          |                |                 |
- **       |          v                v                 v
- **       |      QEMUD-CLIENT#1    QEMUD-CLIENT#2    QEMUD-CLIENT#3
- **       |         ^                ^                  ^
- **       |         |                |                  |
- **       |         |                |                  |
- **       |         v                v                  v
- **       |      PIPE-CLIENT#1     PIPE-CLIENT#2     PIPE-CLIENT#3
- **       |         ^                ^                  ^
- **       |         |                |                  |
- **       |         |________________|                  |
- **       |         |                                   +
- **       |         |                                   |
- **       |      THREAD-STATE#1                   THREAD-STATE#2
- **       |         ^                                   ^
- **       |     ____|___________________________________|
- **       |    |
- **       |    |
- **     PIPE-SERVICE
- **
- **  Note that the QemudService and QemudClient objects are created by
- **  hw-qemud.c and not defined here.
- **
- **/
-
-typedef struct PipeService  PipeService;
-typedef struct PipeClient   PipeClient;
-
-static void pipeService_removeState(PipeService* pipeSvc, int tid);
-
-/**********************************************************************
- **********************************************************************
+/***********************************************************************
+ ***********************************************************************
  *****
- *****  REGISTRY OF SUPPORTED PIPE SERVICES
+ *****   P I P E   S E R V I C E   R E G I S T R A T I O N
  *****
  *****/
 
+#define MAX_PIPE_SERVICES  8
 typedef struct {
-    const char*                   pipeName;
-    void*                         pipeOpaque;
-    const QemudPipeHandlerFuncs*  pipeFuncs;
-} PipeType;
+    const char*        name;
+    void*              opaque;
+    GoldfishPipeFuncs  funcs;
+} PipeService;
 
-#define MAX_PIPE_TYPES  4
+typedef struct {
+    int          count;
+    PipeService  services[MAX_PIPE_SERVICES];
+} PipeServices;
 
-static PipeType  sPipeTypes[MAX_PIPE_TYPES];
-static int       sPipeTypeCount;
+static PipeServices  _pipeServices[1];
 
 void
-goldfish_pipe_add_type( const char*                   pipeName,
-                        void*                         pipeOpaque,
-                        const QemudPipeHandlerFuncs*  pipeFuncs )
+goldfish_pipe_add_type(const char*               pipeName,
+                       void*                     pipeOpaque,
+                       const GoldfishPipeFuncs*  pipeFuncs )
 {
-    int count = sPipeTypeCount;
+    PipeServices* list = _pipeServices;
+    int           count = list->count;
 
-    if (count >= MAX_PIPE_TYPES) {
-        APANIC("%s: Too many qemud pipe types!", __FUNCTION__);
+    if (count >= MAX_PIPE_SERVICES) {
+        APANIC("Too many goldfish pipe services (%d)", count);
     }
 
-    sPipeTypes[count].pipeName   = pipeName;
-    sPipeTypes[count].pipeOpaque = pipeOpaque;
-    sPipeTypes[count].pipeFuncs  = pipeFuncs;
-    sPipeTypeCount = ++count;
+    list->services[count].name   = pipeName;
+    list->services[count].opaque = pipeOpaque;
+    list->services[count].funcs  = pipeFuncs[0];
+
+    list->count++;
 }
 
-static const PipeType*
-goldfish_pipe_find_type( const char*  pipeName )
+static const PipeService*
+goldfish_pipe_find_type(const char*  pipeName)
 {
-    const PipeType* ptype = sPipeTypes;
-    const PipeType* limit = ptype + sPipeTypeCount;
+    PipeServices* list = _pipeServices;
+    int           count = list->count;
+    int           nn;
 
-    for ( ; ptype < limit; ptype++ ) {
-        if (!strcmp(pipeName, ptype->pipeName)) {
-            return ptype;
+    for (nn = 0; nn < count; nn++) {
+        if (!strcmp(list->services[nn].name, pipeName)) {
+            return &list->services[nn];
         }
     }
     return NULL;
 }
 
 
-/**********************************************************************
- **********************************************************************
+/***********************************************************************
+ ***********************************************************************
  *****
- *****  THREAD-SPECIFIC STATE
- *****
- *****/
-
-static void
-pipeClient_closeFromThread( PipeClient*  pcl );
-
-static uint32_t
-pipeClient_doCommand( PipeClient* pcl,
-                      uint32_t   command,
-                      uint32_t   address,
-                      uint32_t*  pSize );
-
-
-/* For each guest thread, we will store the following state:
- *
- * - The current state of the 'address', 'size', 'localId' and 'status'
- *   I/O slots provided through the magic page by hw/goldfish_trace.c
- *
- * - A list of PipeClient objects, corresponding to all the pipes in
- *   this thread, identified by localId.
- */
-typedef struct {
-    uint32_t   address;
-    uint32_t   size;
-    uint32_t   localId;
-    uint32_t   status;
-    AIntMap*   pipes;
-} ThreadState;
-
-static void
-threadState_free( ThreadState*  ts )
-{
-    /* Get rid of the localId -> PipeClient map */
-    AINTMAP_FOREACH_VALUE(ts->pipes, pcl, pipeClient_closeFromThread(pcl));
-    aintMap_free(ts->pipes);
-
-    AFREE(ts);
-}
-
-static ThreadState*
-threadState_new( void )
-{
-    ThreadState*  ts;
-    ANEW0(ts);
-    ts->pipes = aintMap_new();
-    return ts;
-}
-
-static int
-threadState_addPipe( ThreadState* ts, int  localId, PipeClient* pcl )
-{
-    /* We shouldn't already have a pipe for this localId */
-    if (aintMap_get(ts->pipes, localId) != NULL) {
-        errno = EBADF;
-        return -1;
-    }
-    aintMap_set(ts->pipes, localId, pcl);
-    return 0;
-}
-
-static void
-threadState_delPipe( ThreadState* ts, int localId )
-{
-    aintMap_del(ts->pipes, localId);
-}
-
-static void
-threadState_write( ThreadState*  ts, int  offset, uint32_t value )
-{
-    PipeClient*  pcl;
-
-    switch (offset) {
-        case SLOT_COMMAND:
-            pcl = aintMap_get(ts->pipes, (int)ts->localId);
-            if (pcl == NULL) {
-                D("%s: Invalid localId (%d)",
-                  __FUNCTION__, ts->localId);
-                ts->status = QEMUD_PIPE_ERROR_INVAL;
-            } else {
-                ts->status = pipeClient_doCommand(pcl,
-                                                  value,
-                                                  ts->address,
-                                                  &ts->size);
-            }
-            break;
-        case SLOT_ADDRESS:
-            ts->address = value;
-            break;
-        case SLOT_SIZE:
-            ts->size = value;
-            break;
-        case SLOT_CHANNEL:
-            ts->localId = value;
-            break;
-        default:
-            /* XXX: PRINT ERROR? */
-            ;
-    }
-}
-
-static uint32_t
-threadState_read( ThreadState*  ts, int offset )
-{
-    switch (offset) {
-        case SLOT_STATUS:       return ts->status;
-        case SLOT_ADDRESS:      return ts->address;
-        case SLOT_SIZE:         return ts->size;
-        case SLOT_CHANNEL:      return ts->localId;
-        default:                return 0;
-    }
-}
-
-/**********************************************************************
- **********************************************************************
- *****
- *****  PIPE CLIENT STATE
+ *****    P I P E   C O N N E C T I O N S
  *****
  *****/
 
-/* Each client object points to a PipeState after it has received the
- * initial request from the guest, which shall look like:
- * <tid>:<localId>:<name>
- */
-struct PipeClient {
-    char*         pipeName;
-    QemudClient*  client;
-    PipeService*  pipeSvc;
+typedef struct PipeDevice  PipeDevice;
 
-    int                           tid;
-    uint32_t                      localId;
-    void*                         handler;
-    const QemudPipeHandlerFuncs*  handlerFuncs;
-};
+typedef struct Pipe {
+    struct Pipe*              next;
+    struct Pipe*              next_waked;
+    PipeDevice*               device;
+    uint32_t                  channel;
+    void*                     opaque;
+    const GoldfishPipeFuncs*  funcs;
+    unsigned char             wanted;
+    char                      closed;
+} Pipe;
 
-static int  pipeService_addPipe(PipeService* pipeSvc, int tid, int localId, PipeClient* pcl);
-static void pipeService_removePipe(PipeService* pipeSvc, int tid, int localId);
+/* Forward */
+static void*  pipeConnector_new(Pipe*  pipe);
 
-static void
-pipeClient_closeFromThread( PipeClient*  pcl )
+Pipe*
+pipe_new(uint32_t channel, PipeDevice* dev)
 {
-    qemud_client_close(pcl->client);
+    Pipe*  pipe;
+    ANEW0(pipe);
+    pipe->channel = channel;
+    pipe->device  = dev;
+    pipe->opaque  = pipeConnector_new(pipe);
+    return pipe;
 }
 
-/* This function should only be invoked through qemud_client_close().
- * Never call it explicitely. */
-static void
-pipeClient_close( void* opaque )
+static Pipe**
+pipe_list_findp_channel( Pipe** list, uint32_t channel )
 {
-    PipeClient*  pcl = opaque;
-
-    if (pcl->handler && pcl->handlerFuncs && pcl->handlerFuncs->close) {
-        pcl->handlerFuncs->close(pcl->handler);
+    Pipe** pnode = list;
+    for (;;) {
+        Pipe* node = *pnode;
+        if (node == NULL || node->channel == channel) {
+            break;
+        }
+        pnode = &node->next;
     }
-
-    D("qemud:pipe: closing client (%d,%x)", pcl->tid, pcl->localId);
-    qemud_client_close(pcl->client);
-    pcl->client = NULL;
-
-    /* The guest is closing the connection, so remove it from our state */
-    pipeService_removePipe(pcl->pipeSvc, pcl->tid, pcl->localId);
-
-    AFREE(pcl->pipeName);
+    return pnode;
 }
-
-static void
-pipeClient_recv( void* opaque, uint8_t* msg, int msgLen, QemudClient* client )
-{
-    PipeClient*      pcl = opaque;
-    const PipeType*  ptype;
-
-    const char* p;
-    int         failure = 1;
-    char        answer[64];
-
-    if (pcl->pipeName != NULL) {
-        /* Should never happen, the only time we'll receive something
-         * is when the connection is created! Simply ignore any incoming
-         * message.
-         */
-        return;
-    }
-
-    /* The message format is <tid>:<localIdHex>:<name> */
-    if (sscanf((char*)msg, "%d:%x:", &pcl->tid, &pcl->localId) != 2) {
-        goto BAD_FORMAT;
-    }
-    p = strchr((const char*)msg, ':');
-    if (p != NULL) {
-        p = strchr(p+1, ':');
-        if (p != NULL)
-            p += 1;
-    }
-    if (p == NULL || *p == '\0') {
-        goto BAD_FORMAT;
-    }
-
-    pcl->pipeName = ASTRDUP(p);
-
-    ptype = goldfish_pipe_find_type(pcl->pipeName);
-    if (ptype == NULL) {
-        goto UNKNOWN_PIPE_TYPE;
-    }
-
-    pcl->handlerFuncs = ptype->pipeFuncs;
-    pcl->handler      = ptype->pipeFuncs->init( client, ptype->pipeOpaque );
-    if (pcl->handler == NULL) {
-        goto BAD_INIT;
-    }
-
-    if (pipeService_addPipe(pcl->pipeSvc, pcl->tid, pcl->localId, pcl) < 0) {
-        goto DUPLICATE_REQUEST;
-    }
-
-    D("qemud:pipe: Added new client: %s", msg);
-    failure = 0;
-    snprintf(answer, sizeof answer, "OK");
-    goto SEND_ANSWER;
-
-BAD_INIT:
-    /* Initialization failed for some reason! */
-    E("qemud:pipe: Could not initialize pipe: '%s'", pcl->pipeName);
-    snprintf(answer, sizeof answer, "KO:%d:Could not initialize pipe",
-                QEMUD_PIPE_ERROR_INVAL);
-    goto SEND_ANSWER;
-
-UNKNOWN_PIPE_TYPE:
-    E("qemud:pipe: Unknown pipe type: '%s'", p);
-    snprintf(answer, sizeof answer, "KO:%d:Unknown pipe type name",
-             QEMUD_PIPE_ERROR_INVAL);
-    goto SEND_ANSWER;
-
-BAD_FORMAT:
-    E("qemud:pipe: Invalid connection request: '%s'", msg);
-    snprintf(answer, sizeof answer, "KO:%d:Invalid connection request",
-             QEMUD_PIPE_ERROR_INVAL);
-    goto SEND_ANSWER;
-
-DUPLICATE_REQUEST:
-    E("qemud:pipe: Duplicate connection request: '%s'", msg);
-    snprintf(answer, sizeof answer, "KO:%d:Duplicate connection request",
-             QEMUD_PIPE_ERROR_INVAL);
-    goto SEND_ANSWER;
-
-SEND_ANSWER:
-    qemud_client_send(client, (uint8_t*)answer, strlen(answer));
-    if (failure) {
-        qemud_client_close(client);
-    } else {
-        /* Disable framing for the rest of signalling */
-        qemud_client_set_framing(client, 0);
-    }
-}
-
-/* Count the number of GoldfishPipeBuffers we will need to transfer
- * memory from/to [address...address+size)
- */
-static int
-_countPipeBuffers( uint32_t  address, uint32_t  size )
-{
-    CPUState*  env   = cpu_single_env;
-    int        count = 0;
-
-    while (size > 0) {
-        uint32_t   vstart = address & TARGET_PAGE_MASK;
-        uint32_t   vend   = vstart + TARGET_PAGE_SIZE;
-        uint32_t   next   = address + size;
-
-        DD("%s: trying to map (0x%x - 0x%0x, %d bytes) -> page=0x%x - 0x%x",
-          __FUNCTION__, address, address+size, size, vstart, vend);
-
-        if (next > vend) {
-            next = vend;
-        }
-
-        /* Check that the address is valid */
-        if (cpu_get_phys_page_debug(env, vstart) == -1) {
-            DD("%s: bad guest address!", __FUNCTION__);
-            return -1;
-        }
-
-        count++;
-
-        size   -= (next - address);
-        address = next;
-    }
-    return count;
-}
-
-/* Fill the pipe buffers to prepare memory transfer from/to
- * [address...address+size). This assumes 'buffers' points to an array
- * which size corresponds to _countPipeBuffers(address, size)
- */
-static void
-_fillPipeBuffers( uint32_t  address, uint32_t  size, GoldfishPipeBuffer*  buffers )
-{
-    CPUState*  env = cpu_single_env;
-
-    while (size > 0) {
-        uint32_t   vstart = address & TARGET_PAGE_MASK;
-        uint32_t   vend   = vstart + TARGET_PAGE_SIZE;
-        uint32_t   next   = address + size;
-
-        if (next > vend) {
-            next = vend;
-        }
-
-        /* Translate virtual address into physical one, into emulator
-         * memory. */
-        target_phys_addr_t  phys = cpu_get_phys_page_debug(env, vstart);
-
-        buffers[0].data = qemu_get_ram_ptr(phys) + (address - vstart);
-        buffers[0].size = next - address;
-        buffers++;
-
-        size   -= (next - address);
-        address = next;
-    }
-}
-
-static uint32_t
-pipeClient_doCommand( PipeClient* pcl,
-                      uint32_t   command,
-                      uint32_t   address,
-                      uint32_t*  pSize )
-{
-    uint32_t  size = *pSize;
-
-    D("%s: TID=%4d CHANNEL=%08x COMMAND=%d ADDRESS=%08x SIZE=%d\n",
-           __FUNCTION__, pcl->tid, pcl->localId, command, address, size);
-
-    /* XXX: TODO */
-    switch (command) {
-        case QEMUD_PIPE_CMD_CLOSE:
-            /* The client is asking us to close the connection, so
-             * just do that. */
-            qemud_client_close(pcl->client);
-            return 0;
-
-        case QEMUD_PIPE_CMD_SEND: {
-            /* First, try to allocate a buffer from the handler */
-            void*                opaque = pcl->handler;
-            GoldfishPipeBuffer*  buffers;
-            int                  numBuffers = 0;
-
-            /* Count the number of buffers we need, allocate them,
-             * then fill them. */
-            numBuffers = _countPipeBuffers(address, size);
-            if (numBuffers < 0) {
-                D("%s: Invalid guest address range 0x%x - 0x%x (%d bytes)",
-                  __FUNCTION__, address, address+size, size);
-                  return QEMUD_PIPE_ERROR_NOMEM;
-            }
-            buffers = alloca( sizeof(*buffers) * numBuffers );
-            _fillPipeBuffers(address, size, buffers);
-
-            D("%s: Sending %d bytes using %d buffers", __FUNCTION__,
-              size, numBuffers);
-
-            /* Send the data */
-            if (pcl->handlerFuncs->sendBuffers(opaque, buffers, numBuffers) < 0) {
-                /* When .sendBuffers() returns -1, it usually means
-                * that the handler isn't ready to accept a new message. There
-                * is however once exception: when the message is too large
-                * and it wasn't possible to allocate the buffer.
-                *
-                * Differentiate between these two cases by looking at errno.
-                */
-                if (errno == ENOMEM)
-                    return QEMUD_PIPE_ERROR_NOMEM;
-                else
-                    return QEMUD_PIPE_ERROR_AGAIN;
-            }
-            return 0;
-        }
-
-        case QEMUD_PIPE_CMD_RECV: {
-            void*     opaque = pcl->handler;
-            GoldfishPipeBuffer* buffers;
-            int                 numBuffers, ret;
-
-            /* Count the number of buffers we have */
-            numBuffers = _countPipeBuffers(address, size);
-            if (numBuffers < 0) {
-                D("%s: Invalid guest address range 0x%x - 0x%x (%d bytes)",
-                  __FUNCTION__, address, address+size, size);
-                  return QEMUD_PIPE_ERROR_NOMEM;
-            }
-            buffers    = alloca(sizeof(*buffers)*numBuffers);
-            _fillPipeBuffers(address, size, buffers);
-
-            /* Receive data */
-            ret = pcl->handlerFuncs->recvBuffers(opaque, buffers, numBuffers);
-            if (ret < 0) {
-                if (errno == ENOMEM) {
-                    // XXXX: TODO *pSize = msgSize;
-                    return QEMUD_PIPE_ERROR_NOMEM;
-                } else {
-                    return QEMUD_PIPE_ERROR_AGAIN;
-                }
-            }
-            *pSize = ret;
-            return 0;
-        }
-
-        case QEMUD_PIPE_CMD_WAKE_ON_SEND: {
-            pcl->handlerFuncs->wakeOn(pcl->handler, QEMUD_PIPE_WAKE_ON_SEND);
-            return 0;
-        }
-
-        case QEMUD_PIPE_CMD_WAKE_ON_RECV: {
-            pcl->handlerFuncs->wakeOn(pcl->handler, QEMUD_PIPE_WAKE_ON_RECV);
-            return 0;
-        }
-
-        default:
-            return QEMUD_PIPE_ERROR_CONNRESET;
-    }
-}
-
-
-
-QemudClient*
-pipeClient_connect( void* opaque, QemudService*  svc, int channel )
-{
-    PipeClient*   pcl;
-
-    ANEW0(pcl);
-    pcl->pipeSvc = opaque;
-    pcl->client  = qemud_client_new( svc, channel, pcl,
-                                     pipeClient_recv,
-                                     pipeClient_close,
-                                     NULL,   /* TODO: NO SNAPSHOT SAVE */
-                                     NULL ); /* TODO: NO SNAPHOT LOAD */
-
-    /* Only for the initial connection message */
-    qemud_client_set_framing(pcl->client, 1);
-    return pcl->client;
-}
-
-/**********************************************************************
- **********************************************************************
- *****
- *****  GLOBAL PIPE STATE
- *****
- *****/
-
-struct PipeService {
-    AIntMap*  threadMap;  /* maps tid to ThreadState */
-};
 
 #if 0
-static void
-pipeService_done(PipeService*  pipeSvc)
+static Pipe**
+pipe_list_findp_opaque( Pipe** list, void* opaque )
 {
-    /* Get rid of the tid -> ThreadState map */
-    AINTMAP_FOREACH_VALUE(pipeSvc->threadMap, ts, threadState_free(ts));
-    aintMap_free(pipeSvc->threadMap);
-    pipeSvc->threadMap = NULL;
+    Pipe** pnode = list;
+    for (;;) {
+        Pipe* node = *pnode;
+        if (node == NULL || node->opaque == opaque) {
+            break;
+        }
+        pnode = &node->next;
+    }
+    return pnode;
 }
 #endif
 
-static void
-pipeService_init(PipeService*  pipeSvc)
+static Pipe**
+pipe_list_findp_waked( Pipe** list, Pipe* pipe )
 {
-    pipeSvc->threadMap = aintMap_new();
-
-    qemud_service_register( "fast-pipe", 0, pipeSvc,
-                            pipeClient_connect,
-                            NULL,  /* TODO: NO SNAPSHOT SAVE SUPPORT */
-                            NULL   /* TODO: NO SNAPSHOT LOAD SUPPORT */ );
-}
-
-static ThreadState*
-pipeService_getState(PipeService* pipeSvc, int tid)
-{
-    if (pipeSvc->threadMap == NULL)
-        pipeSvc->threadMap = aintMap_new();
-
-    return (ThreadState*) aintMap_get(pipeSvc->threadMap, tid);
-}
-
-static void
-pipeService_removeState(PipeService* pipeSvc, int tid)
-{
-    ThreadState* ts = pipeService_getState(pipeSvc, tid);
-
-    if (ts == NULL)
-        return;
-
-    aintMap_del(pipeSvc->threadMap,tid);
-    threadState_free(ts);
-}
-
-static int
-pipeService_addPipe(PipeService* pipeSvc, int  tid, int  localId, PipeClient*  pcl)
-{
-    ThreadState*  ts = pipeService_getState(pipeSvc, tid);
-
-    if (ts == NULL) {
-        ts = threadState_new();
-        aintMap_set(pipeSvc->threadMap, tid, ts);
+    Pipe** pnode = list;
+    for (;;) {
+        Pipe* node = *pnode;
+        if (node == NULL || node == pipe) {
+            break;
+        }
+        pnode = &node->next_waked;
     }
-
-    return threadState_addPipe(ts, localId, pcl);
+    return pnode;
 }
+
 
 static void
-pipeService_removePipe(PipeService* pipeSvc, int tid, int localId)
+pipe_list_remove_waked( Pipe** list, Pipe*  pipe )
 {
-    ThreadState* ts = pipeService_getState(pipeSvc, tid);
+    Pipe** lookup = pipe_list_findp_waked(list, pipe);
+    Pipe*  node   = *lookup;
 
-    if (ts == NULL)
-        return;
-
-    threadState_delPipe(ts, localId);
+    if (node != NULL) {
+        (*lookup) = node->next_waked;
+        node->next_waked = NULL;
+    }
 }
 
-/**********************************************************************
- **********************************************************************
+/***********************************************************************
+ ***********************************************************************
  *****
- *****  HARDWARE API - AS SEEN FROM hw/goldfish_trace.c
+ *****    P I P E   C O N N E C T O R S
  *****
  *****/
 
-static PipeService  _globalState[1];
+/* These are used to handle the initial connection attempt, where the
+ * client is going to write the name of the pipe service it wants to
+ * connect to, followed by a terminating zero.
+ */
+typedef struct {
+    Pipe*  pipe;
+    char   buffer[128];
+    int    buffpos;
+} PipeConnector;
 
-void  init_qemud_pipes(void)
+static const GoldfishPipeFuncs  pipeConnector_funcs;  // forward
+
+void*
+pipeConnector_new(Pipe*  pipe)
 {
-    pipeService_init(_globalState);
+    PipeConnector*  pcon;
+
+    ANEW0(pcon);
+    pcon->pipe  = pipe;
+    pipe->funcs = &pipeConnector_funcs;
+    return pcon;
 }
 
-void
-goldfish_pipe_thread_death(int  tid)
+static void
+pipeConnector_close( void* opaque )
 {
-    PipeService*  pipeSvc = _globalState;
-    pipeService_removeState(pipeSvc, tid);
+    PipeConnector*  pcon = opaque;
+    AFREE(pcon);
 }
 
-void
-goldfish_pipe_write(int tid, int offset, uint32_t value)
+static int
+pipeConnector_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
 {
-    PipeService*  pipeSvc = _globalState;
-    DD("%s: tid=%d offset=%d value=%d (0x%x)", __FUNCTION__, tid,
-      offset, value, value);
+    PipeConnector* pcon = opaque;
+    const GoldfishPipeBuffer*  buffers_limit = buffers + numBuffers;
+    int ret = 0;
 
-    ThreadState*  ts      = pipeService_getState(pipeSvc, tid);
+    DD("%s: channel=0x%x numBuffers=%d", __FUNCTION__,
+       pcon->pipe->channel,
+       numBuffers);
 
-    if (ts == NULL) {
-        D("%s: no thread state for tid=%d", __FUNCTION__, tid);
+    while (buffers < buffers_limit) {
+        int  avail;
+
+        DD("%s: buffer data (%3d bytes): '%.*s'", __FUNCTION__,
+           buffers[0].size, buffers[0].size, buffers[0].data);
+
+        if (buffers[0].size == 0) {
+            buffers++;
+            continue;
+        }
+
+        avail = sizeof(pcon->buffer) - pcon->buffpos;
+        if (avail > buffers[0].size)
+            avail = buffers[0].size;
+
+        if (avail > 0) {
+            memcpy(pcon->buffer + pcon->buffpos, buffers[0].data, avail);
+            pcon->buffpos += avail;
+            ret += avail;
+        }
+        buffers++;
+    }
+
+    /* Now check that our buffer contains a zero-terminated string */
+    if (memchr(pcon->buffer, '\0', pcon->buffpos) != NULL) {
+        /* Acceptable formats for the connection string are:
+         *
+         *   pipe:<name>
+         *   pipe:<name>:<arguments>
+         */
+        char* pipeName;
+        char* pipeArgs;
+
+        D("%s: connector: '%s'", __FUNCTION__, pcon->buffer);
+
+        if (memcmp(pcon->buffer, "pipe:", 5) != 0) {
+            /* Nope, we don't handle these for now. */
+            D("%s: Unknown pipe connection: '%s'", __FUNCTION__, pcon->buffer);
+            return PIPE_ERROR_INVAL;
+        }
+
+        pipeName = pcon->buffer + 5;
+        pipeArgs = strchr(pipeName, ':');
+
+        if (pipeArgs != NULL) {
+            *pipeArgs++ = '\0';
+        }
+
+        Pipe* pipe = pcon->pipe;
+        const PipeService* svc = goldfish_pipe_find_type(pipeName);
+        if (svc == NULL) {
+            D("%s: Unknown server!", __FUNCTION__);
+            return PIPE_ERROR_INVAL;
+        }
+
+        void*  peer = svc->funcs.init(pipe, svc->opaque, pipeArgs);
+        if (peer == NULL) {
+            D("%s: Initialization failed!", __FUNCTION__);
+            return PIPE_ERROR_INVAL;
+        }
+
+        /* Do the evil switch now */
+        pipe->opaque = peer;
+        pipe->funcs  = &svc->funcs;
+        AFREE(pcon);
+    }
+
+    return ret;
+}
+
+static int
+pipeConnector_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers )
+{
+    return PIPE_ERROR_IO;
+}
+
+static unsigned
+pipeConnector_poll( void* opaque )
+{
+    return PIPE_WAKE_WRITE;
+}
+
+static void
+pipeConnector_wakeOn( void* opaque, int flags )
+{
+    /* nothing, really should never happen */
+}
+
+static const GoldfishPipeFuncs  pipeConnector_funcs = {
+    NULL,  /* init */
+    pipeConnector_close,        /* should rarely happen */
+    pipeConnector_sendBuffers,  /* the interesting stuff */
+    pipeConnector_recvBuffers,  /* should not happen */
+    pipeConnector_poll,         /* should not happen */
+    pipeConnector_wakeOn,       /* should not happen */
+};
+
+/***********************************************************************
+ ***********************************************************************
+ *****
+ *****    Z E R O   P I P E S
+ *****
+ *****/
+
+/* A simple pipe service that mimics /dev/zero, you can write anything to
+ * it, and you can always read any number of zeros from it. Useful for debugging
+ * the kernel driver.
+ */
+#if DEBUG_ZERO_PIPE
+
+typedef struct {
+    void* hwpipe;
+} ZeroPipe;
+
+static void*
+zeroPipe_init( void* hwpipe, void* svcOpaque, const char* args )
+{
+    ZeroPipe*  zpipe;
+
+    D("%s: hwpipe=%p", __FUNCTION__, hwpipe);
+    ANEW0(zpipe);
+    zpipe->hwpipe = hwpipe;
+    return zpipe;
+}
+
+static void
+zeroPipe_close( void* opaque )
+{
+    ZeroPipe*  zpipe = opaque;
+
+    D("%s: hwpipe=%p", __FUNCTION__, zpipe->hwpipe);
+    AFREE(zpipe);
+}
+
+static int
+zeroPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
+{
+    int  ret = 0;
+    while (numBuffers > 0) {
+        ret += buffers[0].size;
+        buffers++;
+        numBuffers--;
+    }
+    return ret;
+}
+
+static int
+zeroPipe_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers )
+{
+    int  ret = 0;
+    while (numBuffers > 0) {
+        ret += buffers[0].size;
+        memset(buffers[0].data, 0, buffers[0].size);
+        buffers++;
+        numBuffers--;
+    }
+    return ret;
+}
+
+static unsigned
+zeroPipe_poll( void* opaque )
+{
+    return PIPE_WAKE_READ | PIPE_WAKE_WRITE;
+}
+
+static void
+zeroPipe_wakeOn( void* opaque, int flags )
+{
+    /* nothing to do here */
+}
+
+static const GoldfishPipeFuncs  zeroPipe_funcs = {
+    zeroPipe_init,
+    zeroPipe_close,
+    zeroPipe_sendBuffers,
+    zeroPipe_recvBuffers,
+    zeroPipe_poll,
+    zeroPipe_wakeOn,
+};
+
+#endif /* DEBUG_ZERO */
+
+/***********************************************************************
+ ***********************************************************************
+ *****
+ *****    P I N G   P O N G   P I P E S
+ *****
+ *****/
+
+/* Similar debug service that sends back anything it receives */
+/* All data is kept in a circular dynamic buffer */
+
+#if DEBUG_PINGPONG_PIPE
+
+/* Initial buffer size */
+#define PINGPONG_SIZE  1024
+
+typedef struct {
+    void*     hwpipe;
+    uint8_t*  buffer;
+    size_t    size;
+    size_t    pos;
+    size_t    count;
+    unsigned  flags;
+} PingPongPipe;
+
+static void
+pingPongPipe_init0( PingPongPipe* pipe, void* hwpipe, void* svcOpaque )
+{
+    pipe->hwpipe = hwpipe;
+    pipe->size = PINGPONG_SIZE;
+    pipe->buffer = malloc(pipe->size);
+    pipe->pos = 0;
+    pipe->count = 0;
+}
+
+static void*
+pingPongPipe_init( void* hwpipe, void* svcOpaque, const char* args )
+{
+    PingPongPipe*  ppipe;
+
+    D("%s: hwpipe=%p", __FUNCTION__, hwpipe);
+    ANEW0(ppipe);
+    pingPongPipe_init0(ppipe, hwpipe, svcOpaque);
+    return ppipe;
+}
+
+static void
+pingPongPipe_close( void* opaque )
+{
+    PingPongPipe*  ppipe = opaque;
+
+    D("%s: hwpipe=%p (pos=%d count=%d size=%d)", __FUNCTION__,
+      ppipe->hwpipe, ppipe->pos, ppipe->count, ppipe->size);
+    free(ppipe->buffer);
+    AFREE(ppipe);
+}
+
+static int
+pingPongPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
+{
+    PingPongPipe*  pipe = opaque;
+    int  ret = 0;
+    int  count;
+    const GoldfishPipeBuffer* buff = buffers;
+    const GoldfishPipeBuffer* buffEnd = buff + numBuffers;
+
+    count = 0;
+    for ( ; buff < buffEnd; buff++ )
+        count += buff->size;
+
+    /* Do we need to grow the pingpong buffer? */
+    while (count > pipe->size - pipe->count) {
+        size_t    newsize = pipe->size*2;
+        uint8_t*  newbuff = realloc(pipe->buffer, newsize);
+        int       wpos    = pipe->pos + pipe->count;
+        if (newbuff == NULL) {
+            break;
+        }
+        if (wpos > pipe->size) {
+            wpos -= pipe->size;
+            memcpy(newbuff + pipe->size, newbuff, wpos);
+        }
+        pipe->buffer = newbuff;
+        pipe->size   = newsize;
+        D("pingpong buffer is now %d bytes", newsize);
+    }
+
+    for ( buff = buffers; buff < buffEnd; buff++ ) {
+        int avail = pipe->size - pipe->count;
+        if (avail <= 0) {
+            if (ret == 0)
+                ret = PIPE_ERROR_AGAIN;
+            break;
+        }
+        if (avail > buff->size) {
+            avail = buff->size;
+        }
+
+        int wpos = pipe->pos + pipe->count;
+        if (wpos >= pipe->size) {
+            wpos -= pipe->size;
+        }
+        if (wpos + avail <= pipe->size) {
+            memcpy(pipe->buffer + wpos, buff->data, avail);
+        } else {
+            int  avail2 = pipe->size - wpos;
+            memcpy(pipe->buffer + wpos, buff->data, avail2);
+            memcpy(pipe->buffer, buff->data + avail2, avail - avail2);
+        }
+        pipe->count += avail;
+        ret += avail;
+    }
+
+    /* Wake up any waiting readers if we wrote something */
+    if (pipe->count > 0 && (pipe->flags & PIPE_WAKE_READ)) {
+        goldfish_pipe_wake(pipe->hwpipe, PIPE_WAKE_READ);
+    }
+
+    return ret;
+}
+
+static int
+pingPongPipe_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers )
+{
+    PingPongPipe*  pipe = opaque;
+    int  ret = 0;
+
+    while (numBuffers > 0) {
+        int avail = pipe->count;
+        if (avail <= 0) {
+            if (ret == 0)
+                ret = PIPE_ERROR_AGAIN;
+            break;
+        }
+        if (avail > buffers[0].size) {
+            avail = buffers[0].size;
+        }
+
+        int rpos = pipe->pos;
+
+        if (rpos + avail <= pipe->size) {
+            memcpy(buffers[0].data, pipe->buffer + rpos, avail);
+        } else {
+            int  avail2 = pipe->size - rpos;
+            memcpy(buffers[0].data, pipe->buffer + rpos, avail2);
+            memcpy(buffers[0].data + avail2, pipe->buffer, avail - avail2);
+        }
+        pipe->count -= avail;
+        pipe->pos   += avail;
+        if (pipe->pos >= pipe->size) {
+            pipe->pos -= pipe->size;
+        }
+        ret += avail;
+        numBuffers--;
+        buffers++;
+    }
+
+    /* Wake up any waiting readers if we wrote something */
+    if (pipe->count < PINGPONG_SIZE && (pipe->flags & PIPE_WAKE_WRITE)) {
+        goldfish_pipe_wake(pipe->hwpipe, PIPE_WAKE_WRITE);
+    }
+
+    return ret;
+}
+
+static unsigned
+pingPongPipe_poll( void* opaque )
+{
+    PingPongPipe*  pipe = opaque;
+    unsigned       ret = 0;
+
+    if (pipe->count < pipe->size)
+        ret |= PIPE_WAKE_WRITE;
+
+    if (pipe->count > 0)
+        ret |= PIPE_WAKE_READ;
+
+    return ret;
+}
+
+static void
+pingPongPipe_wakeOn( void* opaque, int flags )
+{
+    PingPongPipe* pipe = opaque;
+    pipe->flags |= (unsigned)flags;
+}
+
+static const GoldfishPipeFuncs  pingPongPipe_funcs = {
+    pingPongPipe_init,
+    pingPongPipe_close,
+    pingPongPipe_sendBuffers,
+    pingPongPipe_recvBuffers,
+    pingPongPipe_poll,
+    pingPongPipe_wakeOn,
+};
+
+#endif /* DEBUG_PINGPONG_PIPE */
+
+/***********************************************************************
+ ***********************************************************************
+ *****
+ *****    T H R O T T L E   P I P E S
+ *****
+ *****/
+
+/* Similar to PingPongPipe, but will throttle the bandwidth to test
+ * blocking I/O.
+ */
+
+#ifdef DEBUG_THROTTLE_PIPE
+
+typedef struct {
+    PingPongPipe  pingpong;
+    double        sendRate;
+    int64_t       sendExpiration;
+    double        recvRate;
+    int64_t       recvExpiration;
+    QEMUTimer*    timer;
+} ThrottlePipe;
+
+/* forward declaration */
+static void throttlePipe_timerFunc( void* opaque );
+
+static void*
+throttlePipe_init( void* hwpipe, void* svcOpaque, const char* args )
+{
+    ThrottlePipe* pipe;
+
+    ANEW0(pipe);
+    pingPongPipe_init0(&pipe->pingpong, hwpipe, svcOpaque);
+    pipe->timer = qemu_new_timer(vm_clock, throttlePipe_timerFunc, pipe);
+    /* For now, limit to 500 KB/s in both directions */
+    pipe->sendRate = 1e9 / (500*1024*8);
+    pipe->recvRate = pipe->sendRate;
+    return pipe;
+}
+
+static void
+throttlePipe_close( void* opaque )
+{
+    ThrottlePipe* pipe = opaque;
+
+    qemu_del_timer(pipe->timer);
+    qemu_free_timer(pipe->timer);
+    pingPongPipe_close(&pipe->pingpong);
+}
+
+static void
+throttlePipe_rearm( ThrottlePipe* pipe )
+{
+    int64_t  minExpiration = 0;
+
+    DD("%s: sendExpiration=%lld recvExpiration=%lld\n", __FUNCTION__, pipe->sendExpiration, pipe->recvExpiration);
+
+    if (pipe->sendExpiration) {
+        if (minExpiration == 0 || pipe->sendExpiration < minExpiration)
+            minExpiration = pipe->sendExpiration;
+    }
+
+    if (pipe->recvExpiration) {
+        if (minExpiration == 0 || pipe->recvExpiration < minExpiration)
+            minExpiration = pipe->recvExpiration;
+    }
+
+    if (minExpiration != 0) {
+        DD("%s: Arming for %lld\n", __FUNCTION__, minExpiration);
+        qemu_mod_timer(pipe->timer, minExpiration);
+    }
+}
+
+static void
+throttlePipe_timerFunc( void* opaque )
+{
+    ThrottlePipe* pipe = opaque;
+    int64_t  now = qemu_get_clock_ns(vm_clock);
+
+    DD("%s: TICK! now=%lld sendExpiration=%lld recvExpiration=%lld\n",
+       __FUNCTION__, now, pipe->sendExpiration, pipe->recvExpiration);
+
+    /* Timer has expired, signal wake up if needed */
+    int      flags = 0;
+
+    if (pipe->sendExpiration && now > pipe->sendExpiration) {
+        flags |= PIPE_WAKE_WRITE;
+        pipe->sendExpiration = 0;
+    }
+    if (pipe->recvExpiration && now > pipe->recvExpiration) {
+        flags |= PIPE_WAKE_READ;
+        pipe->recvExpiration = 0;
+    }
+    flags &= pipe->pingpong.flags;
+    if (flags != 0) {
+        DD("%s: WAKE %d\n", __FUNCTION__, flags);
+        goldfish_pipe_wake(pipe->pingpong.hwpipe, flags);
+    }
+
+    throttlePipe_rearm(pipe);
+}
+
+static int
+throttlePipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
+{
+    ThrottlePipe*  pipe = opaque;
+    int            ret;
+
+    if (pipe->sendExpiration > 0) {
+        return PIPE_ERROR_AGAIN;
+    }
+
+    ret = pingPongPipe_sendBuffers(&pipe->pingpong, buffers, numBuffers);
+    if (ret > 0) {
+        /* Compute next send expiration time */
+        pipe->sendExpiration = qemu_get_clock_ns(vm_clock) + ret*pipe->sendRate;
+        throttlePipe_rearm(pipe);
+    }
+    return ret;
+}
+
+static int
+throttlePipe_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers )
+{
+    ThrottlePipe* pipe = opaque;
+    int           ret;
+
+    if (pipe->recvExpiration > 0) {
+        return PIPE_ERROR_AGAIN;
+    }
+
+    ret = pingPongPipe_recvBuffers(&pipe->pingpong, buffers, numBuffers);
+    if (ret > 0) {
+        pipe->recvExpiration = qemu_get_clock_ns(vm_clock) + ret*pipe->recvRate;
+        throttlePipe_rearm(pipe);
+    }
+    return ret;
+}
+
+static unsigned
+throttlePipe_poll( void* opaque )
+{
+    ThrottlePipe*  pipe = opaque;
+    unsigned       ret  = pingPongPipe_poll(&pipe->pingpong);
+
+    if (pipe->sendExpiration > 0)
+        ret &= ~PIPE_WAKE_WRITE;
+
+    if (pipe->recvExpiration > 0)
+        ret &= ~PIPE_WAKE_READ;
+
+    return ret;
+}
+
+static void
+throttlePipe_wakeOn( void* opaque, int flags )
+{
+    ThrottlePipe* pipe = opaque;
+    pingPongPipe_wakeOn(&pipe->pingpong, flags);
+}
+
+static const GoldfishPipeFuncs  throttlePipe_funcs = {
+    throttlePipe_init,
+    throttlePipe_close,
+    throttlePipe_sendBuffers,
+    throttlePipe_recvBuffers,
+    throttlePipe_poll,
+    throttlePipe_wakeOn,
+};
+
+#endif /* DEBUG_THROTTLE_PIPE */
+
+/***********************************************************************
+ ***********************************************************************
+ *****
+ *****    G O L D F I S H   P I P E   D E V I C E
+ *****
+ *****/
+
+struct PipeDevice {
+    struct goldfish_device dev;
+
+    /* the list of all pipes */
+    Pipe*  pipes;
+
+    /* the list of signalled pipes */
+    Pipe*  signaled_pipes;
+
+    /* i/o registers */
+    uint32_t  address;
+    uint32_t  size;
+    uint32_t  status;
+    uint32_t  channel;
+    uint32_t  wakes;
+};
+
+
+static void
+pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
+{
+    Pipe** lookup = pipe_list_findp_channel(&dev->pipes, dev->channel);
+    Pipe*  pipe   = *lookup;
+    CPUState* env = cpu_single_env;
+
+    /* Check that we're referring a known pipe channel */
+    if (command != PIPE_CMD_OPEN && pipe == NULL) {
+        dev->status = PIPE_ERROR_INVAL;
         return;
     }
-    threadState_write(ts, offset, value);
+
+    /* If the pipe is closed by the host, return an error */
+    if (pipe != NULL && pipe->closed && command != PIPE_CMD_CLOSE) {
+        dev->status = PIPE_ERROR_IO;
+        return;
+    }
+
+    switch (command) {
+    case PIPE_CMD_OPEN:
+        DD("%s: CMD_OPEN channel=0x%x", __FUNCTION__, dev->channel);
+        if (pipe != NULL) {
+            dev->status = PIPE_ERROR_INVAL;
+            break;
+        }
+        pipe = pipe_new(dev->channel, dev);
+        pipe->next = dev->pipes;
+        dev->pipes = pipe;
+        dev->status = 0;
+        break;
+
+    case PIPE_CMD_CLOSE:
+        DD("%s: CMD_CLOSE channel=0x%x", __FUNCTION__, dev->channel);
+        /* Remove from device's lists */
+        *lookup = pipe->next;
+        pipe->next = NULL;
+        pipe_list_remove_waked(&dev->signaled_pipes, pipe);
+        /* Call close callback */
+        if (pipe->funcs->close) {
+            pipe->funcs->close(pipe->opaque);
+        }
+        /* Free stuff */
+        AFREE(pipe);
+        break;
+
+    case PIPE_CMD_POLL:
+        dev->status = pipe->funcs->poll(pipe->opaque);
+        DD("%s: CMD_POLL > status=%d", __FUNCTION__, dev->status);
+        break;
+
+    case PIPE_CMD_READ_BUFFER: {
+        /* Translate virtual address into physical one, into emulator memory. */
+        GoldfishPipeBuffer  buffer;
+        uint32_t            address = dev->address;
+        uint32_t            page    = address & TARGET_PAGE_MASK;
+        target_phys_addr_t  phys = cpu_get_phys_page_debug(env, page);
+        buffer.data = qemu_get_ram_ptr(phys) + (address - page);
+        buffer.size = dev->size;
+        dev->status = pipe->funcs->recvBuffers(pipe->opaque, &buffer, 1);
+        DD("%s: CMD_READ_BUFFER channel=0x%x address=0x%08x size=%d > status=%d",
+           __FUNCTION__, dev->channel, dev->address, dev->size, dev->status);
+        break;
+    }
+
+    case PIPE_CMD_WRITE_BUFFER: {
+        /* Translate virtual address into physical one, into emulator memory. */
+        GoldfishPipeBuffer  buffer;
+        uint32_t            address = dev->address;
+        uint32_t            page    = address & TARGET_PAGE_MASK;
+        target_phys_addr_t  phys = cpu_get_phys_page_debug(env, page);
+        buffer.data = qemu_get_ram_ptr(phys) + (address - page);
+        buffer.size = dev->size;
+        dev->status = pipe->funcs->sendBuffers(pipe->opaque, &buffer, 1);
+        DD("%s: CMD_WRITE_BUFFER channel=0x%x address=0x%08x size=%d > status=%d",
+           __FUNCTION__, dev->channel, dev->address, dev->size, dev->status);
+        break;
+    }
+
+    case PIPE_CMD_WAKE_ON_READ:
+        DD("%s: CMD_WAKE_ON_READ channel=0x%x", __FUNCTION__, dev->channel);
+        if ((pipe->wanted & PIPE_WAKE_READ) == 0) {
+            pipe->wanted |= PIPE_WAKE_READ;
+            pipe->funcs->wakeOn(pipe->opaque, pipe->wanted);
+        }
+        dev->status = 0;
+        break;
+
+    case PIPE_CMD_WAKE_ON_WRITE:
+        DD("%s: CMD_WAKE_ON_WRITE channel=0x%x", __FUNCTION__, dev->channel);
+        if ((pipe->wanted & PIPE_WAKE_WRITE) == 0) {
+            pipe->wanted |= PIPE_WAKE_WRITE;
+            pipe->funcs->wakeOn(pipe->opaque, pipe->wanted);
+        }
+        dev->status = 0;
+        break;
+
+    default:
+        D("%s: command=%d (0x%x)\n", __FUNCTION__, command, command);
+    }
 }
 
-uint32_t
-goldfish_pipe_read(int tid, int offset)
+static void pipe_dev_write(void *opaque, target_phys_addr_t offset, uint32_t value)
 {
-    PipeService*  pipeSvc = _globalState;
-    uint32_t      ret;
+    PipeDevice *s = (PipeDevice *)opaque;
 
-    DD("%s: tid=%d offset=%d", __FUNCTION__, tid, offset);
+    switch (offset) {
+    case PIPE_REG_COMMAND:
+        DR("%s: command=%d (0x%x)", __FUNCTION__, value, value);
+        pipeDevice_doCommand(s, value);
+        break;
 
-    ThreadState*  ts      = pipeService_getState(pipeSvc, tid);
+    case PIPE_REG_SIZE:
+        DR("%s: size=%d (0x%x)", __FUNCTION__, value, value);
+        s->size = value;
+        break;
 
-    if (ts == NULL) {
-        D("%s: no thread state for tid=%d", __FUNCTION__, tid);
-        return 0;
+    case PIPE_REG_ADDRESS:
+        DR("%s: address=%d (0x%x)", __FUNCTION__, value, value);
+        s->address = value;
+        break;
+
+    case PIPE_REG_CHANNEL:
+        DR("%s: channel=%d (0x%x)", __FUNCTION__, value, value);
+        s->channel = value;
+        break;
+
+    default:
+        D("%s: offset=%d (0x%x) value=%d (0x%x)\n", __FUNCTION__, offset,
+            offset, value, value);
+        break;
     }
-    ret = threadState_read(ts, offset);
-    DD("%s:    result=%d (0x%d)", __FUNCTION__, ret, ret);
-    return ret;
+}
+
+/* I/O read */
+static uint32_t pipe_dev_read(void *opaque, target_phys_addr_t offset)
+{
+    PipeDevice *dev = (PipeDevice *)opaque;
+
+    switch (offset) {
+    case PIPE_REG_STATUS:
+        DR("%s: REG_STATUS status=%d (0x%x)", __FUNCTION__, dev->status, dev->status);
+        return dev->status;
+
+    case PIPE_REG_CHANNEL:
+        if (dev->signaled_pipes != NULL) {
+            Pipe* pipe = dev->signaled_pipes;
+            DR("%s: channel=0x%x wanted=%d", __FUNCTION__,
+               pipe->channel, pipe->wanted);
+            dev->wakes = pipe->wanted;
+            pipe->wanted = 0;
+            dev->signaled_pipes = pipe->next_waked;
+            pipe->next_waked = NULL;
+            if (dev->signaled_pipes == NULL) {
+                goldfish_device_set_irq(&dev->dev, 0, 0);
+                DD("%s: lowering IRQ", __FUNCTION__);
+            }
+            return pipe->channel;
+        }
+        DR("%s: no signaled channels", __FUNCTION__);
+        return 0;
+
+    case PIPE_REG_WAKES:
+        DR("%s: wakes %d", __FUNCTION__, dev->wakes);
+        return dev->wakes;
+
+    default:
+        D("%s: offset=%d (0x%x)\n", __FUNCTION__, offset, offset);
+    }
+    return 0;
+}
+
+static CPUReadMemoryFunc *pipe_dev_readfn[] = {
+   pipe_dev_read,
+   pipe_dev_read,
+   pipe_dev_read
+};
+
+static CPUWriteMemoryFunc *pipe_dev_writefn[] = {
+   pipe_dev_write,
+   pipe_dev_write,
+   pipe_dev_write
+};
+
+/* initialize the trace device */
+void pipe_dev_init()
+{
+    PipeDevice *s;
+
+    s = (PipeDevice *) qemu_mallocz(sizeof(*s));
+
+    s->dev.name = "qemu_pipe";
+    s->dev.id = -1;
+    s->dev.base = 0;       // will be allocated dynamically
+    s->dev.size = 0x2000;
+    s->dev.irq = 0;
+    s->dev.irq_count = 1;
+
+    goldfish_device_add(&s->dev, pipe_dev_readfn, pipe_dev_writefn, s);
+
+#if DEBUG_ZERO_PIPE
+    goldfish_pipe_add_type("zero", NULL, &zeroPipe_funcs);
+#endif
+#if DEBUG_PINGPONG_PIPE
+    goldfish_pipe_add_type("pingpong", NULL, &pingPongPipe_funcs);
+#endif
+#if DEBUG_THROTTLE_PIPE
+    goldfish_pipe_add_type("throttle", NULL, &throttlePipe_funcs);
+#endif
+}
+
+void
+goldfish_pipe_wake( void* hwpipe, unsigned flags )
+{
+    Pipe*  pipe = hwpipe;
+    Pipe** lookup;
+    PipeDevice*  dev = pipe->device;
+
+    DD("%s: channel=0x%x flags=%d", __FUNCTION__, pipe->channel, flags);
+
+    /* If not already there, add to the list of signaled pipes */
+    lookup = pipe_list_findp_waked(&dev->signaled_pipes, pipe);
+    if (!*lookup) {
+        pipe->next_waked = dev->signaled_pipes;
+        dev->signaled_pipes = pipe;
+    }
+    pipe->wanted |= (unsigned)flags;
+
+    /* Raise IRQ to indicate there are items on our list ! */
+    goldfish_device_set_irq(&dev->dev, 0, 1);
+    DD("%s: raising IRQ", __FUNCTION__);
+}
+
+void
+goldfish_pipe_close( void* hwpipe )
+{
+    Pipe* pipe = hwpipe;
+
+    D("%s: channel=0x%x (closed=%d)", __FUNCTION__, pipe->channel, pipe->closed);
+
+    if (!pipe->closed) {
+        pipe->closed = 1;
+        goldfish_pipe_wake( hwpipe, PIPE_WAKE_CLOSED );
+    }
 }

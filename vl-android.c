@@ -52,7 +52,6 @@
 #include "modem_driver.h"
 #include "android/gps.h"
 #include "android/hw-qemud.h"
-#include "android/hw-qemud-pipe.h"
 #include "android/hw-kmsg.h"
 #include "android/charmap.h"
 #include "android/globals.h"
@@ -64,6 +63,7 @@
 #include "android/utils/tempfile.h"
 #include "android/display-core.h"
 #include "android/utils/timezone.h"
+#include "android/pipe-net.h"
 #include "android/snapshot.h"
 #include "targphys.h"
 #include "tcpdump.h"
@@ -4045,6 +4045,7 @@ int main(int argc, char **argv, char **envp)
     /* Initialize boot properties. */
     boot_property_init_service();
     android_hw_control_init();
+    android_net_pipes_init();
 
     optind = 1;
     for(;;) {
@@ -5175,7 +5176,7 @@ int main(int argc, char **argv, char **envp)
     }
 
     /* Initialize OpenGLES emulation */
-    android_hw_opengles_init();
+    //android_hw_opengles_init();
 
     if (android_op_cpu_delay) {
         char*   end;
