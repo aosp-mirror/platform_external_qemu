@@ -147,7 +147,7 @@ bufprint_app_dir(char*  buff, char*  end)
 		len = sizeof(appDir)-1;
 	    appDir[len] = 0;
     }
-	
+
 	sep = strrchr(appDir, '\\');
 	if (sep)
 	  *sep = 0;
@@ -215,9 +215,15 @@ bufprint_temp_dir(char*  buff, char*  end)
 
     return  bufprint(buff, end, "%s", path);
 #else
+    char path[MAX_PATH];
     const char*  tmppath = getenv("ANDROID_TMP");
     if (!tmppath) {
-        tmppath = "/tmp/android";
+        const char* user = getenv("USER");
+        if (user == NULL || user[0] == '\0')
+            user = "unknown";
+
+        snprintf(path, sizeof path, "/tmp/android-%s", user);
+        tmppath = path;
     }
     mkdir(tmppath, 0744);
     return  bufprint(buff, end, "%s", tmppath );
