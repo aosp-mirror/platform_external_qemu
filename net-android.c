@@ -1606,6 +1606,7 @@ static int net_vde_init(VLANState *vlan, const char *model,
 typedef struct NetSocketState {
     VLANClientState *vc;
     int fd;
+    int fd_send; /* only differs from fd in multicast sockets */
     int state; /* 0 = getting length, 1 = getting data */
     unsigned int index;
     unsigned int packet_len;
@@ -1627,15 +1628,15 @@ static ssize_t net_socket_receive(VLANClientState *vc, const uint8_t *buf, size_
     uint32_t len;
     len = htonl(size);
 
-    socket_send(s->fd, (const uint8_t *)&len, sizeof(len));
-    return socket_send(s->fd, buf, size);
+    socket_send(s->fd_send, (const uint8_t *)&len, sizeof(len));
+    return socket_send(s->fd_send, buf, size);
 }
 
 static ssize_t net_socket_receive_dgram(VLANClientState *vc, const uint8_t *buf, size_t size)
 {
     NetSocketState *s = vc->opaque;
 
-    return socket_sendto(s->fd, buf, size, &s->dgram_dst);
+    return socket_sendto(s->fd_send, buf, size, &s->dgram_dst);
 }
 
 static void net_socket_send(void *opaque)
@@ -1775,13 +1776,16 @@ static void net_socket_cleanup(VLANClientState *vc)
     NetSocketState *s = vc->opaque;
     qemu_set_fd_handler(s->fd, NULL, NULL, NULL);
     socket_close(s->fd);
+    if (s->fd != s->fd_send)
+      socket_close(s->fd_send);
     qemu_free(s);
 }
 
-static NetSocketState *net_socket_fd_init_dgram(VLANState *vlan,
-                                                const char *model,
-                                                const char *name,
-                                                int fd, int is_connected)
+static NetSocketState *net_socket_fd_init_dgram2(VLANState *vlan,
+                                                 const char *model,
+                                                 const char *name,
+                                                 int fd_recv, int fd_send,
+                                                 int is_connected)
 {
     SockAddress  saddr;
     int newfd;
@@ -1793,33 +1797,34 @@ static NetSocketState *net_socket_fd_init_dgram(VLANState *vlan,
      */
 
     if (is_connected) {
-	if (socket_get_address(fd, &saddr) == 0) {
-	    /* must be bound */
-	    if (sock_address_get_ip(&saddr) == 0) {
-		fprintf(stderr, "qemu: error: init_dgram: fd=%d unbound, cannot setup multicast dst addr\n",
-			fd);
-		return NULL;
-	    }
-	    /* clone dgram socket */
-	    newfd = net_socket_mcast_create(&saddr);
-	    if (newfd < 0) {
-		/* error already reported by net_socket_mcast_create() */
-		socket_close(fd);
-		return NULL;
-	    }
-	    /* clone newfd to fd, close newfd */
-	    dup2(newfd, fd);
-	    socket_close(newfd);
+      if (socket_get_address(fd_recv, &saddr) == 0) {
+        /* must be bound */
+        if (sock_address_get_ip(&saddr) == 0) {
+          fprintf(stderr, "qemu: error: init_dgram: fd=%d unbound, cannot setup multicast dst addr\n",
+                  fd_recv);
+          return NULL;
+        }
+        /* clone dgram socket */
+        newfd = net_socket_mcast_create(&saddr);
+        if (newfd < 0) {
+          /* error already reported by net_socket_mcast_create() */
+          socket_close(fd_recv);
+          return NULL;
+        }
+        /* clone newfd to fd_recv, close newfd */
+        dup2(newfd, fd_recv);
+        socket_close(newfd);
 
-	} else {
-	    fprintf(stderr, "qemu: error: init_dgram: fd=%d failed getsockname(): %s\n",
-		    fd, strerror(errno));
-	    return NULL;
-	}
+      } else {
+        fprintf(stderr, "qemu: error: init_dgram: fd=%d failed getsockname(): %s\n",
+            fd_recv, strerror(errno));
+        return NULL;
+      }
     }
 
     s = qemu_mallocz(sizeof(NetSocketState));
-    s->fd = fd;
+    s->fd = fd_recv;
+    s->fd_send = fd_send;
 
     s->vc = qemu_new_vlan_client(vlan, model, name, NULL, net_socket_receive_dgram,
                                  NULL, net_socket_cleanup, s);
@@ -1829,10 +1834,18 @@ static NetSocketState *net_socket_fd_init_dgram(VLANState *vlan,
     if (is_connected) s->dgram_dst=saddr;
 
     snprintf(s->vc->info_str, sizeof(s->vc->info_str),
-	    "socket: fd=%d (%s mcast=%s)",
-	    fd, is_connected? "cloned" : "",
-	    sock_address_to_string(&saddr));
+             "socket: fd=%d (%s mcast=%s)",
+             fd_recv, is_connected? "cloned" : "",
+             sock_address_to_string(&saddr));
     return s;
+}
+
+static NetSocketState *net_socket_fd_init_dgram(VLANState *vlan,
+                                                const char *model,
+                                                const char *name,
+                                                int fd, int is_connected)
+{
+  return net_socket_fd_init_dgram2(vlan, model, name, fd, fd, is_connected);
 }
 
 static void net_socket_connect(void *opaque)
@@ -1848,7 +1861,7 @@ static NetSocketState *net_socket_fd_init_stream(VLANState *vlan,
 {
     NetSocketState *s;
     s = qemu_mallocz(sizeof(NetSocketState));
-    s->fd = fd;
+    s->fd = s->fd_send = fd;
     s->vc = qemu_new_vlan_client(vlan, model, name, NULL, net_socket_receive,
                                  NULL, net_socket_cleanup, s);
     snprintf(s->vc->info_str, sizeof(s->vc->info_str),
@@ -1998,18 +2011,31 @@ static int net_socket_mcast_init(VLANState *vlan,
                                  const char *host_str)
 {
     NetSocketState *s;
-    int fd;
+    int fd_recv, fd_send;
     SockAddress saddr;
 
     if (parse_host_port(&saddr, host_str) < 0)
         return -1;
 
 
-    fd = net_socket_mcast_create(&saddr);
-    if (fd < 0)
-	return -1;
+    fd_recv = net_socket_mcast_create(&saddr);
+    if (fd_recv < 0)
+        return -1;
 
-    s = net_socket_fd_init(vlan, model, name, fd, 0);
+    /* We have to create a second socket to send multicast packets out, as sending
+     * from a socket bound to a multicast address throws "Can't assign requested address"
+     * errors. This happens on eg. OSX 10.6.
+     */
+    fd_send = socket_create_inet(SOCKET_DGRAM);
+    if (fd_send < 0) {
+        perror("socket(PF_INET, SOCK_DGRAM)");
+        return -1;
+    }
+
+    socket_set_nonblock(fd_send);
+
+
+    s = net_socket_fd_init_dgram2(vlan, model, name, fd_recv, fd_send, 0);
     if (!s)
         return -1;
 
