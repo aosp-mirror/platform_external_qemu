@@ -265,6 +265,14 @@ path_can_write( const char*  path )
     return (ret == 0);
 }
 
+ABool
+path_can_exec( const char* path )
+{
+    int  ret;
+    CHECKED(ret, access(path, X_OK));
+    return (ret == 0);
+}
+
 /* try to make a directory. returns 0 on success, -1 on failure
  * (error code in errno) */
 APosixStatus
@@ -325,7 +333,7 @@ path_mkdir_recursive( char*  path, unsigned  len, int  mode )
     return ret;
 }
 
-/* ensure that a given directory exists, create it if not, 
+/* ensure that a given directory exists, create it if not,
    0 on success, -1 on failure (error code in errno) */
 APosixStatus
 path_mkdir_if_needed( const char*  path, int  mode )
@@ -363,9 +371,9 @@ path_get_size( const char*  path, uint64_t  *psize )
     /* result in getting the size of a different file */
     LARGE_INTEGER  size;
     HANDLE  file = CreateFile( /* lpFilename */        path,
-                               /* dwDesiredAccess */   GENERIC_READ,    
-                               /* dwSharedMode */     FILE_SHARE_READ|FILE_SHARE_WRITE, 
-                               /* lpSecurityAttributes */  NULL, 
+                               /* dwDesiredAccess */   GENERIC_READ,
+                               /* dwSharedMode */     FILE_SHARE_READ|FILE_SHARE_WRITE,
+                               /* lpSecurityAttributes */  NULL,
                                /* dwCreationDisposition */ OPEN_EXISTING,
                                /* dwFlagsAndAttributes */  0,
                                /* hTemplateFile */      NULL );
@@ -564,3 +572,73 @@ path_load_file(const char *fn, size_t  *pSize)
     return NULL;
 }
 
+#ifdef _WIN32
+#  define DIR_SEP  ';'
+#else
+#  define DIR_SEP  ':'
+#endif
+
+char*
+path_search_exec( const char* filename )
+{
+    const char* sysPath = getenv("PATH");
+    char        temp[PATH_MAX];
+    int         count;
+    int         slen;
+    const char* p;
+
+    /* If the file contains a directory separator, don't search */
+#ifdef _WIN32
+    if (strchr(filename, '/') != NULL || strchr(filename, '\\') != NULL) {
+#else
+    if (strchr(filename, '/') != NULL) {
+#endif
+        if (path_exists(filename)) {
+            return strdup(filename);
+        } else {
+            return NULL;
+        }
+    }
+
+    /* If system path is empty, don't search */
+    if (sysPath == NULL || sysPath[0] == '\0') {
+        return NULL;
+    }
+
+    /* Count the number of non-empty items in the system path
+     * Items are separated by DIR_SEP, and two successive separators
+     * correspond to an empty item that will be ignored.
+     * Also compute the required string storage length. */
+    count   = 0;
+    slen    = 0;
+    p       = sysPath;
+
+    while (*p) {
+        char* p2 = strchr(p, DIR_SEP);
+        int   len;
+        if (p2 == NULL) {
+            len = strlen(p);
+        } else {
+            len = p2 - p;
+        }
+
+        do {
+            if (len <= 0)
+                break;
+
+            snprintf(temp, sizeof(temp), "%.*s/%s", len, p, filename);
+
+            if (path_exists(temp) && path_can_exec(temp)) {
+                return strdup(temp);
+            }
+
+        } while (0);
+
+        p += len;
+        if (*p == DIR_SEP)
+            p++;
+    }
+
+    /* Nothing, really */
+    return NULL;
+}
