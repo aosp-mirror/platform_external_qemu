@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "android/avd/info.h"
+#include "android/avd/util.h"
 #include "android/config/config.h"
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
@@ -62,12 +63,6 @@ AvdInfo*        android_avdInfo;
  * Individual image disk search patch can be over-riden on the command-line
  * with one of the usual options.
  */
-
-/* this is the subdirectory of $HOME/.android where all
- * root configuration files (and default content directories)
- * are located.
- */
-#define  ANDROID_AVD_DIR    "avd"
 
 /* the prefix of config.ini keys that will be used for search directories
  * of system images.
@@ -230,50 +225,6 @@ static const char*  const _imageFileText[ AVD_IMAGE_MAX ] = {
  *****
  *****/
 
-/* Return the path to the Android SDK root installation.
- *
- * (*pFromEnv) will be set to 1 if it comes from the $ANDROID_SDK_ROOT
- * environment variable, or 0 otherwise.
- *
- * Caller must free() returned string.
- */
-static char*
-_getSdkRoot( char *pFromEnv )
-{
-    const char*  env;
-    char*        sdkPath;
-    char         temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-
-    /* If ANDROID_SDK_ROOT is defined is must point to a directory
-     * containing a valid SDK installation.
-     */
-#define  SDK_ROOT_ENV  "ANDROID_SDK_ROOT"
-
-    env = getenv(SDK_ROOT_ENV);
-    if (env != NULL && env[0] != 0) {
-        if (path_exists(env)) {
-            D("found " SDK_ROOT_ENV ": %s", env);
-            *pFromEnv = 1;
-            return ASTRDUP(env);
-        }
-        D(SDK_ROOT_ENV " points to unknown directory: %s", env);
-    }
-
-    *pFromEnv = 0;
-
-    /* We assume the emulator binary is under tools/ so use its
-     * parent as the Android SDK root.
-     */
-    (void) bufprint_app_dir(temp, end);
-    sdkPath = path_parent(temp, 1);
-    if (sdkPath == NULL) {
-        derror("can't find root of SDK directory");
-        return NULL;
-    }
-    D("found SDK root at %s", sdkPath);
-    return sdkPath;
-}
-
 /* Parse a given config.ini file and extract the list of SDK search paths
  * from it. Returns the number of valid paths stored in 'searchPaths', or -1
  * in case of problem.
@@ -326,171 +277,6 @@ _checkAvdName( const char*  name )
     return (len == len2);
 }
 
-/* Return the path to the AVD's root configuration .ini file. it is located in
- * ~/.android/avd/<name>.ini or Windows equivalent
- *
- * This file contains the path to the AVD's content directory, which
- * includes its own config.ini.
- */
-static char*
-_getRootIniPath( const char*  avdName )
-{
-    char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-
-    p = bufprint_config_path(temp, end);
-    p = bufprint(p, end, "/" ANDROID_AVD_DIR "/%s.ini", avdName);
-    if (p >= end) {
-        return NULL;
-    }
-    if (!path_exists(temp)) {
-        return NULL;
-    }
-    return ASTRDUP(temp);
-}
-
-
-/* Retrieves the value of a given system property defined in a .prop
- * file. This is a text file that contains definitions of the format:
- * <name>=<value>
- *
- * Returns NULL if property <name> is undefined or empty.
- * Returned string must be freed by the caller.
- */
-static char*
-_getSystemProperty( const char* propFile, const char* propName )
-{
-    FILE*  file;
-    char   temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-    int    propNameLen = strlen(propName);
-    char*  result = NULL;
-
-    file = fopen(propFile, "rb");
-    if (file == NULL) {
-        D("Could not open file: %s: %s", temp, strerror(errno));
-        return NULL;
-    }
-
-    while (fgets(temp, sizeof temp, file) != NULL) {
-        /* Trim trailing newlines, if any */
-        p = memchr(temp, '\0', sizeof temp);
-        if (p == NULL)
-            p = end;
-        if (p > temp && p[-1] == '\n') {
-            *--p = '\0';
-        }
-        if (p > temp && p[-1] == '\r') {
-            *--p = '\0';
-        }
-        /* force zero-termination in case of full-buffer */
-        if (p == end)
-            *--p = '\0';
-
-        /* check that the line starts with the property name */
-        if (memcmp(temp, propName, propNameLen) != 0) {
-            continue;
-        }
-        p = temp + propNameLen;
-
-        /* followed by an equal sign */
-        if (p >= end || *p != '=')
-            continue;
-        p++;
-
-        /* followed by something */
-        if (p >= end || !*p)
-            break;
-
-        result = ASTRDUP(p);
-        break;
-    }
-    fclose(file);
-    return result;
-}
-
-/* Return a build property. This is a system property defined in a file
- * named $ANDROID_PRODUCT_OUT/system/build.prop
- *
- * Returns NULL if undefined or empty. Returned string must be freed
- * by the caller.
- */
-static char*
-_getBuildProperty( const char* androidOut, const char* propName )
-{
-    char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-
-    p = bufprint(temp, end, "%s/system/build.prop", androidOut);
-    if (p >= end) {
-        D("%s: ANDROID_PRODUCT_OUT too long: %s", __FUNCTION__, androidOut);
-        return NULL;
-    }
-    return _getSystemProperty(temp, propName);
-}
-
-/* Retrieves a string corresponding to the target architecture
- * when in the Android platform tree. The only way to do that
- * properly for now is to look at $OUT/system/build.prop:
- *
- *   ro.product.cpu-abi=<abi>
- *
- * Where <abi> can be 'armeabi', 'armeabi-v7a' or 'x86'.
- */
-static char*
-_getBuildTargetArch( const char* androidOut )
-{
-    const char* defaultArch = "arm";
-    char*       result = NULL;
-    char*       cpuAbi = _getBuildProperty(androidOut, "ro.product.cpu.abi");
-
-    if (cpuAbi == NULL) {
-        D("Coult not find CPU ABI in build properties!");
-        D("Default target architecture=%s", defaultArch);
-        result = ASTRDUP(defaultArch);
-    } else {
-        /* Translate ABI to cpu arch if necessary */
-        if (!strcmp("armeabi",cpuAbi))
-            result = "arm";
-        else if (!strcmp("armeabi-v7a", cpuAbi))
-            result = "arm";
-        else
-            result = cpuAbi;
-
-        D("Found target ABI=%s, architecture=%s", cpuAbi, result);
-        result = ASTRDUP(result);
-        AFREE(cpuAbi);
-    }
-    return result;
-}
-
-static int
-_getBuildTargetApiLevel( const char* androidOut )
-{
-    const int  defaultLevel = 1000;
-    int        level        = defaultLevel;
-    char*      sdkVersion = _getBuildProperty(androidOut, "ro.build.version.sdk");
-
-    if (sdkVersion != NULL) {
-        long  value;
-        char* end;
-        value = strtol(sdkVersion, &end, 10);
-        if (end == NULL || *end != '\0' || value != (int)value) {
-            D("Invalid SDK version build property: '%s'", sdkVersion);
-            D("Defaulting to target API level %d", level);
-        } else {
-            level = (int)value;
-            /* Sanity check, the Android SDK doesn't support anything
-             * before Android 1.5, a.k.a API level 3 */
-            if (level < 3)
-                level = 3;
-            D("Found target API level: %d", level);
-        }
-        AFREE(sdkVersion);
-    } else {
-        D("Could not find target API level / SDK version in build properties!");
-        D("Default target API level: %d", level);
-    }
-    return level;
-}
-
 /* Returns the full path of a given file.
  *
  * If 'fileName' is an absolute path, this returns a simple copy.
@@ -536,7 +322,7 @@ _checkSkinPath( const char*  skinPath )
  */
 static char*
 _checkSkinSkinsDir( const char*  skinDirRoot,
-               const char*  skinName )
+                    const char*  skinName )
 {
     DirScanner*  scanner;
     char*        result;
@@ -649,7 +435,7 @@ static int
 _avdInfo_getSdkRoot( AvdInfo*  i )
 {
 
-    i->sdkRootPath = _getSdkRoot(&i->sdkRootPathFromEnv);
+    i->sdkRootPath = path_getSdkRoot(&i->sdkRootPathFromEnv);
     if (i->sdkRootPath == NULL)
         return -1;
 
@@ -662,7 +448,7 @@ _avdInfo_getSdkRoot( AvdInfo*  i )
 static int
 _avdInfo_getRootIni( AvdInfo*  i )
 {
-    char*  iniPath = _getRootIniPath( i->deviceName );
+    char*  iniPath = path_getRootIniPath( i->deviceName );
 
     if (iniPath == NULL) {
         derror("unknown virtual device name: '%s'", i->deviceName);
@@ -1027,8 +813,8 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
     i->androidBuildRoot = ASTRDUP(androidBuildRoot);
     i->androidOut       = ASTRDUP(androidOut);
     i->contentPath      = ASTRDUP(androidOut);
-    i->targetArch       = _getBuildTargetArch(i->androidOut);
-    i->apiLevel         = _getBuildTargetApiLevel(i->androidOut);
+    i->targetArch       = path_getBuildTargetArch(i->androidOut);
+    i->apiLevel         = path_getBuildTargetApiLevel(i->androidOut);
 
     /* TODO: find a way to provide better information from the build files */
     i->deviceName = ASTRDUP("<build>");

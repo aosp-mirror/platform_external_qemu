@@ -17,6 +17,20 @@
 #error  HWCFG_DOUBLE not defined
 #endif
 
+HWCFG_STRING(
+  hw_cpu_arch,
+  "hw.cpu.arch",
+  "arm",
+  "CPU Architecture",
+  "The CPU Architecture to emulator")
+
+HWCFG_STRING(
+  hw_cpu_model,
+  "hw.cpu.model",
+  "",
+  "CPU model",
+  "The CPU model (QEMU-specific string)")
+
 HWCFG_INT(
   hw_ramSize,
   "hw.ramSize",

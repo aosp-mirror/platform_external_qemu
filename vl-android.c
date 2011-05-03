@@ -5626,6 +5626,29 @@ int main(int argc, char **argv, char **envp)
     }
 #endif
 
+    /* Check the CPU Architecture value */
+#if defined(TARGET_ARM)
+    if (strcmp(android_hw->hw_cpu_arch,"arm") != 0) {
+        fprintf(stderr, "-- Invalid CPU architecture: %s, expected 'arm'\n",
+                android_hw->hw_cpu_arch);
+        exit(1);
+    }
+#elif defined(TARGET_X86)
+    if (strcmp(android_hw->hw_cpu_arch,"x86") != 0) {
+        fprintf(stderr, "-- Invalid CPU architecture: %s, expected 'x86'\n",
+                android_hw->hw_cpu_arch);
+        exit(1);
+    }
+#endif
+
+    /* Grab CPU model if provided in hardware.ini */
+    if (    !cpu_model
+         && android_hw->hw_cpu_model
+         && android_hw->hw_cpu_model[0] != '\0')
+    {
+        cpu_model = android_hw->hw_cpu_model;
+    }
+
     /* Combine kernel command line passed from the UI with parameters
      * collected during initialization.
      *
