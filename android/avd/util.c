@@ -100,19 +100,12 @@ path_getRootIniPath( const char*  avdName )
 char*
 path_getSdkHome(void)
 {
-    const char* sdkHome = getenv("ANDROID_SDK_HOME");
-
-    if (sdkHome == NULL || *sdkHome == '\0') {
-        char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-        p = bufprint_config_path(temp, end);
-        if (p >= end) {
-            APANIC("User path too long!: %s\n", temp);
-        }
-        sdkHome = strdup(temp);
-    } else {
-        sdkHome = strdup(sdkHome);
+    char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
+    p = bufprint_config_path(temp, end);
+    if (p >= end) {
+        APANIC("User path too long!: %s\n", temp);
     }
-    return (char*)sdkHome;
+    return strdup(temp);
 }
 
 
