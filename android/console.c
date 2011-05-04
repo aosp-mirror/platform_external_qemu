@@ -2094,6 +2094,12 @@ static int
 do_snapshot_save( ControlClient  client, char*  args )
 {
     int ret;
+
+    if (args == NULL) {
+        control_write(client, "KO: argument missing, try 'avd snapshot save <name>'\r\n");
+        return -1;
+    }
+
     OutputChannel *err = output_channel_alloc(client, control_write_err_cb);
     do_savevm_oc(err, args);
     ret = output_channel_written(err);
@@ -2106,6 +2112,12 @@ static int
 do_snapshot_load( ControlClient  client, char*  args )
 {
     int ret;
+
+    if (args == NULL) {
+        control_write(client, "KO: argument missing, try 'avd snapshot load <name>'\r\n");
+        return -1;
+    }
+
     OutputChannel *err = output_channel_alloc(client, control_write_err_cb);
     do_loadvm_oc(err, args);
     ret = output_channel_written(err);
@@ -2118,6 +2130,12 @@ static int
 do_snapshot_del( ControlClient  client, char*  args )
 {
     int ret;
+
+    if (args == NULL) {
+        control_write(client, "KO: argument missing, try 'avd snapshot del <name>'\r\n");
+        return -1;
+    }
+
     OutputChannel *err = output_channel_alloc(client, control_write_err_cb);
     do_delvm_oc(err, args);
     ret = output_channel_written(err);
