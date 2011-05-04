@@ -5090,9 +5090,14 @@ int main(int argc, char **argv, char **envp)
                 PANIC("Snapshot storage file does not exist: %s", spath);
             }
             if (filelock_create(spath) == NULL) {
-                PANIC("Snapshot storag already in use: %s", spath);
+                PANIC("Snapshot storage already in use: %s", spath);
             }
             hdb_opts = drive_add(spath, HD_ALIAS, 1);
+            /* VERY IMPORTANT:
+             *    Set this property or the file will be mounted with O_DIRECT,
+             *    which will slow down snapshot saving.x100 !
+             */
+            qemu_opt_set(hdb_opts, "snapshot", "on");
         }
     }
 
