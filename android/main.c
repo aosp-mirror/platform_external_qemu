@@ -1026,6 +1026,9 @@ int main(int argc, char **argv)
 
     hw->avd_name = ASTRDUP(avdInfo_getName(avd));
 
+    args[n++] = "-android-avdname";
+    args[n++] = avdInfo_getName(avd);
+
     /* Set up the interfaces for inter-emulator networking */
     if (opts->shared_net_id) {
         unsigned int shared_net_id = atoi(opts->shared_net_id);
