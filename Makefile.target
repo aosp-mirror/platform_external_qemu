@@ -103,6 +103,9 @@ LOCAL_SRC_FILES += arm-dis.c
 LOCAL_CFLAGS += $(ZLIB_CFLAGS)
 endif
 
+# required to ensure we properly initialize virtual audio hardware
+LOCAL_CFLAGS += -DHAS_AUDIO
+
 ifeq ($(EMULATOR_TARGET_ARCH),x86)
 HW_SOURCES += \
     apic.c \
