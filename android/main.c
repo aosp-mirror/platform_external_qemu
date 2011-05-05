@@ -261,6 +261,21 @@ int main(int argc, char **argv)
     }
 
     if (opts->snapshot_list) {
+        if (opts->snapstorage == NULL) {
+            /* Need to find the default snapstorage */
+            avd = createAVD(opts, &inAndroidBuild);
+            opts->snapstorage = avdInfo_getSnapStoragePath(avd);
+            if (opts->snapstorage != NULL) {
+                D("autoconfig: -snapstorage %s", opts->snapstorage);
+            } else {
+                if (inAndroidBuild) {
+                    derror("You must use the -snapstorage <file> option to specify a snapshot storage file!\n");
+                } else {
+                    derror("This AVD doesn't have snapshotting enabled!\n");
+                }
+                exit(1);
+            }
+        }
         snapshot_print_and_exit(opts->snapstorage);
     }
 
