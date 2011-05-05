@@ -310,7 +310,7 @@ snapshot_print_and_exit( const char *snapstorage )
 {
     /* open snapshot file */
     int fd = open(snapstorage, O_RDONLY);
-    if (!fd) {
+    if (fd < 0) {
         derror("Could not open snapshot file '%s': %s", snapstorage, strerror(errno));
         exit(1);
     }
