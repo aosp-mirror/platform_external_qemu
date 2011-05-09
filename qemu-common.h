@@ -18,10 +18,8 @@ typedef struct QEMUFile QEMUFile;
 typedef struct QEMUBH QEMUBH;
 typedef struct DeviceState DeviceState;
 
-/* Hack around the mess dyngen-exec.h causes: We need QEMU_NORETURN in files that
-   cannot include the following headers without conflicts. This condition has
-   to be removed once dyngen is gone. */
-#ifndef __DYNGEN_EXEC_H__
+struct Monitor;
+typedef struct Monitor Monitor;
 
 /* we put basic includes here to avoid repeating them in device drivers */
 #include <stdlib.h>
@@ -38,7 +36,16 @@ typedef struct DeviceState DeviceState;
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <assert.h>
+
+#ifdef _WIN32
+#include "qemu-os-win32.h"
+#endif
+
+#ifdef CONFIG_POSIX
+#include "qemu-os-posix.h"
+#endif
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -55,6 +62,9 @@ typedef struct DeviceState DeviceState;
 #if !defined(ENOTSUP)
 #define ENOTSUP 4096
 #endif
+#ifndef TIME_MAX
+#define TIME_MAX LONG_MAX
+#endif
 
 #ifndef CONFIG_IOVEC
 #define CONFIG_IOVEC
@@ -70,10 +80,29 @@ struct iovec {
 #include <sys/uio.h>
 #endif
 
+#if defined __GNUC__
+# if (__GNUC__ < 4) || \
+     defined(__GNUC_MINOR__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 4)
+   /* gcc versions before 4.4.x don't support gnu_printf, so use printf. */
+#  define GCC_ATTR __attribute__((__unused__, format(printf, 1, 2)))
+#  define GCC_FMT_ATTR(n, m) __attribute__((format(printf, n, m)))
+# else
+   /* Use gnu_printf when supported (qemu uses standard format strings). */
+#  define GCC_ATTR __attribute__((__unused__, format(gnu_printf, 1, 2)))
+#  define GCC_FMT_ATTR(n, m) __attribute__((format(gnu_printf, n, m)))
+# endif
+#else
+#define GCC_ATTR /**/
+#define GCC_FMT_ATTR(n, m)
+#endif
+
+typedef int (*fprintf_function)(FILE *f, const char *fmt, ...)
+    GCC_FMT_ATTR(2, 3);
+
 #ifdef _WIN32
 #define fsync _commit
 #define lseek _lseeki64
-extern int qemu_ftruncate64(int, int64_t);
+int qemu_ftruncate64(int, int64_t);
 #define ftruncate qemu_ftruncate64
 
 static inline char *realpath(const char *path, char *resolved_path)
@@ -138,6 +167,21 @@ int qemu_fls(int i);
 int qemu_fdatasync(int fd);
 int fcntl_setfl(int fd, int flag);
 
+/*
+ * strtosz() suffixes used to specify the default treatment of an
+ * argument passed to strtosz() without an explicit suffix.
+ * These should be defined using upper case characters in the range
+ * A-Z, as strtosz() will use qemu_toupper() on the given argument
+ * prior to comparison.
+ */
+#define STRTOSZ_DEFSUFFIX_TB	'T'
+#define STRTOSZ_DEFSUFFIX_GB	'G'
+#define STRTOSZ_DEFSUFFIX_MB	'M'
+#define STRTOSZ_DEFSUFFIX_KB	'K'
+#define STRTOSZ_DEFSUFFIX_B	'B'
+int64_t strtosz(const char *nptr, char **end);
+int64_t strtosz_suffix(const char *nptr, char **end, const char default_suffix);
+
 /* path.c */
 void init_paths(const char *prefix);
 const char *path(const char *pathname);
@@ -158,6 +202,12 @@ const char *path(const char *pathname);
 #define qemu_isascii(c)		isascii((unsigned char)(c))
 #define qemu_toascii(c)		toascii((unsigned char)(c))
 
+#ifdef _WIN32
+/* ffs() in oslib-win32.c for WIN32, strings.h for the rest of the world */
+int ffs(int i);
+#endif
+
+void *qemu_oom_check(void *ptr);
 void *qemu_malloc(size_t size);
 void *qemu_realloc(void *ptr, size_t size);
 void *qemu_mallocz(size_t size);
@@ -183,8 +233,7 @@ void *get_mmap_addr(unsigned long size);
 
 /* Error handling.  */
 
-void QEMU_NORETURN hw_error(const char *fmt, ...)
-    __attribute__ ((__format__ (__printf__, 1, 2)));
+void QEMU_NORETURN hw_error(const char *fmt, ...) GCC_FMT_ATTR(1, 2);
 
 /* IO callbacks.  */
 typedef void IOReadHandler(void *opaque, const uint8_t *buf, int size);
@@ -287,9 +336,6 @@ void qemu_iovec_reset(QEMUIOVector *qiov);
 void qemu_iovec_to_buffer(QEMUIOVector *qiov, void *buf);
 void qemu_iovec_from_buffer(QEMUIOVector *qiov, const void *buf, size_t count);
 
-struct Monitor;
-typedef struct Monitor Monitor;
-
 /* Convert a byte between binary and BCD.  */
 static inline uint8_t to_bcd(uint8_t val)
 {
@@ -302,8 +348,6 @@ static inline uint8_t from_bcd(uint8_t val)
 }
 
 #include "module.h"
-
-#endif /* dyngen-exec.h hack */
 
 typedef enum DisplayType
 {

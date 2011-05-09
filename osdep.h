@@ -8,9 +8,7 @@
 #include <sys/signal.h>
 #endif
 
-#ifndef _WIN32
 #include <sys/time.h>
-#endif
 
 #ifndef glue
 #define xglue(x, y) x ## y
@@ -57,6 +55,10 @@
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
+#ifndef DIV_ROUND_UP
+#define DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
+#endif
+
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
@@ -90,6 +92,62 @@ void *qemu_memalign(size_t alignment, size_t size);
 void *qemu_vmalloc(size_t size);
 void qemu_vfree(void *ptr);
 
+#define QEMU_MADV_INVALID -1
+
+#if defined(CONFIG_MADVISE)
+
+#define QEMU_MADV_WILLNEED  MADV_WILLNEED
+#define QEMU_MADV_DONTNEED  MADV_DONTNEED
+#ifdef MADV_DONTFORK
+#define QEMU_MADV_DONTFORK  MADV_DONTFORK
+#else
+#define QEMU_MADV_DONTFORK  QEMU_MADV_INVALID
+#endif
+#ifdef MADV_MERGEABLE
+#define QEMU_MADV_MERGEABLE MADV_MERGEABLE
+#else
+#define QEMU_MADV_MERGEABLE QEMU_MADV_INVALID
+#endif
+
+#elif defined(CONFIG_POSIX_MADVISE)
+
+#define QEMU_MADV_WILLNEED  POSIX_MADV_WILLNEED
+#define QEMU_MADV_DONTNEED  POSIX_MADV_DONTNEED
+#define QEMU_MADV_DONTFORK  QEMU_MADV_INVALID
+#define QEMU_MADV_MERGEABLE QEMU_MADV_INVALID
+
+#else /* no-op */
+
+#define QEMU_MADV_WILLNEED  QEMU_MADV_INVALID
+#define QEMU_MADV_DONTNEED  QEMU_MADV_INVALID
+#define QEMU_MADV_DONTFORK  QEMU_MADV_INVALID
+#define QEMU_MADV_MERGEABLE QEMU_MADV_INVALID
+
+#endif
+
+int qemu_madvise(void *addr, size_t len, int advice);
+
+int qemu_create_pidfile(const char *filename);
+int qemu_get_thread_id(void);
+
+#ifdef _WIN32
+static inline void qemu_timersub(const struct timeval *val1,
+                                 const struct timeval *val2,
+                                 struct timeval *res)
+{
+    res->tv_sec = val1->tv_sec - val2->tv_sec;
+    if (val1->tv_usec < val2->tv_usec) {
+        res->tv_sec--;
+        res->tv_usec = val1->tv_usec - val2->tv_usec + 1000 * 1000;
+    } else {
+        res->tv_usec = val1->tv_usec - val2->tv_usec;
+    }
+}
+#else
+#define qemu_timersub timersub
+#define ffs __builtin_ffs
+#endif
+
 int qemu_create_pidfile(const char *filename);
 
 #ifdef _WIN32
@@ -98,15 +156,6 @@ int ffs(int i);
 int setenv(const char *name, const char *value, int overwrite);
 int asprintf(char **sptr, char *fmt, ...);
 int vasprintf(char **sptr, char *fmt, va_list args);
-
-typedef struct {
-    long tv_sec;
-    long tv_usec;
-} qemu_timeval;
-int qemu_gettimeofday(qemu_timeval *tp);
-#else
-typedef struct timeval qemu_timeval;
-#define qemu_gettimeofday(tp) gettimeofday(tp, NULL);
 #endif /* !_WIN32 */
 
 #endif

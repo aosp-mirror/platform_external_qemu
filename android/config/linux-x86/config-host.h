@@ -15,4 +15,5 @@
 #define CONFIG_KVM_GS_RESTORE   1
 #define CONFIG_IOVEC 1
 #define CONFIG_LINUX   1
+#define CONFIG_POSIX 1
 #define CONFIG_ANDROID       1

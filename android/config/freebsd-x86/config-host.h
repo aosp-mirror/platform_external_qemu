@@ -14,3 +14,4 @@
 #define CONFIG_UNAME_RELEASE ""
 #define CONFIG_SKINS 1
 #define CONFIG_ANDROID 1
+#define CONFIG_POSIX 1

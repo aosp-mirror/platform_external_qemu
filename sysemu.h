@@ -91,22 +91,6 @@ void qemu_error_internal(const char *file, int linenr, const char *func,
 #define qemu_error_new(fmt, ...) \
     qemu_error_internal(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
 
-#ifdef _WIN32
-/* Polling handling */
-
-/* return TRUE if no sleep should be done afterwards */
-typedef int PollingFunc(void *opaque);
-
-int qemu_add_polling_cb(PollingFunc *func, void *opaque);
-void qemu_del_polling_cb(PollingFunc *func, void *opaque);
-
-/* Wait objects handling */
-typedef void WaitObjectFunc(void *opaque);
-
-int qemu_add_wait_object(HANDLE handle, WaitObjectFunc *func, void *opaque);
-void qemu_del_wait_object(HANDLE handle, WaitObjectFunc *func, void *opaque);
-#endif
-
 /* TAP win32 */
 int tap_win32_init(VLANState *vlan, const char *model,
                    const char *name, const char *ifname);
