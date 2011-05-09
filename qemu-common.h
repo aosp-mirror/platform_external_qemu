@@ -151,8 +151,6 @@ void qemu_bh_delete(QEMUBH *bh);
 int qemu_bh_poll(void);
 void qemu_bh_update_timeout(int *timeout);
 
-uint64_t muldiv64(uint64_t a, uint32_t b, uint32_t c);
-
 void qemu_get_timedate(struct tm *tm, int offset);
 int qemu_timedate_diff(struct tm *tm);
 
@@ -330,11 +328,16 @@ typedef struct QEMUIOVector {
 void qemu_iovec_init(QEMUIOVector *qiov, int alloc_hint);
 void qemu_iovec_init_external(QEMUIOVector *qiov, struct iovec *iov, int niov);
 void qemu_iovec_add(QEMUIOVector *qiov, void *base, size_t len);
+void qemu_iovec_copy(QEMUIOVector *dst, QEMUIOVector *src, uint64_t skip,
+    size_t size);
 void qemu_iovec_concat(QEMUIOVector *dst, QEMUIOVector *src, size_t size);
 void qemu_iovec_destroy(QEMUIOVector *qiov);
 void qemu_iovec_reset(QEMUIOVector *qiov);
 void qemu_iovec_to_buffer(QEMUIOVector *qiov, void *buf);
 void qemu_iovec_from_buffer(QEMUIOVector *qiov, const void *buf, size_t count);
+void qemu_iovec_memset(QEMUIOVector *qiov, int c, size_t count);
+void qemu_iovec_memset_skip(QEMUIOVector *qiov, int c, size_t count,
+                            size_t skip);
 
 /* Convert a byte between binary and BCD.  */
 static inline uint8_t to_bcd(uint8_t val)
@@ -345,6 +348,30 @@ static inline uint8_t to_bcd(uint8_t val)
 static inline uint8_t from_bcd(uint8_t val)
 {
     return ((val >> 4) * 10) + (val & 0x0f);
+}
+
+/* compute with 96 bit intermediate result: (a*b)/c */
+static inline uint64_t muldiv64(uint64_t a, uint32_t b, uint32_t c)
+{
+    union {
+        uint64_t ll;
+        struct {
+#ifdef HOST_WORDS_BIGENDIAN
+            uint32_t high, low;
+#else
+            uint32_t low, high;
+#endif
+        } l;
+    } u, res;
+    uint64_t rl, rh;
+
+    u.ll = a;
+    rl = (uint64_t)u.l.low * (uint64_t)b;
+    rh = (uint64_t)u.l.high * (uint64_t)b;
+    rh += (rl >> 32);
+    res.l.high = rh / c;
+    res.l.low = (((rh % c) << 32) + (rl & 0xffffffff)) / c;
+    return res.ll;
 }
 
 #include "module.h"
