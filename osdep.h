@@ -148,14 +148,4 @@ static inline void qemu_timersub(const struct timeval *val1,
 #define ffs __builtin_ffs
 #endif
 
-int qemu_create_pidfile(const char *filename);
-
-#ifdef _WIN32
-int ffs(int i);
-
-int setenv(const char *name, const char *value, int overwrite);
-int asprintf(char **sptr, char *fmt, ...);
-int vasprintf(char **sptr, char *fmt, va_list args);
-#endif /* !_WIN32 */
-
 #endif

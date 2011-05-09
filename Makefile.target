@@ -206,6 +206,14 @@ MCHK_SOURCES := \
 
 LOCAL_SRC_FILES += $(MCHK_SOURCES:%=memcheck/%)
 
+# What a mess, os-posix.c depends on the exact values of options
+# which are target specific.
+ifeq ($(HOST_OS),windows)
+    LOCAL_SRC_FILES += os-win32.c oslib-win32.c
+else
+    LOCAL_SRC_FILES += os-posix.c oslib-posix.c
+endif
+$(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
 
 $(call end-emulator-library)
 
@@ -259,8 +267,8 @@ LOCAL_SRC_FILES := \
     android/protocol/core-commands-impl.c \
     android/protocol/core-commands-qemu.c \
 
-$(call gen-hx-header,qemu-monitor.hx,monitor.c)
-$(call gen-hx-header,qemu-options.hx,vl-android.c)
+$(call gen-hx-header,qemu-monitor.hx,qemu-monitor.h,monitor.c)
+$(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c)
 
 ifeq ($(HOST_OS),darwin)
     FRAMEWORKS := OpenGL Cocoa QuickTime ApplicationServices Carbon IOKit
@@ -337,8 +345,8 @@ LOCAL_SRC_FILES := \
     android/protocol/ui-commands-qemu.c \
     android/
 
-$(call gen-hx-header,qemu-monitor.hx,monitor.c)
-$(call gen-hx-header,qemu-options.hx,vl-android.c)
+$(call gen-hx-header,qemu-monitor.hx,qemu-monitor.h,monitor.c)
+$(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c)
 
 # The following files cannot be in static libraries because they contain
 # constructor functions that are otherwise stripped by the final linker

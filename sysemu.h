@@ -51,6 +51,7 @@ void qemu_system_powerdown_request(void);
 int qemu_shutdown_requested(void);
 int qemu_reset_requested(void);
 int qemu_powerdown_requested(void);
+void qemu_system_killed(int signal, pid_t pid);
 #ifdef NEED_CPU_H
 #if !defined(TARGET_SPARC)
 // Please implement a power failure function to signal the OS

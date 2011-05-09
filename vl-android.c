@@ -2312,7 +2312,8 @@ typedef struct QEMUResetEntry {
 
 static QEMUResetEntry *first_reset_entry;
 static int reset_requested;
-static int shutdown_requested;
+static int shutdown_requested, shutdown_signal = -1;
+static pid_t shutdown_pid;
 static int powerdown_requested;
 static int debug_requested;
 static int vmstop_requested;
@@ -2396,6 +2397,13 @@ void qemu_system_reset_request(void)
         reset_requested = 1;
     }
     qemu_notify_event();
+}
+
+void qemu_system_killed(int signal, pid_t pid)
+{
+    shutdown_signal = signal;
+    shutdown_pid = pid;
+    qemu_system_shutdown_request();
 }
 
 void qemu_system_shutdown_request(void)
@@ -3204,7 +3212,7 @@ void qemu_help(int exitcode)
 #define DEF(option, opt_arg, opt_enum, opt_help)        \
            opt_help
 #define DEFHEADING(text) stringify(text) "\n"
-#include "qemu-options.h"
+#include "qemu-options.def"
 #undef DEF
 #undef DEFHEADING
 #undef GEN_DOCS
@@ -3233,7 +3241,7 @@ enum {
 #define DEF(option, opt_arg, opt_enum, opt_help)        \
     opt_enum,
 #define DEFHEADING(text)
-#include "qemu-options.h"
+#include "qemu-options.def"
 #undef DEF
 #undef DEFHEADING
 #undef GEN_DOCS
@@ -3250,7 +3258,7 @@ static const QEMUOption qemu_options[] = {
 #define DEF(option, opt_arg, opt_enum, opt_help)        \
     { option, opt_arg, opt_enum },
 #define DEFHEADING(text)
-#include "qemu-options.h"
+#include "qemu-options.def"
 #undef DEF
 #undef DEFHEADING
 #undef GEN_DOCS
