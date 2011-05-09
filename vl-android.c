@@ -5079,6 +5079,13 @@ int main(int argc, char **argv, char **envp)
             } else {
                 /* Successful locking */
                 hda_opts = drive_add(sdPath, HD_ALIAS, 0);
+                /* Set this property of any operation involving the SD Card
+                 * will be x100 slower, due to the corresponding file being
+                 * mounted as O_DIRECT. Note that this is only 'unsafe' in
+                 * the context of an emulator crash. The data is already
+                 * synced properly when the emulator exits (either normally or through ^C).
+                 */
+                qemu_opt_set(hda_opts, "cache", "unsafe");
             }
         }
     }
@@ -5093,10 +5100,7 @@ int main(int argc, char **argv, char **envp)
                 PANIC("Snapshot storage already in use: %s", spath);
             }
             hdb_opts = drive_add(spath, HD_ALIAS, 1);
-            /* VERY IMPORTANT:
-             *    Set this property or the file will be mounted with O_DIRECT,
-             *    which will slow down snapshot saving x100 !
-             */
+            /* See comment above to understand why this is needed. */
             qemu_opt_set(hdb_opts, "cache", "unsafe");
         }
     }
