@@ -106,7 +106,7 @@ eventList_findCodeByName( EventList    list,
     if (namelen <= 0)
         return -1;
 
-    for ( ; list != NULL; list += 1 ) {
+    for ( ; list->name != NULL; list += 1 ) {
         if ( !memcmp(name, list->name, namelen) &&
              list->name[namelen] == 0 )
         {
@@ -167,7 +167,11 @@ android_event_from_str( const char*  name,
         q = pend;
 
     list   = eventList_findByType( *ptype );
-    *pcode = eventList_findCodeByName( list, p, q-p );
+    if (list == NULL) {
+        *pcode = -1;
+    } else {
+        *pcode = eventList_findCodeByName( list, p, q-p );
+    }
     if (*pcode < 0) {
         *pcode = (int) strtol( p, &end, 0 );
         if (end != q)
