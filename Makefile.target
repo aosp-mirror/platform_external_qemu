@@ -137,7 +137,6 @@ LOCAL_SRC_FILES += \
     translate-all.c \
     trace.c \
     varint.c \
-    dcache.c \
     softmmu_outside_jit.c \
 
 ##############################################################################

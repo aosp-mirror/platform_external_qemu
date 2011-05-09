@@ -8909,7 +8909,7 @@ static inline void gen_intermediate_code_internal(CPUState *env,
     gen_icount_start();
 #ifdef CONFIG_TRACE
     if (tracing) {
-        gen_traceBB(trace_static.bb_num, tb);
+        gen_traceBB(trace_static_bb_num(), tb);
         trace_bb_start(dc->pc);
     }
 #endif

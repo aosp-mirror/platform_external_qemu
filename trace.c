@@ -26,6 +26,102 @@
 #include "varint.h"
 #include "android/utils/path.h"
 
+// For tracing dynamic execution of basic blocks
+typedef struct TraceBB {
+    char        *filename;
+    FILE        *fstream;
+    BBRec       buffer[kMaxNumBasicBlocks];
+    BBRec       *next;          // points to next record in buffer
+    uint64_t    flush_time;     // time of last buffer flush
+    char        compressed[kCompressedSize];
+    char        *compressed_ptr;
+    char        *high_water_ptr;
+    int64_t     prev_bb_num;
+    uint64_t    prev_bb_time;
+    uint64_t    current_bb_num;
+    uint64_t    current_bb_start_time;
+    uint64_t    recnum;         // counts number of trace records
+    uint32_t    current_bb_addr;
+    int         num_insns;
+} TraceBB;
+
+// For tracing simuation start times of instructions
+typedef struct TraceInsn {
+    char        *filename;
+    FILE        *fstream;
+    InsnRec     dummy;          // this is here so we can use buffer[-1]
+    InsnRec     buffer[kInsnBufferSize];
+    InsnRec     *current;
+    uint64_t    prev_time;      // time of last instruction start
+    char        compressed[kCompressedSize];
+    char        *compressed_ptr;
+    char        *high_water_ptr;
+} TraceInsn;
+
+// For tracing the static information about a basic block
+typedef struct TraceStatic {
+    char        *filename;
+    FILE        *fstream;
+    uint32_t    insns[kMaxInsnPerBB];
+    int         next_insn;
+    uint64_t    bb_num;
+    uint32_t    bb_addr;
+    int         is_thumb;
+} TraceStatic;
+
+// For tracing load and store addresses
+typedef struct TraceAddr {
+    char        *filename;
+    FILE        *fstream;
+    AddrRec     buffer[kMaxNumAddrs];
+    AddrRec     *next;
+    char        compressed[kCompressedSize];
+    char        *compressed_ptr;
+    char        *high_water_ptr;
+    uint32_t    prev_addr;
+    uint64_t    prev_time;
+} TraceAddr;
+
+// For tracing exceptions
+typedef struct TraceExc {
+    char        *filename;
+    FILE        *fstream;
+    char        compressed[kCompressedSize];
+    char        *compressed_ptr;
+    char        *high_water_ptr;
+    uint64_t    prev_time;
+    uint64_t    prev_bb_recnum;
+} TraceExc;
+
+// For tracing process id changes
+typedef struct TracePid {
+    char        *filename;
+    FILE        *fstream;
+    char        compressed[kCompressedSize];
+    char        *compressed_ptr;
+    uint64_t    prev_time;
+} TracePid;
+
+// For tracing Dalvik VM method enter and exit
+typedef struct TraceMethod {
+    char        *filename;
+    FILE        *fstream;
+    char        compressed[kCompressedSize];
+    char        *compressed_ptr;
+    uint64_t    prev_time;
+    uint32_t    prev_addr;
+    int32_t     prev_pid;
+} TraceMethod;
+
+extern TraceBB trace_bb;
+extern TraceInsn trace_insn;
+extern TraceStatic trace_static;
+extern TraceAddr trace_load;
+extern TraceAddr trace_store;
+extern TraceExc trace_exc;
+extern TracePid trace_pid;
+extern TraceMethod trace_method;
+
 TraceBB trace_bb;
 TraceInsn trace_insn;
 TraceStatic trace_static;
@@ -1877,4 +1973,9 @@ void trace_interpreted_method(uint32_t addr, int call_type)
     comp_ptr = varint_encode_signed(pid_diff, comp_ptr);
     comp_ptr = varint_encode(call_type, comp_ptr);
     trace_method.compressed_ptr = comp_ptr;
+}
+
+uint64_t trace_static_bb_num(void)
+{
+    return trace_static.bb_num;
 }
