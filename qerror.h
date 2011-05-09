@@ -34,12 +34,11 @@ typedef struct QError {
 
 QError *qerror_new(void);
 QError *qerror_from_info(const char *file, int linenr, const char *func,
-                         const char *fmt, va_list *va);
+                         const char *fmt, va_list *va) GCC_FMT_ATTR(4, 0);
 QString *qerror_human(const QError *qerror);
 void qerror_print(QError *qerror);
 void qerror_report_internal(const char *file, int linenr, const char *func,
-                            const char *fmt, ...)
-    __attribute__ ((format(printf, 4, 5)));
+                            const char *fmt, ...) GCC_FMT_ATTR(4, 5);
 #define qerror_report(fmt, ...) \
     qerror_report_internal(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
 QError *qobject_to_qerror(const QObject *obj);
@@ -90,6 +89,9 @@ QError *qobject_to_qerror(const QObject *obj);
 
 #define QERR_DEVICE_NO_BUS \
     "{ 'class': 'DeviceNoBus', 'data': { 'device': %s } }"
+
+#define QERR_DEVICE_NO_HOTPLUG \
+    "{ 'class': 'DeviceNoHotplug', 'data': { 'device': %s } }"
 
 #define QERR_DUPLICATE_ID \
     "{ 'class': 'DuplicateId', 'data': { 'id': %s, 'object': %s } }"
@@ -163,7 +165,13 @@ QError *qobject_to_qerror(const QObject *obj);
 #define QERR_UNDEFINED_ERROR \
     "{ 'class': 'UndefinedError', 'data': {} }"
 
+#define QERR_UNKNOWN_BLOCK_FORMAT_FEATURE \
+    "{ 'class': 'UnknownBlockFormatFeature', 'data': { 'device': %s, 'format': %s, 'feature': %s } }"
+
 #define QERR_VNC_SERVER_FAILED \
     "{ 'class': 'VNCServerFailed', 'data': { 'target': %s } }"
+
+#define QERR_FEATURE_DISABLED \
+    "{ 'class': 'FeatureDisabled', 'data': { 'name': %s } }"
 
 #endif /* QERROR_H */
