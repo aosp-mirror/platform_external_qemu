@@ -18,7 +18,7 @@
 
 extern uint64_t start_time, end_time;
 extern uint64_t elapsed_usecs;
-extern uint64 Now();
+extern uint64_t Now();
 
 struct TranslationBlock;
 
@@ -136,8 +136,8 @@ extern void trace_bb_end();
 extern int get_insn_ticks_arm(uint32_t insn);
 extern int get_insn_ticks_thumb(uint32_t  insn);
 
-extern void trace_exception(uint32 pc);
-extern void trace_bb_helper(uint64_t bb_num, TranslationBlock *tb);
+extern void trace_exception(uint32_t pc);
+extern void trace_bb_helper(uint64_t bb_num, struct TranslationBlock *tb);
 extern void trace_insn_helper();
 extern void sim_dcache_load(uint32_t addr);
 extern void sim_dcache_store(uint32_t addr, uint32_t val);
