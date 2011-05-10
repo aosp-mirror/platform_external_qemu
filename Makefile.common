@@ -604,6 +604,7 @@ gen-hx-header = $(eval $(call gen-hx-header-ev,$1,$2,$3))
 
 define gen-hx-header-ev
 intermediates := $$(call intermediates-dir-for,$$(EMULATOR_MODULE_TYPE),$$(LOCAL_MODULE),true)
+
 QEMU_HEADER_H := $$(intermediates)/$$2
 $$(QEMU_HEADER_H): PRIVATE_PATH := $$(LOCAL_PATH)
 $$(QEMU_HEADER_H): PRIVATE_CUSTOM_TOOL = $$(PRIVATE_PATH)/hxtool -h < $$< > $$@

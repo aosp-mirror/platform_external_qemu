@@ -2,8 +2,18 @@
 #define QEMU_TIMER_H
 
 #include "qemu-common.h"
+#include <time.h>
+#include <sys/time.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 /* timers */
+
+#define SCALE_MS 1000000
+#define SCALE_US 1000
+#define SCALE_NS 1
 
 typedef struct QEMUClock QEMUClock;
 typedef void QEMUTimerCB(void *opaque);
@@ -29,8 +39,12 @@ extern QEMUClock *host_clock;
 int64_t qemu_get_clock(QEMUClock *clock);
 int64_t qemu_get_clock_ns(QEMUClock *clock);
 void qemu_clock_enable(QEMUClock *clock, int enabled);
+void qemu_clock_warp(QEMUClock *clock);
 
 QEMUTimer *qemu_new_timer(QEMUClock *clock, QEMUTimerCB *cb, void *opaque);
+QEMUTimer *qemu_new_timer_scale(QEMUClock *clock, int scale,
+                          QEMUTimerCB *cb, void *opaque);
+
 void qemu_free_timer(QEMUTimer *ts);
 void qemu_del_timer(QEMUTimer *ts);
 void qemu_mod_timer(QEMUTimer *ts, int64_t expire_time);
@@ -40,6 +54,7 @@ int qemu_timer_alarm_pending(void);
 
 void qemu_run_all_timers(void);
 int qemu_alarm_pending(void);
+int64_t qemu_next_icount_deadline(void);
 int64_t qemu_next_deadline(void);
 void configure_alarms(char const *opt);
 void configure_icount(const char *option);
@@ -48,11 +63,75 @@ void init_clocks(void);
 int init_timer_alarm(void);
 void quit_timers(void);
 
+int64_t cpu_get_ticks(void);
+void cpu_enable_ticks(void);
+void cpu_disable_ticks(void);
+
+static inline QEMUTimer *qemu_new_timer_ns(QEMUClock *clock, QEMUTimerCB *cb,
+                                           void *opaque)
+{
+    return qemu_new_timer_scale(clock, SCALE_NS, cb, opaque);
+}
+
+static inline QEMUTimer *qemu_new_timer_ms(QEMUClock *clock, QEMUTimerCB *cb,
+                                           void *opaque)
+{
+    return qemu_new_timer_scale(clock, SCALE_MS, cb, opaque);
+}
+
+static inline int64_t qemu_get_clock_ms(QEMUClock *clock)
+{
+    return qemu_get_clock_ns(clock) / SCALE_MS;
+}
+
 static inline int64_t get_ticks_per_sec(void)
 {
     return 1000000000LL;
 }
 
+/* real time host monotonic timer */
+static inline int64_t get_clock_realtime(void)
+{
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec * 1000000000LL + (tv.tv_usec * 1000);
+}
+
+/* Warning: don't insert tracepoints into these functions, they are
+   also used by simpletrace backend and tracepoints would cause
+   an infinite recursion! */
+#ifdef _WIN32
+extern int64_t clock_freq;
+
+static inline int64_t get_clock(void)
+{
+    LARGE_INTEGER ti;
+    QueryPerformanceCounter(&ti);
+    return muldiv64(ti.QuadPart, get_ticks_per_sec(), clock_freq);
+}
+
+#else
+
+extern int use_rt_clock;
+
+static inline int64_t get_clock(void)
+{
+#if defined(__linux__) || (defined(__FreeBSD__) && __FreeBSD_version >= 500000) \
+    || defined(__DragonFly__) || defined(__FreeBSD_kernel__)
+    if (use_rt_clock) {
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        return ts.tv_sec * 1000000000LL + ts.tv_nsec;
+    } else
+#endif
+    {
+        /* XXX: using gettimeofday leads to problems if the date
+           changes, so it should be avoided. */
+        return get_clock_realtime();
+    }
+}
+#endif
 
 void qemu_get_timer(QEMUFile *f, QEMUTimer *ts);
 void qemu_put_timer(QEMUFile *f, QEMUTimer *ts);

@@ -3041,7 +3041,7 @@ static int qemu_cpu_exec(CPUState *env)
         qemu_icount -= (env->icount_decr.u16.low + env->icount_extra);
         env->icount_decr.u16.low = 0;
         env->icount_extra = 0;
-        count = qemu_next_deadline();
+        count = qemu_next_icount_deadline();
         count = (count + (1 << icount_time_shift) - 1)
                 >> icount_time_shift;
         qemu_icount += count;
