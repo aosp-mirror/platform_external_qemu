@@ -60,4 +60,17 @@ typedef void (MonitorCompletion)(void *opaque, QObject *ret_data);
 
 void monitor_set_error(Monitor *mon, QError *qerror);
 
+#ifdef CONFIG_ANDROID
+typedef int (*MonitorFakeFunc)(void* opaque, const char* str, int strsize);
+
+/* Create a new fake Monitor object to send all output to an internal
+ * buffer. This is used to send snapshot save/load errors (produced in
+ * savevm.c) to the Android console when 'avd snapshot save' or
+ * 'avd snapshot load' are used.
+ */
+Monitor* monitor_fake_new(void* opaque, MonitorFakeFunc cb);
+int      monitor_fake_get_bytes(Monitor* mon);
+void     monitor_fake_free(Monitor* mon);
+#endif
+
 #endif /* !MONITOR_H */

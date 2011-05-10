@@ -8,7 +8,6 @@
 #include "qemu-timer.h"
 #include "qdict.h"
 #include "qerror.h"
-#include "outputchannel.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -63,13 +62,9 @@ void qemu_system_powerdown(void);
 void qemu_system_reset(void);
 
 void do_savevm(Monitor *mon, const char *name);
-void do_savevm_oc(OutputChannel *err, const char *name);
 void do_loadvm(Monitor *mon, const char *name);
-void do_loadvm_oc(OutputChannel *err, const char *name);
 void do_delvm(Monitor *mon, const char *name);
-void do_delvm_oc(OutputChannel *err, const char *name);
-void do_info_snapshots(Monitor *mon);
-void do_info_snapshots_oc(OutputChannel *out, OutputChannel *err);
+void do_info_snapshots(Monitor *mon, Monitor* err);
 
 void qemu_announce_self(void);
 

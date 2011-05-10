@@ -353,7 +353,6 @@ CORE_MISC_SOURCES = \
     net-android.c \
     notify.c \
     osdep.c \
-    outputchannel.c \
     path.c \
     qemu-char-android.c \
     qemu-config.c \

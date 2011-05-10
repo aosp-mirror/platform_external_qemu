@@ -86,7 +86,17 @@ struct Monitor {
     void *password_opaque;
     QLIST_ENTRY(Monitor) entry;
     int has_quit;
+#ifdef CONFIG_ANDROID
+    void*            fake_opaque;
+    MonitorFakeFunc  fake_func;
+    int64_t          fake_count;
+
+#endif
 };
+
+#ifdef CONFIG_ANDROID
+#include "monitor-android.h"
+#endif
 
 static QLIST_HEAD(mon_list, Monitor) mon_list;
 
@@ -158,6 +168,7 @@ static int monitor_read_password(Monitor *mon, ReadLineFunc *readline_func,
     }
 }
 
+#ifndef CONFIG_ANDROID /* See monitor-android.h */
 void monitor_flush(Monitor *mon)
 {
     if (mon && mon->outbuf_index != 0 && !mon->mux_out) {
@@ -165,6 +176,7 @@ void monitor_flush(Monitor *mon)
         mon->outbuf_index = 0;
     }
 }
+#endif
 
 /* flush at every end of line or if the buffer is full */
 static void monitor_puts(Monitor *mon, const char *str)
