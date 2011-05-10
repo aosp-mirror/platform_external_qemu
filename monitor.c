@@ -199,13 +199,11 @@ static void monitor_puts(Monitor *mon, const char *str)
     }
 }
 
-int monitor_vprintf(Monitor *mon, const char *fmt, va_list ap)
+void monitor_vprintf(Monitor *mon, const char *fmt, va_list ap)
 {
     char buf[4096];
-    int ret = vsnprintf(buf, sizeof(buf), fmt, ap);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
     monitor_puts(mon, buf);
-
-    return ret;
 }
 
 void monitor_printf(Monitor *mon, const char *fmt, ...)
@@ -243,7 +241,8 @@ void monitor_print_filename(Monitor *mon, const char *filename)
     }
 }
 
-static int monitor_fprintf(FILE *stream, const char *fmt, ...)
+static int GCC_FMT_ATTR(2, 3) monitor_fprintf(FILE *stream,
+                                              const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);

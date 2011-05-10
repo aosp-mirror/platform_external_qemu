@@ -14,7 +14,8 @@ extern Monitor *default_mon;
 #define MONITOR_IS_DEFAULT    0x01
 #define MONITOR_USE_READLINE  0x02
 #define MONITOR_USE_CONTROL   0x04
-#define MONITOR_QUIT_DOESNT_EXIT  0x08  /* prevent 'quit' from exiting the emulator */
+#define MONITOR_USE_PRETTY    0x08
+#define MONITOR_QUIT_DOESNT_EXIT  0x80  /* prevent 'quit' from exiting the emulator */
 
 /* flags for monitor commands */
 #define MONITOR_CMD_ASYNC       0x0001
@@ -33,6 +34,9 @@ typedef enum MonitorEvent {
     QEVENT_BLOCK_IO_ERROR,
     QEVENT_RTC_CHANGE,
     QEVENT_WATCHDOG,
+    QEVENT_SPICE_CONNECTED,
+    QEVENT_SPICE_INITIALIZED,
+    QEVENT_SPICE_DISCONNECTED,
     QEVENT_MAX,
 } MonitorEvent;
 
@@ -50,9 +54,9 @@ int monitor_read_bdrv_key_start(Monitor *mon, BlockDriverState *bs,
 
 int monitor_get_fd(Monitor *mon, const char *fdname);
 
-int monitor_vprintf(Monitor *mon, const char *fmt, va_list ap);
-void monitor_printf(Monitor *mon, const char *fmt, ...)
-    __attribute__ ((__format__ (__printf__, 2, 3)));
+void monitor_vprintf(Monitor *mon, const char *fmt, va_list ap)
+    GCC_FMT_ATTR(2, 0);
+void monitor_printf(Monitor *mon, const char *fmt, ...) GCC_FMT_ATTR(2, 3);
 void monitor_print_filename(Monitor *mon, const char *filename);
 void monitor_flush(Monitor *mon);
 
