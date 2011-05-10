@@ -8,10 +8,6 @@
 #include "exec-all.h"
 #include "disas.h"
 
-#ifdef TARGET_I386
-#include "kvm.h"
-#endif
-
 /* Filled in by elfload.c.  Simplistic, but will do for now. */
 struct syminfo *syminfos = NULL;
 
@@ -37,10 +33,6 @@ target_read_memory (bfd_vma memaddr,
                     int length,
                     struct disassemble_info *info)
 {
-#ifdef TARGET_I386
-    if (kvm_enabled())
-        cpu_synchronize_state(cpu_single_env, 0);
-#endif
     cpu_memory_rw_debug(cpu_single_env, memaddr, myaddr, length, 0);
     return 0;
 }
@@ -216,8 +208,16 @@ void target_disas(FILE *out, target_ulong code, target_ulong size, int flags)
     disasm_info.mach = bfd_mach_alpha;
     print_insn = print_insn_alpha;
 #elif defined(TARGET_CRIS)
+    if (flags != 32) {
+        disasm_info.mach = bfd_mach_cris_v0_v10;
+        print_insn = print_insn_crisv10;
+    } else {
     disasm_info.mach = bfd_mach_cris_v32;
     print_insn = print_insn_crisv32;
+    }
+#elif defined(TARGET_S390X)
+    disasm_info.mach = bfd_mach_s390_64;
+    print_insn = print_insn_s390;
 #elif defined(TARGET_MICROBLAZE)
     disasm_info.mach = bfd_arch_microblaze;
     print_insn = print_insn_microblaze;
@@ -310,11 +310,6 @@ void disas(FILE *out, void *code, unsigned long size)
 #endif
     for (pc = (unsigned long)code; size > 0; pc += count, size -= count) {
 	fprintf(out, "0x%08lx:  ", pc);
-#ifdef __arm__
-        /* since data is included in the code, it is better to
-           display code data too */
-        fprintf(out, "%08x  ", (int)bfd_getl32((const bfd_byte *)pc));
-#endif
 	count = print_insn(pc, &disasm_info);
 	fprintf(out, "\n");
 	if (count < 0)
@@ -350,14 +345,15 @@ monitor_read_memory (bfd_vma memaddr, bfd_byte *myaddr, int length,
                      struct disassemble_info *info)
 {
     if (monitor_disas_is_physical) {
-        cpu_physical_memory_rw(memaddr, myaddr, length, 0);
+        cpu_physical_memory_read(memaddr, myaddr, length);
     } else {
         cpu_memory_rw_debug(monitor_disas_env, memaddr,myaddr, length, 0);
     }
     return 0;
 }
 
-static int monitor_fprintf(FILE *stream, const char *fmt, ...)
+static int GCC_FMT_ATTR(2, 3)
+monitor_fprintf(FILE *stream, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -421,6 +417,9 @@ void monitor_disas(Monitor *mon, CPUState *env,
 #elif defined(TARGET_SH4)
     disasm_info.mach = bfd_mach_sh4;
     print_insn = print_insn_sh;
+#elif defined(TARGET_S390X)
+    disasm_info.mach = bfd_mach_s390_64;
+    print_insn = print_insn_s390;
 #else
     monitor_printf(mon, "0x" TARGET_FMT_lx
                    ": Asm output not supported on this arch\n", pc);
