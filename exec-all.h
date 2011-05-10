@@ -60,8 +60,7 @@ extern uint32_t gen_opc_hflags[OPC_BUF_SIZE];
 
 void gen_intermediate_code(CPUState *env, struct TranslationBlock *tb);
 void gen_intermediate_code_pc(CPUState *env, struct TranslationBlock *tb);
-void gen_pc_load(CPUState *env, struct TranslationBlock *tb,
-                 unsigned long searched_pc, int pc_pos, void *puc);
+void restore_state_to_opc(CPUState *env, struct TranslationBlock *tb, int pc_pos);
 
 unsigned long code_gen_max_block_size(void);
 void cpu_gen_init(void);
