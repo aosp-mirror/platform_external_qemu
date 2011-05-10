@@ -203,12 +203,14 @@ static void cpu_handle_debug_exception(CPUState *env)
 {
     CPUWatchpoint *wp;
 
-    if (!env->watchpoint_hit)
-        QTAILQ_FOREACH(wp, &env->watchpoints, entry)
+    if (!env->watchpoint_hit) {
+        QTAILQ_FOREACH(wp, &env->watchpoints, entry) {
             wp->flags &= ~BP_WATCHPOINT_HIT;
-
-    if (debug_excp_handler)
+        }
+    }
+    if (debug_excp_handler) {
         debug_excp_handler(env);
+    }
 }
 
 /* main execution loop */
@@ -255,7 +257,9 @@ int cpu_exec(CPUState *env1)
     env->cc_x = (env->sr >> 4) & 1;
 #elif defined(TARGET_ALPHA)
 #elif defined(TARGET_ARM)
+#elif defined(TARGET_UNICORE32)
 #elif defined(TARGET_PPC)
+#elif defined(TARGET_LM32)
 #elif defined(TARGET_MICROBLAZE)
 #elif defined(TARGET_MIPS)
 #elif defined(TARGET_SH4)
@@ -280,8 +284,9 @@ int cpu_exec(CPUState *env1)
                 if (env->exception_index >= EXCP_INTERRUPT) {
                     /* exit request from the cpu execution loop */
                     ret = env->exception_index;
-                    if (ret == EXCP_DEBUG)
+                    if (ret == EXCP_DEBUG) {
                         cpu_handle_debug_exception(env);
+                    }
                     break;
                 } else {
 #if defined(CONFIG_USER_ONLY)
@@ -311,6 +316,8 @@ int cpu_exec(CPUState *env1)
                     env->old_exception = -1;
 #elif defined(TARGET_PPC)
                     do_interrupt(env);
+#elif defined(TARGET_LM32)
+                    do_interrupt(env);
 #elif defined(TARGET_MICROBLAZE)
                     do_interrupt(env);
 #elif defined(TARGET_MIPS)
@@ -318,6 +325,8 @@ int cpu_exec(CPUState *env1)
 #elif defined(TARGET_SPARC)
                     do_interrupt(env);
 #elif defined(TARGET_ARM)
+                    do_interrupt(env);
+#elif defined(TARGET_UNICORE32)
                     do_interrupt(env);
 #elif defined(TARGET_SH4)
 		    do_interrupt(env);
@@ -327,6 +336,8 @@ int cpu_exec(CPUState *env1)
                     do_interrupt(env);
 #elif defined(TARGET_M68K)
                     do_interrupt(0);
+#elif defined(TARGET_S390X)
+                    do_interrupt(env);
 #endif
                     env->exception_index = -1;
 #endif
@@ -356,7 +367,7 @@ int cpu_exec(CPUState *env1)
                     }
 #if defined(TARGET_ARM) || defined(TARGET_SPARC) || defined(TARGET_MIPS) || \
     defined(TARGET_PPC) || defined(TARGET_ALPHA) || defined(TARGET_CRIS) || \
-    defined(TARGET_MICROBLAZE)
+    defined(TARGET_MICROBLAZE) || defined(TARGET_LM32) || defined(TARGET_UNICORE32)
                     if (interrupt_request & CPU_INTERRUPT_HALT) {
                         env->interrupt_request &= ~CPU_INTERRUPT_HALT;
                         env->halted = 1;
@@ -436,6 +447,13 @@ int cpu_exec(CPUState *env1)
                             env->interrupt_request &= ~CPU_INTERRUPT_HARD;
                         next_tb = 0;
                     }
+#elif defined(TARGET_LM32)
+                    if ((interrupt_request & CPU_INTERRUPT_HARD)
+                        && (env->ie & IE_IE)) {
+                        env->exception_index = EXCP_IRQ;
+                        do_interrupt(env);
+                        next_tb = 0;
+                    }
 #elif defined(TARGET_MICROBLAZE)
                     if ((interrupt_request & CPU_INTERRUPT_HARD)
                         && (env->sregs[SR_MSR] & MSR_IE)
@@ -447,11 +465,7 @@ int cpu_exec(CPUState *env1)
                     }
 #elif defined(TARGET_MIPS)
                     if ((interrupt_request & CPU_INTERRUPT_HARD) &&
-                        cpu_mips_hw_interrupts_pending(env) &&
-                        (env->CP0_Status & (1 << CP0St_IE)) &&
-                        !(env->CP0_Status & (1 << CP0St_EXL)) &&
-                        !(env->CP0_Status & (1 << CP0St_ERL)) &&
-                        !(env->hflags & MIPS_HFLAG_DM)) {
+                        cpu_mips_hw_interrupts_pending(env)) {
                         /* Raise it */
                         env->exception_index = EXCP_EXT_INTERRUPT;
                         env->error_code = 0;
@@ -473,9 +487,6 @@ int cpu_exec(CPUState *env1)
                                 next_tb = 0;
                             }
                         }
-		    } else if (interrupt_request & CPU_INTERRUPT_TIMER) {
-			//do_interrupt(0, 0, 0, 0, 0);
-			env->interrupt_request &= ~CPU_INTERRUPT_TIMER;
 		    }
 #elif defined(TARGET_ARM)
                     if (interrupt_request & CPU_INTERRUPT_FIQ
@@ -497,6 +508,12 @@ int cpu_exec(CPUState *env1)
                         && ((IS_M(env) && env->regs[15] < 0xfffffff0)
                             || !(env->uncached_cpsr & CPSR_I))) {
                         env->exception_index = EXCP_IRQ;
+                        do_interrupt(env);
+                        next_tb = 0;
+                    }
+#elif defined(TARGET_UNICORE32)
+                    if (interrupt_request & CPU_INTERRUPT_HARD
+                        && !(env->uncached_asr & ASR_I)) {
                         do_interrupt(env);
                         next_tb = 0;
                     }
@@ -535,6 +552,12 @@ int cpu_exec(CPUState *env1)
                            first signalled.  */
                         env->exception_index = env->pending_vector;
                         do_interrupt(1);
+                        next_tb = 0;
+                    }
+#elif defined(TARGET_S390X) && !defined(CONFIG_USER_ONLY)
+                    if ((interrupt_request & CPU_INTERRUPT_HARD) &&
+                        (env->psw.mask & PSW_MASK_EXT)) {
+                        do_interrupt(env);
                         next_tb = 0;
                     }
 #endif
@@ -650,8 +673,10 @@ int cpu_exec(CPUState *env1)
     env->eflags = env->eflags | helper_cc_compute_all(CC_OP) | (DF & DF_MASK);
 #elif defined(TARGET_ARM)
     /* XXX: Save/restore host fpu exception state?.  */
+#elif defined(TARGET_UNICORE32)
 #elif defined(TARGET_SPARC)
 #elif defined(TARGET_PPC)
+#elif defined(TARGET_LM32)
 #elif defined(TARGET_M68K)
     cpu_m68k_flush_flags(env, env->cc_op);
     env->cc_op = CC_OP_FLAGS;
