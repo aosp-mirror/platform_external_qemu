@@ -1721,72 +1721,6 @@ void pcmcia_info(Monitor *mon)
                        "Empty");
 }
 
-/***********************************************************/
-/* I/O handling */
-
-typedef struct IOHandlerRecord {
-    int fd;
-    IOCanReadHandler *fd_read_poll;
-    IOHandler *fd_read;
-    IOHandler *fd_write;
-    int deleted;
-    void *opaque;
-    /* temporary data */
-    struct pollfd *ufd;
-    struct IOHandlerRecord *next;
-} IOHandlerRecord;
-
-static IOHandlerRecord *first_io_handler;
-
-/* XXX: fd_read_poll should be suppressed, but an API change is
-   necessary in the character devices to suppress fd_can_read(). */
-int qemu_set_fd_handler2(int fd,
-                         IOCanReadHandler *fd_read_poll,
-                         IOHandler *fd_read,
-                         IOHandler *fd_write,
-                         void *opaque)
-{
-    IOHandlerRecord **pioh, *ioh;
-
-    if (!fd_read && !fd_write) {
-        pioh = &first_io_handler;
-        for(;;) {
-            ioh = *pioh;
-            if (ioh == NULL)
-                break;
-            if (ioh->fd == fd) {
-                ioh->deleted = 1;
-                break;
-            }
-            pioh = &ioh->next;
-        }
-    } else {
-        for(ioh = first_io_handler; ioh != NULL; ioh = ioh->next) {
-            if (ioh->fd == fd)
-                goto found;
-        }
-        ioh = qemu_mallocz(sizeof(IOHandlerRecord));
-        ioh->next = first_io_handler;
-        first_io_handler = ioh;
-    found:
-        ioh->fd = fd;
-        ioh->fd_read_poll = fd_read_poll;
-        ioh->fd_read = fd_read;
-        ioh->fd_write = fd_write;
-        ioh->opaque = opaque;
-        ioh->deleted = 0;
-    }
-    return 0;
-}
-
-int qemu_set_fd_handler(int fd,
-                        IOHandler *fd_read,
-                        IOHandler *fd_write,
-                        void *opaque)
-{
-    return qemu_set_fd_handler2(fd, NULL, fd_read, fd_write, opaque);
-}
-
 #ifdef _WIN32
 /***********************************************************/
 /* Polling handling */
@@ -2938,7 +2872,6 @@ static void host_main_loop_wait(int *timeout)
 
 void main_loop_wait(int timeout)
 {
-    IOHandlerRecord *ioh;
     fd_set rfds, wfds, xfds;
     int ret, nfds;
     struct timeval tv;
@@ -2947,64 +2880,26 @@ void main_loop_wait(int timeout)
 
     host_main_loop_wait(&timeout);
 
+
+    tv.tv_sec = timeout / 1000;
+    tv.tv_usec = (timeout % 1000) * 1000;
+
     /* poll any events */
+
     /* XXX: separate device handlers from system ones */
     nfds = -1;
     FD_ZERO(&rfds);
     FD_ZERO(&wfds);
     FD_ZERO(&xfds);
-    for(ioh = first_io_handler; ioh != NULL; ioh = ioh->next) {
-        if (ioh->deleted)
-            continue;
-        if (ioh->fd_read &&
-            (!ioh->fd_read_poll ||
-             ioh->fd_read_poll(ioh->opaque) != 0)) {
-            FD_SET(ioh->fd, &rfds);
-            if (ioh->fd > nfds)
-                nfds = ioh->fd;
-        }
-        if (ioh->fd_write) {
-            FD_SET(ioh->fd, &wfds);
-            if (ioh->fd > nfds)
-                nfds = ioh->fd;
-        }
-    }
-
-    tv.tv_sec = timeout / 1000;
-    tv.tv_usec = (timeout % 1000) * 1000;
-
-#if defined(CONFIG_SLIRP)
+    qemu_iohandler_fill(&nfds, &rfds, &wfds, &xfds);
     if (slirp_is_inited()) {
         slirp_select_fill(&nfds, &rfds, &wfds, &xfds);
     }
-#endif
+
     qemu_mutex_unlock_iothread();
     ret = select(nfds + 1, &rfds, &wfds, &xfds, &tv);
     qemu_mutex_lock_iothread();
-    if (ret > 0) {
-        IOHandlerRecord **pioh;
-
-        for(ioh = first_io_handler; ioh != NULL; ioh = ioh->next) {
-            if (!ioh->deleted && ioh->fd_read && FD_ISSET(ioh->fd, &rfds)) {
-                ioh->fd_read(ioh->opaque);
-            }
-            if (!ioh->deleted && ioh->fd_write && FD_ISSET(ioh->fd, &wfds)) {
-                ioh->fd_write(ioh->opaque);
-            }
-        }
-
-        /* remove deleted IO handlers */
-        pioh = &first_io_handler;
-        while (*pioh) {
-            ioh = *pioh;
-            if (ioh->deleted) {
-                *pioh = ioh->next;
-                qemu_free(ioh);
-            } else
-                pioh = &ioh->next;
-        }
-    }
-#if defined(CONFIG_SLIRP)
+    qemu_iohandler_poll(&rfds, &wfds, &xfds, ret);
     if (slirp_is_inited()) {
         if (ret < 0) {
             FD_ZERO(&rfds);
@@ -3013,7 +2908,6 @@ void main_loop_wait(int timeout)
         }
         slirp_select_poll(&rfds, &wfds, &xfds);
     }
-#endif
     charpipe_poll();
 
     qemu_run_all_timers();

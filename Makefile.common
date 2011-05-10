@@ -348,6 +348,7 @@ CORE_MISC_SOURCES = \
     cutils.c \
     d3des.c \
     input.c \
+    iohandler.c \
     ioport.c \
     module.c \
     net-android.c \
