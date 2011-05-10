@@ -10,6 +10,7 @@
 #define MOUSE_EVENT_LBUTTON 0x01
 #define MOUSE_EVENT_RBUTTON 0x02
 #define MOUSE_EVENT_MBUTTON 0x04
+extern int multitouch_enabled;
 
 /* identical to the ps/2 keyboard bits */
 #define QEMU_SCROLL_LOCK_LED (1 << 0)
@@ -22,6 +23,10 @@
 #else
 #define GUI_REFRESH_INTERVAL 30
 #endif
+
+typedef int QEMUDisplayCloseCallback(void *opaque);
+void qemu_set_display_close_handler(QEMUDisplayCloseCallback *cb, void *opaque);
+int qemu_run_display_close_handler(void);
 
 typedef void QEMUPutKBDEvent(void *opaque, int keycode);
 typedef void QEMUPutLEDEvent(void *opaque, int ledstate);
@@ -39,6 +44,14 @@ typedef struct QEMUPutMouseEntry {
     QTAILQ_ENTRY(QEMUPutMouseEntry) node;
 } QEMUPutMouseEntry;
 
+typedef struct QEMUPutKBDEntry {
+    QEMUPutKBDEvent *put_kbd_event;
+    void *opaque;
+
+    /* used internally by qemu for handling keyboards */
+    QTAILQ_ENTRY(QEMUPutKBDEntry) next;
+} QEMUPutKBDEntry;
+
 typedef struct QEMUPutLEDEntry {
     QEMUPutLEDEvent *put_led;
     void *opaque;
@@ -46,7 +59,7 @@ typedef struct QEMUPutLEDEntry {
 } QEMUPutLEDEntry;
 
 void qemu_add_kbd_event_handler(QEMUPutKBDEvent *func, void *opaque);
-void qemu_remove_kbd_event_handler(void);
+void qemu_remove_kbd_event_handler(QEMUPutKBDEvent *func, void *opaque);
 QEMUPutMouseEntry *qemu_add_mouse_event_handler(QEMUPutMouseEvent *func,
                                                 void *opaque, int absolute,
                                                 const char *name);
@@ -165,7 +178,13 @@ struct DisplayChangeListener {
     void (*dpy_fill)(struct DisplayState *s, int x, int y,
                      int w, int h, uint32_t c);
     void (*dpy_text_cursor)(struct DisplayState *s, int x, int y);
-
+#ifdef CONFIG_GLES2
+    void (*dpy_updatecaption)(void);
+#endif
+#ifdef CONFIG_SKINNING
+    void (*dpy_enablezoom)(struct DisplayState *s, int width, int height);
+    void (*dpy_getresolution)(int *width, int *height);
+#endif
     struct DisplayChangeListener *next;
 };
 
@@ -256,7 +275,6 @@ static inline void register_displayupdatelistener(DisplayState *ds, DisplayUpdat
 }
 
 void unregister_displayupdatelistener(DisplayState *ds, DisplayUpdateListener *dul);
-
 #endif
 
 static inline void dpy_update(DisplayState *s, int x, int y, int w, int h)
@@ -274,6 +292,20 @@ static inline void dpy_update(DisplayState *s, int x, int y, int w, int h)
     }
 #endif
 }
+
+#ifdef CONFIG_GLES2
+static inline void dpy_updatecaption(DisplayState *s)
+{
+    struct DisplayChangeListener *dcl = s->listeners;
+    while (dcl != NULL) {
+        if(dcl->dpy_updatecaption != NULL)
+        {
+            dcl->dpy_updatecaption();
+        }
+        dcl = dcl->next;
+    }
+}
+#endif
 
 static inline void dpy_resize(DisplayState *s)
 {
@@ -331,6 +363,26 @@ static inline void dpy_cursor(struct DisplayState *s, int x, int y) {
     }
 }
 
+#ifdef CONFIG_SKINNING
+static inline void dpy_enablezoom(struct DisplayState *s, int width, int height)
+{
+    struct DisplayChangeListener *dcl = s->listeners;
+    while (dcl != NULL) {
+        if (dcl->dpy_enablezoom) dcl->dpy_enablezoom(s, width, height);
+        dcl = dcl->next;
+    }
+}
+
+static inline void dpy_getresolution(struct DisplayState *s, int *width, int *height)
+{
+    struct DisplayChangeListener *dcl = s->listeners;
+    while (dcl != NULL) {
+        if (dcl->dpy_getresolution) dcl->dpy_getresolution(width, height);
+        dcl = dcl->next;
+    }
+}
+#endif
+
 static inline int ds_get_linesize(DisplayState *ds)
 {
     return ds->surface->linesize;
@@ -366,7 +418,7 @@ static inline void console_write_ch(console_ch_t *dest, uint32_t ch)
 {
     if (!(ch & 0xff))
         ch |= ' ';
-    cpu_to_le32wu((uint32_t *) dest, ch);
+    *dest = ch;
 }
 
 typedef void (*vga_hw_update_ptr)(void *);
