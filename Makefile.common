@@ -355,7 +355,7 @@ CORE_MISC_SOURCES = \
     notify.c \
     osdep.c \
     path.c \
-    qemu-char-android.c \
+    qemu-char.c \
     qemu-config.c \
     qemu-error.c \
     qemu-malloc.c \

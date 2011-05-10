@@ -22,12 +22,14 @@
  * THE SOFTWARE.
  */
 #include "qemu-common.h"
+#include "sockets.h"
 #include "net.h"
 #include "monitor.h"
 #include "console.h"
 #include "sysemu.h"
 #include "qemu-timer.h"
 #include "qemu-char.h"
+#include "block.h"
 #include "hw/usb.h"
 #include "hw/baum.h"
 #include "hw/msmouse.h"
@@ -100,11 +102,20 @@
 
 #define READ_BUF_LEN 4096
 
+#ifdef CONFIG_ANDROID
+#include "charpipe.h"
+#include "modem_driver.h"
+#include "android/gps.h"
+#include "android/hw-kmsg.h"
+#include "android/hw-qemud.h"
+#endif /* CONFIG_ANDROID */
+
 /***********************************************************/
 /* character device */
 
 static QTAILQ_HEAD(CharDriverStateHead, CharDriverState) chardevs =
     QTAILQ_HEAD_INITIALIZER(chardevs);
+static int initial_reset_issued;
 
 static void qemu_chr_event(CharDriverState *s, int event)
 {
@@ -512,6 +523,9 @@ static CharDriverState *qemu_chr_open_mux(CharDriverState *drv)
 #ifdef _WIN32
 int send_all(int fd, const void *buf, int len1)
 {
+#if 1
+	return socket_send(fd, buf, len1);
+#else
     int ret, len;
 
     len = len1;
@@ -519,7 +533,7 @@ int send_all(int fd, const void *buf, int len1)
         ret = send(fd, buf, len, 0);
         if (ret < 0) {
             errno = WSAGetLastError();
-            if (errno != WSAEWOULDBLOCK) {
+            if (errno != WSAEWOULDBLOCK && errno != WSAEAGAIN) {
                 return -1;
             }
         } else if (ret == 0) {
@@ -530,6 +544,7 @@ int send_all(int fd, const void *buf, int len1)
         }
     }
     return len1 - len;
+#endif
 }
 
 #else
@@ -555,6 +570,30 @@ int send_all(int fd, const void *_buf, int len1)
     return len1 - len;
 }
 #endif /* !_WIN32 */
+
+static CharDriverState *qemu_chr_open_android_modem(QemuOpts* opts)
+{
+    CharDriverState*  cs;
+    qemu_chr_open_charpipe( &cs, &android_modem_cs );
+    return cs;
+}
+static CharDriverState *qemu_chr_open_android_gps(QemuOpts* opts)
+{
+    CharDriverState*  cs;
+    qemu_chr_open_charpipe( &cs, &android_gps_cs );
+    return cs;
+}
+
+static CharDriverState *qemu_chr_open_android_kmsg(QemuOpts* opts)
+{
+    return android_kmsg_get_cs();
+}
+
+static CharDriverState *qemu_chr_open_android_qemud(QemuOpts* opts)
+{
+    return android_qemud_get_cs();
+}
+
 
 #ifndef _WIN32
 
@@ -691,6 +730,18 @@ static CharDriverState *qemu_chr_open_pipe(QemuOpts *opts)
     return qemu_chr_open_fd(fd_in, fd_out);
 }
 
+#ifdef CONFIG_ANDROID
+static CharDriverState *qemu_chr_open_fdpair(QemuOpts* opts)
+{
+    int fd_in  = qemu_opt_get_number(opts, "fdin",-1);
+    int fd_out = qemu_opt_get_number(opts, "fdout",-1);
+
+    if (fd_in < 0 || fd_out < 0)
+        return NULL;
+
+    return qemu_chr_open_fd(fd_in, fd_out);
+}
+#endif /* CONFIG_ANDROID */
 
 /* for STDIO, we handle the case where several clients use it
    (nographic mode) */
@@ -861,9 +912,7 @@ static void cfmakeraw (struct termios *termios_p)
 }
 #endif
 
-#if defined(__linux__) || defined(__sun__) || defined(__FreeBSD__) \
-    || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) \
-    || defined(__GLIBC__)
+#ifndef _WIN32
 
 typedef struct {
     int fd;
@@ -1000,6 +1049,7 @@ static CharDriverState *qemu_chr_open_pty(QemuOpts *opts)
 #else
     char *pty_name = NULL;
 #define q_ptsname(x) ptsname(x)
+    //extern char* ptsname(int);
 #endif
 
     chr = qemu_mallocz(sizeof(CharDriverState));
@@ -1249,12 +1299,12 @@ static CharDriverState *qemu_chr_open_tty(QemuOpts *opts)
     chr->chr_close = qemu_chr_close_tty;
     return chr;
 }
-#else  /* ! __linux__ && ! __sun__ */
+#else  /* _WIN32 */
 static CharDriverState *qemu_chr_open_pty(QemuOpts *opts)
 {
     return NULL;
 }
-#endif /* __linux__ || __sun__ */
+#endif /* _WIN32 */
 
 #if defined(__linux__)
 typedef struct {
@@ -1815,6 +1865,7 @@ static CharDriverState *qemu_chr_open_win_file_out(QemuOpts *opts)
 
 typedef struct {
     int fd;
+    SockAddress  daddr;
     uint8_t buf[READ_BUF_LEN];
     int bufcnt;
     int bufptr;
@@ -1825,7 +1876,7 @@ static int udp_chr_write(CharDriverState *chr, const uint8_t *buf, int len)
 {
     NetCharDriver *s = chr->opaque;
 
-    return send(s->fd, (const void *)buf, len, 0);
+    return socket_sendto(s->fd, (const void *)buf, len, &s->daddr);
 }
 
 static int udp_chr_read_poll(void *opaque)
@@ -1853,7 +1904,7 @@ static void udp_chr_read(void *opaque)
 
     if (s->max_size == 0)
         return;
-    s->bufcnt = recv(s->fd, (void *)s->buf, sizeof(s->buf), 0);
+    s->bufcnt = socket_recv(s->fd, (void *)s->buf, sizeof(s->buf));
     s->bufptr = s->bufcnt;
     if (s->bufcnt <= 0)
         return;
@@ -1881,10 +1932,9 @@ static void udp_chr_close(CharDriverState *chr)
     NetCharDriver *s = chr->opaque;
     if (s->fd >= 0) {
         qemu_set_fd_handler(s->fd, NULL, NULL, NULL);
-        closesocket(s->fd);
+        socket_close(s->fd);
     }
     qemu_free(s);
-    qemu_chr_event(chr, CHR_EVENT_CLOSED);
 }
 
 static CharDriverState *qemu_chr_open_udp(QemuOpts *opts)
@@ -1894,7 +1944,7 @@ static CharDriverState *qemu_chr_open_udp(QemuOpts *opts)
     int fd = -1;
 
     chr = qemu_mallocz(sizeof(CharDriverState));
-    s = qemu_mallocz(sizeof(NetCharDriver));
+    s   = qemu_mallocz(sizeof(NetCharDriver));
 
     fd = inet_dgram_opts(opts);
     if (fd < 0) {
@@ -2092,7 +2142,7 @@ static void tcp_chr_read(void *opaque)
             qemu_set_fd_handler(s->listen_fd, tcp_chr_accept, NULL, chr);
         }
         qemu_set_fd_handler(s->fd, NULL, NULL, NULL);
-        closesocket(s->fd);
+        socket_close(s->fd);
         s->fd = -1;
         qemu_chr_event(chr, CHR_EVENT_CLOSED);
     } else if (size > 0) {
@@ -2127,46 +2177,24 @@ static void tcp_chr_telnet_init(int fd)
     char buf[3];
     /* Send the telnet negotion to put telnet in binary, no echo, single char mode */
     IACSET(buf, 0xff, 0xfb, 0x01);  /* IAC WILL ECHO */
-    send(fd, (char *)buf, 3, 0);
+    socket_send(fd, (char *)buf, 3);
     IACSET(buf, 0xff, 0xfb, 0x03);  /* IAC WILL Suppress go ahead */
-    send(fd, (char *)buf, 3, 0);
+    socket_send(fd, (char *)buf, 3);
     IACSET(buf, 0xff, 0xfb, 0x00);  /* IAC WILL Binary */
-    send(fd, (char *)buf, 3, 0);
+    socket_send(fd, (char *)buf, 3);
     IACSET(buf, 0xff, 0xfd, 0x00);  /* IAC DO Binary */
-    send(fd, (char *)buf, 3, 0);
-}
-
-static void socket_set_nodelay(int fd)
-{
-    int val = 1;
-    setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *)&val, sizeof(val));
+    socket_send(fd, (char *)buf, 3);
 }
 
 static void tcp_chr_accept(void *opaque)
 {
     CharDriverState *chr = opaque;
     TCPCharDriver *s = chr->opaque;
-    struct sockaddr_in saddr;
-#ifndef _WIN32
-    struct sockaddr_un uaddr;
-#endif
-    struct sockaddr *addr;
-    socklen_t len;
     int fd;
 
     for(;;) {
-#ifndef _WIN32
-	if (s->is_unix) {
-	    len = sizeof(uaddr);
-	    addr = (struct sockaddr *)&uaddr;
-	} else
-#endif
-	{
-	    len = sizeof(saddr);
-	    addr = (struct sockaddr *)&saddr;
-	}
-        fd = qemu_accept(s->listen_fd, addr, &len);
-        if (fd < 0 && errno != EINTR) {
+        fd = socket_accept(s->listen_fd, NULL);
+        if (fd < 0) {
             return;
         } else if (fd >= 0) {
             if (s->do_telnetopt)
@@ -2477,6 +2505,40 @@ QemuOpts *qemu_chr_parse_compat(const char *label, const char *filename)
         qemu_opt_set(opts, "path", filename);
         return opts;
     }
+#ifdef CONFIG_ANDROID
+    if (strstart(filename, "fdpair:", &p)) {
+        int fdin, fdout;
+        char temp[8];
+        qemu_opt_set(opts, "backend", "fdpair");
+        if (sscanf(p, "%d,%d", &fdin, &fdout) != 2) {
+            goto fail;
+        }
+        if (fdin < 0 || fdout < 0) {
+            goto fail;
+        }
+        snprintf(temp, sizeof temp, "%d", fdin);
+        qemu_opt_set(opts, "fdin", temp);
+        snprintf(temp, sizeof temp, "%d", fdout);
+        qemu_opt_set(opts, "fdout", temp);
+        return opts;
+    }
+    if (!strcmp(filename, "android-kmsg")) {
+        qemu_opt_set(opts, "backend", "android-kmsg");
+        return opts;
+    }
+    if (!strcmp(filename, "android-qemud")) {
+        qemu_opt_set(opts, "backend", "android-qemud");
+        return opts;
+    }
+    if (!strcmp(filename, "android-modem")) {
+        qemu_opt_set(opts, "backend", "android-modem");
+        return opts;
+    }
+    if (!strcmp(filename, "android-gps")) {
+        qemu_opt_set(opts, "backend", "android-gps");
+        return opts;
+    }
+#endif /* CONFIG_ANDROID */
 
 fail:
     qemu_opts_del(opts);
@@ -2491,7 +2553,7 @@ static const struct {
     { .name = "socket",    .open = qemu_chr_open_socket },
     { .name = "udp",       .open = qemu_chr_open_udp },
     { .name = "msmouse",   .open = qemu_chr_open_msmouse },
-    { .name = "vc",        .open = text_console_init_compat },
+    { .name = "vc",        .open = text_console_init },
 #ifdef _WIN32
     { .name = "file",      .open = qemu_chr_open_win_file_out },
     { .name = "pipe",      .open = qemu_chr_open_win_pipe },
@@ -2504,7 +2566,13 @@ static const struct {
     { .name = "stdio",     .open = qemu_chr_open_stdio },
 #endif
 #ifdef CONFIG_ANDROID
+#ifndef _WIN32
     { .name = "fdpair",    .open = qemu_chr_open_fdpair },
+#endif
+    { .name = "android-qemud", .open = qemu_chr_open_android_qemud },
+    { .name = "android-kmsg",  .open = qemu_chr_open_android_kmsg },
+    { .name = "android-modem", .open = qemu_chr_open_android_modem },
+    { .name = "android-gps",   .open = qemu_chr_open_android_gps },
 #endif
 #ifdef CONFIG_BRLAPI
     { .name = "braille",   .open = chr_baum_init },
