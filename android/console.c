@@ -1854,9 +1854,10 @@ do_event_send( ControlClient  client, char*  args )
     p = args;
     while (*p) {
         char*  q;
+        char   temp[128];
         int    type, code, value, ret;
 
-        p += strspn( args, " \t" );  /* skip spaces */
+        p += strspn( p, " \t" );  /* skip spaces */
         if (*p == 0)
             break;
 
@@ -1865,7 +1866,8 @@ do_event_send( ControlClient  client, char*  args )
         if (q == p)
             break;
 
-        ret = android_event_from_str( p, &type, &code, &value );
+        snprintf(temp, sizeof temp, "%.*s", q-p, p);
+        ret = android_event_from_str( temp, &type, &code, &value );
         if (ret < 0) {
             if (ret == -1) {
                 control_write( client,
