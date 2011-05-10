@@ -89,25 +89,37 @@
 
 
 #define SELF_ANNOUNCE_ROUNDS 5
-#define ETH_P_EXPERIMENTAL 0x01F1 /* just a number */
-//#define ETH_P_EXPERIMENTAL 0x0012 /* make it the size of the packet */
-#define EXPERIMENTAL_MAGIC 0xf1f23f4f
+
+#ifndef ETH_P_RARP
+#define ETH_P_RARP 0x8035
+#endif
+#define ARP_HTYPE_ETH 0x0001
+#define ARP_PTYPE_IP 0x0800
+#define ARP_OP_REQUEST_REV 0x3
 
 static int announce_self_create(uint8_t *buf,
 				uint8_t *mac_addr)
 {
-    uint32_t magic = EXPERIMENTAL_MAGIC;
-    uint16_t proto = htons(ETH_P_EXPERIMENTAL);
+    /* Ethernet header. */
+    memset(buf, 0xff, 6);         /* destination MAC addr */
+    memcpy(buf + 6, mac_addr, 6); /* source MAC addr */
+    *(uint16_t *)(buf + 12) = htons(ETH_P_RARP); /* ethertype */
 
-    /* FIXME: should we send a different packet (arp/rarp/ping)? */
+    /* RARP header. */
+    *(uint16_t *)(buf + 14) = htons(ARP_HTYPE_ETH); /* hardware addr space */
+    *(uint16_t *)(buf + 16) = htons(ARP_PTYPE_IP); /* protocol addr space */
+    *(buf + 18) = 6; /* hardware addr length (ethernet) */
+    *(buf + 19) = 4; /* protocol addr length (IPv4) */
+    *(uint16_t *)(buf + 20) = htons(ARP_OP_REQUEST_REV); /* opcode */
+    memcpy(buf + 22, mac_addr, 6); /* source hw addr */
+    memset(buf + 28, 0x00, 4);     /* source protocol addr */
+    memcpy(buf + 32, mac_addr, 6); /* target hw addr */
+    memset(buf + 38, 0x00, 4);     /* target protocol addr */
 
-    memset(buf, 0, 64);
-    memset(buf, 0xff, 6);         /* h_dst */
-    memcpy(buf + 6, mac_addr, 6); /* h_src */
-    memcpy(buf + 12, &proto, 2);  /* h_proto */
-    memcpy(buf + 14, &magic, 4);  /* magic */
+    /* Padding to get up to 60 bytes (ethernet min packet size, minus FCS). */
+    memset(buf + 42, 0x00, 18);
 
-    return 64; /* len */
+    return 60; /* len (FCS will be added by hardware) */
 }
 
 static void qemu_announce_self_once(void *opaque)
@@ -128,8 +140,10 @@ static void qemu_announce_self_once(void *opaque)
             vc->receive(vc, buf, len);
         }
     }
-    if (count--) {
-	    qemu_mod_timer(timer, qemu_get_clock_ms(rt_clock) + 100);
+    if (--count) {
+        /* delay 50ms, 150ms, 250ms, ... */
+        qemu_mod_timer(timer, qemu_get_clock_ms(rt_clock) +
+                       50 + (SELF_ANNOUNCE_ROUNDS - count - 1) * 100);
     } else {
 	    qemu_del_timer(timer);
 	    qemu_free_timer(timer);
@@ -167,11 +181,11 @@ struct QEMUFile {
     int has_error;
 };
 
-typedef struct QEMUFilePopen
+typedef struct QEMUFileStdio
 {
-    FILE *popen_file;
+    FILE *stdio_file;
     QEMUFile *file;
-} QEMUFilePopen;
+} QEMUFileStdio;
 
 typedef struct QEMUFileSocket
 {
@@ -179,7 +193,7 @@ typedef struct QEMUFileSocket
     QEMUFile *file;
 } QEMUFileSocket;
 
-static int file_socket_get_buffer(void *opaque, uint8_t *buf, int64_t pos, int size)
+static int socket_get_buffer(void *opaque, uint8_t *buf, int64_t pos, int size)
 {
     QEMUFileSocket *s = opaque;
     ssize_t len;
@@ -201,16 +215,16 @@ static int file_socket_close(void *opaque)
     return 0;
 }
 
-static int popen_put_buffer(void *opaque, const uint8_t *buf, int64_t pos, int size)
+static int stdio_put_buffer(void *opaque, const uint8_t *buf, int64_t pos, int size)
 {
-    QEMUFilePopen *s = opaque;
-    return fwrite(buf, 1, size, s->popen_file);
+    QEMUFileStdio *s = opaque;
+    return fwrite(buf, 1, size, s->stdio_file);
 }
 
-static int popen_get_buffer(void *opaque, uint8_t *buf, int64_t pos, int size)
+static int stdio_get_buffer(void *opaque, uint8_t *buf, int64_t pos, int size)
 {
-    QEMUFilePopen *s = opaque;
-    FILE *fp = s->popen_file;
+    QEMUFileStdio *s = opaque;
+    FILE *fp = s->stdio_file;
     int bytes;
 
     do {
@@ -220,31 +234,42 @@ static int popen_get_buffer(void *opaque, uint8_t *buf, int64_t pos, int size)
     return bytes;
 }
 
-static int popen_close(void *opaque)
+static int stdio_pclose(void *opaque)
 {
-    QEMUFilePopen *s = opaque;
-    pclose(s->popen_file);
+    QEMUFileStdio *s = opaque;
+    int ret;
+    ret = pclose(s->stdio_file);
+    qemu_free(s);
+    return ret;
+}
+
+static int stdio_fclose(void *opaque)
+{
+    QEMUFileStdio *s = opaque;
+    fclose(s->stdio_file);
     qemu_free(s);
     return 0;
 }
 
-QEMUFile *qemu_popen(FILE *popen_file, const char *mode)
+QEMUFile *qemu_popen(FILE *stdio_file, const char *mode)
 {
-    QEMUFilePopen *s;
+    QEMUFileStdio *s;
 
-    if (popen_file == NULL || mode == NULL || (mode[0] != 'r' && mode[0] != 'w') || mode[1] != 0) {
+    if (stdio_file == NULL || mode == NULL || (mode[0] != 'r' && mode[0] != 'w') || mode[1] != 0) {
         fprintf(stderr, "qemu_popen: Argument validity check failed\n");
         return NULL;
     }
 
-    s = qemu_mallocz(sizeof(QEMUFilePopen));
+    s = qemu_mallocz(sizeof(QEMUFileStdio));
 
-    s->popen_file = popen_file;
+    s->stdio_file = stdio_file;
 
     if(mode[0] == 'r') {
-        s->file = qemu_fopen_ops(s, NULL, popen_get_buffer, popen_close, NULL, NULL, NULL);
+        s->file = qemu_fopen_ops(s, NULL, stdio_get_buffer, stdio_pclose, 
+				 NULL, NULL, NULL);
     } else {
-        s->file = qemu_fopen_ops(s, popen_put_buffer, NULL, popen_close, NULL, NULL, NULL);
+        s->file = qemu_fopen_ops(s, stdio_put_buffer, NULL, stdio_pclose, 
+				 NULL, NULL, NULL);
     }
     return s->file;
 }
@@ -261,15 +286,45 @@ QEMUFile *qemu_popen_cmd(const char *command, const char *mode)
     return qemu_popen(popen_file, mode);
 }
 
-int qemu_popen_fd(QEMUFile *f)
+int qemu_stdio_fd(QEMUFile *f)
 {
-    QEMUFilePopen *p;
+    QEMUFileStdio *p;
     int fd;
 
-    p = (QEMUFilePopen *)f->opaque;
-    fd = fileno(p->popen_file);
+    p = (QEMUFileStdio *)f->opaque;
+    fd = fileno(p->stdio_file);
 
     return fd;
+}
+
+QEMUFile *qemu_fdopen(int fd, const char *mode)
+{
+    QEMUFileStdio *s;
+
+    if (mode == NULL ||
+	(mode[0] != 'r' && mode[0] != 'w') ||
+	mode[1] != 'b' || mode[2] != 0) {
+        fprintf(stderr, "qemu_fdopen: Argument validity check failed\n");
+        return NULL;
+    }
+
+    s = qemu_mallocz(sizeof(QEMUFileStdio));
+    s->stdio_file = fdopen(fd, mode);
+    if (!s->stdio_file)
+        goto fail;
+
+    if(mode[0] == 'r') {
+        s->file = qemu_fopen_ops(s, NULL, stdio_get_buffer, stdio_fclose, 
+				 NULL, NULL, NULL);
+    } else {
+        s->file = qemu_fopen_ops(s, stdio_put_buffer, NULL, stdio_fclose, 
+				 NULL, NULL, NULL);
+    }
+    return s->file;
+
+fail:
+    qemu_free(s);
+    return NULL;
 }
 
 QEMUFile *qemu_fopen_socket(int fd)
@@ -277,77 +332,66 @@ QEMUFile *qemu_fopen_socket(int fd)
     QEMUFileSocket *s = qemu_mallocz(sizeof(QEMUFileSocket));
 
     s->fd = fd;
-    s->file = qemu_fopen_ops(s, NULL, file_socket_get_buffer, file_socket_close, NULL, NULL, NULL);
+    s->file = qemu_fopen_ops(s, NULL, socket_get_buffer, file_socket_close, 
+			     NULL, NULL, NULL);
     return s->file;
 }
-
-typedef struct QEMUFileStdio
-{
-    FILE *outfile;
-} QEMUFileStdio;
 
 static int file_put_buffer(void *opaque, const uint8_t *buf,
                             int64_t pos, int size)
 {
     QEMUFileStdio *s = opaque;
-    fseek(s->outfile, pos, SEEK_SET);
-    fwrite(buf, 1, size, s->outfile);
-    return size;
+    fseek(s->stdio_file, pos, SEEK_SET);
+    return fwrite(buf, 1, size, s->stdio_file);
 }
 
 static int file_get_buffer(void *opaque, uint8_t *buf, int64_t pos, int size)
 {
     QEMUFileStdio *s = opaque;
-    fseek(s->outfile, pos, SEEK_SET);
-    return fread(buf, 1, size, s->outfile);
-}
-
-static int file_close(void *opaque)
-{
-    QEMUFileStdio *s = opaque;
-    fclose(s->outfile);
-    qemu_free(s);
-    return 0;
+    fseek(s->stdio_file, pos, SEEK_SET);
+    return fread(buf, 1, size, s->stdio_file);
 }
 
 QEMUFile *qemu_fopen(const char *filename, const char *mode)
 {
     QEMUFileStdio *s;
 
+    if (mode == NULL ||
+	(mode[0] != 'r' && mode[0] != 'w') ||
+	mode[1] != 'b' || mode[2] != 0) {
+        fprintf(stderr, "qemu_fopen: Argument validity check failed\n");
+        return NULL;
+    }
+
     s = qemu_mallocz(sizeof(QEMUFileStdio));
 
-    s->outfile = fopen(filename, mode);
-    if (!s->outfile)
+    s->stdio_file = fopen(filename, mode);
+    if (!s->stdio_file)
         goto fail;
-
-    if (!strcmp(mode, "wb"))
-        return qemu_fopen_ops(s, file_put_buffer, NULL, file_close, NULL, NULL, NULL);
-    else if (!strcmp(mode, "rb"))
-        return qemu_fopen_ops(s, NULL, file_get_buffer, file_close, NULL, NULL, NULL);
-
+    
+    if(mode[0] == 'w') {
+        s->file = qemu_fopen_ops(s, file_put_buffer, NULL, stdio_fclose, 
+				 NULL, NULL, NULL);
+    } else {
+        s->file = qemu_fopen_ops(s, NULL, file_get_buffer, stdio_fclose, 
+			       NULL, NULL, NULL);
+    }
+    return s->file;
 fail:
-    if (s->outfile)
-        fclose(s->outfile);
     qemu_free(s);
     return NULL;
 }
 
-typedef struct QEMUFileBdrv
-{
-    BlockDriverState *bs;
-    int64_t base_offset;
-} QEMUFileBdrv;
-
 static int block_put_buffer(void *opaque, const uint8_t *buf,
                            int64_t pos, int size)
 {
-    bdrv_save_vmstate(((QEMUFileBdrv*)opaque)->bs, buf, pos, size);
+    bdrv_save_vmstate(opaque, buf, pos, size);
     return size;
 }
 
 static int block_get_buffer(void *opaque, uint8_t *buf, int64_t pos, int size)
 {
-    return bdrv_load_vmstate(((QEMUFileBdrv*)opaque)->bs, buf, pos, size);
+    return bdrv_load_vmstate(opaque, buf, pos, size);
 }
 
 static int bdrv_fclose(void *opaque)
@@ -355,19 +399,12 @@ static int bdrv_fclose(void *opaque)
     return 0;
 }
 
-static QEMUFile *qemu_fopen_bdrv(BlockDriverState *bs, int64_t offset, int is_writable)
+static QEMUFile *qemu_fopen_bdrv(BlockDriverState *bs, int is_writable)
 {
-    QEMUFileBdrv *s;
-
-    s = qemu_mallocz(sizeof(QEMUFileBdrv));
-
-    s->bs = bs;
-    s->base_offset = offset;
-
     if (is_writable)
-        return qemu_fopen_ops(s, block_put_buffer, NULL, bdrv_fclose, NULL, NULL, NULL);
-
-    return qemu_fopen_ops(s, NULL, block_get_buffer, bdrv_fclose, NULL, NULL, NULL);
+        return qemu_fopen_ops(bs, block_put_buffer, NULL, bdrv_fclose, 
+			      NULL, NULL, NULL);
+    return qemu_fopen_ops(bs, NULL, block_get_buffer, bdrv_fclose, NULL, NULL, NULL);
 }
 
 QEMUFile *qemu_fopen_ops(void *opaque, QEMUFilePutBufferFunc *put_buffer,
@@ -387,6 +424,7 @@ QEMUFile *qemu_fopen_ops(void *opaque, QEMUFilePutBufferFunc *put_buffer,
     f->close = close;
     f->rate_limit = rate_limit;
     f->set_rate_limit = set_rate_limit;
+    f->get_rate_limit = get_rate_limit;
     f->is_write = 0;
 
     return f;
@@ -564,9 +602,19 @@ int qemu_file_rate_limit(QEMUFile *f)
     return 0;
 }
 
-size_t qemu_file_set_rate_limit(QEMUFile *f, size_t new_rate)
+int64_t qemu_file_get_rate_limit(QEMUFile *f)
 {
-    if (f->set_rate_limit)
+    if (f->get_rate_limit)
+        return f->get_rate_limit(f->opaque);
+
+    return 0;
+}
+
+int64_t qemu_file_set_rate_limit(QEMUFile *f, int64_t new_rate)
+{
+    /* any failed or completed migration keeps its state to allow probing of
+     * migration data, but has no associated file anymore */
+    if (f && f->set_rate_limit)
         return f->set_rate_limit(f->opaque, new_rate);
 
     return 0;
@@ -1227,7 +1275,7 @@ void do_savevm_oc(OutputChannel *err, const char *name)
     }
 
     /* save the VM state */
-    f = qemu_fopen_bdrv(bs, bdi->vm_state_offset, 1);
+    f = qemu_fopen_bdrv(bs, 1);
     if (!f) {
         output_channel_printf(err, "Could not open VM state file\n");
         goto the_end;
@@ -1339,7 +1387,7 @@ void do_loadvm_oc(OutputChannel *err, const char *name)
         goto the_end;
 
     /* restore the VM state */
-    f = qemu_fopen_bdrv(bs, bdi->vm_state_offset, 0);
+    f = qemu_fopen_bdrv(bs, 0);
     if (!f) {
         output_channel_printf(err, "Could not open VM state file\n");
         goto the_end;
