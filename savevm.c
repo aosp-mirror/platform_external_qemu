@@ -93,7 +93,7 @@
 //#define ETH_P_EXPERIMENTAL 0x0012 /* make it the size of the packet */
 #define EXPERIMENTAL_MAGIC 0xf1f23f4f
 
-static int announce_self_create(uint8_t *buf, 
+static int announce_self_create(uint8_t *buf,
 				uint8_t *mac_addr)
 {
     uint32_t magic = EXPERIMENTAL_MAGIC;
@@ -129,7 +129,7 @@ static void qemu_announce_self_once(void *opaque)
         }
     }
     if (count--) {
-	    qemu_mod_timer(timer, qemu_get_clock(rt_clock) + 100);
+	    qemu_mod_timer(timer, qemu_get_clock_ms(rt_clock) + 100);
     } else {
 	    qemu_del_timer(timer);
 	    qemu_free_timer(timer);
@@ -139,7 +139,7 @@ static void qemu_announce_self_once(void *opaque)
 void qemu_announce_self(void)
 {
 	static QEMUTimer *timer;
-	timer = qemu_new_timer(rt_clock, qemu_announce_self_once, &timer);
+	timer = qemu_new_timer_ms(rt_clock, qemu_announce_self_once, &timer);
 	qemu_announce_self_once(&timer);
 }
 
@@ -1218,7 +1218,7 @@ void do_savevm_oc(OutputChannel *err, const char *name)
     sn->date_sec = tv.tv_sec;
     sn->date_nsec = tv.tv_usec * 1000;
 #endif
-    sn->vm_clock_nsec = qemu_get_clock(vm_clock);
+    sn->vm_clock_nsec = qemu_get_clock_ns(vm_clock);
 
     if (bdrv_get_info(bs, bdi) < 0 || bdi->vm_state_offset <= 0) {
         output_channel_printf(err, "Device %s does not support VM state snapshots\n",

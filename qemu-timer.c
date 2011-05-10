@@ -525,7 +525,7 @@ void qemu_clock_warp(QEMUClock *clock)
     }
 }
 
-QEMUTimer *qemu_new_timer_scale(QEMUClock *clock, int scale,
+QEMUTimer *qemu_new_timer(QEMUClock *clock, int scale,
                           QEMUTimerCB *cb, void *opaque)
 {
     QEMUTimer *ts;
@@ -536,14 +536,6 @@ QEMUTimer *qemu_new_timer_scale(QEMUClock *clock, int scale,
     ts->opaque = opaque;
     ts->scale = scale;
     return ts;
-}
-
-QEMUTimer *qemu_new_timer(QEMUClock *clock, QEMUTimerCB *cb, void *opaque)
-{
-    int scale = SCALE_NS;
-    if (clock == rt_clock)
-        scale = SCALE_MS;
-    return qemu_new_timer_scale(clock, scale, cb, opaque);
 }
 
 void qemu_free_timer(QEMUTimer *ts)

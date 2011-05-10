@@ -41,8 +41,7 @@ int64_t qemu_get_clock_ns(QEMUClock *clock);
 void qemu_clock_enable(QEMUClock *clock, int enabled);
 void qemu_clock_warp(QEMUClock *clock);
 
-QEMUTimer *qemu_new_timer(QEMUClock *clock, QEMUTimerCB *cb, void *opaque);
-QEMUTimer *qemu_new_timer_scale(QEMUClock *clock, int scale,
+QEMUTimer *qemu_new_timer(QEMUClock *clock, int scale,
                           QEMUTimerCB *cb, void *opaque);
 
 void qemu_free_timer(QEMUTimer *ts);
@@ -70,13 +69,13 @@ void cpu_disable_ticks(void);
 static inline QEMUTimer *qemu_new_timer_ns(QEMUClock *clock, QEMUTimerCB *cb,
                                            void *opaque)
 {
-    return qemu_new_timer_scale(clock, SCALE_NS, cb, opaque);
+    return qemu_new_timer(clock, SCALE_NS, cb, opaque);
 }
 
 static inline QEMUTimer *qemu_new_timer_ms(QEMUClock *clock, QEMUTimerCB *cb,
                                            void *opaque)
 {
-    return qemu_new_timer_scale(clock, SCALE_MS, cb, opaque);
+    return qemu_new_timer(clock, SCALE_MS, cb, opaque);
 }
 
 static inline int64_t qemu_get_clock_ms(QEMUClock *clock)

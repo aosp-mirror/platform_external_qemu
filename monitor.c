@@ -1120,8 +1120,7 @@ static void do_sendkey(Monitor *mon, const char *string, int has_hold_time,
         kbd_put_keycode(keycode & 0x7f);
     }
     /* delayed key up events */
-    qemu_mod_timer(key_timer, qemu_get_clock(vm_clock) +
-                   muldiv64(get_ticks_per_sec(), hold_time, 1000));
+    qemu_mod_timer(key_timer, qemu_get_clock_ms(vm_clock) + hold_time);
 }
 
 static int mouse_button_state;
@@ -3072,7 +3071,7 @@ void monitor_init(CharDriverState *chr, int flags)
     Monitor *mon;
 
     if (is_first_init) {
-        key_timer = qemu_new_timer(vm_clock, release_keys, NULL);
+        key_timer = qemu_new_timer_ms(vm_clock, release_keys, NULL);
         is_first_init = 0;
     }
 

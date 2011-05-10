@@ -599,7 +599,7 @@ static uint32_t apic_get_current_count(APICState *s)
 {
     int64_t d;
     uint32_t val;
-    d = (qemu_get_clock(vm_clock) - s->initial_count_load_time) >>
+    d = (qemu_get_clock_ns(vm_clock) - s->initial_count_load_time) >>
         s->count_shift;
     if (s->lvt[APIC_LVT_TIMER] & APIC_LVT_TIMER_PERIODIC) {
         /* periodic */
@@ -806,12 +806,12 @@ static void apic_mem_writel(void *opaque, target_phys_addr_t addr, uint32_t val)
             int n = index - 0x32;
             s->lvt[n] = val;
             if (n == APIC_LVT_TIMER)
-                apic_timer_update(s, qemu_get_clock(vm_clock));
+                apic_timer_update(s, qemu_get_clock_ns(vm_clock));
         }
         break;
     case 0x38:
         s->initial_count = val;
-        s->initial_count_load_time = qemu_get_clock(vm_clock);
+        s->initial_count_load_time = qemu_get_clock_ns(vm_clock);
         apic_timer_update(s, s->initial_count_load_time);
         break;
     case 0x39:
@@ -956,7 +956,7 @@ int apic_init(CPUState *env)
         cpu_register_physical_memory(s->apicbase & ~0xfff, 0x1000,
                                      apic_io_memory);
     }
-    s->timer = qemu_new_timer(vm_clock, apic_timer, s);
+    s->timer = qemu_new_timer_ns(vm_clock, apic_timer, s);
 
     register_savevm("apic", s->idx, 2, apic_save, apic_load, s);
     qemu_register_reset(apic_reset, 0, s);
