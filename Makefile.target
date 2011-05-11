@@ -29,7 +29,10 @@ EMULATOR_TARGET_CFLAGS := \
     -DNEED_CPU_H \
 
 TCG_TARGET := $(HOST_ARCH)
-ifeq ($(TCG_TARGET),x86)
+ifeq ($(HOST_ARCH),x86)
+  TCG_TARGET := i386
+endif
+ifeq ($(HOST_ARCH),x86_64)
   TCG_TARGET := i386
 endif
 

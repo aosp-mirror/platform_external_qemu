@@ -304,7 +304,7 @@ static void tcg_out_arithc(TCGContext *s, int rd, int rs1,
               | (val2const ? INSN_IMM13(val2) : INSN_RS2(val2)));
 }
 
-static inline void tcg_out_mov(TCGContext *s, int ret, int arg)
+static inline void tcg_out_mov(TCGContext *s, TCGType type, int ret, int arg)
 {
     tcg_out_arith(s, ret, arg, TCG_REG_G0, ARITH_OR);
 }
@@ -520,7 +520,7 @@ static void tcg_out_cmp(TCGContext *s, TCGArg c1, TCGArg c2, int c2const)
     tcg_out_arithc(s, TCG_REG_G0, c1, c2, c2const, ARITH_SUBCC);
 }
 
-static void tcg_out_brcond_i32(TCGContext *s, int cond,
+static void tcg_out_brcond_i32(TCGContext *s, TCGCond cond,
                                TCGArg arg1, TCGArg arg2, int const_arg2,
                                int label_index)
 {
@@ -530,7 +530,7 @@ static void tcg_out_brcond_i32(TCGContext *s, int cond,
 }
 
 #if TCG_TARGET_REG_BITS == 64
-static void tcg_out_brcond_i64(TCGContext *s, int cond,
+static void tcg_out_brcond_i64(TCGContext *s, TCGCond cond,
                                TCGArg arg1, TCGArg arg2, int const_arg2,
                                int label_index)
 {
@@ -539,7 +539,7 @@ static void tcg_out_brcond_i64(TCGContext *s, int cond,
     tcg_out_nop(s);
 }
 #else
-static void tcg_out_brcond2_i32(TCGContext *s, int cond,
+static void tcg_out_brcond2_i32(TCGContext *s, TCGCond cond,
                                 TCGArg al, TCGArg ah,
                                 TCGArg bl, int blconst,
                                 TCGArg bh, int bhconst, int label_dest)
@@ -587,7 +587,7 @@ static void tcg_out_brcond2_i32(TCGContext *s, int cond,
 }
 #endif
 
-static void tcg_out_setcond_i32(TCGContext *s, int cond, TCGArg ret,
+static void tcg_out_setcond_i32(TCGContext *s, TCGCond cond, TCGArg ret,
                                 TCGArg c1, TCGArg c2, int c2const)
 {
     TCGArg t;
@@ -643,7 +643,7 @@ static void tcg_out_setcond_i32(TCGContext *s, int cond, TCGArg ret,
 }
 
 #if TCG_TARGET_REG_BITS == 64
-static void tcg_out_setcond_i64(TCGContext *s, int cond, TCGArg ret,
+static void tcg_out_setcond_i64(TCGContext *s, TCGCond cond, TCGArg ret,
                                 TCGArg c1, TCGArg c2, int c2const)
 {
     tcg_out_cmp(s, c1, c2, c2const);
@@ -653,7 +653,7 @@ static void tcg_out_setcond_i64(TCGContext *s, int cond, TCGArg ret,
                | MOVCC_XCC | INSN_IMM11(1));
 }
 #else
-static void tcg_out_setcond2_i32(TCGContext *s, int cond, TCGArg ret,
+static void tcg_out_setcond2_i32(TCGContext *s, TCGCond cond, TCGArg ret,
                                  TCGArg al, TCGArg ah,
                                  TCGArg bl, int blconst,
                                  TCGArg bh, int bhconst)
@@ -691,7 +691,7 @@ static void tcg_out_setcond2_i32(TCGContext *s, int cond, TCGArg ret,
 #endif
 
 /* Generate global QEMU prologue and epilogue code */
-void tcg_target_qemu_prologue(TCGContext *s)
+static void tcg_target_qemu_prologue(TCGContext *s)
 {
     tcg_out32(s, SAVE | INSN_RD(TCG_REG_O6) | INSN_RS1(TCG_REG_O6) |
               INSN_IMM13(-TCG_TARGET_STACK_MINFRAME));
@@ -725,10 +725,12 @@ static const void * const qemu_st_helpers[4] = {
 #define TARGET_LD_OP LDX
 #endif
 
-#if TARGET_PHYS_ADDR_BITS == 32
+#if defined(CONFIG_SOFTMMU)
+#if HOST_LONG_BITS == 32
 #define TARGET_ADDEND_LD_OP LDUW
 #else
 #define TARGET_ADDEND_LD_OP LDX
+#endif
 #endif
 
 #ifdef __arch64__
@@ -793,7 +795,7 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
     tcg_out32(s, 0);
 
     /* mov (delay slot) */
-    tcg_out_mov(s, arg0, addr_reg);
+    tcg_out_mov(s, TCG_TYPE_PTR, arg0, addr_reg);
 
     /* mov */
     tcg_out_movi(s, TCG_TYPE_I32, arg1, mem_index);
@@ -843,7 +845,7 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
     case 3:
     default:
         /* mov */
-        tcg_out_mov(s, data_reg, arg0);
+        tcg_out_mov(s, TCG_TYPE_REG, data_reg, arg0);
         break;
     }
 
@@ -1005,10 +1007,10 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
     tcg_out32(s, 0);
 
     /* mov (delay slot) */
-    tcg_out_mov(s, arg0, addr_reg);
+    tcg_out_mov(s, TCG_TYPE_PTR, arg0, addr_reg);
 
     /* mov */
-    tcg_out_mov(s, arg1, data_reg);
+    tcg_out_mov(s, TCG_TYPE_REG, arg1, data_reg);
 
     /* mov */
     tcg_out_movi(s, TCG_TYPE_I32, arg2, mem_index);
@@ -1111,7 +1113,7 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
 #endif
 }
 
-static inline void tcg_out_op(TCGContext *s, int opc, const TCGArg *args,
+static inline void tcg_out_op(TCGContext *s, TCGOpcode opc, const TCGArg *args,
                               const int *const_args)
 {
     int c;
@@ -1316,7 +1318,10 @@ static inline void tcg_out_op(TCGContext *s, int opc, const TCGArg *args,
     case INDEX_op_qemu_ld16s:
         tcg_out_qemu_ld(s, args, 1 | 4);
         break;
+    case INDEX_op_qemu_ld32:
+#if TCG_TARGET_REG_BITS == 64
     case INDEX_op_qemu_ld32u:
+#endif
         tcg_out_qemu_ld(s, args, 2);
         break;
 #if TCG_TARGET_REG_BITS == 64
@@ -1472,8 +1477,9 @@ static const TCGTargetOpDef sparc_op_defs[] = {
     { INDEX_op_qemu_ld8s, { "r", "L" } },
     { INDEX_op_qemu_ld16u, { "r", "L" } },
     { INDEX_op_qemu_ld16s, { "r", "L" } },
-    { INDEX_op_qemu_ld32u, { "r", "L" } },
+    { INDEX_op_qemu_ld32, { "r", "L" } },
 #if TCG_TARGET_REG_BITS == 64
+    { INDEX_op_qemu_ld32u, { "r", "L" } },
     { INDEX_op_qemu_ld32s, { "r", "L" } },
 #endif
 
@@ -1527,7 +1533,7 @@ static const TCGTargetOpDef sparc_op_defs[] = {
     { -1 },
 };
 
-void tcg_target_init(TCGContext *s)
+static void tcg_target_init(TCGContext *s)
 {
     tcg_regset_set32(tcg_target_available_regs[TCG_TYPE_I32], 0, 0xffffffff);
 #if TCG_TARGET_REG_BITS == 64
