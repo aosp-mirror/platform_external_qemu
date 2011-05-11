@@ -157,6 +157,7 @@ LOCAL_SRC_FILES += \
     target-arm/iwmmxt_helper.c \
     target-arm/neon_helper.c \
     target-arm/helper.c \
+    target-arm/helper-android.c \
     target-arm/translate.c \
     target-arm/machine.c \
     hw/armv7m.c \

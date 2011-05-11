@@ -1,29 +1,31 @@
-/* Copyright (C) 2007-2010 The Android Open Source Project
-**
-** This software is licensed under the terms of the GNU General Public
-** License version 2, as published by the Free Software Foundation, and
-** may be copied, distributed, and modified under those terms.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-*/
+/* This file must be included from target-arm/translate.c */
+
+/*****
+ *****
+ *****
+ *****  C O N F I G _ M E M C H E C K
+ *****
+ *****
+ *****/
+
+#ifdef CONFIG_MEMCHECK
 
 /*
- * Contains implementation of memcheck helper routines used by ARM's translator.
+ * Memchecker addition in this module is intended to inject qemu callback into
+ * translated code for each BL/BLX, as well as BL/BLX returns. These callbacks
+ * are used to build calling stack of the thread in order to provide better
+ * reporting on memory access violations. Although this may seem as something
+ * that may gratly impact the performance, in reality it doesn't. Overhead that
+ * is added by setting up callbacks and by callbacks themselves is neglectable.
+ * On the other hand, maintaining calling stack can indeed add some perf.
+ * overhead (TODO: provide solid numbers here).
+ * One of the things to watch out with regards to injecting callbacks, is
+ * consistency between intermediate code generated for execution, and for guest
+ * PC address calculation. If code doesn't match, a segmentation fault is
+ * guaranteed.
  */
 
-#ifndef QEMU_TARGET_ARM_MEMCHECK_ARM_HELPERS_H
-#define QEMU_TARGET_ARM_MEMCHECK_ARM_HELPERS_H
-
-/* This file should compile iff qemu is built with memory checking
- * configuration turned on. */
-#ifndef CONFIG_MEMCHECK
-#error CONFIG_MEMCHECK is not defined.
-#endif  // CONFIG_MEMCHECK
-
-#include "helpers.h"
+#include "memcheck/memcheck_proc_management.h"
 #include "memcheck/memcheck_api.h"
 
 /* Array of return addresses detected in gen_intermediate_code_internal. */
@@ -203,4 +205,183 @@ set_on_ret(target_ulong ret)
     tcg_temp_free_ptr(tmp_ret);
 }
 
-#endif  // QEMU_TARGET_ARM_MEMCHECK_ARM_HELPERS_H
+
+#  define ANDROID_WATCH_CALLSTACK_ARM(s) \
+    if (watch_call_stack(s)) { \
+        if (is_ret_address(env, s->pc)) { \
+            set_on_ret(s->pc); \
+        } \
+        if (is_arm_bl_or_blx(insn)) { \
+            set_on_call(s->pc, s->pc + 4); \
+            if (!s->search_pc) { \
+                register_ret_address(env, s->pc + 4); \
+            } \
+        } \
+    }
+
+#  define ANDROID_WATCH_CALLSTACK_THUMB(s) \
+    if (watch_call_stack(s)) { \
+        target_ulong ret_off; \
+        if (is_ret_address(env, s->pc)) { \
+            set_on_ret(s->pc); \
+        } \
+        if (is_thumb_bl_or_blx(insn, s->pc, &ret_off)) { \
+            set_on_call(s->pc, s->pc + ret_off); \
+            if (!s->search_pc) { \
+                register_ret_address(env, s->pc + ret_off); \
+            } \
+        } \
+    }
+
+#  define ANDROID_DISAS_CONTEXT_FIELDS \
+    int search_pc;
+
+#  define ANDROID_START_CODEGEN(search_pc) \
+    dc->search_pc = search_pc
+
+        /* When memchecker is enabled, we need to keep a match between
+         * translated PC and guest PCs, so memchecker can quickly covert
+         * one to another. Note that we do that only for user mode. */
+#  define ANDROID_CHECK_CODEGEN_PC(search_pc) \
+        ((search_pc) || (memcheck_enabled && dc->user))
+
+#  define ANDROID_END_CODEGEN() \
+    do { \
+        if (memcheck_enabled && dc->user) { \
+            j = gen_opc_ptr - gen_opc_buf; \
+            lj++; \
+            while (lj <= j) \
+                gen_opc_instr_start[lj++] = 0; \
+        } \
+    } while (0)
+
+#else /* !CONFIG_MEMCHECK */
+
+#  define ANDROID_WATCH_CALLSTACK_ARM     ((void)0)
+#  define ANDROID_WATCH_CALLSTACK_THUMB   ((void)0)
+#  define ANDROID_DISAS_CONTEXT_FIELDS     /* nothing */
+#  define ANDROID_START_CODEGEN(s)         ((void)(s))
+#  define ANDROID_CHECK_CODEGEN_PC(s)      (s)
+#  define ANDROID_END_CODEGEN()            ((void)0)
+
+#endif  /* !CONFIG_MEMCHECK */
+
+
+/*****
+ *****
+ *****
+ *****  C O N F I G _ T R A C E
+ *****
+ *****
+ *****/
+
+#ifdef CONFIG_TRACE
+
+#include "trace.h"
+#define  gen_traceInsn()   gen_helper_traceInsn()
+
+static void
+gen_traceTicks( int  count )
+{
+    TCGv  tmp = tcg_temp_new_i32();
+    tcg_gen_movi_i32(tmp, count);
+    gen_helper_traceTicks(tmp);
+    tcg_temp_free_i32(tmp);
+}
+
+static void
+gen_traceBB( uint64_t  bbNum, void* tb )
+{
+#if HOST_LONG_BITS == 32
+    TCGv_i64  tmpNum = tcg_temp_new_i64();
+    TCGv_i32  tmpTb  = tcg_temp_new_i32();
+
+    tcg_gen_movi_i64(tmpNum, (int64_t)bbNum);
+    tcg_gen_movi_i32(tmpTb,  (int32_t)tb);
+    gen_helper_traceBB32(tmpNum, tmpTb);
+    tcg_temp_free_i32(tmpTb);
+    tcg_temp_free_i64(tmpNum);
+#elif HOST_LONG_BITS == 64
+    TCGv_i64  tmpNum = tcg_temp_new_i64();
+    TCGv_i64  tmpTb  = tcg_temp_new_i64();
+
+    tcg_gen_movi_i64(tmpNum, (int64_t)bbNum);
+    tcg_gen_movi_i64(tmpTb,  (int64_t)tb);
+    gen_helper_traceBB64(tmpNum, tmpTb);
+    tcg_temp_free_i64(tmpTb);
+    tcg_temp_free_i64(tmpNum);
+#endif
+}
+
+#  define ANDROID_TRACE_DECLS   int ticks = 0;
+
+#  define ANDROID_TRACE_START_ARM() \
+    do { \
+        if (tracing) { \
+            trace_add_insn(insn, 0); \
+            ticks = get_insn_ticks_arm(insn); \
+            gen_traceInsn(); \
+        } \
+    } while (0)
+
+#  define ANDROID_TRACE_START_THUMB() \
+    do { \
+        if (tracing) { \
+            int  ticks = get_insn_ticks_thumb(insn); \
+            trace_add_insn( insn_wrap_thumb(insn), 1 ); \
+            gen_traceInsn(); \
+            gen_traceTicks(ticks); \
+        } \
+    } while (0)
+
+#  define ANDROID_TRACE_GEN_TICKS() \
+    do { \
+        if (tracing) { \
+        } \
+    } while (0)
+
+#  define ANDROID_TRACE_GEN_SINGLE_TICK() \
+    do { \
+        if (tracing) { \
+            gen_traceTicks(1); \
+            ticks -= 1; \
+        } \
+    } while (0)
+
+# define ANDROID_TRACE_GEN_OTHER_TICKS() \
+    do { \
+        if (tracing && ticks > 0) { \
+            gen_traceTicks(ticks); \
+        } \
+    } while (0)
+
+#  define ANDROID_TRACE_START_BB() \
+    do { \
+        if (tracing) { \
+            gen_traceBB(trace_static_bb_num(), tb); \
+            trace_bb_start(dc->pc); \
+        } \
+    } while (0)
+
+#  define ANDROID_TRACE_END_BB() \
+    do { \
+        if (tracing) { \
+            trace_bb_end(); \
+        } \
+    } while (0)
+
+#else /* !CONFIG_TRACE */
+
+#  define ANDROID_TRACE_DECLS         /* nothing */
+#  define ANDROID_TRACE_START_ARM()   ((void)0)
+#  define ANDROID_TRACE_START_THUMB() ((void)0)
+
+#  define ANDROID_TRACE_GEN_TICKS()        ((void)0)
+#  define ANDROID_TRACE_GEN_SINGLE_TICK()  ((void)0)
+#  define ANDROID_TRACE_GEN_OTHER_TICKS()  ((void)0)
+
+#  define ANDROID_TRACE_START_BB()         ((void)0)
+#  define ANDROID_TRACE_END_BB()           ((void)0)
+
+#endif /* !CONFIG_TRACE */
+

@@ -10,9 +10,6 @@
 #ifdef CONFIG_TRACE
 #include "trace.h"
 #endif
-#ifdef CONFIG_MEMCHECK
-#include "memcheck/memcheck_api.h"
-#endif  // CONFIG_MEMCHECK
 
 static uint32_t cortexa8_cp15_c0_c1[8] =
 { 0x1031, 0x11, 0x400, 0, 0x31100003, 0x20000000, 0x01202000, 0x11 };
@@ -2634,34 +2631,6 @@ uint32_t HELPER(rsqrte_u32)(uint32_t a, CPUState *env)
     return float32_to_int32(tmp, s);
 }
 
-#ifdef CONFIG_TRACE
-#include "trace.h"
-void  HELPER(traceTicks)(uint32_t  ticks)
-{
-    sim_time += ticks;
-}
-
-void  HELPER(traceInsn)(void)
-{
-    trace_insn_helper();
-}
-
-#if HOST_LONG_BITS == 32
-void HELPER(traceBB32)(uint64_t  bb_num, uint32_t  tb)
-{
-    trace_bb_helper(bb_num, (void*)tb);
-}
-#endif
-
-#if HOST_LONG_BITS == 64
-void HELPER(traceBB64)(uint64_t  bb_num, uint64_t  tb)
-{
-    trace_bb_helper(bb_num, (void*)tb);
-}
-#endif
-
-#endif /* CONFIG_TRACE */
-
 void HELPER(set_teecr)(CPUState *env, uint32_t val)
 {
     val &= 1;
@@ -2670,13 +2639,3 @@ void HELPER(set_teecr)(CPUState *env, uint32_t val)
         tb_flush(env);
     }
 }
-
-#ifdef CONFIG_MEMCHECK
-void HELPER(on_call)(target_ulong pc, target_ulong ret) {
-    memcheck_on_call(pc, ret);
-}
-
-void HELPER(on_ret)(target_ulong ret) {
-    memcheck_on_ret(ret);
-}
-#endif  // CONFIG_MEMCHECK

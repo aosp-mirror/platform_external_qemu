@@ -30,10 +30,6 @@
 #include "tcg-op.h"
 #include "qemu-log.h"
 
-#ifdef CONFIG_TRACE
-#include "trace.h"
-#endif
-
 #include "helpers.h"
 #define GEN_HELPER 1
 #include "helpers.h"
@@ -66,38 +62,16 @@ typedef struct DisasContext {
 #endif
 #ifdef CONFIG_MEMCHECK
     int search_pc;
-#endif  // CONFIG_MEMCHECK
+#endif
 } DisasContext;
+
+#include "translate-android.h"
 
 #if defined(CONFIG_USER_ONLY)
 #define IS_USER(s) 1
 #else
 #define IS_USER(s) (s->user)
 #endif
-
-#ifdef CONFIG_TRACE
-#include "helpers.h"
-#endif /* CONFIG_TRACE */
-
-#ifdef CONFIG_MEMCHECK
-/*
- * Memchecker addition in this module is intended to inject qemu callback into
- * translated code for each BL/BLX, as well as BL/BLX returns. These callbacks
- * are used to build calling stack of the thread in order to provide better
- * reporting on memory access violations. Although this may seem as something
- * that may gratly impact the performance, in reality it doesn't. Overhead that
- * is added by setting up callbacks and by callbacks themselves is neglectable.
- * On the other hand, maintaining calling stack can indeed add some perf.
- * overhead (TODO: provide solid numbers here).
- * One of the things to watch out with regards to injecting callbacks, is
- * consistency between intermediate code generated for execution, and for guest
- * PC address calculation. If code doesn't match, a segmentation fault is
- * guaranteed.
- */
-
-#include "memcheck/memcheck_proc_management.h"
-#include "memcheck_arm_helpers.h"
-#endif  // CONFIG_MEMCHECK
 
 /* These instructions trap after executing, so defer them until after the
    conditional executions state has been updated.  */
@@ -5756,50 +5730,10 @@ static void gen_logicq_cc(TCGv_i64 val)
 }
 
 
-#ifdef CONFIG_TRACE
-
-#define  gen_traceInsn()   gen_helper_traceInsn()
-
-static void
-gen_traceTicks( int  count )
-{
-    TCGv  tmp = tcg_temp_new_i32();
-    tcg_gen_movi_i32(tmp, count);
-    gen_helper_traceTicks(tmp);
-    tcg_temp_free_i32(tmp);
-}
-
-static void
-gen_traceBB( uint64_t  bbNum, void* tb )
-{
-#if HOST_LONG_BITS == 32
-    TCGv_i64  tmpNum = tcg_temp_new_i64();
-    TCGv_i32  tmpTb  = tcg_temp_new_i32();
-
-    tcg_gen_movi_i64(tmpNum, (int64_t)bbNum);
-    tcg_gen_movi_i32(tmpTb,  (int32_t)tb);
-    gen_helper_traceBB32(tmpNum, tmpTb);
-    tcg_temp_free_i32(tmpTb);
-    tcg_temp_free_i64(tmpNum);
-#elif HOST_LONG_BITS == 64
-    TCGv_i64  tmpNum = tcg_temp_new_i64();
-    TCGv_i64  tmpTb  = tcg_temp_new_i64();
-
-    tcg_gen_movi_i64(tmpNum, (int64_t)bbNum);
-    tcg_gen_movi_i64(tmpTb,  (int64_t)tb);
-    gen_helper_traceBB64(tmpNum, tmpTb);
-    tcg_temp_free_i64(tmpTb);
-    tcg_temp_free_i64(tmpNum);
-#endif
-}
-#endif /* CONFIG_TRACE */
-
 static void disas_arm_insn(CPUState * env, DisasContext *s)
 {
     unsigned int cond, insn, val, op1, i, shift, rm, rs, rn, rd, sh;
-#ifdef CONFIG_TRACE
-    int  ticks = 0;
-#endif
+    ANDROID_TRACE_DECLS
     TCGv tmp;
     TCGv tmp2;
     TCGv tmp3;
@@ -5807,27 +5741,9 @@ static void disas_arm_insn(CPUState * env, DisasContext *s)
     TCGv_i64 tmp64;
     insn = ldl_code(s->pc);
 
-#ifdef CONFIG_MEMCHECK
-    if (watch_call_stack(s)) {
-        if (is_ret_address(env, s->pc)) {
-            set_on_ret(s->pc);
-        }
-        if (is_arm_bl_or_blx(insn)) {
-            set_on_call(s->pc, s->pc + 4);
-            if (!s->search_pc) {
-                register_ret_address(env, s->pc + 4);
-            }
-        }
-    }
-#endif  // CONFIG_MEMCHECK
+    ANDROID_WATCH_CALLSTACK_ARM(s);
 
-#ifdef CONFIG_TRACE
-    if (tracing) {
-        trace_add_insn(insn, 0);
-        ticks = get_insn_ticks_arm(insn);
-        gen_traceInsn();
-    }
-#endif
+    ANDROID_TRACE_START_ARM();
 
     s->pc += 4;
 
@@ -5836,11 +5752,7 @@ static void disas_arm_insn(CPUState * env, DisasContext *s)
         goto illegal_op;
     cond = insn >> 28;
     if (cond == 0xf){
-#ifdef CONFIG_TRACE
-        if (tracing) {
-            gen_traceTicks(ticks);
-        }
-#endif
+        ANDROID_TRACE_GEN_TICKS();
         /* Unconditional instructions.  */
         if (((insn >> 25) & 7) == 1) {
             /* NEON Data processing.  */
@@ -6028,25 +5940,14 @@ static void disas_arm_insn(CPUState * env, DisasContext *s)
         goto illegal_op;
     }
     if (cond != 0xe) {
-#ifdef CONFIG_TRACE
-        if (tracing) {
-            /* a non-executed conditional instruction takes */
-            /* only 1 cycle */
-            gen_traceTicks(1);
-            ticks -= 1;
-        }
-#endif
+        ANDROID_TRACE_GEN_SINGLE_TICK();
         /* if not always execute, we generate a conditional jump to
            next instruction */
         s->condlabel = gen_new_label();
         gen_test_cc(cond ^ 1, s->condlabel);
         s->condjmp = 1;
     }
-#ifdef CONFIG_TRACE
-    if (tracing && ticks > 0) {
-        gen_traceTicks(ticks);
-    }
-#endif
+    ANDROID_TRACE_GEN_OTHER_TICKS();
     if ((insn & 0x0f900000) == 0x03000000) {
         if ((insn & (1 << 21)) == 0) {
             ARCH(6T2);
@@ -7198,14 +7099,7 @@ static int disas_thumb2_insn(CPUState *env, DisasContext *s, uint16_t insn_hw1)
     }
 
     insn = lduw_code(s->pc);
-#ifdef CONFIG_TRACE
-    if (tracing) {
-        int  ticks = get_insn_ticks_thumb(insn);
-        trace_add_insn( insn_wrap_thumb(insn), 1 );
-        gen_traceInsn();
-        gen_traceTicks(ticks);
-    }
-#endif
+    ANDROID_TRACE_START_THUMB();
 
     insn |= (uint32_t)insn_hw1 << 16;
 
@@ -8188,29 +8082,10 @@ static void disas_thumb_insn(CPUState *env, DisasContext *s)
 
     insn = lduw_code(s->pc);
 
-#ifdef CONFIG_MEMCHECK
-    if (watch_call_stack(s)) {
-        target_ulong ret_off;
-        if (is_ret_address(env, s->pc)) {
-            set_on_ret(s->pc);
-        }
-        if (is_thumb_bl_or_blx(insn, s->pc, &ret_off)) {
-            set_on_call(s->pc, s->pc + ret_off);
-            if (!s->search_pc) {
-                register_ret_address(env, s->pc + ret_off);
-            }
-        }
-    }
-#endif  // CONFIG_MEMCHECK
+    ANDROID_WATCH_CALLSTACK_THUMB(s);
 
-#ifdef CONFIG_TRACE
-    if (tracing) {
-        int  ticks = get_insn_ticks_thumb(insn);
-        trace_add_insn( insn_wrap_thumb(insn), 1 );
-        gen_traceInsn();
-        gen_traceTicks(ticks);
-    }
-#endif
+    ANDROID_TRACE_START_THUMB();
+
     s->pc += 2;
 
     switch (insn >> 12) {
@@ -8888,9 +8763,7 @@ static inline void gen_intermediate_code_internal(CPUState *env,
         dc->user = (env->uncached_cpsr & 0x1f) == ARM_CPU_MODE_USR;
     }
 #endif
-#ifdef CONFIG_MEMCHECK
-    dc->search_pc = search_pc;
-#endif  // CONFIG_MEMCHECK
+    ANDROID_START_CODEGEN(search_pc);
     cpu_F0s = tcg_temp_new_i32();
     cpu_F1s = tcg_temp_new_i32();
     cpu_F0d = tcg_temp_new_i64();
@@ -8907,12 +8780,7 @@ static inline void gen_intermediate_code_internal(CPUState *env,
         max_insns = CF_COUNT_MASK;
 
     gen_icount_start();
-#ifdef CONFIG_TRACE
-    if (tracing) {
-        gen_traceBB(trace_static_bb_num(), tb);
-        trace_bb_start(dc->pc);
-    }
-#endif
+    ANDROID_TRACE_START_BB();
 
     do {
 #ifdef CONFIG_USER_ONLY
@@ -8950,14 +8818,7 @@ static inline void gen_intermediate_code_internal(CPUState *env,
             }
         }
 
-#ifdef CONFIG_MEMCHECK
-        /* When memchecker is enabled, we need to keep a match between
-         * translated PC and guest PCs, so memchecker can quickly covert
-         * one to another. Note that we do that only for user mode. */
-        if (search_pc || (memcheck_enabled && dc->user)) {
-#else   // CONFIG_MEMCHECK
-        if (search_pc) {
-#endif  // CONFIG_MEMCHECK
+        if (ANDROID_CHECK_CODEGEN_PC(search_pc)) {
             j = gen_opc_ptr - gen_opc_buf;
             if (lj < j) {
                 lj++;
@@ -9007,11 +8868,7 @@ static inline void gen_intermediate_code_internal(CPUState *env,
              dc->pc < next_page_start &&
              num_insns < max_insns);
 
-#ifdef CONFIG_TRACE
-    if (tracing) {
-        trace_bb_end();
-    }
-#endif
+    ANDROID_TRACE_END_BB();
 
     if (tb->cflags & CF_LAST_IO) {
         if (dc->condjmp) {
@@ -9104,14 +8961,7 @@ done_generating:
         while (lj <= j)
             gen_opc_instr_start[lj++] = 0;
     } else {
-#ifdef CONFIG_MEMCHECK
-        if (memcheck_enabled && dc->user) {
-            j = gen_opc_ptr - gen_opc_buf;
-            lj++;
-            while (lj <= j)
-                gen_opc_instr_start[lj++] = 0;
-        }
-#endif  // CONFIG_MEMCHECK
+        ANDROID_END_CODEGEN();
         tb->size = dc->pc - pc_start;
         tb->icount = num_insns;
     }
