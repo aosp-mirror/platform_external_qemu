@@ -459,6 +459,9 @@ TELEPHONY_SOURCES := \
 LOCAL_SRC_FILES += $(TELEPHONY_SOURCES:%=telephony/%)
 EMULATOR_LIBQEMU_CFLAGS += -I$(LOCAL_PATH)/telephony
 
+PCSC_CFLAGS  := $(shell cat /tmp/android_pcsc_cflags)
+EMULATOR_LIBQEMU_CFLAGS += $(PCSC_CFLAGS)
+
 # sources inherited from upstream, but not fully
 # integrated into android emulator
 #

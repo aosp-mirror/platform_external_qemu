@@ -1,6 +1,29 @@
 ifneq (,$(filter $(TARGET_ARCH),arm x86))
 LOCAL_PATH:= $(call my-dir)
 
+ifeq ($(PCSCLITE_INCPATH),)
+PCSCLITE_INCPATH := /usr/include/PCSC
+endif
+ifeq ($(PCSCLITE_LIBPATH),)
+PCSCLITE_LIBPATH := /usr/lib
+endif
+
+SHELL_RESULT := $(shell touch $(LOCAL_PATH)/telephony/sim_card.c)
+SHELL_RESULT := $(shell touch $(LOCAL_PATH)/android/cmdline-option.c)
+
+ifeq ($(HOST_OS),windows)
+SHELL_RESULT := $(shell if test -e $(PCSCLITE_INCPATH)/SCardErr.h; then echo -n -e "-DENABLE_PCSC -I$(PCSCLITE_INCPATH)" > /tmp/android_pcsc_cflags; else echo -n > /tmp/android_pcsc_cflags; fi)
+SHELL_RESULT := $(shell if test -e $(PCSCLITE_LIBPATH)/WinSCard.Lib; then echo -n -e "../../../../../../../../../../$(PCSCLITE_LIBPATH)/WinSCard.Lib" > /tmp/android_pcsc_ldflags; else echo -n > /tmp/android_pcsc_ldflags; fi)
+else
+ifeq ($(HOST_OS),darwin)
+SHELL_RESULT := $(shell echo -n -e "-DENABLE_PCSC -I/System/Library/Frameworks/PCSC.framework/Headers" > /tmp/android_pcsc_cflags)
+SHELL_RESULT := $(shell echo -n -e "-framework PCSC" > /tmp/android_pcsc_ldflags)
+else
+SHELL_RESULT := $(shell if test -e $(PCSCLITE_INCPATH)/pcsclite.h; then echo -n -e "-DENABLE_PCSC -I$(PCSCLITE_INCPATH)" > /tmp/android_pcsc_cflags; else echo -n > /tmp/android_pcsc_cflags; fi)
+SHELL_RESULT := $(shell if test -e $(PCSCLITE_LIBPATH)/libpcsclite.la; then echo -n -e "-L$(PCSCLITE_LIBPATH) -lpcsclite" > /tmp/android_pcsc_ldflags; else echo -n > /tmp/android_pcsc_ldflags; fi)
+endif
+endif
+
 # determine the target cpu
 ifeq ($(TARGET_ARCH),arm)
 EMULATOR_TARGET_CPU := target-arm

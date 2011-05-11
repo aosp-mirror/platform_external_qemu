@@ -283,6 +283,16 @@ LOCAL_CFLAGS    += $(BLOCK_CFLAGS)
 
 LOCAL_MODULE_TAGS := debug
 
+PCSC_CFLAGS  := $(shell cat /tmp/android_pcsc_cflags)
+LOCAL_CFLAGS += $(PCSC_CFLAGS)
+
+PCSC_LDFLAGS := $(shell cat /tmp/android_pcsc_ldflags)
+ifeq ($(HOST_OS),windows)
+LOCAL_LDLIBS += $(PCSC_LDFLAGS)
+else
+LOCAL_LDFLAGS += $(PCSC_LDFLAGS)
+endif
+
 $(call end-emulator-program)
 
 ##############################################################################
@@ -357,5 +367,15 @@ ifeq ($(CONFIG_STATIC_EXECUTABLE),true)
 endif
 
 LOCAL_STATIC_LIBRARIES += $(SDL_STATIC_LIBRARIES)
+
+PCSC_CFLAGS  := $(shell cat /tmp/android_pcsc_cflags)
+LOCAL_CFLAGS += $(PCSC_CFLAGS)
+
+PCSC_LDFLAGS := $(shell cat /tmp/android_pcsc_ldflags)
+ifeq ($(HOST_OS),windows)
+LOCAL_LDLIBS += $(PCSC_LDFLAGS)
+else
+LOCAL_LDFLAGS += $(PCSC_LDFLAGS)
+endif
 
 $(call end-emulator-program)

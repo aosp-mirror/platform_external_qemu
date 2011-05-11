@@ -100,6 +100,20 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
             continue;
         }
 
+#if defined(ENABLE_PCSC)
+extern void parse_pcsc_options( const char* options );
+
+        if (!strcmp(arg, "pcsc")) {
+            if ((nargs > 0) && (**aread != '-')) {
+                nargs--;
+                parse_pcsc_options(*aread++);
+                continue;
+            }
+            parse_pcsc_options(NULL);
+            continue;
+        }
+#endif
+
         /* NOTE: variable tables map option names to values
          * (e.g. field offsets into the AndroidOptions structure).
          *
