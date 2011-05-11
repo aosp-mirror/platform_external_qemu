@@ -239,21 +239,6 @@ void pstrcpy_targphys(target_phys_addr_t dest, int buf_size,
                       const char *source);
 #endif
 
-#ifdef HAS_AUDIO
-struct soundhw {
-    const char *name;
-    const char *descr;
-    int enabled;
-    int isa;
-    union {
-        int (*init_isa) (qemu_irq *pic);
-        int (*init_pci) (PCIBus *bus);
-    } init;
-};
-
-extern struct soundhw soundhw[];
-#endif
-
 void do_usb_add(Monitor *mon, const char *devname);
 void do_usb_del(Monitor *mon, const char *devname);
 void usb_info(Monitor *mon);

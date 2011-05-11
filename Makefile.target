@@ -205,6 +205,10 @@ MCHK_SOURCES := \
 
 LOCAL_SRC_FILES += $(MCHK_SOURCES:%=memcheck/%)
 
+LOCAL_SRC_FILES += \
+    cpus.c \
+    arch_init.c
+
 # What a mess, os-posix.c depends on the exact values of options
 # which are target specific.
 ifeq ($(HOST_OS),windows)
@@ -248,7 +252,6 @@ LOCAL_LDLIBS += \
 
 LOCAL_SRC_FILES := \
     audio/audio.c \
-    cpus.c \
     disas.c \
     dma-helpers.c \
     gdbstub.c \
@@ -326,7 +329,6 @@ LOCAL_CFLAGS += \
 
 LOCAL_SRC_FILES := \
     audio/audio.c \
-    cpus.c \
     disas.c \
     dma-helpers.c \
     gdbstub.c \
