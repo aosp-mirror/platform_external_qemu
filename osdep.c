@@ -32,9 +32,16 @@
 /* Needed early for CONFIG_BSD etc. */
 #include "config-host.h"
 
+#if defined(CONFIG_MADVISE) || defined(CONFIG_POSIX_MADVISE)
+#include <sys/mman.h>
+#endif
+
 #ifdef CONFIG_SOLARIS
 #include <sys/types.h>
 #include <sys/statvfs.h>
+/* See MySQL bug #7156 (http://bugs.mysql.com/bug.php?id=7156) for
+   discussion about Solaris header problems */
+extern int madvise(caddr_t, size_t, int);
 #endif
 
 #ifdef _WIN32
@@ -59,6 +66,21 @@ typedef int32_t socklen_t;
 #include "sysemu.h"
 #include "qemu_socket.h"
 
+int qemu_madvise(void *addr, size_t len, int advice)
+{
+    if (advice == QEMU_MADV_INVALID) {
+        errno = EINVAL;
+        return -1;
+    }
+#if defined(CONFIG_MADVISE)
+    return madvise(addr, len, advice);
+#elif defined(CONFIG_POSIX_MADVISE)
+    return posix_madvise(addr, len, advice);
+#else
+    errno = EINVAL;
+    return -1;
+#endif
+}
 
 
 /*

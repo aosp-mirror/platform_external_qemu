@@ -82,7 +82,7 @@ const char arch_config_name[] = CONFIG_QEMU_SHAREDIR "/target-" TARGET_ARCH ".co
 
 const uint32_t arch_type = QEMU_ARCH;
 
-#if 0
+#if 1
 /***********************************************************/
 /* ram save/restore */
 
@@ -249,7 +249,7 @@ static void sort_ram_list(void)
     qemu_free(blocks);
 }
 
-int ram_save_live(Monitor *mon, QEMUFile *f, int stage, void *opaque)
+int ram_save_live(QEMUFile *f, int stage, void *opaque)
 {
     ram_addr_t addr;
     uint64_t bytes_transferred_last;

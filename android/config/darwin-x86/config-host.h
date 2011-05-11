@@ -17,3 +17,4 @@
 #define MAP_ANONYMOUS    MAP_ANON
 #define CONFIG_ANDROID       1
 #define CONFIG_POSIX 1
+#define CONFIG_MADVISE 1

@@ -67,7 +67,9 @@ static inline void qemu_put_ubyte(QEMUFile *f, unsigned int v)
 void qemu_put_be16(QEMUFile *f, unsigned int v);
 void qemu_put_be32(QEMUFile *f, unsigned int v);
 void qemu_put_be64(QEMUFile *f, uint64_t v);
+#ifdef CONFIG_ANDROID
 void qemu_put_float(QEMUFile *f, float v);
+#endif
 int qemu_get_buffer(QEMUFile *f, uint8_t *buf, int size);
 int qemu_get_byte(QEMUFile *f);
 
@@ -81,7 +83,9 @@ static inline unsigned int qemu_get_ubyte(QEMUFile *f)
 unsigned int qemu_get_be16(QEMUFile *f);
 unsigned int qemu_get_be32(QEMUFile *f);
 uint64_t qemu_get_be64(QEMUFile *f);
+#ifdef CONFIG_ANDROID
 float qemu_get_float(QEMUFile *f);
+#endif
 int qemu_file_rate_limit(QEMUFile *f);
 int64_t qemu_file_set_rate_limit(QEMUFile *f, int64_t new_rate);
 int64_t qemu_file_get_rate_limit(QEMUFile *f);

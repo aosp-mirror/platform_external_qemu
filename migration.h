@@ -102,4 +102,11 @@ static inline FdMigrationState *migrate_to_fms(MigrationState *mig_state)
     return container_of(mig_state, FdMigrationState, mig_state);
 }
 
+uint64_t ram_bytes_remaining(void);
+uint64_t ram_bytes_transferred(void);
+uint64_t ram_bytes_total(void);
+
+int ram_save_live(QEMUFile *f, int stage, void *opaque);
+int ram_load(QEMUFile *f, void *opaque, int version_id);
+
 #endif
