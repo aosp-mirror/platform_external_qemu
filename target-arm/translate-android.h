@@ -277,7 +277,7 @@ set_on_ret(target_ulong ret)
 
 #ifdef CONFIG_TRACE
 
-#include "trace.h"
+#include "android-trace.h"
 #define  gen_traceInsn()   gen_helper_traceInsn()
 
 static void

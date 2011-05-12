@@ -8,7 +8,7 @@
 #include "helpers.h"
 #include "qemu-common.h"
 #ifdef CONFIG_TRACE
-#include "trace.h"
+#include "android-trace.h"
 #endif
 
 static uint32_t cortexa8_cp15_c0_c1[8] =

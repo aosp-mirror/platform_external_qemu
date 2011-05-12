@@ -10,7 +10,7 @@
 #include "qemu-common.h"
 
 #ifdef CONFIG_TRACE
-#include "trace.h"
+#include "android-trace.h"
 
 void  HELPER(traceTicks)(uint32_t  ticks)
 {

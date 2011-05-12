@@ -19,7 +19,7 @@
 #include "android/android.h"
 #include "android/globals.h"
 #include "telephony/modem_driver.h"
-#include "trace.h"
+#include "android-trace.h"
 #include "android/looper.h"
 #include "android/async-utils.h"
 #include "android/sync-utils.h"
