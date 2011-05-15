@@ -3549,10 +3549,10 @@ static char *find_datadir(const char *argv0)
 
 /* Find a likely location for support files using the location of the binary.
    For installed binaries this will be "$bindir/../share/qemu".  When
-   running from the build tree this will be "$bindir/../pc-bios".
+   running from the build tree this will be "$bindir/../usr/share/pc-bios".
    The emulator running from the SDK will find the support files in $bindir/lib/pc-bios. */
 #define SHARE_SUFFIX "/share/qemu"
-#define BUILD_SUFFIX "/pc-bios"
+#define BUILD_SUFFIX "/usr/share/pc-bios"
 #define SDK_SUFFIX "/lib/pc-bios"
 static char *find_datadir(const char *argv0)
 {
