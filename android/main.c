@@ -39,6 +39,7 @@
 #include "android/user-config.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/filelock.h"
+#include "android/utils/lineinput.h"
 #include "android/utils/path.h"
 #include "android/utils/tempfile.h"
 
@@ -1089,6 +1090,25 @@ int main(int argc, char **argv)
         }
         args[n++] = "-android-hw";
         args[n++] = strdup(coreHwIniPath);
+
+        /* In verbose mode, dump the file's content */
+        if (VERBOSE_CHECK(init)) {
+            FILE* file = fopen(coreHwIniPath, "rt");
+            if (file == NULL) {
+                derror("Could not open hardware configuration file: %s\n",
+                       coreHwIniPath);
+            } else {
+                LineInput* input = lineInput_newFromStdFile(file);
+                const char* line;
+                printf("Content of hardware configuration file:\n");
+                while ((line = lineInput_getLine(input)) !=  NULL) {
+                    printf("  %s\n", line);
+                }
+                printf(".\n");
+                lineInput_free(input);
+                fclose(file);
+            }
+        }
     }
 
     if(VERBOSE_CHECK(init)) {
