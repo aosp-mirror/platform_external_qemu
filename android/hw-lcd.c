@@ -19,12 +19,14 @@ hwLcd_setBootProperty(int density)
     char  temp[8];
 
     /* map density to one of our three values for now */
-    if (density < (LCD_DENSITY_MIN + LCD_DENSITY_DEFAULT)/2)
-        density = LCD_DENSITY_MIN;
-    else if (density < (LCD_DENSITY_DEFAULT + LCD_DENSITY_MAX)/2)
-        density = LCD_DENSITY_DEFAULT;
+    if (density < (LCD_DENSITY_LDPI + LCD_DENSITY_MDPI)/2)
+        density = LCD_DENSITY_LDPI;
+    else if (density < (LCD_DENSITY_MDPI + LCD_DENSITY_HDPI)/2)
+        density = LCD_DENSITY_MDPI;
+    else if (density < (LCD_DENSITY_HDPI + LCD_DENSITY_XHDPI)/2)
+        density = LCD_DENSITY_HDPI;
     else
-        density = LCD_DENSITY_MAX;
+        density = LCD_DENSITY_XHDPI;
 
     snprintf(temp, sizeof temp, "%d", density);
     boot_property_add("qemu.sf.lcd_density", temp);
