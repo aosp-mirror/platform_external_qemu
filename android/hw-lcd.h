@@ -12,9 +12,10 @@
 #ifndef _ANDROID_HW_LCD_H
 #define _ANDROID_HW_LCD_H
 
-#define  LCD_DENSITY_MIN      120
-#define  LCD_DENSITY_DEFAULT  160
-#define  LCD_DENSITY_MAX      240
+#define  LCD_DENSITY_LDPI      120
+#define  LCD_DENSITY_MDPI      160
+#define  LCD_DENSITY_HDPI      240
+#define  LCD_DENSITY_XHDPI     320
 
 /* Sets the boot property corresponding to the emulated abstract LCD density */
 extern void  hwLcd_setBootProperty(int density);
