@@ -195,6 +195,9 @@
 #include "audio/audio.h"
 #include "migration.h"
 #include "kvm.h"
+#ifdef CONFIG_KVM
+#include "kvm-android.h"
+#endif
 #include "balloon.h"
 #include "android/hw-lcd.h"
 #include "android/boot-properties.h"
@@ -4047,6 +4050,11 @@ int main(int argc, char **argv, char **envp)
     android_hw_control_init();
     android_net_pipes_init();
 
+#ifdef CONFIG_KVM
+    /* By default, force auto-detection for kvm */
+    kvm_allowed = -1;
+#endif
+
     optind = 1;
     for(;;) {
         if (optind >= argc)
@@ -4524,16 +4532,14 @@ int main(int argc, char **argv, char **envp)
                 kqemu_allowed = 2;
                 break;
 #endif
-#ifdef TARGET_I386
 #ifdef CONFIG_KVM
             case QEMU_OPTION_enable_kvm:
                 kvm_allowed = 1;
-#ifdef CONFIG_KQEMU
-                kqemu_allowed = 0;
-#endif
                 break;
-#endif
-#endif  /* TARGET_I386 */
+            case QEMU_OPTION_disable_kvm:
+                kvm_allowed = 0;
+                break;
+#endif /* CONFIG_KVM */
             case QEMU_OPTION_usb:
                 usb_enabled = 1;
                 break;
@@ -5284,6 +5290,12 @@ int main(int argc, char **argv, char **envp)
      * character device as well */
     serial_hds_add_at(1, "android-qemud");
     stralloc_add_str(kernel_params, " android.qemud=ttyS1");
+
+#if defined(CONFIG_KVM)
+    if (kvm_allowed < 0) {
+        kvm_allowed = kvm_check_allowed();
+    }
+#endif
 
 #if defined(CONFIG_KVM) && defined(CONFIG_KQEMU)
     if (kvm_allowed && kqemu_allowed) {
