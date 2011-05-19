@@ -1350,6 +1350,8 @@ ETEXI
 #ifdef CONFIG_KVM
 DEF("enable-kvm", 0, QEMU_OPTION_enable_kvm, \
     "-enable-kvm     enable KVM full virtualization support\n")
+DEF("disable-kvm", 0, QEMU_OPTION_disable_kvm, \
+    "-disable-kvm    disable KVM full virtualization support\n")
 #endif
 STEXI
 @item -enable-kvm
