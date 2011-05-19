@@ -1162,3 +1162,22 @@ avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir )
     AFREE(skinPath);
     return;
 }
+
+char*
+avdInfo_getCharmapFile( AvdInfo* i, const char* charmapName )
+{
+    char        fileNameBuff[PATH_MAX];
+    const char* fileName;
+
+    if (charmapName == NULL || charmapName[0] == '\0')
+        return NULL;
+
+    if (strstr(charmapName, ".kcm") == NULL) {
+        snprintf(fileNameBuff, sizeof fileNameBuff, "%s.kcm", charmapName);
+        fileName = fileNameBuff;
+    } else {
+        fileName = charmapName;
+    }
+
+    return _avdInfo_getContentOrSdkFilePath(i, fileName);
+}

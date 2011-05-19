@@ -215,6 +215,12 @@ const char*  avdInfo_getContentPath( AvdInfo*  i );
  */
 void         avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir );
 
+/* Find a charmap file named <charmapName>.kcm for this AVD.
+ * Returns the path of the file on success, or NULL if not found.
+ * The result string must be freed by the caller.
+ */
+char*        avdInfo_getCharmapFile( AvdInfo* i, const char* charmapName );
+
 /* Returns TRUE iff in the Android build system */
 int          avdInfo_inAndroidBuild( AvdInfo*  i );
 
