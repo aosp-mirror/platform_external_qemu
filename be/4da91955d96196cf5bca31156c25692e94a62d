@@ -1,0 +1,9 @@
+Change-Id: Ice866b6a28664b09c55e2a4286759f5d721afe79
+Code-Review+2: David Turner <digit@android.com>
+Code-Review+1: Jean-Baptiste Queru <jbq@google.com>
+Verified+1: Jean-Baptiste Queru <jbq@google.com>
+Submitted-by: David Turner <digit@android.com>
+Submitted-at: Mon, 14 Sep 2009 05:47:41 -0700
+Reviewed-on: https://review.source.android.com/11471
+Project: platform/external/qemu
+Branch: refs/heads/master

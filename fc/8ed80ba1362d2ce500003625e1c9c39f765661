@@ -1,0 +1,8 @@
+Change-Id: Ifc8ed80ba1362d2ce500003625e1c9c39f765661
+Code-Review+2: Xavier Ducrohet <xav@android.com>
+Verified+1: Xavier Ducrohet <xav@android.com>
+Submitted-by: Xavier Ducrohet <xav@android.com>
+Submitted-at: Wed, 09 Feb 2011 19:05:48 -0700
+Reviewed-on: https://review.source.android.com/21094
+Project: platform/external/qemu
+Branch: refs/heads/master

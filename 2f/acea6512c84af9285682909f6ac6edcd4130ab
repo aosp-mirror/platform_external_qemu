@@ -1,0 +1,8 @@
+Change-Id: I2facea6512c84af9285682909f6ac6edcd4130ab
+Code-Review+2: Xavier Ducrohet <xav@android.com>
+Verified+1: Xavier Ducrohet <xav@android.com>
+Submitted-by: Xavier Ducrohet <xav@android.com>
+Submitted-at: Fri, 18 Mar 2011 14:07:31 -0700
+Reviewed-on: https://review.source.android.com/21880
+Project: platform/external/qemu
+Branch: refs/heads/tools_r10

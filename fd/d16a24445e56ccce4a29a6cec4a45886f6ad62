@@ -1,0 +1,6 @@
+Change-Id: Ifdd16a24445e56ccce4a29a6cec4a45886f6ad62
+Code-Review+2: Brian Swetland <swetland@google.com>
+Verified+1: Brian Swetland <swetland@google.com>
+Reviewed-on: https://review.source.android.com/1376
+Project: platform/external/qemu
+Branch: refs/heads/master

@@ -1,0 +1,8 @@
+Change-Id: I9d1188280fa5294f9438424e5e8eae91f645bfd8
+Code-Review+2: David Turner <digit@android.com>
+Verified+1: David Turner <digit@android.com>
+Submitted-by: David Turner <digit@android.com>
+Submitted-at: Mon, 13 Sep 2010 00:38:05 -0700
+Reviewed-on: https://review.source.android.com/17143
+Project: platform/external/qemu
+Branch: refs/heads/master
