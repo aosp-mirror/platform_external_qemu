@@ -5178,10 +5178,13 @@ int main(int argc, char **argv, char **envp)
 
     /* Initialize audio. */
     if (android_op_audio) {
+        char temp[128];
         if ( !audio_check_backend_name( 0, android_op_audio ) ) {
             PANIC("'%s' is not a valid audio output backend. see -help-audio-out",
                     android_op_audio);
         }
+        snprintf(temp, sizeof temp, "QEMU_AUDIO_DRV=%s", android_op_audio);
+        putenv(temp);
     }
 
     /* Initialize OpenGLES emulation */
