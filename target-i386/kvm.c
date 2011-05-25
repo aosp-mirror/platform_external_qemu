@@ -16,6 +16,8 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
+#undef __user
+#define __xuser  /* nothing */
 #include <linux/kvm.h>
 
 #include "qemu-common.h"
@@ -115,6 +117,10 @@ uint32_t kvm_arch_get_supported_cpuid(CPUState *env, uint32_t function, int reg)
     return -1U;
 }
 
+#endif
+
+#ifndef KVM_MP_STATE_RUNNABLE
+#define KVM_MP_STATE_RUNNABLE 0
 #endif
 
 int kvm_arch_init_vcpu(CPUState *env)
