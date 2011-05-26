@@ -330,9 +330,6 @@ get_default_scale( AndroidOptions*  opts )
     if (scale == 0.0 && dpi_monitor > 0)
         scale = dpi_monitor*1.0/dpi_device;
 
-    if (scale == 0.0)
-        scale = 1.0;
-
     return scale;
 }
 
