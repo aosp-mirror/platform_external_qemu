@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAABBn///jg\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2433,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-05-26T15:26:25Z",
+      "side": 1,
+      "message": "Can you check the return value here, to handle the case where \"args\" only contains whitespace.",
+      "revId": "bb87c7c8f47af7cae4f39642721d90baada1ed4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABBn///jc\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2587,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-05-26T15:26:25Z",
+      "side": 1,
+      "message": "for the sake of consistency, you probably want to call this \"sensor_command\" since it corresponds to the \u0027sensor\u0027, not \u0027sensors\u0027 command.",
+      "revId": "bb87c7c8f47af7cae4f39642721d90baada1ed4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABBn///jo\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2589,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-05-26T15:26:25Z",
+      "side": 1,
+      "message": "the second string in each entry should be a very small abstract (it is used for \"help sensor\"), while the third one should contain the long description (it is used for \"help sensor get\"). I\u0027d recommend using:\n\n{ \"get\", \"get sensor values\", \"\u0027get \u003csensorname\u003e\u0027 returns the values of a given sensor\u0027s state\", ... }",
+      "revId": "bb87c7c8f47af7cae4f39642721d90baada1ed4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABBn///jk\u003d",
+        "filename": "android/console.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2599,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-05-26T15:26:25Z",
+      "side": 1,
+      "message": "I\u0027d recommend putting this as the first entry in the list.",
+      "revId": "bb87c7c8f47af7cae4f39642721d90baada1ed4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
