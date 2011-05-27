@@ -1429,6 +1429,15 @@ help_shared_net_id(stralloc_t*  out)
 }
 
 
+static void
+help_imei(stralloc_t*  out)
+{
+    PRINTF(
+    "  This option is use to specify the IMEI number to be used for the emulator"
+    "   instance.\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

@@ -19,6 +19,9 @@
  **/
 typedef struct AModemRec_*    AModem;
 
+#define IMEI_LENGTH 15
+char imei[IMEI_LENGTH+1];  // one extra char for '\0' character.
+
 /* a function used by the modem to send unsolicited messages to the channel controller */
 typedef void (*AModemUnsolFunc)( void*  opaque, const char*  message );
 

@@ -55,6 +55,7 @@
 
 #include "android/framebuffer.h"
 #include "iolooper.h"
+#include "telephony/android_modem.h"
 
 AndroidRotation  android_framebuffer_rotation;
 
@@ -343,6 +344,16 @@ int main(int argc, char **argv)
         snprintf(boot_prop_ip, sizeof(boot_prop_ip),
                  "net.shared_net_ip=10.1.2.%ld", shared_net_id);
     }
+
+     if (opts->imei) {
+         // imei is defined in telephony/android_modem.h
+         if(strlen(opts->imei) != IMEI_LENGTH) {
+             derror("IMEI number should be %d characters in length.\n", IMEI_LENGTH);
+             exit(0);
+           }
+           strncpy(imei, opts->imei, IMEI_LENGTH);
+           imei[IMEI_LENGTH] = '\0';
+         }
 
 
     user_config_init();

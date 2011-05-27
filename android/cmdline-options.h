@@ -140,6 +140,7 @@ OPT_PARAM( charmap, "<file>", "use specific key character map")
 OPT_LIST(  prop, "<name>=<value>", "set system property on boot")
 
 OPT_PARAM( shared_net_id, "<number>", "join the shared network, using IP address 10.1.2.<number>")
+CFG_PARAM( imei, "<imei_number>", "Assigns <imei_number> as IMEI number to the device" )
 
 #ifdef CONFIG_NAND_LIMITS
 OPT_PARAM( nand_limits, "<nlimits>", "enforce NAND/Flash read/write thresholds" )
