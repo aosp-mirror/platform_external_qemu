@@ -585,7 +585,7 @@ int kvm_cpu_exec(CPUState *env)
         }
 
         kvm_arch_pre_run(env, run);
-        ret = kvm_vcpu_ioctl(env, KVM_RUN, 0);
+        ret = kvm_arch_vcpu_run(env);
         kvm_arch_post_run(env, run);
 
         if (ret == -EINTR || ret == -EAGAIN) {

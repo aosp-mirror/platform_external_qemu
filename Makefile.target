@@ -180,6 +180,7 @@ QEMU_DO_KVM := $(if $(filter linux-x86-x86 linux-x86_64-x86,$(QEMU_KVM_TAG)),tru
 ifeq ($(QEMU_DO_KVM),true)
     LOCAL_SRC_FILES += \
         target-i386/kvm.c \
+        target-i386/kvm-gs-restore.c \
         kvm-all.c \
         kvm-android.c
 endif

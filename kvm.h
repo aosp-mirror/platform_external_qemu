@@ -85,6 +85,8 @@ int kvm_put_mp_state(CPUState *env);
 
 int kvm_arch_post_run(CPUState *env, struct kvm_run *run);
 
+int kvm_arch_vcpu_run(CPUState *env);
+
 int kvm_arch_handle_exit(CPUState *env, struct kvm_run *run);
 
 int kvm_arch_pre_run(CPUState *env, struct kvm_run *run);

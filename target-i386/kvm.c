@@ -26,6 +26,10 @@
 #include "cpu.h"
 #include "gdbstub.h"
 
+#ifdef CONFIG_KVM_GS_RESTORE
+#include "kvm-gs-restore.h"
+#endif
+
 //#define DEBUG_KVM
 
 #ifdef DEBUG_KVM
@@ -690,6 +694,16 @@ int kvm_arch_get_registers(CPUState *env)
     return 0;
 }
 
+int kvm_arch_vcpu_run(CPUState *env)
+{
+#ifdef CONFIG_KVM_GS_RESTORE
+    if (gs_need_restore  != KVM_GS_RESTORE_NO)
+        return no_gs_ioctl(env->kvm_fd, KVM_RUN, 0);
+    else
+#endif
+        return kvm_vcpu_ioctl(env, KVM_RUN, 0);
+}
+
 int kvm_arch_pre_run(CPUState *env, struct kvm_run *run)
 {
     /* Try to inject an interrupt if the guest can accept it */
@@ -721,11 +735,18 @@ int kvm_arch_pre_run(CPUState *env, struct kvm_run *run)
     dprintf("setting tpr\n");
     run->cr8 = cpu_get_apic_tpr(env);
 
+#ifdef CONFIG_KVM_GS_RESTORE
+    gs_base_pre_run();
+#endif
+
     return 0;
 }
 
 int kvm_arch_post_run(CPUState *env, struct kvm_run *run)
 {
+#ifdef CONFIG_KVM_GS_RESTORE
+    gs_base_post_run();
+#endif
     if (run->if_flag)
         env->eflags |= IF_MASK;
     else
