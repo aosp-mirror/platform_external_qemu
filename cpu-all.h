@@ -765,15 +765,15 @@ int page_check_range(target_ulong start, target_ulong len, int flags);
 CPUState *cpu_copy(CPUState *env);
 CPUState *qemu_get_cpu(int cpu);
 
-void cpu_dump_state(CPUState *env, FILE *f,
-                    int (*cpu_fprintf)(FILE *f, const char *fmt, ...),
+#define CPU_DUMP_CODE 0x00010000
+
+void cpu_dump_state(CPUState *env, FILE *f, fprintf_function cpu_fprintf,
                     int flags);
-void cpu_dump_statistics (CPUState *env, FILE *f,
-                          int (*cpu_fprintf)(FILE *f, const char *fmt, ...),
+void cpu_dump_statistics(CPUState *env, FILE *f, fprintf_function cpu_fprintf,
                           int flags);
 
 void QEMU_NORETURN cpu_abort(CPUState *env, const char *fmt, ...)
-    __attribute__ ((__format__ (__printf__, 2, 3)));
+    GCC_FMT_ATTR(2, 3);
 extern CPUState *first_cpu;
 extern CPUState *cpu_single_env;
 
@@ -862,9 +862,31 @@ target_phys_addr_t cpu_get_phys_page_debug(CPUState *env, target_ulong addr);
 /* memory API */
 
 extern int phys_ram_fd;
-extern uint8_t *phys_ram_dirty;
 extern ram_addr_t ram_size;
-extern ram_addr_t last_ram_offset;
+
+/* RAM is pre-allocated and passed into qemu_ram_alloc_from_ptr */
+#define RAM_PREALLOC_MASK   (1 << 0)
+
+typedef struct RAMBlock {
+    uint8_t *host;
+    ram_addr_t offset;
+    ram_addr_t length;
+    uint32_t flags;
+    char idstr[256];
+    QLIST_ENTRY(RAMBlock) next;
+#if defined(__linux__) && !defined(TARGET_S390X)
+    int fd;
+#endif
+} RAMBlock;
+
+typedef struct RAMList {
+    uint8_t *phys_dirty;
+    QLIST_HEAD(ram, RAMBlock) blocks;
+} RAMList;
+extern RAMList ram_list;
+
+extern const char *mem_path;
+extern int mem_prealloc;
 
 /* physical memory access */
 
@@ -891,18 +913,44 @@ extern ram_addr_t last_ram_offset;
 /* read dirty bit (return 0 or 1) */
 static inline int cpu_physical_memory_is_dirty(ram_addr_t addr)
 {
-    return phys_ram_dirty[addr >> TARGET_PAGE_BITS] == 0xff;
+    return ram_list.phys_dirty[addr >> TARGET_PAGE_BITS] == 0xff;
+}
+
+static inline int cpu_physical_memory_get_dirty_flags(ram_addr_t addr)
+{
+    return ram_list.phys_dirty[addr >> TARGET_PAGE_BITS];
 }
 
 static inline int cpu_physical_memory_get_dirty(ram_addr_t addr,
                                                 int dirty_flags)
 {
-    return phys_ram_dirty[addr >> TARGET_PAGE_BITS] & dirty_flags;
+    return ram_list.phys_dirty[addr >> TARGET_PAGE_BITS] & dirty_flags;
 }
 
 static inline void cpu_physical_memory_set_dirty(ram_addr_t addr)
 {
-    phys_ram_dirty[addr >> TARGET_PAGE_BITS] = 0xff;
+    ram_list.phys_dirty[addr >> TARGET_PAGE_BITS] = 0xff;
+}
+
+static inline int cpu_physical_memory_set_dirty_flags(ram_addr_t addr,
+                                                      int dirty_flags)
+{
+    return ram_list.phys_dirty[addr >> TARGET_PAGE_BITS] |= dirty_flags;
+}
+
+static inline void cpu_physical_memory_mask_dirty_range(ram_addr_t start,
+                                                        int length,
+                                                        int dirty_flags)
+{
+    int i, mask, len;
+    uint8_t *p;
+
+    len = length >> TARGET_PAGE_BITS;
+    mask = ~dirty_flags;
+    p = ram_list.phys_dirty + (start >> TARGET_PAGE_BITS);
+    for (i = 0; i < len; i++) {
+        p[i] &= mask;
+    }
 }
 
 void cpu_physical_memory_reset_dirty(ram_addr_t start, ram_addr_t end,

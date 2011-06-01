@@ -25,6 +25,15 @@
 /* allow to see translation results - the slowdown should be negligible, so we leave it */
 #define DEBUG_DISAS
 
+/* Page tracking code uses ram addresses in system mode, and virtual
+   addresses in userspace mode.  Define tb_page_addr_t to be an appropriate
+   type.  */
+#if defined(CONFIG_USER_ONLY)
+typedef abi_ulong tb_page_addr_t;
+#else
+typedef ram_addr_t tb_page_addr_t;
+#endif
+
 /* is_jmp field values */
 #define DISAS_NEXT    0 /* next instruction can be analyzed */
 #define DISAS_JUMP    1 /* only pc was modified dynamically */
@@ -60,19 +69,14 @@ extern uint32_t gen_opc_hflags[OPC_BUF_SIZE];
 
 void gen_intermediate_code(CPUState *env, struct TranslationBlock *tb);
 void gen_intermediate_code_pc(CPUState *env, struct TranslationBlock *tb);
-void gen_pc_load(CPUState *env, struct TranslationBlock *tb,
-                 unsigned long searched_pc, int pc_pos, void *puc);
+void restore_state_to_opc(CPUState *env, struct TranslationBlock *tb, int pc_pos);
 
 unsigned long code_gen_max_block_size(void);
 void cpu_gen_init(void);
 int cpu_gen_code(CPUState *env, struct TranslationBlock *tb,
                  int *gen_code_size_ptr);
 int cpu_restore_state(struct TranslationBlock *tb,
-                      CPUState *env, unsigned long searched_pc,
-                      void *puc);
-int cpu_restore_state_copy(struct TranslationBlock *tb,
-                           CPUState *env, unsigned long searched_pc,
-                           void *puc);
+                      CPUState *env, unsigned long searched_pc);
 void cpu_resume_from_signal(CPUState *env1, void *puc);
 void cpu_io_recompile(CPUState *env, void *retaddr);
 TranslationBlock *tb_gen_code(CPUState *env,
@@ -187,7 +191,7 @@ static inline unsigned int tb_jmp_cache_hash_func(target_ulong pc)
 
 static inline unsigned int tb_phys_hash_func(unsigned long pc)
 {
-    return pc & (CODE_GEN_PHYS_HASH_SIZE - 1);
+    return (pc >> 2) & (CODE_GEN_PHYS_HASH_SIZE - 1);
 }
 
 #ifdef CONFIG_MEMCHECK
@@ -403,59 +407,8 @@ static inline target_ulong get_phys_addr_code(CPUState *env1, target_ulong addr)
     }
     p = (void *)(unsigned long)addr
         + env1->tlb_table[mmu_idx][page_index].addend;
-    return qemu_ram_addr_from_host(p);
+    return qemu_ram_addr_from_host_nofail(p);
 }
-
-#if 0
-/* Deterministic execution requires that IO only be performed on the last
-   instruction of a TB so that interrupts take effect immediately.  */
-static inline int can_do_io(CPUState *env)
-{
-    if (!use_icount)
-        return 1;
-
-    /* If not executing code then assume we are ok.  */
-    if (!env->current_tb)
-        return 1;
-
-    return env->can_do_io != 0;
-}
-#endif
-#endif /* 0 */
-
-#ifdef CONFIG_KQEMU
-#define KQEMU_MODIFY_PAGE_MASK (0xff & ~(VGA_DIRTY_FLAG | CODE_DIRTY_FLAG))
-
-#define MSR_QPI_COMMBASE 0xfabe0010
-
-int kqemu_init(CPUState *env);
-int kqemu_cpu_exec(CPUState *env);
-void kqemu_flush_page(CPUState *env, target_ulong addr);
-void kqemu_flush(CPUState *env, int global);
-void kqemu_set_notdirty(CPUState *env, ram_addr_t ram_addr);
-void kqemu_modify_page(CPUState *env, ram_addr_t ram_addr);
-void kqemu_set_phys_mem(uint64_t start_addr, ram_addr_t size,
-                        ram_addr_t phys_offset);
-void kqemu_cpu_interrupt(CPUState *env);
-void kqemu_record_dump(void);
-
-extern uint32_t kqemu_comm_base;
-
-extern ram_addr_t kqemu_phys_ram_size;
-extern uint8_t *kqemu_phys_ram_base;
-
-static inline int kqemu_is_ok(CPUState *env)
-{
-    return(env->kqemu_enabled &&
-           (env->cr[0] & CR0_PE_MASK) &&
-           !(env->hflags & HF_INHIBIT_IRQ_MASK) &&
-           (env->eflags & IF_MASK) &&
-           !(env->eflags & VM_MASK) &&
-           (env->kqemu_enabled == 2 ||
-            ((env->hflags & HF_CPL_MASK) == 3 &&
-             (env->eflags & IOPL_MASK) != IOPL_MASK)));
-}
-
 #endif
 
 typedef void (CPUDebugExcpHandler)(CPUState *env);

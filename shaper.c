@@ -137,7 +137,7 @@ netshaper_expires( NetShaper  shaper )
     QueuedPacket  packet;
 
     while ((packet = shaper->packets) != NULL) {
-        int64_t   now = qemu_get_clock( SHAPER_CLOCK );
+        int64_t   now = qemu_get_clock_ms( SHAPER_CLOCK );
 
        if (packet->expiration > now)
            break;
@@ -167,9 +167,9 @@ netshaper_create( int                do_copy,
     shaper->active = 0;
     shaper->packets = NULL;
     shaper->num_packets = 0;
-    shaper->timer   = qemu_new_timer( SHAPER_CLOCK,
-                                      (QEMUTimerCB*) netshaper_expires,
-                                      shaper );
+    shaper->timer   = qemu_new_timer_ms( SHAPER_CLOCK,
+                                         (QEMUTimerCB*) netshaper_expires,
+                                         shaper );
     shaper->send_func = send_func;
     shaper->max_rate  = 1e6;
     shaper->inv_rate  = 0.;
@@ -216,7 +216,7 @@ netshaper_send_aux( NetShaper  shaper,
         return;
     }
 
-    now = qemu_get_clock( SHAPER_CLOCK );
+    now = qemu_get_clock_ms( SHAPER_CLOCK );
     if (now >= shaper->block_until) {
         shaper->send_func( data, size, opaque );
         shaper->block_until = now + size*shaper->inv_rate;
@@ -274,7 +274,7 @@ netshaper_can_send( NetShaper  shaper )
     if (shaper->packets)
         return 0;
 
-    now = qemu_get_clock( SHAPER_CLOCK );
+    now = qemu_get_clock_ms( SHAPER_CLOCK );
     return (now >= shaper->block_until);
 }
 
@@ -424,7 +424,7 @@ static void
 netdelay_expires( NetDelay  delay )
 {
     Session  session;
-    int64_t  now = qemu_get_clock( SHAPER_CLOCK );
+    int64_t  now = qemu_get_clock_ms( SHAPER_CLOCK );
     int      rearm = 0;
     int64_t  rearm_time = 0;
 
@@ -463,9 +463,9 @@ netdelay_create( NetShaperSendFunc  send_func )
 
     delay->sessions     = NULL;
     delay->num_sessions = 0;
-    delay->timer        = qemu_new_timer( SHAPER_CLOCK,
-                                          (QEMUTimerCB*) netdelay_expires,
-                                          delay );
+    delay->timer        = qemu_new_timer_ms( SHAPER_CLOCK,
+                                             (QEMUTimerCB*) netdelay_expires,
+                                             delay );
     delay->active = 0;
     delay->min_ms = 0;
     delay->max_ms = 0;
@@ -553,7 +553,7 @@ netdelay_send_aux( NetDelay  delay, const void*  data, size_t  size, void* opaqu
                 delay->sessions      = session;
                 delay->num_sessions += 1;
 
-                session->expiration = qemu_get_clock( SHAPER_CLOCK ) + latency;
+                session->expiration = qemu_get_clock_ms( SHAPER_CLOCK ) + latency;
 
                 session->src_ip   = info->src_ip;
                 session->dst_ip   = info->dst_ip;

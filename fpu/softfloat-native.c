@@ -254,13 +254,22 @@ int float32_is_signaling_nan( float32 a1)
     return ( ( ( a>>22 ) & 0x1FF ) == 0x1FE ) && ( a & 0x003FFFFF );
 }
 
-int float32_is_nan( float32 a1 )
+int float32_is_quiet_nan( float32 a1 )
 {
     float32u u;
     uint64_t a;
     u.f = a1;
     a = u.i;
     return ( 0xFF800000 < ( a<<1 ) );
+}
+
+int float32_is_any_nan( float32 a1 )
+{
+    float32u u;
+    uint32_t a;
+    u.f = a1;
+    a = u.i;
+    return (a & ~(1 << 31)) > 0x7f800000U;
 }
 
 /*----------------------------------------------------------------------------
@@ -411,15 +420,25 @@ int float64_is_signaling_nan( float64 a1)
 
 }
 
-int float64_is_nan( float64 a1 )
+int float64_is_quiet_nan( float64 a1 )
 {
     float64u u;
     uint64_t a;
     u.f = a1;
     a = u.i;
 
-    return ( LIT64( 0xFFF0000000000000 ) < (bits64) ( a<<1 ) );
+    return ( LIT64( 0xFFF0000000000000 ) < (uint64_t) ( a<<1 ) );
 
+}
+
+int float64_is_any_nan( float64 a1 )
+{
+    float64u u;
+    uint64_t a;
+    u.f = a1;
+    a = u.i;
+
+    return (a & ~(1ULL << 63)) > LIT64 (0x7FF0000000000000 );
 }
 
 #ifdef FLOATX80
@@ -500,15 +519,22 @@ int floatx80_is_signaling_nan( floatx80 a1)
     aLow = u.i.low & ~ LIT64( 0x4000000000000000 );
     return
            ( ( u.i.high & 0x7FFF ) == 0x7FFF )
-        && (bits64) ( aLow<<1 )
+        && (uint64_t) ( aLow<<1 )
         && ( u.i.low == aLow );
 }
 
-int floatx80_is_nan( floatx80 a1 )
+int floatx80_is_quiet_nan( floatx80 a1 )
 {
     floatx80u u;
     u.f = a1;
-    return ( ( u.i.high & 0x7FFF ) == 0x7FFF ) && (bits64) ( u.i.low<<1 );
+    return ( ( u.i.high & 0x7FFF ) == 0x7FFF ) && (uint64_t) ( u.i.low<<1 );
+}
+
+int floatx80_is_any_nan( floatx80 a1 )
+{
+    floatx80u u;
+    u.f = a1;
+    return ((u.i.high & 0x7FFF) == 0x7FFF) && ( u.i.low<<1 );
 }
 
 #endif
