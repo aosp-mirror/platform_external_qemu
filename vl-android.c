@@ -3550,22 +3550,11 @@ static char *find_datadir(const char *argv0)
 }
 #else /* !_WIN32 */
 
-/* Find a likely location for support files using the location of the binary.
-   For installed binaries this will be "$bindir/../share/qemu".  When
-   running from the build tree this will be "$bindir/../usr/share/pc-bios".
-   The emulator running from the SDK will find the support files in $bindir/lib/pc-bios. */
-#define SHARE_SUFFIX "/share/qemu"
-#define BUILD_SUFFIX "/usr/share/pc-bios"
-#define SDK_SUFFIX "/lib/pc-bios"
+/* Similarly, return the location of the executable */
 static char *find_datadir(const char *argv0)
 {
-    char *dir;
     char *p = NULL;
-    char *res;
-#ifdef PATH_MAX
     char buf[PATH_MAX];
-#endif
-    size_t max_len;
 
 #if defined(__linux__)
     {
@@ -3589,46 +3578,33 @@ static char *find_datadir(const char *argv0)
     /* If we don't have any way of figuring out the actual executable
        location then try argv[0].  */
     if (!p) {
-#ifdef PATH_MAX
-        p = buf;
-#endif
-        p = realpath(argv0, p);
+        p = realpath(argv0, buf);
         if (!p) {
             return NULL;
         }
     }
 
-#define STRLEN_CONST(str) (sizeof(str)-1)
-    dir = dirname(p);
-    max_len = strlen(dir) + 1 +
-        MAX(STRLEN_CONST(SDK_SUFFIX), MAX(STRLEN_CONST(SHARE_SUFFIX), STRLEN_CONST(BUILD_SUFFIX)));
-    res = qemu_mallocz(max_len);
-
-    snprintf(res, max_len, "%s%s", dir, SDK_SUFFIX);
-    if (access(res, R_OK)) {
-      dir = dirname(dir);
-
-      snprintf(res, max_len, "%s%s", dir, SHARE_SUFFIX);
-      if (access(res, R_OK)) {
-          snprintf(res, max_len, "%s%s", dir, BUILD_SUFFIX);
-          if (access(res, R_OK)) {
-              qemu_free(res);
-              res = NULL;
-          }
-      }
-    }
-#ifndef PATH_MAX
-    free(p);
-#endif
-    return res;
+    return qemu_strdup(dirname(buf));
 }
-#undef SHARE_SUFFIX
-#undef BUILD_SUFFIX
 #endif
+
+static char*
+qemu_find_file_with_subdir(const char* data_dir, const char* subdir, const char* name)
+{
+    int   len = strlen(data_dir) + strlen(name) + strlen(subdir) + 2;
+    char* buf = qemu_mallocz(len);
+
+    snprintf(buf, len, "%s/%s%s", data_dir, subdir, name);
+    VERBOSE_PRINT(init,"    trying to find: %s\n", buf);
+    if (access(buf, R_OK)) {
+        qemu_free(buf);
+        return NULL;
+    }
+    return buf;
+}
 
 char *qemu_find_file(int type, const char *name)
 {
-    int len;
     const char *subdir;
     char *buf;
 
@@ -3647,13 +3623,21 @@ char *qemu_find_file(int type, const char *name)
     default:
         abort();
     }
-    len = strlen(data_dir) + strlen(name) + strlen(subdir) + 2;
-    buf = qemu_mallocz(len);
-    snprintf(buf, len, "%s/%s%s", data_dir, subdir, name);
-    if (access(buf, R_OK)) {
-        qemu_free(buf);
-        return NULL;
+    buf = qemu_find_file_with_subdir(data_dir, subdir, name);
+#ifdef CONFIG_ANDROID
+    if (type == QEMU_FILE_TYPE_BIOS) {
+        /* This case corresponds to the emulator being used as part of an
+         * SDK installation. NOTE: data_dir is really $bindir. */
+        if (buf == NULL)
+            buf = qemu_find_file_with_subdir(data_dir, "lib/pc-bios/", name);
+        /* This case corresponds to platform builds. */
+        if (buf == NULL)
+            buf = qemu_find_file_with_subdir(data_dir, "../usr/share/pc-bios/", name);
+        /* Finally, try this for standalone builds under external/qemu */
+        if (buf == NULL)
+            buf = qemu_find_file_with_subdir(data_dir, "../../../prebuilt/common/pc-bios/", name);
     }
+#endif
     return buf;
 }
 
