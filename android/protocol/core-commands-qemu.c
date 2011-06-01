@@ -19,7 +19,7 @@
 #include "android/globals.h"
 #include "android/hw-sensors.h"
 #include "telephony/modem_driver.h"
-#include "trace.h"
+#include "android-trace.h"
 #include "audio/audio.h"
 #include "android/protocol/core-commands-api.h"
 

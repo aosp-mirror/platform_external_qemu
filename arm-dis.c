@@ -1587,7 +1587,7 @@ arm_decode_bitfield (const char *ptr, unsigned long insn,
 }
 
 static void
-arm_decode_shift (long given, fprintf_ftype func, void *stream,
+arm_decode_shift (long given, fprintf_function func, void *stream,
 		  int print_shift)
 {
   func (stream, "%s", arm_regnames[given & 0xf]);
@@ -1633,7 +1633,7 @@ print_insn_coprocessor (bfd_vma pc, struct disassemble_info *info, long given,
 {
   const struct opcode32 *insn;
   void *stream = info->stream;
-  fprintf_ftype func = info->fprintf_func;
+  fprintf_function func = info->fprintf_func;
   unsigned long mask;
   unsigned long value;
   int cond;
@@ -2127,7 +2127,7 @@ static void
 print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 {
   void *stream = info->stream;
-  fprintf_ftype func = info->fprintf_func;
+  fprintf_function func = info->fprintf_func;
 
   if (((given & 0x000f0000) == 0x000f0000)
       && ((given & 0x02000000) == 0))
@@ -2222,7 +2222,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 {
   const struct opcode32 *insn;
   void *stream = info->stream;
-  fprintf_ftype func = info->fprintf_func;
+  fprintf_function func = info->fprintf_func;
 
   if (thumb)
     {
@@ -2676,7 +2676,7 @@ print_insn_arm_internal (bfd_vma pc, struct disassemble_info *info, long given)
 {
   const struct opcode32 *insn;
   void *stream = info->stream;
-  fprintf_ftype func = info->fprintf_func;
+  fprintf_function func = info->fprintf_func;
 
   if (print_insn_coprocessor (pc, info, given, false))
     return;
@@ -3036,7 +3036,7 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 {
   const struct opcode16 *insn;
   void *stream = info->stream;
-  fprintf_ftype func = info->fprintf_func;
+  fprintf_function func = info->fprintf_func;
 
   for (insn = thumb_opcodes; insn->assembler; insn++)
     if ((given & insn->mask) == insn->value)
@@ -3312,7 +3312,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 {
   const struct opcode32 *insn;
   void *stream = info->stream;
-  fprintf_ftype func = info->fprintf_func;
+  fprintf_function func = info->fprintf_func;
 
   if (print_insn_coprocessor (pc, info, given, true))
     return;
@@ -4100,6 +4100,30 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info)
        In such cases, we can ignore the pc when computing
        addresses, since the addend is not currently pc-relative.  */
     pc = 0;
+
+  /* We include the hexdump of the instruction. The format here
+     matches that used by objdump and the ARM ARM (in particular,
+     32 bit Thumb instructions are displayed as pairs of halfwords,
+     not as a single word.)  */
+  if (is_thumb)
+    {
+      if (size == 2)
+	{
+	  info->fprintf_func(info->stream, "%04lx       ",
+			     ((unsigned long)given) & 0xffff);
+	}
+      else
+	{
+	  info->fprintf_func(info->stream, "%04lx %04lx  ",
+			     (((unsigned long)given) >> 16) & 0xffff,
+			     ((unsigned long)given) & 0xffff);
+	}
+    }
+  else
+    {
+      info->fprintf_func(info->stream, "%08lx      ",
+			 ((unsigned long)given) & 0xffffffff);
+    }
 
   printer (pc, info, given);
 

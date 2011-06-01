@@ -8,7 +8,6 @@
 #include "qemu-timer.h"
 #include "qdict.h"
 #include "qerror.h"
-#include "outputchannel.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -51,6 +50,7 @@ void qemu_system_powerdown_request(void);
 int qemu_shutdown_requested(void);
 int qemu_reset_requested(void);
 int qemu_powerdown_requested(void);
+void qemu_system_killed(int signal, pid_t pid);
 #ifdef NEED_CPU_H
 #if !defined(TARGET_SPARC)
 // Please implement a power failure function to signal the OS
@@ -62,13 +62,9 @@ void qemu_system_powerdown(void);
 void qemu_system_reset(void);
 
 void do_savevm(Monitor *mon, const char *name);
-void do_savevm_oc(OutputChannel *err, const char *name);
 void do_loadvm(Monitor *mon, const char *name);
-void do_loadvm_oc(OutputChannel *err, const char *name);
 void do_delvm(Monitor *mon, const char *name);
-void do_delvm_oc(OutputChannel *err, const char *name);
-void do_info_snapshots(Monitor *mon);
-void do_info_snapshots_oc(OutputChannel *out, OutputChannel *err);
+void do_info_snapshots(Monitor *mon, Monitor* err);
 
 void qemu_announce_self(void);
 
@@ -90,22 +86,6 @@ void qemu_error_internal(const char *file, int linenr, const char *func,
 
 #define qemu_error_new(fmt, ...) \
     qemu_error_internal(__FILE__, __LINE__, __func__, fmt, ## __VA_ARGS__)
-
-#ifdef _WIN32
-/* Polling handling */
-
-/* return TRUE if no sleep should be done afterwards */
-typedef int PollingFunc(void *opaque);
-
-int qemu_add_polling_cb(PollingFunc *func, void *opaque);
-void qemu_del_polling_cb(PollingFunc *func, void *opaque);
-
-/* Wait objects handling */
-typedef void WaitObjectFunc(void *opaque);
-
-int qemu_add_wait_object(HANDLE handle, WaitObjectFunc *func, void *opaque);
-void qemu_del_wait_object(HANDLE handle, WaitObjectFunc *func, void *opaque);
-#endif
 
 /* TAP win32 */
 int tap_win32_init(VLANState *vlan, const char *model,
@@ -137,10 +117,6 @@ extern int no_quit;
 extern int semihosting_enabled;
 extern int old_param;
 extern QEMUClock *rtc_clock;
-
-#ifdef CONFIG_KQEMU
-extern int kqemu_allowed;
-#endif
 
 #define MAX_NODES 64
 extern int nb_numa_nodes;
@@ -261,21 +237,6 @@ int fread_targphys_ok(target_phys_addr_t dst_addr, size_t nbytes, FILE *f);
 int read_targphys(int fd, target_phys_addr_t dst_addr, size_t nbytes);
 void pstrcpy_targphys(target_phys_addr_t dest, int buf_size,
                       const char *source);
-#endif
-
-#ifdef HAS_AUDIO
-struct soundhw {
-    const char *name;
-    const char *descr;
-    int enabled;
-    int isa;
-    union {
-        int (*init_isa) (qemu_irq *pic);
-        int (*init_pci) (PCIBus *bus);
-    } init;
-};
-
-extern struct soundhw soundhw[];
 #endif
 
 void do_usb_add(Monitor *mon, const char *devname);
