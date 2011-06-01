@@ -202,7 +202,7 @@ if [ -n "$SDL_CONFIG" ] ; then
 	SDL_LIBS=`$SDL_CONFIG --static-libs`
 
 	# quick hack, remove the -D_GNU_SOURCE=1 of some SDL Cflags
-	# since they break recent Mingw releases
+7	# since they break recent Mingw releases
 	SDL_CFLAGS=`echo $SDL_CFLAGS | sed -e s/-D_GNU_SOURCE=1//g`
 
 	log "SDL-probe  : SDL_CFLAGS = $SDL_CFLAGS"
@@ -459,6 +459,21 @@ echo "#define CONFIG_GDBSTUB  1" >> $config_h
 echo "#define CONFIG_SLIRP    1" >> $config_h
 echo "#define CONFIG_SKINS    1" >> $config_h
 echo "#define CONFIG_TRACE    1" >> $config_h
+
+case "$TARGET_OS" in
+    windows)
+        echo "#define CONFIG_WIN32  1" >> $config_h
+        ;;
+    *)
+        echo "#define CONFIG_POSIX  1" >> $config_h
+        ;;
+esac
+
+case "$TARGET_OS" in
+    linux-*)
+        echo "#define CONFIG_KVM_GS_RESTORE 1" >> $config_h
+        ;;
+esac
 
 # only Linux has fdatasync()
 case "$TARGET_OS" in
