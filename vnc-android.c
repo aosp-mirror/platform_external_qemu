@@ -722,7 +722,7 @@ static void vnc_update_client(void *opaque)
 
         if (vs->output.offset && !vs->audio_cap && !vs->force_update) {
             /* kernel send buffers are full -> drop frames to throttle */
-            qemu_mod_timer(vs->timer, qemu_get_clock(rt_clock) + VNC_REFRESH_INTERVAL);
+            qemu_mod_timer(vs->timer, qemu_get_clock_ms(rt_clock) + VNC_REFRESH_INTERVAL);
             return;
         }
 
@@ -763,7 +763,7 @@ static void vnc_update_client(void *opaque)
         }
 
         if (!has_dirty && !vs->audio_cap && !vs->force_update) {
-            qemu_mod_timer(vs->timer, qemu_get_clock(rt_clock) + VNC_REFRESH_INTERVAL);
+            qemu_mod_timer(vs->timer, qemu_get_clock_ms(rt_clock) + VNC_REFRESH_INTERVAL);
             return;
         }
 
@@ -811,7 +811,7 @@ static void vnc_update_client(void *opaque)
     }
 
     if (vs->csock != -1) {
-        qemu_mod_timer(vs->timer, qemu_get_clock(rt_clock) + VNC_REFRESH_INTERVAL);
+        qemu_mod_timer(vs->timer, qemu_get_clock_ms(rt_clock) + VNC_REFRESH_INTERVAL);
     } else {
         vnc_disconnect_finish(vs);
     }
@@ -2073,7 +2073,7 @@ static void vnc_connect(VncDisplay *vd, int csock)
 
     vs->vd = vd;
     vs->ds = vd->ds;
-    vs->timer = qemu_new_timer(rt_clock, vnc_update_client, vs);
+    vs->timer = qemu_new_timer_ms(rt_clock, vnc_update_client, vs);
     vs->last_x = -1;
     vs->last_y = -1;
 

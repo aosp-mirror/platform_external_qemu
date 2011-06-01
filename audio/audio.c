@@ -1198,7 +1198,7 @@ static void audio_timer (void *opaque)
     AudioState *s = opaque;
 #if 0
 #define  MAX_DIFFS  100
-    int64_t         now  = qemu_get_clock(vm_clock);
+    int64_t         now  = qemu_get_clock_ms(vm_clock);
     static int64_t  last = 0;
     static float    diffs[MAX_DIFFS];
     static int      num_diffs;
@@ -1227,7 +1227,7 @@ static void audio_timer (void *opaque)
 #endif
 
     audio_run ("timer");
-    qemu_mod_timer (s->ts, qemu_get_clock (vm_clock) + conf.period.ticks);
+    qemu_mod_timer (s->ts, qemu_get_clock_ns (vm_clock) + conf.period.ticks);
 }
 
 
@@ -1250,7 +1250,7 @@ static void audio_reset_timer (void)
     AudioState *s = &glob_audio_state;
 
     if (audio_is_timer_needed ()) {
-        qemu_mod_timer (s->ts, qemu_get_clock (vm_clock) + 1);
+        qemu_mod_timer (s->ts, qemu_get_clock_ns (vm_clock) + 1);
     }
     else {
         qemu_del_timer (s->ts);
@@ -1964,7 +1964,7 @@ static void audio_init (void)
     QLIST_INIT (&s->cap_head);
     atexit (audio_atexit);
 
-    s->ts = qemu_new_timer (vm_clock, audio_timer, s);
+    s->ts = qemu_new_timer_ns (vm_clock, audio_timer, s);
     if (!s->ts) {
         dolog ("Could not create audio timer\n");
         return;
