@@ -248,6 +248,7 @@ LOCAL_LDLIBS += \
 
 LOCAL_SRC_FILES := \
     audio/audio.c \
+    cpus.c \
     disas.c \
     dma-helpers.c \
     gdbstub.c \
@@ -325,6 +326,7 @@ LOCAL_CFLAGS += \
 
 LOCAL_SRC_FILES := \
     audio/audio.c \
+    cpus.c \
     disas.c \
     dma-helpers.c \
     gdbstub.c \
