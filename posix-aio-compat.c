@@ -24,6 +24,7 @@
 
 #include "qemu-queue.h"
 #include "osdep.h"
+#include "sysemu.h"
 #include "qemu-common.h"
 #include "block_int.h"
 
@@ -127,7 +128,7 @@ static ssize_t handle_aiocb_ioctl(struct qemu_paiocb *aiocb)
 
     /*
      * This looks weird, but the aio code only consideres a request
-     * successfull if it has written the number full number of bytes.
+     * successful if it has written the number full number of bytes.
      *
      * Now we overload aio_nbytes as aio_ioctl_cmd for the ioctl command,
      * so in fact we return the ioctl command here to make posix_aio_read()
@@ -269,7 +270,7 @@ static ssize_t handle_aiocb_rw(struct qemu_paiocb *aiocb)
      * Ok, we have to do it the hard way, copy all segments into
      * a single aligned buffer.
      */
-    buf = qemu_memalign(512, aiocb->aio_nbytes);
+    buf = qemu_blockalign(aiocb->common.bs, aiocb->aio_nbytes);
     if (aiocb->aio_type & QEMU_AIO_WRITE) {
         char *p = buf;
         int i;
@@ -453,6 +454,9 @@ static int posix_aio_process_queue(void *opaque)
                 } else {
                     ret = -ret;
                 }
+
+                //trace_paio_complete(acb, acb->common.opaque, ret);
+
                 /* remove the request */
                 *pacb = acb->next;
                 /* call the callback */
@@ -535,6 +539,8 @@ static void paio_cancel(BlockDriverAIOCB *blockacb)
     struct qemu_paiocb *acb = (struct qemu_paiocb *)blockacb;
     int active = 0;
 
+    //trace_paio_cancel(acb, acb->common.opaque);
+
     mutex_lock(&lock);
     if (!acb->active) {
         QTAILQ_REMOVE(&request_list, acb, node);
@@ -583,6 +589,7 @@ BlockDriverAIOCB *paio_submit(BlockDriverState *bs, int fd,
     acb->next = posix_aio_state->first_aio;
     posix_aio_state->first_aio = acb;
 
+    //trace_paio_submit(acb, opaque, sector_num, nb_sectors, type);
     qemu_paio_submit(acb);
     return &acb->common;
 }
@@ -599,6 +606,7 @@ BlockDriverAIOCB *paio_ioctl(BlockDriverState *bs, int fd,
     acb->aio_type = QEMU_AIO_IOCTL;
     acb->aio_fildes = fd;
     acb->ev_signo = SIGUSR2;
+    acb->async_context_id = get_async_context_id();
     acb->aio_offset = 0;
     acb->aio_ioctl_buf = buf;
     acb->aio_ioctl_cmd = req;

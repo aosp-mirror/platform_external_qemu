@@ -105,13 +105,13 @@ static void bitband_writel(void *opaque, target_phys_addr_t offset,
     cpu_physical_memory_write(addr, (uint8_t *)&v, 4);
 }
 
-static CPUReadMemoryFunc *bitband_readfn[] = {
+static CPUReadMemoryFunc * const bitband_readfn[] = {
    bitband_readb,
    bitband_readw,
    bitband_readl
 };
 
-static CPUWriteMemoryFunc *bitband_writefn[] = {
+static CPUWriteMemoryFunc * const bitband_writefn[] = {
    bitband_writeb,
    bitband_writew,
    bitband_writel
@@ -192,9 +192,11 @@ qemu_irq *armv7m_init(int flash_size, int sram_size,
 
     /* Flash programming is done via the SCU, so pretend it is ROM.  */
     cpu_register_physical_memory(0, flash_size,
-                                 qemu_ram_alloc(flash_size) | IO_MEM_ROM);
+                                 qemu_ram_alloc(NULL, "armv7m.flash",
+                                                flash_size) | IO_MEM_ROM);
     cpu_register_physical_memory(0x20000000, sram_size,
-                                 qemu_ram_alloc(sram_size) | IO_MEM_RAM);
+                                 qemu_ram_alloc(NULL, "armv7m.sram",
+                                                sram_size) | IO_MEM_RAM);
     armv7m_bitband_init();
 
     nvic = qdev_create(NULL, "armv7m_nvic");
@@ -233,8 +235,8 @@ qemu_irq *armv7m_init(int flash_size, int sram_size,
        space.  This stops qemu complaining about executing code outside RAM
        when returning from an exception.  */
     cpu_register_physical_memory(0xfffff000, 0x1000,
-                                 qemu_ram_alloc(0x1000) | IO_MEM_RAM);
-
+                                 qemu_ram_alloc(NULL, "armv7m.hack", 
+                                                0x1000) | IO_MEM_RAM);
     return pic;
 }
 

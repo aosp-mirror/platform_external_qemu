@@ -2,7 +2,6 @@
 #include "qemu-error.h"
 #include "qemu-option.h"
 #include "qemu-config.h"
-#include "sysemu.h"
 #include "hw/qdev.h"
 
 static QemuOptsList qemu_drive_opts = {
@@ -146,6 +145,12 @@ static QemuOptsList qemu_chardev_opts = {
         },{
             .name = "signal",
             .type = QEMU_OPT_BOOL,
+        },{
+            .name = "name",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "debug",
+            .type = QEMU_OPT_NUMBER,
         },
         { /* end of list */ }
     },
@@ -283,10 +288,28 @@ static QemuOptsList qemu_mon_opts = {
         },{
             .name = "default",
             .type = QEMU_OPT_BOOL,
+        },{
+            .name = "pretty",
+            .type = QEMU_OPT_BOOL,
         },
         { /* end of list */ }
     },
 };
+
+#ifdef CONFIG_SIMPLE_TRACE
+static QemuOptsList qemu_trace_opts = {
+    .name = "trace",
+    .implied_opt_name = "trace",
+    .head = QTAILQ_HEAD_INITIALIZER(qemu_trace_opts.head),
+    .desc = {
+        {
+            .name = "file",
+            .type = QEMU_OPT_STRING,
+        },
+        { /* end if list */ }
+    },
+};
+#endif
 
 static QemuOptsList qemu_cpudef_opts = {
     .name = "cpudef",
@@ -336,6 +359,97 @@ static QemuOptsList qemu_cpudef_opts = {
     },
 };
 
+QemuOptsList qemu_spice_opts = {
+    .name = "spice",
+    .head = QTAILQ_HEAD_INITIALIZER(qemu_spice_opts.head),
+    .desc = {
+        {
+            .name = "port",
+            .type = QEMU_OPT_NUMBER,
+        },{
+            .name = "tls-port",
+            .type = QEMU_OPT_NUMBER,
+        },{
+            .name = "addr",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "ipv4",
+            .type = QEMU_OPT_BOOL,
+        },{
+            .name = "ipv6",
+            .type = QEMU_OPT_BOOL,
+        },{
+            .name = "password",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "disable-ticketing",
+            .type = QEMU_OPT_BOOL,
+        },{
+            .name = "x509-dir",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "x509-key-file",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "x509-key-password",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "x509-cert-file",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "x509-cacert-file",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "x509-dh-key-file",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "tls-ciphers",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "tls-channel",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "plaintext-channel",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "image-compression",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "jpeg-wan-compression",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "zlib-glz-wan-compression",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "streaming-video",
+            .type = QEMU_OPT_STRING,
+        },{
+            .name = "agent-mouse",
+            .type = QEMU_OPT_BOOL,
+        },{
+            .name = "playback-compression",
+            .type = QEMU_OPT_BOOL,
+        },
+        { /* end if list */ }
+    },
+};
+
+QemuOptsList qemu_option_rom_opts = {
+    .name = "option-rom",
+    .implied_opt_name = "romfile",
+    .head = QTAILQ_HEAD_INITIALIZER(qemu_option_rom_opts.head),
+    .desc = {
+        {
+            .name = "bootindex",
+            .type = QEMU_OPT_NUMBER,
+        }, {
+            .name = "romfile",
+            .type = QEMU_OPT_STRING,
+        },
+        { /* end if list */ }
+    },
+};
+
 static QemuOptsList *vm_config_groups[32] = {
     &qemu_drive_opts,
     &qemu_chardev_opts,
@@ -346,6 +460,10 @@ static QemuOptsList *vm_config_groups[32] = {
     &qemu_global_opts,
     &qemu_mon_opts,
     &qemu_cpudef_opts,
+#ifdef CONFIG_SIMPLE_TRACE
+    &qemu_trace_opts,
+#endif
+    &qemu_option_rom_opts,
     NULL,
 };
 

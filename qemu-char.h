@@ -6,6 +6,7 @@
 #include "qemu-option.h"
 #include "qemu-config.h"
 #include "qobject.h"
+#include "qstring.h"
 
 /* character device */
 
@@ -63,11 +64,15 @@ struct CharDriverState {
     void (*chr_send_event)(struct CharDriverState *chr, int event);
     void (*chr_close)(struct CharDriverState *chr);
     void (*chr_accept_input)(struct CharDriverState *chr);
+    void (*chr_set_echo)(struct CharDriverState *chr, bool echo);
+    void (*chr_guest_open)(struct CharDriverState *chr);
+    void (*chr_guest_close)(struct CharDriverState *chr);
     void *opaque;
     QEMUBH *bh;
     char *label;
     char *filename;
     int opened;
+    int avail_connections;
     QTAILQ_ENTRY(CharDriverState) next;
 };
 
@@ -75,8 +80,12 @@ QemuOpts *qemu_chr_parse_compat(const char *label, const char *filename);
 CharDriverState *qemu_chr_open_opts(QemuOpts *opts,
                                     void (*init)(struct CharDriverState *s));
 CharDriverState *qemu_chr_open(const char *label, const char *filename, void (*init)(struct CharDriverState *s));
+void qemu_chr_set_echo(struct CharDriverState *chr, bool echo);
+void qemu_chr_guest_open(struct CharDriverState *chr);
+void qemu_chr_guest_close(struct CharDriverState *chr);
 void qemu_chr_close(CharDriverState *chr);
-void qemu_chr_printf(CharDriverState *s, const char *fmt, ...);
+void qemu_chr_printf(CharDriverState *s, const char *fmt, ...)
+    GCC_FMT_ATTR(2, 3);
 int qemu_chr_write(CharDriverState *s, const uint8_t *buf, int len);
 void qemu_chr_send_event(CharDriverState *s, int event);
 void qemu_chr_add_handlers(CharDriverState *s,
@@ -92,13 +101,19 @@ void qemu_chr_read(CharDriverState *s, uint8_t *buf, int len);
 int qemu_chr_get_msgfd(CharDriverState *s);
 void qemu_chr_accept_input(CharDriverState *s);
 void qemu_chr_info_print(Monitor *mon, const QObject *ret_data);
-void qemu_chr_info(Monitor *mon);
+void qemu_chr_info(Monitor *mon, QObject **ret_data);
 CharDriverState *qemu_chr_find(const char *name);
 
 /* add an eventfd to the qemu devices that are polled */
 CharDriverState *qemu_chr_open_eventfd(int eventfd);
 
 extern int term_escape_char;
+
+/* memory chardev */
+void qemu_chr_init_mem(CharDriverState *chr);
+void qemu_chr_close_mem(CharDriverState *chr);
+QString *qemu_chr_mem_to_qs(CharDriverState *chr);
+size_t qemu_chr_mem_osize(const CharDriverState *chr);
 
 /* async I/O support */
 

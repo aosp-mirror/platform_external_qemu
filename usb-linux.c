@@ -1374,7 +1374,7 @@ static int usb_host_auto_scan(void *opaque, int bus_num, int addr,
 static void usb_host_auto_timer(void *unused)
 {
     usb_host_scan(NULL, usb_host_auto_scan);
-    qemu_mod_timer(usb_auto_timer, qemu_get_clock(rt_clock) + 2000);
+    qemu_mod_timer(usb_auto_timer, qemu_get_clock_ms(rt_clock) + 2000);
 }
 
 /*
@@ -1452,7 +1452,7 @@ static int usb_host_auto_add(const char *spec)
          * If this turns out to be too expensive we can move that into a
          * separate thread.
          */
-	usb_auto_timer = qemu_new_timer(rt_clock, usb_host_auto_timer, NULL);
+	usb_auto_timer = qemu_new_timer_ms(rt_clock, usb_host_auto_timer, NULL);
 	if (!usb_auto_timer) {
             fprintf(stderr, "husb: failed to allocate auto scan timer\n");
             qemu_free(f);
@@ -1460,7 +1460,7 @@ static int usb_host_auto_add(const char *spec)
         }
 
         /* Check for new devices every two seconds */
-        qemu_mod_timer(usb_auto_timer, qemu_get_clock(rt_clock) + 2000);
+        qemu_mod_timer(usb_auto_timer, qemu_get_clock_ms(rt_clock) + 2000);
     }
 
     dprintf("husb: added auto filter: bus_num %d addr %d vid %d pid %d\n",

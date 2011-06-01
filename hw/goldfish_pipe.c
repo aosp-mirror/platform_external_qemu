@@ -655,7 +655,7 @@ throttlePipe_init( void* hwpipe, void* svcOpaque, const char* args )
 
     ANEW0(pipe);
     pingPongPipe_init0(&pipe->pingpong, hwpipe, svcOpaque);
-    pipe->timer = qemu_new_timer(vm_clock, throttlePipe_timerFunc, pipe);
+    pipe->timer = qemu_new_timer_ns(vm_clock, throttlePipe_timerFunc, pipe);
     /* For now, limit to 500 KB/s in both directions */
     pipe->sendRate = 1e9 / (500*1024*8);
     pipe->recvRate = pipe->sendRate;

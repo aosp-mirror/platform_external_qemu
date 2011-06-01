@@ -212,7 +212,7 @@ _hwSensorClient_new( HwSensors*  sensors )
     cl->sensors     = sensors;
     cl->enabledMask = 0;
     cl->delay_ms    = 800;
-    cl->timer       = qemu_new_timer(vm_clock, _hwSensorClient_tick, cl);
+    cl->timer       = qemu_new_timer_ns(vm_clock, _hwSensorClient_tick, cl);
 
     cl->next         = sensors->clients;
     sensors->clients = cl;
@@ -316,7 +316,7 @@ _hwSensorClient_tick( void*  opaque )
         _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
     }
 
-    now_ns = qemu_get_clock(vm_clock);
+    now_ns = qemu_get_clock_ns(vm_clock);
 
     snprintf(buffer, sizeof buffer, "sync:%lld", now_ns/1000);
     _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));

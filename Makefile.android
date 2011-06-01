@@ -148,15 +148,18 @@ start-emulator-library = \
     $(eval LOCAL_AR := $(MY_AR)) \
     $(eval LOCAL_LDLIBS := $(MY_LDLIBS)) \
     $(eval LOCAL_MODULE_TAGS := debug) \
-    $(eval LOCAL_MODULE := $1)
+    $(eval LOCAL_MODULE := $1) \
 
 # Used with start-emulator-library
 end-emulator-library = \
-    $(eval include $(BUILD_HOST_STATIC_LIBRARY))
+    $(eval include $(BUILD_HOST_STATIC_LIBRARY)) \
+    $(eval EMULATOR_MODULE_TYPE := STATIC_LIBRARY)
 
 # A variant of start-emulator-library to start the definition of a host
 # program instead. Use with end-emulator-program
-start-emulator-program = $(call start-emulator-library,$1)
+start-emulator-program = \
+    $(call start-emulator-library,$1) \
+    $(eval EMULATOR_MODULE_TYPE := EXECUTABLES)
 
 # A varient of end-emulator-library for host programs instead
 end-emulator-program = \

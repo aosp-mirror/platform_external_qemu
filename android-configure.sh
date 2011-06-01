@@ -482,6 +482,12 @@ case "$TARGET_OS" in
         ;;
 esac
 
+case "$TARGET_OS" in
+    linux-*|darwin-*)
+        echo "#define CONFIG_MADVISE  1" >> $config_h
+        ;;
+esac
+
 # the -nand-limits options can only work on non-windows systems
 if [ "$TARGET_OS" != "windows" ] ; then
     echo "#define CONFIG_NAND_LIMITS  1" >> $config_h
