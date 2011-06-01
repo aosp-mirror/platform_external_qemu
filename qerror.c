@@ -101,6 +101,10 @@ static const QErrorStringTable qerror_table[] = {
         .desc      = "Device '%(device)' has no child bus",
     },
     {
+        .error_fmt = QERR_DEVICE_NO_HOTPLUG,
+        .desc      = "Device '%(device)' does not support hotplugging",
+    },
+    {
         .error_fmt = QERR_DUPLICATE_ID,
         .desc      = "Duplicate ID '%(id)' for %(object)",
     },
@@ -197,6 +201,11 @@ static const QErrorStringTable qerror_table[] = {
         .desc      = "An undefined error has ocurred",
     },
     {
+        .error_fmt = QERR_UNKNOWN_BLOCK_FORMAT_FEATURE,
+        .desc      = "'%(device)' uses a %(format) feature which is not "
+                     "supported by this qemu version: %(feature)",
+    },
+    {
         .error_fmt = QERR_VNC_SERVER_FAILED,
         .desc      = "Could not start VNC server on %(target)",
     },
@@ -218,7 +227,8 @@ QError *qerror_new(void)
     return qerr;
 }
 
-static void qerror_abort(const QError *qerr, const char *fmt, ...)
+static void GCC_FMT_ATTR(2, 3) qerror_abort(const QError *qerr,
+                                            const char *fmt, ...)
 {
     va_list ap;
 
@@ -233,7 +243,8 @@ static void qerror_abort(const QError *qerr, const char *fmt, ...)
     abort();
 }
 
-static void qerror_set_data(QError *qerr, const char *fmt, va_list *va)
+static void GCC_FMT_ATTR(2, 0) qerror_set_data(QError *qerr,
+                                               const char *fmt, va_list *va)
 {
     QObject *obj;
 
