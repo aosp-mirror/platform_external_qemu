@@ -343,6 +343,12 @@ void qemu_iovec_memset(QEMUIOVector *qiov, int c, size_t count);
 void qemu_iovec_memset_skip(QEMUIOVector *qiov, int c, size_t count,
                             size_t skip);
 
+/* OS specific functions */
+void os_setup_early_signal_handling(void);
+char *os_find_datadir(const char *argv0);
+void os_parse_cmd_args(int index, const char *optarg);
+void os_pidfile_error(void);
+
 /* Convert a byte between binary and BCD.  */
 static inline uint8_t to_bcd(uint8_t val)
 {

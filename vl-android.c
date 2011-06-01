@@ -85,7 +85,6 @@
 
 #ifndef _WIN32
 #include <libgen.h>
-#include <pwd.h>
 #include <sys/times.h>
 #include <sys/wait.h>
 #include <termios.h>
@@ -308,9 +307,6 @@ int no_reboot = 0;
 int no_shutdown = 0;
 int cursor_hide = 1;
 int graphic_rotate = 0;
-#ifndef _WIN32
-int daemonize = 0;
-#endif
 WatchdogTimerModel *watchdog = NULL;
 int watchdog_action = WDT_RESET;
 const char *option_rom[MAX_OPTION_ROMS];
@@ -3339,14 +3335,6 @@ static void select_vgahw (const char *p)
     }
 }
 
-#ifdef _WIN32
-static BOOL WINAPI qemu_ctrl_handler(DWORD type)
-{
-    exit(STATUS_CONTROL_C_EXIT);
-    return TRUE;
-}
-#endif
-
 int qemu_uuid_parse(const char *str, uint8_t *uuid)
 {
     int ret;
@@ -3369,35 +3357,6 @@ int qemu_uuid_parse(const char *str, uint8_t *uuid)
 }
 
 #define MAX_NET_CLIENTS 32
-
-#ifndef _WIN32
-
-static void termsig_handler(int signal)
-{
-    qemu_system_shutdown_request();
-}
-
-static void sigchld_handler(int signal)
-{
-    waitpid(-1, NULL, WNOHANG);
-}
-
-static void sighandler_setup(void)
-{
-    struct sigaction act;
-
-    memset(&act, 0, sizeof(act));
-    act.sa_handler = termsig_handler;
-    sigaction(SIGINT,  &act, NULL);
-    sigaction(SIGHUP,  &act, NULL);
-    sigaction(SIGTERM, &act, NULL);
-
-    act.sa_handler = sigchld_handler;
-    act.sa_flags = SA_NOCLDSTOP;
-    sigaction(SIGCHLD, &act, NULL);
-}
-
-#endif
 
 #ifdef _WIN32
 /* Look for support files in the same directory as the executable.  */
@@ -3794,18 +3753,9 @@ int main(int argc, char **argv, char **envp)
     const char *cpu_model;
     const char *usb_devices[MAX_USB_CMDLINE];
     int usb_devices_index;
-#ifndef _WIN32
-    int fds[2];
-#endif
     int tb_size;
     const char *pid_file = NULL;
     const char *incoming = NULL;
-#ifndef _WIN32
-    int fd = 0;
-    struct passwd *pwd = NULL;
-    const char *chroot_dir = NULL;
-    const char *run_as = NULL;
-#endif
     CPUState *env;
     int show_vnc_port = 0;
     IniFile*  hw_ini = NULL;
@@ -3824,35 +3774,7 @@ int main(int argc, char **argv, char **envp)
     qemu_cache_utils_init(envp);
 
     QLIST_INIT (&vm_change_state_head);
-#ifndef _WIN32
-    {
-        struct sigaction act;
-        sigfillset(&act.sa_mask);
-        act.sa_flags = 0;
-        act.sa_handler = SIG_IGN;
-        sigaction(SIGPIPE, &act, NULL);
-    }
-#else
-    SetConsoleCtrlHandler(qemu_ctrl_handler, TRUE);
-    /* Note: cpu_interrupt() is currently not SMP safe, so we force
-       QEMU to run on a single CPU */
-    {
-        HANDLE h;
-        DWORD mask, smask;
-        int i;
-        h = GetCurrentProcess();
-        if (GetProcessAffinityMask(h, &mask, &smask)) {
-            for(i = 0; i < 32; i++) {
-                if (mask & (1 << i))
-                    break;
-            }
-            if (i != 32) {
-                mask = 1 << i;
-                SetProcessAffinityMask(h, mask);
-            }
-        }
-    }
-#endif
+    os_setup_early_signal_handling();
 
     module_call_init(MODULE_INIT_MACHINE);
     machine = find_default_machine();
@@ -4142,13 +4064,6 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_bootp:
                 bootp_filename = optarg;
                 break;
-#if 0  /* ANDROID disabled */
-#ifndef _WIN32
-            case QEMU_OPTION_smb:
-		net_slirp_smb(optarg);
-                break;
-#endif
-#endif /* ANDROID */
             case QEMU_OPTION_redir:
                 net_slirp_redir(NULL, optarg, NULL);
                 break;
@@ -4444,11 +4359,6 @@ int main(int argc, char **argv, char **envp)
                     PANIC("Fail to parse UUID string. Wrong format.");
                 }
                 break;
-#ifndef _WIN32
-	    case QEMU_OPTION_daemonize:
-		daemonize = 1;
-		break;
-#endif
 	    case QEMU_OPTION_option_rom:
 		if (nb_option_roms >= MAX_OPTION_ROMS) {
 		    PANIC("Too many option ROMs");
@@ -4614,14 +4524,6 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_incoming:
                 incoming = optarg;
                 break;
-#ifndef _WIN32
-            case QEMU_OPTION_chroot:
-                chroot_dir = optarg;
-                break;
-            case QEMU_OPTION_runas:
-                run_as = optarg;
-                break;
-#endif
 #ifdef CONFIG_XEN
             case QEMU_OPTION_xen_domid:
                 xen_domid = atoi(optarg);
@@ -4788,6 +4690,8 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_snapshot_no_time_update:
                 android_snapshot_update_time = 0;
                 break;
+            default:
+                os_parse_cmd_args(popt->index, optarg);
             }
         }
     }
@@ -5149,6 +5053,11 @@ int main(int argc, char **argv, char **envp)
     serial_hds_add_at(1, "android-qemud");
     stralloc_add_str(kernel_params, " android.qemud=ttyS1");
 
+    if (pid_file && qemu_create_pidfile(pid_file) != 0) {
+        os_pidfile_error();
+        exit(1);
+    }
+
 #if defined(CONFIG_KVM)
     if (kvm_allowed < 0) {
         kvm_allowed = kvm_check_allowed();
@@ -5177,68 +5086,6 @@ int main(int argc, char **argv, char **envp)
        if (strncmp(monitor_device, "vc", 2) == 0)
            monitor_device = "stdio";
     }
-
-#ifndef _WIN32
-    if (daemonize) {
-	pid_t pid;
-
-	if (pipe(fds) == -1) {
-	    PANIC("Unable to aquire pidfile");
-	}
-
-	pid = fork();
-	if (pid > 0) {
-	    uint8_t status;
-	    ssize_t len;
-
-	    close(fds[1]);
-
-	again:
-            len = read(fds[0], &status, 1);
-            if (len == -1 && (errno == EINTR))
-                goto again;
-
-            if (len != 1) {
-                PANIC("Error when aquiring pidfile");
-            }
-            else if (status == 1) {
-                PANIC("Could not acquire pidfile");
-            } else {
-                QEMU_EXIT(0);
-            }
-	} else if (pid < 0) {
-        PANIC("Unable to daemonize");
-	}
-
-	setsid();
-
-	pid = fork();
-	if (pid > 0) {
-	    QEMU_EXIT(0);
-	} else if (pid < 0) {
-         PANIC("Could not acquire pid file");
-	}
-
-	umask(027);
-
-        signal(SIGTSTP, SIG_IGN);
-        signal(SIGTTOU, SIG_IGN);
-        signal(SIGTTIN, SIG_IGN);
-    }
-
-    if (pid_file && qemu_create_pidfile(pid_file) != 0) {
-        if (daemonize) {
-            uint8_t status = 1;
-            int ret;
-            do {
-                ret = write(fds[1], &status, 1);
-            } while (ret < 0 && errno == EINTR);
-            PANIC("Could not acquire pid file");
-        } else {
-            PANIC("Could not acquire pid file");
-        }
-    }
-#endif
 
 #ifdef CONFIG_KQEMU
     if (smp_cpus > 1)
@@ -5270,7 +5117,7 @@ int main(int argc, char **argv, char **envp)
     if (!boot_devices[0]) {
         boot_devices = "cad";
     }
-    setvbuf(stdout, NULL, _IOLBF, 0);
+    os_set_line_buffering();
 
     if (init_timer_alarm() < 0) {
         PANIC("could not initialize alarm timer");
@@ -5385,10 +5232,8 @@ int main(int argc, char **argv, char **envp)
     //register_savevm("timer", 0, 2, timer_save, timer_load, &timers_state);
     register_savevm_live("ram", 0, 3, ram_save_live, NULL, ram_load, NULL);
 
-#ifndef _WIN32
     /* must be after terminal init, SDL library changes signal handlers */
-    sighandler_setup();
-#endif
+    os_setup_signal_handling();
 
     /* Maintain compatibility with multiple stdio monitors */
     if (!strcmp(monitor_device,"stdio")) {
@@ -5724,66 +5569,7 @@ int main(int argc, char **argv, char **envp)
     if (autostart)
         vm_start();
 
-#ifndef _WIN32
-    if (daemonize) {
-	uint8_t status = 0;
-	ssize_t len;
-
-    again1:
-	len = write(fds[1], &status, 1);
-	if (len == -1 && (errno == EINTR))
-	    goto again1;
-
-	if (len != 1) {
-	    PANIC("Unable to daemonize");
-	}
-
-        if (chdir("/")) {
-            perror("not able to chdir to /");
-            PANIC("not able to chdir to /");
-        }
-	TFR(fd = open("/dev/null", O_RDWR));
-	if (fd == -1)
-	    PANIC("open(\"/dev/null\") failed: %s", errno_str);
-    }
-
-    if (run_as) {
-        pwd = getpwnam(run_as);
-        if (!pwd) {
-            PANIC("User \"%s\" doesn't exist", run_as);
-        }
-    }
-
-    if (chroot_dir) {
-        if (chroot(chroot_dir) < 0) {
-            PANIC("chroot failed");
-        }
-        if (chdir("/")) {
-            perror("not able to chdir to /");
-            PANIC("not able to chdir to /");
-        }
-    }
-
-    if (run_as) {
-        if (setgid(pwd->pw_gid) < 0) {
-            PANIC("Failed to setgid(%d)", pwd->pw_gid);
-        }
-        if (setuid(pwd->pw_uid) < 0) {
-            PANIC("Failed to setuid(%d)", pwd->pw_uid);
-        }
-        if (setuid(0) != -1) {
-            PANIC("Dropping privileges failed");
-        }
-    }
-
-    if (daemonize) {
-        dup2(fd, 0);
-        dup2(fd, 1);
-        dup2(fd, 2);
-
-        close(fd);
-    }
-#endif
+    os_setup_post();
 
 #ifdef CONFIG_ANDROID
     // This will notify the UI that the core is successfuly initialized

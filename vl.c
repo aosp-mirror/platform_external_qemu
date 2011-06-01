@@ -193,7 +193,6 @@ static IOPortWriteFunc *ioport_write_table[3][MAX_IOPORTS];
 DriveInfo drives_table[MAX_DRIVES+1];
 int nb_drives;
 enum vga_retrace_method vga_retrace_method = VGA_RETRACE_DUMB;
-static DisplayState *display_state;
 DisplayType display_type = DT_DEFAULT;
 const char* keyboard_layout = NULL;
 ram_addr_t ram_size;
@@ -241,9 +240,6 @@ int no_reboot = 0;
 int no_shutdown = 0;
 int cursor_hide = 1;
 int graphic_rotate = 0;
-#ifndef _WIN32
-int daemonize = 0;
-#endif
 WatchdogTimerModel *watchdog = NULL;
 int watchdog_action = WDT_RESET;
 const char *option_rom[MAX_OPTION_ROMS];
@@ -1524,126 +1520,6 @@ void pcmcia_info(Monitor *mon)
 }
 
 /***********************************************************/
-/* register display */
-
-struct DisplayAllocator default_allocator = {
-    defaultallocator_create_displaysurface,
-    defaultallocator_resize_displaysurface,
-    defaultallocator_free_displaysurface
-};
-
-void register_displaystate(DisplayState *ds)
-{
-    DisplayState **s;
-    s = &display_state;
-    while (*s != NULL)
-        s = &(*s)->next;
-    ds->next = NULL;
-    *s = ds;
-}
-
-DisplayState *get_displaystate(void)
-{
-    return display_state;
-}
-
-DisplayAllocator *register_displayallocator(DisplayState *ds, DisplayAllocator *da)
-{
-    if(ds->allocator ==  &default_allocator) ds->allocator = da;
-    return ds->allocator;
-}
-
-/* dumb display */
-
-static void dumb_display_init(void)
-{
-    DisplayState *ds = qemu_mallocz(sizeof(DisplayState));
-    ds->allocator = &default_allocator;
-    ds->surface = qemu_create_displaysurface(ds, 640, 480);
-    register_displaystate(ds);
-}
-
-#ifdef _WIN32
-/***********************************************************/
-/* Polling handling */
-
-typedef struct PollingEntry {
-    PollingFunc *func;
-    void *opaque;
-    struct PollingEntry *next;
-} PollingEntry;
-
-static PollingEntry *first_polling_entry;
-
-int qemu_add_polling_cb(PollingFunc *func, void *opaque)
-{
-    PollingEntry **ppe, *pe;
-    pe = qemu_mallocz(sizeof(PollingEntry));
-    pe->func = func;
-    pe->opaque = opaque;
-    for(ppe = &first_polling_entry; *ppe != NULL; ppe = &(*ppe)->next);
-    *ppe = pe;
-    return 0;
-}
-
-void qemu_del_polling_cb(PollingFunc *func, void *opaque)
-{
-    PollingEntry **ppe, *pe;
-    for(ppe = &first_polling_entry; *ppe != NULL; ppe = &(*ppe)->next) {
-        pe = *ppe;
-        if (pe->func == func && pe->opaque == opaque) {
-            *ppe = pe->next;
-            qemu_free(pe);
-            break;
-        }
-    }
-}
-
-/***********************************************************/
-/* Wait objects support */
-typedef struct WaitObjects {
-    int num;
-    HANDLE events[MAXIMUM_WAIT_OBJECTS + 1];
-    WaitObjectFunc *func[MAXIMUM_WAIT_OBJECTS + 1];
-    void *opaque[MAXIMUM_WAIT_OBJECTS + 1];
-} WaitObjects;
-
-static WaitObjects wait_objects = {0};
-
-int qemu_add_wait_object(HANDLE handle, WaitObjectFunc *func, void *opaque)
-{
-    WaitObjects *w = &wait_objects;
-
-    if (w->num >= MAXIMUM_WAIT_OBJECTS)
-        return -1;
-    w->events[w->num] = handle;
-    w->func[w->num] = func;
-    w->opaque[w->num] = opaque;
-    w->num++;
-    return 0;
-}
-
-void qemu_del_wait_object(HANDLE handle, WaitObjectFunc *func, void *opaque)
-{
-    int i, found;
-    WaitObjects *w = &wait_objects;
-
-    found = 0;
-    for (i = 0; i < w->num; i++) {
-        if (w->events[i] == handle)
-            found = 1;
-        if (found) {
-            w->events[i] = w->events[i + 1];
-            w->func[i] = w->func[i + 1];
-            w->opaque[i] = w->opaque[i + 1];
-        }
-    }
-    if (found)
-        w->num--;
-}
-#endif
-
-/***********************************************************/
 /* ram save/restore */
 
 static int ram_get_page(QEMUFile *f, uint8_t *buf, int len)
@@ -1791,7 +1667,7 @@ static int ram_save_block(QEMUFile *f)
     return found;
 }
 
-static uint64_t bytes_transferred;
+static uint64_t bytes_transferred = 0;
 
 static ram_addr_t ram_save_remaining(void)
 {
@@ -2944,7 +2820,7 @@ static void help(int exitcode)
 #define DEF(option, opt_arg, opt_enum, opt_help)        \
            opt_help
 #define DEFHEADING(text) stringify(text) "\n"
-#include "qemu-options.h"
+#include "qemu-options.def"
 #undef DEF
 #undef DEFHEADING
 #undef GEN_DOCS
@@ -2973,7 +2849,7 @@ enum {
 #define DEF(option, opt_arg, opt_enum, opt_help)        \
     opt_enum,
 #define DEFHEADING(text)
-#include "qemu-options.h"
+#include "qemu-options.def"
 #undef DEF
 #undef DEFHEADING
 #undef GEN_DOCS
@@ -2990,11 +2866,11 @@ static const QEMUOption qemu_options[] = {
 #define DEF(option, opt_arg, opt_enum, opt_help)        \
     { option, opt_arg, opt_enum },
 #define DEFHEADING(text)
-#include "qemu-options.h"
+#include "qemu-options.def"
 #undef DEF
 #undef DEFHEADING
 #undef GEN_DOCS
-    { NULL },
+    { NULL, 0, 0 },
 };
 
 #ifdef HAS_AUDIO
@@ -3174,14 +3050,6 @@ static void select_vgahw (const char *p)
     }
 }
 
-#ifdef _WIN32
-static BOOL WINAPI qemu_ctrl_handler(DWORD type)
-{
-    exit(STATUS_CONTROL_C_EXIT);
-    return TRUE;
-}
-#endif
-
 int qemu_uuid_parse(const char *str, uint8_t *uuid)
 {
     int ret;
@@ -3204,35 +3072,6 @@ int qemu_uuid_parse(const char *str, uint8_t *uuid)
 }
 
 #define MAX_NET_CLIENTS 32
-
-#ifndef _WIN32
-
-static void termsig_handler(int signal)
-{
-    qemu_system_shutdown_request();
-}
-
-static void sigchld_handler(int signal)
-{
-    waitpid(-1, NULL, WNOHANG);
-}
-
-static void sighandler_setup(void)
-{
-    struct sigaction act;
-
-    memset(&act, 0, sizeof(act));
-    act.sa_handler = termsig_handler;
-    sigaction(SIGINT,  &act, NULL);
-    sigaction(SIGHUP,  &act, NULL);
-    sigaction(SIGTERM, &act, NULL);
-
-    act.sa_handler = sigchld_handler;
-    act.sa_flags = SA_NOCLDSTOP;
-    sigaction(SIGCHLD, &act, NULL);
-}
-
-#endif
 
 #ifdef _WIN32
 /* Look for support files in the same directory as the executable.  */
@@ -3391,18 +3230,9 @@ int main(int argc, char **argv, char **envp)
     const char *cpu_model;
     const char *usb_devices[MAX_USB_CMDLINE];
     int usb_devices_index;
-#ifndef _WIN32
-    int fds[2];
-#endif
     int tb_size;
     const char *pid_file = NULL;
     const char *incoming = NULL;
-#ifndef _WIN32
-    int fd = 0;
-    struct passwd *pwd = NULL;
-    const char *chroot_dir = NULL;
-    const char *run_as = NULL;
-#endif
     CPUState *env;
     int show_vnc_port = 0;
 
@@ -3411,35 +3241,7 @@ int main(int argc, char **argv, char **envp)
     qemu_cache_utils_init(envp);
 
     QLIST_INIT (&vm_change_state_head);
-#ifndef _WIN32
-    {
-        struct sigaction act;
-        sigfillset(&act.sa_mask);
-        act.sa_flags = 0;
-        act.sa_handler = SIG_IGN;
-        sigaction(SIGPIPE, &act, NULL);
-    }
-#else
-    SetConsoleCtrlHandler(qemu_ctrl_handler, TRUE);
-    /* Note: cpu_interrupt() is currently not SMP safe, so we force
-       QEMU to run on a single CPU */
-    {
-        HANDLE h;
-        DWORD mask, smask;
-        int i;
-        h = GetCurrentProcess();
-        if (GetProcessAffinityMask(h, &mask, &smask)) {
-            for(i = 0; i < 32; i++) {
-                if (mask & (1 << i))
-                    break;
-            }
-            if (i != 32) {
-                mask = 1 << i;
-                SetProcessAffinityMask(h, mask);
-            }
-        }
-    }
-#endif
+    os_setup_early_signal_handling();
 
     module_call_init(MODULE_INIT_MACHINE);
     machine = find_default_machine();
@@ -3712,11 +3514,6 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_bootp:
                 bootp_filename = optarg;
                 break;
-#ifndef _WIN32
-            case QEMU_OPTION_smb:
-		net_slirp_smb(optarg);
-                break;
-#endif
             case QEMU_OPTION_redir:
                 net_slirp_redir(NULL, optarg, NULL);
                 break;
@@ -4051,7 +3848,7 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_startdate:
                 {
                     struct tm tm;
-                    time_t rtc_start_date;
+                    time_t rtc_start_date = 0;
                     if (!strcmp(optarg, "now")) {
                         rtc_date_offset = -1;
                     } else {
@@ -4097,14 +3894,6 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_incoming:
                 incoming = optarg;
                 break;
-#ifndef _WIN32
-            case QEMU_OPTION_chroot:
-                chroot_dir = optarg;
-                break;
-            case QEMU_OPTION_runas:
-                run_as = optarg;
-                break;
-#endif
 #ifdef CONFIG_XEN
             case QEMU_OPTION_xen_domid:
                 xen_domid = atoi(optarg);
@@ -4128,6 +3917,11 @@ int main(int argc, char **argv, char **envp)
     /* If all else fails use the install patch specified when building.  */
     if (!data_dir) {
         data_dir = CONFIG_QEMU_SHAREDIR;
+    }
+
+    if (pid_file && qemu_create_pidfile(pid_file) != 0) {
+        os_pidfile_error();
+        exit(1);
     }
 
 #if defined(CONFIG_KVM) && defined(CONFIG_KQEMU)
@@ -4155,60 +3949,6 @@ int main(int argc, char **argv, char **envp)
            monitor_device = "stdio";
     }
 
-#ifndef _WIN32
-    if (daemonize) {
-	pid_t pid;
-
-	if (pipe(fds) == -1)
-	    exit(1);
-
-	pid = fork();
-	if (pid > 0) {
-	    uint8_t status;
-	    ssize_t len;
-
-	    close(fds[1]);
-
-	again:
-            len = read(fds[0], &status, 1);
-            if (len == -1 && (errno == EINTR))
-                goto again;
-
-            if (len != 1)
-                exit(1);
-            else if (status == 1) {
-                fprintf(stderr, "Could not acquire pidfile\n");
-                exit(1);
-            } else
-                exit(0);
-	} else if (pid < 0)
-            exit(1);
-
-	setsid();
-
-	pid = fork();
-	if (pid > 0)
-	    exit(0);
-	else if (pid < 0)
-	    exit(1);
-
-	umask(027);
-
-        signal(SIGTSTP, SIG_IGN);
-        signal(SIGTTOU, SIG_IGN);
-        signal(SIGTTIN, SIG_IGN);
-    }
-
-    if (pid_file && qemu_create_pidfile(pid_file) != 0) {
-        if (daemonize) {
-            uint8_t status = 1;
-            write(fds[1], &status, 1);
-        } else
-            fprintf(stderr, "Could not acquire pid file\n");
-        exit(1);
-    }
-#endif
-
 #ifdef CONFIG_KQEMU
     if (smp_cpus > 1)
         kqemu_allowed = 0;
@@ -4234,7 +3974,7 @@ int main(int argc, char **argv, char **envp)
     if (!boot_devices[0]) {
         boot_devices = "cad";
     }
-    setvbuf(stdout, NULL, _IOLBF, 0);
+    os_set_line_buffering();
 
     if (init_timer_alarm() < 0) {
         fprintf(stderr, "could not initialize alarm timer\n");
@@ -4347,10 +4087,8 @@ int main(int argc, char **argv, char **envp)
     //register_savevm("timer", 0, 2, timer_save, timer_load, NULL);
     register_savevm_live("ram", 0, 3, ram_save_live, NULL, ram_load, NULL);
 
-#ifndef _WIN32
     /* must be after terminal init, SDL library changes signal handlers */
-    sighandler_setup();
-#endif
+    os_setup_signal_handling();
 
     /* Maintain compatibility with multiple stdio monitors */
     if (!strcmp(monitor_device,"stdio")) {
@@ -4614,70 +4352,7 @@ int main(int argc, char **argv, char **envp)
     if (autostart)
         vm_start();
 
-#ifndef _WIN32
-    if (daemonize) {
-	uint8_t status = 0;
-	ssize_t len;
-
-    again1:
-	len = write(fds[1], &status, 1);
-	if (len == -1 && (errno == EINTR))
-	    goto again1;
-
-	if (len != 1)
-	    exit(1);
-
-        if (chdir("/")) {
-            perror("not able to chdir to /");
-            exit(1);
-        }
-	TFR(fd = qemu_open("/dev/null", O_RDWR));
-	if (fd == -1)
-	    exit(1);
-    }
-
-    if (run_as) {
-        pwd = getpwnam(run_as);
-        if (!pwd) {
-            fprintf(stderr, "User \"%s\" doesn't exist\n", run_as);
-            exit(1);
-        }
-    }
-
-    if (chroot_dir) {
-        if (chroot(chroot_dir) < 0) {
-            fprintf(stderr, "chroot failed\n");
-            exit(1);
-        }
-        if (chdir("/")) {
-            perror("not able to chdir to /");
-            exit(1);
-        }
-    }
-
-    if (run_as) {
-        if (setgid(pwd->pw_gid) < 0) {
-            fprintf(stderr, "Failed to setgid(%d)\n", pwd->pw_gid);
-            exit(1);
-        }
-        if (setuid(pwd->pw_uid) < 0) {
-            fprintf(stderr, "Failed to setuid(%d)\n", pwd->pw_uid);
-            exit(1);
-        }
-        if (setuid(0) != -1) {
-            fprintf(stderr, "Dropping privileges failed\n");
-            exit(1);
-        }
-    }
-
-    if (daemonize) {
-        dup2(fd, 0);
-        dup2(fd, 1);
-        dup2(fd, 2);
-
-        close(fd);
-    }
-#endif
+    os_setup_post();
 
     main_loop();
     quit_timers();
