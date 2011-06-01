@@ -108,8 +108,8 @@ static void rtc_coalesced_timer_update(RTCState *s)
         qemu_del_timer(s->coalesced_timer);
     } else {
         /* divide each RTC interval to 2 - 8 smaller intervals */
-        int c = MIN(s->irq_coalesced, 7) + 1; 
-        int64_t next_clock = qemu_get_clock(vm_clock) +
+        int c = MIN(s->irq_coalesced, 7) + 1;
+        int64_t next_clock = qemu_get_clock_ns(vm_clock) +
 		muldiv64(s->period / c, get_ticks_per_sec(), 32768);
         qemu_mod_timer(s->coalesced_timer, next_clock);
     }
@@ -150,7 +150,7 @@ static void rtc_timer_update(RTCState *s, int64_t current_time)
 #endif
 #endif
     enable_pie = 1;
-	
+
     if (period_code != 0
         && (((s->cmos_data[RTC_REG_B] & REG_B_PIE) && enable_pie)
             || ((s->cmos_data[RTC_REG_B] & REG_B_SQWE) && s->sqw_irq))) {
@@ -237,7 +237,7 @@ static void cmos_ioport_write(void *opaque, uint32_t addr, uint32_t data)
             /* UIP bit is read only */
             s->cmos_data[RTC_REG_A] = (data & ~REG_A_UIP) |
                 (s->cmos_data[RTC_REG_A] & REG_A_UIP);
-            rtc_timer_update(s, qemu_get_clock(vm_clock));
+            rtc_timer_update(s, qemu_get_clock_ns(vm_clock));
             break;
         case RTC_REG_B:
             if (data & REG_B_SET) {
@@ -251,7 +251,7 @@ static void cmos_ioport_write(void *opaque, uint32_t addr, uint32_t data)
                 }
             }
             s->cmos_data[RTC_REG_B] = data;
-            rtc_timer_update(s, qemu_get_clock(vm_clock));
+            rtc_timer_update(s, qemu_get_clock_ns(vm_clock));
             break;
         case RTC_REG_C:
         case RTC_REG_D:
@@ -610,18 +610,18 @@ RTCState *rtc_init_sqw(int base, qemu_irq irq, qemu_irq sqw_irq, int base_year)
     s->base_year = base_year;
     rtc_set_date_from_host(s);
 
-    s->periodic_timer = qemu_new_timer(vm_clock,
+    s->periodic_timer = qemu_new_timer_ns(vm_clock,
                                        rtc_periodic_timer, s);
 #ifdef TARGET_I386
     if (rtc_td_hack)
-        s->coalesced_timer = qemu_new_timer(vm_clock, rtc_coalesced_timer, s);
+        s->coalesced_timer = qemu_new_timer_ns(vm_clock, rtc_coalesced_timer, s);
 #endif
-    s->second_timer = qemu_new_timer(vm_clock,
+    s->second_timer = qemu_new_timer_ns(vm_clock,
                                      rtc_update_second, s);
-    s->second_timer2 = qemu_new_timer(vm_clock,
+    s->second_timer2 = qemu_new_timer_ns(vm_clock,
                                       rtc_update_second2, s);
 
-    s->next_second_time = qemu_get_clock(vm_clock) + (get_ticks_per_sec() * 99) / 100;
+    s->next_second_time = qemu_get_clock_ns(vm_clock) + (get_ticks_per_sec() * 99) / 100;
     qemu_mod_timer(s->second_timer2, s->next_second_time);
 
     register_ioport_write(base, 2, 1, cmos_ioport_write, s);
@@ -731,14 +731,14 @@ RTCState *rtc_mm_init(target_phys_addr_t base, int it_shift, qemu_irq irq,
     s->base_year = base_year;
     rtc_set_date_from_host(s);
 
-    s->periodic_timer = qemu_new_timer(vm_clock,
+    s->periodic_timer = qemu_new_timer_ns(vm_clock,
                                        rtc_periodic_timer, s);
-    s->second_timer = qemu_new_timer(vm_clock,
+    s->second_timer = qemu_new_timer_ns(vm_clock,
                                      rtc_update_second, s);
-    s->second_timer2 = qemu_new_timer(vm_clock,
+    s->second_timer2 = qemu_new_timer_ns(vm_clock,
                                       rtc_update_second2, s);
 
-    s->next_second_time = qemu_get_clock(vm_clock) + (get_ticks_per_sec() * 99) / 100;
+    s->next_second_time = qemu_get_clock_ns(vm_clock) + (get_ticks_per_sec() * 99) / 100;
     qemu_mod_timer(s->second_timer2, s->next_second_time);
 
     io_memory = cpu_register_io_memory(rtc_mm_read, rtc_mm_write, s);

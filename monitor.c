@@ -86,7 +86,17 @@ struct Monitor {
     void *password_opaque;
     QLIST_ENTRY(Monitor) entry;
     int has_quit;
+#ifdef CONFIG_ANDROID
+    void*            fake_opaque;
+    MonitorFakeFunc  fake_func;
+    int64_t          fake_count;
+
+#endif
 };
+
+#ifdef CONFIG_ANDROID
+#include "monitor-android.h"
+#endif
 
 static QLIST_HEAD(mon_list, Monitor) mon_list;
 
@@ -158,6 +168,7 @@ static int monitor_read_password(Monitor *mon, ReadLineFunc *readline_func,
     }
 }
 
+#ifndef CONFIG_ANDROID /* See monitor-android.h */
 void monitor_flush(Monitor *mon)
 {
     if (mon && mon->outbuf_index != 0 && !mon->mux_out) {
@@ -165,6 +176,7 @@ void monitor_flush(Monitor *mon)
         mon->outbuf_index = 0;
     }
 }
+#endif
 
 /* flush at every end of line or if the buffer is full */
 static void monitor_puts(Monitor *mon, const char *str)
@@ -187,13 +199,11 @@ static void monitor_puts(Monitor *mon, const char *str)
     }
 }
 
-int monitor_vprintf(Monitor *mon, const char *fmt, va_list ap)
+void monitor_vprintf(Monitor *mon, const char *fmt, va_list ap)
 {
     char buf[4096];
-    int ret = vsnprintf(buf, sizeof(buf), fmt, ap);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
     monitor_puts(mon, buf);
-
-    return ret;
 }
 
 void monitor_printf(Monitor *mon, const char *fmt, ...)
@@ -231,7 +241,8 @@ void monitor_print_filename(Monitor *mon, const char *filename)
     }
 }
 
-static int monitor_fprintf(FILE *stream, const char *fmt, ...)
+static int GCC_FMT_ATTR(2, 3) monitor_fprintf(FILE *stream,
+                                              const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -1120,8 +1131,7 @@ static void do_sendkey(Monitor *mon, const char *string, int has_hold_time,
         kbd_put_keycode(keycode & 0x7f);
     }
     /* delayed key up events */
-    qemu_mod_timer(key_timer, qemu_get_clock(vm_clock) +
-                   muldiv64(get_ticks_per_sec(), hold_time, 1000));
+    qemu_mod_timer(key_timer, qemu_get_clock_ms(vm_clock) + hold_time);
 }
 
 static int mouse_button_state;
@@ -3072,7 +3082,7 @@ void monitor_init(CharDriverState *chr, int flags)
     Monitor *mon;
 
     if (is_first_init) {
-        key_timer = qemu_new_timer(vm_clock, release_keys, NULL);
+        key_timer = qemu_new_timer_ms(vm_clock, release_keys, NULL);
         is_first_init = 0;
     }
 

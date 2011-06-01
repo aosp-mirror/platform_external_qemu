@@ -29,7 +29,10 @@ EMULATOR_TARGET_CFLAGS := \
     -DNEED_CPU_H \
 
 TCG_TARGET := $(HOST_ARCH)
-ifeq ($(TCG_TARGET),x86)
+ifeq ($(HOST_ARCH),x86)
+  TCG_TARGET := i386
+endif
+ifeq ($(HOST_ARCH),x86_64)
   TCG_TARGET := i386
 endif
 
@@ -132,12 +135,11 @@ endif
 LOCAL_SRC_FILES += $(HW_SOURCES:%=hw/%)
 
 LOCAL_SRC_FILES += \
-    exec.c \
     cpu-exec.c  \
+    exec.c \
     translate-all.c \
     trace.c \
     varint.c \
-    dcache.c \
     softmmu_outside_jit.c \
 
 ##############################################################################
@@ -155,6 +157,7 @@ LOCAL_SRC_FILES += \
     target-arm/iwmmxt_helper.c \
     target-arm/neon_helper.c \
     target-arm/helper.c \
+    target-arm/helper-android.c \
     target-arm/translate.c \
     target-arm/machine.c \
     hw/armv7m.c \
@@ -206,6 +209,18 @@ MCHK_SOURCES := \
 
 LOCAL_SRC_FILES += $(MCHK_SOURCES:%=memcheck/%)
 
+LOCAL_SRC_FILES += \
+    cpus.c \
+    arch_init.c
+
+# What a mess, os-posix.c depends on the exact values of options
+# which are target specific.
+ifeq ($(HOST_OS),windows)
+    LOCAL_SRC_FILES += os-win32.c oslib-win32.c
+else
+    LOCAL_SRC_FILES += os-posix.c oslib-posix.c
+endif
+$(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
 
 $(call end-emulator-library)
 
@@ -248,6 +263,7 @@ LOCAL_SRC_FILES := \
     loader.c \
     monitor.c \
     qemu-timer.c \
+    qemu-timer-common.c \
     user-events-qemu.c \
     vl-android.c \
     android/console.c \
@@ -259,8 +275,8 @@ LOCAL_SRC_FILES := \
     android/protocol/core-commands-impl.c \
     android/protocol/core-commands-qemu.c \
 
-$(call gen-hx-header,qemu-monitor.hx,monitor.c)
-$(call gen-hx-header,qemu-options.hx,vl-android.c)
+$(call gen-hx-header,qemu-monitor.hx,qemu-monitor.h,monitor.c)
+$(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
 
 ifeq ($(HOST_OS),darwin)
     FRAMEWORKS := OpenGL Cocoa QuickTime ApplicationServices Carbon IOKit
@@ -324,6 +340,7 @@ LOCAL_SRC_FILES := \
     loader.c \
     monitor.c \
     qemu-timer.c \
+    qemu-timer-common.c \
     user-events-qemu.c \
     vl-android.c \
     android/cmdline-option.c \
@@ -337,8 +354,8 @@ LOCAL_SRC_FILES := \
     android/protocol/ui-commands-qemu.c \
     android/
 
-$(call gen-hx-header,qemu-monitor.hx,monitor.c)
-$(call gen-hx-header,qemu-options.hx,vl-android.c)
+$(call gen-hx-header,qemu-monitor.hx,qemu-monitor.h,monitor.c)
+$(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
 
 # The following files cannot be in static libraries because they contain
 # constructor functions that are otherwise stripped by the final linker

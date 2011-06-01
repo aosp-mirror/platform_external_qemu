@@ -348,14 +348,14 @@ CORE_MISC_SOURCES = \
     cutils.c \
     d3des.c \
     input.c \
+    iohandler.c \
     ioport.c \
     module.c \
     net-android.c \
     notify.c \
     osdep.c \
-    outputchannel.c \
     path.c \
-    qemu-char-android.c \
+    qemu-char.c \
     qemu-config.c \
     qemu-error.c \
     qemu-malloc.c \
@@ -592,9 +592,10 @@ $(call end-emulator-library)
 ###
 ###  This defines a function that can be used inside a module definition
 ###
-###  $(call gen-hx-header,<input>,<source-files>)
+###  $(call gen-hx-header,<input>,<output>,<source-files>)
 ###
 ###  Where: <input> is the input file, with a .hx suffix (e.g. foo.hx)
+###         <output> is the output file, with a .h or .def suffix
 ###         <source-files> is a list of source files that include the header
 ###
 
@@ -602,16 +603,17 @@ $(call end-emulator-library)
 gen-hx-header = $(eval $(call gen-hx-header-ev,$1,$2,$3))
 
 define gen-hx-header-ev
-intermediates := $$(call intermediates-dir-for,EXECUTABLES,$$(LOCAL_MODULE),true)
+intermediates := $$(call intermediates-dir-for,$$(EMULATOR_MODULE_TYPE),$$(LOCAL_MODULE),true)
 
-QEMU_HEADER_H := $$(intermediates)/$$(1:%.hx=%.h)
+QEMU_HEADER_H := $$(intermediates)/$$2
 $$(QEMU_HEADER_H): PRIVATE_PATH := $$(LOCAL_PATH)
 $$(QEMU_HEADER_H): PRIVATE_CUSTOM_TOOL = $$(PRIVATE_PATH)/hxtool -h < $$< > $$@
 $$(QEMU_HEADER_H): $$(LOCAL_PATH)/$$1 $$(LOCAL_PATH)/hxtool
 	$$(transform-generated-source)
 
 LOCAL_GENERATED_SOURCES += $$(QEMU_HEADER_H)
-_objects := $$(patsubst %,$$(intermediates)/%,$$(2:.c=.o))
+LOCAL_C_INCLUDES += $$(intermediates)
+_objects := $$(patsubst %,$$(intermediates)/%,$$(3:.c=.o))
 $$(_objects): $$(QEMU_HEADER_H)
 endef
 

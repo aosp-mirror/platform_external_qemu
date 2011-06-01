@@ -28,24 +28,45 @@
 #include "console.h"
 #include "qjson.h"
 
-static QEMUPutKBDEvent *qemu_put_kbd_event;
-static void *qemu_put_kbd_event_opaque;
+#ifdef CONFIG_SKINNING
+QEMUPutMouseEntry *original_qemu_add_mouse_event_handler(QEMUPutMouseEvent *func,
+                                                         void *opaque, int absolute,
+                                                         const char *name);
+#undef qemu_add_mouse_event_handler
+#define qemu_add_mouse_event_handler original_qemu_add_mouse_event_handler
+#endif
+static QTAILQ_HEAD(, QEMUPutKBDEntry) kbd_handlers =
+    QTAILQ_HEAD_INITIALIZER(kbd_handlers);
 static QTAILQ_HEAD(, QEMUPutLEDEntry) led_handlers = QTAILQ_HEAD_INITIALIZER(led_handlers);
 static QTAILQ_HEAD(, QEMUPutMouseEntry) mouse_handlers =
     QTAILQ_HEAD_INITIALIZER(mouse_handlers);
-static NotifierList mouse_mode_notifiers = 
+static NotifierList mouse_mode_notifiers =
     NOTIFIER_LIST_INITIALIZER(mouse_mode_notifiers);
 
 void qemu_add_kbd_event_handler(QEMUPutKBDEvent *func, void *opaque)
 {
-    qemu_put_kbd_event_opaque = opaque;
-    qemu_put_kbd_event = func;
+    QEMUPutKBDEntry *s;
+
+    if (func != NULL) {
+        s = qemu_mallocz(sizeof(QEMUPutKBDEntry));
+
+        s->put_kbd_event = func;
+        s->opaque = opaque;
+
+        QTAILQ_INSERT_TAIL(&kbd_handlers, s, next);
+    }
 }
 
-void qemu_remove_kbd_event_handler(void)
+void qemu_remove_kbd_event_handler(QEMUPutKBDEvent *func, void *opaque)
 {
-    qemu_put_kbd_event_opaque = NULL;
-    qemu_put_kbd_event = NULL;
+    QEMUPutKBDEntry *cursor, *cursor_next;
+    if (func != NULL) {
+        QTAILQ_FOREACH_SAFE(cursor, &kbd_handlers, next, cursor_next) {
+            if (cursor->put_kbd_event == func && cursor->opaque == opaque) {
+                QTAILQ_REMOVE(&kbd_handlers, cursor, next);
+            }
+        }
+    }
 }
 
 static void check_mode_change(void)
@@ -129,8 +150,9 @@ void qemu_remove_led_event_handler(QEMUPutLEDEntry *entry)
 
 void kbd_put_keycode(int keycode)
 {
-    if (qemu_put_kbd_event) {
-        qemu_put_kbd_event(qemu_put_kbd_event_opaque, keycode);
+    QEMUPutKBDEntry *cursor;
+    QTAILQ_FOREACH(cursor, &kbd_handlers, next) {
+        cursor->put_kbd_event(cursor->opaque, keycode);
     }
 }
 
@@ -148,7 +170,9 @@ void kbd_mouse_event(int dx, int dy, int dz, int buttons_state)
     QEMUPutMouseEntry *entry;
     QEMUPutMouseEvent *mouse_event;
     void *mouse_event_opaque;
+#ifndef CONFIG_SKINNING
     int width;
+#endif
 
     if (QTAILQ_EMPTY(&mouse_handlers)) {
         return;
@@ -160,16 +184,20 @@ void kbd_mouse_event(int dx, int dy, int dz, int buttons_state)
     mouse_event_opaque = entry->qemu_put_mouse_event_opaque;
 
     if (mouse_event) {
+#ifndef CONFIG_SKINNING
         if (graphic_rotate) {
-            if (entry->qemu_put_mouse_event_absolute)
+            if (entry->qemu_put_mouse_event_absolute) {
                 width = 0x7fff;
-            else
+            } else {
                 width = graphic_width - 1;
-            mouse_event(mouse_event_opaque,
-                        width - dy, dx, dz, buttons_state);
-        } else
-            mouse_event(mouse_event_opaque,
-                        dx, dy, dz, buttons_state);
+            }
+            mouse_event(mouse_event_opaque, width - dy, dx, dz, buttons_state);
+        } else {
+            mouse_event(mouse_event_opaque, dx, dy, dz, buttons_state);
+        }
+#else
+        mouse_event(mouse_event_opaque, dx, dy, dz, buttons_state);
+#endif
     }
 }
 

@@ -16,7 +16,7 @@
 #include "qemu_file.h"
 #include "goldfish_trace.h"
 #include "sysemu.h"
-#include "trace.h"
+#include "android-trace.h"
 #ifdef CONFIG_MEMCHECK
 #include "memcheck/memcheck.h"
 #include "memcheck/memcheck_util.h"
