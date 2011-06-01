@@ -2058,33 +2058,33 @@ static const CommandDefRec  event_commands[] =
 /********************************************************************************************/
 
 static int
-control_write_out_cb(void* opaque, const char* fmt, va_list ap)
+control_write_out_cb(void* opaque, const char* str, int strsize)
 {
     ControlClient client = opaque;
-    int ret = control_vwrite(client, fmt, ap);
-    return ret;
+    control_control_write(client, str, strsize);
+    return strsize;
 }
 
 static int
-control_write_err_cb(void* opaque, const char* fmt, va_list ap)
+control_write_err_cb(void* opaque, const char* str, int strsize)
 {
     int ret = 0;
     ControlClient client = opaque;
     ret += control_write(client, "KO: ");
-    ret += control_vwrite(client, fmt, ap);
-    return ret;
+    control_control_write(client, str, strsize);
+    return ret + strsize;
 }
 
 static int
 do_snapshot_list( ControlClient  client, char*  args )
 {
-    int ret;
-    OutputChannel *out = output_channel_alloc(client, control_write_out_cb);
-    OutputChannel *err = output_channel_alloc(client, control_write_err_cb);
-    do_info_snapshots_oc(out, err);
-    ret = output_channel_written(err);
-    output_channel_free(out);
-    output_channel_free(err);
+    int64_t ret;
+    Monitor *out = monitor_fake_new(client, control_write_out_cb);
+    Monitor *err = monitor_fake_new(client, control_write_err_cb);
+    do_info_snapshots(out, err);
+    ret = monitor_fake_get_bytes(err);
+    monitor_fake_free(err);
+    monitor_fake_free(out);
 
     return ret > 0;
 }
@@ -2092,17 +2092,17 @@ do_snapshot_list( ControlClient  client, char*  args )
 static int
 do_snapshot_save( ControlClient  client, char*  args )
 {
-    int ret;
+    int64_t ret;
 
     if (args == NULL) {
         control_write(client, "KO: argument missing, try 'avd snapshot save <name>'\r\n");
         return -1;
     }
 
-    OutputChannel *err = output_channel_alloc(client, control_write_err_cb);
-    do_savevm_oc(err, args);
-    ret = output_channel_written(err);
-    output_channel_free(err);
+    Monitor *err = monitor_fake_new(client, control_write_err_cb);
+    do_savevm(err, args);
+    ret = monitor_fake_get_bytes(err);
+    monitor_fake_free(err);
 
     return ret > 0; // no output on error channel indicates success
 }
@@ -2110,17 +2110,17 @@ do_snapshot_save( ControlClient  client, char*  args )
 static int
 do_snapshot_load( ControlClient  client, char*  args )
 {
-    int ret;
+    int64_t ret;
 
     if (args == NULL) {
         control_write(client, "KO: argument missing, try 'avd snapshot load <name>'\r\n");
         return -1;
     }
 
-    OutputChannel *err = output_channel_alloc(client, control_write_err_cb);
-    do_loadvm_oc(err, args);
-    ret = output_channel_written(err);
-    output_channel_free(err);
+    Monitor *err = monitor_fake_new(client, control_write_err_cb);
+    do_loadvm(err, args);
+    ret = monitor_fake_get_bytes(err);
+    monitor_fake_free(err);
 
     return ret > 0;
 }
@@ -2128,17 +2128,17 @@ do_snapshot_load( ControlClient  client, char*  args )
 static int
 do_snapshot_del( ControlClient  client, char*  args )
 {
-    int ret;
+    int64_t ret;
 
     if (args == NULL) {
         control_write(client, "KO: argument missing, try 'avd snapshot del <name>'\r\n");
         return -1;
     }
 
-    OutputChannel *err = output_channel_alloc(client, control_write_err_cb);
-    do_delvm_oc(err, args);
-    ret = output_channel_written(err);
-    output_channel_free(err);
+    Monitor *err = monitor_fake_new(client, control_write_err_cb);
+    do_delvm(err, args);
+    ret = monitor_fake_get_bytes(err);
+    monitor_fake_free(err);
 
     return ret > 0;
 }

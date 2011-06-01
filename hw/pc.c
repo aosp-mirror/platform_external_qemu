@@ -550,7 +550,7 @@ static void generate_bootsect(target_phys_addr_t option_rom,
     *p++ = 0x1f;		/* pop ds */
     *p++ = 0x58;		/* pop ax */
     *p++ = 0xcb;		/* lret */
-    
+
     /* Actual code */
     *reloc = (p - rom);
 
@@ -910,7 +910,7 @@ static void pc_init1(ram_addr_t ram_size,
         cpu_model = "qemu32";
 #endif
     }
-    
+
     for(i = 0; i < smp_cpus; i++) {
         env = cpu_init(cpu_model);
         if (!env) {
@@ -927,25 +927,23 @@ static void pc_init1(ram_addr_t ram_size,
     vmport_init();
 
     /* allocate RAM */
-    ram_addr = qemu_ram_alloc(0xa0000);
+    ram_addr = qemu_ram_alloc(NULL, "pc.ram",
+                              below_4g_mem_size + above_4g_mem_size);
     cpu_register_physical_memory(0, 0xa0000, ram_addr);
-
-    /* Allocate, even though we won't register, so we don't break the
-     * phys_ram_base + PA assumption. This range includes vga (0xa0000 - 0xc0000),
-     * and some bios areas, which will be registered later
-     */
-    ram_addr = qemu_ram_alloc(0x100000 - 0xa0000);
-    ram_addr = qemu_ram_alloc(below_4g_mem_size - 0x100000);
     cpu_register_physical_memory(0x100000,
                  below_4g_mem_size - 0x100000,
-                 ram_addr);
+                 ram_addr + 0x100000);
+    if (above_4g_mem_size > 0) {
+        cpu_register_physical_memory(0x100000000ULL, above_4g_mem_size,
+                                     ram_addr + below_4g_mem_size);
+    }
 #else
     /*
      * Allocate a single contiguous RAM so that the goldfish
      * framebuffer can work well especially when the frame buffer is
      * large.
      */
-    ram_addr = qemu_ram_alloc(below_4g_mem_size);
+    ram_addr = qemu_ram_alloc(NULL, "pc.ram", below_4g_mem_size);
     cpu_register_physical_memory(0, below_4g_mem_size, ram_addr);
 #endif
 
@@ -975,7 +973,7 @@ static void pc_init1(ram_addr_t ram_size,
         (bios_size % 65536) != 0) {
         goto bios_error;
     }
-    bios_offset = qemu_ram_alloc(bios_size);
+    bios_offset = qemu_ram_alloc(NULL, "bios.bin", bios_size);
     ret = load_image(filename, qemu_get_ram_ptr(bios_offset));
     if (ret != bios_size) {
     bios_error:
@@ -995,7 +993,7 @@ static void pc_init1(ram_addr_t ram_size,
 
 
 
-    option_rom_offset = qemu_ram_alloc(0x20000);
+    option_rom_offset = qemu_ram_alloc(NULL, "pc.rom", 0x20000);
     oprom_area_size = 0;
     cpu_register_physical_memory(0xc0000, 0x20000, option_rom_offset);
 

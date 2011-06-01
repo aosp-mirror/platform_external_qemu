@@ -66,7 +66,7 @@ static int pit_get_count(PITChannelState *s)
     uint64_t d;
     int counter;
 
-    d = muldiv64(qemu_get_clock(vm_clock) - s->count_load_time, PIT_FREQ, get_ticks_per_sec());
+    d = muldiv64(qemu_get_clock_ms(vm_clock) - s->count_load_time, PIT_FREQ, get_ticks_per_sec());
     switch(s->mode) {
     case 0:
     case 1:
@@ -189,7 +189,7 @@ void pit_set_gate(PITState *pit, int channel, int val)
     case 5:
         if (s->gate < val) {
             /* restart counting on rising edge */
-            s->count_load_time = qemu_get_clock(vm_clock);
+            s->count_load_time = qemu_get_clock_ns(vm_clock);
             pit_irq_timer_update(s, s->count_load_time);
         }
         break;
@@ -197,7 +197,7 @@ void pit_set_gate(PITState *pit, int channel, int val)
     case 3:
         if (s->gate < val) {
             /* restart counting on rising edge */
-            s->count_load_time = qemu_get_clock(vm_clock);
+            s->count_load_time = qemu_get_clock_ns(vm_clock);
             pit_irq_timer_update(s, s->count_load_time);
         }
         /* XXX: disable/enable counting */
@@ -228,7 +228,7 @@ static inline void pit_load_count(PITChannelState *s, int val)
 {
     if (val == 0)
         val = 0x10000;
-    s->count_load_time = qemu_get_clock(vm_clock);
+    s->count_load_time = qemu_get_clock_ns(vm_clock);
     s->count = val;
     pit_irq_timer_update(s, s->count_load_time);
 }
@@ -262,7 +262,7 @@ static void pit_ioport_write(void *opaque, uint32_t addr, uint32_t val)
                     if (!(val & 0x10) && !s->status_latched) {
                         /* status latch */
                         /* XXX: add BCD and null count */
-                        s->status =  (pit_get_out1(s, qemu_get_clock(vm_clock)) << 7) |
+                        s->status =  (pit_get_out1(s, qemu_get_clock_ns(vm_clock)) << 7) |
                             (s->rw_mode << 4) |
                             (s->mode << 1) |
                             s->bcd;
@@ -492,7 +492,7 @@ PITState *pit_init(int base, qemu_irq irq)
 
     s = &pit->channels[0];
     /* the timer 0 is connected to an IRQ */
-    s->irq_timer = qemu_new_timer(vm_clock, pit_irq_timer, s);
+    s->irq_timer = qemu_new_timer_ms(vm_clock, pit_irq_timer, s);
     s->irq = irq;
 
     register_savevm("i8254", base, 1, pit_save, pit_load, pit);

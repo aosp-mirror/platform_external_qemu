@@ -65,7 +65,7 @@ enum {
 /* used for function call generation */
 #define TCG_REG_CALL_STACK TCG_REG_R1
 #define TCG_TARGET_STACK_ALIGN 16
-#if defined _CALL_DARWIN
+#if defined _CALL_DARWIN || defined __APPLE__
 #define TCG_TARGET_CALL_STACK_OFFSET 24
 #elif defined _CALL_AIX
 #define TCG_TARGET_CALL_STACK_OFFSET 52
@@ -83,15 +83,16 @@ enum {
 #define TCG_TARGET_HAS_ext16s_i32
 #define TCG_TARGET_HAS_ext8u_i32
 #define TCG_TARGET_HAS_ext16u_i32
-/* #define TCG_TARGET_HAS_bswap16_i32 */
-/* #define TCG_TARGET_HAS_bswap32_i32 */
+#define TCG_TARGET_HAS_bswap16_i32
+#define TCG_TARGET_HAS_bswap32_i32
 #define TCG_TARGET_HAS_not_i32
 #define TCG_TARGET_HAS_neg_i32
 #define TCG_TARGET_HAS_andc_i32
 #define TCG_TARGET_HAS_orc_i32
+#define TCG_TARGET_HAS_eqv_i32
+#define TCG_TARGET_HAS_nand_i32
+#define TCG_TARGET_HAS_nor_i32
 
 #define TCG_AREG0 TCG_REG_R27
-#define TCG_AREG1 TCG_REG_R24
-#define TCG_AREG2 TCG_REG_R25
 
 #define TCG_TARGET_HAS_GUEST_BASE

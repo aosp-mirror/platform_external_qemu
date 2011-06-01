@@ -36,7 +36,7 @@ qlooptimer_startRelative(void* impl, Duration timeout_ms)
     if (timeout_ms == DURATION_INFINITE)
         qemu_del_timer(tt);
     else
-        qemu_mod_timer(tt, qemu_get_clock_ns(host_clock) + timeout_ms*1000000);
+        qemu_mod_timer(tt, qemu_get_clock_ms(host_clock) + timeout_ms);
 }
 
 static void
@@ -85,7 +85,7 @@ qlooper_timer_init(Looper*        looper,
                    void*          opaque)
 {
     timer->clazz = (LoopTimerClass*) &qlooptimer_class;
-    timer->impl  = qemu_new_timer(host_clock, callback, opaque);
+    timer->impl  = qemu_new_timer_ms(host_clock, callback, opaque);
 }
 
 /**********************************************************************
@@ -370,7 +370,7 @@ qlooper_handle_io_bh(void* opaque)
 static Duration
 qlooper_now(Looper* ll)
 {
-    return qemu_get_clock_ns(host_clock)/1000000;
+    return qemu_get_clock_ms(host_clock);
 }
 
 extern void qemu_system_shutdown_request(void);

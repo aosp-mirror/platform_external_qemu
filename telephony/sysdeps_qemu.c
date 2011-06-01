@@ -41,7 +41,7 @@
 SysTime
 sys_time_ms( void )
 {
-    return qemu_get_clock( rt_clock );
+    return qemu_get_clock_ms(rt_clock);
 }
 
 /** TIMERS
@@ -126,7 +126,7 @@ sys_timer_set( SysTimer  timer, SysTime  when, SysCallback   _callback, void*  o
          qemu_free_timer( timer->timer );
     }
 
-    timer->timer    = qemu_new_timer( rt_clock, callback, opaque );
+    timer->timer    = qemu_new_timer_ms( rt_clock, callback, opaque );
     timer->callback = callback;
     timer->opaque   = opaque;
 
@@ -320,7 +320,7 @@ sys_channel_create_tcp_server( int port )
 
     channel->fd = socket_anyaddr_server( port, SOCKET_STREAM );
     if (channel->fd < 0) {
-        D( "%s: failed to created network socket on TCP:%d\n", 
+        D( "%s: failed to created network socket on TCP:%d\n",
             __FUNCTION__, port );
         sys_channel_free( channel );
         return NULL;

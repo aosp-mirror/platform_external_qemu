@@ -24,16 +24,9 @@
 #include "qemu-common.h"
 #include <stdlib.h>
 
-static void *oom_check(void *ptr)
-{
-    if (ptr == NULL) {
-        abort();
-    }
-    return ptr;
-}
-
 void qemu_free(void *ptr)
 {
+    //trace_qemu_free(ptr);
     free(ptr);
 }
 
@@ -48,26 +41,35 @@ static int allow_zero_malloc(void)
 
 void *qemu_malloc(size_t size)
 {
+    void *ptr;
     if (!size && !allow_zero_malloc()) {
         abort();
     }
-    return oom_check(malloc(size ? size : 1));
+    ptr = qemu_oom_check(malloc(size ? size : 1));
+    //trace_qemu_malloc(size, ptr);
+    return ptr;
 }
 
 void *qemu_realloc(void *ptr, size_t size)
 {
+    void *newptr;
     if (!size && !allow_zero_malloc()) {
         abort();
     }
-    return oom_check(realloc(ptr, size ? size : 1));
+    newptr = qemu_oom_check(realloc(ptr, size ? size : 1));
+    //trace_qemu_realloc(ptr, size, newptr);
+    return newptr;
 }
 
 void *qemu_mallocz(size_t size)
 {
+    void *ptr;
     if (!size && !allow_zero_malloc()) {
         abort();
     }
-    return oom_check(calloc(1, size ? size : 1));
+    ptr = qemu_oom_check(calloc(1, size ? size : 1));
+    //trace_qemu_malloc(size, ptr);
+    return ptr;
 }
 
 char *qemu_strdup(const char *str)

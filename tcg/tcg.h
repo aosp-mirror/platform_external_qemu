@@ -47,12 +47,12 @@ typedef uint64_t TCGRegSet;
 #error unsupported
 #endif
 
-enum {
-#define DEF(s, n, copy_size) INDEX_op_ ## s,
+typedef enum TCGOpcode {
+#define DEF(name, oargs, iargs, cargs, flags) INDEX_op_ ## name,
 #include "tcg-opc.h"
 #undef DEF
     NB_OPS,
-};
+} TCGOpcode;
 
 #define tcg_regset_clear(d) (d) = 0
 #define tcg_regset_set(d, s) (d) = (s)
@@ -96,17 +96,29 @@ typedef struct TCGPool {
    this value, they are statically allocated in the TB stack frame */
 #define TCG_STATIC_CALL_ARGS_SIZE 128
 
-typedef int TCGType;
+typedef enum TCGType {
+    TCG_TYPE_I32,
+    TCG_TYPE_I64,
+    TCG_TYPE_COUNT, /* number of different types */
 
-#define TCG_TYPE_I32 0
-#define TCG_TYPE_I64 1
-#define TCG_TYPE_COUNT 2 /* number of different types */
-
+    /* An alias for the size of the host register.  */
 #if TCG_TARGET_REG_BITS == 32
-#define TCG_TYPE_PTR TCG_TYPE_I32
+    TCG_TYPE_REG = TCG_TYPE_I32,
 #else
-#define TCG_TYPE_PTR TCG_TYPE_I64
+    TCG_TYPE_REG = TCG_TYPE_I64,
 #endif
+
+    /* An alias for the size of the native pointer.  We don't currently
+       support any hosts with 64-bit registers and 32-bit pointers.  */
+    TCG_TYPE_PTR = TCG_TYPE_REG,
+
+    /* An alias for the size of the target "long", aka register.  */
+#if TARGET_LONG_BITS == 64
+    TCG_TYPE_TL = TCG_TYPE_I64,
+#else
+    TCG_TYPE_TL = TCG_TYPE_I32,
+#endif
+} TCGType;
 
 typedef tcg_target_ulong TCGArg;
 
@@ -311,6 +323,10 @@ struct TCGContext {
     int64_t restore_count;
     int64_t restore_time;
 #endif
+
+#ifdef CONFIG_DEBUG_TCG
+    int temps_in_use;
+#endif
 };
 
 extern TCGContext tcg_ctx;
@@ -341,6 +357,7 @@ static inline void *tcg_malloc(int size)
 }
 
 void tcg_context_init(TCGContext *s);
+void tcg_prologue_init(TCGContext *s);
 void tcg_func_start(TCGContext *s);
 
 int tcg_gen_code(TCGContext *s, uint8_t *gen_code_buf);
@@ -379,8 +396,20 @@ static inline TCGv_i64 tcg_temp_local_new_i64(void)
 void tcg_temp_free_i64(TCGv_i64 arg);
 char *tcg_get_arg_str_i64(TCGContext *s, char *buf, int buf_size, TCGv_i64 arg);
 
-void tcg_dump_info(FILE *f,
-                   int (*cpu_fprintf)(FILE *f, const char *fmt, ...));
+#if defined(CONFIG_DEBUG_TCG)
+/* If you call tcg_clear_temp_count() at the start of a section of
+ * code which is not supposed to leak any TCG temporaries, then
+ * calling tcg_check_temp_count() at the end of the section will
+ * return 1 if the section did in fact leak a temporary.
+ */
+void tcg_clear_temp_count(void);
+int tcg_check_temp_count(void);
+#else
+#define tcg_clear_temp_count() do { } while (0)
+#define tcg_check_temp_count() 0
+#endif
+
+void tcg_dump_info(FILE *f, fprintf_function cpu_fprintf);
 
 #define TCG_CT_ALIAS  0x80
 #define TCG_CT_IALIAS 0x40
@@ -409,7 +438,6 @@ typedef struct TCGOpDef {
     const char *name;
     uint8_t nb_oargs, nb_iargs, nb_cargs, nb_args;
     uint8_t flags;
-    uint16_t copy_size;
     TCGArgConstraint *args_ct;
     int *sorted_args;
 #if defined(CONFIG_DEBUG_TCG)
@@ -418,12 +446,9 @@ typedef struct TCGOpDef {
 } TCGOpDef;
         
 typedef struct TCGTargetOpDef {
-    int op;
+    TCGOpcode op;
     const char *args_ct_str[TCG_MAX_OP_ARGS];
 } TCGTargetOpDef;
-
-void tcg_target_init(TCGContext *s);
-void tcg_target_qemu_prologue(TCGContext *s);
 
 #define tcg_abort() \
 do {\
@@ -471,9 +496,6 @@ TCGv_i32 tcg_const_i32(int32_t val);
 TCGv_i64 tcg_const_i64(int64_t val);
 TCGv_i32 tcg_const_local_i32(int32_t val);
 TCGv_i64 tcg_const_local_i64(int64_t val);
-
-void tcg_out_reloc(TCGContext *s, uint8_t *code_ptr, int type, 
-                   int label_index, long addend);
 
 extern uint8_t code_gen_prologue[];
 #if defined(_ARCH_PPC) && !defined(_ARCH_PPC64)
