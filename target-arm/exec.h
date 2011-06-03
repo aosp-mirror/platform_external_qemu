@@ -14,17 +14,12 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA  02110-1301 USA
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 #include "config.h"
 #include "dyngen-exec.h"
 
 register struct CPUARMState *env asm(AREG0);
-register uint32_t T0 asm(AREG1);
-register uint32_t T1 asm(AREG2);
-
-#define M0   env->iwmmxt.val
 
 #include "cpu.h"
 #include "exec-all.h"
@@ -61,3 +56,8 @@ static inline int cpu_halted(CPUState *env) {
 #endif
 
 void raise_exception(int);
+static inline void cpu_pc_from_tb(CPUState *env, TranslationBlock *tb)
+{
+    env->regs[15] = tb->pc;
+}
+

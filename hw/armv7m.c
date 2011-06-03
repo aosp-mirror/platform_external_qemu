@@ -200,7 +200,7 @@ qemu_irq *armv7m_init(int flash_size, int sram_size,
     armv7m_bitband_init();
 
     nvic = qdev_create(NULL, "armv7m_nvic");
-    env->v7m.nvic = nvic;
+    env->nvic = nvic;
     qdev_init(nvic);
     cpu_pic = arm_pic_init_cpu(env);
     sysbus_connect_irq(sysbus_from_qdev(nvic), 0, cpu_pic[ARM_PIC_CPU_IRQ]);
