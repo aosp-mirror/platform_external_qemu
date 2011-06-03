@@ -19,6 +19,7 @@
 
 #include "memcheck_common.h"
 #include "elff/elff_api.h"
+#include "exec.h"
 
 #ifdef __cplusplus
 extern "C" {

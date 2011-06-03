@@ -43,6 +43,7 @@
 #define EXCP_EXCEPTION_EXIT  8   /* Return from v7M exception.  */
 #define EXCP_KERNEL_TRAP     9   /* Jumped to kernel code page.  */
 #define EXCP_STREX          10
+#define EXCP_SMC            11   /* secure monitor call */
 
 #define ARMV7M_EXCP_RESET   1
 #define ARMV7M_EXCP_NMI     2
@@ -55,10 +56,16 @@
 #define ARMV7M_EXCP_PENDSV  14
 #define ARMV7M_EXCP_SYSTICK 15
 
+/* ARM-specific interrupt pending bits.  */
+#define CPU_INTERRUPT_FIQ   CPU_INTERRUPT_TGT_EXT_1
+
+
 typedef void ARMWriteCPFunc(void *opaque, int cp_info,
-                            int srcreg, int operand, uint32_t value);
+                            int srcreg, int operand, uint32_t value,
+                            void *retaddr);
 typedef uint32_t ARMReadCPFunc(void *opaque, int cp_info,
-                               int dstreg, int operand);
+                               int dstreg, int operand,
+                               void *retaddr);
 
 struct arm_boot_info;
 
@@ -82,9 +89,9 @@ typedef struct CPUARMState {
     uint32_t spsr;
 
     /* Banked registers.  */
-    uint32_t banked_spsr[6];
-    uint32_t banked_r13[6];
-    uint32_t banked_r14[6];
+    uint32_t banked_spsr[7];
+    uint32_t banked_r13[7];
+    uint32_t banked_r14[7];
 
     /* These hold r8-r12.  */
     uint32_t usr_regs[5];
@@ -112,6 +119,9 @@ typedef struct CPUARMState {
         uint32_t c1_sys; /* System control register.  */
         uint32_t c1_coproc; /* Coprocessor access register.  */
         uint32_t c1_xscaleauxcr; /* XScale auxiliary control register.  */
+        uint32_t c1_secfg; /* Secure configuration register. */
+        uint32_t c1_sedbg; /* Secure debug enable register. */
+        uint32_t c1_nseac; /* Non-secure access control register. */
         uint32_t c2_base0; /* MMU translation table base 0.  */
         uint32_t c2_base1; /* MMU translation table base 1.  */
         uint32_t c2_control; /* MMU translation table base control.  */
@@ -126,8 +136,14 @@ typedef struct CPUARMState {
         uint32_t c6_region[8]; /* MPU base/size registers.  */
         uint32_t c6_insn; /* Fault address registers.  */
         uint32_t c6_data;
+        uint32_t c7_par;  /* Translation result. */
         uint32_t c9_insn; /* Cache lockdown registers.  */
         uint32_t c9_data;
+        uint32_t c9_pmcr_data; /* Performance Monitor Control Register */
+        uint32_t c9_useren; /* user enable register */
+        uint32_t c9_inten; /* interrupt enable set/clear register */
+        uint32_t c12_vbar; /* secure/nonsecure vector base address register. */
+        uint32_t c12_mvbar; /* monitor vector base address register. */
         uint32_t c13_fcse; /* FCSE PID.  */
         uint32_t c13_context; /* Context ID.  */
         uint32_t c13_tls1; /* User RW Thread register.  */
@@ -148,15 +164,10 @@ typedef struct CPUARMState {
         int current_sp;
         int exception;
         int pending_exception;
-        void *nvic;
     } v7m;
 
-    /* Coprocessor IO used by peripherals */
-    struct {
-        ARMReadCPFunc *cp_read;
-        ARMWriteCPFunc *cp_write;
-        void *opaque;
-    } cp[15];
+    /* Minimal set of debug coprocessor state (cp14) */
+    uint32_t cp14_dbgdidr;
 
     /* Thumb-2 EE state.  */
     uint32_t teecr;
@@ -164,10 +175,6 @@ typedef struct CPUARMState {
 
     /* Internal CPU feature flags.  */
     uint32_t features;
-
-    /* Callback for vectored interrupt controller.  */
-    int (*get_irq_vector)(struct CPUARMState *);
-    void *irq_opaque;
 
     /* VFP coprocessor state.  */
     struct {
@@ -181,12 +188,27 @@ typedef struct CPUARMState {
         /* scratch space when Tn are not sufficient.  */
         uint32_t scratch[8];
 
+        /* fp_status is the "normal" fp status. standard_fp_status retains
+         * values corresponding to the ARM "Standard FPSCR Value", ie
+         * default-NaN, flush-to-zero, round-to-nearest and is used by
+         * any operations (generally Neon) which the architecture defines
+         * as controlled by the standard FPSCR value rather than the FPSCR.
+         *
+         * To avoid having to transfer exception bits around, we simply
+         * say that the FPSCR cumulative exception flags are the logical
+         * OR of the flags in the two fp statuses. This relies on the
+         * only thing which needs to read the exception flags being
+         * an explicit FPSCR read.
+         */
         float_status fp_status;
+        float_status standard_fp_status;
     } vfp;
+    uint32_t exclusive_addr;
+    uint32_t exclusive_val;
+    uint32_t exclusive_high;
 #if defined(CONFIG_USER_ONLY)
-    struct mmon_state *mmon_entry;
-#else
-    uint32_t mmon_addr;
+    uint32_t exclusive_test;
+    uint32_t exclusive_info;
 #endif
 
     /* iwMMXt coprocessor state.  */
@@ -205,6 +227,14 @@ typedef struct CPUARMState {
     CPU_COMMON
 
     /* These fields after the common ones so they are preserved on reset.  */
+
+    /* Coprocessor IO used by peripherals */
+    struct {
+        ARMReadCPFunc *cp_read;
+        ARMWriteCPFunc *cp_write;
+        void *opaque;
+    } cp[15];
+    void *nvic;
     struct arm_boot_info *boot_info;
 } CPUARMState;
 
@@ -223,9 +253,8 @@ int cpu_arm_signal_handler(int host_signum, void *pinfo,
                            void *puc);
 int cpu_arm_handle_mmu_fault (CPUARMState *env, target_ulong address, int rw,
                               int mmu_idx, int is_softmuu);
+#define cpu_handle_mmu_fault cpu_arm_handle_mmu_fault
 
-void cpu_lock(void);
-void cpu_unlock(void);
 static inline void cpu_set_tls(CPUARMState *env, target_ulong newtls)
 {
   env->cp15.c13_tls2 = newtls;
@@ -299,11 +328,16 @@ static inline void xpsr_write(CPUARMState *env, uint32_t val, uint32_t mask)
     }
 }
 
+/* Return the current FPSCR value.  */
+uint32_t vfp_get_fpscr(CPUARMState *env);
+void vfp_set_fpscr(CPUARMState *env, uint32_t val);
+
 enum arm_cpu_mode {
   ARM_CPU_MODE_USR = 0x10,
   ARM_CPU_MODE_FIQ = 0x11,
   ARM_CPU_MODE_IRQ = 0x12,
   ARM_CPU_MODE_SVC = 0x13,
+  ARM_CPU_MODE_SMC = 0x16,
   ARM_CPU_MODE_ABT = 0x17,
   ARM_CPU_MODE_UND = 0x1b,
   ARM_CPU_MODE_SYS = 0x1f
@@ -339,11 +373,17 @@ enum arm_features {
     ARM_FEATURE_THUMB2,
     ARM_FEATURE_MPU,    /* Only has Memory Protection Unit, not full MMU.  */
     ARM_FEATURE_VFP3,
+    ARM_FEATURE_VFP_FP16,
     ARM_FEATURE_NEON,
     ARM_FEATURE_DIV,
     ARM_FEATURE_M, /* Microcontroller profile.  */
     ARM_FEATURE_OMAPCP, /* OMAP specific CP15 ops handling.  */
-    ARM_FEATURE_THUMB2EE
+    ARM_FEATURE_THUMB2EE,
+    ARM_FEATURE_V7MP,    /* v7 Multiprocessing Extensions */
+    ARM_FEATURE_V4T,
+    ARM_FEATURE_V5,
+    ARM_FEATURE_STRONGARM,
+    ARM_FEATURE_TRUSTZONE, /* TrustZone Security Extensions. */
 };
 
 static inline int arm_feature(CPUARMState *env, int feature)
@@ -351,7 +391,7 @@ static inline int arm_feature(CPUARMState *env, int feature)
     return (env->features & (1u << feature)) != 0;
 }
 
-void arm_cpu_list(FILE *f, int (*cpu_fprintf)(FILE *f, const char *fmt, ...));
+void arm_cpu_list(FILE *f, fprintf_function cpu_fprintf);
 
 /* Interface between CPU and Interrupt controller.  */
 void armv7m_nvic_set_pending(void *opaque, int irq);
@@ -374,6 +414,8 @@ void cpu_arm_set_cp_io(CPUARMState *env, int cpnum,
 #define ARM_CPUID_ARM946      0x41059461
 #define ARM_CPUID_TI915T      0x54029152
 #define ARM_CPUID_TI925T      0x54029252
+#define ARM_CPUID_SA1100      0x4401A11B
+#define ARM_CPUID_SA1110      0x6901B119
 #define ARM_CPUID_PXA250      0x69052100
 #define ARM_CPUID_PXA255      0x69052d00
 #define ARM_CPUID_PXA260      0x69052903
@@ -390,6 +432,7 @@ void cpu_arm_set_cp_io(CPUARMState *env, int cpnum,
 #define ARM_CPUID_ARM1136_R2  0x4107b362
 #define ARM_CPUID_ARM11MPCORE 0x410fb022
 #define ARM_CPUID_CORTEXA8    0x410fc080
+#define ARM_CPUID_CORTEXA8_R2 0x412fc083
 #define ARM_CPUID_CORTEXA9    0x410fc090
 #define ARM_CPUID_CORTEXM3    0x410fc231
 #define ARM_CPUID_ANY         0xffffffff
@@ -403,13 +446,16 @@ void cpu_arm_set_cp_io(CPUARMState *env, int cpnum,
 #define TARGET_PAGE_BITS 10
 #endif
 
+#define TARGET_PHYS_ADDR_SPACE_BITS 32
+#define TARGET_VIRT_ADDR_SPACE_BITS 32
+
 #define cpu_init cpu_arm_init
 #define cpu_exec cpu_arm_exec
 #define cpu_gen_code cpu_arm_gen_code
 #define cpu_signal_handler cpu_arm_signal_handler
 #define cpu_list arm_cpu_list
 
-#define CPU_SAVE_VERSION 1
+#define CPU_SAVE_VERSION 3
 
 /* MMU modes definitions */
 #define MMU_MODE0_SUFFIX _kernel
@@ -439,24 +485,57 @@ static inline void cpu_clone_regs(CPUState *env, target_ulong newsp)
 #endif
 
 #include "cpu-all.h"
-#include "exec-all.h"
 
-static inline void cpu_pc_from_tb(CPUState *env, TranslationBlock *tb)
-{
-    env->regs[15] = tb->pc;
-}
+/* Bit usage in the TB flags field: */
+#define ARM_TBFLAG_THUMB_SHIFT      0
+#define ARM_TBFLAG_THUMB_MASK       (1 << ARM_TBFLAG_THUMB_SHIFT)
+#define ARM_TBFLAG_VECLEN_SHIFT     1
+#define ARM_TBFLAG_VECLEN_MASK      (0x7 << ARM_TBFLAG_VECLEN_SHIFT)
+#define ARM_TBFLAG_VECSTRIDE_SHIFT  4
+#define ARM_TBFLAG_VECSTRIDE_MASK   (0x3 << ARM_TBFLAG_VECSTRIDE_SHIFT)
+#define ARM_TBFLAG_PRIV_SHIFT       6
+#define ARM_TBFLAG_PRIV_MASK        (1 << ARM_TBFLAG_PRIV_SHIFT)
+#define ARM_TBFLAG_VFPEN_SHIFT      7
+#define ARM_TBFLAG_VFPEN_MASK       (1 << ARM_TBFLAG_VFPEN_SHIFT)
+#define ARM_TBFLAG_CONDEXEC_SHIFT   8
+#define ARM_TBFLAG_CONDEXEC_MASK    (0xff << ARM_TBFLAG_CONDEXEC_SHIFT)
+/* Bits 31..16 are currently unused. */
+
+/* some convenience accessor macros */
+#define ARM_TBFLAG_THUMB(F) \
+    (((F) & ARM_TBFLAG_THUMB_MASK) >> ARM_TBFLAG_THUMB_SHIFT)
+#define ARM_TBFLAG_VECLEN(F) \
+    (((F) & ARM_TBFLAG_VECLEN_MASK) >> ARM_TBFLAG_VECLEN_SHIFT)
+#define ARM_TBFLAG_VECSTRIDE(F) \
+    (((F) & ARM_TBFLAG_VECSTRIDE_MASK) >> ARM_TBFLAG_VECSTRIDE_SHIFT)
+#define ARM_TBFLAG_PRIV(F) \
+    (((F) & ARM_TBFLAG_PRIV_MASK) >> ARM_TBFLAG_PRIV_SHIFT)
+#define ARM_TBFLAG_VFPEN(F) \
+    (((F) & ARM_TBFLAG_VFPEN_MASK) >> ARM_TBFLAG_VFPEN_SHIFT)
+#define ARM_TBFLAG_CONDEXEC(F) \
+    (((F) & ARM_TBFLAG_CONDEXEC_MASK) >> ARM_TBFLAG_CONDEXEC_SHIFT)
 
 static inline void cpu_get_tb_cpu_state(CPUState *env, target_ulong *pc,
                                         target_ulong *cs_base, int *flags)
 {
+    int privmode;
     *pc = env->regs[15];
     *cs_base = 0;
-    *flags = env->thumb | (env->vfp.vec_len << 1)
-            | (env->vfp.vec_stride << 4) | (env->condexec_bits << 8);
-    if ((env->uncached_cpsr & CPSR_M) != ARM_CPU_MODE_USR)
-        *flags |= (1 << 6);
-    if (env->vfp.xregs[ARM_VFP_FPEXC] & (1 << 30))
-        *flags |= (1 << 7);
+    *flags = (env->thumb << ARM_TBFLAG_THUMB_SHIFT)
+        | (env->vfp.vec_len << ARM_TBFLAG_VECLEN_SHIFT)
+        | (env->vfp.vec_stride << ARM_TBFLAG_VECSTRIDE_SHIFT)
+        | (env->condexec_bits << ARM_TBFLAG_CONDEXEC_SHIFT);
+    if (arm_feature(env, ARM_FEATURE_M)) {
+        privmode = !((env->v7m.exception == 0) && (env->v7m.control & 1));
+    } else {
+        privmode = (env->uncached_cpsr & CPSR_M) != ARM_CPU_MODE_USR;
+    }
+    if (privmode) {
+        *flags |= ARM_TBFLAG_PRIV_MASK;
+    }
+    if (env->vfp.xregs[ARM_VFP_FPEXC] & (1 << 30)) {
+        *flags |= ARM_TBFLAG_VFPEN_MASK;
+    }
 }
 
 #endif
