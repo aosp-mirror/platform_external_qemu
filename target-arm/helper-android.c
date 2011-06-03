@@ -9,6 +9,20 @@
 #include "helper-android.h"
 #include "qemu-common.h"
 
+/* copy a string from the simulated virtual space to a buffer in QEMU */
+void vstrcpy(target_ulong ptr, char *buf, int max)
+{
+    int  index;
+
+    if (buf == NULL) return;
+
+    for (index = 0; index < max; index += 1) {
+        cpu_physical_memory_read(ptr + index, (uint8_t*)buf + index, 1);
+        if (buf[index] == 0)
+            break;
+    }
+}
+
 #ifdef CONFIG_TRACE
 #include "android-trace.h"
 
