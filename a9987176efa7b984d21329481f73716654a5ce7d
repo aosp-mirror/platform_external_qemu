@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAABB3///TA\u003d",
+        "filename": "android/avd/hw-config-defs.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-06-06T19:48:14Z",
+      "side": 1,
+      "message": "I would prefer if all paths in the config files are explicit, can I ask you to instead use two explicit _path properties instead, as in:\n\nrom_bios_path\nrom_vgabios_path\n\nAlso add a comment to explain that this is only for x86 emulation, and ignored for other target architectures.",
+      "revId": "a9987176efa7b984d21329481f73716654a5ce7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABB3///S8\u003d",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1002,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-06-06T19:48:14Z",
+      "side": 1,
+      "message": "I\u0027d prefer not that you use this, this makes assumptions that could very well break in the case of internationalized file paths (think non-normalized UTF-8 strings).\n\nPlease use the path_parent() function from \u003candroid/utils/path.h\u003e instead.",
+      "revId": "a9987176efa7b984d21329481f73716654a5ce7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABB3///S4\u003d",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1004,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-06-06T19:48:14Z",
+      "side": 1,
+      "message": "nitpick: matched_file should really be called \"matched_dir\"",
+      "revId": "a9987176efa7b984d21329481f73716654a5ce7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABB3///S0\u003d",
+        "filename": "android/avd/info.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-06-06T19:48:14Z",
+      "side": 1,
+      "message": "I would appreciate a comment explaining what this function does (the implementation is not trivial)",
+      "revId": "a9987176efa7b984d21329481f73716654a5ce7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABB3///Sw\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3870,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-06-06T19:48:14Z",
+      "side": 1,
+      "message": "Please don\u0027t, the directory probing logic is already sufficiently complex that this is likely to introduce weird side-effect. Do not change it.",
+      "revId": "a9987176efa7b984d21329481f73716654a5ce7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
