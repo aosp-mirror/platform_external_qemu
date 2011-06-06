@@ -242,6 +242,13 @@ HWCFG_STRING(
   "Path to the ramdisk image.")
 
 HWCFG_STRING(
+  bios_dir,
+  "bios.dir",
+  "",
+  "Directory where BIOS and VGABIOS are (x86 only)",
+  "Directory where BIOS and VGABIOS are (x86 only).")
+
+HWCFG_STRING(
   disk_systemPartition_path,
   "disk.systemPartition.path",
   "",

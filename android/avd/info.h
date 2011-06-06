@@ -51,6 +51,7 @@
  * implementation. This macro will be expanded several times with
  * varying definitions of _AVD_IMG
  */
+
 #define  AVD_IMAGE_LIST \
     _AVD_IMG(KERNEL,"kernel-qemu","kernel") \
     _AVD_IMG(RAMDISK,"ramdisk.img","ramdisk") \
@@ -167,6 +168,14 @@ char*  avdInfo_getSystemInitImagePath( AvdInfo*  i );
 char*  avdInfo_getDataImagePath( AvdInfo*  i );
 char*  avdInfo_getDefaultDataImagePath( AvdInfo*  i );
 char*  avdInfo_getDataInitImagePath( AvdInfo* i );
+
+/* 
+ * Given the list of files 'files' of size 'num_files' searches
+ * for a directory mentioned in AVD which contains all the
+ * files given. Upon failure returns NULL.
+ * The result string must be freed by the caller.
+ */
+char*  avdInfo_getFilesDir( AvdInfo* i, const char* files[], int num_files );
 
 /* Returns the path to a given AVD image file. This will return NULL if
  * the file cannot be found / does not exist.

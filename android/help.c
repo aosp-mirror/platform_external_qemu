@@ -559,6 +559,15 @@ help_data(stralloc_t*  out)
 }
 
 static void
+help_biosdir(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-biosdir <dir>' to specify directory where BIOS and VGABIOS are.\n"
+    "  The directory must contain both bios.bin and vgabios-cirrus.bin files.\n\n"
+    );
+}
+
+static void
 help_wipe_data(stralloc_t*  out)
 {
     PRINTF(
