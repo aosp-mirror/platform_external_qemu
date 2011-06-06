@@ -3483,16 +3483,6 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
-    /* If no data_dir is specified then try to find it relative to the
-       executable path.  */
-    if (!data_dir) {
-        data_dir = find_datadir(argv[0]);
-    }
-    /* If all else fails use the install patch specified when building.  */
-    if (!data_dir) {
-        data_dir = CONFIG_QEMU_SHAREDIR;
-    }
-
     if (!android_op_hwini) {
         PANIC("Missing -android-hw <file> option!");
     }
@@ -3875,6 +3865,20 @@ int main(int argc, char **argv, char **envp)
     }
     if (initrd_filename == NULL) {
         initrd_filename = android_hw->disk_ramdisk_path;
+    }
+
+    if (!data_dir) {
+        data_dir = android_hw->bios_dir;
+    }
+
+    /* If no data_dir is specified then try to find it relative to the
+       executable path.  */
+    if (!data_dir) {
+        data_dir = find_datadir(argv[0]);
+    }
+    /* If all else fails use the install patch specified when building.  */
+    if (!data_dir) {
+        data_dir = CONFIG_QEMU_SHAREDIR;
     }
 
     linux_boot = (kernel_filename != NULL);

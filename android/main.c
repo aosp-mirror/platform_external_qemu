@@ -487,6 +487,18 @@ int main(int argc, char **argv)
     hw->disk_ramdisk_path = avdInfo_getRamdiskPath(avd);
     D("autoconfig: -ramdisk %s", hw->disk_ramdisk_path);
 
+    char* bios_dir = opts->biosdir;
+    if (bios_dir == NULL) {
+        const char* files[] = { "bios.bin", "vgabios-cirrus.bin" };
+        bios_dir = avdInfo_getFilesDir(avd, files, 2);
+        if (!bios_dir) {
+            derror("BIOS dir not found");
+            exit(1);
+        }
+        D("autoconfig: -biosdir %s", hw->bios_dir);
+    }
+    hw->bios_dir = bios_dir;
+
     /* -partition-size is used to specify the max size of both the system
      * and data partition sizes.
      */
