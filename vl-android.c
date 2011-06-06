@@ -3877,6 +3877,10 @@ int main(int argc, char **argv, char **envp)
         initrd_filename = android_hw->disk_ramdisk_path;
     }
 
+    if (android_hw->bios_dir) {
+        data_dir = android_hw->bios_dir;
+    }
+
     linux_boot = (kernel_filename != NULL);
     net_boot = (boot_devices_bitmap >> ('n' - 'a')) & 0xF;
 

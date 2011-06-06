@@ -9,6 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+
 #include "android/avd/info.h"
 #include "android/avd/util.h"
 #include "android/config/config.h"
@@ -981,6 +982,41 @@ avdInfo_getDataInitImagePath( AvdInfo* i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_INITDATA ];
     return _avdInfo_getContentOrSdkFilePath(i, imageName);
+}
+
+char*
+avdInfo_getFilesDir( AvdInfo* info, const char* files[], int num_files )
+{
+  char* matched_dir = NULL;
+  int i;
+
+  for (i = 0; i < num_files; i++) {
+      char* found_file, *found_dir;
+      found_file = _avdInfo_getContentOrSdkFilePath(info, files[i]);
+      if (!found_file) {
+          derror("failed to find directory containing file %s", files[i]);
+          AFREE(matched_dir);
+          return NULL;
+      }
+
+      found_dir = path_dirname(found_file);
+      AFREE(found_file);
+      // test against already found dir
+      if (!matched_dir) {
+          matched_dir = found_dir;
+      } else {
+          if(strcmp(matched_dir, found_dir)) {
+              D("files found in different directories:\n %s\n %s",
+                  matched_dir, found_file);
+              AFREE(matched_dir);
+              AFREE(found_dir);
+              return NULL;
+          }
+          AFREE(found_dir);
+      }
+  }
+
+  return matched_dir;
 }
 
 int
