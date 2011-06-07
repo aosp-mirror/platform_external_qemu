@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAABB3///Iw\u003d",
+        "filename": "android/avd/hw-config-defs.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1006603
+      },
+      "writtenOn": "2011-06-07T12:32:58Z",
+      "side": 1,
+      "message": "It won\u0027t make sense as qemu accepts single parameter specifying BIOS and VGA BISO dirs. It does have separate -bios parameter but I would prefer not to use it since it\u0027s quite awkward to pass directory for VGA BIOS and name for BIOS",
+      "parentUuid": "AAABB3///TA\u003d",
+      "revId": "a9987176efa7b984d21329481f73716654a5ce7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAABB3///S8\u003d",
         "filename": "android/avd/info.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2011-06-06T19:48:14Z",
       "side": 1,
       "message": "I\u0027d prefer not that you use this, this makes assumptions that could very well break in the case of internationalized file paths (think non-normalized UTF-8 strings).\n\nPlease use the path_parent() function from \u003candroid/utils/path.h\u003e instead.",
+      "revId": "a9987176efa7b984d21329481f73716654a5ce7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABB3///Ik\u003d",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1002,
+      "author": {
+        "id": 1006603
+      },
+      "writtenOn": "2011-06-07T12:32:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAABB3///S8\u003d",
       "revId": "a9987176efa7b984d21329481f73716654a5ce7d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAABB3///Ig\u003d",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1004,
+      "author": {
+        "id": 1006603
+      },
+      "writtenOn": "2011-06-07T12:32:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAABB3///S4\u003d",
+      "revId": "a9987176efa7b984d21329481f73716654a5ce7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAABB3///S0\u003d",
         "filename": "android/avd/info.h",
         "patchSetId": 1
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAABB3///Ic\u003d",
+        "filename": "android/avd/info.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1006603
+      },
+      "writtenOn": "2011-06-07T12:32:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAABB3///S0\u003d",
+      "revId": "a9987176efa7b984d21329481f73716654a5ce7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAABB3///Sw\u003d",
         "filename": "vl-android.c",
         "patchSetId": 1
@@ -81,6 +153,24 @@
       "writtenOn": "2011-06-06T19:48:14Z",
       "side": 1,
       "message": "Please don\u0027t, the directory probing logic is already sufficiently complex that this is likely to introduce weird side-effect. Do not change it.",
+      "revId": "a9987176efa7b984d21329481f73716654a5ce7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABB3///IU\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3870,
+      "author": {
+        "id": 1006603
+      },
+      "writtenOn": "2011-06-07T12:32:58Z",
+      "side": 1,
+      "message": "I refactored the code so the code remais as it was, but if there is parameter passed specifying bios dir of it gets found in on of the dirs found in AVD it takes precedence.",
+      "parentUuid": "AAABB3///Sw\u003d",
       "revId": "a9987176efa7b984d21329481f73716654a5ce7d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
