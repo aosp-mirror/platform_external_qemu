@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAABCH///r4\u003d",
+        "filename": "android/avd/info.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 995,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-06-09T16:13:50Z",
+      "side": 1,
+      "message": "I\u0027m sorry for only realizing this now, but I think this is a bad idea. The BIOS files to use depend on the emulator binary, not the platform images, so looking for them in the Content directory / SDK search paths is not a good option.\n\nThat\u0027s also why the probing logic in vl-android.c uses a path relative to the executable\u0027s parent directory.\n\nWe want to distribute BIOS binaries alongside the emulator executable in the SDK, and update them when necessary when we update the emulator program. That\u0027s what currently done by the way.\n\nThe platform images themselves should be independent from this.\n\nIn other words, the BIOS files should not be part of an SDK add-on.",
+      "revId": "1c0fa16abc97b11bcbc1e0ab434e877c2096d028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABCH///6c\u003d",
+        "filename": "android/avd/info.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-06-09T16:13:50Z",
+      "side": 1,
+      "message": "can you remove the trailing space here?",
+      "revId": "1c0fa16abc97b11bcbc1e0ab434e877c2096d028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABCH///r0\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-06-09T16:13:50Z",
+      "side": 1,
+      "message": "Did you try this code with a platform build (i.e. typing \"emulator\" after building full_x86_eng). I fear this might break this use-case.",
+      "revId": "1c0fa16abc97b11bcbc1e0ab434e877c2096d028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
