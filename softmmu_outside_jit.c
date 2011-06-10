@@ -22,6 +22,7 @@
 
 #include "qemu-common.h"
 #include "cpu.h"
+#include "exec-all.h"
 
 #define OUTSIDE_JIT
 #define MMUSUFFIX       _outside_jit

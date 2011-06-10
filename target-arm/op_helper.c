@@ -14,11 +14,10 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA  02110-1301 USA
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 #include "exec.h"
-#include "helpers.h"
+#include "helper.h"
 
 #define SIGNBIT (uint32_t)0x80000000
 #define SIGNBIT64 ((uint64_t)1 << 63)
@@ -27,20 +26,6 @@ void raise_exception(int tt)
 {
     env->exception_index = tt;
     cpu_loop_exit();
-}
-
-/* thread support */
-
-static spinlock_t global_cpu_lock = SPIN_LOCK_UNLOCKED;
-
-void cpu_lock(void)
-{
-    spin_lock(&global_cpu_lock);
-}
-
-void cpu_unlock(void)
-{
-    spin_unlock(&global_cpu_lock);
 }
 
 uint32_t HELPER(neon_tbl)(uint32_t ireg, uint32_t def,
@@ -67,12 +52,6 @@ uint32_t HELPER(neon_tbl)(uint32_t ireg, uint32_t def,
 
 #if !defined(CONFIG_USER_ONLY)
 
-//#define ALIGNED_ONLY  1
-
-#if ALIGNED_ONLY == 1
-static void do_unaligned_access (target_ulong addr, int is_write, int is_user, void *retaddr);
-#endif
-
 #define MMUSUFFIX _mmu
 
 #define SHIFT 0
@@ -86,21 +65,6 @@ static void do_unaligned_access (target_ulong addr, int is_write, int is_user, v
 
 #define SHIFT 3
 #include "softmmu_template.h"
-
-#if ALIGNED_ONLY == 1
-static void do_unaligned_access (target_ulong addr, int is_write, int mmu_idx, void *retaddr)
-{
-    //printf("::UNALIGNED:: addr=%lx is_write=%d is_user=%d retaddr=%p\n", addr, is_write, is_user, retaddr);
-    if (mmu_idx)
-    {
-        env = cpu_single_env;
-        env->cp15.c5_data = 0x00000001;  /* corresponds to an alignment fault */
-        env->cp15.c6_data = addr;
-        env->exception_index = EXCP_DATA_ABORT;
-        cpu_loop_exit();
-    }
-}
-#endif
 
 /* try to fill the TLB and return an exception if error. If retaddr is
    NULL, it means that the function was called in C code (i.e. not
@@ -132,6 +96,47 @@ void tlb_fill (target_ulong addr, int is_write, int mmu_idx, void *retaddr)
         raise_exception(env->exception_index);
     }
     env = saved_env;
+}
+
+void HELPER(set_cp)(CPUState *env, uint32_t insn, uint32_t val)
+{
+    int cp_num = (insn >> 8) & 0xf;
+    int cp_info = (insn >> 5) & 7;
+    int src = (insn >> 16) & 0xf;
+    int operand = insn & 0xf;
+
+    if (env->cp[cp_num].cp_write)
+        env->cp[cp_num].cp_write(env->cp[cp_num].opaque,
+                                 cp_info, src, operand, val, GETPC());
+        }
+
+uint32_t HELPER(get_cp)(CPUState *env, uint32_t insn)
+{
+    int cp_num = (insn >> 8) & 0xf;
+    int cp_info = (insn >> 5) & 7;
+    int dest = (insn >> 16) & 0xf;
+    int operand = insn & 0xf;
+
+    if (env->cp[cp_num].cp_read)
+        return env->cp[cp_num].cp_read(env->cp[cp_num].opaque,
+                                       cp_info, dest, operand, GETPC());
+        return 0;
+}
+
+#else
+
+void HELPER(set_cp)(CPUState *env, uint32_t insn, uint32_t val)
+{
+    int op1 = (insn >> 8) & 0xf;
+    cpu_abort(env, "cp%i insn %08x\n", op1, insn);
+    return;
+}
+
+uint32_t HELPER(get_cp)(CPUState *env, uint32_t insn)
+{
+    int op1 = (insn >> 8) & 0xf;
+    cpu_abort(env, "cp%i insn %08x\n", op1, insn);
+    return 0;
 }
 
 #endif
@@ -402,14 +407,6 @@ uint32_t HELPER(sar)(uint32_t x, uint32_t i)
     return (int32_t)x >> shift;
 }
 
-uint32_t HELPER(ror)(uint32_t x, uint32_t i)
-{
-    int shift = i & 0xff;
-    if (shift == 0)
-        return x;
-    return (x >> shift) | (x << (32 - shift));
-}
-
 uint32_t HELPER(shl_cc)(uint32_t x, uint32_t i)
 {
     int shift = i & 0xff;
@@ -470,109 +467,126 @@ uint32_t HELPER(ror_cc)(uint32_t x, uint32_t i)
     }
 }
 
-uint64_t HELPER(neon_add_saturate_s64)(uint64_t src1, uint64_t src2)
+void HELPER(neon_vldst_all)(uint32_t insn)
 {
-    uint64_t res;
+#if defined(CONFIG_USER_ONLY)
+#define LDB(addr) ldub(addr)
+#define LDW(addr) lduw(addr)
+#define LDL(addr) ldl(addr)
+#define LDQ(addr) ldq(addr)
+#define STB(addr, val) stb(addr, val)
+#define STW(addr, val) stw(addr, val)
+#define STL(addr, val) stl(addr, val)
+#define STQ(addr, val) stq(addr, val)
+#else
+    int user = cpu_mmu_index(env);
+#define LDB(addr) slow_ldb_mmu(addr, user, GETPC())
+#define LDW(addr) slow_ldw_mmu(addr, user, GETPC())
+#define LDL(addr) slow_ldl_mmu(addr, user, GETPC())
+#define LDQ(addr) slow_ldq_mmu(addr, user, GETPC())
+#define STB(addr, val) slow_stb_mmu(addr, val, user, GETPC())
+#define STW(addr, val) slow_stw_mmu(addr, val, user, GETPC())
+#define STL(addr, val) slow_stl_mmu(addr, val, user, GETPC())
+#define STQ(addr, val) slow_stq_mmu(addr, val, user, GETPC())
+#endif
+    static const struct {
+        int nregs;
+        int interleave;
+        int spacing;
+    } neon_ls_element_type[11] = {
+        {4, 4, 1},
+        {4, 4, 2},
+        {4, 1, 1},
+        {4, 2, 1},
+        {3, 3, 1},
+        {3, 3, 2},
+        {3, 1, 1},
+        {1, 1, 1},
+        {2, 2, 1},
+        {2, 2, 2},
+        {2, 1, 1}
+    };
 
-    res = src1 + src2;
-    if (((res ^ src1) & SIGNBIT64) && !((src1 ^ src2) & SIGNBIT64)) {
-        env->QF = 1;
-        res = ((int64_t)src1 >> 63) ^ ~SIGNBIT64;
+    const int op = (insn >> 8) & 0xf;
+    const int size = (insn >> 6) & 3;
+    int rd = ((insn >> 12) & 0x0f) | ((insn >> 18) & 0x10);
+    const int rn = (insn >> 16) & 0xf;
+    const int load = (insn & (1 << 21)) != 0;
+    const int nregs = neon_ls_element_type[op].nregs;
+    const int interleave = neon_ls_element_type[op].interleave;
+    const int spacing = neon_ls_element_type[op].spacing;
+    uint32_t addr = env->regs[rn];
+    const int stride = (1 << size) * interleave;
+    int i, reg;
+    uint64_t tmp64;
+
+    for (reg = 0; reg < nregs; reg++) {
+        if (interleave > 2 || (interleave == 2 && nregs == 2)) {
+            addr = env->regs[rn] + (1 << size) * reg;
+        } else if (interleave == 2 && nregs == 4 && reg == 2) {
+            addr = env->regs[rn] + (1 << size);
+        }
+        switch (size) {
+            case 3:
+                if (load) {
+                    env->vfp.regs[rd] = make_float64(LDQ(addr));
+                } else {
+                    STQ(addr, float64_val(env->vfp.regs[rd]));
+                }
+                addr += stride;
+                break;
+            case 2:
+                if (load) {
+                    tmp64 = (uint32_t)LDL(addr);
+                    addr += stride;
+                    tmp64 |= (uint64_t)LDL(addr) << 32;
+                    addr += stride;
+                    env->vfp.regs[rd] = make_float64(tmp64);
+                } else {
+                    tmp64 = float64_val(env->vfp.regs[rd]);
+                    STL(addr, tmp64);
+                    addr += stride;
+                    STL(addr, tmp64 >> 32);
+                    addr += stride;
+                }
+                break;
+            case 1:
+                if (load) {
+                    tmp64 = 0ull;
+                    for (i = 0; i < 4; i++, addr += stride) {
+                        tmp64 |= (uint64_t)LDW(addr) << (i * 16);
+                    }
+                    env->vfp.regs[rd] = make_float64(tmp64);
+                } else {
+                    tmp64 = float64_val(env->vfp.regs[rd]);
+                    for (i = 0; i < 4; i++, addr += stride, tmp64 >>= 16) {
+                        STW(addr, tmp64);
+                    }
+                }
+                break;
+            case 0:
+                if (load) {
+                    tmp64 = 0ull;
+                    for (i = 0; i < 8; i++, addr += stride) {
+                        tmp64 |= (uint64_t)LDB(addr) << (i * 8);
+                    }
+                    env->vfp.regs[rd] = make_float64(tmp64);
+                } else {
+                    tmp64 = float64_val(env->vfp.regs[rd]);
+                    for (i = 0; i < 8; i++, addr += stride, tmp64 >>= 8) {
+                        STB(addr, tmp64);
+                    }
+                }
+                break;
+        }
+        rd += spacing;
     }
-    return res;
-}
-
-uint64_t HELPER(neon_add_saturate_u64)(uint64_t src1, uint64_t src2)
-{
-    uint64_t res;
-
-    res = src1 + src2;
-    if (res < src1) {
-        env->QF = 1;
-        res = ~(uint64_t)0;
-    }
-    return res;
-}
-
-uint64_t HELPER(neon_sub_saturate_s64)(uint64_t src1, uint64_t src2)
-{
-    uint64_t res;
-
-    res = src1 - src2;
-    if (((res ^ src1) & SIGNBIT64) && ((src1 ^ src2) & SIGNBIT64)) {
-        env->QF = 1;
-        res = ((int64_t)src1 >> 63) ^ ~SIGNBIT64;
-    }
-    return res;
-}
-
-uint64_t HELPER(neon_sub_saturate_u64)(uint64_t src1, uint64_t src2)
-{
-    uint64_t res;
-
-    if (src1 < src2) {
-        env->QF = 1;
-        res = 0;
-    } else {
-        res = src1 - src2;
-    }
-    return res;
-}
-
-/* These need to return a pair of value, so still use T0/T1.  */
-/* Transpose.  Argument order is rather strange to avoid special casing
-   the tranlation code.
-   On input T0 = rm, T1 = rd.  On output T0 = rd, T1 = rm  */
-void HELPER(neon_trn_u8)(void)
-{
-    uint32_t rd;
-    uint32_t rm;
-    rd = ((T0 & 0x00ff00ff) << 8) | (T1 & 0x00ff00ff);
-    rm = ((T1 & 0xff00ff00) >> 8) | (T0 & 0xff00ff00);
-    T0 = rd;
-    T1 = rm;
-}
-
-void HELPER(neon_trn_u16)(void)
-{
-    uint32_t rd;
-    uint32_t rm;
-    rd = (T0 << 16) | (T1 & 0xffff);
-    rm = (T1 >> 16) | (T0 & 0xffff0000);
-    T0 = rd;
-    T1 = rm;
-}
-
-/* Worker routines for zip and unzip.  */
-void HELPER(neon_unzip_u8)(void)
-{
-    uint32_t rd;
-    uint32_t rm;
-    rd = (T0 & 0xff) | ((T0 >> 8) & 0xff00)
-         | ((T1 << 16) & 0xff0000) | ((T1 << 8) & 0xff000000);
-    rm = ((T0 >> 8) & 0xff) | ((T0 >> 16) & 0xff00)
-         | ((T1 << 8) & 0xff0000) | (T1 & 0xff000000);
-    T0 = rd;
-    T1 = rm;
-}
-
-void HELPER(neon_zip_u8)(void)
-{
-    uint32_t rd;
-    uint32_t rm;
-    rd = (T0 & 0xff) | ((T1 << 8) & 0xff00)
-         | ((T0 << 16) & 0xff0000) | ((T1 << 24) & 0xff000000);
-    rm = ((T0 >> 16) & 0xff) | ((T1 >> 8) & 0xff00)
-         | ((T0 >> 8) & 0xff0000) | (T1 & 0xff000000);
-    T0 = rd;
-    T1 = rm;
-}
-
-void HELPER(neon_zip_u16)(void)
-{
-    uint32_t tmp;
-
-    tmp = (T0 & 0xffff) | (T1 << 16);
-    T1 = (T1 & 0xffff0000) | (T0 >> 16);
-    T0 = tmp;
+#undef LDB
+#undef LDW
+#undef LDL
+#undef LDQ
+#undef STB
+#undef STW
+#undef STL
+#undef STQ
 }

@@ -18,10 +18,10 @@
 #include "qemu-common.h"
 #include "android/utils/path.h"
 #include "cpu.h"
-#include "softmmu_outside_jit.h"
+#include "memcheck_util.h"
 #include "memcheck_proc_management.h"
 #include "memcheck_logging.h"
-#include "memcheck_util.h"
+//#include "softmmu_outside_jit.h"
 
 /* Gets symblos file path for the given module.
  * Param:
