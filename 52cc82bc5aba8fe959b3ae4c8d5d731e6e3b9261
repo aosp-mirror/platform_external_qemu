@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAABCX///tU\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-06-15T23:20:04Z",
+      "side": 1,
+      "message": "wow thanks. Can you adjust the indentation so that the \"defaultPartitionSize :\" appears on the same column than \"hw-\u003edisk_dataPartition_size \u003d\u003d 0 ?\" ?\n\nThanks in advance",
+      "revId": "52cc82bc5aba8fe959b3ae4c8d5d731e6e3b9261",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
