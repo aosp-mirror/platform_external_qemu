@@ -648,7 +648,10 @@ int main(int argc, char **argv)
             hw->disk_dataPartition_initPath = NULL;
         }
 
-        uint64_t     defaultBytes = defaultPartitionSize;
+        uint64_t     defaultBytes =
+                hw->disk_dataPartition_size == 0 ?
+                defaultPartitionSize :
+                convertMBToBytes(hw->disk_dataPartition_size);
         uint64_t     dataBytes;
         const char*  dataPath = hw->disk_dataPartition_initPath;
 
