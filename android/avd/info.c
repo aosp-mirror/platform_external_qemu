@@ -886,9 +886,20 @@ avdInfo_getKernelPath( AvdInfo*  i )
          * for our target architecture.
          */
         char temp[PATH_MAX], *p = temp, *end = p + sizeof(temp);
+        const char* suffix = "";
+        char* abi;
 
-        p = bufprint(temp, end, "%s/prebuilt/android-%s/kernel/kernel-qemu",
-                     i->androidBuildRoot, i->targetArch);
+        /* If the target ABI is armeabi-v7a, then look for
+         * kernel-qemu-armv7 instead of kernel-qemu in the prebuilt
+         * directory. */
+        abi = path_getBuildTargetAbi(i->androidOut);
+        if (!strcmp(abi,"armeabi-v7a")) {
+            suffix = "-armv7";
+        }
+        AFREE(abi);
+
+        p = bufprint(temp, end, "%s/prebuilt/android-%s/kernel/kernel-qemu%s",
+                     i->androidBuildRoot, i->targetArch, suffix);
         if (p >= end || !path_exists(temp)) {
             derror("bad workspace: cannot find prebuilt kernel in: %s", temp);
             exit(1);
@@ -1021,6 +1032,16 @@ int
 avdInfo_inAndroidBuild( AvdInfo*  i )
 {
     return i->inAndroidBuild;
+}
+
+char*
+avdInfo_getTargetAbi( AvdInfo* i )
+{
+    /* For now, we can't get the ABI from SDK AVDs */
+    if (!i->inAndroidBuild)
+        return NULL;
+
+    return path_getBuildTargetAbi(i->androidOut);
 }
 
 char*
