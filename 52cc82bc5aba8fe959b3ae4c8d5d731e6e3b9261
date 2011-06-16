@@ -16,6 +16,24 @@
       "revId": "52cc82bc5aba8fe959b3ae4c8d5d731e6e3b9261",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABCn///+A\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 1006603
+      },
+      "writtenOn": "2011-06-16T07:01:29Z",
+      "side": 1,
+      "message": "moved hw-\u003edisk_dataPartition_size down, otherwise it would be hard to fit in 80 col limit with the last line.",
+      "parentUuid": "AAABCX///tU\u003d",
+      "revId": "52cc82bc5aba8fe959b3ae4c8d5d731e6e3b9261",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
