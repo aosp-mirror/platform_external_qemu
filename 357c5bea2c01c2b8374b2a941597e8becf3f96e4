@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAABCn///9k\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-06-16T09:17:02Z",
+      "side": 1,
+      "message": "ah ah, I meant indenting the lines to the right, not to the left.\nAnyway, that\u0027s good enough for me, thanks :)",
+      "revId": "357c5bea2c01c2b8374b2a941597e8becf3f96e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
