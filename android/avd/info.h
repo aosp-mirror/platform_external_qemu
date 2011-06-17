@@ -218,6 +218,13 @@ void         avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir
 /* Returns TRUE iff in the Android build system */
 int          avdInfo_inAndroidBuild( AvdInfo*  i );
 
+/* Returns the target ABI for the corresponding platform image.
+ * This may return NULL if it cannot be determined. Otherwise this is
+ * a string like "armeabi", "armeabi-v7a" or "x86" that must be freed
+ * by the caller.
+ */
+char*        avdInfo_getTargetAbi( AvdInfo*  i );
+
 /* Reads the AVD's hardware configuration into 'hw'. returns -1 on error, 0 otherwise */
 int          avdInfo_initHwConfig( AvdInfo*  i, AndroidHwConfig*  hw );
 

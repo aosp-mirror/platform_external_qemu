@@ -264,6 +264,24 @@ path_getBuildTargetArch( const char* androidOut )
     return result;
 }
 
+char*
+path_getBuildTargetAbi( const char* androidOut )
+{
+    const char* defaultAbi = "armeabi";
+    char*       result = NULL;
+    char*       cpuAbi = _getBuildProperty(androidOut, "ro.product.cpu.abi");
+
+    if (cpuAbi == NULL) {
+        D("Coult not find CPU ABI in build properties!");
+        D("Default target ABI: %s", defaultAbi);
+        result = ASTRDUP(defaultAbi);
+    } else {
+        D("Found target ABI=%s", cpuAbi);
+        result = cpuAbi;
+    }
+    return result;
+}
+
 
 int
 path_getBuildTargetApiLevel( const char* androidOut )

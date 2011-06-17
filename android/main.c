@@ -169,6 +169,8 @@ int main(int argc, char **argv)
     int    serial = 2;
     int    shell_serial = 0;
 
+    int    forceArmv7 = 0;
+
     AndroidHwConfig*  hw;
     AvdInfo*          avd;
     AConfig*          skinConfig;
@@ -430,8 +432,7 @@ int main(int argc, char **argv)
          */
          kernelFileLen = strlen(kernelFile);
          if (kernelFileLen > 6 && !memcmp(kernelFile + kernelFileLen - 6, "-armv7", 6)) {
-            args[n++] = "-cpu";
-            args[n++] = "cortex-a8";
+             forceArmv7 = 1;
          }
     }
 
@@ -1063,6 +1064,27 @@ int main(int argc, char **argv)
         args[n++] = *argv++;
     }
     args[n] = 0;
+
+    /* If the target ABI is armeabi-v7a, we can auto-detect the cpu model
+     * as a cortex-a8, instead of the default (arm926) which only emulates
+     * an ARMv5TE CPU.
+     */
+    if (!forceArmv7 && hw->hw_cpu_model[0] == '\0')
+    {
+        char* abi = avdInfo_getTargetAbi(avd);
+        if (abi != NULL) {
+            if (!strcmp(abi, "armeabi-v7a")) {
+                forceArmv7 = 1;
+            }
+            AFREE(abi);
+        }
+    }
+
+    if (forceArmv7 != 0) {
+        AFREE(hw->hw_cpu_model);
+        hw->hw_cpu_model = ASTRDUP("cortex-a8");
+        D("Auto-config: -qemu -cpu %s", hw->hw_cpu_model);
+    }
 
     /* Generate a hardware-qemu.ini for this AVD. The real hardware
      * configuration is ususally stored in several files, e.g. the AVD's
