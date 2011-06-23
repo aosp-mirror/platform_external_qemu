@@ -55,7 +55,7 @@ ifeq ($(HOST_OS),freebsd)
 endif
 
 ifeq ($(HOST_OS),windows)
-  MY_CFLAGS += -D_WIN32 -mno-cygwin
+  MY_CFLAGS += -D_WIN32
   # we need Win32 features  that are available since Windows 2000 Professional/Server (NT 5.0)
   MY_CFLAGS += -DWINVER=0x501
 endif
