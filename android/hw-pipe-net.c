@@ -251,7 +251,7 @@ netPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuf
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
-        int  len = write(pipe->io->fd, buff->data + buffStart, avail);
+        int  len = socket_send(pipe->io->fd, buff->data + buffStart, avail);
 
         /* the write succeeded */
         if (len > 0) {
@@ -271,10 +271,6 @@ netPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuf
                 ret = PIPE_ERROR_IO;
             break;
         }
-
-        /* loop on EINTR */
-        if (errno == EINTR)
-            continue;
 
         /* if we already wrote some stuff, simply return */
         if (ret > 0) {
@@ -309,7 +305,7 @@ netPipe_recvBuffers( void* opaque, GoldfishPipeBuffer*  buffers, int  numBuffers
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
-        int  len = read(pipe->io->fd, buff->data + buffStart, avail);
+        int  len = socket_recv(pipe->io->fd, buff->data + buffStart, avail);
 
         /* the read succeeded */
         if (len > 0) {
@@ -329,10 +325,6 @@ netPipe_recvBuffers( void* opaque, GoldfishPipeBuffer*  buffers, int  numBuffers
                 ret = PIPE_ERROR_IO;
             break;
         }
-
-        /* loop on EINTR */
-        if (errno == EINTR)
-            continue;
 
         /* if we already read some stuff, simply return */
         if (ret > 0) {
@@ -436,6 +428,7 @@ netPipe_initTcp( void* hwpipe, void* _looper, const char* args )
     return ret;
 }
 
+#ifndef _WIN32
 void*
 netPipe_initUnix( void* hwpipe, void* _looper, const char* args )
 {
@@ -459,7 +452,7 @@ netPipe_initUnix( void* hwpipe, void* _looper, const char* args )
     sock_address_done(&address);
     return ret;
 }
-
+#endif
 
 /**********************************************************************
  **********************************************************************
@@ -477,6 +470,7 @@ static const GoldfishPipeFuncs  netPipeTcp_funcs = {
     netPipe_wakeOn,
 };
 
+#ifndef _WIN32
 static const GoldfishPipeFuncs  netPipeUnix_funcs = {
     netPipe_initUnix,
     netPipe_closeFromGuest,
@@ -485,7 +479,7 @@ static const GoldfishPipeFuncs  netPipeUnix_funcs = {
     netPipe_poll,
     netPipe_wakeOn,
 };
-
+#endif
 
 #define DEFAULT_OPENGLES_PORT  22468
 
@@ -515,6 +509,8 @@ android_net_pipes_init(void)
     Looper*  looper = looper_newCore();
 
     goldfish_pipe_add_type( "tcp", looper, &netPipeTcp_funcs );
+#ifndef _WIN32
     goldfish_pipe_add_type( "unix", looper, &netPipeUnix_funcs );
+#endif
     goldfish_pipe_add_type( "opengles", looper, &openglesPipe_funcs );
 }
