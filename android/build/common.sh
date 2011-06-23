@@ -457,11 +457,11 @@ check_android_build ()
     unset ANDROID_TOP
     IN_ANDROID_BUILD=no
 
-    if [ -z "$ANDROID_PRODUCT_OUT" ] ; then
+    if [ -z "$ANDROID_BUILD_TOP" ] ; then
         return ;
     fi
 
-    ANDROID_TOP=`cd $ANDROID_PRODUCT_OUT/../../../.. && pwd`
+    ANDROID_TOP=$ANDROID_BUILD_TOP
     log "ANDROID_TOP found at $ANDROID_TOP"
     # $ANDROID_TOP/config/envsetup.make is for the old tree layout
     # $ANDROID_TOP/build/envsetup.sh is for the new one
