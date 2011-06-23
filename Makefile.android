@@ -242,6 +242,7 @@ LOCAL_SRC_FILES := \
     android/snapshot.c \
     android/main-common.c \
     android/main.c \
+    android/utils/setenv.c \
     vl-android-ui.c \
     android/protocol/core-connection.c \
     android/protocol/attach-ui-impl.c \
