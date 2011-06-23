@@ -524,7 +524,7 @@ init_sdl_ui(AConfig*         skinConfig,
 #endif
 
     /* we're not a game, so allow the screensaver to run */
-    putenv("SDL_VIDEO_ALLOW_SCREENSAVER=1");
+    setenv("SDL_VIDEO_ALLOW_SCREENSAVER","1",1);
 
     flags = SDL_INIT_NOPARACHUTE;
     if (!opts->no_window)
