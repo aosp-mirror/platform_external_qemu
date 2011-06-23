@@ -850,7 +850,7 @@ AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
 
         if (!opts->system) {
             opts->system = _getSdkSystemImage(opts->sysdir, "-image", "system.img");
-            D("autoconfig: -image %s", opts->image);
+            D("autoconfig: -system %s", opts->system);
         }
 
         if (!opts->kernel) {
