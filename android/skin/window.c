@@ -1301,15 +1301,9 @@ skin_window_resize( SkinWindow*  window )
 
         {
             char temp[32];
-#ifdef HAVE_SETENV
             sprintf(temp, "%d,%d", window_x, window_y);
             setenv("SDL_VIDEO_WINDOW_POS", temp, 1);
             setenv("SDL_VIDEO_WINDOW_FORCE_VISIBLE", "1", 1);
-#else
-            sprintf(temp,"SDL_VIDEO_WINDOW_POS=%d,%d",window_x,window_y);
-            putenv(temp);
-            putenv("SDL_VIDEO_WINDOW_FORCE_VISIBLE=1");
-#endif
         }
 
         flags = SDL_SWSURFACE;
