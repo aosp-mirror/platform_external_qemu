@@ -86,6 +86,8 @@ HW_SOURCES := \
     usb.c \
     watchdog.c
 
+$(call gen-hw-config-defs,hw/goldfish_audio.c)
+
 ifeq ($(EMULATOR_TARGET_ARCH),arm)
 HW_SOURCES += android_arm.c \
     arm_pic.c \
