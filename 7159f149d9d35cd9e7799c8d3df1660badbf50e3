@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAABEX///o4\u003d",
+        "filename": "Makefile.common",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1003981
+      },
+      "writtenOn": "2011-06-29T17:10:54Z",
+      "side": 1,
+      "message": "If you use an intermediate dir independent of the module, then the header can be shared by all the modules:\nHW_CONFIG_DEFS_HEADER_INTERMEIDATES :\u003d $(call intermediates-dir-for,SHARED_LIBRARIES,hw_config_defs_header,true)",
+      "revId": "7159f149d9d35cd9e7799c8d3df1660badbf50e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABEX///ow\u003d",
+        "filename": "Makefile.common",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1003981
+      },
+      "writtenOn": "2011-06-29T17:10:54Z",
+      "side": 1,
+      "message": "The above 2 lines are enough for the dependency.",
+      "revId": "7159f149d9d35cd9e7799c8d3df1660badbf50e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABEX///o0\u003d",
+        "filename": "Makefile.common",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1003981
+      },
+      "writtenOn": "2011-06-29T17:10:54Z",
+      "side": 1,
+      "message": "You don\u0027t need to add this dependency. The build system will add it with LOCAL_GENERATED_SOURCES.",
+      "revId": "7159f149d9d35cd9e7799c8d3df1660badbf50e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
