@@ -41,4 +41,7 @@ $(foreach src,$(LOCAL_OBJC_SOURCES), \
     $(eval $(call compile-objc-source,$(src))) \
 )
 
+# Ensure that we build all generated sources before the objects
+$(LOCAL_OBJECTS): | $(foreach _src,$(LOCAL_GENERATED_SOURCES),$(_src))
+
 CLEAN_OBJS_DIRS += $(LOCAL_OBJS_DIR)
