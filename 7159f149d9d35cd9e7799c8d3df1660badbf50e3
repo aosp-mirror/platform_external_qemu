@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAABEX//+r4\u003d",
+        "filename": "Makefile.common",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-07-05T19:26:33Z",
+      "side": 1,
+      "message": "That doesn\u0027t seem to work at all. I bet I need to generate a dummy shared library where the header will be generated, and add it to the LOCAL_SHARED_LIBRARIES of all modules that use it. I will also need to save the include path somewhere in a non-LOCAL variable too for reuse. Will try that.",
+      "parentUuid": "AAABEX///o4\u003d",
+      "revId": "7159f149d9d35cd9e7799c8d3df1660badbf50e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAABEX///ow\u003d",
         "filename": "Makefile.common",
         "patchSetId": 1
@@ -47,6 +65,24 @@
       "writtenOn": "2011-06-29T17:10:54Z",
       "side": 1,
       "message": "You don\u0027t need to add this dependency. The build system will add it with LOCAL_GENERATED_SOURCES.",
+      "revId": "7159f149d9d35cd9e7799c8d3df1660badbf50e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAABEX//+r0\u003d",
+        "filename": "Makefile.common",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2011-07-05T19:26:33Z",
+      "side": 1,
+      "message": "Thanks, this is for the benefit of the stand-alone build system used by the emulator. I fixed this by changing external/qemu/android/build/binary.mk instead.",
+      "parentUuid": "AAABEX///o0\u003d",
       "revId": "7159f149d9d35cd9e7799c8d3df1660badbf50e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
