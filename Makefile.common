@@ -13,6 +13,42 @@
 ##############################################################################
 ##############################################################################
 ###
+###  gen-hw-config-defs: Generate hardware configuration definitions header
+###
+###  The 'gen-hw-config.py' script is used to generate the hw-config-defs.h
+###  header from the an .ini file like android/avd/hardware-properties.ini
+###
+###  Due to the way the Android build system works, we need to regenerate
+###  it for each module (the output will go into a module-specific directory).
+###
+###  This defines a function that can be used inside a module definition
+###
+###  $(call gen-hw-config-defs)
+###
+
+# First, define a rule to generate a dummy "emulator_hw_config_defs" module
+# which purpose is simply to host the generated header in its output directory.
+intermediates := $(call intermediates-dir-for,SHARED_LIBRARIES,emulator_hw_config_defs,true)
+
+QEMU_HARDWARE_PROPERTIES_INI := $(LOCAL_PATH)/android/avd/hardware-properties.ini
+QEMU_HW_CONFIG_DEFS_H := $(intermediates)/android/avd/hw-config-defs.h
+$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_PATH := $(LOCAL_PATH)
+$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_CUSTOM_TOOL = $(LOCAL_PATH)/android/tools/gen-hw-config.py $< $@
+$(QEMU_HW_CONFIG_DEFS_H): $(QEMU_HARDWARE_PROPERTIES_INI) $(LOCAL_PATH)/android/tools/gen-hw-config.py
+	$(hide) rm -f $@
+	$(transform-generated-source)
+
+QEMU_HW_CONFIG_DEFS_INCLUDES := $(intermediates)
+
+# Second, define a function that needs to be called inside each module that contains
+# a source file that includes the generated header file.
+gen-hw-config-defs = \
+  $(eval LOCAL_GENERATED_SOURCES += $(QEMU_HW_CONFIG_DEFS_H))\
+  $(eval LOCAL_C_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES))
+
+##############################################################################
+##############################################################################
+###
 ###  emulator-common: LIBRARY OF COMMON FUNCTIONS
 ###
 ###  THESE ARE POTENTIALLY USED BY ALL COMPONENTS
@@ -89,6 +125,8 @@ LOCAL_SRC_FILES += \
 	android/utils/system.c \
 	android/utils/tempfile.c \
 	android/utils/vector.c \
+
+$(call gen-hw-config-defs)
 
 LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
@@ -214,6 +252,8 @@ LOCAL_SRC_FILES += \
              android/resource.c \
              android/qemulator.c \
              android/keycode.c \
+
+$(call gen-hw-config-defs)
 
 # enable MMX code for our skin scaler
 ifeq ($(HOST_ARCH),x86)
@@ -383,6 +423,8 @@ CORE_MISC_SOURCES = \
     android/snapshot.c \
     android/utils/timezone.c \
 
+$(call gen-hw-config-defs)
+
 ifeq ($(HOST_ARCH),x86)
     CORE_MISC_SOURCES += i386-dis.c
 endif
@@ -474,19 +516,6 @@ LOCAL_SRC_FILES += \
     qint.c \
     qlist.c \
     qstring.c \
-
-# hw-config-defs.h is generated from android/avd/hardware-properties.ini
-#
-QEMU_HARDWARE_PROPERTIES_INI := $(LOCAL_PATH)/android/avd/hardware-properties.ini
-QEMU_HW_CONFIG_DEFS_H := $(LOCAL_PATH)/android/avd/hw-config-defs.h
-$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_PATH := $(LOCAL_PATH)
-$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_SOURCES := $(QEMU_HARDWARE_PROPERTIES_INI)
-$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/android/tools/gen-hw-config.py $(QEMU_HARDWARE_PROPERTIES_INI) $@
-$(QEMU_HW_CONFIG_DEFS_H): $(QEMU_HARDWARE_PROPERTIES_INI) $(LOCAL_PATH)/android/tools/gen-hw-config.py
-	$(hide) rm -f $@
-	$(transform-generated-source)
-
-$(LOCAL_PATH)/android/avd/hw-config.h: $(QEMU_HW_CONFIG_DEFS_H)
 
 # gdbstub-xml.c contains C-compilable arrays corresponding to the content
 # of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
@@ -603,7 +632,7 @@ $(call end-emulator-library)
 gen-hx-header = $(eval $(call gen-hx-header-ev,$1,$2,$3))
 
 define gen-hx-header-ev
-intermediates := $$(call intermediates-dir-for,$$(EMULATOR_MODULE_TYPE),$$(LOCAL_MODULE),true)
+intermediates := $$(call intermediates-dir-for,$$(LOCAL_MODULE_CLASS),$$(LOCAL_MODULE),true)
 
 QEMU_HEADER_H := $$(intermediates)/$$2
 $$(QEMU_HEADER_H): PRIVATE_PATH := $$(LOCAL_PATH)
@@ -613,7 +642,5 @@ $$(QEMU_HEADER_H): $$(LOCAL_PATH)/$$1 $$(LOCAL_PATH)/hxtool
 
 LOCAL_GENERATED_SOURCES += $$(QEMU_HEADER_H)
 LOCAL_C_INCLUDES += $$(intermediates)
-_objects := $$(patsubst %,$$(intermediates)/%,$$(3:.c=.o))
-$$(_objects): $$(QEMU_HEADER_H)
 endef
 
