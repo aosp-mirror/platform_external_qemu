@@ -33,7 +33,7 @@ intermediates := $(call intermediates-dir-for,SHARED_LIBRARIES,emulator_hw_confi
 QEMU_HARDWARE_PROPERTIES_INI := $(LOCAL_PATH)/android/avd/hardware-properties.ini
 QEMU_HW_CONFIG_DEFS_H := $(intermediates)/android/avd/hw-config-defs.h
 $(QEMU_HW_CONFIG_DEFS_H): PRIVATE_PATH := $(LOCAL_PATH)
-$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_CUSTOM_TOOL = $(LOCAL_PATH)/android/tools/gen-hw-config.py $< $@
+$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/android/tools/gen-hw-config.py $< $@
 $(QEMU_HW_CONFIG_DEFS_H): $(QEMU_HARDWARE_PROPERTIES_INI) $(LOCAL_PATH)/android/tools/gen-hw-config.py
 	$(hide) rm -f $@
 	$(transform-generated-source)
