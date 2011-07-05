@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAABEX//+pM\u003d",
+        "filename": "Makefile.common",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1003981
+      },
+      "writtenOn": "2011-07-05T21:04:26Z",
+      "side": 1,
+      "message": "You don\u0027t need a dummy shared library.\nYes, you need a global variable to store the path of the generated header, and the rule to generate the header. They are module independent. All modules using the generated header can hook up the dependency by using LOCAL_GENERATED_SOURCES.",
+      "parentUuid": "AAABEX//+r4\u003d",
+      "revId": "7159f149d9d35cd9e7799c8d3df1660badbf50e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAABEX///ow\u003d",
         "filename": "Makefile.common",
         "patchSetId": 1
