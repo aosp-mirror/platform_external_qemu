@@ -178,6 +178,12 @@ const char*  avdInfo_getImagePath( AvdInfo*  i, AvdImageType  imageType );
  */
 const char*  avdInfo_getImageDefaultPath( AvdInfo*  i, AvdImageType  imageType );
 
+/* Searches for the charmap file given in AVD configuration
+ * in content and AVD directories and returns full path.
+ * If the file doesn't exist or is not specified
+ * in the configration NULL is returned.
+ */
+const char*  avdInfo_getCharmapPath( AvdInfo*  i, AndroidHwConfig*  hw );
 
 /* Try to find the path of a given image file, returns NULL
  * if the corresponding file could not be found. the string

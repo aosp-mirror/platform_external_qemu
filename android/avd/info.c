@@ -994,6 +994,22 @@ avdInfo_getDataInitImagePath( AvdInfo* i )
     return _avdInfo_getContentOrSdkFilePath(i, imageName);
 }
 
+const char*
+avdInfo_getCharmapPath( AvdInfo*  i, AndroidHwConfig*  hw )
+{
+    const char* charmapPath;
+    if (!hw->charmap_path) {
+        return NULL;
+    }
+
+    charmapPath = _avdInfo_getContentOrSdkFilePath(i, hw->charmap_path);
+    if (!charmapPath) {
+        derror("Charmap fle %s not found, falling back to default",
+               hw->charmap_path);
+    }
+    return charmapPath;
+}
+
 int
 avdInfo_initHwConfig( AvdInfo*  i, AndroidHwConfig*  hw )
 {

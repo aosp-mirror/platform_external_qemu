@@ -59,6 +59,13 @@ HWCFG_BOOL(
   "Keyboard support",
   "Whether the device has a QWERTY keyboard.")
 
+HWCFG_STRING(
+  charmap_path,
+  "charmap.path",
+  "",
+  "Charmap file",
+  ".kcm file containing character mapping.")
+
 HWCFG_BOOL(
   hw_keyboard_lid,
   "hw.keyboard.lid",

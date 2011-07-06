@@ -284,16 +284,6 @@ int main(int argc, char **argv)
 
     sanitizeOptions(opts);
 
-    /* Initialization of UI started with -attach-core should work differently
-     * than initialization of UI that starts the core. In particular....
-     */
-
-    /* -charmap is incompatible with -attach-core, because particular
-     * charmap gets set up in the running core. */
-    if (android_charmap_setup(opts->charmap)) {
-        exit(1);
-    }
-
     /* Parses options and builds an appropriate AVD. */
     avd = android_avdInfo = createAVD(opts, &inAndroidBuild);
 
@@ -325,6 +315,20 @@ int main(int argc, char **argv)
     hw = android_hw;
     if (avdInfo_initHwConfig(avd, hw) < 0) {
         derror("could not read hardware configuration ?");
+        exit(1);
+    }
+
+    if (!opts->charmap) {
+        opts->charmap = avdInfo_getCharmapPath(avd, hw);
+    }
+
+    /* Initialization of UI started with -attach-core should work differently
+     * than initialization of UI that starts the core. In particular....
+     */
+
+    /* -charmap is incompatible with -attach-core, because particular
+     * charmap gets set up in the running core. */
+    if (android_charmap_setup(opts->charmap)) {
         exit(1);
     }
 
