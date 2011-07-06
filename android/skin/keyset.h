@@ -47,6 +47,20 @@ typedef struct SkinKeyset  SkinKeyset;
     _SKIN_KEY_COMMAND(BUTTON_DPAD_DOWN,"DPad down")         \
     _SKIN_KEY_COMMAND(ONION_ALPHA_UP,"increase onion alpha")           \
     _SKIN_KEY_COMMAND(ONION_ALPHA_DOWN,"decrease onion alpha")         \
+    _SKIN_KEY_COMMAND(BUTTON_TV,"TV button")         \
+    _SKIN_KEY_COMMAND(BUTTON_EPG,"EPG button")         \
+    _SKIN_KEY_COMMAND(BUTTON_DVR,"DVR button")         \
+    _SKIN_KEY_COMMAND(BUTTON_PREV,"Previous button")         \
+    _SKIN_KEY_COMMAND(BUTTON_NEXT,"Next button")         \
+    _SKIN_KEY_COMMAND(BUTTON_PLAY,"Play button")         \
+    _SKIN_KEY_COMMAND(BUTTON_PAUSE,"Pause button")         \
+    _SKIN_KEY_COMMAND(BUTTON_STOP,"Stop button")         \
+    _SKIN_KEY_COMMAND(BUTTON_REWIND,"Rewind button")         \
+    _SKIN_KEY_COMMAND(BUTTON_FFWD,"FFWD button")         \
+    _SKIN_KEY_COMMAND(BUTTON_BOOKMARKS,"Bookmarks button")         \
+    _SKIN_KEY_COMMAND(BUTTON_WINDOW,"Window button")         \
+    _SKIN_KEY_COMMAND(BUTTON_CHANNELUP,"Channel up button")         \
+    _SKIN_KEY_COMMAND(BUTTON_CHANNELDOWN,"Channel down button")         \
 
 
 /* the list of commands in the emulator */

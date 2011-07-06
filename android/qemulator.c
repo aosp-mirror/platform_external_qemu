@@ -340,11 +340,11 @@ handle_key_command( void*  opaque, SkinKeyCommand  command, int  down )
 {
     static const struct { SkinKeyCommand  cmd; AndroidKeyCode  kcode; }  keycodes[] =
     {
-        { SKIN_KEY_COMMAND_BUTTON_CALL,   kKeyCodeCall },
-        { SKIN_KEY_COMMAND_BUTTON_HOME,   kKeyCodeHome },
-        { SKIN_KEY_COMMAND_BUTTON_BACK,   kKeyCodeBack },
-        { SKIN_KEY_COMMAND_BUTTON_HANGUP, kKeyCodeEndCall },
-        { SKIN_KEY_COMMAND_BUTTON_POWER,  kKeyCodePower },
+        { SKIN_KEY_COMMAND_BUTTON_CALL,        kKeyCodeCall },
+        { SKIN_KEY_COMMAND_BUTTON_HOME,        kKeyCodeHome },
+        { SKIN_KEY_COMMAND_BUTTON_BACK,        kKeyCodeBack },
+        { SKIN_KEY_COMMAND_BUTTON_HANGUP,      kKeyCodeEndCall },
+        { SKIN_KEY_COMMAND_BUTTON_POWER,       kKeyCodePower },
         { SKIN_KEY_COMMAND_BUTTON_SEARCH,      kKeyCodeSearch },
         { SKIN_KEY_COMMAND_BUTTON_MENU,        kKeyCodeMenu },
         { SKIN_KEY_COMMAND_BUTTON_DPAD_UP,     kKeyCodeDpadUp },
@@ -355,6 +355,20 @@ handle_key_command( void*  opaque, SkinKeyCommand  command, int  down )
         { SKIN_KEY_COMMAND_BUTTON_VOLUME_UP,   kKeyCodeVolumeUp },
         { SKIN_KEY_COMMAND_BUTTON_VOLUME_DOWN, kKeyCodeVolumeDown },
         { SKIN_KEY_COMMAND_BUTTON_CAMERA,      kKeyCodeCamera },
+        { SKIN_KEY_COMMAND_BUTTON_TV,          kKeyCodeTV },
+        { SKIN_KEY_COMMAND_BUTTON_EPG,         kKeyCodeEPG },
+        { SKIN_KEY_COMMAND_BUTTON_DVR,         kKeyCodeDVR },
+        { SKIN_KEY_COMMAND_BUTTON_PREV,        kKeyCodePrevious },
+        { SKIN_KEY_COMMAND_BUTTON_NEXT,        kKeyCodeNext },
+        { SKIN_KEY_COMMAND_BUTTON_PLAY,        kKeyCodePlay },
+        { SKIN_KEY_COMMAND_BUTTON_PAUSE,       kKeyCodePause },
+        { SKIN_KEY_COMMAND_BUTTON_STOP,        kKeyCodeStop },
+        { SKIN_KEY_COMMAND_BUTTON_REWIND,      kKeyCodeRewind },
+        { SKIN_KEY_COMMAND_BUTTON_FFWD,        kKeyCodeFastForward },
+        { SKIN_KEY_COMMAND_BUTTON_BOOKMARKS,   kKeyCodeBookmarks },
+        { SKIN_KEY_COMMAND_BUTTON_WINDOW,      kKeyCodeCycleWindows },
+        { SKIN_KEY_COMMAND_BUTTON_CHANNELUP,   kKeyCodeChannelUp },
+        { SKIN_KEY_COMMAND_BUTTON_CHANNELDOWN, kKeyCodeChannelDown },
         { SKIN_KEY_COMMAND_NONE, 0 }
     };
     int          nn;
