@@ -1074,6 +1074,20 @@ skin_window_move_mouse( SkinWindow*  window,
                 case kKeyCodeBack:
                 case kKeyCodeCall:
                 case kKeyCodeEndCall:
+                case kKeyCodeTV:
+                case kKeyCodeEPG:
+                case kKeyCodeDVR:
+                case kKeyCodePrevious:
+                case kKeyCodeNext:
+                case kKeyCodePlay:
+                case kKeyCodePause:
+                case kKeyCodeStop:
+                case kKeyCodeRewind:
+                case kKeyCodeFastForward:
+                case kKeyCodeBookmarks:
+                case kKeyCodeCycleWindows:
+                case kKeyCodeChannelUp:
+                case kKeyCodeChannelDown:
                     break;
 
                 /* all the rest is assumed to be qwerty */
