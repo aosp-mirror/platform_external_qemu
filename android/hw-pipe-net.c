@@ -373,40 +373,17 @@ void*
 netPipe_initTcp( void* hwpipe, void* _looper, const char* args )
 {
     /* Build SockAddress from arguments. Acceptable formats are:
-     *
      *   <port>
-     *   <host>:<port>
      */
     SockAddress  address;
+    uint16_t     port;
     void*        ret;
 
     if (args == NULL) {
         D("%s: Missing address!", __FUNCTION__);
         return NULL;
     }
-    D("%s: Address is '%s'", __FUNCTION__, args);
-
-    char        host[256];  /* max size of regular FDQN+1 */
-    int         hostlen = 0;
-    int         port;
-    const char* p;
-
-    /* Assume that anything after the last ':' is a port number
-        * And that what is before it is a port number. Should handle IPv6
-        * notation. */
-    p = strrchr(args, ':');
-    if (p != NULL) {
-        hostlen = p - args;
-        if (hostlen >= sizeof(host)) {
-            D("%s: Address too long!", __FUNCTION__);
-            return NULL;
-        }
-        memcpy(host, args, hostlen);
-        host[hostlen] = '\0';
-        args = p + 1;
-    } else {
-        snprintf(host, sizeof host, "127.0.0.1");
-    }
+    D("%s: Port is '%s'", __FUNCTION__, args);
 
     /* Now, look at the port number */
     {
@@ -415,12 +392,9 @@ netPipe_initTcp( void* hwpipe, void* _looper, const char* args )
         if (end == NULL || *end != '\0' || val <= 0 || val > 65535) {
             D("%s: Invalid port number: '%s'", __FUNCTION__, args);
         }
-        port = (int)val;
+        port = (uint16_t)val;
     }
-    if (sock_address_init_resolve(&address, host, port, 0) < 0) {
-        D("%s: Could not resolve address", __FUNCTION__);
-        return NULL;
-    }
+    sock_address_init_inet(&address, SOCK_ADDRESS_INET_LOOPBACK, port);
 
     ret = netPipe_initFromAddress(hwpipe, &address, _looper);
 
