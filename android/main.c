@@ -549,7 +549,7 @@ int main(int argc, char **argv)
             }
 
             /* If -system <name> is used, use it to find the initial image */
-            if (opts->sysdir != NULL) {
+            if (opts->sysdir != NULL && !path_exists(opts->system)) {
                 initImage = _getFullFilePath(opts->sysdir, opts->system);
             } else {
                 initImage = ASTRDUP(opts->system);
