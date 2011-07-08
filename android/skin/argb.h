@@ -39,12 +39,6 @@ mmx_expand16( int  value )
     return _mm_packs_pi32( t1, t1 );
 }
 
-static inline int
-mmx_makescale( double  s )
-{
-    return (int)(s*(1 << 16));
-}
-
 static inline mmx_t
 mmx_mulshift( mmx_t   argb, int  multiplier, int  rshift, mmx_t  zero )
 {
@@ -237,6 +231,8 @@ ARGB_SCALE_GENERIC( ScaleOp*   op )
     int        ix = op->ix;
     int        iy = op->iy;
 
+    _mm_empty();
+
     src_line += (sx >> 16)*4 + (sy >> 16)*src_pitch;
     sx       &= 0xffff;
     sy       &= 0xffff;
@@ -330,6 +326,8 @@ scale_05_to_10( ScaleOp*   op )
     int        sy = op->sy;
     int        ix = op->ix;
     int        iy = op->iy;
+
+    _mm_empty();
 
     src_line += (sx >> 16)*4 + (sy >> 16)*src_pitch;
     sx       &= 0xffff;
@@ -468,6 +466,8 @@ scale_up_bilinear( ScaleOp*  op )
     int        xlimit, ylimit;
     int        h, sx0;
 
+    _mm_empty();
+
     /* the center pixel is at (sx+ix/2, sy+iy/2), we then want to get */
     /* the four nearest source pixels, which are at (0.5,0.5) offsets */
 
@@ -552,6 +552,8 @@ ARGB_SCALE_UP_QUICK_4x4( ScaleOp*  op )
     int        iy = op->iy;
     int        xlimit, ylimit;
     int        h, sx0;
+
+    _mm_empty();
 
     /* the center pixel is at (sx+ix/2, sy+iy/2), we then want to get */
     /* the four nearest source pixels, which are at (0.5,0.5) offsets */
@@ -804,6 +806,8 @@ ARGB_SCALE_NEAREST( ScaleOp*  op )
     int        iy = op->iy;
     int        xlimit, ylimit;
     int        h, sx0;
+
+    _mm_empty();
 
     /* the center pixel is at (sx+ix/2, sy+iy/2), we then want to get */
     /* the four nearest source pixels, which are at (0.5,0.5) offsets */
