@@ -68,7 +68,7 @@ typedef struct {
     int             wakeWanted;
     LoopIo          io[1];
     AsyncConnector  connector[1];
-
+    int             shouldSetSocketOpt;
 } NetPipe;
 
 static void
@@ -192,6 +192,7 @@ netPipe_initFromAddress( void* hwpipe, const SockAddress*  address, Looper* loop
 
     pipe->hwpipe = hwpipe;
     pipe->state  = STATE_INIT;
+    pipe->shouldSetSocketOpt = 0;
 
     {
         AsyncStatus  status;
@@ -244,6 +245,19 @@ netPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuf
     int       buffStart = 0;
     const GoldfishPipeBuffer* buff = buffers;
     const GoldfishPipeBuffer* buffEnd = buff + numBuffers;
+
+#ifdef _WIN32
+    if (pipe->shouldSetSocketOpt == 1) {
+        int sndbuf = 128 * 1024;
+        int len = sizeof(sndbuf);
+        if (setsockopt(pipe->io->fd, SOL_SOCKET, SO_SNDBUF,
+                       (char*)&sndbuf, len) == SOCKET_ERROR) {
+            D("Failed to set SO_SNDBUF to %d error=0x%x\n",
+               sndbuf, WSAGetLastError());
+        }
+        pipe->shouldSetSocketOpt = 0;
+    }
+#endif
 
     for (; buff < buffEnd; buff++)
         count += buff->size;
@@ -461,10 +475,14 @@ static void*
 openglesPipe_init( void* hwpipe, void* _looper, const char* args )
 {
     char temp[32];
+    NetPipe *pipe;
 
     /* For now, simply connect through tcp */
     snprintf(temp, sizeof temp, "%d", DEFAULT_OPENGLES_PORT);
-    return netPipe_initTcp(hwpipe, _looper, temp);
+    pipe = (NetPipe *)netPipe_initTcp(hwpipe, _looper, temp);
+    pipe->shouldSetSocketOpt = 1;
+
+    return pipe;
 }
 
 static const GoldfishPipeFuncs  openglesPipe_funcs = {
