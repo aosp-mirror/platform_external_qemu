@@ -44,6 +44,23 @@ int android_verbose;
 /* Forward declarations */
 static char* getTargetEmulatorPath(const char* progName, const char* avdArch);
 
+#ifdef _WIN32
+static char* quotePath(const char* path);
+#endif
+
+/* The execv() definition in mingw is slightly bogus.
+ * It takes a second argument of type 'const char* const*'
+ * while POSIX mandates char** instead.
+ *
+ * To avoid compiler warnings, define the safe_execv macro
+ * to perform an explicit cast with mingw.
+ */
+#ifdef _WIN32
+#  define safe_execv(_filepath,_argv)  execv((_filepath),(const char* const*)(_argv))
+#else
+#  define safe_execv(_filepath,_argv)  execv((_filepath),(_argv))
+#endif
+
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -109,9 +126,20 @@ int main(int argc, char** argv)
     /* Replace it in our command-line */
     argv[0] = emulatorPath;
 
+#ifdef _WIN32
+    /* Looks like execv() in mingw (or is it MSVCRT.DLL?) doesn't
+     * support a space in argv[0] unless we explicitely quote it.
+     * IMPORTANT: do not quote the first argument to execv() or it will fail.
+     * This was tested on a 32-bit Vista installation.
+     */
+    if (strchr(emulatorPath, ' ')) {
+        argv[0] = quotePath(emulatorPath);
+        D("Quoted emulator binary path: %s\n", emulatorPath);
+    }
+#endif
+
     /* Launch it with the same set of options ! */
-    /* execv() should be available on Windows with mingw32 */
-    execv(emulatorPath, argv);
+    safe_execv(emulatorPath, argv);
 
     /* We could not launch the program ! */
     fprintf(stderr, "Could not launch '%s': %s\n", emulatorPath, strerror(errno));
@@ -167,3 +195,19 @@ getTargetEmulatorPath(const char* progName, const char* avdArch)
     APANIC("Missing arch-specific emulator program: %s\n", temp);
     return NULL;
 }
+
+#ifdef _WIN32
+static char*
+quotePath(const char* path)
+{
+    int   len = strlen(path);
+    char* ret = malloc(len+3);
+
+    ret[0] = '"';
+    memcpy(ret+1, path, len);
+    ret[len+1] = '"';
+    ret[len+2] = '\0';
+
+    return ret;
+}
+#endif /* _WIN32 */
