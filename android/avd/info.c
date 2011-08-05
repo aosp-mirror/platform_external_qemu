@@ -1117,6 +1117,17 @@ avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir )
                 if (skinPath != NULL)
                     break;
             }
+
+            /* or in the parent directory of the system dir */
+            {
+                char* parentDir = path_parent(i->androidOut, 1);
+                if (parentDir != NULL) {
+                    skinPath = _checkSkinSkinsDir(parentDir, skinName);
+                    AFREE(parentDir);
+                    if (skinPath != NULL)
+                        break;
+                }
+            }
         }
 
         /* look in the search paths. For each <dir> in the list,
@@ -1137,6 +1148,7 @@ avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir )
         }
 
         /* We didn't find anything ! */
+        *pSkinName = skinName;
         return;
 
     } while (0);
