@@ -1134,6 +1134,36 @@ skin_window_create( SkinLayout*  slayout, int  x, int  y, double  scale, int  no
 {
     SkinWindow*  window;
 
+    /* If scale is <= 0, we want to check that the window's default size if
+     * not larger than the current screen. Otherwise, we need to compute
+     * a new scale to ensure it is.
+     */
+    if (scale <= 0) {
+        SDL_Rect  monitor;
+        int       screen_w, screen_h;
+        int       win_w = slayout->size.w;
+        int       win_h = slayout->size.h;
+        double    scale_w, scale_h;
+
+        /* To account for things like menu bars, window decorations etc..
+         * We only compute 95% of the real screen size. */
+        SDL_WM_GetMonitorRect(&monitor);
+        screen_w = monitor.w * 0.95;
+        screen_h = monitor.h * 0.95;
+
+        scale_w = 1.0;
+        scale_h = 1.0;
+
+        if (screen_w < win_w && win_w > 1.)
+            scale_w = 1.0 * screen_w / win_w;
+        if (screen_h < win_h && win_h > 1.)
+            scale_h = 1.0 * screen_h / win_h;
+
+        scale = (scale_w <= scale_h) ? scale_w : scale_h;
+
+        VERBOSE_PRINT(init,"autoconfig: -scale %g", scale);
+    }
+
     ANEW0(window);
 
     window->shrink_scale = scale;
@@ -1151,14 +1181,33 @@ skin_window_create( SkinLayout*  slayout, int  x, int  y, double  scale, int  no
     window->y_pos = y;
 
     if (skin_window_reset_internal(window, slayout) < 0) {
-        skin_window_free( window );
+        skin_window_free(window);
         return NULL;
     }
-    //SDL_WM_SetCaption( "Android Emulator", "Android Emulator" );
-
     SDL_WM_SetPos( x, y );
-    if ( !SDL_WM_IsFullyVisible( 1 ) ) {
-        dprint( "emulator window was out of view and was recentred\n" );
+
+    /* Check that the window is fully visible */
+    if ( !window->no_display && !SDL_WM_IsFullyVisible(0) ) {
+        SDL_Rect  monitor;
+        int       win_x, win_y, win_w, win_h;
+        int       new_x, new_y;
+
+        SDL_WM_GetMonitorRect(&monitor);
+        SDL_WM_GetPos(&win_x, &win_y);
+        win_w = window->surface->w;
+        win_h = window->surface->h;
+
+        /* First, we recenter the window */
+        new_x = (monitor.w - win_w)/2;
+        new_y = (monitor.h - win_h)/2;
+
+        /* If it is still too large, we ensure the top-border is visible */
+        if (new_y < 0)
+            new_y = 0;
+
+        /* Done */
+        SDL_WM_SetPos(new_x, new_y);
+        dprint( "emulator window was out of view and was recentered\n" );
     }
 
     return window;
@@ -1315,8 +1364,6 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
 
     if ( layout_init( &layout, slayout ) < 0 )
         return -1;
-
-    disp = window->layout.displays;
 
     layout_done( &window->layout );
     window->layout = layout;
