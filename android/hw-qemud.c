@@ -21,8 +21,7 @@
 #include "charpipe.h"
 #include "cbuffer.h"
 
-//#define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
-#define  D(...)    printf(__VA_ARGS__), printf("\n")
+#define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(qemud)
 
 /* the T(...) macro is used to dump traffic */
@@ -940,7 +939,6 @@ qemud_client_load(QEMUFile* f, QemudService* current_services )
     }
 
     /* re-connect client */
-    // TODO: Save / load is_pipe here!
     QemudClient* c = qemud_service_connect_client(sv, channel);
     if(c == NULL)
         return -EIO;
@@ -1946,7 +1944,7 @@ _qemudPipe_poll(void* opaque)
     QemudClient*  client = pipe->client;
     unsigned ret = PIPE_WAKE_WRITE;
     if (client->ProtocolSelector.Pipe.messages != NULL) {
-        ret |= PIPE_WAKE_WRITE;
+        ret |= PIPE_WAKE_READ;
     }
 
     return ret;
