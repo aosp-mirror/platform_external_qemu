@@ -137,7 +137,17 @@ qemulator_init( QEmulator*       emulator,
     emulator->aconfig     = aconfig;
     emulator->layout_file = skin_file_create_from_aconfig(aconfig, basepath);
     emulator->layout      = emulator->layout_file->layouts;
-    emulator->keyboard    = skin_keyboard_create(opts->charmap, opts->raw_keys);
+    // If we have a custom charmap use it to initialize keyboard.
+    // Otherwise initialize keyboard from configuration settings.
+    // Another way to configure keyboard to use a custom charmap would
+    // be saving a custom charmap name into AConfig's keyboard->charmap
+    // property, and calling single skin_keyboard_create_from_aconfig
+    // routine to initialize keyboard.
+    if (NULL != opts->charmap) {
+        emulator->keyboard = skin_keyboard_create_from_kcm(opts->charmap, opts->raw_keys);
+    } else {
+        emulator->keyboard = skin_keyboard_create_from_aconfig(aconfig, opts->raw_keys);
+    }
     emulator->window      = NULL;
     emulator->win_x       = x;
     emulator->win_y       = y;
