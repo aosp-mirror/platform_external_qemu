@@ -335,9 +335,6 @@ static const struct {
     { NULL, NULL }
 };
 
-/* this is used by hw/events_device.c to send the charmap name to the system */
-const char*    android_skin_keycharmap = NULL;
-
 void
 parse_skin_files(const char*      skinDirPath,
                  const char*      skinName,
@@ -562,8 +559,6 @@ init_sdl_ui(AConfig*         skinConfig,
         fprintf(stderr, "### Error: could not load emulator skin from '%s'\n", skinPath);
         exit(1);
     }
-
-    android_skin_keycharmap = skin_keyboard_charmap_name(qemulator_get()->keyboard);
 
     /* add an onion overlay image if needed */
     if (opts->onion) {
