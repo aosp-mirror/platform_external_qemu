@@ -2124,8 +2124,22 @@ _qemud_char_client_recv( void*  opaque, uint8_t*  msg, int  msglen,
  */
 static void
 _qemud_char_client_close( void*  opaque )
+
 {
-    derror("unexpected qemud char. channel close");
+    QemudClient* client = opaque;
+
+    /* At this point modem driver still uses char pipe to communicate with
+     * hw-qemud, while communication with the guest is done over qemu pipe.
+     * So, when guest disconnects from the qemu pipe, and emulator-side client
+     * goes through the disconnection process, this routine is called, since it
+     * has been set to called during service registration. Unless modem driver
+     * is changed to drop char pipe communication, this routine will be called
+     * due to guest disconnection. As long as the client was a qemu pipe - based
+     * client, it's fine, since we don't really need to do anything in this case.
+     */
+    if (!_is_pipe_client(client)) {
+        derror("unexpected qemud char. channel close");
+    }
 }
 
 
