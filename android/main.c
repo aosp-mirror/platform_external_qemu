@@ -1032,9 +1032,30 @@ int main(int argc, char **argv)
         args[n++] = opts->http_proxy;
     }
 
+    if (!opts->charmap) {
+        /* Try to find a valid charmap name */
+        char* charmap = avdInfo_getCharmapFile(avd, hw->hw_keyboard_charmap);
+        if (charmap != NULL) {
+            D("autoconfig: -charmap %s", charmap);
+            opts->charmap = charmap;
+        }
+    }
+
     if (opts->charmap) {
-        args[n++] = "-charmap";
-        args[n++] = opts->charmap;
+        char charmap_name[AKEYCHARMAP_NAME_SIZE];
+
+        if (!path_exists(opts->charmap)) {
+            derror("Charmap file does not exist: %s", opts->charmap);
+            exit(1);
+        }
+        /* We need to store the charmap name in the hardware configuration.
+         * However, the charmap file itself is only used by the UI component
+         * and doesn't need to be set to the emulation engine.
+         */
+        kcm_extract_charmap_name(opts->charmap, charmap_name,
+                                 sizeof(charmap_name));
+        AFREE(hw->hw_keyboard_charmap);
+        hw->hw_keyboard_charmap = ASTRDUP(charmap_name);
     }
 
     if (opts->memcheck) {
