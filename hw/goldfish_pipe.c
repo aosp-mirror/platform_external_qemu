@@ -15,7 +15,7 @@
 #include "hw/goldfish_device.h"
 #include "qemu-timer.h"
 
-#define  DEBUG 1
+#define  DEBUG 0
 
 /* Set to 1 to debug i/o register reads/writes */
 #define DEBUG_REGS  0
