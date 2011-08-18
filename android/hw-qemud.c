@@ -620,6 +620,22 @@ typedef enum QemudProtocol {
     QEMUD_PROTOCOL_SERIAL
 } QemudProtocol;
 
+/* Descriptor for a QEMUD pipe connection.
+ *
+ * Every time a client connects to the QEMUD via pipe, an instance of this
+ * structure is created to represent a connection used by new pipe client.
+ */
+typedef struct QemudPipe {
+    /* Pipe descriptor. */
+    void*           hwpipe;
+    /* Looper used for I/O */
+    void*           looper;
+    /* Service for this pipe. */
+    QemudService*   service;
+    /* Client for this pipe. */
+    QemudClient*    client;
+} QemudPipe;
+
 struct QemudClient {
     /* Defines protocol, used by the client. */
     QemudProtocol     protocol;
@@ -652,7 +668,7 @@ struct QemudClient {
         } Serial;
         /* Pipe-specific fields. */
         struct {
-            void*               hwpipe;
+            QemudPipe*          qemud_pipe;
             QemudPipeMessage*   messages;
         } Pipe;
     } ProtocolSelector;
@@ -801,6 +817,10 @@ qemud_client_disconnect( void*  opaque )
         char  tmp[128], *p=tmp, *end=p+sizeof(tmp);
         p = bufprint(tmp, end, "disconnect:00");
         _qemud_pipe_send(c, (uint8_t*)tmp, p-tmp);
+        /* We must NULL the client reference in the QemuPipe for this connection,
+         * so if a sudden receive request comes after client has been closed, we
+         * don't blow up. */
+        c->ProtocolSelector.Pipe.qemud_pipe->client = NULL;
     } else if (c->ProtocolSelector.Serial.channel > 0) {
         char  tmp[128], *p=tmp, *end=p+sizeof(tmp);
         p = bufprint(tmp, end, "disconnect:%02x",
@@ -846,7 +866,7 @@ qemud_client_alloc( int               channel_id,
         /* Allocating a pipe client. */
         c->protocol = QEMUD_PROTOCOL_PIPE;
         c->ProtocolSelector.Pipe.messages   = NULL;
-        c->ProtocolSelector.Pipe.hwpipe     = NULL;
+        c->ProtocolSelector.Pipe.qemud_pipe = NULL;
     } else {
         /* Allocating a serial client. */
         c->protocol = QEMUD_PROTOCOL_SERIAL;
@@ -1556,7 +1576,8 @@ _qemud_pipe_cache_buffer(QemudClient* client, const uint8_t*  msg, int  msglen)
         }
         *ins_at = buf;
         /* Notify the pipe that there is data to read. */
-        goldfish_pipe_wake(client->ProtocolSelector.Pipe.hwpipe, PIPE_WAKE_READ);
+        goldfish_pipe_wake(client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
+                           PIPE_WAKE_READ);
     }
 }
 
@@ -1780,22 +1801,6 @@ qemud_load(QEMUFile *f, void* opaque, int version)
  *
  * ----------------------------------------------------------------------------*/
 
-/* Descriptor for a QEMUD pipe connection.
- *
- * Every time a client connects to the QEMUD via pipe, an instance of this
- * structure is created to represent a connection used by new pipe client.
- */
-typedef struct QemudPipe {
-    /* Pipe descriptor. */
-    void*           hwpipe;
-    /* Looper used for I/O */
-    void*           looper;
-    /* Service for this pipe. */
-    QemudService*   service;
-    /* Client for this pipe. */
-    QemudClient*    client;
-} QemudPipe;
-
 /* This is a callback that gets invoked when guest is connecting to the service.
  *
  * Here we will create a new client as well as pipe descriptor representing new
@@ -1834,7 +1839,7 @@ _qemudPipe_init(void* hwpipe, void* _looper, const char* args)
         pipe->looper = _looper;
         pipe->service = sv;
         pipe->client = client;
-        client->ProtocolSelector.Pipe.hwpipe = hwpipe;
+        client->ProtocolSelector.Pipe.qemud_pipe = pipe;
     }
 
     return pipe;
@@ -1848,7 +1853,11 @@ _qemudPipe_closeFromGuest( void* opaque )
     QemudPipe* pipe = opaque;
     QemudClient*  client = pipe->client;
     D("%s", __FUNCTION__);
-    qemud_client_disconnect(client);
+    if (client != NULL) {
+        qemud_client_disconnect(client);
+    } else {
+        D("%s: Unexpected NULL client", __FUNCTION__);
+    }
 }
 
 /* Called when the guest has sent some data to the client.
@@ -1861,6 +1870,11 @@ _qemudPipe_sendBuffers(void* opaque,
     QemudPipe* pipe = opaque;
     QemudClient*  client = pipe->client;
     size_t transferred = 0;
+
+    if (client == NULL) {
+        D("%s: Unexpected NULL client", __FUNCTION__);
+        return -1;
+    }
 
     if (numBuffers == 1) {
         /* Simple case: all data are in one buffer. */
@@ -1898,12 +1912,18 @@ _qemudPipe_recvBuffers(void* opaque, GoldfishPipeBuffer* buffers, int numBuffers
 {
     QemudPipe* pipe = opaque;
     QemudClient*  client = pipe->client;
-    QemudPipeMessage** msg_list = &client->ProtocolSelector.Pipe.messages;
+    QemudPipeMessage** msg_list;
     GoldfishPipeBuffer* buff = buffers;
     GoldfishPipeBuffer* endbuff = buffers + numBuffers;
     size_t sent_bytes = 0;
     size_t off_in_buff = 0;
 
+    if (client == NULL) {
+        D("%s: Unexpected NULL client", __FUNCTION__);
+        return -1;
+    }
+
+    msg_list = &client->ProtocolSelector.Pipe.messages;
     if (*msg_list == NULL) {
         /* No data to send. Let it block until we wake it up with
          * PIPE_WAKE_READ when service sends data to the client. */
@@ -1942,9 +1962,15 @@ _qemudPipe_poll(void* opaque)
 {
     QemudPipe* pipe = opaque;
     QemudClient*  client = pipe->client;
-    unsigned ret = PIPE_WAKE_WRITE;
-    if (client->ProtocolSelector.Pipe.messages != NULL) {
-        ret |= PIPE_WAKE_READ;
+    unsigned ret = 0;
+
+    if (client != NULL) {
+        ret |= PIPE_WAKE_WRITE;
+        if (client->ProtocolSelector.Pipe.messages != NULL) {
+            ret |= PIPE_WAKE_READ;
+        }
+    } else {
+        D("%s: Unexpected NULL client", __FUNCTION__);
     }
 
     return ret;
