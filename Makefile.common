@@ -422,6 +422,7 @@ CORE_MISC_SOURCES = \
     android/qemu-setup.c \
     android/snapshot.c \
     android/utils/timezone.c \
+    android/camera/camera-format-converters.c
 
 $(call gen-hw-config-defs)
 
@@ -438,13 +439,16 @@ endif
 
 ifeq ($(HOST_OS),linux)
     CORE_MISC_SOURCES += usb-linux.c \
-                         qemu-thread.c
+                         qemu-thread.c \
+                         android/camera/camera-capture-linux.c
 else
     CORE_MISC_SOURCES += usb-dummy-android.c
 endif
 
 ifeq ($(HOST_OS),windows)
-  CORE_MISC_SOURCES   += tap-win32.c
+  CORE_MISC_SOURCES   += tap-win32.c \
+                         android/camera/camera-capture-windows.c
+
 else
   CORE_MISC_SOURCES   += posix-aio-compat.c
 endif
