@@ -462,11 +462,14 @@ _hwSensorClient_load( QEMUFile*  f, QemudClient*  client, void*  opaque  )
 }
 
 static QemudClient*
-_hwSensors_connect( void*  opaque, QemudService*  service, int  channel )
+_hwSensors_connect( void*  opaque,
+                    QemudService*  service,
+                    int  channel,
+                    const char* client_param )
 {
     HwSensors*       sensors = opaque;
     HwSensorClient*  cl      = _hwSensorClient_new(sensors);
-    QemudClient*     client  = qemud_client_new(service, channel, cl,
+    QemudClient*     client  = qemud_client_new(service, channel, client_param, cl,
                                                 _hwSensorClient_recv,
                                                 _hwSensorClient_close,
                                                 _hwSensorClient_save,
