@@ -22,8 +22,8 @@
  * camera emulation.
  */
 
-#ifdef _WIN32
-/* Include declarations that are missing in Windows SDK headers. */
+#if defined(_WIN32) || defined(__APPLE__)
+/* Include declarations that are missing in non-Linux headers. */
 #include "android/camera/camera-win.h"
 #endif  /* _WIN32 */
 
