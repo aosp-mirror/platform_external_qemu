@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef _WIN32
-#elif defined(__APPLE__)
+#elif _DARWIN_C_SOURCE
 #else
 #include <linux/videodev2.h>
 #endif

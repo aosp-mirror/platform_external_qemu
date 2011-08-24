@@ -22,7 +22,10 @@
  * camera emulation.
  */
 
-#if defined(_WIN32) || defined(__APPLE__)
+#ifdef _WIN32
+/* Include declarations that are missing in non-Linux headers. */
+#include "android/camera/camera-win.h"
+#elif _DARWIN_C_SOURCE
 /* Include declarations that are missing in non-Linux headers. */
 #include "android/camera/camera-win.h"
 #endif  /* _WIN32 */
