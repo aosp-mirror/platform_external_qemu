@@ -110,6 +110,7 @@ LOCAL_SRC_FILES += \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
 	android/utils/debug.c \
+	android/utils/dll.c \
 	android/utils/dirscanner.c \
 	android/utils/filelock.c \
 	android/utils/ini.c \
