@@ -17,9 +17,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifndef _WIN32
+#ifdef _WIN32
+#elif defined(__APPLE__)
+#else
 #include <linux/videodev2.h>
-#endif  /* _WIN32 */
+#endif
 #include "android/camera/camera-format-converters.h"
 
 /* Describes a convertor for one pixel format to another. */
