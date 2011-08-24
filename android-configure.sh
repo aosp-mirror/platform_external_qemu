@@ -26,6 +26,11 @@ OPTION_DEBUG=no
 OPTION_STATIC=no
 OPTION_MINGW=no
 
+GLES_INCLUDE=
+GLES_LIBS=
+GLES_SUPPORT=no
+GLES_PROBE=yes
+
 HOST_CC=${CC:-gcc}
 OPTION_CC=
 
@@ -67,6 +72,14 @@ for opt do
   ;;
   --arch=*) TARGET_ARCH=$optarg
   ;;
+  --gles-include=*) GLES_INCLUDE=$optarg
+  GLES_SUPPORT=yes
+  ;;
+  --gles-libs=*) GLES_LIBS=$optarg
+  GLES_SUPPORT=yes
+  ;;
+  --no-gles) GLES_PROBE=no
+  ;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -96,6 +109,9 @@ EOF
     echo "  --static                 build a completely static executable"
     echo "  --verbose                verbose configuration"
     echo "  --debug                  build debug version of the emulator"
+    echo "  --gles-include=PATH      specify path to GLES emulation headers"
+    echo "  --gles-libs=PATH         specify path to GLES emulation host libraries"
+    echo "  --no-gles                disable GLES emulation support"
     echo ""
     exit 1
 fi
@@ -124,10 +140,22 @@ if [ "$OPTION_TRY_64" != "yes" ] ; then
     force_32bit_binaries
 fi
 
+case $OS in
+    linux-*)
+        TARGET_DLL_SUFFIX=.so
+        ;;
+    darwin-*)
+        TARGET_DLL_SUFFIX=.dylib
+        ;;
+    windows*)
+        TARGET_DLL_SUFFIX=.dll
+esac
+
 TARGET_OS=$OS
-if [ "$OPTION_MINGW" == "yes" ] ; then
+if [ "$OPTION_MINGW" = "yes" ] ; then
     enable_linux_mingw
     TARGET_OS=windows
+    TARGET_DLL_SUFFIX=.dll
 else
     enable_cygwin
 fi
@@ -145,6 +173,14 @@ check_android_build
 if [ "$OPTION_NO_PREBUILTS" = "yes" ] ; then
     IN_ANDROID_BUILD=no
 fi
+
+# This is the list of static and shared host libraries we need to link
+# against in order to support OpenGLES emulation properly. Note that in
+# the case of a standalone build, we will find these libraries inside the
+# platform build tree and copy them into objs/lib/ automatically, unless
+# you use --gles-libs to point explicitely to a different directory.
+#
+GLES_SHARED_LIBRARIES="libOpenglRender libGLES_CM_translator libGLES_V2_translator libEGL_translator"
 
 if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
     locate_android_prebuilt
@@ -169,6 +205,9 @@ if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
     # finally ensure that our new binary is copied to the 'out'
     # subdirectory as 'emulator'
     HOST_BIN=$(get_android_abs_build_var HOST_OUT_EXECUTABLES)
+    if [ "$TARGET_OS" = "windows" ]; then
+        HOST_BIN=$(echo $HOST_BIN | sed "s%$OS/bin%windows/bin%")
+    fi
     if [ -n "$HOST_BIN" ] ; then
         OPTION_TARGETS="$OPTION_TARGETS $HOST_BIN/emulator$EXE"
         log "Targets    : TARGETS=$OPTION_TARGETS"
@@ -182,8 +221,70 @@ if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
     else
         log "Tools      : Could not locate $TOOLS_PROPS !?"
     fi
+
+    # Try to find the GLES emulation headers and libraries automatically
+    if [ "$GLES_PROBE" = "yes" ]; then
+        GLES_SUPPORT=yes
+        if [ -z "$GLES_INCLUDE" ]; then
+            log "GLES       : Probing for headers"
+            GLES_INCLUDE=$ANDROID_TOP/development/tools/emulator/opengl/host/include
+            if [ -d "$GLES_INCLUDE" ]; then
+                log "GLES       : Headers in $GLES_INCLUDE"
+            else
+                echo "Warning: Could not find OpenGLES emulation include dir: $GLES_INCLUDE"
+                echo "Disabling GLES emulation from this build!"
+                GLES_SUPPORT=no
+            fi
+        fi
+        if [ -z "$GLES_LIBS" ]; then
+            log "GLES       : Probing for host libraries"
+            GLES_LIBS=$(dirname "$HOST_BIN")/lib
+            if [ -d "$GLES_LIBS" ]; then
+                echo "GLES       : Libs in $GLES_LIBS"
+            else
+                echo "Warning: Could nof find OpenGLES emulation libraries in: $GLES_LIBS"
+                echo "Disabling GLES emulation from this build!"
+                GLES_SUPPORT=no
+            fi
+        fi
+    fi
 fi  # IN_ANDROID_BUILD = no
 
+if [ "$GLES_SUPPORT" = "yes" ]; then
+    if [ -z "$GLES_INCLUDE" -o -z "$GLES_LIBS" ]; then
+        echo "ERROR: You must use both --gles-include and --gles-libs at the same time!"
+        echo "       Or use --no-gles to disable its support from this build."
+        exit 1
+    fi
+
+    GLES_HEADER=$GLES_INCLUDE/libOpenglRender/render_api.h
+    if [ ! -f "$GLES_HEADER" ]; then
+        echo "ERROR: Missing OpenGLES emulation header file: $GLES_HEADER"
+        echo "Please fix this by using --gles-include to point to the right directory!"
+        exit 1
+    fi
+
+    mkdir -p objs/lib
+
+    for lib in $GLES_SHARED_LIBRARIES; do
+        GLES_LIB=$GLES_LIBS/${lib}$TARGET_DLL_SUFFIX
+        if [ ! -f "$GLES_LIB" ]; then
+            echo "ERROR: Missing OpenGLES emulation host library: $GLES_LIB"
+            echo "Please fix this by using --gles-libs to point to the right directory!"
+            if [ "$IN_ANDROID_BUILD" = "true" ]; then
+                echo "You might also be missing the library because you forgot to rebuild the whole platform!"
+            fi
+            exit 1
+        fi
+        cp $GLES_LIB objs/lib
+        if [ $? != 0 ]; then
+            echo "ERROR: Could not find required OpenGLES emulation library: $GLES_LIB"
+            exit 1
+        else
+            log "GLES       : Copying $GLES_LIB"
+        fi
+    done
+fi
 
 # we can build the emulator with Cygwin, so enable it
 enable_cygwin
@@ -440,6 +541,11 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     echo "HOST_OS   := windows" >> $config_mk
 fi
 
+if [ "$GLES_INCLUDE" -a "$GLES_LIBS" ]; then
+    echo "QEMU_OPENGLES_INCLUDE    := $GLES_INCLUDE" >> $config_mk
+    echo "QEMU_OPENGLES_LIBS       := $GLES_LIBS"    >> $config_mk
+fi
+
 # Build the config-host.h file
 #
 config_h=objs/config-host.h
@@ -542,6 +648,10 @@ if [ $BSD = 1 ] ; then
 fi
 
 echo "#define CONFIG_ANDROID       1" >> $config_h
+
+if [ "$GLES_INCLUDE" -a "$GLES_LIBS" ]; then
+    echo "#define CONFIG_ANDROID_OPENGLES 1" >> $config_h
+fi
 
 log "Generate   : $config_h"
 
