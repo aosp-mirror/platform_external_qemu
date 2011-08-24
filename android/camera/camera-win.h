@@ -18,7 +18,7 @@
 #define ANDROID_CAMERA_CAMERA_WIN_H_
 
 /*
- * Contains declarations that are missing in Windows SDK headers.
+ * Contains declarations that are missing in non-Linux headers.
  */
 
 /*  Four-character-code (FOURCC) */
