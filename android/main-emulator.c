@@ -41,8 +41,21 @@ int android_verbose;
 #  define D(...)  do{}while(0)
 #endif
 
+/* The extension used by dynamic libraries on the host platform */
+#ifdef _WIN32
+#  define DLL_EXTENSION  ".dll"
+#elif defined(__APPLE__)
+#  define DLL_EXTENSION  ".dylib"
+#else
+#  define DLL_EXTENSION  ".so"
+#endif
+
+#define  GLES_EMULATION_LIB  "libOpenglRender" DLL_EXTENSION
+
 /* Forward declarations */
 static char* getTargetEmulatorPath(const char* progName, const char* avdArch);
+static char* getSharedLibraryPath(const char* progName, const char* libName);
+static void  prependSharedLibraryPath(const char* prefix);
 
 #ifdef _WIN32
 static char* quotePath(const char* path);
@@ -138,6 +151,20 @@ int main(int argc, char** argv)
     }
 #endif
 
+    /* We need to find the location of the GLES emulation shared libraries
+     * and modify either LD_LIBRARY_PATH or PATH accordingly
+     */
+    {
+        char*  sharedLibPath = getSharedLibraryPath(emulatorPath, GLES_EMULATION_LIB);
+
+        if (sharedLibPath != NULL) {
+            D("Found OpenGLES emulation libraries in %s\n", sharedLibPath);
+            prependSharedLibraryPath(sharedLibPath);
+        } else {
+            D("Could not find OpenGLES emulation host libraries!\n");
+        }
+    }
+
     /* Launch it with the same set of options ! */
     safe_execv(emulatorPath, argv);
 
@@ -194,6 +221,107 @@ getTargetEmulatorPath(const char* progName, const char* avdArch)
     /* Otherwise, the program is missing */
     APANIC("Missing arch-specific emulator program: %s\n", temp);
     return NULL;
+}
+
+/* return 1 iff <path>/<filename> exists */
+static int
+probePathForFile(const char* path, const char* filename)
+{
+    char  temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
+    p = bufprint(temp, end, "%s/%s", path, filename);
+    D("Probing for: %s\n", temp);
+    return (p < end && path_exists(temp));
+}
+
+/* Find the directory containing a given shared library required by the
+ * emulator (for GLES emulation). We will probe several directories
+ * that correspond to various use-cases.
+ *
+ * Caller must free() result string. NULL if not found.
+ */
+
+static char*
+getSharedLibraryPath(const char* progName, const char* libName)
+{
+    char* progDir;
+    char* result = NULL;
+    char  temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
+
+    /* Get program's directory name */
+    path_split(progName, &progDir, NULL);
+
+    /* First, try to probe the program's directory itself, this corresponds
+     * to the standalone build with ./android-configure.sh where the script
+     * will copy the host shared library under external/qemu/objs where
+     * the binaries are located.
+     */
+    if (probePathForFile(progDir, libName)) {
+        return progDir;
+    }
+
+    /* Try under $progDir/lib/, this should correspond to the SDK installation
+     * where the binary is under tools/, and the libraries under tools/lib/
+     */
+    {
+        p = bufprint(temp, end, "%s/lib", progDir);
+        if (p < end && probePathForFile(temp, libName)) {
+            result = strdup(temp);
+            goto EXIT;
+        }
+    }
+
+    /* try in $progDir/../lib, this corresponds to the platform build
+     * where the emulator binary is under out/host/<system>/lib and
+     * the libraries are under out/host/<system>/lib
+     */
+    {
+        char* parentDir = path_parent(progDir, 1);
+
+        if (parentDir == NULL) {
+            parentDir = strdup(".");
+        }
+        p = bufprint(temp, end, "%s/lib", parentDir);
+        free(parentDir);
+        if (p < end && probePathForFile(temp, libName)) {
+            result = strdup(temp);
+            goto EXIT;
+        }
+    }
+
+    /* Nothing found! */
+EXIT:
+    free(progDir);
+    return result;
+}
+
+/* Prepend the path in 'prefix' to either LD_LIBRARY_PATH or PATH to
+ * ensure that the shared libraries inside the path will be available
+ * through dlopen() to the emulator program being launched.
+ */
+static void
+prependSharedLibraryPath(const char* prefix)
+{
+    char temp[2048], *p=temp, *end=p+sizeof(temp);
+#ifdef _WIN32
+    const char* path = getenv("PATH");
+    if (path == NULL || path[0] == '\0') {
+        p = bufprint(temp, end, "PATH=%s", prefix);
+    } else {
+        p = bufprint(temp, end, "PATH=%s;%s", prefix);
+    }
+    /* Ignore overflow, this will push some paths out of the variable, but
+     * so be it. */
+    D("Setting %s\n", temp);
+    putenv(temp);
+#else
+    const char* path = getenv("LD_LIBRARY_PATH");
+    if (path != NULL && path[0] != '\0') {
+        p = bufprint(temp, end, "%s:%s", prefix, path);
+        prefix = temp;
+    }
+    setenv("LD_LIBRARY_PATH",prefix,1);
+    D("Setting LD_LIBRARY_PATH=%s\n", prefix);
+#endif
 }
 
 #ifdef _WIN32
