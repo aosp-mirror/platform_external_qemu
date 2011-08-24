@@ -35,6 +35,7 @@
     _VERBOSE_TAG(avd_config,   "android virtual device configuration") \
     _VERBOSE_TAG(sensors,      "emulated sensors") \
     _VERBOSE_TAG(memcheck,     "memory checker") \
+    _VERBOSE_TAG(camera,       "camera") \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
