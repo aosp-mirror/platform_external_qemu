@@ -414,7 +414,7 @@ echo "PREBUILT          := $ANDROID_PREBUILT" >> $config_mk
 PWD=`pwd`
 echo "SRC_PATH          := $PWD" >> $config_mk
 if [ -n "$SDL_CONFIG" ] ; then
-echo "SDL_CONFIG         := $SDL_CONFIG" >> $config_mk
+echo "QEMU_SDL_CONFIG   := $SDL_CONFIG" >> $config_mk
 fi
 echo "CONFIG_COREAUDIO  := $PROBE_COREAUDIO" >> $config_mk
 echo "CONFIG_WINAUDIO   := $PROBE_WINAUDIO" >> $config_mk

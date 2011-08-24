@@ -192,8 +192,9 @@ endif
 
 # Except if we used android-configure.sh --sdl-config=<script>
 #
-ifneq ($(SDL_CONFIG),)
+ifneq ($(QEMU_SDL_CONFIG),)
    BUILD_SDL_FROM_SOURCES := false
+   SDL_CONFIG := $(QEMU_SDL_CONFIG)
 endif
 
 ifneq ($(BUILD_SDL_FROM_SOURCES),true)
