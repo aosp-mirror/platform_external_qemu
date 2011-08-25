@@ -349,9 +349,9 @@ netPipe_poll( void* opaque )
     unsigned  ret  = 0;
 
     if (mask & LOOP_IO_READ)
-        ret |= PIPE_WAKE_READ;
+        ret |= PIPE_POLL_IN;
     if (mask & LOOP_IO_WRITE)
-        ret |= PIPE_WAKE_WRITE;
+        ret |= PIPE_POLL_OUT;
 
     return ret;
 }
