@@ -1965,9 +1965,9 @@ _qemudPipe_poll(void* opaque)
     unsigned ret = 0;
 
     if (client != NULL) {
-        ret |= PIPE_WAKE_WRITE;
+        ret |= PIPE_POLL_OUT;
         if (client->ProtocolSelector.Pipe.messages != NULL) {
-            ret |= PIPE_WAKE_READ;
+            ret |= PIPE_POLL_IN;
         }
     } else {
         D("%s: Unexpected NULL client", __FUNCTION__);

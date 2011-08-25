@@ -85,7 +85,7 @@ typedef struct {
     int          (*recvBuffers)( void* pipe, GoldfishPipeBuffer* buffers, int numBuffers );
 
     /* Called when guest wants to poll the read/write status for the pipe.
-     * Should return a combination of PIPE_WAKE_XXX flags.
+     * Should return a combination of PIPE_POLL_XXX flags.
      */
     unsigned     (*poll)( void* pipe );
 

@@ -323,7 +323,7 @@ pipeConnector_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuf
 static unsigned
 pipeConnector_poll( void* opaque )
 {
-    return PIPE_WAKE_WRITE;
+    return PIPE_POLL_OUT;
 }
 
 static void
@@ -406,7 +406,7 @@ zeroPipe_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers 
 static unsigned
 zeroPipe_poll( void* opaque )
 {
-    return PIPE_WAKE_READ | PIPE_WAKE_WRITE;
+    return PIPE_POLL_IN | PIPE_POLL_OUT;
 }
 
 static void
@@ -597,10 +597,10 @@ pingPongPipe_poll( void* opaque )
     unsigned       ret = 0;
 
     if (pipe->count < pipe->size)
-        ret |= PIPE_WAKE_WRITE;
+        ret |= PIPE_POLL_OUT;
 
     if (pipe->count > 0)
-        ret |= PIPE_WAKE_READ;
+        ret |= PIPE_POLL_IN;
 
     return ret;
 }
@@ -768,10 +768,10 @@ throttlePipe_poll( void* opaque )
     unsigned       ret  = pingPongPipe_poll(&pipe->pingpong);
 
     if (pipe->sendExpiration > 0)
-        ret &= ~PIPE_WAKE_WRITE;
+        ret &= ~PIPE_POLL_OUT;
 
     if (pipe->recvExpiration > 0)
-        ret &= ~PIPE_WAKE_READ;
+        ret &= ~PIPE_POLL_IN;
 
     return ret;
 }
