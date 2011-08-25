@@ -65,6 +65,7 @@
 #include "android/display-core.h"
 #include "android/utils/timezone.h"
 #include "android/snapshot.h"
+#include "android/opengles.h"
 #include "targphys.h"
 #include "tcpdump.h"
 
@@ -3811,6 +3812,29 @@ int main(int argc, char **argv, char **envp)
             }
         }
         nand_add_dev(tmp);
+    }
+
+    /* qemu.gles will be read by the OpenGLES emulation libraries.
+    * If set to 0, the software GLES renderer will be used as a fallback.
+    * If the parameter is undefined, this means the system image runs
+    * inside an emulator that doesn't support GPU emulation at all.
+    */
+    {
+        int  gles_emul = 0;
+
+        if (android_hw->hw_gpu_enabled) {
+            if (android_initOpenglesEmulation() == 0) {
+                gles_emul = 1;
+                android_startOpenglesRenderer(android_hw->hw_lcd_width, android_hw->hw_lcd_height);
+            } else {
+                dwarning("Could not initialize OpenglES emulation, using software renderer.");
+            }
+        }
+        if (gles_emul) {
+            stralloc_add_str(kernel_params, " qemu.gles=1");
+        } else {
+            stralloc_add_str(kernel_params, " qemu.gles=0");
+        }
     }
 
     /* We always force qemu=1 when running inside QEMU */

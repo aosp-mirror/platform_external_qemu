@@ -22,6 +22,7 @@
 #include <math.h>
 
 #include "android/framebuffer.h"
+#include "android/opengles.h"
 
 /* when shrinking, we reduce the pixel ratio by this fixed amount */
 #define  SHRINK_SCALE  0.6
@@ -1140,6 +1141,44 @@ skin_window_show_trackball( SkinWindow*  window, int  enable )
     }
 }
 
+/* Hide the OpenGL ES framebuffer */
+static void
+skin_window_hide_opengles( SkinWindow* window )
+{
+    android_hideOpenglesWindow();
+}
+
+/* Show the OpenGL ES framebuffer window */
+static void
+skin_window_show_opengles( SkinWindow* window )
+{
+    {
+        SDL_SysWMinfo  wminfo;
+        void*          winhandle;
+        ADisplay*      disp = window->layout.displays;
+        SkinRect       drect = disp->rect;
+
+        memset(&wminfo, 0, sizeof(wminfo));
+        SDL_GetWMInfo(&wminfo);
+#ifdef _WIN32
+        winhandle = (void*)wminfo.window;
+#elif defined(CONFIG_DARWIN)
+        winhandle = (void*)wminfo.nsWindowPtr;
+#else
+        winhandle = (void*)wminfo.info.x11.window;
+#endif
+        skin_scaler_get_scaled_rect(window->scaler, &drect, &drect);
+
+        android_showOpenglesWindow(winhandle, drect.pos.x, drect.pos.y,
+                                   drect.size.w, drect.size.h, disp->rotation * -90.);
+    }
+}
+
+static void
+skin_window_redraw_opengles( SkinWindow* window )
+{
+    android_redrawOpenglesWindow();
+}
 
 static int  skin_window_reset_internal (SkinWindow*, SkinLayout*);
 
@@ -1224,6 +1263,8 @@ skin_window_create( SkinLayout*  slayout, int  x, int  y, double  scale, int  no
         dprint( "emulator window was out of view and was recentered\n" );
     }
 
+    skin_window_show_opengles(window);
+
     return window;
 }
 
@@ -1261,6 +1302,9 @@ skin_window_set_title( SkinWindow*  window, const char*  title )
 static void
 skin_window_resize( SkinWindow*  window )
 {
+    if ( !window->no_display )
+        skin_window_hide_opengles(window);
+
     /* now resize window */
     if (window->surface) {
         SDL_FreeSurface(window->surface);
@@ -1342,7 +1386,10 @@ skin_window_resize( SkinWindow*  window )
         }
 
         if (scale == 1.0)
+        {
             window->surface = surface;
+            skin_scaler_set( window->scaler, 1.0, 0, 0 );
+        }
         else
         {
             window_w = (int) ceil(window_w / scale );
@@ -1361,6 +1408,8 @@ skin_window_resize( SkinWindow*  window )
             }
             skin_scaler_set( window->scaler, scale, window->effective_x, window->effective_y );
         }
+
+        skin_window_show_opengles(window);
     }
 }
 
@@ -1552,6 +1601,7 @@ skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
 
             SDL_UpdateRects( window->surface, 1, &rd );
         }
+        skin_window_redraw_opengles( window );
     }
 }
 
@@ -1680,6 +1730,10 @@ skin_window_process_event( SkinWindow*  window, SDL_Event*  ev )
                 add_finger_event( window->finger.pos.x, window->finger.pos.y, 1 );
             }
         }
+        break;
+
+    case SDL_VIDEOEXPOSE:
+        skin_window_redraw_opengles(window);
         break;
     }
 }

@@ -23,6 +23,7 @@
 #include "android/utils/panic.h"
 #include "android/utils/system.h"
 #include "android/async-utils.h"
+#include "android/opengles.h"
 #include "android/looper.h"
 #include "hw/goldfish_pipe.h"
 
@@ -454,7 +455,11 @@ static const GoldfishPipeFuncs  netPipeUnix_funcs = {
 };
 #endif
 
-#define DEFAULT_OPENGLES_PORT  22468
+/* This is set to 1 in android_init_opengles() below, and tested
+ * by openglesPipe_init() to refuse a pipe connection if the function
+ * was never called.
+ */
+static int  _opengles_init;
 
 static void*
 openglesPipe_init( void* hwpipe, void* _looper, const char* args )
@@ -462,8 +467,15 @@ openglesPipe_init( void* hwpipe, void* _looper, const char* args )
     char temp[32];
     NetPipe *pipe;
 
+    if (!_opengles_init) {
+        /* This should never happen, unless there is a bug in the
+         * emulator's initialization, or the system image. */
+        D("Trying to open the OpenGLES pipe without GPU emulation!");
+        return NULL;
+    }
+
     /* For now, simply connect through tcp */
-    snprintf(temp, sizeof temp, "%d", DEFAULT_OPENGLES_PORT);
+    snprintf(temp, sizeof temp, "%d", ANDROID_OPENGLES_BASE_PORT);
     pipe = (NetPipe *)netPipe_initTcp(hwpipe, _looper, temp);
 
     if (pipe != NULL) {
@@ -496,7 +508,6 @@ static const GoldfishPipeFuncs  openglesPipe_funcs = {
     netPipe_wakeOn,
 };
 
-
 void
 android_net_pipes_init(void)
 {
@@ -507,4 +518,14 @@ android_net_pipes_init(void)
     goldfish_pipe_add_type( "unix", looper, &netPipeUnix_funcs );
 #endif
     goldfish_pipe_add_type( "opengles", looper, &openglesPipe_funcs );
+}
+
+int
+android_init_opengles_pipes(void)
+{
+    /* TODO: Check that we can load and initialize the host emulation
+     *        libraries, and return -1 in case of error.
+     */
+    _opengles_init = 1;
+    return 0;
 }

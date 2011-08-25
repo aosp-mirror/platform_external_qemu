@@ -36,6 +36,7 @@
     _VERBOSE_TAG(sensors,      "emulated sensors") \
     _VERBOSE_TAG(memcheck,     "memory checker") \
     _VERBOSE_TAG(camera,       "camera") \
+    _VERBOSE_TAG(gles,         "hardware OpenGLES emulation") \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
