@@ -47,6 +47,8 @@
  */
 #define QEMUD_SAVE_VERSION 1
 
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+
 
 /* define SUPPORT_LEGACY_QEMUD to 1 if you want to support
  * talking to a legacy qemud daemon. See docs/ANDROID-QEMUD.TXT
@@ -641,6 +643,7 @@ struct QemudClient {
     QemudProtocol     protocol;
 
     /* Fields that are common for all protocols. */
+    char*             param;
     void*             clie_opaque;
     QemudClientRecv   clie_recv;
     QemudClientClose  clie_close;
@@ -795,6 +798,28 @@ qemud_client_recv( void*  opaque, uint8_t*  msg, int  msglen )
 static void
 _qemud_pipe_send(QemudClient*  client, const uint8_t*  msg, int  msglen);
 
+/* Frees memory allocated for the qemud client.
+ */
+static void
+_qemud_client_free(QemudClient* c)
+{
+    if ( c != NULL) {
+        if (_is_pipe_client(c)) {
+            /* Free outstanding messages. */
+            QemudPipeMessage** msg_list = &c->ProtocolSelector.Pipe.messages;
+            while (*msg_list != NULL) {
+                QemudPipeMessage* to_free = *msg_list;
+                *msg_list = to_free->next;
+                free(to_free);
+            }
+        }
+        if (c->param != NULL) {
+            free(c->param);
+        }
+        AFREE(c);
+    }
+}
+
 /* disconnect a client. this automatically frees the QemudClient.
  * note that this also removes the client from the global list
  * and from its service's list, if any.
@@ -841,7 +866,7 @@ qemud_client_disconnect( void*  opaque )
         c->service = NULL;
     }
 
-    AFREE(c);
+    _qemud_client_free(c);
 }
 
 /* allocate a new QemudClient object
@@ -850,6 +875,7 @@ qemud_client_disconnect( void*  opaque )
  * indicate that creating client is a pipe client. */
 static QemudClient*
 qemud_client_alloc( int               channel_id,
+                    const char*       client_param,
                     void*             clie_opaque,
                     QemudClientRecv   clie_recv,
                     QemudClientClose  clie_close,
@@ -873,6 +899,7 @@ qemud_client_alloc( int               channel_id,
         c->ProtocolSelector.Serial.serial   = serial;
         c->ProtocolSelector.Serial.channel  = channel_id;
     }
+    c->param       = client_param ? ASTRDUP(client_param) : NULL;
     c->clie_opaque = clie_opaque;
     c->clie_recv   = clie_recv;
     c->clie_close  = clie_close;
@@ -896,7 +923,8 @@ static char* qemud_service_load_name( QEMUFile* f );
 static QemudService* qemud_service_find(  QemudService*  service_list,
                                           const char*    service_name );
 static QemudClient*  qemud_service_connect_client(  QemudService  *sv,
-                                                    int           channel_id);
+                                                    int           channel_id,
+                                                    const char* client_param);
 
 /* Saves the client state needed to re-establish connections on load.
  */
@@ -959,7 +987,7 @@ qemud_client_load(QEMUFile* f, QemudService* current_services )
     }
 
     /* re-connect client */
-    QemudClient* c = qemud_service_connect_client(sv, channel);
+    QemudClient* c = qemud_service_connect_client(sv, channel, NULL);
     if(c == NULL)
         return -EIO;
 
@@ -1106,9 +1134,12 @@ qemud_service_remove_client( QemudService*  s, QemudClient*  c )
  * returns the client or NULL if an error occurred
  */
 static QemudClient*
-qemud_service_connect_client(QemudService *sv, int channel_id)
+qemud_service_connect_client(QemudService *sv,
+                             int channel_id,
+                             const char* client_param)
 {
-    QemudClient* client = sv->serv_connect( sv->serv_opaque, sv, channel_id );
+    QemudClient* client =
+        sv->serv_connect( sv->serv_opaque, sv, channel_id, client_param );
     if (client == NULL) {
         D("%s: registration failed for '%s' service",
           __FUNCTION__, sv->name);
@@ -1297,7 +1328,7 @@ qemud_multiplexer_connect( QemudMultiplexer*  m,
     }
 
     /* connect a new client to the service on the given channel */
-    if (qemud_service_connect_client(sv, channel_id) == NULL)
+    if (qemud_service_connect_client(sv, channel_id, NULL) == NULL)
         return -1;
 
     return 0;
@@ -1506,6 +1537,7 @@ qemud_multiplexer_init( QemudMultiplexer*  mult,
 
     /* setup listener for channel 0 */
     control = qemud_client_alloc( 0,
+                                  NULL,
                                   mult,
                                   qemud_multiplexer_control_recv,
                                   NULL, NULL, NULL,
@@ -1532,6 +1564,7 @@ static QemudMultiplexer  _multiplexer[1];
 QemudClient*
 qemud_client_new( QemudService*     service,
                   int               channelId,
+                  const char*       client_param,
                   void*             clie_opaque,
                   QemudClientRecv   clie_recv,
                   QemudClientClose  clie_close,
@@ -1540,6 +1573,7 @@ qemud_client_new( QemudService*     service,
 {
     QemudMultiplexer*  m = _multiplexer;
     QemudClient*       c = qemud_client_alloc( channelId,
+                                               client_param,
                                                clie_opaque,
                                                clie_recv,
                                                clie_close,
@@ -1813,6 +1847,9 @@ _qemudPipe_init(void* hwpipe, void* _looper, const char* args)
     QemudService* sv = m->services;
     QemudClient* client;
     QemudPipe* pipe = NULL;
+    char service_name[512];
+    const char* client_args;
+    size_t srv_name_len;
 
     /* 'args' passed in this callback represents name of the service the guest is
      * connecting to. It can't be NULL. */
@@ -1821,18 +1858,35 @@ _qemudPipe_init(void* hwpipe, void* _looper, const char* args)
         return NULL;
     }
 
+    /* 'args' contain service name, and optional parameters for the client that
+     * is about to be created in this call. The parameters are separated from the
+     * service name wit ':'. Separate service name from the client param. */
+    client_args = strchr(args, ':');
+    if (client_args != NULL) {
+        srv_name_len = min(client_args - args, sizeof(service_name) - 1);
+        client_args++;  // Past the ':'
+        if (*client_args == '\0') {
+            /* No actual parameters. */
+            client_args = NULL;
+        }
+    } else {
+        srv_name_len = min(strlen(args), sizeof(service_name) - 1);
+    }
+    memcpy(service_name, args, srv_name_len);
+    service_name[srv_name_len] = '\0';
+
     /* Lookup registered service by its name. */
-    while (sv != NULL && strcmp(sv->name, args)) {
+    while (sv != NULL && strcmp(sv->name, service_name)) {
         sv = sv->next;
     }
     if (sv == NULL) {
-        D("%s: Service '%s' has not been registered!", __FUNCTION__, args);
+        D("%s: Service '%s' has not been registered!", __FUNCTION__, service_name);
         return NULL;
     }
 
     /* Create a client for this connection. -1 as a channel ID signals that this
      * is a pipe client. */
-    client = qemud_service_connect_client(sv, -1);
+    client = qemud_service_connect_client(sv, -1, client_args);
     if (client != NULL) {
         ANEW0(pipe);
         pipe->hwpipe = hwpipe;
@@ -1902,8 +1956,6 @@ _qemudPipe_sendBuffers(void* opaque,
 
     return transferred;
 }
-
-#define min(a, b) (((a) < (b)) ? (a) : (b))
 
 /* Called when the guest is reading data from the client.
  */
@@ -2198,7 +2250,7 @@ static QemudClient*
 _qemud_char_service_connect( void*  opaque, QemudService*  sv, int  channel )
 {
     CharDriverState*   cs = opaque;
-    QemudClient*       c  = qemud_client_new( sv, channel,
+    QemudClient*       c  = qemud_client_new( sv, channel, NULL,
                                               cs,
                                               _qemud_char_client_recv,
                                               _qemud_char_client_close,
