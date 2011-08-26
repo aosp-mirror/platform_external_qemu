@@ -466,21 +466,23 @@ openglesPipe_init( void* hwpipe, void* _looper, const char* args )
     snprintf(temp, sizeof temp, "%d", DEFAULT_OPENGLES_PORT);
     pipe = (NetPipe *)netPipe_initTcp(hwpipe, _looper, temp);
 
-    // Disable TCP nagle algorithm to improve throughput of small packets
-    socket_set_nodelay(pipe->io->fd);
+    if (pipe != NULL) {
+        // Disable TCP nagle algorithm to improve throughput of small packets
+        socket_set_nodelay(pipe->io->fd);
 
     // On Win32, adjust buffer sizes
 #ifdef _WIN32
-    {
-        int sndbuf = 128 * 1024;
-        int len = sizeof(sndbuf);
-        if (setsockopt(pipe->io->fd, SOL_SOCKET, SO_SNDBUF,
-                       (char*)&sndbuf, len) == SOCKET_ERROR) {
-            D("Failed to set SO_SNDBUF to %d error=0x%x\n",
-               sndbuf, WSAGetLastError());
+        {
+            int sndbuf = 128 * 1024;
+            int len = sizeof(sndbuf);
+            if (setsockopt(pipe->io->fd, SOL_SOCKET, SO_SNDBUF,
+                        (char*)&sndbuf, len) == SOCKET_ERROR) {
+                D("Failed to set SO_SNDBUF to %d error=0x%x\n",
+                sndbuf, WSAGetLastError());
+            }
         }
-    }
 #endif /* _WIN32 */
+    }
 
     return pipe;
 }
