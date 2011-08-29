@@ -81,6 +81,28 @@ typedef struct {
 
 
 void
+skin_scaler_get_scaled_rect( SkinScaler*  scaler,
+                             SkinRect*    srect,
+                             SkinRect*    drect )
+{
+    int sx = srect->pos.x;
+    int sy = srect->pos.y;
+    int sw = srect->size.w;
+    int sh = srect->size.h;
+    double scale = scaler->scale;
+
+    if (!scaler->valid) {
+        drect[0] = srect[0];
+        return;
+    }
+
+    drect->pos.x = (int)(sx * scale + scaler->xdisp);
+    drect->pos.y = (int)(sy * scale + scaler->ydisp);
+    drect->size.w = (int)(ceil((sx + sw) * scale + scaler->xdisp)) - drect->pos.x;
+    drect->size.h = (int)(ceil((sy + sh) * scale + scaler->ydisp)) - drect->pos.y;
+}
+
+void
 skin_scaler_scale( SkinScaler*   scaler,
                    SDL_Surface*  dst_surface,
                    SDL_Surface*  src_surface,

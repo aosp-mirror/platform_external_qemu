@@ -269,6 +269,7 @@ LOCAL_SRC_FILES := \
     user-events-qemu.c \
     vl-android.c \
     android/console.c \
+    android/opengles.c \
     android/display-core.c \
     android/protocol/attach-ui-proxy.c \
     android/protocol/fb-updates-proxy.c \
@@ -353,6 +354,7 @@ LOCAL_SRC_FILES := \
     android/help.c \
     android/main-common.c \
     android/main.c \
+    android/opengles.c \
     android/protocol/core-commands-qemu.c \
     android/protocol/ui-commands-qemu.c \
     android/
