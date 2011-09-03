@@ -54,6 +54,7 @@
 #include "android/hw-kmsg.h"
 #include "android/hw-pipe-net.h"
 #include "android/hw-qemud.h"
+#include "android/camera/camera-service.h"
 #include "android/charmap.h"
 #include "android/globals.h"
 #include "android/utils/bufprint.h"
@@ -2618,6 +2619,7 @@ int main(int argc, char **argv, char **envp)
     boot_property_init_service();
     android_hw_control_init();
     android_net_pipes_init();
+    android_camera_service_init();
 
 #ifdef CONFIG_KVM
     /* By default, force auto-detection for kvm */

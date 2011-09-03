@@ -424,7 +424,8 @@ CORE_MISC_SOURCES = \
     android/qemu-setup.c \
     android/snapshot.c \
     android/utils/timezone.c \
-    android/camera/camera-format-converters.c
+    android/camera/camera-format-converters.c \
+    android/camera/camera-service.c
 
 $(call gen-hw-config-defs)
 
