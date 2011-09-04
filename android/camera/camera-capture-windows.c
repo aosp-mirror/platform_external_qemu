@@ -18,17 +18,7 @@
  * Contains code capturing video frames from a camera device on Windows.
  * This code uses capXxx API, available via capCreateCaptureWindow.
  */
-/*
-#include <stddef.h>
-#include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <tchar.h>
-*/
-#include "qemu-common.h"
-#include "android/utils/debug.h"
-#include "android/utils/misc.h"
-#include "android/utils/system.h"
+
 #include <vfw.h>
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
@@ -59,8 +49,6 @@ struct WndCameraDevice {
     char*               window_name;
     /* Input channel (video driver index). (default is 0) */
     int                 input_channel;
-    /* Requested pixel format. */
-    uint32_t            req_pixel_format;
 
     /*
      * Set when framework gets initialized.
@@ -71,15 +59,27 @@ struct WndCameraDevice {
     /* DC for frame bitmap manipulation. Null indicates that frames are not
      * being capturing. */
     HDC                 dc;
-    /* Bitmap info for the frames obtained from the video capture driver.
-     * This information will be used when we get bitmap bits via
-     * GetDIBits API. */
+    /* Bitmap info for the frames obtained from the video capture driver. */
     BITMAPINFO*         frame_bitmap;
+     /* Bitmap info to use for GetDIBits calls. We can't really use bitmap info
+      * obtained from the video capture driver, because of the two issues. First,
+      * the driver may return an incompatible 'biCompresstion' value. For instance,
+      * sometimes it returns a "fourcc' pixel format value instead of BI_XXX,
+      * which causes GetDIBits to fail. Second, the bitmap that represents a frame
+      * that has been actually obtained from the device is not necessarily matches
+      * bitmap info that capture driver has returned. Sometimes the captured bitmap
+      * is a 32-bit RGB, while bit count reported by the driver is 16. So, to
+      * address these issues we need to have another bitmap info, that can be used
+      * in GetDIBits calls. */
+    BITMAPINFO*         gdi_bitmap;
     /* Framebuffer large enough to fit the frame. */
     uint8_t*            framebuffer;
-    /* Converter used to convert camera frames to the format
-     * expected by the client. */
-    FormatConverter     converter;
+    /* Framebuffer size. */
+    size_t              framebuffer_size;
+    /* Framebuffer's pixel format. */
+    uint32_t            pixel_format;
+    /* If != 0, frame bitmap is "top-down". If 0, frame bitmap is "bottom-up". */
+    int                 is_top_down;
 };
 
 /*******************************************************************************
@@ -114,9 +114,7 @@ _camera_device_free(WndCameraDevice* cd)
 {
     if (cd != NULL) {
         if (cd->cap_window != NULL) {
-            /* Since connecting to the driver is part of the successful
-             * camera initialization, we're safe to assume that driver
-             * is connected to the capture window. */
+            /* Disconnect from the driver. */
             capDriverDisconnect(cd->cap_window);
 
             if (cd->dc != NULL) {
@@ -128,6 +126,9 @@ _camera_device_free(WndCameraDevice* cd)
             /* Destroy the capturing window. */
             DestroyWindow(cd->cap_window);
             cd->cap_window = NULL;
+        }
+        if (cd->gdi_bitmap != NULL) {
+            free(cd->gdi_bitmap);
         }
         if (cd->frame_bitmap != NULL) {
             free(cd->frame_bitmap);
@@ -144,44 +145,14 @@ _camera_device_free(WndCameraDevice* cd)
     }
 }
 
-static uint32_t
-_camera_device_convertable_format(WndCameraDevice* cd)
-{
-    if (cd != NULL) {
-        switch (cd->header.pixel_format) {
-            case BI_RGB:
-                switch (cd->frame_bitmap->bmiHeader.biBitCount) {
-                    case 24:
-                        return V4L2_PIX_FMT_RGB24;
-                    default:
-                        E("%s: Camera API uses unsupported RGB format RGB%d",
-                          __FUNCTION__, cd->frame_bitmap->bmiHeader.biBitCount * 3);
-                        return 0;
-                }
-                break;
-            default:
-                E("%s: Camera API uses unsupported format %d",
-                  __FUNCTION__, cd->header.pixel_format);
-                break;
-        }
-    } else {
-        E("%s: No descriptor", __FUNCTION__);
-    }
-
-    return 0;
-}
-
 /*******************************************************************************
  *                     CameraDevice API
  ******************************************************************************/
 
 CameraDevice*
-camera_device_open(const char* name,
-                   int inp_channel,
-                   uint32_t pixel_format)
+camera_device_open(const char* name, int inp_channel)
 {
     WndCameraDevice* wcd;
-    size_t format_info_size;
 
     /* Allocate descriptor and initialize windows-specific fields. */
     wcd = _camera_device_alloc();
@@ -197,7 +168,6 @@ camera_device_open(const char* name,
         return NULL;
     }
     wcd->input_channel = inp_channel;
-    wcd->req_pixel_format = pixel_format;
 
     /* Create capture window that is a child of HWND_MESSAGE window.
      * We make it invisible, so it doesn't mess with the UI. Also
@@ -207,71 +177,8 @@ camera_device_open(const char* name,
     wcd->cap_window = capCreateCaptureWindow(wcd->window_name, WS_CHILD, 0, 0,
                                              0, 0, HWND_MESSAGE, 1);
     if (wcd->cap_window == NULL) {
-        E("%s: Unable to create video capturing window: %d",
-          __FUNCTION__, GetLastError());
-        _camera_device_free(wcd);
-        return NULL;
-    }
-
-    /* Connect capture window to the video capture driver. */
-    if (!capDriverConnect(wcd->cap_window, wcd->input_channel)) {
-        /* Unable to connect to a driver. Need to cleanup everything
-         * now since we're not going to receive camera_cleanup() call
-         * after unsuccessful camera initialization. */
-        E("%s: Unable to connect to the video capturing driver #%d: %d",
-          __FUNCTION__, wcd->input_channel, GetLastError());
-        DestroyWindow(wcd->cap_window);
-        wcd->cap_window = NULL;
-        _camera_device_free(wcd);
-        return NULL;
-    }
-
-    /* Get frame information from the driver. */
-    format_info_size = capGetVideoFormatSize(wcd->cap_window);
-    if (format_info_size == 0) {
-        E("%s: Unable to get video format size: %d",
-          __FUNCTION__, GetLastError());
-        return NULL;
-    }
-    wcd->frame_bitmap = (BITMAPINFO*)malloc(format_info_size);
-    if (wcd->frame_bitmap == NULL) {
-        E("%s: Unable to allocate frame bitmap info buffer", __FUNCTION__);
-        _camera_device_free(wcd);
-        return NULL;
-    }
-    if (!capGetVideoFormat(wcd->cap_window, wcd->frame_bitmap,
-        format_info_size)) {
-        E("%s: Unable to obtain video format: %d", __FUNCTION__, GetLastError());
-        _camera_device_free(wcd);
-        return NULL;
-    }
-
-    /* Initialize the common header. */
-    wcd->header.width = wcd->frame_bitmap->bmiHeader.biWidth;
-    wcd->header.height = wcd->frame_bitmap->bmiHeader.biHeight;
-    wcd->header.bpp = wcd->frame_bitmap->bmiHeader.biBitCount;
-    wcd->header.pixel_format = wcd->frame_bitmap->bmiHeader.biCompression;
-    wcd->header.bpl = (wcd->header.width * wcd->header.bpp) / 8;
-    if ((wcd->header.width * wcd->header.bpp) % 8) {
-        // TODO: Is this correct to assume that new line in framebuffer is aligned
-        // to a byte, or is it alogned to a multiple of bytes occupied by a pixel?
-        wcd->header.bpl++;
-    }
-    wcd->header.framebuffer_size = wcd->header.bpl * wcd->header.height;
-
-    /* Lets see if we have a convertor for the format. */
-    wcd->converter = get_format_converted(_camera_device_convertable_format(wcd),
-                                          wcd->req_pixel_format);
-    if (wcd->converter == NULL) {
-        E("%s: No converter available", __FUNCTION__);
-        _camera_device_free(wcd);
-        return NULL;
-    }
-
-    /* Allocate framebuffer. */
-    wcd->framebuffer = (uint8_t*)malloc(wcd->header.framebuffer_size);
-    if (wcd->framebuffer == NULL) {
-        E("%s: Unable to allocate framebuffer", __FUNCTION__);
+        E("%s: Unable to create video capturing window '%s': %d",
+          __FUNCTION__, wcd->window_name, GetLastError());
         _camera_device_free(wcd);
         return NULL;
     }
@@ -280,20 +187,80 @@ camera_device_open(const char* name,
 }
 
 int
-camera_device_start_capturing(CameraDevice* cd)
+camera_device_start_capturing(CameraDevice* cd,
+                              uint32_t pixel_format,
+                              int frame_width,
+                              int frame_height)
 {
     WndCameraDevice* wcd;
+    HBITMAP bm_handle;
+    BITMAP  bitmap;
+    size_t format_info_size;
+
     if (cd == NULL || cd->opaque == NULL) {
         E("%s: Invalid camera device descriptor", __FUNCTION__);
         return -1;
     }
     wcd = (WndCameraDevice*)cd->opaque;
 
-    /* wcd->dc is an indicator of capturin: !NULL - capturing, NULL - not */
+    /* wcd->dc is an indicator of capturing: !NULL - capturing, NULL - not */
     if (wcd->dc != NULL) {
-        /* It's already capturing. */
-        W("%s: Capturing is already on %s", __FUNCTION__, wcd->window_name);
+        W("%s: Capturing is already on on device '%s'",
+          __FUNCTION__, wcd->window_name);
         return 0;
+    }
+
+    /* Connect capture window to the video capture driver. */
+    if (!capDriverConnect(wcd->cap_window, wcd->input_channel)) {
+        E("%s: Unable to connect to the video capturing driver #%d: %d",
+          __FUNCTION__, wcd->input_channel, GetLastError());
+        return -1;
+    }
+
+    /* Get frame information from the driver. */
+    format_info_size = capGetVideoFormatSize(wcd->cap_window);
+    if (format_info_size == 0) {
+        E("%s: Unable to get video format size: %d",
+          __FUNCTION__, GetLastError());
+        return -1;
+    }
+    wcd->frame_bitmap = (BITMAPINFO*)malloc(format_info_size);
+    if (wcd->frame_bitmap == NULL) {
+        E("%s: Unable to allocate frame bitmap info buffer", __FUNCTION__);
+        return -1;
+    }
+    if (!capGetVideoFormat(wcd->cap_window, wcd->frame_bitmap,
+                           format_info_size)) {
+        E("%s: Unable to obtain video format: %d", __FUNCTION__, GetLastError());
+        return -1;
+    }
+
+    if (wcd->frame_bitmap->bmiHeader.biCompression > BI_PNG) {
+        D("%s: Video capturing driver has reported pixel format %.4s",
+          __FUNCTION__, (const char*)&wcd->frame_bitmap->bmiHeader.biCompression);
+    }
+
+    /* Most of the time frame bitmaps come in "bottom-up" form, where its origin
+     * is the lower-left corner. However, it could be in the normal "top-down"
+     * form with the origin in the upper-left corner. So, we must adjust the
+     * biHeight field, since the way "top-down" form is reported here is by
+     * setting biHeight to a negative value. */
+    if (wcd->frame_bitmap->bmiHeader.biHeight < 0) {
+        wcd->frame_bitmap->bmiHeader.biHeight =
+            -wcd->frame_bitmap->bmiHeader.biHeight;
+        wcd->is_top_down = 1;
+    } else {
+        wcd->is_top_down = 0;
+    }
+
+    /* Make sure that frame dimensions match. */
+    if (frame_width != wcd->frame_bitmap->bmiHeader.biWidth ||
+        frame_height != wcd->frame_bitmap->bmiHeader.biHeight) {
+        E("%s: Requested dimensions %dx%d do not match the actual %dx%d",
+          __FUNCTION__, frame_width, frame_height,
+          wcd->frame_bitmap->bmiHeader.biWidth,
+          wcd->frame_bitmap->bmiHeader.biHeight);
+        return -1;
     }
 
     /* Get DC for the capturing window that will be used when we deal with
@@ -304,6 +271,105 @@ camera_device_start_capturing(CameraDevice* cd)
           __FUNCTION__, wcd->window_name, GetLastError());
         return -1;
     }
+
+    /*
+     * At this point we need to grab a frame to properly setup framebuffer, and
+     * calculate pixel format. The problem is that bitmap information obtained
+     * from the driver doesn't necessarily match the actual bitmap we're going to
+     * obtain via capGrabFrame / capEditCopy / GetClipboardData
+     */
+
+    /* Grab a frame, and post it to the clipboard. Not very effective, but this
+     * is how capXxx API is operating. */
+    if (!capGrabFrameNoStop(wcd->cap_window) ||
+        !capEditCopy(wcd->cap_window) ||
+        !OpenClipboard(wcd->cap_window)) {
+        E("%s: Device '%s' is unable to save frame to the clipboard: %d",
+          __FUNCTION__, wcd->window_name, GetLastError());
+        return -1;
+    }
+
+    /* Get bitmap handle saved into clipboard. Note that bitmap is still
+     * owned by the clipboard here! */
+    bm_handle = (HBITMAP)GetClipboardData(CF_BITMAP);
+    if (bm_handle == NULL) {
+        E("%s: Device '%s' is unable to obtain frame from the clipboard: %d",
+          __FUNCTION__, wcd->window_name, GetLastError());
+        CloseClipboard();
+        return -1;
+    }
+
+    /* Get bitmap object that is initialized with the actual bitmap info. */
+    if (!GetObject(bm_handle, sizeof(BITMAP), &bitmap)) {
+        E("%s: Device '%s' is unable to obtain frame's bitmap: %d",
+          __FUNCTION__, wcd->window_name, GetLastError());
+        CloseClipboard();
+        return -1;
+    }
+
+    /* Now that we have all we need in 'bitmap' */
+    CloseClipboard();
+
+    /* Make sure that dimensions match. Othewise - fail. */
+    if (wcd->frame_bitmap->bmiHeader.biWidth != bitmap.bmWidth ||
+        wcd->frame_bitmap->bmiHeader.biHeight != bitmap.bmHeight ) {
+        E("%s: Requested dimensions %dx%d do not match the actual %dx%d",
+          __FUNCTION__, frame_width, frame_height,
+          wcd->frame_bitmap->bmiHeader.biWidth,
+          wcd->frame_bitmap->bmiHeader.biHeight);
+        return -1;
+    }
+
+    /* Create bitmap info that will be used with GetDIBits. */
+    wcd->gdi_bitmap = (BITMAPINFO*)malloc(wcd->frame_bitmap->bmiHeader.biSize);
+    if (wcd->gdi_bitmap == NULL) {
+        E("%s: Unable to allocate gdi bitmap info", __FUNCTION__);
+        return -1;
+    }
+    memcpy(wcd->gdi_bitmap, wcd->frame_bitmap,
+           wcd->frame_bitmap->bmiHeader.biSize);
+    wcd->gdi_bitmap->bmiHeader.biCompression = BI_RGB;
+    wcd->gdi_bitmap->bmiHeader.biBitCount = bitmap.bmBitsPixel;
+    wcd->gdi_bitmap->bmiHeader.biSizeImage = bitmap.bmWidthBytes * bitmap.bmWidth;
+    /* Adjust GDI's bitmap biHeight for proper frame direction ("top-down", or
+     * "bottom-up") We do this trick in order to simplify pixel format conversion
+     * routines, where we always assume "top-down" frames. The trick he is to
+     * have negative biHeight in 'gdi_bitmap' if driver provides "bottom-up"
+     * frames, and positive biHeight in 'gdi_bitmap' if driver provides "top-down"
+     * frames. This way GetGDIBits will always return "top-down" frames. */
+    if (wcd->is_top_down) {
+        wcd->gdi_bitmap->bmiHeader.biHeight =
+            wcd->frame_bitmap->bmiHeader.biHeight;
+    } else {
+        wcd->gdi_bitmap->bmiHeader.biHeight =
+            -wcd->frame_bitmap->bmiHeader.biHeight;
+    }
+
+    /* Allocate framebuffer. */
+    wcd->framebuffer = (uint8_t*)malloc(wcd->gdi_bitmap->bmiHeader.biSizeImage);
+    if (wcd->framebuffer == NULL) {
+        E("%s: Unable to allocate %d bytes for framebuffer",
+          __FUNCTION__, wcd->gdi_bitmap->bmiHeader.biSizeImage);
+        return -1;
+    }
+
+    /* Lets see what pixel format we will use. */
+    if (wcd->gdi_bitmap->bmiHeader.biBitCount == 16) {
+        wcd->pixel_format = V4L2_PIX_FMT_RGB565;
+    } else if (wcd->gdi_bitmap->bmiHeader.biBitCount == 24) {
+        wcd->pixel_format = V4L2_PIX_FMT_RGB24;
+    } else if (wcd->gdi_bitmap->bmiHeader.biBitCount == 32) {
+        wcd->pixel_format = V4L2_PIX_FMT_RGB32;
+    } else {
+        E("%s: Unsupported number of bits per pixel %d",
+          __FUNCTION__, wcd->gdi_bitmap->bmiHeader.biBitCount);
+        return -1;
+    }
+
+    D("%s: Capturing device '%s': %d bytes in %.4s [%dx%d] frame",
+      __FUNCTION__, wcd->window_name, wcd->gdi_bitmap->bmiHeader.biBitCount,
+      (const char*)&wcd->pixel_format, wcd->frame_bitmap->bmiHeader.biWidth,
+      wcd->frame_bitmap->bmiHeader.biHeight);
 
     return 0;
 }
@@ -317,24 +383,29 @@ camera_device_stop_capturing(CameraDevice* cd)
         return -1;
     }
     wcd = (WndCameraDevice*)cd->opaque;
+
+    /* wcd->dc is the indicator of capture. */
     if (wcd->dc == NULL) {
-        W("%s: Windows %s is not captuing video", __FUNCTION__, wcd->window_name);
+        W("%s: Device '%s' is not capturing video",
+          __FUNCTION__, wcd->window_name);
         return 0;
     }
     ReleaseDC(wcd->cap_window, wcd->dc);
     wcd->dc = NULL;
 
+    /* Disconnect from the driver. */
+    capDriverDisconnect(wcd->cap_window);
+
     return 0;
 }
 
 int
-camera_device_read_frame(CameraDevice* cd, uint8_t* buffer)
+camera_device_read_frame(CameraDevice* cd,
+                         ClientFrameBuffer* framebuffers,
+                         int fbs_num)
 {
     WndCameraDevice* wcd;
-    /* Bitmap handle taken from the clipboard. */
     HBITMAP bm_handle;
-    /* Pitmap placed to the clipboard. */
-    BITMAP  bitmap;
 
     /* Sanity checks. */
     if (cd == NULL || cd->opaque == NULL) {
@@ -343,7 +414,7 @@ camera_device_read_frame(CameraDevice* cd, uint8_t* buffer)
     }
     wcd = (WndCameraDevice*)cd->opaque;
     if (wcd->dc == NULL) {
-        W("%s: Windows %s is not captuing video",
+        W("%s: Device '%s' is not captuing video",
           __FUNCTION__, wcd->window_name);
         return -1;
     }
@@ -353,7 +424,7 @@ camera_device_read_frame(CameraDevice* cd, uint8_t* buffer)
     if (!capGrabFrameNoStop(wcd->cap_window) ||
         !capEditCopy(wcd->cap_window) ||
         !OpenClipboard(wcd->cap_window)) {
-        E("%s: %s: Unable to save frame to the clipboard: %d",
+        E("%s: Device '%s' is unable to save frame to the clipboard: %d",
           __FUNCTION__, wcd->window_name, GetLastError());
         return -1;
     }
@@ -361,39 +432,39 @@ camera_device_read_frame(CameraDevice* cd, uint8_t* buffer)
     /* Get bitmap handle saved into clipboard. Note that bitmap is still
      * owned by the clipboard here! */
     bm_handle = (HBITMAP)GetClipboardData(CF_BITMAP);
-    CloseClipboard();
     if (bm_handle == NULL) {
-        E("%s: %s: Unable to obtain frame from the clipboard: %d",
+        E("%s: Device '%s' is unable to obtain frame from the clipboard: %d",
           __FUNCTION__, wcd->window_name, GetLastError());
+        CloseClipboard();
         return -1;
     }
 
-    /* Get bitmap information */
-    if (!GetObject(bm_handle, sizeof(BITMAP), &bitmap)) {
-        E("%s: %s Unable to obtain frame's bitmap: %d",
-          __FUNCTION__, wcd->window_name, GetLastError());
-        return -1;
+    /* Get bitmap buffer. */
+    if (wcd->gdi_bitmap->bmiHeader.biHeight > 0) {
+        wcd->gdi_bitmap->bmiHeader.biHeight = -wcd->gdi_bitmap->bmiHeader.biHeight;
     }
 
-    /* Save bitmap bits to the framebuffer. */
     if (!GetDIBits(wcd->dc, bm_handle, 0, wcd->frame_bitmap->bmiHeader.biHeight,
-                   wcd->framebuffer, wcd->frame_bitmap, DIB_RGB_COLORS)) {
-        E("%s: %s: Unable to transfer frame to the framebuffer: %d",
+                   wcd->framebuffer, wcd->gdi_bitmap, DIB_RGB_COLORS)) {
+        E("%s: Device '%s' is unable to transfer frame to the framebuffer: %d",
           __FUNCTION__, wcd->window_name, GetLastError());
+        CloseClipboard();
         return -1;
     }
 
-    /* Lets see if conversion is required. */
-    if (_camera_device_convertable_format(wcd) == wcd->req_pixel_format) {
-        /* Formats match. Just copy framebuffer over. */
-        memcpy(buffer, wcd->framebuffer, wcd->header.framebuffer_size);
-    } else {
-        /* Formats do not match. Use the converter. */
-        wcd->converter(wcd->framebuffer, wcd->header.width, wcd->header.height,
-                       buffer);
+    if (wcd->gdi_bitmap->bmiHeader.biHeight < 0) {
+        wcd->gdi_bitmap->bmiHeader.biHeight = -wcd->gdi_bitmap->bmiHeader.biHeight;
     }
 
-    return 0;
+    CloseClipboard();
+
+    /* Convert framebuffer. */
+    return convert_frame(wcd->framebuffer,
+                         wcd->pixel_format,
+                         wcd->gdi_bitmap->bmiHeader.biSizeImage,
+                         wcd->frame_bitmap->bmiHeader.biWidth,
+                         wcd->frame_bitmap->bmiHeader.biHeight,
+                         framebuffers, fbs_num);
 }
 
 void
@@ -406,4 +477,55 @@ camera_device_close(CameraDevice* cd)
         WndCameraDevice* wcd = (WndCameraDevice*)cd->opaque;
         _camera_device_free(wcd);
     }
+}
+
+int
+enumerate_camera_devices(CameraInfo* cis, int max)
+{
+    int inp_channel, found = 0;
+
+    for (inp_channel = 0; inp_channel < 10 && found < max; inp_channel++) {
+        char name[256];
+        CameraDevice* cd;
+
+        snprintf(name, sizeof(name), "%s%d", _default_window_name, found);
+        cd = camera_device_open(name, inp_channel);
+        if (cd != NULL) {
+            WndCameraDevice* wcd = (WndCameraDevice*)cd->opaque;
+
+            /* Unfortunately, on Windows we have to start capturing in order to get the
+             * actual frame properties. Note that on Windows camera_device_start_capturing
+             * will ignore the pixel format parameter, since it will be determined during
+             * the course of the routine. Also note that on Windows all frames will be
+             * 640x480. */
+            if (!camera_device_start_capturing(cd, V4L2_PIX_FMT_RGB32, 640, 480)) {
+                camera_device_stop_capturing(cd);
+                /* capXxx API supports only single frame size (always observed 640x480,
+                 * but the actual numbers may vary). */
+                cis[found].frame_sizes = (CameraFrameDim*)malloc(sizeof(CameraFrameDim));
+                if (cis[found].frame_sizes != NULL) {
+                    cis[found].device_name = ASTRDUP(name);
+                    cis[found].inp_channel = inp_channel;
+                    cis[found].frame_sizes->width = wcd->frame_bitmap->bmiHeader.biWidth;
+                    cis[found].frame_sizes->height = wcd->frame_bitmap->bmiHeader.biHeight;
+                    cis[found].frame_sizes_num = 1;
+                    cis[found].pixel_format = wcd->pixel_format;
+                    cis[found].in_use = 0;
+                    found++;
+                } else {
+                    E("%s: Unable to allocate dimensions", __FUNCTION__);
+                }
+            } else {
+                /* No more cameras. */
+                camera_device_close(cd);
+                break;
+            }
+            camera_device_close(cd);
+        } else {
+            /* No more cameras. */
+            break;
+        }
+    }
+
+    return found;
 }

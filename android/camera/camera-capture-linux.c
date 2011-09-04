@@ -23,11 +23,6 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <linux/videodev2.h>
-#include "qemu-common.h"
-#include "android/utils/debug.h"
-#include "android/utils/misc.h"
-#include "android/utils/system.h"
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
 
@@ -46,6 +41,21 @@
 #endif
 
 #define CLEAR(x) memset (&(x), 0, sizeof(x))
+
+/* Pixel format descriptor.
+ * Instances of this descriptor are created during camera device enumeration, and
+ * an instance of this structure describing pixel format chosen for the camera
+ * emulation is saved by the camera factory service to represent an emulating
+ * camera properties.
+ */
+typedef struct QemuPixelFormat {
+    /* Pixel format in V4L2_PIX_FMT_XXX form. */
+    uint32_t        format;
+    /* Frame dimensions supported by this format. */
+    CameraFrameDim* dims;
+    /* Number of frame dimensions supported by this format. */
+    int             dim_num;
+} QemuPixelFormat;
 
 /* Describes a framebuffer. */
 typedef struct CameraFrameBuffer {
@@ -77,8 +87,6 @@ struct LinuxCameraDevice {
     char*                       device_name;
     /* Input channel. (default is 0) */
     int                         input_channel;
-    /* Requested pixel format. */
-    uint32_t                    req_pixel_format;
 
     /*
      * Set by the framework after initializing camera connection.
@@ -88,7 +96,7 @@ struct LinuxCameraDevice {
     int                         handle;
     /* Device capabilities. */
     struct v4l2_capability      caps;
-    /* Actual pixel format reported by the device. */
+    /* Actual pixel format reported by the device when capturing is started. */
     struct v4l2_pix_format      actual_pixel_format;
     /* Defines type of the I/O to use to retrieve frames from the device. */
     CameraIoType                io_type;
@@ -97,6 +105,37 @@ struct LinuxCameraDevice {
     /* Actual number of allocated framebuffers. */
     int                         framebuffer_num;
 };
+
+/* Preferred pixel formats arranged from the most to the least desired.
+ *
+ * More than anything else this array is defined by an existance of format
+ * conversion between the camera supported formats, and formats that are
+ * supported by camera framework in the guest system. Currently, guest supports
+ * only YV12 pixel format for data, and RGB32 for preview. So, this array should
+ * contain only those formats, for which converters are implemented. Generally
+ * speaking, the order in which entries should be arranged in this array matters
+ * only as far as conversion speed is concerned. So, formats with the fastest
+ * converters should be put closer to the top of the array, while slower ones
+ * should be put closer to the bottom. But as far as functionality is concerned,
+ * the orser doesn't matter, and any format can be placed anywhere in this array,
+ * as long as conversion for it exists.
+ */
+static const uint32_t _preferred_formats[] =
+{
+    /* Native format for the emulated camera: no conversion at all. */
+    V4L2_PIX_FMT_YVU420,
+    /* Continue with YCbCr: less math than with RGB */
+    V4L2_PIX_FMT_NV12,
+    V4L2_PIX_FMT_NV21,
+    V4L2_PIX_FMT_YUYV,
+    /* End with RGB. */
+    V4L2_PIX_FMT_RGB32,
+    V4L2_PIX_FMT_RGB24,
+    V4L2_PIX_FMT_RGB565,
+};
+/* Number of entries in _preferred_formats array. */
+static const int _preferred_format_num =
+    sizeof(_preferred_formats)/sizeof(*_preferred_formats);
 
 /*******************************************************************************
  *                     Helper routines
@@ -110,6 +149,41 @@ _xioctl(int fd, int request, void *arg) {
       r = ioctl(fd, request, arg);
   } while (-1 == r && EINTR == errno);
   return r;
+}
+
+/* Frees resource allocated for QemuPixelFormat instance, excluding the instance
+ * itself.
+ */
+static void _qemu_pixel_format_free(QemuPixelFormat* fmt)
+{
+    if (fmt != NULL) {
+        if (fmt->dims != NULL)
+            free(fmt->dims);
+    }
+}
+
+/* Returns an index of the given pixel format in an array containing pixel
+ * format descriptors.
+ * This routine is used to choose a pixel format for a camera device. The idea
+ * is that when the camera service enumerates all pixel formats for all cameras
+ * connected to the host, we need to choose just one, which would be most
+ * appropriate for camera emulation. To do that, the camera service will run
+ * formats, contained in _preferred_formats array against enumerated pixel
+ * formats to pick the first format that match.
+ * Param:
+ *  fmt - Pixel format, for which to obtain the index.
+ *  formats - Array containing list of pixel formats, supported by the camera
+ *      device.
+ *  size - Number of elements in the 'formats' array.
+ * Return:
+ *  Index of the matched entry in the array, or -1 if no entry has been found.
+ */
+static int
+_get_format_index(uint32_t fmt, QemuPixelFormat* formats, int size)
+{
+    int f;
+    for (f = 0; f < size && formats[f].format != fmt; f++);
+    return f < size ? f : -1;
 }
 
 /*******************************************************************************
@@ -154,7 +228,7 @@ _free_framebuffers(CameraFrameBuffer* fb, int num, CameraIoType io_type)
                 break;
 
             default:
-                E("Invalid I/O type %d", io_type);
+                E("%s: Invalid I/O type %d", __FUNCTION__, io_type);
                 break;
         }
     }
@@ -203,7 +277,7 @@ _camera_device_free(LinuxCameraDevice* lcd)
         }
         AFREE(lcd);
     } else {
-        W("%s: No descriptor", __FUNCTION__);
+        E("%s: No descriptor", __FUNCTION__);
     }
 }
 
@@ -226,7 +300,7 @@ _camera_device_mmap_framebuffer(LinuxCameraDevice* cd)
      * than requested. */
     if(_xioctl(cd->handle, VIDIOC_REQBUFS, &req)) {
         if (EINVAL == errno) {
-            D("%s: %s does not support memory mapping",
+            D("%s: Device '%s' does not support memory mapping",
               __FUNCTION__, cd->device_name);
             return 1;
         } else {
@@ -303,7 +377,7 @@ _camera_device_user_framebuffer(LinuxCameraDevice* cd)
      * than requested. */
     if(_xioctl(cd->handle, VIDIOC_REQBUFS, &req)) {
         if (EINVAL == errno) {
-            D("%s: %s does not support user pointers",
+            D("%s: Device '%s' does not support user pointers",
               __FUNCTION__, cd->device_name);
             return 1;
         } else {
@@ -337,7 +411,7 @@ _camera_device_user_framebuffer(LinuxCameraDevice* cd)
         CLEAR(buf);
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory = V4L2_MEMORY_USERPTR;
-        buf.m.userptr = cd->framebuffers[cd->framebuffer_num].data;
+        buf.m.userptr = (unsigned long)cd->framebuffers[cd->framebuffer_num].data;
         buf.length = cd->framebuffers[cd->framebuffer_num].size;
         if (_xioctl(cd->handle, VIDIOC_QBUF, &buf) < 0) {
             E("%s: VIDIOC_QBUF has failed: %s", __FUNCTION__, strerror(errno));
@@ -379,6 +453,12 @@ _camera_device_direct_framebuffer(LinuxCameraDevice* cd)
     return 0;
 }
 
+/* Opens camera device.
+ * Param:
+ *  cd - Camera device descriptor to open the camera for.
+ * Return:
+ *  0 on success, != 0 on failure.
+ */
 static int
 _camera_device_open(LinuxCameraDevice* cd)
 {
@@ -391,14 +471,14 @@ _camera_device_open(LinuxCameraDevice* cd)
     }
 
     if (!S_ISCHR(st.st_mode)) {
-        E("%s: %s is not a device", __FUNCTION__, cd->device_name);
+        E("%s: '%s' is not a device", __FUNCTION__, cd->device_name);
         return -1;
     }
 
     /* Open handle to the device, and query device capabilities. */
     cd->handle = open(cd->device_name, O_RDWR | O_NONBLOCK, 0);
     if (cd->handle < 0) {
-        E("%s: Cannot open camera device '%s': %s\n",
+        E("%s: Cannot open camera device '%s': %s",
           __FUNCTION__, cd->device_name, strerror(errno));
         return -1;
     }
@@ -410,7 +490,7 @@ _camera_device_open(LinuxCameraDevice* cd)
             cd->handle = -1;
             return -1;
         } else {
-            E("%s: Unable to query camera '%s' capabilities",
+            E("%s: Unable to query capabilities for camera device '%s'",
               __FUNCTION__, cd->device_name);
             close(cd->handle);
             cd->handle = -1;
@@ -430,25 +510,270 @@ _camera_device_open(LinuxCameraDevice* cd)
     return 0;
 }
 
+/* Enumerates frame sizes for the given pixel format.
+ * Param:
+ *  cd - Opened camera device descriptor.
+ *  fmt - Pixel format to enum frame sizes for.
+ *  sizes - Upon success contains an array of supported frame sizes. The size of
+ *      the array is defined by the value, returned from this routine. The caller
+ *      is responsible for freeing memory allocated for this array.
+ * Return:
+ *  On success returns number of entries in the 'sizes' array. On failure returns
+ *  a negative value.
+ */
+static int
+_camera_device_enum_format_sizes(LinuxCameraDevice* cd,
+                                 uint32_t fmt,
+                                 CameraFrameDim** sizes)
+{
+    int n;
+    int sizes_num = 0;
+    int out_num = 0;
+    struct v4l2_frmsizeenum size_enum;
+    CameraFrameDim* arr;
+
+    /* Calculate number of supported sizes for the given format. */
+    for (n = 0; ; n++) {
+        size_enum.index = n;
+        size_enum.pixel_format = fmt;
+        if(_xioctl(cd->handle, VIDIOC_ENUM_FRAMESIZES, &size_enum)) {
+            break;
+        }
+        if (size_enum.type == V4L2_FRMSIZE_TYPE_DISCRETE) {
+            /* Size is in the simpe width, height form. */
+            sizes_num++;
+        } else if (size_enum.type == V4L2_FRMSIZE_TYPE_STEPWISE) {
+            /* Sizes are represented as min/max width and height with a step for
+             * each dimension. Since at the end we want to list each supported
+             * size in the array (that's the only format supported by the guest
+             * camera framework), we need to calculate how many array entries
+             * this will generate. */
+            const uint32_t dif_widths =
+                (size_enum.stepwise.max_width - size_enum.stepwise.min_width) /
+                size_enum.stepwise.step_width + 1;
+            const uint32_t dif_heights =
+                (size_enum.stepwise.max_height - size_enum.stepwise.min_height) /
+                size_enum.stepwise.step_height + 1;
+            sizes_num += dif_widths * dif_heights;
+        } else if (size_enum.type == V4L2_FRMSIZE_TYPE_CONTINUOUS) {
+            /* Special stepwise case, when steps are set to 1. We still need to
+             * flatten this for the guest, but the array may be too big.
+             * Fortunately, we don't need to be fancy, so three sizes would be
+             * sufficient here: min, max, and one in the middle. */
+            sizes_num += 3;
+        }
+
+    }
+    if (sizes_num == 0) {
+        return 0;
+    }
+
+    /* Allocate, and initialize the array of supported entries. */
+    *sizes = (CameraFrameDim*)malloc(sizes_num * sizeof(CameraFrameDim));
+    if (*sizes == NULL) {
+        E("%s: Memory allocation failure", __FUNCTION__);
+        return -1;
+    }
+    arr = *sizes;
+    for (n = 0; out_num < sizes_num; n++) {
+        size_enum.index = n;
+        size_enum.pixel_format = fmt;
+        if(_xioctl(cd->handle, VIDIOC_ENUM_FRAMESIZES, &size_enum)) {
+            /* Errors are not welcome here anymore. */
+            E("%s: Unexpected failure while getting pixel dimensions: %s",
+              strerror(errno));
+            free(arr);
+            return -1;
+        }
+
+        if (size_enum.type == V4L2_FRMSIZE_TYPE_DISCRETE) {
+            arr[out_num].width = size_enum.discrete.width;
+            arr[out_num].height = size_enum.discrete.height;
+            out_num++;
+        } else if (size_enum.type == V4L2_FRMSIZE_TYPE_STEPWISE) {
+            uint32_t w;
+            for (w = size_enum.stepwise.min_width;
+                 w <= size_enum.stepwise.max_width;
+                 w += size_enum.stepwise.step_width) {
+                uint32_t h;
+                for (h = size_enum.stepwise.min_height;
+                     h <= size_enum.stepwise.max_height;
+                     h += size_enum.stepwise.step_height) {
+                    arr[out_num].width = w;
+                    arr[out_num].height = h;
+                    out_num++;
+                }
+            }
+        } else if (size_enum.type == V4L2_FRMSIZE_TYPE_CONTINUOUS) {
+            /* min */
+            arr[out_num].width = size_enum.stepwise.min_width;
+            arr[out_num].height = size_enum.stepwise.min_height;
+            out_num++;
+            /* one in the middle */
+            arr[out_num].width =
+                (size_enum.stepwise.min_width + size_enum.stepwise.max_width) / 2;
+            arr[out_num].height =
+                (size_enum.stepwise.min_height + size_enum.stepwise.max_height) / 2;
+            out_num++;
+            /* max */
+            arr[out_num].width = size_enum.stepwise.max_width;
+            arr[out_num].height = size_enum.stepwise.max_height;
+            out_num++;
+        }
+    }
+
+    return out_num;
+}
+
+/* Enumerates pixel formats, supported by the device.
+ * Note that this routine will enumerate only raw (uncompressed) formats.
+ * Param:
+ *  cd - Opened camera device descriptor.
+ *  fmts - Upon success contains an array of supported pixel formats. The size of
+ *      the array is defined by the value, returned from this routine. The caller
+ *      is responsible for freeing memory allocated for this array.
+ * Return:
+ *  On success returns number of entries in the 'fmts' array. On failure returns
+ *  a negative value.
+ */
+static int
+_camera_device_enum_pixel_formats(LinuxCameraDevice* cd, QemuPixelFormat** fmts)
+{
+    int n;
+    int fmt_num = 0;
+    int out_num = 0;
+    struct v4l2_fmtdesc fmt_enum;
+    QemuPixelFormat* arr;
+
+    /* Calculate number of supported formats. */
+    for (n = 0; ; n++) {
+        fmt_enum.index = n;
+        fmt_enum.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        if(_xioctl(cd->handle, VIDIOC_ENUM_FMT, &fmt_enum)) {
+            break;
+        }
+        /* Skip the compressed ones. */
+        if ((fmt_enum.flags & V4L2_FMT_FLAG_COMPRESSED) == 0) {
+            fmt_num++;
+        }
+    }
+    if (fmt_num == 0) {
+        return 0;
+    }
+
+    /* Allocate, and initialize array for enumerated formats. */
+    *fmts = (QemuPixelFormat*)malloc(fmt_num * sizeof(QemuPixelFormat));
+    if (*fmts == NULL) {
+        E("%s: Memory allocation failure", __FUNCTION__);
+        return -1;
+    }
+    arr = *fmts;
+    memset(arr, 0, fmt_num * sizeof(QemuPixelFormat));
+    for (n = 0; out_num < fmt_num; n++) {
+        fmt_enum.index = n;
+        fmt_enum.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        if(_xioctl(cd->handle, VIDIOC_ENUM_FMT, &fmt_enum)) {
+            int nn;
+            /* Errors are not welcome here anymore. */
+            E("%s: Unexpected failure while getting pixel format: %s",
+              strerror(errno));
+            for (nn = 0; nn < out_num; nn++) {
+                _qemu_pixel_format_free(arr + nn);
+            }
+            free(arr);
+            return -1;
+        }
+        /* Skip the compressed ones. */
+        if ((fmt_enum.flags & V4L2_FMT_FLAG_COMPRESSED) == 0) {
+            arr[out_num].format = fmt_enum.pixelformat;
+            /* Enumerate frame dimensions supported for this format. */
+            arr[out_num].dim_num =
+                _camera_device_enum_format_sizes(cd, fmt_enum.pixelformat,
+                                                 &arr[out_num].dims);
+            if (arr[out_num].dim_num > 0) {
+                out_num++;
+            } else if (arr[out_num].dim_num < 0) {
+                int nn;
+                E("Unable to enumerate supported dimensions for pixel format %d",
+                  fmt_enum.pixelformat);
+                for (nn = 0; nn < out_num; nn++) {
+                    _qemu_pixel_format_free(arr + nn);
+                }
+                free(arr);
+                return -1;
+            }
+        }
+    }
+
+    return out_num;
+}
+
+/* Collects information about an opened camera device.
+ * The information collected in this routine contains list of pixel formats,
+ * supported by the device, and list of frame dimensions supported by the camera
+ * for each pixel format.
+ * Param:
+ *  cd - Opened camera device descriptor.
+ *  cis - Upon success contains information collected from the camera device.
+ * Return:
+ *  0 on success, != 0 on failure.
+ */
+static int
+_camera_device_get_info(LinuxCameraDevice* cd, CameraInfo* cis)
+{
+    int f;
+    int chosen = -1;
+    QemuPixelFormat* formats = NULL;
+    int num_pix_fmts = _camera_device_enum_pixel_formats(cd, &formats);
+    if (num_pix_fmts <= 0) {
+        return num_pix_fmts;
+    }
+
+    /* Lets see if camera supports preferred formats */
+    for (f = 0; f < _preferred_format_num; f++) {
+        chosen = _get_format_index(_preferred_formats[f], formats, num_pix_fmts);
+        if (chosen >= 0) {
+            break;
+        }
+    }
+    if (chosen < 0) {
+        /* Camera doesn't support any of the chosen formats. Then it doesn't
+         * matter which one we choose. Lets choose the first one. */
+        chosen = 0;
+    }
+
+    cis->device_name = ASTRDUP(cd->device_name);
+    cis->inp_channel = cd->input_channel;
+    cis->pixel_format = formats[chosen].format;
+    cis->frame_sizes_num = formats[chosen].dim_num;
+    /* Swap instead of copy. */
+    cis->frame_sizes = formats[chosen].dims;
+    formats[chosen].dims = NULL;
+    cis->in_use = 0;
+
+    for (f = 0; f < num_pix_fmts; f++) {
+        _qemu_pixel_format_free(formats + f);
+    }
+    free(formats);
+
+    return 0;
+}
+
 /*******************************************************************************
  *                     CameraDevice API
  ******************************************************************************/
 
 CameraDevice*
-camera_device_open(const char* name,
-                   int inp_channel,
-                   uint32_t pixel_format)
+camera_device_open(const char* name, int inp_channel)
 {
     struct v4l2_cropcap cropcap;
     struct v4l2_crop crop;
-    struct v4l2_format fmt;
     LinuxCameraDevice* cd;
 
     /* Allocate and initialize the descriptor. */
     cd = _camera_device_alloc();
     cd->device_name = name != NULL ? ASTRDUP(name) : ASTRDUP("/dev/video0");
     cd->input_channel = inp_channel;
-    cd->req_pixel_format = pixel_format;
 
     /* Open the device. */
     if (_camera_device_open(cd)) {
@@ -463,45 +788,19 @@ camera_device_open(const char* name,
     crop.c = cropcap.defrect; /* reset to default */
     _xioctl (cd->handle, VIDIOC_S_CROP, &crop);
 
-    /* Image settings. */
-    CLEAR(fmt);
-    fmt.type                = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    fmt.fmt.pix.width       = 0;
-    fmt.fmt.pix.height      = 0;
-    fmt.fmt.pix.pixelformat = 0;
-    if (_xioctl(cd->handle, VIDIOC_G_FMT, &fmt) < 0) {
-        E("%s: Unable to obtain pixel format", __FUNCTION__);
-        _camera_device_free(cd);
-        return NULL;
-    }
-    if (_xioctl(cd->handle, VIDIOC_S_FMT, &fmt) < 0) {
-        char fmt_str[5];
-        memcpy(fmt_str, &cd->req_pixel_format, 4);
-        fmt_str[4] = '\0';
-        E("%s: Camera '%s' does not support requested pixel format '%s'",
-          __FUNCTION__, cd->device_name, fmt_str);
-        _camera_device_free(cd);
-        return NULL;
-    }
-    /* VIDIOC_S_FMT has changed some properties of the structure, adjusting them
-     * to the actual values, supported by the device. */
-    memcpy(&cd->actual_pixel_format, &fmt.fmt.pix,
-           sizeof(cd->actual_pixel_format));
-    {
-        char fmt_str[5];
-        memcpy(fmt_str, &cd->req_pixel_format, 4);
-        fmt_str[4] = '\0';
-        D("%s: Camera '%s' uses pixel format '%s'",
-          __FUNCTION__, cd->device_name, fmt_str);
-    }
-
     return &cd->header;
 }
 
 int
-camera_device_start_capturing(CameraDevice* ccd)
+camera_device_start_capturing(CameraDevice* ccd,
+                              uint32_t pixel_format,
+                              int frame_width,
+                              int frame_height)
 {
+    struct v4l2_format fmt;
     LinuxCameraDevice* cd;
+    char fmt_str[5];
+    int r;
 
     /* Sanity checks. */
     if (ccd == NULL || ccd->opaque == NULL) {
@@ -510,13 +809,37 @@ camera_device_start_capturing(CameraDevice* ccd)
     }
     cd = (LinuxCameraDevice*)ccd->opaque;
 
+    /* Try to set pixel format with the given dimensions. */
+    CLEAR(fmt);
+    fmt.type                = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    fmt.fmt.pix.width       = frame_width;
+    fmt.fmt.pix.height      = frame_height;
+    fmt.fmt.pix.pixelformat = pixel_format;
+    if (_xioctl(cd->handle, VIDIOC_S_FMT, &fmt) < 0) {
+        memcpy(fmt_str, &pixel_format, 4);
+        fmt_str[4] = '\0';
+        E("%s: Camera '%s' does not support pixel format '%s' with dimensions %dx%d",
+          __FUNCTION__, cd->device_name, fmt_str, frame_width, frame_height);
+        return -1;
+    }
+    /* VIDIOC_S_FMT may has changed some properties of the structure. Make sure
+     * that dimensions didn't change. */
+    if (fmt.fmt.pix.width != frame_width || fmt.fmt.pix.height != frame_height) {
+        memcpy(fmt_str, &pixel_format, 4);
+        fmt_str[4] = '\0';
+        E("%s: Dimensions %dx%d are wrong for pixel format '%s'",
+          __FUNCTION__, frame_width, frame_height, fmt_str);
+        return -1;
+    }
+    memcpy(&cd->actual_pixel_format, &fmt.fmt.pix, sizeof(struct v4l2_pix_format));
+
     /*
      * Lets initialize frame buffers, and see what kind of I/O we're going to
      * use to retrieve frames.
      */
 
     /* First, lets see if we can do mapped I/O (as most performant one). */
-    int r = _camera_device_mmap_framebuffer(cd);
+    r = _camera_device_mmap_framebuffer(cd);
     if (r < 0) {
         /* Some critical error has ocurred. Bail out. */
         return -1;
@@ -530,7 +853,7 @@ camera_device_start_capturing(CameraDevice* ccd)
         } else if (r > 0) {
             /* The only thing left for us is direct reading from the device. */
             if (!(cd->caps.capabilities & V4L2_CAP_READWRITE)) {
-                E("%s: Device '%s' doesn't support direct read",
+                E("%s: Don't know how to access frames on device '%s'",
                   __FUNCTION__, cd->device_name);
                 return -1;
             }
@@ -547,12 +870,11 @@ camera_device_start_capturing(CameraDevice* ccd)
         enum v4l2_buf_type type;
         type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         if (_xioctl (cd->handle, VIDIOC_STREAMON, &type) < 0) {
-            E("%s: VIDIOC_STREAMON has failed: %s",
-              __FUNCTION__, strerror(errno));
+            E("%s: VIDIOC_STREAMON on camera '%s' has failed: %s",
+              __FUNCTION__, cd->device_name, strerror(errno));
             return -1;
         }
     }
-
     return 0;
 }
 
@@ -578,8 +900,8 @@ camera_device_stop_capturing(CameraDevice* ccd)
         case CAMERA_IO_USERPTR:
             type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             if (_xioctl(cd->handle, VIDIOC_STREAMOFF, &type) < 0) {
-	            E("%s: VIDIOC_STREAMOFF has failed: %s",
-                  __FUNCTION__, strerror(errno));
+	            E("%s: VIDIOC_STREAMOFF on camera '%s' has failed: %s",
+                  __FUNCTION__, cd->device_name, strerror(errno));
                 return -1;
             }
             break;
@@ -598,7 +920,9 @@ camera_device_stop_capturing(CameraDevice* ccd)
 }
 
 int
-camera_device_read_frame(CameraDevice* ccd, uint8_t* buff)
+camera_device_read_frame(CameraDevice* ccd,
+                         ClientFrameBuffer* framebuffers,
+                         int fbs_num)
 {
     LinuxCameraDevice* cd;
 
@@ -612,6 +936,8 @@ camera_device_read_frame(CameraDevice* ccd, uint8_t* buff)
     if (cd->io_type == CAMERA_IO_DIRECT) {
         /* Read directly from the device. */
         size_t total_read_bytes = 0;
+        /* There is one framebuffer allocated for direct read. */
+        void* buff = cd->framebuffers[0].data;
         do {
             int read_bytes =
                 read(cd->handle, buff + total_read_bytes,
@@ -622,44 +948,55 @@ camera_device_read_frame(CameraDevice* ccd, uint8_t* buff)
                     case EAGAIN:
                         continue;
                     default:
-                        E("%s: Unable to read from the device: %s",
-                          __FUNCTION__, strerror(errno));
+                        E("%s: Unable to read from the camera device '%s': %s",
+                          __FUNCTION__, cd->device_name, strerror(errno));
                         return -1;
                 }
             }
             total_read_bytes += read_bytes;
         } while (total_read_bytes < cd->actual_pixel_format.sizeimage);
-        return 0;
+        /* Convert the read frame into the caller's framebuffers. */
+        return convert_frame(buff, cd->actual_pixel_format.pixelformat,
+                             cd->actual_pixel_format.sizeimage,
+                             cd->actual_pixel_format.width,
+                             cd->actual_pixel_format.height,
+                             framebuffers, fbs_num);
     } else {
         /* Dequeue next buffer from the device. */
         struct v4l2_buffer buf;
+        int res;
         CLEAR(buf);
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory = cd->io_type == CAMERA_IO_MEMMAP ? V4L2_MEMORY_MMAP :
                                                        V4L2_MEMORY_USERPTR;
-        if (_xioctl(cd->handle, VIDIOC_DQBUF, &buf) < 0) {
-            switch (errno) {
-                case EAGAIN:
-                  return 1;
-
-                case EIO:
-                  /* Could ignore EIO, see spec. */
-                  /* fall through */
-                default:
-                  E("%s: VIDIOC_DQBUF has failed: %s",
-                    __FUNCTION__, strerror(errno));
-                  return 1;
+        for (;;) {
+            const int res = _xioctl(cd->handle, VIDIOC_DQBUF, &buf);
+            if (res >= 0) {
+                break;
+            } else if (errno == EAGAIN) {
+                return 1;   // Tells the caller to repeat.
+            } else if (errno != EINTR && errno != EIO) {
+                E("%s: VIDIOC_DQBUF on camera '%s' has failed: %s",
+                  __FUNCTION__, cd->device_name, strerror(errno));
+                return -1;
             }
         }
-        /* Copy frame to the buffer. */
-        memcpy(buff, cd->framebuffers[buf.index].data,
-               cd->framebuffers[buf.index].size);
-        /* Requeue the buffer with the device. */
+
+        /* Convert frame to the receiving buffers. */
+        res = convert_frame(cd->framebuffers[buf.index].data,
+                            cd->actual_pixel_format.pixelformat,
+                            cd->actual_pixel_format.sizeimage,
+                            cd->actual_pixel_format.width,
+                            cd->actual_pixel_format.height,
+                            framebuffers, fbs_num);
+
+        /* Requeue the buffer back to the device. */
         if (_xioctl(cd->handle, VIDIOC_QBUF, &buf) < 0) {
-            D("%s: VIDIOC_QBUF has failed: %s",
-              __FUNCTION__, strerror(errno));
+            W("%s: VIDIOC_QBUF on camera '%s' has failed: %s",
+              __FUNCTION__, cd->device_name, strerror(errno));
         }
-        return 0;
+
+        return res;
     }
 }
 
@@ -675,4 +1012,31 @@ camera_device_close(CameraDevice* ccd)
     } else {
         E("%s: Invalid camera device descriptor", __FUNCTION__);
     }
+}
+
+int
+enumerate_camera_devices(CameraInfo* cis, int max)
+{
+    char dev_name[24];
+    int found = 0;
+    int n;
+
+    for (n = 0; n < max; n++) {
+        CameraDevice* cd;
+
+        sprintf(dev_name, "/dev/video%d", n);
+        cd = camera_device_open(dev_name, 0);
+        if (cd != NULL) {
+            LinuxCameraDevice* lcd = (LinuxCameraDevice*)cd->opaque;
+            if (!_camera_device_get_info(lcd, cis + found)) {
+                cis[found].in_use = 0;
+                found++;
+            }
+            camera_device_close(cd);
+        } else {
+            break;
+        }
+    }
+
+    return found;
 }
