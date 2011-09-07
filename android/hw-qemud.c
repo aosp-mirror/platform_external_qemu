@@ -1987,7 +1987,7 @@ _qemudPipe_recvBuffers(void* opaque, GoldfishPipeBuffer* buffers, int numBuffers
     while (buff != endbuff && *msg_list != NULL) {
         QemudPipeMessage* msg = *msg_list;
         /* Message data fiting the current pipe's buffer. */
-        size_t to_copy = min(msg->size - msg->offset, buff->size);
+        size_t to_copy = min(msg->size - msg->offset, buff->size - off_in_buff);
         memcpy(buff->data + off_in_buff, msg->message + msg->offset, to_copy);
         /* Update offsets. */
         off_in_buff += to_copy;
@@ -2001,6 +2001,7 @@ _qemudPipe_recvBuffers(void* opaque, GoldfishPipeBuffer* buffers, int numBuffers
         if (off_in_buff == buff->size) {
             /* Current pipe buffer is full. Continue with the next one. */
             buff++;
+            off_in_buff = 0;
         }
     }
 
@@ -2247,10 +2248,13 @@ _qemud_char_service_read( void*  opaque, const uint8_t*  from, int  len )
  * data from it.
  */
 static QemudClient*
-_qemud_char_service_connect( void*  opaque, QemudService*  sv, int  channel )
+_qemud_char_service_connect(void*          opaque,
+                            QemudService*  sv,
+                            int            channel,
+                            const char*    client_param )
 {
     CharDriverState*   cs = opaque;
-    QemudClient*       c  = qemud_client_new( sv, channel, NULL,
+    QemudClient*       c  = qemud_client_new( sv, channel, client_param,
                                               cs,
                                               _qemud_char_client_recv,
                                               _qemud_char_client_close,
