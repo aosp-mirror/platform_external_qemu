@@ -41,6 +41,7 @@
 #include "console.h"
 
 #include "goldfish_device.h"
+#include "goldfish_pipe.h"
 
 char* audio_input_source = NULL;
 /* output Bochs bios info messages */
@@ -1046,6 +1047,7 @@ static void pc_init1(ram_addr_t ram_size,
 #ifdef CONFIG_NAND
     goldfish_add_device_no_io(&nand_device);
     nand_dev_init(nand_device.base);
+    pipe_dev_init();
 #endif
 
     {
