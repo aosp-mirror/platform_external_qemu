@@ -154,6 +154,8 @@ OPT_PARAM( list_cores, "<host>", "list running core process" )
 OPT_PARAM( attach_core, "<console socket>", "attach to a running core process" )
 #endif  // CONFIG_STANDALONE_UI
 
+OPT_PARAM( gpu, "<mode>", "set hardware OpenGLES emulation mode" )
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
