@@ -474,10 +474,21 @@ openglesPipe_init( void* hwpipe, void* _looper, const char* args )
         return NULL;
     }
 
-    /* For now, simply connect through tcp */
-    snprintf(temp, sizeof temp, "%d", ANDROID_OPENGLES_BASE_PORT);
-    pipe = (NetPipe *)netPipe_initTcp(hwpipe, _looper, temp);
-
+#ifndef _WIN32
+    if (android_gles_fast_pipes) {
+        char  unix_path[PATH_MAX];
+        android_gles_unix_path(unix_path, sizeof(unix_path), ANDROID_OPENGLES_BASE_PORT);
+        pipe = (NetPipe *)netPipe_initUnix(hwpipe, _looper, unix_path);
+        D("Creating Unix OpenGLES pipe for GPU emulation: %s", unix_path);
+    } else {
+#else /* _WIN32 */
+    {
+#endif
+        /* Connect through TCP as a fallback */
+        snprintf(temp, sizeof temp, "%d", ANDROID_OPENGLES_BASE_PORT);
+        pipe = (NetPipe *)netPipe_initTcp(hwpipe, _looper, temp);
+        D("Creating TCP OpenGLES pipe for GPU emulation!");
+    }
     if (pipe != NULL) {
         // Disable TCP nagle algorithm to improve throughput of small packets
         socket_set_nodelay(pipe->io->fd);

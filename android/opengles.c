@@ -12,6 +12,7 @@
 
 #include "config-host.h"
 #include "android/opengles.h"
+#include "android/globals.h"
 #include <android/utils/debug.h>
 #include <android/utils/path.h>
 #include <android/utils/bufprint.h>
@@ -22,6 +23,9 @@
 #define D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 #define DD(...) VERBOSE_PRINT(gles,__VA_ARGS__)
 
+/* Declared in "android/globals.h" */
+int  android_gles_fast_pipes = 1;
+
 /* Name of the GLES rendering library we're going to use */
 #define RENDERER_LIB_NAME  "libOpenglRender"
 
@@ -30,12 +34,17 @@
  */
 #define DYNLINK_FUNCTIONS  \
   DYNLINK_FUNC(int,initLibrary,(void),(),return) \
+  DYNLINK_FUNC(int,setStreamMode,(int a),(a),return) \
   DYNLINK_FUNC(int,initOpenGLRenderer,(int width, int height, int port),(width,height,port),return) \
   DYNLINK_FUNC(int,createOpenGLSubwindow,(void* window, int x, int y, int width, int height, float zRot),(window,x,y,width,height,zRot),return)\
   DYNLINK_FUNC(int,destroyOpenGLSubwindow,(void),(),return)\
   DYNLINK_FUNC(void,repaintOpenGLDisplay,(void),(),)\
   DYNLINK_FUNC(void,stopOpenGLRenderer,(void),(),)
 
+#define STREAM_MODE_DEFAULT  0
+#define STREAM_MODE_TCP      1
+#define STREAM_MODE_UNIX     2
+#define STREAM_MODE_PIPE     3
 
 #ifndef CONFIG_STANDALONE_UI
 /* Defined in android/hw-pipe-net.c */
@@ -106,6 +115,16 @@ android_initOpenglesEmulation(void)
         goto BAD_EXIT;
     }
 
+    if (android_gles_fast_pipes) {
+#ifdef _WIN32
+        /* XXX: NEED Win32 pipe implementation */
+        setStreamMode(STREAM_MODE_TCP);
+#else
+	setStreamMode(STREAM_MODE_UNIX);
+#endif
+    } else {
+	setStreamMode(STREAM_MODE_TCP);
+    }
     return 0;
 
 BAD_EXIT:
@@ -164,4 +183,19 @@ android_redrawOpenglesWindow(void)
     if (rendererLib) {
         repaintOpenGLDisplay();
     }
+}
+
+void
+android_gles_unix_path(char* buff, size_t buffsize, int port)
+{
+    const char* user = getenv("USER");
+    char *p = buff, *end = buff + buffsize;
+
+    /* The logic here must correspond to the one inside
+     * development/tools/emulator/opengl/shared/libOpenglCodecCommon/UnixStream.cpp */
+    p = bufprint(p, end, "/tmp/");
+    if (user && user[0]) {
+        p = bufprint(p, end, "android-%s/", user);
+    }
+    p = bufprint(p, end, "qemu-gles-%d", port);
 }
