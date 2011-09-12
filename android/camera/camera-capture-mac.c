@@ -19,7 +19,6 @@
  * This code uses capXxx API, available via capCreateCaptureWindow.
  */
 
-#include <vfw.h>
 #include "android/camera/camera-capture.h"
 
 #define  D(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
