@@ -456,6 +456,10 @@ else
   CORE_MISC_SOURCES   += posix-aio-compat.c
 endif
 
+ifeq ($(HOST_OS),darwin)
+  CORE_MISC_SOURCES   += android/camera/camera-capture-mac.c
+endif
+
 LOCAL_SRC_FILES += $(CORE_MISC_SOURCES)
 
 # Required
