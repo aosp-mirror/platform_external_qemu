@@ -485,8 +485,15 @@ int main(int argc, char **argv)
         args[n++] = opts->dns_server;
     }
 
-    hw->disk_ramdisk_path = avdInfo_getRamdiskPath(avd);
-    D("autoconfig: -ramdisk %s", hw->disk_ramdisk_path);
+    /* opts->ramdisk is never NULL (see createAVD) here */
+    if (opts->ramdisk) {
+        AFREE(hw->disk_ramdisk_path);
+        hw->disk_ramdisk_path = ASTRDUP(opts->ramdisk);
+    }
+    else if (!hw->disk_ramdisk_path[0]) {
+        hw->disk_ramdisk_path = avdInfo_getRamdiskPath(avd);
+        D("autoconfig: -ramdisk %s", hw->disk_ramdisk_path);
+    }
 
     /* -partition-size is used to specify the max size of both the system
      * and data partition sizes.
