@@ -1070,6 +1070,21 @@ int main(int argc, char **argv)
         args[n++] = opts->memcheck;
     }
 
+    if (opts->gpu) {
+        const char* gpu = opts->gpu;
+        if (!strcmp(gpu,"on") || !strcmp(gpu,"enabled")) {
+            hw->hw_gpu_enabled = 1;
+        } else if (!strcmp(gpu,"off") || !strcmp(gpu,"disabled")) {
+            hw->hw_gpu_enabled = 0;
+        } else if (!strcmp(gpu,"auto")) {
+            /* Nothing to do */
+        } else {
+            derror("Invalid value for -gpu <mode> parameter: %s\n", gpu);
+            derror("Valid values are: on, off or auto\n");
+            exit(1);
+        }
+    }
+
     /* physical memory is now in hw->hw_ramSize */
 
     hw->avd_name = ASTRDUP(avdInfo_getName(avd));
