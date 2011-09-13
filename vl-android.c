@@ -3734,6 +3734,13 @@ int main(int argc, char **argv, char **envp)
     /* Initialize OpenGLES emulation */
     //android_hw_opengles_init();
 
+    /* Initialize fake camera */
+    if (android_hw->hw_fakeCamera) {
+        boot_property_add("qemu.sf.fake_camera", android_hw->hw_fakeCamera);
+    } else {
+        boot_property_add("qemu.sf.fake_camera", "back");
+    }
+
     if (android_op_cpu_delay) {
         char*   end;
         long    delay = strtol(android_op_cpu_delay, &end, 0);

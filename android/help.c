@@ -1434,25 +1434,38 @@ help_gpu(stralloc_t* out)
     PRINTF(
     "  Use -gpu <mode> to force the mode of hardware OpenGLES emulation.\n"
     "  Valid values for <mode> are:\n\n"
-    
+
     "     on       -> enable GPU emulation\n"
     "     off      -> disable GPU emulation\n"
     "     auto     -> automatic detection\n"
     "     enabled  -> same as 'on'\n"
     "     disabled -> same as 'off'\n\n"
-    
+
     "  Note that enabling GPU emulation if the system image does not support it\n"
     "  will prevent the proper display of the emulated framebuffer.\n\n"
-    
+
     "  You can always disable GPU emulation (i.e. '-gpu off'), and this will\n"
     "  force the virtual device to use the slow software renderer instead.\n"
     "  Note that OpenGLES 2.0 is _not_ supported by it.\n\n"
-    
+
     "  The 'auto' mode is the default. It will only enable GPU emulation if the\n"
     "  virtual device supports it, and the host-side OpenGLES emulation library\n"
     "  could be properly initialized (this can fail when you run the emulator\n"
     "  under certain restricted environments where the program can't access the\n"
     "  graphics sub-system (e.g. head-less servers).\n"
+    );
+}
+
+static void
+help_fake_camera(stralloc_t* out)
+{
+    PRINTF(
+    "  Use -fake-camera <mode> to control fake camera emulation.\n"
+    "  Valid values for <mode> are:\n\n"
+
+    "     off   -> disable fake camera emulation\n"
+    "     back  -> fake camera is facing back\n"
+    "     front -> fake camera is facing front\n\n"
     );
 }
 

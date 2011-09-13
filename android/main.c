@@ -1072,15 +1072,28 @@ int main(int argc, char **argv)
 
     if (opts->gpu) {
         const char* gpu = opts->gpu;
-        if (!strcmp(gpu,"on") || !strcmp(gpu,"enabled")) {
+        if (!strcmp(gpu,"on") || !strcmp(gpu,"enable")) {
             hw->hw_gpu_enabled = 1;
-        } else if (!strcmp(gpu,"off") || !strcmp(gpu,"disabled")) {
+        } else if (!strcmp(gpu,"off") || !strcmp(gpu,"disable")) {
             hw->hw_gpu_enabled = 0;
         } else if (!strcmp(gpu,"auto")) {
             /* Nothing to do */
         } else {
             derror("Invalid value for -gpu <mode> parameter: %s\n", gpu);
             derror("Valid values are: on, off or auto\n");
+            exit(1);
+        }
+    }
+
+    if (opts->fake_camera) {
+        if (!strcmp(opts->fake_camera, "back") ||
+            !strcmp(opts->fake_camera, "front") ||
+            !strcmp(opts->fake_camera, "off")) {
+            hw->hw_fakeCamera = ASTRDUP(opts->fake_camera);
+        } else {
+            derror("Invalid value for -fake-camera <mode> parameter: %s\n",
+                   opts->fake_camera);
+            derror("Valid values are: back, front, or off\n");
             exit(1);
         }
     }
