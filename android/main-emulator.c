@@ -307,12 +307,12 @@ prependSharedLibraryPath(const char* prefix)
     if (path == NULL || path[0] == '\0') {
         p = bufprint(temp, end, "PATH=%s", prefix);
     } else {
-        p = bufprint(temp, end, "PATH=%s;%s", prefix);
+        p = bufprint(temp, end, "PATH=%s;%s", path, prefix);
     }
     /* Ignore overflow, this will push some paths out of the variable, but
      * so be it. */
     D("Setting %s\n", temp);
-    putenv(temp);
+    putenv(strdup(temp));
 #else
     const char* path = getenv("LD_LIBRARY_PATH");
     if (path != NULL && path[0] != '\0') {
