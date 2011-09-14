@@ -808,6 +808,10 @@ camera_device_start_capturing(CameraDevice* ccd,
       return -1;
     }
     cd = (LinuxCameraDevice*)ccd->opaque;
+    if (cd->handle < 0) {
+      E("%s: Camera device is not opened", __FUNCTION__);
+      return -1;
+    }
 
     /* Try to set pixel format with the given dimensions. */
     CLEAR(fmt);
@@ -890,6 +894,10 @@ camera_device_stop_capturing(CameraDevice* ccd)
       return -1;
     }
     cd = (LinuxCameraDevice*)ccd->opaque;
+    if (cd->handle < 0) {
+      E("%s: Camera device is not opened", __FUNCTION__);
+      return -1;
+    }
 
     switch (cd->io_type) {
         case CAMERA_IO_DIRECT:
@@ -916,6 +924,13 @@ camera_device_stop_capturing(CameraDevice* ccd)
         cd->framebuffers = NULL;
         cd->framebuffer_num = 0;
     }
+
+    /* Reopen the device to reset its internal state. It seems that if we don't
+     * do that, an attempt to reinit the device with different frame dimensions
+     * would fail. */
+    close(cd->handle);
+    cd->handle = open(cd->device_name, O_RDWR | O_NONBLOCK, 0);
+
     return 0;
 }
 
@@ -932,6 +947,10 @@ camera_device_read_frame(CameraDevice* ccd,
       return -1;
     }
     cd = (LinuxCameraDevice*)ccd->opaque;
+    if (cd->handle < 0) {
+      E("%s: Camera device is not opened", __FUNCTION__);
+      return -1;
+    }
 
     if (cd->io_type == CAMERA_IO_DIRECT) {
         /* Read directly from the device. */
