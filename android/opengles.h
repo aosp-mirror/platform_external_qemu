@@ -12,6 +12,8 @@
 #ifndef ANDROID_OPENGLES_H
 #define ANDROID_OPENGLES_H
 
+#include <stddef.h>
+
 #define ANDROID_OPENGLES_BASE_PORT  22468
 
 /* Call this function to initialize the hardware opengles emulation.
@@ -33,5 +35,14 @@ void android_redrawOpenglesWindow(void);
 
 /* Stop the renderer process */
 void android_stopOpenglesRenderer(void);
+
+/* set to TRUE if you want to use fast GLES pipes, 0 if you want to
+ * fallback to local TCP ones
+ */
+extern int  android_gles_fast_pipes;
+
+/* Write the path of the Unix socket we're going to use to access GLES on a given <port> */
+/* The result is only valid on Unix systems */
+void android_gles_unix_path(char* buff, size_t buffsize, int port);
 
 #endif /* ANDROID_OPENGLES_H */
