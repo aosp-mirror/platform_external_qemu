@@ -941,6 +941,8 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
      * along the lines. */
     switch (cc->pixel_format) {
         case V4L2_PIX_FMT_YVU420:
+        case V4L2_PIX_FMT_NV12:
+        case V4L2_PIX_FMT_NV21:
             cc->video_frame_size = (cc->pixel_num * 12) / 8;
             break;
 
