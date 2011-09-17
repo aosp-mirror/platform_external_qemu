@@ -2619,7 +2619,6 @@ int main(int argc, char **argv, char **envp)
     boot_property_init_service();
     android_hw_control_init();
     android_net_pipes_init();
-    android_camera_service_init();
 
 #ifdef CONFIG_KVM
     /* By default, force auto-detection for kvm */
@@ -3468,6 +3467,11 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_snapshot_no_time_update:
                 android_snapshot_update_time = 0;
                 break;
+
+            case QEMU_OPTION_list_webcam:
+                android_list_web_cameras();
+                exit(0);
+
             default:
                 os_parse_cmd_args(popt->index, optarg);
             }
@@ -3740,6 +3744,9 @@ int main(int argc, char **argv, char **envp)
     } else {
         boot_property_add("qemu.sf.fake_camera", "back");
     }
+
+    /* Initialize camera emulation. */
+    android_camera_service_init();
 
     if (android_op_cpu_delay) {
         char*   end;

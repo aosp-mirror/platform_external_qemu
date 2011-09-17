@@ -504,7 +504,11 @@ enumerate_camera_devices(CameraInfo* cis, int max)
                  * but the actual numbers may vary). */
                 cis[found].frame_sizes = (CameraFrameDim*)malloc(sizeof(CameraFrameDim));
                 if (cis[found].frame_sizes != NULL) {
+                    char disp_name[24];
+                    sprintf(disp_name, "webcam%d", found);
+                    cis[found].display_name = ASTRDUP(disp_name);
                     cis[found].device_name = ASTRDUP(name);
+                    cis[found].direction = ASTRDUP("front");
                     cis[found].inp_channel = inp_channel;
                     cis[found].frame_sizes->width = wcd->frame_bitmap->bmiHeader.biWidth;
                     cis[found].frame_sizes->height = wcd->frame_bitmap->bmiHeader.biHeight;

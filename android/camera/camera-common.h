@@ -88,12 +88,16 @@ typedef struct CameraFrameDim {
  * representing that camera.
  */
 typedef struct CameraInfo {
+    /* User-friendly camera display name. */
+    char*               display_name;
     /* Device name for the camera. */
     char*               device_name;
     /* Input channel for the camera. */
     int                 inp_channel;
     /* Pixel format chosen for the camera. */
     uint32_t            pixel_format;
+    /* Direction the camera is facing: 'front', or 'back' */
+    char*               direction;
     /* Array of frame sizes supported for the pixel format chosen for the camera.
      * The size of the array is defined by the frame_sizes_num field of this
      * structure. */
@@ -120,8 +124,12 @@ static __inline__ CameraInfo* _camera_info_alloc(void)
 static __inline__ void _camera_info_free(CameraInfo* ci)
 {
     if (ci != NULL) {
+        if (ci->display_name != NULL)
+            free(ci->display_name);
         if (ci->device_name != NULL)
             free(ci->device_name);
+        if (ci->direction != NULL)
+            free(ci->direction);
         if (ci->frame_sizes != NULL)
             free(ci->frame_sizes);
         AFREE(ci);

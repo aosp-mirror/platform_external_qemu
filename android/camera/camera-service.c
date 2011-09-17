@@ -19,6 +19,7 @@
  */
 
 #include "qemu-common.h"
+#include "android/globals.h"  /* for android_hw */
 #include "android/hw-qemud.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
@@ -60,48 +61,6 @@ struct CameraServiceDesc {
 
 /* One and only one camera service. */
 static CameraServiceDesc    _camera_service_desc;
-
-/********************************************************************************
- * CameraServiceDesc API
- *******************************************************************************/
-
-/* Initializes camera service descriptor.
- */
-static void
-_camera_service_init(CameraServiceDesc* csd)
-{
-    /* Enumerate camera devices connected to the host. */
-    csd->camera_count = enumerate_camera_devices(csd->camera_info, MAX_CAMERA);
-    if (csd->camera_count >= 0) {
-        D("%s: Enumerated %d cameras connected to the host",
-          __FUNCTION__, csd->camera_count);
-    } else {
-        E("%s: Unable to enumerate camera devices", __FUNCTION__);
-        csd->camera_count = 0;
-        return;
-    }
-}
-
-/* Gets camera information for the given camera device name.
- * Param:
- *  cs - Initialized camera service descriptor.
- *  name - Camera device name to look up the information for.
- * Return:
- *  Camera information pointer on success, or NULL if no camera information has
- *  been found for the given device name. Note that camera information returned
- *  from this routine is constant.
- */
-static CameraInfo*
-_camera_service_get_camera_info(CameraServiceDesc* cs, const char* name)
-{
-    int n;
-    for (n = 0; n < cs->camera_count; n++) {
-        if (!strcmp(cs->camera_info[n].device_name, name)) {
-            return &cs->camera_info[n];
-        }
-    }
-    return NULL;
-}
 
 /********************************************************************************
  * Helper routines
@@ -357,7 +316,7 @@ _append_string(char** str_buf, size_t* str_buf_size, const char* str)
 }
 
 /* Represents camera information as a string formatted as follows:
- *  'name=<devname> channel=<num> pix=<format> framedims=<widh1xheight1,widh2xheight2,widhNxheightN>\n'
+ *  'name=<devname> channel=<num> pix=<format> facing=<direction> framedims=<widh1xheight1,...>\n'
  * Param:
  *  ci - Camera information descriptor to convert into a string.
  *  str - Pointer to the string buffer where to save the converted camera
@@ -394,6 +353,12 @@ _camera_info_to_string(const CameraInfo* ci, char** str, size_t* str_size) {
     if (res) {
         return res;
     }
+    /* Append direction. */
+    snprintf(tmp, sizeof(tmp), "dir=%s ", ci->direction);
+    res = _append_string(str, str_size, tmp);
+    if (res) {
+        return res;
+    }
     /* Append supported frame sizes. */
     snprintf(tmp, sizeof(tmp), "framedims=%dx%d",
              ci->frame_sizes[0].width, ci->frame_sizes[0].height);
@@ -412,6 +377,143 @@ _camera_info_to_string(const CameraInfo* ci, char** str, size_t* str_size) {
 
     /* Stringified camera properties should end with EOL. */
     return _append_string(str, str_size, "\n");
+}
+
+/* Gets camera information matching a display name.
+ * Param:
+ *  disp_name - Display name to match.
+ *  arr - Array of camera informations.
+ *  num - Number of elements in the array.
+ * Return:
+ *  Matching camera information, or NULL if matching camera information for the
+ *  given display name has not been found in the array.
+ */
+static CameraInfo*
+_camera_info_get_by_display_name(const char* disp_name, CameraInfo* arr, int num)
+{
+    int n;
+    for (n = 0; n < num; n++) {
+        if (arr[n].display_name != NULL && !strcmp(arr[n].display_name, disp_name)) {
+            return &arr[n];
+        }
+    }
+    return NULL;
+}
+
+/* Gets camera information matching a device name.
+ * Param:
+ *  device_name - Device name to match.
+ *  arr - Array of camera informations.
+ *  num - Number of elements in the array.
+ * Return:
+ *  Matching camera information, or NULL if matching camera information for the
+ *  given device name has not been found in the array.
+ */
+static CameraInfo*
+_camera_info_get_by_device_name(const char* device_name, CameraInfo* arr, int num)
+{
+    int n;
+    for (n = 0; n < num; n++) {
+        if (arr[n].device_name != NULL && !strcmp(arr[n].device_name, device_name)) {
+            return &arr[n];
+        }
+    }
+    return NULL;
+}
+
+/********************************************************************************
+ * CameraServiceDesc API
+ *******************************************************************************/
+
+/* Initializes camera service descriptor.
+ */
+static void
+_camera_service_init(CameraServiceDesc* csd)
+{
+    CameraInfo ci[MAX_CAMERA];
+    int connected_cnt;
+    int i;
+
+    /* Enumerate camera devices connected to the host. */
+    memset(ci, 0, sizeof(CameraInfo) * MAX_CAMERA);
+    memset(csd->camera_info, 0, sizeof(CameraInfo) * MAX_CAMERA);
+    csd->camera_count = 0;
+    connected_cnt = enumerate_camera_devices(ci, MAX_CAMERA);
+    if (connected_cnt <= 0) {
+        /* Nothing is connected - nothing to emulate. */
+        return;
+    }
+
+    /* For each webcam declared in hw.ini find an actual camera information
+     * descriptor, and save it into the service descriptor for the emulation. */
+    for (i = 0; i < android_hw->hw_webcam_count; i++) {
+        const char* disp_name;
+        const char* dir;
+        CameraInfo* found;
+
+        switch (i) {
+            case 0:
+                disp_name = android_hw->hw_webcam_0_name;
+                dir = android_hw->hw_webcam_0_direction;
+                break;
+            case 1:
+                disp_name = android_hw->hw_webcam_1_name;
+                dir = android_hw->hw_webcam_1_direction;
+                break;
+            case 2:
+                disp_name = android_hw->hw_webcam_2_name;
+                dir = android_hw->hw_webcam_2_direction;
+                break;
+            case 3:
+                disp_name = android_hw->hw_webcam_3_name;
+                dir = android_hw->hw_webcam_3_direction;
+                break;
+            case 4:
+                disp_name = android_hw->hw_webcam_4_name;
+                dir = android_hw->hw_webcam_4_direction;
+                break;
+            case 5:
+            default:
+                disp_name = android_hw->hw_webcam_5_name;
+                dir = android_hw->hw_webcam_5_direction;
+                break;
+        }
+        found = _camera_info_get_by_display_name(disp_name, ci, connected_cnt);
+        if (found != NULL) {
+            /* Save to the camera info array that will be used by the service.
+             * Note that we just copy everything over, and NULL the source
+             * record. */
+            memcpy(csd->camera_info + csd->camera_count, found, sizeof(CameraInfo));
+            /* Update direction parameter. */
+            if (csd->camera_info[csd->camera_count].direction != NULL) {
+                free(csd->camera_info[csd->camera_count].direction);
+            }
+            csd->camera_info[csd->camera_count].direction = ASTRDUP(dir);
+            D("Camera %d '%s' connected to '%s' facing %s using %.4s pixel format",
+              csd->camera_count, csd->camera_info[csd->camera_count].display_name,
+              csd->camera_info[csd->camera_count].device_name,
+              csd->camera_info[csd->camera_count].direction,
+              (const char*)(&csd->camera_info[csd->camera_count].pixel_format));
+            csd->camera_count++;
+            memset(found, 0, sizeof(CameraInfo));
+        }
+    }
+}
+
+/* Gets camera information for the given camera device name.
+ * Param:
+ *  cs - Initialized camera service descriptor.
+ *  device_name - Camera's device name to look up the information for.
+ * Return:
+ *  Camera information pointer on success, or NULL if no camera information has
+ *  been found for the given device name.
+ */
+static CameraInfo*
+_camera_service_get_camera_info_by_device_name(CameraServiceDesc* cs,
+                                               const char* device_name)
+{
+    return _camera_info_get_by_device_name(device_name, cs->camera_info,
+                                           cs->camera_count);
 }
 
 /********************************************************************************
@@ -743,7 +845,7 @@ _camera_client_create(CameraServiceDesc* csd, const char* param)
      * then use device name reported in the list to connect to an emulated camera
      * service. So, if camera information for the given device name is not found
      * in the array, we fail this connection due to protocol violation. */
-    ci = _camera_service_get_camera_info(csd, cc->device_name);
+    ci = _camera_service_get_camera_info_by_device_name(csd, cc->device_name);
     if (ci == NULL) {
         E("%s: Cannot find camera info for device '%s'",
           __FUNCTION__, cc->device_name);
@@ -1302,4 +1404,26 @@ android_camera_service_init(void)
         }
         D("%s: Registered '%s' qemud service", __FUNCTION__, SERVICE_NAME);
     }
+}
+
+void
+android_list_web_cameras(void)
+{
+    CameraInfo ci[MAX_CAMERA];
+    int connected_cnt;
+    int i;
+
+    /* Enumerate camera devices connected to the host. */
+    connected_cnt = enumerate_camera_devices(ci, MAX_CAMERA);
+    if (connected_cnt <= 0) {
+        return;
+    }
+
+    printf("List of web cameras connected to the computer:\n");
+    for (i = 0; i < connected_cnt; i++) {
+        printf(" Camera '%s' is connected to device '%s' on channel %d using pixel format '%.4s'\n",
+               ci[i].display_name, ci[i].device_name, ci[i].inp_channel,
+               (const char*)&ci[i].pixel_format);
+    }
+    printf("\n");
 }

@@ -1469,6 +1469,25 @@ help_fake_camera(stralloc_t* out)
     );
 }
 
+static void
+help_webcam(stralloc_t* out)
+{
+    PRINTF(
+    "  Use -webcam off to disable web camera emulation.\n"
+    "  Use -webcam list to list web cameras available for emulation.\n"
+    "  Use -webcam name=<name>[,dir=<direction>] to setup parameters for web camera emulation.\n"
+
+    "  <name> platform-independent name identifying emulated camera device.\n"
+    "  use '-webcam list' to obtain the list of emulated camera devices.\n"
+    "  <direction> defines direction the camera is facing. Valid values are:\n\n"
+
+    "     front -> emulate camera as facing front\n"
+    "     back  -> emulate camera as facing back\n\n"
+
+    "  Default direction value for emulated web camera is 'front'\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

@@ -24,4 +24,7 @@
 /* Initializes camera emulation service over qemu pipe. */
 extern void android_camera_service_init(void);
 
+/* Lists available web cameras. */
+extern void android_list_web_cameras(void);
+
 #endif  /* ANDROID_CAMERA_CAMERA_SERVICE_H_ */

@@ -155,6 +155,65 @@ _adjustPartitionSize( const char*  description,
     return convertMBToBytes(imageMB);
 }
 
+/* Parses a -webcam option, extracting 'name', and 'dir' values.
+ * Param:
+ *  param - -webcam option, that should be formatted as such:
+ *      name=<name>[,dir=<direction>]
+ * name, name_size - buffer (and its size) where to receive <name>
+ * dir, dir_size - buffer (and its size) where to receive <direction>
+ */
+static void
+_parseWebcamOption(const char* param,
+                   char* name, size_t name_size,
+                   char* dir, size_t dir_size)
+{
+    const char* dr;
+    const char* wc_opt = param;
+
+    /* Must start with 'name=' */
+    if (strlen(wc_opt) <= 5 || memcmp(wc_opt, "name=", 5)) {
+        derror("Invalid value for -webcam parameter: %s\n", param);
+        exit(1);
+    }
+
+    /* Move on to 'name' value. */
+    wc_opt += 5;
+    dr = strchr(wc_opt, ',');
+    if (dr == NULL) {
+        dr = wc_opt + strlen(wc_opt);
+    }
+
+    /* Make sure that <name> fits */
+    if ((dr - wc_opt) < name_size) {
+        memcpy(name, wc_opt, dr - wc_opt);
+        name[dr - wc_opt] = '\0';
+        if (*dr == '\0') {
+            /* Default direction value is 'front' */
+            strcpy(dir, "front");
+            return;
+        } else {
+            dr++;
+        }
+    } else {
+        derror("Invalid <name> value for -webcam parameter: %s\n", param);
+        exit(1);
+    }
+
+    /* Parse 'dir'. Must begin with 'dir=' */
+    if (strlen(dr) <= 4 || memcmp(dr, "dir=", 4)) {
+        derror("Invalid value for -webcam parameter: %s\n", param);
+        exit(1);
+    }
+    dr += 4;
+    /* Check the bounds, and the values */
+    if (strlen(dr) >= dir_size || (strcmp(dr, "front") && strcmp(dr, "back"))) {
+        derror("Invalid <direction> value for -webcam parameter: %s\n"
+               "Valid values are: 'front', or 'back'\n", param);
+        exit(1);
+    }
+    strcpy(dir, dr);
+}
+
 int main(int argc, char **argv)
 {
     char   tmp[MAX_PATH];
@@ -1096,6 +1155,67 @@ int main(int argc, char **argv)
             derror("Valid values are: back, front, or off\n");
             exit(1);
         }
+    }
+
+    if (opts->webcam != NULL) {
+        ParamList*  pl = opts->webcam;
+        int webcam_num = 0;
+        for ( ; pl != NULL; pl = pl->next ) {
+            char webcam_name[64];
+            char webcam_dir[16];
+            if (!strcmp(pl->param, "off")) {
+                /* If 'off' is passed, there must be no other -webcam options. */
+                if (webcam_num || pl->next != NULL) {
+                    derror("'-webcam off' cannot be combined with other -webcam otions\n");
+                    exit(1);
+                }
+                break;
+            }
+            if (!strcmp(pl->param, "list")) {
+                /* If 'list' is passed, there must be no other -webcam options. */
+                if (webcam_num || pl->next != NULL) {
+                    derror("'-webcam list' cannot be combined with other -webcam otions\n");
+                    exit(1);
+                }
+                args[n++] = "-list-webcam";
+                break;
+            }
+            /* Extract name, and direction */
+            _parseWebcamOption(pl->param, webcam_name, sizeof(webcam_name),
+                               webcam_dir, sizeof(webcam_dir));
+            /* Save them to appropriate field in hw.ini */
+            switch (webcam_num) {
+                case 0:
+                    hw->hw_webcam_0_name        = ASTRDUP(webcam_name);
+                    hw->hw_webcam_0_direction   = ASTRDUP(webcam_dir);
+                    break;
+                case 1:
+                    hw->hw_webcam_1_name        = ASTRDUP(webcam_name);
+                    hw->hw_webcam_1_direction   = ASTRDUP(webcam_dir);
+                    break;
+                case 2:
+                    hw->hw_webcam_2_name        = ASTRDUP(webcam_name);
+                    hw->hw_webcam_2_direction   = ASTRDUP(webcam_dir);
+                    break;
+                case 3:
+                    hw->hw_webcam_3_name        = ASTRDUP(webcam_name);
+                    hw->hw_webcam_3_direction   = ASTRDUP(webcam_dir);
+                    break;
+                case 4:
+                    hw->hw_webcam_4_name        = ASTRDUP(webcam_name);
+                    hw->hw_webcam_4_direction   = ASTRDUP(webcam_dir);
+                    break;
+                case 5:
+                    hw->hw_webcam_5_name        = ASTRDUP(webcam_name);
+                    hw->hw_webcam_5_direction   = ASTRDUP(webcam_dir);
+                    break;
+                default:
+                    derror("Too many -webcam options. Maximum number of -webcam options is 6\n");
+                    exit(1);
+            }
+            webcam_num++;
+        }
+        hw->hw_webcam_count = webcam_num;
     }
 
     /* physical memory is now in hw->hw_ramSize */

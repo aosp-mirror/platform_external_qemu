@@ -1048,6 +1048,9 @@ enumerate_camera_devices(CameraInfo* cis, int max)
         if (cd != NULL) {
             LinuxCameraDevice* lcd = (LinuxCameraDevice*)cd->opaque;
             if (!_camera_device_get_info(lcd, cis + found)) {
+                char user_name[24];
+                sprintf(user_name, "webcam%d", found);
+                cis[found].display_name = ASTRDUP(user_name);
                 cis[found].in_use = 0;
                 found++;
             }
