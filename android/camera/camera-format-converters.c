@@ -42,18 +42,6 @@
  * 0xff000000, and blue color would be masked as 0x0000ff00,
  */
 
-/* Prototype of a routine that converts frame from one pixel format to another.
- * Param:
- *  from - Frame to convert.
- *  width, height - Width, and height of the frame to convert.
- *  to - Buffer to receive the converted frame. Note that this buffer must
- *    be big enough to contain all the converted pixels!
- */
-typedef void (*FormatConverter)(const uint8_t* from,
-                                int width,
-                                int height,
-                                uint8_t* to);
-
 /*
  * RGB565 color masks
  */
@@ -88,38 +76,38 @@ static const uint32_t kBlue8    = 0x000000ff;
 
 #ifndef HOST_WORDS_BIGENDIAN
 /* Extract red, green, and blue bytes from RGB565 word. */
-#define R16(rgb)    (uint8_t)(rgb & kRed5)
-#define G16(rgb)    (uint8_t)((rgb & kGreen6) >> 5)
-#define B16(rgb)    (uint8_t)((rgb & kBlue5) >> 11)
+#define R16(rgb)    (uint8_t)((rgb) & kRed5)
+#define G16(rgb)    (uint8_t)(((rgb) & kGreen6) >> 5)
+#define B16(rgb)    (uint8_t)(((rgb) & kBlue5) >> 11)
 /* Make 8 bits red, green, and blue, extracted from RGB565 word. */
-#define R16_32(rgb) (uint8_t)(((rgb & kRed5) << 3) | ((rgb & kRed5) >> 2))
-#define G16_32(rgb) (uint8_t)(((rgb & kGreen6) >> 3) | ((rgb & kGreen6) >> 9))
-#define B16_32(rgb) (uint8_t)(((rgb & kBlue5) >> 8) | ((rgb & kBlue5) >> 14))
+#define R16_32(rgb) (uint8_t)((((rgb) & kRed5) << 3) | (((rgb) & kRed5) >> 2))
+#define G16_32(rgb) (uint8_t)((((rgb) & kGreen6) >> 3) | (((rgb) & kGreen6) >> 9))
+#define B16_32(rgb) (uint8_t)((((rgb) & kBlue5) >> 8) | (((rgb) & kBlue5) >> 14))
 /* Extract red, green, and blue bytes from RGB32 dword. */
-#define R32(rgb)    (uint8_t)(rgb & kRed8)
-#define G32(rgb)    (uint8_t)(((rgb & kGreen8) >> 8) & 0xff)
-#define B32(rgb)    (uint8_t)(((rgb & kBlue8) >> 16) & 0xff)
+#define R32(rgb)    (uint8_t)((rgb) & kRed8)
+#define G32(rgb)    (uint8_t)((((rgb) & kGreen8) >> 8) & 0xff)
+#define B32(rgb)    (uint8_t)((((rgb) & kBlue8) >> 16) & 0xff)
 /* Build RGB565 word from red, green, and blue bytes. */
-#define RGB565(r, g, b) (uint16_t)(((((uint16_t)(b) << 6) | g) << 5) | r)
+#define RGB565(r, g, b) (uint16_t)(((((uint16_t)(b) << 6) | (g)) << 5) | (r))
 /* Build RGB32 dword from red, green, and blue bytes. */
-#define RGB32(r, g, b) (uint32_t)(((((uint32_t)(b) << 8) | g) << 8) | r)
+#define RGB32(r, g, b) (uint32_t)(((((uint32_t)(b) << 8) | (g)) << 8) | (r))
 #else   // !HOST_WORDS_BIGENDIAN
 /* Extract red, green, and blue bytes from RGB565 word. */
-#define R16(rgb)    (uint8_t)((rgb & kRed5) >> 11)
-#define G16(rgb)    (uint8_t)((rgb & kGreen6) >> 5)
-#define B16(rgb)    (uint8_t)(rgb & kBlue5)
+#define R16(rgb)    (uint8_t)(((rgb) & kRed5) >> 11)
+#define G16(rgb)    (uint8_t)(((rgb) & kGreen6) >> 5)
+#define B16(rgb)    (uint8_t)((rgb) & kBlue5)
 /* Make 8 bits red, green, and blue, extracted from RGB565 word. */
-#define R16_32(rgb) (uint8_t)(((rgb & kRed5) >> 8) | ((rgb & kRed5) >> 14))
-#define G16_32(rgb) (uint8_t)(((rgb & kGreen6) >> 3) | ((rgb & kGreen6) >> 9))
-#define B16_32(rgb) (uint8_t)(((rgb & kBlue5) << 3) | ((rgb & kBlue5) >> 2))
+#define R16_32(rgb) (uint8_t)((((rgb) & kRed5) >> 8) | (((rgb) & kRed5) >> 14))
+#define G16_32(rgb) (uint8_t)((((rgb) & kGreen6) >> 3) | (((rgb) & kGreen6) >> 9))
+#define B16_32(rgb) (uint8_t)((((rgb) & kBlue5) << 3) | (((rgb) & kBlue5) >> 2))
 /* Extract red, green, and blue bytes from RGB32 dword. */
-#define R32(rgb)    (uint8_t)((rgb & kRed8) >> 16)
-#define G32(rgb)    (uint8_t)((rgb & kGreen8) >> 8)
-#define B32(rgb)    (uint8_t)(rgb & kBlue8)
+#define R32(rgb)    (uint8_t)(((rgb) & kRed8) >> 16)
+#define G32(rgb)    (uint8_t)(((rgb) & kGreen8) >> 8)
+#define B32(rgb)    (uint8_t)((rgb) & kBlue8)
 /* Build RGB565 word from red, green, and blue bytes. */
-#define RGB565(r, g, b) (uint16_t)(((((uint16_t)(r) << 6) | g) << 5) | b)
+#define RGB565(r, g, b) (uint16_t)(((((uint16_t)(r) << 6) | (g)) << 5) | (b))
 /* Build RGB32 dword from red, green, and blue bytes. */
-#define RGB32(r, g, b) (uint32_t)(((((uint32_t)(r) << 8) | g) << 8) | b)
+#define RGB32(r, g, b) (uint32_t)(((((uint32_t)(r) << 8) | (g)) << 8) | (b))
 #endif  // !HOST_WORDS_BIGENDIAN
 
 /* An union that simplifies breaking 32 bit RGB into separate R, G, and B colors.
@@ -183,9 +171,6 @@ RGB32ToYUV(uint32_t rgb, uint8_t* y, uint8_t* u, uint8_t* v)
 
 /********************************************************************************
  * Basics of YUV -> RGB conversion.
- * Note that due to the fact that guest uses RGB only on preview window, and the
- * RGB format that is used is RGB565, we can limit YUV -> RGB conversions to
- * RGB565 only.
  *******************************************************************************/
 
 /*
@@ -228,1249 +213,781 @@ YUVToRGB32(int y, int u, int v)
     /* Calculate C, D, and E values for the optimized macro. */
     y -= 16; u -= 128; v -= 128;
     RGB32_t rgb;
-    rgb.r = YUV2RO(y,u,v) & 0xff;
-    rgb.g = YUV2GO(y,u,v) & 0xff;
-    rgb.b = YUV2BO(y,u,v) & 0xff;
+    rgb.r = YUV2RO(y,u,v);
+    rgb.g = YUV2GO(y,u,v);
+    rgb.b = YUV2BO(y,u,v);
     return rgb.color;
 }
 
-/********************************************************************************
- * YUV -> RGB565 converters.
- *******************************************************************************/
-
-/* Common converter for a variety of YUV 4:2:2 formats to RGB565.
- * Meaning of the parameters is pretty much straight forward here, except for the
- * 'next_Y'. In all YUV 4:2:2 formats, every two pixels are encoded in subseqent
- * four bytes, that contain two Ys (one for each pixel), one U, and one V values
- * that are shared between the two pixels. The only difference between formats is
- * how Y,U, and V values are arranged inside the pair. The actual arrangment
- * doesn't make any difference how to advance Us and Vs: subsequent Us and Vs are
- * always four bytes apart. However, with Y things are a bit more messy inside
- * the pair. The only thing that is certain here is that Ys for subsequent pairs
- * are also always four bytes apart. And we have parameter 'next_Y' here that
- * controls the distance between two Ys inside a pixel pair. */
-static void _YUY422_to_RGB565(const uint8_t* from_Y,
-                              const uint8_t* from_U,
-                              const uint8_t* from_V,
-                              int next_Y,
-                              int width,
-                              int height,
-                              uint16_t* rgb)
+/* Converts YUV color to separated RGB32 colors. */
+static __inline__ void
+YUVToRGBPix(int y, int u, int v, uint8_t* r, uint8_t* g, uint8_t* b)
 {
-    int x, y;
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, from_Y += 4, from_U += 4, from_V += 4) {
-            const uint8_t u = *from_U, v = *from_V;
-            *rgb = YUVToRGB565(*from_Y, u, v); rgb++;
-            *rgb = YUVToRGB565(from_Y[next_Y], u, v); rgb++;
-        }
-    }
-}
-
-/* Converts YUYV frame into RGB565 frame. */
-static void _YUYV_to_RGB565(const uint8_t* from,
-                            int width,
-                            int height,
-                            uint8_t* to)
-{
-    _YUY422_to_RGB565(from, from + 1, from + 3, 2, width, height, (uint16_t*)to);
-}
-
-/* Converts YVYU frame into RGB565 frame. */
-static void _YVYU_to_RGB565(const uint8_t* from,
-                            int width,
-                            int height,
-                            uint8_t* to)
-{
-    _YUY422_to_RGB565(from, from + 3, from + 1, 2, width, height, (uint16_t*)to);
-}
-
-/* Converts UYVY frame into RGB565 frame. */
-static void _UYVY_to_RGB565(const uint8_t* from,
-                            int width,
-                            int height,
-                            uint8_t* to)
-{
-    _YUY422_to_RGB565(from + 1, from, from + 2, 2, width, height, (uint16_t*)to);
-}
-
-/* Converts VYUY frame into RGB565 frame. */
-static void _VYUY_to_RGB565(const uint8_t* from,
-                            int width,
-                            int height,
-                            uint8_t* to)
-{
-    _YUY422_to_RGB565(from + 1, from + 2, from, 2, width, height, (uint16_t*)to);
-}
-
-/* Converts YYUV frame into RGB565 frame. */
-static void _YYUV_to_RGB565(const uint8_t* from,
-                            int width,
-                            int height,
-                            uint8_t* to)
-{
-    _YUY422_to_RGB565(from, from + 2, from + 3, 1, width, height, (uint16_t*)to);
-}
-
-/* Converts YYVU frame into RGB565 frame. */
-static void _YYVU_to_RGB565(const uint8_t* from,
-                            int width,
-                            int height,
-                            uint8_t* to)
-{
-    _YUY422_to_RGB565(from, from + 3, from + 2, 1, width, height, (uint16_t*)to);
+    /* Calculate C, D, and E values for the optimized macro. */
+    y -= 16; u -= 128; v -= 128;
+    *r = (uint8_t)YUV2RO(y,u,v);
+    *g = (uint8_t)YUV2GO(y,u,v);
+    *b = (uint8_t)YUV2BO(y,u,v);
 }
 
 /********************************************************************************
- * YUV -> RGB32 converters.
+ * Generic converters between YUV and RGB formats
  *******************************************************************************/
 
-/* Common converter for a variety of YUV 4:2:2 formats to RGB32.
- * See _YUY422_to_RGB565 comments for explanations. */
-static void _YUY422_to_RGB32(const uint8_t* from_Y,
-                             const uint8_t* from_U,
-                             const uint8_t* from_V,
-                             int next_Y,
-                             int width,
-                             int height,
-                             uint32_t* rgb)
-{
-    int x, y;
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, from_Y += 4, from_U += 4, from_V += 4) {
-            const uint8_t u = *from_U, v = *from_V;
-            *rgb = YUVToRGB32(*from_Y, u, v); rgb++;
-            *rgb = YUVToRGB32(from_Y[next_Y], u, v); rgb++;
-        }
-    }
-}
-
-/* Converts YUYV frame into RGB32 frame. */
-static void _YUYV_to_RGB32(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    _YUY422_to_RGB32(from, from + 1, from + 3, 2, width, height, (uint32_t*)to);
-}
-
-/* Converts YVYU frame into RGB32 frame. */
-static void _YVYU_to_RGB32(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    _YUY422_to_RGB32(from, from + 3, from + 1, 2, width, height, (uint32_t*)to);
-}
-
-/* Converts UYVY frame into RGB32 frame. */
-static void _UYVY_to_RGB32(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    _YUY422_to_RGB32(from + 1, from, from + 2, 2, width, height, (uint32_t*)to);
-}
-
-/* Converts VYUY frame into RGB32 frame. */
-static void _VYUY_to_RGB32(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    _YUY422_to_RGB32(from + 1, from + 2, from, 2, width, height, (uint32_t*)to);
-}
-
-/* Converts YYUV frame into RGB32 frame. */
-static void _YYUV_to_RGB32(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    _YUY422_to_RGB32(from, from + 2, from + 3, 1, width, height, (uint32_t*)to);
-}
-
-/* Converts YYVU frame into RGB32 frame. */
-static void _YYVU_to_RGB32(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    _YUY422_to_RGB32(from, from + 3, from + 2, 1, width, height, (uint32_t*)to);
-}
-
-/********************************************************************************
- * YUV -> YV12 converters.
- *******************************************************************************/
-
-/* Common converter for a variety of YUV 4:2:2 formats to YV12.
- * See comments to _YUY422_to_RGB565 for more information. */
-static void _YUY422_to_YV12(const uint8_t* from_Y,
-                            const uint8_t* from_U,
-                            const uint8_t* from_V,
-                            int next_Y,
-                            int width,
-                            int height,
-                            uint8_t* yv12)
-{
-    const int total_pix = width * height;
-    uint8_t* to_Y = yv12;
-    uint8_t* to_U = yv12 + total_pix;
-    uint8_t* to_V = to_U + total_pix / 4;
-    uint8_t* c_U = to_U;
-    uint8_t* c_V = to_V;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, to_Y += 2, c_U++, c_V++,
-                                       from_Y += 4, from_U += 4, from_V += 4) {
-            *to_Y = *from_Y; to_Y[1] = from_Y[next_Y];
-            *c_U = *from_U; *c_V = *from_V;
-        }
-        if (y & 0x1) {
-            /* Finished two pixel lines: move to the next U/V line */
-            to_U = c_U; to_V = c_V;
-        } else {
-            /* Reset U/V pointers to the beginning of the line */
-            c_U = to_U; c_V = to_V;
-        }
-    }
-}
-
-/* Converts YUYV frame into YV12 frame. */
-static void _YUYV_to_YV12(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_YV12(from, from + 1, from + 3, 2, width, height, to);
-}
-
-/* Converts YVYU frame into YV12 frame. */
-static void _YVYU_to_YV12(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_YV12(from, from + 3, from + 1, 2, width, height, to);
-}
-
-/* Converts UYVY frame into YV12 frame. */
-static void _UYVY_to_YV12(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_YV12(from + 1, from, from + 2, 2, width, height, to);
-}
-
-/* Converts VYUY frame into YV12 frame. */
-static void _VYUY_to_YV12(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_YV12(from + 1, from + 2, from, 2, width, height, to);
-}
-
-/* Converts YYUV frame into YV12 frame. */
-static void _YYUV_to_YV12(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_YV12(from, from + 2, from + 3, 1, width, height, to);
-}
-
-/* Converts YYVU frame into YV12 frame. */
-static void _YYVU_to_YV12(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_YV12(from, from + 3, from + 2, 1, width, height, to);
-}
-
-/********************************************************************************
- * YUV -> NV21 converters.
- *******************************************************************************/
-
-/* Common converter for a variety of YUV 4:2:2 formats to NV21.
- * NV21 contains a single interleaved UV pane, with V taking the lead. */
-static void _YUY422_to_NV21(const uint8_t* from_Y,
-                            const uint8_t* from_U,
-                            const uint8_t* from_V,
-                            int next_Y,
-                            int width,
-                            int height,
-                            uint8_t* nv21)
-{
-    const int total_pix = width * height;
-    uint8_t* to_Y = nv21;
-    uint8_t* to_V = nv21 + total_pix;
-    uint8_t* to_U = to_V + 1;
-    uint8_t* c_U = to_U;
-    uint8_t* c_V = to_V;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, to_Y += 2, c_U += 2, c_V += 2,
-                                       from_Y += 4, from_U += 4, from_V += 4) {
-            *to_Y = *from_Y; to_Y[1] = from_Y[next_Y];
-            *c_U = *from_U; *c_V = *from_V;
-        }
-        if (y & 0x1) {
-            /* Finished two pixel lines: move to the next U/V line */
-            to_U = c_U; to_V = c_V;
-        } else {
-            /* Reset U/V pointers to the beginning of the line */
-            c_U = to_U; c_V = to_V;
-        }
-    }
-}
-
-/* Converts YUYV frame into NV21 frame. */
-static void _YUYV_to_NV21(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_NV21(from, from + 1, from + 3, 2, width, height, to);
-}
-
-/* Converts YVYU frame into NV21 frame. */
-static void _YVYU_to_NV21(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_NV21(from, from + 3, from + 1, 2, width, height, to);
-}
-
-/* Converts UYVY frame into NV21 frame. */
-static void _UYVY_to_NV21(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_NV21(from + 1, from, from + 2, 2, width, height, to);
-}
-
-/* Converts VYUY frame into NV21 frame. */
-static void _VYUY_to_NV21(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_NV21(from + 1, from + 2, from, 2, width, height, to);
-}
-
-/* Converts YYUV frame into NV21 frame. */
-static void _YYUV_to_NV21(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_NV21(from, from + 2, from + 3, 1, width, height, to);
-}
-
-/* Converts YYVU frame into NV21 frame. */
-static void _YYVU_to_NV21(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_NV21(from, from + 3, from + 2, 1, width, height, to);
-}
-
-/********************************************************************************
- * YUV -> NV12 converters.
- *******************************************************************************/
-
-/* Common converter for a variety of YUV 4:2:2 formats to NV12.
- * NV12 contains a single interleaved UV pane, with U taking the lead. */
-static void _YUY422_to_NV12(const uint8_t* from_Y,
-                            const uint8_t* from_U,
-                            const uint8_t* from_V,
-                            int next_Y,
-                            int width,
-                            int height,
-                            uint8_t* nv21)
-{
-    const int total_pix = width * height;
-    uint8_t* to_Y = nv21;
-    uint8_t* to_U = nv21 + total_pix;
-    uint8_t* to_V = to_U + 1;
-    uint8_t* c_U = to_U;
-    uint8_t* c_V = to_V;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, to_Y += 2, c_U += 2, c_V += 2,
-                                       from_Y += 4, from_U += 4, from_V += 4) {
-            *to_Y = *from_Y; to_Y[1] = from_Y[next_Y];
-            *c_U = *from_U; *c_V = *from_V;
-        }
-        if (y & 0x1) {
-            /* Finished two pixel lines: move to the next U/V line */
-            to_U = c_U; to_V = c_V;
-        } else {
-            /* Reset U/V pointers to the beginning of the line */
-            c_U = to_U; c_V = to_V;
-        }
-    }
-}
-
-/* Converts YUYV frame into NV12 frame. */
-static void _YUYV_to_NV12(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_NV12(from, from + 1, from + 3, 2, width, height, to);
-}
-
-/* Converts YVYU frame into NV12 frame. */
-static void _YVYU_to_NV12(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_NV12(from, from + 3, from + 1, 2, width, height, to);
-}
-
-/* Converts UYVY frame into NV12 frame. */
-static void _UYVY_to_NV12(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_NV12(from + 1, from, from + 2, 2, width, height, to);
-}
-
-/* Converts VYUY frame into NV12 frame. */
-static void _VYUY_to_NV12(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_NV12(from + 1, from + 2, from, 2, width, height, to);
-}
-
-/* Converts YYUV frame into NV12 frame. */
-static void _YYUV_to_NV12(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_NV12(from, from + 2, from + 3, 1, width, height, to);
-}
-
-/* Converts YYVU frame into NV12 frame. */
-static void _YYVU_to_NV12(const uint8_t* from,
-                          int width,
-                          int height,
-                          uint8_t* to)
-{
-    _YUY422_to_NV12(from, from + 3, from + 2, 1, width, height, to);
-}
-
-/********************************************************************************
- * RGB -> YV12 converters.
- *******************************************************************************/
-
-/* Converts RGB565 frame into YV12 frame. */
-static void _RGB565_to_YV12(const uint8_t* from,
-                            int width,
-                            int height,
-                            uint8_t* to)
-{
-    const int total_pix = width * height;
-    const uint16_t* rgb = (const uint16_t*)from;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cb = to + total_pix;
-    uint8_t* to_Cr = to_Cb + total_pix / 4;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, to_Cb++, to_Cr++) {
-            RGB565ToYUV(*rgb, to_Y, to_Cb, to_Cr); rgb++; to_Y++;
-            RGB565ToYUV(*rgb, to_Y, to_Cb, to_Cr); rgb++; to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-    }
-}
-
-/* Converts RGB24 frame into YV12 frame. */
-static void _RGB24_to_YV12(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    const int total_pix = width * height;
-    /* Bytes per line: each line must be WORD aligned. */
-    const int bpl = (width * 3 + 1) & ~1;
-    const uint8_t* line_start = from;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cb = to + total_pix;
-    uint8_t* to_Cr = to_Cb + total_pix / 4;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        from = line_start;
-        for (x = 0; x < width; x += 2, from += 6, to_Cb++, to_Cr++) {
-            R8G8B8ToYUV(from[0], from[1], from[2], to_Y, to_Cb, to_Cr); to_Y++;
-            R8G8B8ToYUV(from[3], from[4], from[5], to_Y, to_Cb, to_Cr); to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-        /* Advance to next line, keeping proper alignment. */
-        line_start += bpl;
-    }
-}
-
-/* Converts RGB32 frame into YV12 frame. */
-static void _RGB32_to_YV12(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    const int total_pix = width * height;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cb = to + total_pix;
-    uint8_t* to_Cr = to_Cb + total_pix / 4;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, from += 8, to_Cb++, to_Cr++) {
-            R8G8B8ToYUV(from[0], from[1], from[2], to_Y, to_Cb, to_Cr); to_Y++;
-            R8G8B8ToYUV(from[4], from[5], from[6], to_Y, to_Cb, to_Cr); to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-    }
-}
-
-/********************************************************************************
- * RGB -> NV12 converters.
- *******************************************************************************/
-
-/* Converts RGB565 frame into NV12 frame. */
-static void _RGB565_to_NV12(const uint8_t* from,
-                            int width,
-                            int height,
-                            uint8_t* to)
-{
-    const int total_pix = width * height;
-    const uint16_t* rgb = (const uint16_t*)from;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cb = to + total_pix;
-    uint8_t* to_Cr = to_Cb + 1;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, to_Cb += 2, to_Cr += 2) {
-            RGB565ToYUV(*rgb, to_Y, to_Cb, to_Cr); rgb++; to_Y++;
-            RGB565ToYUV(*rgb, to_Y, to_Cb, to_Cr); rgb++; to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-    }
-}
-
-/* Converts RGB24 frame into NV12 frame. */
-static void _RGB24_to_NV12(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    const int total_pix = width * height;
-    /* Bytes per line: each line must be WORD aligned. */
-    const int bpl = (width * 3 + 1) & ~1;
-    const uint8_t* line_start = from;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cb = to + total_pix;
-    uint8_t* to_Cr = to_Cb + 1;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        from = line_start;
-        for (x = 0; x < width; x += 2, from += 6, to_Cb += 2, to_Cr += 2) {
-            R8G8B8ToYUV(from[0], from[1], from[2], to_Y, to_Cb, to_Cr); to_Y++;
-            R8G8B8ToYUV(from[3], from[4], from[5], to_Y, to_Cb, to_Cr); to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-        /* Advance to next line, keeping proper alignment. */
-        line_start += bpl;
-    }
-}
-
-/* Converts RGB32 frame into NV12 frame. */
-static void _RGB32_to_NV12(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    const int total_pix = width * height;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cb = to + total_pix;
-    uint8_t* to_Cr = to_Cb + 1;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, from += 8, to_Cb += 2, to_Cr += 2) {
-            R8G8B8ToYUV(from[0], from[1], from[2], to_Y, to_Cb, to_Cr); to_Y++;
-            R8G8B8ToYUV(from[4], from[5], from[6], to_Y, to_Cb, to_Cr); to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-    }
-}
-
-/********************************************************************************
- * RGB -> NV21 converters.
- *******************************************************************************/
-
-/* Converts RGB565 frame into NV21 frame. */
-static void _RGB565_to_NV21(const uint8_t* from,
-                            int width,
-                            int height,
-                            uint8_t* to)
-{
-    const int total_pix = width * height;
-    const uint16_t* rgb = (const uint16_t*)from;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cr = to + total_pix;
-    uint8_t* to_Cb = to_Cr + 1;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, to_Cb += 2, to_Cr += 2) {
-            RGB565ToYUV(*rgb, to_Y, to_Cb, to_Cr); rgb++; to_Y++;
-            RGB565ToYUV(*rgb, to_Y, to_Cb, to_Cr); rgb++; to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-    }
-}
-
-/* Converts RGB24 frame into NV21 frame. */
-static void _RGB24_to_NV21(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    const int total_pix = width * height;
-    /* Bytes per line: each line must be WORD aligned. */
-    const int bpl = (width * 3 + 1) & ~1;
-    const uint8_t* line_start = from;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cr = to + total_pix;
-    uint8_t* to_Cb = to_Cr + 1;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        from = line_start;
-        for (x = 0; x < width; x += 2, from += 6, to_Cb += 2, to_Cr += 2) {
-            R8G8B8ToYUV(from[0], from[1], from[2], to_Y, to_Cb, to_Cr); to_Y++;
-            R8G8B8ToYUV(from[3], from[4], from[5], to_Y, to_Cb, to_Cr); to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-        /* Advance to next line, keeping proper alignment. */
-        line_start += bpl;
-    }
-}
-
-/* Converts RGB32 frame into NV21 frame. */
-static void _RGB32_to_NV21(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    const int total_pix = width * height;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cr = to + total_pix;
-    uint8_t* to_Cb = to_Cr + 1;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, from += 8, to_Cb += 2, to_Cr += 2) {
-            R8G8B8ToYUV(from[0], from[1], from[2], to_Y, to_Cb, to_Cr); to_Y++;
-            R8G8B8ToYUV(from[4], from[5], from[6], to_Y, to_Cb, to_Cr); to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-    }
-}
-
-/********************************************************************************
- * BGR -> YV12 converters.
- *******************************************************************************/
-
-/* Converts BGR24 frame into YV12 frame. */
-static void _BGR24_to_YV12(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    const int total_pix = width * height;
-    /* Bytes per line: each line must be WORD aligned. */
-    const int bpl = (width * 3 + 1) & ~1;
-    const uint8_t* line_start = from;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cb = to + total_pix;
-    uint8_t* to_Cr = to_Cb + total_pix / 4;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        from = line_start;
-        for (x = 0; x < width; x += 2, from += 6, to_Cb++, to_Cr++) {
-            R8G8B8ToYUV(from[2], from[1], from[0], to_Y, to_Cb, to_Cr); to_Y++;
-            R8G8B8ToYUV(from[5], from[4], from[3], to_Y, to_Cb, to_Cr); to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-        /* Advance to next line, keeping proper alignment. */
-        line_start += bpl;
-    }
-}
-
-/* Converts BGR32 frame into YV12 frame. */
-static void _BGR32_to_YV12(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    const int total_pix = width * height;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cb = to + total_pix;
-    uint8_t* to_Cr = to_Cb + total_pix / 4;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, from += 8, to_Cb++, to_Cr++) {
-            R8G8B8ToYUV(from[2], from[1], from[0], to_Y, to_Cb, to_Cr); to_Y++;
-            R8G8B8ToYUV(from[6], from[5], from[4], to_Y, to_Cb, to_Cr); to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-    }
-}
-
-/********************************************************************************
- * BGR -> NV12 converters.
- *******************************************************************************/
-
-/* Converts BGR24 frame into NV12 frame. */
-static void _BGR24_to_NV12(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    const int total_pix = width * height;
-    /* Bytes per line: each line must be WORD aligned. */
-    const int bpl = (width * 3 + 1) & ~1;
-    const uint8_t* line_start = from;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cb = to + total_pix;
-    uint8_t* to_Cr = to_Cb + 1;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        from = line_start;
-        for (x = 0; x < width; x += 2, from += 6, to_Cb += 2, to_Cr += 2) {
-            R8G8B8ToYUV(from[2], from[1], from[0], to_Y, to_Cb, to_Cr); to_Y++;
-            R8G8B8ToYUV(from[5], from[4], from[3], to_Y, to_Cb, to_Cr); to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-        /* Advance to next line, keeping proper alignment. */
-        line_start += bpl;
-    }
-}
-
-/* Converts BGR32 frame into NV12 frame. */
-static void _BGR32_to_NV12(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    const int total_pix = width * height;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cb = to + total_pix;
-    uint8_t* to_Cr = to_Cb + 1;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, from += 8, to_Cb += 2, to_Cr += 2) {
-            R8G8B8ToYUV(from[2], from[1], from[0], to_Y, to_Cb, to_Cr); to_Y++;
-            R8G8B8ToYUV(from[6], from[5], from[4], to_Y, to_Cb, to_Cr); to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-    }
-}
-
-/********************************************************************************
- * BGR -> NV21 converters.
- *******************************************************************************/
-
-/* Converts BGR24 frame into NV21 frame. */
-static void _BGR24_to_NV21(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    const int total_pix = width * height;
-    /* Bytes per line: each line must be WORD aligned. */
-    const int bpl = (width * 3 + 1) & ~1;
-    const uint8_t* line_start = from;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cr = to + total_pix;
-    uint8_t* to_Cb = to_Cr + 1;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        from = line_start;
-        for (x = 0; x < width; x += 2, from += 6, to_Cb += 2, to_Cr += 2) {
-            R8G8B8ToYUV(from[2], from[1], from[0], to_Y, to_Cb, to_Cr); to_Y++;
-            R8G8B8ToYUV(from[5], from[4], from[3], to_Y, to_Cb, to_Cr); to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-        /* Advance to next line, keeping proper alignment. */
-        line_start += bpl;
-    }
-}
-
-/* Converts BGR32 frame into NV21 frame. */
-static void _BGR32_to_NV21(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    const int total_pix = width * height;
-    uint8_t* to_Y = to;
-    uint8_t* to_Cr = to + total_pix;
-    uint8_t* to_Cb = to_Cr + 1;
-    uint8_t* Cb = to_Cb;
-    uint8_t* Cr = to_Cr;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x += 2, from += 8, to_Cb += 2, to_Cr += 2) {
-            R8G8B8ToYUV(from[2], from[1], from[0], to_Y, to_Cb, to_Cr); to_Y++;
-            R8G8B8ToYUV(from[6], from[5], from[4], to_Y, to_Cb, to_Cr); to_Y++;
-        }
-        if (y & 0x1) {
-            to_Cb = Cb; to_Cr = Cr;
-        } else {
-            Cb = to_Cb; Cr = to_Cr;
-        }
-    }
-}
-
-/********************************************************************************
- * RGB -> RGB565 converters.
- *******************************************************************************/
-
-/* Converts RGB24 frame into RGB565 frame. */
-static void _RGB24_to_RGB565(const uint8_t* from,
-                             int width,
-                             int height,
-                             uint8_t* to)
-{
-    /* Bytes per line: each line must be WORD aligned. */
-    const int bpl = (width * 3 + 1) & ~1;
-    const uint8_t* line_start = from;
-    uint16_t* rgb = (uint16_t*)to;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        from = line_start;
-        for (x = 0; x < width; x++, rgb++) {
-            const uint16_t r = *from >> 3; from++;
-            const uint16_t g = *from >> 2; from++;
-            const uint16_t b = *from >> 3; from++;
-            *rgb = b | (g << 5) | (r << 11);
-        }
-        /* Advance to next line, keeping proper alignment. */
-        line_start += bpl;
-    }
-}
-
-/* Converts RGB32 frame into RGB565 frame. */
-static void _RGB32_to_RGB565(const uint8_t* from,
-                             int width,
-                             int height,
-                             uint8_t* to)
-{
-    /* Bytes per line: each line must be WORD aligned. */
-    uint16_t* rgb = (uint16_t*)to;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++, rgb++, from++) {
-            const uint16_t r = *from >> 3; from++;
-            const uint16_t g = *from >> 2; from++;
-            const uint16_t b = *from >> 3; from++;
-            *rgb = b | (g << 5) | (r << 11);
-        }
-    }
-}
-
-/********************************************************************************
- * BGR -> RGB565 converters.
- *******************************************************************************/
-
-/* Converts BGR24 frame into RGB565 frame. */
-static void _BGR24_to_RGB565(const uint8_t* from,
-                             int width,
-                             int height,
-                             uint8_t* to)
-{
-    /* Bytes per line: each line must be WORD aligned. */
-    const int bpl = (width * 3 + 1) & ~1;
-    const uint8_t* line_start = from;
-    uint16_t* rgb = (uint16_t*)to;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        from = line_start;
-        for (x = 0; x < width; x++, rgb++) {
-            const uint16_t b = *from >> 3; from++;
-            const uint16_t g = *from >> 2; from++;
-            const uint16_t r = *from >> 3; from++;
-            *rgb = b | (g << 5) | (r << 11);
-        }
-        /* Advance to next line, keeping proper alignment. */
-        line_start += bpl;
-    }
-}
-
-/* Converts BGR32 frame into RGB565 frame. */
-static void _BGR32_to_RGB565(const uint8_t* from,
-                           int width,
-                           int height,
-                           uint8_t* to)
-{
-    /* Bytes per line: each line must be WORD aligned. */
-    uint16_t* rgb = (uint16_t*)to;
-    int x, y;
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++, rgb++, from++) {
-            const uint16_t b = *from >> 3; from++;
-            const uint16_t g = *from >> 2; from++;
-            const uint16_t r = *from >> 3; from++;
-            *rgb = b | (g << 5) | (r << 11);
-        }
-    }
-}
-
-/* Describes a converter for one pixel format to another. */
-typedef struct FormatConverterEntry {
-    /* Pixel format to convert from. */
-    uint32_t          from_format;
-    /* Pixel format to convert to. */
-    uint32_t          to_format;
-    /* Address of the conversion routine. */
-    FormatConverter   converter;
-} FormatConverterEntry;
-
-
-/* Lists currently implemented converters. */
-static const FormatConverterEntry _converters[] = {
-    /*
-     * YUV 4:2:2 variety -> YV12
-     */
-
-    /* YUYV -> YV12 */
-    { V4L2_PIX_FMT_YUYV, V4L2_PIX_FMT_YVU420, _YUYV_to_YV12 },
-    /* UYVY -> YV12 */
-    { V4L2_PIX_FMT_UYVY, V4L2_PIX_FMT_YVU420, _UYVY_to_YV12 },
-    /* YVYU -> YV12 */
-    { V4L2_PIX_FMT_YVYU, V4L2_PIX_FMT_YVU420, _YVYU_to_YV12 },
-    /* VYUY -> YV12 */
-    { V4L2_PIX_FMT_VYUY, V4L2_PIX_FMT_YVU420, _VYUY_to_YV12 },
-    /* YYUV -> YV12 */
-    { V4L2_PIX_FMT_YYUV, V4L2_PIX_FMT_YVU420, _YYUV_to_YV12 },
-    /* YUY2 -> YV12 This format is the same as YYUV */
-    { V4L2_PIX_FMT_YUY2, V4L2_PIX_FMT_YVU420, _YYUV_to_YV12 },
-    /* YUNV -> YV12 This format is the same as YYUV */
-    { V4L2_PIX_FMT_YUNV, V4L2_PIX_FMT_YVU420, _YYUV_to_YV12 },
-    /* V422 -> YV12 This format is the same as YYUV */
-    { V4L2_PIX_FMT_V422, V4L2_PIX_FMT_YVU420, _YYUV_to_YV12 },
-    /* YYVU -> YV12 */
-    { V4L2_PIX_FMT_YYVU, V4L2_PIX_FMT_YVU420, _YYVU_to_YV12 },
-
-    /*
-     * YUV 4:2:2 variety -> NV21
-     */
-
-    /* YUYV -> YV12 */
-    { V4L2_PIX_FMT_YUYV, V4L2_PIX_FMT_NV21, _YUYV_to_NV21 },
-    /* UYVY -> YV12 */
-    { V4L2_PIX_FMT_UYVY, V4L2_PIX_FMT_NV21, _UYVY_to_NV21 },
-    /* YVYU -> YV12 */
-    { V4L2_PIX_FMT_YVYU, V4L2_PIX_FMT_NV21, _YVYU_to_NV21 },
-    /* VYUY -> YV12 */
-    { V4L2_PIX_FMT_VYUY, V4L2_PIX_FMT_NV21, _VYUY_to_NV21 },
-    /* YYUV -> YV12 */
-    { V4L2_PIX_FMT_YYUV, V4L2_PIX_FMT_NV21, _YYUV_to_NV21 },
-    /* YUY2 -> YV12 This format is the same as YYUV */
-    { V4L2_PIX_FMT_YUY2, V4L2_PIX_FMT_NV21, _YYUV_to_NV21 },
-    /* YUNV -> YV12 This format is the same as YYUV */
-    { V4L2_PIX_FMT_YUNV, V4L2_PIX_FMT_NV21, _YYUV_to_NV21 },
-    /* V422 -> YV12 This format is the same as YYUV */
-    { V4L2_PIX_FMT_V422, V4L2_PIX_FMT_NV21, _YYUV_to_NV21 },
-    /* YYVU -> YV12 */
-    { V4L2_PIX_FMT_YYVU, V4L2_PIX_FMT_NV21, _YYVU_to_NV21 },
-
-    /*
-     * YUV 4:2:2 variety -> NV12
-     */
-
-    /* YUYV -> YV12 */
-    { V4L2_PIX_FMT_YUYV, V4L2_PIX_FMT_NV12, _YUYV_to_NV12 },
-    /* UYVY -> YV12 */
-    { V4L2_PIX_FMT_UYVY, V4L2_PIX_FMT_NV12, _UYVY_to_NV12 },
-    /* YVYU -> YV12 */
-    { V4L2_PIX_FMT_YVYU, V4L2_PIX_FMT_NV12, _YVYU_to_NV12 },
-    /* VYUY -> YV12 */
-    { V4L2_PIX_FMT_VYUY, V4L2_PIX_FMT_NV12, _VYUY_to_NV12 },
-    /* YYUV -> YV12 */
-    { V4L2_PIX_FMT_YYUV, V4L2_PIX_FMT_NV12, _YYUV_to_NV12 },
-    /* YUY2 -> YV12 This format is the same as YYUV */
-    { V4L2_PIX_FMT_YUY2, V4L2_PIX_FMT_NV12, _YYUV_to_NV12 },
-    /* YUNV -> YV12 This format is the same as YYUV */
-    { V4L2_PIX_FMT_YUNV, V4L2_PIX_FMT_NV12, _YYUV_to_NV12 },
-    /* V422 -> YV12 This format is the same as YYUV */
-    { V4L2_PIX_FMT_V422, V4L2_PIX_FMT_NV12, _YYUV_to_NV12 },
-    /* YYVU -> YV12 */
-    { V4L2_PIX_FMT_YYVU, V4L2_PIX_FMT_NV12, _YYVU_to_NV12 },
-
-    /*
-     * YUV 4:2:2 variety -> RGB565
-     */
-
-    /* YUYV -> RGB565 */
-    { V4L2_PIX_FMT_YUYV, V4L2_PIX_FMT_RGB565, _YUYV_to_RGB565 },
-    /* UYVY -> RGB565 */
-    { V4L2_PIX_FMT_UYVY, V4L2_PIX_FMT_RGB565, _UYVY_to_RGB565 },
-    /* YVYU -> RGB565 */
-    { V4L2_PIX_FMT_YVYU, V4L2_PIX_FMT_RGB565, _YVYU_to_RGB565 },
-    /* VYUY -> RGB565 */
-    { V4L2_PIX_FMT_VYUY, V4L2_PIX_FMT_RGB565, _VYUY_to_RGB565 },
-    /* YYUV -> RGB565 */
-    { V4L2_PIX_FMT_YYUV, V4L2_PIX_FMT_RGB565, _YYUV_to_RGB565 },
-    /* YUY2 -> RGB565 This format is the same as YYUV */
-    { V4L2_PIX_FMT_YUY2, V4L2_PIX_FMT_RGB565, _YUYV_to_RGB565 },
-    /* YUNV -> RGB565 This format is the same as YYUV */
-    { V4L2_PIX_FMT_YUNV, V4L2_PIX_FMT_RGB565, _YUYV_to_RGB565 },
-    /* V422 -> RGB565 This format is the same as YYUV */
-    { V4L2_PIX_FMT_V422, V4L2_PIX_FMT_RGB565, _YUYV_to_RGB565 },
-    /* YYVU -> RGB565 This format is the same as YYUV */
-    { V4L2_PIX_FMT_YYVU, V4L2_PIX_FMT_RGB565, _YYVU_to_RGB565 },
-
-    /*
-     * YUV 4:2:2 variety -> RGB32
-     */
-
-    /* YUYV -> RGB565 */
-    { V4L2_PIX_FMT_YUYV, V4L2_PIX_FMT_RGB32, _YUYV_to_RGB32 },
-    /* UYVY -> RGB565 */
-    { V4L2_PIX_FMT_UYVY, V4L2_PIX_FMT_RGB32, _UYVY_to_RGB32 },
-    /* YVYU -> RGB565 */
-    { V4L2_PIX_FMT_YVYU, V4L2_PIX_FMT_RGB32, _YVYU_to_RGB32 },
-    /* VYUY -> RGB565 */
-    { V4L2_PIX_FMT_VYUY, V4L2_PIX_FMT_RGB32, _VYUY_to_RGB32 },
-    /* YYUV -> RGB565 */
-    { V4L2_PIX_FMT_YYUV, V4L2_PIX_FMT_RGB32, _YYUV_to_RGB32 },
-    /* YUY2 -> RGB565 This format is the same as YYUV */
-    { V4L2_PIX_FMT_YUY2, V4L2_PIX_FMT_RGB32, _YUYV_to_RGB32 },
-    /* YUNV -> RGB565 This format is the same as YYUV */
-    { V4L2_PIX_FMT_YUNV, V4L2_PIX_FMT_RGB32, _YUYV_to_RGB32 },
-    /* V422 -> RGB565 This format is the same as YYUV */
-    { V4L2_PIX_FMT_V422, V4L2_PIX_FMT_RGB32, _YUYV_to_RGB32 },
-    /* YYVU -> RGB565 This format is the same as YYUV */
-    { V4L2_PIX_FMT_YYVU, V4L2_PIX_FMT_RGB32, _YYVU_to_RGB32 },
-
-    /*
-     * RGB variety -> YV12
-     */
-
-    /* RGB565 -> YV12 */
-    { V4L2_PIX_FMT_RGB565, V4L2_PIX_FMT_YVU420, _RGB565_to_YV12 },
-    /* RGB24 -> YV12 */
-    { V4L2_PIX_FMT_RGB24, V4L2_PIX_FMT_YVU420, _RGB24_to_YV12 },
-    /* RGB32 -> YV12 */
-    { V4L2_PIX_FMT_RGB32, V4L2_PIX_FMT_YVU420, _RGB32_to_YV12 },
-
-    /*
-     * RGB variety -> NV12
-     */
-
-    /* RGB565 -> YV12 */
-    { V4L2_PIX_FMT_RGB565, V4L2_PIX_FMT_NV12, _RGB565_to_NV12 },
-    /* RGB24 -> YV12 */
-    { V4L2_PIX_FMT_RGB24, V4L2_PIX_FMT_NV12, _RGB24_to_NV12 },
-    /* RGB32 -> YV12 */
-    { V4L2_PIX_FMT_RGB32, V4L2_PIX_FMT_NV12, _RGB32_to_NV12 },
-
-    /*
-     * RGB variety -> NV21
-     */
-
-    /* RGB565 -> YV12 */
-    { V4L2_PIX_FMT_RGB565, V4L2_PIX_FMT_NV21, _RGB565_to_NV21 },
-    /* RGB24 -> YV12 */
-    { V4L2_PIX_FMT_RGB24, V4L2_PIX_FMT_NV21, _RGB24_to_NV21 },
-    /* RGB32 -> YV12 */
-    { V4L2_PIX_FMT_RGB32, V4L2_PIX_FMT_NV21, _RGB32_to_NV21 },
-
-    /*
-     * BGR variety -> YV12
-     */
-
-    /* BGR24 -> YV12 */
-    { V4L2_PIX_FMT_BGR24, V4L2_PIX_FMT_YVU420, _BGR24_to_YV12 },
-    /* BGR32 -> YV12 */
-    { V4L2_PIX_FMT_BGR32, V4L2_PIX_FMT_YVU420, _BGR32_to_YV12 },
-
-    /*
-     * BGR variety -> NV12
-     */
-
-    /* BGR24 -> NV12 */
-    { V4L2_PIX_FMT_BGR24, V4L2_PIX_FMT_NV12, _BGR24_to_NV12 },
-    /* BGR32 -> NV12 */
-    { V4L2_PIX_FMT_BGR32, V4L2_PIX_FMT_NV12, _BGR32_to_NV12 },
-
-    /*
-     * BGR variety -> NV21
-     */
-
-    /* BGR24 -> NV21 */
-    { V4L2_PIX_FMT_BGR24, V4L2_PIX_FMT_NV21, _BGR24_to_NV21 },
-    /* BGR32 -> NV21 */
-    { V4L2_PIX_FMT_BGR32, V4L2_PIX_FMT_NV21, _BGR32_to_NV21 },
-
-    /*
-     * RGB variety -> RGB565
-     */
-
-    /* RGB24 -> RGB565 */
-    { V4L2_PIX_FMT_RGB24, V4L2_PIX_FMT_RGB565, _RGB24_to_RGB565 },
-    /* RGB32 -> RGB565 */
-    { V4L2_PIX_FMT_RGB32, V4L2_PIX_FMT_RGB565, _RGB32_to_RGB565 },
-
-    /*
-     * BGR variety -> RGB565
-     */
-
-    /* BGR24 -> RGB565 */
-    { V4L2_PIX_FMT_BGR24, V4L2_PIX_FMT_RGB565, _BGR24_to_RGB565 },
-    /* BGR32 -> RGB565 */
-    { V4L2_PIX_FMT_BGR32, V4L2_PIX_FMT_RGB565, _BGR32_to_RGB565 },
+/*
+ * The converters go line by line, convering one frame format to another.
+ * It's pretty much straight forward for RGB/BRG, where all colors are
+ * grouped next to each other in memory. The only two things that differ one RGB
+ * format from another are:
+ * - Is it an RGB, or BRG (i.e. color ordering)
+ * - Is it 16, 24, or 32 bits format.
+ * All these differences are addressed by load_rgb / save_rgb routines, provided
+ * for each format in the RGB descriptor to load / save RGB color bytes from / to
+ * the buffer. As far as moving from one RGB pixel to the next, there
+ * are two question to consider:
+ * - How many bytes it takes to encode one RGB pixel (could be 2, 3, or 4)
+ * - How many bytes it takes to encode a line (i.e. line alignment issue, which
+ *   makes sence only for 24-bit formats, since 16, and 32 bit formats provide
+ *   automatic word alignment.)
+ * The first question is answered with the 'rgb_inc' field of the RGB descriptor,
+ * and the second one is done by aligning rgb pointer up to the nearest 16 bit
+ * boundaries at the end of each line.
+ * YUV format has much greater complexity for conversion. in YUV color encoding
+ * is divided into three separate panes that can be mixed together in any way
+ * imaginable. Fortunately, there are still some consistent patterns in different
+
+ * YUV formats that can be abstracted through a descriptor:
+ * - At the line-by-line level, colors are always groupped aroud pairs of pixels,
+ *   where each pixel in the pair has its own Y value, and each pair of pixels
+ *   share thesame U, and V values.
+ * - Position of Y, U, and V is the same for each pair, so the distance between
+ *   Ys, and U/V for adjacent pairs is the same.
+ * - Inside the pair, the distance between two Ys is always the same.
+
+ * Moving between the lines in YUV can also be easily formalized. Essentially,
+ * there are three ways how color panes are arranged:
+ * 1. All interleaved, where all three Y, U, and V values are encoded together in
+ *    one block:
+ *               1,2  3,4  5,6      n,n+1
+ *              YUVY YUVY YUVY .... YUVY
+ *
+ *    This type is used to encode YUV 4:2:2 formats.
+ *
+ * 2. One separate block of memory for Y pane, and one separate block of memory
+ *    containing interleaved U, and V panes.
+ *
+ *      YY | YY | YY | YY
+ *      YY | YY | YY | YY
+ *      -----------------
+ *      UV | UV | UV | UV
+ *      -----------------
+ *
+ *    This type is used to encode 4:2:0 formats.
+ *
+ * 3. Three separate blocks of memory for each pane.
+ *
+ *      YY | YY | YY | YY
+ *      YY | YY | YY | YY
+ *      -----------------
+ *      U  | U  | U  | U
+ *      V  | V  | V  | V
+ *      -----------------
+ *
+ *    This type is also used to encode 4:2:0 formats.
+ *
+ * Note that in cases 2, and 3 each pair of U and V is shared among four pixels,
+ * grouped together as they are groupped in the framebeffer: divide the frame's
+ * rectangle into 2x2 pixels squares, starting from 0,0 corner - and each square
+ * represents the group of pixels that share same pair of UV values. So, each
+ * line in the U/V panes table is shared between two adjacent lines in Y pane,
+ * which provides a pattern on how to move between U/V lines as we move between
+ * Y lines.
+ *
+ * So, all these patterns can be coded in a YUV format descriptor, so there can
+ * just one generic way of walking YUV frame.
+ *
+ * Performance considerations:
+ * Since converters implemented here are intended to work as part of the camera
+ * emulation, making the code super performant is not a priority at all. There
+ * will be enough loses in other parts of the emultion to overlook any slight
+ * inefficiences in the conversion algorithm as neglectable.
+ */
+
+typedef struct RGBDesc RGBDesc;
+typedef struct YUVDesc YUVDesc;
+
+/* Prototype for a routine that loads RGB colors from an RGB/BRG stream.
+ * Param:
+ *  rgb - Pointer to a pixel inside the stream where to load colors from.
+ *  r, g, b - Upon return will contain red, green, and blue colors for the pixel
+ *      addressed by 'rgb' pointer.
+ * Return:
+ *  Pointer to the next pixel in the stream.
+ */
+typedef const void* (*load_rgb_func)(const void* rgb,
+                                     uint8_t* r,
+                                     uint8_t* g,
+                                     uint8_t* b);
+
+/* Prototype for a routine that saves RGB colors to an RGB/BRG stream.
+ * Param:
+ *  rgb - Pointer to a pixel inside the stream where to save colors.
+ *  r, g, b - Red, green, and blue colors to save to the pixel addressed by
+ *      'rgb' pointer.
+ * Return:
+ *  Pointer to the next pixel in the stream.
+ */
+typedef void* (*save_rgb_func)(void* rgb, uint8_t r, uint8_t g, uint8_t b);
+
+/* Prototype for a routine that calculates an offset of the first U value for the
+ * given line in a YUV framebuffer.
+ * Param:
+ *  desc - Descriptor for the YUV frame for which the offset is being calculated.
+ *  line - Zero-based line number for which to calculate the offset.
+ *  width, height - Frame dimensions.
+ * Return:
+ *  Offset of the first U value for the given frame line. The offset returned
+ *  here is relative to the beginning of the YUV framebuffer.
+ */
+typedef int (*u_offset_func)(const YUVDesc* desc, int line, int width, int height);
+
+/* Prototype for a routine that calculates an offset of the first V value for the
+ * given line in a YUV framebuffer.
+ * Param:
+ *  desc - Descriptor for the YUV frame for which the offset is being calculated.
+ *  line - Zero-based line number for which to calculate the offset.
+ *  width, height - Frame dimensions.
+ * Return:
+ *  Offset of the first V value for the given frame line. The offset returned
+ *  here is relative to the beginning of the YUV framebuffer.
+ */
+typedef int (*v_offset_func)(const YUVDesc* desc, int line, int width, int height);
+
+/* RGB/BRG format descriptor. */
+struct RGBDesc {
+    /* Routine that loads RGB colors from a buffer. */
+    load_rgb_func   load_rgb;
+    /* Routine that saves RGB colors into a buffer. */
+    save_rgb_func   save_rgb;
+    /* Byte size of an encoded RGB pixel. */
+    int             rgb_inc;
 };
 
-/* Gets an address of a routine that provides frame conversion for the
- * given pixel formats.
- * Param:
- *  from - Pixel format to convert from.
- *  to - Pixel format to convert to.
- * Return:
- *  Address of an appropriate conversion routine, or NULL if no conversion
- *  routine exsits for the given pair of pixel formats.
- */
-static FormatConverter
-_get_format_converter(uint32_t from, uint32_t to)
+/* YUV format descriptor. */
+struct YUVDesc {
+    /* Offset of the first Y value in a fully interleaved YUV framebuffer. */
+    int             Y_offset;
+    /* Distance between two Y values inside a pair of pixels in a fully
+     * interleaved YUV framebuffer. */
+    int             Y_inc;
+    /* Distance between first Y values of the adjacent pixel pairs in a fully
+     * interleaved YUV framebuffer. */
+    int             Y_next_pair;
+    /* Increment between adjacent U/V values in a YUV framebuffer. */
+    int             UV_inc;
+    /* Controls location of the first U value in YUV framebuffer. Depending on
+     * the actual YUV format can mean three things:
+     *  - For fully interleaved YUV formats contains offset of the first U value
+     *    in each line.
+     *  - For YUV format that use separate, but interleaved UV pane, this field
+     *    contains an offset of the first U value in the UV pane.
+     *  - For YUV format that use fully separated Y, U, and V panes this field
+     *    defines order of U and V panes in the framebuffer:
+     *      = 1 - U pane comes first, right after Y pane.
+     *      = 0 - U pane follows V pane that startes right after Y pane. */
+    int             U_offset;
+    /* Controls location of the first V value in YUV framebuffer.
+     * See comments to U_offset for more info. */
+    int             V_offset;
+    /* Routine that calculates an offset of the first U value for the given line
+     * in a YUV framebuffer. */
+    u_offset_func   u_offset;
+    /* Routine that calculates an offset of the first V value for the given line
+     * in a YUV framebuffer. */
+    v_offset_func   v_offset;
+};
+
+/********************************************************************************
+ * RGB/BRG load / save routines.
+ *******************************************************************************/
+
+/* Loads R, G, and B colors from a RGB32 framebuffer. */
+static const void*
+_load_RGB32(const void* rgb, uint8_t* r, uint8_t* g, uint8_t* b)
 {
-    const int num_converters = sizeof(_converters) / sizeof(*_converters);
-    int n;
-    for (n = 0; n < num_converters; n++) {
-        if (_converters[n].from_format == from &&
-            _converters[n].to_format == to) {
-            return _converters[n].converter;
+    const uint8_t* rgb_ptr = (const uint8_t*)rgb;
+    *r = rgb_ptr[0]; *g = rgb_ptr[1]; *b = rgb_ptr[2];
+    return rgb_ptr + 4;
+}
+
+/* Saves R, G, and B colors to a RGB32 framebuffer. */
+static void*
+_save_RGB32(void* rgb, uint8_t r, uint8_t g, uint8_t b)
+{
+    uint8_t* rgb_ptr = (uint8_t*)rgb;
+    rgb_ptr[0] = r; rgb_ptr[1] = g; rgb_ptr[2] = b;
+    return rgb_ptr + 4;
+}
+
+/* Loads R, G, and B colors from a BRG32 framebuffer. */
+static const void*
+_load_BRG32(const void* rgb, uint8_t* r, uint8_t* g, uint8_t* b)
+{
+    const uint8_t* rgb_ptr = (const uint8_t*)rgb;
+    *r = rgb_ptr[2]; *g = rgb_ptr[1]; *b = rgb_ptr[0];
+    return rgb_ptr + 4;
+}
+
+/* Saves R, G, and B colors to a BRG32 framebuffer. */
+static void*
+_save_BRG32(void* rgb, uint8_t r, uint8_t g, uint8_t b)
+{
+    uint8_t* rgb_ptr = (uint8_t*)rgb;
+    rgb_ptr[2] = r; rgb_ptr[1] = g; rgb_ptr[0] = b;
+    return rgb_ptr + 4;
+}
+
+/* Loads R, G, and B colors from a RGB24 framebuffer.
+ * Note that it's the caller's responsibility to ensure proper alignment of the
+ * returned pointer at the line's break. */
+static const void*
+_load_RGB24(const void* rgb, uint8_t* r, uint8_t* g, uint8_t* b)
+{
+    const uint8_t* rgb_ptr = (const uint8_t*)rgb;
+    *r = rgb_ptr[0]; *g = rgb_ptr[1]; *b = rgb_ptr[2];
+    return rgb_ptr + 3;
+}
+
+/* Saves R, G, and B colors to a RGB24 framebuffer.
+ * Note that it's the caller's responsibility to ensure proper alignment of the
+ * returned pointer at the line's break. */
+static void*
+_save_RGB24(void* rgb, uint8_t r, uint8_t g, uint8_t b)
+{
+    uint8_t* rgb_ptr = (uint8_t*)rgb;
+    rgb_ptr[0] = r; rgb_ptr[1] = g; rgb_ptr[2] = b;
+    return rgb_ptr + 3;
+}
+
+/* Loads R, G, and B colors from a BRG32 framebuffer.
+ * Note that it's the caller's responsibility to ensure proper alignment of the
+ * returned pointer at the line's break. */
+static const void*
+_load_BRG24(const void* rgb, uint8_t* r, uint8_t* g, uint8_t* b)
+{
+    const uint8_t* rgb_ptr = (const uint8_t*)rgb;
+    *r = rgb_ptr[2]; *g = rgb_ptr[1]; *b = rgb_ptr[0];
+    return rgb_ptr + 3;
+}
+
+/* Saves R, G, and B colors to a BRG24 framebuffer.
+ * Note that it's the caller's responsibility to ensure proper alignment of the
+ * returned pointer at the line's break. */
+static void*
+_save_BRG24(void* rgb, uint8_t r, uint8_t g, uint8_t b)
+{
+    uint8_t* rgb_ptr = (uint8_t*)rgb;
+    rgb_ptr[2] = r; rgb_ptr[1] = g; rgb_ptr[0] = b;
+    return rgb_ptr + 3;
+}
+
+/* Loads R, G, and B colors from a RGB565 framebuffer. */
+static const void*
+_load_RGB16(const void* rgb, uint8_t* r, uint8_t* g, uint8_t* b)
+{
+    const uint16_t rgb16 = *(const uint16_t*)rgb;
+    *r = R16(rgb16); *g = G16(rgb16); *b = B16(rgb16);
+    return (const uint8_t*)rgb + 2;
+}
+
+/* Saves R, G, and B colors to a RGB565 framebuffer. */
+static void*
+_save_RGB16(void* rgb, uint8_t r, uint8_t g, uint8_t b)
+{
+    *(uint16_t*)rgb = RGB565(r & 0x1f, g & 0x3f, b & 0x1f);
+    return (uint8_t*)rgb + 2;
+}
+
+/* Loads R, G, and B colors from a BRG565 framebuffer. */
+static const void*
+_load_BRG16(const void* rgb, uint8_t* r, uint8_t* g, uint8_t* b)
+{
+    const uint16_t rgb16 = *(const uint16_t*)rgb;
+    *r = B16(rgb16); *g = G16(rgb16); *b = R16(rgb16);
+    return (const uint8_t*)rgb + 2;
+}
+
+/* Saves R, G, and B colors to a BRG565 framebuffer. */
+static void*
+_save_BRG16(void* rgb, uint8_t r, uint8_t g, uint8_t b)
+{
+    *(uint16_t*)rgb = RGB565(b & 0x1f, g & 0x3f, r & 0x1f);
+    return (uint8_t*)rgb + 2;
+}
+
+/********************************************************************************
+ * YUV's U/V offset calculation routines.
+ *******************************************************************************/
+
+/* U offset in a fully interleaved YUV 4:2:2 */
+static int
+_UOffIntrlYUV(const YUVDesc* desc, int line, int width, int height)
+{
+    /* In interleaved YUV 4:2:2 each pair of pixels is encoded with 4 consecutive
+     * bytes (or 2 bytes per pixel). So line size in a fully interleaved YUV 4:2:2
+     * is twice its width. */
+    return line * width * 2 + desc->U_offset;
+}
+
+/* V offset in a fully interleaved YUV 4:2:2 */
+static int
+_VOffIntrlYUV(const YUVDesc* desc, int line, int width, int height)
+{
+    /* See _UOffIntrlYUV comments. */
+    return line * width * 2 + desc->V_offset;
+}
+
+/* U offset in an interleaved UV pane of YUV 4:2:0 */
+static int
+_UOffIntrlUV(const YUVDesc* desc, int line, int width, int height)
+{
+    /* UV pane starts right after the Y pane, that occupies 'height * width'
+     * bytes. Eacht line in UV pane contains width / 2 'UV' pairs, which makes UV
+     * lane to contain as many bytes, as the width is.
+     * Each line in the UV pane is shared between two Y lines. So, final formula
+     * for the beggining of the UV pane's line for the given line in YUV
+     * framebuffer is:
+     *
+     *    height * width + (line / 2) * width = (height + line / 2) * width
+     */
+    return (height + line / 2) * width + desc->U_offset;
+}
+
+/* V offset in an interleaved UV pane of YUV 4:2:0 */
+static int
+_VOffIntrlUV(const YUVDesc* desc, int line, int width, int height)
+{
+    /* See comments in _UOffIntrlUV. */
+    return (height + line / 2) * width + desc->V_offset;
+}
+
+/* U offset in a 3-pane YUV 4:2:0 */
+static int
+_UOffSepYUV(const YUVDesc* desc, int line, int width, int height)
+{
+    /* U, or V pane starts right after the Y pane, that occupies 'height * width'
+     * bytes. Eacht line in each of U and V panes contains width / 2 elements.
+     * Also, each line in each of U and V panes is shared between two Y lines.
+     * So, final formula for the beggining of a line in the U/V pane is:
+     *
+     *    <Y pane size> + (line / 2) * width / 2
+     *
+     * for the pane that follows right after the Y pane, or
+     *
+     *    <Y pane size> + <Y pane size> / 4 + (line / 2) * width / 2
+     *
+     * for the second pane.
+     */
+    const int y_pane_size = height * width;
+    if (desc->U_offset) {
+        /* U pane comes right after the Y pane. */
+        return y_pane_size + (line / 2) * width / 2;
+    } else {
+        /* U pane follows V pane. */
+        return y_pane_size + y_pane_size / 4 + (line / 2) * width / 2;
+    }
+}
+
+/* V offset in a 3-pane YUV 4:2:0 */
+static int
+_VOffSepYUV(const YUVDesc* desc, int line, int width, int height)
+{
+    /* See comment for _UOffSepYUV. */
+    const int y_pane_size = height * width;
+    if (desc->V_offset) {
+        /* V pane comes right after the Y pane. */
+        return y_pane_size + (line / 2) * width / 2;
+    } else {
+        /* V pane follows U pane. */
+        return y_pane_size + y_pane_size / 4 + (line / 2) * width / 2;
+    }
+}
+
+/********************************************************************************
+ * Generic YUV/RGB converters
+ *******************************************************************************/
+
+/* Generic converter from an RGB/BRG format to a YUV format. */
+static void
+RGBToYUV(const RGBDesc* rgb_fmt,
+         const YUVDesc* yuv_fmt,
+         const void* rgb,
+         void* yuv,
+         int width,
+         int height)
+{
+    int y, x;
+    const int Y_Inc = yuv_fmt->Y_inc;
+    const int UV_inc = yuv_fmt->UV_inc;
+    const int Y_next_pair = yuv_fmt->Y_next_pair;
+    uint8_t* pY = (uint8_t*)yuv + yuv_fmt->Y_offset;
+    for (y = 0; y < height; y++) {
+        uint8_t* pU =
+            (uint8_t*)yuv + yuv_fmt->u_offset(yuv_fmt, y, width, height);
+        uint8_t* pV =
+            (uint8_t*)yuv + yuv_fmt->v_offset(yuv_fmt, y, width, height);
+        for (x = 0; x < width; x += 2,
+                               pY += Y_next_pair, pU += UV_inc, pV += UV_inc) {
+            uint8_t r, g, b;
+            rgb = rgb_fmt->load_rgb(rgb, &r, &g, &b);
+            R8G8B8ToYUV(r, g, b, pY, pU, pV);
+            rgb = rgb_fmt->load_rgb(rgb, &r, &g, &b);
+            pY[Y_Inc] = RGB2Y((int)r, (int)g, (int)b);
+        }
+        /* Aling rgb_ptr to 16 bit */
+        if (((uintptr_t)rgb & 1) != 0) rgb = (const uint8_t*)rgb + 1;
+    }
+}
+
+/* Generic converter from one RGB/BRG format to another RGB/BRG format. */
+static void
+RGBToRGB(const RGBDesc* src_rgb_fmt,
+         const RGBDesc* dst_rgb_fmt,
+         const void* src_rgb,
+         void* dst_rgb,
+         int width,
+         int height)
+{
+    int x, y;
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            uint8_t r, g, b;
+            src_rgb = src_rgb_fmt->load_rgb(src_rgb, &r, &g, &b);
+            dst_rgb = dst_rgb_fmt->save_rgb(dst_rgb, r, g, b);
+        }
+        /* Aling rgb pinters to 16 bit */
+        if (((uintptr_t)src_rgb & 1) != 0) src_rgb = (uint8_t*)src_rgb + 1;
+        if (((uintptr_t)dst_rgb & 1) != 0) dst_rgb = (uint8_t*)dst_rgb + 1;
+    }
+}
+
+/* Generic converter from a YUV format to an RGB/BRG format. */
+static void
+YUVToRGB(const YUVDesc* yuv_fmt,
+         const RGBDesc* rgb_fmt,
+         const void* yuv,
+         void* rgb,
+         int width,
+         int height)
+{
+    int y, x;
+    const int Y_Inc = yuv_fmt->Y_inc;
+    const int UV_inc = yuv_fmt->UV_inc;
+    const int Y_next_pair = yuv_fmt->Y_next_pair;
+    const uint8_t* pY = (const uint8_t*)yuv + yuv_fmt->Y_offset;
+    for (y = 0; y < height; y++) {
+        const uint8_t* pU =
+            (const uint8_t*)yuv + yuv_fmt->u_offset(yuv_fmt, y, width, height);
+        const uint8_t* pV =
+            (const uint8_t*)yuv + yuv_fmt->v_offset(yuv_fmt, y, width, height);
+        for (x = 0; x < width; x += 2,
+                               pY += Y_next_pair, pU += UV_inc, pV += UV_inc) {
+            uint8_t r, g, b;
+            const uint8_t U = *pU;
+            const uint8_t V = *pV;
+            YUVToRGBPix(*pY, U, V, &r, &g, &b);
+            rgb = rgb_fmt->save_rgb(rgb, r, g, b);
+            YUVToRGBPix(pY[Y_Inc], U, V, &r, &g, &b);
+            rgb = rgb_fmt->save_rgb(rgb, r, g, b);
+        }
+        /* Aling rgb_ptr to 16 bit */
+        if (((uintptr_t)rgb & 1) != 0) rgb = (uint8_t*)rgb + 1;
+    }
+}
+
+/* Generic converter from one YUV format to another YUV format. */
+static void
+YUVToYUV(const YUVDesc* src_fmt,
+         const YUVDesc* dst_fmt,
+         const void* src,
+         void* dst,
+         int width,
+         int height)
+{
+    int y, x;
+    const int Y_Inc_src = src_fmt->Y_inc;
+    const int UV_inc_src = src_fmt->UV_inc;
+    const int Y_next_pair_src = src_fmt->Y_next_pair;
+    const int Y_Inc_dst = dst_fmt->Y_inc;
+    const int UV_inc_dst = dst_fmt->UV_inc;
+    const int Y_next_pair_dst = dst_fmt->Y_next_pair;
+    const uint8_t* pYsrc = (const uint8_t*)src + src_fmt->Y_offset;
+    uint8_t* pYdst = (uint8_t*)dst + dst_fmt->Y_offset;
+    for (y = 0; y < height; y++) {
+        const uint8_t* pUsrc =
+            (const uint8_t*)src + src_fmt->u_offset(src_fmt, y, width, height);
+        const uint8_t* pVsrc =
+            (const uint8_t*)src + src_fmt->v_offset(src_fmt, y, width, height);
+        uint8_t* pUdst =
+            (uint8_t*)dst + dst_fmt->u_offset(dst_fmt, y, width, height);
+        uint8_t* pVdst =
+            (uint8_t*)dst + dst_fmt->v_offset(dst_fmt, y, width, height);
+        for (x = 0; x < width; x += 2, pYsrc += Y_next_pair_src,
+                                       pUsrc += UV_inc_src,
+                                       pVsrc += UV_inc_src,
+                                       pYdst += Y_next_pair_dst,
+                                       pUdst += UV_inc_dst,
+                                       pVdst += UV_inc_dst) {
+            *pYdst = *pYsrc; *pUdst = *pUsrc; *pVdst = *pVsrc;
+            pYdst[Y_Inc_dst] = pYsrc[Y_Inc_src];
         }
     }
+}
 
-    E("%s: No converter found from %.4s to %.4s pixel formats",
-      __FUNCTION__, (const char*)&from, (const char*)&to);
+/********************************************************************************
+ * RGB format descriptors.
+ */
+
+/* Describes RGB32 format. */
+static const RGBDesc _RGB32 =
+{
+    .load_rgb   = _load_RGB32,
+    .save_rgb   = _save_RGB32,
+    .rgb_inc    = 4
+};
+
+/* Describes BRG32 format. */
+static const RGBDesc _BRG32 =
+{
+    .load_rgb   = _load_BRG32,
+    .save_rgb   = _save_BRG32,
+    .rgb_inc    = 4
+};
+
+/* Describes RGB24 format. */
+static const RGBDesc _RGB24 =
+{
+    .load_rgb   = _load_RGB24,
+    .save_rgb   = _save_RGB24,
+    .rgb_inc    = 3
+};
+
+/* Describes BRG24 format. */
+static const RGBDesc _BRG24 =
+{
+    .load_rgb   = _load_BRG24,
+    .save_rgb   = _save_BRG24,
+    .rgb_inc    = 3
+};
+
+/* Describes RGB16 format. */
+static const RGBDesc _RGB16 =
+{
+    .load_rgb   = _load_RGB16,
+    .save_rgb   = _save_RGB16,
+    .rgb_inc    = 2
+};
+
+/* Describes BRG16 format. */
+static const RGBDesc _BRG16 =
+{
+    .load_rgb   = _load_BRG16,
+    .save_rgb   = _save_BRG16,
+    .rgb_inc    = 2
+};
+
+/********************************************************************************
+ * YUV 4:2:2 format descriptors.
+ */
+
+/* YUYV: 4:2:2, YUV are interleaved. */
+static const YUVDesc _YUYV =
+{
+    .Y_offset       = 0,
+    .Y_inc          = 2,
+    .Y_next_pair    = 4,
+    .UV_inc         = 4,
+    .U_offset       = 1,
+    .V_offset       = 3,
+    .u_offset       = &_UOffIntrlYUV,
+    .v_offset       = &_VOffIntrlYUV
+};
+
+/* UYVY: 4:2:2, YUV are interleaved. */
+static const YUVDesc _UYVY =
+{
+    .Y_offset       = 1,
+    .Y_inc          = 2,
+    .Y_next_pair    = 4,
+    .UV_inc         = 4,
+    .U_offset       = 0,
+    .V_offset       = 2,
+    .u_offset       = &_UOffIntrlYUV,
+    .v_offset       = &_VOffIntrlYUV
+};
+
+/* YVYU: 4:2:2, YUV are interleaved. */
+static const YUVDesc _YVYU =
+{
+    .Y_offset       = 0,
+    .Y_inc          = 2,
+    .Y_next_pair    = 4,
+    .UV_inc         = 4,
+    .U_offset       = 3,
+    .V_offset       = 1,
+    .u_offset       = &_UOffIntrlYUV,
+    .v_offset       = &_VOffIntrlYUV
+};
+
+/* VYUY: 4:2:2, YUV are interleaved. */
+static const YUVDesc _VYUY =
+{
+    .Y_offset       = 1,
+    .Y_inc          = 2,
+    .Y_next_pair    = 4,
+    .UV_inc         = 4,
+    .U_offset       = 2,
+    .V_offset       = 0,
+    .u_offset       = &_UOffIntrlYUV,
+    .v_offset       = &_VOffIntrlYUV
+};
+
+/* YYUV (also YUY2, YUNV, V422) : 4:2:2, YUV are interleaved. */
+static const YUVDesc _YYUV =
+{
+    .Y_offset       = 0,
+    .Y_inc          = 1,
+    .Y_next_pair    = 4,
+    .UV_inc         = 4,
+    .U_offset       = 2,
+    .V_offset       = 3,
+    .u_offset       = &_UOffIntrlYUV,
+    .v_offset       = &_VOffIntrlYUV
+};
+
+/* YYVU: 4:2:2, YUV are interleaved. */
+static const YUVDesc _YYVU =
+{
+    .Y_offset       = 0,
+    .Y_inc          = 1,
+    .Y_next_pair    = 4,
+    .UV_inc         = 4,
+    .U_offset       = 3,
+    .V_offset       = 2,
+    .u_offset       = &_UOffIntrlYUV,
+    .v_offset       = &_VOffIntrlYUV
+};
+
+/********************************************************************************
+ * YUV 4:2:0 descriptors.
+ */
+
+/* YV12: 4:2:0, YUV are fully separated, U pane follows V pane */
+static const YUVDesc _YV12 =
+{
+    .Y_offset       = 0,
+    .Y_inc          = 1,
+    .Y_next_pair    = 2,
+    .UV_inc         = 1,
+    .U_offset       = 0,
+    .V_offset       = 1,
+    .u_offset       = &_UOffSepYUV,
+    .v_offset       = &_VOffSepYUV
+};
+
+/* NV12: 4:2:0, UV are interleaved, V follows U in UV pane */
+static const YUVDesc _NV12 =
+{
+    .Y_offset       = 0,
+    .Y_inc          = 1,
+    .Y_next_pair    = 2,
+    .UV_inc         = 2,
+    .U_offset       = 1,
+    .V_offset       = 0,
+    .u_offset       = &_UOffIntrlUV,
+    .v_offset       = &_VOffIntrlUV
+};
+
+/* NV21: 4:2:0, UV are interleaved, U follows V in UV pane */
+static const YUVDesc _NV21 =
+{
+    .Y_offset       = 0,
+    .Y_inc          = 1,
+    .Y_next_pair    = 2,
+    .UV_inc         = 2,
+    .U_offset       = 0,
+    .V_offset       = 1,
+    .u_offset       = &_UOffIntrlUV,
+    .v_offset       = &_VOffIntrlUV
+};
+
+/********************************************************************************
+ * List of descriptors for supported formats.
+ *******************************************************************************/
+
+/* Formats entry in the list of descriptors for supported formats. */
+typedef struct PIXFormat {
+    /* "FOURCC" (V4L2_PIX_FMT_XXX) format type. */
+    uint32_t        fourcc_type;
+    /* RGB/YUV selector:
+     *  1 - Entry is related to an RGB/BRG format.
+     *  0 - Entry is related to a YUV format. */
+    int             is_RGB;
+    union {
+        /* References RGB format descriptor for that format. */
+        const RGBDesc*  rgb_desc;
+        /* References YUV format descriptor for that format. */
+        const YUVDesc*  yuv_desc;
+    } desc;
+} PIXFormat;
+
+/* Array of supported pixel format descriptors. */
+static const PIXFormat _PIXFormats[] = {
+    /* RGB/BRG formats. */
+    { V4L2_PIX_FMT_RGB32,   1, .desc.rgb_desc = &_RGB32 },
+    { V4L2_PIX_FMT_BGR32,   1, .desc.rgb_desc = &_BRG32 },
+    { V4L2_PIX_FMT_RGB565,  1, .desc.rgb_desc = &_RGB16 },
+    { V4L2_PIX_FMT_RGB24,   1, .desc.rgb_desc = &_RGB24 },
+    { V4L2_PIX_FMT_BGR24,   1, .desc.rgb_desc = &_BRG24 },
+
+    /* YUV 4:2:0 formats. */
+    { V4L2_PIX_FMT_YVU420,  0, .desc.yuv_desc = &_YV12  },
+    { V4L2_PIX_FMT_NV12,    0, .desc.yuv_desc = &_NV12  },
+    { V4L2_PIX_FMT_NV21,    0, .desc.yuv_desc = &_NV21  },
+
+    /* YUV 4:2:2 formats. */
+    { V4L2_PIX_FMT_YUYV,    0, .desc.yuv_desc = &_YUYV  },
+    { V4L2_PIX_FMT_YYUV,    0, .desc.yuv_desc = &_YYUV  },
+    { V4L2_PIX_FMT_YVYU,    0, .desc.yuv_desc = &_YVYU  },
+    { V4L2_PIX_FMT_UYVY,    0, .desc.yuv_desc = &_UYVY  },
+    { V4L2_PIX_FMT_VYUY,    0, .desc.yuv_desc = &_VYUY  },
+    { V4L2_PIX_FMT_YVYU,    0, .desc.yuv_desc = &_YVYU  },
+    { V4L2_PIX_FMT_VYUY,    0, .desc.yuv_desc = &_VYUY  },
+    { V4L2_PIX_FMT_YYVU,    0, .desc.yuv_desc = &_YYVU  },
+    { V4L2_PIX_FMT_YUY2,    0, .desc.yuv_desc = &_YUYV  },
+    { V4L2_PIX_FMT_YUNV,    0, .desc.yuv_desc = &_YUYV  },
+    { V4L2_PIX_FMT_V422,    0, .desc.yuv_desc = &_YUYV  },
+};
+static const int _PIXFormats_num = sizeof(_PIXFormats) / sizeof(*_PIXFormats);
+
+/* Get an entry in the array of supported pixel format descriptors.
+ * Param:
+ *  pixel_format - "fourcc" pixel format to lookup an entry for.
+ * Return"
+ *  Pointer to the found entry, or NULL if no entry exists for the given pixel
+ *  format.
+ */
+static const PIXFormat*
+_get_pixel_format_descriptor(uint32_t pixel_format)
+{
+    int f;
+    for (f = 0; f < _PIXFormats_num; f++) {
+        if (_PIXFormats[f].fourcc_type == pixel_format) {
+            return &_PIXFormats[f];
+        }
+    }
+    W("%s: Pixel format %.4s is unknown",
+      __FUNCTION__, (const char*)&pixel_format);
     return NULL;
 }
 
@@ -1481,8 +998,12 @@ _get_format_converter(uint32_t from, uint32_t to)
 int
 has_converter(uint32_t from, uint32_t to)
 {
-    return (from == to) ? 1 :
-                          (_get_format_converter(from, to) != NULL);
+    if (from == to) {
+        /* Same format: converter esists. */
+        return 1;
+    }
+    return _get_pixel_format_descriptor(from) != NULL &&
+           _get_pixel_format_descriptor(to) != NULL;
 }
 
 int
@@ -1495,23 +1016,41 @@ convert_frame(const void* frame,
               int fbs_num)
 {
     int n;
+    const PIXFormat* src_desc = _get_pixel_format_descriptor(pixel_format);
+    if (src_desc == NULL) {
+        E("%s: Source pixel format %.4s is unknown",
+          __FUNCTION__, (const char*)&pixel_format);
+        return -1;
+    }
 
     for (n = 0; n < fbs_num; n++) {
         if (framebuffers[n].pixel_format == pixel_format) {
-            /* Same pixel format. No conversion needed. */
+            /* Same pixel format. No conversion needed: just make a copy. */
             memcpy(framebuffers[n].framebuffer, frame, framebuffer_size);
         } else {
-            /* Get the converter. Note that the client must have ensured the
-             * existence of the converter when it was starting the camera. */
-            FormatConverter convert =
-                _get_format_converter(pixel_format, framebuffers[n].pixel_format);
-            if (convert != NULL) {
-                convert(frame, width, height, framebuffers[n].framebuffer);
-            } else {
-                E("%s No converter from %.4s to %.4s for framebuffer # %d ",
-                  __FUNCTION__, (const char*)&pixel_format,
-                  (const char*)&framebuffers[n].pixel_format, n);
+            const PIXFormat* dst_desc =
+                _get_pixel_format_descriptor(framebuffers[n].pixel_format);
+            if (dst_desc == NULL) {
+                E("%s: Destination pixel format %.4s is unknown",
+                  __FUNCTION__, (const char*)&framebuffers[n].pixel_format);
                 return -1;
+            }
+            if (src_desc->is_RGB) {
+                if (dst_desc->is_RGB) {
+                    RGBToRGB(src_desc->desc.rgb_desc, dst_desc->desc.rgb_desc,
+                             frame, framebuffers[n].framebuffer, width, height);
+                } else {
+                    RGBToYUV(src_desc->desc.rgb_desc, dst_desc->desc.yuv_desc,
+                             frame, framebuffers[n].framebuffer, width, height);
+                }
+            } else {
+                if (dst_desc->is_RGB) {
+                    YUVToRGB(src_desc->desc.yuv_desc, dst_desc->desc.rgb_desc,
+                             frame, framebuffers[n].framebuffer, width, height);
+                } else {
+                    YUVToYUV(src_desc->desc.yuv_desc, dst_desc->desc.yuv_desc,
+                             frame, framebuffers[n].framebuffer, width, height);
+                }
             }
         }
     }
