@@ -58,7 +58,39 @@
 #ifndef V4L2_PIX_FMT_YYVU
 #define V4L2_PIX_FMT_YYVU    v4l2_fourcc('Y', 'Y', 'V', 'U')
 #endif /* V4L2_PIX_FMT_YYVU */
-
+#ifndef V4L2_PIX_FMT_SGBRG8
+#define V4L2_PIX_FMT_SGBRG8  v4l2_fourcc('G', 'B', 'R', 'G')
+#endif  /* V4L2_PIX_FMT_SGBRG8 */
+#ifndef V4L2_PIX_FMT_SGRBG8
+#define V4L2_PIX_FMT_SGRBG8  v4l2_fourcc('G', 'R', 'B', 'G')
+#endif  /* V4L2_PIX_FMT_SGRBG8 */
+#ifndef V4L2_PIX_FMT_SRGGB8
+#define V4L2_PIX_FMT_SRGGB8  v4l2_fourcc('R', 'G', 'G', 'B')
+#endif  /* V4L2_PIX_FMT_SRGGB8 */
+#ifndef V4L2_PIX_FMT_SBGGR10
+#define V4L2_PIX_FMT_SBGGR10 v4l2_fourcc('B', 'G', '1', '\0')
+#endif  /* V4L2_PIX_FMT_SBGGR10 */
+#ifndef V4L2_PIX_FMT_SGBRG10
+#define V4L2_PIX_FMT_SGBRG10 v4l2_fourcc('G', 'B', '1', '\0')
+#endif  /* V4L2_PIX_FMT_SGBRG10 */
+#ifndef V4L2_PIX_FMT_SGRBG10
+#define V4L2_PIX_FMT_SGRBG10 v4l2_fourcc('B', 'A', '1', '\0')
+#endif  /* V4L2_PIX_FMT_SGRBG10 */
+#ifndef V4L2_PIX_FMT_SRGGB10
+#define V4L2_PIX_FMT_SRGGB10 v4l2_fourcc('R', 'G', '1', '\0')
+#endif  /* V4L2_PIX_FMT_SRGGB10 */
+#ifndef V4L2_PIX_FMT_SBGGR12
+#define V4L2_PIX_FMT_SBGGR12 v4l2_fourcc('B', 'G', '1', '2')
+#endif  /* V4L2_PIX_FMT_SBGGR12 */
+#ifndef V4L2_PIX_FMT_SGBRG12
+#define V4L2_PIX_FMT_SGBRG12 v4l2_fourcc('G', 'B', '1', '2')
+#endif  /* V4L2_PIX_FMT_SGBRG12 */
+#ifndef V4L2_PIX_FMT_SGRBG12
+#define V4L2_PIX_FMT_SGRBG12 v4l2_fourcc('B', 'A', '1', '2')
+#endif  /* V4L2_PIX_FMT_SGRBG12 */
+#ifndef V4L2_PIX_FMT_SRGGB12
+#define V4L2_PIX_FMT_SRGGB12 v4l2_fourcc('R', 'G', '1', '2')
+#endif  /* V4L2_PIX_FMT_SRGGB12 */
 
 /* Describes framebuffer, used by the client of camera capturing API.
  * This descritptor is used in camera_device_read_frame call.

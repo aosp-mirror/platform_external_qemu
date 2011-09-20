@@ -110,6 +110,17 @@ static const uint32_t kBlue8    = 0x000000ff;
 #define RGB32(r, g, b) (uint32_t)(((((uint32_t)(r) << 8) | (g)) << 8) | (b))
 #endif  // !HOST_WORDS_BIGENDIAN
 
+/*
+ * BAYER bitmasks
+ */
+
+/* Bitmask for 8-bits BAYER pixel. */
+#define kBayer8     0xff
+/* Bitmask for 10-bits BAYER pixel. */
+#define kBayer10    0x3ff
+/* Bitmask for 12-bits BAYER pixel. */
+#define kBayer12    0xfff
+
 /* An union that simplifies breaking 32 bit RGB into separate R, G, and B colors.
  */
 typedef union RGB32_t {
@@ -306,6 +317,13 @@ YUVToRGBPix(int y, int u, int v, uint8_t* r, uint8_t* g, uint8_t* b)
  * So, all these patterns can be coded in a YUV format descriptor, so there can
  * just one generic way of walking YUV frame.
  *
+ * BAYER format.
+ * We don't use BAYER inside the guest system, so there is no need to have a
+ * converter to the BAYER formats, only from it. The color approximation  used in
+ * the BAYER format converters implemented here simply averages corresponded
+ * color values found in pixels sorrounding the one for which RGB colors are
+ * calculated.
+ *
  * Performance considerations:
  * Since converters implemented here are intended to work as part of the camera
  * emulation, making the code super performant is not a priority at all. There
@@ -315,6 +333,7 @@ YUVToRGBPix(int y, int u, int v, uint8_t* r, uint8_t* g, uint8_t* b)
 
 typedef struct RGBDesc RGBDesc;
 typedef struct YUVDesc YUVDesc;
+typedef struct BayerDesc BayerDesc;
 
 /* Prototype for a routine that loads RGB colors from an RGB/BRG stream.
  * Param:
@@ -405,6 +424,23 @@ struct YUVDesc {
     /* Routine that calculates an offset of the first V value for the given line
      * in a YUV framebuffer. */
     v_offset_func   v_offset;
+};
+
+/* Bayer format descriptor. */
+struct BayerDesc {
+    /* Defines color ordering in the BAYER framebuffer. Can be one of the four:
+     *  - "GBRG" for GBGBGB / RGRGRG
+     *  - "GRBG" for GRGRGR / BGBGBG
+     *  - "RGGB" for RGRGRG / GBGBGB
+     *  - "BGGR" for BGBGBG / GRGRGR
+     */
+    const char* color_order;
+    /* Bitmask for valid bits in the pixel:
+     *  - 0xff  For a 8-bit BAYER format
+     *  - 0x3ff For a 10-bit BAYER format
+     *  - 0xfff For a 12-bit BAYER format
+     */
+    int         mask;
 };
 
 /********************************************************************************
@@ -614,7 +650,258 @@ _VOffSepYUV(const YUVDesc* desc, int line, int width, int height)
 }
 
 /********************************************************************************
- * Generic YUV/RGB converters
+ * Bayer routines.
+ *******************************************************************************/
+
+/* Gets a color value for the given pixel in a bayer framebuffer.
+ * Param:
+ *  desc - Bayer framebuffer descriptor.
+ *  buf - Beginning of the framebuffer.
+ *  x, y - Coordinates of the pixel inside the framebuffer to get the color for.
+ *  width - Number of pixel in a line inside the framebuffer.
+ * Return:
+ *  Given pixel color.
+ */
+static __inline__ int
+_get_bayer_color(const BayerDesc* desc, const void* buf, int x, int y, int width)
+{
+    if (desc->mask == kBayer8) {
+        /* Each pixel is represented with one byte. */
+        return *((const uint8_t*)buf + y * width + x);
+    } else {
+#ifndef HOST_WORDS_BIGENDIAN
+        return *((const int16_t*)buf + y * width + x) & desc->mask;
+#else
+        const uint8_t* pixel = (const uint8_t*)buf + (y * width + x) * 2;
+        return (((uint16_t)pixel[1] << 8) | pixel[0]) & desc->mask;
+#endif  /* !HOST_WORDS_BIGENDIAN */
+    }
+}
+
+/* Gets an average value of colors that are horisontally adjacent to a pixel in
+ * a bayer framebuffer.
+ * Param:
+ *  desc - Bayer framebuffer descriptor.
+ *  buf - Beginning of the framebuffer.
+ *  x, y - Coordinates of the pixel inside the framebuffer that is the center for
+ *      the calculation.
+ *  width, height - Framebuffer dimensions.
+ * Return:
+ *  Average color for horisontally adjacent pixels.
+ */
+static int
+_get_bayer_ave_hor(const BayerDesc* desc,
+                   const void* buf,
+                   int x,
+                   int y,
+                   int width,
+                   int height)
+{
+    if (x == 0) {
+        return _get_bayer_color(desc, buf, x + 1, y, width);
+    } else if (x == (width - 1)) {
+        return _get_bayer_color(desc, buf, x - 1, y, width);
+    } else {
+        return (_get_bayer_color(desc, buf, x - 1, y, width) +
+                _get_bayer_color(desc, buf, x + 1, y, width)) / 2;
+    }
+}
+
+/* Gets an average value of colors that are vertically adjacent to a pixel in
+ * a bayer framebuffer.
+ * Param:
+ *  desc - Bayer framebuffer descriptor.
+ *  buf - Beginning of the framebuffer.
+ *  x, y - Coordinates of the pixel inside the framebuffer that is the center for
+ *      the calculation.
+ *  width, height - Framebuffer dimensions.
+ * Return:
+ *  Average color for vertically adjacent pixels.
+ */
+static int
+_get_bayer_ave_vert(const BayerDesc* desc,
+                    const void* buf,
+                    int x,
+                    int y,
+                    int width,
+                    int height)
+{
+    if (y == 0) {
+        return _get_bayer_color(desc, buf, x, y + 1, width);
+    } else if (y == (height - 1)) {
+        return _get_bayer_color(desc, buf, x, y - 1, width);
+    } else {
+        return (_get_bayer_color(desc, buf, x, y - 1, width) +
+                _get_bayer_color(desc, buf, x, y + 1, width)) / 2;
+    }
+}
+
+/* Gets an average value of colors that are horisontally and vertically adjacent
+ * to a pixel in a bayer framebuffer.
+ * Param:
+ *  desc - Bayer framebuffer descriptor.
+ *  buf - Beginning of the framebuffer.
+ *  x, y - Coordinates of the pixel inside the framebuffer that is the center for
+ *      the calculation.
+ *  width, height - Framebuffer dimensions.
+ * Return:
+ *  Average color for horisontally and vertically adjacent pixels.
+ */
+static int
+_get_bayer_ave_cross(const BayerDesc* desc,
+                     const void* buf,
+                     int x,
+                     int y,
+                     int width,
+                     int height)
+{
+    if (x > 0 && x < (width - 1) && y > 0 && y < (height - 1)) {
+        /* Most of the time the code will take this path. So it makes sence to
+         * special case it for performance reasons. */
+        return (_get_bayer_color(desc, buf, x - 1, y, width) +
+                _get_bayer_color(desc, buf, x + 1, y, width) +
+                _get_bayer_color(desc, buf, x, y - 1, width) +
+                _get_bayer_color(desc, buf, x, y + 1, width)) / 4;
+    } else {
+        int sum = 0;
+        int num = 0;
+
+        /* Horisontal sum */
+        if (x == 0) {
+            sum += _get_bayer_color(desc, buf, x + 1, y, width);
+            num++;
+        } else if (x == (width - 1)) {
+            sum += _get_bayer_color(desc, buf, x - 1, y, width);
+            num++;
+        } else {
+            sum += _get_bayer_color(desc, buf, x - 1, y, width) +
+                   _get_bayer_color(desc, buf, x + 1, y, width);
+            num += 2;
+        }
+
+        /* Vertical sum */
+        if (y == 0) {
+            sum += _get_bayer_color(desc, buf, x, y + 1, width);
+            num++;
+        } else if (y == (height - 1)) {
+            sum += _get_bayer_color(desc, buf, x, y - 1, width);
+            num++;
+        } else {
+            sum += _get_bayer_color(desc, buf, x, y - 1, width) +
+                   _get_bayer_color(desc, buf, x, y + 1, width);
+            num += 2;
+        }
+
+        return sum / num;
+    }
+}
+
+/* Gets an average value of colors that are diagonally adjacent to a pixel in a
+ * bayer framebuffer.
+ * Param:
+ *  desc - Bayer framebuffer descriptor.
+ *  buf - Beginning of the framebuffer.
+ *  x, y - Coordinates of the pixel inside the framebuffer that is the center for
+ *      the calculation.
+ *  width, height - Framebuffer dimensions.
+ * Return:
+ *  Average color for diagonally adjacent pixels.
+ */
+static int
+_get_bayer_ave_diag(const BayerDesc* desc,
+                    const void* buf,
+                    int x,
+                    int y,
+                    int width,
+                    int height)
+{
+    if (x > 0 && x < (width - 1) && y > 0 && y < (height - 1)) {
+        /* Most of the time the code will take this path. So it makes sence to
+         * special case it for performance reasons. */
+        return (_get_bayer_color(desc, buf, x - 1, y - 1, width) +
+                _get_bayer_color(desc, buf, x + 1, y - 1, width) +
+                _get_bayer_color(desc, buf, x - 1, y + 1, width) +
+                _get_bayer_color(desc, buf, x + 1, y + 1, width)) / 4;
+    } else {
+        int sum = 0;
+        int num = 0;
+        int xx, yy;
+        for (xx = x - 1; xx < (x + 2); xx += 2) {
+            for (yy = y - 1; yy < (y + 2); yy += 2) {
+                if (xx >= 0 && yy >= 0 && xx < width && yy < height) {
+                    sum += _get_bayer_color(desc, buf, xx, yy, width);
+                    num++;
+                }
+            }
+        }
+        return sum / num;
+    }
+}
+
+/* Gets pixel color selector for the given pixel in a bayer framebuffer.
+ * Param:
+ *  desc - Bayer framebuffer descriptor.
+ *  x, y - Coordinates of the pixel inside the framebuffer to get the color
+ *      selector for.
+ * Return:
+ *  Pixel color selector:
+ *      - 'R' - pixel is red.
+ *      - 'G' - pixel is green.
+ *      - 'B' - pixel is blue.
+ */
+static __inline__ char
+_get_bayer_color_sel(const BayerDesc* desc, int x, int y)
+{
+    return desc->color_order[((y & 1) << 1) | (x & 1)];
+}
+
+/* Calculates RGB colors for a pixel in a bayer framebuffer.
+ * Param:
+ *  desc - Bayer framebuffer descriptor.
+ *  buf - Beginning of the framebuffer.
+ *  x, y - Coordinates of the pixel inside the framebuffer to get the colors for.
+ *  width, height - Framebuffer dimensions.
+ *  red, green bluu - Upon return will contain RGB colors calculated for the pixel.
+ */
+static void
+_get_bayerRGB(const BayerDesc* desc,
+              const void* buf,
+              int x,
+              int y,
+              int width,
+              int height,
+              int* red,
+              int* green,
+              int* blue)
+{
+    const char pixel_color = _get_bayer_color_sel(desc, x, y);
+
+    if (pixel_color == 'G') {
+        /* This is a green pixel. */
+        const char next_pixel_color = _get_bayer_color_sel(desc, x + 1, y);
+        *green = _get_bayer_color(desc, buf, x, y, width);
+        if (next_pixel_color == 'R') {
+            *red = _get_bayer_ave_hor(desc, buf, x, y, width, height);
+            *blue = _get_bayer_ave_vert(desc, buf, x, y, width, height);
+        } else {
+            *red = _get_bayer_ave_vert(desc, buf, x, y, width, height);
+            *blue = _get_bayer_ave_hor(desc, buf, x, y, width, height);
+        }
+    } else if (pixel_color == 'R') {
+        /* This is a red pixel. */
+        *red = _get_bayer_color(desc, buf, x, y, width);
+        *green = _get_bayer_ave_cross(desc, buf, x, y, width, height);
+        *blue = _get_bayer_ave_diag(desc, buf, x, y, width, height);
+    } else {
+        /* This is a blue pixel. */
+        *blue = _get_bayer_color(desc, buf, x, y, width);
+        *green = _get_bayer_ave_cross(desc, buf, x, y, width, height);
+        *red = _get_bayer_ave_diag(desc, buf, x, y, width, height);
+    }
+}
+
+/********************************************************************************
+ * Generic YUV/RGB/BAYER converters
  *******************************************************************************/
 
 /* Generic converter from an RGB/BRG format to a YUV format. */
@@ -740,6 +1027,62 @@ YUVToYUV(const YUVDesc* src_fmt,
                                        pVdst += UV_inc_dst) {
             *pYdst = *pYsrc; *pUdst = *pUsrc; *pVdst = *pVsrc;
             pYdst[Y_Inc_dst] = pYsrc[Y_Inc_src];
+        }
+    }
+}
+
+/* Generic converter from a BAYER format to an RGB/BRG format. */
+static void
+BAYERToRGB(const BayerDesc* bayer_fmt,
+           const RGBDesc* rgb_fmt,
+           const void* bayer,
+           void* rgb,
+           int width,
+           int height)
+{
+    int y, x;
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            int r, g, b;
+            _get_bayerRGB(bayer_fmt, bayer, x, y, width, height, &r, &g, &b);
+            if (bayer_fmt->mask == kBayer10) {
+                r >>= 2; g >>= 2; b >>= 2;
+            } else if (bayer_fmt->mask == kBayer12) {
+                r >>= 4; g >>= 4; b >>= 4;
+            }
+            rgb = rgb_fmt->save_rgb(rgb, r, g, b);
+        }
+        /* Aling rgb_ptr to 16 bit */
+        if (((uintptr_t)rgb & 1) != 0) rgb = (uint8_t*)rgb + 1;
+    }
+}
+
+/* Generic converter from a BAYER format to a YUV format. */
+static void
+BAYERToYUV(const BayerDesc* bayer_fmt,
+           const YUVDesc* yuv_fmt,
+           const void* bayer,
+           void* yuv,
+           int width,
+           int height)
+{
+    int y, x;
+    const int Y_Inc = yuv_fmt->Y_inc;
+    const int UV_inc = yuv_fmt->UV_inc;
+    const int Y_next_pair = yuv_fmt->Y_next_pair;
+    uint8_t* pY = (uint8_t*)yuv + yuv_fmt->Y_offset;
+    for (y = 0; y < height; y++) {
+        uint8_t* pU =
+            (uint8_t*)yuv + yuv_fmt->u_offset(yuv_fmt, y, width, height);
+        uint8_t* pV =
+            (uint8_t*)yuv + yuv_fmt->v_offset(yuv_fmt, y, width, height);
+        for (x = 0; x < width; x += 2,
+                               pY += Y_next_pair, pU += UV_inc, pV += UV_inc) {
+            int r, g, b;
+            _get_bayerRGB(bayer_fmt, bayer, x, y, width, height, &r, &g, &b);
+            R8G8B8ToYUV(r, g, b, pY, pU, pV);
+            _get_bayerRGB(bayer_fmt, bayer, x + 1, y, width, height, &r, &g, &b);
+            pY[Y_Inc] = RGB2Y(r, g, b);
         }
     }
 }
@@ -922,51 +1265,164 @@ static const YUVDesc _NV21 =
 };
 
 /********************************************************************************
+ * RGB bayer format descriptors.
+ */
+
+/* Descriptor for a 8-bit GBGB / RGRG format. */
+static const BayerDesc _GB8 =
+{
+    .mask           = kBayer8,
+    .color_order    = "GBRG"
+};
+
+/* Descriptor for a 8-bit GRGR / BGBG format. */
+static const BayerDesc _GR8 =
+{
+    .mask           = kBayer8,
+    .color_order    = "GRBG"
+};
+
+/* Descriptor for a 8-bit BGBG / GRGR format. */
+static const BayerDesc _BG8 =
+{
+    .mask           = kBayer8,
+    .color_order    = "BGGR"
+};
+
+/* Descriptor for a 8-bit RGRG / GBGB format. */
+static const BayerDesc _RG8 =
+{
+    .mask           = kBayer8,
+    .color_order    = "RGGB"
+};
+
+/* Descriptor for a 10-bit GBGB / RGRG format. */
+static const BayerDesc _GB10 =
+{
+    .mask           = kBayer10,
+    .color_order    = "GBRG"
+};
+
+/* Descriptor for a 10-bit GRGR / BGBG format. */
+static const BayerDesc _GR10 =
+{
+    .mask           = kBayer10,
+    .color_order    = "GRBG"
+};
+
+/* Descriptor for a 10-bit BGBG / GRGR format. */
+static const BayerDesc _BG10 =
+{
+    .mask           = kBayer10,
+    .color_order    = "BGGR"
+};
+
+/* Descriptor for a 10-bit RGRG / GBGB format. */
+static const BayerDesc _RG10 =
+{
+    .mask           = kBayer10,
+    .color_order    = "RGGB"
+};
+
+/* Descriptor for a 12-bit GBGB / RGRG format. */
+static const BayerDesc _GB12 =
+{
+    .mask           = kBayer12,
+    .color_order    = "GBRG"
+};
+
+/* Descriptor for a 12-bit GRGR / BGBG format. */
+static const BayerDesc _GR12 =
+{
+    .mask           = kBayer12,
+    .color_order    = "GRBG"
+};
+
+/* Descriptor for a 12-bit BGBG / GRGR format. */
+static const BayerDesc _BG12 =
+{
+    .mask           = kBayer12,
+    .color_order    = "BGGR"
+};
+
+/* Descriptor for a 12-bit RGRG / GBGB format. */
+static const BayerDesc _RG12 =
+{
+    .mask           = kBayer12,
+    .color_order    = "RGGB"
+};
+
+
+/********************************************************************************
  * List of descriptors for supported formats.
  *******************************************************************************/
+
+/* Enumerates pixel formats supported by converters. */
+typedef enum PIXFormatSel {
+    /* Pixel format is RGB/BGR */
+    PIX_FMT_RGB,
+    /* Pixel format is YUV */
+    PIX_FMT_YUV,
+    /* Pixel format is BAYER */
+    PIX_FMT_BAYER
+} PIXFormatSel;
 
 /* Formats entry in the list of descriptors for supported formats. */
 typedef struct PIXFormat {
     /* "FOURCC" (V4L2_PIX_FMT_XXX) format type. */
     uint32_t        fourcc_type;
-    /* RGB/YUV selector:
-     *  1 - Entry is related to an RGB/BRG format.
-     *  0 - Entry is related to a YUV format. */
-    int             is_RGB;
+    /* RGB/YUV/BAYER format selector */
+    PIXFormatSel    format_sel;
     union {
         /* References RGB format descriptor for that format. */
-        const RGBDesc*  rgb_desc;
+        const RGBDesc*      rgb_desc;
         /* References YUV format descriptor for that format. */
-        const YUVDesc*  yuv_desc;
+        const YUVDesc*      yuv_desc;
+        /* References BAYER format descriptor for that format. */
+        const BayerDesc*    bayer_desc;
     } desc;
 } PIXFormat;
 
 /* Array of supported pixel format descriptors. */
 static const PIXFormat _PIXFormats[] = {
     /* RGB/BRG formats. */
-    { V4L2_PIX_FMT_RGB32,   1, .desc.rgb_desc = &_RGB32 },
-    { V4L2_PIX_FMT_BGR32,   1, .desc.rgb_desc = &_BRG32 },
-    { V4L2_PIX_FMT_RGB565,  1, .desc.rgb_desc = &_RGB16 },
-    { V4L2_PIX_FMT_RGB24,   1, .desc.rgb_desc = &_RGB24 },
-    { V4L2_PIX_FMT_BGR24,   1, .desc.rgb_desc = &_BRG24 },
+    { V4L2_PIX_FMT_RGB32,   PIX_FMT_RGB,    .desc.rgb_desc = &_RGB32  },
+    { V4L2_PIX_FMT_BGR32,   PIX_FMT_RGB,    .desc.rgb_desc = &_BRG32  },
+    { V4L2_PIX_FMT_RGB565,  PIX_FMT_RGB,    .desc.rgb_desc = &_RGB16  },
+    { V4L2_PIX_FMT_RGB24,   PIX_FMT_RGB,    .desc.rgb_desc = &_RGB24  },
+    { V4L2_PIX_FMT_BGR24,   PIX_FMT_RGB,    .desc.rgb_desc = &_BRG24  },
 
     /* YUV 4:2:0 formats. */
-    { V4L2_PIX_FMT_YVU420,  0, .desc.yuv_desc = &_YV12  },
-    { V4L2_PIX_FMT_NV12,    0, .desc.yuv_desc = &_NV12  },
-    { V4L2_PIX_FMT_NV21,    0, .desc.yuv_desc = &_NV21  },
+    { V4L2_PIX_FMT_YVU420,  PIX_FMT_YUV,    .desc.yuv_desc = &_YV12   },
+    { V4L2_PIX_FMT_NV12,    PIX_FMT_YUV,    .desc.yuv_desc = &_NV12   },
+    { V4L2_PIX_FMT_NV21,    PIX_FMT_YUV,    .desc.yuv_desc = &_NV21   },
 
     /* YUV 4:2:2 formats. */
-    { V4L2_PIX_FMT_YUYV,    0, .desc.yuv_desc = &_YUYV  },
-    { V4L2_PIX_FMT_YYUV,    0, .desc.yuv_desc = &_YYUV  },
-    { V4L2_PIX_FMT_YVYU,    0, .desc.yuv_desc = &_YVYU  },
-    { V4L2_PIX_FMT_UYVY,    0, .desc.yuv_desc = &_UYVY  },
-    { V4L2_PIX_FMT_VYUY,    0, .desc.yuv_desc = &_VYUY  },
-    { V4L2_PIX_FMT_YVYU,    0, .desc.yuv_desc = &_YVYU  },
-    { V4L2_PIX_FMT_VYUY,    0, .desc.yuv_desc = &_VYUY  },
-    { V4L2_PIX_FMT_YYVU,    0, .desc.yuv_desc = &_YYVU  },
-    { V4L2_PIX_FMT_YUY2,    0, .desc.yuv_desc = &_YUYV  },
-    { V4L2_PIX_FMT_YUNV,    0, .desc.yuv_desc = &_YUYV  },
-    { V4L2_PIX_FMT_V422,    0, .desc.yuv_desc = &_YUYV  },
+    { V4L2_PIX_FMT_YUYV,    PIX_FMT_YUV,    .desc.yuv_desc = &_YUYV   },
+    { V4L2_PIX_FMT_YYUV,    PIX_FMT_YUV,    .desc.yuv_desc = &_YYUV   },
+    { V4L2_PIX_FMT_YVYU,    PIX_FMT_YUV,    .desc.yuv_desc = &_YVYU   },
+    { V4L2_PIX_FMT_UYVY,    PIX_FMT_YUV,    .desc.yuv_desc = &_UYVY   },
+    { V4L2_PIX_FMT_VYUY,    PIX_FMT_YUV,    .desc.yuv_desc = &_VYUY   },
+    { V4L2_PIX_FMT_YVYU,    PIX_FMT_YUV,    .desc.yuv_desc = &_YVYU   },
+    { V4L2_PIX_FMT_VYUY,    PIX_FMT_YUV,    .desc.yuv_desc = &_VYUY   },
+    { V4L2_PIX_FMT_YYVU,    PIX_FMT_YUV,    .desc.yuv_desc = &_YYVU   },
+    { V4L2_PIX_FMT_YUY2,    PIX_FMT_YUV,    .desc.yuv_desc = &_YUYV   },
+    { V4L2_PIX_FMT_YUNV,    PIX_FMT_YUV,    .desc.yuv_desc = &_YUYV   },
+    { V4L2_PIX_FMT_V422,    PIX_FMT_YUV,    .desc.yuv_desc = &_YUYV   },
+
+    /* BAYER formats. */
+    { V4L2_PIX_FMT_SBGGR8,  PIX_FMT_BAYER,  .desc.bayer_desc = &_BG8  },
+    { V4L2_PIX_FMT_SGBRG8,  PIX_FMT_BAYER,  .desc.bayer_desc = &_GB8  },
+    { V4L2_PIX_FMT_SGRBG8,  PIX_FMT_BAYER,  .desc.bayer_desc = &_GR8  },
+    { V4L2_PIX_FMT_SRGGB8,  PIX_FMT_BAYER,  .desc.bayer_desc = &_RG8  },
+    { V4L2_PIX_FMT_SBGGR10, PIX_FMT_BAYER,  .desc.bayer_desc = &_BG10 },
+    { V4L2_PIX_FMT_SGBRG10, PIX_FMT_BAYER,  .desc.bayer_desc = &_GB10 },
+    { V4L2_PIX_FMT_SGRBG10, PIX_FMT_BAYER,  .desc.bayer_desc = &_GR10 },
+    { V4L2_PIX_FMT_SRGGB10, PIX_FMT_BAYER,  .desc.bayer_desc = &_RG10 },
+    { V4L2_PIX_FMT_SBGGR12, PIX_FMT_BAYER,  .desc.bayer_desc = &_BG12 },
+    { V4L2_PIX_FMT_SGBRG12, PIX_FMT_BAYER,  .desc.bayer_desc = &_GB12 },
+    { V4L2_PIX_FMT_SGRBG12, PIX_FMT_BAYER,  .desc.bayer_desc = &_GR12 },
+    { V4L2_PIX_FMT_SRGGB12, PIX_FMT_BAYER,  .desc.bayer_desc = &_RG12 },
 };
 static const int _PIXFormats_num = sizeof(_PIXFormats) / sizeof(*_PIXFormats);
 
@@ -1035,22 +1491,50 @@ convert_frame(const void* frame,
                   __FUNCTION__, (const char*)&framebuffers[n].pixel_format);
                 return -1;
             }
-            if (src_desc->is_RGB) {
-                if (dst_desc->is_RGB) {
-                    RGBToRGB(src_desc->desc.rgb_desc, dst_desc->desc.rgb_desc,
-                             frame, framebuffers[n].framebuffer, width, height);
-                } else {
-                    RGBToYUV(src_desc->desc.rgb_desc, dst_desc->desc.yuv_desc,
-                             frame, framebuffers[n].framebuffer, width, height);
-                }
-            } else {
-                if (dst_desc->is_RGB) {
-                    YUVToRGB(src_desc->desc.yuv_desc, dst_desc->desc.rgb_desc,
-                             frame, framebuffers[n].framebuffer, width, height);
-                } else {
-                    YUVToYUV(src_desc->desc.yuv_desc, dst_desc->desc.yuv_desc,
-                             frame, framebuffers[n].framebuffer, width, height);
-                }
+            switch (src_desc->format_sel) {
+                case PIX_FMT_RGB:
+                    if (dst_desc->format_sel == PIX_FMT_RGB) {
+                        RGBToRGB(src_desc->desc.rgb_desc, dst_desc->desc.rgb_desc,
+                                 frame, framebuffers[n].framebuffer, width, height);
+                    } else if (dst_desc->format_sel == PIX_FMT_YUV) {
+                        RGBToYUV(src_desc->desc.rgb_desc, dst_desc->desc.yuv_desc,
+                                 frame, framebuffers[n].framebuffer, width, height);
+                    } else {
+                        E("%s: Unexpected destination pixel format %d",
+                          __FUNCTION__, dst_desc->format_sel);
+                        return -1;
+                    }
+                    break;
+                case PIX_FMT_YUV:
+                    if (dst_desc->format_sel == PIX_FMT_RGB) {
+                        YUVToRGB(src_desc->desc.yuv_desc, dst_desc->desc.rgb_desc,
+                                 frame, framebuffers[n].framebuffer, width, height);
+                    } else if (dst_desc->format_sel == PIX_FMT_YUV) {
+                        YUVToYUV(src_desc->desc.yuv_desc, dst_desc->desc.yuv_desc,
+                                 frame, framebuffers[n].framebuffer, width, height);
+                    } else {
+                        E("%s: Unexpected destination pixel format %d",
+                          __FUNCTION__, dst_desc->format_sel);
+                        return -1;
+                    }
+                    break;
+                case PIX_FMT_BAYER:
+                    if (dst_desc->format_sel == PIX_FMT_RGB) {
+                        BAYERToRGB(src_desc->desc.bayer_desc, dst_desc->desc.rgb_desc,
+                                  frame, framebuffers[n].framebuffer, width, height);
+                    } else if (dst_desc->format_sel == PIX_FMT_YUV) {
+                        BAYERToYUV(src_desc->desc.bayer_desc, dst_desc->desc.yuv_desc,
+                                   frame, framebuffers[n].framebuffer, width, height);
+                    } else {
+                        E("%s: Unexpected destination pixel format %d",
+                          __FUNCTION__, dst_desc->format_sel);
+                        return -1;
+                    }
+                    break;
+                default:
+                    E("%s: Unexpected source pixel format %d",
+                      __FUNCTION__, dst_desc->format_sel);
+                    return -1;
             }
         }
     }
