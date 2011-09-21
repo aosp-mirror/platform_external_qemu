@@ -496,6 +496,10 @@ _camera_service_init(CameraServiceDesc* csd)
               (const char*)(&csd->camera_info[csd->camera_count].pixel_format));
             csd->camera_count++;
             memset(found, 0, sizeof(CameraInfo));
+        } else {
+            dwarning("Camera name '%s' is not found in the list of connected cameras.\n"
+                     "Use -webcam-list emulator option to obtain the list of connected camera names\n\n",
+                     disp_name);
         }
     }
 }
