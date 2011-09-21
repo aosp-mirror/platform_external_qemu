@@ -123,6 +123,7 @@ struct LinuxCameraDevice {
 static const uint32_t _preferred_formats[] =
 {
     /* Native format for the emulated camera: no conversion at all. */
+    V4L2_PIX_FMT_YUV420,
     V4L2_PIX_FMT_YVU420,
     /* Continue with YCbCr: less math than with RGB */
     V4L2_PIX_FMT_NV12,

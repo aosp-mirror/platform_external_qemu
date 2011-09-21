@@ -1238,6 +1238,19 @@ static const YUVDesc _YV12 =
     .v_offset       = &_VOffSepYUV
 };
 
+/* YU12: 4:2:0, YUV are fully separated, V pane follows U pane */
+static const YUVDesc _YU12 =
+{
+    .Y_offset       = 0,
+    .Y_inc          = 1,
+    .Y_next_pair    = 2,
+    .UV_inc         = 1,
+    .U_offset       = 1,
+    .V_offset       = 0,
+    .u_offset       = &_UOffSepYUV,
+    .v_offset       = &_VOffSepYUV
+};
+
 /* NV12: 4:2:0, UV are interleaved, V follows U in UV pane */
 static const YUVDesc _NV12 =
 {
@@ -1245,8 +1258,8 @@ static const YUVDesc _NV12 =
     .Y_inc          = 1,
     .Y_next_pair    = 2,
     .UV_inc         = 2,
-    .U_offset       = 1,
-    .V_offset       = 0,
+    .U_offset       = 0,
+    .V_offset       = 1,
     .u_offset       = &_UOffIntrlUV,
     .v_offset       = &_VOffIntrlUV
 };
@@ -1258,8 +1271,8 @@ static const YUVDesc _NV21 =
     .Y_inc          = 1,
     .Y_next_pair    = 2,
     .UV_inc         = 2,
-    .U_offset       = 0,
-    .V_offset       = 1,
+    .U_offset       = 1,
+    .V_offset       = 0,
     .u_offset       = &_UOffIntrlUV,
     .v_offset       = &_VOffIntrlUV
 };
@@ -1394,6 +1407,7 @@ static const PIXFormat _PIXFormats[] = {
 
     /* YUV 4:2:0 formats. */
     { V4L2_PIX_FMT_YVU420,  PIX_FMT_YUV,    .desc.yuv_desc = &_YV12   },
+    { V4L2_PIX_FMT_YUV420,  PIX_FMT_YUV,    .desc.yuv_desc = &_YU12   },
     { V4L2_PIX_FMT_NV12,    PIX_FMT_YUV,    .desc.yuv_desc = &_NV12   },
     { V4L2_PIX_FMT_NV21,    PIX_FMT_YUV,    .desc.yuv_desc = &_NV21   },
 
