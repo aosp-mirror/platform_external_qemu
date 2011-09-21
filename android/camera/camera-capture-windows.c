@@ -357,9 +357,9 @@ camera_device_start_capturing(CameraDevice* cd,
     if (wcd->gdi_bitmap->bmiHeader.biBitCount == 16) {
         wcd->pixel_format = V4L2_PIX_FMT_RGB565;
     } else if (wcd->gdi_bitmap->bmiHeader.biBitCount == 24) {
-        wcd->pixel_format = V4L2_PIX_FMT_RGB24;
+        wcd->pixel_format = V4L2_PIX_FMT_BGR24;
     } else if (wcd->gdi_bitmap->bmiHeader.biBitCount == 32) {
-        wcd->pixel_format = V4L2_PIX_FMT_RGB32;
+        wcd->pixel_format = V4L2_PIX_FMT_BGR32;
     } else {
         E("%s: Unsupported number of bits per pixel %d",
           __FUNCTION__, wcd->gdi_bitmap->bmiHeader.biBitCount);
