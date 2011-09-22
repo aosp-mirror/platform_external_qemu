@@ -282,6 +282,38 @@ _camera_device_free(LinuxCameraDevice* lcd)
     }
 }
 
+/* Resets camera device after capturing.
+ * Since new capture request may require different frame dimensions we must
+ * reset camera device by reopening its handle. Otherwise attempts to set up new
+ * frame properties (different from the previous one) may fail. */
+static void
+_camera_device_reset(LinuxCameraDevice* cd)
+{
+    struct v4l2_cropcap cropcap;
+    struct v4l2_crop crop;
+
+    /* Free capturing framebuffers first. */
+    if (cd->framebuffers != NULL) {
+        _free_framebuffers(cd->framebuffers, cd->framebuffer_num, cd->io_type);
+        free(cd->framebuffers);
+        cd->framebuffers = NULL;
+        cd->framebuffer_num = 0;
+    }
+
+    /* Reset device handle. */
+    close(cd->handle);
+    cd->handle = open(cd->device_name, O_RDWR | O_NONBLOCK, 0);
+
+    if (cd->handle >= 0) {
+        /* Select video input, video standard and tune here. */
+        cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        _xioctl(cd->handle, VIDIOC_CROPCAP, &cropcap);
+        crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        crop.c = cropcap.defrect; /* reset to default */
+        _xioctl (cd->handle, VIDIOC_S_CROP, &crop);
+    }
+}
+
 /* Memory maps buffers and shares mapped memory with the device.
  * Return:
  *  0 Framebuffers have been mapped.
@@ -825,6 +857,7 @@ camera_device_start_capturing(CameraDevice* ccd,
         fmt_str[4] = '\0';
         E("%s: Camera '%s' does not support pixel format '%s' with dimensions %dx%d",
           __FUNCTION__, cd->device_name, fmt_str, frame_width, frame_height);
+        _camera_device_reset(cd);
         return -1;
     }
     /* VIDIOC_S_FMT may has changed some properties of the structure. Make sure
@@ -834,6 +867,7 @@ camera_device_start_capturing(CameraDevice* ccd,
         fmt_str[4] = '\0';
         E("%s: Dimensions %dx%d are wrong for pixel format '%s'",
           __FUNCTION__, frame_width, frame_height, fmt_str);
+        _camera_device_reset(cd);
         return -1;
     }
     memcpy(&cd->actual_pixel_format, &fmt.fmt.pix, sizeof(struct v4l2_pix_format));
@@ -847,6 +881,7 @@ camera_device_start_capturing(CameraDevice* ccd,
     r = _camera_device_mmap_framebuffer(cd);
     if (r < 0) {
         /* Some critical error has ocurred. Bail out. */
+        _camera_device_reset(cd);
         return -1;
     } else if (r > 0) {
         /* Device doesn't support memory mapping. Retrieve to the next performant
@@ -854,17 +889,20 @@ camera_device_start_capturing(CameraDevice* ccd,
         r = _camera_device_user_framebuffer(cd);
         if (r < 0) {
             /* Some critical error has ocurred. Bail out. */
+            _camera_device_reset(cd);
             return -1;
         } else if (r > 0) {
             /* The only thing left for us is direct reading from the device. */
             if (!(cd->caps.capabilities & V4L2_CAP_READWRITE)) {
                 E("%s: Don't know how to access frames on device '%s'",
                   __FUNCTION__, cd->device_name);
+                _camera_device_reset(cd);
                 return -1;
             }
             r = _camera_device_direct_framebuffer(cd);
             if (r != 0) {
                 /* Any error at this point is a critical one. */
+                _camera_device_reset(cd);
                 return -1;
             }
         }
@@ -877,6 +915,7 @@ camera_device_start_capturing(CameraDevice* ccd,
         if (_xioctl (cd->handle, VIDIOC_STREAMON, &type) < 0) {
             E("%s: VIDIOC_STREAMON on camera '%s' has failed: %s",
               __FUNCTION__, cd->device_name, strerror(errno));
+            _camera_device_reset(cd);
             return -1;
         }
     }
@@ -919,18 +958,10 @@ camera_device_stop_capturing(CameraDevice* ccd)
             return -1;
     }
 
-    if (cd->framebuffers != NULL) {
-        _free_framebuffers(cd->framebuffers, cd->framebuffer_num, cd->io_type);
-        free(cd->framebuffers);
-        cd->framebuffers = NULL;
-        cd->framebuffer_num = 0;
-    }
-
     /* Reopen the device to reset its internal state. It seems that if we don't
      * do that, an attempt to reinit the device with different frame dimensions
      * would fail. */
-    close(cd->handle);
-    cd->handle = open(cd->device_name, O_RDWR | O_NONBLOCK, 0);
+    _camera_device_reset(cd);
 
     return 0;
 }
