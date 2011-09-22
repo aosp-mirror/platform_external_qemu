@@ -145,6 +145,46 @@ _camera_device_free(WndCameraDevice* cd)
     }
 }
 
+/* Resets camera device after capturing.
+ * Since new capture request may require different frame dimensions we must
+ * reset frame info cached in the capture window. The only way to do that would
+ * be closing, and reopening it again. */
+static void
+_camera_device_reset(WndCameraDevice* cd)
+{
+    if (cd != NULL && cd->cap_window != NULL) {
+        capDriverDisconnect(cd->cap_window);
+        if (cd->dc != NULL) {
+            ReleaseDC(cd->cap_window, cd->dc);
+            cd->dc = NULL;
+        }
+        if (cd->gdi_bitmap != NULL) {
+            free(cd->gdi_bitmap);
+            cd->gdi_bitmap = NULL;
+        }
+        if (cd->frame_bitmap != NULL) {
+            free(cd->frame_bitmap);
+            cd->frame_bitmap = NULL;
+        }
+        if (cd->framebuffer != NULL) {
+            free(cd->framebuffer);
+            cd->framebuffer = NULL;
+        }
+
+        /* Recreate the capturing window. */
+        DestroyWindow(cd->cap_window);
+        cd->cap_window = capCreateCaptureWindow(cd->window_name, WS_CHILD, 0, 0,
+                                                0, 0, HWND_MESSAGE, 1);
+    }
+}
+
+/* Gets an absolute value out of a signed integer. */
+static __inline__ int
+_abs(int val)
+{
+    return (val < 0) ? -val : val;
+}
+
 /*******************************************************************************
  *                     CameraDevice API
  ******************************************************************************/
@@ -217,22 +257,49 @@ camera_device_start_capturing(CameraDevice* cd,
         return -1;
     }
 
-    /* Get frame information from the driver. */
+    /* Get current frame information from the driver. */
     format_info_size = capGetVideoFormatSize(wcd->cap_window);
     if (format_info_size == 0) {
         E("%s: Unable to get video format size: %d",
           __FUNCTION__, GetLastError());
+        _camera_device_reset(wcd);
         return -1;
     }
     wcd->frame_bitmap = (BITMAPINFO*)malloc(format_info_size);
     if (wcd->frame_bitmap == NULL) {
         E("%s: Unable to allocate frame bitmap info buffer", __FUNCTION__);
+        _camera_device_reset(wcd);
         return -1;
     }
     if (!capGetVideoFormat(wcd->cap_window, wcd->frame_bitmap,
                            format_info_size)) {
         E("%s: Unable to obtain video format: %d", __FUNCTION__, GetLastError());
+        _camera_device_reset(wcd);
         return -1;
+    }
+
+    /* Lets see if we need to set different frame dimensions */
+    if (wcd->frame_bitmap->bmiHeader.biWidth != frame_width ||
+            abs(wcd->frame_bitmap->bmiHeader.biHeight) != frame_height) {
+        /* Dimensions don't match. Set new frame info. */
+        wcd->frame_bitmap->bmiHeader.biWidth = frame_width;
+        wcd->frame_bitmap->bmiHeader.biHeight = frame_height;
+        /* We need to recalculate image size, since the capture window / driver
+         * will use image size provided by us. */
+        if (wcd->frame_bitmap->bmiHeader.biBitCount == 24) {
+            /* Special case that may require WORD boundary alignment. */
+            uint32_t bpl = (frame_width * 3 + 1) & ~1;
+            wcd->frame_bitmap->bmiHeader.biSizeImage = bpl * frame_height;
+        } else {
+            wcd->frame_bitmap->bmiHeader.biSizeImage =
+                (frame_width * frame_height * wcd->frame_bitmap->bmiHeader.biBitCount) / 8;
+        }
+        if (!capSetVideoFormat(wcd->cap_window, wcd->frame_bitmap,
+                               format_info_size)) {
+            E("%s: Unable to set video format: %d", __FUNCTION__, GetLastError());
+            _camera_device_reset(wcd);
+            return -1;
+        }
     }
 
     if (wcd->frame_bitmap->bmiHeader.biCompression > BI_PNG) {
@@ -253,22 +320,13 @@ camera_device_start_capturing(CameraDevice* cd,
         wcd->is_top_down = 0;
     }
 
-    /* Make sure that frame dimensions match. */
-    if (frame_width != wcd->frame_bitmap->bmiHeader.biWidth ||
-        frame_height != wcd->frame_bitmap->bmiHeader.biHeight) {
-        E("%s: Requested dimensions %dx%d do not match the actual %dx%d",
-          __FUNCTION__, frame_width, frame_height,
-          wcd->frame_bitmap->bmiHeader.biWidth,
-          wcd->frame_bitmap->bmiHeader.biHeight);
-        return -1;
-    }
-
     /* Get DC for the capturing window that will be used when we deal with
      * bitmaps obtained from the camera device during frame capturing. */
     wcd->dc = GetDC(wcd->cap_window);
     if (wcd->dc == NULL) {
         E("%s: Unable to obtain DC for %s: %d",
           __FUNCTION__, wcd->window_name, GetLastError());
+        _camera_device_reset(wcd);
         return -1;
     }
 
@@ -286,6 +344,7 @@ camera_device_start_capturing(CameraDevice* cd,
         !OpenClipboard(wcd->cap_window)) {
         E("%s: Device '%s' is unable to save frame to the clipboard: %d",
           __FUNCTION__, wcd->window_name, GetLastError());
+        _camera_device_reset(wcd);
         return -1;
     }
 
@@ -296,6 +355,7 @@ camera_device_start_capturing(CameraDevice* cd,
         E("%s: Device '%s' is unable to obtain frame from the clipboard: %d",
           __FUNCTION__, wcd->window_name, GetLastError());
         CloseClipboard();
+        _camera_device_reset(wcd);
         return -1;
     }
 
@@ -304,6 +364,7 @@ camera_device_start_capturing(CameraDevice* cd,
         E("%s: Device '%s' is unable to obtain frame's bitmap: %d",
           __FUNCTION__, wcd->window_name, GetLastError());
         CloseClipboard();
+        _camera_device_reset(wcd);
         return -1;
     }
 
@@ -317,6 +378,7 @@ camera_device_start_capturing(CameraDevice* cd,
           __FUNCTION__, frame_width, frame_height,
           wcd->frame_bitmap->bmiHeader.biWidth,
           wcd->frame_bitmap->bmiHeader.biHeight);
+        _camera_device_reset(wcd);
         return -1;
     }
 
@@ -324,6 +386,7 @@ camera_device_start_capturing(CameraDevice* cd,
     wcd->gdi_bitmap = (BITMAPINFO*)malloc(wcd->frame_bitmap->bmiHeader.biSize);
     if (wcd->gdi_bitmap == NULL) {
         E("%s: Unable to allocate gdi bitmap info", __FUNCTION__);
+        _camera_device_reset(wcd);
         return -1;
     }
     memcpy(wcd->gdi_bitmap, wcd->frame_bitmap,
@@ -350,6 +413,7 @@ camera_device_start_capturing(CameraDevice* cd,
     if (wcd->framebuffer == NULL) {
         E("%s: Unable to allocate %d bytes for framebuffer",
           __FUNCTION__, wcd->gdi_bitmap->bmiHeader.biSizeImage);
+        _camera_device_reset(wcd);
         return -1;
     }
 
@@ -363,10 +427,11 @@ camera_device_start_capturing(CameraDevice* cd,
     } else {
         E("%s: Unsupported number of bits per pixel %d",
           __FUNCTION__, wcd->gdi_bitmap->bmiHeader.biBitCount);
+        _camera_device_reset(wcd);
         return -1;
     }
 
-    D("%s: Capturing device '%s': %d bytes in %.4s [%dx%d] frame",
+    D("%s: Capturing device '%s': %d bits per pixel in %.4s [%dx%d] frame",
       __FUNCTION__, wcd->window_name, wcd->gdi_bitmap->bmiHeader.biBitCount,
       (const char*)&wcd->pixel_format, wcd->frame_bitmap->bmiHeader.biWidth,
       wcd->frame_bitmap->bmiHeader.biHeight);
@@ -393,8 +458,8 @@ camera_device_stop_capturing(CameraDevice* cd)
     ReleaseDC(wcd->cap_window, wcd->dc);
     wcd->dc = NULL;
 
-    /* Disconnect from the driver. */
-    capDriverDisconnect(wcd->cap_window);
+    /* Reset the device in preparation for the next capture. */
+    _camera_device_reset(wcd);
 
     return 0;
 }
@@ -499,7 +564,6 @@ enumerate_camera_devices(CameraInfo* cis, int max)
              * the course of the routine. Also note that on Windows all frames will be
              * 640x480. */
             if (!camera_device_start_capturing(cd, V4L2_PIX_FMT_RGB32, 640, 480)) {
-                camera_device_stop_capturing(cd);
                 /* capXxx API supports only single frame size (always observed 640x480,
                  * but the actual numbers may vary). */
                 cis[found].frame_sizes = (CameraFrameDim*)malloc(sizeof(CameraFrameDim));
@@ -519,6 +583,7 @@ enumerate_camera_devices(CameraInfo* cis, int max)
                 } else {
                     E("%s: Unable to allocate dimensions", __FUNCTION__);
                 }
+                camera_device_stop_capturing(cd);
             } else {
                 /* No more cameras. */
                 camera_device_close(cd);
