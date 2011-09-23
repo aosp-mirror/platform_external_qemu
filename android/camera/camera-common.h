@@ -189,7 +189,7 @@ _get_timestamp(void)
 
 /* Sleeps for the given amount of milliseconds */
 static __inline__ void
-_sleep(int millisec)
+_camera_sleep(int millisec)
 {
     struct timeval t;
     const uint64_t wake_at = _get_timestamp() + (uint64_t)millisec * 1000;
