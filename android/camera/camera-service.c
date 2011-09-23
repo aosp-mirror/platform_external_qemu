@@ -1247,7 +1247,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     while (repeat == 1 && !cc->frames_cached &&
            (_get_timestamp() - tick) < 2000000LL) {
         /* Sleep for 10 millisec before repeating the attempt. */
-        _sleep(10);
+        _camera_sleep(10);
         repeat = camera_device_read_frame(cc->camera, fbs, fbs_num);
     }
     if (repeat == 1 && !cc->frames_cached) {
