@@ -445,8 +445,11 @@ _camera_service_init(CameraServiceDesc* csd)
     }
 
     /* For each webcam declared in hw.ini find an actual camera information
-     * descriptor, and save it into the service descriptor for the emulation. */
-    for (i = 0; i < android_hw->hw_webcam_count; i++) {
+     * descriptor, and save it into the service descriptor for the emulation.
+     * Stop the loop when all the connected cameras have been added to the
+     * service. */
+    for (i = 0; i < android_hw->hw_webcam_count &&
+                csd->camera_count < connected_cnt; i++) {
         const char* disp_name;
         const char* dir;
         CameraInfo* found;
@@ -498,8 +501,31 @@ _camera_service_init(CameraServiceDesc* csd)
             memset(found, 0, sizeof(CameraInfo));
         } else {
             W("Camera name '%s' is not found in the list of connected cameras.\n"
-              "Use -webcam-list emulator option to obtain the list of connected camera names",
+              "Use '-webcam list' emulator option to obtain the list of connected camera names.\n",
               disp_name);
+        }
+    }
+
+    /* Make sure that camera 0 and camera 1 are facing in opposite directions.
+     * If they don't the camera application will crash on an attempt to switch
+     * cameras. */
+    if (csd->camera_count > 0) {
+        const char* cam2_dir = NULL;
+        const char* cam2_name = NULL;
+        if (csd->camera_count >= 2) {
+            cam2_dir = csd->camera_info[1].direction;
+            cam2_name = csd->camera_info[1].display_name;
+        } else if (strcmp(android_hw->hw_fakeCamera, "off")) {
+            cam2_dir = android_hw->hw_fakeCamera;
+            cam2_name = "fake camera";
+        }
+        if (cam2_dir != NULL && !strcmp(csd->camera_info[0].direction, cam2_dir)) {
+            W("Cameras '%s' and '%s' are both facing %s.\n"
+              "It is required by the camera application that first two emulated cameras\n"
+              "are facing in opposite directions. If they both are facing in the same direction,\n"
+              "the camera application will crash on an attempt to switch the camera.\n",
+              csd->camera_info[0].display_name, cam2_name, cam2_dir);
+
         }
     }
 }
@@ -752,10 +778,6 @@ struct CameraClient
      * Note that memory allocated for this buffer
      * also contains preview framebuffer. */
     uint8_t*            video_frame;
-    /* Point to Cb pane inside the video frame buffer. */
-    uint8_t*            video_frame_Cb;
-    /* Point to Cr pane inside the video frame buffer. */
-    uint8_t*            video_frame_Cr;
     /* Preview frame buffer.
      * This address points inside the 'video_frame' buffer. */
     uint16_t*           preview_frame;
@@ -1090,11 +1112,6 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
 
     /* Set framebuffer pointers. */
     cc->preview_frame = (uint16_t*)(cc->video_frame + cc->video_frame_size);
-    /* TODO: Get rid if this! It assumes that client's framebuffer is YV12. Let
-     * the camera do the conversion. All we need is to ensure that framebuffers
-     * allocated here are large enough! */
-    cc->video_frame_Cb = cc->video_frame + cc->pixel_num;
-    cc->video_frame_Cr = cc->video_frame_Cb + cc->pixel_num / 4;
 
     /* Start the camera. */
     if (camera_device_start_capturing(cc->camera, cc->camera_info->pixel_format,
