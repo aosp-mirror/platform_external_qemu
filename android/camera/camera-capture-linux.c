@@ -26,9 +26,9 @@
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
 
+#define  E(...)    derror(__VA_ARGS__)
+#define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
-#define  W(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
-#define  E(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(camera)
 
 /* the T(...) macro is used to dump traffic */
@@ -498,8 +498,6 @@ _camera_device_open(LinuxCameraDevice* cd)
     struct stat st;
 
     if (stat(cd->device_name, &st)) {
-        E("%s: Cannot identify camera device '%s': %s",
-          __FUNCTION__, cd->device_name, strerror(errno));
         return -1;
     }
 

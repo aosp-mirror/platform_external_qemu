@@ -24,9 +24,10 @@
 #endif
 #include "android/camera/camera-format-converters.h"
 
+#define  E(...)    derror(__VA_ARGS__)
+#define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
-#define  W(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
-#define  E(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
+#define  D_ACTIVE  VERBOSE_CHECK(camera)
 
  /*
  * NOTE: RGB and big/little endian considerations. Wherewer in this code RGB

@@ -23,9 +23,9 @@
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
 
+#define  E(...)    derror(__VA_ARGS__)
+#define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
-#define  W(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
-#define  E(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(camera)
 
 /* the T(...) macro is used to dump traffic */
@@ -252,8 +252,6 @@ camera_device_start_capturing(CameraDevice* cd,
 
     /* Connect capture window to the video capture driver. */
     if (!capDriverConnect(wcd->cap_window, wcd->input_channel)) {
-        E("%s: Unable to connect to the video capturing driver #%d: %d",
-          __FUNCTION__, wcd->input_channel, GetLastError());
         return -1;
     }
 

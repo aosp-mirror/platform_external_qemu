@@ -28,9 +28,9 @@
 #include "android/camera/camera-format-converters.h"
 #include "android/camera/camera-service.h"
 
+#define  E(...)    derror(__VA_ARGS__)
+#define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
-#define  W(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
-#define  E(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(camera)
 
 /* the T(...) macro is used to dump traffic */
@@ -497,9 +497,9 @@ _camera_service_init(CameraServiceDesc* csd)
             csd->camera_count++;
             memset(found, 0, sizeof(CameraInfo));
         } else {
-            dwarning("Camera name '%s' is not found in the list of connected cameras.\n"
-                     "Use -webcam-list emulator option to obtain the list of connected camera names\n\n",
-                     disp_name);
+            W("Camera name '%s' is not found in the list of connected cameras.\n"
+              "Use -webcam-list emulator option to obtain the list of connected camera names",
+              disp_name);
         }
     }
 }
@@ -1164,6 +1164,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     ClientFrameBuffer fbs[2];
     int fbs_num = 0;
     size_t payload_size;
+    uint64_t tick;
 
     /* Sanity check. */
     if (cc->video_frame == NULL) {
@@ -1212,25 +1213,41 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     }
 
     /* Capture new frame. */
+    tick = _get_timestamp();
     repeat = camera_device_read_frame(cc->camera, fbs, fbs_num);
 
     /* Note that there is no (known) way how to wait on next frame being
-     * available, so we dequeue frame buffer from the device only when we know
-     * it's available. Instead we're shooting in the dark, and quite often
+     * available, so we could dequeue frame buffer from the device only when we
+     * know it's available. Instead we're shooting in the dark, and quite often
      * device will response with EAGAIN, indicating that it doesn't have frame
      * ready. In turn, it means that the last frame we have obtained from the
      * device is still good, and we can reply with the cached frames. The only
      * case when we need to keep trying to obtain a new frame is when frame cache
-     * is empty. */
-    while (repeat == 1 && !cc->frames_cached) {
+     * is empty. To prevent ourselves from an indefinite loop in case device got
+     * stuck on something (observed with some Microsoft devices) we will limit
+     * the loop by 2 second time period (which is more than enough to obtain
+     * something from the device) */
+    while (repeat == 1 && !cc->frames_cached &&
+           (_get_timestamp() - tick) < 2000000LL) {
+        /* Sleep for 10 millisec before repeating the attempt. */
+        _sleep(10);
         repeat = camera_device_read_frame(cc->camera, fbs, fbs_num);
     }
-    if (repeat < 0) {
-        E("%s: Unable to obtain video frame from the camera '%s': %s",
-          __FUNCTION__, cc->device_name, strerror(errno));
+    if (repeat == 1 && !cc->frames_cached) {
+        /* Waited too long for the first frame. */
+        E("%s: Unable to obtain first video frame from the camera '%s' in %d milliseconds: %s.",
+          __FUNCTION__, cc->device_name,
+          (uint32_t)(_get_timestamp() - tick) / 1000, strerror(errno));
         _qemu_client_reply_ko(qc, "Unable to obtain video frame from the camera");
         return;
+    } else if (repeat < 0) {
+        /* An I/O error. */
+        E("%s: Unable to obtain video frame from the camera '%s': %s.",
+          __FUNCTION__, cc->device_name, strerror(errno));
+        _qemu_client_reply_ko(qc, strerror(errno));
+        return;
     }
+
     /* We have cached something... */
     cc->frames_cached = 1;
 
