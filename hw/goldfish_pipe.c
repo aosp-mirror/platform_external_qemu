@@ -14,6 +14,9 @@
 #include "hw/goldfish_pipe.h"
 #include "hw/goldfish_device.h"
 #include "qemu-timer.h"
+#ifdef TARGET_I386
+#include "kvm.h"
+#endif
 
 #define  DEBUG 0
 
@@ -875,7 +878,13 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         GoldfishPipeBuffer  buffer;
         uint32_t            address = dev->address;
         uint32_t            page    = address & TARGET_PAGE_MASK;
-        target_phys_addr_t  phys = cpu_get_phys_page_debug(env, page);
+        target_phys_addr_t  phys;
+#ifdef TARGET_I386
+        if(kvm_enabled()) {
+            cpu_synchronize_state(env, 0);
+        }
+#endif
+        phys = cpu_get_phys_page_debug(env, page);
         buffer.data = qemu_get_ram_ptr(phys) + (address - page);
         buffer.size = dev->size;
         dev->status = pipe->funcs->recvBuffers(pipe->opaque, &buffer, 1);
@@ -889,7 +898,13 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         GoldfishPipeBuffer  buffer;
         uint32_t            address = dev->address;
         uint32_t            page    = address & TARGET_PAGE_MASK;
-        target_phys_addr_t  phys = cpu_get_phys_page_debug(env, page);
+        target_phys_addr_t  phys;
+#ifdef TARGET_I386
+        if(kvm_enabled()) {
+            cpu_synchronize_state(env, 0);
+        }
+#endif
+        phys = cpu_get_phys_page_debug(env, page);
         buffer.data = qemu_get_ram_ptr(phys) + (address - page);
         buffer.size = dev->size;
         dev->status = pipe->funcs->sendBuffers(pipe->opaque, &buffer, 1);
