@@ -14,7 +14,7 @@
 #include "hw/goldfish_pipe.h"
 #include "hw/goldfish_device.h"
 #include "qemu-timer.h"
-#ifdef TARGET_I386
+#ifdef CONFIG_KVM
 #include "kvm.h"
 #endif
 
@@ -879,7 +879,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         uint32_t            address = dev->address;
         uint32_t            page    = address & TARGET_PAGE_MASK;
         target_phys_addr_t  phys;
-#ifdef TARGET_I386
+#ifdef CONFIG_KVM
         if(kvm_enabled()) {
             cpu_synchronize_state(env, 0);
         }
@@ -899,7 +899,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         uint32_t            address = dev->address;
         uint32_t            page    = address & TARGET_PAGE_MASK;
         target_phys_addr_t  phys;
-#ifdef TARGET_I386
+#ifdef CONFIG_KVM
         if(kvm_enabled()) {
             cpu_synchronize_state(env, 0);
         }
