@@ -4169,7 +4169,7 @@ int main(int argc, char **argv, char **envp)
                 android_hw->hw_cpu_arch);
         exit(1);
     }
-#elif defined(TARGET_X86)
+#elif defined(TARGET_I386)
     if (strcmp(android_hw->hw_cpu_arch,"x86") != 0) {
         fprintf(stderr, "-- Invalid CPU architecture: %s, expected 'x86'\n",
                 android_hw->hw_cpu_arch);
