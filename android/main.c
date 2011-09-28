@@ -455,6 +455,17 @@ int main(int argc, char **argv)
         opts->trace = tracePath;
     }
 
+    /* Update CPU architecture for HW configs created from build dir. */
+    if (inAndroidBuild) {
+#if defined(TARGET_ARM)
+        free(android_hw->hw_cpu_arch);
+        android_hw->hw_cpu_arch = ASTRDUP("arm");
+#elif defined(TARGET_I386)
+        free(android_hw->hw_cpu_arch);
+        android_hw->hw_cpu_arch = ASTRDUP("x86");
+#endif
+    }
+
     n = 1;
     /* generate arguments for the underlying qemu main() */
     {
