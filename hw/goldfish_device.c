@@ -12,6 +12,7 @@
 #include "qemu_file.h"
 #include "arm_pic.h"
 #include "goldfish_device.h"
+#include "android/utils/debug.h"
 #ifdef TARGET_I386
 #include "kvm.h"
 #endif
@@ -59,6 +60,18 @@ int goldfish_add_device_no_io(struct goldfish_device *dev)
     if(dev->irq == 0 && dev->irq_count > 0) {
         dev->irq = goldfish_free_irq;
         goldfish_free_irq += dev->irq_count;
+#ifdef TARGET_I386
+        /* Make sure that we pass by the reserved IRQs. */
+        while (goldfish_free_irq == GFD_KBD_IRQ ||
+               goldfish_free_irq == GFD_MOUSE_IRQ ||
+               goldfish_free_irq == GFD_ERR_IRQ) {
+            goldfish_free_irq++;
+        }
+#endif
+        if (goldfish_free_irq >= GFD_MAX_IRQ) {
+            derror("Goldfish device has exceeded available IRQ number.");
+            exit(1);
+        }
     }
     //printf("goldfish_add_device: %s, base %x %x, irq %d %d\n",
     //       dev->name, dev->base, dev->size, dev->irq, dev->irq_count);

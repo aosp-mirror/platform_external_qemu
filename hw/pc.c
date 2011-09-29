@@ -1033,7 +1033,7 @@ static void pc_init1(ram_addr_t ram_size,
 
     cpu_irq = qemu_allocate_irqs(pic_irq_request, NULL, 1);
     i8259 = i8259_init(cpu_irq[0]);
-    ferr_irq = i8259[13];
+    ferr_irq = i8259[GFD_ERR_IRQ];
 
 #define IRQ_PDEV_BUS 4
     goldfish_device_init(i8259, 0xff010000, 0x7f0000, 5, 5);
@@ -1177,7 +1177,7 @@ static void pc_init1(ram_addr_t ram_size,
     }
 #endif
 
-    i8042_init(i8259[1], i8259[12], 0x60);
+    i8042_init(i8259[GFD_KBD_IRQ], i8259[GFD_MOUSE_IRQ], 0x60);
     DMA_init(0);
 
     goldfish_fb_init(0);
