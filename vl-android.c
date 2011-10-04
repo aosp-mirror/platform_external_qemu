@@ -3689,6 +3689,9 @@ int main(int argc, char **argv, char **envp)
         hwLcd_setBootProperty(density);
     }
 
+    /* Initialize presence of hardware nav button */
+    boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
+
     /* Initialize TCP dump */
     if (android_op_tcpdump) {
         if (qemu_tcpdump_start(android_op_tcpdump) < 0) {
