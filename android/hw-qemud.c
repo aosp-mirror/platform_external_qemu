@@ -45,7 +45,7 @@
 /* Version number of snapshots code. Increment whenever the data saved
  * or the layout in which it is saved is changed.
  */
-#define QEMUD_SAVE_VERSION 1
+#define QEMUD_SAVE_VERSION 2
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -934,7 +934,7 @@ qemud_client_save(QEMUFile* f, QemudClient* c)
     /* save generic information */
     qemud_service_save_name(f, c->service);
     qemu_put_be32(f, c->protocol);
-    if (_is_pipe_client(c)) {
+    if (!_is_pipe_client(c)) {
         qemu_put_be32(f, c->ProtocolSelector.Serial.channel);
     }
 
@@ -959,7 +959,7 @@ qemud_client_save(QEMUFile* f, QemudClient* c)
  * corresponding service.
  */
 static int
-qemud_client_load(QEMUFile* f, QemudService* current_services )
+qemud_client_load(QEMUFile* f, QemudService* current_services, int version )
 {
     char *service_name = qemud_service_load_name(f);
     if (service_name == NULL)
@@ -973,13 +973,19 @@ qemud_client_load(QEMUFile* f, QemudService* current_services )
         return -EIO;
     }
 
-    /* get protocol. */
-    QemudProtocol protocol = qemu_get_be32(f);
-    /* get channel id */
     int channel = -1;
-    if (protocol == QEMUD_PROTOCOL_SERIAL) {
-        qemu_get_be32(f);
+
+    if (version >= 2) {
+        /* get protocol. */
+        QemudProtocol protocol = qemu_get_be32(f);
+        /* get channel id */
+        if (protocol == QEMUD_PROTOCOL_SERIAL) {
+            channel = qemu_get_be32(f);
+        }
+    } else {
+        channel = qemu_get_be32(f);
     }
+
     if (channel == 0) {
         D("%s: illegal snapshot: client for control channel must no be saved\n",
           __FUNCTION__);
@@ -1791,7 +1797,7 @@ qemud_load_services( QEMUFile*  f, QemudService*  current_services )
  * changes, there is no communication with the guest.
  */
 static int
-qemud_load_clients(QEMUFile* f, QemudMultiplexer* m )
+qemud_load_clients(QEMUFile* f, QemudMultiplexer* m, int version )
 {
     /* Remove all clients, except on the control channel.*/
     qemud_multiplexer_disconnect_noncontrol(m);
@@ -1800,7 +1806,7 @@ qemud_load_clients(QEMUFile* f, QemudMultiplexer* m )
     int client_count = qemu_get_be32(f);
     int i, ret;
     for (i = 0; i < client_count; i++) {
-        if ((ret = qemud_client_load(f, m->services))) {
+        if ((ret = qemud_client_load(f, m->services, version))) {
             return ret;
         }
     }
@@ -1816,14 +1822,12 @@ qemud_load(QEMUFile *f, void* opaque, int version)
     QemudMultiplexer *m = opaque;
 
     int ret;
-    if (version != QEMUD_SAVE_VERSION)
-        return -1;
 
     if ((ret = qemud_serial_load(f, m->serial)))
         return ret;
     if ((ret = qemud_load_services(f, m->services)))
         return ret;
-    if ((ret = qemud_load_clients(f, m)))
+    if ((ret = qemud_load_clients(f, m, version)))
         return ret;
 
     return 0;

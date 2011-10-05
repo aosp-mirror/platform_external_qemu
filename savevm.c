@@ -1121,7 +1121,11 @@ int qemu_loadvm_state(QEMUFile *f)
             le->next = first_le;
             first_le = le;
 
-            le->se->load_state(f, le->se->opaque, le->version_id);
+            if (le->se->load_state(f, le->se->opaque, le->version_id)) {
+                fprintf(stderr, "savevm: unable to load section %s\n", idstr);
+                ret = -EINVAL;
+                goto out;
+            }
             break;
         case QEMU_VM_SECTION_PART:
         case QEMU_VM_SECTION_END:
