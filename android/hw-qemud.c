@@ -20,6 +20,7 @@
 #include "qemu-char.h"
 #include "charpipe.h"
 #include "cbuffer.h"
+#include "utils/panic.h"
 
 #define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(qemud)
@@ -927,16 +928,16 @@ static QemudClient*  qemud_service_connect_client(  QemudService  *sv,
                                                     const char* client_param);
 
 /* Saves the client state needed to re-establish connections on load.
+ * Note that we save only serial clients here. The pipe clients will be
+ * saved along with the pipe to which they are attached.
  */
 static void
-qemud_client_save(QEMUFile* f, QemudClient* c)
+qemud_serial_client_save(QEMUFile* f, QemudClient* c)
 {
     /* save generic information */
     qemud_service_save_name(f, c->service);
-    qemu_put_be32(f, c->protocol);
-    if (!_is_pipe_client(c)) {
-        qemu_put_be32(f, c->ProtocolSelector.Serial.channel);
-    }
+    qemu_put_string(f, c->param);
+    qemu_put_be32(f, c->ProtocolSelector.Serial.channel);
 
     /* save client-specific state */
     if (c->clie_save)
@@ -957,14 +958,16 @@ qemud_client_save(QEMUFile* f, QemudClient* c)
 
 /* Loads client state from file, then starts a new client connected to the
  * corresponding service.
+ * Note that we load only serial clients here. The pipe clients will be
+ * loaded along with the pipe to which they were attached.
  */
 static int
-qemud_client_load(QEMUFile* f, QemudService* current_services, int version )
+qemud_serial_client_load(QEMUFile* f, QemudService* current_services, int version )
 {
     char *service_name = qemud_service_load_name(f);
     if (service_name == NULL)
         return -EIO;
-
+    char* param = qemu_get_string(f);
     /* get current service instance */
     QemudService *sv = qemud_service_find(current_services, service_name);
     if (sv == NULL) {
@@ -973,18 +976,7 @@ qemud_client_load(QEMUFile* f, QemudService* current_services, int version )
         return -EIO;
     }
 
-    int channel = -1;
-
-    if (version >= 2) {
-        /* get protocol. */
-        QemudProtocol protocol = qemu_get_be32(f);
-        /* get channel id */
-        if (protocol == QEMUD_PROTOCOL_SERIAL) {
-            channel = qemu_get_be32(f);
-        }
-    } else {
-        channel = qemu_get_be32(f);
-    }
+    int channel = qemu_get_be32(f);
 
     if (channel == 0) {
         D("%s: illegal snapshot: client for control channel must no be saved\n",
@@ -993,7 +985,7 @@ qemud_client_load(QEMUFile* f, QemudService* current_services, int version )
     }
 
     /* re-connect client */
-    QemudClient* c = qemud_service_connect_client(sv, channel, NULL);
+    QemudClient* c = qemud_service_connect_client(sv, channel, param);
     if(c == NULL)
         return -EIO;
 
@@ -1717,8 +1709,9 @@ qemud_client_save_count(QEMUFile* f, QemudClient* c)
 {
     unsigned int client_count = 0;
     for( ; c; c = c->next)   // walk over linked list
-        // skip control channel, which is not saved
-        if (_is_pipe_client(c) || c->ProtocolSelector.Serial.channel > 0)
+        /* skip control channel, which is not saved, and pipe channels that
+         * are saved along with the pipe. */
+        if (!_is_pipe_client(c) && c->ProtocolSelector.Serial.channel > 0)
             client_count++;
 
     qemu_put_be32(f, client_count);
@@ -1760,9 +1753,9 @@ qemud_save(QEMUFile* f, void* opaque)
     qemud_client_save_count(f, m->clients);
     QemudClient *c;
     for (c = m->clients; c; c = c->next) {
-        /* skip control channel client */
-        if (_is_pipe_client(c) || c->ProtocolSelector.Serial.channel > 0) {
-            qemud_client_save(f, c);
+        /* skip control channel, and pipe clients */
+        if (!_is_pipe_client(c) && c->ProtocolSelector.Serial.channel > 0) {
+            qemud_serial_client_save(f, c);
         }
     }
 
@@ -1806,7 +1799,7 @@ qemud_load_clients(QEMUFile* f, QemudMultiplexer* m, int version )
     int client_count = qemu_get_be32(f);
     int i, ret;
     for (i = 0; i < client_count; i++) {
-        if ((ret = qemud_client_load(f, m->services, version))) {
+        if ((ret = qemud_serial_client_load(f, m->services, version))) {
             return ret;
         }
     }
@@ -1838,6 +1831,46 @@ qemud_load(QEMUFile *f, void* opaque, int version)
  * QEMUD PIPE service callbacks
  *
  * ----------------------------------------------------------------------------*/
+
+/* Saves pending pipe message to the snapshot file. */
+static void
+_save_pipe_message(QEMUFile* f, QemudPipeMessage* msg)
+{
+    qemu_put_be32(f, msg->size);
+    qemu_put_be32(f, msg->offset);
+    qemu_put_buffer(f, msg->message, msg->size);
+}
+
+/* Loads pending pipe messages from the snapshot file.
+ * Return:
+ *  List of pending pipe messages loaded from snapshot, or NULL if snapshot didn't
+ *  contain saved messages.
+ */
+static QemudPipeMessage*
+_load_pipe_message(QEMUFile* f)
+{
+    QemudPipeMessage* ret = NULL;
+    QemudPipeMessage** next = &ret;
+
+    uint32_t size = qemu_get_be32(f);
+    while (size != 0) {
+        QemudPipeMessage* wrk;
+        ANEW0(wrk);
+        *next = wrk;
+        wrk->size = size;
+        wrk->offset = qemu_get_be32(f);
+        wrk->message = malloc(wrk->size);
+        if (wrk->message == NULL) {
+            APANIC("Unable to allocate buffer for pipe's pending message.");
+        }
+        qemu_get_buffer(f, wrk->message, wrk->size);
+        next = &wrk->next;
+        *next = NULL;
+        size = qemu_get_be32(f);
+    }
+
+    return ret;
+}
 
 /* This is a callback that gets invoked when guest is connecting to the service.
  *
@@ -2039,6 +2072,122 @@ _qemudPipe_wakeOn(void* opaque, int flags)
     D("%s: -> %X", __FUNCTION__, flags);
 }
 
+static void
+_qemudPipe_save(void* opaque, QEMUFile* f )
+{
+    QemudPipe* qemud_pipe = (QemudPipe*)opaque;
+    QemudClient* c = qemud_pipe->client;
+    QemudPipeMessage* msg = c->ProtocolSelector.Pipe.messages;
+
+    /* save generic information */
+    qemud_service_save_name(f, c->service);
+    qemu_put_string(f, c->param);
+
+    /* Save pending messages. */
+    while (msg != NULL) {
+        _save_pipe_message(f, msg);
+        msg = msg->next;
+    }
+    /* End of pending messages. */
+    qemu_put_be32(f, 0);
+
+    /* save client-specific state */
+    if (c->clie_save)
+        c->clie_save(f, c, c->clie_opaque);
+
+    /* save framing configuration */
+    qemu_put_be32(f, c->framing);
+    if (c->framing) {
+        qemu_put_be32(f, c->need_header);
+        /* header sink always connected to c->header0, no need to save */
+        qemu_put_be32(f, FRAME_HEADER_SIZE);
+        qemu_put_buffer(f, c->header0, FRAME_HEADER_SIZE);
+        /* payload sink */
+        qemud_sink_save(f, c->payload);
+        qemu_put_buffer(f, c->payload->buff, c->payload->size);
+    }
+}
+
+static void*
+_qemudPipe_load(void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* f)
+{
+    QemudPipe* qemud_pipe = NULL;
+    char* param;
+    char *service_name = qemud_service_load_name(f);
+    if (service_name == NULL)
+        return NULL;
+    /* get service instance for the loading client*/
+    QemudService *sv = qemud_service_find(_multiplexer->services, service_name);
+    if (sv == NULL) {
+        D("%s: load failed: unknown service \"%s\"\n",
+          __FUNCTION__, service_name);
+        return NULL;
+    }
+
+    /* Load saved parameters. */
+    param = qemu_get_string(f);
+
+    /* re-connect client */
+    QemudClient* c = qemud_service_connect_client(sv, -1, param);
+    if(c == NULL)
+        return NULL;
+
+    /* Load pending messages. */
+    c->ProtocolSelector.Pipe.messages = _load_pipe_message(f);
+
+    /* load client-specific state */
+    if (c->clie_load && c->clie_load(f, c, c->clie_opaque)) {
+        /* load failure */
+        return NULL;
+    }
+
+    /* load framing configuration */
+    c->framing = qemu_get_be32(f);
+    if (c->framing) {
+
+        /* header buffer */
+        c->need_header = qemu_get_be32(f);
+        int header_size = qemu_get_be32(f);
+        if (header_size > FRAME_HEADER_SIZE) {
+            D("%s: load failed: payload buffer requires %d bytes, %d available\n",
+              __FUNCTION__, header_size, FRAME_HEADER_SIZE);
+            return NULL;
+        }
+        int ret;
+        if ((ret = qemu_get_buffer(f, c->header0, header_size)) != header_size) {
+            D("%s: frame header buffer load failed: expected %d bytes, got %d\n",
+              __FUNCTION__, header_size, ret);
+            return NULL;
+        }
+
+        /* payload sink */
+        if ((ret = qemud_sink_load(f, c->payload)))
+            return NULL;
+
+        /* replace payload buffer by saved data */
+        if (c->payload->buff) {
+            AFREE(c->payload->buff);
+        }
+        AARRAY_NEW(c->payload->buff, c->payload->size+1);  /* +1 for terminating zero */
+        if ((ret = qemu_get_buffer(f, c->payload->buff, c->payload->size)) != c->payload->size) {
+            D("%s: frame payload buffer load failed: expected %d bytes, got %d\n",
+              __FUNCTION__, c->payload->size, ret);
+            AFREE(c->payload->buff);
+            return NULL;
+        }
+    }
+
+    /* Associate the client with the pipe. */
+    ANEW0(qemud_pipe);
+    qemud_pipe->hwpipe = hwpipe;
+    qemud_pipe->looper = pipeOpaque;
+    qemud_pipe->service = sv;
+    qemud_pipe->client = c;
+    c->ProtocolSelector.Pipe.qemud_pipe = qemud_pipe;
+
+    return qemud_pipe;
+}
+
 /* QEMUD pipe functions.
  */
 static const GoldfishPipeFuncs _qemudPipe_funcs = {
@@ -2048,6 +2197,8 @@ static const GoldfishPipeFuncs _qemudPipe_funcs = {
     _qemudPipe_recvBuffers,
     _qemudPipe_poll,
     _qemudPipe_wakeOn,
+    _qemudPipe_save,
+    _qemudPipe_load,
 };
 
 /* Initializes QEMUD pipe interface.

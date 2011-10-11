@@ -94,6 +94,27 @@ typedef struct {
      * then the pipe implementation shall call goldfish_pipe_wake().
      */
     void         (*wakeOn)( void* opaque, int flags );
+
+    /* Called to save the pipe's state to a QEMUFile, i.e. when saving
+     * snapshots. This can be NULL to indicate that no state can be saved.
+     * In this case, when the pipe is loaded, the emulator will automatically
+     * force-close so the next operation the guest performs on it will return
+     * a PIPE_ERROR_IO error code.
+     */
+    void         (*save)( void* pipe, QEMUFile* file );
+
+    /* Called to load the sate of a pipe from a QEMUFile. This will always
+     * correspond to the state of the pipe as saved by a previous call to
+     * the 'save' method. Can be NULL to indicate that the pipe state cannot
+     * be loaded. In this case, the emulator will automatically force-close
+     * it.
+     *
+     * In case of success, this returns 0, and the new pipe object is returned
+     * in '*ppipe'. In case of errno code is returned to indicate a failure.
+     * 'hwpipe' and 'pipeOpaque' are the same arguments than those passed
+     * to 'init'.
+     */
+    void*        (*load)( void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* file);
 } GoldfishPipeFuncs;
 
 /* Register a new pipe handler type. 'pipeOpaque' is passed directly
