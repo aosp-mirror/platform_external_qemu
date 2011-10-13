@@ -457,7 +457,7 @@ else
 endif
 
 ifeq ($(HOST_OS),darwin)
-  CORE_MISC_SOURCES   += android/camera/camera-capture-mac.c
+  CORE_MISC_SOURCES   += android/camera/camera-capture-mac.m
 endif
 
 LOCAL_SRC_FILES += $(CORE_MISC_SOURCES)
