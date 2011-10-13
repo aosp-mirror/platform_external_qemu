@@ -795,7 +795,18 @@ void nand_add_dev(const char *arg)
     }
 
     if(rwfilename) {
-        rwfd = open(rwfilename, O_BINARY | (read_only ? O_RDONLY : O_RDWR));
+        if (initfilename) {
+            /* Overwrite with content of the 'initfilename'. */
+            if (read_only) {
+                /* Cannot be readonly when initializing the device from another file. */
+                XLOG("incompatible read only option is requested while initializing %.*s from %s\n",
+                     devname_len, devname, initfilename);
+                exit(1);
+            }
+            rwfd = open(rwfilename, O_BINARY | O_TRUNC | O_RDWR);
+        } else {
+            rwfd = open(rwfilename, O_BINARY | (read_only ? O_RDONLY : O_RDWR));
+        }
         if(rwfd < 0) {
             XLOG("could not open file %s, %s\n", rwfilename, strerror(errno));
             exit(1);
