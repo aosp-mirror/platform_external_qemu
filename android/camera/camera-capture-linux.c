@@ -612,7 +612,7 @@ _camera_device_enum_format_sizes(LinuxCameraDevice* cd,
         if(_xioctl(cd->handle, VIDIOC_ENUM_FRAMESIZES, &size_enum)) {
             /* Errors are not welcome here anymore. */
             E("%s: Unexpected failure while getting pixel dimensions: %s",
-              strerror(errno));
+              __FUNCTION__, strerror(errno));
             free(arr);
             return -1;
         }
@@ -707,7 +707,7 @@ _camera_device_enum_pixel_formats(LinuxCameraDevice* cd, QemuPixelFormat** fmts)
             int nn;
             /* Errors are not welcome here anymore. */
             E("%s: Unexpected failure while getting pixel format: %s",
-              strerror(errno));
+              __FUNCTION__, strerror(errno));
             for (nn = 0; nn < out_num; nn++) {
                 _qemu_pixel_format_free(arr + nn);
             }
