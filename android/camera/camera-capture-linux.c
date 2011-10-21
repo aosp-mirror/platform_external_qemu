@@ -700,7 +700,7 @@ _camera_device_enum_pixel_formats(LinuxCameraDevice* cd, QemuPixelFormat** fmts)
     }
     arr = *fmts;
     memset(arr, 0, fmt_num * sizeof(QemuPixelFormat));
-    for (n = 0; out_num < fmt_num; n++) {
+    for (n = 0; n < fmt_num && out_num < fmt_num; n++) {
         fmt_enum.index = n;
         fmt_enum.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         if(_xioctl(cd->handle, VIDIOC_ENUM_FMT, &fmt_enum)) {
