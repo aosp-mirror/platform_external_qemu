@@ -601,7 +601,7 @@ _qemu_client_query_reply(QemudClient* qc,
     /* Make sure extra_size is 0 if extra is NULL. */
     if (extra == NULL && extra_size != 0) {
         W("%s: 'extra' = NULL, while 'extra_size' = %d",
-          __FUNCTION__, extra, extra_size);
+          __FUNCTION__, (int)extra_size);
         extra_size = 0;
     }
 
