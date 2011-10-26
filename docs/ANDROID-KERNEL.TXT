@@ -7,13 +7,18 @@ I. Helper script:
 We now provide a helper script to rebuild the kernel,
 it is under distrib/rebuild-kernel.sh.
 
-You need the sources in android.git.kernel.org/kernel/common.git,
-in branch origin/archive/android-gldfish-2.6.29 (note the typo!)
+You need the sources in android.git.kernel.org/kernel/qemu.git,
+in branch origin/android-goldfish-2.6.29
 
-To rebuild the ARM kernel:
+To rebuild the ARMv5TE kernel:
 
   cd $KERNEL_SOURCES
   /path/to/rebuild-kernel.sh --out=$ANDROID/prebuilt/android-arm/kernel
+
+To rebuild the ARMv7-A one:
+
+  cd $KERNEL_SOURCES
+  /path/to/rebuild-kernel.sh --armv7 --out=$ANDROID/prebuilt/android-arm/kernel
 
 To rebuild the x86 kernel:
 
