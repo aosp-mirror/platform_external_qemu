@@ -36,6 +36,8 @@
     _VERBOSE_TAG(sensors,      "emulated sensors") \
     _VERBOSE_TAG(memcheck,     "memory checker") \
     _VERBOSE_TAG(camera,       "camera") \
+    _VERBOSE_TAG(adevice,      "android device connected via port forwarding") \
+    _VERBOSE_TAG(sensors_port, "sensors emulator connected to android device") \
     _VERBOSE_TAG(gles,         "hardware OpenGLES emulation") \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,

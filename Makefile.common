@@ -423,6 +423,8 @@ CORE_MISC_SOURCES = \
     android/hw-pipe-net.c \
     android/qemu-setup.c \
     android/snapshot.c \
+    android/android-device.c \
+    android/sensors-port.c \
     android/utils/timezone.c \
     android/camera/camera-format-converters.c \
     android/camera/camera-service.c

@@ -20,7 +20,10 @@
 #include "hw/hw.h"
 #include "qemu-char.h"
 #include "qemu-timer.h"
+#include "android/sensors-port.h"
 
+#define  E(...)    derror(__VA_ARGS__)
+#define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)  VERBOSE_PRINT(sensors,__VA_ARGS__)
 
 /* define T_ACTIVE to 1 to debug transport communications */
@@ -165,9 +168,10 @@ typedef struct {
 typedef struct HwSensorClient   HwSensorClient;
 
 typedef struct {
-    QemudService*    service;
-    Sensor           sensors[MAX_SENSORS];
-    HwSensorClient*  clients;
+    QemudService*       service;
+    Sensor              sensors[MAX_SENSORS];
+    HwSensorClient*     clients;
+    AndroidSensorsPort* sensors_port;
 } HwSensors;
 
 struct HwSensorClient {
@@ -301,7 +305,8 @@ _hwSensorClient_tick( void*  opaque )
 
     if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_MAGNETIC_FIELD)) {
         sensor = &hw->sensors[ANDROID_SENSOR_MAGNETIC_FIELD];
-        snprintf(buffer, sizeof buffer, "magnetic-field:%g:%g:%g",
+        /* NOTE: sensors HAL expects "magnetic", not "magnetic-field" name here. */
+        snprintf(buffer, sizeof buffer, "magnetic:%g:%g:%g",
                  sensor->u.magnetic.x,
                  sensor->u.magnetic.y,
                  sensor->u.magnetic.z);
@@ -430,6 +435,16 @@ _hwSensorClient_receive( HwSensorClient*  cl, uint8_t*  msg, int  msglen )
             D("%s: %s %s sensor", __FUNCTION__,
                 (cl->enabledMask & (1 << id))  ? "enabling" : "disabling",  msg);
         }
+
+        /* If emulating device is connected update sensor state there too. */
+        if (hw->sensors_port != NULL && sensors_port_is_connected(hw->sensors_port)) {
+            if (enabled) {
+                sensors_port_enable_sensor(hw->sensors_port, (const char*)msg);
+            } else {
+                sensors_port_disable_sensor(hw->sensors_port, (const char*)msg);
+            }
+        }
+
         _hwSensorClient_tick(cl);
         return;
     }
@@ -645,14 +660,40 @@ _hwSensors_setCoarseOrientation( HwSensors*  h, AndroidCoarseOrientation  orient
 static void
 _hwSensors_init( HwSensors*  h )
 {
+    /* Try to see if there is a device attached that can be used for
+     * sensor emulation. */
+    h->sensors_port = sensors_port_create(h);
+    if (h->sensors_port == NULL) {
+        W("Unable to create sensors port: %s", strerror(errno));
+    }
+
     h->service = qemud_service_register("sensors", 0, h, _hwSensors_connect,
                                         _hwSensors_save, _hwSensors_load);
 
-    if (android_hw->hw_accelerometer)
+    if (android_hw->hw_accelerometer) {
         h->sensors[ANDROID_SENSOR_ACCELERATION].enabled = 1;
+    }
 
-    if (android_hw->hw_sensors_proximity)
+    if (android_hw->hw_sensors_proximity) {
         h->sensors[ANDROID_SENSOR_PROXIMITY].enabled = 1;
+    }
+
+    if (android_hw->hw_sensors_magnetic_field) {
+        h->sensors[ANDROID_SENSOR_MAGNETIC_FIELD].enabled = 1;
+    }
+
+    if (android_hw->hw_sensors_orientation) {
+        h->sensors[ANDROID_SENSOR_ORIENTATION].enabled = 1;
+    }
+
+    if (android_hw->hw_sensors_temperature) {
+        h->sensors[ANDROID_SENSOR_TEMPERATURE].enabled = 1;
+    }
+
+    if (h->sensors_port != NULL) {
+        /* Init sensors on the attached device. */
+        sensors_port_init_sensors(h->sensors_port);
+    }
 
     /* XXX: TODO: Add other tests when we add the corresponding
         * properties to hardware-properties.ini et al. */
