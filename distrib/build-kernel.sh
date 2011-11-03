@@ -129,12 +129,10 @@ else
         arm)
             CROSSTOOLCHAIN=arm-eabi-4.4.3
             CROSSPREFIX=arm-eabi-
-            ZIMAGE=zImage
             ;;
         x86)
             CROSSTOOLCHAIN=i686-android-linux-4.4.3
             CROSSPREFIX=i686-android-linux-
-            ZIMAGE=bzImage
             ;;
         *)
             echo "ERROR: Unsupported architecture!"
@@ -143,6 +141,14 @@ else
     esac
     echo "Auto-config: --cross=$CROSSPREFIX"
 fi
+
+ZIMAGE=zImage
+
+case $ARCH in
+    x86)
+        ZIMAGE=bzImage
+        ;;
+esac
 
 # If the cross-compiler is not in the path, try to find it automatically
 CROSS_COMPILER="${CROSSPREFIX}gcc"
