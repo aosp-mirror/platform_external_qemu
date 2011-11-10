@@ -442,6 +442,8 @@ static const GoldfishPipeFuncs  netPipeTcp_funcs = {
     netPipe_recvBuffers,
     netPipe_poll,
     netPipe_wakeOn,
+    NULL,  /* we can't save these */
+    NULL,  /* we can't load these */
 };
 
 #ifndef _WIN32
@@ -452,6 +454,8 @@ static const GoldfishPipeFuncs  netPipeUnix_funcs = {
     netPipe_recvBuffers,
     netPipe_poll,
     netPipe_wakeOn,
+    NULL,  /* we can't save these */
+    NULL,  /* we can't load these */
 };
 #endif
 
@@ -517,6 +521,8 @@ static const GoldfishPipeFuncs  openglesPipe_funcs = {
     netPipe_recvBuffers,
     netPipe_poll,
     netPipe_wakeOn,
+    NULL,  /* we can't save these */
+    NULL,  /* we can't load these */
 };
 
 void

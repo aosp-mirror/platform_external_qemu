@@ -52,6 +52,11 @@
 /* Set to 1 to enable the 'throttle' pipe type, useful for debugging */
 #define DEBUG_THROTTLE_PIPE 1
 
+/* Maximum length of pipe service name, in characters (excluding final 0) */
+#define MAX_PIPE_SERVICE_NAME_SIZE  255
+
+#define GOLDFISH_PIPE_SAVE_VERSION  1
+
 /***********************************************************************
  ***********************************************************************
  *****
@@ -83,6 +88,10 @@ goldfish_pipe_add_type(const char*               pipeName,
 
     if (count >= MAX_PIPE_SERVICES) {
         APANIC("Too many goldfish pipe services (%d)", count);
+    }
+
+    if (strlen(pipeName) > MAX_PIPE_SERVICE_NAME_SIZE) {
+        APANIC("Pipe service name too long: '%s'", pipeName);
     }
 
     list->services[count].name   = pipeName;
@@ -120,24 +129,33 @@ typedef struct PipeDevice  PipeDevice;
 typedef struct Pipe {
     struct Pipe*              next;
     struct Pipe*              next_waked;
-    PipeDevice*               device;
-    uint32_t                  channel;
-    void*                     opaque;
-    const GoldfishPipeFuncs*  funcs;
-    unsigned char             wanted;
-    char                      closed;
+    PipeDevice*                device;
+    uint32_t                   channel;
+    void*                      opaque;
+    const GoldfishPipeFuncs*   funcs;
+    const PipeService*         service;
+    char*                      args;
+    unsigned char              wanted;
+    char                       closed;
 } Pipe;
 
 /* Forward */
 static void*  pipeConnector_new(Pipe*  pipe);
 
-Pipe*
-pipe_new(uint32_t channel, PipeDevice* dev)
+static Pipe*
+pipe_new0(PipeDevice* dev)
 {
     Pipe*  pipe;
     ANEW0(pipe);
+    pipe->device = dev;
+    return pipe;
+}
+
+static Pipe*
+pipe_new(uint32_t channel, PipeDevice* dev)
+{
+    Pipe*  pipe = pipe_new0(dev);
     pipe->channel = channel;
-    pipe->device  = dev;
     pipe->opaque  = pipeConnector_new(pipe);
     return pipe;
 }
@@ -197,6 +215,97 @@ pipe_list_remove_waked( Pipe** list, Pipe*  pipe )
         (*lookup) = node->next_waked;
         node->next_waked = NULL;
     }
+}
+
+static void
+pipe_save( Pipe* pipe, QEMUFile* file )
+{
+    if (pipe->service == NULL) {
+        /* pipe->service == NULL means we're still using a PipeConnector */
+        /* Write a zero to indicate this condition */
+        qemu_put_byte(file, 0);
+    } else {
+        /* Otherwise, write a '1' then the service name */
+        qemu_put_byte(file, 1);
+        qemu_put_string(file, pipe->service->name);
+    }
+
+    /* Now save other common data */
+    qemu_put_be32(file, (unsigned int)pipe->channel);
+    qemu_put_byte(file, (int)pipe->wanted);
+    qemu_put_byte(file, (int)pipe->closed);
+
+    /* Write 1 + args, if any, or simply 0 otherwise */
+    if (pipe->args != NULL) {
+        qemu_put_byte(file, 1);
+        qemu_put_string(file, pipe->args);
+    } else {
+        qemu_put_byte(file, 0);
+    }
+
+    if (pipe->funcs->save) {
+        pipe->funcs->save(pipe->opaque, file);
+    }
+}
+
+static Pipe*
+pipe_load( PipeDevice* dev, QEMUFile* file )
+{
+    Pipe*              pipe;
+    const PipeService* service = NULL;
+    int   state = qemu_get_byte(file);
+    uint32_t channel;
+
+    if (state != 0) {
+        /* Pipe is associated with a service. */
+        char* name = qemu_get_string(file);
+        if (name == NULL)
+            return NULL;
+
+        service = goldfish_pipe_find_type(name);
+        if (service == NULL) {
+            D("No QEMU pipe service named '%s'", name);
+            AFREE(name);
+            return NULL;
+        }
+    }
+
+    channel = qemu_get_be32(file);
+    pipe = pipe_new(channel, dev);
+    pipe->wanted  = qemu_get_byte(file);
+    pipe->closed  = qemu_get_byte(file);
+    if (qemu_get_byte(file) != 0) {
+        pipe->args = qemu_get_string(file);
+    }
+
+    pipe->service = service;
+    if (service != NULL) {
+        pipe->funcs = &service->funcs;
+    }
+
+    if (pipe->funcs->load) {
+        pipe->opaque = pipe->funcs->load(pipe, service->opaque, pipe->args, file);
+        if (pipe->opaque == NULL) {
+            AFREE(pipe);
+            return NULL;
+        }
+    } else {
+        /* Force-close the pipe on load */
+        pipe->closed = 1;
+    }
+    return pipe;
+}
+
+static void
+pipe_free( Pipe* pipe )
+{
+    /* Call close callback */
+    if (pipe->funcs->close) {
+        pipe->funcs->close(pipe->opaque);
+    }
+    /* Free stuff */
+    AFREE(pipe->args);
+    AFREE(pipe);
 }
 
 /***********************************************************************
@@ -293,6 +402,8 @@ pipeConnector_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int 
 
         if (pipeArgs != NULL) {
             *pipeArgs++ = '\0';
+            if (!*pipeArgs)
+                pipeArgs = NULL;
         }
 
         Pipe* pipe = pcon->pipe;
@@ -310,7 +421,9 @@ pipeConnector_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int 
 
         /* Do the evil switch now */
         pipe->opaque = peer;
+        pipe->service = svc;
         pipe->funcs  = &svc->funcs;
+        pipe->args   = ASTRDUP(pipeArgs);
         AFREE(pcon);
     }
 
@@ -335,6 +448,32 @@ pipeConnector_wakeOn( void* opaque, int flags )
     /* nothing, really should never happen */
 }
 
+static void
+pipeConnector_save( void* pipe, QEMUFile* file )
+{
+    PipeConnector*  pcon = pipe;
+    qemu_put_sbe32(file, pcon->buffpos);
+    qemu_put_sbuffer(file, (const int8_t*)pcon->buffer, pcon->buffpos);
+}
+
+static void*
+pipeConnector_load( void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* file )
+{
+    PipeConnector*  pcon;
+
+    int len = qemu_get_sbe32(file);
+    if (len < 0 || len > sizeof(pcon->buffer)) {
+        return NULL;
+    }
+    pcon = pipeConnector_new(hwpipe);
+    pcon->buffpos = len;
+    if (qemu_get_buffer(file, (uint8_t*)pcon->buffer, pcon->buffpos) != pcon->buffpos) {
+        AFREE(pcon);
+        return NULL;
+    }
+    return pcon;
+}
+
 static const GoldfishPipeFuncs  pipeConnector_funcs = {
     NULL,  /* init */
     pipeConnector_close,        /* should rarely happen */
@@ -342,6 +481,8 @@ static const GoldfishPipeFuncs  pipeConnector_funcs = {
     pipeConnector_recvBuffers,  /* should not happen */
     pipeConnector_poll,         /* should not happen */
     pipeConnector_wakeOn,       /* should not happen */
+    pipeConnector_save,
+    pipeConnector_load,
 };
 
 /***********************************************************************
@@ -860,12 +1001,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         *lookup = pipe->next;
         pipe->next = NULL;
         pipe_list_remove_waked(&dev->signaled_pipes, pipe);
-        /* Call close callback */
-        if (pipe->funcs->close) {
-            pipe->funcs->close(pipe->opaque);
-        }
-        /* Free stuff */
-        AFREE(pipe);
+        pipe_free(pipe);
         break;
 
     case PIPE_CMD_POLL:
@@ -1018,6 +1154,69 @@ static CPUWriteMemoryFunc *pipe_dev_writefn[] = {
    pipe_dev_write
 };
 
+static void
+goldfish_pipe_save( QEMUFile* file, void* opaque )
+{
+    PipeDevice* dev = opaque;
+    Pipe* pipe;
+
+    qemu_put_be32(file, dev->address);
+    qemu_put_be32(file, dev->size);
+    qemu_put_be32(file, dev->status);
+    qemu_put_be32(file, dev->channel);
+    qemu_put_be32(file, dev->wakes);
+
+    /* Count the number of pipe connections */
+    int count = 0;
+    for ( pipe = dev->pipes; pipe; pipe = pipe->next )
+        count++;
+
+    qemu_put_sbe32(file, count);
+
+    /* Now save each pipe one after the other */
+    for ( pipe = dev->pipes; pipe; pipe = pipe->next ) {
+        pipe_save(pipe, file);
+    }
+}
+
+static int
+goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
+{
+    PipeDevice* dev = opaque;
+    Pipe*       pipe;
+
+    if (version_id != GOLDFISH_PIPE_SAVE_VERSION)
+        return -EINVAL;
+
+    dev->address = qemu_get_be32(file);
+    dev->size    = qemu_get_be32(file);
+    dev->status  = qemu_get_be32(file);
+    dev->channel = qemu_get_be32(file);
+    dev->wakes   = qemu_get_be32(file);
+
+    /* Count the number of pipe connections */
+    int count = qemu_get_sbe32(file);
+
+    /* Load all pipe connections */
+    for ( ; count > 0; count-- ) {
+        pipe = pipe_load(dev, file);
+        if (pipe == NULL) {
+            return -EIO;
+        }
+        pipe->next = dev->pipes;
+        dev->pipes = pipe;
+    }
+
+    /* Now we need to wake/close all relevant pipes */
+    for ( pipe = dev->pipes; pipe; pipe = pipe->next ) {
+        if (pipe->wanted != 0)
+            goldfish_pipe_wake(pipe, pipe->wanted);
+        if (pipe->closed != 0)
+            goldfish_pipe_close(pipe);
+    }
+    return 0;
+}
+
 /* initialize the trace device */
 void pipe_dev_init()
 {
@@ -1033,6 +1232,9 @@ void pipe_dev_init()
     s->dev.irq_count = 1;
 
     goldfish_device_add(&s->dev, pipe_dev_readfn, pipe_dev_writefn, s);
+
+    register_savevm( "goldfish_pipe", 0, GOLDFISH_PIPE_SAVE_VERSION,
+                      goldfish_pipe_save, goldfish_pipe_load, s);
 
 #if DEBUG_ZERO_PIPE
     goldfish_pipe_add_type("zero", NULL, &zeroPipe_funcs);

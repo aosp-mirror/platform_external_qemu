@@ -567,6 +567,37 @@ int qemu_get_byte(QEMUFile *f)
     return f->buf[f->buf_index++];
 }
 
+#ifdef CONFIG_ANDROID
+void qemu_put_string(QEMUFile *f, const char* str)
+{
+    /* We will encode NULL and the empty string in the same way */
+    int  slen;
+    if (str == NULL) {
+        str = "";
+    }
+    slen = strlen(str);
+    qemu_put_be32(f, slen);
+    qemu_put_buffer(f, (const uint8_t*)str, slen);
+}
+
+char* qemu_get_string(QEMUFile *f)
+{
+    int slen = qemu_get_be32(f);
+    char* str;
+    if (slen == 0)
+        return NULL;
+
+    str = qemu_malloc(slen+1);
+    if (qemu_get_buffer(f, (uint8_t*)str, slen) != slen) {
+        qemu_free(str);
+        return NULL;
+    }
+    str[slen] = '\0';
+    return str;
+}
+#endif
+
+
 int64_t qemu_ftell(QEMUFile *f)
 {
     return f->buf_offset - f->buf_size + f->buf_index;
@@ -858,7 +889,7 @@ void unregister_savevm(const char *idstr, void *opaque)
 
 #define QEMU_VM_FILE_MAGIC           0x5145564d
 #define QEMU_VM_FILE_VERSION_COMPAT  0x00000002
-#define QEMU_VM_FILE_VERSION         0x00000003
+#define QEMU_VM_FILE_VERSION         0x00000004
 
 #define QEMU_VM_EOF                  0x00
 #define QEMU_VM_SECTION_START        0x01
@@ -1075,8 +1106,13 @@ int qemu_loadvm_state(QEMUFile *f)
     v = qemu_get_be32(f);
     if (v == QEMU_VM_FILE_VERSION_COMPAT)
         return qemu_loadvm_state_v2(f);
-    if (v != QEMU_VM_FILE_VERSION)
+    if (v < QEMU_VM_FILE_VERSION) {
+        fprintf(stderr, "Snapshot format %d is too old for this version of the emulator, please create a new one.\n", v);
         return -ENOTSUP;
+    } else if (v > QEMU_VM_FILE_VERSION) {
+        fprintf(stderr, "Snapshot format %d is more recent than the emulator, please update your Android SDK Tools.\n", v);
+        return -ENOTSUP;
+    }
 
     while ((section_type = qemu_get_byte(f)) != QEMU_VM_EOF) {
         uint32_t instance_id, version_id, section_id;
