@@ -1072,11 +1072,11 @@ _on_android_device_connected_async(void* opaque,
             case ENETUNREACH:
             case ENETDOWN:
             case EBUSY:
-#ifndef _DARWIN_C_SOURCE
+#if !defined(_DARWIN_C_SOURCE) && !defined(_WIN32)
             case ERESTART:
             case ECOMM:
             case ENONET:
-#endif  /* _DARWIN_C_SOURCE */
+#endif  /* !_DARWIN_C_SOURCE && !_WIN32 */
                 /* Device is not available / reachable at the moment.
                  * Retry connection later. */
                 loopTimer_startRelative(ad->timer, ADS_RETRY_CONNECTION_TIMEOUT);
