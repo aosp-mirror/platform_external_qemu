@@ -556,6 +556,8 @@ static const CameraFrameDim _emulate_dims[] =
   {640, 480},
   /* Emulates 352x288 frame (required by camera framework). */
   {352, 288},
+  /* Emulates 320x240 frame (required by camera framework). */
+  {320, 240},
   /* Emulates 176x144 frame (required by camera framework). */
   {176, 144}
 };
