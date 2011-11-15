@@ -20,7 +20,7 @@
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)    VERBOSE_PRINT(sensors_port,__VA_ARGS__)
-#define  D_ACTIVE  VERBOSE_CHECK(camera)
+#define  D_ACTIVE  VERBOSE_CHECK(sensors_port)
 
 /* Maximum number of sensors supported. */
 #define ASP_MAX_SENSOR          12
