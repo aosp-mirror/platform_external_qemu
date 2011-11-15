@@ -494,8 +494,10 @@ static const CameraFrameDim _emulate_dims[] =
 {
   /* Emulates 640x480 frame. */
   {640, 480},
-  /* Emulates 320x240 frame. */
-  {320, 240},
+  /* Emulates 352x288 frame (required by camera framework). */
+  {352, 288},
+  /* Emulates 176x144 frame (required by camera framework). */
+  {176, 144}
 };
 
     /* Obtain default video device. QT API doesn't really provide a reliable

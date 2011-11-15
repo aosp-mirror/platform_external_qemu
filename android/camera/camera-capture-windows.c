@@ -545,6 +545,20 @@ camera_device_close(CameraDevice* cd)
 int
 enumerate_camera_devices(CameraInfo* cis, int max)
 {
+/* Array containing emulated webcam frame dimensions.
+ * capXxx API provides device independent frame dimensions, by scaling frames
+ * received from the device to whatever dimensions were requested by the user.
+ * So, we can just use a small set of frame dimensions to emulate.
+ */
+static const CameraFrameDim _emulate_dims[] =
+{
+  /* Emulates 640x480 frame. */
+  {640, 480},
+  /* Emulates 352x288 frame (required by camera framework). */
+  {352, 288},
+  /* Emulates 176x144 frame (required by camera framework). */
+  {176, 144}
+};
     int inp_channel, found = 0;
 
     for (inp_channel = 0; inp_channel < 10 && found < max; inp_channel++) {
@@ -557,14 +571,9 @@ enumerate_camera_devices(CameraInfo* cis, int max)
             WndCameraDevice* wcd = (WndCameraDevice*)cd->opaque;
 
             /* Unfortunately, on Windows we have to start capturing in order to get the
-             * actual frame properties. Note that on Windows camera_device_start_capturing
-             * will ignore the pixel format parameter, since it will be determined during
-             * the course of the routine. Also note that on Windows all frames will be
-             * 640x480. */
+             * actual frame properties. */
             if (!camera_device_start_capturing(cd, V4L2_PIX_FMT_RGB32, 640, 480)) {
-                /* capXxx API supports only single frame size (always observed 640x480,
-                 * but the actual numbers may vary). */
-                cis[found].frame_sizes = (CameraFrameDim*)malloc(sizeof(CameraFrameDim));
+                cis[found].frame_sizes = (CameraFrameDim*)malloc(sizeof(_emulate_dims));
                 if (cis[found].frame_sizes != NULL) {
                     char disp_name[24];
                     sprintf(disp_name, "webcam%d", found);
@@ -572,9 +581,8 @@ enumerate_camera_devices(CameraInfo* cis, int max)
                     cis[found].device_name = ASTRDUP(name);
                     cis[found].direction = ASTRDUP("front");
                     cis[found].inp_channel = inp_channel;
-                    cis[found].frame_sizes->width = wcd->frame_bitmap->bmiHeader.biWidth;
-                    cis[found].frame_sizes->height = wcd->frame_bitmap->bmiHeader.biHeight;
-                    cis[found].frame_sizes_num = 1;
+                    cis[found].frame_sizes_num = sizeof(_emulate_dims) / sizeof(*_emulate_dims);
+                    memcpy(cis[found].frame_sizes, _emulate_dims, sizeof(_emulate_dims));
                     cis[found].pixel_format = wcd->pixel_format;
                     cis[found].in_use = 0;
                     found++;
