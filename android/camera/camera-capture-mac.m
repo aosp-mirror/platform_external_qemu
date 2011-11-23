@@ -120,7 +120,7 @@ _QTtoFOURCC(uint32_t qt_pix_format)
  *  in the device. The client should respond to this value by repeating the
  *  read, rather than reporting an error.
  */
-- (int)read_frame:(ClientFrameBuffer*)framebuffers:(int)fbs_num;
+- (int)read_frame:(ClientFrameBuffer*)framebuffers:(int)fbs_num:(float)r_scale:(float)g_scale:(float)b_scale:(float)exp_comp;
 
 @end
 
@@ -260,7 +260,7 @@ _QTtoFOURCC(uint32_t qt_pix_format)
   }
 }
 
-- (int)read_frame:(ClientFrameBuffer*)framebuffers:(int)fbs_num
+- (int)read_frame:(ClientFrameBuffer*)framebuffers:(int)fbs_num:(float)r_scale:(float)g_scale:(float)b_scale:(float)exp_comp
 {
     int res = -1;
 
@@ -284,7 +284,8 @@ _QTtoFOURCC(uint32_t qt_pix_format)
                 /* Convert framebuffer. */
                 res = convert_frame(pixels, pixel_format, frame_size,
                                     frame_width, frame_height,
-                                    framebuffers, fbs_num);
+                                    framebuffers, fbs_num,
+                                    r_scale, g_scale, b_scale, exp_comp);
             } else {
                 E("%s: Unable to obtain framebuffer", __FUNCTION__);
                 res = -1;
@@ -452,7 +453,11 @@ camera_device_stop_capturing(CameraDevice* cd)
 int
 camera_device_read_frame(CameraDevice* cd,
                          ClientFrameBuffer* framebuffers,
-                         int fbs_num)
+                         int fbs_num,
+                         float r_scale,
+                         float g_scale,
+                         float b_scale,
+                         float exp_comp)
 {
     MacCameraDevice* mcd;
 
@@ -467,7 +472,7 @@ camera_device_read_frame(CameraDevice* cd,
         return -1;
     }
 
-    return [mcd->device read_frame:framebuffers:fbs_num];
+    return [mcd->device read_frame:framebuffers:fbs_num:r_scale:g_scale:b_scale:exp_comp];
 }
 
 void

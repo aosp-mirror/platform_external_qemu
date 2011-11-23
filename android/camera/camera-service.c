@@ -1167,10 +1167,15 @@ _camera_client_query_stop(CameraClient* cc, QemudClient* qc, const char* param)
  * Param:
  *  cc - Queried camera client descriptor.
  *  qc - Qemu client for the emulated camera.
- *  param - Query parameters. Parameters for this query must contain a 'video',
- *      and a 'preview' parameters, both must be decimal values, defining size of
- *      requested video, and preview frames respectively. Zero value for any of
- *      the parameters means that this particular frame is not requested.
+ *  param - Query parameters. Parameters for this query are formatted as such:
+ *          video=<size> preview=<size> whiteb=<red>,<green>,<blue> expcomp=<comp>
+ *      where:
+ *       - 'video', and 'preview' both must be decimal values, defining size of
+ *         requested video, and preview frames respectively. Zero value for any
+ *         of these parameters means that this particular frame is not requested.
+ *       - whiteb contains float values required to calculate whilte balance.
+ *       - expcomp contains a float value required to calculate exposure
+ *         compensation.
  */
 static void
 _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
@@ -1182,6 +1187,8 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     int fbs_num = 0;
     size_t payload_size;
     uint64_t tick;
+    float r_scale = 1.0f, g_scale = 1.0f, b_scale = 1.0f, exp_comp = 1.0f;
+    char tmp[256];
 
     /* Sanity check. */
     if (cc->video_frame == NULL) {
@@ -1199,6 +1206,22 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
         _qemu_client_reply_ko(qc,
             "Invalid or missing 'video', or 'preview' parameter");
         return;
+    }
+
+    /* Pull white balance values. */
+    if (!_get_param_value(param, "whiteb", tmp, sizeof(tmp))) {
+        if (sscanf(tmp, "%g,%g,%g", &r_scale, &g_scale, &b_scale) != 3) {
+            D("Invalid value '%s' for parameter 'whiteb'", tmp);
+            r_scale = g_scale = b_scale = 1.0f;
+        }
+    }
+
+    /* Pull exposure compensation. */
+    if (!_get_param_value(param, "expcomp", tmp, sizeof(tmp))) {
+        if (sscanf(tmp, "%g", &exp_comp) != 1) {
+            D("Invalid value '%s' for parameter 'whiteb'", tmp);
+            exp_comp = 1.0f;
+        }
     }
 
     /* Verify that framebuffer sizes match the ones that the started camera
@@ -1231,7 +1254,8 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
 
     /* Capture new frame. */
     tick = _get_timestamp();
-    repeat = camera_device_read_frame(cc->camera, fbs, fbs_num);
+    repeat = camera_device_read_frame(cc->camera, fbs, fbs_num,
+                                      r_scale, g_scale, b_scale, exp_comp);
 
     /* Note that there is no (known) way how to wait on next frame being
      * available, so we could dequeue frame buffer from the device only when we
@@ -1248,7 +1272,8 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
            (_get_timestamp() - tick) < 2000000LL) {
         /* Sleep for 10 millisec before repeating the attempt. */
         _camera_sleep(10);
-        repeat = camera_device_read_frame(cc->camera, fbs, fbs_num);
+        repeat = camera_device_read_frame(cc->camera, fbs, fbs_num,
+                                          r_scale, g_scale, b_scale, exp_comp);
     }
     if (repeat == 1 && !cc->frames_cached) {
         /* Waited too long for the first frame. */

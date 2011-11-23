@@ -465,7 +465,11 @@ camera_device_stop_capturing(CameraDevice* cd)
 int
 camera_device_read_frame(CameraDevice* cd,
                          ClientFrameBuffer* framebuffers,
-                         int fbs_num)
+                         int fbs_num,
+                         float r_scale,
+                         float g_scale,
+                         float b_scale,
+                         float exp_comp)
 {
     WndCameraDevice* wcd;
     HBITMAP bm_handle;
@@ -527,7 +531,8 @@ camera_device_read_frame(CameraDevice* cd,
                          wcd->gdi_bitmap->bmiHeader.biSizeImage,
                          wcd->frame_bitmap->bmiHeader.biWidth,
                          wcd->frame_bitmap->bmiHeader.biHeight,
-                         framebuffers, fbs_num);
+                         framebuffers, fbs_num,
+                         r_scale, g_scale, b_scale, exp_comp);
 }
 
 void

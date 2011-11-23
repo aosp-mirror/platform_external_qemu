@@ -969,7 +969,11 @@ camera_device_stop_capturing(CameraDevice* ccd)
 int
 camera_device_read_frame(CameraDevice* ccd,
                          ClientFrameBuffer* framebuffers,
-                         int fbs_num)
+                         int fbs_num,
+                         float r_scale,
+                         float g_scale,
+                         float b_scale,
+                         float exp_comp)
 {
     LinuxCameraDevice* cd;
 
@@ -1011,7 +1015,8 @@ camera_device_read_frame(CameraDevice* ccd,
                              cd->actual_pixel_format.sizeimage,
                              cd->actual_pixel_format.width,
                              cd->actual_pixel_format.height,
-                             framebuffers, fbs_num);
+                             framebuffers, fbs_num,
+                             r_scale, g_scale, b_scale, exp_comp);
     } else {
         /* Dequeue next buffer from the device. */
         struct v4l2_buffer buf;
@@ -1039,7 +1044,8 @@ camera_device_read_frame(CameraDevice* ccd,
                             cd->actual_pixel_format.sizeimage,
                             cd->actual_pixel_format.width,
                             cd->actual_pixel_format.height,
-                            framebuffers, fbs_num);
+                            framebuffers, fbs_num,
+                            r_scale, g_scale, b_scale, exp_comp);
 
         /* Requeue the buffer back to the device. */
         if (_xioctl(cd->handle, VIDIOC_QBUF, &buf) < 0) {

@@ -53,6 +53,8 @@ extern int has_converter(uint32_t from, uint32_t to);
  *      make sure that buffers are large enough to contain entire frame captured
  *      from the device.
  *  fbs_num - Number of entries in the 'framebuffers' array.
+ *  r_scale, g_scale, b_scale - White balance scale.
+ *  exp_comp - Expsoure compensation.
  * Return:
  *  0 on success, or non-zero value on failure.
 */
@@ -62,6 +64,10 @@ extern int convert_frame(const void* frame,
                          int width,
                          int height,
                          ClientFrameBuffer* framebuffers,
-                         int fbs_num);
+                         int fbs_num,
+                         float r_scale,
+                         float g_scale,
+                         float b_scale,
+                         float exp_comp);
 
 #endif  /* ANDROID_CAMERA_CAMERA_FORMAT_CONVERTERS_H */
