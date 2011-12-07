@@ -824,30 +824,47 @@ _qemud_client_free(QemudClient* c)
 /* disconnect a client. this automatically frees the QemudClient.
  * note that this also removes the client from the global list
  * and from its service's list, if any.
+ * Param:
+ *  opaque - QemuClient instance
+ *  guest_close - For pipe clients control whether or not the disconnect is
+ *      caused by guest closing the pipe handle (in which case 1 is passed in
+ *      this parameter). For serial clients this parameter is ignored.
  */
 static void
-qemud_client_disconnect( void*  opaque )
+qemud_client_disconnect( void*  opaque, int guest_close )
 {
     QemudClient*  c = opaque;
 
     if (c->closing) {  /* recursive call, exit immediately */
         return;
     }
+
+    if (_is_pipe_client(c) && !guest_close) {
+        /* This is emulator component (rather than the guest) closing a pipe
+         * client. Since pipe clients are controlled strictly by the guest, we
+         * don't actually close the client here, but notify the guest about the
+         * client being disconnected. Then we will do the real client close when
+         * the guest explicitly closes the pipe, in which case this routine will
+         * be called from the _qemudPipe_closeFromGuest callback with guest_close
+         * set to 1. */
+        char  tmp[128], *p=tmp, *end=p+sizeof(tmp);
+        p = bufprint(tmp, end, "disconnect:00");
+        _qemud_pipe_send(c, (uint8_t*)tmp, p-tmp);
+        return;
+    }
+
     c->closing = 1;
 
     /* remove from current list */
     qemud_client_remove(c);
 
-    /* send a disconnect command to the daemon */
     if (_is_pipe_client(c)) {
-        char  tmp[128], *p=tmp, *end=p+sizeof(tmp);
-        p = bufprint(tmp, end, "disconnect:00");
-        _qemud_pipe_send(c, (uint8_t*)tmp, p-tmp);
         /* We must NULL the client reference in the QemuPipe for this connection,
          * so if a sudden receive request comes after client has been closed, we
          * don't blow up. */
         c->ProtocolSelector.Pipe.qemud_pipe->client = NULL;
     } else if (c->ProtocolSelector.Serial.channel > 0) {
+        /* send a disconnect command to the daemon */
         char  tmp[128], *p=tmp, *end=p+sizeof(tmp);
         p = bufprint(tmp, end, "disconnect:%02x",
                      c->ProtocolSelector.Serial.channel);
@@ -1348,7 +1365,7 @@ qemud_multiplexer_disconnect( QemudMultiplexer*  m,
              * m->clients automatically.
              */
             c->ProtocolSelector.Serial.channel = -1; /* no need to send disconnect:<id> */
-            qemud_client_disconnect(c);
+            qemud_client_disconnect(c, 0);
             return;
         }
     }
@@ -1378,7 +1395,7 @@ qemud_multiplexer_disconnect_noncontrol( QemudMultiplexer*  m )
             D("%s: disconnecting client %d\n",
               __FUNCTION__, c->ProtocolSelector.Serial.channel);
             c->ProtocolSelector.Serial.channel = -1; /* do not send disconnect:<id> */
-            qemud_client_disconnect(c);
+            qemud_client_disconnect(c, 0);
         }
     }
 }
@@ -1695,7 +1712,7 @@ qemud_client_set_framing( QemudClient*  client, int  framing )
 void
 qemud_client_close( QemudClient*  client )
 {
-    qemud_client_disconnect(client);
+    qemud_client_disconnect(client, 0);
 }
 
 
@@ -1945,7 +1962,7 @@ _qemudPipe_closeFromGuest( void* opaque )
     QemudClient*  client = pipe->client;
     D("%s", __FUNCTION__);
     if (client != NULL) {
-        qemud_client_disconnect(client);
+        qemud_client_disconnect(client, 1);
     } else {
         D("%s: Unexpected NULL client", __FUNCTION__);
     }
