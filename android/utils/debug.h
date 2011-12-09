@@ -39,6 +39,8 @@
     _VERBOSE_TAG(adevice,      "android device connected via port forwarding") \
     _VERBOSE_TAG(sensors_port, "sensors emulator connected to android device") \
     _VERBOSE_TAG(gles,         "hardware OpenGLES emulation") \
+    _VERBOSE_TAG(adbserver,    "ADB server") \
+    _VERBOSE_TAG(adbclient,    "ADB QEMU client") \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
