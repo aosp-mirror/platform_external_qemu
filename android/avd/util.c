@@ -313,3 +313,24 @@ path_getBuildTargetApiLevel( const char* androidOut )
     return level;
 }
 
+int
+path_getAdbdCommunicationMode( const char* androidOut )
+{
+    char* prop = _getBuildProperty(androidOut, "ro.adb.qemud");
+    if (prop != NULL) {
+        long val = 0;
+        char* end;
+        val = strtol(prop, &end, 10);
+        if (end == NULL || *end != '\0' || val != (int)val) {
+            D("Invalid ro.adb.qemud build property: '%s'", prop);
+            val = 0;
+        } else {
+            D("Found ro.adb.qemud build property: %d", val);
+        }
+        AFREE(prop);
+        return (int)val;
+    } else {
+        /* Missing ro.adb.qemud means "legacy" ADBD. */
+        return 0;
+    }
+}

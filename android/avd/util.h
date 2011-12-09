@@ -64,4 +64,13 @@ char* path_getBuildTargetAbi( const char* androidOut );
  */
 int path_getBuildTargetApiLevel( const char* androidOut );
 
+/* Returns mode in which ADB daemon running in the guest communicates with the
+ * emulator
+ * Return:
+ *  0 - ADBD communicates with the emulator via forwarded TCP port 5555 (a
+ *      "legacy" mode).
+ *  1 - ADBD communicates with the emulator via 'adb' QEMUD service.
+ */
+int path_getAdbdCommunicationMode( const char* androidOut );
+
 #endif /* _ANDROID_AVD_UTIL_H */
