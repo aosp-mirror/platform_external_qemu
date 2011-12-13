@@ -242,6 +242,96 @@ YUVToRGBPix(int y, int u, int v, uint8_t* r, uint8_t* g, uint8_t* b)
     *b = (uint8_t)YUV2BO(y,u,v);
 }
 
+/* Computes a luminance value after taking the exposure compensation.
+ * value into account.
+ *
+ * Param:
+ * inputY - The input luminance value.
+ * Return:
+ * The luminance value after adjusting the exposure compensation.
+ */
+static __inline__ uint8_t
+_change_exposure(uint8_t inputY, float exp_comp)
+{
+    return (uint8_t)clamp((float)inputY * exp_comp);
+}
+
+/* Adjusts an RGB pixel for the given exposure compensation. */
+static __inline__ void
+_change_exposure_RGB(uint8_t* r, uint8_t* g, uint8_t* b, float exp_comp)
+{
+    uint8_t y, u, v;
+    R8G8B8ToYUV(*r, *g, *b, &y, &u, &v);
+    YUVToRGBPix(_change_exposure(y, exp_comp), u, v, r, g, b);
+}
+
+/* Adjusts an RGB pixel for the given exposure compensation. */
+static __inline__ void
+_change_exposure_RGB_i(int* r, int* g, int* b, float exp_comp)
+{
+    uint8_t y, u, v;
+    R8G8B8ToYUV(*r, *g, *b, &y, &u, &v);
+    y = _change_exposure(y, exp_comp);
+    *r = YUV2RO(y,u,v);
+    *g = YUV2GO(y,u,v);
+    *b = YUV2BO(y,u,v);
+}
+
+/* Computes the pixel value after adjusting the white balance to the current
+ * one. The input the y, u, v channel of the pixel and the adjusted value will
+ * be stored in place. The adjustment is done in RGB space.
+ */
+static __inline__ void
+_change_white_balance_YUV(uint8_t* y,
+                          uint8_t* u,
+                          uint8_t* v,
+                          float r_scale,
+                          float g_scale,
+                          float b_scale)
+{
+    int r = (float)(YUV2R((int)*y, (int)*u, (int)*v)) / r_scale;
+    int g = (float)(YUV2G((int)*y, (int)*u, (int)*v)) / g_scale;
+    int b = (float)(YUV2B((int)*y, (int)*u, (int)*v)) / b_scale;
+
+    *y = RGB2Y(r, g, b);
+    *u = RGB2U(r, g, b);
+    *v = RGB2V(r, g, b);
+}
+
+/* Computes the pixel value after adjusting the white balance to the current
+ * one. The input the r, and b channels of the pixel and the adjusted value will
+ * be stored in place.
+ */
+static __inline__ void
+_change_white_balance_RGB(int* r,
+                          int* g,
+                          int* b,
+                          float r_scale,
+                          float g_scale,
+                          float b_scale)
+{
+    *r = (float)*r / r_scale;
+    *g = (float)*g / g_scale;
+    *b = (float)*b / b_scale;
+}
+
+/* Computes the pixel value after adjusting the white balance to the current
+ * one. The input the r, and b channels of the pixel and the adjusted value will
+ * be stored in place.
+ */
+static __inline__ void
+_change_white_balance_RGB_b(uint8_t* r,
+                            uint8_t* g,
+                            uint8_t* b,
+                            float r_scale,
+                            float g_scale,
+                            float b_scale)
+{
+    *r = (float)*r / r_scale;
+    *g = (float)*g / g_scale;
+    *b = (float)*b / b_scale;
+}
+
 /********************************************************************************
  * Generic converters between YUV and RGB formats
  *******************************************************************************/
@@ -912,7 +1002,11 @@ RGBToYUV(const RGBDesc* rgb_fmt,
          const void* rgb,
          void* yuv,
          int width,
-         int height)
+         int height,
+         float r_scale,
+         float g_scale,
+         float b_scale,
+         float exp_comp)
 {
     int y, x;
     const int Y_Inc = yuv_fmt->Y_inc;
@@ -928,8 +1022,12 @@ RGBToYUV(const RGBDesc* rgb_fmt,
                                pY += Y_next_pair, pU += UV_inc, pV += UV_inc) {
             uint8_t r, g, b;
             rgb = rgb_fmt->load_rgb(rgb, &r, &g, &b);
+            _change_white_balance_RGB_b(&r, &g, &b, r_scale, g_scale, b_scale);
+            _change_exposure_RGB(&r, &g, &b, exp_comp);
             R8G8B8ToYUV(r, g, b, pY, pU, pV);
             rgb = rgb_fmt->load_rgb(rgb, &r, &g, &b);
+            _change_white_balance_RGB_b(&r, &g, &b, r_scale, g_scale, b_scale);
+            _change_exposure_RGB(&r, &g, &b, exp_comp);
             pY[Y_Inc] = RGB2Y((int)r, (int)g, (int)b);
         }
         /* Aling rgb_ptr to 16 bit */
@@ -944,13 +1042,19 @@ RGBToRGB(const RGBDesc* src_rgb_fmt,
          const void* src_rgb,
          void* dst_rgb,
          int width,
-         int height)
+         int height,
+         float r_scale,
+         float g_scale,
+         float b_scale,
+         float exp_comp)
 {
     int x, y;
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
             uint8_t r, g, b;
             src_rgb = src_rgb_fmt->load_rgb(src_rgb, &r, &g, &b);
+            _change_white_balance_RGB_b(&r, &g, &b, r_scale, g_scale, b_scale);
+            _change_exposure_RGB(&r, &g, &b, exp_comp);
             dst_rgb = dst_rgb_fmt->save_rgb(dst_rgb, r, g, b);
         }
         /* Aling rgb pinters to 16 bit */
@@ -966,7 +1070,11 @@ YUVToRGB(const YUVDesc* yuv_fmt,
          const void* yuv,
          void* rgb,
          int width,
-         int height)
+         int height,
+         float r_scale,
+         float g_scale,
+         float b_scale,
+         float exp_comp)
 {
     int y, x;
     const int Y_Inc = yuv_fmt->Y_inc;
@@ -984,8 +1092,12 @@ YUVToRGB(const YUVDesc* yuv_fmt,
             const uint8_t U = *pU;
             const uint8_t V = *pV;
             YUVToRGBPix(*pY, U, V, &r, &g, &b);
+            _change_white_balance_RGB_b(&r, &g, &b, r_scale, g_scale, b_scale);
+            _change_exposure_RGB(&r, &g, &b, exp_comp);
             rgb = rgb_fmt->save_rgb(rgb, r, g, b);
             YUVToRGBPix(pY[Y_Inc], U, V, &r, &g, &b);
+            _change_white_balance_RGB_b(&r, &g, &b, r_scale, g_scale, b_scale);
+            _change_exposure_RGB(&r, &g, &b, exp_comp);
             rgb = rgb_fmt->save_rgb(rgb, r, g, b);
         }
         /* Aling rgb_ptr to 16 bit */
@@ -1000,7 +1112,11 @@ YUVToYUV(const YUVDesc* src_fmt,
          const void* src,
          void* dst,
          int width,
-         int height)
+         int height,
+         float r_scale,
+         float g_scale,
+         float b_scale,
+         float exp_comp)
 {
     int y, x;
     const int Y_Inc_src = src_fmt->Y_inc;
@@ -1027,7 +1143,9 @@ YUVToYUV(const YUVDesc* src_fmt,
                                        pUdst += UV_inc_dst,
                                        pVdst += UV_inc_dst) {
             *pYdst = *pYsrc; *pUdst = *pUsrc; *pVdst = *pVsrc;
-            pYdst[Y_Inc_dst] = pYsrc[Y_Inc_src];
+            _change_white_balance_YUV(pYdst, pUdst, pVdst, r_scale, g_scale, b_scale);
+            *pYdst = _change_exposure(*pYdst, exp_comp);
+            pYdst[Y_Inc_dst] = _change_exposure(pYsrc[Y_Inc_src], exp_comp);
         }
     }
 }
@@ -1039,7 +1157,11 @@ BAYERToRGB(const BayerDesc* bayer_fmt,
            const void* bayer,
            void* rgb,
            int width,
-           int height)
+           int height,
+           float r_scale,
+           float g_scale,
+           float b_scale,
+           float exp_comp)
 {
     int y, x;
     for (y = 0; y < height; y++) {
@@ -1051,6 +1173,8 @@ BAYERToRGB(const BayerDesc* bayer_fmt,
             } else if (bayer_fmt->mask == kBayer12) {
                 r >>= 4; g >>= 4; b >>= 4;
             }
+            _change_white_balance_RGB(&r, &g, &b, r_scale, g_scale, b_scale);
+            _change_exposure_RGB_i(&r, &g, &b, exp_comp);
             rgb = rgb_fmt->save_rgb(rgb, r, g, b);
         }
         /* Aling rgb_ptr to 16 bit */
@@ -1065,7 +1189,11 @@ BAYERToYUV(const BayerDesc* bayer_fmt,
            const void* bayer,
            void* yuv,
            int width,
-           int height)
+           int height,
+           float r_scale,
+           float g_scale,
+           float b_scale,
+           float exp_comp)
 {
     int y, x;
     const int Y_Inc = yuv_fmt->Y_inc;
@@ -1081,8 +1209,12 @@ BAYERToYUV(const BayerDesc* bayer_fmt,
                                pY += Y_next_pair, pU += UV_inc, pV += UV_inc) {
             int r, g, b;
             _get_bayerRGB(bayer_fmt, bayer, x, y, width, height, &r, &g, &b);
+            _change_white_balance_RGB(&r, &g, &b, r_scale, g_scale, b_scale);
+            _change_exposure_RGB_i(&r, &g, &b, exp_comp);
             R8G8B8ToYUV(r, g, b, pY, pU, pV);
             _get_bayerRGB(bayer_fmt, bayer, x + 1, y, width, height, &r, &g, &b);
+            _change_white_balance_RGB(&r, &g, &b, r_scale, g_scale, b_scale);
+            _change_exposure_RGB_i(&r, &g, &b, exp_comp);
             pY[Y_Inc] = RGB2Y(r, g, b);
         }
     }
@@ -1484,7 +1616,11 @@ convert_frame(const void* frame,
               int width,
               int height,
               ClientFrameBuffer* framebuffers,
-              int fbs_num)
+              int fbs_num,
+              float r_scale,
+              float g_scale,
+              float b_scale,
+              float exp_comp)
 {
     int n;
     const PIXFormat* src_desc = _get_pixel_format_descriptor(pixel_format);
@@ -1495,62 +1631,67 @@ convert_frame(const void* frame,
     }
 
     for (n = 0; n < fbs_num; n++) {
-        if (framebuffers[n].pixel_format == pixel_format) {
-            /* Same pixel format. No conversion needed: just make a copy. */
-            memcpy(framebuffers[n].framebuffer, frame, framebuffer_size);
-        } else {
-            const PIXFormat* dst_desc =
-                _get_pixel_format_descriptor(framebuffers[n].pixel_format);
-            if (dst_desc == NULL) {
-                E("%s: Destination pixel format %.4s is unknown",
-                  __FUNCTION__, (const char*)&framebuffers[n].pixel_format);
-                return -1;
-            }
-            switch (src_desc->format_sel) {
-                case PIX_FMT_RGB:
-                    if (dst_desc->format_sel == PIX_FMT_RGB) {
-                        RGBToRGB(src_desc->desc.rgb_desc, dst_desc->desc.rgb_desc,
-                                 frame, framebuffers[n].framebuffer, width, height);
-                    } else if (dst_desc->format_sel == PIX_FMT_YUV) {
-                        RGBToYUV(src_desc->desc.rgb_desc, dst_desc->desc.yuv_desc,
-                                 frame, framebuffers[n].framebuffer, width, height);
-                    } else {
-                        E("%s: Unexpected destination pixel format %d",
-                          __FUNCTION__, dst_desc->format_sel);
-                        return -1;
-                    }
-                    break;
-                case PIX_FMT_YUV:
-                    if (dst_desc->format_sel == PIX_FMT_RGB) {
-                        YUVToRGB(src_desc->desc.yuv_desc, dst_desc->desc.rgb_desc,
-                                 frame, framebuffers[n].framebuffer, width, height);
-                    } else if (dst_desc->format_sel == PIX_FMT_YUV) {
-                        YUVToYUV(src_desc->desc.yuv_desc, dst_desc->desc.yuv_desc,
-                                 frame, framebuffers[n].framebuffer, width, height);
-                    } else {
-                        E("%s: Unexpected destination pixel format %d",
-                          __FUNCTION__, dst_desc->format_sel);
-                        return -1;
-                    }
-                    break;
-                case PIX_FMT_BAYER:
-                    if (dst_desc->format_sel == PIX_FMT_RGB) {
-                        BAYERToRGB(src_desc->desc.bayer_desc, dst_desc->desc.rgb_desc,
-                                  frame, framebuffers[n].framebuffer, width, height);
-                    } else if (dst_desc->format_sel == PIX_FMT_YUV) {
-                        BAYERToYUV(src_desc->desc.bayer_desc, dst_desc->desc.yuv_desc,
-                                   frame, framebuffers[n].framebuffer, width, height);
-                    } else {
-                        E("%s: Unexpected destination pixel format %d",
-                          __FUNCTION__, dst_desc->format_sel);
-                        return -1;
-                    }
-                    break;
-                default:
-                    E("%s: Unexpected source pixel format %d",
+        /* Note that we need to apply white balance, exposure compensation, etc.
+         * when we transfer the captured frame to the user framebuffer. So, even
+         * if source and destination formats are the same, we will have to go
+         * thrugh the converters to apply these things. */
+        const PIXFormat* dst_desc =
+            _get_pixel_format_descriptor(framebuffers[n].pixel_format);
+        if (dst_desc == NULL) {
+            E("%s: Destination pixel format %.4s is unknown",
+              __FUNCTION__, (const char*)&framebuffers[n].pixel_format);
+            return -1;
+        }
+        switch (src_desc->format_sel) {
+            case PIX_FMT_RGB:
+                if (dst_desc->format_sel == PIX_FMT_RGB) {
+                    RGBToRGB(src_desc->desc.rgb_desc, dst_desc->desc.rgb_desc,
+                             frame, framebuffers[n].framebuffer, width, height,
+                             r_scale, g_scale, b_scale, exp_comp);
+                } else if (dst_desc->format_sel == PIX_FMT_YUV) {
+                    RGBToYUV(src_desc->desc.rgb_desc, dst_desc->desc.yuv_desc,
+                             frame, framebuffers[n].framebuffer, width, height,
+                             r_scale, g_scale, b_scale, exp_comp);
+                } else {
+                    E("%s: Unexpected destination pixel format %d",
                       __FUNCTION__, dst_desc->format_sel);
                     return -1;
-            }
+                }
+                break;
+            case PIX_FMT_YUV:
+                if (dst_desc->format_sel == PIX_FMT_RGB) {
+                    YUVToRGB(src_desc->desc.yuv_desc, dst_desc->desc.rgb_desc,
+                             frame, framebuffers[n].framebuffer, width, height,
+                             r_scale, g_scale, b_scale, exp_comp);
+                } else if (dst_desc->format_sel == PIX_FMT_YUV) {
+                    YUVToYUV(src_desc->desc.yuv_desc, dst_desc->desc.yuv_desc,
+                             frame, framebuffers[n].framebuffer, width, height,
+                             r_scale, g_scale, b_scale, exp_comp);
+                } else {
+                    E("%s: Unexpected destination pixel format %d",
+                      __FUNCTION__, dst_desc->format_sel);
+                    return -1;
+                }
+                break;
+            case PIX_FMT_BAYER:
+                if (dst_desc->format_sel == PIX_FMT_RGB) {
+                    BAYERToRGB(src_desc->desc.bayer_desc, dst_desc->desc.rgb_desc,
+                              frame, framebuffers[n].framebuffer, width, height,
+                              r_scale, g_scale, b_scale, exp_comp);
+                } else if (dst_desc->format_sel == PIX_FMT_YUV) {
+                    BAYERToYUV(src_desc->desc.bayer_desc, dst_desc->desc.yuv_desc,
+                               frame, framebuffers[n].framebuffer, width, height,
+                               r_scale, g_scale, b_scale, exp_comp);
+                } else {
+                    E("%s: Unexpected destination pixel format %d",
+                      __FUNCTION__, dst_desc->format_sel);
+                    return -1;
+                }
+                break;
+            default:
+                E("%s: Unexpected source pixel format %d",
+                  __FUNCTION__, dst_desc->format_sel);
+                return -1;
         }
     }
 

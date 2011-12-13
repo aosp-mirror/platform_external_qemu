@@ -73,6 +73,8 @@ extern int camera_device_stop_capturing(CameraDevice* cd);
  *      make sure that buffers are large enough to contain entire frame captured
  *      from the device.
  *  fbs_num - Number of entries in the 'framebuffers' array.
+ *  r_scale, g_scale, b_scale - White balance scale.
+ *  exp_comp - Expsoure compensation.
  * Return:
  *  0 on success, or non-zero value on failure. There is a special vaule 1
  *  returned from this routine which indicates that frames were not available in
@@ -82,7 +84,11 @@ extern int camera_device_stop_capturing(CameraDevice* cd);
  */
 extern int camera_device_read_frame(CameraDevice* cd,
                                     ClientFrameBuffer* framebuffers,
-                                    int fbs_num);
+                                    int fbs_num,
+                                    float r_scale,
+                                    float g_scale,
+                                    float b_scale,
+                                    float exp_comp);
 
 /* Closes camera device, opened in camera_device_open routine.
  * Param:
