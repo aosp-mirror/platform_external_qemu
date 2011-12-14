@@ -182,6 +182,18 @@ else
     echo "Auto-config: -j$JOBS"
 fi
 
+
+# Special magic redirection with our magic toolbox script
+# This is needed to add extra compiler flags for x86
+#
+# We could use that for ARM, but don't need to at the moment.
+#
+if [ "$ARCH" = "x86" ]; then
+    export REAL_CROSS_COMPILE="$CROSS_COMPILE"
+    export ARCH
+    CROSS_COMPILE=$(dirname "$0")/kernel-toolchain/android-kernel-toolchain-
+fi
+
 # Do the build
 #
 rm -f include/asm &&
