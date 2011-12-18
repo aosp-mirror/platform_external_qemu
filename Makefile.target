@@ -176,6 +176,18 @@ LOCAL_SRC_FILES += \
     target-i386/translate.c \
     target-i386/machine.c \
 
+ifeq ($(HOST_OS),darwin)
+LOCAL_SRC_FILES += \
+      target-i386/hax-all.c       \
+      target-i386/hax-darwin.c
+endif
+
+ifeq ($(HOST_OS),windows)
+LOCAL_SRC_FILES += \
+      target-i386/hax-all.c       \
+      target-i386/hax-windows.c
+endif
+
 LOCAL_SRC_FILES += fpu/softfloat-native.c
 endif
 
