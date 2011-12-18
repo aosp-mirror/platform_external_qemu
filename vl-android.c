@@ -198,6 +198,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "audio/audio.h"
 #include "migration.h"
 #include "kvm.h"
+#include "hax.h"
 #ifdef CONFIG_KVM
 #include "kvm-android.h"
 #endif
@@ -298,6 +299,7 @@ int smp_cpus = 1;
 const char *vnc_display;
 int acpi_enabled = 1;
 int no_hpet = 0;
+int hax_disabled = 0;
 int no_virtio_balloon = 0;
 int fd_bootchk = 1;
 int no_reboot = 0;
@@ -1989,6 +1991,11 @@ static void main_loop(void)
     qemu_cond_broadcast(&qemu_system_cond);
 #endif
 
+#ifdef CONFIG_HAX
+    if (hax_enabled())
+        hax_sync_vcpus();
+#endif
+
     for (;;) {
         do {
 #ifdef CONFIG_PROFILER
@@ -3357,7 +3364,11 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_nand:
                 nand_add_dev(optarg);
                 break;
+
 #endif
+            case QEMU_OPTION_disable_hax:
+                hax_disabled = 1;
+                break;
             case QEMU_OPTION_android_ports:
                 android_op_ports = (char*)optarg;
                 break;
@@ -4127,6 +4138,17 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
+#ifdef CONFIG_HAX
+    if (!hax_disabled)
+    {
+        int ret;
+
+        ret = hax_init(smp_cpus);
+        fprintf(stderr, "HAX is %s and emulator runs in %s mode\n",
+            !ret ? "working" :"not working", !ret ? "fast virt" : "emulation");
+    }
+#endif
+
     if (monitor_device) {
         monitor_hd = qemu_chr_open("monitor", monitor_device, NULL);
         if (!monitor_hd) {
@@ -4258,6 +4280,11 @@ int main(int argc, char **argv, char **envp)
             PANIC("failed to initialize vcpus");
         }
     }
+
+#ifdef CONFIG_HAX
+    if (hax_enabled())
+        hax_sync_vcpus();
+#endif
 
     /* init USB devices */
     if (usb_enabled) {
