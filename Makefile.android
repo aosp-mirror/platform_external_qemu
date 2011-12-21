@@ -74,8 +74,8 @@ ifeq ($(HOST_OS),darwin)
     ifneq ($(filter 10.1 10.2 10.3 10.1.% 10.2.% 10.3.% 10.4 10.4.%,$(DARWIN_VERSION)),)
         $(error Building the Android emulator requires OS X 10.5 or above)
     endif
-    ifeq ($(filter 10.5 10.5.%,$(DARWIN_VERSION)),)
-        # We are on Snow Leopard or above
+    ifneq ($(filter 10.6 10.6.%,$(DARWIN_VERSION)),)
+        # We are on Snow Leopard
         LEOPARD_SDK := /Developer/SDKs/MacOSX10.5.sdk
         ifeq ($(strip $(wildcard $(LEOPARD_SDK))),)
             $(info  Please install the 10.5 SDK on this machine at $(LEOPARD_SDK))
