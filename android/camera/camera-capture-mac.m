@@ -21,7 +21,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <QTKit/QTkit.h>
+#import <QTKit/QTKit.h>
 #import <CoreAudio/CoreAudio.h>
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
