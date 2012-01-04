@@ -192,9 +192,10 @@ endif
 ifeq ($(HOST_OS),darwin)
   QEMU_SYSTEM_LDLIBS += -Wl,-framework,Cocoa,-framework,QTKit,-framework,CoreVideo
   ifneq ($(filter 10.7 10.7.%,$(DARWIN_VERSION)),)
-    # Lion needs to be forced to link dylib to avoid problems
-    # with the dynamic function lookups in SDL 1.2
-    QEMU_SYSTEM_LDLIBS += /usr/lib/dylib1.o
+    # Lion/XCode4 needs to be explicitly told the dynamic library
+    # lookup symbols in the precompiled libSDL are resolved at
+    # runtime
+    QEMU_SYSTEM_LDLIBS += -undefined dynamic_lookup
   endif
 endif
 
