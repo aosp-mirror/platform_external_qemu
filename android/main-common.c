@@ -806,12 +806,15 @@ AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
                 exit(2);
             }
 
-            android_build_root = path_parent( out, 4 );
-            if (android_build_root == NULL || !path_exists(android_build_root)) {
-                derror("Can't find the Android build root from '%s'\n"
-                    "Please check the definition of the ANDROID_PRODUCT_OUT variable.\n"
-                    "It should point to your product-specific build output directory.\n",
-                    out );
+            android_build_root = getenv("ANDROID_BUILD_TOP");
+            if (android_build_root == NULL || android_build_root[0] == 0)
+                break;
+
+            if (!path_exists(android_build_root)) {
+                derror("Can't find the Android build root '%s'\n"
+                    "Please check the definition of the ANDROID_BUILD_TOP variable.\n"
+                    "It should point to the root of your source tree.\n",
+                    android_build_root );
                 exit(2);
             }
             android_build_out = out;
