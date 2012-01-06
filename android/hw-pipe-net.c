@@ -30,7 +30,7 @@
 /* Implement the OpenGL fast-pipe */
 
 /* Set to 1 or 2 for debug traces */
-#define  DEBUG  1
+// #define  DEBUG  1
 
 #if DEBUG >= 1
 #  define D(...)   printf(__VA_ARGS__), printf("\n")
