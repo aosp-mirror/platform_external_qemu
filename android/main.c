@@ -1168,9 +1168,9 @@ int main(int argc, char **argv)
         }
     }
 
+    int webcam_num = 0;
     if (opts->webcam != NULL) {
         ParamList*  pl = opts->webcam;
-        int webcam_num = 0;
         for ( ; pl != NULL; pl = pl->next ) {
             char webcam_name[64];
             char webcam_dir[16];
@@ -1227,6 +1227,18 @@ int main(int argc, char **argv)
             webcam_num++;
         }
         hw->hw_webcam_count = webcam_num;
+    }
+
+    /* Command line options related to webcam, and fake camera should
+     * override camera emulation flag, set in AVD. */
+    if (hw->hw_camera == 0) {
+        /* Camera emulation is disabled in AVD. Lets see if command line enables
+         * webcam, or fake camera emulation. */
+        if (webcam_num != 0 ||
+            (opts->fake_camera && strcmp(hw->hw_fakeCamera, "off") != 0)) {
+            /* Command line parameters enable camera emulation. */
+            hw->hw_camera = 1;
+        }
     }
 
     /* physical memory is now in hw->hw_ramSize */
