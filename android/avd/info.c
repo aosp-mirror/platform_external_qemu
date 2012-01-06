@@ -898,7 +898,7 @@ avdInfo_getKernelPath( AvdInfo*  i )
         }
         AFREE(abi);
 
-        p = bufprint(temp, end, "%s/prebuilt/android-%s/kernel/kernel-qemu%s",
+        p = bufprint(temp, end, "%s/prebuilts/qemu-kernel/%s/kernel-qemu%s",
                      i->androidBuildRoot, i->targetArch, suffix);
         if (p >= end || !path_exists(temp)) {
             derror("bad workspace: cannot find prebuilt kernel in: %s", temp);
