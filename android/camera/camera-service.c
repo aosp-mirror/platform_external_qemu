@@ -438,6 +438,12 @@ _camera_service_init(CameraServiceDesc* csd)
     memset(ci, 0, sizeof(CameraInfo) * MAX_CAMERA);
     memset(csd->camera_info, 0, sizeof(CameraInfo) * MAX_CAMERA);
     csd->camera_count = 0;
+
+    if (android_hw->hw_camera == 0) {
+        /* Camera emulation is disabled. Skip enumeration of webcameras. */
+        return;
+    }
+
     connected_cnt = enumerate_camera_devices(ci, MAX_CAMERA);
     if (connected_cnt <= 0) {
         /* Nothing is connected - nothing to emulate. */
