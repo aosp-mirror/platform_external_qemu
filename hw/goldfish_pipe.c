@@ -284,7 +284,7 @@ pipe_load( PipeDevice* dev, QEMUFile* file )
     }
 
     if (pipe->funcs->load) {
-        pipe->opaque = pipe->funcs->load(pipe, service->opaque, pipe->args, file);
+        pipe->opaque = pipe->funcs->load(pipe, service ? service->opaque : NULL, pipe->args, file);
         if (pipe->opaque == NULL) {
             AFREE(pipe);
             return NULL;
