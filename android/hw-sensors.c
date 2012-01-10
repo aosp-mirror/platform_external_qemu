@@ -25,6 +25,7 @@
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)  VERBOSE_PRINT(sensors,__VA_ARGS__)
+#define  V(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 
 /* define T_ACTIVE to 1 to debug transport communications */
 #define  T_ACTIVE  0
@@ -664,7 +665,8 @@ _hwSensors_init( HwSensors*  h )
      * sensor emulation. */
     h->sensors_port = sensors_port_create(h);
     if (h->sensors_port == NULL) {
-        W("Unable to create sensors port: %s", strerror(errno));
+        V("Realistic sensor emulation is not available, since the remote controller is not accessible:\n %s",
+          strerror(errno));
     }
 
     h->service = qemud_service_register("sensors", 0, h, _hwSensors_connect,
