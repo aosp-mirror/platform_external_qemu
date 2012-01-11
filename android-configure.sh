@@ -119,11 +119,7 @@ fi
 # On Linux, try to use our 32-bit prebuilt toolchain to generate binaries
 # that are compatible with Ubuntu 8.04
 if [ -z "$CC" -a -z "$OPTION_CC" -a "$HOST_OS" = linux -a "$OPTION_TRY_64" != "yes" ] ; then
-    if [ -d `dirname $0`/../../prebuilts/gcc/linux-x86/host/i686-linux-glibc2.7-4.4.3/bin/i686-linux-gcc] ; then
-      HOST_CC=`dirname $0`/../../prebuilts/gcc/linux-x86/host/i686-linux-glibc2.7-4.4.3/bin/i686-linux-gcc
-      HOST_CC=`dirname $0`/../../prebuilt/linux-x86/toolchain/i686-linux-glibc2.7-4.4.3/bin/i686-linux-gcc
-    else
-    fi
+    HOST_CC=`dirname $0`/../../prebuilt/linux-x86/toolchain/i686-linux-glibc2.7-4.4.3/bin/i686-linux-gcc
     if [ -f "$HOST_CC" ] ; then
         echo "Using prebuilt 32-bit toolchain: $HOST_CC"
         CC="$HOST_CC"
