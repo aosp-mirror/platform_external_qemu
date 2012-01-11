@@ -243,6 +243,15 @@ char*        avdInfo_getTracePath( AvdInfo*  i, const char*  traceName );
  */
 const char*  avdInfo_getCoreHwIniPath( AvdInfo* i );
 
+/* Returns mode in which ADB daemon running in the guest communicates with the
+ * emulator
+ * Return:
+ *  0 - ADBD communicates with the emulator via forwarded TCP port 5555 (a
+ *      "legacy" mode).
+ *  1 - ADBD communicates with the emulator via 'adb' QEMUD service.
+ */
+int          avdInfo_getAdbdCommunicationMode( AvdInfo* i );
+
 /* */
 
 #endif /* ANDROID_AVD_INFO_H */

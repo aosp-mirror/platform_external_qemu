@@ -23,6 +23,8 @@
 #include "android/utils/path.h"
 #include "android/utils/system.h"
 #include "android/utils/bufprint.h"
+#include "android/adb-server.h"
+#include "android/adb-qemud.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -252,6 +254,8 @@ void  android_emulation_setup( void )
         exit(1);
     }
 
+    int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
+
     if (android_op_ports) {
         char* comma_location;
         char* end;
@@ -276,9 +280,16 @@ void  android_emulation_setup( void )
 
         // Set up redirect from host to guest system. adbd on the guest listens
         // on 5555.
-        slirp_redir( 0, adb_port, guest_ip, 5555 );
+        if (legacy_adb) {
+            slirp_redir( 0, adb_port, guest_ip, 5555 );
+        } else {
+            adb_server_init(adb_port);
+            android_adb_service_init();
+        }
         if ( control_console_start( console_port ) < 0 ) {
-            slirp_unredir( 0, adb_port );
+            if (legacy_adb) {
+                slirp_unredir( 0, adb_port );
+            }
         }
 
         base_port = console_port;
@@ -304,12 +315,20 @@ void  android_emulation_setup( void )
         for ( ; tries > 0; tries--, base_port += 2 ) {
 
             /* setup first redirection for ADB, the Android Debug Bridge */
-            if ( slirp_redir( 0, base_port+1, guest_ip, 5555 ) < 0 )
-                continue;
+            if (legacy_adb) {
+                if ( slirp_redir( 0, base_port+1, guest_ip, 5555 ) < 0 )
+                    continue;
+            } else {
+                if (adb_server_init(base_port+1))
+                    continue;
+                android_adb_service_init();
+            }
 
             /* setup second redirection for the emulator console */
             if ( control_console_start( base_port ) < 0 ) {
-                slirp_unredir( 0, base_port+1 );
+                if (legacy_adb) {
+                    slirp_unredir( 0, base_port+1 );
+                }
                 continue;
             }
 
