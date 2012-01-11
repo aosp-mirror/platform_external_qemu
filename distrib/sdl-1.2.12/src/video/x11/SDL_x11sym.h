@@ -70,6 +70,7 @@ SDL_X11_SYM(Status,XGetWindowAttributes,(Display* a,Window b,XWindowAttributes* 
 SDL_X11_SYM(int,XGrabKeyboard,(Display* a,Window b,Bool c,int d,int e,Time f),(a,b,c,d,e,f),return)
 SDL_X11_SYM(int,XGrabPointer,(Display* a,Window b,Bool c,unsigned int d,int e,int f,Window g,Cursor h,Time i),(a,b,c,d,e,f,g,h,i),return)
 SDL_X11_SYM(Status,XIconifyWindow,(Display* a,Window b,int c),(a,b,c),return)
+SDL_X11_SYM(Status,XInitThreads,(void),(),return)
 SDL_X11_SYM(int,XInstallColormap,(Display* a,Colormap b),(a,b),return)
 SDL_X11_SYM(KeyCode,XKeysymToKeycode,(Display* a,KeySym b),(a,b),return)
 SDL_X11_SYM(Atom,XInternAtom,(Display* a,_Xconst char* b,Bool c),(a,b,c),return)
