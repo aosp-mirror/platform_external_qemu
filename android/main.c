@@ -1308,7 +1308,11 @@ int main(int argc, char **argv)
              coreHwIniPath = tempfile_path(tempIni);
         }
 
-        if (iniFile_saveToFile(hwIni, coreHwIniPath) < 0) {
+        /* While saving HW config, ignore valueless entries. This will not break
+         * anything, but will significantly simplify comparing the current HW
+         * config with the one that has been associated with a snapshot (in case
+         * VM starts from a snapshot for this instance of emulator). */
+        if (iniFile_saveToFileClean(hwIni, coreHwIniPath) < 0) {
             derror("Could not write hardware.ini to %s: %s", coreHwIniPath, strerror(errno));
             exit(2);
         }
