@@ -208,6 +208,8 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "android/core-init-utils.h"
 #include "android/audio-test.h"
 
+#include "android/snaphost-android.h"
+
 #ifdef CONFIG_STANDALONE_CORE
 /* Verbose value used by the standalone emulator core (without UI) */
 unsigned long   android_verbose;
@@ -234,8 +236,6 @@ extern void  android_emulator_set_base_port(int  port);
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"
 #endif
-
-
 
 #define DEFAULT_RAM_SIZE 128
 
@@ -2025,6 +2025,10 @@ static void main_loop(void)
                 no_shutdown = 0;
             } else {
                 if (savevm_on_exit != NULL) {
+                  /* Prior to saving VM to the snapshot file, save HW config
+                   * settings for that VM, so we can match them when VM gets
+                   * loaded from the snapshot. */
+                  snaphost_save_config(savevm_on_exit);
                   do_savevm(cur_mon, savevm_on_exit);
                 }
                 break;
@@ -3511,6 +3515,12 @@ int main(int argc, char **argv, char **envp)
     androidHwConfig_init(android_hw, 0);
     androidHwConfig_read(android_hw, hw_ini);
 
+    /* If we're loading VM from a snapshot, make sure that the current HW config
+     * matches the one with which the VM has been saved. */
+    if (loadvm && *loadvm && !snaphost_match_configs(hw_ini, loadvm)) {
+        exit(0);
+    }
+
     iniFile_free(hw_ini);
 
     {
@@ -4228,7 +4238,6 @@ int main(int argc, char **argv, char **envp)
         stralloc_reset(kernel_params);
         stralloc_reset(kernel_config);
     }
-
 
     for (env = first_cpu; env != NULL; env = env->next_cpu) {
         for (i = 0; i < nb_numa_nodes; i++) {
