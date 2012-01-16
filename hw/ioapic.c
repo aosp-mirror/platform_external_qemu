@@ -28,7 +28,7 @@
 
 //#define DEBUG_IOAPIC
 
-#define IOAPIC_NUM_PINS			0x18
+#define IOAPIC_NUM_PINS			0x30
 #define IOAPIC_LVT_MASKED 		(1<<16)
 
 #define IOAPIC_TRIGGER_EDGE		0
@@ -43,11 +43,15 @@
 #define IOAPIC_DM_SIPI			0x5
 #define IOAPIC_DM_EXTINT		0x7
 
+/* Take care of this version whenever IOAPICState changed */
+#define IOAPIC_STATE_SAVE_VERSION 0x2
+
 struct IOAPICState {
     uint8_t id;
     uint8_t ioregsel;
+    uint8_t pinnum;
 
-    uint32_t irr;
+    uint64_t irr;
     uint64_t ioredtbl[IOAPIC_NUM_PINS];
 };
 
@@ -57,14 +61,14 @@ static void ioapic_service(IOAPICState *s)
     uint8_t trig_mode;
     uint8_t vector;
     uint8_t delivery_mode;
-    uint32_t mask;
+    uint64_t mask = 0;
     uint64_t entry;
     uint8_t dest;
     uint8_t dest_mode;
     uint8_t polarity;
 
     for (i = 0; i < IOAPIC_NUM_PINS; i++) {
-        mask = 1 << i;
+        mask = 1ULL << i;
         if (s->irr & mask) {
             entry = s->ioredtbl[i];
             if (!(entry & IOAPIC_LVT_MASKED)) {
@@ -99,7 +103,7 @@ void ioapic_set_irq(void *opaque, int vector, int level)
         vector = 2;
 
     if (vector >= 0 && vector < IOAPIC_NUM_PINS) {
-        uint32_t mask = 1 << vector;
+        uint64_t mask = 1ULL << vector;
         uint64_t entry = s->ioredtbl[vector];
 
         if ((entry >> 15) & 1) {
@@ -199,7 +203,9 @@ static void ioapic_save(QEMUFile *f, void *opaque)
 
     qemu_put_8s(f, &s->id);
     qemu_put_8s(f, &s->ioregsel);
-    for (i = 0; i < IOAPIC_NUM_PINS; i++) {
+    qemu_put_8s(f, &s->pinnum);
+    qemu_put_be64s(f, &s->irr);
+    for (i = 0; i < s->pinnum; i++) {
         qemu_put_be64s(f, &s->ioredtbl[i]);
     }
 }
@@ -207,14 +213,25 @@ static void ioapic_save(QEMUFile *f, void *opaque)
 static int ioapic_load(QEMUFile *f, void *opaque, int version_id)
 {
     IOAPICState *s = opaque;
+    int pinnum;
     int i;
 
-    if (version_id != 1)
+    if (version_id > IOAPIC_STATE_SAVE_VERSION)
         return -EINVAL;
 
     qemu_get_8s(f, &s->id);
     qemu_get_8s(f, &s->ioregsel);
-    for (i = 0; i < IOAPIC_NUM_PINS; i++) {
+    if (version_id == 1)
+    {
+        pinnum = 24;
+        s->irr = 0;
+    }
+    else
+    {
+        qemu_get_8s(f, &s->pinnum);
+        qemu_get_be64s(f, &s->irr);
+    }
+    for (i = 0; i < s->pinnum; i++) {
         qemu_get_be64s(f, &s->ioredtbl[i]);
     }
     return 0;
@@ -226,6 +243,7 @@ static void ioapic_reset(void *opaque)
     int i;
 
     memset(s, 0, sizeof(*s));
+    s->pinnum = IOAPIC_NUM_PINS;
     for(i = 0; i < IOAPIC_NUM_PINS; i++)
         s->ioredtbl[i] = 1 << 16; /* mask LVT */
 }
@@ -254,7 +272,7 @@ IOAPICState *ioapic_init(void)
                                        ioapic_mem_write, s);
     cpu_register_physical_memory(0xfec00000, 0x1000, io_memory);
 
-    register_savevm("ioapic", 0, 1, ioapic_save, ioapic_load, s);
+    register_savevm("ioapic", 0, IOAPIC_STATE_SAVE_VERSION, ioapic_save, ioapic_load, s);
     qemu_register_reset(ioapic_reset, 0, s);
 
     return s;
