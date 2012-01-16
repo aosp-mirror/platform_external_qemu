@@ -56,8 +56,13 @@ void events_dev_init(uint32_t base, qemu_irq irq);
 void nand_dev_init(uint32_t base);
 
 #ifdef TARGET_I386
-/* Maximum IRQ number available for a device on x86. */
-#define GFD_MAX_IRQ      16
+/*
+ * Maximum IRQ number available for a device on x86.
+ * It equals to IOAPIC pin number minus non-goldfish
+ * device, timer, i8042 * 2, cascade, PCI interrupt
+ * should be ok since they can be shared
+*/
+#define GFD_MAX_IRQ      (48 - 4)
 /* IRQ reserved for keyboard. */
 #define GFD_KBD_IRQ      1
 /* IRQ reserved for mouse. */
