@@ -28,18 +28,9 @@ enum {
     PAGE_NAME       = 0x00000,
     PAGE_EVBITS     = 0x10000,
     PAGE_ABSDATA    = 0x20000 | EV_ABS,
+    PAGE_STATUS     = 0x40000,
 };
 
-/* These corresponds to the state of the driver.
- * Unfortunately, we have to buffer events coming
- * from the UI, since the kernel driver is not
- * capable of receiving them until XXXXXX
- */
-enum {
-    STATE_INIT = 0,  /* The device is initialized */
-    STATE_BUFFERED,  /* Events have been buffered, but no IRQ raised yet */
-    STATE_LIVE       /* Events can be sent directly to the kernel */
-};
 
 /* NOTE: The ev_bits arrays are used to indicate to the kernel
  *       which events can be sent by the emulated hardware.
@@ -55,6 +46,12 @@ typedef struct
     unsigned events[MAX_EVENTS];
     unsigned first;
     unsigned last;
+
+    /* For device and driver status maintainance.
+     * bit 0~1: internal interrupt buffer, Read get 0 and write has no effect
+     * bit 2~4: initialization status, RW
+     * bit 5: event pending status, RO
+     * bit 6~31: Reserved, Read get 0 and write has no effect */
     unsigned state;
 
     const char *name;
@@ -67,6 +64,83 @@ typedef struct
     int32_t *abs_info;
     size_t abs_info_count;
 } events_state;
+
+/* These corresponds to the state of the driver.
+ * Unfortunately, we have to buffer events coming
+ * from the UI, since the kernel driver is not
+ * capable of receiving them until XXXXXX
+ */
+enum {
+    STATE_INIT = 0,  /* The device is initialized */
+    STATE_BUFFERED,  /* Events have been buffered, but no IRQ raised yet */
+    STATE_LIVE       /* Events can be sent directly to the kernel */
+};
+
+/*
+ * The device is uninited when start
+ * When driver_probe happens in kernel, it's marked as initiating
+ * After everything is done in kernel, it's marked as initiated to
+ * indicate to device that it's ready to accept interrupt
+ * Device will inject interrupt only after driver initiated done
+ *
+ * To keep backward compatibility, if driver access register without
+ * update the status, it means legacy driver and we will inject interrupt
+ * as current method, i.e. when get PAGE_ABSDATA's length
+ */
+#define REG_STATUS_INITMASK     (0x1c)
+#define REG_STATUS_UNINITIATED  (0x0)
+#define REG_STATUS_INITIATING   (0x4)
+#define REG_STATUS_INITIATED    (0x8)
+
+#define REG_STATUS_READ_MASK     (0x3c)
+#define REG_STATUS_WRITE_MASK    (0x1c)
+
+#define REG_STATUS_INTERRUPT    (0x3)
+/*
+ * Indicate event pending
+ */
+#define REG_STATUS_EVENTPENDING (0x20)
+
+/* return 1 if driver can accept interrupt now */
+static inline int inject_interrupt_ready(events_state *s)
+{
+    if( (s->state & REG_STATUS_INTERRUPT) == STATE_LIVE)
+        return 1;
+    return 0;
+}
+
+/* return 1 if interrupt is buffered */
+static inline int interrupt_buffering(events_state *s)
+{
+    if( (s->state & REG_STATUS_INTERRUPT) == STATE_BUFFERED)
+        return 1;
+    return 0;
+}
+
+static inline void update_inject_status(events_state *s, int status)
+{
+    s->state = (s->state & ~REG_STATUS_INTERRUPT) |
+                (status & REG_STATUS_INTERRUPT);
+}
+
+static void events_update_status(events_state *s, int offset, uint32_t val)
+{
+    if (s->page != PAGE_STATUS)
+        return;
+    if (offset > sizeof(uint32_t))
+        return;
+
+    s->state = (s->state & ~REG_STATUS_WRITE_MASK) |
+                (val & REG_STATUS_WRITE_MASK);
+    if ( (val & REG_STATUS_INITMASK) == REG_STATUS_INITIATED)
+    {
+        /* The driver have finish the initialization */
+        if (interrupt_buffering(s))
+            qemu_irq_raise(s->irq);
+        update_inject_status(s, STATE_LIVE);
+    }
+    return;
+}
 
 /* modify this each time you change the events_device structure. you
  * will also need to upadte events_state_load and events_state_save
@@ -115,11 +189,10 @@ static void enqueue_event(events_state *s, unsigned int type, unsigned int code,
     }
 
     if(s->first == s->last) {
-	if (s->state == STATE_LIVE)
-	  qemu_irq_raise(s->irq);
-	else {
-	  s->state = STATE_BUFFERED;
-	}
+        if (inject_interrupt_ready(s))
+            qemu_irq_raise(s->irq);
+        else
+            update_inject_status(s, STATE_BUFFERED);
     }
 
     //fprintf(stderr, "##KBD: type=%d code=%d value=%d\n", type, code, value);
@@ -130,6 +203,8 @@ static void enqueue_event(events_state *s, unsigned int type, unsigned int code,
     s->last = (s->last + 1) & (MAX_EVENTS-1);
     s->events[s->last] = value;
     s->last = (s->last + 1) & (MAX_EVENTS-1);
+
+    s->state |= REG_STATUS_EVENTPENDING;
 }
 
 static unsigned dequeue_event(events_state *s)
@@ -146,6 +221,7 @@ static unsigned dequeue_event(events_state *s)
 
     if(s->first == s->last) {
         qemu_irq_lower(s->irq);
+        s->state &= ~REG_STATUS_EVENTPENDING;
     }
 #ifdef TARGET_I386
     /*
@@ -177,6 +253,8 @@ static int get_page_len(events_state *s)
         return s->ev_bits[page - PAGE_EVBITS].len;
     if (page == PAGE_ABSDATA)
         return s->abs_info_count * sizeof(s->abs_info[0]);
+    if (page == PAGE_STATUS)
+        return sizeof(uint32_t);
     return 0;
 }
 
@@ -194,7 +272,24 @@ static int get_page_data(events_state *s, int offset)
     if (page == PAGE_ABSDATA) {
         return s->abs_info[offset / sizeof(s->abs_info[0])];
     }
+    if (page == PAGE_STATUS)
+    {
+        return s->state & REG_STATUS_READ_MASK;
+    }
     return 0;
+}
+
+static inline void catch_interrupt(events_state *s, int offset)
+{
+    if (offset == REG_LEN && s->page == PAGE_ABSDATA) {
+        if ((s->state & REG_STATUS_INITMASK) == REG_STATUS_UNINITIATED)
+        {
+            /* The driver is an legacy driver */
+            if (interrupt_buffering(s))
+                qemu_irq_raise(s->irq);
+            update_inject_status(s, STATE_LIVE);
+        }
+    }
 }
 
 static uint32_t events_read(void *x, target_phys_addr_t off)
@@ -208,12 +303,8 @@ static uint32_t events_read(void *x, target_phys_addr_t off)
      * becomes confused and ignores all input events
      * as soon as one was buffered!
      */
-    if (offset == REG_LEN && s->page == PAGE_ABSDATA) {
-	if (s->state == STATE_BUFFERED)
-	  qemu_irq_raise(s->irq);
-	s->state = STATE_LIVE;
-    }
 
+    catch_interrupt(s, off);
     if (offset == REG_READ)
         return dequeue_event(s);
     else if (offset == REG_LEN)
@@ -229,6 +320,8 @@ static void events_write(void *x, target_phys_addr_t off, uint32_t val)
     int offset = off; // - s->base;
     if (offset == REG_SET_PAGE)
         s->page = val;
+    else if (offset >= REG_DATA && (s->page == PAGE_STATUS))
+        events_update_status(s, off - REG_DATA, val);
 }
 
 static CPUReadMemoryFunc *events_readfn[] = {
