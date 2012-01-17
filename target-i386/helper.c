@@ -28,6 +28,7 @@
 #include "exec-all.h"
 #include "qemu-common.h"
 #include "kvm.h"
+#include "hax.h"
 
 //#define DEBUG_MMU
 
@@ -661,6 +662,11 @@ void cpu_dump_state(CPUState *env, FILE *f,
 
     if (kvm_enabled())
         kvm_arch_get_registers(env);
+
+#ifdef CONFIG_HAX
+    if (hax_enabled())
+        hax_arch_get_registers(env);
+#endif
 
     eflags = env->eflags;
 #ifdef TARGET_X86_64
