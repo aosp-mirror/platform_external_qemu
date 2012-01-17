@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAACDX///+w\u003d",
+        "filename": "hw/goldfish_events_device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2012-01-17T17:48:15Z",
+      "side": 1,
+      "message": "*ouch* this isn\u0027t going to work well. See below",
+      "revId": "d3829924be0bed9306cde920882e8dbdda49b660",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAACDX///+s\u003d",
+        "filename": "hw/goldfish_events_device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2012-01-17T17:48:15Z",
+      "side": 1,
+      "message": "There is a huge problem here: this change will break snapshots, i.e. the new emulator will not be able to properly load all snapshots saved by the old version.\n\nI think you should do that slightly differently. May I suggest the following route:\n\n1/ rename the \"state\" variable in the original structure as \"old_state\". Also add a *new* variable named \"state\", or even something entirely different at the end of the structure (keep the initial fields the same to simplify the snapshot load function)/\n\n2/ bump EVENTS_STATE_SAVE_VERSION to 3\n\n3/ do not change the events_state_fields definition (except renaming \u0027state\u0027 into \u0027old_state\u0027). But in events_device_save, add a line to save the new \"state\" after the initial fields.\n\n4/ in events_state_load, load the structure through events_state_fields. If version \u003d\u003d 2, translate the \u0027old_state\u0027 value into a value that corresponds to your new \u0027state\u0027 variable. If version \u003d\u003d 3, load the new \u0027state\u0027 value directly from the file.\n\n5/ Please, please add a technical note on top of the file as a comment that explains what\u0027s happening here. The less surprises the better :-)",
+      "revId": "d3829924be0bed9306cde920882e8dbdda49b660",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
