@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAACH3////0\u003d",
+        "filename": "hw/ioapic.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1006404
+      },
+      "writtenOn": "2012-01-18T15:38:30Z",
+      "side": 1,
+      "message": "BTW, for why the IRR is not saved in ioapic_load(), I checked upstream qemu and seems it is save restored at latest version now. I will have a check in more details later.",
+      "parentUuid": "AAACDX////A\u003d",
+      "revId": "979b96ed3be168a52a869100c1194fbf19ac21bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAACDX///+8\u003d",
         "filename": "hw/ioapic.c",
         "patchSetId": 1
