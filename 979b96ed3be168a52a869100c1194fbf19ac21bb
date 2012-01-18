@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAACH3////8\u003d",
+        "filename": "hw/ioapic.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1006404
+      },
+      "writtenOn": "2012-01-18T15:25:37Z",
+      "side": 1,
+      "message": "I\u0027m not sure if it\u0027s ok that we have (32 -4 ) IRQ number support in x86, the 32 is the IRQ pin number, minus 4 for timer, i8042 etc. If that\u0027s ok, then I will update the patch to only increase it to 32. Then it will be much simpler",
+      "parentUuid": "AAACDX////A\u003d",
+      "revId": "979b96ed3be168a52a869100c1194fbf19ac21bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAACDX///+8\u003d",
         "filename": "hw/ioapic.c",
         "patchSetId": 1
