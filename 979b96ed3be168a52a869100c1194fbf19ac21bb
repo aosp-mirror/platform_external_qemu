@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAACDX////A\u003d",
+        "filename": "hw/ioapic.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2012-01-18T15:12:09Z",
+      "side": 1,
+      "message": "Important note: This changes the size of IOAPICState defined below and thus breaks snapshots. What I mean is that after this change is applied, the emulator will no longer be able to load snapshots that were savec with a previous version of it.\n\nI\u0027m not sure this is important because x86 emulation support is still not official in the Android SDK, but I wanted to note it.\n\nThe alternative is to bump the savevm version number, and update the ioapic_load() function to recognize the old version number (and only load 24 values, instead of 48).",
+      "revId": "979b96ed3be168a52a869100c1194fbf19ac21bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAACDX///+8\u003d",
+        "filename": "hw/ioapic.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2012-01-18T15:12:09Z",
+      "side": 1,
+      "message": "I\u0027m curious to know why this field is never saved/restored by the snapshotting functions below. It\u0027s not clear to me if this is a bug or not necessary though.",
+      "revId": "979b96ed3be168a52a869100c1194fbf19ac21bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
