@@ -33,6 +33,24 @@
       "revId": "d3829924be0bed9306cde920882e8dbdda49b660",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAACCX///3s\u003d",
+        "filename": "hw/goldfish_events_device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1006404
+      },
+      "writtenOn": "2012-01-18T00:41:56Z",
+      "side": 1,
+      "message": "Sure, I will do it this way.",
+      "parentUuid": "AAACDX///+s\u003d",
+      "revId": "d3829924be0bed9306cde920882e8dbdda49b660",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
