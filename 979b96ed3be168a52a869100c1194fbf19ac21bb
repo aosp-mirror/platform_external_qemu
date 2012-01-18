@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "AAACFH////Y\u003d",
+        "filename": "hw/ioapic.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1001414
+      },
+      "writtenOn": "2012-01-18T20:30:57Z",
+      "side": 1,
+      "message": "I think it\u0027s fine this breaks existing snapshots. Vladimir is working on detecting obsolete snapshots and we should make sure this gets detected.",
+      "parentUuid": "AAACDX////A\u003d",
+      "revId": "979b96ed3be168a52a869100c1194fbf19ac21bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAACDX///+8\u003d",
         "filename": "hw/ioapic.c",
         "patchSetId": 1
