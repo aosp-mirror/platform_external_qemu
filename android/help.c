@@ -114,9 +114,9 @@ help_build_images( stralloc_t*  out )
     "    - kernel-qemu  : the emulator-specific Linux kernel image.\n\n"
 
     "  If the kernel image is not found in the out directory, then it is searched\n"
-    "  in <build-root>/prebuilt/android-arm/kernel/.\n\n"
+    "  in <build-root>/prebuilts/qemu-kernel/.\n\n"
 
-    "  Skins will be looked in <build-root>/sdk/emulator/skins/\n\n"
+    "  Skins will be looked in <build-root>/development/tools/emulator/skins/\n\n"
 
     "  You can use the -sysdir, -system, -kernel, -ramdisk, -datadir, -data options\n"
     "  to specify different search directories or specific image files. You can\n"
