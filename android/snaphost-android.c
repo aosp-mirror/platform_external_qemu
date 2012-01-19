@@ -167,6 +167,14 @@ snaphost_save_config(const char* name)
     }
     androidHwConfig_write(android_hw, hwcfg_bkp);
 
+    /* Invalidate data partition initialization path in the backup copy of HW
+     * config. The reason we need to do this is that we want the system loading
+     * from the snapshot to be in sync with the data partition the snapshot was
+     * saved for. For that we must disalow overwritting it on snapshot load. In
+     * other words, we should allow snapshot loading only on condition
+     * that disk.dataPartition.initPath is empty. */
+    iniFile_setValue(hwcfg_bkp, "disk.dataPartition.initPath", "");
+
     /* Save backup file. */
     if (!iniFile_saveToFileClean(hwcfg_bkp, bkp_path)) {
         D("HW config has been backed up to '%s'", bkp_path);
