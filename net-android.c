@@ -1,7 +1,7 @@
 /*
  * QEMU System Emulator
  *
- * Copyright (c) 2003-2008 Fabrice Bellard
+ * Copyright (c) 2003-2008, 2012 Fabrice Bellard
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -2671,8 +2671,8 @@ android_parse_network_speed(const char*  speed)
         }
     }
 
-    if (android_modem)
-        amodem_set_data_network_type( android_modem,
+    if (android_modem[0])
+        amodem_set_data_network_type( android_modem[0],
                                       android_parse_network_type(speed) );
     return 0;
 }
