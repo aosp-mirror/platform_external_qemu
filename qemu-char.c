@@ -574,7 +574,7 @@ int send_all(int fd, const void *_buf, int len1)
 static CharDriverState *qemu_chr_open_android_modem(QemuOpts* opts)
 {
     CharDriverState*  cs;
-    qemu_chr_open_charpipe( &cs, &android_modem_cs );
+    qemu_chr_open_charpipe( &cs, &android_modem_cs[0] );
     return cs;
 }
 static CharDriverState *qemu_chr_open_android_gps(QemuOpts* opts)

@@ -16,7 +16,7 @@
 
 typedef struct ASimCardRec_*    ASimCard;
 
-extern ASimCard  asimcard_create( int from_port );
+extern ASimCard  asimcard_create( int from_port, int index );
 extern void      asimcard_destroy( ASimCard  sim );
 
 typedef enum {
