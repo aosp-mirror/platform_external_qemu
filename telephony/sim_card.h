@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2008, 2012 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -16,7 +16,7 @@
 
 typedef struct ASimCardRec_*    ASimCard;
 
-extern ASimCard  asimcard_create( int from_port );
+extern ASimCard  asimcard_create( int from_port, int index );
 extern void      asimcard_destroy( ASimCard  sim );
 
 typedef enum {

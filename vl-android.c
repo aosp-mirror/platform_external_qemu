@@ -1,7 +1,7 @@
 /*
  * QEMU System Emulator
  *
- * Copyright (c) 2003-2008 Fabrice Bellard
+ * Copyright (c) 2003-2008, 2012 Fabrice Bellard
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -3732,8 +3732,15 @@ int main(int argc, char **argv, char **envp)
         }
         android_qemud_set_channel( ANDROID_QEMUD_GSM, cs);
     } else if (android_hw->hw_gsmModem != 0 ) {
-        if ( android_qemud_get_channel( ANDROID_QEMUD_GSM, &android_modem_cs ) < 0 ) {
+        if ( android_qemud_get_channel( ANDROID_QEMUD_GSM, &android_modem_cs[0] ) < 0 ) {
             PANIC("could not initialize qemud 'gsm' channel");
+        } else {
+            fprintf(stdout,"gsm connected");
+        }
+        if ( android_qemud_get_channel( "gsm1", &android_modem_cs[1] ) < 0 ) {
+            PANIC("could not initialize qemud 'gsm1' channel");
+        } else {
+            fprintf(stdout, "gsm1 connected");
         }
     }
 
