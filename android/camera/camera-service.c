@@ -66,172 +66,12 @@ static CameraServiceDesc    _camera_service_desc;
  * Helper routines
  *******************************************************************************/
 
-/* A strict 'int' version of the 'strtol'.
- * This routine is implemented on top of the standard 'strtol' for 32/64 bit
- * portability.
- */
-static int
-strtoi(const char *nptr, char **endptr, int base)
-{
-    long val;
-
-    errno = 0;
-    val = strtol(nptr, endptr, base);
-    if (errno) {
-        return (val == LONG_MAX) ? INT_MAX : INT_MIN;
-    } else {
-        if (val == (int)val) {
-            return (int)val;
-        } else {
-            errno = ERANGE;
-            return val > 0 ? INT_MAX : INT_MIN;
-        }
-    }
-}
-
-/* Gets a parameter value out of the parameter string.
- * All parameters that are passed to the camera service are formatted as such:
- *      "<name1>=<value1> <name2>=<value2> ... <nameN>=<valueN>"
- * I.e.:
- *  - Every parameter must have a name, and a value.
- *  - Name and value must be separated with '='.
- *  - No spaces are allowed around '=' separating name and value.
- *  - Parameters must be separated with a single ' ' character.
- *  - No '=' character is allowed in name and in value.
- * Param:
- *  params - String, containing the parameters.
- *  name - Parameter name.
- *  value - Upon success contains value for the given parameter.
- *  val_size - Size of the 'value' string buffer.
- * Return:
- *  0 on success, -1 if requested parameter is not found, or (a positive) number
- *  of bytes, required to make a copy of the parameter's value if 'value' string
- *  was too small to contain it.
- */
-static int
-_get_param_value(const char* params, const char* name, char* value, int val_size)
-{
-    const char* val_end;
-    int len = strlen(name);
-    const char* par_end = params + strlen(params);
-    const char* par_start = strstr(params, name);
-
-    /* Search for 'name=' */
-    while (par_start != NULL) {
-        /* Make sure that we're within the parameters buffer. */
-        if ((par_end - par_start) < len) {
-            par_start = NULL;
-            break;
-        }
-        /* Make sure that par_start starts at the beginning of <name>, and only
-         * then check for '=' value separator. */
-        if ((par_start == params || (*(par_start - 1) == ' ')) &&
-                par_start[len] == '=') {
-            break;
-        }
-        /* False positive. Move on... */
-        par_start = strstr(par_start + 1, name);
-    }
-    if (par_start == NULL) {
-        return -1;
-    }
-
-    /* Advance past 'name=', and calculate value's string length. */
-    par_start += len + 1;
-    val_end = strchr(par_start, ' ');
-    if (val_end == NULL) {
-        val_end = par_start + strlen(par_start);
-    }
-    len = val_end - par_start;
-
-    /* Check if fits... */
-    if ((len + 1) <= val_size) {
-        memcpy(value, par_start, len);
-        value[len] = '\0';
-        return 0;
-    } else {
-        return len + 1;
-    }
-}
-
-/* Gets a parameter value out of the parameter string.
- * This routine is similar to _get_param_value, except it will always allocate
- * a string buffer for the value.
- * Param:
- *  params - String, containing the parameters.
- *  name - Parameter name.
- *  value - Upon success contains an allocated string containint the value for
- *      the given parameter. The caller is responsible for freeing the buffer
- *      returned in this parameter on success.
- * Return:
- *  0 on success, -1 if requested parameter is not found, or -2 on
- *  memory failure.
- */
-static int
-_get_param_value_alloc(const char* params, const char* name, char** value)
-{
-    char tmp;
-    int res;
-
-    /* Calculate size of string buffer required for the value. */
-    const int val_size = _get_param_value(params, name, &tmp, 0);
-    if (val_size < 0) {
-        *value = NULL;
-        return val_size;
-    }
-
-    /* Allocate string buffer, and retrieve the value. */
-    *value = (char*)malloc(val_size);
-    if (*value == NULL) {
-        E("%s: Unable to allocated %d bytes for string buffer.",
-          __FUNCTION__, val_size);
-        return -2;
-    }
-    res = _get_param_value(params, name, *value, val_size);
-    if (res) {
-        E("%s: Unable to retrieve value into allocated buffer.", __FUNCTION__);
-        free(*value);
-        *value = NULL;
-    }
-
-    return res;
-}
-
-/* Gets an integer parameter value out of the parameter string.
- * Param:
- *  params - String, containing the parameters. See comments to _get_param_value
- *      routine on the parameters format.
- *  name - Parameter name. Parameter value must be a decimal number.
- *  value - Upon success contains integer value for the given parameter.
- * Return:
- *  0 on success, or -1 if requested parameter is not found, or -2 if parameter's
- *  format was bad (i.e. value was not a decimal number).
- */
-static int
-_get_param_value_int(const char* params, const char* name, int* value)
-{
-    char val_str[64];   // Should be enough for all numeric values.
-    if (!_get_param_value(params, name, val_str, sizeof(val_str))) {
-        errno = 0;
-        *value = strtoi(val_str, (char**)NULL, 10);
-        if (errno) {
-            E("%s: Value '%s' of the parameter '%s' in '%s' is not a decimal number.",
-              __FUNCTION__, val_str, name, params);
-            return -2;
-        } else {
-            return 0;
-        }
-    } else {
-        return -1;
-    }
-}
-
 /* Extracts query name, and (optionally) query parameters from the query string.
  * Param:
  *  query - Query string. Query string in the camera service are formatted as such:
  *          "<query name>[ <parameters>]",
  *      where parameters are optional, and if present, must be separated from the
- *      query name with a single ' '. See comments to _get_param_value routine
+ *      query name with a single ' '. See comments to get_token_value routine
  *      for the format of the parameters string.
  *  query_name - Upon success contains query name extracted from the query
  *      string.
@@ -829,7 +669,7 @@ _camera_client_free(CameraClient* cc)
  * Param:
  *  csd - Camera service descriptor.
  *  param - Client parameters. Must be formatted as described in comments to
- *      _get_param_value routine, and must contain at least 'name' parameter,
+ *      get_token_value routine, and must contain at least 'name' parameter,
  *      identifiying the camera device to create the service for. Also parameters
  *      may contain a decimal 'inp_channel' parameter, selecting the input
  *      channel to use when communicating with the camera device.
@@ -849,14 +689,14 @@ _camera_client_create(CameraServiceDesc* csd, const char* param)
      */
 
     /* Pull required device name. */
-    if (_get_param_value_alloc(param, "name", &cc->device_name)) {
+    if (get_token_value_alloc(param, "name", &cc->device_name)) {
         E("%s: Allocation failure, or required 'name' parameter is missing, or misformed in '%s'",
           __FUNCTION__, param);
         return NULL;
     }
 
     /* Pull optional input channel. */
-    res = _get_param_value_int(param, "inp_channel", &cc->inp_channel);
+    res = get_token_value_int(param, "inp_channel", &cc->inp_channel);
     if (res != 0) {
         if (res == -1) {
             /* 'inp_channel' parameter has been ommited. Use default input
@@ -1009,14 +849,14 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
     }
 
     /* Pull required 'dim' parameter. */
-    if (_get_param_value(param, "dim", dim, sizeof(dim))) {
+    if (get_token_value(param, "dim", dim, sizeof(dim))) {
         E("%s: Invalid or missing 'dim' parameter in '%s'", __FUNCTION__, param);
         _qemu_client_reply_ko(qc, "Invalid or missing 'dim' parameter");
         return;
     }
 
     /* Pull required 'pix' parameter. */
-    if (_get_param_value_int(param, "pix", &pix_format)) {
+    if (get_token_value_int(param, "pix", &pix_format)) {
         E("%s: Invalid or missing 'pix' parameter in '%s'", __FUNCTION__, param);
         _qemu_client_reply_ko(qc, "Invalid or missing 'pix' parameter");
         return;
@@ -1205,8 +1045,8 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     }
 
     /* Pull required parameters. */
-    if (_get_param_value_int(param, "video", &video_size) ||
-        _get_param_value_int(param, "preview", &preview_size)) {
+    if (get_token_value_int(param, "video", &video_size) ||
+        get_token_value_int(param, "preview", &preview_size)) {
         E("%s: Invalid or missing 'video', or 'preview' parameter in '%s'",
           __FUNCTION__, param);
         _qemu_client_reply_ko(qc,
@@ -1215,7 +1055,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     }
 
     /* Pull white balance values. */
-    if (!_get_param_value(param, "whiteb", tmp, sizeof(tmp))) {
+    if (!get_token_value(param, "whiteb", tmp, sizeof(tmp))) {
         if (sscanf(tmp, "%g,%g,%g", &r_scale, &g_scale, &b_scale) != 3) {
             D("Invalid value '%s' for parameter 'whiteb'", tmp);
             r_scale = g_scale = b_scale = 1.0f;
@@ -1223,7 +1063,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     }
 
     /* Pull exposure compensation. */
-    if (!_get_param_value(param, "expcomp", tmp, sizeof(tmp))) {
+    if (!get_token_value(param, "expcomp", tmp, sizeof(tmp))) {
         if (sscanf(tmp, "%g", &exp_comp) != 1) {
             D("Invalid value '%s' for parameter 'whiteb'", tmp);
             exp_comp = 1.0f;
