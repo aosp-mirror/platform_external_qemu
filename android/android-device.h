@@ -222,6 +222,47 @@ extern int android_device_query(AndroidDevice* ad,
                                 size_t buffsize,
                                 int to);
 
+/* Starts a query that may require more than one buffer transfer.
+ * This routine allows to initiate a query that may require more than one call to
+ * send_data, or may have a format that differs from the usual (a zero-terminated
+ * string). For instance, sending a BLOB data should use this routine to start a
+ * a query, then use android_device_send_query_data to transfer the data, and
+ * then call android_device_complete_query to obtain the response.
+ * Param:
+ *  ad - Android device descriptor, returned from android_device_init API.
+ *  query - Zero-terminated query string.
+ *  to - Milliseconds to wait for the entire query to complete.
+ * Return:
+ *  Zero on success, or non-zero value on failure with 'errno' properly set:
+ *      - 0 Indicates that the server has failed the query.
+ *      - Anything else indicates an I/O error.
+ */
+extern int android_device_start_query(AndroidDevice* ad,
+                                      const char* query,
+                                      int to);
+
+/* Sends data block for a query started with android_device_start_query
+ * Param:
+ *  ad - Android device descriptor, returned from android_device_init API.
+ *  data, size - Data to transfer.
+ * Return:
+ *  Number of bytes transferred on success, or -1 on failure with errno
+ *  containing the reason for failure.
+ */
+extern int android_device_send_query_data(AndroidDevice* ad,
+                                          const void* data,
+                                          int size);
+
+/* Completes a query started with android_device_start_query, and receives the
+ * query response.
+ * Param:
+ *  ad - Android device descriptor, returned from android_device_init API.
+ *  buff, buffsize - Buffer where to receive the response to the query.
+ * Return:
+ *  Zero on success, or non-zero value on failure with 'errno' properly set.
+ */
+extern int android_device_complete_query(AndroidDevice* ad, char* buff, size_t buffsize);
+
 /* Start listening on the event channel.
  * Param:
  *  ad - Android device descriptor, returned from android_device_init API.

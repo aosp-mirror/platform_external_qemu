@@ -1271,6 +1271,35 @@ android_device_query(AndroidDevice* ad,
 }
 
 int
+android_device_start_query(AndroidDevice* ad, const char* query, int to)
+{
+    int res;
+
+    /* Setup deadline for the query. */
+    _ads_set_deadline(&ad->query_socket.dev_socket, to);
+
+    /* Send the query header. */
+    res = _android_dev_socket_send(&ad->query_socket.dev_socket, query,
+                                   strlen(query) + 1);
+    return (res > 0) ? 0 : -1;
+}
+
+int
+android_device_send_query_data(AndroidDevice* ad, const void* data, int size)
+{
+    return _android_dev_socket_send(&ad->query_socket.dev_socket, data, size);
+}
+
+int
+android_device_complete_query(AndroidDevice* ad, char* buff, size_t buffsize)
+{
+    /* Receive the response to the query. */
+    const int res = _android_dev_socket_read_response(&ad->query_socket.dev_socket,
+                                                      buff, buffsize);
+    return (res >= 0) ? 0 : -1;
+}
+
+int
 android_device_listen(AndroidDevice* ad,
                       char* buff,
                       int buffsize,
