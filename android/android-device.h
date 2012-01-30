@@ -108,6 +108,17 @@
 /* Definis infinite timeout. */
 #define AD_INFINITE_WAIT    -1
 
+/* Enumerates results of asynchronous data transfer.
+ */
+typedef enum ATResult {
+    /* Data transfer has been completed. */
+    ATR_SUCCESS,
+    /* Socket got disconnected while data transfer has been in progress. */
+    ATR_DISCONNECT,
+    /* An I/O error has occured. 'errno' contains error value. */
+    ATR_IO_ERROR,
+} ATResult;
+
 /* Android device descriptor. */
 typedef struct AndroidDevice AndroidDevice;
 
@@ -148,6 +159,20 @@ typedef void (*event_cb)(void* opaque, AndroidDevice* ad, char* msg, int msgsize
  *  failure - Contains 'errno' indicating the reason for failure.
  */
 typedef void (*io_failure_cb)(void* opaque, AndroidDevice* ad, int failure);
+
+/* Callback routine that is invoked when an asynchronous data send has been
+ * completed.
+ * Param:
+ *  opaque - An opaque pointer associated with the data.
+ *  res - Result of data transfer.
+ *  data, size - Transferred data buffer.
+ *  sent - Number of sent bytes.
+ */
+typedef void (*async_send_cb)(void* opaque,
+                              ATResult res,
+                              void* data,
+                              int size,
+                              int sent);
 
 /********************************************************************************
  *                       Android Device API.
@@ -276,5 +301,21 @@ extern int android_device_listen(AndroidDevice* ad,
                                  char* buff,
                                  int buffsize,
                                  event_cb on_event);
+
+/* Asynchronously sends data to the android device.
+ * Param:
+ *  ad - Android device descriptor, returned from android_device_init API.
+ *  data, size - Buffer containing data to send.
+ *  free_on_close - A boolean flag indicating whether the data buffer should be
+ *      freed upon data transfer completion.
+ *  cb - Callback to invoke when data transfer is completed.
+ *  opaque - An opaque pointer to pass to the transfer completion callback.
+ */
+extern int android_device_send_async(AndroidDevice* ad,
+                                     void* data,
+                                     int size,
+                                     int free_on_close,
+                                     async_send_cb cb,
+                                     void* opaque);
 
 #endif  /* ANDROID_ANDROID_DEVICE_H_ */

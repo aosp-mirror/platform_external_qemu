@@ -21,6 +21,7 @@
  */
 
 #include "android/android-device.h"
+#include "utils/panic.h"
 #include "iolooper.h"
 
 #define  E(...)    derror(__VA_ARGS__)
@@ -105,6 +106,24 @@ typedef struct AndroidQuerySocket {
     AndroidDevSocket    dev_socket;
 } AndroidQuerySocket;
 
+/* Describes data to send via an asynchronous socket. */
+typedef struct AsyncSendBuffer {
+    /* Next buffer to send. */
+    struct AsyncSendBuffer* next;
+    /* Callback to invoke when data transfer is completed. */
+    async_send_cb           complete_cb;
+    /* An opaque pointer to pass to the transfer completion callback. */
+    void*                   complete_opaque;
+    /* Data to send. */
+    uint8_t*                data;
+    /* Size of the entire data buffer. */
+    int                     data_size;
+    /* Remaining bytes to send. */
+    int                     data_remaining;
+    /* Boolean flag indicating whether to free data buffer upon completion. */
+    int                     free_on_completion;
+} AsyncSendBuffer;
+
 /* Event socket descriptor. */
 typedef struct AndroidEventSocket {
     /* Common socket descriptor. */
@@ -120,6 +139,8 @@ typedef struct AndroidEventSocket {
     ads_socket_connected_cb on_connected;
     /* Callback to call when an event is received on this socket. Can be NULL. */
     event_cb                on_event;
+    /* Lists buffers that are pending to be sent. */
+    AsyncSendBuffer*        send_pending;
 } AndroidEventSocket;
 
 /* Android device descriptor. */
@@ -141,6 +162,61 @@ struct AndroidDevice {
     /* I/O failure callback .*/
     io_failure_cb       on_io_failure;
 };
+
+/* Creates descriptor for a buffer to send asynchronously.
+ * Param:
+ *  data, size - Buffer to send.
+ *  free_on_close - Boolean flag indicating whether to free data buffer upon
+ *      completion.
+ *  cb - Callback to invoke when data transfer is completed.
+ *  opaque - An opaque pointer to pass to the transfer completion callback.
+ */
+static AsyncSendBuffer*
+_async_send_buffer_create(void* data,
+                          int size,
+                          int free_on_close,
+                          async_send_cb cb,
+                          void* opaque)
+{
+    AsyncSendBuffer* desc = malloc(sizeof(AsyncSendBuffer));
+    if (desc == NULL) {
+        APANIC("Unable to allocate %d bytes for AsyncSendBuffer",
+              sizeof(AsyncSendBuffer));
+    }
+    desc->next = NULL;
+    desc->data = (uint8_t*)data;
+    desc->data_size = desc->data_remaining = size;
+    desc->free_on_completion = free_on_close;
+    desc->complete_cb = cb;
+    desc->complete_opaque = opaque;
+
+    return desc;
+}
+
+/* Completes data transfer for the given descriptor.
+ * Note that this routine will free the descriptor.
+ * Param:
+ *  desc - Asynchronous data transfer descriptor. Will be freed upon the exit
+ *      from this routine.
+ *  res - Data transfer result.
+ */
+static void
+_async_send_buffer_complete(AsyncSendBuffer* desc, ATResult res)
+{
+    /* Invoke completion callback (if present) */
+    if (desc->complete_cb) {
+        desc->complete_cb(desc->complete_opaque, res, desc->data, desc->data_size,
+                          desc->data_size - desc->data_remaining);
+    }
+
+    /* Free data buffer (if required) */
+    if (desc->free_on_completion) {
+        free(desc->data);
+    }
+
+    /* Free the descriptor itself. */
+    free(desc);
+}
 
 /********************************************************************************
  *                        Common socket declarations
@@ -778,6 +854,30 @@ static int _android_event_socket_listen(AndroidEventSocket* adsevent,
                                         int strsize,
                                         event_cb cb);
 
+/* Asynchronously sends data via event socket.
+ * Param:
+ *  adsevent - Descriptor for the event socket to send data to.
+ *  data, size - Buffer containing data to send.
+ *  free_on_close - A boolean flag indicating whether the data buffer should be
+ *      freed upon data transfer completion.
+ *  cb - Callback to invoke when data transfer is completed.
+ *  opaque - An opaque pointer to pass to the transfer completion callback.
+ */
+static int _android_event_socket_send(AndroidEventSocket* adsevent,
+                                      void* data,
+                                      int size,
+                                      int free_on_close,
+                                      async_send_cb cb,
+                                      void* opaque);
+
+/* Cancels all asynchronous data transfers on the event socket.
+ * Param:
+ *  adsevent - Descriptor for the event socket to cancel data transfer.
+ *  reason - Reason for the cancellation.
+ */
+static void _android_event_socket_cancel_send(AndroidEventSocket* adsevent,
+                                              ATResult reason);
+
 /* Event socket's asynchronous I/O looper callback.
  * Param:
  *  opaque - AndroidEventSocket instance.
@@ -887,6 +987,9 @@ _android_event_socket_disconnect(AndroidEventSocket* adsevent)
     AndroidDevSocket* ads = &adsevent->dev_socket;
 
     if (ads->socket_status != ADS_DISCONNECTED) {
+        /* Cancel data transfer. */
+        _android_event_socket_cancel_send(adsevent, ATR_DISCONNECT);
+
         /* Stop all async I/O. */
         loopIo_done(adsevent->io);
 
@@ -940,6 +1043,40 @@ _android_event_socket_listen(AndroidEventSocket* adsevent,
     return 0;
 }
 
+static int
+_android_event_socket_send(AndroidEventSocket* adsevent,
+                           void* data,
+                           int size,
+                           int free_on_close,
+                           async_send_cb cb,
+                           void* opaque)
+{
+    /* Create data transfer descriptor, and place it at the end of the list. */
+    AsyncSendBuffer* const desc =
+        _async_send_buffer_create(data, size, free_on_close, cb, opaque);
+    AsyncSendBuffer** place = &adsevent->send_pending;
+    while (*place != NULL) {
+        place = &((*place)->next);
+    }
+    *place = desc;
+
+    /* We're ready to transfer data. */
+    loopIo_wantWrite(adsevent->io);
+
+    return 0;
+}
+
+static void
+_android_event_socket_cancel_send(AndroidEventSocket* adsevent, ATResult reason)
+{
+    while (adsevent->send_pending != NULL) {
+        AsyncSendBuffer* const to_cancel = adsevent->send_pending;
+        adsevent->send_pending = to_cancel->next;
+        _async_send_buffer_complete(to_cancel, reason);
+    }
+    loopIo_dontWantWrite(adsevent->io);
+}
+
 static void
 _on_event_socket_io(void* opaque, int fd, unsigned events)
 {
@@ -964,8 +1101,7 @@ _on_event_socket_io(void* opaque, int fd, unsigned events)
     }
 
     /*
-     * Device is connected. Continue with the data transfer. We don't expect
-     * any writes here, since we always write to the event socket synchronously.
+     * Device is connected. Continue with the data transfer.
      */
 
     if ((events & LOOP_IO_READ) != 0) {
@@ -988,6 +1124,44 @@ _on_event_socket_io(void* opaque, int fd, unsigned events)
                 }
             }
         }
+    }
+
+    if ((events & LOOP_IO_WRITE) != 0) {
+        while (adsevent->send_pending != NULL) {
+            AsyncSendBuffer* to_send = adsevent->send_pending;
+            const int offset = to_send->data_size - to_send->data_remaining;
+            const int sent = socket_send(ads->fd, to_send->data + offset,
+                                         to_send->data_remaining);
+            if (sent < 0) {
+                if (errno == EWOULDBLOCK) {
+                    /* Try again later. */
+                    return;
+                } else {
+                    /* An error has occured. */
+                    _android_event_socket_cancel_send(adsevent, ATR_IO_ERROR);
+                    if (ads->ad->on_io_failure != NULL) {
+                        ads->ad->on_io_failure(ads->ad->opaque, ads->ad, errno);
+                    }
+                    return;
+                }
+            } else if (sent == 0) {
+                /* Disconnect condition. */
+                _android_event_socket_cancel_send(adsevent, ATR_DISCONNECT);
+                if (ads->ad->on_io_failure != NULL) {
+                    ads->ad->on_io_failure(ads->ad->opaque, ads->ad, errno);
+                }
+                return;
+            } else if (sent == to_send->data_remaining) {
+                /* All data is sent. */
+                adsevent->send_pending = to_send->next;
+                _async_send_buffer_complete(to_send, ATR_SUCCESS);
+            } else {
+                /* Chunk is sent. */
+                to_send->data_remaining -= sent;
+                return;
+            }
+        }
+        loopIo_dontWantWrite(adsevent->io);
     }
 }
 
@@ -1307,4 +1481,16 @@ android_device_listen(AndroidDevice* ad,
 {
     return _android_event_socket_listen(&ad->event_socket, buff, buffsize,
                                         on_event);
+}
+
+int
+android_device_send_async(AndroidDevice* ad,
+                          void* data,
+                          int size,
+                          int free_on_close,
+                          async_send_cb cb,
+                          void* opaque)
+{
+    return _android_event_socket_send(&ad->event_socket, data, size,
+                                      free_on_close, cb, opaque);
 }
