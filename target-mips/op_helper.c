@@ -61,7 +61,7 @@ static void do_restore_state (void *pc_ptr)
     
     tb = tb_find_pc (pc);
     if (tb) {
-        cpu_restore_state (tb, env, pc, NULL);
+        cpu_restore_state (tb, env, pc);
     }
 }
 #endif
@@ -1846,7 +1846,7 @@ void tlb_fill (target_ulong addr, int is_write, int mmu_idx, void *retaddr)
             if (tb) {
                 /* the PC is inside the translated code. It means that we have
                    a virtual CPU fault */
-                cpu_restore_state(tb, env, pc, NULL);
+                cpu_restore_state(tb, env, pc);
             }
         }
         helper_raise_exception_err(env->exception_index, env->error_code);
@@ -1862,6 +1862,80 @@ void do_unassigned_access(target_phys_addr_t addr, int is_write, int is_exec,
     else
         helper_raise_exception(EXCP_DBE);
 }
+/*
+ * The following functions are address translation helper functions 
+ * for fast memory access in QEMU. 
+ */
+static unsigned long v2p_mmu(target_ulong addr, int is_user)
+{
+    int index;
+    target_ulong tlb_addr;
+    target_phys_addr_t physaddr;
+    void *retaddr;
+
+    index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
+redo:
+    tlb_addr = env->tlb_table[is_user][index].addr_read;
+    if ((addr & TARGET_PAGE_MASK) == (tlb_addr & (TARGET_PAGE_MASK | TLB_INVALID_MASK))) {
+        physaddr = addr + env->tlb_table[is_user][index].addend;
+    } else {
+        /* the page is not in the TLB : fill it */
+        retaddr = GETPC();
+        tlb_fill(addr, 0, is_user, retaddr);
+        goto redo;
+    }
+    return physaddr;
+}
+
+/* 
+ * translation from virtual address of simulated OS 
+ * to the address of simulation host (not the physical 
+ * address of simulated OS.
+ */
+target_phys_addr_t v2p(target_ulong ptr, int is_user)
+{
+    CPUState *saved_env;
+    int index;
+    target_ulong addr;
+    target_phys_addr_t physaddr;
+
+    saved_env = env;
+    env = cpu_single_env;
+    addr = ptr;
+    index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
+    if (__builtin_expect(env->tlb_table[is_user][index].addr_read != 
+                (addr & TARGET_PAGE_MASK), 0)) {
+        physaddr = v2p_mmu(addr, is_user);
+    } else {
+	    physaddr = (target_phys_addr_t)addr + env->tlb_table[is_user][index].addend;
+    }
+    env = saved_env;
+    return physaddr;
+}
+
+/* copy a string from the simulated virtual space to a buffer in QEMU */
+void vstrcpy(target_ulong ptr, char *buf, int max)
+{
+    char *phys = 0;
+    unsigned long page = 0;
+
+    if (buf == NULL) return;
+
+    while (max) {
+        if ((ptr & TARGET_PAGE_MASK) != page) {
+            phys = (char *)v2p(ptr, 0);
+            page = ptr & TARGET_PAGE_MASK;
+        }
+        *buf = *phys;
+        if (*phys == '\0')
+            return;
+        ptr ++;
+        buf ++;
+        phys ++;
+        max --;
+    }
+}
+
 #endif /* !CONFIG_USER_ONLY */
 
 /* Complex FPU operations which may need stack space. */
@@ -2751,10 +2825,10 @@ static int float64_is_unordered(int sig, float64 a, float64 b STATUS_PARAM)
 {
     if (float64_is_signaling_nan(a) ||
         float64_is_signaling_nan(b) ||
-        (sig && (float64_is_nan(a) || float64_is_nan(b)))) {
+        (sig && (float64_is_any_nan(a) || float64_is_any_nan(b)))) {
         float_raise(float_flag_invalid, status);
         return 1;
-    } else if (float64_is_nan(a) || float64_is_nan(b)) {
+    } else if (float64_is_any_nan(a) || float64_is_any_nan(b)) {
         return 1;
     } else {
         return 0;
@@ -2809,10 +2883,10 @@ static flag float32_is_unordered(int sig, float32 a, float32 b STATUS_PARAM)
 {
     if (float32_is_signaling_nan(a) ||
         float32_is_signaling_nan(b) ||
-        (sig && (float32_is_nan(a) || float32_is_nan(b)))) {
+        (sig && (float32_is_any_nan(a) || float32_is_any_nan(b)))) {
         float_raise(float_flag_invalid, status);
         return 1;
-    } else if (float32_is_nan(a) || float32_is_nan(b)) {
+    } else if (float32_is_any_nan(a) || float32_is_any_nan(b)) {
         return 1;
     } else {
         return 0;
