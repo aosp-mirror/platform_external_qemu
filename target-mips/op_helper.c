@@ -2230,6 +2230,7 @@ uint64_t helper_float_roundl_d(uint64_t fdt0)
 {
     uint64_t dt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     set_float_rounding_mode(float_round_nearest_even, &env->active_fpu.fp_status);
     dt2 = float64_to_int64(fdt0, &env->active_fpu.fp_status);
     RESTORE_ROUNDING_MODE;
@@ -2243,6 +2244,7 @@ uint64_t helper_float_roundl_s(uint32_t fst0)
 {
     uint64_t dt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     set_float_rounding_mode(float_round_nearest_even, &env->active_fpu.fp_status);
     dt2 = float32_to_int64(fst0, &env->active_fpu.fp_status);
     RESTORE_ROUNDING_MODE;
@@ -2256,6 +2258,7 @@ uint32_t helper_float_roundw_d(uint64_t fdt0)
 {
     uint32_t wt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     set_float_rounding_mode(float_round_nearest_even, &env->active_fpu.fp_status);
     wt2 = float64_to_int32(fdt0, &env->active_fpu.fp_status);
     RESTORE_ROUNDING_MODE;
@@ -2269,6 +2272,7 @@ uint32_t helper_float_roundw_s(uint32_t fst0)
 {
     uint32_t wt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     set_float_rounding_mode(float_round_nearest_even, &env->active_fpu.fp_status);
     wt2 = float32_to_int32(fst0, &env->active_fpu.fp_status);
     RESTORE_ROUNDING_MODE;
@@ -2282,6 +2286,7 @@ uint64_t helper_float_truncl_d(uint64_t fdt0)
 {
     uint64_t dt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     dt2 = float64_to_int64_round_to_zero(fdt0, &env->active_fpu.fp_status);
     update_fcr31();
     if (GET_FP_CAUSE(env->active_fpu.fcr31) & (FP_OVERFLOW | FP_INVALID))
@@ -2293,6 +2298,7 @@ uint64_t helper_float_truncl_s(uint32_t fst0)
 {
     uint64_t dt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     dt2 = float32_to_int64_round_to_zero(fst0, &env->active_fpu.fp_status);
     update_fcr31();
     if (GET_FP_CAUSE(env->active_fpu.fcr31) & (FP_OVERFLOW | FP_INVALID))
@@ -2304,6 +2310,7 @@ uint32_t helper_float_truncw_d(uint64_t fdt0)
 {
     uint32_t wt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     wt2 = float64_to_int32_round_to_zero(fdt0, &env->active_fpu.fp_status);
     update_fcr31();
     if (GET_FP_CAUSE(env->active_fpu.fcr31) & (FP_OVERFLOW | FP_INVALID))
@@ -2315,6 +2322,7 @@ uint32_t helper_float_truncw_s(uint32_t fst0)
 {
     uint32_t wt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     wt2 = float32_to_int32_round_to_zero(fst0, &env->active_fpu.fp_status);
     update_fcr31();
     if (GET_FP_CAUSE(env->active_fpu.fcr31) & (FP_OVERFLOW | FP_INVALID))
@@ -2326,6 +2334,7 @@ uint64_t helper_float_ceill_d(uint64_t fdt0)
 {
     uint64_t dt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     set_float_rounding_mode(float_round_up, &env->active_fpu.fp_status);
     dt2 = float64_to_int64(fdt0, &env->active_fpu.fp_status);
     RESTORE_ROUNDING_MODE;
@@ -2339,6 +2348,7 @@ uint64_t helper_float_ceill_s(uint32_t fst0)
 {
     uint64_t dt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     set_float_rounding_mode(float_round_up, &env->active_fpu.fp_status);
     dt2 = float32_to_int64(fst0, &env->active_fpu.fp_status);
     RESTORE_ROUNDING_MODE;
@@ -2352,6 +2362,7 @@ uint32_t helper_float_ceilw_d(uint64_t fdt0)
 {
     uint32_t wt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     set_float_rounding_mode(float_round_up, &env->active_fpu.fp_status);
     wt2 = float64_to_int32(fdt0, &env->active_fpu.fp_status);
     RESTORE_ROUNDING_MODE;
@@ -2365,6 +2376,7 @@ uint32_t helper_float_ceilw_s(uint32_t fst0)
 {
     uint32_t wt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     set_float_rounding_mode(float_round_up, &env->active_fpu.fp_status);
     wt2 = float32_to_int32(fst0, &env->active_fpu.fp_status);
     RESTORE_ROUNDING_MODE;
@@ -2378,6 +2390,7 @@ uint64_t helper_float_floorl_d(uint64_t fdt0)
 {
     uint64_t dt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     set_float_rounding_mode(float_round_down, &env->active_fpu.fp_status);
     dt2 = float64_to_int64(fdt0, &env->active_fpu.fp_status);
     RESTORE_ROUNDING_MODE;
@@ -2391,6 +2404,7 @@ uint64_t helper_float_floorl_s(uint32_t fst0)
 {
     uint64_t dt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     set_float_rounding_mode(float_round_down, &env->active_fpu.fp_status);
     dt2 = float32_to_int64(fst0, &env->active_fpu.fp_status);
     RESTORE_ROUNDING_MODE;
@@ -2404,6 +2418,7 @@ uint32_t helper_float_floorw_d(uint64_t fdt0)
 {
     uint32_t wt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     set_float_rounding_mode(float_round_down, &env->active_fpu.fp_status);
     wt2 = float64_to_int32(fdt0, &env->active_fpu.fp_status);
     RESTORE_ROUNDING_MODE;
@@ -2417,6 +2432,7 @@ uint32_t helper_float_floorw_s(uint32_t fst0)
 {
     uint32_t wt2;
 
+    set_float_exception_flags(0, &env->active_fpu.fp_status);
     set_float_rounding_mode(float_round_down, &env->active_fpu.fp_status);
     wt2 = float32_to_int32(fst0, &env->active_fpu.fp_status);
     RESTORE_ROUNDING_MODE;
