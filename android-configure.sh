@@ -17,6 +17,7 @@ cd `dirname $0`
 
 # Parse options
 OPTION_TARGETS=""
+OPTION_TARGET_ARCH=mips
 OPTION_DEBUG=no
 OPTION_IGNORE_AUDIO=no
 OPTION_NO_PREBUILTS=no
@@ -51,6 +52,8 @@ for opt do
   --debug) OPTION_DEBUG=yes
   ;;
   --install=*) OPTION_TARGETS="$OPTION_TARGETS $optarg";
+  ;;
+  --target-arch=*) OPTION_TARGET_ARCH=$optarg
   ;;
   --sdl-config=*) SDL_CONFIG=$optarg
   ;;
@@ -506,6 +509,10 @@ fi
 
 if [ $TARGET_ARCH = x86 ] ; then
 echo "TARGET_ARCH       := x86" >> $config_mk
+fi
+
+if [ $TARGET_ARCH = mips ] ; then
+echo "TARGET_ARCH       := mips" >> $config_mk
 fi
 
 echo "HOST_PREBUILT_TAG := $TARGET_OS" >> $config_mk
