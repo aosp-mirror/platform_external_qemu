@@ -280,6 +280,18 @@ EMULATOR_LIBQEMU_CFLAGS :=
 
 LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
+###########################################################
+# Jpeg configuration
+#
+LIBJPEG_DIR := distrib/jpeg-6b
+include $(LOCAL_PATH)/$(LIBJPEG_DIR)/sources.make
+
+EMULATOR_LIBQEMU_CFLAGS += \
+    $(LIBJPEG_CFLAGS) \
+    -I$(LOCAL_PATH)/$(LIBJPEG_DIR)
+
+LOCAL_SRC_FILES += $(LIBJPEG_SOURCES)
+
 AUDIO_SOURCES := noaudio.c wavaudio.c wavcapture.c mixeng.c
 AUDIO_CFLAGS  := -I$(LOCAL_PATH)/audio -DHAS_AUDIO
 AUDIO_LDLIBS  :=
