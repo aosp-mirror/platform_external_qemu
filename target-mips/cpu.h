@@ -630,7 +630,6 @@ int cpu_mips_handle_mmu_fault (CPUState *env, target_ulong address, int rw,
                                int mmu_idx, int is_softmmu);
 #define cpu_handle_mmu_fault cpu_mips_handle_mmu_fault
 void do_interrupt (CPUState *env);
-void r4k_invalidate_tlb (CPUState *env, int idx, int use_extra);
 target_phys_addr_t cpu_mips_translate_address (CPUState *env, target_ulong address,
 		                               int rw);
 

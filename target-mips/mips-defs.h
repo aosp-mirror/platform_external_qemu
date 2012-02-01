@@ -8,6 +8,39 @@
 #define TARGET_PAGE_BITS 12
 #define MIPS_TLB_MAX 128
 
+#define ADDR (*(volatile long *) addr)
+static inline int test_bit(int nr, const volatile unsigned long * addr)
+{
+    int oldbit;
+
+    __asm__ __volatile__(
+                         "btl %2,%1\n\tsbbl %0,%0"
+    :"=r" (oldbit)
+    :"m" (ADDR),"Ir" (nr));
+    return oldbit;
+}
+
+static inline int __test_and_set_bit(int nr, volatile unsigned long * addr)
+{
+    int oldbit;
+
+    __asm__(
+            "btsl %2,%1\n\tsbbl %0,%0"
+    :"=r" (oldbit),"+m" (ADDR)
+    :"Ir" (nr));
+    return oldbit;
+}
+
+static inline void __change_bit(int nr, volatile unsigned long * addr)
+{
+    __asm__ __volatile__(
+                         "btcl %1,%0"
+    :"+m" (ADDR)
+    :"Ir" (nr));
+}
+
+#undef ADDR
+
 #if defined(TARGET_MIPS64)
 #define TARGET_LONG_BITS 64
 #else
