@@ -235,7 +235,7 @@ int main(int argc, char **argv)
     AConfig*          skinConfig;
     char*             skinPath;
     int               inAndroidBuild;
-    uint64_t          defaultPartitionSize = convertMBToBytes(66);
+    uint64_t          defaultPartitionSize = convertMBToBytes(256);
 
     AndroidOptions  opts[1];
     /* net.shared_net_ip boot property value. */
