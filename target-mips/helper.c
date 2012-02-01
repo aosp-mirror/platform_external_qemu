@@ -324,7 +324,7 @@ target_phys_addr_t cpu_mips_translate_address(CPUState *env, target_ulong addres
     access_type = ACCESS_INT;
     ret = get_physical_address(env, &physical, &prot,
                                address, rw, access_type);
-    if (ret != TLBRET_MATCH) {
+    if (ret != TLBRET_MATCH || ret != TLBRET_DIRTY) {
         raise_mmu_exception(env, address, rw, ret);
         return -1LL;
     } else {
