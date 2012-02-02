@@ -80,6 +80,13 @@ struct WndCameraDevice {
     uint32_t            pixel_format;
     /* If != 0, frame bitmap is "top-down". If 0, frame bitmap is "bottom-up". */
     int                 is_top_down;
+    /* Flags whether frame should be captured using clipboard (1), or via frame
+     * callback (0) */
+    int                 use_clipboard;
+    /* Contains last frame captured via frame callback. */
+    void*               last_frame;
+    /* Byte size of the 'last_frame' buffer. */
+    uint32_t            last_frame_size;
 };
 
 /*******************************************************************************
@@ -139,6 +146,9 @@ _camera_device_free(WndCameraDevice* cd)
         if (cd->framebuffer != NULL) {
             free(cd->framebuffer);
         }
+        if (cd->last_frame != NULL) {
+            free(cd->last_frame);
+        }
         AFREE(cd);
     } else {
         W("%s: No descriptor", __FUNCTION__);
@@ -170,11 +180,20 @@ _camera_device_reset(WndCameraDevice* cd)
             free(cd->framebuffer);
             cd->framebuffer = NULL;
         }
+        if (cd->last_frame != NULL) {
+            free(cd->last_frame);
+            cd->last_frame = NULL;
+        }
+        cd->last_frame_size = 0;
 
         /* Recreate the capturing window. */
         DestroyWindow(cd->cap_window);
         cd->cap_window = capCreateCaptureWindow(cd->window_name, WS_CHILD, 0, 0,
                                                 0, 0, HWND_MESSAGE, 1);
+        if (cd->cap_window != NULL) {
+            /* Save capture window descriptor as window's user data. */
+            capSetUserData(cd->cap_window, cd);
+        }
     }
 }
 
@@ -183,6 +202,28 @@ static __inline__ int
 _abs(int val)
 {
     return (val < 0) ? -val : val;
+}
+
+/* Callback that is invoked when a frame gets captured in capGrabFrameNoStop */
+static LRESULT CALLBACK
+_on_captured_frame(HWND hwnd, LPVIDEOHDR hdr)
+{
+    /* Capture window descriptor is saved in window's user data. */
+    WndCameraDevice* wcd = (WndCameraDevice*)capGetUserData(hwnd);
+
+    /* Reallocate frame buffer (if needed) */
+    if (wcd->last_frame_size < hdr->dwBytesUsed) {
+        wcd->last_frame_size = hdr->dwBytesUsed;
+        if (wcd->last_frame != NULL) {
+            free(wcd->last_frame);
+        }
+        wcd->last_frame = malloc(wcd->last_frame_size);
+    }
+
+    /* Copy captured frame. */
+    memcpy(wcd->last_frame, hdr->lpData, hdr->dwBytesUsed);
+
+    return (LRESULT)0;
 }
 
 /*******************************************************************************
@@ -222,6 +263,8 @@ camera_device_open(const char* name, int inp_channel)
         _camera_device_free(wcd);
         return NULL;
     }
+    /* Save capture window descriptor as window's user data. */
+    capSetUserData(wcd->cap_window, wcd);
 
     return &wcd->header;
 }
@@ -236,6 +279,7 @@ camera_device_start_capturing(CameraDevice* cd,
     HBITMAP bm_handle;
     BITMAP  bitmap;
     size_t format_info_size;
+    CAPTUREPARMS cap_param;
 
     if (cd == NULL || cd->opaque == NULL) {
         E("%s: Invalid camera device descriptor", __FUNCTION__);
@@ -328,6 +372,15 @@ camera_device_start_capturing(CameraDevice* cd,
         return -1;
     }
 
+    /* Setup some capture parameters. */
+    if (capCaptureGetSetup(wcd->cap_window, &cap_param, sizeof(cap_param))) {
+        /* Use separate thread to capture video stream. */
+        cap_param.fYield = TRUE;
+        /* Don't show any dialogs. */
+        cap_param.fMakeUserHitOKToCapture = FALSE;
+        capCaptureSetSetup(wcd->cap_window, &cap_param, sizeof(cap_param));
+    }
+
     /*
      * At this point we need to grab a frame to properly setup framebuffer, and
      * calculate pixel format. The problem is that bitmap information obtained
@@ -361,12 +414,14 @@ camera_device_start_capturing(CameraDevice* cd,
     if (!GetObject(bm_handle, sizeof(BITMAP), &bitmap)) {
         E("%s: Device '%s' is unable to obtain frame's bitmap: %d",
           __FUNCTION__, wcd->window_name, GetLastError());
+        EmptyClipboard();
         CloseClipboard();
         _camera_device_reset(wcd);
         return -1;
     }
 
     /* Now that we have all we need in 'bitmap' */
+    EmptyClipboard();
     CloseClipboard();
 
     /* Make sure that dimensions match. Othewise - fail. */
@@ -434,6 +489,13 @@ camera_device_start_capturing(CameraDevice* cd,
       (const char*)&wcd->pixel_format, wcd->frame_bitmap->bmiHeader.biWidth,
       wcd->frame_bitmap->bmiHeader.biHeight);
 
+    /* Try to setup capture frame callback. */
+    wcd->use_clipboard = 1;
+    if (capSetCallbackOnFrame(wcd->cap_window, _on_captured_frame)) {
+        /* Callback is set. Don't use clipboard when capturing frames. */
+        wcd->use_clipboard = 0;
+    }
+
     return 0;
 }
 
@@ -446,6 +508,9 @@ camera_device_stop_capturing(CameraDevice* cd)
         return -1;
     }
     wcd = (WndCameraDevice*)cd->opaque;
+
+    /* Disable frame callback. */
+    capSetCallbackOnFrame(wcd->cap_window, NULL);
 
     /* wcd->dc is the indicator of capture. */
     if (wcd->dc == NULL) {
@@ -462,29 +527,49 @@ camera_device_stop_capturing(CameraDevice* cd)
     return 0;
 }
 
-int
-camera_device_read_frame(CameraDevice* cd,
-                         ClientFrameBuffer* framebuffers,
-                         int fbs_num,
-                         float r_scale,
-                         float g_scale,
-                         float b_scale,
-                         float exp_comp)
+/* Capture frame using frame callback.
+ * Parameters and return value for this routine matches _camera_device_read_frame
+ */
+static int
+_camera_device_read_frame_callback(WndCameraDevice* wcd,
+                                   ClientFrameBuffer* framebuffers,
+                                   int fbs_num,
+                                   float r_scale,
+                                   float g_scale,
+                                   float b_scale,
+                                   float exp_comp)
 {
-    WndCameraDevice* wcd;
-    HBITMAP bm_handle;
+    /* Grab the frame. Note that this call will cause frame callback to be
+     * invoked before capGrabFrameNoStop returns. */
+    if (!capGrabFrameNoStop(wcd->cap_window) || wcd->last_frame == NULL) {
+        E("%s: Device '%s' is unable to grab a frame: %d",
+          __FUNCTION__, wcd->window_name, GetLastError());
+        return -1;
+    }
 
-    /* Sanity checks. */
-    if (cd == NULL || cd->opaque == NULL) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
-        return -1;
-    }
-    wcd = (WndCameraDevice*)cd->opaque;
-    if (wcd->dc == NULL) {
-        W("%s: Device '%s' is not captuing video",
-          __FUNCTION__, wcd->window_name);
-        return -1;
-    }
+    /* Convert framebuffer. */
+    return convert_frame(wcd->last_frame,
+                         wcd->frame_bitmap->bmiHeader.biCompression,
+                         wcd->frame_bitmap->bmiHeader.biSizeImage,
+                         wcd->frame_bitmap->bmiHeader.biWidth,
+                         wcd->frame_bitmap->bmiHeader.biHeight,
+                         framebuffers, fbs_num,
+                         r_scale, g_scale, b_scale, exp_comp);
+}
+
+/* Capture frame using clipboard.
+ * Parameters and return value for this routine matches _camera_device_read_frame
+ */
+static int
+_camera_device_read_frame_clipboard(WndCameraDevice* wcd,
+                                    ClientFrameBuffer* framebuffers,
+                                    int fbs_num,
+                                    float r_scale,
+                                    float g_scale,
+                                    float b_scale,
+                                    float exp_comp)
+{
+    HBITMAP bm_handle;
 
     /* Grab a frame, and post it to the clipboard. Not very effective, but this
      * is how capXxx API is operating. */
@@ -502,6 +587,7 @@ camera_device_read_frame(CameraDevice* cd,
     if (bm_handle == NULL) {
         E("%s: Device '%s' is unable to obtain frame from the clipboard: %d",
           __FUNCTION__, wcd->window_name, GetLastError());
+        EmptyClipboard();
         CloseClipboard();
         return -1;
     }
@@ -515,6 +601,7 @@ camera_device_read_frame(CameraDevice* cd,
                    wcd->framebuffer, wcd->gdi_bitmap, DIB_RGB_COLORS)) {
         E("%s: Device '%s' is unable to transfer frame to the framebuffer: %d",
           __FUNCTION__, wcd->window_name, GetLastError());
+        EmptyClipboard();
         CloseClipboard();
         return -1;
     }
@@ -523,6 +610,7 @@ camera_device_read_frame(CameraDevice* cd,
         wcd->gdi_bitmap->bmiHeader.biHeight = -wcd->gdi_bitmap->bmiHeader.biHeight;
     }
 
+    EmptyClipboard();
     CloseClipboard();
 
     /* Convert framebuffer. */
@@ -533,6 +621,38 @@ camera_device_read_frame(CameraDevice* cd,
                          wcd->frame_bitmap->bmiHeader.biHeight,
                          framebuffers, fbs_num,
                          r_scale, g_scale, b_scale, exp_comp);
+}
+
+int
+camera_device_read_frame(CameraDevice* cd,
+                         ClientFrameBuffer* framebuffers,
+                         int fbs_num,
+                         float r_scale,
+                         float g_scale,
+                         float b_scale,
+                         float exp_comp)
+{
+    WndCameraDevice* wcd;
+
+    /* Sanity checks. */
+    if (cd == NULL || cd->opaque == NULL) {
+        E("%s: Invalid camera device descriptor", __FUNCTION__);
+        return -1;
+    }
+    wcd = (WndCameraDevice*)cd->opaque;
+    if (wcd->dc == NULL) {
+        W("%s: Device '%s' is not captuing video",
+          __FUNCTION__, wcd->window_name);
+        return -1;
+    }
+
+    /* Dispatch the call to an appropriate routine: grabbing a frame using
+     * clipboard, or using a frame callback. */
+    return wcd->use_clipboard ?
+        _camera_device_read_frame_clipboard(wcd, framebuffers, fbs_num, r_scale,
+                                            g_scale, b_scale, exp_comp) :
+        _camera_device_read_frame_callback(wcd, framebuffers, fbs_num, r_scale,
+                                           g_scale, b_scale, exp_comp);
 }
 
 void
