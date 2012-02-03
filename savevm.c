@@ -1362,8 +1362,8 @@ void do_loadvm(Monitor *err, const char *name)
     saved_vm_running = vm_running;
     vm_stop(0);
 
-    bs1 = NULL;
-    while ((bs1 = bdrv_next(bs))) {
+    bs1 = bs;
+    do {
         if (bdrv_can_snapshot(bs1)) {
             ret = bdrv_snapshot_goto(bs1, name);
             if (ret < 0) {
@@ -1390,7 +1390,7 @@ void do_loadvm(Monitor *err, const char *name)
                     goto the_end;
             }
         }
-    }
+    } while ((bs1 = bdrv_next(bs)));
 
     if (bdrv_get_info(bs, bdi) < 0 || bdi->vm_state_offset <= 0) {
         monitor_printf(err, "Device %s does not support VM state snapshots\n",
