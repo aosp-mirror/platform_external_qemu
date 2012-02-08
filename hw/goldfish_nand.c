@@ -856,6 +856,12 @@ void nand_add_dev(const char *arg)
 #endif
 
     if (initfd >= 0) {
+        if (do_ftruncate(rwfd, 0) < 0) {
+            /* secure that no old data is used */
+            XLOG("%s ftruncate failed: %s\n", __FUNCTION__, strerror(errno));
+            exit(1);
+        }
+
         do {
             read_size = do_read(initfd, dev->data, dev->erase_size);
             if(read_size < 0) {
