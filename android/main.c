@@ -1155,6 +1155,15 @@ int main(int argc, char **argv)
         }
     }
 
+    /* Quit emulator on condition that both, gpu and snapstorage are on. This is
+     * a temporary solution preventing the emulator from crashing until GPU state
+     * can be properly saved / resored in snapshot file. */
+    if (hw->hw_gpu_enabled && opts->snapstorage && (!opts->no_snapshot_load ||
+                                                    !opts->no_snapshot_save)) {
+        derror("Snapshots and gpu are mutually exclusive at this point. Please turn one of them off, and restart the emulator.");
+        exit(1);
+    }
+
     if (opts->fake_camera) {
         if (!strcmp(opts->fake_camera, "back") ||
             !strcmp(opts->fake_camera, "front") ||
