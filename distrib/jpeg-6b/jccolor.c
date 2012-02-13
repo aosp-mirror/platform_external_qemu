@@ -173,6 +173,53 @@ rgb_ycc_convert (j_compress_ptr cinfo,
   }
 }
 
+#ifdef ANDROID_RGB
+/* Converts RGB565 row into YCbCr */
+METHODDEF(void)
+rgb565_ycc_convert (j_compress_ptr cinfo,
+		 JSAMPARRAY input_buf, JSAMPIMAGE output_buf,
+		 JDIMENSION output_row, int num_rows)
+{
+  my_cconvert_ptr cconvert = (my_cconvert_ptr) cinfo->cconvert;
+  register int r, g, b;
+  register INT32 * ctab = cconvert->rgb_ycc_tab;
+  register unsigned short* inptr;
+  register JSAMPROW outptr0, outptr1, outptr2;
+  register JDIMENSION col;
+  JDIMENSION num_cols = cinfo->image_width;
+
+  while (--num_rows >= 0) {
+    inptr = (unsigned short*)(*input_buf++);
+    outptr0 = output_buf[0][output_row];
+    outptr1 = output_buf[1][output_row];
+    outptr2 = output_buf[2][output_row];
+    output_row++;
+    for (col = 0; col < num_cols; col++) {
+      register const unsigned short color = inptr[col];
+      r = ((color & 0xf800) >> 8) | ((color & 0xf800) >> 14);
+      g = ((color & 0x7e0) >> 3) | ((color & 0x7e0) >> 9);
+      b = ((color & 0x1f) << 3) | ((color & 0x1f) >> 2);
+      /* If the inputs are 0..MAXJSAMPLE, the outputs of these equations
+       * must be too; we do not need an explicit range-limiting operation.
+       * Hence the value being shifted is never negative, and we don't
+       * need the general RIGHT_SHIFT macro.
+       */
+      /* Y */
+      outptr0[col] = (JSAMPLE)
+		((ctab[r+R_Y_OFF] + ctab[g+G_Y_OFF] + ctab[b+B_Y_OFF])
+		 >> SCALEBITS);
+      /* Cb */
+      outptr1[col] = (JSAMPLE)
+		((ctab[r+R_CB_OFF] + ctab[g+G_CB_OFF] + ctab[b+B_CB_OFF])
+		 >> SCALEBITS);
+      /* Cr */
+      outptr2[col] = (JSAMPLE)
+		((ctab[r+R_CR_OFF] + ctab[g+G_CR_OFF] + ctab[b+B_CR_OFF])
+		 >> SCALEBITS);
+    }
+  }
+}
+#endif  /* ANDROID_RGB */
 
 /**************** Cases other than RGB -> YCbCr **************/
 
@@ -355,12 +402,12 @@ null_convert (j_compress_ptr cinfo,
         JSAMPROW outptr0 = output_buf[0][output_row];
         JSAMPROW outptr1 = output_buf[1][output_row];
         JSAMPROW outptr2 = output_buf[2][output_row];
-        
+
         int col = num_cols;
         int col4 = col >> 2;
         if (col4 > 0 && ptr_is_quad(inptr) && ptr_is_quad(outptr0) &&
                         ptr_is_quad(outptr1) && ptr_is_quad(outptr2)) {
-            
+
             const UINT32* in = (const UINT32*)inptr;
             UINT32* out0 = (UINT32*)outptr0;
             UINT32* out1 = (UINT32*)outptr1;
@@ -453,6 +500,13 @@ jinit_color_converter (j_compress_ptr cinfo)
       ERREXIT(cinfo, JERR_BAD_IN_COLORSPACE);
     break;
 
+#ifdef ANDROID_RGB
+  case JCS_RGB_565:
+    if (cinfo->input_components != 2)
+      ERREXIT(cinfo, JERR_BAD_IN_COLORSPACE);
+    break;
+#endif  /* ANDROID_RGB */
+
   default:			/* JCS_UNKNOWN can be anything */
     if (cinfo->input_components < 1)
       ERREXIT(cinfo, JERR_BAD_IN_COLORSPACE);
@@ -490,8 +544,15 @@ jinit_color_converter (j_compress_ptr cinfo)
     if (cinfo->in_color_space == JCS_RGB) {
       cconvert->pub.start_pass = rgb_ycc_start;
       cconvert->pub.color_convert = rgb_ycc_convert;
-    } else if (cinfo->in_color_space == JCS_YCbCr)
+    } else if (cinfo->in_color_space == JCS_YCbCr) {
       cconvert->pub.color_convert = null_convert;
+    }
+#ifdef ANDROID_RGB
+    else if (cinfo->in_color_space == JCS_RGB_565) {
+      cconvert->pub.start_pass = rgb_ycc_start;
+      cconvert->pub.color_convert = rgb565_ycc_convert;
+    }
+#endif  /* ANDROID_RGB */
     else
       ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
     break;
