@@ -38,6 +38,8 @@
     _VERBOSE_TAG(camera,       "camera") \
     _VERBOSE_TAG(adevice,      "android device connected via port forwarding") \
     _VERBOSE_TAG(sensors_port, "sensors emulator connected to android device") \
+    _VERBOSE_TAG(mtport,       "multi-touch emulator connected to android device") \
+    _VERBOSE_TAG(mtscreen,     "multi-touch screen emulation") \
     _VERBOSE_TAG(gles,         "hardware OpenGLES emulation") \
     _VERBOSE_TAG(adbserver,    "ADB server") \
     _VERBOSE_TAG(adbclient,    "ADB QEMU client") \

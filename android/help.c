@@ -1488,6 +1488,21 @@ help_webcam(stralloc_t* out)
     );
 }
 
+static void
+help_screen(stralloc_t* out)
+{
+    PRINTF(
+    "  Use -screen <mode> to set the emulated screen mode.\n"
+    "  Valid values for <mode> are:\n\n"
+
+    "     touch       -> emulate a touch screen\n"
+    "     multi-touch -> emulate a multi-touch screen\n"
+    "     off         -> disable touch and multi-touch screen emulation\n\n"
+
+    "  Default mode for screen emulation is 'touch'.\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

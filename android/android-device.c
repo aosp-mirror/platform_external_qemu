@@ -581,35 +581,60 @@ _android_dev_socket_recv(AndroidDevSocket* ads, char* buf, int bufsize)
         return -1;
     }
 
-    iolooper_add_read(_ads_io_looper(ads), ads->fd);
-    do {
-        int res = socket_recv(ads->fd, buf + recvd, bufsize - recvd);
-        if (res == 0) {
-            /* Disconnection. */
-            errno = ECONNRESET;
-            recvd = -1;
-            break;
-        }
+    /* XXX: This is a hack that implements a blocked line read on an async
+     * event socket! Redo this ASAP! */
+    if (ads->type == ADS_TYPE_EVENT) {
+        AndroidEventSocket* adsevent = (AndroidEventSocket*)ads;
+        asyncLineReader_init(&adsevent->alr, buf, bufsize, adsevent->io);
+        /* Default EOL for the line reader was '\n'. */
+        asyncLineReader_setEOL(&adsevent->alr, '\0');
+        AsyncStatus status = ASYNC_NEED_MORE;
 
-        if (res < 0) {
-            if (errno == EINTR) {
-                /* loop on EINTR */
-                continue;
+        while (status == ASYNC_NEED_MORE) {
+            status = asyncLineReader_read(&adsevent->alr);
+            if (status == ASYNC_COMPLETE) {
+                recvd = adsevent->alr.pos;
+                break;
+            } else if (status == ASYNC_ERROR) {
+                if (errno == ENOMEM) {
+                    recvd = adsevent->alr.pos;
+                } else {
+                    recvd = -1;
+                }
+                break;
+            }
+        }
+    } else {
+        iolooper_add_read(_ads_io_looper(ads), ads->fd);
+        do {
+            int res = socket_recv(ads->fd, buf + recvd, bufsize - recvd);
+            if (res == 0) {
+                /* Disconnection. */
+                errno = ECONNRESET;
+                recvd = -1;
+                break;
             }
 
-            if (errno == EWOULDBLOCK || errno == EAGAIN) {
-                res = iolooper_wait_absolute(_ads_io_looper(ads), ads->deadline);
-                if (res > 0) {
-                    /* Ready to read. */
+            if (res < 0) {
+                if (errno == EINTR) {
+                    /* loop on EINTR */
                     continue;
                 }
+
+                if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                    res = iolooper_wait_absolute(_ads_io_looper(ads), ads->deadline);
+                    if (res > 0) {
+                        /* Ready to read. */
+                        continue;
+                    }
+                }
+                recvd = -1;
+                break;
             }
-            recvd = -1;
-            break;
-        }
-        recvd += res;
-    } while (recvd < bufsize);
-    iolooper_del_read(_ads_io_looper(ads), ads->fd);
+            recvd += res;
+        } while (recvd < bufsize);
+        iolooper_del_read(_ads_io_looper(ads), ads->fd);
+    }
 
     /* In case of an I/O failure we have to invoke failure callback. Note that we
      * report I/O failures only on registered sockets. */
@@ -1108,6 +1133,7 @@ _on_event_socket_io(void* opaque, int fd, unsigned events)
         /* Continue reading data. */
         status = asyncLineReader_read(&adsevent->alr);
         if (status == ASYNC_COMPLETE) {
+            errno = 0;
             _on_event_received(adsevent);
         } else if (status == ASYNC_ERROR) {
             D("I/O failure while reading from channel '%s'@%d: %s",
@@ -1153,6 +1179,7 @@ _on_event_socket_io(void* opaque, int fd, unsigned events)
                 return;
             } else if (sent == to_send->data_remaining) {
                 /* All data is sent. */
+                errno = 0;
                 adsevent->send_pending = to_send->next;
                 _async_send_buffer_complete(to_send, ATR_SUCCESS);
             } else {
@@ -1182,6 +1209,7 @@ _on_event_socket_connected(AndroidEventSocket* adsevent, int failure)
     /* Complete event socket connection by identifying it as "event" socket with
      * the application. */
     res = _android_dev_socket_register(ads);
+
     if (res) {
         const int save_error = errno;
         _android_event_socket_disconnect(adsevent);

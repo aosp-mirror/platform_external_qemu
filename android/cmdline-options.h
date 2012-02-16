@@ -159,6 +159,8 @@ OPT_PARAM( gpu, "<mode>", "set hardware OpenGLES emulation mode" )
 OPT_PARAM( fake_camera, "<mode>", "set fake camera emulation mode" )
 OPT_LIST( webcam, "name=<name>[,dir=<direction>]", "setup web camera emulation" )
 
+OPT_PARAM( screen, "<mode>", "set emulated screen mode" )
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
