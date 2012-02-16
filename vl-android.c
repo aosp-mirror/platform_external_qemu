@@ -55,6 +55,7 @@
 #include "android/hw-pipe-net.h"
 #include "android/hw-qemud.h"
 #include "android/camera/camera-service.h"
+#include "android/multitouch-port.h"
 #include "android/charmap.h"
 #include "android/globals.h"
 #include "android/utils/bufprint.h"
@@ -4257,6 +4258,11 @@ int main(int argc, char **argv, char **envp)
                       kernel_parameters,
                       initrd_filename,
                       cpu_model);
+
+        /* Initialize multi-touch emulation. */
+        if (android_hw->hw_multiTouch) {
+            mts_port_create(NULL);
+        }
 
         stralloc_reset(kernel_params);
         stralloc_reset(kernel_config);
