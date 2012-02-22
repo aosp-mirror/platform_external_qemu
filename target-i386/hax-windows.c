@@ -198,9 +198,10 @@ static char *hax_vcpu_devfs_string(int vm_id, int vcpu_id)
     return name;
 }
 
-int hax_host_create_vm(struct hax_state *hax, int vm_id)
+int hax_host_create_vm(struct hax_state *hax, int *vmid)
 {
     int ret;
+    int vm_id = 0;
     DWORD dSize = 0;
 
     if (hax_invalid_fd(hax->fd))
@@ -219,7 +220,7 @@ int hax_host_create_vm(struct hax_state *hax, int vm_id)
         dprint("error code:%d", GetLastError());
         return -1;
     }
-
+    *vmid = vm_id;
     return 0;
 }
 
