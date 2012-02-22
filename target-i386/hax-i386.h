@@ -40,6 +40,7 @@ struct hax_state
     hax_fd fd; /* the global hax device interface */
     uint32_t version;
     struct hax_vm *vm;
+    uint64_t mem_quota;
 };
 
 #define HAX_MAX_VCPU 0x10
@@ -67,6 +68,7 @@ int hax_sync_vcpu_state(CPUState *env, struct vcpu_state_t *state, int set);
 int hax_sync_msr(CPUState *env, struct hax_msr_data *msrs, int set);
 int hax_sync_fpu(CPUState *env, struct fx_layout *fl, int set);
 int hax_vm_destroy(struct hax_vm *vm);
+int hax_capability(struct hax_state *hax, struct hax_capabilityinfo *cap);
 
 /* Common host function */
 int hax_host_create_vm(struct hax_state *hax, int vm_id);
