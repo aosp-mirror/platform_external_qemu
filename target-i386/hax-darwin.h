@@ -40,6 +40,8 @@ static inline void hax_close_fd(hax_fd fd)
 #define HAX_IOCTL_VERSION _IOWR(0, 0x20, struct hax_module_version)
 /* Create VM instance and return the vm_id */
 #define HAX_IOCTL_CREATE_VM _IOWR(0, 0x21, int)
+/* Get HAXM capability information */
+#define HAX_IOCTL_CAPABILITY _IOR(0, 0x23, struct hax_capabilityinfo)
 
 /* Pass down a VM_ID, create a VCPU instance for it */
 #define HAX_VM_IOCTL_VCPU_CREATE    _IOR(0, 0x80, int)

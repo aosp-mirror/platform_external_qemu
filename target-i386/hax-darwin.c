@@ -85,6 +85,20 @@ int hax_set_phys_mem(target_phys_addr_t start_addr, ram_addr_t size, ram_addr_t 
     return ret;
 }
 
+int hax_capability(struct hax_state *hax, struct hax_capabilityinfo *cap)
+{
+    int ret;
+
+    ret = ioctl(hax->fd, HAX_IOCTL_CAPABILITY, cap);
+    if (ret == -1)
+    {
+        dprint("Failed to get HAX capability\n");
+        return -errno;
+    }
+
+    return 0;
+}
+
 int hax_mod_version(struct hax_state *hax, struct hax_module_version *version)
 {
     int ret;

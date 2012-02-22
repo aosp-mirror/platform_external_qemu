@@ -347,4 +347,39 @@ struct hax_set_ram_info
     uint64_t va;
 };
 
+/*
+ * HAXM will not work if VT/NX is disabled in host system, but it can still be
+ * loaded successfully, this is mainly to smooth installation procedure
+ *
+ * Currently HAXM has no swapping support, once RAM is allocated as guest RAM,
+ * that memory can't be swapped out.
+ * To avoid use up all RAM,  User can set the maxium RAM that can be used as
+ * guest RAM. After HAXM used up it's quota, it will fail to allocate memory
+ * for guest.
+ * Detect that HAXM is out of quota can take the emulator to non-HAXM model
+ */
+struct hax_capabilityinfo
+{
+    /* bit 0: 1 - HAXM is working
+     *        0 - HAXM is not working possibly because NT/NX disabled
+     * bit 1: 1 - HAXM has hard limit on how many RAM can be used as guest RAM
+     *        0 - HAXM has no memory limitation
+     */
+#define HAX_CAP_STATUS_WORKING  0x1
+#define HAX_CAP_STATUS_NOTWORKING  0x0
+#define HAX_CAP_WORKSTATUS_MASK 0x1
+#define HAX_CAP_MEMQUOTA        0x2
+    uint16_t wstatus;
+    /*
+     * valid when HAXM is not working
+     * bit 0: HAXM is not working because VT is not enabeld
+     * bit 1: HAXM is not working because NX not enabled
+     */
+#define HAX_CAP_FAILREASON_VT   0x1
+#define HAX_CAP_FAILREASON_NX   0x2
+    uint16_t winfo;
+    uint32_t pad;
+    uint64_t mem_quota;
+};
+
 #endif
