@@ -223,6 +223,20 @@ _on_captured_frame(HWND hwnd, LPVIDEOHDR hdr)
     /* Copy captured frame. */
     memcpy(wcd->last_frame, hdr->lpData, hdr->dwBytesUsed);
 
+    /* If biCompression is set to default (RGB), set correct pixel format
+     * for converters. */
+    if (wcd->frame_bitmap->bmiHeader.biCompression == BI_RGB) {
+        if (wcd->frame_bitmap->bmiHeader.biBitCount == 32) {
+            wcd->pixel_format = V4L2_PIX_FMT_BGR32;
+        } else if (wcd->frame_bitmap->bmiHeader.biBitCount == 16) {
+            wcd->pixel_format = V4L2_PIX_FMT_RGB565;
+        } else {
+            wcd->pixel_format = V4L2_PIX_FMT_BGR24;
+        }
+    } else {
+        wcd->pixel_format = wcd->frame_bitmap->bmiHeader.biCompression;
+    }
+
     return (LRESULT)0;
 }
 
@@ -549,7 +563,7 @@ _camera_device_read_frame_callback(WndCameraDevice* wcd,
 
     /* Convert framebuffer. */
     return convert_frame(wcd->last_frame,
-                         wcd->frame_bitmap->bmiHeader.biCompression,
+                         wcd->pixel_format,
                          wcd->frame_bitmap->bmiHeader.biSizeImage,
                          wcd->frame_bitmap->bmiHeader.biWidth,
                          wcd->frame_bitmap->bmiHeader.biHeight,
