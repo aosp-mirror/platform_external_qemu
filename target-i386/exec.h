@@ -29,7 +29,11 @@
 
 #include "cpu-defs.h"
 
-register struct CPUX86State *env asm(AREG0);
+/* Xcode 4.3 doesn't support global register variables */
+#if !defined(__APPLE_CC__) || __APPLE_CC__ < 5621
+       register
+#endif
+struct CPUX86State *env asm(AREG0);
 
 #include "qemu-common.h"
 #include "qemu-log.h"
