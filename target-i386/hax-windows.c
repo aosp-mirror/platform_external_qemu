@@ -133,6 +133,36 @@ int hax_set_phys_mem(target_phys_addr_t start_addr, ram_addr_t size, ram_addr_t 
         return 0;
 }
 
+int hax_capability(struct hax_state *hax, struct hax_capabilityinfo *cap)
+{
+    int ret;
+    HANDLE hDevice = hax->fd;   //handle to hax module
+    DWORD dSize = 0;
+    DWORD err = 0;
+
+    if (hax_invalid_fd(hDevice)) {
+        dprint("Invalid fd for hax device!\n");
+        return -ENODEV;
+    }
+
+    ret = DeviceIoControl(hDevice,
+      HAX_IOCTL_CAPABILITY,
+      NULL, 0,
+      cap, sizeof(*cap),
+      &dSize,
+      (LPOVERLAPPED) NULL);
+
+    if (!ret) {
+        err = GetLastError();
+        if (err == ERROR_INSUFFICIENT_BUFFER ||
+            err == ERROR_MORE_DATA)
+            dprint("hax capability is too long to hold.\n");
+        dprint("Failed to get Hax capability:%d\n", err);
+        return -EFAULT;
+    } else
+        return 0;
+}
+
 int hax_mod_version(struct hax_state *hax, struct hax_module_version *version)
 {
     int ret;

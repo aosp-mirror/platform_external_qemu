@@ -347,4 +347,39 @@ struct hax_set_ram_info
     uint64_t va;
 };
 
+/*
+ * We need to load the HAXM (HAX Manager) to tell if the host system has the
+ * required capabilities to operate, and we use hax_capabilityinfo to get such
+ * info from HAXM.
+ *
+ * To prevent HAXM from over-consuming RAM, we set the maximum amount of RAM
+ * that can be used for guests at HAX installation time. Once the quota is
+ * reached, HAXM will no longer attempt to allocate memory for guests.
+ * Detect that HAXM is out of quota can take the emulator to non-HAXM model
+ */
+struct hax_capabilityinfo
+{
+    /* bit 0: 1 - HAXM is working
+     *        0 - HAXM is not working possibly because VT/NX is disabled
+                  NX means Non-eXecution, aks. XD (eXecution Disable)
+     * bit 1: 1 - HAXM has hard limit on how many RAM can be used as guest RAM
+     *        0 - HAXM has no memory limitation
+     */
+#define HAX_CAP_STATUS_WORKING  0x1
+#define HAX_CAP_STATUS_NOTWORKING  0x0
+#define HAX_CAP_WORKSTATUS_MASK 0x1
+#define HAX_CAP_MEMQUOTA        0x2
+    uint16_t wstatus;
+    /*
+     * valid when HAXM is not working
+     * bit 0: HAXM is not working because VT is not enabeld
+     * bit 1: HAXM is not working because NX not enabled
+     */
+#define HAX_CAP_FAILREASON_VT   0x1
+#define HAX_CAP_FAILREASON_NX   0x2
+    uint16_t winfo;
+    uint32_t pad;
+    uint64_t mem_quota;
+};
+
 #endif

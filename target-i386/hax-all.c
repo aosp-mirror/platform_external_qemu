@@ -124,6 +124,37 @@ uint32_t hax_cur_version = 0x1;
 /* Least HAX kernel version */
 uint32_t hax_lest_version = 0x1;
 
+static int hax_get_capability(struct hax_state *hax)
+{
+    int ret;
+    struct hax_capabilityinfo capinfo, *cap = &capinfo;
+
+    ret = hax_capability(hax, cap);
+    if (ret)
+        return -ENOSYS;
+
+    if ( ((cap->wstatus & HAX_CAP_WORKSTATUS_MASK) ==
+          HAX_CAP_STATUS_NOTWORKING ))
+    {
+        if (cap->winfo & HAX_CAP_FAILREASON_VT)
+            dprint("VT feature is not enabled, HAXM not working.\n");
+        else if (cap->winfo & HAX_CAP_FAILREASON_NX)
+            dprint("NX feature is not enabled, HAXM not working.\n");
+        return -ENXIO;
+    }
+
+    if (cap->wstatus & HAX_CAP_MEMQUOTA)
+    {
+        if (cap->mem_quota < hax->mem_quota)
+        {
+            dprint("The memory needed by this VM exceeds the driver limit.\n");
+            return -ENOSPC;
+        }
+    }
+
+    return 0;
+}
+
 static int hax_version_support(struct hax_state *hax)
 {
     int ret;
@@ -296,6 +327,16 @@ int hax_vm_destroy(struct hax_vm *vm)
     return 0;
 }
 
+int hax_set_ramsize(uint64_t ramsize)
+{
+    struct hax_state *hax = &hax_global;
+
+    memset(hax, 0, sizeof(struct hax_state));
+    hax->mem_quota = ram_size;
+
+    return 0;
+}
+
 int hax_init(int smp_cpus)
 {
     struct hax_state *hax = NULL;
@@ -304,13 +345,20 @@ int hax_init(int smp_cpus)
     hax_support = 0;
 
     hax = &hax_global;
-    memset(hax, 0, sizeof(struct hax_state));
 
     hax->fd = hax_mod_open();
     if (hax_invalid_fd(hax->fd))
     {
         hax->fd = 0;
         ret = -ENODEV;
+        goto error;
+    }
+
+    ret = hax_get_capability(hax);
+    /* In case HAXM have no such capability support */
+    if (ret && (ret != -ENOSYS))
+    {
+        ret = -EINVAL;
         goto error;
     }
 
