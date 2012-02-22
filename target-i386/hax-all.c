@@ -258,8 +258,7 @@ struct hax_vm *hax_vm_create(struct hax_state *hax)
     if (!vm)
         return NULL;
     memset(vm, 0, sizeof(struct hax_vm));
-
-    ret = hax_host_create_vm(hax, vm_id);
+    ret = hax_host_create_vm(hax, &vm_id);
     if (ret) {
         dprint("Failed to create vm %x\n", ret);
         goto error;
