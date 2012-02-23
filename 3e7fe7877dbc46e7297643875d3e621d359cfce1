@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAADKn////8\u003d",
+        "filename": "target-i386/hax-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1006404
+      },
+      "writtenOn": "2012-02-23T03:09:01Z",
+      "side": 1,
+      "message": "But then original memset(), which is called in hax_init() after this fucntion, will reset the ramsize to 0 again. Except that we init each filed of hax_state in hax_init.\n\nIn fact, we considered to merge this function (hax_set_ram()) into hax_init(), something like hax_init(int smp_cpus, uint64_t ramsize), but later we keep it this way, to keep hax_init() as similar as kvm_init().",
+      "parentUuid": "AAADGX////k\u003d",
+      "revId": "3e7fe7877dbc46e7297643875d3e621d359cfce1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAADGX////g\u003d",
         "filename": "target-i386/hax-interface.h",
         "patchSetId": 1
