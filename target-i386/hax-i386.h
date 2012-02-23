@@ -69,7 +69,7 @@ int hax_sync_fpu(CPUState *env, struct fx_layout *fl, int set);
 int hax_vm_destroy(struct hax_vm *vm);
 
 /* Common host function */
-int hax_host_create_vm(struct hax_state *hax, int vm_id);
+int hax_host_create_vm(struct hax_state *hax, int *vm_id);
 hax_fd hax_host_open_vm(struct hax_state *hax, int vm_id);
 int hax_host_create_vcpu(hax_fd vm_fd, int vcpuid);
 hax_fd hax_host_open_vcpu(int vmid, int vcpuid);

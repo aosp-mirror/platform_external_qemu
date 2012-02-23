@@ -136,9 +136,10 @@ static char *hax_vcpu_devfs_string(int vm_id, int vcpu_id)
     return name;
 }
 
-int hax_host_create_vm(struct hax_state *hax, int vm_id)
+int hax_host_create_vm(struct hax_state *hax, int *vmid)
 {
     int ret;
+    int vm_id = 0;
 
     if (hax_invalid_fd(hax->fd))
         return -EINVAL;
@@ -147,7 +148,7 @@ int hax_host_create_vm(struct hax_state *hax, int vm_id)
         return 0;
 
     ret = ioctl(hax->fd, HAX_IOCTL_CREATE_VM, &vm_id);
-
+    *vmid = vm_id;
     return ret;
 }
 
