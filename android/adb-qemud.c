@@ -26,10 +26,13 @@
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)    VERBOSE_PRINT(adbclient,__VA_ARGS__)
+#define  DD(...)   VERBOSE_PRINT(adb,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(adbclient)
+#define  DD_ACTIVE VERBOSE_CHECK(adb)
 #define  QB(b, s)  quote_bytes((const char*)b, (s < 32) ? s : 32)
 
-#define SERVICE_NAME    "adb"
+#define SERVICE_NAME        "adb"
+#define DEBUG_SERVICE_NAME  "adb-debug"
 
 /* Enumerates ADB client state values. */
 typedef enum AdbClientState {
@@ -55,6 +58,13 @@ struct AdbClient {
     QemudClient*    qemud_client;
     /* Connection state. */
     AdbClientState  state;
+};
+
+/* ADB debugging client descriptor. */
+typedef struct AdbDbgClient AdbDbgClient;
+struct AdbDbgClient {
+    /* QEMUD client pipe for this client. */
+    QemudClient*    qemud_client;
 };
 
 /********************************************************************************
@@ -259,6 +269,82 @@ _adb_service_connect(void*          opaque,
 }
 
 /********************************************************************************
+ *                      Debugging ADB guest communication.
+ *******************************************************************************/
+
+/* Allocates AdbDbgClient instance. */
+static AdbDbgClient*
+_adb_dbg_client_new(void)
+{
+    AdbDbgClient* adb_dbg_client;
+
+    ANEW0(adb_dbg_client);
+
+    return adb_dbg_client;
+}
+
+/* Frees AdbDbgClient instance, allocated with _adb_dbg_client_new */
+static void
+_adb_dbg_client_free(AdbDbgClient* adb_dbg_client)
+{
+    if (adb_dbg_client != NULL) {
+        free(adb_dbg_client);
+    }
+}
+
+/* A callback that is invoked when ADB debugging guest sends data to the service.
+ * Param:
+ *  opaque - AdbDbgClient instance.
+ *  msg, msglen - Message received from the ADB guest.
+ *  client - adb-debug QEMUD client.
+ */
+static void
+_adb_dbg_client_recv(void* opaque, uint8_t* msg, int msglen, QemudClient* client)
+{
+    if (DD_ACTIVE) {
+        fprintf(stderr, "ADB: %s", (const char*)msg);
+    }
+}
+
+/* A callback that is invoked when ADB debugging guest disconnects from the
+ * service. */
+static void
+_adb_dbg_client_close(void* opaque)
+{
+    AdbDbgClient* const adb_dbg_client = (AdbDbgClient*)opaque;
+
+    DD("ADB debugging client %p is disconnected from the guest.", adb_dbg_client);
+    _adb_dbg_client_free(adb_dbg_client);
+}
+
+/* A callback that is invoked when ADB daemon running inside the guest connects
+ * to the debugging service.
+ * Client parameters are ignored here.
+ */
+static QemudClient*
+_adb_debug_service_connect(void*          opaque,
+                           QemudService*  serv,
+                           int            channel,
+                           const char*    client_param)
+{
+    /* Create new QEMUD client for the connection with ADB debugger. */
+    AdbDbgClient* const adb_dbg_client = _adb_dbg_client_new();
+
+    DD("Connecting ADB debugging guest: '%s'",
+       client_param ? client_param : "<null>");
+    adb_dbg_client->qemud_client =
+        qemud_client_new(serv, channel, client_param, adb_dbg_client,
+                         _adb_dbg_client_recv, _adb_dbg_client_close, NULL, NULL);
+    if (adb_dbg_client->qemud_client == NULL) {
+        DD("Unable to create QEMUD client for ADB debugging guest.");
+        _adb_dbg_client_free(adb_dbg_client);
+        return NULL;
+    }
+
+    return adb_dbg_client->qemud_client;
+}
+
+/********************************************************************************
  *                      ADB service API.
  *******************************************************************************/
 
@@ -272,6 +358,7 @@ static int _inited = 0;
     }
 
     if (!_inited) {
+        /* Register main ADB service. */
         QemudService*  serv = qemud_service_register(SERVICE_NAME, 0, NULL,
                                                      _adb_service_connect,
                                                      NULL, NULL);
@@ -281,5 +368,15 @@ static int _inited = 0;
             return;
         }
         D("%s: Registered '%s' qemud service", __FUNCTION__, SERVICE_NAME);
+
+        /* Register debugging ADB service. */
+        serv = qemud_service_register(DEBUG_SERVICE_NAME, 0, NULL,
+                                      _adb_debug_service_connect, NULL, NULL);
+        if (serv != NULL) {
+            DD("Registered '%s' qemud service", DEBUG_SERVICE_NAME);
+        } else {
+            dwarning("%s: Could not register '%s' service",
+                   __FUNCTION__, DEBUG_SERVICE_NAME);
+        }
     }
 }

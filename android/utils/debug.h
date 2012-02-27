@@ -41,6 +41,7 @@
     _VERBOSE_TAG(gles,         "hardware OpenGLES emulation") \
     _VERBOSE_TAG(adbserver,    "ADB server") \
     _VERBOSE_TAG(adbclient,    "ADB QEMU client") \
+    _VERBOSE_TAG(adb,          "ADB debugger") \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
