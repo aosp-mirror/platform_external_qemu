@@ -474,7 +474,7 @@ void events_dev_init(uint32_t base, qemu_irq irq)
 
     /* configure EV_SW array
      *
-     * EW_SW events are sent to indicate that the keyboard lid
+     * EV_SW events are sent to indicate that the keyboard lid
      * was closed or opened (done when we switch layouts through
      * KP-7 or KP-9).
      *
