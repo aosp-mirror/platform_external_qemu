@@ -13,6 +13,7 @@
 #include "android/hw-events.h"
 #include "android/charmap.h"
 #include "android/globals.h"  /* for android_hw */
+#include "android/multitouch-screen.h"
 #include "irq.h"
 #include "user-events.h"
 #include "console.h"
@@ -67,6 +68,18 @@ typedef struct
     int32_t *abs_info;
     size_t abs_info_count;
 } events_state;
+
+/* An entry in the array of ABS_XXX values */
+typedef struct ABSEntry {
+    /* Minimum ABS_XXX value. */
+    uint32_t    min;
+    /* Maximum ABS_XXX value. */
+    uint32_t    max;
+    /* 'fuzz;, and 'flat' ABS_XXX values are always zero here. */
+    uint32_t    fuzz;
+    uint32_t    flat;
+} ABSEntry;
+
 
 /* modify this each time you change the events_device structure. you
  * will also need to upadte events_state_load and events_state_save
@@ -258,20 +271,27 @@ static void events_put_mouse(void *opaque, int dx, int dy, int dz, int buttons_s
      * in android/skin/trackball.c and android/skin/window.c
      */
     if (dz == 0) {
-        enqueue_event(s, EV_ABS, ABS_X, dx);
-        enqueue_event(s, EV_ABS, ABS_Y, dy);
-        enqueue_event(s, EV_ABS, ABS_Z, dz);
-        enqueue_event(s, EV_KEY, BTN_TOUCH, buttons_state&1);
+        if (android_hw->hw_multiTouch) {
+            /* Convert mouse event into multi-touch event */
+            multitouch_update_pointer(MTES_MOUSE, 0, dx, dy,
+                                      (buttons_state & 1) ? 0x81 : 0);
+        } else if (android_hw->hw_touchScreen) {
+            enqueue_event(s, EV_ABS, ABS_X, dx);
+            enqueue_event(s, EV_ABS, ABS_Y, dy);
+            enqueue_event(s, EV_ABS, ABS_Z, dz);
+            enqueue_event(s, EV_KEY, BTN_TOUCH, buttons_state&1);
+            enqueue_event(s, EV_SYN, 0, 0);
+        }
     } else {
         enqueue_event(s, EV_REL, REL_X, dx);
         enqueue_event(s, EV_REL, REL_Y, dy);
+        enqueue_event(s, EV_SYN, 0, 0);
     }
-    enqueue_event(s, EV_SYN, 0, 0);
 }
 
 static void  events_put_generic(void*  opaque, int  type, int  code, int  value)
 {
-   events_state *s = (events_state *) opaque;
+    events_state *s = (events_state *) opaque;
 
     enqueue_event(s, type, code, value);
 }
@@ -431,13 +451,13 @@ void events_dev_init(uint32_t base, qemu_irq irq)
      *
      * EV_ABS events are sent when the touchscreen is pressed
      */
-    if (config->hw_touchScreen) {
-        int32_t*  values;
+    if (config->hw_touchScreen || config->hw_multiTouch) {
+        ABSEntry* abs_values;
 
         events_set_bit (s, EV_SYN, EV_ABS );
         events_set_bits(s, EV_ABS, ABS_X, ABS_Z);
         /* Allocate the absinfo to report the min/max bounds for each
-         * absolute dimension. The array must contain 3 tuples
+         * absolute dimension. The array must contain 3, or ABS_MAX tuples
          * of (min,max,fuzz,flat) 32-bit values.
          *
          * min and max are the bounds
@@ -448,28 +468,34 @@ void events_dev_init(uint32_t base, qemu_irq irq)
          * There is no need to save/restore this array in a snapshot
          * since the values only depend on the hardware configuration.
          */
-        s->abs_info_count = 3*4;
-        s->abs_info = values = malloc(sizeof(uint32_t)*s->abs_info_count);
+        s->abs_info_count = config->hw_multiTouch ? ABS_MAX * 4 : 3 * 4;
+        const int abs_size = sizeof(uint32_t) * s->abs_info_count;
+        s->abs_info = malloc(abs_size);
+        memset(s->abs_info, 0, abs_size);
+        abs_values = (ABSEntry*)s->abs_info;
 
-        /* ABS_X min/max/fuzz/flat */
-        values[0] = 0;
-        values[1] = config->hw_lcd_width-1;
-        values[2] = 0;
-        values[3] = 0;
-        values   += 4;
+        abs_values[ABS_X].max = config->hw_lcd_width-1;
+        abs_values[ABS_Y].max = config->hw_lcd_height-1;
+        abs_values[ABS_Z].max = 1;
 
-        /* ABS_Y */
-        values[0] = 0;
-        values[1] = config->hw_lcd_height-1;
-        values[2] = 0;
-        values[3] = 0;
-        values   += 4;
+        if (config->hw_multiTouch) {
+            /*
+             * Setup multitouch.
+             */
+            events_set_bit(s, EV_ABS, ABS_MT_SLOT);
+            events_set_bit(s, EV_ABS, ABS_MT_POSITION_X);
+            events_set_bit(s, EV_ABS, ABS_MT_POSITION_Y);
+            events_set_bit(s, EV_ABS, ABS_MT_TRACKING_ID);
+            events_set_bit(s, EV_ABS, ABS_MT_TOUCH_MAJOR);
+            events_set_bit(s, EV_ABS, ABS_MT_PRESSURE);
 
-        /* ABS_Z */
-        values[0] = 0;
-        values[1] = 1;
-        values[2] = 0;
-        values[3] = 0;
+            abs_values[ABS_MT_SLOT].max = multitouch_get_max_slot();
+            abs_values[ABS_MT_TRACKING_ID].max = abs_values[ABS_MT_SLOT].max + 1;
+            abs_values[ABS_MT_POSITION_X].max = abs_values[ABS_X].max;
+            abs_values[ABS_MT_POSITION_Y].max = abs_values[ABS_Y].max;
+            abs_values[ABS_MT_TOUCH_MAJOR].max = 0x7fffffff; // TODO: Make it less random
+            abs_values[ABS_MT_PRESSURE].max = 0x100; // TODO: Make it less random
+        }
     }
 
     /* configure EV_SW array

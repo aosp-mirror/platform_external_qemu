@@ -442,7 +442,10 @@ CORE_MISC_SOURCES = \
     android/camera/camera-service.c \
     android/adb-server.c \
     android/adb-qemud.c \
-    android/snaphost-android.c
+    android/snaphost-android.c \
+    android/multitouch-screen.c \
+    android/multitouch-port.c \
+    android/utils/jpeg-compress.c
 
 $(call gen-hw-config-defs)
 
