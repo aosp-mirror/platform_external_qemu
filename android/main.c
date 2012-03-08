@@ -235,7 +235,7 @@ int main(int argc, char **argv)
     AConfig*          skinConfig;
     char*             skinPath;
     int               inAndroidBuild;
-    uint64_t          defaultPartitionSize = convertMBToBytes(66);
+    uint64_t          defaultPartitionSize = convertMBToBytes(128);
 
     AndroidOptions  opts[1];
     /* net.shared_net_ip boot property value. */
@@ -729,7 +729,7 @@ int main(int argc, char **argv)
         uint64_t     defaultBytes =
                 hw->disk_dataPartition_size == 0 ?
                 defaultPartitionSize :
-                convertMBToBytes(hw->disk_dataPartition_size);
+                hw->disk_dataPartition_size;
         uint64_t     dataBytes;
         const char*  dataPath = hw->disk_dataPartition_initPath;
 
