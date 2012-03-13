@@ -493,21 +493,20 @@ get_android_abs_build_var ()
 # Locate the Android prebuilt directory for your os
 # you should only call this if IN_ANDROID_BUILD is "yes"
 #
-# This will set ANDROID_PREBUILT_HOST_TAG and ANDROID_PREBUILT
+# This will set ANDROID_PREBUILT_HOST_TAG, ANDROID_PREBUILT and ANDROID_PREBUILTS
 #
 locate_android_prebuilt ()
 {
     # locate prebuilt directory
     ANDROID_PREBUILT_HOST_TAG=$OS
     ANDROID_PREBUILT=$ANDROID_TOP/prebuilt/$ANDROID_PREBUILT_HOST_TAG
+    ANDROID_PREBUILTS=$ANDROID_TOP/prebuilts/misc/$ANDROID_PREBUILT_HOST_TAG
     if [ ! -d $ANDROID_PREBUILT ] ; then
         # this can happen when building on x86_64
         case $OS in
             linux-x86_64)
                 ANDROID_PREBUILT_HOST_TAG=linux-x86
                 ANDROID_PREBUILT=$ANDROID_TOP/prebuilt/$ANDROID_PREBUILT_HOST_TAG
-                log "Forcing usage of 32-bit prebuilts"
-                force_32bit_binaries
                 ;;
             *)
         esac
@@ -516,7 +515,22 @@ locate_android_prebuilt ()
             exit 1
         fi
     fi
+    if [ ! -d $ANDROID_PREBUILTS ] ; then
+        # this can happen when building on x86_64
+        case $OS in
+            linux-x86_64)
+                ANDROID_PREBUILT_HOST_TAG=linux-x86
+                ANDROID_PREBUILTS=$ANDROID_TOP/prebuilts/misc/$ANDROID_PREBUILT_HOST_TAG
+                ;;
+            *)
+        esac
+        if [ ! -d $ANDROID_PREBUILTS ] ; then
+            echo "Can't find the prebuilts directory $ANDROID_PREBUILTS in Android build"
+            exit 1
+        fi
+    fi
     log "Prebuilt   : ANDROID_PREBUILT=$ANDROID_PREBUILT"
+    log "Prebuilts  : ANDROID_PREBUILTS=$ANDROID_PREBUILTS"
 }
 
 ## Build configuration file support
@@ -561,6 +575,7 @@ add_android_config_mk ()
     fi
     echo "HOST_PREBUILT_TAG := $HOST_TAG" >> $config_mk
     echo "PREBUILT          := $ANDROID_PREBUILT" >> $config_mk
+    echo "PREBUILTS         := $ANDROID_PREBUILTS" >> $config_mk
 }
 
 # Find pattern $1 in string $2

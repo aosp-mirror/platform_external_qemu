@@ -145,7 +145,7 @@ _adjustPartitionSize( const char*  description,
     if (imageMB > defaultMB) {
         snprintf(temp, sizeof temp, "(%d MB > %d MB)", imageMB, defaultMB);
     } else {
-        snprintf(temp, sizeof temp, "(%lld bytes > %lld bytes)", imageBytes, defaultBytes);
+        snprintf(temp, sizeof temp, "(%" PRIu64 "  bytes > %" PRIu64 " bytes)", imageBytes, defaultBytes);
     }
 
     if (inAndroidBuild) {

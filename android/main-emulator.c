@@ -50,7 +50,17 @@ int android_verbose;
 #  define DLL_EXTENSION  ".so"
 #endif
 
+#if defined(__x86_64__)
+/* Normally emulator is compiled in 32-bit.  In standalone it can be compiled
+   in 64-bit (with ,/android-configure.sh --try-64).  In this case, emulator-$ARCH
+   are also compiled in 64-bit and will search for lib64*.so instead of lib*so */
+#define  GLES_EMULATION_LIB  "lib64OpenglRender" DLL_EXTENSION
+#elif defined(__i386__)
 #define  GLES_EMULATION_LIB  "libOpenglRender" DLL_EXTENSION
+#else
+#error Unknown architecture for codegen
+#endif
+
 
 /* Forward declarations */
 static char* getTargetEmulatorPath(const char* progName, const char* avdArch);
@@ -173,6 +183,29 @@ int main(int argc, char** argv)
     return errno;
 }
 
+static int
+getHostOSBitness()
+{
+  /*
+     This function returns 64 if host is running 64-bit OS, or 32 otherwise.
+
+     It uses the same technique in ndk/build/core/ndk-common.sh.
+     Here are comments from there:
+
+  ## On Linux or Darwin, a 64-bit kernel (*) doesn't mean that the user-land
+  ## is always 32-bit, so use "file" to determine the bitness of the shell
+  ## that invoked us. The -L option is used to de-reference symlinks.
+  ##
+  ## Note that on Darwin, a single executable can contain both x86 and
+  ## x86_64 machine code, so just look for x86_64 (darwin) or x86-64 (Linux)
+  ## in the output.
+
+    (*) ie. The following code doesn't always work:
+        struct utsname u;
+        int host_runs_64bit_OS = (uname(&u) == 0 && strcmp(u.machine, "x86_64") == 0);
+  */
+    return system("file -L \"$SHELL\" | grep -q \"x86[_-]64\"") == 0 ? 64 : 32;
+}
 
 /* Find the target-specific emulator binary. This will be something
  * like  <programDir>/emulator-<targetArch>, where <programDir> is
@@ -182,24 +215,43 @@ static char*
 getTargetEmulatorPath(const char* progName, const char* avdArch)
 {
     char*  progDir;
-    char   temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
+    char   path[PATH_MAX], *pathEnd=path+sizeof(path), *p;
+    const char* emulatorPrefix = "emulator-";
+    const char* emulator64Prefix = "emulator64-";
 #ifdef _WIN32
     const char* exeExt = ".exe";
+    /* ToDo: currently amd64-mingw32msvc-gcc doesn't work (http://b/issue?id=5949152)
+             which prevents us from generating 64-bit emulator for Windows */
+    int host_runs_64bit_OS = 0;
 #else
     const char* exeExt = "";
+    int host_runs_64bit_OS = getHostOSBitness() == 64;
 #endif
 
     /* Get program's directory name in progDir */
     path_split(progName, &progDir, NULL);
 
-    p = bufprint(temp, end, "%s/emulator-%s%s", progDir, avdArch, exeExt);
+    if (host_runs_64bit_OS) {
+        /* Find 64-bit emulator first */
+        p = bufprint(path, pathEnd, "%s/%s%s%s", progDir, emulator64Prefix, avdArch, exeExt);
+        if (p >= pathEnd) {
+            APANIC("Path too long: %s\n", progName);
+        }
+        if (path_exists(path)) {
+            free(progDir);
+            return strdup(path);
+        }
+    }
+
+    /* Find 32-bit emulator */
+    p = bufprint(path, pathEnd, "%s/%s%s%s", progDir, emulatorPrefix, avdArch, exeExt);
     free(progDir);
-    if (p >= end) {
+    if (p >= pathEnd) {
         APANIC("Path too long: %s\n", progName);
     }
 
-    if (path_exists(temp)) {
-        return strdup(temp);
+    if (path_exists(path)) {
+        return strdup(path);
     }
 
     /* Mmm, the file doesn't exist, If there is no slash / backslash
@@ -210,16 +262,25 @@ getTargetEmulatorPath(const char* progName, const char* avdArch)
 #else
     if (strchr(progName, '/') == NULL) {
 #endif
-        p = bufprint(temp, end, "emulator-%s%s", avdArch, exeExt);
-        if (p < end) {
-            char*  resolved = path_search_exec(temp);
+        if (host_runs_64bit_OS) {
+           p = bufprint(path, pathEnd, "%s%s%s", emulator64Prefix, avdArch, exeExt);
+           if (p < pathEnd) {
+               char*  resolved = path_search_exec(path);
+               if (resolved != NULL)
+                   return resolved;
+           }
+        }
+
+        p = bufprint(path, pathEnd, "%s%s%s", emulatorPrefix, avdArch, exeExt);
+        if (p < pathEnd) {
+            char*  resolved = path_search_exec(path);
             if (resolved != NULL)
                 return resolved;
         }
     }
 
     /* Otherwise, the program is missing */
-    APANIC("Missing arch-specific emulator program: %s\n", temp);
+    APANIC("Missing arch-specific emulator program: %s\n", path);
     return NULL;
 }
 
@@ -271,7 +332,7 @@ getSharedLibraryPath(const char* progName, const char* libName)
     }
 
     /* try in $progDir/../lib, this corresponds to the platform build
-     * where the emulator binary is under out/host/<system>/lib and
+     * where the emulator binary is under out/host/<system>/bin and
      * the libraries are under out/host/<system>/lib
      */
     {

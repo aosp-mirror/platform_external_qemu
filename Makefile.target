@@ -42,13 +42,15 @@ EMULATOR_TARGET_CFLAGS += \
     -DTARGET_ARCH=\"$(EMULATOR_TARGET_ARCH)\"
 
 
-$(call start-emulator-library, emulator-target-$(EMULATOR_TARGET_CPU))
+common_LOCAL_CFLAGS =
+common_LOCAL_SRC_FILES =
+
 
 # The following is to ensure that "config.h" will map to a target-specific
 # configuration file header.
-LOCAL_CFLAGS += $(EMULATOR_TARGET_CFLAGS)
+common_LOCAL_CFLAGS += $(EMULATOR_TARGET_CFLAGS)
 
-LOCAL_SRC_FILES += \
+common_LOCAL_SRC_FILES += \
     tcg/tcg.c \
 
 ##############################################################################
@@ -86,7 +88,6 @@ HW_SOURCES := \
     usb.c \
     watchdog.c
 
-$(call gen-hw-config-defs)
 
 ifeq ($(EMULATOR_TARGET_ARCH),arm)
 HW_SOURCES += android_arm.c \
@@ -102,14 +103,14 @@ HW_SOURCES += android_arm.c \
 HW_OBJ_SOURCES := hw/smc91c111.c
 HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
 
-LOCAL_SRC_FILES += arm-dis.c
+common_LOCAL_SRC_FILES += arm-dis.c
 
 # smc91c111.c requires <zlib.h>
-LOCAL_CFLAGS += $(ZLIB_CFLAGS)
+common_LOCAL_CFLAGS += $(ZLIB_CFLAGS)
 endif
 
 # required to ensure we properly initialize virtual audio hardware
-LOCAL_CFLAGS += -DHAS_AUDIO
+common_LOCAL_CFLAGS += -DHAS_AUDIO
 
 ifeq ($(EMULATOR_TARGET_ARCH),x86)
 HW_SOURCES += \
@@ -134,9 +135,9 @@ HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
 
 endif
 
-LOCAL_SRC_FILES += $(HW_SOURCES:%=hw/%)
+common_LOCAL_SRC_FILES += $(HW_SOURCES:%=hw/%)
 
-LOCAL_SRC_FILES += \
+common_LOCAL_SRC_FILES += \
     cpu-exec.c  \
     exec.c \
     translate-all.c \
@@ -147,14 +148,14 @@ LOCAL_SRC_FILES += \
 ##############################################################################
 # CPU-specific emulation.
 #
-LOCAL_CFLAGS += -fno-PIC -fomit-frame-pointer -Wno-sign-compare
+common_LOCAL_CFLAGS += -fno-PIC -fomit-frame-pointer -Wno-sign-compare
 
 ifeq ($(HOST_ARCH),ppc)
-    LOCAL_CFLAGS += -D__powerpc__
+    common_LOCAL_CFLAGS += -D__powerpc__
 endif
 
 ifeq ($(EMULATOR_TARGET_ARCH),arm)
-LOCAL_SRC_FILES += \
+common_LOCAL_SRC_FILES += \
     target-arm/op_helper.c \
     target-arm/iwmmxt_helper.c \
     target-arm/neon_helper.c \
@@ -166,36 +167,36 @@ LOCAL_SRC_FILES += \
     hw/armv7m_nvic.c \
     arm-semi.c \
 
-LOCAL_SRC_FILES += fpu/softfloat.c
+common_LOCAL_SRC_FILES += fpu/softfloat.c
 endif
 
 ifeq ($(EMULATOR_TARGET_ARCH), x86)
-LOCAL_SRC_FILES += \
+common_LOCAL_SRC_FILES += \
     target-i386/op_helper.c \
     target-i386/helper.c \
     target-i386/translate.c \
     target-i386/machine.c \
 
 ifeq ($(HOST_OS),darwin)
-LOCAL_SRC_FILES += \
+common_LOCAL_SRC_FILES += \
       target-i386/hax-all.c       \
       target-i386/hax-darwin.c
 endif
 
 ifeq ($(HOST_OS),windows)
-LOCAL_SRC_FILES += \
+common_LOCAL_SRC_FILES += \
       target-i386/hax-all.c       \
       target-i386/hax-windows.c
 endif
 
-LOCAL_SRC_FILES += fpu/softfloat-native.c
+common_LOCAL_SRC_FILES += fpu/softfloat-native.c
 endif
 
 # compile KVM only if target is x86 on x86 Linux
 QEMU_KVM_TAG := $(QEMU_HOST_TAG)-$(EMULATOR_TARGET_ARCH)
 QEMU_DO_KVM := $(if $(filter linux-x86-x86 linux-x86_64-x86,$(QEMU_KVM_TAG)),true,false)
 ifeq ($(QEMU_DO_KVM),true)
-    LOCAL_SRC_FILES += \
+    common_LOCAL_SRC_FILES += \
         target-i386/kvm.c \
         target-i386/kvm-gs-restore.c \
         kvm-all.c \
@@ -210,7 +211,7 @@ endif
 # memory is within allocated block. This information also allows detecting
 # memory leaks and attempts to free/realloc invalid pointers.
 #
-LOCAL_CFLAGS += \
+common_LOCAL_CFLAGS += \
     -I$(LOCAL_PATH)/memcheck \
     -I$(LOCAL_PATH)/elff
 
@@ -221,22 +222,42 @@ MCHK_SOURCES := \
     memcheck_mmrange_map.c \
     memcheck_util.c \
 
-LOCAL_SRC_FILES += $(MCHK_SOURCES:%=memcheck/%)
+common_LOCAL_SRC_FILES += $(MCHK_SOURCES:%=memcheck/%)
 
-LOCAL_SRC_FILES += \
+common_LOCAL_SRC_FILES += \
     cpus.c \
     arch_init.c
 
 # What a mess, os-posix.c depends on the exact values of options
 # which are target specific.
 ifeq ($(HOST_OS),windows)
-    LOCAL_SRC_FILES += os-win32.c oslib-win32.c
+    common_LOCAL_SRC_FILES += os-win32.c oslib-win32.c
 else
-    LOCAL_SRC_FILES += os-posix.c oslib-posix.c
+    common_LOCAL_SRC_FILES += os-posix.c oslib-posix.c
 endif
-$(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
 
+
+## one for 32-bit
+$(call start-emulator-library, emulator-target-$(EMULATOR_TARGET_CPU))
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+$(call gen-hw-config-defs)
+$(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
 $(call end-emulator-library)
+
+## another for 64-bit, see note in file Makefile.common emulator64-common
+ifeq ($(HOST_OS),linux)
+  ifneq ($(BUILD_STANDALONE_EMULATOR),true)
+    $(call start-emulator-library, emulator64-target-$(EMULATOR_TARGET_CPU))
+    LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
+    LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+    $(call gen-hw-config-defs)
+    $(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
+    $(call end-emulator-library)
+  endif # BUILD_STANDALONE_EMULATOR == nil
+endif # HOST_OS == linux
+
+
 
 ##############################################################################
 ##############################################################################
@@ -326,28 +347,31 @@ $(call end-emulator-program)
 ###
 ###
 
-$(call start-emulator-program, emulator-$(EMULATOR_TARGET_ARCH))
+common_LOCAL_LDLIBS =
+common_LOCAL_CFLAGS =
+common_LOCAL_SRC_FILES =
 
-LOCAL_STATIC_LIBRARIES := \
+
+common_LOCAL_STATIC_LIBRARIES := \
     emulator-libui \
     emulator-libqemu \
     emulator-target-$(EMULATOR_TARGET_CPU) \
     emulator-libelff \
     emulator-common \
 
-LOCAL_LDLIBS += \
+common_LOCAL_LDLIBS += \
     $(EMULATOR_COMMON_LDLIBS) \
     $(EMULATOR_LIBQEMU_LDLIBS) \
     $(EMULATOR_LIBUI_LDLIBS) \
     $(ELFF_LDLIBS) \
 
-LOCAL_CFLAGS += \
+common_LOCAL_CFLAGS += \
     $(EMULATOR_TARGET_CFLAGS) \
     $(EMULATOR_COMMON_CFLAGS) \
     $(EMULATOR_LIBQEMU_CFLAGS) \
     $(EMULATOR_LIBUI_CFLAGS)
 
-LOCAL_SRC_FILES := \
+common_LOCAL_SRC_FILES := \
     audio/audio.c \
     disas.c \
     dma-helpers.c \
@@ -371,28 +395,60 @@ LOCAL_SRC_FILES := \
     android/protocol/ui-commands-qemu.c \
     android/
 
-$(call gen-hx-header,qemu-monitor.hx,qemu-monitor.h,monitor.c)
-$(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
-$(call gen-hw-config-defs)
 
 # The following files cannot be in static libraries because they contain
 # constructor functions that are otherwise stripped by the final linker
-LOCAL_SRC_FILES += $(HW_OBJ_SOURCES)
-LOCAL_CFLAGS    += $(HW_OBJ_CFLAGS)
+common_LOCAL_SRC_FILES += $(HW_OBJ_SOURCES)
+common_LOCAL_CFLAGS    += $(HW_OBJ_CFLAGS)
 
-LOCAL_SRC_FILES += $(BLOCK_SOURCES)
-LOCAL_CFLAGS    += $(BLOCK_CFLAGS)
+common_LOCAL_SRC_FILES += $(BLOCK_SOURCES)
+common_LOCAL_CFLAGS    += $(BLOCK_CFLAGS)
 
-LOCAL_SRC_FILES += $(SDLMAIN_SOURCES)
+common_LOCAL_SRC_FILES += $(SDLMAIN_SOURCES)
 
 # Generate a completely static executable if needed.
 # Note that this means no sound and graphics on Linux.
 #
 ifeq ($(CONFIG_STATIC_EXECUTABLE),true)
-    LOCAL_SRC_FILES += dynlink-static.c
-    LOCAL_LDLIBS    += -static
+    common_LOCAL_SRC_FILES += dynlink-static.c
+    common_LOCAL_LDLIBS    += -static
 endif
 
-LOCAL_STATIC_LIBRARIES += $(SDL_STATIC_LIBRARIES)
-
+## one for 32-bit
+$(call start-emulator-program, emulator-$(EMULATOR_TARGET_ARCH))
+LOCAL_STATIC_LIBRARIES += \
+    emulator-libui \
+    emulator-libqemu \
+    emulator-target-$(EMULATOR_TARGET_CPU) \
+    emulator-libelff \
+    emulator-common \
+    $(SDL_STATIC_LIBRARIES)
+LOCAL_LDLIBS += $(common_LOCAL_LDLIBS)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+$(call gen-hx-header,qemu-monitor.hx,qemu-monitor.h,monitor.c)
+$(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
+$(call gen-hw-config-defs)
 $(call end-emulator-program)
+
+
+## another for 64-bit, see note in file Makefile.common emulator64-common
+ifeq ($(HOST_OS),linux)
+  ifneq ($(BUILD_STANDALONE_EMULATOR),true)
+    $(call start-emulator-program, emulator64-$(EMULATOR_TARGET_ARCH))
+    LOCAL_STATIC_LIBRARIES += \
+        emulator64-libui \
+        emulator64-libqemu \
+        emulator64-target-$(EMULATOR_TARGET_CPU) \
+        emulator64-libelff \
+        emulator64-common \
+        $(SDL_STATIC_LIBRARIES_64)
+    LOCAL_LDLIBS += $(common_LOCAL_LDLIBS) -m64
+    LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
+    LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+    $(call gen-hx-header,qemu-monitor.hx,qemu-monitor.h,monitor.c)
+    $(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
+    $(call gen-hw-config-defs)
+    $(call end-emulator-program)
+  endif # BUILD_STANDALONE_EMULATOR == nil
+endif # HOST_OS == linux
