@@ -1207,3 +1207,12 @@ int avdInfo_getAdbdCommunicationMode( AvdInfo* i )
 {
     return path_getAdbdCommunicationMode(i->androidOut);
 }
+
+int avdInfo_getSnapshotPresent(AvdInfo* i)
+{
+    if (i->configIni == NULL) {
+        return 0;
+    } else {
+        return iniFile_getBoolean(i->configIni, "snapshot.present", "no");
+    }
+}

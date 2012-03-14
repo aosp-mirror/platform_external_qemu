@@ -853,7 +853,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        if (!opts->snapstorage) {
+        if (!opts->snapstorage && avdInfo_getSnapshotPresent(avd)) {
             opts->snapstorage = avdInfo_getSnapStoragePath(avd);
             if (opts->snapstorage != NULL) {
                 D("autoconfig: -snapstorage %s", opts->snapstorage);
