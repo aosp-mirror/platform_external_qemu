@@ -252,6 +252,15 @@ const char*  avdInfo_getCoreHwIniPath( AvdInfo* i );
  */
 int          avdInfo_getAdbdCommunicationMode( AvdInfo* i );
 
+/* Returns config.ini snapshot presense status.
+ * This routine checks if snapshots are enabled in AVD config.ini file.
+ * Return:
+ *  1 - Snapshots are enabled in AVD config.ini file.
+ *  0 - Snapshots are disabled in AVD config.ini file, of config.ini file is not
+ *      found.
+*/
+int          avdInfo_getSnapshotPresent(AvdInfo* i);
+
 /* */
 
 #endif /* ANDROID_AVD_INFO_H */
