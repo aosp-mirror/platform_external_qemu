@@ -389,6 +389,14 @@ _android_dev_socket_destroy(AndroidDevSocket* ads)
     memset(&ads->address, 0, sizeof(ads->address));
 }
 
+/* Event socket's asynchronous I/O looper callback.
+ * Param:
+ *  opaque - AndroidEventSocket instance.
+ *  fd - Socket's FD.
+ *  events - I/O type bitsmask (read | write).
+ */
+static void _on_event_socket_io(void* opaque, int fd, unsigned events);
+
 static int
 _android_dev_socket_connect(AndroidDevSocket* ads)
 {
@@ -402,6 +410,14 @@ _android_dev_socket_connect(AndroidDevSocket* ads)
         return -1;
     }
     socket_set_nonblock(ads->fd);
+
+    /* XXX: A quick fix for event channel init. Redo this later. */
+    if (ads->type == ADS_TYPE_EVENT) {
+        AndroidEventSocket* adsevent = (AndroidEventSocket*)ads;
+        /* Prepare for async I/O on the event socket. */
+        loopIo_init(adsevent->io, adsevent->dev_socket.ad->looper, ads->fd,
+                    _on_event_socket_io, adsevent);
+    }
 
     /* Synchronously connect to it. */
     ads->socket_status = ADS_CONNECTING;
@@ -952,11 +968,14 @@ _android_event_socket_connect_sync(AndroidEventSocket* adsevent)
 {
     AndroidDevSocket* ads = &adsevent->dev_socket;
     const int res = _android_dev_socket_connect(&adsevent->dev_socket);
+    /* XXX: This is patch-fixed in _android_dev_socket_connect */
+#if 0
     if (res == 0) {
         /* Prepare for async I/O on the event socket. */
         loopIo_init(adsevent->io, _aes_looper(adsevent), ads->fd,
                     _on_event_socket_io, adsevent);
     }
+#endif
     return res;
 }
 
@@ -1208,6 +1227,7 @@ _on_event_socket_connected(AndroidEventSocket* adsevent, int failure)
 
     /* Complete event socket connection by identifying it as "event" socket with
      * the application. */
+    ads->socket_status = ADS_CONNECTED;
     res = _android_dev_socket_register(ads);
 
     if (res) {
