@@ -395,4 +395,17 @@ typedef enum DisplayType
     DT_NOGRAPHIC,
 } DisplayType;
 
+/*
+ * A fixer for timeout value passed to select() on Mac. The issue is that Mac's
+ * version of select() will return EINVAL on timeouts larger than 100000000
+ * seconds, even though it should have just clamped it. So, for Mac we should
+ * make sure that timeout value is bound to 100000000 seconds before passing it
+ * to select().
+ */
+#if _DARWIN_C_SOURCE
+#define CLAMP_MAC_TIMEOUT(to) do { if (to > 100000000000LL) to = 100000000000LL; } while (0)
+#else
+#define CLAMP_MAC_TIMEOUT(to) ((void)0)
+#endif  // _DARWIN_C_SOURCE
+
 #endif
