@@ -1273,26 +1273,16 @@ int main(int argc, char **argv)
 
     /* Setup screen emulation */
     if (opts->screen) {
-        if (!strcmp(opts->screen, "touch")) {
-            hw->hw_touchScreen = 1;
-            hw->hw_multiTouch = 0;
-        } else if (!strcmp(opts->screen, "multi-touch")) {
-            hw->hw_multiTouch = 1;
-            hw->hw_touchScreen = 0;
-        } else if (!strcmp(opts->screen, "off")) {
-            hw->hw_touchScreen = 0;
-            hw->hw_multiTouch = 0;
-        } else {
-            derror("Invalid value for -screen <mode> parameter: %s\n", opts->screen);
-            derror("Valid values are: touch, multi-touch, or off\n");
+        if (strcmp(opts->screen, "touch") &&
+            strcmp(opts->screen, "multi-touch") &&
+            strcmp(opts->screen, "no-touch")) {
+
+            derror("Invalid value for -screen <mode> parameter: %s\n"
+                   "Valid values are: touch, multi-touch, or no-touch\n",
+                   opts->screen);
             exit(1);
         }
-    } else {
-        /* If both, touch and multitouch are set in hw.ini, choose multi-touch
-         * for screen emulation. */
-        if (hw->hw_touchScreen && hw->hw_multiTouch) {
-            hw->hw_touchScreen = 0;
-        }
+        hw->hw_screen = ASTRDUP(opts->screen);
     }
 
     while(argc-- > 0) {

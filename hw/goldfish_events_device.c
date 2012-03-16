@@ -271,11 +271,11 @@ static void events_put_mouse(void *opaque, int dx, int dy, int dz, int buttons_s
      * in android/skin/trackball.c and android/skin/window.c
      */
     if (dz == 0) {
-        if (android_hw->hw_multiTouch) {
+        if (androidHwConfig_isScreenMultiTouch(android_hw)) {
             /* Convert mouse event into multi-touch event */
             multitouch_update_pointer(MTES_MOUSE, 0, dx, dy,
                                       (buttons_state & 1) ? 0x81 : 0);
-        } else if (android_hw->hw_touchScreen) {
+        } else if (androidHwConfig_isScreenTouch(android_hw)) {
             enqueue_event(s, EV_ABS, ABS_X, dx);
             enqueue_event(s, EV_ABS, ABS_Y, dy);
             enqueue_event(s, EV_ABS, ABS_Z, dz);
@@ -402,7 +402,7 @@ void events_dev_init(uint32_t base, qemu_irq irq)
     if (config->hw_trackBall) {
         events_set_bit(s, EV_KEY, BTN_MOUSE);
     }
-    if (config->hw_touchScreen) {
+    if (androidHwConfig_isScreenTouch(config)) {
         events_set_bit(s, EV_KEY, BTN_TOUCH);
     }
 
@@ -451,7 +451,7 @@ void events_dev_init(uint32_t base, qemu_irq irq)
      *
      * EV_ABS events are sent when the touchscreen is pressed
      */
-    if (config->hw_touchScreen || config->hw_multiTouch) {
+    if (!androidHwConfig_isScreenNoTouch(config)) {
         ABSEntry* abs_values;
 
         events_set_bit (s, EV_SYN, EV_ABS );
@@ -468,7 +468,7 @@ void events_dev_init(uint32_t base, qemu_irq irq)
          * There is no need to save/restore this array in a snapshot
          * since the values only depend on the hardware configuration.
          */
-        s->abs_info_count = config->hw_multiTouch ? ABS_MAX * 4 : 3 * 4;
+        s->abs_info_count = androidHwConfig_isScreenMultiTouch(config) ? ABS_MAX * 4 : 3 * 4;
         const int abs_size = sizeof(uint32_t) * s->abs_info_count;
         s->abs_info = malloc(abs_size);
         memset(s->abs_info, 0, abs_size);
@@ -478,7 +478,7 @@ void events_dev_init(uint32_t base, qemu_irq irq)
         abs_values[ABS_Y].max = config->hw_lcd_height-1;
         abs_values[ABS_Z].max = 1;
 
-        if (config->hw_multiTouch) {
+        if (androidHwConfig_isScreenMultiTouch(config)) {
             /*
              * Setup multitouch.
              */

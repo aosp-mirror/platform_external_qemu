@@ -81,8 +81,8 @@ qemulator_setup( QEmulator*  emulator )
 
         qemulator_set_title(emulator);
 
-        skin_window_enable_touch ( emulator->window, android_hw->hw_touchScreen != 0 ||
-                                                     android_hw->hw_multiTouch != 0);
+        skin_window_enable_touch ( emulator->window,
+                                   !androidHwConfig_isScreenNoTouch(android_hw));
         skin_window_enable_dpad  ( emulator->window, android_hw->hw_dPad != 0 );
         skin_window_enable_qwerty( emulator->window, android_hw->hw_keyboard != 0 );
         skin_window_enable_trackball( emulator->window, android_hw->hw_trackBall != 0 );

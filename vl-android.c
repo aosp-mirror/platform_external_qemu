@@ -4260,7 +4260,7 @@ int main(int argc, char **argv, char **envp)
                       cpu_model);
 
         /* Initialize multi-touch emulation. */
-        if (android_hw->hw_multiTouch) {
+        if (androidHwConfig_isScreenMultiTouch(android_hw)) {
             mts_port_create(NULL);
         }
 

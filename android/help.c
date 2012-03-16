@@ -1497,7 +1497,7 @@ help_screen(stralloc_t* out)
 
     "     touch       -> emulate a touch screen\n"
     "     multi-touch -> emulate a multi-touch screen\n"
-    "     off         -> disable touch and multi-touch screen emulation\n\n"
+    "     no-touch    -> disable touch and multi-touch screen emulation\n\n"
 
     "  Default mode for screen emulation is 'touch'.\n\n"
     );
