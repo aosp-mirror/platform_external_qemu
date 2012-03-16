@@ -116,12 +116,12 @@ EOF
     exit 1
 fi
 
-# On Linux, try to use our 32-bit prebuilt toolchain to generate binaries
+# On Linux, try to use our prebuilt toolchain to generate binaries
 # that are compatible with Ubuntu 8.04
-if [ -z "$CC" -a -z "$OPTION_CC" -a "$HOST_OS" = linux -a "$OPTION_TRY_64" != "yes" ] ; then
-    HOST_CC=`dirname $0`/../../prebuilt/linux-x86/toolchain/i686-linux-glibc2.7-4.4.3/bin/i686-linux-gcc
+if [ -z "$CC" -a -z "$OPTION_CC" -a "$HOST_OS" = linux ] ; then
+    HOST_CC=`dirname $0`/../../prebuilts/tools/gcc-sdk/gcc
     if [ -f "$HOST_CC" ] ; then
-        echo "Using prebuilt 32-bit toolchain: $HOST_CC"
+        echo "Using prebuilt toolchain: $HOST_CC"
         CC="$HOST_CC"
     fi
 fi
@@ -130,6 +130,10 @@ echo "OPTION_CC='$OPTION_CC'"
 if [ -n "$OPTION_CC" ]; then
     echo "Using specified C compiler: $OPTION_CC"
     CC="$OPTION_CC"
+fi
+
+if [ -z "$CC" ]; then
+  CC=$HOST_CC
 fi
 
 # we only support generating 32-bit binaris on 64-bit systems.
@@ -180,7 +184,11 @@ fi
 # platform build tree and copy them into objs/lib/ automatically, unless
 # you use --gles-libs to point explicitely to a different directory.
 #
-GLES_SHARED_LIBRARIES="libOpenglRender libGLES_CM_translator libGLES_V2_translator libEGL_translator"
+if [ "$OPTION_TRY_64" != "yes" ] ; then
+    GLES_SHARED_LIBRARIES="libOpenglRender libGLES_CM_translator libGLES_V2_translator libEGL_translator"
+else
+    GLES_SHARED_LIBRARIES="lib64OpenglRender lib64GLES_CM_translator lib64GLES_V2_translator lib64EGL_translator"
+fi
 
 if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
     locate_android_prebuilt
@@ -196,10 +204,15 @@ if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
         if [ ! -f $CCACHE ] ; then
             CCACHE="$ANDROID_PREBUILT/ccache$EXE"
         fi
+        if [ ! -f $CCACHE ] ; then
+            CCACHE="$ANDROID_PREBUILTS/ccache/ccache$EXE"
+        fi
         if [ -f $CCACHE ] ; then
             CC="$CCACHE $CC"
+            log "Prebuilt   : CCACHE=$CCACHE"
+	else
+            log "Prebuilt   : CCACHE can't be found"
         fi
-        log "Prebuilt   : CCACHE=$CCACHE"
     fi
 
     # finally ensure that our new binary is copied to the 'out'
@@ -511,6 +524,7 @@ fi
 echo "HOST_PREBUILT_TAG := $TARGET_OS" >> $config_mk
 echo "HOST_EXEEXT       := $TARGET_EXEEXT" >> $config_mk
 echo "PREBUILT          := $ANDROID_PREBUILT" >> $config_mk
+echo "PREBUILTS         := $ANDROID_PREBUILTS" >> $config_mk
 
 PWD=`pwd`
 echo "SRC_PATH          := $PWD" >> $config_mk

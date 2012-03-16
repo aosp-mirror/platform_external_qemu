@@ -339,7 +339,7 @@ _hwSensorClient_tick( void*  opaque )
 
     now_ns = qemu_get_clock_ns(vm_clock);
 
-    snprintf(buffer, sizeof buffer, "sync:%lld", now_ns/1000);
+    snprintf(buffer, sizeof buffer, "sync:%" PRId64, now_ns/1000);
     _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
 
     /* rearm timer, use a minimum delay of 20 ms, just to

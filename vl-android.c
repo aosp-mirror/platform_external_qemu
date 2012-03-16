@@ -3576,10 +3576,10 @@ int main(int argc, char **argv, char **envp)
         uint64_t    sysBytes = android_hw->disk_systemPartition_size;
 
         if (sysBytes == 0) {
-            PANIC("Invalid system partition size: %" PRUd64, sysBytes);
+            PANIC("Invalid system partition size: %" PRIu64, sysBytes);
         }
 
-        snprintf(tmp,sizeof(tmp),"system,size=0x%" PRUx64, sysBytes);
+        snprintf(tmp,sizeof(tmp),"system,size=0x%" PRIx64, sysBytes);
 
         if (sysImage && *sysImage) {
             if (filelock_create(sysImage) == NULL) {
@@ -3611,10 +3611,10 @@ int main(int argc, char **argv, char **envp)
         uint64_t    dataBytes = android_hw->disk_dataPartition_size;
 
         if (dataBytes == 0) {
-            PANIC("Invalid data partition size: %" PRUd64, dataBytes);
+            PANIC("Invalid data partition size: %" PRIu64, dataBytes);
         }
 
-        snprintf(tmp,sizeof(tmp),"userdata,size=0x%" PRUx64, dataBytes);
+        snprintf(tmp,sizeof(tmp),"userdata,size=0x%" PRIx64, dataBytes);
 
         if (dataImage && *dataImage) {
             if (filelock_create(dataImage) == NULL) {
@@ -3834,7 +3834,7 @@ int main(int argc, char **argv, char **envp)
         const char* partPath = android_hw->disk_cachePartition_path;
         uint64_t    partSize = android_hw->disk_cachePartition_size;
 
-        snprintf(tmp,sizeof(tmp),"cache,size=0x%" PRUx64, partSize);
+        snprintf(tmp,sizeof(tmp),"cache,size=0x%" PRIx64, partSize);
 
         if (partPath && *partPath && strcmp(partPath, "<temp>") != 0) {
             if (filelock_create(partPath) == NULL) {

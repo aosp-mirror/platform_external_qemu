@@ -45,20 +45,23 @@ endif
 
 MY_LDLIBS :=
 
-# this is needed to build the emulator on 64-bit Linux systems
-ifeq ($(HOST_OS)-$(HOST_ARCH),linux-x86)
-  MY_CFLAGS += -Wa,--32
-endif
-
 ifeq ($(HOST_OS),freebsd)
-  MY_CFLAGS += -Wa,--32 -I /usr/local/include
+  MY_CFLAGS += -I /usr/local/include
 endif
 
 ifeq ($(HOST_OS),windows)
-  MY_CFLAGS += -D_WIN32
-  # we need Win32 features  that are available since Windows 2000 Professional/Server (NT 5.0)
+  # we need Win32 features that are available since Windows 2000 Professional/Server (NT 5.0)
   MY_CFLAGS += -DWINVER=0x501
-  MY_LDLIBS += -lvfw32
+  MY_CFLAGS += -D_WIN32
+  ifneq ($(BUILD_HOST_64bit),)
+    # Microsoft 64-bit compiler define both _WIN32 and _WIN64
+    MY_CFLAGS += -D_WIN64
+    # amd64-mingw32msvc- toolchain still name it vfw32.  May change it once amd64-mingw32msvc-
+    # is stabilized
+    MY_LDLIBS += -lvfw32
+  else
+    MY_LDLIBS += -lvfw32
+  endif
 endif
 
 ifeq ($(HOST_ARCH),ppc)
@@ -91,17 +94,17 @@ endif
 # adequate values for HOST_CC
 #
 ifneq ($(BUILD_STANDALONE_EMULATOR),true)
-  # On Linux, use our custom 32-bit host toolchain, which contains the
-  # relevant headers and 32-bit libraries for audio (The host 64-bit Lucid
-  # doesn't provide these anymore, only their 64-bit versions).
+  # On Linux, use our custom 32-bit host toolchain (unless BUILD_HOST_64bit=1)
+  # which contains the relevant headers and 32-bit libraries for audio (The host 64-bit
+  # Lucid doesn't provide these anymore, only their 64-bit versions).
   ifeq ($(HOST_OS),linux)
-    HOST_SDK_TOOLCHAIN_PREFIX := prebuilt/linux-x86/toolchain/i686-linux-glibc2.7-4.4.3/bin/i686-linux
+    HOST_SDK_TOOLCHAIN_PREFIX := prebuilts/tools/gcc-sdk
     # Don't do anything if the toolchain is not there
-    ifneq (,$(strip $(wildcard $(HOST_SDK_TOOLCHAIN_PREFIX)-gcc)))
-      MY_CC  := $(HOST_SDK_TOOLCHAIN_PREFIX)-gcc
-      MY_CXX := $(HOST_SDK_TOOLCHAIN_PREFIX)-g++
-      MY_AR  := $(HOST_SDK_TOOLCHAIN_PREFIX)-ar
-    endif # $(HOST_SDK_TOOLCHAIN_PREFIX)-gcc exists
+    ifneq (,$(strip $(wildcard $(HOST_SDK_TOOLCHAIN_PREFIX)/gcc)))
+      MY_CC  := $(HOST_SDK_TOOLCHAIN_PREFIX)/gcc
+      MY_CXX := $(HOST_SDK_TOOLCHAIN_PREFIX)/g++
+      MY_AR  := $(HOST_SDK_TOOLCHAIN_PREFIX)/ar
+    endif # $(HOST_SDK_TOOLCHAIN_PREFIX)/gcc exists
   endif # HOST_OS == linux
 
   ifneq ($(USE_CCACHE),)
@@ -109,6 +112,7 @@ ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     ccache := $(strip $(wildcard $(ccache)))
     ifneq ($(ccache),$(firstword $(MY_CC)))
       MY_CC := $(ccache) $(MY_CC)
+      MY_CXX := $(ccache) $(MY_CXX)
     endif
     ccache :=
   endif
@@ -116,9 +120,14 @@ endif
 
 
 ifneq ($(combo_target)$(TARGET_SIMULATOR),HOST_true)
-  ifneq ($(HOST_ARCH),x86_64)
-    MY_CFLAGS += -m32
-    MY_LDLIBS += -m32
+  ifneq ($(BUILD_HOST_64bit),)
+    MY_CFLAGS += -m64
+    MY_LDLIBS += -m64
+  else
+    ifneq ($(HOST_ARCH),x86_64)
+      MY_CFLAGS += -m32
+      MY_LDLIBS += -m32
+    endif
   endif
 endif
 
@@ -184,6 +193,8 @@ ifeq ($(HOST_OS),linux)
 endif
 
 ifeq ($(HOST_OS),windows)
+  # amd64-mingw32msvc- toolchain still name it ws2_32.  May change it once amd64-mingw32msvc-
+  # is stabilized
   QEMU_SYSTEM_LDLIBS += -lwinmm -lws2_32 -liphlpapi
 else
   QEMU_SYSTEM_LDLIBS += -lpthread

@@ -27,7 +27,13 @@
 int  android_gles_fast_pipes = 1;
 
 /* Name of the GLES rendering library we're going to use */
+#if HOST_LONG_BITS == 32
 #define RENDERER_LIB_NAME  "libOpenglRender"
+#elif HOST_LONG_BITS == 64
+#define RENDERER_LIB_NAME  "lib64OpenglRender"
+#else
+#error Unknown HOST_LONG_BITS
+#endif
 
 /* These definitions *must* match those under:
  * development/tools/emulator/opengl/host/include/libOpenglRender/render_api.h

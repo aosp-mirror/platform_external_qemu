@@ -54,7 +54,8 @@ gen-hw-config-defs = \
 ###  THESE ARE POTENTIALLY USED BY ALL COMPONENTS
 ###
 
-$(call start-emulator-library, emulator-common)
+common_LOCAL_CFLAGS =
+common_LOCAL_SRC_FILES =
 
 EMULATOR_COMMON_CFLAGS :=
 
@@ -90,12 +91,12 @@ ZLIB_DIR := distrib/zlib-1.2.3
 include $(LOCAL_PATH)/$(ZLIB_DIR)/sources.make
 EMULATOR_COMMON_CFLAGS += -I$(LOCAL_PATH)/$(ZLIB_DIR)
 
-LOCAL_SRC_FILES += $(ZLIB_SOURCES)
+common_LOCAL_SRC_FILES += $(ZLIB_SOURCES)
 
 ###########################################################
 # Android utility functions
 #
-LOCAL_SRC_FILES += \
+common_LOCAL_SRC_FILES += \
 	sockets.c \
 	iolooper-select.c \
 	android/async-console.c \
@@ -127,11 +128,30 @@ LOCAL_SRC_FILES += \
 	android/utils/tempfile.c \
 	android/utils/vector.c \
 
+common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
+
+
+## one for 32-bit
+$(call start-emulator-library, emulator-common)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hw-config-defs)
-
-LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
-
 $(call end-emulator-library)
+
+## another for 64-bit
+# NOTE: only linux in non-standalone mode is supported, because
+#  1) For Windows: amd64-mingw32msvc-gcc doesn't work, see http://b/issue?id=5949152.
+#  2) For MacOSX: 64-bit libSDL*.a 1.2.x depends on NSQuickDrawView doesn't exist
+#  3) Standalone has --try-64
+ifeq ($(HOST_OS),linux)
+  ifneq ($(BUILD_STANDALONE_EMULATOR),true)
+    $(call start-emulator-library, emulator64-common)
+    LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
+    LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+    $(call gen-hw-config-defs)
+    $(call end-emulator-library)
+  endif # BUILD_STANDALONE_EMULATOR == nil
+endif # HOST_OS == linux
 
 ##############################################################################
 ##############################################################################
@@ -141,11 +161,12 @@ $(call end-emulator-library)
 ###  THESE ARE USED BY 'emulator-ui' AND THE STANDALONE PROGRAMS
 ###
 
-$(call start-emulator-library, emulator-libui)
+common_LOCAL_CFLAGS =
+common_LOCAL_SRC_FILES =
 
 EMULATOR_LIBUI_CFLAGS :=
 
-LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
+common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
 ###########################################################
 # Libpng configuration
@@ -157,7 +178,7 @@ EMULATOR_LIBUI_CFLAGS += \
     $(LIBPNG_CFLAGS) \
     -I$(LOCAL_PATH)/$(LIBPNG_DIR)
 
-LOCAL_SRC_FILES += $(LIBPNG_SOURCES) loadpng.c
+common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) loadpng.c
 
 ##############################################################################
 # SDL-related definitions
@@ -211,12 +232,13 @@ ifneq ($(BUILD_SDL_FROM_SOURCES),true)
     # Circular dependencies between libSDL and libSDLmain
     # We repeat the libraries in the final link to work around it
     SDL_STATIC_LIBRARIES := libSDL libSDLmain libSDL libSDLmain
+    SDL_STATIC_LIBRARIES_64 := lib64SDL lib64SDLmain lib64SDL lib64SDLmain
 
 else # BUILD_SDL_FROM_SOURCES
 
     SDL_DIR := distrib/sdl-1.2.12
     include $(LOCAL_PATH)/$(SDL_DIR)/sources.make
-    LOCAL_SRC_FILES += $(SDL_SOURCES)
+    common_LOCAL_SRC_FILES += $(SDL_SOURCES)
 
     EMULATOR_LIBUI_CFLAGS += \
         -I$(LOCAL_PATH)/$(SDL_DIR)/include
@@ -247,24 +269,41 @@ SKIN_SOURCES := rect.c \
                 composer.c \
                 surface.c \
 
-LOCAL_SRC_FILES += $(SKIN_SOURCES:%=android/skin/%)
+common_LOCAL_SRC_FILES += $(SKIN_SOURCES:%=android/skin/%)
 
-LOCAL_SRC_FILES += \
+common_LOCAL_SRC_FILES += \
              android/user-config.c \
              android/resource.c \
              android/qemulator.c \
              android/keycode.c \
 
-$(call gen-hw-config-defs)
-
 # enable MMX code for our skin scaler
 ifeq ($(HOST_ARCH),x86)
-LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx
+common_LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx
 endif
 
-LOCAL_CFLAGS += $(EMULATOR_LIBUI_CFLAGS)
+common_LOCAL_CFLAGS += $(EMULATOR_LIBUI_CFLAGS)
 
+
+## one for 32-bit
+$(call start-emulator-library, emulator-libui)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+$(call gen-hw-config-defs)
 $(call end-emulator-library)
+
+
+## another for 64-bit, see note in emulator64-common
+ifeq ($(HOST_OS),linux)
+  ifneq ($(BUILD_STANDALONE_EMULATOR),true)
+    $(call start-emulator-library, emulator64-libui)
+    LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
+    LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+    $(call gen-hw-config-defs)
+    $(call end-emulator-library)
+  endif # BUILD_STANDALONE_EMULATOR == nil
+endif # HOST_OS == linux
+
 
 ##############################################################################
 ##############################################################################
@@ -274,11 +313,13 @@ $(call end-emulator-library)
 ###  THESE ARE USED BY EVERYTHING EXCEPT 'emulator-ui'
 ###
 
-$(call start-emulator-library, emulator-libqemu)
+common_LOCAL_CFLAGS =
+common_LOCAL_SRC_FILES =
+
 
 EMULATOR_LIBQEMU_CFLAGS :=
 
-LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
+common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
 ###########################################################
 # Jpeg configuration
@@ -290,13 +331,13 @@ EMULATOR_LIBQEMU_CFLAGS += \
     $(LIBJPEG_CFLAGS) \
     -I$(LOCAL_PATH)/$(LIBJPEG_DIR)
 
-LOCAL_SRC_FILES += $(LIBJPEG_SOURCES)
+common_LOCAL_SRC_FILES += $(LIBJPEG_SOURCES)
 
 AUDIO_SOURCES := noaudio.c wavaudio.c wavcapture.c mixeng.c
 AUDIO_CFLAGS  := -I$(LOCAL_PATH)/audio -DHAS_AUDIO
 AUDIO_LDLIBS  :=
 
-LOCAL_CFLAGS += -Wall -Wno-missing-field-initializers
+common_LOCAL_CFLAGS += -Wall -Wno-missing-field-initializers
 
 ifeq ($(HOST_OS),darwin)
   CONFIG_COREAUDIO ?= yes
@@ -351,17 +392,17 @@ endif
 
 AUDIO_SOURCES := $(call sort,$(AUDIO_SOURCES:%=audio/%))
 
-LOCAL_CFLAGS += -Wno-sign-compare \
+common_LOCAL_CFLAGS += -Wno-sign-compare \
                 -fno-strict-aliasing -W -Wall -Wno-unused-parameter \
 
 # this is very important, otherwise the generated binaries may
 # not link properly on our build servers
 ifeq ($(HOST_OS),linux)
-LOCAL_CFLAGS += -fno-stack-protector
+common_LOCAL_CFLAGS += -fno-stack-protector
 endif
 
-LOCAL_SRC_FILES += $(AUDIO_SOURCES)
-LOCAL_SRC_FILES += \
+common_LOCAL_SRC_FILES += $(AUDIO_SOURCES)
+common_LOCAL_SRC_FILES += \
     android/audio-test.c
 
 # other flags
@@ -374,14 +415,14 @@ endif
 EMULATOR_LIBQEMU_CFLAGS += $(AUDIO_CFLAGS)
 EMULATOR_LIBQEMU_LDLIBS += $(AUDIO_LDLIBS)
 
-LOCAL_CFLAGS += -Wno-missing-field-initializers
+common_LOCAL_CFLAGS += -Wno-missing-field-initializers
 
 # migration sources
 #
 ifeq ($(HOST_OS),windows)
-  LOCAL_SRC_FILES += migration-dummy-android.c
+  common_LOCAL_SRC_FILES += migration-dummy-android.c
 else
-  LOCAL_SRC_FILES += migration.c \
+  common_LOCAL_SRC_FILES += migration.c \
                      migration-exec.c \
                      migration-tcp-android.c
 endif
@@ -447,8 +488,6 @@ CORE_MISC_SOURCES = \
     android/multitouch-port.c \
     android/utils/jpeg-compress.c
 
-$(call gen-hw-config-defs)
-
 ifeq ($(HOST_ARCH),x86)
     CORE_MISC_SOURCES += i386-dis.c
 endif
@@ -480,10 +519,10 @@ ifeq ($(HOST_OS),darwin)
   CORE_MISC_SOURCES   += android/camera/camera-capture-mac.m
 endif
 
-LOCAL_SRC_FILES += $(CORE_MISC_SOURCES)
+common_LOCAL_SRC_FILES += $(CORE_MISC_SOURCES)
 
 # Required
-LOCAL_CFLAGS += -D_XOPEN_SOURCE=600 -D_BSD_SOURCE=1
+common_LOCAL_CFLAGS += -D_XOPEN_SOURCE=600 -D_BSD_SOURCE=1
 
 SLIRP_SOURCES := \
     bootp.c \
@@ -505,7 +544,7 @@ SLIRP_SOURCES := \
     tftp.c \
     udp.c
 
-LOCAL_SRC_FILES += $(SLIRP_SOURCES:%=slirp-android/%)
+common_LOCAL_SRC_FILES += $(SLIRP_SOURCES:%=slirp-android/%)
 EMULATOR_LIBQEMU_CFLAGS += -I$(LOCAL_PATH)/slirp-android
 
 # socket proxy support
@@ -516,7 +555,7 @@ PROXY_SOURCES := \
     proxy_http_connector.c \
     proxy_http_rewriter.c \
 
-LOCAL_SRC_FILES += $(PROXY_SOURCES:%=proxy/%)
+common_LOCAL_SRC_FILES += $(PROXY_SOURCES:%=proxy/%)
 EMULATOR_LIBQEMU_CFLAGS += -I$(LOCAL_PATH)/proxy
 
 # include telephony stuff
@@ -530,13 +569,13 @@ TELEPHONY_SOURCES := \
     sms.c \
     remote_call.c
 
-LOCAL_SRC_FILES += $(TELEPHONY_SOURCES:%=telephony/%)
+common_LOCAL_SRC_FILES += $(TELEPHONY_SOURCES:%=telephony/%)
 EMULATOR_LIBQEMU_CFLAGS += -I$(LOCAL_PATH)/telephony
 
 # sources inherited from upstream, but not fully
 # integrated into android emulator
 #
-LOCAL_SRC_FILES += \
+common_LOCAL_SRC_FILES += \
     json-lexer.c \
     json-parser.c \
     json-streamer.c \
@@ -548,31 +587,57 @@ LOCAL_SRC_FILES += \
     qlist.c \
     qstring.c \
 
-# gdbstub-xml.c contains C-compilable arrays corresponding to the content
-# of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
-#
-intermediates := $(call intermediates-dir-for,STATIC_LIBRARIES,$(LOCAL_MODULE),true)
-
 ifeq ($(QEMU_TARGET_XML_SOURCES),)
     QEMU_TARGET_XML_SOURCES := arm-core arm-neon arm-vfp arm-vfp3
     QEMU_TARGET_XML_SOURCES := $(QEMU_TARGET_XML_SOURCES:%=$(LOCAL_PATH)/gdb-xml/%.xml)
 endif
 
-QEMU_GDBSTUB_XML_C := $(intermediates)/gdbstub-xml.c
+common_LOCAL_CFLAGS += $(EMULATOR_LIBQEMU_CFLAGS)
+
+
+## one for 32-bit
+$(call start-emulator-library, emulator-libqemu)
+# gdbstub-xml.c contains C-compilable arrays corresponding to the content
+# of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
+#
+intermediates = $(call intermediates-dir-for,STATIC_LIBRARIES,$(LOCAL_MODULE),true)
+QEMU_GDBSTUB_XML_C = $(intermediates)/gdbstub-xml.c
 $(QEMU_GDBSTUB_XML_C): PRIVATE_PATH := $(LOCAL_PATH)
 $(QEMU_GDBSTUB_XML_C): PRIVATE_SOURCES := $(TARGET_XML_SOURCES)
 $(QEMU_GDBSTUB_XML_C): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/feature_to_c.sh $@ $(QEMU_TARGET_XML_SOURCES)
 $(QEMU_GDBSTUB_XML_C): $(QEMU_TARGET_XML_SOURCES) $(LOCAL_PATH)/feature_to_c.sh
 	$(hide) rm -f $@
 	$(transform-generated-source)
-
 LOCAL_GENERATED_SOURCES += $(QEMU_GDBSTUB_XML_C)
-
-EMULATOR_LIBQEMU_CFLAGS += -I$(intermediates)
-
-LOCAL_CFLAGS += $(EMULATOR_LIBQEMU_CFLAGS)
-
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(intermediates)
+LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+$(call gen-hw-config-defs)
 $(call end-emulator-library)
+
+
+## another for 64-bit, see note in emulator64-common
+ifeq ($(HOST_OS),linux)
+  ifneq ($(BUILD_STANDALONE_EMULATOR),true)
+    $(call start-emulator-library, emulator64-libqemu)
+    # gdbstub-xml.c contains C-compilable arrays corresponding to the content
+    # of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
+    #
+    intermediates = $(call intermediates-dir-for,STATIC_LIBRARIES,$(LOCAL_MODULE),true)
+    QEMU_GDBSTUB_XML_C = $(intermediates)/gdbstub-xml.c
+    $(QEMU_GDBSTUB_XML_C): PRIVATE_PATH := $(LOCAL_PATH)
+    $(QEMU_GDBSTUB_XML_C): PRIVATE_SOURCES := $(TARGET_XML_SOURCES)
+    $(QEMU_GDBSTUB_XML_C): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/feature_to_c.sh $@ $(QEMU_TARGET_XML_SOURCES)
+    $(QEMU_GDBSTUB_XML_C): $(QEMU_TARGET_XML_SOURCES) $(LOCAL_PATH)/feature_to_c.sh
+	$(hide) rm -f $@
+	$(transform-generated-source)
+    LOCAL_GENERATED_SOURCES += $(QEMU_GDBSTUB_XML_C)
+    LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(intermediates) -m64
+    LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+    $(call gen-hw-config-defs)
+    $(call end-emulator-library)
+  endif # BUILD_STANDALONE_EMULATOR == nil
+endif # HOST_OS == linux
+
 
 # Block sources, we must compile them with each executable because they
 # are only referenced by the rest of the code using constructor functions.
@@ -614,9 +679,8 @@ BLOCK_CFLAGS += -DCONFIG_BDRV_WHITELIST=""
 ###  THEM IN emulator-libqemu SINCE THE SOURCES ARE C++
 ###
 
-$(call start-emulator-library, emulator-libelff)
-
-LOCAL_CPP_EXTENSION := .cc
+common_LOCAL_CFLAGS =
+common_LOCAL_SRC_FILES =
 
 ELFF_CFLAGS := -I$(LOCAL_PATH)/elff
 ELFF_LDLIBS := -lstdc++
@@ -630,13 +694,31 @@ ELFF_SOURCES := \
     elf_mapped_section.cc \
     elff_api.cc \
 
-LOCAL_SRC_FILES += $(ELFF_SOURCES:%=elff/%)
+common_LOCAL_SRC_FILES += $(ELFF_SOURCES:%=elff/%)
 
-LOCAL_CFLAGS += \
+common_LOCAL_CFLAGS += \
     -fno-exceptions \
     $(ELFF_CFLAGS) \
 
+
+## one for 32-bit
+$(call start-emulator-library, emulator-libelff)
+LOCAL_CPP_EXTENSION := .cc
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call end-emulator-library)
+
+
+## another for 64-bit, see note in emulator64-common
+ifeq ($(HOST_OS),linux)
+  ifneq ($(BUILD_STANDALONE_EMULATOR),true)
+    $(call start-emulator-library, emulator64-libelff)
+    LOCAL_CPP_EXTENSION := .cc
+    LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
+    LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+    $(call end-emulator-library)
+  endif # BUILD_STANDALONE_EMULATOR == nil
+endif # HOST_OS == linux
 
 
 ##############################################################################
