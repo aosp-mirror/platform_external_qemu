@@ -139,11 +139,12 @@ $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
 ## another for 64-bit
+##### NOTE: disable 64-bit for now until new 64-bit prebuilts/gcc toolchain exist in AOSP
 # NOTE: only linux in non-standalone mode is supported, because
 #  1) For Windows: amd64-mingw32msvc-gcc doesn't work, see http://b/issue?id=5949152.
 #  2) For MacOSX: 64-bit libSDL*.a 1.2.x depends on NSQuickDrawView doesn't exist
 #  3) Standalone has --try-64
-ifeq ($(HOST_OS),linux)
+ifeq ($(HOST_OS),)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-library, emulator64-common)
     LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
@@ -294,7 +295,7 @@ $(call end-emulator-library)
 
 
 ## another for 64-bit, see note in emulator64-common
-ifeq ($(HOST_OS),linux)
+ifeq ($(HOST_OS),)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-library, emulator64-libui)
     LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
@@ -616,7 +617,7 @@ $(call end-emulator-library)
 
 
 ## another for 64-bit, see note in emulator64-common
-ifeq ($(HOST_OS),linux)
+ifeq ($(HOST_OS),)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-library, emulator64-libqemu)
     # gdbstub-xml.c contains C-compilable arrays corresponding to the content
@@ -710,7 +711,7 @@ $(call end-emulator-library)
 
 
 ## another for 64-bit, see note in emulator64-common
-ifeq ($(HOST_OS),linux)
+ifeq ($(HOST_OS),)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-library, emulator64-libelff)
     LOCAL_CPP_EXTENSION := .cc
