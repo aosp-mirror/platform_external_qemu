@@ -240,13 +240,26 @@ static int _android_dev_socket_init(AndroidDevSocket* ads,
 /* Destroys socket descriptor. */
 static void _android_dev_socket_destroy(AndroidDevSocket* ads);
 
+/* Callback that is ivoked from _android_dev_socket_connect when a file
+ * descriptor has been created for a socket.
+ * Param:
+ *  ads - Socket descritor.
+ *  opaque - An opaque pointer associated with the callback.
+ */
+typedef void (*on_socked_fd_created)(AndroidDevSocket* ads, void* opaque);
+
 /* Synchronously connects to the socket, and registers it with the server.
  * Param:
  *  ads - Socket to connect. Must have 'deadline' field properly setup.
+ *  cb, opaque - A callback to invoke (and opaque parameters to pass to the
+ *      callback) when a file descriptor has been created for a socket. These
+ *      parameters are optional and can be NULL.
  * Return:
  *  0 on success, -1 on failure with errno containing the reason for failure.
  */
-static int _android_dev_socket_connect(AndroidDevSocket* ads);
+static int _android_dev_socket_connect(AndroidDevSocket* ads,
+                                       on_socked_fd_created cb,
+                                       void* opaque);
 
 /* Synchronously registers a connected socket with the server.
  * Param:
@@ -389,16 +402,10 @@ _android_dev_socket_destroy(AndroidDevSocket* ads)
     memset(&ads->address, 0, sizeof(ads->address));
 }
 
-/* Event socket's asynchronous I/O looper callback.
- * Param:
- *  opaque - AndroidEventSocket instance.
- *  fd - Socket's FD.
- *  events - I/O type bitsmask (read | write).
- */
-static void _on_event_socket_io(void* opaque, int fd, unsigned events);
-
 static int
-_android_dev_socket_connect(AndroidDevSocket* ads)
+_android_dev_socket_connect(AndroidDevSocket* ads,
+                            on_socked_fd_created cb,
+                            void* opaque)
 {
     int res;
 
@@ -411,12 +418,9 @@ _android_dev_socket_connect(AndroidDevSocket* ads)
     }
     socket_set_nonblock(ads->fd);
 
-    /* XXX: A quick fix for event channel init. Redo this later. */
-    if (ads->type == ADS_TYPE_EVENT) {
-        AndroidEventSocket* adsevent = (AndroidEventSocket*)ads;
-        /* Prepare for async I/O on the event socket. */
-        loopIo_init(adsevent->io, adsevent->dev_socket.ad->looper, ads->fd,
-                    _on_event_socket_io, adsevent);
+    /* Invoke FD creation callback (if required) */
+    if (cb != NULL) {
+        cb(ads, opaque);
     }
 
     /* Synchronously connect to it. */
@@ -805,7 +809,7 @@ _android_query_socket_destroy(AndroidQuerySocket* adsquery)
 static int
 _android_query_socket_connect(AndroidQuerySocket* adsquery)
 {
-    return _android_dev_socket_connect(&adsquery->dev_socket);
+    return _android_dev_socket_connect(&adsquery->dev_socket, NULL, NULL);
 }
 
 static void
@@ -937,21 +941,24 @@ _android_event_socket_destroy(AndroidEventSocket* adsevent)
     _android_dev_socket_destroy(&adsevent->dev_socket);
 }
 
+/* A callback invoked when file descriptor is created for the event socket.
+ * We use this callback to initialize the event socket for async I/O right after
+ * the FD has been created.
+ */
+static void
+_on_event_fd_created(AndroidDevSocket* ads, void* opaque)
+{
+    AndroidEventSocket* adsevent = (AndroidEventSocket*)opaque;
+   /* Prepare for async I/O on the event socket. */
+   loopIo_init(adsevent->io, _aes_looper(adsevent), ads->fd,
+               _on_event_socket_io, adsevent);
+}
 
 static int
 _android_event_socket_connect_sync(AndroidEventSocket* adsevent)
 {
-    AndroidDevSocket* ads = &adsevent->dev_socket;
-    const int res = _android_dev_socket_connect(&adsevent->dev_socket);
-    /* XXX: This is patch-fixed in _android_dev_socket_connect */
-#if 0
-    if (res == 0) {
-        /* Prepare for async I/O on the event socket. */
-        loopIo_init(adsevent->io, _aes_looper(adsevent), ads->fd,
-                    _on_event_socket_io, adsevent);
-    }
-#endif
-    return res;
+    return _android_dev_socket_connect(&adsevent->dev_socket,
+                                       _on_event_fd_created, adsevent);
 }
 
 static int
