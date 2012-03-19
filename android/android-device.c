@@ -597,60 +597,35 @@ _android_dev_socket_recv(AndroidDevSocket* ads, char* buf, int bufsize)
         return -1;
     }
 
-    /* XXX: This is a hack that implements a blocked line read on an async
-     * event socket! Redo this ASAP! */
-    if (ads->type == ADS_TYPE_EVENT) {
-        AndroidEventSocket* adsevent = (AndroidEventSocket*)ads;
-        asyncLineReader_init(&adsevent->alr, buf, bufsize, adsevent->io);
-        /* Default EOL for the line reader was '\n'. */
-        asyncLineReader_setEOL(&adsevent->alr, '\0');
-        AsyncStatus status = ASYNC_NEED_MORE;
-
-        while (status == ASYNC_NEED_MORE) {
-            status = asyncLineReader_read(&adsevent->alr);
-            if (status == ASYNC_COMPLETE) {
-                recvd = adsevent->alr.pos;
-                break;
-            } else if (status == ASYNC_ERROR) {
-                if (errno == ENOMEM) {
-                    recvd = adsevent->alr.pos;
-                } else {
-                    recvd = -1;
-                }
-                break;
-            }
+    iolooper_add_read(_ads_io_looper(ads), ads->fd);
+    do {
+        int res = socket_recv(ads->fd, buf + recvd, bufsize - recvd);
+        if (res == 0) {
+            /* Disconnection. */
+            errno = ECONNRESET;
+            recvd = -1;
+            break;
         }
-    } else {
-        iolooper_add_read(_ads_io_looper(ads), ads->fd);
-        do {
-            int res = socket_recv(ads->fd, buf + recvd, bufsize - recvd);
-            if (res == 0) {
-                /* Disconnection. */
-                errno = ECONNRESET;
-                recvd = -1;
-                break;
+
+        if (res < 0) {
+            if (errno == EINTR) {
+                /* loop on EINTR */
+                continue;
             }
 
-            if (res < 0) {
-                if (errno == EINTR) {
-                    /* loop on EINTR */
+            if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                res = iolooper_wait_absolute(_ads_io_looper(ads), ads->deadline);
+                if (res > 0) {
+                    /* Ready to read. */
                     continue;
                 }
-
-                if (errno == EWOULDBLOCK || errno == EAGAIN) {
-                    res = iolooper_wait_absolute(_ads_io_looper(ads), ads->deadline);
-                    if (res > 0) {
-                        /* Ready to read. */
-                        continue;
-                    }
-                }
-                recvd = -1;
-                break;
             }
-            recvd += res;
-        } while (recvd < bufsize);
-        iolooper_del_read(_ads_io_looper(ads), ads->fd);
-    }
+            recvd = -1;
+            break;
+        }
+        recvd += res;
+    } while (recvd < bufsize);
+    iolooper_del_read(_ads_io_looper(ads), ads->fd);
 
     /* In case of an I/O failure we have to invoke failure callback. Note that we
      * report I/O failures only on registered sockets. */
