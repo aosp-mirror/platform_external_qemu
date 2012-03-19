@@ -3764,10 +3764,21 @@ int main(int argc, char **argv, char **envp)
     //android_hw_opengles_init();
 
     /* Initialize fake camera */
-    if (android_hw->hw_fakeCamera) {
-        boot_property_add("qemu.sf.fake_camera", android_hw->hw_fakeCamera);
+    if (strcmp(android_hw->hw_camera_back, "emulated") &&
+        strcmp(android_hw->hw_camera_front, "emulated")) {
+        /* Fake camera is not used for camera emulation. */
+        boot_property_add("qemu.sf.fake_camera", "none");
     } else {
-        boot_property_add("qemu.sf.fake_camera", "back");
+        /* Fake camera is used for at least one camera emulation. */
+        if (!strcmp(android_hw->hw_camera_back, "emulated") &&
+            !strcmp(android_hw->hw_camera_front, "emulated")) {
+            /* Fake camera is used for both, front and back camera emulation. */
+            boot_property_add("qemu.sf.fake_camera", "both");
+        } else if (!strcmp(android_hw->hw_camera_back, "emulated")) {
+            boot_property_add("qemu.sf.fake_camera", "back");
+        } else {
+            boot_property_add("qemu.sf.fake_camera", "front");
+        }
     }
 
     /* Initialize camera emulation. */

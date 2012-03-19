@@ -155,65 +155,6 @@ _adjustPartitionSize( const char*  description,
     return convertMBToBytes(imageMB);
 }
 
-/* Parses a -webcam option, extracting 'name', and 'dir' values.
- * Param:
- *  param - -webcam option, that should be formatted as such:
- *      name=<name>[,dir=<direction>]
- * name, name_size - buffer (and its size) where to receive <name>
- * dir, dir_size - buffer (and its size) where to receive <direction>
- */
-static void
-_parseWebcamOption(const char* param,
-                   char* name, size_t name_size,
-                   char* dir, size_t dir_size)
-{
-    const char* dr;
-    const char* wc_opt = param;
-
-    /* Must start with 'name=' */
-    if (strlen(wc_opt) <= 5 || memcmp(wc_opt, "name=", 5)) {
-        derror("Invalid value for -webcam parameter: %s\n", param);
-        exit(1);
-    }
-
-    /* Move on to 'name' value. */
-    wc_opt += 5;
-    dr = strchr(wc_opt, ',');
-    if (dr == NULL) {
-        dr = wc_opt + strlen(wc_opt);
-    }
-
-    /* Make sure that <name> fits */
-    if ((dr - wc_opt) < name_size) {
-        memcpy(name, wc_opt, dr - wc_opt);
-        name[dr - wc_opt] = '\0';
-        if (*dr == '\0') {
-            /* Default direction value is 'front' */
-            strcpy(dir, "front");
-            return;
-        } else {
-            dr++;
-        }
-    } else {
-        derror("Invalid <name> value for -webcam parameter: %s\n", param);
-        exit(1);
-    }
-
-    /* Parse 'dir'. Must begin with 'dir=' */
-    if (strlen(dr) <= 4 || memcmp(dr, "dir=", 4)) {
-        derror("Invalid value for -webcam parameter: %s\n", param);
-        exit(1);
-    }
-    dr += 4;
-    /* Check the bounds, and the values */
-    if (strlen(dr) >= dir_size || (strcmp(dr, "front") && strcmp(dr, "back"))) {
-        derror("Invalid <direction> value for -webcam parameter: %s\n"
-               "Valid values are: 'front', or 'back'\n", param);
-        exit(1);
-    }
-    strcpy(dir, dr);
-}
-
 int main(int argc, char **argv)
 {
     char   tmp[MAX_PATH];
@@ -1164,90 +1105,36 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    if (opts->fake_camera) {
-        if (!strcmp(opts->fake_camera, "back") ||
-            !strcmp(opts->fake_camera, "front") ||
-            !strcmp(opts->fake_camera, "off")) {
-            hw->hw_fakeCamera = ASTRDUP(opts->fake_camera);
-        } else {
-            derror("Invalid value for -fake-camera <mode> parameter: %s\n",
-                   opts->fake_camera);
-            derror("Valid values are: back, front, or off\n");
+    /* Deal with camera emulation */
+    if (opts->webcam_list) {
+        /* List connected webcameras */
+        args[n++] = "-list-webcam";
+    }
+
+    if (opts->camera_back) {
+        /* Validate parameter. */
+        if (memcmp(opts->camera_back, "webcam", 6) &&
+            strcmp(opts->camera_back, "emulated") &&
+            strcmp(opts->camera_back, "none")) {
+            derror("Invalid value for -camera-back <mode> parameter: %s\n"
+                   "Valid values are: 'emulated', 'webcam<N>', or 'none'\n",
+                   opts->camera_back);
             exit(1);
         }
+        hw->hw_camera_back = ASTRDUP(opts->camera_back);
     }
 
-    int webcam_num = 0;
-    if (opts->webcam != NULL) {
-        ParamList*  pl = opts->webcam;
-        for ( ; pl != NULL; pl = pl->next ) {
-            char webcam_name[64];
-            char webcam_dir[16];
-            if (!strcmp(pl->param, "off")) {
-                /* If 'off' is passed, there must be no other -webcam options. */
-                if (webcam_num || pl->next != NULL) {
-                    derror("'-webcam off' cannot be combined with other -webcam otions\n");
-                    exit(1);
-                }
-                break;
-            }
-            if (!strcmp(pl->param, "list")) {
-                /* If 'list' is passed, there must be no other -webcam options. */
-                if (webcam_num || pl->next != NULL) {
-                    derror("'-webcam list' cannot be combined with other -webcam otions\n");
-                    exit(1);
-                }
-                args[n++] = "-list-webcam";
-                break;
-            }
-            /* Extract name, and direction */
-            _parseWebcamOption(pl->param, webcam_name, sizeof(webcam_name),
-                               webcam_dir, sizeof(webcam_dir));
-            /* Save them to appropriate field in hw.ini */
-            switch (webcam_num) {
-                case 0:
-                    hw->hw_webcam_0_name        = ASTRDUP(webcam_name);
-                    hw->hw_webcam_0_direction   = ASTRDUP(webcam_dir);
-                    break;
-                case 1:
-                    hw->hw_webcam_1_name        = ASTRDUP(webcam_name);
-                    hw->hw_webcam_1_direction   = ASTRDUP(webcam_dir);
-                    break;
-                case 2:
-                    hw->hw_webcam_2_name        = ASTRDUP(webcam_name);
-                    hw->hw_webcam_2_direction   = ASTRDUP(webcam_dir);
-                    break;
-                case 3:
-                    hw->hw_webcam_3_name        = ASTRDUP(webcam_name);
-                    hw->hw_webcam_3_direction   = ASTRDUP(webcam_dir);
-                    break;
-                case 4:
-                    hw->hw_webcam_4_name        = ASTRDUP(webcam_name);
-                    hw->hw_webcam_4_direction   = ASTRDUP(webcam_dir);
-                    break;
-                case 5:
-                    hw->hw_webcam_5_name        = ASTRDUP(webcam_name);
-                    hw->hw_webcam_5_direction   = ASTRDUP(webcam_dir);
-                    break;
-                default:
-                    derror("Too many -webcam options. Maximum number of -webcam options is 6\n");
-                    exit(1);
-            }
-            webcam_num++;
+    if (opts->camera_front) {
+        /* Validate parameter. */
+        if (memcmp(opts->camera_front, "webcam", 6) &&
+            strcmp(opts->camera_front, "emulated") &&
+            strcmp(opts->camera_front, "none")) {
+            derror("Invalid value for -camera-front <mode> parameter: %s\n"
+                   "Valid values are: 'emulated', 'webcam<N>', or 'none'\n",
+                   opts->camera_front);
+            exit(1);
         }
-        hw->hw_webcam_count = webcam_num;
-    }
-
-    /* Command line options related to webcam, and fake camera should
-     * override camera emulation flag, set in AVD. */
-    if (hw->hw_camera == 0) {
-        /* Camera emulation is disabled in AVD. Lets see if command line enables
-         * webcam, or fake camera emulation. */
-        if (webcam_num != 0 ||
-            (opts->fake_camera && strcmp(hw->hw_fakeCamera, "off") != 0)) {
-            /* Command line parameters enable camera emulation. */
-            hw->hw_camera = 1;
-        }
+        hw->hw_camera_front = ASTRDUP(opts->camera_front);
     }
 
     /* physical memory is now in hw->hw_ramSize */

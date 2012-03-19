@@ -1457,34 +1457,36 @@ help_gpu(stralloc_t* out)
 }
 
 static void
-help_fake_camera(stralloc_t* out)
+help_camera_back(stralloc_t* out)
 {
     PRINTF(
-    "  Use -fake-camera <mode> to control fake camera emulation.\n"
+    "  Use -camera-back <mode> to control emulation of a camera facing back.\n"
     "  Valid values for <mode> are:\n\n"
 
-    "     off   -> disable fake camera emulation\n"
-    "     back  -> fake camera is facing back\n"
-    "     front -> fake camera is facing front\n\n"
+    "     emulated  -> camera will be emulated using software ('fake') camera emulation\n"
+    "     webcam<N> -> camera will be emulated using a webcamera connected to the host\n"
+    "     none      -> camera emulation will be disabled\n\n"
     );
 }
 
 static void
-help_webcam(stralloc_t* out)
+help_camera_front(stralloc_t* out)
 {
     PRINTF(
-    "  Use -webcam off to disable web camera emulation.\n"
-    "  Use -webcam list to list web cameras available for emulation.\n"
-    "  Use -webcam name=<name>[,dir=<direction>] to setup parameters for web camera emulation.\n"
+    "  Use -camera-front <mode> to control emulation of a camera facing front.\n"
+    "  Valid values for <mode> are:\n\n"
 
-    "  <name> platform-independent name identifying emulated camera device.\n"
-    "  use '-webcam list' to obtain the list of emulated camera devices.\n"
-    "  <direction> defines direction the camera is facing. Valid values are:\n\n"
+    "     emulated  -> camera will be emulated using software ('fake') camera emulation\n"
+    "     webcam<N> -> camera will be emulated using a webcamera connected to the host\n"
+    "     none      -> camera emulation will be disabled\n\n"
+    );
+}
 
-    "     front -> emulate camera as facing front\n"
-    "     back  -> emulate camera as facing back\n\n"
-
-    "  Default direction value for emulated web camera is 'front'\n\n"
+static void
+help_webcam_list(stralloc_t* out)
+{
+    PRINTF(
+    "  Use -webcam-list to list web cameras available for emulation.\n\n"
     );
 }
 

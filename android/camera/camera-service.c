@@ -233,7 +233,8 @@ _camera_info_get_by_display_name(const char* disp_name, CameraInfo* arr, int num
 {
     int n;
     for (n = 0; n < num; n++) {
-        if (arr[n].display_name != NULL && !strcmp(arr[n].display_name, disp_name)) {
+        if (!arr[n].in_use && arr[n].display_name != NULL &&
+            !strcmp(arr[n].display_name, disp_name)) {
             return &arr[n];
         }
     }
@@ -265,6 +266,47 @@ _camera_info_get_by_device_name(const char* device_name, CameraInfo* arr, int nu
  * CameraServiceDesc API
  *******************************************************************************/
 
+/* Initialized webcam emulation record in camera service descriptor.
+ * Param:
+ *  csd - Camera service descriptor to initialize a record in.
+ *  disp_name - Display name of a web camera ('webcam<N>') to use for emulation.
+ *  dir - Direction ('back', or 'front') that emulated camera is facing.
+ *  ci, ci_cnt - Array of webcam information for enumerated web cameras connected
+ *      to the host.
+ */
+static void
+_wecam_setup(CameraServiceDesc* csd,
+             const char* disp_name,
+             const char* dir,
+             CameraInfo* ci,
+             int ci_cnt)
+{
+    /* Find webcam record in the list of enumerated web cameras. */
+    CameraInfo* found = _camera_info_get_by_display_name(disp_name, ci, ci_cnt);
+    if (found == NULL) {
+        W("Camera name '%s' is not found in the list of connected cameras.\n"
+          "Use '-webcam-list' emulator option to obtain the list of connected camera names.\n",
+          disp_name);
+        return;
+    }
+
+    /* Save to the camera info array that will be used by the service. */
+    memcpy(csd->camera_info + csd->camera_count, found, sizeof(CameraInfo));
+    /* This camera is taken. */
+    found->in_use = 1;
+    /* Update direction parameter. */
+    if (csd->camera_info[csd->camera_count].direction != NULL) {
+        free(csd->camera_info[csd->camera_count].direction);
+    }
+    csd->camera_info[csd->camera_count].direction = ASTRDUP(dir);
+    D("Camera %d '%s' connected to '%s' facing %s using %.4s pixel format",
+      csd->camera_count, csd->camera_info[csd->camera_count].display_name,
+      csd->camera_info[csd->camera_count].device_name,
+      csd->camera_info[csd->camera_count].direction,
+      (const char*)(&csd->camera_info[csd->camera_count].pixel_format));
+      csd->camera_count++;
+}
+
 /* Initializes camera service descriptor.
  */
 static void
@@ -272,107 +314,34 @@ _camera_service_init(CameraServiceDesc* csd)
 {
     CameraInfo ci[MAX_CAMERA];
     int connected_cnt;
-    int i;
 
     /* Enumerate camera devices connected to the host. */
     memset(ci, 0, sizeof(CameraInfo) * MAX_CAMERA);
     memset(csd->camera_info, 0, sizeof(CameraInfo) * MAX_CAMERA);
     csd->camera_count = 0;
 
-    if (android_hw->hw_camera == 0) {
-        /* Camera emulation is disabled. Skip enumeration of webcameras. */
+    /* Lets see if HW config uses web cameras. */
+    if (memcmp(android_hw->hw_camera_back, "webcam", 6) &&
+        memcmp(android_hw->hw_camera_front, "webcam", 6)) {
+        /* Web camera emulation is disabled. Skip enumeration of webcameras. */
         return;
     }
 
+    /* Enumerate web cameras connected to the host. */
     connected_cnt = enumerate_camera_devices(ci, MAX_CAMERA);
     if (connected_cnt <= 0) {
         /* Nothing is connected - nothing to emulate. */
         return;
     }
 
-    /* For each webcam declared in hw.ini find an actual camera information
-     * descriptor, and save it into the service descriptor for the emulation.
-     * Stop the loop when all the connected cameras have been added to the
-     * service. */
-    for (i = 0; i < android_hw->hw_webcam_count &&
-                csd->camera_count < connected_cnt; i++) {
-        const char* disp_name;
-        const char* dir;
-        CameraInfo* found;
-
-        switch (i) {
-            case 0:
-                disp_name = android_hw->hw_webcam_0_name;
-                dir = android_hw->hw_webcam_0_direction;
-                break;
-            case 1:
-                disp_name = android_hw->hw_webcam_1_name;
-                dir = android_hw->hw_webcam_1_direction;
-                break;
-            case 2:
-                disp_name = android_hw->hw_webcam_2_name;
-                dir = android_hw->hw_webcam_2_direction;
-                break;
-            case 3:
-                disp_name = android_hw->hw_webcam_3_name;
-                dir = android_hw->hw_webcam_3_direction;
-                break;
-            case 4:
-                disp_name = android_hw->hw_webcam_4_name;
-                dir = android_hw->hw_webcam_4_direction;
-                break;
-            case 5:
-            default:
-                disp_name = android_hw->hw_webcam_5_name;
-                dir = android_hw->hw_webcam_5_direction;
-                break;
-        }
-        found = _camera_info_get_by_display_name(disp_name, ci, connected_cnt);
-        if (found != NULL) {
-            /* Save to the camera info array that will be used by the service.
-             * Note that we just copy everything over, and NULL the source
-             * record. */
-            memcpy(csd->camera_info + csd->camera_count, found, sizeof(CameraInfo));
-            /* Update direction parameter. */
-            if (csd->camera_info[csd->camera_count].direction != NULL) {
-                free(csd->camera_info[csd->camera_count].direction);
-            }
-            csd->camera_info[csd->camera_count].direction = ASTRDUP(dir);
-            D("Camera %d '%s' connected to '%s' facing %s using %.4s pixel format",
-              csd->camera_count, csd->camera_info[csd->camera_count].display_name,
-              csd->camera_info[csd->camera_count].device_name,
-              csd->camera_info[csd->camera_count].direction,
-              (const char*)(&csd->camera_info[csd->camera_count].pixel_format));
-            csd->camera_count++;
-            memset(found, 0, sizeof(CameraInfo));
-        } else {
-            W("Camera name '%s' is not found in the list of connected cameras.\n"
-              "Use '-webcam list' emulator option to obtain the list of connected camera names.\n",
-              disp_name);
-        }
+    /* Set up back camera emulation. */
+    if (!memcmp(android_hw->hw_camera_back, "webcam", 6)) {
+        _wecam_setup(csd, android_hw->hw_camera_back, "back", ci, connected_cnt);
     }
 
-    /* Make sure that camera 0 and camera 1 are facing in opposite directions.
-     * If they don't the camera application will crash on an attempt to switch
-     * cameras. */
-    if (csd->camera_count > 0) {
-        const char* cam2_dir = NULL;
-        const char* cam2_name = NULL;
-        if (csd->camera_count >= 2) {
-            cam2_dir = csd->camera_info[1].direction;
-            cam2_name = csd->camera_info[1].display_name;
-        } else if (strcmp(android_hw->hw_fakeCamera, "off")) {
-            cam2_dir = android_hw->hw_fakeCamera;
-            cam2_name = "fake camera";
-        }
-        if (cam2_dir != NULL && !strcmp(csd->camera_info[0].direction, cam2_dir)) {
-            W("Cameras '%s' and '%s' are both facing %s.\n"
-              "It is required by the camera application that first two emulated cameras\n"
-              "are facing in opposite directions. If they both are facing in the same direction,\n"
-              "the camera application will crash on an attempt to switch the camera.\n",
-              csd->camera_info[0].display_name, cam2_name, cam2_dir);
-
-        }
+    /* Set up front camera emulation. */
+    if (!memcmp(android_hw->hw_camera_front, "webcam", 6)) {
+        _wecam_setup(csd, android_hw->hw_camera_front, "front", ci, connected_cnt);
     }
 }
 

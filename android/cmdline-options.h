@@ -156,8 +156,9 @@ OPT_PARAM( attach_core, "<console socket>", "attach to a running core process" )
 
 OPT_PARAM( gpu, "<mode>", "set hardware OpenGLES emulation mode" )
 
-OPT_PARAM( fake_camera, "<mode>", "set fake camera emulation mode" )
-OPT_LIST( webcam, "name=<name>[,dir=<direction>]", "setup web camera emulation" )
+OPT_PARAM( camera_back, "<mode>", "set emulation mode for a camera facing back" )
+OPT_PARAM( camera_front, "<mode>", "set emulation mode for a camera facing front" )
+OPT_FLAG( webcam_list, "lists web cameras available for emulation" )
 
 OPT_PARAM( screen, "<mode>", "set emulated screen mode" )
 

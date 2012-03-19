@@ -406,7 +406,9 @@ void events_dev_init(uint32_t base, qemu_irq irq)
         events_set_bit(s, EV_KEY, BTN_TOUCH);
     }
 
-    if (config->hw_camera) {
+    if (strcmp(config->hw_camera_back, "none") ||
+        strcmp(config->hw_camera_front, "none")) {
+        /* Camera emulation is enabled. */
         events_set_bit(s, EV_KEY, KEY_CAMERA);
     }
 
