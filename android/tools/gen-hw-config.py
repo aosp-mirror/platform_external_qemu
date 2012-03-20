@@ -28,7 +28,7 @@ def quoteStringForC(str):
 # a dictionary that maps item types as they appear in the .ini
 # file into macro names in the generated C header
 #
-typesToMacros = { 
+typesToMacros = {
     'integer': 'HWCFG_INT',
     'string': 'HWCFG_STRING',
     'boolean': 'HWCFG_BOOL',
@@ -69,12 +69,69 @@ class Item:
         self.default  = None
         self.abstract = ""
         self.description = ""
+        self.enum_values = []
+
+    # gets base type for an enum value.
+    # This is a very basic implementation of enum parser that assumes that enum
+    # is formatted as such:
+    #
+    #    enum(type: val1[, val2[, ..., valN] [, ...])
+    #
+    # where:
+    #    - 'type' defines type of enumerated values, and must be one of the types
+    #      listed in typesToMacros
+    #    - 'val1'... 'valN' lists enumerated values, separated with a comma.
+    #    - '...' is a special value indicating that AVD editor may set property
+    #      value that doesn't match values enumerated in the .ini file. However,
+    #      default value set for the property must match one of the enumerated
+    #      values.
+    # This method provides some basic checking for the format, but it could, or
+    # should be improved.
+    #
+    def trueenumtype(self,type):
+        # Make sure enum ends with a ')'
+        if not type.endswith(")"):
+            print"Bad enum fomat in '" + type + "'"
+            sys.exit(1)
+        # Cut substring between 'enum(', and terminating ')'
+        enum_data = type[5:len(type)-1]
+        # Locate enum's value type
+        type_index = enum_data.find(':')
+        if type_index == -1:
+            print "Property '" + self.name + "': Value type is missing in enum."
+            sys.exit(1)
+        value_type = enum_data[:type_index].strip()
+        # Make sure value type is known
+        if not value_type in typesToMacros:
+            print "Property '" + self.name + "': Unknown value type '" + value_type + "' in enum."
+            sys.exit(1)
+        # Save list of enumerated values, stripped of spaces.
+        for value in enum_data[type_index+1:].split(','):
+            self.enum_values.append(value.strip())
+        return value_type
+
+    # gets true basic type for a type obtained from the .ini file
+    # Here we simply check if type is an enum, and if so, we extract basic
+    # type for enumerated values.
+    def truetype(self,type):
+        if type.startswith("enum("):
+            return self.trueenumtype(type.strip())
+        return type
 
     def add(self,key,val):
         if key == 'type':
-            self.type = val
+            self.type = self.truetype(val)
         elif key == 'default':
-            self.default = val
+            if len(val) > 0 and len(self.enum_values) > 0:
+                # Make sure that default value (if set) is present in enum.
+                if self.enum_values.count(val) == 0:
+                    print "Property '" + self.name + "': Default value '" + val + "' is missing in enum: ",
+                    print self.enum_values,
+                    sys.exit(1)
+                else:
+                    self.default = val
+            else:
+                self.default = val
         elif key == 'abstract':
             self.abstract = val
         elif key == 'description':
