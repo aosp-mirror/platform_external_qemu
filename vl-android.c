@@ -3877,8 +3877,7 @@ int main(int argc, char **argv, char **envp)
         if (android_hw->hw_gpu_enabled) {
             if (android_initOpenglesEmulation() == 0) {
                 gles_emul = 1;
-                android_startOpenglesRenderer(android_hw->hw_lcd_width, android_hw->hw_lcd_height,
-                                              NULL, NULL);
+                android_startOpenglesRenderer(android_hw->hw_lcd_width, android_hw->hw_lcd_height);
             } else {
                 dwarning("Could not initialize OpenglES emulation, using software renderer.");
             }
