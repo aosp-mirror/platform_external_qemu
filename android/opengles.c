@@ -41,7 +41,7 @@ int  android_gles_fast_pipes = 1;
 #define DYNLINK_FUNCTIONS  \
   DYNLINK_FUNC(int,initLibrary,(void),(),return) \
   DYNLINK_FUNC(int,setStreamMode,(int a),(a),return) \
-  DYNLINK_FUNC(int,initOpenGLRenderer,(int width, int height, int port, OnPostFn onPost, void* onPostContext),(width,height,port,onPost,onPostContext),return) \
+  DYNLINK_FUNC(int,initOpenGLRenderer,(int width, int height, int port),(width,height,port),return) \
   DYNLINK_FUNC(int,createOpenGLSubwindow,(void* window, int x, int y, int width, int height, float zRot),(window,x,y,width,height,zRot),return)\
   DYNLINK_FUNC(int,destroyOpenGLSubwindow,(void),(),return)\
   DYNLINK_FUNC(void,repaintOpenGLDisplay,(void),(),)\
@@ -141,14 +141,14 @@ BAD_EXIT:
 }
 
 int
-android_startOpenglesRenderer(int width, int height, OnPostFn onPost, void* onPostContext)
+android_startOpenglesRenderer(int width, int height)
 {
     if (!rendererLib) {
         D("Can't start OpenGLES renderer without support libraries");
         return -1;
     }
 
-    if (initOpenGLRenderer(width, height, ANDROID_OPENGLES_BASE_PORT, onPost, onPostContext) != 0) {
+    if (initOpenGLRenderer(width, height,ANDROID_OPENGLES_BASE_PORT) != 0) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }
