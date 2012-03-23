@@ -2381,7 +2381,7 @@ net_slirp_forward(const char *optarg)
     char *dst_net, *dst_mask, *dst_port;
     char *redirect_ip, *redirect_port;
     uint32_t dnet, dmask, rip;
-    unsigned short dlport, dhport, rport;
+    unsigned short dlport = 0, dhport = 0, rport;
 
 
     dst_net = strtok(p, ":");
@@ -2447,7 +2447,7 @@ slirp_allow(const char *optarg, u_int8_t proto)
   char *argument = strdup(optarg), *p = argument;
   char *dst_ip_str, *dst_port_str;
   uint32_t dst_ip;
-  unsigned short dst_lport, dst_hport;
+  unsigned short dst_lport = 0, dst_hport = 0;
 
   dst_ip_str = strtok(p, ":");
   dst_port_str = strtok(NULL, ":");
