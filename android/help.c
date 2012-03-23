@@ -1505,6 +1505,15 @@ help_screen(stralloc_t* out)
     );
 }
 
+static void
+help_force_32bit(stralloc_t* out)
+{
+    PRINTF(
+    "  Use -force-32bit to use 32-bit emulator on 64-bit platforms\n\n"
+
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

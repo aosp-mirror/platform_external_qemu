@@ -162,6 +162,8 @@ OPT_FLAG( webcam_list, "lists web cameras available for emulation" )
 
 OPT_PARAM( screen, "<mode>", "set emulated screen mode" )
 
+OPT_FLAG( force_32bit, "always use 32-bit emulator" )
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

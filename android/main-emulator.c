@@ -63,7 +63,7 @@ int android_verbose;
 
 
 /* Forward declarations */
-static char* getTargetEmulatorPath(const char* progName, const char* avdArch);
+static char* getTargetEmulatorPath(const char* progName, const char* avdArch, const int force_32bit);
 static char* getSharedLibraryPath(const char* progName, const char* libName);
 static void  prependSharedLibraryPath(const char* prefix);
 
@@ -90,6 +90,7 @@ int main(int argc, char** argv)
     const char* avdName = NULL;
     char*       avdArch = NULL;
     char*       emulatorPath;
+    int         force_32bit = 0;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -99,8 +100,9 @@ int main(int argc, char** argv)
     if (debug != NULL && *debug && *debug != '0')
         android_verbose = 1;
 
-    /* Parse command-line and look for an avd name
-     * Either in the form or '-avd <name>' or '@<name>'
+    /* Parse command-line and look for
+     * 1) an avd name either in the form or '-avd <name>' or '@<name>'
+     * 2) '-force-32bit' which always use 32-bit emulator on 64-bit platforms
      */
     int  nn;
     for (nn = 1; nn < argc; nn++) {
@@ -109,13 +111,18 @@ int main(int argc, char** argv)
         if (!strcmp(opt,"-qemu"))
             break;
 
-        if (!strcmp(opt,"-avd") && nn+1 < argc) {
-            avdName = argv[nn+1];
-            break;
+        if (!strcmp(opt,"-force-32bit")) {
+            force_32bit = 1;
+            continue;
         }
-        else if (opt[0] == '@' && opt[1] != '\0') {
-            avdName = opt+1;
-            break;
+
+        if (!avdName) {
+            if (!strcmp(opt,"-avd") && nn+1 < argc) {
+                avdName = argv[nn+1];
+            }
+            else if (opt[0] == '@' && opt[1] != '\0') {
+                avdName = opt+1;
+            }
         }
     }
 
@@ -143,7 +150,7 @@ int main(int argc, char** argv)
     }
 
     /* Find the architecture-specific program in the same directory */
-    emulatorPath = getTargetEmulatorPath(argv[0], avdArch);
+    emulatorPath = getTargetEmulatorPath(argv[0], avdArch, force_32bit);
     D("Found target-specific emulator binary: %s\n", emulatorPath);
 
     /* Replace it in our command-line */
@@ -212,7 +219,7 @@ getHostOSBitness()
  * the directory of the current program.
  */
 static char*
-getTargetEmulatorPath(const char* progName, const char* avdArch)
+getTargetEmulatorPath(const char* progName, const char* avdArch, const int force_32bit)
 {
     char*  progDir;
     char   path[PATH_MAX], *pathEnd=path+sizeof(path), *p;
@@ -222,16 +229,16 @@ getTargetEmulatorPath(const char* progName, const char* avdArch)
     const char* exeExt = ".exe";
     /* ToDo: currently amd64-mingw32msvc-gcc doesn't work (http://b/issue?id=5949152)
              which prevents us from generating 64-bit emulator for Windows */
-    int host_runs_64bit_OS = 0;
+    int search_for_64bit_emulator = 0;
 #else
     const char* exeExt = "";
-    int host_runs_64bit_OS = getHostOSBitness() == 64;
+    int search_for_64bit_emulator = !force_32bit && getHostOSBitness() == 64;
 #endif
 
     /* Get program's directory name in progDir */
     path_split(progName, &progDir, NULL);
 
-    if (host_runs_64bit_OS) {
+    if (search_for_64bit_emulator) {
         /* Find 64-bit emulator first */
         p = bufprint(path, pathEnd, "%s/%s%s%s", progDir, emulator64Prefix, avdArch, exeExt);
         if (p >= pathEnd) {
@@ -262,7 +269,7 @@ getTargetEmulatorPath(const char* progName, const char* avdArch)
 #else
     if (strchr(progName, '/') == NULL) {
 #endif
-        if (host_runs_64bit_OS) {
+        if (search_for_64bit_emulator) {
            p = bufprint(path, pathEnd, "%s%s%s", emulator64Prefix, avdArch, exeExt);
            if (p < pathEnd) {
                char*  resolved = path_search_exec(path);
