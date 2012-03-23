@@ -246,7 +246,7 @@ $(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
 $(call end-emulator-library)
 
 ## another for 64-bit, see note in file Makefile.common emulator64-common
-ifeq ($(HOST_OS),)
+ifeq ($(HOST_OS),linux)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-library, emulator64-target-$(EMULATOR_TARGET_CPU))
     LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
@@ -433,7 +433,7 @@ $(call end-emulator-program)
 
 
 ## another for 64-bit, see note in file Makefile.common emulator64-common
-ifeq ($(HOST_OS),)
+ifeq ($(HOST_OS),linux)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-program, emulator64-$(EMULATOR_TARGET_ARCH))
     LOCAL_STATIC_LIBRARIES += \
