@@ -328,6 +328,15 @@ struct hax_module_version
     uint32_t cur_version;
 };
 
+/* This interface is support only after API version 2 */
+struct hax_qemu_version
+{
+    /* Current API version in QEMU*/
+    uint32_t cur_version;
+    /* The least API version supported by QEMU */
+    uint32_t least_version;
+};
+
 /* See comments for HAX_VM_IOCTL_ALLOC_RAM ioctl */
 struct hax_alloc_ram_info
 {

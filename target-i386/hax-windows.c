@@ -279,6 +279,29 @@ hax_fd hax_host_open_vm(struct hax_state *hax, int vm_id)
     return hDeviceVM;
 }
 
+int hax_notify_qemu_version(hax_fd vm_fd, struct hax_qemu_version *qversion)
+{
+    int ret;
+    DWORD dSize = 0;
+
+    if (hax_invalid_fd(vm_fd))
+        return -EINVAL;
+
+    ret = DeviceIoControl(vm_fd,
+      HAX_VM_IOCTL_NOTIFY_QEMU_VERSION,
+      qversion, sizeof(struct hax_qemu_version),
+      NULL, 0,
+      &dSize,
+      (LPOVERLAPPED) NULL);
+    if (!ret)
+    {
+        dprint("Failed to notify qemu API version\n");
+        return -1;
+    }
+
+    return 0;
+}
+
 int hax_host_create_vcpu(hax_fd vm_fd, int vcpuid)
 {
     int ret;
