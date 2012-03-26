@@ -44,6 +44,7 @@
     _VERBOSE_TAG(adbserver,    "ADB server") \
     _VERBOSE_TAG(adbclient,    "ADB QEMU client") \
     _VERBOSE_TAG(adb,          "ADB debugger") \
+    _VERBOSE_TAG(asconnector,  "Asynchronous socket connector") \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
