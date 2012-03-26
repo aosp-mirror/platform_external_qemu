@@ -16,6 +16,10 @@
 
 #define ANDROID_OPENGLES_BASE_PORT  22468
 
+/* See the description in render_api.h. */
+typedef void (*OnPostFn)(void* context, int width, int height, int ydir,
+                         int format, int type, unsigned char* pixels);
+
 /* Call this function to initialize the hardware opengles emulation.
  * This function will abort if we can't find the corresponding host
  * libraries through dlopen() or equivalent.
@@ -23,9 +27,11 @@
 int android_initOpenglesEmulation(void);
 
 /* Tries to start the renderer process. Returns 0 on success, -1 on error.
- * At the moment, this must be done before the VM starts.
+ * At the moment, this must be done before the VM starts. The onPost callback
+ * may be NULL.
  */
-int android_startOpenglesRenderer(int width, int height);
+int android_startOpenglesRenderer(int width, int height,
+                                  OnPostFn onPost, void* onPostContext);
 
 int android_showOpenglesWindow(void* window, int x, int y, int width, int height, float rotation);
 
