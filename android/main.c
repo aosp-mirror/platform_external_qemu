@@ -1271,12 +1271,22 @@ int main(int argc, char **argv)
         args[n++] = "-net";
         snprintf(nic, sizeof nic, "nic,vlan=1,macaddr=52:54:00:12:34:%02x", shared_net_id);
         args[n++] = strdup(nic);
+
         args[n++] = "-net";
         args[n++] = "socket,vlan=1,mcast=230.0.0.10:1234";
     } else if (opts->netbridge) {
-        char tap1[100];
+      char tap1[128];
         args[n++] = "-net";
-        snprintf(tap1, sizeof(tap1), "tap,name=%s,vlan=0,script=no,downscript=no", opts->netbridge
+        args[n++] = "nic,vlan=0";
+        args[n++] = "-net";
+        args[n++] = "user,vlan=0";
+
+      args[n++] = "-net";
+      args[n++] = "nic,vlan=1";
+
+      args[n++] = "-net";
+      snprintf(tap1, sizeof(tap1), "tap,name=%s,ifname=%s,vlan=1,script=no,downscript=no", opts->netbridge, opts->netbridge);
+      args[n++] = strdup(tap1);
     }
 
     /* Setup screen emulation */

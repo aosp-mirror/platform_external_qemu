@@ -1508,6 +1508,7 @@ help_screen(stralloc_t* out)
 #define  help_netdelay  help_shaper
 #define  help_netfast   help_shaper
 
+#define  help_netbridge    NULL
 #define  help_noaudio      NULL
 #define  help_noskin       NULL
 #define  help_nocache      NULL
