@@ -91,6 +91,7 @@ CFG_FLAG ( no_skin, "don't use any emulator skin" )
 CFG_FLAG ( noskin, "same as -no-skin" )
 CFG_PARAM( memory, "<size>", "physical RAM size in MBs" )
 
+OPT_PARAM( netbridge, "<tuntap>", "bridge emulator to /dev/tun/<tuntap> rather than reverse proxy" )
 OPT_PARAM( netspeed, "<speed>", "maximum network download/upload speeds" )
 OPT_PARAM( netdelay, "<delay>", "network latency emulation" )
 OPT_FLAG ( netfast, "disable network shaping" )

@@ -1431,22 +1431,26 @@ static int tap_open(char *ifname, int ifname_size)
 static int tap_open(char *ifname, int ifname_size)
 {
     struct ifreq ifr;
+    static int tapnum = 0;
     int fd, ret;
 
     TFR(fd = open("/dev/net/tun", O_RDWR));
     if (fd < 0) {
-        fprintf(stderr, "warning: could not open /dev/net/tun: no virtual network emulation\n");
+        fprintf(stderr, "warning: could not open /dev/net/tun: no virtual network emulation 2\n");
         return -1;
     }
     memset(&ifr, 0, sizeof(ifr));
     ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
     if (ifname[0] != '\0')
         pstrcpy(ifr.ifr_name, IFNAMSIZ, ifname);
-    else
-        pstrcpy(ifr.ifr_name, IFNAMSIZ, "tap%d");
+    else {
+      snprintf(ifr.ifr_name, IFNAMSIZ, "tap%d",tapnum++);
+    }
     ret = ioctl(fd, TUNSETIFF, (void *) &ifr);
     if (ret != 0) {
-        fprintf(stderr, "warning: could not configure /dev/net/tun: no virtual network emulation\n");
+	fprintf(stderr,
+	    "warning: could not configure /dev/net/tun: no virtual network emulation 3: %s\n",
+	    ifr.ifr_name);
         close(fd);
         return -1;
     }
@@ -2368,6 +2372,7 @@ int net_client_init(Monitor *mon, const char *device, const char *p)
             if (get_param_value(down_script, sizeof(down_script), "downscript", p) == 0) {
                 pstrcpy(down_script, sizeof(down_script), DEFAULT_NETWORK_DOWN_SCRIPT);
             }
+            fprintf(stderr, "opening tap device: %s ifname=%s\n", name, ifname);
             ret = net_tap_init(vlan, device, name, ifname, setup_script, down_script);
         }
     } else

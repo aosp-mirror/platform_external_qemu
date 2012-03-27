@@ -1318,7 +1318,9 @@ static int tap_open(char *ifname, int ifname_size)
         pstrcpy(ifr.ifr_name, IFNAMSIZ, "tap%d");
     ret = ioctl(fd, TUNSETIFF, (void *) &ifr);
     if (ret != 0) {
-        fprintf(stderr, "warning: could not configure /dev/net/tun: no virtual network emulation\n");
+	fprintf(stderr,
+	      "warning: could not configure /dev/net/tun: no virtual network emulation 6: %s\n",
+	      ifr.ifr_name);
         close(fd);
         return -1;
     }
