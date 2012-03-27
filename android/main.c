@@ -439,6 +439,10 @@ int main(int argc, char **argv)
         }
     }
 
+    if (opts->netbridge) {
+        D("network bridge: '%s'", opts->netbridge);
+    }
+
     if (opts->trace) {
         char*   tracePath = avdInfo_getTracePath(avd, opts->trace);
         int     ret;
@@ -1269,6 +1273,10 @@ int main(int argc, char **argv)
         args[n++] = strdup(nic);
         args[n++] = "-net";
         args[n++] = "socket,vlan=1,mcast=230.0.0.10:1234";
+    } else if (opts->netbridge) {
+        char tap1[100];
+        args[n++] = "-net";
+        snprintf(tap1, sizeof(tap1), "tap,name=%s,vlan=0,script=no,downscript=no", opts->netbridge
     }
 
     /* Setup screen emulation */
