@@ -165,7 +165,7 @@ static int parse_macaddr(uint8_t *macaddr, const char *p)
     long int offset;
 
     errno = 0;
-    offset = strtol(p, &last_char, 0);    
+    offset = strtol(p, &last_char, 0);
     if (0 == errno && '\0' == *last_char &&
             offset >= 0 && offset <= 0xFFFFFF) {
         macaddr[3] = (offset & 0xFF0000) >> 16;
@@ -184,7 +184,7 @@ static int parse_macaddr(uint8_t *macaddr, const char *p)
                 p++;
             }
         }
-        return 0;    
+        return 0;
     }
 
     return -1;
@@ -1318,7 +1318,9 @@ static int tap_open(char *ifname, int ifname_size)
         pstrcpy(ifr.ifr_name, IFNAMSIZ, "tap%d");
     ret = ioctl(fd, TUNSETIFF, (void *) &ifr);
     if (ret != 0) {
-        fprintf(stderr, "warning: could not configure /dev/net/tun: no virtual network emulation\n");
+	fprintf(stderr,
+	      "warning: could not configure /dev/net/tun: no virtual network emulation for: %s\n",
+	      ifr.ifr_name);
         close(fd);
         return -1;
     }
