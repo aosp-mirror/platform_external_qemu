@@ -477,6 +477,7 @@ CORE_MISC_SOURCES = \
     android/qemu-setup.c \
     android/snapshot.c \
     android/android-device.c \
+    android/async-socket-connector.c \
     android/sensors-port.c \
     android/utils/timezone.c \
     android/camera/camera-format-converters.c \
