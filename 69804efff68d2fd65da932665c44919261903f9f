@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAEdX////8\u003d",
+        "filename": "hw/goldfish_fb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1010186
+      },
+      "writtenOn": "2012-03-29T11:27:24Z",
+      "side": 1,
+      "message": "Could you remove tab?",
+      "revId": "69804efff68d2fd65da932665c44919261903f9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAEdX////4\u003d",
+        "filename": "hw/goldfish_fb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1010186
+      },
+      "writtenOn": "2012-03-29T11:27:24Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "69804efff68d2fd65da932665c44919261903f9f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
