@@ -140,7 +140,7 @@ typedef struct {
  * 2: saving actual disk contents as well
  * 3: use the correct data length and truncate to avoid padding.
  */
-#define  NAND_DEV_STATE_SAVE_VERSION  3
+#define  NAND_DEV_STATE_SAVE_VERSION  4
 
 #define  QFIELD_STRUCT  nand_dev_controller_state
 QFIELD_BEGIN(nand_dev_controller_state_fields)
@@ -149,6 +149,8 @@ QFIELD_BEGIN(nand_dev_controller_state_fields)
     QFIELD_INT32(addr_high),
     QFIELD_INT32(transfer_size),
     QFIELD_INT32(data),
+    QFIELD_INT32(batch_addr_low),
+    QFIELD_INT32(batch_addr_high),
     QFIELD_INT32(result),
 QFIELD_END
 
