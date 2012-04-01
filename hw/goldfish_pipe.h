@@ -153,6 +153,11 @@ extern void goldfish_pipe_wake( void* hwpipe, unsigned flags );
 #define PIPE_REG_SIZE               0x0c  /* read/write: buffer size */
 #define PIPE_REG_ADDRESS            0x10  /* write: physical address */
 #define PIPE_REG_WAKES              0x14  /* read: wake flags */
+/* read/write: parameter buffer address */
+#define PIPE_REG_PARAMS_ADDR_LOW     0x18
+#define PIPE_REG_PARAMS_ADDR_HIGH    0x1c
+/* write: access with paremeter buffer */
+#define PIPE_REG_ACCESS_PARAMS       0x20
 
 /* list of commands for PIPE_REG_COMMAND */
 #define PIPE_CMD_OPEN               1  /* open new channel */
@@ -188,5 +193,15 @@ extern void goldfish_pipe_wake( void* hwpipe, unsigned flags );
 #define PIPE_WAKE_WRITE        (1 << 2)  /* pipe can now be written to */
 
 void pipe_dev_init(void);
+
+struct access_params{
+    uint32_t channel;
+    uint32_t size;
+    uint32_t address;
+    uint32_t cmd;
+    uint32_t result;
+    /* reserved for future extension */
+    uint32_t flags;
+};
 
 #endif /* _HW_GOLDFISH_PIPE_H */

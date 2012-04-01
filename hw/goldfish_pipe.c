@@ -55,7 +55,7 @@
 /* Maximum length of pipe service name, in characters (excluding final 0) */
 #define MAX_PIPE_SERVICE_NAME_SIZE  255
 
-#define GOLDFISH_PIPE_SAVE_VERSION  1
+#define GOLDFISH_PIPE_SAVE_VERSION  2
 
 /***********************************************************************
  ***********************************************************************
@@ -960,8 +960,8 @@ struct PipeDevice {
     uint32_t  status;
     uint32_t  channel;
     uint32_t  wakes;
+    uint64_t  params_addr;
 };
-
 
 static void
 pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
@@ -1097,6 +1097,42 @@ static void pipe_dev_write(void *opaque, target_phys_addr_t offset, uint32_t val
         s->channel = value;
         break;
 
+    case PIPE_REG_PARAMS_ADDR_HIGH:
+        s->params_addr = (s->params_addr & ~(0xFFFFFFFFULL << 32) ) |
+                          ((uint64_t)value << 32);
+        break;
+
+    case PIPE_REG_PARAMS_ADDR_LOW:
+        s->params_addr = (s->params_addr & ~(0xFFFFFFFFULL) ) | value;
+        break;
+
+    case PIPE_REG_ACCESS_PARAMS:
+    {
+        struct access_params aps;
+        uint32_t cmd;
+
+        /* Don't touch aps.result if anything wrong */
+        if (s->params_addr == 0)
+            break;
+
+        cpu_physical_memory_read(s->params_addr, (void*)&aps,
+                        sizeof(struct access_params));
+
+        /* sync pipe device state from batch buffer */
+        s->channel = aps.channel;
+        s->size = aps.size;
+        s->address = aps.address;
+        cmd = aps.cmd;
+        if ((cmd != PIPE_CMD_READ_BUFFER) && (cmd != PIPE_CMD_WRITE_BUFFER))
+            break;
+
+        pipeDevice_doCommand(s, cmd);
+        aps.result = s->status;
+        cpu_physical_memory_write(s->params_addr, (void*)&aps,
+                    sizeof(struct access_params));
+    }
+    break;
+
     default:
         D("%s: offset=%d (0x%x) value=%d (0x%x)\n", __FUNCTION__, offset,
             offset, value, value);
@@ -1136,6 +1172,12 @@ static uint32_t pipe_dev_read(void *opaque, target_phys_addr_t offset)
         DR("%s: wakes %d", __FUNCTION__, dev->wakes);
         return dev->wakes;
 
+    case PIPE_REG_PARAMS_ADDR_HIGH:
+        return dev->params_addr >> 32;
+
+    case PIPE_REG_PARAMS_ADDR_LOW:
+        return dev->params_addr & 0xFFFFFFFFUL;
+
     default:
         D("%s: offset=%d (0x%x)\n", __FUNCTION__, offset, offset);
     }
@@ -1165,6 +1207,7 @@ goldfish_pipe_save( QEMUFile* file, void* opaque )
     qemu_put_be32(file, dev->status);
     qemu_put_be32(file, dev->channel);
     qemu_put_be32(file, dev->wakes);
+    qemu_put_be64(file, dev->params_addr);
 
     /* Count the number of pipe connections */
     int count = 0;
@@ -1193,6 +1236,7 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
     dev->status  = qemu_get_be32(file);
     dev->channel = qemu_get_be32(file);
     dev->wakes   = qemu_get_be32(file);
+    dev->params_addr   = qemu_get_be64(file);
 
     /* Count the number of pipe connections */
     int count = qemu_get_sbe32(file);
