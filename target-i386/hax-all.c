@@ -120,7 +120,7 @@ hax_fd hax_vcpu_get_fd(CPUState *env)
 }
 
 /* Current version */
-uint32_t hax_cur_version = 0x1;
+uint32_t hax_cur_version = 0x2;
 /* Least HAX kernel version */
 uint32_t hax_lest_version = 0x1;
 
@@ -395,6 +395,31 @@ error:
     return ret;
 }
 
+int  hax_handle_fastmmio(CPUState *env, struct hax_fastmmio *hft)
+{
+    uint64_t buf = 0;
+
+    /*
+     * With fast MMIO, QEMU need not sync vCPU state with HAXM
+     * driver because it will only invoke MMIO handler
+     * However, some MMIO operations utilize virtual address like qemu_pipe
+     * Thus we need to sync the CR0, CR3 and CR4 so that QEMU
+     * can translate the guest virtual address to guest physical
+     * address
+     */
+    env->cr[0] = hft->_cr0;
+    env->cr[2] = hft->_cr2;
+    env->cr[3] = hft->_cr3;
+    env->cr[4] = hft->_cr4;
+
+    buf = hft->value;
+    cpu_physical_memory_rw(hft->gpa, &buf, hft->size, hft->direction);
+    if (hft->direction == 0)
+        hft->value = buf;
+
+    return 0;
+}
+
 int hax_handle_io(CPUState *env, uint32_t df, uint16_t port, int direction,
   int size, int count, void *buffer)
 {
@@ -541,6 +566,10 @@ static int hax_vcpu_hax_exec(CPUState *env)
                 break;
             case HAX_EXIT_MMIO:
                 ret = HAX_EMUL_ONE;
+                break;
+            case HAX_EXIT_FAST_MMIO:
+                ret = hax_handle_fastmmio(env,
+                        (struct hax_fastmmio *)vcpu->iobuf);
                 break;
             case HAX_EXIT_REAL:
                 ret = HAX_EMUL_REAL;
