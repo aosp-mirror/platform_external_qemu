@@ -17,15 +17,17 @@
 #ifndef ANDROID_ASYNC_SOCKET_CONNECTOR_H_
 #define ANDROID_ASYNC_SOCKET_CONNECTOR_H_
 
+#include "android/async-io-common.h"
+
 /*
  * Contains declaration of an API that allows asynchronous connection to a
  * socket with retries.
  *
  * The typical usage of this API is as such:
  *
- * 1. The client creates an async connector instance by calling async_socket_connector_new
- *    routine, supplying there address of the socket to connect, and a callback
- *    to invoke on connection events.
+ * 1. The client creates an asynchronous connector instance by calling
+ *    async_socket_connector_new routine, supplying there address of the socket
+ *    to connect, and a callback to invoke on connection events.
  * 2. The client then proceeds with calling async_socket_connector_connect that
  *    would initiate connection attempts.
  *
@@ -38,94 +40,58 @@
  * 2. Failure.
  * 3. Retry.
  *
- * Typically, when client's callback is called for successful connection, the
+ * Typically, when client's callback is called for a successful connection, the
  * client will pull connected socket's FD from the connector, and then this FD
- * will be used by the client for I/O on the connected socket. If socket's FD
- * is pulled by the client, it must return ASC_CB_KEEP from the callback.
+ * will be used by the client for I/O on the connected socket.
  *
- * When client's callback is invoked with an error (ASC_CONNECTION_FAILED event),
- * the client has an opportunity to review the error (available in 'errno'), and
- * either abort the connection by returning ASC_CB_ABORT, or schedule a retry
- * by returning ASC_CB_RETRY from the callback. If client returns ASC_CB_ABORT
+ * When client's callback is invoked with an error (ASIO_STATE_FAILED event), the
+ * client has an opportunity to review the error (available in 'errno'), and
+ * either abort the connection by returning ASIO_ACTION_ABORT, or schedule a retry
+ * by returning ASIO_ACTION_RETRY from the callback. If client returns ASIO_ACTION_ABORT
  * from the callback, the connector will stop connection attempts, and will
- * self-destruct. If ASC_CB_RETRY is returned from the callback, the connector
+ * self-destruct. If ASIO_ACTION_RETRY is returned from the callback, the connector
  * will retry connection attempt after timeout that was set by the caller in the
  * call to async_socket_connector_new routine.
  *
- * When client's callback is invoked with ASC_CONNECTION_RETRY, the client has an
- * opportunity to cancel further connection attempts by returning ASC_CB_ABORT,
- * or it can allow another connection attempt by returning ASC_CB_RETRY.
+ * When client's callback is invoked with ASIO_STATE_RETRYING (indicating that
+ * connector is about to retry a connection attempt), the client has an opportunity
+ * to cancel further connection attempts by returning ASIO_ACTION_ABORT, or it
+ * can allow another connection attempt by returning ASIO_ACTION_RETRY.
  *
  * The client has no control over the lifespan of initialized connector instance.
  * It always self-destructs after client's cllback returns with a status other
- * than ASC_CB_RETRY.
+ * than ASIO_ACTION_RETRY.
  */
 
 /* Declares async socket connector descriptor. */
 typedef struct AsyncSocketConnector AsyncSocketConnector;
 
-/* Enumerates connection events.
- * Values from this enum are passed to the callback that connector's client uses
- * to monitor connection status / progress.
- */
-typedef enum ASCEvent {
-    /* Connection with the socket has been successfuly established. */
-    ASC_CONNECTION_SUCCEEDED,
-    /* A failure has occured while establising connection, with errno containing
-     * the actual error. */
-    ASC_CONNECTION_FAILED,
-    /* Async socket connector is about to retry the connection. */
-    ASC_CONNECTION_RETRY,
-} ASCEvent;
-
-/* Enumerates return values from the callback to the connector's client.
- */
-typedef enum ASCCbRes {
-    /* Keep established connection. */
-    ASC_CB_KEEP,
-    /* Abort connection attempts. */
-    ASC_CB_ABORT,
-    /* Retry connection attempt. */
-    ASC_CB_RETRY,
-} ASCCbRes;
-
-/* Enumerates values returned from the connector routine.
- */
-typedef enum ASCConnectRes {
-    /* Connection has succeeded in the connector routine. */
-    ASC_CONNECT_SUCCEEDED,
-    /* Connection has failed in the connector routine. */
-    ASC_CONNECT_FAILED,
-    /* Connection is in progress, and will be completed asynchronously. */
-    ASC_CONNECT_IN_PROGRESS,
-} ASCConnectRes;
-
 /* Declares callback that connector's client uses to monitor connection
  * status / progress.
  * Param:
  *  opaque - An opaque pointer associated with the client.
- *  connector - Connector instance for thecallback.
- *  event - Event that has occured. If event is set to ASC_CONNECTION_FAILED,
+ *  connector - AsyncSocketConnector instance.
+ *  event - Event that has occurred. If event is set to ASIO_STATE_FAILED,
  *      errno contains connection error.
  * Return:
- *  One of ASCCbRes values.
+ *  One of AsyncIOAction values.
  */
-typedef ASCCbRes (*asc_event_cb)(void* opaque,
-                                 AsyncSocketConnector* connector,
-                                 ASCEvent event);
+typedef AsyncIOAction (*asc_event_cb)(void* opaque,
+                                      AsyncSocketConnector* connector,
+                                      AsyncIOState event);
 
 /* Creates and initializes AsyncSocketConnector instance.
  * Param:
  *  address - Initialized socket address to connect to.
- *  retry_to - Retry timeout in milliseconds.
+ *  retry_to - Timeout to retry a failed connection attempt in milliseconds.
  *  cb, cb_opaque - Callback to invoke on connection events. This callback is
  *      required, and must not be NULL.
  * Return:
  *  Initialized AsyncSocketConnector instance. Note that AsyncSocketConnector
  *  instance returned from this routine will be destroyed by the connector itself,
- *  when its work on connecting to the socket is completed. Typically, the
- * connector wil destroy the descriptor after client's callback routine returns
- * with the status other than ASC_CB_RETRY.
+ *  when its work on connecting to the socket is completed. Typically, connector
+ *  will destroy its descriptor after client's callback routine returns with a
+ *  status other than ASIO_ACTION_RETRY.
  */
 extern AsyncSocketConnector* async_socket_connector_new(const SockAddress* address,
                                                         int retry_to,
@@ -133,21 +99,20 @@ extern AsyncSocketConnector* async_socket_connector_new(const SockAddress* addre
                                                         void* cb_opaque);
 
 /* Initiates asynchronous connection.
+ * Note that connection result will be reported via callback set with the call to
+ * async_socket_connector_new routine.
  * Param:
- *  connector - Initialized AsyncSocketConnector instance.
- * Return:
- *  Status indicating state of the connection: completed, failed, or in progress.
- *  Note that the connector will always invoke a callback passed to the
- *  async_socket_connector_new routine prior to exiting from this routine with
- *  statuses other ASC_CONNECT_IN_PROGRESS.
+ *  connector - Initialized AsyncSocketConnector instance. Note that this
+ *      connector descriptor might be destroyed asynchronously, before this
+ *      routine returns.
  */
-extern ASCConnectRes async_socket_connector_connect(AsyncSocketConnector* connector);
+extern void async_socket_connector_connect(AsyncSocketConnector* connector);
 
 /* Pulls socket's file descriptor from the connector.
  * This routine should be called from the connection callback on successful
- * connection status. This will provide the connector's client with operational
- * socket FD, and at the same time this will tell the connector not to close
- * the FD when connector descriptor gets destroyed.
+ * connection status. This will provide the connector's client with an operational
+ * socket FD, and at the same time this will tell the connector not to close the
+ * FD when connector descriptor gets destroyed.
  * Param:
  *  connector - Initialized AsyncSocketConnector instance.
  * Return:

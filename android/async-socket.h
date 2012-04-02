@@ -17,12 +17,14 @@
 #ifndef ANDROID_ASYNC_SOCKET_H_
 #define ANDROID_ASYNC_SOCKET_H_
 
+#include "android/async-io-common.h"
+
 /*
- * Contains declaration of an API that encapsulates communication via
+ * Contains declaration of an API that encapsulates communication via an
  * asynchronous socket.
  *
- * This is pretty basic API that allows to asynchronously connect to a socket,
- * and perform asynchronous read from / write to the connected socket.
+ * This is pretty basic API that allows asynchronous connection to a socket,
+ * and asynchronous read from / write to the connected socket.
  *
  * Since all the operations (including connection) are asynchronous, all the
  * operation results are reported back to the client of this API via set of
@@ -32,32 +34,8 @@
 /* Declares asynchronous socket descriptor. */
 typedef struct AsyncSocket AsyncSocket;
 
-/* Enumerates asynchronous socket connection statuses.
- * Values enumerated here are passed to the client's callback that was set to
- * monitor socket connection.
- */
-typedef enum ASConnectStatus {
-    /* Socket has been connected. */
-    ASCS_CONNECTED,
-    /* Socket has been disconnected. */
-    ASCS_DISCONNECTED,
-    /* An error has occured while connecting to the socket. */
-    ASCS_FAILURE,
-    /* An attempt to retry connection is about to begin. */
-    ASCS_RETRY,
-} ASConnectStatus;
-
-/* Enumerates values returned from the client's callback that was set to
- * monitor socket connection.
- */
-typedef enum ASConnectAction {
-    /* Keep the connection. */
-    ASCA_KEEP,
-    /* Retry connection attempt. */
-    ASCA_RETRY,
-    /* Abort the connection. */
-    ASCA_ABORT,
-} ASConnectAction;
+/* Asynchronous socket I/O (reader, or writer) descriptor. */
+typedef struct AsyncSocketIO AsyncSocketIO;
 
 /* Defines client's callback set to monitor socket connection.
  * Param:
@@ -65,216 +43,177 @@ typedef enum ASConnectAction {
  *  as - Initialized AsyncSocket instance.
  *  status - Socket connection status.
  * Return:
- *  One of the ASConnectAction values.
+ *  One of the AsyncIOAction values.
  */
-typedef ASConnectAction (*on_as_connection_cb)(void* client_opaque,
-                                               AsyncSocket* as,
-                                               ASConnectStatus status);
+typedef AsyncIOAction (*on_as_connection_cb)(void* client_opaque,
+                                             AsyncSocket* as,
+                                             AsyncIOState status);
 
-/* Defines client's callback set to monitor socket I/O failures.
+/* Defines client's callback set to monitor I/O progress.
  * Param:
- *  client_opaque - An opaque pointer associated with the client.
- *  as - Initialized AsyncSocket instance.
- *  is_io_read - I/O type selector: 1 - read, 0 - write.
- *  io_opaque - An opaque pointer associated with the I/O that has failed.
- *  buffer - Address of the I/O buffer.
- *  transferred - Number of bytes that were transferred before I/O has failed.
- *  to_transfer - Number of bytes initially requested to transfer with the
- *      failed I/O.
- *  failure - Error that occured (errno value)
+ *  io_opaque - An opaque pointer associated with the I/O.
+ *  asio - Async I/O in progress.
+ *  status - Status of the I/O.
+ * Return:
+ *  One of the AsyncIOAction values.
  */
-typedef void (*on_as_io_failure_cb)(void* client_opaque,
-                                    AsyncSocket* as,
-                                    int is_io_read,
-                                    void* io_opaque,
-                                    void* buffer,
-                                    uint32_t transferred,
-                                    uint32_t to_transfer,
-                                    int failure);
+typedef AsyncIOAction (*on_as_io_cb)(void* io_opaque,
+                                     AsyncSocketIO* asio,
+                                     AsyncIOState status);
 
-/* Defines client's callback invoked when I/O has been completed.
+/********************************************************************************
+ *                          AsyncSocketIO API
+ *******************************************************************************/
+
+/* Gets AsyncSocket instance for an I/O */
+extern AsyncSocket* async_socket_io_get_socket(const AsyncSocketIO* asio);
+
+/* Cancels time out set for an I/O */
+extern void async_socket_io_cancel_time_out(AsyncSocketIO* asio);
+
+/* Gets an opaque pointer associated with an I/O */
+extern void* async_socket_io_get_io_opaque(const AsyncSocketIO* asio);
+
+/* Gets an opaque pointer associated with the client that has requested I/O */
+extern void* async_socket_io_get_client_opaque(const AsyncSocketIO* asio);
+
+/* Gets I/O buffer information.
  * Param:
- *  client_opaque - An opaque pointer associated with the client.
- *  as - Initialized AsyncSocket instance.
- *  is_io_read - I/O type selector: 1 - read, 0 - write.
- *  io_opaque - An opaque pointer associated with the I/O that has been
- *      completed.
- *  buffer - Address of the I/O buffer.
- *  transferred - Number of bytes that were transferred.
+ *  asio - I/O descriptor.
+ *  transferred - Optional pointer to receive number of bytes transferred with
+ *      this I/O. Can be NULL.
+ *  to_transfer - Optional pointer to receive number of bytes requested to
+ *      transfer with this I/O. Can be NULL.
+ * Return:
+ *  I/O buffer.
  */
-typedef void (*on_as_io_completed_cb)(void* client_opaque,
-                                      AsyncSocket* as,
-                                      int is_io_read,
-                                      void* io_opaque,
-                                      void* buffer,
-                                      uint32_t transferred);
+extern void* async_socket_io_get_buffer_info(const AsyncSocketIO* asio,
+                                             uint32_t* transferred,
+                                             uint32_t* to_transfer);
 
-/* Defines client's callback invoked when an I/O gets cancelled (due to a
- * disconnection, for instance).
- * Param:
- *  client_opaque - An opaque pointer associated with the client.
- *  as - Initialized AsyncSocket instance.
- *  is_io_read - I/O type selector: 1 - read, 0 - write.
- *  io_opaque - An opaque pointer associated with the I/O that has been
- *      cancelled.
- *  buffer - Address of the I/O buffer.
- *  transferred - Number of bytes that were transferred before I/O has been
- *      cancelled.
- *  to_transfer - Number of bytes initially requested to transfer with the
- *  cancelled I/O.
- */
-typedef void (*on_as_io_cancelled_cb)(void* client_opaque,
-                                      AsyncSocket* as,
-                                      int is_io_read,
-                                      void* io_opaque,
-                                      void* buffer,
-                                      uint32_t transferred,
-                                      uint32_t to_transfer);
+/* Gets I/O buffer. */
+extern void* async_socket_io_get_buffer(const AsyncSocketIO* asio);
 
-/* Defines client's callback invoked when an I/O gets timed out.
- * Param:
- *  client_opaque - An opaque pointer associated with the client.
- *  as - Initialized AsyncSocket instance.
- *  is_io_read - I/O type selector: 1 - read, 0 - write.
- *  io_opaque - An opaque pointer associated with the I/O that has timed out.
- *  buffer - Address of the I/O buffer.
- *  transferred - Number of bytes that were transferred before I/O has timed out.
- *  to_transfer - Number of bytes initially requested to transfer with the timed
- *  out I/O.
- */
-typedef void (*on_as_io_timed_out_cb)(void* client_opaque,
-                                      AsyncSocket* as,
-                                      int is_io_read,
-                                      void* io_opaque,
-                                      void* buffer,
-                                      uint32_t transferred,
-                                      uint32_t to_transfer);
+/* Gets number of bytes transferred with this I/O. */
+extern uint32_t async_socket_io_get_transferred(const AsyncSocketIO* asio);
 
-/* Lists asynchronous socket I/O callbacks. */
-typedef struct ASIOCb {
-    on_as_io_completed_cb   on_completed;
-    on_as_io_cancelled_cb   on_cancelled;
-    on_as_io_timed_out_cb   on_timed_out;
-    on_as_io_failure_cb     on_io_failure;
-} ASIOCb;
+/* Gets number of bytes requested to transfer with this I/O. */
+extern uint32_t async_socket_io_get_to_transfer(const AsyncSocketIO* asio);
 
+/* Gets I/O type: read (returns 1), or write (returns 0). */
+extern int async_socket_io_is_read(const AsyncSocketIO* asio);
 
-/* Lists asynchronous socket client callbacks. */
-typedef struct ASClientCb {
-    /* Connection callback (client must have one) */
-    on_as_connection_cb     on_connection;
-    /* Optional client-level I/O callbacks. */
-    const ASIOCb*           io_cb;
-} ASClientCb;
+/********************************************************************************
+ *                            AsyncSocket API
+ *******************************************************************************/
 
 /* Creates an asynchronous socket descriptor.
  * Param:
  *  port - TCP port to connect the socket to.
- *  reconnect_to - Timeout before retrying to reconnect after disconnection.
- *      0 means "don't try to reconnect".
- *  client_callbacks - Lists socket client callbacks.
+ *  reconnect_to - Timeout before trying to reconnect after disconnection.
+ *  connect_cb - Client callback to monitor connection state (must not be NULL).
  *  client_opaque - An opaque pointer to associate with the socket client.
  * Return:
  *  Initialized AsyncSocket instance on success, or NULL on failure.
  */
 extern AsyncSocket* async_socket_new(int port,
                                      int reconnect_to,
-                                     const ASClientCb* client_callbacks,
+                                     on_as_connection_cb connect_cb,
                                      void* client_opaque);
 
 /* Asynchronously connects to an asynchronous socket.
+ * Note that connection result will be reported via callback passed to the
+ * async_socket_new routine.
  * Param:
  *  as - Initialized AsyncSocket instance.
  *  retry_to - Number of milliseconds to wait before retrying a failed
- *      connection.
- * Return:
- *  0 on success, or -1 on failure. If this routine returns a failure, I/O
- *  failure callback has not been invoked.
+ *      connection attempt.
  */
-extern int async_socket_connect(AsyncSocket* as, int retry_to);
+extern void async_socket_connect(AsyncSocket* as, int retry_to);
 
 /* Disconnects from an asynchronous socket.
+ * NOTE: AsyncSocket instance referenced in this call will be destroyed in this
+ *  routine.
  * Param:
  *  as - Initialized and connected AsyncSocket instance.
  */
 extern void async_socket_disconnect(AsyncSocket* as);
 
 /* Asynchronously reconnects to an asynchronous socket.
+ * Note that connection result will be reported via callback passed to the
+ * async_socket_new routine.
  * Param:
  *  as - Initialized AsyncSocket instance.
- *  retry_to - Number of milliseconds to wait before retrying to reconnect.
- * Return:
- *  0 on success, or -1 on failure. If this routine returns a failure, I/O
- *  failure callback has not been invoked.
+ *  retry_to - Number of milliseconds to wait before trying to reconnect.
  */
-extern int async_socket_reconnect(AsyncSocket* as, int retry_to);
+extern void async_socket_reconnect(AsyncSocket* as, int retry_to);
 
 /* Asynchronously reads data from an asynchronous socket with a deadline.
  * Param:
  *  as - Initialized and connected AsyncSocket instance.
  *  buffer, len - Buffer where to read data.
- *  reader_cb - Lists reader's callbacks.
+ *  reader_cb - Callback to monitor I/O progress (must not be NULL).
  *  reader_opaque - An opaque pointer associated with the reader.
  *  deadline - Deadline to complete the read.
- * Return:
- *  0 on success, or -1 on failure. If this routine returns a failure, I/O
- *  failure callback has not been invoked.
  */
-extern int async_socket_read_abs(AsyncSocket* as,
-                                 void* buffer, uint32_t len,
-                                 const ASIOCb* reader_cb,
-                                 void* reader_opaque,
-                                 Duration deadline);
+extern void async_socket_read_abs(AsyncSocket* as,
+                                  void* buffer, uint32_t len,
+                                  on_as_io_cb reader_cb,
+                                  void* reader_opaque,
+                                  Duration deadline);
 
 /* Asynchronously reads data from an asynchronous socket with a relative timeout.
  * Param:
  *  as - Initialized and connected AsyncSocket instance.
  *  buffer, len - Buffer where to read data.
- *  reader_cb - Lists reader's callbacks.
+ *  reader_cb - Callback to monitor I/O progress (must not be NULL).
  *  reader_opaque - An opaque pointer associated with the reader.
  *  to - Milliseconds to complete the read. to < 0 indicates "no timeout"
- * Return:
- *  0 on success, or -1 on failure. If this routine returns a failure, I/O
- *  failure callback has not been invoked.
  */
-extern int async_socket_read_rel(AsyncSocket* as,
-                                 void* buffer, uint32_t len,
-                                 const ASIOCb* reader_cb,
-                                 void* reader_opaque,
-                                 int to);
+extern void async_socket_read_rel(AsyncSocket* as,
+                                  void* buffer, uint32_t len,
+                                  on_as_io_cb reader_cb,
+                                  void* reader_opaque,
+                                  int to);
 
 /* Asynchronously writes data to an asynchronous socket with a deadline.
  * Param:
  *  as - Initialized and connected AsyncSocket instance.
  *  buffer, len - Buffer with writing data.
- *  writer_cb - Lists writer's callbacks.
+ *  writer_cb - Callback to monitor I/O progress (must not be NULL).
  *  writer_opaque - An opaque pointer associated with the writer.
  *  deadline - Deadline to complete the write.
- * Return:
- *  0 on success, or -1 on failure. If this routine returns a failure, I/O
- *  failure callback has not been invoked.
  */
-extern int async_socket_write_abs(AsyncSocket* as,
-                                 const void* buffer, uint32_t len,
-                                 const ASIOCb* writer_cb,
-                                 void* writer_opaque,
-                                 Duration deadline);
+extern void async_socket_write_abs(AsyncSocket* as,
+                                   const void* buffer, uint32_t len,
+                                   on_as_io_cb writer_cb,
+                                   void* writer_opaque,
+                                   Duration deadline);
 
 /* Asynchronously writes data to an asynchronous socket with a relative timeout.
  * Param:
  *  as - Initialized and connected AsyncSocket instance.
  *  buffer, len - Buffer with writing data.
- *  writer_cb - Lists writer's callbacks.
+ *  writer_cb - Callback to monitor I/O progress (must not be NULL)
  *  writer_opaque - An opaque pointer associated with the writer.
  *  to - Milliseconds to complete the write. to < 0 indicates "no timeout"
- * Return:
- *  0 on success, or -1 on failure. If this routine returns a failure, I/O
- *  failure callback has not been invoked.
  */
-extern int async_socket_write_rel(AsyncSocket* as,
-                                 const void* buffer, uint32_t len,
-                                 const ASIOCb* writer_cb,
-                                 void* writer_opaque,
-                                 int to);
+extern void async_socket_write_rel(AsyncSocket* as,
+                                   const void* buffer, uint32_t len,
+                                   on_as_io_cb writer_cb,
+                                   void* writer_opaque,
+                                   int to);
+
+/* Get a deadline for the given time interval relative to "now".
+ * Param:
+ *  as - Initialized AsyncSocket instance.
+ *  rel - Time interval. If < 0 an infinite duration will be returned.
+ * Return:
+ *  A deadline for the given time interval relative to "now".
+ */
+extern Duration async_socket_deadline(AsyncSocket* as, int rel);
+
+/* Gets an opaque pointer associated with the socket's client */
+extern void* async_socket_get_client_opaque(const AsyncSocket* as);
 
 #endif  /* ANDROID_ASYNC_SOCKET_H_ */
