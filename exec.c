@@ -1527,7 +1527,7 @@ void cpu_set_log(int log_flags)
         logfile = fopen(logfilename, log_append ? "a" : "w");
         if (!logfile) {
             perror(logfilename);
-            _exit(1);
+            exit(1);
         }
 #if !defined(CONFIG_SOFTMMU)
         /* must avoid mmap() usage of glibc by setting a buffer "by hand" */
