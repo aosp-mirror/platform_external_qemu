@@ -58,9 +58,10 @@
  * to cancel further connection attempts by returning ASIO_ACTION_ABORT, or it
  * can allow another connection attempt by returning ASIO_ACTION_RETRY.
  *
- * The client has no control over the lifespan of initialized connector instance.
- * It always self-destructs after client's cllback returns with a status other
- * than ASIO_ACTION_RETRY.
+ * Since it's hard to control lifespan of an object in asynchronous environment,
+ * we make AsyncSocketConnector a referenced object, that will self-destruct when
+ * its reference count drops to zero, indicating that the last client has
+ * abandoned that object.
  */
 
 /* Declares async socket connector descriptor. */
@@ -81,6 +82,8 @@ typedef AsyncIOAction (*asc_event_cb)(void* opaque,
                                       AsyncIOState event);
 
 /* Creates and initializes AsyncSocketConnector instance.
+ * Note that upon exit from this routine the reference count to the returned
+ * object is set to 1.
  * Param:
  *  address - Initialized socket address to connect to.
  *  retry_to - Timeout to retry a failed connection attempt in milliseconds.
@@ -97,6 +100,24 @@ extern AsyncSocketConnector* async_socket_connector_new(const SockAddress* addre
                                                         int retry_to,
                                                         asc_event_cb cb,
                                                         void* cb_opaque);
+
+/* References AsyncSocketConnector object.
+ * Param:
+ *  connector - Initialized AsyncSocketConnector instance.
+ * Return:
+ *  Number of outstanding references to the object.
+ */
+extern int async_socket_connector_reference(AsyncSocketConnector* connector);
+
+/* Releases AsyncSocketConnector object.
+ * Note that upon exit from this routine the object might be destroyed, even if
+ * the routine returns value other than zero.
+ * Param:
+ *  connector - Initialized AsyncSocketConnector instance.
+ * Return:
+ *  Number of outstanding references to the object.
+ */
+extern int async_socket_connector_release(AsyncSocketConnector* connector);
 
 /* Initiates asynchronous connection.
  * Note that connection result will be reported via callback set with the call to

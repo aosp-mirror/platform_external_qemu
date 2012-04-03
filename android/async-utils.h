@@ -225,4 +225,12 @@ asyncConnector_init(AsyncConnector*    ac,
 AsyncStatus
 asyncConnector_run(AsyncConnector* ac);
 
+/* Stops connection in progress.
+ * Return:
+ *  0 if connection in progress has been stopped, or -1 if no connection has been
+ *  in progress.
+ */
+int
+asyncConnector_stop(AsyncConnector* ac);
+
 #endif /* ANDROID_ASYNC_UTILS_H */

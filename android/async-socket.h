@@ -29,6 +29,11 @@
  * Since all the operations (including connection) are asynchronous, all the
  * operation results are reported back to the client of this API via set of
  * callbacks that client supplied to this API.
+ *
+ * Since it's hard to control lifespan of an object in asynchronous environment,
+ * we make AsyncSocketConnector a referenced object, that will self-destruct when
+ * its reference count drops to zero, indicating that the last client has
+ * abandoned that object.
  */
 
 /* Declares asynchronous socket descriptor. */
@@ -65,7 +70,26 @@ typedef AsyncIOAction (*on_as_io_cb)(void* io_opaque,
  *                          AsyncSocketIO API
  *******************************************************************************/
 
-/* Gets AsyncSocket instance for an I/O */
+/* References AsyncSocketIO object.
+ * Param:
+ *  asio - Initialized AsyncSocketIO instance.
+ * Return:
+ *  Number of outstanding references to the object.
+ */
+extern int async_socket_io_reference(AsyncSocketIO* asio);
+
+/* Releases AsyncSocketIO object.
+ * Note that upon exit from this routine the object might be destroyed, even if
+ * the routine returns value other than zero.
+ * Param:
+ *  asio - Initialized AsyncSocketIO instance.
+ * Return:
+ *  Number of outstanding references to the object.
+ */
+extern int async_socket_io_release(AsyncSocketIO* asio);
+
+/* Gets AsyncSocket instance for an I/O. Note that this routine will reference
+ * AsyncSocket instance before returning it to the caller. */
 extern AsyncSocket* async_socket_io_get_socket(const AsyncSocketIO* asio);
 
 /* Cancels time out set for an I/O */
@@ -120,6 +144,24 @@ extern AsyncSocket* async_socket_new(int port,
                                      int reconnect_to,
                                      on_as_connection_cb connect_cb,
                                      void* client_opaque);
+
+/* References AsyncSocket object.
+ * Param:
+ *  as - Initialized AsyncSocket instance.
+ * Return:
+ *  Number of outstanding references to the object.
+ */
+extern int async_socket_reference(AsyncSocket* as);
+
+/* Releases AsyncSocket object.
+ * Note that upon exit from this routine the object might be destroyed, even if
+ * the routine returns value other than zero.
+ * Param:
+ *  as - Initialized AsyncSocket instance.
+ * Return:
+ *  Number of outstanding references to the object.
+ */
+extern int async_socket_release(AsyncSocket* as);
 
 /* Asynchronously connects to an asynchronous socket.
  * Note that connection result will be reported via callback passed to the
@@ -215,5 +257,8 @@ extern Duration async_socket_deadline(AsyncSocket* as, int rel);
 
 /* Gets an opaque pointer associated with the socket's client */
 extern void* async_socket_get_client_opaque(const AsyncSocket* as);
+
+/* Gets TCP port for the socket. */
+extern int async_socket_get_port(const AsyncSocket* as);
 
 #endif  /* ANDROID_ASYNC_SOCKET_H_ */

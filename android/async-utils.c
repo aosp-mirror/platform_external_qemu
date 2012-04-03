@@ -268,3 +268,14 @@ asyncConnector_run(AsyncConnector* ac)
         return ASYNC_COMPLETE;
     }
 }
+
+int
+asyncConnector_stop(AsyncConnector* ac)
+{
+    if (ac->state == CONNECT_CONNECTING) {
+        loopIo_dontWantWrite(ac->io);
+        ac->state = CONNECT_COMPLETED;
+        return 0;
+    }
+    return -1;
+}
