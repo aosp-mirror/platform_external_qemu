@@ -220,7 +220,7 @@ endif
 
 ifneq ($(BUILD_SDL_FROM_SOURCES),true)
 
-    SDL_CONFIG ?= prebuilt/$(QEMU_HOST_TAG)/sdl/bin/sdl-config
+    SDL_CONFIG ?= prebuilts/tools/$(QEMU_HOST_TAG)/sdl/bin/sdl-config
     SDL_CFLAGS := $(shell $(SDL_CONFIG) --cflags)
 
     # We need to filter out the _GNU_SOURCE variable because it breaks recent
