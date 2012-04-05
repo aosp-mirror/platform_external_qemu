@@ -173,12 +173,54 @@ _on_io_failure(void* opaque, AndroidDevice* ad, int failure)
  *                          Sensors port API
  *******************************************************************************/
 
+#include "android/sdk-controller-socket.h"
+
+static AsyncIOAction
+_on_sdkctl_connection(void* client_opaque, SDKCtlSocket* sdkctl, AsyncIOState status)
+{
+    if (status == ASIO_STATE_FAILED) {
+        sdkctl_socket_reconnect(sdkctl, 1970, 20);
+    }
+    return ASIO_ACTION_DONE;
+}
+
+void on_sdkctl_handshake(void* client_opaque,
+                         SDKCtlSocket* sdkctl,
+                         void* handshake,
+                         uint32_t handshake_size,
+                         AsyncIOState status)
+{
+    if (status == ASIO_STATE_SUCCEEDED) {
+        printf("---------- Handshake %d bytes received.\n", handshake_size);
+    } else {
+        printf("!!!!!!!!!! Handshake failed with status %d: %d -> %s\n",
+               status, errno, strerror(errno));
+        sdkctl_socket_reconnect(sdkctl, 1970, 20);
+    }
+}
+
+void on_sdkctl_message(void* client_opaque,
+                       SDKCtlSocket* sdkctl,
+                       SDKCtlPacket* message,
+                       int msg_type,
+                       void* msg_data,
+                       int msg_size)
+{
+    printf("########################################################\n");
+}
+
 AndroidSensorsPort*
 sensors_port_create(void* opaque)
 {
     AndroidSensorsPort* asp;
     char* wrk;
     int res;
+
+    SDKCtlSocket* sdkctl = sdkctl_socket_new(20, "test", _on_sdkctl_connection,
+                                             on_sdkctl_handshake, on_sdkctl_message,
+                                             NULL);
+//    sdkctl_init_recycler(sdkctl, 64, 8);
+    sdkctl_socket_connect(sdkctl, 1970, 20);
 
     ANEW0(asp);
     asp->opaque = opaque;

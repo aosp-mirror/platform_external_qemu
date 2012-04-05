@@ -44,6 +44,12 @@ typedef enum AsyncIOState {
     /* Asynchronous I/O has been cancelled (due to disconnect, for
      * instance).                                       (7) */
     ASIO_STATE_CANCELLED,
+    /* Asynchronous I/O is finished and is about to be discarder. This state is
+     * useful in case there is an association between an I/O and some client's
+     * component, that holds a reference associated with this I/O. When callback
+     * is invoked with this state, it means that it's safe to drop that extra
+     * reference associated with the I/O                (8) */
+    ASIO_STATE_FINISHED,
 } AsyncIOState;
 
 /* Enumerates actions to perform with an I/O on state transition.

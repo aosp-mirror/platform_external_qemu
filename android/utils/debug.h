@@ -46,6 +46,7 @@
     _VERBOSE_TAG(adb,          "ADB debugger") \
     _VERBOSE_TAG(asconnector,  "Asynchronous socket connector") \
     _VERBOSE_TAG(asyncsocket,  "Asynchronous socket") \
+    _VERBOSE_TAG(sdkctlsocket, "Socket tethering to SdkControl server") \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {

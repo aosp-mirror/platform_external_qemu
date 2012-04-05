@@ -32,6 +32,14 @@
 #define  D(...)    VERBOSE_PRINT(asconnector,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(asconnector)
 
+#define TRACE_ON    0
+
+#if TRACE_ON
+#define  T(...)    VERBOSE_PRINT(asconnector,__VA_ARGS__)
+#else
+#define  T(...)
+#endif
+
 /********************************************************************************
  *                             Internals
  *******************************************************************************/
@@ -57,6 +65,8 @@ struct AsyncSocketConnector {
     int             fd;
     /* Number of outstanding references to the connector. */
     int             ref_count;
+    /* Flags whether (1) or not (0) connector owns the looper. */
+    int             owns_looper;
 };
 
 /* Asynchronous I/O looper callback invoked by the connector.
@@ -81,23 +91,30 @@ static void
 _async_socket_connector_free(AsyncSocketConnector* connector)
 {
     if (connector != NULL) {
-        D("%s: Connector is destroyed.", _asc_socket_string(connector));
+        T("ASC %s: Connector is destroying...", _asc_socket_string(connector));
+
+        /* Stop all activities. */
         if (asyncConnector_stop(connector->connector) == 0) {
             /* Connection was in progress. We need to destroy I/O descriptor for
              * that connection. */
-            D("%s: Stopped async connection in progress.",
+            D("ASC %s: Stopped async connection in progress.",
               _asc_socket_string(connector));
             loopIo_done(connector->connector_io);
         }
+
+        /* Free allocated resources. */
+        if (connector->looper != NULL) {
+            loopTimer_done(connector->connector_timer);
+            if (connector->owns_looper) {
+                looper_free(connector->looper);
+            }
+        }
+
         if (connector->fd >= 0) {
             socket_close(connector->fd);
         }
 
-        if (connector->looper != NULL) {
-            loopTimer_stop(connector->connector_timer);
-            loopTimer_done(connector->connector_timer);
-            looper_free(connector->looper);
-        }
+        T("ASC %s: Connector is destroyed", _asc_socket_string(connector));
 
         sock_address_done(&connector->address);
 
@@ -117,13 +134,16 @@ _async_socket_connector_open_socket(AsyncSocketConnector* connector)
     /* Open socket. */
     connector->fd = socket_create_inet(SOCKET_STREAM);
     if (connector->fd < 0) {
-        D("%s: Unable to create socket: %d -> %s",
+        D("ASC %s: Unable to create socket: %d -> %s",
           _asc_socket_string(connector), errno, strerror(errno));
         return -1;
     }
 
     /* Prepare for async I/O on the connector. */
     socket_set_nonblock(connector->fd);
+
+    T("ASC %s: Connector socket is opened with FD = %d",
+      _asc_socket_string(connector), connector->fd);
 
     return 0;
 }
@@ -139,6 +159,8 @@ _async_socket_connector_close_socket(AsyncSocketConnector* connector)
 {
     if (connector->fd >= 0) {
         socket_close(connector->fd);
+        T("ASC %s: Connector socket FD = %d is closed.",
+          _asc_socket_string(connector), connector->fd);
         connector->fd = -1;
     }
 }
@@ -177,15 +199,18 @@ _on_async_socket_connector_connecting(AsyncSocketConnector* connector,
             break;
 
         case ASYNC_NEED_MORE:
+            T("ASC %s: Waiting on connection to complete. Connector FD = %d",
+              _asc_socket_string(connector), connector->fd);
             return;
     }
 
     if (action == ASIO_ACTION_RETRY) {
-        D("%s: Retrying connection", _asc_socket_string(connector));
+        D("ASC %s: Retrying connection. Connector FD = %d",
+          _asc_socket_string(connector), connector->fd);
         loopTimer_startRelative(connector->connector_timer, connector->retry_to);
     } else if (action == ASIO_ACTION_ABORT) {
-        D("%s: AsyncSocketConnector client for socket '%s' has aborted connection",
-          __FUNCTION__, _asc_socket_string(connector));
+        D("ASC %s: Client has aborted connection. Connector FD = %d",
+          _asc_socket_string(connector), connector->fd);
     }
 }
 
@@ -206,8 +231,8 @@ _on_async_socket_connector_io(void* opaque, int fd, unsigned events)
         const AsyncStatus status = asyncConnector_run(connector->connector);
         _on_async_socket_connector_connecting(connector, status);
     } else {
-        D("%s: AsyncSocketConnector client for socket '%s' has aborted connection",
-          __FUNCTION__, _asc_socket_string(connector));
+        D("ASC %s: Client has aborted connection. Connector FD = %d",
+          _asc_socket_string(connector), connector->fd);
     }
 
     /* Release the connector after we're done with handing I/O. */
@@ -223,6 +248,9 @@ _on_async_socket_connector_retry(void* opaque)
 {
     AsyncStatus status;
     AsyncSocketConnector* const connector = (AsyncSocketConnector*)opaque;
+
+    T("ASC %s: Reconnect timer expired. Connector FD = %d",
+              _asc_socket_string(connector), connector->fd);
 
     /* Reference the connector while we're in callback. */
     async_socket_connector_reference(connector);
@@ -249,8 +277,8 @@ _on_async_socket_connector_retry(void* opaque)
 
         _on_async_socket_connector_connecting(connector, status);
     } else {
-        D("%s: AsyncSocketConnector client for socket '%s' has aborted connection",
-          __FUNCTION__, _asc_socket_string(connector));
+        D("ASC %s: Client has aborted connection. Connector FD = %d",
+          _asc_socket_string(connector), connector->fd);
     }
 
     /* Release the connector after we're done with the callback. */
@@ -265,7 +293,8 @@ AsyncSocketConnector*
 async_socket_connector_new(const SockAddress* address,
                            int retry_to,
                            asc_event_cb cb,
-                           void* cb_opaque)
+                           void* cb_opaque,
+                           Looper* looper)
 {
     AsyncSocketConnector* connector;
 
@@ -292,18 +321,26 @@ async_socket_connector_new(const SockAddress* address,
     }
 
     /* Create a looper for asynchronous I/O. */
-    connector->looper = looper_newCore();
-    if (connector->looper == NULL) {
-        E("Unable to create I/O looper for AsyncSocketConnector for socket '%s'",
-          _asc_socket_string(connector));
-        cb(cb_opaque, connector, ASIO_STATE_FAILED);
-        _async_socket_connector_free(connector);
-        return NULL;
+    if (looper == NULL) {
+        connector->looper = looper_newCore();
+        if (connector->looper == NULL) {
+            E("Unable to create I/O looper for AsyncSocketConnector for socket '%s'",
+              _asc_socket_string(connector));
+            cb(cb_opaque, connector, ASIO_STATE_FAILED);
+            _async_socket_connector_free(connector);
+            return NULL;
+        }
+        connector->owns_looper = 1;
+    } else {
+        connector->looper = looper;
+        connector->owns_looper = 0;
     }
 
     /* Create a timer that will be used for connection retries. */
     loopTimer_init(connector->connector_timer, connector->looper,
                    _on_async_socket_connector_retry, connector);
+
+    T("ASC %s: New connector object", _asc_socket_string(connector));
 
     return connector;
 }
@@ -334,13 +371,16 @@ async_socket_connector_connect(AsyncSocketConnector* connector)
 {
     AsyncStatus status;
 
+    T("ASC %s: Handling connect request. Connector FD = %d",
+      _asc_socket_string(connector), connector->fd);
+
     if (_async_socket_connector_open_socket(connector) == 0) {
         const AsyncIOAction action =
             connector->on_connected_cb(connector->on_connected_cb_opaque,
                                        connector, ASIO_STATE_STARTED);
         if (action == ASIO_ACTION_ABORT) {
-            D("%s: AsyncSocketConnector client for socket '%s' has aborted connection",
-              __FUNCTION__, _asc_socket_string(connector));
+            D("ASC %s: Client has aborted connection. Connector FD = %d",
+              _asc_socket_string(connector), connector->fd);
             return;
         } else {
             loopIo_init(connector->connector_io, connector->looper,
@@ -363,5 +403,8 @@ async_socket_connector_pull_fd(AsyncSocketConnector* connector)
     if (fd >= 0) {
         connector->fd = -1;
     }
+
+    T("ASC %s: Client has pulled connector FD %d", _asc_socket_string(connector), fd);
+
     return fd;
 }

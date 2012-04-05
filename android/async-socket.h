@@ -137,13 +137,16 @@ extern int async_socket_io_is_read(const AsyncSocketIO* asio);
  *  reconnect_to - Timeout before trying to reconnect after disconnection.
  *  connect_cb - Client callback to monitor connection state (must not be NULL).
  *  client_opaque - An opaque pointer to associate with the socket client.
+ *  looper - An optional (can be NULL) I/O looper to use for socket I/O. If
+ *      this parameter is NULL, the socket will create its own looper.
  * Return:
  *  Initialized AsyncSocket instance on success, or NULL on failure.
  */
 extern AsyncSocket* async_socket_new(int port,
                                      int reconnect_to,
                                      on_as_connection_cb connect_cb,
-                                     void* client_opaque);
+                                     void* client_opaque,
+                                     Looper* looper);
 
 /* References AsyncSocket object.
  * Param:
