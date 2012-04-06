@@ -89,6 +89,8 @@ typedef AsyncIOAction (*asc_event_cb)(void* opaque,
  *  retry_to - Timeout to retry a failed connection attempt in milliseconds.
  *  cb, cb_opaque - Callback to invoke on connection events. This callback is
  *      required, and must not be NULL.
+ *  looper - An optional (can be NULL) I/O looper to use for connection I/O. If
+ *      this parameter is NULL, the connector will create its own looper.
  * Return:
  *  Initialized AsyncSocketConnector instance. Note that AsyncSocketConnector
  *  instance returned from this routine will be destroyed by the connector itself,
@@ -99,7 +101,8 @@ typedef AsyncIOAction (*asc_event_cb)(void* opaque,
 extern AsyncSocketConnector* async_socket_connector_new(const SockAddress* address,
                                                         int retry_to,
                                                         asc_event_cb cb,
-                                                        void* cb_opaque);
+                                                        void* cb_opaque,
+                                                        Looper* looper);
 
 /* References AsyncSocketConnector object.
  * Param:

@@ -479,6 +479,7 @@ CORE_MISC_SOURCES = \
     android/android-device.c \
     android/async-socket-connector.c \
     android/async-socket.c \
+    android/sdk-controller-socket.c \
     android/sensors-port.c \
     android/utils/timezone.c \
     android/camera/camera-format-converters.c \
