@@ -16,6 +16,24 @@
       "revId": "8a539eaab40dc7a8047dbf97c081467029e6c518",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAEjn////E\u003d",
+        "filename": "target-i386/hax-windows.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1006404
+      },
+      "writtenOn": "2012-04-09T14:24:21Z",
+      "side": 1,
+      "message": "There is a IOCTL that was added but not used anymore.\r\n#define HAX_VCPU_IOCTL_KICKOFF  CTL_CODE(HAX_DEVICE_TYPE, 0x90f, METHOD_BUFFERE\r\n\r\n\r\nThat HAX_VCPU_IOCTL_KICKOFF is to kick a running VCPU from guest mode to HAXM, this is specially required in windows because Windows\u0027s timer implementation. The reason that it\u0027s not used in the end is, we find that current QEMU timer mechanism is ok without this kick-off. \r\n\r\n\r\nAs this is not used and is the end of the IOCTLs, I removed it when submit the HAXM patches. But I just realized that if we want to add other platform support (like SVM), possibly this IOCTL should also be included to avoid potential future conflict (there is no other IOCTLs anymore).  If needed, I will submit another patch to push this definition to AOSP too.",
+      "parentUuid": "AAAEhn///4w\u003d",
+      "revId": "8a539eaab40dc7a8047dbf97c081467029e6c518",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
