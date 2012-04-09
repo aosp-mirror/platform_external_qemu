@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAEhn///48\u003d",
+        "filename": "hw/goldfish_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1101,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2012-04-09T13:23:56Z",
+      "side": 1,
+      "message": "Why not just\n\ns-\u003eparams_addr \u003d ((uint64_t)value \u003c\u003c 32) \u0026 0xffffffff00000000ULL;\n\n?",
+      "revId": "e8bca780fc70318f38cab5bc38e5abdee60375da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
