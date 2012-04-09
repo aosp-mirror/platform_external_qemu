@@ -16,6 +16,24 @@
       "revId": "e8bca780fc70318f38cab5bc38e5abdee60375da",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAEjn///+8\u003d",
+        "filename": "hw/goldfish_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1101,
+      "author": {
+        "id": 1006404
+      },
+      "writtenOn": "2012-04-09T14:31:24Z",
+      "side": 1,
+      "message": "I think we need keep the low 32bit not changed? Otherwise, writing the ADDR_HIGH will clobber the low 32 bit?",
+      "parentUuid": "AAAEhn///48\u003d",
+      "revId": "e8bca780fc70318f38cab5bc38e5abdee60375da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
