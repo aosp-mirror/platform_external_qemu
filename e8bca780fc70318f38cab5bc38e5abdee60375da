@@ -34,6 +34,24 @@
       "revId": "e8bca780fc70318f38cab5bc38e5abdee60375da",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAEhn///14\u003d",
+        "filename": "hw/goldfish_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1101,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2012-04-09T19:15:26Z",
+      "side": 1,
+      "message": "Sorry, got lost in brackets :-)",
+      "parentUuid": "AAAEjn///+8\u003d",
+      "revId": "e8bca780fc70318f38cab5bc38e5abdee60375da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
