@@ -340,6 +340,7 @@ int hax_set_ramsize(uint64_t ramsize)
 int hax_init(int smp_cpus)
 {
     struct hax_state *hax = NULL;
+    struct hax_qemu_version qversion;
     int ret;
 
     hax_support = 0;
@@ -378,6 +379,9 @@ int hax_init(int smp_cpus)
         goto error;
     }
 
+    qversion.cur_version = hax_cur_version;
+    qversion.least_version = hax_lest_version;
+    hax_notify_qemu_version(hax->vm->fd, &qversion);
     hax_support = 1;
     qemu_register_reset( hax_reset_vcpu_state, 0, NULL);
 

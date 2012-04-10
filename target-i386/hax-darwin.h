@@ -59,6 +59,14 @@ static inline void hax_close_fd(hax_fd fd)
  * Setup translation between guest physical address and host physical address
  */
 #define HAX_VM_IOCTL_SET_RAM _IOWR(0, 0x82, struct hax_set_ram_info)
+
+/*
+ * QEMU notify HAXM driver of the API version currently in use, so that
+ * HAXM driver will not present features that possibly not supported
+ * by QEMU
+ */
+#define HAX_VM_IOCTL_NOTIFY_QEMU_VERSION   _IOW(0, 0x84, struct hax_qemu_version)
+
 /* Run the guest in non-root mode */
 #define HAX_VCPU_IOCTL_RUN  _IO(0, 0xc0)
 /* Sync QEMU's guest MSR value to HAX driver */

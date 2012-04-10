@@ -181,6 +181,23 @@ hax_fd hax_host_open_vm(struct hax_state *hax, int vm_id)
     return fd;
 }
 
+int hax_notify_qemu_version(hax_fd vm_fd, struct hax_qemu_version *qversion)
+{
+    int ret;
+
+    if (hax_invalid_fd(vm_fd))
+        return -EINVAL;
+
+    ret = ioctl(vm_fd, HAX_VM_IOCTL_NOTIFY_QEMU_VERSION, qversion);
+    if (ret == -1)
+    {
+        dprint("Failed to notify qemu API version\n");
+        return -errno;
+    }
+
+    return 0;
+}
+
 /* 
  * Simply assume that the size should be bigger than the hax_tunnel,
  * since the hax_tunnel can be extended later with backward
