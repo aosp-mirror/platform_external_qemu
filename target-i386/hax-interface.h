@@ -316,6 +316,14 @@ enum exit_status {
      * Now the vcpu is only paused when to be destroid, so simply return to hax
      */
     HAX_EXIT_PAUSED,
+    /* from API 2.0 */
+    /*
+     * In API 1.0, HAXM driver utilizes QEMU to decode and emulate MMIO
+     * operations.
+     * From 2.0, HAXM driver will decode some MMIO instructions to improve
+     * MMIO handling performance, especially for GLES hardware acceleration
+     */
+    HAX_EXIT_FAST_MMIO,
 };
 
 /*
@@ -389,6 +397,22 @@ struct hax_capabilityinfo
     uint16_t winfo;
     uint32_t pad;
     uint64_t mem_quota;
+};
+
+/* API 2.0 */
+
+struct hax_fastmmio
+{
+    uint64_t gpa;
+    uint64_t value;
+    uint8_t size;
+    uint8_t direction;
+    uint16_t reg_index;
+    uint32_t pad0;
+    uint64_t _cr0;
+    uint64_t _cr2;
+    uint64_t _cr3;
+    uint64_t _cr4;
 };
 
 #endif
