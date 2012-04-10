@@ -23,8 +23,6 @@
  * the host via USB.
  */
 
-#include "android/android-device.h"
-
 /* Declares sensors port descriptor. */
 typedef struct AndroidSensorsPort AndroidSensorsPort;
 
@@ -41,15 +39,6 @@ extern AndroidSensorsPort* sensors_port_create(void* opaque);
 
 /* Disconnects from the sensors port, and destroys the descriptor. */
 extern void sensors_port_destroy(AndroidSensorsPort* asp);
-
-/* Initializes sensors on the connected device. */
-extern int sensors_port_init_sensors(AndroidSensorsPort* asp);
-
-/* Checks if port is connected to a sensor reading application on the device.
- * Note that connection can go out and then be restored at any time after
- * sensors_port_create API succeeded.
- */
-extern int sensors_port_is_connected(AndroidSensorsPort* asp);
 
 /* Enables events from a particular sensor.
  * Param:
@@ -71,21 +60,5 @@ extern int sensors_port_enable_sensor(AndroidSensorsPort* asp, const char* name)
  *  Zero on success, failure otherwise.
  */
 extern int sensors_port_disable_sensor(AndroidSensorsPort* asp, const char* name);
-
-/* Queries the connected application to start delivering sensor events.
- * Param:
- *  asp - Android sensors port instance returned from sensors_port_create.
- * Return:
- *  Zero on success, failure otherwise.
- */
-extern int sensors_port_start(AndroidSensorsPort* asp);
-
-/* Queries the connected application to stop delivering sensor events.
- * Param:
- *  asp - Android sensors port instance returned from sensors_port_create.
- * Return:
- *  Zero on success, failure otherwise.
- */
-extern int sensors_port_stop(AndroidSensorsPort* asp);
 
 #endif  /* ANDROID_SENSORS_PORT_H_ */

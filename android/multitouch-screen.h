@@ -17,6 +17,7 @@
 #ifndef ANDROID_MULTITOUCH_SCREEN_H_
 #define ANDROID_MULTITOUCH_SCREEN_H_
 
+#include "android/sdk-controller-socket.h"
 #include "android/multitouch-port.h"
 
 /*
@@ -60,9 +61,6 @@ extern void multitouch_update_pointer(MTESource source,
 
 /* Gets maximum slot index available for the multi-touch emulation. */
 extern int multitouch_get_max_slot();
-
-/* Saves screen size reported by the device that emulates multi-touch. */
-extern void multitouch_set_device_screen_size(int width, int height);
 
 /* A callback set to monitor OpenGLES framebuffer updates.
  * This callback is called by the renderer just before each new frame is

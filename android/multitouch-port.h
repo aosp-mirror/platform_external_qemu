@@ -17,16 +17,13 @@
 #ifndef ANDROID_ANDROID_MULTITOUCH_PORT_H_
 #define ANDROID_ANDROID_MULTITOUCH_PORT_H_
 
+#include "android/sdk-controller-socket.h"
+
 /*
  * Encapsulates exchange protocol between the multi-touch screen emulator, and an
  * application running on an Android device that provides touch events, and is
  * connected to the host via USB.
  */
-
-#include "android/android-device.h"
-
-/* TCP port reserved for multi-touch emulation. */
-#define AD_MULTITOUCH_PORT      1969
 
 /*
  * Codes that define transmitted framebuffer format:
@@ -89,28 +86,6 @@ extern AndroidMTSPort* mts_port_create(void* opaque);
 /* Disconnects from the multi-touch port, and destroys the descriptor. */
 extern void mts_port_destroy(AndroidMTSPort* amtp);
 
-/* Checks if port is connected to a MT-emulating application on the device.
- * Note that connection can go out and then be restored at any time after
- * mts_port_create API succeeded.
- */
-extern int mts_port_is_connected(AndroidMTSPort* amtp);
-
-/* Queries the connected application to start delivering multi-touch events.
- * Param:
- *  amtp - Android multi-touch port instance returned from mts_port_create.
- * Return:
- *  Zero on success, failure otherwise.
- */
-extern int mts_port_start(AndroidMTSPort* amtp);
-
-/* Queries the connected application to stop delivering multi-touch events.
- * Param:
- *  amtp - Android multi-touch port instance returned from mts_port_create.
- * Return:
- *  Zero on success, failure otherwise.
- */
-extern int mts_port_stop(AndroidMTSPort* amtp);
-
 /* Sends framebuffer update to the multi-touch emulation application, running on
  * the android device.
  * Param:
@@ -129,7 +104,7 @@ extern int mts_port_stop(AndroidMTSPort* amtp);
 extern int mts_port_send_frame(AndroidMTSPort* mtsp,
                                MTFrameHeader* fmt,
                                const uint8_t* fb,
-                               async_send_cb cb,
+                               on_sdkctl_direct_cb cb,
                                void* cb_opaque,
                                int ydir);
 

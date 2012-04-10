@@ -478,7 +478,6 @@ CORE_MISC_SOURCES = \
     android/hw-pipe-net.c \
     android/qemu-setup.c \
     android/snapshot.c \
-    android/android-device.c \
     android/async-socket-connector.c \
     android/async-socket.c \
     android/sdk-controller-socket.c \

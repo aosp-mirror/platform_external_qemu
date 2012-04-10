@@ -17,7 +17,9 @@
 #ifndef ANDROID_ASYNC_SOCKET_CONNECTOR_H_
 #define ANDROID_ASYNC_SOCKET_CONNECTOR_H_
 
+#include "qemu-common.h"
 #include "android/async-io-common.h"
+#include "android/async-utils.h"
 
 /*
  * Contains declaration of an API that allows asynchronous connection to a

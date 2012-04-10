@@ -20,8 +20,6 @@
  * a TCP port forwarding, enabled by ADB.
  */
 
-#include "qemu-common.h"
-#include "android/async-utils.h"
 #include "android/utils/debug.h"
 #include "android/async-socket-connector.h"
 #include "android/async-socket.h"
@@ -683,10 +681,10 @@ static void
 _async_socket_close_socket(AsyncSocket* as)
 {
     if (as->fd >= 0) {
-        loopIo_done(as->io);
-        socket_close(as->fd);
         T("ASocket %s: Socket handle %d is closed.",
           _async_socket_string(as), as->fd);
+        loopIo_done(as->io);
+        socket_close(as->fd);
         as->fd = -1;
     }
 }
@@ -1217,15 +1215,22 @@ async_socket_read_abs(AsyncSocket* as,
     AsyncSocketIO* const asr =
         _async_socket_reader_new(as, buffer, len, reader_cb, reader_opaque,
                                  deadline);
-    /* Add new reader to the list. Note that we use initial reference from I/O
-     * 'new' routine as "in the list" reference counter. */
-    if (as->readers_head == NULL) {
-        as->readers_head = as->readers_tail = asr;
+    if (async_socket_is_connected(as)) {
+        /* Add new reader to the list. Note that we use initial reference from I/O
+         * 'new' routine as "in the list" reference counter. */
+        if (as->readers_head == NULL) {
+            as->readers_head = as->readers_tail = asr;
+        } else {
+            as->readers_tail->next = asr;
+            as->readers_tail = asr;
+        }
+        loopIo_wantRead(as->io);
     } else {
-        as->readers_tail->next = asr;
-        as->readers_tail = asr;
+        D("ASocket %s: Read on a disconnected socket.", _async_socket_string(as));
+        errno = ECONNRESET;
+        reader_cb(reader_opaque, asr, ASIO_STATE_FAILED);
+        async_socket_io_release(asr);
     }
-    loopIo_wantRead(as->io);
 }
 
 void
@@ -1253,15 +1258,22 @@ async_socket_write_abs(AsyncSocket* as,
     AsyncSocketIO* const asw =
         _async_socket_writer_new(as, buffer, len, writer_cb, writer_opaque,
                                  deadline);
-    /* Add new writer to the list. Note that we use initial reference from I/O
-     * 'new' routine as "in the list" reference counter. */
-    if (as->writers_head == NULL) {
-        as->writers_head = as->writers_tail = asw;
+    if (async_socket_is_connected(as)) {
+        /* Add new writer to the list. Note that we use initial reference from I/O
+         * 'new' routine as "in the list" reference counter. */
+        if (as->writers_head == NULL) {
+            as->writers_head = as->writers_tail = asw;
+        } else {
+            as->writers_tail->next = asw;
+            as->writers_tail = asw;
+        }
+        loopIo_wantWrite(as->io);
     } else {
-        as->writers_tail->next = asw;
-        as->writers_tail = asw;
+        D("ASocket %s: Write on a disconnected socket.", _async_socket_string(as));
+        errno = ECONNRESET;
+        writer_cb(writer_opaque, asw, ASIO_STATE_FAILED);
+        async_socket_io_release(asw);
     }
-    loopIo_wantWrite(as->io);
 }
 
 void
@@ -1293,4 +1305,10 @@ int
 async_socket_get_port(const AsyncSocket* as)
 {
     return sock_address_get_port(&as->address);
+}
+
+int
+async_socket_is_connected(const AsyncSocket* as)
+{
+    return as->fd >= 0;
 }

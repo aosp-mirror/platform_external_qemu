@@ -20,8 +20,6 @@
  * a TCP port forwarding, enabled by ADB.
  */
 
-#include "qemu-common.h"
-#include "android/async-utils.h"
 #include "android/utils/debug.h"
 #include "android/async-socket-connector.h"
 #include "utils/panic.h"

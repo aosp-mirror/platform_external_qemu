@@ -19,47 +19,97 @@
 #include "android/hw-events.h"
 #include "android/charmap.h"
 #include "android/multitouch-screen.h"
+#include "android/sdk-controller-socket.h"
 #include "android/multitouch-port.h"
 #include "android/globals.h"  /* for android_hw */
 #include "android/utils/misc.h"
 #include "android/utils/jpeg-compress.h"
+#include "android/utils/debug.h"
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)    VERBOSE_PRINT(mtport,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(mtport)
 
-/* Query timeout in milliseconds. */
-#define MTSP_QUERY_TIMEOUT       3000
-#define MTSP_MAX_MSG             2048
-#define MTSP_MAX_EVENT           2048
+#define TRACE_ON    1
+
+#if TRACE_ON
+#define  T(...)    VERBOSE_PRINT(mtport,__VA_ARGS__)
+#else
+#define  T(...)
+#endif
+
+/* Timeout (millisec) to use when communicating with SDK controller. */
+#define SDKCTL_MT_TIMEOUT      3000
+
+/*
+ * Message types used in multi-touch emulation.
+ */
+
+/* Pointer move message. */
+#define SDKCTL_MT_MOVE          1
+/* First pointer down message. */
+#define SDKCTL_MT_FISRT_DOWN    2
+/* Last pointer up message. */
+#define SDKCTL_MT_LAST_UP       3
+/* Pointer down message. */
+#define SDKCTL_MT_POINTER_DOWN  4
+/* Pointer up message. */
+#define SDKCTL_MT_POINTER_UP    5
+/* Sends framebuffer update. */
+#define SDKCTL_MT_FB_UPDATE     6
 
 /* Multi-touch port descriptor. */
 struct AndroidMTSPort {
     /* Caller identifier. */
-    void*           opaque;
-    /* Connected android device. */
-    AndroidDevice*  device;
+    void*               opaque;
+    /* Communication socket. */
+    SDKCtlSocket*       sdkctl;
     /* Initialized JPEG compressor instance. */
-    AJPEGDesc*      jpeg_compressor;
-    /* Connection status: 1 connected, 0 - disconnected. */
-    int             is_connected;
-    /* Buffer where to receive multitouch messages. */
-    char            mts_msg[MTSP_MAX_MSG];
-    /* Buffer where to receive multitouch events. */
-    char            events[MTSP_MAX_EVENT];
+    AJPEGDesc*          jpeg_compressor;
+    /* Direct packet descriptor for framebuffer updates. */
+    SDKCtlDirectPacket* fb_packet;
 };
+
+/* Data sent with SDKCTL_MT_QUERY_START */
+typedef struct QueryDispData {
+    /* Width of the emulator display. */
+    int     width;
+    /* Height of the emulator display. */
+    int     height;
+} QueryDispData;
+
+/* Multi-touch event structure received from SDK controller port. */
+typedef struct AndroidMTEvent {
+    /* Pointer identifier. */
+    int     pid;
+    /* Pointer 'x' coordinate. */
+    int     x;
+    /* Pointer 'y' coordinate. */
+    int     y;
+    /* Pointer pressure. */
+    int     pressure;
+} AndroidMTEvent;
+
+/* Multi-touch pointer descriptor received from SDK controller port. */
+typedef struct AndroidMTPtr {
+    /* Pointer identifier. */
+    int     pid;
+} AndroidMTPtr;
 
 /* Destroys and frees the descriptor. */
 static void
 _mts_port_free(AndroidMTSPort* mtsp)
 {
     if (mtsp != NULL) {
+        if (mtsp->fb_packet != NULL) {
+            sdkctl_direct_packet_release(mtsp->fb_packet);
+        }
         if (mtsp->jpeg_compressor != NULL) {
             jpeg_compressor_destroy(mtsp->jpeg_compressor);
         }
-        if (mtsp->device != NULL) {
-            android_device_destroy(mtsp->device);
+        if (mtsp->sdkctl != NULL) {
+            sdkctl_socket_release(mtsp->sdkctl);
         }
         AFREE(mtsp);
     }
@@ -114,170 +164,163 @@ _on_action_move(int tracking_id, int x, int y, int pressure)
  *                          Multi-touch event handlers
  *******************************************************************************/
 
-/* Handles "pointer move" event. */
+/* Handles "pointer move" event.
+ * Param:
+ *  param - Array of moving pointers.
+ *  pointers_count - Number of pointers in the array.
+ */
 static void
-_on_move(const char* param)
+_on_move(const AndroidMTEvent* param, int pointers_count)
 {
-    const char* pid = param;
-    D(">>> MOVE: %s", param);
-    while (pid && *pid) {
-        int pid_val, x, y, pressure = 0;
-        if (!get_token_value_int(pid, "pid", &pid_val) &&
-            !get_token_value_int(pid, "x", &x) &&
-            !get_token_value_int(pid, "y", &y)) {
-            get_token_value_int(pid, "pressure", &pressure);
-            _on_action_move(pid_val, x, y, pressure);
-            pid = strstr(pid + 1, "pid");
-        } else {
-            break;
-        }
+    int n;
+    for (n = 0; n < pointers_count; n++, param++) {
+        T("Multi-touch: MOVE(%d): %d-> %d:%d:%d",
+          n, param->pid, param->x, param->y, param->pressure);
+         _on_action_move(param->pid, param->x, param->y, param->pressure);
     }
 }
 
 /* Handles "first pointer down" event. */
 static void
-_on_down(const char* param)
+_on_down(const AndroidMTEvent* param)
 {
-    int pid_val, x, y, pressure = 0;
-    D(">>> 1-ST DOWN: %s", param);
-    if (!get_token_value_int(param, "pid", &pid_val) &&
-        !get_token_value_int(param, "x", &x) &&
-        !get_token_value_int(param, "y", &y)) {
-        get_token_value_int(param, "pressure", &pressure);
-        _on_action_down(pid_val, x, y, pressure);
-    } else {
-        W("Invalid parameters '%s' for MTS 'down' event", param);
-    }
+    T("Multi-touch: 1-ST DOWN: %d-> %d:%d:%d",
+      param->pid, param->x, param->y, param->pressure);
+    _on_action_down(param->pid, param->x, param->y, param->pressure);
 }
 
 /* Handles "last pointer up" event. */
 static void
-_on_up(const char* param)
+_on_up(const AndroidMTPtr* param)
 {
-    int pid_val;
-    D(">>> LAST UP: %s", param);
-    if (!get_token_value_int(param, "pid", &pid_val)) {
-        _on_action_up(pid_val);
-    } else {
-        W("Invalid parameters '%s' for MTS 'up' event", param);
-    }
+    T("Multi-touch: LAST UP: %d", param->pid);
+    _on_action_up(param->pid);
 }
 
 /* Handles "next pointer down" event. */
 static void
-_on_pdown(const char* param)
+_on_pdown(const AndroidMTEvent* param)
 {
-    int pid_val, x, y, pressure = 0;
-    D(">>> DOWN: %s", param);
-    if (!get_token_value_int(param, "pid", &pid_val) &&
-        !get_token_value_int(param, "x", &x) &&
-        !get_token_value_int(param, "y", &y)) {
-        get_token_value_int(param, "pressure", &pressure);
-        _on_action_pointer_down(pid_val, x, y, pressure);
-    } else {
-        W("Invalid parameters '%s' for MTS 'pointer down' event", param);
-    }
+    T("Multi-touch: DOWN: %d-> %d:%d:%d",
+      param->pid, param->x, param->y, param->pressure);
+    _on_action_pointer_down(param->pid, param->x, param->y, param->pressure);
 }
 
 /* Handles "next pointer up" event. */
 static void
-_on_pup(const char* param)
+_on_pup(const AndroidMTPtr* param)
 {
-    int pid_val;
-    D(">>> UP: %s", param);
-    if (!get_token_value_int(param, "pid", &pid_val)) {
-        _on_action_pointer_up(pid_val);
-    } else {
-        W("Invalid parameters '%s' for MTS 'up' event", param);
-    }
+    T("Multi-touch: UP: %d", param->pid);
+    _on_action_pointer_up(param->pid);
 }
 
 /********************************************************************************
  *                      Device communication callbacks
  *******************************************************************************/
 
-/* Main event handler.
- * This routine is invoked when an event message has been received from the
- * device.
- */
-static void
-_on_event_received(void* opaque, AndroidDevice* ad, char* msg, int msgsize)
+/* A callback that is invoked on SDK controller socket connection events. */
+static AsyncIOAction
+_on_multitouch_socket_connection(void* opaque,
+                                 SDKCtlSocket* sdkctl,
+                                 AsyncIOState status)
 {
-    char* action;
-    int res;
-    AndroidMTSPort* mtsp = (AndroidMTSPort*)opaque;
-
-    if (errno) {
-        D("Multi-touch notification has failed: %s", strerror(errno));
-        return;
-    }
-
-    /* Dispatch the event to an appropriate handler. */
-    res = get_token_value_alloc(msg, "action", &action);
-    if (!res) {
-        const char* param = strchr(msg, ' ');
-        if (param) {
-            param++;
+    if (status == ASIO_STATE_FAILED) {
+        /* Reconnect (after timeout delay) on failures */
+        if (sdkctl_socket_is_handshake_ok(sdkctl)) {
+            sdkctl_socket_reconnect(sdkctl, SDKCTL_DEFAULT_TCP_PORT,
+                                    SDKCTL_MT_TIMEOUT);
         }
-        if (!strcmp(action, "move")) {
-            _on_move(param);
-        } else if (!strcmp(action, "down")) {
-            _on_down(param);
-        } else if (!strcmp(action, "up")) {
-            _on_up(param);
-        } else if (!strcmp(action, "pdown")) {
-            _on_pdown(param);
-        } else if (!strcmp(action, "pup")) {
-            _on_pup(param);
-        } else {
-            D("Unknown multi-touch event action '%s'", action);
-        }
-        free(action);
     }
-
-    /* Listen to the next event. */
-    android_device_listen(ad, mtsp->events, sizeof(mtsp->events),
-                          _on_event_received);
+    return ASIO_ACTION_DONE;
 }
 
-/* A callback that is invoked when android device is connected (i.e. both,
- * command and event channels have been established).
- * Param:
- *  opaque - AndroidMTSPort instance.
- *  ad - Android device used by this port.
- *  failure - Connections status.
- */
+/* A callback that is invoked on SDK controller port connection events. */
 static void
-_on_device_connected(void* opaque, AndroidDevice* ad, int failure)
+_on_multitouch_port_connection(void* opaque,
+                               SDKCtlSocket* sdkctl,
+                               SdkCtlPortStatus status)
 {
-    if (!failure) {
-        AndroidMTSPort* mtsp = (AndroidMTSPort*)opaque;
-        mtsp->is_connected = 1;
-        D("Multi-touch emulation has started");
-        android_device_listen(mtsp->device, mtsp->events, sizeof(mtsp->events),
-                              _on_event_received);
-        mts_port_start(mtsp);
+    switch (status) {
+        case SDKCTL_PORT_CONNECTED:
+            D("Multi-touch: SDK Controller is connected");
+            break;
+
+        case SDKCTL_PORT_DISCONNECTED:
+            D("Multi-touch: SDK Controller is disconnected");
+            break;
+
+        case SDKCTL_PORT_ENABLED:
+            D("Multi-touch: SDK Controller port is enabled.");
+            break;
+
+        case SDKCTL_PORT_DISABLED:
+            D("Multi-touch: SDK Controller port is disabled.");
+            break;
+
+        case SDKCTL_HANDSHAKE_CONNECTED:
+            D("Multi-touch: Handshake succeeded with connected port.");
+            break;
+
+        case SDKCTL_HANDSHAKE_NO_PORT:
+            D("Multi-touch: Handshake succeeded with disconnected port.");
+            break;
+
+        case SDKCTL_HANDSHAKE_DUP:
+            W("Multi-touch: Handshake failed due to port duplication.");
+            sdkctl_socket_disconnect(sdkctl);
+            break;
+
+        case SDKCTL_HANDSHAKE_UNKNOWN_QUERY:
+            W("Multi-touch: Handshake failed due to unknown query.");
+            sdkctl_socket_disconnect(sdkctl);
+            break;
+
+        case SDKCTL_HANDSHAKE_UNKNOWN_RESPONSE:
+        default:
+            W("Multi-touch: Handshake failed due to unknown reason.");
+            sdkctl_socket_disconnect(sdkctl);
+            break;
     }
 }
 
-/* Invoked when an I/O failure occurs on a socket.
- * Note that this callback will not be invoked on connection failures.
- * Param:
- *  opaque - AndroidMTSPort instance.
- *  ad - Android device instance
- *  ads - Connection socket where failure has occured.
- *  failure - Contains 'errno' indicating the reason for failure.
- */
+/* A callback that is invoked when a message is received from the device. */
 static void
-_on_io_failure(void* opaque, AndroidDevice* ad, int failure)
+_on_multitouch_message(void* client_opaque,
+                       SDKCtlSocket* sdkctl,
+                       SDKCtlMessage* message,
+                       int msg_type,
+                       void* msg_data,
+                       int msg_size)
 {
-    AndroidMTSPort* mtsp = (AndroidMTSPort*)opaque;
-    E("Multi-touch port got disconnected: %s", strerror(failure));
-    mtsp->is_connected = 0;
-    android_device_disconnect(ad);
+    switch (msg_type) {
+        case SDKCTL_MT_MOVE: {
+            assert((msg_size / sizeof(AndroidMTEvent)) && !(msg_size % sizeof(AndroidMTEvent)));
+            _on_move((const AndroidMTEvent*)msg_data, msg_size / sizeof(AndroidMTEvent));
+            break;
+        }
 
-    /* Try to reconnect again. */
-    android_device_connect_async(ad, _on_device_connected);
+        case SDKCTL_MT_FISRT_DOWN:
+            assert(msg_size / sizeof(AndroidMTEvent) && !(msg_size % sizeof(AndroidMTEvent)));
+            _on_down((const AndroidMTEvent*)msg_data);
+            break;
+
+        case SDKCTL_MT_LAST_UP:
+            _on_up((const AndroidMTPtr*)msg_data);
+            break;
+
+        case SDKCTL_MT_POINTER_DOWN:
+            assert(msg_size / sizeof(AndroidMTEvent) && !(msg_size % sizeof(AndroidMTEvent)));
+            _on_pdown((const AndroidMTEvent*)msg_data);
+            break;
+
+        case SDKCTL_MT_POINTER_UP:
+            _on_pup((const AndroidMTPtr*)msg_data);
+            break;
+
+        default:
+            W("Multi-touch: Unknown message %d", msg_type);
+            break;
+    }
 }
 
 /********************************************************************************
@@ -288,31 +331,32 @@ AndroidMTSPort*
 mts_port_create(void* opaque)
 {
     AndroidMTSPort* mtsp;
-    int res;
 
     ANEW0(mtsp);
-    mtsp->opaque = opaque;
-    mtsp->is_connected = 0;
+    mtsp->opaque                = opaque;
 
     /* Initialize default MTS descriptor. */
     multitouch_init(mtsp);
 
-    /* Create JPEG compressor. Put "$BLOB:%09d\0" + MTFrameHeader header in front
-     * of the compressed data. this way we will have entire query ready to be
+    /* Create JPEG compressor. Put message header + MTFrameHeader in front of the
+     * compressed data. this way we will have entire query ready to be
      * transmitted to the device. */
-    mtsp->jpeg_compressor = jpeg_compressor_create(16 + sizeof(MTFrameHeader), 4096);
+    mtsp->jpeg_compressor =
+        jpeg_compressor_create(sdkctl_message_get_header_size() + sizeof(MTFrameHeader), 4096);
 
-    mtsp->device = android_device_init(mtsp, AD_MULTITOUCH_PORT, _on_io_failure);
-    if (mtsp->device == NULL) {
-        _mts_port_free(mtsp);
-        return NULL;
-    }
+    mtsp->sdkctl = sdkctl_socket_new(SDKCTL_MT_TIMEOUT, "multi-touch",
+                                     _on_multitouch_socket_connection,
+                                     _on_multitouch_port_connection,
+                                     _on_multitouch_message, mtsp);
+    sdkctl_init_recycler(mtsp->sdkctl, 64, 8);
 
-    res = android_device_connect_async(mtsp->device, _on_device_connected);
-    if (res != 0) {
-        mts_port_destroy(mtsp);
-        return NULL;
-    }
+    /* Create a direct packet that will wrap up framebuffer updates. Note that
+     * we need to do this after we have initialized the recycler! */
+    mtsp->fb_packet = sdkctl_direct_packet_new(mtsp->sdkctl);
+
+    /* Now we can initiate connection witm MT port on the device. */
+    sdkctl_socket_connect(mtsp->sdkctl, SDKCTL_DEFAULT_TCP_PORT,
+                          SDKCTL_MT_TIMEOUT);
 
     return mtsp;
 }
@@ -321,75 +365,6 @@ void
 mts_port_destroy(AndroidMTSPort* mtsp)
 {
     _mts_port_free(mtsp);
-}
-
-int
-mts_port_is_connected(AndroidMTSPort* mtsp)
-{
-    return mtsp->is_connected;
-}
-
-int
-mts_port_start(AndroidMTSPort* mtsp)
-{
-    char qresp[MTSP_MAX_MSG];
-    char query[256];
-    AndroidHwConfig* config = android_hw;
-
-    /* Query the device to start capturing multi-touch events, also providing
-     * the device with width / height of the emulator's screen. This is required
-     * so device can properly adjust multi-touch event coordinates, and display
-     * emulator's framebuffer. */
-    snprintf(query, sizeof(query), "start:%dx%d",
-             config->hw_lcd_width, config->hw_lcd_height);
-    int res = android_device_query(mtsp->device, query, qresp, sizeof(qresp),
-                                   MTSP_QUERY_TIMEOUT);
-    if (!res) {
-        /* By protocol device should reply with its view dimensions. */
-        if (*qresp) {
-            int width, height;
-            if (sscanf(qresp, "%dx%d", &width, &height) == 2) {
-                multitouch_set_device_screen_size(width, height);
-                D("Multi-touch emulation has started. Device dims: %dx%d",
-                  width, height);
-            } else {
-                E("Unexpected reply to MTS 'start' query: %s", qresp);
-                android_device_query(mtsp->device, "stop", qresp, sizeof(qresp),
-                                     MTSP_QUERY_TIMEOUT);
-                res = -1;
-            }
-        } else {
-            E("MTS protocol error: no reply to query 'start'");
-            android_device_query(mtsp->device, "stop", qresp, sizeof(qresp),
-                                 MTSP_QUERY_TIMEOUT);
-            res = -1;
-        }
-    } else {
-        if (errno) {
-            D("Query 'start' failed on I/O: %s", strerror(errno));
-        } else {
-            D("Query 'start' failed on device: %s", qresp);
-        }
-    }
-    return res;
-}
-
-int
-mts_port_stop(AndroidMTSPort* mtsp)
-{
-    char qresp[MTSP_MAX_MSG];
-    const int res =
-        android_device_query(mtsp->device, "stop", qresp, sizeof(qresp),
-                             MTSP_QUERY_TIMEOUT);
-    if (res) {
-        if (errno) {
-            D("Query 'stop' failed on I/O: %s", strerror(errno));
-        } else {
-            D("Query 'stop' failed on device: %s", qresp);
-        }
-    }
-
-    return res;
 }
 
 /********************************************************************************
@@ -412,6 +387,8 @@ _fb_compress(const AndroidMTSPort* mtsp,
              int jpeg_quality,
              int ydir)
 {
+    T("Multi-touch: compressing %d bytes frame buffer", fmt->w * fmt->h * fmt->bpp);
+
     jpeg_compressor_compress_fb(mtsp->jpeg_compressor, fmt->x, fmt->y, fmt->w,
                                 fmt->h, fmt->disp_height, fmt->bpp, fmt->bpl,
                                 fb, jpeg_quality, ydir);
@@ -421,15 +398,12 @@ int
 mts_port_send_frame(AndroidMTSPort* mtsp,
                     MTFrameHeader* fmt,
                     const uint8_t* fb,
-                    async_send_cb cb,
+                    on_sdkctl_direct_cb cb,
                     void* cb_opaque,
                     int ydir)
 {
-    char* query;
-    int blob_size, off;
-
     /* Make sure that port is connected. */
-    if (!mts_port_is_connected(mtsp)) {
+    if (!sdkctl_socket_is_port_ready(mtsp->sdkctl)) {
         return -1;
     }
 
@@ -437,31 +411,32 @@ mts_port_send_frame(AndroidMTSPort* mtsp,
     fmt->format = MTFB_JPEG;
     _fb_compress(mtsp, fmt, fb, 10, ydir);
 
-    /* Total size of the blob: header + JPEG image. */
-    blob_size = sizeof(MTFrameHeader) +
-                jpeg_compressor_get_jpeg_size(mtsp->jpeg_compressor);
+    /* Total size of the update data: header + JPEG image. */
+    const int update_size =
+        sizeof(MTFrameHeader) + jpeg_compressor_get_jpeg_size(mtsp->jpeg_compressor);
 
-    /* Query starts at the beginning of the buffer allocated by the compressor's
-     * destination manager. */
-    query = (char*)jpeg_compressor_get_buffer(mtsp->jpeg_compressor);
+    /* Update message starts at the beginning of the buffer allocated by the
+     * compressor's destination manager. */
+    uint8_t* const msg = (uint8_t*)jpeg_compressor_get_buffer(mtsp->jpeg_compressor);
 
-    /* Build the $BLOB query to transfer to the device. */
-    snprintf(query, jpeg_compressor_get_header_size(mtsp->jpeg_compressor),
-             "$BLOB:%09d", blob_size);
-    off = strlen(query) + 1;
+    /* Initialize message header. */
+    sdkctl_init_message_header(msg, SDKCTL_MT_FB_UPDATE, update_size);
 
-    /* Copy framebuffer update header to the query. */
-    memcpy(query + off, fmt, sizeof(MTFrameHeader));
+    /* Copy framebuffer update header to the message. */
+    memcpy(msg + sdkctl_message_get_header_size(), fmt, sizeof(MTFrameHeader));
+
+    /* Compression rate... */
+    const float comp_rate = ((float)jpeg_compressor_get_jpeg_size(mtsp->jpeg_compressor) / (fmt->w * fmt->h * fmt->bpp)) * 100;
 
     /* Zeroing the rectangle in the update header we indicate that it contains
      * no updates. */
     fmt->x = fmt->y = fmt->w = fmt->h = 0;
 
-    /* Initiate asynchronous transfer of the updated framebuffer rectangle. */
-    if (android_device_send_async(mtsp->device, query, off + blob_size, 0, cb, cb_opaque)) {
-        D("Unable to send query '%s': %s", query, strerror(errno));
-        return -1;
-    }
+    /* Send update to the device. */
+    sdkctl_direct_packet_send(mtsp->fb_packet, msg, cb, cb_opaque);
+
+    T("Multi-touch: Sent %d bytes in framebuffer update. Compression rate is %.2f%%",
+      update_size, comp_rate);
 
     return 0;
 }

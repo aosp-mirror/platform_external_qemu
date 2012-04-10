@@ -18,6 +18,7 @@
 #define ANDROID_SDKCONTROL_SOCKET_H_
 
 #include "android/async-socket.h"
+#include "android/async-utils.h"
 
 /*
  * Contains declaration of an API that encapsulates communication protocol with
@@ -102,19 +103,28 @@
  * interested in that particular descriptor.
  *
  * There are three types of data in the exchange protocol:
- * - A packet - the simplest type of data that doesn't require any replies.
+ * - A message - the simplest type of data that doesn't require any replies.
  * - A query - A message that require a reply, and
  * - A query reply - A message that delivers query reply.
  */
 
+/* Default TCP port to use for connection with SDK controller. */
+#define SDKCTL_DEFAULT_TCP_PORT     1970
+
 /* Declares SDK controller socket descriptor. */
 typedef struct SDKCtlSocket SDKCtlSocket;
 
-/* Declares SDK controller data packet descriptor. */
-typedef struct SDKCtlPacket SDKCtlPacket;
+/* Declares SDK controller message descriptor. */
+typedef struct SDKCtlMessage SDKCtlMessage;
 
 /* Declares SDK controller query descriptor. */
 typedef struct SDKCtlQuery SDKCtlQuery;
+
+/* Declares SDK controller direct packet descriptor.
+ * Direct packet (unlike message, or query packets) doesn't contain data buffer,
+ * but rather references message, or query data allocated by the client.
+ */
+typedef struct SDKCtlDirectPacket SDKCtlDirectPacket;
 
 /* Defines client's callback set to monitor SDK controller socket connection.
  *
@@ -137,30 +147,52 @@ typedef struct SDKCtlQuery SDKCtlQuery;
  * Return:
  *  One of the AsyncIOAction values.
  */
-typedef AsyncIOAction (*on_sdkctl_connection_cb)(void* client_opaque,
-                                                 SDKCtlSocket* sdkctl,
-                                                 AsyncIOState status);
+typedef AsyncIOAction (*on_sdkctl_socket_connection_cb)(void* client_opaque,
+                                                        SDKCtlSocket* sdkctl,
+                                                        AsyncIOState status);
 
-/* Defines client's callback set to receive handshake reply from the SdkController
- * service running on the device.
+/* Enumerates port connection statuses passed to port connection callback.
+ */
+typedef enum SdkCtlPortStatus {
+    /* Service-side port has connected to the socket. */
+    SDKCTL_PORT_DISCONNECTED,
+    /* Service-side port has disconnected from the socket. */
+    SDKCTL_PORT_CONNECTED,
+    /* Service-side port has enabled emulation */
+    SDKCTL_PORT_ENABLED,
+    /* Service-side port has disabled emulation */
+    SDKCTL_PORT_DISABLED,
+    /* Handshake request has succeeded, and service-side port is connected. */
+    SDKCTL_HANDSHAKE_CONNECTED,
+    /* Handshake request has succeeded, but service-side port is not connected. */
+    SDKCTL_HANDSHAKE_NO_PORT,
+    /* Handshake request has failed due to port duplication. */
+    SDKCTL_HANDSHAKE_DUP,
+    /* Handshake request has failed on an unknown query. */
+    SDKCTL_HANDSHAKE_UNKNOWN_QUERY,
+    /* Handshake request has failed on an unknown response. */
+    SDKCTL_HANDSHAKE_UNKNOWN_RESPONSE,
+} SdkCtlPortStatus;
+
+/* Defines client's callback set to receive port connection status.
  *
- * Successful handshake means that connection between the client and SDK
- * controller service has been established.
+ * Port connection is different than socket connection, and indicates whether
+ * or not a service-side port that provides requested emulation functionality is
+ * hooked up with the connected socket. For instance, multi-touch port may be
+ * inactive at the time when socket is connected. So, there is a successful
+ * socket connection, but there is no service at the device end that provides
+ * multi-touch functionality. So, for multi-touch example, this callback will be
+ * invoked when multi-touch port at the device end becomes active, and hooks up
+ * with the socket that was connected before.
  *
  * Param:
  *  client_opaque - An opaque pointer associated with the client.
  *  sdkctl - Initialized SDKCtlSocket instance.
- *  handshake - Handshake message received from the SDK controller service.
- *  handshake_size - Size of the fandshake message received from the SDK
- *      controller service.
- *  status - Handshake status. Note that handshake, and handshake_size are valid
- *      only if this parameter is set to ASIO_STATE_SUCCEEDED.
+ *  status - Port connection status.
  */
-typedef void (*on_sdkctl_handshake_cb)(void* client_opaque,
-                                       SDKCtlSocket* sdkctl,
-                                       void* handshake,
-                                       uint32_t handshake_size,
-                                       AsyncIOState status);
+typedef void (*on_sdkctl_port_connection_cb)(void* client_opaque,
+                                             SDKCtlSocket* sdkctl,
+                                             SdkCtlPortStatus status);
 
 /* Defines a message notification callback.
  * Param:
@@ -176,7 +208,7 @@ typedef void (*on_sdkctl_handshake_cb)(void* client_opaque,
  */
 typedef void (*on_sdkctl_message_cb)(void* client_opaque,
                                      SDKCtlSocket* sdkctl,
-                                     SDKCtlPacket* message,
+                                     SDKCtlMessage* message,
                                      int msg_type,
                                      void* msg_data,
                                      int msg_size);
@@ -203,27 +235,114 @@ typedef AsyncIOAction (*on_sdkctl_query_cb)(void* query_opaque,
                                             SDKCtlQuery* query,
                                             AsyncIOState status);
 
+/* Defines direct packet completion callback.
+ * Param:
+ *  opaque - An opaque pointer associated with the direct packet by the client.
+ *  packet - Packet descriptor.  Note that packet descriptor will be released
+ *      upon exit from this callback (thus, could be freed). If the client is
+ *      interested in working with that packet after the callback returns, it
+ *      should reference the packet descriptor in this callback.
+ *  status - Packet status. Can be one of these:
+ *    - ASIO_STATE_SUCCEEDED : Packet has been successfully sent.
+ *    - ASIO_STATE_FAILED    : Packet has failed on an I/O.
+ *    - ASIO_STATE_CANCELLED : Packet has been cancelled due to socket
+ *                             disconnection.
+ * Return:
+ *  One of the AsyncIOAction values.
+ */
+typedef AsyncIOAction (*on_sdkctl_direct_cb)(void* opaque,
+                                             SDKCtlDirectPacket* packet,
+                                             AsyncIOState status);
+
 /********************************************************************************
- *                         SDKCtlPacket API
+ *                        SDKCtlDirectPacket API
  ********************************************************************************/
 
-/* References SDKCtlPacket object.
+/* Creates new SDKCtlDirectPacket descriptor.
  * Param:
- *  packet - Initialized SDKCtlPacket instance.
+ *  sdkctl - Initialized SDKCtlSocket instance to create a direct packet for.
+ * Return:
+ *  Referenced SDKCtlDirectPacket instance.
+ */
+extern SDKCtlDirectPacket* sdkctl_direct_packet_new(SDKCtlSocket* sdkctl);
+
+/* References SDKCtlDirectPacket object.
+ * Param:
+ *  packet - Initialized SDKCtlDirectPacket instance.
  * Return:
  *  Number of outstanding references to the object.
  */
-extern int sdkctl_packet_reference(SDKCtlPacket* packet);
+extern int sdkctl_direct_packet_reference(SDKCtlDirectPacket* packet);
 
-/* Releases SDKCtlPacket object.
+/* Releases SDKCtlDirectPacket object.
  * Note that upon exiting from this routine the object might be destroyed, even
  * if this routine returns value other than zero.
  * Param:
- *  packet - Initialized SDKCtlPacket instance.
+ *  packet - Initialized SDKCtlDirectPacket instance.
  * Return:
  *  Number of outstanding references to the object.
  */
-extern int sdkctl_packet_release(SDKCtlPacket* packet);
+extern int sdkctl_direct_packet_release(SDKCtlDirectPacket* packet);
+
+/* Sends direct packet.
+ * Param:
+ *  packet - Packet descriptor for the direct packet to send.
+ *  data - Data to send with the packet. Must be fully initialized message, or
+ *      query header.
+ *  cb, cb_opaque - Callback to invoke on packet transmission events.
+ */
+extern void sdkctl_direct_packet_send(SDKCtlDirectPacket* packet,
+                                      void* data,
+                                      on_sdkctl_direct_cb cb,
+                                      void* cb_opaque);
+
+/********************************************************************************
+ *                         SDKCtlMessage API
+ ********************************************************************************/
+
+/* References SDKCtlMessage object.
+ * Param:
+ *  msg - Initialized SDKCtlMessage instance.
+ * Return:
+ *  Number of outstanding references to the object.
+ */
+extern int sdkctl_message_reference(SDKCtlMessage* msg);
+
+/* Releases SDKCtlMessage object.
+ * Note that upon exiting from this routine the object might be destroyed, even
+ * if this routine returns value other than zero.
+ * Param:
+ *  msg - Initialized SDKCtlMessage instance.
+ * Return:
+ *  Number of outstanding references to the object.
+ */
+extern int sdkctl_message_release(SDKCtlMessage* msg);
+
+/* Builds and sends a message to the device.
+ * Param:
+ *  sdkctl - SDKCtlSocket instance for the message.
+ *  msg_type - Defines message type.
+ *  data - Message data. Can be NULL if there is no data associated with the
+ *      message.
+ *  size - Byte size of the data buffer.
+ * Return:
+ *  Referenced SDKCtlQuery descriptor.
+ */
+extern SDKCtlMessage* sdkctl_message_send(SDKCtlSocket* sdkctl,
+                                          int msg_type,
+                                          const void* data,
+                                          uint32_t size);
+
+/* Gets message header size */
+extern int sdkctl_message_get_header_size(void);
+
+/* Initializes message header.
+ * Param:
+ *  msg - Beginning of the message packet.
+ *  msg_type - Message type.
+ *  msg_size - Message data size.
+ */
+extern void sdkctl_init_message_header(void* msg, int msg_type, int msg_size);
 
 /********************************************************************************
  *                          SDKCtlQuery API
@@ -349,6 +468,14 @@ extern int sdkctl_query_release(SDKCtlQuery* query);
  */
 extern void* sdkctl_query_get_buffer_in(SDKCtlQuery* query);
 
+/* Gets address of query's output data buffer (response data).
+ * Param:
+ *  query - Query to get data buffer for.
+ * Return:
+ *  Address of query's output data buffer.
+ */
+extern void* sdkctl_query_get_buffer_out(SDKCtlQuery* query);
+
 /********************************************************************************
  *                          SDKCtlSocket API
  ********************************************************************************/
@@ -359,8 +486,8 @@ extern void* sdkctl_query_get_buffer_in(SDKCtlQuery* query);
  *      attempts after disconnection, or on connection failures.
  *  service_name - Name of the SdkController service for this socket (such as
  *      'sensors', 'milti-touch', etc.)
- *  on_connection - A callback to invoke on socket connection events.
- *  on_handshake - A callback to invoke on handshake events.
+ *  on_socket_connection - A callback to invoke on socket connection events.
+ *  on_port_connection - A callback to invoke on port connection events.
  *  on_message - A callback to invoke when a message is received from the SDK
  *      controller.
  *  opaque - An opaque pointer to associate with the socket.
@@ -369,8 +496,8 @@ extern void* sdkctl_query_get_buffer_in(SDKCtlQuery* query);
  */
 extern SDKCtlSocket* sdkctl_socket_new(int reconnect_to,
                                        const char* service_name,
-                                       on_sdkctl_connection_cb on_connection,
-                                       on_sdkctl_handshake_cb on_handshake,
+                                       on_sdkctl_socket_connection_cb on_socket_connection,
+                                       on_sdkctl_port_connection_cb on_port_connection,
                                        on_sdkctl_message_cb on_message,
                                        void* opaque);
 
@@ -436,5 +563,37 @@ extern void sdkctl_socket_reconnect(SDKCtlSocket* sdkctl, int port, int retry_to
  *  sdkctl - Initialized SDKCtlSocket instance.
  */
 extern void sdkctl_socket_disconnect(SDKCtlSocket* sdkctl);
+
+/* Checks if SDK controller socket is connected.
+ * Param:
+ *  sdkctl - Initialized SDKCtlSocket instance.
+ * Return:
+ *  Boolean: 1 if socket is connected, 0 if socket is not connected.
+ */
+extern int sdkctl_socket_is_connected(SDKCtlSocket* sdkctl);
+
+/* Checks if SDK controller port is ready for emulation.
+ * Param:
+ *  sdkctl - Initialized SDKCtlSocket instance.
+ * Return:
+ *  Boolean: 1 if port is ready, 0 if port is not ready.
+ */
+extern int sdkctl_socket_is_port_ready(SDKCtlSocket* sdkctl);
+
+/* Gets status of the SDK controller port for this socket.
+ * Param:
+ *  sdkctl - Initialized SDKCtlSocket instance.
+ * Return:
+ *  Status of the SDK controller port for this socket.
+ */
+extern SdkCtlPortStatus sdkctl_socket_get_port_status(SDKCtlSocket* sdkctl);
+
+/* Checks if handshake was successful.
+ * Param:
+ *  sdkctl - Initialized SDKCtlSocket instance.
+ * Return:
+ *  Boolean: 1 if handshake was successful, 0 if handshake was not successful.
+ */
+extern int sdkctl_socket_is_handshake_ok(SDKCtlSocket* sdkctl);
 
 #endif  /* ANDROID_SDKCONTROL_SOCKET_H_ */

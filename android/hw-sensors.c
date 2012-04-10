@@ -438,7 +438,7 @@ _hwSensorClient_receive( HwSensorClient*  cl, uint8_t*  msg, int  msglen )
         }
 
         /* If emulating device is connected update sensor state there too. */
-        if (hw->sensors_port != NULL && sensors_port_is_connected(hw->sensors_port)) {
+        if (hw->sensors_port != NULL) {
             if (enabled) {
                 sensors_port_enable_sensor(hw->sensors_port, (const char*)msg);
             } else {
@@ -690,11 +690,6 @@ _hwSensors_init( HwSensors*  h )
 
     if (android_hw->hw_sensors_temperature) {
         h->sensors[ANDROID_SENSOR_TEMPERATURE].enabled = 1;
-    }
-
-    if (h->sensors_port != NULL) {
-        /* Init sensors on the attached device. */
-        sensors_port_init_sensors(h->sensors_port);
     }
 
     /* XXX: TODO: Add other tests when we add the corresponding
