@@ -120,6 +120,9 @@ extern int mts_port_stop(AndroidMTSPort* amtp);
  *  cb - Callback to invoke when update has been transferred to the MT-emulating
  *      application on the device.
  *  cb_opaque - An opaque parameter to pass back to the 'cb' callback.
+ *  ydir - Indicates direction in which lines are arranged in the framebuffer. If
+ *      this value is negative, lines are arranged in bottom-up format (i.e. the
+ *      bottom line is at the beginning of the buffer).
  * Return:
  *  0 on success, or != 0 on failure.
  */
@@ -127,6 +130,7 @@ extern int mts_port_send_frame(AndroidMTSPort* mtsp,
                                MTFrameHeader* fmt,
                                const uint8_t* fb,
                                async_send_cb cb,
-                               void* cb_opaque);
+                               void* cb_opaque,
+                               int ydir);
 
 #endif  /* ANDROID_ANDROID_MULTITOUCH_PORT_H_ */

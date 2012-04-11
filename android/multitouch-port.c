@@ -409,10 +409,12 @@ static void
 _fb_compress(const AndroidMTSPort* mtsp,
              const MTFrameHeader* fmt,
              const uint8_t* fb,
-             int jpeg_quality)
+             int jpeg_quality,
+             int ydir)
 {
     jpeg_compressor_compress_fb(mtsp->jpeg_compressor, fmt->x, fmt->y, fmt->w,
-                                fmt->h, fmt->bpp, fmt->bpl, fb, jpeg_quality);
+                                fmt->h, fmt->disp_height, fmt->bpp, fmt->bpl,
+                                fb, jpeg_quality, ydir);
 }
 
 int
@@ -420,7 +422,8 @@ mts_port_send_frame(AndroidMTSPort* mtsp,
                     MTFrameHeader* fmt,
                     const uint8_t* fb,
                     async_send_cb cb,
-                    void* cb_opaque)
+                    void* cb_opaque,
+                    int ydir)
 {
     char* query;
     int blob_size, off;
@@ -432,7 +435,7 @@ mts_port_send_frame(AndroidMTSPort* mtsp,
 
     /* Compress framebuffer region. 10% quality seems to be sufficient. */
     fmt->format = MTFB_JPEG;
-    _fb_compress(mtsp, fmt, fb, 10);
+    _fb_compress(mtsp, fmt, fb, 10, ydir);
 
     /* Total size of the blob: header + JPEG image. */
     blob_size = sizeof(MTFrameHeader) +

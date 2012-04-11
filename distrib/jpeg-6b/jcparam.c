@@ -379,6 +379,7 @@ jpeg_default_colorspace (j_compress_ptr cinfo)
     break;
 #ifdef ANDROID_RGB
   case JCS_RGB_565:
+  case JCS_RGBA_8888:
     jpeg_set_colorspace(cinfo, JCS_YCbCr);
     break;
 #endif  /* ANDROID_RGB */

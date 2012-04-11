@@ -219,6 +219,52 @@ rgb565_ycc_convert (j_compress_ptr cinfo,
     }
   }
 }
+
+/* Converts RGBA8888 row into YCbCr */
+METHODDEF(void)
+rgba8888_ycc_convert (j_compress_ptr cinfo,
+		 JSAMPARRAY input_buf, JSAMPIMAGE output_buf,
+		 JDIMENSION output_row, int num_rows)
+{
+  my_cconvert_ptr cconvert = (my_cconvert_ptr) cinfo->cconvert;
+  register int r, g, b;
+  register INT32 * ctab = cconvert->rgb_ycc_tab;
+  register INT32* inptr;
+  register JSAMPROW outptr0, outptr1, outptr2;
+  register JDIMENSION col;
+  JDIMENSION num_cols = cinfo->image_width;
+
+  while (--num_rows >= 0) {
+    inptr = (INT32*)(*input_buf++);
+    outptr0 = output_buf[0][output_row];
+    outptr1 = output_buf[1][output_row];
+    outptr2 = output_buf[2][output_row];
+    output_row++;
+    for (col = 0; col < num_cols; col++) {
+      register const unsigned char* color = (unsigned char*)(inptr + col);
+      r = (*color) & 0xff; color++;
+      g = (*color) & 0xff; color++;
+      b = (*color) & 0xff; color++;
+      /* If the inputs are 0..MAXJSAMPLE, the outputs of these equations
+       * must be too; we do not need an explicit range-limiting operation.
+       * Hence the value being shifted is never negative, and we don't
+       * need the general RIGHT_SHIFT macro.
+       */
+      /* Y */
+      outptr0[col] = (JSAMPLE)
+		((ctab[r+R_Y_OFF] + ctab[g+G_Y_OFF] + ctab[b+B_Y_OFF])
+		 >> SCALEBITS);
+      /* Cb */
+      outptr1[col] = (JSAMPLE)
+		((ctab[r+R_CB_OFF] + ctab[g+G_CB_OFF] + ctab[b+B_CB_OFF])
+		 >> SCALEBITS);
+      /* Cr */
+      outptr2[col] = (JSAMPLE)
+		((ctab[r+R_CR_OFF] + ctab[g+G_CR_OFF] + ctab[b+B_CR_OFF])
+		 >> SCALEBITS);
+    }
+  }
+}
 #endif  /* ANDROID_RGB */
 
 /**************** Cases other than RGB -> YCbCr **************/
@@ -505,6 +551,10 @@ jinit_color_converter (j_compress_ptr cinfo)
     if (cinfo->input_components != 2)
       ERREXIT(cinfo, JERR_BAD_IN_COLORSPACE);
     break;
+  case JCS_RGBA_8888:
+    if (cinfo->input_components != 4)
+      ERREXIT(cinfo, JERR_BAD_IN_COLORSPACE);
+    break;
 #endif  /* ANDROID_RGB */
 
   default:			/* JCS_UNKNOWN can be anything */
@@ -551,6 +601,9 @@ jinit_color_converter (j_compress_ptr cinfo)
     else if (cinfo->in_color_space == JCS_RGB_565) {
       cconvert->pub.start_pass = rgb_ycc_start;
       cconvert->pub.color_convert = rgb565_ycc_convert;
+    } else if (cinfo->in_color_space == JCS_RGBA_8888) {
+      cconvert->pub.start_pass = rgb_ycc_start;
+      cconvert->pub.color_convert = rgba8888_ycc_convert;
     }
 #endif  /* ANDROID_RGB */
     else

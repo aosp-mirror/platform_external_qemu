@@ -73,6 +73,12 @@ typedef struct MTSState {
     /* Boolean value indicating if framebuffer updates are currently being
      * transferred to the application running on the device. */
     int             fb_transfer_in_progress;
+    /* Indicates direction in which lines are arranged in the framebuffer. If
+     * this value is negative, lines are arranged in bottom-up format (i.e. the
+     * bottom line is at the beginning of the buffer). */
+    int             ydir;
+    /* Current framebuffer pointer. */
+    uint8_t*        current_fb;
 } MTSState;
 
 /* Default multi-touch screen descriptor */
@@ -228,6 +234,9 @@ _mts_pointer_move(MTSState* mts_state, int slot_index, int x, int y, int pressur
  *                       Multi-touch API
  *******************************************************************************/
 
+/* Multi-touch service initialization flag. */
+static int _is_mt_initialized = 0;
+
 /* Callback that is invoked when framebuffer update has been transmitted to the
  * device. */
 static void
@@ -240,8 +249,8 @@ _on_fb_sent(void* opaque, ATResult res, void* data, int size, int sent)
     if (mts_state->fb_header.w && mts_state->fb_header.h) {
         /* Send accumulated updates. */
         if (mts_port_send_frame(mts_state->mtsp, &mts_state->fb_header,
-                                mts_state->ds->surface->data, _on_fb_sent,
-                                mts_state)) {
+                                mts_state->current_fb, _on_fb_sent, mts_state,
+                                mts_state->ydir)) {
             mts_state->fb_transfer_in_progress = 0;
         }
     } else {
@@ -250,17 +259,12 @@ _on_fb_sent(void* opaque, ATResult res, void* data, int size, int sent)
     }
 }
 
-/* A callback invoked on framebuffer updates.
- * Param:
- *  opaque - MTSState instance.
- *  x, y, w, h - Defines an updated rectangle inside the framebuffer.
+/* Common handler for framebuffer updates invoked by both, software, and OpenGLES
+ * renderers.
  */
 static void
-_mt_fb_update(void* opaque, int x, int y, int w, int h)
+_mt_fb_common_update(MTSState* mts_state, int x, int y, int w, int h)
 {
-    MTSState* const mts_state = (MTSState*)opaque;
-    const DisplaySurface* const surface = mts_state->ds->surface;
-
     if (mts_state->fb_header.w == 0 && mts_state->fb_header.h == 0) {
         /* First update after previous one has been transmitted to the device. */
         mts_state->fb_header.x = x;
@@ -297,31 +301,69 @@ _mt_fb_update(void* opaque, int x, int y, int w, int h)
         mts_state->fb_header.h = bottom - mts_state->fb_header.y;
     }
 
-    /* TODO: Looks like general framebuffer properties can change on the fly.
-     * Find a callback that can catch that. For now, just copy FB properties
-     * over in every FB update. */
-    mts_state->fb_header.bpp = surface->pf.bytes_per_pixel;
-    mts_state->fb_header.bpl = surface->linesize;
-    mts_state->fb_header.disp_width = surface->width;
-    mts_state->fb_header.disp_height = surface->height;
-
     /* We will send updates to the device only after previous transmission is
      * completed. */
     if (!mts_state->fb_transfer_in_progress) {
         mts_state->fb_transfer_in_progress = 1;
         if (mts_port_send_frame(mts_state->mtsp, &mts_state->fb_header,
-                                surface->data, _on_fb_sent, mts_state)) {
+                                mts_state->current_fb, _on_fb_sent, mts_state,
+                                mts_state->ydir)) {
             mts_state->fb_transfer_in_progress = 0;
         }
     }
 }
 
+/* A callback invoked on framebuffer updates by software renderer.
+ * Param:
+ *  opaque - MTSState instance.
+ *  x, y, w, h - Defines an updated rectangle inside the framebuffer.
+ */
+static void
+_mt_fb_update(void* opaque, int x, int y, int w, int h)
+{
+    MTSState* const mts_state = (MTSState*)opaque;
+    const DisplaySurface* const surface = mts_state->ds->surface;
+
+    /* TODO: For sofware renderer general framebuffer properties can change on
+     * the fly. Find a callback that can catch that. For now, just copy FB
+     * properties over in every FB update. */
+    mts_state->fb_header.bpp = surface->pf.bytes_per_pixel;
+    mts_state->fb_header.bpl = surface->linesize;
+    mts_state->fb_header.disp_width = surface->width;
+    mts_state->fb_header.disp_height = surface->height;
+    mts_state->current_fb = surface->data;
+    mts_state->ydir = 1;
+
+    _mt_fb_common_update(mts_state, x, y, w, h);
+}
+void
+multitouch_opengles_fb_update(void* context,
+                              int w, int h, int ydir,
+                              int format, int type,
+                              unsigned char* pixels)
+{
+    MTSState* const mts_state = &_MTSState;
+
+    /* Make sure MT port is initialized. */
+    if (!_is_mt_initialized) {
+        return;
+    }
+
+    /* GLES format is always RGBA8888 */
+    mts_state->fb_header.bpp = 4;
+    mts_state->fb_header.bpl = 4 * w;
+    mts_state->fb_header.disp_width = w;
+    mts_state->fb_header.disp_height = h;
+    mts_state->current_fb = pixels;
+    mts_state->ydir = ydir;
+
+    /* GLES emulator alwas update the entire framebuffer. */
+    _mt_fb_common_update(mts_state, 0, 0, w, h);
+}
+
 void
 multitouch_init(AndroidMTSPort* mtsp)
 {
-    /* Multi-touch service initialization flag. */
-    static int _is_mt_initialized = 0;
-
     if (!_is_mt_initialized) {
         MTSState* const mts_state = &_MTSState;
         DisplayState* const ds = get_displaystate();

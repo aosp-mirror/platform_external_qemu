@@ -151,12 +151,14 @@ jpeg_compressor_get_header_size(const AJPEGDesc* dsc)
 
 void
 jpeg_compressor_compress_fb(AJPEGDesc* dsc,
-                            int x, int y, int w, int h,
+                            int x, int y, int w, int h, int num_lines,
                             int bpp, int bpl,
                             const uint8_t* fb,
-                            int jpeg_quality){
+                            int jpeg_quality,
+                            int ydir){
     struct jpeg_compress_struct cinfo = {0};
     struct jpeg_error_mgr err_mgr;
+    const int x_shift = x * bpp;
 
     /*
      * Initialize compressin information structure, and start compression
@@ -186,9 +188,17 @@ jpeg_compressor_compress_fb(AJPEGDesc* dsc,
     jpeg_start_compress(&cinfo, TRUE);
 
     /* Line by line compress the region. */
-    while (cinfo.next_scanline < cinfo.image_height) {
-        JSAMPROW rgb = (JSAMPROW)(fb + (cinfo.next_scanline + y) * bpl + x * bpp);
-        jpeg_write_scanlines(&cinfo, (JSAMPARRAY)&rgb, 1);
+    if (ydir >= 0) {
+        while (cinfo.next_scanline < cinfo.image_height) {
+            JSAMPROW rgb = (JSAMPROW)(fb + (cinfo.next_scanline + y) * bpl + x_shift);
+            jpeg_write_scanlines(&cinfo, (JSAMPARRAY)&rgb, 1);
+        }
+    } else {
+        const int y_shift = num_lines - y - 1;
+        while (cinfo.next_scanline < cinfo.image_height) {
+            JSAMPROW rgb = (JSAMPROW)(fb + (y_shift - cinfo.next_scanline) * bpl + x_shift);
+            jpeg_write_scanlines(&cinfo, (JSAMPARRAY)&rgb, 1);
+        }
     }
 
     /* Complete the compression. */

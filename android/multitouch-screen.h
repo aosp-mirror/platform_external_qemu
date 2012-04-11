@@ -64,5 +64,37 @@ extern int multitouch_get_max_slot();
 /* Saves screen size reported by the device that emulates multi-touch. */
 extern void multitouch_set_device_screen_size(int width, int height);
 
-#endif  /* ANDROID_MULTITOUCH_SCREEN_H_ */
+/* A callback set to monitor OpenGLES framebuffer updates.
+ * This callback is called by the renderer just before each new frame is
+ * displayed, providing a copy of the framebuffer contents.
+ * The callback will be called from one of the renderer's threads, so it may
+ * require synchronization on any data structures it modifies. The pixels buffer
+ * may be overwritten as soon as the callback returns.
+ * The pixels buffer is intentionally not const: the callback may modify the data
+ * without copying to another buffer if it wants, e.g. in-place RGBA to RGB
+ * conversion, or in-place y-inversion.
+ * Param:
+ *   context        The pointer optionally provided when the callback was
+ *                  registered. The client can use this to pass whatever
+ *                  information it wants to the callback.
+ *   width, height  Dimensions of the image, in pixels. Rows are tightly packed;
+ *                  there is no inter-row padding.
+ *   ydir           Indicates row order: 1 means top-to-bottom order, -1 means
+ *                  bottom-to-top order.
+ *   format, type   Format and type GL enums, as used in glTexImage2D() or
+ *                  glReadPixels(), describing the pixel format.
+ *   pixels         The framebuffer image.
+ *
+ * In the first implementation, ydir is always -1 (bottom to top), format and
+ * type are always GL_RGBA and GL_UNSIGNED_BYTE, and the width and height will
+ * always be the same as the ones passed to initOpenGLRenderer().
+ */
+extern void multitouch_opengles_fb_update(void* context,
+                                          int width,
+                                          int height,
+                                          int ydir,
+                                          int format,
+                                          int type,
+                                          unsigned char* pixels);
 
+#endif  /* ANDROID_MULTITOUCH_SCREEN_H_ */

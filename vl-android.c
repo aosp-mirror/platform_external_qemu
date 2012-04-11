@@ -68,6 +68,7 @@
 #include "android/utils/timezone.h"
 #include "android/snapshot.h"
 #include "android/opengles.h"
+#include "android/multitouch-screen.h"
 #include "targphys.h"
 #include "tcpdump.h"
 
@@ -3877,8 +3878,12 @@ int main(int argc, char **argv, char **envp)
         if (android_hw->hw_gpu_enabled) {
             if (android_initOpenglesEmulation() == 0) {
                 gles_emul = 1;
+                /* Set framebuffer change notification callback when starting
+                 * GLES emulation. Currently only multi-touch emulation is
+                 * interested in FB changes (to transmit them to the device), so
+                 * the callback is set within MT emulation.*/
                 android_startOpenglesRenderer(android_hw->hw_lcd_width, android_hw->hw_lcd_height,
-                                              NULL, NULL);
+                                              multitouch_opengles_fb_update, NULL);
             } else {
                 dwarning("Could not initialize OpenglES emulation, using software renderer.");
             }

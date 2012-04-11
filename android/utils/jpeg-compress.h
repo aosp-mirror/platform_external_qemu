@@ -77,17 +77,23 @@ extern int jpeg_compressor_get_header_size(const AJPEGDesc* dsc);
  * Param:
  *  dsc - Compression descriptor, obtained with jpeg_compressor_create.
  *  x, y, w, h - Coordinates and sizes of framebuffer region to compress.
+ *  num_lines - Number of lines in the framebuffer (true height).
  *  bpp - Number of bytes per pixel in the framebuffer.
  *  bpl - Number of bytes per line in the framebuffer.
  *  fb - Beginning of the framebuffer.
  *  jpeg_quality JPEG compression quality. A number from 1 to 100. Note that
  *      value 10 provides pretty decent image for the purpose of multi-touch
  *      emulation.
+ *  ydir - Indicates direction in which lines are arranged in the framebuffer. If
+ *      this value is negative, lines are arranged in bottom-up format (i.e. the
+ *      bottom line is at the beginning of the buffer).
  */
 extern void jpeg_compressor_compress_fb(AJPEGDesc* dsc,
                                         int x, int y, int w, int h,
+                                        int num_lines,
                                         int bpp, int bpl,
                                         const uint8_t* fb,
-                                        int jpeg_quality);
+                                        int jpeg_quality,
+                                        int ydir);
 
 #endif  /* _ANDROID_UTILS_JPEG_COMPRESS_H */
