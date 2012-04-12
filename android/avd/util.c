@@ -183,7 +183,7 @@ _getSystemProperty( const char* propFile, const char* propName )
 
     file = fopen(propFile, "rb");
     if (file == NULL) {
-        D("Could not open file: %s: %s", temp, strerror(errno));
+        D("Could not open file: %s: %s", propFile, strerror(errno));
         return NULL;
     }
 
