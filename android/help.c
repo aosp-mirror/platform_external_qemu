@@ -1432,12 +1432,12 @@ static void
 help_gpu(stralloc_t* out)
 {
     PRINTF(
-    "  Use -gpu <mode> to force the mode of hardware OpenGLES emulation.\n"
-    "  Valid values for <mode> are:\n\n"
+    "  Use -gpu <mode> to override the mode of hardware OpenGL ES emulation\n"
+    "  indicated by the AVD. Valid values for <mode> are:\n\n"
 
     "     on       -> enable GPU emulation\n"
     "     off      -> disable GPU emulation\n"
-    "     auto     -> automatic detection\n"
+    "     auto     -> use the setting from the AVD\n"
     "     enabled  -> same as 'on'\n"
     "     disabled -> same as 'off'\n\n"
 
@@ -1448,11 +1448,13 @@ help_gpu(stralloc_t* out)
     "  force the virtual device to use the slow software renderer instead.\n"
     "  Note that OpenGLES 2.0 is _not_ supported by it.\n\n"
 
-    "  The 'auto' mode is the default. It will only enable GPU emulation if the\n"
-    "  virtual device supports it, and the host-side OpenGLES emulation library\n"
-    "  could be properly initialized (this can fail when you run the emulator\n"
-    "  under certain restricted environments where the program can't access the\n"
-    "  graphics sub-system (e.g. head-less servers).\n"
+    "  The 'auto' mode is the default. In this mode, the hw.gpu.enabled setting\n"
+    "  in the AVD's hardware-qemu.ini file will determine whether GPU emulation\n"
+    "  is enabled.\n\n"
+
+    "  Even if hardware GPU emulation is enabled, if the host-side OpenGL ES\n"
+    "  emulation library cannot be initialized, the emulator will run with GPU\n"
+    "  emulation disabled rather than failing to start.\n"
     );
 }
 
