@@ -274,7 +274,7 @@ LOCAL_CFLAGS += \
     $(EMULATOR_TARGET_CFLAGS) \
     -DCONFIG_STANDALONE_CORE \
 
-LOCAL_CFLAGS += -Wno-missing-field-initializers
+LOCAL_CFLAGS += -Isdk/emulator/opengl/host/include -Wno-missing-field-initializers
 
 
 LOCAL_STATIC_LIBRARIES := \

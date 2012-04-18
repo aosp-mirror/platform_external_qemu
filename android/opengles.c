@@ -10,6 +10,8 @@
 ** GNU General Public License for more details.
 */
 
+#define RENDER_API_NO_PROTOTYPES 1
+
 #include "config-host.h"
 #include "android/opengles.h"
 #include "android/globals.h"
@@ -17,6 +19,7 @@
 #include <android/utils/path.h>
 #include <android/utils/bufprint.h>
 #include <android/utils/dll.h>
+#include <libOpenglRender/render_api.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -35,22 +38,14 @@ int  android_gles_fast_pipes = 1;
 #error Unknown HOST_LONG_BITS
 #endif
 
-/* These definitions *must* match those under:
- * development/tools/emulator/opengl/host/include/libOpenglRender/render_api.h
- */
 #define DYNLINK_FUNCTIONS  \
-  DYNLINK_FUNC(int,initLibrary,(void),(),return) \
-  DYNLINK_FUNC(int,setStreamMode,(int a),(a),return) \
-  DYNLINK_FUNC(int,initOpenGLRenderer,(int width, int height, int port, OnPostFn onPost, void* onPostContext),(width,height,port,onPost,onPostContext),return) \
-  DYNLINK_FUNC(int,createOpenGLSubwindow,(void* window, int x, int y, int width, int height, float zRot),(window,x,y,width,height,zRot),return)\
-  DYNLINK_FUNC(int,destroyOpenGLSubwindow,(void),(),return)\
-  DYNLINK_FUNC(void,repaintOpenGLDisplay,(void),(),)\
-  DYNLINK_FUNC(void,stopOpenGLRenderer,(void),(),)
-
-#define STREAM_MODE_DEFAULT  0
-#define STREAM_MODE_TCP      1
-#define STREAM_MODE_UNIX     2
-#define STREAM_MODE_PIPE     3
+  DYNLINK_FUNC(initLibrary) \
+  DYNLINK_FUNC(setStreamMode) \
+  DYNLINK_FUNC(initOpenGLRenderer) \
+  DYNLINK_FUNC(createOpenGLSubwindow) \
+  DYNLINK_FUNC(destroyOpenGLSubwindow) \
+  DYNLINK_FUNC(repaintOpenGLDisplay) \
+  DYNLINK_FUNC(stopOpenGLRenderer)
 
 #ifndef CONFIG_STANDALONE_UI
 /* Defined in android/hw-pipe-net.c */
@@ -59,15 +54,10 @@ extern int android_init_opengles_pipes(void);
 
 static ADynamicLibrary*  rendererLib;
 
-/* Define the pointers and the wrapper functions to call them */
-#define DYNLINK_FUNC(result,name,sig,params,ret) \
-    static result (*_ptr_##name) sig; \
-    static result name sig { \
-        ret (*_ptr_##name) params ; \
-    }
-
+/* Define the function pointers */
+#define DYNLINK_FUNC(name) \
+    static name##Fn name = NULL;
 DYNLINK_FUNCTIONS
-
 #undef DYNLINK_FUNC
 
 static int
@@ -75,10 +65,11 @@ initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib)
 {
     void*  symbol;
     char*  error;
-#define DYNLINK_FUNC(result,name,sig,params,ret) \
-    symbol = adynamicLibrary_findSymbol( rendererLib, #name, &error ); \
+
+#define DYNLINK_FUNC(name) \
+    symbol = adynamicLibrary_findSymbol(rendererLib, #name, &error); \
     if (symbol != NULL) { \
-        _ptr_##name = symbol; \
+        name = symbol; \
     } else { \
         derror("GLES emulation: Could not find required symbol (%s): %s", #name, error); \
         free(error); \
@@ -86,6 +77,7 @@ initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib)
     }
 DYNLINK_FUNCTIONS
 #undef DYNLINK_FUNC
+
     return 0;
 }
 
@@ -126,10 +118,10 @@ android_initOpenglesEmulation(void)
         /* XXX: NEED Win32 pipe implementation */
         setStreamMode(STREAM_MODE_TCP);
 #else
-	setStreamMode(STREAM_MODE_UNIX);
+	    setStreamMode(STREAM_MODE_UNIX);
 #endif
     } else {
-	setStreamMode(STREAM_MODE_TCP);
+	    setStreamMode(STREAM_MODE_TCP);
     }
     return 0;
 
@@ -148,7 +140,7 @@ android_startOpenglesRenderer(int width, int height, OnPostFn onPost, void* onPo
         return -1;
     }
 
-    if (initOpenGLRenderer(width, height, ANDROID_OPENGLES_BASE_PORT, onPost, onPostContext) != 0) {
+    if (!initOpenGLRenderer(width, height, ANDROID_OPENGLES_BASE_PORT, onPost, onPostContext)) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }
@@ -167,7 +159,8 @@ int
 android_showOpenglesWindow(void* window, int x, int y, int width, int height, float rotation)
 {
     if (rendererLib) {
-        return createOpenGLSubwindow(window, x, y, width, height, rotation);
+        int success = createOpenGLSubwindow((FBNativeWindowType)window, x, y, width, height, rotation);
+        return success ? 0 : -1;
     } else {
         return -1;
     }
@@ -177,7 +170,8 @@ int
 android_hideOpenglesWindow(void)
 {
     if (rendererLib) {
-        return destroyOpenGLSubwindow();
+        int success = destroyOpenGLSubwindow();
+        return success ? 0 : -1;
     } else {
         return -1;
     }

@@ -3876,14 +3876,15 @@ int main(int argc, char **argv, char **envp)
         int  gles_emul = 0;
 
         if (android_hw->hw_gpu_enabled) {
-            if (android_initOpenglesEmulation() == 0) {
+            /* Set framebuffer change notification callback when starting
+             * GLES emulation. Currently only multi-touch emulation is
+             * interested in FB changes (to transmit them to the device), so
+             * the callback is set within MT emulation.*/
+            if (android_initOpenglesEmulation() == 0 &&
+                android_startOpenglesRenderer(android_hw->hw_lcd_width,
+                    android_hw->hw_lcd_height,
+                    multitouch_opengles_fb_update, NULL) == 0) {
                 gles_emul = 1;
-                /* Set framebuffer change notification callback when starting
-                 * GLES emulation. Currently only multi-touch emulation is
-                 * interested in FB changes (to transmit them to the device), so
-                 * the callback is set within MT emulation.*/
-                android_startOpenglesRenderer(android_hw->hw_lcd_width, android_hw->hw_lcd_height,
-                                              multitouch_opengles_fb_update, NULL);
             } else {
                 dwarning("Could not initialize OpenglES emulation, using software renderer.");
             }

@@ -164,7 +164,7 @@ endif # HOST_OS == linux
 common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
 
-EMULATOR_LIBUI_CFLAGS :=
+EMULATOR_LIBUI_CFLAGS := -Isdk/emulator/opengl/host/include
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
