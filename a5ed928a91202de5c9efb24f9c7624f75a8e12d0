@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAE03////Q\u003d",
+        "filename": "hw/goldfish_fb.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1010186
+      },
+      "writtenOn": "2012-04-19T01:57:05Z",
+      "side": 1,
+      "message": "One minor issue, please add enough space.  Sorry for being meticulous.",
+      "revId": "a5ed928a91202de5c9efb24f9c7624f75a8e12d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAE03////M\u003d",
+        "filename": "hw/goldfish_fb.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1010186
+      },
+      "writtenOn": "2012-04-19T01:57:05Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "a5ed928a91202de5c9efb24f9c7624f75a8e12d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
