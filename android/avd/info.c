@@ -780,11 +780,22 @@ _avdInfo_getBuildSkinHardwareIni( AvdInfo*  i )
 {
     char* skinName;
     char* skinDirPath;
-    char  temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
 
     avdInfo_getSkinInfo(i, &skinName, &skinDirPath);
     if (skinDirPath == NULL)
         return 0;
+
+    int result = avdInfo_getSkinHardwareIni(i, skinName, skinDirPath);
+
+    AFREE(skinName);
+    AFREE(skinDirPath);
+
+    return result;
+}
+
+int avdInfo_getSkinHardwareIni( AvdInfo* i, char* skinName, char* skinDirPath)
+{
+    char  temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
 
     p = bufprint(temp, end, "%s/%s/hardware.ini", skinDirPath, skinName);
     if (p >= end || !path_exists(temp)) {
@@ -793,6 +804,8 @@ _avdInfo_getBuildSkinHardwareIni( AvdInfo*  i )
     }
 
     D("found skin-specific hardware.ini: %s", temp);
+    if (i->skinHardwareIni != NULL)
+        iniFile_free(i->skinHardwareIni);
     i->skinHardwareIni = iniFile_newFromFile(temp);
     if (i->skinHardwareIni == NULL)
         return -1;
@@ -1082,7 +1095,7 @@ avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir )
     /* First, see if the config.ini contains a SKIN_PATH entry that
      * names the full directory path for the skin.
      */
-    if ( i->configIni != NULL ) {
+    if (i->configIni != NULL ) {
         skinPath = iniFile_getString( i->configIni, SKIN_PATH, NULL );
         if (skinPath != NULL) {
             /* If this skin name is magic or a direct directory path
