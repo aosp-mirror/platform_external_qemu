@@ -106,6 +106,9 @@ typedef struct {
  */
 AvdInfo*  avdInfo_new( const char*  name, AvdInfoParams*  params );
 
+/* Update the AvdInfo hardware config from a given skin name and path */
+int avdInfo_getSkinHardwareIni( AvdInfo* i, char* skinName, char* skinDirPath);
+
 /* A special function used to setup an AvdInfo for use when starting
  * the emulator from the Android build system. In this specific instance
  * we're going to create temporary files to hold all writable image
