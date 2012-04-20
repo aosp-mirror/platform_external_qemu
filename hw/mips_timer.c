@@ -103,7 +103,7 @@ static void mips_timer_cb (void *opaque)
 
 void cpu_mips_clock_init (CPUState *env)
 {
-    env->timer = qemu_new_timer(vm_clock, &mips_timer_cb, env);
+    env->timer = qemu_new_timer_ns(vm_clock, &mips_timer_cb, env);
     env->CP0_Compare = 0;
     cpu_mips_store_count(env, 1);
 }
