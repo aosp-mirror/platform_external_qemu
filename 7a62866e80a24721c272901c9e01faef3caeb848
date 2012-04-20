@@ -16,6 +16,24 @@
       "revId": "7a62866e80a24721c272901c9e01faef3caeb848",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAE2H///5E\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1005760
+      },
+      "writtenOn": "2012-04-20T06:27:43Z",
+      "side": 1,
+      "message": "Yes. If I remember correctly around 140mb was the limit I was hitting, so 200 should be plenty.",
+      "parentUuid": "AAAE33////o\u003d",
+      "revId": "7a62866e80a24721c272901c9e01faef3caeb848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
