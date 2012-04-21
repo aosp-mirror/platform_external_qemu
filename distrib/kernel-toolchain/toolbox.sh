@@ -11,7 +11,7 @@
 
 # REAL_CROSS_COMPILE must be defined, and its value must be one of the
 # CROSS_COMPILE values that are supported by the Kernel build system
-# (e.g. "i686-android-linux-")
+# (e.g. "i686-linux-android-")
 #
 if [ -z "$REAL_CROSS_COMPILE" ]; then
     echo "ERROR: The REAL_CROSS_COMPILE environment variable should be defined!"
