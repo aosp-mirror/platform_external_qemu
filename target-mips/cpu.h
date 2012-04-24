@@ -500,6 +500,16 @@ static inline int cpu_mmu_index (CPUState *env)
     return env->hflags & MIPS_HFLAG_KSU;
 }
 
+static inline int is_cpu_user (CPUState *env)
+{
+#ifdef CONFIG_USER_ONLY
+    return 1;
+#else
+    return ((env->CP0_Status &
+	     ((3 << CP0St_KSU) | (1 << CP0St_ERL) | (1 << CP0St_EXL))) == (3 << CP0St_KSU));
+#endif  // CONFIG_USER_ONLY
+}
+
 static inline void cpu_clone_regs(CPUState *env, target_ulong newsp)
 {
     if (newsp)
