@@ -46,6 +46,7 @@ int  android_gles_fast_pipes = 1;
   DYNLINK_FUNC(initLibrary) \
   DYNLINK_FUNC(setStreamMode) \
   DYNLINK_FUNC(initOpenGLRenderer) \
+  DYNLINK_FUNC(getHardwareStrings) \
   DYNLINK_FUNC(createOpenGLSubwindow) \
   DYNLINK_FUNC(destroyOpenGLSubwindow) \
   DYNLINK_FUNC(repaintOpenGLDisplay) \
@@ -149,6 +150,62 @@ android_startOpenglesRenderer(int width, int height, OnPostFunc onPost, void* on
         return -1;
     }
     return 0;
+}
+
+static void strncpy_safe(char* dst, const char* src, size_t n)
+{
+    strncpy(dst, src, n);
+    dst[n-1] = '\0';
+}
+
+static void extractBaseString(char* dst, const char* src, size_t dstSize)
+{
+    size_t len = strlen(src);
+    const char* begin = strchr(src, '(');
+    const char* end = strrchr(src, ')');
+
+    if (!begin || !end) {
+        strncpy_safe(dst, src, dstSize);
+        return;
+    }
+    begin += 1;
+
+    // "foo (bar)"
+    //       ^  ^
+    //       b  e
+    //     = 5  8
+    // substring with NUL-terminator is end-begin+1 bytes
+    if (end - begin + 1 > dstSize) {
+        end = begin + dstSize - 1;
+    }
+
+    strncpy_safe(dst, begin, end - begin + 1);
+}
+
+void
+android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
+                                   char* renderer, size_t rendererBufSize,
+                                   char* version, size_t versionBufSize)
+{
+    const char *vendorSrc, *rendererSrc, *versionSrc;
+
+    getHardwareStrings(&vendorSrc, &rendererSrc, &versionSrc);
+    if (!vendorSrc) vendorSrc = "";
+    if (!rendererSrc) rendererSrc = "";
+    if (!versionSrc) versionSrc = "";
+
+    /* Special case for the default ES to GL translators: extract the strings
+     * of the underlying OpenGL implementation. */
+    if (strncmp(vendorSrc, "Google", 6) == 0 &&
+            strncmp(rendererSrc, "Android Emulator OpenGL ES Translator", 37) == 0) {
+        extractBaseString(vendor, vendorSrc, vendorBufSize);
+        extractBaseString(renderer, rendererSrc, rendererBufSize);
+        extractBaseString(version, versionSrc, versionBufSize);
+    } else {
+        strncpy_safe(vendor, vendorSrc, vendorBufSize);
+        strncpy_safe(renderer, rendererSrc, rendererBufSize);
+        strncpy_safe(version, versionSrc, versionBufSize);
+    }
 }
 
 void

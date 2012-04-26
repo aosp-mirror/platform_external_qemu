@@ -33,6 +33,18 @@ int android_initOpenglesEmulation(void);
 int android_startOpenglesRenderer(int width, int height,
                                   OnPostFunc onPost, void* onPostContext);
 
+/* Retrieve the Vendor/Renderer/Version strings describing the underlying GL
+ * implementation. The call only works while the renderer is started.
+ *
+ * Each string is copied into the corresponding buffer. If the original string
+ * (including NUL terminator) is more than xxBufSize bytes, it will be
+ * truncated. In all cases, including failure, the buffer will be NUL-
+ * terminated when this function returns.
+ */
+void android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
+                                        char* renderer, size_t rendererBufSize,
+                                        char* version, size_t versionBufSize);
+
 int android_showOpenglesWindow(void* window, int x, int y, int width, int height, float rotation);
 
 int android_hideOpenglesWindow(void);

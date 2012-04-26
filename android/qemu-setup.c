@@ -47,6 +47,11 @@ char* op_http_proxy = NULL;
 /* Base port for the emulated system. */
 int    android_base_port;
 
+/* Strings describing the host system's OpenGL implementation */
+char android_gl_vendor[ANDROID_GLSTRING_BUF_SIZE];
+char android_gl_renderer[ANDROID_GLSTRING_BUF_SIZE];
+char android_gl_version[ANDROID_GLSTRING_BUF_SIZE];
+
 /*** APPLICATION DIRECTORY
  *** Where are we ?
  ***/
@@ -483,6 +488,14 @@ void  android_emulation_setup( void )
         char         tmp[PATH_MAX];
         const char*  appdir = get_app_dir();
 
+        const size_t ARGSLEN =
+                PATH_MAX +                    // max ping program path
+                10 +                          // max VERSION_STRING length
+                3*ANDROID_GLSTRING_BUF_SIZE + // max GL string lengths
+                29 +                          // static args characters
+                1;                            // NUL terminator
+        char args[ARGSLEN];
+
         if (snprintf( tmp, PATH_MAX, "%s%s%s", appdir, PATH_SEP,
                       _ANDROID_PING_PROGRAM ) >= PATH_MAX) {
             dprint( "Application directory too long: %s", appdir);
@@ -507,10 +520,12 @@ void  android_emulation_setup( void )
             if (!comspec) comspec = "cmd.exe";
 
             // Run
-            char args[PATH_MAX + 30];
-            if (snprintf( args, PATH_MAX, "/C \"%s\" ping emulator " VERSION_STRING,
-                          tmp) >= PATH_MAX ) {
-                D( "DDMS path too long: %s", tmp);
+            if (snprintf(args, ARGSLEN,
+                    "/C \"%s\" ping emulator " VERSION_STRING " \"%s\" \"%s\" \"%s\"",
+                    tmp, android_gl_vendor, android_gl_renderer, android_gl_version)
+                >= ARGSLEN)
+            {
+                D( "DDMS command line too long: %s", args);
                 return;
             }
 
@@ -540,13 +555,17 @@ void  android_emulation_setup( void )
                     int  fd = open("/dev/null", O_WRONLY);
                     dup2(fd, 1);
                     dup2(fd, 2);
-                    execl( tmp, _ANDROID_PING_PROGRAM, "ping", "emulator", VERSION_STRING, NULL );
+                    execl( tmp, _ANDROID_PING_PROGRAM, "ping", "emulator", VERSION_STRING,
+                            android_gl_vendor, android_gl_renderer, android_gl_version,
+                            NULL );
                 }
             END_NOSIGALRM
 
             /* don't do anything in the parent or in case of error */
-            strncat( tmp, " ping emulator " VERSION_STRING, PATH_MAX - strlen(tmp) );
-            D( "ping command: %s", tmp );
+            snprintf(args, ARGSLEN,
+                    "%s ping emulator " VERSION_STRING " \"%s\" \"%s\" \"%s\"",
+                    tmp, android_gl_vendor, android_gl_renderer, android_gl_version);
+            D( "ping command: %s", args );
 #endif
         }
     }
