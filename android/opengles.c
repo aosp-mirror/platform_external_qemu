@@ -133,7 +133,7 @@ BAD_EXIT:
 }
 
 int
-android_startOpenglesRenderer(int width, int height, OnPostFn onPost, void* onPostContext)
+android_startOpenglesRenderer(int width, int height, OnPostFunc onPost, void* onPostContext)
 {
     if (!rendererLib) {
         D("Can't start OpenGLES renderer without support libraries");
