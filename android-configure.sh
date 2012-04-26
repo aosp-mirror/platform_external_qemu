@@ -240,7 +240,7 @@ if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
         GLES_SUPPORT=yes
         if [ -z "$GLES_INCLUDE" ]; then
             log "GLES       : Probing for headers"
-            GLES_INCLUDE=$ANDROID_TOP/development/tools/emulator/opengl/host/include
+            GLES_INCLUDE=$ANDROID_TOP/sdk/emulator/opengl/host/include
             if [ -d "$GLES_INCLUDE" ]; then
                 log "GLES       : Headers in $GLES_INCLUDE"
             else

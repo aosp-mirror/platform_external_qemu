@@ -10,24 +10,28 @@
 ** GNU General Public License for more details.
 */
 
-#define RENDER_API_NO_PROTOTYPES 1
-
 #include "config-host.h"
 #include "android/opengles.h"
+
+/* Declared in "android/globals.h" */
+int  android_gles_fast_pipes = 1;
+
+#if CONFIG_ANDROID_OPENGLES
+
 #include "android/globals.h"
 #include <android/utils/debug.h>
 #include <android/utils/path.h>
 #include <android/utils/bufprint.h>
 #include <android/utils/dll.h>
+
+#define RENDER_API_NO_PROTOTYPES 1
 #include <libOpenglRender/render_api.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
 #define D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 #define DD(...) VERBOSE_PRINT(gles,__VA_ARGS__)
-
-/* Declared in "android/globals.h" */
-int  android_gles_fast_pipes = 1;
 
 /* Name of the GLES rendering library we're going to use */
 #if HOST_LONG_BITS == 32
@@ -199,3 +203,38 @@ android_gles_unix_path(char* buff, size_t buffsize, int port)
     }
     p = bufprint(p, end, "qemu-gles-%d", port);
 }
+
+#else // CONFIG_ANDROID_OPENGLES
+
+int android_initOpenglesEmulation(void)
+{
+    return -1;
+}
+
+int android_startOpenglesRenderer(int width, int height, OnPostFunc onPost, void* onPostContext)
+{
+    return -1;
+}
+
+void android_stopOpenglesRenderer(void)
+{}
+
+int android_showOpenglesWindow(void* window, int x, int y, int width, int height, float rotation)
+{
+    return -1;
+}
+
+int android_hideOpenglesWindow(void)
+{
+    return -1;
+}
+
+void android_redrawOpenglesWindow(void)
+{}
+
+void android_gles_unix_path(char* buff, size_t buffsize, int port)
+{
+    buff[0] = '\0';
+}
+
+#endif // !CONFIG_ANDROID_OPENGLES

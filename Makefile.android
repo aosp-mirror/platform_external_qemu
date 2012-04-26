@@ -116,6 +116,9 @@ ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     endif
     ccache :=
   endif
+
+  QEMU_OPENGLES_INCLUDE := sdk/emulator/opengl/host/include
+  QEMU_OPENGLES_LIBS := $(HOST_OUT)
 endif
 
 
