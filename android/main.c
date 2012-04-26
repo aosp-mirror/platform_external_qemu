@@ -723,6 +723,18 @@ int main(int argc, char **argv)
         }
     }
 
+    if (hw->disk_cachePartition_path && opts->cache_size) {
+        /* Set cache partition size per user options. */
+        char*  end;
+        long   sizeMB = strtol(opts->cache_size, &end, 0);
+
+        if (sizeMB < 0 || *end != 0) {
+            derror( "-cache-size must be followed by a positive integer" );
+            exit(1);
+        }
+        hw->disk_cachePartition_size = (uint64_t) sizeMB * ONE_MB;
+    }
+
     /** SD CARD PARTITION */
 
     if (!hw->hw_sdCard) {

@@ -585,6 +585,15 @@ help_cache(stralloc_t*  out)
 }
 
 static void
+help_cache_size(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-cache <size>' to specify a /cache partition size in MB. By default,\n"
+    "  the cache partition size is set to 66MB\n\n"
+    );
+}
+
+static void
 help_no_cache(stralloc_t*  out)
 {
     PRINTF(
