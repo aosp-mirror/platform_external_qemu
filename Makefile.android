@@ -129,6 +129,10 @@ ifneq ($(combo_target)$(TARGET_SIMULATOR),HOST_true)
       MY_LDLIBS += -m32
     endif
   endif
+
+  ifneq ($(BUILD_HOST_static),)
+    MY_LDLIBS += -static
+  endif
 endif
 
 # Enable warning, except those related to missing field initializers
