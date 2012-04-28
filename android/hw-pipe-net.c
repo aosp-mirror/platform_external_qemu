@@ -194,8 +194,6 @@ netPipe_initFromAddress( void* hwpipe, const SockAddress*  address, Looper* loop
     pipe->state  = STATE_INIT;
 
     {
-        AsyncStatus  status;
-
         int  fd = socket_create( sock_address_get_family(address), SOCKET_STREAM );
         if (fd < 0) {
             D("%s: Could create socket from address family!", __FUNCTION__);
@@ -206,18 +204,6 @@ netPipe_initFromAddress( void* hwpipe, const SockAddress*  address, Looper* loop
         loopIo_init(pipe->io, looper, fd, netPipe_io_func, pipe);
         asyncConnector_init(pipe->connector, address, pipe->io);
         pipe->state = STATE_CONNECTING;
-
-        status = asyncConnector_run(pipe->connector);
-        if (status == ASYNC_ERROR) {
-            D("%s: Could not connect to socket: %s",
-              __FUNCTION__, errno_str);
-            netPipe_free(pipe);
-            return NULL;
-        }
-        if (status == ASYNC_COMPLETE) {
-            pipe->state = STATE_CONNECTED;
-            netPipe_resetState(pipe);
-        }
     }
 
     return pipe;
@@ -234,6 +220,15 @@ netPipe_closeFromGuest( void* opaque )
     netPipe_free(pipe);
 }
 
+static int netPipeReadySend(NetPipe *pipe)
+{
+    if (pipe->state == STATE_CONNECTED)
+        return 0;
+    else if (pipe->state == STATE_CONNECTING)
+        return PIPE_ERROR_AGAIN;
+    else
+        return PIPE_ERROR_IO;
+}
 
 static int
 netPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
@@ -244,6 +239,10 @@ netPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuf
     int       buffStart = 0;
     const GoldfishPipeBuffer* buff = buffers;
     const GoldfishPipeBuffer* buffEnd = buff + numBuffers;
+
+    ret = netPipeReadySend(pipe);
+    if (ret != 0)
+        return ret;
 
     for (; buff < buffEnd; buff++)
         count += buff->size;
