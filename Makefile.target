@@ -326,7 +326,7 @@ endif
 # Generate a completely static executable if needed.
 # Note that this means no sound and graphics on Linux.
 #
-ifeq ($(CONFIG_STATIC_EXECUTABLE),true)
+ifneq ($(strip $(CONFIG_STATIC_EXECUTABLE)$(BUILD_HOST_static)),)
     LOCAL_SRC_FILES += dynlink-static.c
     LOCAL_LDLIBS    += -static
 endif
@@ -412,7 +412,7 @@ common_LOCAL_SRC_FILES += $(SDLMAIN_SOURCES)
 # Generate a completely static executable if needed.
 # Note that this means no sound and graphics on Linux.
 #
-ifeq ($(CONFIG_STATIC_EXECUTABLE),true)
+ifneq ($(strip $(CONFIG_STATIC_EXECUTABLE)$(BUILD_HOST_static)),)
     common_LOCAL_SRC_FILES += dynlink-static.c
     common_LOCAL_LDLIBS    += -static
 endif
