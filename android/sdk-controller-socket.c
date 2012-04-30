@@ -271,12 +271,12 @@ typedef struct SDKCtlMessageHeader {
  * All messages, sent and received via SDK controller socket begin with this
  * header, with message data immediately following this header.
  */
-typedef struct SDKCtlMessage {
+struct SDKCtlMessage {
     /* Data packet descriptor for this message. */
     SDKCtlPacket  packet;
     /* Message type. */
     int           msg_type;
-} SDKCtlMessage;
+};
 
 /********************************************************************************
  *                      SDK Control Socket declarations

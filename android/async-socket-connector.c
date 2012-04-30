@@ -312,11 +312,15 @@ async_socket_connector_new(const SockAddress* address,
     connector->ref_count = 1;
 
     /* Copy socket address. */
+#ifdef _WIN32
+    connector->address = *address;
+#else
     if (sock_address_get_family(address) == SOCKET_UNIX) {
         sock_address_init_unix(&connector->address, sock_address_get_path(address));
     } else {
         connector->address = *address;
     }
+#endif
 
     /* Create a looper for asynchronous I/O. */
     if (looper == NULL) {
