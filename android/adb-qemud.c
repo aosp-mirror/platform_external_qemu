@@ -33,7 +33,8 @@
 
 #define SERVICE_NAME        "adb"
 #define DEBUG_SERVICE_NAME  "adb-debug"
-
+/* Maximum length of the message that can be received from the guest. */
+#define ADB_MAX_MSG_LEN     8
 /* Enumerates ADB client state values. */
 typedef enum AdbClientState {
     /* Waiting on a connection from ADB host. */
@@ -58,6 +59,10 @@ struct AdbClient {
     QemudClient*    qemud_client;
     /* Connection state. */
     AdbClientState  state;
+    /* Buffer, collecting accept / stop messages from client. */
+    char            msg_buffer[ADB_MAX_MSG_LEN];
+    /* Current position in message buffer. */
+    int             msg_cur;
 };
 
 /* ADB debugging client descriptor. */
@@ -183,17 +188,36 @@ _adb_client_recv(void* opaque, uint8_t* msg, int msglen, QemudClient* client)
     D("ADB client %p(o=%p) received from guest %d bytes in %s",
       adb_client, adb_client->opaque, msglen, QB(msg, msglen));
 
+    if (adb_client->state == ADBC_STATE_CONNECTED) {
+        /* Connection is fully established. Dispatch the message to the host. */
+        adb_server_on_guest_message(adb_client->opaque, msg, msglen);
+        return;
+    }
+
+    /*
+     * At this point we expect either "accept", or "start" messages. Depending
+     * on the state of the pipe (although small) these messages could be broken
+     * into pieces. So, simply checking msg for "accept", or "start" may not
+     * work. Lets collect them first in internal buffer, and then will see.
+     */
+
+    /* Make sure tha message doesn't overflow the buffer. */
+    if ((msglen + adb_client->msg_cur) > sizeof(adb_client->msg_buffer)) {
+        D("Unexpected message in ADB client.");
+        adb_client->msg_cur = 0;
+        return;
+    }
+    /* Append to current message. */
+    memcpy(adb_client->msg_buffer + adb_client->msg_cur, msg, msglen);
+    adb_client->msg_cur += msglen;
+
     /* Properly dispatch the message, depending on the client state. */
     switch (adb_client->state) {
-        case ADBC_STATE_CONNECTED:
-            /* Connection is fully established. Dispatch the message to the
-             * host. */
-            adb_server_on_guest_message(adb_client->opaque, msg, msglen);
-            break;
-
         case ADBC_STATE_WAIT_ON_HOST:
             /* At this state the only message that is allowed is 'accept' */
-            if (msglen == 6 && !memcmp(msg, "accept", 6)) {
+            if (adb_client->msg_cur == 6 &&
+                !memcmp(adb_client->msg_buffer, "accept", 6)) {
+                adb_client->msg_cur = 0;
                 /* Register ADB guest connection with the ADB server. */
                 adb_client->opaque =
                     adb_server_register_guest(adb_client, &_adb_client_routines);
@@ -210,7 +234,9 @@ _adb_client_recv(void* opaque, uint8_t* msg, int msglen, QemudClient* client)
 
         case ADBC_STATE_HOST_CONNECTED:
             /* At this state the only message that is allowed is 'start' */
-            if (msglen == 5 && !memcmp(msg, "start", 5)) {
+            if (adb_client->msg_cur &&
+                !memcmp(adb_client->msg_buffer, "start", 5)) {
+                adb_client->msg_cur = 0;
                 adb_client->state = ADBC_STATE_CONNECTED;
                 adb_server_complete_connection(adb_client->opaque);
             } else {
