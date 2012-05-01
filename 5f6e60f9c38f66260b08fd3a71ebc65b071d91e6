@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAFLn////8\u003d",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1006404
+      },
+      "writtenOn": "2012-05-01T00:53:28Z",
+      "side": 1,
+      "message": "Thanks. Will do it this way. Also bit curios, why it my testing in  Mac system, which should setup the connection in asyncConnector_init.",
+      "parentUuid": "AAAFJX///+E\u003d",
+      "revId": "5f6e60f9c38f66260b08fd3a71ebc65b071d91e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAFHH///6Y\u003d",
         "filename": "android/hw-pipe-net.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-04-30T14:40:15Z",
       "side": 1,
       "message": "Also check pipe-\u003ehwpipe for NULL, and return PIPE_ERROR_INVAL, indicating that pipe has been closed.",
+      "revId": "5f6e60f9c38f66260b08fd3a71ebc65b071d91e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAFLn////4\u003d",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1006404
+      },
+      "writtenOn": "2012-05-01T00:53:28Z",
+      "side": 1,
+      "message": "ok, will do it.",
+      "parentUuid": "AAAFHH///6Y\u003d",
       "revId": "5f6e60f9c38f66260b08fd3a71ebc65b071d91e6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
