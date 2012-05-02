@@ -78,8 +78,12 @@ path_parent( const char*  path, int  levels )
         while (base > path && !ispathsep(base[-1]))
             base--;
 
-        if (base <= path) /* we can't go that far */
+        if (base <= path) {
+            if (end == base+1 && base[0] == '.' && levels == 1)
+                return strdup("..");
+          /* we can't go that far */
             return NULL;
+        }
 
         if (end == base+1 && base[0] == '.')
             goto Next;
