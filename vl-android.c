@@ -2271,7 +2271,7 @@ char *qemu_find_file(int type, const char *name)
             buf = qemu_find_file_with_subdir(data_dir, "../usr/share/pc-bios/", name);
         /* Finally, try this for standalone builds under external/qemu */
         if (buf == NULL)
-            buf = qemu_find_file_with_subdir(data_dir, "../../../prebuilt/common/pc-bios/", name);
+            buf = qemu_find_file_with_subdir(data_dir, "../../../prebuilts/qemu-kernel/x86/pc-bios/", name);
     }
 #endif
     return buf;
