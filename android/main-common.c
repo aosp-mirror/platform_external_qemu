@@ -232,7 +232,7 @@ sdl_set_window_icon( void )
 
         SDL_GetWMInfo(&wminfo);
 
-        SetClassLong( wminfo.window, GCL_HICON, (LONG)icon );
+        SetClassLongPtr( wminfo.window, GCLP_HICON, (LONG)icon );
 #else  /* !_WIN32 */
         unsigned              icon_w, icon_h;
         size_t                icon_bytes;
