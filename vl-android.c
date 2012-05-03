@@ -3867,29 +3867,40 @@ int main(int argc, char **argv, char **envp)
         nand_add_dev(tmp);
     }
 
-    /* qemu.gles will be read by the OpenGLES emulation libraries.
-    * If set to 0, the software GLES renderer will be used as a fallback.
-    * If the parameter is undefined, this means the system image runs
-    * inside an emulator that doesn't support GPU emulation at all.
-    */
+    /* qemu.gles will be read by the OpenGL ES emulation libraries.
+     * If set to 0, the software GL ES renderer will be used as a fallback.
+     * If the parameter is undefined, this means the system image runs
+     * inside an emulator that doesn't support GPU emulation at all.
+     *
+     * We always start the GL ES renderer so we can gather stats on the
+     * underlying GL implementation. If GL ES acceleration is disabled,
+     * we just shut it down again once we have the strings. */
     {
-        int  gles_emul = 0;
+        int qemu_gles = 0;
 
-        if (android_hw->hw_gpu_enabled) {
-            /* Set framebuffer change notification callback when starting
-             * GLES emulation. Currently only multi-touch emulation is
-             * interested in FB changes (to transmit them to the device), so
-             * the callback is set within MT emulation.*/
-            if (android_initOpenglesEmulation() == 0 &&
-                android_startOpenglesRenderer(android_hw->hw_lcd_width,
-                    android_hw->hw_lcd_height,
-                    multitouch_opengles_fb_update, NULL) == 0) {
-                gles_emul = 1;
+        /* Set framebuffer change notification callback when starting
+         * GLES emulation. Currently only multi-touch emulation is
+         * interested in FB changes (to transmit them to the device), so
+         * the callback is set within MT emulation. */
+        if (android_initOpenglesEmulation() == 0 &&
+            android_startOpenglesRenderer(android_hw->hw_lcd_width,
+                android_hw->hw_lcd_height,
+                multitouch_opengles_fb_update, NULL) == 0)
+        {
+            android_getOpenglesHardwareStrings(
+                    android_gl_vendor, sizeof(android_gl_vendor),
+                    android_gl_renderer, sizeof(android_gl_renderer),
+                    android_gl_version, sizeof(android_gl_version));
+            if (android_hw->hw_gpu_enabled) {
+                qemu_gles = 1;
             } else {
-                dwarning("Could not initialize OpenglES emulation, using software renderer.");
+                android_stopOpenglesRenderer();
+                qemu_gles = 0;
             }
+        } else {
+            dwarning("Could not initialize OpenglES emulation, using software renderer.");
         }
-        if (gles_emul) {
+        if (qemu_gles) {
             stralloc_add_str(kernel_params, " qemu.gles=1");
         } else {
             stralloc_add_str(kernel_params, " qemu.gles=0");
