@@ -219,6 +219,31 @@ endif
 
 include $(LOCAL_PATH)/Makefile.common
 
+ifeq ($(HOST_OS),windows)
+  # on Windows, link the icon file as well into the executable
+  # unfortunately, our build system doesn't help us much, so we need
+  # to use some weird pathnames to make this work...
+
+  # Locate windres executable
+  WINDRES := windres
+  ifneq ($(USE_MINGW),)
+    # When building the Windows emulator under Linux, use the MinGW one
+    WINDRES := i586-mingw32msvc-windres
+  endif
+
+  # Usage: $(eval $(call insert-windows-icon))
+  define insert-windows-icon
+    LOCAL_PREBUILT_OBJ_FILES += images/emulator_icon.o
+  endef
+
+# This seems to be the only way to add an object file that was not generated from
+# a C/C++/Java source file to our build system. and very unfortunately,
+# $(TOPDIR)/$(LOCALPATH) will always be prepended to this value, which forces
+# us to put the object file in the source directory.
+$(LOCAL_PATH)/images/emulator_icon.o: $(LOCAL_PATH)/images/android_icon.rc
+	$(WINDRES) $< -I $(LOCAL_PATH)/images -o $@
+endif
+
 # We want to build all variants of the emulator binaries. This makes
 # it easier to catch target-specific regressions during emulator development.
 EMULATOR_TARGET_ARCH := arm
@@ -237,6 +262,10 @@ $(call start-emulator-program, emulator)
 
 LOCAL_SRC_FILES := android/main-emulator.c
 LOCAL_STATIC_LIBRARIES := emulator-common
+
+ifeq ($(HOST_OS),windows)
+$(eval $(call insert-windows-icon))
+endif
 
 $(call end-emulator-program)
 

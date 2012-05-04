@@ -432,6 +432,11 @@ LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hx-header,qemu-monitor.hx,qemu-monitor.h,monitor.c)
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
 $(call gen-hw-config-defs)
+
+ifeq ($(HOST_OS),windows)
+$(eval $(call insert-windows-icon))
+endif
+
 $(call end-emulator-program)
 
 
@@ -455,3 +460,4 @@ ifeq ($(HOST_OS),linux)
     $(call end-emulator-program)
   endif # BUILD_STANDALONE_EMULATOR == nil
 endif # HOST_OS == linux
+
