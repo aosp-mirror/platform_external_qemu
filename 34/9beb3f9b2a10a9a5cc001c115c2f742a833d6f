@@ -1,0 +1,8 @@
+Change-Id: I349beb3f9b2a10a9a5cc001c115c2f742a833d6f
+Code-Review+2: Jean-Baptiste Queru <jbq@google.com>
+Verified+1: Jean-Baptiste Queru <jbq@google.com>
+Submitted-by: Jean-Baptiste Queru <jbq@google.com>
+Submitted-at: Fri, 04 May 2012 12:19:34 -0700
+Reviewed-on: https://android-review.googlesource.com/33020
+Project: platform/external/qemu
+Branch: refs/heads/master
