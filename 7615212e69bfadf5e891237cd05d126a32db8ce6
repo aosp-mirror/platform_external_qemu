@@ -33,6 +33,24 @@
       "revId": "7615212e69bfadf5e891237cd05d126a32db8ce6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAFPX///7Q\u003d",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 998,
+      "author": {
+        "id": 1010669
+      },
+      "writtenOn": "2012-05-04T18:13:11Z",
+      "side": 1,
+      "message": "Actual limit in Mips Goldfish is 496MB: 512MB kseg0 space - 16MB reserved by lowest memory-mapped registers reserved by Goldfish.",
+      "parentUuid": "AAAFPX///9Q\u003d",
+      "revId": "7615212e69bfadf5e891237cd05d126a32db8ce6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
