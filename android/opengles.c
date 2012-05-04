@@ -12,6 +12,7 @@
 
 #include "config-host.h"
 #include "android/opengles.h"
+#include <assert.h>
 
 /* Declared in "android/globals.h" */
 int  android_gles_fast_pipes = 1;
@@ -271,6 +272,15 @@ int android_initOpenglesEmulation(void)
 int android_startOpenglesRenderer(int width, int height, OnPostFunc onPost, void* onPostContext)
 {
     return -1;
+}
+
+void android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
+                                       char* renderer, size_t rendererBufSize,
+                                       char* version, size_t versionBufSize)
+{
+    assert(vendorBufSize > 0 && rendererBufSize > 0 && versionBufSize > 0);
+    assert(vendor != NULL && renderer != NULL && version != NULL);
+    vendor[0] = renderer[0] = version[0] = 0;
 }
 
 void android_stopOpenglesRenderer(void)
