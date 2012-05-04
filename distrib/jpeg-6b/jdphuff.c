@@ -82,6 +82,10 @@ METHODDEF(boolean) decode_mcu_DC_refine JPP((j_decompress_ptr cinfo,
 					     JBLOCKROW *MCU_data));
 METHODDEF(boolean) decode_mcu_AC_refine JPP((j_decompress_ptr cinfo,
 					     JBLOCKROW *MCU_data));
+GLOBAL(void) jpeg_configure_huffman_decoder_progressive(
+		j_decompress_ptr cinfo, huffman_offset_data offset);
+GLOBAL(void) jpeg_get_huffman_decoder_configuration_progressive(
+	        j_decompress_ptr cinfo, huffman_offset_data *offset);
 
 /*
  * Initialize for a Huffman-compressed scan.
