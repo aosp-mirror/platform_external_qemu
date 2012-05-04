@@ -51,6 +51,23 @@
       "revId": "7615212e69bfadf5e891237cd05d126a32db8ce6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAFPX///7A\u003d",
+        "filename": "hw/android_mips.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1010669
+      },
+      "writtenOn": "2012-05-04T18:18:35Z",
+      "side": 1,
+      "message": "Recommended place to check Mips Goldfish ram size limit, to handle both Avd and explicit command line sizes:\n\n\n#define GOLDFISH_IO_SPACE  0x1f000000\n    if (ram_size \u003e GOLDFISH_IO_SPACE)\n        ram_size \u003d GOLDFISH_IO_SPACE;   /* avoid overlap of ram and IO regs */",
+      "revId": "7615212e69bfadf5e891237cd05d126a32db8ce6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
