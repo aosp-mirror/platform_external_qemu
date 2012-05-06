@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAFT3///2M\u003d",
+        "filename": "hw/i8259.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1000660
+      },
+      "writtenOn": "2012-05-06T16:20:57Z",
+      "side": 1,
+      "message": "Brace on same line as if.",
+      "revId": "4c03d073b5842e7a08328f7cbfa2e88a934c3a55",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAFUH///mI\u003d",
+        "filename": "hw/ioapic.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1000660
+      },
+      "writtenOn": "2012-05-06T16:20:57Z",
+      "side": 1,
+      "message": "It looks like the local code style is common Android style, with opening braces on the same line as the matching conditionals.",
+      "revId": "4c03d073b5842e7a08328f7cbfa2e88a934c3a55",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAFUX///4A\u003d",
+        "filename": "hw/ioapic.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1000660
+      },
+      "writtenOn": "2012-05-06T16:20:57Z",
+      "side": 1,
+      "message": "} else {",
+      "revId": "4c03d073b5842e7a08328f7cbfa2e88a934c3a55",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
