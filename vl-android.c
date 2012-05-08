@@ -3882,10 +3882,15 @@ int main(int argc, char **argv, char **envp)
          * GLES emulation. Currently only multi-touch emulation is
          * interested in FB changes (to transmit them to the device), so
          * the callback is set within MT emulation. */
+        OnPostFunc onPost = NULL;
+        if (androidHwConfig_isScreenMultiTouch(android_hw)) {
+            onPost = multitouch_opengles_fb_update;
+        }
+
         if (android_initOpenglesEmulation() == 0 &&
             android_startOpenglesRenderer(android_hw->hw_lcd_width,
                 android_hw->hw_lcd_height,
-                multitouch_opengles_fb_update, NULL) == 0)
+                onPost, NULL) == 0)
         {
             android_getOpenglesHardwareStrings(
                     android_gl_vendor, sizeof(android_gl_vendor),
