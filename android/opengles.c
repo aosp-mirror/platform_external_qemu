@@ -60,6 +60,7 @@ extern int android_init_opengles_pipes(void);
 #endif
 
 static ADynamicLibrary*  rendererLib;
+static int               rendererStarted;
 
 /* Define the function pointers */
 #define DYNLINK_FUNC(name) \
@@ -147,10 +148,16 @@ android_startOpenglesRenderer(int width, int height)
         return -1;
     }
 
+    if (rendererStarted) {
+        return 0;
+    }
+
     if (!initOpenGLRenderer(width, height, ANDROID_OPENGLES_BASE_PORT)) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }
+
+    rendererStarted = 1;
     return 0;
 }
 
@@ -199,6 +206,15 @@ android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
 {
     const char *vendorSrc, *rendererSrc, *versionSrc;
 
+    assert(vendorBufSize > 0 && rendererBufSize > 0 && versionBufSize > 0);
+    assert(vendor != NULL && renderer != NULL && version != NULL);
+
+    if (!rendererStarted) {
+        D("Can't get OpenGL ES hardware strings when renderer not started");
+        vendor[0] = renderer[0] = version = '\0';
+        return;
+    }
+
     getHardwareStrings(&vendorSrc, &rendererSrc, &versionSrc);
     if (!vendorSrc) vendorSrc = "";
     if (!rendererSrc) rendererSrc = "";
@@ -221,15 +237,16 @@ android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
 void
 android_stopOpenglesRenderer(void)
 {
-    if (rendererLib) {
+    if (rendererStarted) {
         stopOpenGLRenderer();
+        rendererStarted = 0;
     }
 }
 
 int
 android_showOpenglesWindow(void* window, int x, int y, int width, int height, float rotation)
 {
-    if (rendererLib) {
+    if (rendererStarted) {
         int success = createOpenGLSubwindow((FBNativeWindowType)window, x, y, width, height, rotation);
         return success ? 0 : -1;
     } else {
@@ -240,7 +257,7 @@ android_showOpenglesWindow(void* window, int x, int y, int width, int height, fl
 int
 android_hideOpenglesWindow(void)
 {
-    if (rendererLib) {
+    if (rendererStarted) {
         int success = destroyOpenGLSubwindow();
         return success ? 0 : -1;
     } else {
@@ -251,7 +268,7 @@ android_hideOpenglesWindow(void)
 void
 android_redrawOpenglesWindow(void)
 {
-    if (rendererLib) {
+    if (rendererStarted) {
         repaintOpenGLDisplay();
     }
 }
