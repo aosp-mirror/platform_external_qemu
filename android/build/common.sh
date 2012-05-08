@@ -499,10 +499,10 @@ locate_android_prebuilt ()
 {
     # locate prebuilt directory
     ANDROID_PREBUILT_HOST_TAG=$OS
-    ANDROID_PREBUILT=$ANDROID_TOP/prebuilt/$ANDROID_PREBUILT_HOST_TAG
-    ANDROID_PREBUILTS=$ANDROID_TOP/prebuilts/misc/$ANDROID_PREBUILT_HOST_TAG
+    ANDROID_PREBUILT=$ANDROID_TOP/prebuilt/$ANDROID_PREBUILT_HOST_TAG  # AOSP still has it
+    ANDROID_PREBUILTS=$ANDROID_TOP/prebuilts/misc/$ANDROID_PREBUILT_HOST_TAG # AOSP does't have it yet
     if [ ! -d $ANDROID_PREBUILT ] ; then
-        # this can happen when building on x86_64
+        # this can happen when building on x86_64, or in AOSP
         case $OS in
             linux-x86_64)
                 ANDROID_PREBUILT_HOST_TAG=linux-x86
@@ -511,9 +511,8 @@ locate_android_prebuilt ()
             *)
         esac
         if [ ! -d $ANDROID_PREBUILT ] ; then
-            echo "Can't find the prebuilt directory $ANDROID_PREBUILT in Android build"
-            exit 1
-        fi
+	    ANDROID_PREBUILT=
+	fi
     fi
     if [ ! -d $ANDROID_PREBUILTS ] ; then
         # this can happen when building on x86_64
@@ -525,9 +524,8 @@ locate_android_prebuilt ()
             *)
         esac
         if [ ! -d $ANDROID_PREBUILTS ] ; then
-            echo "Can't find the prebuilts directory $ANDROID_PREBUILTS in Android build"
-            exit 1
-        fi
+	    ANDROID_PREBUILTS=
+	fi
     fi
     log "Prebuilt   : ANDROID_PREBUILT=$ANDROID_PREBUILT"
     log "Prebuilts  : ANDROID_PREBUILTS=$ANDROID_PREBUILTS"

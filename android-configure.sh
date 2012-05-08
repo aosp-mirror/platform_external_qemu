@@ -196,14 +196,8 @@ if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
     # use ccache if USE_CCACHE is defined and the corresponding
     # binary is available.
     #
-    # note: located in PREBUILT/ccache/ccache in the new tree layout
-    #       located in PREBUILT/ccache in the old one
-    #
     if [ -n "$USE_CCACHE" ] ; then
         CCACHE="$ANDROID_PREBUILT/ccache/ccache$EXE"
-        if [ ! -f $CCACHE ] ; then
-            CCACHE="$ANDROID_PREBUILT/ccache$EXE"
-        fi
         if [ ! -f $CCACHE ] ; then
             CCACHE="$ANDROID_PREBUILTS/ccache/ccache$EXE"
         fi
