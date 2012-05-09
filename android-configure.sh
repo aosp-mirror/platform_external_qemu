@@ -22,7 +22,6 @@ OPTION_IGNORE_AUDIO=no
 OPTION_NO_PREBUILTS=no
 OPTION_TRY_64=no
 OPTION_HELP=no
-OPTION_DEBUG=no
 OPTION_STATIC=no
 OPTION_MINGW=no
 
@@ -59,8 +58,6 @@ for opt do
   --cc=*) OPTION_CC="$optarg"
   ;;
   --no-strip) OPTION_NO_STRIP=yes
-  ;;
-  --debug) OPTION_DEBUG=yes
   ;;
   --ignore-audio) OPTION_IGNORE_AUDIO=yes
   ;;
@@ -539,6 +536,10 @@ fi
 
 if [ $TARGET_ARCH = x86 ] ; then
 echo "TARGET_ARCH       := x86" >> $config_mk
+fi
+
+if [ $TARGET_ARCH = mips ] ; then
+echo "TARGET_ARCH       := mips" >> $config_mk
 fi
 
 echo "HOST_PREBUILT_TAG := $TARGET_OS" >> $config_mk
