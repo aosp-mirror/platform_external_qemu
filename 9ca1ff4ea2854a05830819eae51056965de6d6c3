@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAFX3///no\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3889,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2012-05-10T18:18:05Z",
+      "side": 1,
+      "message": "You don\u0027t really need to do this. Multi-touch port will take care of this when MT-emulation get activated. Just remove that block.",
+      "revId": "9ca1ff4ea2854a05830819eae51056965de6d6c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
