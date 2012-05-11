@@ -283,6 +283,11 @@ int android_startOpenglesRenderer(int width, int height)
     return -1;
 }
 
+void
+android_setPostCallback(OnPostFunc onPost, void* onPostContext)
+{
+}
+
 void android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
                                        char* renderer, size_t rendererBufSize,
                                        char* version, size_t versionBufSize)

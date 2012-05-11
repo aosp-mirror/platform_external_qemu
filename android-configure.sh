@@ -255,6 +255,32 @@ if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
             fi
         fi
     fi
+else
+    if [ "$GLES_PROBE" = "yes" ]; then
+        GLES_SUPPORT=yes
+        if [ -z "$GLES_INCLUDE" ]; then
+            log "GLES       : Probing for headers"
+            GLES_INCLUDE=../../sdk/emulator/opengl/host/include
+            if [ -d "$GLES_INCLUDE" ]; then
+                log "GLES       : Headers in $GLES_INCLUDE"
+            else
+                echo "Warning: Could not find OpenGLES emulation include dir: $GLES_INCLUDE"
+                echo "Disabling GLES emulation from this build!"
+                GLES_SUPPORT=no
+            fi
+        fi
+        if [ -z "$GLES_LIBS" ]; then
+            log "GLES       : Probing for host libraries"
+            GLES_LIBS=../../out/host/$OS/lib
+            if [ -d "$GLES_LIBS" ]; then
+                echo "GLES       : Libs in $GLES_LIBS"
+            else
+                echo "Warning: Could nof find OpenGLES emulation libraries in: $GLES_LIBS"
+                echo "Disabling GLES emulation from this build!"
+                GLES_SUPPORT=no
+            fi
+        fi
+    fi
 fi  # IN_ANDROID_BUILD = no
 
 if [ "$GLES_SUPPORT" = "yes" ]; then
