@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAFYH///cE\u003d",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1010672
+      },
+      "writtenOn": "2012-05-11T16:08:53Z",
+      "side": 1,
+      "message": "Do we support this build configuration on Mac?",
+      "revId": "0b6b2c59d609fff7764d5f5169bc3ba4b65aeb91",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
