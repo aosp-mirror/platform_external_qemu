@@ -22,6 +22,7 @@
 #include "android/sdk-controller-socket.h"
 #include "android/multitouch-port.h"
 #include "android/globals.h"  /* for android_hw */
+#include "android/opengles.h"
 #include "android/utils/misc.h"
 #include "android/utils/jpeg-compress.h"
 #include "android/utils/debug.h"
@@ -247,14 +248,26 @@ _on_multitouch_port_connection(void* opaque,
 
         case SDKCTL_PORT_DISCONNECTED:
             D("Multi-touch: SDK Controller is disconnected");
+            // Disable OpenGLES framebuffer updates.
+            if (android_hw->hw_gpu_enabled) {
+                android_setPostCallback(NULL, NULL);
+            }
             break;
 
         case SDKCTL_PORT_ENABLED:
             D("Multi-touch: SDK Controller port is enabled.");
+            // Enable OpenGLES framebuffer updates.
+            if (android_hw->hw_gpu_enabled) {
+                android_setPostCallback(multitouch_opengles_fb_update, NULL);
+            }
             break;
 
         case SDKCTL_PORT_DISABLED:
             D("Multi-touch: SDK Controller port is disabled.");
+            // Disable OpenGLES framebuffer updates.
+            if (android_hw->hw_gpu_enabled) {
+                android_setPostCallback(NULL, NULL);
+            }
             break;
 
         case SDKCTL_HANDSHAKE_CONNECTED:
