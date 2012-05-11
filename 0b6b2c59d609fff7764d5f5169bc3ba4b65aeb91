@@ -16,6 +16,24 @@
       "revId": "0b6b2c59d609fff7764d5f5169bc3ba4b65aeb91",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAFX3///V4\u003d",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1003763
+      },
+      "writtenOn": "2012-05-11T21:44:23Z",
+      "side": 1,
+      "message": "Sorry, took long time before I could bring my Mac up to date. Please take another look",
+      "parentUuid": "AAAFYH///cE\u003d",
+      "revId": "0b6b2c59d609fff7764d5f5169bc3ba4b65aeb91",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
