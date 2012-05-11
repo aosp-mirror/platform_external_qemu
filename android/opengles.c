@@ -278,7 +278,7 @@ int android_initOpenglesEmulation(void)
     return -1;
 }
 
-int android_startOpenglesRenderer(int width, int height, OnPostFunc onPost, void* onPostContext)
+int android_startOpenglesRenderer(int width, int height)
 {
     return -1;
 }
