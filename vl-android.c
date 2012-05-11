@@ -3877,15 +3877,8 @@ int main(int argc, char **argv, char **envp)
      * we just shut it down again once we have the strings. */
     {
         int qemu_gles = 0;
-
-        /* Set framebuffer change notification callback when starting
-         * GLES emulation. Currently only multi-touch emulation is
-         * interested in FB changes (to transmit them to the device), so
-         * the callback is set within MT emulation. */
         if (android_initOpenglesEmulation() == 0 &&
-            android_startOpenglesRenderer(android_hw->hw_lcd_width,
-                android_hw->hw_lcd_height,
-                multitouch_opengles_fb_update, NULL) == 0)
+            android_startOpenglesRenderer(android_hw->hw_lcd_width, android_hw->hw_lcd_height) == 0)
         {
             android_getOpenglesHardwareStrings(
                     android_gl_vendor, sizeof(android_gl_vendor),
