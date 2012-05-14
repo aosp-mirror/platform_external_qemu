@@ -4046,6 +4046,32 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
+    /* Quite often (especially on older XP machines) attempts to allocate large
+     * VM RAM is going to fail, and crash the emulator. Since it's failing deep
+     * inside QEMU, it's not really possible to provide the user with a
+     * meaningful explanation for the crash. So, lets see if QEMU is going to be
+     * able to allocate requested amount of RAM, and if not, lets try to come up
+     * with a recomendation. */
+    {
+        ram_addr_t r_ram = ram_size;
+        void* alloc_check = malloc(r_ram);
+        while (alloc_check == NULL && r_ram > 1024 * 1024) {
+        /* Make it 25% less */
+            r_ram -= r_ram / 4;
+            alloc_check = malloc(r_ram);
+        }
+        if (alloc_check != NULL) {
+            free(alloc_check);
+        }
+        if (r_ram != ram_size) {
+            /* Requested RAM is too large. Report this, as well as calculated
+             * recomendation. */
+            dwarning("Requested RAM size of %dMB is too large for your environment, and is reduced to %dMB.",
+                     (int)(ram_size / 1024 / 1024), (int)(r_ram / 1024 / 1024));
+            ram_size = r_ram;
+        }
+    }
+
 #ifdef CONFIG_KQEMU
     /* FIXME: This is a nasty hack because kqemu can't cope with dynamic
        guest ram allocation.  It needs to go away.  */
