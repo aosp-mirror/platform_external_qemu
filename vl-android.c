@@ -4274,6 +4274,31 @@ int main(int argc, char **argv, char **envp)
         kernel_parameters = stralloc_cstr(kernel_params);
         VERBOSE_PRINT(init, "Kernel parameters: %s", kernel_parameters);
 
+        /* Quite often (especially on older XP machines) attempts to allocate
+         * large VM RAM is going to fail, and crash the emulator. Since it's
+         * failing deep inside QEMU, it's not really possible to provide the
+         * user with a meaningful explanation for the crash. So, lets see if
+         * QEMU is going to be able to allocate requested amount of RAM, and if
+         * not, lets try to come up with a recomendation. */
+        {
+            ram_addr_t r_ram = ram_size;
+            void* alloc_check = malloc(r_ram);
+            while (alloc_check == NULL && r_ram > 1024 * 1024) {
+                /* Make it 25% less */
+                r_ram -= r_ram / 4;
+                alloc_check = malloc(r_ram);
+            }
+            if (alloc_check != NULL) {
+                free(alloc_check);
+            }
+            if (r_ram != ram_size) {
+                /* Requested RAM is too large. Report this, as well as calculated
+                 * recomendation. */
+                PANIC("Requested RAM size of %dMB is too large for your environment.\n"
+                      "Please reduce it to %dMB, and restart the emulator.",
+                      (int)(ram_size / 1024 / 1024), (int)(r_ram / 1024 / 1024));
+            }
+        }
         machine->init(ram_size,
                       boot_devices,
                       kernel_filename,
