@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAFbX///1Y\u003d",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4297,
+      "author": {
+        "id": 1001414
+      },
+      "writtenOn": "2012-05-14T20:24:15Z",
+      "side": 1,
+      "message": "can we just use that new amount instead (and still display a warning of course)?",
+      "revId": "5ef327e69fade2a372b75c3cea70322016e5c43e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
