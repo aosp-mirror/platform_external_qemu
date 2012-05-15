@@ -252,16 +252,15 @@ _on_fb_sent(void* opaque, SDKCtlDirectPacket* packet, AsyncIOState status)
     if (status == ASIO_STATE_SUCCEEDED) {
         /* Lets see if we have accumulated more changes while transmission has been
          * in progress. */
-        if (mts_state->fb_header.w && mts_state->fb_header.h) {
+        if (mts_state->fb_header.w && mts_state->fb_header.h &&
+            !mts_state->fb_transfer_in_progress) {
+            mts_state->fb_transfer_in_progress = 1;
             /* Send accumulated updates. */
             if (mts_port_send_frame(mts_state->mtsp, &mts_state->fb_header,
                                     mts_state->current_fb, _on_fb_sent, mts_state,
                                     mts_state->ydir)) {
                 mts_state->fb_transfer_in_progress = 0;
             }
-        } else {
-            /* Framebuffer transfer is completed, and no more updates are pending. */
-            mts_state->fb_transfer_in_progress = 0;
         }
     }
 
@@ -376,7 +375,8 @@ multitouch_opengles_fb_update(void* context,
     _mt_fb_common_update(mts_state, 0, 0, w, h);
 }
 
-void multitouch_refresh_screen(void)
+void
+multitouch_refresh_screen(void)
 {
     MTSState* const mts_state = &_MTSState;
 
@@ -389,6 +389,27 @@ void multitouch_refresh_screen(void)
     if (NULL != mts_state->current_fb) {
         _mt_fb_common_update(mts_state, 0, 0, mts_state->fb_header.disp_width,
                              mts_state->fb_header.disp_height);
+    }
+}
+
+void
+multitouch_fb_updated(void)
+{
+    MTSState* const mts_state = &_MTSState;
+
+    /* This concludes framebuffer update. */
+    mts_state->fb_transfer_in_progress = 0;
+
+    /* Lets see if we have accumulated more changes while transmission has been
+     * in progress. */
+    if (mts_state->fb_header.w && mts_state->fb_header.h) {
+        mts_state->fb_transfer_in_progress = 1;
+        /* Send accumulated updates. */
+        if (mts_port_send_frame(mts_state->mtsp, &mts_state->fb_header,
+                                mts_state->current_fb, _on_fb_sent, mts_state,
+                                mts_state->ydir)) {
+            mts_state->fb_transfer_in_progress = 0;
+        }
     }
 }
 
