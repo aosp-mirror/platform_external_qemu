@@ -1,0 +1,8 @@
+Code-Review+2: Xavier Ducrohet <xav@android.com>
+Verified+1: Vladimir Chtchetkine <vchtchetkine@google.com>
+Code-Review+1: Andrew Hsieh <andrewhsieh@google.com>
+Submitted-by: Vladimir Chtchetkine <vchtchetkine@google.com>
+Submitted-at: Tue, 15 May 2012 10:48:08 -0700
+Reviewed-on: https://android-review.googlesource.com/36509
+Project: platform/external/qemu
+Branch: refs/heads/master
