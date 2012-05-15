@@ -87,7 +87,7 @@ typedef struct MTSState {
 } MTSState;
 
 /* Default multi-touch screen descriptor */
-static MTSState _MTSState;
+static MTSState _MTSState = { 0 };
 
 /* Pushes event to the event device. */
 static void
@@ -374,6 +374,22 @@ multitouch_opengles_fb_update(void* context,
 
     /* GLES emulator alwas update the entire framebuffer. */
     _mt_fb_common_update(mts_state, 0, 0, w, h);
+}
+
+void multitouch_refresh_screen(void)
+{
+    MTSState* const mts_state = &_MTSState;
+
+    /* Make sure MT port is initialized. */
+    if (!_is_mt_initialized) {
+        return;
+    }
+
+    /* Lets see if any updates have been received so far. */
+    if (NULL != mts_state->current_fb) {
+        _mt_fb_common_update(mts_state, 0, 0, mts_state->fb_header.disp_width,
+                             mts_state->fb_header.disp_height);
+    }
 }
 
 void
