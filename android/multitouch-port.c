@@ -260,6 +260,8 @@ _on_multitouch_port_connection(void* opaque,
             if (android_hw->hw_gpu_enabled) {
                 android_setPostCallback(multitouch_opengles_fb_update, NULL);
             }
+            /* Refresh (possibly stale) device screen. */
+            multitouch_refresh_screen();
             break;
 
         case SDKCTL_PORT_DISABLED:

@@ -95,4 +95,9 @@ extern void multitouch_opengles_fb_update(void* context,
                                           int type,
                                           unsigned char* pixels);
 
+/* Pushes the entire framebuffer to the device. This will force the device to
+ * refresh the entire screen.
+ */
+extern void multitouch_refresh_screen(void);
+
 #endif  /* ANDROID_MULTITOUCH_SCREEN_H_ */
