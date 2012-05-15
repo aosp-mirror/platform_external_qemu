@@ -100,4 +100,7 @@ extern void multitouch_opengles_fb_update(void* context,
  */
 extern void multitouch_refresh_screen(void);
 
+/* Framebuffer update has been handled by the device. */
+extern void multitouch_fb_updated(void);
+
 #endif  /* ANDROID_MULTITOUCH_SCREEN_H_ */

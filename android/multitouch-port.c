@@ -48,17 +48,21 @@
  */
 
 /* Pointer move message. */
-#define SDKCTL_MT_MOVE          1
+#define SDKCTL_MT_MOVE                  1
 /* First pointer down message. */
-#define SDKCTL_MT_FISRT_DOWN    2
+#define SDKCTL_MT_FISRT_DOWN            2
 /* Last pointer up message. */
-#define SDKCTL_MT_LAST_UP       3
+#define SDKCTL_MT_LAST_UP               3
 /* Pointer down message. */
-#define SDKCTL_MT_POINTER_DOWN  4
+#define SDKCTL_MT_POINTER_DOWN          4
 /* Pointer up message. */
-#define SDKCTL_MT_POINTER_UP    5
+#define SDKCTL_MT_POINTER_UP            5
 /* Sends framebuffer update. */
-#define SDKCTL_MT_FB_UPDATE     6
+#define SDKCTL_MT_FB_UPDATE             6
+/* Framebuffer update has been received. */
+#define SDKCTL_MT_FB_UPDATE_RECEIVED    7
+/* Framebuffer update has been handled. */
+#define SDKCTL_MT_FB_UPDATE_HANDLED     8
 
 /* Multi-touch port descriptor. */
 struct AndroidMTSPort {
@@ -330,6 +334,15 @@ _on_multitouch_message(void* client_opaque,
 
         case SDKCTL_MT_POINTER_UP:
             _on_pup((const AndroidMTPtr*)msg_data);
+            break;
+
+        case SDKCTL_MT_FB_UPDATE_RECEIVED:
+            D("Framebuffer update ACK.");
+            break;
+
+        case SDKCTL_MT_FB_UPDATE_HANDLED:
+            D("Framebuffer update handled.");
+            multitouch_fb_updated();
             break;
 
         default:
