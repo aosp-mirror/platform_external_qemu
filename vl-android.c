@@ -3782,6 +3782,15 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
+    /* Set LCD density (if required by -qemu, and AVD is missing it. */
+    if (android_op_lcd_density && !android_hw->hw_lcd_density) {
+        int density;
+        if (parse_int(android_op_lcd_density, &density) || density <= 0) {
+            PANIC("-lcd-density : %d", density);
+        }
+        hwLcd_setBootProperty(density);
+    }
+
     /* Initialize camera emulation. */
     android_camera_service_init();
 
