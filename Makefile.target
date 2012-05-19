@@ -373,8 +373,6 @@ LOCAL_CFLAGS    += $(HW_OBJ_CFLAGS)
 LOCAL_SRC_FILES += $(BLOCK_SOURCES)
 LOCAL_CFLAGS    += $(BLOCK_CFLAGS)
 
-LOCAL_MODULE_TAGS := debug
-
 $(call end-emulator-program)
 
 ##############################################################################

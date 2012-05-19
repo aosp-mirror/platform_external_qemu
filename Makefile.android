@@ -158,7 +158,6 @@ start-emulator-library = \
     $(eval LOCAL_CFLAGS := $(MY_CFLAGS)) \
     $(eval LOCAL_AR := $(MY_AR)) \
     $(eval LOCAL_LDLIBS := $(MY_LDLIBS)) \
-    $(eval LOCAL_MODULE_TAGS := debug) \
     $(eval LOCAL_MODULE := $1) \
     $(eval LOCAL_MODULE_CLASS := STATIC_LIBRARIES)
 
