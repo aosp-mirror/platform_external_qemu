@@ -134,6 +134,10 @@ else
             CROSSTOOLCHAIN=i686-android-linux-4.4.3
             CROSSPREFIX=i686-android-linux-
             ;;
+        mips)
+            CROSSTOOLCHAIN=mipsel-linux-android-4.4.3
+            CROSSPREFIX=mipsel-linux-android-
+            ;;
         *)
             echo "ERROR: Unsupported architecture!"
             exit 1
@@ -165,7 +169,11 @@ if [ $? != 0 ] ; then
             BUILD_TOP=$(cd $BUILD_TOP && pwd)
         fi
     fi
-    CROSSPREFIX=$BUILD_TOP/prebuilt/$HOST_TAG/toolchain/$CROSSTOOLCHAIN/bin/$CROSSPREFIX
+    if [ "$ARCH" = "mips" ]; then
+        CROSSPREFIX=$BUILD_TOP/prebuilts/gcc/$HOST_TAG/$ARCH/$CROSSTOOLCHAIN/bin/$CROSSPREFIX
+    else
+        CROSSPREFIX=$BUILD_TOP/prebuilt/$HOST_TAG/toolchain/$CROSSTOOLCHAIN/bin/$CROSSPREFIX
+    fi
     if [ "$BUILD_TOP" -a -f ${CROSSPREFIX}gcc ]; then
         echo "Auto-config: --cross=$CROSSPREFIX"
     else
