@@ -131,8 +131,8 @@ else
             CROSSPREFIX=arm-eabi-
             ;;
         x86)
-            CROSSTOOLCHAIN=i686-android-linux-4.4.3
-            CROSSPREFIX=i686-android-linux-
+            CROSSTOOLCHAIN=i686-linux-android-4.6
+            CROSSPREFIX=i686-linux-android-
             ;;
         *)
             echo "ERROR: Unsupported architecture!"
