@@ -134,6 +134,10 @@ else
             CROSSTOOLCHAIN=i686-linux-android-4.6
             CROSSPREFIX=i686-linux-android-
             ;;
+        mips)
+            CROSSTOOLCHAIN=mipsel-linux-android-4.4.3
+            CROSSPREFIX=mipsel-linux-android-
+            ;;
         *)
             echo "ERROR: Unsupported architecture!"
             exit 1
@@ -147,6 +151,9 @@ ZIMAGE=zImage
 case $ARCH in
     x86)
         ZIMAGE=bzImage
+        ;;
+    mips)
+        ZIMAGE=
         ;;
 esac
 
@@ -165,7 +172,11 @@ if [ $? != 0 ] ; then
             BUILD_TOP=$(cd $BUILD_TOP && pwd)
         fi
     fi
-    CROSSPREFIX=$BUILD_TOP/prebuilt/$HOST_TAG/toolchain/$CROSSTOOLCHAIN/bin/$CROSSPREFIX
+    if [ "$ARCH" = "mips" ]; then
+        CROSSPREFIX=$BUILD_TOP/prebuilts/gcc/$HOST_TAG/$ARCH/$CROSSTOOLCHAIN/bin/$CROSSPREFIX
+    else
+        CROSSPREFIX=$BUILD_TOP/prebuilt/$HOST_TAG/toolchain/$CROSSTOOLCHAIN/bin/$CROSSPREFIX
+    fi
     if [ "$BUILD_TOP" -a -f ${CROSSPREFIX}gcc ]; then
         echo "Auto-config: --cross=$CROSSPREFIX"
     else
@@ -225,8 +236,12 @@ case $CONFIG in
         OUTPUT_VMLINUX=vmlinux-$CONFIG
 esac
 
-cp -f arch/$ARCH/boot/$ZIMAGE $OUTPUT/$OUTPUT_KERNEL
 cp -f vmlinux $OUTPUT/$OUTPUT_VMLINUX
+if [ ! -z $ZIMAGE ]; then
+    cp -f arch/$ARCH/boot/$ZIMAGE $OUTPUT/$OUTPUT_KERNEL
+    echo "Kernel $CONFIG prebuilt images ($OUTPUT_KERNEL and $OUTPUT_VMLINUX) copied to $OUTPUT successfully !"
+else
+    echo "Kernel $CONFIG prebuilt image ($OUTPUT_VMLINUX) copied to $OUTPUT successfully !"
+fi
 
-echo "Kernel $CONFIG prebuilt images ($OUTPUT_KERNEL and $OUTPUT_VMLINUX) copied to $OUTPUT successfully !"
 exit 0
