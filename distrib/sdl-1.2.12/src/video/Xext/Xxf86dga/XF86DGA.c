@@ -601,9 +601,9 @@ SDL_NAME(XF86DGAForkApp)(int screen)
 	    XSync(sp->display, False);
 	}
         if (WIFEXITED(status))
-	    _exit(0);
+	    exit(0);
 	else
-	    _exit(-1);
+	    exit(-1);
     }
     return pid;
 }
@@ -652,7 +652,7 @@ XF86cleanup(int sig)
     static char beenhere = 0;
 
     if (beenhere)
-	_exit(3);
+	exit(3);
     beenhere = 1;
 
     for (i = 0; i < numScrs; i++) {
@@ -660,7 +660,7 @@ XF86cleanup(int sig)
 	SDL_NAME(XF86DGADirectVideo)(sp->display, sp->screen, 0);
 	XSync(sp->display, False);
     }
-    _exit(3);
+    exit(3);
 }
 
 Bool
