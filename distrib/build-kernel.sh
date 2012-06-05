@@ -231,9 +231,9 @@ esac
 cp -f vmlinux $OUTPUT/$OUTPUT_VMLINUX
 if [ ! -z $ZIMAGE ]; then
     cp -f arch/$ARCH/boot/$ZIMAGE $OUTPUT/$OUTPUT_KERNEL
-    echo "Kernel $CONFIG prebuilt images ($OUTPUT_KERNEL and $OUTPUT_VMLINUX) copied to $OUTPUT successfully !"
 else
-    echo "Kernel $CONFIG prebuilt image ($OUTPUT_VMLINUX) copied to $OUTPUT successfully !"
+    cp -f vmlinux $OUTPUT/$OUTPUT_KERNEL
 fi
+echo "Kernel $CONFIG prebuilt images ($OUTPUT_KERNEL and $OUTPUT_VMLINUX) copied to $OUTPUT successfully !"
 
 exit 0
