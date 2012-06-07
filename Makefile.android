@@ -72,22 +72,9 @@ endif
 ifeq ($(HOST_OS),darwin)
     MY_CFLAGS += -mdynamic-no-pic -D_DARWIN_C_SOURCE=1
 
-    # When building on Leopard or above, we need to use the 10.4 SDK
-    # or the generated binary will not run on Tiger.
-    DARWIN_VERSION := $(strip $(shell sw_vers -productVersion))
-    ifneq ($(filter 10.1 10.2 10.3 10.1.% 10.2.% 10.3.% 10.4 10.4.%,$(DARWIN_VERSION)),)
-        $(error Building the Android emulator requires OS X 10.5 or above)
-    endif
-    ifneq ($(filter 10.6 10.6.%,$(DARWIN_VERSION)),)
-        # We are on Snow Leopard
-        LEOPARD_SDK := /Developer/SDKs/MacOSX10.5.sdk
-        ifeq ($(strip $(wildcard $(LEOPARD_SDK))),)
-            $(info  Please install the 10.5 SDK on this machine at $(LEOPARD_SDK))
-            $(error Aborting the build.)
-        endif
-        MY_CFLAGS += -isysroot $(LEOPARD_SDK) -mmacosx-version-min=10.5 -DMACOSX_DEPLOYMENT_TARGET=10.5
-        MY_LDLIBS += -isysroot $(LEOPARD_SDK) -Wl,-syslibroot,$(LEOPARD_SDK) -mmacosx-version-min=10.5
-    endif
+    # mac_sdk_root and mac_sdk_version are defined in build/core/combo/HOST_darwin-x86.mk.
+    MY_CFLAGS += -isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version) -DMACOSX_DEPLOYMENT_TARGET=$(mac_sdk_version)
+    MY_LDLIBS += -isysroot $(mac_sdk_root) -Wl,-syslibroot,$(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version) /usr/lib/dylib1.o
 endif
 
 # BUILD_STANDALONE_EMULATOR is only defined when building with
