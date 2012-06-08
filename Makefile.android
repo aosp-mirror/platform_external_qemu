@@ -1,11 +1,15 @@
-ifneq (,$(filter $(TARGET_ARCH),arm x86))
+ifneq (,$(filter $(TARGET_ARCH),arm x86 mips))
 LOCAL_PATH:= $(call my-dir)
 
 # determine the target cpu
 ifeq ($(TARGET_ARCH),arm)
 EMULATOR_TARGET_CPU := target-arm
-else
+endif
+ifeq ($(TARGET_ARCH),x86)
 EMULATOR_TARGET_CPU := target-i386
+endif
+ifeq ($(TARGET_ARCH),mips)
+EMULATOR_TARGET_CPU := target-mips
 endif
 
 # determine the host tag to use
@@ -253,6 +257,9 @@ include $(LOCAL_PATH)/Makefile.target
 EMULATOR_TARGET_ARCH := x86
 include $(LOCAL_PATH)/Makefile.target
 
+EMULATOR_TARGET_ARCH := mips
+include $(LOCAL_PATH)/Makefile.target
+
 ##############################################################################
 ##############################################################################
 ###
@@ -316,4 +323,4 @@ $(call end-emulator-program)
 
 ## VOILA!!
 
-endif  # TARGET_ARCH == arm || TARGET_ARCH == x86
+endif  # TARGET_ARCH == arm || TARGET_ARCH == x86 || TARGET_ARCH == mips
