@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAGhn////0\u003d",
+        "filename": "tcg/tcg.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2034,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2012-06-11T10:28:34Z",
+      "side": 1,
+      "message": "I think it\u0027d be nicer to the unsuspecting developer to explain what the problem is here. I.e. that the an LLVM-based compiler cannot build a working emulator binary, and that they should rebuild it with a gcc-based one instead.",
+      "revId": "21fa3d633959ef5888008226767e304fbb4c382b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
