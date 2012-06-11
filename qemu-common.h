@@ -408,4 +408,20 @@ typedef enum DisplayType
 #define CLAMP_MAC_TIMEOUT(to) ((void)0)
 #endif  // _DARWIN_C_SOURCE
 
+#if defined(__clang__) || defined(__llvm__)
+/* Clang and llvm-gcc don't support global register variable (GRV).
+   Clang issues compile-time error for GRV.  llvm-gcc accepts GRV (because
+   its front-end is gcc) but ignores it in the llvm-based back-end.
+   Undefining GRV decl to allow external/qemu and the rest of Android
+   to compile.  But emulator built w/o GRV support will not function
+   correctly.  User will be greeted with an error message (issued
+   in tcg/tcg.c) when emulator built this way is launched.
+ */
+#define SUPPORT_GLOBAL_REGISTER_VARIABLE 0
+#define GLOBAL_REGISTER_VARIABLE_DECL
+#else
+#define SUPPORT_GLOBAL_REGISTER_VARIABLE 1
+#define GLOBAL_REGISTER_VARIABLE_DECL register
+#endif /* __clang__ || __llvm__ */
+
 #endif
