@@ -8,7 +8,7 @@
 #include "dyngen-exec.h"
 #include "cpu-defs.h"
 
-register struct CPUMIPSState *env asm(AREG0);
+GLOBAL_REGISTER_VARIABLE_DECL struct CPUMIPSState *env asm(AREG0);
 
 #include "cpu.h"
 #include "exec-all.h"

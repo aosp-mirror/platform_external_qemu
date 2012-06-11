@@ -19,11 +19,7 @@
 #include "config.h"
 #include "dyngen-exec.h"
 
-/* Xcode 4.3 doesn't support global register variables */
-#if !defined(__APPLE_CC__) || __APPLE_CC__ < 5621
-	register
-#endif
-struct CPUARMState *env asm(AREG0);
+GLOBAL_REGISTER_VARIABLE_DECL struct CPUARMState *env asm(AREG0);
 
 #include "cpu.h"
 #include "exec-all.h"
