@@ -724,8 +724,8 @@ do_network_speed( ControlClient  client, char*  args )
         return -1;
     }
 
-    netshaper_set_rate( slirp_shaper_in,  qemu_net_download_speed );
-    netshaper_set_rate( slirp_shaper_out, qemu_net_upload_speed );
+    netshaper_set_rate( slirp_shaper_out,  qemu_net_download_speed );
+    netshaper_set_rate( slirp_shaper_in, qemu_net_upload_speed );
 
     if (android_modem) {
         amodem_set_data_network_type( android_modem,
