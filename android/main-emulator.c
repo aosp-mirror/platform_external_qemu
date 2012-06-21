@@ -148,8 +148,6 @@ int main(int argc, char** argv)
         avdArch = "arm";
         D("Can't determine target AVD architecture: defaulting to %s\n", avdArch);
     }
-    if (!strcmp(avdArch, "mips"))
-        force_32bit = 1;   /* emulator64-mips segfaults currently, 4-19-2012 */
 
     /* Find the architecture-specific program in the same directory */
     emulatorPath = getTargetEmulatorPath(argv[0], avdArch, force_32bit);

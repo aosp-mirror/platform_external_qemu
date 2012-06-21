@@ -1870,7 +1870,7 @@ static unsigned long v2p_mmu(target_ulong addr, int is_user)
 {
     int index;
     target_ulong tlb_addr;
-    target_phys_addr_t physaddr;
+    unsigned long physaddr;
     void *retaddr;
 
     index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
@@ -1892,12 +1892,12 @@ redo:
  * to the address of simulation host (not the physical 
  * address of simulated OS.
  */
-target_phys_addr_t v2p(target_ulong ptr, int is_user)
+unsigned long v2p(target_ulong ptr, int is_user)
 {
     CPUState *saved_env;
     int index;
     target_ulong addr;
-    target_phys_addr_t physaddr;
+    unsigned long physaddr;
 
     saved_env = env;
     env = cpu_single_env;
@@ -1907,7 +1907,7 @@ target_phys_addr_t v2p(target_ulong ptr, int is_user)
                 (addr & TARGET_PAGE_MASK), 0)) {
         physaddr = v2p_mmu(addr, is_user);
     } else {
-	    physaddr = (target_phys_addr_t)addr + env->tlb_table[is_user][index].addend;
+        physaddr = addr + env->tlb_table[is_user][index].addend;
     }
     env = saved_env;
     return physaddr;
