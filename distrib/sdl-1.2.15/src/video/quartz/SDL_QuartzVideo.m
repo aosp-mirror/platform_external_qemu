@@ -23,6 +23,7 @@
 
 #include "SDL_QuartzVideo.h"
 #include "SDL_QuartzWindow.h"
+#include "SDL_QuartzWM.h"
 
 /* These APIs aren't just deprecated; they're gone from the headers in the
    10.7 SDK. If we're using a >= 10.7 SDK, but targeting < 10.7, then we
@@ -220,7 +221,12 @@ static SDL_VideoDevice* QZ_CreateDevice (int device_index)
     device->SetCaption    = QZ_SetCaption;
     device->SetIcon       = QZ_SetIcon;
     device->IconifyWindow = QZ_IconifyWindow;
-    /*device->GetWMInfo     = QZ_GetWMInfo;*/
+    device->SetWindowPos  = QZ_SetWindowPos;
+    device->GetWindowPos  = QZ_GetWindowPos;
+    device->IsWindowVisible = QZ_IsWindowVisible;
+    device->GetMonitorDPI = QZ_GetMonitorDPI;
+    device->GetMonitorRect = QZ_GetMonitorRect;
+    device->GetWMInfo     = QZ_GetWMInfo;
     device->GrabInput     = QZ_GrabInput;
 
     /*

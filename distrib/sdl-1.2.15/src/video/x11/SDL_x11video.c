@@ -68,6 +68,8 @@ static int X11_SetColors(_THIS, int firstcolor, int ncolors,
 static int X11_SetGammaRamp(_THIS, Uint16 *ramp);
 static void X11_VideoQuit(_THIS);
 
+int  X11_wmXAdjust;
+int  X11_wmYAdjust;
 
 /* X11 driver bootstrap functions */
 
@@ -164,6 +166,11 @@ static SDL_VideoDevice *X11_CreateDevice(int devindex)
 		device->SetIcon = X11_SetIcon;
 		device->IconifyWindow = X11_IconifyWindow;
 		device->GrabInput = X11_GrabInput;
+		device->GetWindowPos = X11_GetWindowPos;
+		device->SetWindowPos = X11_SetWindowPos;
+		device->IsWindowVisible = X11_IsWindowVisible;
+		device->GetMonitorDPI = X11_GetMonitorDPI;
+		device->GetMonitorRect = X11_GetMonitorRect;
 		device->GetWMInfo = X11_GetWMInfo;
 		device->FreeWMCursor = X11_FreeWMCursor;
 		device->CreateWMCursor = X11_CreateWMCursor;
@@ -350,7 +357,9 @@ static void create_aux_windows(_THIS)
     xattr.colormap = SDL_XColorMap;
 
     FSwindow = XCreateWindow(SDL_Display, SDL_Root,
-                             x, y, 32, 32, 0,
+                             x + X11_wmXAdjust,
+                             y + X11_wmYAdjust,
+                             32, 32, 0,
 			     this->hidden->depth, InputOutput, SDL_Visual,
 			     CWOverrideRedirect | CWBackPixel | CWBorderPixel
 			     | CWColormap,

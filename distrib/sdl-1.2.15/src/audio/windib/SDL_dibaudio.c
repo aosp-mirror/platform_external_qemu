@@ -45,6 +45,10 @@ static void DIB_PlayAudio(_THIS);
 static void DIB_WaitDone(_THIS);
 static void DIB_CloseAudio(_THIS);
 
+int volatile dibaudio_thread_debug = 0;
+int volatile dibaudio_cb_debug     = 0;
+int volatile dibaudio_main_debug   = 0;
+
 /* Audio driver bootstrap functions */
 
 static int Audio_Available(void)
@@ -109,11 +113,13 @@ static void CALLBACK FillSound(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance,
 		return;
 
 	/* Signal that we are done playing a buffer */
-#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
-	ReleaseSemaphoreCE(audio_sem, 1, NULL);
-#else
-	ReleaseSemaphore(audio_sem, 1, NULL);
-#endif
+	dibaudio_cb_debug = 1;
+	EnterCriticalSection(&audio_cs);
+	dibaudio_cb_debug = 2;
+	SetEvent(audio_event);
+	dibaudio_cb_debug = 3;
+	LeaveCriticalSection(&audio_cs);
+	dibaudio_cb_debug = 4;
 }
 
 static void SetMMerror(char *function, MMRESULT code)
@@ -147,17 +153,20 @@ static void DIB_ThreadInit(_THIS)
 void DIB_WaitAudio(_THIS)
 {
 	/* Wait for an audio chunk to finish */
-#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
-	WaitForSemaphoreCE(audio_sem, INFINITE);
-#else
-	WaitForSingleObject(audio_sem, INFINITE);
-#endif
+	dibaudio_thread_debug = 1;
+	WaitForSingleObject(audio_event, INFINITE);
+	dibaudio_thread_debug = 2;
+	ResetEvent(audio_event);
+	dibaudio_thread_debug = 3;
 }
 
 Uint8 *DIB_GetAudioBuf(_THIS)
 {
         Uint8 *retval;
 
+    dibaudio_thread_debug = 4;
+    EnterCriticalSection(&audio_cs);
+    dibaudio_thread_debug = 5;
 	retval = (Uint8 *)(wavebuf[next_buffer].lpData);
 	return retval;
 }
@@ -165,14 +174,23 @@ Uint8 *DIB_GetAudioBuf(_THIS)
 void DIB_PlayAudio(_THIS)
 {
 	/* Queue it up */
+	dibaudio_thread_debug = 6;
 	waveOutWrite(sound, &wavebuf[next_buffer], sizeof(wavebuf[0]));
+	dibaudio_thread_debug = 7;
 	next_buffer = (next_buffer+1)%NUM_BUFFERS;
+	LeaveCriticalSection(&audio_cs);
+	dibaudio_thread_debug = 8;
 }
 
 void DIB_WaitDone(_THIS)
 {
-	int i, left;
+	int i, left, tries = 5;
 
+	dibaudio_thread_debug = 9;
+
+	/* give some time for the wave output to send the last buffer,
+	   but don't hang if one was cancelled
+	  */
 	do {
 		left = NUM_BUFFERS;
 		for ( i=0; i<NUM_BUFFERS; ++i ) {
@@ -180,10 +198,13 @@ void DIB_WaitDone(_THIS)
 				--left;
 			}
 		}
-		if ( left > 0 ) {
-			SDL_Delay(100);
-		}
-	} while ( left > 0 );
+		if ( left == 0 )
+			break;
+
+		SDL_Delay(100);
+	} while ( --tries > 0 );
+
+	dibaudio_thread_debug = 10;
 }
 
 void DIB_CloseAudio(_THIS)
@@ -191,15 +212,15 @@ void DIB_CloseAudio(_THIS)
 	int i;
 
 	/* Close up audio */
-	if ( audio_sem ) {
+	if (audio_event != INVALID_HANDLE_VALUE ) {
 #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
-		CloseSynchHandle(audio_sem);
+		CloseSynchHandle(audio_event);
 #else
-		CloseHandle(audio_sem);
+		CloseHandle(audio_event);
 #endif
 	}
 	if ( sound ) {
-		waveOutClose(sound);
+		waveOutReset(sound);
 	}
 
 	/* Clean up mixing buffers */
@@ -215,6 +236,9 @@ void DIB_CloseAudio(_THIS)
 		SDL_free(mixbuf);
 		mixbuf = NULL;
 	}
+
+	if ( sound )
+		waveOutClose(sound);
 }
 
 int DIB_OpenAudio(_THIS, SDL_AudioSpec *spec)
@@ -225,7 +249,8 @@ int DIB_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
 	/* Initialize the wavebuf structures for closing */
 	sound = NULL;
-	audio_sem = NULL;
+	InitializeCriticalSection(&audio_cs);
+	audio_event = INVALID_HANDLE_VALUE;
 	for ( i = 0; i < NUM_BUFFERS; ++i )
 		wavebuf[i].dwUser = 0xFFFF;
 	mixbuf = NULL;
@@ -287,12 +312,8 @@ int DIB_OpenAudio(_THIS, SDL_AudioSpec *spec)
 #endif
 
 	/* Create the audio buffer semaphore */
-#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
-	audio_sem = CreateSemaphoreCE(NULL, NUM_BUFFERS-1, NUM_BUFFERS, NULL);
-#else
-	audio_sem = CreateSemaphore(NULL, NUM_BUFFERS-1, NUM_BUFFERS, NULL);
-#endif
-	if ( audio_sem == NULL ) {
+	audio_event = CreateEvent( NULL, TRUE, FALSE, NULL );
+	if (audio_event == NULL) {
 		SDL_SetError("Couldn't create semaphore");
 		return(-1);
 	}

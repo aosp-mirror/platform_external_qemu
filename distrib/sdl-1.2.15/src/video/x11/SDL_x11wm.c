@@ -325,6 +325,147 @@ int X11_IconifyWindow(_THIS)
 	return(result);
 }
 
+#if 0
+#define  D(...)  printf(__VA_ARGS__)
+#define  E(...)  D(__VA_ARGS__)
+#else
+#define  D(...)  ((void)0)
+#define  E(...)  ((void)0)
+#endif
+
+static void  set_window_pos_nolock(_THIS, int x, int y)
+{
+    int          xNew, yNew;
+    Window       child;
+    int          xAdjust = X11_wmXAdjust;
+    int          yAdjust = X11_wmYAdjust;
+
+    /* don't do anything in full-screen mode, because the FSwindow is used
+     * instead of the WMwindow, which will make the adjustment go wild
+     */
+    if (this->screen->flags & SDL_FULLSCREEN)
+        return;
+
+    /* this code is tricky because some window managers, but not all,
+     * will translate the final window position by a given offset
+     * corresponding to the frame decoration.
+     *
+     * so we first try to move the window, get the position that the
+     * window manager has set, and if they are different, re-position the
+     * window again with an adjustment.
+     *
+     * this causes a slight flicker since the window 'jumps' very
+     * quickly from one position to the other.
+     */
+
+    D("%s: move to [%d,%d] adjusted to [%d,%d]\n", __FUNCTION__,
+      x, y, x+xAdjust, y+yAdjust);
+    XMoveWindow(SDL_Display, WMwindow, x + xAdjust, y + yAdjust);
+    XSync(SDL_Display, True);
+    XTranslateCoordinates( SDL_Display, WMwindow, SDL_Root, 0, 0, &xNew, &yNew, &child );
+    if (xNew != x || yNew != y) {
+        X11_wmXAdjust = xAdjust = x - xNew;
+        X11_wmYAdjust = yAdjust = y - yNew;
+        D("%s: read pos [%d,%d], recomputing adjust=[%d,%d] moving to [%d,%d]\n",
+          __FUNCTION__, xNew, yNew, xAdjust, yAdjust, x+xAdjust, y+yAdjust);
+        XMoveWindow(SDL_Display, WMwindow, x + xAdjust, y + yAdjust );
+    }
+    XSync(SDL_Display, False);
+}
+
+/* Set window position */
+void  X11_SetWindowPos(_THIS, int  x, int  y)
+{
+    SDL_Lock_EventThread();
+    set_window_pos_nolock(this, x, y);
+    SDL_Unlock_EventThread();
+}
+
+/* Get window position */
+void  X11_GetWindowPos(_THIS, int  *px, int  *py)
+{
+    /* in full-screen mode, you can't move the window */
+    if (this->screen->flags & SDL_FULLSCREEN) {
+        *px = *py = 0;
+        return;
+    }
+
+
+    SDL_Lock_EventThread();
+    {
+        Window  child;
+
+        XTranslateCoordinates( SDL_Display, WMwindow, SDL_Root, 0, 0, px, py, &child );
+    }
+    SDL_Unlock_EventThread();
+}
+
+static int
+is_window_visible(_THIS, int  screen_x, int  screen_y, int  screen_w, int  screen_h )
+{
+    XWindowAttributes   attr;
+    int                 x, y;
+    Window              child;
+
+    XGetWindowAttributes( SDL_Display, WMwindow, &attr );
+    XTranslateCoordinates( SDL_Display, WMwindow, SDL_Root, 0, 0, &x, &y, &child );
+
+    return ( x >= screen_x && x + attr.width  <= screen_x + screen_w  &&
+             y >= screen_y && y + attr.height <= screen_y + screen_h );
+}
+
+int  X11_IsWindowVisible(_THIS, int  recenter)
+{
+    int                 result = 0;
+    XWindowAttributes   attr;
+    int                 screen_w, screen_h;
+
+    SDL_Lock_EventThread();
+    XGetWindowAttributes( SDL_Display, SDL_Root, &attr );
+    screen_w = attr.width;
+    screen_h = attr.height;
+
+#if SDL_VIDEO_DRIVER_X11_XINERAMA
+    if (use_xinerama) {
+        SDL_NAME(XineramaScreenInfo) *xinerama;
+        int                           i, screens;
+
+        xinerama = SDL_NAME(XineramaQueryScreens)(SDL_Display, &screens);
+        for (i = 0; i < screens; i++) {
+            if ( is_window_visible( this,
+                                    xinerama[i].x_org, xinerama[i].y_org,
+                                    xinerama[i].width, xinerama[i].height ) )
+            {
+                result = 1;
+                break;
+            }
+        }
+
+        if ( !result && recenter ) {
+            set_window_pos_nolock(this,
+                              xinerama[0].x_org + (xinerama[0].width  - this->screen->w)/2,
+                              xinerama[0].y_org + (xinerama[0].height - this->screen->h)/2 );
+        }
+        XFree(xinerama);
+        goto Exit;
+    }
+#endif
+    if ( is_window_visible( this, 0, 0, screen_w, screen_h ) ) {
+        result = 1;
+    }
+
+    if ( !result && recenter ) {
+        set_window_pos_nolock( this,
+                          (screen_w - this->screen->w)/2,
+                          (screen_h - this->screen->h)/2 );
+    }
+#ifdef SDL_VIDEO_DRIVER_X11_XINERAMA
+Exit:
+#endif
+    SDL_Unlock_EventThread();
+    return result;
+}
+
 SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 {
 	int result;
@@ -385,6 +526,51 @@ SDL_GrabMode X11_GrabInput(_THIS, SDL_GrabMode mode)
 	SDL_Unlock_EventThread();
 
 	return(mode);
+}
+
+#define  MM_PER_INCH  25.4
+
+int
+X11_GetMonitorDPI(_THIS, int  *px_dpi, int *py_dpi)
+{
+    Display*      display = SDL_Display;
+    int           screen  = XDefaultScreen(display);
+    int           xdpi, ydpi;
+
+    int  width     = XDisplayWidth(display, screen);
+    int  width_mm  = XDisplayWidthMM(display, screen);
+    int  height    = XDisplayHeight(display, screen);
+    int  height_mm = XDisplayHeightMM(display, screen);
+
+    if (width_mm <= 0 || height_mm <= 0) {
+        return -1;
+    }
+
+    xdpi = (int)(width  * MM_PER_INCH / width_mm + 0.5);
+    ydpi = (int)(height * MM_PER_INCH / height_mm + 0.5);
+
+    if (xdpi < 20 || xdpi > 400 || ydpi < 20 || ydpi > 400) {
+        return -1;
+    }
+
+    *px_dpi = xdpi;
+    *py_dpi = ydpi;
+
+    return 0;
+}
+
+int
+X11_GetMonitorRect(_THIS, SDL_Rect *rect)
+{
+    Display*  display = SDL_Display;
+    int       screen  = XDefaultScreen(display);
+
+    rect->x = 0;
+    rect->y = 0;
+    rect->w = XDisplayWidth(display, screen);
+    rect->h = XDisplayHeight(display, screen);
+
+    return 0;
 }
 
 /* If 'info' is the right version, this function fills it and returns 1.

@@ -1963,6 +1963,66 @@ int SDL_WM_ToggleFullScreen(SDL_Surface *surface)
 }
 
 /*
+ *  Set window position
+ */
+void  SDL_WM_SetPos(int  x, int  y)
+{
+    SDL_VideoDevice*  video = current_video;
+
+    if (video && video->SetWindowPos)
+        video->SetWindowPos(video, x, y);
+}
+
+/*
+ * Get window position
+ */
+void  SDL_WM_GetPos(int  *px, int  *py)
+{
+    SDL_VideoDevice*  video = current_video;
+
+    if (video && video->GetWindowPos)
+        video->GetWindowPos(video, px, py);
+    else {
+        *px = 100;
+        *py = 100;
+    }
+}
+
+int   SDL_WM_IsFullyVisible( int  recenter )
+{
+    int  result = 1;
+
+    SDL_VideoDevice*  video = current_video;
+
+    if (video && video->IsWindowVisible) {
+        result = video->IsWindowVisible(video, recenter);
+    }
+    return result;
+}
+
+int   SDL_WM_GetMonitorDPI( int  *xDpi, int  *yDpi )
+{
+    int               result = -1;
+    SDL_VideoDevice*  video  = current_video;
+
+    if (video && video->GetMonitorDPI) {
+        result = video->GetMonitorDPI(video, xDpi, yDpi);
+    }
+    return result;
+}
+
+int   SDL_WM_GetMonitorRect( SDL_Rect  *rect )
+{
+    int               result = -1;
+    SDL_VideoDevice*  video  = current_video;
+
+    if (video && video->GetMonitorRect) {
+        result = video->GetMonitorRect(video, rect);
+    }
+    return result;
+}
+
+/*
  * Get some platform dependent window manager information
  */
 int SDL_GetWMInfo (SDL_SysWMinfo *info)

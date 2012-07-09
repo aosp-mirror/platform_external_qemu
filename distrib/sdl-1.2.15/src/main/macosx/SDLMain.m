@@ -371,6 +371,20 @@ int main (int argc, char **argv)
         gFinderLaunch = NO;
     }
 
+/* ANDROID_BEGIN */
+    /* if -no-window is used, we don't want to launch a graphical
+     * application that creates a Menu bar and steals the focus.
+     */
+    {
+        int nn;
+        for (nn = 0; nn < argc; nn++) {
+            if ( !strcmp( argv[nn], "-no-window" ) ) {
+                return SDL_main (argc, argv);
+            }
+        }
+    }
+/* ANDROID_END */
+
 #if SDL_USE_NIB_FILE
     NSApplicationMain (argc, argv);
 #else

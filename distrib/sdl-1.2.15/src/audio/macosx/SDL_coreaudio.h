@@ -25,6 +25,7 @@
 #define _SDL_coreaudio_h
 
 #include "../SDL_sysaudio.h"
+#include <AudioUnit/AUNTComponent.h>
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_AudioDevice *this

@@ -31,4 +31,8 @@ extern int X11_IconifyWindow(_THIS);
 extern SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode);
 extern SDL_GrabMode X11_GrabInput(_THIS, SDL_GrabMode mode);
 extern int X11_GetWMInfo(_THIS, SDL_SysWMinfo *info);
-
+extern void  X11_GetWindowPos(_THIS, int  *px, int  *py);
+extern void  X11_SetWindowPos(_THIS, int  x, int  y);
+extern int   X11_IsWindowVisible(_THIS, int  recenter);
+extern int X11_GetMonitorDPI(_THIS, int* xdpi, int *ydpi);
+extern int X11_GetMonitorRect(_THIS, SDL_Rect *rect);
