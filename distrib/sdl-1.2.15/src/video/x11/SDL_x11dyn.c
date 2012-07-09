@@ -200,6 +200,7 @@ int SDL_X11_LoadSymbols(void)
 
 		if (SDL_X11_HAVE_BASEXLIB) {  /* all required symbols loaded. */
 			SDL_ClearError();
+			XInitThreads();
 		} else {
 			SDL_X11_UnloadSymbols();  /* in case something got loaded... */
 			rc = 0;

@@ -181,6 +181,18 @@ typedef struct SDL_SysWMinfo {
 	int data;
 } SDL_SysWMinfo;
 
+#elif defined(SDL_VIDEO_DRIVER_QUARTZ)
+
+struct SDL_SysWMmsg {
+	SDL_version version;
+	int data;
+};
+
+typedef struct SDL_SysWMinfo {
+	SDL_version version;
+	void* nsWindowPtr;
+} SDL_SysWMinfo;
+
 #else
 
 /** The generic custom event structure */
