@@ -115,6 +115,12 @@ static void DIB_RealizePalette(_THIS);
 static void DIB_PaletteChanged(_THIS, HWND window);
 static void DIB_WinPAINT(_THIS, HDC hdc);
 
+static void DIB_GetWinPos(_THIS, int* px, int *py);
+static void DIB_SetWinPos(_THIS, int  x, int  y);
+static int  DIB_IsWinVisible(_THIS, int recenter);
+static int  DIB_GetMonitorDPI(_THIS, int* xDpi, int *yDpi);
+static int  DIB_GetMonitorRect(_THIS, SDL_Rect*  rect);
+
 /* helper fn */
 static int DIB_SussScreenDepth();
 
@@ -211,6 +217,12 @@ static SDL_VideoDevice *DIB_CreateDevice(int devindex)
 	device->CheckMouseMode = WIN_CheckMouseMode;
 	device->InitOSKeymap = DIB_InitOSKeymap;
 	device->PumpEvents = DIB_PumpEvents;
+
+	device->GetWindowPos = DIB_GetWinPos;
+	device->SetWindowPos = DIB_SetWinPos;
+	device->IsWindowVisible = DIB_IsWinVisible;
+	device->GetMonitorDPI = DIB_GetMonitorDPI;
+	device->GetMonitorRect = DIB_GetMonitorRect;
 
 	/* Set up the windows message handling functions */
 	WIN_Activate = DIB_Activate;
@@ -1312,6 +1324,170 @@ static void DIB_WinPAINT(_THIS, HDC hdc)
 	BitBlt(hdc, 0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h,
 							mdc, 0, 0, SRCCOPY);
 	DeleteDC(mdc);
+}
+
+static void DIB_GetWinPos(_THIS, int* px, int *py)
+{
+	RECT  rect;
+	GetWindowRect(SDL_Window, &rect);
+	*px = rect.left;
+	*py = rect.top;
+}
+
+static void DIB_SetWinPos(_THIS, int  x, int  y)
+{
+    SetWindowPos(SDL_Window, HWND_TOPMOST, 
+                 x, y, 0, 0, SWP_NOSIZE|SWP_NOZORDER);
+}
+
+typedef struct {
+    int   result;
+    int   first;
+    RECT  wrect;
+    RECT  primary;
+} VisibilityData;
+
+
+BOOL CALLBACK visibility_cb(HMONITOR  hMonitor,
+                            HDC       hdcMonitor,
+                            LPRECT    mrect,
+                            LPARAM    dwData)
+{
+    VisibilityData*  data = (VisibilityData*)dwData;
+    
+    if ( data->first ) {
+        data->first   = 0;
+        data->primary = mrect[0];
+    }
+    
+    if ( data->wrect.left   >= mrect->left   &&
+         data->wrect.right  <= mrect->right  &&
+         data->wrect.top    >= mrect->top    &&
+         data->wrect.bottom <= mrect->bottom )
+    {
+        data->result = 1;
+        return FALSE;
+    }
+    return TRUE;
+}
+
+static int  DIB_IsWinVisible(_THIS, int  recenter)
+{
+    VisibilityData  data;
+    data.result = 0;
+    data.first  = 1;
+    
+    GetWindowRect(SDL_Window, &data.wrect);
+
+    EnumDisplayMonitors(NULL, NULL, visibility_cb, (LPARAM)&data);
+    
+    if ( !data.result && recenter ) {
+        int  new_x = 10;
+        int  new_y = 10;
+
+        if ( !data.first ) {
+            int  primary_w = data.primary.right  - data.primary.left;
+            int  primary_h = data.primary.bottom - data.primary.top;
+
+            new_x = data.primary.left + (primary_w - this->screen->w)/2;
+            new_y = data.primary.top  + (primary_h - this->screen->h)/2;
+        }
+        DIB_SetWinPos(this, new_x, new_y);
+    }
+    return  data.result;
+}
+
+static int  DIB_GetMonitorDPI(_THIS, int* xDpi, int *yDpi)
+{
+    HDC  displayDC = CreateDC( "DISPLAY", NULL, NULL, NULL );
+    int  xdpi, ydpi;
+
+    if (displayDC == NULL) {
+        return -1;
+    }
+    xdpi = GetDeviceCaps( displayDC, LOGPIXELSX );
+    ydpi = GetDeviceCaps( displayDC, LOGPIXELSY );
+
+    DeleteDC(displayDC);
+
+    /* sanity checks */
+    if (xdpi < 20 || xdpi > 400 || ydpi < 20 || ydpi > 400) {
+        return -1;
+    }
+
+    *xDpi = xdpi;
+    *yDpi = ydpi;
+    return 0;
+}
+
+
+typedef struct {
+    int   first;
+    RECT  wrect;
+	long  bestArea;
+	RECT  bestRect;
+	RECT  primary;
+} ProximityData;
+
+BOOL CALLBACK proximity_cb(HMONITOR  hMonitor,
+                           HDC       hdcMonitor,
+                           LPRECT    mrect,
+                           LPARAM    dwData)
+{
+    ProximityData*  data = (ProximityData*)dwData;
+    int   x1, y1, x2, y2, area;
+	
+	x1 = mrect->left;
+	x2 = mrect->right;
+	y1 = mrect->top;
+	y2 = mrect->bottom;
+
+	if (data->first) {
+		data->primary = mrect[0];
+	}
+	
+	if (x1 < data->wrect.left)
+		x1 = data->wrect.left;
+    if (x2 > data->wrect.right)
+		x2 = data->wrect.right;
+	if (y1 < data->wrect.top)
+		y1 = data->wrect.top;
+	if (y2 > data->wrect.bottom)
+		y2 = data->wrect.bottom;
+	
+	if (x1 >= x2 || y1 >= y2)
+		return TRUE;
+
+	area = (x2-x1)*(y2-y1);
+	if (data->first || area > data->bestArea) {
+		data->first    = 0;
+		data->bestRect = mrect[0];
+		data->bestArea = area;
+	}
+    return TRUE;
+}
+
+static int  DIB_GetMonitorRect(_THIS, SDL_Rect*  rect)
+{
+    ProximityData  data;
+	RECT*          sr;
+
+    data.first  = 1;
+    GetWindowRect(SDL_Window, &data.wrect);
+
+    EnumDisplayMonitors(NULL, NULL, proximity_cb, (LPARAM)&data);
+
+	if (data.first)
+		return -1;
+
+	sr = &data.bestRect;
+
+	rect->x = sr->left;
+	rect->y = sr->top;
+	rect->w = sr->right - sr->left;
+	rect->h = sr->bottom - sr->top;
+	
+	return 0;
 }
 
 /* Stub in case DirectX isn't available */

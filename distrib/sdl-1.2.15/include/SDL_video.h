@@ -936,6 +936,36 @@ typedef enum {
  */
 extern DECLSPEC SDL_GrabMode SDLCALL SDL_WM_GrabInput(SDL_GrabMode mode);
 
+/*
+ * Move the SDL Window to a specific position. Does nothing in fullscreen mode.
+ */
+extern DECLSPEC void SDL_WM_SetPos(int x, int y);
+
+/*
+ * Get the current SDL window position. Returns (0,0) in fullscreen mode.
+ */
+extern DECLSPEC void SDL_WM_GetPos(int *px, int *py);
+
+/*
+ * If the window is fully visible, return TRUE; otherwise, recenter the window
+ * if the 'recenter' parameter is non-0, and return FALSE.
+ */
+extern DECLSPEC int SDL_WM_IsFullyVisible(int recenter);
+
+/*
+ * Get the resolution of the main monitor in DPIs, if available.
+ * Return 0 on success, or -1 if the data is not available.
+ */
+extern DECLSPEC int SDL_WM_GetMonitorDPI(int *xDPI, int *yDPI);
+
+/*
+ * Get the coordinates of the monitor in virtual desktop space.
+ * In the case of multi-monitor systems, returns the rectangle of
+ * the 'nearest' monitor relative to the main SDL_window. Returns
+ * 0 on success, or -1 if the data is not available.
+ */
+extern DECLSPEC int SDL_WM_GetMonitorRect(SDL_Rect *rect);
+
 /*@}*/
 
 /** @internal Not in public API at the moment - do not use! */
