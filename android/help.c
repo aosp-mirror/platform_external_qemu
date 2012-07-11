@@ -408,8 +408,10 @@ help_char_devices(stralloc_t*  out)
     "      pty  [Linux only]\n"
     "          pseudo TTY (a new PTY is automatically allocated)\n\n"
 
-    "      /dev/<file>  [Unix only]\n"
-    "          host char device file, e.g. /dev/ttyS0. may require root access\n\n"
+    "      /dev/<file>[,baudrate]  [Unix only]\n"
+    "          host char device file, e.g. /dev/ttyS0. may require root access.\n"
+    "          baudrate is optional. If no baudrate is supplied, standard\n"
+    "          baudrate is used: 115200 bps\n\n"
 
     "      /dev/parport<N>  [Linux only]\n"
     "          use host parallel port. may require root access\n\n"
@@ -1123,9 +1125,9 @@ static void
 help_radio(stralloc_t*  out)
 {
     PRINTF(
-    "  use '-radio <device>' to redirect the GSM modem emulation to an external\n"
-    "  character device or program. this bypasses the emulator's internal modem\n"
-    "  and should only be used for testing.\n\n"
+    "  use '-radio <device>[,baudrate]' to redirect the GSM modem emulation to an\n"
+    "  external character device or program. This bypasses the emulator's internal\n"
+    "  modem and should only be used for testing.\n\n"
 
     "  see '-help-char-devices' for the format of <device>\n\n"
 

@@ -1749,7 +1749,7 @@ DEF("android-avdname", HAS_ARG, QEMU_OPTION_android_avdname, \
     "-android-avdname <avdname> names the virtual device\n")
 
 DEF("radio", HAS_ARG, QEMU_OPTION_radio, \
-    "-radio <device> redirect radio modem interface to character device\n")
+    "-radio <device>[,baudrate] redirect radio modem interface to character device\n")
 
 DEF("gps", HAS_ARG, QEMU_OPTION_gps, \
     "-gps <device> redirect NMEA GPS to character device\n")

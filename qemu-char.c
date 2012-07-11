@@ -1282,6 +1282,8 @@ static void qemu_chr_close_tty(CharDriverState *chr)
 static CharDriverState *qemu_chr_open_tty(QemuOpts *opts)
 {
     const char *filename = qemu_opt_get(opts, "path");
+    const char *baudrate_str = qemu_opt_get(opts, "baudrate");
+    int baudrate = 115200;
     CharDriverState *chr;
     int fd;
 
@@ -1289,7 +1291,15 @@ static CharDriverState *qemu_chr_open_tty(QemuOpts *opts)
     if (fd < 0) {
         return NULL;
     }
-    tty_serial_init(fd, 115200, 'N', 8, 1);
+
+    /* parse a possibly supplied baudrate */
+    if (baudrate_str) {
+        baudrate = strtol(baudrate_str, NULL, 0);
+        if (baudrate == 0 || baudrate == LONG_MIN || baudrate == LONG_MAX) {
+            baudrate = 115200;
+        }
+    }
+    tty_serial_init(fd, baudrate, 'N', 8, 1);
     chr = qemu_chr_open_fd(fd, fd);
     if (!chr) {
         close(fd);
@@ -2393,6 +2403,7 @@ QemuOpts *qemu_chr_parse_compat(const char *label, const char *filename)
     int pos;
     const char *p;
     QemuOpts *opts;
+    char *baud_comma;
 
     opts = qemu_opts_create(qemu_find_opts("chardev"), label, 1);
     if (NULL == opts)
@@ -2502,6 +2513,14 @@ QemuOpts *qemu_chr_parse_compat(const char *label, const char *filename)
     }
     if (strstart(filename, "/dev/", NULL)) {
         qemu_opt_set(opts, "backend", "tty");
+        /* check for a comma, which means a baudrate after the devicename */
+        baud_comma = strchr(filename, ',');
+        if (baud_comma) {
+            baud_comma[0] = '\0';
+            if (baud_comma[1]) {
+                qemu_opt_set(opts, "baudrate", &baud_comma[1]);
+            }
+        }
         qemu_opt_set(opts, "path", filename);
         return opts;
     }
