@@ -61,6 +61,7 @@ extern int android_init_opengles_pipes(void);
 
 static ADynamicLibrary*  rendererLib;
 static int               rendererStarted;
+static char              rendererAddress[256];
 
 /* Define the function pointers */
 #define DYNLINK_FUNC(name) \
@@ -152,7 +153,7 @@ android_startOpenglesRenderer(int width, int height)
         return 0;
     }
 
-    if (!initOpenGLRenderer(width, height, ANDROID_OPENGLES_BASE_PORT)) {
+    if (!initOpenGLRenderer(width, height, rendererAddress, sizeof(rendererAddress))) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }
@@ -177,7 +178,6 @@ static void strncpy_safe(char* dst, const char* src, size_t n)
 
 static void extractBaseString(char* dst, const char* src, size_t dstSize)
 {
-    size_t len = strlen(src);
     const char* begin = strchr(src, '(');
     const char* end = strrchr(src, ')');
 
@@ -211,7 +211,7 @@ android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
 
     if (!rendererStarted) {
         D("Can't get OpenGL ES hardware strings when renderer not started");
-        vendor[0] = renderer[0] = version = '\0';
+        vendor[0] = renderer[0] = version[0] = '\0';
         return;
     }
 
@@ -274,18 +274,9 @@ android_redrawOpenglesWindow(void)
 }
 
 void
-android_gles_unix_path(char* buff, size_t buffsize, int port)
+android_gles_server_path(char* buff, size_t buffsize)
 {
-    const char* user = getenv("USER");
-    char *p = buff, *end = buff + buffsize;
-
-    /* The logic here must correspond to the one inside
-     * development/tools/emulator/opengl/shared/libOpenglCodecCommon/UnixStream.cpp */
-    p = bufprint(p, end, "/tmp/");
-    if (user && user[0]) {
-        p = bufprint(p, end, "android-%s/", user);
-    }
-    p = bufprint(p, end, "qemu-gles-%d", port);
+    strncpy_safe(buff, rendererAddress, buffsize);
 }
 
 #else // CONFIG_ANDROID_OPENGLES
@@ -330,7 +321,7 @@ int android_hideOpenglesWindow(void)
 void android_redrawOpenglesWindow(void)
 {}
 
-void android_gles_unix_path(char* buff, size_t buffsize, int port)
+void android_gles_server_path(char* buff, size_t buffsize)
 {
     buff[0] = '\0';
 }
