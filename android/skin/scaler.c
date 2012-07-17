@@ -150,6 +150,34 @@ skin_scaler_scale( SkinScaler*   scaler,
         else
             scale_generic( &op );
     }
+
+    // The optimized scale functions in argb.h assume the destination is ARGB.
+    // If that's not the case, do a channel reorder now.
+    if (dst_surface->format->Rshift != 16 ||
+        dst_surface->format->Gshift !=  8 ||
+        dst_surface->format->Bshift !=  0)
+    {
+        uint32_t rshift = dst_surface->format->Rshift;
+        uint32_t gshift = dst_surface->format->Gshift;
+        uint32_t bshift = dst_surface->format->Bshift;
+        uint32_t ashift = dst_surface->format->Ashift;
+        uint32_t amask  = dst_surface->format->Amask; // may be 0x00
+        int x, y;
+
+        for (y = 0; y < op.rd.h; y++)
+        {
+            uint32_t* line = (uint32_t*)(op.dst_line + y*op.dst_pitch);
+            for (x = 0; x < op.rd.w; x++) {
+                uint32_t r = (line[x] & 0x00ff0000) >> 16;
+                uint32_t g = (line[x] & 0x0000ff00) >>  8;
+                uint32_t b = (line[x] & 0x000000ff) >>  0;
+                uint32_t a = (line[x] & 0xff000000) >> 24;
+                line[x] = (r << rshift) | (g << gshift) | (b << bshift) |
+                          ((a << ashift) & amask);
+            }
+        }
+    }
+
     SDL_UnlockSurface( dst_surface );
     SDL_UnlockSurface( src_surface );
 
