@@ -1463,7 +1463,12 @@ int usb_device_add_dev(USBDevice *dev)
 
     /* Find a USB port to add the device to.  */
     port = free_usb_ports;
-    if (!port->next) {
+    if (!port){
+        USBDevice *hub = usb_hub_init(VM_USB_HUB_SIZE);
+        port = free_usb_ports;
+        usb_attach(port, hub);
+    }
+    else if (!port->next){
         USBDevice *hub;
 
         /* Create a new hub and chain it on.  */
@@ -1499,9 +1504,6 @@ static int usb_device_add(const char *devname, int is_hotplug)
 {
     const char *p;
     USBDevice *dev;
-
-    if (!free_usb_ports)
-        return -1;
 
     if (strstart(devname, "host:", &p)) {
         dev = usb_host_device_open(p);
