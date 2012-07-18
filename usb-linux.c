@@ -355,6 +355,7 @@ static int usb_host_claim_interfaces(USBHostDevice *dev, int configuration)
         for (interface = 0; interface < nb_interfaces; interface++) {
             ctrl.ioctl_code = USBDEVFS_DISCONNECT;
             ctrl.ifno = interface;
+            ctrl.data = NULL;
             ret = ioctl(dev->fd, USBDEVFS_IOCTL, &ctrl);
             if (ret < 0 && errno != ENODATA) {
                 perror("USBDEVFS_DISCONNECT");
@@ -1548,6 +1549,8 @@ static int usb_host_find_device(int *pbus_num, int *paddr,
         *paddr = strtoul(p + 1, NULL, 0);
         fs.bus_num = *pbus_num;
         fs.addr = *paddr;
+        fs.vendor_id = -1;
+        fs.product_id = -1;
         ret = usb_host_scan(&fs, usb_host_find_device_scan);
         if (ret)
             pstrcpy(product_name, product_name_size, fs.product_name);
@@ -1558,6 +1561,8 @@ static int usb_host_find_device(int *pbus_num, int *paddr,
     if (p) {
         fs.vendor_id = strtoul(devname, NULL, 16);
         fs.product_id = strtoul(p + 1, NULL, 16);
+        fs.bus_num = -1;
+        fs.addr = -1;
         ret = usb_host_scan(&fs, usb_host_find_device_scan);
         if (ret) {
             *pbus_num = fs.bus_num;
