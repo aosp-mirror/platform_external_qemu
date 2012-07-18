@@ -198,14 +198,6 @@ ifeq ($(QEMU_HOST_TAG),linux-x86)
     BUILD_SDL_FROM_SOURCES := false
 endif
 
-# On darwin-x86, a bug in the Android build system prevents the compilation
-# of Objective-C sources. Fixed recently in AOSP, but we still use the
-# prebuilts for the benefit of older platform branches.
-#
-ifeq ($(QEMU_HOST_TAG),darwin-x86)
-    BUILD_SDL_FROM_SOURCES := false
-endif
-
 # If we're building with android-configure.sh && make, always build from
 # sources to catch regressions as soon as they happen.
 #
@@ -238,7 +230,7 @@ ifneq ($(BUILD_SDL_FROM_SOURCES),true)
 
 else # BUILD_SDL_FROM_SOURCES
 
-    SDL_DIR := distrib/sdl-1.2.12
+    SDL_DIR := distrib/sdl-1.2.15
     include $(LOCAL_PATH)/$(SDL_DIR)/sources.make
     common_LOCAL_SRC_FILES += $(SDL_SOURCES)
 
