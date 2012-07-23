@@ -148,22 +148,25 @@ display_init( ADisplay*  disp, SkinDisplay*  sdisp, SkinLocation*  loc, SkinRect
     return (disp->data == NULL) ? -1 : 0;
 }
 
-static __inline__ uint32_t  rgb565_to_argb32( uint32_t  pix )
+static __inline__ uint32_t rgb565_to_rgba32(uint32_t pix,
+        uint32_t rshift, uint32_t gshift, uint32_t bshift, uint32_t amask)
 {
-    uint32_t  r = ((pix & 0xf800) << 8) | ((pix & 0xe000) << 3);
-    uint32_t  g = ((pix & 0x07e0) << 5) | ((pix & 0x0600) >> 1);
-    uint32_t  b = ((pix & 0x001f) << 3) | ((pix & 0x001c) >> 2);
-    return 0xff000000 | r | g | b;
+    uint32_t r8 = ((pix & 0xf800) >>  8) | ((pix & 0xe000) >> 13);
+    uint32_t g8 = ((pix & 0x07e0) >>  3) | ((pix & 0x0600) >>  9);
+    uint32_t b8 = ((pix & 0x001f) <<  3) | ((pix & 0x001c) >>  2);
+    return (r8 << rshift) | (g8 << gshift) | (b8 << bshift) | amask;
 }
 
 /* The framebuffer format is R,G,B,X in framebuffer memory, on a
  * little-endian system, this translates to XBGR after a load.
  */
-static __inline__ uint32_t  xbgr_to_argb32( uint32_t pix )
+static __inline__ uint32_t xbgr_to_rgba32(uint32_t pix,
+        uint32_t rshift, uint32_t gshift, uint32_t bshift, uint32_t amask)
 {
-    uint32_t  g  = (pix & 0x0000ff00);
-    uint32_t  rb = (pix & 0xff00ff);
-    return 0xff000000 | (rb << 16) | g | (rb >> 16);
+    uint32_t r8 = (pix & 0x00ff0000) >> 16;
+    uint32_t g8 = (pix & 0x0000ff00) >>  8;
+    uint32_t b8 = (pix & 0x000000ff) >>  0;
+    return (r8 << rshift) | (g8 << gshift) | (b8 << bshift) | amask;
 }
 
 static void
@@ -392,6 +395,10 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
     int           src_pitch = disp->datasize.w*2;
     uint8_t*      src_line  = (uint8_t*)disp->data;
     int           yy, xx;
+    uint32_t      rshift = surface->format->Rshift;
+    uint32_t      gshift = surface->format->Gshift;
+    uint32_t      bshift = surface->format->Bshift;
+    uint32_t      amask  = surface->format->Amask; // may be 0x00 for non-alpha format
 
     switch ( disp->rotation & 3 )
     {
@@ -405,7 +412,7 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
 
             xx = 0;
             DUFF4(w, {
-                dst[xx] = rgb565_to_argb32(src[xx]);
+                dst[xx] = rgb565_to_rgba32(src[xx], rshift, gshift, bshift, amask);
                 xx++;
             });
             src_line += src_pitch;
@@ -422,7 +429,7 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
             uint8_t*   src = src_line;
 
             DUFF4(w, {
-                dst[0] = rgb565_to_argb32(((uint16_t*)src)[0]);
+                dst[0] = rgb565_to_rgba32(((uint16_t*)src)[0], rshift, gshift, bshift, amask);
                 src -= src_pitch;
                 dst += 1;
             });
@@ -440,7 +447,7 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
             uint32_t*  dst = (uint32_t*)dst_line;
 
             DUFF4(w, {
-                dst[0] = rgb565_to_argb32(src[0]);
+                dst[0] = rgb565_to_rgba32(src[0], rshift, gshift, bshift, amask);
                 src -= 1;
                 dst += 1;
             });
@@ -458,7 +465,7 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
             uint8_t*   src = src_line;
 
             DUFF4(w, {
-                dst[0] = rgb565_to_argb32(((uint16_t*)src)[0]);
+                dst[0] = rgb565_to_rgba32(((uint16_t*)src)[0], rshift, gshift, bshift, amask);
                 dst   += 1;
                 src   += src_pitch;
             });
@@ -482,6 +489,10 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
     int           src_pitch = disp->datasize.w*4;
     uint8_t*      src_line  = (uint8_t*)disp->data;
     int           yy;
+    uint32_t      rshift = surface->format->Rshift;
+    uint32_t      gshift = surface->format->Gshift;
+    uint32_t      bshift = surface->format->Bshift;
+    uint32_t      amask  = surface->format->Amask; // may be 0x00 for non-alpha format
 
     switch ( disp->rotation & 3 )
     {
@@ -493,7 +504,7 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
             uint32_t*  dst = (uint32_t*)dst_line;
 
             DUFF4(w, {
-                dst[0] = xbgr_to_argb32(src[0]);
+                dst[0] = xbgr_to_rgba32(src[0], rshift, gshift, bshift, amask);
                 dst++;
                 src++;
             });
@@ -511,7 +522,7 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
             uint8_t*   src = src_line;
 
             DUFF4(w, {
-                dst[0] = xbgr_to_argb32(*(uint32_t*)src);
+                dst[0] = xbgr_to_rgba32(*(uint32_t*)src, rshift, gshift, bshift, amask);
                 src -= src_pitch;
                 dst += 1;
             });
@@ -529,7 +540,7 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
             uint32_t*  dst = (uint32_t*)dst_line;
 
             DUFF4(w, {
-                dst[0] = xbgr_to_argb32(src[0]);
+                dst[0] = xbgr_to_rgba32(src[0], rshift, gshift, bshift, amask);
                 src -= 1;
                 dst += 1;
             });
@@ -547,7 +558,7 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
             uint8_t*   src = src_line;
 
             DUFF4(w, {
-                dst[0] = xbgr_to_argb32(*(uint32_t*)src);
+                dst[0] = xbgr_to_rgba32(*(uint32_t*)src, rshift, gshift, bshift, amask);
                 dst   += 1;
                 src   += src_pitch;
             });
