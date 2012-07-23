@@ -156,6 +156,9 @@ struct SDL_PrivateVideoData {
     int allow_screensaver;
 };
 
+extern int X11_wmXAdjust;
+extern int X11_wmYAdjust;
+
 /* Old variable names */
 #define local_X11		(this->hidden->local_X11)
 #define SDL_Display		(this->hidden->X11_Display)

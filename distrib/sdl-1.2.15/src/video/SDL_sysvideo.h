@@ -217,6 +217,21 @@ struct SDL_VideoDevice {
 	/* Get some platform dependent window information */
 	int (*GetWMInfo)(_THIS, SDL_SysWMinfo *info);
 
+	/* set window position */
+	void (*SetWindowPos)(_THIS, int x, int y);
+
+	/* get window position */
+	void (*GetWindowPos)(_THIS, int *px, int *py);
+
+	/* determine if the window is fully visible on screen */
+	int (*IsWindowVisible)(_THIS, int recenter);
+
+	/* get main monitor's resolution */
+	int (*GetMonitorDPI)(_THIS, int *xdpi, int *ydpi);
+
+	/* get nearest monitor's rectangle */
+	int (*GetMonitorRect)(_THIS, SDL_Rect* rect);
+
 	/* * * */
 	/* Cursor manager functions */
 

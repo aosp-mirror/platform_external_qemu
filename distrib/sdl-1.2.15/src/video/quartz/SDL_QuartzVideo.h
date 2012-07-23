@@ -215,6 +215,12 @@ void         QZ_PumpEvents       (_THIS);
 void         QZ_SetCaption       (_THIS, const char *title, const char *icon);
 void         QZ_SetIcon          (_THIS, SDL_Surface *icon, Uint8 *mask);
 int          QZ_IconifyWindow    (_THIS);
+void         QZ_SetWindowPos     (_THIS, int x, int y);
+void         QZ_GetWindowPos     (_THIS, int *px, int *py);
+int          QZ_IsWindowVisible  (_THIS, int recenter);
+int          QZ_GetMonitorDPI    (_THIS, int *xDpi, int *yDpi);
+int          QZ_GetMonitorRect   (_THIS, SDL_Rect *rect);
+
 SDL_GrabMode QZ_GrabInput        (_THIS, SDL_GrabMode grab_mode);
 /*int          QZ_GetWMInfo        (_THIS, SDL_SysWMinfo *info);*/
 

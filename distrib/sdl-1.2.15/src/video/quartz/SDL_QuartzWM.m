@@ -278,6 +278,137 @@ void QZ_SetCaption    (_THIS, const char *title, const char *icon) {
     }
 }
 
+void QZ_SetWindowPos (_THIS, int  x, int  y)
+{
+    if ( qz_window == nil ) {
+        //printf( "%s(%d,%d): called for NULL window\n", __FUNCTION__, x, y ); 
+        return;
+    }
+     
+    [ qz_window setFrameTopLeftPoint:NSMakePoint( x, this->hidden->height - y ) ];
+    //printf( "%s(%d,%d): done\n", __FUNCTION__, x, y );
+}
+
+void  QZ_GetWindowPos(_THIS, int  *px, int  *py)
+{
+    NSPoint  pt;
+    
+    *px = *py = 0;
+ 
+    if ( qz_window == NULL ) {
+        //printf( "%s: called on NULL window\n", __FUNCTION__ );
+    }
+
+    if ( qz_window != nil ) {
+        NSRect  rect = [ qz_window frame ];
+        *px = rect.origin.x;
+        *py = this->hidden->height - rect.origin.y - rect.size.height;
+        //printf( "%s: returning (%d,%d)\n", __FUNCTION__, *px, *py );
+    }
+}
+
+/* determine if the window is fully visible on the current screen configuration */
+int  QZ_IsWindowVisible(_THIS, int  recenter)
+{
+    int  result = 0;
+   
+    //printf( "... enter %s\n", __FUNCTION__ );
+
+    if ( qz_window != NULL ) {
+        NSRect        frame   = [ qz_window frame ]; 
+        NSArray*      screens = [ NSScreen screens ];
+        unsigned int  count   = [ screens count ];
+        unsigned int  n;
+        //printf( "window frame (%d,%d) (%d,%d)\n", frame.origin.x, frame.origin.y,
+        //        frame.size.width, frame.size.height );
+        for (n = 0; n < count; n++) {
+            NSScreen*  screen = [ screens objectAtIndex: n ];
+            NSRect     vis    = [ screen visibleFrame ];
+   
+            //printf( "screen %d/%d  frame (%d,%d) (%d,%d)\n", n+1, count,
+            //        vis.origin.x, vis.origin.y, vis.size.width, vis.size.height );
+
+            if (frame.origin.x >= vis.origin.x && 
+                frame.origin.x + frame.size.width <= vis.origin.x + vis.size.width &&
+                frame.origin.y >= vis.origin.y &&
+                frame.origin.y + frame.size.height <= vis.origin.y + vis.size.height )
+            {
+                result = 1;
+                break;
+            }
+        }
+    }
+    //printf ( "... exit %s, result = %d\n", __FUNCTION__, result );
+    if ( !result && recenter ) {
+        [ qz_window center ] ;
+    }
+    return result;
+}
+
+int QZ_GetMonitorDPI(_THIS, int  *xDpi, int *yDpi)
+{
+    /* FIXME: how to get this information from Cocoa ? */
+    return -1;
+}
+
+int QZ_GetMonitorRect   (_THIS, SDL_Rect  *rect)
+{
+    NSWindow*     window = qz_window;
+    NSRect        frame   = [ window frame ];
+    int           fx1     = frame.origin.x;
+    int           fy1     = frame.origin.y;
+    int           fx2     = frame.size.width + fx1;
+    int           fy2     = frame.size.height + fy1; 
+    NSArray*      screens = [ NSScreen screens ];
+    unsigned int  count   = [ screens count ];
+    int           bestScreen = -1;
+    int           bestArea = 0;
+
+    unsigned int  n;
+
+    /* we need to compute which screen has the most window pixels */
+    for (n = 0; n < count; n++) {
+        NSScreen*  screen = [ screens objectAtIndex: n ];
+        NSRect     vis    = [ screen visibleFrame ];
+        int        vx1    = vis.origin.x;
+        int        vy1    = vis.origin.y;
+        int        vx2    = vis.size.width + vx1;
+        int        vy2    = vis.size.height + vy1;
+        int        cx1, cx2, cy1, cy2, cArea;
+
+        if (fx1 >= vx2 || vx1 >= fx2 || fy1 >= vy2 || vy1 >= fy2)
+            continue;
+
+        cx1 = (fx1 < vx1) ? vx1 : fx1;
+        cx2 = (fx2 > vx2) ? vx2 : fx2;
+        cy1 = (fy1 < vy1) ? vy1 : fy1;
+        cy2 = (fy2 > vy2) ? vy2 : fy2;
+
+        if (cx1 >= cx2 || cy1 >= cy2)
+            continue;
+
+        cArea = (cx2-cx1)*(cy2-cy1);
+
+        if (bestScreen < 0 || cArea > bestArea) {
+            bestScreen = n;
+            bestArea   = cArea;
+        }
+    }
+    if (bestScreen < 0)
+        bestScreen = 0;
+
+    {
+        NSScreen*  screen = [ screens objectAtIndex: bestScreen ];
+        NSRect     vis    = [ screen visibleFrame ];
+
+        rect->x = vis.origin.x;
+        rect->y = vis.origin.y;
+        rect->w = vis.size.width;
+        rect->h = vis.size.height; 
+    }
+    return 0;
+}
+
 void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask)
 {
     NSBitmapImageRep *imgrep;
@@ -362,11 +493,10 @@ int  QZ_IconifyWindow (_THIS) {
     }
 }
 
-/*
 int  QZ_GetWMInfo  (_THIS, SDL_SysWMinfo *info) { 
     info->nsWindowPtr = qz_window;
     return 0; 
-}*/
+}
 
 void QZ_ChangeGrabState (_THIS, int action) {
 
