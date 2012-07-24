@@ -84,18 +84,18 @@ ifeq ($(HOST_OS),darwin)
     endif
     ifneq ($(filter 10.5 10.5.% 10.6 10.6.%,$(DARWIN_VERSION)),)
         # We are on Leopard or Snow Leopard
-        MSDK=10.5
+        OSX_VERSION=10.5
     else
         # We are on Lion or beyond, and 10.6 SDK is the minimum in Xcode 4.x
-        MSDK=10.6
+        OSX_VERSION=10.6
     endif
-    MACOSX_SDK := /Developer/SDKs/MacOSX$(MSDK).sdk
+    MACOSX_SDK := /Developer/SDKs/MacOSX$(OSX_VERSION).sdk
     ifeq ($(strip $(wildcard $(MACOSX_SDK))),)
-        $(info  Please install the $(MSDK) SDK on this machine at $(MACOSX_SDK))
+        $(info  Please install the $(OSX_VERSION) SDK on this machine at $(MACOSX_SDK))
         $(error Aborting the build.)
     endif
-    MY_CFLAGS += -isysroot $(MACOSX_SDK) -mmacosx-version-min=$(MSDK) -DMACOSX_DEPLOYMENT_TARGET=$(MSDK)
-    MY_LDLIBS += -isysroot $(MACOSX_SDK) -Wl,-syslibroot,$(MACOSX_SDK) -mmacosx-version-min=$(MSDK)
+    MY_CFLAGS += -isysroot $(MACOSX_SDK) -mmacosx-version-min=$(OSX_VERSION) -DMACOSX_DEPLOYMENT_TARGET=$(OSX_VERSION)
+    MY_LDLIBS += -isysroot $(MACOSX_SDK) -Wl,-syslibroot,$(MACOSX_SDK) -mmacosx-version-min=$(OSX_VERSION)
 endif
 
 # BUILD_STANDALONE_EMULATOR is only defined when building with

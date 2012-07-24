@@ -139,11 +139,10 @@ $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
 ## another for 64-bit
-# NOTE: only linux in non-standalone mode is supported, because
+# NOTE: only linux and darwin in non-standalone mode is supported, because
 #  1) For Windows: amd64-mingw32msvc-gcc doesn't work, see http://b/issue?id=5949152.
-#  2) For MacOSX: 64-bit libSDL*.a 1.2.x depends on NSQuickDrawView doesn't exist
-#  3) Standalone has --try-64
-ifeq ($(HOST_OS),linux)
+#  2) Standalone has --try-64
+ifneq ($(filter linux darwin,$(HOST_OS)),)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-library, emulator64-common)
     LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
@@ -151,7 +150,7 @@ ifeq ($(HOST_OS),linux)
     $(call gen-hw-config-defs)
     $(call end-emulator-library)
   endif # BUILD_STANDALONE_EMULATOR == nil
-endif # HOST_OS == linux
+endif # HOST_OS == linux || darwin
 
 ##############################################################################
 ##############################################################################
@@ -288,7 +287,7 @@ $(call end-emulator-library)
 
 
 ## another for 64-bit, see note in emulator64-common
-ifeq ($(HOST_OS),linux)
+ifneq ($(filter linux darwin,$(HOST_OS)),)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-library, emulator64-libui)
     LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
@@ -296,7 +295,7 @@ ifeq ($(HOST_OS),linux)
     $(call gen-hw-config-defs)
     $(call end-emulator-library)
   endif # BUILD_STANDALONE_EMULATOR == nil
-endif # HOST_OS == linux
+endif # HOST_OS == linux || darwin
 
 
 ##############################################################################
@@ -612,7 +611,7 @@ $(call end-emulator-library)
 
 
 ## another for 64-bit, see note in emulator64-common
-ifeq ($(HOST_OS),linux)
+ifneq ($(filter linux darwin,$(HOST_OS)),)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-library, emulator64-libqemu)
     # gdbstub-xml.c contains C-compilable arrays corresponding to the content
@@ -632,7 +631,7 @@ ifeq ($(HOST_OS),linux)
     $(call gen-hw-config-defs)
     $(call end-emulator-library)
   endif # BUILD_STANDALONE_EMULATOR == nil
-endif # HOST_OS == linux
+endif # HOST_OS == linux || darwin
 
 
 # Block sources, we must compile them with each executable because they
@@ -706,7 +705,7 @@ $(call end-emulator-library)
 
 
 ## another for 64-bit, see note in emulator64-common
-ifeq ($(HOST_OS),linux)
+ifneq ($(filter linux darwin,$(HOST_OS)),)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-library, emulator64-libelff)
     LOCAL_CPP_EXTENSION := .cc
@@ -714,7 +713,7 @@ ifeq ($(HOST_OS),linux)
     LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
     $(call end-emulator-library)
   endif # BUILD_STANDALONE_EMULATOR == nil
-endif # HOST_OS == linux
+endif # HOST_OS == linux || darwin
 
 
 ##############################################################################
