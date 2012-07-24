@@ -281,7 +281,7 @@ $(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
 $(call end-emulator-library)
 
 ## another for 64-bit, see note in file Makefile.common emulator64-common
-ifeq ($(HOST_OS),linux)
+ifneq ($(filter linux darwin,$(HOST_OS)),)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-library, emulator64-target-$(EMULATOR_TARGET_CPU))
     LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
@@ -290,7 +290,7 @@ ifeq ($(HOST_OS),linux)
     $(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
     $(call end-emulator-library)
   endif # BUILD_STANDALONE_EMULATOR == nil
-endif # HOST_OS == linux
+endif # HOST_OS == linux || darwin
 
 
 
@@ -475,7 +475,7 @@ $(call end-emulator-program)
 
 
 ## another for 64-bit, see note in file Makefile.common emulator64-common
-ifeq ($(HOST_OS),linux)
+ifneq ($(filter linux darwin,$(HOST_OS)),)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-program, emulator64-$(EMULATOR_TARGET_ARCH))
     LOCAL_STATIC_LIBRARIES += \
@@ -493,5 +493,5 @@ ifeq ($(HOST_OS),linux)
     $(call gen-hw-config-defs)
     $(call end-emulator-program)
   endif # BUILD_STANDALONE_EMULATOR == nil
-endif # HOST_OS == linux
+endif # HOST_OS == linux || darwin
 
