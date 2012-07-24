@@ -82,16 +82,20 @@ ifeq ($(HOST_OS),darwin)
     ifneq ($(filter 10.1 10.2 10.3 10.1.% 10.2.% 10.3.% 10.4 10.4.%,$(DARWIN_VERSION)),)
         $(error Building the Android emulator requires OS X 10.5 or above)
     endif
-    ifneq ($(filter 10.6 10.6.%,$(DARWIN_VERSION)),)
-        # We are on Snow Leopard
-        LEOPARD_SDK := /Developer/SDKs/MacOSX10.5.sdk
-        ifeq ($(strip $(wildcard $(LEOPARD_SDK))),)
-            $(info  Please install the 10.5 SDK on this machine at $(LEOPARD_SDK))
-            $(error Aborting the build.)
-        endif
-        MY_CFLAGS += -isysroot $(LEOPARD_SDK) -mmacosx-version-min=10.5 -DMACOSX_DEPLOYMENT_TARGET=10.5
-        MY_LDLIBS += -isysroot $(LEOPARD_SDK) -Wl,-syslibroot,$(LEOPARD_SDK) -mmacosx-version-min=10.5
+    ifneq ($(filter 10.5 10.5.% 10.6 10.6.%,$(DARWIN_VERSION)),)
+        # We are on Leopard or Snow Leopard
+        MSDK=10.5
+    else
+        # We are on Lion or beyond, and 10.6 SDK is the minimum in Xcode 4.x
+        MSDK=10.6
     endif
+    MACOSX_SDK := /Developer/SDKs/MacOSX$(MSDK).sdk
+    ifeq ($(strip $(wildcard $(MACOSX_SDK))),)
+        $(info  Please install the $(MSDK) SDK on this machine at $(MACOSX_SDK))
+        $(error Aborting the build.)
+    endif
+    MY_CFLAGS += -isysroot $(MACOSX_SDK) -mmacosx-version-min=$(MSDK) -DMACOSX_DEPLOYMENT_TARGET=$(MSDK)
+    MY_LDLIBS += -isysroot $(MACOSX_SDK) -Wl,-syslibroot,$(MACOSX_SDK) -mmacosx-version-min=$(MSDK)
 endif
 
 # BUILD_STANDALONE_EMULATOR is only defined when building with
