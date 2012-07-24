@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAHtH//9/U\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1001252
+      },
+      "writtenOn": "2012-07-24T20:55:50Z",
+      "side": 1,
+      "message": "maybe \"SDK_VERSION\" here?",
+      "revId": "ddcd0227c34b3ab15c8feeabff1a00329e156a58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
