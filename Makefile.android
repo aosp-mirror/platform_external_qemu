@@ -78,26 +78,8 @@ endif
 ifeq ($(HOST_OS),darwin)
     MY_CFLAGS += -mdynamic-no-pic -D_DARWIN_C_SOURCE=1
 
-    # When building on Leopard or above, we need to use the 10.4 SDK
-    # or the generated binary will not run on Tiger.
-    DARWIN_VERSION := $(strip $(shell sw_vers -productVersion))
-    ifneq ($(filter 10.1 10.2 10.3 10.1.% 10.2.% 10.3.% 10.4 10.4.%,$(DARWIN_VERSION)),)
-        $(error Building the Android emulator requires OS X 10.5 or above)
-    endif
-    ifneq ($(filter 10.5 10.5.% 10.6 10.6.%,$(DARWIN_VERSION)),)
-        # We are on Leopard or Snow Leopard
-        OSX_VERSION=10.5
-    else
-        # We are on Lion or beyond, and 10.6 SDK is the minimum in Xcode 4.x
-        OSX_VERSION=10.6
-    endif
-    MACOSX_SDK := /Developer/SDKs/MacOSX$(OSX_VERSION).sdk
-    ifeq ($(strip $(wildcard $(MACOSX_SDK))),)
-        $(info  Please install the $(OSX_VERSION) SDK on this machine at $(MACOSX_SDK))
-        $(error Aborting the build.)
-    endif
-    MY_CFLAGS += -isysroot $(MACOSX_SDK) -mmacosx-version-min=$(OSX_VERSION) -DMACOSX_DEPLOYMENT_TARGET=$(OSX_VERSION)
-    MY_LDLIBS += -isysroot $(MACOSX_SDK) -Wl,-syslibroot,$(MACOSX_SDK) -mmacosx-version-min=$(OSX_VERSION)
+    MY_CFLAGS += -isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version) -DMACOSX_DEPLOYMENT_TARGET=$(mac_sdk_version)
+    MY_LDLIBS += -isysroot $(mac_sdk_root) -Wl,-syslibroot,$(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)
 endif
 
 # BUILD_STANDALONE_EMULATOR is only defined when building with
@@ -220,7 +202,7 @@ endif
 
 ifeq ($(HOST_OS),darwin)
   QEMU_SYSTEM_LDLIBS += -Wl,-framework,Cocoa,-framework,QTKit,-framework,CoreVideo
-  ifneq ($(filter 10.7 10.7.% 10.8 10.8.%,$(DARWIN_VERSION)),)
+  ifneq ($(filter 10.7 10.7.% 10.8 10.8.%,$(build_mac_version)),)
     # 10.7+ with XCode4 needs to be explicitly told the dynamic library
     # lookup symbols in the precompiled libSDL are resolved at
     # runtime
