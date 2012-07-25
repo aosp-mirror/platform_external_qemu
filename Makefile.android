@@ -1,3 +1,5 @@
+ifeq ($(BUILD_EMULATOR),true)
+
 ifneq (,$(filter $(TARGET_ARCH),arm x86 mips))
 LOCAL_PATH:= $(call my-dir)
 
@@ -328,3 +330,4 @@ $(call end-emulator-program)
 ## VOILA!!
 
 endif  # TARGET_ARCH == arm || TARGET_ARCH == x86 || TARGET_ARCH == mips
+endif  # BUILD_EMULATOR
