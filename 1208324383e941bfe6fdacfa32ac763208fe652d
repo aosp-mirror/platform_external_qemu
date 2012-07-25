@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAHrn///rI\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1001414
+      },
+      "writtenOn": "2012-07-25T00:37:46Z",
+      "side": 1,
+      "message": "I would rename this OSX_VERSION.\n\nSDK_VERSION could be confused with the version of the Android SDK or something.",
+      "revId": "1208324383e941bfe6fdacfa32ac763208fe652d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
