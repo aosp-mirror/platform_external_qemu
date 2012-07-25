@@ -16,6 +16,24 @@
       "revId": "1208324383e941bfe6fdacfa32ac763208fe652d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAHvH///zM\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1010186
+      },
+      "writtenOn": "2012-07-25T00:41:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAHrn///rI\u003d",
+      "revId": "1208324383e941bfe6fdacfa32ac763208fe652d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
