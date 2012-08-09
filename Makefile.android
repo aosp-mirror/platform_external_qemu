@@ -80,6 +80,14 @@ ifeq ($(HOST_OS),darwin)
 
     MY_CFLAGS += -isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version) -DMACOSX_DEPLOYMENT_TARGET=$(mac_sdk_version)
     MY_LDLIBS += -isysroot $(mac_sdk_root) -Wl,-syslibroot,$(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)
+
+    # Function "__dyld_func_lookup" required by SDL_dlcompat.c is no longer provided in SDK 10.6+.
+    # Explicitly link dylib1.o instead.
+    OSX_VERSION_MAJOR := $(shell echo $(mac_sdk_version) | cut -d . -f 2)
+    OSX_VERSION_MAJOR_GREATER_THAN_OR_EQUAL_TO_6 := $(shell [ $(OSX_VERSION_MAJOR) -ge 6 ] && echo true)
+    ifeq ($(OSX_VERSION_MAJOR_GREATER_THAN_OR_EQUAL_TO_6),true)
+        MY_LDLIBS += /usr/lib/dylib1.o
+    endif
 endif
 
 # BUILD_STANDALONE_EMULATOR is only defined when building with
