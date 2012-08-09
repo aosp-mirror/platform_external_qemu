@@ -16,6 +16,24 @@
       "revId": "e9bd6b6d60a1bb12037ffa12f8194b8547fca1dd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAIJH///2Y\u003d",
+        "filename": "telephony/android_modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2226,
+      "author": {
+        "id": 1004677
+      },
+      "writtenOn": "2012-08-09T21:49:23Z",
+      "side": 1,
+      "message": "These are random values added to match the size of RIL_SignalStrength_v6 .\nIf the size of this message is not same as RIL_SignalStrength_v6 , parsing in reference ril will break or we need to add additional length validity check in reference-ril",
+      "parentUuid": "AAAIIn///8Y\u003d",
+      "revId": "e9bd6b6d60a1bb12037ffa12f8194b8547fca1dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
