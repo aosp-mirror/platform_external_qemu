@@ -58,7 +58,6 @@ void cpu_save(QEMUFile *f, void *opaque)
 
     /* Save TLB */
     qemu_put_be32s(f, &env->tlb->nb_tlb);
-    qemu_put_be32s(f, &env->tlb->tlb_in_use);
     for(i = 0; i < MIPS_TLB_MAX; i++) {
         uint16_t flags = ((env->tlb->mmu.r4k.tlb[i].G << 10) |
                           (env->tlb->mmu.r4k.tlb[i].C0 << 7) |
@@ -209,7 +208,6 @@ int cpu_load(QEMUFile *f, void *opaque, int version_id)
 
     /* Load TLB */
     qemu_get_be32s(f, &env->tlb->nb_tlb);
-    qemu_get_be32s(f, &env->tlb->tlb_in_use);
     for(i = 0; i < MIPS_TLB_MAX; i++) {
         uint16_t flags;
         uint8_t asid;

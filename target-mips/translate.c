@@ -8675,7 +8675,6 @@ void cpu_reset (CPUMIPSState *env)
     }
     env->active_tc.PC = (int32_t)0xBFC00000;
     env->CP0_Random = env->tlb->nb_tlb - 1;
-    env->tlb->tlb_in_use = env->tlb->nb_tlb;
     env->CP0_Wired = 0;
     /* SMP not implemented */
     env->CP0_EBase = 0x80000000;
