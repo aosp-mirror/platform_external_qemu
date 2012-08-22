@@ -35,12 +35,7 @@ MY_CC  := $(HOST_CC)
 MY_CXX := $(HOST_CXX)
 MY_AR  := $(HOST_AR)
 
-MY_OPTIM := -O2 -g -fno-PIC -falign-functions=0 -fomit-frame-pointer
-ifeq ($(BUILD_DEBUG_EMULATOR),true)
-    MY_OPTIM := -O0 -g
-endif
-
-MY_CFLAGS := $(CONFIG_INCLUDES) $(MY_OPTIM)
+MY_CFLAGS := $(CONFIG_INCLUDES) -O2 -g -fno-PIC -falign-functions=0 -fomit-frame-pointer
 
 # Overwrite configuration for debug builds.
 #
