@@ -318,6 +318,7 @@ LOCAL_CFLAGS += -Wno-missing-field-initializers
 LOCAL_STATIC_LIBRARIES := \
     emulator-libqemu \
     emulator-target-$(EMULATOR_TARGET_CPU) \
+    emulator-libjpeg \
     emulator-libelff \
     emulator-common
 
@@ -455,6 +456,7 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     emulator-libqemu \
     emulator-target-$(EMULATOR_TARGET_CPU) \
+    emulator-libjpeg \
     emulator-libelff \
     emulator-common \
     $(SDL_STATIC_LIBRARIES)
@@ -480,6 +482,7 @@ ifneq ($(filter linux darwin,$(HOST_OS)),)
         emulator64-libui \
         emulator64-libqemu \
         emulator64-target-$(EMULATOR_TARGET_CPU) \
+        emulator64-libjpeg \
         emulator64-libelff \
         emulator64-common \
         $(SDL_STATIC_LIBRARIES_64)

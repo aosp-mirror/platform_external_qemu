@@ -314,18 +314,6 @@ EMULATOR_LIBQEMU_CFLAGS :=
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
-###########################################################
-# Jpeg configuration
-#
-LIBJPEG_DIR := distrib/jpeg-6b
-include $(LOCAL_PATH)/$(LIBJPEG_DIR)/sources.make
-
-EMULATOR_LIBQEMU_CFLAGS += \
-    $(LIBJPEG_CFLAGS) \
-    -I$(LOCAL_PATH)/$(LIBJPEG_DIR)
-
-common_LOCAL_SRC_FILES += $(LIBJPEG_SOURCES)
-
 AUDIO_SOURCES := noaudio.c wavaudio.c wavcapture.c mixeng.c
 AUDIO_CFLAGS  := -I$(LOCAL_PATH)/audio -DHAS_AUDIO
 AUDIO_LDLIBS  :=
@@ -517,7 +505,7 @@ endif
 common_LOCAL_SRC_FILES += $(CORE_MISC_SOURCES)
 
 # Required
-common_LOCAL_CFLAGS += -D_XOPEN_SOURCE=600 -D_BSD_SOURCE=1
+common_LOCAL_CFLAGS += -D_XOPEN_SOURCE=600 -D_BSD_SOURCE=1 -I$(LOCAL_PATH)/distrib/jpeg-6b
 
 SLIRP_SOURCES := \
     bootp.c \
@@ -663,6 +651,46 @@ endif
 
 BLOCK_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 BLOCK_CFLAGS += -DCONFIG_BDRV_WHITELIST=""
+
+##############################################################################
+##############################################################################
+###
+###  emulator-libjpeg: TARGET-INDEPENDENT QEMU FUNCTIONS
+###
+###  THESE ARE USED BY EVERYTHING EXCEPT 'emulator-ui'
+###
+
+common_LOCAL_CFLAGS =
+common_LOCAL_SRC_FILES =
+
+###########################################################
+# Jpeg configuration
+#
+LIBJPEG_DIR := distrib/jpeg-6b
+include $(LOCAL_PATH)/$(LIBJPEG_DIR)/sources.make
+
+common_LOCAL_SRC_FILES += $(LIBJPEG_SOURCES)
+
+common_LOCAL_CFLAGS += \
+    $(LIBJPEG_CFLAGS) \
+    -I$(LOCAL_PATH)/$(LIBJPEG_DIR)
+
+## one for 32-bit
+$(call start-emulator-library, emulator-libjpeg)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+$(call end-emulator-library)
+
+
+## another for 64-bit, see note in emulator64-common
+ifeq ($(HOST_OS),linux)
+  ifneq ($(BUILD_STANDALONE_EMULATOR),true)
+    $(call start-emulator-library, emulator64-libjpeg)
+    LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
+    LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+    $(call end-emulator-library)
+  endif # BUILD_STANDALONE_EMULATOR == nil
+endif # HOST_OS == linux
 
 
 ##############################################################################
