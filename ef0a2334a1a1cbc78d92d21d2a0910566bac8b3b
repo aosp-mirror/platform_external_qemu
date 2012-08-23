@@ -16,6 +16,24 @@
       "revId": "ef0a2334a1a1cbc78d92d21d2a0910566bac8b3b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAI53///5U\u003d",
+        "filename": "Makefile.android",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2012-08-23T15:12:23Z",
+      "side": 1,
+      "message": "grr, typo, but you got the idea:\n\n  ifneq (,$(filter true,$(BUILD_EMULATOR) $(BUILD_STANDALONE_EMULATOR)))",
+      "parentUuid": "AAAI53///5c\u003d",
+      "revId": "ef0a2334a1a1cbc78d92d21d2a0910566bac8b3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
