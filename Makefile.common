@@ -683,7 +683,7 @@ $(call end-emulator-library)
 
 
 ## another for 64-bit, see note in emulator64-common
-ifeq ($(HOST_OS),linux)
+ifneq ($(filter linux darwin,$(HOST_OS)),)
   ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     $(call start-emulator-library, emulator64-libjpeg)
     LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
