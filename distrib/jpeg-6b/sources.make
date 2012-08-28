@@ -7,7 +7,7 @@ LIBJPEG_SOURCES := jcapimin.c jcapistd.c jccoefct.c jccolor.c jcdctmgr.c jchuff.
 	jdinput.c jdmainct.c jdmarker.c jdmaster.c jdmerge.c jdphuff.c \
 	jdpostct.c jdsample.c jdtrans.c jerror.c jfdctflt.c jfdctfst.c \
 	jfdctint.c jidctflt.c jidctfst.c jidctint.c jidctred.c jquant1.c \
-	jquant2.c jutils.c jmemmgr.c
+	jquant2.c jutils.c jmemmgr.c jidctintelsse.c
 
 # jmem-ashmem.c doesn't compile for Windows.
 #LIBJPEG_CFLAGS += -DUSE_ANDROID_ASHMEM
@@ -19,6 +19,7 @@ LIBJPEG_SOURCES += jmem-android.c
 
 LIBJPEG_CFLAGS += -DAVOID_TABLES
 LIBJPEG_CFLAGS += -O3 -fstrict-aliasing
+LIBJPEG_CFLAGS += -DANDROID_INTELSSE2_IDCT -msse2
 #LIBJPEG_CFLAGS += -march=armv6j
 
 # enable tile based decode
