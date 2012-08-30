@@ -366,7 +366,11 @@ typedef int boolean;
  */
 
 #ifndef MULTIPLIER
+#ifdef ANDROID_INTELSSE2_IDCT
+  #define MULTIPLIER short
+#else
 #define MULTIPLIER  int		/* type for fastest integer multiply */
+#endif
 #endif
 
 
