@@ -8357,7 +8357,10 @@ gen_intermediate_code_internal (CPUState *env, TranslationBlock *tb,
         if (env->singlestep_enabled && (ctx.hflags & MIPS_HFLAG_BMASK) == 0)
             break;
 
-        if ((ctx.pc & (TARGET_PAGE_SIZE - 1)) == 0)
+        /* Do not split a branch instruction and its delay slot into two
+           TB's when a page boundary is crossed. This causes TB's to be
+           invalidated incorrectly if branch target is patched.  */
+        if ((ctx.pc & (TARGET_PAGE_SIZE - 1)) == 0 && (ctx.hflags & MIPS_HFLAG_BMASK) == 0)
             break;
 
         if (gen_opc_ptr >= gen_opc_end)
