@@ -90,6 +90,7 @@ CFG_PARAM( skindir, "<dir>", "search skins in <dir> (default <system>/skins)" )
 CFG_PARAM( skin, "<name>", "select a given skin" )
 CFG_FLAG ( no_skin, "don't use any emulator skin" )
 CFG_FLAG ( noskin, "same as -no-skin" )
+CFG_FLAG ( dynamic_skin, "dynamically construct a skin of given size, requires -skin WxH option" )
 CFG_PARAM( memory, "<size>", "physical RAM size in MBs" )
 
 OPT_PARAM( netspeed, "<speed>", "maximum network download/upload speeds" )

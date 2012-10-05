@@ -121,6 +121,20 @@ aconfig_set(AConfig *root, const char *name, const char *value)
     node->value = value;
 }
 
+void
+aconfig_add_child(AConfig *node, AConfig *child)
+{
+    if (node == NULL || child == NULL)
+        return;
+
+    if(node->last_child) {
+        node->last_child->next = child;
+    } else {
+        node->first_child = child;
+    }
+    node->last_child = child;
+}
+
 #define T_EOF 0
 #define T_TEXT 1
 #define T_DOT 2
