@@ -46,6 +46,9 @@ extern AConfig*  aconfig_find(AConfig *root, const char *name);
 /* add a named child to a config node (or modify it if it already exists) */
 extern void      aconfig_set(AConfig *root, const char *name, const char *value);
 
+/* add a child node to the given node */
+extern void     aconfig_add_child(AConfig *node, AConfig *child);
+
 
 /* look up a child by name and return its value, eventually converted
  * into a boolean or integer */
