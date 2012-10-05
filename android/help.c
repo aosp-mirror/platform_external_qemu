@@ -759,6 +759,15 @@ help_skin(stralloc_t*  out)
     "  specify an exact framebuffer size, without any visual ornaments.\n\n" );
 }
 
+static void
+help_dynamic_skin(stralloc_t* out)
+{
+    PRINTF(
+    "  use '-dynamic_skin' to dynamically generate a skin based on the settings\n"
+    "  in the AVD. This option only has effect if the -skin WxH option is used\n"
+    "  to specify the width and height of the framebuffer\n");
+}
+
 /* default network settings for emulator */
 #define  DEFAULT_NETSPEED  "full"
 #define  DEFAULT_NETDELAY  "none"
