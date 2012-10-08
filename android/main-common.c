@@ -459,11 +459,12 @@ load_dynamic_skin(AndroidHwConfig* hwConfig,
 
     part_properties* props = read_all_part_properties(aconfig_find(root, "parts"));
 
-    const int N_PARTS = 3;
+    const int N_PARTS = 4;
     char* parts[N_PARTS];
-    parts[0] = hwConfig->hw_mainKeys ? "hwkeys_on" : "hwkeys_off";
-    parts[1] = hwConfig->hw_dPad ? "dpad_on" : "dpad_off";
-    parts[2] = hwConfig->hw_keyboard ? "keyboard_on" : "keyboard_off";
+    parts[0] = "basic_controls";
+    parts[1] = hwConfig->hw_mainKeys ? "hwkeys_on" : "hwkeys_off";
+    parts[2] = hwConfig->hw_dPad ? "dpad_on" : "dpad_off";
+    parts[3] = hwConfig->hw_keyboard ? "keyboard_on" : "keyboard_off";
 
     for (i = 0, max_part_width = 0; i < N_PARTS; i++) {
         part_properties *p = get_part_properties(props, parts[i]);
