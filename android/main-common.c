@@ -24,6 +24,7 @@
 
 #include "console.h"
 
+#include "android/avd/util.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
@@ -413,7 +414,7 @@ add_parts_to_layout(AConfig* layout,
 
 int
 load_dynamic_skin(AndroidHwConfig* hwConfig,
-                  const char*      skinDirPath,
+                  char**           skinDirPath,
                   int              width,
                   int              height,
                   AConfig*         root)
@@ -422,15 +423,22 @@ load_dynamic_skin(AndroidHwConfig* hwConfig,
     AConfig*  node;
     int       i;
     int       max_part_width;
+    char      fromEnv;
+    char*     sdkRoot = path_getSdkRoot(&fromEnv);
 
-    if (skinDirPath == NULL)
+    if (sdkRoot == NULL) {
+        dwarning("Unable to locate sdk root. Will not use dynamic skin.");
         return 0;
+    }
 
-    snprintf(tmp, sizeof(tmp), "%s/dynamic", skinDirPath);
+    snprintf(tmp, sizeof(tmp), "%s/tools/lib/emulator/skins/dynamic/", sdkRoot);
+    free(sdkRoot);
+
     if (!path_exists(tmp))
         return 0;
 
-    snprintf(tmp, sizeof(tmp), "%s/dynamic/layout", skinDirPath);
+    *skinDirPath = strdup(tmp);
+    snprintf(tmp, sizeof(tmp), "%s/layout", *skinDirPath);
     D("trying to load skin file '%s'", tmp);
 
     if(aconfig_load_file(root, tmp) < 0) {
@@ -600,9 +608,9 @@ parse_skin_files(const char*      skinDirPath,
             }
 
             if (opts->dynamic_skin) {
-                if (load_dynamic_skin(hwConfig, skinDirPath, width, height, root)) {
-                    snprintf(tmp, sizeof tmp, "%s/dynamic/", skinDirPath);
-                    path = tmp;
+                char *dynamicSkinDirPath;
+                if (load_dynamic_skin(hwConfig, &dynamicSkinDirPath, width, height, root)) {
+                    path = dynamicSkinDirPath;
                     D("loaded dynamic skin width=%d height=%d bpp=%d\n", width, height, bpp);
                     goto FOUND_SKIN;
                 }
