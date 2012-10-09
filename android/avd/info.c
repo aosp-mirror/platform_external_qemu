@@ -84,6 +84,9 @@ AvdInfo*        android_avdInfo;
  */
 #define  SKIN_NAME       "skin.name"
 
+/* the config.ini key that specifies if this AVD should use a dynamic skin */
+#define  SKIN_DYNAMIC    "skin.dynamic"
+
 /* default skin name */
 #define  SKIN_DEFAULT    "HVGA"
 
@@ -1195,6 +1198,14 @@ avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir )
     DD("found skin '%s' in directory: %s", *pSkinName, *pSkinDir);
     AFREE(skinPath);
     return;
+}
+
+int
+avdInfo_shouldUseDynamicSkin( AvdInfo* i)
+{
+    if (i == NULL || i->configIni == NULL)
+        return 0;
+    return iniFile_getBoolean( i->configIni, SKIN_DYNAMIC, "no" );
 }
 
 char*

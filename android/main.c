@@ -324,6 +324,10 @@ int main(int argc, char **argv)
         avdInfo_getSkinHardwareIni(avd, opts->skin, opts->skindir);
     }
 
+    if (opts->dynamic_skin == 0) {
+        opts->dynamic_skin = avdInfo_shouldUseDynamicSkin(avd);
+    }
+
     /* Read hardware configuration */
     hw = android_hw;
     if (avdInfo_initHwConfig(avd, hw) < 0) {
