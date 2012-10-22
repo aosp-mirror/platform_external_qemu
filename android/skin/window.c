@@ -1553,6 +1553,19 @@ skin_window_set_scale( SkinWindow*  window, double  scale )
     skin_window_redraw( window, NULL );
 }
 
+static uint32_t
+sdl_surface_map_argb( SDL_Surface* s, uint32_t  c )
+{
+    if (s != NULL) {
+        return SDL_MapRGBA( s->format,
+            ((c) >> 16) & 255,
+            ((c) >> 8) & 255,
+            ((c) & 255),
+            ((c) >> 24) & 255 );
+    }
+    return 0x00000000;
+}
+
 void
 skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
 {
@@ -1572,7 +1585,8 @@ skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
                 rd.w = r.size.w;
                 rd.h = r.size.h;
 
-                SDL_FillRect( window->surface, &rd, layout->color );
+                SDL_FillRect( window->surface, &rd,
+                              sdl_surface_map_argb( window->surface, layout->color ));
             }
         }
 
