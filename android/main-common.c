@@ -487,14 +487,14 @@ load_dynamic_skin(AndroidHwConfig* hwConfig,
                 portrait {\n \
                     width %d\n \
                     height %d\n \
-                    color 0x404040\n \
+                    color 0xff404040\n \
                     event EV_SW:0:1\n \
                     part1 {\n name device\n x 0\n y 0\n}\n \
                 }\n \
                 landscape {\n \
                     width %d\n \
                     height %d\n \
-                    color 0x404040\n \
+                    color 0xff404040\n \
                     event EV_SW:0:0\n \
                     dpad-rotation 3\n \
                     part1 {\n name device\n x 0\n y %d\n rotation 3\n }\n \
