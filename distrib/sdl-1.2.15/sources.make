@@ -183,12 +183,7 @@ ifeq ($(SDL_CONFIG_VIDEO_QUARTZ),yes)
           quartz/SDL_QuartzVideo.m \
           quartz/SDL_QuartzWM.m \
           quartz/SDL_QuartzWindow.m \
-          quartz/SDL_QuartzEvents.m \
-          maccommon/SDL_macevents.c \
-          maccommon/SDL_macgl.c \
-          maccommon/SDL_macmouse.c \
-          maccommon/SDL_macwm.c
-
+          quartz/SDL_QuartzEvents.m
 endif
 
 ifeq ($(SDL_CONFIG_VIDEO_X11),yes)
