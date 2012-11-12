@@ -72,7 +72,9 @@ endif
 
 ifeq ($(HOST_OS),darwin)
     MY_CFLAGS += -mdynamic-no-pic -D_DARWIN_C_SOURCE=1
-
+    ifneq ($(host_toolchain_header),)
+        MY_CFLAGS += -isystem $(host_toolchain_header)
+    endif
     MY_CFLAGS += -isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version) -DMACOSX_DEPLOYMENT_TARGET=$(mac_sdk_version)
     MY_LDLIBS += -isysroot $(mac_sdk_root) -Wl,-syslibroot,$(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)
 
