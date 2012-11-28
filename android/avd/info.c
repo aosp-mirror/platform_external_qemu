@@ -479,15 +479,37 @@ _avdInfo_getRootIni( AvdInfo*  i )
 static int
 _avdInfo_getContentPath( AvdInfo*  i )
 {
-#   define  ROOT_PATH_KEY    "path"
+/* AVD root ini keys.
+ * These keys must match their counterpart defined in
+ * sdk/sdkmanager/libs/sdklib/src/com/android/sdklib/internal/avd/AvdManager.java
+*/
+#   define  ROOT_ABS_PATH_KEY    "path"
+#   define  ROOT_REL_PATH_KEY    "path.rel"
 
-    i->contentPath = iniFile_getString(i->rootIni, ROOT_PATH_KEY, NULL);
+    char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
+
+    i->contentPath = iniFile_getString(i->rootIni, ROOT_ABS_PATH_KEY, NULL);
 
     if (i->contentPath == NULL) {
         derror("bad config: %s",
-               "virtual device file lacks a "ROOT_PATH_KEY" entry");
+               "virtual device file lacks a "ROOT_ABS_PATH_KEY" entry");
         return -1;
     }
+    
+    if (!path_is_dir(i->contentPath)) {
+        // If the absolute path doesn't match an actual directory, try
+        // the relative path if present.
+        const char* relPath = iniFile_getString(i->rootIni, ROOT_REL_PATH_KEY, NULL);
+        if (relPath != null) {
+            p = bufprint_config_path(temp, end);
+            p = bufprint(p, end, PATH_SEP "%s.ini", relPath);
+            if (p < end && path_is_dir(temp)) {
+                AFREE(i->contentPath);
+                i->contentPath = ASTRDUP(temp);
+            }
+        }
+    }
+    
     D("virtual device content at %s", i->contentPath);
     return 0;
 }
