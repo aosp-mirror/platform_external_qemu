@@ -84,6 +84,7 @@ ifeq ($(HOST_OS),linux)
 EMULATOR_COMMON_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
 endif
 
+
 ###########################################################
 # Zlib sources
 #
@@ -318,7 +319,7 @@ AUDIO_SOURCES := noaudio.c wavaudio.c wavcapture.c mixeng.c
 AUDIO_CFLAGS  := -I$(LOCAL_PATH)/audio -DHAS_AUDIO
 AUDIO_LDLIBS  :=
 
-common_LOCAL_CFLAGS += -Wall -Wno-missing-field-initializers
+common_LOCAL_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 
 ifeq ($(HOST_OS),darwin)
   CONFIG_COREAUDIO ?= yes
@@ -396,7 +397,7 @@ endif
 EMULATOR_LIBQEMU_CFLAGS += $(AUDIO_CFLAGS)
 EMULATOR_LIBQEMU_LDLIBS += $(AUDIO_LDLIBS)
 
-common_LOCAL_CFLAGS += -Wno-missing-field-initializers
+common_LOCAL_CFLAGS += $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 
 # migration sources
 #
