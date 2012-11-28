@@ -313,7 +313,7 @@ ifneq ($(QEMU_OPENGLES_INCLUDE),)
     LOCAL_CFLAGS += -I$(QEMU_OPENGLES_INCLUDE)
 endif
 
-LOCAL_CFLAGS += -Wno-missing-field-initializers
+LOCAL_CFLAGS += $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 
 LOCAL_STATIC_LIBRARIES := \
     emulator-libqemu \
