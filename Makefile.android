@@ -78,6 +78,20 @@ ifeq ($(HOST_OS),darwin)
 
 endif
 
+# Some CFLAGS below use -Wno-missing-field-initializers but this is not
+# supported on GCC 3.x which is still present under Cygwin.
+# Find out by probing GCC for support of this flag. Note that the test
+# itself only works on GCC 4.x anyway.
+GCC_W_NO_MISSING_FIELD_INITIALIZERS := -Wno-missing-field-initializers
+ifeq ($(HOST_OS),windows)
+  ifeq ($(USE_MINGW),)
+    ifeq (,$(shell gcc -Q --help=warnings 2>/dev/null | grep missing-field-initializers))
+        $(info emulator: Ignoring unsupported GCC flag $(GCC_W_NO_MISSING_FIELD_INITIALIZERS))
+        GCC_W_NO_MISSING_FIELD_INITIALIZERS :=
+    endif
+  endif
+endif
+
 # BUILD_STANDALONE_EMULATOR is only defined when building with
 # the android-rebuild.sh script. The script will also provide
 # adequate values for HOST_CC
@@ -130,7 +144,7 @@ endif
 # Enable warning, except those related to missing field initializers
 # (the QEMU coding style loves using these).
 #
-MY_CFLAGS += -Wall -Wno-missing-field-initializers
+MY_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 
 # Needed to build fpu/softfloat-native.h properly
 MY_CFLAGS += -D_GNU_SOURCE=1
