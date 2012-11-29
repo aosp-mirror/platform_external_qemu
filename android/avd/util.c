@@ -19,6 +19,7 @@
 #include "android/utils/path.h"
 #include "android/utils/system.h"
 #include "android/avd/util.h"
+#include "android/avd/keys.h"
 
 #define D(...) VERBOSE_PRINT(init,__VA_ARGS__)
 
@@ -86,7 +87,7 @@ path_getRootIniPath( const char*  avdName )
     char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
 
     p = bufprint_config_path(temp, end);
-    p = bufprint(p, end, "/" ANDROID_AVD_DIR "/%s.ini", avdName);
+    p = bufprint(p, end, PATH_SEP ANDROID_AVD_DIR PATH_SEP "%s.ini", avdName);
     if (p >= end) {
         return NULL;
     }
@@ -112,26 +113,37 @@ path_getSdkHome(void)
 static char*
 _getAvdContentPath(const char* avdName)
 {
-    char*    sdkHome = path_getSdkHome();
+    char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
+    IniFile* ini = NULL;
+    char*    iniPath = path_getRootIniPath(avdName);
     char*    avdPath = NULL;
-    IniFile* ini;
-    char     temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
 
-    /* Look for the root .ini file */
-    p = bufprint(temp, end, "%s/avd/%s.ini", sdkHome, avdName);
-    if (p >= end) {
-        APANIC("AVD Name too long: %s\n", avdName);
+    if (iniPath != NULL) {
+        ini = iniFile_newFromFile(iniPath);
+        AFREE(iniPath);
     }
 
-    ini = iniFile_newFromFile(temp);
     if (ini == NULL) {
-        APANIC("Could not open: %s", temp);
+        APANIC("Could not open: %s\n", iniPath == NULL ? avdName : iniPath);
     }
 
-    avdPath = iniFile_getString(ini, "path", NULL);
+    avdPath = iniFile_getString(ini, ROOT_ABS_PATH_KEY, NULL);
+
+    if (!path_is_dir(avdPath)) {
+        // If the absolute path doesn't match an actual directory, try
+        // the relative path if present.
+        const char* relPath = iniFile_getString(ini, ROOT_REL_PATH_KEY, NULL);
+        if (relPath != NULL) {
+            p = bufprint_config_path(temp, end);
+            p = bufprint(p, end, PATH_SEP "%s", relPath);
+            if (p < end && path_is_dir(temp)) {
+                AFREE(avdPath);
+                avdPath = ASTRDUP(temp);
+            }
+        }
+    }
 
     iniFile_free(ini);
-    AFREE(sdkHome);
 
     return avdPath;
 }
@@ -143,13 +155,13 @@ _getAvdTargetArch(const char* avdPath)
     IniFile* ini;
     char*    targetArch = NULL;
     char     temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-    p = bufprint(temp, end, "%s/config.ini", avdPath);
+    p = bufprint(temp, end, "%s" PATH_SEP "config.ini", avdPath);
     if (p >= end) {
         APANIC("AVD path too long: %s\n", avdPath);
     }
     ini = iniFile_newFromFile(temp);
     if (ini == NULL) {
-        APANIC("Could not open AVD config file: %s", temp);
+        APANIC("Could not open AVD config file: %s\n", temp);
     }
     targetArch = iniFile_getString(ini, "hw.cpu.arch", "arm");
     iniFile_free(ini);

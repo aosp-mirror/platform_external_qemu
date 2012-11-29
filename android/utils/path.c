@@ -219,6 +219,8 @@ ABool
 path_exists( const char*  path )
 {
     int  ret;
+    if (path == NULL)
+        return 0;
     CHECKED(ret, access(path, F_OK));
     return (ret == 0) || (errno != ENOENT);
 }
@@ -230,6 +232,8 @@ path_is_regular( const char*  path )
     int          ret;
     struct stat  st;
 
+    if (path == NULL)
+        return 0;
     CHECKED(ret, stat(path, &st));
     if (ret < 0)
         return 0;
@@ -245,6 +249,8 @@ path_is_dir( const char*  path )
     int          ret;
     struct stat  st;
 
+    if (path == NULL)
+        return 0;
     CHECKED(ret, stat(path, &st));
     if (ret < 0)
         return 0;
@@ -257,6 +263,8 @@ ABool
 path_can_read( const char*  path )
 {
     int  ret;
+    if (path == NULL)
+        return 0;
     CHECKED(ret, access(path, R_OK));
     return (ret == 0);
 }
@@ -265,6 +273,8 @@ ABool
 path_can_write( const char*  path )
 {
     int  ret;
+    if (path == NULL)
+        return 0;
     CHECKED(ret, access(path, R_OK));
     return (ret == 0);
 }
@@ -273,6 +283,8 @@ ABool
 path_can_exec( const char* path )
 {
     int  ret;
+    if (path == NULL)
+        return 0;
     CHECKED(ret, access(path, X_OK));
     return (ret == 0);
 }
