@@ -1030,7 +1030,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             initWithContentRect:contentRect
                 styleMask:style 
                     backing:NSBackingStoreBuffered
-                        defer:NO ];
+                        defer:YES ];
                           
         if (qz_window == nil) {
             SDL_SetError ("Could not create the Cocoa window");
