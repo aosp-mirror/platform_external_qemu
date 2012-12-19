@@ -33,11 +33,10 @@
 static void QZ_SetPortAlphaOpaque () {
     
     SDL_Surface *surface = current_video->screen;
-    int bpp;
-    
-    bpp = surface->format->BitsPerPixel;
-    
-    if (bpp == 32) {
+    int bpp = surface->format->BitsPerPixel;
+    Uint32 amask = surface->format->Amask;
+
+    if (bpp == 32 && amask != 0) {
     
         Uint32    *pixels = (Uint32*) surface->pixels;
         Uint32    rowPixels = surface->pitch / 4;
@@ -46,7 +45,7 @@ static void QZ_SetPortAlphaOpaque () {
         for (i = 0; i < surface->h; i++)
             for (j = 0; j < surface->w; j++) {
         
-                pixels[ (i * rowPixels) + j ] |= 0xFF000000;
+                pixels[ (i * rowPixels) + j ] |= amask;
             }
     }
 }
