@@ -152,4 +152,7 @@ static inline void cpu_synchronize_state(CPUState *env, int modified)
 #endif
 }
 
+int kvm_get_sregs(CPUState *env);
+
+
 #endif
