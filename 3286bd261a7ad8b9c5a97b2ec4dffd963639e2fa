@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "N-4I7D8k",
+        "filename": "hw/goldfish_vmem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2013-01-11T16:10:10Z",
+      "side": 1,
+      "message": "Probably needs 2013 here instead.",
+      "revId": "3286bd261a7ad8b9c5a97b2ec4dffd963639e2fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "N-.JiA9E",
+        "filename": "hw/goldfish_vmem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2013-01-11T16:10:10Z",
+      "side": 1,
+      "message": "the previous code didn\u0027t really checked any error in cpu_synchronize_state(), so I wouldn\u0027t be worried about this.\n\nOn the other hand, can you avoid duplicating the comment, i.e. put it before both functions.\n\nnit: \"Intel\" instead of \"intel\" would probably be appreciated by Intel folks :-)",
+      "revId": "3286bd261a7ad8b9c5a97b2ec4dffd963639e2fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "N-2JX8-M",
+        "filename": "hw/goldfish_vmem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2013-01-11T16:10:10Z",
+      "side": 1,
+      "message": "Since it\u0027s a new file, 2013 too :)",
+      "revId": "3286bd261a7ad8b9c5a97b2ec4dffd963639e2fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "N-0Ja9xw",
+        "filename": "hw/goldfish_vmem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2013-01-11T16:10:10Z",
+      "side": 1,
+      "message": "I\u0027d prefer if you avoided repeating the comment and be somewhat more explicit, as in:\n\n  // Call these functions instead of cpu_memory_rw_debug and\n  // cpu_get_phys_page_debug to ensure address translation\n  // always works properly, and efficiently, under KVM.",
+      "revId": "3286bd261a7ad8b9c5a97b2ec4dffd963639e2fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
