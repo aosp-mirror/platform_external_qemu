@@ -42,6 +42,7 @@ OPTION_CROSS=
 OPTION_ARCH=
 OPTION_CONFIG=
 OPTION_JOBS=
+OPTION_VERBOSE=
 
 for opt do
     optarg=$(expr "x$opt" : 'x[^=]*=\(.*\)')
@@ -63,6 +64,9 @@ for opt do
     --config=*)
         OPTION_CONFIG=$optarg
         ;;
+    --verbose)
+        OPTION_VERBOSE=true
+        ;;
     -j*)
         OPTION_JOBS=$optarg
         ;;
@@ -83,6 +87,7 @@ if [ $OPTION_HELP = "yes" ] ; then
     echo "  --out=<directory>        output directory [$OUTPUT]"
     echo "  --cross=<prefix>         cross-toolchain prefix [$CROSSPREFIX]"
     echo "  --config=<name>          kernel config name [$CONFIG]"
+    echo "  --verbose                show build commands"
     echo "  -j<number>               launch <number> parallel build jobs [$JOBS]"
     echo ""
     echo "NOTE: --armv7 is equivalent to --config=goldfish_armv7. It is"
@@ -197,11 +202,16 @@ fi
 export REAL_CROSS_COMPILE="$CROSS_COMPILE"
 CROSS_COMPILE=$(dirname "$0")/kernel-toolchain/android-kernel-toolchain-
 
+MAKE_FLAGS=
+if [ "$OPTION_VERBOSE" ]; then
+  MAKE_FLAGS="$MAKE_FLAGS V=1"
+fi
+
 # Do the build
 #
 rm -f include/asm &&
 make ${CONFIG}_defconfig &&    # configure the kernel
-make -j$JOBS                   # build it
+make -j$JOBS $MAKE_FLAGS       # build it
 
 if [ $? != 0 ] ; then
     echo "Could not build the kernel. Aborting !"
