@@ -48,10 +48,7 @@
 /* Defines name of the camera service. */
 #define SERVICE_NAME    "camera"
 
-/* Maximum number of supported emulated cameras.
-   I (deepanshu) think that this number includes two cameras: one facing back
-   and the other facing forward. These two cameras are copies of the actual ones
-   connected to the host. */
+/* Maximum number of supported emulated cameras. */
 #define MAX_CAMERA      8
 #define MAX_VIDEO       8
 
@@ -110,7 +107,7 @@ getVideoInfo(FILE* fp, VideoInfo *videoInfo) {
 int
 enumerate_video_devices(VideoInfo* vi, int max)
 {
-    FILE* fp = fopen("/usr/local/google/home/deepanshu/Desktop/videoa.bmp", "rb");
+    FILE* fp = fopen("/path/to/file.bmp", "rb");
     if (fp == NULL) {
         return 0;
     }
@@ -118,7 +115,7 @@ enumerate_video_devices(VideoInfo* vi, int max)
     ANEW(vd);
     vi->vd = vd;
     vi->vd->fp = fp;
-    vi->display_name = ASTRDUP("videoa.bmp");
+    vi->display_name = ASTRDUP("file.bmp");
     vi->in_use=0;
     getVideoInfo(fp, vi);
     return 1;
