@@ -1136,10 +1136,11 @@ int main(int argc, char **argv)
     if (opts->camera_back) {
         /* Validate parameter. */
         if (memcmp(opts->camera_back, "webcam", 6) &&
+            memcmp(opts->camera_back, "video", 5) &&
             strcmp(opts->camera_back, "emulated") &&
             strcmp(opts->camera_back, "none")) {
             derror("Invalid value for -camera-back <mode> parameter: %s\n"
-                   "Valid values are: 'emulated', 'webcam<N>', or 'none'\n",
+                   "Valid values are: 'emulated', 'webcam<N>', 'video<N>' or 'none'\n",
                    opts->camera_back);
             exit(1);
         }
@@ -1149,10 +1150,11 @@ int main(int argc, char **argv)
     if (opts->camera_front) {
         /* Validate parameter. */
         if (memcmp(opts->camera_front, "webcam", 6) &&
+            memcmp(opts->camera_back, "video", 5) &&
             strcmp(opts->camera_front, "emulated") &&
             strcmp(opts->camera_front, "none")) {
             derror("Invalid value for -camera-front <mode> parameter: %s\n"
-                   "Valid values are: 'emulated', 'webcam<N>', or 'none'\n",
+                   "Valid values are: 'emulated', 'webcam<N>', 'video<N>' or 'none'\n",
                    opts->camera_front);
             exit(1);
         }
