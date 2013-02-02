@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "PD2WIySo",
+        "filename": "android/camera/bmp-reader.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1001414
+      },
+      "writtenOn": "2013-02-02T00:46:29Z",
+      "side": 1,
+      "message": "should be 2013",
+      "revId": "3d7708dc39b9ca6f23698deb822a9a4bc896f0cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "PD2WR6Uw",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1001414
+      },
+      "writtenOn": "2013-02-02T00:46:29Z",
+      "side": 1,
+      "message": "I would put a todo here explaining this is work in progress and not used now.",
+      "revId": "3d7708dc39b9ca6f23698deb822a9a4bc896f0cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
