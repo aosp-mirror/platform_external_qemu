@@ -25,5 +25,17 @@
 /* Initializes adb QEMUD service. */
 extern void android_adb_service_init(void);
 
+/* Notifies the ADB Server that a snapshot has been restored.
+ *
+ * When using the pipe based connection to the device ADB we enter a state
+ * in which the server running in qemu is expecting the adbd on the device
+ * to initiate a connection to the pipe. The adbd on the device has just been
+ * restored and thinks it has a valid connection to the adb server in qemu.
+ * By closing any open pipe connections resurrected by loadvm the adbd on the
+ * device will reinitialize its connection with the adb server and we will enter
+ * a valid state.
+ */
+extern void android_adb_service_on_loadvm();
+
 #endif  /* ANDROID_ADB_PIPE_H_ */
 

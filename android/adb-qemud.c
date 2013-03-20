@@ -72,6 +72,43 @@ struct AdbDbgClient {
     QemudClient*    qemud_client;
 };
 
+typedef struct LoadedClient LoadedClient;
+struct LoadedClient {
+  QemudClient* client;
+  LoadedClient* next;
+};
+
+static LoadedClient* _loadedClients;
+
+static void _AddClient(QemudClient* client) {
+  LoadedClient* loadedClient = malloc(sizeof(LoadedClient));
+  loadedClient->client = client;
+  loadedClient->next = _loadedClients;
+  _loadedClients = loadedClient;
+}
+
+static void _CloseAllClients() {
+  LoadedClient* client = _loadedClients;
+  while (NULL != client) {
+    E("CLOSING a client");
+    qemud_client_close(client->client);
+    E("CLOSED...");
+    LoadedClient* old_client = client;
+    client = client->next;
+    E("FREED..");
+    AFREE(old_client);
+  }
+
+  _loadedClients = NULL;
+}
+
+
+static int _close_client_on_load(QEMUFile* f, QemudClient* client, void* opaque)
+{
+  _AddClient(client);
+  return 0;
+}
+
 /********************************************************************************
  *                      ADB host communication.
  *******************************************************************************/
@@ -173,6 +210,7 @@ _adb_client_free(AdbClient* adb_client)
         free(adb_client);
     }
 }
+
 
 /* A callback that is invoked when ADB guest sends data to the service.
  * Param:
@@ -284,7 +322,7 @@ _adb_service_connect(void*          opaque,
     D("Connecting ADB guest: '%s'", client_param ? client_param : "<null>");
     adb_client->qemud_client =
         qemud_client_new(serv, channel, client_param, adb_client,
-                         _adb_client_recv, _adb_client_close, NULL, NULL);
+                         _adb_client_recv, _adb_client_close, NULL, _close_client_on_load);
     if (adb_client->qemud_client == NULL) {
         D("Unable to create QEMUD client for ADB guest.");
         _adb_client_free(adb_client);
@@ -374,35 +412,47 @@ _adb_debug_service_connect(void*          opaque,
  *                      ADB service API.
  *******************************************************************************/
 
+void android_adb_service_on_loadvm(void)
+{
+  _CloseAllClients();
+}
 void
 android_adb_service_init(void)
 {
 static int _inited = 0;
+    W("HELLO ENTERING...");
 
     if (!adb_server_is_initialized()) {
+        W("server not initialized...");
         return;
+    } else {
+        W("adb server is initialized initiing pipe");
     }
 
     if (!_inited) {
+        W("begin init");
         /* Register main ADB service. */
-        QemudService*  serv = qemud_service_register(SERVICE_NAME, 0, NULL,
-                                                     _adb_service_connect,
-                                                     NULL, NULL);
+        QemudService* serv = qemud_service_register(SERVICE_NAME, 0, NULL,
+                                          _adb_service_connect,
+                                          NULL, NULL);
         if (serv == NULL) {
             derror("%s: Could not register '%s' service",
                    __FUNCTION__, SERVICE_NAME);
             return;
         }
-        D("%s: Registered '%s' qemud service", __FUNCTION__, SERVICE_NAME);
+        W("%s: Registered '%s' qemud service", __FUNCTION__, SERVICE_NAME);
 
         /* Register debugging ADB service. */
         serv = qemud_service_register(DEBUG_SERVICE_NAME, 0, NULL,
                                       _adb_debug_service_connect, NULL, NULL);
         if (serv != NULL) {
-            DD("Registered '%s' qemud service", DEBUG_SERVICE_NAME);
+            W("Registered '%s' qemud service", DEBUG_SERVICE_NAME);
         } else {
             dwarning("%s: Could not register '%s' service",
                    __FUNCTION__, DEBUG_SERVICE_NAME);
         }
+    } else {
+
+        W("already init");
     }
 }
