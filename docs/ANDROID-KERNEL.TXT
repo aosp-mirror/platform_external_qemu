@@ -7,7 +7,7 @@ I. Helper script:
 We now provide a helper script to rebuild the kernel,
 it is under distrib/rebuild-kernel.sh.
 
-You need the sources in android.git.kernel.org/kernel/qemu.git,
+You need the sources in android.googlesource.com/kernel/goldfish.git,
 in branch origin/android-goldfish-2.6.29
 
 To rebuild the ARMv5TE kernel:
@@ -47,9 +47,9 @@ You need to have the Android toolchain in your path
 
 then:
 
-git clone git://android.git.kernel.org/kernel/common.git kernel-common
-cd kernel-common
-git checkout origin/archive/android-gldfish-2.6.29
+git clone https://android.googlesource.com/kernel/goldfish.git kernel-goldfish
+cd kernel-goldfish
+git checkout origin/android-gldfish-2.6.29
 
 export CROSS_COMPILE=arm-eabi-
 export ARCH=arm
