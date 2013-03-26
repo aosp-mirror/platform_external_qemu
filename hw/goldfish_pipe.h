@@ -143,7 +143,7 @@ extern void goldfish_pipe_wake( void* hwpipe, unsigned flags );
  *
  * Where $KERNEL points to the android-goldfish-2.6.xx branch on:
  *
- *     android.git.kernel.org/kernel/qemu.git.
+ *     android.googlesource.com/kernel/goldfish.git.
  */
 
 /* pipe device registers */
