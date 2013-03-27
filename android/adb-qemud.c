@@ -72,6 +72,42 @@ struct AdbDbgClient {
     QemudClient*    qemud_client;
 };
 
+/* tracks ADB pipe clients brought into existance by snapshot reloads */
+typedef struct ReloadedAdbPipeClient ReloadedAdbPipeClient;
+struct ReloadedAdbPipeClient {
+  QemudClient* client;
+  ReloadedAdbPipeClient* next;
+};
+
+static ReloadedAdbPipeClient* _reloaded_clients = NULL;
+
+static int
+_track_reloaded_client(QEMUFile* file, QemudClient* client, void* opaque) {
+  ReloadedAdbPipeClient* reloaded_client = malloc(sizeof(ReloadedAdbPipeClient));
+  reloaded_client->client = client;
+  reloaded_client->next = _reloaded_clients;
+  _reloaded_clients = reloaded_client;
+  return 0;
+}
+
+/* Once the vm snapshot has been fully reloaded, we can close all the clients
+ * that were resurrected by the reload. This will make adbd reconnect with the
+ * emulator and the adbd <-> emulator communication protocol will be in the
+ * sane state.
+ */
+static void
+_close_reloaded_clients(void) {
+  ReloadedAdbPipeClient* client = _reloaded_clients;
+  while (NULL != client) {
+    qemud_client_close(client->client);
+    ReloadedAdbPipeClient* old_client = client;
+    client = client->next;
+    free(old_client);
+  }
+
+  _reloaded_clients = NULL;
+}
+
 /********************************************************************************
  *                      ADB host communication.
  *******************************************************************************/
@@ -173,6 +209,7 @@ _adb_client_free(AdbClient* adb_client)
         free(adb_client);
     }
 }
+
 
 /* A callback that is invoked when ADB guest sends data to the service.
  * Param:
@@ -284,7 +321,8 @@ _adb_service_connect(void*          opaque,
     D("Connecting ADB guest: '%s'", client_param ? client_param : "<null>");
     adb_client->qemud_client =
         qemud_client_new(serv, channel, client_param, adb_client,
-                         _adb_client_recv, _adb_client_close, NULL, NULL);
+                         _adb_client_recv, _adb_client_close, NULL,
+                         _track_reloaded_client);
     if (adb_client->qemud_client == NULL) {
         D("Unable to create QEMUD client for ADB guest.");
         _adb_client_free(adb_client);
@@ -360,7 +398,8 @@ _adb_debug_service_connect(void*          opaque,
        client_param ? client_param : "<null>");
     adb_dbg_client->qemud_client =
         qemud_client_new(serv, channel, client_param, adb_dbg_client,
-                         _adb_dbg_client_recv, _adb_dbg_client_close, NULL, NULL);
+                         _adb_dbg_client_recv, _adb_dbg_client_close, NULL,
+                         _track_reloaded_client);
     if (adb_dbg_client->qemud_client == NULL) {
         DD("Unable to create QEMUD client for ADB debugging guest.");
         _adb_dbg_client_free(adb_dbg_client);
@@ -375,6 +414,12 @@ _adb_debug_service_connect(void*          opaque,
  *******************************************************************************/
 
 void
+android_adb_service_on_loadvm(void)
+{
+  _close_reloaded_clients();
+}
+
+void
 android_adb_service_init(void)
 {
 static int _inited = 0;
@@ -385,9 +430,9 @@ static int _inited = 0;
 
     if (!_inited) {
         /* Register main ADB service. */
-        QemudService*  serv = qemud_service_register(SERVICE_NAME, 0, NULL,
-                                                     _adb_service_connect,
-                                                     NULL, NULL);
+        QemudService* serv = qemud_service_register(SERVICE_NAME, 0, NULL,
+                                                    _adb_service_connect,
+                                                    NULL, NULL);
         if (serv == NULL) {
             derror("%s: Could not register '%s' service",
                    __FUNCTION__, SERVICE_NAME);

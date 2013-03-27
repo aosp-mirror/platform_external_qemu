@@ -1211,9 +1211,13 @@ avdInfo_getCharmapFile( AvdInfo* i, const char* charmapName )
     return _avdInfo_getContentOrSdkFilePath(i, fileName);
 }
 
-int avdInfo_getAdbdCommunicationMode( AvdInfo* i )
+int avdInfo_getAdbdCommunicationMode(AvdInfo* i, AndroidHwConfig* hw)
 {
+  if (hw->adbd_over_pipe) {
+    return 1;
+  } else {
     return path_getAdbdCommunicationMode(i->androidOut);
+  }
 }
 
 int avdInfo_getSnapshotPresent(AvdInfo* i)

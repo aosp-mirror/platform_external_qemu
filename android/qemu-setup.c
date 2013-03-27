@@ -259,7 +259,7 @@ void  android_emulation_setup( void )
         exit(1);
     }
 
-    int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
+    int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo, android_hw) ? 0 : 1;
 
     if (android_op_ports) {
         char* comma_location;

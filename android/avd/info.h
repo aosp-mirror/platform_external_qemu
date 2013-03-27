@@ -256,7 +256,7 @@ const char*  avdInfo_getCoreHwIniPath( AvdInfo* i );
  *      "legacy" mode).
  *  1 - ADBD communicates with the emulator via 'adb' QEMUD service.
  */
-int          avdInfo_getAdbdCommunicationMode( AvdInfo* i );
+int          avdInfo_getAdbdCommunicationMode(AvdInfo* i, AndroidHwConfig* hw);
 
 /* Returns config.ini snapshot presense status.
  * This routine checks if snapshots are enabled in AVD config.ini file.

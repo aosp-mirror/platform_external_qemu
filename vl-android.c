@@ -48,6 +48,7 @@
 
 #include "qemu_file.h"
 #include "android/android.h"
+#include "android/adb-qemud.h"
 #include "charpipe.h"
 #include "modem_driver.h"
 #include "android/gps.h"
@@ -4474,8 +4475,10 @@ int main(int argc, char **argv, char **envp)
     android_emulator_set_base_port(android_base_port);
 #endif
 
-    if (loadvm)
+    if (loadvm) {
         do_loadvm(cur_mon, loadvm);
+        android_adb_service_on_loadvm();
+    }
 
     if (incoming) {
         autostart = 0; /* fixme how to deal with -daemonize */
