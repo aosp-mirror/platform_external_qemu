@@ -3310,6 +3310,18 @@ void cpu_physical_memory_rw(target_phys_addr_t addr, uint8_t *buf,
 }
 
 #else
+
+static void invalidate_and_set_dirty(target_phys_addr_t addr,
+                                     target_phys_addr_t length)
+{
+    if (!cpu_physical_memory_is_dirty(addr)) {
+        /* invalidate code */
+        tb_invalidate_phys_page_range(addr, addr + length, 0);
+        /* set dirty bit */
+        cpu_physical_memory_set_dirty_flags(addr, (0xff & ~CODE_DIRTY_FLAG));
+    }
+}
+
 void cpu_physical_memory_rw(target_phys_addr_t addr, uint8_t *buf,
                             int len, int is_write)
 {
@@ -3362,13 +3374,7 @@ void cpu_physical_memory_rw(target_phys_addr_t addr, uint8_t *buf,
                 /* RAM case */
                 ptr = qemu_get_ram_ptr(addr1);
                 memcpy(ptr, buf, l);
-                if (!cpu_physical_memory_is_dirty(addr1)) {
-                    /* invalidate code */
-                    tb_invalidate_phys_page_range(addr1, addr1 + l, 0);
-                    /* set dirty bit */
-                    cpu_physical_memory_set_dirty_flags(
-                        addr1, (0xff & ~CODE_DIRTY_FLAG));
-                }
+                invalidate_and_set_dirty(addr1, l);
             }
         } else {
             if ((pd & ~TARGET_PAGE_MASK) > IO_MEM_ROM &&
@@ -3439,6 +3445,7 @@ void cpu_physical_memory_write_rom(target_phys_addr_t addr,
             /* ROM/RAM case */
             ptr = qemu_get_ram_ptr(addr1);
             memcpy(ptr, buf, l);
+            invalidate_and_set_dirty(addr1, l);
         }
         len -= l;
         buf += l;
@@ -3569,13 +3576,7 @@ void cpu_physical_memory_unmap(void *buffer, target_phys_addr_t len,
                 l = TARGET_PAGE_SIZE;
                 if (l > access_len)
                     l = access_len;
-                if (!cpu_physical_memory_is_dirty(addr1)) {
-                    /* invalidate code */
-                    tb_invalidate_phys_page_range(addr1, addr1 + l, 0);
-                    /* set dirty bit */
-                    cpu_physical_memory_set_dirty_flags(
-                        addr1, (0xff & ~CODE_DIRTY_FLAG));
-                }
+                invalidate_and_set_dirty(addr1, l);
                 addr1 += l;
                 access_len -= l;
             }
@@ -3773,13 +3774,7 @@ void stl_phys(target_phys_addr_t addr, uint32_t val)
         /* RAM case */
         ptr = qemu_get_ram_ptr(addr1);
         stl_p(ptr, val);
-        if (!cpu_physical_memory_is_dirty(addr1)) {
-            /* invalidate code */
-            tb_invalidate_phys_page_range(addr1, addr1 + 4, 0);
-            /* set dirty bit */
-            cpu_physical_memory_set_dirty_flags(addr1,
-                (0xff & ~CODE_DIRTY_FLAG));
-        }
+        invalidate_and_set_dirty(addr1, 4);
     }
 }
 
