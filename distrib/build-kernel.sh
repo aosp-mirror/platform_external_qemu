@@ -41,6 +41,7 @@ OPTION_OUT=
 OPTION_CROSS=
 OPTION_ARCH=
 OPTION_CONFIG=
+OPTION_SAVEDEFCONFIG=no
 OPTION_JOBS=
 OPTION_VERBOSE=
 
@@ -63,6 +64,9 @@ for opt do
         ;;
     --config=*)
         OPTION_CONFIG=$optarg
+        ;;
+    --savedefconfig)
+        OPTION_SAVEDEFCONFIG=yes
         ;;
     --verbose)
         OPTION_VERBOSE=true
@@ -87,6 +91,7 @@ if [ $OPTION_HELP = "yes" ] ; then
     echo "  --out=<directory>        output directory [$OUTPUT]"
     echo "  --cross=<prefix>         cross-toolchain prefix [$CROSSPREFIX]"
     echo "  --config=<name>          kernel config name [$CONFIG]"
+    echo "  --savedefconfig          run savedefconfig"
     echo "  --verbose                show build commands"
     echo "  -j<number>               launch <number> parallel build jobs [$JOBS]"
     echo ""
@@ -216,6 +221,11 @@ make -j$JOBS $MAKE_FLAGS       # build it
 if [ $? != 0 ] ; then
     echo "Could not build the kernel. Aborting !"
     exit 1
+fi
+
+if [ "$OPTION_SAVEDEFCONFIG" = "yes" ]; then
+    make savedefconfig
+    mv -f defconfig arch/$ARCH/configs/${CONFIG}_defconfig
 fi
 
 # Note: The exact names of the output files are important for the Android build,
