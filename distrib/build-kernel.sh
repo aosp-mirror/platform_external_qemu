@@ -43,6 +43,17 @@ OPTION_ARCH=
 OPTION_CONFIG=
 OPTION_JOBS=
 OPTION_VERBOSE=
+CCACHE=
+
+case "$USE_CCACHE" in
+    "")
+        CCACHE=
+        ;;
+    *)
+        # use ccache bundled in AOSP source tree
+        CCACHE=${ANDROID_BUILD_TOP:-$(dirname $0)/../../..}/prebuilts/misc/$HOST_TAG/ccache/ccache
+        ;;
+esac
 
 for opt do
     optarg=$(expr "x$opt" : 'x[^=]*=\(.*\)')
@@ -63,6 +74,9 @@ for opt do
         ;;
     --config=*)
         OPTION_CONFIG=$optarg
+        ;;
+    --ccache=*)
+        CCACHE=$optarg
         ;;
     --verbose)
         OPTION_VERBOSE=true
@@ -87,6 +101,7 @@ if [ $OPTION_HELP = "yes" ] ; then
     echo "  --out=<directory>        output directory [$OUTPUT]"
     echo "  --cross=<prefix>         cross-toolchain prefix [$CROSSPREFIX]"
     echo "  --config=<name>          kernel config name [$CONFIG]"
+    echo "  --ccache=<path>          use compiler cache [${CCACHE:-not set}]"
     echo "  --verbose                show build commands"
     echo "  -j<number>               launch <number> parallel build jobs [$JOBS]"
     echo ""
@@ -184,6 +199,11 @@ if [ $? != 0 ] ; then
         echo "It looks like $CROSS_COMPILER is not in your path ! Aborting."
         exit 1
     fi
+fi
+
+if [ -n $CCACHE ] ; then
+    echo "Using ccache program: $CCACHE"
+    CROSSPREFIX="$CCACHE $CROSSPREFIX"
 fi
 
 export CROSS_COMPILE="$CROSSPREFIX" ARCH SUBARCH=$ARCH
