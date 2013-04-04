@@ -16,6 +16,24 @@
       "revId": "42e5f11755918ee2d95b315f280a511957ae8ff1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "S9FQMhPI",
+        "filename": "distrib/build-kernel.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1005082
+      },
+      "writtenOn": "2013-04-04T16:34:51Z",
+      "side": 1,
+      "message": "How about like this?\n\n1. turn off ccache as default.\n\n2. check USE_CCACHE variable in shell (it is used in android build) and set default ccache path for AOSP repo layout.\n\n3. add --ccache\u003d\u003cpath\u003e option as you mentioned.",
+      "parentUuid": "TAGvFcVs",
+      "revId": "42e5f11755918ee2d95b315f280a511957ae8ff1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
