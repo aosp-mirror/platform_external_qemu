@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "TAGvFcVs",
+        "filename": "distrib/build-kernel.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2013-04-04T14:13:36Z",
+      "side": 1,
+      "message": "Please add a --no-ccache option to disable this, in order to be able to diagnose ccache-related issues.\n\nShould we be concerned about differences between the ccache in the current PATH and the one under prebuilts/ ? It\u0027s probably better to favor the one in prebuilts/, unless an option like --ccache\u003d\u003cname\u003e is used.",
+      "revId": "42e5f11755918ee2d95b315f280a511957ae8ff1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
