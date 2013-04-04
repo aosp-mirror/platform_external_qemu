@@ -186,7 +186,29 @@ if [ $? != 0 ] ; then
     fi
 fi
 
-export CROSS_COMPILE="$CROSSPREFIX" ARCH SUBARCH=$ARCH
+CCACHE=$(which ccache 2>/dev/null)
+if [ $? != 0 ] ; then
+    BUILD_TOP=$ANDROID_BUILD_TOP
+    if [ -z "$BUILD_TOP" ]; then
+        # Assume this script is under external/qemu/distrib/ in the
+        # Android source tree.
+        BUILD_TOP=$(dirname $0)/../../..
+        if [ ! -d "$BUILD_TOP/prebuilts" ]; then
+            BUILD_TOP=
+        else
+            BUILD_TOP=$(cd $BUILD_TOP && pwd)
+        fi
+    fi
+    CCACHE=$BUILD_TOP/prebuilts/misc/$HOST_TAG/ccache/ccache
+    if [ "$BUILD_TOP" -a -f ${CCACHE} ]; then
+        echo "using ccache"
+    else
+        echo "It looks like $CCACHE is not in your path ! Skipping."
+        CCACHE=
+    fi
+fi
+
+export CROSS_COMPILE="$CCACHE $CROSSPREFIX" ARCH SUBARCH=$ARCH
 
 if [ "$OPTION_JOBS" ]; then
     JOBS=$OPTION_JOBS
