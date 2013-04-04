@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "TAFaclFs",
+        "filename": "distrib/build-kernel.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2013-04-04T16:42:02Z",
+      "side": 1,
+      "message": "I\u0027d recommend testing that the file exists though, and unsetting CCACHE if that\u0027s not the case.",
+      "revId": "2b7504f44298ba2ee25d511022d6dfae4fa2ec61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
