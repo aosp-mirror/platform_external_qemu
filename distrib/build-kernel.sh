@@ -36,7 +36,7 @@ JOBS=$(( $BUILD_NUM_CPUS * 2 ))
 ARCH=arm
 
 OPTION_HELP=no
-OPTION_ARMV7=no
+OPTION_ARMV7=yes
 OPTION_OUT=
 OPTION_CROSS=
 OPTION_ARCH=
@@ -48,9 +48,6 @@ for opt do
     optarg=$(expr "x$opt" : 'x[^=]*=\(.*\)')
     case $opt in
     --help|-h|-\?) OPTION_HELP=yes
-        ;;
-    --armv7)
-        OPTION_ARMV7=yes
         ;;
     --out=*)
         OPTION_OUT=$optarg
@@ -83,15 +80,11 @@ if [ $OPTION_HELP = "yes" ] ; then
     echo ""
     echo "  --help                   print this message"
     echo "  --arch=<arch>            change target architecture [$ARCH]"
-    echo "  --armv7                  build ARMv7 binaries (see note below)"
     echo "  --out=<directory>        output directory [$OUTPUT]"
     echo "  --cross=<prefix>         cross-toolchain prefix [$CROSSPREFIX]"
     echo "  --config=<name>          kernel config name [$CONFIG]"
     echo "  --verbose                show build commands"
     echo "  -j<number>               launch <number> parallel build jobs [$JOBS]"
-    echo ""
-    echo "NOTE: --armv7 is equivalent to --config=goldfish_armv7. It is"
-    echo "      ignored if --config=<name> is used."
     echo ""
     exit 0
 fi
