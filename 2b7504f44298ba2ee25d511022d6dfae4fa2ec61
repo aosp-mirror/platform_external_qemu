@@ -16,6 +16,24 @@
       "revId": "2b7504f44298ba2ee25d511022d6dfae4fa2ec61",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "S9D0H25A",
+        "filename": "distrib/build-kernel.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1005082
+      },
+      "writtenOn": "2013-04-08T11:41:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "TAFaclFs",
+      "revId": "2b7504f44298ba2ee25d511022d6dfae4fa2ec61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
