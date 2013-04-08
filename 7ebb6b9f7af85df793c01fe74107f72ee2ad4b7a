@@ -16,6 +16,24 @@
       "revId": "7ebb6b9f7af85df793c01fe74107f72ee2ad4b7a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "S9H0rI.8",
+        "filename": "distrib/build-kernel.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1005082
+      },
+      "writtenOn": "2013-04-08T12:55:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "TAGl6Fs4",
+      "revId": "7ebb6b9f7af85df793c01fe74107f72ee2ad4b7a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
