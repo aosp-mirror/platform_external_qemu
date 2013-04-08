@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "TAGl6Fs4",
+        "filename": "distrib/build-kernel.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2013-04-08T12:49:34Z",
+      "side": 1,
+      "message": "nit: Use [ \"$CCACHE\" ] instead.\n\nThe -n is optional, but you need to quote the variable, or some shells will complain they can\u0027t parse the statement when the variable is empty :-)",
+      "revId": "7ebb6b9f7af85df793c01fe74107f72ee2ad4b7a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
