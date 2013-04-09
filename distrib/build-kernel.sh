@@ -112,7 +112,7 @@ fi
 if [ -n "$OPTION_CONFIG" ]; then
     CONFIG=$OPTION_CONFIG
 else
-    if [ "$OPTION_ARMV7" = "yes" ]; then
+    if [ "$ARCH" = "arm" -a "$OPTION_ARMV7" = "yes" ]; then
         CONFIG=goldfish_armv7
     fi
     echo "Auto-config: --config=$CONFIG"
