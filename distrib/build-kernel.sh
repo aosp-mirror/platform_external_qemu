@@ -157,15 +157,15 @@ if [ -n "$OPTION_CROSS" ] ; then
 else
     case $ARCH in
         arm)
-            CROSSTOOLCHAIN=arm-linux-androideabi-4.6
+            CROSSTOOLCHAIN=arm-linux-androideabi-4.7
             CROSSPREFIX=arm-linux-androideabi-
             ;;
         x86)
-            CROSSTOOLCHAIN=i686-linux-android-4.6
+            CROSSTOOLCHAIN=i686-linux-android-4.7
             CROSSPREFIX=i686-linux-android-
             ;;
         mips)
-            CROSSTOOLCHAIN=mipsel-linux-android-4.6
+            CROSSTOOLCHAIN=mipsel-linux-android-4.7
             CROSSPREFIX=mipsel-linux-android-
             ;;
         *)
