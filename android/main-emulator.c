@@ -206,12 +206,19 @@ getHostOSBitness()
   ## Note that on Darwin, a single executable can contain both x86 and
   ## x86_64 machine code, so just look for x86_64 (darwin) or x86-64 (Linux)
   ## in the output.
+  ##
+  ## Also note that some versions of 'file' in MacPort may report erroneous
+  ## result.  See http://b.android.com/53769.  Use /usr/bin/file if exists.
 
     (*) ie. The following code doesn't always work:
         struct utsname u;
         int host_runs_64bit_OS = (uname(&u) == 0 && strcmp(u.machine, "x86_64") == 0);
   */
-    return system("file -L \"$SHELL\" | grep -q \"x86[_-]64\"") == 0 ? 64 : 32;
+    int ret = 1;
+#if defined(__APPLE__)
+    ret = system("/usr/bin/file -L \"$SHELL\" | grep -q \"x86[_-]64\"");
+#endif
+    return (ret == 0 || system("file -L \"$SHELL\" | grep -q \"x86[_-]64\"") == 0) ? 64 : 32;
 }
 
 /* Find the target-specific emulator binary. This will be something
