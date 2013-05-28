@@ -65,6 +65,12 @@ AvdInfo*        android_avdInfo;
  * with one of the usual options.
  */
 
+/* default skin root path name */
+#define  PREBUILT_SKINS_ROOT "development/tools/emulator"
+
+/* default skin name */
+#define  SKIN_DEFAULT    "HVGA"
+
 /* the name of the .ini file that will contain the complete hardware
  * properties for the AVD. This will be used to launch the corresponding
  * core from the UI.
@@ -483,8 +489,6 @@ _avdInfo_getApiLevel( AvdInfo*  i )
     const char* p;
     const int   defaultLevel = 1000;
     int         level        = defaultLevel;
-
-#    define ROOT_TARGET_KEY   "target"
 
     target = iniFile_getString(i->rootIni, ROOT_TARGET_KEY, NULL);
     if (target == NULL) {
@@ -1126,8 +1130,6 @@ avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir )
         skinPath = _checkSkinSkinsDir(i->contentPath, skinName);
         if (skinPath != NULL)
             break;
-
-#define  PREBUILT_SKINS_ROOT "development/tools/emulator"
 
         /* if we are in the Android build, try the prebuilt directory */
         if (i->inAndroidBuild) {
