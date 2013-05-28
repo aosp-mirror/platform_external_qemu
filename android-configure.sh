@@ -333,7 +333,7 @@ if [ -n "$SDL_CONFIG" ] ; then
 	SDL_LIBS=`$SDL_CONFIG --static-libs`
 
 	# quick hack, remove the -D_GNU_SOURCE=1 of some SDL Cflags
-7	# since they break recent Mingw releases
+	# since they break recent Mingw releases
 	SDL_CFLAGS=`echo $SDL_CFLAGS | sed -e s/-D_GNU_SOURCE=1//g`
 
 	log "SDL-probe  : SDL_CFLAGS = $SDL_CFLAGS"
