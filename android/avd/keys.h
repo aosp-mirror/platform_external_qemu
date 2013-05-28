@@ -15,11 +15,15 @@
 /* Keys of the properties found in avd/name.ini and config.ini files.
  *
  * These keys must match their counterpart defined in
- * sdk/sdkmanager/libs/sdklib/src/com/android/sdklib/internal/avd/AvdManager.java
+ * tools/base/sdklib/src/main/java/com/android/sdklib/internal/avd/AvdManager.java
  */
 
 
 /* -- Keys used in avd/name.ini -- */
+
+/* Target name of the AVD
+ */
+#define  ROOT_TARGET_KEY      "target"
 
 /* Absolute path of the AVD content directory.
  */
@@ -55,9 +59,6 @@
 
 /* the config.ini key that specifies if this AVD should use a dynamic skin */
 #define  SKIN_DYNAMIC    "skin.dynamic"
-
-/* default skin name */
-#define  SKIN_DEFAULT    "HVGA"
 
 /* the config.ini key that is used to indicate the absolute path
  * to the SD Card image file, if you don't want to place it in
