@@ -22,7 +22,7 @@ typedef struct AModemRec_*    AModem;
 /* a function used by the modem to send unsolicited messages to the channel controller */
 typedef void (*AModemUnsolFunc)( void*  opaque, const char*  message );
 
-extern AModem      amodem_create( int  base_port, AModemUnsolFunc  unsol_func, void*  unsol_opaque );
+extern AModem      amodem_create( int  base_port, AModemUnsolFunc  unsol_func, void*  unsol_opaque, int index );
 extern void        amodem_set_legacy( AModem  modem );
 extern void        amodem_destroy( AModem  modem );
 

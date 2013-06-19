@@ -36,9 +36,9 @@ int
 corecmd_toggle_network()
 {
     qemu_net_disable = !qemu_net_disable;
-    if (android_modem) {
+    if (android_modem[0]) {
         amodem_set_data_registration(
-                android_modem,
+                android_modem[0],
         qemu_net_disable ? A_REGISTRATION_UNREGISTERED
             : A_REGISTRATION_HOME);
     }

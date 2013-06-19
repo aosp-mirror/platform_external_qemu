@@ -573,16 +573,18 @@ static int  android_modem_state_load(QEMUFile *f, void  *opaque, int version_id)
     return 0; // >=0 Happy
 }
 
-static AModemRec   _android_modem[1];
+static AModemRec   _android_modem[2];
 
 AModem
-amodem_create( int  base_port, AModemUnsolFunc  unsol_func, void*  unsol_opaque )
+amodem_create( int  base_port, AModemUnsolFunc  unsol_func, void*  unsol_opaque, int index )
 {
-    AModem  modem = _android_modem;
+    AModem  modem;
     char nvfname[MAX_PATH];
     char *start = nvfname;
     char *end = start + sizeof(nvfname);
 
+    D("%s:\n",__FUNCTION__);
+    modem = &_android_modem[index];
     modem->base_port    = base_port;
     start = bufprint_config_file( start, end, "modem-nv-ram-" );
     start = bufprint( start, end, "%d", modem->base_port );
@@ -593,7 +595,7 @@ amodem_create( int  base_port, AModemUnsolFunc  unsol_func, void*  unsol_opaque 
     modem->unsol_func   = unsol_func;
     modem->unsol_opaque = unsol_opaque;
 
-    modem->sim = asimcard_create(base_port);
+    modem->sim = asimcard_create(base_port, index);
 
     sys_main_init();
     register_savevm( "android_modem", 0, MODEM_DEV_STATE_SAVE_VERSION,
