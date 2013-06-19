@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 The Android Open Source Project
+/* Copyright (C) 2010, 2012 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -37,9 +37,9 @@ int
 corecmd_toggle_network()
 {
     qemu_net_disable = !qemu_net_disable;
-    if (android_modem) {
+    if (android_modem[0]) {
         amodem_set_data_registration(
-                android_modem,
+                android_modem[0],
         qemu_net_disable ? A_REGISTRATION_UNREGISTERED
             : A_REGISTRATION_HOME);
     }

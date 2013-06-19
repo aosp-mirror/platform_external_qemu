@@ -1,7 +1,7 @@
 /*
  * QEMU System Emulator
  *
- * Copyright (c) 2003-2008 Fabrice Bellard
+ * Copyright (c) 2003-2008, 2012 Fabrice Bellard
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -574,7 +574,7 @@ int send_all(int fd, const void *_buf, int len1)
 static CharDriverState *qemu_chr_open_android_modem(QemuOpts* opts)
 {
     CharDriverState*  cs;
-    qemu_chr_open_charpipe( &cs, &android_modem_cs );
+    qemu_chr_open_charpipe( &cs, &android_modem_cs[0] );
     return cs;
 }
 static CharDriverState *qemu_chr_open_android_gps(QemuOpts* opts)
