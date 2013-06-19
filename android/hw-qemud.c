@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2008,2012 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -364,7 +364,7 @@ qemud_serial_read( void*  opaque, const uint8_t*  from, int  len )
                     D("%s: legacy qemud detected.", __FUNCTION__);
                     s->version = QEMUD_VERSION_LEGACY;
                     /* tell the modem to use legacy emulation mode */
-                    amodem_set_legacy(android_modem);
+                    amodem_set_legacy(android_modem[0]);
                 } else {
                     D("%s: normal qemud detected.", __FUNCTION__);
                     s->version = QEMUD_VERSION_NORMAL;
@@ -835,6 +835,7 @@ static void
 qemud_client_disconnect( void*  opaque, int guest_close )
 {
     QemudClient*  c = opaque;
+    D( "%s: client=%d disconnected", __FUNCTION__, c->ProtocolSelector.Serial.channel);
 
     if (c->closing) {  /* recursive call, exit immediately */
         return;
@@ -1117,6 +1118,7 @@ qemud_service_add_client( QemudService*  s, QemudClient*  c )
     c->next_serv    = s->clients;
     s->clients      = c;
     s->num_clients += 1;
+    D( "%s: service=%s, num_clients=%d", __FUNCTION__, s->name, s->num_clients );
 }
 
 /* used internally to remove a QemudClient from a QemudService */
@@ -1125,6 +1127,7 @@ qemud_service_remove_client( QemudService*  s, QemudClient*  c )
 {
     QemudClient**  pnode = &s->clients;
     QemudClient*   node;
+    D( "%s: service=%s, channel =%d", __FUNCTION__, s->name, c->ProtocolSelector.Serial.channel);
 
     /* remove from clients linked-list */
     for (;;) {
@@ -1141,6 +1144,7 @@ qemud_service_remove_client( QemudService*  s, QemudClient*  c )
 
     *pnode          = node->next_serv;
     s->num_clients -= 1;
+    D( "%s: num_clients=%d", __FUNCTION__, s->num_clients );
 }
 
 /* ask the service to create a new QemudClient. Note that we
@@ -1356,6 +1360,7 @@ qemud_multiplexer_disconnect( QemudMultiplexer*  m,
                               int                channel )
 {
     QemudClient*  c;
+    D("%s: channel %d", __FUNCTION__, channel);
 
     /* find the client by its channel id, then disconnect it */
     for (c = m->clients; c; c = c->next) {
@@ -1422,6 +1427,7 @@ qemud_multiplexer_control_recv( void*         opaque,
      * the client message must be "connect:<service-name>:<id>"
      * where <id> is a 2-char hexadecimal string, which must be > 0
      */
+    D("%s: %s",__FUNCTION__,msg);
     if (msglen > 8 && !memcmp(msg, "connect:", 8))
     {
         const char*    service_name = (const char*)msg + 8;
@@ -1468,6 +1474,8 @@ qemud_multiplexer_control_recv( void*         opaque,
      */
     if (msglen == 13 && !memcmp(msg, "disconnect:", 11)) {
         int  channel_id = hex2int(msg+11, 2);
+        D("%s: client[%d] closed the FD",__FUNCTION__,channel_id);
+
         if (channel_id <= 0) {
             D("%s: malformed disconnect channel id: '%.*s'",
               __FUNCTION__, 2, msg+11);
@@ -2431,6 +2439,12 @@ _qemud_char_service_connect(void*          opaque,
                                               _qemud_char_client_close,
                                               NULL, NULL );
 
+/*    if(c == NULL)
+       derror("\n %s: Char service connect refused.", __FUNCTION__);
+    else
+       derror("\n %s: Char service connect accepted.", __FUNCTION__);
+*/
+
     /* now we can open the gates :-) */
     qemu_chr_add_handlers( cs,
                            _qemud_char_service_can_read,
@@ -2448,12 +2462,17 @@ int
 android_qemud_get_channel( const char*  name, CharDriverState* *pcs )
 {
     CharDriverState*   cs;
+    QemudService *s;
 
+    D(" %s: Name=%s", __FUNCTION__, name);
     if (qemu_chr_open_charpipe(&cs, pcs) < 0) {
         derror("can't open charpipe for '%s' qemud service", name);
         exit(2);
     }
-    qemud_service_register(name, 1, cs, _qemud_char_service_connect, NULL, NULL);
+    s = qemud_service_register(name, 2, cs, _qemud_char_service_connect, NULL, NULL);
+    if (s == NULL)
+        derror(" %s: serv is NULL", __FUNCTION__, name);
+
     return 0;
 }
 
