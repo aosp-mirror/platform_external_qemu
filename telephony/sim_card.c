@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2008, 2012 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -32,19 +32,21 @@ typedef struct ASimCardRec_ {
     char        out_buff[ 256 ];
     int         out_size;
 
+    int         index;
 } ASimCardRec;
 
-static ASimCardRec  _s_card[1];
+static ASimCardRec  _s_card[2];
 
 ASimCard
-asimcard_create(int port)
+asimcard_create(int port, int index)
 {
-    ASimCard  card    = _s_card;
+    ASimCard  card    = &_s_card[index];
     card->status      = A_SIM_STATUS_READY;
     card->pin_retries = 0;
     strncpy( card->pin, "0000", sizeof(card->pin) );
     strncpy( card->puk, "12345678", sizeof(card->puk) );
     card->port = port;
+    card->index = index;
     return card;
 }
 
@@ -300,6 +302,10 @@ static const byte_t  _const_iccid[10] = {
     0x98, 0x10, 0x14, 0x30, 0x12, 0x11, 0x81, 0x15, 0x70, 0x02
 };
 
+static const byte_t  _const_iccid_1[10] = {
+    0x98, 0x10, 0x14, 0x30, 0x12, 0x11, 0x81, 0x15, 0x70, 0x20
+};
+
 static const byte_t  _const_cff_cphs[1] = {
     0x55
 };
@@ -320,6 +326,41 @@ static SimFileEFDedicatedRec  _const_files_dedicated[] =
 
     { 0, 0, 0, NULL, 0 }  /* end of list */
 };
+
+static SimFileEFDedicatedRec  _const_files_1_dedicated[] =
+{
+    { SIM_FILE_EF_DEDICATED, 0x6f14, SIM_FILE_READ_ONLY | SIM_FILE_NEED_PIN,
+      _const_spn_cphs, sizeof(_const_spn_cphs) },
+
+    { SIM_FILE_EF_DEDICATED, 0x6f11, SIM_FILE_NEED_PIN,
+      _const_voicemail_cphs, sizeof(_const_voicemail_cphs) },
+
+    { SIM_FILE_EF_DEDICATED, 0x2fe2, SIM_FILE_READ_ONLY,
+      _const_iccid_1, sizeof(_const_iccid_1) },
+
+    { SIM_FILE_EF_DEDICATED, 0x6f13, SIM_FILE_NEED_PIN,
+      _const_cff_cphs, sizeof(_const_cff_cphs) },
+
+    { 0, 0, 0, NULL, 0 }  /* end of list */
+};
+
+const SimFileEFDedicatedRec* get_simfile(ASimCard sim)
+{
+    SimFileEFDedicatedRec* file;
+    switch(sim->index) {
+        case 0:
+            file = &_const_files_dedicated[0];
+            break;
+        case 1:
+            file = &_const_files_1_dedicated[0];
+            break;
+        default:
+            /* Index not identifed, return files of 1st simcard only */
+            file = &_const_files_dedicated[0];
+
+    }
+    return file;
+}
 #endif /* ENABLE_DYNAMIC_RECORDS */
 
 const char*
@@ -380,8 +421,7 @@ asimcard_io( ASimCard  sim, const char*  cmd )
         switch (command) {
             case A_SIM_CMD_GET_RESPONSE:
                 {
-                    const SimFileEFDedicatedRec*  file = _const_files_dedicated;
-
+                    const SimFileEFDedicatedRec*  file = get_simfile(sim);
                     assert(p1 == 0 && p2 == 0 && p3 == 15);
 
                     for ( ; file->id != 0; file++ ) {
@@ -402,7 +442,7 @@ asimcard_io( ASimCard  sim, const char*  cmd )
 
             case A_SIM_CMD_READ_BINARY:
                 {
-                    const SimFileEFDedicatedRec*  file = _const_files_dedicated;
+                    const SimFileEFDedicatedRec*  file = get_simfile(sim);
 
                     assert(p1 == 0 && p2 == 0);
 
