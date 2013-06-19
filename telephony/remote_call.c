@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2008, 2012 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -397,6 +397,8 @@ remote_call_dial( const char*       number,
 {
     RemoteCall   call = remote_call_generic( REMOTE_CALL_DIAL, number, from );
 
+    D("%s: Enter\n", __FUNCTION__);
+
     if (call != NULL) {
         call->result_func   = result_func;
         call->result_opaque = result_opaque;
@@ -408,6 +410,7 @@ remote_call_dial( const char*       number,
 void
 remote_call_other( const char*  to_number, int  from_port, RemoteCallType  type )
 {
+    D("%s: Enter\n", __FUNCTION__);
     remote_call_generic( type, to_number, from_port );
 }
 
