@@ -150,8 +150,15 @@ netshaper_expires( NetShaper  shaper )
 
    /* reprogram timer if needed */
    if (shaper->packets) {
-       shaper->block_until = shaper->packets->expiration;
-       qemu_mod_timer( shaper->timer, shaper->block_until );
+       /*shaper->block_until = shaper->packets->expiration;*/
+       /*FIX: We comment out above assignment since it causes block_until to roll back to the expiry time of the packets that are already queued.
+       The packets that arrive in meantime are again assigned expiry time starting with shaper->packets->expiration, leading packets to be 
+       leaked in bursts and out of order. We just need to reprogram timer to fire on expiry time of the next packet in the queue without resetting
+       block_until variable. */
+
+       /*qemu_mod_timer( shaper->timer, shaper->block_until );*/
+       qemu_mod_timer( shaper->timer, shaper->packets->expiration );   
+
    } else {
        shaper->block_until = -1;
    }
@@ -587,4 +594,3 @@ netdelay_destroy( NetDelay  delay )
         qemu_free( delay );
     }
 }
-
