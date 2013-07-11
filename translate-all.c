@@ -148,12 +148,13 @@ int cpu_gen_code(CPUState *env, TranslationBlock *tb, int *gen_code_size_ptr)
     /* Save translated PC -> guest PC map into TB. */
     if (memcheck_enabled && gen_opc_tpc2gpc_pairs && is_cpu_user(env)) {
         tb->tpc2gpc =
-                qemu_malloc(gen_opc_tpc2gpc_pairs * 2 * sizeof(target_ulong));
+                qemu_malloc(gen_opc_tpc2gpc_pairs * 2 * sizeof(uintptr_t));
         if (tb->tpc2gpc != NULL) {
             memcpy(tb->tpc2gpc, gen_opc_tpc2gpc_ptr,
-                   gen_opc_tpc2gpc_pairs * 2 * sizeof(target_ulong));
+                   gen_opc_tpc2gpc_pairs * 2 * sizeof(uintptr_t));
             tb->tpc2gpc_pairs = gen_opc_tpc2gpc_pairs;
         }
+
     }
 #endif  // CONFIG_MEMCHECK
 
