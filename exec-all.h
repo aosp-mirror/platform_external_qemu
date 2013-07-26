@@ -166,7 +166,7 @@ struct TranslationBlock {
      * guest PC corresponding to that PC in the translation block. This
      * arrangement is set by tcg_gen_code_common that initializes this array
      * when performing guest code translation. */
-    target_ulong*   tpc2gpc;
+    uintptr_t*   tpc2gpc;
     /* Number of pairs (pc_tb, pc_guest) in tpc2gpc array. */
     unsigned int    tpc2gpc_pairs;
 #endif  // CONFIG_MEMCHECK
