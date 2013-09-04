@@ -667,8 +667,8 @@ void nand_add_dev(const char *arg)
     int read_only = 0;
     int pad;
     ssize_t read_size;
-    uint32_t page_size = 512;
-    uint32_t extra_size = 0;
+    uint32_t page_size = 2048;
+    uint32_t extra_size = 64;
     uint32_t erase_pages = 64;
 
     VERBOSE_PRINT(init, "%s: %s", __FUNCTION__, arg);
