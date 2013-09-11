@@ -670,6 +670,8 @@ void nand_add_dev(const char *arg)
     uint32_t page_size = 2048;
     uint32_t extra_size = 64;
     uint32_t erase_pages = 64;
+    char use_default_page_size = 1;
+    char use_default_extra_size = 1;
 
     VERBOSE_PRINT(init, "%s: %s", __FUNCTION__, arg);
 
@@ -707,6 +709,14 @@ void nand_add_dev(const char *arg)
             if(arg_match("readonly", arg, arg_len)) {
                 read_only = 1;
             }
+            else if(arg_match("useext4", arg, arg_len)) {
+                if (use_default_page_size) {
+                    page_size = 512;
+                }
+                if(use_default_extra_size) {
+                    extra_size = 0;
+                }
+            }
             else {
                 XLOG("bad arg: %.*s\n", arg_len, arg);
                 exit(1);
@@ -722,12 +732,14 @@ void nand_add_dev(const char *arg)
             else if(arg_match("pagesize", arg, arg_len)) {
                 char *ep;
                 page_size = strtoul(value, &ep, 0);
+                use_default_page_size = 0;
                 if(ep != value + value_len)
                     goto bad_arg_and_value;
             }
             else if(arg_match("extrasize", arg, arg_len)) {
                 char *ep;
                 extra_size = strtoul(value, &ep, 0);
+                use_default_extra_size = 0;
                 if(ep != value + value_len)
                     goto bad_arg_and_value;
             }
