@@ -3603,6 +3603,9 @@ int main(int argc, char **argv, char **envp)
         } else {
             PANIC("Missing initial system image path!");
         }
+        if (android_hw->hw_useext4) {
+          pstrcat(tmp,sizeof(tmp),",useext4");
+        }
         nand_add_dev(tmp);
     }
 
@@ -3638,6 +3641,9 @@ int main(int argc, char **argv, char **envp)
         if (initImage && *initImage) {
             pstrcat(tmp, sizeof(tmp), ",initfile=");
             pstrcat(tmp, sizeof(tmp), initImage);
+        }
+        if (android_hw->hw_useext4) {
+          pstrcat(tmp, sizeof(tmp), ",useext4");
         }
         nand_add_dev(tmp);
     }
@@ -3874,6 +3880,9 @@ int main(int argc, char **argv, char **envp)
                 pstrcat(tmp, sizeof(tmp), ",file=");
                 pstrcat(tmp, sizeof(tmp), partPath);
             }
+        }
+        if (android_hw->hw_useext4) {
+          pstrcat(tmp, sizeof(tmp), ",useext4");
         }
         nand_add_dev(tmp);
     }
