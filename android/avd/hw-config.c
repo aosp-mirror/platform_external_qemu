@@ -72,6 +72,13 @@ androidHwConfig_init( AndroidHwConfig*  config,
     if (apiLevel >= 12) {
         config->hw_keyboard_lid = 0;
     }
+
+    /* Special case for hw.useext4, we need to set the default to FALSE for
+     * apiLevel <=18. We use yaffs2 for earlier versions.
+     */
+    if (apiLevel <= 18) {
+        config->hw_useext4 = 0;
+    }
 }
 
 int
