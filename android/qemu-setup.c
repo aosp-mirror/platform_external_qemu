@@ -364,6 +364,7 @@ void  android_emulation_setup( void )
     {
         SockAddress  addr;
         char         tmp[32];
+        char         tmp2[28];
 
         s = socket_create_inet( SOCKET_STREAM );
         if (s < 0) {
@@ -377,8 +378,9 @@ void  android_emulation_setup( void )
             break;
         }
 
-        sprintf(tmp,"0012host:emulator:%d",base_port+1);
-        socket_send(s, tmp, 18+4);
+        sprintf(tmp2,"host:emulator:%d",base_port+1);
+        sprintf(tmp,"%04x%s", strlen(tmp2), tmp2);
+        socket_send(s, tmp, strlen(tmp));
         D("sent '%s' to ADB server", tmp);
     }
     while (0);
