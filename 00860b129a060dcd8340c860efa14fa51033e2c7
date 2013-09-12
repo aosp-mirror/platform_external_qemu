@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "07f4b1cf_afaf7990",
+        "filename": "android/avd/hw-config.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2013-09-12T20:51:46Z",
+      "side": 1,
+      "message": "indent 4.",
+      "revId": "00860b129a060dcd8340c860efa14fa51033e2c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07f4b1cf_0fc1e53a",
+        "filename": "hw/goldfish_nand.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 713,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2013-09-12T20:51:46Z",
+      "side": 1,
+      "message": "indent 4 (here and below)",
+      "revId": "00860b129a060dcd8340c860efa14fa51033e2c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07f4b1cf_8fddd52f",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3607,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2013-09-12T20:51:46Z",
+      "side": 1,
+      "message": "indent 4, to be consistent with surrounding code.",
+      "revId": "00860b129a060dcd8340c860efa14fa51033e2c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07f4b1cf_6fe3d1eb",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3646,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2013-09-12T20:51:46Z",
+      "side": 1,
+      "message": "indent 4.",
+      "revId": "00860b129a060dcd8340c860efa14fa51033e2c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07f4b1cf_4fe00ddd",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3885,
+      "author": {
+        "id": 1003966
+      },
+      "writtenOn": "2013-09-12T20:51:46Z",
+      "side": 1,
+      "message": "indent 4",
+      "revId": "00860b129a060dcd8340c860efa14fa51033e2c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
