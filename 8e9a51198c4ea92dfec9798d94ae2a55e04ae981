@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87dfc155_0b5d5df1",
+        "filename": "vl-android.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3607,
+      "author": {
+        "id": 1000205
+      },
+      "writtenOn": "2013-09-13T02:47:30Z",
+      "side": 1,
+      "message": "why don\u0027t you use the existing arguments that the nanddriver supports instead of adding new ones.",
+      "revId": "8e9a51198c4ea92dfec9798d94ae2a55e04ae981",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7d87d6d_744cc076",
+        "filename": "vl-android.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3609,
+      "author": {
+        "id": 1000205
+      },
+      "writtenOn": "2013-09-13T02:47:30Z",
+      "side": 1,
+      "message": "You should really use a block device for ext4, not nand.",
+      "revId": "8e9a51198c4ea92dfec9798d94ae2a55e04ae981",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
