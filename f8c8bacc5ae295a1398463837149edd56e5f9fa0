@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c7eff930_e3a1668c",
+        "filename": "vl-android.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3607,
+      "author": {
+        "id": 1000205
+      },
+      "writtenOn": "2013-09-13T22:15:47Z",
+      "side": 1,
+      "message": "I would add a comment here explaining that you are using a nand device without extradata to approximate a block device until we get full support for using a block device directly.",
+      "revId": "f8c8bacc5ae295a1398463837149edd56e5f9fa0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
