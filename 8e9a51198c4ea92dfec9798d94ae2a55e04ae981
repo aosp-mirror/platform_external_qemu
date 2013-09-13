@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "27645599_37eae2bd",
+        "filename": "vl-android.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3607,
+      "author": {
+        "id": 1017685
+      },
+      "writtenOn": "2013-09-13T20:10:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "87dfc155_0b5d5df1",
+      "revId": "8e9a51198c4ea92dfec9798d94ae2a55e04ae981",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e7d87d6d_744cc076",
         "filename": "vl-android.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2013-09-13T02:47:30Z",
       "side": 1,
       "message": "You should really use a block device for ext4, not nand.",
+      "revId": "8e9a51198c4ea92dfec9798d94ae2a55e04ae981",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27645599_f7ba0ad4",
+        "filename": "vl-android.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3609,
+      "author": {
+        "id": 1017685
+      },
+      "writtenOn": "2013-09-13T20:10:18Z",
+      "side": 1,
+      "message": "It\u0027ll probably take some time for me to figure out how to do that. I\u0027ll file that as a bug assigned to me.",
+      "parentUuid": "e7d87d6d_744cc076",
       "revId": "8e9a51198c4ea92dfec9798d94ae2a55e04ae981",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
