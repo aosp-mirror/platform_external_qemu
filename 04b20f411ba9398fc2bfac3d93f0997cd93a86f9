@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4515b1f_46263280",
+        "filename": "android/avd/hw-config.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1010578
+      },
+      "writtenOn": "2013-09-19T09:02:51Z",
+      "side": 1,
+      "message": "Currently emulator can\u0027t run master head images due to this line. If I change it to \u003c 18 it works. It seems to me master system api should be changed to 19 or this line should be changed to \u003c 18 to fix this issues.",
+      "revId": "04b20f411ba9398fc2bfac3d93f0997cd93a86f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
