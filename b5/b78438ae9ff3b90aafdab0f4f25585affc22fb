@@ -1,0 +1,9 @@
+Code-Review+1: Andrew Hsieh <andrewhsieh@google.com>
+Code-Review+1: Pavel Chupin <pavel.v.chupin@intel.com>
+Code-Review+2: Deepanshu Gupta <deepanshu@google.com>
+Verified+1: Deepanshu Gupta <deepanshu@google.com>
+Submitted-by: Deepanshu Gupta <deepanshu@google.com>
+Submitted-at: Mon, 23 Sep 2013 18:13:36 +0000
+Reviewed-on: https://android-review.googlesource.com/66073
+Project: platform/external/qemu
+Branch: refs/heads/master
