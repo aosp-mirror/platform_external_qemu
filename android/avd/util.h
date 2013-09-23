@@ -73,4 +73,12 @@ int path_getBuildTargetApiLevel( const char* androidOut );
  */
 int path_getAdbdCommunicationMode( const char* androidOut );
 
+/* Check whether the image file is Ext4 or not.
+ *
+ * Return:
+ *  0 - The image file can't be recognized as Ext4.
+ *  1 - The image file is an Ext4 image.
+ */
+int path_isExt4Image( const char* imagePath );
+
 #endif /* _ANDROID_AVD_UTIL_H */
