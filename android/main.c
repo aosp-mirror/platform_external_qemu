@@ -913,6 +913,14 @@ int main(int argc, char **argv)
         args[n++] = opts->gps;
     }
 
+    if (opts->selinux) {
+        if ((strcmp(opts->selinux, "permissive") != 0)
+                && (strcmp(opts->selinux, "disabled") != 0)) {
+            derror("-selinux must be \"disabled\" or \"permissive\"");
+            exit(1);
+        }
+    }
+
     if (opts->memory) {
         char*  end;
         long   ramSize = strtol(opts->memory, &end, 0);
@@ -1042,6 +1050,10 @@ int main(int argc, char **argv)
 
         if (opts->bootchart) {
             p = bufprint(p, end, " androidboot.bootchart=%s", opts->bootchart);
+        }
+
+        if (opts->selinux) {
+            p = bufprint(p, end, " androidboot.selinux=%s", opts->selinux);
         }
 
         if (p >= end) {
