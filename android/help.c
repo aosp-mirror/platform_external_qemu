@@ -1526,6 +1526,18 @@ help_screen(stralloc_t* out)
 }
 
 static void
+help_selinux(stralloc_t* out)
+{
+    PRINTF(
+    "  Use -selinux to control the SELinux enforcement mode.\n"
+    "  By default, SELinux is in enforcing mode. Other modes available are:\n"
+    "     -selinux permissive   -> Load the SELinux policy, but do not enforce it.\n"
+    "                              Policy violations are logged, but not rejected.\n"
+    "     -selinux disabled     -> Disable kernel support for SELinux.\n"
+    );
+}
+
+static void
 help_force_32bit(stralloc_t* out)
 {
     PRINTF(
