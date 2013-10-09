@@ -1,0 +1,10 @@
+Code-Review+2: Nick Kralevich <nnk@google.com>
+Verified+1: Nick Kralevich <nnk@google.com>
+Code-Review+1: Stephen Smalley <sds@tycho.nsa.gov>
+Code-Review+1: William Roberts <wroberts@tresys.com>
+Code-Review+1: Richard Haines <richard_c_haines@btinternet.com>
+Submitted-by: Nick Kralevich <nnk@google.com>
+Submitted-at: Wed, 09 Oct 2013 19:25:50 +0000
+Reviewed-on: https://android-review.googlesource.com/67293
+Project: platform/external/qemu
+Branch: refs/heads/master
