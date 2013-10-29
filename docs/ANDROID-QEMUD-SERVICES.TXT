@@ -158,6 +158,15 @@ image.
 "boot-properties" service:
 --------------------------
 
+  WARNING: These properties don't get set until init starts a service in
+  class "core" called "qemu-props". Other init services in class "core"
+  include servicemanager and vold.  If those processes read the property
+  (they probably don't right now), there is a small chance it has not been set yet.
+  Also, init services are started asynchronously, so there is no guarantee that
+  services started just after qemu-props will not run before qemu-props, and may
+  not see the new properties. This hasn't been an issue, but should probably
+  be cleaned up.
+
   This service is used to set system properties in the emulated system at
   boot time. It is invoked by the 'qemu-props' helper program that is invoked
   by /system/etc/init.goldfish.rc. All messages are framed and the protocol

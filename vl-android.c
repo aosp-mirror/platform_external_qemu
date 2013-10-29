@@ -3697,6 +3697,11 @@ int main(int argc, char **argv, char **envp)
         boot_property_add("dalvik.vm.heapsize",tmp);
     }
 
+    /* From API 19 and above, the platform provides an explicit property for low memory devices. */
+    if (android_hw->hw_ramSize <= 512) {
+        boot_property_add("ro.config.low_ram", "true");
+    }
+
     /* Initialize net speed and delays stuff. */
     if (android_parse_network_speed(android_op_netspeed) < 0 ) {
         PANIC("invalid -netspeed parameter '%s'",
