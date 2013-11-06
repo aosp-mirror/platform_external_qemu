@@ -302,6 +302,7 @@ const char *vnc_display;
 int acpi_enabled = 1;
 int no_hpet = 0;
 int hax_disabled = 0;
+int new_dev_api = 0;
 int no_virtio_balloon = 0;
 int fd_bootchk = 1;
 int no_reboot = 0;
@@ -3377,6 +3378,10 @@ int main(int argc, char **argv, char **envp)
                 android_op_ports = (char*)optarg;
                 break;
 
+            case QEMU_OPTION_new_dev_api:
+                 new_dev_api = 1;
+                 break;
+
             case QEMU_OPTION_android_port:
                 android_op_port = (char*)optarg;
                 break;
@@ -3937,12 +3942,18 @@ int main(int argc, char **argv, char **envp)
     /* We always initialize the first serial port for the android-kmsg
      * character device (used to send kernel messages) */
     serial_hds_add_at(0, "android-kmsg");
-    stralloc_add_str(kernel_params, " console=ttyS0");
+    if (new_dev_api)
+        stralloc_add_str(kernel_params, " console=ttyGF0");
+    else
+        stralloc_add_str(kernel_params, " console=ttyS0");
 
     /* We always initialize the second serial port for the android-qemud
      * character device as well */
     serial_hds_add_at(1, "android-qemud");
-    stralloc_add_str(kernel_params, " android.qemud=ttyS1");
+    if (new_dev_api)
+        stralloc_add_str(kernel_params, " android.qemud=ttyGF1");
+    else
+        stralloc_add_str(kernel_params, " android.qemud=ttyS1");
 
     if (pid_file && qemu_create_pidfile(pid_file) != 0) {
         os_pidfile_error();

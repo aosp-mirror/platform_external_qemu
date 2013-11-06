@@ -422,13 +422,17 @@ int main(int argc, char **argv)
     {
         char*  kernelFile    = opts->kernel;
         int    kernelFileLen;
+        char cmd[256], output[256] = { 0, };
+        FILE *f;
 
         if (kernelFile == NULL) {
+
             kernelFile = avdInfo_getKernelPath(avd);
             if (kernelFile == NULL) {
                 derror( "This AVD's configuration is missing a kernel file!!" );
                 exit(2);
             }
+
             D("autoconfig: -kernel %s", kernelFile);
         }
         if (!path_exists(kernelFile)) {
@@ -455,6 +459,29 @@ int main(int argc, char **argv)
          if (kernelFileLen > 6 && !memcmp(kernelFile + kernelFileLen - 6, "-armv7", 6)) {
              forceArmv7 = 1;
          }
+
+        /* for kernel >= 3.10 use the new device driver names */
+        snprintf(cmd, sizeof(cmd), "file %s", kernelFile);
+        f = popen(cmd, "r");
+        if (f) {
+            fread(output, sizeof(output), 1, f);
+            if (!ferror(f)) {
+                char *bzImage = strstr(output, "bzImage");
+                if (bzImage) {
+                    char *version = strstr(bzImage, "version ");
+                    if (version) {
+                            version += strlen("version ");
+                        if (version[0] > '3' ||
+                            (version[0] == '3' && version[1] == '.' && version[2] == '1' &&
+                             version[3] >= '0' && version[3] <= '9')) {
+                                opts->new_dev_api = 1;
+                                D("autoconfig: -new-dev-api\n");
+                        }
+                    }
+                }
+            }
+            fclose(f);
+	}
     }
 
     if (boot_prop_ip[0]) {
@@ -1017,7 +1044,10 @@ int main(int argc, char **argv)
 #endif
 
         if (opts->shell || opts->logcat) {
-            p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );
+            if (opts->new_dev_api)
+                p = bufprint(p, end, " androidboot.console=ttyGF%d", shell_serial );
+            else
+                p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );
         }
 
         if (opts->trace) {
@@ -1282,6 +1312,9 @@ int main(int argc, char **argv)
             }
         }
     }
+
+    if (opts->new_dev_api)
+        args[n++] = "-new-dev-api";
 
     if(VERBOSE_CHECK(init)) {
         int i;

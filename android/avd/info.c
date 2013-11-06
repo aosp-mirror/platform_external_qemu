@@ -882,8 +882,9 @@ avdInfo_getKernelPath( AvdInfo*  i )
     char*  kernelPath = _avdInfo_getContentOrSdkFilePath(i, imageName);
 
     if (kernelPath == NULL && i->inAndroidBuild) {
-        /* When in the Android build, look into the prebuilt directory
-         * for our target architecture.
+        /* When in the Android build, first look into the out build
+         * directory then in the prebuilt directory for our target
+         * architecture.
          */
         char temp[PATH_MAX], *p = temp, *end = p + sizeof(temp);
         const char* suffix = "";
@@ -897,6 +898,10 @@ avdInfo_getKernelPath( AvdInfo*  i )
             suffix = "-armv7";
         }
         AFREE(abi);
+
+        p = bufprint(temp, end, "%s/kernel", i->androidOut);
+        if (path_exists(temp))
+            return ASTRDUP(temp);
 
         p = bufprint(temp, end, "%s/prebuilts/qemu-kernel/%s/kernel-qemu%s",
                      i->androidBuildRoot, i->targetArch, suffix);

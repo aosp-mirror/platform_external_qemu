@@ -168,6 +168,8 @@ OPT_FLAG( force_32bit, "always use 32-bit emulator" )
 
 OPT_PARAM(selinux, "<disabled|permissive>", "Set SELinux to either disabled or permissive mode")
 
+OPT_FLAG( new_dev_api, "use new device API" )
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
