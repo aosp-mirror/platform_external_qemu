@@ -17,6 +17,8 @@
 #define  LCD_DENSITY_TVDPI     213
 #define  LCD_DENSITY_HDPI      240
 #define  LCD_DENSITY_XHDPI     320
+#define  LCD_DENSITY_XXHDPI    480
+#define  LCD_DENSITY_XXXHDPI   640
 
 /* Sets the boot property corresponding to the emulated abstract LCD density */
 extern void  hwLcd_setBootProperty(int density);
