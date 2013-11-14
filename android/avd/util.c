@@ -268,6 +268,8 @@ path_getBuildTargetArch( const char* androidOut )
             result = "arm";
         else if (!strncmp("mips", cpuAbi, 4))
             result = "mips";
+        else if (!strncmp("x86", cpuAbi, 3))
+            result = "x86";
         else
             result = cpuAbi;
 
