@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fe71ed53_448562a7",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1017685
+      },
+      "writtenOn": "2013-11-20T17:49:53Z",
+      "side": 1,
+      "message": "I think you mean to say minimum. Worst seems to imply that there is something wrong or unfavourable with that case.",
+      "revId": "620d80d19037a1f65e268f087553e7a3ef727ee6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
