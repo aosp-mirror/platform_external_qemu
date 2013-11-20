@@ -369,26 +369,42 @@ EXIT:
 static void
 prependSharedLibraryPath(const char* prefix)
 {
-    char temp[2048], *p=temp, *end=p+sizeof(temp);
+    size_t len = 0;
+    char *temp = NULL;
+    const char* path = NULL;
+
 #ifdef _WIN32
-    const char* path = getenv("PATH");
-    if (path == NULL || path[0] == '\0') {
-        p = bufprint(temp, end, "PATH=%s", prefix);
+    path = getenv("PATH");
+#else
+    path = getenv("LD_LIBRARY_PATH");
+#endif
+
+    /* Will need up to 7 extra characters: "PATH=", ';' or ':', and '\0' */
+    len = 7 + strlen(prefix) + (path ? strlen(path) : 0);
+    temp = malloc(len);
+    if (!temp)
+        return;
+
+    if (path && path[0] != '\0') {
+#ifdef _WIN32
+        bufprint(temp, temp + len, "PATH=%s;%s", prefix, path);
+#else
+        bufprint(temp, temp + len, "%s:%s", prefix, path);
+#endif
     } else {
-        p = bufprint(temp, end, "PATH=%s;%s", path, prefix);
+#ifdef _WIN32
+        bufprint(temp, temp + len, "PATH=%s", prefix);
+#else
+        strcpy(temp, prefix);
+#endif
     }
-    /* Ignore overflow, this will push some paths out of the variable, but
-     * so be it. */
+
+#ifdef _WIN32
     D("Setting %s\n", temp);
     putenv(strdup(temp));
 #else
-    const char* path = getenv("LD_LIBRARY_PATH");
-    if (path != NULL && path[0] != '\0') {
-        p = bufprint(temp, end, "%s:%s", prefix, path);
-        prefix = temp;
-    }
-    setenv("LD_LIBRARY_PATH",prefix,1);
-    D("Setting LD_LIBRARY_PATH=%s\n", prefix);
+    D("Setting LD_LIBRARY_PATH=%s\n", temp);
+    setenv("LD_LIBRARY_PATH", temp, 1);
 #endif
 }
 
