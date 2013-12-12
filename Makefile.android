@@ -185,6 +185,11 @@ end-emulator-program = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
     $(eval include $(BUILD_HOST_EXECUTABLE))
 
+# A varient of end-emulator-library for host programs instead without PIE
+end-emulator-program-no-pie = \
+    $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
+    $(eval include $(BUILD_HOST_EXECUTABLE_NO_PIE))
+
 
 # The common libraries
 #
