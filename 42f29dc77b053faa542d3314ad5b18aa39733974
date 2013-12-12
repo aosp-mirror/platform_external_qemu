@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e8ce934a_8fb45965",
+        "filename": "Makefile.target",
+        "patchSetId": 1
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 1003981
+      },
+      "writtenOn": "2013-12-12T23:45:33Z",
+      "side": 1,
+      "message": "Actually start-emulator-program already set \"LOCAL_NO_DEFAULT_COMPILER_FLAGS :\u003d true\". So with the new approach you don\u0027t need any change here.",
+      "revId": "42f29dc77b053faa542d3314ad5b18aa39733974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
