@@ -151,6 +151,8 @@ MY_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 # Needed to build fpu/softfloat-native.h properly
 MY_CFLAGS += -D_GNU_SOURCE=1
 
+MY_CFLAGS += -I$(LOCAL_PATH)/include
+
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.
 # Usage:
