@@ -16,6 +16,24 @@
       "revId": "42f29dc77b053faa542d3314ad5b18aa39733974",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8762fc5_b6ff4618",
+        "filename": "Makefile.target",
+        "patchSetId": 1
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 1037474
+      },
+      "writtenOn": "2013-12-13T00:01:04Z",
+      "side": 1,
+      "message": "Thanks for pointing this out.",
+      "parentUuid": "e8ce934a_8fb45965",
+      "revId": "42f29dc77b053faa542d3314ad5b18aa39733974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
