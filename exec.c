@@ -37,7 +37,7 @@
 #include "qemu-common.h"
 #include "tcg.h"
 #include "hw/hw.h"
-#include "osdep.h"
+#include "qemu/osdep.h"
 #include "kvm.h"
 #include "hax.h"
 #include "qemu-timer.h"

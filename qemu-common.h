@@ -121,7 +121,7 @@ static inline char *realpath(const char *path, char *resolved_path)
 #ifndef NEED_CPU_H
 
 #include <setjmp.h>
-#include "osdep.h"
+#include "qemu/osdep.h"
 #include "qemu/bswap.h"
 
 #else
