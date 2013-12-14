@@ -13,10 +13,10 @@
 
 #include "qapi/qmp/qlist.h"
 #include "qapi/qmp/qint.h"
-#include "qdict.h"
+#include "qapi/qmp/qdict.h"
 #include "qemu-common.h"
-#include "json-lexer.h"
-#include "json-streamer.h"
+#include "qapi/qmp/json-lexer.h"
+#include "qapi/qmp/json-streamer.h"
 
 static void json_message_process_token(JSONLexer *lexer, QString *token, JSONTokenType type, int x, int y)
 {

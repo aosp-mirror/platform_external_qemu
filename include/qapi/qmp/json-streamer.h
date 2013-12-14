@@ -15,7 +15,7 @@
 #define QEMU_JSON_STREAMER_H
 
 #include "qapi/qmp/qlist.h"
-#include "json-lexer.h"
+#include "qapi/qmp/json-lexer.h"
 
 typedef struct JSONMessageParser
 {
