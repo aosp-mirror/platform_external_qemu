@@ -18,7 +18,7 @@
  */
 #include "config.h"
 #include "exec.h"
-#include "disas.h"
+#include "disas/disas.h"
 #include "tcg.h"
 #include "kvm.h"
 #include "hax.h"

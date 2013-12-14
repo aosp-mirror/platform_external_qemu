@@ -44,7 +44,7 @@
  */
 
 #include "qemu-common.h"
-#include "disas.h"
+#include "disas/disas.h"
 #include "sysemu.h"
 #include "uboot_image.h"
 

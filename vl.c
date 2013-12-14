@@ -161,7 +161,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "balloon.h"
 #include "qemu-option.h"
 
-#include "disas.h"
+#include "disas/disas.h"
 
 #include "exec/exec-all.h"
 

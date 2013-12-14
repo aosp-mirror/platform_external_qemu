@@ -18,7 +18,7 @@ the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this file; see the file COPYING.  If not,
 see <http://www.gnu.org/licenses/>.  */
-#include "dis-asm.h"
+#include "disas/bfd.h"
 #define BFD_DEFAULT_TARGET_SIZE 64
 
 /* ppc.h -- Header file for PowerPC opcode table
@@ -5076,7 +5076,7 @@ const int powerpc_num_macros =
 
 
 /* This file provides several disassembler functions, all of which use
-   the disassembler interface defined in dis-asm.h.  Several functions
+   the disassembler interface defined in bfd.h.  Several functions
    are provided because this file handles disassembly for the PowerPC
    in both big and little endian mode and also for the POWER (RS/6000)
    chip.  */
