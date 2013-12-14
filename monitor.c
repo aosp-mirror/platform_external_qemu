@@ -40,7 +40,7 @@
 #include "audio/audio.h"
 #include "disas.h"
 #include "balloon.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 #include "migration.h"
 #include "kvm.h"
 #include "acl.h"

@@ -14,7 +14,7 @@
 #include "hw/goldfish_pipe.h"
 #include "hw/goldfish_device.h"
 #include "hw/goldfish_vmem.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 
 #define  DEBUG 0
 

@@ -1,6 +1,6 @@
 #include "hw.h"
 #include "mips.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 
 #define TIMER_FREQ	100 * 1000 * 1000
 

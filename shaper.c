@@ -11,7 +11,7 @@
 */
 #include "shaper.h"
 #include "qemu-common.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 #include <stdlib.h>
 
 #define  SHAPER_CLOCK        rt_clock

@@ -31,7 +31,7 @@
  */
 
 #include "qemu-common.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 #include "monitor.h"
 
 #include <dirent.h>

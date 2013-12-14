@@ -15,7 +15,7 @@
 #include <android/looper.h>
 #include <android/utils/panic.h>
 #include "qemu-common.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 #include "qemu-char.h"
 #include "sockets.h"  /* for socket_set_nonblock() */
 

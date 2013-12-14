@@ -150,7 +150,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "console.h"
 #include "sysemu.h"
 #include "gdbstub.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 #include "qemu-char.h"
 #include "cache-utils.h"
 #include "block.h"

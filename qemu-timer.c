@@ -53,7 +53,7 @@
 #include <mmsystem.h>
 #endif
 
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 
 /* Conversion factor from emulated instructions to virtual clock ticks.  */
 int icount_time_shift;

@@ -24,7 +24,7 @@
 #include "hw.h"
 #include "pc.h"
 #include "isa.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 
 //#define DEBUG_PIT
 

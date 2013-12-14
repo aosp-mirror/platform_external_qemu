@@ -23,7 +23,7 @@
  */
 #include "qemu-common.h"
 #include "console.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 
 //#define DEBUG_CONSOLE
 #define DEFAULT_BACKSCROLL 512
