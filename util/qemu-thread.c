@@ -17,7 +17,7 @@
 #include <signal.h>
 #include <stdint.h>
 #include <string.h>
-#include "qemu-thread.h"
+#include "qemu/thread.h"
 
 static void error_exit(int err, const char *msg)
 {

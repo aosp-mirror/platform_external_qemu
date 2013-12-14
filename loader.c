@@ -281,7 +281,7 @@ static void *load_at(int fd, int offset, int size)
 #define elf_word        uint32_t
 #define elf_sword        int32_t
 #define bswapSZs	bswap32s
-#include "elf_ops.h"
+#include "hw/elf_ops.h"
 
 #undef elfhdr
 #undef elf_phdr
@@ -301,7 +301,7 @@ static void *load_at(int fd, int offset, int size)
 #define elf_sword        int64_t
 #define bswapSZs	bswap64s
 #define SZ		64
-#include "elf_ops.h"
+#include "hw/elf_ops.h"
 
 /* return < 0 if error, otherwise the number of bytes loaded in memory */
 int load_elf(const char *filename, int64_t address_offset,
