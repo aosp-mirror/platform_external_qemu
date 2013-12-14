@@ -2,7 +2,7 @@
 #define QDEV_H
 
 #include "hw.h"
-#include "qemu-queue.h"
+#include "qemu/queue.h"
 
 typedef struct DeviceType DeviceType;
 

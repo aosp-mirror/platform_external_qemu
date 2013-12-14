@@ -32,7 +32,7 @@
 #include "android/android.h"
 #include "android/sockets.h"
 
-#include "qemu-queue.h"
+#include "qemu/queue.h"
 
 /* proto types */
 static void slirp_net_forward_init(void);
