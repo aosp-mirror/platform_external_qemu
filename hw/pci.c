@@ -25,7 +25,7 @@
 #include "pci.h"
 #include "monitor/monitor.h"
 #include "net/net.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 
 //#define DEBUG_PCI
 

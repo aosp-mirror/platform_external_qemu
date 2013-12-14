@@ -28,7 +28,7 @@
  */
 #include "qemu-common.h"
 #include "net/net.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include <stdio.h>
 #include <windows.h>
 #include <winioctl.h>

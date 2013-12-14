@@ -113,7 +113,7 @@
 #include "qemu-common.h"
 #include "net/net.h"
 #include "monitor/monitor.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"
 #include "audio/audio.h"

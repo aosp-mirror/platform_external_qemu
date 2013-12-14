@@ -15,7 +15,7 @@
 #include "migration/migration.h"
 #include "monitor/monitor.h"
 #include "buffered_file.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "block.h"
 #include "qemu_socket.h"
 

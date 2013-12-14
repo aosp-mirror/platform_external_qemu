@@ -12,7 +12,7 @@
 #include "pc.h"
 #include "isa.h"
 #include "net/net.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "boards.h"
 #include "flash.h"
 #include "qemu-log.h"

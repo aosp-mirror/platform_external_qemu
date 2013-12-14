@@ -7,7 +7,7 @@
  * (GNU GPL), version 2 or later.
  */
 
-#include "dma.h"
+#include "sysemu/dma.h"
 #include "block_int.h"
 
 void qemu_sglist_init(QEMUSGList *qsg, int alloc_hint)

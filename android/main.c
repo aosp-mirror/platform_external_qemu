@@ -22,7 +22,7 @@
 
 #include "android/android.h"
 #include "qemu-common.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "ui/console.h"
 #include "android/user-events.h"
 

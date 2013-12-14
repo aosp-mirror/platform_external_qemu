@@ -17,7 +17,7 @@
 #include "qemu_socket.h"
 #include "migration/migration.h"
 #include "qemu-char.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "buffered_file.h"
 #include "block.h"
 #include <sys/types.h>

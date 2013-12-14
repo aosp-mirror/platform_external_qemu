@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "net/net.h"
 #include "monitor/monitor.h"
 #include "ui/console.h"

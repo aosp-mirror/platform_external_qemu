@@ -12,7 +12,7 @@
 #include "hw.h"
 #include "goldfish_vmem.h"
 #ifdef TARGET_I386
-#include "kvm.h"
+#include "sysemu/kvm.h"
 #endif
 
 

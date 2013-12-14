@@ -27,7 +27,7 @@
 #include "cpu.h"
 #include "exec/exec-all.h"
 #include "qemu-common.h"
-#include "kvm.h"
+#include "sysemu/kvm.h"
 #include "hax.h"
 
 //#define DEBUG_MMU

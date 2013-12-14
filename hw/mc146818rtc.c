@@ -23,7 +23,7 @@
  */
 #include "hw.h"
 #include "qemu/timer.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "pc.h"
 #include "isa.h"
 //#include "hpet_emul.h"

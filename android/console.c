@@ -23,7 +23,7 @@
 
 #include "android/sockets.h"
 #include "qemu-char.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "android/android.h"
 #include "cpu.h"
 #include "hw/goldfish_device.h"

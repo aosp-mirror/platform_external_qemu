@@ -21,8 +21,8 @@
 #include <linux/kvm.h>
 
 #include "qemu-common.h"
-#include "sysemu.h"
-#include "kvm.h"
+#include "sysemu/sysemu.h"
+#include "sysemu/kvm.h"
 #include "cpu.h"
 #include "exec/gdbstub.h"
 

@@ -14,8 +14,8 @@
  */
 
 #include <qemu-common.h>
-#include <sysemu.h>
-#include "blockdev.h"
+#include "sysemu/sysemu.h"
+#include "sysemu/blockdev.h"
 //#define DEBUG_SCSI
 
 #ifdef DEBUG_SCSI

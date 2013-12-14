@@ -26,7 +26,7 @@
 #include "net/net.h"
 #include "monitor/monitor.h"
 #include "ui/console.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"
 #include "block.h"
