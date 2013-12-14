@@ -39,7 +39,7 @@
 #include "kvm.h"
 #include "migration.h"
 #include "net.h"
-#include "gdbstub.h"
+#include "exec/gdbstub.h"
 #include "hw/smbios.h"
 
 #ifdef TARGET_SPARC

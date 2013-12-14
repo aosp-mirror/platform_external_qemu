@@ -3,9 +3,9 @@
 #include <string.h>
 
 #include "cpu.h"
-#include "exec-all.h"
-#include "gdbstub.h"
-#include "def-helper.h"
+#include "exec/exec-all.h"
+#include "exec/gdbstub.h"
+#include "exec/def-helper.h"
 #include "helper-android.h"
 #include "qemu-common.h"
 

@@ -149,7 +149,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "monitor.h"
 #include "ui/console.h"
 #include "sysemu.h"
-#include "gdbstub.h"
+#include "exec/gdbstub.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"
 #include "qemu/cache-utils.h"
@@ -163,7 +163,7 @@ int qemu_main(int argc, char **argv, char **envp);
 
 #include "disas.h"
 
-#include "exec-all.h"
+#include "exec/exec-all.h"
 
 #include "qemu_socket.h"
 

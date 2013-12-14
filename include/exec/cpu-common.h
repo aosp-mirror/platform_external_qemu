@@ -12,7 +12,7 @@
 #endif
 
 #ifndef NEED_CPU_H
-#include "poison.h"
+#include "exec/poison.h"
 #endif
 
 #include "qemu/bswap.h"

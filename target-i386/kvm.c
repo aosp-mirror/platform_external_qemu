@@ -24,7 +24,7 @@
 #include "sysemu.h"
 #include "kvm.h"
 #include "cpu.h"
-#include "gdbstub.h"
+#include "exec/gdbstub.h"
 
 #ifdef CONFIG_KVM_GS_RESTORE
 #include "kvm-gs-restore.h"

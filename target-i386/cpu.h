@@ -44,7 +44,7 @@
 
 #define CPUState struct CPUX86State
 
-#include "cpu-defs.h"
+#include "exec/cpu-defs.h"
 
 #include "softfloat.h"
 
@@ -897,8 +897,8 @@ static inline void cpu_clone_regs(CPUState *env, target_ulong newsp)
 }
 #endif
 
-#include "cpu-all.h"
-#include "exec-all.h"
+#include "exec/cpu-all.h"
+#include "exec/exec-all.h"
 
 #include "svm.h"
 

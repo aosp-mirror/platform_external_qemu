@@ -29,7 +29,7 @@
 #include "hw/pc.h"
 #include "hw/pci.h"
 #include "hw/watchdog.h"
-#include "gdbstub.h"
+#include "exec/gdbstub.h"
 #include "net.h"
 #include "qemu-char.h"
 #include "sysemu.h"
@@ -44,7 +44,7 @@
 #include "migration.h"
 #include "kvm.h"
 #include "qemu/acl.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 
 //#define DEBUG
 //#define DEBUG_COMPLETION

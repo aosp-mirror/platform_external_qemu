@@ -19,7 +19,7 @@
  */
 #define CPU_NO_GLOBAL_REGS
 #include "exec.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 #include "qemu/host-utils.h"
 
 //#define DEBUG_PCALL
@@ -4809,16 +4809,16 @@ static float approx_rcp(float a)
 #define MMUSUFFIX _mmu
 
 #define SHIFT 0
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 1
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 2
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 3
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #endif
 

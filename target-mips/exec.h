@@ -6,15 +6,15 @@
 #include "config.h"
 #include "mips-defs.h"
 #include "dyngen-exec.h"
-#include "cpu-defs.h"
+#include "exec/cpu-defs.h"
 
 GLOBAL_REGISTER_VARIABLE_DECL struct CPUMIPSState *env asm(AREG0);
 
 #include "cpu.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 
 #if !defined(CONFIG_USER_ONLY)
-#include "softmmu_exec.h"
+#include "exec/softmmu_exec.h"
 #endif /* !defined(CONFIG_USER_ONLY) */
 
 void dump_fpu(CPUState *env);

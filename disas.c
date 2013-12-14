@@ -5,7 +5,7 @@
 #include <errno.h>
 
 #include "cpu.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 #include "disas.h"
 
 /* Filled in by elfload.c.  Simplistic, but will do for now. */

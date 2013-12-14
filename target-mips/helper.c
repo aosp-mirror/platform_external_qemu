@@ -24,7 +24,7 @@
 #include <signal.h>
 
 #include "cpu.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 
 enum {
     TLBRET_DIRTY = -4,

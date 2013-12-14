@@ -25,7 +25,7 @@
 #include <signal.h>
 
 #include "cpu.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 #include "qemu-common.h"
 #include "kvm.h"
 #include "hax.h"
