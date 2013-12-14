@@ -70,7 +70,7 @@
 #include "android/opengles.h"
 #include "android/multitouch-screen.h"
 #include "targphys.h"
-#include "tcpdump.h"
+#include "android/tcpdump.h"
 
 #ifdef CONFIG_MEMCHECK
 #include "memcheck/memcheck.h"

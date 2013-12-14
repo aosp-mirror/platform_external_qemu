@@ -29,7 +29,7 @@
 #include <sys/time.h>
 #include <zlib.h>
 
-#include "tcpdump.h"
+#include "android/tcpdump.h"
 
 /* Needed early for HOST_BSD etc. */
 #include "config-host.h"
