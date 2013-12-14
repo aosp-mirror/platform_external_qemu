@@ -24,7 +24,7 @@
 #include "qemu-common.h"
 #include "sysemu.h"
 #include "ui/console.h"
-#include "user-events.h"
+#include "android/user-events.h"
 
 #include <SDL.h>
 #include <SDL_syswm.h>

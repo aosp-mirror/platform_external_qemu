@@ -231,7 +231,7 @@ extern void  android_emulator_set_base_port(int  port);
 #include "disas.h"
 
 #ifdef CONFIG_TRACE
-#include "android-trace.h"
+#include "android/trace.h"
 #endif
 
 #include "qemu_socket.h"

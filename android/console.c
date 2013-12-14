@@ -47,7 +47,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "android/hw-events.h"
-#include "user-events.h"
+#include "android/user-events.h"
 #include "android/hw-sensors.h"
 #include "android/keycode-array.h"
 #include "android/charmap.h"

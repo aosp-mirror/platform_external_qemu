@@ -22,7 +22,7 @@
 #include <time.h>
 #include "cpu.h"
 #include "exec/exec-all.h"
-#include "android-trace.h"
+#include "android/trace.h"
 #include "varint.h"
 #include "android/utils/path.h"
 
