@@ -33,7 +33,7 @@
 #include "net/net.h"
 #include "qemu-char.h"
 #include "sysemu.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 #include "readline.h"
 #include "ui/console.h"
 #include "blockdev.h"
@@ -96,7 +96,7 @@ struct Monitor {
 };
 
 #ifdef CONFIG_ANDROID
-#include "monitor-android.h"
+#include "android/monitor.h"
 #endif
 
 static QLIST_HEAD(mon_list, Monitor) mon_list;

@@ -29,7 +29,7 @@
 
 #include "qemu-common.h"
 #include "ui/console.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 #include "audio/audio.h"
 #include <zlib.h>
 

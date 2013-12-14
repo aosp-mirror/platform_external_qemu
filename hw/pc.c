@@ -33,7 +33,7 @@
 //#include "smbus.h"
 #include "boards.h"
 #include "android/globals.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 #include "fw_cfg.h"
 //#include "hpet_emul.h"
 #include "watchdog.h"

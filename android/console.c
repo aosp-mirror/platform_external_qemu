@@ -38,7 +38,7 @@
 #include "android/config/config.h"
 #include "tcpdump.h"
 #include "net/net.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 
 #include <stdlib.h>
 #include <stdio.h>

@@ -24,7 +24,7 @@
 #include "hw.h"
 #include "pc.h"
 #include "isa.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 #include "goldfish_device.h"
 
 /* debug PIC */

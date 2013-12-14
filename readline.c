@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 #include "readline.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 
 #define IS_NORM 0
 #define IS_ESC  1
