@@ -9,7 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "android/cbuffer.h"
 #include "android/qemu-debug.h"
 

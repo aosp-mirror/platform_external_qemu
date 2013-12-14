@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 #include "qemu-common.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "slirp.h"
 #include "proxy_common.h"
 #include "hw/hw.h"

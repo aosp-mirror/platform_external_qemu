@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "android/hw-kmsg.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "android/charpipe.h"
 #include "android/utils/debug.h"
 

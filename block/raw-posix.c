@@ -23,7 +23,7 @@
  */
 #include "qemu-common.h"
 #include "qemu/timer.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "qemu/log.h"
 #include "block/block_int.h"
 #include "qemu/module.h"

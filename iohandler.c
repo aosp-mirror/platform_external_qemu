@@ -24,7 +24,7 @@
 
 #include "config-host.h"
 #include "qemu-common.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "qemu-queue.h"
 
 #ifndef _WIN32

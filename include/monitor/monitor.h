@@ -2,7 +2,7 @@
 #define MONITOR_H
 
 #include "qemu-common.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "qapi/qmp/qerror.h"
 #include "qapi/qmp/qdict.h"
 #include "block/block.h"

@@ -18,7 +18,7 @@
 #include <fcntl.h>
 #include <stddef.h>
 #include "android/qemu-debug.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include <stdlib.h>
 #include <string.h>
 #include "android/utils/path.h"

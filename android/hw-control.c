@@ -26,7 +26,7 @@
 #include "android/globals.h"
 #include "android/utils/misc.h"
 #include "android/utils/debug.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include <stdio.h>
 #include <string.h>
 
