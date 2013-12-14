@@ -28,7 +28,7 @@
 #define __QEMU_VNC_H
 
 #include "qemu-common.h"
-#include "console.h"
+#include "ui/console.h"
 #include "monitor.h"
 #include "audio/audio.h"
 #include <zlib.h>

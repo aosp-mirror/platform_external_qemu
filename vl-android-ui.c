@@ -38,7 +38,7 @@
 
 #include "qemu-common.h"
 #include "net.h"
-#include "console.h"
+#include "ui/console.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"
 #include "block.h"

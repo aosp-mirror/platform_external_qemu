@@ -35,7 +35,7 @@
 #include "sysemu.h"
 #include "monitor.h"
 #include "readline.h"
-#include "console.h"
+#include "ui/console.h"
 #include "blockdev.h"
 #include "audio/audio.h"
 #include "disas.h"

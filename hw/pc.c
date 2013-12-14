@@ -38,7 +38,7 @@
 //#include "hpet_emul.h"
 #include "watchdog.h"
 #include "smbios.h"
-#include "console.h"
+#include "ui/console.h"
 
 #include "goldfish_device.h"
 #include "goldfish_pipe.h"

@@ -27,10 +27,10 @@
 #include <string.h>
 
 #include "qemu-common.h"
-#include "qemu-error.h"
+#include "qemu/error-report.h"
 #include "qemu-objects.h"
 #include "qemu-option.h"
-#include "qerror.h"
+#include "qapi/qmp/qerror.h"
 
 /*
  * Extracts the name of an option from the parameter string (p points at the

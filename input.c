@@ -25,8 +25,8 @@
 #include "sysemu.h"
 #include "net.h"
 #include "monitor.h"
-#include "console.h"
-#include "qjson.h"
+#include "ui/console.h"
+#include "qapi/qmp/qjson.h"
 
 #ifdef CONFIG_SKINNING
 QEMUPutMouseEntry *original_qemu_add_mouse_event_handler(QEMUPutMouseEvent *func,

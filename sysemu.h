@@ -7,7 +7,7 @@
 #include "qemu-queue.h"
 #include "qemu/timer.h"
 #include "qdict.h"
-#include "qerror.h"
+#include "qapi/qmp/qerror.h"
 
 #ifdef _WIN32
 #include <windows.h>

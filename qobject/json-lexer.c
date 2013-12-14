@@ -11,10 +11,10 @@
  *
  */
 
-#include "qstring.h"
-#include "qlist.h"
+#include "qapi/qmp/qstring.h"
+#include "qapi/qmp/qlist.h"
 #include "qdict.h"
-#include "qint.h"
+#include "qapi/qmp/qint.h"
 #include "qemu-common.h"
 #include "json-lexer.h"
 

@@ -13,8 +13,8 @@
 #define QERROR_H
 
 #include "qdict.h"
-#include "qstring.h"
-#include "qemu-error.h"
+#include "qapi/qmp/qstring.h"
+#include "qemu/error-report.h"
 #include <stdarg.h>
 
 typedef struct QErrorStringTable {

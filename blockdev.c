@@ -10,9 +10,9 @@
 #include "block.h"
 #include "blockdev.h"
 #include "monitor.h"
-#include "qerror.h"
+#include "qapi/qmp/qerror.h"
 #include "qemu-option.h"
-#include "qemu-config.h"
+#include "qemu/config-file.h"
 #include "sysemu.h"
 
 static QTAILQ_HEAD(drivelist, DriveInfo) drives = QTAILQ_HEAD_INITIALIZER(drives);
