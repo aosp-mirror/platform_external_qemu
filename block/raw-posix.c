@@ -26,7 +26,7 @@
 #include "qemu-char.h"
 #include "qemu-log.h"
 #include "block_int.h"
-#include "module.h"
+#include "qemu/module.h"
 #include "block/raw-posix-aio.h"
 
 #ifdef CONFIG_COCOA

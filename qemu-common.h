@@ -384,7 +384,7 @@ static inline uint64_t muldiv64(uint64_t a, uint32_t b, uint32_t c)
     return res.ll;
 }
 
-#include "module.h"
+#include "qemu/module.h"
 
 typedef enum DisplayType
 {

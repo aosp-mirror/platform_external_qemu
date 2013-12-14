@@ -20,7 +20,7 @@
 #define CPU_NO_GLOBAL_REGS
 #include "exec.h"
 #include "exec-all.h"
-#include "host-utils.h"
+#include "qemu/host-utils.h"
 
 //#define DEBUG_PCALL
 

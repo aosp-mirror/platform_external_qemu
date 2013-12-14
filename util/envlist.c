@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 #include "qemu-queue.h"
-#include "envlist.h"
+#include "qemu/envlist.h"
 
 struct envlist_entry {
 	const char *ev_var;			/* actual env value */

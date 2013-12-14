@@ -420,14 +420,11 @@ CORE_MISC_SOURCES = \
     cbuffer.c \
     charpipe.c \
     console.c \
-    cutils.c \
     d3des.c \
     input.c \
     iohandler.c \
     ioport.c \
-    module.c \
     net-android.c \
-    notify.c \
     path.c \
     qemu-char.c \
     qemu-config.c \
@@ -470,6 +467,9 @@ CORE_MISC_SOURCES = \
     android/utils/jpeg-compress.c \
     util/acl.c \
     util/aes.c \
+    util/cutils.c \
+    util/module.c \
+    util/notify.c \
     util/osdep.c \
 
 ifeq ($(HOST_ARCH),x86)

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 #include "qemu-common.h"
-#include "host-utils.h"
+#include "qemu/host-utils.h"
 #include <math.h>
 
 void pstrcpy(char *buf, int buf_size, const char *str)
