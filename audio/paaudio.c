@@ -38,7 +38,7 @@
 
 static void* pa_lib;
 
-#include "dynlink.h"
+#include "android/dynlink.h"
 
 typedef struct {
     HWVoiceOut hw;

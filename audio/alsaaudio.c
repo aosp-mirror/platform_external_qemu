@@ -94,7 +94,7 @@
 #define DYNLINK_FUNCTIONS_INIT \
     alsa_dynlink_init
 
-#include "dynlink.h"
+#include "android/dynlink.h"
 
 /* these are inlined functions in the original headers */
 #define FF_snd_pcm_hw_params_alloca(ptr) \
