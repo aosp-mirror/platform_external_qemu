@@ -80,10 +80,10 @@
 #include "blockdev.h"
 #include "block.h"
 #include "audio/audio.h"
-#include "migration.h"
+#include "migration/migration.h"
 #include "qemu_socket.h"
 #include "qemu-queue.h"
-#include "qemu_file.h"
+#include "migration/qemu-file.h"
 #include "android/snapshot.h"
 
 

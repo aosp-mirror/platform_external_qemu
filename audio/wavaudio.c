@@ -28,7 +28,7 @@
 
 #define AUDIO_CAP "wav"
 #include "audio_int.h"
-#include "qemu_file.h"
+#include "migration/qemu-file.h"
 
 #define  WAV_AUDIO_IN  1
 

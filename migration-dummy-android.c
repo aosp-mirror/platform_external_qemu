@@ -12,7 +12,7 @@
  */
 
 #include "qemu-common.h"
-#include "migration.h"
+#include "migration/migration.h"
 #include "monitor/monitor.h"
 #include "buffered_file.h"
 #include "sysemu.h"

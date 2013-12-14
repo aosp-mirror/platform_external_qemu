@@ -13,7 +13,7 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "qemu_file.h"
+#include "migration/qemu-file.h"
 #include "goldfish_device.h"
 #include "audio/audio.h"
 
