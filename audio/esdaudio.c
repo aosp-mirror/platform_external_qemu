@@ -30,7 +30,7 @@
 #include "audio_int.h"
 #include "audio_pt_int.h"
 
-#include "qemu_debug.h"
+#include "android/qemu-debug.h"
 
 #define  DEBUG  1
 

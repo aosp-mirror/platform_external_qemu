@@ -13,7 +13,7 @@
 #include "goldfish_device.h"
 #include "mmc.h"
 #include "sd.h"
-#include "block.h"
+#include "block/block.h"
 
 enum {
     /* status register */

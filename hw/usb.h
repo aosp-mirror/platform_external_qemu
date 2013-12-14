@@ -25,7 +25,7 @@
 #ifndef _HW_USB_H
 #define _HW_USB_H
 
-#include "block.h"
+#include "block/block.h"
 
 #define USB_TOKEN_SETUP 0x2d
 #define USB_TOKEN_IN    0x69 /* device -> host */

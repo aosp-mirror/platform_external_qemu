@@ -5,7 +5,7 @@
 #include "qemu-char.h"
 #include "qapi/qmp/qerror.h"
 #include "qapi/qmp/qdict.h"
-#include "block.h"
+#include "block/block.h"
 
 extern Monitor *cur_mon;
 extern Monitor *default_mon;

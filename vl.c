@@ -153,7 +153,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "qemu/timer.h"
 #include "qemu-char.h"
 #include "qemu/cache-utils.h"
-#include "block.h"
+#include "block/block.h"
 #include "sysemu/dma.h"
 #include "audio/audio.h"
 #include "migration/migration.h"

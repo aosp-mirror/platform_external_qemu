@@ -17,7 +17,7 @@
 #include "android/sockets.h"
 #include <fcntl.h>
 #include <stddef.h>
-#include "qemu_debug.h"
+#include "android/qemu-debug.h"
 #include "qemu-char.h"
 #include <stdlib.h>
 #include <string.h>

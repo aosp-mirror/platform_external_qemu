@@ -14,7 +14,7 @@
 #include "goldfish_nand.h"
 #include "goldfish_vmem.h"
 #include "android/utils/tempfile.h"
-#include "qemu_debug.h"
+#include "android/qemu-debug.h"
 #include "android/android.h"
 
 #define  DEBUG  1

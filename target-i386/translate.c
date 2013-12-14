@@ -32,7 +32,7 @@
 #include "helper.h"
 #define GEN_HELPER 1
 #include "helper.h"
-#include "hax.h"
+#include "exec/hax.h"
 
 #define PREFIX_REPZ   0x01
 #define PREFIX_REPNZ  0x02

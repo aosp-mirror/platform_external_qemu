@@ -15,7 +15,7 @@
 #include "sysemu/sysemu.h"
 #include "boards.h"
 #include "flash.h"
-#include "qemu-log.h"
+#include "qemu/log.h"
 #include "mips-bios.h"
 #include "ide.h"
 #include "loader.h"

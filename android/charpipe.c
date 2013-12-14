@@ -10,8 +10,8 @@
 ** GNU General Public License for more details.
 */
 #include "qemu-char.h"
-#include "cbuffer.h"
-#include "qemu_debug.h"
+#include "android/cbuffer.h"
+#include "android/qemu-debug.h"
 
 #define  xxDEBUG
 

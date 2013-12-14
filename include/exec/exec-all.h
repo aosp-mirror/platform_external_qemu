@@ -65,7 +65,7 @@ extern uint16_t gen_opc_icount[OPC_BUF_SIZE];
 extern target_ulong gen_opc_jump_pc[2];
 extern uint32_t gen_opc_hflags[OPC_BUF_SIZE];
 
-#include "qemu-log.h"
+#include "qemu/log.h"
 
 void gen_intermediate_code(CPUState *env, struct TranslationBlock *tb);
 void gen_intermediate_code_pc(CPUState *env, struct TranslationBlock *tb);
@@ -342,7 +342,7 @@ extern CPUWriteMemoryFunc *io_mem_write[IO_MEM_NB_ENTRIES][4];
 extern CPUReadMemoryFunc *io_mem_read[IO_MEM_NB_ENTRIES][4];
 extern void *io_mem_opaque[IO_MEM_NB_ENTRIES];
 
-#include "qemu-lock.h"
+#include "exec/spinlock.h"
 
 extern spinlock_t tb_lock;
 

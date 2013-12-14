@@ -118,7 +118,7 @@
 #include "qemu-char.h"
 #include "audio/audio.h"
 #include "qemu_socket.h"
-#include "qemu-log.h"
+#include "qemu/log.h"
 
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"

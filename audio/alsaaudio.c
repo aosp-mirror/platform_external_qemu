@@ -35,7 +35,7 @@
 #include "audio_int.h"
 #include <dlfcn.h>
 #include <pthread.h>
-#include "qemu_debug.h"
+#include "android/qemu-debug.h"
 
 #define  DEBUG  1
 

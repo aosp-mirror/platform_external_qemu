@@ -39,7 +39,7 @@
 #include "hw/hw.h"
 #include "qemu/osdep.h"
 #include "sysemu/kvm.h"
-#include "hax.h"
+#include "exec/hax.h"
 #include "qemu/timer.h"
 #if defined(CONFIG_USER_ONLY)
 #include <qemu.h>

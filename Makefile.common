@@ -417,8 +417,6 @@ CORE_MISC_SOURCES = \
     bt-host.c \
     bt-vhci.c \
     buffered_file.c \
-    cbuffer.c \
-    charpipe.c \
     input.c \
     iohandler.c \
     ioport.c \
@@ -428,6 +426,8 @@ CORE_MISC_SOURCES = \
     savevm.c \
     tcpdump.c \
     android/boot-properties.c \
+    android/cbuffer.c \
+    android/charpipe.c \
     android/config.c \
     android/core-init-utils.c   \
     android/gps.c \

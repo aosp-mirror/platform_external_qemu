@@ -32,7 +32,7 @@
 GLOBAL_REGISTER_VARIABLE_DECL struct CPUX86State *env asm(AREG0);
 
 #include "qemu-common.h"
-#include "qemu-log.h"
+#include "qemu/log.h"
 
 #define EAX (env->regs[R_EAX])
 #define ECX (env->regs[R_ECX])

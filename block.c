@@ -24,7 +24,7 @@
 #include "config-host.h"
 #include "qemu-common.h"
 #include "monitor/monitor.h"
-#include "block_int.h"
+#include "block/block_int.h"
 #include "qemu/module.h"
 #include "qemu-objects.h"
 

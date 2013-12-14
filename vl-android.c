@@ -48,7 +48,7 @@
 
 #include "migration/qemu-file.h"
 #include "android/android.h"
-#include "charpipe.h"
+#include "android/charpipe.h"
 #include "modem_driver.h"
 #include "android/gps.h"
 #include "android/hw-kmsg.h"
@@ -195,12 +195,12 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "qemu/timer.h"
 #include "qemu-char.h"
 #include "qemu/cache-utils.h"
-#include "block.h"
+#include "block/block.h"
 #include "sysemu/dma.h"
 #include "audio/audio.h"
 #include "migration/migration.h"
 #include "sysemu/kvm.h"
-#include "hax.h"
+#include "exec/hax.h"
 #ifdef CONFIG_KVM
 #include "android/kvm.h"
 #endif
