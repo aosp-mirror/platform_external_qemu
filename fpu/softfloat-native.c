@@ -1,6 +1,6 @@
 /* Native implementation of soft float functions. Only a single status
    context is supported */
-#include "softfloat.h"
+#include "fpu/softfloat.h"
 #include <math.h>
 #if defined(CONFIG_SOLARIS)
 #include <fenv.h>

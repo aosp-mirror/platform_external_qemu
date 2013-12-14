@@ -35,7 +35,7 @@
  * TARGET_WORDS_BIGENDIAN : same for target cpu
  */
 
-#include "softfloat.h"
+#include "fpu/softfloat.h"
 
 #if defined(HOST_WORDS_BIGENDIAN) != defined(TARGET_WORDS_BIGENDIAN)
 #define BSWAP_NEEDED
