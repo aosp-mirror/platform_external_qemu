@@ -36,7 +36,7 @@
 /* Needed early for CONFIG_BSD etc. */
 #include "config-host.h"
 #include "sysemu.h"
-#include "net.h"
+#include "net/net.h"
 #include "qemu-options.h"
 
 #ifdef CONFIG_LINUX

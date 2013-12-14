@@ -113,7 +113,7 @@
 #endif
 
 #include "qemu-common.h"
-#include "net.h"
+#include "net/net.h"
 #include "monitor.h"
 #include "sysemu.h"
 #include "qemu/timer.h"
@@ -127,7 +127,7 @@
 #endif
 
 #if defined(CONFIG_ANDROID)
-#include "shaper.h"
+#include "android/shaper.h"
 #endif
 
 #include "android/android.h"

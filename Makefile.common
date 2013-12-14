@@ -98,7 +98,6 @@ common_LOCAL_SRC_FILES += $(ZLIB_SOURCES)
 # Android utility functions
 #
 common_LOCAL_SRC_FILES += \
-	sockets.c \
 	iolooper-select.c \
 	android/async-console.c \
 	android/async-utils.c \
@@ -108,6 +107,7 @@ common_LOCAL_SRC_FILES += \
 	android/avd/hw-config.c \
 	android/avd/info.c \
 	android/avd/util.c \
+	android/sockets.c \
 	android/sync-utils.c \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
@@ -422,12 +422,10 @@ CORE_MISC_SOURCES = \
     input.c \
     iohandler.c \
     ioport.c \
-    net-android.c \
     qemu-char.c \
     qemu-malloc.c \
     readline.c \
     savevm.c \
-    shaper.c \
     tcpdump.c \
     android/boot-properties.c \
     android/config.c \
@@ -442,6 +440,7 @@ CORE_MISC_SOURCES = \
     android/looper-qemu.c \
     android/hw-pipe-net.c \
     android/qemu-setup.c \
+    android/shaper.c \
     android/snapshot.c \
     android/async-socket-connector.c \
     android/async-socket.c \
@@ -456,6 +455,7 @@ CORE_MISC_SOURCES = \
     android/multitouch-screen.c \
     android/multitouch-port.c \
     android/utils/jpeg-compress.c \
+    net/net-android.c \
     qobject/qerror.c \
     ui/console.c \
     ui/d3des.c \

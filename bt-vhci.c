@@ -19,7 +19,7 @@
 
 #include "qemu-common.h"
 #include "qemu-char.h"
-#include "net.h"
+#include "net/net.h"
 #include "hw/bt.h"
 
 #define VHCI_DEV	"/dev/vhci"

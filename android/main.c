@@ -18,7 +18,7 @@
 #include <process.h>
 #endif
 
-#include "sockets.h"
+#include "android/sockets.h"
 
 #include "android/android.h"
 #include "qemu-common.h"

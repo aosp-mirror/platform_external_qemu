@@ -22,7 +22,7 @@
 #include "qemu-common.h"
 #include "errno.h"
 #include "iolooper.h"
-#include "sockets.h"
+#include "android/sockets.h"
 #include "android/utils/debug.h"
 #include "android/sync-utils.h"
 #include "android/utils/system.h"

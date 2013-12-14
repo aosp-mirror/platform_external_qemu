@@ -18,7 +18,7 @@
  * guest clients to directly connect to a TCP port through /dev/qemu_pipe.
  */
 
-#include "sockets.h"
+#include "android/sockets.h"
 #include "android/utils/assert.h"
 #include "android/utils/panic.h"
 #include "android/utils/system.h"

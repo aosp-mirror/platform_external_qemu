@@ -27,7 +27,7 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "qemu-common.h"
-#include "net.h"
+#include "net/net.h"
 #include "sysemu.h"
 #include <stdio.h>
 #include <windows.h>

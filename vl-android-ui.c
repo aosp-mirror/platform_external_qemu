@@ -37,12 +37,12 @@
 #endif
 
 #include "qemu-common.h"
-#include "net.h"
+#include "net/net.h"
 #include "ui/console.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"
 #include "block.h"
-#include "sockets.h"
+#include "android/sockets.h"
 #include "audio/audio.h"
 
 #include "android/android.h"

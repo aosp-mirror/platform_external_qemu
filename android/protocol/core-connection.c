@@ -12,7 +12,7 @@
 
 #include <unistd.h>
 
-#include "sockets.h"
+#include "android/sockets.h"
 #include "qemu-common.h"
 #include "errno.h"
 #include "iolooper.h"

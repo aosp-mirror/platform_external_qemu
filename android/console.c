@@ -21,14 +21,14 @@
  *
  */
 
-#include "sockets.h"
+#include "android/sockets.h"
 #include "qemu-char.h"
 #include "sysemu.h"
 #include "android/android.h"
 #include "cpu.h"
 #include "hw/goldfish_device.h"
 #include "hw/power_supply.h"
-#include "shaper.h"
+#include "android/shaper.h"
 #include "modem_driver.h"
 #include "android/gps.h"
 #include "android/globals.h"
@@ -37,7 +37,7 @@
 #include "android/utils/stralloc.h"
 #include "android/config/config.h"
 #include "tcpdump.h"
-#include "net.h"
+#include "net/net.h"
 #include "monitor.h"
 
 #include <stdlib.h>

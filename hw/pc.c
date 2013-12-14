@@ -29,7 +29,7 @@
 #include "sysemu.h"
 #include "blockdev.h"
 #include "audio/audio.h"
-#include "net.h"
+#include "net/net.h"
 //#include "smbus.h"
 #include "boards.h"
 #include "android/globals.h"

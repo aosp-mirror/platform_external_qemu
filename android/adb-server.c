@@ -15,7 +15,7 @@
  */
 
 #include "qemu-common.h"
-#include "sockets.h"
+#include "android/sockets.h"
 #include "iolooper.h"
 #include "android/async-utils.h"
 #include "android/utils/debug.h"

@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "proxy_int.h"
-#include "sockets.h"
+#include "android/sockets.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>

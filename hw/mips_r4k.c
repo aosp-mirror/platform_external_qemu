@@ -11,7 +11,7 @@
 #include "mips.h"
 #include "pc.h"
 #include "isa.h"
-#include "net.h"
+#include "net/net.h"
 #include "sysemu.h"
 #include "boards.h"
 #include "flash.h"

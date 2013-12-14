@@ -17,7 +17,7 @@
 #include "qemu-common.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"
-#include "sockets.h"  /* for socket_set_nonblock() */
+#include "android/sockets.h"  /* for socket_set_nonblock() */
 
 /**********************************************************************
  **********************************************************************

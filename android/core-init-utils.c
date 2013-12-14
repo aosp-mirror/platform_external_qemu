@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include "qemu-common.h"
-#include "sockets.h"
+#include "android/sockets.h"
 #include "android/android.h"
 #include "android/core-init-utils.h"
 #include "android/utils/bufprint.h"

@@ -30,7 +30,7 @@
 #include "hw/pci.h"
 #include "hw/watchdog.h"
 #include "exec/gdbstub.h"
-#include "net.h"
+#include "net/net.h"
 #include "qemu-char.h"
 #include "sysemu.h"
 #include "monitor.h"

@@ -41,7 +41,7 @@
 #include <slirp.h>
 #include "ip_icmp.h"
 #define SLIRP_COMPILATION  1
-#include "sockets.h"
+#include "android/sockets.h"
 
 #ifdef LOG_ENABLED
 struct udpstat udpstat;
