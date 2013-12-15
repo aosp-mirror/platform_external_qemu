@@ -11,7 +11,7 @@
 #include "sysemu/blockdev.h"
 #include "monitor/monitor.h"
 #include "qapi/qmp/qerror.h"
-#include "qemu-option.h"
+#include "qemu/option.h"
 #include "qemu/config-file.h"
 #include "sysemu/sysemu.h"
 

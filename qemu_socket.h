@@ -2,7 +2,7 @@
 #ifndef QEMU__SOCKET_H
 #define QEMU__SOCKET_H
 
-#include "qemu-option.h"
+#include "qemu/option.h"
 
 #include "android/sockets.h"
 #define  socket_error()  errno

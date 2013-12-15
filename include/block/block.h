@@ -3,7 +3,7 @@
 
 #include "block/qemu-aio.h"
 #include "qemu-common.h"
-#include "qemu-option.h"
+#include "qemu/option.h"
 #include "qapi/qmp/qobject.h"
 
 /* block.c */

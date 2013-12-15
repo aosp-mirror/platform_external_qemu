@@ -159,7 +159,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "migration/migration.h"
 #include "sysemu/kvm.h"
 #include "sysemu/balloon.h"
-#include "qemu-option.h"
+#include "qemu/option.h"
 
 #include "disas/disas.h"
 
