@@ -101,7 +101,7 @@ HW_SOURCES += \
 
 # The following sources must be compiled with the final executables
 # because they contain device_init() or machine_init() statements.
-HW_OBJ_SOURCES := hw/smc91c111.c
+HW_OBJ_SOURCES := hw/net/smc91c111.c
 HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
 
 common_LOCAL_SRC_FILES += disas/arm.c
@@ -149,7 +149,7 @@ HW_SOURCES += \
 
 # The following sources must be compiled with the final executables
 # because they contain device_init() or machine_init() statements.
-HW_OBJ_SOURCES := hw/smc91c111.c
+HW_OBJ_SOURCES := hw/net/smc91c111.c
 HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
 
 common_LOCAL_SRC_FILES += disas/mips.c
