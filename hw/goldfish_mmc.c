@@ -11,8 +11,8 @@
 */
 #include "migration/qemu-file.h"
 #include "hw/android/goldfish/device.h"
-#include "mmc.h"
-#include "sd.h"
+#include "hw/mmc.h"
+#include "hw/sd.h"
 #include "block/block.h"
 
 enum {
