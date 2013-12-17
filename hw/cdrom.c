@@ -26,7 +26,7 @@
    here.  */
 
 #include "qemu-common.h"
-#include "scsi-disk.h"
+#include "hw/scsi/scsi-disk.h"
 
 static void lba_to_msf(uint8_t *buf, int lba)
 {

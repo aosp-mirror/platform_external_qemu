@@ -10,7 +10,7 @@
 #include "qemu-common.h"
 #include "hw/usb.h"
 #include "block/block.h"
-#include "scsi-disk.h"
+#include "hw/scsi/scsi-disk.h"
 #include "ui/console.h"
 
 //#define DEBUG_MSD

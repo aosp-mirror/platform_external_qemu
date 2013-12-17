@@ -30,7 +30,7 @@ do { fprintf(stderr, "scsi-disk: " fmt , ## __VA_ARGS__); } while (0)
 
 #include "qemu-common.h"
 #include "block/block.h"
-#include "scsi-disk.h"
+#include "hw/scsi/scsi-disk.h"
 
 #define SENSE_NO_SENSE        0
 #define SENSE_NOT_READY       2
