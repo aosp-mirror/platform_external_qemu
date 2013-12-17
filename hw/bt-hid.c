@@ -20,7 +20,7 @@
 
 #include "qemu-common.h"
 #include "usb.h"
-#include "bt.h"
+#include "hw/bt.h"
 
 enum hid_transaction_req {
     BT_HANDSHAKE			= 0x0,
