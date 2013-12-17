@@ -17,7 +17,7 @@ extern target_phys_addr_t pci_mem_base;
 #define PCI_FUNC(devfn)         ((devfn) & 0x07)
 
 /* Class, Vendor and Device IDs from Linux's pci_ids.h */
-#include "pci_ids.h"
+#include "hw/pci/pci_ids.h"
 
 /* QEMU-specific Vendor and Device ID definitions */
 

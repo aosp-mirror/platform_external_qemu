@@ -24,7 +24,7 @@
 
 #include "hw/hw.h"
 #include "hw/i386/pc.h"
-#include "pci.h"
+#include "hw/pci/pci.h"
 
 typedef uint32_t pci_addr_t;
 #include "pci_host.h"

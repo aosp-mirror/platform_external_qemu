@@ -24,7 +24,7 @@
 #include "hw/hw.h"
 #include "hw/i386/pc.h"
 #include "hw/block/fdc.h"
-#include "pci.h"
+#include "hw/pci/pci.h"
 #include "block/block.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/blockdev.h"

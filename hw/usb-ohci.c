@@ -29,7 +29,7 @@
 #include "hw/hw.h"
 #include "qemu/timer.h"
 #include "hw/usb.h"
-#include "pci.h"
+#include "hw/pci/pci.h"
 #include "pxa.h"
 #include "hw/devices.h"
 

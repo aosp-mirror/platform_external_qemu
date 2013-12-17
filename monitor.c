@@ -27,7 +27,7 @@
 #include "hw/usb.h"
 #include "hw/pcmcia.h"
 #include "hw/i386/pc.h"
-#include "hw/pci.h"
+#include "hw/pci/pci.h"
 #include "hw/watchdog.h"
 #include "exec/gdbstub.h"
 #include "net/net.h"
