@@ -12,7 +12,7 @@
  */
 
 #include "sysemu/sysemu.h"
-#include "smbios.h"
+#include "hw/i386/smbios.h"
 
 /*
  * Structures shared with the BIOS

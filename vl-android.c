@@ -184,7 +184,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "hw/baum.h"
 #include "hw/bt.h"
 #include "hw/watchdog.h"
-#include "hw/smbios.h"
+#include "hw/i386/smbios.h"
 #include "hw/xen.h"
 #include "sysemu/bt.h"
 #include "net/net.h"

@@ -40,7 +40,7 @@
 #include "migration/migration.h"
 #include "net/net.h"
 #include "exec/gdbstub.h"
-#include "hw/smbios.h"
+#include "hw/i386/smbios.h"
 
 #ifdef TARGET_SPARC
 int graphic_width = 1024;

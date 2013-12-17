@@ -37,7 +37,7 @@
 #include "hw/nvram/fw_cfg.h"
 //#include "hpet_emul.h"
 #include "watchdog.h"
-#include "smbios.h"
+#include "hw/i386/smbios.h"
 #include "ui/console.h"
 
 #include "hw/android/goldfish/device.h"
