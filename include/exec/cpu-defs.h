@@ -29,7 +29,7 @@
 #include <signal.h>
 #include "qemu/osdep.h"
 #include "qemu/queue.h"
-#include "targphys.h"
+#include "exec/targphys.h"
 
 #ifndef TARGET_LONG_BITS
 #error TARGET_LONG_BITS must be defined before including this header

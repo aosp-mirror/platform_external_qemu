@@ -8,7 +8,7 @@
 #endif
 
 #ifdef TARGET_PHYS_ADDR_BITS
-#include "targphys.h"
+#include "exec/targphys.h"
 #endif
 
 #ifndef NEED_CPU_H
