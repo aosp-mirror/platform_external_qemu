@@ -71,7 +71,7 @@
 /* For the benefit of older linux systems which don't supply it,
    we use a local copy of hpet.h. */
 /* #include <linux/hpet.h> */
-#include "hpet.h"
+#include "hw/timer/hpet.h"
 
 #include <linux/ppdev.h>
 #include <linux/parport.h>
