@@ -143,7 +143,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "hw/bt.h"
 #include "sysemu/watchdog.h"
 #include "hw/i386/smbios.h"
-#include "hw/xen.h"
+#include "hw/xen/xen.h"
 #include "sysemu/bt.h"
 #include "net/net.h"
 #include "monitor/monitor.h"
