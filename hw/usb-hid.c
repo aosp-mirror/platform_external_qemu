@@ -24,7 +24,7 @@
  */
 #include "hw/hw.h"
 #include "ui/console.h"
-#include "usb.h"
+#include "hw/usb.h"
 
 /* HID interface requests */
 #define GET_REPORT   0xa101
