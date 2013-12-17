@@ -120,7 +120,7 @@ HW_SOURCES += \
     timer/mc146818rtc.c \
     pci-host/piix.c \
     timer/i8254.c \
-    pckbd.c \
+    input/pckbd.c \
     ioapic.c \
     input/ps2.c \
     smbios.c \
