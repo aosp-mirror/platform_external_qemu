@@ -24,7 +24,7 @@
 #include "hw/hw.h"
 #include "hw/isa/isa.h"
 #include "hw/i386/pc.h"
-#include "ps2.h"
+#include "hw/input/ps2.h"
 #include "sysemu/sysemu.h"
 
 /* debug PC keyboard */
