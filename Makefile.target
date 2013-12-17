@@ -182,6 +182,7 @@ endif
 
 ifeq ($(EMULATOR_TARGET_ARCH),arm)
 common_LOCAL_SRC_FILES += \
+    target-arm/arm-semi.c \
     target-arm/op_helper.c \
     target-arm/iwmmxt_helper.c \
     target-arm/neon_helper.c \
@@ -190,8 +191,7 @@ common_LOCAL_SRC_FILES += \
     target-arm/translate.c \
     target-arm/machine.c \
     hw/armv7m.c \
-    hw/armv7m_nvic.c \
-    arm-semi.c
+    hw/armv7m_nvic.c
 
 common_LOCAL_SRC_FILES += fpu/softfloat.c
 endif
