@@ -7,7 +7,7 @@
  * This code is licenced under the GPL.
  */
 
-#include "hw.h"
+#include "hw/hw.h"
 #include "arm-misc.h"
 #include "sysemu/sysemu.h"
 

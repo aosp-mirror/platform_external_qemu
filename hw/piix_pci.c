@@ -22,8 +22,8 @@
  * THE SOFTWARE.
  */
 
-#include "hw.h"
-#include "pc.h"
+#include "hw/hw.h"
+#include "hw/i386/pc.h"
 #include "pci.h"
 
 typedef uint32_t pci_addr_t;

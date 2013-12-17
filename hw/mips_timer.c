@@ -1,4 +1,4 @@
-#include "hw.h"
+#include "hw/hw.h"
 #include "mips.h"
 #include "qemu/timer.h"
 

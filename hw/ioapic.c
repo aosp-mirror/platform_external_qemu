@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA  02110-1301 USA
  */
 
-#include "hw.h"
-#include "pc.h"
+#include "hw/hw.h"
+#include "hw/i386/pc.h"
 #include "qemu/timer.h"
 #include "qemu/host-utils.h"
 

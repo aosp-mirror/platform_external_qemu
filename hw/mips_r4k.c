@@ -7,10 +7,10 @@
  * All peripherial devices are attached to this "bus" with
  * the standard PC ISA addresses.
 */
-#include "hw.h"
+#include "hw/hw.h"
 #include "mips.h"
-#include "pc.h"
-#include "isa.h"
+#include "hw/i386/pc.h"
+#include "hw/isa/isa.h"
 #include "net/net.h"
 #include "sysemu/sysemu.h"
 #include "boards.h"

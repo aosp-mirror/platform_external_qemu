@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "hw.h"
-#include "isa.h"
-#include "pc.h"
+#include "hw/hw.h"
+#include "hw/isa/isa.h"
+#include "hw/i386/pc.h"
 #include "ps2.h"
 #include "sysemu/sysemu.h"
 

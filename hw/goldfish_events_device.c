@@ -14,7 +14,7 @@
 #include "android/charmap.h"
 #include "android/globals.h"  /* for android_hw */
 #include "android/multitouch-screen.h"
-#include "irq.h"
+#include "hw/irq.h"
 #include "android/user-events.h"
 #include "ui/console.h"
 

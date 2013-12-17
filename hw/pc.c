@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "hw.h"
-#include "pc.h"
+#include "hw/hw.h"
+#include "hw/i386/pc.h"
 #include "fdc.h"
 #include "pci.h"
 #include "block/block.h"

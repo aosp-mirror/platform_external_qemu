@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "hw.h"
-#include "isa.h"
+#include "hw/hw.h"
+#include "hw/isa/isa.h"
 
 /* #define DEBUG_DMA */
 

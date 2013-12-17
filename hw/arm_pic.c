@@ -7,8 +7,8 @@
  * This code is licenced under the LGPL
  */
 
-#include "hw.h"
-#include "pc.h"
+#include "hw/hw.h"
+#include "hw/i386/pc.h"
 #include "arm-misc.h"
 
 /* Stub functions for hardware that doesn't exist.  */

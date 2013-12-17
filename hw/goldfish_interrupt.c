@@ -12,7 +12,7 @@
 #include "migration/qemu-file.h"
 #include "arm_pic.h"
 #include "goldfish_device.h"
-#include "irq.h"
+#include "hw/irq.h"
 
 enum {
     INTERRUPT_STATUS        = 0x00, // number of pending interrupts

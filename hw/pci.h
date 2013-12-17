@@ -3,10 +3,10 @@
 
 #include "qemu-common.h"
 
-#include "qdev.h"
+#include "hw/qdev.h"
 
 /* PCI includes legacy ISA access.  */
-#include "isa.h"
+#include "hw/isa/isa.h"
 
 /* PCI bus */
 
