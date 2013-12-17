@@ -23,7 +23,7 @@
  */
 #include "hw/hw.h"
 #include "hw/i386/pc.h"
-#include "fdc.h"
+#include "hw/block/fdc.h"
 #include "pci.h"
 #include "block/block.h"
 #include "sysemu/sysemu.h"
