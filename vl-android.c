@@ -166,7 +166,7 @@
 #define memalign(align, size) malloc(size)
 #endif
 
-#include "cpus.h"
+#include "sysemu/cpus.h"
 #include "sysemu/arch_init.h"
 
 #ifdef CONFIG_COCOA
