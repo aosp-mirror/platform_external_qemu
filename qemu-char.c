@@ -98,7 +98,7 @@
 #endif
 #endif
 
-#include "qemu_socket.h"
+#include "qemu/sockets.h"
 
 #define READ_BUF_LEN 4096
 

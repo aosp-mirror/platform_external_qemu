@@ -19,7 +19,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include "qemu_socket.h"
+#include "qemu/sockets.h"
 #include "qemu-common.h" /* for qemu_isdigit */
 
 #ifndef AI_ADDRCONFIG

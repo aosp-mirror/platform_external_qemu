@@ -64,7 +64,7 @@ typedef int32_t socklen_t;
 
 #include "qemu-common.h"
 #include "sysemu/sysemu.h"
-#include "qemu_socket.h"
+#include "qemu/sockets.h"
 
 int qemu_madvise(void *addr, size_t len, int advice)
 {

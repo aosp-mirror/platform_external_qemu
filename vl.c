@@ -165,7 +165,7 @@ int qemu_main(int argc, char **argv, char **envp);
 
 #include "exec/exec-all.h"
 
-#include "qemu_socket.h"
+#include "qemu/sockets.h"
 
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"

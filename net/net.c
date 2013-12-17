@@ -117,7 +117,7 @@
 #include "qemu/timer.h"
 #include "sysemu/char.h"
 #include "audio/audio.h"
-#include "qemu_socket.h"
+#include "qemu/sockets.h"
 #include "qemu/log.h"
 
 #if defined(CONFIG_SLIRP)
