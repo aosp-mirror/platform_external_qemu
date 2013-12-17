@@ -120,7 +120,7 @@ HW_SOURCES += \
     i8259.c \
     mc146818rtc.c \
     piix_pci.c \
-    i8254.c \
+    timer/i8254.c \
     pckbd.c \
     ioapic.c \
     ps2.c \
