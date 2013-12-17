@@ -36,7 +36,7 @@
 #include "monitor/monitor.h"
 #include "hw/nvram/fw_cfg.h"
 //#include "hpet_emul.h"
-#include "watchdog.h"
+#include "sysemu/watchdog.h"
 #include "hw/i386/smbios.h"
 #include "ui/console.h"
 

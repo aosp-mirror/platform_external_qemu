@@ -22,7 +22,7 @@
 #include "qemu-common.h"
 #include "qemu/queue.h"
 #include "sysemu/sysemu.h"
-#include "hw/watchdog.h"
+#include "sysemu/watchdog.h"
 
 static QLIST_HEAD(watchdog_list, WatchdogTimerModel) watchdog_list;
 

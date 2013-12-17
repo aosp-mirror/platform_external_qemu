@@ -183,7 +183,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "hw/isa/isa.h"
 #include "hw/baum.h"
 #include "hw/bt.h"
-#include "hw/watchdog.h"
+#include "sysemu/watchdog.h"
 #include "hw/i386/smbios.h"
 #include "hw/xen.h"
 #include "sysemu/bt.h"
