@@ -12,7 +12,7 @@
 #include "migration/qemu-file.h"
 #include "goldfish_nand_reg.h"
 #include "goldfish_nand.h"
-#include "goldfish_vmem.h"
+#include "hw/android/goldfish/vmem.h"
 #include "android/utils/tempfile.h"
 #include "android/qemu-debug.h"
 #include "android/android.h"

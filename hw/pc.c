@@ -40,8 +40,8 @@
 #include "smbios.h"
 #include "ui/console.h"
 
-#include "goldfish_device.h"
-#include "goldfish_pipe.h"
+#include "hw/android/goldfish/device.h"
+#include "hw/android/goldfish/pipe.h"
 
 char* audio_input_source = NULL;
 /* output Bochs bios info messages */

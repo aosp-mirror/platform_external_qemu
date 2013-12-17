@@ -11,8 +11,8 @@
 */
 #include "migration/qemu-file.h"
 #include "hw/arm/pic.h"
-#include "goldfish_device.h"
-#include "goldfish_vmem.h"
+#include "hw/android/goldfish/device.h"
+#include "hw/android/goldfish/vmem.h"
 #include "android/utils/debug.h"
 
 #define PDEV_BUS_OP_DONE        (0x00)

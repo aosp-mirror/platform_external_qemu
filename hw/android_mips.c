@@ -15,7 +15,7 @@
 #include "net/net.h"
 #include "sysemu/sysemu.h"
 #include "mips.h"
-#include "goldfish_device.h"
+#include "hw/android/goldfish/device.h"
 #include "android/globals.h"
 #include "audio/audio.h"
 #include "sysemu/blockdev.h"

@@ -10,8 +10,8 @@
 ** GNU General Public License for more details.
 */
 #include "migration/qemu-file.h"
-#include "goldfish_device.h"
-#include "goldfish_vmem.h"
+#include "hw/android/goldfish/device.h"
+#include "hw/android/goldfish/vmem.h"
 
 enum {
     SW_NAME_LEN     = 0x00,

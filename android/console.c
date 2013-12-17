@@ -26,7 +26,7 @@
 #include "sysemu/sysemu.h"
 #include "android/android.h"
 #include "cpu.h"
-#include "hw/goldfish_device.h"
+#include "hw/android/goldfish/device.h"
 #include "hw/power_supply.h"
 #include "android/shaper.h"
 #include "modem_driver.h"
