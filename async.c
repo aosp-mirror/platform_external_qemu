@@ -23,7 +23,7 @@
  */
 
 #include "qemu-common.h"
-#include "block/qemu-aio.h"
+#include "block/aio.h"
 
 /*
  * An AsyncContext protects the callbacks of AIO requests and Bottom Halves

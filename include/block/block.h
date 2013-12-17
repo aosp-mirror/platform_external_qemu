@@ -1,7 +1,7 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
-#include "block/qemu-aio.h"
+#include "block/aio.h"
 #include "qemu-common.h"
 #include "qemu/option.h"
 #include "qapi/qmp/qobject.h"
