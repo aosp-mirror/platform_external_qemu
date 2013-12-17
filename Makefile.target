@@ -97,7 +97,7 @@ HW_SOURCES += android_arm.c \
     goldfish_switch.c \
     goldfish_timer.c \
     goldfish_trace.c \
-    arm_boot.c
+    arm/boot.c
 
 # The following sources must be compiled with the final executables
 # because they contain device_init() or machine_init() statements.
