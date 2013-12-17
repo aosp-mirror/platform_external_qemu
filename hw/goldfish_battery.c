@@ -11,7 +11,7 @@
 */
 #include "migration/qemu-file.h"
 #include "hw/android/goldfish/device.h"
-#include "power_supply.h"
+#include "hw/power_supply.h"
 
 
 enum {
