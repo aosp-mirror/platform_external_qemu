@@ -20,7 +20,7 @@
 #include "qemu-common.h"
 #include "sysemu/char.h"
 #include "net/net.h"
-#include "bt-host.h"
+#include "sysemu/bt.h"
 
 #ifndef _WIN32
 # include <errno.h>
