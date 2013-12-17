@@ -12,7 +12,7 @@
 
 #include "hw/sysbus.h"
 #include "qemu/timer.h"
-#include "arm-misc.h"
+#include "hw/arm/arm.h"
 
 /* 32 internal lines (16 used for system exceptions) plus 64 external
    interrupt lines.  */
