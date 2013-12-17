@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "migration/qemu-file.h"
-#include "arm_pic.h"
+#include "hw/arm/pic.h"
 #include "goldfish_device.h"
 #include "hw/irq.h"
 

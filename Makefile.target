@@ -190,8 +190,8 @@ common_LOCAL_SRC_FILES += \
     target-arm/helper-android.c \
     target-arm/translate.c \
     target-arm/machine.c \
-    hw/armv7m.c \
-    hw/armv7m_nvic.c
+    hw/arm/armv7m.c \
+    hw/arm/armv7m_nvic.c
 
 common_LOCAL_SRC_FILES += fpu/softfloat.c
 endif

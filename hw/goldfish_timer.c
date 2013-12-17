@@ -12,7 +12,7 @@
 #include "qemu-common.h"
 #include "qemu/timer.h"
 #include "cpu.h"
-#include "arm_pic.h"
+#include "hw/arm/pic.h"
 #include "goldfish_device.h"
 #include "hw/hw.h"
 
