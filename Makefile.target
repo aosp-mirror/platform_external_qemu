@@ -67,7 +67,7 @@ HW_SOURCES := \
     core/irq.c \
     core/qdev.c \
     core/sysbus.c \
-    dma.c \
+    core/dma.c \
     android/goldfish/audio.c \
     android/goldfish/device.c \
     android/goldfish/events_device.c \
