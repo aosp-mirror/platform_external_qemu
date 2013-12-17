@@ -68,17 +68,17 @@ HW_SOURCES := \
     core/qdev.c \
     core/sysbus.c \
     dma.c \
-    goldfish_audio.c \
-    goldfish_device.c \
-    goldfish_events_device.c \
-    goldfish_fb.c \
-    goldfish_battery.c \
-    goldfish_mmc.c   \
-    goldfish_memlog.c \
-    goldfish_nand.c \
-    goldfish_pipe.c \
-    goldfish_tty.c \
-    goldfish_vmem.c \
+    android/goldfish/audio.c \
+    android/goldfish/device.c \
+    android/goldfish/events_device.c \
+    android/goldfish/fb.c \
+    android/goldfish/battery.c \
+    android/goldfish/mmc.c   \
+    android/goldfish/memlog.c \
+    android/goldfish/nand.c \
+    android/goldfish/pipe.c \
+    android/goldfish/tty.c \
+    android/goldfish/vmem.c \
     msmouse.c \
     pci.c \
     scsi-disk.c \
@@ -95,10 +95,10 @@ HW_SOURCES += \
     android_arm.c \
     arm/pic.c \
     arm/boot.c \
-    goldfish_interrupt.c \
-    goldfish_switch.c \
-    goldfish_timer.c \
-    goldfish_trace.c \
+    android/goldfish/interrupt.c \
+    android/goldfish/switch.c \
+    android/goldfish/timer.c \
+    android/goldfish/trace.c \
 
 # The following sources must be compiled with the final executables
 # because they contain device_init() or machine_init() statements.
@@ -141,10 +141,10 @@ ifeq ($(EMULATOR_TARGET_ARCH),mips)
 HW_SOURCES += \
     android_mips.c \
     mips_pic.c \
-    goldfish_interrupt.c \
-    goldfish_switch.c \
-    goldfish_timer.c \
-    goldfish_trace.c \
+    android/goldfish/interrupt.c \
+    android/goldfish/switch.c \
+    android/goldfish/timer.c \
+    android/goldfish/trace.c \
     mips_timer.c \
     mips_int.c
 

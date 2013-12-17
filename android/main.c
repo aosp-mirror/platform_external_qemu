@@ -45,7 +45,7 @@
 
 #include "android/main-common.h"
 #include "android/help.h"
-#include "hw/goldfish_nand.h"
+#include "hw/android/goldfish/nand.h"
 
 #include "android/globals.h"
 

@@ -10,8 +10,8 @@
 ** GNU General Public License for more details.
 */
 #include "migration/qemu-file.h"
-#include "goldfish_nand_reg.h"
-#include "goldfish_nand.h"
+#include "nand_reg.h"
+#include "hw/android/goldfish/nand.h"
 #include "hw/android/goldfish/vmem.h"
 #include "android/utils/tempfile.h"
 #include "android/qemu-debug.h"
