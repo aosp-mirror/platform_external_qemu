@@ -7,7 +7,7 @@
  * This code is licenced under the GNU GPL v2.
  */
 #ifndef PXA_H
-# define PXA_H			"pxa.h"
+# define PXA_H			"hw/arm/pxa.h"
 
 /* Interrupt numbers */
 # define PXA2XX_PIC_SSP3	0

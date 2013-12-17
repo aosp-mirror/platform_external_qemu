@@ -119,7 +119,7 @@ HW_SOURCES += \
     intc/apic.c \
     i8259.c \
     mc146818rtc.c \
-    piix_pci.c \
+    pci-host/piix.c \
     timer/i8254.c \
     pckbd.c \
     ioapic.c \
