@@ -130,7 +130,7 @@ HW_SOURCES += \
 # because they contain device_init() or machine_init() statements.
 HW_OBJ_SOURCES := \
     hw/net/ne2000.c \
-    hw/pc.c
+    hw/i386/pc.c
 
 HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
 
