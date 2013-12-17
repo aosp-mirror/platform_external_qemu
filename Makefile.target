@@ -86,7 +86,7 @@ HW_SOURCES := \
     usb-msd.c \
     usb-ohci.c \
     usb.c \
-    watchdog.c
+    watchdog/watchdog.c
 
 
 ifeq ($(EMULATOR_TARGET_ARCH),arm)
