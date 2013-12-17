@@ -116,7 +116,7 @@ common_LOCAL_CFLAGS += -DHAS_AUDIO
 ifeq ($(EMULATOR_TARGET_ARCH),x86)
 HW_SOURCES += \
     intc/apic.c \
-    i8259.c \
+    intc/i8259.c \
     mc146818rtc.c \
     pci-host/piix.c \
     timer/i8254.c \
