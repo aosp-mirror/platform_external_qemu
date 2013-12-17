@@ -124,7 +124,7 @@ HW_SOURCES += \
     ioapic.c \
     input/ps2.c \
     smbios.c \
-    fw_cfg.c
+    nvram/fw_cfg.c
 
 # The following sources must be compiled with the final executables
 # because they contain device_init() or machine_init() statements.
