@@ -417,7 +417,6 @@ CORE_MISC_SOURCES = \
     bt-host.c \
     bt-vhci.c \
     buffered_file.c \
-    input.c \
     iohandler.c \
     ioport.c \
     qemu-char.c \
@@ -459,6 +458,7 @@ CORE_MISC_SOURCES = \
     qobject/qerror.c \
     ui/console.c \
     ui/d3des.c \
+    ui/input.c \
     ui/vnc-android.c \
     util/acl.c \
     util/aes.c \
