@@ -484,11 +484,11 @@ ifeq ($(HOST_ARCH),ppc)
 endif
 
 ifeq ($(HOST_OS),linux)
-    CORE_MISC_SOURCES += usb-linux.c \
+    CORE_MISC_SOURCES += hw/usb/usb-linux.c \
                          util/qemu-thread.c \
                          android/camera/camera-capture-linux.c
 else
-    CORE_MISC_SOURCES += usb-dummy-android.c
+    CORE_MISC_SOURCES += hw/usb/usb-dummy-android.c
 endif
 
 ifeq ($(HOST_OS),windows)
