@@ -10,7 +10,7 @@
  * NVIC.  Much of that is also implemented here.
  */
 
-#include "sysbus.h"
+#include "hw/sysbus.h"
 #include "qemu/timer.h"
 #include "arm-misc.h"
 
