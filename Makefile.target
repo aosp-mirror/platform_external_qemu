@@ -123,7 +123,7 @@ HW_SOURCES += \
     timer/i8254.c \
     pckbd.c \
     ioapic.c \
-    ps2.c \
+    input/ps2.c \
     smbios.c \
     fw_cfg.c
 
