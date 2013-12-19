@@ -175,12 +175,12 @@ static int  do_write(int  fd, const void*  buf, size_t  size)
 }
 
 /* EINTR-proof lseek - due to SIGALRM in use elsewhere */
-static int  do_lseek(int  fd, off_t offset, int whence)
+static off_t do_lseek(int  fd, off_t offset, int whence)
 {
-    int  ret;
+    off_t ret;
     do {
         ret = lseek(fd, offset, whence);
-    } while (ret < 0 && errno == EINTR);
+    } while (ret == -1 && errno == EINTR);
 
     return ret;
 }
@@ -209,24 +209,25 @@ static void  nand_dev_save_disk_state(QEMUFile *f, nand_dev *dev)
 {
     int buf_size = NAND_DEV_SAVE_DISK_BUF_SIZE;
     uint8_t buffer[NAND_DEV_SAVE_DISK_BUF_SIZE] = {0};
+    off_t lseek_ret;
     int ret;
     uint64_t total_copied = 0;
 
     /* Size of file to restore, hence size of data block following.
      * TODO Work out whether to use lseek64 here. */
 
-    ret = do_lseek(dev->fd, 0, SEEK_END);
-    if (ret < 0) {
+    lseek_ret = do_lseek(dev->fd, 0, SEEK_END);
+    if (lseek_ret == -1) {
       XLOG("%s EOF seek failed: %s\n", __FUNCTION__, strerror(errno));
       qemu_file_set_error(f);
       return;
     }
-    const uint64_t total_size = ret;
+    const uint64_t total_size = lseek_ret;
     qemu_put_be64(f, total_size);
 
     /* copy all data from the stream to the stored image */
-    ret = do_lseek(dev->fd, 0, SEEK_SET);
-    if (ret < 0) {
+    lseek_ret = do_lseek(dev->fd, 0, SEEK_SET);
+    if (lseek_ret == -1) {
         XLOG("%s seek failed: %s\n", __FUNCTION__, strerror(errno));
         qemu_file_set_error(f);
         return;
@@ -267,6 +268,7 @@ static int  nand_dev_load_disk_state(QEMUFile *f, nand_dev *dev)
 {
     int buf_size = NAND_DEV_SAVE_DISK_BUF_SIZE;
     uint8_t buffer[NAND_DEV_SAVE_DISK_BUF_SIZE] = {0};
+    off_t lseek_ret;
     int ret;
 
     /* File size for restore and truncate */
@@ -279,8 +281,8 @@ static int  nand_dev_load_disk_state(QEMUFile *f, nand_dev *dev)
 
     /* overwrite disk contents with snapshot contents */
     uint64_t next_offset = 0;
-    ret = do_lseek(dev->fd, 0, SEEK_SET);
-    if (ret < 0) {
+    lseek_ret = do_lseek(dev->fd, 0, SEEK_SET);
+    if (lseek_ret == -1) {
         XLOG("%s seek failed: %s\n", __FUNCTION__, strerror(errno));
         return -EIO;
     }
