@@ -263,6 +263,17 @@ static int   audio_state_load( QEMUFile*  f, void*  opaque, int  version_id )
         goldfish_audio_buff_get( s->out_buff2, f );
         goldfish_audio_buff_get (s->in_buff, f);
     }
+
+    // Similar to enable_audio - without the buffer reset.
+    if (s->voice != NULL) {
+        AUD_set_active_out(s->voice,  (s->int_enable & (AUDIO_INT_WRITE_BUFFER_1_EMPTY | AUDIO_INT_WRITE_BUFFER_2_EMPTY)) != 0);
+    }
+    if (s->voicein) {
+        AUD_set_active_in(s->voicein, (s->int_enable & AUDIO_INT_READ_BUFFER_FULL) != 0);
+    }
+
+    // upon snapshot restore we must also re signal the IRQ
+    goldfish_device_set_irq(&s->dev, 0,(s->int_status & s->int_enable));
     return ret;
 }
 
