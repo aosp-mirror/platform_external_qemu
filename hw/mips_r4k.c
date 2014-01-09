@@ -8,7 +8,7 @@
  * the standard PC ISA addresses.
 */
 #include "hw/hw.h"
-#include "mips.h"
+#include "hw/mips/mips.h"
 #include "hw/i386/pc.h"
 #include "hw/isa/isa.h"
 #include "net/net.h"
