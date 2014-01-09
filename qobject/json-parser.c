@@ -16,12 +16,12 @@
 #include "qemu-common.h"
 #include "qapi/qmp/qstring.h"
 #include "qapi/qmp/qint.h"
-#include "qdict.h"
+#include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qlist.h"
 #include "qapi/qmp/qfloat.h"
 #include "qapi/qmp/qbool.h"
-#include "json-parser.h"
-#include "json-lexer.h"
+#include "qapi/qmp/json-parser.h"
+#include "qapi/qmp/json-lexer.h"
 
 typedef struct JSONParserContext
 {

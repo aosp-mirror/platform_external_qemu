@@ -13,10 +13,10 @@
 
 #include "qapi/qmp/qstring.h"
 #include "qapi/qmp/qlist.h"
-#include "qdict.h"
+#include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qint.h"
 #include "qemu-common.h"
-#include "json-lexer.h"
+#include "qapi/qmp/json-lexer.h"
 
 /*
  * \"([^\\\"]|(\\\"\\'\\\\\\/\\b\\f\\n\\r\\t\\u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]))*\"

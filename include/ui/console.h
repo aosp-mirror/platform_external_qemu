@@ -2,7 +2,7 @@
 #define CONSOLE_H
 
 #include "qemu-char.h"
-#include "qdict.h"
+#include "qapi/qmp/qdict.h"
 #include "qemu/notify.h"
 
 /* keyboard/mouse support */

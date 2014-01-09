@@ -28,7 +28,7 @@
 
 #include <stdint.h>
 #include "qemu-queue.h"
-#include "qdict.h"
+#include "qapi/qmp/qdict.h"
 
 enum QEMUOptionParType {
     OPT_FLAG,

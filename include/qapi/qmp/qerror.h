@@ -12,7 +12,7 @@
 #ifndef QERROR_H
 #define QERROR_H
 
-#include "qdict.h"
+#include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qstring.h"
 #include "qemu/error-report.h"
 #include <stdarg.h>
