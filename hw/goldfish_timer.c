@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "qemu-common.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 #include "cpu.h"
 #include "arm_pic.h"
 #include "goldfish_device.h"

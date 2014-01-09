@@ -40,7 +40,7 @@
 #include "qemu/osdep.h"
 #include "kvm.h"
 #include "hax.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 #if defined(CONFIG_USER_ONLY)
 #include <qemu.h>
 #endif

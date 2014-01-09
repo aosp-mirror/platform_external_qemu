@@ -114,7 +114,7 @@
 #include "net.h"
 #include "monitor.h"
 #include "sysemu.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 #include "qemu-char.h"
 #include "audio/audio.h"
 #include "qemu_socket.h"

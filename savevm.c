@@ -75,7 +75,7 @@
 #include "net.h"
 #include "monitor.h"
 #include "sysemu.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 #include "qemu-char.h"
 #include "blockdev.h"
 #include "block.h"

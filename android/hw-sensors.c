@@ -19,7 +19,7 @@
 #include "android/globals.h"
 #include "hw/hw.h"
 #include "qemu-char.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 #include "android/sensors-port.h"
 
 #define  E(...)    derror(__VA_ARGS__)

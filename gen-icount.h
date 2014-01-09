@@ -1,4 +1,4 @@
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 
 /* Helpers for instruction counting code generation.  */
 
