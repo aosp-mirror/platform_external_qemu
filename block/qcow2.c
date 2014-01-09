@@ -25,7 +25,7 @@
 #include "block_int.h"
 #include "module.h"
 #include <zlib.h>
-#include "aes.h"
+#include "qemu/aes.h"
 #include "block/qcow2.h"
 
 /*

@@ -194,7 +194,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "gdbstub.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"
-#include "cache-utils.h"
+#include "qemu/cache-utils.h"
 #include "block.h"
 #include "dma.h"
 #include "audio/audio.h"

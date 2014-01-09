@@ -412,8 +412,6 @@ endif
 # misc. sources
 #
 CORE_MISC_SOURCES = \
-    acl.c \
-    aes.c \
     aio-android.c \
     async.c \
     bt-host.c \
@@ -470,6 +468,8 @@ CORE_MISC_SOURCES = \
     android/multitouch-screen.c \
     android/multitouch-port.c \
     android/utils/jpeg-compress.c \
+    util/acl.c \
+    util/aes.c \
     util/osdep.c \
 
 ifeq ($(HOST_ARCH),x86)
@@ -480,7 +480,7 @@ ifeq ($(HOST_ARCH),x86_64)
 endif
 ifeq ($(HOST_ARCH),ppc)
     CORE_MISC_SOURCES += ppc-dis.c \
-                         cache-utils.c
+                         util/cache-utils.c
 endif
 
 ifeq ($(HOST_OS),linux)

@@ -45,7 +45,7 @@
 #endif
 
 #include "qemu-common.h"
-#include "cache-utils.h"
+#include "qemu/cache-utils.h"
 #include "host-utils.h"
 #include "qemu/timer.h"
 
