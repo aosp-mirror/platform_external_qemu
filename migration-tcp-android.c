@@ -12,7 +12,7 @@
  */
 
 #include "qemu-common.h"
-#include "qemu_socket.h"
+#include "qemu/sockets.h"
 #include "migration/migration.h"
 #include "sysemu/char.h"
 #include "sysemu/sysemu.h"

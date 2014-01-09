@@ -17,7 +17,7 @@
 #include "buffered_file.h"
 #include "sysemu/sysemu.h"
 #include "block/block.h"
-#include "qemu_socket.h"
+#include "qemu/sockets.h"
 
 //#define DEBUG_MIGRATION
 

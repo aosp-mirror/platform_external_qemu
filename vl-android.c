@@ -234,7 +234,7 @@ extern void  android_emulator_set_base_port(int  port);
 #include "android/trace.h"
 #endif
 
-#include "qemu_socket.h"
+#include "qemu/sockets.h"
 
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"
