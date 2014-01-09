@@ -34,7 +34,7 @@
 #include "sysemu/arch_init.h"
 #include "audio/audio.h"
 #include "hw/irq.h"
-#include "hw/pci.h"
+#include "hw/pci/pci.h"
 #include "hw/audiodev.h"
 #include "sysemu/kvm.h"
 #include "migration/migration.h"

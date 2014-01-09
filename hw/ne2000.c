@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 #include "hw/hw.h"
-#include "pci.h"
+#include "hw/pci/pci.h"
 #include "hw/i386/pc.h"
 #include "net/net.h"
 
