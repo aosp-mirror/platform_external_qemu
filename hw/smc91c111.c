@@ -8,7 +8,7 @@
  */
 
 #include "sysbus.h"
-#include "net.h"
+#include "net/net.h"
 #include "devices.h"
 #include "hw/hw.h"
 /* For crc32 */

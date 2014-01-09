@@ -38,7 +38,7 @@
 #include "hw/audiodev.h"
 #include "kvm.h"
 #include "migration.h"
-#include "net.h"
+#include "net/net.h"
 #include "exec/gdbstub.h"
 #include "hw/smbios.h"
 

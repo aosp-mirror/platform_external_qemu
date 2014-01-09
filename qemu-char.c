@@ -22,8 +22,8 @@
  * THE SOFTWARE.
  */
 #include "qemu-common.h"
-#include "sockets.h"
-#include "net.h"
+#include "android/sockets.h"
+#include "net/net.h"
 #include "monitor.h"
 #include "ui/console.h"
 #include "sysemu.h"

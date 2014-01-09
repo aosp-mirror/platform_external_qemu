@@ -12,7 +12,7 @@
 #include "hw.h"
 #include "boards.h"
 #include "devices.h"
-#include "net.h"
+#include "net/net.h"
 #include "arm_pic.h"
 #include "sysemu.h"
 #include "goldfish_device.h"

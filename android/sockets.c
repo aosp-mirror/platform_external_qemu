@@ -14,7 +14,7 @@
 #  define _GNU_SOURCE 1
 #endif
 
-#include "sockets.h"
+#include "android/sockets.h"
 #include <fcntl.h>
 #include <stddef.h>
 #include "qemu_debug.h"

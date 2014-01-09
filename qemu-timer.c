@@ -23,7 +23,7 @@
  */
 
 #include "sysemu.h"
-#include "net.h"
+#include "net/net.h"
 #include "monitor.h"
 #include "ui/console.h"
 

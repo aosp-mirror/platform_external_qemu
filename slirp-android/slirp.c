@@ -30,7 +30,7 @@
 #include "android/utils/debug.h"  /* for dprint */
 #include "android/utils/bufprint.h"
 #include "android/android.h"
-#include "sockets.h"
+#include "android/sockets.h"
 
 #include "qemu-queue.h"
 

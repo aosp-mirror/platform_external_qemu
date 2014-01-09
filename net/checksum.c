@@ -16,7 +16,7 @@
  */
 
 #include "hw/hw.h"
-#include "net.h"
+#include "net/net.h"
 
 #define PROTO_TCP  6
 #define PROTO_UDP 17

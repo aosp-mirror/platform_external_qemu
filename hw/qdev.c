@@ -26,7 +26,7 @@
    inherit from a particular bus (e.g. PCI or I2C) rather than
    this API directly.  */
 
-#include "net.h"
+#include "net/net.h"
 #include "qdev.h"
 #include "sysemu.h"
 #include "monitor.h"

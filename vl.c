@@ -145,7 +145,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "hw/smbios.h"
 #include "hw/xen.h"
 #include "bt-host.h"
-#include "net.h"
+#include "net/net.h"
 #include "monitor.h"
 #include "ui/console.h"
 #include "sysemu.h"
