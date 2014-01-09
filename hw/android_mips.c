@@ -10,8 +10,8 @@
 ** GNU General Public License for more details.
 */
 #include "hw/hw.h"
-#include "boards.h"
-#include "devices.h"
+#include "hw/boards.h"
+#include "hw/devices.h"
 #include "net/net.h"
 #include "sysemu/sysemu.h"
 #include "mips.h"

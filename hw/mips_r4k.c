@@ -13,7 +13,7 @@
 #include "hw/isa/isa.h"
 #include "net/net.h"
 #include "sysemu/sysemu.h"
-#include "boards.h"
+#include "hw/boards.h"
 #include "flash.h"
 #include "qemu/log.h"
 #include "mips-bios.h"

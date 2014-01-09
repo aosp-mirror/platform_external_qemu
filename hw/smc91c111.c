@@ -9,7 +9,7 @@
 
 #include "hw/sysbus.h"
 #include "net/net.h"
-#include "devices.h"
+#include "hw/devices.h"
 #include "hw/hw.h"
 /* For crc32 */
 #include <zlib.h>

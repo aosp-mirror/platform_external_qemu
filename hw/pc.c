@@ -31,7 +31,7 @@
 #include "audio/audio.h"
 #include "net/net.h"
 //#include "smbus.h"
-#include "boards.h"
+#include "hw/boards.h"
 #include "android/globals.h"
 #include "monitor/monitor.h"
 #include "fw_cfg.h"
