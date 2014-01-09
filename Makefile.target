@@ -65,6 +65,7 @@ HW_SOURCES := \
     bt-sdp.c \
     cdrom.c \
     core/irq.c \
+    core/qdev.c \
     dma.c \
     goldfish_audio.c \
     goldfish_device.c \
@@ -79,7 +80,6 @@ HW_SOURCES := \
     goldfish_vmem.c \
     msmouse.c \
     pci.c \
-    qdev.c \
     scsi-disk.c \
     sysbus.c \
     usb-hid.c \
