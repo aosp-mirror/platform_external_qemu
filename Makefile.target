@@ -121,7 +121,7 @@ HW_SOURCES += \
     pci-host/piix.c \
     timer/i8254.c \
     input/pckbd.c \
-    ioapic.c \
+    intc/ioapic.c \
     input/ps2.c \
     smbios.c \
     nvram/fw_cfg.c
