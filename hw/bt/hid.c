@@ -19,7 +19,7 @@
  */
 
 #include "qemu-common.h"
-#include "usb.h"
+#include "hw/usb.h"
 #include "hw/bt.h"
 
 enum hid_transaction_req {

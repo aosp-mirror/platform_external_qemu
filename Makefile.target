@@ -58,11 +58,11 @@ common_LOCAL_SRC_FILES += \
 #
 
 HW_SOURCES := \
-    bt.c \
-    bt-hci.c \
-    bt-hid.c \
-    bt-l2cap.c \
-    bt-sdp.c \
+    bt/core.c \
+    bt/hci.c \
+    bt/hid.c \
+    bt/l2cap.c \
+    bt/sdp.c \
     cdrom.c \
     core/irq.c \
     core/qdev.c \

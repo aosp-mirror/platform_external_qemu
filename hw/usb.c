@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 #include "qemu-common.h"
-#include "usb.h"
+#include "hw/usb.h"
 
 void usb_attach(USBPort *port, USBDevice *dev)
 {
