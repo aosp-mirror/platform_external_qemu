@@ -40,7 +40,7 @@
 #include "net/net.h"
 #include "ui/console.h"
 #include "qemu/timer.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "block/block.h"
 #include "android/sockets.h"
 #include "audio/audio.h"

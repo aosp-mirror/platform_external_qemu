@@ -31,7 +31,7 @@
 #include "hw/watchdog.h"
 #include "exec/gdbstub.h"
 #include "net/net.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "sysemu/sysemu.h"
 #include "monitor/monitor.h"
 #include "monitor/readline.h"

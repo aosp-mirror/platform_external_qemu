@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "migration/qemu-file.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "goldfish_device.h"
 #include "goldfish_vmem.h"
 

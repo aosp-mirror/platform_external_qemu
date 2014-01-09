@@ -15,7 +15,7 @@
 #define QEMU_AIO_H
 
 #include "qemu-common.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 
 /* Returns 1 if there are still outstanding AIO requests; 0 otherwise */
 typedef int (AioFlushHandler)(void *opaque);

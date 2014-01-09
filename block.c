@@ -26,7 +26,8 @@
 #include "monitor/monitor.h"
 #include "block/block_int.h"
 #include "qemu/module.h"
-#include "qemu-objects.h"
+//#include "qemu-objects.h"
+#include "qapi/qmp/qjson.h"
 
 #ifdef CONFIG_BSD
 #include <sys/types.h>

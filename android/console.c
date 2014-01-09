@@ -22,7 +22,7 @@
  */
 
 #include "android/sockets.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "sysemu/sysemu.h"
 #include "android/android.h"
 #include "cpu.h"

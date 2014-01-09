@@ -19,7 +19,7 @@
  */
 
 #include "qemu-common.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "qemu/timer.h"
 #include "irq.h"
 #include "sysemu/sysemu.h"

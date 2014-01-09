@@ -18,7 +18,7 @@
  */
 
 #include "qemu-common.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "net/net.h"
 #include "hw/bt.h"
 

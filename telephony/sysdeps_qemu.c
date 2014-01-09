@@ -13,7 +13,7 @@
 #include "sysdeps.h"
 #include "qemu-common.h"
 #include "qemu/timer.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #ifdef _WIN32
 #include <winsock2.h>
 #else

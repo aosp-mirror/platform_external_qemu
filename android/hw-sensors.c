@@ -18,7 +18,7 @@
 #include "android/hw-qemud.h"
 #include "android/globals.h"
 #include "hw/hw.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "qemu/timer.h"
 #include "android/sensors-port.h"
 

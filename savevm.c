@@ -76,7 +76,7 @@
 #include "monitor/monitor.h"
 #include "sysemu/sysemu.h"
 #include "qemu/timer.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "sysemu/blockdev.h"
 #include "block/block.h"
 #include "audio/audio.h"

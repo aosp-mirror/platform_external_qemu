@@ -17,7 +17,7 @@
 #include "android/looper.h"
 #include "hw/hw.h"
 #include "hw/goldfish_pipe.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "android/charpipe.h"
 #include "android/cbuffer.h"
 #include "utils/panic.h"
