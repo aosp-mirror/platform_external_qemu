@@ -41,7 +41,7 @@
 #include "disas/disas.h"
 #include "balloon.h"
 #include "qemu/timer.h"
-#include "migration.h"
+#include "migration/migration.h"
 #include "kvm.h"
 #include "qemu/acl.h"
 #include "exec/exec-all.h"

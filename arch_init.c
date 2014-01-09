@@ -37,7 +37,7 @@
 #include "hw/pci.h"
 #include "hw/audiodev.h"
 #include "kvm.h"
-#include "migration.h"
+#include "migration/migration.h"
 #include "net/net.h"
 #include "exec/gdbstub.h"
 #include "hw/smbios.h"

@@ -13,7 +13,7 @@
  * Virtual hardware for bridging the FUSE kernel module
  * in the emulated OS and outside file system
  */
-#include "qemu_file.h"
+#include "migration/qemu-file.h"
 #include "goldfish_trace.h"
 #include "goldfish_vmem.h"
 #include "sysemu.h"

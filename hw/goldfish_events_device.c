@@ -9,7 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "qemu_file.h"
+#include "migration/qemu-file.h"
 #include "android/hw-events.h"
 #include "android/charmap.h"
 #include "android/globals.h"  /* for android_hw */

@@ -156,7 +156,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "block.h"
 #include "dma.h"
 #include "audio/audio.h"
-#include "migration.h"
+#include "migration/migration.h"
 #include "kvm.h"
 #include "balloon.h"
 #include "qemu-option.h"

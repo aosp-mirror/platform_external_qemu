@@ -46,7 +46,7 @@
 #include "blockdev.h"
 #include "audio/audio.h"
 
-#include "qemu_file.h"
+#include "migration/qemu-file.h"
 #include "android/android.h"
 #include "charpipe.h"
 #include "modem_driver.h"
@@ -198,7 +198,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "block.h"
 #include "dma.h"
 #include "audio/audio.h"
-#include "migration.h"
+#include "migration/migration.h"
 #include "kvm.h"
 #include "hax.h"
 #ifdef CONFIG_KVM

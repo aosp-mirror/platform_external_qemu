@@ -15,7 +15,7 @@
  */
 
 #include "qemu-queue.h"
-#include "qemu_file.h"
+#include "migration/qemu-file.h"
 #include "elff_api.h"
 #include "memcheck.h"
 #include "memcheck_proc_management.h"
