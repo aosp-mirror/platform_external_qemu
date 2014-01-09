@@ -80,7 +80,7 @@ HW_SOURCES := \
     android/goldfish/tty.c \
     android/goldfish/vmem.c \
     msmouse.c \
-    pci.c \
+    pci/pci.c \
     scsi-disk.c \
     usb-hid.c \
     usb-hub.c \
