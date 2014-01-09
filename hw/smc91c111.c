@@ -7,7 +7,7 @@
  * This code is licenced under the GPL
  */
 
-#include "sysbus.h"
+#include "hw/sysbus.h"
 #include "net/net.h"
 #include "devices.h"
 #include "hw/hw.h"

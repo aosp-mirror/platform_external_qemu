@@ -7,7 +7,7 @@
  * This code is licenced under the GPL.
  */
 
-#include "sysbus.h"
+#include "hw/sysbus.h"
 #include "arm-misc.h"
 #include "sysemu/sysemu.h"
 
