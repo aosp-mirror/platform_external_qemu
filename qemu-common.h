@@ -122,7 +122,7 @@ static inline char *realpath(const char *path, char *resolved_path)
 
 #include <setjmp.h>
 #include "osdep.h"
-#include "bswap.h"
+#include "qemu/bswap.h"
 
 #else
 
