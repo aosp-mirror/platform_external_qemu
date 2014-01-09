@@ -139,13 +139,13 @@ endif
 ifeq ($(EMULATOR_TARGET_ARCH),mips)
 HW_SOURCES += \
     android_mips.c \
-    mips_pic.c \
+    mips/mips_pic.c \
     android/goldfish/interrupt.c \
     android/goldfish/switch.c \
     android/goldfish/timer.c \
     android/goldfish/trace.c \
-    mips_timer.c \
-    mips_int.c
+    mips/cputimer.c \
+    mips/mips_int.c
 
 # The following sources must be compiled with the final executables
 # because they contain device_init() or machine_init() statements.
