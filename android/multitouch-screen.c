@@ -15,7 +15,7 @@
  */
 
 #include "qemu-common.h"
-#include "user-events.h"
+#include "android/user-events.h"
 #include "android/display-core.h"
 #include "android/hw-events.h"
 #include "android/charmap.h"

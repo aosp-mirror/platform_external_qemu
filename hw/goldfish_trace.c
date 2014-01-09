@@ -17,7 +17,7 @@
 #include "goldfish_trace.h"
 #include "goldfish_vmem.h"
 #include "sysemu.h"
-#include "android-trace.h"
+#include "android/trace.h"
 #ifdef CONFIG_MEMCHECK
 #include "memcheck/memcheck.h"
 #include "memcheck/memcheck_util.h"

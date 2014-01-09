@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#include "user-events.h"
+#include "android/user-events.h"
 #include "ui/console.h"
 #include "android/looper.h"
 #include "android/async-utils.h"

@@ -167,7 +167,7 @@ common_LOCAL_SRC_FILES += \
     cpu-exec.c  \
     exec.c \
     translate-all.c \
-    trace.c \
+    android/trace.c \
     varint.c \
     softmmu_outside_jit.c
 
@@ -337,7 +337,6 @@ LOCAL_SRC_FILES := \
     monitor.c \
     qemu-timer.c \
     qemu-timer-common.c \
-    user-events-qemu.c \
     vl-android.c \
     android/console.c \
     android/opengles.c \
@@ -348,6 +347,7 @@ LOCAL_SRC_FILES := \
     android/protocol/ui-commands-proxy.c \
     android/protocol/core-commands-impl.c \
     android/protocol/core-commands-qemu.c \
+    android/user-events-qemu.c \
     ui/keymaps.c \
 
 $(call gen-hx-header,qemu-monitor.hx,qemu-monitor.h,monitor.c)
@@ -417,7 +417,6 @@ common_LOCAL_SRC_FILES := \
     monitor.c \
     qemu-timer.c \
     qemu-timer-common.c \
-    user-events-qemu.c \
     vl-android.c \
     android/cmdline-option.c \
     android/console.c \
@@ -429,6 +428,7 @@ common_LOCAL_SRC_FILES := \
     android/opengles.c \
     android/protocol/core-commands-qemu.c \
     android/protocol/ui-commands-qemu.c \
+    android/user-events-qemu.c \
     ui/keymaps.c \
 
 

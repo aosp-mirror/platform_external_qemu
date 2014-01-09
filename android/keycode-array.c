@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include "android/utils/debug.h"
 #include "android/keycode-array.h"
-#include "user-events.h"
+#include "android/user-events.h"
 
 void
 android_keycodes_add_key_event( AKeycodeBuffer* keycodes,

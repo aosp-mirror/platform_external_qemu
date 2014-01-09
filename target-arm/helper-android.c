@@ -24,7 +24,7 @@ void vstrcpy(target_ulong ptr, char *buf, int max)
 }
 
 #ifdef CONFIG_TRACE
-#include "android-trace.h"
+#include "android/trace.h"
 
 void  HELPER(traceTicks)(uint32_t  ticks)
 {

@@ -11,7 +11,7 @@
 #if !defined(CONFIG_USER_ONLY)
 //#include "hw/loader.h"
 #ifdef CONFIG_TRACE
-#include "android-trace.h"
+#include "android/trace.h"
 #endif
 #endif
 

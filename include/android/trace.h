@@ -14,7 +14,7 @@
 #define TRACE_H
 
 #include <inttypes.h>
-#include "android-trace_common.h"
+#include "android/trace_common.h"
 
 extern uint64_t start_time, end_time;
 extern uint64_t elapsed_usecs;

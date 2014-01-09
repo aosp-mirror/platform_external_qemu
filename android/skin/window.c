@@ -18,7 +18,7 @@
 #include "android/utils/duff.h"
 #include "android/protocol/core-commands-api.h"
 #include <SDL_syswm.h>
-#include "user-events.h"
+#include "android/user-events.h"
 #include <math.h>
 
 #include "android/framebuffer.h"
