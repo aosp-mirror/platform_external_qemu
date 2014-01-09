@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "hw.h"
+#include "hw/hw.h"
 #include "sysemu/sysemu.h"
-#include "isa.h"
+#include "hw/isa/isa.h"
 #include "fw_cfg.h"
 
 /* debug firmware config */

@@ -3,7 +3,7 @@
 
 /* Devices attached directly to the main system bus.  */
 
-#include "qdev.h"
+#include "hw/qdev.h"
 
 #define QDEV_MAX_MMIO 5
 #define QDEV_MAX_IRQ 32

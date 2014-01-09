@@ -27,7 +27,7 @@
    this API directly.  */
 
 #include "net/net.h"
-#include "qdev.h"
+#include "hw/qdev.h"
 #include "sysemu/sysemu.h"
 #include "monitor/monitor.h"
 #include "sysemu/blockdev.h"

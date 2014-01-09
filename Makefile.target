@@ -64,8 +64,8 @@ HW_SOURCES := \
     bt-l2cap.c \
     bt-sdp.c \
     cdrom.c \
+    core/irq.c \
     dma.c \
-    irq.c \
     goldfish_audio.c \
     goldfish_device.c \
     goldfish_events_device.c \

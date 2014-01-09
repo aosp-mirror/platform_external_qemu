@@ -14,7 +14,7 @@
 #ifndef ARM_INTERRUPT_H
 #define ARM_INTERRUPT_H 1
 
-#include "irq.h"
+#include "hw/irq.h"
 
 /* The CPU is also modeled as an interrupt controller.  */
 #define ARM_PIC_CPU_IRQ 0

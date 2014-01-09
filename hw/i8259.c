@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "hw.h"
-#include "pc.h"
-#include "isa.h"
+#include "hw/hw.h"
+#include "hw/i386/pc.h"
+#include "hw/isa/isa.h"
 #include "monitor/monitor.h"
 #include "goldfish_device.h"
 

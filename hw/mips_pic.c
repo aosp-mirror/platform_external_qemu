@@ -3,7 +3,7 @@
  *
  */
 
-#include "hw.h"
+#include "hw/hw.h"
 
 /* Stub functions for hardware that don't exist.  */
 void pic_info(void)

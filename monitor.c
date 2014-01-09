@@ -26,7 +26,7 @@
 #include "hw/qdev.h"
 #include "hw/usb.h"
 #include "hw/pcmcia.h"
-#include "hw/pc.h"
+#include "hw/i386/pc.h"
 #include "hw/pci.h"
 #include "hw/watchdog.h"
 #include "exec/gdbstub.h"

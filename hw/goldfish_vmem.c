@@ -9,7 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "hw.h"
+#include "hw/hw.h"
 #include "goldfish_vmem.h"
 #ifdef TARGET_I386
 #include "sysemu/kvm.h"

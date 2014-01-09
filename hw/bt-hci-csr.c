@@ -21,7 +21,7 @@
 #include "qemu-common.h"
 #include "sysemu/char.h"
 #include "qemu/timer.h"
-#include "irq.h"
+#include "hw/irq.h"
 #include "sysemu/sysemu.h"
 #include "net/net.h"
 #include "bt.h"
