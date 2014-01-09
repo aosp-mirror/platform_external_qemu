@@ -14,8 +14,8 @@
  * in the emulated OS and outside file system
  */
 #include "migration/qemu-file.h"
-#include "goldfish_trace.h"
-#include "goldfish_vmem.h"
+#include "hw/android/goldfish/trace.h"
+#include "hw/android/goldfish/vmem.h"
 #include "sysemu/sysemu.h"
 #include "android/trace.h"
 #ifdef CONFIG_MEMCHECK

@@ -11,9 +11,9 @@
 */
 #include "android/utils/panic.h"
 #include "android/utils/system.h"
-#include "hw/goldfish_pipe.h"
-#include "hw/goldfish_device.h"
-#include "hw/goldfish_vmem.h"
+#include "hw/android/goldfish/pipe.h"
+#include "hw/android/goldfish/device.h"
+#include "hw/android/goldfish/vmem.h"
 #include "qemu/timer.h"
 
 #define  DEBUG 0

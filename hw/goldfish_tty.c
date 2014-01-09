@@ -11,8 +11,8 @@
 */
 #include "migration/qemu-file.h"
 #include "sysemu/char.h"
-#include "goldfish_device.h"
-#include "goldfish_vmem.h"
+#include "hw/android/goldfish/device.h"
+#include "hw/android/goldfish/vmem.h"
 
 enum {
     TTY_PUT_CHAR       = 0x00,

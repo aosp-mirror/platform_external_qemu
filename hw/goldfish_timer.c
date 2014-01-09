@@ -13,7 +13,7 @@
 #include "qemu/timer.h"
 #include "cpu.h"
 #include "hw/arm/pic.h"
-#include "goldfish_device.h"
+#include "hw/android/goldfish/device.h"
 #include "hw/hw.h"
 
 enum {

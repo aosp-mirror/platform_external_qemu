@@ -14,7 +14,7 @@
 #include <string.h>
 
 #include "migration/qemu-file.h"
-#include "goldfish_device.h"
+#include "hw/android/goldfish/device.h"
 #include "audio/audio.h"
 
 extern void  dprint(const char*  fmt, ...);

@@ -25,7 +25,7 @@
 #include "hw/i386/pc.h"
 #include "hw/isa/isa.h"
 #include "monitor/monitor.h"
-#include "goldfish_device.h"
+#include "hw/android/goldfish/device.h"
 
 /* debug PIC */
 //#define DEBUG_PIC

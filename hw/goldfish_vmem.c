@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "hw/hw.h"
-#include "goldfish_vmem.h"
+#include "hw/android/goldfish/vmem.h"
 #ifdef TARGET_I386
 #include "sysemu/kvm.h"
 #endif

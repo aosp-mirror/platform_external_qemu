@@ -15,13 +15,13 @@
 #include "net/net.h"
 #include "hw/arm/pic.h"
 #include "sysemu/sysemu.h"
-#include "goldfish_device.h"
+#include "hw/android/goldfish/device.h"
 #include "android/globals.h"
 #include "audio/audio.h"
 #include "hw/arm/arm.h"
 #include "ui/console.h"
 #include "sysemu/blockdev.h"
-#include "goldfish_pipe.h"
+#include "hw/android/goldfish/pipe.h"
 #ifdef CONFIG_MEMCHECK
 #include "memcheck/memcheck_api.h"
 #endif  // CONFIG_MEMCHECK

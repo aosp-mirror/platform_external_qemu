@@ -25,7 +25,7 @@
 #include "android/async-utils.h"
 #include "android/opengles.h"
 #include "android/looper.h"
-#include "hw/goldfish_pipe.h"
+#include "hw/android/goldfish/pipe.h"
 
 /* Implement the OpenGL fast-pipe */
 
