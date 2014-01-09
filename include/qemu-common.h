@@ -40,11 +40,11 @@ typedef struct Monitor Monitor;
 #include <assert.h>
 
 #ifdef _WIN32
-#include "qemu-os-win32.h"
+#include "sysemu/os-win32.h"
 #endif
 
 #ifdef CONFIG_POSIX
-#include "qemu-os-posix.h"
+#include "sysemu/os-posix.h"
 #endif
 
 #ifndef O_LARGEFILE

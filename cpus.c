@@ -265,7 +265,7 @@ void vm_stop(int reason)
 
 #else /* CONFIG_IOTHREAD */
 
-#include "qemu-thread.h"
+#include "qemu/thread.h"
 
 QemuMutex qemu_global_mutex;
 static QemuMutex qemu_fair_mutex;
