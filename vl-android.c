@@ -69,7 +69,7 @@
 #include "android/snapshot.h"
 #include "android/opengles.h"
 #include "android/multitouch-screen.h"
-#include "targphys.h"
+#include "exec/targphys.h"
 #include "android/tcpdump.h"
 
 #ifdef CONFIG_MEMCHECK
