@@ -1,12 +1,12 @@
 /* General "disassemble this chunk" code.  Used for debugging. */
 #include "config.h"
-#include "dis-asm.h"
+#include "disas/bfd.h"
 #include "elf.h"
 #include <errno.h>
 
 #include "cpu.h"
 #include "exec/exec-all.h"
-#include "disas.h"
+#include "disas/disas.h"
 
 /* Filled in by elfload.c.  Simplistic, but will do for now. */
 struct syminfo *syminfos = NULL;

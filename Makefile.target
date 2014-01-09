@@ -104,7 +104,7 @@ HW_SOURCES += android_arm.c \
 HW_OBJ_SOURCES := hw/smc91c111.c
 HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
 
-common_LOCAL_SRC_FILES += arm-dis.c
+common_LOCAL_SRC_FILES += disas/arm.c
 
 # smc91c111.c requires <zlib.h>
 common_LOCAL_CFLAGS += $(ZLIB_CFLAGS)
@@ -152,7 +152,7 @@ HW_SOURCES += \
 HW_OBJ_SOURCES := hw/smc91c111.c
 HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
 
-common_LOCAL_SRC_FILES += mips-dis.c
+common_LOCAL_SRC_FILES += disas/mips.c
 
 # smc91c111.c requires <zlib.h>
 LOCAL_CFLAGS += $(ZLIB_CFLAGS)

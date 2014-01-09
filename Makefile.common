@@ -473,13 +473,13 @@ CORE_MISC_SOURCES = \
     util/qemu-sockets-android.c \
 
 ifeq ($(HOST_ARCH),x86)
-    CORE_MISC_SOURCES += i386-dis.c
+    CORE_MISC_SOURCES += disas/i386.c
 endif
 ifeq ($(HOST_ARCH),x86_64)
-    CORE_MISC_SOURCES += i386-dis.c
+    CORE_MISC_SOURCES += disas/i386.c
 endif
 ifeq ($(HOST_ARCH),ppc)
-    CORE_MISC_SOURCES += ppc-dis.c \
+    CORE_MISC_SOURCES += disas/ppc.c \
                          util/cache-utils.c
 endif
 
