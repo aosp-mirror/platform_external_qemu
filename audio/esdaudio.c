@@ -62,7 +62,7 @@
 #define  DYNLINK_FUNCTIONS_INIT \
     esd_dynlink_init
 
-#include "dynlink.h"
+#include "android/dynlink.h"
 
 static void*    esd_lib;
 

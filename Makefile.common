@@ -180,7 +180,7 @@ EMULATOR_LIBUI_CFLAGS += \
     $(LIBPNG_CFLAGS) \
     -I$(LOCAL_PATH)/$(LIBPNG_DIR)
 
-common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) loadpng.c
+common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
 
 ##############################################################################
 # SDL-related definitions
