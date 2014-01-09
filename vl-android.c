@@ -36,7 +36,7 @@
 #include "hw/audiodev.h"
 #include "hw/isa/isa.h"
 #include "hw/baum.h"
-#include "hw/goldfish_nand.h"
+#include "hw/android/goldfish/nand.h"
 #include "net/net.h"
 #include "ui/console.h"
 #include "sysemu/sysemu.h"
