@@ -79,7 +79,6 @@ HW_SOURCES := \
     android/goldfish/pipe.c \
     android/goldfish/tty.c \
     android/goldfish/vmem.c \
-    msmouse.c \
     pci/pci.c \
     scsi-disk.c \
     usb-hid.c \
@@ -165,6 +164,7 @@ endif
 common_LOCAL_SRC_FILES += $(HW_SOURCES:%=hw/%)
 
 common_LOCAL_SRC_FILES += \
+    backends/msmouse.c \
     cpu-exec.c  \
     exec.c \
     translate-all.c \
