@@ -28,7 +28,7 @@
 #include <inttypes.h>
 #include <signal.h>
 #include "qemu/osdep.h"
-#include "qemu-queue.h"
+#include "qemu/queue.h"
 #include "targphys.h"
 
 #ifndef TARGET_LONG_BITS

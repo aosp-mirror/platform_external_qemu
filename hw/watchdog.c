@@ -20,7 +20,7 @@
  */
 
 #include "qemu-common.h"
-#include "qemu-queue.h"
+#include "qemu/queue.h"
 #include "sysemu/sysemu.h"
 #include "hw/watchdog.h"
 

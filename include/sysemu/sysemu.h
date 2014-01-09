@@ -4,7 +4,7 @@
 
 #include "qemu-common.h"
 #include "qemu-option.h"
-#include "qemu-queue.h"
+#include "qemu/queue.h"
 #include "qemu/timer.h"
 #include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qerror.h"

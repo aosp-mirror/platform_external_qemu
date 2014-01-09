@@ -14,7 +14,7 @@
 #define QLIST_H
 
 #include "qapi/qmp/qobject.h"
-#include "qemu-queue.h"
+#include "qemu/queue.h"
 #include "qemu-common.h"
 
 typedef struct QListEntry {

@@ -82,7 +82,7 @@
 #include "audio/audio.h"
 #include "migration/migration.h"
 #include "qemu_socket.h"
-#include "qemu-queue.h"
+#include "qemu/queue.h"
 #include "migration/qemu-file.h"
 #include "android/snapshot.h"
 

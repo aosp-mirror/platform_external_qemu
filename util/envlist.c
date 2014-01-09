@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "qemu-queue.h"
+#include "qemu/queue.h"
 #include "qemu/envlist.h"
 
 struct envlist_entry {

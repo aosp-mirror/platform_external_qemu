@@ -14,7 +14,7 @@
  * Contains implementation of memory checking framework in the emulator.
  */
 
-#include "qemu-queue.h"
+#include "qemu/queue.h"
 #include "migration/qemu-file.h"
 #include "elff_api.h"
 #include "memcheck.h"
