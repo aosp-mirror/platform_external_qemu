@@ -30,7 +30,7 @@
 #include "qemu/timer.h"
 #include "hw/usb.h"
 #include "hw/pci/pci.h"
-#include "pxa.h"
+#include "hw/arm/pxa.h"
 #include "hw/devices.h"
 
 //#define DEBUG_OHCI
