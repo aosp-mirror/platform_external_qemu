@@ -10,7 +10,7 @@
 #include "config.h"
 #include "mips-defs.h"
 #include "exec/cpu-defs.h"
-#include "softfloat.h"
+#include "fpu/softfloat.h"
 
 // uint_fast8_t and uint_fast16_t not in <sys/int_types.h>
 // XXX: move that elsewhere
