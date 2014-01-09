@@ -12,7 +12,7 @@
  */
 
 #include "qemu-common.h"
-#include "compatfd.h"
+#include "qemu/compatfd.h"
 
 #include <sys/syscall.h>
 #include <pthread.h>

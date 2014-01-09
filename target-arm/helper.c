@@ -7,7 +7,7 @@
 #include "gdbstub.h"
 #include "helper.h"
 #include "qemu-common.h"
-#include "host-utils.h"
+#include "qemu/host-utils.h"
 #if !defined(CONFIG_USER_ONLY)
 //#include "hw/loader.h"
 #ifdef CONFIG_TRACE

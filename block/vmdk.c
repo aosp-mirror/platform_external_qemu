@@ -25,7 +25,7 @@
 
 #include "qemu-common.h"
 #include "block_int.h"
-#include "module.h"
+#include "qemu/module.h"
 
 #define VMDK3_MAGIC (('C' << 24) | ('O' << 16) | ('W' << 8) | 'D')
 #define VMDK4_MAGIC (('K' << 24) | ('D' << 16) | ('M' << 8) | 'V')

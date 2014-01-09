@@ -24,7 +24,7 @@
 #include "hw.h"
 #include "pc.h"
 #include "qemu/timer.h"
-#include "host-utils.h"
+#include "qemu/host-utils.h"
 
 //#define DEBUG_IOAPIC
 

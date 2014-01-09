@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include "exec.h"
 
-#include "host-utils.h"
+#include "qemu/host-utils.h"
 
 #include "helper.h"
 /*****************************************************************************/

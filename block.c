@@ -25,7 +25,7 @@
 #include "qemu-common.h"
 #include "monitor.h"
 #include "block_int.h"
-#include "module.h"
+#include "qemu/module.h"
 #include "qemu-objects.h"
 
 #ifdef CONFIG_BSD

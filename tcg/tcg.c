@@ -46,7 +46,7 @@
 
 #include "qemu-common.h"
 #include "qemu/cache-utils.h"
-#include "host-utils.h"
+#include "qemu/host-utils.h"
 #include "qemu/timer.h"
 
 /* Note: the long term plan is to reduce the dependancies on the QEMU
