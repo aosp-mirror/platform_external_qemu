@@ -446,10 +446,13 @@ int kvm_init(int smp_cpus)
         goto err;
     }
 
-    s->vmfd = kvm_ioctl(s, KVM_CREATE_VM, 0);
+    do {
+      s->vmfd = kvm_ioctl(s, KVM_CREATE_VM, 0);
+    } while (s->vmfd < 0 && (EINTR == errno || EAGAIN == errno));
+
     if (s->vmfd < 0) {
         ret = -errno;
-        fprintf(stderr, "ioctl(KVM_CREATE_VM) failed: %s\n", strerror(errno));
+        fprintf(stderr, "ioctl(KVM_CREATE_VM) failed: %d %s\n", errno, strerror(errno));
         goto err;
     }
 
