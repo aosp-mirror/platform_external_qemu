@@ -55,7 +55,7 @@
 #include "android/snapshot.h"
 
 #include "android/framebuffer.h"
-#include "iolooper.h"
+#include "android/iolooper.h"
 
 AndroidRotation  android_framebuffer_rotation;
 

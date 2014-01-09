@@ -98,11 +98,11 @@ common_LOCAL_SRC_FILES += $(ZLIB_SOURCES)
 # Android utility functions
 #
 common_LOCAL_SRC_FILES += \
-	iolooper-select.c \
 	android/async-console.c \
 	android/async-utils.c \
 	android/charmap.c \
 	android/framebuffer.c \
+	android/iolooper-select.c \
 	android/keycode-array.c \
 	android/avd/hw-config.c \
 	android/avd/info.c \

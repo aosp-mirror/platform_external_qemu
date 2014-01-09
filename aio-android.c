@@ -15,7 +15,7 @@
 #include "block.h"
 #include "qemu-queue.h"
 #include "qemu_socket.h"
-#include "iolooper.h"
+#include "android/iolooper.h"
 
 typedef struct AioHandler AioHandler;
 
