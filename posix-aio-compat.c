@@ -23,7 +23,7 @@
 #include <stdio.h>
 
 #include "qemu-queue.h"
-#include "osdep.h"
+#include "qemu/osdep.h"
 #include "sysemu.h"
 #include "qemu-common.h"
 #include "block_int.h"

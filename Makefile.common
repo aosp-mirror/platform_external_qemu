@@ -430,7 +430,6 @@ CORE_MISC_SOURCES = \
     module.c \
     net-android.c \
     notify.c \
-    osdep.c \
     path.c \
     qemu-char.c \
     qemu-config.c \
@@ -470,7 +469,8 @@ CORE_MISC_SOURCES = \
     android/snaphost-android.c \
     android/multitouch-screen.c \
     android/multitouch-port.c \
-    android/utils/jpeg-compress.c
+    android/utils/jpeg-compress.c \
+    util/osdep.c \
 
 ifeq ($(HOST_ARCH),x86)
     CORE_MISC_SOURCES += i386-dis.c
