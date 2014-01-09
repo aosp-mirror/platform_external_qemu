@@ -168,7 +168,7 @@ common_LOCAL_SRC_FILES += \
     exec.c \
     translate-all.c \
     android/trace.c \
-    varint.c \
+    android/varint.c \
     softmmu_outside_jit.c
 
 ##############################################################################
