@@ -16,7 +16,7 @@
 #include "hw/boards.h"
 #include "flash.h"
 #include "qemu/log.h"
-#include "mips-bios.h"
+#include "hw/mips/bios.h"
 #include "ide.h"
 #include "loader.h"
 #include "elf.h"
