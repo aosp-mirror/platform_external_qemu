@@ -13,12 +13,12 @@
 #include "boards.h"
 #include "devices.h"
 #include "net/net.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "mips.h"
 #include "goldfish_device.h"
 #include "android/globals.h"
 #include "audio/audio.h"
-#include "blockdev.h"
+#include "sysemu/blockdev.h"
 #ifdef CONFIG_MEMCHECK
 #include "memcheck/memcheck_api.h"
 #endif  // CONFIG_MEMCHECK

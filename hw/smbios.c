@@ -11,7 +11,7 @@
  *
  */
 
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "smbios.h"
 
 /*

@@ -28,9 +28,9 @@
 
 #include "net/net.h"
 #include "qdev.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "monitor/monitor.h"
-#include "blockdev.h"
+#include "sysemu/blockdev.h"
 
 struct DeviceProperty {
     const char *name;

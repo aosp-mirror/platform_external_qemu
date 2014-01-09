@@ -63,7 +63,7 @@ typedef int32_t socklen_t;
 #endif /* CONFIG_ANDROID */
 
 #include "qemu-common.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "qemu_socket.h"
 
 int qemu_madvise(void *addr, size_t len, int advice)

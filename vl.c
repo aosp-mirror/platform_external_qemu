@@ -112,7 +112,7 @@
 #endif
 
 #include "cpus.h"
-#include "arch_init.h"
+#include "sysemu/arch_init.h"
 
 #ifdef CONFIG_SDL
 #ifdef __APPLE__
@@ -148,17 +148,17 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "net/net.h"
 #include "monitor/monitor.h"
 #include "ui/console.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "exec/gdbstub.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"
 #include "qemu/cache-utils.h"
 #include "block.h"
-#include "dma.h"
+#include "sysemu/dma.h"
 #include "audio/audio.h"
 #include "migration/migration.h"
-#include "kvm.h"
-#include "balloon.h"
+#include "sysemu/kvm.h"
+#include "sysemu/balloon.h"
 #include "qemu-option.h"
 
 #include "disas/disas.h"

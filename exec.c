@@ -38,7 +38,7 @@
 #include "tcg.h"
 #include "hw/hw.h"
 #include "qemu/osdep.h"
-#include "kvm.h"
+#include "sysemu/kvm.h"
 #include "hax.h"
 #include "qemu/timer.h"
 #if defined(CONFIG_USER_ONLY)

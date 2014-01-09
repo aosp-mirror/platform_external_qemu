@@ -31,14 +31,14 @@
 #else
 #include "monitor/monitor.h"
 #include "qemu-char.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "exec/gdbstub.h"
 #endif
 
 #define MAX_PACKET_LENGTH 4096
 
 #include "qemu_socket.h"
-#include "kvm.h"
+#include "sysemu/kvm.h"
 
 
 enum {

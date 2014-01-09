@@ -8,12 +8,12 @@
  */
 
 #include "block.h"
-#include "blockdev.h"
+#include "sysemu/blockdev.h"
 #include "monitor/monitor.h"
 #include "qapi/qmp/qerror.h"
 #include "qemu-option.h"
 #include "qemu/config-file.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 
 static QTAILQ_HEAD(drivelist, DriveInfo) drives = QTAILQ_HEAD_INITIALIZER(drives);
 

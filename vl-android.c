@@ -39,11 +39,11 @@
 #include "hw/goldfish_nand.h"
 #include "net/net.h"
 #include "ui/console.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "exec/gdbstub.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"
-#include "blockdev.h"
+#include "sysemu/blockdev.h"
 #include "audio/audio.h"
 
 #include "migration/qemu-file.h"
@@ -167,7 +167,7 @@
 #endif
 
 #include "cpus.h"
-#include "arch_init.h"
+#include "sysemu/arch_init.h"
 
 #ifdef CONFIG_COCOA
 int qemu_main(int argc, char **argv, char **envp);
@@ -190,21 +190,21 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "net/net.h"
 #include "monitor/monitor.h"
 #include "ui/console.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "exec/gdbstub.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"
 #include "qemu/cache-utils.h"
 #include "block.h"
-#include "dma.h"
+#include "sysemu/dma.h"
 #include "audio/audio.h"
 #include "migration/migration.h"
-#include "kvm.h"
+#include "sysemu/kvm.h"
 #include "hax.h"
 #ifdef CONFIG_KVM
-#include "kvm-android.h"
+#include "android/kvm.h"
 #endif
-#include "balloon.h"
+#include "sysemu/balloon.h"
 #include "android/hw-lcd.h"
 #include "android/boot-properties.h"
 #include "android/hw-control.h"

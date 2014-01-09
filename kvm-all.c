@@ -21,10 +21,10 @@
 #include <linux/kvm.h>
 
 #include "qemu-common.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "hw/hw.h"
 #include "exec/gdbstub.h"
-#include "kvm.h"
+#include "sysemu/kvm.h"
 
 /* KVM uses PAGE_SIZE in it's definition of COALESCED_MMIO_MAX */
 #define PAGE_SIZE TARGET_PAGE_SIZE

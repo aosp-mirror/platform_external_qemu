@@ -4,7 +4,7 @@
 #include "hw/isa.h"
 
 #include "exec/exec-all.h"
-#include "kvm.h"
+#include "sysemu/kvm.h"
 
 static void cpu_put_seg(QEMUFile *f, SegmentCache *dt)
 {
