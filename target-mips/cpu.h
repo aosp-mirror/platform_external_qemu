@@ -9,7 +9,7 @@
 
 #include "config.h"
 #include "mips-defs.h"
-#include "cpu-defs.h"
+#include "exec/cpu-defs.h"
 #include "softfloat.h"
 
 // uint_fast8_t and uint_fast16_t not in <sys/int_types.h>
@@ -548,8 +548,8 @@ static inline int cpu_mips_hw_interrupts_pending(CPUState *env)
     return r;
 }
 
-#include "cpu-all.h"
-#include "exec-all.h"
+#include "exec/cpu-all.h"
+#include "exec/exec-all.h"
 
 /* Memory access type :
  * may be needed for precise access rights control and precise exceptions.

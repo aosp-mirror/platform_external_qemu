@@ -333,7 +333,6 @@ LOCAL_SRC_FILES := \
     disas.c \
     dma-helpers.c \
     gdbstub.c \
-    keymaps.c \
     loader.c \
     monitor.c \
     qemu-timer.c \
@@ -348,7 +347,8 @@ LOCAL_SRC_FILES := \
     android/protocol/user-events-impl.c \
     android/protocol/ui-commands-proxy.c \
     android/protocol/core-commands-impl.c \
-    android/protocol/core-commands-qemu.c
+    android/protocol/core-commands-qemu.c \
+    ui/keymaps.c \
 
 $(call gen-hx-header,qemu-monitor.hx,qemu-monitor.h,monitor.c)
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
@@ -413,7 +413,6 @@ common_LOCAL_SRC_FILES := \
     disas.c \
     dma-helpers.c \
     gdbstub.c \
-    keymaps.c \
     loader.c \
     monitor.c \
     qemu-timer.c \
@@ -430,7 +429,7 @@ common_LOCAL_SRC_FILES := \
     android/opengles.c \
     android/protocol/core-commands-qemu.c \
     android/protocol/ui-commands-qemu.c \
-    android/
+    ui/keymaps.c \
 
 
 # The following files cannot be in static libraries because they contain

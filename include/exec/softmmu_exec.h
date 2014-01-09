@@ -9,37 +9,37 @@
 #define ldul_executive  ldl_executive
 #define ldul_supervisor ldl_supervisor
 
-#include "softmmu_defs.h"
+#include "exec/softmmu_defs.h"
 
 #define ACCESS_TYPE 0
 #define MEMSUFFIX MMU_MODE0_SUFFIX
 #define DATA_SIZE 1
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 2
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 4
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 8
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 #undef ACCESS_TYPE
 #undef MEMSUFFIX
 
 #define ACCESS_TYPE 1
 #define MEMSUFFIX MMU_MODE1_SUFFIX
 #define DATA_SIZE 1
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 2
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 4
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 8
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 #undef ACCESS_TYPE
 #undef MEMSUFFIX
 
@@ -48,16 +48,16 @@
 #define ACCESS_TYPE 2
 #define MEMSUFFIX MMU_MODE2_SUFFIX
 #define DATA_SIZE 1
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 2
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 4
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 8
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 #undef ACCESS_TYPE
 #undef MEMSUFFIX
 #endif /* (NB_MMU_MODES >= 3) */
@@ -67,16 +67,16 @@
 #define ACCESS_TYPE 3
 #define MEMSUFFIX MMU_MODE3_SUFFIX
 #define DATA_SIZE 1
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 2
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 4
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 8
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 #undef ACCESS_TYPE
 #undef MEMSUFFIX
 #endif /* (NB_MMU_MODES >= 4) */
@@ -86,16 +86,16 @@
 #define ACCESS_TYPE 4
 #define MEMSUFFIX MMU_MODE4_SUFFIX
 #define DATA_SIZE 1
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 2
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 4
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 8
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 #undef ACCESS_TYPE
 #undef MEMSUFFIX
 #endif /* (NB_MMU_MODES >= 5) */
@@ -105,16 +105,16 @@
 #define ACCESS_TYPE 5
 #define MEMSUFFIX MMU_MODE5_SUFFIX
 #define DATA_SIZE 1
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 2
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 4
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 8
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 #undef ACCESS_TYPE
 #undef MEMSUFFIX
 #endif /* (NB_MMU_MODES >= 6) */
@@ -127,16 +127,16 @@
 #define ACCESS_TYPE (NB_MMU_MODES)
 #define MEMSUFFIX _data
 #define DATA_SIZE 1
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 2
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 4
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 8
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 #undef ACCESS_TYPE
 #undef MEMSUFFIX
 

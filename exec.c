@@ -33,7 +33,7 @@
 #include <inttypes.h>
 
 #include "cpu.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 #include "qemu-common.h"
 #include "tcg.h"
 #include "hw/hw.h"
@@ -3951,16 +3951,16 @@ void dump_exec_info(FILE *f, fprintf_function cpu_fprintf)
 #define SOFTMMU_CODE_ACCESS
 
 #define SHIFT 0
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 1
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 2
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 3
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #undef env
 

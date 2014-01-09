@@ -57,16 +57,16 @@ void REGPARM __stq_outside_jit(target_ulong addr, uint64_t val, int mmu_idx);
 #define ACCESS_TYPE 1
 
 #define DATA_SIZE 1
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 2
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 4
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 8
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #undef MEMSUFFIX
 #undef ACCESS_TYPE
@@ -78,16 +78,16 @@ void REGPARM __stq_outside_jit(target_ulong addr, uint64_t val, int mmu_idx);
 #define ACCESS_TYPE 0
 
 #define DATA_SIZE 1
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 2
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 4
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 8
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #undef MEMSUFFIX
 #undef ACCESS_TYPE

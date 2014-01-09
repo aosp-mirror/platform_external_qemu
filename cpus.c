@@ -25,7 +25,7 @@
 
 #include "monitor.h"
 #include "sysemu.h"
-#include "gdbstub.h"
+#include "exec/gdbstub.h"
 #include "dma.h"
 #include "kvm.h"
 #include "hax.h"

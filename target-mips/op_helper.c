@@ -1886,16 +1886,16 @@ static void do_unaligned_access (target_ulong addr, int is_write, int is_user, v
 #define ALIGNED_ONLY
 
 #define SHIFT 0
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 1
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 2
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 3
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 static void do_unaligned_access (target_ulong addr, int is_write, int is_user, void *retaddr)
 {

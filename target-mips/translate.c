@@ -26,7 +26,7 @@
 #include <inttypes.h>
 
 #include "cpu.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 #include "disas.h"
 #include "tcg-op.h"
 #include "qemu-common.h"
@@ -433,7 +433,7 @@ static TCGv cpu_dspctrl, btarget, bcond;
 static TCGv_i32 hflags;
 static TCGv_i32 fpu_fcr0, fpu_fcr31;
 
-#include "gen-icount.h"
+#include "exec/gen-icount.h"
 
 #define gen_helper_0i(name, arg) do {                             \
     TCGv_i32 helper_tmp = tcg_const_i32(arg);                     \

@@ -353,23 +353,23 @@ extern int tb_invalidated_flag;
 void tlb_fill(target_ulong addr, int is_write, int mmu_idx,
               void *retaddr);
 
-#include "softmmu_defs.h"
+#include "exec/softmmu_defs.h"
 
 #define ACCESS_TYPE (NB_MMU_MODES + 1)
 #define MEMSUFFIX _code
 #define env cpu_single_env
 
 #define DATA_SIZE 1
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 2
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 4
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #define DATA_SIZE 8
-#include "softmmu_header.h"
+#include "exec/softmmu_header.h"
 
 #undef ACCESS_TYPE
 #undef MEMSUFFIX

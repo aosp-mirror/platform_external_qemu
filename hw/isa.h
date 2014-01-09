@@ -3,7 +3,7 @@
 
 /* ISA bus */
 
-#include "ioport.h"
+#include "exec/ioport.h"
 #include "qdev.h"
 
 extern target_phys_addr_t isa_mem_base;

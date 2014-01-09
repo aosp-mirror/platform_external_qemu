@@ -3,8 +3,8 @@
 #include <string.h>
 
 #include "cpu.h"
-#include "exec-all.h"
-#include "gdbstub.h"
+#include "exec/exec-all.h"
+#include "exec/gdbstub.h"
 #include "helper.h"
 #include "qemu-common.h"
 #include "qemu/host-utils.h"

@@ -20,7 +20,7 @@
 #define CPU_ALL_H
 
 #include "qemu-common.h"
-#include "cpu-common.h"
+#include "exec/cpu-common.h"
 
 /* some important defines:
  *
@@ -896,7 +896,7 @@ void cpu_set_log_filename(const char *filename);
 int cpu_str_to_log_mask(const char *str);
 
 /* IO ports API */
-#include "ioport.h"
+#include "exec/ioport.h"
 
 /* Return the physical page corresponding to a virtual one. Use it
    only for debugging because no protection checks are done. Return -1

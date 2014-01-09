@@ -23,7 +23,7 @@
 #include "qemu-common.h"
 #include "sysemu.h"
 #include "hw/hw.h"
-#include "gdbstub.h"
+#include "exec/gdbstub.h"
 #include "kvm.h"
 
 /* KVM uses PAGE_SIZE in it's definition of COALESCED_MMIO_MAX */

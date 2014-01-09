@@ -25,7 +25,7 @@
 #include <inttypes.h>
 
 #include "cpu.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 #include "disas.h"
 #include "tcg-op.h"
 #include "qemu-log.h"
@@ -103,7 +103,7 @@ static TCGv_i32 cpu_exclusive_info;
 static TCGv cpu_F0s, cpu_F1s;
 static TCGv_i64 cpu_F0d, cpu_F1d;
 
-#include "gen-icount.h"
+#include "exec/gen-icount.h"
 
 static const char *regnames[] =
     { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
