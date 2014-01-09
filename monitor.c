@@ -28,7 +28,7 @@
 #include "hw/pcmcia.h"
 #include "hw/i386/pc.h"
 #include "hw/pci/pci.h"
-#include "hw/watchdog.h"
+#include "sysemu/watchdog.h"
 #include "exec/gdbstub.h"
 #include "net/net.h"
 #include "sysemu/char.h"
