@@ -13,7 +13,7 @@
 #include "boards.h"
 #include "devices.h"
 #include "net/net.h"
-#include "arm_pic.h"
+#include "hw/arm/pic.h"
 #include "sysemu/sysemu.h"
 #include "goldfish_device.h"
 #include "android/globals.h"
