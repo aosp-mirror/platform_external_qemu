@@ -333,7 +333,6 @@ LOCAL_SRC_FILES := \
     disas.c \
     dma-helpers.c \
     gdbstub.c \
-    loader.c \
     monitor.c \
     qemu-timer.c \
     qemu-timer-common.c \
@@ -348,6 +347,7 @@ LOCAL_SRC_FILES := \
     android/protocol/core-commands-impl.c \
     android/protocol/core-commands-qemu.c \
     android/user-events-qemu.c \
+    hw/core/loader.c \
     ui/keymaps.c \
 
 $(call gen-hx-header,qemu-monitor.hx,qemu-monitor.h,monitor.c)
@@ -413,7 +413,6 @@ common_LOCAL_SRC_FILES := \
     disas.c \
     dma-helpers.c \
     gdbstub.c \
-    loader.c \
     monitor.c \
     qemu-timer.c \
     qemu-timer-common.c \
@@ -429,6 +428,7 @@ common_LOCAL_SRC_FILES := \
     android/protocol/core-commands-qemu.c \
     android/protocol/ui-commands-qemu.c \
     android/user-events-qemu.c \
+    hw/core/loader.c \
     ui/keymaps.c \
 
 
