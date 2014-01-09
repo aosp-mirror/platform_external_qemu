@@ -24,7 +24,7 @@
 #include "hw/irq.h"
 #include "sysemu/sysemu.h"
 #include "net/net.h"
-#include "bt.h"
+#include "hw/bt.h"
 
 struct csrhci_s {
     int enable;
