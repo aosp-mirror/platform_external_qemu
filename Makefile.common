@@ -424,7 +424,6 @@ CORE_MISC_SOURCES = \
     qemu-malloc.c \
     readline.c \
     savevm.c \
-    tcpdump.c \
     android/boot-properties.c \
     android/cbuffer.c \
     android/charpipe.c \
@@ -440,6 +439,7 @@ CORE_MISC_SOURCES = \
     android/looper-qemu.c \
     android/hw-pipe-net.c \
     android/qemu-setup.c \
+    android/qemu-tcpdump.c \
     android/shaper.c \
     android/snapshot.c \
     android/async-socket-connector.c \
