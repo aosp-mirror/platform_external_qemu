@@ -148,7 +148,7 @@ endif
 #
 MY_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 
-# Needed to build fpu/softfloat-native.h properly
+# Needed to build block.c on Linux/x86_64.
 MY_CFLAGS += -D_GNU_SOURCE=1
 
 MY_CFLAGS += -I$(LOCAL_PATH)/include
