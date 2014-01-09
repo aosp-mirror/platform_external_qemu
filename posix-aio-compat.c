@@ -26,7 +26,7 @@
 #include "qemu/osdep.h"
 #include "sysemu/sysemu.h"
 #include "qemu-common.h"
-#include "block_int.h"
+#include "block/block_int.h"
 
 #include "block/raw-posix-aio.h"
 

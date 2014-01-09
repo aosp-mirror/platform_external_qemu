@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "readline.h"
+#include "monitor/readline.h"
 #include "monitor/monitor.h"
 
 #define IS_NORM 0

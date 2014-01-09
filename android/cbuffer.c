@@ -9,7 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "cbuffer.h"
+#include "android/cbuffer.h"
 #include "android/utils/stralloc.h"
 #include <string.h>
 #include <stdlib.h>

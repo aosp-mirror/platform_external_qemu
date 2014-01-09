@@ -17,7 +17,7 @@
 #include "qemu-char.h"
 #include "sysemu/sysemu.h"
 #include "buffered_file.h"
-#include "block.h"
+#include "block/block.h"
 
 //#define DEBUG_MIGRATION_TCP
 

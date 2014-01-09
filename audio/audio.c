@@ -31,7 +31,7 @@
 #define AUDIO_CAP "audio"
 #include "audio_int.h"
 #include "android/utils/system.h"
-#include "qemu_debug.h"
+#include "android/qemu-debug.h"
 #include "android/android.h"
 
 /* #define DEBUG_PLIVE */

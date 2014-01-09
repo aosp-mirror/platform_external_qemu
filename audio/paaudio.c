@@ -13,7 +13,7 @@
 #define DEBUG 1
 
 #if DEBUG
-#  include "qemu_debug.h"
+#  include "android/qemu-debug.h"
 #  include <stdio.h>
 #  define D(...)  VERBOSE_PRINT(audio,__VA_ARGS__)
 #  define D_ACTIVE  VERBOSE_CHECK(audio)

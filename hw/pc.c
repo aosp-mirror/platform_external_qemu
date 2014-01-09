@@ -25,7 +25,7 @@
 #include "pc.h"
 #include "fdc.h"
 #include "pci.h"
-#include "block.h"
+#include "block/block.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/blockdev.h"
 #include "audio/audio.h"

@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include "qemu-common.h"
-#include "block_int.h"
+#include "block/block_int.h"
 #include "qemu/module.h"
 
 #ifndef S_IWGRP

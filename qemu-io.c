@@ -15,7 +15,7 @@
 #include <libgen.h>
 
 #include "qemu-common.h"
-#include "block_int.h"
+#include "block/block_int.h"
 #include "cmd.h"
 
 #define VERSION	"0.0.1"

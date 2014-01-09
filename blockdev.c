@@ -7,7 +7,7 @@
  * later.  See the COPYING file in the top-level directory.
  */
 
-#include "block.h"
+#include "block/block.h"
 #include "sysemu/blockdev.h"
 #include "monitor/monitor.h"
 #include "qapi/qmp/qerror.h"

@@ -9,7 +9,7 @@
 
 #include "qemu-common.h"
 #include "usb.h"
-#include "block.h"
+#include "block/block.h"
 #include "scsi-disk.h"
 #include "ui/console.h"
 

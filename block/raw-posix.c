@@ -24,8 +24,8 @@
 #include "qemu-common.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"
-#include "qemu-log.h"
-#include "block_int.h"
+#include "qemu/log.h"
+#include "block/block_int.h"
 #include "qemu/module.h"
 #include "block/raw-posix-aio.h"
 

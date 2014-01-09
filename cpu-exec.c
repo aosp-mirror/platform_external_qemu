@@ -21,8 +21,8 @@
 #include "disas/disas.h"
 #include "tcg.h"
 #include "sysemu/kvm.h"
-#include "hax.h"
-#include "qemu-barrier.h"
+#include "exec/hax.h"
+#include "qemu/atomic.h"
 
 #if !defined(CONFIG_SOFTMMU)
 #undef EAX

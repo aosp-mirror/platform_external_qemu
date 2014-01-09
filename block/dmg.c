@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 #include "qemu-common.h"
-#include "block_int.h"
+#include "block/block_int.h"
 #include "qemu/bswap.h"
 #include "qemu/module.h"
 #include <zlib.h>

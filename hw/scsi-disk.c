@@ -29,7 +29,7 @@ do { printf("scsi-disk: " fmt , ## __VA_ARGS__); } while (0)
 do { fprintf(stderr, "scsi-disk: " fmt , ## __VA_ARGS__); } while (0)
 
 #include "qemu-common.h"
-#include "block.h"
+#include "block/block.h"
 #include "scsi-disk.h"
 
 #define SENSE_NO_SENSE        0

@@ -29,7 +29,7 @@
 #include "sysemu/sysemu.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"
-#include "block.h"
+#include "block/block.h"
 #include "hw/usb.h"
 #include "hw/baum.h"
 #include "hw/msmouse.h"
@@ -103,7 +103,7 @@
 #define READ_BUF_LEN 4096
 
 #ifdef CONFIG_ANDROID
-#include "charpipe.h"
+#include "android/charpipe.h"
 #include "modem_driver.h"
 #include "android/gps.h"
 #include "android/hw-kmsg.h"

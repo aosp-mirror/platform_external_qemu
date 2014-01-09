@@ -13,7 +13,7 @@
 #include <stdio.h>
 //#include "cpu.h"
 #include "hw/hw.h"
-#include "block.h"
+#include "block/block.h"
 
 typedef struct {
     target_phys_addr_t base;
