@@ -25,7 +25,7 @@
 #define BLOCK_INT_H
 
 #include "block/block.h"
-#include "qemu-option.h"
+#include "qemu/option.h"
 #include "qemu/queue.h"
 
 #define BLOCK_FLAG_ENCRYPT	1

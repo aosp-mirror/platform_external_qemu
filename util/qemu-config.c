@@ -1,6 +1,6 @@
 #include "qemu-common.h"
 #include "qemu/error-report.h"
-#include "qemu-option.h"
+#include "qemu/option.h"
 #include "qemu/config-file.h"
 #include "hw/qdev.h"
 
