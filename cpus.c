@@ -30,7 +30,7 @@
 #include "sysemu/kvm.h"
 #include "exec/hax.h"
 
-#include "cpus.h"
+#include "sysemu/cpus.h"
 
 static CPUState *cur_cpu;
 static CPUState *next_cpu;
