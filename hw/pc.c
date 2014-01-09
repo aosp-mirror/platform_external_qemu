@@ -34,7 +34,7 @@
 #include "hw/boards.h"
 #include "android/globals.h"
 #include "monitor/monitor.h"
-#include "fw_cfg.h"
+#include "hw/nvram/fw_cfg.h"
 //#include "hpet_emul.h"
 #include "watchdog.h"
 #include "smbios.h"

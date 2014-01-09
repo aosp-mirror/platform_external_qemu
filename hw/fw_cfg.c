@@ -24,7 +24,7 @@
 #include "hw/hw.h"
 #include "sysemu/sysemu.h"
 #include "hw/isa/isa.h"
-#include "fw_cfg.h"
+#include "hw/nvram/fw_cfg.h"
 
 /* debug firmware config */
 //#define DEBUG_FW_CFG
