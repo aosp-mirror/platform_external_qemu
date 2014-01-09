@@ -643,7 +643,7 @@ RTCState *rtc_init(int base, qemu_irq irq, int base_year)
 }
 
 /* Memory mapped interface */
-static uint32_t cmos_mm_readb (void *opaque, target_phys_addr_t addr)
+static uint32_t cmos_mm_readb (void *opaque, hwaddr addr)
 {
     RTCState *s = opaque;
 
@@ -651,14 +651,14 @@ static uint32_t cmos_mm_readb (void *opaque, target_phys_addr_t addr)
 }
 
 static void cmos_mm_writeb (void *opaque,
-                            target_phys_addr_t addr, uint32_t value)
+                            hwaddr addr, uint32_t value)
 {
     RTCState *s = opaque;
 
     cmos_ioport_write(s, addr >> s->it_shift, value & 0xFF);
 }
 
-static uint32_t cmos_mm_readw (void *opaque, target_phys_addr_t addr)
+static uint32_t cmos_mm_readw (void *opaque, hwaddr addr)
 {
     RTCState *s = opaque;
     uint32_t val;
@@ -671,7 +671,7 @@ static uint32_t cmos_mm_readw (void *opaque, target_phys_addr_t addr)
 }
 
 static void cmos_mm_writew (void *opaque,
-                            target_phys_addr_t addr, uint32_t value)
+                            hwaddr addr, uint32_t value)
 {
     RTCState *s = opaque;
 #ifdef TARGET_WORDS_BIGENDIAN
@@ -680,7 +680,7 @@ static void cmos_mm_writew (void *opaque,
     cmos_ioport_write(s, addr >> s->it_shift, value & 0xFFFF);
 }
 
-static uint32_t cmos_mm_readl (void *opaque, target_phys_addr_t addr)
+static uint32_t cmos_mm_readl (void *opaque, hwaddr addr)
 {
     RTCState *s = opaque;
     uint32_t val;
@@ -693,7 +693,7 @@ static uint32_t cmos_mm_readl (void *opaque, target_phys_addr_t addr)
 }
 
 static void cmos_mm_writel (void *opaque,
-                            target_phys_addr_t addr, uint32_t value)
+                            hwaddr addr, uint32_t value)
 {
     RTCState *s = opaque;
 #ifdef TARGET_WORDS_BIGENDIAN
@@ -714,7 +714,7 @@ static CPUWriteMemoryFunc *rtc_mm_write[] = {
     &cmos_mm_writel,
 };
 
-RTCState *rtc_mm_init(target_phys_addr_t base, int it_shift, qemu_irq irq,
+RTCState *rtc_mm_init(hwaddr base, int it_shift, qemu_irq irq,
                       int base_year)
 {
     RTCState *s;

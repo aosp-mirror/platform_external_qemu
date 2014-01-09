@@ -548,7 +548,7 @@ static void goldfish_fb_invalidate_display(void * opaque)
     s->need_update = 1;
 }
 
-static uint32_t goldfish_fb_read(void *opaque, target_phys_addr_t offset)
+static uint32_t goldfish_fb_read(void *opaque, hwaddr offset)
 {
     uint32_t ret;
     struct goldfish_fb_state *s = opaque;
@@ -591,7 +591,7 @@ static uint32_t goldfish_fb_read(void *opaque, target_phys_addr_t offset)
     }
 }
 
-static void goldfish_fb_write(void *opaque, target_phys_addr_t offset,
+static void goldfish_fb_write(void *opaque, hwaddr offset,
                         uint32_t val)
 {
     struct goldfish_fb_state *s = opaque;

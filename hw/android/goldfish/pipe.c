@@ -1012,7 +1012,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         GoldfishPipeBuffer  buffer;
         uint32_t            address = dev->address;
         uint32_t            page    = address & TARGET_PAGE_MASK;
-        target_phys_addr_t  phys;
+        hwaddr  phys;
         phys = safe_get_phys_page_debug(env, page);
         buffer.data = qemu_get_ram_ptr(phys) + (address - page);
         buffer.size = dev->size;
@@ -1027,7 +1027,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         GoldfishPipeBuffer  buffer;
         uint32_t            address = dev->address;
         uint32_t            page    = address & TARGET_PAGE_MASK;
-        target_phys_addr_t  phys;
+        hwaddr  phys;
         phys = safe_get_phys_page_debug(env, page);
         buffer.data = qemu_get_ram_ptr(phys) + (address - page);
         buffer.size = dev->size;
@@ -1060,7 +1060,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
     }
 }
 
-static void pipe_dev_write(void *opaque, target_phys_addr_t offset, uint32_t value)
+static void pipe_dev_write(void *opaque, hwaddr offset, uint32_t value)
 {
     PipeDevice *s = (PipeDevice *)opaque;
 
@@ -1129,7 +1129,7 @@ static void pipe_dev_write(void *opaque, target_phys_addr_t offset, uint32_t val
 }
 
 /* I/O read */
-static uint32_t pipe_dev_read(void *opaque, target_phys_addr_t offset)
+static uint32_t pipe_dev_read(void *opaque, hwaddr offset)
 {
     PipeDevice *dev = (PipeDevice *)opaque;
 

@@ -6,9 +6,9 @@
 #include "exec/ioport.h"
 #include "hw/qdev.h"
 
-extern target_phys_addr_t isa_mem_base;
+extern hwaddr isa_mem_base;
 
-void isa_mmio_init(target_phys_addr_t base, target_phys_addr_t size);
+void isa_mmio_init(hwaddr base, hwaddr size);
 
 /* dma.c */
 int DMA_get_channel_mode (int nchan);

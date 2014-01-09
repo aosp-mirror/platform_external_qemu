@@ -110,7 +110,7 @@ typedef struct {
     uint32_t htest;
 
     /* SM501 local memory offset */
-    target_phys_addr_t localmem_base;
+    hwaddr localmem_base;
 
     /* Active packets.  */
     uint32_t old_ctl;
@@ -1397,7 +1397,7 @@ static void ohci_port_set_status(OHCIState *ohci, int portnum, uint32_t val)
     return;
 }
 
-static uint32_t ohci_mem_read(void *ptr, target_phys_addr_t addr)
+static uint32_t ohci_mem_read(void *ptr, hwaddr addr)
 {
     OHCIState *ohci = ptr;
     uint32_t retval;
@@ -1521,7 +1521,7 @@ static uint32_t ohci_mem_read(void *ptr, target_phys_addr_t addr)
     return retval;
 }
 
-static void ohci_mem_write(void *ptr, target_phys_addr_t addr, uint32_t val)
+static void ohci_mem_write(void *ptr, hwaddr addr, uint32_t val)
 {
     OHCIState *ohci = ptr;
 
@@ -1735,7 +1735,7 @@ void usb_ohci_init_pci(struct PCIBus *bus, int num_ports, int devfn)
                            PCI_ADDRESS_SPACE_MEM, ohci_mapfunc);
 }
 
-void usb_ohci_init_pxa(target_phys_addr_t base, int num_ports, int devfn,
+void usb_ohci_init_pxa(hwaddr base, int num_ports, int devfn,
                        qemu_irq irq)
 {
     OHCIState *ohci = (OHCIState *)qemu_mallocz(sizeof(OHCIState));

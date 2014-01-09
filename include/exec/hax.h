@@ -20,7 +20,7 @@ int hax_vcpu_exec(CPUState *env);
 int hax_sync_vcpus(void);
 void hax_vcpu_sync_state(CPUState *env, int modified);
 int hax_populate_ram(uint64_t va, uint32_t size);
-int hax_set_phys_mem(target_phys_addr_t start_addr,
+int hax_set_phys_mem(hwaddr start_addr,
                      ram_addr_t size, ram_addr_t phys_offset);
 /* Check if QEMU need emulate guest execution */
 int hax_vcpu_emulation_mode(CPUState *env);

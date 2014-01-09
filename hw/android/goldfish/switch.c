@@ -60,7 +60,7 @@ static int  goldfish_switch_load(QEMUFile*  f, void*  opaque, int  version_id)
     return 0;
 }
 
-static uint32_t goldfish_switch_read(void *opaque, target_phys_addr_t offset)
+static uint32_t goldfish_switch_read(void *opaque, hwaddr offset)
 {
     struct switch_state *s = (struct switch_state *)opaque;
 
@@ -86,7 +86,7 @@ static uint32_t goldfish_switch_read(void *opaque, target_phys_addr_t offset)
     }
 }
 
-static void goldfish_switch_write(void *opaque, target_phys_addr_t offset, uint32_t value)
+static void goldfish_switch_write(void *opaque, hwaddr offset, uint32_t value)
 {
     struct switch_state *s = (struct switch_state *)opaque;
 

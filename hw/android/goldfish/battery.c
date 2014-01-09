@@ -79,7 +79,7 @@ static int   goldfish_battery_load(QEMUFile*  f, void*  opaque, int  version_id)
 
 static struct goldfish_battery_state *battery_state;
 
-static uint32_t goldfish_battery_read(void *opaque, target_phys_addr_t offset)
+static uint32_t goldfish_battery_read(void *opaque, hwaddr offset)
 {
     uint32_t ret;
     struct goldfish_battery_state *s = opaque;
@@ -113,7 +113,7 @@ static uint32_t goldfish_battery_read(void *opaque, target_phys_addr_t offset)
     }
 }
 
-static void goldfish_battery_write(void *opaque, target_phys_addr_t offset, uint32_t val)
+static void goldfish_battery_write(void *opaque, hwaddr offset, uint32_t val)
 {
     struct goldfish_battery_state *s = opaque;
 

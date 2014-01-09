@@ -42,7 +42,7 @@ static struct _loaderparams {
     const char *initrd_filename;
 } loaderparams;
 
-static void mips_qemu_writel (void *opaque, target_phys_addr_t addr,
+static void mips_qemu_writel (void *opaque, hwaddr addr,
 			      uint32_t val)
 {
     if ((addr & 0xffff) == 0 && val == 42)
@@ -51,7 +51,7 @@ static void mips_qemu_writel (void *opaque, target_phys_addr_t addr,
         qemu_system_shutdown_request ();
 }
 
-static uint32_t mips_qemu_readl (void *opaque, target_phys_addr_t addr)
+static uint32_t mips_qemu_readl (void *opaque, hwaddr addr)
 {
     return 0;
 }

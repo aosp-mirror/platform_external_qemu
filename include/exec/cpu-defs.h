@@ -29,7 +29,7 @@
 #include <signal.h>
 #include "qemu/osdep.h"
 #include "qemu/queue.h"
-#include "exec/targphys.h"
+#include "exec/hwaddr.h"
 
 #ifndef TARGET_LONG_BITS
 #error TARGET_LONG_BITS must be defined before including this header
@@ -107,7 +107,7 @@ extern int CPUTLBEntry_wrong_size[sizeof(CPUTLBEntry) == (1 << CPU_TLB_ENTRY_BIT
 #define CPU_COMMON_TLB \
     /* The meaning of the MMU modes is defined in the target code. */   \
     CPUTLBEntry tlb_table[NB_MMU_MODES][CPU_TLB_SIZE];                  \
-    target_phys_addr_t iotlb[NB_MMU_MODES][CPU_TLB_SIZE];               \
+    hwaddr iotlb[NB_MMU_MODES][CPU_TLB_SIZE];               \
     target_ulong tlb_flush_addr;                                        \
     target_ulong tlb_flush_mask;
 

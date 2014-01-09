@@ -31,7 +31,7 @@ void sysbus_connect_irq(SysBusDevice *dev, int n, qemu_irq irq)
     }
 }
 
-void sysbus_mmio_map(SysBusDevice *dev, int n, target_phys_addr_t addr)
+void sysbus_mmio_map(SysBusDevice *dev, int n, hwaddr addr)
 {
     assert(n >= 0 && n < dev->num_mmio);
 
@@ -39,7 +39,7 @@ void sysbus_mmio_map(SysBusDevice *dev, int n, target_phys_addr_t addr)
         /* ??? region already mapped here.  */
         return;
     }
-    if (dev->mmio[n].addr != (target_phys_addr_t)-1) {
+    if (dev->mmio[n].addr != (hwaddr)-1) {
         /* Unregister previous mapping.  */
         cpu_register_physical_memory(dev->mmio[n].addr, dev->mmio[n].size,
                                      IO_MEM_UNASSIGNED);
@@ -75,7 +75,7 @@ void sysbus_pass_irq(SysBusDevice *dev, SysBusDevice *target)
     }
 }
 
-void sysbus_init_mmio(SysBusDevice *dev, target_phys_addr_t size, int iofunc)
+void sysbus_init_mmio(SysBusDevice *dev, hwaddr size, int iofunc)
 {
     int n;
 
@@ -86,7 +86,7 @@ void sysbus_init_mmio(SysBusDevice *dev, target_phys_addr_t size, int iofunc)
     dev->mmio[n].iofunc = iofunc;
 }
 
-void sysbus_init_mmio_cb(SysBusDevice *dev, target_phys_addr_t size,
+void sysbus_init_mmio_cb(SysBusDevice *dev, hwaddr size,
                          mmio_mapfunc cb)
 {
     int n;
@@ -126,7 +126,7 @@ void sysbus_register_dev(const char *name, size_t size, sysbus_initfn init)
 }
 
 DeviceState *sysbus_create_varargs(const char *name,
-                                   target_phys_addr_t addr, ...)
+                                   hwaddr addr, ...)
 {
     DeviceState *dev;
     SysBusDevice *s;
@@ -137,7 +137,7 @@ DeviceState *sysbus_create_varargs(const char *name,
     dev = qdev_create(NULL, name);
     s = sysbus_from_qdev(dev);
     qdev_init(dev);
-    if (addr != (target_phys_addr_t)-1) {
+    if (addr != (hwaddr)-1) {
         sysbus_mmio_map(s, 0, addr);
     }
     va_start(va, addr);

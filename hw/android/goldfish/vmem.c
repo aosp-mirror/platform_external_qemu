@@ -37,7 +37,7 @@ int safe_memory_rw_debug(CPUState *env, target_ulong addr, uint8_t *buf,
     return cpu_memory_rw_debug(env, addr, buf, len, is_write);
 }
 
-target_phys_addr_t safe_get_phys_page_debug(CPUState *env, target_ulong addr)
+hwaddr safe_get_phys_page_debug(CPUState *env, target_ulong addr)
 {
 #ifdef TARGET_I386
     if (kvm_enabled()) {

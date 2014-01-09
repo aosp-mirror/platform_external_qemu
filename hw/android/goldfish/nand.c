@@ -523,7 +523,7 @@ uint32_t nand_dev_do_cmd(nand_dev_controller_state *s, uint32_t cmd)
 }
 
 /* I/O write */
-static void nand_dev_write(void *opaque, target_phys_addr_t offset, uint32_t value)
+static void nand_dev_write(void *opaque, hwaddr offset, uint32_t value)
 {
     nand_dev_controller_state *s = (nand_dev_controller_state *)opaque;
 
@@ -569,7 +569,7 @@ static void nand_dev_write(void *opaque, target_phys_addr_t offset, uint32_t val
 }
 
 /* I/O read */
-static uint32_t nand_dev_read(void *opaque, target_phys_addr_t offset)
+static uint32_t nand_dev_read(void *opaque, hwaddr offset)
 {
     nand_dev_controller_state *s = (nand_dev_controller_state *)opaque;
     nand_dev *dev;

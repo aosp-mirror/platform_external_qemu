@@ -96,7 +96,7 @@ int goldfish_device_add(struct goldfish_device *dev,
     return 0;
 }
 
-static uint32_t goldfish_bus_read(void *opaque, target_phys_addr_t offset)
+static uint32_t goldfish_bus_read(void *opaque, hwaddr offset)
 {
     struct bus_state *s = (struct bus_state *)opaque;
 
@@ -147,7 +147,7 @@ static void goldfish_bus_op_init(struct bus_state *s)
     goldfish_device_set_irq(&s->dev, 0, first_device != NULL);
 }
 
-static void goldfish_bus_write(void *opaque, target_phys_addr_t offset, uint32_t value)
+static void goldfish_bus_write(void *opaque, hwaddr offset, uint32_t value)
 {
     struct bus_state *s = (struct bus_state *)opaque;
 
