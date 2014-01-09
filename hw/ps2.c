@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 #include "hw/hw.h"
-#include "ps2.h"
+#include "hw/input/ps2.h"
 #include "ui/console.h"
 
 /* debug PC keyboard */
