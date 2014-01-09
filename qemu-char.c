@@ -33,7 +33,7 @@
 #include "hw/usb.h"
 #include "hw/baum.h"
 #include "hw/msmouse.h"
-#include "qemu-objects.h"
+#include "qapi/qmp/types.h"
 
 #include <unistd.h>
 #include <fcntl.h>
