@@ -16,7 +16,7 @@
 #include "android/multitouch-screen.h"
 #include "irq.h"
 #include "user-events.h"
-#include "console.h"
+#include "ui/console.h"
 
 #define MAX_EVENTS 256*4
 

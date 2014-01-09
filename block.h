@@ -4,7 +4,7 @@
 #include "qemu-aio.h"
 #include "qemu-common.h"
 #include "qemu-option.h"
-#include "qobject.h"
+#include "qapi/qmp/qobject.h"
 
 /* block.c */
 typedef struct BlockDriver BlockDriver;

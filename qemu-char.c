@@ -25,7 +25,7 @@
 #include "sockets.h"
 #include "net.h"
 #include "monitor.h"
-#include "console.h"
+#include "ui/console.h"
 #include "sysemu.h"
 #include "qemu/timer.h"
 #include "qemu-char.h"

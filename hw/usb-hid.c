@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 #include "hw.h"
-#include "console.h"
+#include "ui/console.h"
 #include "usb.h"
 
 /* HID interface requests */

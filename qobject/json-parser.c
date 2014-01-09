@@ -14,12 +14,12 @@
 #include <stdarg.h>
 
 #include "qemu-common.h"
-#include "qstring.h"
-#include "qint.h"
+#include "qapi/qmp/qstring.h"
+#include "qapi/qmp/qint.h"
 #include "qdict.h"
-#include "qlist.h"
-#include "qfloat.h"
-#include "qbool.h"
+#include "qapi/qmp/qlist.h"
+#include "qapi/qmp/qfloat.h"
+#include "qapi/qmp/qbool.h"
 #include "json-parser.h"
 #include "json-lexer.h"
 

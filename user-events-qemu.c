@@ -11,7 +11,7 @@
 */
 #include "user-events.h"
 #include "android/utils/debug.h"
-#include "console.h"
+#include "ui/console.h"
 #include <stdio.h>
 
 void

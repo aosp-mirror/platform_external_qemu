@@ -267,9 +267,9 @@ common_LOCAL_SRC_FILES += \
 # What a mess, os-posix.c depends on the exact values of options
 # which are target specific.
 ifeq ($(HOST_OS),windows)
-    common_LOCAL_SRC_FILES += os-win32.c oslib-win32.c
+    common_LOCAL_SRC_FILES += os-win32.c util/oslib-win32.c
 else
-    common_LOCAL_SRC_FILES += os-posix.c oslib-posix.c
+    common_LOCAL_SRC_FILES += os-posix.c util/oslib-posix.c
 endif
 
 

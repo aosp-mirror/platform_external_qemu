@@ -419,25 +419,16 @@ CORE_MISC_SOURCES = \
     buffered_file.c \
     cbuffer.c \
     charpipe.c \
-    console.c \
-    d3des.c \
     input.c \
     iohandler.c \
     ioport.c \
     net-android.c \
-    path.c \
     qemu-char.c \
-    qemu-config.c \
-    qemu-error.c \
     qemu-malloc.c \
-    qemu-option.c \
-    qemu-sockets-android.c \
-    qerror.c \
     readline.c \
     savevm.c \
     shaper.c \
     tcpdump.c \
-    vnc-android.c \
     android/boot-properties.c \
     android/config.c \
     android/core-init-utils.c   \
@@ -465,12 +456,21 @@ CORE_MISC_SOURCES = \
     android/multitouch-screen.c \
     android/multitouch-port.c \
     android/utils/jpeg-compress.c \
+    qobject/qerror.c \
+    ui/console.c \
+    ui/d3des.c \
+    ui/vnc-android.c \
     util/acl.c \
     util/aes.c \
     util/cutils.c \
     util/module.c \
     util/notify.c \
     util/osdep.c \
+    util/path.c \
+    util/qemu-config.c \
+    util/qemu-error.c \
+    util/qemu-option.c \
+    util/qemu-sockets-android.c \
 
 ifeq ($(HOST_ARCH),x86)
     CORE_MISC_SOURCES += i386-dis.c
@@ -485,7 +485,7 @@ endif
 
 ifeq ($(HOST_OS),linux)
     CORE_MISC_SOURCES += usb-linux.c \
-                         qemu-thread.c \
+                         util/qemu-thread.c \
                          android/camera/camera-capture-linux.c
 else
     CORE_MISC_SOURCES += usb-dummy-android.c
@@ -560,16 +560,16 @@ EMULATOR_LIBQEMU_CFLAGS += -I$(LOCAL_PATH)/telephony
 # integrated into android emulator
 #
 common_LOCAL_SRC_FILES += \
-    json-lexer.c \
-    json-parser.c \
-    json-streamer.c \
-    qjson.c \
-    qbool.c \
-    qdict.c \
-    qfloat.c \
-    qint.c \
-    qlist.c \
-    qstring.c \
+    qobject/json-lexer.c \
+    qobject/json-parser.c \
+    qobject/json-streamer.c \
+    qobject/qjson.c \
+    qobject/qbool.c \
+    qobject/qdict.c \
+    qobject/qfloat.c \
+    qobject/qint.c \
+    qobject/qlist.c \
+    qobject/qstring.c \
 
 ifeq ($(QEMU_TARGET_XML_SOURCES),)
     QEMU_TARGET_XML_SOURCES := arm-core arm-neon arm-vfp arm-vfp3

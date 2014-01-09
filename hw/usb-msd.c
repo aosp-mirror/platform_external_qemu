@@ -11,7 +11,7 @@
 #include "usb.h"
 #include "block.h"
 #include "scsi-disk.h"
-#include "console.h"
+#include "ui/console.h"
 
 //#define DEBUG_MSD
 

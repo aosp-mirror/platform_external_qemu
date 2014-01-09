@@ -15,7 +15,7 @@
  * to the UI connected to the core.
  */
 
-#include "console.h"
+#include "ui/console.h"
 #include "android/looper.h"
 #include "android/display-core.h"
 #include "android/async-utils.h"

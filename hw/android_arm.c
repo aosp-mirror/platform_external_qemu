@@ -19,7 +19,7 @@
 #include "android/globals.h"
 #include "audio/audio.h"
 #include "arm-misc.h"
-#include "console.h"
+#include "ui/console.h"
 #include "blockdev.h"
 #include "goldfish_pipe.h"
 #ifdef CONFIG_MEMCHECK

@@ -34,7 +34,7 @@
 #endif
 
 #include "qemu-common.h"
-#include "console.h"
+#include "ui/console.h"
 #include "sysemu.h"
 
 #define FONT_HEIGHT 16

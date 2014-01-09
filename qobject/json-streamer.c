@@ -11,8 +11,8 @@
  *
  */
 
-#include "qlist.h"
-#include "qint.h"
+#include "qapi/qmp/qlist.h"
+#include "qapi/qmp/qint.h"
 #include "qdict.h"
 #include "qemu-common.h"
 #include "json-lexer.h"

@@ -3,7 +3,7 @@
 
 #include "qemu-common.h"
 #include "qemu-char.h"
-#include "qerror.h"
+#include "qapi/qmp/qerror.h"
 #include "qdict.h"
 #include "block.h"
 
