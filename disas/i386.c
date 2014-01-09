@@ -155,6 +155,13 @@
 
 #include <setjmp.h>
 
+// ANDROID: TODO(digit): Remove this hack once compilation with mingw-w64 works.
+#ifdef _WIN32
+#define sigjmp_buf jmp_buf
+#define sigsetjmp(x,y) setjmp(x)
+#define siglongjmp longjmp
+#endif
+
 static int fetch_data2(struct disassemble_info *, bfd_byte *);
 static int fetch_data(struct disassemble_info *, bfd_byte *);
 static void ckprefix (void);
@@ -226,7 +233,7 @@ struct dis_private {
   bfd_byte the_buffer[MAX_MNEM_SIZE];
   bfd_vma insn_start;
   int orig_sizeflag;
-  jmp_buf bailout;
+  sigjmp_buf bailout;
 };
 
 enum address_mode
@@ -303,7 +310,7 @@ fetch_data2(struct disassemble_info *info, bfd_byte *addr)
 	 STATUS.  */
       if (priv->max_fetched == priv->the_buffer)
 	(*info->memory_error_func) (status, start, info);
-      longjmp (priv->bailout, 1);
+      siglongjmp(priv->bailout, 1);
     }
   else
     priv->max_fetched = addr;
@@ -664,6 +671,13 @@ fetch_data(struct disassemble_info *info, bfd_byte *addr)
 #define PREGRP95  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 95 } }
 #define PREGRP96  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 96 } }
 #define PREGRP97  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 97 } }
+#define PREGRP98  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 98 } }
+#define PREGRP99  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 99 } }
+#define PREGRP100 NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 100 } }
+#define PREGRP101 NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 101 } }
+#define PREGRP102 NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 102 } }
+#define PREGRP103 NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 103 } }
+#define PREGRP104 NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 104 } }
 
 
 #define X86_64_0  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 0 } }
@@ -1440,7 +1454,7 @@ static const unsigned char threebyte_0x38_uses_DATA_prefix[256] = {
   /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
   /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
   /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
+  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1, /* df */
   /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
   /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
   /*       -------------------------------        */
@@ -1503,7 +1517,7 @@ static const unsigned char threebyte_0x3a_uses_DATA_prefix[256] = {
   /* 10 */ 0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0, /* 1f */
   /* 20 */ 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
   /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
+  /* 40 */ 1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
   /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
   /* 60 */ 1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
   /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
@@ -1512,7 +1526,7 @@ static const unsigned char threebyte_0x3a_uses_DATA_prefix[256] = {
   /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
   /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
   /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
+  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1, /* df */
   /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
   /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
   /*       -------------------------------        */
@@ -2710,6 +2724,63 @@ static const struct dis386 prefix_user_table[][4] = {
     { "punpckldq",{ MX, EMq } },
     { "(bad)",	{ XX } },
   },
+
+  /* PREGRP98 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pclmulqdq", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP99 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "aesimc", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP100 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "aesenc", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP101 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "aesenclast", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP102 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "aesdec", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP103 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "aesdeclast", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP104 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "aeskeygenassist", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
 };
 
 static const struct dis386 x86_64_table[][2] = {
@@ -2981,11 +3052,11 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP99 },
+    { PREGRP100 },
+    { PREGRP101 },
+    { PREGRP102 },
+    { PREGRP103 },
     /* e0 */
     { "(bad)", { XX } },
     { "(bad)", { XX } },
@@ -3102,7 +3173,7 @@ static const struct dis386 three_byte_table[][256] = {
     { PREGRP84 },
     { PREGRP85 },
     { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP98 },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
@@ -3276,7 +3347,7 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP104 },
     /* e0 */
     { "(bad)", { XX } },
     { "(bad)", { XX } },
@@ -3661,7 +3732,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
   start_codep = priv.the_buffer;
   codep = priv.the_buffer;
 
-  if (setjmp (priv.bailout) != 0)
+  if (sigsetjmp(priv.bailout, 0) != 0)
     {
       const char *name;
 
@@ -4720,7 +4791,8 @@ print_operand_value (char *buf, size_t bufsize, int hex, bfd_vma disp)
 	  buf[0] = '0';
 	  buf[1] = 'x';
           snprintf_vma (tmp, sizeof(tmp), disp);
-	  for (i = 0; tmp[i] == '0' && tmp[i + 1]; i++);
+          for (i = 0; tmp[i] == '0' && tmp[i + 1]; i++) {
+          }
           pstrcpy (buf + 2, bufsize - 2, tmp + i);
 	}
       else
