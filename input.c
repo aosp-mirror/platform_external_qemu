@@ -24,7 +24,7 @@
 
 #include "sysemu.h"
 #include "net/net.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 #include "ui/console.h"
 #include "qapi/qmp/qjson.h"
 

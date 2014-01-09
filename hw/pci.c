@@ -23,7 +23,7 @@
  */
 #include "hw.h"
 #include "pci.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 #include "net/net.h"
 #include "sysemu.h"
 

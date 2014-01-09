@@ -29,7 +29,7 @@
 #include "net/net.h"
 #include "qdev.h"
 #include "sysemu.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 #include "blockdev.h"
 
 struct DeviceProperty {

@@ -23,7 +23,7 @@
  */
 #include "config-host.h"
 
-#include "monitor.h"
+#include "monitor/monitor.h"
 #include "sysemu.h"
 #include "exec/gdbstub.h"
 #include "dma.h"

@@ -29,7 +29,7 @@
 #include <sys/mman.h>
 #endif
 #include "config.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 #include "sysemu.h"
 #include "arch_init.h"
 #include "audio/audio.h"

@@ -20,7 +20,7 @@
 
 #include "sysbus.h"
 #include "sysemu.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 
 void sysbus_connect_irq(SysBusDevice *dev, int n, qemu_irq irq)
 {

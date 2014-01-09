@@ -24,7 +24,7 @@
 
 #include "qemu-common.h"
 #include "qemu/timer.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 #include "hw/usb.h"
 
 USBDevice *usb_host_device_open(const char *devname)

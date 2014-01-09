@@ -24,7 +24,7 @@
 #include "qemu-common.h"
 #include "android/sockets.h"
 #include "net/net.h"
-#include "monitor.h"
+#include "monitor/monitor.h"
 #include "ui/console.h"
 #include "sysemu.h"
 #include "qemu/timer.h"
