@@ -117,7 +117,7 @@ ifeq ($(EMULATOR_TARGET_ARCH),x86)
 HW_SOURCES += \
     intc/apic.c \
     intc/i8259.c \
-    mc146818rtc.c \
+    timer/mc146818rtc.c \
     pci-host/piix.c \
     timer/i8254.c \
     pckbd.c \
