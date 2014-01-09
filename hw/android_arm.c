@@ -18,7 +18,7 @@
 #include "goldfish_device.h"
 #include "android/globals.h"
 #include "audio/audio.h"
-#include "arm-misc.h"
+#include "hw/arm/arm.h"
 #include "ui/console.h"
 #include "sysemu/blockdev.h"
 #include "goldfish_pipe.h"

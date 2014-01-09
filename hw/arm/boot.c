@@ -8,7 +8,7 @@
  */
 
 #include "hw/hw.h"
-#include "arm-misc.h"
+#include "hw/arm/arm.h"
 #include "sysemu/sysemu.h"
 
 #define KERNEL_ARGS_ADDR 0x100

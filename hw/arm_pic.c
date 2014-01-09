@@ -9,7 +9,7 @@
 
 #include "hw/hw.h"
 #include "hw/i386/pc.h"
-#include "arm-misc.h"
+#include "hw/arm/arm.h"
 
 /* Stub functions for hardware that doesn't exist.  */
 void pic_info(Monitor *mon)
