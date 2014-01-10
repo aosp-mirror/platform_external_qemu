@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8dea89ed_40a1f8bd",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1014685
+      },
+      "writtenOn": "2014-01-10T14:42:44Z",
+      "side": 1,
+      "message": "Sorry forgot to mention you also need to change the MAX_ORDER. On some kernel configurations you can set CONFIG_FORCE_MAX_ZONEORDER. Not the case for x86 but FORCE_MAX_ZONEORDER can be added to kconfig.\n\nThe following is from arch/arm/Kconfig:\n\"The kernel memory allocator divides physically contiguous memory blocks into \"zones\", where each zone is a power of two number of pages.  This option selects the largest power of two that the kernel keeps in the memory allocator.  If you need to allocate very large blocks of physically contiguous memory, then you may need to increase this value.\n\nThis config option is actually maximum order plus one. For example, a value of 11 means that the largest free memory block is 2^10 pages.\"\n\nI believe the Android block size is 4K so 2^10 * 4K \u003d 4MB.  Increasing the MAX_ORDER to 12 gives us 2^11 * 4K \u003d 8MB",
+      "range": {
+        "startLine": 443,
+        "startChar": 0,
+        "endLine": 450,
+        "endChar": 25
+      },
+      "revId": "4ad5d5e0503aed29b2f3a742a955d3679a681742",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
