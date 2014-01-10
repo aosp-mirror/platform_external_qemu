@@ -22,6 +22,69 @@
       "revId": "4ad5d5e0503aed29b2f3a742a955d3679a681742",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8dea89ed_20cb945b",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 614,
+      "author": {
+        "id": 1014685
+      },
+      "writtenOn": "2014-01-10T16:34:04Z",
+      "side": 1,
+      "message": "should be /hw/goldfish_events_device.c",
+      "range": {
+        "startLine": 614,
+        "startChar": 2,
+        "endLine": 614,
+        "endChar": 36
+      },
+      "revId": "4ad5d5e0503aed29b2f3a742a955d3679a681742",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cdcac190_ff13ea24",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 665,
+      "author": {
+        "id": 1014685
+      },
+      "writtenOn": "2014-01-10T16:34:04Z",
+      "side": 1,
+      "message": "Multi-touch is also supported. Although I think something is currently broken when trying to connect the multi-touch app to the emulator.\n\nEV_ABS, ABS_MT_SLOT\n\nEV_ABS, ABS_MT_POSITION_X\n\nEV_ABS, ABS_MT_POSITION_Y\n\nEV_ABS, ABS_MT_TRACKING_ID\n\nEV_ABS, ABS_MT_TOUCH_MAJOR\n\nEV_ABS, ABS_MT_PRESSURE",
+      "revId": "4ad5d5e0503aed29b2f3a742a955d3679a681742",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cdcac190_3ffa8290",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 788,
+      "author": {
+        "id": 1014685
+      },
+      "writtenOn": "2014-01-10T16:34:04Z",
+      "side": 1,
+      "message": "Seems to still be in use. There were some recent changes to support ext4 on the emulator. The switch from yaffs to ext4 was 4.4.\n\nWhen I run the emulator with -verbose I see a mesage about loading NAND device.",
+      "range": {
+        "startLine": 788,
+        "startChar": 14,
+        "endLine": 788,
+        "endChar": 65
+      },
+      "revId": "4ad5d5e0503aed29b2f3a742a955d3679a681742",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
