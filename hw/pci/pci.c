@@ -111,7 +111,7 @@ PCIBus *pci_register_bus(DeviceState *parent, const char *name,
 static PCIBus *pci_register_secondary_bus(PCIDevice *dev, pci_map_irq_fn map_irq)
 {
     PCIBus *bus;
-    bus = qemu_mallocz(sizeof(PCIBus));
+    bus = g_malloc0(sizeof(PCIBus));
     bus->map_irq = map_irq;
     bus->parent_dev = dev;
     bus->next = dev->bus->next;
@@ -276,7 +276,7 @@ PCIDevice *pci_register_device(PCIBus *bus, const char *name,
 {
     PCIDevice *pci_dev;
 
-    pci_dev = qemu_mallocz(instance_size);
+    pci_dev = g_malloc0(instance_size);
     pci_dev = do_pci_register_device(pci_dev, bus, name, devfn,
                                      config_read, config_write);
     return pci_dev;
@@ -923,8 +923,8 @@ void pci_qdev_register(const char *name, int size, pci_qdev_initfn init)
 {
     PCIDeviceInfo *info;
 
-    info = qemu_mallocz(sizeof(*info));
-    info->qdev.name = qemu_strdup(name);
+    info = g_malloc0(sizeof(*info));
+    info->qdev.name = g_strdup(name);
     info->qdev.size = size;
     info->init = init;
     info->qdev.init = pci_qdev_init;

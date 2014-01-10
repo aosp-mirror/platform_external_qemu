@@ -72,7 +72,7 @@ queued_packet_create( const void*   data,
     if (do_copy)
         packet_size += size;
 
-    packet = qemu_malloc(packet_size);
+    packet = g_malloc(packet_size);
     packet->next       = NULL;
     packet->expiration = 0;
     packet->size       = (size_t)size;
@@ -91,7 +91,7 @@ static void
 queued_packet_free( QueuedPacket  packet )
 {
     if (packet) {
-        qemu_free( packet );
+        g_free( packet );
     }
 }
 
@@ -126,7 +126,7 @@ netshaper_destroy( NetShaper  shaper )
         qemu_del_timer(shaper->timer);
         qemu_free_timer(shaper->timer);
         shaper->timer = NULL;
-        qemu_free(shaper);
+        g_free(shaper);
     }
 }
 
@@ -162,7 +162,7 @@ NetShaper
 netshaper_create( int                do_copy,
                   NetShaperSendFunc  send_func )
 {
-    NetShaper  shaper = qemu_malloc(sizeof(*shaper));
+    NetShaper  shaper = g_malloc(sizeof(*shaper));
 
     shaper->active = 0;
     shaper->packets = NULL;
@@ -188,7 +188,7 @@ netshaper_set_rate( NetShaper  shaper,
         QueuedPacket  packet = shaper->packets;
         shaper->packets = packet->next;
         shaper->send_func(packet->data, packet->size, packet->opaque);
-        qemu_free(packet);
+        g_free(packet);
         shaper->num_packets = 0;
     }
 
@@ -311,7 +311,7 @@ session_free( Session  session )
             queued_packet_free(session->packet);
             session->packet = NULL;
         }
-        qemu_free( session );
+        g_free( session );
     }
 }
 
@@ -459,7 +459,7 @@ netdelay_expires( NetDelay  delay )
 NetDelay
 netdelay_create( NetShaperSendFunc  send_func )
 {
-    NetDelay  delay = qemu_malloc(sizeof(*delay));
+    NetDelay  delay = g_malloc(sizeof(*delay));
 
     delay->sessions     = NULL;
     delay->num_sessions = 0;
@@ -547,7 +547,7 @@ netdelay_send_aux( NetDelay  delay, const void*  data, size_t  size, void* opaqu
                     latency += rand() % range;
 
                     //fprintf(stderr, "NetDelay:RST: delay creation for %s\n", session_to_string(info) );
-                session = qemu_malloc( sizeof(*session) );
+                session = g_malloc( sizeof(*session) );
 
                 session->next        = delay->sessions;
                 delay->sessions      = session;
@@ -584,7 +584,7 @@ netdelay_destroy( NetDelay  delay )
             delay->num_sessions -= 1;
         }
         delay->active = 0;
-        qemu_free( delay );
+        g_free( delay );
     }
 }
 

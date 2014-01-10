@@ -137,7 +137,7 @@ static void
 goldfish_audio_buff_ensure( struct goldfish_audio_buff*  b, uint32_t  size )
 {
     if (b->capacity < size) {
-        b->data     = qemu_realloc(b->data, size);
+        b->data     = g_realloc(b->data, size);
         b->capacity = size;
     }
 }
@@ -565,7 +565,7 @@ void goldfish_audio_init(uint32_t base, int id, const char* input_source)
     if (!android_hw->hw_audioOutput && !android_hw->hw_audioInput)
         return;
 
-    s = (struct goldfish_audio_state *)qemu_mallocz(sizeof(*s));
+    s = (struct goldfish_audio_state *)g_malloc0(sizeof(*s));
     s->dev.name = "goldfish_audio";
     s->dev.id = id;
     s->dev.base = base;

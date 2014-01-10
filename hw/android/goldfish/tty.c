@@ -201,7 +201,7 @@ int goldfish_tty_add(CharDriverState *cs, int id, uint32_t base, int irq)
     struct tty_state *s;
     static int  instance_id = 0;
 
-    s = qemu_mallocz(sizeof(*s));
+    s = g_malloc0(sizeof(*s));
     s->dev.name = "goldfish_tty";
     s->dev.id = id;
     s->dev.base = base;
@@ -216,7 +216,7 @@ int goldfish_tty_add(CharDriverState *cs, int id, uint32_t base, int irq)
 
     ret = goldfish_device_add(&s->dev, goldfish_tty_readfn, goldfish_tty_writefn, s);
     if(ret) {
-        qemu_free(s);
+        g_free(s);
     } else {
         register_savevm( "goldfish_tty", instance_id++, GOLDFISH_TTY_SAVE_VERSION,
                          goldfish_tty_save, goldfish_tty_load, s);

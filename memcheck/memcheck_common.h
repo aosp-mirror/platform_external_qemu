@@ -415,7 +415,7 @@ addrarray_add(AddrArray* addr_array, target_ulong addr)
     addr &= ~1;
     if (addr_array->num == 0) {
         /* First element. */
-        addr_array->addr = qemu_malloc(sizeof(target_ulong));
+        addr_array->addr = g_malloc(sizeof(target_ulong));
         assert(addr_array->addr != NULL);
         if (addr_array->addr == NULL) {
             return 0;
@@ -444,7 +444,7 @@ addrarray_add(AddrArray* addr_array, target_ulong addr)
         m_max = 0;
     }
     /* Expand the array. */
-    new_arr = qemu_malloc(sizeof(target_ulong) * (addr_array->num + 1));
+    new_arr = g_malloc(sizeof(target_ulong) * (addr_array->num + 1));
     assert(new_arr != NULL);
     if (new_arr == NULL) {
         return 0;
@@ -465,7 +465,7 @@ addrarray_add(AddrArray* addr_array, target_ulong addr)
                (addr_array->num - m_max) * sizeof(target_ulong));
     }
     /* Swap arrays. */
-    qemu_free(addr_array->addr);
+    g_free(addr_array->addr);
     addr_array->addr = new_arr;
     addr_array->num++;
     return 1;

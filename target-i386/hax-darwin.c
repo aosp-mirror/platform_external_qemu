@@ -123,7 +123,7 @@ static char *hax_vm_devfs_string(int vm_id)
         return NULL;
     }
 
-    name = qemu_strdup("/dev/hax_vm/vmxx");
+    name = g_strdup("/dev/hax_vm/vmxx");
     if (!name)
         return NULL;
     sprintf(name, "/dev/hax_vm/vm%02d", vm_id);
@@ -141,7 +141,7 @@ static char *hax_vcpu_devfs_string(int vm_id, int vcpu_id)
         return NULL;
     }
 
-    name = qemu_strdup("/dev/hax_vmxx/vcpuyy");
+    name = g_strdup("/dev/hax_vmxx/vcpuyy");
     if (!name)
         return NULL;
 
@@ -176,7 +176,7 @@ hax_fd hax_host_open_vm(struct hax_state *hax, int vm_id)
         return -1;
 
     fd = open(vm_name, O_RDWR);
-    qemu_free(vm_name);
+    g_free(vm_name);
 
     return fd;
 }
@@ -227,7 +227,7 @@ hax_fd hax_host_open_vcpu(int vmid, int vcpuid)
     }
 
     fd = open(devfs_path, O_RDWR);
-    qemu_free(devfs_path);
+    g_free(devfs_path);
     if (fd < 0)
         dprint("Failed to open the vcpu devfs\n");
     return fd;

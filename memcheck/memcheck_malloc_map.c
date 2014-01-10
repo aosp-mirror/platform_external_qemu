@@ -121,7 +121,7 @@ allocmap_insert_desc(AllocMap* map,
      * with the new one. */
     memcpy(replaced, &existing->desc, sizeof(MallocDescEx));
     AllocMap_RB_REMOVE(map, existing);
-    qemu_free(existing);
+    g_free(existing);
     AllocMap_RB_INSERT(map, adesc);
     return RBT_MAP_RESULT_ENTRY_REPLACED;
 }
@@ -165,7 +165,7 @@ allocmap_insert(AllocMap* map, const MallocDescEx* desc, MallocDescEx* replaced)
     RBTMapResult ret;
 
     // Allocate and initialize new map entry.
-    AllocMapEntry* adesc = qemu_malloc(sizeof(AllocMapEntry));
+    AllocMapEntry* adesc = g_malloc(sizeof(AllocMapEntry));
     if (adesc == NULL) {
         ME("memcheck: Unable to allocate new AllocMapEntry on insert.");
         return RBT_MAP_RESULT_ERROR;
@@ -178,7 +178,7 @@ allocmap_insert(AllocMap* map, const MallocDescEx* desc, MallocDescEx* replaced)
         ret == RBT_MAP_RESULT_ERROR) {
         /* Another descriptor already exists for this block, or an error
          * occurred. We have to tree new descriptor, as it wasn't inserted. */
-        qemu_free(adesc);
+        g_free(adesc);
     }
     return ret;
 }
@@ -197,7 +197,7 @@ allocmap_pull(AllocMap* map, target_ulong address, MallocDescEx* pulled)
     if (adesc != NULL) {
         memcpy(pulled, &adesc->desc, sizeof(MallocDescEx));
         AllocMap_RB_REMOVE(map, adesc);
-        qemu_free(adesc);
+        g_free(adesc);
         return 0;
     } else {
         return -1;
@@ -211,7 +211,7 @@ allocmap_pull_first(AllocMap* map, MallocDescEx* pulled)
     if (first != NULL) {
         memcpy(pulled, &first->desc, sizeof(MallocDescEx));
         AllocMap_RB_REMOVE(map, first);
-        qemu_free(first);
+        g_free(first);
         return 0;
     } else {
         return -1;
@@ -228,7 +228,7 @@ allocmap_copy(AllocMap* to,
     RB_FOREACH(entry, AllocMap, (AllocMap*)from) {
         RBTMapResult ins_res;
         AllocMapEntry* new_entry =
-                (AllocMapEntry*)qemu_malloc(sizeof(AllocMapEntry));
+                (AllocMapEntry*)g_malloc(sizeof(AllocMapEntry));
         if (new_entry == NULL) {
             ME("memcheck: Unable to allocate new AllocMapEntry on copy.");
             return -1;
@@ -238,7 +238,7 @@ allocmap_copy(AllocMap* to,
         new_entry->desc.flags |= set_flags;
         if (entry->desc.call_stack_count) {
             new_entry->desc.call_stack =
-               qemu_malloc(entry->desc.call_stack_count * sizeof(target_ulong));
+               g_malloc(entry->desc.call_stack_count * sizeof(target_ulong));
             memcpy(new_entry->desc.call_stack, entry->desc.call_stack,
                    entry->desc.call_stack_count * sizeof(target_ulong));
         } else {
@@ -256,9 +256,9 @@ allocmap_copy(AllocMap* to,
             ME("memcheck: Unable to insert new map entry on copy. Insert returned %u",
                ins_res);
             if (new_entry->desc.call_stack != NULL) {
-                qemu_free(new_entry->desc.call_stack);
+                g_free(new_entry->desc.call_stack);
             }
-            qemu_free(new_entry);
+            g_free(new_entry);
             return -1;
         }
     }
@@ -275,7 +275,7 @@ allocmap_empty(AllocMap* map)
     while (!allocmap_pull_first(map, &pulled)) {
         removed++;
         if (pulled.call_stack != NULL) {
-            qemu_free(pulled.call_stack);
+            g_free(pulled.call_stack);
         }
     }
 

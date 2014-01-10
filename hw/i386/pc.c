@@ -83,9 +83,9 @@ static void option_rom_reset(void *_rrd)
 
 static void option_rom_setup_reset(hwaddr addr, unsigned size)
 {
-    RomResetData *rrd = qemu_malloc(sizeof *rrd);
+    RomResetData *rrd = g_malloc(sizeof *rrd);
 
-    rrd->data = qemu_malloc(size);
+    rrd->data = g_malloc(size);
     cpu_physical_memory_read(addr, rrd->data, size);
     rrd->addr = addr;
     rrd->size = size;
@@ -497,7 +497,7 @@ static void bochs_bios_init(void)
      * of nodes, one word for each VCPU->node and one word for each node to
      * hold the amount of memory.
      */
-    numa_fw_cfg = qemu_mallocz((1 + smp_cpus + nb_numa_nodes) * 8);
+    numa_fw_cfg = g_malloc0((1 + smp_cpus + nb_numa_nodes) * 8);
     numa_fw_cfg[0] = cpu_to_le64(nb_numa_nodes);
     for (i = 0; i < smp_cpus; i++) {
         for (j = 0; j < nb_numa_nodes; j++) {
@@ -834,7 +834,7 @@ static int load_option_rom(const char *oprom, hwaddr start,
                 exit(1);
             }
             size = load_image_targphys(filename, start, end - start);
-            qemu_free(filename);
+            g_free(filename);
         } else {
             size = -1;
         }
@@ -987,7 +987,7 @@ static void pc_init1(ram_addr_t ram_size,
         exit(1);
     }
     if (filename) {
-        qemu_free(filename);
+        g_free(filename);
     }
     /* map the last 128KB of the BIOS in ISA space */
     isa_bios_size = bios_size;
@@ -1227,7 +1227,7 @@ static void pc_init1(ram_addr_t ram_size,
     }
 
     if (pci_enabled && acpi_enabled) {
-        uint8_t *eeprom_buf = qemu_mallocz(8 * 256); /* XXX: make this persistent */
+        uint8_t *eeprom_buf = g_malloc0(8 * 256); /* XXX: make this persistent */
         i2c_bus *smbus;
 
         /* TODO: Populate SPD eeprom data.  */

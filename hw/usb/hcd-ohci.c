@@ -1738,7 +1738,7 @@ void usb_ohci_init_pci(struct PCIBus *bus, int num_ports, int devfn)
 void usb_ohci_init_pxa(hwaddr base, int num_ports, int devfn,
                        qemu_irq irq)
 {
-    OHCIState *ohci = (OHCIState *)qemu_mallocz(sizeof(OHCIState));
+    OHCIState *ohci = (OHCIState *)g_malloc0(sizeof(OHCIState));
 
     usb_ohci_init(ohci, num_ports, devfn, irq,
                   OHCI_TYPE_PXA, "OHCI USB", 0);
@@ -1749,7 +1749,7 @@ void usb_ohci_init_pxa(hwaddr base, int num_ports, int devfn,
 void usb_ohci_init_sm501(uint32_t mmio_base, uint32_t localmem_base,
                          int num_ports, int devfn, qemu_irq irq)
 {
-    OHCIState *ohci = (OHCIState *)qemu_mallocz(sizeof(OHCIState));
+    OHCIState *ohci = (OHCIState *)g_malloc0(sizeof(OHCIState));
 
     usb_ohci_init(ohci, num_ports, devfn, irq,
                   OHCI_TYPE_SM501, "OHCI USB", localmem_base);
