@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ad33cd7d_22592ee8",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-01-10T14:30:20Z",
+      "side": 1,
+      "message": "Fixed, thanks.",
+      "parentUuid": "0d8a192f_8d5e61d1",
+      "range": {
+        "startLine": 363,
+        "startChar": 24,
+        "endLine": 363,
+        "endChar": 37
+      },
+      "revId": "72be3643a3e323377b342a011fde9f70ced9bf68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cd93a168_4b8c651e",
         "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ede2251a_effd7d56",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-01-10T14:30:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cd93a168_4b8c651e",
+      "range": {
+        "startLine": 416,
+        "startChar": 12,
+        "endLine": 416,
+        "endChar": 16
+      },
+      "revId": "72be3643a3e323377b342a011fde9f70ced9bf68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d76fd12_c64a023e",
         "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2014-01-08T15:15:20Z",
       "side": 1,
       "message": "Should mention that by default dma_alloc_writecombine()(On ARM) will allocate a maximum of 4MB of contiguous memory. Default can be changed by editing CONSISTENT_DMA_SIZE.  Same should apply to x86.",
+      "range": {
+        "startLine": 417,
+        "startChar": 37,
+        "endLine": 417,
+        "endChar": 57
+      },
+      "revId": "72be3643a3e323377b342a011fde9f70ced9bf68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad33cd7d_02b18ac9",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-01-10T14:30:20Z",
+      "side": 1,
+      "message": "Done. By the way, do you know why increasing the value over 4 MB doesn\u0027t work on ARM (I know nearly nothing about coherent/write-combine memory).",
+      "parentUuid": "2d76fd12_c64a023e",
       "range": {
         "startLine": 417,
         "startChar": 37,
