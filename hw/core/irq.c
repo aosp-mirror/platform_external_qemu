@@ -44,8 +44,8 @@ qemu_irq *qemu_allocate_irqs(qemu_irq_handler handler, void *opaque, int n)
     struct IRQState *p;
     int i;
 
-    s = (qemu_irq *)qemu_mallocz(sizeof(qemu_irq) * n);
-    p = (struct IRQState *)qemu_mallocz(sizeof(struct IRQState) * n);
+    s = (qemu_irq *)g_malloc0(sizeof(qemu_irq) * n);
+    p = (struct IRQState *)g_malloc0(sizeof(struct IRQState) * n);
     for (i = 0; i < n; i++) {
         p->handler = handler;
         p->opaque = opaque;
@@ -58,8 +58,8 @@ qemu_irq *qemu_allocate_irqs(qemu_irq_handler handler, void *opaque, int n)
 
 void qemu_free_irqs(qemu_irq *s)
 {
-    qemu_free(s[0]);
-    qemu_free(s);
+    g_free(s[0]);
+    g_free(s);
 }
 
 static void qemu_notirq(void *opaque, int line, int level)

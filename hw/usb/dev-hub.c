@@ -518,7 +518,7 @@ static void usb_hub_handle_destroy(USBDevice *dev)
 {
     USBHubState *s = (USBHubState *)dev;
 
-    qemu_free(s);
+    g_free(s);
 }
 
 USBDevice *usb_hub_init(int nb_ports)
@@ -529,7 +529,7 @@ USBDevice *usb_hub_init(int nb_ports)
 
     if (nb_ports > MAX_PORTS)
         return NULL;
-    s = qemu_mallocz(sizeof(USBHubState));
+    s = g_malloc0(sizeof(USBHubState));
     s->dev.speed = USB_SPEED_FULL;
     s->dev.handle_packet = usb_hub_handle_packet;
 

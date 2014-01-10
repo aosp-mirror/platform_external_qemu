@@ -265,9 +265,9 @@ static void *load_at(int fd, int offset, int size)
     void *ptr;
     if (lseek(fd, offset, SEEK_SET) < 0)
         return NULL;
-    ptr = qemu_malloc(size);
+    ptr = g_malloc(size);
     if (read(fd, ptr, size) != size) {
-        qemu_free(ptr);
+        g_free(ptr);
         return NULL;
     }
     return ptr;
@@ -377,14 +377,14 @@ static void *zalloc(void *x, unsigned items, unsigned size)
     size *= items;
     size = (size + ZALLOC_ALIGNMENT - 1) & ~(ZALLOC_ALIGNMENT - 1);
 
-    p = qemu_malloc(size);
+    p = g_malloc(size);
 
     return (p);
 }
 
 static void zfree(void *x, void *addr)
 {
-    qemu_free(addr);
+    g_free(addr);
 }
 
 
@@ -502,7 +502,7 @@ int load_uimage(const char *filename, target_ulong *ep, target_ulong *loadaddr,
     }
 
     *ep = hdr->ih_ep;
-    data = qemu_malloc(hdr->ih_size);
+    data = g_malloc(hdr->ih_size);
 
     if (read(fd, data, hdr->ih_size) != hdr->ih_size) {
         fprintf(stderr, "Error reading file\n");
@@ -516,10 +516,10 @@ int load_uimage(const char *filename, target_ulong *ep, target_ulong *loadaddr,
 
         compressed_data = data;
         max_bytes = UBOOT_MAX_GUNZIP_BYTES;
-        data = qemu_malloc(max_bytes);
+        data = g_malloc(max_bytes);
 
         bytes = gunzip(data, max_bytes, compressed_data, hdr->ih_size);
-        qemu_free(compressed_data);
+        g_free(compressed_data);
         if (bytes < 0) {
             fprintf(stderr, "Unable to decompress gzipped image!\n");
             goto out;
@@ -536,7 +536,7 @@ int load_uimage(const char *filename, target_ulong *ep, target_ulong *loadaddr,
 
 out:
     if (data)
-        qemu_free(data);
+        g_free(data);
     close(fd);
     return ret;
 }

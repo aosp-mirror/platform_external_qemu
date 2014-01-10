@@ -39,6 +39,8 @@ typedef struct Monitor Monitor;
 #include <sys/time.h>
 #include <assert.h>
 
+#include <glib.h>
+
 #ifdef _WIN32
 #include "sysemu/os-win32.h"
 #endif
@@ -204,14 +206,6 @@ const char *path(const char *pathname);
 /* ffs() in oslib-win32.c for WIN32, strings.h for the rest of the world */
 int ffs(int i);
 #endif
-
-void *qemu_oom_check(void *ptr);
-void *qemu_malloc(size_t size);
-void *qemu_realloc(void *ptr, size_t size);
-void *qemu_mallocz(size_t size);
-void qemu_free(void *ptr);
-char *qemu_strdup(const char *str);
-char *qemu_strndup(const char *str, size_t size);
 
 void qemu_mutex_lock_iothread(void);
 void qemu_mutex_unlock_iothread(void);

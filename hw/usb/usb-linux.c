@@ -209,12 +209,12 @@ typedef struct AsyncURB
 
 static AsyncURB *async_alloc(void)
 {
-    return (AsyncURB *) qemu_mallocz(sizeof(AsyncURB));
+    return (AsyncURB *) g_malloc0(sizeof(AsyncURB));
 }
 
 static void async_free(AsyncURB *aurb)
 {
-    qemu_free(aurb);
+    g_free(aurb);
 }
 
 static void async_complete_ctrl(USBHostDevice *s, USBPacket *p)
@@ -430,7 +430,7 @@ static void usb_host_handle_destroy(USBDevice *dev)
     if (s->fd >= 0)
         close(s->fd);
 
-    qemu_free(s);
+    g_free(s);
 }
 
 static int usb_linux_update_endp_table(USBHostDevice *s);
@@ -889,7 +889,7 @@ static USBDevice *usb_host_device_open_addr(int bus_num, int addr, const char *p
     struct usbdevfs_connectinfo ci;
     char buf[1024];
 
-    dev = qemu_mallocz(sizeof(USBHostDevice));
+    dev = g_malloc0(sizeof(USBHostDevice));
 
     dev->bus_num = bus_num;
     dev->addr = addr;
@@ -974,7 +974,7 @@ static USBDevice *usb_host_device_open_addr(int bus_num, int addr, const char *p
 
 fail:
     if (dev)
-        qemu_free(dev);
+        g_free(dev);
 
     close(fd);
     return NULL;
@@ -1300,7 +1300,7 @@ static int usb_host_scan(void *opaque, USBScanFunc *func)
         }
 
         /* the module setting (used later for opening devices) */
-        usb_host_device_path = qemu_mallocz(strlen(devpath)+1);
+        usb_host_device_path = g_malloc0(strlen(devpath)+1);
         strcpy(usb_host_device_path, devpath);
         monitor_printf(mon, "husb: using %s file-system with %s\n",
                        fs_type[usb_fs_type], usb_host_device_path);
@@ -1442,7 +1442,7 @@ static int usb_host_auto_add(const char *spec)
     if (parse_filter(spec, &filter) < 0)
         return -1;
 
-    f = qemu_mallocz(sizeof(*f));
+    f = g_malloc0(sizeof(*f));
 
     *f = filter;
 
@@ -1456,7 +1456,7 @@ static int usb_host_auto_add(const char *spec)
 	usb_auto_timer = qemu_new_timer_ms(rt_clock, usb_host_auto_timer, NULL);
 	if (!usb_auto_timer) {
             fprintf(stderr, "husb: failed to allocate auto scan timer\n");
-            qemu_free(f);
+            g_free(f);
             return -1;
         }
 

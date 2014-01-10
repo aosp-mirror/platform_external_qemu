@@ -68,7 +68,7 @@ static QLIST_HEAD(thread_list, ThreadDesc) thread_list;
 static ThreadDesc*
 create_new_thread(ProcDesc* proc, uint32_t tid)
 {
-    ThreadDesc* new_thread = (ThreadDesc*)qemu_malloc(sizeof(ThreadDesc));
+    ThreadDesc* new_thread = (ThreadDesc*)g_malloc(sizeof(ThreadDesc));
     if (new_thread == NULL) {
         ME("memcheck: Unable to allocate new thread descriptor.");
         return NULL;
@@ -98,7 +98,7 @@ static ProcDesc*
 create_new_process(uint32_t pid, uint32_t parent_pid)
 {
     // Create and init new process descriptor.
-    ProcDesc* new_proc = (ProcDesc*)qemu_malloc(sizeof(ProcDesc));
+    ProcDesc* new_proc = (ProcDesc*)g_malloc(sizeof(ProcDesc));
     if (new_proc == NULL) {
         ME("memcheck: Unable to allocate new process descriptor");
         return NULL;
@@ -121,7 +121,7 @@ create_new_process(uint32_t pid, uint32_t parent_pid)
         if (parent == NULL) {
             ME("memcheck: Unable to get parent process pid=%u for new process pid=%u",
                parent_pid, pid);
-            qemu_free(new_proc);
+            g_free(new_proc);
             return NULL;
         }
 
@@ -134,7 +134,7 @@ create_new_process(uint32_t pid, uint32_t parent_pid)
             ME("memcheck: Unable to copy process' %s[pid=%u] allocation map to new process pid=%u",
                parent->image_path, parent_pid, pid);
             allocmap_empty(&new_proc->alloc_map);
-            qemu_free(new_proc);
+            g_free(new_proc);
             return NULL;
         }
 
@@ -145,7 +145,7 @@ create_new_process(uint32_t pid, uint32_t parent_pid)
                parent->image_path, parent_pid, pid);
             mmrangemap_empty(&new_proc->mmrange_map);
             allocmap_empty(&new_proc->alloc_map);
-            qemu_free(new_proc);
+            g_free(new_proc);
             return NULL;
         }
     }
@@ -154,7 +154,7 @@ create_new_process(uint32_t pid, uint32_t parent_pid)
     if(create_new_thread(new_proc, pid) == NULL) {
         mmrangemap_empty(&new_proc->mmrange_map);
         allocmap_empty(&new_proc->alloc_map);
-        qemu_free(new_proc);
+        g_free(new_proc);
         return NULL;
     }
 
@@ -264,12 +264,12 @@ procdesc_set_image_path(ProcDesc* proc,
             // Paths are the same. Just bail out.
             return 0;
         }
-        qemu_free(proc->image_path);
+        g_free(proc->image_path);
         proc->image_path = NULL;
     }
 
     // Save new image path into process' descriptor.
-    proc->image_path = qemu_malloc(strlen(image_path) + 1);
+    proc->image_path = g_malloc(strlen(image_path) + 1);
     if (proc->image_path == NULL) {
         ME("memcheck: Unable to allocate %u bytes for image path %s to set it for pid=%u",
            strlen(image_path) + 1, image_path, proc->pid);
@@ -293,12 +293,12 @@ threaddesc_free(ThreadDesc* thread)
     if (thread->call_stack != NULL) {
         for (indx = 0; indx < thread->call_stack_count; indx++) {
             if (thread->call_stack[indx].module_path != NULL) {
-                qemu_free(thread->call_stack[indx].module_path);
+                g_free(thread->call_stack[indx].module_path);
             }
         }
-        qemu_free(thread->call_stack);
+        g_free(thread->call_stack);
     }
-    qemu_free(thread);
+    g_free(thread);
 }
 
 // =============================================================================
@@ -382,7 +382,7 @@ memcheck_on_call(target_ulong from, target_ulong ret)
         /* Expand calling stack array buffer. */
         thread->call_stack_max += grow_by;
         ThreadCallStackEntry* new_array =
-            qemu_malloc(thread->call_stack_max * sizeof(ThreadCallStackEntry));
+            g_malloc(thread->call_stack_max * sizeof(ThreadCallStackEntry));
         if (new_array == NULL) {
             ME("memcheck: Unable to allocate %u bytes for calling stack.",
                thread->call_stack_max * sizeof(ThreadCallStackEntry));
@@ -394,7 +394,7 @@ memcheck_on_call(target_ulong from, target_ulong ret)
                    thread->call_stack_count * sizeof(ThreadCallStackEntry));
         }
         if (thread->call_stack != NULL) {
-            qemu_free(thread->call_stack);
+            g_free(thread->call_stack);
         }
         thread->call_stack = new_array;
     }
@@ -405,7 +405,7 @@ memcheck_on_call(target_ulong from, target_ulong ret)
     thread->call_stack[thread->call_stack_count].ret_address_rel =
             mmrangedesc_get_module_offset(rdesc, ret);
     thread->call_stack[thread->call_stack_count].module_path =
-            qemu_malloc(strlen(rdesc->path) + 1);
+            g_malloc(strlen(rdesc->path) + 1);
     if (thread->call_stack[thread->call_stack_count].module_path == NULL) {
         ME("memcheck: Unable to allocate %u bytes for module path in the thread calling stack.",
             strlen(rdesc->path) + 1);
@@ -686,9 +686,9 @@ memcheck_exit(uint32_t exit_code)
     // Empty process' mmapings map.
     mmrangemap_empty(&proc->mmrange_map);
     if (proc->image_path != NULL) {
-        qemu_free(proc->image_path);
+        g_free(proc->image_path);
     }
-    qemu_free(proc);
+    g_free(proc);
 }
 
 void
@@ -715,7 +715,7 @@ memcheck_mmap_exepath(target_ulong vstart,
     desc.map_start = vstart;
     desc.map_end = vend;
     desc.exec_offset = exec_offset;
-    desc.path = qemu_malloc(strlen(path) + 1);
+    desc.path = g_malloc(strlen(path) + 1);
     if (desc.path == NULL) {
         ME("memcheck: MMAP(0x%08X, 0x%08X, 0x%08X, %s) Unable to allocate path for the entry.",
            vstart, vend, exec_offset, path);
@@ -727,7 +727,7 @@ memcheck_mmap_exepath(target_ulong vstart,
     if (ins_res == RBT_MAP_RESULT_ERROR) {
         ME("memcheck: %s[pid=%u] unable to insert memory mapping entry: 0x%08X - 0x%08X",
            proc->image_path, proc->pid, vstart, vend);
-        qemu_free(desc.path);
+        g_free(desc.path);
         return;
     }
 
@@ -735,7 +735,7 @@ memcheck_mmap_exepath(target_ulong vstart,
         MD("memcheck: %s[pid=%u] MMRANGE %s[0x%08X - 0x%08X] is replaced with %s[0x%08X - 0x%08X]",
            proc->image_path, proc->pid, replaced.path, replaced.map_start,
            replaced.map_end, desc.path, desc.map_start, desc.map_end);
-        qemu_free(replaced.path);
+        g_free(replaced.path);
     }
 
     T(PROC_MMAP, "memcheck: %s[pid=%u] %s is mapped: 0x%08X - 0x%08X + 0x%08X\n",
@@ -761,7 +761,7 @@ memcheck_unmap(target_ulong vstart, target_ulong vend)
         /* Entire mapping has been deleted. */
         T(PROC_MMAP, "memcheck: %s[pid=%u] %s is unmapped: [0x%08X - 0x%08X + 0x%08X]\n",
           proc->image_path, proc->pid, desc.path, vstart, vend, desc.exec_offset);
-        qemu_free(desc.path);
+        g_free(desc.path);
         return;
     }
 
@@ -785,7 +785,7 @@ memcheck_unmap(target_ulong vstart, target_ulong vend)
         tail.map_start = vend;
         tail.map_end = desc.map_end;
         tail.exec_offset = vend - desc.map_start + desc.exec_offset;
-        tail.path = qemu_malloc(strlen(desc.path) + 1);
+        tail.path = g_malloc(strlen(desc.path) + 1);
         strcpy(tail.path, desc.path);
         mmrangemap_insert(&proc->mmrange_map, &tail, NULL);
         desc.map_end = vstart;

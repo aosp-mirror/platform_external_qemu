@@ -313,9 +313,9 @@ int kvm_physical_sync_dirty_bitmap(hwaddr start_addr,
 
         size = ((mem->memory_size >> TARGET_PAGE_BITS) + 7) / 8;
         if (!d.dirty_bitmap) {
-            d.dirty_bitmap = qemu_malloc(size);
+            d.dirty_bitmap = g_malloc(size);
         } else if (size > allocated_size) {
-            d.dirty_bitmap = qemu_realloc(d.dirty_bitmap, size);
+            d.dirty_bitmap = g_realloc(d.dirty_bitmap, size);
         }
         allocated_size = size;
         memset(d.dirty_bitmap, 0, allocated_size);
@@ -342,7 +342,7 @@ int kvm_physical_sync_dirty_bitmap(hwaddr start_addr,
         }
         start_addr = phys_addr;
     }
-    qemu_free(d.dirty_bitmap);
+    g_free(d.dirty_bitmap);
 
     return ret;
 }
@@ -416,7 +416,7 @@ int kvm_init(int smp_cpus)
         return -EINVAL;
     }
 
-    s = qemu_mallocz(sizeof(KVMState));
+    s = g_malloc0(sizeof(KVMState));
 
 #ifdef KVM_CAP_SET_GUEST_DEBUG
     QTAILQ_INIT(&s->kvm_sw_breakpoints);
@@ -511,7 +511,7 @@ err:
         if (s->fd != -1)
             close(s->fd);
     }
-    qemu_free(s);
+    g_free(s);
 
     return ret;
 }
@@ -934,7 +934,7 @@ int kvm_insert_breakpoint(CPUState *current_env, target_ulong addr,
             return 0;
         }
 
-        bp = qemu_malloc(sizeof(struct kvm_sw_breakpoint));
+        bp = g_malloc(sizeof(struct kvm_sw_breakpoint));
         if (!bp)
             return -ENOMEM;
 
@@ -984,7 +984,7 @@ int kvm_remove_breakpoint(CPUState *current_env, target_ulong addr,
             return err;
 
         QTAILQ_REMOVE(&current_env->kvm_state->kvm_sw_breakpoints, bp, entry);
-        qemu_free(bp);
+        g_free(bp);
     } else {
         err = kvm_arch_remove_hw_breakpoint(addr, len, type);
         if (err)

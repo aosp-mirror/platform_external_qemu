@@ -79,7 +79,7 @@ MigrationState *tcp_start_outgoing_migration(const char *host_port,
     if (parse_host_port(&addr, host_port) < 0)
         return NULL;
 
-    s = qemu_mallocz(sizeof(*s));
+    s = g_malloc0(sizeof(*s));
 
     s->get_error = socket_errno;
     s->write = socket_write;
@@ -93,7 +93,7 @@ MigrationState *tcp_start_outgoing_migration(const char *host_port,
     s->bandwidth_limit = bandwidth_limit;
     s->fd = socket_create_inet(SOCKET_STREAM);
     if (s->fd == -1) {
-        qemu_free(s);
+        g_free(s);
         return NULL;
     }
 
@@ -114,7 +114,7 @@ MigrationState *tcp_start_outgoing_migration(const char *host_port,
     if (ret < 0 && ret != -EINPROGRESS && ret != -EWOULDBLOCK && ret != -EAGAIN) {
         dprintf("connect failed\n");
         socket_close(s->fd);
-        qemu_free(s);
+        g_free(s);
         return NULL;
     } else if (ret >= 0)
         migrate_fd_connect(s);

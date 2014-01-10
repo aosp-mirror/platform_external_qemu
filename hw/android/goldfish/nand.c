@@ -635,7 +635,7 @@ void nand_dev_init(uint32_t base)
     static int  instance_id = 0;
     nand_dev_controller_state *s;
 
-    s = (nand_dev_controller_state *)qemu_mallocz(sizeof(nand_dev_controller_state));
+    s = (nand_dev_controller_state *)g_malloc0(sizeof(nand_dev_controller_state));
     iomemtype = cpu_register_io_memory(nand_dev_readfn, nand_dev_writefn, s);
     cpu_register_physical_memory(base, 0x00000fff, iomemtype);
     s->base = base;

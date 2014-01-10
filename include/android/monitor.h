@@ -8,7 +8,7 @@ monitor_fake_new(void* opaque, MonitorFakeFunc cb)
     Monitor* mon;
 
     assert(cb != NULL);
-    mon = qemu_mallocz(sizeof(*mon));
+    mon = g_malloc0(sizeof(*mon));
     mon->fake_opaque = opaque;
     mon->fake_func   = cb;
     mon->fake_count  = 0;

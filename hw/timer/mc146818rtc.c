@@ -598,7 +598,7 @@ RTCState *rtc_init_sqw(int base, qemu_irq irq, qemu_irq sqw_irq, int base_year)
 {
     RTCState *s;
 
-    s = qemu_mallocz(sizeof(RTCState));
+    s = g_malloc0(sizeof(RTCState));
 
     s->irq = irq;
     s->sqw_irq = sqw_irq;
@@ -720,7 +720,7 @@ RTCState *rtc_mm_init(hwaddr base, int it_shift, qemu_irq irq,
     RTCState *s;
     int io_memory;
 
-    s = qemu_mallocz(sizeof(RTCState));
+    s = g_malloc0(sizeof(RTCState));
 
     s->irq = irq;
     s->cmos_data[RTC_REG_A] = 0x26;

@@ -48,7 +48,7 @@ void qemu_add_kbd_event_handler(QEMUPutKBDEvent *func, void *opaque)
     QEMUPutKBDEntry *s;
 
     if (func != NULL) {
-        s = qemu_mallocz(sizeof(QEMUPutKBDEntry));
+        s = g_malloc0(sizeof(QEMUPutKBDEntry));
 
         s->put_kbd_event = func;
         s->opaque = opaque;
@@ -94,12 +94,12 @@ QEMUPutMouseEntry *qemu_add_mouse_event_handler(QEMUPutMouseEvent *func,
     QEMUPutMouseEntry *s;
     static int mouse_index = 0;
 
-    s = qemu_mallocz(sizeof(QEMUPutMouseEntry));
+    s = g_malloc0(sizeof(QEMUPutMouseEntry));
 
     s->qemu_put_mouse_event = func;
     s->qemu_put_mouse_event_opaque = opaque;
     s->qemu_put_mouse_event_absolute = absolute;
-    s->qemu_put_mouse_event_name = qemu_strdup(name);
+    s->qemu_put_mouse_event_name = g_strdup(name);
     s->index = mouse_index++;
 
     QTAILQ_INSERT_TAIL(&mouse_handlers, s, node);
@@ -121,8 +121,8 @@ void qemu_remove_mouse_event_handler(QEMUPutMouseEntry *entry)
 {
     QTAILQ_REMOVE(&mouse_handlers, entry, node);
 
-    qemu_free(entry->qemu_put_mouse_event_name);
-    qemu_free(entry);
+    g_free(entry->qemu_put_mouse_event_name);
+    g_free(entry);
 
     check_mode_change();
 }
@@ -132,7 +132,7 @@ QEMUPutLEDEntry *qemu_add_led_event_handler(QEMUPutLEDEvent *func,
 {
     QEMUPutLEDEntry *s;
 
-    s = qemu_mallocz(sizeof(QEMUPutLEDEntry));
+    s = g_malloc0(sizeof(QEMUPutLEDEntry));
 
     s->put_led = func;
     s->opaque = opaque;
@@ -145,7 +145,7 @@ void qemu_remove_led_event_handler(QEMUPutLEDEntry *entry)
     if (entry == NULL)
         return;
     QTAILQ_REMOVE(&led_handlers, entry, next);
-    qemu_free(entry);
+    g_free(entry);
 }
 
 void kbd_put_keycode(int keycode)

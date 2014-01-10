@@ -67,7 +67,7 @@ static char *addr_to_string(const char *format,
     /* Enough for the existing format + the 2 vars we're
      * substituting in. */
     addrlen = strlen(format) + strlen(host) + strlen(serv);
-    addr = qemu_malloc(addrlen + 1);
+    addr = g_malloc(addrlen + 1);
     snprintf(addr, addrlen, format, host, serv);
     addr[addrlen] = '\0';
 
@@ -311,7 +311,7 @@ void buffer_reserve(Buffer *buffer, size_t len)
 {
     if ((buffer->capacity - buffer->offset) < len) {
         buffer->capacity += (len + 1024);
-        buffer->buffer = qemu_realloc(buffer->buffer, buffer->capacity);
+        buffer->buffer = g_realloc(buffer->buffer, buffer->capacity);
         if (buffer->buffer == NULL) {
             fprintf(stderr, "vnc: out of memory\n");
             exit(1);
@@ -347,7 +347,7 @@ static void vnc_resize(VncState *vs)
 
     /* guest surface */
     if (!vs->guest.ds)
-        vs->guest.ds = qemu_mallocz(sizeof(*vs->guest.ds));
+        vs->guest.ds = g_malloc0(sizeof(*vs->guest.ds));
     if (ds_get_bytes_per_pixel(ds) != vs->guest.ds->pf.bytes_per_pixel)
         console_color_init(ds);
     vnc_colordepth(vs);
@@ -368,11 +368,11 @@ static void vnc_resize(VncState *vs)
 
     /* server surface */
     if (!vs->server.ds)
-        vs->server.ds = qemu_mallocz(sizeof(*vs->server.ds));
+        vs->server.ds = g_malloc0(sizeof(*vs->server.ds));
     if (vs->server.ds->data)
-        qemu_free(vs->server.ds->data);
+        g_free(vs->server.ds->data);
     *(vs->server.ds) = *(ds->surface);
-    vs->server.ds->data = qemu_mallocz(vs->server.ds->linesize *
+    vs->server.ds->data = g_malloc0(vs->server.ds->linesize *
                                        vs->server.ds->height);
     memset(vs->server.dirty, 0xFF, sizeof(vs->guest.dirty));
 }
@@ -524,8 +524,8 @@ static void send_framebuffer_update_hextile(VncState *vs, int x, int y, int w, i
     int has_fg, has_bg;
     uint8_t *last_fg, *last_bg;
 
-    last_fg = (uint8_t *) qemu_malloc(vs->server.ds->pf.bytes_per_pixel);
-    last_bg = (uint8_t *) qemu_malloc(vs->server.ds->pf.bytes_per_pixel);
+    last_fg = (uint8_t *) g_malloc(vs->server.ds->pf.bytes_per_pixel);
+    last_bg = (uint8_t *) g_malloc(vs->server.ds->pf.bytes_per_pixel);
     has_fg = has_bg = 0;
     for (j = y; j < (y + h); j += 16) {
         for (i = x; i < (x + w); i += 16) {
@@ -891,8 +891,8 @@ static void vnc_disconnect_finish(VncState *vs)
 {
     qemu_del_timer(vs->timer);
     qemu_free_timer(vs->timer);
-    if (vs->input.buffer) qemu_free(vs->input.buffer);
-    if (vs->output.buffer) qemu_free(vs->output.buffer);
+    if (vs->input.buffer) g_free(vs->input.buffer);
+    if (vs->output.buffer) g_free(vs->output.buffer);
 #ifdef CONFIG_VNC_TLS
     vnc_tls_client_cleanup(vs);
 #endif /* CONFIG_VNC_TLS */
@@ -915,10 +915,10 @@ static void vnc_disconnect_finish(VncState *vs)
     if (!vs->vd->clients)
         dcl->idle = 1;
 
-    qemu_free(vs->server.ds->data);
-    qemu_free(vs->server.ds);
-    qemu_free(vs->guest.ds);
-    qemu_free(vs);
+    g_free(vs->server.ds->data);
+    g_free(vs->server.ds);
+    g_free(vs->guest.ds);
+    g_free(vs);
 }
 
 int vnc_client_io_error(VncState *vs, int ret, int last_errno)
@@ -2057,7 +2057,7 @@ static int protocol_version(VncState *vs, uint8_t *version, size_t len)
 
 static void vnc_connect(VncDisplay *vd, int csock)
 {
-    VncState *vs = qemu_mallocz(sizeof(VncState));
+    VncState *vs = g_malloc0(sizeof(VncState));
     vs->csock = csock;
 
     VNC_DEBUG("New client on socket %d\n", csock);
@@ -2106,9 +2106,9 @@ static void vnc_listen_read(void *opaque)
 
 void vnc_display_init(DisplayState *ds)
 {
-    VncDisplay *vs = qemu_mallocz(sizeof(*vs));
+    VncDisplay *vs = g_malloc0(sizeof(*vs));
 
-    dcl = qemu_mallocz(sizeof(DisplayChangeListener));
+    dcl = g_malloc0(sizeof(DisplayChangeListener));
 
     ds->opaque = vs;
     dcl->idle = 1;
@@ -2141,7 +2141,7 @@ void vnc_display_close(DisplayState *ds)
     if (!vs)
         return;
     if (vs->display) {
-        qemu_free(vs->display);
+        g_free(vs->display);
         vs->display = NULL;
     }
     if (vs->lsock != -1) {
@@ -2161,11 +2161,11 @@ int vnc_display_password(DisplayState *ds, const char *password)
     VncDisplay *vs = ds ? (VncDisplay *)ds->opaque : vnc_display;
 
     if (vs->password) {
-        qemu_free(vs->password);
+        g_free(vs->password);
         vs->password = NULL;
     }
     if (password && password[0]) {
-        if (!(vs->password = qemu_strdup(password)))
+        if (!(vs->password = g_strdup(password)))
             return -1;
     }
 
@@ -2232,20 +2232,20 @@ int vnc_display_open(DisplayState *ds, const char *display)
             end = strchr(options, ',');
             if (start && (!end || (start < end))) {
                 int len = end ? end-(start+1) : strlen(start+1);
-                char *path = qemu_strndup(start + 1, len);
+                char *path = g_strndup(start + 1, len);
 
                 VNC_DEBUG("Trying certificate path '%s'\n", path);
                 if (vnc_tls_set_x509_creds_dir(vs, path) < 0) {
                     fprintf(stderr, "Failed to find x509 certificates/keys in %s\n", path);
-                    qemu_free(path);
-                    qemu_free(vs->display);
+                    g_free(path);
+                    g_free(vs->display);
                     vs->display = NULL;
                     return -1;
                 }
-                qemu_free(path);
+                g_free(path);
             } else {
                 fprintf(stderr, "No certificate path provided\n");
-                qemu_free(vs->display);
+                g_free(vs->display);
                 vs->display = NULL;
                 return -1;
             }
@@ -2379,7 +2379,7 @@ int vnc_display_open(DisplayState *ds, const char *display)
     } else {
         /* listen for connects */
         char *dpy;
-        dpy = qemu_malloc(256);
+        dpy = g_malloc(256);
         if (strncmp(display, "unix:", 5) == 0) {
             pstrcpy(dpy, 256, "unix:");
             vs->lsock = unix_listen(display+5, dpy+5, 256-5);

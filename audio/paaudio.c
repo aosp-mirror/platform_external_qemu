@@ -367,7 +367,7 @@ static int qpa_init_out (HWVoiceOut *hw, struct audsettings *as)
     return 0;
 
  fail3:
-    qemu_free (pa->pcm_buf);
+    g_free (pa->pcm_buf);
     pa->pcm_buf = NULL;
  fail2:
     FF(pa_simple_free) (pa->s);
@@ -421,7 +421,7 @@ static int qpa_init_in (HWVoiceIn *hw, struct audsettings *as)
     return 0;
 
  fail3:
-    qemu_free (pa->pcm_buf);
+    g_free (pa->pcm_buf);
     pa->pcm_buf = NULL;
  fail2:
     FF(pa_simple_free) (pa->s);
@@ -446,7 +446,7 @@ static void qpa_fini_out (HWVoiceOut *hw)
     }
 
     audio_pt_fini (&pa->pt, AUDIO_FUNC);
-    qemu_free (pa->pcm_buf);
+    g_free (pa->pcm_buf);
     pa->pcm_buf = NULL;
 }
 
@@ -466,7 +466,7 @@ static void qpa_fini_in (HWVoiceIn *hw)
     }
 
     audio_pt_fini (&pa->pt, AUDIO_FUNC);
-    qemu_free (pa->pcm_buf);
+    g_free (pa->pcm_buf);
     pa->pcm_buf = NULL;
 }
 

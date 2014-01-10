@@ -165,7 +165,7 @@ qemu_irq*  goldfish_interrupt_init(uint32_t base, qemu_irq parent_irq, qemu_irq 
     struct goldfish_int_state *s;
     qemu_irq*  qi;
 
-    s = qemu_mallocz(sizeof(*s));
+    s = g_malloc0(sizeof(*s));
     qi = qemu_allocate_irqs(goldfish_int_set_irq, s, GFD_MAX_IRQ);
     s->dev.name = "goldfish_interrupt_controller";
     s->dev.id = -1;
@@ -176,7 +176,7 @@ qemu_irq*  goldfish_interrupt_init(uint32_t base, qemu_irq parent_irq, qemu_irq 
 
     ret = goldfish_device_add(&s->dev, goldfish_int_readfn, goldfish_int_writefn, s);
     if(ret) {
-        qemu_free(s);
+        g_free(s);
         return NULL;
     }
 

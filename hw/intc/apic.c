@@ -939,7 +939,7 @@ int apic_init(CPUState *env)
 
     if (last_apic_idx >= MAX_APICS)
         return -1;
-    s = qemu_mallocz(sizeof(APICState));
+    s = g_malloc0(sizeof(APICState));
     env->apic_state = s;
     s->idx = last_apic_idx++;
     s->id = env->cpuid_apic_id;

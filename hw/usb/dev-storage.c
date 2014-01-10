@@ -511,7 +511,7 @@ static void usb_msd_handle_destroy(USBDevice *dev)
 
     s->scsi_dev->destroy(s->scsi_dev);
     bdrv_delete(s->bs);
-    qemu_free(s);
+    g_free(s);
 }
 
 USBDevice *usb_msd_init(const char *filename)
@@ -548,7 +548,7 @@ USBDevice *usb_msd_init(const char *filename)
         return NULL;
     }
 
-    s = qemu_mallocz(sizeof(MSDState));
+    s = g_malloc0(sizeof(MSDState));
 
     bdrv = bdrv_new("usb");
     if (bdrv_open(bdrv, filename, 0, drv) < 0)
@@ -570,7 +570,7 @@ USBDevice *usb_msd_init(const char *filename)
     usb_msd_handle_reset((USBDevice *)s);
     return (USBDevice *)s;
  fail:
-    qemu_free(s);
+    g_free(s);
     return NULL;
 }
 

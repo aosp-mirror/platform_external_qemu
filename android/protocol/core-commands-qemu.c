@@ -97,7 +97,7 @@ corecmd_get_qemu_path(int type,
     }
     strncpy(path, filepath, path_buf_size);
     path[path_buf_size - 1] = '\0';
-    qemu_free(filepath);
+    g_free(filepath);
     return 0;
 }
 

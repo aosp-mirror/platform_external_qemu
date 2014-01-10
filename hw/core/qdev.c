@@ -59,7 +59,7 @@ void qdev_register(DeviceInfo *info)
 
     assert(info->size >= sizeof(DeviceState));
 
-    t = qemu_mallocz(sizeof(DeviceType));
+    t = g_malloc0(sizeof(DeviceType));
     t->next = device_type_list;
     device_type_list = t;
     t->info = info;
@@ -82,7 +82,7 @@ DeviceState *qdev_create(BusState *bus, const char *name)
         hw_error("Unknown device '%s'\n", name);
     }
 
-    dev = qemu_mallocz(t->info->size);
+    dev = g_malloc0(t->info->size);
     dev->type = t;
 
     if (!bus) {
@@ -228,7 +228,7 @@ void qdev_init(DeviceState *dev)
 void qdev_free(DeviceState *dev)
 {
     QLIST_REMOVE(dev, sibling);
-    qemu_free(dev);
+    g_free(dev);
 }
 
 static DeviceProperty *create_prop(DeviceState *dev, const char *name,
@@ -237,8 +237,8 @@ static DeviceProperty *create_prop(DeviceState *dev, const char *name,
     DeviceProperty *prop;
 
     /* TODO: Check for duplicate properties.  */
-    prop = qemu_mallocz(sizeof(*prop));
-    prop->name = qemu_strdup(name);
+    prop = g_malloc0(sizeof(*prop));
+    prop->name = g_strdup(name);
     prop->type = type;
     prop->next = dev->props;
     dev->props = prop;
@@ -439,10 +439,10 @@ BusState *qbus_create(BusType type, size_t size,
 {
     BusState *bus;
 
-    bus = qemu_mallocz(size);
+    bus = g_malloc0(size);
     bus->type = type;
     bus->parent = parent;
-    bus->name = qemu_strdup(name);
+    bus->name = g_strdup(name);
     QLIST_INIT(&bus->children);
     if (parent) {
         QLIST_INSERT_HEAD(&parent->child_bus, bus, sibling);

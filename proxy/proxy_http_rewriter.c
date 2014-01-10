@@ -75,8 +75,8 @@ static void
 http_header_free( HttpHeader*  h )
 {
     if (h) {
-        qemu_free((char*)h->value);
-        qemu_free(h);
+        g_free((char*)h->value);
+        g_free(h);
     }
 }
 
@@ -102,7 +102,7 @@ http_header_alloc( const char*  key, const char*  value )
         h->next  = NULL;
         h->key   = (const char*)(h+1);
         memcpy( (char*)h->key, key, len );
-        h->value = qemu_strdup(value);
+        h->value = g_strdup(value);
     }
     return h;
 }
@@ -197,9 +197,9 @@ http_request_alloc( const char*      method,
 {
     HttpRequest*  r = malloc(sizeof(*r));
 
-    r->req_method   = qemu_strdup(method);
-    r->req_uri      = qemu_strdup(uri);
-    r->req_version  = qemu_strdup(version);
+    r->req_method   = g_strdup(method);
+    r->req_uri      = g_strdup(uri);
+    r->req_version  = g_strdup(version);
     r->rep_version  = NULL;
     r->rep_code     = -1;
     r->rep_readable = NULL;
@@ -226,8 +226,8 @@ http_request_replace_uri( HttpRequest*  r,
                           const char*   uri )
 {
     const char*  old = r->req_uri;
-    r->req_uri = qemu_strdup(uri);
-    qemu_free((char*)old);
+    r->req_uri = g_strdup(uri);
+    g_free((char*)old);
 }
 
 static void
@@ -236,12 +236,12 @@ http_request_free( HttpRequest*  r )
     if (r) {
         http_header_list_done(r->headers);
 
-        qemu_free(r->req_method);
-        qemu_free(r->req_uri);
-        qemu_free(r->req_version);
-        qemu_free(r->rep_version);
-        qemu_free(r->rep_readable);
-        qemu_free(r);
+        g_free(r->req_method);
+        g_free(r->req_uri);
+        g_free(r->req_version);
+        g_free(r->rep_version);
+        g_free(r->rep_readable);
+        g_free(r);
     }
 }
 
@@ -293,8 +293,8 @@ http_request_set_reply( HttpRequest*  r,
         return -1;
     }
 
-    r->rep_version  = qemu_strdup(version);
-    r->rep_readable = qemu_strdup(readable);
+    r->rep_version  = g_strdup(version);
+    r->rep_readable = g_strdup(readable);
 
     /* reset the list of headers */
     http_header_list_done(r->headers);
@@ -375,7 +375,7 @@ rewrite_connection_free( ProxyConnection*  root )
     }
     http_request_free(conn->request);
     proxy_connection_done(root);
-    qemu_free(conn);
+    g_free(conn);
 }
 
 
@@ -1158,7 +1158,7 @@ http_rewriter_connect( HttpService*  service,
     if (s < 0)
         return NULL;
 
-    conn = qemu_mallocz(sizeof(*conn));
+    conn = g_malloc0(sizeof(*conn));
     if (conn == NULL) {
         socket_close(s);
         return NULL;
