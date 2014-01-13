@@ -193,9 +193,7 @@ common_LOCAL_SRC_FILES += \
     target-arm/machine.c \
     hw/arm/armv7m.c \
     hw/arm/armv7m_nvic.c
-
-common_LOCAL_SRC_FILES += fpu/softfloat.c
-endif
+endif  # EMULATOR_TARGET_ARCH == arm
 
 ifeq ($(EMULATOR_TARGET_ARCH), x86)
 common_LOCAL_SRC_FILES += \
@@ -215,9 +213,7 @@ common_LOCAL_SRC_FILES += \
       target-i386/hax-all.c       \
       target-i386/hax-windows.c
 endif
-
-common_LOCAL_SRC_FILES += fpu/softfloat-native.c
-endif
+endif  # EMULATOR_TARGET_ARCH == x86
 
 ifeq ($(EMULATOR_TARGET_ARCH), mips)
 common_LOCAL_SRC_FILES += \
@@ -225,9 +221,9 @@ common_LOCAL_SRC_FILES += \
     target-mips/helper.c \
     target-mips/translate.c \
     target-mips/machine.c
+endif  # EMULATOR_TARGET_ARCH == mips
 
 common_LOCAL_SRC_FILES += fpu/softfloat.c
-endif
 
 # compile KVM only if target is x86 on x86 Linux
 QEMU_KVM_TAG := $(QEMU_HOST_TAG)-$(EMULATOR_TARGET_ARCH)
