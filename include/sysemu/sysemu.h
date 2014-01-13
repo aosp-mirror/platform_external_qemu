@@ -16,10 +16,6 @@
 /* vl.c */
 extern const char *bios_name;
 
-#define QEMU_FILE_TYPE_BIOS   0
-#define QEMU_FILE_TYPE_KEYMAP 1
-char *qemu_find_file(int type, const char *name);
-
 extern int vm_running;
 extern const char *qemu_name;
 extern uint8_t qemu_uuid[];
@@ -93,6 +89,17 @@ int tap_win32_init(VLANState *vlan, const char *model,
 
 /* SLIRP */
 void do_info_slirp(Monitor *mon);
+
+typedef enum DisplayType
+{
+    DT_DEFAULT,
+    DT_CURSES,
+    DT_SDL,
+    DT_GTK,
+    DT_VNC,
+    DT_NOGRAPHIC,
+    DT_NONE,
+} DisplayType;
 
 extern int autostart;
 extern int bios_size;
