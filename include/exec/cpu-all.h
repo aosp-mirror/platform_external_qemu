@@ -901,7 +901,7 @@ int cpu_str_to_log_mask(const char *str);
 /* Return the physical page corresponding to a virtual one. Use it
    only for debugging because no protection checks are done. Return -1
    if no page found. */
-target_phys_addr_t cpu_get_phys_page_debug(CPUState *env, target_ulong addr);
+hwaddr cpu_get_phys_page_debug(CPUState *env, target_ulong addr);
 
 /* memory API */
 
@@ -1005,8 +1005,8 @@ int cpu_physical_memory_set_dirty_tracking(int enable);
 
 int cpu_physical_memory_get_dirty_tracking(void);
 
-int cpu_physical_sync_dirty_bitmap(target_phys_addr_t start_addr,
-                                   target_phys_addr_t end_addr);
+int cpu_physical_sync_dirty_bitmap(hwaddr start_addr,
+                                   hwaddr end_addr);
 
 void dump_exec_info(FILE *f,
                     int (*cpu_fprintf)(FILE *f, const char *fmt, ...));
@@ -1016,9 +1016,9 @@ void dump_exec_info(FILE *f,
  * batching which can make a major impact on performance when using
  * virtualization.
  */
-void qemu_register_coalesced_mmio(target_phys_addr_t addr, ram_addr_t size);
+void qemu_register_coalesced_mmio(hwaddr addr, ram_addr_t size);
 
-void qemu_unregister_coalesced_mmio(target_phys_addr_t addr, ram_addr_t size);
+void qemu_unregister_coalesced_mmio(hwaddr addr, ram_addr_t size);
 
 void qemu_flush_coalesced_mmio_buffer(void);
 

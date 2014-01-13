@@ -54,7 +54,7 @@ int hax_populate_ram(uint64_t va, uint32_t size)
     return 0;
 }
 
-int hax_set_phys_mem(target_phys_addr_t start_addr, ram_addr_t size, ram_addr_t phys_offset)
+int hax_set_phys_mem(hwaddr start_addr, ram_addr_t size, ram_addr_t phys_offset)
 {
     struct hax_set_ram_info info, *pinfo = &info;
     int ret;

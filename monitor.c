@@ -634,7 +634,7 @@ static void monitor_printc(Monitor *mon, int c)
 }
 
 static void memory_dump(Monitor *mon, int count, int format, int wsize,
-                        target_phys_addr_t addr, int is_physical)
+                        hwaddr addr, int is_physical)
 {
     CPUState *env;
     int nb_per_line, l, line_size, i, max_digits, len;
@@ -781,14 +781,14 @@ static void do_physical_memory_dump(Monitor *mon, int count, int format,
                                     int size, uint32_t addrh, uint32_t addrl)
 
 {
-    target_phys_addr_t addr = GET_TPHYSADDR(addrh, addrl);
+    hwaddr addr = GET_TPHYSADDR(addrh, addrl);
     memory_dump(mon, count, format, size, addr, 1);
 }
 
 static void do_print(Monitor *mon, int count, int format, int size,
                      unsigned int valh, unsigned int vall)
 {
-    target_phys_addr_t val = GET_TPHYSADDR(valh, vall);
+    hwaddr val = GET_TPHYSADDR(valh, vall);
 #if TARGET_PHYS_ADDR_BITS == 32
     switch(format) {
     case 'o':
@@ -868,7 +868,7 @@ static void do_physical_memory_save(Monitor *mon, unsigned int valh,
     FILE *f;
     uint32_t l;
     uint8_t buf[1024];
-    target_phys_addr_t addr = GET_TPHYSADDR(valh, vall);
+    hwaddr addr = GET_TPHYSADDR(valh, vall);
 
     f = fopen(filename, "wb");
     if (!f) {

@@ -210,7 +210,7 @@ static int get_page_data(events_state *s, int offset)
     return 0;
 }
 
-static uint32_t events_read(void *x, target_phys_addr_t off)
+static uint32_t events_read(void *x, hwaddr off)
 {
     events_state *s = (events_state *) x;
     int offset = off; // - s->base;
@@ -236,7 +236,7 @@ static uint32_t events_read(void *x, target_phys_addr_t off)
     return 0; // this shouldn't happen, if the driver does the right thing
 }
 
-static void events_write(void *x, target_phys_addr_t off, uint32_t val)
+static void events_write(void *x, hwaddr off, uint32_t val)
 {
     events_state *s = (events_state *) x;
     int offset = off; // - s->base;

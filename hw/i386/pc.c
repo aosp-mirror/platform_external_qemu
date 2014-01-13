@@ -70,7 +70,7 @@ static PCIDevice *i440fx_state;
 
 typedef struct rom_reset_data {
     uint8_t *data;
-    target_phys_addr_t addr;
+    hwaddr addr;
     unsigned size;
 } RomResetData;
 
@@ -81,7 +81,7 @@ static void option_rom_reset(void *_rrd)
     cpu_physical_memory_write_rom(rrd->addr, rrd->data, rrd->size);
 }
 
-static void option_rom_setup_reset(target_phys_addr_t addr, unsigned size)
+static void option_rom_setup_reset(hwaddr addr, unsigned size)
 {
     RomResetData *rrd = qemu_malloc(sizeof *rrd);
 
@@ -516,7 +516,7 @@ static void bochs_bios_init(void)
 
 /* Generate an initial boot sector which sets state and jump to
    a specified vector */
-static void generate_bootsect(target_phys_addr_t option_rom,
+static void generate_bootsect(hwaddr option_rom,
                               uint32_t gpr[8], uint16_t segs[6], uint16_t ip)
 {
     uint8_t rom[512], *p, *reloc;
@@ -608,11 +608,11 @@ static long get_file_size(FILE *f)
     return size;
 }
 
-static void load_linux(target_phys_addr_t option_rom,
+static void load_linux(hwaddr option_rom,
                        const char *kernel_filename,
 		       const char *initrd_filename,
 		       const char *kernel_cmdline,
-               target_phys_addr_t max_ram_size)
+               hwaddr max_ram_size)
 {
     uint16_t protocol;
     uint32_t gpr[8];
@@ -621,7 +621,7 @@ static void load_linux(target_phys_addr_t option_rom,
     int setup_size, kernel_size, initrd_size = 0, cmdline_size;
     uint32_t initrd_max;
     uint8_t header[1024];
-    target_phys_addr_t real_addr, prot_addr, cmdline_addr, initrd_addr = 0;
+    hwaddr real_addr, prot_addr, cmdline_addr, initrd_addr = 0;
     FILE *f, *fi;
 
     /* Align to 16 bytes as a paranoia measure */
@@ -819,8 +819,8 @@ static void pc_init_ne2k_isa(NICInfo *nd, qemu_irq *pic)
     nb_ne2k++;
 }
 
-static int load_option_rom(const char *oprom, target_phys_addr_t start,
-                           target_phys_addr_t end)
+static int load_option_rom(const char *oprom, hwaddr start,
+                           hwaddr end)
 {
         int size;
         char *filename;

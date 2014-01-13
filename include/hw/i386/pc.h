@@ -9,21 +9,21 @@
 
 SerialState *serial_init(int base, qemu_irq irq, int baudbase,
                          CharDriverState *chr);
-SerialState *serial_mm_init (target_phys_addr_t base, int it_shift,
+SerialState *serial_mm_init (hwaddr base, int it_shift,
                              qemu_irq irq, int baudbase,
                              CharDriverState *chr, int ioregister);
-uint32_t serial_mm_readb (void *opaque, target_phys_addr_t addr);
-void serial_mm_writeb (void *opaque, target_phys_addr_t addr, uint32_t value);
-uint32_t serial_mm_readw (void *opaque, target_phys_addr_t addr);
-void serial_mm_writew (void *opaque, target_phys_addr_t addr, uint32_t value);
-uint32_t serial_mm_readl (void *opaque, target_phys_addr_t addr);
-void serial_mm_writel (void *opaque, target_phys_addr_t addr, uint32_t value);
+uint32_t serial_mm_readb (void *opaque, hwaddr addr);
+void serial_mm_writeb (void *opaque, hwaddr addr, uint32_t value);
+uint32_t serial_mm_readw (void *opaque, hwaddr addr);
+void serial_mm_writew (void *opaque, hwaddr addr, uint32_t value);
+uint32_t serial_mm_readl (void *opaque, hwaddr addr);
+void serial_mm_writel (void *opaque, hwaddr addr, uint32_t value);
 
 /* parallel.c */
 
 typedef struct ParallelState ParallelState;
 ParallelState *parallel_init(int base, qemu_irq irq, CharDriverState *chr);
-ParallelState *parallel_mm_init(target_phys_addr_t base, int it_shift, qemu_irq irq, CharDriverState *chr);
+ParallelState *parallel_mm_init(hwaddr base, int it_shift, qemu_irq irq, CharDriverState *chr);
 
 /* i8259.c */
 
@@ -82,8 +82,8 @@ void *vmmouse_init(void *m);
 
 void i8042_init(qemu_irq kbd_irq, qemu_irq mouse_irq, uint32_t io_base);
 void i8042_mm_init(qemu_irq kbd_irq, qemu_irq mouse_irq,
-                   target_phys_addr_t base, ram_addr_t size,
-                   target_phys_addr_t mask);
+                   hwaddr base, ram_addr_t size,
+                   hwaddr mask);
 
 /* mc146818rtc.c */
 
@@ -91,7 +91,7 @@ typedef struct RTCState RTCState;
 
 RTCState *rtc_init(int base, qemu_irq irq, int base_year);
 RTCState *rtc_init_sqw(int base, qemu_irq irq, qemu_irq sqw_irq, int base_year);
-RTCState *rtc_mm_init(target_phys_addr_t base, int it_shift, qemu_irq irq,
+RTCState *rtc_mm_init(hwaddr base, int it_shift, qemu_irq irq,
                       int base_year);
 void rtc_set_memory(RTCState *s, int addr, int val);
 void rtc_set_date(RTCState *s, const struct tm *tm);
@@ -141,8 +141,8 @@ extern enum vga_retrace_method vga_retrace_method;
 int isa_vga_init(void);
 int pci_vga_init(PCIBus *bus,
                  unsigned long vga_bios_offset, int vga_bios_size);
-int isa_vga_mm_init(target_phys_addr_t vram_base,
-                    target_phys_addr_t ctrl_base, int it_shift);
+int isa_vga_mm_init(hwaddr vram_base,
+                    hwaddr ctrl_base, int it_shift);
 
 /* cirrus_vga.c */
 void pci_cirrus_vga_init(PCIBus *bus);

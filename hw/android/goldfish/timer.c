@@ -73,7 +73,7 @@ static int  goldfish_timer_load(QEMUFile*  f, void*  opaque, int  version_id)
     return 0;
 }
 
-static uint32_t goldfish_timer_read(void *opaque, target_phys_addr_t offset)
+static uint32_t goldfish_timer_read(void *opaque, hwaddr offset)
 {
     struct timer_state *s = (struct timer_state *)opaque;
     switch(offset) {
@@ -88,7 +88,7 @@ static uint32_t goldfish_timer_read(void *opaque, target_phys_addr_t offset)
     }
 }
 
-static void goldfish_timer_write(void *opaque, target_phys_addr_t offset, uint32_t value_ns)
+static void goldfish_timer_write(void *opaque, hwaddr offset, uint32_t value_ns)
 {
     struct timer_state *s = (struct timer_state *)opaque;
     int64_t alarm_ns, now_ns;
@@ -157,7 +157,7 @@ static int  goldfish_rtc_load(QEMUFile*  f, void*  opaque, int  version_id)
     return 0;
 }
 
-static uint32_t goldfish_rtc_read(void *opaque, target_phys_addr_t offset)
+static uint32_t goldfish_rtc_read(void *opaque, hwaddr offset)
 {
     struct rtc_state *s = (struct rtc_state *)opaque;
     switch(offset) {
@@ -172,7 +172,7 @@ static uint32_t goldfish_rtc_read(void *opaque, target_phys_addr_t offset)
     }
 }
 
-static void goldfish_rtc_write(void *opaque, target_phys_addr_t offset, uint32_t value)
+static void goldfish_rtc_write(void *opaque, hwaddr offset, uint32_t value)
 {
     struct rtc_state *s = (struct rtc_state *)opaque;
     int64_t alarm;

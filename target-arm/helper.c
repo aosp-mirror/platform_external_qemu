@@ -1351,7 +1351,7 @@ int cpu_arm_handle_mmu_fault (CPUState *env, target_ulong address,
     return 1;
 }
 
-target_phys_addr_t cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
+hwaddr cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
 {
     uint32_t phys_addr;
     target_ulong page_size;

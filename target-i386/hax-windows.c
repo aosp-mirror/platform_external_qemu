@@ -93,7 +93,7 @@ int hax_populate_ram(uint64_t va, uint32_t size)
 }
 
 
-int hax_set_phys_mem(target_phys_addr_t start_addr, ram_addr_t size, ram_addr_t phys_offset)
+int hax_set_phys_mem(hwaddr start_addr, ram_addr_t size, ram_addr_t phys_offset)
 {
     struct hax_set_ram_info info, *pinfo = &info;
     ram_addr_t flags = phys_offset & ~TARGET_PAGE_MASK;

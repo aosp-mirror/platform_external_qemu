@@ -202,7 +202,7 @@ static int tb_phys_invalidate_count;
 
 #define SUBPAGE_IDX(addr) ((addr) & ~TARGET_PAGE_MASK)
 typedef struct subpage_t {
-    target_phys_addr_t base;
+    hwaddr base;
     CPUReadMemoryFunc **mem_read[TARGET_PAGE_SIZE][4];
     CPUWriteMemoryFunc **mem_write[TARGET_PAGE_SIZE][4];
     void *opaque[TARGET_PAGE_SIZE][2][4];
@@ -344,7 +344,7 @@ static inline PageDesc *page_find(target_ulong index)
     return p + (index & (L2_SIZE - 1));
 }
 
-static PhysPageDesc *phys_page_find_alloc(target_phys_addr_t index, int alloc)
+static PhysPageDesc *phys_page_find_alloc(hwaddr index, int alloc)
 {
     void **lp, **p;
     PhysPageDesc *pd;
@@ -383,7 +383,7 @@ static PhysPageDesc *phys_page_find_alloc(target_phys_addr_t index, int alloc)
     return ((PhysPageDesc *)pd) + (index & (L2_SIZE - 1));
 }
 
-static inline PhysPageDesc *phys_page_find(target_phys_addr_t index)
+static inline PhysPageDesc *phys_page_find(hwaddr index)
 {
     return phys_page_find_alloc(index, 0);
 }
@@ -784,7 +784,7 @@ void tb_phys_invalidate(TranslationBlock *tb, target_ulong page_addr)
     CPUState *env;
     PageDesc *p;
     unsigned int h, n1;
-    target_phys_addr_t phys_pc;
+    hwaddr phys_pc;
     TranslationBlock *tb1, *tb2;
 
     /* remove the TB from the hash list */
@@ -944,7 +944,7 @@ TranslationBlock *tb_gen_code(CPUState *env,
    the same physical page. 'is_cpu_write_access' should be true if called
    from a real cpu write access: the virtual CPU will exit the current
    TB if code is modified inside this TB. */
-void tb_invalidate_phys_page_range(target_phys_addr_t start, target_phys_addr_t end,
+void tb_invalidate_phys_page_range(hwaddr start, hwaddr end,
                                    int is_cpu_write_access)
 {
     TranslationBlock *tb, *tb_next, *saved_tb;
@@ -1050,7 +1050,7 @@ void tb_invalidate_phys_page_range(target_phys_addr_t start, target_phys_addr_t 
 }
 
 /* len must be <= 8 and start must be a multiple of len */
-static inline void tb_invalidate_phys_page_fast(target_phys_addr_t start, int len)
+static inline void tb_invalidate_phys_page_fast(hwaddr start, int len)
 {
     PageDesc *p;
     int offset, b;
@@ -1077,7 +1077,7 @@ static inline void tb_invalidate_phys_page_fast(target_phys_addr_t start, int le
 }
 
 #if !defined(CONFIG_SOFTMMU)
-static void tb_invalidate_phys_page(target_phys_addr_t addr,
+static void tb_invalidate_phys_page(hwaddr addr,
                                     unsigned long pc, void *puc)
 {
     TranslationBlock *tb;
@@ -1343,7 +1343,7 @@ static void tb_reset_jump_recursive(TranslationBlock *tb)
 #if defined(TARGET_HAS_ICE)
 static void breakpoint_invalidate(CPUState *env, target_ulong pc)
 {
-    target_phys_addr_t addr;
+    hwaddr addr;
     target_ulong pd;
     ram_addr_t ram_addr;
     PhysPageDesc *p;
@@ -1928,8 +1928,8 @@ int cpu_physical_memory_get_dirty_tracking(void)
     return in_migration;
 }
 
-int cpu_physical_sync_dirty_bitmap(target_phys_addr_t start_addr,
-                                   target_phys_addr_t end_addr)
+int cpu_physical_sync_dirty_bitmap(hwaddr start_addr,
+                                   hwaddr end_addr)
 {
     int ret = 0;
 
@@ -1988,7 +1988,7 @@ static inline void tlb_set_dirty(CPUState *env, target_ulong vaddr)
    (can only happen in non SOFTMMU mode for I/O pages or pages
    conflicting with the host address space). */
 int tlb_set_page_exec(CPUState *env, target_ulong vaddr,
-                      target_phys_addr_t paddr, int prot,
+                      hwaddr paddr, int prot,
                       int mmu_idx, int is_softmmu)
 {
     PhysPageDesc *p;
@@ -2000,7 +2000,7 @@ int tlb_set_page_exec(CPUState *env, target_ulong vaddr,
     int ret;
     CPUTLBEntry *te;
     CPUWatchpoint *wp;
-    target_phys_addr_t iotlb;
+    hwaddr iotlb;
 
     p = phys_page_find(paddr >> TARGET_PAGE_BITS);
     if (!p) {
@@ -2128,7 +2128,7 @@ void tlb_flush_page(CPUState *env, target_ulong addr)
 }
 
 int tlb_set_page_exec(CPUState *env, target_ulong vaddr,
-                      target_phys_addr_t paddr, int prot,
+                      hwaddr paddr, int prot,
                       int mmu_idx, int is_softmmu)
 {
     return 0;
@@ -2336,7 +2336,7 @@ static inline void tlb_set_dirty(CPUState *env,
 
 static int subpage_register (subpage_t *mmio, uint32_t start, uint32_t end,
                              ram_addr_t memory, ram_addr_t region_offset);
-static void *subpage_init (target_phys_addr_t base, ram_addr_t *phys,
+static void *subpage_init (hwaddr base, ram_addr_t *phys,
                            ram_addr_t orig_memory, ram_addr_t region_offset);
 #define CHECK_SUBPAGE(addr, start_addr, start_addr2, end_addr, end_addr2, \
                       need_subpage)                                     \
@@ -2366,13 +2366,13 @@ static void *subpage_init (target_phys_addr_t base, ram_addr_t *phys,
    start_addr and region_offset are rounded down to a page boundary
    before calculating this offset.  This should not be a problem unless
    the low bits of start_addr and region_offset differ.  */
-void cpu_register_physical_memory_log(target_phys_addr_t start_addr,
+void cpu_register_physical_memory_log(hwaddr start_addr,
                                          ram_addr_t size,
                                          ram_addr_t phys_offset,
                                          ram_addr_t region_offset,
                                          bool log_dirty)
 {
-    target_phys_addr_t addr, end_addr;
+    hwaddr addr, end_addr;
     PhysPageDesc *p;
     CPUState *env;
     ram_addr_t orig_size = size;
@@ -2390,14 +2390,14 @@ void cpu_register_physical_memory_log(target_phys_addr_t start_addr,
     }
     region_offset &= TARGET_PAGE_MASK;
     size = (size + TARGET_PAGE_SIZE - 1) & TARGET_PAGE_MASK;
-    end_addr = start_addr + (target_phys_addr_t)size;
+    end_addr = start_addr + (hwaddr)size;
 
     addr = start_addr;
     do {
         p = phys_page_find(addr >> TARGET_PAGE_BITS);
         if (p && p->phys_offset != IO_MEM_UNASSIGNED) {
             ram_addr_t orig_memory = p->phys_offset;
-            target_phys_addr_t start_addr2, end_addr2;
+            hwaddr start_addr2, end_addr2;
             int need_subpage = 0;
 
             CHECK_SUBPAGE(addr, start_addr, start_addr2, end_addr, end_addr2,
@@ -2428,7 +2428,7 @@ void cpu_register_physical_memory_log(target_phys_addr_t start_addr,
                 (phys_offset & IO_MEM_ROMD)) {
                 phys_offset += TARGET_PAGE_SIZE;
             } else {
-                target_phys_addr_t start_addr2, end_addr2;
+                hwaddr start_addr2, end_addr2;
                 int need_subpage = 0;
 
                 CHECK_SUBPAGE(addr, start_addr, start_addr2, end_addr,
@@ -2457,7 +2457,7 @@ void cpu_register_physical_memory_log(target_phys_addr_t start_addr,
 }
 
 /* XXX: temporary until new memory mapping API */
-ram_addr_t cpu_get_physical_page_desc(target_phys_addr_t addr)
+ram_addr_t cpu_get_physical_page_desc(hwaddr addr)
 {
     PhysPageDesc *p;
 
@@ -2467,13 +2467,13 @@ ram_addr_t cpu_get_physical_page_desc(target_phys_addr_t addr)
     return p->phys_offset;
 }
 
-void qemu_register_coalesced_mmio(target_phys_addr_t addr, ram_addr_t size)
+void qemu_register_coalesced_mmio(hwaddr addr, ram_addr_t size)
 {
     if (kvm_enabled())
         kvm_coalesce_mmio_region(addr, size);
 }
 
-void qemu_unregister_coalesced_mmio(target_phys_addr_t addr, ram_addr_t size)
+void qemu_unregister_coalesced_mmio(hwaddr addr, ram_addr_t size)
 {
     if (kvm_enabled())
         kvm_uncoalesce_mmio_region(addr, size);
@@ -2786,7 +2786,7 @@ ram_addr_t qemu_ram_addr_from_host_nofail(void *ptr)
     return ram_addr;
 }
 
-static uint32_t unassigned_mem_readb(void *opaque, target_phys_addr_t addr)
+static uint32_t unassigned_mem_readb(void *opaque, hwaddr addr)
 {
 #ifdef DEBUG_UNASSIGNED
     printf("Unassigned mem read " TARGET_FMT_plx "\n", addr);
@@ -2797,7 +2797,7 @@ static uint32_t unassigned_mem_readb(void *opaque, target_phys_addr_t addr)
     return 0;
 }
 
-static uint32_t unassigned_mem_readw(void *opaque, target_phys_addr_t addr)
+static uint32_t unassigned_mem_readw(void *opaque, hwaddr addr)
 {
 #ifdef DEBUG_UNASSIGNED
     printf("Unassigned mem read " TARGET_FMT_plx "\n", addr);
@@ -2808,7 +2808,7 @@ static uint32_t unassigned_mem_readw(void *opaque, target_phys_addr_t addr)
     return 0;
 }
 
-static uint32_t unassigned_mem_readl(void *opaque, target_phys_addr_t addr)
+static uint32_t unassigned_mem_readl(void *opaque, hwaddr addr)
 {
 #ifdef DEBUG_UNASSIGNED
     printf("Unassigned mem read " TARGET_FMT_plx "\n", addr);
@@ -2819,7 +2819,7 @@ static uint32_t unassigned_mem_readl(void *opaque, target_phys_addr_t addr)
     return 0;
 }
 
-static void unassigned_mem_writeb(void *opaque, target_phys_addr_t addr, uint32_t val)
+static void unassigned_mem_writeb(void *opaque, hwaddr addr, uint32_t val)
 {
 #ifdef DEBUG_UNASSIGNED
     printf("Unassigned mem write " TARGET_FMT_plx " = 0x%x\n", addr, val);
@@ -2829,7 +2829,7 @@ static void unassigned_mem_writeb(void *opaque, target_phys_addr_t addr, uint32_
 #endif
 }
 
-static void unassigned_mem_writew(void *opaque, target_phys_addr_t addr, uint32_t val)
+static void unassigned_mem_writew(void *opaque, hwaddr addr, uint32_t val)
 {
 #ifdef DEBUG_UNASSIGNED
     printf("Unassigned mem write " TARGET_FMT_plx " = 0x%x\n", addr, val);
@@ -2839,7 +2839,7 @@ static void unassigned_mem_writew(void *opaque, target_phys_addr_t addr, uint32_
 #endif
 }
 
-static void unassigned_mem_writel(void *opaque, target_phys_addr_t addr, uint32_t val)
+static void unassigned_mem_writel(void *opaque, hwaddr addr, uint32_t val)
 {
 #ifdef DEBUG_UNASSIGNED
     printf("Unassigned mem write " TARGET_FMT_plx " = 0x%x\n", addr, val);
@@ -2861,7 +2861,7 @@ static CPUWriteMemoryFunc * const unassigned_mem_write[3] = {
     unassigned_mem_writel,
 };
 
-static void notdirty_mem_writeb(void *opaque, target_phys_addr_t ram_addr,
+static void notdirty_mem_writeb(void *opaque, hwaddr ram_addr,
                                 uint32_t val)
 {
     int dirty_flags;
@@ -2881,7 +2881,7 @@ static void notdirty_mem_writeb(void *opaque, target_phys_addr_t ram_addr,
         tlb_set_dirty(cpu_single_env, cpu_single_env->mem_io_vaddr);
 }
 
-static void notdirty_mem_writew(void *opaque, target_phys_addr_t ram_addr,
+static void notdirty_mem_writew(void *opaque, hwaddr ram_addr,
                                 uint32_t val)
 {
     int dirty_flags;
@@ -2901,7 +2901,7 @@ static void notdirty_mem_writew(void *opaque, target_phys_addr_t ram_addr,
         tlb_set_dirty(cpu_single_env, cpu_single_env->mem_io_vaddr);
 }
 
-static void notdirty_mem_writel(void *opaque, target_phys_addr_t ram_addr,
+static void notdirty_mem_writel(void *opaque, hwaddr ram_addr,
                                 uint32_t val)
 {
     int dirty_flags;
@@ -2981,39 +2981,39 @@ static void check_watchpoint(int offset, int len_mask, int flags)
 /* Watchpoint access routines.  Watchpoints are inserted using TLB tricks,
    so these check for a hit then pass through to the normal out-of-line
    phys routines.  */
-static uint32_t watch_mem_readb(void *opaque, target_phys_addr_t addr)
+static uint32_t watch_mem_readb(void *opaque, hwaddr addr)
 {
     check_watchpoint(addr & ~TARGET_PAGE_MASK, ~0x0, BP_MEM_READ);
     return ldub_phys(addr);
 }
 
-static uint32_t watch_mem_readw(void *opaque, target_phys_addr_t addr)
+static uint32_t watch_mem_readw(void *opaque, hwaddr addr)
 {
     check_watchpoint(addr & ~TARGET_PAGE_MASK, ~0x1, BP_MEM_READ);
     return lduw_phys(addr);
 }
 
-static uint32_t watch_mem_readl(void *opaque, target_phys_addr_t addr)
+static uint32_t watch_mem_readl(void *opaque, hwaddr addr)
 {
     check_watchpoint(addr & ~TARGET_PAGE_MASK, ~0x3, BP_MEM_READ);
     return ldl_phys(addr);
 }
 
-static void watch_mem_writeb(void *opaque, target_phys_addr_t addr,
+static void watch_mem_writeb(void *opaque, hwaddr addr,
                              uint32_t val)
 {
     check_watchpoint(addr & ~TARGET_PAGE_MASK, ~0x0, BP_MEM_WRITE);
     stb_phys(addr, val);
 }
 
-static void watch_mem_writew(void *opaque, target_phys_addr_t addr,
+static void watch_mem_writew(void *opaque, hwaddr addr,
                              uint32_t val)
 {
     check_watchpoint(addr & ~TARGET_PAGE_MASK, ~0x1, BP_MEM_WRITE);
     stw_phys(addr, val);
 }
 
-static void watch_mem_writel(void *opaque, target_phys_addr_t addr,
+static void watch_mem_writel(void *opaque, hwaddr addr,
                              uint32_t val)
 {
     check_watchpoint(addr & ~TARGET_PAGE_MASK, ~0x3, BP_MEM_WRITE);
@@ -3032,7 +3032,7 @@ static CPUWriteMemoryFunc * const watch_mem_write[3] = {
     watch_mem_writel,
 };
 
-static inline uint32_t subpage_readlen (subpage_t *mmio, target_phys_addr_t addr,
+static inline uint32_t subpage_readlen (subpage_t *mmio, hwaddr addr,
                                  unsigned int len)
 {
     uint32_t ret;
@@ -3049,7 +3049,7 @@ static inline uint32_t subpage_readlen (subpage_t *mmio, target_phys_addr_t addr
     return ret;
 }
 
-static inline void subpage_writelen (subpage_t *mmio, target_phys_addr_t addr,
+static inline void subpage_writelen (subpage_t *mmio, hwaddr addr,
                               uint32_t value, unsigned int len)
 {
     unsigned int idx;
@@ -3064,7 +3064,7 @@ static inline void subpage_writelen (subpage_t *mmio, target_phys_addr_t addr,
                                   value);
 }
 
-static uint32_t subpage_readb (void *opaque, target_phys_addr_t addr)
+static uint32_t subpage_readb (void *opaque, hwaddr addr)
 {
 #if defined(DEBUG_SUBPAGE)
     printf("%s: addr " TARGET_FMT_plx "\n", __func__, addr);
@@ -3073,7 +3073,7 @@ static uint32_t subpage_readb (void *opaque, target_phys_addr_t addr)
     return subpage_readlen(opaque, addr, 0);
 }
 
-static void subpage_writeb (void *opaque, target_phys_addr_t addr,
+static void subpage_writeb (void *opaque, hwaddr addr,
                             uint32_t value)
 {
 #if defined(DEBUG_SUBPAGE)
@@ -3082,7 +3082,7 @@ static void subpage_writeb (void *opaque, target_phys_addr_t addr,
     subpage_writelen(opaque, addr, value, 0);
 }
 
-static uint32_t subpage_readw (void *opaque, target_phys_addr_t addr)
+static uint32_t subpage_readw (void *opaque, hwaddr addr)
 {
 #if defined(DEBUG_SUBPAGE)
     printf("%s: addr " TARGET_FMT_plx "\n", __func__, addr);
@@ -3091,7 +3091,7 @@ static uint32_t subpage_readw (void *opaque, target_phys_addr_t addr)
     return subpage_readlen(opaque, addr, 1);
 }
 
-static void subpage_writew (void *opaque, target_phys_addr_t addr,
+static void subpage_writew (void *opaque, hwaddr addr,
                             uint32_t value)
 {
 #if defined(DEBUG_SUBPAGE)
@@ -3100,7 +3100,7 @@ static void subpage_writew (void *opaque, target_phys_addr_t addr,
     subpage_writelen(opaque, addr, value, 1);
 }
 
-static uint32_t subpage_readl (void *opaque, target_phys_addr_t addr)
+static uint32_t subpage_readl (void *opaque, hwaddr addr)
 {
 #if defined(DEBUG_SUBPAGE)
     printf("%s: addr " TARGET_FMT_plx "\n", __func__, addr);
@@ -3110,7 +3110,7 @@ static uint32_t subpage_readl (void *opaque, target_phys_addr_t addr)
 }
 
 static void subpage_writel (void *opaque,
-                         target_phys_addr_t addr, uint32_t value)
+                         hwaddr addr, uint32_t value)
 {
 #if defined(DEBUG_SUBPAGE)
     printf("%s: addr " TARGET_FMT_plx " val %08x\n", __func__, addr, value);
@@ -3163,7 +3163,7 @@ static int subpage_register (subpage_t *mmio, uint32_t start, uint32_t end,
     return 0;
 }
 
-static void *subpage_init (target_phys_addr_t base, ram_addr_t *phys,
+static void *subpage_init (hwaddr base, ram_addr_t *phys,
                            ram_addr_t orig_memory, ram_addr_t region_offset)
 {
     subpage_t *mmio;
@@ -3269,7 +3269,7 @@ static void io_mem_init(void)
 
 /* physical memory access (slow version, mainly for debug) */
 #if defined(CONFIG_USER_ONLY)
-void cpu_physical_memory_rw(target_phys_addr_t addr, uint8_t *buf,
+void cpu_physical_memory_rw(hwaddr addr, uint8_t *buf,
                             int len, int is_write)
 {
     int l, flags;
@@ -3311,8 +3311,8 @@ void cpu_physical_memory_rw(target_phys_addr_t addr, uint8_t *buf,
 
 #else
 
-static void invalidate_and_set_dirty(target_phys_addr_t addr,
-                                     target_phys_addr_t length)
+static void invalidate_and_set_dirty(hwaddr addr,
+                                     hwaddr length)
 {
     if (!cpu_physical_memory_is_dirty(addr)) {
         /* invalidate code */
@@ -3322,13 +3322,13 @@ static void invalidate_and_set_dirty(target_phys_addr_t addr,
     }
 }
 
-void cpu_physical_memory_rw(target_phys_addr_t addr, uint8_t *buf,
+void cpu_physical_memory_rw(hwaddr addr, uint8_t *buf,
                             int len, int is_write)
 {
     int l, io_index;
     uint8_t *ptr;
     uint32_t val;
-    target_phys_addr_t page;
+    hwaddr page;
     unsigned long pd;
     PhysPageDesc *p;
 
@@ -3346,7 +3346,7 @@ void cpu_physical_memory_rw(target_phys_addr_t addr, uint8_t *buf,
 
         if (is_write) {
             if ((pd & ~TARGET_PAGE_MASK) != IO_MEM_RAM) {
-                target_phys_addr_t addr1 = addr;
+                hwaddr addr1 = addr;
                 io_index = (pd >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
                 if (p)
                     addr1 = (addr & ~TARGET_PAGE_MASK) + p->region_offset;
@@ -3379,7 +3379,7 @@ void cpu_physical_memory_rw(target_phys_addr_t addr, uint8_t *buf,
         } else {
             if ((pd & ~TARGET_PAGE_MASK) > IO_MEM_ROM &&
                 !(pd & IO_MEM_ROMD)) {
-                target_phys_addr_t addr1 = addr;
+                hwaddr addr1 = addr;
                 /* I/O case */
                 io_index = (pd >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
                 if (p)
@@ -3414,12 +3414,12 @@ void cpu_physical_memory_rw(target_phys_addr_t addr, uint8_t *buf,
 }
 
 /* used for ROM loading : can write in RAM and ROM */
-void cpu_physical_memory_write_rom(target_phys_addr_t addr,
+void cpu_physical_memory_write_rom(hwaddr addr,
                                    const uint8_t *buf, int len)
 {
     int l;
     uint8_t *ptr;
-    target_phys_addr_t page;
+    hwaddr page;
     unsigned long pd;
     PhysPageDesc *p;
 
@@ -3455,8 +3455,8 @@ void cpu_physical_memory_write_rom(target_phys_addr_t addr,
 
 typedef struct {
     void *buffer;
-    target_phys_addr_t addr;
-    target_phys_addr_t len;
+    hwaddr addr;
+    hwaddr len;
 } BounceBuffer;
 
 static BounceBuffer bounce;
@@ -3506,16 +3506,16 @@ static void cpu_notify_map_clients(void)
  * Use cpu_register_map_client() to know when retrying the map operation is
  * likely to succeed.
  */
-void *cpu_physical_memory_map(target_phys_addr_t addr,
-                              target_phys_addr_t *plen,
+void *cpu_physical_memory_map(hwaddr addr,
+                              hwaddr *plen,
                               int is_write)
 {
-    target_phys_addr_t len = *plen;
-    target_phys_addr_t done = 0;
+    hwaddr len = *plen;
+    hwaddr done = 0;
     int l;
     uint8_t *ret = NULL;
     uint8_t *ptr;
-    target_phys_addr_t page;
+    hwaddr page;
     unsigned long pd;
     PhysPageDesc *p;
     unsigned long addr1;
@@ -3565,8 +3565,8 @@ void *cpu_physical_memory_map(target_phys_addr_t addr,
  * Will also mark the memory as dirty if is_write == 1.  access_len gives
  * the amount of memory that was actually read or written by the caller.
  */
-void cpu_physical_memory_unmap(void *buffer, target_phys_addr_t len,
-                               int is_write, target_phys_addr_t access_len)
+void cpu_physical_memory_unmap(void *buffer, hwaddr len,
+                               int is_write, hwaddr access_len)
 {
     if (buffer != bounce.buffer) {
         if (is_write) {
@@ -3592,7 +3592,7 @@ void cpu_physical_memory_unmap(void *buffer, target_phys_addr_t len,
 }
 
 /* warning: addr must be aligned */
-uint32_t ldl_phys(target_phys_addr_t addr)
+uint32_t ldl_phys(hwaddr addr)
 {
     int io_index;
     uint8_t *ptr;
@@ -3624,7 +3624,7 @@ uint32_t ldl_phys(target_phys_addr_t addr)
 }
 
 /* warning: addr must be aligned */
-uint64_t ldq_phys(target_phys_addr_t addr)
+uint64_t ldq_phys(hwaddr addr)
 {
     int io_index;
     uint8_t *ptr;
@@ -3662,7 +3662,7 @@ uint64_t ldq_phys(target_phys_addr_t addr)
 }
 
 /* XXX: optimize */
-uint32_t ldub_phys(target_phys_addr_t addr)
+uint32_t ldub_phys(hwaddr addr)
 {
     uint8_t val;
     cpu_physical_memory_read(addr, &val, 1);
@@ -3670,7 +3670,7 @@ uint32_t ldub_phys(target_phys_addr_t addr)
 }
 
 /* XXX: optimize */
-uint32_t lduw_phys(target_phys_addr_t addr)
+uint32_t lduw_phys(hwaddr addr)
 {
     uint16_t val;
     cpu_physical_memory_read(addr, (uint8_t *)&val, 2);
@@ -3680,7 +3680,7 @@ uint32_t lduw_phys(target_phys_addr_t addr)
 /* warning: addr must be aligned. The ram page is not masked as dirty
    and the code inside is not invalidated. It is useful if the dirty
    bits are used to track modified PTEs */
-void stl_phys_notdirty(target_phys_addr_t addr, uint32_t val)
+void stl_phys_notdirty(hwaddr addr, uint32_t val)
 {
     int io_index;
     uint8_t *ptr;
@@ -3716,7 +3716,7 @@ void stl_phys_notdirty(target_phys_addr_t addr, uint32_t val)
     }
 }
 
-void stq_phys_notdirty(target_phys_addr_t addr, uint64_t val)
+void stq_phys_notdirty(hwaddr addr, uint64_t val)
 {
     int io_index;
     uint8_t *ptr;
@@ -3749,7 +3749,7 @@ void stq_phys_notdirty(target_phys_addr_t addr, uint64_t val)
 }
 
 /* warning: addr must be aligned */
-void stl_phys(target_phys_addr_t addr, uint32_t val)
+void stl_phys(hwaddr addr, uint32_t val)
 {
     int io_index;
     uint8_t *ptr;
@@ -3779,21 +3779,21 @@ void stl_phys(target_phys_addr_t addr, uint32_t val)
 }
 
 /* XXX: optimize */
-void stb_phys(target_phys_addr_t addr, uint32_t val)
+void stb_phys(hwaddr addr, uint32_t val)
 {
     uint8_t v = val;
     cpu_physical_memory_write(addr, &v, 1);
 }
 
 /* XXX: optimize */
-void stw_phys(target_phys_addr_t addr, uint32_t val)
+void stw_phys(hwaddr addr, uint32_t val)
 {
     uint16_t v = tswap16(val);
     cpu_physical_memory_write(addr, (const uint8_t *)&v, 2);
 }
 
 /* XXX: optimize */
-void stq_phys(target_phys_addr_t addr, uint64_t val)
+void stq_phys(hwaddr addr, uint64_t val)
 {
     val = tswap64(val);
     cpu_physical_memory_write(addr, (const uint8_t *)&val, 8);
@@ -3806,7 +3806,7 @@ int cpu_memory_rw_debug(CPUState *env, target_ulong addr,
                         uint8_t *buf, int len, int is_write)
 {
     int l;
-    target_phys_addr_t phys_addr;
+    hwaddr phys_addr;
     target_ulong page;
 
     while (len > 0) {

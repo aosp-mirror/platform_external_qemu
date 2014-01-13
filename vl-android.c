@@ -69,7 +69,7 @@
 #include "android/snapshot.h"
 #include "android/opengles.h"
 #include "android/multitouch-screen.h"
-#include "exec/targphys.h"
+#include "exec/hwaddr.h"
 #include "android/tcpdump.h"
 
 #ifdef CONFIG_MEMCHECK
@@ -436,7 +436,7 @@ const char* savevm_on_exit = NULL;
 /***********************************************************/
 /* x86 ISA bus support */
 
-target_phys_addr_t isa_mem_base = 0;
+hwaddr isa_mem_base = 0;
 PicState2 *isa_pic;
 
 static IOPortReadFunc default_ioport_readb, default_ioport_readw, default_ioport_readl;

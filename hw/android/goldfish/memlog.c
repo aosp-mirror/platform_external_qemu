@@ -21,7 +21,7 @@ extern void  dprint(const char*  fmt, ...);
 
 int fd = -1;
 
-static uint32_t memlog_read(void *opaque, target_phys_addr_t offset)
+static uint32_t memlog_read(void *opaque, hwaddr offset)
 {
     (void)opaque;
     (void)offset;
@@ -30,7 +30,7 @@ static uint32_t memlog_read(void *opaque, target_phys_addr_t offset)
 
 unsigned info[8];
 
-static void memlog_write(void *opaque, target_phys_addr_t offset, uint32_t val)
+static void memlog_write(void *opaque, hwaddr offset, uint32_t val)
 {
     char buf[128];
     struct goldfish_device *dev = opaque;
