@@ -165,10 +165,10 @@ typedef struct PhysPageDesc {
 #define L1_SIZE (1 << L1_BITS)
 #define L2_SIZE (1 << L2_BITS)
 
-unsigned long qemu_real_host_page_size;
-unsigned long qemu_host_page_bits;
-unsigned long qemu_host_page_size;
-unsigned long qemu_host_page_mask;
+uintptr_t qemu_real_host_page_size;
+uintptr_t qemu_host_page_bits;
+uintptr_t qemu_host_page_size;
+uintptr_t qemu_host_page_mask;
 
 /* XXX: for system emulation, it could just be an array */
 static PageDesc *l1_map[L1_SIZE];
