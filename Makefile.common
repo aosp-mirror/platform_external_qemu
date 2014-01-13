@@ -97,7 +97,7 @@ common_LOCAL_SRC_FILES += $(ZLIB_SOURCES)
 ###########################################################
 # GLib sources
 #
-GLIB_DIR := distrib/mini-glib
+GLIB_DIR := $(LOCAL_PATH)/distrib/mini-glib
 include $(LOCAL_PATH)/$(GLIB_DIR)/sources.make
 EMULATOR_COMMON_CFLAGS += -I$(GLIB_INCLUDE_DIR)
 
