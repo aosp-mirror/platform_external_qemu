@@ -63,7 +63,7 @@ static unsigned long unmap_start; // start address to unmap
 //static unsigned long cs_pid;    // context switch PID
 
 /* I/O write */
-static void trace_dev_write(void *opaque, target_phys_addr_t offset, uint32_t value)
+static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
 {
     trace_dev_state *s = (trace_dev_state *)opaque;
 
@@ -361,7 +361,7 @@ static void trace_dev_write(void *opaque, target_phys_addr_t offset, uint32_t va
 }
 
 /* I/O read */
-static uint32_t trace_dev_read(void *opaque, target_phys_addr_t offset)
+static uint32_t trace_dev_read(void *opaque, hwaddr offset)
 {
     trace_dev_state *s = (trace_dev_state *)opaque;
 

@@ -92,7 +92,7 @@ static void goldfish_int_set_irq(void *opaque, int irq, int level)
     goldfish_int_update(s);
 }
 
-static uint32_t goldfish_int_read(void *opaque, target_phys_addr_t offset)
+static uint32_t goldfish_int_read(void *opaque, hwaddr offset)
 {
     struct goldfish_int_state *s = (struct goldfish_int_state *)opaque;
 
@@ -114,7 +114,7 @@ static uint32_t goldfish_int_read(void *opaque, target_phys_addr_t offset)
     }
 }
 
-static void goldfish_int_write(void *opaque, target_phys_addr_t offset, uint32_t value)
+static void goldfish_int_write(void *opaque, hwaddr offset, uint32_t value)
 {
     struct goldfish_int_state *s = (struct goldfish_int_state *)opaque;
     uint32_t mask = (1U << value);

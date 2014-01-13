@@ -172,7 +172,7 @@ static const char* get_command_name(int command)
 
 static int  goldfish_mmc_bdrv_read(struct goldfish_mmc_state *s,
                                    int64_t                    sector_number,
-                                   target_phys_addr_t         dst_address,
+                                   hwaddr         dst_address,
                                    int                        num_sectors)
 {
     int  ret;
@@ -192,7 +192,7 @@ static int  goldfish_mmc_bdrv_read(struct goldfish_mmc_state *s,
 
 static int  goldfish_mmc_bdrv_write(struct goldfish_mmc_state *s,
                                     int64_t                    sector_number,
-                                    target_phys_addr_t         dst_address,
+                                    hwaddr         dst_address,
                                     int                        num_sectors)
 {
     int  ret;
@@ -412,7 +412,7 @@ static void goldfish_mmc_do_command(struct goldfish_mmc_state *s, uint32_t cmd, 
     }
 }
 
-static uint32_t goldfish_mmc_read(void *opaque, target_phys_addr_t offset)
+static uint32_t goldfish_mmc_read(void *opaque, hwaddr offset)
 {
     uint32_t ret;
     struct goldfish_mmc_state *s = opaque;
@@ -442,7 +442,7 @@ static uint32_t goldfish_mmc_read(void *opaque, target_phys_addr_t offset)
     }
 }
 
-static void goldfish_mmc_write(void *opaque, target_phys_addr_t offset, uint32_t val)
+static void goldfish_mmc_write(void *opaque, hwaddr offset, uint32_t val)
 {
     struct goldfish_mmc_state *s = opaque;
     int status, old_status;

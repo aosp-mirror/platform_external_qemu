@@ -4900,7 +4900,7 @@ void helper_svm_check_io(uint32_t port, uint32_t param,
 }
 #else
 
-static inline void svm_save_seg(target_phys_addr_t addr,
+static inline void svm_save_seg(hwaddr addr,
                                 const SegmentCache *sc)
 {
     stw_phys(addr + offsetof(struct vmcb_seg, selector),
@@ -4913,7 +4913,7 @@ static inline void svm_save_seg(target_phys_addr_t addr,
              ((sc->flags >> 8) & 0xff) | ((sc->flags >> 12) & 0x0f00));
 }
 
-static inline void svm_load_seg(target_phys_addr_t addr, SegmentCache *sc)
+static inline void svm_load_seg(hwaddr addr, SegmentCache *sc)
 {
     unsigned int flags;
 
@@ -4924,7 +4924,7 @@ static inline void svm_load_seg(target_phys_addr_t addr, SegmentCache *sc)
     sc->flags = ((flags & 0xff) << 8) | ((flags & 0x0f00) << 12);
 }
 
-static inline void svm_load_seg_cache(target_phys_addr_t addr,
+static inline void svm_load_seg_cache(hwaddr addr,
                                       CPUState *env, int seg_reg)
 {
     SegmentCache sc1, *sc = &sc1;

@@ -67,7 +67,7 @@ static int  goldfish_tty_load(QEMUFile*  f, void*  opaque, int  version_id)
     return 0;
 }
 
-static uint32_t goldfish_tty_read(void *opaque, target_phys_addr_t offset)
+static uint32_t goldfish_tty_read(void *opaque, hwaddr offset)
 {
     struct tty_state *s = (struct tty_state *)opaque;
 
@@ -82,7 +82,7 @@ static uint32_t goldfish_tty_read(void *opaque, target_phys_addr_t offset)
     }
 }
 
-static void goldfish_tty_write(void *opaque, target_phys_addr_t offset, uint32_t value)
+static void goldfish_tty_write(void *opaque, hwaddr offset, uint32_t value)
 {
     struct tty_state *s = (struct tty_state *)opaque;
 
@@ -116,7 +116,7 @@ static void goldfish_tty_write(void *opaque, target_phys_addr_t offset, uint32_t
                 case TTY_CMD_WRITE_BUFFER:
                     if(s->cs) {
                         int len;
-                        target_phys_addr_t  buf;
+                        hwaddr  buf;
 
                         buf = s->ptr;
                         len = s->ptr_len;

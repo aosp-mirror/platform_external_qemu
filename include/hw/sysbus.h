@@ -9,7 +9,7 @@
 #define QDEV_MAX_IRQ 32
 
 typedef struct SysBusDevice SysBusDevice;
-typedef void (*mmio_mapfunc)(SysBusDevice *dev, target_phys_addr_t addr);
+typedef void (*mmio_mapfunc)(SysBusDevice *dev, hwaddr addr);
 
 struct SysBusDevice {
     DeviceState qdev;
@@ -18,8 +18,8 @@ struct SysBusDevice {
     qemu_irq *irqp[QDEV_MAX_IRQ];
     int num_mmio;
     struct {
-        target_phys_addr_t addr;
-        target_phys_addr_t size;
+        hwaddr addr;
+        hwaddr size;
         mmio_mapfunc cb;
         int iofunc;
     } mmio[QDEV_MAX_MMIO];
@@ -39,21 +39,21 @@ typedef struct {
 void sysbus_register_dev(const char *name, size_t size, sysbus_initfn init);
 void sysbus_register_withprop(SysBusDeviceInfo *info);
 void *sysbus_new(void);
-void sysbus_init_mmio(SysBusDevice *dev, target_phys_addr_t size, int iofunc);
-void sysbus_init_mmio_cb(SysBusDevice *dev, target_phys_addr_t size,
+void sysbus_init_mmio(SysBusDevice *dev, hwaddr size, int iofunc);
+void sysbus_init_mmio_cb(SysBusDevice *dev, hwaddr size,
                             mmio_mapfunc cb);
 void sysbus_init_irq(SysBusDevice *dev, qemu_irq *p);
 void sysbus_pass_irq(SysBusDevice *dev, SysBusDevice *target);
 
 
 void sysbus_connect_irq(SysBusDevice *dev, int n, qemu_irq irq);
-void sysbus_mmio_map(SysBusDevice *dev, int n, target_phys_addr_t addr);
+void sysbus_mmio_map(SysBusDevice *dev, int n, hwaddr addr);
 
 /* Legacy helper function for creating devices.  */
 DeviceState *sysbus_create_varargs(const char *name,
-                                 target_phys_addr_t addr, ...);
+                                 hwaddr addr, ...);
 static inline DeviceState *sysbus_create_simple(const char *name,
-                                              target_phys_addr_t addr,
+                                              hwaddr addr,
                                               qemu_irq irq)
 {
     return sysbus_create_varargs(name, addr, irq, NULL);

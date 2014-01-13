@@ -264,7 +264,7 @@ uint8_t qemu_uuid[16];
 /***********************************************************/
 /* x86 ISA bus support */
 
-target_phys_addr_t isa_mem_base = 0;
+hwaddr isa_mem_base = 0;
 PicState2 *isa_pic;
 
 static IOPortReadFunc default_ioport_readb, default_ioport_readw, default_ioport_readl;

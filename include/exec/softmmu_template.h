@@ -65,7 +65,7 @@
 static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
                                                         int mmu_idx,
                                                         void *retaddr);
-static inline DATA_TYPE glue(io_read, SUFFIX)(target_phys_addr_t physaddr,
+static inline DATA_TYPE glue(io_read, SUFFIX)(hwaddr physaddr,
                                               target_ulong addr,
                                               void *retaddr)
 {
@@ -101,7 +101,7 @@ DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
     DATA_TYPE res;
     int index;
     target_ulong tlb_addr;
-    target_phys_addr_t ioaddr;
+    hwaddr ioaddr;
     unsigned long addend;
     void *retaddr;
 #ifdef CONFIG_MEMCHECK_MMU
@@ -194,7 +194,7 @@ static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
 {
     DATA_TYPE res, res1, res2;
     int index, shift;
-    target_phys_addr_t ioaddr;
+    hwaddr ioaddr;
     unsigned long addend;
     target_ulong tlb_addr, addr1, addr2;
 
@@ -244,7 +244,7 @@ static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(target_ulong addr,
                                                    int mmu_idx,
                                                    void *retaddr);
 
-static inline void glue(io_write, SUFFIX)(target_phys_addr_t physaddr,
+static inline void glue(io_write, SUFFIX)(hwaddr physaddr,
                                           DATA_TYPE val,
                                           target_ulong addr,
                                           void *retaddr)
@@ -276,7 +276,7 @@ void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
                                                  DATA_TYPE val,
                                                  int mmu_idx)
 {
-    target_phys_addr_t ioaddr;
+    hwaddr ioaddr;
     unsigned long addend;
     target_ulong tlb_addr;
     void *retaddr;
@@ -368,7 +368,7 @@ static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(target_ulong addr,
                                                    int mmu_idx,
                                                    void *retaddr)
 {
-    target_phys_addr_t ioaddr;
+    hwaddr ioaddr;
     unsigned long addend;
     target_ulong tlb_addr;
     int index, i;

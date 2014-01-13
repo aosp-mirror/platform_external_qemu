@@ -10,7 +10,7 @@
 
 /* PCI bus */
 
-extern target_phys_addr_t pci_mem_base;
+extern hwaddr pci_mem_base;
 
 #define PCI_DEVFN(slot, func)   ((((slot) & 0x1f) << 3) | ((func) & 0x07))
 #define PCI_SLOT(devfn)         (((devfn) >> 3) & 0x1f)
@@ -240,8 +240,8 @@ void usb_ohci_init_pci(struct PCIBus *bus, int num_ports, int devfn);
 PCIBus *pci_prep_init(qemu_irq *pic);
 
 /* apb_pci.c */
-PCIBus *pci_apb_init(target_phys_addr_t special_base,
-                     target_phys_addr_t mem_base,
+PCIBus *pci_apb_init(hwaddr special_base,
+                     hwaddr mem_base,
                      qemu_irq *pic, PCIBus **bus2, PCIBus **bus3);
 
 /* sh_pci.c */

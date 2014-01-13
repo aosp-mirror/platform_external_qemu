@@ -81,10 +81,10 @@ int load_image(const char *filename, uint8_t *addr)
 }
 
 /* return the amount read, just like fread.  0 may mean error or eof */
-int fread_targphys(target_phys_addr_t dst_addr, size_t nbytes, FILE *f)
+int fread_targphys(hwaddr dst_addr, size_t nbytes, FILE *f)
 {
     uint8_t buf[4096];
-    target_phys_addr_t dst_begin = dst_addr;
+    hwaddr dst_begin = dst_addr;
     size_t want, did;
 
     while (nbytes) {
@@ -101,16 +101,16 @@ int fread_targphys(target_phys_addr_t dst_addr, size_t nbytes, FILE *f)
 }
 
 /* returns 0 on error, 1 if ok */
-int fread_targphys_ok(target_phys_addr_t dst_addr, size_t nbytes, FILE *f)
+int fread_targphys_ok(hwaddr dst_addr, size_t nbytes, FILE *f)
 {
     return fread_targphys(dst_addr, nbytes, f) == nbytes;
 }
 
 /* read()-like version */
-int read_targphys(int fd, target_phys_addr_t dst_addr, size_t nbytes)
+int read_targphys(int fd, hwaddr dst_addr, size_t nbytes)
 {
     uint8_t buf[4096];
-    target_phys_addr_t dst_begin = dst_addr;
+    hwaddr dst_begin = dst_addr;
     size_t want, did;
 
     while (nbytes) {
@@ -127,7 +127,7 @@ int read_targphys(int fd, target_phys_addr_t dst_addr, size_t nbytes)
 
 /* return the size or -1 if error */
 int load_image_targphys(const char *filename,
-			target_phys_addr_t addr, int max_sz)
+			hwaddr addr, int max_sz)
 {
     FILE *f;
     size_t got;
@@ -142,7 +142,7 @@ int load_image_targphys(const char *filename,
     return got;
 }
 
-void pstrcpy_targphys(target_phys_addr_t dest, int buf_size,
+void pstrcpy_targphys(hwaddr dest, int buf_size,
                       const char *source)
 {
     static const uint8_t nul_byte = 0;
@@ -208,7 +208,7 @@ static void bswap_ahdr(struct exec *e)
      : (_N_SEGMENT_ROUND (_N_TXTENDADDR(x))))
 
 
-int load_aout(const char *filename, target_phys_addr_t addr, int max_sz)
+int load_aout(const char *filename, hwaddr addr, int max_sz)
 {
     int fd, size, ret;
     struct exec e;
