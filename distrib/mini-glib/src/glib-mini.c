@@ -18,7 +18,7 @@
 #include <string.h>
 
 // Print a panic message then exit the program immediately.
-static  __attribute__((noreturn)) void g_panic(const char* fmt, ...){
+void g_panic(const char* fmt, ...){
   va_list args;
   fprintf(stderr, "MiniGLib:PANIC: ");
   va_start(args, fmt);
