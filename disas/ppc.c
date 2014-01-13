@@ -5076,7 +5076,7 @@ const int powerpc_num_macros =
 
 
 /* This file provides several disassembler functions, all of which use
-   the disassembler interface defined in bfd.h.  Several functions
+   the disassembler interface defined in dis-asm.h.  Several functions
    are provided because this file handles disassembly for the PowerPC
    in both big and little endian mode and also for the POWER (RS/6000)
    chip.  */
@@ -5152,12 +5152,13 @@ powerpc_dialect (struct disassemble_info *info)
   return dialect;
 }
 
-/* Qemu default */
+/* QEMU default */
 int
 print_insn_ppc (bfd_vma memaddr, struct disassemble_info *info)
 {
   int dialect = (char *) info->private_data - (char *) 0;
-  return print_insn_powerpc (memaddr, info, 1, dialect);
+  return print_insn_powerpc (memaddr, info, info->endian == BFD_ENDIAN_BIG,
+                             dialect);
 }
 
 /* Print a big endian PowerPC instruction.  */

@@ -819,6 +819,10 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V3M, 0x00800090, 0x0fa000f0, "%22?sumull%20's%c\t%12-15r, %16-19r, %0-3r, %8-11r"},
   {ARM_EXT_V3M, 0x00a00090, 0x0fa000f0, "%22?sumlal%20's%c\t%12-15r, %16-19r, %0-3r, %8-11r"},
 
+  /* IDIV instructions.  */
+  {ARM_EXT_DIV, 0x0710f010, 0x0ff0f0f0, "sdiv%c\t%16-19r, %0-3r, %8-11r"},
+  {ARM_EXT_DIV, 0x0730f010, 0x0ff0f0f0, "udiv%c\t%16-19r, %0-3r, %8-11r"},
+
   /* V7 instructions.  */
   {ARM_EXT_V7, 0xf450f000, 0xfd70f000, "pli\t%P"},
   {ARM_EXT_V7, 0x0320f0f0, 0x0ffffff0, "dbg%c\t#%0-3d"},
@@ -1624,7 +1628,7 @@ arm_decode_shift (long given, fprintf_function func, void *stream,
 }
 
 /* Print one coprocessor instruction on INFO->STREAM.
-   Return true if the instuction matched, false if this is not a
+   Return true if the instruction matched, false if this is not a
    recognised coprocessor instruction.  */
 
 static bfd_boolean
@@ -2214,7 +2218,7 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 }
 
 /* Print one neon instruction on INFO->STREAM.
-   Return true if the instuction matched, false if this is not a
+   Return true if the instruction matched, false if this is not a
    recognised neon instruction.  */
 
 static bfd_boolean
@@ -3927,7 +3931,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info)
 	    n = last_mapping_sym - 1;
 
 	  /* No mapping symbol found at this address.  Look backwards
-	     for a preceeding one.  */
+	     for a preceding one.  */
 	  for (; n >= 0; n--)
 	    {
 	      if (get_sym_code_type (info, n, &type))
