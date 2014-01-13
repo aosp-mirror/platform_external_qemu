@@ -1254,7 +1254,7 @@ void pipe_dev_init()
 {
     PipeDevice *s;
 
-    s = (PipeDevice *) qemu_mallocz(sizeof(*s));
+    s = (PipeDevice *) g_malloc0(sizeof(*s));
 
     s->dev.name = "qemu_pipe";
     s->dev.id = -1;

@@ -536,7 +536,7 @@ void cpu_reset(CPUX86State *env)
 
 void cpu_x86_close(CPUX86State *env)
 {
-    qemu_free(env);
+    g_free(env);
 }
 
 /***********************************************************/
@@ -1526,7 +1526,7 @@ static void mce_init(CPUX86State *cenv)
         cenv->mcg_cap = MCE_CAP_DEF | MCE_BANKS_DEF;
         cenv->mcg_ctl = ~(uint64_t)0;
         bank_num = cenv->mcg_cap & 0xff;
-        cenv->mce_banks = qemu_mallocz(bank_num * sizeof(uint64_t) * 4);
+        cenv->mce_banks = g_malloc0(bank_num * sizeof(uint64_t) * 4);
         for (bank = 0; bank < bank_num; bank++)
             cenv->mce_banks[bank*4] = ~(uint64_t)0;
     }
@@ -1780,7 +1780,7 @@ CPUX86State *cpu_x86_init(const char *cpu_model)
     CPUX86State *env;
     static int inited;
 
-    env = qemu_mallocz(sizeof(CPUX86State));
+    env = g_malloc0(sizeof(CPUX86State));
     cpu_exec_init(env);
     env->cpu_model_str = cpu_model;
 

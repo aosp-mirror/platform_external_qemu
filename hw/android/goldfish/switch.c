@@ -147,7 +147,7 @@ void *goldfish_switch_add(char *name, uint32_t (*writefn)(void *opaque, uint32_t
     int ret;
     struct switch_state *s;
 
-    s = qemu_mallocz(sizeof(*s));
+    s = g_malloc0(sizeof(*s));
     s->dev.name = "goldfish-switch";
     s->dev.id = id;
     s->dev.size = 0x1000;
@@ -159,7 +159,7 @@ void *goldfish_switch_add(char *name, uint32_t (*writefn)(void *opaque, uint32_t
 
     ret = goldfish_device_add(&s->dev, goldfish_switch_readfn, goldfish_switch_writefn, s);
     if(ret) {
-        qemu_free(s);
+        g_free(s);
         return NULL;
     }
 

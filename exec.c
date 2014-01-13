@@ -312,7 +312,7 @@ static inline PageDesc *page_find_alloc(target_ulong index)
         /* allocate if not found */
 #if defined(CONFIG_USER_ONLY)
         size_t len = sizeof(PageDesc) * L2_SIZE;
-        /* Don't use qemu_malloc because it may recurse.  */
+        /* Don't use g_malloc because it may recurse.  */
         p = mmap(NULL, len, PROT_READ | PROT_WRITE,
                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         *lp = p;
@@ -323,7 +323,7 @@ static inline PageDesc *page_find_alloc(target_ulong index)
                            PAGE_RESERVED);
         }
 #else
-        p = qemu_mallocz(sizeof(PageDesc) * L2_SIZE);
+        p = g_malloc0(sizeof(PageDesc) * L2_SIZE);
         *lp = p;
 #endif
     }
@@ -499,7 +499,7 @@ static void code_gen_alloc(unsigned long tb_size)
         }
     }
 #else
-    code_gen_buffer = qemu_malloc(code_gen_buffer_size);
+    code_gen_buffer = g_malloc(code_gen_buffer_size);
     map_exec(code_gen_buffer, code_gen_buffer_size);
 #endif
 #endif /* !USE_STATIC_CODE_GEN_BUFFER */
@@ -507,7 +507,7 @@ static void code_gen_alloc(unsigned long tb_size)
     code_gen_buffer_max_size = code_gen_buffer_size -
         code_gen_max_block_size();
     code_gen_max_blocks = code_gen_buffer_size / CODE_GEN_AVG_BLOCK_SIZE;
-    tbs = qemu_malloc(code_gen_max_blocks * sizeof(TranslationBlock));
+    tbs = g_malloc(code_gen_max_blocks * sizeof(TranslationBlock));
 }
 
 /* Must be called before using the QEMU cpus. 'tb_size' is the size
@@ -609,7 +609,7 @@ void cpu_exec_init(CPUState *env)
 static inline void invalidate_page_bitmap(PageDesc *p)
 {
     if (p->code_bitmap) {
-        qemu_free(p->code_bitmap);
+        g_free(p->code_bitmap);
         p->code_bitmap = NULL;
     }
     p->code_write_count = 0;
@@ -655,7 +655,7 @@ void tb_flush(CPUState *env1)
         for (tb_to_clean = 0; tb_to_clean < TB_JMP_CACHE_SIZE; tb_to_clean++) {
             if (env->tb_jmp_cache[tb_to_clean] != NULL &&
                 env->tb_jmp_cache[tb_to_clean]->tpc2gpc != NULL) {
-                qemu_free(env->tb_jmp_cache[tb_to_clean]->tpc2gpc);
+                g_free(env->tb_jmp_cache[tb_to_clean]->tpc2gpc);
                 env->tb_jmp_cache[tb_to_clean]->tpc2gpc = NULL;
                 env->tb_jmp_cache[tb_to_clean]->tpc2gpc_pairs = 0;
             }
@@ -834,7 +834,7 @@ void tb_phys_invalidate(TranslationBlock *tb, target_ulong page_addr)
 
 #ifdef CONFIG_MEMCHECK
     if (tb->tpc2gpc != NULL) {
-        qemu_free(tb->tpc2gpc);
+        g_free(tb->tpc2gpc);
         tb->tpc2gpc = NULL;
         tb->tpc2gpc_pairs = 0;
     }
@@ -875,7 +875,7 @@ static void build_page_bitmap(PageDesc *p)
     int n, tb_start, tb_end;
     TranslationBlock *tb;
 
-    p->code_bitmap = qemu_mallocz(TARGET_PAGE_SIZE / 8);
+    p->code_bitmap = g_malloc0(TARGET_PAGE_SIZE / 8);
 
     tb = p->first_tb;
     while (tb != NULL) {
@@ -1373,7 +1373,7 @@ int cpu_watchpoint_insert(CPUState *env, target_ulong addr, target_ulong len,
                 TARGET_FMT_lx ", len=" TARGET_FMT_lu "\n", addr, len);
         return -EINVAL;
     }
-    wp = qemu_malloc(sizeof(*wp));
+    wp = g_malloc(sizeof(*wp));
 
     wp->vaddr = addr;
     wp->len_mask = len_mask;
@@ -1416,7 +1416,7 @@ void cpu_watchpoint_remove_by_ref(CPUState *env, CPUWatchpoint *watchpoint)
 
     tlb_flush_page(env, watchpoint->vaddr);
 
-    qemu_free(watchpoint);
+    g_free(watchpoint);
 }
 
 /* Remove all matching watchpoints.  */
@@ -1437,7 +1437,7 @@ int cpu_breakpoint_insert(CPUState *env, target_ulong pc, int flags,
 #if defined(TARGET_HAS_ICE)
     CPUBreakpoint *bp;
 
-    bp = qemu_malloc(sizeof(*bp));
+    bp = g_malloc(sizeof(*bp));
 
     bp->pc = pc;
     bp->flags = flags;
@@ -1484,7 +1484,7 @@ void cpu_breakpoint_remove_by_ref(CPUState *env, CPUBreakpoint *breakpoint)
 
     breakpoint_invalidate(env, breakpoint->pc);
 
-    qemu_free(breakpoint);
+    g_free(breakpoint);
 #endif
 }
 
@@ -2522,14 +2522,14 @@ ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
     RAMBlock *new_block, *block;
 
     size = TARGET_PAGE_ALIGN(size);
-    new_block = qemu_mallocz(sizeof(*new_block));
+    new_block = g_malloc0(sizeof(*new_block));
 
 #if 0
     if (dev && dev->parent_bus && dev->parent_bus->info->get_dev_path) {
         char *id = dev->parent_bus->info->get_dev_path(dev);
         if (id) {
             snprintf(new_block->idstr, sizeof(new_block->idstr), "%s/", id);
-            qemu_free(id);
+            g_free(id);
         }
     }
 #endif
@@ -2599,7 +2599,7 @@ ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
 
     QLIST_INSERT_HEAD(&ram_list.blocks, new_block, next);
 
-    ram_list.phys_dirty = qemu_realloc(ram_list.phys_dirty,
+    ram_list.phys_dirty = g_realloc(ram_list.phys_dirty,
                                        last_ram_offset() >> TARGET_PAGE_BITS);
     memset(ram_list.phys_dirty + (new_block->offset >> TARGET_PAGE_BITS),
            0xff, size >> TARGET_PAGE_BITS);
@@ -2642,7 +2642,7 @@ void qemu_ram_free(ram_addr_t addr)
                 qemu_vfree(block->host);
 #endif
             }
-            qemu_free(block);
+            g_free(block);
             return;
         }
     }
@@ -3169,7 +3169,7 @@ static void *subpage_init (hwaddr base, ram_addr_t *phys,
     subpage_t *mmio;
     int subpage_memory;
 
-    mmio = qemu_mallocz(sizeof(subpage_t));
+    mmio = g_malloc0(sizeof(subpage_t));
 
     mmio->base = base;
     subpage_memory = cpu_register_io_memory(subpage_read, subpage_write, mmio);
@@ -3472,7 +3472,7 @@ static QLIST_HEAD(map_client_list, MapClient) map_client_list
 
 void *cpu_register_map_client(void *opaque, void (*callback)(void *opaque))
 {
-    MapClient *client = qemu_malloc(sizeof(*client));
+    MapClient *client = g_malloc(sizeof(*client));
 
     client->opaque = opaque;
     client->callback = callback;
@@ -3485,7 +3485,7 @@ void cpu_unregister_map_client(void *_client)
     MapClient *client = (MapClient *)_client;
 
     QLIST_REMOVE(client, link);
-    qemu_free(client);
+    g_free(client);
 }
 
 static void cpu_notify_map_clients(void)

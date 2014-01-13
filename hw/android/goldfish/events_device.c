@@ -307,11 +307,11 @@ events_set_bits(events_state *s, int type, int bitl, int bith)
     il = bitl / 8;
     ih = bith / 8;
     if (ih >= s->ev_bits[type].len) {
-        bits = qemu_mallocz(ih + 1);
+        bits = g_malloc0(ih + 1);
         if (bits == NULL)
             return;
         memcpy(bits, s->ev_bits[type].bits, s->ev_bits[type].len);
-        qemu_free(s->ev_bits[type].bits);
+        g_free(s->ev_bits[type].bits);
         s->ev_bits[type].bits = bits;
         s->ev_bits[type].len = ih + 1;
     }
@@ -352,7 +352,7 @@ void events_dev_init(uint32_t base, qemu_irq irq)
     int iomemtype;
     AndroidHwConfig*  config = android_hw;
 
-    s = (events_state *) qemu_mallocz(sizeof(events_state));
+    s = (events_state *) g_malloc0(sizeof(events_state));
 
     /* now set the events capability bits depending on hardware configuration */
     /* apparently, the EV_SYN array is used to indicate which other
@@ -526,7 +526,7 @@ void events_dev_init(uint32_t base, qemu_irq irq)
     s->first = 0;
     s->last = 0;
     s->state = STATE_INIT;
-    s->name = qemu_strdup(config->hw_keyboard_charmap);
+    s->name = g_strdup(config->hw_keyboard_charmap);
 
     /* This function migh fire buffered events to the device, so
      * ensure that it is called after initialization is complete

@@ -1507,7 +1507,7 @@ static void do_stop_capture(Monitor *mon, int n)
         if (i == n) {
             s->ops.destroy (s->opaque);
             QLIST_REMOVE (s, entries);
-            qemu_free (s);
+            g_free (s);
             return;
         }
     }
@@ -1520,7 +1520,7 @@ static void do_wav_capture(Monitor *mon, const char *path,
 {
     CaptureState *s;
 
-    s = qemu_mallocz (sizeof (*s));
+    s = g_malloc0 (sizeof (*s));
 
     freq = has_freq ? freq : 44100;
     bits = has_bits ? bits : 16;
@@ -1528,7 +1528,7 @@ static void do_wav_capture(Monitor *mon, const char *path,
 
     if (wav_start_capture (s, path, freq, bits, nchannels)) {
         monitor_printf(mon, "Faied to add wave capture\n");
-        qemu_free (s);
+        g_free (s);
     }
     QLIST_INSERT_HEAD (&capture_head, s, entries);
 }
@@ -2511,7 +2511,7 @@ static void monitor_handle_command(Monitor *mon, const char *cmdline)
                     }
                     goto fail;
                 }
-                str = qemu_malloc(strlen(buf) + 1);
+                str = g_malloc(strlen(buf) + 1);
                 pstrcpy(str, sizeof(buf), buf);
                 str_allocated[nb_args] = str;
             add_str:
@@ -2753,7 +2753,7 @@ static void monitor_handle_command(Monitor *mon, const char *cmdline)
     }
  fail:
     for(i = 0; i < MAX_ARGS; i++)
-        qemu_free(str_allocated[i]);
+        g_free(str_allocated[i]);
 }
 
 void monitor_set_error(Monitor *mon, QError *qerror)
@@ -2878,7 +2878,7 @@ static void parse_cmdline(const char *cmdline,
         if (nb_args >= MAX_ARGS)
             break;
         ret = get_str(buf, sizeof(buf), &p);
-        args[nb_args] = qemu_strdup(buf);
+        args[nb_args] = g_strdup(buf);
         nb_args++;
         if (ret < 0)
             break;
@@ -2908,7 +2908,7 @@ static void monitor_find_completion(const char *cmdline)
     if (len > 0 && qemu_isspace(cmdline[len - 1])) {
         if (nb_args >= MAX_ARGS)
             return;
-        args[nb_args++] = qemu_strdup("");
+        args[nb_args++] = g_strdup("");
     }
     if (nb_args <= 1) {
         /* command completion */
@@ -2970,7 +2970,7 @@ static void monitor_find_completion(const char *cmdline)
         }
     }
     for(i = 0; i < nb_args; i++)
-        qemu_free(args[i]);
+        g_free(args[i]);
 }
 
 static int monitor_can_read(void *opaque)
@@ -3087,7 +3087,7 @@ void monitor_init(CharDriverState *chr, int flags)
         is_first_init = 0;
     }
 
-    mon = qemu_mallocz(sizeof(*mon));
+    mon = g_malloc0(sizeof(*mon));
 
     mon->chr = chr;
     mon->flags = flags;
@@ -3114,7 +3114,7 @@ static void monitor_done(Monitor *mon)
     readline_free(mon->rs);
     qemu_chr_close(mon->chr);
 
-    qemu_free(mon);
+    g_free(mon);
 }
 
 static void bdrv_password_cb(Monitor *mon, const char *password, void *opaque)

@@ -503,7 +503,7 @@ void goldfish_mmc_init(uint32_t base, int id, BlockDriverState* bs)
 {
     struct goldfish_mmc_state *s;
 
-    s = (struct goldfish_mmc_state *)qemu_mallocz(sizeof(*s));
+    s = (struct goldfish_mmc_state *)g_malloc0(sizeof(*s));
     s->dev.name = "goldfish_mmc";
     s->dev.id = id;
     s->dev.base = base;

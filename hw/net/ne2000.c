@@ -732,7 +732,7 @@ static void isa_ne2000_cleanup(VLANClientState *vc)
     isa_unassign_ioport(s->isa_io_base + 0x10, 2);
     isa_unassign_ioport(s->isa_io_base + 0x1f, 1);
 
-    qemu_free(s);
+    g_free(s);
 }
 
 void isa_ne2000_init(int base, qemu_irq irq, NICInfo *nd)
@@ -741,7 +741,7 @@ void isa_ne2000_init(int base, qemu_irq irq, NICInfo *nd)
 
     qemu_check_nic_model(nd, "ne2k_isa");
 
-    s = qemu_mallocz(sizeof(NE2000State));
+    s = g_malloc0(sizeof(NE2000State));
 
     register_ioport_write(base, 16, 1, ne2000_ioport_write, s);
     register_ioport_read(base, 16, 1, ne2000_ioport_read, s);

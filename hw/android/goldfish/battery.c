@@ -147,7 +147,7 @@ void goldfish_battery_init()
 {
     struct goldfish_battery_state *s;
 
-    s = (struct goldfish_battery_state *)qemu_mallocz(sizeof(*s));
+    s = (struct goldfish_battery_state *)g_malloc0(sizeof(*s));
     s->dev.name = "goldfish-battery";
     s->dev.base = 0;    // will be allocated dynamically
     s->dev.size = 0x1000;

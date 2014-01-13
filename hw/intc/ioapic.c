@@ -247,7 +247,7 @@ IOAPICState *ioapic_init(void)
     IOAPICState *s;
     int io_memory;
 
-    s = qemu_mallocz(sizeof(IOAPICState));
+    s = g_malloc0(sizeof(IOAPICState));
     ioapic_reset(s);
 
     io_memory = cpu_register_io_memory(ioapic_mem_read,

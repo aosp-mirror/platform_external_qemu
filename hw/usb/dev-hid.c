@@ -843,14 +843,14 @@ static void usb_hid_handle_destroy(USBDevice *dev)
     if (s->kind != USB_KEYBOARD)
         qemu_remove_mouse_event_handler(s->ptr.eh_entry);
     /* TODO: else */
-    qemu_free(s);
+    g_free(s);
 }
 
 USBDevice *usb_tablet_init(void)
 {
     USBHIDState *s;
 
-    s = qemu_mallocz(sizeof(USBHIDState));
+    s = g_malloc0(sizeof(USBHIDState));
     s->dev.speed = USB_SPEED_FULL;
     s->dev.handle_packet = usb_generic_handle_packet;
 
@@ -871,7 +871,7 @@ USBDevice *usb_mouse_init(void)
 {
     USBHIDState *s;
 
-    s = qemu_mallocz(sizeof(USBHIDState));
+    s = g_malloc0(sizeof(USBHIDState));
     s->dev.speed = USB_SPEED_FULL;
     s->dev.handle_packet = usb_generic_handle_packet;
 
@@ -892,7 +892,7 @@ USBDevice *usb_keyboard_init(void)
 {
     USBHIDState *s;
 
-    s = qemu_mallocz(sizeof(USBHIDState));
+    s = g_malloc0(sizeof(USBHIDState));
     s->dev.speed = USB_SPEED_FULL;
     s->dev.handle_packet = usb_generic_handle_packet;
 
