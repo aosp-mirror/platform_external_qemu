@@ -648,7 +648,7 @@ void goldfish_fb_init(int id)
 {
     struct goldfish_fb_state *s;
 
-    s = (struct goldfish_fb_state *)qemu_mallocz(sizeof(*s));
+    s = (struct goldfish_fb_state *)g_malloc0(sizeof(*s));
     s->dev.name = "goldfish_fb";
     s->dev.id = id;
     s->dev.size = 0x1000;

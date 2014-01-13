@@ -425,7 +425,7 @@ memcheck_guest_alloc(target_ulong guest_address)
     thread = get_current_thread();
     desc.call_stack_count = thread->call_stack_count;
     if (desc.call_stack_count) {
-        desc.call_stack = qemu_malloc(desc.call_stack_count * sizeof(target_ulong));
+        desc.call_stack = g_malloc(desc.call_stack_count * sizeof(target_ulong));
         if (desc.call_stack == NULL) {
             ME("memcheck: Unable to allocate %u bytes for the calling stack",
                desc.call_stack_count * sizeof(target_ulong));
@@ -462,7 +462,7 @@ memcheck_guest_alloc(target_ulong guest_address)
             memcheck_dump_malloc_desc(&replaced, 1, 1);
         }
         if (replaced.call_stack != NULL) {
-            qemu_free(replaced.call_stack);
+            g_free(replaced.call_stack);
         }
     } else {
         ME("memcheck: Unable to insert an entry to the allocation map:");
@@ -517,7 +517,7 @@ memcheck_guest_free(target_ulong guest_address)
         }
     }
     if (pulled.call_stack != NULL) {
-        qemu_free(pulled.call_stack);
+        g_free(pulled.call_stack);
     }
 }
 

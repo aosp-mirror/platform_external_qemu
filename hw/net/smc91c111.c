@@ -774,7 +774,7 @@ static void smc91c111_cleanup(VLANClientState *vc)
     smc91c111_state *s = vc->opaque;
 
     cpu_unregister_io_memory(s->mmio_index);
-    qemu_free(s);
+    g_free(s);
 }
 
 static void smc91c111_init1(SysBusDevice *dev)

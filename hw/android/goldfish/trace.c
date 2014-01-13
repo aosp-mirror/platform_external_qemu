@@ -399,7 +399,7 @@ void trace_dev_init()
 {
     trace_dev_state *s;
 
-    s = (trace_dev_state *)qemu_mallocz(sizeof(trace_dev_state));
+    s = (trace_dev_state *)g_malloc0(sizeof(trace_dev_state));
     s->dev.name = "qemu_trace";
     s->dev.id = -1;
     s->dev.base = 0;       // will be allocated dynamically

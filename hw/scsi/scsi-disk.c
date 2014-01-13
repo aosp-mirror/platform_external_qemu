@@ -88,7 +88,7 @@ static SCSIRequest *scsi_new_request(SCSIDeviceState *s, uint32_t tag)
         r = free_requests;
         free_requests = r->next;
     } else {
-        r = qemu_malloc(sizeof(SCSIRequest));
+        r = g_malloc(sizeof(SCSIRequest));
         r->iov.iov_base = qemu_memalign(512, SCSI_DMA_BUF_SIZE);
     }
     r->dev = s;
@@ -923,8 +923,8 @@ static int32_t scsi_send_command(SCSIDevice *d, uint32_t tag,
 
 static void scsi_destroy(SCSIDevice *d)
 {
-    qemu_free(d->state);
-    qemu_free(d);
+    g_free(d->state);
+    g_free(d);
 }
 
 SCSIDevice *scsi_disk_init(BlockDriverState *bdrv, int tcq,
@@ -934,7 +934,7 @@ SCSIDevice *scsi_disk_init(BlockDriverState *bdrv, int tcq,
     SCSIDeviceState *s;
     uint64_t nb_sectors;
 
-    s = (SCSIDeviceState *)qemu_mallocz(sizeof(SCSIDeviceState));
+    s = (SCSIDeviceState *)g_malloc0(sizeof(SCSIDeviceState));
     s->bdrv = bdrv;
     s->tcq = tcq;
     s->completion = completion;
@@ -956,7 +956,7 @@ SCSIDevice *scsi_disk_init(BlockDriverState *bdrv, int tcq,
 #endif
         pstrcpy(s->drive_serial_str, sizeof(s->drive_serial_str), "0");
     qemu_add_vm_change_state_handler(scsi_dma_restart_cb, s);
-    d = (SCSIDevice *)qemu_mallocz(sizeof(SCSIDevice));
+    d = (SCSIDevice *)g_malloc0(sizeof(SCSIDevice));
     d->state = s;
     d->destroy = scsi_destroy;
     d->send_command = scsi_send_command;
