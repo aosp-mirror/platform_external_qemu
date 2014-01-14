@@ -66,7 +66,7 @@ static void android_arm_init_(ram_addr_t ram_size,
     const char *initrd_filename,
     const char *cpu_model)
 {
-    CPUState *env;
+    CPUARMState *env;
     qemu_irq *cpu_pic;
     qemu_irq *goldfish_pic;
     int i;

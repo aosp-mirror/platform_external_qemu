@@ -37,7 +37,7 @@ struct arm_boot_info {
     hwaddr initrd_size;
     hwaddr entry;
 };
-void arm_load_kernel(CPUState *env, struct arm_boot_info *info);
+void arm_load_kernel(CPUARMState *env, struct arm_boot_info *info);
 
 /* Multiplication factor to convert from system clock ticks to qemu timer
    ticks.  */
