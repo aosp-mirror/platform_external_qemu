@@ -17,7 +17,7 @@
 #ifndef _ANDROID_PROTOCOL_FB_UPDATES_H
 #define _ANDROID_PROTOCOL_FB_UPDATES_H
 
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 
 /* Requests the Core to refresh framebuffer.
  * This message is sent by the UI to the Core right after the UI is initialized.

@@ -15,9 +15,9 @@
 #include <android/looper.h>
 #include <android/utils/panic.h>
 #include "qemu-common.h"
-#include "qemu-timer.h"
-#include "qemu-char.h"
-#include "sockets.h"  /* for socket_set_nonblock() */
+#include "qemu/timer.h"
+#include "sysemu/char.h"
+#include "android/sockets.h"  /* for socket_set_nonblock() */
 
 /**********************************************************************
  **********************************************************************
@@ -140,7 +140,7 @@ static void qlooper_delIo(QLooper*  looper, QLoopIo* io);
 static QLoopIo*
 qloopio_new(int fd, LoopIoFunc callback, void* opaque, QLooper* qlooper)
 {
-    QLoopIo*  io = qemu_malloc(sizeof(*io));
+    QLoopIo*  io = g_malloc(sizeof(*io));
 
     io->fd = fd;
     io->user_callback = callback;
@@ -251,7 +251,7 @@ qloopio_free(void* impl)
     /* make QEMU forget about this fd */
     qemu_set_fd_handler(io->fd, NULL, NULL, NULL);
     io->fd = -1;
-    qemu_free(io);
+    g_free(io);
 }
 
 static unsigned
@@ -400,13 +400,13 @@ qlooper_destroy(Looper* ll)
         qloopio_free(io);
 
     qemu_bh_delete(looper->io_bh);
-    qemu_free(looper);
+    g_free(looper);
 }
 
 Looper*
 looper_newCore(void)
 {
-    QLooper*  looper = qemu_mallocz(sizeof(*looper));
+    QLooper*  looper = g_malloc0(sizeof(*looper));
 
     looper->io_list    = NULL;
     looper->io_pending = NULL;

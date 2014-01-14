@@ -25,7 +25,7 @@
 #define QEMU_AUDIO_H
 
 #include "config-host.h"
-#include "qemu-queue.h"
+#include "qemu/queue.h"
 #include "qemu-common.h"  /* For QEMUTimer */
 
 typedef void (*audio_callback_fn) (void *opaque, int avail);

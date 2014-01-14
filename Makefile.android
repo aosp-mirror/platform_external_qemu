@@ -55,6 +55,8 @@ ifeq ($(HOST_OS),windows)
   # we need Win32 features that are available since Windows 2000 Professional/Server (NT 5.0)
   MY_CFLAGS += -DWINVER=0x501
   MY_CFLAGS += -D_WIN32
+  # LARGEADDRESSAWARE gives more address space to 32-bit process
+  MY_LDLIBS += -Xlinker --large-address-aware
   ifneq ($(BUILD_HOST_64bit),)
     # Microsoft 64-bit compiler define both _WIN32 and _WIN64
     MY_CFLAGS += -D_WIN64
@@ -146,8 +148,10 @@ endif
 #
 MY_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 
-# Needed to build fpu/softfloat-native.h properly
+# Needed to build block.c on Linux/x86_64.
 MY_CFLAGS += -D_GNU_SOURCE=1
+
+MY_CFLAGS += -I$(LOCAL_PATH)/include
 
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.

@@ -11,7 +11,7 @@
 */
 #include "android/gps.h"
 #include "android/utils/debug.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 
 CharDriverState*   android_gps_cs;
 

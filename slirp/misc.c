@@ -549,7 +549,7 @@ relay(s)
 #endif
 
 #ifdef CONFIG_QEMU
-#include "monitor.h"
+#include "monitor/monitor.h"
 
 void lprint(const char *format, ...)
 {

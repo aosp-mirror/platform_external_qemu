@@ -31,8 +31,8 @@
 #include <sys/soundcard.h>
 #endif
 #include "qemu-common.h"
-#include "host-utils.h"
-#include "qemu-char.h"
+#include "qemu/host-utils.h"
+#include "sysemu/char.h"
 #include "audio.h"
 
 #define AUDIO_CAP "oss"
@@ -498,7 +498,7 @@ static void oss_fini_out (HWVoiceOut *hw)
             }
         }
         else {
-            qemu_free (oss->pcm_buf);
+            g_free (oss->pcm_buf);
         }
         oss->pcm_buf = NULL;
     }
@@ -731,7 +731,7 @@ static void oss_fini_in (HWVoiceIn *hw)
     oss_anal_close (&oss->fd);
 
     if (oss->pcm_buf) {
-        qemu_free (oss->pcm_buf);
+        g_free (oss->pcm_buf);
         oss->pcm_buf = NULL;
     }
 }

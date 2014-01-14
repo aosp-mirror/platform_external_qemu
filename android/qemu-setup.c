@@ -12,7 +12,7 @@
 
 #include "libslirp.h"
 #include "qemu-common.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "modem_driver.h"
 #include "proxy_http.h"
 

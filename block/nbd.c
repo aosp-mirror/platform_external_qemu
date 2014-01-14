@@ -28,7 +28,7 @@
 
 #include "qemu-common.h"
 #include "nbd.h"
-#include "module.h"
+#include "qemu/module.h"
 
 #include <sys/types.h>
 #include <unistd.h>

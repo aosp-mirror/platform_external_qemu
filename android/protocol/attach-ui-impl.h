@@ -13,7 +13,7 @@
 #ifndef _ANDROID_PROTOCOL_ATTACH_UI_IMPL_H
 #define _ANDROID_PROTOCOL_ATTACH_UI_IMPL_H
 
-#include "sockets.h"
+#include "android/sockets.h"
 
 /*
  * Contains the UI-side implementation of the "attach-ui" service that is

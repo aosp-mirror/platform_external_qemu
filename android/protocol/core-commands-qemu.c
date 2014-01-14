@@ -19,7 +19,7 @@
 #include "android/globals.h"
 #include "android/hw-sensors.h"
 #include "telephony/modem_driver.h"
-#include "android-trace.h"
+#include "android/trace.h"
 #include "audio/audio.h"
 #include "android/protocol/core-commands-api.h"
 
@@ -97,7 +97,7 @@ corecmd_get_qemu_path(int type,
     }
     strncpy(path, filepath, path_buf_size);
     path[path_buf_size - 1] = '\0';
-    qemu_free(filepath);
+    g_free(filepath);
     return 0;
 }
 

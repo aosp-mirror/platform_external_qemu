@@ -15,7 +15,7 @@ emulator without requiring special kernel support; this simplifies a lot of
 things since it does *not* require:
 
 - writing/configuring a specific kernel driver
-- writing the corresponding hardware emulation code in hw/goldfish_xxxx.c
+- writing the corresponding hardware emulation code in hw/android/goldfish/*.c
 - dealing with device allocation and permission issues in the emulated system
 
 The emulator provides 'services' to various parts of the emulated system.

@@ -4,8 +4,8 @@ Android Framebuffer emulation technical notes:
 This document tries to explain how framebuffer emulation works in the
 Android emulator.
 
-1 - Hardware emulation (hw/goldfish_fb.c):
-------------------------------------------
+1 - Hardware emulation (hw/android/goldfish/fb.c):
+--------------------------------------------------
 
   The emulated hardware provides a bunch of i/o registers to allow
   the following:
@@ -16,6 +16,8 @@ Android emulator.
   - let the kernel control the physical base address for the framebuffer
     and the internal pixel rotation to apply before display (see
     goldfish_fb_write).
+
+  Read docs/GOLDFISH-VIRTUAL-HARDWARE.TXT for low-level details.
 
   The pixel buffer is itself a set of physical pages allocated by the
   kernel driver in the emulated system. These pages are contiguous in
@@ -53,7 +55,7 @@ Android emulator.
                      foreach cl in fb.clients:
                         cl.update(cl.opaque, up.x, up.y. up.w, up.h)
 
-  hw/goldfish_fb.c implements a producer
+  hw/android/goldfish/fb.c implements a producer
   the QEmulator type in android/main.c implements a client.
 
 

@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include "exec.h"
 
-#include "host-utils.h"
+#include "qemu/host-utils.h"
 
 #include "helper.h"
 /*****************************************************************************/
@@ -277,9 +277,9 @@ void helper_dmultu (target_ulong arg1, target_ulong arg2)
 
 #ifndef CONFIG_USER_ONLY
 
-static inline target_phys_addr_t do_translate_address(target_ulong address, int rw)
+static inline hwaddr do_translate_address(target_ulong address, int rw)
 {
-    target_phys_addr_t lladdr;
+    hwaddr lladdr;
 
     lladdr = cpu_mips_translate_address(env, address, rw);
 
@@ -1886,16 +1886,16 @@ static void do_unaligned_access (target_ulong addr, int is_write, int is_user, v
 #define ALIGNED_ONLY
 
 #define SHIFT 0
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 1
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 2
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 3
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 static void do_unaligned_access (target_ulong addr, int is_write, int is_user, void *retaddr)
 {
@@ -1932,7 +1932,7 @@ void tlb_fill (target_ulong addr, int is_write, int mmu_idx, void *retaddr)
     env = saved_env;
 }
 
-void do_unassigned_access(target_phys_addr_t addr, int is_write, int is_exec,
+void do_unassigned_access(hwaddr addr, int is_write, int is_exec,
                           int unused, int size)
 {
     if (is_exec)

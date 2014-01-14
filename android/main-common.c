@@ -22,7 +22,7 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
-#include "console.h"
+#include "ui/console.h"
 
 #include "android/avd/util.h"
 #include "android/utils/debug.h"

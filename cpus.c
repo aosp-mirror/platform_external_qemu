@@ -23,14 +23,14 @@
  */
 #include "config-host.h"
 
-#include "monitor.h"
-#include "sysemu.h"
-#include "gdbstub.h"
-#include "dma.h"
-#include "kvm.h"
-#include "hax.h"
+#include "monitor/monitor.h"
+#include "sysemu/sysemu.h"
+#include "exec/gdbstub.h"
+#include "sysemu/dma.h"
+#include "sysemu/kvm.h"
+#include "exec/hax.h"
 
-#include "cpus.h"
+#include "sysemu/cpus.h"
 
 static CPUState *cur_cpu;
 static CPUState *next_cpu;
@@ -265,7 +265,7 @@ void vm_stop(int reason)
 
 #else /* CONFIG_IOTHREAD */
 
-#include "qemu-thread.h"
+#include "qemu/thread.h"
 
 QemuMutex qemu_global_mutex;
 static QemuMutex qemu_fair_mutex;
@@ -515,8 +515,8 @@ static void tcg_init_vcpu(void *_env)
     CPUState *env = _env;
     /* share a single thread for all cpus with TCG */
     if (!tcg_cpu_thread) {
-        env->thread = qemu_mallocz(sizeof(QemuThread));
-        env->halt_cond = qemu_mallocz(sizeof(QemuCond));
+        env->thread = g_malloc0(sizeof(QemuThread));
+        env->halt_cond = g_malloc0(sizeof(QemuCond));
         qemu_cond_init(env->halt_cond);
         qemu_thread_create(env->thread, tcg_cpu_thread_fn, env);
         while (env->created == 0)
@@ -533,8 +533,8 @@ static void kvm_start_vcpu(CPUState *env)
 {
 #if 0
     kvm_init_vcpu(env);
-    env->thread = qemu_mallocz(sizeof(QemuThread));
-    env->halt_cond = qemu_mallocz(sizeof(QemuCond));
+    env->thread = g_malloc0(sizeof(QemuThread));
+    env->halt_cond = g_malloc0(sizeof(QemuCond));
     qemu_cond_init(env->halt_cond);
     qemu_thread_create(env->thread, kvm_cpu_thread_fn, env);
     while (env->created == 0)

@@ -36,9 +36,9 @@ Implementation details:
 
 In the emulator source tree:
 
-    ./hw/goldfish_pipe.c implements the virtual driver.
+    ./hw/android/goldfish/pipe.c implements the virtual driver.
 
-    ./hw/goldfish_pipe.h provides the interface that must be
+    ./hw/android/goldfish/pipe.h provides the interface that must be
     implemented by any emulator pipe service.
 
     ./android/hw-pipe-net.c contains the implementation of the network pipe
@@ -157,7 +157,7 @@ registers:
     This is the same than CMD_WAKE_ON_WRITE, but for readability instead.
 
         REG_CHANNEL = <channel>
-        REG_CMD     = CMD_WAKE_ON_WRITE
+        REG_CMD     = CMD_WAKE_ON_READ
 
   7/ Polling for write-able/read-able state:
 
@@ -202,17 +202,61 @@ registers:
     PIPE_WAKE_CLOSED can be signaled at any time.
 
 
+  9/ Faster read/writes through parameter blocks:
+
+    Recent Goldfish kernels implement a faster way to perform reads and writes
+    that perform a single I/O write per operation (which is useful when
+    emulating x86 system through KVM or HAX).
+
+    This uses the following structure known to both the virtual device and
+    the kernel, defined in $QEMU/hw/android/goldfish/pipe.h:
+
+        struct access_params{
+            uint32_t channel;
+            uint32_t size;
+            uint32_t address;
+            uint32_t cmd;
+            uint32_t result;
+            /* reserved for future extension */
+            uint32_t flags;
+        };
+
+    This is simply a way to pack several parameters into a single structure.
+    Preliminary, e.g. at boot time, the kernel will allocate one such structure
+    and pass its physical address with:
+
+       PARAMS_ADDR_LOW  = (params & 0xffffffff);
+       PARAMS_ADDR_HIGH = (params >> 32) & 0xffffffff;
+
+    Then for each operation, it will do something like:
+
+        params.channel = channel;
+        params.address = buffer;
+        params.size = buffer_size;
+        params.cmd = CMD_WRITE_BUFFER (or CMD_READ_BUFFER)
+
+        REG_ACCESS_PARAMS = <any>
+
+        status = params.status
+
+    The write to REG_ACCESS_PARAMS will trigger the operation, i.e. QEMU will
+    read the content of the params block, use its fields to perform the
+    operation then write back the return value into params.status.
+
+
 Available services:
 -------------------
 
   tcp:<port>
-  tcp:<hostname>:<port>
 
-     Open a TCP socket to a given port. This provides a very fast
+     Open a TCP socket to a given localhost port. This provides a very fast
      pass-through that doesn't depend on the very slow internal emulator
      NAT router. Note that you can only use the file descriptor with read()
      and write() though, send() and recv() will return an ENOTSOCK error,
      as well as any socket ioctl().
+
+     For security reasons, it is not possible to connect to non-localhost
+     ports.
 
   unix:<path>
 
@@ -222,3 +266,10 @@ Available services:
 
      Connects to the OpenGL ES emulation process. For now, the implementation
      is equivalent to tcp:22468, but this may change in the future.
+
+  qemud
+
+     Connects to the QEMUD service inside the emulator. This replaces the
+     connection that was performed through /dev/ttyS1 in older Android platform
+     releases. See $QEMU/docs/ANDROID-QEMUD.TXT for details.
+

@@ -37,16 +37,16 @@
 #endif
 
 #include "qemu-common.h"
-#include "net.h"
-#include "console.h"
-#include "qemu-timer.h"
-#include "qemu-char.h"
-#include "block.h"
-#include "sockets.h"
+#include "net/net.h"
+#include "ui/console.h"
+#include "qemu/timer.h"
+#include "sysemu/char.h"
+#include "block/block.h"
+#include "android/sockets.h"
 #include "audio/audio.h"
 
 #include "android/android.h"
-#include "charpipe.h"
+#include "android/charpipe.h"
 #include "android/globals.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/system.h"

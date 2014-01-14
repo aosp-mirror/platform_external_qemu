@@ -12,9 +12,9 @@
  */
 
 #include "qemu-common.h"
-#include "block.h"
-#include "qemu-queue.h"
-#include "qemu_socket.h"
+#include "block/block.h"
+#include "qemu/queue.h"
+#include "qemu/sockets.h"
 
 typedef struct AioHandler AioHandler;
 
@@ -75,13 +75,13 @@ int qemu_aio_set_fd_handler(int fd,
                  * releasing the walking_handlers lock.
                  */
                 QLIST_REMOVE(node, node);
-                qemu_free(node);
+                g_free(node);
             }
         }
     } else {
         if (node == NULL) {
             /* Alloc and insert if it's not already there */
-            node = qemu_mallocz(sizeof(AioHandler));
+            node = g_malloc0(sizeof(AioHandler));
             node->fd = fd;
             QLIST_INSERT_HEAD(&aio_handlers, node, node);
         }
@@ -220,7 +220,7 @@ void qemu_aio_wait(void)
 
                 if (tmp->deleted) {
                     QLIST_REMOVE(tmp, node);
-                    qemu_free(tmp);
+                    g_free(tmp);
                 }
             }
 

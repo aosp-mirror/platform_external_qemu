@@ -7,13 +7,13 @@
  * later.  See the COPYING file in the top-level directory.
  */
 
-#include "block.h"
-#include "blockdev.h"
-#include "monitor.h"
-#include "qerror.h"
-#include "qemu-option.h"
-#include "qemu-config.h"
-#include "sysemu.h"
+#include "block/block.h"
+#include "sysemu/blockdev.h"
+#include "monitor/monitor.h"
+#include "qapi/qmp/qerror.h"
+#include "qemu/option.h"
+#include "qemu/config-file.h"
+#include "sysemu/sysemu.h"
 
 static QTAILQ_HEAD(drivelist, DriveInfo) drives = QTAILQ_HEAD_INITIALIZER(drives);
 
@@ -111,7 +111,7 @@ void drive_uninit(DriveInfo *dinfo)
     qemu_opts_del(dinfo->opts);
     bdrv_delete(dinfo->bdrv);
     QTAILQ_REMOVE(&drives, dinfo, next);
-    qemu_free(dinfo);
+    g_free(dinfo);
 }
 
 static int parse_block_error_action(const char *buf, int is_read)
@@ -396,12 +396,12 @@ DriveInfo *drive_init(QemuOpts *opts, int default_to_scsi, int *fatal_error)
 
     /* init */
 
-    dinfo = qemu_mallocz(sizeof(*dinfo));
+    dinfo = g_malloc0(sizeof(*dinfo));
     if ((buf = qemu_opts_id(opts)) != NULL) {
-        dinfo->id = qemu_strdup(buf);
+        dinfo->id = g_strdup(buf);
     } else {
         /* no id supplied -> create one */
-        dinfo->id = qemu_mallocz(32);
+        dinfo->id = g_malloc0(32);
         if (type == IF_IDE || type == IF_SCSI)
             mediastr = (media == MEDIA_CDROM) ? "-cd" : "-hd";
         if (max_devs)

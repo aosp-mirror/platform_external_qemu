@@ -93,7 +93,7 @@ int hax_populate_ram(uint64_t va, uint32_t size)
 }
 
 
-int hax_set_phys_mem(target_phys_addr_t start_addr, ram_addr_t size, ram_addr_t phys_offset)
+int hax_set_phys_mem(hwaddr start_addr, ram_addr_t size, ram_addr_t phys_offset)
 {
     struct hax_set_ram_info info, *pinfo = &info;
     ram_addr_t flags = phys_offset & ~TARGET_PAGE_MASK;
@@ -203,7 +203,7 @@ static char *hax_vm_devfs_string(int vm_id)
         return NULL;
     }
 
-    name = qemu_strdup("\\\\.\\hax_vmxx");
+    name = g_strdup("\\\\.\\hax_vmxx");
     if (!name)
         return NULL;
     sprintf(name, "\\\\.\\hax_vm%02d", vm_id);
@@ -220,7 +220,7 @@ static char *hax_vcpu_devfs_string(int vm_id, int vcpu_id)
         dprint("Too big vm id %x or vcpu id %x\n", vm_id, vcpu_id);
         return NULL;
     }
-    name = qemu_strdup("\\\\.\\hax_vmxx_vcpuxx");
+    name = g_strdup("\\\\.\\hax_vmxx_vcpuxx");
     if (!name)
         return NULL;
     sprintf(name, "\\\\.\\hax_vm%02d_vcpu%02d", vm_id, vcpu_id);
@@ -275,7 +275,7 @@ hax_fd hax_host_open_vm(struct hax_state *hax, int vm_id)
     if (hDeviceVM == INVALID_HANDLE_VALUE)
         dprint("Open the vm devcie error:%s, ec:%d\n", vm_name, GetLastError());
 
-    qemu_free(vm_name);
+    g_free(vm_name);
     return hDeviceVM;
 }
 
@@ -344,7 +344,7 @@ hax_fd hax_host_open_vcpu(int vmid, int vcpuid)
 
     if (hDeviceVCPU == INVALID_HANDLE_VALUE)
         dprint("Failed to open the vcpu devfs\n");
-    qemu_free(devfs_path);
+    g_free(devfs_path);
     return hDeviceVCPU;
 }
 

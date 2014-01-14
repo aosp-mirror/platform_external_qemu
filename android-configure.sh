@@ -253,6 +253,15 @@ if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
         fi
     fi
 else
+    if [ -n "$USE_CCACHE" ]; then
+        CCACHE=$(which ccache 2>/dev/null)
+        if [ -n "$CCACHE" -a -f "$CCACHE" ] ; then
+            CC="$CCACHE $CC"
+            log "Prebuilt   : CCACHE=$CCACHE"
+	else
+            log "Prebuilt   : CCACHE can't be found"
+        fi
+    fi
     if [ "$GLES_PROBE" = "yes" ]; then
         GLES_SUPPORT=yes
         if [ -z "$GLES_INCLUDE" ]; then

@@ -33,7 +33,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "bswap.h"
+#include "qemu/bswap.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 #include "android/snapshot.h"

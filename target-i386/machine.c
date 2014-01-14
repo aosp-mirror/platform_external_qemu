@@ -1,10 +1,10 @@
 #include "hw/hw.h"
 #include "hw/boards.h"
-#include "hw/pc.h"
-#include "hw/isa.h"
+#include "hw/i386/pc.h"
+#include "hw/isa/isa.h"
 
-#include "exec-all.h"
-#include "kvm.h"
+#include "exec/exec-all.h"
+#include "sysemu/kvm.h"
 
 static void cpu_put_seg(QEMUFile *f, SegmentCache *dt)
 {

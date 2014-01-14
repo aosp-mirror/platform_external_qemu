@@ -26,8 +26,8 @@
 #include <inttypes.h>
 
 #include "cpu.h"
-#include "exec-all.h"
-#include "disas.h"
+#include "exec/exec-all.h"
+#include "disas/disas.h"
 #include "tcg-op.h"
 #include "qemu-common.h"
 
@@ -433,7 +433,7 @@ static TCGv cpu_dspctrl, btarget, bcond;
 static TCGv_i32 hflags;
 static TCGv_i32 fpu_fcr0, fpu_fcr31;
 
-#include "gen-icount.h"
+#include "exec/gen-icount.h"
 
 #define gen_helper_0i(name, arg) do {                             \
     TCGv_i32 helper_tmp = tcg_const_i32(arg);                     \
@@ -8588,7 +8588,7 @@ CPUMIPSState *cpu_mips_init (const char *cpu_model)
     def = cpu_mips_find_by_name(cpu_model);
     if (!def)
         return NULL;
-    env = qemu_mallocz(sizeof(CPUMIPSState));
+    env = g_malloc0(sizeof(CPUMIPSState));
     env->cpu_model = def;
     env->cpu_model_str = cpu_model;
 
