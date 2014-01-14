@@ -23,7 +23,7 @@
 #define ANDROID_SYNC_UTILS_H
 
 #include "android/android.h"
-#include "sockets.h"
+#include "android/sockets.h"
 
 /* Descriptor for a connected non-blocking socket providing synchronous I/O */
 typedef struct SyncSocket SyncSocket;

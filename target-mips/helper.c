@@ -24,7 +24,7 @@
 #include <signal.h>
 
 #include "cpu.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 
 enum {
     TLBRET_DIRTY = -4,
@@ -35,7 +35,7 @@ enum {
 };
 
 /* no MMU emulation */
-int no_mmu_map_address (CPUState *env, target_phys_addr_t *physical, int *prot,
+int no_mmu_map_address (CPUState *env, hwaddr *physical, int *prot,
                         target_ulong address, int rw, int access_type)
 {
     *physical = address;
@@ -44,7 +44,7 @@ int no_mmu_map_address (CPUState *env, target_phys_addr_t *physical, int *prot,
 }
 
 /* fixed mapping MMU emulation */
-int fixed_mmu_map_address (CPUState *env, target_phys_addr_t *physical, int *prot,
+int fixed_mmu_map_address (CPUState *env, hwaddr *physical, int *prot,
                            target_ulong address, int rw, int access_type)
 {
     if (address <= (int32_t)0x7FFFFFFFUL) {
@@ -62,7 +62,7 @@ int fixed_mmu_map_address (CPUState *env, target_phys_addr_t *physical, int *pro
 }
 
 /* MIPS32/MIPS64 R4000-style MMU emulation */
-int r4k_map_address (CPUState *env, target_phys_addr_t *physical, int *prot,
+int r4k_map_address (CPUState *env, hwaddr *physical, int *prot,
                      target_ulong address, int rw, int access_type)
 {
     uint8_t ASID = env->CP0_EntryHi & 0xFF;
@@ -105,7 +105,7 @@ int r4k_map_address (CPUState *env, target_phys_addr_t *physical, int *prot,
 }
 
 #if !defined(CONFIG_USER_ONLY)
-static int get_physical_address (CPUState *env, target_phys_addr_t *physical,
+static int get_physical_address (CPUState *env, hwaddr *physical,
                                 int *prot, target_ulong address,
                                 int rw, int access_type)
 {
@@ -439,7 +439,7 @@ int cpu_mips_handle_mmu_fault (CPUState *env, target_ulong address, int rw,
                                int mmu_idx, int is_softmmu)
 {
 #if !defined(CONFIG_USER_ONLY)
-    target_phys_addr_t physical;
+    hwaddr physical;
     int prot;
 #endif
     int exception = 0, error_code = 0;
@@ -483,9 +483,9 @@ int cpu_mips_handle_mmu_fault (CPUState *env, target_ulong address, int rw,
 }
 
 #if !defined(CONFIG_USER_ONLY)
-target_phys_addr_t cpu_mips_translate_address(CPUState *env, target_ulong address, int rw)
+hwaddr cpu_mips_translate_address(CPUState *env, target_ulong address, int rw)
 {
-    target_phys_addr_t physical;
+    hwaddr physical;
     int prot;
     int access_type;
     int ret = 0;
@@ -505,12 +505,12 @@ target_phys_addr_t cpu_mips_translate_address(CPUState *env, target_ulong addres
 }
 #endif
 
-target_phys_addr_t cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
+hwaddr cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
 {
 #if defined(CONFIG_USER_ONLY)
     return addr;
 #else
-    target_phys_addr_t phys_addr;
+    hwaddr phys_addr;
     int prot, ret;
 
     ret = get_physical_address(env, &phys_addr, &prot, addr, 0, ACCESS_INT);

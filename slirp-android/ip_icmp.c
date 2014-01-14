@@ -32,7 +32,7 @@
 
 #include "slirp.h"
 #include "ip_icmp.h"
-#include "sockets.h"
+#include "android/sockets.h"
 
 #ifdef LOG_ENABLED
 struct icmpstat icmpstat;

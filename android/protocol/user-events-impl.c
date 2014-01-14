@@ -15,7 +15,7 @@
  * handle user events sent from the UI.
  */
 
-#include "user-events.h"
+#include "android/user-events.h"
 #include "android/globals.h"
 #include "android/android.h"
 #include "android/looper.h"

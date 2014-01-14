@@ -12,12 +12,12 @@
  */
 
 #include "qemu-common.h"
-#include "qemu_socket.h"
-#include "migration.h"
-#include "qemu-char.h"
-#include "sysemu.h"
+#include "qemu/sockets.h"
+#include "migration/migration.h"
+#include "sysemu/char.h"
+#include "sysemu/sysemu.h"
 #include "buffered_file.h"
-#include "block.h"
+#include "block/block.h"
 
 //#define DEBUG_MIGRATION_TCP
 
@@ -87,7 +87,7 @@ MigrationState *tcp_start_outgoing_migration(const char *host_port,
     if (parse_host_port(&addr, host_port) < 0)
         return NULL;
 
-    s = qemu_mallocz(sizeof(*s));
+    s = g_malloc0(sizeof(*s));
 
     s->get_error = socket_errno;
     s->write = socket_write;
@@ -101,7 +101,7 @@ MigrationState *tcp_start_outgoing_migration(const char *host_port,
     s->bandwidth_limit = bandwidth_limit;
     s->fd = socket(PF_INET, SOCK_STREAM, 0);
     if (s->fd == -1) {
-        qemu_free(s);
+        g_free(s);
         return NULL;
     }
 
@@ -122,7 +122,7 @@ MigrationState *tcp_start_outgoing_migration(const char *host_port,
     if (ret < 0 && ret != -EINPROGRESS && ret != -EWOULDBLOCK) {
         dprintf("connect failed\n");
         close(s->fd);
-        qemu_free(s);
+        g_free(s);
         return NULL;
     } else if (ret >= 0)
         migrate_fd_connect(s);

@@ -18,7 +18,7 @@
 #include "android/utils/duff.h"
 #include "android/protocol/core-commands-api.h"
 #include <SDL_syswm.h>
-#include "user-events.h"
+#include "android/user-events.h"
 #include <math.h>
 
 #include "android/framebuffer.h"
@@ -974,8 +974,8 @@ add_finger_event(unsigned x, unsigned y, unsigned state)
 {
     //fprintf(stderr, "::: finger %d,%d %d\n", x, y, state);
 
-    /* NOTE: the 0 is used in hw/goldfish_events.c to differentiate
-     * between a touch-screen and a trackball event
+    /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
+     * differentiate between a touch-screen and a trackball event
      */
     user_event_mouse(x, y, 0, state);
 }

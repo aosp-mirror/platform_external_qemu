@@ -25,10 +25,10 @@
 #include <signal.h>
 
 #include "cpu.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 #include "qemu-common.h"
-#include "kvm.h"
-#include "hax.h"
+#include "sysemu/kvm.h"
+#include "exec/hax.h"
 
 //#define DEBUG_MMU
 
@@ -536,7 +536,7 @@ void cpu_reset(CPUX86State *env)
 
 void cpu_x86_close(CPUX86State *env)
 {
-    qemu_free(env);
+    g_free(env);
 }
 
 /***********************************************************/
@@ -953,7 +953,7 @@ int cpu_x86_handle_mmu_fault(CPUX86State *env, target_ulong addr,
     return 1;
 }
 
-target_phys_addr_t cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
+hwaddr cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
 {
     return addr;
 }
@@ -984,7 +984,7 @@ int cpu_x86_handle_mmu_fault(CPUX86State *env, target_ulong addr,
     uint64_t ptep, pte;
     target_ulong pde_addr, pte_addr;
     int error_code, is_dirty, prot, page_size, ret, is_write, is_user;
-    target_phys_addr_t paddr;
+    hwaddr paddr;
     uint32_t page_offset;
     target_ulong vaddr, virt_addr;
 
@@ -1268,11 +1268,11 @@ int cpu_x86_handle_mmu_fault(CPUX86State *env, target_ulong addr,
     return 1;
 }
 
-target_phys_addr_t cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
+hwaddr cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
 {
     target_ulong pde_addr, pte_addr;
     uint64_t pte;
-    target_phys_addr_t paddr;
+    hwaddr paddr;
     uint32_t page_offset;
     int page_size;
 
@@ -1526,7 +1526,7 @@ static void mce_init(CPUX86State *cenv)
         cenv->mcg_cap = MCE_CAP_DEF | MCE_BANKS_DEF;
         cenv->mcg_ctl = ~(uint64_t)0;
         bank_num = cenv->mcg_cap & 0xff;
-        cenv->mce_banks = qemu_mallocz(bank_num * sizeof(uint64_t) * 4);
+        cenv->mce_banks = g_malloc0(bank_num * sizeof(uint64_t) * 4);
         for (bank = 0; bank < bank_num; bank++)
             cenv->mce_banks[bank*4] = ~(uint64_t)0;
     }
@@ -1780,7 +1780,7 @@ CPUX86State *cpu_x86_init(const char *cpu_model)
     CPUX86State *env;
     static int inited;
 
-    env = qemu_mallocz(sizeof(CPUX86State));
+    env = g_malloc0(sizeof(CPUX86State));
     cpu_exec_init(env);
     env->cpu_model_str = cpu_model;
 

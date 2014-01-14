@@ -22,7 +22,7 @@
 
 #include "qemu-common.h"
 #include "cpu.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 
 #define OUTSIDE_JIT
 #define MMUSUFFIX       _outside_jit
@@ -32,16 +32,16 @@
 #define CPU_MMU_INDEX   (cpu_mmu_index(env))
 
 #define SHIFT 0
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 1
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 2
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 3
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #undef CPU_MMU_INDEX
 #undef ACCESS_TYPE

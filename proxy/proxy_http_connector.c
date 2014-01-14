@@ -39,7 +39,7 @@ static void
 connection_free( ProxyConnection*  root )
 {
     proxy_connection_done(root);
-    qemu_free(root);
+    g_free(root);
 }
 
 
@@ -183,7 +183,7 @@ http_connector_connect( HttpService*  service,
     if (s < 0)
         return NULL;
 
-    conn = qemu_mallocz(sizeof(*conn));
+    conn = g_malloc0(sizeof(*conn));
     if (conn == NULL) {
         socket_close(s);
         return NULL;

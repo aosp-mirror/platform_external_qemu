@@ -95,19 +95,28 @@ EMULATOR_COMMON_CFLAGS += -I$(LOCAL_PATH)/$(ZLIB_DIR)
 common_LOCAL_SRC_FILES += $(ZLIB_SOURCES)
 
 ###########################################################
+# GLib sources
+#
+GLIB_DIR := distrib/mini-glib
+include $(LOCAL_PATH)/$(GLIB_DIR)/sources.make
+EMULATOR_COMMON_CFLAGS += -I$(GLIB_INCLUDE_DIR)
+
+common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
+
+###########################################################
 # Android utility functions
 #
 common_LOCAL_SRC_FILES += \
-	sockets.c \
-	iolooper-select.c \
 	android/async-console.c \
 	android/async-utils.c \
 	android/charmap.c \
 	android/framebuffer.c \
+	android/iolooper-select.c \
 	android/keycode-array.c \
 	android/avd/hw-config.c \
 	android/avd/info.c \
 	android/avd/util.c \
+	android/sockets.c \
 	android/sync-utils.c \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
@@ -180,7 +189,7 @@ EMULATOR_LIBUI_CFLAGS += \
     $(LIBPNG_CFLAGS) \
     -I$(LOCAL_PATH)/$(LIBPNG_DIR)
 
-common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) loadpng.c
+common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
 
 ##############################################################################
 # SDL-related definitions
@@ -412,39 +421,19 @@ endif
 # misc. sources
 #
 CORE_MISC_SOURCES = \
-    acl.c \
-    aes.c \
     aio-android.c \
     async.c \
     bt-host.c \
     bt-vhci.c \
     buffered_file.c \
-    cbuffer.c \
-    charpipe.c \
-    console.c \
-    cutils.c \
-    d3des.c \
-    input.c \
     iohandler.c \
     ioport.c \
-    module.c \
-    net-android.c \
-    notify.c \
-    osdep.c \
-    path.c \
     qemu-char.c \
-    qemu-config.c \
-    qemu-error.c \
-    qemu-malloc.c \
-    qemu-option.c \
-    qemu-sockets-android.c \
-    qerror.c \
     readline.c \
     savevm.c \
-    shaper.c \
-    tcpdump.c \
-    vnc-android.c \
     android/boot-properties.c \
+    android/cbuffer.c \
+    android/charpipe.c \
     android/config.c \
     android/core-init-utils.c   \
     android/gps.c \
@@ -457,6 +446,8 @@ CORE_MISC_SOURCES = \
     android/looper-qemu.c \
     android/hw-pipe-net.c \
     android/qemu-setup.c \
+    android/qemu-tcpdump.c \
+    android/shaper.c \
     android/snapshot.c \
     android/async-socket-connector.c \
     android/async-socket.c \
@@ -470,25 +461,42 @@ CORE_MISC_SOURCES = \
     android/snaphost-android.c \
     android/multitouch-screen.c \
     android/multitouch-port.c \
-    android/utils/jpeg-compress.c
+    android/utils/jpeg-compress.c \
+    net/net-android.c \
+    qobject/qerror.c \
+    ui/console.c \
+    ui/d3des.c \
+    ui/input.c \
+    ui/vnc-android.c \
+    util/acl.c \
+    util/aes.c \
+    util/cutils.c \
+    util/module.c \
+    util/notify.c \
+    util/osdep.c \
+    util/path.c \
+    util/qemu-config.c \
+    util/qemu-error.c \
+    util/qemu-option.c \
+    util/qemu-sockets-android.c \
 
 ifeq ($(HOST_ARCH),x86)
-    CORE_MISC_SOURCES += i386-dis.c
+    CORE_MISC_SOURCES += disas/i386.c
 endif
 ifeq ($(HOST_ARCH),x86_64)
-    CORE_MISC_SOURCES += i386-dis.c
+    CORE_MISC_SOURCES += disas/i386.c
 endif
 ifeq ($(HOST_ARCH),ppc)
-    CORE_MISC_SOURCES += ppc-dis.c \
-                         cache-utils.c
+    CORE_MISC_SOURCES += disas/ppc.c \
+                         util/cache-utils.c
 endif
 
 ifeq ($(HOST_OS),linux)
-    CORE_MISC_SOURCES += usb-linux.c \
-                         qemu-thread.c \
+    CORE_MISC_SOURCES += hw/usb/usb-linux.c \
+                         util/qemu-thread.c \
                          android/camera/camera-capture-linux.c
 else
-    CORE_MISC_SOURCES += usb-dummy-android.c
+    CORE_MISC_SOURCES += hw/usb/usb-dummy-android.c
 endif
 
 ifeq ($(HOST_OS),windows)
@@ -560,16 +568,16 @@ EMULATOR_LIBQEMU_CFLAGS += -I$(LOCAL_PATH)/telephony
 # integrated into android emulator
 #
 common_LOCAL_SRC_FILES += \
-    json-lexer.c \
-    json-parser.c \
-    json-streamer.c \
-    qjson.c \
-    qbool.c \
-    qdict.c \
-    qfloat.c \
-    qint.c \
-    qlist.c \
-    qstring.c \
+    qobject/json-lexer.c \
+    qobject/json-parser.c \
+    qobject/json-streamer.c \
+    qobject/qjson.c \
+    qobject/qbool.c \
+    qobject/qdict.c \
+    qobject/qfloat.c \
+    qobject/qint.c \
+    qobject/qlist.c \
+    qobject/qstring.c \
 
 ifeq ($(QEMU_TARGET_XML_SOURCES),)
     QEMU_TARGET_XML_SOURCES := arm-core arm-neon arm-vfp arm-vfp3

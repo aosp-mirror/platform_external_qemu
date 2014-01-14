@@ -7,23 +7,23 @@
  * (GNU GPL), version 2 or later.
  */
 
-#include "dma.h"
-#include "block_int.h"
+#include "sysemu/dma.h"
+#include "block/block_int.h"
 
 void qemu_sglist_init(QEMUSGList *qsg, int alloc_hint)
 {
-    qsg->sg = qemu_malloc(alloc_hint * sizeof(ScatterGatherEntry));
+    qsg->sg = g_malloc(alloc_hint * sizeof(ScatterGatherEntry));
     qsg->nsg = 0;
     qsg->nalloc = alloc_hint;
     qsg->size = 0;
 }
 
-void qemu_sglist_add(QEMUSGList *qsg, target_phys_addr_t base,
-                     target_phys_addr_t len)
+void qemu_sglist_add(QEMUSGList *qsg, hwaddr base,
+                     hwaddr len)
 {
     if (qsg->nsg == qsg->nalloc) {
         qsg->nalloc = 2 * qsg->nalloc + 1;
-        qsg->sg = qemu_realloc(qsg->sg, qsg->nalloc * sizeof(ScatterGatherEntry));
+        qsg->sg = g_realloc(qsg->sg, qsg->nalloc * sizeof(ScatterGatherEntry));
     }
     qsg->sg[qsg->nsg].base = base;
     qsg->sg[qsg->nsg].len = len;
@@ -33,7 +33,7 @@ void qemu_sglist_add(QEMUSGList *qsg, target_phys_addr_t base,
 
 void qemu_sglist_destroy(QEMUSGList *qsg)
 {
-    qemu_free(qsg->sg);
+    g_free(qsg->sg);
 }
 
 typedef struct {
@@ -44,7 +44,7 @@ typedef struct {
     uint64_t sector_num;
     int is_write;
     int sg_cur_index;
-    target_phys_addr_t sg_cur_byte;
+    hwaddr sg_cur_byte;
     QEMUIOVector iov;
     QEMUBH *bh;
 } DMAAIOCB;
@@ -82,7 +82,7 @@ static void dma_bdrv_unmap(DMAAIOCB *dbs)
 static void dma_bdrv_cb(void *opaque, int ret)
 {
     DMAAIOCB *dbs = (DMAAIOCB *)opaque;
-    target_phys_addr_t cur_addr, cur_len;
+    hwaddr cur_addr, cur_len;
     void *mem;
 
     dbs->acb = NULL;

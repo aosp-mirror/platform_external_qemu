@@ -1,4 +1,4 @@
-#include "def-helper.h"
+#include "exec/def-helper.h"
 
 DEF_HELPER_1(clz, i32, i32)
 DEF_HELPER_1(sxtb16, i32, i32)
@@ -474,4 +474,4 @@ DEF_HELPER_2(neon_qzip32, void, i32, i32)
 DEF_HELPER_1(neon_vldst_all, void, i32)
 
 #include "helper-android.h"
-#include "def-helper.h"
+#include "exec/def-helper.h"

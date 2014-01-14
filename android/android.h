@@ -64,7 +64,7 @@ extern const size_t android_netdelays_count;
 extern void  qemu_polling_enable(void);
 extern void  qemu_polling_disable(void);
 
-/**in hw/goldfish_fb.c */
+/**in hw/android/goldfish/fb.c */
 
 /* framebuffer dimensions in pixels, note these can change dynamically */
 extern int  android_framebuffer_w;

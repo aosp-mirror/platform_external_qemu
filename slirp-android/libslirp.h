@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include "sockets.h"
+#include "android/sockets.h"
 #include "slirp.h"
 #ifdef _WIN32
 #  define WIN32_LEAN_AND_MEAN

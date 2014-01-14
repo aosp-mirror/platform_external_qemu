@@ -71,7 +71,7 @@
 /* For the benefit of older linux systems which don't supply it,
    we use a local copy of hpet.h. */
 /* #include <linux/hpet.h> */
-#include "hpet.h"
+#include "hw/timer/hpet.h"
 
 #include <linux/ppdev.h>
 #include <linux/parport.h>
@@ -111,8 +111,8 @@
 #define memalign(align, size) malloc(size)
 #endif
 
-#include "cpus.h"
-#include "arch_init.h"
+#include "sysemu/cpus.h"
+#include "sysemu/arch_init.h"
 
 #ifdef CONFIG_SDL
 #ifdef __APPLE__
@@ -137,35 +137,35 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "hw/boards.h"
 #include "hw/usb.h"
 #include "hw/pcmcia.h"
-#include "hw/pc.h"
-#include "hw/isa.h"
+#include "hw/i386/pc.h"
+#include "hw/isa/isa.h"
 #include "hw/baum.h"
 #include "hw/bt.h"
-#include "hw/watchdog.h"
-#include "hw/smbios.h"
-#include "hw/xen.h"
-#include "bt-host.h"
-#include "net.h"
-#include "monitor.h"
-#include "console.h"
-#include "sysemu.h"
-#include "gdbstub.h"
-#include "qemu-timer.h"
-#include "qemu-char.h"
-#include "cache-utils.h"
-#include "block.h"
-#include "dma.h"
+#include "sysemu/watchdog.h"
+#include "hw/i386/smbios.h"
+#include "hw/xen/xen.h"
+#include "sysemu/bt.h"
+#include "net/net.h"
+#include "monitor/monitor.h"
+#include "ui/console.h"
+#include "sysemu/sysemu.h"
+#include "exec/gdbstub.h"
+#include "qemu/timer.h"
+#include "sysemu/char.h"
+#include "qemu/cache-utils.h"
+#include "block/block.h"
+#include "sysemu/dma.h"
 #include "audio/audio.h"
-#include "migration.h"
-#include "kvm.h"
-#include "balloon.h"
-#include "qemu-option.h"
+#include "migration/migration.h"
+#include "sysemu/kvm.h"
+#include "sysemu/balloon.h"
+#include "qemu/option.h"
 
-#include "disas.h"
+#include "disas/disas.h"
 
-#include "exec-all.h"
+#include "exec/exec-all.h"
 
-#include "qemu_socket.h"
+#include "qemu/sockets.h"
 
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"
@@ -264,7 +264,7 @@ uint8_t qemu_uuid[16];
 /***********************************************************/
 /* x86 ISA bus support */
 
-target_phys_addr_t isa_mem_base = 0;
+hwaddr isa_mem_base = 0;
 PicState2 *isa_pic;
 
 static IOPortReadFunc default_ioport_readb, default_ioport_readw, default_ioport_readl;
@@ -503,7 +503,7 @@ static struct bt_scatternet_s *qemu_find_bt_vlan(int id)
         if (vlan->id == id)
             return &vlan->net;
     }
-    vlan = qemu_mallocz(sizeof(struct bt_vlan_s));
+    vlan = g_malloc0(sizeof(struct bt_vlan_s));
     vlan->id = id;
     pvlan = &first_bt_vlan;
     while (*pvlan != NULL)
@@ -1459,7 +1459,7 @@ void pcmcia_socket_register(PCMCIASocket *socket)
 {
     struct pcmcia_socket_entry_s *entry;
 
-    entry = qemu_malloc(sizeof(struct pcmcia_socket_entry_s));
+    entry = g_malloc(sizeof(struct pcmcia_socket_entry_s));
     entry->socket = socket;
     entry->next = pcmcia_sockets;
     pcmcia_sockets = entry;
@@ -1473,7 +1473,7 @@ void pcmcia_socket_unregister(PCMCIASocket *socket)
     for (entry = *ptr; entry; ptr = &entry->next, entry = *ptr)
         if (entry->socket == socket) {
             *ptr = entry->next;
-            qemu_free(entry);
+            g_free(entry);
         }
 }
 
@@ -1570,7 +1570,7 @@ VMChangeStateEntry *qemu_add_vm_change_state_handler(VMChangeStateHandler *cb,
 {
     VMChangeStateEntry *e;
 
-    e = qemu_mallocz(sizeof (*e));
+    e = g_malloc0(sizeof (*e));
 
     e->cb = cb;
     e->opaque = opaque;
@@ -1581,7 +1581,7 @@ VMChangeStateEntry *qemu_add_vm_change_state_handler(VMChangeStateHandler *cb,
 void qemu_del_vm_change_state_handler(VMChangeStateEntry *e)
 {
     QLIST_REMOVE (e, entries);
-    qemu_free (e);
+    g_free (e);
 }
 
 void vm_state_notify(int running, int reason)
@@ -1664,7 +1664,7 @@ void qemu_register_reset(QEMUResetHandler *func, int order, void *opaque)
     while (*pre != NULL && (*pre)->order >= order) {
         pre = &(*pre)->next;
     }
-    re = qemu_mallocz(sizeof(QEMUResetEntry));
+    re = g_malloc0(sizeof(QEMUResetEntry));
     re->func = func;
     re->opaque = opaque;
     re->order = order;
@@ -1952,7 +1952,7 @@ static char *find_datadir(const char *argv0)
         p--;
     *p = 0;
     if (access(buf, R_OK) == 0) {
-        return qemu_strdup(buf);
+        return g_strdup(buf);
     }
     return NULL;
 }
@@ -2008,12 +2008,12 @@ static char *find_datadir(const char *argv0)
 
     max_len = strlen(dir) +
         MAX(strlen(SHARE_SUFFIX), strlen(BUILD_SUFFIX)) + 1;
-    res = qemu_mallocz(max_len);
+    res = g_malloc0(max_len);
     snprintf(res, max_len, "%s%s", dir, SHARE_SUFFIX);
     if (access(res, R_OK)) {
         snprintf(res, max_len, "%s%s", dir, BUILD_SUFFIX);
         if (access(res, R_OK)) {
-            qemu_free(res);
+            g_free(res);
             res = NULL;
         }
     }
@@ -2035,7 +2035,7 @@ char *qemu_find_file(int type, const char *name)
     /* If name contains path separators then try it as a straight path.  */
     if ((strchr(name, '/') || strchr(name, '\\'))
         && access(name, R_OK) == 0) {
-        return qemu_strdup(name);
+        return g_strdup(name);
     }
     switch (type) {
     case QEMU_FILE_TYPE_BIOS:
@@ -2048,10 +2048,10 @@ char *qemu_find_file(int type, const char *name)
         abort();
     }
     len = strlen(data_dir) + strlen(name) + strlen(subdir) + 2;
-    buf = qemu_mallocz(len);
+    buf = g_malloc0(len);
     snprintf(buf, len, "%s/%s%s", data_dir, subdir, name);
     if (access(buf, R_OK)) {
-        qemu_free(buf);
+        g_free(buf);
         return NULL;
     }
     return buf;
@@ -2874,12 +2874,12 @@ int main(int argc, char **argv, char **envp)
                         fprintf(stderr, "Too many option ROMs\n");
                         exit(1);
                     }
-                    option_rom[nb_option_roms] = qemu_strdup(buf);
+                    option_rom[nb_option_roms] = g_strdup(buf);
                     nb_option_roms++;
                     netroms++;
                 }
                 if (filename) {
-                    qemu_free(filename);
+                    g_free(filename);
                 }
             }
 	}

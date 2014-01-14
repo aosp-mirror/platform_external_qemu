@@ -960,7 +960,7 @@ static void tcg_out_jmp(TCGContext *s, tcg_target_long dest)
 
 #if defined(CONFIG_SOFTMMU)
 
-#include "../../softmmu_defs.h"
+#include "exec/softmmu_defs.h"
 
 static void *qemu_ld_helpers[4] = {
     __ldb_mmu,

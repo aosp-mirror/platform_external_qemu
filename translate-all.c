@@ -26,10 +26,10 @@
 
 #define NO_CPU_IO_DEFS
 #include "cpu.h"
-#include "exec-all.h"
-#include "disas.h"
+#include "exec/exec-all.h"
+#include "disas/disas.h"
 #include "tcg.h"
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 
 /* code generation context */
 TCGContext tcg_ctx;
@@ -148,7 +148,7 @@ int cpu_gen_code(CPUState *env, TranslationBlock *tb, int *gen_code_size_ptr)
     /* Save translated PC -> guest PC map into TB. */
     if (memcheck_enabled && gen_opc_tpc2gpc_pairs && is_cpu_user(env)) {
         tb->tpc2gpc =
-                qemu_malloc(gen_opc_tpc2gpc_pairs * 2 * sizeof(uintptr_t));
+                g_malloc(gen_opc_tpc2gpc_pairs * 2 * sizeof(uintptr_t));
         if (tb->tpc2gpc != NULL) {
             memcpy(tb->tpc2gpc, gen_opc_tpc2gpc_ptr,
                    gen_opc_tpc2gpc_pairs * 2 * sizeof(uintptr_t));

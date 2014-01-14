@@ -80,8 +80,8 @@ I/O memory, as well as providing read/write callbacks for it. Then actions
 will be based on which offset of the I/O memory is read from/written to and
 eventually with which value.
 
-You can have a look at hw/goldfish_tty.c that implements an emulated serial
-port for the Goldfish platform.
+You can have a look at hw/android/goldfish/tty.c that implements an
+emulated serial port for the Goldfish platform.
 
 "Goldfish" is simply the name of the virtual Linux platform used to build
 the Android-emulator-specific kernel image. The corresponding sources are
