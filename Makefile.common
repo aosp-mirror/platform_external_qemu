@@ -149,17 +149,14 @@ $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
 ## another for 64-bit
-# NOTE: only linux and darwin in non-standalone mode is supported, because
-#  1) For Windows: amd64-mingw32msvc-gcc doesn't work, see http://b/issue?id=5949152.
-#  2) Standalone has --try-64
+# NOTE: only linux and darwin is supported, because for Windows,
+# amd64-mingw32msvc-gcc doesn't work, see http://b/issue?id=5949152.
 ifneq ($(filter linux darwin,$(HOST_OS)),)
-  ifneq ($(BUILD_STANDALONE_EMULATOR),true)
-    $(call start-emulator-library, emulator64-common)
-    LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
-    LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-    $(call gen-hw-config-defs)
-    $(call end-emulator-library)
-  endif # BUILD_STANDALONE_EMULATOR == nil
+  $(call start-emulator-library, emulator64-common)
+  LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
+  LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+  $(call gen-hw-config-defs)
+  $(call end-emulator-library)
 endif # HOST_OS == linux || darwin
 
 ##############################################################################
@@ -298,13 +295,11 @@ $(call end-emulator-library)
 
 ## another for 64-bit, see note in emulator64-common
 ifneq ($(filter linux darwin,$(HOST_OS)),)
-  ifneq ($(BUILD_STANDALONE_EMULATOR),true)
-    $(call start-emulator-library, emulator64-libui)
-    LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
-    LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-    $(call gen-hw-config-defs)
-    $(call end-emulator-library)
-  endif # BUILD_STANDALONE_EMULATOR == nil
+  $(call start-emulator-library, emulator64-libui)
+  LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
+  LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+  $(call gen-hw-config-defs)
+  $(call end-emulator-library)
 endif # HOST_OS == linux || darwin
 
 
@@ -609,25 +604,23 @@ $(call end-emulator-library)
 
 ## another for 64-bit, see note in emulator64-common
 ifneq ($(filter linux darwin,$(HOST_OS)),)
-  ifneq ($(BUILD_STANDALONE_EMULATOR),true)
-    $(call start-emulator-library, emulator64-libqemu)
-    # gdbstub-xml.c contains C-compilable arrays corresponding to the content
-    # of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
-    #
-    intermediates = $(call intermediates-dir-for,STATIC_LIBRARIES,$(LOCAL_MODULE),true)
-    QEMU_GDBSTUB_XML_C = $(intermediates)/gdbstub-xml.c
-    $(QEMU_GDBSTUB_XML_C): PRIVATE_PATH := $(LOCAL_PATH)
-    $(QEMU_GDBSTUB_XML_C): PRIVATE_SOURCES := $(TARGET_XML_SOURCES)
-    $(QEMU_GDBSTUB_XML_C): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/feature_to_c.sh $@ $(QEMU_TARGET_XML_SOURCES)
-    $(QEMU_GDBSTUB_XML_C): $(QEMU_TARGET_XML_SOURCES) $(LOCAL_PATH)/feature_to_c.sh
+  $(call start-emulator-library, emulator64-libqemu)
+  # gdbstub-xml.c contains C-compilable arrays corresponding to the content
+  # of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
+  #
+  intermediates = $(call intermediates-dir-for,STATIC_LIBRARIES,$(LOCAL_MODULE),true)
+  QEMU_GDBSTUB_XML_C = $(intermediates)/gdbstub-xml.c
+  $(QEMU_GDBSTUB_XML_C): PRIVATE_PATH := $(LOCAL_PATH)
+  $(QEMU_GDBSTUB_XML_C): PRIVATE_SOURCES := $(TARGET_XML_SOURCES)
+  $(QEMU_GDBSTUB_XML_C): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/feature_to_c.sh $@ $(QEMU_TARGET_XML_SOURCES)
+  $(QEMU_GDBSTUB_XML_C): $(QEMU_TARGET_XML_SOURCES) $(LOCAL_PATH)/feature_to_c.sh
 	$(hide) rm -f $@
 	$(transform-generated-source)
-    LOCAL_GENERATED_SOURCES += $(QEMU_GDBSTUB_XML_C)
-    LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(intermediates) -m64
-    LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-    $(call gen-hw-config-defs)
-    $(call end-emulator-library)
-  endif # BUILD_STANDALONE_EMULATOR == nil
+  LOCAL_GENERATED_SOURCES += $(QEMU_GDBSTUB_XML_C)
+  LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(intermediates) -m64
+  LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+  $(call gen-hw-config-defs)
+  $(call end-emulator-library)
 endif # HOST_OS == linux || darwin
 
 
@@ -693,19 +686,17 @@ $(call end-emulator-library)
 
 ## another for 64-bit, see note in emulator64-common
 ifneq ($(filter linux darwin,$(HOST_OS)),)
-  ifneq ($(BUILD_STANDALONE_EMULATOR),true)
-    $(call start-emulator-library, emulator64-libjpeg)
-    LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
-    LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-    $(call end-emulator-library)
-  endif # BUILD_STANDALONE_EMULATOR == nil
+  $(call start-emulator-library, emulator64-libjpeg)
+  LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
+  LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+  $(call end-emulator-library)
 endif # HOST_OS == linux
 
 
 ##############################################################################
 ##############################################################################
 ###
-###  emulator-libelff: TARGET-INDEPENDENT ELF/DWARD PARSER
+###  emulator-libelff: TARGET-INDEPENDENT ELF/DWARF PARSER
 ###
 ###  THESE ARE USED BY EVERYTHING EXCEPT 'emulator-ui', BUT WE CANNOT PUT
 ###  THEM IN emulator-libqemu SINCE THE SOURCES ARE C++
@@ -743,13 +734,11 @@ $(call end-emulator-library)
 
 ## another for 64-bit, see note in emulator64-common
 ifneq ($(filter linux darwin,$(HOST_OS)),)
-  ifneq ($(BUILD_STANDALONE_EMULATOR),true)
-    $(call start-emulator-library, emulator64-libelff)
-    LOCAL_CPP_EXTENSION := .cc
-    LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
-    LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-    $(call end-emulator-library)
-  endif # BUILD_STANDALONE_EMULATOR == nil
+  $(call start-emulator-library, emulator64-libelff)
+  LOCAL_CPP_EXTENSION := .cc
+  LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
+  LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+  $(call end-emulator-library)
 endif # HOST_OS == linux || darwin
 
 
