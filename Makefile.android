@@ -1,18 +1,6 @@
 ifneq ($(filter true% %true,$(BUILD_EMULATOR)$(BUILD_STANDALONE_EMULATOR)),)
 
-ifneq (,$(filter $(TARGET_ARCH),arm x86 mips))
 LOCAL_PATH:= $(call my-dir)
-
-# determine the target cpu
-ifeq ($(TARGET_ARCH),arm)
-EMULATOR_TARGET_CPU := target-arm
-endif
-ifeq ($(TARGET_ARCH),x86)
-EMULATOR_TARGET_CPU := target-i386
-endif
-ifeq ($(TARGET_ARCH),mips)
-EMULATOR_TARGET_CPU := target-mips
-endif
 
 # determine the host tag to use
 QEMU_HOST_TAG := $(HOST_PREBUILT_TAG)
@@ -280,51 +268,6 @@ endif
 
 $(call end-emulator-program)
 
-##############################################################################
-##############################################################################
-###
-###  emulator-ui: UI FRONT-END PROGRAM
-###
-###
-$(call start-emulator-program, emulator-ui)
-
-LOCAL_STATIC_LIBRARIES := \
-    emulator-common \
-    emulator-libui \
-    emulator-common \
-
-LOCAL_CFLAGS += -DCONFIG_STANDALONE_UI=1
-
-LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS) $(EMULATOR_LIBUI_CFLAGS)
-LOCAL_LDLIBS += $(EMULATOR_COMMON_LDLIBS) $(EMULATOR_LIBUI_LDLIBS)
-
-LOCAL_SRC_FILES := \
-    android/cmdline-option.c \
-    android/config.c \
-    android/help.c \
-    android/looper-generic.c \
-    android/snapshot.c \
-    android/main-common.c \
-    android/main.c \
-    android/opengles.c \
-    android/utils/setenv.c \
-    vl-android-ui.c \
-    android/protocol/core-connection.c \
-    android/protocol/attach-ui-impl.c \
-    android/protocol/fb-updates-impl.c \
-    android/protocol/ui-commands-impl.c \
-    android/protocol/core-commands-proxy.c \
-    android/protocol/user-events-proxy.c \
-
-$(call gen-hw-config-defs,android/main-common.c)
-
-LOCAL_SRC_FILES += $(SDLMAIN_SOURCES)
-
-LOCAL_STATIC_LIBRARIES += $(SDL_STATIC_LIBRARIES)
-
-$(call end-emulator-program)
-
 ## VOILA!!
 
-endif  # TARGET_ARCH == arm || TARGET_ARCH == x86 || TARGET_ARCH == mips
 endif  # BUILD_EMULATOR == true || BUILD_STANDALONE_EMULATOR == true
