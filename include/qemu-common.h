@@ -14,21 +14,13 @@
 
 #include "qemu/compiler.h"
 #include "config-host.h"
+#include "qemu/typedefs.h"
 
 #if defined(__arm__) || defined(__sparc__) || defined(__mips__) || defined(__hppa__) || defined(__ia64__)
 #define WORDS_ALIGNED
 #endif
 
 #define TFR(expr) do { if ((expr) != -1) break; } while (errno == EINTR)
-
-
-typedef struct QEMUTimer QEMUTimer;
-typedef struct QEMUFile QEMUFile;
-typedef struct QEMUBH QEMUBH;
-typedef struct DeviceState DeviceState;
-
-struct Monitor;
-typedef struct Monitor Monitor;
 
 /* we put basic includes here to avoid repeating them in device drivers */
 #include <stdlib.h>
@@ -278,41 +270,6 @@ struct ParallelIOArg {
 
 typedef int (*DMA_transfer_handler) (void *opaque, int nchan, int pos, int size);
 
-/* A load of opaque types so that device init declarations don't have to
-   pull in all the real definitions.  */
-typedef struct NICInfo NICInfo;
-typedef struct HCIInfo HCIInfo;
-typedef struct AudioState AudioState;
-typedef struct BlockDriverState BlockDriverState;
-typedef struct DriveInfo DriveInfo;
-typedef struct DisplayState DisplayState;
-typedef struct DisplayChangeListener DisplayChangeListener;
-typedef struct DisplaySurface DisplaySurface;
-typedef struct DisplayAllocator DisplayAllocator;
-typedef struct PixelFormat PixelFormat;
-typedef struct TextConsole TextConsole;
-typedef TextConsole QEMUConsole;
-typedef struct CharDriverState CharDriverState;
-typedef struct MACAddr MACAddr;
-typedef struct VLANState VLANState;
-typedef struct VLANClientState VLANClientState;
-typedef struct i2c_bus i2c_bus;
-typedef struct i2c_slave i2c_slave;
-typedef struct SMBusDevice SMBusDevice;
-typedef struct PCIHostState PCIHostState;
-typedef struct PCIExpressHost PCIExpressHost;
-typedef struct PCIBus PCIBus;
-typedef struct PCIDevice PCIDevice;
-typedef struct SerialState SerialState;
-typedef struct IRQState *qemu_irq;
-typedef struct PCMCIACardState PCMCIACardState;
-typedef struct MouseTransformInfo MouseTransformInfo;
-typedef struct uWireSlave uWireSlave;
-typedef struct I2SCodec I2SCodec;
-typedef struct SSIBus SSIBus;
-typedef struct EventNotifier EventNotifier;
-typedef struct VirtIODevice VirtIODevice;
-
 typedef uint64_t pcibus_t;
 
 typedef enum {
@@ -377,16 +334,12 @@ typedef struct QEMUIOVector {
 void qemu_iovec_init(QEMUIOVector *qiov, int alloc_hint);
 void qemu_iovec_init_external(QEMUIOVector *qiov, struct iovec *iov, int niov);
 void qemu_iovec_add(QEMUIOVector *qiov, void *base, size_t len);
-void qemu_iovec_copy(QEMUIOVector *dst, QEMUIOVector *src, uint64_t skip,
-    size_t size);
-void qemu_iovec_concat(QEMUIOVector *dst, QEMUIOVector *src, size_t size);
+void qemu_iovec_concat(QEMUIOVector *dst, QEMUIOVector *src, size_t offset, size_t size);
 void qemu_iovec_destroy(QEMUIOVector *qiov);
 void qemu_iovec_reset(QEMUIOVector *qiov);
-void qemu_iovec_to_buffer(QEMUIOVector *qiov, void *buf);
-void qemu_iovec_from_buffer(QEMUIOVector *qiov, const void *buf, size_t count);
-void qemu_iovec_memset(QEMUIOVector *qiov, int c, size_t count);
-void qemu_iovec_memset_skip(QEMUIOVector *qiov, int c, size_t count,
-                            size_t skip);
+size_t qemu_iovec_to_buf(QEMUIOVector *qiov, size_t offset, void *buf, size_t count);
+size_t qemu_iovec_from_buf(QEMUIOVector *qiov, size_t offset, const void *buf, size_t count);
+size_t qemu_iovec_memset(QEMUIOVector *qiov, size_t offset, int c, size_t count);
 
 bool buffer_is_zero(const void *buf, size_t len);
 
@@ -463,6 +416,14 @@ int64_t pow2floor(int64_t value);
 int uleb128_encode_small(uint8_t *out, uint32_t n);
 int uleb128_decode_small(const uint8_t *in, uint32_t *n);
 
+/* unicode.c */
+int mod_utf8_codepoint(const char *s, size_t n, char **end);
+
+/*
+ * Hexdump a buffer to a file. An optional string prefix is added to every line
+ */
+
+void qemu_hexdump(const char *buf, FILE *fp, const char *prefix, size_t size);
 
 /*
  * A fixer for timeout value passed to select() on Mac. The issue is that Mac's
