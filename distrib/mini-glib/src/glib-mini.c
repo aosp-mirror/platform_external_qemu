@@ -155,3 +155,133 @@ int g_vasprintf(char** str, const char* fmt, va_list args) {
   return len;
 #endif
 }
+
+
+// Single-linked list
+
+static GSList* _g_slist_alloc(void) {
+  return (GSList*) g_malloc(sizeof(GSList));
+}
+
+void g_slist_free(GSList* list) {
+  while (list) {
+    GSList* next = list->next;
+    g_free(list);
+    list = next;
+  }
+}
+
+GSList* g_slist_last(GSList* list) {
+  while (list && list->next)
+    list = list->next;
+  return list;
+}
+
+GSList* g_slist_find(GSList* list, const void* data) {
+  while (list) {
+    if (list->data == data)
+      break;
+    list = list->next;
+  }
+  return list;
+}
+
+GSList* g_slist_append(GSList* list, void* data) {
+  GSList* new_list = _g_slist_alloc();
+  new_list->data = data;
+  new_list->next = NULL;
+
+  if (!list)
+    return new_list;
+
+  GSList* last = g_slist_last(list);
+  last->next = new_list;
+  return list;
+}
+
+GSList* g_slist_prepend(GSList* list, void* data) {
+  GSList* new_list = _g_slist_alloc();
+  new_list->data = data;
+  new_list->next = list;
+  return new_list;
+}
+
+GSList* g_slist_remove(GSList* list, const void* data) {
+  GSList** pnode = &list;
+  for (;;) {
+    GSList* node = *pnode;
+    if (!node)
+      break;
+    if (node->data == data) {
+      *pnode = node->next;
+      g_slist_free(node);
+      break;
+    }
+    pnode = &node->next;
+  }
+  return list;
+}
+
+void g_slist_foreach(GSList* list, GFunc func, void* user_data) {
+  while (list) {
+    GSList* next = list->next;
+    (*func)(list->data, user_data);
+    list = next;
+  }
+}
+
+// 
+static GSList* g_slist_sort_merge(GSList* l1,
+                                  GSList* l2,
+                                  GFunc compare_func,
+                                  void* user_data) {
+  GSList* list = NULL;
+  GSList** tail = &list;
+
+  while (l1 && l2) {
+    int cmp = ((GCompareDataFunc) compare_func)(l1->data, l2->data, user_data);
+    if (cmp <= 0) {
+      *tail = l1;
+      tail = &l1->next;
+      l1 = l1->next;
+    } else {
+      *tail = l2;
+      tail = &l2->next;
+      l2 = l2->next;
+    }
+  }
+  *tail = l1 ? l1 : l2;
+
+  return list;
+}
+
+static GSList* g_slist_sort_real(GSList* list,
+                                 GFunc compare_func,
+                                 void* user_data) {
+
+  if (!list)
+    return NULL;
+  if (!list->next)
+    return list;
+
+  // Split list into two halves.
+  GSList* l1 = list;
+  GSList* l2 = list->next;
+
+  while (l2->next && l2->next->next) {
+    l2 = l2->next->next;
+    l1 = l1->next;
+  }
+  l2 = l1->next;
+  l1->next = NULL;
+
+  return g_slist_sort_merge(
+      g_slist_sort_real(list, compare_func, user_data),
+      g_slist_sort_real(l2, compare_func, user_data),
+      compare_func,
+      user_data);
+}
+
+GSList* g_slist_sort(GSList* list, GCompareFunc compare_func) {
+  return g_slist_sort_real(list, (GFunc) compare_func, NULL);
+}
