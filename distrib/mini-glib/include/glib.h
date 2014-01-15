@@ -53,4 +53,8 @@ char* g_strndup(const char* str, size_t size);
 char* g_strdup_printf(const char* fmt, ...);
 char* g_strdup_vprintf(const char* fmt, va_list args);
 
+#ifdef _WIN32
+char* g_win32_error_message(int error);
+#endif
+
 #endif  // GLIB_H
