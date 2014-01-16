@@ -13,9 +13,24 @@
 
 #include <glib.h>
 
+#include <assert.h>
 #include <wchar.h>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+
+// Atomic operations
+
+void g_atomic_int_inc(int volatile* atomic) {
+  assert(sizeof(LONG) == sizeof(int));
+  InterlockedIncrement((LONG volatile*)atomic);
+}
+
+gboolean g_atomic_int_dec_and_test(int volatile* atomic) {
+  assert(sizeof(LONG) == sizeof(int));
+  return !InterlockedIncrement((LONG volatile*)atomic);
+}
+
+// Win32 error messages.
 
 static char*
 utf16_to_utf8(const wchar_t* wstring, int wstring_len)
