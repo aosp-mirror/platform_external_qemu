@@ -18,15 +18,22 @@
 #include <string.h>
 
 // Print a panic message then exit the program immediately.
+void g_critical(const char* fmt, ...) {
+  va_list args;
+  fprintf(stderr, "CRITICAL: ");
+  va_start(args, fmt);
+  vfprintf(stderr, fmt, args);
+  va_end(args);
+}
+
 void g_panic(const char* fmt, ...) {
   va_list args;
-  fprintf(stderr, "MiniGLib:PANIC: ");
+  fprintf(stderr, "PANIC: ");
   va_start(args, fmt);
   vfprintf(stderr, fmt, args);
   va_end(args);
   exit(1);
 }
-
 
 // Heap allocation.
 

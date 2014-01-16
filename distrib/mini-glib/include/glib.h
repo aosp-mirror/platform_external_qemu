@@ -45,10 +45,19 @@ typedef gboolean (*GHRFunc)(gpointer key,
                             gpointer value,
                             gpointer user_data);
 
+// Constants.
+
+#ifdef _WIN32
+#define G_DIR_SEPARATOR_S "\\"
+#else
+#define G_DIR_SEPARATOR_S  "/"
+#endif
+
 // Testing
 
 // TODO(digit): Turn assertions on.
 
+void g_critical(const char* fmt, ...);
 
 void g_panic(const char* fmt, ...) __attribute__((noreturn));
 
