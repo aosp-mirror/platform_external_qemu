@@ -426,6 +426,7 @@ CORE_MISC_SOURCES = \
     iohandler.c \
     ioport.c \
     qemu-char.c \
+    qemu-log.c \
     readline.c \
     savevm.c \
     android/boot-properties.c \
