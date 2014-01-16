@@ -75,20 +75,6 @@
 #define TIME_MAX LONG_MAX
 #endif
 
-#ifndef CONFIG_IOVEC
-#define CONFIG_IOVEC
-struct iovec {
-    void *iov_base;
-    size_t iov_len;
-};
-/*
- * Use the same value as Linux for now.
- */
-#define IOV_MAX		1024
-#else
-#include <sys/uio.h>
-#endif
-
 typedef int (*fprintf_function)(FILE *f, const char *fmt, ...)
     GCC_FMT_ATTR(2, 3);
 
@@ -240,6 +226,10 @@ void qemu_mutex_unlock_iothread(void);
 int qemu_open(const char *name, int flags, ...);
 ssize_t qemu_write_full(int fd, const void *buf, size_t count)
     QEMU_WARN_UNUSED_RESULT;
+ssize_t qemu_send_full(int fd, const void *buf, size_t count, int flags)
+    QEMU_WARN_UNUSED_RESULT;
+ssize_t qemu_recv_full(int fd, void *buf, size_t count, int flags)
+    QEMU_WARN_UNUSED_RESULT;
 void qemu_set_cloexec(int fd);
 
 #ifndef _WIN32
@@ -247,6 +237,36 @@ int qemu_add_child_watch(pid_t pid);
 int qemu_eventfd(int pipefd[2]);
 int qemu_pipe(int pipefd[2]);
 #endif
+
+#ifdef CONFIG_ANDROID
+int qemu_recv(int sock, void* buf, size_t len, int flags);
+
+int qemu_getsockopt(int sockfd, int level, int optname,
+                    void* optval, size_t* optlen);
+
+int qemu_setsockopt(int sockfd, int level, int optname,
+                    const void* optval, size_t optlen);
+
+#else  // !CONFIG_ANDROID
+#ifdef _WIN32
+/* MinGW needs type casts for the 'buf' and 'optval' arguments. */
+#define qemu_getsockopt(sockfd, level, optname, optval, optlen) \
+    getsockopt(sockfd, level, optname, optval, optlen);
+#define qemu_setsockopt(sockfd, level, optname, optval, optlen) \
+    setsockopt(sockfd, level, optname, (const void *)optval, optlen)
+#define qemu_recv(sockfd, buf, len, flags) recv(sockfd, (void *)buf, len, flags)
+#define qemu_sendto(sockfd, buf, len, flags, destaddr, addrlen) \
+    sendto(sockfd, (const void *)buf, len, flags, destaddr, addrlen)
+#else
+#define qemu_getsockopt(sockfd, level, optname, optval, optlen) \
+    getsockopt(sockfd, level, optname, optval, optlen)
+#define qemu_setsockopt(sockfd, level, optname, optval, optlen) \
+    setsockopt(sockfd, level, optname, optval, optlen)
+#define qemu_recv(sockfd, buf, len, flags) recv(sockfd, buf, len, flags)
+#define qemu_sendto(sockfd, buf, len, flags, destaddr, addrlen) \
+    sendto(sockfd, buf, len, flags, destaddr, addrlen)
+#endif
+#endif  // !CONFIG_ANDROID
 
 void *get_mmap_addr(unsigned long size);
 
@@ -334,12 +354,19 @@ typedef struct QEMUIOVector {
 void qemu_iovec_init(QEMUIOVector *qiov, int alloc_hint);
 void qemu_iovec_init_external(QEMUIOVector *qiov, struct iovec *iov, int niov);
 void qemu_iovec_add(QEMUIOVector *qiov, void *base, size_t len);
-void qemu_iovec_concat(QEMUIOVector *dst, QEMUIOVector *src, size_t offset, size_t size);
+void qemu_iovec_concat(QEMUIOVector *dst,
+                       QEMUIOVector *src, size_t soffset, size_t sbytes);
+void qemu_iovec_concat_iov(QEMUIOVector *dst,
+                           struct iovec *src_iov, unsigned int src_cnt,
+                           size_t soffset, size_t sbytes);
 void qemu_iovec_destroy(QEMUIOVector *qiov);
 void qemu_iovec_reset(QEMUIOVector *qiov);
-size_t qemu_iovec_to_buf(QEMUIOVector *qiov, size_t offset, void *buf, size_t count);
-size_t qemu_iovec_from_buf(QEMUIOVector *qiov, size_t offset, const void *buf, size_t count);
-size_t qemu_iovec_memset(QEMUIOVector *qiov, size_t offset, int c, size_t count);
+size_t qemu_iovec_to_buf(QEMUIOVector *qiov, size_t offset,
+                         void *buf, size_t bytes);
+size_t qemu_iovec_from_buf(QEMUIOVector *qiov, size_t offset,
+                           const void *buf, size_t bytes);
+size_t qemu_iovec_memset(QEMUIOVector *qiov, size_t offset,
+                         int fillc, size_t bytes);
 
 bool buffer_is_zero(const void *buf, size_t len);
 

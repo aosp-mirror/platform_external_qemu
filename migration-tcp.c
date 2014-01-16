@@ -192,7 +192,7 @@ int tcp_start_incoming_migration(const char *host_port)
         return -socket_error();
 
     val = 1;
-    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char *)&val, sizeof(val));
+    qemu_setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char *)&val, sizeof(val));
 
     if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) == -1)
         goto err;
