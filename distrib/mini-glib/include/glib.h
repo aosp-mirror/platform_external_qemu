@@ -145,6 +145,28 @@ GHashTable* g_hash_table_ref(GHashTable* hash_table);
 void g_hash_table_unref(GHashTable* hash_table);
 
 
+// Queues
+
+typedef struct _GQueueNode GQueueNode;
+
+typedef struct _GQueue {
+  GQueueNode* head;
+  GQueueNode* tail;
+  guint length;
+} GQueue;
+
+GQueue* g_queue_new(void);
+
+void g_queue_free(GQueue* queue);
+
+void g_queue_push_tail(GQueue* queue, void* data);
+
+void* g_queue_peek_head(GQueue* queue);
+
+void* g_queue_pop_head(GQueue* queue);
+
+gboolean g_queue_is_empty(GQueue* queue);
+
 #ifdef _WIN32
 char* g_win32_error_message(int error);
 #endif
