@@ -21,10 +21,10 @@ void mipsnet_init(int base, qemu_irq irq, NICInfo *nd);
 extern void jazz_led_init(hwaddr base);
 
 /* mips_int.c */
-extern void cpu_mips_irq_init_cpu(CPUState *env);
+extern void cpu_mips_irq_init_cpu(CPUOldState *env);
 
 /* mips_timer.c */
-extern void cpu_mips_clock_init(CPUState *);
+extern void cpu_mips_clock_init(CPUOldState *);
 
 /* rc4030.c */
 typedef struct rc4030DMAState *rc4030_dma;

@@ -43,7 +43,7 @@
 #endif
 
 // TODO(digit): Remove this define.
-#define CPUState struct CPUX86State
+#define CPUOldState struct CPUX86State
 
 #define CPUArchState struct CPUX86State
 
@@ -1059,7 +1059,7 @@ static inline int cpu_get_time_fast(void)
 #define MMU_MODE0_SUFFIX _kernel
 #define MMU_MODE1_SUFFIX _user
 #define MMU_USER_IDX 1
-static inline int cpu_mmu_index (CPUState *env)
+static inline int cpu_mmu_index (CPUX86State *env)
 {
     return (env->hflags & HF_CPL_MASK) == 3 ? 1 : 0;
 }
@@ -1073,13 +1073,13 @@ typedef struct CCTable {
 } CCTable;
 
 /* XXX not defined yet. Should be fixed */
-static inline int is_cpu_user(CPUState *env)
+static inline int is_cpu_user(CPUX86State *env)
 {
 	return 0;
 }
 
 #if defined(CONFIG_USER_ONLY)
-static inline void cpu_clone_regs(CPUState *env, target_ulong newsp)
+static inline void cpu_clone_regs(CPUX86State *env, target_ulong newsp)
 {
     if (newsp)
         env->regs[R_ESP] = newsp;
@@ -1092,12 +1092,12 @@ static inline void cpu_clone_regs(CPUState *env, target_ulong newsp)
 
 #include "svm.h"
 
-static inline void cpu_pc_from_tb(CPUState *env, TranslationBlock *tb)
+static inline void cpu_pc_from_tb(CPUX86State *env, TranslationBlock *tb)
 {
     env->eip = tb->pc - tb->cs_base;
 }
 
-static inline void cpu_get_tb_cpu_state(CPUState *env, target_ulong *pc,
+static inline void cpu_get_tb_cpu_state(CPUX86State *env, target_ulong *pc,
                                         target_ulong *cs_base, int *flags)
 {
     *cs_base = env->segs[R_CS].base;
@@ -1106,8 +1106,8 @@ static inline void cpu_get_tb_cpu_state(CPUState *env, target_ulong *pc,
         (env->eflags & (IOPL_MASK | TF_MASK | RF_MASK | VM_MASK));
 }
 
-void apic_init_reset(CPUState *env);
-void apic_sipi(CPUState *env);
-void do_cpu_init(CPUState *env);
-void do_cpu_sipi(CPUState *env);
+void apic_init_reset(CPUX86State *env);
+void apic_sipi(CPUX86State *env);
+void do_cpu_init(CPUX86State *env);
+void do_cpu_sipi(CPUX86State *env);
 #endif /* CPU_I386_H */

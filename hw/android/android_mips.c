@@ -71,7 +71,7 @@ uint32_t switch_test_write(void *opaque, uint32_t state)
 
 #define PHYS_TO_VIRT(x) ((x) | ~(target_ulong)0x7fffffff)
 
-static void android_load_kernel(CPUState *env, int ram_size, const char *kernel_filename,
+static void android_load_kernel(CPUOldState *env, int ram_size, const char *kernel_filename,
               const char *kernel_cmdline, const char *initrd_filename)
 {
     int initrd_size;
@@ -156,7 +156,7 @@ static void android_mips_init_(ram_addr_t ram_size,
     const char *initrd_filename,
     const char *cpu_model)
 {
-    CPUState *env;
+    CPUOldState *env;
     qemu_irq *goldfish_pic;
     int i;
     ram_addr_t ram_offset;

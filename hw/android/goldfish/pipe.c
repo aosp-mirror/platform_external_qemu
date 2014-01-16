@@ -966,7 +966,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
 {
     Pipe** lookup = pipe_list_findp_channel(&dev->pipes, dev->channel);
     Pipe*  pipe   = *lookup;
-    CPUState* env = cpu_single_env;
+    CPUOldState* env = cpu_single_env;
 
     /* Check that we're referring a known pipe channel */
     if (command != PIPE_CMD_OPEN && pipe == NULL) {

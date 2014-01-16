@@ -5,7 +5,7 @@
 #define TIMER_FREQ	100 * 1000 * 1000
 
 /* XXX: do not use a global */
-uint32_t cpu_mips_get_random (CPUState *env)
+uint32_t cpu_mips_get_random (CPUOldState *env)
 {
     static uint32_t lfsr = 1;
     static uint32_t prev_idx = 0;
@@ -20,7 +20,7 @@ uint32_t cpu_mips_get_random (CPUState *env)
 }
 
 /* MIPS R4K timer */
-uint32_t cpu_mips_get_count (CPUState *env)
+uint32_t cpu_mips_get_count (CPUOldState *env)
 {
     if (env->CP0_Cause & (1 << CP0Ca_DC))
         return env->CP0_Count;
@@ -30,7 +30,7 @@ uint32_t cpu_mips_get_count (CPUState *env)
                                TIMER_FREQ, get_ticks_per_sec());
 }
 
-static void cpu_mips_timer_update(CPUState *env)
+static void cpu_mips_timer_update(CPUOldState *env)
 {
     uint64_t now, next;
     uint32_t wait;
@@ -42,7 +42,7 @@ static void cpu_mips_timer_update(CPUState *env)
     qemu_mod_timer(env->timer, next);
 }
 
-void cpu_mips_store_count (CPUState *env, uint32_t count)
+void cpu_mips_store_count (CPUOldState *env, uint32_t count)
 {
     if (env->CP0_Cause & (1 << CP0Ca_DC))
         env->CP0_Count = count;
@@ -56,7 +56,7 @@ void cpu_mips_store_count (CPUState *env, uint32_t count)
     }
 }
 
-void cpu_mips_store_compare (CPUState *env, uint32_t value)
+void cpu_mips_store_compare (CPUOldState *env, uint32_t value)
 {
     env->CP0_Compare = value;
     if (!(env->CP0_Cause & (1 << CP0Ca_DC)))
@@ -66,12 +66,12 @@ void cpu_mips_store_compare (CPUState *env, uint32_t value)
     qemu_irq_lower(env->irq[(env->CP0_IntCtl >> CP0IntCtl_IPTI) & 0x7]);
 }
 
-void cpu_mips_start_count(CPUState *env)
+void cpu_mips_start_count(CPUOldState *env)
 {
     cpu_mips_store_count(env, env->CP0_Count);
 }
 
-void cpu_mips_stop_count(CPUState *env)
+void cpu_mips_stop_count(CPUOldState *env)
 {
     /* Store the current value */
     env->CP0_Count += (uint32_t)muldiv64(qemu_get_clock(vm_clock),
@@ -80,7 +80,7 @@ void cpu_mips_stop_count(CPUState *env)
 
 static void mips_timer_cb (void *opaque)
 {
-    CPUState *env;
+    CPUOldState *env;
 
     env = opaque;
 #if 0
@@ -101,7 +101,7 @@ static void mips_timer_cb (void *opaque)
     qemu_irq_raise(env->irq[(env->CP0_IntCtl >> CP0IntCtl_IPTI) & 0x7]);
 }
 
-void cpu_mips_clock_init (CPUState *env)
+void cpu_mips_clock_init (CPUOldState *env)
 {
     env->timer = qemu_new_timer_ns(vm_clock, &mips_timer_cb, env);
     env->CP0_Compare = 0;

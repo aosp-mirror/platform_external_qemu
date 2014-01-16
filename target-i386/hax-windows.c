@@ -398,7 +398,7 @@ int hax_vcpu_run(struct hax_vcpu_state* vcpu)
         return 0;
 }
 
-int hax_sync_fpu(CPUState *env, struct fx_layout *fl, int set)
+int hax_sync_fpu(CPUX86State *env, struct fx_layout *fl, int set)
 {
     int ret;
     hax_fd fd;
@@ -431,7 +431,7 @@ int hax_sync_fpu(CPUState *env, struct fx_layout *fl, int set)
         return 0;
 }
 
-int hax_sync_msr(CPUState *env, struct hax_msr_data *msrs, int set)
+int hax_sync_msr(CPUX86State *env, struct hax_msr_data *msrs, int set)
 {
     int ret;
     hax_fd fd;
@@ -463,7 +463,7 @@ int hax_sync_msr(CPUState *env, struct hax_msr_data *msrs, int set)
         return 0;
 }
 
-int hax_sync_vcpu_state(CPUState *env, struct vcpu_state_t *state, int set)
+int hax_sync_vcpu_state(CPUX86State *env, struct vcpu_state_t *state, int set)
 {
     int ret;
     hax_fd fd;
@@ -496,7 +496,7 @@ int hax_sync_vcpu_state(CPUState *env, struct vcpu_state_t *state, int set)
         return 0;
 }
 
-int hax_inject_interrupt(CPUState *env, int vector)
+int hax_inject_interrupt(CPUX86State *env, int vector)
 {
     int ret;
     hax_fd fd;

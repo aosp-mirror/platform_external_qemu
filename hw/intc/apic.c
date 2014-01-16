@@ -64,7 +64,7 @@
 #define MAX_APIC_WORDS 8
 
 typedef struct APICState {
-    CPUState *cpu_env;
+    CPUOldState *cpu_env;
     uint32_t apicbase;
     uint8_t id;
     uint8_t arb_id;
@@ -136,7 +136,7 @@ static inline int get_bit(uint32_t *tab, int index)
     return !!(tab[i] & mask);
 }
 
-static void apic_local_deliver(CPUState *env, int vector)
+static void apic_local_deliver(CPUOldState *env, int vector)
 {
     APICState *s = env->apic_state;
     uint32_t lvt = s->lvt[vector];
@@ -167,7 +167,7 @@ static void apic_local_deliver(CPUState *env, int vector)
     }
 }
 
-void apic_deliver_pic_intr(CPUState *env, int level)
+void apic_deliver_pic_intr(CPUOldState *env, int level)
 {
     if (level)
         apic_local_deliver(env, APIC_LVT_LINT0);
@@ -276,7 +276,7 @@ void apic_deliver_irq(uint8_t dest, uint8_t dest_mode,
                      trigger_mode);
 }
 
-void cpu_set_apic_base(CPUState *env, uint64_t val)
+void cpu_set_apic_base(CPUOldState *env, uint64_t val)
 {
     APICState *s = env->apic_state;
 #ifdef DEBUG_APIC
@@ -294,7 +294,7 @@ void cpu_set_apic_base(CPUState *env, uint64_t val)
     }
 }
 
-uint64_t cpu_get_apic_base(CPUState *env)
+uint64_t cpu_get_apic_base(CPUOldState *env)
 {
     APICState *s = env->apic_state;
 #ifdef DEBUG_APIC
@@ -455,7 +455,7 @@ static void apic_get_delivery_bitmask(uint32_t *deliver_bitmask,
 }
 
 
-void apic_init_reset(CPUState *env)
+void apic_init_reset(CPUOldState *env)
 {
     APICState *s = env->apic_state;
     int i;
@@ -490,7 +490,7 @@ static void apic_startup(APICState *s, int vector_num)
     cpu_interrupt(s->cpu_env, CPU_INTERRUPT_SIPI);
 }
 
-void apic_sipi(CPUState *env)
+void apic_sipi(CPUOldState *env)
 {
     APICState *s = env->apic_state;
 
@@ -554,7 +554,7 @@ static void apic_deliver(APICState *s, uint8_t dest, uint8_t dest_mode,
                      trigger_mode);
 }
 
-int apic_get_interrupt(CPUState *env)
+int apic_get_interrupt(CPUOldState *env)
 {
     APICState *s = env->apic_state;
     int intno;
@@ -578,7 +578,7 @@ int apic_get_interrupt(CPUState *env)
     return intno;
 }
 
-int apic_accept_pic_intr(CPUState *env)
+int apic_accept_pic_intr(CPUOldState *env)
 {
     APICState *s = env->apic_state;
     uint32_t lvt0;
@@ -666,7 +666,7 @@ static void apic_mem_writew(void *opaque, hwaddr addr, uint32_t val)
 
 static uint32_t apic_mem_readl(void *opaque, hwaddr addr)
 {
-    CPUState *env;
+    CPUOldState *env;
     APICState *s;
     uint32_t val;
     int index;
@@ -747,7 +747,7 @@ static uint32_t apic_mem_readl(void *opaque, hwaddr addr)
 
 static void apic_mem_writel(void *opaque, hwaddr addr, uint32_t val)
 {
-    CPUState *env;
+    CPUOldState *env;
     APICState *s;
     int index;
 
@@ -933,7 +933,7 @@ static CPUWriteMemoryFunc *apic_mem_write[3] = {
     apic_mem_writel,
 };
 
-int apic_init(CPUState *env)
+int apic_init(CPUOldState *env)
 {
     APICState *s;
 

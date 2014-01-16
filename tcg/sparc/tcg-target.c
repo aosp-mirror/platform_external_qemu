@@ -774,7 +774,7 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
     tcg_out_andi(s, arg1, (CPU_TLB_SIZE - 1) << CPU_TLB_ENTRY_BITS);
 
     /* add arg1, x, arg1 */
-    tcg_out_addi(s, arg1, offsetof(CPUState,
+    tcg_out_addi(s, arg1, offsetof(CPUOldState,
                                    tlb_table[mem_index][0].addr_read));
 
     /* add env, arg1, arg1 */
@@ -986,7 +986,7 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
     tcg_out_andi(s, arg1, (CPU_TLB_SIZE - 1) << CPU_TLB_ENTRY_BITS);
 
     /* add arg1, x, arg1 */
-    tcg_out_addi(s, arg1, offsetof(CPUState,
+    tcg_out_addi(s, arg1, offsetof(CPUOldState,
                                    tlb_table[mem_index][0].addr_write));
 
     /* add env, arg1, arg1 */

@@ -121,10 +121,10 @@ static int in_migration;
 RAMList ram_list = { .blocks = QLIST_HEAD_INITIALIZER(ram_list) };
 #endif
 
-CPUState *first_cpu;
+CPUOldState *first_cpu;
 /* current CPU in the current thread. It is only valid inside
    cpu_exec() */
-CPUState *cpu_single_env;
+CPUOldState *cpu_single_env;
 /* 0 = Do not count executed instructions.
    1 = Precise instruction counting.
    2 = Adaptive rate instruction counting.  */
@@ -390,7 +390,7 @@ static inline PhysPageDesc *phys_page_find(hwaddr index)
 
 #if !defined(CONFIG_USER_ONLY)
 static void tlb_protect_code(ram_addr_t ram_addr);
-static void tlb_unprotect_code_phys(CPUState *env, ram_addr_t ram_addr,
+static void tlb_unprotect_code_phys(CPUOldState *env, ram_addr_t ram_addr,
                                     target_ulong vaddr);
 #define mmap_lock() do { } while(0)
 #define mmap_unlock() do { } while(0)
@@ -535,7 +535,7 @@ void cpu_exec_init_all(unsigned long tb_size)
 
 static void cpu_common_save(QEMUFile *f, void *opaque)
 {
-    CPUState *env = opaque;
+    CPUOldState *env = opaque;
 
     cpu_synchronize_state(env, 0);
 
@@ -545,7 +545,7 @@ static void cpu_common_save(QEMUFile *f, void *opaque)
 
 static int cpu_common_load(QEMUFile *f, void *opaque, int version_id)
 {
-    CPUState *env = opaque;
+    CPUOldState *env = opaque;
 
     if (version_id != CPU_COMMON_SAVE_VERSION)
         return -EINVAL;
@@ -562,9 +562,9 @@ static int cpu_common_load(QEMUFile *f, void *opaque, int version_id)
 }
 #endif
 
-CPUState *qemu_get_cpu(int cpu)
+CPUOldState *qemu_get_cpu(int cpu)
 {
-    CPUState *env = first_cpu;
+    CPUOldState *env = first_cpu;
 
     while (env) {
         if (env->cpu_index == cpu)
@@ -575,9 +575,9 @@ CPUState *qemu_get_cpu(int cpu)
     return env;
 }
 
-void cpu_exec_init(CPUState *env)
+void cpu_exec_init(CPUOldState *env)
 {
-    CPUState **penv;
+    CPUOldState **penv;
     int cpu_index;
 
 #if defined(CONFIG_USER_ONLY)
@@ -635,9 +635,9 @@ static void page_flush_tb(void)
 
 /* flush all the translation blocks */
 /* XXX: tb_flush is currently not thread safe */
-void tb_flush(CPUState *env1)
+void tb_flush(CPUOldState *env1)
 {
-    CPUState *env;
+    CPUOldState *env;
 #if defined(DEBUG_FLUSH)
     printf("qemu: flush code_size=%ld nb_tbs=%d avg_tb_size=%ld\n",
            (unsigned long)(code_gen_ptr - code_gen_buffer),
@@ -781,7 +781,7 @@ static inline void tb_reset_jump(TranslationBlock *tb, int n)
 
 void tb_phys_invalidate(TranslationBlock *tb, target_ulong page_addr)
 {
-    CPUState *env;
+    CPUOldState *env;
     PageDesc *p;
     unsigned int h, n1;
     hwaddr phys_pc;
@@ -898,7 +898,7 @@ static void build_page_bitmap(PageDesc *p)
     }
 }
 
-TranslationBlock *tb_gen_code(CPUState *env,
+TranslationBlock *tb_gen_code(CPUOldState *env,
                               target_ulong pc, target_ulong cs_base,
                               int flags, int cflags)
 {
@@ -948,7 +948,7 @@ void tb_invalidate_phys_page_range(hwaddr start, hwaddr end,
                                    int is_cpu_write_access)
 {
     TranslationBlock *tb, *tb_next, *saved_tb;
-    CPUState *env = cpu_single_env;
+    CPUOldState *env = cpu_single_env;
     target_ulong tb_start, tb_end;
     PageDesc *p;
     int n;
@@ -1085,7 +1085,7 @@ static void tb_invalidate_phys_page(hwaddr addr,
     int n;
 #ifdef TARGET_HAS_PRECISE_SMC
     TranslationBlock *current_tb = NULL;
-    CPUState *env = cpu_single_env;
+    CPUOldState *env = cpu_single_env;
     int current_tb_modified = 0;
     target_ulong current_pc = 0;
     target_ulong current_cs_base = 0;
@@ -1341,7 +1341,7 @@ static void tb_reset_jump_recursive(TranslationBlock *tb)
 }
 
 #if defined(TARGET_HAS_ICE)
-static void breakpoint_invalidate(CPUState *env, target_ulong pc)
+static void breakpoint_invalidate(CPUOldState *env, target_ulong pc)
 {
     hwaddr addr;
     target_ulong pd;
@@ -1361,7 +1361,7 @@ static void breakpoint_invalidate(CPUState *env, target_ulong pc)
 #endif
 
 /* Add a watchpoint.  */
-int cpu_watchpoint_insert(CPUState *env, target_ulong addr, target_ulong len,
+int cpu_watchpoint_insert(CPUOldState *env, target_ulong addr, target_ulong len,
                           int flags, CPUWatchpoint **watchpoint)
 {
     target_ulong len_mask = ~(len - 1);
@@ -1393,7 +1393,7 @@ int cpu_watchpoint_insert(CPUState *env, target_ulong addr, target_ulong len,
 }
 
 /* Remove a specific watchpoint.  */
-int cpu_watchpoint_remove(CPUState *env, target_ulong addr, target_ulong len,
+int cpu_watchpoint_remove(CPUOldState *env, target_ulong addr, target_ulong len,
                           int flags)
 {
     target_ulong len_mask = ~(len - 1);
@@ -1410,7 +1410,7 @@ int cpu_watchpoint_remove(CPUState *env, target_ulong addr, target_ulong len,
 }
 
 /* Remove a specific watchpoint by reference.  */
-void cpu_watchpoint_remove_by_ref(CPUState *env, CPUWatchpoint *watchpoint)
+void cpu_watchpoint_remove_by_ref(CPUOldState *env, CPUWatchpoint *watchpoint)
 {
     QTAILQ_REMOVE(&env->watchpoints, watchpoint, entry);
 
@@ -1420,7 +1420,7 @@ void cpu_watchpoint_remove_by_ref(CPUState *env, CPUWatchpoint *watchpoint)
 }
 
 /* Remove all matching watchpoints.  */
-void cpu_watchpoint_remove_all(CPUState *env, int mask)
+void cpu_watchpoint_remove_all(CPUOldState *env, int mask)
 {
     CPUWatchpoint *wp, *next;
 
@@ -1431,7 +1431,7 @@ void cpu_watchpoint_remove_all(CPUState *env, int mask)
 }
 
 /* Add a breakpoint.  */
-int cpu_breakpoint_insert(CPUState *env, target_ulong pc, int flags,
+int cpu_breakpoint_insert(CPUOldState *env, target_ulong pc, int flags,
                           CPUBreakpoint **breakpoint)
 {
 #if defined(TARGET_HAS_ICE)
@@ -1459,7 +1459,7 @@ int cpu_breakpoint_insert(CPUState *env, target_ulong pc, int flags,
 }
 
 /* Remove a specific breakpoint.  */
-int cpu_breakpoint_remove(CPUState *env, target_ulong pc, int flags)
+int cpu_breakpoint_remove(CPUOldState *env, target_ulong pc, int flags)
 {
 #if defined(TARGET_HAS_ICE)
     CPUBreakpoint *bp;
@@ -1477,7 +1477,7 @@ int cpu_breakpoint_remove(CPUState *env, target_ulong pc, int flags)
 }
 
 /* Remove a specific breakpoint by reference.  */
-void cpu_breakpoint_remove_by_ref(CPUState *env, CPUBreakpoint *breakpoint)
+void cpu_breakpoint_remove_by_ref(CPUOldState *env, CPUBreakpoint *breakpoint)
 {
 #if defined(TARGET_HAS_ICE)
     QTAILQ_REMOVE(&env->breakpoints, breakpoint, entry);
@@ -1489,7 +1489,7 @@ void cpu_breakpoint_remove_by_ref(CPUState *env, CPUBreakpoint *breakpoint)
 }
 
 /* Remove all matching breakpoints. */
-void cpu_breakpoint_remove_all(CPUState *env, int mask)
+void cpu_breakpoint_remove_all(CPUOldState *env, int mask)
 {
 #if defined(TARGET_HAS_ICE)
     CPUBreakpoint *bp, *next;
@@ -1503,7 +1503,7 @@ void cpu_breakpoint_remove_all(CPUState *env, int mask)
 
 /* enable or disable single step mode. EXCP_DEBUG is returned by the
    CPU loop after each instruction */
-void cpu_single_step(CPUState *env, int enabled)
+void cpu_single_step(CPUOldState *env, int enabled)
 {
 #if defined(TARGET_HAS_ICE)
     if (env->singlestep_enabled != enabled) {
@@ -1557,7 +1557,7 @@ void cpu_set_log_filename(const char *filename)
     cpu_set_log(loglevel);
 }
 
-static void cpu_unlink_tb(CPUState *env)
+static void cpu_unlink_tb(CPUOldState *env)
 {
     /* FIXME: TB unchaining isn't SMP safe.  For now just ignore the
        problem and hope the cpu will stop of its own accord.  For userspace
@@ -1578,7 +1578,7 @@ static void cpu_unlink_tb(CPUState *env)
 }
 
 /* mask must never be zero, except for A20 change call */
-void cpu_interrupt(CPUState *env, int mask)
+void cpu_interrupt(CPUOldState *env, int mask)
 {
     int old_mask;
 
@@ -1609,12 +1609,12 @@ void cpu_interrupt(CPUState *env, int mask)
     }
 }
 
-void cpu_reset_interrupt(CPUState *env, int mask)
+void cpu_reset_interrupt(CPUOldState *env, int mask)
 {
     env->interrupt_request &= ~mask;
 }
 
-void cpu_exit(CPUState *env)
+void cpu_exit(CPUOldState *env)
 {
     env->exit_request = 1;
     cpu_unlink_tb(env);
@@ -1692,7 +1692,7 @@ int cpu_str_to_log_mask(const char *str)
     return mask;
 }
 
-void cpu_abort(CPUState *env, const char *fmt, ...)
+void cpu_abort(CPUOldState *env, const char *fmt, ...)
 {
     va_list ap;
     va_list ap2;
@@ -1732,17 +1732,17 @@ void cpu_abort(CPUState *env, const char *fmt, ...)
     abort();
 }
 
-CPUState *cpu_copy(CPUState *env)
+CPUOldState *cpu_copy(CPUOldState *env)
 {
-    CPUState *new_env = cpu_init(env->cpu_model_str);
-    CPUState *next_cpu = new_env->next_cpu;
+    CPUOldState *new_env = cpu_init(env->cpu_model_str);
+    CPUOldState *next_cpu = new_env->next_cpu;
     int cpu_index = new_env->cpu_index;
 #if defined(TARGET_HAS_ICE)
     CPUBreakpoint *bp;
     CPUWatchpoint *wp;
 #endif
 
-    memcpy(new_env, env, sizeof(CPUState));
+    memcpy(new_env, env, sizeof(CPUOldState));
 
     /* Preserve chaining and index. */
     new_env->next_cpu = next_cpu;
@@ -1768,7 +1768,7 @@ CPUState *cpu_copy(CPUState *env)
 
 #if !defined(CONFIG_USER_ONLY)
 
-static inline void tlb_flush_jmp_cache(CPUState *env, target_ulong addr)
+static inline void tlb_flush_jmp_cache(CPUOldState *env, target_ulong addr)
 {
     unsigned int i;
 
@@ -1785,7 +1785,7 @@ static inline void tlb_flush_jmp_cache(CPUState *env, target_ulong addr)
 
 /* NOTE: if flush_global is true, also flush global entries (not
    implemented yet) */
-void tlb_flush(CPUState *env, int flush_global)
+void tlb_flush(CPUOldState *env, int flush_global)
 {
     int i;
 
@@ -1829,7 +1829,7 @@ static inline void tlb_flush_entry(CPUTLBEntry *tlb_entry, target_ulong addr)
     }
 }
 
-void tlb_flush_page(CPUState *env, target_ulong addr)
+void tlb_flush_page(CPUOldState *env, target_ulong addr)
 {
     int i;
     int mmu_idx;
@@ -1860,7 +1860,7 @@ static void tlb_protect_code(ram_addr_t ram_addr)
 
 /* update the TLB so that writes in physical page 'phys_addr' are no longer
    tested for self modifying code */
-static void tlb_unprotect_code_phys(CPUState *env, ram_addr_t ram_addr,
+static void tlb_unprotect_code_phys(CPUOldState *env, ram_addr_t ram_addr,
                                     target_ulong vaddr)
 {
     cpu_physical_memory_set_dirty_flags(ram_addr, CODE_DIRTY_FLAG);
@@ -1882,7 +1882,7 @@ static inline void tlb_reset_dirty_range(CPUTLBEntry *tlb_entry,
 void cpu_physical_memory_reset_dirty(ram_addr_t start, ram_addr_t end,
                                      int dirty_flags)
 {
-    CPUState *env;
+    CPUOldState *env;
     unsigned long length, start1;
     int i;
 
@@ -1954,7 +1954,7 @@ static inline void tlb_update_dirty(CPUTLBEntry *tlb_entry)
 }
 
 /* update the TLB according to the current state of the dirty bits */
-void cpu_tlb_update_dirty(CPUState *env)
+void cpu_tlb_update_dirty(CPUOldState *env)
 {
     int i;
     int mmu_idx;
@@ -1972,7 +1972,7 @@ static inline void tlb_set_dirty1(CPUTLBEntry *tlb_entry, target_ulong vaddr)
 
 /* update the TLB corresponding to virtual page vaddr
    so that it is no longer dirty */
-static inline void tlb_set_dirty(CPUState *env, target_ulong vaddr)
+static inline void tlb_set_dirty(CPUOldState *env, target_ulong vaddr)
 {
     int i;
     int mmu_idx;
@@ -1987,7 +1987,7 @@ static inline void tlb_set_dirty(CPUState *env, target_ulong vaddr)
    is permitted. Return 0 if OK or 2 if the page could not be mapped
    (can only happen in non SOFTMMU mode for I/O pages or pages
    conflicting with the host address space). */
-int tlb_set_page_exec(CPUState *env, target_ulong vaddr,
+int tlb_set_page_exec(CPUOldState *env, target_ulong vaddr,
                       hwaddr paddr, int prot,
                       int mmu_idx, int is_softmmu)
 {
@@ -2119,15 +2119,15 @@ int tlb_set_page_exec(CPUState *env, target_ulong vaddr,
 
 #else
 
-void tlb_flush(CPUState *env, int flush_global)
+void tlb_flush(CPUOldState *env, int flush_global)
 {
 }
 
-void tlb_flush_page(CPUState *env, target_ulong addr)
+void tlb_flush_page(CPUOldState *env, target_ulong addr)
 {
 }
 
-int tlb_set_page_exec(CPUState *env, target_ulong vaddr,
+int tlb_set_page_exec(CPUOldState *env, target_ulong vaddr,
                       hwaddr paddr, int prot,
                       int mmu_idx, int is_softmmu)
 {
@@ -2326,7 +2326,7 @@ int page_unprotect(target_ulong address, unsigned long pc, void *puc)
     return 0;
 }
 
-static inline void tlb_set_dirty(CPUState *env,
+static inline void tlb_set_dirty(CPUOldState *env,
                                  unsigned long addr, target_ulong vaddr)
 {
 }
@@ -2374,7 +2374,7 @@ void cpu_register_physical_memory_log(hwaddr start_addr,
 {
     hwaddr addr, end_addr;
     PhysPageDesc *p;
-    CPUState *env;
+    CPUOldState *env;
     ram_addr_t orig_size = size;
     subpage_t *subpage;
 
@@ -2935,7 +2935,7 @@ static CPUWriteMemoryFunc * const notdirty_mem_write[3] = {
 /* Generate a debug exception if a watchpoint has been hit.  */
 static void check_watchpoint(int offset, int len_mask, int flags)
 {
-    CPUState *env = cpu_single_env;
+    CPUOldState *env = cpu_single_env;
     target_ulong pc, cs_base;
     TranslationBlock *tb;
     target_ulong vaddr;
@@ -3803,7 +3803,7 @@ void stq_phys(hwaddr addr, uint64_t val)
 #endif
 
 /* virtual memory access for debug (includes writing to ROM) */
-int cpu_memory_rw_debug(CPUState *env, target_ulong addr,
+int cpu_memory_rw_debug(CPUOldState *env, target_ulong addr,
                         void *buf, int len, int is_write)
 {
     int l;
@@ -3836,7 +3836,7 @@ int cpu_memory_rw_debug(CPUState *env, target_ulong addr,
 
 /* in deterministic execution mode, instructions doing device I/Os
    must be at the end of the TB */
-void cpu_io_recompile(CPUState *env, void *retaddr)
+void cpu_io_recompile(CPUOldState *env, void *retaddr)
 {
     TranslationBlock *tb;
     uint32_t n, cflags;

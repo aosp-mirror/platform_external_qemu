@@ -338,7 +338,7 @@ static inline void regs_to_env(void)
 #endif
 }
 
-static inline int cpu_has_work(CPUState *env)
+static inline int cpu_has_work(CPUX86State *env)
 {
     int work;
 
@@ -351,7 +351,7 @@ static inline int cpu_has_work(CPUState *env)
     return work;
 }
 
-static inline int cpu_halted(CPUState *env) {
+static inline int cpu_halted(CPUX86State *env) {
     /* handle exit of HALTED state */
     if (!env->halted)
         return 0;
@@ -365,7 +365,7 @@ static inline int cpu_halted(CPUState *env) {
 
 /* load efer and update the corresponding hflags. XXX: do consistency
    checks with cpuid bits ? */
-static inline void cpu_load_efer(CPUState *env, uint64_t val)
+static inline void cpu_load_efer(CPUX86State *env, uint64_t val)
 {
     env->efer = val;
     env->hflags &= ~(HF_LMA_MASK | HF_SVME_MASK);
