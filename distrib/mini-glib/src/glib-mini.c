@@ -156,6 +156,19 @@ int g_vasprintf(char** str, const char* fmt, va_list args) {
 #endif
 }
 
+gboolean g_str_equal(const void* v1, const void* v2) {
+  return !strcmp((const char*)v1, (const char*)v2);
+}
+
+guint g_str_hash(const void* str) {
+  const signed char* p = str;
+  guint hash = 5381U;
+
+  for (; *p; ++p)
+    hash = (hash << 5) + hash + (guint)*p;
+
+  return hash;
+}
 
 // Single-linked list
 

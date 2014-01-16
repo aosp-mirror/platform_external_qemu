@@ -17,6 +17,7 @@
 
 // Types
 
+typedef char gchar;
 typedef int gint;
 typedef unsigned int guint;
 typedef int gboolean;
@@ -82,11 +83,14 @@ char* g_strndup(const char* str, size_t size);
 char* g_strdup_printf(const char* fmt, ...);
 char* g_strdup_vprintf(const char* fmt, va_list args);
 
+gboolean g_str_equal(const void* s1, const void* s2);
+guint g_str_hash(const void* str);
+
 // Atomic operations
 
 void g_atomic_int_inc(int volatile* atomic);
 
-gboolean g_atomic_dec_and_test(int volatile* atomic);
+gboolean g_atomic_int_dec_and_test(int volatile* atomic);
 
 // Single-linked lists
 
