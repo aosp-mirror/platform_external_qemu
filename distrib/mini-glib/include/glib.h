@@ -83,6 +83,9 @@ char* g_strndup(const char* str, size_t size);
 char* g_strdup_printf(const char* fmt, ...);
 char* g_strdup_vprintf(const char* fmt, va_list args);
 
+char** g_strsplit(const char* str, const char* sep, int max_tokens);
+void g_strfreev(char** strings);
+
 gboolean g_str_equal(const void* s1, const void* s2);
 guint g_str_hash(const void* str);
 
