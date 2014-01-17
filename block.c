@@ -23,10 +23,11 @@
  */
 #include "config-host.h"
 #include "qemu-common.h"
-#include "monitor.h"
-#include "block_int.h"
-#include "module.h"
-#include "qemu-objects.h"
+#include "monitor/monitor.h"
+#include "block/block_int.h"
+#include "qemu/module.h"
+//#include "qapi/qmp/types.h"
+#include "qapi/qmp/qjson.h"
 
 #ifdef CONFIG_BSD
 #include <sys/types.h>
@@ -156,7 +157,7 @@ BlockDriverState *bdrv_new(const char *device_name)
 {
     BlockDriverState *bs;
 
-    bs = qemu_mallocz(sizeof(BlockDriverState));
+    bs = g_malloc0(sizeof(BlockDriverState));
     pstrcpy(bs->device_name, sizeof(bs->device_name), device_name);
     if (device_name[0] != '\0') {
         QTAILQ_INSERT_TAIL(&bdrv_states, bs, list);
@@ -428,7 +429,7 @@ static int bdrv_open_common(BlockDriverState *bs, const char *filename,
     }
 
     bs->drv = drv;
-    bs->opaque = qemu_mallocz(drv->instance_size);
+    bs->opaque = g_malloc0(drv->instance_size);
 
     /*
      * Yes, BDRV_O_NOCACHE aka O_DIRECT means we have to present a
@@ -485,7 +486,7 @@ free_and_fail:
         bdrv_delete(bs->file);
         bs->file = NULL;
     }
-    qemu_free(bs->opaque);
+    g_free(bs->opaque);
     bs->opaque = NULL;
     bs->drv = NULL;
     return ret;
@@ -655,7 +656,7 @@ void bdrv_close(BlockDriverState *bs)
             bs->backing_hd = NULL;
         }
         bs->drv->bdrv_close(bs);
-        qemu_free(bs->opaque);
+        g_free(bs->opaque);
 #ifdef _WIN32
         if (bs->is_temporary) {
             unlink(bs->filename);
@@ -699,7 +700,7 @@ void bdrv_delete(BlockDriverState *bs)
     }
 
     assert(bs != bs_snapshots);
-    qemu_free(bs);
+    g_free(bs);
 }
 
 int bdrv_attach(BlockDriverState *bs, DeviceState *qdev)
@@ -791,7 +792,7 @@ int bdrv_commit(BlockDriverState *bs)
     }
 
     total_sectors = bdrv_getlength(bs) >> BDRV_SECTOR_BITS;
-    buf = qemu_malloc(COMMIT_BUF_SECTORS * BDRV_SECTOR_SIZE);
+    buf = g_malloc(COMMIT_BUF_SECTORS * BDRV_SECTOR_SIZE);
 
     for (sector = 0; sector < total_sectors; sector += n) {
         if (drv->bdrv_is_allocated(bs, sector, COMMIT_BUF_SECTORS, &n)) {
@@ -821,7 +822,7 @@ int bdrv_commit(BlockDriverState *bs)
         bdrv_flush(bs->backing_hd);
 
 ro_cleanup:
-    qemu_free(buf);
+    g_free(buf);
 
     if (ro) {
         /* re-open as RO */
@@ -2053,7 +2054,7 @@ static void multiwrite_user_cb(MultiwriteCB *mcb)
         if (mcb->callbacks[i].free_qiov) {
             qemu_iovec_destroy(mcb->callbacks[i].free_qiov);
         }
-        qemu_free(mcb->callbacks[i].free_qiov);
+        g_free(mcb->callbacks[i].free_qiov);
         qemu_vfree(mcb->callbacks[i].free_buf);
     }
 }
@@ -2069,7 +2070,7 @@ static void multiwrite_cb(void *opaque, int ret)
     mcb->num_requests--;
     if (mcb->num_requests == 0) {
         multiwrite_user_cb(mcb);
-        qemu_free(mcb);
+        g_free(mcb);
     }
 }
 
@@ -2129,7 +2130,7 @@ static int multiwrite_merge(BlockDriverState *bs, BlockRequest *reqs,
 
         if (merge) {
             size_t size;
-            QEMUIOVector *qiov = qemu_mallocz(sizeof(*qiov));
+            QEMUIOVector *qiov = g_malloc0(sizeof(*qiov));
             qemu_iovec_init(qiov,
                 reqs[outidx].qiov->niov + reqs[i].qiov->niov + 1);
 
@@ -2190,7 +2191,7 @@ int bdrv_aio_multiwrite(BlockDriverState *bs, BlockRequest *reqs, int num_reqs)
     }
 
     // Create MultiwriteCB structure
-    mcb = qemu_mallocz(sizeof(*mcb) + num_reqs * sizeof(*mcb->callbacks));
+    mcb = g_malloc0(sizeof(*mcb) + num_reqs * sizeof(*mcb->callbacks));
     mcb->num_requests = 0;
     mcb->num_callbacks = num_reqs;
 
@@ -2250,7 +2251,7 @@ fail:
     for (i = 0; i < mcb->num_callbacks; i++) {
         reqs[i].error = -EIO;
     }
-    qemu_free(mcb);
+    g_free(mcb);
     return -1;
 }
 
@@ -2487,7 +2488,7 @@ void *qemu_aio_get(AIOPool *pool, BlockDriverState *bs,
         acb = pool->free_aiocb;
         pool->free_aiocb = acb->next;
     } else {
-        acb = qemu_mallocz(pool->aiocb_size);
+        acb = g_malloc0(pool->aiocb_size);
         acb->pool = pool;
     }
     acb->bs = bs;
@@ -2627,11 +2628,11 @@ void bdrv_set_dirty_tracking(BlockDriverState *bs, int enable)
                     BDRV_SECTORS_PER_DIRTY_CHUNK * 8 - 1;
             bitmap_size /= BDRV_SECTORS_PER_DIRTY_CHUNK * 8;
 
-            bs->dirty_bitmap = qemu_mallocz(bitmap_size);
+            bs->dirty_bitmap = g_malloc0(bitmap_size);
         }
     } else {
         if (bs->dirty_bitmap) {
-            qemu_free(bs->dirty_bitmap);
+            g_free(bs->dirty_bitmap);
             bs->dirty_bitmap = NULL;
         }
     }

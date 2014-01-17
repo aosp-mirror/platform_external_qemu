@@ -17,6 +17,7 @@
 #define  LCD_DENSITY_TVDPI     213
 #define  LCD_DENSITY_HDPI      240
 #define  LCD_DENSITY_XHDPI     320
+#define  LCD_DENSITY_400DPI    400
 #define  LCD_DENSITY_XXHDPI    480
 #define  LCD_DENSITY_XXXHDPI   640
 

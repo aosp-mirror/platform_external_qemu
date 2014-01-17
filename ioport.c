@@ -25,7 +25,7 @@
  * splitted out ioport related stuffs from vl.c.
  */
 
-#include "ioport.h"
+#include "exec/ioport.h"
 
 /***********************************************************/
 /* IO Port */

@@ -18,13 +18,13 @@
 #include <process.h>
 #endif
 
-#include "sockets.h"
+#include "android/sockets.h"
 
 #include "android/android.h"
 #include "qemu-common.h"
-#include "sysemu.h"
-#include "console.h"
-#include "user-events.h"
+#include "sysemu/sysemu.h"
+#include "ui/console.h"
+#include "android/user-events.h"
 
 #include <SDL.h>
 #include <SDL_syswm.h>
@@ -45,7 +45,7 @@
 
 #include "android/main-common.h"
 #include "android/help.h"
-#include "hw/goldfish_nand.h"
+#include "hw/android/goldfish/nand.h"
 
 #include "android/globals.h"
 
@@ -55,7 +55,7 @@
 #include "android/snapshot.h"
 
 #include "android/framebuffer.h"
-#include "iolooper.h"
+#include "android/iolooper.h"
 
 AndroidRotation  android_framebuffer_rotation;
 

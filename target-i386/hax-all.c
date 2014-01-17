@@ -188,7 +188,7 @@ int hax_vcpu_create(int id)
         return 0;
     }
 
-    vcpu = qemu_malloc(sizeof(struct hax_vcpu_state));
+    vcpu = g_malloc(sizeof(struct hax_vcpu_state));
     if (!vcpu)
     {
         dprint("Failed to alloc vcpu state\n");
@@ -229,7 +229,7 @@ error:
         hax_close_fd(vcpu->fd);
 
     hax_global.vm->vcpus[id] = NULL;
-    qemu_free(vcpu);
+    g_free(vcpu);
     return -1;
 }
 
@@ -252,7 +252,7 @@ int hax_vcpu_destroy(CPUState *env)
      */
     hax_close_fd(vcpu->fd);
     hax_global.vm->vcpus[vcpu->vcpu_id] = NULL;
-    qemu_free(vcpu);
+    g_free(vcpu);
     return 0;
 }
 
@@ -285,7 +285,7 @@ struct hax_vm *hax_vm_create(struct hax_state *hax)
     if (hax->vm)
         return hax->vm;
 
-    vm = qemu_malloc(sizeof(struct hax_vm));
+    vm = g_malloc(sizeof(struct hax_vm));
     if (!vm)
         return NULL;
     memset(vm, 0, sizeof(struct hax_vm));
@@ -306,7 +306,7 @@ struct hax_vm *hax_vm_create(struct hax_state *hax)
     return vm;
 
 error:
-    qemu_free(vm);
+    g_free(vm);
     hax->vm = NULL;
     return NULL;
 }
@@ -322,7 +322,7 @@ int hax_vm_destroy(struct hax_vm *vm)
             return -1;
         }
     hax_close_fd(vm->fd);
-    qemu_free(vm);
+    g_free(vm);
     hax_global.vm = NULL;
     return 0;
 }

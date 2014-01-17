@@ -21,10 +21,10 @@
 #include <linux/kvm.h>
 
 #include "qemu-common.h"
-#include "sysemu.h"
-#include "kvm.h"
+#include "sysemu/sysemu.h"
+#include "sysemu/kvm.h"
 #include "cpu.h"
-#include "gdbstub.h"
+#include "exec/gdbstub.h"
 
 #ifdef CONFIG_KVM_GS_RESTORE
 #include "kvm-gs-restore.h"
@@ -48,7 +48,7 @@ static struct kvm_cpuid2 *try_get_cpuid(KVMState *s, int max)
     int r, size;
 
     size = sizeof(*cpuid) + max * sizeof(*cpuid->entries);
-    cpuid = (struct kvm_cpuid2 *)qemu_mallocz(size);
+    cpuid = (struct kvm_cpuid2 *)g_malloc0(size);
     cpuid->nent = max;
     r = kvm_ioctl(s, KVM_GET_SUPPORTED_CPUID, cpuid);
     if (r == 0 && cpuid->nent >= max) {
@@ -56,7 +56,7 @@ static struct kvm_cpuid2 *try_get_cpuid(KVMState *s, int max)
     }
     if (r < 0) {
         if (r == -E2BIG) {
-            qemu_free(cpuid);
+            g_free(cpuid);
             return NULL;
         } else {
             fprintf(stderr, "KVM_GET_SUPPORTED_CPUID failed: %s\n",
@@ -109,7 +109,7 @@ uint32_t kvm_arch_get_supported_cpuid(CPUState *env, uint32_t function, int reg)
         }
     }
 
-    qemu_free(cpuid);
+    g_free(cpuid);
 
     return ret;
 }
@@ -223,7 +223,7 @@ static int kvm_has_msr_star(CPUState *env)
         if (ret < 0)
             return 0;
 
-        kvm_msr_list = qemu_mallocz(sizeof(msr_list) +
+        kvm_msr_list = g_malloc0(sizeof(msr_list) +
                                     msr_list.nmsrs * sizeof(msr_list.indices[0]));
 
         kvm_msr_list->nmsrs = msr_list.nmsrs;

@@ -45,6 +45,7 @@ EMULATOR_TARGET_CFLAGS += \
 common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
 
+common_LOCAL_CFLAGS += -I$(GLIB_INCLUDE_DIR)
 
 # The following is to ensure that "config.h" will map to a target-specific
 # configuration file header.
@@ -58,53 +59,53 @@ common_LOCAL_SRC_FILES += \
 #
 
 HW_SOURCES := \
-    bt.c \
-    bt-hci.c \
-    bt-hid.c \
-    bt-l2cap.c \
-    bt-sdp.c \
-    cdrom.c \
-    dma.c \
-    irq.c \
-    goldfish_audio.c \
-    goldfish_device.c \
-    goldfish_events_device.c \
-    goldfish_fb.c \
-    goldfish_battery.c \
-    goldfish_mmc.c   \
-    goldfish_memlog.c \
-    goldfish_nand.c \
-    goldfish_pipe.c \
-    goldfish_tty.c \
-    goldfish_vmem.c \
-    msmouse.c \
-    pci.c \
-    qdev.c \
-    scsi-disk.c \
-    sysbus.c \
-    usb-hid.c \
-    usb-hub.c \
-    usb-msd.c \
-    usb-ohci.c \
-    usb.c \
-    watchdog.c
+    bt/core.c \
+    bt/hci.c \
+    bt/hid.c \
+    bt/l2cap.c \
+    bt/sdp.c \
+    block/cdrom.c \
+    core/irq.c \
+    core/qdev.c \
+    core/sysbus.c \
+    core/dma.c \
+    android/goldfish/audio.c \
+    android/goldfish/device.c \
+    android/goldfish/events_device.c \
+    android/goldfish/fb.c \
+    android/goldfish/battery.c \
+    android/goldfish/mmc.c   \
+    android/goldfish/memlog.c \
+    android/goldfish/nand.c \
+    android/goldfish/pipe.c \
+    android/goldfish/tty.c \
+    android/goldfish/vmem.c \
+    pci/pci.c \
+    scsi/scsi-disk.c \
+    usb/dev-hid.c \
+    usb/dev-hub.c \
+    usb/dev-storage.c \
+    usb/hcd-ohci.c \
+    usb/core.c \
+    watchdog/watchdog.c
 
 
 ifeq ($(EMULATOR_TARGET_ARCH),arm)
-HW_SOURCES += android_arm.c \
-    arm_pic.c \
-    goldfish_interrupt.c \
-    goldfish_switch.c \
-    goldfish_timer.c \
-    goldfish_trace.c \
-    arm_boot.c
+HW_SOURCES += \
+    android/android_arm.c \
+    arm/pic.c \
+    arm/boot.c \
+    android/goldfish/interrupt.c \
+    android/goldfish/switch.c \
+    android/goldfish/timer.c \
+    android/goldfish/trace.c \
 
 # The following sources must be compiled with the final executables
 # because they contain device_init() or machine_init() statements.
-HW_OBJ_SOURCES := hw/smc91c111.c
+HW_OBJ_SOURCES := hw/net/smc91c111.c
 HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
 
-common_LOCAL_SRC_FILES += arm-dis.c
+common_LOCAL_SRC_FILES += disas/arm.c
 
 # smc91c111.c requires <zlib.h>
 common_LOCAL_CFLAGS += $(ZLIB_CFLAGS)
@@ -115,22 +116,22 @@ common_LOCAL_CFLAGS += -DHAS_AUDIO
 
 ifeq ($(EMULATOR_TARGET_ARCH),x86)
 HW_SOURCES += \
-    apic.c \
-    i8259.c \
-    mc146818rtc.c \
-    piix_pci.c \
-    i8254.c \
-    pckbd.c \
-    ioapic.c \
-    ps2.c \
-    smbios.c \
-    fw_cfg.c
+    intc/apic.c \
+    intc/i8259.c \
+    timer/mc146818rtc.c \
+    pci-host/piix.c \
+    timer/i8254.c \
+    input/pckbd.c \
+    intc/ioapic.c \
+    input/ps2.c \
+    i386/smbios.c \
+    nvram/fw_cfg.c
 
 # The following sources must be compiled with the final executables
 # because they contain device_init() or machine_init() statements.
 HW_OBJ_SOURCES := \
-    hw/ne2000.c \
-    hw/pc.c
+    hw/net/ne2000.c \
+    hw/i386/pc.c
 
 HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
 
@@ -138,21 +139,21 @@ endif
 
 ifeq ($(EMULATOR_TARGET_ARCH),mips)
 HW_SOURCES += \
-    android_mips.c \
-    mips_pic.c \
-    goldfish_interrupt.c \
-    goldfish_switch.c \
-    goldfish_timer.c \
-    goldfish_trace.c \
-    mips_timer.c \
-    mips_int.c
+    android/android_mips.c \
+    mips/mips_pic.c \
+    android/goldfish/interrupt.c \
+    android/goldfish/switch.c \
+    android/goldfish/timer.c \
+    android/goldfish/trace.c \
+    mips/cputimer.c \
+    mips/mips_int.c
 
 # The following sources must be compiled with the final executables
 # because they contain device_init() or machine_init() statements.
-HW_OBJ_SOURCES := hw/smc91c111.c
+HW_OBJ_SOURCES := hw/net/smc91c111.c
 HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
 
-common_LOCAL_SRC_FILES += mips-dis.c
+common_LOCAL_SRC_FILES += disas/mips.c
 
 # smc91c111.c requires <zlib.h>
 LOCAL_CFLAGS += $(ZLIB_CFLAGS)
@@ -164,11 +165,12 @@ endif
 common_LOCAL_SRC_FILES += $(HW_SOURCES:%=hw/%)
 
 common_LOCAL_SRC_FILES += \
+    backends/msmouse.c \
     cpu-exec.c  \
     exec.c \
     translate-all.c \
-    trace.c \
-    varint.c \
+    android/trace.c \
+    android/varint.c \
     softmmu_outside_jit.c
 
 ##############################################################################
@@ -182,6 +184,7 @@ endif
 
 ifeq ($(EMULATOR_TARGET_ARCH),arm)
 common_LOCAL_SRC_FILES += \
+    target-arm/arm-semi.c \
     target-arm/op_helper.c \
     target-arm/iwmmxt_helper.c \
     target-arm/neon_helper.c \
@@ -189,12 +192,9 @@ common_LOCAL_SRC_FILES += \
     target-arm/helper-android.c \
     target-arm/translate.c \
     target-arm/machine.c \
-    hw/armv7m.c \
-    hw/armv7m_nvic.c \
-    arm-semi.c
-
-common_LOCAL_SRC_FILES += fpu/softfloat.c
-endif
+    hw/arm/armv7m.c \
+    hw/arm/armv7m_nvic.c
+endif  # EMULATOR_TARGET_ARCH == arm
 
 ifeq ($(EMULATOR_TARGET_ARCH), x86)
 common_LOCAL_SRC_FILES += \
@@ -214,9 +214,7 @@ common_LOCAL_SRC_FILES += \
       target-i386/hax-all.c       \
       target-i386/hax-windows.c
 endif
-
-common_LOCAL_SRC_FILES += fpu/softfloat-native.c
-endif
+endif  # EMULATOR_TARGET_ARCH == x86
 
 ifeq ($(EMULATOR_TARGET_ARCH), mips)
 common_LOCAL_SRC_FILES += \
@@ -224,9 +222,9 @@ common_LOCAL_SRC_FILES += \
     target-mips/helper.c \
     target-mips/translate.c \
     target-mips/machine.c
+endif  # EMULATOR_TARGET_ARCH == mips
 
 common_LOCAL_SRC_FILES += fpu/softfloat.c
-endif
 
 # compile KVM only if target is x86 on x86 Linux
 QEMU_KVM_TAG := $(QEMU_HOST_TAG)-$(EMULATOR_TARGET_ARCH)
@@ -267,9 +265,9 @@ common_LOCAL_SRC_FILES += \
 # What a mess, os-posix.c depends on the exact values of options
 # which are target specific.
 ifeq ($(HOST_OS),windows)
-    common_LOCAL_SRC_FILES += os-win32.c oslib-win32.c
+    common_LOCAL_SRC_FILES += os-win32.c util/oslib-win32.c
 else
-    common_LOCAL_SRC_FILES += os-posix.c oslib-posix.c
+    common_LOCAL_SRC_FILES += os-posix.c util/oslib-posix.c
 endif
 
 
@@ -333,12 +331,9 @@ LOCAL_SRC_FILES := \
     disas.c \
     dma-helpers.c \
     gdbstub.c \
-    keymaps.c \
-    loader.c \
     monitor.c \
     qemu-timer.c \
     qemu-timer-common.c \
-    user-events-qemu.c \
     vl-android.c \
     android/console.c \
     android/opengles.c \
@@ -348,7 +343,10 @@ LOCAL_SRC_FILES := \
     android/protocol/user-events-impl.c \
     android/protocol/ui-commands-proxy.c \
     android/protocol/core-commands-impl.c \
-    android/protocol/core-commands-qemu.c
+    android/protocol/core-commands-qemu.c \
+    android/user-events-qemu.c \
+    hw/core/loader.c \
+    ui/keymaps.c \
 
 $(call gen-hx-header,qemu-monitor.hx,qemu-monitor.h,monitor.c)
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
@@ -363,7 +361,7 @@ endif
 # Note that this means no sound and graphics on Linux.
 #
 ifneq ($(strip $(CONFIG_STATIC_EXECUTABLE)$(BUILD_HOST_static)),)
-    LOCAL_SRC_FILES += dynlink-static.c
+    LOCAL_SRC_FILES += android/dynlink-static.c
     LOCAL_LDLIBS    += -static
 endif
 
@@ -413,12 +411,9 @@ common_LOCAL_SRC_FILES := \
     disas.c \
     dma-helpers.c \
     gdbstub.c \
-    keymaps.c \
-    loader.c \
     monitor.c \
     qemu-timer.c \
     qemu-timer-common.c \
-    user-events-qemu.c \
     vl-android.c \
     android/cmdline-option.c \
     android/console.c \
@@ -430,7 +425,9 @@ common_LOCAL_SRC_FILES := \
     android/opengles.c \
     android/protocol/core-commands-qemu.c \
     android/protocol/ui-commands-qemu.c \
-    android/
+    android/user-events-qemu.c \
+    hw/core/loader.c \
+    ui/keymaps.c \
 
 
 # The following files cannot be in static libraries because they contain
@@ -447,7 +444,7 @@ common_LOCAL_SRC_FILES += $(SDLMAIN_SOURCES)
 # Note that this means no sound and graphics on Linux.
 #
 ifneq ($(strip $(CONFIG_STATIC_EXECUTABLE)$(BUILD_HOST_static)),)
-    common_LOCAL_SRC_FILES += dynlink-static.c
+    common_LOCAL_SRC_FILES += android/dynlink-static.c
     common_LOCAL_LDLIBS    += -static
 endif
 

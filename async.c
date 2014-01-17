@@ -23,7 +23,7 @@
  */
 
 #include "qemu-common.h"
-#include "qemu-aio.h"
+#include "block/aio.h"
 
 /*
  * An AsyncContext protects the callbacks of AIO requests and Bottom Halves
@@ -64,7 +64,7 @@ static struct AsyncContext *async_context = &(struct AsyncContext) { 0 };
  */
 void async_context_push(void)
 {
-    struct AsyncContext *new = qemu_mallocz(sizeof(*new));
+    struct AsyncContext *new = g_malloc0(sizeof(*new));
     new->parent = async_context;
     new->id = async_context->id + 1;
     async_context = new;
@@ -75,7 +75,7 @@ static void bh_run_aio_completions(void *opaque)
 {
     QEMUBH **bh = opaque;
     qemu_bh_delete(*bh);
-    qemu_free(bh);
+    g_free(bh);
     qemu_aio_process_queue();
 }
 /*
@@ -92,14 +92,14 @@ void async_context_pop(void)
 
     /* Switch back to the parent context */
     async_context = async_context->parent;
-    qemu_free(old);
+    g_free(old);
 
     if (async_context == NULL) {
         abort();
     }
 
     /* Schedule BH to run any queued AIO completions as soon as possible */
-    bh = qemu_malloc(sizeof(*bh));
+    bh = g_malloc(sizeof(*bh));
     *bh = qemu_bh_new(bh_run_aio_completions, bh);
     qemu_bh_schedule(*bh);
 }
@@ -127,7 +127,7 @@ struct QEMUBH {
 QEMUBH *qemu_bh_new(QEMUBHFunc *cb, void *opaque)
 {
     QEMUBH *bh;
-    bh = qemu_mallocz(sizeof(QEMUBH));
+    bh = g_malloc0(sizeof(QEMUBH));
     bh->cb = cb;
     bh->opaque = opaque;
     bh->next = async_context->first_bh;
@@ -157,7 +157,7 @@ int qemu_bh_poll(void)
         bh = *bhp;
         if (bh->deleted) {
             *bhp = bh->next;
-            qemu_free(bh);
+            g_free(bh);
         } else
             bhp = &bh->next;
     }

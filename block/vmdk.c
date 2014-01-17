@@ -24,8 +24,8 @@
  */
 
 #include "qemu-common.h"
-#include "block_int.h"
-#include "module.h"
+#include "block/block_int.h"
+#include "qemu/module.h"
 
 #define VMDK3_MAGIC (('C' << 24) | ('O' << 16) | ('W' << 8) | 'D')
 #define VMDK4_MAGIC (('K' << 24) | ('D' << 16) | ('M' << 8) | 'V')
@@ -287,7 +287,7 @@ static int vmdk_snapshot_create(const char *filename, const char *backing_file)
     gd_size = gde_entries * sizeof(uint32_t);
 
     /* write RGD */
-    rgd_buf = qemu_malloc(gd_size);
+    rgd_buf = g_malloc(gd_size);
     if (lseek(p_fd, rgd_offset, SEEK_SET) == -1) {
         ret = -errno;
         goto fail_rgd;
@@ -306,7 +306,7 @@ static int vmdk_snapshot_create(const char *filename, const char *backing_file)
     }
 
     /* write GD */
-    gd_buf = qemu_malloc(gd_size);
+    gd_buf = g_malloc(gd_size);
     if (lseek(p_fd, gd_offset, SEEK_SET) == -1) {
         ret = -errno;
         goto fail_gd;
@@ -326,9 +326,9 @@ static int vmdk_snapshot_create(const char *filename, const char *backing_file)
     ret = 0;
 
 fail_gd:
-    qemu_free(gd_buf);
+    g_free(gd_buf);
 fail_rgd:
-    qemu_free(rgd_buf);
+    g_free(rgd_buf);
 fail:
     close(p_fd);
     close(snp_fd);
@@ -408,7 +408,7 @@ static int vmdk_open(BlockDriverState *bs, int flags)
 
     /* read the L1 table */
     l1_size = s->l1_size * sizeof(uint32_t);
-    s->l1_table = qemu_malloc(l1_size);
+    s->l1_table = g_malloc(l1_size);
     if (bdrv_pread(bs->file, s->l1_table_offset, s->l1_table, l1_size) != l1_size)
         goto fail;
     for(i = 0; i < s->l1_size; i++) {
@@ -416,7 +416,7 @@ static int vmdk_open(BlockDriverState *bs, int flags)
     }
 
     if (s->l1_backup_table_offset) {
-        s->l1_backup_table = qemu_malloc(l1_size);
+        s->l1_backup_table = g_malloc(l1_size);
         if (bdrv_pread(bs->file, s->l1_backup_table_offset, s->l1_backup_table, l1_size) != l1_size)
             goto fail;
         for(i = 0; i < s->l1_size; i++) {
@@ -424,12 +424,12 @@ static int vmdk_open(BlockDriverState *bs, int flags)
         }
     }
 
-    s->l2_cache = qemu_malloc(s->l2_size * L2_CACHE_SIZE * sizeof(uint32_t));
+    s->l2_cache = g_malloc(s->l2_size * L2_CACHE_SIZE * sizeof(uint32_t));
     return 0;
  fail:
-    qemu_free(s->l1_backup_table);
-    qemu_free(s->l1_table);
-    qemu_free(s->l2_cache);
+    g_free(s->l1_backup_table);
+    g_free(s->l1_table);
+    g_free(s->l2_cache);
     return -1;
 }
 
@@ -819,8 +819,8 @@ static void vmdk_close(BlockDriverState *bs)
 {
     BDRVVmdkState *s = bs->opaque;
 
-    qemu_free(s->l1_table);
-    qemu_free(s->l2_cache);
+    g_free(s->l1_table);
+    g_free(s->l2_cache);
 }
 
 static void vmdk_flush(BlockDriverState *bs)

@@ -21,10 +21,10 @@
 #include <linux/kvm.h>
 
 #include "qemu-common.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "hw/hw.h"
-#include "gdbstub.h"
-#include "kvm.h"
+#include "exec/gdbstub.h"
+#include "sysemu/kvm.h"
 
 /* KVM uses PAGE_SIZE in it's definition of COALESCED_MMIO_MAX */
 #define PAGE_SIZE TARGET_PAGE_SIZE
@@ -41,7 +41,7 @@
 
 typedef struct KVMSlot
 {
-    target_phys_addr_t start_addr;
+    hwaddr start_addr;
     ram_addr_t memory_size;
     ram_addr_t phys_offset;
     int slot;
@@ -84,8 +84,8 @@ static KVMSlot *kvm_alloc_slot(KVMState *s)
 }
 
 static KVMSlot *kvm_lookup_matching_slot(KVMState *s,
-                                         target_phys_addr_t start_addr,
-                                         target_phys_addr_t end_addr)
+                                         hwaddr start_addr,
+                                         hwaddr end_addr)
 {
     int i;
 
@@ -105,8 +105,8 @@ static KVMSlot *kvm_lookup_matching_slot(KVMState *s,
  * Find overlapping slot with lowest start address
  */
 static KVMSlot *kvm_lookup_overlapping_slot(KVMState *s,
-                                            target_phys_addr_t start_addr,
-                                            target_phys_addr_t end_addr)
+                                            hwaddr start_addr,
+                                            hwaddr end_addr)
 {
     KVMSlot *found = NULL;
     int i;
@@ -219,7 +219,7 @@ int kvm_sync_vcpus(void)
 /*
  * dirty pages logging control
  */
-static int kvm_dirty_pages_log_change(target_phys_addr_t phys_addr,
+static int kvm_dirty_pages_log_change(hwaddr phys_addr,
                                       ram_addr_t size, int flags, int mask)
 {
     KVMState *s = kvm_state;
@@ -249,14 +249,14 @@ static int kvm_dirty_pages_log_change(target_phys_addr_t phys_addr,
     return kvm_set_user_memory_region(s, mem);
 }
 
-int kvm_log_start(target_phys_addr_t phys_addr, ram_addr_t size)
+int kvm_log_start(hwaddr phys_addr, ram_addr_t size)
 {
         return kvm_dirty_pages_log_change(phys_addr, size,
                                           KVM_MEM_LOG_DIRTY_PAGES,
                                           KVM_MEM_LOG_DIRTY_PAGES);
 }
 
-int kvm_log_stop(target_phys_addr_t phys_addr, ram_addr_t size)
+int kvm_log_stop(hwaddr phys_addr, ram_addr_t size)
 {
         return kvm_dirty_pages_log_change(phys_addr, size,
                                           0,
@@ -293,12 +293,12 @@ int kvm_set_migration_log(int enable)
  * @start_add: start of logged region.
  * @end_addr: end of logged region.
  */
-int kvm_physical_sync_dirty_bitmap(target_phys_addr_t start_addr,
-                                   target_phys_addr_t end_addr)
+int kvm_physical_sync_dirty_bitmap(hwaddr start_addr,
+                                   hwaddr end_addr)
 {
     KVMState *s = kvm_state;
     unsigned long size, allocated_size = 0;
-    target_phys_addr_t phys_addr;
+    hwaddr phys_addr;
     ram_addr_t addr;
     KVMDirtyLog d;
     KVMSlot *mem;
@@ -313,9 +313,9 @@ int kvm_physical_sync_dirty_bitmap(target_phys_addr_t start_addr,
 
         size = ((mem->memory_size >> TARGET_PAGE_BITS) + 7) / 8;
         if (!d.dirty_bitmap) {
-            d.dirty_bitmap = qemu_malloc(size);
+            d.dirty_bitmap = g_malloc(size);
         } else if (size > allocated_size) {
-            d.dirty_bitmap = qemu_realloc(d.dirty_bitmap, size);
+            d.dirty_bitmap = g_realloc(d.dirty_bitmap, size);
         }
         allocated_size = size;
         memset(d.dirty_bitmap, 0, allocated_size);
@@ -342,12 +342,12 @@ int kvm_physical_sync_dirty_bitmap(target_phys_addr_t start_addr,
         }
         start_addr = phys_addr;
     }
-    qemu_free(d.dirty_bitmap);
+    g_free(d.dirty_bitmap);
 
     return ret;
 }
 
-int kvm_coalesce_mmio_region(target_phys_addr_t start, ram_addr_t size)
+int kvm_coalesce_mmio_region(hwaddr start, ram_addr_t size)
 {
     int ret = -ENOSYS;
 #ifdef KVM_CAP_COALESCED_MMIO
@@ -366,7 +366,7 @@ int kvm_coalesce_mmio_region(target_phys_addr_t start, ram_addr_t size)
     return ret;
 }
 
-int kvm_uncoalesce_mmio_region(target_phys_addr_t start, ram_addr_t size)
+int kvm_uncoalesce_mmio_region(hwaddr start, ram_addr_t size)
 {
     int ret = -ENOSYS;
 #ifdef KVM_CAP_COALESCED_MMIO
@@ -416,7 +416,7 @@ int kvm_init(int smp_cpus)
         return -EINVAL;
     }
 
-    s = qemu_mallocz(sizeof(KVMState));
+    s = g_malloc0(sizeof(KVMState));
 
 #ifdef KVM_CAP_SET_GUEST_DEBUG
     QTAILQ_INIT(&s->kvm_sw_breakpoints);
@@ -446,10 +446,13 @@ int kvm_init(int smp_cpus)
         goto err;
     }
 
-    s->vmfd = kvm_ioctl(s, KVM_CREATE_VM, 0);
+    do {
+      s->vmfd = kvm_ioctl(s, KVM_CREATE_VM, 0);
+    } while (s->vmfd < 0 && (EINTR == errno || EAGAIN == errno));
+
     if (s->vmfd < 0) {
         ret = -errno;
-        fprintf(stderr, "ioctl(KVM_CREATE_VM) failed: %s\n", strerror(errno));
+        fprintf(stderr, "ioctl(KVM_CREATE_VM) failed: %d %s\n", errno, strerror(errno));
         goto err;
     }
 
@@ -508,7 +511,7 @@ err:
         if (s->fd != -1)
             close(s->fd);
     }
-    qemu_free(s);
+    g_free(s);
 
     return ret;
 }
@@ -667,7 +670,7 @@ int kvm_cpu_exec(CPUState *env)
     return ret;
 }
 
-void kvm_set_phys_mem(target_phys_addr_t start_addr,
+void kvm_set_phys_mem(hwaddr start_addr,
                       ram_addr_t size,
                       ram_addr_t phys_offset)
 {
@@ -931,7 +934,7 @@ int kvm_insert_breakpoint(CPUState *current_env, target_ulong addr,
             return 0;
         }
 
-        bp = qemu_malloc(sizeof(struct kvm_sw_breakpoint));
+        bp = g_malloc(sizeof(struct kvm_sw_breakpoint));
         if (!bp)
             return -ENOMEM;
 
@@ -981,7 +984,7 @@ int kvm_remove_breakpoint(CPUState *current_env, target_ulong addr,
             return err;
 
         QTAILQ_REMOVE(&current_env->kvm_state->kvm_sw_breakpoints, bp, entry);
-        qemu_free(bp);
+        g_free(bp);
     } else {
         err = kvm_arch_remove_hw_breakpoint(addr, len, type);
         if (err)

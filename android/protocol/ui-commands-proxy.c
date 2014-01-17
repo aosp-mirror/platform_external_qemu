@@ -149,12 +149,12 @@ _uiCmdProxy_brightness_change_callback(void* opaque,
     const size_t cmd_size = sizeof(UICmdChangeDispBrightness) + strlen(light) + 1;
     // Allocate and initialize parameters.
     UICmdChangeDispBrightness* cmd =
-        (UICmdChangeDispBrightness*)qemu_malloc(cmd_size);
+        (UICmdChangeDispBrightness*)g_malloc(cmd_size);
     cmd->brightness = brightness;
     strcpy(cmd->light, light);
     // Send the command.
     _uiCmdProxy_send_command(AUICMD_CHANGE_DISP_BRIGHTNESS, cmd, cmd_size);
-    qemu_free(cmd);
+    g_free(cmd);
 }
 
 int

@@ -16,7 +16,7 @@
 #include "android/qemulator.h"
 #include "android/protocol/core-commands-api.h"
 #include "android/protocol/ui-commands-api.h"
-#include "user-events.h"
+#include "android/user-events.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 static double get_default_scale( AndroidOptions*  opts );

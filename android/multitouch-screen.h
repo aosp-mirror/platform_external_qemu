@@ -23,11 +23,11 @@
 /*
  * Encapsulates functionality of multi-touch screen. Main task of this component
  * is to report touch events to the emulated system via event device (see
- * hw/goldfish_events_device.c) The source of touch events can be a mouse, or an
- * actual android device that is used for multi-touch emulation. Note that since
- * we need to simultaneousely support a mouse and a device as event source, we
- * need to know which one has sent us a touch event. This is important for proper
- * tracking of pointer IDs when multitouch is in play.
+ * hw/android/goldfish/events_device.c) The source of touch events can be a
+ * mouse, or an actual android device that is used for multi-touch emulation.
+ * Note that since we need to simultaneousely support a mouse and a device as
+ * event source, we need to know which one has sent us a touch event. This is
+ * important for proper tracking of pointer IDs when multitouch is in play.
  */
 
 /* Defines a source of multi-touch event. This is used to properly track
