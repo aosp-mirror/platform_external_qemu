@@ -102,6 +102,16 @@ static inline int tlb_set_page(CPUOldState *env1, target_ulong vaddr,
     return tlb_set_page_exec(env1, vaddr, paddr, prot, mmu_idx, is_softmmu);
 }
 
+typedef struct PhysPageDesc {
+    /* offset in host memory of the page + io_index in the low bits */
+    ram_addr_t phys_offset;
+    ram_addr_t region_offset;
+} PhysPageDesc;
+
+PhysPageDesc *phys_page_find(hwaddr index);
+
+int io_mem_watch;
+
 #define CODE_GEN_ALIGN           16 /* must be >= of the size of a icache line */
 
 #define CODE_GEN_PHYS_HASH_BITS     15
