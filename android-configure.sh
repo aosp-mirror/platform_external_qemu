@@ -321,6 +321,36 @@ if [ "$GLES_SUPPORT" = "yes" ]; then
     done
 fi
 
+# For OS X, detect the location of the SDK to use.
+if [ "$HOST_OS" = darwin ]; then
+    OSX_VERSION=$(sw_vers -productVersion)
+    OSX_SDK_SUPPORTED="10.6 10.7 10.8"
+    OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | grep macosx | sed -e "s/.*macosx//g" | sort -n)
+    if [ -z "$OSX_SDK_INSTALLED_LIST" ]; then
+        echo "ERROR: Please install XCode on this machine!"
+        exit 1
+    fi
+    log "OSX: Installed SDKs: $OSX_SDK_INSTALLED_LIST"
+
+    OSX_SDK_VERSION=$(echo "$OSX_SDK_INSTALLED_LIST" | tr ' ' '\n' | head -1)
+    log "OSX: Using SDK version $OSX_SDK_VERSION"
+
+    XCODE_PATH=$(xcode-select -print-path 2>/dev/null)
+    log "OSX: XCode path: $XCODE_PATH"
+
+    OSX_SDK_ROOT=$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${OSX_SDK_VERSION}.sdk
+    log "OSX: Looking for $OSX_SDK_ROOT"
+    if [ ! -d "$OSX_SDK_ROOT" ]; then
+        OSX_SDK_ROOT=/Developer/SDKs/MaxOSX${OSX_SDK_VERSION}.sdk
+        log "OSX: Looking for $OSX_SDK_ROOT"
+        if [ ! -d "$OSX_SDK_ROOT" ]; then
+            echo "ERROR: Could not find SDK $OSX_SDK_VERSION at $OSX_SDK_ROOT"
+            exit 1
+        fi
+    fi
+    echo "OSX SDK   : Found at $OSX_SDK_ROOT"
+fi
+
 # we can build the emulator with Cygwin, so enable it
 enable_cygwin
 
@@ -572,6 +602,11 @@ fi
 if [ "$GLES_INCLUDE" -a "$GLES_LIBS" ]; then
     echo "QEMU_OPENGLES_INCLUDE    := $GLES_INCLUDE" >> $config_mk
     echo "QEMU_OPENGLES_LIBS       := $GLES_LIBS"    >> $config_mk
+fi
+
+if [ "$HOST_OS" = "darwin" ]; then
+    echo "mac_sdk_root := $OSX_SDK_ROOT" >> $config_mk
+    echo "mac_sdk_version := $OSX_SDK_VERSION" >> $config_mk
 fi
 
 # Build the config-host.h file
