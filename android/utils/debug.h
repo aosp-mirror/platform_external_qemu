@@ -55,7 +55,6 @@ typedef enum {
 } VerboseTag;
 #undef  _VERBOSE_TAG
 
-/* defined in android_main.c */
 extern unsigned long  android_verbose;
 
 #define  VERBOSE_ENABLE(tag)    \
