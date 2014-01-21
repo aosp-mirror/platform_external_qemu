@@ -213,11 +213,6 @@ int qemu_main(int argc, char **argv, char **envp);
 
 #include "android/snaphost-android.h"
 
-#ifdef CONFIG_STANDALONE_CORE
-/* Verbose value used by the standalone emulator core (without UI) */
-unsigned long   android_verbose;
-#endif  // CONFIG_STANDALONE_CORE
-
 #if !defined(CONFIG_STANDALONE_CORE)
 /* in android/qemulator.c */
 extern void  android_emulator_set_base_port(int  port);
