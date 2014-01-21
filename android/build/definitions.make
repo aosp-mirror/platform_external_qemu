@@ -38,9 +38,8 @@ endef
 hide :=
 endif
 
-define my-dir
-.
-endef
+parent-dir = $(dir $1)
+my-dir = $(call parent-dir,$(lastword $(MAKEFILE_LIST)))
 
 # return the directory containing the intermediate files for a given
 # kind of executable
@@ -72,9 +71,9 @@ $$(OBJ): PRIVATE_CFLAGS := $$(CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOC
 $$(OBJ): PRIVATE_CC     := $$(LOCAL_CC)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
-$$(OBJ): PRIVATE_SRC    := $$(SRC_PATH)/$$(SRC)
+$$(OBJ): PRIVATE_SRC    := $$(LOCAL_PATH)/$$(SRC)
 $$(OBJ): PRIVATE_SRC0   := $$(SRC)
-$$(OBJ): $$(SRC_PATH)/$$(SRC)
+$$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
@@ -92,9 +91,9 @@ $$(OBJ): PRIVATE_CFLAGS := $$(CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOC
 $$(OBJ): PRIVATE_CXX    := $$(LOCAL_CC)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
-$$(OBJ): PRIVATE_SRC    := $$(SRC_PATH)/$$(SRC)
+$$(OBJ): PRIVATE_SRC    := $$(LOCAL_PATH)/$$(SRC)
 $$(OBJ): PRIVATE_SRC0   := $$(SRC)
-$$(OBJ): $$(SRC_PATH)/$$(SRC)
+$$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CXX) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
@@ -112,9 +111,9 @@ $$(OBJ): PRIVATE_CFLAGS := $$(CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOC
 $$(OBJ): PRIVATE_CC     := $$(LOCAL_CC)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
-$$(OBJ): PRIVATE_SRC    := $$(SRC_PATH)/$$(SRC)
+$$(OBJ): PRIVATE_SRC    := $$(LOCAL_PATH)/$$(SRC)
 $$(OBJ): PRIVATE_SRC0   := $$(SRC)
-$$(OBJ): $$(SRC_PATH)/$$(SRC)
+$$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
