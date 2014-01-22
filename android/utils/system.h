@@ -17,6 +17,9 @@
 #define __STDC_FORMAT_MACROS 1
 #include <inttypes.h>  /* for PRId64 et al. */
 #include "android/utils/assert.h"
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /* internal helpers */
 void*  _android_array_alloc( size_t  itemSize, size_t  count );
@@ -179,5 +182,7 @@ extern  void   sleep_ms( int  timeout );
 #endif
 
 /* */
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_SYSTEM_H */
