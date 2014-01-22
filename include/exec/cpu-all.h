@@ -355,20 +355,20 @@ void page_set_flags(target_ulong start, target_ulong end, int flags);
 int page_check_range(target_ulong start, target_ulong len, int flags);
 #endif
 
-CPUOldState *cpu_copy(CPUOldState *env);
-CPUOldState *qemu_get_cpu(int cpu);
+CPUArchState *cpu_copy(CPUArchState *env);
+CPUArchState *qemu_get_cpu(int cpu);
 
 #define CPU_DUMP_CODE 0x00010000
 
-void cpu_dump_state(CPUOldState *env, FILE *f, fprintf_function cpu_fprintf,
+void cpu_dump_state(CPUArchState *env, FILE *f, fprintf_function cpu_fprintf,
                     int flags);
-void cpu_dump_statistics(CPUOldState *env, FILE *f, fprintf_function cpu_fprintf,
+void cpu_dump_statistics(CPUArchState *env, FILE *f, fprintf_function cpu_fprintf,
                           int flags);
 
-void QEMU_NORETURN cpu_abort(CPUOldState *env, const char *fmt, ...)
+void QEMU_NORETURN cpu_abort(CPUArchState *env, const char *fmt, ...)
     GCC_FMT_ATTR(2, 3);
-extern CPUOldState *first_cpu;
-extern CPUOldState *cpu_single_env;
+extern CPUArchState *first_cpu;
+extern CPUArchState *cpu_single_env;
 
 /* Flags for use in ENV->INTERRUPT_PENDING.
 
@@ -436,17 +436,17 @@ int qemu_cpu_has_work(CPUOldState *env);
 #define BP_GDB                0x10
 #define BP_CPU                0x20
 
-int cpu_breakpoint_insert(CPUOldState *env, target_ulong pc, int flags,
+int cpu_breakpoint_insert(CPUArchState *env, target_ulong pc, int flags,
                           CPUBreakpoint **breakpoint);
-int cpu_breakpoint_remove(CPUOldState *env, target_ulong pc, int flags);
-void cpu_breakpoint_remove_by_ref(CPUOldState *env, CPUBreakpoint *breakpoint);
-void cpu_breakpoint_remove_all(CPUOldState *env, int mask);
-int cpu_watchpoint_insert(CPUOldState *env, target_ulong addr, target_ulong len,
+int cpu_breakpoint_remove(CPUArchState *env, target_ulong pc, int flags);
+void cpu_breakpoint_remove_by_ref(CPUArchState *env, CPUBreakpoint *breakpoint);
+void cpu_breakpoint_remove_all(CPUArchState *env, int mask);
+int cpu_watchpoint_insert(CPUArchState *env, target_ulong addr, target_ulong len,
                           int flags, CPUWatchpoint **watchpoint);
-int cpu_watchpoint_remove(CPUOldState *env, target_ulong addr,
+int cpu_watchpoint_remove(CPUArchState *env, target_ulong addr,
                           target_ulong len, int flags);
-void cpu_watchpoint_remove_by_ref(CPUOldState *env, CPUWatchpoint *watchpoint);
-void cpu_watchpoint_remove_all(CPUOldState *env, int mask);
+void cpu_watchpoint_remove_by_ref(CPUArchState *env, CPUWatchpoint *watchpoint);
+void cpu_watchpoint_remove_all(CPUArchState *env, int mask);
 
 #define SSTEP_ENABLE  0x1  /* Enable simulated HW single stepping */
 #define SSTEP_NOIRQ   0x2  /* Do not use IRQ while single stepping */
