@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA  02110-1301 USA
  */
 
+#include "exec/cpu-common.h"
 #include "hw/sysbus.h"
 #include "sysemu/sysemu.h"
 #include "monitor/monitor.h"

@@ -9,6 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "cpu.h"
 #include "migration/qemu-file.h"
 #include "hw/arm/pic.h"
 #include "hw/android/goldfish/device.h"

@@ -433,4 +433,18 @@ CPUDebugExcpHandler *cpu_set_debug_excp_handler(CPUDebugExcpHandler *handler);
 /* vl.c */
 extern int singlestep;
 
+/* Deterministic execution requires that IO only be performed on the last
+   instruction of a TB so that interrupts take effect immediately.  */
+static inline int can_do_io(CPUArchState *env)
+{
+    if (!use_icount)
+        return 1;
+
+    /* If not executing code then assume we are ok.  */
+    if (!env->current_tb)
+        return 1;
+
+    return env->can_do_io != 0;
+}
+
 #endif

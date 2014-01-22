@@ -20,6 +20,7 @@
 
 #include <linux/kvm.h>
 
+#include "cpu.h"
 #include "qemu-common.h"
 #include "sysemu/sysemu.h"
 #include "hw/hw.h"

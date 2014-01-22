@@ -5,7 +5,7 @@
 #include "qemu-common.h"
 #include "hw/irq.h"
 
-#if defined(TARGET_PHYS_ADDRESS_SPACE_BITS) && !defined(NEED_CPU_H)
+#ifdef NEED_CPU_H
 #include "cpu.h"
 #endif
 

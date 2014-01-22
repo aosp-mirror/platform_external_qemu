@@ -1,13 +1,11 @@
 #ifndef CPU_COMMON_H
 #define CPU_COMMON_H 1
 
-/* CPU interfaces that are target indpendent.  */
+#include "qemu-common.h"
 
-#if defined(__arm__) || defined(__sparc__) || defined(__mips__) || defined(__hppa__) || defined(__ia64__)
-#define WORDS_ALIGNED
-#endif
+/* CPU interfaces that are target independent.  */
 
-#ifdef TARGET_PHYS_ADDR_BITS
+#ifndef CONFIG_USER_ONLY
 #include "exec/hwaddr.h"
 #endif
 
@@ -18,10 +16,36 @@
 #include "qemu/bswap.h"
 #include "qemu/queue.h"
 
+/**
+ * CPUListState:
+ * @cpu_fprintf: Print function.
+ * @file: File to print to using @cpu_fprint.
+ *
+ * State commonly used for iterating over CPU models.
+ */
+typedef struct CPUListState {
+    fprintf_function cpu_fprintf;
+    FILE *file;
+} CPUListState;
+
 #if !defined(CONFIG_USER_ONLY)
 
+enum device_endian {
+    DEVICE_NATIVE_ENDIAN,
+    DEVICE_BIG_ENDIAN,
+    DEVICE_LITTLE_ENDIAN,
+};
+
 /* address in the RAM (different from a physical address) */
-typedef unsigned long ram_addr_t;
+#if defined(CONFIG_XEN_BACKEND)
+typedef uint64_t ram_addr_t;
+#  define RAM_ADDR_MAX UINT64_MAX
+#  define RAM_ADDR_FMT "%" PRIx64
+#else
+typedef uintptr_t ram_addr_t;
+#  define RAM_ADDR_MAX UINTPTR_MAX
+#  define RAM_ADDR_FMT "%" PRIxPTR
+#endif
 
 /* memory API */
 

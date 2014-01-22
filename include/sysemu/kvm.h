@@ -15,6 +15,7 @@
 #define QEMU_KVM_H
 
 #include "config.h"
+#include "cpu.h"
 #include "qemu/queue.h"
 
 #ifdef CONFIG_KVM
