@@ -137,6 +137,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/system.c \
 	android/utils/tempfile.c \
 	android/utils/vector.c \
+	android/utils/win32_cmdline_quote.c \
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
