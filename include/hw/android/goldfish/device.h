@@ -12,6 +12,7 @@
 #ifndef GOLDFISH_DEVICE_H
 #define GOLDFISH_DEVICE_H
 
+#include "config.h"
 #include "exec/cpu-common.h"
 
 struct goldfish_device {
