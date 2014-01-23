@@ -263,7 +263,7 @@ int ram_save_live(QEMUFile *f, int stage, void *opaque)
     }
 
     if (cpu_physical_sync_dirty_bitmap(0, TARGET_PHYS_ADDR_MAX) != 0) {
-        qemu_file_set_error(f);
+        qemu_file_set_error(f, -errno);
         return 0;
     }
 
@@ -449,7 +449,7 @@ int ram_load(QEMUFile *f, void *opaque, int version_id)
 
             qemu_get_buffer(f, host, TARGET_PAGE_SIZE);
         }
-        if (qemu_file_has_error(f)) {
+        if (qemu_file_get_error(f)) {
             return -EIO;
         }
     } while (!(flags & RAM_SAVE_FLAG_EOS));
