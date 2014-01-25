@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d2f7c297_eb4371ca",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-01-25T01:26:28Z",
+      "side": 1,
+      "message": "Thanks, that\u0027s really useful, I\u0027ll try to play with this a bit later. In the meantime, I\u0027ve updated the paragraph to reflect this.",
+      "parentUuid": "8dea89ed_40a1f8bd",
+      "range": {
+        "startLine": 443,
+        "startChar": 0,
+        "endLine": 450,
+        "endChar": 25
+      },
+      "revId": "4ad5d5e0503aed29b2f3a742a955d3679a681742",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8dea89ed_20cb945b",
         "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2014-01-10T16:34:04Z",
       "side": 1,
       "message": "should be /hw/goldfish_events_device.c",
+      "range": {
+        "startLine": 614,
+        "startChar": 2,
+        "endLine": 614,
+        "endChar": 36
+      },
+      "revId": "4ad5d5e0503aed29b2f3a742a955d3679a681742",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d2f7c297_6ba78159",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 614,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-01-25T01:26:28Z",
+      "side": 1,
+      "message": "Thanks, updated to hw/android/goldfish/events_device.c, which is the correct location.\n\nNote: I\u0027m heavily refactoring the code base to better match upstream QEMU, hence the change to a new directory.",
+      "parentUuid": "8dea89ed_20cb945b",
       "range": {
         "startLine": 614,
         "startChar": 2,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "f2fa0681_ec7b8bd1",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 665,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-01-25T01:26:28Z",
+      "side": 1,
+      "message": "Yes, I\u0027ve updated this with a link to the Linux spec.\n\nAlso, it looks like there are some broken-ness in one of the emulator, the driver or even the platform here, but we\u0027ll get there later. Thanks.",
+      "parentUuid": "cdcac190_ff13ea24",
+      "revId": "4ad5d5e0503aed29b2f3a742a955d3679a681742",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cdcac190_3ffa8290",
         "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
         "patchSetId": 2
@@ -76,6 +142,30 @@
       "writtenOn": "2014-01-10T16:34:04Z",
       "side": 1,
       "message": "Seems to still be in use. There were some recent changes to support ext4 on the emulator. The switch from yaffs to ext4 was 4.4.\n\nWhen I run the emulator with -verbose I see a mesage about loading NAND device.",
+      "range": {
+        "startLine": 788,
+        "startChar": 14,
+        "endLine": 788,
+        "endChar": 65
+      },
+      "revId": "4ad5d5e0503aed29b2f3a742a955d3679a681742",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f2fa0681_2c559340",
+        "filename": "docs/GOLDFISH-VIRTUAL-HARDWARE.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 788,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-01-25T01:26:28Z",
+      "side": 1,
+      "message": "Yes, I was confused and I fixed this.\n\nThe short story is that real device kernels do not use NAND drivers anymore, and rely on MMC (or something else) now. But this is not the case for Goldfish, and there is probably no plan to change that for now.",
+      "parentUuid": "cdcac190_3ffa8290",
       "range": {
         "startLine": 788,
         "startChar": 14,
