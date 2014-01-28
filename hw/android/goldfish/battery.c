@@ -44,6 +44,10 @@ struct goldfish_battery_state {
     int health;
     int present;
     int capacity;
+
+    // the fields below are part of the device configuration
+    // and don't need to be saved to / restored from snapshots.
+    int hw_has_battery;
 };
 
 /* update this each time you update the battery_state struct */
@@ -143,7 +147,7 @@ static CPUWriteMemoryFunc *goldfish_battery_writefn[] = {
     goldfish_battery_write
 };
 
-void goldfish_battery_init()
+void goldfish_battery_init(int has_battery)
 {
     struct goldfish_battery_state *s;
 
@@ -155,10 +159,18 @@ void goldfish_battery_init()
 
     // default values for the battery
     s->ac_online = 1;
-    s->status = POWER_SUPPLY_STATUS_CHARGING;
-    s->health = POWER_SUPPLY_HEALTH_GOOD;
-    s->present = 1;     // battery is present
-    s->capacity = 50;   // 50% charged
+    s->hw_has_battery = has_battery;
+    if (has_battery) {
+        s->status = POWER_SUPPLY_STATUS_CHARGING;
+        s->health = POWER_SUPPLY_HEALTH_GOOD;
+        s->present = 1;     // battery is present
+        s->capacity = 50;   // 50% charged
+    } else {
+        s->status = POWER_SUPPLY_STATUS_NOT_CHARGING;
+        s->health = POWER_SUPPLY_HEALTH_DEAD;
+        s->present = 0;
+        s->capacity = 0;
+    }
 
     battery_state = s;
 
@@ -171,6 +183,9 @@ void goldfish_battery_init()
 void goldfish_battery_set_prop(int ac, int property, int value)
 {
     int new_status = (ac ? AC_STATUS_CHANGED : BATTERY_STATUS_CHANGED);
+
+    if (!battery_state || !battery_state->hw_has_battery)
+        return;
 
     if (ac) {
         switch (property) {
@@ -206,55 +221,56 @@ void goldfish_battery_display(void (* callback)(void *data, const char* string),
     char          buffer[100];
     const char*   value;
 
-    sprintf(buffer, "AC: %s\r\n", (battery_state->ac_online ? "online" : "offline"));
+    // Note: obviously, if there is no battery, the AC must always be on.
+    snprintf(buffer, sizeof buffer, "AC: %s\r\n",
+             (battery_state->ac_online) ? "online" : "offline");
     callback(data, buffer);
 
     switch (battery_state->status) {
-	    case POWER_SUPPLY_STATUS_CHARGING:
-	        value = "Charging";
-	        break;
-	    case POWER_SUPPLY_STATUS_DISCHARGING:
-	        value = "Discharging";
-	        break;
-	    case POWER_SUPPLY_STATUS_NOT_CHARGING:
-	        value = "Not charging";
-	        break;
-	    case POWER_SUPPLY_STATUS_FULL:
-	        value = "Full";
-	        break;
+        case POWER_SUPPLY_STATUS_CHARGING:
+            value = "Charging";
+            break;
+        case POWER_SUPPLY_STATUS_DISCHARGING:
+            value = "Discharging";
+            break;
+        case POWER_SUPPLY_STATUS_NOT_CHARGING:
+            value = "Not charging";
+            break;
+        case POWER_SUPPLY_STATUS_FULL:
+            value = "Full";
+            break;
         default:
-	        value = "Unknown";
-	        break;
+            value = "Unknown";
     }
-    sprintf(buffer, "status: %s\r\n", value);
+    snprintf(buffer, sizeof buffer, "status: %s\r\n", value);
     callback(data, buffer);
 
     switch (battery_state->health) {
-	    case POWER_SUPPLY_HEALTH_GOOD:
-	        value = "Good";
-	        break;
-	    case POWER_SUPPLY_HEALTH_OVERHEAT:
-	        value = "Overhead";
-	        break;
-	    case POWER_SUPPLY_HEALTH_DEAD:
-	        value = "Dead";
-	        break;
-	    case POWER_SUPPLY_HEALTH_OVERVOLTAGE:
-	        value = "Overvoltage";
-	        break;
-	    case POWER_SUPPLY_HEALTH_UNSPEC_FAILURE:
-	        value = "Unspecified failure";
-	        break;
+        case POWER_SUPPLY_HEALTH_GOOD:
+            value = "Good";
+            break;
+        case POWER_SUPPLY_HEALTH_OVERHEAT:
+            value = "Overhead";
+            break;
+        case POWER_SUPPLY_HEALTH_DEAD:
+            value = "Dead";
+            break;
+        case POWER_SUPPLY_HEALTH_OVERVOLTAGE:
+            value = "Overvoltage";
+            break;
+        case POWER_SUPPLY_HEALTH_UNSPEC_FAILURE:
+            value = "Unspecified failure";
+            break;
         default:
-	        value = "Unknown";
-	        break;
+            value = "Unknown";
     }
-    sprintf(buffer, "health: %s\r\n", value);
+    snprintf(buffer, sizeof buffer, "health: %s\r\n", value);
     callback(data, buffer);
 
-    sprintf(buffer, "present: %s\r\n", (battery_state->present ? "true" : "false"));
+    snprintf(buffer, sizeof buffer, "present: %s\r\n",
+             (battery_state->present) ? "true" : "false");
     callback(data, buffer);
 
-    sprintf(buffer, "capacity: %d\r\n", battery_state->capacity);
+    snprintf(buffer, sizeof buffer, "capacity: %d\r\n", battery_state->capacity);
     callback(data, buffer);
 }
