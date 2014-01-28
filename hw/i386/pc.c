@@ -1044,8 +1044,7 @@ static void pc_init1(ram_addr_t ram_size,
     goldfish_device_init(i8259, 0xff010000, 0x7f0000, 5, 5);
     goldfish_device_bus_init(0xff001000, IRQ_PDEV_BUS);
 
-    if (android_hw->hw_battery)
-        goldfish_battery_init();
+    goldfish_battery_init(android_hw->hw_battery);
 
     goldfish_memlog_init(0);
 
