@@ -293,6 +293,7 @@ Device properties:
     0x08  CMD           W: Send command (see below).
     0x10  DATA_PTR      W: Write kernel buffer address.
     0x14  DATA_LEN      W: Write kernel buffer size.
+    0x18  DATA_PTR_HIGH    W: Write kernel buffer high 32 bit address.
 
 This is the first case of a multi-instance goldfish device in this document.
 Each instance implements a virtual serial port that contains a small internal
