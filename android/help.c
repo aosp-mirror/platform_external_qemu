@@ -1561,6 +1561,7 @@ help_force_32bit(stralloc_t* out)
 #define  help_version      NULL
 #define  help_memory       NULL
 #define  help_partition_size NULL
+#define  help_new_dev_name NULL
 
 typedef struct {
     const char*  name;

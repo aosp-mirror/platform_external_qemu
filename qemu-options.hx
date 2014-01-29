@@ -1801,4 +1801,7 @@ DEF("snapshot-no-time-update", 0, QEMU_OPTION_snapshot_no_time_update, \
 DEF("list-webcam", 0, QEMU_OPTION_list_webcam, \
     "-list-webcam List web cameras available for emulation\n")
 
+DEF("new-dev-name", 0, QEMU_OPTION_new_dev_name, \
+    "-new-dev-name Use new device name for new goldfish kernel (3.9+)\n")
+
 #endif /* ANDROID */

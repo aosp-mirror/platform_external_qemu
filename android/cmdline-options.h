@@ -166,6 +166,8 @@ OPT_PARAM( screen, "<mode>", "set emulated screen mode" )
 
 OPT_FLAG( force_32bit, "always use 32-bit emulator" )
 
+OPT_FLAG( new_dev_name, "use new device name for new goldfish kernel (3.9+)" )
+
 OPT_PARAM(selinux, "<disabled|permissive>", "Set SELinux to either disabled or permissive mode")
 
 #undef CFG_FLAG

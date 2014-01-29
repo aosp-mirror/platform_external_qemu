@@ -424,10 +424,35 @@ int main(int argc, char **argv)
         int    kernelFileLen;
 
         if (kernelFile == NULL) {
+            char cmd[256], output[256] = { 0, };
+            FILE *f;
             kernelFile = avdInfo_getKernelPath(avd);
             if (kernelFile == NULL) {
                 derror( "This AVD's configuration is missing a kernel file!!" );
                 exit(2);
+            }
+            /* FIXME: For kernel >= 3.9 use the new device driver names.
+             * Reading the file meta info only works on the Linux host for Intel kernel.
+             */
+            snprintf(cmd, sizeof(cmd), "file %s", kernelFile);
+            f = popen(cmd, "r");
+            if (f) {
+                fread(output, sizeof(output), 1, f);
+                if (!ferror(f)) {
+                    char *bzImage = strstr(output, "bzImage");
+                    if (bzImage) {
+                        char *version = strstr(bzImage, "version ");
+                        if (version) {
+                                version += strlen("version ");
+                                if (version[0] > '3' ||
+                                    (version[0] == '3' && version[1] == '.' && version[2] == '1' &&
+                                     version[3] >= '0' && version[3] <= '9')) {
+                                        opts->new_dev_name = 1;
+                                        D("autoconfig: -new-dev-name\n");
+                                }
+                        }
+                    }
+                }
             }
             D("autoconfig: -kernel %s", kernelFile);
         }
@@ -1017,7 +1042,10 @@ int main(int argc, char **argv)
 #endif
 
         if (opts->shell || opts->logcat) {
-            p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );
+            if (opts->new_dev_name)
+                p = bufprint(p, end, " androidboot.console=ttyGF%d", shell_serial );
+            else
+                p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );
         }
 
         if (opts->trace) {
@@ -1282,6 +1310,9 @@ int main(int argc, char **argv)
             }
         }
     }
+
+    if (opts->new_dev_name)
+        args[n++] = "-new-dev-name";
 
     if(VERBOSE_CHECK(init)) {
         int i;
