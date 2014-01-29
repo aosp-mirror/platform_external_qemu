@@ -27,12 +27,12 @@
 #define TARGET_LONG_BITS 32
 #endif
 
-#include "cpu-defs.h"
+#include "exec/cpu-defs.h"
 
 GLOBAL_REGISTER_VARIABLE_DECL struct CPUX86State *env asm(AREG0);
 
 #include "qemu-common.h"
-#include "qemu-log.h"
+#include "qemu/log.h"
 
 #define EAX (env->regs[R_EAX])
 #define ECX (env->regs[R_ECX])
@@ -56,7 +56,7 @@ GLOBAL_REGISTER_VARIABLE_DECL struct CPUX86State *env asm(AREG0);
 #define ST1    ST(1)
 
 #include "cpu.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 
 /* op_helper.c */
 void do_interrupt(int intno, int is_int, int error_code,
@@ -85,7 +85,7 @@ static inline void svm_check_intercept(uint32_t type)
 
 #if !defined(CONFIG_USER_ONLY)
 
-#include "softmmu_exec.h"
+#include "exec/softmmu_exec.h"
 
 #endif /* !defined(CONFIG_USER_ONLY) */
 

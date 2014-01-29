@@ -12,7 +12,7 @@
 #include "android/skin/trackball.h"
 #include "android/skin/image.h"
 #include "android/utils/system.h"
-#include "user-events.h"
+#include "android/user-events.h"
 #include <math.h>
 
 /***********************************************************************/

@@ -14,6 +14,10 @@
 
 #include <stdarg.h>
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* These are always defined, so you can write your own macros that
  * call them, independently of the value of ACONFIG_USE_ASSERT
  */
@@ -166,5 +170,7 @@ void __attribute__((noreturn)) android_assert_fail(const char*  messageFmt, ...)
  */
 typedef void (*AAssertLogFunc)( const char*  fmt, va_list  args );
 void  android_assert_registerLog( AAssertLogFunc  logger );
+
+ANDROID_END_HEADER
 
 #endif /* ANDROID_UTILS_ASSERT_H */

@@ -16,10 +16,10 @@
 #include "android/utils/bufprint.h"
 #include "android/looper.h"
 #include "hw/hw.h"
-#include "hw/goldfish_pipe.h"
-#include "qemu-char.h"
-#include "charpipe.h"
-#include "cbuffer.h"
+#include "hw/android/goldfish/pipe.h"
+#include "sysemu/char.h"
+#include "android/charpipe.h"
+#include "android/cbuffer.h"
 #include "utils/panic.h"
 
 #define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)

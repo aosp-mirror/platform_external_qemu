@@ -15,7 +15,7 @@
 #include "sysdeps.h"
 #include "gsm.h"
 #include "android/android.h"
-#include "sockets.h"
+#include "android/sockets.h"
 #include <stdlib.h>
 
 #define  DEBUG  1

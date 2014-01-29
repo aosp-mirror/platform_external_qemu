@@ -25,7 +25,7 @@ allocation block and operation that is being performed on this block. Emulator
 and libc use a "magic page" that is set up in such a way that every write to
 that page on the emulated system produces some sort of event in the emulator,
 allowing emulator to receive data that emulated system has written to the "magic
-page". For more info on that, see hw/goldfish-trace.c
+page". For more info on that, see hw/android/goldfish/trace.c
 
 In response to events, received from libc.so, emulator keep tracks of all blocks
 that have been allocated from the heap on emulated system. Block descriptors are

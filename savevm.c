@@ -72,18 +72,18 @@
 
 #include "qemu-common.h"
 #include "hw/hw.h"
-#include "net.h"
-#include "monitor.h"
-#include "sysemu.h"
-#include "qemu-timer.h"
-#include "qemu-char.h"
-#include "blockdev.h"
-#include "block.h"
+#include "net/net.h"
+#include "monitor/monitor.h"
+#include "sysemu/sysemu.h"
+#include "qemu/timer.h"
+#include "sysemu/char.h"
+#include "sysemu/blockdev.h"
+#include "block/block.h"
 #include "audio/audio.h"
-#include "migration.h"
-#include "qemu_socket.h"
-#include "qemu-queue.h"
-#include "qemu_file.h"
+#include "migration/migration.h"
+#include "qemu/sockets.h"
+#include "qemu/queue.h"
+#include "migration/qemu-file.h"
 #include "android/snapshot.h"
 
 
@@ -210,7 +210,7 @@ static int socket_get_buffer(void *opaque, uint8_t *buf, int64_t pos, int size)
 static int file_socket_close(void *opaque)
 {
     QEMUFileSocket *s = opaque;
-    qemu_free(s);
+    g_free(s);
     return 0;
 }
 
@@ -238,7 +238,7 @@ static int stdio_pclose(void *opaque)
     QEMUFileStdio *s = opaque;
     int ret;
     ret = pclose(s->stdio_file);
-    qemu_free(s);
+    g_free(s);
     return ret;
 }
 
@@ -246,7 +246,7 @@ static int stdio_fclose(void *opaque)
 {
     QEMUFileStdio *s = opaque;
     fclose(s->stdio_file);
-    qemu_free(s);
+    g_free(s);
     return 0;
 }
 
@@ -259,7 +259,7 @@ QEMUFile *qemu_popen(FILE *stdio_file, const char *mode)
         return NULL;
     }
 
-    s = qemu_mallocz(sizeof(QEMUFileStdio));
+    s = g_malloc0(sizeof(QEMUFileStdio));
 
     s->stdio_file = stdio_file;
 
@@ -307,7 +307,7 @@ QEMUFile *qemu_fdopen(int fd, const char *mode)
         return NULL;
     }
 
-    s = qemu_mallocz(sizeof(QEMUFileStdio));
+    s = g_malloc0(sizeof(QEMUFileStdio));
     s->stdio_file = fdopen(fd, mode);
     if (!s->stdio_file)
         goto fail;
@@ -322,13 +322,13 @@ QEMUFile *qemu_fdopen(int fd, const char *mode)
     return s->file;
 
 fail:
-    qemu_free(s);
+    g_free(s);
     return NULL;
 }
 
 QEMUFile *qemu_fopen_socket(int fd)
 {
-    QEMUFileSocket *s = qemu_mallocz(sizeof(QEMUFileSocket));
+    QEMUFileSocket *s = g_malloc0(sizeof(QEMUFileSocket));
 
     s->fd = fd;
     s->file = qemu_fopen_ops(s, NULL, socket_get_buffer, file_socket_close,
@@ -362,7 +362,7 @@ QEMUFile *qemu_fopen(const char *filename, const char *mode)
         return NULL;
     }
 
-    s = qemu_mallocz(sizeof(QEMUFileStdio));
+    s = g_malloc0(sizeof(QEMUFileStdio));
 
     s->stdio_file = fopen(filename, mode);
     if (!s->stdio_file)
@@ -377,7 +377,7 @@ QEMUFile *qemu_fopen(const char *filename, const char *mode)
     }
     return s->file;
 fail:
-    qemu_free(s);
+    g_free(s);
     return NULL;
 }
 
@@ -415,7 +415,7 @@ QEMUFile *qemu_fopen_ops(void *opaque, QEMUFilePutBufferFunc *put_buffer,
 {
     QEMUFile *f;
 
-    f = qemu_mallocz(sizeof(QEMUFile));
+    f = g_malloc0(sizeof(QEMUFile));
 
     f->opaque = opaque;
     f->put_buffer = put_buffer;
@@ -481,7 +481,7 @@ int qemu_fclose(QEMUFile *f)
     qemu_fflush(f);
     if (f->close)
         ret = f->close(f->opaque);
-    qemu_free(f);
+    g_free(f);
     return ret;
 }
 
@@ -587,9 +587,9 @@ char* qemu_get_string(QEMUFile *f)
     if (slen == 0)
         return NULL;
 
-    str = qemu_malloc(slen+1);
+    str = g_malloc(slen+1);
     if (qemu_get_buffer(f, (uint8_t*)str, slen) != slen) {
-        qemu_free(str);
+        g_free(str);
         return NULL;
     }
     str[slen] = '\0';
@@ -836,7 +836,7 @@ int register_savevm_live(const char *idstr,
     SaveStateEntry *se, **pse;
     static int global_section_id;
 
-    se = qemu_malloc(sizeof(SaveStateEntry));
+    se = g_malloc(sizeof(SaveStateEntry));
     pstrcpy(se->idstr, sizeof(se->idstr), idstr);
     se->instance_id = (instance_id == -1) ? 0 : instance_id;
     se->version_id = version_id;
@@ -879,7 +879,7 @@ void unregister_savevm(const char *idstr, void *opaque)
     while (*pse != NULL) {
         if (strcmp((*pse)->idstr, idstr) == 0 && (*pse)->opaque == opaque) {
             SaveStateEntry *next = (*pse)->next;
-            qemu_free(*pse);
+            g_free(*pse);
             *pse = next;
             continue;
         }
@@ -1149,7 +1149,7 @@ int qemu_loadvm_state(QEMUFile *f)
             }
 
             /* Add entry */
-            le = qemu_mallocz(sizeof(*le));
+            le = g_malloc0(sizeof(*le));
 
             le->se = se;
             le->section_id = section_id;
@@ -1189,7 +1189,7 @@ out:
     while (first_le) {
         LoadStateEntry *le = first_le;
         first_le = first_le->next;
-        qemu_free(le);
+        g_free(le);
     }
 
     if (qemu_file_has_error(f))
@@ -1234,7 +1234,7 @@ static int bdrv_snapshot_find(BlockDriverState *bs, QEMUSnapshotInfo *sn_info,
             break;
         }
     }
-    qemu_free(sn_tab);
+    g_free(sn_tab);
     return ret;
 }
 
@@ -1481,5 +1481,5 @@ void do_info_snapshots(Monitor* out, Monitor* err)
         sn = &sn_tab[i];
         monitor_printf(out, "%s\n", bdrv_snapshot_dump(buf, sizeof(buf), sn));
     }
-    qemu_free(sn_tab);
+    g_free(sn_tab);
 }

@@ -32,23 +32,23 @@
 #include "hw/boards.h"
 #include "hw/usb.h"
 #include "hw/pcmcia.h"
-#include "hw/pc.h"
+#include "hw/i386/pc.h"
 #include "hw/audiodev.h"
-#include "hw/isa.h"
+#include "hw/isa/isa.h"
 #include "hw/baum.h"
-#include "hw/goldfish_nand.h"
-#include "net.h"
-#include "console.h"
-#include "sysemu.h"
-#include "gdbstub.h"
-#include "qemu-timer.h"
-#include "qemu-char.h"
-#include "blockdev.h"
+#include "hw/android/goldfish/nand.h"
+#include "net/net.h"
+#include "ui/console.h"
+#include "sysemu/sysemu.h"
+#include "exec/gdbstub.h"
+#include "qemu/timer.h"
+#include "sysemu/char.h"
+#include "sysemu/blockdev.h"
 #include "audio/audio.h"
 
-#include "qemu_file.h"
+#include "migration/qemu-file.h"
 #include "android/android.h"
-#include "charpipe.h"
+#include "android/charpipe.h"
 #include "modem_driver.h"
 #include "android/gps.h"
 #include "android/hw-kmsg.h"
@@ -69,8 +69,8 @@
 #include "android/snapshot.h"
 #include "android/opengles.h"
 #include "android/multitouch-screen.h"
-#include "targphys.h"
-#include "tcpdump.h"
+#include "exec/hwaddr.h"
+#include "android/tcpdump.h"
 
 #ifdef CONFIG_MEMCHECK
 #include "memcheck/memcheck.h"
@@ -126,7 +126,7 @@
 /* For the benefit of older linux systems which don't supply it,
    we use a local copy of hpet.h. */
 /* #include <linux/hpet.h> */
-#include "hpet.h"
+#include "hw/timer/hpet.h"
 
 #include <linux/ppdev.h>
 #include <linux/parport.h>
@@ -166,8 +166,8 @@
 #define memalign(align, size) malloc(size)
 #endif
 
-#include "cpus.h"
-#include "arch_init.h"
+#include "sysemu/cpus.h"
+#include "sysemu/arch_init.h"
 
 #ifdef CONFIG_COCOA
 int qemu_main(int argc, char **argv, char **envp);
@@ -179,32 +179,32 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "hw/boards.h"
 #include "hw/usb.h"
 #include "hw/pcmcia.h"
-#include "hw/pc.h"
-#include "hw/isa.h"
+#include "hw/i386/pc.h"
+#include "hw/isa/isa.h"
 #include "hw/baum.h"
 #include "hw/bt.h"
-#include "hw/watchdog.h"
-#include "hw/smbios.h"
-#include "hw/xen.h"
-#include "bt-host.h"
-#include "net.h"
-#include "monitor.h"
-#include "console.h"
-#include "sysemu.h"
-#include "gdbstub.h"
-#include "qemu-timer.h"
-#include "qemu-char.h"
-#include "cache-utils.h"
-#include "block.h"
-#include "dma.h"
+#include "sysemu/watchdog.h"
+#include "hw/i386/smbios.h"
+#include "hw/xen/xen.h"
+#include "sysemu/bt.h"
+#include "net/net.h"
+#include "monitor/monitor.h"
+#include "ui/console.h"
+#include "sysemu/sysemu.h"
+#include "exec/gdbstub.h"
+#include "qemu/timer.h"
+#include "sysemu/char.h"
+#include "qemu/cache-utils.h"
+#include "block/block.h"
+#include "sysemu/dma.h"
 #include "audio/audio.h"
-#include "migration.h"
-#include "kvm.h"
-#include "hax.h"
+#include "migration/migration.h"
+#include "sysemu/kvm.h"
+#include "exec/hax.h"
 #ifdef CONFIG_KVM
-#include "kvm-android.h"
+#include "android/kvm.h"
 #endif
-#include "balloon.h"
+#include "sysemu/balloon.h"
 #include "android/hw-lcd.h"
 #include "android/boot-properties.h"
 #include "android/hw-control.h"
@@ -212,11 +212,6 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "android/audio-test.h"
 
 #include "android/snaphost-android.h"
-
-#ifdef CONFIG_STANDALONE_CORE
-/* Verbose value used by the standalone emulator core (without UI) */
-unsigned long   android_verbose;
-#endif  // CONFIG_STANDALONE_CORE
 
 #if !defined(CONFIG_STANDALONE_CORE)
 /* in android/qemulator.c */
@@ -228,13 +223,13 @@ extern void  android_emulator_set_base_port(int  port);
 #define main qemu_main
 #endif
 
-#include "disas.h"
+#include "disas/disas.h"
 
 #ifdef CONFIG_TRACE
-#include "android-trace.h"
+#include "android/trace.h"
 #endif
 
-#include "qemu_socket.h"
+#include "qemu/sockets.h"
 
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"
@@ -436,7 +431,7 @@ const char* savevm_on_exit = NULL;
 /***********************************************************/
 /* x86 ISA bus support */
 
-target_phys_addr_t isa_mem_base = 0;
+hwaddr isa_mem_base = 0;
 PicState2 *isa_pic;
 
 static IOPortReadFunc default_ioport_readb, default_ioport_readw, default_ioport_readl;
@@ -699,7 +694,7 @@ static struct bt_scatternet_s *qemu_find_bt_vlan(int id)
         if (vlan->id == id)
             return &vlan->net;
     }
-    vlan = qemu_mallocz(sizeof(struct bt_vlan_s));
+    vlan = g_malloc0(sizeof(struct bt_vlan_s));
     vlan->id = id;
     pvlan = &first_bt_vlan;
     while (*pvlan != NULL)
@@ -1665,7 +1660,7 @@ void pcmcia_socket_register(PCMCIASocket *socket)
 {
     struct pcmcia_socket_entry_s *entry;
 
-    entry = qemu_malloc(sizeof(struct pcmcia_socket_entry_s));
+    entry = g_malloc(sizeof(struct pcmcia_socket_entry_s));
     entry->socket = socket;
     entry->next = pcmcia_sockets;
     pcmcia_sockets = entry;
@@ -1679,7 +1674,7 @@ void pcmcia_socket_unregister(PCMCIASocket *socket)
     for (entry = *ptr; entry; ptr = &entry->next, entry = *ptr)
         if (entry->socket == socket) {
             *ptr = entry->next;
-            qemu_free(entry);
+            g_free(entry);
         }
 }
 
@@ -1776,7 +1771,7 @@ VMChangeStateEntry *qemu_add_vm_change_state_handler(VMChangeStateHandler *cb,
 {
     VMChangeStateEntry *e;
 
-    e = qemu_mallocz(sizeof (*e));
+    e = g_malloc0(sizeof (*e));
 
     e->cb = cb;
     e->opaque = opaque;
@@ -1787,7 +1782,7 @@ VMChangeStateEntry *qemu_add_vm_change_state_handler(VMChangeStateHandler *cb,
 void qemu_del_vm_change_state_handler(VMChangeStateEntry *e)
 {
     QLIST_REMOVE (e, entries);
-    qemu_free (e);
+    g_free (e);
 }
 
 void vm_state_notify(int running, int reason)
@@ -1870,7 +1865,7 @@ void qemu_register_reset(QEMUResetHandler *func, int order, void *opaque)
     while (*pre != NULL && (*pre)->order >= order) {
         pre = &(*pre)->next;
     }
-    re = qemu_mallocz(sizeof(QEMUResetEntry));
+    re = g_malloc0(sizeof(QEMUResetEntry));
     re->func = func;
     re->opaque = opaque;
     re->order = order;
@@ -2182,7 +2177,7 @@ static char *find_datadir(const char *argv0)
         p--;
     *p = 0;
     if (access(buf, R_OK) == 0) {
-        return qemu_strdup(buf);
+        return g_strdup(buf);
     }
     return NULL;
 }
@@ -2222,7 +2217,7 @@ static char *find_datadir(const char *argv0)
         }
     }
 
-    return qemu_strdup(dirname(buf));
+    return g_strdup(dirname(buf));
 }
 #endif
 
@@ -2230,12 +2225,12 @@ static char*
 qemu_find_file_with_subdir(const char* data_dir, const char* subdir, const char* name)
 {
     int   len = strlen(data_dir) + strlen(name) + strlen(subdir) + 2;
-    char* buf = qemu_mallocz(len);
+    char* buf = g_malloc0(len);
 
     snprintf(buf, len, "%s/%s%s", data_dir, subdir, name);
     VERBOSE_PRINT(init,"    trying to find: %s\n", buf);
     if (access(buf, R_OK)) {
-        qemu_free(buf);
+        g_free(buf);
         return NULL;
     }
     return buf;
@@ -4048,12 +4043,12 @@ int main(int argc, char **argv, char **envp)
                     if (nb_option_roms >= MAX_OPTION_ROMS) {
                         PANIC("Too many option ROMs");
                     }
-                    option_rom[nb_option_roms] = qemu_strdup(buf);
+                    option_rom[nb_option_roms] = g_strdup(buf);
                     nb_option_roms++;
                     netroms++;
                 }
                 if (filename) {
-                    qemu_free(filename);
+                    g_free(filename);
                 }
             }
 	}

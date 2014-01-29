@@ -141,9 +141,9 @@ qemu_chr_add_handlers().
 
 Typical examples are the following:
 
-  - The hardware serial port emulation (e.g. hw/goldfish_tty.c) will read data
-    from the kernel then send it to a CS. It also uses a small buffer that is
-    used to read data from the CS and send it back to the kernel.
+  - The hardware serial port emulation (e.g. hw/android/goldfish/tty.c) will
+    read data from the kernel then send it to a CS. It also uses a small buffer
+    that is used to read data from the CS and send it back to the kernel.
 
   - The Android emulated modem also uses a CS to talk with its client,
     which will in most cases be an emulated serial port.
@@ -177,8 +177,8 @@ IV. CharPipe objects:
 
 The Android emulator also provides a convenient abstraction called a "charpipe"
 used to connect two CharDriverState users together. For example, this is used
-to connect a serial port emulation (in hw/goldfish_tty.c) to the internal
-GSM modem emulation (see telephony/modem_driver.c).
+to connect a serial port emulation (in hw/android/goldfish/tty.c) to the
+internal GSM modem emulation (see telephony/modem_driver.c).
 
 Essentially, a "charpipe" is a bi-directionnal communication pipe whose two
 endpoints are both CS objects. You call "qemu_chr_open_pipe()" to create the

@@ -20,7 +20,6 @@ OPTION_TARGETS=""
 OPTION_DEBUG=no
 OPTION_IGNORE_AUDIO=no
 OPTION_NO_PREBUILTS=no
-OPTION_TRY_64=no
 OPTION_HELP=no
 OPTION_STATIC=no
 OPTION_MINGW=no
@@ -32,8 +31,6 @@ GLES_PROBE=yes
 
 HOST_CC=${CC:-gcc}
 OPTION_CC=
-
-TARGET_ARCH=arm
 
 for opt do
   optarg=`expr "x$opt" : 'x[^=]*=\(.*\)'`
@@ -63,11 +60,7 @@ for opt do
   ;;
   --no-prebuilts) OPTION_NO_PREBUILTS=yes
   ;;
-  --try-64) OPTION_TRY_64=yes
-  ;;
   --static) OPTION_STATIC=yes
-  ;;
-  --arch=*) TARGET_ARCH=$optarg
   ;;
   --gles-include=*) GLES_INCLUDE=$optarg
   GLES_SUPPORT=yes
@@ -95,13 +88,11 @@ EOF
     echo "  --help                   print this message"
     echo "  --install=FILEPATH       copy emulator executable to FILEPATH [$TARGETS]"
     echo "  --cc=PATH                specify C compiler [$HOST_CC]"
-    echo "  --arch=ARM               specify target architecture [$TARGET_ARCH]"
     echo "  --sdl-config=FILE        use specific sdl-config script [$SDL_CONFIG]"
     echo "  --no-strip               do not strip emulator executable"
     echo "  --debug                  enable debug (-O0 -g) build"
     echo "  --ignore-audio           ignore audio messages (may build sound-less emulator)"
     echo "  --no-prebuilts           do not use prebuilt libraries and compiler"
-    echo "  --try-64                 try to build a 64-bit executable (may crash)"
     echo "  --mingw                  build Windows executable on Linux"
     echo "  --static                 build a completely static executable"
     echo "  --verbose                verbose configuration"
@@ -133,13 +124,9 @@ if [ -z "$CC" ]; then
   CC=$HOST_CC
 fi
 
-# we only support generating 32-bit binaris on 64-bit systems.
-# And we may need to add a -Wa,--32 to CFLAGS to let the assembler
-# generate 32-bit binaries on Linux x86_64.
-#
-if [ "$OPTION_TRY_64" != "yes" ] ; then
-    force_32bit_binaries
-fi
+# By default, generate 32-bit binaries, the Makefile have targets that
+# generate 64-bit ones by using -m64 on the command-line.
+force_32bit_binaries
 
 case $OS in
     linux-*)
@@ -181,10 +168,19 @@ fi
 # platform build tree and copy them into objs/lib/ automatically, unless
 # you use --gles-libs to point explicitely to a different directory.
 #
-if [ "$OPTION_TRY_64" != "yes" ] ; then
-    GLES_SHARED_LIBRARIES="libOpenglRender libGLES_CM_translator libGLES_V2_translator libEGL_translator"
-else
-    GLES_SHARED_LIBRARIES="lib64OpenglRender lib64GLES_CM_translator lib64GLES_V2_translator lib64EGL_translator"
+GLES_SHARED_LIBRARIES="\
+  libOpenglRender \
+  libGLES_CM_translator \
+  libGLES_V2_translator \
+  libEGL_translator"
+
+if [ "$OPTION_MINGW" != "true" ]; then
+  # There are no 64-bit libraries for Windows yet!
+  GLES_SHARED_LIBRARIES="$GLES_SHARED_LIBRARIES \
+    lib64OpenglRender \
+    lib64GLES_CM_translator \
+    lib64GLES_V2_translator \
+    lib64EGL_translator"
 fi
 
 if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
@@ -253,6 +249,15 @@ if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
         fi
     fi
 else
+    if [ -n "$USE_CCACHE" ]; then
+        CCACHE=$(which ccache 2>/dev/null)
+        if [ -n "$CCACHE" -a -f "$CCACHE" ] ; then
+            CC="$CCACHE $CC"
+            log "Prebuilt   : CCACHE=$CCACHE"
+	else
+            log "Prebuilt   : CCACHE can't be found"
+        fi
+    fi
     if [ "$GLES_PROBE" = "yes" ]; then
         GLES_SUPPORT=yes
         if [ -z "$GLES_INCLUDE" ]; then
@@ -314,6 +319,36 @@ if [ "$GLES_SUPPORT" = "yes" ]; then
             log "GLES       : Copying $GLES_LIB"
         fi
     done
+fi
+
+# For OS X, detect the location of the SDK to use.
+if [ "$HOST_OS" = darwin ]; then
+    OSX_VERSION=$(sw_vers -productVersion)
+    OSX_SDK_SUPPORTED="10.6 10.7 10.8"
+    OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | grep macosx | sed -e "s/.*macosx//g" | sort -n)
+    if [ -z "$OSX_SDK_INSTALLED_LIST" ]; then
+        echo "ERROR: Please install XCode on this machine!"
+        exit 1
+    fi
+    log "OSX: Installed SDKs: $OSX_SDK_INSTALLED_LIST"
+
+    OSX_SDK_VERSION=$(echo "$OSX_SDK_INSTALLED_LIST" | tr ' ' '\n' | head -1)
+    log "OSX: Using SDK version $OSX_SDK_VERSION"
+
+    XCODE_PATH=$(xcode-select -print-path 2>/dev/null)
+    log "OSX: XCode path: $XCODE_PATH"
+
+    OSX_SDK_ROOT=$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${OSX_SDK_VERSION}.sdk
+    log "OSX: Looking for $OSX_SDK_ROOT"
+    if [ ! -d "$OSX_SDK_ROOT" ]; then
+        OSX_SDK_ROOT=/Developer/SDKs/MaxOSX${OSX_SDK_VERSION}.sdk
+        log "OSX: Looking for $OSX_SDK_ROOT"
+        if [ ! -d "$OSX_SDK_ROOT" ]; then
+            echo "ERROR: Could not find SDK $OSX_SDK_VERSION at $OSX_SDK_ROOT"
+            exit 1
+        fi
+    fi
+    echo "OSX SDK   : Found at $OSX_SDK_ROOT"
 fi
 
 # we can build the emulator with Cygwin, so enable it
@@ -530,18 +565,6 @@ esac
 
 create_config_mk
 echo "" >> $config_mk
-if [ $TARGET_ARCH = arm ] ; then
-echo "TARGET_ARCH       := arm" >> $config_mk
-fi
-
-if [ $TARGET_ARCH = x86 ] ; then
-echo "TARGET_ARCH       := x86" >> $config_mk
-fi
-
-if [ $TARGET_ARCH = mips ] ; then
-echo "TARGET_ARCH       := mips" >> $config_mk
-fi
-
 echo "HOST_PREBUILT_TAG := $TARGET_OS" >> $config_mk
 echo "HOST_EXEEXT       := $TARGET_EXEEXT" >> $config_mk
 echo "PREBUILT          := $ANDROID_PREBUILT" >> $config_mk
@@ -581,12 +604,31 @@ if [ "$GLES_INCLUDE" -a "$GLES_LIBS" ]; then
     echo "QEMU_OPENGLES_LIBS       := $GLES_LIBS"    >> $config_mk
 fi
 
+if [ "$HOST_OS" = "darwin" ]; then
+    echo "mac_sdk_root := $OSX_SDK_ROOT" >> $config_mk
+    echo "mac_sdk_version := $OSX_SDK_VERSION" >> $config_mk
+fi
+
 # Build the config-host.h file
 #
 config_h=objs/config-host.h
-echo "/* This file was autogenerated by '$PROGNAME' */" > $config_h
-echo "#define CONFIG_QEMU_SHAREDIR   \"/usr/local/share/qemu\"" >> $config_h
-echo "#define HOST_LONG_BITS  $HOST_LONGBITS" >> $config_h
+cat > $config_h <<EOF
+/* This file was autogenerated by '$PROGNAME' */
+
+#define CONFIG_QEMU_SHAREDIR   "/usr/local/share/qemu"
+
+#if defined(__x86_64__)
+#define HOST_X86_64    1
+#define HOST_LONG_BITS  64
+#elif defined(__i386__)
+#define HOST_I386    1
+#define HOST_LONG_BITS  32
+#else
+#error Unknown architecture for codegen
+#endif
+
+EOF
+
 if [ "$HAVE_BYTESWAP_H" = "yes" ] ; then
   echo "#define CONFIG_BYTESWAP_H 1" >> $config_h
 fi
@@ -645,7 +687,6 @@ case "$CPU" in
     *) CONFIG_CPU=$CPU
     ;;
 esac
-echo "#define HOST_$CONFIG_CPU    1" >> $config_h
 if [ "$HOST_BIGENDIAN" = "1" ] ; then
   echo "#define HOST_WORDS_BIGENDIAN 1" >> $config_h
 fi

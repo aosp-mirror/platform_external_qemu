@@ -1,12 +1,12 @@
 /* General "disassemble this chunk" code.  Used for debugging. */
 #include "config.h"
-#include "dis-asm.h"
+#include "disas/bfd.h"
 #include "elf.h"
 #include <errno.h>
 
 #include "cpu.h"
-#include "exec-all.h"
-#include "disas.h"
+#include "exec/exec-all.h"
+#include "disas/disas.h"
 
 /* Filled in by elfload.c.  Simplistic, but will do for now. */
 struct syminfo *syminfos = NULL;
@@ -335,7 +335,7 @@ const char *lookup_symbol(target_ulong orig_addr)
 
 #if !defined(CONFIG_USER_ONLY)
 
-#include "monitor.h"
+#include "monitor/monitor.h"
 
 static int monitor_disas_is_physical;
 static CPUState *monitor_disas_env;

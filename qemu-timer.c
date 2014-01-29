@@ -22,10 +22,10 @@
  * THE SOFTWARE.
  */
 
-#include "sysemu.h"
-#include "net.h"
-#include "monitor.h"
-#include "console.h"
+#include "sysemu/sysemu.h"
+#include "net/net.h"
+#include "monitor/monitor.h"
+#include "ui/console.h"
 
 #include "hw/hw.h"
 
@@ -45,7 +45,7 @@
 /* For the benefit of older linux systems which don't supply it,
    we use a local copy of hpet.h. */
 /* #include <linux/hpet.h> */
-#include "hpet.h"
+#include "hw/timer/hpet.h"
 #endif
 
 #ifdef _WIN32
@@ -53,7 +53,7 @@
 #include <mmsystem.h>
 #endif
 
-#include "qemu-timer.h"
+#include "qemu/timer.h"
 
 /* Conversion factor from emulated instructions to virtual clock ticks.  */
 int icount_time_shift;
@@ -378,7 +378,7 @@ void configure_alarms(char const *opt)
         exit(0);
     }
 
-    arg = qemu_strdup(opt);
+    arg = g_strdup(opt);
 
     /* Reorder the array */
     name = strtok(arg, ",");
@@ -407,7 +407,7 @@ next:
         name = strtok(NULL, ",");
     }
 
-    qemu_free(arg);
+    g_free(arg);
 
     if (cur) {
         /* Disable remaining timers */
@@ -430,7 +430,7 @@ static QEMUTimer *active_timers[QEMU_NUM_CLOCKS];
 static QEMUClock *qemu_new_clock(int type)
 {
     QEMUClock *clock;
-    clock = qemu_mallocz(sizeof(QEMUClock));
+    clock = g_malloc0(sizeof(QEMUClock));
     clock->type = type;
     clock->enabled = 1;
     return clock;
@@ -530,7 +530,7 @@ QEMUTimer *qemu_new_timer(QEMUClock *clock, int scale,
 {
     QEMUTimer *ts;
 
-    ts = qemu_mallocz(sizeof(QEMUTimer));
+    ts = g_malloc0(sizeof(QEMUTimer));
     ts->clock = clock;
     ts->cb = cb;
     ts->opaque = opaque;
@@ -540,7 +540,7 @@ QEMUTimer *qemu_new_timer(QEMUClock *clock, int scale,
 
 void qemu_free_timer(QEMUTimer *ts)
 {
-    qemu_free(ts);
+    g_free(ts);
 }
 
 /* stop a timer, but do not dealloc it */

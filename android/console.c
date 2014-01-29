@@ -21,14 +21,14 @@
  *
  */
 
-#include "sockets.h"
-#include "qemu-char.h"
-#include "sysemu.h"
+#include "android/sockets.h"
+#include "sysemu/char.h"
+#include "sysemu/sysemu.h"
 #include "android/android.h"
 #include "cpu.h"
-#include "hw/goldfish_device.h"
+#include "hw/android/goldfish/device.h"
 #include "hw/power_supply.h"
-#include "shaper.h"
+#include "android/shaper.h"
 #include "modem_driver.h"
 #include "android/gps.h"
 #include "android/globals.h"
@@ -36,9 +36,9 @@
 #include "android/utils/debug.h"
 #include "android/utils/stralloc.h"
 #include "android/config/config.h"
-#include "tcpdump.h"
-#include "net.h"
-#include "monitor.h"
+#include "android/tcpdump.h"
+#include "net/net.h"
+#include "monitor/monitor.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -47,7 +47,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "android/hw-events.h"
-#include "user-events.h"
+#include "android/user-events.h"
 #include "android/hw-sensors.h"
 #include "android/keycode-array.h"
 #include "android/charmap.h"
