@@ -11,6 +11,7 @@
 */
 #include "migration/qemu-file.h"
 #include "nand_reg.h"
+#include "hw/android/goldfish/device.h"
 #include "hw/android/goldfish/nand.h"
 #include "hw/android/goldfish/vmem.h"
 #include "android/utils/tempfile.h"
@@ -126,7 +127,7 @@ typedef struct {
     uint32_t addr_low;
     uint32_t addr_high;
     uint32_t transfer_size;
-    uint32_t data;
+    uint64_t data;
     uint32_t batch_addr_low;
     uint32_t batch_addr_high;
     uint32_t result;
@@ -361,7 +362,7 @@ static int   nand_dev_controller_state_load(QEMUFile *f, void  *opaque, int  ver
     return 0;
 }
 
-static uint32_t nand_dev_read_file(nand_dev *dev, uint32_t data, uint64_t addr, uint32_t total_len)
+static uint32_t nand_dev_read_file(nand_dev *dev, target_ulong data, uint64_t addr, uint32_t total_len)
 {
     uint32_t len = total_len;
     size_t read_len = dev->erase_size;
@@ -388,7 +389,7 @@ static uint32_t nand_dev_read_file(nand_dev *dev, uint32_t data, uint64_t addr, 
     return total_len;
 }
 
-static uint32_t nand_dev_write_file(nand_dev *dev, uint32_t data, uint64_t addr, uint32_t total_len)
+static uint32_t nand_dev_write_file(nand_dev *dev, target_ulong data, uint64_t addr, uint32_t total_len)
 {
     uint32_t len = total_len;
     size_t write_len = dev->erase_size;
@@ -455,14 +456,23 @@ uint32_t nand_dev_do_cmd(nand_dev_controller_state *s, uint32_t cmd)
     if (cmd == NAND_CMD_WRITE_BATCH || cmd == NAND_CMD_READ_BATCH ||
         cmd == NAND_CMD_ERASE_BATCH) {
         struct batch_data bd;
+        struct batch_data_64 bd64;
         uint64_t bd_addr = ((uint64_t)s->batch_addr_high << 32) | s->batch_addr_low;
-
-        cpu_physical_memory_read(bd_addr, (void*)&bd, sizeof(struct batch_data));
-        s->dev = bd.dev;
-        s->addr_low = bd.addr_low;
-        s->addr_high = bd.addr_high;
-        s->transfer_size = bd.transfer_size;
-        s->data = bd.data;
+        if (goldfish_64bit_guest) {
+            cpu_physical_memory_read(bd_addr, (void*)&bd64, sizeof(struct batch_data_64));
+            s->dev = bd64.dev;
+            s->addr_low = bd64.addr_low;
+            s->addr_high = bd64.addr_high;
+            s->transfer_size = bd64.transfer_size;
+            s->data = bd64.data;
+        } else {
+            cpu_physical_memory_read(bd_addr, (void*)&bd, sizeof(struct batch_data));
+            s->dev = bd.dev;
+            s->addr_low = bd.addr_low;
+            s->addr_high = bd.addr_high;
+            s->transfer_size = bd.transfer_size;
+            s->data = bd.data;
+        }
     }
     addr = s->addr_low | ((uint64_t)s->addr_high << 32);
     size = s->transfer_size;
@@ -550,16 +560,27 @@ static void nand_dev_write(void *opaque, hwaddr offset, uint32_t value)
         s->transfer_size = value;
         break;
     case NAND_DATA:
-        s->data = value;
+        uint64_set_low(&s->data, value);
         break;
+#ifdef TARGET_X86_64
+    case NAND_DATA_HIGH:
+        uint64_set_high(&s->data, value);
+        break;
+#endif
     case NAND_COMMAND:
         s->result = nand_dev_do_cmd(s, value);
         if (value == NAND_CMD_WRITE_BATCH || value == NAND_CMD_READ_BATCH ||
             value == NAND_CMD_ERASE_BATCH) {
             struct batch_data bd;
+            struct batch_data_64 bd64;
             uint64_t bd_addr = ((uint64_t)s->batch_addr_high << 32) | s->batch_addr_low;
-            bd.result = s->result;
-            cpu_physical_memory_write(bd_addr, (void*)&bd, sizeof(struct batch_data));
+            if (goldfish_64bit_guest) {
+                bd64.result = s->result;
+                cpu_physical_memory_write(bd_addr, (void*)&bd64, sizeof(struct batch_data_64));
+            } else {
+                bd.result = s->result;
+                cpu_physical_memory_write(bd_addr, (void*)&bd, sizeof(struct batch_data));
+            }
         }
         break;
     default:

@@ -33,6 +33,15 @@ struct batch_data{
 	uint32_t result;
 };
 
+struct batch_data_64 {
+	uint32_t dev;
+	uint32_t addr_low;
+	uint32_t addr_high;
+	uint32_t transfer_size;
+	uint64_t data;
+	uint32_t result;
+};
+
 enum nand_dev_flags {
 	NAND_DEV_FLAG_READ_ONLY = 0x00000001,
 	NAND_DEV_FLAG_BATCH_CAP = 0x00000002
@@ -59,6 +68,9 @@ enum nand_reg {
 	NAND_RESULT         = 0x040,
 	NAND_COMMAND        = 0x044,
 	NAND_DATA           = 0x048,
+#ifdef TARGET_X86_64
+	NAND_DATA_HIGH      = 0x100,
+#endif
 	NAND_TRANSFER_SIZE  = 0x04c,
 	NAND_ADDR_LOW       = 0x050,
 	NAND_ADDR_HIGH      = 0x054,
