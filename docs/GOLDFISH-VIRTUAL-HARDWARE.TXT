@@ -493,6 +493,9 @@ Device properties:
     0x1c  SET_READ_BUFFER
     0x20  START_READ
     0x24  READ_BUFFER_AVAILABLE
+    0x28  SET_WRITE_BUFFER_1_HIGH  W: Set high 32 bit address of first kernel output buffer.
+    0x30  SET_WRITE_BUFFER_2_HIGH  W: Set high 32 bit address of second kernel output buffer.
+    0x34  SET_READ_BUFFER_HIGH
 
 This device implements a virtual sound card with the following properties:
 
