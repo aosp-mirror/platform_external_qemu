@@ -201,7 +201,11 @@ snapshot_format_create_date( char *buf, size_t buf_size, time_t *time )
 {
     struct tm *tm;
     tm = localtime(time);
-    strftime(buf, buf_size, "%Y-%m-%d %H:%M:%S", tm);
+    if (!tm) {
+        snprintf(buf, buf_size, "<invalid-snapshot-date>");
+    } else {
+        strftime(buf, buf_size, "%Y-%m-%d %H:%M:%S", tm);
+    }
     return buf;
 }
 
@@ -225,9 +229,11 @@ snapshot_info_print( SnapshotInfo *info )
     char date_buf[21];
     char clock_buf[21];
 
+    // Note: time_t might be larger than uint32_t.
+    time_t date_sec = info->date_sec;
+
     snapshot_format_size(size_buf, sizeof(size_buf), info->vm_state_size);
-    snapshot_format_create_date(date_buf, sizeof(date_buf),
-                                (time_t*) &info->date_sec);
+    snapshot_format_create_date(date_buf, sizeof(date_buf), &date_sec);
     snapshot_format_vm_clock(clock_buf, sizeof(clock_buf), info->vm_clock_nsec);
 
     printf(" %-10s%-20s%7s%20s%15s\n",
