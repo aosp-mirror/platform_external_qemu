@@ -22,6 +22,9 @@ enum {
     MMC_INT_ENABLE          = 0x04,
     /* set this to specify buffer address */
     MMC_SET_BUFFER          = 0x08,
+#ifdef TARGET_X86_64
+    MMC_SET_BUFFER_HIGH     = 0x30,
+#endif
 
     /* MMC command number */
     MMC_CMD                 = 0x0C,
@@ -63,7 +66,7 @@ struct goldfish_mmc_state {
     struct goldfish_device dev;
     BlockDriverState *bs;
     // pointer to our buffer
-    uint32_t buffer_address;
+    uint64_t buffer_address;
     // offsets for read and write operations
     uint32_t read_offset, write_offset;
     // buffer status flags
@@ -467,8 +470,14 @@ static void goldfish_mmc_write(void *opaque, hwaddr offset, uint32_t val)
             break;
         case MMC_SET_BUFFER:
             /* save pointer to buffer 1 */
-            s->buffer_address = val;
+            uint64_set_low(&s->buffer_address, val);
             break;
+#ifdef TARGET_X86_64
+	    case MMC_SET_BUFFER_HIGH:
+            /* save pointer to buffer 1 */
+            uint64_set_high(&s->buffer_address, val);
+            break;
+#endif
         case MMC_CMD:
             goldfish_mmc_do_command(s, val, s->arg);
             break;
