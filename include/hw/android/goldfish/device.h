@@ -52,6 +52,7 @@ void goldfish_battery_display(void (* callback)(void *data, const char* string),
 void goldfish_mmc_init(uint32_t base, int id, BlockDriverState* bs);
 void *goldfish_switch_add(char *name, uint32_t (*writefn)(void *opaque, uint32_t state), void *writeopaque, int id);
 void goldfish_switch_set_state(void *opaque, uint32_t state);
+int goldfish_guest_is_64bit();
 
 // these do not add a device
 void trace_dev_init();
@@ -73,5 +74,15 @@ void nand_dev_init(uint32_t base);
 /* Maximum IRQ number available for a device on ARM. */
 #define GFD_MAX_IRQ     32
 #endif
+
+static inline void uint64_set_low(uint64_t *addr, uint32 value)
+{
+    *addr = (*addr & ~(0xFFFFFFFFULL)) | value;
+}
+
+static inline void uint64_set_high(uint64_t *addr, uint32 value)
+{
+    *addr = (*addr & 0xFFFFFFFFULL) | ((uint64_t)value << 32);
+}
 
 #endif  /* GOLDFISH_DEVICE_H */
