@@ -14,12 +14,12 @@
  */
 
 #include "qemu-common.h"
-#include "qemu_socket.h"
-#include "migration.h"
-#include "qemu-char.h"
-#include "sysemu.h"
+#include "qemu/sockets.h"
+#include "migration/migration.h"
+#include "sysemu/char.h"
+#include "sysemu/sysemu.h"
 #include "buffered_file.h"
-#include "block.h"
+#include "block/block.h"
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -69,7 +69,7 @@ MigrationState *exec_start_outgoing_migration(const char *command,
     FdMigrationState *s;
     FILE *f;
 
-    s = qemu_mallocz(sizeof(*s));
+    s = g_malloc0(sizeof(*s));
 
     f = popen(command, "w");
     if (f == NULL) {
@@ -110,7 +110,7 @@ MigrationState *exec_start_outgoing_migration(const char *command,
 err_after_open:
     pclose(f);
 err_after_alloc:
-    qemu_free(s);
+    g_free(s);
     return NULL;
 }
 

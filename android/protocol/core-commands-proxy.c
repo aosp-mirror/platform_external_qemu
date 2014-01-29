@@ -15,7 +15,7 @@
  * part of the UI control protocol. Here we send UI control commands to the Core.
  */
 
-#include "console.h"
+#include "ui/console.h"
 #include "android/looper.h"
 #include "android/async-utils.h"
 #include "android/sync-utils.h"

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 #include "qemu-common.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "slirp.h"
 #include "proxy_common.h"
 #include "hw/hw.h"
@@ -30,9 +30,9 @@
 #include "android/utils/debug.h"  /* for dprint */
 #include "android/utils/bufprint.h"
 #include "android/android.h"
-#include "sockets.h"
+#include "android/sockets.h"
 
-#include "qemu-queue.h"
+#include "qemu/queue.h"
 
 /* proto types */
 static void slirp_net_forward_init(void);

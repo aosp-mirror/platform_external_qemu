@@ -14,7 +14,7 @@
  * on the emulated device.
  */
 #include "modem_driver.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 
 #define  xxDEBUG
 

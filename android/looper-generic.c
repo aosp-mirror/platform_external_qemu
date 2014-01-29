@@ -15,8 +15,8 @@
 #include "android/utils/refset.h"
 #include "android/utils/system.h"
 #include "android/looper.h"
-#include "iolooper.h"
-#include "sockets.h"
+#include "android/iolooper.h"
+#include "android/sockets.h"
 #include <inttypes.h>
 #include <limits.h>
 #include <errno.h>

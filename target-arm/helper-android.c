@@ -3,9 +3,9 @@
 #include <string.h>
 
 #include "cpu.h"
-#include "exec-all.h"
-#include "gdbstub.h"
-#include "def-helper.h"
+#include "exec/exec-all.h"
+#include "exec/gdbstub.h"
+#include "exec/def-helper.h"
 #include "helper-android.h"
 #include "qemu-common.h"
 
@@ -24,7 +24,7 @@ void vstrcpy(target_ulong ptr, char *buf, int max)
 }
 
 #ifdef CONFIG_TRACE
-#include "android-trace.h"
+#include "android/trace.h"
 
 void  HELPER(traceTicks)(uint32_t  ticks)
 {

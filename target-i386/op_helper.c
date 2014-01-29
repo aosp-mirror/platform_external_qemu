@@ -17,10 +17,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA  02110-1301 USA
  */
+#include <math.h>
+
 #define CPU_NO_GLOBAL_REGS
 #include "exec.h"
-#include "exec-all.h"
-#include "host-utils.h"
+#include "exec/exec-all.h"
+#include "qemu/host-utils.h"
 
 //#define DEBUG_PCALL
 
@@ -4809,16 +4811,16 @@ static float approx_rcp(float a)
 #define MMUSUFFIX _mmu
 
 #define SHIFT 0
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 1
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 2
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #define SHIFT 3
-#include "softmmu_template.h"
+#include "exec/softmmu_template.h"
 
 #endif
 
@@ -4898,7 +4900,7 @@ void helper_svm_check_io(uint32_t port, uint32_t param,
 }
 #else
 
-static inline void svm_save_seg(target_phys_addr_t addr,
+static inline void svm_save_seg(hwaddr addr,
                                 const SegmentCache *sc)
 {
     stw_phys(addr + offsetof(struct vmcb_seg, selector),
@@ -4911,7 +4913,7 @@ static inline void svm_save_seg(target_phys_addr_t addr,
              ((sc->flags >> 8) & 0xff) | ((sc->flags >> 12) & 0x0f00));
 }
 
-static inline void svm_load_seg(target_phys_addr_t addr, SegmentCache *sc)
+static inline void svm_load_seg(hwaddr addr, SegmentCache *sc)
 {
     unsigned int flags;
 
@@ -4922,7 +4924,7 @@ static inline void svm_load_seg(target_phys_addr_t addr, SegmentCache *sc)
     sc->flags = ((flags & 0xff) << 8) | ((flags & 0x0f00) << 12);
 }
 
-static inline void svm_load_seg_cache(target_phys_addr_t addr,
+static inline void svm_load_seg_cache(hwaddr addr,
                                       CPUState *env, int seg_reg)
 {
     SegmentCache sc1, *sc = &sc1;

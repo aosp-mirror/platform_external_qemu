@@ -25,14 +25,14 @@
 #include <signal.h>
 
 #include "cpu.h"
-#include "exec-all.h"
-#include "disas.h"
+#include "exec/exec-all.h"
+#include "disas/disas.h"
 #include "tcg-op.h"
 
 #include "helper.h"
 #define GEN_HELPER 1
 #include "helper.h"
-#include "hax.h"
+#include "exec/hax.h"
 
 #define PREFIX_REPZ   0x01
 #define PREFIX_REPNZ  0x02
@@ -73,7 +73,7 @@ static TCGv_i32 cpu_tmp2_i32, cpu_tmp3_i32;
 static TCGv_i64 cpu_tmp1_i64;
 static TCGv cpu_tmp5, cpu_tmp6;
 
-#include "gen-icount.h"
+#include "exec/gen-icount.h"
 
 #ifdef TARGET_X86_64
 static int x86_64_hregs;

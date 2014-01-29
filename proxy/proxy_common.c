@@ -10,14 +10,14 @@
 ** GNU General Public License for more details.
 */
 #include "proxy_int.h"
-#include "sockets.h"
+#include "android/sockets.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
-#include "iolooper.h"
+#include "android/iolooper.h"
 #include <stdlib.h>
 
 int  proxy_log = 0;

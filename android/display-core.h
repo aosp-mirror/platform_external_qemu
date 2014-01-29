@@ -18,7 +18,7 @@
 #ifndef _ANDROID_DISPLAY_CORE_H
 #define _ANDROID_DISPLAY_CORE_H
 
-#include "console.h"
+#include "ui/console.h"
 
 /*
  * Initializes one and only one instance of a core display.

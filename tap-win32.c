@@ -27,8 +27,8 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "qemu-common.h"
-#include "net.h"
-#include "sysemu.h"
+#include "net/net.h"
+#include "sysemu/sysemu.h"
 #include <stdio.h>
 #include <windows.h>
 #include <winioctl.h>
@@ -641,7 +641,7 @@ static void tap_cleanup(VLANClientState *vc)
     /* FIXME: need to kill thread and close file handle:
        tap_win32_close(s);
     */
-    qemu_free(s);
+    g_free(s);
 }
 
 static ssize_t tap_receive(VLANClientState *vc, const uint8_t *buf, size_t size)
@@ -670,7 +670,7 @@ int tap_win32_init(VLANState *vlan, const char *model,
 {
     TAPState *s;
 
-    s = qemu_mallocz(sizeof(TAPState));
+    s = g_malloc0(sizeof(TAPState));
     if (!s)
         return -1;
     if (tap_win32_open(&s->handle, ifname) < 0) {

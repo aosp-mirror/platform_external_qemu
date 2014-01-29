@@ -29,18 +29,18 @@
 #include <sys/mman.h>
 #endif
 #include "config.h"
-#include "monitor.h"
-#include "sysemu.h"
-#include "arch_init.h"
+#include "monitor/monitor.h"
+#include "sysemu/sysemu.h"
+#include "sysemu/arch_init.h"
 #include "audio/audio.h"
 #include "hw/irq.h"
-#include "hw/pci.h"
+#include "hw/pci/pci.h"
 #include "hw/audiodev.h"
-#include "kvm.h"
-#include "migration.h"
-#include "net.h"
-#include "gdbstub.h"
-#include "hw/smbios.h"
+#include "sysemu/kvm.h"
+#include "migration/migration.h"
+#include "net/net.h"
+#include "exec/gdbstub.h"
+#include "hw/i386/smbios.h"
 
 #ifdef TARGET_SPARC
 int graphic_width = 1024;
@@ -236,7 +236,7 @@ static void sort_ram_list(void)
     QLIST_FOREACH(block, &ram_list.blocks, next) {
         ++n;
     }
-    blocks = qemu_malloc(n * sizeof *blocks);
+    blocks = g_malloc(n * sizeof *blocks);
     n = 0;
     QLIST_FOREACH_SAFE(block, &ram_list.blocks, next, nblock) {
         blocks[n++] = block;
@@ -246,7 +246,7 @@ static void sort_ram_list(void)
     while (--n >= 0) {
         QLIST_INSERT_HEAD(&ram_list.blocks, blocks[n], next);
     }
-    qemu_free(blocks);
+    g_free(blocks);
 }
 
 int ram_save_live(QEMUFile *f, int stage, void *opaque)

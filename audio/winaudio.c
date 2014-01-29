@@ -144,7 +144,7 @@ winaudio_out_fini (HWVoiceOut *hw)
     }
 
     if (s->buffer_bytes != NULL) {
-        qemu_free(s->buffer_bytes);
+        g_free(s->buffer_bytes);
         s->buffer_bytes = NULL;
     }
 
@@ -204,7 +204,7 @@ winaudio_out_init (HWVoiceOut *hw, struct audsettings *as)
     }
 
     samples_size    = format.nBlockAlign * conf.nb_samples;
-    s->buffer_bytes = qemu_malloc( NUM_OUT_BUFFERS * samples_size );
+    s->buffer_bytes = g_malloc( NUM_OUT_BUFFERS * samples_size );
     if (s->buffer_bytes == NULL) {
             waveOutClose( s->waveout );
             s->waveout = NULL;
@@ -390,7 +390,7 @@ winaudio_in_fini (HWVoiceIn *hw)
     }
 
     if (s->buffer_bytes != NULL) {
-        qemu_free(s->buffer_bytes);
+        g_free(s->buffer_bytes);
         s->buffer_bytes = NULL;
     }
 
@@ -448,7 +448,7 @@ winaudio_in_init (HWVoiceIn *hw, struct audsettings *as)
     }
 
     samples_size    = format.nBlockAlign * conf.nb_samples;
-    s->buffer_bytes = qemu_malloc( NUM_IN_BUFFERS * samples_size );
+    s->buffer_bytes = g_malloc( NUM_IN_BUFFERS * samples_size );
     if (s->buffer_bytes == NULL) {
             waveInClose( s->wavein );
             s->wavein = NULL;

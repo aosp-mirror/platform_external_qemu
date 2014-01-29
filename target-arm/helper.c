@@ -3,15 +3,15 @@
 #include <string.h>
 
 #include "cpu.h"
-#include "exec-all.h"
-#include "gdbstub.h"
+#include "exec/exec-all.h"
+#include "exec/gdbstub.h"
 #include "helper.h"
 #include "qemu-common.h"
-#include "host-utils.h"
+#include "qemu/host-utils.h"
 #if !defined(CONFIG_USER_ONLY)
 //#include "hw/loader.h"
 #ifdef CONFIG_TRACE
-#include "android-trace.h"
+#include "android/trace.h"
 #endif
 #endif
 
@@ -381,7 +381,7 @@ CPUARMState *cpu_arm_init(const char *cpu_model)
     id = cpu_arm_find_by_name(cpu_model);
     if (id == 0)
         return NULL;
-    env = qemu_mallocz(sizeof(CPUARMState));
+    env = g_malloc0(sizeof(CPUARMState));
     cpu_exec_init(env);
     if (!inited) {
         inited = 1;
@@ -1351,7 +1351,7 @@ int cpu_arm_handle_mmu_fault (CPUState *env, target_ulong address,
     return 1;
 }
 
-target_phys_addr_t cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
+hwaddr cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
 {
     uint32_t phys_addr;
     target_ulong page_size;

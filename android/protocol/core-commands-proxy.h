@@ -13,7 +13,7 @@
 #ifndef _ANDROID_PROTOCOL_CORE_COMMANDS_PROXY_H
 #define _ANDROID_PROTOCOL_CORE_COMMANDS_PROXY_H
 
-#include "sockets.h"
+#include "android/sockets.h"
 
 /*
  * Contains the UI-side implementation of the "ui-core-control" service that is

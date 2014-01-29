@@ -10,8 +10,8 @@
 ** GNU General Public License for more details.
 */
 #include "android/hw-kmsg.h"
-#include "qemu-char.h"
-#include "charpipe.h"
+#include "sysemu/char.h"
+#include "android/charpipe.h"
 #include "android/utils/debug.h"
 
 static CharDriverState*  android_kmsg_cs;

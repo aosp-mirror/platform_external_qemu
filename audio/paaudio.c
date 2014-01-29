@@ -13,7 +13,7 @@
 #define DEBUG 1
 
 #if DEBUG
-#  include "qemu_debug.h"
+#  include "android/qemu-debug.h"
 #  include <stdio.h>
 #  define D(...)  VERBOSE_PRINT(audio,__VA_ARGS__)
 #  define D_ACTIVE  VERBOSE_CHECK(audio)
@@ -38,7 +38,7 @@
 
 static void* pa_lib;
 
-#include "dynlink.h"
+#include "android/dynlink.h"
 
 typedef struct {
     HWVoiceOut hw;
@@ -367,7 +367,7 @@ static int qpa_init_out (HWVoiceOut *hw, struct audsettings *as)
     return 0;
 
  fail3:
-    qemu_free (pa->pcm_buf);
+    g_free (pa->pcm_buf);
     pa->pcm_buf = NULL;
  fail2:
     FF(pa_simple_free) (pa->s);
@@ -421,7 +421,7 @@ static int qpa_init_in (HWVoiceIn *hw, struct audsettings *as)
     return 0;
 
  fail3:
-    qemu_free (pa->pcm_buf);
+    g_free (pa->pcm_buf);
     pa->pcm_buf = NULL;
  fail2:
     FF(pa_simple_free) (pa->s);
@@ -446,7 +446,7 @@ static void qpa_fini_out (HWVoiceOut *hw)
     }
 
     audio_pt_fini (&pa->pt, AUDIO_FUNC);
-    qemu_free (pa->pcm_buf);
+    g_free (pa->pcm_buf);
     pa->pcm_buf = NULL;
 }
 
@@ -466,7 +466,7 @@ static void qpa_fini_in (HWVoiceIn *hw)
     }
 
     audio_pt_fini (&pa->pt, AUDIO_FUNC);
-    qemu_free (pa->pcm_buf);
+    g_free (pa->pcm_buf);
     pa->pcm_buf = NULL;
 }
 

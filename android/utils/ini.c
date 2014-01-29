@@ -18,7 +18,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/system.h" /* for ASTRDUP */
 #include "android/utils/bufprint.h"
-#include "osdep.h"
+#include "qemu/osdep.h"
 
 /* W() is used to print warnings, D() to print debugging info */
 #define  W(...)   dwarning(__VA_ARGS__)

@@ -12,7 +12,7 @@
 #ifndef _ANDROID_DISPLAY_H
 #define _ANDROID_DISPLAY_H
 
-#include "console.h"
+#include "ui/console.h"
 #include "android/framebuffer.h"
 
 extern void android_display_init(DisplayState* ds, QFrameBuffer* qfbuff);

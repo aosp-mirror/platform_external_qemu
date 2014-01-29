@@ -44,9 +44,9 @@
 
 #define CPUState struct CPUX86State
 
-#include "cpu-defs.h"
+#include "exec/cpu-defs.h"
 
-#include "softfloat.h"
+#include "fpu/softfloat.h"
 
 #define R_EAX 0
 #define R_ECX 1
@@ -897,8 +897,8 @@ static inline void cpu_clone_regs(CPUState *env, target_ulong newsp)
 }
 #endif
 
-#include "cpu-all.h"
-#include "exec-all.h"
+#include "exec/cpu-all.h"
+#include "exec/exec-all.h"
 
 #include "svm.h"
 

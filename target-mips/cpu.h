@@ -9,8 +9,8 @@
 
 #include "config.h"
 #include "mips-defs.h"
-#include "cpu-defs.h"
-#include "softfloat.h"
+#include "exec/cpu-defs.h"
+#include "fpu/softfloat.h"
 
 // uint_fast8_t and uint_fast16_t not in <sys/int_types.h>
 // XXX: move that elsewhere
@@ -39,7 +39,7 @@ struct r4k_tlb_t {
 typedef struct CPUMIPSTLBContext CPUMIPSTLBContext;
 struct CPUMIPSTLBContext {
     uint32_t nb_tlb;
-    int (*map_address) (struct CPUMIPSState *env, target_phys_addr_t *physical, int *prot, target_ulong address, int rw, int access_type);
+    int (*map_address) (struct CPUMIPSState *env, hwaddr *physical, int *prot, target_ulong address, int rw, int access_type);
     void (*helper_tlbwi) (void);
     void (*helper_tlbwr) (void);
     void (*helper_tlbp) (void);
@@ -465,11 +465,11 @@ struct CPUMIPSState {
     struct QEMUTimer *timer; /* Internal timer */
 };
 
-int no_mmu_map_address (CPUMIPSState *env, target_phys_addr_t *physical, int *prot,
+int no_mmu_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
                         target_ulong address, int rw, int access_type);
-int fixed_mmu_map_address (CPUMIPSState *env, target_phys_addr_t *physical, int *prot,
+int fixed_mmu_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
                            target_ulong address, int rw, int access_type);
-int r4k_map_address (CPUMIPSState *env, target_phys_addr_t *physical, int *prot,
+int r4k_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
                      target_ulong address, int rw, int access_type);
 void r4k_helper_tlbwi (void);
 void r4k_helper_tlbwr (void);
@@ -477,7 +477,7 @@ void r4k_helper_tlbp (void);
 void r4k_helper_tlbr (void);
 void mips_cpu_list (FILE *f, int (*cpu_fprintf)(FILE *f, const char *fmt, ...));
 
-void do_unassigned_access(target_phys_addr_t addr, int is_write, int is_exec,
+void do_unassigned_access(hwaddr addr, int is_write, int is_exec,
                           int unused, int size);
 
 #define cpu_init cpu_mips_init
@@ -548,8 +548,8 @@ static inline int cpu_mips_hw_interrupts_pending(CPUState *env)
     return r;
 }
 
-#include "cpu-all.h"
-#include "exec-all.h"
+#include "exec/cpu-all.h"
+#include "exec/exec-all.h"
 
 /* Memory access type :
  * may be needed for precise access rights control and precise exceptions.
@@ -629,7 +629,7 @@ int cpu_mips_handle_mmu_fault (CPUState *env, target_ulong address, int rw,
                                int mmu_idx, int is_softmmu);
 #define cpu_handle_mmu_fault cpu_mips_handle_mmu_fault
 void do_interrupt (CPUState *env);
-target_phys_addr_t cpu_mips_translate_address (CPUState *env, target_ulong address,
+hwaddr cpu_mips_translate_address (CPUState *env, target_ulong address,
 		                               int rw);
 
 static inline void cpu_pc_from_tb(CPUState *env, TranslationBlock *tb)

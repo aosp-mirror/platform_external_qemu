@@ -1,6 +1,6 @@
 This document details how the Android-specific -trace <name> instruction works.
 
-hw/goldfish_trace.c:
+hw/android/goldfish/trace.c:
 
 - virtual hardware i/o memory used by the goldfish kernel to send event information
   to the emulator (e.g. context switches, forks, execs, etc...). Used by both -trace

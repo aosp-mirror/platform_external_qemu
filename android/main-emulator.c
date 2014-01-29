@@ -27,6 +27,7 @@
 #include <android/utils/panic.h>
 #include <android/utils/path.h>
 #include <android/utils/bufprint.h>
+#include <android/utils/win32_cmdline_quote.h>
 #include <android/avd/util.h>
 
 /* Required by android/utils/debug.h */
@@ -156,18 +157,6 @@ int main(int argc, char** argv)
     /* Replace it in our command-line */
     argv[0] = emulatorPath;
 
-#ifdef _WIN32
-    /* Looks like execv() in mingw (or is it MSVCRT.DLL?) doesn't
-     * support a space in argv[0] unless we explicitely quote it.
-     * IMPORTANT: do not quote the first argument to execv() or it will fail.
-     * This was tested on a 32-bit Vista installation.
-     */
-    if (strchr(emulatorPath, ' ')) {
-        argv[0] = quotePath(emulatorPath);
-        D("Quoted emulator binary path: %s\n", emulatorPath);
-    }
-#endif
-
     /* We need to find the location of the GLES emulation shared libraries
      * and modify either LD_LIBRARY_PATH or PATH accordingly
      */
@@ -182,7 +171,22 @@ int main(int argc, char** argv)
         }
     }
 
-    /* Launch it with the same set of options ! */
+#ifdef _WIN32
+    // Take care of quoting all parameters before sending them to execv().
+    // See the "Eveyone quotes command line arguments the wrong way" on
+    // MSDN.
+    int n;
+    for (n = 0; n < argc; ++n) {
+        // Technically, this leaks the quoted strings, but we don't care
+        // since this process will terminate after the execv() anyway.
+        argv[n] = win32_cmdline_quote(argv[n]);
+        D("Quoted param: [%s]\n", argv[n]);
+    }
+#endif
+
+    // Launch it with the same set of options !
+    // Note that on Windows, the first argument must _not_ be quoted or
+    // Windows will fail to find the program.
     safe_execv(emulatorPath, argv);
 
     /* We could not launch the program ! */

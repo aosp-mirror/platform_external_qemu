@@ -29,8 +29,10 @@ hwLcd_setBootProperty(int density)
             density = LCD_DENSITY_MDPI;
         else if (density < (LCD_DENSITY_HDPI + LCD_DENSITY_XHDPI)/2)
             density = LCD_DENSITY_HDPI;
-        else if (density < (LCD_DENSITY_XHDPI + LCD_DENSITY_XXHDPI)/2)
+        else if (density < (LCD_DENSITY_XHDPI + LCD_DENSITY_400DPI)/2)
             density = LCD_DENSITY_XHDPI;
+        else if (density < (LCD_DENSITY_400DPI + LCD_DENSITY_XXHDPI)/2)
+            density = LCD_DENSITY_400DPI;
         else if (density < (LCD_DENSITY_XXHDPI + LCD_DENSITY_XXXHDPI)/2)
             density = LCD_DENSITY_XXHDPI;
         else
