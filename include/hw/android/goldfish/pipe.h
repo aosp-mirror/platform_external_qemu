@@ -150,8 +150,14 @@ extern void goldfish_pipe_wake( void* hwpipe, unsigned flags );
 #define PIPE_REG_COMMAND            0x00  /* write: value = command */
 #define PIPE_REG_STATUS             0x04  /* read */
 #define PIPE_REG_CHANNEL            0x08  /* read/write: channel id */
+#ifdef TARGET_X86_64
+#define PIPE_REG_CHANNEL_HIGH	    0x30
+#endif
 #define PIPE_REG_SIZE               0x0c  /* read/write: buffer size */
 #define PIPE_REG_ADDRESS            0x10  /* write: physical address */
+#ifdef TARGET_X86_64
+#define PIPE_REG_ADDRESS_HIGH	    0x34
+#endif
 #define PIPE_REG_WAKES              0x14  /* read: wake flags */
 /* read/write: parameter buffer address */
 #define PIPE_REG_PARAMS_ADDR_LOW     0x18
@@ -198,6 +204,16 @@ struct access_params{
     uint32_t channel;
     uint32_t size;
     uint32_t address;
+    uint32_t cmd;
+    uint32_t result;
+    /* reserved for future extension */
+    uint32_t flags;
+};
+
+struct access_params_64 {
+    uint64_t channel;
+    uint32_t size;
+    uint64_t address;
     uint32_t cmd;
     uint32_t result;
     /* reserved for future extension */
