@@ -23,6 +23,9 @@
 
 #define PDEV_BUS_OP             (0x00)
 #define PDEV_BUS_GET_NAME       (0x04)
+#ifdef TARGET_X86_64
+#define PDEV_BUS_GET_NAME_HIGH  (0x20)
+#endif
 #define PDEV_BUS_NAME_LEN       (0x08)
 #define PDEV_BUS_ID             (0x0c)
 #define PDEV_BUS_IO_BASE        (0x10)
@@ -33,6 +36,9 @@
 struct bus_state {
     struct goldfish_device dev;
     struct goldfish_device *current;
+#ifdef TARGET_X86_64
+    uint32 ptr_high;
+#endif
 };
 
 qemu_irq *goldfish_pic;
@@ -40,6 +46,8 @@ static struct goldfish_device *first_device;
 static struct goldfish_device *last_device;
 uint32_t goldfish_free_base;
 uint32_t goldfish_free_irq;
+
+int goldfish_64bit_guest;
 
 void goldfish_device_set_irq(struct goldfish_device *dev, int irq, int level)
 {
@@ -164,9 +172,21 @@ static void goldfish_bus_write(void *opaque, hwaddr offset, uint32_t value)
             break;
         case PDEV_BUS_GET_NAME:
             if(s->current) {
-                safe_memory_rw_debug(cpu_single_env, value, (void*)s->current->name, strlen(s->current->name), 1);
+                target_ulong name;
+#ifdef TARGET_X86_64
+                name = (uint64_t)s->ptr_high << 32 | value;
+#else
+                name = value;
+#endif
+                safe_memory_rw_debug(cpu_single_env, name, (void*)s->current->name, strlen(s->current->name), 1);
             }
             break;
+#ifdef TARGET_X86_64
+        case PDEV_BUS_GET_NAME_HIGH:
+            s->ptr_high = value;
+            goldfish_64bit_guest = 1;
+            break;
+#endif
         default:
             cpu_abort (cpu_single_env, "goldfish_bus_write: Bad offset %x\n", offset);
     }

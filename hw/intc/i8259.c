@@ -185,6 +185,13 @@ static void i8259_set_irq(void *opaque, int irq, int level)
 {
     PicState2 *s = opaque;
 
+    if (irq >= 16)
+    {
+        if (s->alt_irq_func)
+            s->alt_irq_func(s->alt_irq_opaque, irq, level);
+        return;
+    }
+
 #if defined(DEBUG_PIC) || defined(DEBUG_IRQ_COUNT)
     if (level != irq_level[irq]) {
 #if defined(DEBUG_PIC)

@@ -28,7 +28,7 @@
 
 //#define DEBUG_IOAPIC
 
-#define IOAPIC_NUM_PINS			0x18
+#define IOAPIC_NUM_PINS			0x30
 #define IOAPIC_LVT_MASKED 		(1<<16)
 
 #define IOAPIC_TRIGGER_EDGE		0
@@ -47,7 +47,7 @@ struct IOAPICState {
     uint8_t id;
     uint8_t ioregsel;
 
-    uint32_t irr;
+    uint64_t irr;
     uint64_t ioredtbl[IOAPIC_NUM_PINS];
 };
 
@@ -57,14 +57,14 @@ static void ioapic_service(IOAPICState *s)
     uint8_t trig_mode;
     uint8_t vector;
     uint8_t delivery_mode;
-    uint32_t mask;
+    uint64_t mask = 0;
     uint64_t entry;
     uint8_t dest;
     uint8_t dest_mode;
     uint8_t polarity;
 
     for (i = 0; i < IOAPIC_NUM_PINS; i++) {
-        mask = 1 << i;
+        mask = 1ULL << i;
         if (s->irr & mask) {
             entry = s->ioredtbl[i];
             if (!(entry & IOAPIC_LVT_MASKED)) {
@@ -99,7 +99,7 @@ void ioapic_set_irq(void *opaque, int vector, int level)
         vector = 2;
 
     if (vector >= 0 && vector < IOAPIC_NUM_PINS) {
-        uint32_t mask = 1 << vector;
+        uint32_t mask = 1ULL << vector;
         uint64_t entry = s->ioredtbl[vector];
 
         if ((entry >> 15) & 1) {
