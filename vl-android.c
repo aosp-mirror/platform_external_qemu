@@ -3694,7 +3694,7 @@ int main(int argc, char **argv, char **envp)
     if (android_hw->vm_heapSize > 0) {
         char  tmp[64];
         snprintf(tmp, sizeof(tmp), "%dm", android_hw->vm_heapSize);
-        boot_property_add("dalvik.vm.heapsize",tmp);
+        boot_property_add("dalvik.vm.heapstartsize",tmp);
     }
 
     /* From API 19 and above, the platform provides an explicit property for low memory devices. */
