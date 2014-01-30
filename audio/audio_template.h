@@ -72,7 +72,7 @@ static void glue (audio_init_nb_voices_, TYPE) (struct audio_driver *drv)
 static void glue (audio_pcm_hw_free_resources_, TYPE) (HW *hw)
 {
     if (HWBUF) {
-        qemu_free (HWBUF);
+        g_free (HWBUF);
     }
 
     HWBUF = NULL;
@@ -93,7 +93,7 @@ static int glue (audio_pcm_hw_alloc_resources_, TYPE) (HW *hw)
 static void glue (audio_pcm_sw_free_resources_, TYPE) (SW *sw)
 {
     if (sw->buf) {
-        qemu_free (sw->buf);
+        g_free (sw->buf);
     }
 
     if (sw->rate) {
@@ -127,7 +127,7 @@ static int glue (audio_pcm_sw_alloc_resources_, TYPE) (SW *sw)
     sw->rate = st_rate_start (sw->hw->info.freq, sw->info.freq);
 #endif
     if (!sw->rate) {
-        qemu_free (sw->buf);
+        g_free (sw->buf);
         sw->buf = NULL;
         return -1;
     }
@@ -164,10 +164,10 @@ static int glue (audio_pcm_sw_init_, TYPE) (
         [sw->info.swap_endianness]
         [audio_bits_to_index (sw->info.bits)];
 
-    sw->name = qemu_strdup (name);
+    sw->name = g_strdup (name);
     err = glue (audio_pcm_sw_alloc_resources_, TYPE) (sw);
     if (err) {
-        qemu_free (sw->name);
+        g_free (sw->name);
         sw->name = NULL;
     }
     return err;
@@ -177,7 +177,7 @@ static void glue (audio_pcm_sw_fini_, TYPE) (SW *sw)
 {
     glue (audio_pcm_sw_free_resources_, TYPE) (sw);
     if (sw->name) {
-        qemu_free (sw->name);
+        g_free (sw->name);
         sw->name = NULL;
     }
 }
@@ -207,7 +207,7 @@ static void glue (audio_pcm_hw_gc_, TYPE) (HW **hwp)
         BEGIN_NOSIGALRM
         glue (hw->pcm_ops->fini_, TYPE) (hw);
         END_NOSIGALRM
-        qemu_free (hw);
+        g_free (hw);
         *hwp = NULL;
     }
 }
@@ -311,7 +311,7 @@ static HW *glue (audio_pcm_hw_add_new_, TYPE) (struct audsettings *as)
     glue (hw->pcm_ops->fini_, TYPE) (hw);
     END_NOSIGALRM
  err0:
-    qemu_free (hw);
+    g_free (hw);
     return NULL;
 }
 
@@ -379,7 +379,7 @@ err3:
     glue (audio_pcm_hw_del_sw_, TYPE) (sw);
     glue (audio_pcm_hw_gc_, TYPE) (&hw);
 err2:
-    qemu_free (sw);
+    g_free (sw);
 err1:
     return NULL;
 }
@@ -389,7 +389,7 @@ static void glue (audio_close_, TYPE) (SW *sw)
     glue (audio_pcm_sw_fini_, TYPE) (sw);
     glue (audio_pcm_hw_del_sw_, TYPE) (sw);
     glue (audio_pcm_hw_gc_, TYPE) (&sw->hw);
-    qemu_free (sw);
+    g_free (sw);
 }
 
 void glue (AUD_close_, TYPE) (QEMUSoundCard *card, SW *sw)

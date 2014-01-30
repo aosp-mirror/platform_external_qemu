@@ -24,7 +24,7 @@
  */
 #include <alsa/asoundlib.h>
 #include "qemu-common.h"
-#include "qemu-char.h"
+#include "sysemu/char.h"
 #include "audio.h"
 
 #if QEMU_GNUC_PREREQ(4, 3)
@@ -35,7 +35,7 @@
 #include "audio_int.h"
 #include <dlfcn.h>
 #include <pthread.h>
-#include "qemu_debug.h"
+#include "android/qemu-debug.h"
 
 #define  DEBUG  1
 
@@ -94,7 +94,7 @@
 #define DYNLINK_FUNCTIONS_INIT \
     alsa_dynlink_init
 
-#include "dynlink.h"
+#include "android/dynlink.h"
 
 /* these are inlined functions in the original headers */
 #define FF_snd_pcm_hw_params_alloca(ptr) \
@@ -208,7 +208,7 @@ static void alsa_fini_poll (struct pollhlp *hlp)
         for (i = 0; i < hlp->count; ++i) {
             qemu_set_fd_handler (pfds[i].fd, NULL, NULL, NULL);
         }
-        qemu_free (pfds);
+        g_free (pfds);
     }
     hlp->pfds = NULL;
     hlp->count = 0;
@@ -332,7 +332,7 @@ static int alsa_poll_helper (snd_pcm_t *handle, struct pollhlp *hlp, int mask)
     if (err < 0) {
         alsa_logerr (err, "Could not initialize poll mode\n"
                      "Could not obtain poll descriptors\n");
-        qemu_free (pfds);
+        g_free (pfds);
         return -1;
     }
 
@@ -360,7 +360,7 @@ static int alsa_poll_helper (snd_pcm_t *handle, struct pollhlp *hlp, int mask)
             while (i--) {
                 qemu_set_fd_handler (pfds[i].fd, NULL, NULL, NULL);
             }
-            qemu_free (pfds);
+            g_free (pfds);
             return -1;
         }
     }
@@ -869,7 +869,7 @@ static void alsa_fini_out (HWVoiceOut *hw)
     alsa_anal_close (&alsa->handle, &alsa->pollhlp);
 
     if (alsa->pcm_buf) {
-        qemu_free (alsa->pcm_buf);
+        g_free (alsa->pcm_buf);
         alsa->pcm_buf = NULL;
     }
 }
@@ -1039,7 +1039,7 @@ static void alsa_fini_in (HWVoiceIn *hw)
     alsa_anal_close (&alsa->handle, &alsa->pollhlp);
 
     if (alsa->pcm_buf) {
-        qemu_free (alsa->pcm_buf);
+        g_free (alsa->pcm_buf);
         alsa->pcm_buf = NULL;
     }
 }

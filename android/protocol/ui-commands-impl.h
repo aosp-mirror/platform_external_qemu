@@ -13,7 +13,7 @@
 #ifndef _ANDROID_PROTOCOL_UI_COMMANDS_IMPL_H
 #define _ANDROID_PROTOCOL_UI_COMMANDS_IMPL_H
 
-#include "sockets.h"
+#include "android/sockets.h"
 #include "android/looper.h"
 #include "android/protocol/ui-commands.h"
 

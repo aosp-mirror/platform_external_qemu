@@ -39,7 +39,7 @@
  */
 
 #include <slirp.h>
-#include <osdep.h>
+#include <qemu/osdep.h>
 #include "ip_icmp.h"
 
 #ifdef LOG_ENABLED

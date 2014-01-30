@@ -22,7 +22,7 @@
 GLOBAL_REGISTER_VARIABLE_DECL struct CPUARMState *env asm(AREG0);
 
 #include "cpu.h"
-#include "exec-all.h"
+#include "exec/exec-all.h"
 
 static inline void env_to_regs(void)
 {
@@ -52,7 +52,7 @@ static inline int cpu_halted(CPUState *env) {
 }
 
 #if !defined(CONFIG_USER_ONLY)
-#include "softmmu_exec.h"
+#include "exec/softmmu_exec.h"
 #endif
 
 void raise_exception(int);

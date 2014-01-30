@@ -23,7 +23,7 @@
  */
 
 #include "qemu-common.h"
-#include "block_int.h"
+#include "block/block_int.h"
 #include "block/qcow2.h"
 
 typedef struct __attribute__((packed)) QCowSnapshotHeader {
@@ -52,10 +52,10 @@ void qcow2_free_snapshots(BlockDriverState *bs)
     int i;
 
     for(i = 0; i < s->nb_snapshots; i++) {
-        qemu_free(s->snapshots[i].name);
-        qemu_free(s->snapshots[i].id_str);
+        g_free(s->snapshots[i].name);
+        g_free(s->snapshots[i].id_str);
     }
-    qemu_free(s->snapshots);
+    g_free(s->snapshots);
     s->snapshots = NULL;
     s->nb_snapshots = 0;
 }
@@ -76,7 +76,7 @@ int qcow2_read_snapshots(BlockDriverState *bs)
     }
 
     offset = s->snapshots_offset;
-    s->snapshots = qemu_mallocz(s->nb_snapshots * sizeof(QCowSnapshot));
+    s->snapshots = g_malloc0(s->nb_snapshots * sizeof(QCowSnapshot));
     for(i = 0; i < s->nb_snapshots; i++) {
         offset = align_offset(offset, 8);
         if (bdrv_pread(bs->file, offset, &h, sizeof(h)) != sizeof(h))
@@ -96,13 +96,13 @@ int qcow2_read_snapshots(BlockDriverState *bs)
 
         offset += extra_data_size;
 
-        sn->id_str = qemu_malloc(id_str_size + 1);
+        sn->id_str = g_malloc(id_str_size + 1);
         if (bdrv_pread(bs->file, offset, sn->id_str, id_str_size) != id_str_size)
             goto fail;
         offset += id_str_size;
         sn->id_str[id_str_size] = '\0';
 
-        sn->name = qemu_malloc(name_size + 1);
+        sn->name = g_malloc(name_size + 1);
         if (bdrv_pread(bs->file, offset, sn->name, name_size) != name_size)
             goto fail;
         offset += name_size;
@@ -251,10 +251,10 @@ int qcow2_snapshot_create(BlockDriverState *bs, QEMUSnapshotInfo *sn_info)
     if (find_snapshot_by_id(bs, sn_info->id_str) >= 0)
         return -ENOENT;
 
-    sn->id_str = qemu_strdup(sn_info->id_str);
+    sn->id_str = g_strdup(sn_info->id_str);
     if (!sn->id_str)
         goto fail;
-    sn->name = qemu_strdup(sn_info->name);
+    sn->name = g_strdup(sn_info->name);
     if (!sn->name)
         goto fail;
     sn->vm_state_size = sn_info->vm_state_size;
@@ -276,7 +276,7 @@ int qcow2_snapshot_create(BlockDriverState *bs, QEMUSnapshotInfo *sn_info)
     sn->l1_size = s->l1_size;
 
     if (s->l1_size != 0) {
-        l1_table = qemu_malloc(s->l1_size * sizeof(uint64_t));
+        l1_table = g_malloc(s->l1_size * sizeof(uint64_t));
     } else {
         l1_table = NULL;
     }
@@ -287,13 +287,13 @@ int qcow2_snapshot_create(BlockDriverState *bs, QEMUSnapshotInfo *sn_info)
     if (bdrv_pwrite_sync(bs->file, sn->l1_table_offset,
                     l1_table, s->l1_size * sizeof(uint64_t)) < 0)
         goto fail;
-    qemu_free(l1_table);
+    g_free(l1_table);
     l1_table = NULL;
 
-    snapshots1 = qemu_malloc((s->nb_snapshots + 1) * sizeof(QCowSnapshot));
+    snapshots1 = g_malloc((s->nb_snapshots + 1) * sizeof(QCowSnapshot));
     if (s->snapshots) {
         memcpy(snapshots1, s->snapshots, s->nb_snapshots * sizeof(QCowSnapshot));
-        qemu_free(s->snapshots);
+        g_free(s->snapshots);
     }
     s->snapshots = snapshots1;
     s->snapshots[s->nb_snapshots++] = *sn;
@@ -305,8 +305,8 @@ int qcow2_snapshot_create(BlockDriverState *bs, QEMUSnapshotInfo *sn_info)
 #endif
     return 0;
  fail:
-    qemu_free(sn->name);
-    qemu_free(l1_table);
+    g_free(sn->name);
+    g_free(l1_table);
     return -1;
 }
 
@@ -372,8 +372,8 @@ int qcow2_snapshot_delete(BlockDriverState *bs, const char *snapshot_id)
         return ret;
     qcow2_free_clusters(bs, sn->l1_table_offset, sn->l1_size * sizeof(uint64_t));
 
-    qemu_free(sn->id_str);
-    qemu_free(sn->name);
+    g_free(sn->id_str);
+    g_free(sn->name);
     memmove(sn, sn + 1, (s->nb_snapshots - snapshot_index - 1) * sizeof(*sn));
     s->nb_snapshots--;
     ret = qcow_write_snapshots(bs);
@@ -399,7 +399,7 @@ int qcow2_snapshot_list(BlockDriverState *bs, QEMUSnapshotInfo **psn_tab)
         return s->nb_snapshots;
     }
 
-    sn_tab = qemu_mallocz(s->nb_snapshots * sizeof(QEMUSnapshotInfo));
+    sn_tab = g_malloc0(s->nb_snapshots * sizeof(QEMUSnapshotInfo));
     for(i = 0; i < s->nb_snapshots; i++) {
         sn_info = sn_tab + i;
         sn = s->snapshots + i;

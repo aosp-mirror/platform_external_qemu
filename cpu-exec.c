@@ -18,11 +18,11 @@
  */
 #include "config.h"
 #include "exec.h"
-#include "disas.h"
+#include "disas/disas.h"
 #include "tcg.h"
-#include "kvm.h"
-#include "hax.h"
-#include "qemu-barrier.h"
+#include "sysemu/kvm.h"
+#include "exec/hax.h"
+#include "qemu/atomic.h"
 
 #if !defined(CONFIG_SOFTMMU)
 #undef EAX

@@ -12,7 +12,7 @@
 
 #include "libslirp.h"
 #include "qemu-common.h"
-#include "sysemu.h"
+#include "sysemu/sysemu.h"
 #include "modem_driver.h"
 #include "proxy_http.h"
 
@@ -230,7 +230,7 @@ void  android_emulation_setup( void )
     int   base_port = 5554;
     int   adb_host_port = 5037; // adb's default
     int   success   = 0;
-    int   s;
+    int   adb_port = -1;
     uint32_t  guest_ip;
 
         /* Set the port where the emulator expects adb to run on the host
@@ -271,7 +271,7 @@ void  android_emulation_setup( void )
             exit(1);
         }
 
-        int adb_port = strtol( comma_location+1, &end, 0 );
+        adb_port = strtol( comma_location+1, &end, 0 );
 
         if ( end == NULL || *end ) {
             derror( "option -ports must be followed by two comma separated positive integer numbers" );
@@ -320,11 +320,12 @@ void  android_emulation_setup( void )
         for ( ; tries > 0; tries--, base_port += 2 ) {
 
             /* setup first redirection for ADB, the Android Debug Bridge */
+            adb_port = base_port + 1;
             if (legacy_adb) {
-                if ( slirp_redir( 0, base_port+1, guest_ip, 5555 ) < 0 )
+                if ( slirp_redir( 0, adb_port, guest_ip, 5555 ) < 0 )
                     continue;
             } else {
-                if (adb_server_init(base_port+1))
+                if (adb_server_init(adb_port))
                     continue;
                 android_adb_service_init();
             }
@@ -332,12 +333,12 @@ void  android_emulation_setup( void )
             /* setup second redirection for the emulator console */
             if ( control_console_start( base_port ) < 0 ) {
                 if (legacy_adb) {
-                    slirp_unredir( 0, base_port+1 );
+                    slirp_unredir( 0, adb_port );
                 }
                 continue;
             }
 
-            D( "control console listening on port %d, ADB on port %d", base_port, base_port+1 );
+            D( "control console listening on port %d, ADB on port %d", base_port, adb_port );
             success = 1;
             break;
         }
@@ -360,31 +361,24 @@ void  android_emulation_setup( void )
    /* send a simple message to the ADB host server to tell it we just started.
     * it should be listening on port 5037. if we can't reach it, don't bother
     */
-    do
-    {
-        SockAddress  addr;
-        char         tmp[32];
+    int s = socket_loopback_client(adb_host_port, SOCKET_STREAM);
+    if (s < 0) {
+        D("can't connect to ADB server: %s", errno_str );
+    } else {
+        char tmp[32];
+        char header[5];
 
-        s = socket_create_inet( SOCKET_STREAM );
-        if (s < 0) {
-            D("can't create socket to talk to the ADB server");
-            break;
-        }
-
-        sock_address_init_inet( &addr, SOCK_ADDRESS_INET_LOOPBACK, adb_host_port );
-        if (socket_connect( s, &addr ) < 0) {
-            D("can't connect to ADB server: %s", errno_str );
-            break;
-        }
-
-        sprintf(tmp,"0012host:emulator:%d",base_port+1);
-        socket_send(s, tmp, 18+4);
+        // Expected format: <hex4>host:emulator:<port>
+        // Where <port> is the decimal adb port number, and <hex4> is the length
+        // of the payload that follows it in hex.
+        int len = snprintf(tmp, sizeof tmp, "0000host:emulator:%d", adb_port);
+        snprintf(header, sizeof header, "%04x", len - 4);
+        memcpy(tmp, header, 4);
+        socket_send(s, tmp, len);
         D("sent '%s' to ADB server", tmp);
-    }
-    while (0);
 
-    if (s >= 0)
         socket_close(s);
+    }
 
     /* setup the http proxy, if any */
     if (VERBOSE_CHECK(proxy))

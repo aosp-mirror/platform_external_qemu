@@ -19,7 +19,7 @@
 #include "android/android.h"
 #include "android/globals.h"
 #include "telephony/modem_driver.h"
-#include "android-trace.h"
+#include "android/trace.h"
 #include "android/looper.h"
 #include "android/async-utils.h"
 #include "android/sync-utils.h"
@@ -89,7 +89,7 @@ _alloc_cmd_param_buf(CoreCmdImpl* corecmd, uint32_t size)
         corecmd->cmd_param_buf = &corecmd->cmd_param[0];
     } else {
         // Expected request us too large to fit into preallocated buffer.
-        corecmd->cmd_param_buf = qemu_malloc(size);
+        corecmd->cmd_param_buf = g_malloc(size);
     }
     return corecmd->cmd_param_buf;
 }
@@ -100,7 +100,7 @@ static void
 _free_cmd_param_buf(CoreCmdImpl* corecmd)
 {
     if (corecmd->cmd_param_buf != &corecmd->cmd_param[0]) {
-        qemu_free(corecmd->cmd_param_buf);
+        g_free(corecmd->cmd_param_buf);
         corecmd->cmd_param_buf = &corecmd->cmd_param[0];
     }
 }
@@ -227,7 +227,7 @@ _coreCmdImpl_handle_command(CoreCmdImpl* corecmd,
                 }
                 // Allocate and initialize response data buffer.
                 resp_data =
-                    (UICmdGetNetSpeedResp*)qemu_malloc(resp.resp_data_size);
+                    (UICmdGetNetSpeedResp*)g_malloc(resp.resp_data_size);
                 resp_data->upload = netspeed->upload;
                 resp_data->download = netspeed->download;
                 strcpy(resp_data->name, netspeed->name);
@@ -240,7 +240,7 @@ _coreCmdImpl_handle_command(CoreCmdImpl* corecmd,
             }
             _coreCmdImpl_respond(corecmd, &resp, resp_data);
             if (resp_data != NULL) {
-                qemu_free(resp_data);
+                g_free(resp_data);
             }
             break;
         }
@@ -271,7 +271,7 @@ _coreCmdImpl_handle_command(CoreCmdImpl* corecmd,
                 }
                 // Allocate and initialize response data buffer.
                 resp_data =
-                    (UICmdGetNetDelayResp*)qemu_malloc(resp.resp_data_size);
+                    (UICmdGetNetDelayResp*)g_malloc(resp.resp_data_size);
                 resp_data->min_ms = netdelay->min_ms;
                 resp_data->max_ms = netdelay->max_ms;
                 strcpy(resp_data->name, netdelay->name);
@@ -284,7 +284,7 @@ _coreCmdImpl_handle_command(CoreCmdImpl* corecmd,
             }
             _coreCmdImpl_respond(corecmd, &resp, resp_data);
             if (resp_data != NULL) {
-                qemu_free(resp_data);
+                g_free(resp_data);
             }
             break;
         }
@@ -303,7 +303,7 @@ _coreCmdImpl_handle_command(CoreCmdImpl* corecmd,
             }
             _coreCmdImpl_respond(corecmd, &resp, filepath);
             if (filepath != NULL) {
-                qemu_free(filepath);
+                g_free(filepath);
             }
             break;
         }
