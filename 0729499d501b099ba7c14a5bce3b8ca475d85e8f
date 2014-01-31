@@ -128,6 +128,29 @@
       "revId": "0729499d501b099ba7c14a5bce3b8ca475d85e8f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f26f6639_ed70bdae",
+        "filename": "docs/REFACTORING-MADNESS.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1020283
+      },
+      "writtenOn": "2014-01-31T04:31:38Z",
+      "side": 1,
+      "message": "Merging",
+      "range": {
+        "startLine": 53,
+        "startChar": 4,
+        "endLine": 53,
+        "endChar": 10
+      },
+      "revId": "0729499d501b099ba7c14a5bce3b8ca475d85e8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
