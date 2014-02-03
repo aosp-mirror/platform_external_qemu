@@ -1,0 +1,113 @@
+Introduction:
+-------------
+
+This document provides important information about the Android
+emulator codebase, which will be useful for anyone planning to
+contribute patches to it.
+
+  **** IMPORTANT NOTE *******************************************************
+  THE ANDROID EMULATOR SOURCES ARE CURRENTLY HEAVILY BEING REFACTORED, IF YOU
+  PLAN TO SUBMIT CONTRIBUTIONS, PLEASE READ docs/REFACTORING-MADNESS.TXT FOR
+  DETAILS ON HOW TO AVOID BREAKAGES.
+  ***************************************************************************
+
+
+I. Building from sources:
+-------------------------
+
+This is covered in docs/BUILDING.TXT
+
+
+II. Overall source layout:
+--------------------------
+
+The Android emulator sources contains many, heavily-modified, sources from the
+upstream QEMU project (http://www.qemu.org). It adds the following directories:
+
+  android/
+    Android-specific code, used to implement a UI and functional layer on
+    top of the QEMU code base. Ideally, anything that shouldn't impact the
+    QEMU internals should be here.
+
+  include/hw/android/goldfish/
+    Headers for the Android-specific goldfish virtual devices.
+    See docs/GOLDFISH-VIRTUAL-PLATFORM.TXT for more details.
+
+  hw/android/goldfish/
+    Implementation files for the Android-specific goldfish virtual devices.
+
+  hw/android/
+    Implementation files for the Android-specific virtual ARM and MIPS
+    boards. For x86, the content of hw/i386/pc.c was modified instead.
+
+  distrib/
+    Contains various third-party libraries the emulator depends on
+    (e.g. zlib, libpng, libSDL).
+
+  elff/
+    Generic ELF processing library, used by memcheck/ implementation.
+    Also used by the "ndk-stack" Android NDK tool. Should probably move
+    to distrib/ or android/ though.
+
+  memcheck/
+    Implementation files related to the Valgrind-like memory checking mode
+    triggered by the -memcheck option (see -help-memcheck). Should move
+    to android/
+
+  slirp-android/
+    Modified version of the slirp/ directory, which adds various Android-specific
+    features and modifications.
+
+  telephony/
+    GSM modem emulation code. Implemented as a QEMU CharDevice (probably
+    needs to be refactored then move to android/).
+
+  proxy/
+    A transparent HTTP rewriting proxy used to implement the -http-proxy option.
+    (need refactor + move to android/)
+
+Generally speaking, some QEMU source files have been rewritten in so signficant
+ways that they gained an -android prefix (e.g. vl-android.c versus vl.c). The
+original file is typically kept as a reference to make it easier to see
+modifications and eventually integrate upstream changes.
+
+Only a fraction of the QEMU sources are actually part of the Android emulator
+sources, and this is intentional. It makes maintaining them easier, especially
+when trying to compare with the state of upstream QEMU.
+
+
+III. Testing:
+-------------
+
+There is currently very limited automated testing for the Android emulator,
+in the form of the "android_unittests" and "android64_unittests" programs,
+which, when invoked, will run a series of GoogleTest-based unit tests that
+only check internal features of the Android-specific code.
+
+There is work to significantly increase the coverage of these unit tests, as
+well as plans for automated function testing. However, for now manual testing of
+the emulator binaries with existing SDK system images remains necessary.
+
+
+III. Integrating upstream QEMU changes:
+---------------------------------------
+
+It is sometimes useful to integrate changes from upstream QEMU into the Android
+emulator code (e.g. to gain new features, like the ability to emulate new CPUs,
+or fix some bugs).
+
+Doing this is a delicate affair, but workable when using directory comparison
+tools (e.g. meld), and a lot of patience. It is strongly recommended to read
+both Android emulator and QEMU documentation before trying to do so though.
+
+Do not try to integrate QEMU features that are not directly useful to the
+Android emulator. It's generally preferable to write stubs. The Android emulator
+does not use many QEMU features, like user-mode-emulation, the QEMU monitor,
+the QMP protocol, tracing, and many many more.
+
+
+  **** IMPORTANT NOTE *******************************************************
+  THE ANDROID EMULATOR SOURCES ARE CURRENTLY HEAVILY BEING REFACTORED, IF YOU
+  PLAN TO SUBMIT CONTRIBUTIONS, PLEASE READ docs/REFACTORING-MADNESS.TXT FOR
+  DETAILS ON HOW TO AVOID BREAKAGES.
+  ***************************************************************************
