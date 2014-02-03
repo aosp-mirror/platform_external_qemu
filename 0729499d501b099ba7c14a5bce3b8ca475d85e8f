@@ -151,6 +151,30 @@
       "revId": "0729499d501b099ba7c14a5bce3b8ca475d85e8f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9238ea5d_21104e69",
+        "filename": "docs/REFACTORING-MADNESS.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-03T03:35:09Z",
+      "side": 1,
+      "message": "Thanks. Done.",
+      "parentUuid": "f26f6639_ed70bdae",
+      "range": {
+        "startLine": 53,
+        "startChar": 4,
+        "endLine": 53,
+        "endChar": 10
+      },
+      "revId": "0729499d501b099ba7c14a5bce3b8ca475d85e8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
