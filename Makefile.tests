@@ -3,6 +3,7 @@ include $(LOCAL_PATH)/distrib/googletest/Android.mk
 
 EMULATOR_UNITTESTS_SOURCES := \
   android/utils/bufprint_unittest.cpp \
+  android/utils/eintr_wrapper_unittest.cpp \
   android/utils/win32_cmdline_quote_unittest.cpp \
 
 $(call start-emulator-program, emulator_unittests)
