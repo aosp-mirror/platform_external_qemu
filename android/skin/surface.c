@@ -539,12 +539,10 @@ skin_line_blit_srcover( uint32_t*  dst, const uint32_t*  src, int  len )
     ARGB_DECL_ZERO();
 
     for ( ; dst < end; dst++ ) {
-        ARGB_DECL(s);
         ARGB_DECL(d);
         ARGB_DECL(v);
         uint32_t  alpha;
 
-        ARGB_READ(s,src);
         alpha = (src[0] >> 24);
         if (alpha > 0) {
             ARGB_READ(d,dst);
@@ -564,11 +562,9 @@ skin_line_blit_dstover( uint32_t*  dst, const uint32_t*  src, int  len )
 
     for ( ; dst < end; dst++ ) {
         ARGB_DECL(s);
-        ARGB_DECL(d);
         ARGB_DECL(v);
         uint32_t  alpha;
 
-        ARGB_READ(d,dst);
         alpha = (dst[0] >> 24);
         if (alpha < 255) {
             ARGB_READ(s,src);

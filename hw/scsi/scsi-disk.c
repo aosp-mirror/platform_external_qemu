@@ -351,7 +351,7 @@ static int32_t scsi_send_command(SCSIDevice *d, uint32_t tag,
     uint64_t nb_sectors;
     uint64_t lba;
     uint32_t len;
-    int cmdlen;
+    int __attribute__((unused)) cmdlen;
     int is_write;
     uint8_t command;
     uint8_t *outbuf;

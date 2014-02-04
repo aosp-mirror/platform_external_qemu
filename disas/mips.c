@@ -572,6 +572,7 @@ struct mips_opcode
 
 /* MIPS ISA defines, use instead of hardcoding ISA level.  */
 
+#ifndef ISA_MIPS1
 #define       ISA_UNKNOWN     0               /* Gas internal use.  */
 #define       ISA_MIPS1       (INSN_ISA1)
 #define       ISA_MIPS2       (ISA_MIPS1 | INSN_ISA2)
@@ -584,7 +585,7 @@ struct mips_opcode
 
 #define       ISA_MIPS32R2    (ISA_MIPS32 | INSN_ISA32R2)
 #define       ISA_MIPS64R2    (ISA_MIPS64 | INSN_ISA32R2 | INSN_ISA64R2)
-
+#endif  // ISA_MIPS1
 
 /* CPU defines, use instead of hardcoding processor number. Keep this
    in sync with bfd/archures.c in order for machine selection to work.  */
@@ -608,13 +609,17 @@ struct mips_opcode
 #define CPU_R8000	8000
 #define CPU_R10000	10000
 #define CPU_R12000	12000
+
 #define CPU_MIPS16	16
+#define CPU_SB1         12310201        /* octal 'SB', 01.  */
+
+#ifndef CPU_MIPS32
 #define CPU_MIPS32	32
 #define CPU_MIPS32R2	33
 #define CPU_MIPS5       5
 #define CPU_MIPS64      64
 #define CPU_MIPS64R2	65
-#define CPU_SB1         12310201        /* octal 'SB', 01.  */
+#endif  // !CPU_MIPS32
 
 /* Test for membership in an ISA including chip specific ISAs.  INSN
    is pointer to an element of the opcode table; ISA is the specified

@@ -764,6 +764,9 @@ static void sdp_service_db_build(struct bt_l2cap_sdp_state_s *sdp,
     }
 }
 
+#undef TRUE
+#undef FALSE
+
 #define LAST { .type = 0 }
 #define SERVICE(name, attrs)				\
     static struct sdp_def_service_s glue(glue(sdp_service_, name), _s) = { \

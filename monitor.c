@@ -637,7 +637,7 @@ static void memory_dump(Monitor *mon, int count, int format, int wsize,
                         hwaddr addr, int is_physical)
 {
     CPUState *env;
-    int nb_per_line, l, line_size, i, max_digits, len;
+    int l, line_size, i, max_digits, len;
     uint8_t buf[16];
     uint64_t v;
 
@@ -676,7 +676,6 @@ static void memory_dump(Monitor *mon, int count, int format, int wsize,
         line_size = 8;
     else
         line_size = 16;
-    nb_per_line = line_size / wsize;
     max_digits = 0;
 
     switch(format) {
