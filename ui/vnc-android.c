@@ -1045,17 +1045,16 @@ static long vnc_client_write_plain(VncState *vs)
  */
 void vnc_client_write(void *opaque)
 {
-    long ret;
     VncState *vs = opaque;
 
 #ifdef CONFIG_VNC_SASL
     if (vs->sasl.conn &&
         vs->sasl.runSSF &&
-        !vs->sasl.waitWriteSSF)
-        ret = vnc_client_write_sasl(vs);
-    else
+        !vs->sasl.waitWriteSSF) {
+        vnc_client_write_sasl(vs);
+    } else
 #endif /* CONFIG_VNC_SASL */
-        ret = vnc_client_write_plain(vs);
+        vnc_client_write_plain(vs);
 }
 
 void vnc_read_when(VncState *vs, VncReadEvent *func, size_t expecting)
@@ -2189,15 +2188,14 @@ int vnc_display_open(DisplayState *ds, const char *display)
     const char *options;
     int password = 0;
     int reverse = 0;
-    int to_port = 0;
 #ifdef CONFIG_VNC_TLS
     int tls = 0, x509 = 0;
 #endif
 #ifdef CONFIG_VNC_SASL
     int sasl = 0;
     int saslErr;
-#endif
     int acl = 0;
+#endif
 
     if (!vnc_display)
         return -1;
@@ -2216,7 +2214,7 @@ int vnc_display_open(DisplayState *ds, const char *display)
         } else if (strncmp(options, "reverse", 7) == 0) {
             reverse = 1;
         } else if (strncmp(options, "to=", 3) == 0) {
-            to_port = atoi(options+3) + 5900;
+            //to_port = atoi(options+3) + 5900;
 #ifdef CONFIG_VNC_SASL
         } else if (strncmp(options, "sasl", 4) == 0) {
             sasl = 1; /* Require SASL auth */
@@ -2255,7 +2253,9 @@ int vnc_display_open(DisplayState *ds, const char *display)
             }
 #endif
         } else if (strncmp(options, "acl", 3) == 0) {
+#ifdef CONFIG_VNC_SASL
             acl = 1;
+#endif
         }
     }
 

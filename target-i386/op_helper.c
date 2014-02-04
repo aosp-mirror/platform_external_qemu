@@ -282,7 +282,7 @@ static void switch_tss(int tss_selector,
     int tss_limit, tss_limit_max, type, old_tss_limit_max, old_type, v1, v2, i;
     target_ulong tss_base;
     uint32_t new_regs[8], new_segs[6];
-    uint32_t new_eflags, new_eip, new_cr3, new_ldt, new_trap;
+    uint32_t new_eflags, new_eip, new_cr3, new_ldt;
     uint32_t old_eflags, eflags_mask;
     SegmentCache *dt;
     int index;
@@ -336,7 +336,7 @@ static void switch_tss(int tss_selector,
         for(i = 0; i < 6; i++)
             new_segs[i] = lduw_kernel(tss_base + (0x48 + i * 4));
         new_ldt = lduw_kernel(tss_base + 0x60);
-        new_trap = ldl_kernel(tss_base + 0x64);
+        ldl_kernel(tss_base + 0x64);
     } else {
         /* 16 bit */
         new_cr3 = 0;
@@ -349,7 +349,6 @@ static void switch_tss(int tss_selector,
         new_ldt = lduw_kernel(tss_base + 0x2a);
         new_segs[R_FS] = 0;
         new_segs[R_GS] = 0;
-        new_trap = 0;
     }
 
     /* NOTE: we must avoid memory exceptions during the task switch,
@@ -5444,15 +5443,13 @@ void helper_vmexit(uint32_t exit_code, uint64_t exit_info_1)
 void helper_enter_mmx(void)
 {
     env->fpstt = 0;
-    *(uint32_t *)(env->fptags) = 0;
-    *(uint32_t *)(env->fptags + 4) = 0;
+    memset(env->fptags, 0, sizeof(env->fptags));
 }
 
 void helper_emms(void)
 {
     /* set to empty state */
-    *(uint32_t *)(env->fptags) = 0x01010101;
-    *(uint32_t *)(env->fptags + 4) = 0x01010101;
+    memset(env->fptags, 1, sizeof(env->fptags));
 }
 
 /* XXX: suppress */

@@ -29,8 +29,8 @@ typedef void CPUWriteMemoryFunc(void *opaque, hwaddr addr, uint32_t value);
 typedef uint32_t CPUReadMemoryFunc(void *opaque, hwaddr addr);
 
 void cpu_register_physical_memory_log(hwaddr start_addr,
-                                         ram_addr_t size,
-                                         ram_addr_t phys_offset,
+                                      ram_addr_t size,
+                                      ram_addr_t phys_offset,
                                       ram_addr_t region_offset,
                                       bool log_dirty);
 
@@ -70,17 +70,17 @@ int cpu_register_io_memory(CPUReadMemoryFunc * const *mem_read,
                            void *opaque);
 void cpu_unregister_io_memory(int table_address);
 
-void cpu_physical_memory_rw(hwaddr addr, uint8_t *buf,
+void cpu_physical_memory_rw(hwaddr addr, void *buf,
                             int len, int is_write);
 static inline void cpu_physical_memory_read(hwaddr addr,
-                                            uint8_t *buf, int len)
+                                            void *buf, int len)
 {
     cpu_physical_memory_rw(addr, buf, len, 0);
 }
 static inline void cpu_physical_memory_write(hwaddr addr,
-                                             const uint8_t *buf, int len)
+                                             const void *buf, int len)
 {
-    cpu_physical_memory_rw(addr, (uint8_t *)buf, len, 1);
+    cpu_physical_memory_rw(addr, (void*)buf, len, 1);
 }
 void *cpu_physical_memory_map(hwaddr addr,
                               hwaddr *plen,
@@ -102,7 +102,7 @@ void stl_phys(hwaddr addr, uint32_t val);
 void stq_phys(hwaddr addr, uint64_t val);
 
 void cpu_physical_memory_write_rom(hwaddr addr,
-                                   const uint8_t *buf, int len);
+                                   const void *buf, int len);
 
 #define IO_MEM_SHIFT       3
 

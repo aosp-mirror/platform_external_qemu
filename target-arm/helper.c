@@ -290,10 +290,10 @@ void cpu_reset(CPUARMState *env)
     /* On ARMv7-M the CPSR_I is the value of the PRIMASK register, and is
        clear at reset.  Initial SP and PC are loaded from ROM.  */
     if (IS_M(env)) {
-        uint32_t pc;
-        uint8_t *rom;
         env->uncached_cpsr &= ~CPSR_I;
 #ifndef CONFIG_ANDROID  /* No hw/loader.h and no ROM support for now on Android */
+        uint32_t pc;
+        uint8_t *rom;
         rom = rom_ptr(0);
         if (rom) {
             /* We should really use ldl_phys here, in case the guest
