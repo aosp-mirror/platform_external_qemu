@@ -15,6 +15,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/duff.h"
 #include "hw/android/goldfish/device.h"
+#include "hw/hw.h"
 #include "ui/console.h"
 
 /* These values *must* match the platform definitions found under
