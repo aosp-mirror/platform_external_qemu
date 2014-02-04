@@ -283,7 +283,7 @@ static inline hwaddr do_translate_address(target_ulong address, int rw)
 
     lladdr = cpu_mips_translate_address(env, address, rw);
 
-    if (lladdr == -1LL) {
+    if (lladdr == (hwaddr)-1LL) {
         cpu_loop_exit();
     } else {
         return lladdr;
@@ -1656,8 +1656,6 @@ void r4k_helper_tlbp (void)
     target_ulong VPN;
     uint8_t ASID;
     int i;
-    target_ulong addr;
-    target_ulong end;
 
     ASID = env->CP0_EntryHi & 0xFF;
     for (i = 0; i < env->tlb->nb_tlb; i++) {

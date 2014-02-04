@@ -175,17 +175,12 @@ static uint32_t goldfish_rtc_read(void *opaque, hwaddr offset)
 static void goldfish_rtc_write(void *opaque, hwaddr offset, uint32_t value)
 {
     struct rtc_state *s = (struct rtc_state *)opaque;
-    int64_t alarm;
     switch(offset) {
         case 0x8:
             s->alarm_low = value;
-            alarm = s->alarm_low | (int64_t)s->alarm_high << 32;
-            //printf("next alarm at %lld, tps %lld\n", alarm, ticks_per_sec);
-            //qemu_mod_timer(s->timer, alarm);
             break;
         case 0xc:
             s->alarm_high = value;
-            //printf("alarm_high %d\n", s->alarm_high);
             break;
         case 0x10:
             goldfish_device_set_irq(&s->dev, 0, 0);

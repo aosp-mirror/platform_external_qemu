@@ -4044,7 +4044,10 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
     int shift, ot;
     int modrm, reg, rm, mod, reg_addr, op, opreg, offset_addr, val;
     target_ulong next_eip, tval;
-    int rex_w, rex_r;
+#ifdef TARGET_X86_64
+    int rex_w = -1;
+#endif
+    int rex_r;
 
     if (unlikely(qemu_loglevel_mask(CPU_LOG_TB_OP)))
         tcg_gen_debug_insn_start(pc_start);
@@ -4053,7 +4056,6 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
     aflag = s->code32;
     dflag = s->code32;
     s->override = -1;
-    rex_w = -1;
     rex_r = 0;
 #ifdef TARGET_X86_64
     s->rex_x = 0;
@@ -7606,7 +7608,7 @@ static inline void gen_intermediate_code_internal(CPUState *env,
     target_ulong pc_ptr;
     uint16_t *gen_opc_end;
     CPUBreakpoint *bp;
-    int j, lj, cflags;
+    int j, lj;
     uint64_t flags;
     target_ulong pc_start;
     target_ulong cs_base;
@@ -7617,7 +7619,6 @@ static inline void gen_intermediate_code_internal(CPUState *env,
     pc_start = tb->pc;
     cs_base = tb->cs_base;
     flags = tb->flags;
-    cflags = tb->cflags;
 
     dc->pe = (flags >> HF_PE_SHIFT) & 1;
     dc->code32 = (flags >> HF_CS32_SHIFT) & 1;
