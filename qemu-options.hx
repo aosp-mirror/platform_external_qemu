@@ -1687,18 +1687,8 @@ DEF("old-param", 0, QEMU_OPTION_old_param,
     "-old-param      old param mode\n")
 #endif
 
-#ifdef CONFIG_TRACE
-DEF("tracing", HAS_ARG, QEMU_OPTION_tracing, \
-    "-tracing on|off enable/disable tracing\n")
-
-DEF("trace", HAS_ARG, QEMU_OPTION_trace, \
-    "-trace name\n" \
-    "                set trace directory\n")
-
 DEF("nand", HAS_ARG, QEMU_OPTION_nand, \
     "-nand <params>  enable NAND Flash partition\n")
-
-#endif /* CONFIG_TRACE */
 
 #ifdef CONFIG_ANDROID
 
