@@ -12,7 +12,7 @@
 #ifndef _ANDROID_SKIN_KEYSET_H_
 #define _ANDROID_SKIN_KEYSET_H_
 
-#include "android/config.h"
+#include "android/config-file.h"
 
 /* A SkinKeySet maps keystrokes to specific commands. we have a few hard-coded
  * keysets in the emulator binary, and the user can define its own if he wants

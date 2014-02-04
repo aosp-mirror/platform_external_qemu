@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_CONFIG_H
-#define ANDROID_CONFIG_H
+#ifndef ANDROID_CONFIG_FILE_H
+#define ANDROID_CONFIG_FILE_H
 
 /** ANDROID CONFIGURATION FILE SUPPORT
  **
@@ -54,4 +54,4 @@ extern unsigned     aconfig_unsigned(AConfig *root, const char *name, unsigned _
 extern int          aconfig_int     (AConfig *root, const char *name, int _default);
 extern const char*  aconfig_str     (AConfig *root, const char *name, const char *_default);
 
-#endif /* ANDROID_CONFIG_H */
+#endif /* ANDROID_CONFIG_FILE_H */
