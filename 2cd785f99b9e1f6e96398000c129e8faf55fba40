@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f2aa06eb_12f94c9c",
+        "filename": "distrib/build-kernel.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1003360
+      },
+      "writtenOn": "2014-02-05T20:54:17Z",
+      "side": 1,
+      "message": "Be nice if this was also \"goldfish\".",
+      "range": {
+        "startLine": 183,
+        "startChar": 14,
+        "endLine": 183,
+        "endChar": 15
+      },
+      "revId": "2cd785f99b9e1f6e96398000c129e8faf55fba40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "32a1fe0c_f732b209",
+        "filename": "distrib/build-kernel.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1003360
+      },
+      "writtenOn": "2014-02-05T20:54:17Z",
+      "side": 1,
+      "message": "x86 and x86_64 can/should both use the x86_64 toolchain (it can do both 32bit and 64bit).\n\n[this comment modulo the 4.6/4.7 issue].",
+      "range": {
+        "startLine": 218,
+        "startChar": 12,
+        "endLine": 218,
+        "endChar": 23
+      },
+      "revId": "2cd785f99b9e1f6e96398000c129e8faf55fba40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f2aa06eb_32cba861",
+        "filename": "distrib/build-kernel.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1003360
+      },
+      "writtenOn": "2014-02-05T20:54:17Z",
+      "side": 1,
+      "message": "Be nice of all of this arch specific tweaks were pulled into one place rather than scattered all over this script.",
+      "range": {
+        "startLine": 235,
+        "startChar": 8,
+        "endLine": 235,
+        "endChar": 14
+      },
+      "revId": "2cd785f99b9e1f6e96398000c129e8faf55fba40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f2aa06eb_52d2b412",
+        "filename": "distrib/build-kernel.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1003360
+      },
+      "writtenOn": "2014-02-05T20:54:17Z",
+      "side": 1,
+      "message": "Why not fix this in prebuilts?",
+      "range": {
+        "startLine": 261,
+        "startChar": 25,
+        "endLine": 261,
+        "endChar": 26
+      },
+      "revId": "2cd785f99b9e1f6e96398000c129e8faf55fba40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
