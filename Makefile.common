@@ -119,6 +119,7 @@ common_LOCAL_SRC_FILES += \
 	android/sockets.c \
 	android/sync-utils.c \
 	android/base/Log.cpp \
+	android/base/StringView.cpp \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
 	android/utils/debug.c \
