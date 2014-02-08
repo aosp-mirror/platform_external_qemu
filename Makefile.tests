@@ -7,6 +7,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/utils/win32_cmdline_quote_unittest.cpp \
   android/base/Log_unittest.cpp \
   android/base/StringView_unittest.cpp \
+  android/base/memory/ScopedPtr_unittest.cpp \
 
 $(call start-emulator-program, emulator_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES)
