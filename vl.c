@@ -1711,14 +1711,6 @@ void qemu_system_powerdown_request(void)
     qemu_notify_event();
 }
 
-#ifdef CONFIG_IOTHREAD
-static void qemu_system_vmstop_request(int reason)
-{
-    vmstop_requested = reason;
-    qemu_notify_event();
-}
-#endif
-
 void main_loop_wait(int timeout)
 {
     fd_set rfds, wfds, xfds;
@@ -1783,19 +1775,12 @@ static void main_loop(void)
 {
     int r;
 
-#ifdef CONFIG_IOTHREAD
-    qemu_system_ready = 1;
-    qemu_cond_broadcast(&qemu_system_cond);
-#endif
-
     for (;;) {
         do {
 #ifdef CONFIG_PROFILER
             int64_t ti;
 #endif
-#ifndef CONFIG_IOTHREAD
             tcg_cpu_exec();
-#endif
 #ifdef CONFIG_PROFILER
             ti = profile_getclock();
 #endif
