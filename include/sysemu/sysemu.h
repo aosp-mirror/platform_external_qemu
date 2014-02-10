@@ -18,7 +18,11 @@
 /* vl.c */
 extern const char *bios_name;
 
+extern const char* savevm_on_exit;
+extern int no_shutdown;
 extern int vm_running;
+extern int vm_can_run(void);
+extern int qemu_debug_requested(void);
 extern const char *qemu_name;
 extern uint8_t qemu_uuid[];
 int qemu_uuid_parse(const char *str, uint8_t *uuid);
@@ -34,6 +38,8 @@ void qemu_del_vm_change_state_handler(VMChangeStateEntry *e);
 void vm_start(void);
 void vm_stop(int reason);
 
+void qemu_adjust_clock(QEMUClock* clock);
+
 uint64_t ram_bytes_remaining(void);
 uint64_t ram_bytes_transferred(void);
 uint64_t ram_bytes_total(void);
@@ -42,11 +48,14 @@ int64_t cpu_get_ticks(void);
 void cpu_enable_ticks(void);
 void cpu_disable_ticks(void);
 
+int tcg_has_work(void);
+
 void qemu_system_reset_request(void);
 void qemu_system_shutdown_request(void);
 void qemu_system_powerdown_request(void);
 int qemu_shutdown_requested(void);
 int qemu_reset_requested(void);
+int qemu_vmstop_requested(void);
 int qemu_powerdown_requested(void);
 void qemu_system_killed(int signal, pid_t pid);
 #ifdef NEED_CPU_H
@@ -126,6 +135,9 @@ extern int no_quit;
 extern int semihosting_enabled;
 extern int old_param;
 extern QEMUClock *rtc_clock;
+
+const char* dns_log_filename;
+const char* drop_log_filename;
 
 #define MAX_NODES 64
 extern int nb_numa_nodes;

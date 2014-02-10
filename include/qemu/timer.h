@@ -36,10 +36,22 @@ extern QEMUClock *vm_clock;
    the virtual clock. */
 extern QEMUClock *host_clock;
 
+// TODO(digit): Hide this implementation detail.
+#define QEMU_CLOCK_REALTIME 0
+#define QEMU_CLOCK_VIRTUAL  1
+#define QEMU_CLOCK_HOST     2
+#define QEMU_NUM_CLOCKS 3
+
+extern QEMUTimer *active_timers[QEMU_NUM_CLOCKS];
+
 int64_t qemu_get_clock(QEMUClock *clock);
 int64_t qemu_get_clock_ns(QEMUClock *clock);
 void qemu_clock_enable(QEMUClock *clock, int enabled);
-void qemu_clock_warp(QEMUClock *clock);
+//void qemu_clock_warp(QEMUClock *clock);
+
+QEMUTimer* qemu_clock_get_warp_timer(QEMUClock *clock);
+int qemu_clock_has_active_timer(QEMUClock* clock);
+int64_t qemu_clock_next_deadline(QEMUClock* clock);
 
 QEMUTimer *qemu_new_timer(QEMUClock *clock, int scale,
                           QEMUTimerCB *cb, void *opaque);
@@ -50,6 +62,9 @@ void qemu_mod_timer(QEMUTimer *ts, int64_t expire_time);
 int qemu_timer_pending(QEMUTimer *ts);
 int qemu_timer_expired(QEMUTimer *timer_head, int64_t current_time);
 int qemu_timer_alarm_pending(void);
+void qemu_run_timers(QEMUClock *clock);
+
+void qemu_timer_register_savevm(void);
 
 void qemu_run_all_timers(void);
 int qemu_alarm_pending(void);
@@ -131,6 +146,8 @@ static inline int64_t get_clock(void)
     }
 }
 #endif
+
+extern int64_t cpu_get_clock(void);
 
 void qemu_get_timer(QEMUFile *f, QEMUTimer *ts);
 void qemu_put_timer(QEMUFile *f, QEMUTimer *ts);

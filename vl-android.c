@@ -50,6 +50,7 @@
 #include "migration/qemu-file.h"
 #include "android/android.h"
 #include "android/charpipe.h"
+#include "android/log-rotate.h"
 #include "modem_driver.h"
 #include "android/gps.h"
 #include "android/hw-kmsg.h"
@@ -399,7 +400,6 @@ extern void  dprint( const char* format, ... );
 
 const char* dns_log_filename = NULL;
 const char* drop_log_filename = NULL;
-static int rotate_logs_requested = 0;
 
 const char* savevm_on_exit = NULL;
 
@@ -505,52 +505,6 @@ static void default_ioport_writel(void *opaque, uint32_t address, uint32_t data)
 #ifdef DEBUG_UNUSED_IOPORT
     fprintf(stderr, "unused outl: port=0x%04x data=0x%02x\n", address, data);
 #endif
-}
-
-/*
- * Sets a flag (rotate_logs_requested) to clear both the DNS and the
- * drop logs upon receiving a SIGUSR1 signal. We need to clear the logs
- * between the tasks that do not require restarting Qemu.
- */
-void rotate_qemu_logs_handler(int signum) {
-  rotate_logs_requested = 1;
-}
-
-/*
- * Resets the rotate_log_requested_flag. Normally called after qemu
- * logs has been rotated.
- */
-void reset_rotate_qemu_logs_request(void) {
-  rotate_logs_requested = 0;
-}
-
-/*
- * Clears the passed qemu log when the rotate_logs_requested
- * is set. We need to clear the logs between the tasks that do not
- * require restarting Qemu.
- */
-FILE* rotate_qemu_log(FILE* old_log_fd, const char* filename) {
-  FILE* new_log_fd = NULL;
-  if (old_log_fd) {
-    if (fclose(old_log_fd) == -1) {
-      fprintf(stderr, "Cannot close old_log fd\n");
-      exit(errno);
-    }
-  }
-
-  if (!filename) {
-    fprintf(stderr, "The log filename to be rotated is not provided");
-    exit(-1);
-  }
-
-  new_log_fd = fopen(filename , "wb+");
-  if (new_log_fd == NULL) {
-    fprintf(stderr, "Cannot open the log file: %s for write.\n",
-            filename);
-    exit(1);
-  }
-
-  return new_log_fd;
 }
 
 /***************/
@@ -1784,14 +1738,14 @@ int qemu_powerdown_requested(void)
     return r;
 }
 
-static int qemu_debug_requested(void)
+int qemu_debug_requested(void)
 {
     int r = debug_requested;
     debug_requested = 0;
     return r;
 }
 
-static int qemu_vmstop_requested(void)
+int qemu_vmstop_requested(void)
 {
     int r = vmstop_requested;
     vmstop_requested = 0;
@@ -1853,55 +1807,7 @@ void qemu_system_powerdown_request(void)
     qemu_notify_event();
 }
 
-void main_loop_wait(int timeout)
-{
-    fd_set rfds, wfds, xfds;
-    int ret, nfds;
-    struct timeval tv;
-
-    qemu_bh_update_timeout(&timeout);
-
-    os_host_main_loop_wait(&timeout);
-
-
-    tv.tv_sec = timeout / 1000;
-    tv.tv_usec = (timeout % 1000) * 1000;
-
-    /* poll any events */
-
-    /* XXX: separate device handlers from system ones */
-    nfds = -1;
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
-    FD_ZERO(&xfds);
-    qemu_iohandler_fill(&nfds, &rfds, &wfds, &xfds);
-    if (slirp_is_inited()) {
-        slirp_select_fill(&nfds, &rfds, &wfds, &xfds);
-    }
-
-    qemu_mutex_unlock_iothread();
-    ret = select(nfds + 1, &rfds, &wfds, &xfds, &tv);
-    qemu_mutex_lock_iothread();
-    qemu_iohandler_poll(&rfds, &wfds, &xfds, ret);
-    if (slirp_is_inited()) {
-        if (ret < 0) {
-            FD_ZERO(&rfds);
-            FD_ZERO(&wfds);
-            FD_ZERO(&xfds);
-        }
-        slirp_select_poll(&rfds, &wfds, &xfds);
-    }
-    charpipe_poll();
-
-    qemu_run_all_timers();
-
-    /* Check bottom-halves last in case any of the earlier events triggered
-       them.  */
-    qemu_bh_poll();
-
-}
-
-static int vm_can_run(void)
+int vm_can_run(void)
 {
     if (powerdown_requested)
         return 0;
@@ -1912,71 +1818,6 @@ static int vm_can_run(void)
     if (debug_requested)
         return 0;
     return 1;
-}
-
-static void main_loop(void)
-{
-    int r;
-
-#ifdef CONFIG_HAX
-    if (hax_enabled())
-        hax_sync_vcpus();
-#endif
-
-    for (;;) {
-        do {
-#ifdef CONFIG_PROFILER
-            int64_t ti;
-#endif
-            tcg_cpu_exec();
-#ifdef CONFIG_PROFILER
-            ti = profile_getclock();
-#endif
-            main_loop_wait(qemu_calculate_timeout());
-#ifdef CONFIG_PROFILER
-            dev_time += profile_getclock() - ti;
-#endif
-
-            if (rotate_logs_requested) {
-                FILE* new_dns_log_fd = rotate_qemu_log(get_slirp_dns_log_fd(),
-                                                        dns_log_filename);
-                FILE* new_drop_log_fd = rotate_qemu_log(get_slirp_drop_log_fd(),
-                                                         drop_log_filename);
-                slirp_dns_log_fd(new_dns_log_fd);
-                slirp_drop_log_fd(new_drop_log_fd);
-                reset_rotate_qemu_logs_request();
-            }
-
-        } while (vm_can_run());
-
-        if (qemu_debug_requested())
-            vm_stop(EXCP_DEBUG);
-        if (qemu_shutdown_requested()) {
-            if (no_shutdown) {
-                vm_stop(0);
-                no_shutdown = 0;
-            } else {
-                if (savevm_on_exit != NULL) {
-                  /* Prior to saving VM to the snapshot file, save HW config
-                   * settings for that VM, so we can match them when VM gets
-                   * loaded from the snapshot. */
-                  snaphost_save_config(savevm_on_exit);
-                  do_savevm(cur_mon, savevm_on_exit);
-                }
-                break;
-            }
-        }
-        if (qemu_reset_requested()) {
-            pause_all_vcpus();
-            qemu_system_reset();
-            resume_all_vcpus();
-        }
-        if (qemu_powerdown_requested())
-            qemu_system_powerdown();
-        if ((r = qemu_vmstop_requested()))
-            vm_stop(r);
-    }
-    pause_all_vcpus();
 }
 
 void version(void)
@@ -2239,24 +2080,6 @@ parse_int(const char *str, int *result)
 
     return 0;
 }
-
-#ifndef _WIN32
-/*
- * Initializes the SIGUSR1 signal handler to clear Qemu logs.
- */
-void init_qemu_clear_logs_sig() {
-  struct sigaction act;
-  sigfillset(&act.sa_mask);
-  act.sa_flags = 0;
-  act.sa_handler = rotate_qemu_logs_handler;
-  if (sigaction(SIGUSR1, &act, NULL) == -1) {
-    fprintf(stderr, "Failed to setup SIGUSR1 handler to clear Qemu logs\n");
-    exit(-1);
-  }
-}
-#endif
-
-
 
 /* parses a null-terminated string specifying a network port (e.g., "80") or
  * port range (e.g., "[6666-7000]"). In case of a single port, lport and hport
@@ -3986,7 +3809,7 @@ int main(int argc, char **argv, char **envp)
     }
 
 #ifndef _WIN32
-    init_qemu_clear_logs_sig();
+    qemu_log_rotation_init();
 #endif
 
     /* init the dynamic translator */
