@@ -312,9 +312,6 @@ void cpu_exec_init_all(unsigned long tb_size);
 void cpu_save(QEMUFile *f, void *opaque);
 int cpu_load(QEMUFile *f, void *opaque, int version_id);
 
-/* Force QEMU to stop what it's doing and service IO */
-void qemu_service_io(void);
-
 /* Force QEMU to process pending events */
 void qemu_notify_event(void);
 

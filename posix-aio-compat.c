@@ -512,7 +512,7 @@ static void aio_signal_handler(int signum)
             die("write()");
     }
 
-    qemu_service_io();
+    qemu_notify_event();
 }
 
 static void paio_remove(struct qemu_paiocb *acb)
