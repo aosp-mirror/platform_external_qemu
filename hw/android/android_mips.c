@@ -16,6 +16,7 @@
 #include "sysemu/sysemu.h"
 #include "hw/mips/mips.h"
 #include "hw/android/goldfish/device.h"
+#include "hw/android/goldfish/pipe.h"
 #include "android/globals.h"
 #include "audio/audio.h"
 #include "sysemu/blockdev.h"
@@ -124,7 +125,8 @@ static void android_load_kernel(CPUState *env, int ram_size, const char *kernel_
     if (initrd_size > 0)
         sprintf (kernel_cmd, "%s rd_start=0x" TARGET_FMT_lx " rd_size=%li",
                        kernel_cmdline,
-                       PHYS_TO_VIRT(initrd_offset), initrd_size);
+                       (hwaddr)PHYS_TO_VIRT(initrd_offset),
+                       (long int)initrd_size);
     else
         strcpy (kernel_cmd, kernel_cmdline);
 

@@ -1048,8 +1048,6 @@ AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
      */
     if (opts->avd == NULL && !android_build_out)
     {
-        char   dataDirIsSystem = 0;
-
         if (!opts->sysdir) {
             opts->sysdir = _getSdkImagePath("system.img");
             if (!opts->sysdir) {
@@ -1084,7 +1082,6 @@ AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
         /* if no data directory is specified, use the system directory */
         if (!opts->datadir) {
             opts->datadir   = android_strdup(opts->sysdir);
-            dataDirIsSystem = 1;
             D("autoconfig: -datadir %s", opts->sysdir);
         }
 

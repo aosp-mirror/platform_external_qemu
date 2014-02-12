@@ -103,7 +103,8 @@ static const uint8_t json_lexer[][256] =  {
         ['u'] = IN_DQ_UCODE0,
     },
     [IN_DQ_STRING] = {
-        [1 ... 0xFF] = IN_DQ_STRING,
+        [1 ... 0xBF] = IN_DQ_STRING,
+        [0xC2 ... 0xF4] = IN_DQ_STRING,
         ['\\'] = IN_DQ_STRING_ESCAPE,
         ['"'] = JSON_STRING,
     },
@@ -142,7 +143,8 @@ static const uint8_t json_lexer[][256] =  {
         ['u'] = IN_SQ_UCODE0,
     },
     [IN_SQ_STRING] = {
-        [1 ... 0xFF] = IN_SQ_STRING,
+        [1 ... 0xBF] = IN_SQ_STRING,
+        [0xC2 ... 0xF4] = IN_SQ_STRING,
         ['\\'] = IN_SQ_STRING_ESCAPE,
         ['\''] = JSON_STRING,
     },

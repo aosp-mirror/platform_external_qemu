@@ -980,7 +980,7 @@ OP_ST_ATOMIC(scd,st64,ld64,0x7);
 static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
                       int base, int16_t offset)
 {
-    const char *opn = "ldst";
+    const char * __attribute__((unused)) opn = "ldst";
     TCGv t0 = tcg_temp_new();
     TCGv t1 = tcg_temp_new();
 
@@ -1137,7 +1137,7 @@ static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
 static void gen_st_cond (DisasContext *ctx, uint32_t opc, int rt,
                          int base, int16_t offset)
 {
-    const char *opn = "st_cond";
+    const char * __attribute__((unused)) opn = "st_cond";
     TCGv t0, t1;
 
     t0 = tcg_temp_local_new();
@@ -1178,7 +1178,7 @@ static void gen_st_cond (DisasContext *ctx, uint32_t opc, int rt,
 static void gen_flt_ldst (DisasContext *ctx, uint32_t opc, int ft,
                           int base, int16_t offset)
 {
-    const char *opn = "flt_ldst";
+    const char * __attribute__((unused)) opn = "flt_ldst";
     TCGv t0 = tcg_temp_new();
 
     if (base == 0) {
@@ -1251,7 +1251,7 @@ static void gen_arith_imm (CPUState *env, DisasContext *ctx, uint32_t opc,
                            int rt, int rs, int16_t imm)
 {
     target_ulong uimm = (target_long)imm; /* Sign extend to 32/64 bits */
-    const char *opn = "imm arith";
+    const char * __attribute__((unused)) opn = "imm arith";
 
     if (rt == 0 && opc != OPC_ADDI && opc != OPC_DADDI) {
         /* If no destination, treat it as a NOP.
@@ -1337,7 +1337,7 @@ static void gen_arith_imm (CPUState *env, DisasContext *ctx, uint32_t opc,
 static void gen_logic_imm (CPUState *env, uint32_t opc, int rt, int rs, int16_t imm)
 {
     target_ulong uimm;
-    const char *opn = "imm logic";
+    const char * __attribute__((unused)) opn = "imm logic";
 
     if (rt == 0) {
         /* If no destination, treat it as a NOP. */
@@ -1379,7 +1379,7 @@ static void gen_logic_imm (CPUState *env, uint32_t opc, int rt, int rs, int16_t 
 static void gen_slt_imm (CPUState *env, uint32_t opc, int rt, int rs, int16_t imm)
 {
     target_ulong uimm = (target_long)imm; /* Sign extend to 32/64 bits */
-    const char *opn = "imm arith";
+    const char * __attribute__((unused)) opn = "imm arith";
     TCGv t0;
 
     if (rt == 0) {
@@ -1408,7 +1408,7 @@ static void gen_shift_imm(CPUState *env, DisasContext *ctx, uint32_t opc,
                           int rt, int rs, int16_t imm)
 {
     target_ulong uimm = ((uint16_t)imm) & 0x1f;
-    const char *opn = "imm shift";
+    const char* __attribute__((unused)) opn = "imm shift";
     TCGv t0;
 
     if (rt == 0) {
@@ -1546,7 +1546,7 @@ static void gen_shift_imm(CPUState *env, DisasContext *ctx, uint32_t opc,
 static void gen_arith (CPUState *env, DisasContext *ctx, uint32_t opc,
                        int rd, int rs, int rt)
 {
-    const char *opn = "arith";
+    const char* __attribute__((unused)) opn = "arith";
 
     if (rd == 0 && opc != OPC_ADD && opc != OPC_SUB
        && opc != OPC_DADD && opc != OPC_DSUB) {
@@ -1726,7 +1726,7 @@ static void gen_arith (CPUState *env, DisasContext *ctx, uint32_t opc,
 /* Conditional move */
 static void gen_cond_move (CPUState *env, uint32_t opc, int rd, int rs, int rt)
 {
-    const char *opn = "cond move";
+    const char* __attribute__((unused)) opn = "cond move";
     int l1;
 
     if (rd == 0) {
@@ -1763,7 +1763,7 @@ static void gen_cond_move (CPUState *env, uint32_t opc, int rd, int rs, int rt)
 /* Logic */
 static void gen_logic (CPUState *env, uint32_t opc, int rd, int rs, int rt)
 {
-    const char *opn = "logic";
+    const char* __attribute__((unused)) opn = "logic";
 
     if (rd == 0) {
         /* If no destination, treat it as a NOP. */
@@ -1823,7 +1823,7 @@ static void gen_logic (CPUState *env, uint32_t opc, int rd, int rs, int rt)
 /* Set on lower than */
 static void gen_slt (CPUState *env, uint32_t opc, int rd, int rs, int rt)
 {
-    const char *opn = "slt";
+    const char* __attribute__((unused)) opn = "slt";
     TCGv t0, t1;
 
     if (rd == 0) {
@@ -1855,7 +1855,7 @@ static void gen_slt (CPUState *env, uint32_t opc, int rd, int rs, int rt)
 static void gen_shift (CPUState *env, DisasContext *ctx, uint32_t opc,
                        int rd, int rs, int rt)
 {
-    const char *opn = "shifts";
+    const char* __attribute__((unused)) opn = "shifts";
     TCGv t0, t1;
 
     if (rd == 0) {
@@ -1965,7 +1965,7 @@ static void gen_shift (CPUState *env, DisasContext *ctx, uint32_t opc,
 /* Arithmetic on HI/LO registers */
 static void gen_HILO (DisasContext *ctx, uint32_t opc, int reg)
 {
-    const char *opn = "hilo";
+    const char* __attribute__((unused)) opn = "hilo";
 
     if (reg == 0 && (opc == OPC_MFHI || opc == OPC_MFLO)) {
         /* Treat as NOP. */
@@ -2002,7 +2002,7 @@ static void gen_HILO (DisasContext *ctx, uint32_t opc, int reg)
 static void gen_muldiv (DisasContext *ctx, uint32_t opc,
                         int rs, int rt)
 {
-    const char *opn = "mul/div";
+    const char* __attribute__((unused)) opn = "mul/div";
     TCGv t0, t1;
 
     switch (opc) {
@@ -2237,7 +2237,7 @@ static void gen_muldiv (DisasContext *ctx, uint32_t opc,
 static void gen_mul_vr54xx (DisasContext *ctx, uint32_t opc,
                             int rd, int rs, int rt)
 {
-    const char *opn = "mul vr54xx";
+    const char* __attribute__((unused)) opn = "mul vr54xx";
     TCGv t0 = tcg_temp_new();
     TCGv t1 = tcg_temp_new();
 
@@ -2317,7 +2317,7 @@ static void gen_mul_vr54xx (DisasContext *ctx, uint32_t opc,
 static void gen_cl (DisasContext *ctx, uint32_t opc,
                     int rd, int rs)
 {
-    const char *opn = "CLx";
+    const char* __attribute__((unused)) opn = "CLx";
     TCGv t0;
 
     if (rd == 0) {
@@ -2897,7 +2897,7 @@ static inline void gen_mtc0_store64 (TCGv arg, target_ulong off)
 
 static void gen_mfc0 (CPUState *env, DisasContext *ctx, TCGv arg, int reg, int sel)
 {
-    const char *rn = "invalid";
+    const char * __attribute__((unused)) rn = "invalid";
 
     if (sel != 0)
         check_insn(env, ctx, ISA_MIPS32);
@@ -3474,7 +3474,7 @@ die:
 
 static void gen_mtc0 (CPUState *env, DisasContext *ctx, TCGv arg, int reg, int sel)
 {
-    const char *rn = "invalid";
+    const char * __attribute__((unused)) rn = "invalid";
 
     if (sel != 0)
         check_insn(env, ctx, ISA_MIPS32);
@@ -5551,7 +5551,7 @@ die:
 
 static void gen_cp0 (CPUState *env, DisasContext *ctx, uint32_t opc, int rt, int rd)
 {
-    const char *opn = "ldst";
+    const char* __attribute__((unused)) opn = "ldst";
 
     switch (opc) {
     case OPC_MFC0:
@@ -5676,7 +5676,7 @@ static void gen_compute_branch1 (CPUState *env, DisasContext *ctx, uint32_t op,
                                  int32_t cc, int32_t offset)
 {
     target_ulong btarget;
-    const char *opn = "cp1 cond branch";
+    const char* __attribute__((unused)) opn = "cp1 cond branch";
     TCGv_i32 t0 = tcg_temp_new_i32();
 
     if (cc != 0)
@@ -5792,7 +5792,7 @@ static void gen_compute_branch1 (CPUState *env, DisasContext *ctx, uint32_t op,
 
 static void gen_cp1 (DisasContext *ctx, uint32_t opc, int rt, int fs)
 {
-    const char *opn = "cp1 move";
+    const char* __attribute__((unused)) opn = "cp1 move";
     TCGv t0 = tcg_temp_new();
 
     switch (opc) {
@@ -5973,7 +5973,7 @@ static inline void gen_movcf_ps (int fs, int fd, int cc, int tf)
 static void gen_farith (DisasContext *ctx, uint32_t op1,
                         int ft, int fs, int fd, int cc)
 {
-    const char *opn = "farith";
+    const char* __attribute__((unused)) opn = "farith";
     const char *condnames[] = {
             "c.f",
             "c.un",
@@ -7243,8 +7243,8 @@ static void gen_farith (DisasContext *ctx, uint32_t op1,
 static void gen_flt3_ldst (DisasContext *ctx, uint32_t opc,
                            int fd, int fs, int base, int index)
 {
-    const char *opn = "extended float load/store";
-    int store = 0;
+    const char* __attribute__((unused)) opn = "extended float load/store";
+    int __attribute__((unused)) store = 0;
     TCGv t0 = tcg_temp_new();
 
     if (base == 0) {
@@ -7345,7 +7345,7 @@ static void gen_flt3_ldst (DisasContext *ctx, uint32_t opc,
 static void gen_flt3_arith (DisasContext *ctx, uint32_t opc,
                             int fd, int fr, int fs, int ft)
 {
-    const char *opn = "flt3_arith";
+    const char* __attribute__((unused)) opn = "flt3_arith";
 
     switch (opc) {
     case OPC_ALNV_PS:
