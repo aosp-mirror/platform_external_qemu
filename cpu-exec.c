@@ -65,7 +65,7 @@ void cpu_loop_exit(void)
 /* exit the current TB from a signal handler. The host registers are
    restored in a state compatible with the CPU emulator
  */
-void cpu_resume_from_signal(CPUOldState *env1, void *puc)
+void cpu_resume_from_signal(CPUArchState *env1, void *puc)
 {
 #if !defined(CONFIG_SOFTMMU)
 #ifdef __linux__
