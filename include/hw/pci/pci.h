@@ -200,21 +200,69 @@ PCIBus *pci_bridge_init(PCIBus *bus, int devfn, uint16_t vid, uint16_t did,
                         pci_map_irq_fn map_irq, const char *name);
 
 static inline void
+pci_set_byte(uint8_t *config, uint8_t val)
+{
+    *config = val;
+}
+
+static inline uint8_t
+pci_get_byte(const uint8_t *config)
+{
+    return *config;
+}
+
+static inline void
+pci_set_word(uint8_t *config, uint16_t val)
+{
+    stw_le_p(config, val);
+}
+
+static inline uint16_t
+pci_get_word(const uint8_t *config)
+{
+    return lduw_le_p(config);
+}
+
+static inline void
+pci_set_long(uint8_t *config, uint32_t val)
+{
+    stl_le_p(config, val);
+}
+
+static inline uint32_t
+pci_get_long(const uint8_t *config)
+{
+    return ldl_le_p(config);
+}
+
+static inline void
+pci_set_quad(uint8_t *config, uint64_t val)
+{
+    cpu_to_le64w((uint64_t *)config, val);
+}
+
+static inline uint64_t
+pci_get_quad(const uint8_t *config)
+{
+    return le64_to_cpup((const uint64_t *)config);
+}
+
+static inline void
 pci_config_set_vendor_id(uint8_t *pci_config, uint16_t val)
 {
-    cpu_to_le16wu((uint16_t *)&pci_config[PCI_VENDOR_ID], val);
+    pci_set_word(&pci_config[PCI_VENDOR_ID], val);
 }
 
 static inline void
 pci_config_set_device_id(uint8_t *pci_config, uint16_t val)
 {
-    cpu_to_le16wu((uint16_t *)&pci_config[PCI_DEVICE_ID], val);
+    pci_set_word(&pci_config[PCI_DEVICE_ID], val);
 }
 
 static inline void
 pci_config_set_class(uint8_t *pci_config, uint16_t val)
 {
-    cpu_to_le16wu((uint16_t *)&pci_config[PCI_CLASS_DEVICE], val);
+    pci_set_word(&pci_config[PCI_CLASS_DEVICE], val);
 }
 
 typedef void (*pci_qdev_initfn)(PCIDevice *dev);
