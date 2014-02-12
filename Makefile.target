@@ -342,6 +342,7 @@ common_LOCAL_SRC_FILES := \
     android/user-events-qemu.c \
     hw/core/loader.c \
     ui/keymaps.c \
+    util/iov.c \
 
 
 # The following files cannot be in static libraries because they contain

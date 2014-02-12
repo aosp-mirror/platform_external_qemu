@@ -469,6 +469,8 @@ CORE_MISC_SOURCES = \
     util/aes.c \
     util/cutils.c \
     util/error.c \
+    util/hexdump.c \
+    util/iov.c \
     util/module.c \
     util/notify.c \
     util/osdep.c \
