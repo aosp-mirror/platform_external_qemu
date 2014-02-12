@@ -21,6 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include "cpu.h"
+#include "exec/cpu-common.h"
 #include "hw/hw.h"
 #include "hw/isa/isa.h"
 

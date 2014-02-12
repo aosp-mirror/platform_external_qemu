@@ -18,6 +18,7 @@
 #include <process.h>
 #endif
 
+#include "config.h"
 #include "android/sockets.h"
 
 #include "android/android.h"

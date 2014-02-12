@@ -9,6 +9,8 @@
 #ifndef PXA_H
 # define PXA_H			"hw/arm/pxa.h"
 
+#include "cpu.h"
+
 /* Interrupt numbers */
 # define PXA2XX_PIC_SSP3	0
 # define PXA2XX_PIC_USBH2	2

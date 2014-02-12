@@ -11,6 +11,9 @@
 #ifndef ARM_MISC_H
 #define ARM_MISC_H 1
 
+#include "cpu.h"
+#include "hw/loader.h"
+
 /* The CPU is also modeled as an interrupt controller.  */
 #define ARM_PIC_CPU_IRQ 0
 #define ARM_PIC_CPU_FIQ 1
