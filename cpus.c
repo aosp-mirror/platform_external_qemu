@@ -27,6 +27,7 @@
 #include "exec/exec-all.h"
 #include "monitor/monitor.h"
 #include "sysemu/sysemu.h"
+#include "exec/exec-all.h"
 #include "exec/gdbstub.h"
 #include "sysemu/dma.h"
 #include "sysemu/kvm.h"

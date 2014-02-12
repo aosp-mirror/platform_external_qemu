@@ -282,6 +282,15 @@ int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
     return ret;
 }
 
+int tlb_set_page(CPUArchState *env1, target_ulong vaddr,
+                 hwaddr paddr, int prot,
+                 int mmu_idx, int is_softmmu)
+{
+    if (prot & PAGE_READ)
+        prot |= PAGE_EXEC;
+    return tlb_set_page_exec(env1, vaddr, paddr, prot, mmu_idx, is_softmmu);
+}
+
 #define MMUSUFFIX _cmmu
 #define GETPC() NULL
 #define env cpu_single_env

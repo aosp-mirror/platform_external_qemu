@@ -72,6 +72,7 @@ void GCC_FMT_ATTR(2, 3) qemu_log_mask(int mask, const char *fmt, ...);
 /* Special cases: */
 
 #ifdef NEED_CPU_H
+
 /* cpu_dump_state() logging functions: */
 /**
  * log_cpu_state:

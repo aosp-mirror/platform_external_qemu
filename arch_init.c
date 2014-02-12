@@ -38,6 +38,7 @@
 #include "hw/audiodev.h"
 #include "sysemu/kvm.h"
 #include "migration/migration.h"
+#include "migration/qemu-file.h"
 #include "net/net.h"
 #include "exec/gdbstub.h"
 #include "hw/i386/smbios.h"
