@@ -488,7 +488,7 @@ endif
 
 ifeq ($(HOST_OS),linux)
     CORE_MISC_SOURCES += hw/usb/usb-linux.c \
-                         util/qemu-thread.c \
+                         util/qemu-thread-posix.c \
                          android/camera/camera-capture-linux.c
 else
     CORE_MISC_SOURCES += hw/usb/usb-dummy-android.c
@@ -496,14 +496,16 @@ endif
 
 ifeq ($(HOST_OS),windows)
   CORE_MISC_SOURCES   += tap-win32.c \
-                         android/camera/camera-capture-windows.c
+                         android/camera/camera-capture-windows.c \
+                         util/qemu-thread-win32.c
 
 else
   CORE_MISC_SOURCES   += posix-aio-compat.c
 endif
 
 ifeq ($(HOST_OS),darwin)
-  CORE_MISC_SOURCES   += android/camera/camera-capture-mac.m
+  CORE_MISC_SOURCES   += android/camera/camera-capture-mac.m \
+                         util/qemu-thread-posix.c
 endif
 
 common_LOCAL_SRC_FILES += $(CORE_MISC_SOURCES)
