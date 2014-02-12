@@ -371,14 +371,6 @@ void QEMU_NORETURN cpu_abort(CPUState *env, const char *fmt, ...)
 extern CPUState *first_cpu;
 extern CPUState *cpu_single_env;
 
-#define CPU_INTERRUPT_TIMER  0x08 /* internal timer exception pending */
-#define CPU_INTERRUPT_SMI    0x40 /* (x86 only) SMI interrupt pending */
-#define CPU_INTERRUPT_VIRQ   0x100 /* virtual interrupt pending.  */
-#define CPU_INTERRUPT_NMI    0x200 /* NMI pending. */
-#define CPU_INTERRUPT_INIT   0x400 /* INIT pending. */
-#define CPU_INTERRUPT_SIPI   0x800 /* SIPI pending. */
-#define CPU_INTERRUPT_MCE    0x1000 /* (x86 only) MCE pending. */
-
 /* Flags for use in ENV->INTERRUPT_PENDING.
 
    The numbers assigned here are non-sequential in order to preserve
