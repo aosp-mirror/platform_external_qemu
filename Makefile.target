@@ -327,7 +327,6 @@ common_LOCAL_SRC_FILES := \
     dma-helpers.c \
     gdbstub.c \
     qemu-timer.c \
-    qemu-timer-common.c \
     vl-android.c \
     android/cmdline-option.c \
     android/console.c \
@@ -342,6 +341,7 @@ common_LOCAL_SRC_FILES := \
     android/user-events-qemu.c \
     hw/core/loader.c \
     ui/keymaps.c \
+    util/qemu-timer-common.c \
     util/iov.c \
 
 
