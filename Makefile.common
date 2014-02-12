@@ -461,6 +461,9 @@ CORE_MISC_SOURCES = \
     android/utils/jpeg-compress.c \
     net/net-android.c \
     qobject/qerror.c \
+    qom/container.c \
+    qom/object.c \
+    qom/qom-qobject.c \
     ui/console.c \
     ui/d3des.c \
     ui/input.c \
