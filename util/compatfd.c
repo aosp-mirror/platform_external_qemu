@@ -13,11 +13,16 @@
  * GNU GPL, version 2 or (at your option) any later version.
  */
 
+// This is necessary to be able to include <sys/syscall.h> on Linux.
+#define _GNU_SOURCE 1
+
 #include "qemu-common.h"
 #include "qemu/compatfd.h"
 #include "qemu/thread.h"
 
+#ifdef CONFIG_SIGNALFD
 #include <sys/syscall.h>
+#endif
 
 struct sigfd_compat_info
 {
