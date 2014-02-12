@@ -657,3 +657,76 @@ gpointer g_hash_table_find(GHashTable* hash_table,
 guint g_hash_table_size(GHashTable* hash_table) {
   return hash_table->num_items;
 }
+
+// Queues
+
+struct _GQueueNode {
+  void* data;
+  GQueueNode* next;
+  GQueueNode* prev;
+};
+
+static inline GQueueNode* _g_queue_node_alloc(void) {
+  return g_new0(GQueueNode, 1);
+}
+
+static void inline _g_queue_node_free(GQueueNode* node) {
+  g_free(node);
+}
+
+GQueue* g_queue_new(void) {
+  GQueue* queue = g_new0(GQueue, 1);
+  return queue;
+}
+
+void g_queue_free(GQueue* queue) {
+  GQueueNode* node = queue->head;
+  while (node) {
+    GQueueNode* next = node->next;
+    _g_queue_node_free(node);
+    node = next;
+  }
+  queue->head = queue->tail = NULL;
+  queue->length = 0;
+  g_free(queue);
+}
+
+gboolean g_queue_is_empty(GQueue* queue) {
+  return queue->head == NULL;
+}
+
+void g_queue_push_tail(GQueue* queue, void* data) {
+  GQueueNode* node = _g_queue_node_alloc();
+  node->data = data;
+  node->next = NULL;
+  node->prev = queue->tail;
+  queue->tail = node;
+  queue->length++;
+}
+
+void* g_queue_peek_head(GQueue* queue) {
+  return (queue->head) ? queue->head->data : NULL;
+}
+
+void* g_queue_peek_tail(GQueue* queue) {
+  return (queue->tail) ? queue->tail->data : NULL;
+}
+
+void* g_queue_pop_head(GQueue* queue) {
+  GQueueNode* head = queue->head;
+  if (!head)
+    return NULL;
+
+  void* result = head->data;
+
+  if (head->next) {
+    queue->head = head->next;
+    head->next->prev = NULL;
+  } else {
+    queue->head = NULL;
+    queue->tail = NULL;
+  }
+  queue->length--;
+
+  return result;
+}
