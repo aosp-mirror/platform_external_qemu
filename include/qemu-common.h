@@ -159,16 +159,41 @@ void qemu_bh_update_timeout(int *timeout);
 void qemu_get_timedate(struct tm *tm, int offset);
 int qemu_timedate_diff(struct tm *tm);
 
+/**
+ * is_help_option:
+ * @s: string to test
+ *
+ * Check whether @s is one of the standard strings which indicate
+ * that the user is asking for a list of the valid values for a
+ * command option like -cpu or -M. The current accepted strings
+ * are 'help' and '?'. '?' is deprecated (it is a shell wildcard
+ * which makes it annoying to use in a reliable way) but provided
+ * for backwards compatibility.
+ *
+ * Returns: true if @s is a request for a list.
+ */
+static inline bool is_help_option(const char *s)
+{
+    return !strcmp(s, "?") || !strcmp(s, "help");
+}
+
 /* cutils.c */
 void pstrcpy(char *buf, int buf_size, const char *str);
+void strpadcpy(char *buf, int buf_size, const char *str, char pad);
 char *pstrcat(char *buf, int buf_size, const char *s);
 int strstart(const char *str, const char *val, const char **ptr);
 int stristart(const char *str, const char *val, const char **ptr);
 int qemu_strnlen(const char *s, int max_len);
+char *qemu_strsep(char **input, const char *delim);
 time_t mktimegm(struct tm *tm);
 int qemu_fls(int i);
 int qemu_fdatasync(int fd);
 int fcntl_setfl(int fd, int flag);
+int qemu_parse_fd(const char *param);
+
+int parse_uint(const char *s, unsigned long long *value, char **endptr,
+               int base);
+int parse_uint_full(const char *s, unsigned long long *value, int base);
 
 /*
  * strtosz() suffixes used to specify the default treatment of an
@@ -186,6 +211,8 @@ int fcntl_setfl(int fd, int flag);
 #define STRTOSZ_DEFSUFFIX_B	'B'
 int64_t strtosz(const char *nptr, char **end);
 int64_t strtosz_suffix(const char *nptr, char **end, const char default_suffix);
+int64_t strtosz_suffix_unit(const char *nptr, char **end,
+                            const char default_suffix, int64_t unit);
 
 /* used to print char* safely */
 #define STR_OR_NULL(str) ((str) ? (str) : "null")
@@ -361,10 +388,11 @@ void qemu_iovec_memset(QEMUIOVector *qiov, int c, size_t count);
 void qemu_iovec_memset_skip(QEMUIOVector *qiov, int c, size_t count,
                             size_t skip);
 
+bool buffer_is_zero(const void *buf, size_t len);
+
 #define QEMU_FILE_TYPE_BIOS   0
 #define QEMU_FILE_TYPE_KEYMAP 1
 char *qemu_find_file(int type, const char *name);
-
 
 /* OS specific functions */
 void os_setup_early_signal_handling(void);
@@ -407,7 +435,34 @@ static inline uint64_t muldiv64(uint64_t a, uint32_t b, uint32_t c)
     return res.ll;
 }
 
+/* Round number down to multiple */
+#define QEMU_ALIGN_DOWN(n, m) ((n) / (m) * (m))
+
+/* Round number up to multiple */
+#define QEMU_ALIGN_UP(n, m) QEMU_ALIGN_DOWN((n) + (m) - 1, (m))
+
+static inline bool is_power_of_2(uint64_t value)
+{
+    if (!value) {
+        return 0;
+    }
+
+    return !(value & (value - 1));
+}
+
+/* round down to the nearest power of 2*/
+int64_t pow2floor(int64_t value);
+
 #include "qemu/module.h"
+
+/*
+ * Implementation of ULEB128 (http://en.wikipedia.org/wiki/LEB128)
+ * Input is limited to 14-bit numbers
+ */
+
+int uleb128_encode_small(uint8_t *out, uint32_t n);
+int uleb128_decode_small(const uint8_t *in, uint32_t *n);
+
 
 /*
  * A fixer for timeout value passed to select() on Mac. The issue is that Mac's
@@ -437,5 +492,47 @@ static inline uint64_t muldiv64(uint64_t a, uint32_t b, uint32_t c)
 #define SUPPORT_GLOBAL_REGISTER_VARIABLE 1
 #define GLOBAL_REGISTER_VARIABLE_DECL register
 #endif /* __clang__ || __llvm__ */
+
+/* vector definitions */
+#ifdef __ALTIVEC__
+#include <altivec.h>
+/* The altivec.h header says we're allowed to undef these for
+ * C++ compatibility.  Here we don't care about C++, but we
+ * undef them anyway to avoid namespace pollution.
+ */
+#undef vector
+#undef pixel
+#undef bool
+#define VECTYPE        __vector unsigned char
+#define SPLAT(p)       vec_splat(vec_ld(0, p), 0)
+#define ALL_EQ(v1, v2) vec_all_eq(v1, v2)
+/* altivec.h may redefine the bool macro as vector type.
+ * Reset it to POSIX semantics. */
+#define bool _Bool
+#elif defined __SSE2__
+#include <emmintrin.h>
+#define VECTYPE        __m128i
+#define SPLAT(p)       _mm_set1_epi8(*(p))
+#define ALL_EQ(v1, v2) (_mm_movemask_epi8(_mm_cmpeq_epi8(v1, v2)) == 0xFFFF)
+#else
+#define VECTYPE        unsigned long
+#define SPLAT(p)       (*(p) * (~0UL / 255))
+#define ALL_EQ(v1, v2) ((v1) == (v2))
+#endif
+
+#define BUFFER_FIND_NONZERO_OFFSET_UNROLL_FACTOR 8
+static inline bool
+can_use_buffer_find_nonzero_offset(const void *buf, size_t len)
+{
+    return (len % (BUFFER_FIND_NONZERO_OFFSET_UNROLL_FACTOR
+                   * sizeof(VECTYPE)) == 0
+            && ((uintptr_t) buf) % sizeof(VECTYPE) == 0);
+}
+size_t buffer_find_nonzero_offset(const void *buf, size_t len);
+
+/*
+ * helper to parse debug environment variables
+ */
+int parse_debug_env(const char *name, int max, int initial);
 
 #endif
