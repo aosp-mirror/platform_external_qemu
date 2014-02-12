@@ -41,6 +41,7 @@
 #include "ui/console.h"
 #include "sysemu/sysemu.h"
 #include "exec/gdbstub.h"
+#include "qemu/log.h"
 #include "qemu/timer.h"
 #include "sysemu/char.h"
 #include "sysemu/blockdev.h"
@@ -2556,6 +2557,8 @@ int main(int argc, char **argv, char **envp)
     int tb_size;
     const char *pid_file = NULL;
     const char *incoming = NULL;
+    const char* log_mask = NULL;
+    const char* log_file = NULL;
     CPUOldState *env;
     int show_vnc_port = 0;
     IniFile*  hw_ini = NULL;
@@ -2921,20 +2924,7 @@ int main(int argc, char **argv, char **envp)
                 break;
             }
             case QEMU_OPTION_d:
-                {
-                    int mask;
-                    const CPULogItem *item;
-
-                    mask = cpu_str_to_log_mask(optarg);
-                    if (!mask) {
-                        printf("Log items (comma separated):\n");
-                        for(item = cpu_log_items; item->mask != 0; item++) {
-                            printf("%-10s %s\n", item->name, item->help);
-                        }
-                        PANIC("Invalid parameter -d=%s", optarg);
-                    }
-                    cpu_set_log(mask);
-                }
+                log_mask = optarg;
                 break;
             case QEMU_OPTION_s:
                 gdbstub_dev = "tcp::" DEFAULT_GDBSTUB_PORT;
@@ -3944,6 +3934,25 @@ int main(int argc, char **argv, char **envp)
         exit(1);
     }
 
+    /* Open the logfile at this point, if necessary. We can't open the logfile
+     * when encountering either of the logging options (-d or -D) because the
+     * other one may be encountered later on the command line, changing the
+     * location or level of logging.
+     */
+    if (log_mask) {
+        int mask;
+        if (log_file) {
+            qemu_set_log_filename(log_file);
+        }
+
+        mask = qemu_str_to_log_mask(log_mask);
+        if (!mask) {
+            qemu_print_log_usage(stdout);
+            exit(1);
+        }
+        qemu_set_log(mask);
+    }
+  
 #if defined(CONFIG_KVM)
     if (kvm_allowed < 0) {
         kvm_allowed = kvm_check_allowed();
