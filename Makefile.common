@@ -458,7 +458,6 @@ CORE_MISC_SOURCES = \
     ui/d3des.c \
     ui/input.c \
     ui/vnc-android.c \
-    util/acl.c \
     util/aes.c \
     util/compatfd.c \
     util/cutils.c \
