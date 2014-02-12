@@ -15,6 +15,12 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+// Types
+
+typedef void (*GFunc)(void* data, void* user_data);
+typedef int (*GCompareFunc)(const void* a, const void* b);
+typedef int (*GCompareDataFunc)(const void* a, const void* b, void* user_data);
+
 // Testing
 
 // TODO(digit): Turn assertions on.
@@ -52,6 +58,22 @@ char* g_strdup(const char* str);
 char* g_strndup(const char* str, size_t size);
 char* g_strdup_printf(const char* fmt, ...);
 char* g_strdup_vprintf(const char* fmt, va_list args);
+
+// Single-linked lists
+
+typedef struct _GSList {
+  void* data;
+  struct _GSList* next;
+} GSList;
+
+void g_slist_free(GSList* list);
+GSList* g_slist_last(GSList* list);
+GSList* g_slist_find(GSList* list, const void* data);
+GSList* g_slist_append(GSList* list, void* data);
+GSList* g_slist_prepend(GSList* list, void* data);
+GSList* g_slist_remove(GSList* list, const void* data);
+void g_slist_foreach(GSList* list, GFunc func, void* user_data);
+GSList* g_slist_sort(GSList* list, GCompareFunc compare_func);
 
 #ifdef _WIN32
 char* g_win32_error_message(int error);
