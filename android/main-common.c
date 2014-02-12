@@ -26,6 +26,7 @@
 
 #include "android/avd/util.h"
 #include "android/utils/debug.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/dirscanner.h"
@@ -184,9 +185,8 @@ write_default_keyset( void )
     bufprint_config_file( path, path+sizeof(path), KEYSET_FILE );
 
     /* only write if there is no file here */
-    if ( !path_exists(path) ) {
+    if (!path_exists(path)) {
         int          fd = open( path, O_WRONLY | O_CREAT, 0666 );
-        int          ret;
         const char*  ks = skin_keyset_get_default();
 
 
@@ -196,8 +196,8 @@ write_default_keyset( void )
             D( "%s: could not create file: %s", __FUNCTION__, strerror(errno) );
             return;
         }
-        CHECKED(ret, write(fd, ks, strlen(ks)));
-        close(fd);
+        HANDLE_EINTR(write(fd, ks, strlen(ks)));
+        IGNORE_EINTR(close(fd));
     }
 }
 

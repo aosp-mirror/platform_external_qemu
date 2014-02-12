@@ -123,6 +123,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/debug.c \
 	android/utils/dll.c \
 	android/utils/dirscanner.c \
+	android/utils/eintr_wrapper.c \
 	android/utils/filelock.c \
 	android/utils/ini.c \
 	android/utils/intmap.c \

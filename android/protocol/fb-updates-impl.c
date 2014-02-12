@@ -17,6 +17,7 @@
 
 #include "android/utils/system.h"
 #include "android/utils/debug.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/panic.h"
 #include "android/sync-utils.h"
 #include "android/protocol/core-connection.h"
@@ -113,21 +114,20 @@ _fbUpdatesImpl_io_callback(void* opaque, int fd, unsigned events)
     // Read updates while they are immediately available.
     for (;;) {
         // Read next chunk of data.
-        ret = socket_recv(fbi->sock, fbi->reader_buffer + fbi->reader_offset,
-                          fbi->reader_bytes - fbi->reader_offset);
-        if (ret == 0) {
-            /* disconnection ! */
-            fbUpdatesImpl_destroy();
+        ret = HANDLE_EINTR(
+                socket_recv(fbi->sock,
+                            fbi->reader_buffer + fbi->reader_offset,
+                            fbi->reader_bytes - fbi->reader_offset));
+        if (ret < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)) {
+            // Chunk is not avalable at this point. Come back later.
             return;
         }
-        if (ret < 0) {
-            if (errno == EINTR) {
-                /* loop on EINTR */
-                continue;
-            } else if (errno == EWOULDBLOCK || errno == EAGAIN) {
-                // Chunk is not avalable at this point. Come back later.
-                return;
-            }
+        if (ret <= 0) {
+            /* disconnection ! */
+            derror("Unable to receive framebuffer data: %s\n",
+                   ret < 0 ? strerror(errno), "unexpected disconnection");
+            fbUpdatesImpl_destroy();
+            return;
         }
 
         fbi->reader_offset += ret;
