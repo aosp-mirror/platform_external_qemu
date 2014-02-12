@@ -67,33 +67,33 @@ extern uint32_t gen_opc_hflags[OPC_BUF_SIZE];
 
 #include "qemu/log.h"
 
-void gen_intermediate_code(CPUState *env, struct TranslationBlock *tb);
-void gen_intermediate_code_pc(CPUState *env, struct TranslationBlock *tb);
-void restore_state_to_opc(CPUState *env, struct TranslationBlock *tb, int pc_pos);
+void gen_intermediate_code(CPUOldState *env, struct TranslationBlock *tb);
+void gen_intermediate_code_pc(CPUOldState *env, struct TranslationBlock *tb);
+void restore_state_to_opc(CPUOldState *env, struct TranslationBlock *tb, int pc_pos);
 
 unsigned long code_gen_max_block_size(void);
 void cpu_gen_init(void);
-int cpu_gen_code(CPUState *env, struct TranslationBlock *tb,
+int cpu_gen_code(CPUOldState *env, struct TranslationBlock *tb,
                  int *gen_code_size_ptr);
 int cpu_restore_state(struct TranslationBlock *tb,
-                      CPUState *env, unsigned long searched_pc);
-void cpu_resume_from_signal(CPUState *env1, void *puc);
-void cpu_io_recompile(CPUState *env, void *retaddr);
-TranslationBlock *tb_gen_code(CPUState *env,
+                      CPUOldState *env, unsigned long searched_pc);
+void cpu_resume_from_signal(CPUOldState *env1, void *puc);
+void cpu_io_recompile(CPUOldState *env, void *retaddr);
+TranslationBlock *tb_gen_code(CPUOldState *env,
                               target_ulong pc, target_ulong cs_base, int flags,
                               int cflags);
-void cpu_exec_init(CPUState *env);
+void cpu_exec_init(CPUOldState *env);
 void QEMU_NORETURN cpu_loop_exit(void);
 int page_unprotect(target_ulong address, unsigned long pc, void *puc);
 void tb_invalidate_phys_page_range(hwaddr start, hwaddr end,
                                    int is_cpu_write_access);
 void tb_invalidate_page_range(target_ulong start, target_ulong end);
-void tlb_flush_page(CPUState *env, target_ulong addr);
-void tlb_flush(CPUState *env, int flush_global);
-int tlb_set_page_exec(CPUState *env, target_ulong vaddr,
+void tlb_flush_page(CPUOldState *env, target_ulong addr);
+void tlb_flush(CPUOldState *env, int flush_global);
+int tlb_set_page_exec(CPUOldState *env, target_ulong vaddr,
                       hwaddr paddr, int prot,
                       int mmu_idx, int is_softmmu);
-static inline int tlb_set_page(CPUState *env1, target_ulong vaddr,
+static inline int tlb_set_page(CPUOldState *env1, target_ulong vaddr,
                                hwaddr paddr, int prot,
                                int mmu_idx, int is_softmmu)
 {
@@ -250,7 +250,7 @@ tb_search_guest_pc_from_tb_pc(const TranslationBlock* tb, target_ulong tb_pc)
 
 TranslationBlock *tb_alloc(target_ulong pc);
 void tb_free(TranslationBlock *tb);
-void tb_flush(CPUState *env);
+void tb_flush(CPUOldState *env);
 void tb_link_phys(TranslationBlock *tb,
                   target_ulong phys_pc, target_ulong phys_page2);
 void tb_phys_invalidate(TranslationBlock *tb, target_ulong page_addr);
@@ -378,7 +378,7 @@ void tlb_fill(target_ulong addr, int is_write, int mmu_idx,
 #endif
 
 #if defined(CONFIG_USER_ONLY)
-static inline target_ulong get_phys_addr_code(CPUState *env1, target_ulong addr)
+static inline target_ulong get_phys_addr_code(CPUOldState *env1, target_ulong addr)
 {
     return addr;
 }
@@ -386,7 +386,7 @@ static inline target_ulong get_phys_addr_code(CPUState *env1, target_ulong addr)
 /* NOTE: this function can trigger an exception */
 /* NOTE2: the returned address is not exactly the physical address: it
    is the offset relative to phys_ram_base */
-static inline target_ulong get_phys_addr_code(CPUState *env1, target_ulong addr)
+static inline target_ulong get_phys_addr_code(CPUOldState *env1, target_ulong addr)
 {
     int mmu_idx, page_index, pd;
     void *p;
@@ -411,7 +411,7 @@ static inline target_ulong get_phys_addr_code(CPUState *env1, target_ulong addr)
 }
 #endif
 
-typedef void (CPUDebugExcpHandler)(CPUState *env);
+typedef void (CPUDebugExcpHandler)(CPUOldState *env);
 
 CPUDebugExcpHandler *cpu_set_debug_excp_handler(CPUDebugExcpHandler *handler);
 

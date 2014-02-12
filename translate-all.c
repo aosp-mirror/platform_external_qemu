@@ -86,7 +86,7 @@ unsigned long code_gen_max_block_size(void)
 void cpu_gen_init(void)
 {
     tcg_context_init(&tcg_ctx);
-    tcg_set_frame(&tcg_ctx, TCG_AREG0, offsetof(CPUState, temp_buf),
+    tcg_set_frame(&tcg_ctx, TCG_AREG0, offsetof(CPUOldState, temp_buf),
                   CPU_TEMP_BUF_NLONGS * sizeof(long));
 }
 
@@ -96,7 +96,7 @@ void cpu_gen_init(void)
    '*gen_code_size_ptr' contains the size of the generated code (host
    code).
 */
-int cpu_gen_code(CPUState *env, TranslationBlock *tb, int *gen_code_size_ptr)
+int cpu_gen_code(CPUOldState *env, TranslationBlock *tb, int *gen_code_size_ptr)
 {
     TCGContext *s = &tcg_ctx;
     uint8_t *gen_code_buf;
@@ -172,7 +172,7 @@ int cpu_gen_code(CPUState *env, TranslationBlock *tb, int *gen_code_size_ptr)
 /* The cpu state corresponding to 'searched_pc' is restored.
  */
 int cpu_restore_state(TranslationBlock *tb,
-                      CPUState *env, unsigned long searched_pc)
+                      CPUOldState *env, unsigned long searched_pc)
 {
     TCGContext *s = &tcg_ctx;
     int j;

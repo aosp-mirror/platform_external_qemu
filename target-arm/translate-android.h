@@ -129,7 +129,7 @@ is_thumb_bl_or_blx(uint16_t insn, target_ulong pc, target_ulong* ret_off)
  *  0  - Insufficient memory.
  */
 static int
-register_ret_address(CPUState* env, target_ulong addr)
+register_ret_address(CPUARMState* env, target_ulong addr)
 {
     int ret;
     if ((0x90000000 <= addr && addr <= 0xBFFFFFFF)) {
@@ -172,7 +172,7 @@ register_ret_address(CPUState* env, target_ulong addr)
  *  or 0 if it's not.
  */
 static inline int
-is_ret_address(CPUState* env, target_ulong addr)
+is_ret_address(CPUARMState* env, target_ulong addr)
 {
     if ((0x90000000 <= addr && addr <= 0xBFFFFFFF)) {
         return addrarray_check(&ret_addresses, get_phys_addr_code(env, addr));

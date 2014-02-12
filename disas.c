@@ -9,7 +9,7 @@
 
 typedef struct CPUDebug {
     struct disassemble_info info;
-    CPUState *env;
+    CPUArchState *env;
 } CPUDebug;
 
 /* Filled in by elfload.c.  Simplistic, but will do for now. */
@@ -194,7 +194,7 @@ static int print_insn_od_target(bfd_vma pc, disassemble_info *info)
     ppc  - nonzero means little endian
     other targets - unused
  */
-void target_disas(FILE *out, CPUState *env, target_ulong code,
+void target_disas(FILE *out, CPUArchState *env, target_ulong code,
                   target_ulong size, int flags)
 {
     target_ulong pc;
@@ -434,7 +434,7 @@ monitor_fprintf(FILE *stream, const char *fmt, ...)
     return 0;
 }
 
-void monitor_disas(Monitor *mon, CPUState *env,
+void monitor_disas(Monitor *mon, CPUArchState *env,
                    target_ulong pc, int nb_insn, int is_physical, int flags)
 {
     int count, i;

@@ -1498,7 +1498,7 @@ target_ulong helper_yield(target_ulong arg1)
 }
 
 #ifndef CONFIG_USER_ONLY
-static void inline r4k_invalidate_tlb_shadow (CPUState *env, int idx)
+static void inline r4k_invalidate_tlb_shadow (CPUMIPSState *env, int idx)
 {
     r4k_tlb_t *tlb;
     uint8_t ASID = env->CP0_EntryHi & 0xFF;
@@ -1511,7 +1511,7 @@ static void inline r4k_invalidate_tlb_shadow (CPUState *env, int idx)
     }
 }
 
-static void inline r4k_invalidate_tlb (CPUState *env, int idx)
+static void inline r4k_invalidate_tlb (CPUMIPSState *env, int idx)
 {
     r4k_tlb_t *tlb;
     target_ulong addr;
@@ -1557,7 +1557,7 @@ static void inline r4k_invalidate_tlb (CPUState *env, int idx)
 }
 
 /* TLB management */
-void cpu_mips_tlb_flush (CPUState *env, int flush_global)
+void cpu_mips_tlb_flush (CPUMIPSState *env, int flush_global)
 {
     /* Flush qemu's TLB and discard all shadowed entries.  */
     tlb_flush (env, flush_global);
@@ -1586,9 +1586,9 @@ static void r4k_fill_tlb (int idx)
     tlb->PFN[1] = (env->CP0_EntryLo1 >> 6) << 12;
 }
 
-void r4k_helper_ptw_tlbrefill(CPUState *target_env)
+void r4k_helper_ptw_tlbrefill(CPUMIPSState *target_env)
 {
-   CPUState *saved_env;
+   CPUMIPSState *saved_env;
 
    /* Save current 'env' value */
    saved_env = env;
@@ -1905,7 +1905,7 @@ static void do_unaligned_access (target_ulong addr, int is_write, int is_user, v
 void tlb_fill (target_ulong addr, int is_write, int mmu_idx, void *retaddr)
 {
     TranslationBlock *tb;
-    CPUState *saved_env;
+    CPUMIPSState *saved_env;
     unsigned long pc;
     int ret;
 
@@ -1970,7 +1970,7 @@ redo:
  */
 unsigned long v2p(target_ulong ptr, int is_user)
 {
-    CPUState *saved_env;
+    CPUMIPSState *saved_env;
     int index;
     target_ulong addr;
     unsigned long physaddr;

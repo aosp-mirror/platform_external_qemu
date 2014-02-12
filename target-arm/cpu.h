@@ -33,7 +33,7 @@
 #endif
 
 // TODO(digit): Remove this line.
-#define CPUState struct CPUARMState
+#define CPUOldState struct CPUARMState
 
 #define CPUArchState struct CPUARMState
 
@@ -702,7 +702,7 @@ static inline bool cp_access_ok(CPUARMState *env,
  * @cpu: ARMCPU
  *
  * For each register listed in the ARMCPU cpreg_indexes list, write
- * its value from the cpreg_values list into the ARMCPUState structure.
+ * its value from the cpreg_values list into the ARMCPUARMState structure.
  * This updates TCG's working data structures from KVM data or
  * from incoming migration state.
  *
@@ -718,7 +718,7 @@ bool write_list_to_cpustate(ARMCPU *cpu);
  * @cpu: ARMCPU
  *
  * For each register listed in the ARMCPU cpreg_indexes list, write
- * its value from the ARMCPUState structure into the cpreg_values list.
+ * its value from the ARMCPUARMState structure into the cpreg_values list.
  * This is used to copy info from TCG's working data structures into
  * KVM or for outbound migration.
  *
@@ -803,7 +803,7 @@ static inline int cpu_mmu_index (CPUARMState *env)
     return (env->uncached_cpsr & CPSR_M) == ARM_CPU_MODE_USR ? 1 : 0;
 }
 
-static inline int is_cpu_user (CPUState *env)
+static inline int is_cpu_user (CPUARMState *env)
 {
 #ifdef CONFIG_USER_ONLY
     return 1;
@@ -813,7 +813,7 @@ static inline int is_cpu_user (CPUState *env)
 }
 
 #if defined(CONFIG_USER_ONLY)
-static inline void cpu_clone_regs(CPUState *env, target_ulong newsp)
+static inline void cpu_clone_regs(CPUARMState *env, target_ulong newsp)
 {
     if (newsp)
         env->regs[13] = newsp;

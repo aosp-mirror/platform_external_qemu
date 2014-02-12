@@ -82,7 +82,7 @@ struct Monitor {
     uint8_t outbuf[1024];
     int outbuf_index;
     ReadLineState *rs;
-    CPUState *mon_cpu;
+    CPUOldState *mon_cpu;
     BlockDriverCompletionFunc *password_completion_cb;
     void *password_opaque;
     QLIST_ENTRY(Monitor) entry;
@@ -109,7 +109,7 @@ static void do_inject_mce(Monitor *mon,
                           unsigned addr_hi, unsigned addr_lo,
                           unsigned misc_hi, unsigned misc_lo)
 {
-    CPUState *cenv;
+    CPUOldState *cenv;
     uint64_t status = ((uint64_t)status_hi << 32) | status_lo;
     uint64_t mcg_status = ((uint64_t)mcg_status_hi << 32) | mcg_status_lo;
     uint64_t addr = ((uint64_t)addr_hi << 32) | addr_lo;
@@ -356,7 +356,7 @@ static void do_info_uuid(Monitor *mon)
 /* get the current CPU defined by the user */
 static int mon_set_cpu(int cpu_index)
 {
-    CPUState *env;
+    CPUOldState *env;
 
     for(env = first_cpu; env != NULL; env = env->next_cpu) {
         if (env->cpu_index == cpu_index) {
@@ -367,7 +367,7 @@ static int mon_set_cpu(int cpu_index)
     return -1;
 }
 
-static CPUState *mon_get_cpu(void)
+static CPUOldState *mon_get_cpu(void)
 {
     if (!cur_mon->mon_cpu) {
         mon_set_cpu(0);
@@ -378,7 +378,7 @@ static CPUState *mon_get_cpu(void)
 
 static void do_info_registers(Monitor *mon)
 {
-    CPUState *env;
+    CPUOldState *env;
     env = mon_get_cpu();
     if (!env)
         return;
@@ -393,7 +393,7 @@ static void do_info_registers(Monitor *mon)
 
 static void do_info_cpus(Monitor *mon)
 {
-    CPUState *env;
+    CPUOldState *env;
 
     /* just to set the default cpu if not already done */
     mon_get_cpu();
@@ -452,7 +452,7 @@ static void do_info_history(Monitor *mon)
 /* XXX: not implemented in other targets */
 static void do_info_cpu_stats(Monitor *mon)
 {
-    CPUState *env;
+    CPUOldState *env;
 
     env = mon_get_cpu();
     cpu_dump_statistics(env, (FILE *)mon, &monitor_fprintf, 0);
@@ -636,7 +636,7 @@ static void monitor_printc(Monitor *mon, int c)
 static void memory_dump(Monitor *mon, int count, int format, int wsize,
                         hwaddr addr, int is_physical)
 {
-    CPUState *env;
+    CPUOldState *env;
     int l, line_size, i, max_digits, len;
     uint8_t buf[16];
     uint64_t v;
@@ -836,7 +836,7 @@ static void do_memory_save(Monitor *mon, unsigned int valh, unsigned int vall,
     FILE *f;
     target_long addr = GET_TLONG(valh, vall);
     uint32_t l;
-    CPUState *env;
+    CPUOldState *env;
     uint8_t buf[1024];
 
     env = mon_get_cpu();
@@ -1241,7 +1241,7 @@ static void print_pte(Monitor *mon, uint32_t addr, uint32_t pte, uint32_t mask)
 
 static void tlb_info(Monitor *mon)
 {
-    CPUState *env;
+    CPUOldState *env;
     int l1, l2;
     uint32_t pgd, pde, pte;
 
@@ -1299,7 +1299,7 @@ static void mem_print(Monitor *mon, uint32_t *pstart, int *plast_prot,
 
 static void mem_info(Monitor *mon)
 {
-    CPUState *env;
+    CPUOldState *env;
     int l1, l2, prot, last_prot;
     uint32_t pgd, pde, pte, start, end;
 
@@ -1360,7 +1360,7 @@ static void print_tlb(Monitor *mon, int idx, tlb_t *tlb)
 
 static void tlb_info(Monitor *mon)
 {
-    CPUState *env = mon_get_cpu();
+    CPUOldState *env = mon_get_cpu();
     int i;
 
     monitor_printf (mon, "ITLB:\n");
@@ -1376,7 +1376,7 @@ static void tlb_info(Monitor *mon)
 static void do_info_kqemu(Monitor *mon)
 {
 #ifdef CONFIG_KQEMU
-    CPUState *env;
+    CPUOldState *env;
     int val;
     val = 0;
     env = mon_get_cpu();
@@ -1419,7 +1419,7 @@ static void do_info_kvm(Monitor *mon)
 static void do_info_numa(Monitor *mon)
 {
     int i;
-    CPUState *env;
+    CPUOldState *env;
 
     monitor_printf(mon, "%d nodes\n", nb_numa_nodes);
     for (i = 0; i < nb_numa_nodes; i++) {
@@ -1536,7 +1536,7 @@ static void do_wav_capture(Monitor *mon, const char *path,
 #if defined(TARGET_I386)
 static void do_inject_nmi(Monitor *mon, int cpu_index)
 {
-    CPUState *env;
+    CPUOldState *env;
 
     for (env = first_cpu; env != NULL; env = env->next_cpu)
         if (env->cpu_index == cpu_index) {
@@ -1764,7 +1764,7 @@ typedef struct MonitorDef {
 #if defined(TARGET_I386)
 static target_long monitor_get_pc (const struct MonitorDef *md, int val)
 {
-    CPUState *env = mon_get_cpu();
+    CPUOldState *env = mon_get_cpu();
     if (!env)
         return 0;
     return env->eip + env->segs[R_CS].base;
@@ -1774,7 +1774,7 @@ static target_long monitor_get_pc (const struct MonitorDef *md, int val)
 #if defined(TARGET_PPC)
 static target_long monitor_get_ccr (const struct MonitorDef *md, int val)
 {
-    CPUState *env = mon_get_cpu();
+    CPUOldState *env = mon_get_cpu();
     unsigned int u;
     int i;
 
@@ -1790,7 +1790,7 @@ static target_long monitor_get_ccr (const struct MonitorDef *md, int val)
 
 static target_long monitor_get_msr (const struct MonitorDef *md, int val)
 {
-    CPUState *env = mon_get_cpu();
+    CPUOldState *env = mon_get_cpu();
     if (!env)
         return 0;
     return env->msr;
@@ -1798,7 +1798,7 @@ static target_long monitor_get_msr (const struct MonitorDef *md, int val)
 
 static target_long monitor_get_xer (const struct MonitorDef *md, int val)
 {
-    CPUState *env = mon_get_cpu();
+    CPUOldState *env = mon_get_cpu();
     if (!env)
         return 0;
     return env->xer;
@@ -1806,7 +1806,7 @@ static target_long monitor_get_xer (const struct MonitorDef *md, int val)
 
 static target_long monitor_get_decr (const struct MonitorDef *md, int val)
 {
-    CPUState *env = mon_get_cpu();
+    CPUOldState *env = mon_get_cpu();
     if (!env)
         return 0;
     return cpu_ppc_load_decr(env);
@@ -1814,7 +1814,7 @@ static target_long monitor_get_decr (const struct MonitorDef *md, int val)
 
 static target_long monitor_get_tbu (const struct MonitorDef *md, int val)
 {
-    CPUState *env = mon_get_cpu();
+    CPUOldState *env = mon_get_cpu();
     if (!env)
         return 0;
     return cpu_ppc_load_tbu(env);
@@ -1822,7 +1822,7 @@ static target_long monitor_get_tbu (const struct MonitorDef *md, int val)
 
 static target_long monitor_get_tbl (const struct MonitorDef *md, int val)
 {
-    CPUState *env = mon_get_cpu();
+    CPUOldState *env = mon_get_cpu();
     if (!env)
         return 0;
     return cpu_ppc_load_tbl(env);
@@ -1833,7 +1833,7 @@ static target_long monitor_get_tbl (const struct MonitorDef *md, int val)
 #ifndef TARGET_SPARC64
 static target_long monitor_get_psr (const struct MonitorDef *md, int val)
 {
-    CPUState *env = mon_get_cpu();
+    CPUOldState *env = mon_get_cpu();
     if (!env)
         return 0;
     return GET_PSR(env);
@@ -1842,7 +1842,7 @@ static target_long monitor_get_psr (const struct MonitorDef *md, int val)
 
 static target_long monitor_get_reg(const struct MonitorDef *md, int val)
 {
-    CPUState *env = mon_get_cpu();
+    CPUOldState *env = mon_get_cpu();
     if (!env)
         return 0;
     return env->regwptr[val];
@@ -1853,30 +1853,30 @@ static const MonitorDef monitor_defs[] = {
 #ifdef TARGET_I386
 
 #define SEG(name, seg) \
-    { name, offsetof(CPUState, segs[seg].selector), NULL, MD_I32 },\
-    { name ".base", offsetof(CPUState, segs[seg].base) },\
-    { name ".limit", offsetof(CPUState, segs[seg].limit), NULL, MD_I32 },
+    { name, offsetof(CPUOldState, segs[seg].selector), NULL, MD_I32 },\
+    { name ".base", offsetof(CPUOldState, segs[seg].base) },\
+    { name ".limit", offsetof(CPUOldState, segs[seg].limit), NULL, MD_I32 },
 
-    { "eax", offsetof(CPUState, regs[0]) },
-    { "ecx", offsetof(CPUState, regs[1]) },
-    { "edx", offsetof(CPUState, regs[2]) },
-    { "ebx", offsetof(CPUState, regs[3]) },
-    { "esp|sp", offsetof(CPUState, regs[4]) },
-    { "ebp|fp", offsetof(CPUState, regs[5]) },
-    { "esi", offsetof(CPUState, regs[6]) },
-    { "edi", offsetof(CPUState, regs[7]) },
+    { "eax", offsetof(CPUOldState, regs[0]) },
+    { "ecx", offsetof(CPUOldState, regs[1]) },
+    { "edx", offsetof(CPUOldState, regs[2]) },
+    { "ebx", offsetof(CPUOldState, regs[3]) },
+    { "esp|sp", offsetof(CPUOldState, regs[4]) },
+    { "ebp|fp", offsetof(CPUOldState, regs[5]) },
+    { "esi", offsetof(CPUOldState, regs[6]) },
+    { "edi", offsetof(CPUOldState, regs[7]) },
 #ifdef TARGET_X86_64
-    { "r8", offsetof(CPUState, regs[8]) },
-    { "r9", offsetof(CPUState, regs[9]) },
-    { "r10", offsetof(CPUState, regs[10]) },
-    { "r11", offsetof(CPUState, regs[11]) },
-    { "r12", offsetof(CPUState, regs[12]) },
-    { "r13", offsetof(CPUState, regs[13]) },
-    { "r14", offsetof(CPUState, regs[14]) },
-    { "r15", offsetof(CPUState, regs[15]) },
+    { "r8", offsetof(CPUOldState, regs[8]) },
+    { "r9", offsetof(CPUOldState, regs[9]) },
+    { "r10", offsetof(CPUOldState, regs[10]) },
+    { "r11", offsetof(CPUOldState, regs[11]) },
+    { "r12", offsetof(CPUOldState, regs[12]) },
+    { "r13", offsetof(CPUOldState, regs[13]) },
+    { "r14", offsetof(CPUOldState, regs[14]) },
+    { "r15", offsetof(CPUOldState, regs[15]) },
 #endif
-    { "eflags", offsetof(CPUState, eflags) },
-    { "eip", offsetof(CPUState, eip) },
+    { "eflags", offsetof(CPUOldState, eflags) },
+    { "eip", offsetof(CPUOldState, eip) },
     SEG("cs", R_CS)
     SEG("ds", R_DS)
     SEG("es", R_ES)
@@ -1886,76 +1886,76 @@ static const MonitorDef monitor_defs[] = {
     { "pc", 0, monitor_get_pc, },
 #elif defined(TARGET_PPC)
     /* General purpose registers */
-    { "r0", offsetof(CPUState, gpr[0]) },
-    { "r1", offsetof(CPUState, gpr[1]) },
-    { "r2", offsetof(CPUState, gpr[2]) },
-    { "r3", offsetof(CPUState, gpr[3]) },
-    { "r4", offsetof(CPUState, gpr[4]) },
-    { "r5", offsetof(CPUState, gpr[5]) },
-    { "r6", offsetof(CPUState, gpr[6]) },
-    { "r7", offsetof(CPUState, gpr[7]) },
-    { "r8", offsetof(CPUState, gpr[8]) },
-    { "r9", offsetof(CPUState, gpr[9]) },
-    { "r10", offsetof(CPUState, gpr[10]) },
-    { "r11", offsetof(CPUState, gpr[11]) },
-    { "r12", offsetof(CPUState, gpr[12]) },
-    { "r13", offsetof(CPUState, gpr[13]) },
-    { "r14", offsetof(CPUState, gpr[14]) },
-    { "r15", offsetof(CPUState, gpr[15]) },
-    { "r16", offsetof(CPUState, gpr[16]) },
-    { "r17", offsetof(CPUState, gpr[17]) },
-    { "r18", offsetof(CPUState, gpr[18]) },
-    { "r19", offsetof(CPUState, gpr[19]) },
-    { "r20", offsetof(CPUState, gpr[20]) },
-    { "r21", offsetof(CPUState, gpr[21]) },
-    { "r22", offsetof(CPUState, gpr[22]) },
-    { "r23", offsetof(CPUState, gpr[23]) },
-    { "r24", offsetof(CPUState, gpr[24]) },
-    { "r25", offsetof(CPUState, gpr[25]) },
-    { "r26", offsetof(CPUState, gpr[26]) },
-    { "r27", offsetof(CPUState, gpr[27]) },
-    { "r28", offsetof(CPUState, gpr[28]) },
-    { "r29", offsetof(CPUState, gpr[29]) },
-    { "r30", offsetof(CPUState, gpr[30]) },
-    { "r31", offsetof(CPUState, gpr[31]) },
+    { "r0", offsetof(CPUOldState, gpr[0]) },
+    { "r1", offsetof(CPUOldState, gpr[1]) },
+    { "r2", offsetof(CPUOldState, gpr[2]) },
+    { "r3", offsetof(CPUOldState, gpr[3]) },
+    { "r4", offsetof(CPUOldState, gpr[4]) },
+    { "r5", offsetof(CPUOldState, gpr[5]) },
+    { "r6", offsetof(CPUOldState, gpr[6]) },
+    { "r7", offsetof(CPUOldState, gpr[7]) },
+    { "r8", offsetof(CPUOldState, gpr[8]) },
+    { "r9", offsetof(CPUOldState, gpr[9]) },
+    { "r10", offsetof(CPUOldState, gpr[10]) },
+    { "r11", offsetof(CPUOldState, gpr[11]) },
+    { "r12", offsetof(CPUOldState, gpr[12]) },
+    { "r13", offsetof(CPUOldState, gpr[13]) },
+    { "r14", offsetof(CPUOldState, gpr[14]) },
+    { "r15", offsetof(CPUOldState, gpr[15]) },
+    { "r16", offsetof(CPUOldState, gpr[16]) },
+    { "r17", offsetof(CPUOldState, gpr[17]) },
+    { "r18", offsetof(CPUOldState, gpr[18]) },
+    { "r19", offsetof(CPUOldState, gpr[19]) },
+    { "r20", offsetof(CPUOldState, gpr[20]) },
+    { "r21", offsetof(CPUOldState, gpr[21]) },
+    { "r22", offsetof(CPUOldState, gpr[22]) },
+    { "r23", offsetof(CPUOldState, gpr[23]) },
+    { "r24", offsetof(CPUOldState, gpr[24]) },
+    { "r25", offsetof(CPUOldState, gpr[25]) },
+    { "r26", offsetof(CPUOldState, gpr[26]) },
+    { "r27", offsetof(CPUOldState, gpr[27]) },
+    { "r28", offsetof(CPUOldState, gpr[28]) },
+    { "r29", offsetof(CPUOldState, gpr[29]) },
+    { "r30", offsetof(CPUOldState, gpr[30]) },
+    { "r31", offsetof(CPUOldState, gpr[31]) },
     /* Floating point registers */
-    { "f0", offsetof(CPUState, fpr[0]) },
-    { "f1", offsetof(CPUState, fpr[1]) },
-    { "f2", offsetof(CPUState, fpr[2]) },
-    { "f3", offsetof(CPUState, fpr[3]) },
-    { "f4", offsetof(CPUState, fpr[4]) },
-    { "f5", offsetof(CPUState, fpr[5]) },
-    { "f6", offsetof(CPUState, fpr[6]) },
-    { "f7", offsetof(CPUState, fpr[7]) },
-    { "f8", offsetof(CPUState, fpr[8]) },
-    { "f9", offsetof(CPUState, fpr[9]) },
-    { "f10", offsetof(CPUState, fpr[10]) },
-    { "f11", offsetof(CPUState, fpr[11]) },
-    { "f12", offsetof(CPUState, fpr[12]) },
-    { "f13", offsetof(CPUState, fpr[13]) },
-    { "f14", offsetof(CPUState, fpr[14]) },
-    { "f15", offsetof(CPUState, fpr[15]) },
-    { "f16", offsetof(CPUState, fpr[16]) },
-    { "f17", offsetof(CPUState, fpr[17]) },
-    { "f18", offsetof(CPUState, fpr[18]) },
-    { "f19", offsetof(CPUState, fpr[19]) },
-    { "f20", offsetof(CPUState, fpr[20]) },
-    { "f21", offsetof(CPUState, fpr[21]) },
-    { "f22", offsetof(CPUState, fpr[22]) },
-    { "f23", offsetof(CPUState, fpr[23]) },
-    { "f24", offsetof(CPUState, fpr[24]) },
-    { "f25", offsetof(CPUState, fpr[25]) },
-    { "f26", offsetof(CPUState, fpr[26]) },
-    { "f27", offsetof(CPUState, fpr[27]) },
-    { "f28", offsetof(CPUState, fpr[28]) },
-    { "f29", offsetof(CPUState, fpr[29]) },
-    { "f30", offsetof(CPUState, fpr[30]) },
-    { "f31", offsetof(CPUState, fpr[31]) },
-    { "fpscr", offsetof(CPUState, fpscr) },
+    { "f0", offsetof(CPUOldState, fpr[0]) },
+    { "f1", offsetof(CPUOldState, fpr[1]) },
+    { "f2", offsetof(CPUOldState, fpr[2]) },
+    { "f3", offsetof(CPUOldState, fpr[3]) },
+    { "f4", offsetof(CPUOldState, fpr[4]) },
+    { "f5", offsetof(CPUOldState, fpr[5]) },
+    { "f6", offsetof(CPUOldState, fpr[6]) },
+    { "f7", offsetof(CPUOldState, fpr[7]) },
+    { "f8", offsetof(CPUOldState, fpr[8]) },
+    { "f9", offsetof(CPUOldState, fpr[9]) },
+    { "f10", offsetof(CPUOldState, fpr[10]) },
+    { "f11", offsetof(CPUOldState, fpr[11]) },
+    { "f12", offsetof(CPUOldState, fpr[12]) },
+    { "f13", offsetof(CPUOldState, fpr[13]) },
+    { "f14", offsetof(CPUOldState, fpr[14]) },
+    { "f15", offsetof(CPUOldState, fpr[15]) },
+    { "f16", offsetof(CPUOldState, fpr[16]) },
+    { "f17", offsetof(CPUOldState, fpr[17]) },
+    { "f18", offsetof(CPUOldState, fpr[18]) },
+    { "f19", offsetof(CPUOldState, fpr[19]) },
+    { "f20", offsetof(CPUOldState, fpr[20]) },
+    { "f21", offsetof(CPUOldState, fpr[21]) },
+    { "f22", offsetof(CPUOldState, fpr[22]) },
+    { "f23", offsetof(CPUOldState, fpr[23]) },
+    { "f24", offsetof(CPUOldState, fpr[24]) },
+    { "f25", offsetof(CPUOldState, fpr[25]) },
+    { "f26", offsetof(CPUOldState, fpr[26]) },
+    { "f27", offsetof(CPUOldState, fpr[27]) },
+    { "f28", offsetof(CPUOldState, fpr[28]) },
+    { "f29", offsetof(CPUOldState, fpr[29]) },
+    { "f30", offsetof(CPUOldState, fpr[30]) },
+    { "f31", offsetof(CPUOldState, fpr[31]) },
+    { "fpscr", offsetof(CPUOldState, fpscr) },
     /* Next instruction pointer */
-    { "nip|pc", offsetof(CPUState, nip) },
-    { "lr", offsetof(CPUState, lr) },
-    { "ctr", offsetof(CPUState, ctr) },
+    { "nip|pc", offsetof(CPUOldState, nip) },
+    { "lr", offsetof(CPUOldState, lr) },
+    { "ctr", offsetof(CPUOldState, ctr) },
     { "decr", 0, &monitor_get_decr, },
     { "ccr", 0, &monitor_get_ccr, },
     /* Machine state register */
@@ -1965,36 +1965,36 @@ static const MonitorDef monitor_defs[] = {
     { "tbl", 0, &monitor_get_tbl, },
 #if defined(TARGET_PPC64)
     /* Address space register */
-    { "asr", offsetof(CPUState, asr) },
+    { "asr", offsetof(CPUOldState, asr) },
 #endif
     /* Segment registers */
-    { "sdr1", offsetof(CPUState, sdr1) },
-    { "sr0", offsetof(CPUState, sr[0]) },
-    { "sr1", offsetof(CPUState, sr[1]) },
-    { "sr2", offsetof(CPUState, sr[2]) },
-    { "sr3", offsetof(CPUState, sr[3]) },
-    { "sr4", offsetof(CPUState, sr[4]) },
-    { "sr5", offsetof(CPUState, sr[5]) },
-    { "sr6", offsetof(CPUState, sr[6]) },
-    { "sr7", offsetof(CPUState, sr[7]) },
-    { "sr8", offsetof(CPUState, sr[8]) },
-    { "sr9", offsetof(CPUState, sr[9]) },
-    { "sr10", offsetof(CPUState, sr[10]) },
-    { "sr11", offsetof(CPUState, sr[11]) },
-    { "sr12", offsetof(CPUState, sr[12]) },
-    { "sr13", offsetof(CPUState, sr[13]) },
-    { "sr14", offsetof(CPUState, sr[14]) },
-    { "sr15", offsetof(CPUState, sr[15]) },
+    { "sdr1", offsetof(CPUOldState, sdr1) },
+    { "sr0", offsetof(CPUOldState, sr[0]) },
+    { "sr1", offsetof(CPUOldState, sr[1]) },
+    { "sr2", offsetof(CPUOldState, sr[2]) },
+    { "sr3", offsetof(CPUOldState, sr[3]) },
+    { "sr4", offsetof(CPUOldState, sr[4]) },
+    { "sr5", offsetof(CPUOldState, sr[5]) },
+    { "sr6", offsetof(CPUOldState, sr[6]) },
+    { "sr7", offsetof(CPUOldState, sr[7]) },
+    { "sr8", offsetof(CPUOldState, sr[8]) },
+    { "sr9", offsetof(CPUOldState, sr[9]) },
+    { "sr10", offsetof(CPUOldState, sr[10]) },
+    { "sr11", offsetof(CPUOldState, sr[11]) },
+    { "sr12", offsetof(CPUOldState, sr[12]) },
+    { "sr13", offsetof(CPUOldState, sr[13]) },
+    { "sr14", offsetof(CPUOldState, sr[14]) },
+    { "sr15", offsetof(CPUOldState, sr[15]) },
     /* Too lazy to put BATs and SPRs ... */
 #elif defined(TARGET_SPARC)
-    { "g0", offsetof(CPUState, gregs[0]) },
-    { "g1", offsetof(CPUState, gregs[1]) },
-    { "g2", offsetof(CPUState, gregs[2]) },
-    { "g3", offsetof(CPUState, gregs[3]) },
-    { "g4", offsetof(CPUState, gregs[4]) },
-    { "g5", offsetof(CPUState, gregs[5]) },
-    { "g6", offsetof(CPUState, gregs[6]) },
-    { "g7", offsetof(CPUState, gregs[7]) },
+    { "g0", offsetof(CPUOldState, gregs[0]) },
+    { "g1", offsetof(CPUOldState, gregs[1]) },
+    { "g2", offsetof(CPUOldState, gregs[2]) },
+    { "g3", offsetof(CPUOldState, gregs[3]) },
+    { "g4", offsetof(CPUOldState, gregs[4]) },
+    { "g5", offsetof(CPUOldState, gregs[5]) },
+    { "g6", offsetof(CPUOldState, gregs[6]) },
+    { "g7", offsetof(CPUOldState, gregs[7]) },
     { "o0", 0, monitor_get_reg },
     { "o1", 1, monitor_get_reg },
     { "o2", 2, monitor_get_reg },
@@ -2019,72 +2019,72 @@ static const MonitorDef monitor_defs[] = {
     { "i5", 21, monitor_get_reg },
     { "i6", 22, monitor_get_reg },
     { "i7", 23, monitor_get_reg },
-    { "pc", offsetof(CPUState, pc) },
-    { "npc", offsetof(CPUState, npc) },
-    { "y", offsetof(CPUState, y) },
+    { "pc", offsetof(CPUOldState, pc) },
+    { "npc", offsetof(CPUOldState, npc) },
+    { "y", offsetof(CPUOldState, y) },
 #ifndef TARGET_SPARC64
     { "psr", 0, &monitor_get_psr, },
-    { "wim", offsetof(CPUState, wim) },
+    { "wim", offsetof(CPUOldState, wim) },
 #endif
-    { "tbr", offsetof(CPUState, tbr) },
-    { "fsr", offsetof(CPUState, fsr) },
-    { "f0", offsetof(CPUState, fpr[0]) },
-    { "f1", offsetof(CPUState, fpr[1]) },
-    { "f2", offsetof(CPUState, fpr[2]) },
-    { "f3", offsetof(CPUState, fpr[3]) },
-    { "f4", offsetof(CPUState, fpr[4]) },
-    { "f5", offsetof(CPUState, fpr[5]) },
-    { "f6", offsetof(CPUState, fpr[6]) },
-    { "f7", offsetof(CPUState, fpr[7]) },
-    { "f8", offsetof(CPUState, fpr[8]) },
-    { "f9", offsetof(CPUState, fpr[9]) },
-    { "f10", offsetof(CPUState, fpr[10]) },
-    { "f11", offsetof(CPUState, fpr[11]) },
-    { "f12", offsetof(CPUState, fpr[12]) },
-    { "f13", offsetof(CPUState, fpr[13]) },
-    { "f14", offsetof(CPUState, fpr[14]) },
-    { "f15", offsetof(CPUState, fpr[15]) },
-    { "f16", offsetof(CPUState, fpr[16]) },
-    { "f17", offsetof(CPUState, fpr[17]) },
-    { "f18", offsetof(CPUState, fpr[18]) },
-    { "f19", offsetof(CPUState, fpr[19]) },
-    { "f20", offsetof(CPUState, fpr[20]) },
-    { "f21", offsetof(CPUState, fpr[21]) },
-    { "f22", offsetof(CPUState, fpr[22]) },
-    { "f23", offsetof(CPUState, fpr[23]) },
-    { "f24", offsetof(CPUState, fpr[24]) },
-    { "f25", offsetof(CPUState, fpr[25]) },
-    { "f26", offsetof(CPUState, fpr[26]) },
-    { "f27", offsetof(CPUState, fpr[27]) },
-    { "f28", offsetof(CPUState, fpr[28]) },
-    { "f29", offsetof(CPUState, fpr[29]) },
-    { "f30", offsetof(CPUState, fpr[30]) },
-    { "f31", offsetof(CPUState, fpr[31]) },
+    { "tbr", offsetof(CPUOldState, tbr) },
+    { "fsr", offsetof(CPUOldState, fsr) },
+    { "f0", offsetof(CPUOldState, fpr[0]) },
+    { "f1", offsetof(CPUOldState, fpr[1]) },
+    { "f2", offsetof(CPUOldState, fpr[2]) },
+    { "f3", offsetof(CPUOldState, fpr[3]) },
+    { "f4", offsetof(CPUOldState, fpr[4]) },
+    { "f5", offsetof(CPUOldState, fpr[5]) },
+    { "f6", offsetof(CPUOldState, fpr[6]) },
+    { "f7", offsetof(CPUOldState, fpr[7]) },
+    { "f8", offsetof(CPUOldState, fpr[8]) },
+    { "f9", offsetof(CPUOldState, fpr[9]) },
+    { "f10", offsetof(CPUOldState, fpr[10]) },
+    { "f11", offsetof(CPUOldState, fpr[11]) },
+    { "f12", offsetof(CPUOldState, fpr[12]) },
+    { "f13", offsetof(CPUOldState, fpr[13]) },
+    { "f14", offsetof(CPUOldState, fpr[14]) },
+    { "f15", offsetof(CPUOldState, fpr[15]) },
+    { "f16", offsetof(CPUOldState, fpr[16]) },
+    { "f17", offsetof(CPUOldState, fpr[17]) },
+    { "f18", offsetof(CPUOldState, fpr[18]) },
+    { "f19", offsetof(CPUOldState, fpr[19]) },
+    { "f20", offsetof(CPUOldState, fpr[20]) },
+    { "f21", offsetof(CPUOldState, fpr[21]) },
+    { "f22", offsetof(CPUOldState, fpr[22]) },
+    { "f23", offsetof(CPUOldState, fpr[23]) },
+    { "f24", offsetof(CPUOldState, fpr[24]) },
+    { "f25", offsetof(CPUOldState, fpr[25]) },
+    { "f26", offsetof(CPUOldState, fpr[26]) },
+    { "f27", offsetof(CPUOldState, fpr[27]) },
+    { "f28", offsetof(CPUOldState, fpr[28]) },
+    { "f29", offsetof(CPUOldState, fpr[29]) },
+    { "f30", offsetof(CPUOldState, fpr[30]) },
+    { "f31", offsetof(CPUOldState, fpr[31]) },
 #ifdef TARGET_SPARC64
-    { "f32", offsetof(CPUState, fpr[32]) },
-    { "f34", offsetof(CPUState, fpr[34]) },
-    { "f36", offsetof(CPUState, fpr[36]) },
-    { "f38", offsetof(CPUState, fpr[38]) },
-    { "f40", offsetof(CPUState, fpr[40]) },
-    { "f42", offsetof(CPUState, fpr[42]) },
-    { "f44", offsetof(CPUState, fpr[44]) },
-    { "f46", offsetof(CPUState, fpr[46]) },
-    { "f48", offsetof(CPUState, fpr[48]) },
-    { "f50", offsetof(CPUState, fpr[50]) },
-    { "f52", offsetof(CPUState, fpr[52]) },
-    { "f54", offsetof(CPUState, fpr[54]) },
-    { "f56", offsetof(CPUState, fpr[56]) },
-    { "f58", offsetof(CPUState, fpr[58]) },
-    { "f60", offsetof(CPUState, fpr[60]) },
-    { "f62", offsetof(CPUState, fpr[62]) },
-    { "asi", offsetof(CPUState, asi) },
-    { "pstate", offsetof(CPUState, pstate) },
-    { "cansave", offsetof(CPUState, cansave) },
-    { "canrestore", offsetof(CPUState, canrestore) },
-    { "otherwin", offsetof(CPUState, otherwin) },
-    { "wstate", offsetof(CPUState, wstate) },
-    { "cleanwin", offsetof(CPUState, cleanwin) },
-    { "fprs", offsetof(CPUState, fprs) },
+    { "f32", offsetof(CPUOldState, fpr[32]) },
+    { "f34", offsetof(CPUOldState, fpr[34]) },
+    { "f36", offsetof(CPUOldState, fpr[36]) },
+    { "f38", offsetof(CPUOldState, fpr[38]) },
+    { "f40", offsetof(CPUOldState, fpr[40]) },
+    { "f42", offsetof(CPUOldState, fpr[42]) },
+    { "f44", offsetof(CPUOldState, fpr[44]) },
+    { "f46", offsetof(CPUOldState, fpr[46]) },
+    { "f48", offsetof(CPUOldState, fpr[48]) },
+    { "f50", offsetof(CPUOldState, fpr[50]) },
+    { "f52", offsetof(CPUOldState, fpr[52]) },
+    { "f54", offsetof(CPUOldState, fpr[54]) },
+    { "f56", offsetof(CPUOldState, fpr[56]) },
+    { "f58", offsetof(CPUOldState, fpr[58]) },
+    { "f60", offsetof(CPUOldState, fpr[60]) },
+    { "f62", offsetof(CPUOldState, fpr[62]) },
+    { "asi", offsetof(CPUOldState, asi) },
+    { "pstate", offsetof(CPUOldState, pstate) },
+    { "cansave", offsetof(CPUOldState, cansave) },
+    { "canrestore", offsetof(CPUOldState, canrestore) },
+    { "otherwin", offsetof(CPUOldState, otherwin) },
+    { "wstate", offsetof(CPUOldState, wstate) },
+    { "cleanwin", offsetof(CPUOldState, cleanwin) },
+    { "fprs", offsetof(CPUOldState, fprs) },
 #endif
 #endif
     MONITOR_DEF_INITIALIZER
@@ -2107,7 +2107,7 @@ static int get_monitor_def(target_long *pval, const char *name)
             if (md->get_value) {
                 *pval = md->get_value(md, md->offset);
             } else {
-                CPUState *env = mon_get_cpu();
+                CPUOldState *env = mon_get_cpu();
                 if (!env)
                     return -2;
                 ptr = (uint8_t *)env + md->offset;
@@ -3144,7 +3144,8 @@ int monitor_read_bdrv_key_start(Monitor *mon, BlockDriverState *bs,
     }
 
     if (monitor_ctrl_mode(mon)) {
-        qerror_report(QERR_DEVICE_ENCRYPTED, bdrv_get_device_name(bs));
+        qerror_report(QERR_DEVICE_ENCRYPTED, bdrv_get_device_name(bs),
+                      bdrv_get_encrypted_filename(bs));
         return -1;
     }
 

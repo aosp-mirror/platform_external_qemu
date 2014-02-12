@@ -1375,7 +1375,7 @@ int qemu_calculate_timeout(void)
 int64_t cpu_get_icount(void)
 {
     int64_t icount;
-    CPUState *env = cpu_single_env;;
+    CPUOldState *env = cpu_single_env;;
 
     icount = qemu_icount;
     if (env) {
