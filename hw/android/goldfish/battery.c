@@ -12,6 +12,7 @@
 #include "cpu.h"
 #include "migration/qemu-file.h"
 #include "hw/android/goldfish/device.h"
+#include "hw/hw.h"
 #include "hw/power_supply.h"
 
 
