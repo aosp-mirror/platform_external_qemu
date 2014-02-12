@@ -110,6 +110,7 @@ log2 "EXE=$EXE"
 #   linux-x86
 #   linux-x86_64
 #   darwin-x86
+#   darwin-x86_64
 #   darwin-ppc
 #   windows  (MSys)
 #   cygwin
@@ -263,7 +264,6 @@ EOF
             # this is highly dependent on your GCC installation (and no, we can't set
             # this flag all the time)
             CFLAGS="$CFLAGS -Wa,--32"
-            compile
         fi
     fi
 
