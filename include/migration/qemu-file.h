@@ -132,7 +132,7 @@ int64_t qemu_ftell(QEMUFile *f);
 void qemu_put_buffer(QEMUFile *f, const uint8_t *buf, int size);
 void qemu_put_byte(QEMUFile *f, int v);
 
-void qemu_file_set_error(QEMUFile* f);
+void qemu_file_set_error(QEMUFile* f, int error);
 int qemu_file_has_error(QEMUFile* f);
 void qemu_file_put_notify(QEMUFile* f);
 
@@ -176,7 +176,7 @@ float qemu_get_float(QEMUFile *f);
 #endif
 int qemu_file_rate_limit(QEMUFile *f);
 void qemu_file_reset_rate_limit(QEMUFile *f);
-int64_t qemu_file_set_rate_limit(QEMUFile *f, int64_t new_rate);
+void qemu_file_set_rate_limit(QEMUFile *f, int64_t new_rate);
 int64_t qemu_file_get_rate_limit(QEMUFile *f);
 int qemu_file_get_error(QEMUFile *f);
 void qemu_fflush(QEMUFile *f);
