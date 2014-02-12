@@ -15,6 +15,25 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+// Testing
+
+// TODO(digit): Turn assertions on.
+
+
+void g_panic(const char* fmt, ...) __attribute__((noreturn));
+
+#define g_assert(condition)  do { \
+    if (!(condition)) { \
+      g_panic("%s:%d: Assertion failure: %s\n", \
+              __FILE__, \
+              __LINE__, \
+              #condition); \
+      } \
+  } while (0)
+
+#define g_assert_not_reached()  \
+    g_panic("%s:%d: Assertion failure: NOT REACHED\n", __FILE__, __LINE__)
+
 // Heap allocation.
 void* g_malloc(size_t size);
 void* g_malloc0(size_t size);
