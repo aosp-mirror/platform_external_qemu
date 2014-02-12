@@ -608,14 +608,6 @@ static int qemu_cpu_exec(CPUOldState *env)
         env->icount_decr.u16.low = decr;
         env->icount_extra = count;
     }
-#ifdef CONFIG_TRACE
-    if (tbflush_requested) {
-        tbflush_requested = 0;
-        tb_flush(env);
-        return EXCP_INTERRUPT;
-    }
-#endif
-
 
     ret = cpu_exec(env);
 #ifdef CONFIG_PROFILER

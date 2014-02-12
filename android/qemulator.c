@@ -363,9 +363,6 @@ handle_key_command( void*  opaque, SkinKeyCommand  command, int  down )
         { SKIN_KEY_COMMAND_NONE, 0 }
     };
     int          nn;
-#ifdef CONFIG_TRACE
-    static int   tracing = 0;
-#endif
     QEmulator*   emulator = opaque;
 
 
@@ -405,15 +402,6 @@ handle_key_command( void*  opaque, SkinKeyCommand  command, int  down )
     case SKIN_KEY_COMMAND_TOGGLE_FULLSCREEN:
         if (emulator->window) {
             skin_window_toggle_fullscreen(emulator->window);
-        }
-        break;
-
-    case SKIN_KEY_COMMAND_TOGGLE_TRACING:
-        {
-#ifdef CONFIG_TRACE
-            tracing = !tracing;
-            corecmd_trace_control(tracing);
-#endif
         }
         break;
 

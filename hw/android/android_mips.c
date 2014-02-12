@@ -232,23 +232,12 @@ static void android_mips_init_(ram_addr_t ram_size,
     goldfish_add_device_no_io(&nand_device);
     nand_dev_init(nand_device.base);
 #endif
-#ifdef CONFIG_TRACE
-    extern const char *trace_filename;
-    /* Init trace device if either tracing, or memory checking is enabled. */
-    if (trace_filename != NULL
+
 #ifdef CONFIG_MEMCHECK
-        || memcheck_enabled
-#endif  // CONFIG_MEMCHECK
-       ) {
+    if (memcheck_enabled) {
         trace_dev_init();
     }
-    if (trace_filename != NULL) {
-        D( "Trace file name is set to %s\n", trace_filename );
-    } else  {
-        D("Trace file name is not set\n");
-    }
-#endif
-
+#endif  // CONFIG_MEMCHECK
     pipe_dev_init();
 
 #if TEST_SWITCH

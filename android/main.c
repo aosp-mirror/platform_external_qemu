@@ -79,11 +79,6 @@ extern int qemu_milli_needed;
  */
 #define  DEFAULT_DEVICE_DPI  165
 
-#ifdef CONFIG_TRACE
-extern void  start_tracing(void);
-extern void  stop_tracing(void);
-#endif
-
 int qemu_main(int argc, char **argv);
 
 /* this function dumps the QEMU help */
