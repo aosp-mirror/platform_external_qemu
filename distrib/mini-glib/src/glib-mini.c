@@ -156,6 +156,57 @@ int g_vasprintf(char** str, const char* fmt, va_list args) {
 #endif
 }
 
+char** g_strsplit(const char* string, const char* delim, int max_tokens) {
+  // Sanity checks.
+  if (!string || !delim || !*delim)
+    return NULL;
+
+  if (max_tokens < 1)
+    max_tokens = INT_MAX;
+
+  // Create empty list of results.
+  GSList* string_list = NULL;
+  guint n = 0;
+
+  if (*string) {
+    // Input list is not empty, so try to split it.
+    const char* remainder = string;
+    const char* s = strstr(remainder, delim);
+    if (s) {
+      size_t delim_len = strlen(delim);
+      while (--max_tokens && s) {
+        size_t len = s - remainder;
+        string_list = g_slist_prepend(string_list, g_strndup(remainder, len));
+        n++;
+        remainder = s + delim_len;
+        s = strstr(remainder, delim);
+      }
+    }
+    n++;
+    string_list = g_slist_prepend(string_list, g_strdup(remainder));
+  }
+
+  // Convert list into NULL-terminated vector.
+  char** result = g_new(char*, n + 1);
+  result[n--] = NULL;
+  GSList* slist = string_list;
+  while (slist) {
+    result[n--] = slist->data;
+    slist = slist->next;
+  }
+  g_slist_free(string_list);
+
+  return result;
+}
+
+void g_strfreev(char** strings) {
+  guint n;
+  for (n = 0; strings[n]; ++n) {
+    g_free(strings[n]);
+  }
+  g_free(strings);
+}
+
 gboolean g_str_equal(const void* v1, const void* v2) {
   return !strcmp((const char*)v1, (const char*)v2);
 }
