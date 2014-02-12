@@ -58,12 +58,6 @@ void tlb_flush(CPUArchState *env, int flush_global)
     }
 
     memset(env->tb_jmp_cache, 0, TB_JMP_CACHE_SIZE * sizeof (void *));
-
-#ifdef CONFIG_KQEMU
-    if (env->kqemu_enabled) {
-        kqemu_flush(env, flush_global);
-    }
-#endif
     tlb_flush_count++;
 }
 

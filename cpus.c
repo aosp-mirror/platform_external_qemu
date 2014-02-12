@@ -227,10 +227,6 @@ void qemu_notify_event(void)
 
     if (env) {
         cpu_exit(env);
-#ifdef USE_KQEMU
-        if (env->kqemu_enabled)
-            kqemu_cpu_interrupt(env);
-#endif
     /*
      * This is mainly for the Windows host, where the timer may be in
      * a different thread with vcpu. Thus the timer function needs to
