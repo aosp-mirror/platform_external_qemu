@@ -723,6 +723,12 @@ if [ $BSD = 1 ] ; then
     echo "#define MAP_ANONYMOUS    MAP_ANON" >> $config_h
 fi
 
+case "$TARGET_OS" in
+    linux-*)
+        echo "#define CONFIG_SIGNALFD       1" >> $config_h
+        ;;
+esac
+
 echo "#define CONFIG_ANDROID       1" >> $config_h
 
 if [ "$GLES_SUPPORT" = "yes" ]; then

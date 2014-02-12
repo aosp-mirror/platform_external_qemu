@@ -460,6 +460,7 @@ CORE_MISC_SOURCES = \
     ui/vnc-android.c \
     util/acl.c \
     util/aes.c \
+    util/compatfd.c \
     util/cutils.c \
     util/error.c \
     util/hexdump.c \
