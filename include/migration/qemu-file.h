@@ -77,13 +77,6 @@ typedef ssize_t (QEMUFileWritevBufferFunc)(void *opaque, struct iovec *iov,
  */
 typedef int (QEMURamHookFunc)(QEMUFile *f, void *opaque, uint64_t flags);
 
-#ifdef CONFIG_ANDROID
-// Legacy stuff to get rid of in the future.
-typedef int64_t (QEMUSetRateLimitFunc)(void* opaque, int64_t limit);
-typedef int64_t (QEMUGetRateLimitFunc)(void* opaque);
-typedef int (QEMURateLimitFunc)(void* opaque);
-#endif  // CONFIG_ANDROID
-
 /*
  * Constants used by ram_control_* hooks
  */
@@ -113,18 +106,12 @@ typedef struct QEMUFileOps {
     QEMURamHookFunc *after_ram_iterate;
     QEMURamHookFunc *hook_ram_load;
     QEMURamSaveFunc *save_page;
-#ifdef CONFIG_ANDROID  // TODO(digit): Get rid of this.
-    QEMUGetRateLimitFunc *get_rate_limit;
-    QEMUSetRateLimitFunc *set_rate_limit;
-    QEMURateLimitFunc *rate_limit;
-#endif  // CONFIG_ANDROID
 } QEMUFileOps;
 
 QEMUFile *qemu_fopen_ops(void *opaque, const QEMUFileOps *ops);
 QEMUFile *qemu_fopen(const char *filename, const char *mode);
 QEMUFile *qemu_fdopen(int fd, const char *mode);
 QEMUFile *qemu_fopen_socket(int fd, const char *mode);
-QEMUFile* qemu_popen(FILE* stdio_file, const char* mode);
 QEMUFile *qemu_popen_cmd(const char *command, const char *mode);
 int qemu_get_fd(QEMUFile *f);
 int qemu_fclose(QEMUFile *f);

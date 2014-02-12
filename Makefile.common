@@ -405,16 +405,6 @@ EMULATOR_LIBQEMU_LDLIBS += $(AUDIO_LDLIBS)
 
 common_LOCAL_CFLAGS += $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 
-# migration sources
-#
-ifeq ($(HOST_OS),windows)
-  common_LOCAL_SRC_FILES += migration-dummy-android.c
-else
-  common_LOCAL_SRC_FILES += migration.c \
-                     migration-exec.c \
-                     migration-tcp-android.c
-endif
-
 # misc. sources
 #
 CORE_MISC_SOURCES = \
@@ -422,9 +412,9 @@ CORE_MISC_SOURCES = \
     async.c \
     bt-host.c \
     bt-vhci.c \
-    buffered_file.c \
     iohandler.c \
     ioport.c \
+    migration-dummy-android.c \
     qemu-char.c \
     qemu-log.c \
     readline.c \
