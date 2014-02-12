@@ -11,7 +11,7 @@
 */
 #include "android/android.h"
 #include "android_modem.h"
-#include "android/config.h"
+#include "android/config-file.h"
 #include "android/config/config.h"
 #include "android/snapshot.h"
 #include "android/utils/debug.h"

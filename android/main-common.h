@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include "android/cmdline-option.h"
 #include "android/skin/keyset.h"
-#include "android/config.h"
+#include "android/config-file.h"
 #include "android/avd/hw-config.h"
 
 /* Common routines used by both android/main.c and android/main-ui.c */

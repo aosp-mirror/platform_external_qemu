@@ -432,7 +432,7 @@ CORE_MISC_SOURCES = \
     android/boot-properties.c \
     android/cbuffer.c \
     android/charpipe.c \
-    android/config.c \
+    android/config-file.c \
     android/core-init-utils.c   \
     android/gps.c \
     android/hw-kmsg.c \
