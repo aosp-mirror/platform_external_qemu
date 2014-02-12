@@ -140,7 +140,6 @@ static int64_t cpu_get_clock(void)
     }
 }
 
-#ifndef CONFIG_IOTHREAD
 static int64_t qemu_icount_delta(void)
 {
     if (!use_icount) {
@@ -154,7 +153,6 @@ static int64_t qemu_icount_delta(void)
         return cpu_get_icount() - cpu_get_clock();
     }
 }
-#endif
 
 /* enable cpu_get_ticks() */
 void cpu_enable_ticks(void)
@@ -735,10 +733,6 @@ void configure_icount(const char *option)
     if (!option)
         return;
 
-#ifdef CONFIG_IOTHREAD
-    vm_clock->warp_timer = qemu_new_timer_ns(rt_clock, icount_warp_rt, NULL);
-#endif
-
     if (strcmp(option, "auto") != 0) {
         icount_time_shift = strtol(option, NULL, 0);
         use_icount = 1;
@@ -1316,7 +1310,6 @@ extern int tcg_has_work(void);
 
 int qemu_calculate_timeout(void)
 {
-#ifndef CONFIG_IOTHREAD
     int timeout;
 
     if (!vm_running)
@@ -1366,7 +1359,4 @@ int qemu_calculate_timeout(void)
     }
 
     return timeout;
-#else /* CONFIG_IOTHREAD */
-    return 1000;
-#endif
 }
