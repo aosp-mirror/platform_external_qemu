@@ -4,6 +4,8 @@ include $(LOCAL_PATH)/distrib/googletest/Android.mk
 EMULATOR_UNITTESTS_SOURCES := \
   android/utils/bufprint_unittest.cpp \
   android/utils/eintr_wrapper_unittest.cpp \
+  android/utils/file_data_unittest.cpp \
+  android/utils/property_file_unittest.cpp \
   android/utils/win32_cmdline_quote_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
   android/base/files/PathUtils_unittest.cpp \
