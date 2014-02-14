@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "af97455d_c2318208",
+        "filename": "hw/android/goldfish/nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:30:02Z",
+      "side": 1,
+      "message": "If you do this, please update the snapshot fields definitions (which still only deals with 32-bit values) and save/load functions appropriately. Please ensure you increment the version number and read the 32-bit data field for the existing version number. Thanks.",
+      "revId": "273573bd1334235afb83bf27933cee84b687d280",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf6c794a_4332860c",
+        "filename": "hw/android/goldfish/nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 565,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:30:02Z",
+      "side": 1,
+      "message": "remove the #ifdef. Thanks.",
+      "revId": "273573bd1334235afb83bf27933cee84b687d280",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf6c794a_633782fb",
+        "filename": "hw/android/goldfish/nand_reg.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:30:02Z",
+      "side": 1,
+      "message": "Please remove the #ifdef, and put that at the end of the list. Thanks.",
+      "revId": "273573bd1334235afb83bf27933cee84b687d280",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
