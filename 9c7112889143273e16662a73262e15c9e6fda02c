@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6fa38db3_b64b7044",
+        "filename": "Makefile.target",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T16:28:54Z",
+      "side": 1,
+      "message": "I don\u0027t think util/host-utils.c is needed to link the emulator binary. If so, can you remove the last line?",
+      "revId": "9c7112889143273e16662a73262e15c9e6fda02c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2fdfd524_a44ee654",
+        "filename": "tcg/tcg-runtime.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T16:28:54Z",
+      "side": 1,
+      "message": "Most of these includes are not needed. Also, the upstream version places tcg-runtime.c at the root directory (I agree this is lame), can I ask you to move this here to, it makes comparing the source bases easier for me, thanks.",
+      "range": {
+        "startLine": 33,
+        "startChar": 1,
+        "endLine": 33,
+        "endChar": 8
+      },
+      "revId": "9c7112889143273e16662a73262e15c9e6fda02c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
