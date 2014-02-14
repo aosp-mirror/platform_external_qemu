@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f76f512_4632920c",
+        "filename": "hw/android/goldfish/mmc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:24:19Z",
+      "side": 1,
+      "message": "I would also recommend to remove the #ifdef and #endif here, just add it to the definition (and put it at the end of the list).\n\nThe good news is that this virtual device is not documented in docs/GOLDFISH-VIRTUAL-HARDWARE.TXT so you won\u0027t need to update it (I\u0027ll do that later myself).",
+      "range": {
+        "startLine": 25,
+        "startChar": 7,
+        "endLine": 25,
+        "endChar": 20
+      },
+      "revId": "4152fade856925fb3200f7b14d06db63f3c8aba0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f76f512_262d96a9",
+        "filename": "hw/android/goldfish/mmc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:24:19Z",
+      "side": 1,
+      "message": "If you modify this field, you need to ensure that snapshot support is modified appropriately, i.e. modify the definition in goldfish_mmc_fields below to use QFIELD_INT64, also increase the version number and ensure that the load hook is capable of reading previous versions of the snasphot, (i.e. make reading buffer_address conditional on the version number).",
+      "range": {
+        "startLine": 69,
+        "startChar": 13,
+        "endLine": 69,
+        "endChar": 27
+      },
+      "revId": "4152fade856925fb3200f7b14d06db63f3c8aba0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf6c794a_a3133a77",
+        "filename": "hw/android/goldfish/mmc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:24:19Z",
+      "side": 1,
+      "message": "please remote this #ifdef and #endif below.",
+      "revId": "4152fade856925fb3200f7b14d06db63f3c8aba0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf6c794a_83163e68",
+        "filename": "hw/android/goldfish/mmc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 476,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:24:19Z",
+      "side": 1,
+      "message": "can I ask you to remove the extra tab here?",
+      "range": {
+        "startLine": 476,
+        "startChar": 0,
+        "endLine": 476,
+        "endChar": 5
+      },
+      "revId": "4152fade856925fb3200f7b14d06db63f3c8aba0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
