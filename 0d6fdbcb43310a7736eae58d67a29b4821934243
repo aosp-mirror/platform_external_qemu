@@ -1,0 +1,118 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "af97455d_821c9a80",
+        "filename": "hw/android/goldfish/pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:38:06Z",
+      "side": 1,
+      "message": "please support loading snapshots saved with a previous version (i.e. read 32-bit channel id in this specific case). Thanks.",
+      "revId": "0d6fdbcb43310a7736eae58d67a29b4821934243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf6c794a_23566a25",
+        "filename": "hw/android/goldfish/pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1181,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:38:06Z",
+      "side": 1,
+      "message": "why the extra braces? Can you remove them?",
+      "range": {
+        "startLine": 1181,
+        "startChar": 27,
+        "endLine": 1181,
+        "endChar": 28
+      },
+      "revId": "0d6fdbcb43310a7736eae58d67a29b4821934243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf6c794a_434b6678",
+        "filename": "hw/android/goldfish/pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1200,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:38:06Z",
+      "side": 1,
+      "message": "remove #ifdef, plus tabs belows.",
+      "revId": "0d6fdbcb43310a7736eae58d67a29b4821934243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f76f512_06517a2c",
+        "filename": "hw/android/goldfish/pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1204,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:38:06Z",
+      "side": 1,
+      "message": "it might be useful to distinguish this from the debug message on line 1184, e.g. include \"HIGH\" or something like that in the output.",
+      "revId": "0d6fdbcb43310a7736eae58d67a29b4821934243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf6c794a_63506226",
+        "filename": "hw/android/goldfish/pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1276,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:38:06Z",
+      "side": 1,
+      "message": "please increment GOLDFISH_PIPE_SAVE_VERSION, and support loading the state of the previous one..",
+      "range": {
+        "startLine": 1276,
+        "startChar": 9,
+        "endLine": 1276,
+        "endChar": 16
+      },
+      "revId": "0d6fdbcb43310a7736eae58d67a29b4821934243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf6c794a_a3417a57",
+        "filename": "include/hw/android/goldfish/pipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:38:06Z",
+      "side": 1,
+      "message": "no #ifdefs please. Also update docs/GOLDFISH-VIRTUAL-HARDWARE.TXT appropraitely.",
+      "revId": "0d6fdbcb43310a7736eae58d67a29b4821934243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
