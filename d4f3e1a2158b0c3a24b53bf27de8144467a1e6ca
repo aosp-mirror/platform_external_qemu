@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "af97455d_422692ca",
+        "filename": "android/config/config.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:39:02Z",
+      "side": 1,
+      "message": "this actually now conflicts with the compilation of exec.c when rebased on top of the current AOSP/external/qemu.\n\nI\u0027ll handle it and will keep you posted.",
+      "revId": "d4f3e1a2158b0c3a24b53bf27de8144467a1e6ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
