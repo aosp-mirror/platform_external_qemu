@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f76f512_a618a68b",
+        "filename": "hw/android/goldfish/tty.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:31:49Z",
+      "side": 1,
+      "message": "please remove #ifdef and move after TTY_DATA_LEN in the file. Also update docs/GOLDFISH-VIRTUAL-HARDWARE.TXT appropriately.",
+      "revId": "03a715c1f98426f13fba6fb2eb8e72557f062c6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f76f512_861baa87",
+        "filename": "hw/android/goldfish/tty.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:31:49Z",
+      "side": 1,
+      "message": "Please support previous snapshots, i.e. increment GOLDFISH_TTY_SAVE_VERSION, and deal with version_id also equal to GOLDFISH_TTY_SAVE_VERSION - 1 in a way that reads a 32-bit ptr value from the file. Thanks.",
+      "revId": "03a715c1f98426f13fba6fb2eb8e72557f062c6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf6c794a_a3189a8b",
+        "filename": "hw/android/goldfish/tty.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-02-14T17:31:49Z",
+      "side": 1,
+      "message": "remove #ifdef.",
+      "revId": "03a715c1f98426f13fba6fb2eb8e72557f062c6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
