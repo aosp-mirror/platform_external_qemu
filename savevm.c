@@ -160,6 +160,8 @@ void qemu_announce_self(void)
 /***********************************************************/
 /* savevm/loadvm support */
 
+void yield_until_fd_readable(int fd);
+
 #define IO_BUF_SIZE 32768
 #define MAX_IOV_SIZE MIN(IOV_MAX, 64)
 

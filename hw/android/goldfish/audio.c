@@ -12,6 +12,7 @@
 #include "cpu.h"
 #include "migration/qemu-file.h"
 #include "hw/android/goldfish/device.h"
+#include "hw/hw.h"
 #include "audio/audio.h"
 #include "android/qemu-debug.h"
 #include "android/globals.h"

@@ -35,6 +35,7 @@
 #include "hw/i386/pc.h"
 #include "hw/audiodev.h"
 #include "hw/isa/isa.h"
+#include "hw/loader.h"
 #include "hw/baum.h"
 #include "hw/android/goldfish/nand.h"
 #include "net/net.h"

@@ -24,6 +24,7 @@
 #include "hw/hw.h"
 #include "hw/i386/pc.h"
 #include "hw/block/fdc.h"
+#include "hw/loader.h"
 #include "hw/pci/pci.h"
 #include "block/block.h"
 #include "sysemu/sysemu.h"
@@ -672,7 +673,7 @@ static void load_linux(hwaddr option_rom,
     	initrd_max = max_ram_size-ACPI_DATA_SIZE-1;
 
     /* kernel command line */
-    pstrcpy_targphys(cmdline_addr, 4096, kernel_cmdline);
+    pstrcpy_targphys("cmdline", cmdline_addr, 4096, kernel_cmdline);
 
     if (protocol >= 0x202) {
 	stl_p(header+0x228, cmdline_addr);
