@@ -77,10 +77,6 @@ void init_clocks(void);
 int init_timer_alarm(void);
 void quit_timers(void);
 
-int64_t cpu_get_ticks(void);
-void cpu_enable_ticks(void);
-void cpu_disable_ticks(void);
-
 static inline QEMUTimer *qemu_new_timer_ns(QEMUClock *clock, QEMUTimerCB *cb,
                                            void *opaque)
 {
@@ -102,6 +98,10 @@ static inline int64_t get_ticks_per_sec(void)
 {
     return 1000000000LL;
 }
+
+/*
+ * Low level clock functions
+ */
 
 /* real time host monotonic timer */
 static inline int64_t get_clock_realtime(void)
@@ -131,8 +131,7 @@ extern int use_rt_clock;
 
 static inline int64_t get_clock(void)
 {
-#if defined(__linux__) || (defined(__FreeBSD__) && __FreeBSD_version >= 500000) \
-    || defined(__DragonFly__) || defined(__FreeBSD_kernel__)
+#ifdef CLOCK_MONOTONIC
     if (use_rt_clock) {
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -147,33 +146,13 @@ static inline int64_t get_clock(void)
 }
 #endif
 
-extern int64_t cpu_get_clock(void);
+
+/* icount */
+int64_t cpu_get_icount(void);
+int64_t cpu_get_clock(void);
 
 void qemu_get_timer(QEMUFile *f, QEMUTimer *ts);
 void qemu_put_timer(QEMUFile *f, QEMUTimer *ts);
-
-/* ptimer.c */
-typedef struct ptimer_state ptimer_state;
-typedef void (*ptimer_cb)(void *opaque);
-
-ptimer_state *ptimer_init(QEMUBH *bh);
-void ptimer_set_period(ptimer_state *s, int64_t period);
-void ptimer_set_freq(ptimer_state *s, uint32_t freq);
-void ptimer_set_limit(ptimer_state *s, uint64_t limit, int reload);
-uint64_t ptimer_get_count(ptimer_state *s);
-void ptimer_set_count(ptimer_state *s, uint64_t count);
-void ptimer_run(ptimer_state *s, int oneshot);
-void ptimer_stop(ptimer_state *s);
-void qemu_put_ptimer(QEMUFile *f, ptimer_state *s);
-void qemu_get_ptimer(QEMUFile *f, ptimer_state *s);
-
-/* icount */
-int64_t qemu_icount_round(int64_t count);
-extern int64_t qemu_icount;
-extern int use_icount;
-extern int icount_time_shift;
-extern int64_t qemu_icount_bias;
-int64_t cpu_get_icount(void);
 
 /*******************************************/
 /* host CPU ticks (if available) */
@@ -253,7 +232,7 @@ static inline int64_t cpu_get_real_ticks(void)
     return val;
 }
 
-#elif defined(__sparc_v8plus__) || defined(__sparc_v8plusa__) || defined(__sparc_v9__)
+#elif defined(__sparc__)
 
 static inline int64_t cpu_get_real_ticks (void)
 {
@@ -262,6 +241,8 @@ static inline int64_t cpu_get_real_ticks (void)
     asm volatile("rd %%tick,%0" : "=r"(rval));
     return rval;
 #else
+    /* We need an %o or %g register for this.  For recent enough gcc
+       there is an "h" constraint for that.  Don't bother with that.  */
     union {
         uint64_t i64;
         struct {
@@ -269,8 +250,8 @@ static inline int64_t cpu_get_real_ticks (void)
             uint32_t low;
         }       i32;
     } rval;
-    asm volatile("rd %%tick,%1; srlx %1,32,%0"
-                 : "=r"(rval.i32.high), "=r"(rval.i32.low));
+    asm volatile("rd %%tick,%%g1; srlx %%g1,32,%0; mov %%g1,%1"
+                 : "=r"(rval.i32.high), "=r"(rval.i32.low) : : "g1");
     return rval.i64;
 #endif
 }
@@ -327,9 +308,6 @@ static inline int64_t cpu_get_real_ticks (void)
     static int64_t ticks = 0;
     return ticks++;
 }
-#endif
-
-#ifdef NEED_CPU_H
 #endif
 
 #ifdef CONFIG_PROFILER

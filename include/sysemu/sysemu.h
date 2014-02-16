@@ -48,6 +48,10 @@ int64_t cpu_get_ticks(void);
 void cpu_enable_ticks(void);
 void cpu_disable_ticks(void);
 
+int64_t qemu_icount;
+int64_t qemu_icount_bias;
+int icount_time_shift;
+
 int tcg_has_work(void);
 
 void qemu_system_reset_request(void);

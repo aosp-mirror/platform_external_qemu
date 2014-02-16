@@ -243,6 +243,53 @@ void tcg_cpu_exec(void)
     }
 }
 
+/***********************************************************/
+/* guest cycle counter */
+
+typedef struct TimersState {
+    int64_t cpu_ticks_prev;
+    int64_t cpu_ticks_offset;
+    int64_t cpu_clock_offset;
+    int32_t cpu_ticks_enabled;
+    int64_t dummy;
+} TimersState;
+
+static void timer_save(QEMUFile *f, void *opaque)
+{
+    TimersState *s = opaque;
+
+    if (s->cpu_ticks_enabled) {
+        hw_error("cannot save state if virtual timers are running");
+    }
+    qemu_put_be64(f, s->cpu_ticks_prev);
+    qemu_put_be64(f, s->cpu_ticks_offset);
+    qemu_put_be64(f, s->cpu_clock_offset);
+ }
+
+static int timer_load(QEMUFile *f, void *opaque, int version_id)
+{
+    TimersState *s = opaque;
+
+    if (version_id != 1 && version_id != 2)
+        return -EINVAL;
+    if (s->cpu_ticks_enabled) {
+        return -EINVAL;
+    }
+    s->cpu_ticks_prev   = qemu_get_sbe64(f);
+    s->cpu_ticks_offset = qemu_get_sbe64(f);
+    if (version_id == 2) {
+        s->cpu_clock_offset = qemu_get_sbe64(f);
+    }
+    return 0;
+}
+
+
+TimersState timers_state;
+
+void qemu_timer_register_savevm(void) {
+    register_savevm("timer", 0, 2, timer_save, timer_load, &timers_state);
+}
+
 /* Return the virtual CPU time, based on the instruction counter.  */
 int64_t cpu_get_icount(void)
 {
@@ -257,4 +304,58 @@ int64_t cpu_get_icount(void)
         icount -= (env->icount_decr.u16.low + env->icount_extra);
     }
     return qemu_icount_bias + (icount << icount_time_shift);
+}
+
+/* return the host CPU cycle counter and handle stop/restart */
+int64_t cpu_get_ticks(void)
+{
+    if (use_icount) {
+        return cpu_get_icount();
+    }
+    if (!timers_state.cpu_ticks_enabled) {
+        return timers_state.cpu_ticks_offset;
+    } else {
+        int64_t ticks;
+        ticks = cpu_get_real_ticks();
+        if (timers_state.cpu_ticks_prev > ticks) {
+            /* Note: non increasing ticks may happen if the host uses
+               software suspend */
+            timers_state.cpu_ticks_offset += timers_state.cpu_ticks_prev - ticks;
+        }
+        timers_state.cpu_ticks_prev = ticks;
+        return ticks + timers_state.cpu_ticks_offset;
+    }
+}
+
+/* return the host CPU monotonic timer and handle stop/restart */
+int64_t cpu_get_clock(void)
+{
+    int64_t ti;
+    if (!timers_state.cpu_ticks_enabled) {
+        return timers_state.cpu_clock_offset;
+    } else {
+        ti = get_clock();
+        return ti + timers_state.cpu_clock_offset;
+    }
+}
+
+/* enable cpu_get_ticks() */
+void cpu_enable_ticks(void)
+{
+    if (!timers_state.cpu_ticks_enabled) {
+        timers_state.cpu_ticks_offset -= cpu_get_real_ticks();
+        timers_state.cpu_clock_offset -= get_clock();
+        timers_state.cpu_ticks_enabled = 1;
+    }
+}
+
+/* disable cpu_get_ticks() : the clock is stopped. You must not call
+   cpu_get_ticks() after that.  */
+void cpu_disable_ticks(void)
+{
+    if (timers_state.cpu_ticks_enabled) {
+        timers_state.cpu_ticks_offset = cpu_get_ticks();
+        timers_state.cpu_clock_offset = cpu_get_clock();
+        timers_state.cpu_ticks_enabled = 0;
+    }
 }
