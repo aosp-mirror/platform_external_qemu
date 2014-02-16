@@ -188,6 +188,7 @@ static int qemu_cpu_exec(CPUOldState *env)
 #ifdef CONFIG_PROFILER
     int64_t ti = profile_getclock();
 #endif
+#ifndef CONFIG_ANDROID
     if (use_icount) {
         int64_t count;
         int decr;
@@ -203,11 +204,12 @@ static int qemu_cpu_exec(CPUOldState *env)
         env->icount_decr.u16.low = decr;
         env->icount_extra = count;
     }
-
+#endif
     ret = cpu_exec(env);
 #ifdef CONFIG_PROFILER
     qemu_time += profile_getclock() - ti;
 #endif
+#ifndef CONFIG_ANDROID
     if (use_icount) {
         /* Fold pending instructions back into the
            instruction counter, and clear the interrupt flag.  */
@@ -216,6 +218,7 @@ static int qemu_cpu_exec(CPUOldState *env)
         env->icount_decr.u32 = 0;
         env->icount_extra = 0;
     }
+#endif
     return ret;
 }
 
@@ -358,4 +361,7 @@ void cpu_disable_ticks(void)
         timers_state.cpu_clock_offset = cpu_get_clock();
         timers_state.cpu_ticks_enabled = 0;
     }
+}
+
+void qemu_clock_warp(QEMUClockType clock) {
 }

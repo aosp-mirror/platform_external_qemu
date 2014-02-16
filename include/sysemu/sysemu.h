@@ -38,8 +38,6 @@ void qemu_del_vm_change_state_handler(VMChangeStateEntry *e);
 void vm_start(void);
 void vm_stop(int reason);
 
-void qemu_adjust_clock(QEMUClock* clock);
-
 uint64_t ram_bytes_remaining(void);
 uint64_t ram_bytes_transferred(void);
 uint64_t ram_bytes_total(void);
@@ -47,6 +45,12 @@ uint64_t ram_bytes_total(void);
 int64_t cpu_get_ticks(void);
 void cpu_enable_ticks(void);
 void cpu_disable_ticks(void);
+
+void configure_icount(const char* opts);
+void configure_alarms(const char* opts);
+int init_timer_alarm(void);
+int qemu_timer_alarm_pending(void);
+void quit_timers(void);
 
 int64_t qemu_icount;
 int64_t qemu_icount_bias;
@@ -138,7 +142,6 @@ extern int graphic_rotate;
 extern int no_quit;
 extern int semihosting_enabled;
 extern int old_param;
-extern QEMUClock *rtc_clock;
 
 const char* dns_log_filename;
 const char* drop_log_filename;
