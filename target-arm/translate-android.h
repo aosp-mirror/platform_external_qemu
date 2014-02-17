@@ -248,10 +248,10 @@ set_on_ret(target_ulong ret)
 #  define ANDROID_END_CODEGEN() \
     do { \
         if (memcheck_enabled && dc->user) { \
-            j = gen_opc_ptr - gen_opc_buf; \
+            j = tcg_ctx.gen_opc_ptr - tcg_ctx.gen_opc_buf; \
             lj++; \
             while (lj <= j) \
-                gen_opc_instr_start[lj++] = 0; \
+                tcg_ctx.gen_opc_instr_start[lj++] = 0; \
         } \
     } while (0)
 

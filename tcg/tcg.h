@@ -328,6 +328,34 @@ struct TCGContext {
     int temps_in_use;
 #endif
 
+    uint16_t gen_opc_buf[OPC_BUF_SIZE];
+    TCGArg gen_opparam_buf[OPPARAM_BUF_SIZE];
+
+    uint16_t *gen_opc_ptr;
+    TCGArg *gen_opparam_ptr;
+    target_ulong gen_opc_pc[OPC_BUF_SIZE];
+    uint16_t gen_opc_icount[OPC_BUF_SIZE];
+    uint8_t gen_opc_instr_start[OPC_BUF_SIZE];
+    #if defined(TARGET_I386)
+    uint8_t gen_opc_cc_op[OPC_BUF_SIZE];
+    #elif defined(TARGET_SPARC)
+    target_ulong gen_opc_npc[OPC_BUF_SIZE];
+    target_ulong gen_opc_jump_pc[2];
+    #elif defined(TARGET_MIPS) || defined(TARGET_SH4)
+    uint32_t gen_opc_hflags[OPC_BUF_SIZE];
+    #elif defined(TARGET_ARM)
+    uint32_t gen_opc_condexec_bits[OPC_BUF_SIZE];
+    #endif
+
+    /* Code generation */
+    int code_gen_max_blocks;
+    uint8_t* code_gen_prologue;
+    uint8_t* code_gen_buffer;
+    size_t code_gen_buffer_size;
+    /* threshold to flush the translated code buffer */
+    size_t code_gen_buffer_max_size;
+    uint8_t *code_gen_ptr;
+
     TBContext tb_ctx;
 };
 
@@ -499,10 +527,9 @@ TCGv_i64 tcg_const_i64(int64_t val);
 TCGv_i32 tcg_const_local_i32(int32_t val);
 TCGv_i64 tcg_const_local_i64(int64_t val);
 
-extern uint8_t code_gen_prologue[];
 #if defined(_ARCH_PPC) && !defined(_ARCH_PPC64)
 #define tcg_qemu_tb_exec(tb_ptr) \
-    ((long REGPARM __attribute__ ((longcall)) (*)(void *))code_gen_prologue)(tb_ptr)
+    ((long REGPARM __attribute__ ((longcall)) (*)(void *))tcg_ctx.code_gen_prologue)(tb_ptr)
 #else
-#define tcg_qemu_tb_exec(tb_ptr) ((long REGPARM (*)(void *))code_gen_prologue)(tb_ptr)
+#define tcg_qemu_tb_exec(tb_ptr) ((long REGPARM (*)(void *))tcg_ctx.code_gen_prologue)(tb_ptr)
 #endif
