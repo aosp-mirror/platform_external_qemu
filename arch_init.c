@@ -298,7 +298,7 @@ int ram_save_live(QEMUFile *f, int stage, void *opaque)
     }
 
     bytes_transferred_last = bytes_transferred;
-    bwidth = qemu_get_clock_ns(rt_clock);
+    bwidth = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
 
     while (!qemu_file_rate_limit(f)) {
         int bytes_sent;
@@ -310,7 +310,7 @@ int ram_save_live(QEMUFile *f, int stage, void *opaque)
         }
     }
 
-    bwidth = qemu_get_clock_ns(rt_clock) - bwidth;
+    bwidth = qemu_clock_get_ns(QEMU_CLOCK_REALTIME) - bwidth;
     bwidth = (bytes_transferred - bytes_transferred_last) / bwidth;
 
     /* if we haven't transferred anything this round, force expected_time to a

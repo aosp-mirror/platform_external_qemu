@@ -171,12 +171,12 @@ int cpu_gen_code(CPUArchState *env, TranslationBlock *tb, int *gen_code_size_ptr
 
 /* The cpu state corresponding to 'searched_pc' is restored.
  */
-int cpu_restore_state(TranslationBlock *tb,
-                      CPUArchState *env, unsigned long searched_pc)
+bool cpu_restore_state(TranslationBlock *tb,
+                       CPUArchState *env, uintptr_t searched_pc)
 {
     TCGContext *s = &tcg_ctx;
     int j;
-    unsigned long tc_ptr;
+    uintptr_t tc_ptr;
 #ifdef CONFIG_PROFILER
     int64_t ti;
 #endif
@@ -196,7 +196,7 @@ int cpu_restore_state(TranslationBlock *tb,
     }
 
     /* find opc index corresponding to search_pc */
-    tc_ptr = (unsigned long)tb->tc_ptr;
+    tc_ptr = (uintptr_t)tb->tc_ptr;
     if (searched_pc < tc_ptr)
         return -1;
 
@@ -210,7 +210,7 @@ int cpu_restore_state(TranslationBlock *tb,
 #endif
     j = tcg_gen_code_search_pc(s, (uint8_t *)tc_ptr, searched_pc - tc_ptr);
     if (j < 0)
-        return -1;
+        return false;
     /* now find start of instruction before */
     while (gen_opc_instr_start[j] == 0)
         j--;
@@ -222,7 +222,7 @@ int cpu_restore_state(TranslationBlock *tb,
     s->restore_time += profile_getclock() - ti;
     s->restore_count++;
 #endif
-    return 0;
+    return true;
 }
 
 void tb_flush_jmp_cache(CPUArchState *env, target_ulong addr)

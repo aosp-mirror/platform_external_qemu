@@ -38,8 +38,6 @@ void qemu_del_vm_change_state_handler(VMChangeStateEntry *e);
 void vm_start(void);
 void vm_stop(int reason);
 
-void qemu_adjust_clock(QEMUClock* clock);
-
 uint64_t ram_bytes_remaining(void);
 uint64_t ram_bytes_transferred(void);
 uint64_t ram_bytes_total(void);
@@ -47,6 +45,16 @@ uint64_t ram_bytes_total(void);
 int64_t cpu_get_ticks(void);
 void cpu_enable_ticks(void);
 void cpu_disable_ticks(void);
+
+void configure_icount(const char* opts);
+void configure_alarms(const char* opts);
+int init_timer_alarm(void);
+int qemu_timer_alarm_pending(void);
+void quit_timers(void);
+
+int64_t qemu_icount;
+int64_t qemu_icount_bias;
+int icount_time_shift;
 
 int tcg_has_work(void);
 
@@ -134,7 +142,6 @@ extern int graphic_rotate;
 extern int no_quit;
 extern int semihosting_enabled;
 extern int old_param;
-extern QEMUClock *rtc_clock;
 
 const char* dns_log_filename;
 const char* drop_log_filename;
@@ -241,26 +248,6 @@ extern CharDriverState *parallel_hds[MAX_PARALLEL_PORTS];
 extern CharDriverState *virtcon_hds[MAX_VIRTIO_CONSOLES];
 
 #define TFR(expr) do { if ((expr) != -1) break; } while (errno == EINTR)
-
-#if 0 //DIGIT
-#ifdef NEED_CPU_H
-/* loader.c */
-int get_image_size(const char *filename);
-int load_image(const char *filename, uint8_t *addr); /* deprecated */
-int load_image_targphys(const char *filename, hwaddr, int max_sz);
-int load_elf(const char *filename, int64_t address_offset,
-             uint64_t *pentry, uint64_t *lowaddr, uint64_t *highaddr);
-int load_aout(const char *filename, hwaddr addr, int max_sz);
-int load_uimage(const char *filename, target_ulong *ep, target_ulong *loadaddr,
-                int *is_linux);
-
-int fread_targphys(hwaddr dst_addr, size_t nbytes, FILE *f);
-int fread_targphys_ok(hwaddr dst_addr, size_t nbytes, FILE *f);
-int read_targphys(int fd, hwaddr dst_addr, size_t nbytes);
-void pstrcpy_targphys(hwaddr dest, int buf_size,
-                      const char *source);
-#endif
-#endif //DIGIT
 
 void do_usb_add(Monitor *mon, const char *devname);
 void do_usb_del(Monitor *mon, const char *devname);

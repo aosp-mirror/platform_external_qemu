@@ -1003,7 +1003,7 @@ void helper_syscall(int next_eip_addend)
 {
     env->exception_index = EXCP_SYSCALL;
     env->exception_next_eip = env->eip + next_eip_addend;
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 #else
 void helper_syscall(int next_eip_addend)
@@ -1338,7 +1338,7 @@ static void QEMU_NORETURN raise_interrupt(int intno, int is_int, int error_code,
     env->error_code = error_code;
     env->exception_is_int = is_int;
     env->exception_next_eip = env->eip + next_eip_addend;
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 
 /* shortcuts to generate exceptions */
@@ -4640,7 +4640,7 @@ static void do_hlt(void)
     env->hflags &= ~HF_INHIBIT_IRQ_MASK; /* needed if sti is just before */
     env->halted = 1;
     env->exception_index = EXCP_HLT;
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 
 void helper_hlt(int next_eip_addend)
@@ -4678,7 +4678,7 @@ void helper_mwait(int next_eip_addend)
 void helper_debug(void)
 {
     env->exception_index = EXCP_DEBUG;
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 
 void helper_reset_rf(void)
@@ -5040,7 +5040,7 @@ void helper_vmrun(int aflag, int next_eip_addend)
                 env->exception_is_int = 0;
                 env->exception_next_eip = EIP;
                 qemu_log_mask(CPU_LOG_TB_IN_ASM, "NMI");
-                cpu_loop_exit();
+                cpu_loop_exit(env);
                 break;
         case SVM_EVTINJ_TYPE_EXEPT:
                 env->exception_index = vector;
@@ -5048,7 +5048,7 @@ void helper_vmrun(int aflag, int next_eip_addend)
                 env->exception_is_int = 0;
                 env->exception_next_eip = -1;
                 qemu_log_mask(CPU_LOG_TB_IN_ASM, "EXEPT");
-                cpu_loop_exit();
+                cpu_loop_exit(env);
                 break;
         case SVM_EVTINJ_TYPE_SOFT:
                 env->exception_index = vector;
@@ -5056,7 +5056,7 @@ void helper_vmrun(int aflag, int next_eip_addend)
                 env->exception_is_int = 1;
                 env->exception_next_eip = EIP;
                 qemu_log_mask(CPU_LOG_TB_IN_ASM, "SOFT");
-                cpu_loop_exit();
+                cpu_loop_exit(env);
                 break;
         }
         qemu_log_mask(CPU_LOG_TB_IN_ASM, " %#x %#x\n", env->exception_index, env->error_code);
@@ -5391,7 +5391,7 @@ void helper_vmexit(uint32_t exit_code, uint64_t exit_info_1)
     env->error_code = 0;
     env->old_exception = -1;
 
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 
 #endif

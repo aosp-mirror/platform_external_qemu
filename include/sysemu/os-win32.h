@@ -24,6 +24,7 @@
  */
 
 #ifndef QEMU_OS_WIN32_H
+#define QEMU_OS_WIN32_H
 
 #define socket_close  winsock2_socket_close3
 
@@ -31,6 +32,60 @@
 #include <windows.h>
 
 #undef socket_close
+
+/* Workaround for older versions of MinGW. */
+#ifndef ECONNREFUSED
+# define ECONNREFUSED WSAECONNREFUSED
+#endif
+#ifndef EINPROGRESS
+# define EINPROGRESS  WSAEINPROGRESS
+#endif
+#ifndef EHOSTUNREACH
+# define EHOSTUNREACH WSAEHOSTUNREACH
+#endif
+#ifndef EINTR
+# define EINTR        WSAEINTR
+#endif
+#ifndef EINPROGRESS
+# define EINPROGRESS  WSAEINPROGRESS
+#endif
+#ifndef ENETUNREACH
+# define ENETUNREACH  WSAENETUNREACH
+#endif
+#ifndef ENOTCONN
+# define ENOTCONN     WSAENOTCONN
+#endif
+#ifndef EWOULDBLOCK
+# define EWOULDBLOCK  WSAEWOULDBLOCK
+#endif
+
+#if defined(_WIN64)
+/* On w64, setjmp is implemented by _setjmp which needs a second parameter.
+ * If this parameter is NULL, longjump does no stack unwinding.
+ * That is what we need for QEMU. Passing the value of register rsp (default)
+ * lets longjmp try a stack unwinding which will crash with generated code. */
+# undef setjmp
+# define setjmp(env) _setjmp(env, NULL)
+#endif
+/* QEMU uses sigsetjmp()/siglongjmp() as the portable way to specify
+ * "longjmp and don't touch the signal masks". Since we know that the
+ * savemask parameter will always be zero we can safely define these
+ * in terms of setjmp/longjmp on Win32.
+ */
+#define sigjmp_buf jmp_buf
+#define sigsetjmp(env, savemask) setjmp(env)
+#define siglongjmp(env, val) longjmp(env, val)
+
+/* Declaration of ffs() is missing in MinGW's strings.h. */
+int ffs(int i);
+
+/* Missing POSIX functions. Don't use MinGW-w64 macros. */
+#undef gmtime_r
+struct tm *gmtime_r(const time_t *timep, struct tm *result);
+#undef localtime_r
+struct tm *localtime_r(const time_t *timep, struct tm *result);
+
+char *strtok_r(char *str, const char *delim, char **saveptr);
 
 /* Polling handling */
 
@@ -65,5 +120,15 @@ typedef struct {
     long tv_usec;
 } qemu_timeval;
 int qemu_gettimeofday(qemu_timeval *tp);
+
+static inline bool is_daemonized(void)
+{
+    return false;
+}
+
+static inline int os_mlock(void)
+{
+    return -ENOSYS;
+}
 
 #endif

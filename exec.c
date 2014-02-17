@@ -749,7 +749,7 @@ static inline void tb_reset_jump(TranslationBlock *tb, int n)
     tb_set_jmp_target(tb, n, (unsigned long)(tb->tc_ptr + tb->tb_next_offset[n]));
 }
 
-void tb_phys_invalidate(TranslationBlock *tb, target_ulong page_addr)
+void tb_phys_invalidate(TranslationBlock *tb, tb_page_addr_t page_addr)
 {
     CPUArchState *env;
     PageDesc *p;
@@ -1326,6 +1326,18 @@ static void breakpoint_invalidate(CPUArchState *env, target_ulong pc)
 }
 #endif
 
+#if defined(CONFIG_USER_ONLY)
+void cpu_watchpoint_remove_all(CPUArchState *env, int mask)
+
+{
+}
+
+int cpu_watchpoint_insert(CPUArchState *env, target_ulong addr, target_ulong len,
+                          int flags, CPUWatchpoint **watchpoint)
+{
+    return -ENOSYS;
+}
+#else
 /* Add a watchpoint.  */
 int cpu_watchpoint_insert(CPUArchState *env, target_ulong addr, target_ulong len,
                           int flags, CPUWatchpoint **watchpoint)
@@ -1334,7 +1346,8 @@ int cpu_watchpoint_insert(CPUArchState *env, target_ulong addr, target_ulong len
     CPUWatchpoint *wp;
 
     /* sanity checks: allow power-of-2 lengths, deny unaligned watchpoints */
-    if ((len != 1 && len != 2 && len != 4 && len != 8) || (addr & ~len_mask)) {
+    if ((len & (len - 1)) || (addr & ~len_mask) ||
+            len == 0 || len > TARGET_PAGE_SIZE) {
         fprintf(stderr, "qemu: tried to set invalid watchpoint at "
                 TARGET_FMT_lx ", len=" TARGET_FMT_lu "\n", addr, len);
         return -EINVAL;
@@ -1395,6 +1408,7 @@ void cpu_watchpoint_remove_all(CPUArchState *env, int mask)
             cpu_watchpoint_remove_by_ref(env, wp);
     }
 }
+#endif
 
 /* Add a breakpoint.  */
 int cpu_breakpoint_insert(CPUArchState *env, target_ulong pc, int flags,
@@ -1409,15 +1423,17 @@ int cpu_breakpoint_insert(CPUArchState *env, target_ulong pc, int flags,
     bp->flags = flags;
 
     /* keep all GDB-injected breakpoints in front */
-    if (flags & BP_GDB)
+    if (flags & BP_GDB) {
         QTAILQ_INSERT_HEAD(&env->breakpoints, bp, entry);
-    else
+    } else {
         QTAILQ_INSERT_TAIL(&env->breakpoints, bp, entry);
+    }
 
     breakpoint_invalidate(env, pc);
 
-    if (breakpoint)
+    if (breakpoint) {
         *breakpoint = bp;
+    }
     return 0;
 #else
     return -ENOSYS;
@@ -1586,7 +1602,7 @@ void cpu_exit(CPUOldState *env)
     cpu_unlink_tb(env);
 }
 
-void cpu_abort(CPUOldState *env, const char *fmt, ...)
+void cpu_abort(CPUArchState *env, const char *fmt, ...)
 {
     va_list ap;
     va_list ap2;
@@ -1911,7 +1927,7 @@ int page_check_range(target_ulong start, target_ulong len, int flags)
 
 /* called from signal handler: invalidate the code and unprotect the
    page. Return TRUE if the fault was successfully handled. */
-int page_unprotect(target_ulong address, unsigned long pc, void *puc)
+int page_unprotect(target_ulong address, uintptr_t pc, void *puc)
 {
     unsigned int page_index, prot, pindex;
     PageDesc *p, *p1;
@@ -2567,7 +2583,7 @@ static CPUWriteMemoryFunc * const notdirty_mem_write[3] = {
 /* Generate a debug exception if a watchpoint has been hit.  */
 static void check_watchpoint(int offset, int len_mask, int flags)
 {
-    CPUOldState *env = cpu_single_env;
+    CPUArchState *env = cpu_single_env;
     target_ulong pc, cs_base;
     TranslationBlock *tb;
     target_ulong vaddr;
@@ -2597,11 +2613,12 @@ static void check_watchpoint(int offset, int len_mask, int flags)
                 tb_phys_invalidate(tb, -1);
                 if (wp->flags & BP_STOP_BEFORE_ACCESS) {
                     env->exception_index = EXCP_DEBUG;
+                    cpu_loop_exit(env);
                 } else {
                     cpu_get_tb_cpu_state(env, &pc, &cs_base, &cpu_flags);
                     tb_gen_code(env, pc, cs_base, cpu_flags, 1);
+                    cpu_resume_from_signal(env, NULL);
                 }
-                cpu_resume_from_signal(env, NULL);
             }
         } else {
             wp->flags &= ~BP_WATCHPOINT_HIT;
@@ -3468,20 +3485,20 @@ int cpu_memory_rw_debug(CPUOldState *env, target_ulong addr,
 
 /* in deterministic execution mode, instructions doing device I/Os
    must be at the end of the TB */
-void cpu_io_recompile(CPUArchState *env, void *retaddr)
+void cpu_io_recompile(CPUArchState *env, uintptr_t retaddr)
 {
     TranslationBlock *tb;
     uint32_t n, cflags;
     target_ulong pc, cs_base;
     uint64_t flags;
 
-    tb = tb_find_pc((unsigned long)retaddr);
+    tb = tb_find_pc(retaddr);
     if (!tb) {
         cpu_abort(env, "cpu_io_recompile: could not find TB for pc=%p",
-                  retaddr);
+                  (void*)retaddr);
     }
     n = env->icount_decr.u16.low + tb->icount;
-    cpu_restore_state(tb, env, (unsigned long)retaddr);
+    cpu_restore_state(tb, env, retaddr);
     /* Calculate how many instructions had been executed before the fault
        occurred.  */
     n = n - env->icount_decr.u16.low;

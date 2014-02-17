@@ -43,7 +43,7 @@
 // TODO(digit): Re-enable tracing some day?
 #define tracing 0
 
-extern void cpu_loop_exit(void);
+extern void cpu_loop_exit(CPUArchState* env);
 
 extern const char *trace_filename;
 
@@ -255,7 +255,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         cpu_single_env->exception_index = EXCP_HLT;
         cpu_single_env->halted = 1;
         qemu_system_shutdown_request();
-        cpu_loop_exit();
+        cpu_loop_exit(cpu_single_env);
         break;
 
     case TRACE_DEV_REG_ENABLE:          // tracing enable: 0 = stop, 1 = start

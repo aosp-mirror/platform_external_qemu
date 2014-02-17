@@ -29,6 +29,8 @@ int load_uimage(const char *filename, target_ulong *ep, target_ulong *loadaddr,
  */
 int load_ramdisk(const char *filename, hwaddr addr, uint64_t max_sz);
 
+int fread_targphys_ok(hwaddr dst_addr, size_t nbytes, FILE *f);
+
 ssize_t read_targphys(const char *name,
                       int fd, hwaddr dst_addr, size_t nbytes);
 void pstrcpy_targphys(const char *name,

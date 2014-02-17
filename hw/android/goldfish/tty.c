@@ -13,6 +13,7 @@
 #include "sysemu/char.h"
 #include "hw/android/goldfish/device.h"
 #include "hw/android/goldfish/vmem.h"
+#include "hw/hw.h"
 
 enum {
     TTY_PUT_CHAR       = 0x00,
