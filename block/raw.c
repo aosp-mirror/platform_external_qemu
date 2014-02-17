@@ -152,7 +152,7 @@ static BlockDriverAIOCB *raw_aio_writev(BlockDriverState *bs,
         b->opaque = opaque;
 
         qemu_iovec_init(&b->qiov, qiov->nalloc);
-        qemu_iovec_concat(&b->qiov, qiov, qiov->size);
+        qemu_iovec_concat(&b->qiov, qiov, 0, qiov->size);
 
         b->qiov.size -= 512;
         b->qiov.iov[first_buf_index].iov_base += 512;

@@ -1611,7 +1611,7 @@ static int net_socket_mcast_create(struct sockaddr_in *mcastaddr)
     }
 
     val = 1;
-    ret=setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
+    ret=qemu_setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
                    (const char *)&val, sizeof(val));
     if (ret < 0) {
 	perror("setsockopt(SOL_SOCKET, SO_REUSEADDR)");
@@ -1628,7 +1628,7 @@ static int net_socket_mcast_create(struct sockaddr_in *mcastaddr)
     imr.imr_multiaddr = mcastaddr->sin_addr;
     imr.imr_interface.s_addr = htonl(INADDR_ANY);
 
-    ret = setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+    ret = qemu_setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
                      (const char *)&imr, sizeof(struct ip_mreq));
     if (ret < 0) {
 	perror("setsockopt(IP_ADD_MEMBERSHIP)");
@@ -1637,7 +1637,7 @@ static int net_socket_mcast_create(struct sockaddr_in *mcastaddr)
 
     /* Force mcast msgs to loopback (eg. several QEMUs in same host */
     val = 1;
-    ret=setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP,
+    ret=qemu_setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP,
                    (const char *)&val, sizeof(val));
     if (ret < 0) {
 	perror("setsockopt(SOL_IP, IP_MULTICAST_LOOP)");
@@ -1818,7 +1818,7 @@ static int net_socket_listen_init(VLANState *vlan,
 
     /* allow fast reuse */
     val = 1;
-    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&val, sizeof(val));
+    qemu_setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&val, sizeof(val));
 
     ret = bind(fd, (struct sockaddr *)&saddr, sizeof(saddr));
     if (ret < 0) {
@@ -1957,7 +1957,7 @@ static ssize_t dump_receive(VLANClientState *vc, const uint8_t *buf, size_t size
         return size;
     }
 
-    ts = muldiv64(qemu_get_clock(vm_clock), 1000000, get_ticks_per_sec());
+    ts = muldiv64(qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL), 1000000, get_ticks_per_sec());
     caplen = size > s->pcap_caplen ? s->pcap_caplen : size;
 
     hdr.ts.tv_sec = ts / 1000000;

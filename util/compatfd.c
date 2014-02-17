@@ -9,13 +9,20 @@
  * This work is licensed under the terms of the GNU GPL, version 2.  See
  * the COPYING file in the top-level directory.
  *
+ * Contributions after 2012-01-13 are licensed under the terms of the
+ * GNU GPL, version 2 or (at your option) any later version.
  */
+
+// This is necessary to be able to include <sys/syscall.h> on Linux.
+#define _GNU_SOURCE 1
 
 #include "qemu-common.h"
 #include "qemu/compatfd.h"
+#include "qemu/thread.h"
 
+#ifdef CONFIG_SIGNALFD
 #include <sys/syscall.h>
-#include <pthread.h>
+#endif
 
 struct sigfd_compat_info
 {
@@ -26,10 +33,6 @@ struct sigfd_compat_info
 static void *sigwait_compat(void *opaque)
 {
     struct sigfd_compat_info *info = opaque;
-    sigset_t all;
-
-    sigfillset(&all);
-    sigprocmask(SIG_BLOCK, &all, NULL);
 
     while (1) {
         int sig;
@@ -69,9 +72,8 @@ static void *sigwait_compat(void *opaque)
 
 static int qemu_signalfd_compat(const sigset_t *mask)
 {
-    pthread_attr_t attr;
-    pthread_t tid;
     struct sigfd_compat_info *info;
+    QemuThread thread;
     int fds[2];
 
     info = malloc(sizeof(*info));
@@ -91,12 +93,7 @@ static int qemu_signalfd_compat(const sigset_t *mask)
     memcpy(&info->mask, mask, sizeof(*mask));
     info->fd = fds[1];
 
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-
-    pthread_create(&tid, &attr, sigwait_compat, info);
-
-    pthread_attr_destroy(&attr);
+    qemu_thread_create(&thread, sigwait_compat, info, QEMU_THREAD_DETACHED);
 
     return fds[0];
 }
@@ -114,4 +111,23 @@ int qemu_signalfd(const sigset_t *mask)
 #endif
 
     return qemu_signalfd_compat(mask);
+}
+
+bool qemu_signalfd_available(void)
+{
+#ifdef CONFIG_SIGNALFD
+    sigset_t mask;
+    int fd;
+    bool ok;
+    sigemptyset(&mask);
+    errno = 0;
+    fd = syscall(SYS_signalfd, -1, &mask, _NSIG / 8);
+    ok = (errno != ENOSYS);
+    if (fd >= 0) {
+        close(fd);
+    }
+    return ok;
+#else
+    return false;
+#endif
 }

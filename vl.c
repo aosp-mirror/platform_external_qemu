@@ -1547,14 +1547,14 @@ static void gui_update(void *opaque)
             interval = dcl->gui_timer_interval;
         dcl = dcl->next;
     }
-    qemu_mod_timer(ds->gui_timer, interval + qemu_get_clock_ms(rt_clock));
+    timer_mod(ds->gui_timer, interval + qemu_clock_get_ms(QEMU_CLOCK_REALTIME));
 }
 
 static void nographic_update(void *opaque)
 {
     uint64_t interval = GUI_REFRESH_INTERVAL;
 
-    qemu_mod_timer(nographic_timer, interval + qemu_get_clock_ms(rt_clock));
+    timer_mod(nographic_timer, interval + qemu_clock_get_ms(QEMU_CLOCK_REALTIME));
 }
 
 struct vm_change_state_entry {
@@ -1711,14 +1711,6 @@ void qemu_system_powerdown_request(void)
     qemu_notify_event();
 }
 
-#ifdef CONFIG_IOTHREAD
-static void qemu_system_vmstop_request(int reason)
-{
-    vmstop_requested = reason;
-    qemu_notify_event();
-}
-#endif
-
 void main_loop_wait(int timeout)
 {
     fd_set rfds, wfds, xfds;
@@ -1783,19 +1775,12 @@ static void main_loop(void)
 {
     int r;
 
-#ifdef CONFIG_IOTHREAD
-    qemu_system_ready = 1;
-    qemu_cond_broadcast(&qemu_system_cond);
-#endif
-
     for (;;) {
         do {
 #ifdef CONFIG_PROFILER
             int64_t ti;
 #endif
-#ifndef CONFIG_IOTHREAD
             tcg_cpu_exec();
-#endif
 #ifdef CONFIG_PROFILER
             ti = profile_getclock();
 #endif
@@ -2093,7 +2078,7 @@ int main(int argc, char **argv, char **envp)
     int tb_size;
     const char *pid_file = NULL;
     const char *incoming = NULL;
-    CPUState *env;
+    CPUOldState *env;
     int show_vnc_port = 0;
 
     init_clocks();
@@ -2600,20 +2585,9 @@ int main(int argc, char **argv, char **envp)
                 }
                 break;
 #endif
-#ifdef CONFIG_KQEMU
-            case QEMU_OPTION_no_kqemu:
-                kqemu_allowed = 0;
-                break;
-            case QEMU_OPTION_kernel_kqemu:
-                kqemu_allowed = 2;
-                break;
-#endif
 #ifdef CONFIG_KVM
             case QEMU_OPTION_enable_kvm:
                 kvm_allowed = 1;
-#ifdef CONFIG_KQEMU
-                kqemu_allowed = 0;
-#endif
                 break;
 #endif
             case QEMU_OPTION_usb:
@@ -2779,14 +2753,6 @@ int main(int argc, char **argv, char **envp)
         exit(1);
     }
 
-#if defined(CONFIG_KVM) && defined(CONFIG_KQEMU)
-    if (kvm_allowed && kqemu_allowed) {
-        fprintf(stderr,
-                "You can not enable both KVM and kqemu at the same time\n");
-        exit(1);
-    }
-#endif
-
     machine->max_cpus = machine->max_cpus ?: 1; /* Default to UP */
     if (smp_cpus > machine->max_cpus) {
         fprintf(stderr, "Number of SMP cpus requested (%d), exceeds max cpus "
@@ -2804,10 +2770,6 @@ int main(int argc, char **argv, char **envp)
            monitor_device = "stdio";
     }
 
-#ifdef CONFIG_KQEMU
-    if (smp_cpus > 1)
-        kqemu_allowed = 0;
-#endif
     if (qemu_init_main_loop()) {
         fprintf(stderr, "qemu_init_main_loop failed\n");
         exit(1);
@@ -2898,19 +2860,6 @@ int main(int argc, char **argv, char **envp)
     /* init the memory */
     if (ram_size == 0)
         ram_size = DEFAULT_RAM_SIZE * 1024 * 1024;
-
-#ifdef CONFIG_KQEMU
-    /* FIXME: This is a nasty hack because kqemu can't cope with dynamic
-       guest ram allocation.  It needs to go away.  */
-    if (kqemu_allowed) {
-        kqemu_phys_ram_size = ram_size + 8 * 1024 * 1024 + 4 * 1024 * 1024;
-        kqemu_phys_ram_base = qemu_vmalloc(kqemu_phys_ram_size);
-        if (!kqemu_phys_ram_base) {
-            fprintf(stderr, "Could not allocate physical memory\n");
-            exit(1);
-        }
-    }
-#endif
 
     /* init the dynamic translator */
     cpu_exec_init_all(tb_size * 1024 * 1024);
@@ -3078,7 +3027,7 @@ int main(int argc, char **argv, char **envp)
 
     current_machine = machine;
 
-    /* Set KVM's vcpu state to qemu's initial CPUState. */
+    /* Set KVM's vcpu state to qemu's initial CPUOldState. */
     if (kvm_enabled()) {
         int ret;
 
@@ -3149,15 +3098,15 @@ int main(int argc, char **argv, char **envp)
     dcl = ds->listeners;
     while (dcl != NULL) {
         if (dcl->dpy_refresh != NULL) {
-            ds->gui_timer = qemu_new_timer_ms(rt_clock, gui_update, ds);
-            qemu_mod_timer(ds->gui_timer, qemu_get_clock_ms(rt_clock));
+            ds->gui_timer = timer_new(QEMU_CLOCK_REALTIME, SCALE_MS, gui_update, ds);
+            timer_mod(ds->gui_timer, qemu_clock_get_ms(QEMU_CLOCK_REALTIME));
         }
         dcl = dcl->next;
     }
 
     if (display_type == DT_NOGRAPHIC || display_type == DT_VNC) {
-        nographic_timer = qemu_new_timer_ms(rt_clock, nographic_update, NULL);
-        qemu_mod_timer(nographic_timer, qemu_get_clock_ms(rt_clock));
+        nographic_timer = timer_new(QEMU_CLOCK_REALTIME, SCALE_MS, nographic_update, NULL);
+        timer_mod(nographic_timer, qemu_clock_get_ms(QEMU_CLOCK_REALTIME));
     }
 
     text_consoles_set_display(display_state);

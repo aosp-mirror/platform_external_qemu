@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include "cpu.h"
 #include "hw/hw.h"
 #include "hw/pci/pci.h"
 #include "monitor/monitor.h"
@@ -839,10 +840,10 @@ PCIDevice *pci_nic_init(PCIBus *bus, NICInfo *nd, int devfn,
     return NULL;
 }
 
-typedef struct {
+struct PCIBridge {
     PCIDevice dev;
     PCIBus *bus;
-} PCIBridge;
+};
 
 static void pci_bridge_write_config(PCIDevice *d,
                              uint32_t address, uint32_t val, int len)

@@ -13,6 +13,7 @@
 #include "hw/arm/pic.h"
 #include "hw/android/goldfish/device.h"
 #include "hw/irq.h"
+#include "hw/hw.h"
 
 enum {
     INTERRUPT_STATUS        = 0x00, // number of pending interrupts

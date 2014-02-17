@@ -13,6 +13,7 @@
 #include "nand_reg.h"
 #include "hw/android/goldfish/nand.h"
 #include "hw/android/goldfish/vmem.h"
+#include "hw/hw.h"
 #include "android/utils/tempfile.h"
 #include "android/qemu-debug.h"
 #include "android/android.h"
@@ -218,8 +219,8 @@ static void  nand_dev_save_disk_state(QEMUFile *f, nand_dev *dev)
 
     lseek_ret = do_lseek(dev->fd, 0, SEEK_END);
     if (lseek_ret == -1) {
+      qemu_file_set_error(f, -errno);
       XLOG("%s EOF seek failed: %s\n", __FUNCTION__, strerror(errno));
-      qemu_file_set_error(f);
       return;
     }
     const uint64_t total_size = lseek_ret;
@@ -228,15 +229,15 @@ static void  nand_dev_save_disk_state(QEMUFile *f, nand_dev *dev)
     /* copy all data from the stream to the stored image */
     lseek_ret = do_lseek(dev->fd, 0, SEEK_SET);
     if (lseek_ret == -1) {
+        qemu_file_set_error(f, -errno);
         XLOG("%s seek failed: %s\n", __FUNCTION__, strerror(errno));
-        qemu_file_set_error(f);
         return;
     }
     do {
         ret = do_read(dev->fd, buffer, buf_size);
         if (ret < 0) {
+            qemu_file_set_error(f, -errno);
             XLOG("%s read failed: %s\n", __FUNCTION__, strerror(errno));
-            qemu_file_set_error(f);
             return;
         }
         qemu_put_buffer(f, buffer, ret);

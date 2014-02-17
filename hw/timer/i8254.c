@@ -66,7 +66,7 @@ static int pit_get_count(PITChannelState *s)
     uint64_t d;
     int counter;
 
-    d = muldiv64(qemu_get_clock_ns(vm_clock) - s->count_load_time, PIT_FREQ, get_ticks_per_sec());
+    d = muldiv64(qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) - s->count_load_time, PIT_FREQ, get_ticks_per_sec());
     switch(s->mode) {
     case 0:
     case 1:
@@ -189,7 +189,7 @@ void pit_set_gate(PITState *pit, int channel, int val)
     case 5:
         if (s->gate < val) {
             /* restart counting on rising edge */
-            s->count_load_time = qemu_get_clock_ns(vm_clock);
+            s->count_load_time = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
             pit_irq_timer_update(s, s->count_load_time);
         }
         break;
@@ -197,7 +197,7 @@ void pit_set_gate(PITState *pit, int channel, int val)
     case 3:
         if (s->gate < val) {
             /* restart counting on rising edge */
-            s->count_load_time = qemu_get_clock_ns(vm_clock);
+            s->count_load_time = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
             pit_irq_timer_update(s, s->count_load_time);
         }
         /* XXX: disable/enable counting */
@@ -228,7 +228,7 @@ static inline void pit_load_count(PITChannelState *s, int val)
 {
     if (val == 0)
         val = 0x10000;
-    s->count_load_time = qemu_get_clock_ns(vm_clock);
+    s->count_load_time = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
     s->count = val;
     pit_irq_timer_update(s, s->count_load_time);
 }
@@ -262,7 +262,7 @@ static void pit_ioport_write(void *opaque, uint32_t addr, uint32_t val)
                     if (!(val & 0x10) && !s->status_latched) {
                         /* status latch */
                         /* XXX: add BCD and null count */
-                        s->status =  (pit_get_out1(s, qemu_get_clock_ns(vm_clock)) << 7) |
+                        s->status =  (pit_get_out1(s, qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL)) << 7) |
                             (s->rw_mode << 4) |
                             (s->mode << 1) |
                             s->bcd;
@@ -377,9 +377,9 @@ static void pit_irq_timer_update(PITChannelState *s, int64_t current_time)
 #endif
     s->next_transition_time = expire_time;
     if (expire_time != -1)
-        qemu_mod_timer(s->irq_timer, expire_time);
+        timer_mod(s->irq_timer, expire_time);
     else
-        qemu_del_timer(s->irq_timer);
+        timer_del(s->irq_timer);
 }
 
 static void pit_irq_timer(void *opaque)
@@ -412,7 +412,7 @@ static void pit_save(QEMUFile *f, void *opaque)
         qemu_put_be64(f, s->count_load_time);
         if (s->irq_timer) {
             qemu_put_be64(f, s->next_transition_time);
-            qemu_put_timer(f, s->irq_timer);
+            timer_put(f, s->irq_timer);
         }
     }
 }
@@ -443,7 +443,7 @@ static int pit_load(QEMUFile *f, void *opaque, int version_id)
         s->count_load_time=qemu_get_be64(f);
         if (s->irq_timer) {
             s->next_transition_time=qemu_get_be64(f);
-            qemu_get_timer(f, s->irq_timer);
+            timer_get(f, s->irq_timer);
         }
     }
     return 0;
@@ -468,7 +468,7 @@ void hpet_pit_disable(void) {
     PITChannelState *s;
     s = &pit_state.channels[0];
     if (s->irq_timer)
-        qemu_del_timer(s->irq_timer);
+        timer_del(s->irq_timer);
 }
 
 /* When HPET is reset or leaving legacy mode, it must reenable i8254
@@ -492,7 +492,7 @@ PITState *pit_init(int base, qemu_irq irq)
 
     s = &pit->channels[0];
     /* the timer 0 is connected to an IRQ */
-    s->irq_timer = qemu_new_timer_ns(vm_clock, pit_irq_timer, s);
+    s->irq_timer = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, pit_irq_timer, s);
     s->irq = irq;
 
     register_savevm("i8254", base, 1, pit_save, pit_load, pit);

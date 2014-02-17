@@ -9,6 +9,8 @@
 #ifndef PXA_H
 # define PXA_H			"hw/arm/pxa.h"
 
+#include "cpu.h"
+
 /* Interrupt numbers */
 # define PXA2XX_PIC_SSP3	0
 # define PXA2XX_PIC_USBH2	2
@@ -63,7 +65,7 @@
 # define PXA2XX_INTERNAL_SIZE	0x40000
 
 /* pxa2xx_pic.c */
-qemu_irq *pxa2xx_pic_init(hwaddr base, CPUState *env);
+qemu_irq *pxa2xx_pic_init(hwaddr base, CPUOldState *env);
 
 /* pxa2xx_timer.c */
 void pxa25x_timer_init(hwaddr base, qemu_irq *irqs);
@@ -72,7 +74,7 @@ void pxa27x_timer_init(hwaddr base, qemu_irq *irqs, qemu_irq irq4);
 /* pxa2xx_gpio.c */
 typedef struct PXA2xxGPIOInfo PXA2xxGPIOInfo;
 PXA2xxGPIOInfo *pxa2xx_gpio_init(hwaddr base,
-                CPUState *env, qemu_irq *pic, int lines);
+                CPUOldState *env, qemu_irq *pic, int lines);
 qemu_irq *pxa2xx_gpio_in_get(PXA2xxGPIOInfo *s);
 void pxa2xx_gpio_out_set(PXA2xxGPIOInfo *s,
                 int line, qemu_irq handler);
@@ -128,7 +130,7 @@ typedef struct PXA2xxI2SState PXA2xxI2SState;
 typedef struct PXA2xxFIrState PXA2xxFIrState;
 
 typedef struct {
-    CPUState *env;
+    CPUOldState *env;
     qemu_irq *pic;
     qemu_irq reset;
     PXA2xxDMAState *dma;

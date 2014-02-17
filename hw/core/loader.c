@@ -142,7 +142,8 @@ int load_image_targphys(const char *filename,
     return got;
 }
 
-void pstrcpy_targphys(hwaddr dest, int buf_size,
+void pstrcpy_targphys(const char* name,
+                      hwaddr dest, int buf_size,
                       const char *source)
 {
     static const uint8_t nul_byte = 0;
