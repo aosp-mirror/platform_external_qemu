@@ -12,6 +12,7 @@
 #include "hw/hw.h"
 #include "hw/boards.h"
 #include "hw/devices.h"
+#include "hw/loader.h"
 #include "net/net.h"
 #include "sysemu/sysemu.h"
 #include "hw/mips/mips.h"

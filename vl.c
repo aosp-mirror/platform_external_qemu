@@ -1547,14 +1547,14 @@ static void gui_update(void *opaque)
             interval = dcl->gui_timer_interval;
         dcl = dcl->next;
     }
-    qemu_mod_timer(ds->gui_timer, interval + qemu_get_clock_ms(rt_clock));
+    timer_mod(ds->gui_timer, interval + qemu_clock_get_ms(QEMU_CLOCK_REALTIME));
 }
 
 static void nographic_update(void *opaque)
 {
     uint64_t interval = GUI_REFRESH_INTERVAL;
 
-    qemu_mod_timer(nographic_timer, interval + qemu_get_clock_ms(rt_clock));
+    timer_mod(nographic_timer, interval + qemu_clock_get_ms(QEMU_CLOCK_REALTIME));
 }
 
 struct vm_change_state_entry {
@@ -3098,15 +3098,15 @@ int main(int argc, char **argv, char **envp)
     dcl = ds->listeners;
     while (dcl != NULL) {
         if (dcl->dpy_refresh != NULL) {
-            ds->gui_timer = qemu_new_timer_ms(rt_clock, gui_update, ds);
-            qemu_mod_timer(ds->gui_timer, qemu_get_clock_ms(rt_clock));
+            ds->gui_timer = timer_new(QEMU_CLOCK_REALTIME, SCALE_MS, gui_update, ds);
+            timer_mod(ds->gui_timer, qemu_clock_get_ms(QEMU_CLOCK_REALTIME));
         }
         dcl = dcl->next;
     }
 
     if (display_type == DT_NOGRAPHIC || display_type == DT_VNC) {
-        nographic_timer = qemu_new_timer_ms(rt_clock, nographic_update, NULL);
-        qemu_mod_timer(nographic_timer, qemu_get_clock_ms(rt_clock));
+        nographic_timer = timer_new(QEMU_CLOCK_REALTIME, SCALE_MS, nographic_update, NULL);
+        timer_mod(nographic_timer, qemu_clock_get_ms(QEMU_CLOCK_REALTIME));
     }
 
     text_consoles_set_display(display_state);

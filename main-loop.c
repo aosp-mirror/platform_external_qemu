@@ -51,7 +51,9 @@
 #include <mmsystem.h>
 #endif
 
+int qemu_calculate_timeout(void);
 
+#ifndef CONFIG_ANDROID
 /* Conversion factor from emulated instructions to virtual clock ticks.  */
 int icount_time_shift;
 /* Arbitrarily pick 1MIPS as the minimum allowable speed.  */
@@ -60,6 +62,7 @@ int icount_time_shift;
 int64_t qemu_icount_bias;
 static QEMUTimer *icount_rt_timer;
 static QEMUTimer *icount_vm_timer;
+#endif  // !CONFIG_ANDROID
 
 #ifndef _WIN32
 static int io_thread_fd = -1;
@@ -301,7 +304,7 @@ void main_loop_wait(int timeout)
     }
     charpipe_poll();
 
-    qemu_run_all_timers();
+    qemu_clock_run_all_timers();
 
     /* Check bottom-halves last in case any of the earlier events triggered
        them.  */
@@ -366,6 +369,7 @@ void main_loop(void)
     pause_all_vcpus();
 }
 
+#ifndef CONFIG_ANDROID // TODO(digit): Re-enable icount handling.
 /* Correlation between real and virtual time is always going to be
    fairly approximate, so ignore small variation.
    When the guest is idle real and virtual time will be aligned in
@@ -383,7 +387,7 @@ static void icount_adjust(void)
         return;
 
     cur_time = cpu_get_clock();
-    cur_icount = qemu_get_clock_ns(vm_clock);
+    cur_icount = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
     delta = cur_icount - cur_time;
     /* FIXME: This is a very crude algorithm, somewhat prone to oscillation.  */
     if (delta > 0
@@ -404,15 +408,15 @@ static void icount_adjust(void)
 
 static void icount_adjust_rt(void * opaque)
 {
-    qemu_mod_timer(icount_rt_timer,
-                   qemu_get_clock_ms(rt_clock) + 1000);
+    timer_mod(icount_rt_timer,
+                   qemu_clock_get_ms(QEMU_CLOCK_REALTIME) + 1000);
     icount_adjust();
 }
 
 static void icount_adjust_vm(void * opaque)
 {
-    qemu_mod_timer(icount_vm_timer,
-                   qemu_get_clock_ns(vm_clock) + get_ticks_per_sec() / 10);
+    timer_mod(icount_vm_timer,
+                   qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + get_ticks_per_sec() / 10);
     icount_adjust();
 }
 
@@ -440,13 +444,17 @@ void configure_icount(const char *option)
        the virtual time trigger catches emulated time passing too fast.
        Realtime triggers occur even when idle, so use them less frequently
        than VM triggers.  */
-    icount_rt_timer = qemu_new_timer_ms(rt_clock, icount_adjust_rt, NULL);
-    qemu_mod_timer(icount_rt_timer,
-                   qemu_get_clock_ms(rt_clock) + 1000);
-    icount_vm_timer = qemu_new_timer_ns(vm_clock, icount_adjust_vm, NULL);
-    qemu_mod_timer(icount_vm_timer,
-                   qemu_get_clock_ns(vm_clock) + get_ticks_per_sec() / 10);
+    icount_rt_timer = timer_new(QEMU_CLOCK_REALTIME, SCALE_MS, icount_adjust_rt, NULL);
+    timer_mod(icount_rt_timer,
+                   qemu_clock_get_ms(QEMU_CLOCK_REALTIME) + 1000);
+    icount_vm_timer = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, icount_adjust_vm, NULL);
+    timer_mod(icount_vm_timer,
+                   qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + get_ticks_per_sec() / 10);
 }
+#else  // CONFIG_ANDROID
+void configure_icount(const char* opts) {
+}
+#endif  // CONFIG_ANDROID
 
 struct qemu_alarm_timer {
     char const *name;
@@ -612,103 +620,6 @@ next:
     }
 }
 
-static int64_t vm_clock_warp_start;
-
-static void icount_warp_rt(void *opaque)
-{
-    if (vm_clock_warp_start == -1) {
-        return;
-    }
-
-    if (vm_running) {
-        int64_t clock = qemu_get_clock_ns(rt_clock);
-        int64_t warp_delta = clock - vm_clock_warp_start;
-        if (use_icount == 1) {
-            qemu_icount_bias += warp_delta;
-        } else {
-            /*
-             * In adaptive mode, do not let the vm_clock run too
-             * far ahead of real time.
-             */
-            int64_t cur_time = cpu_get_clock();
-            int64_t cur_icount = qemu_get_clock_ns(vm_clock);
-            int64_t delta = cur_time - cur_icount;
-            qemu_icount_bias += MIN(warp_delta, delta);
-        }
-        if (qemu_timer_expired(active_timers[QEMU_CLOCK_VIRTUAL],
-                               qemu_get_clock_ns(vm_clock))) {
-            qemu_notify_event();
-        }
-    }
-    vm_clock_warp_start = -1;
-}
-
-static void qemu_clock_warp(QEMUClock *clock)
-{
-    int64_t deadline;
-
-    QEMUTimer* warp_timer = qemu_clock_get_warp_timer(clock);
-    if (!warp_timer)
-        return;
-
-    /*
-     * There are too many global variables to make the "warp" behavior
-     * applicable to other clocks.  But a clock argument removes the
-     * need for if statements all over the place.
-     */
-    assert(clock == vm_clock);
-
-    /*
-     * If the CPUs have been sleeping, advance the vm_clock timer now.  This
-     * ensures that the deadline for the timer is computed correctly below.
-     * This also makes sure that the insn counter is synchronized before the
-     * CPU starts running, in case the CPU is woken by an event other than
-     * the earliest vm_clock timer.
-     */
-    icount_warp_rt(NULL);
-    if (qemu_cpu_has_work(cpu_single_env) || 
-            !qemu_clock_has_active_timer(clock)) {
-        qemu_del_timer(qemu_clock_get_warp_timer(clock));
-        return;
-    }
-
-    vm_clock_warp_start = qemu_get_clock_ns(rt_clock);
-    deadline = qemu_next_icount_deadline();
-    if (deadline > 0) {
-        /*
-         * Ensure the vm_clock proceeds even when the virtual CPU goes to
-         * sleep.  Otherwise, the CPU might be waiting for a future timer
-         * interrupt to wake it up, but the interrupt never comes because
-         * the vCPU isn't running any insns and thus doesn't advance the
-         * vm_clock.
-         *
-         * An extreme solution for this problem would be to never let VCPUs
-         * sleep in icount mode if there is a pending vm_clock timer; rather
-         * time could just advance to the next vm_clock event.  Instead, we
-         * do stop VCPUs and only advance vm_clock after some "real" time,
-         * (related to the time left until the next event) has passed.  This
-         * rt_clock timer will do this.  This avoids that the warps are too
-         * visible externally---for example, you will not be sending network
-         * packets continously instead of every 100ms.
-         */
-        qemu_mod_timer(qemu_clock_get_warp_timer(clock),
-                       vm_clock_warp_start + deadline);
-    } else {
-        qemu_notify_event();
-    }
-}
-
-void qemu_adjust_clock(QEMUClock* clock) {
-    if (!alarm_timer->pending) {
-        qemu_rearm_alarm_timer(alarm_timer);
-    }
-    /* Interrupt execution to force deadline recalculation.  */
-    qemu_clock_warp(clock);
-    if (use_icount) {
-        qemu_notify_event();
-    }
-}
-
 void qemu_run_all_timers(void)
 {
     alarm_timer->pending = 0;
@@ -721,11 +632,11 @@ void qemu_run_all_timers(void)
 
     /* vm time timers */
     if (vm_running) {
-        qemu_run_timers(vm_clock);
+        qemu_clock_run_timers(QEMU_CLOCK_VIRTUAL);
     }
 
-    qemu_run_timers(rt_clock);
-    qemu_run_timers(host_clock);
+    qemu_clock_run_timers(QEMU_CLOCK_REALTIME);
+    qemu_clock_run_timers(QEMU_CLOCK_HOST);
 }
 
 static int timer_alarm_pending = 1;
@@ -756,7 +667,7 @@ static void host_alarm_handler(int host_signum)
         static int64_t delta_min = INT64_MAX;
         static int64_t delta_max, delta_cum, last_clock, delta, ti;
         static int count;
-        ti = qemu_get_clock_ns(vm_clock);
+        ti = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
         if (last_clock != 0) {
             delta = ti - last_clock;
             if (delta < delta_min)
@@ -791,20 +702,20 @@ static void host_alarm_handler(int host_signum)
 int64_t qemu_next_icount_deadline(void)
 {
     assert(use_icount);
-    return qemu_clock_next_deadline(vm_clock);
+    return qemu_clock_deadline_ns_all(QEMU_CLOCK_VIRTUAL);
 }
 
 static int64_t qemu_next_alarm_deadline(void)
 {
     int64_t delta = INT32_MAX;
     if (!use_icount) {
-        delta = qemu_clock_next_deadline(vm_clock);
+        delta = qemu_clock_deadline_ns_all(QEMU_CLOCK_VIRTUAL);
     }
-    int64_t hdelta = qemu_clock_next_deadline(host_clock);
+    int64_t hdelta = qemu_clock_deadline_ns_all(QEMU_CLOCK_HOST);
     if (hdelta < delta) {
         delta = hdelta;
     }
-    int64_t rtdelta = qemu_clock_next_deadline(rt_clock);
+    int64_t rtdelta = qemu_clock_deadline_ns_all(QEMU_CLOCK_REALTIME);
     if (rtdelta < delta) {
         delta = rtdelta;
     }
@@ -964,9 +875,9 @@ static void dynticks_rearm_timer(struct qemu_alarm_timer *t)
     int64_t current_ns;
 
     assert(alarm_has_dynticks(t));
-    if (!active_timers[QEMU_CLOCK_REALTIME] &&
-        !active_timers[QEMU_CLOCK_VIRTUAL] &&
-        !active_timers[QEMU_CLOCK_HOST])
+    if (!qemu_clock_has_timers(QEMU_CLOCK_REALTIME) &&
+        !qemu_clock_has_timers(QEMU_CLOCK_VIRTUAL) &&
+        !qemu_clock_has_timers(QEMU_CLOCK_HOST))
         return;
 
     nearest_delta_ns = qemu_next_alarm_deadline();
@@ -1100,9 +1011,9 @@ static void mm_rearm_timer(struct qemu_alarm_timer *t)
     int nearest_delta_ms;
 
     assert(alarm_has_dynticks(t));
-    if (!active_timers[QEMU_CLOCK_REALTIME] &&
-        !active_timers[QEMU_CLOCK_VIRTUAL] &&
-        !active_timers[QEMU_CLOCK_HOST]) {
+    if (!qemu_clock_has_timers(QEMU_CLOCK_REALTIME) &&
+        !qemu_clock_has_timers(QEMU_CLOCK_VIRTUAL) &&
+        !qemu_clock_has_timers(QEMU_CLOCK_HOST)) {
         return;
     }
 
@@ -1170,11 +1081,11 @@ static void win32_rearm_timer(struct qemu_alarm_timer *t)
     BOOLEAN success;
 
     assert(alarm_has_dynticks(t));
-    if (!active_timers[QEMU_CLOCK_REALTIME] &&
-        !active_timers[QEMU_CLOCK_VIRTUAL] &&
-        !active_timers[QEMU_CLOCK_HOST])
+    if (!qemu_clock_has_timers(QEMU_CLOCK_REALTIME) &&
+        !qemu_clock_has_timers(QEMU_CLOCK_VIRTUAL) &&
+        !qemu_clock_has_timers(QEMU_CLOCK_HOST)) {
         return;
-
+    }
     nearest_delta_ms = (qemu_next_alarm_deadline() + 999999) / 1000000;
     if (nearest_delta_ms < 1) {
         nearest_delta_ms = 1;

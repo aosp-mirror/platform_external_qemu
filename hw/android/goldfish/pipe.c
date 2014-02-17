@@ -797,7 +797,7 @@ throttlePipe_init( void* hwpipe, void* svcOpaque, const char* args )
 
     ANEW0(pipe);
     pingPongPipe_init0(&pipe->pingpong, hwpipe, svcOpaque);
-    pipe->timer = qemu_new_timer_ns(vm_clock, throttlePipe_timerFunc, pipe);
+    pipe->timer = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, throttlePipe_timerFunc, pipe);
     /* For now, limit to 500 KB/s in both directions */
     pipe->sendRate = 1e9 / (500*1024*8);
     pipe->recvRate = pipe->sendRate;
@@ -809,8 +809,8 @@ throttlePipe_close( void* opaque )
 {
     ThrottlePipe* pipe = opaque;
 
-    qemu_del_timer(pipe->timer);
-    qemu_free_timer(pipe->timer);
+    timer_del(pipe->timer);
+    timer_free(pipe->timer);
     pingPongPipe_close(&pipe->pingpong);
 }
 
@@ -833,7 +833,7 @@ throttlePipe_rearm( ThrottlePipe* pipe )
 
     if (minExpiration != 0) {
         DD("%s: Arming for %lld\n", __FUNCTION__, minExpiration);
-        qemu_mod_timer(pipe->timer, minExpiration);
+        timer_mod(pipe->timer, minExpiration);
     }
 }
 
@@ -841,7 +841,7 @@ static void
 throttlePipe_timerFunc( void* opaque )
 {
     ThrottlePipe* pipe = opaque;
-    int64_t  now = qemu_get_clock_ns(vm_clock);
+    int64_t  now = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
 
     DD("%s: TICK! now=%lld sendExpiration=%lld recvExpiration=%lld\n",
        __FUNCTION__, now, pipe->sendExpiration, pipe->recvExpiration);
@@ -879,7 +879,7 @@ throttlePipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int n
     ret = pingPongPipe_sendBuffers(&pipe->pingpong, buffers, numBuffers);
     if (ret > 0) {
         /* Compute next send expiration time */
-        pipe->sendExpiration = qemu_get_clock_ns(vm_clock) + ret*pipe->sendRate;
+        pipe->sendExpiration = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + ret*pipe->sendRate;
         throttlePipe_rearm(pipe);
     }
     return ret;
@@ -897,7 +897,7 @@ throttlePipe_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuff
 
     ret = pingPongPipe_recvBuffers(&pipe->pingpong, buffers, numBuffers);
     if (ret > 0) {
-        pipe->recvExpiration = qemu_get_clock_ns(vm_clock) + ret*pipe->recvRate;
+        pipe->recvExpiration = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + ret*pipe->recvRate;
         throttlePipe_rearm(pipe);
     }
     return ret;

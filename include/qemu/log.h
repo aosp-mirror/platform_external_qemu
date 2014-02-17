@@ -103,12 +103,15 @@ static inline void log_cpu_state_mask(int mask, CPUOldState *cpu, int flags)
 }
 
 /* disas() and target_disas() to qemu_logfile: */
+void target_disas(FILE*, CPUArchState*, target_ulong, target_ulong, int);
+
 static inline void log_target_disas(CPUArchState *env, target_ulong start,
                                     target_ulong len, int flags)
 {
     target_disas(qemu_logfile, env, start, len, flags);
 }
 
+void disas(FILE*, void*, unsigned long);
 static inline void log_disas(void *code, unsigned long size)
 {
     disas(qemu_logfile, code, size);
