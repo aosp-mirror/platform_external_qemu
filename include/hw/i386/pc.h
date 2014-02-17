@@ -1,7 +1,9 @@
 #ifndef HW_PC_H
 #define HW_PC_H
 
+#include "cpu.h"
 #include "qemu-common.h"
+#include "exec/hwaddr.h"
 
 /* PC-style peripherals (also used by other machines).  */
 
@@ -46,10 +48,10 @@ void apic_deliver_irq(uint8_t dest, uint8_t dest_mode,
                              uint8_t delivery_mode,
                              uint8_t vector_num, uint8_t polarity,
                              uint8_t trigger_mode);
-int apic_init(CPUState *env);
-int apic_accept_pic_intr(CPUState *env);
-void apic_deliver_pic_intr(CPUState *env, int level);
-int apic_get_interrupt(CPUState *env);
+int apic_init(CPUOldState *env);
+int apic_accept_pic_intr(CPUOldState *env);
+void apic_deliver_pic_intr(CPUOldState *env, int level);
+int apic_get_interrupt(CPUOldState *env);
 IOAPICState *ioapic_init(void);
 void ioapic_set_irq(void *opaque, int vector, int level);
 void apic_reset_irq_delivered(void);
@@ -162,5 +164,5 @@ void pci_piix4_ide_init(PCIBus *bus, BlockDriverState **hd_table, int devfn,
 
 void isa_ne2000_init(int base, qemu_irq irq, NICInfo *nd);
 
-int cpu_is_bsp(CPUState *env);
+int cpu_is_bsp(CPUOldState *env);
 #endif

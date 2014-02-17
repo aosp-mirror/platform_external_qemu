@@ -13,6 +13,7 @@
 #define _TRACE_DEV_H_
 
 #include "hw/android/goldfish/device.h"
+#include "cpu.h"
 
 #define CLIENT_PAGE_SIZE        4096
 

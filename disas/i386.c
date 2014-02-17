@@ -155,13 +155,6 @@
 
 #include <setjmp.h>
 
-// ANDROID: TODO(digit): Remove this hack once compilation with mingw-w64 works.
-#ifdef _WIN32
-#define sigjmp_buf jmp_buf
-#define sigsetjmp(x,y) setjmp(x)
-#define siglongjmp longjmp
-#endif
-
 static int fetch_data2(struct disassemble_info *, bfd_byte *);
 static int fetch_data(struct disassemble_info *, bfd_byte *);
 static void ckprefix (void);

@@ -27,4 +27,6 @@ int parse_host_port(SockAddress*  saddr, const char *str);
 int parse_host_src_port(SockAddress*  haddr, SockAddress*  saddr,
                         const char *str);
 
+void qemu_set_block(int fd);
+
 #endif /* QEMU__SOCKET_H */

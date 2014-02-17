@@ -28,7 +28,6 @@
 
 #define AUDIO_CAP "wav"
 #include "audio_int.h"
-#include "migration/qemu-file.h"
 
 #define  WAV_AUDIO_IN  1
 
@@ -36,7 +35,7 @@
  **/
 typedef struct WAVVoiceOut {
     HWVoiceOut hw;
-    QEMUFile *f;
+    FILE *f;
     int64_t old_ticks;
     void *pcm_buf;
     int total_samples;
@@ -61,7 +60,7 @@ static int wav_out_run (HWVoiceOut *hw, int live)
     int rpos, decr, samples;
     uint8_t *dst;
     struct st_sample *src;
-    int64_t now = qemu_get_clock (vm_clock);
+    int64_t now = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
     int64_t ticks = now - wav->old_ticks;
     int64_t bytes =
         muldiv64 (ticks, hw->info.bytes_per_second, get_ticks_per_sec ());
@@ -85,7 +84,10 @@ static int wav_out_run (HWVoiceOut *hw, int live)
         dst = advance (wav->pcm_buf, rpos << hw->info.shift);
 
         hw->clip (dst, src, convert_samples);
-        qemu_put_buffer (wav->f, dst, convert_samples << hw->info.shift);
+        if (fwrite (dst, convert_samples << hw->info.shift, 1, wav->f) != 1) {
+            dolog ("wav_run_out: fwrite of %d bytes failed\nReaons: %s\n",
+                   convert_samples << hw->info.shift, strerror (errno));
+        }
 
         rpos = (rpos + convert_samples) % hw->samples;
         samples -= convert_samples;
@@ -161,7 +163,7 @@ static int wav_out_init (HWVoiceOut *hw, struct audsettings *as)
     le_store (hdr + 28, hw->info.freq << (bits16 + stereo), 4);
     le_store (hdr + 32, 1 << (bits16 + stereo), 2);
 
-    wav->f = qemu_fopen (conf_out.wav_path, "wb");
+    wav->f = fopen (conf_out.wav_path, "wb");
     if (!wav->f) {
         dolog ("Failed to open wave file `%s'\nReason: %s\n",
                conf_out.wav_path, strerror (errno));
@@ -170,7 +172,11 @@ static int wav_out_init (HWVoiceOut *hw, struct audsettings *as)
         return -1;
     }
 
-    qemu_put_buffer (wav->f, hdr, sizeof (hdr));
+    if (fwrite (hdr, sizeof (hdr), 1, wav->f) != 1) {
+        dolog ("wav_init_out: failed to write header\nReason: %s\n",
+               strerror(errno));
+        return -1;
+    }
     return 0;
 }
 
@@ -189,13 +195,13 @@ static void wav_out_fini (HWVoiceOut *hw)
     le_store (rlen, rifflen, 4);
     le_store (dlen, datalen, 4);
 
-    qemu_fseek (wav->f, 4, SEEK_SET);
-    qemu_put_buffer (wav->f, rlen, 4);
+    fseek (wav->f, 4, SEEK_SET);
+    fwrite(rlen, 4, 1, wav->f);
 
-    qemu_fseek (wav->f, 32, SEEK_CUR);
-    qemu_put_buffer (wav->f, dlen, 4);
+    fseek (wav->f, 32, SEEK_CUR);
+    fwrite(dlen, 4, 1, wav->f);
 
-    qemu_fclose (wav->f);
+    fclose (wav->f);
     wav->f = NULL;
 
     g_free (wav->pcm_buf);
@@ -223,7 +229,7 @@ static int wav_out_ctl (HWVoiceOut *hw, int cmd, ...)
 
 typedef struct WAVVoiceIn {
     HWVoiceIn  hw;
-    QEMUFile*  f;
+    FILE*      f;
     int64_t    old_ticks;
     void*      pcm_buf;
     int        total_samples;
@@ -252,15 +258,15 @@ wav_in_init (HWVoiceIn *hw, struct audsettings *as)
     struct audsettings wav_as = *as;
     int           nchannels, freq, format, bits;
 
-    wav->f = qemu_fopen (path, "rb");
+    wav->f = fopen (path, "rb");
     if (wav->f == NULL) {
         dolog("Failed to open wave file '%s'\nReason: %s\n", path,
               strerror(errno));
         return -1;
     }
 
-    if (qemu_get_buffer (wav->f, hdr, sizeof(hdr)) != (int)sizeof(hdr)) {
-        dolog("File '%s' to be a .wav file\n", path);
+    if (fread(hdr, sizeof(hdr), 1, wav->f) != 1) {
+        dolog("File '%s' doesn't seem to be a .wav file\n", path);
         goto Fail;
     }
 
@@ -321,7 +327,7 @@ wav_in_init (HWVoiceIn *hw, struct audsettings *as)
     return 0;
 
 Fail:
-    qemu_fclose (wav->f);
+    fclose (wav->f);
     wav->f = NULL;
     return -1;
 }
@@ -335,7 +341,7 @@ static void wav_in_fini (HWVoiceIn *hw)
         return;
     }
 
-    qemu_fclose (wav->f);
+    fclose (wav->f);
     wav->f = NULL;
 
     g_free (wav->pcm_buf);
@@ -349,7 +355,7 @@ static int wav_in_run (HWVoiceIn *hw)
     uint8_t*      src;
     struct st_sample*  dst;
 
-    int64_t  now   = qemu_get_clock (vm_clock);
+    int64_t  now   = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
     int64_t  ticks = now - wav->old_ticks;
     int64_t  bytes = muldiv64(ticks, hw->info.bytes_per_second, get_ticks_per_sec());
 
@@ -377,12 +383,17 @@ static int wav_in_run (HWVoiceIn *hw)
         dst = hw->conv_buf + wpos;
         src = advance (wav->pcm_buf, wpos << hw->info.shift);
 
-        qemu_get_buffer (wav->f, src, convert_samples << hw->info.shift);
-        memcpy (dst, src, convert_samples << hw->info.shift);
+        clearerr(wav->f);
+        size_t read_bytes = fread(src, 1, convert_samples << hw->info.shift, wav->f);
+        if (read_bytes == 0 && ferror(wav->f) != EINTR)
+            return 0;
 
-        wpos                = (wpos + convert_samples) % hw->samples;
-        samples            -= convert_samples;
-        wav->total_samples += convert_samples;
+        size_t read_samples = read_bytes >> hw->info.shift;
+        memcpy (dst, src, read_bytes);
+
+        wpos                = (wpos + read_samples) % hw->samples;
+        samples            -= read_samples;
+        wav->total_samples += read_samples;
     }
 
     hw->wpos = wpos;

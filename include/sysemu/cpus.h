@@ -32,5 +32,6 @@ extern int debug_requested;
 void resume_all_vcpus(void);
 void pause_all_vcpus(void);
 int qemu_init_main_loop(void);
+void main_loop(void);
 
 #endif /* QEMU_CPUS_H */

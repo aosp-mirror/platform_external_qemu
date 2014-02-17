@@ -1,9 +1,9 @@
-#include "hw/hw.h"
+#include <stdio.h>
 #include "monitor/monitor.h"
 #include "audio.h"
 
 typedef struct {
-    QEMUFile *f;
+    FILE *f;
     int bytes;
     char *path;
     int freq;
@@ -40,12 +40,12 @@ static void wav_destroy (void *opaque)
         le_store (rlen, rifflen, 4);
         le_store (dlen, datalen, 4);
 
-        qemu_fseek (wav->f, 4, SEEK_SET);
-        qemu_put_buffer (wav->f, rlen, 4);
+        fseek (wav->f, 4, SEEK_SET);
+        fwrite(rlen, 4, 1, wav->f);
 
-        qemu_fseek (wav->f, 32, SEEK_CUR);
-        qemu_put_buffer (wav->f, dlen, 4);
-        qemu_fclose (wav->f);
+        fseek (wav->f, 32, SEEK_CUR);
+        fwrite(dlen, 4, 1, wav->f);
+        fclose (wav->f);
     }
 
     g_free (wav->path);
@@ -55,7 +55,7 @@ static void wav_capture (void *opaque, void *buf, int size)
 {
     WAVState *wav = opaque;
 
-    qemu_put_buffer (wav->f, buf, size);
+    fwrite(buf, size, 1, wav->f);
     wav->bytes += size;
 }
 
@@ -130,7 +130,7 @@ int wav_start_capture (CaptureState *s, const char *path, int freq,
     le_store (hdr + 28, freq << shift, 4);
     le_store (hdr + 32, 1 << shift, 2);
 
-    wav->f = qemu_fopen (path, "wb");
+    wav->f = fopen (path, "wb");
     if (!wav->f) {
         monitor_printf(mon, "Failed to open wave file `%s'\nReason: %s\n",
                        path, strerror (errno));
@@ -143,13 +143,13 @@ int wav_start_capture (CaptureState *s, const char *path, int freq,
     wav->nchannels = nchannels;
     wav->freq = freq;
 
-    qemu_put_buffer (wav->f, hdr, sizeof (hdr));
+    fwrite(hdr, sizeof(hdr), 1, wav->f);
 
     cap = AUD_add_capture (&as, &ops, wav);
     if (!cap) {
         monitor_printf(mon, "Failed to add audio capture\n");
         g_free (wav->path);
-        qemu_fclose (wav->f);
+        fclose (wav->f);
         g_free (wav);
         return -1;
     }
