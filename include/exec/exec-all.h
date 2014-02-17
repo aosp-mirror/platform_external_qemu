@@ -77,6 +77,7 @@ void restore_state_to_opc(CPUArchState *env, struct TranslationBlock *tb,
 
 unsigned long code_gen_max_block_size(void);
 void cpu_gen_init(void);
+void tcg_exec_init(unsigned long tb_size);
 int cpu_gen_code(CPUArchState *env, struct TranslationBlock *tb,
                  int *gen_code_size_ptr);
 bool cpu_restore_state(struct TranslationBlock *tb,
@@ -101,8 +102,8 @@ int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
 int tlb_set_page(CPUArchState *env1, target_ulong vaddr,
                  hwaddr paddr, int prot,
                  int mmu_idx, int is_softmmu);
+void tb_reset_jump_recursive(TranslationBlock *tb);
 #else
-#error BOO
 static inline void tlb_flush_page(CPUArchState *env, target_ulong addr)
 {
 }
@@ -119,6 +120,7 @@ typedef struct PhysPageDesc {
 } PhysPageDesc;
 
 PhysPageDesc *phys_page_find(hwaddr index);
+PhysPageDesc *phys_page_find_alloc(hwaddr index, int alloc);
 
 int io_mem_watch;
 
@@ -291,7 +293,8 @@ void tb_flush(CPUArchState *env);
 void tb_link_phys(TranslationBlock *tb,
                   target_ulong phys_pc, target_ulong phys_page2);
 void tb_phys_invalidate(TranslationBlock *tb, tb_page_addr_t page_addr);
-
+void tb_invalidate_phys_page_fast0(hwaddr start, int len);
+    
 extern uint8_t *code_gen_ptr;
 extern int code_gen_max_blocks;
 
