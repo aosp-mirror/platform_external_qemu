@@ -716,7 +716,7 @@ static void vnc_update_client(void *opaque)
 
         if (vs->output.offset && !vs->audio_cap && !vs->force_update) {
             /* kernel send buffers are full -> drop frames to throttle */
-            qemu_mod_timer(vs->timer, qemu_get_clock_ms(rt_clock) + VNC_REFRESH_INTERVAL);
+            timer_mod(vs->timer, qemu_clock_get_ms(QEMU_CLOCK_REALTIME) + VNC_REFRESH_INTERVAL);
             return;
         }
 
@@ -757,7 +757,7 @@ static void vnc_update_client(void *opaque)
         }
 
         if (!has_dirty && !vs->audio_cap && !vs->force_update) {
-            qemu_mod_timer(vs->timer, qemu_get_clock_ms(rt_clock) + VNC_REFRESH_INTERVAL);
+            timer_mod(vs->timer, qemu_clock_get_ms(QEMU_CLOCK_REALTIME) + VNC_REFRESH_INTERVAL);
             return;
         }
 
@@ -805,7 +805,7 @@ static void vnc_update_client(void *opaque)
     }
 
     if (vs->csock != -1) {
-        qemu_mod_timer(vs->timer, qemu_get_clock_ms(rt_clock) + VNC_REFRESH_INTERVAL);
+        timer_mod(vs->timer, qemu_clock_get_ms(QEMU_CLOCK_REALTIME) + VNC_REFRESH_INTERVAL);
     } else {
         vnc_disconnect_finish(vs);
     }
@@ -889,8 +889,8 @@ static void vnc_disconnect_start(VncState *vs)
 
 static void vnc_disconnect_finish(VncState *vs)
 {
-    qemu_del_timer(vs->timer);
-    qemu_free_timer(vs->timer);
+    timer_del(vs->timer);
+    timer_free(vs->timer);
     if (vs->input.buffer) g_free(vs->input.buffer);
     if (vs->output.buffer) g_free(vs->output.buffer);
 #ifdef CONFIG_VNC_TLS
@@ -2067,7 +2067,7 @@ static void vnc_connect(VncDisplay *vd, int csock)
 
     vs->vd = vd;
     vs->ds = vd->ds;
-    vs->timer = qemu_new_timer_ms(rt_clock, vnc_update_client, vs);
+    vs->timer = timer_new(QEMU_CLOCK_REALTIME, SCALE_MS, vnc_update_client, vs);
     vs->last_x = -1;
     vs->last_y = -1;
 

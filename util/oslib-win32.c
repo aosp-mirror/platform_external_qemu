@@ -26,10 +26,15 @@
  * THE SOFTWARE.
  */
 #include <windows.h>
+#include <glib.h>
+#include <stdlib.h>
 #include "config-host.h"
 #include "sysemu/sysemu.h"
 #include "trace.h"
 #include "qemu/sockets.h"
+
+/* this must come after including "trace.h" */
+#include <shlobj.h>
 
 void *qemu_oom_check(void *ptr)
 {
@@ -67,19 +72,83 @@ void *qemu_vmalloc(size_t size)
     return ptr;
 }
 
+void *qemu_anon_ram_alloc(size_t size)
+{
+    void *ptr;
+
+    /* FIXME: this is not exactly optimal solution since VirtualAlloc
+       has 64Kb granularity, but at least it guarantees us that the
+       memory is page aligned. */
+    ptr = VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
+    //trace_qemu_anon_ram_alloc(size, ptr);
+    return ptr;
+}
+
 void qemu_vfree(void *ptr)
 {
     //trace_qemu_vfree(ptr);
-    VirtualFree(ptr, 0, MEM_RELEASE);
+    if (ptr) {
+        VirtualFree(ptr, 0, MEM_RELEASE);
+    }
 }
 
-#if 0 /* in sockets.c */
-void socket_set_nonblock(int fd)
+void qemu_anon_ram_free(void *ptr, size_t size)
+{
+    //trace_qemu_anon_ram_free(ptr, size);
+    if (ptr) {
+        VirtualFree(ptr, 0, MEM_RELEASE);
+    }
+}
+
+/* FIXME: add proper locking */
+struct tm *gmtime_r(const time_t *timep, struct tm *result)
+{
+    struct tm *p = gmtime(timep);
+    memset(result, 0, sizeof(*result));
+    if (p) {
+        *result = *p;
+        p = result;
+    }
+    return p;
+}
+
+/* FIXME: add proper locking */
+struct tm *localtime_r(const time_t *timep, struct tm *result)
+{
+    struct tm *p = localtime(timep);
+    memset(result, 0, sizeof(*result));
+    if (p) {
+        *result = *p;
+        p = result;
+    }
+    return p;
+}
+
+void qemu_set_block(int fd)
+{
+    unsigned long opt = 0;
+    WSAEventSelect(fd, NULL, 0);
+    ioctlsocket(fd, FIONBIO, &opt);
+}
+
+void qemu_set_nonblock(int fd)
 {
     unsigned long opt = 1;
     ioctlsocket(fd, FIONBIO, &opt);
-}
+#ifndef CONFIG_ANDROID
+    qemu_fd_register(fd);
 #endif
+}
+
+int socket_set_fast_reuse(int fd)
+{
+    /* Enabling the reuse of an endpoint that was used by a socket still in
+     * TIME_WAIT state is usually performed by setting SO_REUSEADDR. On Windows
+     * fast reuse is the default and SO_REUSEADDR does strange things. So we
+     * don't have to do anything here. More info can be found at:
+     * http://msdn.microsoft.com/en-us/library/windows/desktop/ms740621.aspx */
+    return 0;
+}
 
 int inet_aton(const char *cp, struct in_addr *ia)
 {
@@ -113,4 +182,26 @@ int qemu_gettimeofday(qemu_timeval *tp)
   /* Always return 0 as per Open Group Base Specifications Issue 6.
      Do not set errno on error.  */
   return 0;
+}
+
+int qemu_get_thread_id(void)
+{
+    return GetCurrentThreadId();
+}
+
+char *
+qemu_get_local_state_pathname(const char *relative_pathname)
+{
+    HRESULT result;
+    char base_path[MAX_PATH+1] = "";
+
+    result = SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL,
+                             /* SHGFP_TYPE_CURRENT */ 0, base_path);
+    if (result != S_OK) {
+        /* misconfigured environment */
+        g_critical("CSIDL_COMMON_APPDATA unavailable: %ld", (long)result);
+        abort();
+    }
+    return g_strdup_printf("%s" G_DIR_SEPARATOR_S "%s", base_path,
+                           relative_pathname);
 }

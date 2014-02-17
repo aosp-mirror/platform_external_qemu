@@ -3,6 +3,12 @@
 #ifndef TARGPHYS_H
 #define TARGPHYS_H
 
+#include <stdint.h>
+
+#ifndef TARGET_PHYS_ADDR_BITS
+#define TARGET_PHYS_ADDR_BITS 32
+#endif
+
 #ifdef TARGET_PHYS_ADDR_BITS
 /* hwaddr is the type of a physical address (its size can
    be different from 'target_ulong').  */

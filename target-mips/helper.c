@@ -35,7 +35,7 @@ enum {
 };
 
 /* no MMU emulation */
-int no_mmu_map_address (CPUState *env, hwaddr *physical, int *prot,
+int no_mmu_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
                         target_ulong address, int rw, int access_type)
 {
     *physical = address;
@@ -44,7 +44,7 @@ int no_mmu_map_address (CPUState *env, hwaddr *physical, int *prot,
 }
 
 /* fixed mapping MMU emulation */
-int fixed_mmu_map_address (CPUState *env, hwaddr *physical, int *prot,
+int fixed_mmu_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
                            target_ulong address, int rw, int access_type)
 {
     if (address <= (int32_t)0x7FFFFFFFUL) {
@@ -62,7 +62,7 @@ int fixed_mmu_map_address (CPUState *env, hwaddr *physical, int *prot,
 }
 
 /* MIPS32/MIPS64 R4000-style MMU emulation */
-int r4k_map_address (CPUState *env, hwaddr *physical, int *prot,
+int r4k_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
                      target_ulong address, int rw, int access_type)
 {
     uint8_t ASID = env->CP0_EntryHi & 0xFF;
@@ -105,7 +105,7 @@ int r4k_map_address (CPUState *env, hwaddr *physical, int *prot,
 }
 
 #if !defined(CONFIG_USER_ONLY)
-static int get_physical_address (CPUState *env, hwaddr *physical,
+static int get_physical_address (CPUMIPSState *env, hwaddr *physical,
                                 int *prot, target_ulong address,
                                 int rw, int access_type)
 {
@@ -207,7 +207,7 @@ static int get_physical_address (CPUState *env, hwaddr *physical,
 }
 #endif
 
-static void raise_mmu_exception(CPUState *env, target_ulong address,
+static void raise_mmu_exception(CPUMIPSState *env, target_ulong address,
                                 int rw, int tlb_error)
 {
     int exception = 0, error_code = 0;
@@ -269,7 +269,7 @@ static struct {
     int softshift;
 } linux_pte_info = {0};
 
-static inline target_ulong cpu_mips_get_pgd(CPUState *env)
+static inline target_ulong cpu_mips_get_pgd(CPUMIPSState *env)
 {
     if (unlikely(linux_pte_info.pgd_current_p == 0)) {
         int i;
@@ -341,9 +341,9 @@ static inline target_ulong cpu_mips_get_pgd(CPUState *env)
 }
 
 // in target-mips/op_helper.c
-extern void r4k_helper_ptw_tlbrefill(CPUState*);
+extern void r4k_helper_ptw_tlbrefill(CPUMIPSState*);
 
-static inline int cpu_mips_tlb_refill(CPUState *env, target_ulong address, int rw ,
+static inline int cpu_mips_tlb_refill(CPUMIPSState *env, target_ulong address, int rw ,
                                       int mmu_idx, int is_softmmu)
 {
     int32_t saved_hflags;
@@ -436,7 +436,7 @@ out:
     return ret;
 }
 
-int cpu_mips_handle_mmu_fault (CPUState *env, target_ulong address, int rw,
+int cpu_mips_handle_mmu_fault (CPUMIPSState *env, target_ulong address, int rw,
                                int mmu_idx, int is_softmmu)
 {
 #if !defined(CONFIG_USER_ONLY)
@@ -484,7 +484,7 @@ int cpu_mips_handle_mmu_fault (CPUState *env, target_ulong address, int rw,
 }
 
 #if !defined(CONFIG_USER_ONLY)
-hwaddr cpu_mips_translate_address(CPUState *env, target_ulong address, int rw)
+hwaddr cpu_mips_translate_address(CPUMIPSState *env, target_ulong address, int rw)
 {
     hwaddr physical;
     int prot;
@@ -506,7 +506,7 @@ hwaddr cpu_mips_translate_address(CPUState *env, target_ulong address, int rw)
 }
 #endif
 
-hwaddr cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
+hwaddr cpu_get_phys_page_debug(CPUMIPSState *env, target_ulong addr)
 {
 #if defined(CONFIG_USER_ONLY)
     return addr;
@@ -584,7 +584,7 @@ static const char * const excp_names[EXCP_LAST + 1] = {
     [EXCP_CACHE] = "cache error",
 };
 
-void do_interrupt (CPUState *env)
+void do_interrupt (CPUMIPSState *env)
 {
 #if !defined(CONFIG_USER_ONLY)
     target_ulong offset;
@@ -807,7 +807,7 @@ void do_interrupt (CPUState *env)
     env->exception_index = EXCP_NONE;
 }
 
-void r4k_invalidate_tlb (CPUState *env, int idx)
+void r4k_invalidate_tlb (CPUMIPSState *env, int idx)
 {
     r4k_tlb_t *tlb;
     target_ulong addr;

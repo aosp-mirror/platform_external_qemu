@@ -594,7 +594,7 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
 
     /* lea offset(r1, env), r1 */
     tcg_out_modrm_offset2(s, 0x8d | P_REXW, r1, r1, TCG_AREG0, 0,
-                          offsetof(CPUState, tlb_table[mem_index][0].addr_read));
+                          offsetof(CPUOldState, tlb_table[mem_index][0].addr_read));
 
     /* cmp 0(r1), r0 */
     tcg_out_modrm_offset(s, 0x3b | rexw, r0, r1, 0);
@@ -789,7 +789,7 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
 
     /* lea offset(r1, env), r1 */
     tcg_out_modrm_offset2(s, 0x8d | P_REXW, r1, r1, TCG_AREG0, 0,
-                          offsetof(CPUState, tlb_table[mem_index][0].addr_write));
+                          offsetof(CPUOldState, tlb_table[mem_index][0].addr_write));
 
     /* cmp 0(r1), r0 */
     tcg_out_modrm_offset(s, 0x3b | rexw, r0, r1, 0);

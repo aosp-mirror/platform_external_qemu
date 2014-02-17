@@ -9,11 +9,13 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "cpu.h"
 #include "migration/qemu-file.h"
 #include "android/android.h"
 #include "android/utils/debug.h"
 #include "android/utils/duff.h"
 #include "hw/android/goldfish/device.h"
+#include "hw/hw.h"
 #include "ui/console.h"
 
 /* These values *must* match the platform definitions found under

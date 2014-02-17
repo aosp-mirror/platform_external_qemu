@@ -14,7 +14,6 @@
 #define CONFIG_GDBSTUB  1
 #define CONFIG_SLIRP    1
 #define CONFIG_SKINS    1
-#define CONFIG_TRACE    1
 #define CONFIG_NAND_LIMITS  1
 #define QEMU_VERSION    "0.10.50"
 #define QEMU_PKGVERSION "Android"

@@ -17,7 +17,6 @@
 #include "hw/android/goldfish/trace.h"
 #include "hw/android/goldfish/vmem.h"
 #include "sysemu/sysemu.h"
-#include "android/trace.h"
 #ifdef CONFIG_MEMCHECK
 #include "memcheck/memcheck.h"
 #include "memcheck/memcheck_util.h"
@@ -41,9 +40,11 @@
 #  define  DPID(...)  ((void)0)
 #endif
 
-extern void cpu_loop_exit(void);
+// TODO(digit): Re-enable tracing some day?
+#define tracing 0
 
-extern int tracing;
+extern void cpu_loop_exit(CPUArchState* env);
+
 extern const char *trace_filename;
 
 /* for execve */
@@ -73,7 +74,6 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
     case TRACE_DEV_REG_SWITCH:  // context switch, switch to pid
         DPID("QEMU.trace: context switch tid=%u\n", value);
         if (trace_filename != NULL) {
-            trace_switch(value);
             D("QEMU.trace: kernel, context switch %u\n", value);
         }
 #ifdef CONFIG_MEMCHECK
@@ -93,7 +93,6 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
     case TRACE_DEV_REG_FORK:    // fork, fork new pid
         DPID("QEMU.trace: fork (pid=%d tgid=%d value=%d)\n", pid, tgid, value);
         if (trace_filename != NULL) {
-            trace_fork(tgid, value);
             D("QEMU.trace: kernel, fork %u\n", value);
         }
 #ifdef CONFIG_MEMCHECK
@@ -105,7 +104,6 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
     case TRACE_DEV_REG_CLONE:    // fork, clone new pid (i.e. thread)
         DPID("QEMU.trace: clone (pid=%d tgid=%d value=%d)\n", pid, tgid, value);
         if (trace_filename != NULL) {
-            trace_clone(tgid, value);
             D("QEMU.trace: kernel, clone %u\n", value);
         }
 #ifdef CONFIG_MEMCHECK
@@ -126,7 +124,6 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
     case TRACE_DEV_REG_EXECVE_EXEPATH:  // init exec, path of EXE
         vstrcpy(value, exec_path, CLIENT_PAGE_SIZE);
         if (trace_filename != NULL) {
-            trace_init_exec(vstart, vend, eoff, exec_path);
             D("QEMU.trace: kernel, init exec [%lx,%lx]@%lx [%s]\n",
               vstart, vend, eoff, exec_path);
         }
@@ -148,7 +145,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
     case TRACE_DEV_REG_CMDLINE:         // execve, process cmdline
         safe_memory_rw_debug(cpu_single_env, value, (uint8_t*)exec_arg, cmdlen, 0);
         if (trace_filename != NULL) {
-            trace_execve(exec_arg, cmdlen);
+            D("QEMU.trace: kernel, execve [%.*s]\n", cmdlen, exec_arg);
         }
 #ifdef CONFIG_MEMCHECK
         if (memcheck_enabled) {
@@ -169,7 +166,6 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
     case TRACE_DEV_REG_EXIT:            // exit, exit current process with exit code
         DPID("QEMU.trace: exit tid=%u\n", value);
         if (trace_filename != NULL) {
-            trace_exit(value);
             D("QEMU.trace: kernel, exit %x\n", value);
         }
 #ifdef CONFIG_MEMCHECK
@@ -188,7 +184,6 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
             exec_path[len - 1] = 0;
         }
         if (trace_filename != NULL) {
-            trace_name(exec_path);
             D("QEMU.trace: kernel, name %s\n", exec_path);
         }
         break;
@@ -196,7 +191,6 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         vstrcpy(value, exec_path, CLIENT_PAGE_SIZE);
         DPID("QEMU.trace: mmap exe=%s\n", exec_path);
         if (trace_filename != NULL) {
-            trace_mmap(vstart, vend, eoff, exec_path);
             D("QEMU.trace: kernel, mmap [%lx,%lx]@%lx [%s]\n", vstart, vend, eoff, exec_path);
         }
 #ifdef CONFIG_MEMCHECK
@@ -224,7 +218,6 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         vstrcpy(value, exec_path, CLIENT_PAGE_SIZE);
         DPID("QEMU.trace: tgid=%d pid=%d name=%s\n", tgid, pid, exec_path);
         if (trace_filename != NULL) {
-            trace_init_name(tgid, pid, exec_path);
             D("QEMU.trace: kernel, init name %u [%s]\n", pid, exec_path);
         }
         exec_path[0] = 0;
@@ -236,14 +229,12 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
     case TRACE_DEV_REG_DYN_SYM:         // add dynamic symbol
         vstrcpy(value, exec_arg, CLIENT_PAGE_SIZE);
         if (trace_filename != NULL) {
-            trace_dynamic_symbol_add(dsaddr, exec_arg);
             D("QEMU.trace: dynamic symbol %lx:%s\n", dsaddr, exec_arg);
         }
         exec_arg[0] = 0;
         break;
     case TRACE_DEV_REG_REMOVE_ADDR:         // remove dynamic symbol addr
         if (trace_filename != NULL) {
-            trace_dynamic_symbol_remove(value);
             D("QEMU.trace: dynamic symbol remove %lx\n", dsaddr);
         }
         break;
@@ -261,41 +252,19 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         break;
 
     case TRACE_DEV_REG_STOP_EMU:        // stop the VM execution
-        if (trace_filename != NULL) {
-            // To ensure that the number of instructions executed in this
-            // block is correct, we pretend that there was an exception.
-            trace_exception(0);
-        }
         cpu_single_env->exception_index = EXCP_HLT;
         cpu_single_env->halted = 1;
         qemu_system_shutdown_request();
-        cpu_loop_exit();
+        cpu_loop_exit(cpu_single_env);
         break;
 
     case TRACE_DEV_REG_ENABLE:          // tracing enable: 0 = stop, 1 = start
-        if (value == 1) {
-            if (trace_filename != NULL) {
-                start_tracing();
-            }
-        }
-        else if (value == 0) {
-            if (trace_filename != NULL) {
-                stop_tracing();
-
-                // To ensure that the number of instructions executed in this
-                // block is correct, we pretend that there was an exception.
-                trace_exception(0);
-            }
-        }
         break;
 
     case TRACE_DEV_REG_UNMAP_START:
         unmap_start = value;
         break;
     case TRACE_DEV_REG_UNMAP_END:
-        if (trace_filename != NULL) {
-            trace_munmap(unmap_start, value);
-        }
 #ifdef CONFIG_MEMCHECK
         if (memcheck_enabled) {
             memcheck_unmap(unmap_start, value);
@@ -311,8 +280,8 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
     case TRACE_DEV_REG_NATIVE_EXCEPTION:
         if (trace_filename != NULL) {
             if (tracing) {
-                int call_type = (offset - 4096) >> 2;
-                trace_interpreted_method(value, call_type);
+                int __attribute__((unused)) call_type = (offset - 4096) >> 2;
+                //trace_interpreted_method(value, call_type);
             }
         }
         break;

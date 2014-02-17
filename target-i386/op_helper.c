@@ -1003,7 +1003,7 @@ void helper_syscall(int next_eip_addend)
 {
     env->exception_index = EXCP_SYSCALL;
     env->exception_next_eip = env->eip + next_eip_addend;
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 #else
 void helper_syscall(int next_eip_addend)
@@ -1113,14 +1113,6 @@ void helper_sysret(int dflag)
         env->eflags |= IF_MASK;
         cpu_x86_set_cpl(env, 3);
     }
-#ifdef CONFIG_KQEMU
-    if (kqemu_is_ok(env)) {
-        if (env->hflags & HF_LMA_MASK)
-            CC_OP = CC_OP_EFLAGS;
-        env->exception_index = -1;
-        cpu_loop_exit();
-    }
-#endif
 }
 #endif
 
@@ -1346,7 +1338,7 @@ static void QEMU_NORETURN raise_interrupt(int intno, int is_int, int error_code,
     env->error_code = error_code;
     env->exception_is_int = is_int;
     env->exception_next_eip = env->eip + next_eip_addend;
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 
 /* shortcuts to generate exceptions */
@@ -2508,12 +2500,6 @@ void helper_lcall_protected(int new_cs, target_ulong new_eip,
         SET_ESP(sp, sp_mask);
         EIP = offset;
     }
-#ifdef CONFIG_KQEMU
-    if (kqemu_is_ok(env)) {
-        env->exception_index = -1;
-        cpu_loop_exit();
-    }
-#endif
 }
 
 /* real and vm86 mode iret */
@@ -2794,24 +2780,11 @@ void helper_iret_protected(int shift, int next_eip)
         helper_ret_protected(shift, 1, 0);
     }
     env->hflags2 &= ~HF2_NMI_MASK;
-#ifdef CONFIG_KQEMU
-    if (kqemu_is_ok(env)) {
-        CC_OP = CC_OP_EFLAGS;
-        env->exception_index = -1;
-        cpu_loop_exit();
-    }
-#endif
 }
 
 void helper_lret_protected(int shift, int addend)
 {
     helper_ret_protected(shift, 0, addend);
-#ifdef CONFIG_KQEMU
-    if (kqemu_is_ok(env)) {
-        env->exception_index = -1;
-        cpu_loop_exit();
-    }
-#endif
 }
 
 void helper_sysenter(void)
@@ -2884,12 +2857,6 @@ void helper_sysexit(int dflag)
     }
     ESP = ECX;
     EIP = EDX;
-#ifdef CONFIG_KQEMU
-    if (kqemu_is_ok(env)) {
-        env->exception_index = -1;
-        cpu_loop_exit();
-    }
-#endif
 }
 
 #if defined(CONFIG_USER_ONLY)
@@ -3211,15 +3178,6 @@ void helper_rdmsr(void)
         break;
     case MSR_KERNELGSBASE:
         val = env->kernelgsbase;
-        break;
-#endif
-#ifdef CONFIG_KQEMU
-    case MSR_QPI_COMMBASE:
-        if (env->kqemu_enabled) {
-            val = kqemu_comm_base;
-        } else {
-            val = 0;
-        }
         break;
 #endif
     case MSR_MTRRphysBase(0):
@@ -4682,7 +4640,7 @@ static void do_hlt(void)
     env->hflags &= ~HF_INHIBIT_IRQ_MASK; /* needed if sti is just before */
     env->halted = 1;
     env->exception_index = EXCP_HLT;
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 
 void helper_hlt(int next_eip_addend)
@@ -4720,7 +4678,7 @@ void helper_mwait(int next_eip_addend)
 void helper_debug(void)
 {
     env->exception_index = EXCP_DEBUG;
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 
 void helper_reset_rf(void)
@@ -4924,7 +4882,7 @@ static inline void svm_load_seg(hwaddr addr, SegmentCache *sc)
 }
 
 static inline void svm_load_seg_cache(hwaddr addr,
-                                      CPUState *env, int seg_reg)
+                                      CPUX86State *env, int seg_reg)
 {
     SegmentCache sc1, *sc = &sc1;
     svm_load_seg(addr, sc);
@@ -5082,7 +5040,7 @@ void helper_vmrun(int aflag, int next_eip_addend)
                 env->exception_is_int = 0;
                 env->exception_next_eip = EIP;
                 qemu_log_mask(CPU_LOG_TB_IN_ASM, "NMI");
-                cpu_loop_exit();
+                cpu_loop_exit(env);
                 break;
         case SVM_EVTINJ_TYPE_EXEPT:
                 env->exception_index = vector;
@@ -5090,7 +5048,7 @@ void helper_vmrun(int aflag, int next_eip_addend)
                 env->exception_is_int = 0;
                 env->exception_next_eip = -1;
                 qemu_log_mask(CPU_LOG_TB_IN_ASM, "EXEPT");
-                cpu_loop_exit();
+                cpu_loop_exit(env);
                 break;
         case SVM_EVTINJ_TYPE_SOFT:
                 env->exception_index = vector;
@@ -5098,7 +5056,7 @@ void helper_vmrun(int aflag, int next_eip_addend)
                 env->exception_is_int = 1;
                 env->exception_next_eip = EIP;
                 qemu_log_mask(CPU_LOG_TB_IN_ASM, "SOFT");
-                cpu_loop_exit();
+                cpu_loop_exit(env);
                 break;
         }
         qemu_log_mask(CPU_LOG_TB_IN_ASM, " %#x %#x\n", env->exception_index, env->error_code);
@@ -5433,7 +5391,7 @@ void helper_vmexit(uint32_t exit_code, uint64_t exit_info_1)
     env->error_code = 0;
     env->old_exception = -1;
 
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 
 #endif

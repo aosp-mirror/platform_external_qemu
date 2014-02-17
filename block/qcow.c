@@ -23,6 +23,7 @@
  */
 #include "qemu-common.h"
 #include "block/block_int.h"
+#include "qemu/iov.h"
 #include "qemu/module.h"
 #include <zlib.h>
 #include "qemu/aes.h"
@@ -529,7 +530,7 @@ static QCowAIOCB *qcow_aio_setup(BlockDriverState *bs,
     if (qiov->niov > 1) {
         acb->buf = acb->orig_buf = qemu_blockalign(bs, qiov->size);
         if (is_write)
-            qemu_iovec_to_buffer(qiov, acb->buf);
+            qemu_iovec_to_buf(qiov, 0, acb->buf, qiov->size);
     } else {
         acb->buf = (uint8_t *)qiov->iov->iov_base;
     }
@@ -623,7 +624,7 @@ static void qcow_aio_read_cb(void *opaque, int ret)
 
 done:
     if (acb->qiov->niov > 1) {
-        qemu_iovec_from_buffer(acb->qiov, acb->orig_buf, acb->qiov->size);
+        qemu_iovec_from_buf(acb->qiov, 0, acb->orig_buf, acb->qiov->size);
         qemu_vfree(acb->orig_buf);
     }
     acb->common.cb(acb->common.opaque, ret);

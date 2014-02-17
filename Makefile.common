@@ -410,16 +410,6 @@ EMULATOR_LIBQEMU_LDLIBS += $(AUDIO_LDLIBS)
 
 common_LOCAL_CFLAGS += $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 
-# migration sources
-#
-ifeq ($(HOST_OS),windows)
-  common_LOCAL_SRC_FILES += migration-dummy-android.c
-else
-  common_LOCAL_SRC_FILES += migration.c \
-                     migration-exec.c \
-                     migration-tcp-android.c
-endif
-
 # misc. sources
 #
 CORE_MISC_SOURCES = \
@@ -427,16 +417,16 @@ CORE_MISC_SOURCES = \
     async.c \
     bt-host.c \
     bt-vhci.c \
-    buffered_file.c \
     iohandler.c \
     ioport.c \
+    migration-dummy-android.c \
     qemu-char.c \
-    readline.c \
+    qemu-log.c \
     savevm.c \
     android/boot-properties.c \
     android/cbuffer.c \
     android/charpipe.c \
-    android/config.c \
+    android/config-file.c \
     android/core-init-utils.c   \
     android/gps.c \
     android/hw-kmsg.c \
@@ -466,13 +456,18 @@ CORE_MISC_SOURCES = \
     android/utils/jpeg-compress.c \
     net/net-android.c \
     qobject/qerror.c \
+    qom/container.c \
+    qom/object.c \
+    qom/qom-qobject.c \
     ui/console.c \
     ui/d3des.c \
     ui/input.c \
     ui/vnc-android.c \
-    util/acl.c \
     util/aes.c \
     util/cutils.c \
+    util/error.c \
+    util/hexdump.c \
+    util/iov.c \
     util/module.c \
     util/notify.c \
     util/osdep.c \
@@ -481,6 +476,8 @@ CORE_MISC_SOURCES = \
     util/qemu-error.c \
     util/qemu-option.c \
     util/qemu-sockets-android.c \
+    util/unicode.c \
+    util/yield-android.c \
 
 ifeq ($(HOST_ARCH),x86)
     CORE_MISC_SOURCES += disas/i386.c
@@ -495,7 +492,8 @@ endif
 
 ifeq ($(HOST_OS),linux)
     CORE_MISC_SOURCES += hw/usb/usb-linux.c \
-                         util/qemu-thread.c \
+                         util/compatfd.c \
+                         util/qemu-thread-posix.c \
                          android/camera/camera-capture-linux.c
 else
     CORE_MISC_SOURCES += hw/usb/usb-dummy-android.c
@@ -503,14 +501,17 @@ endif
 
 ifeq ($(HOST_OS),windows)
   CORE_MISC_SOURCES   += tap-win32.c \
-                         android/camera/camera-capture-windows.c
+                         android/camera/camera-capture-windows.c \
+                         util/qemu-thread-win32.c
 
 else
   CORE_MISC_SOURCES   += posix-aio-compat.c
 endif
 
 ifeq ($(HOST_OS),darwin)
-  CORE_MISC_SOURCES   += android/camera/camera-capture-mac.m
+  CORE_MISC_SOURCES   += android/camera/camera-capture-mac.m \
+                         util/compatfd.c \
+                         util/qemu-thread-posix.c
 endif
 
 common_LOCAL_SRC_FILES += $(CORE_MISC_SOURCES)
@@ -647,9 +648,6 @@ BLOCK_SOURCES += \
     block/qcow2-refcount.c \
     block/qcow2-snapshot.c \
     block/qcow2-cluster.c \
-    block/cloop.c \
-    block/dmg.c \
-    block/vvfat.c \
     block/raw.c
 
 ifeq ($(HOST_OS),windows)

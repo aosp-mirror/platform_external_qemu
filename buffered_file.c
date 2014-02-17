@@ -181,8 +181,8 @@ static int buffered_close(void *opaque)
 
     ret = s->close(s->opaque);
 
-    qemu_del_timer(s->timer);
-    qemu_free_timer(s->timer);
+    timer_del(s->timer);
+    timer_free(s->timer);
     g_free(s->buffer);
     g_free(s);
 
@@ -237,7 +237,7 @@ static void buffered_rate_tick(void *opaque)
         return;
     }
 
-    qemu_mod_timer(s->timer, qemu_get_clock_ms(rt_clock) + 100);
+    timer_mod(s->timer, qemu_clock_get_ms(QEMU_CLOCK_REALTIME) + 100);
 
     if (s->freeze_output)
         return;
@@ -249,6 +249,14 @@ static void buffered_rate_tick(void *opaque)
     /* Add some checks around this */
     s->put_ready(s->opaque);
 }
+
+static const QEMUFileOps buffered_file_ops = {
+    .put_buffer = buffered_put_buffer,
+    .close = buffered_close,
+    .rate_limit = buffered_rate_limit,
+    .set_rate_limit = buffered_set_rate_limit,
+    .get_rate_limit = buffered_get_rate_limit,
+};
 
 QEMUFile *qemu_fopen_ops_buffered(void *opaque,
                                   size_t bytes_per_sec,
@@ -268,14 +276,10 @@ QEMUFile *qemu_fopen_ops_buffered(void *opaque,
     s->wait_for_unfreeze = wait_for_unfreeze;
     s->close = close;
 
-    s->file = qemu_fopen_ops(s, buffered_put_buffer, NULL,
-                             buffered_close, buffered_rate_limit,
-                             buffered_set_rate_limit,
-			     buffered_get_rate_limit);
+    s->file = qemu_fopen_ops(s, &buffered_file_ops);
+    s->timer = timer_new(QEMU_CLOCK_REALTIME, SCALE_MS, buffered_rate_tick, s);
 
-    s->timer = qemu_new_timer_ms(rt_clock, buffered_rate_tick, s);
-
-    qemu_mod_timer(s->timer, qemu_get_clock_ms(rt_clock) + 100);
+    timer_mod(s->timer, qemu_clock_get_ms(QEMU_CLOCK_REALTIME) + 100);
 
     return s->file;
 }

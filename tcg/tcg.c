@@ -2042,7 +2042,7 @@ static inline int tcg_gen_code_common(TCGContext *s, uint8_t *gen_code_buf,
 #ifdef DEBUG_DISAS
     if (unlikely(qemu_loglevel_mask(CPU_LOG_TB_OP))) {
         qemu_log("OP:\n");
-        tcg_dump_ops(s, logfile);
+        tcg_dump_ops(s, qemu_logfile);
         qemu_log("\n");
     }
 #endif
@@ -2058,7 +2058,7 @@ static inline int tcg_gen_code_common(TCGContext *s, uint8_t *gen_code_buf,
 #ifdef DEBUG_DISAS
     if (unlikely(qemu_loglevel_mask(CPU_LOG_TB_OP_OPT))) {
         qemu_log("OP after liveness analysis:\n");
-        tcg_dump_ops(s, logfile);
+        tcg_dump_ops(s, qemu_logfile);
         qemu_log("\n");
     }
 #endif

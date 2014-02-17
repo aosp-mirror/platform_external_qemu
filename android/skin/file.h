@@ -13,7 +13,7 @@
 #define _ANDROID_SKIN_FILE_H
 
 #include "android/skin/image.h"
-#include "android/config.h"
+#include "android/config-file.h"
 #include "android/framebuffer.h"
 
 /**  Layout

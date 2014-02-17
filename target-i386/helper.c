@@ -598,7 +598,7 @@ static const char *cc_op_str[] = {
 };
 
 static void
-cpu_x86_dump_seg_cache(CPUState *env, FILE *f,
+cpu_x86_dump_seg_cache(CPUX86State *env, FILE *f,
                        int (*cpu_fprintf)(FILE *f, const char *fmt, ...),
                        const char *name, struct SegmentCache *sc)
 {
@@ -652,7 +652,7 @@ done:
     cpu_fprintf(f, "\n");
 }
 
-void cpu_dump_state(CPUState *env, FILE *f,
+void cpu_dump_state(CPUX86State *env, FILE *f,
                     int (*cpu_fprintf)(FILE *f, const char *fmt, ...),
                     int flags)
 {
@@ -953,7 +953,7 @@ int cpu_x86_handle_mmu_fault(CPUX86State *env, target_ulong addr,
     return 1;
 }
 
-hwaddr cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
+hwaddr cpu_get_phys_page_debug(CPUX86State *env, target_ulong addr)
 {
     return addr;
 }
@@ -962,14 +962,10 @@ hwaddr cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
 
 /* XXX: This value should match the one returned by CPUID
  * and in exec.c */
-#if defined(CONFIG_KQEMU)
-#define PHYS_ADDR_MASK 0xfffff000LL
-#else
-# if defined(TARGET_X86_64)
+#if defined(TARGET_X86_64)
 # define PHYS_ADDR_MASK 0xfffffff000LL
-# else
+#else
 # define PHYS_ADDR_MASK 0xffffff000LL
-# endif
 #endif
 
 /* return value:
@@ -1268,7 +1264,7 @@ int cpu_x86_handle_mmu_fault(CPUX86State *env, target_ulong addr,
     return 1;
 }
 
-hwaddr cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
+hwaddr cpu_get_phys_page_debug(CPUX86State *env, target_ulong addr)
 {
     target_ulong pde_addr, pte_addr;
     uint64_t pte;
@@ -1362,7 +1358,7 @@ hwaddr cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
     return paddr;
 }
 
-void hw_breakpoint_insert(CPUState *env, int index)
+void hw_breakpoint_insert(CPUX86State *env, int index)
 {
     int type, err = 0;
 
@@ -1390,7 +1386,7 @@ void hw_breakpoint_insert(CPUState *env, int index)
         env->cpu_breakpoint[index] = NULL;
 }
 
-void hw_breakpoint_remove(CPUState *env, int index)
+void hw_breakpoint_remove(CPUX86State *env, int index)
 {
     if (!env->cpu_breakpoint[index])
         return;
@@ -1409,7 +1405,7 @@ void hw_breakpoint_remove(CPUState *env, int index)
     }
 }
 
-int check_hw_breakpoints(CPUState *env, int force_dr6_update)
+int check_hw_breakpoints(CPUX86State *env, int force_dr6_update)
 {
     target_ulong dr6;
     int reg, type;
@@ -1435,7 +1431,7 @@ static CPUDebugExcpHandler *prev_debug_excp_handler;
 
 void raise_exception(int exception_index);
 
-static void breakpoint_handler(CPUState *env)
+static void breakpoint_handler(CPUX86State *env)
 {
     CPUBreakpoint *bp;
 
@@ -1465,7 +1461,7 @@ static void breakpoint_handler(CPUState *env)
 /* This should come from sysemu.h - if we could include it here... */
 void qemu_system_reset_request(void);
 
-void cpu_inject_x86_mce(CPUState *cenv, int bank, uint64_t status,
+void cpu_inject_x86_mce(CPUX86State *cenv, int bank, uint64_t status,
                         uint64_t mcg_status, uint64_t addr, uint64_t misc)
 {
     uint64_t mcg_cap = cenv->mcg_cap;
@@ -1739,21 +1735,13 @@ void cpu_x86_cpuid(CPUX86State *env, uint32_t index, uint32_t count,
 /* XXX: This value must match the one used in the MMU code. */ 
         if (env->cpuid_ext2_features & CPUID_EXT2_LM) {
             /* 64 bit processor */
-#if defined(CONFIG_KQEMU)
-            *eax = 0x00003020;	/* 48 bits virtual, 32 bits physical */
-#else
 /* XXX: The physical address space is limited to 42 bits in exec.c. */
             *eax = 0x00003028;	/* 48 bits virtual, 40 bits physical */
-#endif
         } else {
-#if defined(CONFIG_KQEMU)
-            *eax = 0x00000020;	/* 32 bits physical */
-#else
             if (env->cpuid_features & CPUID_PSE36)
                 *eax = 0x00000024; /* 36 bits physical */
             else
                 *eax = 0x00000020; /* 32 bits physical */
-#endif
         }
         *ebx = 0;
         *ecx = 0;
@@ -1799,9 +1787,6 @@ CPUX86State *cpu_x86_init(const char *cpu_model)
     }
     mce_init(env);
     cpu_reset(env);
-#ifdef CONFIG_KQEMU
-    kqemu_init(env);
-#endif
 
     qemu_init_vcpu(env);
 
@@ -1824,7 +1809,7 @@ CPUX86State *cpu_x86_init(const char *cpu_model)
 }
 
 #if !defined(CONFIG_USER_ONLY)
-void do_cpu_init(CPUState *env)
+void do_cpu_init(CPUX86State *env)
 {
     int sipi = env->interrupt_request & CPU_INTERRUPT_SIPI;
     cpu_reset(env);
@@ -1832,15 +1817,15 @@ void do_cpu_init(CPUState *env)
     apic_init_reset(env);
 }
 
-void do_cpu_sipi(CPUState *env)
+void do_cpu_sipi(CPUX86State *env)
 {
     apic_sipi(env);
 }
 #else
-void do_cpu_init(CPUState *env)
+void do_cpu_init(CPUX86State *env)
 {
 }
-void do_cpu_sipi(CPUState *env)
+void do_cpu_sipi(CPUX86State *env)
 {
 }
 #endif

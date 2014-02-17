@@ -20,12 +20,12 @@ typedef struct {
     hwaddr len;
 } ScatterGatherEntry;
 
-typedef struct {
+struct QEMUSGList {
     ScatterGatherEntry *sg;
     int nsg;
     int nalloc;
     hwaddr size;
-} QEMUSGList;
+};
 
 void qemu_sglist_init(QEMUSGList *qsg, int alloc_hint);
 void qemu_sglist_add(QEMUSGList *qsg, hwaddr base,

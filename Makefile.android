@@ -147,6 +147,10 @@ MY_CFLAGS += -D_GNU_SOURCE=1
 
 MY_CFLAGS += -I$(LOCAL_PATH)/include
 
+# Need to include "qapi-types.h" and other auto-generated files from
+# android-configure.sh
+MY_CFLAGS += -I$(LOCAL_PATH)/qapi-auto-generated
+
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.
 # Usage:

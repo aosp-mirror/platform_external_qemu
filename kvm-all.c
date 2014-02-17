@@ -20,6 +20,7 @@
 
 #include <linux/kvm.h>
 
+#include "cpu.h"
 #include "qemu-common.h"
 #include "sysemu/sysemu.h"
 #include "hw/hw.h"
@@ -144,7 +145,7 @@ static int kvm_set_user_memory_region(KVMState *s, KVMSlot *slot)
 }
 
 
-int kvm_init_vcpu(CPUState *env)
+int kvm_init_vcpu(CPUOldState *env)
 {
     KVMState *s = kvm_state;
     long mmap_size;
@@ -181,14 +182,14 @@ err:
     return ret;
 }
 
-int kvm_put_mp_state(CPUState *env)
+int kvm_put_mp_state(CPUOldState *env)
 {
     struct kvm_mp_state mp_state = { .mp_state = env->mp_state };
 
     return kvm_vcpu_ioctl(env, KVM_SET_MP_STATE, &mp_state);
 }
 
-int kvm_get_mp_state(CPUState *env)
+int kvm_get_mp_state(CPUOldState *env)
 {
     struct kvm_mp_state mp_state;
     int ret;
@@ -203,7 +204,7 @@ int kvm_get_mp_state(CPUState *env)
 
 int kvm_sync_vcpus(void)
 {
-    CPUState *env;
+    CPUOldState *env;
 
     for (env = first_cpu; env != NULL; env = env->next_cpu) {
         int ret;
@@ -516,7 +517,7 @@ err:
     return ret;
 }
 
-static int kvm_handle_io(CPUState *env, uint16_t port, void *data,
+static int kvm_handle_io(CPUOldState *env, uint16_t port, void *data,
                          int direction, int size, uint32_t count)
 {
     int i;
@@ -555,7 +556,7 @@ static int kvm_handle_io(CPUState *env, uint16_t port, void *data,
     return 1;
 }
 
-static void kvm_run_coalesced_mmio(CPUState *env, struct kvm_run *run)
+static void kvm_run_coalesced_mmio(CPUOldState *env, struct kvm_run *run)
 {
 #ifdef KVM_CAP_COALESCED_MMIO
     KVMState *s = kvm_state;
@@ -576,7 +577,7 @@ static void kvm_run_coalesced_mmio(CPUState *env, struct kvm_run *run)
 #endif
 }
 
-int kvm_cpu_exec(CPUState *env)
+int kvm_cpu_exec(CPUOldState *env)
 {
     struct kvm_run *run = env->kvm_run;
     int ret;
@@ -842,7 +843,7 @@ int kvm_vm_ioctl(KVMState *s, int type, ...)
     return ret;
 }
 
-int kvm_vcpu_ioctl(CPUState *env, int type, ...)
+int kvm_vcpu_ioctl(CPUOldState *env, int type, ...)
 {
     int ret;
     void *arg;
@@ -889,7 +890,7 @@ void kvm_setup_guest_memory(void *start, size_t size)
 }
 
 #ifdef KVM_CAP_SET_GUEST_DEBUG
-struct kvm_sw_breakpoint *kvm_find_sw_breakpoint(CPUState *env,
+struct kvm_sw_breakpoint *kvm_find_sw_breakpoint(CPUOldState *env,
                                                  target_ulong pc)
 {
     struct kvm_sw_breakpoint *bp;
@@ -901,12 +902,12 @@ struct kvm_sw_breakpoint *kvm_find_sw_breakpoint(CPUState *env,
     return NULL;
 }
 
-int kvm_sw_breakpoints_active(CPUState *env)
+int kvm_sw_breakpoints_active(CPUOldState *env)
 {
     return !QTAILQ_EMPTY(&env->kvm_state->kvm_sw_breakpoints);
 }
 
-int kvm_update_guest_debug(CPUState *env, unsigned long reinject_trap)
+int kvm_update_guest_debug(CPUOldState *env, unsigned long reinject_trap)
 {
     struct kvm_guest_debug dbg;
 
@@ -920,11 +921,11 @@ int kvm_update_guest_debug(CPUState *env, unsigned long reinject_trap)
     return kvm_vcpu_ioctl(env, KVM_SET_GUEST_DEBUG, &dbg);
 }
 
-int kvm_insert_breakpoint(CPUState *current_env, target_ulong addr,
+int kvm_insert_breakpoint(CPUOldState *current_env, target_ulong addr,
                           target_ulong len, int type)
 {
     struct kvm_sw_breakpoint *bp;
-    CPUState *env;
+    CPUOldState *env;
     int err;
 
     if (type == GDB_BREAKPOINT_SW) {
@@ -962,11 +963,11 @@ int kvm_insert_breakpoint(CPUState *current_env, target_ulong addr,
     return 0;
 }
 
-int kvm_remove_breakpoint(CPUState *current_env, target_ulong addr,
+int kvm_remove_breakpoint(CPUOldState *current_env, target_ulong addr,
                           target_ulong len, int type)
 {
     struct kvm_sw_breakpoint *bp;
-    CPUState *env;
+    CPUOldState *env;
     int err;
 
     if (type == GDB_BREAKPOINT_SW) {
@@ -999,11 +1000,11 @@ int kvm_remove_breakpoint(CPUState *current_env, target_ulong addr,
     return 0;
 }
 
-void kvm_remove_all_breakpoints(CPUState *current_env)
+void kvm_remove_all_breakpoints(CPUOldState *current_env)
 {
     struct kvm_sw_breakpoint *bp, *next;
     KVMState *s = current_env->kvm_state;
-    CPUState *env;
+    CPUOldState *env;
 
     QTAILQ_FOREACH_SAFE(bp, &s->kvm_sw_breakpoints, entry, next) {
         if (kvm_arch_remove_sw_breakpoint(current_env, bp) != 0) {
@@ -1022,24 +1023,24 @@ void kvm_remove_all_breakpoints(CPUState *current_env)
 
 #else /* !KVM_CAP_SET_GUEST_DEBUG */
 
-int kvm_update_guest_debug(CPUState *env, unsigned long reinject_trap)
+int kvm_update_guest_debug(CPUOldState *env, unsigned long reinject_trap)
 {
     return -EINVAL;
 }
 
-int kvm_insert_breakpoint(CPUState *current_env, target_ulong addr,
+int kvm_insert_breakpoint(CPUOldState *current_env, target_ulong addr,
                           target_ulong len, int type)
 {
     return -EINVAL;
 }
 
-int kvm_remove_breakpoint(CPUState *current_env, target_ulong addr,
+int kvm_remove_breakpoint(CPUOldState *current_env, target_ulong addr,
                           target_ulong len, int type)
 {
     return -EINVAL;
 }
 
-void kvm_remove_all_breakpoints(CPUState *current_env)
+void kvm_remove_all_breakpoints(CPUOldState *current_env)
 {
 }
 #endif /* !KVM_CAP_SET_GUEST_DEBUG */

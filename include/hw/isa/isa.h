@@ -3,6 +3,7 @@
 
 /* ISA bus */
 
+#include "exec/hwaddr.h"
 #include "exec/ioport.h"
 #include "hw/qdev.h"
 

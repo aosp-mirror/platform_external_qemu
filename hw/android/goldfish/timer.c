@@ -43,7 +43,7 @@ static void  goldfish_timer_save(QEMUFile*  f, void*  opaque)
     qemu_put_be64(f, s->now_ns);  /* in case the kernel is in the middle of a timer read */
     qemu_put_byte(f, s->armed);
     if (s->armed) {
-        int64_t  now_ns   = qemu_get_clock_ns(vm_clock);
+        int64_t  now_ns   = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
         int64_t  alarm_ns = (s->alarm_low_ns | (int64_t)s->alarm_high_ns << 32);
         qemu_put_be64(f, alarm_ns - now_ns);
     }
@@ -59,7 +59,7 @@ static int  goldfish_timer_load(QEMUFile*  f, void*  opaque, int  version_id)
     s->now_ns = qemu_get_be64(f);
     s->armed  = qemu_get_byte(f);
     if (s->armed) {
-        int64_t  now_tks   = qemu_get_clock(vm_clock);
+        int64_t  now_tks   = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
         int64_t  diff_tks  = qemu_get_be64(f);
         int64_t  alarm_tks = now_tks + diff_tks;
 
@@ -67,7 +67,7 @@ static int  goldfish_timer_load(QEMUFile*  f, void*  opaque, int  version_id)
             goldfish_device_set_irq(&s->dev, 0, 1);
             s->armed = 0;
         } else {
-            qemu_mod_timer(s->timer, alarm_tks);
+            timer_mod(s->timer, alarm_tks);
         }
     }
     return 0;
@@ -78,7 +78,7 @@ static uint32_t goldfish_timer_read(void *opaque, hwaddr offset)
     struct timer_state *s = (struct timer_state *)opaque;
     switch(offset) {
         case TIMER_TIME_LOW:
-            s->now_ns = qemu_get_clock_ns(vm_clock);
+            s->now_ns = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
             return s->now_ns;
         case TIMER_TIME_HIGH:
             return s->now_ns >> 32;
@@ -96,11 +96,11 @@ static void goldfish_timer_write(void *opaque, hwaddr offset, uint32_t value_ns)
         case TIMER_ALARM_LOW:
             s->alarm_low_ns = value_ns;
             alarm_ns = (s->alarm_low_ns | (int64_t)s->alarm_high_ns << 32);
-            now_ns   = qemu_get_clock_ns(vm_clock);
+            now_ns   = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
             if (alarm_ns <= now_ns) {
                 goldfish_device_set_irq(&s->dev, 0, 1);
             } else {
-                qemu_mod_timer(s->timer, alarm_ns);
+                timer_mod(s->timer, alarm_ns);
                 s->armed = 1;
             }
             break;
@@ -108,7 +108,7 @@ static void goldfish_timer_write(void *opaque, hwaddr offset, uint32_t value_ns)
             s->alarm_high_ns = value_ns;
             break;
         case TIMER_CLEAR_ALARM:
-            qemu_del_timer(s->timer);
+            timer_del(s->timer);
             s->armed = 0;
             /* fall through */
         case TIMER_CLEAR_INTERRUPT:
@@ -236,7 +236,7 @@ void goldfish_timer_and_rtc_init(uint32_t timerbase, int timerirq)
 {
     timer_state.dev.base = timerbase;
     timer_state.dev.irq = timerirq;
-    timer_state.timer = qemu_new_timer_ns(vm_clock, goldfish_timer_tick, &timer_state);
+    timer_state.timer = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, goldfish_timer_tick, &timer_state);
     goldfish_device_add(&timer_state.dev, goldfish_timer_readfn, goldfish_timer_writefn, &timer_state);
     register_savevm( "goldfish_timer", 0, GOLDFISH_TIMER_SAVE_VERSION,
                      goldfish_timer_save, goldfish_timer_load, &timer_state);
