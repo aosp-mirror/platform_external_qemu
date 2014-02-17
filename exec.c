@@ -37,6 +37,7 @@
 #include "qemu-common.h"
 #include "tcg.h"
 #include "hw/hw.h"
+#include "hw/xen/xen.h"
 #include "qemu/osdep.h"
 #include "sysemu/kvm.h"
 #include "exec/cputlb.h"
@@ -49,16 +50,6 @@
 #include "memcheck/memcheck_api.h"
 #endif  // CONFIG_MEMCHECK
 
-//#define DEBUG_TB_INVALIDATE
-//#define DEBUG_FLUSH
-//#define DEBUG_TLB
-//#define DEBUG_UNASSIGNED
-
-/* make various TB consistency checks */
-//#define DEBUG_TB_CHECK
-//#define DEBUG_TLB_CHECK
-
-//#define DEBUG_IOPORT
 //#define DEBUG_SUBPAGE
 
 #if !defined(CONFIG_USER_ONLY)
@@ -102,7 +93,7 @@ uint8_t *code_gen_ptr;
 int phys_ram_fd;
 static int in_migration;
 
-RAMList ram_list = { .blocks = QLIST_HEAD_INITIALIZER(ram_list) };
+RAMList ram_list = { .blocks = QTAILQ_HEAD_INITIALIZER(ram_list.blocks) };
 #endif
 
 CPUArchState *first_cpu;
@@ -490,6 +481,7 @@ void cpu_exec_init_all(unsigned long tb_size)
     code_gen_ptr = code_gen_buffer;
     page_init();
 #if !defined(CONFIG_USER_ONLY)
+    qemu_mutex_init(&ram_list.mutex);
     io_mem_init();
 #endif
 #if !defined(CONFIG_USER_ONLY) || !defined(CONFIG_USE_GUEST_BASE)
@@ -1687,6 +1679,28 @@ CPUArchState *cpu_copy(CPUOldState *env)
 }
 
 #if !defined(CONFIG_USER_ONLY)
+static RAMBlock *qemu_get_ram_block(ram_addr_t addr)
+{
+    RAMBlock *block;
+
+    /* The list is protected by the iothread lock here.  */
+    block = ram_list.mru_block;
+    if (block && addr - block->offset < block->length) {
+        goto found;
+    }
+    QTAILQ_FOREACH(block, &ram_list.blocks, next) {
+        if (addr - block->offset < block->length) {
+            goto found;
+        }
+    }
+
+    fprintf(stderr, "Bad ram offset %" PRIx64 "\n", (uint64_t)addr);
+    abort();
+
+found:
+    ram_list.mru_block = block;
+    return block;
+}
 
 /* Note: start and end must be within the same ram block.  */
 void cpu_physical_memory_reset_dirty(ram_addr_t start, ram_addr_t end,
@@ -1996,6 +2010,19 @@ static int subpage_register (subpage_t *mmio, uint32_t start, uint32_t end,
                              ram_addr_t memory, ram_addr_t region_offset);
 static void *subpage_init (hwaddr base, ram_addr_t *phys,
                            ram_addr_t orig_memory, ram_addr_t region_offset);
+
+static void *(*phys_mem_alloc)(size_t size) = qemu_anon_ram_alloc;
+
+/*
+ * Set a custom physical guest memory alloator.
+ * Accelerators with unusual needs may need this.  Hopefully, we can
+ * get rid of it eventually.
+ */
+void phys_mem_set_alloc(void *(*alloc)(size_t))
+{
+    phys_mem_alloc = alloc;
+}
+
 #define CHECK_SUBPAGE(addr, start_addr, start_addr2, end_addr, end_addr2, \
                       need_subpage)                                     \
     do {                                                                \
@@ -2137,95 +2164,301 @@ void qemu_unregister_coalesced_mmio(hwaddr addr, ram_addr_t size)
         kvm_uncoalesce_mmio_region(addr, size);
 }
 
+void qemu_mutex_lock_ramlist(void)
+{
+    qemu_mutex_lock(&ram_list.mutex);
+}
+
+void qemu_mutex_unlock_ramlist(void)
+{
+    qemu_mutex_unlock(&ram_list.mutex);
+}
+
+#if defined(__linux__) && !defined(CONFIG_ANDROID)
+
+#include <sys/vfs.h>
+
+#define HUGETLBFS_MAGIC       0x958458f6
+
+static long gethugepagesize(const char *path)
+{
+    struct statfs fs;
+    int ret;
+
+    do {
+        ret = statfs(path, &fs);
+    } while (ret != 0 && errno == EINTR);
+
+    if (ret != 0) {
+        perror(path);
+        return 0;
+    }
+
+    if (fs.f_type != HUGETLBFS_MAGIC)
+        fprintf(stderr, "Warning: path not on HugeTLBFS: %s\n", path);
+
+    return fs.f_bsize;
+}
+
+static sigjmp_buf sigjump;
+
+static void sigbus_handler(int signal)
+{
+    siglongjmp(sigjump, 1);
+}
+
+static void *file_ram_alloc(RAMBlock *block,
+                            ram_addr_t memory,
+                            const char *path)
+{
+    char *filename;
+    char *sanitized_name;
+    char *c;
+    void *area;
+    int fd;
+    unsigned long hpagesize;
+
+    hpagesize = gethugepagesize(path);
+    if (!hpagesize) {
+        return NULL;
+    }
+
+    if (memory < hpagesize) {
+        return NULL;
+    }
+
+    if (kvm_enabled() && !kvm_has_sync_mmu()) {
+        fprintf(stderr, "host lacks kvm mmu notifiers, -mem-path unsupported\n");
+        return NULL;
+    }
+
+    /* Make name safe to use with mkstemp by replacing '/' with '_'. */
+    sanitized_name = g_strdup(block->mr->name);
+    for (c = sanitized_name; *c != '\0'; c++) {
+        if (*c == '/')
+            *c = '_';
+    }
+
+    filename = g_strdup_printf("%s/qemu_back_mem.%s.XXXXXX", path,
+                               sanitized_name);
+    g_free(sanitized_name);
+
+    fd = mkstemp(filename);
+    if (fd < 0) {
+        perror("unable to create backing store for hugepages");
+        g_free(filename);
+        return NULL;
+    }
+    unlink(filename);
+    g_free(filename);
+
+    memory = (memory+hpagesize-1) & ~(hpagesize-1);
+
+    /*
+     * ftruncate is not supported by hugetlbfs in older
+     * hosts, so don't bother bailing out on errors.
+     * If anything goes wrong with it under other filesystems,
+     * mmap will fail.
+     */
+    if (ftruncate(fd, memory))
+        perror("ftruncate");
+
+    area = mmap(0, memory, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+    if (area == MAP_FAILED) {
+        perror("file_ram_alloc: can't mmap RAM pages");
+        close(fd);
+        return (NULL);
+    }
+
+    if (mem_prealloc) {
+        int ret, i;
+        struct sigaction act, oldact;
+        sigset_t set, oldset;
+
+        memset(&act, 0, sizeof(act));
+        act.sa_handler = &sigbus_handler;
+        act.sa_flags = 0;
+
+        ret = sigaction(SIGBUS, &act, &oldact);
+        if (ret) {
+            perror("file_ram_alloc: failed to install signal handler");
+            exit(1);
+        }
+
+        /* unblock SIGBUS */
+        sigemptyset(&set);
+        sigaddset(&set, SIGBUS);
+        pthread_sigmask(SIG_UNBLOCK, &set, &oldset);
+
+        if (sigsetjmp(sigjump, 1)) {
+            fprintf(stderr, "file_ram_alloc: failed to preallocate pages\n");
+            exit(1);
+        }
+
+        /* MAP_POPULATE silently ignores failures */
+        for (i = 0; i < (memory/hpagesize)-1; i++) {
+            memset(area + (hpagesize*i), 0, 1);
+        }
+
+        ret = sigaction(SIGBUS, &oldact, NULL);
+        if (ret) {
+            perror("file_ram_alloc: failed to reinstall signal handler");
+            exit(1);
+        }
+
+        pthread_sigmask(SIG_SETMASK, &oldset, NULL);
+    }
+
+    block->fd = fd;
+    return area;
+}
+#else
+static void *file_ram_alloc(RAMBlock *block,
+                            ram_addr_t memory,
+                            const char *path)
+{
+    fprintf(stderr, "-mem-path not supported on this host\n");
+    exit(1);
+}
+#endif
+
 static ram_addr_t find_ram_offset(ram_addr_t size)
 {
     RAMBlock *block, *next_block;
-    ram_addr_t offset = 0, mingap = ULONG_MAX;
+    ram_addr_t offset = RAM_ADDR_MAX, mingap = RAM_ADDR_MAX;
 
-    if (QLIST_EMPTY(&ram_list.blocks))
+    assert(size != 0); /* it would hand out same offset multiple times */
+
+    if (QTAILQ_EMPTY(&ram_list.blocks))
         return 0;
 
-    QLIST_FOREACH(block, &ram_list.blocks, next) {
-        ram_addr_t end, next = ULONG_MAX;
+    QTAILQ_FOREACH(block, &ram_list.blocks, next) {
+        ram_addr_t end, next = RAM_ADDR_MAX;
 
         end = block->offset + block->length;
 
-        QLIST_FOREACH(next_block, &ram_list.blocks, next) {
+        QTAILQ_FOREACH(next_block, &ram_list.blocks, next) {
             if (next_block->offset >= end) {
                 next = MIN(next, next_block->offset);
             }
         }
         if (next - end >= size && next - end < mingap) {
-            offset =  end;
+            offset = end;
             mingap = next - end;
         }
     }
+
+    if (offset == RAM_ADDR_MAX) {
+        fprintf(stderr, "Failed to find gap of requested size: %" PRIu64 "\n",
+                (uint64_t)size);
+        abort();
+    }
+
     return offset;
 }
 
-static ram_addr_t last_ram_offset(void)
+ram_addr_t last_ram_offset(void)
 {
     RAMBlock *block;
     ram_addr_t last = 0;
 
-    QLIST_FOREACH(block, &ram_list.blocks, next)
+    QTAILQ_FOREACH(block, &ram_list.blocks, next)
         last = MAX(last, block->offset + block->length);
 
     return last;
 }
 
-ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
-                                   ram_addr_t size, void *host)
+static void qemu_ram_setup_dump(void *addr, ram_addr_t size)
+{
+#ifndef CONFIG_ANDROID
+    int ret;
+
+    /* Use MADV_DONTDUMP, if user doesn't want the guest memory in the core */
+    if (!qemu_opt_get_bool(qemu_get_machine_opts(),
+                           "dump-guest-core", true)) {
+        ret = qemu_madvise(addr, size, QEMU_MADV_DONTDUMP);
+        if (ret) {
+            perror("qemu_madvise");
+            fprintf(stderr, "madvise doesn't support MADV_DONTDUMP, "
+                            "but dump_guest_core=off specified\n");
+        }
+    }
+#endif  // !CONFIG_ANDROID
+}
+
+void qemu_ram_set_idstr(ram_addr_t addr, const char *name, DeviceState *dev)
 {
     RAMBlock *new_block, *block;
 
-    size = TARGET_PAGE_ALIGN(size);
-    new_block = g_malloc0(sizeof(*new_block));
+    new_block = NULL;
+    QTAILQ_FOREACH(block, &ram_list.blocks, next) {
+        if (block->offset == addr) {
+            new_block = block;
+            break;
+        }
+    }
+    assert(new_block);
+    assert(!new_block->idstr[0]);
 
-#if 0
-    if (dev && dev->parent_bus && dev->parent_bus->info->get_dev_path) {
-        char *id = dev->parent_bus->info->get_dev_path(dev);
+    if (dev) {
+        char *id = qdev_get_dev_path(dev);
         if (id) {
             snprintf(new_block->idstr, sizeof(new_block->idstr), "%s/", id);
             g_free(id);
         }
     }
-#endif
     pstrcat(new_block->idstr, sizeof(new_block->idstr), name);
 
-    QLIST_FOREACH(block, &ram_list.blocks, next) {
-        if (!strcmp(block->idstr, new_block->idstr)) {
+    /* This assumes the iothread lock is taken here too.  */
+    qemu_mutex_lock_ramlist();
+    QTAILQ_FOREACH(block, &ram_list.blocks, next) {
+        if (block != new_block && !strcmp(block->idstr, new_block->idstr)) {
             fprintf(stderr, "RAMBlock \"%s\" already registered, abort!\n",
                     new_block->idstr);
             abort();
         }
     }
+    qemu_mutex_unlock_ramlist();
+}
 
+static int memory_try_enable_merging(void *addr, size_t len)
+{
+#ifndef CONFIG_ANDROID
+    if (!qemu_opt_get_bool(qemu_get_machine_opts(), "mem-merge", true)) {
+        /* disabled by the user */
+        return 0;
+    }
+
+    return qemu_madvise(addr, len, QEMU_MADV_MERGEABLE);
+#else  // CONFIG_ANDROID
+    return qemu_madvise(addr, len, QEMU_MADV_MERGEABLE);
+#endif  // CONFIG_ANDROID
+}
+
+ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
+                                   ram_addr_t size, void *host)
+{
+    RAMBlock *block, *new_block;
+
+    size = TARGET_PAGE_ALIGN(size);
+    new_block = g_malloc0(sizeof(*new_block));
+    new_block->fd = -1;
+
+    /* This assumes the iothread lock is taken here too.  */
+    qemu_mutex_lock_ramlist();
+    //new_block->mr = mr;
+    new_block->offset = find_ram_offset(size);
     if (host) {
         new_block->host = host;
         new_block->flags |= RAM_PREALLOC_MASK;
-    } else {
+    } else if (xen_enabled()) {
         if (mem_path) {
-#if 0 && defined (__linux__) && !defined(TARGET_S390X)
-            new_block->host = file_ram_alloc(new_block, size, mem_path);
-            if (!new_block->host) {
-                new_block->host = qemu_vmalloc(size);
-                qemu_madvise(new_block->host, size, QEMU_MADV_MERGEABLE);
-            }
-#else
-            fprintf(stderr, "-mem-path option unsupported\n");
+            fprintf(stderr, "-mem-path not supported with Xen\n");
             exit(1);
-#endif
-        } else {
-#if defined(TARGET_S390X) && defined(CONFIG_KVM)
-            /* XXX S390 KVM requires the topmost vma of the RAM to be < 256GB */
-            new_block->host = mmap((void*)0x1000000, size,
-                                   PROT_EXEC|PROT_READ|PROT_WRITE,
-                                   MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-#else
-            new_block->host = qemu_vmalloc(size);
-
+        }
+        //xen_ram_alloc(new_block->offset, size, mr);
 #ifdef CONFIG_HAX
+    } else if (hax_enabled()) {
         /*
          * In HAX, qemu allocates the virtual address, and HAX kernel
          * module populates the region with physical memory. Currently
@@ -2233,34 +2466,66 @@ ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
          * make sure that sufficient amount of memory is available in
          * advance.
          */
-        if (hax_enabled()) {
-            int ret = hax_populate_ram(
-                    (uint64_t)(uintptr_t)new_block->host,
-                    size);
-            if (ret < 0) {
-                fprintf(stderr, "Hax failed to populate ram\n");
-                exit(-1);
-            }
+        int ret = hax_populate_ram(
+                (uint64_t)(uintptr_t)new_block->host,
+                (uint32_t)size);
+        if (ret < 0) {
+            fprintf(stderr, "Hax failed to populate ram\n");
+            exit(-1);
         }
-#endif
-
-#endif
-#ifdef MADV_MERGEABLE
-            madvise(new_block->host, size, MADV_MERGEABLE);
-#endif
+#endif  // CONFIG_HAX
+    } else {
+        if (mem_path) {
+            if (phys_mem_alloc != qemu_anon_ram_alloc) {
+                /*
+                 * file_ram_alloc() needs to allocate just like
+                 * phys_mem_alloc, but we haven't bothered to provide
+                 * a hook there.
+                 */
+                fprintf(stderr,
+                        "-mem-path not supported with this accelerator\n");
+                exit(1);
+            }
+            new_block->host = file_ram_alloc(new_block, size, mem_path);
+        }
+        if (!new_block->host) {
+            new_block->host = phys_mem_alloc(size);
+            if (!new_block->host) {
+                fprintf(stderr, "Cannot set up guest memory '%s': %s\n",
+                        name, strerror(errno));
+                exit(1);
+            }
+            memory_try_enable_merging(new_block->host, size);
         }
     }
-
-    new_block->offset = find_ram_offset(size);
     new_block->length = size;
 
-    QLIST_INSERT_HEAD(&ram_list.blocks, new_block, next);
+    /* Keep the list sorted from biggest to smallest block.  */
+    QTAILQ_FOREACH(block, &ram_list.blocks, next) {
+        if (block->length < new_block->length) {
+            break;
+        }
+    }
+    if (block) {
+        QTAILQ_INSERT_BEFORE(block, new_block, next);
+    } else {
+        QTAILQ_INSERT_TAIL(&ram_list.blocks, new_block, next);
+    }
+    ram_list.mru_block = NULL;
+
+    ram_list.version++;
+    qemu_mutex_unlock_ramlist();
 
     ram_list.phys_dirty = g_realloc(ram_list.phys_dirty,
                                        last_ram_offset() >> TARGET_PAGE_BITS);
     memset(ram_list.phys_dirty + (new_block->offset >> TARGET_PAGE_BITS),
            0xff, size >> TARGET_PAGE_BITS);
+    //cpu_physical_memory_set_dirty_range(new_block->offset, size, 0xff);
 
+    //qemu_ram_setup_dump(new_block->host, size);
+    //qemu_madvise(new_block->host, size, QEMU_MADV_HUGEPAGE);
+    //qemu_madvise(new_block->host, size, QEMU_MADV_DONTFORK);
+    
     if (kvm_enabled())
         kvm_setup_guest_memory(new_block->host, size);
 
@@ -2272,99 +2537,107 @@ ram_addr_t qemu_ram_alloc(DeviceState *dev, const char *name, ram_addr_t size)
     return qemu_ram_alloc_from_ptr(dev, name, size, NULL);
 }
 
+void qemu_ram_free_from_ptr(ram_addr_t addr)
+{
+    RAMBlock *block;
+
+    /* This assumes the iothread lock is taken here too.  */
+    qemu_mutex_lock_ramlist();
+    QTAILQ_FOREACH(block, &ram_list.blocks, next) {
+        if (addr == block->offset) {
+            QTAILQ_REMOVE(&ram_list.blocks, block, next);
+            ram_list.mru_block = NULL;
+            ram_list.version++;
+            g_free(block);
+            break;
+        }
+    }
+    qemu_mutex_unlock_ramlist();
+}
+
 void qemu_ram_free(ram_addr_t addr)
 {
     RAMBlock *block;
 
-    QLIST_FOREACH(block, &ram_list.blocks, next) {
+    /* This assumes the iothread lock is taken here too.  */
+    qemu_mutex_lock_ramlist();
+    QTAILQ_FOREACH(block, &ram_list.blocks, next) {
         if (addr == block->offset) {
-            QLIST_REMOVE(block, next);
+            QTAILQ_REMOVE(&ram_list.blocks, block, next);
+            ram_list.mru_block = NULL;
+            ram_list.version++;
             if (block->flags & RAM_PREALLOC_MASK) {
                 ;
-            } else if (mem_path) {
-#if defined (__linux__) && !defined(TARGET_S390X)
-                if (block->fd) {
-                    munmap(block->host, block->length);
-                    close(block->fd);
-                } else {
-                    qemu_vfree(block->host);
-                }
-#else
-                abort();
+            } else if (xen_enabled()) {
+                //xen_invalidate_map_cache_entry(block->host);
+#ifndef _WIN32
+            } else if (block->fd >= 0) {
+                munmap(block->host, block->length);
+                close(block->fd);
 #endif
             } else {
-#if defined(TARGET_S390X) && defined(CONFIG_KVM)
-                munmap(block->host, block->length);
-#else
-                qemu_vfree(block->host);
-#endif
+                qemu_anon_ram_free(block->host, block->length);
             }
             g_free(block);
-            return;
+            break;
         }
     }
+    qemu_mutex_unlock_ramlist();
 
 }
 
 #ifndef _WIN32
 void qemu_ram_remap(ram_addr_t addr, ram_addr_t length)
 {
-#ifndef CONFIG_ANDROID
     RAMBlock *block;
     ram_addr_t offset;
     int flags;
     void *area, *vaddr;
 
-    QLIST_FOREACH(block, &ram_list.blocks, next) {
+    QTAILQ_FOREACH(block, &ram_list.blocks, next) {
         offset = addr - block->offset;
         if (offset < block->length) {
             vaddr = block->host + offset;
             if (block->flags & RAM_PREALLOC_MASK) {
                 ;
+            } else if (xen_enabled()) {
+                abort();
             } else {
                 flags = MAP_FIXED;
                 munmap(vaddr, length);
-                if (mem_path) {
-#if defined(__linux__) && !defined(TARGET_S390X)
-                    if (block->fd) {
+                if (block->fd >= 0) {
 #ifdef MAP_POPULATE
-                        flags |= mem_prealloc ? MAP_POPULATE | MAP_SHARED :
-                            MAP_PRIVATE;
+                    flags |= mem_prealloc ? MAP_POPULATE | MAP_SHARED :
+                        MAP_PRIVATE;
 #else
-                        flags |= MAP_PRIVATE;
+                    flags |= MAP_PRIVATE;
 #endif
-                        area = mmap(vaddr, length, PROT_READ | PROT_WRITE,
-                                    flags, block->fd, offset);
-                    } else {
-                        flags |= MAP_PRIVATE | MAP_ANONYMOUS;
-                        area = mmap(vaddr, length, PROT_READ | PROT_WRITE,
-                                    flags, -1, 0);
-                    }
-#else
-                    abort();
-#endif
+                    area = mmap(vaddr, length, PROT_READ | PROT_WRITE,
+                                flags, block->fd, offset);
                 } else {
-#if defined(TARGET_S390X) && defined(CONFIG_KVM)
-                    flags |= MAP_SHARED | MAP_ANONYMOUS;
-                    area = mmap(vaddr, length, PROT_EXEC|PROT_READ|PROT_WRITE,
-                                flags, -1, 0);
-#else
+                    /*
+                     * Remap needs to match alloc.  Accelerators that
+                     * set phys_mem_alloc never remap.  If they did,
+                     * we'd need a remap hook here.
+                     */
+                    assert(phys_mem_alloc == qemu_anon_ram_alloc);
+
                     flags |= MAP_PRIVATE | MAP_ANONYMOUS;
                     area = mmap(vaddr, length, PROT_READ | PROT_WRITE,
                                 flags, -1, 0);
-#endif
                 }
                 if (area != vaddr) {
-                    fprintf(stderr, "Could not remap addr: %lx@%lx\n",
+                    fprintf(stderr, "Could not remap addr: "
+                            RAM_ADDR_FMT "@" RAM_ADDR_FMT "\n",
                             length, addr);
                     exit(1);
                 }
-                qemu_madvise(vaddr, length, QEMU_MADV_MERGEABLE);
+                memory_try_enable_merging(vaddr, length);
+                qemu_ram_setup_dump(vaddr, length);
             }
             return;
         }
     }
-#endif /* !CONFIG_ANDROID */
 }
 #endif /* !_WIN32 */
 
@@ -2378,24 +2651,23 @@ void qemu_ram_remap(ram_addr_t addr, ram_addr_t length)
  */
 void *qemu_get_ram_ptr(ram_addr_t addr)
 {
-    RAMBlock *block;
-
-    QLIST_FOREACH(block, &ram_list.blocks, next) {
-        if (addr - block->offset < block->length) {
-            /* Move this entry to to start of the list.  */
-            if (block != QLIST_FIRST(&ram_list.blocks)) {
-                QLIST_REMOVE(block, next);
-                QLIST_INSERT_HEAD(&ram_list.blocks, block, next);
-    }
-            return block->host + (addr - block->offset);
+    RAMBlock *block = qemu_get_ram_block(addr);
+#if 0
+    if (xen_enabled()) {
+        /* We need to check if the requested address is in the RAM
+         * because we don't want to map the entire memory in QEMU.
+         * In that case just map until the end of the page.
+         */
+        if (block->offset == 0) {
+            return xen_map_cache(addr, 0, 0);
+        } else if (block->host == NULL) {
+            block->host =
+                xen_map_cache(block->offset, block->length, 1);
         }
     }
-
-        fprintf(stderr, "Bad ram offset %" PRIx64 "\n", (uint64_t)addr);
-        abort();
-
-    return NULL;
-    }
+#endif
+    return block->host + (addr - block->offset);
+}
 
 /* Return a host pointer to ram allocated with qemu_ram_alloc.
  * Same as qemu_get_ram_ptr but avoid reordering ramblocks.
@@ -2404,10 +2676,10 @@ void *qemu_safe_ram_ptr(ram_addr_t addr)
 {
     RAMBlock *block;
 
-    QLIST_FOREACH(block, &ram_list.blocks, next) {
+    QTAILQ_FOREACH(block, &ram_list.blocks, next) {
         if (addr - block->offset < block->length) {
-    return block->host + (addr - block->offset);
-}
+            return block->host + (addr - block->offset);
+        }
     }
 
     fprintf(stderr, "Bad ram offset %" PRIx64 "\n", (uint64_t)addr);
@@ -2416,18 +2688,38 @@ void *qemu_safe_ram_ptr(ram_addr_t addr)
     return NULL;
 }
 
+/* Some of the softmmu routines need to translate from a host pointer
+   (typically a TLB entry) back to a ram offset.  */
 int qemu_ram_addr_from_host(void *ptr, ram_addr_t *ram_addr)
 {
     RAMBlock *block;
     uint8_t *host = ptr;
+#if 0
+    if (xen_enabled()) {
+        *ram_addr = xen_ram_addr_from_mapcache(ptr);
+        return qemu_get_ram_block(*ram_addr)->mr;
+    }
+#endif
+    block = ram_list.mru_block;
+    if (block && block->host && host - block->host < block->length) {
+        goto found;
+    }
 
-    QLIST_FOREACH(block, &ram_list.blocks, next) {
+    QTAILQ_FOREACH(block, &ram_list.blocks, next) {
+        /* This case append when the block is not mapped. */
+        if (block->host == NULL) {
+            continue;
+        }
         if (host - block->host < block->length) {
-            *ram_addr = block->offset + (host - block->host);
-            return 0;
+            goto found;
+        }
     }
-    }
+
     return -1;
+
+found:
+    *ram_addr = block->offset + (host - block->host);
+    return 0;
 }
 
 /* Some of the softmmu routines need to translate from a host pointer
