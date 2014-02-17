@@ -35,6 +35,7 @@
 
 #include "qemu/bswap.h"
 #include "android/utils/debug.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/system.h"
 #include "android/snapshot.h"
 
@@ -50,17 +51,11 @@
 static int
 read_or_die(int fd, void *buf, size_t nbyte)
 {
-    int ret = 0;
-    do {
-        ret = read(fd, buf, nbyte);
-    }
-    while(ret < 0 && errno == EINTR);
-
+    int ret = HANDLE_EINTR(read(fd, buf, nbyte));
     if (ret < 0) {
         derror("read failed: %s", strerror(errno));
         exit(1);
     }
-
     return ret;
 }
 

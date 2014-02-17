@@ -48,8 +48,9 @@
  */
 #define QEMUD_SAVE_VERSION 2
 
+#ifndef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))
-
+#endif
 
 /* define SUPPORT_LEGACY_QEMUD to 1 if you want to support
  * talking to a legacy qemud daemon. See docs/ANDROID-QEMUD.TXT
@@ -1542,8 +1543,6 @@ static void
 qemud_multiplexer_init( QemudMultiplexer*  mult,
                         CharDriverState*   serial_cs )
 {
-    QemudClient*  control;
-
     /* initialize serial handler */
     qemud_serial_init( mult->serial,
                        serial_cs,
@@ -1551,13 +1550,13 @@ qemud_multiplexer_init( QemudMultiplexer*  mult,
                        mult );
 
     /* setup listener for channel 0 */
-    control = qemud_client_alloc( 0,
-                                  NULL,
-                                  mult,
-                                  qemud_multiplexer_control_recv,
-                                  NULL, NULL, NULL,
-                                  mult->serial,
-                                  &mult->clients );
+    qemud_client_alloc(0,
+                       NULL,
+                       mult,
+                       qemud_multiplexer_control_recv,
+                       NULL, NULL, NULL,
+                       mult->serial,
+                       &mult->clients );
 }
 
 /* the global multiplexer state */

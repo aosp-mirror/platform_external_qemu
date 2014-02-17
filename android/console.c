@@ -34,6 +34,7 @@
 #include "android/globals.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/stralloc.h"
 #include "android/config/config.h"
 #include "android/tcpdump.h"
@@ -285,9 +286,9 @@ static void  control_control_write( ControlClient  client, const char*  buff, in
         len = strlen(buff);
 
     while (len > 0) {
-        ret = socket_send( client->sock, buff, len);
+        ret = HANDLE_EINTR(socket_send( client->sock, buff, len));
         if (ret < 0) {
-            if (errno != EINTR && errno != EWOULDBLOCK && errno != EAGAIN)
+            if (errno != EWOULDBLOCK && errno != EAGAIN)
                 return;
         } else {
             buff += ret;
@@ -600,16 +601,11 @@ control_global_accept( void*  _global )
 
     D(( "control_global_accept: just in (fd=%d)\n", global->listen_fd ));
 
-    for(;;) {
-        fd = socket_accept( global->listen_fd, NULL );
-        if (fd < 0 && errno != EINTR) {
-            D(( "problem in accept: %d: %s\n", errno, errno_str ));
-            perror("accept");
-            return;
-        } else if (fd >= 0) {
-            break;
-        }
-        D(( "relooping in accept()\n" ));
+    fd = HANDLE_EINTR(socket_accept(global->listen_fd, NULL));
+    if (fd < 0) {
+        D(( "problem in accept: %d: %s\n", errno, errno_str ));
+        perror("accept");
+        return;
     }
 
     socket_set_xreuseaddr( fd );
@@ -2269,8 +2265,7 @@ do_geo_fix( ControlClient  client, char*  args )
     double  params[ NUM_GEO_PARAMS ];
     int     n_satellites = 1;
 
-    static  int     last_time = 0;
-    static  double  last_altitude = 0.;
+    static  int last_time = 0;
 
     if (!p)
         p = "";
@@ -2371,7 +2366,6 @@ do_geo_fix( ControlClient  client, char*  args )
         /* optional altitude + bogus diff */
         if (top_param >= GEO_ALT) {
             stralloc_add_format( s, ",%.1g,M,0.,M", params[GEO_ALT] );
-            last_altitude = params[GEO_ALT];
         } else {
             stralloc_add_str( s, ",,,," );
         }

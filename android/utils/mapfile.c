@@ -15,6 +15,8 @@
  * file I/O.
  */
 
+#include "android/utils/mapfile.h"
+
 #include "stddef.h"
 #include "sys/types.h"
 #include "errno.h"
@@ -27,7 +29,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "mapfile.h"
+#include "android/utils/eintr_wrapper.h"
 
 MapFile*
 mapfile_open(const char* path, int oflag, int share_mode)
@@ -120,11 +122,7 @@ mapfile_read(MapFile* handle, void* buf, size_t nbyte)
     }
     return ret_bytes;
 #else   // WIN32
-    ssize_t ret;
-    do {
-        ret = read((int)(ptrdiff_t)handle, buf, nbyte);
-    } while (ret < 0 && errno == EINTR);
-    return ret;
+    return HANDLE_EINTR(read((int)(ptrdiff_t)handle, buf, nbyte));
 #endif  // WIN32
 }
 

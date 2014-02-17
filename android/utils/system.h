@@ -109,19 +109,6 @@ extern char*  win32_strsep(char**  pline, const char*  delim);
 #  define  strcasecmp  stricmp
 #endif
 
-/** EINTR HANDLING
- **
- ** since QEMU uses SIGALRM pretty extensively, having a system call returning
- ** EINTR on Unix happens very frequently. provide a simple macro to guard against
- ** this.
- **/
-
-#ifdef _WIN32
-#  define   CHECKED(ret, call)    (ret) = (call)
-#else
-#  define   CHECKED(ret, call)    do { (ret) = (call); } while ((ret) < 0 && errno == EINTR)
-#endif
-
 /** SIGNAL HANDLING
  **
  ** the following can be used to block SIGALRM for a given period of time.
