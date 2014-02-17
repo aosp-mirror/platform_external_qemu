@@ -229,8 +229,13 @@ int goldfish_tty_add(CharDriverState *cs, int id, uint32_t base, int irq)
     if(ret) {
         g_free(s);
     } else {
-        register_savevm( "goldfish_tty", instance_id++, GOLDFISH_TTY_SAVE_VERSION,
-                         goldfish_tty_save, goldfish_tty_load, s);
+        register_savevm(NULL,
+                        "goldfish_tty",
+                        instance_id++,
+                        GOLDFISH_TTY_SAVE_VERSION,
+                        goldfish_tty_save,
+                        goldfish_tty_load,
+                        s);
     }
     return ret;
 }

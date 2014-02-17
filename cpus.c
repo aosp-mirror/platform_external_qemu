@@ -290,7 +290,13 @@ static int timer_load(QEMUFile *f, void *opaque, int version_id)
 TimersState timers_state;
 
 void qemu_timer_register_savevm(void) {
-    register_savevm("timer", 0, 2, timer_save, timer_load, &timers_state);
+    register_savevm(NULL,
+                    "timer",
+                    0,
+                    2,
+                    timer_save,
+                    timer_load,
+                    &timers_state);
 }
 
 /* Return the virtual CPU time, based on the instruction counter.  */

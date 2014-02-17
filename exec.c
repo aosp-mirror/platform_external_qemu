@@ -569,10 +569,20 @@ void cpu_exec_init(CPUArchState *env)
     cpu_list_unlock();
 #endif
 #if defined(CPU_SAVE_VERSION) && !defined(CONFIG_USER_ONLY)
-    register_savevm("cpu_common", cpu_index, CPU_COMMON_SAVE_VERSION,
-                    cpu_common_save, cpu_common_load, env);
-    register_savevm("cpu", cpu_index, CPU_SAVE_VERSION,
-                    cpu_save, cpu_load, env);
+    register_savevm(NULL,
+                    "cpu_common",
+                    cpu_index,
+                    CPU_COMMON_SAVE_VERSION,
+                    cpu_common_save,
+                    cpu_common_load,
+                    env);
+    register_savevm(NULL,
+                    "cpu",
+                    cpu_index,
+                    CPU_SAVE_VERSION,
+                    cpu_save,
+                    cpu_load,
+                    env);
 #endif
 }
 

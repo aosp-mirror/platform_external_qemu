@@ -681,8 +681,13 @@ void nand_dev_init(uint32_t base)
     cpu_register_physical_memory(base, 0x00000fff, iomemtype);
     s->base = base;
 
-    register_savevm( "nand_dev", instance_id++, NAND_DEV_STATE_SAVE_VERSION,
-                      nand_dev_controller_state_save, nand_dev_controller_state_load, s);
+    register_savevm(NULL,
+                    "nand_dev",
+                    instance_id++,
+                    NAND_DEV_STATE_SAVE_VERSION,
+                    nand_dev_controller_state_save,
+                    nand_dev_controller_state_load,
+                    s);
 }
 
 static int arg_match(const char *a, const char *b, size_t b_len)
