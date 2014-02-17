@@ -14,6 +14,10 @@
 
 #include <stdarg.h>
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* Print formatted panic message and halts the process */
 void __attribute__((noreturn)) android_panic ( const char*  fmt, ... );
 
@@ -25,9 +29,9 @@ void __attribute__((noreturn)) android_vpanic( const char*  fmt, va_list  args )
 
 typedef void (*APanicHandlerFunc)(const char*, va_list) __attribute__((noreturn));
 
-#ifdef ACONFIG_UNIT_TEST
 /* Register a new panic handler. This should only be used for unit-testing */
 void android_panic_registerHandler( APanicHandlerFunc  handler );
-#endif /* ACONFIG_UNIT_TEST */
+
+ANDROID_END_HEADER
 
 #endif /* ANDROID_UTILS_PANIC_H */

@@ -2524,7 +2524,7 @@ int main(int argc, char **argv, char **envp)
     const char *gdbstub_dev = NULL;
     uint32_t boot_devices_bitmap = 0;
     int i;
-    int snapshot, linux_boot, net_boot;
+    int snapshot, linux_boot, __attribute__((unused)) net_boot;
     const char *icount_option = NULL;
     const char *initrd_filename;
     const char *kernel_filename, *kernel_cmdline;

@@ -16,6 +16,7 @@
  * Some portion of code from KVM is used in this file.
  */
 
+#include "hw/hw.h"
 #include "target-i386/hax-i386.h"
 
 #define HAX_EMUL_ONE    0x1

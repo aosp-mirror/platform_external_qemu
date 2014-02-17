@@ -18,9 +18,12 @@
 #ifndef _ANDROID_UTILS_FILEIO_H
 #define _ANDROID_UTILS_FILEIO_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "android/utils/compiler.h"
+
+#include <stddef.h>
+#include <unistd.h>
+
+ANDROID_BEGIN_HEADER
 
 typedef struct MapFile MapFile;
 
@@ -126,8 +129,6 @@ extern void* mapfile_map(MapFile* handle,
  */
 extern int mapfile_unmap(void* mapped_at, size_t len);
 
-#ifdef __cplusplus
-}   /* end of extern "C" */
-#endif
+ANDROID_END_HEADER
 
 #endif  // _ANDROID_UTILS_FILEIO_H

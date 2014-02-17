@@ -237,7 +237,6 @@ static void smc91c111_do_tx(smc91c111_state *s)
     int i;
     int len;
     int control;
-    int add_crc;
     int packetnum;
     uint8_t *p;
 
@@ -276,8 +275,6 @@ static void smc91c111_do_tx(smc91c111_state *s)
             memcpy(p + len, &crc, 4);
             len += 4;
         }
-#else
-        add_crc = 0;
 #endif
         if (s->ctr & CTR_AUTO_RELEASE)
             /* Race?  */

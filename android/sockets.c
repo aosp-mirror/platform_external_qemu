@@ -23,6 +23,7 @@
 #include <string.h>
 #include "android/utils/path.h"
 #include "android/utils/debug.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
 
@@ -59,7 +60,7 @@
 #  define  QSOCKET_CALL(_ret,_cmd)   \
     do { \
         errno = 0; \
-        do { _ret = (_cmd); } while ( _ret < 0 && errno == EINTR ); \
+        _ret = HANDLE_EINTR(_cmd); \
     } while (0);
 #endif
 
@@ -1096,10 +1097,11 @@ socket_getoption(int  fd, int  domain, int  option, int  defaut)
         int  opt  = -1;
 #endif
         socklen_t  optlen = sizeof(opt);
-        ret = getsockopt(fd, domain, option, (char*)&opt, &optlen);
+        ret = HANDLE_EINTR(
+                getsockopt(fd, domain, option, (char*)&opt, &optlen));
         if (ret == 0)
             return (int)opt;
-        if (errno != EINTR)
+        else
             return defaut;
     }
 #undef OPT_CAST
@@ -1263,7 +1265,7 @@ socket_close( int  fd )
     int  old_errno = errno;
 
     shutdown( fd, SHUT_RDWR );
-    close( fd );
+    IGNORE_EINTR(close( fd ));
 
     errno = old_errno;
 }
@@ -1405,9 +1407,7 @@ socket_unix_server( const char*  name, SocketType  type )
 
     sock_address_init_unix( &addr, name );
 
-    do {
-        ret = unlink( name );
-    } while (ret < 0 && errno == EINTR);
+    HANDLE_EINTR(unlink(name));
 
     ret = socket_bind_server( s, &addr, type );
 

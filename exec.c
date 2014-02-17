@@ -2575,12 +2575,11 @@ ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
          * make sure that sufficient amount of memory is available in
          * advance.
          */
-        if (hax_enabled())
-        {
-            int ret;
-            ret = hax_populate_ram((uint64_t)new_block->host, size);
-            if (ret < 0)
-            {
+        if (hax_enabled()) {
+            int ret = hax_populate_ram(
+                    (uint64_t)(uintptr_t)new_block->host,
+                    size);
+            if (ret < 0) {
                 fprintf(stderr, "Hax failed to populate ram\n");
                 exit(-1);
             }
@@ -3269,7 +3268,7 @@ static void io_mem_init(void)
 
 /* physical memory access (slow version, mainly for debug) */
 #if defined(CONFIG_USER_ONLY)
-void cpu_physical_memory_rw(hwaddr addr, uint8_t *buf,
+void cpu_physical_memory_rw(hwaddr addr, void *buf,
                             int len, int is_write)
 {
     int l, flags;
@@ -3322,7 +3321,7 @@ static void invalidate_and_set_dirty(hwaddr addr,
     }
 }
 
-void cpu_physical_memory_rw(hwaddr addr, uint8_t *buf,
+void cpu_physical_memory_rw(hwaddr addr, void *buf,
                             int len, int is_write)
 {
     int l, io_index;
@@ -3330,6 +3329,7 @@ void cpu_physical_memory_rw(hwaddr addr, uint8_t *buf,
     uint32_t val;
     hwaddr page;
     unsigned long pd;
+    uint8_t* buf8 = (uint8_t*)buf;
     PhysPageDesc *p;
 
     while (len > 0) {
@@ -3354,17 +3354,17 @@ void cpu_physical_memory_rw(hwaddr addr, uint8_t *buf,
                    potential bugs */
                 if (l >= 4 && ((addr1 & 3) == 0)) {
                     /* 32 bit write access */
-                    val = ldl_p(buf);
+                    val = ldl_p(buf8);
                     io_mem_write[io_index][2](io_mem_opaque[io_index], addr1, val);
                     l = 4;
                 } else if (l >= 2 && ((addr1 & 1) == 0)) {
                     /* 16 bit write access */
-                    val = lduw_p(buf);
+                    val = lduw_p(buf8);
                     io_mem_write[io_index][1](io_mem_opaque[io_index], addr1, val);
                     l = 2;
                 } else {
                     /* 8 bit write access */
-                    val = ldub_p(buf);
+                    val = ldub_p(buf8);
                     io_mem_write[io_index][0](io_mem_opaque[io_index], addr1, val);
                     l = 1;
                 }
@@ -3373,7 +3373,7 @@ void cpu_physical_memory_rw(hwaddr addr, uint8_t *buf,
                 addr1 = (pd & TARGET_PAGE_MASK) + (addr & ~TARGET_PAGE_MASK);
                 /* RAM case */
                 ptr = qemu_get_ram_ptr(addr1);
-                memcpy(ptr, buf, l);
+                memcpy(ptr, buf8, l);
                 invalidate_and_set_dirty(addr1, l);
             }
         } else {
@@ -3387,40 +3387,41 @@ void cpu_physical_memory_rw(hwaddr addr, uint8_t *buf,
                 if (l >= 4 && ((addr1 & 3) == 0)) {
                     /* 32 bit read access */
                     val = io_mem_read[io_index][2](io_mem_opaque[io_index], addr1);
-                    stl_p(buf, val);
+                    stl_p(buf8, val);
                     l = 4;
                 } else if (l >= 2 && ((addr1 & 1) == 0)) {
                     /* 16 bit read access */
                     val = io_mem_read[io_index][1](io_mem_opaque[io_index], addr1);
-                    stw_p(buf, val);
+                    stw_p(buf8, val);
                     l = 2;
                 } else {
                     /* 8 bit read access */
                     val = io_mem_read[io_index][0](io_mem_opaque[io_index], addr1);
-                    stb_p(buf, val);
+                    stb_p(buf8, val);
                     l = 1;
                 }
             } else {
                 /* RAM case */
                 ptr = qemu_get_ram_ptr(pd & TARGET_PAGE_MASK) +
                     (addr & ~TARGET_PAGE_MASK);
-                memcpy(buf, ptr, l);
+                memcpy(buf8, ptr, l);
             }
         }
         len -= l;
-        buf += l;
+        buf8 += l;
         addr += l;
     }
 }
 
 /* used for ROM loading : can write in RAM and ROM */
 void cpu_physical_memory_write_rom(hwaddr addr,
-                                   const uint8_t *buf, int len)
+                                   const void *buf, int len)
 {
     int l;
     uint8_t *ptr;
     hwaddr page;
     unsigned long pd;
+    const uint8_t* buf8 = (const uint8_t*)buf;
     PhysPageDesc *p;
 
     while (len > 0) {
@@ -3444,11 +3445,11 @@ void cpu_physical_memory_write_rom(hwaddr addr,
             addr1 = (pd & TARGET_PAGE_MASK) + (addr & ~TARGET_PAGE_MASK);
             /* ROM/RAM case */
             ptr = qemu_get_ram_ptr(addr1);
-            memcpy(ptr, buf, l);
+            memcpy(ptr, buf8, l);
             invalidate_and_set_dirty(addr1, l);
         }
         len -= l;
-        buf += l;
+        buf8 += l;
         addr += l;
     }
 }
@@ -3803,11 +3804,12 @@ void stq_phys(hwaddr addr, uint64_t val)
 
 /* virtual memory access for debug (includes writing to ROM) */
 int cpu_memory_rw_debug(CPUState *env, target_ulong addr,
-                        uint8_t *buf, int len, int is_write)
+                        void *buf, int len, int is_write)
 {
     int l;
     hwaddr phys_addr;
     target_ulong page;
+    uint8_t* buf8 = (uint8_t*)buf;
 
     while (len > 0) {
         page = addr & TARGET_PAGE_MASK;
@@ -3821,12 +3823,12 @@ int cpu_memory_rw_debug(CPUState *env, target_ulong addr,
         phys_addr += (addr & ~TARGET_PAGE_MASK);
 #if !defined(CONFIG_USER_ONLY)
         if (is_write)
-            cpu_physical_memory_write_rom(phys_addr, buf, l);
+            cpu_physical_memory_write_rom(phys_addr, buf8, l);
         else
 #endif
-            cpu_physical_memory_rw(phys_addr, buf, l, is_write);
+            cpu_physical_memory_rw(phys_addr, buf8, l, is_write);
         len -= l;
-        buf += l;
+        buf8 += l;
         addr += l;
     }
     return 0;

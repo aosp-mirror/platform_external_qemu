@@ -596,7 +596,7 @@ void tcg_gen_callN(TCGContext *s, TCGv_ptr func, unsigned int flags,
                    int sizemask, TCGArg ret, int nargs, TCGArg *args)
 {
 #ifdef TCG_TARGET_I386
-    int call_type;
+    int __attribute__((unused)) call_type;
 #endif
     int i;
     int real_args;

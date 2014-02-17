@@ -35,31 +35,6 @@ append_string( const char* str1, const char* str2 )
 
 #include <windows.h>
 
-/* This function is used to revert all forward slashes (/) in a path
- * string into unquoted backwards one (\). This is necessary because
- * LoadLibrary() and AddDllDirectory() do not support forward slashes.
- *
- * Caller must free the result string
- */
-static char*
-reverse_slashes( const char* path )
-{
-    int   len    = strlen(path);
-    char* result = malloc(len+1);
-    int   nn;
-
-    for (nn = 0; nn < len; nn++) {
-        int ch = path[nn];
-        if (ch == '/') {
-            ch = '\\';
-        }
-        result[nn] = (char)ch;
-    }
-    result[nn] = '\0';
-
-    return result;
-}
-
 ADynamicLibrary*
 adynamicLibrary_open( const char*  libraryName,
                       char**       pError)

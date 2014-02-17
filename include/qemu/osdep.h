@@ -148,4 +148,9 @@ static inline void qemu_timersub(const struct timeval *val1,
 #define ffs __builtin_ffs
 #endif
 
+/* in osdep.c */
+#ifdef _WIN32
+int asprintf(char**, const char*, ...);
+#endif
+
 #endif

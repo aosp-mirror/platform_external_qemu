@@ -79,7 +79,7 @@ syncsocket_connect(int fd, SockAddress* sockaddr, int timeout)
                 iolooper_free(looper);
                 return NULL;
             }
-        } else if (errno != EINTR) {
+        } else {
             return NULL;
         }
     }
@@ -184,9 +184,7 @@ syncsocket_read_absolute(SyncSocket* ssocket,
             D("%s: Internal error, iolooper_is_read() not set!", __FUNCTION__);
             return -1;
         }
-        do {
-            ret = socket_recv(ssocket->fd, buf, size);
-        } while( ret < 0 && errno == EINTR);
+        ret = socket_recv(ssocket->fd, buf, size);
     } else if (ret == 0) {
         // Timed out
         errno = ETIMEDOUT;
@@ -229,10 +227,7 @@ syncsocket_write_absolute(SyncSocket* ssocket,
             return -1;
         }
 
-        do {
-            ret = socket_send(ssocket->fd, (const char*)buf + written, size - written);
-        } while( ret < 0 && errno == EINTR);
-
+        ret = socket_send(ssocket->fd, (const char*)buf + written, size - written);
         if (ret > 0) {
             written += ret;
         } else if (ret < 0) {

@@ -1207,11 +1207,11 @@ sim_adn_record_to_bytes( SimAdnRecord  rec, bytes_t   data, int  datalen )
 {
     bytes_t   end    = data + datalen;
     bytes_t   footer = end - ADN_FOOTER_SIZE;
-    int       ton    = 0x81;
+    //int       ton    = 0x81;
     cbytes_t  number = (cbytes_t) rec->adn.number;
 
     if (number[0] == '+') {
-        ton     = 0x91;
+        //ton     = 0x91;
         number += 1;
     }
     footer[0] = (strlen((const char*)number)+1)/2 + 1;

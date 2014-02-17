@@ -547,7 +547,7 @@ fail:
      * some cases like ENOSPC for allocating a new refcount block)
      */
     if (ret < 0) {
-        int dummy;
+        int __attribute__((unused)) dummy;
         dummy = update_refcount(bs, offset, cluster_offset - offset, -addend);
     }
 

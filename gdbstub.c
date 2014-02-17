@@ -28,11 +28,13 @@
 #include <fcntl.h>
 
 #include "qemu.h"
+#include "hw/hw.h"
 #else
 #include "monitor/monitor.h"
 #include "sysemu/char.h"
 #include "sysemu/sysemu.h"
 #include "exec/gdbstub.h"
+#include "exec/exec-all.h"
 #endif
 
 #define MAX_PACKET_LENGTH 4096
@@ -1989,7 +1991,7 @@ static void gdb_vm_state_change(void *opaque, int running, int reason)
             env->watchpoint_hit = NULL;
             return;
         }
-	tb_flush(env);
+        tb_flush(env);
         ret = GDB_SIGNAL_TRAP;
     } else {
         ret = GDB_SIGNAL_INT;

@@ -753,7 +753,7 @@ static void load_linux(hwaddr option_rom,
 
     /* generate bootsector to set up the initial register state */
     real_seg = real_addr >> 4;
-    seg[0] = seg[2] = seg[3] = seg[4] = seg[4] = real_seg;
+    seg[0] = seg[2] = seg[3] = seg[4] = seg[5] = real_seg;
     seg[1] = real_seg+0x20;	/* CS */
     memset(gpr, 0, sizeof gpr);
     gpr[4] = cmdline_addr-real_addr-16;	/* SP (-16 is paranoia) */
@@ -886,7 +886,7 @@ static void pc_init1(ram_addr_t ram_size,
     ram_addr_t below_4g_mem_size, above_4g_mem_size = 0;
     int bios_size, isa_bios_size, oprom_area_size;
     PCIBus *pci_bus;
-    int piix3_devfn = -1;
+    int __attribute__((unused)) piix3_devfn = -1;
     CPUState *env;
     qemu_irq *cpu_irq;
     qemu_irq *i8259;

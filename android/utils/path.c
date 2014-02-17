@@ -9,6 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "android/utils/debug.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 
 #include <stdio.h>
@@ -34,16 +36,7 @@
 #include <signal.h>
 #endif
 
-#include "android/utils/debug.h"
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
-
-#ifndef CHECKED
-#  ifdef _WIN32
-#    define   CHECKED(ret, call)    (ret) = (call)
-#  else
-#    define   CHECKED(ret, call)    do { (ret) = (call); } while ((ret) < 0 && errno == EINTR)
-#  endif
-#endif
 
 /** PATH HANDLING ROUTINES
  **
@@ -218,10 +211,10 @@ path_dirname( const char*  path )
 ABool
 path_exists( const char*  path )
 {
-    int  ret;
-    if (path == NULL)
+    if (!path)
         return 0;
-    CHECKED(ret, access(path, F_OK));
+
+    int ret = HANDLE_EINTR(access(path, F_OK));
     return (ret == 0) || (errno != ENOENT);
 }
 
@@ -229,12 +222,11 @@ path_exists( const char*  path )
 ABool
 path_is_regular( const char*  path )
 {
-    int          ret;
-    struct stat  st;
-
     if (path == NULL)
         return 0;
-    CHECKED(ret, stat(path, &st));
+
+    struct stat  st;
+    int ret = HANDLE_EINTR(stat(path, &st));
     if (ret < 0)
         return 0;
 
@@ -246,12 +238,11 @@ path_is_regular( const char*  path )
 ABool
 path_is_dir( const char*  path )
 {
-    int          ret;
-    struct stat  st;
-
-    if (path == NULL)
+    if (!path)
         return 0;
-    CHECKED(ret, stat(path, &st));
+
+    struct stat  st;
+    int ret = HANDLE_EINTR(stat(path, &st));
     if (ret < 0)
         return 0;
 
@@ -262,31 +253,28 @@ path_is_dir( const char*  path )
 ABool
 path_can_read( const char*  path )
 {
-    int  ret;
-    if (path == NULL)
+    if (!path)
         return 0;
-    CHECKED(ret, access(path, R_OK));
-    return (ret == 0);
+
+    return HANDLE_EINTR(access(path, R_OK)) == 0;
 }
 
 ABool
 path_can_write( const char*  path )
 {
-    int  ret;
-    if (path == NULL)
+    if (!path)
         return 0;
-    CHECKED(ret, access(path, R_OK));
-    return (ret == 0);
+
+    return HANDLE_EINTR(access(path, W_OK)) == 0;
 }
 
 ABool
 path_can_exec( const char* path )
 {
-    int  ret;
-    if (path == NULL)
+    if (!path)
         return 0;
-    CHECKED(ret, access(path, X_OK));
-    return (ret == 0);
+
+    return HANDLE_EINTR(access(path, X_OK)) == 0;
 }
 
 /* try to make a directory. returns 0 on success, -1 on failure
@@ -298,9 +286,7 @@ path_mkdir( const char*  path, int  mode )
     (void)mode;
     return _mkdir(path);
 #else
-    int  ret;
-    CHECKED(ret, mkdir(path, mode));
-    return ret;
+    return HANDLE_EINTR(mkdir(path, mode));
 #endif
 }
 
@@ -408,10 +394,8 @@ path_get_size( const char*  path, uint64_t  *psize )
     CloseHandle(file);
     return 0;
 #else
-    int    ret;
     struct stat  st;
-
-    CHECKED(ret, stat(path, &st));
+    int ret = HANDLE_EINTR(stat(path, &st));
     if (ret == 0) {
         *psize = (uint64_t) st.st_size;
     }
@@ -654,8 +638,6 @@ path_search_exec( const char* filename )
 {
     const char* sysPath = getenv("PATH");
     char        temp[PATH_MAX];
-    int         count;
-    int         slen;
     const char* p;
 
     /* If the file contains a directory separator, don't search */
@@ -680,9 +662,7 @@ path_search_exec( const char* filename )
      * Items are separated by DIR_SEP, and two successive separators
      * correspond to an empty item that will be ignored.
      * Also compute the required string storage length. */
-    count   = 0;
-    slen    = 0;
-    p       = sysPath;
+    p = sysPath;
 
     while (*p) {
         char* p2 = strchr(p, DIR_SEP);

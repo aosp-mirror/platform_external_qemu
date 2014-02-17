@@ -340,6 +340,9 @@ static inline target_ulong cpu_mips_get_pgd(CPUState *env)
     return ldl_phys(linux_pte_info.pgd_current_p);
 }
 
+// in target-mips/op_helper.c
+extern void r4k_helper_ptw_tlbrefill(CPUState*);
+
 static inline int cpu_mips_tlb_refill(CPUState *env, target_ulong address, int rw ,
                                       int mmu_idx, int is_softmmu)
 {
@@ -347,9 +350,8 @@ static inline int cpu_mips_tlb_refill(CPUState *env, target_ulong address, int r
     target_ulong saved_badvaddr,saved_entryhi,saved_context;
 
     target_ulong pgd_addr,pt_addr,index;
-    target_ulong fault_addr,ptw_phys;
+    target_ulong fault_addr, ptw_phys;
     target_ulong elo_even,elo_odd;
-    uint32_t page_valid;
     int ret;
 
     saved_badvaddr = env->CP0_BadVAddr;
@@ -366,7 +368,6 @@ static inline int cpu_mips_tlb_refill(CPUState *env, target_ulong address, int r
     env->hflags = MIPS_HFLAG_KM;
 
     fault_addr = env->CP0_BadVAddr;
-    page_valid = 0;
 
     pgd_addr = cpu_mips_get_pgd(env);
     if (unlikely(!pgd_addr))
@@ -442,7 +443,7 @@ int cpu_mips_handle_mmu_fault (CPUState *env, target_ulong address, int rw,
     hwaddr physical;
     int prot;
 #endif
-    int exception = 0, error_code = 0;
+    //int exception = 0, error_code = 0;
     int access_type;
     int ret = 0;
 

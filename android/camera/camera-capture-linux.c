@@ -25,6 +25,7 @@
 #include <sys/ioctl.h>
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
+#include "android/utils/eintr_wrapper.h"
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
@@ -145,11 +146,7 @@ static const int _preferred_format_num =
 /* IOCTL wrapper. */
 static int
 _xioctl(int fd, int request, void *arg) {
-  int r;
-  do {
-      r = ioctl(fd, request, arg);
-  } while (-1 == r && EINTR == errno);
-  return r;
+    return HANDLE_EINTR(ioctl(fd, request, arg));
 }
 
 /* Frees resource allocated for QemuPixelFormat instance, excluding the instance
@@ -1031,7 +1028,7 @@ camera_device_read_frame(CameraDevice* ccd,
                 break;
             } else if (errno == EAGAIN) {
                 return 1;   // Tells the caller to repeat.
-            } else if (errno != EINTR && errno != EIO) {
+            } else if (errno != EIO) {
                 E("%s: VIDIOC_DQBUF on camera '%s' has failed: %s",
                   __FUNCTION__, cd->device_name, strerror(errno));
                 return -1;

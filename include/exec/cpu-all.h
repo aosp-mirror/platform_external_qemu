@@ -1036,7 +1036,7 @@ extern int64_t dev_time;
 #endif
 
 int cpu_memory_rw_debug(CPUState *env, target_ulong addr,
-                        uint8_t *buf, int len, int is_write);
+                        void *buf, int len, int is_write);
 
 void cpu_inject_x86_mce(CPUState *cenv, int bank, uint64_t status,
                         uint64_t mcg_status, uint64_t addr, uint64_t misc);

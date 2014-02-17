@@ -12,6 +12,11 @@
 #ifndef _ANDROID_AVD_UTIL_H
 #define _ANDROID_AVD_UTIL_H
 
+#include "android/utils/compiler.h"
+#include "android/utils/file_data.h"
+
+ANDROID_BEGIN_HEADER
+
 /* A collection of simple functions to extract relevant AVD-related
  * information either from an SDK AVD or a platform build.
  */
@@ -39,39 +44,53 @@ char* path_getRootIniPath( const char*  avdName );
 char* path_getAvdTargetArch( const char* avdName );
 
 /* Retrieves a string corresponding to the target architecture
- * when in the Android platform tree. The only way to do that
- * properly for now is to look at $OUT/system/build.prop:
+ * extracted from a build properties file.
  *
- *   ro.product.cpu-abi=<abi>
- *
- * Where <abi> can be 'armeabi', 'armeabi-v7a' or 'x86'.
+ * |data| is a FileData instance holding the build.prop contents.
+ * Returns a a new string that must be freed by the caller, which can
+ * be 'armeabi', 'armeabi-v7a', 'x86', etc... or NULL if
+ * it cannot be determined.
+ */
+char* propertyFile_getTargetAbi(const FileData* data);
+
+/* Retrieves a string corresponding to the target architecture
+ * extracted from a build properties file.
+ * 
+ * |data| is a FileData instance holding the build.prop contents.
+ * Returns a new string that must be freed by the caller, which can
+ * be 'arm', 'x86, 'mips', etc..., or NULL if if cannot be determined.
+ */
+char* propertyFile_getTargetArch(const FileData* data);
+
+/* Retrieve the target API level from the build.prop contents.
+ * Returns a very large value (e.g. 100000) if it cannot be determined
+ * (which happens for platform builds), or 3 (the minimum SDK API level)
+ * if there is invalid value.
+ */
+int propertyFile_getApiLevel(const FileData* data);
+
+/* Retrieve the mode describing how the ADB daemon is communicating with
+ * the emulator from inside the guest.
+ * Return 0 for legacy mode, which uses TCP port 5555.
+ * Return 1 for the 'qemud' mode, which uses a QEMUD service instead.
+ */
+int propertyFile_getAdbdCommunicationMode(const FileData* data);
+
+/* Return the path of the build properties file (build.prop) from an
+ * Android platform build, or NULL if it doesn't exist.
+ */
+char* path_getBuildBuildProp( const char* androidOut );
+
+/* Return the path of the boot properties file (boot.prop) from an
+ * Android platform build, or NULL if it doesn't exit.
+ */
+char* path_getBuildBootProp( const char* androidOut );
+
+/* Return the target architecture from the build properties file
+ *  (build.prop) of an Android platformn build. Return NULL or a new
+ * string that must be freed by the caller.
  */
 char* path_getBuildTargetArch( const char* androidOut );
-
-/* Retrieves a string corresponding to the target CPU ABI
- * when in the Android platform tree. The only way to do that
- * properly for now is to look at $OUT/system/build.prop:
- *
- *   ro.product.cpu-abi=<abi>
- *
- * Where <abi> can be 'armeabi', 'armeabi-v7a' or 'x86'.
- */
-char* path_getBuildTargetAbi( const char* androidOut );
-
-/* Retrieve the target API level when in the Android platform tree.
- * This can be a very large number like 1000 if the value cannot
- * be extracted from the appropriate file
- */
-int path_getBuildTargetApiLevel( const char* androidOut );
-
-/* Returns mode in which ADB daemon running in the guest communicates with the
- * emulator
- * Return:
- *  0 - ADBD communicates with the emulator via forwarded TCP port 5555 (a
- *      "legacy" mode).
- *  1 - ADBD communicates with the emulator via 'adb' QEMUD service.
- */
-int path_getAdbdCommunicationMode( const char* androidOut );
 
 /* Check whether the image file is Ext4 or not.
  *
@@ -80,5 +99,7 @@ int path_getAdbdCommunicationMode( const char* androidOut );
  *  1 - The image file is an Ext4 image.
  */
 int path_isExt4Image( const char* imagePath );
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_AVD_UTIL_H */

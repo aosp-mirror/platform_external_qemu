@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "android/utils/debug.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/timezone.h"
 #include "android/utils/bufprint.h"
 #include "android/android.h"
@@ -207,10 +208,10 @@ compare_timezone_to_localtime( ScanDataRec*  scan,
             char  temp[2];
             int   ret;
 
-            do { ret = read(fd1, &temp[0], 1); } while (ret < 0 && errno == EINTR);
+            ret = HANDLE_EINTR(read(fd1, &temp[0], 1));
             if (ret < 0) break;
 
-            do { ret = read(fd2, &temp[1], 1); } while (ret < 0 && errno == EINTR);
+            ret = HANDLE_EINTR(read(fd2, &temp[1], 1));
             if (ret < 0) break;
 
             if (temp[0] != temp[1])

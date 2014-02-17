@@ -8,6 +8,9 @@ VARIANT=goldfish
 OUTPUT=/tmp/kernel-qemu
 CROSSPREFIX=arm-linux-androideabi-
 CONFIG=goldfish
+GCC_VERSION=4.7
+
+VALID_ARCHS="arm x86 x86_64 mips"
 
 # Determine the host architecture, and which default prebuilt tag we need.
 # For the toolchain auto-detection.
@@ -44,6 +47,7 @@ OPTION_CONFIG=
 OPTION_SAVEDEFCONFIG=no
 OPTION_JOBS=
 OPTION_VERBOSE=
+OPTION_GCC_VERSION=
 CCACHE=
 
 case "$USE_CCACHE" in
@@ -62,35 +66,38 @@ for opt do
     case $opt in
     --help|-h|-\?) OPTION_HELP=yes
         ;;
+    --arch=*)
+        OPTION_ARCH=$optarg
+        ;;
     --armv5)
         OPTION_ARMV7=no
         ;;
     --armv7)
         OPTION_ARMV7=yes
         ;;
-    --out=*)
-        OPTION_OUT=$optarg
-        ;;
-    --cross=*)
-        OPTION_CROSS=$optarg
-        ;;
-    --arch=*)
-        OPTION_ARCH=$optarg
+    --ccache=*)
+        CCACHE=$optarg
         ;;
     --config=*)
         OPTION_CONFIG=$optarg
         ;;
+    --cross=*)
+        OPTION_CROSS=$optarg
+        ;;
+    --gcc-version=*)
+        OPTION_GCC_VERSION=$optarg
+        ;;
+    -j*|--jobs=*)
+        OPTION_JOBS=$optarg
+        ;;
+    --out=*)
+        OPTION_OUT=$optarg
+        ;;
     --savedefconfig)
         OPTION_SAVEDEFCONFIG=yes
         ;;
-    --ccache=*)
-        CCACHE=$optarg
-        ;;
     --verbose)
         OPTION_VERBOSE=true
-        ;;
-    -j*)
-        OPTION_JOBS=$optarg
         ;;
     *)
         echo "unknown option '$opt', use --help"
@@ -112,6 +119,7 @@ if [ $OPTION_HELP = "yes" ] ; then
     echo "  --config=<name>          kernel config name [$CONFIG]"
     echo "  --savedefconfig          run savedefconfig"
     echo "  --ccache=<path>          use compiler cache [${CCACHE:-not set}]"
+    echo "  --gcc-version=<version>  use specific GCC version [$GCC_VERSION]"
     echo "  --verbose                show build commands"
     echo "  -j<number>               launch <number> parallel build jobs [$JOBS]"
     echo ""
@@ -121,24 +129,68 @@ if [ $OPTION_HELP = "yes" ] ; then
     exit 0
 fi
 
+if [ ! -f include/linux/vermagic.h ]; then
+    echo "ERROR: You must be in the top-level kernel source directory to run this script."
+    exit 1
+fi
+
+# Extract kernel version, we'll need to put this in the final binaries names
+# to ensure the emulator can trivially know it without probing the binary with
+# 'file' or other unreliable heuristics.
+KERNEL_MAJOR=$(awk '$1 == "VERSION" { print $3; }' Makefile)
+KERNEL_MINOR=$(awk '$1 == "PATCHLEVEL" { print $3; }' Makefile)
+KERNEL_PATCH=$(awk '$1 == "SUBLEVEL" { print $3; }' Makefile)
+KERNEL_VERSION="$KERNEL_MAJOR.$KERNEL_MINOR.$KERNEL_PATCH"
+echo "Found kernel version: $KERNEL_VERSION"
+
 if [ -n "$OPTION_ARCH" ]; then
     ARCH=$OPTION_ARCH
+fi
+
+if [ -n "$OPTION_GCC_VERSION" ]; then
+    GCC_VERSION=$OPTION_GCC_VERSION
+else
+    if [ "$ARCH" = "x86" ]; then
+        # Work-around a nasty bug.
+        # Hence 132637 is 2.6.29.
+        if [ "$KERNEL_VERSION" = "2.6.29" ]; then
+            GCC_VERSION=4.6
+            echo "WARNING: android-goldfish-$KERNEL_VERSION doesn't build --arch=$ARCH with GCC 4.7"
+        fi
+    fi
+    echo "Autoconfig: --gcc-version=$GCC_VERSION"
 fi
 
 if [ -n "$OPTION_CONFIG" ]; then
     CONFIG=$OPTION_CONFIG
 else
-    if [ "$ARCH" = "arm" -a "$OPTION_ARMV7" = "yes" ]; then
-        CONFIG=goldfish_armv7
-    fi
+    case $ARCH in
+        arm)
+            CONFIG=goldfish_armv7
+            if  [ "$OPTION_ARMV5" = "yes" ]; then
+                CONFIG=goldfish
+            fi
+            ;;
+        x86)
+            # Warning: this is ambiguous, should be 'goldfish' before 3.10,
+            # and 'i386_emu" after it.
+            if [ -f "arch/x86/configs/i386_emu_defconfig" ]; then
+                CONFIG=i386_emu
+            else
+                CONFIG=goldfish
+            fi
+            ;;
+        x86_64)
+            CONFIG=x86_64_emu
+            ;;
+        mips)
+            CONFIG=goldfish
+            ;;
+        *)
+            echo "ERROR: Invalid arch '$ARCH', try one of $VALID_ARCHS"
+            exit 1
+    esac
     echo "Auto-config: --config=$CONFIG"
-fi
-
-# Check that we are in the kernel directory
-if [ ! -d arch/$ARCH/mach-$MACHINE ] ; then
-    echo "Cannot find arch/$ARCH/mach-$MACHINE. Please cd to the kernel source directory."
-    echo "Aborting."
-    #exit 1
 fi
 
 # Check output directory.
@@ -157,15 +209,15 @@ if [ -n "$OPTION_CROSS" ] ; then
 else
     case $ARCH in
         arm)
-            CROSSTOOLCHAIN=arm-linux-androideabi-4.6
             CROSSPREFIX=arm-linux-androideabi-
             ;;
         x86)
-            CROSSTOOLCHAIN=i686-linux-android-4.6
             CROSSPREFIX=i686-linux-android-
             ;;
+        x86_64)
+            CROSSPREFIX=x86_64-linux-android-
+            ;;
         mips)
-            CROSSTOOLCHAIN=mipsel-linux-android-4.6
             CROSSPREFIX=mipsel-linux-android-
             ;;
         *)
@@ -173,13 +225,14 @@ else
             exit 1
             ;;
     esac
+    CROSSTOOLCHAIN=${CROSSPREFIX}$GCC_VERSION
     echo "Auto-config: --cross=$CROSSPREFIX"
 fi
 
 ZIMAGE=zImage
 
 case $ARCH in
-    x86)
+    x86|x86_64)
         ZIMAGE=bzImage
         ;;
     mips)
@@ -202,7 +255,17 @@ if [ $? != 0 ] ; then
             BUILD_TOP=$(cd $BUILD_TOP && pwd)
         fi
     fi
-    CROSSPREFIX=$BUILD_TOP/prebuilts/gcc/$HOST_TAG/$ARCH/$CROSSTOOLCHAIN/bin/$CROSSPREFIX
+    case $ARCH in
+        x86_64)
+            # x86_46 binaries are under prebuilts/gcc/<host>/x86 !!
+            PREBUILT_ARCH=x86
+            ;;
+        *)
+            PREBUILT_ARCH=$ARCH
+            ;;
+    esac
+    CROSSPREFIX=$BUILD_TOP/prebuilts/gcc/$HOST_TAG/$PREBUILT_ARCH/$CROSSTOOLCHAIN/bin/$CROSSPREFIX
+    echo "Checking for ${CROSSPREFIX}gcc"
     if [ "$BUILD_TOP" -a -f ${CROSSPREFIX}gcc ]; then
         echo "Auto-config: --cross=$CROSSPREFIX"
     else
@@ -255,23 +318,27 @@ fi
 
 # Note: The exact names of the output files are important for the Android build,
 #       do not change the definitions lightly.
+KERNEL_PREFIX=kernel-$KERNEL_VERSION
+
 case $CONFIG in
     vbox*)
-        OUTPUT_KERNEL=kernel-vbox
-        OUTPUT_VMLINUX=vmlinux-vbox
+        KERNEL_SUFFIX=vbox
         ;;
     goldfish)
-        OUTPUT_KERNEL=kernel-qemu
-        OUTPUT_VMLINUX=vmlinux-qemu
+        if [ "$ARCH" = "arm" ]; then
+            KERNEL_SUFFIX=qemu-armv5
+        else
+            KERNEL_SUFFIX=qemu-$ARCH
+        fi
         ;;
     goldfish_armv7)
-        OUTPUT_KERNEL=kernel-qemu-armv7
-        OUTPUT_VMLINUX=vmlinux-qemu-armv7
+        KERNEL_SUFFIX=qemu-armv7
         ;;
     *)
-        OUTPUT_KERNEL=kernel-$CONFIG
-        OUTPUT_VMLINUX=vmlinux-$CONFIG
+        KERNEL_SUFFIX=qemu-$ARCH
 esac
+OUTPUT_KERNEL=$KERNEL_PREFIX-$KERNEL_SUFFIX
+OUTPUT_VMLINUX=vmlinux-${OUTPUT_KERNEL##kernel-}
 
 cp -f vmlinux $OUTPUT/$OUTPUT_VMLINUX
 if [ ! -z $ZIMAGE ]; then

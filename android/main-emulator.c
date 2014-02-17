@@ -68,10 +68,6 @@ static char* getTargetEmulatorPath(const char* progName, const char* avdArch, co
 static char* getSharedLibraryPath(const char* progName, const char* libName);
 static void  prependSharedLibraryPath(const char* prefix);
 
-#ifdef _WIN32
-static char* quotePath(const char* path);
-#endif
-
 /* The execv() definition in mingw is slightly bogus.
  * It takes a second argument of type 'const char* const*'
  * while POSIX mandates char** instead.
@@ -138,10 +134,11 @@ int main(int argc, char** argv)
         /* Otherwise, using the ANDROID_PRODUCT_OUT directory */
         const char* androidOut = getenv("ANDROID_PRODUCT_OUT");
 
-        if (androidOut != NULL && *androidOut != '\0') {
+        if (androidOut != NULL) {
             D("Found ANDROID_PRODUCT_OUT: %s\n", androidOut);
             avdArch = path_getBuildTargetArch(androidOut);
-            D("Found build target architecture: %s\n", avdArch);
+            D("Found build target architecture: %s\n", 
+              avdArch ? avdArch : "<NULL>");
         }
     }
 
@@ -194,6 +191,7 @@ int main(int argc, char** argv)
     return errno;
 }
 
+#ifndef _WIN32
 static int
 getHostOSBitness()
 {
@@ -217,6 +215,7 @@ getHostOSBitness()
   */
     return system("file -L \"$SHELL\" | grep -q \"x86[_-]64\"") == 0 ? 64 : 32;
 }
+#endif  // !_WIN32
 
 /* Find the target-specific emulator binary. This will be something
  * like  <programDir>/emulator-<targetArch>, where <programDir> is
@@ -411,19 +410,3 @@ prependSharedLibraryPath(const char* prefix)
     setenv("LD_LIBRARY_PATH", temp, 1);
 #endif
 }
-
-#ifdef _WIN32
-static char*
-quotePath(const char* path)
-{
-    int   len = strlen(path);
-    char* ret = malloc(len+3);
-
-    ret[0] = '"';
-    memcpy(ret+1, path, len);
-    ret[len+1] = '"';
-    ret[len+2] = '\0';
-
-    return ret;
-}
-#endif /* _WIN32 */

@@ -20,10 +20,11 @@
  * a TCP port forwarding, enabled by ADB.
  */
 
-#include "android/utils/debug.h"
 #include "android/async-socket-connector.h"
 #include "android/async-socket.h"
-#include "utils/panic.h"
+#include "android/utils/debug.h"
+#include "android/utils/eintr_wrapper.h"
+#include "android/utils/panic.h"
 #include "android/iolooper.h"
 
 #define  E(...)    derror(__VA_ARGS__)
@@ -827,13 +828,10 @@ _on_async_socket_recv(AsyncSocket* as)
     }
 
     /* Read next chunk of data. */
-    int res = socket_recv(as->fd, asr->buffer + asr->transferred,
-                          asr->to_transfer - asr->transferred);
-    while (res < 0 && errno == EINTR) {
-        res = socket_recv(as->fd, asr->buffer + asr->transferred,
-                          asr->to_transfer - asr->transferred);
-    }
-
+    int res = HANDLE_EINTR(
+            socket_recv(as->fd,
+                        asr->buffer + asr->transferred,
+                        asr->to_transfer - asr->transferred));
     if (res == 0) {
         /* Socket has been disconnected. */
         errno = ECONNRESET;
@@ -937,13 +935,10 @@ _on_async_socket_send(AsyncSocket* as)
     }
 
     /* Write next chunk of data. */
-    int res = socket_send(as->fd, asw->buffer + asw->transferred,
-                          asw->to_transfer - asw->transferred);
-    while (res < 0 && errno == EINTR) {
-        res = socket_send(as->fd, asw->buffer + asw->transferred,
-                          asw->to_transfer - asw->transferred);
-    }
-
+    int res = HANDLE_EINTR(
+            socket_send(as->fd,
+                        asw->buffer + asw->transferred,
+                        asw->to_transfer - asw->transferred));
     if (res == 0) {
         /* Socket has been disconnected. */
         errno = ECONNRESET;

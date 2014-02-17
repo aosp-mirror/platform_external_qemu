@@ -22,6 +22,7 @@
 #include "android/sync-utils.h"
 #include "android/utils/system.h"
 #include "android/utils/debug.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/panic.h"
 #include "android/protocol/core-connection.h"
 #include "android/protocol/ui-commands-impl.h"
@@ -124,23 +125,23 @@ _uiCmdImpl_io_callback(void* opaque, int fd, unsigned events)
     // Read requests while they are immediately available.
     for (;;) {
         // Read next chunk of data.
-        status = socket_recv(uicmd->sock,
-                             uicmd->reader_buffer + uicmd->reader_offset,
-                             uicmd->reader_bytes - uicmd->reader_offset);
-        if (status == 0) {
-            /* Disconnection, meaning that the core process got terminated. */
-            fprintf(stderr, "core-ui-control service got disconnected\n");
-            uiCmdImpl_destroy();
+        status = HANDLE_EINTR(
+                socket_recv(uicmd->sock,
+                            uicmd->reader_buffer + uicmd->reader_offset,
+                            uicmd->reader_bytes - uicmd->reader_offset));
+        if (status < 0 && (errno == EWOULDBLOCK || errno == EGAIN) {
+            // Chunk is not avalable at this point. Come back later.
             return;
         }
-        if (status < 0) {
-            if (errno == EINTR) {
-                /* loop on EINTR */
-                continue;
-            } else if (errno == EWOULDBLOCK || errno == EAGAIN) {
-                // Chunk is not avalable at this point. Come back later.
-                return;
-            }
+        if (status <= 0) {
+            /* Disconnection, meaning that the core process got terminated. */
+            fprintf(stderr,
+                    "core-ui-control service got disconnected: %s\n",
+                    status < 0 ?
+                        strerror(errno) :
+                        "unexpected disconnection");
+            uiCmdImpl_destroy();
+            return;
         }
 
         uicmd->reader_offset += status;

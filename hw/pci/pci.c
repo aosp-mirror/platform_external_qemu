@@ -721,6 +721,11 @@ static void pci_info_device(PCIDevice *d)
     PCIIORegion *r;
     const pci_class_desc *desc;
 
+    typedef union {
+        uint16_t* ptr16;
+        void* ptr;
+    } u16;
+
     monitor_printf(mon, "  Bus %2d, device %3d, function %d:\n",
                    d->bus->bus_num, d->devfn >> 3, d->devfn & 7);
     class = le16_to_cpu(*((uint16_t *)(d->config + PCI_CLASS_DEVICE)));
@@ -733,9 +738,12 @@ static void pci_info_device(PCIDevice *d)
     } else {
         monitor_printf(mon, "Class %04x", class);
     }
+    u16 vendor_id = { .ptr = d->config + PCI_VENDOR_ID };
+    u16 device_id = { .ptr = d->config + PCI_DEVICE_ID };
+
     monitor_printf(mon, ": PCI device %04x:%04x\n",
-           le16_to_cpu(*((uint16_t *)(d->config + PCI_VENDOR_ID))),
-           le16_to_cpu(*((uint16_t *)(d->config + PCI_DEVICE_ID))));
+           le16_to_cpu(*vendor_id.ptr16),
+           le16_to_cpu(*device_id.ptr16));
 
     if (d->config[PCI_INTERRUPT_PIN] != 0) {
         monitor_printf(mon, "      IRQ %d.\n",

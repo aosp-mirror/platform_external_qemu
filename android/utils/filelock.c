@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/filelock.h"
 #include "android/utils/path.h"
 #include <stdio.h>
@@ -29,14 +30,6 @@
 #endif
 
 #define  D(...)  ((void)0)
-
-#ifndef CHECKED
-#  ifdef _WIN32
-#    define   CHECKED(ret, call)    (ret) = (call)
-#  else
-#    define   CHECKED(ret, call)    do { (ret) = (call); } while ((ret) < 0 && errno == EINTR)
-#  endif
-#endif
 
 /** FILE LOCKS SUPPORT
  **
@@ -241,7 +234,7 @@ filelock_lock( FileLock*  lock )
     close( temp_fd );
     temp_fd = -1;
 
-    CHECKED(rc, lstat( lock->temp, &st_temp ));
+    rc = HANDLE_EINTR(lstat( lock->temp, &st_temp ));
     if (rc < 0) {
         D( "can't properly stat our locking temp file '%s'", lock->temp );
         goto Fail;
@@ -264,16 +257,16 @@ filelock_lock( FileLock*  lock )
         _sleep += 200000;
 
         /* the return value of link() is buggy on NFS */
-        CHECKED(rc, link( lock->temp, lock->lock ));
+        rc = HANDLE_EINTR(link( lock->temp, lock->lock ));
 
-        CHECKED(rc, lstat( lock->lock, &st_lock ));
+        rc = HANDLE_EINTR(lstat( lock->lock, &st_lock ));
         if (rc == 0 &&
             st_temp.st_rdev == st_lock.st_rdev &&
             st_temp.st_ino  == st_lock.st_ino  )
         {
             /* SUCCESS */
             lock->locked = 1;
-            CHECKED(rc, unlink( lock->temp ));
+            rc = HANDLE_EINTR(unlink( lock->temp ));
             return 0;
         }
 
@@ -287,26 +280,26 @@ filelock_lock( FileLock*  lock )
             int     stale = 2;  /* means don't know */
             struct stat  st;
 
-            CHECKED(rc, time( &now));
+            rc = HANDLE_EINTR(time( &now));
             st.st_mtime = now - 120;
 
-            CHECKED(lockfd, open( lock->lock,O_RDONLY ));
+            lockfd = HANDLE_EINTR(open( lock->lock,O_RDONLY ));
             if ( lockfd >= 0 ) {
                 int  len;
 
-                CHECKED(len, read( lockfd, buf, sizeof(buf)-1 ));
+                len = HANDLE_EINTR(read( lockfd, buf, sizeof(buf)-1 ));
                 buf[len] = 0;
                 lockpid = atoi(buf);
 
-                CHECKED(rc, fstat( lockfd, &st ));
+                rc = HANDLE_EINTR(fstat( lockfd, &st ));
                 if (rc == 0)
                   now = st.st_atime;
 
-                CHECKED(rc, close(lockfd));
+                IGNORE_EINTR(close(lockfd));
             }
             /* if there is a PID, check that it is still alive */
             if (lockpid > 0) {
-                CHECKED(rc, kill( lockpid, 0 ));
+                rc = HANDLE_EINTR(kill( lockpid, 0 ));
                 if (rc == 0 || errno == EPERM) {
                     stale = 0;
                 } else if (rc < 0 && errno == ESRCH) {
@@ -320,7 +313,7 @@ filelock_lock( FileLock*  lock )
 
             if (stale) {
                 D( "removing stale lockfile '%s'", lock->lock );
-                CHECKED(rc, unlink( lock->lock ));
+                rc = HANDLE_EINTR(unlink( lock->lock ));
                 _sleep = 0;
                 tries++;
             }
@@ -333,15 +326,15 @@ Fail:
         fclose(f);
 
     if (temp_fd >= 0) {
-        close(temp_fd);
+        IGNORE_EINTR(close(temp_fd));
     }
 
     if (lock_fd >= 0) {
-        close(lock_fd);
+        IGNORE_EINTR(close(lock_fd));
     }
 
-    unlink( lock->lock );
-    unlink( lock->temp );
+    HANDLE_EINTR(unlink(lock->lock));
+    HANDLE_EINTR(unlink(lock->temp));
     return -1;
 #endif
 }

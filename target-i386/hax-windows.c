@@ -50,11 +50,13 @@ static int hax_open_device(hax_fd *fd)
 hax_fd hax_mod_open(void)
 {
     int ret;
-    hax_fd fd;
+    hax_fd fd = INVALID_HANDLE_VALUE;
 
     ret = hax_open_device(&fd);
-    if (ret != 0)
+    if (ret != 0) {
         dprint("Open HAX device failed\n");
+        return INVALID_HANDLE_VALUE;
+    }
 
     return fd;
 }
@@ -115,7 +117,7 @@ int hax_set_phys_mem(hwaddr start_addr, ram_addr_t size, ram_addr_t phys_offset)
 
     info.pa_start = start_addr;
     info.size = size;
-    info.va = (uint64_t)qemu_get_ram_ptr(phys_offset);
+    info.va = (uint64_t)(uintptr_t)qemu_get_ram_ptr(phys_offset);
     info.flags = (flags & IO_MEM_ROM) ? 1 : 0;
 
     hDeviceVM = hax_global.vm->fd;
@@ -373,8 +375,8 @@ int hax_host_setup_vcpu_channel(struct hax_vcpu_state *vcpu)
         ret = -EINVAL;
         return ret;
     }
-    vcpu->tunnel = (struct hax_tunnel *)(info.va);
-    vcpu->iobuf = (unsigned char *)(info.io_va);
+    vcpu->tunnel = (struct hax_tunnel *)(uintptr_t)(info.va);
+    vcpu->iobuf = (unsigned char *)(uintptr_t)(info.io_va);
     return 0;
 }
 

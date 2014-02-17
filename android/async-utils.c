@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "android/async-utils.h"
+#include "android/utils/eintr_wrapper.h"
 #include "unistd.h"
 
 void
@@ -40,15 +41,16 @@ asyncReader_read(AsyncReader*  ar)
     }
 
     do {
-        ret = socket_recv(ar->io->fd, ar->buffer + ar->pos, ar->buffsize - ar->pos);
+        ret = HANDLE_EINTR(
+                socket_recv(ar->io->fd,
+                            ar->buffer + ar->pos,
+                            ar->buffsize - ar->pos));
         if (ret == 0) {
             /* disconnection ! */
             errno = ECONNRESET;
             return ASYNC_ERROR;
         }
         if (ret < 0) {
-            if (errno == EINTR) /* loop on EINTR */
-                continue;
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
                 loopIo_wantRead(ar->io);
                 return ASYNC_NEED_MORE;
@@ -87,15 +89,16 @@ asyncWriter_write(AsyncWriter* aw)
     }
 
     do {
-        ret = socket_send(aw->io->fd, aw->buffer + aw->pos, aw->buffsize - aw->pos);
+        ret = HANDLE_EINTR(
+                socket_send(aw->io->fd,
+                            aw->buffer + aw->pos,
+                            aw->buffsize - aw->pos));
         if (ret == 0) {
             /* disconnection ! */
             errno = ECONNRESET;
             return ASYNC_ERROR;
         }
         if (ret < 0) {
-            if (errno == EINTR) /* loop on EINTR */
-                continue;
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
                 return ASYNC_NEED_MORE;
             }
@@ -137,15 +140,13 @@ asyncLineReader_read(AsyncLineReader* alr)
 
     do {
         char ch;
-        ret = socket_recv(alr->io->fd, &ch, 1);
+        ret = HANDLE_EINTR(socket_recv(alr->io->fd, &ch, 1));
         if (ret == 0) {
             /* disconnection ! */
             errno = ECONNRESET;
             return ASYNC_ERROR;
         }
         if (ret < 0) {
-            if (errno == EINTR) /* loop on EINTR */
-                continue;
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
                 loopIo_wantRead(alr->io);
                 return ASYNC_NEED_MORE;

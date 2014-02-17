@@ -28,6 +28,7 @@
 #include "exec/gdbstub.h"
 #include "sysemu/dma.h"
 #include "sysemu/kvm.h"
+#include "exec/exec-all.h"
 #include "exec/hax.h"
 
 #include "sysemu/cpus.h"
