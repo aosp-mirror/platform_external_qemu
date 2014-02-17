@@ -62,6 +62,7 @@ int goldfish_add_device_no_io(struct goldfish_device *dev)
 #ifdef TARGET_I386
         /* Make sure that we pass by the reserved IRQs. */
         while (goldfish_free_irq == GFD_KBD_IRQ ||
+               goldfish_free_irq == GFD_RTC_IRQ ||
                goldfish_free_irq == GFD_MOUSE_IRQ ||
                goldfish_free_irq == GFD_ERR_IRQ) {
             goldfish_free_irq++;
