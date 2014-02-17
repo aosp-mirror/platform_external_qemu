@@ -327,6 +327,8 @@ struct TCGContext {
 #ifdef CONFIG_DEBUG_TCG
     int temps_in_use;
 #endif
+
+    TBContext tb_ctx;
 };
 
 extern TCGContext tcg_ctx;

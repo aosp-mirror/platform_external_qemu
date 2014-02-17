@@ -59,10 +59,7 @@
 
 #define SMC_BITMAP_USE_THRESHOLD 10
 
-static TranslationBlock *tbs;
 int code_gen_max_blocks;
-TranslationBlock *tb_phys_hash[CODE_GEN_PHYS_HASH_SIZE];
-static int nb_tbs;
 /* any access to the tbs or the page table must use this lock */
 spinlock_t tb_lock = SPIN_LOCK_UNLOCKED;
 
@@ -162,10 +159,6 @@ static const char *logfilename = "/tmp/qemu.log";
 FILE *logfile;
 int loglevel;
 static int log_append = 0;
-
-/* statistics */
-static int tb_flush_count;
-static int tb_phys_invalidate_count;
 
 #define SUBPAGE_IDX(addr) ((addr) & ~TARGET_PAGE_MASK)
 typedef struct subpage_t {
@@ -468,7 +461,7 @@ static void code_gen_alloc(unsigned long tb_size)
     code_gen_buffer_max_size = code_gen_buffer_size -
         code_gen_max_block_size();
     code_gen_max_blocks = code_gen_buffer_size / CODE_GEN_AVG_BLOCK_SIZE;
-    tbs = g_malloc(code_gen_max_blocks * sizeof(TranslationBlock));
+    tcg_ctx.tb_ctx.tbs = g_malloc(code_gen_max_blocks * sizeof(TranslationBlock));
 }
 
 /* Must be called before using the QEMU cpus. 'tb_size' is the size
@@ -619,7 +612,7 @@ void tb_flush(CPUArchState *env1)
     if ((unsigned long)(code_gen_ptr - code_gen_buffer) > code_gen_buffer_size)
         cpu_abort(env1, "Internal error: code buffer overflow\n");
 
-    nb_tbs = 0;
+    tcg_ctx.tb_ctx.nb_tbs = 0;
 
     for(env = first_cpu; env != NULL; env = env->next_cpu) {
 #ifdef CONFIG_MEMCHECK
@@ -636,13 +629,13 @@ void tb_flush(CPUArchState *env1)
         memset (env->tb_jmp_cache, 0, TB_JMP_CACHE_SIZE * sizeof (void *));
     }
 
-    memset (tb_phys_hash, 0, CODE_GEN_PHYS_HASH_SIZE * sizeof (void *));
+    memset (tcg_ctx.tb_ctx.tb_phys_hash, 0, CODE_GEN_PHYS_HASH_SIZE * sizeof (void *));
     page_flush_tb();
 
     code_gen_ptr = code_gen_buffer;
     /* XXX: flush processor icache at this point if cache flush is
        expensive */
-    tb_flush_count++;
+    tcg_ctx.tb_ctx.tb_flush_count++;
 }
 
 #ifdef DEBUG_TB_CHECK
@@ -762,7 +755,7 @@ void tb_phys_invalidate(TranslationBlock *tb, tb_page_addr_t page_addr)
     /* remove the TB from the hash list */
     phys_pc = tb->page_addr[0] + (tb->pc & ~TARGET_PAGE_MASK);
     h = tb_phys_hash_func(phys_pc);
-    tb_remove(&tb_phys_hash[h], tb,
+    tb_remove(&tcg_ctx.tb_ctx.tb_phys_hash[h], tb,
               offsetof(TranslationBlock, phys_hash_next));
 
     /* remove the TB from the page list */
@@ -777,7 +770,7 @@ void tb_phys_invalidate(TranslationBlock *tb, tb_page_addr_t page_addr)
         invalidate_page_bitmap(p);
     }
 
-    tb_invalidated_flag = 1;
+    tcg_ctx.tb_ctx.tb_invalidated_flag = 1;
 
     /* remove the TB from the hash list */
     h = tb_jmp_cache_hash_func(tb->pc);
@@ -812,7 +805,7 @@ void tb_phys_invalidate(TranslationBlock *tb, tb_page_addr_t page_addr)
     }
 #endif  // CONFIG_MEMCHECK
 
-    tb_phys_invalidate_count++;
+    tcg_ctx.tb_ctx.tb_phys_invalidate_count++;
 }
 
 static inline void set_bits(uint8_t *tab, int start, int len)
@@ -879,7 +872,7 @@ TranslationBlock *tb_gen_code(CPUArchState *env,
     target_ulong phys_pc, phys_page2, virt_page2;
     int code_gen_size;
 
-    phys_pc = get_phys_addr_code(env, pc);
+    phys_pc = get_page_addr_code(env, pc);
     tb = tb_alloc(pc);
     if (!tb) {
         /* flush must be done */
@@ -887,7 +880,7 @@ TranslationBlock *tb_gen_code(CPUArchState *env,
         /* cannot fail at this point */
         tb = tb_alloc(pc);
         /* Don't forget to invalidate previous TB info.  */
-        tb_invalidated_flag = 1;
+        tcg_ctx.tb_ctx.tb_invalidated_flag = 1;
     }
     tc_ptr = code_gen_ptr;
     tb->tc_ptr = tc_ptr;
@@ -901,7 +894,7 @@ TranslationBlock *tb_gen_code(CPUArchState *env,
     virt_page2 = (pc + tb->size - 1) & TARGET_PAGE_MASK;
     phys_page2 = -1;
     if ((pc & TARGET_PAGE_MASK) != virt_page2) {
-        phys_page2 = get_phys_addr_code(env, virt_page2);
+        phys_page2 = get_page_addr_code(env, virt_page2);
     }
     tb_link_phys(tb, phys_pc, phys_page2);
     return tb;
@@ -1166,10 +1159,10 @@ TranslationBlock *tb_alloc(target_ulong pc)
 {
     TranslationBlock *tb;
 
-    if (nb_tbs >= code_gen_max_blocks ||
+    if (tcg_ctx.tb_ctx.nb_tbs >= code_gen_max_blocks ||
         (code_gen_ptr - code_gen_buffer) >= code_gen_buffer_max_size)
         return NULL;
-    tb = &tbs[nb_tbs++];
+    tb = &tcg_ctx.tb_ctx.tbs[tcg_ctx.tb_ctx.nb_tbs++];
     tb->pc = pc;
     tb->cflags = 0;
 #ifdef CONFIG_MEMCHECK
@@ -1184,9 +1177,9 @@ void tb_free(TranslationBlock *tb)
     /* In practice this is mostly used for single use temporary TB
        Ignore the hard cases and just back up if this TB happens to
        be the last one generated.  */
-    if (nb_tbs > 0 && tb == &tbs[nb_tbs - 1]) {
+    if (tcg_ctx.tb_ctx.nb_tbs > 0 && tb == &tcg_ctx.tb_ctx.tbs[tcg_ctx.tb_ctx.nb_tbs - 1]) {
         code_gen_ptr = tb->tc_ptr;
-        nb_tbs--;
+        tcg_ctx.tb_ctx.nb_tbs--;
     }
 }
 
@@ -1203,7 +1196,7 @@ void tb_link_phys(TranslationBlock *tb,
     mmap_lock();
     /* add in the physical hash table */
     h = tb_phys_hash_func(phys_pc);
-    ptb = &tb_phys_hash[h];
+    ptb = &tcg_ctx.tb_ctx.tb_phys_hash[h];
     tb->phys_hash_next = *ptb;
     *ptb = tb;
 
@@ -1238,17 +1231,17 @@ TranslationBlock *tb_find_pc(unsigned long tc_ptr)
     unsigned long v;
     TranslationBlock *tb;
 
-    if (nb_tbs <= 0)
+    if (tcg_ctx.tb_ctx.nb_tbs <= 0)
         return NULL;
     if (tc_ptr < (unsigned long)code_gen_buffer ||
         tc_ptr >= (unsigned long)code_gen_ptr)
         return NULL;
     /* binary search (cf Knuth) */
     m_min = 0;
-    m_max = nb_tbs - 1;
+    m_max = tcg_ctx.tb_ctx.nb_tbs - 1;
     while (m_min <= m_max) {
         m = (m_min + m_max) >> 1;
-        tb = &tbs[m];
+        tb = &tcg_ctx.tb_ctx.tbs[m];
         v = (unsigned long)tb->tc_ptr;
         if (v == tc_ptr)
             return tb;
@@ -1258,7 +1251,7 @@ TranslationBlock *tb_find_pc(unsigned long tc_ptr)
             m_min = m + 1;
         }
     }
-    return &tbs[m_max];
+    return &tcg_ctx.tb_ctx.tbs[m_max];
 }
 
 static void tb_reset_jump_recursive(TranslationBlock *tb);
@@ -3857,8 +3850,8 @@ void dump_exec_info(FILE *f, fprintf_function cpu_fprintf)
     cross_page = 0;
     direct_jmp_count = 0;
     direct_jmp2_count = 0;
-    for(i = 0; i < nb_tbs; i++) {
-        tb = &tbs[i];
+    for(i = 0; i < tcg_ctx.tb_ctx.nb_tbs; i++) {
+        tb = &tcg_ctx.tb_ctx.tbs[i];
         target_code_size += tb->size;
         if (tb->size > max_target_code_size)
             max_target_code_size = tb->size;
@@ -3876,24 +3869,24 @@ void dump_exec_info(FILE *f, fprintf_function cpu_fprintf)
     cpu_fprintf(f, "gen code size       %td/%ld\n",
                 code_gen_ptr - code_gen_buffer, code_gen_buffer_max_size);
     cpu_fprintf(f, "TB count            %d/%d\n",
-                nb_tbs, code_gen_max_blocks);
+                tcg_ctx.tb_ctx.nb_tbs, code_gen_max_blocks);
     cpu_fprintf(f, "TB avg target size  %d max=%d bytes\n",
-                nb_tbs ? target_code_size / nb_tbs : 0,
+                tcg_ctx.tb_ctx.nb_tbs ? target_code_size / tcg_ctx.tb_ctx.nb_tbs : 0,
                 max_target_code_size);
     cpu_fprintf(f, "TB avg host size    %td bytes (expansion ratio: %0.1f)\n",
-                nb_tbs ? (code_gen_ptr - code_gen_buffer) / nb_tbs : 0,
+                tcg_ctx.tb_ctx.nb_tbs ? (code_gen_ptr - code_gen_buffer) / tcg_ctx.tb_ctx.nb_tbs : 0,
                 target_code_size ? (double) (code_gen_ptr - code_gen_buffer) / target_code_size : 0);
     cpu_fprintf(f, "cross page TB count %d (%d%%)\n",
             cross_page,
-            nb_tbs ? (cross_page * 100) / nb_tbs : 0);
+            tcg_ctx.tb_ctx.nb_tbs ? (cross_page * 100) / tcg_ctx.tb_ctx.nb_tbs : 0);
     cpu_fprintf(f, "direct jump count   %d (%d%%) (2 jumps=%d %d%%)\n",
                 direct_jmp_count,
-                nb_tbs ? (direct_jmp_count * 100) / nb_tbs : 0,
+                tcg_ctx.tb_ctx.nb_tbs ? (direct_jmp_count * 100) / tcg_ctx.tb_ctx.nb_tbs : 0,
                 direct_jmp2_count,
-                nb_tbs ? (direct_jmp2_count * 100) / nb_tbs : 0);
+                tcg_ctx.tb_ctx.nb_tbs ? (direct_jmp2_count * 100) / tcg_ctx.tb_ctx.nb_tbs : 0);
     cpu_fprintf(f, "\nStatistics:\n");
-    cpu_fprintf(f, "TB flush count      %d\n", tb_flush_count);
-    cpu_fprintf(f, "TB invalidate count %d\n", tb_phys_invalidate_count);
+    cpu_fprintf(f, "TB flush count      %d\n", tcg_ctx.tb_ctx.tb_flush_count);
+    cpu_fprintf(f, "TB invalidate count %d\n", tcg_ctx.tb_ctx.tb_phys_invalidate_count);
     cpu_fprintf(f, "TLB flush count     %d\n", tlb_flush_count);
     tcg_dump_info(f, cpu_fprintf);
 }
