@@ -134,10 +134,11 @@ int main(int argc, char** argv)
         /* Otherwise, using the ANDROID_PRODUCT_OUT directory */
         const char* androidOut = getenv("ANDROID_PRODUCT_OUT");
 
-        if (androidOut != NULL && *androidOut != '\0') {
+        if (androidOut != NULL) {
             D("Found ANDROID_PRODUCT_OUT: %s\n", androidOut);
             avdArch = path_getBuildTargetArch(androidOut);
-            D("Found build target architecture: %s\n", avdArch);
+            D("Found build target architecture: %s\n", 
+              avdArch ? avdArch : "<NULL>");
         }
     }
 
