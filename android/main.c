@@ -42,6 +42,7 @@
 #include "android/utils/filelock.h"
 #include "android/utils/lineinput.h"
 #include "android/utils/path.h"
+#include "android/utils/property_file.h"
 #include "android/utils/tempfile.h"
 
 #include "android/main-common.h"
@@ -987,7 +988,22 @@ int main(int argc, char **argv)
         args[n++] = "off";
     }
 
-    /* Pass boot properties to the core. */
+    /* Pass boot properties to the core. First, those from boot.prop, 
+     * then those from the command-line */
+    const FileData* bootProperties = avdInfo_getBootProperties(avd);
+    if (!fileData_isEmpty(bootProperties)) {
+        PropertyFileIterator iter[1];
+        propertyFileIterator_init(iter,
+                                  bootProperties->data,
+                                  bootProperties->size);
+        while (propertyFileIterator_next(iter)) {
+            char temp[MAX_PROPERTY_NAME_LEN + MAX_PROPERTY_VALUE_LEN + 2];
+            snprintf(temp, sizeof temp, "%s=%s", iter->name, iter->value);
+            args[n++] = "-boot-property";
+            args[n++] = ASTRDUP(temp);
+        }
+    }
+    
     if (opts->prop != NULL) {
         ParamList*  pl = opts->prop;
         for ( ; pl != NULL; pl = pl->next ) {
