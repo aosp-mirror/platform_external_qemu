@@ -9,12 +9,14 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/ini.h"
+#include "android/utils/property_file.h"
 #include "android/utils/panic.h"
 #include "android/utils/path.h"
 #include "android/utils/system.h"
@@ -149,6 +151,139 @@ _getAvdContentPath(const char* avdName)
 }
 
 
+char*
+propertyFile_getTargetAbi(const FileData* data) {
+    return propertyFile_getValue((const char*)data->data,
+                                 data->size,
+                                 "ro.product.cpu.abi");
+}
+
+
+char*
+propertyFile_getTargetArch(const FileData* data) {
+    char* ret = propertyFile_getTargetAbi(data);
+    if (ret) {
+        // Translate ABI name into architecture name.
+        // By default, there are the same with a few exceptions.
+        static const struct {
+            const char* input;
+            const char* output;
+        } kData[] = {
+            { "armeabi", "arm" },
+            { "armeabi-v7a", "arm" },
+        };
+        size_t n;
+        for (n = 0; n < sizeof(kData)/sizeof(kData[0]); ++n) {
+            if (!strcmp(ret, kData[n].input)) {
+                free(ret);
+                ret = ASTRDUP(kData[n].output);
+                break;
+            }
+        }
+    }
+    return ret;
+}
+
+
+int
+propertyFile_getApiLevel(const FileData* data) {
+    char* sdkVersion = propertyFile_getValue((const char*)data->data,
+                                             data->size,
+                                             "ro.build.version.sdk");
+    const int kMinLevel = 3;
+    const int kMaxLevel = 10000;
+    int level = kMinLevel;
+    if (!sdkVersion) {
+        D("Could not find target API sdkVersion / SDK version in build properties!");
+        level = kMaxLevel;
+        D("Default target API sdkVersion: %d", level);
+    } else {
+        char* end = NULL;
+        long levelLong = strtol(sdkVersion, &end, 10);
+        int level = (int)levelLong;
+        if (levelLong == LONG_MIN || levelLong == LONG_MAX || 
+            levelLong < 0 || !end || *end || level != levelLong) {
+            level = kMinLevel;
+            D("Invalid SDK version build property: '%s'", sdkVersion);
+            D("Defaulting to target API sdkVersion %d", level);
+        } else {
+            D("Found target API sdkVersion: %d\n", level);
+        }
+    }
+    free(sdkVersion);
+    return level;
+}
+
+
+int
+propertyFile_getAdbdCommunicationMode(const FileData* data) {
+    char* prop = propertyFile_getValue((const char*)data->data,
+                                       data->size,
+                                       "ro.adb.qemud");
+    if (!prop) {
+        // No ro.adb.qemud means 'legacy' ADBD.
+        return 0;
+    }
+    
+    char* end;
+    long val = strtol(prop, &end, 10);
+    if (end == NULL || *end != '\0' || val != (int)val) {
+        D("Invalid ro.adb.qemud build property: '%s'", prop);
+        val = 0;
+    } else {
+        D("Found ro.adb.qemud build property: %d", val);
+    }
+    AFREE(prop);
+    return (int)val;
+}
+
+
+char* path_getBuildBuildProp(const char* androidOut) {
+    char temp[MAX_PATH], *p = temp, *end = p + sizeof(temp);
+    p = bufprint(temp, end, "%s/system/build.prop", androidOut);
+    if (p >= end) {
+        D("ANDROID_BUILD_OUT is too long: %s\n", androidOut);
+        return NULL;
+    }
+    if (!path_exists(temp)) {
+        D("Cannot find build properties file: %s\n", temp);
+        return NULL;
+    }
+    return ASTRDUP(temp);
+}
+
+
+char* path_getBuildBootProp(const char* androidOut) {
+    char temp[MAX_PATH], *p = temp, *end = p + sizeof(temp);
+    p = bufprint(temp, end, "%s/boot.prop", androidOut);
+    if (p >= end) {
+        D("ANDROID_BUILD_OUT is too long: %s\n", androidOut);
+        return NULL;
+    }
+    if (!path_exists(temp)) {
+        D("Cannot find boot properties file: %s\n", temp);
+        return NULL;
+    }
+    return ASTRDUP(temp);
+}
+
+
+char*
+path_getBuildTargetArch(const char* androidOut) {
+    char* buildPropPath = path_getBuildBuildProp(androidOut);
+    if (!buildPropPath) {
+        return NULL;
+    }
+
+    FileData buildProp[1];
+    fileData_initFromFile(buildProp, buildPropPath);
+    char* ret = propertyFile_getTargetArch(buildProp);
+    fileData_done(buildProp);
+    AFREE(buildPropPath);
+    return ret;
+}
+
+
 static char*
 _getAvdTargetArch(const char* avdPath)
 {
@@ -174,179 +309,9 @@ path_getAvdTargetArch( const char* avdName )
 {
     char*  avdPath = _getAvdContentPath(avdName);
     char*  avdArch = _getAvdTargetArch(avdPath);
+    AFREE(avdPath);
 
     return avdArch;
-}
-
-/* Retrieves the value of a given system property defined in a .prop
- * file. This is a text file that contains definitions of the format:
- * <name>=<value>
- *
- * Returns NULL if property <name> is undefined or empty.
- * Returned string must be freed by the caller.
- */
-static char*
-_getSystemProperty( const char* propFile, const char* propName )
-{
-    FILE*  file;
-    char   temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-    int    propNameLen = strlen(propName);
-    char*  result = NULL;
-
-    file = fopen(propFile, "rb");
-    if (file == NULL) {
-        D("Could not open file: %s: %s", propFile, strerror(errno));
-        return NULL;
-    }
-
-    while (fgets(temp, sizeof temp, file) != NULL) {
-        /* Trim trailing newlines, if any */
-        p = memchr(temp, '\0', sizeof temp);
-        if (p == NULL)
-            p = end;
-        if (p > temp && p[-1] == '\n') {
-            *--p = '\0';
-        }
-        if (p > temp && p[-1] == '\r') {
-            *--p = '\0';
-        }
-        /* force zero-termination in case of full-buffer */
-        if (p == end)
-            *--p = '\0';
-
-        /* check that the line starts with the property name */
-        if (memcmp(temp, propName, propNameLen) != 0) {
-            continue;
-        }
-        p = temp + propNameLen;
-
-        /* followed by an equal sign */
-        if (p >= end || *p != '=')
-            continue;
-        p++;
-
-        /* followed by something */
-        if (p >= end || !*p)
-            break;
-
-        result = ASTRDUP(p);
-        break;
-    }
-    fclose(file);
-    return result;
-}
-
-static char*
-_getBuildProperty( const char* androidOut, const char* propName )
-{
-    char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-
-    p = bufprint(temp, end, "%s/system/build.prop", androidOut);
-    if (p >= end) {
-        D("%s: ANDROID_PRODUCT_OUT too long: %s", __FUNCTION__, androidOut);
-        return NULL;
-    }
-    return _getSystemProperty(temp, propName);
-}
-
-char*
-path_getBuildTargetArch( const char* androidOut )
-{
-    const char* defaultArch = "arm";
-    char*       result = NULL;
-    char*       cpuAbi = _getBuildProperty(androidOut, "ro.product.cpu.abi");
-
-    if (cpuAbi == NULL) {
-        D("Coult not find CPU ABI in build properties!");
-        D("Default target architecture=%s", defaultArch);
-        result = ASTRDUP(defaultArch);
-    } else {
-        /* Translate ABI to cpu arch if necessary */
-        if (!strcmp("armeabi",cpuAbi))
-            result = "arm";
-        else if (!strcmp("armeabi-v7a", cpuAbi))
-            result = "arm";
-        else if (!strncmp("mips", cpuAbi, 4))
-            result = "mips";
-        else
-            result = cpuAbi;
-
-        D("Found target ABI=%s, architecture=%s", cpuAbi, result);
-        result = ASTRDUP(result);
-        AFREE(cpuAbi);
-    }
-    return result;
-}
-
-char*
-path_getBuildTargetAbi( const char* androidOut )
-{
-    const char* defaultAbi = "armeabi";
-    char*       result = NULL;
-    char*       cpuAbi = _getBuildProperty(androidOut, "ro.product.cpu.abi");
-
-    if (cpuAbi == NULL) {
-        D("Coult not find CPU ABI in build properties!");
-        D("Default target ABI: %s", defaultAbi);
-        result = ASTRDUP(defaultAbi);
-    } else {
-        D("Found target ABI=%s", cpuAbi);
-        result = cpuAbi;
-    }
-    return result;
-}
-
-
-int
-path_getBuildTargetApiLevel( const char* androidOut )
-{
-    const int  defaultLevel = 1000;
-    int        level        = defaultLevel;
-    char*      sdkVersion = _getBuildProperty(androidOut, "ro.build.version.sdk");
-
-    if (sdkVersion != NULL) {
-        long  value;
-        char* end;
-        value = strtol(sdkVersion, &end, 10);
-        if (end == NULL || *end != '\0' || value != (int)value) {
-            D("Invalid SDK version build property: '%s'", sdkVersion);
-            D("Defaulting to target API level %d", level);
-        } else {
-            level = (int)value;
-            /* Sanity check, the Android SDK doesn't support anything
-             * before Android 1.5, a.k.a API level 3 */
-            if (level < 3)
-                level = 3;
-            D("Found target API level: %d", level);
-        }
-        AFREE(sdkVersion);
-    } else {
-        D("Could not find target API level / SDK version in build properties!");
-        D("Default target API level: %d", level);
-    }
-    return level;
-}
-
-int
-path_getAdbdCommunicationMode( const char* androidOut )
-{
-    char* prop = _getBuildProperty(androidOut, "ro.adb.qemud");
-    if (prop != NULL) {
-        long val = 0;
-        char* end;
-        val = strtol(prop, &end, 10);
-        if (end == NULL || *end != '\0' || val != (int)val) {
-            D("Invalid ro.adb.qemud build property: '%s'", prop);
-            val = 0;
-        } else {
-            D("Found ro.adb.qemud build property: %d", val);
-        }
-        AFREE(prop);
-        return (int)val;
-    } else {
-        /* Missing ro.adb.qemud means "legacy" ADBD. */
-        return 0;
-    }
 }
 
 static int
