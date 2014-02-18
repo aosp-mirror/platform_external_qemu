@@ -103,14 +103,13 @@ fi
 # On Linux, try to use our prebuilt toolchain to generate binaries
 # that are compatible with Ubuntu 8.04
 if [ -z "$CC" -a -z "$OPTION_CC" -a "$HOST_OS" = linux ] ; then
-    HOST_CC=`dirname $0`/../../prebuilts/tools/gcc-sdk/gcc
-    if [ -f "$HOST_CC" ] ; then
-        echo "Using prebuilt toolchain: $HOST_CC"
-        CC="$HOST_CC"
+    PROBE_HOST_CC=`dirname $0`/../../prebuilts/tools/gcc-sdk/gcc
+    if [ -f "$PROBE_HOST_CC" ] ; then
+        echo "Using prebuilt toolchain: $PROBE_HOST_CC"
+        CC="$PROBE_HOST_CC"
     fi
 fi
 
-echo "OPTION_CC='$OPTION_CC'"
 if [ -n "$OPTION_CC" ]; then
     echo "Using specified C compiler: $OPTION_CC"
     CC="$OPTION_CC"
@@ -441,7 +440,8 @@ probe_system_library ()
             if [ "$OPTION_IGNORE_AUDIO" = no ] ; then
                 echo "The $2 development files do not seem to be installed on this system"
                 echo "Are you missing the $4 package ?"
-                echo "Correct the errors below and try again:"
+                echo "You can ignore this error with --ignore-audio, otherwise correct"
+                echo "the issue(s) below and try again:"
                 cat $TMPL
                 clean_exit
             fi
