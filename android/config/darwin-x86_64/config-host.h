@@ -27,4 +27,3 @@
 #define O_LARGEFILE      0
 #define MAP_ANONYMOUS    MAP_ANON
 #define CONFIG_ANDROID       1
-#define CONFIG_ANDROID_OPENGLES 1

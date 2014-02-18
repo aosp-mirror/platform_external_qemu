@@ -176,11 +176,6 @@ endif # HOST_OS == linux || darwin
 
 common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
-
-ifneq ($(QEMU_OPENGLES_INCLUDE),)
-    EMULATOR_LIBUI_CFLAGS := -I$(QEMU_OPENGLES_INCLUDE)
-endif
-
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
 ###########################################################

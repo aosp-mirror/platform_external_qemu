@@ -24,7 +24,6 @@ OPTION_HELP=no
 OPTION_STATIC=no
 OPTION_MINGW=no
 
-GLES_INCLUDE=
 GLES_LIBS=
 GLES_SUPPORT=no
 GLES_PROBE=yes
@@ -61,9 +60,6 @@ for opt do
   --no-prebuilts) OPTION_NO_PREBUILTS=yes
   ;;
   --static) OPTION_STATIC=yes
-  ;;
-  --gles-include=*) GLES_INCLUDE=$optarg
-  GLES_SUPPORT=yes
   ;;
   --gles-libs=*) GLES_LIBS=$optarg
   GLES_SUPPORT=yes
@@ -174,7 +170,7 @@ GLES_SHARED_LIBRARIES="\
   libGLES_V2_translator \
   libEGL_translator"
 
-if [ "$OPTION_MINGW" != "true" ]; then
+if [ "$OPTION_MINGW" != "yes" ]; then
   # There are no 64-bit libraries for Windows yet!
   GLES_SHARED_LIBRARIES="$GLES_SHARED_LIBRARIES \
     lib64OpenglRender \
@@ -193,12 +189,6 @@ if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
         CCACHE="$ANDROID_PREBUILT/ccache/ccache$EXE"
         if [ ! -f $CCACHE ] ; then
             CCACHE="$ANDROID_PREBUILTS/ccache/ccache$EXE"
-        fi
-        if [ -f $CCACHE ] ; then
-            CC="$CCACHE $CC"
-            log "Prebuilt   : CCACHE=$CCACHE"
-	else
-            log "Prebuilt   : CCACHE can't be found"
         fi
     fi
 
@@ -222,83 +212,47 @@ if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
         log "Tools      : Could not locate $TOOLS_PROPS !?"
     fi
 
-    # Try to find the GLES emulation headers and libraries automatically
-    if [ "$GLES_PROBE" = "yes" ]; then
-        GLES_SUPPORT=yes
-        if [ -z "$GLES_INCLUDE" ]; then
-            log "GLES       : Probing for headers"
-            GLES_INCLUDE=$ANDROID_TOP/sdk/emulator/opengl/host/include
-            if [ -d "$GLES_INCLUDE" ]; then
-                log "GLES       : Headers in $GLES_INCLUDE"
-            else
-                echo "Warning: Could not find OpenGLES emulation include dir: $GLES_INCLUDE"
-                echo "Disabling GLES emulation from this build!"
-                GLES_SUPPORT=no
-            fi
-        fi
-        if [ -z "$GLES_LIBS" ]; then
-            log "GLES       : Probing for host libraries"
-            GLES_LIBS=$(dirname "$HOST_BIN")/lib
-            if [ -d "$GLES_LIBS" ]; then
-                echo "GLES       : Libs in $GLES_LIBS"
-            else
-                echo "Warning: Could nof find OpenGLES emulation libraries in: $GLES_LIBS"
-                echo "Disabling GLES emulation from this build!"
-                GLES_SUPPORT=no
-            fi
-        fi
-    fi
+    GLES_PROBE_LIB_DIR=$(dirname "$HOST_BIN")/lib
+    case $GLES_PROBE_LIB_DIR in
+        */windows/lib)
+            GLES_PROBE_LIB_DIR=${GLES_PROBE_LIB_DIR%%/windows/lib}/windows-x86/lib
+            ;;
+    esac
 else
     if [ -n "$USE_CCACHE" ]; then
         CCACHE=$(which ccache 2>/dev/null)
-        if [ -n "$CCACHE" -a -f "$CCACHE" ] ; then
-            CC="$CCACHE $CC"
-            log "Prebuilt   : CCACHE=$CCACHE"
-	else
-            log "Prebuilt   : CCACHE can't be found"
-        fi
     fi
-    if [ "$GLES_PROBE" = "yes" ]; then
-        GLES_SUPPORT=yes
-        if [ -z "$GLES_INCLUDE" ]; then
-            log "GLES       : Probing for headers"
-            GLES_INCLUDE=../../sdk/emulator/opengl/host/include
-            if [ -d "$GLES_INCLUDE" ]; then
-                log "GLES       : Headers in $GLES_INCLUDE"
-            else
-                echo "Warning: Could not find OpenGLES emulation include dir: $GLES_INCLUDE"
-                echo "Disabling GLES emulation from this build!"
-                GLES_SUPPORT=no
-            fi
-        fi
-        if [ -z "$GLES_LIBS" ]; then
-            log "GLES       : Probing for host libraries"
-            GLES_LIBS=../../out/host/$OS/lib
-            if [ -d "$GLES_LIBS" ]; then
-                echo "GLES       : Libs in $GLES_LIBS"
-            else
-                echo "Warning: Could nof find OpenGLES emulation libraries in: $GLES_LIBS"
-                echo "Disabling GLES emulation from this build!"
-                GLES_SUPPORT=no
-            fi
-        fi
+    GLES_PROBE_OS=$TARGET_OS
+    if [ "$GLES_PROBE_OS" = "windows" ]; then
+      GLES_PROBE_OS=windows-x86
     fi
+    GLES_PROBE_LIB_DIR=../../out/host/$GLES_PROBE_OS/lib
 fi  # IN_ANDROID_BUILD = no
 
+if [ -n "$CCACHE" -a -f "$CCACHE" ] ; then
+    CC="$CCACHE $CC"
+    log "Prebuilt   : CCACHE=$CCACHE"
+else
+    log "Prebuilt   : CCACHE can't be found"
+    CCACHE=
+fi
+
+# Try to find the GLES emulation headers and libraries automatically
+if [ "$GLES_PROBE" = "yes" ]; then
+    GLES_SUPPORT=yes
+    if [ -z "$GLES_LIBS" ]; then
+        log "GLES       : Probing for host libraries"
+        GLES_LIBS=$GLES_PROBE_LIB_DIR
+        if [ -d "$GLES_LIBS" ]; then
+            echo "GLES       : Libs in $GLES_LIBS"
+        else
+            echo "Warning: Could nof find OpenGLES emulation libraries in: $GLES_LIBS"
+            GLES_SUPPORT=no
+        fi
+    fi
+fi
+
 if [ "$GLES_SUPPORT" = "yes" ]; then
-    if [ -z "$GLES_INCLUDE" -o -z "$GLES_LIBS" ]; then
-        echo "ERROR: You must use both --gles-include and --gles-libs at the same time!"
-        echo "       Or use --no-gles to disable its support from this build."
-        exit 1
-    fi
-
-    GLES_HEADER=$GLES_INCLUDE/libOpenglRender/render_api.h
-    if [ ! -f "$GLES_HEADER" ]; then
-        echo "ERROR: Missing OpenGLES emulation header file: $GLES_HEADER"
-        echo "Please fix this by using --gles-include to point to the right directory!"
-        exit 1
-    fi
-
     mkdir -p objs/lib
 
     for lib in $GLES_SHARED_LIBRARIES; do
@@ -599,11 +553,6 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     echo "HOST_OS   := windows" >> $config_mk
 fi
 
-if [ "$GLES_SUPPORT" = "yes" -a "$GLES_INCLUDE" -a "$GLES_LIBS" ]; then
-    echo "QEMU_OPENGLES_INCLUDE    := $GLES_INCLUDE" >> $config_mk
-    echo "QEMU_OPENGLES_LIBS       := $GLES_LIBS"    >> $config_mk
-fi
-
 if [ "$HOST_OS" = "darwin" ]; then
     echo "mac_sdk_root := $OSX_SDK_ROOT" >> $config_mk
     echo "mac_sdk_version := $OSX_SDK_VERSION" >> $config_mk
@@ -730,10 +679,6 @@ case "$TARGET_OS" in
 esac
 
 echo "#define CONFIG_ANDROID       1" >> $config_h
-
-if [ "$GLES_SUPPORT" = "yes" ]; then
-    echo "#define CONFIG_ANDROID_OPENGLES 1" >> $config_h
-fi
 
 log "Generate   : $config_h"
 
