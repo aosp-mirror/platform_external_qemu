@@ -33,10 +33,6 @@ bool fileData_isValid(const FileData* data) {
     return false;
 }
 
-bool fileData_isInited(const FileData* data) {
-    return (data->flags == FILE_DATA_MAGIC);
-}
-
 static inline void fileData_setValid(FileData* data) {
     data->flags = FILE_DATA_MAGIC;
 }
@@ -62,10 +58,6 @@ void fileData_initEmpty(FileData* data) {
 
 
 int fileData_initFromFile(FileData* data, const char* filePath) {
-    if (fileData_isInited(data)) {
-        APANIC("Trying to re-init a FileData instance\n");
-    }
-
     FILE* f = fopen(filePath, "rb");
     if (!f)
         return -errno;
@@ -119,9 +111,6 @@ int fileData_initFromFile(FileData* data, const char* filePath) {
 
 
 int fileData_initFrom(FileData* data, const FileData* other) {
-    if (fileData_isInited(data)) {
-        APANIC("Trying to re-init a FileData instance\n");
-    }
     if (!other || !fileData_isValid(other)) {
         APANIC("Trying to copy an uninitialized FileData instance\n");
     }
@@ -145,6 +134,7 @@ int fileData_initFromMemory(FileData* data,
                              size_t inputLen) {
     FileData other;
     fileData_initWith(&other, input, inputLen);
+    memset(data, 0, sizeof(*data));  // make valgrind happy.
     return fileData_initFrom(data, &other);
 }
 

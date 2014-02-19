@@ -64,15 +64,14 @@ class StringView {
 public:
     StringView() : mString(NULL), mSize(0U) {}
 
-    explicit StringView(const StringView& other) :
+    StringView(const StringView& other) :
         mString(other.data()), mSize(other.size()) {}
 
     // IMPORTANT: This is intentionally not 'explicit'.
     StringView(const char* string) : 
             mString(string), mSize(strlen(string)) {}
 
-    // Also intentionally not explicit
-    StringView(const String& str);
+    explicit StringView(const String& str);
 
     StringView(const char* str, size_t len) : mString(str), mSize(len) {}
 
@@ -96,7 +95,7 @@ public:
     char operator[](size_t index) {
         return mString[index];
     }
-    
+
     void set(const char* data, size_t len) {
         mString = data;
         mSize = len;
@@ -106,12 +105,12 @@ public:
         mString = str;
         mSize = ::strlen(str);
     }
-    
+
     void set(const StringView& other) {
         mString = other.mString;
         mSize = other.mSize;
     }
-    
+
     // Compare with another StringView.
     int compare(const StringView& other) const;
 
