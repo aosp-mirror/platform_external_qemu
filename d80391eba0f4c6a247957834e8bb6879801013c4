@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "effcddee_dc352d5b",
+        "filename": "hw/android/goldfish/device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1006838
+      },
+      "writtenOn": "2014-02-19T06:49:56Z",
+      "side": 1,
+      "message": "Just started to handle these patches. It seems we provided a quick and dirty solution. I will handle the snapshot, remove x86_64 macros and also update the docs in all the devices.",
+      "parentUuid": "2fdfd524_24b576fd",
+      "range": {
+        "startLine": 26,
+        "startChar": 7,
+        "endLine": 26,
+        "endChar": 20
+      },
+      "revId": "d80391eba0f4c6a247957834e8bb6879801013c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6fa38db3_d6a2b4bc",
         "filename": "hw/android/goldfish/device.c",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2014-02-14T16:22:51Z",
       "side": 1,
       "message": "I\u0027d recommend another name, since a write here doesn\u0027t \"get\" anything, e.g. PDEV_BUS_SET_NAME_ADDR_HIGH",
+      "revId": "d80391eba0f4c6a247957834e8bb6879801013c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cff9d9ff_9ba3ab96",
+        "filename": "hw/android/goldfish/device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1006838
+      },
+      "writtenOn": "2014-02-19T06:49:56Z",
+      "side": 1,
+      "message": "How about still keep it aligning to the PDEV_BUS_GET_NAME?",
+      "parentUuid": "6fa38db3_d6a2b4bc",
       "revId": "d80391eba0f4c6a247957834e8bb6879801013c4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -88,6 +130,30 @@
     },
     {
       "key": {
+        "uuid": "cff9d9ff_db9d3356",
+        "filename": "hw/android/goldfish/device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1006838
+      },
+      "writtenOn": "2014-02-19T06:49:56Z",
+      "side": 1,
+      "message": "Yes. I will add a function to handle it.",
+      "parentUuid": "6fa38db3_76b4a8fe",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 24
+      },
+      "revId": "d80391eba0f4c6a247957834e8bb6879801013c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6fa38db3_16127c41",
         "filename": "hw/android/goldfish/device.c",
         "patchSetId": 1
@@ -99,6 +165,24 @@
       "writtenOn": "2014-02-14T16:22:51Z",
       "side": 1,
       "message": "Again, probably not guard this with TARGET_X86_64. Either rely on the fact that |ptr_high| will be 0 if \u0027GET_NAME_HIGH\u0027 is never called, or check against |goldfish_64bit_guest|.",
+      "revId": "d80391eba0f4c6a247957834e8bb6879801013c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ff0510e_1d8dd3d8",
+        "filename": "hw/android/goldfish/device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1006838
+      },
+      "writtenOn": "2014-02-19T06:49:56Z",
+      "side": 1,
+      "message": "Yes. the high 32 bit PDEV_BUS_GET_NAME_HIGH should be called before the low 32 bit name address. We just need to check the return value from goldfish_guest_is64bit(). Thanks!",
+      "parentUuid": "6fa38db3_16127c41",
       "revId": "d80391eba0f4c6a247957834e8bb6879801013c4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -139,6 +223,24 @@
       "writtenOn": "2014-02-14T16:22:51Z",
       "side": 1,
       "message": "This seems to be not directly related to x86_64 support (i.e. this affects x86 as well), and I wonder if this could actually introduce regressions for existing x86 system images. Can I ask you to put that in a separate patch instead. It\u0027s better to put logically distinct changes in separate patches, because fixing regressions often involves bisecting.",
+      "revId": "d80391eba0f4c6a247957834e8bb6879801013c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "effcddee_fca58951",
+        "filename": "hw/intc/i8259.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1006838
+      },
+      "writtenOn": "2014-02-19T06:49:56Z",
+      "side": 1,
+      "message": "Yes. I will move this part separately. And also handle the ioapic in another patch.",
+      "parentUuid": "6fa38db3_96258c91",
       "revId": "d80391eba0f4c6a247957834e8bb6879801013c4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
