@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0ff0510e_60aa6c65",
+        "filename": "hw/android/goldfish/nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1006838
+      },
+      "writtenOn": "2014-02-19T09:38:27Z",
+      "side": 1,
+      "message": "Digit,\n\nThe original snapshot load function seems didn\u0027t consider the older snapshot as the below code. I also didn\u0027t find out any other device maintaining the old version of snapshots before:\n\nif (version_id !\u003d GOLDFISH_NAND_SAVE_VERSION)\n        return -1;\n\nThe struct stored the offset of the each data, if we changed the struct, the offset should be also changed. It\u0027s difficult to only maintain one struct to restore the old data struct. A simple solution is storing/loading the data one by one not by struct. Do you think if we really need to maintain it?\n\nThanks",
+      "parentUuid": "af97455d_c2318208",
+      "revId": "273573bd1334235afb83bf27933cee84b687d280",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf6c794a_4332860c",
         "filename": "hw/android/goldfish/nand.c",
         "patchSetId": 1
