@@ -32,6 +32,7 @@
 #include "net/net.h"
 #include "qemu-common.h"
 #include "qemu/sockets.h"
+#include "qemu/thread.h"
 #include "qemu/timer.h"
 #include "slirp-android/libslirp.h"
 #include "sysemu/cpus.h"
@@ -62,7 +63,7 @@ static QEMUTimer *icount_vm_timer;
 #ifndef _WIN32
 static int io_thread_fd = -1;
 
-static void qemu_event_read(void *opaque)
+static void qemu_main_loop_event_read(void *opaque)
 {
     int fd = (unsigned long)opaque;
     ssize_t len;
@@ -74,7 +75,7 @@ static void qemu_event_read(void *opaque)
     } while ((len == -1 && errno == EINTR) || len > 0);
 }
 
-static int qemu_event_init(void)
+static int qemu_main_loop_event_init(void)
 {
     int err;
     int fds[2];
@@ -91,7 +92,7 @@ static int qemu_event_init(void)
     if (err < 0)
         goto fail;
 
-    qemu_set_fd_handler2(fds[0], NULL, qemu_event_read, NULL,
+    qemu_set_fd_handler2(fds[0], NULL, qemu_main_loop_event_read, NULL,
                          (void *)(unsigned long)fds[0]);
 
     io_thread_fd = fds[1];
@@ -109,7 +110,7 @@ static void dummy_event_handler(void *opaque)
 {
 }
 
-static int qemu_event_init(void)
+static int qemu_main_loop_event_init(void)
 {
     qemu_event_handle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if (!qemu_event_handle) {
@@ -123,7 +124,7 @@ static int qemu_event_init(void)
 
 int qemu_init_main_loop(void)
 {
-    return qemu_event_init();
+    return qemu_main_loop_event_init();
 }
 
 #ifndef _WIN32
@@ -371,11 +372,11 @@ void main_loop(void)
 void configure_icount(const char* opts) {
 }
 
-struct qemu_alarm_timer {
+typedef struct QemuAlarm {
     char const *name;
-    int (*start)(struct qemu_alarm_timer *t);
-    void (*stop)(struct qemu_alarm_timer *t);
-    void (*rearm)(struct qemu_alarm_timer *t);
+    int (*start)(struct QemuAlarm *t);
+    void (*stop)(struct QemuAlarm *t);
+    void (*rearm)(struct QemuAlarm *t);
 #if defined(__linux__)
     int fd;
     timer_t timer;
@@ -383,16 +384,16 @@ struct qemu_alarm_timer {
     HANDLE timer;
 #endif
     char expired;
-};
+} QemuAlarm;
 
-static struct qemu_alarm_timer *alarm_timer;
+static QemuAlarm *alarm_timer;
 
-static inline int alarm_has_dynticks(struct qemu_alarm_timer *t)
+static inline int alarm_has_dynticks(QemuAlarm *t)
 {
     return t->rearm != NULL;
 }
 
-static void qemu_rearm_alarm_timer(struct qemu_alarm_timer *t)
+static void qemu_rearm_alarm_timer(QemuAlarm *t)
 {
     if (t->rearm) {
         t->rearm(t);
@@ -410,53 +411,50 @@ static void qemu_run_alarm_timer(void) {
 /* TODO: MIN_TIMER_REARM_NS should be optimized */
 #define MIN_TIMER_REARM_NS 250000
 
+static int thread_alarm_start(QemuAlarm* t);
+static void thread_alarm_stop(QemuAlarm* t);
+static void thread_alarm_rearm(QemuAlarm* t);
+
 #ifdef _WIN32
 
-static int mm_start_timer(struct qemu_alarm_timer *t);
-static void mm_stop_timer(struct qemu_alarm_timer *t);
-static void mm_rearm_timer(struct qemu_alarm_timer *t);
+static int mm_alarm_start(QemuAlarm *t);
+static void mm_alarm_stop(QemuAlarm *t);
+static void mm_alarm_ream(QemuAlarm *t);
 
-static int win32_start_timer(struct qemu_alarm_timer *t);
-static void win32_stop_timer(struct qemu_alarm_timer *t);
-static void win32_rearm_timer(struct qemu_alarm_timer *t);
+static int win32_alarm_start(QemuAlarm *t);
+static void win32_alarm_stop(QemuAlarm *t);
+static void win32_alarm_rearm(QemuAlarm *t);
 
 #else
 
-static int unix_start_timer(struct qemu_alarm_timer *t);
-static void unix_stop_timer(struct qemu_alarm_timer *t);
+static int unix_alarm_start(QemuAlarm *t);
+static void unix_alarm_stop(QemuAlarm *t);
 
 #ifdef __linux__
 
-static int dynticks_start_timer(struct qemu_alarm_timer *t);
-static void dynticks_stop_timer(struct qemu_alarm_timer *t);
-static void dynticks_rearm_timer(struct qemu_alarm_timer *t);
+static int dynticks_alarm_start(QemuAlarm *t);
+static void dynticks_alarm_stop(QemuAlarm *t);
+static void dynticks_alarm_rearm(QemuAlarm *t);
 
 #endif /* __linux__ */
 
 #endif /* _WIN32 */
 
-int64_t qemu_icount_round(int64_t count)
-{
-    return (count + (1 << icount_time_shift) - 1) >> icount_time_shift;
-}
-
-static struct qemu_alarm_timer alarm_timers[] = {
+static QemuAlarm alarm_timers[] = {
 #ifndef _WIN32
-    {"unix", unix_start_timer, unix_stop_timer, NULL},
-#ifdef __linux__
-    /* on Linux, the 'dynticks' clock sometimes doesn't work
-     * properly. this results in the UI freezing while emulation
-     * continues, for several seconds... So move it to the end
-     * of the list. */
-    {"dynticks", dynticks_start_timer,
-     dynticks_stop_timer, dynticks_rearm_timer},
-#endif
-#else
-    {"mmtimer", mm_start_timer, mm_stop_timer, NULL},
-    {"mmtimer2", mm_start_timer, mm_stop_timer, mm_rearm_timer},
-    {"dynticks", win32_start_timer, win32_stop_timer, win32_rearm_timer},
-    {"win32", win32_start_timer, win32_stop_timer, NULL},
-#endif
+    {"unix", unix_alarm_start, unix_alarm_stop, NULL},
+# ifdef __linux__
+    {"dynticks", dynticks_alarm_start,
+     dynticks_alarm_stop, dynticks_alarm_rearm},
+# endif
+#endif  // !_WIN32
+    {"thread", thread_alarm_start, thread_alarm_stop, thread_alarm_rearm},
+#ifdef _WIN32
+    {"mmtimer", mm_alarm_start, mm_alarm_stop, NULL},
+    {"mmtimer2", mm_alarm_start, mm_alarm_stop, mm_alarm_ream},
+    {"dynticks", win32_alarm_start, win32_alarm_stop, win32_alarm_rearm},
+    {"win32", win32_alarm_start, win32_alarm_stop, NULL},
+#endif  // _WIN32
     {NULL, }
 };
 
@@ -476,7 +474,7 @@ void configure_alarms(char const *opt)
     int count = ARRAY_SIZE(alarm_timers) - 1;
     char *arg;
     char *name;
-    struct qemu_alarm_timer tmp;
+    QemuAlarm tmp;
 
     if (!strcmp(opt, "?")) {
         show_available_alarms();
@@ -562,7 +560,7 @@ static void CALLBACK host_alarm_handler(PVOID lpParam, BOOLEAN unused)
 static void host_alarm_handler(int host_signum)
 #endif
 {
-    struct qemu_alarm_timer *t = alarm_timer;
+    QemuAlarm *t = alarm_timer;
     if (!t)
         return;
 
@@ -582,7 +580,7 @@ static void host_alarm_handler(int host_signum)
 
 #if defined(__linux__)
 
-static int dynticks_start_timer(struct qemu_alarm_timer *t)
+static int dynticks_alarm_start(QemuAlarm *t)
 {
     struct sigevent ev;
     timer_t host_timer;
@@ -617,14 +615,14 @@ static int dynticks_start_timer(struct qemu_alarm_timer *t)
     return 0;
 }
 
-static void dynticks_stop_timer(struct qemu_alarm_timer *t)
+static void dynticks_alarm_stop(QemuAlarm *t)
 {
     timer_t host_timer = t->timer;
 
     timer_delete(host_timer);
 }
 
-static void dynticks_rearm_timer(struct qemu_alarm_timer *t)
+static void dynticks_alarm_rearm(QemuAlarm *t)
 {
     timer_t host_timer = t->timer;
     struct itimerspec timeout;
@@ -666,7 +664,7 @@ static void dynticks_rearm_timer(struct qemu_alarm_timer *t)
 
 #if !defined(_WIN32)
 
-static int unix_start_timer(struct qemu_alarm_timer *t)
+static int unix_alarm_start(QemuAlarm *t)
 {
     struct sigaction act;
     struct itimerval itv;
@@ -692,7 +690,7 @@ static int unix_start_timer(struct qemu_alarm_timer *t)
     return 0;
 }
 
-static void unix_stop_timer(struct qemu_alarm_timer *t)
+static void unix_alarm_stop(QemuAlarm *t)
 {
     struct itimerval itv;
 
@@ -712,7 +710,7 @@ static void CALLBACK mm_alarm_handler(UINT uTimerID, UINT uMsg,
                                       DWORD_PTR dwUser, DWORD_PTR dw1,
                                       DWORD_PTR dw2)
 {
-    struct qemu_alarm_timer *t = alarm_timer;
+    QemuAlarm *t = alarm_timer;
     if (!t) {
         return;
     }
@@ -725,7 +723,7 @@ static void CALLBACK mm_alarm_handler(UINT uTimerID, UINT uMsg,
     }
 }
 
-static int mm_start_timer(struct qemu_alarm_timer *t)
+static int mm_alarm_start(QemuAlarm *t)
 {
     TIMECAPS tc;
     UINT flags;
@@ -759,13 +757,13 @@ static int mm_start_timer(struct qemu_alarm_timer *t)
     return 0;
 }
 
-static void mm_stop_timer(struct qemu_alarm_timer *t)
+static void mm_alarm_stop(QemuAlarm *t)
 {
     timeKillEvent(mm_timer);
     timeEndPeriod(mm_period);
 }
 
-static void mm_rearm_timer(struct qemu_alarm_timer *t)
+static void mm_alarm_ream(QemuAlarm *t)
 {
     int nearest_delta_ms;
 
@@ -797,7 +795,7 @@ static void mm_rearm_timer(struct qemu_alarm_timer *t)
     }
 }
 
-static int win32_start_timer(struct qemu_alarm_timer *t)
+static int win32_alarm_start(QemuAlarm *t)
 {
     HANDLE hTimer;
     BOOLEAN success;
@@ -824,7 +822,7 @@ static int win32_start_timer(struct qemu_alarm_timer *t)
     return 0;
 }
 
-static void win32_stop_timer(struct qemu_alarm_timer *t)
+static void win32_alarm_stop(QemuAlarm *t)
 {
     HANDLE hTimer = t->timer;
 
@@ -833,7 +831,7 @@ static void win32_stop_timer(struct qemu_alarm_timer *t)
     }
 }
 
-static void win32_rearm_timer(struct qemu_alarm_timer *t)
+static void win32_alarm_rearm(QemuAlarm *t)
 {
     HANDLE hTimer = t->timer;
     int nearest_delta_ms;
@@ -861,19 +859,134 @@ static void win32_rearm_timer(struct qemu_alarm_timer *t)
     }
 }
 
+
 #endif /* _WIN32 */
+
+// An alarm timer that uses a background thread instead of relying on the
+// windows event loop. Mode of operation:
+//
+//   - The timer thread runs in a simple loop that waits until
+//     the next alarm deadline, then sets timer_alarm_pending to 1
+//     and calls qemu_notify_event().
+//
+//   - A Win32 event is also used to unblock the thread when needed,
+//     e.g. when the next deadline changes due to adding/removing
+//     timers during execution.
+//
+//
+
+typedef struct {
+    QemuAlarm* alarm;
+    QemuThread thread;
+    QemuSemaphore sem;
+    QemuMutex lock;
+    bool enabled;
+    bool exit_requested;
+} ThreadTimerData;
+
+static void thread_alarm_data_free(ThreadTimerData* data) {
+    qemu_sem_destroy(&data->sem);
+    qemu_mutex_destroy(&data->lock);
+    g_free(data);
+}
+
+static void* thread_alarm_thread_func(void* param) {
+    ThreadTimerData* data = param;
+
+    for (;;) {
+        // Compute the next deadline.
+        int timeout_ms = -1;
+        const int kMinTimeout = 1000/15;
+
+        qemu_mutex_lock(&data->lock);
+
+        bool exit_requested = data->exit_requested;
+
+        if (data->enabled) {
+            int64_t timeout_ns = qemu_next_alarm_deadline();
+            timeout_ms = (int)((timeout_ns + 999999LL) / 1000000LL);
+        }
+
+        qemu_mutex_unlock(&data->lock);
+
+        if (exit_requested)
+            break;
+
+        if (timeout_ms < kMinTimeout) {
+            timeout_ms = kMinTimeout;
+        }
+
+        // Wait until the semaphore is triggered, or time expires.
+        int ret = qemu_sem_timedwait(&data->sem, timeout_ms);
+        if (ret < 0) {
+            // Timeout, signal it.
+            timer_alarm_pending = 1;
+            data->alarm->expired = 1;
+            qemu_notify_event();
+        }
+    }
+
+    // Exiting the thread on stop.
+    return NULL;
+}
+
+static ThreadTimerData* thread_alarm_data_create(QemuAlarm* t) {
+    ThreadTimerData* data = g_malloc0(sizeof(*data));
+
+    data->alarm = t;
+    qemu_mutex_init(&data->lock);
+    qemu_sem_init(&data->sem, 0);
+    qemu_thread_create(&data->thread, thread_alarm_thread_func, data,
+                       QEMU_THREAD_JOINABLE);
+    return data;
+}
+
+
+static ThreadTimerData* thread_alarm_data;
+
+static int thread_alarm_start(QemuAlarm *t) {
+    ThreadTimerData* data = thread_alarm_data_create(t);
+
+    thread_alarm_data = data;
+    qemu_mutex_lock(&data->lock);
+    data->enabled = true;
+    qemu_sem_post(&data->sem);
+    qemu_mutex_unlock(&data->lock);
+    return 0;
+}
+
+static void thread_alarm_stop(QemuAlarm *t) {
+    ThreadTimerData* data = thread_alarm_data;
+
+    qemu_mutex_lock(&data->lock);
+    data->enabled = false;
+    data->exit_requested = true;
+    qemu_sem_post(&data->sem);
+    qemu_mutex_unlock(&data->lock);
+
+    qemu_thread_join(&data->thread);
+    thread_alarm_data_free(data);
+}
+
+static void thread_alarm_rearm(QemuAlarm *t) {
+    ThreadTimerData* data = thread_alarm_data;
+
+    // Just trigger the semaphore, the timer thread will recompute
+    // the right deadline automatically.
+    qemu_sem_post(&data->sem);
+}
 
 static void alarm_timer_on_change_state_rearm(void *opaque, 
                                               int running, 
                                               int reason)
 {
     if (running)
-        qemu_rearm_alarm_timer((struct qemu_alarm_timer *) opaque);
+        qemu_rearm_alarm_timer((QemuAlarm *) opaque);
 }
 
 int init_timer_alarm(void)
 {
-    struct qemu_alarm_timer *t = NULL;
+    QemuAlarm *t = NULL;
     int i, err = -1;
 
     for (i = 0; alarm_timers[i].name; i++) {
@@ -902,7 +1015,7 @@ fail:
 
 void quit_timers(void)
 {
-    struct qemu_alarm_timer *t = alarm_timer;
+    QemuAlarm *t = alarm_timer;
     alarm_timer = NULL;
     t->stop(t);
 }
