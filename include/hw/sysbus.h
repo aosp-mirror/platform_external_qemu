@@ -3,6 +3,7 @@
 
 /* Devices attached directly to the main system bus.  */
 
+#include "exec/hwaddr.h"
 #include "hw/qdev.h"
 
 #define QDEV_MAX_MMIO 5

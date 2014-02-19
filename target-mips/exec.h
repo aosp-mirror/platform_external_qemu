@@ -17,13 +17,13 @@ GLOBAL_REGISTER_VARIABLE_DECL struct CPUMIPSState *env asm(AREG0);
 #include "exec/softmmu_exec.h"
 #endif /* !defined(CONFIG_USER_ONLY) */
 
-void dump_fpu(CPUState *env);
-void fpu_dump_state(CPUState *env, FILE *f,
+void dump_fpu(CPUMIPSState *env);
+void fpu_dump_state(CPUMIPSState *env, FILE *f,
                     int (*fpu_fprintf)(FILE *f, const char *fmt, ...),
                     int flags);
 
-void cpu_mips_clock_init (CPUState *env);
-void cpu_mips_tlb_flush (CPUState *env, int flush_global);
+void cpu_mips_clock_init (CPUMIPSState *env);
+void cpu_mips_tlb_flush (CPUMIPSState *env, int flush_global);
 
 static inline void env_to_regs(void)
 {
@@ -33,7 +33,7 @@ static inline void regs_to_env(void)
 {
 }
 
-static inline int cpu_has_work(CPUState *env)
+static inline int cpu_has_work(CPUMIPSState *env)
 {
     int has_work = 0;
 
@@ -52,7 +52,7 @@ static inline int cpu_has_work(CPUState *env)
     return has_work;
 }
 
-static inline int cpu_halted(CPUState *env)
+static inline int cpu_halted(CPUMIPSState *env)
 {
     if (!env->halted)
         return 0;
@@ -63,7 +63,7 @@ static inline int cpu_halted(CPUState *env)
     return EXCP_HALTED;
 }
 
-static inline void compute_hflags(CPUState *env)
+static inline void compute_hflags(CPUMIPSState *env)
 {
     env->hflags &= ~(MIPS_HFLAG_COP1X | MIPS_HFLAG_64 | MIPS_HFLAG_CP0 |
                      MIPS_HFLAG_F64 | MIPS_HFLAG_FPU | MIPS_HFLAG_KSU |

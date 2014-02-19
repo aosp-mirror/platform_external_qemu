@@ -15,7 +15,6 @@
 
 #include "qapi/qmp/qobject.h"
 #include "qemu/queue.h"
-#include "qemu-common.h"
 
 typedef struct QListEntry {
     QObject *value;
@@ -48,6 +47,17 @@ void qlist_iter(const QList *qlist,
 QObject *qlist_pop(QList *qlist);
 QObject *qlist_peek(QList *qlist);
 int qlist_empty(const QList *qlist);
+size_t qlist_size(const QList *qlist);
 QList *qobject_to_qlist(const QObject *obj);
+
+static inline const QListEntry *qlist_first(const QList *qlist)
+{
+    return QTAILQ_FIRST(&qlist->head);
+}
+
+static inline const QListEntry *qlist_next(const QListEntry *entry)
+{
+    return QTAILQ_NEXT(entry, next);
+}
 
 #endif /* QLIST_H */

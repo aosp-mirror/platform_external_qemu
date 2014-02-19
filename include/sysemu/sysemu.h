@@ -9,6 +9,8 @@
 #include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qerror.h"
 
+#include "exec/hwaddr.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -16,11 +18,11 @@
 /* vl.c */
 extern const char *bios_name;
 
-#define QEMU_FILE_TYPE_BIOS   0
-#define QEMU_FILE_TYPE_KEYMAP 1
-char *qemu_find_file(int type, const char *name);
-
+extern const char* savevm_on_exit;
+extern int no_shutdown;
 extern int vm_running;
+extern int vm_can_run(void);
+extern int qemu_debug_requested(void);
 extern const char *qemu_name;
 extern uint8_t qemu_uuid[];
 int qemu_uuid_parse(const char *str, uint8_t *uuid);
@@ -44,11 +46,24 @@ int64_t cpu_get_ticks(void);
 void cpu_enable_ticks(void);
 void cpu_disable_ticks(void);
 
+void configure_icount(const char* opts);
+void configure_alarms(const char* opts);
+int init_timer_alarm(void);
+int qemu_timer_alarm_pending(void);
+void quit_timers(void);
+
+int64_t qemu_icount;
+int64_t qemu_icount_bias;
+int icount_time_shift;
+
+int tcg_has_work(void);
+
 void qemu_system_reset_request(void);
 void qemu_system_shutdown_request(void);
 void qemu_system_powerdown_request(void);
 int qemu_shutdown_requested(void);
 int qemu_reset_requested(void);
+int qemu_vmstop_requested(void);
 int qemu_powerdown_requested(void);
 void qemu_system_killed(int signal, pid_t pid);
 #ifdef NEED_CPU_H
@@ -94,6 +109,17 @@ int tap_win32_init(VLANState *vlan, const char *model,
 /* SLIRP */
 void do_info_slirp(Monitor *mon);
 
+typedef enum DisplayType
+{
+    DT_DEFAULT,
+    DT_CURSES,
+    DT_SDL,
+    DT_GTK,
+    DT_VNC,
+    DT_NOGRAPHIC,
+    DT_NONE,
+} DisplayType;
+
 extern int autostart;
 extern int bios_size;
 extern int cirrus_vga_enabled;
@@ -116,7 +142,9 @@ extern int graphic_rotate;
 extern int no_quit;
 extern int semihosting_enabled;
 extern int old_param;
-extern QEMUClock *rtc_clock;
+
+const char* dns_log_filename;
+const char* drop_log_filename;
 
 #define MAX_NODES 64
 extern int nb_numa_nodes;
@@ -220,24 +248,6 @@ extern CharDriverState *parallel_hds[MAX_PARALLEL_PORTS];
 extern CharDriverState *virtcon_hds[MAX_VIRTIO_CONSOLES];
 
 #define TFR(expr) do { if ((expr) != -1) break; } while (errno == EINTR)
-
-#ifdef NEED_CPU_H
-/* loader.c */
-int get_image_size(const char *filename);
-int load_image(const char *filename, uint8_t *addr); /* deprecated */
-int load_image_targphys(const char *filename, hwaddr, int max_sz);
-int load_elf(const char *filename, int64_t address_offset,
-             uint64_t *pentry, uint64_t *lowaddr, uint64_t *highaddr);
-int load_aout(const char *filename, hwaddr addr, int max_sz);
-int load_uimage(const char *filename, target_ulong *ep, target_ulong *loadaddr,
-                int *is_linux);
-
-int fread_targphys(hwaddr dst_addr, size_t nbytes, FILE *f);
-int fread_targphys_ok(hwaddr dst_addr, size_t nbytes, FILE *f);
-int read_targphys(int fd, hwaddr dst_addr, size_t nbytes);
-void pstrcpy_targphys(hwaddr dest, int buf_size,
-                      const char *source);
-#endif
 
 void do_usb_add(Monitor *mon, const char *devname);
 void do_usb_del(Monitor *mon, const char *devname);

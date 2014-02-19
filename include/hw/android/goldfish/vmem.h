@@ -12,14 +12,16 @@
 #ifndef GOLDFISH_VMEM_H
 #define GOLDFISH_VMEM_H
 
+#include "cpu.h"
+
 // Call these functions instead of cpu_memory_rw_debug and
 // cpu_get_phys_page_debug to ensure virtual address translation always works
 // properly, and efficently, under KVM.
 
-int safe_memory_rw_debug(CPUState *env, target_ulong addr, uint8_t *buf,
+int safe_memory_rw_debug(CPUOldState *env, target_ulong addr, uint8_t *buf,
                          int len, int is_write);
 
-hwaddr safe_get_phys_page_debug(CPUState *env, target_ulong addr);
+hwaddr safe_get_phys_page_debug(CPUOldState *env, target_ulong addr);
 
 
 #endif  /* GOLDFISH_VMEM_H */

@@ -3,6 +3,8 @@
 #ifndef HW_BOARDS_H
 #define HW_BOARDS_H
 
+#include "exec/cpu-common.h"
+
 typedef void QEMUMachineInitFunc(ram_addr_t ram_size,
                                  const char *boot_device,
                                  const char *kernel_filename,

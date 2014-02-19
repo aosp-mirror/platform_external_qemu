@@ -1,14 +1,30 @@
 #ifndef QEMU_OSDEP_H
 #define QEMU_OSDEP_H
 
+#include "config-host.h"
 #include <stdarg.h>
 #include <stddef.h>
-#ifdef __OpenBSD__
+#include <stdbool.h>
 #include <sys/types.h>
+#ifdef __OpenBSD__
 #include <sys/signal.h>
 #endif
 
+#ifndef _WIN32
+#include <sys/wait.h>
+#else
+#define WIFEXITED(x)   1
+#define WEXITSTATUS(x) (x)
+#endif
+
 #include <sys/time.h>
+
+#if defined(CONFIG_SOLARIS) && CONFIG_SOLARIS_VERSION < 10
+/* [u]int_fast*_t not in <sys/int_types.h> */
+typedef unsigned char           uint_fast8_t;
+typedef unsigned int            uint_fast16_t;
+typedef signed int              int_fast16_t;
+#endif
 
 #ifndef glue
 #define xglue(x, y) x ## y
@@ -26,9 +42,6 @@
 #define unlikely(x)   __builtin_expect(!!(x), 0)
 #endif
 
-#ifdef CONFIG_NEED_OFFSETOF
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *) 0)->MEMBER)
-#endif
 #ifndef container_of
 #define container_of(ptr, type, member) ({                      \
         const typeof(((type *) 0)->member) *__mptr = (ptr);     \
@@ -55,6 +68,10 @@
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
+#ifndef ROUND_UP
+#define ROUND_UP(n,d) (((n) + (d) - 1) & -(d))
+#endif
+
 #ifndef DIV_ROUND_UP
 #define DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
 #endif
@@ -66,10 +83,12 @@
 #ifndef always_inline
 #if !((__GNUC__ < 3) || defined(__APPLE__))
 #ifdef __OPTIMIZE__
+#undef inline
 #define inline __attribute__ (( always_inline )) __inline__
 #endif
 #endif
 #else
+#undef inline
 #define inline always_inline
 #endif
 
@@ -81,16 +100,12 @@
 
 #define qemu_printf printf
 
-#if defined (__GNUC__) && defined (__GNUC_MINOR__)
-# define QEMU_GNUC_PREREQ(maj, min) \
-         ((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
-#else
-# define QEMU_GNUC_PREREQ(maj, min) 0
-#endif
-
+int qemu_daemon(int nochdir, int noclose);
 void *qemu_memalign(size_t alignment, size_t size);
 void *qemu_vmalloc(size_t size);
+void *qemu_anon_ram_alloc(size_t size);
 void qemu_vfree(void *ptr);
+void qemu_anon_ram_free(void *ptr, size_t size);
 
 #define QEMU_MADV_INVALID -1
 
@@ -108,6 +123,16 @@ void qemu_vfree(void *ptr);
 #else
 #define QEMU_MADV_MERGEABLE QEMU_MADV_INVALID
 #endif
+#ifdef MADV_DONTDUMP
+#define QEMU_MADV_DONTDUMP MADV_DONTDUMP
+#else
+#define QEMU_MADV_DONTDUMP QEMU_MADV_INVALID
+#endif
+#ifdef MADV_HUGEPAGE
+#define QEMU_MADV_HUGEPAGE MADV_HUGEPAGE
+#else
+#define QEMU_MADV_HUGEPAGE QEMU_MADV_INVALID
+#endif
 
 #elif defined(CONFIG_POSIX_MADVISE)
 
@@ -115,6 +140,8 @@ void qemu_vfree(void *ptr);
 #define QEMU_MADV_DONTNEED  POSIX_MADV_DONTNEED
 #define QEMU_MADV_DONTFORK  QEMU_MADV_INVALID
 #define QEMU_MADV_MERGEABLE QEMU_MADV_INVALID
+#define QEMU_MADV_DONTDUMP QEMU_MADV_INVALID
+#define QEMU_MADV_HUGEPAGE  QEMU_MADV_INVALID
 
 #else /* no-op */
 
@@ -122,13 +149,42 @@ void qemu_vfree(void *ptr);
 #define QEMU_MADV_DONTNEED  QEMU_MADV_INVALID
 #define QEMU_MADV_DONTFORK  QEMU_MADV_INVALID
 #define QEMU_MADV_MERGEABLE QEMU_MADV_INVALID
+#define QEMU_MADV_DONTDUMP QEMU_MADV_INVALID
+#define QEMU_MADV_HUGEPAGE  QEMU_MADV_INVALID
 
 #endif
 
 int qemu_madvise(void *addr, size_t len, int advice);
 
+int qemu_open(const char *name, int flags, ...);
+int qemu_close(int fd);
+
+#if defined(__HAIKU__) && defined(__i386__)
+#define FMT_pid "%ld"
+#elif defined(WIN64)
+#define FMT_pid "%" PRId64
+#else
+#define FMT_pid "%d"
+#endif
+
 int qemu_create_pidfile(const char *filename);
 int qemu_get_thread_id(void);
+
+#ifndef CONFIG_IOVEC
+struct iovec {
+    void *iov_base;
+    size_t iov_len;
+};
+/*
+ * Use the same value as Linux for now.
+ */
+#define IOV_MAX 1024
+
+ssize_t readv(int fd, const struct iovec *iov, int iov_cnt);
+ssize_t writev(int fd, const struct iovec *iov, int iov_cnt);
+#else
+#include <sys/uio.h>
+#endif
 
 #ifdef _WIN32
 static inline void qemu_timersub(const struct timeval *val1,
@@ -148,9 +204,48 @@ static inline void qemu_timersub(const struct timeval *val1,
 #define ffs __builtin_ffs
 #endif
 
-/* in osdep.c */
-#ifdef _WIN32
-int asprintf(char**, const char*, ...);
+void qemu_set_cloexec(int fd);
+
+void qemu_set_version(const char *);
+const char *qemu_get_version(void);
+
+void fips_set_state(bool requested);
+bool fips_get_state(void);
+
+/* Return a dynamically allocated pathname denoting a file or directory that is
+ * appropriate for storing local state.
+ *
+ * @relative_pathname need not start with a directory separator; one will be
+ * added automatically.
+ *
+ * The caller is responsible for releasing the value returned with g_free()
+ * after use.
+ */
+char *qemu_get_local_state_pathname(const char *relative_pathname);
+
+/**
+ * qemu_getauxval:
+ * @type: the auxiliary vector key to lookup
+ *
+ * Search the auxiliary vector for @type, returning the value
+ * or 0 if @type is not present.
+ */
+#if defined(CONFIG_GETAUXVAL) || defined(__linux__)
+unsigned long qemu_getauxval(unsigned long type);
+#else
+static inline unsigned long qemu_getauxval(unsigned long type) { return 0; }
+#endif
+
+/**
+ * qemu_init_auxval:
+ * @envp: the third argument to main
+ *
+ * If supported and required, locate the auxiliary vector at program startup.
+ */
+#if defined(CONFIG_GETAUXVAL) || !defined(__linux__)
+static inline void qemu_init_auxval(char **envp) { }
+#else
+void qemu_init_auxval(char **envp);
 #endif
 
 #endif

@@ -34,9 +34,9 @@ qlooptimer_startRelative(void* impl, Duration timeout_ms)
 {
     QEMUTimer* tt = impl;
     if (timeout_ms == DURATION_INFINITE)
-        qemu_del_timer(tt);
+        timer_del(tt);
     else
-        qemu_mod_timer(tt, qemu_get_clock_ms(host_clock) + timeout_ms);
+        timer_mod(tt, qemu_clock_get_ms(QEMU_CLOCK_HOST) + timeout_ms);
 }
 
 static void
@@ -44,30 +44,30 @@ qlooptimer_startAbsolute(void* impl, Duration deadline_ms)
 {
     QEMUTimer* tt = impl;
     if (deadline_ms == DURATION_INFINITE)
-        qemu_del_timer(tt);
+        timer_del(tt);
     else
-        qemu_mod_timer(tt, deadline_ms);
+        timer_mod(tt, deadline_ms);
 }
 
 static void
 qlooptimer_stop(void* impl)
 {
     QEMUTimer* tt = impl;
-    qemu_del_timer(tt);
+    timer_del(tt);
 }
 
 static int
 qlooptimer_isActive(void* impl)
 {
     QEMUTimer* tt = impl;
-    return qemu_timer_pending(tt);
+    return timer_pending(tt);
 }
 
 static void
 qlooptimer_free(void* impl)
 {
     QEMUTimer* tt = impl;
-    qemu_free_timer(tt);
+    timer_free(tt);
 }
 
 static const LoopTimerClass  qlooptimer_class = {
@@ -85,7 +85,7 @@ qlooper_timer_init(Looper*        looper,
                    void*          opaque)
 {
     timer->clazz = (LoopTimerClass*) &qlooptimer_class;
-    timer->impl  = qemu_new_timer_ms(host_clock, callback, opaque);
+    timer->impl  = timer_new(QEMU_CLOCK_HOST, SCALE_MS, callback, opaque);
 }
 
 /**********************************************************************
@@ -370,7 +370,7 @@ qlooper_handle_io_bh(void* opaque)
 static Duration
 qlooper_now(Looper* ll)
 {
-    return qemu_get_clock_ms(host_clock);
+    return qemu_clock_get_ms(QEMU_CLOCK_HOST);
 }
 
 extern void qemu_system_shutdown_request(void);

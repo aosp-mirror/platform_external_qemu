@@ -1167,6 +1167,14 @@ int socket_set_oobinline(int  fd)
     return socket_setoption(fd, SOL_SOCKET, SO_OOBINLINE, 1);
 }
 
+int socket_set_cork(int fd, int v)
+{
+#if defined(SOL_TCP) && defined(TCP_CORK)
+    return socket_setoption(fd, SOL_TCP, TCP_CORK, v);
+#else
+    return 0;
+#endif
+}
 
 int  socket_set_nodelay(int  fd)
 {
@@ -1565,4 +1573,25 @@ host_name( void )
         return "localhost";
     else
         return buf;
+}
+
+
+// Temporary work-arounds until we get rid of this source file.
+
+int qemu_getsockopt(int sock, int level, int optname, void* optval,
+                    size_t* optlen) {
+    socklen_t len = (socklen_t) *optlen;
+    int ret = getsockopt(sock, level, optname, (char*)optval, &len);
+    *optlen = (size_t) len;
+    return ret;
+}
+
+int qemu_setsockopt(int sock, int level, int optname, const void* optval,
+                    size_t optlen) {
+  return setsockopt(sock, level, optname, (const char*)optval,
+                    (socklen_t)optlen);
+}
+
+int qemu_recv(int sock, void* buf, size_t len, int flags) {
+  return recv(sock, buf, len, flags);
 }

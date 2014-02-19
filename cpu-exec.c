@@ -51,21 +51,21 @@ int tb_invalidated_flag;
 //#define CONFIG_DEBUG_EXEC
 //#define DEBUG_SIGNAL
 
-int qemu_cpu_has_work(CPUState *env)
+int qemu_cpu_has_work(CPUOldState *env)
 {
     return cpu_has_work(env);
 }
 
-void cpu_loop_exit(void)
+void cpu_loop_exit(CPUArchState* env1)
 {
-    env->current_tb = NULL;
-    longjmp(env->jmp_env, 1);
+    env1->current_tb = NULL;
+    longjmp(env1->jmp_env, 1);
 }
 
 /* exit the current TB from a signal handler. The host registers are
    restored in a state compatible with the CPU emulator
  */
-void cpu_resume_from_signal(CPUState *env1, void *puc)
+void cpu_resume_from_signal(CPUArchState *env1, void *puc)
 {
 #if !defined(CONFIG_SOFTMMU)
 #ifdef __linux__
@@ -206,7 +206,7 @@ CPUDebugExcpHandler *cpu_set_debug_excp_handler(CPUDebugExcpHandler *handler)
     return old_handler;
 }
 
-static void cpu_handle_debug_exception(CPUState *env)
+static void cpu_handle_debug_exception(CPUOldState *env)
 {
     CPUWatchpoint *wp;
 
@@ -230,7 +230,7 @@ volatile sig_atomic_t exit_request;
  * be emulated in qemu because MMIO is emulated for only one
  * instruction now and then back to the HAX kernel module.
  */
-int need_handle_intr_request(CPUState *env)
+int need_handle_intr_request(CPUOldState *env)
 {
 #ifdef CONFIG_HAX
     if (!hax_enabled() || hax_vcpu_emulation_mode(env))
@@ -241,7 +241,7 @@ int need_handle_intr_request(CPUState *env)
 #endif
 }
 
-int cpu_exec(CPUState *env1)
+int cpu_exec(CPUOldState *env1)
 {
     volatile host_reg_t saved_env_reg;
     int ret, interrupt_request;
@@ -394,7 +394,7 @@ int cpu_exec(CPUState *env1)
                     if (interrupt_request & CPU_INTERRUPT_DEBUG) {
                         env->interrupt_request &= ~CPU_INTERRUPT_DEBUG;
                         env->exception_index = EXCP_DEBUG;
-                        cpu_loop_exit();
+                        cpu_loop_exit(env);
                     }
 #if defined(TARGET_ARM) || defined(TARGET_SPARC) || defined(TARGET_MIPS) || \
     defined(TARGET_PPC) || defined(TARGET_ALPHA) || defined(TARGET_CRIS) || \
@@ -403,7 +403,7 @@ int cpu_exec(CPUState *env1)
                         env->interrupt_request &= ~CPU_INTERRUPT_HALT;
                         env->halted = 1;
                         env->exception_index = EXCP_HLT;
-                        cpu_loop_exit();
+                        cpu_loop_exit(env);
                     }
 #endif
 #if defined(TARGET_I386)
@@ -411,7 +411,7 @@ int cpu_exec(CPUState *env1)
                             svm_check_intercept(SVM_EXIT_INIT);
                             do_cpu_init(env);
                             env->exception_index = EXCP_HALTED;
-                            cpu_loop_exit();
+                            cpu_loop_exit(env);
                     } else if (interrupt_request & CPU_INTERRUPT_SIPI) {
                             do_cpu_sipi(env);
                     } else if (env->hflags2 & HF2_GIF_MASK) {
@@ -604,7 +604,7 @@ int cpu_exec(CPUState *env1)
                 if (unlikely(env->exit_request)) {
                     env->exit_request = 0;
                     env->exception_index = EXCP_INTERRUPT;
-                    cpu_loop_exit();
+                    cpu_loop_exit(env);
                 }
 #if defined(DEBUG_DISAS) || defined(CONFIG_DEBUG_EXEC)
                 if (qemu_loglevel_mask(CPU_LOG_TB_CPU)) {
@@ -687,14 +687,14 @@ int cpu_exec(CPUState *env1)
                             }
                             env->exception_index = EXCP_INTERRUPT;
                             next_tb = 0;
-                            cpu_loop_exit();
+                            cpu_loop_exit(env);
                         }
                     }
                 }
                 env->current_tb = NULL;
 #ifdef CONFIG_HAX
                 if (hax_enabled() && hax_stop_emulation(env))
-                    cpu_loop_exit();
+                    cpu_loop_exit(env);
 #endif
                 /* reset soft MMU for next block (it can currently
                    only be set by a memory fault) */
@@ -799,7 +799,7 @@ void cpu_x86_frstor(CPUX86State *s, target_ulong ptr, int data32)
 #if defined(TARGET_I386)
 #define EXCEPTION_ACTION raise_exception_err(env->exception_index, env->error_code)
 #else
-#define EXCEPTION_ACTION cpu_loop_exit()
+#define EXCEPTION_ACTION cpu_loop_exit(env)
 #endif
 
 /* 'pc' is the host PC at which the exception was raised. 'address' is

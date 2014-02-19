@@ -42,7 +42,7 @@ static int strneq(const char *s1, unsigned int n, const char *s2)
 }
 
 static struct pathelem *add_entry(struct pathelem *root, const char *name,
-                                  unsigned char type);
+                                  unsigned type);
 
 static struct pathelem *new_entry(const char *root,
                                   struct pathelem *parent,
@@ -50,10 +50,7 @@ static struct pathelem *new_entry(const char *root,
 {
     struct pathelem *new = malloc(sizeof(*new));
     new->name = strdup(name);
-    if (asprintf(&new->pathname, "%s/%s", root, name) == -1) {
-        printf("Cannot allocate memory\n");
-        exit(1);
-    }
+    new->pathname = g_strdup_printf("%s/%s", root, name);
     new->num_entries = 0;
     return new;
 }
@@ -61,9 +58,10 @@ static struct pathelem *new_entry(const char *root,
 #define streq(a,b) (strcmp((a), (b)) == 0)
 
 /* Not all systems provide this feature */
-#if defined(DT_DIR) && defined(DT_UNKNOWN)
+#if defined(DT_DIR) && defined(DT_UNKNOWN) && defined(DT_LNK)
 # define dirent_type(dirent) ((dirent)->d_type)
-# define is_dir_maybe(type)  ((type) == DT_DIR || (type) == DT_UNKNOWN)
+# define is_dir_maybe(type) \
+    ((type) == DT_DIR || (type) == DT_UNKNOWN || (type) == DT_LNK)
 #else
 # define dirent_type(dirent) (1)
 # define is_dir_maybe(type)  (type)
@@ -87,7 +85,7 @@ static struct pathelem *add_dir_maybe(struct pathelem *path)
 }
 
 static struct pathelem *add_entry(struct pathelem *root, const char *name,
-                                  unsigned char type)
+                                  unsigned type)
 {
     struct pathelem **e;
 

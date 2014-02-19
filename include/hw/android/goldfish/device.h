@@ -12,6 +12,9 @@
 #ifndef GOLDFISH_DEVICE_H
 #define GOLDFISH_DEVICE_H
 
+#include "config.h"
+#include "exec/cpu-common.h"
+
 struct goldfish_device {
     struct goldfish_device *next;
     struct goldfish_device *prev;
@@ -60,6 +63,8 @@ void nand_dev_init(uint32_t base);
 #define GFD_MAX_IRQ      16
 /* IRQ reserved for keyboard. */
 #define GFD_KBD_IRQ      1
+/* IRQ reserved for RTC. */
+#define GFD_RTC_IRQ      8
 /* IRQ reserved for mouse. */
 #define GFD_MOUSE_IRQ    12
 /* IRQ reserved for error (raising an exception in TB code). */

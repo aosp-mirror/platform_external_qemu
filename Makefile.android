@@ -115,9 +115,6 @@ ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     endif
     ccache :=
   endif
-
-  QEMU_OPENGLES_INCLUDE := sdk/emulator/opengl/host/include
-  QEMU_OPENGLES_LIBS := $(HOST_OUT)
 endif
 
 
@@ -146,6 +143,10 @@ MY_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 MY_CFLAGS += -D_GNU_SOURCE=1
 
 MY_CFLAGS += -I$(LOCAL_PATH)/include
+
+# Need to include "qapi-types.h" and other auto-generated files from
+# android-configure.sh
+MY_CFLAGS += -I$(LOCAL_PATH)/qapi-auto-generated
 
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.

@@ -401,6 +401,28 @@ const QDictEntry *qdict_next(const QDict *qdict, const QDictEntry *entry)
 }
 
 /**
+ * qdict_clone_shallow(): Clones a given QDict. Its entries are not copied, but
+ * another reference is added.
+ */
+QDict *qdict_clone_shallow(const QDict *src)
+{
+    QDict *dest;
+    QDictEntry *entry;
+    int i;
+
+    dest = qdict_new();
+
+    for (i = 0; i < QDICT_BUCKET_MAX; i++) {
+        QLIST_FOREACH(entry, &src->table[i], next) {
+            qobject_incref(entry->value);
+            qdict_put_obj(dest, entry->key, entry->value);
+        }
+    }
+
+    return dest;
+}
+
+/**
  * qentry_destroy(): Free all the memory allocated by a QDictEntry
  */
 static void qentry_destroy(QDictEntry *e)
@@ -453,4 +475,82 @@ static void qdict_destroy_obj(QObject *obj)
     }
 
     g_free(qdict);
+}
+
+static void qdict_do_flatten(QDict *qdict, QDict *target, const char *prefix)
+{
+    QObject *value;
+    const QDictEntry *entry, *next;
+    char *new_key;
+    bool delete;
+
+    entry = qdict_first(qdict);
+
+    while (entry != NULL) {
+
+        next = qdict_next(qdict, entry);
+        value = qdict_entry_value(entry);
+        new_key = NULL;
+        delete = false;
+
+        if (prefix) {
+            new_key = g_strdup_printf("%s.%s", prefix, entry->key);
+        }
+
+        if (qobject_type(value) == QTYPE_QDICT) {
+            /* Entries of QDicts are processed recursively, the QDict object
+             * itself disappears. */
+            qdict_do_flatten(qobject_to_qdict(value), target,
+                             new_key ? new_key : entry->key);
+            delete = true;
+        } else if (prefix) {
+            /* All other objects are moved to the target unchanged. */
+            qobject_incref(value);
+            qdict_put_obj(target, new_key, value);
+            delete = true;
+        }
+
+        g_free(new_key);
+
+        if (delete) {
+            qdict_del(qdict, entry->key);
+
+            /* Restart loop after modifying the iterated QDict */
+            entry = qdict_first(qdict);
+            continue;
+        }
+
+        entry = next;
+    }
+}
+
+/**
+ * qdict_flatten(): For each nested QDict with key x, all fields with key y
+ * are moved to this QDict and their key is renamed to "x.y". This operation
+ * is applied recursively for nested QDicts.
+ */
+void qdict_flatten(QDict *qdict)
+{
+    qdict_do_flatten(qdict, qdict, NULL);
+}
+
+/* extract all the src QDict entries starting by start into dst */
+void qdict_extract_subqdict(QDict *src, QDict **dst, const char *start)
+
+{
+    const QDictEntry *entry, *next;
+    const char *p;
+
+    *dst = qdict_new();
+    entry = qdict_first(src);
+
+    while (entry != NULL) {
+        next = qdict_next(src, entry);
+        if (strstart(entry->key, start, &p)) {
+            qobject_incref(entry->value);
+            qdict_put_obj(*dst, p, entry->value);
+            qdict_del(src, entry->key);
+        }
+        entry = next;
+    }
 }

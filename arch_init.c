@@ -38,6 +38,7 @@
 #include "hw/audiodev.h"
 #include "sysemu/kvm.h"
 #include "migration/migration.h"
+#include "migration/qemu-file.h"
 #include "net/net.h"
 #include "exec/gdbstub.h"
 #include "hw/i386/smbios.h"
@@ -262,7 +263,7 @@ int ram_save_live(QEMUFile *f, int stage, void *opaque)
     }
 
     if (cpu_physical_sync_dirty_bitmap(0, TARGET_PHYS_ADDR_MAX) != 0) {
-        qemu_file_set_error(f);
+        qemu_file_set_error(f, -errno);
         return 0;
     }
 
@@ -297,7 +298,7 @@ int ram_save_live(QEMUFile *f, int stage, void *opaque)
     }
 
     bytes_transferred_last = bytes_transferred;
-    bwidth = qemu_get_clock_ns(rt_clock);
+    bwidth = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
 
     while (!qemu_file_rate_limit(f)) {
         int bytes_sent;
@@ -309,7 +310,7 @@ int ram_save_live(QEMUFile *f, int stage, void *opaque)
         }
     }
 
-    bwidth = qemu_get_clock_ns(rt_clock) - bwidth;
+    bwidth = qemu_clock_get_ns(QEMU_CLOCK_REALTIME) - bwidth;
     bwidth = (bytes_transferred - bytes_transferred_last) / bwidth;
 
     /* if we haven't transferred anything this round, force expected_time to a
@@ -448,7 +449,7 @@ int ram_load(QEMUFile *f, void *opaque, int version_id)
 
             qemu_get_buffer(f, host, TARGET_PAGE_SIZE);
         }
-        if (qemu_file_has_error(f)) {
+        if (qemu_file_get_error(f)) {
             return -EIO;
         }
     } while (!(flags & RAM_SAVE_FLAG_EOS));
@@ -456,11 +457,6 @@ int ram_load(QEMUFile *f, void *opaque, int version_id)
     return 0;
 }
 #endif
-
-void qemu_service_io(void)
-{
-    qemu_notify_event();
-}
 
 #ifdef HAS_AUDIO
 struct soundhw {

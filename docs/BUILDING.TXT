@@ -1,0 +1,120 @@
+Rebuilding the Android emulator from sources
+============================================
+
+I. Getting the sources:
+-----------------------
+
+At the moment, you'll need a full AOSP source checkout to rebuild the
+emulator from sources. See the instructions at http://source.android.com on
+how to download the platform sources.
+
+The following directories will be relevant:
+
+  $AOSP/external/qemu        -> The emulator itself.
+  $AOSP/sdk/emulator/opengl  -> Host GPU emulation libraries.
+
+  $AOSP/prebuilts/tools/gcc-sdk           -> host toolchains for SDK tools.
+  $AOSP/prebuilts/gcc/linux-x86/host/
+  $AOSP/prebuilts/gcc/darwin-x86/host/
+
+
+I. Building:
+------------
+
+You can only build the emulator on Linux or Darwin. Windows binaries are always
+generated on Linux, and actually run under Wine (you will need to install
+mingw32 and wine packages from your distribution to build and run them).
+
+1) Generate the host GPU emulation libraries:
+
+  cd $AOSP
+  . build/envsetup.sh
+  lunch sdk-eng
+  make libOpenglRender \
+       libEGL_translator \
+       libGLES_CM_translator \
+       libGLES_V2_translator
+
+on Linux and Darwin, also generate the 64-bit host libraries:
+
+  make lib64OpenglRender \
+       lib64EGL_translator \
+       lib64GLES_CM_translator \
+       lib64GLES_V2_translator
+
+Building 64-bit host binaries is not supported on Windows yet.
+
+
+2) Generate emulator binaries:
+
+  # If you haven't done it yet in 1)
+  cd $AOSP
+  . build/envsetup.sh
+  lunch sdk-eng
+  # then
+  cd external/qemu
+  mm
+
+The emulator binaries are placed under $AOSP/host/<system>/bin which is
+already in your path. If you have a local SDK installation, you can start
+an existing AVD with:
+
+  export ANDROID_SDK_ROOT=/path/to/sdk
+  emulator -avd <name>  [other options...]
+
+
+3) Optional: build system image:
+
+You can also use the emulator to run an SDK system image build from your
+AOSP checkout:
+
+     lunch sdk-eng
+     make
+     emulator
+
+Use sdk_x86-eng for Android/x86 system images, and sdk_mips-eng for MIPS ones.
+
+
+4) Optional: standalone emulator builds:
+
+After generating the GPU libraries as in 1), you have the option to use the
+standalone Android build system to generate the emulator binaries. This is
+convenient if you hack a lot on the emulator sources, because it's faster and
+gives your more options:
+
+    cd $AOSP/external/qemu
+    ./android-rebuild.sh
+
+Use --help option when calling android-rebuild.sh for more information.
+Note that 'android-rebuild.sh' is a wrapper script that calls
+'android-configure.sh' and later invokes 'make'.
+
+The generated binaries are placed under external/qemu/objs which is _not_
+in your PATH, but can be invoked directly, e.g.:
+
+    ./android-rebuild.sh
+    objs/emulator -avd <name>
+
+    IMPORTANT: At the moment, the build will fail if you haven't
+    generated GPU emulation libraries with the platform build.
+
+In all cases, several binaries will be generated:
+
+    emulator         -> 32-bit launcher program.
+    emulator-<cpu>   -> 32-bit emulator for Android <cpu> images.
+    emulator64-<cpu> -> 64-bit emulator for Android <cpu> images.
+
+With <cpu> being one of the CPU architectures supported by the
+Android emulator (e.g. 'arm', 'x86' or 'mips').
+
+The 'emulator' executable is a very small program used to probe
+the host system and the AVD you want to launch, in order to
+invoke the appropriate 'real' emulator program. It also adjusts
+library search paths to ensure that the emulator can load the
+GPU emulation libraries from the right location.
+
+Note that there are no emulator64-<cpu> executables generated on
+Windows at the moment, due to issues with the mingw32-w64 cross-toolchains.
+
+Define ANDROID_SDK_ROOT in your environment to point to your SDK installation
+and be able to start AVDs with your freshly built emulator.

@@ -1328,25 +1328,6 @@ STEXI
 Set the filename for the BIOS.
 ETEXI
 
-#ifdef CONFIG_KQEMU
-DEF("kernel-kqemu", 0, QEMU_OPTION_kernel_kqemu, \
-    "-kernel-kqemu   enable KQEMU full virtualization (default is user mode only)\n")
-#endif
-STEXI
-@item -kernel-kqemu
-Enable KQEMU full virtualization (default is user mode only).
-ETEXI
-
-#ifdef CONFIG_KQEMU
-DEF("no-kqemu", 0, QEMU_OPTION_no_kqemu, \
-    "-no-kqemu       disable KQEMU kernel module usage\n")
-#endif
-STEXI
-@item -no-kqemu
-Disable KQEMU kernel module usage. KQEMU options are only available if
-KQEMU support is enabled when compiling.
-ETEXI
-
 #ifdef CONFIG_KVM
 DEF("enable-kvm", 0, QEMU_OPTION_enable_kvm, \
     "-enable-kvm     enable KVM full virtualization support\n")
@@ -1687,18 +1668,8 @@ DEF("old-param", 0, QEMU_OPTION_old_param,
     "-old-param      old param mode\n")
 #endif
 
-#ifdef CONFIG_TRACE
-DEF("tracing", HAS_ARG, QEMU_OPTION_tracing, \
-    "-tracing on|off enable/disable tracing\n")
-
-DEF("trace", HAS_ARG, QEMU_OPTION_trace, \
-    "-trace name\n" \
-    "                set trace directory\n")
-
 DEF("nand", HAS_ARG, QEMU_OPTION_nand, \
     "-nand <params>  enable NAND Flash partition\n")
-
-#endif /* CONFIG_TRACE */
 
 #ifdef CONFIG_ANDROID
 

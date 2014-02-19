@@ -44,7 +44,7 @@ static uint32_t smpboot[] = {
 
 static void main_cpu_reset(void *opaque)
 {
-    CPUState *env = opaque;
+    CPUARMState *env = opaque;
 
     cpu_reset(env);
     if (env->boot_info)
@@ -184,7 +184,7 @@ static void set_kernel_args_old(struct arm_boot_info *info,
     }
 }
 
-void arm_load_kernel(CPUState *env, struct arm_boot_info *info)
+void arm_load_kernel(CPUARMState *env, struct arm_boot_info *info)
 {
     int kernel_size;
     int initrd_size;

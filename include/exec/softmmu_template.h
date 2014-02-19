@@ -1,6 +1,11 @@
 /*
  *  Software MMU support
  *
+ * Generate helpers used by TCG for qemu_ld/st ops and code load
+ * functions.
+ *
+ * Included from target op helpers and exec.c.
+ *
  *  Copyright (c) 2003 Fabrice Bellard
  *
  * This library is free software; you can redistribute it and/or
@@ -76,7 +81,7 @@ static inline DATA_TYPE glue(io_read, SUFFIX)(hwaddr physaddr,
     env->mem_io_pc = (unsigned long)retaddr;
     if (index > (IO_MEM_NOTDIRTY >> IO_MEM_SHIFT)
             && !can_do_io(env)) {
-        cpu_io_recompile(env, retaddr);
+        cpu_io_recompile(env, (uintptr_t)retaddr);
     }
 
     env->mem_io_vaddr = addr;
@@ -254,7 +259,7 @@ static inline void glue(io_write, SUFFIX)(hwaddr physaddr,
     physaddr = (physaddr & TARGET_PAGE_MASK) + addr;
     if (index > (IO_MEM_NOTDIRTY >> IO_MEM_SHIFT)
             && !can_do_io(env)) {
-        cpu_io_recompile(env, retaddr);
+        cpu_io_recompile(env, (uintptr_t)retaddr);
     }
 
     env->mem_io_vaddr = addr;

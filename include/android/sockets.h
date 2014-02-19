@@ -339,6 +339,9 @@ int  socket_set_nonblock(int fd);
 /* set socket in blocking mode */
 int  socket_set_blocking(int fd);
 
+/* set cork mode on Linux (if set, don't send partial frames). */
+int socket_set_cork(int fd, int value);
+
 /* disable the TCP Nagle algorithm for lower latency */
 int  socket_set_nodelay(int fd);
 

@@ -175,7 +175,7 @@ boot_property_save_property( QEMUFile  *f, BootProperty  *p )
     if (split == NULL) {
         D("%s: save failed: illegal key/value pair \"%s\" (missing '=')\n",
           __FUNCTION__, p->property);
-        qemu_file_set_error(f);
+        qemu_file_set_error(f, -EINVAL);
         return -1;
     }
 

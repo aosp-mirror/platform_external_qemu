@@ -44,6 +44,7 @@ typedef enum {
     QTYPE_QFLOAT,
     QTYPE_QBOOL,
     QTYPE_QERROR,
+    QTYPE_MAX,
 } qtype_code;
 
 struct QObject;
@@ -71,7 +72,7 @@ typedef struct QObject {
 
 /* High-level interface for qobject_decref() */
 #define QDECREF(obj)              \
-    qobject_decref(QOBJECT(obj))
+    qobject_decref(obj ? QOBJECT(obj) : NULL)
 
 /* Initialize an object to default values */
 #define QOBJECT_INIT(obj, qtype_type)   \

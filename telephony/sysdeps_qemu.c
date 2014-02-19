@@ -41,7 +41,7 @@
 SysTime
 sys_time_ms( void )
 {
-    return qemu_get_clock_ms(rt_clock);
+    return qemu_clock_get_ms(QEMU_CLOCK_REALTIME);
 }
 
 /** TIMERS
@@ -87,8 +87,8 @@ static void
 sys_timer_free( SysTimer  timer )
 {
     if (timer->timer) {
-        qemu_del_timer( timer->timer );
-        qemu_free_timer( timer->timer );
+        timer_del( timer->timer );
+        timer_free( timer->timer );
         timer->timer = NULL;
     }
     timer->next    = _s_free_timers;
@@ -109,8 +109,8 @@ sys_timer_set( SysTimer  timer, SysTime  when, SysCallback   _callback, void*  o
 
     if (callback == NULL) {  /* unsetting the timer */
         if (timer->timer) {
-            qemu_del_timer( timer->timer );
-            qemu_free_timer( timer->timer );
+            timer_del( timer->timer );
+            timer_free( timer->timer );
             timer->timer = NULL;
         }
         timer->callback = callback;
@@ -123,22 +123,22 @@ sys_timer_set( SysTimer  timer, SysTime  when, SysCallback   _callback, void*  o
             goto ReuseTimer;
 
          /* need to replace the timer */
-         qemu_free_timer( timer->timer );
+         timer_free( timer->timer );
     }
 
-    timer->timer    = qemu_new_timer_ms( rt_clock, callback, opaque );
+    timer->timer    = timer_new(QEMU_CLOCK_REALTIME, SCALE_MS, callback, opaque );
     timer->callback = callback;
     timer->opaque   = opaque;
 
 ReuseTimer:
-    qemu_mod_timer( timer->timer, when );
+    timer_mod( timer->timer, when );
 }
 
 void
 sys_timer_unset( SysTimer  timer )
 {
     if (timer->timer) {
-        qemu_del_timer( timer->timer );
+        timer_del( timer->timer );
     }
 }
 

@@ -15,6 +15,7 @@
 #define QJSON_H
 
 #include <stdarg.h>
+#include "qemu/compiler.h"
 #include "qapi/qmp/qobject.h"
 #include "qapi/qmp/qstring.h"
 

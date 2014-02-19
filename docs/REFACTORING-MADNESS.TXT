@@ -1,0 +1,123 @@
+Android emulator upstream integration madness
+=============================================
+
+After more than 2 years of inactivity, the Android emulator sources are
+being refactored to match the level of a much more recent upstream QEMU.
+
+The main goal for this work is to get to reuse Intel, ARM and MIPS 64-bit
+emulation support, as well as to clean up some of the cruft accumulated over
+the years.
+
+A secondary goal is to make it drastically easier to send patches to QEMU
+upstream to support Android use cases, when that makes sense, and if they
+are interested.
+
+
+I. Branches:
+------------
+
+All work happens in the open on the public AOSP source/gerrit servers, but
+two branches are being used:
+
+  idea133
+        This branch is currently used by the Android SDK tools team to
+        develop the next release of all SDK tools, emulator included.
+
+        If you have a general fix that is not related to the refactoring
+        work, this is where to send your contributions if you want them
+        to appear as soon as possible in the next public SDK tools release.
+
+  master
+        This branch is used to host a series of several hundred small patches
+        needed by the refactoring work. Each patch should try to do one simple
+        thing at a time. However, due to the extremely high coupling present in
+        the QEMU code base, even changing a couple header lines might impact
+        several dozen sources.
+
+        Each patch *must* result in a perfectly buildable emulator for all
+        supported host systems, and ideally not break anything when running it.
+
+        Because these patches are so numerous, they are typically uploaded to
+        the AOSP server as a batch of 20 or 50, through an explicit merge
+        commit. I.e. the batch will appear on Gerrit as a simple change, instead
+        of 20-50 individual ones.
+
+        We currently discourage you to submit to this branch on your own, unless
+        you've contacted tools@android.com first (we can help rebasing your
+        patches on top of the next batch before they happen).
+
+See section III. to see how to checkout and submit to the idea133 branch.
+
+Explicit (manual) merges will happen too:
+
+  - Merging aosp/idea133 into aosp/master will happen frequently, to ensure that
+    general fixes go into the refactored codebase.
+
+  - Merging aosp/master into aosp/idea133 will happen more rarely, and after
+    significant testing from the team to ensure that doesn't break anything.
+
+For reference, the master branch is currently targetting the upstream QEMU
+commit with the following SHA-1:
+
+        47acdd63a33a5966bf4fc94a6ac835d72a70c555
+
+Which may be updated later to integrate more upstream fixes.
+
+
+II. Scope:
+----------
+
+The priority is to get the following components to the level of upstream
+as soon as possible:
+
+  - tcg
+  - cpu emulation
+  - softmmu
+  - kvm / haxm
+  - virtual devices (goldfish and others).
+
+Other components like block/, net/, ui/, audio/ have lower priority.
+Some upstream components like qmp, tracing or migration will not be used.
+In case of doubt, contact tools@android.com.
+
+The content of android/ will also be refactored to make it more testable and
+less dependant on the QEMU parts of the code, whenever possible. It is expected
+that some of this code will be rewritten in C++ too. This is lower priority and
+will probably happen in the idea133 branch, instead of the master one.
+
+
+III. Checking it out and sending patches to idea133:
+----------------------------------------------------
+
+If you plan to work on general emulator fixes, without other parts of the
+platform, it is highly recommended to checkout the full branch with repo:
+
+  cd android-idea133
+  repo init -u https://android.googlesource.com/a/platform/manifest -b idea133
+  repo sync
+
+In that case, "repo upload" will send your patches directly from the right
+branch when you upload them to gerrit.
+
+
+If you already have a 'master' checkout of AOSP, you can still work on individual
+changes for the branch, but do _not_ use repo to upload them, instead do
+something like:
+
+  cd external/qemu
+  git checkout -t -b my-fix aosp/idea133
+
+  ... edit files ...
+  mm                     # Verify that everything builds.
+  emulator_unittests     # Run the unit tests.
+  emulator @my-test-avd  # Verify manually that everything runs.
+
+  git add .
+  git commit
+  git push aosp +HEAD:refs/for/idea133
+
+This will upload the patch to gerrit to the right branch.
+
+Be careful that a "repo sync" will erase all custom branches that are not
+tracking master. If this happens use "git reflog" to get your past state
+(but not your branches).

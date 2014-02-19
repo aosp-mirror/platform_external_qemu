@@ -71,7 +71,7 @@ static CPUReadMemoryFunc * const mips_qemu_read[] = {
 static int mips_qemu_iomemtype = 0;
 
 typedef struct ResetData {
-    CPUState *env;
+    CPUOldState *env;
     uint64_t vector;
 } ResetData;
 
@@ -148,7 +148,7 @@ static int64_t load_kernel(void)
 static void main_cpu_reset(void *opaque)
 {
     ResetData *s = (ResetData *)opaque;
-    CPUState *env = s->env;
+    CPUOldState *env = s->env;
 
     cpu_reset(env);
     env->active_tc.PC = s->vector;
@@ -165,7 +165,7 @@ void mips_r4k_init (ram_addr_t ram_size,
     ram_addr_t ram_offset;
     ram_addr_t bios_offset;
     int bios_size;
-    CPUState *env;
+    CPUOldState *env;
     ResetData *reset_info;
     RTCState *rtc_state;
     int i;

@@ -16,7 +16,7 @@ void irq_info(void)
 
 static void mips_cpu_irq_handler(void *opaque, int irq, int level)
 {
-    CPUState *env = (CPUState *)opaque;
+    CPUOldState *env = (CPUOldState *)opaque;
     int causebit;
 
     if (irq < 0 || 7 < irq)
@@ -33,7 +33,7 @@ static void mips_cpu_irq_handler(void *opaque, int irq, int level)
     }
 }
 
-qemu_irq *mips_cpu_irq_init(CPUState *env)
+qemu_irq *mips_cpu_irq_init(CPUOldState *env)
 {
     return qemu_allocate_irqs(mips_cpu_irq_handler, env, 8);
 }

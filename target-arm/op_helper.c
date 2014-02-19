@@ -25,7 +25,7 @@
 void raise_exception(int tt)
 {
     env->exception_index = tt;
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 
 uint32_t HELPER(neon_tbl)(uint32_t ireg, uint32_t def,
@@ -73,7 +73,7 @@ uint32_t HELPER(neon_tbl)(uint32_t ireg, uint32_t def,
 void tlb_fill (target_ulong addr, int is_write, int mmu_idx, void *retaddr)
 {
     TranslationBlock *tb;
-    CPUState *saved_env;
+    CPUARMState *saved_env;
     unsigned long pc;
     int ret;
 
@@ -98,7 +98,7 @@ void tlb_fill (target_ulong addr, int is_write, int mmu_idx, void *retaddr)
     env = saved_env;
 }
 
-void HELPER(set_cp)(CPUState *env, uint32_t insn, uint32_t val)
+void HELPER(set_cp)(CPUARMState *env, uint32_t insn, uint32_t val)
 {
     int cp_num = (insn >> 8) & 0xf;
     int cp_info = (insn >> 5) & 7;
@@ -110,7 +110,7 @@ void HELPER(set_cp)(CPUState *env, uint32_t insn, uint32_t val)
                                  cp_info, src, operand, val, GETPC());
         }
 
-uint32_t HELPER(get_cp)(CPUState *env, uint32_t insn)
+uint32_t HELPER(get_cp)(CPUARMState *env, uint32_t insn)
 {
     int cp_num = (insn >> 8) & 0xf;
     int cp_info = (insn >> 5) & 7;
@@ -125,14 +125,14 @@ uint32_t HELPER(get_cp)(CPUState *env, uint32_t insn)
 
 #else
 
-void HELPER(set_cp)(CPUState *env, uint32_t insn, uint32_t val)
+void HELPER(set_cp)(CPUARMState *env, uint32_t insn, uint32_t val)
 {
     int op1 = (insn >> 8) & 0xf;
     cpu_abort(env, "cp%i insn %08x\n", op1, insn);
     return;
 }
 
-uint32_t HELPER(get_cp)(CPUState *env, uint32_t insn)
+uint32_t HELPER(get_cp)(CPUARMState *env, uint32_t insn)
 {
     int op1 = (insn >> 8) & 0xf;
     cpu_abort(env, "cp%i insn %08x\n", op1, insn);
@@ -141,7 +141,7 @@ uint32_t HELPER(get_cp)(CPUState *env, uint32_t insn)
 
 #endif
 
-/* FIXME: Pass an axplicit pointer to QF to CPUState, and move saturating
+/* FIXME: Pass an axplicit pointer to QF to CPUARMState, and move saturating
    instructions into helper.c  */
 uint32_t HELPER(add_setq)(uint32_t a, uint32_t b)
 {
@@ -276,13 +276,13 @@ void HELPER(wfi)(void)
 {
     env->exception_index = EXCP_HLT;
     env->halted = 1;
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 
 void HELPER(exception)(uint32_t excp)
 {
     env->exception_index = excp;
-    cpu_loop_exit();
+    cpu_loop_exit(env);
 }
 
 uint32_t HELPER(cpsr_read)(void)

@@ -300,7 +300,7 @@ static int mux_chr_write(CharDriverState *chr, const uint8_t *buf, int len)
                 int64_t ti;
                 int secs;
 
-                ti = qemu_get_clock_ms(rt_clock);
+                ti = qemu_clock_get_ms(QEMU_CLOCK_REALTIME);
                 if (d->timestamps_start == -1)
                     d->timestamps_start = ti;
                 ti -= d->timestamps_start;
@@ -985,7 +985,7 @@ static void pty_chr_update_read_handler(CharDriverState *chr)
      * timeout to the normal (much longer) poll interval before the
      * timer triggers.
      */
-    qemu_mod_timer(s->timer, qemu_get_clock_ms(rt_clock) + 10);
+    timer_mod(s->timer, qemu_clock_get_ms(QEMU_CLOCK_REALTIME) + 10);
 }
 
 static void pty_chr_state(CharDriverState *chr, int connected)
@@ -999,7 +999,7 @@ static void pty_chr_state(CharDriverState *chr, int connected)
         /* (re-)connect poll interval for idle guests: once per second.
          * We check more frequently in case the guests sends data to
          * the virtual device linked to our pty. */
-        qemu_mod_timer(s->timer, qemu_get_clock_ms(rt_clock) + 1000);
+        timer_mod(s->timer, qemu_clock_get_ms(QEMU_CLOCK_REALTIME) + 1000);
     } else {
         if (!s->connected)
             qemu_chr_generic_open(chr);
@@ -1031,8 +1031,8 @@ static void pty_chr_close(struct CharDriverState *chr)
 
     qemu_set_fd_handler2(s->fd, NULL, NULL, NULL, NULL);
     close(s->fd);
-    qemu_del_timer(s->timer);
-    qemu_free_timer(s->timer);
+    timer_del(s->timer);
+    timer_free(s->timer);
     g_free(s);
     qemu_chr_event(chr, CHR_EVENT_CLOSED);
 }
@@ -1076,7 +1076,7 @@ static CharDriverState *qemu_chr_open_pty(QemuOpts *opts)
     chr->chr_update_read_handler = pty_chr_update_read_handler;
     chr->chr_close = pty_chr_close;
 
-    s->timer = qemu_new_timer_ms(rt_clock, pty_chr_timer, chr);
+    s->timer = timer_new(QEMU_CLOCK_REALTIME, SCALE_MS, pty_chr_timer, chr);
 
     return chr;
 }

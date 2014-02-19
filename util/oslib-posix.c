@@ -26,10 +26,55 @@
  * THE SOFTWARE.
  */
 
+/* The following block of code temporarily renames the daemon() function so the
+   compiler does not see the warning associated with it in stdlib.h on OSX */
+#ifdef __APPLE__
+#define daemon qemu_fake_daemon_function
+#include <stdlib.h>
+#undef daemon
+extern int daemon(int, int);
+#endif
+
+#if defined(__linux__) && (defined(__x86_64__) || defined(__arm__))
+   /* Use 2 MiB alignment so transparent hugepages can be used by KVM.
+      Valgrind does not support alignments larger than 1 MiB,
+      therefore we need special code which handles running on Valgrind. */
+#  define QEMU_VMALLOC_ALIGN (512 * 4096)
+#elif defined(__linux__) && defined(__s390x__)
+   /* Use 1 MiB (segment size) alignment so gmap can be used by KVM. */
+#  define QEMU_VMALLOC_ALIGN (256 * 4096)
+#else
+#  define QEMU_VMALLOC_ALIGN getpagesize()
+#endif
+
+#include "config-host.h"
+#ifndef CONFIG_ANDROID
+#include <glib/gprintf.h>
+#endif
+
 #include "config-host.h"
 #include "sysemu/sysemu.h"
 #include "trace.h"
 #include "qemu/sockets.h"
+#include <sys/mman.h>
+
+#ifdef CONFIG_LINUX
+#include <sys/syscall.h>
+#endif
+
+int qemu_get_thread_id(void)
+{
+#if defined(__linux__)
+    return syscall(SYS_gettid);
+#else
+    return getpid();
+#endif
+}
+
+int qemu_daemon(int nochdir, int noclose)
+{
+    return daemon(nochdir, noclose);
+}
 
 void *qemu_oom_check(void *ptr)
 {
@@ -66,20 +111,76 @@ void *qemu_vmalloc(size_t size)
     return qemu_memalign(getpagesize(), size);
 }
 
+/* alloc shared memory pages */
+void *qemu_anon_ram_alloc(size_t size)
+{
+    size_t align = QEMU_VMALLOC_ALIGN;
+    size_t total = size + align - getpagesize();
+    void *ptr = mmap(0, total, PROT_READ | PROT_WRITE,
+                     MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    size_t offset = QEMU_ALIGN_UP((uintptr_t)ptr, align) - (uintptr_t)ptr;
+
+    if (ptr == MAP_FAILED) {
+        return NULL;
+    }
+
+    ptr += offset;
+    total -= offset;
+
+    if (offset > 0) {
+        munmap(ptr - offset, offset);
+    }
+    if (total > size) {
+        munmap(ptr + size, total - size);
+    }
+
+    //trace_qemu_anon_ram_alloc(size, ptr);
+    return ptr;
+}
+
 void qemu_vfree(void *ptr)
 {
     //trace_qemu_vfree(ptr);
     free(ptr);
 }
 
-#if 0 /* in sockets.c */
-void socket_set_nonblock(int fd)
+void qemu_anon_ram_free(void *ptr, size_t size)
+{
+    //trace_qemu_anon_ram_free(ptr, size);
+    if (ptr) {
+        munmap(ptr, size);
+    }
+}
+
+void qemu_set_block(int fd)
+{
+    int f;
+    f = fcntl(fd, F_GETFL);
+    fcntl(fd, F_SETFL, f & ~O_NONBLOCK);
+}
+
+void qemu_set_nonblock(int fd)
 {
     int f;
     f = fcntl(fd, F_GETFL);
     fcntl(fd, F_SETFL, f | O_NONBLOCK);
 }
+
+int socket_set_fast_reuse(int fd)
+{
+#ifdef CONFIG_ANDROID
+    return socket_set_xreuseaddr(fd);
+#else
+    int val = 1, ret;
+
+    ret = qemu_setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
+                     (const char *)&val, sizeof(val));
+
+    assert(ret == 0);
+
+    return ret;
 #endif
+}
 
 void qemu_set_cloexec(int fd)
 {
@@ -110,8 +211,7 @@ int qemu_pipe(int pipefd[2])
     return ret;
 }
 
-int qemu_utimensat(int dirfd, const char *path, const struct timespec *times,
-                   int flags)
+int qemu_utimens(const char *path, const struct timespec *times)
 {
     struct timeval tv[2], tv_now;
     struct stat st;
@@ -119,7 +219,7 @@ int qemu_utimensat(int dirfd, const char *path, const struct timespec *times,
 #ifdef CONFIG_UTIMENSAT
     int ret;
 
-    ret = utimensat(dirfd, path, times, flags);
+    ret = utimensat(AT_FDCWD, path, times, AT_SYMLINK_NOFOLLOW);
     if (ret != -1 || errno != ENOSYS) {
         return ret;
     }
@@ -156,4 +256,15 @@ int qemu_utimensat(int dirfd, const char *path, const struct timespec *times,
     }
 
     return utimes(path, &tv[0]);
+}
+
+char *
+qemu_get_local_state_pathname(const char *relative_pathname)
+{
+#ifdef CONFIG_ANDROID
+    return NULL;
+#else
+    return g_strdup_printf("%s/%s", CONFIG_QEMU_LOCALSTATEDIR,
+                           relative_pathname);
+#endif
 }

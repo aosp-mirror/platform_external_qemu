@@ -23,35 +23,6 @@ void vstrcpy(target_ulong ptr, char *buf, int max)
     }
 }
 
-#ifdef CONFIG_TRACE
-#include "android/trace.h"
-
-void  HELPER(traceTicks)(uint32_t  ticks)
-{
-    sim_time += ticks;
-}
-
-void  HELPER(traceInsn)(void)
-{
-    trace_insn_helper();
-}
-
-#if HOST_LONG_BITS == 32
-void HELPER(traceBB32)(uint64_t  bb_num, uint32_t  tb)
-{
-    trace_bb_helper(bb_num, (void*)tb);
-}
-#endif
-
-#if HOST_LONG_BITS == 64
-void HELPER(traceBB64)(uint64_t  bb_num, uint64_t  tb)
-{
-    trace_bb_helper(bb_num, (void*)tb);
-}
-#endif
-
-#endif /* CONFIG_TRACE */
-
 #ifdef CONFIG_MEMCHECK
 #include "memcheck/memcheck_api.h"
 
