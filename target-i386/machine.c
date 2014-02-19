@@ -24,7 +24,7 @@ static void cpu_get_seg(QEMUFile *f, SegmentCache *dt)
 
 void cpu_save(QEMUFile *f, void *opaque)
 {
-    CPUState *env = opaque;
+    CPUX86State *env = opaque;
     uint16_t fptag, fpus, fpuc, fpregs_format;
     uint32_t hflags;
     int32_t a20_mask;
@@ -187,7 +187,7 @@ static void fp64_to_fp80(union x86_longdouble *p, uint64_t temp)
 
 int cpu_load(QEMUFile *f, void *opaque, int version_id)
 {
-    CPUState *env = opaque;
+    CPUX86State *env = opaque;
     int i, guess_mmx;
     uint32_t hflags;
     uint16_t fpus, fpuc, fptag, fpregs_format;

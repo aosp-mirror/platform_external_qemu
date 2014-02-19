@@ -27,6 +27,11 @@ for OPT; do
     esac
 done
 
+panic () {
+    echo "ERROR: $@"
+    exit 1
+}
+
 run () {
   if [ "$VERBOSE" -ge 1 ]; then
     "$@"
@@ -54,26 +59,32 @@ esac
 cd `dirname $0`
 rm -rf objs
 echo "Configuring build."
-run ./android-configure.sh "$@"
+run ./android-configure.sh "$@" ||
+    panic "Configuration error, please run ./android-configure.sh to see why."
 
 echo "Building sources."
-run make -j$HOST_NUM_CPUS
+run make -j$HOST_NUM_CPUS ||
+    panic "Could not build sources, please run 'make' to see why."
 
 RUN_64BIT_TESTS=true
 
 TEST_SHELL=
 EXE_SUFFIX=
 if [ "$MINGW" ]; then
-  RUN_64BIT_TESTS=false
+  RUN_64BIT_TESTS=
   TEST_SHELL=wine
   EXE_SUFFIX=.exe
 fi
 
 echo "Running 32-bit unit test suite."
-run $TEST_SHELL objs/emulator_unittests$EXE_SUFFIX
+UNIT_TEST=objs/emulator_unittests$EXE_SUFFIX
+run $TEST_SHELL $UNIT_TEST ||
+panic "For details, run: $UNIT_TEST"
+
 if [ "$RUN_64BIT_TESTS" ]; then
     echo "Running 64-bit unit test suite."
-    run $TEST_SHELL objs/emulator64_unittests$EXE_SUFFIX
+    UNIT_TEST=objs/emulator64_unittests$EXE_SUFFIX
+    run $TEST_SHELL $UNIT_TEST || panic "For details, run: $UNIT_TEST"
 fi
 
 echo "Done. !!"

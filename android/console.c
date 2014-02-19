@@ -214,18 +214,6 @@ control_client_detach( ControlClient  client )
 
 static void  control_client_read( void*  _client );  /* forward */
 
-/* Reattach a control client to a given socket.
- * Return the old socket descriptor for the client.
- */
-static int
-control_client_reattach( ControlClient client, int fd )
-{
-    int result = control_client_detach(client);
-    client->sock = fd;
-    qemu_set_fd_handler( fd, control_client_read, NULL, client );
-    return result;
-}
-
 static void
 control_client_destroy( ControlClient  client )
 {
@@ -2654,26 +2642,8 @@ static const CommandDefRec  window_commands[] =
 static int
 do_qemu_monitor( ControlClient client, char* args )
 {
-    char             socketname[32];
-    int              fd;
-    CharDriverState* cs;
-
-    if (args != NULL) {
-        control_write( client, "KO: no argument for 'qemu monitor'\r\n" );
-        return -1;
-    }
-    /* Detach the client socket, and re-attach it to a monitor */
-    fd = control_client_detach(client);
-    snprintf(socketname, sizeof socketname, "tcp:socket=%d", fd);
-    cs = qemu_chr_open("monitor", socketname, NULL);
-    if (cs == NULL) {
-        control_client_reattach(client, fd);
-        control_write( client, "KO: internal error: could not detach from console !\r\n" );
-        return -1;
-    }
-    monitor_init(cs, MONITOR_USE_READLINE|MONITOR_QUIT_DOESNT_EXIT);
-    control_client_destroy(client);
-    return 0;
+    control_write(client, "KO: QEMU support no longer available\r\n");
+    return -1;
 }
 
 #ifdef CONFIG_STANDALONE_CORE

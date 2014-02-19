@@ -4,7 +4,7 @@
 
 /* Raise IRQ to CPU if necessary. It must be called every time the active
    IRQ may change */
-void cpu_mips_update_irq(CPUState *env)
+void cpu_mips_update_irq(CPUOldState *env)
 {
     if ((env->CP0_Status & (1 << CP0St_IE)) &&
         !(env->CP0_Status & (1 << CP0St_EXL)) &&
@@ -20,7 +20,7 @@ void cpu_mips_update_irq(CPUState *env)
 
 static void cpu_mips_irq_request(void *opaque, int irq, int level)
 {
-    CPUState *env = (CPUState *)opaque;
+    CPUOldState *env = (CPUOldState *)opaque;
 
     if (irq < 0 || irq > 7)
         return;
@@ -33,7 +33,7 @@ static void cpu_mips_irq_request(void *opaque, int irq, int level)
     cpu_mips_update_irq(env);
 }
 
-void cpu_mips_irq_init_cpu(CPUState *env)
+void cpu_mips_irq_init_cpu(CPUOldState *env)
 {
     qemu_irq *qi;
     int i;

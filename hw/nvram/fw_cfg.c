@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include "cpu.h"
 #include "hw/hw.h"
 #include "sysemu/sysemu.h"
 #include "hw/isa/isa.h"
@@ -45,11 +46,11 @@ typedef struct _FWCfgEntry {
     FWCfgCallback callback;
 } FWCfgEntry;
 
-typedef struct _FWCfgState {
+struct FWCfgState {
     FWCfgEntry entries[2][FW_CFG_MAX_ENTRY];
     uint16_t cur_entry;
     uint16_t cur_offset;
-} FWCfgState;
+};
 
 static void fw_cfg_write(FWCfgState *s, uint8_t value)
 {

@@ -13,6 +13,8 @@
 #ifndef _ANDROID_SNAPHOST_ANDROID_H_
 #define _ANDROID_SNAPHOST_ANDROID_H_
 
+#include "android/utils/ini.h"
+
 /* Matches HW config saved for a VM snapshot against the current HW config.
  * Param:
  *  hw_ini - IniFile instance containing the current HW config settings.

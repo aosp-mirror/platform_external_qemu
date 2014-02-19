@@ -12,6 +12,7 @@
 #include "migration/qemu-file.h"
 #include "hw/android/goldfish/device.h"
 #include "hw/android/goldfish/vmem.h"
+#include "hw/hw.h"
 
 enum {
     SW_NAME_LEN     = 0x00,
