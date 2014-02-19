@@ -129,7 +129,7 @@ is_thumb_bl_or_blx(uint16_t insn, target_ulong pc, target_ulong* ret_off)
  *  0  - Insufficient memory.
  */
 static int
-register_ret_address(CPUState* env, target_ulong addr)
+register_ret_address(CPUARMState* env, target_ulong addr)
 {
     int ret;
     if ((0x90000000 <= addr && addr <= 0xBFFFFFFF)) {
@@ -172,7 +172,7 @@ register_ret_address(CPUState* env, target_ulong addr)
  *  or 0 if it's not.
  */
 static inline int
-is_ret_address(CPUState* env, target_ulong addr)
+is_ret_address(CPUARMState* env, target_ulong addr)
 {
     if ((0x90000000 <= addr && addr <= 0xBFFFFFFF)) {
         return addrarray_check(&ret_addresses, get_phys_addr_code(env, addr));
@@ -265,123 +265,3 @@ set_on_ret(target_ulong ret)
 #  define ANDROID_END_CODEGEN()            ((void)0)
 
 #endif  /* !CONFIG_MEMCHECK */
-
-
-/*****
- *****
- *****
- *****  C O N F I G _ T R A C E
- *****
- *****
- *****/
-
-#ifdef CONFIG_TRACE
-
-#include "android/trace.h"
-#define  gen_traceInsn()   gen_helper_traceInsn()
-
-static void
-gen_traceTicks( int  count )
-{
-    TCGv  tmp = tcg_temp_new_i32();
-    tcg_gen_movi_i32(tmp, count);
-    gen_helper_traceTicks(tmp);
-    tcg_temp_free_i32(tmp);
-}
-
-static void
-gen_traceBB( uint64_t  bbNum, void* tb )
-{
-#if HOST_LONG_BITS == 32
-    TCGv_i64  tmpNum = tcg_temp_new_i64();
-    TCGv_i32  tmpTb  = tcg_temp_new_i32();
-
-    tcg_gen_movi_i64(tmpNum, (int64_t)bbNum);
-    tcg_gen_movi_i32(tmpTb,  (int32_t)tb);
-    gen_helper_traceBB32(tmpNum, tmpTb);
-    tcg_temp_free_i32(tmpTb);
-    tcg_temp_free_i64(tmpNum);
-#elif HOST_LONG_BITS == 64
-    TCGv_i64  tmpNum = tcg_temp_new_i64();
-    TCGv_i64  tmpTb  = tcg_temp_new_i64();
-
-    tcg_gen_movi_i64(tmpNum, (int64_t)bbNum);
-    tcg_gen_movi_i64(tmpTb,  (int64_t)tb);
-    gen_helper_traceBB64(tmpNum, tmpTb);
-    tcg_temp_free_i64(tmpTb);
-    tcg_temp_free_i64(tmpNum);
-#endif
-}
-
-#  define ANDROID_TRACE_DECLS   int ticks = 0;
-
-#  define ANDROID_TRACE_START_ARM() \
-    do { \
-        if (tracing) { \
-            trace_add_insn(insn, 0); \
-            ticks = get_insn_ticks_arm(insn); \
-            gen_traceInsn(); \
-        } \
-    } while (0)
-
-#  define ANDROID_TRACE_START_THUMB() \
-    do { \
-        if (tracing) { \
-            int  ticks = get_insn_ticks_thumb(insn); \
-            trace_add_insn( insn_wrap_thumb(insn), 1 ); \
-            gen_traceInsn(); \
-            gen_traceTicks(ticks); \
-        } \
-    } while (0)
-
-#  define ANDROID_TRACE_GEN_TICKS() \
-    do { \
-        if (tracing) { \
-        } \
-    } while (0)
-
-#  define ANDROID_TRACE_GEN_SINGLE_TICK() \
-    do { \
-        if (tracing) { \
-            gen_traceTicks(1); \
-            ticks -= 1; \
-        } \
-    } while (0)
-
-# define ANDROID_TRACE_GEN_OTHER_TICKS() \
-    do { \
-        if (tracing && ticks > 0) { \
-            gen_traceTicks(ticks); \
-        } \
-    } while (0)
-
-#  define ANDROID_TRACE_START_BB() \
-    do { \
-        if (tracing) { \
-            gen_traceBB(trace_static_bb_num(), tb); \
-            trace_bb_start(dc->pc); \
-        } \
-    } while (0)
-
-#  define ANDROID_TRACE_END_BB() \
-    do { \
-        if (tracing) { \
-            trace_bb_end(); \
-        } \
-    } while (0)
-
-#else /* !CONFIG_TRACE */
-
-#  define ANDROID_TRACE_DECLS         /* nothing */
-#  define ANDROID_TRACE_START_ARM()   ((void)0)
-#  define ANDROID_TRACE_START_THUMB() ((void)0)
-
-#  define ANDROID_TRACE_GEN_TICKS()        ((void)0)
-#  define ANDROID_TRACE_GEN_SINGLE_TICK()  ((void)0)
-#  define ANDROID_TRACE_GEN_OTHER_TICKS()  ((void)0)
-
-#  define ANDROID_TRACE_START_BB()         ((void)0)
-#  define ANDROID_TRACE_END_BB()           ((void)0)
-
-#endif /* !CONFIG_TRACE */
-

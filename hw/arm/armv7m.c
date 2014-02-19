@@ -156,7 +156,7 @@ static void armv7m_bitband_init(void)
 qemu_irq *armv7m_init(int flash_size, int sram_size,
                       const char *kernel_filename, const char *cpu_model)
 {
-    CPUState *env;
+    CPUOldState *env;
     DeviceState *nvic;
     /* FIXME: make this local state.  */
     static qemu_irq pic[64];

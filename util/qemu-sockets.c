@@ -180,11 +180,11 @@ int inet_listen_opts(QemuOpts *opts, int port_offset)
             continue;
         }
 
-        setsockopt(slisten,SOL_SOCKET,SO_REUSEADDR,(void*)&on,sizeof(on));
+        qemu_setsockopt(slisten,SOL_SOCKET,SO_REUSEADDR,(void*)&on,sizeof(on));
 #ifdef IPV6_V6ONLY
         if (e->ai_family == PF_INET6) {
             /* listen on both ipv4 and ipv6 */
-            setsockopt(slisten,IPPROTO_IPV6,IPV6_V6ONLY,(void*)&off,
+            qemu_setsockopt(slisten,IPPROTO_IPV6,IPV6_V6ONLY,(void*)&off,
                 sizeof(off));
         }
 #endif
@@ -284,7 +284,7 @@ int inet_connect_opts(QemuOpts *opts)
             inet_strfamily(e->ai_family), strerror(errno));
             continue;
         }
-        setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(void*)&on,sizeof(on));
+        qemu_setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(void*)&on,sizeof(on));
 
         /* connect to peer */
         if (connect(sock,e->ai_addr,e->ai_addrlen) < 0) {
@@ -377,7 +377,7 @@ int inet_dgram_opts(QemuOpts *opts)
                 inet_strfamily(peer->ai_family), strerror(errno));
         goto err;
     }
-    setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(void*)&on,sizeof(on));
+    qemu_setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(void*)&on,sizeof(on));
 
     /* bind socket */
     if (getnameinfo((struct sockaddr*)local->ai_addr,local->ai_addrlen,

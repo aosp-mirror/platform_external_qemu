@@ -13,7 +13,7 @@
 #define _ANDROID_SKIN_KEYBOARD_H
 
 #include "android/charmap.h"
-#include "android/config.h"
+#include "android/config-file.h"
 #include "android/skin/image.h"  /* for SkinRotation */
 #include "android/skin/keyset.h"
 #include <SDL.h>

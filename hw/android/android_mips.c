@@ -12,6 +12,7 @@
 #include "hw/hw.h"
 #include "hw/boards.h"
 #include "hw/devices.h"
+#include "hw/loader.h"
 #include "net/net.h"
 #include "sysemu/sysemu.h"
 #include "hw/mips/mips.h"
@@ -71,7 +72,7 @@ uint32_t switch_test_write(void *opaque, uint32_t state)
 
 #define PHYS_TO_VIRT(x) ((x) | ~(target_ulong)0x7fffffff)
 
-static void android_load_kernel(CPUState *env, int ram_size, const char *kernel_filename,
+static void android_load_kernel(CPUOldState *env, int ram_size, const char *kernel_filename,
               const char *kernel_cmdline, const char *initrd_filename)
 {
     int initrd_size;
@@ -156,7 +157,7 @@ static void android_mips_init_(ram_addr_t ram_size,
     const char *initrd_filename,
     const char *cpu_model)
 {
-    CPUState *env;
+    CPUOldState *env;
     qemu_irq *goldfish_pic;
     int i;
     ram_addr_t ram_offset;
@@ -232,23 +233,12 @@ static void android_mips_init_(ram_addr_t ram_size,
     goldfish_add_device_no_io(&nand_device);
     nand_dev_init(nand_device.base);
 #endif
-#ifdef CONFIG_TRACE
-    extern const char *trace_filename;
-    /* Init trace device if either tracing, or memory checking is enabled. */
-    if (trace_filename != NULL
+
 #ifdef CONFIG_MEMCHECK
-        || memcheck_enabled
-#endif  // CONFIG_MEMCHECK
-       ) {
+    if (memcheck_enabled) {
         trace_dev_init();
     }
-    if (trace_filename != NULL) {
-        D( "Trace file name is set to %s\n", trace_filename );
-    } else  {
-        D("Trace file name is not set\n");
-    }
-#endif
-
+#endif  // CONFIG_MEMCHECK
     pipe_dev_init();
 
 #if TEST_SWITCH

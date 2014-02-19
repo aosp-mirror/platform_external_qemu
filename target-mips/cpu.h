@@ -1,13 +1,19 @@
 #if !defined (__MIPS_CPU_H__)
 #define __MIPS_CPU_H__
 
+//#define DEBUG_OP
+
 #define TARGET_HAS_ICE 1
 
 #define ELF_MACHINE	EM_MIPS
 
-#define CPUState struct CPUMIPSState
+// TODO(digit): Remove this define.
+#define CPUOldState struct CPUMIPSState
+
+#define CPUArchState struct CPUMIPSState
 
 #include "config.h"
+#include "qemu-common.h"
 #include "mips-defs.h"
 #include "exec/cpu-defs.h"
 #include "fpu/softfloat.h"
@@ -36,6 +42,7 @@ struct r4k_tlb_t {
     target_ulong PFN[2];
 };
 
+#if !defined(CONFIG_USER_ONLY)
 typedef struct CPUMIPSTLBContext CPUMIPSTLBContext;
 struct CPUMIPSTLBContext {
     uint32_t nb_tlb;
@@ -50,6 +57,7 @@ struct CPUMIPSTLBContext {
         } r4k;
     } mmu;
 };
+#endif
 
 typedef union fpr_t fpr_t;
 union fpr_t {
@@ -59,7 +67,7 @@ union fpr_t {
     uint32_t w[2]; /* binary single fixed-point */
 };
 /* define FP_ENDIAN_IDX to access the same location
- * in the fpr_t union regardless of the host endianess
+ * in the fpr_t union regardless of the host endianness
  */
 #if defined(HOST_WORDS_BIGENDIAN)
 #  define FP_ENDIAN_IDX 1
@@ -360,6 +368,7 @@ struct CPUMIPSState {
 #define CP0C2_SA   0
     int32_t CP0_Config3;
 #define CP0C3_M    31
+#define CP0C3_ISA_ON_EXC 16
 #define CP0C3_DSPP 10
 #define CP0C3_LPA  7
 #define CP0C3_VEIC 6
@@ -411,7 +420,7 @@ struct CPUMIPSState {
     /* We waste some space so we can handle shadow registers like TCs. */
     TCState tcs[MIPS_SHADOW_SET_MAX];
     CPUMIPSFPUContext fpus[MIPS_FPU_MAX];
-    /* Qemu */
+    /* QEMU */
     int error_code;
     uint32_t hflags;    /* CPU State */
     /* TMASK defines different execution modes */
@@ -458,7 +467,9 @@ struct CPUMIPSState {
     CPU_COMMON
 
     CPUMIPSMVPContext *mvp;
+#if !defined(CONFIG_USER_ONLY)
     CPUMIPSTLBContext *tlb;
+#endif
 
     const mips_def_t *cpu_model;
     void *irq[8];
@@ -488,18 +499,21 @@ void do_unassigned_access(hwaddr addr, int is_write, int is_exec,
 
 #define CPU_SAVE_VERSION 3
 
+// NOTE(digit): Came from cpu-all.h, to be removed later.
+#define CPU_INTERRUPT_TIMER  0x08 /* internal timer exception pending */
+
 /* MMU modes definitions. We carefully match the indices with our
    hflags layout. */
 #define MMU_MODE0_SUFFIX _kernel
 #define MMU_MODE1_SUFFIX _super
 #define MMU_MODE2_SUFFIX _user
 #define MMU_USER_IDX 2
-static inline int cpu_mmu_index (CPUState *env)
+static inline int cpu_mmu_index (CPUMIPSState *env)
 {
     return env->hflags & MIPS_HFLAG_KSU;
 }
 
-static inline int is_cpu_user (CPUState *env)
+static inline int is_cpu_user (CPUMIPSState *env)
 {
 #ifdef CONFIG_USER_ONLY
     return 1;
@@ -509,7 +523,7 @@ static inline int is_cpu_user (CPUState *env)
 #endif  // CONFIG_USER_ONLY
 }
 
-static inline void cpu_clone_regs(CPUState *env, target_ulong newsp)
+static inline void cpu_clone_regs(CPUMIPSState *env, target_ulong newsp)
 {
     if (newsp)
         env->active_tc.gpr[29] = newsp;
@@ -517,7 +531,7 @@ static inline void cpu_clone_regs(CPUState *env, target_ulong newsp)
     env->active_tc.gpr[2] = 0;
 }
 
-static inline int cpu_mips_hw_interrupts_pending(CPUState *env)
+static inline int cpu_mips_hw_interrupts_pending(CPUMIPSState *env)
 {
     int32_t pending;
     int32_t status;
@@ -608,38 +622,46 @@ enum {
 /* Dummy exception for conditional stores.  */
 #define EXCP_SC 0x100
 
+/*
+ * This is an interrnally generated WAKE request line.
+ * It is driven by the CPU itself. Raised when the MT
+ * block wants to wake a VPE from an inactive state and
+ * cleared when VPE goes from active to inactive.
+ */
+#define CPU_INTERRUPT_WAKE CPU_INTERRUPT_TGT_INT_0
+
 int cpu_mips_exec(CPUMIPSState *s);
 CPUMIPSState *cpu_mips_init(const char *cpu_model);
 //~ uint32_t cpu_mips_get_clock (void);
 int cpu_mips_signal_handler(int host_signum, void *pinfo, void *puc);
 
 /* mips_timer.c */
-uint32_t cpu_mips_get_random (CPUState *env);
-uint32_t cpu_mips_get_count (CPUState *env);
-void cpu_mips_store_count (CPUState *env, uint32_t value);
-void cpu_mips_store_compare (CPUState *env, uint32_t value);
-void cpu_mips_start_count(CPUState *env);
-void cpu_mips_stop_count(CPUState *env);
+uint32_t cpu_mips_get_random (CPUMIPSState *env);
+uint32_t cpu_mips_get_count (CPUMIPSState *env);
+void cpu_mips_store_count (CPUMIPSState *env, uint32_t value);
+void cpu_mips_store_compare (CPUMIPSState *env, uint32_t value);
+void cpu_mips_start_count(CPUMIPSState *env);
+void cpu_mips_stop_count(CPUMIPSState *env);
 
 /* mips_int.c */
-void cpu_mips_update_irq (CPUState *env);
+void cpu_mips_update_irq (CPUMIPSState *env);
 
 /* helper.c */
-int cpu_mips_handle_mmu_fault (CPUState *env, target_ulong address, int rw,
+int cpu_mips_handle_mmu_fault (CPUMIPSState *env, target_ulong address, int rw,
                                int mmu_idx, int is_softmmu);
 #define cpu_handle_mmu_fault cpu_mips_handle_mmu_fault
-void do_interrupt (CPUState *env);
-hwaddr cpu_mips_translate_address (CPUState *env, target_ulong address,
+void do_interrupt (CPUMIPSState *env);
+hwaddr cpu_mips_translate_address (CPUMIPSState *env, target_ulong address,
 		                               int rw);
 
-static inline void cpu_pc_from_tb(CPUState *env, TranslationBlock *tb)
+static inline void cpu_pc_from_tb(CPUMIPSState *env, TranslationBlock *tb)
 {
     env->active_tc.PC = tb->pc;
     env->hflags &= ~MIPS_HFLAG_BMASK;
     env->hflags |= tb->flags & MIPS_HFLAG_BMASK;
 }
 
-static inline void cpu_get_tb_cpu_state(CPUState *env, target_ulong *pc,
+static inline void cpu_get_tb_cpu_state(CPUMIPSState *env, target_ulong *pc,
                                         target_ulong *cs_base, int *flags)
 {
     *pc = env->active_tc.PC;
@@ -647,7 +669,7 @@ static inline void cpu_get_tb_cpu_state(CPUState *env, target_ulong *pc,
     *flags = env->hflags & (MIPS_HFLAG_TMASK | MIPS_HFLAG_BMASK);
 }
 
-static inline void cpu_set_tls(CPUState *env, target_ulong newtls)
+static inline void cpu_set_tls(CPUMIPSState *env, target_ulong newtls)
 {
     env->tls_value = newtls;
 }

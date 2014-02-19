@@ -25,6 +25,7 @@
 #include "qemu-common.h"
 #include "monitor/monitor.h"
 #include "block/block_int.h"
+#include "qemu/iov.h"
 #include "qemu/module.h"
 //#include "qapi/qmp/types.h"
 #include "qapi/qmp/qjson.h"
@@ -2137,7 +2138,7 @@ static int multiwrite_merge(BlockDriverState *bs, BlockRequest *reqs,
             // Add the first request to the merged one. If the requests are
             // overlapping, drop the last sectors of the first request.
             size = (reqs[i].sector - reqs[outidx].sector) << 9;
-            qemu_iovec_concat(qiov, reqs[outidx].qiov, size);
+            qemu_iovec_concat(qiov, reqs[outidx].qiov, 0, size);
 
             // We might need to add some zeros between the two requests
             if (reqs[i].sector > oldreq_last) {
@@ -2149,7 +2150,7 @@ static int multiwrite_merge(BlockDriverState *bs, BlockRequest *reqs,
             }
 
             // Add the second request
-            qemu_iovec_concat(qiov, reqs[i].qiov, reqs[i].qiov->size);
+            qemu_iovec_concat(qiov, reqs[i].qiov, 0, reqs[i].qiov->size);
 
             reqs[outidx].nb_sectors = qiov->size >> 9;
             reqs[outidx].qiov = qiov;
@@ -2307,7 +2308,7 @@ static void bdrv_aio_bh_cb(void *opaque)
     BlockDriverAIOCBSync *acb = opaque;
 
     if (!acb->is_write)
-        qemu_iovec_from_buffer(acb->qiov, acb->bounce, acb->qiov->size);
+        qemu_iovec_from_buf(acb->qiov, 0, acb->bounce, acb->qiov->size);
     qemu_vfree(acb->bounce);
     acb->common.cb(acb->common.opaque, acb->ret);
     qemu_bh_delete(acb->bh);
@@ -2335,7 +2336,7 @@ static BlockDriverAIOCB *bdrv_aio_rw_vector(BlockDriverState *bs,
         acb->bh = qemu_bh_new(bdrv_aio_bh_cb, acb);
 
     if (is_write) {
-        qemu_iovec_to_buffer(acb->qiov, acb->bounce);
+        qemu_iovec_to_buf(acb->qiov, 0, acb->bounce, qiov->size);
         acb->ret = bdrv_write(bs, sector_num, acb->bounce, nb_sectors);
     } else {
         acb->ret = bdrv_read(bs, sector_num, acb->bounce, nb_sectors);

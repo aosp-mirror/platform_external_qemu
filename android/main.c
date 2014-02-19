@@ -18,6 +18,7 @@
 #include <process.h>
 #endif
 
+#include "config.h"
 #include "android/sockets.h"
 
 #include "android/android.h"
@@ -33,7 +34,7 @@
 
 #include "android/charmap.h"
 #include "android/utils/debug.h"
-#include "android/config.h"
+#include "android/config-file.h"
 #include "android/config/config.h"
 
 #include "android/user-config.h"
@@ -78,11 +79,6 @@ extern int qemu_milli_needed;
 /* the default device DPI if none is specified by the skin
  */
 #define  DEFAULT_DEVICE_DPI  165
-
-#ifdef CONFIG_TRACE
-extern void  start_tracing(void);
-extern void  stop_tracing(void);
-#endif
 
 int qemu_main(int argc, char **argv);
 
