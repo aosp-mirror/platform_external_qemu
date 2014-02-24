@@ -1101,13 +1101,6 @@ avdInfo_initHwConfig( AvdInfo*  i, AndroidHwConfig*  hw )
         }
     }
 
-    /* Set hw.useext4=yes, if the Ext4 file system is used. */
-    char* p = avdInfo_getSystemInitImagePath(i);
-    if (path_isExt4Image(p)) {
-        hw->hw_useext4 = 1;
-    }
-    AFREE(p);
-
     return ret;
 }
 
