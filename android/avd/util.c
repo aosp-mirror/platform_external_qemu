@@ -313,36 +313,3 @@ path_getAvdTargetArch( const char* avdName )
 
     return avdArch;
 }
-
-static int
-_isExt4Image( FILE* file )
-{
-    /* Seek to magic offset */
-    if (fseek(file, 0x438, SEEK_SET) != 0) {
-        return 0;
-    }
-    /* Read the magic number */
-    char magic[2];
-    if (fread(magic, sizeof(magic), 1, file) != 1) {
-        return 0;
-    }
-    /* Check the magic number */
-    if (magic[0] == (char)0x53 && magic[1] == (char)0xef) {
-        return 1;
-    }
-    return 0;
-}
-
-int
-path_isExt4Image( const char* path )
-{
-    FILE* file = fopen(path, "rb");
-    if (!file) {
-        D("Could not open file: %s: %s", path, strerror(errno));
-        return 0;
-    }
-
-    int ret = _isExt4Image(file);
-    fclose(file);
-    return ret;
-}

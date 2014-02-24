@@ -40,7 +40,7 @@ _cmp_hw_config(IniFile* current, IniFile* saved)
 
     /* Check 1: must contain same number of entries. */
     if (num_pairs != iniFile_getPairCount(saved)) {
-        D("Different numbers of entries in the HW config files. Current contans %d, while saved contains %d entries.",
+        D("Different numbers of entries in the HW config files. Current contains %d, while saved contains %d entries.",
           num_pairs, iniFile_getPairCount(saved));
         return -1;
     }
