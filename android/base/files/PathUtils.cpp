@@ -16,8 +16,6 @@
 namespace android {
 namespace base {
 
-typedef std::vector<std::string> StringVector;    
-    
 // static
 bool PathUtils::isDirSeparator(int ch, HostType hostType) {
     return (ch == '/') || (hostType == HOST_WIN32 && ch == '\\');
@@ -34,10 +32,10 @@ bool PathUtils::isPathSeparator(int ch, HostType hostType) {
 size_t PathUtils::rootPrefixSize(const char* path, HostType hostType) {
     if (!path || !path[0])
         return 0;
-    
+
     if (hostType != HOST_WIN32)
         return (path[0] == '/') ? 1U : 0U;
-    
+
     size_t result = 0;
     if (path[1] == ':') {
         int ch = path[0];
@@ -57,7 +55,7 @@ size_t PathUtils::rootPrefixSize(const char* path, HostType hostType) {
     }
     if (result && path[result] && isDirSeparator(path[result], HOST_WIN32))
         result++;
-    
+
     return result;
 }
 
@@ -74,15 +72,14 @@ bool PathUtils::isAbsolute(const char* path, HostType hostType) {
 }
 
 // static
-std::vector<std::string> PathUtils::decompose(const char* path,
-                                              HostType hostType) {
-    std::vector<std::string> result;
+StringVector PathUtils::decompose(const char* path, HostType hostType) {
+    StringVector result;
     if (!path || !path[0])
         return result;
 
     size_t prefixLen = rootPrefixSize(path, hostType);
     if (prefixLen) {
-        result.push_back(std::string(path, prefixLen));
+        result.push_back(String(path, prefixLen));
         path += prefixLen;
     }
     for (;;) {
@@ -90,7 +87,7 @@ std::vector<std::string> PathUtils::decompose(const char* path,
         while (*p && !isDirSeparator(*p, hostType))
             p++;
         if (p > path) {
-            result.push_back(std::string(path, p - path));
+            result.push_back(String(path, p - path));
         }
         if (!*p) {
             break;
@@ -101,11 +98,10 @@ std::vector<std::string> PathUtils::decompose(const char* path,
 }
 
 // static
-std::string PathUtils::recompose(
-        const std::vector<std::string>& components,
-        HostType hostType) {
+String PathUtils::recompose(const StringVector& components,
+                            HostType hostType) {
     const char dirSeparator = (hostType == HOST_WIN32) ? '\\' : '/';
-    std::string result;
+    String result;
     size_t capacity = 0;
     // To reduce memory allocations, compute capacity before doing the
     // real append.
@@ -114,12 +110,12 @@ std::string PathUtils::recompose(
             capacity++;
         capacity += components[n].size();
     }
-    
+
     result.reserve(capacity);
 
     bool addSeparator = false;
     for (size_t n = 0; n < components.size(); ++n) {
-        const std::string& component = components[n];
+        const String& component = components[n];
         if (addSeparator)
             result += dirSeparator;
         addSeparator = true;
@@ -135,7 +131,7 @@ std::string PathUtils::recompose(
 }
 
 // static
-void PathUtils::simplifyComponents(std::vector<std::string>* components) {
+void PathUtils::simplifyComponents(StringVector* components) {
     StringVector stack;
     for (StringVector::const_iterator it = components->begin();
             it != components->end(); 
@@ -161,7 +157,7 @@ void PathUtils::simplifyComponents(std::vector<std::string>* components) {
     if (stack.empty())
         stack.push_back(".");
 
-    components->swap(stack);
+    components->swap(&stack);
 }
 
 }  // namespace base

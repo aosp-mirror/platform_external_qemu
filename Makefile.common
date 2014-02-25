@@ -118,8 +118,11 @@ common_LOCAL_SRC_FILES += \
 	android/avd/util.c \
 	android/sockets.c \
 	android/sync-utils.c \
+	android/base/containers/PodVector.cpp \
+	android/base/containers/StringVector.cpp \
 	android/base/files/PathUtils.cpp \
 	android/base/Log.cpp \
+	android/base/String.cpp \
 	android/base/StringView.cpp \
 	android/filesystems/ext4_utils.cpp \
 	android/utils/assert.c \
