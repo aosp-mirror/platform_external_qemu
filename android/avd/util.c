@@ -201,7 +201,7 @@ propertyFile_getApiLevel(const FileData* data) {
         char* end = NULL;
         long levelLong = strtol(sdkVersion, &end, 10);
         int level = (int)levelLong;
-        if (levelLong == LONG_MIN || levelLong == LONG_MAX || 
+        if (levelLong == LONG_MIN || levelLong == LONG_MAX ||
             levelLong < 0 || !end || *end || level != levelLong) {
             level = kMinLevel;
             D("Invalid SDK version build property: '%s'", sdkVersion);
@@ -224,7 +224,7 @@ propertyFile_getAdbdCommunicationMode(const FileData* data) {
         // No ro.adb.qemud means 'legacy' ADBD.
         return 0;
     }
-    
+
     char* end;
     long val = strtol(prop, &end, 10);
     if (end == NULL || *end != '\0' || val != (int)val) {

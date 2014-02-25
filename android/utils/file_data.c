@@ -61,20 +61,20 @@ int fileData_initFromFile(FileData* data, const char* filePath) {
     FILE* f = fopen(filePath, "rb");
     if (!f)
         return -errno;
-    
+
     int ret = 0;
     do {
         if (fseek(f, 0, SEEK_END) < 0) {
             ret = -errno;
             break;
         }
-        
+
         long fileSize = ftell(f);
         if (fileSize < 0) {
             ret = -errno;
             break;
         }
-        
+
         if (fileSize == 0) {
             fileData_initEmpty(data);
             break;
@@ -84,13 +84,13 @@ int fileData_initFromFile(FileData* data, const char* filePath) {
             ret = -errno;
             break;
         }
-        
+
         char* buffer = malloc((size_t)fileSize);
         if (!buffer) {
             ret = -errno;
             break;
         }
-        
+
         size_t readLen = fread(buffer, 1, (size_t)fileSize, f);
         if (readLen != (size_t)fileSize) {
             if (feof(f)) {
@@ -100,11 +100,11 @@ int fileData_initFromFile(FileData* data, const char* filePath) {
             }
             break;
         }
-        
+
         fileData_initWith(data, buffer, readLen);
 
     } while (0);
-    
+
     fclose(f);
     return ret;
 }
@@ -122,12 +122,12 @@ int fileData_initFrom(FileData* data, const FileData* other) {
     if (!copy) {
         return -errno;
     }
-    
+
     memcpy(copy, other->data, other->size);
     fileData_initWith(data, copy, other->size);
     return 0;
 }
-    
+
 
 int fileData_initFromMemory(FileData* data,
                              const void* input,
@@ -146,7 +146,7 @@ void fileData_swap(FileData* data, FileData* other) {
     uint8_t* buffer = data->data;
     data->data = other->data;
     other->data = buffer;
-    
+
     size_t size = data->size;
     data->size = other->size;
     other->size = size;
@@ -157,7 +157,7 @@ void fileData_done(FileData* data) {
     if (!fileData_isValid(data)) {
         APANIC("Trying to finalize an un-initialized FileData instance\n");
     }
-    
+
     free(data->data);
     fileData_initWith(data, NULL, 0);
     fileData_setInvalid(data);

@@ -65,7 +65,7 @@ LogSeverity getMinLogLevel();
 // This means LOG(severity) should expand to something that can take
 // << operators on its right hand side. This is achieved with the
 // ternary '? :', as implemented by this helper macro.
-// 
+//
 // Unfortunately, a simple thing like:
 //
 //   !(condition) ? (void)0 : (expr)
@@ -93,7 +93,7 @@ LogSeverity getMinLogLevel();
 #define LOG(severity)  \
         LOG_LAZY_EVAL(LOG_IS_ON(severity), \
         LOG_MESSAGE_STREAM_COMPACT(severity))
-  
+
 // A variant of LOG() that only performs logging if a specific condition
 // is encountered. Note that |condition| is only evaluated if |severity|
 // is high enough. Usage example:
@@ -124,7 +124,7 @@ LogSeverity getMinLogLevel();
 #define PLOG_IF(severity, condition) \
         LOG_LAZY_EVAL(LOG_IS_ON(severity) && (condition), \
                       PLOG_MESSAGE_STREAM_COMPACT(severity))
-        
+
 // Evaluate |condition|, and if it fails, log a fatal message.
 // This is a better version of assert(), in the future, this will
 // also break directly into the debugger for debug builds.
@@ -166,7 +166,7 @@ LogSeverity getMinLogLevel();
 #    define ENABLE_DCHECK 2
 #  endif
 #endif
-    
+
 // DLOG_IS_ON(severity) is used to indicate whether DLOG() should print
 // something for the current level.
 #if ENABLE_DLOG
@@ -176,7 +176,7 @@ LogSeverity getMinLogLevel();
 //       not compiled in the final binary.
 #  define DLOG_IS_ON(severity) false
 #endif
-    
+
 // DCHECK_IS_ON() is used to indicate whether DCHECK() should do anything.
 #if ENABLE_DCHECK == 0
     // NOTE: Compile-time constant ensures the DCHECK() statements are
@@ -212,7 +212,7 @@ bool setDcheckLevel(bool enabled);
 #define DCHECK(condition) \
         LOG_IF(FATAL, DCHECK_IS_ON() && !(condition)) \
             << "Check failed: " #condition ". "
-            
+
 // Convenience class used hold a formatted string for logging reasons.
 // Usage example:
 //
@@ -251,7 +251,7 @@ class LogStream {
 public:
     LogStream(const char* file, int lineno, LogSeverity severity);
     ~LogStream();
-    
+
     inline LogStream& operator<<(const char* str) {
         append(str);
         return *this;
@@ -275,7 +275,7 @@ public:
     LogStream& operator<<(unsigned long long v);
     LogStream& operator<<(float v);
     LogStream& operator<<(double v);
-    
+
     const char* string() const { return mString ? mString : ""; }
     size_t size() const { return mSize; }
     const LogParams& params() const { return mParams; }
@@ -347,7 +347,7 @@ public:
                     LogSeverity severity,
                     int errnoCode);
     ~ErrnoLogMessage();
-    
+
     LogStream& stream() const { return *mStream; }
 private:
     LogStream* mStream;
@@ -370,10 +370,10 @@ namespace testing {
 // Abstract interface to the output where the log messages are sent.
 // IMPORTANT: Only use this for unit testing the log facility.
 class LogOutput {
-public:    
+public:
     LogOutput() {}
     virtual ~LogOutput() {}
-    
+
     // Send a full log message to the output. Not zero terminated, and
     // Does not have a trailing \n which can be added by the implementation
     // when writing the message to a file.
@@ -382,7 +382,7 @@ public:
     virtual void logMessage(const LogParams& params,
                             const char* message,
                             size_t message_len) = 0;
-    
+
     // Set a new log output, and return pointer to the previous
     // implementation, which will be NULL for the default one.
     // |newOutput| is either NULL (which means the default), or a

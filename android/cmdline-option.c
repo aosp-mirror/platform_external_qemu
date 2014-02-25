@@ -165,7 +165,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
                         {
                             ((char**)field)[0] = *aread++;
                         }
-                        else if (oo->var_type == OPTION_IS_LIST) 
+                        else if (oo->var_type == OPTION_IS_LIST)
                         {
                             ParamList**  head = (ParamList**)field;
                             ParamList*   pl;

@@ -55,7 +55,7 @@ char* propertyFile_getTargetAbi(const FileData* data);
 
 /* Retrieves a string corresponding to the target architecture
  * extracted from a build properties file.
- * 
+ *
  * |data| is a FileData instance holding the build.prop contents.
  * Returns a new string that must be freed by the caller, which can
  * be 'arm', 'x86, 'mips', etc..., or NULL if if cannot be determined.

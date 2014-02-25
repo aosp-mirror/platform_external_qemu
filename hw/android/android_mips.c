@@ -132,7 +132,7 @@ static void android_load_kernel(CPUOldState *env, int ram_size, const char *kern
         strcpy (kernel_cmd, kernel_cmdline);
 
     cpu_physical_memory_write(ram_size - TARGET_PAGE_SIZE, (void *)kernel_cmd, strlen(kernel_cmd) + 1);
-   
+
 #if 0
     if (initrd_size > 0)
         sprintf (phys_ram_base+cmdline, "%s rd_start=0x" TARGET_FMT_lx " rd_size=%li",

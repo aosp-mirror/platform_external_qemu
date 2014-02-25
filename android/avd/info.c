@@ -893,7 +893,7 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
         _avdInfo_readPropertyFile(i, bootPropPath, i->bootProperties);
         free(bootPropPath);
     }
-    
+
     _avdInfo_extractBuildProperties(i);
 
     /* TODO: find a way to provide better information from the build files */

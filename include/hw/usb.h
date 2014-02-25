@@ -127,16 +127,16 @@ typedef struct USBPacket USBPacket;
 struct USBDevice {
     void *opaque;
 
-    /* 
-     * Process USB packet. 
+    /*
+     * Process USB packet.
      * Called by the HC (Host Controller).
      *
-     * Returns length of the transaction 
+     * Returns length of the transaction
      * or one of the USB_RET_XXX codes.
-     */ 
+     */
     int (*handle_packet)(USBDevice *dev, USBPacket *p);
 
-    /* 
+    /*
      * Called when device is destroyed.
      */
     void (*handle_destroy)(USBDevice *dev);
@@ -144,12 +144,12 @@ struct USBDevice {
     int speed;
 
     /* The following fields are used by the generic USB device
-       layer. They are here just to avoid creating a new structure 
+       layer. They are here just to avoid creating a new structure
        for them. */
 
     /*
      * Reset the device
-     */  
+     */
     void (*handle_reset)(USBDevice *dev);
 
     /*
