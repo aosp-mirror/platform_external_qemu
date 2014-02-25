@@ -56,7 +56,7 @@ void defaultLogMessage(const LogParams& params,
     // easier. On the other hand, it means lots of logging will impact
     // performance.
     fflush(stderr);
-    
+
     if (params.severity >= LOG_FATAL)
         exit(1);
 }
@@ -72,8 +72,8 @@ void logMessage(const LogParams& params,
 }
 
 }  // namespace
-    
-// DCHECK level.    
+
+// DCHECK level.
 
 bool dcheckIsEnabled() {
     return gDcheckLevel;
@@ -90,7 +90,7 @@ bool setDcheckLevel(bool enabled) {
 LogSeverity getMinLogLevel() {
     return 0;
 }
-    
+
 // LogString
 
 LogString::LogString(const char* fmt, ...) : mString(NULL) {

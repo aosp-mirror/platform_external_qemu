@@ -68,7 +68,7 @@ public:
         mString(other.data()), mSize(other.size()) {}
 
     // IMPORTANT: This is intentionally not 'explicit'.
-    StringView(const char* string) : 
+    StringView(const char* string) :
             mString(string), mSize(strlen(string)) {}
 
     explicit StringView(const String& str);

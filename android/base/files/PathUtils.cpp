@@ -41,7 +41,7 @@ size_t PathUtils::rootPrefixSize(const char* path, HostType hostType) {
         int ch = path[0];
         if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'))
             result = 2U;
-    } else if (!strncmp(path, "\\\\.\\", 4) || 
+    } else if (!strncmp(path, "\\\\.\\", 4) ||
             !strncmp(path, "\\\\?\\", 4)) {
         // UNC prefixes.
         return 4U;
@@ -134,7 +134,7 @@ String PathUtils::recompose(const StringVector& components,
 void PathUtils::simplifyComponents(StringVector* components) {
     StringVector stack;
     for (StringVector::const_iterator it = components->begin();
-            it != components->end(); 
+            it != components->end();
             ++it) {
         if (*it == ".") {
             // Ignore any instance of '.' from the list.

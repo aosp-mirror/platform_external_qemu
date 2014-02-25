@@ -18,7 +18,7 @@ int slirp_debug = 0;
 
 extern char *strerror _P((int));
 
-/* Carry over one item from main.c so that the tty's restored. 
+/* Carry over one item from main.c so that the tty's restored.
  * Only done when the tty being used is /dev/tty --RedWolf */
 extern struct termios slirp_tty_settings;
 extern int slirp_tty_restore;

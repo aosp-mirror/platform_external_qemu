@@ -38,7 +38,7 @@ ESD_SYMBOLS
 #undef  ESD_FUNCTION
 static void*    esd_lib;
 
-int main( void ) 
+int main( void )
 {
     int  fd;
 

@@ -34,7 +34,7 @@ TEST(PropertyFile, SingleLineFile) {
     String value(propertyFile_getValue(kFile, sizeof kFile, "foo"));
     EXPECT_TRUE(value.str());
     EXPECT_STREQ("bar", value.str());
-    
+
     String value2(propertyFile_getValue(kFile, sizeof kFile, "bar"));
     EXPECT_FALSE(value2.str());
 }
@@ -44,7 +44,7 @@ TEST(PropertyFile, SingleLineFileWithZeroTerminator) {
     String value(propertyFile_getValue(kFile, sizeof kFile, "foo"));
     EXPECT_TRUE(value.str());
     EXPECT_STREQ("bar", value.str());
-    
+
     String value2(propertyFile_getValue(kFile, sizeof kFile, "bar"));
     EXPECT_FALSE(value2.str());
 }
@@ -54,11 +54,11 @@ TEST(PropertyFile, MultiLineFile) {
         "foo=bar\n"
         "bar=zoo\n"
         "sdk=4.2\n";
-    
+
     String foo(propertyFile_getValue(kFile, sizeof kFile, "foo"));
     String bar(propertyFile_getValue(kFile, sizeof kFile, "bar"));
     String sdk(propertyFile_getValue(kFile, sizeof kFile, "sdk"));
-    
+
     EXPECT_STREQ("bar", foo.str());
     EXPECT_STREQ("zoo", bar.str());
     EXPECT_STREQ("4.2", sdk.str());
@@ -69,11 +69,11 @@ TEST(PropertyFile, MultiLineFileWithZeroTerminator) {
         "foo=bar\n"
         "bar=zoo\n"
         "sdk=4.2";
-    
+
     String foo(propertyFile_getValue(kFile, sizeof kFile, "foo"));
     String bar(propertyFile_getValue(kFile, sizeof kFile, "bar"));
     String sdk(propertyFile_getValue(kFile, sizeof kFile, "sdk"));
-    
+
     EXPECT_STREQ("bar", foo.str());
     EXPECT_STREQ("zoo", bar.str());
     EXPECT_STREQ("4.2", sdk.str());
@@ -84,11 +84,11 @@ TEST(PropertyFile, MultiLineFileWithCRLF) {
         "foo=bar\r\n"
         "bar=zoo\r\n"
         "sdk=4.2\n";
-    
+
     String foo(propertyFile_getValue(kFile, sizeof kFile, "foo"));
     String bar(propertyFile_getValue(kFile, sizeof kFile, "bar"));
     String sdk(propertyFile_getValue(kFile, sizeof kFile, "sdk"));
-    
+
     EXPECT_STREQ("bar", foo.str());
     EXPECT_STREQ("zoo", bar.str());
     EXPECT_STREQ("4.2", sdk.str());
@@ -120,7 +120,7 @@ TEST(PropertyFile, ReturnLatestVariableDefinition) {
 }
 
 TEST(PropertyFile, Iterator) {
-    static const char kFile[] = 
+    static const char kFile[] =
             "foo=bar\n"
             "this-name-is-too-long-and-will-be-ignored-by-the-parser=ahah\n"
             "foo2=this-value-is-too-long-and-will-be-truncated-by-the-parser"
@@ -134,19 +134,19 @@ TEST(PropertyFile, Iterator) {
     EXPECT_TRUE(propertyFileIterator_next(iter));
     EXPECT_STREQ("foo", iter->name);
     EXPECT_STREQ("bar", iter->value);
-    
+
     EXPECT_TRUE(propertyFileIterator_next(iter));
     EXPECT_STREQ("foo2", iter->name);
     EXPECT_STREQ("this-value-is-too-long-and-will-be-truncated-by-the-"
                  "parser-which-only-wants-something-small", iter->value);
-    
+
     EXPECT_TRUE(propertyFileIterator_next(iter));
     EXPECT_STREQ("foo3", iter->name);
     EXPECT_STREQ("bar", iter->value);
-    
+
     EXPECT_TRUE(propertyFileIterator_next(iter));
     EXPECT_STREQ("bar", iter->name);
     EXPECT_STREQ(" zoo", iter->value);
-    
+
     EXPECT_FALSE(propertyFileIterator_next(iter));
 }

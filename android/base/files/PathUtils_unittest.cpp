@@ -172,7 +172,7 @@ TEST(PathUtils, decompose) {
     } kData[] = {
         { "", { { NULL }, { NULL } } },
         { "foo", {
-            { "foo", NULL }, 
+            { "foo", NULL },
             { "foo", NULL } } },
         { "foo/", {
             { "foo", NULL },
@@ -193,7 +193,7 @@ TEST(PathUtils, decompose) {
             { "C:", "foo", NULL },
             { "C:/", "foo", NULL } } },
         { "/foo", {
-            { "/", "foo", NULL }, 
+            { "/", "foo", NULL },
             { "/", "foo", NULL } } },
         { "\\foo", {
             { "\\foo", NULL },

@@ -3686,7 +3686,7 @@ int main(int argc, char **argv, char **envp)
         }
         qemu_set_log(mask);
     }
-  
+
 #if defined(CONFIG_KVM)
     if (kvm_allowed < 0) {
         kvm_allowed = kvm_check_allowed();
