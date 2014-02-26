@@ -3314,7 +3314,7 @@ int main(int argc, char **argv, char **envp)
              * support is added */
             pstrcat(tmp,sizeof(tmp),",pagesize=512,extrasize=0");
         }
-        dprint("System partition format: %s",
+        VERBOSE_PRINT(init, "System partition format: %s",
                systemImageIsExt4 ? "ext4" : "yaffs2");
         nand_add_dev(tmp);
     }
@@ -3360,7 +3360,7 @@ int main(int argc, char **argv, char **envp)
              * support is added */
             pstrcat(tmp, sizeof(tmp), ",pagesize=512,extrasize=0");
         }
-        dprint("Data partition format: %s",
+        VERBOSE_PRINT(init, "Data partition format: %s",
                dataImageIsExt4 ? "ext4" : "yaffs2");
         nand_add_dev(tmp);
     }
@@ -3612,7 +3612,7 @@ int main(int argc, char **argv, char **envp)
              * support is added */
             pstrcat(tmp, sizeof(tmp), ",pagesize=512,extrasize=0");
         }
-        dprint("Cache partition format: %s",
+        VERBOSE_PRINT(init, "Cache partition format: %s",
                cacheImageIsExt4 ? "ext4" : "yaffs2");
         nand_add_dev(tmp);
     }
