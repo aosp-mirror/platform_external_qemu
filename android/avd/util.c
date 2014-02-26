@@ -201,7 +201,7 @@ propertyFile_getApiLevel(const FileData* data) {
         char* end = NULL;
         long levelLong = strtol(sdkVersion, &end, 10);
         int level = (int)levelLong;
-        if (levelLong == LONG_MIN || levelLong == LONG_MAX || 
+        if (levelLong == LONG_MIN || levelLong == LONG_MAX ||
             levelLong < 0 || !end || *end || level != levelLong) {
             level = kMinLevel;
             D("Invalid SDK version build property: '%s'", sdkVersion);
@@ -224,7 +224,7 @@ propertyFile_getAdbdCommunicationMode(const FileData* data) {
         // No ro.adb.qemud means 'legacy' ADBD.
         return 0;
     }
-    
+
     char* end;
     long val = strtol(prop, &end, 10);
     if (end == NULL || *end != '\0' || val != (int)val) {
@@ -312,37 +312,4 @@ path_getAvdTargetArch( const char* avdName )
     AFREE(avdPath);
 
     return avdArch;
-}
-
-static int
-_isExt4Image( FILE* file )
-{
-    /* Seek to magic offset */
-    if (fseek(file, 0x438, SEEK_SET) != 0) {
-        return 0;
-    }
-    /* Read the magic number */
-    char magic[2];
-    if (fread(magic, sizeof(magic), 1, file) != 1) {
-        return 0;
-    }
-    /* Check the magic number */
-    if (magic[0] == (char)0x53 && magic[1] == (char)0xef) {
-        return 1;
-    }
-    return 0;
-}
-
-int
-path_isExt4Image( const char* path )
-{
-    FILE* file = fopen(path, "rb");
-    if (!file) {
-        D("Could not open file: %s: %s", path, strerror(errno));
-        return 0;
-    }
-
-    int ret = _isExt4Image(file);
-    fclose(file);
-    return ret;
 }

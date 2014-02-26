@@ -17,16 +17,48 @@
 /* Declared in "android/globals.h" */
 int  android_gles_fast_pipes = 1;
 
-#if CONFIG_ANDROID_OPENGLES
-
 #include "android/globals.h"
 #include <android/utils/debug.h>
 #include <android/utils/path.h>
 #include <android/utils/bufprint.h>
 #include <android/utils/dll.h>
 
-#define RENDER_API_NO_PROTOTYPES 1
-#include <libOpenglRender/render_api.h>
+// NOTE: The declarations below should be equivalent to those in
+// <libOpenglRender/render_api_platform_types.h>
+#ifdef _WIN32
+#include <windows.h>
+typedef HDC FBNativeDisplayType;
+typedef HWND FBNativeWindowType;
+#elif defined(__linux__)
+// Really a Window, which is defined as 32-bit unsigned long on all platforms
+// but we don't want to include the X11 headers here.
+typedef uint32_t FBNativeWindowType;
+#elif defined(__APPLE__)
+typedef void* FBNativeWindowType;
+#else
+#warning "unsupported platform"
+#endif
+
+// NOTE: The declarations below should be equivalent to those in
+// <libOpenglRender/render_api.h>
+
+/* list of constants to be passed to setStreamMode */
+#define STREAM_MODE_DEFAULT   0
+#define STREAM_MODE_TCP       1
+#define STREAM_MODE_UNIX      2
+#define STREAM_MODE_PIPE      3
+
+#define RENDERER_FUNCTIONS_LIST \
+  FUNCTION_(int, initLibrary, (void), ()) \
+  FUNCTION_(int, setStreamMode, (int mode), (mode)) \
+  FUNCTION_(int, initOpenGLRenderer, (int width, int height, char* addr, size_t addrLen), (width, height, addr, addrLen)) \
+  FUNCTION_VOID_(getHardwareStrings, (const char** vendors, const char** renderer, const char** version), (vendors, renderer, version)) \
+  FUNCTION_VOID_(setPostCallback, (OnPostFunc onPost, void* onPostContext), (onPost, onPostContext)) \
+  FUNCTION_(int, createOpenGLSubwindow, (FBNativeWindowType window, int x, int y, int width, int height, float zRot), (window, x, y, width, height, zRot)) \
+  FUNCTION_(int, destroyOpenGLSubwindow, (void), ()) \
+  FUNCTION_VOID_(setOpenGLDisplayRotation, (float zRot), (zRot)) \
+  FUNCTION_VOID_(repaintOpenGLDisplay, (void), ()) \
+  FUNCTION_(int, stopOpenGLRenderer, (void), ()) \
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,16 +75,40 @@ int  android_gles_fast_pipes = 1;
 #error Unknown HOST_LONG_BITS
 #endif
 
-#define DYNLINK_FUNCTIONS  \
-  DYNLINK_FUNC(initLibrary) \
-  DYNLINK_FUNC(setStreamMode) \
-  DYNLINK_FUNC(initOpenGLRenderer) \
-  DYNLINK_FUNC(setPostCallback) \
-  DYNLINK_FUNC(getHardwareStrings) \
-  DYNLINK_FUNC(createOpenGLSubwindow) \
-  DYNLINK_FUNC(destroyOpenGLSubwindow) \
-  DYNLINK_FUNC(repaintOpenGLDisplay) \
-  DYNLINK_FUNC(stopOpenGLRenderer)
+// Define the corresponding function pointers.
+#define FUNCTION_(ret, name, sig, params) \
+        static ret (*name) sig = NULL;
+#define FUNCTION_VOID_(name, sig, params) \
+        static void (*name) sig = NULL;
+RENDERER_FUNCTIONS_LIST
+#undef FUNCTION_
+#undef FUNCTION_VOID_
+
+// Define a function that initializes the function pointers by looking up
+// the symbols from the shared library.
+static int
+initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib)
+{
+    void*  symbol;
+    char*  error;
+
+#define FUNCTION_(ret, name, sig, params) \
+    symbol = adynamicLibrary_findSymbol(rendererLib, #name, &error); \
+    if (symbol != NULL) { \
+        name = symbol; \
+    } else { \
+        derror("GLES emulation: Could not find required symbol (%s): %s", #name, error); \
+        free(error); \
+        return -1; \
+    }
+#define FUNCTION_VOID_(name, sig, params) FUNCTION_(void, name, sig, params)
+RENDERER_FUNCTIONS_LIST
+#undef FUNCTION_VOID_
+#undef FUNCTION_
+
+    return 0;
+}
+
 
 #ifndef CONFIG_STANDALONE_UI
 /* Defined in android/hw-pipe-net.c */
@@ -62,33 +118,6 @@ extern int android_init_opengles_pipes(void);
 static ADynamicLibrary*  rendererLib;
 static int               rendererStarted;
 static char              rendererAddress[256];
-
-/* Define the function pointers */
-#define DYNLINK_FUNC(name) \
-    static name##Fn name = NULL;
-DYNLINK_FUNCTIONS
-#undef DYNLINK_FUNC
-
-static int
-initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib)
-{
-    void*  symbol;
-    char*  error;
-
-#define DYNLINK_FUNC(name) \
-    symbol = adynamicLibrary_findSymbol(rendererLib, #name, &error); \
-    if (symbol != NULL) { \
-        name = symbol; \
-    } else { \
-        derror("GLES emulation: Could not find required symbol (%s): %s", #name, error); \
-        free(error); \
-        return -1; \
-    }
-DYNLINK_FUNCTIONS
-#undef DYNLINK_FUNC
-
-    return 0;
-}
 
 int
 android_initOpenglesEmulation(void)
@@ -247,7 +276,7 @@ int
 android_showOpenglesWindow(void* window, int x, int y, int width, int height, float rotation)
 {
     if (rendererStarted) {
-        int success = createOpenGLSubwindow((FBNativeWindowType)window, x, y, width, height, rotation);
+        int success = createOpenGLSubwindow((FBNativeWindowType)(uintptr_t)window, x, y, width, height, rotation);
         return success ? 0 : -1;
     } else {
         return -1;
@@ -278,52 +307,3 @@ android_gles_server_path(char* buff, size_t buffsize)
 {
     strncpy_safe(buff, rendererAddress, buffsize);
 }
-
-#else // CONFIG_ANDROID_OPENGLES
-
-int android_initOpenglesEmulation(void)
-{
-    return -1;
-}
-
-int android_startOpenglesRenderer(int width, int height)
-{
-    return -1;
-}
-
-void
-android_setPostCallback(OnPostFunc onPost, void* onPostContext)
-{
-}
-
-void android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
-                                       char* renderer, size_t rendererBufSize,
-                                       char* version, size_t versionBufSize)
-{
-    assert(vendorBufSize > 0 && rendererBufSize > 0 && versionBufSize > 0);
-    assert(vendor != NULL && renderer != NULL && version != NULL);
-    vendor[0] = renderer[0] = version[0] = 0;
-}
-
-void android_stopOpenglesRenderer(void)
-{}
-
-int android_showOpenglesWindow(void* window, int x, int y, int width, int height, float rotation)
-{
-    return -1;
-}
-
-int android_hideOpenglesWindow(void)
-{
-    return -1;
-}
-
-void android_redrawOpenglesWindow(void)
-{}
-
-void android_gles_server_path(char* buff, size_t buffsize)
-{
-    buff[0] = '\0';
-}
-
-#endif // !CONFIG_ANDROID_OPENGLES

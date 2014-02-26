@@ -39,7 +39,7 @@ PULSEAUDIO_SYMBOLS
 #undef  PULSEAUDIO_FUNCTION
 static void*    pa_lib;
 
-int main( void ) 
+int main( void )
 {
     int  fd;
 

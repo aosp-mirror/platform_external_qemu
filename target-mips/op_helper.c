@@ -58,7 +58,7 @@ static void do_restore_state (void *pc_ptr)
 {
     TranslationBlock *tb;
     unsigned long pc = (unsigned long) pc_ptr;
-    
+
     tb = tb_find_pc (pc);
     if (tb) {
         cpu_restore_state (tb, env, pc);
@@ -1939,8 +1939,8 @@ void do_unassigned_access(hwaddr addr, int is_write, int is_exec,
         helper_raise_exception(EXCP_DBE);
 }
 /*
- * The following functions are address translation helper functions 
- * for fast memory access in QEMU. 
+ * The following functions are address translation helper functions
+ * for fast memory access in QEMU.
  */
 static unsigned long v2p_mmu(target_ulong addr, int is_user)
 {
@@ -1963,9 +1963,9 @@ redo:
     return physaddr;
 }
 
-/* 
- * translation from virtual address of simulated OS 
- * to the address of simulation host (not the physical 
+/*
+ * translation from virtual address of simulated OS
+ * to the address of simulation host (not the physical
  * address of simulated OS.
  */
 unsigned long v2p(target_ulong ptr, int is_user)
@@ -1979,7 +1979,7 @@ unsigned long v2p(target_ulong ptr, int is_user)
     env = cpu_single_env;
     addr = ptr;
     index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
-    if (__builtin_expect(env->tlb_table[is_user][index].addr_read != 
+    if (__builtin_expect(env->tlb_table[is_user][index].addr_read !=
                 (addr & TARGET_PAGE_MASK), 0)) {
         physaddr = v2p_mmu(addr, is_user);
     } else {

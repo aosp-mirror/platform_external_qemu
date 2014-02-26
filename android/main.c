@@ -988,7 +988,7 @@ int main(int argc, char **argv)
         args[n++] = "off";
     }
 
-    /* Pass boot properties to the core. First, those from boot.prop, 
+    /* Pass boot properties to the core. First, those from boot.prop,
      * then those from the command-line */
     const FileData* bootProperties = avdInfo_getBootProperties(avd);
     if (!fileData_isEmpty(bootProperties)) {
@@ -1003,7 +1003,7 @@ int main(int argc, char **argv)
             args[n++] = ASTRDUP(temp);
         }
     }
-    
+
     if (opts->prop != NULL) {
         ParamList*  pl = opts->prop;
         for ( ; pl != NULL; pl = pl->next ) {

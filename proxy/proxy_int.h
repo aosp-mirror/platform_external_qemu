@@ -105,7 +105,7 @@ extern void
 proxy_connection_done( ProxyConnection*  conn );
 
 /* free the proxy connection object. this will also
- * close the corresponding socket unless the 
+ * close the corresponding socket unless the
  * 'keep_alive' flag is set to TRUE.
  */
 extern void
