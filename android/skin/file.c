@@ -422,6 +422,9 @@ skin_layout_free( SkinLayout*  layout )
             AFREE(loc);
         SKIN_LAYOUT_LOOP_END
         layout->locations = NULL;
+        if (layout->onion_image) {
+          skin_image_unref( &layout->onion_image );
+        }
         AFREE(layout);
     }
 }
@@ -497,7 +500,7 @@ skin_layout_event_decode( const char*  event, int  *ptype, int  *pcode, int *pva
 }
 
 static SkinLayout*
-skin_layout_create_from_v2( AConfig*  root, SkinPart*  parts )
+skin_layout_create_from_v2( AConfig*  root, SkinPart*  parts, const char*  basepath )
 {
     SkinLayout*    layout;
     int            width, height;
@@ -529,6 +532,20 @@ skin_layout_create_from_v2( AConfig*  root, SkinPart*  parts )
     if (node != NULL) {
         layout->dpad_rotation     = aconfig_int( root, "dpad-rotation", 0 );
         layout->has_dpad_rotation = 1;
+    }
+
+    node = aconfig_find( root, "onion" );
+    if (node != NULL) {
+        const char* img = aconfig_str(node, "image", NULL);
+        layout->onion_image = skin_image_find_in( basepath, img );
+        if (layout->onion_image == SKIN_IMAGE_NONE) {
+            layout->onion_image = NULL;
+        }
+        // In layout file, alpha is specified in range 0-100. Convert to
+        // internal range 0-256 with default=128.
+        int alpha = aconfig_int( node, "alpha", 50 );
+        layout->onion_alpha = (256*alpha)/100;
+        layout->onion_rotation = aconfig_int( node, "rotation", 0 );
     }
 
     for (node = root->first_child; node; node = node->next)
@@ -665,7 +682,7 @@ skin_file_load_from_v2( SkinFile*  file, AConfig*  aconfig, const char*  basepat
         SkinLayout**  ptail = &file->layouts;
         for (node = node->first_child; node != NULL; node = node->next)
         {
-            SkinLayout*  layout = skin_layout_create_from_v2( node, file->parts );
+            SkinLayout*  layout = skin_layout_create_from_v2( node, file->parts, basepath );
             if (layout == NULL) {
                 dprint( "## WARNING: ignoring layout in skin file" );
                 continue;
