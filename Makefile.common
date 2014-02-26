@@ -185,7 +185,7 @@ common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 ###########################################################
 # Libpng configuration
 #
-LIBPNG_DIR := distrib/libpng-1.2.19
+LIBPNG_DIR := distrib/libpng-1.2.46
 include $(LOCAL_PATH)/$(LIBPNG_DIR)/sources.make
 
 EMULATOR_LIBUI_CFLAGS += \
