@@ -88,7 +88,7 @@ endif
 ###########################################################
 # Zlib sources
 #
-ZLIB_DIR := distrib/zlib-1.2.3
+ZLIB_DIR := distrib/zlib-1.2.8
 include $(LOCAL_PATH)/$(ZLIB_DIR)/sources.make
 EMULATOR_COMMON_CFLAGS += -I$(LOCAL_PATH)/$(ZLIB_DIR)
 
