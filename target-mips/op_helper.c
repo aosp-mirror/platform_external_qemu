@@ -283,7 +283,7 @@ static inline hwaddr do_translate_address(target_ulong address, int rw)
 
     lladdr = cpu_mips_translate_address(env, address, rw);
 
-    if (lladdr == -1LL) {
+    if (lladdr == (hwaddr)-1LL) {
         cpu_loop_exit(env);
     } else {
         return lladdr;
