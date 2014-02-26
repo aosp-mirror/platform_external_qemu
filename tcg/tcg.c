@@ -65,7 +65,7 @@
 
 static void tcg_target_init(TCGContext *s);
 static void tcg_target_qemu_prologue(TCGContext *s);
-static void patch_reloc(uint8_t *code_ptr, int type, 
+static void patch_reloc(uint8_t *code_ptr, int type,
                         tcg_target_long value, tcg_target_long addend);
 
 static TCGOpDef tcg_op_defs[] = {
@@ -119,7 +119,7 @@ static void tcg_out_reloc(TCGContext *s, uint8_t *code_ptr, int type,
     l = &s->labels[label_index];
     if (l->has_value) {
         /* FIXME: This may break relocations on RISC targets that
-           modify instruction fields in place.  The caller may not have 
+           modify instruction fields in place.  The caller may not have
            written the initial value.  */
         patch_reloc(code_ptr, type, l->u.value, addend);
     } else {
@@ -133,7 +133,7 @@ static void tcg_out_reloc(TCGContext *s, uint8_t *code_ptr, int type,
     }
 }
 
-static void tcg_out_label(TCGContext *s, int label_index, 
+static void tcg_out_label(TCGContext *s, int label_index,
                           tcg_target_long value)
 {
     TCGLabel *l;
@@ -173,7 +173,7 @@ void *tcg_malloc_internal(TCGContext *s, int size)
 {
     TCGPool *p;
     int pool_size;
-    
+
     if (size > TCG_POOL_CHUNK_SIZE) {
         /* big malloc: insert a new pool (XXX: could optimize) */
         p = g_malloc(sizeof(TCGPool) + size);
@@ -196,7 +196,7 @@ void *tcg_malloc_internal(TCGContext *s, int size)
                 p = g_malloc(sizeof(TCGPool) + pool_size);
                 p->size = pool_size;
                 p->next = NULL;
-                if (s->pool_current) 
+                if (s->pool_current)
                     s->pool_current->next = p;
                 else
                     s->pool_first = p;
@@ -227,7 +227,7 @@ void tcg_context_init(TCGContext *s)
     memset(s, 0, sizeof(*s));
     s->temps = s->static_temps;
     s->nb_globals = 0;
-    
+
     /* Count total number of arguments and allocate the corresponding
        space */
     total_args = 0;
@@ -248,7 +248,7 @@ void tcg_context_init(TCGContext *s)
         sorted_args += n;
         args_ct += n;
     }
-    
+
     tcg_target_init(s);
 }
 
@@ -258,7 +258,7 @@ void tcg_prologue_init(TCGContext *s)
     s->code_buf = code_gen_prologue;
     s->code_ptr = s->code_buf;
     tcg_target_qemu_prologue(s);
-    flush_icache_range((unsigned long)s->code_buf, 
+    flush_icache_range((unsigned long)s->code_buf,
                        (unsigned long)s->code_ptr);
 }
 
@@ -792,7 +792,7 @@ static char *tcg_get_arg_str_idx(TCGContext *s, char *buf, int buf_size,
     if (idx < s->nb_globals) {
         pstrcpy(buf, buf_size, ts->name);
     } else {
-        if (ts->temp_local) 
+        if (ts->temp_local)
             snprintf(buf, buf_size, "loc%d", idx - s->nb_globals);
         else
             snprintf(buf, buf_size, "tmp%d", idx - s->nb_globals);
@@ -830,7 +830,7 @@ static TCGHelperInfo *tcg_find_helper(TCGContext *s, tcg_target_ulong val)
     tcg_target_ulong v;
 
     if (unlikely(!s->helpers_sorted)) {
-        qsort(s->helpers, s->nb_helpers, sizeof(TCGHelperInfo), 
+        qsort(s->helpers, s->nb_helpers, sizeof(TCGHelperInfo),
               helper_cmp);
         s->helpers_sorted = 1;
     }
@@ -890,7 +890,7 @@ void tcg_dump_ops(TCGContext *s, FILE *outfile)
 #else
             pc = args[0];
 #endif
-            if (!first_insn) 
+            if (!first_insn)
                 fprintf(outfile, "\n");
             fprintf(outfile, " ---- 0x%" PRIx64, pc);
             first_insn = 0;
@@ -930,7 +930,7 @@ void tcg_dump_ops(TCGContext *s, FILE *outfile)
                             tcg_get_arg_str_idx(s, buf, sizeof(buf), args[nb_oargs + i]));
                 }
             }
-        } else if (c == INDEX_op_movi_i32 
+        } else if (c == INDEX_op_movi_i32
 #if TCG_TARGET_REG_BITS == 64
                    || c == INDEX_op_movi_i64
 #endif
@@ -941,7 +941,7 @@ void tcg_dump_ops(TCGContext *s, FILE *outfile)
             nb_oargs = def->nb_oargs;
             nb_iargs = def->nb_iargs;
             nb_cargs = def->nb_cargs;
-            fprintf(outfile, " %s %s,$", def->name, 
+            fprintf(outfile, " %s %s,$", def->name,
                     tcg_get_arg_str_idx(s, buf, sizeof(buf), args[0]));
             val = args[1];
             th = tcg_find_helper(s, val);
@@ -965,7 +965,7 @@ void tcg_dump_ops(TCGContext *s, FILE *outfile)
                 nb_iargs = def->nb_iargs;
                 nb_cargs = def->nb_cargs;
             }
-            
+
             k = 0;
             for(i = 0; i < nb_oargs; i++) {
                 if (k != 0)
@@ -1163,7 +1163,7 @@ void tcg_add_target_add_op_defs(const TCGTargetOpDef *tdefs)
 #ifdef USE_LIVENESS_ANALYSIS
 
 /* set a nop for an operation using 'nb_args' */
-static inline void tcg_set_nop(TCGContext *s, uint16_t *opc_ptr, 
+static inline void tcg_set_nop(TCGContext *s, uint16_t *opc_ptr,
                                TCGArg *args, int nb_args)
 {
     if (nb_args == 0) {
@@ -1227,7 +1227,7 @@ static void tcg_liveness_analysis(TCGContext *s)
     nb_ops = gen_opc_ptr - gen_opc_buf;
 
     s->op_dead_iargs = tcg_malloc(nb_ops * sizeof(uint16_t));
-    
+
     dead_temps = tcg_malloc(s->nb_temps);
     memset(dead_temps, 1, s->nb_temps);
 
@@ -1256,7 +1256,7 @@ static void tcg_liveness_analysis(TCGContext *s)
                         if (!dead_temps[arg])
                             goto do_not_remove_call;
                     }
-                    tcg_set_nop(s, gen_opc_buf + op_index, 
+                    tcg_set_nop(s, gen_opc_buf + op_index,
                                 args - 1, nb_args);
                 } else {
                 do_not_remove_call:
@@ -1266,7 +1266,7 @@ static void tcg_liveness_analysis(TCGContext *s)
                         arg = args[i];
                         dead_temps[arg] = 1;
                     }
-                    
+
                     if (!(call_flags & TCG_CALL_CONST)) {
                         /* globals are live (they may be used by the call) */
                         memset(dead_temps, 0, s->nb_globals);
