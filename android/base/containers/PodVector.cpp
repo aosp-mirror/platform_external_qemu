@@ -12,19 +12,10 @@
 #include "android/base/containers/PodVector.h"
 
 #include "android/base/Log.h"
+#include "android/base/memory/MallocUsableSize.h"
 
 #include <stdlib.h>
 #include <string.h>
-
-#if defined(__linux__) || defined(__APPLE__)
-#define USE_MALLOC_USABLE_SIZE 1
-#else
-#define USE_MALLOC_USABLE_SIZE 0
-#endif
-
-#if USE_MALLOC_USABLE_SIZE
-#include <malloc.h>
-#endif
 
 namespace android {
 namespace base {
