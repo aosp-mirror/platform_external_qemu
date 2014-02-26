@@ -13,6 +13,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/files/PathUtils_unittest.cpp \
   android/base/files/ScopedStdioFile_unittest.cpp \
   android/base/Log_unittest.cpp \
+  android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/ScopedPtr_unittest.cpp \
   android/base/String_unittest.cpp \
   android/base/StringView_unittest.cpp \
