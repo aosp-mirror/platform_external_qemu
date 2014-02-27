@@ -532,7 +532,7 @@ static int cpu_gdb_read_register(CPUOldState *env, uint8_t *mem_buf, int n)
             return 16;
         } else if (n == CPU_NB_REGS) {
             GET_REG32(env->mxcsr);
-        } 
+        }
     } else {
         n -= CPU_NB_REGS;
         switch (n) {
@@ -1065,7 +1065,7 @@ static int cpu_gdb_write_register(CPUOldState *env, uint8_t *mem_buf, int n)
     case 36: env->CP0_Cause = tmp; break;
     case 37: env->active_tc.PC = tmp; break;
     case 72: /* fp, ignored */ break;
-    default: 
+    default:
 	if (n > 89)
 	    return 0;
 	/* Other registers are readonly.  Ignore writes.  */
@@ -2176,7 +2176,7 @@ gdb_handlesig (CPUOldState *env, int sig)
       snprintf(buf, sizeof(buf), "S%02x", target_signal_to_gdb (sig));
       put_packet(s, buf);
     }
-  /* put_packet() might have detected that the peer terminated the 
+  /* put_packet() might have detected that the peer terminated the
      connection.  */
   if (s->fd < 0)
       return sig;

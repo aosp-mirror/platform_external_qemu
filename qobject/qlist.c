@@ -21,7 +21,7 @@ static const QType qlist_type = {
     .code = QTYPE_QLIST,
     .destroy = qlist_destroy_obj,
 };
- 
+
 /**
  * qlist_new(): Create a new QList
  *

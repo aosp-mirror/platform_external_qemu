@@ -65,7 +65,7 @@ static int qcow_probe(const uint8_t *buf, int buf_size, const char *filename)
 }
 
 
-/* 
+/*
  * read qcow2 extension and fill bs
  * start reading from start_offset
  * finish reading upon magic of value 0 or when end_offset reached

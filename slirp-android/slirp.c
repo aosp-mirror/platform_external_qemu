@@ -1137,7 +1137,7 @@ static void _slirp_redir_loop(void (*func)(void *opaque, int is_udp,
 
     for (so = head->so_next; so != head; so = so->so_next) {
         SockAddress  local, foreign;
-	
+
 		sock_address_init_inet(&local, so->so_laddr_ip, so->so_laddr_port);
 		sock_address_init_inet(&foreign, so->so_faddr_ip, so->so_faddr_port);
         func(opaque, is_udp,
@@ -1256,7 +1256,7 @@ void slirp_socket_recv(int addr_low_byte, int guest_port, const uint8_t *buf,
 {
     int ret;
     struct socket *so = slirp_find_ctl_socket(addr_low_byte, guest_port);
-   
+
     if (!so)
         return;
 

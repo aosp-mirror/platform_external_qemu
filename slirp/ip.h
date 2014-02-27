@@ -235,7 +235,7 @@ struct	ipasfrag {
 #define ipf_tos      ipf_ip.ip_tos
 #define ipf_len      ipf_ip.ip_len
 #define ipf_next     ipf_link.next
-#define ipf_prev     ipf_link.prev 
+#define ipf_prev     ipf_link.prev
 
 /*
  * Structure stored in mbuf in inpcb.ip_options

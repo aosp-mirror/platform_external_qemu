@@ -22,8 +22,8 @@ namespace base {
 
 // Create a severity level which is guaranteed to never generate a log
 // message. See LogOnlyEvaluatesArgumentsIfNeeded for usage.
-const LogSeverity LOG_INVISIBLE = -10000;    
-    
+const LogSeverity LOG_INVISIBLE = -10000;
+
 class LogTest : public ::testing::Test, android::base::testing::LogOutput {
 public:
     LogTest() : mFatal(false) {
@@ -32,7 +32,7 @@ public:
         mBuffer[0] = '\x7f';
         mBuffer[1] = '\0';
     }
-    
+
     ~LogTest() {
         ::android::base::testing::LogOutput::setNewOutput(mSavedOutput);
     }
@@ -70,12 +70,12 @@ class CheckTest : public LogTest {
 
 #if ENABLE_DCHECK != 0
 class DCheckEnabledTest : public LogTest {
-public:    
+public:
     DCheckEnabledTest() : LogTest() {
         // Ensure DCHECKS() always run.
         mSavedLevel = setDcheckLevel(true);
     }
-    
+
     ~DCheckEnabledTest() {
         setDcheckLevel(mSavedLevel);
     }
@@ -90,7 +90,7 @@ public:
     DCheckDisabledTest() : LogTest() {
         mSavedLevel = setDcheckLevel(false);
     }
-    
+
     ~DCheckDisabledTest() {
         setDcheckLevel(mSavedLevel);
     }
@@ -117,7 +117,7 @@ public:
         snprintf(mExpected,
                  sizeof(mExpected),
                  "%sError message: %s",
-                 suffix, 
+                 suffix,
                  strerror(errnoCode));
     }
 
@@ -125,7 +125,7 @@ public:
                     const char* message,
                     size_t messageLen) {
         LogTest::logMessage(params, message, messageLen);
-        
+
         if (mForcedErrno != -1000)
             errno = mForcedErrno;
     }
