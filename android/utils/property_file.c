@@ -45,7 +45,7 @@ bool propertyFileIterator_next(PropertyFileIterator* iter) {
         } else {
             p = lineEnd + 1;
         }
-        
+
         // Remove trailing \r before the \n, if any.
         if (lineEnd > line && lineEnd[-1] == '\r')
             lineEnd--;
@@ -53,13 +53,13 @@ bool propertyFileIterator_next(PropertyFileIterator* iter) {
         // Skip leading whitespace.
         while (line < lineEnd && isspace(line[0]))
             line++;
-        
+
         // Skip empty lines, and those that begin with '#' for comments.
         if (lineEnd == line || line[0] == '#')
             continue;
 
         const char* name = line;
-        const char* nameEnd = 
+        const char* nameEnd =
                 (const char*)memchr(name, '=', lineEnd - name);
         if (!nameEnd) {
             // Skipping lines without a =
@@ -68,7 +68,7 @@ bool propertyFileIterator_next(PropertyFileIterator* iter) {
         const char* value = nameEnd + 1;
         while (nameEnd > name && isspace(nameEnd[-1]))
             nameEnd--;
-        
+
         size_t nameLen = nameEnd - name;
         if (nameLen == 0 || nameLen >= MAX_PROPERTY_NAME_LEN) {
             // Skip lines without names, or with names too long.
@@ -77,15 +77,15 @@ bool propertyFileIterator_next(PropertyFileIterator* iter) {
 
         memcpy(iter->name, name, nameLen);
         iter->name[nameLen] = '\0';
-        
+
         // Truncate value's length.
         size_t valueLen = (lineEnd - value);
         if (valueLen >= MAX_PROPERTY_VALUE_LEN)
             valueLen = (MAX_PROPERTY_VALUE_LEN - 1);
-        
+
         memcpy(iter->value, value, valueLen);
         iter->value[valueLen] = '\0';
-        
+
         iter->p = p;
         return true;
     }

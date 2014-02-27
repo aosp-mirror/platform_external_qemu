@@ -893,7 +893,7 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
         _avdInfo_readPropertyFile(i, bootPropPath, i->bootProperties);
         free(bootPropPath);
     }
-    
+
     _avdInfo_extractBuildProperties(i);
 
     /* TODO: find a way to provide better information from the build files */
@@ -1100,13 +1100,6 @@ avdInfo_initHwConfig( AvdInfo*  i, AndroidHwConfig*  hw )
             hw->hw_keyboard = 0;
         }
     }
-
-    /* Set hw.useext4=yes, if the Ext4 file system is used. */
-    char* p = avdInfo_getSystemInitImagePath(i);
-    if (path_isExt4Image(p)) {
-        hw->hw_useext4 = 1;
-    }
-    AFREE(p);
 
     return ret;
 }

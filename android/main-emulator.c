@@ -137,7 +137,7 @@ int main(int argc, char** argv)
         if (androidOut != NULL) {
             D("Found ANDROID_PRODUCT_OUT: %s\n", androidOut);
             avdArch = path_getBuildTargetArch(androidOut);
-            D("Found build target architecture: %s\n", 
+            D("Found build target architecture: %s\n",
               avdArch ? avdArch : "<NULL>");
         }
     }

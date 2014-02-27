@@ -303,7 +303,7 @@ bad:
 }
 
 int udp_output2_(struct socket *so, struct mbuf *m,
-                 const SockAddress*  saddr, 
+                 const SockAddress*  saddr,
                  const SockAddress*  daddr,
                  int iptos)
 {

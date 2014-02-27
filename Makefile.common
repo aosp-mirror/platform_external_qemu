@@ -88,7 +88,7 @@ endif
 ###########################################################
 # Zlib sources
 #
-ZLIB_DIR := distrib/zlib-1.2.3
+ZLIB_DIR := distrib/zlib-1.2.8
 include $(LOCAL_PATH)/$(ZLIB_DIR)/sources.make
 EMULATOR_COMMON_CFLAGS += -I$(LOCAL_PATH)/$(ZLIB_DIR)
 
@@ -118,9 +118,13 @@ common_LOCAL_SRC_FILES += \
 	android/avd/util.c \
 	android/sockets.c \
 	android/sync-utils.c \
+	android/base/containers/PodVector.cpp \
+	android/base/containers/StringVector.cpp \
 	android/base/files/PathUtils.cpp \
 	android/base/Log.cpp \
+	android/base/String.cpp \
 	android/base/StringView.cpp \
+	android/filesystems/ext4_utils.cpp \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
 	android/utils/debug.c \
@@ -176,17 +180,12 @@ endif # HOST_OS == linux || darwin
 
 common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
-
-ifneq ($(QEMU_OPENGLES_INCLUDE),)
-    EMULATOR_LIBUI_CFLAGS := -I$(QEMU_OPENGLES_INCLUDE)
-endif
-
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
 ###########################################################
 # Libpng configuration
 #
-LIBPNG_DIR := distrib/libpng-1.2.19
+LIBPNG_DIR := distrib/libpng-1.2.46
 include $(LOCAL_PATH)/$(LIBPNG_DIR)/sources.make
 
 EMULATOR_LIBUI_CFLAGS += \

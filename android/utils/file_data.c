@@ -33,10 +33,6 @@ bool fileData_isValid(const FileData* data) {
     return false;
 }
 
-bool fileData_isInited(const FileData* data) {
-    return (data->flags == FILE_DATA_MAGIC);
-}
-
 static inline void fileData_setValid(FileData* data) {
     data->flags = FILE_DATA_MAGIC;
 }
@@ -62,27 +58,23 @@ void fileData_initEmpty(FileData* data) {
 
 
 int fileData_initFromFile(FileData* data, const char* filePath) {
-    if (fileData_isInited(data)) {
-        APANIC("Trying to re-init a FileData instance\n");
-    }
-
     FILE* f = fopen(filePath, "rb");
     if (!f)
         return -errno;
-    
+
     int ret = 0;
     do {
         if (fseek(f, 0, SEEK_END) < 0) {
             ret = -errno;
             break;
         }
-        
+
         long fileSize = ftell(f);
         if (fileSize < 0) {
             ret = -errno;
             break;
         }
-        
+
         if (fileSize == 0) {
             fileData_initEmpty(data);
             break;
@@ -92,13 +84,13 @@ int fileData_initFromFile(FileData* data, const char* filePath) {
             ret = -errno;
             break;
         }
-        
+
         char* buffer = malloc((size_t)fileSize);
         if (!buffer) {
             ret = -errno;
             break;
         }
-        
+
         size_t readLen = fread(buffer, 1, (size_t)fileSize, f);
         if (readLen != (size_t)fileSize) {
             if (feof(f)) {
@@ -108,20 +100,17 @@ int fileData_initFromFile(FileData* data, const char* filePath) {
             }
             break;
         }
-        
+
         fileData_initWith(data, buffer, readLen);
 
     } while (0);
-    
+
     fclose(f);
     return ret;
 }
 
 
 int fileData_initFrom(FileData* data, const FileData* other) {
-    if (fileData_isInited(data)) {
-        APANIC("Trying to re-init a FileData instance\n");
-    }
     if (!other || !fileData_isValid(other)) {
         APANIC("Trying to copy an uninitialized FileData instance\n");
     }
@@ -133,18 +122,19 @@ int fileData_initFrom(FileData* data, const FileData* other) {
     if (!copy) {
         return -errno;
     }
-    
+
     memcpy(copy, other->data, other->size);
     fileData_initWith(data, copy, other->size);
     return 0;
 }
-    
+
 
 int fileData_initFromMemory(FileData* data,
                              const void* input,
                              size_t inputLen) {
     FileData other;
     fileData_initWith(&other, input, inputLen);
+    memset(data, 0, sizeof(*data));  // make valgrind happy.
     return fileData_initFrom(data, &other);
 }
 
@@ -156,7 +146,7 @@ void fileData_swap(FileData* data, FileData* other) {
     uint8_t* buffer = data->data;
     data->data = other->data;
     other->data = buffer;
-    
+
     size_t size = data->size;
     data->size = other->size;
     other->size = size;
@@ -167,7 +157,7 @@ void fileData_done(FileData* data) {
     if (!fileData_isValid(data)) {
         APANIC("Trying to finalize an un-initialized FileData instance\n");
     }
-    
+
     free(data->data);
     fileData_initWith(data, NULL, 0);
     fileData_setInvalid(data);
