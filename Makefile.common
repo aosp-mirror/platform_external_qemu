@@ -159,16 +159,13 @@ LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
-## another for 64-bit
-# NOTE: only linux and darwin is supported, because for Windows,
-# amd64-mingw32msvc-gcc doesn't work, see http://b/issue?id=5949152.
-ifneq ($(filter linux darwin,$(HOST_OS)),)
+ifdef EMULATOR_BUILD_64BITS
   $(call start-emulator-library, emulator64-common)
   LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
   LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
   $(call gen-hw-config-defs)
   $(call end-emulator-library)
-endif # HOST_OS == linux || darwin
+endif # EMULATOR_BUILD_64BITS
 
 ##############################################################################
 ##############################################################################
@@ -244,12 +241,12 @@ else # BUILD_SDL_FROM_SOURCES
 
     SDL_DIR := distrib/sdl-1.2.15
     include $(LOCAL_PATH)/$(SDL_DIR)/sources.make
-    common_LOCAL_SRC_FILES += $(SDL_SOURCES)
+
+    SDL_STATIC_LIBRARIES := emulator_libSDL emulator_libSDLmain emulator_libSDL emulator_libSDLmain
+    SDL_STATIC_LIBRARIES_64 := emulator_lib64SDL emulator_lib64SDLmain emulator_lib64SDL emulator_lib64SDLmain
 
     EMULATOR_LIBUI_CFLAGS += \
         -I$(LOCAL_PATH)/$(SDL_DIR)/include
-
-    SDL_STATIC_LIBRARIES :=
 
 endif # BUILD_SDL_FROM_SOURCES
 
@@ -299,8 +296,7 @@ $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
 
-## another for 64-bit, see note in emulator64-common
-ifneq ($(filter linux darwin,$(HOST_OS)),)
+ifdef EMULATOR_BUILD_64BITS
   $(call start-emulator-library, emulator64-libui)
   LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
   LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
@@ -610,7 +606,7 @@ $(call end-emulator-library)
 
 
 ## another for 64-bit, see note in emulator64-common
-ifneq ($(filter linux darwin,$(HOST_OS)),)
+ifdef EMULATOR_BUILD_64BITS
   $(call start-emulator-library, emulator64-libqemu)
   # gdbstub-xml.c contains C-compilable arrays corresponding to the content
   # of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
@@ -628,7 +624,7 @@ ifneq ($(filter linux darwin,$(HOST_OS)),)
   LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
   $(call gen-hw-config-defs)
   $(call end-emulator-library)
-endif # HOST_OS == linux || darwin
+endif # EMULATOR_BUILD_64BITS
 
 
 # Block sources, we must compile them with each executable because they
@@ -689,12 +685,12 @@ $(call end-emulator-library)
 
 
 ## another for 64-bit, see note in emulator64-common
-ifneq ($(filter linux darwin,$(HOST_OS)),)
+ifdef EMULATOR_BUILD_64BITS
   $(call start-emulator-library, emulator64-libjpeg)
   LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
   LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
   $(call end-emulator-library)
-endif # HOST_OS == linux
+endif # EMULATOR_BUILD_64BITS
 
 
 ##############################################################################
@@ -736,14 +732,13 @@ LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call end-emulator-library)
 
 
-## another for 64-bit, see note in emulator64-common
-ifneq ($(filter linux darwin,$(HOST_OS)),)
+ifdef EMULATOR_BUILD_64BITS
   $(call start-emulator-library, emulator64-libelff)
   LOCAL_CPP_EXTENSION := .cc
   LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
   LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
   $(call end-emulator-library)
-endif # HOST_OS == linux || darwin
+endif # EMULATOR_BUILD_64BITS
 
 
 ##############################################################################
