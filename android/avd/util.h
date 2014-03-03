@@ -55,7 +55,7 @@ char* propertyFile_getTargetAbi(const FileData* data);
 
 /* Retrieves a string corresponding to the target architecture
  * extracted from a build properties file.
- * 
+ *
  * |data| is a FileData instance holding the build.prop contents.
  * Returns a new string that must be freed by the caller, which can
  * be 'arm', 'x86, 'mips', etc..., or NULL if if cannot be determined.
@@ -91,14 +91,6 @@ char* path_getBuildBootProp( const char* androidOut );
  * string that must be freed by the caller.
  */
 char* path_getBuildTargetArch( const char* androidOut );
-
-/* Check whether the image file is Ext4 or not.
- *
- * Return:
- *  0 - The image file can't be recognized as Ext4.
- *  1 - The image file is an Ext4 image.
- */
-int path_isExt4Image( const char* imagePath );
 
 ANDROID_END_HEADER
 

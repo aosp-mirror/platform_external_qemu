@@ -70,7 +70,7 @@ typedef struct TCGRelocation {
     int type;
     uint8_t *ptr;
     tcg_target_long addend;
-} TCGRelocation; 
+} TCGRelocation;
 
 typedef struct TCGLabel {
     int has_value;
@@ -193,7 +193,7 @@ typedef int TCGv_i64;
 /* A pure function only reads its arguments and TCG global variables
    and cannot raise exceptions. Hence a call to a pure function can be
    safely suppressed if the return value is not used. */
-#define TCG_CALL_PURE           0x0010 
+#define TCG_CALL_PURE           0x0010
 /* A const function only reads its arguments and does not use TCG
    global variables. Hence a call to such a function does not
    save TCG global variables back to their canonical location. */
@@ -277,7 +277,7 @@ struct TCGContext {
     int nb_globals;
     int nb_temps;
     /* index of free temps, -1 if none */
-    int first_free_temp[TCG_TYPE_COUNT * 2]; 
+    int first_free_temp[TCG_TYPE_COUNT * 2];
 
     /* goto_tb support */
     uint8_t *code_buf;
@@ -288,7 +288,7 @@ struct TCGContext {
     /* liveness analysis */
     uint16_t *op_dead_iargs; /* for each operation, each bit tells if the
                                 corresponding input argument is dead */
-    
+
     /* tells in which temporary a given register is. It does not take
        into account fixed registers */
     int reg_to_temp[TCG_TARGET_NB_REGS];
@@ -428,7 +428,7 @@ typedef struct TCGArgConstraint {
 
 #define TCG_OPF_BB_END     0x01 /* instruction defines the end of a basic
                                    block */
-#define TCG_OPF_CALL_CLOBBER 0x02 /* instruction clobbers call registers 
+#define TCG_OPF_CALL_CLOBBER 0x02 /* instruction clobbers call registers
                                    and potentially update globals. */
 #define TCG_OPF_SIDE_EFFECTS 0x04 /* instruction has side effects : it
                                      cannot be removed if its output
@@ -444,7 +444,7 @@ typedef struct TCGOpDef {
     int used;
 #endif
 } TCGOpDef;
-        
+
 typedef struct TCGTargetOpDef {
     TCGOpcode op;
     const char *args_ct_str[TCG_MAX_OP_ARGS];

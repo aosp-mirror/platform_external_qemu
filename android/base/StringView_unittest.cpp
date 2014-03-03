@@ -20,7 +20,7 @@ TEST(StringView, InitEmpty) {
     StringView view;
     EXPECT_TRUE(view.empty());
 }
-    
+
 TEST(StringView, InitWithCString) {
     static const char kString[] = "Hello";
     StringView view(kString);
@@ -91,9 +91,9 @@ TEST(StringView, Iterators) {
     StringView view(kString);
     EXPECT_EQ(kString, view.begin());
     EXPECT_EQ(kString + kStringLen, view.end());
-    
+
     size_t n = 0;
-    for (StringView::const_iterator it = view.begin(); 
+    for (StringView::const_iterator it = view.begin();
          it != view.end(); ++it, ++n) {
         EXPECT_EQ(kString[n], *it);
     }
@@ -110,7 +110,7 @@ TEST(StringView, ComparisonOperators) {
     EXPECT_TRUE(view1 >= view2);
     EXPECT_FALSE(view1 < view2);
     EXPECT_FALSE(view1 > view2);
-    
+
     StringView view3("hell");  // Shorter, but first char is larger.
     EXPECT_FALSE(view1 == view3);
     EXPECT_TRUE(view1 != view3);
@@ -118,7 +118,7 @@ TEST(StringView, ComparisonOperators) {
     EXPECT_TRUE(view1 <= view3);
     EXPECT_FALSE(view1 > view3);
     EXPECT_FALSE(view1 >= view3);
-    
+
     StringView view4("Hell");  // Shorter, but first char is smaller.
     EXPECT_FALSE(view1 == view4);
     EXPECT_TRUE(view1 != view4);

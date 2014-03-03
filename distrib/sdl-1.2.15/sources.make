@@ -2,7 +2,11 @@
 # to declare the SDL-related sources, compiler flags and libraries
 #
 
-SDL_CFLAGS :=
+SDL_OLD_LOCAL_PATH := $(LOCAL_PATH)
+
+LOCAL_PATH := $(call my-dir)
+
+SDL_CFLAGS := -I$(LOCAL_PATH)/include
 SDL_LDLIBS :=
 SDL_STATIC_LIBRARIES :=
 
@@ -88,7 +92,7 @@ SRCS += stdlib/SDL_getenv.c \
 
 SRCS += cpuinfo/SDL_cpuinfo.c
 
-SDL_SOURCES += $(SRCS:%=$(SDL_DIR)/src/%)
+SDL_SOURCES += $(SRCS:%=src/%)
 
 # the LoadSO sources
 #
@@ -108,7 +112,7 @@ ifeq ($(SDL_CONFIG_LOADSO_WIN32),yes)
   SRCS += win32/SDL_sysloadso.c
 endif
 
-SDL_SOURCES += $(SRCS:%=$(SDL_DIR)/src/loadso/%)
+SDL_SOURCES += $(SRCS:%=src/loadso/%)
 
 # the Thread sources
 #
@@ -128,7 +132,7 @@ ifeq ($(SDL_CONFIG_THREAD_WIN32),yes)
           win32/SDL_systhread.c
 endif
 
-SDL_SOURCES += $(SRCS:%=$(SDL_DIR)/src/thread/%)
+SDL_SOURCES += $(SRCS:%=src/thread/%)
 
 # the Timer sources
 #
@@ -143,7 +147,7 @@ ifeq ($(SDL_CONFIG_TIMER_WIN32),yes)
   SRCS += win32/SDL_systimer.c
 endif
 
-SDL_SOURCES += $(SRCS:%=$(SDL_DIR)/src/timer/%)
+SDL_SOURCES += $(SRCS:%=src/timer/%)
 
 # the Video sources
 #
@@ -216,7 +220,20 @@ ifeq ($(SDL_CONFIG_VIDEO_X11_XV),yes)
   SRCS += Xext/Xv/Xv.c
 endif
 
-SDL_SOURCES += $(SRCS:%=$(SDL_DIR)/src/video/%)
+SDL_SOURCES += $(SRCS:%=src/video/%)
+
+$(call start-emulator-library,emulator_libSDL)
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+LOCAL_SRC_FILES := $(SDL_SOURCES)
+$(call end-emulator-library)
+
+ifdef EMULATOR_BUILD_64BITS
+$(call start-emulator-library,emulator_lib64SDL)
+LOCAL_SRC_FILES := $(SDL_SOURCES)
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+LOCAL_CFLAGS += -m64 -fPIC
+$(call end-emulator-library)
+endif  # EMULATOR_BUILD_64BITS
 
 ## Build libSDLmain
 ##
@@ -235,4 +252,20 @@ ifeq ($(SDL_CONFIG_MAIN_WIN32),yes)
   SRCS += win32/SDL_win32_main.c
 endif
 
-SDLMAIN_SOURCES := $(SRCS:%=$(SDL_DIR)/src/main/%)
+SDLMAIN_SOURCES := $(SRCS:%=src/main/%)
+
+$(call start-emulator-library,emulator_libSDLmain)
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+LOCAL_SRC_FILES := $(SDLMAIN_SOURCES)
+$(call end-emulator-library)
+
+ifdef EMULATOR_BUILD_64BITS
+  $(call start-emulator-library,emulator_lib64SDLmain)
+  LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+  LOCAL_SRC_FILES := $(SDLMAIN_SOURCES)
+  LOCAL_CFLAGS += -m64
+  $(call end-emulator-library)
+endif  # EMULATOR_BUILD_64BITS
+
+# Restore LOCAL_PATH
+LOCAL_PATH := $(SDL_OLD_LOCAL_PATH)
