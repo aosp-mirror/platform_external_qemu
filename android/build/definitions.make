@@ -38,33 +38,44 @@ endef
 hide :=
 endif
 
+# Return the parent directory of a given path.
+# $1: path
 parent-dir = $(dir $1)
+
+# Return the directory of the current Makefile / Android.mk.
 my-dir = $(call parent-dir,$(lastword $(MAKEFILE_LIST)))
 
-# return the directory containing the intermediate files for a given
+# Return the directory containing the intermediate files for a given
 # kind of executable
-# $1 = type (EXECUTABLES or STATIC_LIBRARIES)
+# $1 = type (EXECUTABLES, STATIC_LIBRARIES or SHARED_LIBRARIES).
 # $2 = module name
 # $3 = ignored
 #
-define intermediates-dir-for
-$(OBJS_DIR)/intermediates/$(2)
-endef
+intermediates-dir-for = $(OBJS_DIR)/intermediates/$(2)
 
+# Return the name of a given host tool, based on the value of
+# LOCAL_HOST_BUILD. If the variable is defined, return $(BUILD_$1),
+# otherwise return $(HOST_$1).
+# $1: Tool name (e.g. CC, LD, etc...)
+#
+local-host-tool = $(if $(strip $(LOCAL_HOST_BUILD)),$(BUILD_$1),$(MY_$1))
+local-host-exe = $(call local-host-tool,EXEEXT)
+local-host-dll = $(call local-host-tool,DLLEXT)
+
+local-host-define = $(if $(strip $(LOCAL_$1)),,$(eval LOCAL_$1 := $$(call local-host-tool,$1)))
+
+# Return the directory containing the intermediate files for the current
+# module. LOCAL_MODULE must be defined before calling this.
 local-intermediates-dir = $(OBJS_DIR)/intermediates/$(LOCAL_MODULE)
 
-# Generate the full path of a given static library
-define library-path
-$(OBJS_DIR)/libs/$(1).a
-endef
+local-library-path = $(OBJS_DIR)/libs/$(1).a
+local-executable-path = $(OBJS_DIR)/$(1)$(call local-host-tool,EXEEXT)
+local-shared-library-path = $(OBJS_DIR)/lib/$(1)$(call local-host-tool,DLLEXT)
 
-define executable-path
-$(OBJS_DIR)/$(1)$(EXE)
-endef
 
-define shared-library-path
-$(OBJS_DIR)/lib/$(1)$(HOST_DLLEXT)
-endef
+# Toolchain control support.
+# It's possible to switch between the regular toolchain and the host one
+# in certain cases.
 
 # Compile a C source file
 #
@@ -73,7 +84,7 @@ SRC:=$(1)
 OBJ:=$$(LOCAL_OBJS_DIR)/$$(SRC:%.c=%.o)
 LOCAL_OBJECTS += $$(OBJ)
 DEPENDENCY_DIRS += $$(dir $$(OBJ))
-$$(OBJ): PRIVATE_CFLAGS := $$(CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
+$$(OBJ): PRIVATE_CFLAGS := $$(call local-host-tool,CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
 $$(OBJ): PRIVATE_CC     := $$(LOCAL_CC)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
@@ -93,7 +104,7 @@ SRC:=$(1)
 OBJ:=$$(LOCAL_OBJS_DIR)/$$(SRC:%$(LOCAL_CPP_EXTENSION)=%.o)
 LOCAL_OBJECTS += $$(OBJ)
 DEPENDENCY_DIRS += $$(dir $$(OBJ))
-$$(OBJ): PRIVATE_CFLAGS := $$(CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
+$$(OBJ): PRIVATE_CFLAGS := $$(call local-host-tool,CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
 $$(OBJ): PRIVATE_CXX    := $$(LOCAL_CC)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
@@ -113,7 +124,7 @@ SRC:=$(1)
 OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%.m=%.o))
 LOCAL_OBJECTS += $$(OBJ)
 DEPENDENCY_DIRS += $$(dir $$(OBJ))
-$$(OBJ): PRIVATE_CFLAGS := $$(CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
+$$(OBJ): PRIVATE_CFLAGS := $$(call local-host-tool,CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
 $$(OBJ): PRIVATE_CC     := $$(LOCAL_CC)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
@@ -133,7 +144,7 @@ SRC:=$(1)
 OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%.c=%.o))
 LOCAL_OBJECTS += $$(OBJ)
 DEPENDENCY_DIRS += $$(dir $$(OBJ))
-$$(OBJ): PRIVATE_CFLAGS := $$(CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
+$$(OBJ): PRIVATE_CFLAGS := $$(call local-host-tool,CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
 $$(OBJ): PRIVATE_CC     := $$(LOCAL_CC)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
@@ -151,7 +162,7 @@ SRC:=$(1)
 OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%$(LOCAL_CPP_EXTENSION)=%.o))
 LOCAL_OBJECTS += $$(OBJ)
 DEPENDENCY_DIRS += $$(dir $$(OBJ))
-$$(OBJ): PRIVATE_CFLAGS := $$(CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
+$$(OBJ): PRIVATE_CFLAGS := $$(call local-host-tool,CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
 $$(OBJ): PRIVATE_CXX    := $$(LOCAL_CC)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
@@ -204,4 +215,3 @@ define transform-generated-source
 @mkdir -p $(dir $@)
 $(hide) $(PRIVATE_CUSTOM_TOOL)
 endef
-
