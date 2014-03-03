@@ -488,7 +488,7 @@ static int hax_vcpu_interrupt(CPUX86State *env)
         }
     }
 
-    /* 
+    /*
      * If we have an interrupt pending but the guest is not ready to
      * receive it, request an interrupt window exit.  This will cause
      * a return to userspace as soon as the guest is ready to receive

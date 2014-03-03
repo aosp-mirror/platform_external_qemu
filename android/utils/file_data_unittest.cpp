@@ -20,7 +20,7 @@ public:
     ScopedFileData(const void* buff, size_t length) {
         mStatus = fileData_initFromMemory(&mFileData, buff, length);
     }
-    
+
     explicit ScopedFileData(const ScopedFileData& other) {
         mStatus = fileData_initFrom(&mFileData, other.ptr());
     }
@@ -28,9 +28,9 @@ public:
     explicit ScopedFileData(const FileData* other) {
         mStatus = fileData_initFrom(&mFileData, other);
     }
-    
+
     ~ScopedFileData() { fileData_done(&mFileData); }
-    
+
     int status() const { return mStatus; }
     FileData* ptr() { return &mFileData; }
     const FileData* ptr() const { return &mFileData; }
@@ -43,7 +43,7 @@ private:
 
 TEST(FileData, IsValid) {
     EXPECT_FALSE(fileData_isValid(NULL));
-    
+
     FileData fakeData = { (uint8_t*)0x012345678, 12345, 23983 };
     EXPECT_FALSE(fileData_isValid(&fakeData));
 }
@@ -92,7 +92,7 @@ TEST(FileData, InitFromOther) {
 
     ScopedFileData data2(data1.ptr());
     EXPECT_EQ(0, data2.status());
-    
+
     EXPECT_EQ(data1->size, data2->size);
     EXPECT_NE(data1->data, data2->data);
     for (size_t n = 0; n < data1->size; ++n) {
@@ -109,7 +109,7 @@ TEST(FileData, Swap) {
     ScopedFileData data2;
     EXPECT_EQ(0, data2.status());
     fileData_swap(data1.ptr(), data2.ptr());
-    
+
     EXPECT_TRUE(fileData_isEmpty(data1.ptr()));
     EXPECT_FALSE(fileData_isEmpty(data2.ptr()));
     EXPECT_EQ(sizeof kData, data2->size);

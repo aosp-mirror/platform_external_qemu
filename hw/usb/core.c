@@ -49,7 +49,7 @@ static int do_token_setup(USBDevice *s, USBPacket *p)
 
     if (p->len != 8)
         return USB_RET_STALL;
- 
+
     memcpy(s->setup_buf, p->data, 8);
     s->setup_len   = (s->setup_buf[7] << 8) | s->setup_buf[6];
     s->setup_index = 0;
@@ -57,9 +57,9 @@ static int do_token_setup(USBDevice *s, USBPacket *p)
     request = (s->setup_buf[0] << 8) | s->setup_buf[1];
     value   = (s->setup_buf[3] << 8) | s->setup_buf[2];
     index   = (s->setup_buf[5] << 8) | s->setup_buf[4];
- 
+
     if (s->setup_buf[0] & USB_DIR_IN) {
-        ret = s->handle_control(s, request, value, index, 
+        ret = s->handle_control(s, request, value, index,
                                 s->setup_len, s->data_buf);
         if (ret < 0)
             return ret;
@@ -88,7 +88,7 @@ static int do_token_in(USBDevice *s, USBPacket *p)
     request = (s->setup_buf[0] << 8) | s->setup_buf[1];
     value   = (s->setup_buf[3] << 8) | s->setup_buf[2];
     index   = (s->setup_buf[5] << 8) | s->setup_buf[4];
- 
+
     switch(s->setup_state) {
     case SETUP_STATE_ACK:
         if (!(s->setup_buf[0] & USB_DIR_IN)) {
@@ -196,7 +196,7 @@ int usb_generic_handle_packet(USBDevice *s, USBPacket *p)
 
     case USB_TOKEN_OUT:
         return do_token_out(s, p);
- 
+
     default:
         return USB_RET_STALL;
     }

@@ -120,7 +120,7 @@ void cpu_save(QEMUFile *f, void *opaque)
 
     qemu_put_be64s(f, &env->pat);
     qemu_put_be32s(f, &env->hflags2);
-    
+
     qemu_put_be64s(f, &env->vm_hsave);
     qemu_put_be64s(f, &env->vm_vmcb);
     qemu_put_be64s(f, &env->tsc_offset);

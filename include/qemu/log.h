@@ -14,7 +14,7 @@
 extern FILE *qemu_logfile;
 extern int qemu_loglevel;
 
-/* 
+/*
  * The new API:
  *
  */

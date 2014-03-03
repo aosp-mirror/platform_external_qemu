@@ -7,11 +7,17 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/utils/file_data_unittest.cpp \
   android/utils/property_file_unittest.cpp \
   android/utils/win32_cmdline_quote_unittest.cpp \
+  android/base/containers/PodVector_unittest.cpp \
+  android/base/containers/StringVector_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
   android/base/files/PathUtils_unittest.cpp \
+  android/base/files/ScopedStdioFile_unittest.cpp \
   android/base/Log_unittest.cpp \
+  android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/ScopedPtr_unittest.cpp \
+  android/base/String_unittest.cpp \
   android/base/StringView_unittest.cpp \
+  android/filesystems/ext4_utils_unittest.cpp \
 
 $(call start-emulator-program, emulator_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES)

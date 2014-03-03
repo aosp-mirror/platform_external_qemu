@@ -19,7 +19,7 @@ int slirp_can_output(void);
 void slirp_output(const uint8_t *pkt, int pkt_len);
 
 void slirp_redir_loop(void (*func)(void *opaque, int is_udp,
-                                  struct in_addr *laddr, u_int lport,              
+                                  struct in_addr *laddr, u_int lport,
                                   struct in_addr *faddr, u_int fport),
                      void *opaque);
 int slirp_redir_rm(int is_udp, int host_port);

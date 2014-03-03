@@ -1437,11 +1437,21 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
     window->layout = layout;
 
     disp = window->layout.displays;
-    if (disp != NULL && window->onion)
-        display_set_onion( disp,
-                           window->onion,
-                           window->onion_rotation,
-                           window->onion_alpha );
+    if (disp != NULL) {
+        if (slayout->onion_image) {
+            // Onion was specified in layout file.
+            display_set_onion( disp,
+                               slayout->onion_image,
+                               slayout->onion_rotation,
+                               slayout->onion_alpha );
+        } else if (window->onion) {
+            // Onion was specified via command line.
+            display_set_onion( disp,
+                               window->onion,
+                               window->onion_rotation,
+                               window->onion_alpha );
+        }
+    }
 
     skin_window_resize(window);
 
