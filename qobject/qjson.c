@@ -242,7 +242,7 @@ static void to_json(const QObject *obj, QString *str, int pretty, int indent)
         } else {
             buffer[len] = 0;
         }
-        
+
         qstring_append(str, buffer);
         break;
     }

@@ -165,7 +165,7 @@ static int parse_macaddr(uint8_t *macaddr, const char *p)
     long int offset;
 
     errno = 0;
-    offset = strtol(p, &last_char, 0);    
+    offset = strtol(p, &last_char, 0);
     if (0 == errno && '\0' == *last_char &&
             offset >= 0 && offset <= 0xFFFFFF) {
         macaddr[3] = (offset & 0xFF0000) >> 16;
@@ -184,7 +184,7 @@ static int parse_macaddr(uint8_t *macaddr, const char *p)
                 p++;
             }
         }
-        return 0;    
+        return 0;
     }
 
     return -1;

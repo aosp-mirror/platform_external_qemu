@@ -17,7 +17,7 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
     unsigned char **rowptrs = 0;
     png_structp p = 0;
     png_infop pi = 0;
-    
+
     png_uint_32 width, height;
     int bitdepth, colortype, imethod, cmethod, fmethod, i;
 
@@ -32,7 +32,7 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
         LOG("%s: failed to allocate png info struct\n", fn);
         goto oops;
     }
-        
+
     fp = fopen(fn, "rb");
     if(fp == 0) {
         LOG("%s: failed to open file\n", fn);
@@ -43,7 +43,7 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
         LOG("%s: failed to read header\n", fn);
         goto oops;
     }
-    
+
     if(png_sig_cmp(header, 0, 8)) {
         LOG("%s: header is not a PNG header\n", fn);
         goto oops;
@@ -81,7 +81,7 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
             png_set_filler(p, 0xff, PNG_FILLER_AFTER);
         }
         break;
-        
+
     case PNG_COLOR_TYPE_RGB_ALPHA:
         break;
 
@@ -89,7 +89,7 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
         if(bitdepth < 8) {
             png_set_gray_1_2_4_to_8(p);
         }
-        
+
     default:
         LOG("%s: unsupported (grayscale?) color type\n");
         goto oops;
@@ -110,17 +110,17 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
     for(i = 0; i < height; i++) {
         rowptrs[i] = data + ((width * 4) * i);
     }
-    
+
     png_read_image(p, rowptrs);
-    
+
     png_destroy_read_struct(&p, &pi, 0);
     fclose(fp);
     if(rowptrs != 0) free(rowptrs);
 
     *_width = width;
     *_height = height;
-    
-    return (void*) data;    
+
+    return (void*) data;
 }
 
 
@@ -251,7 +251,7 @@ void *readpng(const unsigned char *base, size_t   size, unsigned *_width, unsign
     *_width = width;
     *_height = height;
 
-    return (void*) data;    
+    return (void*) data;
 }
 
 
@@ -260,7 +260,7 @@ int main(int argc, char **argv)
 {
     unsigned w,h;
     unsigned char *data;
-    
+
     if(argc < 2) return 0;
 
 

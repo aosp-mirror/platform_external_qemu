@@ -226,7 +226,7 @@ report_console( const char*  proto_port, int  console_port )
  */
 void  android_emulation_setup( void )
 {
-    int   tries     = 16;
+    int   tries     = MAX_ANDROID_EMULATORS;
     int   base_port = 5554;
     int   adb_host_port = 5037; // adb's default
     int   success   = 0;

@@ -53,6 +53,7 @@
 #include "android/charpipe.h"
 #include "android/log-rotate.h"
 #include "modem_driver.h"
+#include "android/filesystems/ext4_utils.h"
 #include "android/gps.h"
 #include "android/hw-kmsg.h"
 #include "android/hw-pipe-net.h"
@@ -3268,6 +3269,10 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
+    bool systemImageIsExt4 = false;
+    bool dataImageIsExt4 = false;
+    bool cacheImageIsExt4 = false;
+
     /* Initialize system partition image */
     {
         char        tmp[PATH_MAX+32];
@@ -3281,7 +3286,9 @@ int main(int argc, char **argv, char **envp)
 
         snprintf(tmp,sizeof(tmp),"system,size=0x%" PRIx64, sysBytes);
 
+        const char* imageFile = NULL;
         if (sysImage && *sysImage) {
+            imageFile = sysImage;
             if (filelock_create(sysImage) == NULL) {
                 fprintf(stderr,"WARNING: System image already in use, changes will not persist!\n");
                 /* If there is no file= parameters, nand_add_dev will create
@@ -3292,6 +3299,7 @@ int main(int argc, char **argv, char **envp)
             }
         }
         if (initImage && *initImage) {
+            imageFile = initImage;
             if (!path_exists(initImage)) {
                 PANIC("Invalid initial system image path: %s", initImage);
             }
@@ -3300,11 +3308,14 @@ int main(int argc, char **argv, char **envp)
         } else {
             PANIC("Missing initial system image path!");
         }
-        if (android_hw->hw_useext4) {
+        systemImageIsExt4 = imageFile && android_pathIsExt4PartitionImage(imageFile);
+        if (systemImageIsExt4) {
             /* Using a nand device to approximate a block device until full
              * support is added */
             pstrcat(tmp,sizeof(tmp),",pagesize=512,extrasize=0");
         }
+        VERBOSE_PRINT(init, "System partition format: %s",
+               systemImageIsExt4 ? "ext4" : "yaffs2");
         nand_add_dev(tmp);
     }
 
@@ -3321,6 +3332,7 @@ int main(int argc, char **argv, char **envp)
 
         snprintf(tmp,sizeof(tmp),"userdata,size=0x%" PRIx64, dataBytes);
 
+        const char* imageFile = dataImage;
         if (dataImage && *dataImage) {
             if (filelock_create(dataImage) == NULL) {
                 fprintf(stderr, "WARNING: Data partition already in use. Changes will not persist!\n");
@@ -3338,14 +3350,18 @@ int main(int argc, char **argv, char **envp)
             }
         }
         if (initImage && *initImage) {
+            imageFile = initImage;
             pstrcat(tmp, sizeof(tmp), ",initfile=");
             pstrcat(tmp, sizeof(tmp), initImage);
         }
-        if (android_hw->hw_useext4) {
+        dataImageIsExt4 = imageFile && android_pathIsExt4PartitionImage(imageFile);
+        if (dataImageIsExt4) {
             /* Using a nand device to approximate a block device until full
              * support is added */
             pstrcat(tmp, sizeof(tmp), ",pagesize=512,extrasize=0");
         }
+        VERBOSE_PRINT(init, "Data partition format: %s",
+               dataImageIsExt4 ? "ext4" : "yaffs2");
         nand_add_dev(tmp);
     }
 
@@ -3571,6 +3587,9 @@ int main(int argc, char **argv, char **envp)
 
         snprintf(tmp,sizeof(tmp),"cache,size=0x%" PRIx64, partSize);
 
+        // NOTE: Assume the /cache and /data partitions have the same format
+        cacheImageIsExt4 = dataImageIsExt4;
+
         if (partPath && *partPath && strcmp(partPath, "<temp>") != 0) {
             if (filelock_create(partPath) == NULL) {
                 fprintf(stderr, "WARNING: Cache partition already in use. Changes will not persist!\n");
@@ -3579,6 +3598,7 @@ int main(int argc, char **argv, char **envp)
             } else {
                 /* Create the file if needed */
                 if (!path_exists(partPath)) {
+                    // TODO(digit): For EXT4, create a real empty ext4 partition image.
                     if (path_empty_file(partPath) < 0) {
                         PANIC("Could not create cache image file %s: %s", partPath, strerror(errno));
                     }
@@ -3587,11 +3607,13 @@ int main(int argc, char **argv, char **envp)
                 pstrcat(tmp, sizeof(tmp), partPath);
             }
         }
-        if (android_hw->hw_useext4) {
+        if (cacheImageIsExt4) {
             /* Using a nand device to approximate a block device until full
              * support is added */
             pstrcat(tmp, sizeof(tmp), ",pagesize=512,extrasize=0");
         }
+        VERBOSE_PRINT(init, "Cache partition format: %s",
+               cacheImageIsExt4 ? "ext4" : "yaffs2");
         nand_add_dev(tmp);
     }
 
@@ -3664,7 +3686,7 @@ int main(int argc, char **argv, char **envp)
         }
         qemu_set_log(mask);
     }
-  
+
 #if defined(CONFIG_KVM)
     if (kvm_allowed < 0) {
         kvm_allowed = kvm_check_allowed();

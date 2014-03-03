@@ -298,6 +298,7 @@ EOF
         AR=ar
     fi
     log "AR         : archiver ($AR)"
+    clean_temp
 }
 
 # try to compile the current source file in $TMPC into an object
@@ -401,6 +402,7 @@ feature_check_link ()
     CFLAGS=$OLD_CFLAGS
     LDFLAGS=$OLD_LDFLAGS
     eval $1=$result_cl
+    clean_temp
 }
 
 # check that a given C header file exists on the host system
@@ -422,6 +424,7 @@ EOF
     eval $1=$result_ch
     #eval result=$`echo $1`
     #log  "Host       : $1=$result_ch"
+    clean_temp
 }
 
 # run the test program that is in $TMPC and set its exit status
@@ -441,6 +444,7 @@ feature_run_exec ()
     LDFLAGS="$OLD_LDFLAGS"
     eval $1=$run_exec_result
     log "Host       : $1=$run_exec_result"
+    clean_temp
 }
 
 ## Android build system auto-detection

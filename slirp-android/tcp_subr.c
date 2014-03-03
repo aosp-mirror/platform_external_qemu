@@ -469,7 +469,7 @@ int tcp_fconnect(struct socket *so)
     }
     /*-------------------------------------------------------------*/
 
-    if ((ret=so->s=socket_create_inet(SOCKET_STREAM)) >= 0) 
+    if ((ret=so->s=socket_create_inet(SOCKET_STREAM)) >= 0)
     {
         int  s = so->s;
 
