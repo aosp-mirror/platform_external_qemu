@@ -51,6 +51,8 @@ define intermediates-dir-for
 $(OBJS_DIR)/intermediates/$(2)
 endef
 
+local-intermediates-dir = $(OBJS_DIR)/intermediates/$(LOCAL_MODULE)
+
 # Generate the full path of a given static library
 define library-path
 $(OBJS_DIR)/libs/$(1).a
@@ -58,6 +60,10 @@ endef
 
 define executable-path
 $(OBJS_DIR)/$(1)$(EXE)
+endef
+
+define shared-library-path
+$(OBJS_DIR)/lib/$(1)$(HOST_DLLEXT)
 endef
 
 # Compile a C source file
@@ -137,6 +143,24 @@ $$(OBJ): $$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
+	$(hide) $$(BUILD_SYSTEM)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+endef
+
+define compile-generated-cxx-source
+SRC:=$(1)
+OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%$(LOCAL_CPP_EXTENSION)=%.o))
+LOCAL_OBJECTS += $$(OBJ)
+DEPENDENCY_DIRS += $$(dir $$(OBJ))
+$$(OBJ): PRIVATE_CFLAGS := $$(CFLAGS) $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
+$$(OBJ): PRIVATE_CXX    := $$(LOCAL_CC)
+$$(OBJ): PRIVATE_OBJ    := $$(OBJ)
+$$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
+$$(OBJ): PRIVATE_SRC    := $$(SRC)
+$$(OBJ): PRIVATE_SRC0   := $$(SRC)
+$$(OBJ): $$(SRC)
+	@mkdir -p $$(dir $$(PRIVATE_OBJ))
+	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
+	$(hide) $$(PRIVATE_CXX) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
 	$(hide) $$(BUILD_SYSTEM)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 

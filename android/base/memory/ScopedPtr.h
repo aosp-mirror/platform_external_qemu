@@ -68,7 +68,7 @@ public:
     // Return a reference to the scoped object. Allows one to
     // write (*foo).DoStuff().
     T& operator*() { return *mPtr; }
-    
+
     // Return a pointer to the scoped object. Allows one to write
     // foo->DoStuff().
     T* operator->() { return mPtr; }

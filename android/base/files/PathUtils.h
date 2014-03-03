@@ -12,10 +12,8 @@
 #ifndef ANDROID_BASE_FILES_PATH_UTIL_H
 #define ANDROID_BASE_FILES_PATH_UTIL_H
 
-#include <stddef.h>
-
-#include <string>
-#include <vector>
+#include "android/base/containers/StringVector.h"
+#include "android/base/String.h"
 
 namespace android {
 namespace base {
@@ -44,7 +42,7 @@ public:
 
     // Return true if |ch| is a directory separator for a given |hostType|.
     static bool isDirSeparator(int ch, HostType hostType);
-    
+
     // Return true if |ch| is a directory separator for the current platform.
     static inline bool isDirSeparator(int ch) {
         return isDirSeparator(ch, HOST_TYPE);
@@ -67,16 +65,16 @@ public:
     //    <drive>:<sep>
     //    <sep><sep>volumeName<sep>
     static size_t rootPrefixSize(const char* path, HostType hostType);
-    
+
     // Return the root prefix for the current platform. See above for
     // documentation.
     static inline size_t rootPrefixSize(const char* path) {
         return rootPrefixSize(path, HOST_TYPE);
     }
-    
+
     // Return true iff |path| is an absolute path for a given |hostType|.
     static bool isAbsolute(const char* path, HostType hostType);
-    
+
     // Return true iff |path| is an absolute path for the current host.
     static inline bool isAbsolute(const char* path) {
         return isAbsolute(path, HOST_TYPE);
@@ -91,12 +89,11 @@ public:
     // each one being a path component (prefix or subdirectory or file
     // name). Directory separators do not appear in components, except
     // for the root prefix, if any.
-    static std::vector<std::string> decompose(const char* path,
-                                              HostType hostType);
-    
+    static StringVector decompose(const char* path, HostType hostType);
+
     // Decompose |path| into individual components for the host platform.
     // See comments above for more details.
-    static inline std::vector<std::string> decompose(const char* path) {
+    static inline StringVector decompose(const char* path) {
         return decompose(path, HOST_TYPE);
     }
 
@@ -106,22 +103,21 @@ public:
     // first component is a root prefix, it will be kept as is, i.e.:
     //   [ 'C:', 'foo' ] -> 'C:foo' on Win32, but not Posix where it will
     // be 'C:/foo'.
-    static std::string recompose(const std::vector<std::string>& components,
+    static String recompose(const StringVector& components,
                                  HostType hostType);
-    
+
     // Recompose a path from individual components into a file path string
     // for the current host. |components| is a vector os strings.
     // Returns a new file path string.
-    static inline std::string recompose(
-            const std::vector<std::string>& components) {
+    static inline String recompose(const StringVector& components) {
         return recompose(components, HOST_TYPE);
     }
-    
+
     // Given a list of components returned by decompose(), simplify it
     // by removing instances of '.' and '..' when that makes sense.
     // Note that it is not possible to simplify initial instances of
     // '..', i.e. "foo/../../bar" -> "../bar"
-    static void simplifyComponents(std::vector<std::string>* components);
+    static void simplifyComponents(StringVector* components);
 };
 
 // Useful shortcuts to avoid too much typing.

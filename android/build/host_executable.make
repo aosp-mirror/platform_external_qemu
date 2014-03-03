@@ -20,7 +20,10 @@ include $(BUILD_SYSTEM)/binary.make
 
 LOCAL_LIBRARIES := $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call library-path,$(lib)))
 
-LOCAL_LDLIBS := $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call library-path,$(lib))) $(LOCAL_LDLIBS)
+LOCAL_LDLIBS := \
+    $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call library-path,$(lib))) \
+    $(foreach lib,$(LOCAL_SHARED_LIBRARIES),$(call shared-library-path,$(lib))) \
+    $(LOCAL_LDLIBS)
 
 $(LOCAL_BUILT_MODULE): PRIVATE_LDFLAGS := $(LDFLAGS) $(LOCAL_LDFLAGS)
 $(LOCAL_BUILT_MODULE): PRIVATE_LDLIBS  := $(LOCAL_LDLIBS)
@@ -33,4 +36,5 @@ $(LOCAL_BUILT_MODULE): $(LOCAL_OBJECTS) $(LOCAL_LIBRARIES)
 
 EXECUTABLES += $(LOCAL_BUILT_MODULE)
 $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call library-path,$(lib)))
+$(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_SHARED_LIBRARIES),$(call shared-library-path,$(lib)))
 

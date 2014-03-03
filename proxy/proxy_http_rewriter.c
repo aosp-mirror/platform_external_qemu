@@ -442,7 +442,7 @@ rewrite_connection_read_request( RewriteConnection*  conn )
 
         method = strsep(&p, " ");
         if (p == NULL) {
-            PROXY_LOG("%s: can't parse method in '%'", 
+            PROXY_LOG("%s: can't parse method in '%'",
                       root->name, line);
             return DATA_ERROR;
         }
@@ -690,7 +690,7 @@ rewrite_connection_get_body_length( RewriteConnection*  conn,
         conn->body_mode = BODY_UNTIL_CLOSE;
     }
     D("%s: body_length=%lld body_mode=%s",
-      root->name, conn->body_length, 
+      root->name, conn->body_length,
       body_mode_str[conn->body_mode]);
 
     proxy_connection_rewind(root);
@@ -832,7 +832,7 @@ rewrite_connection_read_body( RewriteConnection*  conn, int  fd )
     if (avail <= 0) {
         /* wait for some flush */
         conn->body_is_full = 1;
-        D("%s: waiting to flush %d bytes", 
+        D("%s: waiting to flush %d bytes",
           root->name, current);
         return DATA_NEED_MORE;
     }
@@ -849,7 +849,7 @@ rewrite_connection_read_body( RewriteConnection*  conn, int  fd )
             /* a disconnection here is normal and signals the
              * end of the body */
             conn->body_total    += root->str_recv;
-            D("%s: body completed by close (%lld bytes)", 
+            D("%s: body completed by close (%lld bytes)",
                 root->name, conn->body_total);
             conn->body_is_closed = 1;
             ret = DATA_COMPLETED;
@@ -864,7 +864,7 @@ rewrite_connection_read_body( RewriteConnection*  conn, int  fd )
             conn->chunk_length -= avail;
 
             if (conn->chunk_length == 0) {
-                D("%s: chunk completed (%lld bytes)", 
+                D("%s: chunk completed (%lld bytes)",
                     root->name, conn->chunk_total);
                 conn->body_total  += conn->chunk_total;
                 conn->chunk_total  = 0;
@@ -878,7 +878,7 @@ rewrite_connection_read_body( RewriteConnection*  conn, int  fd )
             conn->body_total  += avail;
 
             if (conn->body_length == 0) {
-                D("%s: body completed (%lld bytes)", 
+                D("%s: body completed (%lld bytes)",
                     root->name, conn->body_total);
                 conn->body_is_closed = 1;
                 ret = DATA_COMPLETED;

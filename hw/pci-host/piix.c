@@ -176,7 +176,7 @@ PCIBus *i440fx_init(PCIDevice **pi440fx_state, qemu_irq *pic)
     I440FXState *s;
 
     s = g_malloc0(sizeof(I440FXState));
-    b = pci_register_bus(NULL, "pci", 
+    b = pci_register_bus(NULL, "pci",
                          piix3_set_irq, pci_slot_get_pirq, pic, 0, 4);
     s->bus = b;
 

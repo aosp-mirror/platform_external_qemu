@@ -64,7 +64,7 @@ auserConfig_new( AvdInfo*  info )
     if (inAndroidBuild) {
         p = bufprint_config_file(temp, end, USER_CONFIG_FILE);
     } else {
-        p = bufprint(temp, end, "%s/%s", avdInfo_getContentPath(info), 
+        p = bufprint(temp, end, "%s/%s", avdInfo_getContentPath(info),
                      USER_CONFIG_FILE);
     }
 

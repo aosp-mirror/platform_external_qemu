@@ -212,7 +212,7 @@ static const uint8_t json_lexer[][256] =  {
         ['\t'] = IN_WHITESPACE,
         ['\r'] = IN_WHITESPACE,
         ['\n'] = IN_WHITESPACE,
-    },        
+    },
 
     /* escape */
     [IN_ESCAPE_LL] = {
