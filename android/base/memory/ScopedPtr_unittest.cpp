@@ -23,7 +23,7 @@ public:
     void DoIncrement() {
         (*mCountPtr)++;
     }
-    
+
     ~Foo() {
         DoIncrement();
     }

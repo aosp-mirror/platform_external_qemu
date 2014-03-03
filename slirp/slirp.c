@@ -691,7 +691,7 @@ void if_encap(const uint8_t *ip_data, int ip_data_len)
 
     if (ip_data_len + ETH_HLEN > sizeof(buf))
         return;
-    
+
     if (!memcmp(client_ethaddr, zero_ethaddr, ETH_ALEN)) {
         uint8_t arp_req[ETH_HLEN + sizeof(struct arphdr)];
         struct ethhdr *reh = (struct ethhdr *)arp_req;
@@ -853,7 +853,7 @@ void slirp_socket_recv(int addr_low_byte, int guest_port, const uint8_t *buf,
 {
     int ret;
     struct socket *so = slirp_find_ctl_socket(addr_low_byte, guest_port);
-   
+
     if (!so)
         return;
 

@@ -863,8 +863,8 @@ static void win32_rearm_timer(struct qemu_alarm_timer *t)
 
 #endif /* _WIN32 */
 
-static void alarm_timer_on_change_state_rearm(void *opaque, 
-                                              int running, 
+static void alarm_timer_on_change_state_rearm(void *opaque,
+                                              int running,
                                               int reason)
 {
     if (running)

@@ -29,12 +29,12 @@ namespace base {
 using namespace ::android::base::testing;
 
 class EintrWrapperTest : public ::testing::Test, LogOutput {
-public:    
-    EintrWrapperTest() : 
+public:
+    EintrWrapperTest() :
             mFatal(false),
             mLogged(true),
             mPrevious(LogOutput::setNewOutput(this)) {}
-    
+
     ~EintrWrapperTest() {
         LogOutput::setNewOutput(mPrevious);
     }
@@ -47,7 +47,7 @@ public:
         if (mFatal)
             longjmp(mJumper, 1);
     }
-    
+
 protected:
     bool mFatal;
     bool mLogged;
@@ -55,7 +55,7 @@ protected:
     jmp_buf mJumper;
 };
 
-    
+
 // Loop counter used by several functions below.
 static int gLoopCount = 0;
 

@@ -211,7 +211,7 @@ static int kvm_has_msr_star(CPUX86State *env)
     int ret;
 
     /* first time */
-    if (has_msr_star == 0) {        
+    if (has_msr_star == 0) {
         struct kvm_msr_list msr_list, *kvm_msr_list;
 
         has_msr_star = -1;
@@ -269,7 +269,7 @@ int kvm_arch_init(KVMState *s, int smp_cpus)
      */
     return kvm_vm_ioctl(s, KVM_SET_TSS_ADDR, 0xfffbd000);
 }
-                    
+
 static void set_v8086_seg(struct kvm_segment *lhs, const SegmentCache *rhs)
 {
     lhs->selector = rhs->selector;
@@ -503,7 +503,7 @@ int kvm_get_sregs(CPUX86State *env)
     if (ret < 0)
         return ret;
 
-    memcpy(env->interrupt_bitmap, 
+    memcpy(env->interrupt_bitmap,
            sregs.interrupt_bitmap,
            sizeof(sregs.interrupt_bitmap));
 
@@ -751,7 +751,7 @@ int kvm_arch_post_run(CPUX86State *env, struct kvm_run *run)
         env->eflags |= IF_MASK;
     else
         env->eflags &= ~IF_MASK;
-    
+
     cpu_set_apic_tpr(env, run->cr8);
     cpu_set_apic_base(env, run->apic_base);
 

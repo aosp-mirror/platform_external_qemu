@@ -235,7 +235,7 @@ qemu_irq *armv7m_init(int flash_size, int sram_size,
        space.  This stops qemu complaining about executing code outside RAM
        when returning from an exception.  */
     cpu_register_physical_memory(0xfffff000, 0x1000,
-                                 qemu_ram_alloc(NULL, "armv7m.hack", 
+                                 qemu_ram_alloc(NULL, "armv7m.hack",
                                                 0x1000) | IO_MEM_RAM);
     return pic;
 }

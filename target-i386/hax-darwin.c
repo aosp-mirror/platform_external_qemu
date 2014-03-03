@@ -198,7 +198,7 @@ int hax_notify_qemu_version(hax_fd vm_fd, struct hax_qemu_version *qversion)
     return 0;
 }
 
-/* 
+/*
  * Simply assume that the size should be bigger than the hax_tunnel,
  * since the hax_tunnel can be extended later with backward
  * compatibility.
