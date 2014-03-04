@@ -28,6 +28,8 @@ GLES_LIBS=
 GLES_SUPPORT=no
 GLES_PROBE=yes
 
+PCBIOS_PROBE=yes
+
 HOST_CC=${CC:-gcc}
 OPTION_CC=
 
@@ -66,6 +68,8 @@ for opt do
   ;;
   --no-gles) GLES_PROBE=no
   ;;
+  --no-pcbios) PCBIOS_PROBE=no
+  ;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -93,9 +97,9 @@ EOF
     echo "  --static                 build a completely static executable"
     echo "  --verbose                verbose configuration"
     echo "  --debug                  build debug version of the emulator"
-    echo "  --gles-include=PATH      specify path to GLES emulation headers"
     echo "  --gles-libs=PATH         specify path to GLES emulation host libraries"
     echo "  --no-gles                disable GLES emulation support"
+    echo "  --no-pcbios              disable copying of PC Bios files"
     echo ""
     exit 1
 fi
@@ -272,6 +276,24 @@ if [ "$GLES_SUPPORT" = "yes" ]; then
             log "GLES       : Copying $GLES_LIB"
         fi
     done
+fi
+
+if [ "$PCBIOS_PROBE" = "yes" ]; then
+    PCBIOS_DIR=$(dirname "$0")/../../prebuilts/qemu-kernel/x86/pc-bios
+    if [ ! -d "$PCBIOS_DIR" ]; then
+        log2 "PC Bios    : Probing $PCBIOS_DIR (missing)"
+        PCBIOS_DIR=../pc-bios
+    fi
+    log2 "PC Bios    : Probing $PCBIOS_DIR"
+    if [ ! -d "$PCBIOS_DIR" ]; then
+        log "PC Bios    : Could not find prebuilts directory."
+    else
+        mkdir -p objs/lib/pc-bios
+        for BIOS_FILE in bios.bin vgabios-cirrus.bin; do
+            log "PC Bios    : Copying $BIOS_FILE"
+            cp -f $PCBIOS_DIR/$BIOS_FILE objs/lib/pc-bios/$BIOS_FILE
+        done
+    fi
 fi
 
 # For OS X, detect the location of the SDK to use.
