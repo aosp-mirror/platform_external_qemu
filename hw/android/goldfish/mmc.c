@@ -49,6 +49,11 @@ enum {
     /* MMC state flags */
     MMC_STATE               = 0x2C,
 
+    /* 64-bit guest CPUs only */
+
+    /* Set high 32-bits of buffer address */
+    MMC_SET_BUFFER_HIGH     = 0x30,
+
     /* MMC_INT_STATUS bits */
 
     MMC_STAT_END_OF_CMD     = 1U << 0,
@@ -65,7 +70,7 @@ struct goldfish_mmc_state {
     struct goldfish_device dev;
     BlockDriverState *bs;
     // pointer to our buffer
-    uint32_t buffer_address;
+    uint64_t buffer_address;
     // offsets for read and write operations
     uint32_t read_offset, write_offset;
     // buffer status flags
@@ -84,10 +89,13 @@ struct goldfish_mmc_state {
     uint8_t* buf;
 };
 
-#define  GOLDFISH_MMC_SAVE_VERSION  2
+#define  GOLDFISH_MMC_SAVE_VERSION  3
+#define  GOLDFISH_MMC_SAVE_VERSION_LEGACY  2
+
+// Note: This doesn't include |buffer_address| which is saved and loaded
+//       explictly below to support legacy encodings.
 #define  QFIELD_STRUCT  struct goldfish_mmc_state
 QFIELD_BEGIN(goldfish_mmc_fields)
-    QFIELD_INT32(buffer_address),
     QFIELD_INT32(read_offset),
     QFIELD_INT32(write_offset),
     QFIELD_INT32(int_status),
@@ -106,6 +114,7 @@ static void  goldfish_mmc_save(QEMUFile*  f, void*  opaque)
 {
     struct goldfish_mmc_state*  s = opaque;
 
+    qemu_put_be64(f, s->buffer_address);
     qemu_put_struct(f, goldfish_mmc_fields, s);
 }
 
@@ -113,9 +122,14 @@ static int  goldfish_mmc_load(QEMUFile*  f, void*  opaque, int  version_id)
 {
     struct goldfish_mmc_state*  s = opaque;
 
-    if (version_id != GOLDFISH_MMC_SAVE_VERSION)
+    if (version_id == GOLDFISH_MMC_SAVE_VERSION) {
+        s->buffer_address = qemu_get_be64(f);
+    } else if (version_id == GOLDFISH_MMC_SAVE_VERSION_LEGACY) {
+        s->buffer_address = qemu_get_be32(f);
+    } else {
+        // Unsupported version!
         return -1;
-
+    }
     return qemu_get_struct(f, goldfish_mmc_fields, s);
 }
 
@@ -468,7 +482,11 @@ static void goldfish_mmc_write(void *opaque, hwaddr offset, uint32_t val)
             break;
         case MMC_SET_BUFFER:
             /* save pointer to buffer 1 */
-            s->buffer_address = val;
+            uint64_set_low(&s->buffer_address, val);
+            break;
+        case MMC_SET_BUFFER_HIGH:
+            /* save pointer to buffer 1 */
+            uint64_set_high(&s->buffer_address, val);
             break;
         case MMC_CMD:
             goldfish_mmc_do_command(s, val, s->arg);
