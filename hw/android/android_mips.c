@@ -167,7 +167,13 @@ static void android_mips_init_(ram_addr_t ram_size,
 
     env = cpu_init(cpu_model);
 
-    register_savevm( "cpu", 0, MIPS_CPU_SAVE_VERSION, cpu_save, cpu_load, env );
+    register_savevm(NULL,
+                    "cpu",
+                    0,
+                    MIPS_CPU_SAVE_VERSION,
+                    cpu_save,
+                    cpu_load,
+                    env);
 
     if (ram_size > GOLDFISH_IO_SPACE)
         ram_size = GOLDFISH_IO_SPACE;   /* avoid overlap of ram and IO regs */

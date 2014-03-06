@@ -533,7 +533,12 @@ void goldfish_mmc_init(uint32_t base, int id, BlockDriverState* bs)
 
     goldfish_device_add(&s->dev, goldfish_mmc_readfn, goldfish_mmc_writefn, s);
 
-    register_savevm( "goldfish_mmc", 0, GOLDFISH_MMC_SAVE_VERSION,
-                     goldfish_mmc_save, goldfish_mmc_load, s);
+    register_savevm(NULL,
+                    "goldfish_mmc",
+                    0,
+                    GOLDFISH_MMC_SAVE_VERSION,
+                    goldfish_mmc_save,
+                    goldfish_mmc_load,
+                    s);
 }
 

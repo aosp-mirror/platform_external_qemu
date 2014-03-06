@@ -261,6 +261,7 @@ DisplayType display_type = DT_DEFAULT;
 const char* keyboard_layout = NULL;
 int64_t ticks_per_sec;
 ram_addr_t ram_size;
+bool xen_allowed;
 const char *mem_path = NULL;
 #ifdef MAP_POPULATE
 int mem_prealloc = 0; /* force preallocation of physical target memory */
@@ -3861,8 +3862,18 @@ int main(int argc, char **argv, char **envp)
     if (qemu_opts_foreach(qemu_find_opts("drive"), drive_init_func, &machine->use_scsi, 1) != 0)
         exit(1);
 
-    //register_savevm("timer", 0, 2, timer_save, timer_load, &timers_state);
-    register_savevm_live("ram", 0, 3, ram_save_live, NULL, ram_load, NULL);
+    //register_savevm(NULL, "timer", 0, 2, timer_save, timer_load, &timers_state);
+
+    SaveVMHandlers* ops = g_malloc0(sizeof(*ops));
+    ops->save_live_state = ram_save_live;
+    ops->load_state = ram_load;
+
+    register_savevm_live(NULL,
+                         "ram",
+                         0,
+                         3,
+                         ops,
+                         NULL);
 
     /* must be after terminal init, SDL library changes signal handlers */
     os_setup_signal_handling();

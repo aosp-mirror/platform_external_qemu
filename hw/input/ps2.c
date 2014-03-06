@@ -591,7 +591,7 @@ void *ps2_kbd_init(void (*update_irq)(void *, int), void *update_arg)
     s->common.update_arg = update_arg;
     s->scancode_set = 2;
     ps2_reset(&s->common);
-    register_savevm("ps2kbd", 0, 3, ps2_kbd_save, ps2_kbd_load, s);
+    register_savevm(NULL, "ps2kbd", 0, 3, ps2_kbd_save, ps2_kbd_load, s);
     //qemu_add_kbd_event_handler(ps2_put_keycode, s);
     qemu_register_reset(ps2_reset, 0, &s->common);
     return s;
@@ -604,7 +604,7 @@ void *ps2_mouse_init(void (*update_irq)(void *, int), void *update_arg)
     s->common.update_irq = update_irq;
     s->common.update_arg = update_arg;
     ps2_reset(&s->common);
-    register_savevm("ps2mouse", 0, 2, ps2_mouse_save, ps2_mouse_load, s);
+    register_savevm(NULL, "ps2mouse", 0, 2, ps2_mouse_save, ps2_mouse_load, s);
     //qemu_add_mouse_event_handler(ps2_mouse_event, s, 0, "QEMU PS/2 Mouse");
     qemu_register_reset(ps2_reset, 0, &s->common);
     return s;

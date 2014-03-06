@@ -136,11 +136,11 @@ static TranslationBlock *tb_find_slow(target_ulong pc,
     tb_invalidated_flag = 0;
 
     /* find translated block using physical mappings */
-    phys_pc = get_phys_addr_code(env, pc);
+    phys_pc = get_page_addr_code(env, pc);
     phys_page1 = phys_pc & TARGET_PAGE_MASK;
     phys_page2 = -1;
     h = tb_phys_hash_func(phys_pc);
-    ptb1 = &tb_phys_hash[h];
+    ptb1 = &tcg_ctx.tb_ctx.tb_phys_hash[h];
     for(;;) {
         tb = *ptb1;
         if (!tb)
@@ -153,7 +153,7 @@ static TranslationBlock *tb_find_slow(target_ulong pc,
             if (tb->page_addr[1] != -1) {
                 virt_page2 = (pc & TARGET_PAGE_MASK) +
                     TARGET_PAGE_SIZE;
-                phys_page2 = get_phys_addr_code(env, virt_page2);
+                phys_page2 = get_page_addr_code(env, virt_page2);
                 if (tb->page_addr[1] == phys_page2)
                     goto found;
             } else {
@@ -170,8 +170,8 @@ static TranslationBlock *tb_find_slow(target_ulong pc,
     /* Move the last found TB to the head of the list */
     if (likely(*ptb1)) {
         *ptb1 = tb->phys_hash_next;
-        tb->phys_hash_next = tb_phys_hash[h];
-        tb_phys_hash[h] = tb;
+        tb->phys_hash_next = tcg_ctx.tb_ctx.tb_phys_hash[h];
+        tcg_ctx.tb_ctx.tb_phys_hash[h] = tb;
     }
     /* we add the TB in the virtual pc hash table */
     env->tb_jmp_cache[tb_jmp_cache_hash_func(pc)] = tb;
@@ -198,12 +198,9 @@ static inline TranslationBlock *tb_find_fast(void)
 
 static CPUDebugExcpHandler *debug_excp_handler;
 
-CPUDebugExcpHandler *cpu_set_debug_excp_handler(CPUDebugExcpHandler *handler)
+void cpu_set_debug_excp_handler(CPUDebugExcpHandler *handler)
 {
-    CPUDebugExcpHandler *old_handler = debug_excp_handler;
-
     debug_excp_handler = handler;
-    return old_handler;
 }
 
 static void cpu_handle_debug_exception(CPUOldState *env)
@@ -624,7 +621,7 @@ int cpu_exec(CPUOldState *env1)
 #endif
                 }
 #endif /* DEBUG_DISAS || CONFIG_DEBUG_EXEC */
-                spin_lock(&tb_lock);
+                spin_lock(&tcg_ctx.tb_ctx.tb_lock);
                 tb = tb_find_fast();
                 /* Note: we do it here to avoid a gcc bug on Mac OS X when
                    doing it in tb_find_slow */
@@ -646,7 +643,7 @@ int cpu_exec(CPUOldState *env1)
                 if (next_tb != 0 && tb->page_addr[1] == -1) {
                     tb_add_jump((TranslationBlock *)(next_tb & ~3), next_tb & 3, tb);
                 }
-                spin_unlock(&tb_lock);
+                spin_unlock(&tcg_ctx.tb_ctx.tb_lock);
 
                 /* cpu_interrupt might be called while translating the
                    TB, but before it is linked into a potentially
@@ -745,7 +742,7 @@ void tb_invalidate_page_range(target_ulong start, target_ulong end)
        where NIP != read address on PowerPC */
 #if 0
     target_ulong phys_addr;
-    phys_addr = get_phys_addr_code(env, start);
+    phys_addr = get_page_addr_code(env, start);
     tb_invalidate_phys_page_range(phys_addr, phys_addr + end - start, 0);
 #endif
 }

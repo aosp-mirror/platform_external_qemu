@@ -665,7 +665,12 @@ void goldfish_audio_init(uint32_t base, int id, const char* input_source)
 
     goldfish_device_add(&s->dev, goldfish_audio_readfn, goldfish_audio_writefn, s);
 
-    register_savevm( "audio_state", 0, AUDIO_STATE_SAVE_VERSION,
-                     audio_state_save, audio_state_load, s );
+    register_savevm(NULL,
+                    "audio_state",
+                    0,
+                    AUDIO_STATE_SAVE_VERSION,
+                    audio_state_save,
+                    audio_state_load,
+                    s);
 }
 

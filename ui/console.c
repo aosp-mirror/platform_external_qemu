@@ -147,7 +147,7 @@ typedef enum {
 
 /* ??? This is mis-named.
    It is used for both text and graphical consoles.  */
-struct TextConsole {
+struct QEMUConsole {
     console_type_t console_type;
     DisplayState *ds;
     /* Graphic console state.  */
@@ -189,8 +189,8 @@ struct TextConsole {
 };
 
 static DisplayState *display_state;
-static TextConsole *active_console;
-static TextConsole *consoles[MAX_CONSOLES];
+static QEMUConsole *active_console;
+static QEMUConsole *consoles[MAX_CONSOLES];
 static int nb_consoles = 0;
 
 #ifdef CONFIG_ANDROID
@@ -216,7 +216,7 @@ void vga_hw_invalidate(void)
 
 void vga_hw_screen_dump(const char *filename)
 {
-    TextConsole *previous_active_console;
+    QEMUConsole *previous_active_console;
 
     previous_active_console = active_console;
     active_console = consoles[0];
@@ -545,7 +545,7 @@ static void vga_putcharxy(DisplayState *ds, int x, int y, int ch,
     }
 }
 
-static void text_console_resize(TextConsole *s)
+static void text_console_resize(QEMUConsole *s)
 {
     TextCell *cells, *c, *c1;
     int w1, x, y, last_width;
@@ -577,7 +577,7 @@ static void text_console_resize(TextConsole *s)
     s->cells = cells;
 }
 
-static inline void text_update_xy(TextConsole *s, int x, int y)
+static inline void text_update_xy(QEMUConsole *s, int x, int y)
 {
     s->text_x[0] = MIN(s->text_x[0], x);
     s->text_x[1] = MAX(s->text_x[1], x);
@@ -585,7 +585,7 @@ static inline void text_update_xy(TextConsole *s, int x, int y)
     s->text_y[1] = MAX(s->text_y[1], y);
 }
 
-static void invalidate_xy(TextConsole *s, int x, int y)
+static void invalidate_xy(QEMUConsole *s, int x, int y)
 {
     if (s->update_x0 > x * FONT_WIDTH)
         s->update_x0 = x * FONT_WIDTH;
@@ -597,7 +597,7 @@ static void invalidate_xy(TextConsole *s, int x, int y)
         s->update_y1 = (y + 1) * FONT_HEIGHT;
 }
 
-static void update_xy(TextConsole *s, int x, int y)
+static void update_xy(QEMUConsole *s, int x, int y)
 {
     TextCell *c;
     int y1, y2;
@@ -621,7 +621,7 @@ static void update_xy(TextConsole *s, int x, int y)
     }
 }
 
-static void console_show_cursor(TextConsole *s, int show)
+static void console_show_cursor(QEMUConsole *s, int show)
 {
     TextCell *c;
     int y, y1;
@@ -655,7 +655,7 @@ static void console_show_cursor(TextConsole *s, int show)
     }
 }
 
-static void console_refresh(TextConsole *s)
+static void console_refresh(QEMUConsole *s)
 {
     TextCell *c;
     int x, y, y1;
@@ -690,7 +690,7 @@ static void console_refresh(TextConsole *s)
 
 static void console_scroll(int ydelta)
 {
-    TextConsole *s;
+    QEMUConsole *s;
     int i, y1;
 
     s = active_console;
@@ -722,7 +722,7 @@ static void console_scroll(int ydelta)
     console_refresh(s);
 }
 
-static void console_put_lf(TextConsole *s)
+static void console_put_lf(QEMUConsole *s)
 {
     TextCell *c;
     int x, y1;
@@ -773,7 +773,7 @@ static void console_put_lf(TextConsole *s)
  * NOTE: I know this code is not very efficient (checking every color for it
  * self) but it is more readable and better maintainable.
  */
-static void console_handle_escape(TextConsole *s)
+static void console_handle_escape(QEMUConsole *s)
 {
     int i;
 
@@ -866,7 +866,7 @@ static void console_handle_escape(TextConsole *s)
     }
 }
 
-static void console_clear_xy(TextConsole *s, int x, int y)
+static void console_clear_xy(QEMUConsole *s, int x, int y)
 {
     int y1 = (s->y_base + y) % s->total_height;
     TextCell *c = &s->cells[y1 * s->width + x];
@@ -875,7 +875,7 @@ static void console_clear_xy(TextConsole *s, int x, int y)
     update_xy(s, x, y);
 }
 
-static void console_putchar(TextConsole *s, int ch)
+static void console_putchar(QEMUConsole *s, int ch)
 {
     TextCell *c;
     int y1, i;
@@ -1099,7 +1099,7 @@ static void console_putchar(TextConsole *s, int ch)
 
 void console_select(unsigned int index)
 {
-    TextConsole *s;
+    QEMUConsole *s;
 
     if (index >= MAX_CONSOLES)
         return;
@@ -1124,7 +1124,7 @@ void console_select(unsigned int index)
 
 static int console_puts(CharDriverState *chr, const uint8_t *buf, int len)
 {
-    TextConsole *s = chr->opaque;
+    QEMUConsole *s = chr->opaque;
     int i;
 
     s->update_x0 = s->width * FONT_WIDTH;
@@ -1146,7 +1146,7 @@ static int console_puts(CharDriverState *chr, const uint8_t *buf, int len)
 
 static void console_send_event(CharDriverState *chr, int event)
 {
-    TextConsole *s = chr->opaque;
+    QEMUConsole *s = chr->opaque;
     int i;
 
     if (event == CHR_EVENT_FOCUS) {
@@ -1161,7 +1161,7 @@ static void console_send_event(CharDriverState *chr, int event)
 
 static void kbd_send_chars(void *opaque)
 {
-    TextConsole *s = opaque;
+    QEMUConsole *s = opaque;
     int len;
     uint8_t buf[16];
 
@@ -1184,7 +1184,7 @@ static void kbd_send_chars(void *opaque)
 /* called when an ascii key is pressed */
 void kbd_put_keysym(int keysym)
 {
-    TextConsole *s;
+    QEMUConsole *s;
     uint8_t buf[16], *q;
     int c;
 
@@ -1239,7 +1239,7 @@ void kbd_put_keysym(int keysym)
 
 static void text_console_invalidate(void *opaque)
 {
-    TextConsole *s = (TextConsole *) opaque;
+    QEMUConsole *s = (QEMUConsole *) opaque;
     if (!ds_get_bits_per_pixel(s->ds) && s->console_type == TEXT_CONSOLE) {
         s->g_width = ds_get_width(s->ds);
         s->g_height = ds_get_height(s->ds);
@@ -1250,7 +1250,7 @@ static void text_console_invalidate(void *opaque)
 
 static void text_console_update(void *opaque, console_ch_t *chardata)
 {
-    TextConsole *s = (TextConsole *) opaque;
+    QEMUConsole *s = (QEMUConsole *) opaque;
     int i, j, src;
 
     if (s->text_x[0] <= s->text_x[1]) {
@@ -1275,10 +1275,10 @@ static void text_console_update(void *opaque, console_ch_t *chardata)
     }
 }
 
-static TextConsole *get_graphic_console(DisplayState *ds)
+static QEMUConsole *get_graphic_console(DisplayState *ds)
 {
     int i;
-    TextConsole *s;
+    QEMUConsole *s;
     for (i = 0; i < nb_consoles; i++) {
         s = consoles[i];
         if (s->console_type == GRAPHIC_CONSOLE && s->ds == ds)
@@ -1287,14 +1287,14 @@ static TextConsole *get_graphic_console(DisplayState *ds)
     return NULL;
 }
 
-static TextConsole *new_console(DisplayState *ds, console_type_t console_type)
+static QEMUConsole *new_console(DisplayState *ds, console_type_t console_type)
 {
-    TextConsole *s;
+    QEMUConsole *s;
     int i;
 
     if (nb_consoles >= MAX_CONSOLES)
         return NULL;
-    s = g_malloc0(sizeof(TextConsole));
+    s = g_malloc0(sizeof(QEMUConsole));
     if (!active_console || ((active_console->console_type != GRAPHIC_CONSOLE) &&
         (console_type == GRAPHIC_CONSOLE))) {
         active_console = s;
@@ -1435,7 +1435,7 @@ DisplayState *graphic_console_init(vga_hw_update_ptr update,
                                    vga_hw_text_update_ptr text_update,
                                    void *opaque)
 {
-    TextConsole *s;
+    QEMUConsole *s;
     DisplayState *ds;
 
     ds = (DisplayState *) g_malloc0(sizeof(DisplayState));
@@ -1488,14 +1488,14 @@ static CharDriverState *text_consoles[128];
 
 static void text_console_set_echo(CharDriverState *chr, bool echo)
 {
-    TextConsole *s = chr->opaque;
+    QEMUConsole *s = chr->opaque;
 
     s->echo = echo;
 }
 
 static void text_console_do_init(CharDriverState *chr, DisplayState *ds)
 {
-    TextConsole *s;
+    QEMUConsole *s;
     static int color_inited;
 
     s = chr->opaque;
@@ -1556,7 +1556,7 @@ static void text_console_do_init(CharDriverState *chr, DisplayState *ds)
 CharDriverState *text_console_init(QemuOpts *opts)
 {
     CharDriverState *chr;
-    TextConsole *s;
+    QEMUConsole *s;
     unsigned width;
     unsigned height;
 
@@ -1641,7 +1641,7 @@ void text_consoles_set_display(DisplayState *ds)
 
 void qemu_console_resize(DisplayState *ds, int width, int height)
 {
-    TextConsole *s = get_graphic_console(ds);
+    QEMUConsole *s = get_graphic_console(ds);
     if (!s) return;
 
     s->g_width = width;

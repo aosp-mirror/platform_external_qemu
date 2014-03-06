@@ -728,5 +728,11 @@ static void gic_init(gic_state *s)
     s->iomemtype = cpu_register_io_memory(gic_dist_readfn,
                                           gic_dist_writefn, s);
     gic_reset(s);
-    register_savevm("arm_gic", -1, 1, gic_save, gic_load, s);
+    register_savevm(NULL,
+                    "arm_gic",
+                    -1,
+                    1,
+                    gic_save,
+                    gic_load,
+                    s);
 }

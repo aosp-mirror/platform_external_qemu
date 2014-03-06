@@ -135,9 +135,9 @@ register_ret_address(CPUARMState* env, target_ulong addr)
     if ((0x90000000 <= addr && addr <= 0xBFFFFFFF)) {
         /* Address belongs to a module that always loads at this fixed address.
          * So, we can keep this address in the global array. */
-        ret = addrarray_add(&ret_addresses, get_phys_addr_code(env, addr));
+        ret = addrarray_add(&ret_addresses, get_page_addr_code(env, addr));
     } else {
-        ret = addrarray_add(&ret_addresses, get_phys_addr_code(env, addr));
+        ret = addrarray_add(&ret_addresses, get_page_addr_code(env, addr));
     }
     assert(ret != 0);
 
@@ -153,10 +153,10 @@ register_ret_address(CPUARMState* env, target_ulong addr)
          * code contains it. This inconsistency will lead to an immanent
          * segmentation fault.*/
         TranslationBlock* tb;
-        const target_ulong phys_pc = get_phys_addr_code(env, addr);
+        const target_ulong phys_pc = get_page_addr_code(env, addr);
         const target_ulong phys_page1 = phys_pc & TARGET_PAGE_MASK;
 
-        for(tb = tb_phys_hash[tb_phys_hash_func(phys_pc)]; tb != NULL;
+        for(tb = tcg_ctx.tb_ctx.tb_phys_hash[tb_phys_hash_func(phys_pc)]; tb != NULL;
             tb = tb->phys_hash_next) {
             if (tb->pc == addr && tb->page_addr[0] == phys_page1) {
                 tb_phys_invalidate(tb, -1);
@@ -175,9 +175,9 @@ static inline int
 is_ret_address(CPUARMState* env, target_ulong addr)
 {
     if ((0x90000000 <= addr && addr <= 0xBFFFFFFF)) {
-        return addrarray_check(&ret_addresses, get_phys_addr_code(env, addr));
+        return addrarray_check(&ret_addresses, get_page_addr_code(env, addr));
     } else {
-        return addrarray_check(&ret_addresses, get_phys_addr_code(env, addr));
+        return addrarray_check(&ret_addresses, get_page_addr_code(env, addr));
     }
 }
 
@@ -248,10 +248,10 @@ set_on_ret(target_ulong ret)
 #  define ANDROID_END_CODEGEN() \
     do { \
         if (memcheck_enabled && dc->user) { \
-            j = gen_opc_ptr - gen_opc_buf; \
+            j = tcg_ctx.gen_opc_ptr - tcg_ctx.gen_opc_buf; \
             lj++; \
             while (lj <= j) \
-                gen_opc_instr_start[lj++] = 0; \
+                tcg_ctx.gen_opc_instr_start[lj++] = 0; \
         } \
     } while (0)
 

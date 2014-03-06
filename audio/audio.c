@@ -2047,7 +2047,7 @@ static void audio_init (void)
     initialized = 1;
 
     QLIST_INIT (&s->card_head);
-    register_savevm ("audio", 0, 1, audio_save, audio_load, s);
+    register_savevm(NULL, "audio", 0, 1, audio_save, audio_load, s);
     audio_reset_timer();
 }
 
