@@ -105,7 +105,7 @@ PCIBus *pci_register_bus(DeviceState *parent, const char *name,
     bus->nirq = nirq;
     bus->next = first_bus;
     first_bus = bus;
-    register_savevm("PCIBUS", nbus++, 1, pcibus_save, pcibus_load, bus);
+    register_savevm(NULL, "PCIBUS", nbus++, 1, pcibus_save, pcibus_load, bus);
     return bus;
 }
 

@@ -1427,8 +1427,6 @@ int check_hw_breakpoints(CPUX86State *env, int force_dr6_update)
     return hit_enabled;
 }
 
-static CPUDebugExcpHandler *prev_debug_excp_handler;
-
 void raise_exception(int exception_index);
 
 static void breakpoint_handler(CPUX86State *env)
@@ -1453,8 +1451,6 @@ static void breakpoint_handler(CPUX86State *env)
                 break;
             }
     }
-    if (prev_debug_excp_handler)
-        prev_debug_excp_handler(env);
 }
 
 
@@ -1777,8 +1773,7 @@ CPUX86State *cpu_x86_init(const char *cpu_model)
         inited = 1;
         optimize_flags_init();
 #ifndef CONFIG_USER_ONLY
-        prev_debug_excp_handler =
-            cpu_set_debug_excp_handler(breakpoint_handler);
+        cpu_set_debug_excp_handler(breakpoint_handler);
 #endif
     }
     if (cpu_x86_register(env, cpu_model) < 0) {

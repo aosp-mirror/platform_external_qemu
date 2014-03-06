@@ -627,10 +627,16 @@ RTCState *rtc_init_sqw(int base, qemu_irq irq, qemu_irq sqw_irq, int base_year)
     register_ioport_write(base, 2, 1, cmos_ioport_write, s);
     register_ioport_read(base, 2, 1, cmos_ioport_read, s);
 
-    register_savevm("mc146818rtc", base, 1, rtc_save, rtc_load, s);
+    register_savevm(NULL, "mc146818rtc", base, 1, rtc_save, rtc_load, s);
 #ifdef TARGET_I386
     if (rtc_td_hack)
-        register_savevm("mc146818rtc-td", base, 1, rtc_save_td, rtc_load_td, s);
+        register_savevm(NULL,
+                        "mc146818rtc-td",
+                        base,
+                        1,
+                        rtc_save_td,
+                        rtc_load_td,
+                        s);
 #endif
     qemu_register_reset(rtc_reset, 0, s);
 
@@ -744,10 +750,16 @@ RTCState *rtc_mm_init(hwaddr base, int it_shift, qemu_irq irq,
     io_memory = cpu_register_io_memory(rtc_mm_read, rtc_mm_write, s);
     cpu_register_physical_memory(base, 2 << it_shift, io_memory);
 
-    register_savevm("mc146818rtc", base, 1, rtc_save, rtc_load, s);
+    register_savevm(NULL, "mc146818rtc", base, 1, rtc_save, rtc_load, s);
 #ifdef TARGET_I386
     if (rtc_td_hack)
-        register_savevm("mc146818rtc-td", base, 1, rtc_save_td, rtc_load_td, s);
+        register_savevm(NULL,
+                        "mc146818rtc-td",
+                        base,
+                        1,
+                        rtc_save_td,
+                        rtc_load_td,
+                        s);
 #endif
     qemu_register_reset(rtc_reset, 0, s);
     return s;
