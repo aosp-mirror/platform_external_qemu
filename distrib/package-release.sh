@@ -146,6 +146,7 @@ build_darwin_binaries_on () {
   dump "Retrieving Darwin binaries from: $HOST"
   rm -rf objs/*
   run scp $HOST:$DST_DIR/$PKG_FILE_PREFIX/qemu/objs/emulator* objs/
+  # TODO(digit): Retrieve GPU emulation libraries + PC Bios files.
   run ssh $HOST rm -rf $DST_DIR/$PKG_FILE_PREFIX
 }
 
@@ -431,7 +432,7 @@ for SYSTEM in $SYSTEMS; do
     if [ -d "objs/lib" ]; then
         dump "[$PKG_NAME] Copying GLES emulation libraries."
         run mkdir -p "$TEMP_PKG_DIR"/tools/lib
-        run2 cp -p objs/lib/* "$TEMP_PKG_DIR"/tools/lib/
+        run2 cp -rp objs/lib/* "$TEMP_PKG_DIR"/tools/lib/
     fi
 
     dump "[$PKG_NAME] Creating README file."
