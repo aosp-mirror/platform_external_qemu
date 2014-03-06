@@ -31,9 +31,12 @@
 #define PDEV_BUS_IRQ            (0x18)
 #define PDEV_BUS_IRQ_COUNT      (0x1c)
 
+#define PDEV_BUS_NAME_ADDR_HIGH  (0x20)
+
 struct bus_state {
     struct goldfish_device dev;
     struct goldfish_device *current;
+    uint64_t name_addr_high;
 };
 
 qemu_irq *goldfish_pic;
@@ -41,6 +44,13 @@ static struct goldfish_device *first_device;
 static struct goldfish_device *last_device;
 uint32_t goldfish_free_base;
 uint32_t goldfish_free_irq;
+
+int goldfish_64bit_guest = 0;
+
+int goldfish_guest_is_64bit()
+{
+    return goldfish_64bit_guest;
+}
 
 void goldfish_device_set_irq(struct goldfish_device *dev, int irq, int level)
 {
@@ -165,8 +175,13 @@ static void goldfish_bus_write(void *opaque, hwaddr offset, uint32_t value)
             break;
         case PDEV_BUS_GET_NAME:
             if(s->current) {
-                safe_memory_rw_debug(cpu_single_env, value, (void*)s->current->name, strlen(s->current->name), 1);
+                target_ulong name = (target_ulong)(s->name_addr_high | value);
+                safe_memory_rw_debug(cpu_single_env, name, (void*)s->current->name, strlen(s->current->name), 1);
             }
+            break;
+        case PDEV_BUS_NAME_ADDR_HIGH:
+            s->name_addr_high = ((uint64_t)value << 32);
+            goldfish_64bit_guest = 1;
             break;
         default:
             cpu_abort (cpu_single_env, "goldfish_bus_write: Bad offset %x\n", offset);

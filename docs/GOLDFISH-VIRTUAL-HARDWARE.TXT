@@ -83,6 +83,11 @@ Device properties:
     0x18 IRQ_BASE    R: Read base IRQ of current device.
     0x1c IRQ_COUNT   R: Read IRQ count of current device.
 
+    # For 64-bit guest architectures only:
+    0x20 NAME_ADDR_HIGH  W: Write high 32-bit of kernel address of name
+                            buffer used by GET_NAME. Must be written to
+                            before the GET_NAME write.
+
 The kernel iterates over the list of current devices with something like:
 
    IO_WRITE(BUS_OP, 0);    // Start iteration, any value other than 0 is invalid.
@@ -103,7 +108,10 @@ The kernel iterates over the list of current devices with something like:
        dev.irq_count = IO_READ(IRQ_COUNT);
 
        dev.name = kalloc(dev.name_len + 1);  // allocate room for device name.
-       IO_WRITE(GET_NAME, dev.name);         // copy to kernel memory.
+    #if 64BIT_GUEST_CPU
+       IO_WRITE(NAME_ADDR_HIGH, (uint32_t)(dev.name >> 32));
+    #endif
+       IO_WRITE(GET_NAME, (uint32_t)dev.name);  // copy to kernel memory.
        dev.name[dev.name_len] = 0;
 
        .. add device to kernel's list.
