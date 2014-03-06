@@ -53,6 +53,7 @@ common_LOCAL_CFLAGS += $(EMULATOR_TARGET_CFLAGS)
 
 common_LOCAL_SRC_FILES += \
     tcg/tcg.c \
+    tcg-runtime.c \
 
 ##############################################################################
 # Emulated hardware devices.
