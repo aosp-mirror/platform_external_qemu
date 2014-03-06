@@ -53,7 +53,10 @@
 /* Maximum length of pipe service name, in characters (excluding final 0) */
 #define MAX_PIPE_SERVICE_NAME_SIZE  255
 
-#define GOLDFISH_PIPE_SAVE_VERSION  2
+#define GOLDFISH_PIPE_SAVE_VERSION  3
+
+// Up to Tools r22.6, the emulator saved with this version number.
+#define GOLDFISH_PIPE_SAVE_VERSION_LEGACY  2
 
 /***********************************************************************
  ***********************************************************************
@@ -128,7 +131,7 @@ typedef struct Pipe {
     struct Pipe*              next;
     struct Pipe*              next_waked;
     PipeDevice*                device;
-    uint32_t                   channel;
+    uint64_t                   channel;
     void*                      opaque;
     const GoldfishPipeFuncs*   funcs;
     const PipeService*         service;
@@ -150,7 +153,7 @@ pipe_new0(PipeDevice* dev)
 }
 
 static Pipe*
-pipe_new(uint32_t channel, PipeDevice* dev)
+pipe_new(uint64_t channel, PipeDevice* dev)
 {
     Pipe*  pipe = pipe_new0(dev);
     pipe->channel = channel;
@@ -159,7 +162,7 @@ pipe_new(uint32_t channel, PipeDevice* dev)
 }
 
 static Pipe**
-pipe_list_findp_channel( Pipe** list, uint32_t channel )
+pipe_list_findp_channel( Pipe** list, uint64_t channel )
 {
     Pipe** pnode = list;
     for (;;) {
@@ -229,7 +232,7 @@ pipe_save( Pipe* pipe, QEMUFile* file )
     }
 
     /* Now save other common data */
-    qemu_put_be32(file, (unsigned int)pipe->channel);
+    qemu_put_be64(file, pipe->channel);
     qemu_put_byte(file, (int)pipe->wanted);
     qemu_put_byte(file, (int)pipe->closed);
 
@@ -247,12 +250,12 @@ pipe_save( Pipe* pipe, QEMUFile* file )
 }
 
 static Pipe*
-pipe_load( PipeDevice* dev, QEMUFile* file )
+pipe_load( PipeDevice* dev, QEMUFile* file, int version_id )
 {
     Pipe*              pipe;
     const PipeService* service = NULL;
     int   state = qemu_get_byte(file);
-    uint32_t channel;
+    uint64_t channel;
 
     if (state != 0) {
         /* Pipe is associated with a service. */
@@ -268,7 +271,11 @@ pipe_load( PipeDevice* dev, QEMUFile* file )
         }
     }
 
-    channel = qemu_get_be32(file);
+    if (version_id == GOLDFISH_PIPE_SAVE_VERSION_LEGACY) {
+        channel = qemu_get_be32(file);
+    } else {
+        channel = qemu_get_be64(file);
+    }
     pipe = pipe_new(channel, dev);
     pipe->wanted  = qemu_get_byte(file);
     pipe->closed  = qemu_get_byte(file);
@@ -350,8 +357,8 @@ pipeConnector_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int 
     const GoldfishPipeBuffer*  buffers_limit = buffers + numBuffers;
     int ret = 0;
 
-    DD("%s: channel=0x%x numBuffers=%d", __FUNCTION__,
-       pcon->pipe->channel,
+    DD("%s: channel=0x%llx numBuffers=%d", __FUNCTION__,
+       (unsigned long long)pcon->pipe->channel,
        numBuffers);
 
     while (buffers < buffers_limit) {
@@ -953,10 +960,10 @@ struct PipeDevice {
     Pipe*  signaled_pipes;
 
     /* i/o registers */
-    uint32_t  address;
+    uint64_t  address;
     uint32_t  size;
     uint32_t  status;
-    uint32_t  channel;
+    uint64_t  channel;
     uint32_t  wakes;
     uint64_t  params_addr;
 };
@@ -982,7 +989,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
 
     switch (command) {
     case PIPE_CMD_OPEN:
-        DD("%s: CMD_OPEN channel=0x%x", __FUNCTION__, dev->channel);
+        DD("%s: CMD_OPEN channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
         if (pipe != NULL) {
             dev->status = PIPE_ERROR_INVAL;
             break;
@@ -994,7 +1001,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         break;
 
     case PIPE_CMD_CLOSE:
-        DD("%s: CMD_CLOSE channel=0x%x", __FUNCTION__, dev->channel);
+        DD("%s: CMD_CLOSE channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
         /* Remove from device's lists */
         *lookup = pipe->next;
         pipe->next = NULL;
@@ -1010,35 +1017,43 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
     case PIPE_CMD_READ_BUFFER: {
         /* Translate virtual address into physical one, into emulator memory. */
         GoldfishPipeBuffer  buffer;
-        uint32_t            address = dev->address;
-        uint32_t            page    = address & TARGET_PAGE_MASK;
+        target_ulong        address = dev->address;
+        target_ulong        page    = address & TARGET_PAGE_MASK;
         hwaddr  phys;
         phys = safe_get_phys_page_debug(env, page);
+#ifdef TARGET_X86_64
+        phys = phys & TARGET_PTE_MASK;
+#endif
         buffer.data = qemu_get_ram_ptr(phys) + (address - page);
         buffer.size = dev->size;
         dev->status = pipe->funcs->recvBuffers(pipe->opaque, &buffer, 1);
-        DD("%s: CMD_READ_BUFFER channel=0x%x address=0x%08x size=%d > status=%d",
-           __FUNCTION__, dev->channel, dev->address, dev->size, dev->status);
+        DD("%s: CMD_READ_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
+           __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
+           dev->size, dev->status);
         break;
     }
 
     case PIPE_CMD_WRITE_BUFFER: {
         /* Translate virtual address into physical one, into emulator memory. */
         GoldfishPipeBuffer  buffer;
-        uint32_t            address = dev->address;
-        uint32_t            page    = address & TARGET_PAGE_MASK;
+        target_ulong        address = dev->address;
+        target_ulong        page    = address & TARGET_PAGE_MASK;
         hwaddr  phys;
         phys = safe_get_phys_page_debug(env, page);
+#ifdef TARGET_X86_64
+        phys = phys & TARGET_PTE_MASK;
+#endif
         buffer.data = qemu_get_ram_ptr(phys) + (address - page);
         buffer.size = dev->size;
         dev->status = pipe->funcs->sendBuffers(pipe->opaque, &buffer, 1);
-        DD("%s: CMD_WRITE_BUFFER channel=0x%x address=0x%08x size=%d > status=%d",
-           __FUNCTION__, dev->channel, dev->address, dev->size, dev->status);
+        DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
+           __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
+           dev->size, dev->status);
         break;
     }
 
     case PIPE_CMD_WAKE_ON_READ:
-        DD("%s: CMD_WAKE_ON_READ channel=0x%x", __FUNCTION__, dev->channel);
+        DD("%s: CMD_WAKE_ON_READ channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
         if ((pipe->wanted & PIPE_WAKE_READ) == 0) {
             pipe->wanted |= PIPE_WAKE_READ;
             pipe->funcs->wakeOn(pipe->opaque, pipe->wanted);
@@ -1047,7 +1062,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         break;
 
     case PIPE_CMD_WAKE_ON_WRITE:
-        DD("%s: CMD_WAKE_ON_WRITE channel=0x%x", __FUNCTION__, dev->channel);
+        DD("%s: CMD_WAKE_ON_WRITE channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
         if ((pipe->wanted & PIPE_WAKE_WRITE) == 0) {
             pipe->wanted |= PIPE_WAKE_WRITE;
             pipe->funcs->wakeOn(pipe->opaque, pipe->wanted);
@@ -1077,12 +1092,22 @@ static void pipe_dev_write(void *opaque, hwaddr offset, uint32_t value)
 
     case PIPE_REG_ADDRESS:
         DR("%s: address=%d (0x%x)", __FUNCTION__, value, value);
-        s->address = value;
+        uint64_set_low(&s->address, value);
+        break;
+
+    case PIPE_REG_ADDRESS_HIGH:
+        DR("%s: address_high=%d (0x%x)", __FUNCTION__, value, value);
+        uint64_set_high(&s->address, value);
         break;
 
     case PIPE_REG_CHANNEL:
         DR("%s: channel=%d (0x%x)", __FUNCTION__, value, value);
-        s->channel = value;
+        uint64_set_low(&s->channel, value);
+        break;
+
+    case PIPE_REG_CHANNEL_HIGH:
+        DR("%s: channel_high=%d (0x%x)", __FUNCTION__, value, value);
+        uint64_set_high(&s->channel, value);
         break;
 
     case PIPE_REG_PARAMS_ADDR_HIGH:
@@ -1097,27 +1122,45 @@ static void pipe_dev_write(void *opaque, hwaddr offset, uint32_t value)
     case PIPE_REG_ACCESS_PARAMS:
     {
         struct access_params aps;
+        struct access_params_64 aps64;
         uint32_t cmd;
 
         /* Don't touch aps.result if anything wrong */
         if (s->params_addr == 0)
             break;
 
-        cpu_physical_memory_read(s->params_addr, (void*)&aps,
-                        sizeof(struct access_params));
-
+        if (goldfish_guest_is_64bit()) {
+            cpu_physical_memory_read(s->params_addr, (void*)&aps64,
+                                     sizeof(aps64));
+        } else {
+            cpu_physical_memory_read(s->params_addr, (void*)&aps,
+                                     sizeof(aps));
+        }
         /* sync pipe device state from batch buffer */
-        s->channel = aps.channel;
-        s->size = aps.size;
-        s->address = aps.address;
-        cmd = aps.cmd;
+        if (goldfish_guest_is_64bit()) {
+            s->channel = aps64.channel;
+            s->size = aps64.size;
+            s->address = aps64.address;
+            cmd = aps64.cmd;
+        } else {
+            s->channel = aps.channel;
+            s->size = aps.size;
+            s->address = aps.address;
+            cmd = aps.cmd;
+        }
         if ((cmd != PIPE_CMD_READ_BUFFER) && (cmd != PIPE_CMD_WRITE_BUFFER))
             break;
 
         pipeDevice_doCommand(s, cmd);
-        aps.result = s->status;
-        cpu_physical_memory_write(s->params_addr, (void*)&aps,
-                    sizeof(struct access_params));
+        if (goldfish_guest_is_64bit()) {
+            aps64.result = s->status;
+            cpu_physical_memory_write(s->params_addr, (void*)&aps64,
+                                      sizeof(aps64));
+        } else {
+            aps.result = s->status;
+            cpu_physical_memory_write(s->params_addr, (void*)&aps,
+                                      sizeof(aps));
+        }
     }
     break;
 
@@ -1141,8 +1184,8 @@ static uint32_t pipe_dev_read(void *opaque, hwaddr offset)
     case PIPE_REG_CHANNEL:
         if (dev->signaled_pipes != NULL) {
             Pipe* pipe = dev->signaled_pipes;
-            DR("%s: channel=0x%x wanted=%d", __FUNCTION__,
-               pipe->channel, pipe->wanted);
+            DR("%s: channel=0x%llx wanted=%d", __FUNCTION__,
+               (unsigned long long)pipe->channel, pipe->wanted);
             dev->wakes = pipe->wanted;
             pipe->wanted = 0;
             dev->signaled_pipes = pipe->next_waked;
@@ -1151,7 +1194,17 @@ static uint32_t pipe_dev_read(void *opaque, hwaddr offset)
                 goldfish_device_set_irq(&dev->dev, 0, 0);
                 DD("%s: lowering IRQ", __FUNCTION__);
             }
-            return pipe->channel;
+            return (uint32_t)(pipe->channel & 0xFFFFFFFFUL);
+        }
+        DR("%s: no signaled channels", __FUNCTION__);
+        return 0;
+
+    case PIPE_REG_CHANNEL_HIGH:
+        if (dev->signaled_pipes != NULL) {
+            Pipe* pipe = dev->signaled_pipes;
+            DR("%s: channel_high=0x%llx wanted=%d", __FUNCTION__,
+               (unsigned long long)pipe->channel, pipe->wanted);
+            return (uint32_t)(pipe->channel >> 32);
         }
         DR("%s: no signaled channels", __FUNCTION__);
         return 0;
@@ -1161,10 +1214,10 @@ static uint32_t pipe_dev_read(void *opaque, hwaddr offset)
         return dev->wakes;
 
     case PIPE_REG_PARAMS_ADDR_HIGH:
-        return dev->params_addr >> 32;
+        return (uint32_t)(dev->params_addr >> 32);
 
     case PIPE_REG_PARAMS_ADDR_LOW:
-        return dev->params_addr & 0xFFFFFFFFUL;
+        return (uint32_t)(dev->params_addr & 0xFFFFFFFFUL);
 
     default:
         D("%s: offset=%d (0x%x)\n", __FUNCTION__, offset, offset);
@@ -1190,10 +1243,10 @@ goldfish_pipe_save( QEMUFile* file, void* opaque )
     PipeDevice* dev = opaque;
     Pipe* pipe;
 
-    qemu_put_be32(file, dev->address);
+    qemu_put_be64(file, dev->address);
     qemu_put_be32(file, dev->size);
     qemu_put_be32(file, dev->status);
-    qemu_put_be32(file, dev->channel);
+    qemu_put_be64(file, dev->channel);
     qemu_put_be32(file, dev->wakes);
     qemu_put_be64(file, dev->params_addr);
 
@@ -1216,13 +1269,22 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
     PipeDevice* dev = opaque;
     Pipe*       pipe;
 
-    if (version_id != GOLDFISH_PIPE_SAVE_VERSION)
+    if ((version_id != GOLDFISH_PIPE_SAVE_VERSION) &&
+        (version_id != GOLDFISH_PIPE_SAVE_VERSION_LEGACY)) {
         return -EINVAL;
-
-    dev->address = qemu_get_be32(file);
+    }
+    if (version_id == GOLDFISH_PIPE_SAVE_VERSION_LEGACY) {
+        dev->address = (uint64_t)qemu_get_be32(file);
+    } else {
+        dev->address = qemu_get_be64(file);
+    }
     dev->size    = qemu_get_be32(file);
     dev->status  = qemu_get_be32(file);
-    dev->channel = qemu_get_be32(file);
+    if (version_id == GOLDFISH_PIPE_SAVE_VERSION_LEGACY) {
+        dev->channel = (uint64_t)qemu_get_be32(file);
+    } else {
+        dev->channel = qemu_get_be64(file);
+    }
     dev->wakes   = qemu_get_be32(file);
     dev->params_addr   = qemu_get_be64(file);
 
@@ -1231,7 +1293,7 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
 
     /* Load all pipe connections */
     for ( ; count > 0; count-- ) {
-        pipe = pipe_load(dev, file);
+        pipe = pipe_load(dev, file, version_id);
         if (pipe == NULL) {
             return -EIO;
         }
@@ -1286,7 +1348,7 @@ goldfish_pipe_wake( void* hwpipe, unsigned flags )
     Pipe** lookup;
     PipeDevice*  dev = pipe->device;
 
-    DD("%s: channel=0x%x flags=%d", __FUNCTION__, pipe->channel, flags);
+    DD("%s: channel=0x%llx flags=%d", __FUNCTION__, (unsigned long long)pipe->channel, flags);
 
     /* If not already there, add to the list of signaled pipes */
     lookup = pipe_list_findp_waked(&dev->signaled_pipes, pipe);
@@ -1306,7 +1368,7 @@ goldfish_pipe_close( void* hwpipe )
 {
     Pipe* pipe = hwpipe;
 
-    D("%s: channel=0x%x (closed=%d)", __FUNCTION__, pipe->channel, pipe->closed);
+    D("%s: channel=0x%llx (closed=%d)", __FUNCTION__, (unsigned long long)pipe->channel, pipe->closed);
 
     if (!pipe->closed) {
         pipe->closed = 1;
