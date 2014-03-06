@@ -15,6 +15,16 @@
 #include "android/avd/info.h"
 #include "android/avd/hw-config.h"
 
+/* Maximum numbers of emulators that can run concurrently without
+ * forcing their port numbers with the -port option.
+ * This is not a hard limit. Instead, when starting up, the program
+ * will trying to bind to localhost ports 5554 + n*2, for n in
+ * [0..MAX_EMULATORS), if it fails, it will refuse to start.
+ * You can route around this by using the -port or -ports options
+ * to specify the ports manually.
+ */
+#define MAX_ANDROID_EMULATORS  64
+
 /* this structure is setup when loading the virtual device
  * after that, you can read the 'flags' field to determine
  * wether a data or cache wipe has been in effect.
