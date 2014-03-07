@@ -1312,13 +1312,13 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
 }
 
 /* initialize the trace device */
-void pipe_dev_init()
+void pipe_dev_init(bool newDeviceNaming)
 {
     PipeDevice *s;
 
     s = (PipeDevice *) g_malloc0(sizeof(*s));
 
-    s->dev.name = "qemu_pipe";
+    s->dev.name = newDeviceNaming ? "goldfish_pipe" : "qemu_pipe";
     s->dev.id = -1;
     s->dev.base = 0;       // will be allocated dynamically
     s->dev.size = 0x2000;

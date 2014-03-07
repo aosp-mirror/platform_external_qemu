@@ -18,6 +18,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/String_unittest.cpp \
   android/base/StringView_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
+  android/kernel/kernel_utils_unittest.cpp \
 
 $(call start-emulator-program, emulator_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES)

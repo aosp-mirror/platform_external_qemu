@@ -1042,8 +1042,10 @@ static void pc_init1(ram_addr_t ram_size,
 #ifdef CONFIG_NAND
     goldfish_add_device_no_io(&nand_device);
     nand_dev_init(nand_device.base);
-    pipe_dev_init();
 #endif
+    bool newDeviceNaming =
+            (androidHwConfig_getKernelDeviceNaming(android_hw) >= 1);
+    pipe_dev_init(newDeviceNaming);
 
     {
         DriveInfo* info = drive_get( IF_IDE, 0, 0 );
