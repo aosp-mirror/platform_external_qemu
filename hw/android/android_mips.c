@@ -221,8 +221,7 @@ static void android_mips_init_(ram_addr_t ram_size,
     }
     goldfish_memlog_init(GOLDFISH_MEMLOG);
 
-    if (android_hw->hw_battery)
-        goldfish_battery_init();
+    goldfish_battery_init(android_hw->hw_battery);
 
     goldfish_add_device_no_io(&event0_device);
     events_dev_init(event0_device.base, goldfish_pic[event0_device.irq]);
