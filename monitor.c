@@ -296,10 +296,10 @@ static void help_cmd(Monitor *mon, const char *name)
     } else {
         help_cmd_dump(mon, mon_cmds, "", name);
         if (name && !strcmp(name, "log")) {
-            const CPULogItem *item;
+            const QEMULogItem *item;
             monitor_printf(mon, "Log items (comma separated):\n");
             monitor_printf(mon, "%-10s %s\n", "none", "remove all logs");
-            for(item = cpu_log_items; item->mask != 0; item++) {
+            for(item = qemu_log_items; item->mask != 0; item++) {
                 monitor_printf(mon, "%-10s %s\n", item->name, item->help);
             }
         }
@@ -512,7 +512,7 @@ static void do_screen_dump(Monitor *mon, const char *filename)
 
 static void do_logfile(Monitor *mon, const char *filename)
 {
-    cpu_set_log_filename(filename);
+    qemu_set_log_filename(filename);
 }
 
 static void do_log(Monitor *mon, const char *items)
@@ -522,13 +522,13 @@ static void do_log(Monitor *mon, const char *items)
     if (!strcmp(items, "none")) {
         mask = 0;
     } else {
-        mask = cpu_str_to_log_mask(items);
+        mask = qemu_str_to_log_mask(items);
         if (!mask) {
             help_cmd(mon, "log");
             return;
         }
     }
-    cpu_set_log(mask);
+    qemu_set_log(mask);
 }
 
 static void do_singlestep(Monitor *mon, const char *option)
