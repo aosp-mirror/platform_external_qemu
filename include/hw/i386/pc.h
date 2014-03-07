@@ -1,7 +1,9 @@
 #ifndef HW_PC_H
 #define HW_PC_H
 
+#include "cpu.h"
 #include "qemu-common.h"
+#include "exec/hwaddr.h"
 
 /* PC-style peripherals (also used by other machines).  */
 

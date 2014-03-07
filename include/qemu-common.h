@@ -12,9 +12,14 @@
 #ifndef QEMU_COMMON_H
 #define QEMU_COMMON_H
 
+#include <setjmp.h>
+
 #include "qemu/compiler.h"
 #include "config-host.h"
 #include "qemu/typedefs.h"
+#include "qemu/osdep.h"
+#include "qemu/bswap.h"
+
 
 #if defined(__arm__) || defined(__sparc__) || defined(__mips__) || defined(__hppa__) || defined(__ia64__)
 #define WORDS_ALIGNED
@@ -99,19 +104,6 @@ static inline char *realpath(const char *path, char *resolved_path)
 #define PRIu64 "I64u"
 #define PRIo64 "I64o"
 #endif
-
-/* FIXME: Remove NEED_CPU_H.  */
-#ifndef NEED_CPU_H
-
-#include <setjmp.h>
-#include "qemu/osdep.h"
-#include "qemu/bswap.h"
-
-#else
-
-#include "cpu.h"
-
-#endif /* !defined(NEED_CPU_H) */
 
 /* bottom halves */
 typedef void QEMUBHFunc(void *opaque);
@@ -522,5 +514,7 @@ size_t buffer_find_nonzero_offset(const void *buf, size_t len);
  * helper to parse debug environment variables
  */
 int parse_debug_env(const char *name, int max, int initial);
+
+extern int use_icount;
 
 #endif

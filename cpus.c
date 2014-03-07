@@ -23,6 +23,8 @@
  */
 #include "config-host.h"
 
+#include "cpu.h"
+#include "exec/exec-all.h"
 #include "monitor/monitor.h"
 #include "sysemu/sysemu.h"
 #include "exec/gdbstub.h"
@@ -653,3 +655,18 @@ void tcg_cpu_exec(void)
     }
 }
 
+/* Return the virtual CPU time, based on the instruction counter.  */
+int64_t cpu_get_icount(void)
+{
+    int64_t icount;
+    CPUOldState *env = cpu_single_env;;
+
+    icount = qemu_icount;
+    if (env) {
+        if (!can_do_io(env)) {
+            fprintf(stderr, "Bad clock read\n");
+        }
+        icount -= (env->icount_decr.u16.low + env->icount_extra);
+    }
+    return qemu_icount_bias + (icount << icount_time_shift);
+}

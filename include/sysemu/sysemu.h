@@ -9,6 +9,8 @@
 #include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qerror.h"
 
+#include "exec/hwaddr.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -228,6 +230,7 @@ extern CharDriverState *virtcon_hds[MAX_VIRTIO_CONSOLES];
 
 #define TFR(expr) do { if ((expr) != -1) break; } while (errno == EINTR)
 
+#if 0 //DIGIT
 #ifdef NEED_CPU_H
 /* loader.c */
 int get_image_size(const char *filename);
@@ -245,6 +248,7 @@ int read_targphys(int fd, hwaddr dst_addr, size_t nbytes);
 void pstrcpy_targphys(hwaddr dest, int buf_size,
                       const char *source);
 #endif
+#endif //DIGIT
 
 void do_usb_add(Monitor *mon, const char *devname);
 void do_usb_del(Monitor *mon, const char *devname);
