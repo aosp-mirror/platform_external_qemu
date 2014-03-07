@@ -468,6 +468,7 @@ CORE_MISC_SOURCES = \
     util/acl.c \
     util/aes.c \
     util/cutils.c \
+    util/error.c \
     util/module.c \
     util/notify.c \
     util/osdep.c \
@@ -476,6 +477,7 @@ CORE_MISC_SOURCES = \
     util/qemu-error.c \
     util/qemu-option.c \
     util/qemu-sockets-android.c \
+    util/unicode.c \
 
 ifeq ($(HOST_ARCH),x86)
     CORE_MISC_SOURCES += disas/i386.c
