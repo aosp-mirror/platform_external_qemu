@@ -640,9 +640,6 @@ BLOCK_SOURCES += \
     block/qcow2-refcount.c \
     block/qcow2-snapshot.c \
     block/qcow2-cluster.c \
-    block/cloop.c \
-    block/dmg.c \
-    block/vvfat.c \
     block/raw.c
 
 ifeq ($(HOST_OS),windows)
