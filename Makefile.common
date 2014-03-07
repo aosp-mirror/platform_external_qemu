@@ -484,6 +484,7 @@ CORE_MISC_SOURCES = \
     util/qemu-option.c \
     util/qemu-sockets-android.c \
     util/unicode.c \
+    util/yield-android.c \
 
 ifeq ($(HOST_ARCH),x86)
     CORE_MISC_SOURCES += disas/i386.c

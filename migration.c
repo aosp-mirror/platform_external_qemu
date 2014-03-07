@@ -206,7 +206,7 @@ void migrate_fd_put_notify(void *opaque)
     FdMigrationState *s = opaque;
 
     qemu_set_fd_handler2(s->fd, NULL, NULL, NULL, NULL);
-    qemu_file_put_notify(s->file);
+    //qemu_file_put_notify(s->file);
 }
 
 ssize_t migrate_fd_put_buffer(void *opaque, const void *data, size_t size)
