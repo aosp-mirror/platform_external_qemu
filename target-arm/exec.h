@@ -32,13 +32,13 @@ static inline void regs_to_env(void)
 {
 }
 
-static inline int cpu_has_work(CPUState *env)
+static inline int cpu_has_work(CPUARMState *env)
 {
     return (env->interrupt_request &
             (CPU_INTERRUPT_FIQ | CPU_INTERRUPT_HARD | CPU_INTERRUPT_EXITTB));
 }
 
-static inline int cpu_halted(CPUState *env) {
+static inline int cpu_halted(CPUARMState *env) {
     if (!env->halted)
         return 0;
     /* An interrupt wakes the CPU even if the I and F CPSR bits are
@@ -56,7 +56,7 @@ static inline int cpu_halted(CPUState *env) {
 #endif
 
 void raise_exception(int);
-static inline void cpu_pc_from_tb(CPUState *env, TranslationBlock *tb)
+static inline void cpu_pc_from_tb(CPUARMState *env, TranslationBlock *tb)
 {
     env->regs[15] = tb->pc;
 }

@@ -4924,7 +4924,7 @@ static inline void svm_load_seg(hwaddr addr, SegmentCache *sc)
 }
 
 static inline void svm_load_seg_cache(hwaddr addr,
-                                      CPUState *env, int seg_reg)
+                                      CPUX86State *env, int seg_reg)
 {
     SegmentCache sc1, *sc = &sc1;
     svm_load_seg(addr, sc);

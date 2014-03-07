@@ -126,7 +126,7 @@ uint64_t cpu_get_tsc(CPUX86State *env)
 }
 
 /* SMM support */
-void cpu_smm_update(CPUState *env)
+void cpu_smm_update(CPUOldState *env)
 {
     if (i440fx_state && env == first_cpu)
         i440fx_set_smm(i440fx_state, (env->hflags >> HF_SMM_SHIFT) & 1);
@@ -134,7 +134,7 @@ void cpu_smm_update(CPUState *env)
 
 
 /* IRQ handling */
-int cpu_get_pic_interrupt(CPUState *env)
+int cpu_get_pic_interrupt(CPUOldState *env)
 {
     int intno;
 
@@ -155,7 +155,7 @@ int cpu_get_pic_interrupt(CPUState *env)
 
 static void pic_irq_request(void *opaque, int irq, int level)
 {
-    CPUState *env = first_cpu;
+    CPUOldState *env = first_cpu;
 
     if (env->apic_state) {
         while (env) {
@@ -769,7 +769,7 @@ static void load_linux(hwaddr option_rom,
 
 static void main_cpu_reset(void *opaque)
 {
-    CPUState *env = opaque;
+    CPUOldState *env = opaque;
     cpu_reset(env);
 }
 
@@ -848,7 +848,7 @@ static int load_option_rom(const char *oprom, hwaddr start,
         return size;
 }
 
-int cpu_is_bsp(CPUState *env)
+int cpu_is_bsp(CPUOldState *env)
 {
 	return env->cpuid_apic_id == 0;
 }
@@ -887,7 +887,7 @@ static void pc_init1(ram_addr_t ram_size,
     int bios_size, isa_bios_size, oprom_area_size;
     PCIBus *pci_bus;
     int __attribute__((unused)) piix3_devfn = -1;
-    CPUState *env;
+    CPUOldState *env;
     qemu_irq *cpu_irq;
     qemu_irq *i8259;
 #ifndef CONFIG_ANDROID

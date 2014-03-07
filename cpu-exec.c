@@ -51,7 +51,7 @@ int tb_invalidated_flag;
 //#define CONFIG_DEBUG_EXEC
 //#define DEBUG_SIGNAL
 
-int qemu_cpu_has_work(CPUState *env)
+int qemu_cpu_has_work(CPUOldState *env)
 {
     return cpu_has_work(env);
 }
@@ -65,7 +65,7 @@ void cpu_loop_exit(void)
 /* exit the current TB from a signal handler. The host registers are
    restored in a state compatible with the CPU emulator
  */
-void cpu_resume_from_signal(CPUState *env1, void *puc)
+void cpu_resume_from_signal(CPUOldState *env1, void *puc)
 {
 #if !defined(CONFIG_SOFTMMU)
 #ifdef __linux__
@@ -206,7 +206,7 @@ CPUDebugExcpHandler *cpu_set_debug_excp_handler(CPUDebugExcpHandler *handler)
     return old_handler;
 }
 
-static void cpu_handle_debug_exception(CPUState *env)
+static void cpu_handle_debug_exception(CPUOldState *env)
 {
     CPUWatchpoint *wp;
 
@@ -230,7 +230,7 @@ volatile sig_atomic_t exit_request;
  * be emulated in qemu because MMIO is emulated for only one
  * instruction now and then back to the HAX kernel module.
  */
-int need_handle_intr_request(CPUState *env)
+int need_handle_intr_request(CPUOldState *env)
 {
 #ifdef CONFIG_HAX
     if (!hax_enabled() || hax_vcpu_emulation_mode(env))
@@ -241,7 +241,7 @@ int need_handle_intr_request(CPUState *env)
 #endif
 }
 
-int cpu_exec(CPUState *env1)
+int cpu_exec(CPUOldState *env1)
 {
     volatile host_reg_t saved_env_reg;
     int ret, interrupt_request;

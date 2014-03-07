@@ -11,22 +11,22 @@
 #define GDB_WATCHPOINT_ACCESS    4
 
 #ifdef NEED_CPU_H
-typedef void (*gdb_syscall_complete_cb)(CPUState *env,
+typedef void (*gdb_syscall_complete_cb)(CPUOldState *env,
                                         target_ulong ret, target_ulong err);
 
 void gdb_do_syscall(gdb_syscall_complete_cb cb, const char *fmt, ...);
 int use_gdb_syscalls(void);
-void gdb_set_stop_cpu(CPUState *env);
-void gdb_exit(CPUState *, int);
+void gdb_set_stop_cpu(CPUOldState *env);
+void gdb_exit(CPUOldState *, int);
 #ifdef CONFIG_USER_ONLY
 int gdb_queuesig (void);
-int gdb_handlesig (CPUState *, int);
-void gdb_signalled(CPUState *, int);
-void gdbserver_fork(CPUState *);
+int gdb_handlesig (CPUOldState *, int);
+void gdb_signalled(CPUOldState *, int);
+void gdbserver_fork(CPUOldState *);
 #endif
 /* Get or set a register.  Returns the size of the register.  */
-typedef int (*gdb_reg_cb)(CPUState *env, uint8_t *buf, int reg);
-void gdb_register_coprocessor(CPUState *env,
+typedef int (*gdb_reg_cb)(CPUOldState *env, uint8_t *buf, int reg);
+void gdb_register_coprocessor(CPUOldState *env,
                               gdb_reg_cb get_reg, gdb_reg_cb set_reg,
                               int num_regs, const char *xml, int g_pos);
 

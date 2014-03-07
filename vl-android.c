@@ -2556,7 +2556,7 @@ int main(int argc, char **argv, char **envp)
     int tb_size;
     const char *pid_file = NULL;
     const char *incoming = NULL;
-    CPUState *env;
+    CPUOldState *env;
     int show_vnc_port = 0;
     IniFile*  hw_ini = NULL;
     STRALLOC_DEFINE(kernel_params);
@@ -4352,7 +4352,7 @@ int main(int argc, char **argv, char **envp)
 
     current_machine = machine;
 
-    /* Set KVM's vcpu state to qemu's initial CPUState. */
+    /* Set KVM's vcpu state to qemu's initial CPUOldState. */
     if (kvm_enabled()) {
         int ret;
 

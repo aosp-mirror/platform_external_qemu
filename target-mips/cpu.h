@@ -8,7 +8,7 @@
 #define ELF_MACHINE	EM_MIPS
 
 // TODO(digit): Remove this define.
-#define CPUState struct CPUMIPSState
+#define CPUOldState struct CPUMIPSState
 
 #define CPUArchState struct CPUMIPSState
 
@@ -523,7 +523,7 @@ static inline int is_cpu_user (CPUMIPSState *env)
 #endif  // CONFIG_USER_ONLY
 }
 
-static inline void cpu_clone_regs(CPUState *env, target_ulong newsp)
+static inline void cpu_clone_regs(CPUMIPSState *env, target_ulong newsp)
 {
     if (newsp)
         env->active_tc.gpr[29] = newsp;
@@ -531,7 +531,7 @@ static inline void cpu_clone_regs(CPUState *env, target_ulong newsp)
     env->active_tc.gpr[2] = 0;
 }
 
-static inline int cpu_mips_hw_interrupts_pending(CPUState *env)
+static inline int cpu_mips_hw_interrupts_pending(CPUMIPSState *env)
 {
     int32_t pending;
     int32_t status;
@@ -636,32 +636,32 @@ CPUMIPSState *cpu_mips_init(const char *cpu_model);
 int cpu_mips_signal_handler(int host_signum, void *pinfo, void *puc);
 
 /* mips_timer.c */
-uint32_t cpu_mips_get_random (CPUState *env);
-uint32_t cpu_mips_get_count (CPUState *env);
-void cpu_mips_store_count (CPUState *env, uint32_t value);
-void cpu_mips_store_compare (CPUState *env, uint32_t value);
-void cpu_mips_start_count(CPUState *env);
-void cpu_mips_stop_count(CPUState *env);
+uint32_t cpu_mips_get_random (CPUMIPSState *env);
+uint32_t cpu_mips_get_count (CPUMIPSState *env);
+void cpu_mips_store_count (CPUMIPSState *env, uint32_t value);
+void cpu_mips_store_compare (CPUMIPSState *env, uint32_t value);
+void cpu_mips_start_count(CPUMIPSState *env);
+void cpu_mips_stop_count(CPUMIPSState *env);
 
 /* mips_int.c */
-void cpu_mips_update_irq (CPUState *env);
+void cpu_mips_update_irq (CPUMIPSState *env);
 
 /* helper.c */
-int cpu_mips_handle_mmu_fault (CPUState *env, target_ulong address, int rw,
+int cpu_mips_handle_mmu_fault (CPUMIPSState *env, target_ulong address, int rw,
                                int mmu_idx, int is_softmmu);
 #define cpu_handle_mmu_fault cpu_mips_handle_mmu_fault
-void do_interrupt (CPUState *env);
-hwaddr cpu_mips_translate_address (CPUState *env, target_ulong address,
+void do_interrupt (CPUMIPSState *env);
+hwaddr cpu_mips_translate_address (CPUMIPSState *env, target_ulong address,
 		                               int rw);
 
-static inline void cpu_pc_from_tb(CPUState *env, TranslationBlock *tb)
+static inline void cpu_pc_from_tb(CPUMIPSState *env, TranslationBlock *tb)
 {
     env->active_tc.PC = tb->pc;
     env->hflags &= ~MIPS_HFLAG_BMASK;
     env->hflags |= tb->flags & MIPS_HFLAG_BMASK;
 }
 
-static inline void cpu_get_tb_cpu_state(CPUState *env, target_ulong *pc,
+static inline void cpu_get_tb_cpu_state(CPUMIPSState *env, target_ulong *pc,
                                         target_ulong *cs_base, int *flags)
 {
     *pc = env->active_tc.PC;
@@ -669,7 +669,7 @@ static inline void cpu_get_tb_cpu_state(CPUState *env, target_ulong *pc,
     *flags = env->hflags & (MIPS_HFLAG_TMASK | MIPS_HFLAG_BMASK);
 }
 
-static inline void cpu_set_tls(CPUState *env, target_ulong newtls)
+static inline void cpu_set_tls(CPUMIPSState *env, target_ulong newtls)
 {
     env->tls_value = newtls;
 }

@@ -356,20 +356,20 @@ void page_set_flags(target_ulong start, target_ulong end, int flags);
 int page_check_range(target_ulong start, target_ulong len, int flags);
 #endif
 
-CPUState *cpu_copy(CPUState *env);
-CPUState *qemu_get_cpu(int cpu);
+CPUOldState *cpu_copy(CPUOldState *env);
+CPUOldState *qemu_get_cpu(int cpu);
 
 #define CPU_DUMP_CODE 0x00010000
 
-void cpu_dump_state(CPUState *env, FILE *f, fprintf_function cpu_fprintf,
+void cpu_dump_state(CPUOldState *env, FILE *f, fprintf_function cpu_fprintf,
                     int flags);
-void cpu_dump_statistics(CPUState *env, FILE *f, fprintf_function cpu_fprintf,
+void cpu_dump_statistics(CPUOldState *env, FILE *f, fprintf_function cpu_fprintf,
                           int flags);
 
-void QEMU_NORETURN cpu_abort(CPUState *env, const char *fmt, ...)
+void QEMU_NORETURN cpu_abort(CPUOldState *env, const char *fmt, ...)
     GCC_FMT_ATTR(2, 3);
-extern CPUState *first_cpu;
-extern CPUState *cpu_single_env;
+extern CPUOldState *first_cpu;
+extern CPUOldState *cpu_single_env;
 
 /* Flags for use in ENV->INTERRUPT_PENDING.
 
@@ -421,12 +421,12 @@ extern CPUState *cpu_single_env;
      | CPU_INTERRUPT_TGT_EXT_3   \
      | CPU_INTERRUPT_TGT_EXT_4)
 
-void cpu_interrupt(CPUState *s, int mask);
-void cpu_reset_interrupt(CPUState *env, int mask);
+void cpu_interrupt(CPUOldState *s, int mask);
+void cpu_reset_interrupt(CPUOldState *env, int mask);
 
-void cpu_exit(CPUState *s);
+void cpu_exit(CPUOldState *s);
 
-int qemu_cpu_has_work(CPUState *env);
+int qemu_cpu_has_work(CPUOldState *env);
 
 /* Breakpoint/watchpoint flags */
 #define BP_MEM_READ           0x01
@@ -437,26 +437,26 @@ int qemu_cpu_has_work(CPUState *env);
 #define BP_GDB                0x10
 #define BP_CPU                0x20
 
-int cpu_breakpoint_insert(CPUState *env, target_ulong pc, int flags,
+int cpu_breakpoint_insert(CPUOldState *env, target_ulong pc, int flags,
                           CPUBreakpoint **breakpoint);
-int cpu_breakpoint_remove(CPUState *env, target_ulong pc, int flags);
-void cpu_breakpoint_remove_by_ref(CPUState *env, CPUBreakpoint *breakpoint);
-void cpu_breakpoint_remove_all(CPUState *env, int mask);
-int cpu_watchpoint_insert(CPUState *env, target_ulong addr, target_ulong len,
+int cpu_breakpoint_remove(CPUOldState *env, target_ulong pc, int flags);
+void cpu_breakpoint_remove_by_ref(CPUOldState *env, CPUBreakpoint *breakpoint);
+void cpu_breakpoint_remove_all(CPUOldState *env, int mask);
+int cpu_watchpoint_insert(CPUOldState *env, target_ulong addr, target_ulong len,
                           int flags, CPUWatchpoint **watchpoint);
-int cpu_watchpoint_remove(CPUState *env, target_ulong addr,
+int cpu_watchpoint_remove(CPUOldState *env, target_ulong addr,
                           target_ulong len, int flags);
-void cpu_watchpoint_remove_by_ref(CPUState *env, CPUWatchpoint *watchpoint);
-void cpu_watchpoint_remove_all(CPUState *env, int mask);
+void cpu_watchpoint_remove_by_ref(CPUOldState *env, CPUWatchpoint *watchpoint);
+void cpu_watchpoint_remove_all(CPUOldState *env, int mask);
 
 #define SSTEP_ENABLE  0x1  /* Enable simulated HW single stepping */
 #define SSTEP_NOIRQ   0x2  /* Do not use IRQ while single stepping */
 #define SSTEP_NOTIMER 0x4  /* Do not Timers while single stepping */
 
-void cpu_single_step(CPUState *env, int enabled);
-void cpu_reset(CPUState *s);
-int cpu_is_stopped(CPUState *env);
-void run_on_cpu(CPUState *env, void (*func)(void *data), void *data);
+void cpu_single_step(CPUOldState *env, int enabled);
+void cpu_reset(CPUOldState *s);
+int cpu_is_stopped(CPUOldState *env);
+void run_on_cpu(CPUOldState *env, void (*func)(void *data), void *data);
 
 #define CPU_LOG_TB_OUT_ASM (1 << 0)
 #define CPU_LOG_TB_IN_ASM  (1 << 1)
@@ -488,7 +488,7 @@ int cpu_str_to_log_mask(const char *str);
 /* Return the physical page corresponding to a virtual one. Use it
    only for debugging because no protection checks are done. Return -1
    if no page found. */
-hwaddr cpu_get_phys_page_debug(CPUState *env, target_ulong addr);
+hwaddr cpu_get_phys_page_debug(CPUOldState *env, target_ulong addr);
 
 /* memory API */
 
@@ -586,7 +586,7 @@ static inline void cpu_physical_memory_mask_dirty_range(ram_addr_t start,
 
 void cpu_physical_memory_reset_dirty(ram_addr_t start, ram_addr_t end,
                                      int dirty_flags);
-void cpu_tlb_update_dirty(CPUState *env);
+void cpu_tlb_update_dirty(CPUOldState *env);
 
 int cpu_physical_memory_set_dirty_tracking(int enable);
 
@@ -622,10 +622,10 @@ extern int64_t tlb_flush_time;
 extern int64_t dev_time;
 #endif
 
-int cpu_memory_rw_debug(CPUState *env, target_ulong addr,
+int cpu_memory_rw_debug(CPUOldState *env, target_ulong addr,
                         void *buf, int len, int is_write);
 
-void cpu_inject_x86_mce(CPUState *cenv, int bank, uint64_t status,
+void cpu_inject_x86_mce(CPUOldState *cenv, int bank, uint64_t status,
                         uint64_t mcg_status, uint64_t addr, uint64_t misc);
 
 #endif /* CPU_ALL_H */
