@@ -6415,7 +6415,6 @@ static void gen_store_exclusive(DisasContext *s, int rd, int rt, int rt2,
 static void disas_arm_insn(CPUARMState * env, DisasContext *s)
 {
     unsigned int cond, insn, val, op1, i, shift, rm, rs, rn, rd, sh;
-    ANDROID_TRACE_DECLS
     TCGv tmp;
     TCGv tmp2;
     TCGv tmp3;
@@ -6425,8 +6424,6 @@ static void disas_arm_insn(CPUARMState * env, DisasContext *s)
     insn = ldl_code(s->pc);
 
     ANDROID_WATCH_CALLSTACK_ARM(s);
-
-    ANDROID_TRACE_START_ARM();
 
     s->pc += 4;
 
@@ -6441,7 +6438,6 @@ static void disas_arm_insn(CPUARMState * env, DisasContext *s)
          */
         ARCH(5);
 
-        ANDROID_TRACE_GEN_TICKS();
         /* Unconditional instructions.  */
         if (((insn >> 25) & 7) == 1) {
             /* NEON Data processing.  */
@@ -6654,14 +6650,12 @@ static void disas_arm_insn(CPUARMState * env, DisasContext *s)
         goto illegal_op;
     }
     if (cond != 0xe) {
-        ANDROID_TRACE_GEN_SINGLE_TICK();
         /* if not always execute, we generate a conditional jump to
            next instruction */
         s->condlabel = gen_new_label();
         gen_test_cc(cond ^ 1, s->condlabel);
         s->condjmp = 1;
     }
-    ANDROID_TRACE_GEN_OTHER_TICKS();
     if ((insn & 0x0f900000) == 0x03000000) {
         if ((insn & (1 << 21)) == 0) {
             ARCH(6T2);
@@ -7833,7 +7827,6 @@ static int disas_thumb2_insn(CPUARMState *env, DisasContext *s, uint16_t insn_hw
     }
 
     insn = lduw_code(s->pc);
-    ANDROID_TRACE_START_THUMB();
     s->pc += 2;
     insn |= (uint32_t)insn_hw1 << 16;
 
@@ -8869,8 +8862,6 @@ static void disas_thumb_insn(CPUARMState *env, DisasContext *s)
 
     ANDROID_WATCH_CALLSTACK_THUMB(s);
 
-    ANDROID_TRACE_START_THUMB();
-
     s->pc += 2;
 
     switch (insn >> 12) {
@@ -9589,7 +9580,6 @@ static inline void gen_intermediate_code_internal(CPUARMState *env,
         max_insns = CF_COUNT_MASK;
 
     gen_icount_start();
-    ANDROID_TRACE_START_BB();
 
     tcg_clear_temp_count();
 
@@ -9718,8 +9708,6 @@ static inline void gen_intermediate_code_internal(CPUARMState *env,
              !singlestep &&
              dc->pc < next_page_start &&
              num_insns < max_insns);
-
-    ANDROID_TRACE_END_BB();
 
     if (tb->cflags & CF_LAST_IO) {
         if (dc->condjmp) {

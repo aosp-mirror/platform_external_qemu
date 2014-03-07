@@ -10,9 +10,6 @@
 #include "qemu/host-utils.h"
 #if !defined(CONFIG_USER_ONLY)
 //#include "hw/loader.h"
-#ifdef CONFIG_TRACE
-#include "android/trace.h"
-#endif
 #endif
 
 static uint32_t cortexa9_cp15_c0_c1[8] =
@@ -827,12 +824,6 @@ void do_interrupt(CPUARMState *env)
     uint32_t mask;
     int new_mode;
     uint32_t offset;
-
-#ifdef CONFIG_TRACE
-    if (tracing) {
-        trace_exception(env->regs[15]);
-    }
-#endif
 
     if (IS_M(env)) {
         do_interrupt_v7m(env);

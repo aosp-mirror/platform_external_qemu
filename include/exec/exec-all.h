@@ -166,10 +166,7 @@ struct TranslationBlock {
        jmp_first */
     struct TranslationBlock *jmp_next[2];
     struct TranslationBlock *jmp_first;
-#ifdef CONFIG_TRACE
-    struct BBRec *bb_rec;
-    uint64_t prev_time;
-#endif
+    uint32_t icount;
 
 #ifdef CONFIG_MEMCHECK
     /* Maps PCs in this translation block to corresponding PCs in guest address
@@ -182,8 +179,6 @@ struct TranslationBlock {
     /* Number of pairs (pc_tb, pc_guest) in tpc2gpc array. */
     unsigned int    tpc2gpc_pairs;
 #endif  // CONFIG_MEMCHECK
-
-    uint32_t icount;
 };
 
 static inline unsigned int tb_jmp_cache_hash_page(target_ulong pc)

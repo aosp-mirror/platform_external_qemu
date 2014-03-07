@@ -226,10 +226,6 @@ extern void  android_emulator_set_base_port(int  port);
 
 #include "disas/disas.h"
 
-#ifdef CONFIG_TRACE
-#include "android/trace.h"
-#endif
-
 #include "qemu/sockets.h"
 
 #if defined(CONFIG_SLIRP)
@@ -618,62 +614,6 @@ int qemu_timedate_diff(struct tm *tm)
 
     return seconds - time(NULL);
 }
-
-
-#ifdef CONFIG_TRACE
-int tbflush_requested;
-static int exit_requested;
-
-void start_tracing()
-{
-  if (trace_filename == NULL)
-    return;
-  if (!tracing) {
-    fprintf(stderr,"-- start tracing --\n");
-    start_time = Now();
-  }
-  tracing = 1;
-  tbflush_requested = 1;
-  qemu_notify_event();
-}
-
-void stop_tracing()
-{
-  if (trace_filename == NULL)
-    return;
-  if (tracing) {
-    end_time = Now();
-    elapsed_usecs += end_time - start_time;
-    fprintf(stderr,"-- stop tracing --\n");
-  }
-  tracing = 0;
-  tbflush_requested = 1;
-  qemu_notify_event();
-}
-
-#ifndef _WIN32
-/* This is the handler for the SIGUSR1 and SIGUSR2 signals.
- * SIGUSR1 turns tracing on.  SIGUSR2 turns tracing off.
- */
-void sigusr_handler(int sig)
-{
-  if (sig == SIGUSR1)
-    start_tracing();
-  else
-    stop_tracing();
-}
-#endif
-
-/* This is the handler to catch control-C so that we can exit cleanly.
- * This is needed when tracing to flush the buffers to disk.
- */
-void sigint_handler(int sig)
-{
-  exit_requested = 1;
-  qemu_notify_event();
-}
-#endif /* CONFIG_TRACE */
-
 
 /***********************************************************/
 /* Bluetooth support */
@@ -3317,38 +3257,6 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_mic:
                 audio_input_source = (char*)optarg;
                 break;
-#ifdef CONFIG_TRACE
-            case QEMU_OPTION_trace:
-                trace_filename = optarg;
-                tracing = 1;
-                break;
-#if 0
-            case QEMU_OPTION_trace_miss:
-                trace_cache_miss = 1;
-                break;
-            case QEMU_OPTION_trace_addr:
-                trace_all_addr = 1;
-                break;
-#endif
-            case QEMU_OPTION_tracing:
-                if (strcmp(optarg, "off") == 0)
-                    tracing = 0;
-                else if (strcmp(optarg, "on") == 0 && trace_filename)
-                    tracing = 1;
-                else {
-                    PANIC("Unexpected option to -tracing ('%s')",
-                            optarg);
-                }
-                break;
-#if 0
-            case QEMU_OPTION_dcache_load_miss:
-                dcache_load_miss_penalty = atoi(optarg);
-                break;
-            case QEMU_OPTION_dcache_store_miss:
-                dcache_store_miss_penalty = atoi(optarg);
-                break;
-#endif
-#endif
 #ifdef CONFIG_NAND
             case QEMU_OPTION_nand:
                 nand_add_dev(optarg);
@@ -4274,13 +4182,6 @@ int main(int argc, char **argv, char **envp)
 
     module_call_init(MODULE_INIT_DEVICE);
 
-
-#ifdef CONFIG_TRACE
-    if (trace_filename) {
-        trace_init(trace_filename);
-        fprintf(stderr, "-- When done tracing, exit the emulator. --\n");
-    }
-#endif
 
     /* Check the CPU Architecture value */
 #if defined(TARGET_ARM)
