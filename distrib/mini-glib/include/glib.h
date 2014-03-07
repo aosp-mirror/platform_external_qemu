@@ -20,6 +20,7 @@
 typedef char gchar;
 typedef int gint;
 typedef unsigned int guint;
+typedef unsigned short gushort;
 typedef int gboolean;
 typedef void* gpointer;
 typedef const void* gconstpointer;
@@ -179,5 +180,31 @@ gboolean g_queue_is_empty(GQueue* queue);
 #ifdef _WIN32
 char* g_win32_error_message(int error);
 #endif
+
+// GSource etc...
+
+// Opaque data type.
+typedef struct GSource GSource;
+
+typedef gboolean (*GSourceFunc)(gpointer user_data);
+
+typedef struct {
+  gboolean (*prepare)(GSource* source, gint* timeout);
+  gboolean (*check)(GSource* source);
+  gboolean (*dispatch)(GSource* source,
+                       GSourceFunc callback,
+                       gpointer user_data);
+  void (*finalize)(GSource* source);
+} GSourceFuncs;
+
+typedef struct GPollFD {
+#if defined(_WIN32) && defined(__LP64__)
+  int64_t fd;
+#else
+  int fd;
+#endif
+  gushort events;
+  gushort revents;
+} GPollFD;
 
 #endif  // GLIB_H
