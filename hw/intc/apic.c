@@ -599,7 +599,7 @@ static uint32_t apic_get_current_count(APICState *s)
 {
     int64_t d;
     uint32_t val;
-    d = (qemu_get_clock_ns(vm_clock) - s->initial_count_load_time) >>
+    d = (qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) - s->initial_count_load_time) >>
         s->count_shift;
     if (s->lvt[APIC_LVT_TIMER] & APIC_LVT_TIMER_PERIODIC) {
         /* periodic */
@@ -630,11 +630,11 @@ static void apic_timer_update(APICState *s, int64_t current_time)
             d = (uint64_t)s->initial_count + 1;
         }
         next_time = s->initial_count_load_time + (d << s->count_shift);
-        qemu_mod_timer(s->timer, next_time);
+        timer_mod(s->timer, next_time);
         s->next_time = next_time;
     } else {
     no_timer:
-        qemu_del_timer(s->timer);
+        timer_del(s->timer);
     }
 }
 
@@ -806,12 +806,12 @@ static void apic_mem_writel(void *opaque, hwaddr addr, uint32_t val)
             int n = index - 0x32;
             s->lvt[n] = val;
             if (n == APIC_LVT_TIMER)
-                apic_timer_update(s, qemu_get_clock_ns(vm_clock));
+                apic_timer_update(s, qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL));
         }
         break;
     case 0x38:
         s->initial_count = val;
-        s->initial_count_load_time = qemu_get_clock_ns(vm_clock);
+        s->initial_count_load_time = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
         apic_timer_update(s, s->initial_count_load_time);
         break;
     case 0x39:
@@ -859,7 +859,7 @@ static void apic_save(QEMUFile *f, void *opaque)
     qemu_put_be64(f, s->initial_count_load_time);
     qemu_put_be64(f, s->next_time);
 
-    qemu_put_timer(f, s->timer);
+    timer_put(f, s->timer);
 }
 
 static int apic_load(QEMUFile *f, void *opaque, int version_id)
@@ -896,7 +896,7 @@ static int apic_load(QEMUFile *f, void *opaque, int version_id)
     s->next_time=qemu_get_be64(f);
 
     if (version_id >= 2)
-        qemu_get_timer(f, s->timer);
+        timer_get(f, s->timer);
     return 0;
 }
 
@@ -956,7 +956,7 @@ int apic_init(CPUOldState *env)
         cpu_register_physical_memory(s->apicbase & ~0xfff, 0x1000,
                                      apic_io_memory);
     }
-    s->timer = qemu_new_timer_ns(vm_clock, apic_timer, s);
+    s->timer = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, apic_timer, s);
 
     register_savevm("apic", s->idx, 2, apic_save, apic_load, s);
     qemu_register_reset(apic_reset, 0, s);

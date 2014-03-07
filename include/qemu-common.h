@@ -207,11 +207,6 @@ const char *path(const char *pathname);
 #define qemu_isascii(c)		isascii((unsigned char)(c))
 #define qemu_toascii(c)		toascii((unsigned char)(c))
 
-#ifdef _WIN32
-/* ffs() in oslib-win32.c for WIN32, strings.h for the rest of the world */
-int ffs(int i);
-#endif
-
 void qemu_mutex_lock_iothread(void);
 void qemu_mutex_unlock_iothread(void);
 
@@ -243,7 +238,7 @@ int qemu_setsockopt(int sockfd, int level, int optname,
 #ifdef _WIN32
 /* MinGW needs type casts for the 'buf' and 'optval' arguments. */
 #define qemu_getsockopt(sockfd, level, optname, optval, optlen) \
-    getsockopt(sockfd, level, optname, optval, optlen);
+    getsockopt(sockfd, level, optname, (void *)optval, optlen)
 #define qemu_setsockopt(sockfd, level, optname, optval, optlen) \
     setsockopt(sockfd, level, optname, (const void *)optval, optlen)
 #define qemu_recv(sockfd, buf, len, flags) recv(sockfd, (void *)buf, len, flags)
