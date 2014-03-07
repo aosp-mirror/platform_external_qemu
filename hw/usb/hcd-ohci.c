@@ -604,7 +604,7 @@ static int ohci_service_iso_td(OHCIState *ohci, struct ohci_ed *ed,
 {
     int dir;
     size_t len = 0;
-    const char *str = NULL;
+    const char * __attribute__((unused)) str = NULL;
     int pid;
     int ret;
     int i;
@@ -839,7 +839,7 @@ static int ohci_service_td(OHCIState *ohci, struct ohci_ed *ed)
 {
     int dir;
     size_t len = 0;
-    const char *str = NULL;
+    const char * __attribute__((unused)) str = NULL;
     int pid;
     int ret;
     int i;

@@ -482,7 +482,6 @@ static int  _opengles_init;
 static void*
 openglesPipe_init( void* hwpipe, void* _looper, const char* args )
 {
-    char temp[32];
     NetPipe *pipe;
 
     if (!_opengles_init) {

@@ -2265,8 +2265,7 @@ do_geo_fix( ControlClient  client, char*  args )
     double  params[ NUM_GEO_PARAMS ];
     int     n_satellites = 1;
 
-    static  int     last_time = 0;
-    static  double  last_altitude = 0.;
+    static  int last_time = 0;
 
     if (!p)
         p = "";
@@ -2367,7 +2366,6 @@ do_geo_fix( ControlClient  client, char*  args )
         /* optional altitude + bogus diff */
         if (top_param >= GEO_ALT) {
             stralloc_add_format( s, ",%.1g,M,0.,M", params[GEO_ALT] );
-            last_altitude = params[GEO_ALT];
         } else {
             stralloc_add_str( s, ",,,," );
         }
