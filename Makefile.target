@@ -167,6 +167,7 @@ common_LOCAL_SRC_FILES += $(HW_SOURCES:%=hw/%)
 common_LOCAL_SRC_FILES += \
     backends/msmouse.c \
     cpu-exec.c  \
+    cputlb.c \
     exec.c \
     translate-all.c \
     android/trace.c \
