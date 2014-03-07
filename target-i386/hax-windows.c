@@ -87,8 +87,9 @@ int hax_populate_ram(uint64_t va, uint32_t size)
       (LPOVERLAPPED) NULL);
 
     if (!ret) {
-        dprint("Failed to allocate %x memory\n", size);
-        return ret;
+        dprint("HAX: Failed to allocate %x memory (address %llx)\n", 
+               size, (unsigned long long)va);
+        return -1;
     }
 
     return 0;

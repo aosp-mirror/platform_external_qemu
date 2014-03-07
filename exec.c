@@ -1353,23 +1353,6 @@ ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
             exit(1);
         }
         //xen_ram_alloc(new_block->offset, size, mr);
-#ifdef CONFIG_HAX
-    } else if (hax_enabled()) {
-        /*
-         * In HAX, qemu allocates the virtual address, and HAX kernel
-         * module populates the region with physical memory. Currently
-         * we don’t populate guest memory on demand, thus we should
-         * make sure that sufficient amount of memory is available in
-         * advance.
-         */
-        int ret = hax_populate_ram(
-                (uint64_t)(uintptr_t)new_block->host,
-                (uint32_t)size);
-        if (ret < 0) {
-            fprintf(stderr, "Hax failed to populate ram\n");
-            exit(-1);
-        }
-#endif  // CONFIG_HAX
     } else {
         if (mem_path) {
             if (phys_mem_alloc != qemu_anon_ram_alloc) {
@@ -1391,6 +1374,24 @@ ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
                         name, strerror(errno));
                 exit(1);
             }
+#ifdef CONFIG_HAX
+            if (hax_enabled()) {
+                /*
+                 * In HAX, qemu allocates the virtual address, and HAX kernel
+                 * module populates the region with physical memory. Currently
+                 * we don’t populate guest memory on demand, thus we should
+                 * make sure that sufficient amount of memory is available in
+                 * advance.
+                 */
+                int ret = hax_populate_ram(
+                        (uint64_t)(uintptr_t)new_block->host,
+                        (uint32_t)size);
+                if (ret < 0) {
+                    fprintf(stderr, "Hax failed to populate ram\n");
+                    exit(-1);
+                }
+            }
+#endif  // CONFIG_HAX
             memory_try_enable_merging(new_block->host, size);
         }
     }
