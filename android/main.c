@@ -33,7 +33,7 @@
 
 #include "android/charmap.h"
 #include "android/utils/debug.h"
-#include "android/config.h"
+#include "android/config-file.h"
 #include "android/config/config.h"
 
 #include "android/user-config.h"

@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "android/config.h"
+#include "android/config-file.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 
