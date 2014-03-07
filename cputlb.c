@@ -152,7 +152,7 @@ void tlb_set_dirty(CPUArchState *env, target_ulong vaddr)
    is permitted. Return 0 if OK or 2 if the page could not be mapped
    (can only happen in non SOFTMMU mode for I/O pages or pages
    conflicting with the host address space). */
-int tlb_set_page_exec(CPUOldState *env, target_ulong vaddr,
+int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
                       hwaddr paddr, int prot,
                       int mmu_idx, int is_softmmu)
 {
