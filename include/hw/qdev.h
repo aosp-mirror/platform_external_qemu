@@ -8,8 +8,6 @@ typedef struct DeviceType DeviceType;
 
 typedef struct DeviceProperty DeviceProperty;
 
-typedef struct BusState BusState;
-
 /* This structure should not be accessed directly.  We declare it here
    so that it can be embedded in individual device state structures.  */
 struct DeviceState {

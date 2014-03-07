@@ -839,10 +839,10 @@ PCIDevice *pci_nic_init(PCIBus *bus, NICInfo *nd, int devfn,
     return NULL;
 }
 
-typedef struct {
+struct PCIBridge {
     PCIDevice dev;
     PCIBus *bus;
-} PCIBridge;
+};
 
 static void pci_bridge_write_config(PCIDevice *d,
                              uint32_t address, uint32_t val, int len)
