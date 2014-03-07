@@ -25,6 +25,9 @@
 #include "qemu/host-utils.h"
 #include <math.h>
 
+#include "qemu/sockets.h"
+#include "qemu/iov.h"
+
 void strpadcpy(char *buf, int buf_size, const char *str, char pad)
 {
     int len = qemu_strnlen(str, buf_size);
