@@ -2850,11 +2850,7 @@ int main(int argc, char **argv, char **envp)
                 }
 
                 /* On 32-bit hosts, QEMU is limited by virtual address space */
-                if (value > (2047 << 20)
-#ifndef CONFIG_KQEMU
-                    && HOST_LONG_BITS == 32
-#endif
-                    ) {
+                if (value > (2047 << 20) && HOST_LONG_BITS == 32) {
                     PANIC("qemu: at most 2047 MB RAM can be simulated");
                 }
                 if (value != (uint64_t)(ram_addr_t)value) {
@@ -3867,13 +3863,6 @@ int main(int argc, char **argv, char **envp)
     }
 #endif
 
-#if defined(CONFIG_KVM) && defined(CONFIG_KQEMU)
-    if (kvm_allowed && kqemu_allowed) {
-        PANIC(
-                "You can not enable both KVM and kqemu at the same time");
-    }
-#endif
-
     machine->max_cpus = machine->max_cpus ?: 1; /* Default to UP */
     if (smp_cpus > machine->max_cpus) {
         PANIC("Number of SMP cpus requested (%d), exceeds max cpus "
@@ -3890,10 +3879,6 @@ int main(int argc, char **argv, char **envp)
            monitor_device = "stdio";
     }
 
-#ifdef CONFIG_KQEMU
-    if (smp_cpus > 1)
-        kqemu_allowed = 0;
-#endif
     if (qemu_init_main_loop()) {
         PANIC("qemu_init_main_loop failed");
     }
@@ -4014,18 +3999,6 @@ int main(int argc, char **argv, char **envp)
             ram_size = r_ram;
         }
     }
-
-#ifdef CONFIG_KQEMU
-    /* FIXME: This is a nasty hack because kqemu can't cope with dynamic
-       guest ram allocation.  It needs to go away.  */
-    if (kqemu_allowed) {
-        kqemu_phys_ram_size = ram_size + 8 * 1024 * 1024 + 4 * 1024 * 1024;
-        kqemu_phys_ram_base = qemu_vmalloc(kqemu_phys_ram_size);
-        if (!kqemu_phys_ram_base) {
-            PANIC("Could not allocate physical memory");
-        }
-    }
-#endif
 
 #ifndef _WIN32
     init_qemu_clear_logs_sig();
