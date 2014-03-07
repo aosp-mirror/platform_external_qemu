@@ -599,7 +599,7 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     echo "HOST_OS   := windows" >> $config_mk
 fi
 
-if [ "$GLES_INCLUDE" -a "$GLES_LIBS" ]; then
+if [ "$GLES_SUPPORT" = "yes" -a "$GLES_INCLUDE" -a "$GLES_LIBS" ]; then
     echo "QEMU_OPENGLES_INCLUDE    := $GLES_INCLUDE" >> $config_mk
     echo "QEMU_OPENGLES_LIBS       := $GLES_LIBS"    >> $config_mk
 fi
@@ -725,7 +725,7 @@ fi
 
 echo "#define CONFIG_ANDROID       1" >> $config_h
 
-if [ "$GLES_INCLUDE" -a "$GLES_LIBS" ]; then
+if [ "$GLES_SUPPORT" = "yes" ]; then
     echo "#define CONFIG_ANDROID_OPENGLES 1" >> $config_h
 fi
 
