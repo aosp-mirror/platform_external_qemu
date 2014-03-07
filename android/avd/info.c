@@ -978,6 +978,12 @@ avdInfo_getKernelPath( AvdInfo*  i )
             suffix = "-armv7";
         }
 
+        p = bufprint(temp, end, "%s/kernel", i->androidOut);
+        if (p < end && path_exists(temp)) {
+            kernelPath = ASTRDUP(temp);
+            break;
+        }
+
         p = bufprint(temp, end, "%s/prebuilts/qemu-kernel/%s/kernel-qemu%s",
                      i->androidBuildRoot, i->targetArch, suffix);
         if (p >= end || !path_exists(temp)) {

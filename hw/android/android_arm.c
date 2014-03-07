@@ -144,7 +144,9 @@ static void android_arm_init_(ram_addr_t ram_size,
     }
 #endif  // CONFIG_MEMCHECK
 
-    pipe_dev_init();
+    bool newDeviceNaming =
+            (androidHwConfig_getKernelDeviceNaming(android_hw) >= 1);
+    pipe_dev_init(newDeviceNaming);
 
 #if TEST_SWITCH
     {
