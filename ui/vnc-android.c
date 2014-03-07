@@ -28,7 +28,9 @@
 #include "sysemu/sysemu.h"
 #include "qemu/sockets.h"
 #include "qemu/timer.h"
+#ifdef CONFIG_VNC_TLS
 #include "qemu/acl.h"
+#endif
 
 #define VNC_REFRESH_INTERVAL (1000 / 30)
 
