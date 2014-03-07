@@ -567,6 +567,8 @@ int do_block_set_passwd(Monitor *mon, const QDict *qdict,
     return 0;
 }
 
+#ifndef CONFIG_ANDROID
+// Monitor support disabled on Android.
 int do_change_block(Monitor *mon, const char *device,
                     const char *filename, const char *fmt)
 {
@@ -597,3 +599,4 @@ int do_change_block(Monitor *mon, const char *device,
     }
     return monitor_read_bdrv_key_start(mon, bs, NULL, NULL);
 }
+#endif

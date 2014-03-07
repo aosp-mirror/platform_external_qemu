@@ -417,7 +417,6 @@ CORE_MISC_SOURCES = \
     migration-dummy-android.c \
     qemu-char.c \
     qemu-log.c \
-    readline.c \
     savevm.c \
     android/boot-properties.c \
     android/cbuffer.c \
