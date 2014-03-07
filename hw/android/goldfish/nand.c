@@ -13,6 +13,7 @@
 #include "nand_reg.h"
 #include "hw/android/goldfish/nand.h"
 #include "hw/android/goldfish/vmem.h"
+#include "hw/hw.h"
 #include "android/utils/tempfile.h"
 #include "android/qemu-debug.h"
 #include "android/android.h"

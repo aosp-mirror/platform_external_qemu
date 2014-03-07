@@ -250,6 +250,14 @@ static void buffered_rate_tick(void *opaque)
     s->put_ready(s->opaque);
 }
 
+static const QEMUFileOps buffered_file_ops = {
+    .put_buffer = buffered_put_buffer,
+    .close = buffered_close,
+    .rate_limit = buffered_rate_limit,
+    .set_rate_limit = buffered_set_rate_limit,
+    .get_rate_limit = buffered_get_rate_limit,
+};
+
 QEMUFile *qemu_fopen_ops_buffered(void *opaque,
                                   size_t bytes_per_sec,
                                   BufferedPutFunc *put_buffer,
@@ -268,11 +276,7 @@ QEMUFile *qemu_fopen_ops_buffered(void *opaque,
     s->wait_for_unfreeze = wait_for_unfreeze;
     s->close = close;
 
-    s->file = qemu_fopen_ops(s, buffered_put_buffer, NULL,
-                             buffered_close, buffered_rate_limit,
-                             buffered_set_rate_limit,
-			     buffered_get_rate_limit);
-
+    s->file = qemu_fopen_ops(s, &buffered_file_ops);
     s->timer = qemu_new_timer_ms(rt_clock, buffered_rate_tick, s);
 
     qemu_mod_timer(s->timer, qemu_get_clock_ms(rt_clock) + 100);

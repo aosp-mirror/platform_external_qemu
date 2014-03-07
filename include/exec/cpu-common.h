@@ -49,6 +49,12 @@ typedef uintptr_t ram_addr_t;
 
 /* memory API */
 
+/* MMIO pages are identified by a combination of an IO device index and
+   3 flags.  The ROMD code stores the page ram offset in iotlb entry,
+   so only a limited number of ids are avaiable.  */
+
+#define IO_MEM_NB_ENTRIES  (1 << (TARGET_PAGE_BITS  - IO_MEM_SHIFT))
+
 typedef void CPUWriteMemoryFunc(void *opaque, hwaddr addr, uint32_t value);
 typedef uint32_t CPUReadMemoryFunc(void *opaque, hwaddr addr);
 

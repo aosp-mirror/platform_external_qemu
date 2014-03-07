@@ -21,6 +21,8 @@
 #define _EXEC_ALL_H_
 
 #include "qemu-common.h"
+#include "exec/cpu-common.h"
+#include "exec/cpu-all.h"
 
 /* allow to see translation results - the slowdown should be negligible, so we leave it */
 #define DEBUG_DISAS
@@ -95,14 +97,9 @@ void tlb_flush(CPUArchState *env, int flush_global);
 int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
                       hwaddr paddr, int prot,
                       int mmu_idx, int is_softmmu);
-static inline int tlb_set_page(CPUArchState *env1, target_ulong vaddr,
-                               hwaddr paddr, int prot,
-                               int mmu_idx, int is_softmmu)
-{
-    if (prot & PAGE_READ)
-        prot |= PAGE_EXEC;
-    return tlb_set_page_exec(env1, vaddr, paddr, prot, mmu_idx, is_softmmu);
-}
+int tlb_set_page(CPUArchState *env1, target_ulong vaddr,
+                 hwaddr paddr, int prot,
+                 int mmu_idx, int is_softmmu);
 
 typedef struct PhysPageDesc {
     /* offset in host memory of the page + io_index in the low bits */

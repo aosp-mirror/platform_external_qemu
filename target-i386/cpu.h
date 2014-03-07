@@ -1087,8 +1087,10 @@ static inline void cpu_clone_regs(CPUX86State *env, target_ulong newsp)
 }
 #endif
 
-#include "exec/cpu-all.h"
+//#include "exec/cpu-all.h"
 #include "exec/exec-all.h"
+
+struct TranslationBlock;
 
 #include "svm.h"
 
