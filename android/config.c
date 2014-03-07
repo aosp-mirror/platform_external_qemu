@@ -17,6 +17,7 @@
 #include <errno.h>
 
 #include "android/config.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 
 AConfig*
@@ -386,11 +387,7 @@ writer_write( Writer*  w, const char*  src, int  len )
 
         w->p += avail;
         if (w->p == w->end) {
-            int ret;
-            do {
-                ret = write( w->fd, w->buff, w->p - w->buff );
-            } while (ret < 0 && errno == EINTR);
-            if (ret < 0)
+            if (HANDLE_EINTR(write(w->fd, w->buff, w->p - w->buff)) < 0)
                 break;
             w->p = w->buff;
         }
@@ -401,12 +398,9 @@ static void
 writer_done( Writer*  w )
 {
     if (w->p > w->buff) {
-        int ret;
-        do {
-            ret = write( w->fd, w->buff, w->p - w->buff );
-        } while (ret < 0 && errno == EINTR);
+        HANDLE_EINTR(write(w->fd, w->buff, w->p - w->buff));
     }
-    close( w->fd );
+    IGNORE_EINTR(close( w->fd ));
 }
 
 static void
