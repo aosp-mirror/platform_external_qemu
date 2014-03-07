@@ -57,8 +57,8 @@ extern int loglevel;
   } while (0)
 
 /* disas() and target_disas() to logfile: */
-#define log_target_disas(start, len, flags) \
-        target_disas(logfile, (start), (len), (flags))
+#define log_target_disas(env, start, len, flags) \
+        target_disas(logfile, (env), (start), (len), (flags))
 #define log_disas(start, len) \
         disas(logfile, (start), (len))
 
