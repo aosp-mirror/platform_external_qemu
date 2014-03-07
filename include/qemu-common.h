@@ -1,17 +1,26 @@
-/* Common header file that is included by all of qemu.  */
+
+/* Common header file that is included by all of QEMU.
+ *
+ * This file is supposed to be included only by .c files. No header file should
+ * depend on qemu-common.h, as this would easily lead to circular header
+ * dependencies.
+ *
+ * If a header file uses a definition from qemu-common.h, that definition
+ * must be moved to a separate header file, and the header that uses it
+ * must include that header.
+ */
 #ifndef QEMU_COMMON_H
 #define QEMU_COMMON_H
 
+#include "qemu/compiler.h"
 #include "config-host.h"
 
-#define QEMU_NORETURN __attribute__ ((__noreturn__))
-#ifdef CONFIG_GCC_ATTRIBUTE_WARN_UNUSED_RESULT
-#define QEMU_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
-#else
-#define QEMU_WARN_UNUSED_RESULT
+#if defined(__arm__) || defined(__sparc__) || defined(__mips__) || defined(__hppa__) || defined(__ia64__)
+#define WORDS_ALIGNED
 #endif
 
-#define QEMU_BUILD_BUG_ON(x) typedef char __build_bug_on__##__LINE__[(x)?-1:1];
+#define TFR(expr) do { if ((expr) != -1) break; } while (errno == EINTR)
+
 
 typedef struct QEMUTimer QEMUTimer;
 typedef struct QEMUFile QEMUFile;
@@ -38,7 +47,7 @@ typedef struct Monitor Monitor;
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <assert.h>
-
+#include <signal.h>
 #include <glib.h>
 
 #ifdef _WIN32
@@ -64,6 +73,12 @@ typedef struct Monitor Monitor;
 #if !defined(ENOTSUP)
 #define ENOTSUP 4096
 #endif
+#if !defined(ECANCELED)
+#define ECANCELED 4097
+#endif
+#if !defined(EMEDIUMTYPE)
+#define EMEDIUMTYPE 4098
+#endif
 #ifndef TIME_MAX
 #define TIME_MAX LONG_MAX
 #endif
@@ -82,30 +97,18 @@ struct iovec {
 #include <sys/uio.h>
 #endif
 
-#if defined __GNUC__
-# if (__GNUC__ < 4) || \
-     defined(__GNUC_MINOR__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 4)
-   /* gcc versions before 4.4.x don't support gnu_printf, so use printf. */
-#  define GCC_ATTR __attribute__((__unused__, format(printf, 1, 2)))
-#  define GCC_FMT_ATTR(n, m) __attribute__((format(printf, n, m)))
-# else
-   /* Use gnu_printf when supported (qemu uses standard format strings). */
-#  define GCC_ATTR __attribute__((__unused__, format(gnu_printf, 1, 2)))
-#  define GCC_FMT_ATTR(n, m) __attribute__((format(gnu_printf, n, m)))
-# endif
-#else
-#define GCC_ATTR /**/
-#define GCC_FMT_ATTR(n, m)
-#endif
-
 typedef int (*fprintf_function)(FILE *f, const char *fmt, ...)
     GCC_FMT_ATTR(2, 3);
 
 #ifdef _WIN32
 #define fsync _commit
-#define lseek _lseeki64
+#if !defined(lseek)
+# define lseek _lseeki64
+#endif
 int qemu_ftruncate64(int, int64_t);
-#define ftruncate qemu_ftruncate64
+#if !defined(ftruncate)
+# define ftruncate qemu_ftruncate64
+#endif
 
 static inline char *realpath(const char *path, char *resolved_path)
 {
@@ -174,6 +177,8 @@ int fcntl_setfl(int fd, int flag);
  * A-Z, as strtosz() will use qemu_toupper() on the given argument
  * prior to comparison.
  */
+#define STRTOSZ_DEFSUFFIX_EB	'E'
+#define STRTOSZ_DEFSUFFIX_PB	'P'
 #define STRTOSZ_DEFSUFFIX_TB	'T'
 #define STRTOSZ_DEFSUFFIX_GB	'G'
 #define STRTOSZ_DEFSUFFIX_MB	'M'
@@ -181,6 +186,9 @@ int fcntl_setfl(int fd, int flag);
 #define STRTOSZ_DEFSUFFIX_B	'B'
 int64_t strtosz(const char *nptr, char **end);
 int64_t strtosz_suffix(const char *nptr, char **end, const char default_suffix);
+
+/* used to print char* safely */
+#define STR_OR_NULL(str) ((str) ? (str) : "null")
 
 /* path.c */
 void init_paths(const char *prefix);
@@ -286,6 +294,22 @@ typedef enum {
     IF_COUNT
 } BlockInterfaceType;
 
+typedef enum LostTickPolicy {
+    LOST_TICK_DISCARD,
+    LOST_TICK_DELAY,
+    LOST_TICK_MERGE,
+    LOST_TICK_SLEW,
+    LOST_TICK_MAX
+} LostTickPolicy;
+
+typedef struct PCIHostDeviceAddress {
+    unsigned int domain;
+    unsigned int bus;
+    unsigned int slot;
+    unsigned int function;
+} PCIHostDeviceAddress;
+
+
 void cpu_exec_init_all(unsigned long tb_size);
 
 /* CPU save/load.  */
@@ -337,6 +361,11 @@ void qemu_iovec_memset(QEMUIOVector *qiov, int c, size_t count);
 void qemu_iovec_memset_skip(QEMUIOVector *qiov, int c, size_t count,
                             size_t skip);
 
+#define QEMU_FILE_TYPE_BIOS   0
+#define QEMU_FILE_TYPE_KEYMAP 1
+char *qemu_find_file(int type, const char *name);
+
+
 /* OS specific functions */
 void os_setup_early_signal_handling(void);
 char *os_find_datadir(const char *argv0);
@@ -379,15 +408,6 @@ static inline uint64_t muldiv64(uint64_t a, uint32_t b, uint32_t c)
 }
 
 #include "qemu/module.h"
-
-typedef enum DisplayType
-{
-    DT_DEFAULT,
-    DT_CURSES,
-    DT_SDL,
-    DT_VNC,
-    DT_NOGRAPHIC,
-} DisplayType;
 
 /*
  * A fixer for timeout value passed to select() on Mac. The issue is that Mac's
