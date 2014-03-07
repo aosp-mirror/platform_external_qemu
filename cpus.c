@@ -304,7 +304,7 @@ int qemu_init_main_loop(void)
     qemu_mutex_lock(&qemu_global_mutex);
 
     unblock_io_signals();
-    qemu_thread_self(&io_thread);
+    qemu_thread_get_self(&io_thread);
 
     return 0;
 }
@@ -339,7 +339,7 @@ static void *kvm_cpu_thread_fn(void *arg)
     CPUOldState *env = arg;
 
     block_io_signals();
-    qemu_thread_self(env->thread);
+    qemu_thread_get_self(env->thread);
 
     /* signal CPU creation */
     qemu_mutex_lock(&qemu_global_mutex);
@@ -366,7 +366,7 @@ static void *tcg_cpu_thread_fn(void *arg)
     CPUOldState *env = arg;
 
     block_io_signals();
-    qemu_thread_self(env->thread);
+    qemu_thread_get_self(env->thread);
 
     /* signal CPU creation */
     qemu_mutex_lock(&qemu_global_mutex);
@@ -563,10 +563,7 @@ void qemu_notify_event(void)
 
 void vm_stop(int reason)
 {
-    QemuThread me;
-    qemu_thread_self(&me);
-
-    if (!qemu_thread_equal(&me, &io_thread)) {
+    if (!qemu_thread_is_self(&io_thread)) {
         qemu_system_vmstop_request(reason);
         /*
          * FIXME: should not return to device code in case
