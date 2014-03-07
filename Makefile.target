@@ -169,6 +169,7 @@ common_LOCAL_SRC_FILES += \
     cpu-exec.c  \
     cputlb.c \
     exec.c \
+    main-loop.c \
     monitor-android.c \
     translate-all.c \
     android/varint.c \
@@ -327,6 +328,7 @@ common_LOCAL_SRC_FILES := \
     dma-helpers.c \
     gdbstub.c \
     qemu-timer.c \
+    log-rotate-android.c \
     vl-android.c \
     android/cmdline-option.c \
     android/console.c \

@@ -103,92 +103,6 @@ int tcg_has_work(void)
     return 0;
 }
 
-#ifndef _WIN32
-static int io_thread_fd = -1;
-
-#if 0
-static void qemu_event_increment(void)
-{
-    static const char byte = 0;
-
-    if (io_thread_fd == -1)
-        return;
-
-    write(io_thread_fd, &byte, sizeof(byte));
-}
-#endif
-
-static void qemu_event_read(void *opaque)
-{
-    int fd = (unsigned long)opaque;
-    ssize_t len;
-
-    /* Drain the notify pipe */
-    do {
-        char buffer[512];
-        len = read(fd, buffer, sizeof(buffer));
-    } while ((len == -1 && errno == EINTR) || len > 0);
-}
-
-static int qemu_event_init(void)
-{
-    int err;
-    int fds[2];
-
-    err = pipe(fds);
-    if (err == -1)
-        return -errno;
-
-    err = fcntl_setfl(fds[0], O_NONBLOCK);
-    if (err < 0)
-        goto fail;
-
-    err = fcntl_setfl(fds[1], O_NONBLOCK);
-    if (err < 0)
-        goto fail;
-
-    qemu_set_fd_handler2(fds[0], NULL, qemu_event_read, NULL,
-                         (void *)(unsigned long)fds[0]);
-
-    io_thread_fd = fds[1];
-    return 0;
-
-fail:
-    close(fds[0]);
-    close(fds[1]);
-    return err;
-}
-#else
-HANDLE qemu_event_handle;
-
-static void dummy_event_handler(void *opaque)
-{
-}
-
-static int qemu_event_init(void)
-{
-    qemu_event_handle = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if (!qemu_event_handle) {
-        perror("Failed CreateEvent");
-        return -1;
-    }
-    qemu_add_wait_object(qemu_event_handle, dummy_event_handler, NULL);
-    return 0;
-}
-
-#if 0
-static void qemu_event_increment(void)
-{
-    SetEvent(qemu_event_handle);
-}
-#endif
-#endif
-
-int qemu_init_main_loop(void)
-{
-    return qemu_event_init();
-}
-
 void qemu_init_vcpu(void *_env)
 {
     CPUOldState *env = _env;
@@ -219,6 +133,11 @@ void qemu_cpu_kick(void *env)
 {
     return;
 }
+
+// In main-loop.c
+#ifdef _WIN32
+extern HANDLE qemu_event_handle;
+#endif
 
 void qemu_notify_event(void)
 {
@@ -265,12 +184,9 @@ void vm_stop(int reason)
 static int qemu_cpu_exec(CPUOldState *env)
 {
     int ret;
-#ifdef CONFIG_PROFILER
-    int64_t ti;
-#endif
 
 #ifdef CONFIG_PROFILER
-    ti = profile_getclock();
+    int64_t ti = profile_getclock();
 #endif
     if (use_icount) {
         int64_t count;
