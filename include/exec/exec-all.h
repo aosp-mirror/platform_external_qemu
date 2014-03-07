@@ -72,20 +72,23 @@ void cpu_gen_init(void);
 void tcg_exec_init(unsigned long tb_size);
 int cpu_gen_code(CPUArchState *env, struct TranslationBlock *tb,
                  int *gen_code_size_ptr);
-bool cpu_restore_state(struct TranslationBlock *tb,
-                       CPUArchState *env, uintptr_t searched_pc);
+bool cpu_restore_state(CPUArchState *env, uintptr_t searched_pc);
+
 void QEMU_NORETURN cpu_resume_from_signal(CPUArchState *env1, void *puc);
 void QEMU_NORETURN cpu_io_recompile(CPUArchState *env, uintptr_t retaddr);
-TranslationBlock *tb_gen_code(CPUArchState *env,
+TranslationBlock *tb_gen_code(CPUArchState *env, 
                               target_ulong pc, target_ulong cs_base, int flags,
                               int cflags);
 void cpu_exec_init(CPUArchState *env);
 void QEMU_NORETURN cpu_loop_exit(CPUArchState *env1);
 int page_unprotect(target_ulong address, uintptr_t pc, void *puc);
-void tb_invalidate_phys_page_range(hwaddr start, hwaddr end,
+void tb_invalidate_phys_page_range(tb_page_addr_t start, tb_page_addr_t end,
                                    int is_cpu_write_access);
 void tb_invalidate_page_range(target_ulong start, target_ulong end);
+void tb_invalidate_phys_range(tb_page_addr_t start, tb_page_addr_t end,
+                              int is_cpu_write_access);
 #if !defined(CONFIG_USER_ONLY)
+/* cputlb.c */
 void tlb_flush_page(CPUArchState *env, target_ulong addr);
 void tlb_flush(CPUArchState *env, int flush_global);
 int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
@@ -95,6 +98,7 @@ int tlb_set_page(CPUArchState *env1, target_ulong vaddr,
                  hwaddr paddr, int prot,
                  int mmu_idx, int is_softmmu);
 void tb_reset_jump_recursive(TranslationBlock *tb);
+void tb_invalidate_phys_addr(hwaddr addr);
 #else
 static inline void tlb_flush_page(CPUArchState *env, target_ulong addr)
 {
@@ -277,7 +281,6 @@ tb_search_guest_pc_from_tb_pc(const TranslationBlock* tb, target_ulong tb_pc)
 }
 #endif  // CONFIG_MEMCHECK
 
-TranslationBlock *tb_alloc(target_ulong pc);
 void tb_free(TranslationBlock *tb);
 void tb_flush(CPUArchState *env);
 void tb_link_phys(TranslationBlock *tb,
@@ -402,7 +405,7 @@ extern uintptr_t tci_tb_ptr;
 
 void phys_mem_set_alloc(void *(*alloc)(size_t));
 
-TranslationBlock *tb_find_pc(unsigned long pc_ptr);
+TranslationBlock *tb_find_pc(uintptr_t pc_ptr);
 
 extern CPUWriteMemoryFunc *io_mem_write[IO_MEM_NB_ENTRIES][4];
 extern CPUReadMemoryFunc *io_mem_read[IO_MEM_NB_ENTRIES][4];
@@ -436,7 +439,7 @@ void tlb_fill(target_ulong addr, int is_write, int mmu_idx,
 #endif
 
 #if defined(CONFIG_USER_ONLY)
-static inline target_ulong get_page_addr_code(CPUArchState *env1, target_ulong addr)
+static inline tb_page_addr_t get_page_addr_code(CPUArchState *env1, target_ulong addr)
 {
     return addr;
 }
@@ -444,7 +447,7 @@ static inline target_ulong get_page_addr_code(CPUArchState *env1, target_ulong a
 /* NOTE: this function can trigger an exception */
 /* NOTE2: the returned address is not exactly the physical address: it
    is the offset relative to phys_ram_base */
-static inline target_ulong get_page_addr_code(CPUArchState *env1, target_ulong addr)
+static inline tb_page_addr_t get_page_addr_code(CPUArchState *env1, target_ulong addr)
 {
     int mmu_idx, page_index, pd;
     void *p;
@@ -463,7 +466,7 @@ static inline target_ulong get_page_addr_code(CPUArchState *env1, target_ulong a
         cpu_abort(env1, "Trying to execute code outside RAM or ROM at 0x" TARGET_FMT_lx "\n", addr);
 #endif
     }
-    p = (void *)(unsigned long)addr
+    p = (void *)(uintptr_t)addr
         + env1->tlb_table[mmu_idx][page_index].addend;
     return qemu_ram_addr_from_host_nofail(p);
 }
@@ -476,6 +479,9 @@ void cpu_set_debug_excp_handler(CPUDebugExcpHandler *handler);
 /* vl.c */
 extern int singlestep;
 
+/* cpu-exec.c */
+extern volatile sig_atomic_t exit_request;
+
 /* Deterministic execution requires that IO only be performed on the last
    instruction of a TB so that interrupts take effect immediately.  */
 static inline int can_do_io(CPUArchState *env)
@@ -484,7 +490,7 @@ static inline int can_do_io(CPUArchState *env)
         return 1;
     }
     /* If not executing code then assume we are ok.  */
-    if (!env->current_tb) {
+    if (env->current_tb == NULL) {
         return 1;
     }
     return env->can_do_io != 0;

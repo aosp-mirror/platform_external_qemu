@@ -4807,7 +4807,7 @@ void tlb_fill(target_ulong addr, int is_write, int mmu_idx, void *retaddr)
             if (tb) {
                 /* the PC is inside the translated code. It means that we have
                    a virtual CPU fault */
-                cpu_restore_state(tb, env, pc);
+                cpu_restore_state(env, pc);
             }
         }
         raise_exception_err(env->exception_index, env->error_code);

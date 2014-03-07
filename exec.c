@@ -437,7 +437,7 @@ void cpu_set_log_filename(const char *filename)
     cpu_set_log(loglevel);
 }
 
-static void cpu_unlink_tb(CPUOldState *env)
+void cpu_unlink_tb(CPUOldState *env)
 {
     /* FIXME: TB unchaining isn't SMP safe.  For now just ignore the
        problem and hope the cpu will stop of its own accord.  For userspace
@@ -455,38 +455,6 @@ static void cpu_unlink_tb(CPUOldState *env)
         tb_reset_jump_recursive(tb);
     }
     spin_unlock(&interrupt_lock);
-}
-
-/* mask must never be zero, except for A20 change call */
-void cpu_interrupt(CPUOldState *env, int mask)
-{
-    int old_mask;
-
-    old_mask = env->interrupt_request;
-    env->interrupt_request |= mask;
-
-#ifndef CONFIG_USER_ONLY
-    /*
-     * If called from iothread context, wake the target cpu in
-     * case its halted.
-     */
-    if (!qemu_cpu_self(env)) {
-        qemu_cpu_kick(env);
-        return;
-    }
-#endif
-
-    if (use_icount) {
-        env->icount_decr.u16.high = 0xffff;
-#ifndef CONFIG_USER_ONLY
-        if (!can_do_io(env)
-            && (mask & ~old_mask) != 0) {
-            cpu_abort(env, "Raised interrupt while not in I/O function");
-        }
-#endif
-    } else {
-        cpu_unlink_tb(env);
-    }
 }
 
 void cpu_reset_interrupt(CPUOldState *env, int mask)
@@ -699,198 +667,6 @@ int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
                       hwaddr paddr, int prot,
                       int mmu_idx, int is_softmmu)
 {
-    return 0;
-}
-
-/*
- * Walks guest process memory "regions" one by one
- * and calls callback function 'fn' for each region.
- */
-int walk_memory_regions(void *priv,
-    int (*fn)(void *, unsigned long, unsigned long, unsigned long))
-{
-    unsigned long start, end;
-    PageDesc *p = NULL;
-    int i, j, prot, prot1;
-    int rc = 0;
-
-    start = end = -1;
-    prot = 0;
-
-    for (i = 0; i <= L1_SIZE; i++) {
-        p = (i < L1_SIZE) ? l1_map[i] : NULL;
-        for (j = 0; j < L2_SIZE; j++) {
-            prot1 = (p == NULL) ? 0 : p[j].flags;
-            /*
-             * "region" is one continuous chunk of memory
-             * that has same protection flags set.
-             */
-            if (prot1 != prot) {
-                end = (i << (32 - L1_BITS)) | (j << TARGET_PAGE_BITS);
-                if (start != -1) {
-                    rc = (*fn)(priv, start, end, prot);
-                    /* callback can stop iteration by returning != 0 */
-                    if (rc != 0)
-                        return (rc);
-                }
-                if (prot1 != 0)
-                    start = end;
-                else
-                    start = -1;
-                prot = prot1;
-            }
-            if (p == NULL)
-                break;
-        }
-    }
-    return (rc);
-}
-
-static int dump_region(void *priv, unsigned long start,
-    unsigned long end, unsigned long prot)
-{
-    FILE *f = (FILE *)priv;
-
-    (void) fprintf(f, "%08lx-%08lx %08lx %c%c%c\n",
-        start, end, end - start,
-        ((prot & PAGE_READ) ? 'r' : '-'),
-        ((prot & PAGE_WRITE) ? 'w' : '-'),
-        ((prot & PAGE_EXEC) ? 'x' : '-'));
-
-    return (0);
-}
-
-/* dump memory mappings */
-void page_dump(FILE *f)
-{
-    (void) fprintf(f, "%-8s %-8s %-8s %s\n",
-            "start", "end", "size", "prot");
-    walk_memory_regions(f, dump_region);
-}
-
-int page_get_flags(target_ulong address)
-{
-    PageDesc *p;
-
-    p = page_find(address >> TARGET_PAGE_BITS);
-    if (!p)
-        return 0;
-    return p->flags;
-}
-
-/* Modify the flags of a page and invalidate the code if necessary.
-   The flag PAGE_WRITE_ORG is positioned automatically depending
-   on PAGE_WRITE.  The mmap_lock should already be held.  */
-void page_set_flags(target_ulong start, target_ulong end, int flags)
-{
-    PageDesc *p;
-    target_ulong addr;
-
-    /* mmap_lock should already be held.  */
-    start = start & TARGET_PAGE_MASK;
-    end = TARGET_PAGE_ALIGN(end);
-    if (flags & PAGE_WRITE)
-        flags |= PAGE_WRITE_ORG;
-    for(addr = start; addr < end; addr += TARGET_PAGE_SIZE) {
-        p = page_find_alloc(addr >> TARGET_PAGE_BITS);
-        /* We may be called for host regions that are outside guest
-           address space.  */
-        if (!p)
-            return;
-        /* if the write protection is set, then we invalidate the code
-           inside */
-        if (!(p->flags & PAGE_WRITE) &&
-            (flags & PAGE_WRITE) &&
-            p->first_tb) {
-            tb_invalidate_phys_page(addr, 0, NULL);
-        }
-        p->flags = flags;
-    }
-}
-
-int page_check_range(target_ulong start, target_ulong len, int flags)
-{
-    PageDesc *p;
-    target_ulong end;
-    target_ulong addr;
-
-    if (start + len < start)
-        /* we've wrapped around */
-        return -1;
-
-    end = TARGET_PAGE_ALIGN(start+len); /* must do before we loose bits in the next step */
-    start = start & TARGET_PAGE_MASK;
-
-    for(addr = start; addr < end; addr += TARGET_PAGE_SIZE) {
-        p = page_find(addr >> TARGET_PAGE_BITS);
-        if( !p )
-            return -1;
-        if( !(p->flags & PAGE_VALID) )
-            return -1;
-
-        if ((flags & PAGE_READ) && !(p->flags & PAGE_READ))
-            return -1;
-        if (flags & PAGE_WRITE) {
-            if (!(p->flags & PAGE_WRITE_ORG))
-                return -1;
-            /* unprotect the page if it was put read-only because it
-               contains translated code */
-            if (!(p->flags & PAGE_WRITE)) {
-                if (!page_unprotect(addr, 0, NULL))
-                    return -1;
-            }
-            return 0;
-        }
-    }
-    return 0;
-}
-
-/* called from signal handler: invalidate the code and unprotect the
-   page. Return TRUE if the fault was successfully handled. */
-int page_unprotect(target_ulong address, uintptr_t pc, void *puc)
-{
-    unsigned int page_index, prot, pindex;
-    PageDesc *p, *p1;
-    target_ulong host_start, host_end, addr;
-
-    /* Technically this isn't safe inside a signal handler.  However we
-       know this only ever happens in a synchronous SEGV handler, so in
-       practice it seems to be ok.  */
-    mmap_lock();
-
-    host_start = address & qemu_host_page_mask;
-    page_index = host_start >> TARGET_PAGE_BITS;
-    p1 = page_find(page_index);
-    if (!p1) {
-        mmap_unlock();
-        return 0;
-    }
-    host_end = host_start + qemu_host_page_size;
-    p = p1;
-    prot = 0;
-    for(addr = host_start;addr < host_end; addr += TARGET_PAGE_SIZE) {
-        prot |= p->flags;
-        p++;
-    }
-    /* if the page was really writable, then we change its
-       protection back to writable */
-    if (prot & PAGE_WRITE_ORG) {
-        pindex = (address - host_start) >> TARGET_PAGE_BITS;
-        if (!(p1[pindex].flags & PAGE_WRITE)) {
-            mprotect((void *)g2h(host_start), qemu_host_page_size,
-                     (prot & PAGE_BITS) | PAGE_WRITE);
-            p1[pindex].flags |= PAGE_WRITE;
-            /* and since the content will be modified, we must invalidate
-               the corresponding translated code. */
-            tb_invalidate_phys_page(address, pc, puc);
-#ifdef DEBUG_TB_CHECK
-            tb_invalidate_check(address);
-#endif
-            mmap_unlock();
-            return 1;
-        }
-    }
-    mmap_unlock();
     return 0;
 }
 
@@ -1808,7 +1584,7 @@ static void check_watchpoint(int offset, int len_mask, int flags)
                     cpu_abort(env, "check_watchpoint: could not find TB for "
                               "pc=%p", (void *)env->mem_io_pc);
                 }
-                cpu_restore_state(tb, env, env->mem_io_pc);
+                cpu_restore_state(env, env->mem_io_pc);
                 tb_phys_invalidate(tb, -1);
                 if (wp->flags & BP_STOP_BEFORE_ACCESS) {
                     env->exception_index = EXCP_DEBUG;

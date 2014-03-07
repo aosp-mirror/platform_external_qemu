@@ -36,8 +36,18 @@ static const CPUTLBEntry s_cputlb_empty_entry = {
     .addend     = -1,
 };
 
-/* NOTE: if flush_global is true, also flush global entries (not
-   implemented yet) */
+/* NOTE:
+ * If flush_global is true (the usual case), flush all tlb entries.
+ * If flush_global is false, flush (at least) all tlb entries not
+ * marked global.
+ *
+ * Since QEMU doesn't currently implement a global/not-global flag
+ * for tlb entries, at the moment tlb_flush() will also flush all
+ * tlb entries in the flush_global == false case. This is OK because
+ * CPU architectures generally permit an implementation to drop
+ * entries from the TLB at any time, so flushing more entries than
+ * required is only an efficiency issue, not a correctness issue.
+ */
 void tlb_flush(CPUArchState *env, int flush_global)
 {
     int i;
@@ -111,22 +121,30 @@ void tlb_unprotect_code_phys(CPUArchState *env, ram_addr_t ram_addr,
     cpu_physical_memory_set_dirty_flags(ram_addr, CODE_DIRTY_FLAG);
 }
 
-void tlb_reset_dirty_range(CPUTLBEntry *tlb_entry,
-                           uintptr_t start, uintptr_t length)
+static bool tlb_is_dirty_ram(CPUTLBEntry *tlbe)
+{
+    return (tlbe->addr_write & ~TARGET_PAGE_MASK) == IO_MEM_RAM;
+}
+
+void tlb_reset_dirty_range(CPUTLBEntry *tlb_entry, uintptr_t start,
+                           uintptr_t length)
 {
     uintptr_t addr;
-    if ((tlb_entry->addr_write & ~TARGET_PAGE_MASK) == IO_MEM_RAM) {
+
+    if (tlb_is_dirty_ram(tlb_entry)) {
         addr = (tlb_entry->addr_write & TARGET_PAGE_MASK) + tlb_entry->addend;
         if ((addr - start) < length) {
-            tlb_entry->addr_write = (tlb_entry->addr_write & TARGET_PAGE_MASK) | TLB_NOTDIRTY;
+            tlb_entry->addr_write &= TARGET_PAGE_MASK;
+            tlb_entry->addr_write |= TLB_NOTDIRTY;
         }
     }
 }
 
 static inline void tlb_set_dirty1(CPUTLBEntry *tlb_entry, target_ulong vaddr)
 {
-    if (tlb_entry->addr_write == (vaddr | TLB_NOTDIRTY))
+    if (tlb_entry->addr_write == (vaddr | TLB_NOTDIRTY)) {
         tlb_entry->addr_write = vaddr;
+    }
 }
 
 /* update the TLB corresponding to virtual page vaddr
@@ -138,8 +156,9 @@ void tlb_set_dirty(CPUArchState *env, target_ulong vaddr)
 
     vaddr &= TARGET_PAGE_MASK;
     i = (vaddr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
-    for (mmu_idx = 0; mmu_idx < NB_MMU_MODES; mmu_idx++)
+    for (mmu_idx = 0; mmu_idx < NB_MMU_MODES; mmu_idx++) {
         tlb_set_dirty1(&env->tlb_table[mmu_idx][i], vaddr);
+    }
 }
 
 /* add a new TLB entry. At most one entry for a given virtual address
@@ -168,8 +187,9 @@ int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
         pd = p->phys_offset;
     }
 #if defined(DEBUG_TLB)
-    printf("tlb_set_page: vaddr=" TARGET_FMT_lx " paddr=0x%08x prot=%x idx=%d smmu=%d pd=0x%08lx\n",
-           vaddr, (int)paddr, prot, mmu_idx, is_softmmu, pd);
+    printf("tlb_set_page: vaddr=" TARGET_FMT_lx " paddr=0x" TARGET_FMT_plx
+           " prot=%x idx=%d smmu=%d pd=0x%08lx\n",
+           vaddr, paddr, prot, mmu_idx, is_softmmu, pd);
 #endif
 
     ret = 0;
