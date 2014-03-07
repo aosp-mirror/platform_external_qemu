@@ -24,10 +24,13 @@
  */
 
 #ifndef QEMU_OS_WIN32_H
-#define QEMU_OS_WIN32_H
+
+#define socket_close  winsock2_socket_close3
 
 #include <winsock2.h>
 #include <windows.h>
+
+#undef socket_close
 
 /* Polling handling */
 
