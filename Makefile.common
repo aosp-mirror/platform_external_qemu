@@ -459,7 +459,6 @@ CORE_MISC_SOURCES = \
     ui/input.c \
     ui/vnc-android.c \
     util/aes.c \
-    util/compatfd.c \
     util/cutils.c \
     util/error.c \
     util/hexdump.c \
@@ -488,6 +487,7 @@ endif
 
 ifeq ($(HOST_OS),linux)
     CORE_MISC_SOURCES += hw/usb/usb-linux.c \
+                         util/compatfd.c \
                          util/qemu-thread-posix.c \
                          android/camera/camera-capture-linux.c
 else
@@ -505,6 +505,7 @@ endif
 
 ifeq ($(HOST_OS),darwin)
   CORE_MISC_SOURCES   += android/camera/camera-capture-mac.m \
+                         util/compatfd.c \
                          util/qemu-thread-posix.c
 endif
 
