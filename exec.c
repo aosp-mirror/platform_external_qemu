@@ -144,7 +144,6 @@ typedef struct PageDesc {
 #define L2_SIZE (1 << L2_BITS)
 
 uintptr_t qemu_real_host_page_size;
-uintptr_t qemu_host_page_bits;
 uintptr_t qemu_host_page_size;
 uintptr_t qemu_host_page_mask;
 
@@ -230,9 +229,6 @@ static void page_init(void)
         qemu_host_page_size = qemu_real_host_page_size;
     if (qemu_host_page_size < TARGET_PAGE_SIZE)
         qemu_host_page_size = TARGET_PAGE_SIZE;
-    qemu_host_page_bits = 0;
-    while ((1 << qemu_host_page_bits) < qemu_host_page_size)
-        qemu_host_page_bits++;
     qemu_host_page_mask = ~(qemu_host_page_size - 1);
     l1_phys_map = qemu_vmalloc(L1_SIZE * sizeof(void *));
     memset(l1_phys_map, 0, L1_SIZE * sizeof(void *));
