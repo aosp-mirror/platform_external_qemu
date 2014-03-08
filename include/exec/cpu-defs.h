@@ -27,6 +27,7 @@
 #include <setjmp.h>
 #include <inttypes.h>
 #include <signal.h>
+#include "qemu-common.h"
 #include "qemu/osdep.h"
 #include "qemu/queue.h"
 #include "exec/hwaddr.h"
