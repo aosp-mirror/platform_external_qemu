@@ -3237,6 +3237,11 @@ int main(int argc, char **argv, char **envp)
 
     iniFile_free(hw_ini);
 
+    const char* kernelSerialDevicePrefix =
+            androidHwConfig_getKernelSerialPrefix(android_hw);
+    VERBOSE_PRINT(init, "Using kernel serial device prefix: %s",
+                  kernelSerialDevicePrefix);
+
     {
         int width  = android_hw->hw_lcd_width;
         int height = android_hw->hw_lcd_height;
@@ -3657,12 +3662,16 @@ int main(int argc, char **argv, char **envp)
     /* We always initialize the first serial port for the android-kmsg
      * character device (used to send kernel messages) */
     serial_hds_add_at(0, "android-kmsg");
-    stralloc_add_str(kernel_params, " console=ttyS0");
+    stralloc_add_format(kernel_params,
+                        " console=%s0",
+                        kernelSerialDevicePrefix);
 
     /* We always initialize the second serial port for the android-qemud
      * character device as well */
     serial_hds_add_at(1, "android-qemud");
-    stralloc_add_str(kernel_params, " android.qemud=ttyS1");
+    stralloc_add_format(kernel_params,
+                        " android.qemud=%s1",
+                        kernelSerialDevicePrefix);
 
     if (pid_file && qemu_create_pidfile(pid_file) != 0) {
         os_pidfile_error();

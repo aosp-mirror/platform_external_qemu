@@ -37,6 +37,7 @@
 #include "android/config-file.h"
 #include "android/config/config.h"
 
+#include "android/kernel/kernel_utils.h"
 #include "android/user-config.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/filelock.h"
@@ -450,6 +451,24 @@ int main(int argc, char **argv)
          if (kernelFileLen > 6 && !memcmp(kernelFile + kernelFileLen - 6, "-armv7", 6)) {
              forceArmv7 = 1;
          }
+    }
+
+    // Auto-detect kernel device naming scheme if needed.
+    if (androidHwConfig_getKernelDeviceNaming(hw) < 0) {
+        KernelType kernelType;
+        const char* newDeviceNaming = "no";
+        if (!android_pathProbeKernelType(hw->kernel_path, &kernelType)) {
+            D("WARNING: Could not determine kernel device naming scheme. Assuming legacy\n"
+              "If this AVD doesn't boot, and uses a recent kernel (3.10 or above) try setting\n"
+              "'kernel.newDeviceNaming' to 'yes' in its configuration.\n");
+        } else if (kernelType == KERNEL_TYPE_3_10_OR_ABOVE) {
+            D("Auto-detect: Kernel image requires new device naming scheme.");
+            newDeviceNaming = "yes";
+        } else {
+            D("Auto-detect: Kernel image requires legacy device naming scheme.");
+        }
+        AFREE(hw->kernel_newDeviceNaming);
+        hw->kernel_newDeviceNaming = ASTRDUP(newDeviceNaming);
     }
 
     if (boot_prop_ip[0]) {
@@ -1027,7 +1046,9 @@ int main(int argc, char **argv)
 #endif
 
         if (opts->shell || opts->logcat) {
-            p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );
+            p = bufprint(p, end, " androidboot.console=%s%d",
+                         androidHwConfig_getKernelSerialPrefix(android_hw),
+                         shell_serial );
         }
 
         if (opts->trace) {

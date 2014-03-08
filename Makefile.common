@@ -125,6 +125,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/String.cpp \
 	android/base/StringView.cpp \
 	android/filesystems/ext4_utils.cpp \
+	android/kernel/kernel_utils.cpp \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
 	android/utils/debug.c \

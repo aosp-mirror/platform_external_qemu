@@ -12,6 +12,7 @@
 #ifndef _HW_GOLDFISH_PIPE_H
 #define _HW_GOLDFISH_PIPE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "hw/hw.h"
 
@@ -194,7 +195,7 @@ extern void goldfish_pipe_wake( void* hwpipe, unsigned flags );
 #define PIPE_WAKE_READ         (1 << 1)  /* pipe can now be read from */
 #define PIPE_WAKE_WRITE        (1 << 2)  /* pipe can now be written to */
 
-void pipe_dev_init(void);
+void pipe_dev_init(bool newDeviceNaming);
 
 struct access_params{
     uint32_t channel;
