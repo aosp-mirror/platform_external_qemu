@@ -123,7 +123,7 @@ static void goldfish_tty_write(void *opaque, hwaddr offset, uint32_t value)
                 case TTY_CMD_WRITE_BUFFER:
                     if(s->cs) {
                         int len;
-                        hwaddr  buf;
+                        target_ulong  buf;
 
                         buf = s->ptr;
                         len = s->ptr_len;
