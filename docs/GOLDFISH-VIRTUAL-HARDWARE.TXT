@@ -302,6 +302,9 @@ Device properties:
     0x10  DATA_PTR      W: Write kernel buffer address.
     0x14  DATA_LEN      W: Write kernel buffer size.
 
+    # For 64-bit guest CPUs only:
+    0x18  DATA_PTR_HIGH    W: Write high 32 bits of kernel buffer address.
+
 This is the first case of a multi-instance goldfish device in this document.
 Each instance implements a virtual serial port that contains a small internal
 buffer where incoming data is stored until the kernel fetches it.
@@ -322,6 +325,9 @@ following:
     if (len == 0) return;      // Nothing to do.
 
     available = get_buffer(len, &buffer);  // Get address of buffer and its size.
+    #if 64BIT_GUEST_CPU
+    IO_WRITE(DATA_PTR_HIGH, buffer >> 32);
+    #endif
     IO_WRITE(DATA_PTR, buffer);            // Write buffer address to device.
     IO_WRITE(DATA_LEN, available);         // Write buffer length to device.
     IO_WRITE(CMD, CMD_READ_BUFFER);        // Read the data into kernel buffer.
@@ -340,6 +346,9 @@ with:
 
 Or use the mode efficient sequence:
 
+  #if 64BIT_GUEST_CPU
+  IO_WRITE(DATA_PTR_HIGH, buffer >> 32)
+  #endif
   IO_WRITE(DATA_PTR, buffer)
   IO_WRITE(DATA_LEN, buffer_len)
   IO_WRITE(CMD, CMD_WRITE_BUFFER)
