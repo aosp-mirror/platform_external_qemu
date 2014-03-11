@@ -12,6 +12,9 @@ From the guest, usage is simply as follows:
 
   1/ Open the /dev/qemu_pipe device for read+write
 
+     NOTE: Starting with Linux 3.10, the device was renamed as
+           /dev/goldfish_pipe but behaves exactly in the same way.
+
   2/ Write a zero-terminated string describing which service you want to
      connect.
 
