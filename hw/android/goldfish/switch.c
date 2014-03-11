@@ -164,8 +164,13 @@ void *goldfish_switch_add(char *name, uint32_t (*writefn)(void *opaque, uint32_t
         return NULL;
     }
 
-    register_savevm( "goldfish_switch", 0, GOLDFISH_SWITCH_SAVE_VERSION,
-                     goldfish_switch_save, goldfish_switch_load, s);
+    register_savevm(NULL,
+                    "goldfish_switch",
+                    0,
+                    GOLDFISH_SWITCH_SAVE_VERSION,
+                    goldfish_switch_save,
+                    goldfish_switch_load,
+                    s);
 
     return s;
 }

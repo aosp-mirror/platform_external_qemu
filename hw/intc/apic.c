@@ -958,7 +958,7 @@ int apic_init(CPUOldState *env)
     }
     s->timer = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, apic_timer, s);
 
-    register_savevm("apic", s->idx, 2, apic_save, apic_load, s);
+    register_savevm(NULL, "apic", s->idx, 2, apic_save, apic_load, s);
     qemu_register_reset(apic_reset, 0, s);
 
     local_apics[s->idx] = s;

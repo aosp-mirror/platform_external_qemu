@@ -8291,7 +8291,7 @@ gen_intermediate_code_internal (CPUMIPSState *env, TranslationBlock *tb,
         qemu_log("search pc %d\n", search_pc);
 
     pc_start = tb->pc;
-    gen_opc_end = gen_opc_buf + OPC_MAX_SIZE;
+    gen_opc_end = tcg_ctx.gen_opc_buf + OPC_MAX_SIZE;
     ctx.pc = pc_start;
     ctx.saved_pc = -1;
     ctx.singlestep_enabled = env->singlestep_enabled;
@@ -8332,16 +8332,16 @@ gen_intermediate_code_internal (CPUMIPSState *env, TranslationBlock *tb,
         }
 
         if (search_pc) {
-            j = gen_opc_ptr - gen_opc_buf;
+            j = tcg_ctx.gen_opc_ptr - tcg_ctx.gen_opc_buf;
             if (lj < j) {
                 lj++;
                 while (lj < j)
-                    gen_opc_instr_start[lj++] = 0;
+                    tcg_ctx.gen_opc_instr_start[lj++] = 0;
             }
-            gen_opc_pc[lj] = ctx.pc;
-            gen_opc_hflags[lj] = ctx.hflags & MIPS_HFLAG_BMASK;
-            gen_opc_instr_start[lj] = 1;
-            gen_opc_icount[lj] = num_insns;
+            tcg_ctx.gen_opc_pc[lj] = ctx.pc;
+            tcg_ctx.gen_opc_hflags[lj] = ctx.hflags & MIPS_HFLAG_BMASK;
+            tcg_ctx.gen_opc_instr_start[lj] = 1;
+            tcg_ctx.gen_opc_icount[lj] = num_insns;
         }
         if (num_insns + 1 == max_insns && (tb->cflags & CF_LAST_IO))
             gen_io_start();
@@ -8363,7 +8363,7 @@ gen_intermediate_code_internal (CPUMIPSState *env, TranslationBlock *tb,
         if ((ctx.pc & (TARGET_PAGE_SIZE - 1)) == 0 && (ctx.hflags & MIPS_HFLAG_BMASK) == 0)
             break;
 
-        if (gen_opc_ptr >= gen_opc_end)
+        if (tcg_ctx.gen_opc_ptr >= gen_opc_end)
             break;
 
         if (num_insns >= max_insns)
@@ -8398,12 +8398,12 @@ gen_intermediate_code_internal (CPUMIPSState *env, TranslationBlock *tb,
     }
 done_generating:
     gen_icount_end(tb, num_insns);
-    *gen_opc_ptr = INDEX_op_end;
+    *tcg_ctx.gen_opc_ptr = INDEX_op_end;
     if (search_pc) {
-        j = gen_opc_ptr - gen_opc_buf;
+        j = tcg_ctx.gen_opc_ptr - tcg_ctx.gen_opc_buf;
         lj++;
         while (lj <= j)
-            gen_opc_instr_start[lj++] = 0;
+            tcg_ctx.gen_opc_instr_start[lj++] = 0;
     } else {
         tb->size = ctx.pc - pc_start;
         tb->icount = num_insns;
@@ -8709,7 +8709,7 @@ void cpu_reset (CPUMIPSState *env)
 
 void restore_state_to_opc(CPUMIPSState *env, TranslationBlock *tb, int pc_pos)
 {
-    env->active_tc.PC = gen_opc_pc[pc_pos];
+    env->active_tc.PC = tcg_ctx.gen_opc_pc[pc_pos];
     env->hflags &= ~MIPS_HFLAG_BMASK;
-    env->hflags |= gen_opc_hflags[pc_pos];
+    env->hflags |= tcg_ctx.gen_opc_hflags[pc_pos];
 }

@@ -672,6 +672,11 @@ void goldfish_fb_init(int id)
 
     goldfish_device_add(&s->dev, goldfish_fb_readfn, goldfish_fb_writefn, s);
 
-    register_savevm( "goldfish_fb", 0, GOLDFISH_FB_SAVE_VERSION,
-                     goldfish_fb_save, goldfish_fb_load, s);
+    register_savevm(NULL,
+                    "goldfish_fb",
+                    0,
+                    GOLDFISH_FB_SAVE_VERSION,
+                    goldfish_fb_save,
+                    goldfish_fb_load,
+                    s);
 }

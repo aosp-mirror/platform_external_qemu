@@ -60,14 +60,6 @@ typedef struct TranslationBlock TranslationBlock;
 
 #define OPPARAM_BUF_SIZE (OPC_BUF_SIZE * MAX_OPC_PARAM)
 
-extern target_ulong gen_opc_pc[OPC_BUF_SIZE];
-extern target_ulong gen_opc_npc[OPC_BUF_SIZE];
-extern uint8_t gen_opc_cc_op[OPC_BUF_SIZE];
-extern uint8_t gen_opc_instr_start[OPC_BUF_SIZE];
-extern uint16_t gen_opc_icount[OPC_BUF_SIZE];
-extern target_ulong gen_opc_jump_pc[2];
-extern uint32_t gen_opc_hflags[OPC_BUF_SIZE];
-
 #include "qemu/log.h"
 
 void gen_intermediate_code(CPUArchState *env, struct TranslationBlock *tb);
@@ -77,6 +69,7 @@ void restore_state_to_opc(CPUArchState *env, struct TranslationBlock *tb,
 
 unsigned long code_gen_max_block_size(void);
 void cpu_gen_init(void);
+void tcg_exec_init(unsigned long tb_size);
 int cpu_gen_code(CPUArchState *env, struct TranslationBlock *tb,
                  int *gen_code_size_ptr);
 bool cpu_restore_state(struct TranslationBlock *tb,
@@ -92,6 +85,7 @@ int page_unprotect(target_ulong address, uintptr_t pc, void *puc);
 void tb_invalidate_phys_page_range(hwaddr start, hwaddr end,
                                    int is_cpu_write_access);
 void tb_invalidate_page_range(target_ulong start, target_ulong end);
+#if !defined(CONFIG_USER_ONLY)
 void tlb_flush_page(CPUArchState *env, target_ulong addr);
 void tlb_flush(CPUArchState *env, int flush_global);
 int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
@@ -100,6 +94,16 @@ int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
 int tlb_set_page(CPUArchState *env1, target_ulong vaddr,
                  hwaddr paddr, int prot,
                  int mmu_idx, int is_softmmu);
+void tb_reset_jump_recursive(TranslationBlock *tb);
+#else
+static inline void tlb_flush_page(CPUArchState *env, target_ulong addr)
+{
+}
+
+static inline void tlb_flush(CPUArchState *env, int flush_global)
+{
+}
+#endif
 
 typedef struct PhysPageDesc {
     /* offset in host memory of the page + io_index in the low bits */
@@ -108,6 +112,7 @@ typedef struct PhysPageDesc {
 } PhysPageDesc;
 
 PhysPageDesc *phys_page_find(hwaddr index);
+PhysPageDesc *phys_page_find_alloc(hwaddr index, int alloc);
 
 int io_mem_watch;
 
@@ -115,8 +120,6 @@ int io_mem_watch;
 
 #define CODE_GEN_PHYS_HASH_BITS     15
 #define CODE_GEN_PHYS_HASH_SIZE     (1 << CODE_GEN_PHYS_HASH_BITS)
-
-#define MIN_CODE_GEN_BUFFER_SIZE     (1024 * 1024)
 
 /* estimated block size for TB allocation */
 /* XXX: use a per code average code fragment size and modulate it
@@ -179,6 +182,25 @@ struct TranslationBlock {
     /* Number of pairs (pc_tb, pc_guest) in tpc2gpc array. */
     unsigned int    tpc2gpc_pairs;
 #endif  // CONFIG_MEMCHECK
+};
+
+#include "exec/spinlock.h"
+
+typedef struct TBContext TBContext;
+
+struct TBContext {
+
+    TranslationBlock *tbs;
+    TranslationBlock *tb_phys_hash[CODE_GEN_PHYS_HASH_SIZE];
+    int nb_tbs;
+    /* any access to the tbs or the page table must use this lock */
+    spinlock_t tb_lock;
+
+    /* statistics */
+    int tb_flush_count;
+    int tb_phys_invalidate_count;
+
+    int tb_invalidated_flag;
 };
 
 static inline unsigned int tb_jmp_cache_hash_page(target_ulong pc)
@@ -261,8 +283,8 @@ void tb_flush(CPUArchState *env);
 void tb_link_phys(TranslationBlock *tb,
                   target_ulong phys_pc, target_ulong phys_page2);
 void tb_phys_invalidate(TranslationBlock *tb, tb_page_addr_t page_addr);
-
-extern TranslationBlock *tb_phys_hash[CODE_GEN_PHYS_HASH_SIZE];
+void tb_invalidate_phys_page_fast0(hwaddr start, int len);
+    
 extern uint8_t *code_gen_ptr;
 extern int code_gen_max_blocks;
 
@@ -353,19 +375,38 @@ static inline void tb_add_jump(TranslationBlock *tb, int n,
     }
 }
 
+/* GETRA is the true target of the return instruction that we'll execute,
+   defined here for simplicity of defining the follow-up macros.  */
+#if defined(CONFIG_TCG_INTERPRETER)
+extern uintptr_t tci_tb_ptr;
+# define GETRA() tci_tb_ptr
+#else
+# define GETRA() \
+    ((uintptr_t)__builtin_extract_return_addr(__builtin_return_address(0)))
+#endif
+
+/* The true return address will often point to a host insn that is part of
+   the next translated guest insn.  Adjust the address backward to point to
+   the middle of the call insn.  Subtracting one would do the job except for
+   several compressed mode architectures (arm, mips) which set the low bit
+   to indicate the compressed mode; subtracting two works around that.  It
+   is also the case that there are no host isas that contain a call insn
+   smaller than 4 bytes, so we don't worry about special-casing this.  */
+#if defined(CONFIG_TCG_INTERPRETER)
+# define GETPC_ADJ   0
+#else
+# define GETPC_ADJ   2
+#endif
+
+#if !defined(CONFIG_USER_ONLY)
+
+void phys_mem_set_alloc(void *(*alloc)(size_t));
+
 TranslationBlock *tb_find_pc(unsigned long pc_ptr);
 
 extern CPUWriteMemoryFunc *io_mem_write[IO_MEM_NB_ENTRIES][4];
 extern CPUReadMemoryFunc *io_mem_read[IO_MEM_NB_ENTRIES][4];
 extern void *io_mem_opaque[IO_MEM_NB_ENTRIES];
-
-#include "exec/spinlock.h"
-
-extern spinlock_t tb_lock;
-
-extern int tb_invalidated_flag;
-
-#if !defined(CONFIG_USER_ONLY)
 
 void tlb_fill(target_ulong addr, int is_write, int mmu_idx,
               void *retaddr);
@@ -395,7 +436,7 @@ void tlb_fill(target_ulong addr, int is_write, int mmu_idx,
 #endif
 
 #if defined(CONFIG_USER_ONLY)
-static inline target_ulong get_phys_addr_code(CPUArchState *env1, target_ulong addr)
+static inline target_ulong get_page_addr_code(CPUArchState *env1, target_ulong addr)
 {
     return addr;
 }
@@ -403,7 +444,7 @@ static inline target_ulong get_phys_addr_code(CPUArchState *env1, target_ulong a
 /* NOTE: this function can trigger an exception */
 /* NOTE2: the returned address is not exactly the physical address: it
    is the offset relative to phys_ram_base */
-static inline target_ulong get_phys_addr_code(CPUArchState *env1, target_ulong addr)
+static inline target_ulong get_page_addr_code(CPUArchState *env1, target_ulong addr)
 {
     int mmu_idx, page_index, pd;
     void *p;
@@ -430,7 +471,7 @@ static inline target_ulong get_phys_addr_code(CPUArchState *env1, target_ulong a
 
 typedef void (CPUDebugExcpHandler)(CPUArchState *env);
 
-CPUDebugExcpHandler *cpu_set_debug_excp_handler(CPUDebugExcpHandler *handler);
+void cpu_set_debug_excp_handler(CPUDebugExcpHandler *handler);
 
 /* vl.c */
 extern int singlestep;

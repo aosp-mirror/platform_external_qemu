@@ -1327,8 +1327,13 @@ void pipe_dev_init()
 
     goldfish_device_add(&s->dev, pipe_dev_readfn, pipe_dev_writefn, s);
 
-    register_savevm( "goldfish_pipe", 0, GOLDFISH_PIPE_SAVE_VERSION,
-                      goldfish_pipe_save, goldfish_pipe_load, s);
+    register_savevm(NULL,
+                    "goldfish_pipe",
+                    0,
+                    GOLDFISH_PIPE_SAVE_VERSION,
+                    goldfish_pipe_save,
+                    goldfish_pipe_load,
+                    s);
 
 #if DEBUG_ZERO_PIPE
     goldfish_pipe_add_type("zero", NULL, &zeroPipe_funcs);
