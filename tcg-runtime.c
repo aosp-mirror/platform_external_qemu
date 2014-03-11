@@ -27,6 +27,8 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "qemu/host-utils.h"
+
 /* 32-bit helpers */
 
 int32_t tcg_helper_div_i32(int32_t arg1, int32_t arg2)
