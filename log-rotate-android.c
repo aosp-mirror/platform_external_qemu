@@ -80,7 +80,7 @@ static FILE* rotate_log(FILE* old_log_fd, const char* filename) {
 void qemu_log_rotation_poll(void) {
     if (!rotate_logs_requested)
         return;
-    
+
     FILE* new_dns_log_fd = rotate_log(get_slirp_dns_log_fd(),
                                       dns_log_filename);
     FILE* new_drop_log_fd = rotate_log(get_slirp_drop_log_fd(),
