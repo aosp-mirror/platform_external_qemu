@@ -534,9 +534,15 @@ feature_check_header HAVE_FNMATCH_H       "<fnmatch.h>"
 case $TARGET_OS in
     windows)
         TARGET_EXEEXT=.exe
+        TARGET_DLLEXT=.dll
+        ;;
+    darwin)
+        TARGET_EXEXT=
+        TARGET_DLLEXT=.dylib
         ;;
     *)
         TARGET_EXEEXT=
+        TARGET_DLLEXT=.so
         ;;
 esac
 
@@ -556,6 +562,7 @@ create_config_mk
 echo "" >> $config_mk
 echo "HOST_PREBUILT_TAG := $TARGET_OS" >> $config_mk
 echo "HOST_EXEEXT       := $TARGET_EXEEXT" >> $config_mk
+echo "HOST_DLLEXT       := $TARGET_DLLEXT" >> $config_mk
 echo "PREBUILT          := $ANDROID_PREBUILT" >> $config_mk
 echo "PREBUILTS         := $ANDROID_PREBUILTS" >> $config_mk
 
