@@ -232,7 +232,7 @@ int audio_bug (const char *funcname, int cond)
         AUD_log (NULL, "Context:\n");
 
 #if defined AUDIO_BREAKPOINT_ON_BUG
-#  if defined HOST_I386
+#  if defined __i386__
 #    if defined __GNUC__
         __asm__ ("int3");
 #    elif defined _MSC_VER
