@@ -125,12 +125,12 @@ bool android_pathProbeKernelType(const char* kernelPath, KernelType* ktype) {
                              &description)) {
         return false;
     }
-    char* bzImage = ::strstr(description.c_str(), "bzImage");
+    const char* bzImage = ::strstr(description.c_str(), "bzImage");
     if (!bzImage) {
         KERNEL_ERROR << "Not a compressed Linux kernel image!";
         return false;
     }
-    char* version = ::strstr(bzImage, "version ");
+    const char* version = ::strstr(bzImage, "version ");
     if (!version) {
         KERNEL_ERROR << "Could not determine version!";
         return false;
