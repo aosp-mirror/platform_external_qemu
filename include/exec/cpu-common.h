@@ -118,7 +118,6 @@ void *cpu_physical_memory_map(hwaddr addr,
 void cpu_physical_memory_unmap(void *buffer, hwaddr len,
                                int is_write, hwaddr access_len);
 void *cpu_register_map_client(void *opaque, void (*callback)(void *opaque));
-void cpu_unregister_map_client(void *cookie);
 
 uint32_t ldub_phys(hwaddr addr);
 uint32_t lduw_phys(hwaddr addr);
