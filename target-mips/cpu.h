@@ -488,8 +488,8 @@ void r4k_helper_tlbp (void);
 void r4k_helper_tlbr (void);
 void mips_cpu_list (FILE *f, int (*cpu_fprintf)(FILE *f, const char *fmt, ...));
 
-void do_unassigned_access(hwaddr addr, int is_write, int is_exec,
-                          int unused, int size);
+void cpu_unassigned_access(CPUArchState* env, hwaddr addr,
+                           int is_write, int is_exec, int unused, int size);
 
 #define cpu_init cpu_mips_init
 #define cpu_exec cpu_mips_exec

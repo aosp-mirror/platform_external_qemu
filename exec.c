@@ -1414,7 +1414,7 @@ static uint32_t unassigned_mem_readb(void *opaque, hwaddr addr)
     printf("Unassigned mem read " TARGET_FMT_plx "\n", addr);
 #endif
 #if defined(TARGET_SPARC) || defined(TARGET_MICROBLAZE)
-    do_unassigned_access(addr, 0, 0, 0, 1);
+    cpu_unassigned_access(cpu_single_env, addr, 0, 0, 0, 1);
 #endif
     return 0;
 }
@@ -1425,7 +1425,7 @@ static uint32_t unassigned_mem_readw(void *opaque, hwaddr addr)
     printf("Unassigned mem read " TARGET_FMT_plx "\n", addr);
 #endif
 #if defined(TARGET_SPARC) || defined(TARGET_MICROBLAZE)
-    do_unassigned_access(addr, 0, 0, 0, 2);
+    cpu_unassigned_access(cpu_single_env, addr, 0, 0, 0, 2);
 #endif
     return 0;
 }
@@ -1436,7 +1436,7 @@ static uint32_t unassigned_mem_readl(void *opaque, hwaddr addr)
     printf("Unassigned mem read " TARGET_FMT_plx "\n", addr);
 #endif
 #if defined(TARGET_SPARC) || defined(TARGET_MICROBLAZE)
-    do_unassigned_access(addr, 0, 0, 0, 4);
+    cpu_unassigned_access(cpu_single_env, addr, 0, 0, 0, 4);
 #endif
     return 0;
 }
@@ -1447,7 +1447,7 @@ static void unassigned_mem_writeb(void *opaque, hwaddr addr, uint32_t val)
     printf("Unassigned mem write " TARGET_FMT_plx " = 0x%x\n", addr, val);
 #endif
 #if defined(TARGET_SPARC) || defined(TARGET_MICROBLAZE)
-    do_unassigned_access(addr, 1, 0, 0, 1);
+    cpu_unassigned_access(cpu_single_env, addr, 1, 0, 0, 1);
 #endif
 }
 
@@ -1457,7 +1457,7 @@ static void unassigned_mem_writew(void *opaque, hwaddr addr, uint32_t val)
     printf("Unassigned mem write " TARGET_FMT_plx " = 0x%x\n", addr, val);
 #endif
 #if defined(TARGET_SPARC) || defined(TARGET_MICROBLAZE)
-    do_unassigned_access(addr, 1, 0, 0, 2);
+    cpu_unassigned_access(cpu_single_env, addr, 1, 0, 0, 2);
 #endif
 }
 
@@ -1467,7 +1467,7 @@ static void unassigned_mem_writel(void *opaque, hwaddr addr, uint32_t val)
     printf("Unassigned mem write " TARGET_FMT_plx " = 0x%x\n", addr, val);
 #endif
 #if defined(TARGET_SPARC) || defined(TARGET_MICROBLAZE)
-    do_unassigned_access(addr, 1, 0, 0, 4);
+    cpu_unassigned_access(cpu_single_env, addr, 1, 0, 0, 4);
 #endif
 }
 
