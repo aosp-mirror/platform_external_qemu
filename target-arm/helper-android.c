@@ -24,7 +24,7 @@ void vstrcpy(target_ulong ptr, char *buf, int max)
 }
 
 #ifdef CONFIG_MEMCHECK
-#include "memcheck/memcheck_api.h"
+#include "android/qemu/memcheck/memcheck_api.h"
 
 void HELPER(on_call)(target_ulong pc, target_ulong ret) {
     memcheck_on_call(pc, ret);

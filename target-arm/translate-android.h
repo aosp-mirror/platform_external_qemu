@@ -25,8 +25,8 @@
  * guaranteed.
  */
 
-#include "memcheck/memcheck_proc_management.h"
-#include "memcheck/memcheck_api.h"
+#include "android/qemu/memcheck/memcheck_proc_management.h"
+#include "android/qemu/memcheck/memcheck_api.h"
 
 /* Array of return addresses detected in gen_intermediate_code_internal. */
 AddrArray   ret_addresses = { 0 };

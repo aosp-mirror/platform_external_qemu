@@ -250,7 +250,6 @@ endif
 # memory leaks and attempts to free/realloc invalid pointers.
 #
 common_LOCAL_CFLAGS += \
-    -I$(LOCAL_PATH)/memcheck \
     -I$(LOCAL_PATH)/elff
 
 MCHK_SOURCES := \
@@ -260,7 +259,7 @@ MCHK_SOURCES := \
     memcheck_mmrange_map.c \
     memcheck_util.c
 
-common_LOCAL_SRC_FILES += $(MCHK_SOURCES:%=memcheck/%)
+common_LOCAL_SRC_FILES += $(MCHK_SOURCES:%=android/qemu/memcheck/%)
 
 common_LOCAL_SRC_FILES += \
     cpus.c \

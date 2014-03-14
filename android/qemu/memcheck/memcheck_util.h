@@ -14,10 +14,10 @@
  * Contains declarations of utility routines for memchecker framework.
  */
 
-#ifndef QEMU_MEMCHECK_MEMCHECK_UTIL_H
-#define QEMU_MEMCHECK_MEMCHECK_UTIL_H
+#ifndef ANDROID_QEMU_MEMCHECK_MEMCHECK_UTIL_H
+#define ANDROID_QEMU_MEMCHECK_MEMCHECK_UTIL_H
 
-#include "memcheck_common.h"
+#include "android/qemu/memcheck/memcheck_common.h"
 #include "elff/elff_api.h"
 #include "exec.h"
 
@@ -237,4 +237,4 @@ void memcheck_dump_malloc_desc(const MallocDescEx* desc,
 };  /* end of extern "C" */
 #endif
 
-#endif  // QEMU_MEMCHECK_MEMCHECK_UTIL_H
+#endif  // ANDROID_QEMU_MEMCHECK_MEMCHECK_UTIL_H

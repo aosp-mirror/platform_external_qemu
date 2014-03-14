@@ -15,10 +15,10 @@
  * checking framework.
  */
 
-#ifndef QEMU_MEMCHECK_MEMCHECK_H
-#define QEMU_MEMCHECK_MEMCHECK_H
+#ifndef ANDROID_QEMU_MEMCHECK_MEMCHECK_H
+#define ANDROID_QEMU_MEMCHECK_MEMCHECK_H
 
-#include "memcheck_common.h"
+#include "android/qemu/memcheck/memcheck_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -185,4 +185,4 @@ extern int memcheck_enabled;
 };  /* end of extern "C" */
 #endif
 
-#endif  // QEMU_MEMCHECK_MEMCHECK_H
+#endif  // ANDROID_QEMU_MEMCHECK_MEMCHECK_H

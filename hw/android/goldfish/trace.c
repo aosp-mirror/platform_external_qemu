@@ -18,8 +18,8 @@
 #include "hw/android/goldfish/vmem.h"
 #include "sysemu/sysemu.h"
 #ifdef CONFIG_MEMCHECK
-#include "memcheck/memcheck.h"
-#include "memcheck/memcheck_util.h"
+#include "android/qemu/memcheck/memcheck.h"
+#include "android/qemu/memcheck/memcheck_util.h"
 #endif  // CONFIG_MEMCHECK
 
 /* Set to 1 to debug tracing */

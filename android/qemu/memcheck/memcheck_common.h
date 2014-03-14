@@ -15,8 +15,8 @@
  * in memechecker framework.
  */
 
-#ifndef QEMU_MEMCHECK_MEMCHECK_COMMON_H
-#define QEMU_MEMCHECK_MEMCHECK_COMMON_H
+#ifndef ANDROID_QEMU_MEMCHECK_MEMCHECK_COMMON_H
+#define ANDROID_QEMU_MEMCHECK_MEMCHECK_COMMON_H
 
 #include "qemu-common.h"
 #include "cpu.h"
@@ -475,4 +475,4 @@ addrarray_add(AddrArray* addr_array, target_ulong addr)
 };  /* end of extern "C" */
 #endif
 
-#endif  // QEMU_MEMCHECK_MEMCHECK_COMMON_H
+#endif  // ANDROID_QEMU_MEMCHECK_MEMCHECK_COMMON_H

@@ -15,9 +15,9 @@
  * memory blocks allocated by the guest system.
  */
 
-#include "memcheck_malloc_map.h"
-#include "memcheck_util.h"
-#include "memcheck_logging.h"
+#include "android/qemu/memcheck/memcheck_malloc_map.h"
+#include "android/qemu/memcheck/memcheck_util.h"
+#include "android/qemu/memcheck/memcheck_logging.h"
 
 /* Global flag, indicating whether or not __ld/__stx_mmu should be instrumented
  * for checking for access violations. If read / write access violation check.

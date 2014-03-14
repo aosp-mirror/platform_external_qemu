@@ -87,7 +87,7 @@ static TCGRegSet tcg_target_call_clobber_regs;
  * and is saved into temporary gen_opc_tpc2gpc_ptr array, that later will be
  * copied into the TranslationBlock that represents the translated code.
  */
-#include "memcheck/memcheck_api.h"
+#include "android/qemu/memcheck/memcheck_api.h"
 #endif  // CONFIG_MEMCHECK
 
 static inline void tcg_out8(TCGContext *s, uint8_t v)
