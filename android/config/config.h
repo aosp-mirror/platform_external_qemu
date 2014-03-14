@@ -13,4 +13,4 @@
 #ifndef _WIN32
 #define CONFIG_NAND_LIMITS 1
 #endif
-#define CONFIG_MEMCHECK 1
+#define CONFIG_ANDROID_MEMCHECK 1

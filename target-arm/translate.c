@@ -66,7 +66,7 @@ typedef struct DisasContext {
     int vfp_enabled;
     int vec_len;
     int vec_stride;
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
     int search_pc;
 #endif
 } DisasContext;

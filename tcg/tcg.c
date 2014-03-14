@@ -80,7 +80,7 @@ static TCGRegSet tcg_target_call_clobber_regs;
 /* XXX: move that inside the context */
 //TCGArg *s->gen_opparam_ptr;
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
 /*
  * Memchecker addition in this module is intended to build a map that matches
  * translated PC to a guest PC. Map is built in tcg_gen_code_common routine,
@@ -88,7 +88,7 @@ static TCGRegSet tcg_target_call_clobber_regs;
  * copied into the TranslationBlock that represents the translated code.
  */
 #include "android/qemu/memcheck/memcheck_api.h"
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 
 static inline void tcg_out8(TCGContext *s, uint8_t v)
 {
@@ -2025,9 +2025,9 @@ static inline int tcg_gen_code_common(TCGContext *s, uint8_t *gen_code_buf,
     const TCGOpDef *def;
     unsigned int dead_iargs;
     const TCGArg *args;
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
     unsigned int tpc2gpc_index = 0;
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 
 #if !SUPPORT_GLOBAL_REGISTER_VARIABLE
     printf("ERROR: This emulator is built by compiler without global register variable\n"
@@ -2070,12 +2070,12 @@ static inline int tcg_gen_code_common(TCGContext *s, uint8_t *gen_code_buf,
     args = s->gen_opparam_buf;
     op_index = 0;
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
     gen_opc_tpc2gpc_pairs = 0;
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 
     for(;;) {
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
         /* On condition that memcheck is enabled, and operation index reached
          * new operation in the guest code, save (pc_tb, pc_guest) pair into
          * gen_opc_tpc2gpc array. Note that we do that only on condition that
@@ -2090,7 +2090,7 @@ static inline int tcg_gen_code_common(TCGContext *s, uint8_t *gen_code_buf,
             tpc2gpc_index++;
             gen_opc_tpc2gpc_pairs++;
         }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
         opc = s->gen_opc_buf[op_index];
 #ifdef CONFIG_PROFILER
         tcg_table_op_count[opc]++;

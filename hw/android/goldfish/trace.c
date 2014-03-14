@@ -17,10 +17,10 @@
 #include "hw/android/goldfish/trace.h"
 #include "hw/android/goldfish/vmem.h"
 #include "sysemu/sysemu.h"
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
 #include "android/qemu/memcheck/memcheck.h"
 #include "android/qemu/memcheck/memcheck_util.h"
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 
 /* Set to 1 to debug tracing */
 #define DEBUG   0
@@ -76,11 +76,11 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, context switch %u\n", value);
         }
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
         if (memcheck_enabled) {
             memcheck_switch(value);
         }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
         tid = (unsigned) value;
         break;
     case TRACE_DEV_REG_TGID:    // save the tgid for the following fork/clone
@@ -95,22 +95,22 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, fork %u\n", value);
         }
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
         if (memcheck_enabled) {
             memcheck_fork(tgid, value);
         }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
         break;
     case TRACE_DEV_REG_CLONE:    // fork, clone new pid (i.e. thread)
         DPID("QEMU.trace: clone (pid=%d tgid=%d value=%d)\n", pid, tgid, value);
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, clone %u\n", value);
         }
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
         if (memcheck_enabled) {
             memcheck_clone(tgid, value);
         }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
         break;
     case TRACE_DEV_REG_EXECVE_VMSTART:  // execve, vstart
         vstart = value;
@@ -127,7 +127,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
             D("QEMU.trace: kernel, init exec [%lx,%lx]@%lx [%s]\n",
               vstart, vend, eoff, exec_path);
         }
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
         if (memcheck_enabled) {
             if (exec_path[0] == '\0') {
                 // vstrcpy may fail to copy path. In this case lets do it
@@ -136,7 +136,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
             }
             memcheck_mmap_exepath(vstart, vend, eoff, exec_path);
         }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
         exec_path[0] = 0;
         break;
     case TRACE_DEV_REG_CMDLINE_LEN:     // execve, process cmdline length
@@ -147,11 +147,11 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, execve [%.*s]\n", cmdlen, exec_arg);
         }
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
         if (memcheck_enabled) {
             memcheck_set_cmd_line(exec_arg, cmdlen);
         }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 #if DEBUG || DEBUG_PID
         if (trace_filename != NULL) {
             int i;
@@ -168,11 +168,11 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, exit %x\n", value);
         }
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
         if (memcheck_enabled) {
             memcheck_exit(value);
         }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
         break;
     case TRACE_DEV_REG_NAME:            // record thread name
         vstrcpy(value, exec_path, CLIENT_PAGE_SIZE);
@@ -193,7 +193,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, mmap [%lx,%lx]@%lx [%s]\n", vstart, vend, eoff, exec_path);
         }
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
         if (memcheck_enabled) {
             if (exec_path[0] == '\0') {
                 // vstrcpy may fail to copy path. In this case lets do it
@@ -202,17 +202,17 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
             }
             memcheck_mmap_exepath(vstart, vend, eoff, exec_path);
         }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
         exec_path[0] = 0;
         break;
     case TRACE_DEV_REG_INIT_PID:        // init, name the pid that starts before device registered
         pid = value;
         DPID("QEMU.trace: pid=%d\n", value);
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
         if (memcheck_enabled) {
             memcheck_init_pid(value);
         }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
         break;
     case TRACE_DEV_REG_INIT_NAME:       // init, the comm of the init pid
         vstrcpy(value, exec_path, CLIENT_PAGE_SIZE);
@@ -265,11 +265,11 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         unmap_start = value;
         break;
     case TRACE_DEV_REG_UNMAP_END:
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
         if (memcheck_enabled) {
             memcheck_unmap(unmap_start, value);
         }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
         break;
 
     case TRACE_DEV_REG_METHOD_ENTRY:
@@ -286,7 +286,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         }
         break;
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
     case TRACE_DEV_REG_MALLOC:
         if (memcheck_enabled) {
             memcheck_guest_alloc(value);
@@ -316,7 +316,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
             memcheck_guest_print_str(value);
         }
         break;
-#endif // CONFIG_MEMCHECK
+#endif // CONFIG_ANDROID_MEMCHECK
 
     default:
         if (offset < 4096) {

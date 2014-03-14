@@ -22,7 +22,7 @@
 #include "exec/exec-all.h"
 #include "exec/cputlb.h"
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
 #include "android/qemu/memcheck/memcheck_api.h"
 #endif
 
@@ -263,7 +263,7 @@ int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
         te->addr_write = -1;
     }
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
     /*
      * If we have memchecker running, we need to make sure that page, cached
      * into TLB as the result of this operation will comply with our requirement
@@ -291,7 +291,7 @@ int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
             te->addr_write ^= TARGET_PAGE_MASK;
         }
     }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 
     return ret;
 }
