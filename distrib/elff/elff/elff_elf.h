@@ -19,7 +19,7 @@
 #define ELFF_ELH_H_
 
 #include <stdint.h>
-#include "elff-common.h"
+#include "elff/elff-common.h"
 
 //=============================================================================
 // ELF file definitions

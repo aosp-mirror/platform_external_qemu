@@ -15,9 +15,9 @@
  * an ELF file containing debugging information in DWARF format.
  */
 
-#include "elff_api.h"
-#include "elf_file.h"
-#include "dwarf_defs.h"
+#include "elff/elff_api.h"
+#include "elff/elf_file.h"
+#include "elff/dwarf_defs.h"
 
 #ifdef __cplusplus
 extern "C" {

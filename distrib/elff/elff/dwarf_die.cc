@@ -15,10 +15,10 @@
  */
 
 #include "stdio.h"
-#include "dwarf_die.h"
-#include "dwarf_cu.h"
-#include "dwarf_utils.h"
-#include "elf_file.h"
+#include "elff/dwarf_die.h"
+#include "elff/dwarf_cu.h"
+#include "elff/dwarf_utils.h"
+#include "elff/elf_file.h"
 
 DIEObject::~DIEObject() {
   /* Delete all children of this object. */

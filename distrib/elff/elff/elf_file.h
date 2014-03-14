@@ -17,10 +17,10 @@
 #ifndef ELFF_ELF_FILE_H_
 #define ELFF_ELF_FILE_H_
 
-#include "dwarf_die.h"
-#include "elf_mapped_section.h"
-#include "elff_api.h"
-#include "android/utils/mapfile.h"
+#include "elff/dwarf_die.h"
+#include "elff/elf_mapped_section.h"
+#include "elff/elff_api.h"
+#include "elff/elff_map_file.h"
 
 /* Encapsulates architecture-independent functionality of an ELF file.
  *

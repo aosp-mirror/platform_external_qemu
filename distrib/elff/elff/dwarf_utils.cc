@@ -17,7 +17,7 @@
 #include <stdio.h>
 #define __STDC_FORMAT_MACROS 1
 #include <inttypes.h>
-#include "dwarf_utils.h"
+#include "elff/dwarf_utils.h"
 
 /* "Stringifies" the parameter. */
 #define DWARF_NAMEFY(val) case val: return "" #val ""

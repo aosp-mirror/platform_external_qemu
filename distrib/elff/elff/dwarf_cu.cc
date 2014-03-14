@@ -17,9 +17,9 @@
 
 #include "string.h"
 #include "stdio.h"
-#include "elf_file.h"
-#include "dwarf_cu.h"
-#include "dwarf_utils.h"
+#include "elff/elf_file.h"
+#include "elff/dwarf_cu.h"
+#include "elff/dwarf_utils.h"
 
 DwarfCU::DwarfCU(ElfFile* elf)
     : elf_file_(elf),

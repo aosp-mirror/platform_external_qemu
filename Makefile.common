@@ -706,7 +706,7 @@ endif # EMULATOR_BUILD_64BITS
 common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
 
-ELFF_CFLAGS := -I$(LOCAL_PATH)/elff
+ELFF_CFLAGS := -I$(LOCAL_PATH)/distrib/elff
 ELFF_LDLIBS := -lstdc++
 
 ELFF_SOURCES := \
@@ -718,7 +718,7 @@ ELFF_SOURCES := \
     elf_mapped_section.cc \
     elff_api.cc \
 
-common_LOCAL_SRC_FILES += $(ELFF_SOURCES:%=elff/%)
+common_LOCAL_SRC_FILES += $(ELFF_SOURCES:%=distrib/elff/elff/%)
 
 common_LOCAL_CFLAGS += \
     -fno-exceptions \

@@ -16,7 +16,7 @@
 
 #include "qemu/queue.h"
 #include "migration/qemu-file.h"
-#include "elff_api.h"
+#include "elff/elff_api.h"
 #include "android/qemu/memcheck/memcheck.h"
 #include "android/qemu/memcheck/memcheck_proc_management.h"
 #include "android/qemu/memcheck/memcheck_util.h"

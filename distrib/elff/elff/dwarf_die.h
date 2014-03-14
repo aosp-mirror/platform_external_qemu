@@ -18,7 +18,7 @@
 #define ELFF_DWARF_DIE_H_
 
 #include "dwarf_defs.h"
-#include "elf_alloc.h"
+#include "elff/elf_alloc.h"
 
 class ElfFile;
 class DwarfCU;

@@ -18,8 +18,8 @@
 #ifndef ELFF_DWARF_DEFS_H_
 #define ELFF_DWARF_DEFS_H_
 
-#include "dwarf.h"
-#include "elf_defs.h"
+#include "elff/dwarf.h"
+#include "elff/elf_defs.h"
 
 /* DWARF structures are packed to 1 byte. */
 #define ELFF_PACKED __attribute__ ((packed))
