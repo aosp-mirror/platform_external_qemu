@@ -468,7 +468,7 @@ void glue(helper_maskmov, SUFFIX) (Reg *d, Reg *s, target_ulong a0)
     int i;
     for(i = 0; i < (8 << SHIFT); i++) {
         if (s->B(i) & 0x80)
-            stb(a0 + i, d->B(i));
+            cpu_stb_data(env, a0 + i, d->B(i));
     }
 }
 

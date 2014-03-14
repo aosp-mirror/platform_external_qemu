@@ -49,16 +49,8 @@
 
 #if ACCESS_TYPE < (NB_MMU_MODES)
 
-#if defined(OUTSIDE_JIT)
-/* Dispatch calls to __ldx_outside_jit / __stx_outside_jit, which don't
- * expect CPU environment. to be cached in ebp register, but rather uses
- * cpu_single_env variable for that purpose.
- */
-#define MMUSUFFIX _outside_jit
-#else   // OUTSIDE_JIT
-#define MMUSUFFIX _mmu
-#endif  // OUTSIDE_JIT
 #define CPU_MMU_INDEX ACCESS_TYPE
+#define MMUSUFFIX _mmu
 
 #elif ACCESS_TYPE == (NB_MMU_MODES)
 
@@ -88,12 +80,12 @@
 
 /* generic load/store macros */
 
-static inline RES_TYPE glue(glue(ld, USUFFIX), MEMSUFFIX)(target_ulong ptr)
+static inline RES_TYPE
+glue(glue(cpu_ld, USUFFIX), MEMSUFFIX)(CPUArchState *env, target_ulong ptr)
 {
     int page_index;
     RES_TYPE res;
     target_ulong addr;
-    unsigned long physaddr;
     int mmu_idx;
 
     addr = ptr;
@@ -103,18 +95,18 @@ static inline RES_TYPE glue(glue(ld, USUFFIX), MEMSUFFIX)(target_ulong ptr)
                  (addr & (TARGET_PAGE_MASK | (DATA_SIZE - 1))))) {
         res = glue(glue(__ld, SUFFIX), MMUSUFFIX)(addr, mmu_idx);
     } else {
-        physaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
-        res = glue(glue(ld, USUFFIX), _raw)((uint8_t *)physaddr);
+        uintptr_t hostaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
+        res = glue(glue(ld, USUFFIX), _raw)((uint8_t *)hostaddr);
     }
     return res;
 }
 
 #if DATA_SIZE <= 2
-static inline int glue(glue(lds, SUFFIX), MEMSUFFIX)(target_ulong ptr)
+static inline int
+glue(glue(cpu_lds, SUFFIX), MEMSUFFIX)(CPUArchState *env, target_ulong ptr)
 {
     int res, page_index;
     target_ulong addr;
-    unsigned long physaddr;
     int mmu_idx;
 
     addr = ptr;
@@ -124,8 +116,8 @@ static inline int glue(glue(lds, SUFFIX), MEMSUFFIX)(target_ulong ptr)
                  (addr & (TARGET_PAGE_MASK | (DATA_SIZE - 1))))) {
         res = (DATA_STYPE)glue(glue(__ld, SUFFIX), MMUSUFFIX)(addr, mmu_idx);
     } else {
-        physaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
-        res = glue(glue(lds, SUFFIX), _raw)((uint8_t *)physaddr);
+        uintptr_t hostaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
+        res = glue(glue(lds, SUFFIX), _raw)((uint8_t *)hostaddr);
     }
     return res;
 }
@@ -135,11 +127,12 @@ static inline int glue(glue(lds, SUFFIX), MEMSUFFIX)(target_ulong ptr)
 
 /* generic store macro */
 
-static inline void glue(glue(st, SUFFIX), MEMSUFFIX)(target_ulong ptr, RES_TYPE v)
+static inline void
+glue(glue(cpu_st, SUFFIX), MEMSUFFIX)(CPUArchState *env, target_ulong ptr,
+                                      RES_TYPE v)
 {
     int page_index;
     target_ulong addr;
-    unsigned long physaddr;
     int mmu_idx;
 
     addr = ptr;
@@ -149,8 +142,8 @@ static inline void glue(glue(st, SUFFIX), MEMSUFFIX)(target_ulong ptr, RES_TYPE 
                  (addr & (TARGET_PAGE_MASK | (DATA_SIZE - 1))))) {
         glue(glue(__st, SUFFIX), MMUSUFFIX)(addr, v, mmu_idx);
     } else {
-        physaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
-        glue(glue(st, SUFFIX), _raw)((uint8_t *)physaddr, v);
+        uintptr_t hostaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
+        glue(glue(st, SUFFIX), _raw)((uint8_t *)hostaddr, v);
     }
 }
 
@@ -159,46 +152,50 @@ static inline void glue(glue(st, SUFFIX), MEMSUFFIX)(target_ulong ptr, RES_TYPE 
 #if ACCESS_TYPE != (NB_MMU_MODES + 1)
 
 #if DATA_SIZE == 8
-static inline float64 glue(ldfq, MEMSUFFIX)(target_ulong ptr)
+static inline float64 glue(cpu_ldfq, MEMSUFFIX)(CPUArchState *env,
+                                                target_ulong ptr)
 {
     union {
         float64 d;
         uint64_t i;
     } u;
-    u.i = glue(ldq, MEMSUFFIX)(ptr);
+    u.i = glue(cpu_ldq, MEMSUFFIX)(env, ptr);
     return u.d;
 }
 
-static inline void glue(stfq, MEMSUFFIX)(target_ulong ptr, float64 v)
+static inline void glue(cpu_stfq, MEMSUFFIX)(CPUArchState *env,
+                                             target_ulong ptr, float64 v)
 {
     union {
         float64 d;
         uint64_t i;
     } u;
     u.d = v;
-    glue(stq, MEMSUFFIX)(ptr, u.i);
+    glue(cpu_stq, MEMSUFFIX)(env, ptr, u.i);
 }
 #endif /* DATA_SIZE == 8 */
 
 #if DATA_SIZE == 4
-static inline float32 glue(ldfl, MEMSUFFIX)(target_ulong ptr)
+static inline float32 glue(cpu_ldfl, MEMSUFFIX)(CPUArchState *env,
+                                                target_ulong ptr)
 {
     union {
         float32 f;
         uint32_t i;
     } u;
-    u.i = glue(ldl, MEMSUFFIX)(ptr);
+    u.i = glue(cpu_ldl, MEMSUFFIX)(env, ptr);
     return u.f;
 }
 
-static inline void glue(stfl, MEMSUFFIX)(target_ulong ptr, float32 v)
+static inline void glue(cpu_stfl, MEMSUFFIX)(CPUArchState *env,
+                                             target_ulong ptr, float32 v)
 {
     union {
         float32 f;
         uint32_t i;
     } u;
     u.f = v;
-    glue(stl, MEMSUFFIX)(ptr, u.i);
+    glue(cpu_stl, MEMSUFFIX)(env, ptr, u.i);
 }
 #endif /* DATA_SIZE == 4 */
 

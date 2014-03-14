@@ -95,7 +95,7 @@ memcheck_get_guest_buffer(void* qemu_address,
      * buffer to 32 bits and use ld/stl_user instead of ld/stub_user to
      * read / write guest's memory. */
     while (buffer_size) {
-        *(uint8_t*)qemu_address = ldub_user(guest_address);
+        *(uint8_t*)qemu_address = cpu_ldub_user(cpu_single_env, guest_address);
         qemu_address = (uint8_t*)qemu_address + 1;
         guest_address++;
         buffer_size--;
@@ -108,7 +108,7 @@ memcheck_set_guest_buffer(target_ulong guest_address,
                           size_t buffer_size)
 {
     while (buffer_size) {
-        stb_user(guest_address, *(uint8_t*)qemu_address);
+        cpu_stb_user(cpu_single_env, guest_address, *(uint8_t*)qemu_address);
         guest_address++;
         qemu_address = (uint8_t*)qemu_address + 1;
         buffer_size--;
@@ -124,7 +124,7 @@ memcheck_get_guest_string(char* qemu_str,
 
     if (qemu_buffer_size > 1) {
         for (copied = 0; copied < qemu_buffer_size - 1; copied++) {
-            qemu_str[copied] = ldub_user(guest_str + copied);
+            qemu_str[copied] = cpu_ldub_user(cpu_single_env, guest_str + copied);
             if (qemu_str[copied] == '\0') {
                 return copied;
             }
@@ -143,7 +143,7 @@ memcheck_get_guest_kernel_string(char* qemu_str,
 
     if (qemu_buffer_size > 1) {
         for (copied = 0; copied < qemu_buffer_size - 1; copied++) {
-            qemu_str[copied] = ldub_kernel(guest_str + copied);
+            qemu_str[copied] = cpu_ldub_kernel(cpu_single_env, guest_str + copied);
             if (qemu_str[copied] == '\0') {
                 return copied;
             }
@@ -160,19 +160,19 @@ memcheck_get_guest_kernel_string(char* qemu_str,
 void
 memcheck_fail_alloc(target_ulong guest_address)
 {
-    stl_user(ALLOC_RES_ADDRESS(guest_address), 0);
+    cpu_stl_user(cpu_single_env, ALLOC_RES_ADDRESS(guest_address), 0);
 }
 
 void
 memcheck_fail_free(target_ulong guest_address)
 {
-    stl_user(FREE_RES_ADDRESS(guest_address), 0);
+    cpu_stl_user(cpu_single_env, FREE_RES_ADDRESS(guest_address), 0);
 }
 
 void
 memcheck_fail_query(target_ulong guest_address)
 {
-    stl_user(QUERY_RES_ADDRESS(guest_address), 0);
+    cpu_stl_user(cpu_single_env, QUERY_RES_ADDRESS(guest_address), 0);
 }
 
 // =============================================================================

@@ -6419,7 +6419,7 @@ static void disas_arm_insn(CPUARMState * env, DisasContext *s)
     TCGv addr;
     TCGv_i64 tmp64;
 
-    insn = ldl_code(s->pc);
+    insn = cpu_ldl_code(env, s->pc);
 
     ANDROID_WATCH_CALLSTACK_ARM(s);
 
@@ -7824,7 +7824,7 @@ static int disas_thumb2_insn(CPUARMState *env, DisasContext *s, uint16_t insn_hw
         /* Fall through to 32-bit decode.  */
     }
 
-    insn = lduw_code(s->pc);
+    insn = cpu_lduw_code(env, s->pc);
     s->pc += 2;
     insn |= (uint32_t)insn_hw1 << 16;
 
@@ -8856,7 +8856,7 @@ static void disas_thumb_insn(CPUARMState *env, DisasContext *s)
         }
     }
 
-    insn = lduw_code(s->pc);
+    insn = cpu_lduw_code(env, s->pc);
 
     ANDROID_WATCH_CALLSTACK_THUMB(s);
 
