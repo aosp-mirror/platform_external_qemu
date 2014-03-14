@@ -16,6 +16,24 @@
       "revId": "7f9826692febc48c6ce23f65bc6770fc5f9fe576",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcb49dfd_b0e7e050",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3597,
+      "author": {
+        "id": 1005480
+      },
+      "writtenOn": "2014-03-14T20:52:42Z",
+      "side": 1,
+      "message": "\u003e explaining that for now the /cache partition is still limited to yaffs2.\n\nThat explanation is in the commit message.\n\"\"\"The emulation tools don\u0027t fully support ext4. Yet.\nSo we stick with the default which ends up being yaffs2.\n\"\"\"\n\n\u003e But then what was the urge exactly?\n\nQA was blocked on this issue on master because of this. Bug was raised to p1. http://b/13330763\n\n\u003e uploaded to the idea133 branch\n\nI don\u0027t see that branch in our automerger. Master needed fixing. I followed the merges upstream, which start in aosp.",
+      "parentUuid": "1ca891a1_a050b423",
+      "revId": "7f9826692febc48c6ce23f65bc6770fc5f9fe576",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
