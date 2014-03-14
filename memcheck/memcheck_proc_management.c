@@ -643,8 +643,8 @@ memcheck_exit(uint32_t exit_code)
                             uint32_t rel =
                                 mmrangedesc_get_module_offset(rdesc,
                                                   leaked_alloc.call_stack[stk]);
-                            printf("         Frame %u: PC=0x%08X (relative 0x%08X) in module %s\n",
-                                   stk, leaked_alloc.call_stack[stk], rel,
+                            printf("         Frame %u: PC=" TARGET_FMT_lx " (relative %llx) in module %s\n",
+                                   stk, leaked_alloc.call_stack[stk], (long long)rel,
                                    rdesc->path);
                             if (memcheck_get_address_info(leaked_alloc.call_stack[stk],
                                                           rdesc, &elff_info,
@@ -659,7 +659,7 @@ memcheck_exit(uint32_t exit_code)
                                 elff_close(elff_handle);
                             }
                         } else {
-                            printf("         Frame %u: PC=0x%08X in module <unknown>\n",
+                            printf("         Frame %u: PC=" TARGET_FMT_lx " in module <unknown>\n",
                                    stk, leaked_alloc.call_stack[stk]);
 
                         }
@@ -738,7 +738,7 @@ memcheck_mmap_exepath(target_ulong vstart,
         g_free(replaced.path);
     }
 
-    T(PROC_MMAP, "memcheck: %s[pid=%u] %s is mapped: 0x%08X - 0x%08X + 0x%08X\n",
+    T(PROC_MMAP, "memcheck: %s[pid=%u] %s is mapped: " TARGET_FMT_lx " - " TARGET_FMT_lx " + " TARGET_FMT_lx "\n",
       proc->image_path, proc->pid, path, vstart, vend, exec_offset);
 }
 
@@ -759,7 +759,7 @@ memcheck_unmap(target_ulong vstart, target_ulong vend)
 
     if (desc.map_start >= vstart && desc.map_end <= vend) {
         /* Entire mapping has been deleted. */
-        T(PROC_MMAP, "memcheck: %s[pid=%u] %s is unmapped: [0x%08X - 0x%08X + 0x%08X]\n",
+        T(PROC_MMAP, "memcheck: %s[pid=%u] %s is unmapped: [" TARGET_FMT_lx " - " TARGET_FMT_lx " + " TARGET_FMT_lx "]\n",
           proc->image_path, proc->pid, desc.path, vstart, vend, desc.exec_offset);
         g_free(desc.path);
         return;
@@ -768,7 +768,7 @@ memcheck_unmap(target_ulong vstart, target_ulong vend)
     /* This can be first stage of "remap" request, when part of the existing
      * mapping has been unmapped. If that's so, lets cut unmapped part from the
      * block that we just pulled, and add whatever's left back to the map. */
-    T(PROC_MMAP, "memcheck: REMAP(0x%08X, 0x%08X + 0x%08X) -> (0x%08X, 0x%08X)\n",
+    T(PROC_MMAP, "memcheck: REMAP(" TARGET_FMT_lx ", " TARGET_FMT_lx " + " TARGET_FMT_lx ") -> (" TARGET_FMT_lx ", " TARGET_FMT_lx ")\n",
        desc.map_start, desc.map_end, desc.exec_offset, vstart, vend);
     if (desc.map_start == vstart) {
         /* We cut part from the beginning. Add the tail back. */

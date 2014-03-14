@@ -64,11 +64,14 @@ av_invalid_pointer(ProcDesc* proc, target_ulong ptr, int routine)
 {
     if (trace_flags & TRACE_CHECK_INVALID_PTR_ENABLED) {
         printf("memcheck: Access violation is detected in process %s[pid=%u]:\n"
-          "  INVALID POINTER 0x%08X is used in '%s' operation.\n"
+          "  INVALID POINTER " TARGET_FMT_lx " is used in '%s' operation.\n"
           "  Allocation descriptor for this pointer has not been found in the\n"
           "  allocation map for the process. Most likely, this is an attempt\n"
           "  to %s a pointer that has been freed.\n",
-          proc->image_path, proc->pid, ptr, routine == 1 ? "free" : "realloc",
+          proc->image_path,
+          proc->pid,
+          ptr,
+          routine == 1 ? "free" : "realloc",
           routine == 1 ? "free" : "reallocate");
     }
 }
@@ -114,7 +117,7 @@ av_access_violation(ProcDesc* proc,
     const MMRangeDesc* rdesc = procdesc_get_range_desc(proc, vaddr);
     if (rdesc != NULL) {
         int elff_res;
-        printf("  In module %s at address 0x%08X\n", rdesc->path, vaddr);
+        printf("  In module %s at address " TARGET_FMT_lx "\n", rdesc->path, vaddr);
         elff_res =
           memcheck_get_address_info(vaddr, rdesc, &elff_info, &elff_handle);
         if (elff_res == 0) {
@@ -151,14 +154,15 @@ av_access_violation(ProcDesc* proc,
             printf("  Unable to obtain routine information. Symbols file is not found.\n");
         } else {
             printf("  Unable to obtain routine information.\n"
-                   "  Symbols file doesn't contain debugging information for address 0x%08X.\n",
+                   "  Symbols file doesn't contain debugging information for address "
+                   TARGET_FMT_lx ".\n",
                     mmrangedesc_get_module_offset(rdesc, vaddr));
         }
     } else {
-        printf("  In unknown module at address 0x%08X\n", vaddr);
+        printf("  In unknown module at address " TARGET_FMT_lx "\n", vaddr);
     }
 
-    printf("  Process attempts to %s %u bytes %s address 0x%08X\n",
+    printf("  Process attempts to %s %u bytes %s address " TARGET_FMT_lx "\n",
            is_read ? "read" : "write", data_size,
            is_read ? "from" : "to", addr);
     printf("  Accessed range belongs to the %s guarding area of allocated block.\n",

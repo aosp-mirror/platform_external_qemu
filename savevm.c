@@ -72,6 +72,7 @@
 
 #include "qemu-common.h"
 #include "hw/hw.h"
+#include "hw/qdev.h"
 #include "net/net.h"
 #include "monitor/monitor.h"
 #include "sysemu/sysemu.h"
@@ -1722,14 +1723,6 @@ static int calculate_compat_instance_id(const char *idstr)
     }
     return instance_id;
 }
-
-#ifdef CONFIG_ANDROID
-// TODO(digit): Implement this properly once we switch all devices to
-// be DeviceState instances.
-char* qdev_get_dev_path(DeviceState* dev) {
-    return NULL;
-}
-#endif
 
 /* TODO: Individual devices generally have very little idea about the rest
    of the system, so instance_id should be removed/replaced.

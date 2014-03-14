@@ -124,4 +124,6 @@ BusState *qbus_create(BusType type, size_t size,
 void do_info_qtree(Monitor *mon);
 void sysbus_dev_print(Monitor *mon, DeviceState *dev, int indent);
 
+char *qdev_get_dev_path(DeviceState *dev);
+
 #endif
