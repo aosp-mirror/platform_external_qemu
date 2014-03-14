@@ -306,6 +306,7 @@ int tlb_set_page(CPUArchState *env1, target_ulong vaddr,
 }
 
 #define MMUSUFFIX _cmmu
+#undef GETPC
 #define GETPC() NULL
 #define env cpu_single_env
 #define SOFTMMU_CODE_ACCESS

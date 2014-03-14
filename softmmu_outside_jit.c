@@ -26,6 +26,7 @@
 
 #define OUTSIDE_JIT
 #define MMUSUFFIX       _outside_jit
+#undef GETPC
 #define GETPC()         NULL
 #define env             cpu_single_env
 #define ACCESS_TYPE     1
