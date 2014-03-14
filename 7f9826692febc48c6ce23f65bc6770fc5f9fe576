@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ca891a1_a050b423",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3597,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-03-14T20:32:53Z",
+      "side": 1,
+      "message": "Wow, this code is already hard to understand, please do not make it even more confusing with this sort of context-less comment. You should have instead corrected the comment, for example by explaining that for now the /cache partition is still limited to yaffs2.\n\nYou should also have mentioned in the commit message what this patch is supposed to fix exactly.\n\nI believe that yaffs2 has been completely removed from the 3.4+ goldfish kernel sources. I plan to add some code in the future to create an empty cache ext4 partition on demand to the emulator, so we will have to re-enable that later. I assume this was to fixed /cache emulation on JB and before then? But then what was the urge exactly?\n\nFinally, this should have been uploaded to the idea133 branch, which is our development branch for all things related to SDK tools now. I\u0027ll upload a proper fix there myself.",
+      "revId": "7f9826692febc48c6ce23f65bc6770fc5f9fe576",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
