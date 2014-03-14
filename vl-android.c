@@ -3588,7 +3588,7 @@ int main(int argc, char **argv, char **envp)
         snprintf(tmp,sizeof(tmp),"cache,size=0x%" PRIx64, partSize);
 
         // NOTE: Assume the /cache and /data partitions have the same format
-        cacheImageIsExt4 = dataImageIsExt4;
+        // DON'T. WRONG.
 
         if (partPath && *partPath && strcmp(partPath, "<temp>") != 0) {
             if (filelock_create(partPath) == NULL) {
