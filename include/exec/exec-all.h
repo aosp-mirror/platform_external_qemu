@@ -411,7 +411,7 @@ extern CPUWriteMemoryFunc *io_mem_write[IO_MEM_NB_ENTRIES][4];
 extern CPUReadMemoryFunc *io_mem_read[IO_MEM_NB_ENTRIES][4];
 extern void *io_mem_opaque[IO_MEM_NB_ENTRIES];
 
-void tlb_fill(target_ulong addr, int is_write, int mmu_idx,
+void tlb_fill(CPUArchState* env, target_ulong addr, int is_write, int mmu_idx,
               void *retaddr);
 
 #include "exec/softmmu_defs.h"

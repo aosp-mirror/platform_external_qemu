@@ -1902,7 +1902,7 @@ static void do_unaligned_access (target_ulong addr, int is_write, int is_user, v
     helper_raise_exception ((is_write == 1) ? EXCP_AdES : EXCP_AdEL);
 }
 
-void tlb_fill (target_ulong addr, int is_write, int mmu_idx, void *retaddr)
+void tlb_fill (CPUMIPSState* env1, target_ulong addr, int is_write, int mmu_idx, void *retaddr)
 {
     TranslationBlock *tb;
     CPUMIPSState *saved_env;
@@ -1912,7 +1912,7 @@ void tlb_fill (target_ulong addr, int is_write, int mmu_idx, void *retaddr)
     /* XXX: hack to restore env in all cases, even if not called from
        generated code */
     saved_env = env;
-    env = cpu_single_env;
+    env = env1;
     ret = cpu_mips_handle_mmu_fault(env, addr, is_write, mmu_idx, 1);
     if (ret) {
         if (retaddr) {
@@ -1957,7 +1957,7 @@ redo:
     } else {
         /* the page is not in the TLB : fill it */
         retaddr = GETPC();
-        tlb_fill(addr, 0, is_user, retaddr);
+        tlb_fill(env, addr, 0, is_user, retaddr);
         goto redo;
     }
     return physaddr;
