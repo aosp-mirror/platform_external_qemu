@@ -19,7 +19,8 @@
 # the directory where we're going to place our object files
 LOCAL_OBJS_DIR  := $(call intermediates-dir-for,EXECUTABLES,$(LOCAL_MODULE))
 LOCAL_OBJECTS   :=
-LOCAL_CC        ?= $(CC)
+$(call local-host-define,CC)
+$(call local-host-define,LD)
 LOCAL_C_SOURCES := $(filter  %.c,$(LOCAL_SRC_FILES))
 LOCAL_GENERATED_C_SOURCES := $(filter %.c,$(LOCAL_GENERATED_SOURCES))
 LOCAL_GENERATED_CXX_SOURCES := $(filter %$(LOCAL_CPP_EXTENSION),$(LOCAL_GENERATED_SOURCES))
@@ -27,6 +28,18 @@ LOCAL_CXX_SOURCES := $(filter %$(LOCAL_CPP_EXTENSION),$(LOCAL_SRC_FILES))
 LOCAL_OBJC_SOURCES := $(filter %.m,$(LOCAL_SRC_FILES))
 
 LOCAL_CFLAGS := $(strip $(patsubst %,-I%,$(LOCAL_C_INCLUDES)) $(LOCAL_CFLAGS))
+
+# HACK ATTACK: For the Darwin x86 build, we need to add
+# '-read_only_relocs suppress' to the linker command to avoid errors.
+# The only way to detect if we're building 32-bit or 64-bit binaries
+# is to look at -m32 and -m64 statements in the final link line, and
+# only keep the last one.
+ifeq ($(HOST_OS),darwin)
+  my_bitness := $(lastword $(filter -m32 -m64,$(LOCAL_LDFLAGS) $(LOCAL_LDLIBS) $(LOCAL_CFLAGS)))
+  ifeq (-m32,$(my_bitness))
+    LOCAL_LDLIBS += -Wl,-read_only_relocs,suppress
+  endif
+endif
 
 $(foreach src,$(LOCAL_C_SOURCES), \
     $(eval $(call compile-c-source,$(src))) \
