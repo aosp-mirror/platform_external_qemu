@@ -559,11 +559,13 @@ create_config_mk ()
     echo "HOST_OS     := $HOST_OS" >> $config_mk
     echo "HOST_ARCH   := $HOST_ARCH" >> $config_mk
     echo "CC          := $CC" >> $config_mk
-    echo "HOST_CC     := $CC" >> $config_mk
     echo "LD          := $LD" >> $config_mk
     echo "AR          := $AR" >> $config_mk
     echo "CFLAGS      := $CFLAGS" >> $config_mk
     echo "LDFLAGS     := $LDFLAGS" >> $config_mk
+    echo "HOST_CC     := $CC" >> $config_mk
+    echo "HOST_LD     := $LD" >> $config_mk
+    echo "HOST_AR     := $AR" >> $config_mk
 }
 
 add_android_config_mk ()
