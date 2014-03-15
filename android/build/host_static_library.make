@@ -18,13 +18,13 @@
 #
 
 #$(info STATIC_LIBRARY SRCS=$(LOCAL_SRC_FILES))
-LOCAL_BUILT_MODULE := $(call library-path,$(LOCAL_MODULE))
-LOCAL_CC ?= $(CC)
+LOCAL_BUILT_MODULE := $(call local-library-path,$(LOCAL_MODULE))
+LOCAL_CC ?= $(call local-host-tool,CC)
 include $(BUILD_SYSTEM)/binary.make
 
 LOCAL_AR := $(strip $(LOCAL_AR))
 ifndef LOCAL_AR
-    LOCAL_AR := $(AR)
+    LOCAL_AR := $(call local-host-tool,AR)
 endif
 ARFLAGS := crs
 
