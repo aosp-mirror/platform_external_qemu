@@ -1,0 +1,7 @@
+Code-Review+2: Ian Rogers <irogers@google.com>
+Verified+1: Greg Hackmann <ghackmann@google.com>
+Submitted-by: Greg Hackmann <ghackmann@google.com>
+Submitted-at: Mon, 17 Mar 2014 23:19:48 +0000
+Reviewed-on: https://android-review.googlesource.com/88227
+Project: platform/external/qemu
+Branch: refs/heads/master
