@@ -978,6 +978,10 @@ avdInfo_getKernelPath( AvdInfo*  i )
             suffix = "-armv7";
         }
 
+        if (!strcmp(i->targetAbi, "x86_64")) {
+            suffix = "-x86_64";
+        }
+
         p = bufprint(temp, end, "%s/kernel", i->androidOut);
         if (p < end && path_exists(temp)) {
             kernelPath = ASTRDUP(temp);
