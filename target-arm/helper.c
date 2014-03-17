@@ -634,7 +634,7 @@ uint32_t HELPER(get_r13_banked)(CPUARMState *env, uint32_t mode)
 extern int semihosting_enabled;
 
 /* Map CPU modes onto saved register banks.  */
-static inline int bank_number (int mode)
+static inline int bank_number (CPUARMState *env, int mode)
 {
     switch (mode) {
     case ARM_CPU_MODE_USR:
@@ -653,7 +653,7 @@ static inline int bank_number (int mode)
     case ARM_CPU_MODE_SMC:
         return 6;
     }
-    cpu_abort(cpu_single_env, "Bad mode %x\n", mode);
+    cpu_abort(env, "Bad mode %x\n", mode);
     return -1;
 }
 
@@ -674,12 +674,12 @@ void switch_mode(CPUARMState *env, int mode)
         memcpy (env->regs + 8, env->fiq_regs, 5 * sizeof(uint32_t));
     }
 
-    i = bank_number(old_mode);
+    i = bank_number(env, old_mode);
     env->banked_r13[i] = env->regs[13];
     env->banked_r14[i] = env->regs[14];
     env->banked_spsr[i] = env->spsr;
 
-    i = bank_number(mode);
+    i = bank_number(env, mode);
     env->regs[13] = env->banked_r13[i];
     env->regs[14] = env->banked_r14[i];
     env->spsr = env->banked_spsr[i];
@@ -2192,7 +2192,7 @@ void HELPER(set_r13_banked)(CPUARMState *env, uint32_t mode, uint32_t val)
     if ((env->uncached_cpsr & CPSR_M) == mode) {
         env->regs[13] = val;
     } else {
-    env->banked_r13[bank_number(mode)] = val;
+    env->banked_r13[bank_number(env, mode)] = val;
 }
 }
 
@@ -2201,7 +2201,7 @@ uint32_t HELPER(get_r13_banked)(CPUARMState *env, uint32_t mode)
     if ((env->uncached_cpsr & CPSR_M) == mode) {
         return env->regs[13];
     } else {
-    return env->banked_r13[bank_number(mode)];
+    return env->banked_r13[bank_number(env, mode)];
     }
 }
 
