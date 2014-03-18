@@ -509,8 +509,6 @@ void tcg_gen_shifti_i64(TCGv_i64 ret, TCGv_i64 arg1,
                         int c, int right, int arith);
 
 /* only used for debugging purposes */
-void tcg_register_helper(void *func, const char *name);
-const char *tcg_helper_get_name(TCGContext *s, void *func);
 void tcg_dump_ops(TCGContext *s, FILE *outfile);
 
 void dump_ops(const uint16_t *opc_buf, const TCGArg *opparam_buf);

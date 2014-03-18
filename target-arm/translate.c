@@ -131,9 +131,6 @@ void arm_translate_init(void)
     cpu_exclusive_info = tcg_global_mem_new_i32(TCG_AREG0,
         offsetof(CPUARMState, exclusive_info), "exclusive_info");
 #endif
-
-#define GEN_HELPER 2
-#include "helper.h"
 }
 
 static inline TCGv load_cpu_offset(int offset)

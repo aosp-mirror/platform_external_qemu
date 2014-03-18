@@ -7591,10 +7591,6 @@ void optimize_flags_init(void)
                                     "cc_dst");
     cpu_cc_tmp = tcg_global_mem_new(TCG_AREG0, offsetof(CPUX86State, cc_tmp),
                                     "cc_tmp");
-
-    /* register helpers */
-#define GEN_HELPER 2
-#include "helper.h"
 }
 
 /* generate intermediate code in tcg_ctx.gen_opc_buf and gen_opparam_buf for
