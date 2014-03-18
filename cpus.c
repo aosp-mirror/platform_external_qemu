@@ -26,6 +26,7 @@
 #include "cpu.h"
 #include "monitor/monitor.h"
 #include "sysemu/sysemu.h"
+#include "exec.h"
 #include "exec/exec-all.h"
 #include "exec/gdbstub.h"
 #include "sysemu/dma.h"
@@ -79,7 +80,7 @@ static int cpu_can_run(CPUOldState *env)
     return 1;
 }
 
-static int cpu_has_work(CPUOldState *env)
+static int internal_cpu_has_work(CPUOldState *env)
 {
     if (env->stop)
         return 1;
@@ -87,7 +88,7 @@ static int cpu_has_work(CPUOldState *env)
         return 0;
     if (!env->halted)
         return 1;
-    if (qemu_cpu_has_work(env))
+    if (cpu_has_work(env))
         return 1;
     return 0;
 }
@@ -97,7 +98,7 @@ int tcg_has_work(void)
     CPUOldState *env;
 
     for (env = first_cpu; env != NULL; env = env->next_cpu)
-        if (cpu_has_work(env))
+        if (internal_cpu_has_work(env))
             return 1;
     return 0;
 }

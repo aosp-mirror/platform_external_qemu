@@ -25,25 +25,6 @@ void fpu_dump_state(CPUMIPSState *env, FILE *f,
 void cpu_mips_clock_init (CPUMIPSState *env);
 void cpu_mips_tlb_flush (CPUMIPSState *env, int flush_global);
 
-static inline bool cpu_has_work(CPUMIPSState *env)
-{
-    int has_work = 0;
-
-    /* It is implementation dependent if non-enabled interrupts
-       wake-up the CPU, however most of the implementations only
-       check for interrupts that can be taken. */
-    if ((env->interrupt_request & CPU_INTERRUPT_HARD) &&
-        cpu_mips_hw_interrupts_pending(env)) {
-        has_work = 1;
-    }
-
-    if (env->interrupt_request & CPU_INTERRUPT_TIMER) {
-        has_work = 1;
-    }
-
-    return has_work;
-}
-
 static inline int cpu_halted(CPUMIPSState *env)
 {
     if (!env->halted)
