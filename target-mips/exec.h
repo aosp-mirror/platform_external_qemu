@@ -25,15 +25,7 @@ void fpu_dump_state(CPUMIPSState *env, FILE *f,
 void cpu_mips_clock_init (CPUMIPSState *env);
 void cpu_mips_tlb_flush (CPUMIPSState *env, int flush_global);
 
-static inline void env_to_regs(void)
-{
-}
-
-static inline void regs_to_env(void)
-{
-}
-
-static inline int cpu_has_work(CPUMIPSState *env)
+static inline bool cpu_has_work(CPUMIPSState *env)
 {
     int has_work = 0;
 
