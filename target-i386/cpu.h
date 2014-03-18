@@ -1081,4 +1081,15 @@ void apic_init_reset(CPUX86State *env);
 void apic_sipi(CPUX86State *env);
 void do_cpu_init(CPUX86State *env);
 void do_cpu_sipi(CPUX86State *env);
+
+/* op_helper.c */
+void do_interrupt(CPUArchState *env);
+void do_interrupt_x86_hardirq(CPUArchState *env, int intno, int is_hw);
+
+void do_smm_enter(CPUArchState *env1);
+
+void svm_check_intercept(CPUArchState *env1, uint32_t type);
+
+uint32_t cpu_cc_compute_all(CPUArchState *env1, int op);
+
 #endif /* CPU_I386_H */

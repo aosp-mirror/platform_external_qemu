@@ -59,13 +59,8 @@ GLOBAL_REGISTER_VARIABLE_DECL struct CPUX86State *env asm(AREG0);
 #include "exec/exec-all.h"
 
 /* op_helper.c */
-void do_interrupt(int intno, int is_int, int error_code,
-                  target_ulong next_eip, int is_hw);
-void do_interrupt_user(int intno, int is_int, int error_code,
-                       target_ulong next_eip);
 void QEMU_NORETURN raise_exception_err(int exception_index, int error_code);
 void QEMU_NORETURN raise_exception(int exception_index);
-void do_smm_enter(void);
 
 /* n must be a constant to be efficient */
 static inline target_long lshift(target_long x, int n)
@@ -77,11 +72,6 @@ static inline target_long lshift(target_long x, int n)
 }
 
 #include "helper.h"
-
-static inline void svm_check_intercept(uint32_t type)
-{
-    helper_svm_check_intercept_param(type, 0);
-}
 
 #if !defined(CONFIG_USER_ONLY)
 
