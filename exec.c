@@ -2188,7 +2188,8 @@ void cpu_physical_memory_unmap(void *buffer, hwaddr len,
 }
 
 /* warning: addr must be aligned */
-uint32_t ldl_phys(hwaddr addr)
+static inline uint32_t ldl_phys_internal(hwaddr addr,
+                                         enum device_endian endian)
 {
     int io_index;
     uint8_t *ptr;
@@ -2210,17 +2211,52 @@ uint32_t ldl_phys(hwaddr addr)
         if (p)
             addr = (addr & ~TARGET_PAGE_MASK) + p->region_offset;
         val = io_mem_read[io_index][2](io_mem_opaque[io_index], addr);
+#if defined(TARGET_WORDS_BIGENDIAN)
+        if (endian == DEVICE_LITTLE_ENDIAN) {
+            val = bswap32(val);
+        }
+#else
+        if (endian == DEVICE_BIG_ENDIAN) {
+            val = bswap32(val);
+        }
+#endif
     } else {
         /* RAM case */
         ptr = qemu_get_ram_ptr(pd & TARGET_PAGE_MASK) +
             (addr & ~TARGET_PAGE_MASK);
-        val = ldl_p(ptr);
+        switch (endian) {
+            case DEVICE_LITTLE_ENDIAN:
+                val = ldl_le_p(ptr);
+                break;
+            case DEVICE_BIG_ENDIAN:
+                val = ldl_be_p(ptr);
+                break;
+            default:
+                val = ldl_p(ptr);
+                break;
+        }
     }
     return val;
 }
 
+uint32_t ldl_phys(hwaddr addr)
+{
+    return ldl_phys_internal(addr, DEVICE_NATIVE_ENDIAN);
+}
+
+uint32_t ldl_le_phys(hwaddr addr)
+{
+    return ldl_phys_internal(addr, DEVICE_LITTLE_ENDIAN);
+}
+
+uint32_t ldl_be_phys(hwaddr addr)
+{
+    return ldl_phys_internal(addr, DEVICE_BIG_ENDIAN);
+}
+
 /* warning: addr must be aligned */
-uint64_t ldq_phys(hwaddr addr)
+static inline uint64_t ldq_phys_internal(hwaddr addr,
+                                         enum device_endian endian)
 {
     int io_index;
     uint8_t *ptr;
@@ -2241,6 +2277,9 @@ uint64_t ldq_phys(hwaddr addr)
         io_index = (pd >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
         if (p)
             addr = (addr & ~TARGET_PAGE_MASK) + p->region_offset;
+
+        /* XXX This is broken when device endian != cpu endian.
+               Fix and add "endian" variable check */
 #ifdef TARGET_WORDS_BIGENDIAN
         val = (uint64_t)io_mem_read[io_index][2](io_mem_opaque[io_index], addr) << 32;
         val |= io_mem_read[io_index][2](io_mem_opaque[io_index], addr + 4);
@@ -2252,9 +2291,34 @@ uint64_t ldq_phys(hwaddr addr)
         /* RAM case */
         ptr = qemu_get_ram_ptr(pd & TARGET_PAGE_MASK) +
             (addr & ~TARGET_PAGE_MASK);
-        val = ldq_p(ptr);
+        switch (endian) {
+        case DEVICE_LITTLE_ENDIAN:
+            val = ldq_le_p(ptr);
+            break;
+        case DEVICE_BIG_ENDIAN:
+            val = ldq_be_p(ptr);
+            break;
+        default:
+            val = ldq_p(ptr);
+            break;
+        }
     }
     return val;
+}
+
+uint64_t ldq_phys(hwaddr addr)
+{
+    return ldq_phys_internal(addr, DEVICE_NATIVE_ENDIAN);
+}
+
+uint64_t ldq_le_phys(hwaddr addr)
+{
+    return ldq_phys_internal(addr, DEVICE_LITTLE_ENDIAN);
+}
+
+uint64_t ldq_be_phys(hwaddr addr)
+{
+    return ldq_phys_internal(addr, DEVICE_BIG_ENDIAN);
 }
 
 /* XXX: optimize */
@@ -2266,11 +2330,70 @@ uint32_t ldub_phys(hwaddr addr)
 }
 
 /* XXX: optimize */
+static inline uint32_t lduw_phys_internal(hwaddr addr,
+                                          enum device_endian endian)
+{
+    int io_index;
+    uint8_t *ptr;
+    uint64_t val;
+    unsigned long pd;
+    PhysPageDesc *p;
+
+    p = phys_page_find(addr >> TARGET_PAGE_BITS);
+    if (!p) {
+        pd = IO_MEM_UNASSIGNED;
+    } else {
+        pd = p->phys_offset;
+    }
+
+    if ((pd & ~TARGET_PAGE_MASK) > IO_MEM_ROM &&
+        !(pd & IO_MEM_ROMD)) {
+        /* I/O case */
+        io_index = (pd >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
+        if (p)
+            addr = (addr & ~TARGET_PAGE_MASK) + p->region_offset;
+        val = io_mem_read[io_index][1](io_mem_opaque[io_index], addr);
+#if defined(TARGET_WORDS_BIGENDIAN)
+        if (endian == DEVICE_LITTLE_ENDIAN) {
+            val = bswap16(val);
+        }
+#else
+        if (endian == DEVICE_BIG_ENDIAN) {
+            val = bswap16(val);
+        }
+#endif
+    } else {
+        /* RAM case */
+        ptr = qemu_get_ram_ptr(pd & TARGET_PAGE_MASK) +
+            (addr & ~TARGET_PAGE_MASK);
+        switch (endian) {
+        case DEVICE_LITTLE_ENDIAN:
+            val = lduw_le_p(ptr);
+            break;
+        case DEVICE_BIG_ENDIAN:
+            val = lduw_be_p(ptr);
+            break;
+        default:
+            val = lduw_p(ptr);
+            break;
+        }
+    }
+    return val;
+}
+
 uint32_t lduw_phys(hwaddr addr)
 {
-    uint16_t val;
-    cpu_physical_memory_read(addr, (uint8_t *)&val, 2);
-    return tswap16(val);
+    return lduw_phys_internal(addr, DEVICE_NATIVE_ENDIAN);
+}
+
+uint32_t lduw_le_phys(hwaddr addr)
+{
+    return lduw_phys_internal(addr, DEVICE_LITTLE_ENDIAN);
+}
+
+uint32_t lduw_be_phys(hwaddr addr)
+{
+    return lduw_phys_internal(addr, DEVICE_BIG_ENDIAN);
 }
 
 /* warning: addr must be aligned. The ram page is not masked as dirty
@@ -2345,7 +2468,8 @@ void stq_phys_notdirty(hwaddr addr, uint64_t val)
 }
 
 /* warning: addr must be aligned */
-void stl_phys(hwaddr addr, uint32_t val)
+static inline void stl_phys_internal(hwaddr addr, uint32_t val,
+                                     enum device_endian endian)
 {
     int io_index;
     uint8_t *ptr;
@@ -2363,15 +2487,49 @@ void stl_phys(hwaddr addr, uint32_t val)
         io_index = (pd >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
         if (p)
             addr = (addr & ~TARGET_PAGE_MASK) + p->region_offset;
+#if defined(TARGET_WORDS_BIGENDIAN)
+        if (endian == DEVICE_LITTLE_ENDIAN) {
+            val = bswap32(val);
+        }
+#else
+        if (endian == DEVICE_BIG_ENDIAN) {
+            val = bswap32(val);
+        }
+#endif
         io_mem_write[io_index][2](io_mem_opaque[io_index], addr, val);
     } else {
         unsigned long addr1;
         addr1 = (pd & TARGET_PAGE_MASK) + (addr & ~TARGET_PAGE_MASK);
         /* RAM case */
         ptr = qemu_get_ram_ptr(addr1);
-        stl_p(ptr, val);
+        switch (endian) {
+        case DEVICE_LITTLE_ENDIAN:
+            stl_le_p(ptr, val);
+            break;
+        case DEVICE_BIG_ENDIAN:
+            stl_be_p(ptr, val);
+            break;
+        default:
+            stl_p(ptr, val);
+            break;
+        }
         invalidate_and_set_dirty(addr1, 4);
     }
+}
+
+void stl_phys(hwaddr addr, uint32_t val)
+{
+    stl_phys_internal(addr, val, DEVICE_NATIVE_ENDIAN);
+}
+
+void stl_le_phys(hwaddr addr, uint32_t val)
+{
+    stl_phys_internal(addr, val, DEVICE_LITTLE_ENDIAN);
+}
+
+void stl_be_phys(hwaddr addr, uint32_t val)
+{
+    stl_phys_internal(addr, val, DEVICE_BIG_ENDIAN);
 }
 
 /* XXX: optimize */
@@ -2382,17 +2540,94 @@ void stb_phys(hwaddr addr, uint32_t val)
 }
 
 /* XXX: optimize */
+static inline void stw_phys_internal(hwaddr addr, uint32_t val,
+                                     enum device_endian endian)
+{
+    int io_index;
+    uint8_t *ptr;
+    unsigned long pd;
+    PhysPageDesc *p;
+
+    p = phys_page_find(addr >> TARGET_PAGE_BITS);
+    if (!p) {
+        pd = IO_MEM_UNASSIGNED;
+    } else {
+        pd = p->phys_offset;
+    }
+
+    if ((pd & ~TARGET_PAGE_MASK) != IO_MEM_RAM) {
+        io_index = (pd >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
+        if (p)
+            addr = (addr & ~TARGET_PAGE_MASK) + p->region_offset;
+#if defined(TARGET_WORDS_BIGENDIAN)
+        if (endian == DEVICE_LITTLE_ENDIAN) {
+            val = bswap16(val);
+        }
+#else
+        if (endian == DEVICE_BIG_ENDIAN) {
+            val = bswap16(val);
+        }
+#endif
+        io_mem_write[io_index][1](io_mem_opaque[io_index], addr, val);
+    } else {
+        unsigned long addr1;
+        addr1 = (pd & TARGET_PAGE_MASK) + (addr & ~TARGET_PAGE_MASK);
+        /* RAM case */
+        ptr = qemu_get_ram_ptr(addr1);
+        switch (endian) {
+        case DEVICE_LITTLE_ENDIAN:
+            stw_le_p(ptr, val);
+            break;
+        case DEVICE_BIG_ENDIAN:
+            stw_be_p(ptr, val);
+            break;
+        default:
+            stw_p(ptr, val);
+            break;
+        }
+        if (!cpu_physical_memory_is_dirty(addr1)) {
+            /* invalidate code */
+            tb_invalidate_phys_page_range(addr1, addr1 + 2, 0);
+            /* set dirty bit */
+            cpu_physical_memory_set_dirty_flags(addr1,
+                (0xff & ~CODE_DIRTY_FLAG));
+        }
+    }
+}
+
 void stw_phys(hwaddr addr, uint32_t val)
 {
-    uint16_t v = tswap16(val);
-    cpu_physical_memory_write(addr, (const uint8_t *)&v, 2);
+    stw_phys_internal(addr, val, DEVICE_NATIVE_ENDIAN);
+}
+
+void stw_le_phys(hwaddr addr, uint32_t val)
+{
+    stw_phys_internal(addr, val, DEVICE_LITTLE_ENDIAN);
+}
+
+void stw_be_phys(hwaddr addr, uint32_t val)
+{
+    stw_phys_internal(addr, val, DEVICE_BIG_ENDIAN);
 }
 
 /* XXX: optimize */
 void stq_phys(hwaddr addr, uint64_t val)
 {
     val = tswap64(val);
-    cpu_physical_memory_write(addr, (const uint8_t *)&val, 8);
+    cpu_physical_memory_write(addr, &val, 8);
+}
+
+
+void stq_le_phys(hwaddr addr, uint64_t val)
+{
+    val = cpu_to_le64(val);
+    cpu_physical_memory_write(addr, &val, 8);
+}
+
+void stq_be_phys(hwaddr addr, uint64_t val)
+{
+    val = cpu_to_be64(val);
+    cpu_physical_memory_write(addr, &val, 8);
 }
 
 #endif
