@@ -48,7 +48,7 @@ static void main_cpu_reset(void *opaque)
 
     cpu_reset(env);
     if (env->boot_info)
-        arm_load_kernel(env, env->boot_info);
+        arm_load_kernel(env, (struct arm_boot_info*)env->boot_info);
 
     /* TODO:  Reset secondary CPUs.  */
 }
@@ -58,7 +58,7 @@ static void main_cpu_reset(void *opaque)
     p += 4;                       \
 } while (0)
 
-static void set_kernel_args(struct arm_boot_info *info,
+static void set_kernel_args(const struct arm_boot_info *info,
                 int initrd_size, hwaddr base)
 {
     hwaddr p;
@@ -111,7 +111,7 @@ static void set_kernel_args(struct arm_boot_info *info,
     WRITE_WORD(p, 0);
 }
 
-static void set_kernel_args_old(struct arm_boot_info *info,
+static void set_kernel_args_old(const struct arm_boot_info *info,
                 int initrd_size, hwaddr base)
 {
     hwaddr p;
@@ -190,6 +190,7 @@ void arm_load_kernel(CPUARMState *env, struct arm_boot_info *info)
     int initrd_size;
     int n;
     int is_linux = 0;
+    int nb_cpus;
     uint64_t elf_entry;
     hwaddr entry;
 
@@ -199,8 +200,7 @@ void arm_load_kernel(CPUARMState *env, struct arm_boot_info *info)
         exit(1);
     }
 
-    if (info->nb_cpus == 0)
-        info->nb_cpus = 1;
+    nb_cpus = info->nb_cpus ? info->nb_cpus : 1;
     env->boot_info = info;
 
     /* Assume that raw images are linux kernels, and ELF images are not.  */
@@ -246,7 +246,7 @@ void arm_load_kernel(CPUARMState *env, struct arm_boot_info *info)
         for (n = 0; n < sizeof(bootloader) / 4; n++) {
             stl_phys_notdirty(info->loader_start + (n * 4), bootloader[n]);
         }
-        if (info->nb_cpus > 1) {
+        if (nb_cpus > 1) {
             for (n = 0; n < sizeof(smpboot) / 4; n++) {
                 stl_phys_notdirty(info->smp_loader_start + (n * 4), smpboot[n]);
             }
@@ -256,6 +256,6 @@ void arm_load_kernel(CPUARMState *env, struct arm_boot_info *info)
         else
             set_kernel_args(info, initrd_size, info->loader_start);
     }
-    info->is_linux = is_linux;
+    //info->is_linux = is_linux;
     qemu_register_reset(main_cpu_reset, 0, env);
 }
