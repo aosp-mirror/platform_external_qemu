@@ -437,6 +437,7 @@ enum arm_features {
     ARM_FEATURE_V4T,
     ARM_FEATURE_V5,
     ARM_FEATURE_STRONGARM,
+    ARM_FEATURE_VAPA, /* cp15 VA to PA lookups */
     ARM_FEATURE_TRUSTZONE, /* TrustZone Security Extensions. */
 };
 
