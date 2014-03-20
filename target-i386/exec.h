@@ -127,31 +127,6 @@ static inline void load_eflags(int eflags, int update_mask)
         (eflags & update_mask) | 0x2;
 }
 
-static inline bool cpu_has_work(CPUX86State *env)
-{
-    int work;
-
-    work = (env->interrupt_request & CPU_INTERRUPT_HARD) &&
-           (env->eflags & IF_MASK);
-    work |= env->interrupt_request & CPU_INTERRUPT_NMI;
-    work |= env->interrupt_request & CPU_INTERRUPT_INIT;
-    work |= env->interrupt_request & CPU_INTERRUPT_SIPI;
-
-    return work;
-}
-
-static inline int cpu_halted(CPUX86State *env) {
-    /* handle exit of HALTED state */
-    if (!env->halted)
-        return 0;
-    /* disable halt condition */
-    if (cpu_has_work(env)) {
-        env->halted = 0;
-        return 0;
-    }
-    return EXCP_HALTED;
-}
-
 /* load efer and update the corresponding hflags. XXX: do consistency
    checks with cpuid bits ? */
 static inline void cpu_load_efer(CPUX86State *env, uint64_t val)
