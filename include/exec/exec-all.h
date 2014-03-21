@@ -48,8 +48,19 @@ typedef struct TranslationBlock TranslationBlock;
 /* XXX: make safe guess about sizes */
 #define MAX_OP_PER_INSTR 208
 
-/* A Call op needs up to 6 + 2N parameters (N = number of arguments).  */
-#define MAX_OPC_PARAM 10
+#if HOST_LONG_BITS == 32
+#define MAX_OPC_PARAM_PER_ARG 2
+#else
+#define MAX_OPC_PARAM_PER_ARG 1
+#endif
+#define MAX_OPC_PARAM_IARGS 5
+#define MAX_OPC_PARAM_OARGS 1
+#define MAX_OPC_PARAM_ARGS (MAX_OPC_PARAM_IARGS + MAX_OPC_PARAM_OARGS)
+
+/* A Call op needs up to 4 + 2N parameters on 32-bit archs,
+ * and up to 4 + N parameters on 64-bit archs
+ * (N = number of input arguments + output arguments).  */
+#define MAX_OPC_PARAM (4 + (MAX_OPC_PARAM_PER_ARG * MAX_OPC_PARAM_ARGS))
 #define OPC_BUF_SIZE 2048
 #define OPC_MAX_SIZE (OPC_BUF_SIZE - MAX_OP_PER_INSTR)
 
@@ -416,7 +427,10 @@ extern void *io_mem_opaque[IO_MEM_NB_ENTRIES];
 void tlb_fill(CPUArchState *env1, target_ulong addr, int is_write, int mmu_idx,
               uintptr_t retaddr);
 
-#include "exec/softmmu_defs.h"
+uint8_t helper_ldb_cmmu(CPUArchState *env, target_ulong addr, int mmu_idx);
+uint16_t helper_ldw_cmmu(CPUArchState *env, target_ulong addr, int mmu_idx);
+uint32_t helper_ldl_cmmu(CPUArchState *env, target_ulong addr, int mmu_idx);
+uint64_t helper_ldq_cmmu(CPUArchState *env, target_ulong addr, int mmu_idx);
 
 #define ACCESS_TYPE (NB_MMU_MODES + 1)
 #define MEMSUFFIX _code
@@ -444,6 +458,7 @@ static inline tb_page_addr_t get_page_addr_code(CPUArchState *env1, target_ulong
     return addr;
 }
 #else
+/* cputlb.c */
 tb_page_addr_t get_page_addr_code(CPUArchState *env1, target_ulong addr);
 #endif
 

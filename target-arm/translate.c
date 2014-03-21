@@ -72,6 +72,7 @@ typedef struct DisasContext {
 } DisasContext;
 
 #include "translate-android.h"
+static uint32_t gen_opc_condexec_bits[OPC_BUF_SIZE];
 
 #if defined(CONFIG_USER_ONLY)
 #define IS_USER(s) 1
@@ -9824,7 +9825,7 @@ static inline void gen_intermediate_code_internal(CPUARMState *env,
                     tcg_ctx.gen_opc_instr_start[lj++] = 0;
             }
             tcg_ctx.gen_opc_pc[lj] = dc->pc;
-            tcg_ctx.gen_opc_condexec_bits[lj] = (dc->condexec_cond << 4) | (dc->condexec_mask >> 1);
+            gen_opc_condexec_bits[lj] = (dc->condexec_cond << 4) | (dc->condexec_mask >> 1);
             tcg_ctx.gen_opc_instr_start[lj] = 1;
             tcg_ctx.gen_opc_icount[lj] = num_insns;
         }
@@ -10045,5 +10046,5 @@ void cpu_dump_state(CPUState *cpu, FILE *f, fprintf_function cpu_fprintf,
 void restore_state_to_opc(CPUARMState *env, TranslationBlock *tb, int pc_pos)
 {
     env->regs[15] = tcg_ctx.gen_opc_pc[pc_pos];
-    env->condexec_bits = tcg_ctx.gen_opc_condexec_bits[pc_pos];
+    env->condexec_bits = gen_opc_condexec_bits[pc_pos];
 }

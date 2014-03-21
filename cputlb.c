@@ -373,36 +373,3 @@ tb_page_addr_t get_page_addr_code(CPUArchState *env1, target_ulong addr)
 
 #define SHIFT 3
 #include "exec/softmmu_template.h"
-
-// TODO(digit): Remove this once TCG is upgraded.
-uint8_t REGPARM __ldb_mmu(target_ulong addr, int mmu_idx) {
-    return helper_ldb_mmu(cpu_single_env, addr, mmu_idx);
-}
-
-void REGPARM __stb_mmu(target_ulong addr, uint8_t val, int mmu_idx) {
-    return helper_stb_mmu(cpu_single_env, addr, val, mmu_idx);
-}
-
-uint16_t REGPARM __ldw_mmu(target_ulong addr, int mmu_idx) {
-    return helper_ldw_mmu(cpu_single_env, addr, mmu_idx);
-}
-
-void REGPARM __stw_mmu(target_ulong addr, uint16_t val, int mmu_idx) {
-    return helper_stw_mmu(cpu_single_env, addr, val, mmu_idx);
-}
-
-uint32_t REGPARM __ldl_mmu(target_ulong addr, int mmu_idx) {
-    return helper_ldl_mmu(cpu_single_env, addr, mmu_idx);
-}
-
-void REGPARM __stl_mmu(target_ulong addr, uint32_t val, int mmu_idx) {
-    return helper_stl_mmu(cpu_single_env, addr, val, mmu_idx);
-}
-
-uint64_t REGPARM __ldq_mmu(target_ulong addr, int mmu_idx) {
-    return helper_ldq_mmu(cpu_single_env, addr, mmu_idx);
-}
-
-void REGPARM __stq_mmu(target_ulong addr, uint64_t val, int mmu_idx) {
-    return helper_stq_mmu(cpu_single_env, addr, val, mmu_idx);
-}

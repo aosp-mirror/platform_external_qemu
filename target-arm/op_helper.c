@@ -17,7 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 #include "cpu.h"
-#include "exec/exec-all.h"
+#include "tcg.h"
 #include "helper.h"
 
 #define SIGNBIT (uint32_t)0x80000000
@@ -57,7 +57,6 @@ uint32_t HELPER(neon_tbl)(CPUARMState *env, uint32_t ireg, uint32_t def,
 
 #if !defined(CONFIG_USER_ONLY)
 
-#include "exec/softmmu_exec.h"
 
 #define MMUSUFFIX _mmu
 
@@ -471,14 +470,14 @@ void HELPER(neon_vldst_all)(CPUARMState *env, uint32_t insn)
 #define STQ(addr, val) stq(addr, val)
 #else
     int user = cpu_mmu_index(env);
-#define LDB(addr) slow_ldb_mmu(env, addr, user, GETPC())
-#define LDW(addr) slow_ldw_mmu(env, addr, user, GETPC())
-#define LDL(addr) slow_ldl_mmu(env, addr, user, GETPC())
-#define LDQ(addr) slow_ldq_mmu(env, addr, user, GETPC())
-#define STB(addr, val) slow_stb_mmu(env, addr, val, user, GETPC())
-#define STW(addr, val) slow_stw_mmu(env, addr, val, user, GETPC())
-#define STL(addr, val) slow_stl_mmu(env, addr, val, user, GETPC())
-#define STQ(addr, val) slow_stq_mmu(env, addr, val, user, GETPC())
+#define LDB(addr) helper_ldb_mmu(env, addr, user)
+#define LDW(addr) helper_le_lduw_mmu(env, addr, user, GETPC())
+#define LDL(addr) helper_le_ldul_mmu(env, addr, user, GETPC())
+#define LDQ(addr) helper_le_ldq_mmu(env, addr, user, GETPC())
+#define STB(addr, val) helper_stb_mmu(env, addr, val, user)
+#define STW(addr, val) helper_le_stw_mmu(env, addr, val, user, GETPC())
+#define STL(addr, val) helper_le_stl_mmu(env, addr, val, user, GETPC())
+#define STQ(addr, val) helper_le_stq_mmu(env, addr, val, user, GETPC())
 #endif
     static const struct {
         int nregs;
