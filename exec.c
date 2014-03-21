@@ -76,8 +76,8 @@ int64_t qemu_icount;
 static void io_mem_init(void);
 
 /* io memory support */
-CPUWriteMemoryFunc *io_mem_write[IO_MEM_NB_ENTRIES][4];
-CPUReadMemoryFunc *io_mem_read[IO_MEM_NB_ENTRIES][4];
+CPUWriteMemoryFunc *_io_mem_write[IO_MEM_NB_ENTRIES][4];
+CPUReadMemoryFunc *_io_mem_read[IO_MEM_NB_ENTRIES][4];
 void *io_mem_opaque[IO_MEM_NB_ENTRIES];
 static char io_mem_used[IO_MEM_NB_ENTRIES];
 int io_mem_watch;
@@ -1741,13 +1741,13 @@ static int subpage_register (subpage_t *mmio, uint32_t start, uint32_t end,
     memory >>= IO_MEM_SHIFT;
     for (; idx <= eidx; idx++) {
         for (i = 0; i < 4; i++) {
-            if (io_mem_read[memory][i]) {
-                mmio->mem_read[idx][i] = &io_mem_read[memory][i];
+            if (_io_mem_read[memory][i]) {
+                mmio->mem_read[idx][i] = &_io_mem_read[memory][i];
                 mmio->opaque[idx][0][i] = io_mem_opaque[memory];
                 mmio->region_offset[idx][0][i] = region_offset;
             }
-            if (io_mem_write[memory][i]) {
-                mmio->mem_write[idx][i] = &io_mem_write[memory][i];
+            if (_io_mem_write[memory][i]) {
+                mmio->mem_write[idx][i] = &_io_mem_write[memory][i];
                 mmio->opaque[idx][1][i] = io_mem_opaque[memory];
                 mmio->region_offset[idx][1][i] = region_offset;
             }
@@ -1818,8 +1818,8 @@ static int cpu_register_io_memory_fixed(int io_index,
     for(i = 0;i < 3; i++) {
         if (!mem_read[i] || !mem_write[i])
             subwidth = IO_MEM_SUBWIDTH;
-        io_mem_read[io_index][i] = mem_read[i];
-        io_mem_write[io_index][i] = mem_write[i];
+        _io_mem_read[io_index][i] = mem_read[i];
+        _io_mem_write[io_index][i] = mem_write[i];
     }
     io_mem_opaque[io_index] = opaque;
     return (io_index << IO_MEM_SHIFT) | subwidth;
@@ -1838,8 +1838,8 @@ void cpu_unregister_io_memory(int io_table_address)
     int io_index = io_table_address >> IO_MEM_SHIFT;
 
     for (i=0;i < 3; i++) {
-        io_mem_read[io_index][i] = unassigned_mem_read[i];
-        io_mem_write[io_index][i] = unassigned_mem_write[i];
+        _io_mem_read[io_index][i] = unassigned_mem_read[i];
+        _io_mem_write[io_index][i] = unassigned_mem_write[i];
     }
     io_mem_opaque[io_index] = NULL;
     io_mem_used[io_index] = 0;
@@ -1950,17 +1950,17 @@ void cpu_physical_memory_rw(hwaddr addr, void *buf,
                 if (l >= 4 && ((addr1 & 3) == 0)) {
                     /* 32 bit write access */
                     val = ldl_p(buf8);
-                    io_mem_write[io_index][2](io_mem_opaque[io_index], addr1, val);
+                    io_mem_write(io_index, addr1, val, 4);
                     l = 4;
                 } else if (l >= 2 && ((addr1 & 1) == 0)) {
                     /* 16 bit write access */
                     val = lduw_p(buf8);
-                    io_mem_write[io_index][1](io_mem_opaque[io_index], addr1, val);
+                    io_mem_write(io_index, addr1, val, 2);
                     l = 2;
                 } else {
                     /* 8 bit write access */
                     val = ldub_p(buf8);
-                    io_mem_write[io_index][0](io_mem_opaque[io_index], addr1, val);
+                    io_mem_write(io_index, addr1, val, 1);
                     l = 1;
                 }
             } else {
@@ -1981,17 +1981,17 @@ void cpu_physical_memory_rw(hwaddr addr, void *buf,
                     addr1 = (addr & ~TARGET_PAGE_MASK) + p->region_offset;
                 if (l >= 4 && ((addr1 & 3) == 0)) {
                     /* 32 bit read access */
-                    val = io_mem_read[io_index][2](io_mem_opaque[io_index], addr1);
+                    val = io_mem_read(io_index, addr1, 4);
                     stl_p(buf8, val);
                     l = 4;
                 } else if (l >= 2 && ((addr1 & 1) == 0)) {
                     /* 16 bit read access */
-                    val = io_mem_read[io_index][1](io_mem_opaque[io_index], addr1);
+                    val = io_mem_read(io_index, addr1, 2);
                     stw_p(buf8, val);
                     l = 2;
                 } else {
                     /* 8 bit read access */
-                    val = io_mem_read[io_index][0](io_mem_opaque[io_index], addr1);
+                    val = io_mem_read(io_index, addr1, 1);
                     stb_p(buf8, val);
                     l = 1;
                 }
@@ -2210,7 +2210,7 @@ static inline uint32_t ldl_phys_internal(hwaddr addr,
         io_index = (pd >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
         if (p)
             addr = (addr & ~TARGET_PAGE_MASK) + p->region_offset;
-        val = io_mem_read[io_index][2](io_mem_opaque[io_index], addr);
+        val = io_mem_read(io_index, addr, 4);
 #if defined(TARGET_WORDS_BIGENDIAN)
         if (endian == DEVICE_LITTLE_ENDIAN) {
             val = bswap32(val);
@@ -2281,11 +2281,11 @@ static inline uint64_t ldq_phys_internal(hwaddr addr,
         /* XXX This is broken when device endian != cpu endian.
                Fix and add "endian" variable check */
 #ifdef TARGET_WORDS_BIGENDIAN
-        val = (uint64_t)io_mem_read[io_index][2](io_mem_opaque[io_index], addr) << 32;
-        val |= io_mem_read[io_index][2](io_mem_opaque[io_index], addr + 4);
+        val = (uint64_t)io_mem_read(io_index, addr, 4) << 32;
+        val |= io_mem_read(io_index, addr + 4, 4);
 #else
-        val = io_mem_read[io_index][2](io_mem_opaque[io_index], addr);
-        val |= (uint64_t)io_mem_read[io_index][2](io_mem_opaque[io_index], addr + 4) << 32;
+        val = io_mem_read(io_index, addr, 4);
+        val |= (uint64_t)io_mem_read(io_index, addr + 4, 4) << 32;
 #endif
     } else {
         /* RAM case */
@@ -2352,7 +2352,7 @@ static inline uint32_t lduw_phys_internal(hwaddr addr,
         io_index = (pd >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
         if (p)
             addr = (addr & ~TARGET_PAGE_MASK) + p->region_offset;
-        val = io_mem_read[io_index][1](io_mem_opaque[io_index], addr);
+        val = io_mem_read(io_index, addr, 2);
 #if defined(TARGET_WORDS_BIGENDIAN)
         if (endian == DEVICE_LITTLE_ENDIAN) {
             val = bswap16(val);
@@ -2417,7 +2417,7 @@ void stl_phys_notdirty(hwaddr addr, uint32_t val)
         io_index = (pd >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
         if (p)
             addr = (addr & ~TARGET_PAGE_MASK) + p->region_offset;
-        io_mem_write[io_index][2](io_mem_opaque[io_index], addr, val);
+        io_mem_write(io_index, addr, val, 4);
     } else {
         unsigned long addr1 = (pd & TARGET_PAGE_MASK) + (addr & ~TARGET_PAGE_MASK);
         ptr = qemu_get_ram_ptr(addr1);
@@ -2454,11 +2454,11 @@ void stq_phys_notdirty(hwaddr addr, uint64_t val)
         if (p)
             addr = (addr & ~TARGET_PAGE_MASK) + p->region_offset;
 #ifdef TARGET_WORDS_BIGENDIAN
-        io_mem_write[io_index][2](io_mem_opaque[io_index], addr, val >> 32);
-        io_mem_write[io_index][2](io_mem_opaque[io_index], addr + 4, val);
+        io_mem_write(io_index, addr, val >> 32, 4);
+        io_mem_write(io_index, addr + 4, val, 4);
 #else
-        io_mem_write[io_index][2](io_mem_opaque[io_index], addr, val);
-        io_mem_write[io_index][2](io_mem_opaque[io_index], addr + 4, val >> 32);
+        io_mem_write(io_index, addr, val, 4);
+        io_mem_write(io_index, addr + 4, val >> 32, 4);
 #endif
     } else {
         ptr = qemu_get_ram_ptr(pd & TARGET_PAGE_MASK) +
@@ -2496,7 +2496,7 @@ static inline void stl_phys_internal(hwaddr addr, uint32_t val,
             val = bswap32(val);
         }
 #endif
-        io_mem_write[io_index][2](io_mem_opaque[io_index], addr, val);
+        io_mem_write(io_index, addr, val, 4);
     } else {
         unsigned long addr1;
         addr1 = (pd & TARGET_PAGE_MASK) + (addr & ~TARGET_PAGE_MASK);
@@ -2568,7 +2568,7 @@ static inline void stw_phys_internal(hwaddr addr, uint32_t val,
             val = bswap16(val);
         }
 #endif
-        io_mem_write[io_index][1](io_mem_opaque[io_index], addr, val);
+        io_mem_write(io_index, addr, val, 2);
     } else {
         unsigned long addr1;
         addr1 = (pd & TARGET_PAGE_MASK) + (addr & ~TARGET_PAGE_MASK);

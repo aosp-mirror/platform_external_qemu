@@ -406,8 +406,11 @@ void phys_mem_set_alloc(void *(*alloc)(size_t));
 
 TranslationBlock *tb_find_pc(uintptr_t pc_ptr);
 
-extern CPUWriteMemoryFunc *io_mem_write[IO_MEM_NB_ENTRIES][4];
-extern CPUReadMemoryFunc *io_mem_read[IO_MEM_NB_ENTRIES][4];
+uint64_t io_mem_read(int index, hwaddr addr, unsigned size);
+void io_mem_write(int index, hwaddr addr, uint64_t value, unsigned size);
+
+extern CPUWriteMemoryFunc *_io_mem_write[IO_MEM_NB_ENTRIES][4];
+extern CPUReadMemoryFunc *_io_mem_read[IO_MEM_NB_ENTRIES][4];
 extern void *io_mem_opaque[IO_MEM_NB_ENTRIES];
 
 void tlb_fill(CPUArchState *env1, target_ulong addr, int is_write, int mmu_idx,
