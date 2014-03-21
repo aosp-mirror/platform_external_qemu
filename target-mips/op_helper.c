@@ -113,10 +113,9 @@ void helper_interrupt_restart (void)
 }
 
 #if !defined(CONFIG_USER_ONLY)
-static void do_restore_state (void *pc_ptr)
+static void do_restore_state (uintptr_t pc)
 {
     TranslationBlock *tb;
-    unsigned long pc = (unsigned long) pc_ptr;
 
     tb = tb_find_pc (pc);
     if (tb) {
@@ -2055,7 +2054,8 @@ void helper_wait (void)
 
 #if !defined(CONFIG_USER_ONLY)
 
-static void do_unaligned_access (target_ulong addr, int is_write, int is_user, void *retaddr);
+static void do_unaligned_access (target_ulong addr, int is_write,
+                                 int is_user, uintptr_t retaddr);
 
 #define MMUSUFFIX _mmu
 #define ALIGNED_ONLY
@@ -2072,18 +2072,19 @@ static void do_unaligned_access (target_ulong addr, int is_write, int is_user, v
 #define SHIFT 3
 #include "exec/softmmu_template.h"
 
-static void do_unaligned_access (target_ulong addr, int is_write, int is_user, void *retaddr)
+static void do_unaligned_access (target_ulong addr, int is_write,
+                                 int is_user, uintptr_t retaddr)
 {
     env->CP0_BadVAddr = addr;
     do_restore_state (retaddr);
     helper_raise_exception ((is_write == 1) ? EXCP_AdES : EXCP_AdEL);
 }
 
-void tlb_fill (CPUMIPSState* env1, target_ulong addr, int is_write, int mmu_idx, void *retaddr)
+void tlb_fill (CPUMIPSState* env1, target_ulong addr, int is_write, int mmu_idx,
+               uintptr_t retaddr)
 {
     TranslationBlock *tb;
     CPUMIPSState *saved_env;
-    unsigned long pc;
     int ret;
 
     /* XXX: hack to restore env in all cases, even if not called from
@@ -2094,12 +2095,11 @@ void tlb_fill (CPUMIPSState* env1, target_ulong addr, int is_write, int mmu_idx,
     if (ret) {
         if (retaddr) {
             /* now we have a real cpu fault */
-            pc = (unsigned long)retaddr;
-            tb = tb_find_pc(pc);
+            tb = tb_find_pc(retaddr);
             if (tb) {
                 /* the PC is inside the translated code. It means that we have
                    a virtual CPU fault */
-                cpu_restore_state(env, pc);
+                cpu_restore_state(env, retaddr);
             }
         }
         helper_raise_exception_err(env->exception_index, env->error_code);
@@ -2125,8 +2125,8 @@ static unsigned long v2p_mmu(target_ulong addr, int is_user)
 {
     int index;
     target_ulong tlb_addr;
-    unsigned long physaddr;
-    void *retaddr;
+    hwaddr physaddr;
+    uintptr_t retaddr;
 
     index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
 redo:
@@ -2152,7 +2152,7 @@ unsigned long v2p(target_ulong ptr, int is_user)
     CPUMIPSState *saved_env;
     int index;
     target_ulong addr;
-    unsigned long physaddr;
+    hwaddr physaddr;
 
     saved_env = env;
     env = cpu_single_env;
@@ -2172,7 +2172,7 @@ unsigned long v2p(target_ulong ptr, int is_user)
 void vstrcpy(target_ulong ptr, char *buf, int max)
 {
     char *phys = 0;
-    unsigned long page = 0;
+    target_ulong page = 0;
 
     if (buf == NULL) return;
 

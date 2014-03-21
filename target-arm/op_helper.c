@@ -75,11 +75,11 @@ uint32_t HELPER(neon_tbl)(uint32_t ireg, uint32_t def,
    NULL, it means that the function was called in C code (i.e. not
    from generated code or from helper.c) */
 /* XXX: fix it to restore all registers */
-void tlb_fill (CPUARMState* env1, target_ulong addr, int is_write, int mmu_idx, void *retaddr)
+void tlb_fill (CPUARMState* env1, target_ulong addr, int is_write, int mmu_idx,
+               uintptr_t retaddr)
 {
     TranslationBlock *tb;
     CPUARMState *saved_env;
-    unsigned long pc;
     int ret;
 
     /* XXX: hack to restore env in all cases, even if not called from
@@ -90,12 +90,11 @@ void tlb_fill (CPUARMState* env1, target_ulong addr, int is_write, int mmu_idx, 
     if (unlikely(ret)) {
         if (retaddr) {
             /* now we have a real cpu fault */
-            pc = (unsigned long)retaddr;
-            tb = tb_find_pc(pc);
+            tb = tb_find_pc(retaddr);
             if (tb) {
                 /* the PC is inside the translated code. It means that we have
                    a virtual CPU fault */
-                cpu_restore_state(env, pc);
+                cpu_restore_state(env, retaddr);
             }
         }
         raise_exception(env->exception_index);
@@ -112,7 +111,7 @@ void HELPER(set_cp)(CPUARMState *env, uint32_t insn, uint32_t val)
 
     if (env->cp[cp_num].cp_write)
         env->cp[cp_num].cp_write(env->cp[cp_num].opaque,
-                                 cp_info, src, operand, val, GETPC());
+                                 cp_info, src, operand, val, (void*)GETPC());
         }
 
 uint32_t HELPER(get_cp)(CPUARMState *env, uint32_t insn)
@@ -124,7 +123,7 @@ uint32_t HELPER(get_cp)(CPUARMState *env, uint32_t insn)
 
     if (env->cp[cp_num].cp_read)
         return env->cp[cp_num].cp_read(env->cp[cp_num].opaque,
-                                       cp_info, dest, operand, GETPC());
+                                       cp_info, dest, operand, (void*)GETPC());
         return 0;
 }
 

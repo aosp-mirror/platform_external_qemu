@@ -4926,11 +4926,11 @@ static float approx_rcp(float a)
    NULL, it means that the function was called in C code (i.e. not
    from generated code or from helper.c) */
 /* XXX: fix it to restore all registers */
-void tlb_fill(CPUX86State* env1, target_ulong addr, int is_write, int mmu_idx, void *retaddr)
+void tlb_fill(CPUX86State* env1, target_ulong addr, int is_write, int mmu_idx,
+              uintptr_t retaddr)
 {
     TranslationBlock *tb;
     int ret;
-    unsigned long pc;
     CPUX86State *saved_env;
 
     /* XXX: hack to restore env in all cases, even if not called from
@@ -4941,12 +4941,11 @@ void tlb_fill(CPUX86State* env1, target_ulong addr, int is_write, int mmu_idx, v
     if (ret) {
         if (retaddr) {
             /* now we have a real cpu fault */
-            pc = (unsigned long)retaddr;
-            tb = tb_find_pc(pc);
+            tb = tb_find_pc(retaddr);
             if (tb) {
                 /* the PC is inside the translated code. It means that we have
                    a virtual CPU fault */
-                cpu_restore_state(env, pc);
+                cpu_restore_state(env, retaddr);
             }
         }
         raise_exception_err(env->exception_index, env->error_code);

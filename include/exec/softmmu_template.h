@@ -69,16 +69,16 @@
 
 static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
                                                         int mmu_idx,
-                                                        void *retaddr);
+                                                        uintptr_t retaddr);
 static inline DATA_TYPE glue(io_read, SUFFIX)(hwaddr physaddr,
                                               target_ulong addr,
-                                              void *retaddr)
+                                              uintptr_t retaddr)
 {
     DATA_TYPE res;
     int index;
     index = (physaddr >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
     physaddr = (physaddr & TARGET_PAGE_MASK) + addr;
-    env->mem_io_pc = (unsigned long)retaddr;
+    env->mem_io_pc = retaddr;
     if (index > (IO_MEM_NOTDIRTY >> IO_MEM_SHIFT)
             && !can_do_io(env)) {
         cpu_io_recompile(env, (uintptr_t)retaddr);
@@ -107,8 +107,7 @@ DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
     int index;
     target_ulong tlb_addr;
     hwaddr ioaddr;
-    unsigned long addend;
-    void *retaddr;
+    uintptr_t retaddr;
 #ifdef CONFIG_ANDROID_MEMCHECK_MMU
     int invalidate_cache = 0;
 #endif  // CONFIG_ANDROID_MEMCHECK_MMU
@@ -162,8 +161,9 @@ DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
                 do_unaligned_access(addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
             }
 #endif
-            addend = env->tlb_table[mmu_idx][index].addend;
-            res = glue(glue(ld, USUFFIX), _raw)((uint8_t *)(long)(addr+addend));
+            uintptr_t addend = env->tlb_table[mmu_idx][index].addend;
+            res = glue(glue(ld, USUFFIX), _raw)((uint8_t *)(intptr_t)
+                                                (addr+addend));
         }
 #ifdef CONFIG_ANDROID_MEMCHECK_MMU
         if (invalidate_cache) {
@@ -195,12 +195,11 @@ DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
 /* handle all unaligned cases */
 static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
                                                         int mmu_idx,
-                                                        void *retaddr)
+                                                        uintptr_t retaddr)
 {
     DATA_TYPE res, res1, res2;
     int index, shift;
     hwaddr ioaddr;
-    unsigned long addend;
     target_ulong tlb_addr, addr1, addr2;
 
     index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
@@ -231,8 +230,9 @@ static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
             res = (DATA_TYPE)res;
         } else {
             /* unaligned/aligned access in the same page */
-            addend = env->tlb_table[mmu_idx][index].addend;
-            res = glue(glue(ld, USUFFIX), _raw)((uint8_t *)(long)(addr+addend));
+            uintptr_t addend = env->tlb_table[mmu_idx][index].addend;
+            res = glue(glue(ld, USUFFIX), _raw)((uint8_t *)(intptr_t)
+                                                (addr + addend));
         }
     } else {
         /* the page is not in the TLB : fill it */
@@ -247,12 +247,12 @@ static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
 static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(target_ulong addr,
                                                    DATA_TYPE val,
                                                    int mmu_idx,
-                                                   void *retaddr);
+                                                   uintptr_t retaddr);
 
 static inline void glue(io_write, SUFFIX)(hwaddr physaddr,
                                           DATA_TYPE val,
                                           target_ulong addr,
-                                          void *retaddr)
+                                          uintptr_t retaddr)
 {
     int index;
     index = (physaddr >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
@@ -282,9 +282,8 @@ void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
                                                  int mmu_idx)
 {
     hwaddr ioaddr;
-    unsigned long addend;
     target_ulong tlb_addr;
-    void *retaddr;
+    uintptr_t retaddr;
     int index;
 #ifdef CONFIG_ANDROID_MEMCHECK_MMU
     int invalidate_cache = 0;
@@ -338,8 +337,9 @@ void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
                 do_unaligned_access(addr, 1, mmu_idx, retaddr);
             }
 #endif
-            addend = env->tlb_table[mmu_idx][index].addend;
-            glue(glue(st, SUFFIX), _raw)((uint8_t *)(long)(addr+addend), val);
+            uintptr_t addend = env->tlb_table[mmu_idx][index].addend;
+            glue(glue(st, SUFFIX), _raw)((uint8_t *)(intptr_t)
+                                         (addr + addend), val);
         }
 #ifdef CONFIG_ANDROID_MEMCHECK_MMU
         if (invalidate_cache) {
@@ -371,10 +371,9 @@ void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
 static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(target_ulong addr,
                                                    DATA_TYPE val,
                                                    int mmu_idx,
-                                                   void *retaddr)
+                                                   uintptr_t retaddr)
 {
     hwaddr ioaddr;
-    unsigned long addend;
     target_ulong tlb_addr;
     int index, i;
 
@@ -404,8 +403,9 @@ static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(target_ulong addr,
             }
         } else {
             /* aligned/unaligned access in the same page */
-            addend = env->tlb_table[mmu_idx][index].addend;
-            glue(glue(st, SUFFIX), _raw)((uint8_t *)(long)(addr+addend), val);
+            uintptr_t addend = env->tlb_table[mmu_idx][index].addend;
+            glue(glue(st, SUFFIX), _raw)((uint8_t *)(intptr_t)
+                                         (addr + addend), val);
         }
     } else {
         /* the page is not in the TLB : fill it */

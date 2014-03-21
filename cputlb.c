@@ -361,7 +361,7 @@ tb_page_addr_t get_page_addr_code(CPUArchState *env1, target_ulong addr)
 
 #define MMUSUFFIX _cmmu
 #undef GETPC
-#define GETPC() NULL
+#define GETPC() 0
 #define env cpu_single_env
 #define SOFTMMU_CODE_ACCESS
 
