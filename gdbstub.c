@@ -1650,7 +1650,7 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
             addr = strtoull(p, (char **)&p, 16);
             gdb_set_cpu_pc(s, addr);
         }
-        cpu_single_step(s->c_cpu, sstep_flags);
+        cpu_single_step(ENV_GET_CPU(s->c_cpu), sstep_flags);
         gdb_continue(s);
 	return RS_IDLE;
     case 'F':
@@ -1971,7 +1971,7 @@ static void gdb_vm_state_change(void *opaque, int running, int reason)
         return;
 
     /* disable single step if it was enable */
-    cpu_single_step(env, 0);
+    cpu_single_step(ENV_GET_CPU(env), 0);
 
     if (reason == EXCP_DEBUG) {
         if (env->watchpoint_hit) {

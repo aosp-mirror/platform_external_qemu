@@ -7805,7 +7805,7 @@ static inline void gen_intermediate_code_internal(CPUX86State *env,
     dc->cpl = (flags >> HF_CPL_SHIFT) & 3;
     dc->iopl = (flags >> IOPL_SHIFT) & 3;
     dc->tf = (flags >> TF_SHIFT) & 1;
-    dc->singlestep_enabled = env->singlestep_enabled;
+    dc->singlestep_enabled = ENV_GET_CPU(env)->singlestep_enabled;
     dc->cc_op = CC_OP_DYNAMIC;
     dc->cs_base = cs_base;
     dc->tb = tb;
@@ -7827,7 +7827,7 @@ static inline void gen_intermediate_code_internal(CPUX86State *env,
     dc->code64 = (flags >> HF_CS64_SHIFT) & 1;
 #endif
     dc->flags = flags;
-    dc->jmp_opt = !(dc->tf || env->singlestep_enabled ||
+    dc->jmp_opt = !(dc->tf || ENV_GET_CPU(env)->singlestep_enabled ||
                     (flags & HF_INHIBIT_IRQ_MASK)
 #ifndef CONFIG_SOFTMMU
                     || (flags & HF_SOFTMMU_MASK)

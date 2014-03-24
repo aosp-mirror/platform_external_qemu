@@ -327,7 +327,7 @@ int cpu_exec(CPUOldState *env)
             for(;;) {
                 interrupt_request = cpu->interrupt_request;
                 if (unlikely(need_handle_intr_request(env))) {
-                    if (unlikely(env->singlestep_enabled & SSTEP_NOIRQ)) {
+                    if (unlikely(cpu->singlestep_enabled & SSTEP_NOIRQ)) {
                         /* Mask out external interrupts for this step. */
                         interrupt_request &= ~CPU_INTERRUPT_SSTEP_MASK;
                     }

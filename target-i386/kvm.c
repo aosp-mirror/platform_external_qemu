@@ -900,7 +900,7 @@ int kvm_arch_debug(struct kvm_debug_exit_arch *arch_info)
 
     if (arch_info->exception == 1) {
         if (arch_info->dr6 & (1 << 14)) {
-            if (cpu_single_env->singlestep_enabled)
+            if (current_cpu->singlestep_enabled)
                 handle = 1;
         } else {
             for (n = 0; n < 4; n++)

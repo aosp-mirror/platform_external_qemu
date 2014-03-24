@@ -914,7 +914,7 @@ int kvm_update_guest_debug(CPUOldState *env, unsigned long reinject_trap)
     struct kvm_guest_debug dbg;
 
     dbg.control = 0;
-    if (env->singlestep_enabled)
+    if (ENV_GET_CPU(env)->singlestep_enabled)
         dbg.control = KVM_GUESTDBG_ENABLE | KVM_GUESTDBG_SINGLESTEP;
 
     kvm_arch_update_guest_debug(env, &dbg);

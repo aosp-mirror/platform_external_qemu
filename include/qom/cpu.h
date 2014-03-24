@@ -56,6 +56,7 @@ struct CPUState {
 
     void *env_ptr; /* CPUArchState */
     struct TranslationBlock *current_tb; /* currently executing TB  */
+    int singlestep_enabled;
     struct GDBRegisterState *gdb_regs;
     QTAILQ_ENTRY(CPUState) node;   /* next CPU sharing TB cache */
 
