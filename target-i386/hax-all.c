@@ -61,7 +61,9 @@ static int hax_prepare_emulation(CPUX86State *env)
  */
 static int hax_stop_tbloop(CPUX86State *env)
 {
-    switch (env->hax_vcpu->emulation_state)
+    CPUState *cpu = ENV_GET_CPU(env);
+
+    switch (cpu->hax_vcpu->emulation_state)
     {
         case HAX_EMULATE_STATE_MMIO:
             return 1;
@@ -72,7 +74,7 @@ static int hax_stop_tbloop(CPUX86State *env)
             break;
         default:
             dprint("Invalid emulation state in hax_sto_tbloop state %x\n",
-              env->hax_vcpu->emulation_state);
+                   cpu->hax_vcpu->emulation_state);
             break;
     }
 
@@ -83,7 +85,7 @@ int hax_stop_emulation(CPUX86State *env)
 {
     if (hax_stop_tbloop(env))
     {
-        env->hax_vcpu->emulation_state =  HAX_EMULATE_STATE_NONE;
+        ENV_GET_CPU(env)->hax_vcpu->emulation_state =  HAX_EMULATE_STATE_NONE;
         /*
          * QEMU emulation changes vcpu state,
          * Sync the vcpu state to HAX kernel module
@@ -99,7 +101,7 @@ int hax_stop_translate(CPUX86State *env)
 {
     struct hax_vcpu_state *vstate;
 
-    vstate = env->hax_vcpu;
+    vstate = ENV_GET_CPU(env)->hax_vcpu;
     assert(vstate->emulation_state);
     if (vstate->emulation_state == HAX_EMULATE_STATE_MMIO )
         return 1;
@@ -114,7 +116,7 @@ int valid_hax_tunnel_size(uint16_t size)
 
 hax_fd hax_vcpu_get_fd(CPUX86State *env)
 {
-    struct hax_vcpu_state *vcpu = env->hax_vcpu;
+    struct hax_vcpu_state *vcpu = ENV_GET_CPU(env)->hax_vcpu;
     if (!vcpu)
         return HAX_INVALID_FD;
     return vcpu->fd;
@@ -236,7 +238,7 @@ error:
 
 int hax_vcpu_destroy(CPUX86State *env)
 {
-    struct hax_vcpu_state *vcpu = env->hax_vcpu;
+    struct hax_vcpu_state *vcpu = ENV_GET_CPU(env)->hax_vcpu;
 
     if (!hax_global.vm)
     {
@@ -260,16 +262,17 @@ int hax_vcpu_destroy(CPUX86State *env)
 int hax_init_vcpu(CPUX86State *env)
 {
     int ret;
+    CPUState *cpu = ENV_GET_CPU(env);
 
-    ret = hax_vcpu_create(env->cpu_index);
+    ret = hax_vcpu_create(cpu->cpu_index);
     if (ret < 0)
     {
         dprint("Failed to create HAX vcpu\n");
         exit(-1);
     }
 
-    env->hax_vcpu = hax_global.vm->vcpus[env->cpu_index];
-    env->hax_vcpu->emulation_state = HAX_EMULATE_STATE_INITIAL;
+    cpu->hax_vcpu = hax_global.vm->vcpus[cpu->cpu_index];
+    cpu->hax_vcpu->emulation_state = HAX_EMULATE_STATE_INITIAL;
 
     return ret;
 }
@@ -469,7 +472,8 @@ int hax_handle_io(CPUX86State *env, uint32_t df, uint16_t port, int direction,
 
 static int hax_vcpu_interrupt(CPUX86State *env)
 {
-    struct hax_vcpu_state *vcpu = env->hax_vcpu;
+    CPUState *cpu = ENV_GET_CPU(env);
+    struct hax_vcpu_state *vcpu = cpu->hax_vcpu;
     struct hax_tunnel *ht = vcpu->tunnel;
 
     /*
@@ -477,11 +481,11 @@ static int hax_vcpu_interrupt(CPUX86State *env)
      * Unlike KVM, the HAX kernel module checks the eflags, instead.
      */
     if (ht->ready_for_interrupt_injection &&
-      (env->interrupt_request & CPU_INTERRUPT_HARD))
+      (cpu->interrupt_request & CPU_INTERRUPT_HARD))
     {
         int irq;
 
-        env->interrupt_request &= ~CPU_INTERRUPT_HARD;
+        cpu->interrupt_request &= ~CPU_INTERRUPT_HARD;
         irq = cpu_get_pic_interrupt(env);
         if (irq >= 0) {
             hax_inject_interrupt(env, irq);
@@ -494,7 +498,7 @@ static int hax_vcpu_interrupt(CPUX86State *env)
      * a return to userspace as soon as the guest is ready to receive
      * an interrupt.
      */
-    if ((env->interrupt_request & CPU_INTERRUPT_HARD))
+    if ((cpu->interrupt_request & CPU_INTERRUPT_HARD))
         ht->request_interrupt_window = 1;
     else
         ht->request_interrupt_window = 0;
@@ -503,7 +507,7 @@ static int hax_vcpu_interrupt(CPUX86State *env)
 
 void hax_raise_event(CPUX86State *env)
 {
-    struct hax_vcpu_state *vcpu = env->hax_vcpu;
+    struct hax_vcpu_state *vcpu = ENV_GET_CPU(env)->hax_vcpu;
 
     if (!vcpu)
         return;
@@ -524,7 +528,8 @@ extern void qemu_system_reset_request(void);
 static int hax_vcpu_hax_exec(CPUX86State *env)
 {
     int ret = 0;
-    struct hax_vcpu_state *vcpu = env->hax_vcpu;
+    CPUState *cpu = ENV_GET_CPU(env);
+    struct hax_vcpu_state *vcpu = cpu->hax_vcpu;
     struct hax_tunnel *ht = vcpu->tunnel;
 
     if (hax_vcpu_emulation_mode(env))
@@ -536,7 +541,7 @@ static int hax_vcpu_hax_exec(CPUX86State *env)
     do {
         int hax_ret;
 
-        if (env->exit_request) {
+        if (cpu->exit_request) {
             ret = HAX_EMUL_EXITLOOP ;
             break;
         }
@@ -591,11 +596,11 @@ static int hax_vcpu_hax_exec(CPUX86State *env)
                 ret = HAX_EMUL_EXITLOOP;
                 break;
             case HAX_EXIT_HLT:
-                if (!(env->interrupt_request & CPU_INTERRUPT_HARD) &&
-                  !(env->interrupt_request & CPU_INTERRUPT_NMI)) {
+                if (!(cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
+                  !(cpu->interrupt_request & CPU_INTERRUPT_NMI)) {
                     /* hlt instruction with interrupt disabled is shutdown */
                     env->eflags |= IF_MASK;
-                    env->halted = 1;
+                    cpu->halted = 1;
                     env->exception_index = EXCP_HLT;
                     ret = HAX_EMUL_HLT;
                 }
@@ -614,8 +619,8 @@ static int hax_vcpu_hax_exec(CPUX86State *env)
         }
     }while (!ret);
 
-    if (env->exit_request) {
-        env->exit_request = 0;
+    if (cpu->exit_request) {
+        cpu->exit_request = 0;
         env->exception_index = EXCP_INTERRUPT;
     }
     return ret;
@@ -628,22 +633,23 @@ int hax_vcpu_exec(CPUX86State *env)
 {
     int next = 0, ret = 0;
     struct hax_vcpu_state *vcpu;
+    CPUState *cpu = ENV_GET_CPU(env);
 
-    if (env->hax_vcpu->emulation_state != HAX_EMULATE_STATE_NONE)
+    if (cpu->hax_vcpu->emulation_state != HAX_EMULATE_STATE_NONE)
         return 1;
 
-    vcpu = env->hax_vcpu;
+    vcpu = cpu->hax_vcpu;
     next = hax_vcpu_hax_exec(env);
     switch (next)
     {
         case HAX_EMUL_ONE:
             ret = 1;
-            env->hax_vcpu->emulation_state = HAX_EMULATE_STATE_MMIO;
+            cpu->hax_vcpu->emulation_state = HAX_EMULATE_STATE_MMIO;
             hax_prepare_emulation(env);
             break;
         case HAX_EMUL_REAL:
             ret = 1;
-            env->hax_vcpu->emulation_state =
+            cpu->hax_vcpu->emulation_state =
               HAX_EMULATE_STATE_REAL;
             hax_prepare_emulation(env);
             break;
@@ -1049,7 +1055,7 @@ int hax_sync_vcpus(void)
         CPUState *cpu;
 
         CPU_FOREACH(cpu) {
-            int ret = hax_arch_set_registers(cpu);
+            int ret = hax_arch_set_registers(cpu->env_ptr);
             if (ret < 0) {
                 dprint("Failed to sync HAX vcpu context\n");
                 exit(1);

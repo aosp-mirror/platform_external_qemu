@@ -47,7 +47,7 @@ int tb_invalidated_flag;
 
 bool qemu_cpu_has_work(CPUOldState *env)
 {
-    return cpu_has_work(env);
+    return cpu_has_work(ENV_GET_CPU(env));
 }
 
 void cpu_loop_exit(CPUArchState* env)
@@ -222,12 +222,13 @@ volatile sig_atomic_t exit_request;
  */
 int need_handle_intr_request(CPUOldState *env)
 {
+    CPUState *cpu = ENV_GET_CPU(env);
 #ifdef CONFIG_HAX
     if (!hax_enabled() || hax_vcpu_emulation_mode(env))
-        return env->interrupt_request;
+        return cpu->interrupt_request;
     return 0;
 #else
-    return env->interrupt_request;
+    return cpu->interrupt_request;
 #endif
 }
 
@@ -237,19 +238,21 @@ int cpu_exec(CPUOldState *env)
     TranslationBlock *tb;
     uint8_t *tc_ptr;
     tcg_target_ulong next_tb;
+    CPUState *cpu = ENV_GET_CPU(env);
 
-    if (env->halted) {
-        if (!cpu_has_work(env)) {
+    if (cpu->halted) {
+        if (!cpu_has_work(cpu)) {
         return EXCP_HALTED;
         }
 
-        env->halted = 0;
+        cpu->halted = 0;
     }
 
-    cpu_single_env = env;
+    current_cpu = cpu;
+    //cpu_single_env = env;
 
     if (unlikely(exit_request)) {
-        env->exit_request = 1;
+        cpu->exit_request = 1;
     }
 
 #if defined(TARGET_I386)
@@ -322,14 +325,14 @@ int cpu_exec(CPUOldState *env)
 
             next_tb = 0; /* force lookup of first TB */
             for(;;) {
-                interrupt_request = env->interrupt_request;
+                interrupt_request = cpu->interrupt_request;
                 if (unlikely(need_handle_intr_request(env))) {
                     if (unlikely(env->singlestep_enabled & SSTEP_NOIRQ)) {
                         /* Mask out external interrupts for this step. */
                         interrupt_request &= ~CPU_INTERRUPT_SSTEP_MASK;
                     }
                     if (interrupt_request & CPU_INTERRUPT_DEBUG) {
-                        env->interrupt_request &= ~CPU_INTERRUPT_DEBUG;
+                        cpu->interrupt_request &= ~CPU_INTERRUPT_DEBUG;
                         env->exception_index = EXCP_DEBUG;
                         cpu_loop_exit(env);
                     }
@@ -337,8 +340,8 @@ int cpu_exec(CPUOldState *env)
     defined(TARGET_PPC) || defined(TARGET_ALPHA) || defined(TARGET_CRIS) || \
     defined(TARGET_MICROBLAZE) || defined(TARGET_LM32) || defined(TARGET_UNICORE32)
                     if (interrupt_request & CPU_INTERRUPT_HALT) {
-                        env->interrupt_request &= ~CPU_INTERRUPT_HALT;
-                        env->halted = 1;
+                        cpu->interrupt_request &= ~CPU_INTERRUPT_HALT;
+                        cpu->halted = 1;
                         env->exception_index = EXCP_HLT;
                         cpu_loop_exit(env);
                     }
@@ -355,17 +358,17 @@ int cpu_exec(CPUOldState *env)
                         if ((interrupt_request & CPU_INTERRUPT_SMI) &&
                             !(env->hflags & HF_SMM_MASK)) {
                             svm_check_intercept(env, SVM_EXIT_SMI);
-                            env->interrupt_request &= ~CPU_INTERRUPT_SMI;
+                            cpu->interrupt_request &= ~CPU_INTERRUPT_SMI;
                             do_smm_enter(env);
                             next_tb = 0;
                         } else if ((interrupt_request & CPU_INTERRUPT_NMI) &&
                                    !(env->hflags2 & HF2_NMI_MASK)) {
-                            env->interrupt_request &= ~CPU_INTERRUPT_NMI;
+                            cpu->interrupt_request &= ~CPU_INTERRUPT_NMI;
                             env->hflags2 |= HF2_NMI_MASK;
                             do_interrupt_x86_hardirq(env, EXCP02_NMI, 1);
                             next_tb = 0;
 			} else if (interrupt_request & CPU_INTERRUPT_MCE) {
-                            env->interrupt_request &= ~CPU_INTERRUPT_MCE;
+                            cpu->interrupt_request &= ~CPU_INTERRUPT_MCE;
                             do_interrupt_x86_hardirq(env, EXCP12_MCHK, 0);
                             next_tb = 0;
                         } else if ((interrupt_request & CPU_INTERRUPT_HARD) &&
@@ -376,7 +379,7 @@ int cpu_exec(CPUOldState *env)
                                       !(env->hflags & HF_INHIBIT_IRQ_MASK))))) {
                             int intno;
                             svm_check_intercept(env, SVM_EXIT_INTR);
-                            env->interrupt_request &= ~(CPU_INTERRUPT_HARD | CPU_INTERRUPT_VIRQ);
+                            cpu->interrupt_request &= ~(CPU_INTERRUPT_HARD | CPU_INTERRUPT_VIRQ);
                             intno = cpu_get_pic_interrupt(env);
                             qemu_log_mask(CPU_LOG_TB_IN_ASM, "Servicing hardware INT=0x%02x\n", intno);
                             do_interrupt_x86_hardirq(env, intno, 1);
@@ -393,7 +396,7 @@ int cpu_exec(CPUOldState *env)
                             intno = ldl_phys(env->vm_vmcb + offsetof(struct vmcb, control.int_vector));
                             qemu_log_mask(CPU_LOG_TB_IN_ASM, "Servicing virtual hardware INT=0x%02x\n", intno);
                             do_interrupt_x86_hardirq(env, intno, 1);
-                            env->interrupt_request &= ~CPU_INTERRUPT_VIRQ;
+                            cpu->interrupt_request &= ~CPU_INTERRUPT_VIRQ;
                             next_tb = 0;
 #endif
                         }
@@ -526,15 +529,15 @@ int cpu_exec(CPUOldState *env)
 #endif
                    /* Don't use the cached interrupt_request value,
                       do_interrupt may have updated the EXITTB flag. */
-                    if (env->interrupt_request & CPU_INTERRUPT_EXITTB) {
-                        env->interrupt_request &= ~CPU_INTERRUPT_EXITTB;
+                    if (cpu->interrupt_request & CPU_INTERRUPT_EXITTB) {
+                        cpu->interrupt_request &= ~CPU_INTERRUPT_EXITTB;
                         /* ensure that no TB jump will be modified as
                            the program flow was changed */
                         next_tb = 0;
                     }
                 }
-                if (unlikely(env->exit_request)) {
-                    env->exit_request = 0;
+                if (unlikely(cpu->exit_request)) {
+                    cpu->exit_request = 0;
                     env->exception_index = EXCP_INTERRUPT;
                     cpu_loop_exit(env);
                 }
@@ -587,7 +590,7 @@ int cpu_exec(CPUOldState *env)
                    starting execution if there is a pending interrupt. */
                 env->current_tb = tb;
                 barrier();
-                if (likely(!env->exit_request)) {
+                if (likely(!cpu->exit_request)) {
                     tc_ptr = tb->tc_ptr;
                 /* execute the generated code */
                     next_tb = tcg_qemu_tb_exec(env, tc_ptr);
@@ -662,7 +665,7 @@ int cpu_exec(CPUOldState *env)
 #endif
 
     /* fail safe : never use cpu_single_env outside cpu_exec() */
-    cpu_single_env = NULL;
+    current_cpu = NULL;
     return ret;
 }
 

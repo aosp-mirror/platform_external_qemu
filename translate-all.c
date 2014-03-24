@@ -760,7 +760,7 @@ static void page_flush_tb(void)
 /* XXX: tb_flush is currently not thread safe */
 void tb_flush(CPUArchState *env1)
 {
-    CPUArchState *env;
+    CPUState *cpu;
 #if defined(DEBUG_FLUSH)
     printf("qemu: flush code_size=%ld nb_tbs=%d avg_tb_size=%ld\n",
            (unsigned long)(tcg_ctx.code_gen_ptr - tcg_ctx.code_gen_buffer),
@@ -774,7 +774,8 @@ void tb_flush(CPUArchState *env1)
     }
     tcg_ctx.tb_ctx.nb_tbs = 0;
 
-    CPU_FOREACH(env) {
+    CPU_FOREACH(cpu) {
+        CPUArchState *env = cpu->env_ptr;
 #ifdef CONFIG_ANDROID_MEMCHECK
         int tb_to_clean;
         for (tb_to_clean = 0; tb_to_clean < TB_JMP_CACHE_SIZE; tb_to_clean++) {
@@ -910,7 +911,7 @@ static inline void tb_reset_jump(TranslationBlock *tb, int n)
 /* invalidate one TB */
 void tb_phys_invalidate(TranslationBlock *tb, tb_page_addr_t page_addr)
 {
-    CPUArchState *env;
+    CPUState *cpu;
     PageDesc *p;
     unsigned int h, n1;
     tb_page_addr_t phys_pc;
@@ -937,7 +938,8 @@ void tb_phys_invalidate(TranslationBlock *tb, tb_page_addr_t page_addr)
 
     /* remove the TB from the hash list */
     h = tb_jmp_cache_hash_func(tb->pc);
-    CPU_FOREACH(env) {
+    CPU_FOREACH(cpu) {
+        CPUArchState *env = cpu->env_ptr;
         if (env->tb_jmp_cache[h] == tb) {
             env->tb_jmp_cache[h] = NULL;
         }
@@ -1096,7 +1098,8 @@ void tb_invalidate_phys_page_range(tb_page_addr_t start, tb_page_addr_t end,
                                    int is_cpu_write_access)
 {
     TranslationBlock *tb, *tb_next, *saved_tb;
-    CPUArchState *env = cpu_single_env;
+    CPUState *cpu = current_cpu;
+    CPUArchState *env = cpu->env_ptr;
     tb_page_addr_t tb_start, tb_end;
     PageDesc *p;
     int n;
@@ -1172,8 +1175,8 @@ void tb_invalidate_phys_page_range(tb_page_addr_t start, tb_page_addr_t end,
             tb_phys_invalidate(tb, -1);
             if (env) {
                 env->current_tb = saved_tb;
-                if (env->interrupt_request && env->current_tb) {
-                    cpu_interrupt(env, env->interrupt_request);
+                if (cpu->interrupt_request && env->current_tb) {
+                    cpu_interrupt(env, cpu->interrupt_request);
                 }
             }
         }
@@ -1471,9 +1474,9 @@ void tb_check_watchpoint(CPUArchState *env)
 
 #ifndef CONFIG_USER_ONLY
 /* mask must never be zero, except for A20 change call */
-void cpu_interrupt(CPUArchState *cpu, int mask)
+void cpu_interrupt(CPUArchState *env, int mask)
 {
-    CPUArchState *env = cpu;
+    CPUState *cpu = ENV_GET_CPU(env);
     int old_mask;
 
     old_mask = cpu->interrupt_request;

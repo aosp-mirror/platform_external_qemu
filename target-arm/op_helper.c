@@ -23,11 +23,13 @@
 #define SIGNBIT (uint32_t)0x80000000
 #define SIGNBIT64 ((uint64_t)1 << 63)
 
+#if !defined(CONFIG_USER_ONLY)
 static void raise_exception(CPUARMState *env, int tt)
 {
     env->exception_index = tt;
     cpu_loop_exit(env);
 }
+#endif
 
 uint32_t HELPER(neon_tbl)(CPUARMState *env, uint32_t ireg, uint32_t def,
                           uint32_t rn, uint32_t maxindex)
@@ -50,6 +52,8 @@ uint32_t HELPER(neon_tbl)(CPUARMState *env, uint32_t ireg, uint32_t def,
     }
     return val;
 }
+
+#undef env
 
 #if !defined(CONFIG_USER_ONLY)
 
@@ -262,7 +266,7 @@ uint32_t HELPER(usat16)(CPUARMState *env, uint32_t x, uint32_t shift)
 void HELPER(wfi)(CPUARMState *env)
 {
     env->exception_index = EXCP_HLT;
-    env->halted = 1;
+    ENV_GET_CPU(env)->halted = 1;
     cpu_loop_exit(env);
 }
 

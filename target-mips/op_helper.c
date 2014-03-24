@@ -663,7 +663,7 @@ void helper_sdr(CPUMIPSState *env, target_ulong arg1, target_ulong arg2,
 static CPUMIPSState *mips_cpu_map_tc(CPUMIPSState *env, int *tc)
 {
     CPUMIPSState *other;
-    int vpe_idx, nr_threads = env->nr_threads;
+    int vpe_idx, nr_threads = ENV_GET_CPU(env)->nr_threads;
     int tc_idx = *tc;
 
     if (!(env->CP0_VPEConf0 & (1 << CP0VPEC0_MVP))) {
@@ -2059,7 +2059,7 @@ void helper_pmon(CPUMIPSState *env, int function)
 
 void helper_wait(CPUMIPSState *env)
 {
-    env->halted = 1;
+    ENV_GET_CPU(env)->halted = 1;
     helper_raise_exception(env, EXCP_HLT);
 }
 

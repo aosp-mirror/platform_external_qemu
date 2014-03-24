@@ -125,25 +125,27 @@ void cpu_exec_init_all(unsigned long tb_size)
 static void cpu_common_save(QEMUFile *f, void *opaque)
 {
     CPUOldState *env = opaque;
+    CPUState *cpu = ENV_GET_CPU(env);
 
     cpu_synchronize_state(env, 0);
 
-    qemu_put_be32s(f, &env->halted);
-    qemu_put_be32s(f, &env->interrupt_request);
+    qemu_put_be32s(f, &cpu->halted);
+    qemu_put_be32s(f, &cpu->interrupt_request);
 }
 
 static int cpu_common_load(QEMUFile *f, void *opaque, int version_id)
 {
     CPUOldState *env = opaque;
+    CPUState *cpu = ENV_GET_CPU(env);
 
     if (version_id != CPU_COMMON_SAVE_VERSION)
         return -EINVAL;
 
-    qemu_get_be32s(f, &env->halted);
-    qemu_get_be32s(f, &env->interrupt_request);
+    qemu_get_be32s(f, &cpu->halted);
+    qemu_get_be32s(f, &cpu->interrupt_request);
     /* 0x01 was CPU_INTERRUPT_EXIT. This line can be removed when the
        version_id is increased. */
-    env->interrupt_request &= ~0x01;
+    cpu->interrupt_request &= ~0x01;
     tlb_flush(env, 1);
     cpu_synchronize_state(env, 1);
 
@@ -151,32 +153,34 @@ static int cpu_common_load(QEMUFile *f, void *opaque, int version_id)
 }
 #endif
 
-CPUArchState *qemu_get_cpu(int cpu)
+CPUArchState *qemu_get_cpu(int cpu_index)
 {
-    CPUState *env;
+    CPUState *cpu;
 
-    CPU_FOREACH(env) {
-        if (env->cpu_index == cpu)
+    CPU_FOREACH(cpu) {
+        if (cpu->cpu_index == cpu_index)
             break;
     }
-    return env;
+    return cpu ? cpu->env_ptr : NULL;
 }
 
 void cpu_exec_init(CPUArchState *env)
 {
+    CPUState *cpu = ENV_GET_CPU(env);
+
 #if defined(CONFIG_USER_ONLY)
     cpu_list_lock();
 #endif
     // Compute CPU index from list position.
     int cpu_index = 0;
-    CPUState *env1;
-    CPU_FOREACH(env1) {
+    CPUState *cpu1;
+    CPU_FOREACH(cpu1) {
         cpu_index++;
     }
-    env->cpu_index = cpu_index;
-    QTAILQ_INSERT_TAIL(&cpus, env, node);
+    cpu->cpu_index = cpu_index;
+    QTAILQ_INSERT_TAIL(&cpus, cpu, node);
 
-    env->numa_node = 0;
+    cpu->numa_node = 0;
     QTAILQ_INIT(&env->breakpoints);
     QTAILQ_INIT(&env->watchpoints);
 #if defined(CONFIG_USER_ONLY)
@@ -455,12 +459,14 @@ void cpu_unlink_tb(CPUOldState *env)
 
 void cpu_reset_interrupt(CPUOldState *env, int mask)
 {
-    env->interrupt_request &= ~mask;
+    CPUState *cpu = ENV_GET_CPU(env);
+    cpu->interrupt_request &= ~mask;
 }
 
 void cpu_exit(CPUOldState *env)
 {
-    env->exit_request = 1;
+    CPUState *cpu = ENV_GET_CPU(env);
+    cpu->exit_request = 1;
     cpu_unlink_tb(env);
 }
 
@@ -532,7 +538,6 @@ found:
 void cpu_physical_memory_reset_dirty(ram_addr_t start, ram_addr_t end,
                                      int dirty_flags)
 {
-    CPUOldState *env;
     unsigned long length, start1;
     int i;
 
@@ -554,12 +559,15 @@ void cpu_physical_memory_reset_dirty(ram_addr_t start, ram_addr_t end,
         abort();
     }
 
-    CPU_FOREACH(env) {
+    CPUState *cpu;
+    CPU_FOREACH(cpu) {
         int mmu_idx;
         for (mmu_idx = 0; mmu_idx < NB_MMU_MODES; mmu_idx++) {
-            for(i = 0; i < CPU_TLB_SIZE; i++)
+            for(i = 0; i < CPU_TLB_SIZE; i++) {
+                CPUArchState* env = cpu->env_ptr;
                 tlb_reset_dirty_range(&env->tlb_table[mmu_idx][i],
                                       start1, length);
+            }
         }
     }
 }
@@ -693,7 +701,7 @@ void cpu_register_physical_memory_log(hwaddr start_addr,
 {
     hwaddr addr, end_addr;
     PhysPageDesc *p;
-    CPUOldState *env;
+    CPUState *cpu;
     ram_addr_t orig_size = size;
     subpage_t *subpage;
 
@@ -770,8 +778,8 @@ void cpu_register_physical_memory_log(hwaddr start_addr,
     /* since each CPU stores ram addresses in its TLB cache, we must
        reset the modified entries */
     /* XXX: slow ! */
-    CPU_FOREACH(env) {
-        tlb_flush(env, 1);
+    CPU_FOREACH(cpu) {
+        tlb_flush(cpu->env_ptr, 1);
     }
 }
 

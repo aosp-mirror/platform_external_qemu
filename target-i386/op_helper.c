@@ -4784,7 +4784,7 @@ void helper_idivq_EAX(CPUX86State *env, target_ulong t0)
 static void do_hlt(CPUX86State *env)
 {
     env->hflags &= ~HF_INHIBIT_IRQ_MASK; /* needed if sti is just before */
-    env->halted = 1;
+    ENV_GET_CPU(env)->halted = 1;
     env->exception_index = EXCP_HLT;
     cpu_loop_exit(env);
 }
@@ -4813,7 +4813,8 @@ void helper_mwait(CPUX86State *env, int next_eip_addend)
     EIP += next_eip_addend;
 
     /* XXX: not complete but not completely erroneous */
-    if (env->cpu_index != 0 || QTAILQ_NEXT(env, node) != NULL) {
+    CPUState *cpu = ENV_GET_CPU(env);
+    if (cpu->cpu_index != 0 || QTAILQ_NEXT(cpu, node) != NULL) {
         /* more than one CPU: do not sleep because another CPU may
            wake this one */
     } else {
@@ -4935,19 +4936,13 @@ static float approx_rcp(float a)
 void tlb_fill(CPUX86State* env, target_ulong addr, int is_write, int mmu_idx,
               uintptr_t retaddr)
 {
-    TranslationBlock *tb;
     int ret;
 
     ret = cpu_x86_handle_mmu_fault(env, addr, is_write, mmu_idx);
     if (ret) {
         if (retaddr) {
             /* now we have a real cpu fault */
-            tb = tb_find_pc(retaddr);
-            if (tb) {
-                /* the PC is inside the translated code. It means that we have
-                   a virtual CPU fault */
-                cpu_restore_state(env, retaddr);
-            }
+            cpu_restore_state(env, retaddr);
         }
         raise_exception_err(env, env->exception_index, env->error_code);
     }
@@ -5157,7 +5152,7 @@ void helper_vmrun(CPUX86State *env, int aflag, int next_eip_addend)
     env->hflags2 |= HF2_GIF_MASK;
 
     if (int_ctl & V_IRQ_MASK) {
-        env->interrupt_request |= CPU_INTERRUPT_VIRQ;
+        ENV_GET_CPU(env)->interrupt_request |= CPU_INTERRUPT_VIRQ;
     }
 
     /* maybe we need to inject an event */
@@ -5392,7 +5387,6 @@ void svm_check_intercept(CPUArchState *env, uint32_t type)
     helper_svm_check_intercept_param(env, type, 0);
 }
 
-
 void helper_svm_check_io(CPUX86State *env,
                          uint32_t port, uint32_t param,
                          uint32_t next_eip_addend)
@@ -5453,7 +5447,7 @@ void helper_vmexit(CPUX86State *env,
     int_ctl = ldl_phys(env->vm_vmcb + offsetof(struct vmcb, control.int_ctl));
     int_ctl &= ~(V_TPR_MASK | V_IRQ_MASK);
     int_ctl |= env->v_tpr & V_TPR_MASK;
-    if (env->interrupt_request & CPU_INTERRUPT_VIRQ)
+    if (ENV_GET_CPU(env)->interrupt_request & CPU_INTERRUPT_VIRQ)
         int_ctl |= V_IRQ_MASK;
     stl_phys(env->vm_vmcb + offsetof(struct vmcb, control.int_ctl), int_ctl);
 
@@ -5470,7 +5464,7 @@ void helper_vmexit(CPUX86State *env,
     env->hflags &= ~HF_SVMI_MASK;
     env->intercept = 0;
     env->intercept_exceptions = 0;
-    env->interrupt_request &= ~CPU_INTERRUPT_VIRQ;
+    ENV_GET_CPU(env)->interrupt_request &= ~CPU_INTERRUPT_VIRQ;
     env->tsc_offset = 0;
 
     env->gdt.base  = ldq_phys(env->vm_hsave + offsetof(struct vmcb, save.gdtr.base));

@@ -481,7 +481,7 @@ void apic_init_reset(CPUOldState *env)
     s->next_time = 0;
     s->wait_for_sipi = 1;
 
-    env->halted = !(s->apicbase & MSR_IA32_APICBASE_BSP);
+    ENV_GET_CPU(env)->halted = !(s->apicbase & MSR_IA32_APICBASE_BSP);
 }
 
 static void apic_startup(APICState *s, int vector_num)
@@ -502,7 +502,7 @@ void apic_sipi(CPUOldState *env)
     env->eip = 0;
     cpu_x86_load_seg_cache(env, R_CS, s->sipi_vector << 8, s->sipi_vector << 12,
                            0xffff, 0);
-    env->halted = 0;
+    ENV_GET_CPU(env)->halted = 0;
     s->wait_for_sipi = 0;
 }
 
