@@ -206,10 +206,8 @@ int kvm_sync_vcpus(void)
 {
     CPUOldState *env;
 
-    for (env = first_cpu; env != NULL; env = env->next_cpu) {
-        int ret;
-
-        ret = kvm_arch_put_registers(env);
+    CPU_FOREACH(env) {
+        int ret = kvm_arch_put_registers(env);
         if (ret)
             return ret;
     }
@@ -955,7 +953,7 @@ int kvm_insert_breakpoint(CPUOldState *current_env, target_ulong addr,
             return err;
     }
 
-    for (env = first_cpu; env != NULL; env = env->next_cpu) {
+    CPU_FOREACH(env) {
         err = kvm_update_guest_debug(env, 0);
         if (err)
             return err;
@@ -992,7 +990,7 @@ int kvm_remove_breakpoint(CPUOldState *current_env, target_ulong addr,
             return err;
     }
 
-    for (env = first_cpu; env != NULL; env = env->next_cpu) {
+    CPU_FOREACH(env) {
         err = kvm_update_guest_debug(env, 0);
         if (err)
             return err;
@@ -1009,7 +1007,7 @@ void kvm_remove_all_breakpoints(CPUOldState *current_env)
     QTAILQ_FOREACH_SAFE(bp, &s->kvm_sw_breakpoints, entry, next) {
         if (kvm_arch_remove_sw_breakpoint(current_env, bp) != 0) {
             /* Try harder to find a CPU that currently sees the breakpoint. */
-            for (env = first_cpu; env != NULL; env = env->next_cpu) {
+            CPU_FOREACH(env) {
                 if (kvm_arch_remove_sw_breakpoint(env, bp) == 0)
                     break;
             }
@@ -1017,8 +1015,9 @@ void kvm_remove_all_breakpoints(CPUOldState *current_env)
     }
     kvm_arch_remove_all_hw_breakpoints();
 
-    for (env = first_cpu; env != NULL; env = env->next_cpu)
+    CPU_FOREACH(env) {
         kvm_update_guest_debug(env, 0);
+    }
 }
 
 #else /* !KVM_CAP_SET_GUEST_DEBUG */

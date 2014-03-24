@@ -43,13 +43,13 @@ static CPUOldState *next_cpu;
 void hw_error(const char *fmt, ...)
 {
     va_list ap;
-    CPUOldState *env;
+    CPUState *env;
 
     va_start(ap, fmt);
     fprintf(stderr, "qemu: hardware error: ");
     vfprintf(stderr, fmt, ap);
     fprintf(stderr, "\n");
-    for(env = first_cpu; env != NULL; env = env->next_cpu) {
+    CPU_FOREACH(env) {
         fprintf(stderr, "CPU #%d:\n", env->cpu_index);
 #ifdef TARGET_I386
         cpu_dump_state(env, stderr, fprintf, X86_DUMP_FPU);
@@ -80,26 +80,21 @@ static int cpu_can_run(CPUOldState *env)
     return 1;
 }
 
-static int internal_cpu_has_work(CPUOldState *env)
-{
-    if (env->stop)
-        return 1;
-    if (env->stopped)
-        return 0;
-    if (!env->halted)
-        return 1;
-    if (cpu_has_work(env))
-        return 1;
-    return 0;
-}
-
 int tcg_has_work(void)
 {
     CPUOldState *env;
 
-    for (env = first_cpu; env != NULL; env = env->next_cpu)
-        if (internal_cpu_has_work(env))
+    CPU_FOREACH(env) {
+        if (env->stop)
             return 1;
+        if (env->stopped)
+            return 0;
+        if (!env->halted)
+            return 1;
+        if (cpu_has_work(env))
+            return 1;
+        return 0;
+    }
     return 0;
 }
 
@@ -227,8 +222,8 @@ void tcg_cpu_exec(void)
     int ret = 0;
 
     if (next_cpu == NULL)
-        next_cpu = first_cpu;
-    for (; next_cpu != NULL; next_cpu = next_cpu->next_cpu) {
+        next_cpu = QTAILQ_FIRST(&cpus);
+    for (; next_cpu != NULL; next_cpu = QTAILQ_NEXT(next_cpu, node)) {
         CPUOldState *env = cur_cpu = next_cpu;
 
         if (!vm_running)

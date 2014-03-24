@@ -40,6 +40,7 @@
 #include "hw/qdev.h"
 #include "hw/xen/xen.h"
 #include "qemu/osdep.h"
+#include "qemu/tls.h"
 #include "sysemu/kvm.h"
 #include "exec/cputlb.h"
 #include "exec/hax.h"
@@ -60,10 +61,9 @@ static int in_migration;
 RAMList ram_list = { .blocks = QTAILQ_HEAD_INITIALIZER(ram_list.blocks) };
 #endif
 
-CPUArchState *first_cpu;
-/* current CPU in the current thread. It is only valid inside
-   cpu_exec() */
-CPUArchState *cpu_single_env;
+struct CPUTailQ cpus = QTAILQ_HEAD_INITIALIZER(cpus);
+DEFINE_TLS(CPUState *, current_cpu);
+
 /* 0 = Do not count executed instructions.
    1 = Precise instruction counting.
    2 = Adaptive rate instruction counting.  */
@@ -153,37 +153,32 @@ static int cpu_common_load(QEMUFile *f, void *opaque, int version_id)
 
 CPUArchState *qemu_get_cpu(int cpu)
 {
-    CPUArchState *env = first_cpu;
+    CPUState *env;
 
-    while (env) {
+    CPU_FOREACH(env) {
         if (env->cpu_index == cpu)
             break;
-        env = env->next_cpu;
     }
-
     return env;
 }
 
 void cpu_exec_init(CPUArchState *env)
 {
-    CPUArchState **penv;
-    int cpu_index;
-
 #if defined(CONFIG_USER_ONLY)
     cpu_list_lock();
 #endif
-    env->next_cpu = NULL;
-    penv = &first_cpu;
-    cpu_index = 0;
-    while (*penv != NULL) {
-        penv = &(*penv)->next_cpu;
+    // Compute CPU index from list position.
+    int cpu_index = 0;
+    CPUState *env1;
+    CPU_FOREACH(env1) {
         cpu_index++;
     }
     env->cpu_index = cpu_index;
+    QTAILQ_INSERT_TAIL(&cpus, env, node);
+
     env->numa_node = 0;
     QTAILQ_INIT(&env->breakpoints);
     QTAILQ_INIT(&env->watchpoints);
-    *penv = env;
 #if defined(CONFIG_USER_ONLY)
     cpu_list_unlock();
 #endif
@@ -559,7 +554,7 @@ void cpu_physical_memory_reset_dirty(ram_addr_t start, ram_addr_t end,
         abort();
     }
 
-    for(env = first_cpu; env != NULL; env = env->next_cpu) {
+    CPU_FOREACH(env) {
         int mmu_idx;
         for (mmu_idx = 0; mmu_idx < NB_MMU_MODES; mmu_idx++) {
             for(i = 0; i < CPU_TLB_SIZE; i++)
@@ -775,7 +770,7 @@ void cpu_register_physical_memory_log(hwaddr start_addr,
     /* since each CPU stores ram addresses in its TLB cache, we must
        reset the modified entries */
     /* XXX: slow ! */
-    for(env = first_cpu; env != NULL; env = env->next_cpu) {
+    CPU_FOREACH(env) {
         tlb_flush(env, 1);
     }
 }

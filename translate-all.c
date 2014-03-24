@@ -774,7 +774,7 @@ void tb_flush(CPUArchState *env1)
     }
     tcg_ctx.tb_ctx.nb_tbs = 0;
 
-    for(env = first_cpu; env != NULL; env = env->next_cpu) {
+    CPU_FOREACH(env) {
 #ifdef CONFIG_ANDROID_MEMCHECK
         int tb_to_clean;
         for (tb_to_clean = 0; tb_to_clean < TB_JMP_CACHE_SIZE; tb_to_clean++) {
@@ -937,7 +937,7 @@ void tb_phys_invalidate(TranslationBlock *tb, tb_page_addr_t page_addr)
 
     /* remove the TB from the hash list */
     h = tb_jmp_cache_hash_func(tb->pc);
-    for(env = first_cpu; env != NULL; env = env->next_cpu) {
+    CPU_FOREACH(env) {
         if (env->tb_jmp_cache[h] == tb) {
             env->tb_jmp_cache[h] = NULL;
         }

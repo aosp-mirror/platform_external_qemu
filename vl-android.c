@@ -4080,7 +4080,7 @@ int main(int argc, char **argv, char **envp)
         stralloc_reset(kernel_config);
     }
 
-    for (env = first_cpu; env != NULL; env = env->next_cpu) {
+    CPU_FOREACH(env) {
         for (i = 0; i < nb_numa_nodes; i++) {
             if (node_cpumask[i] & (1 << env->cpu_index)) {
                 env->numa_node = i;

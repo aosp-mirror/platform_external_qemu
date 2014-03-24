@@ -4813,7 +4813,7 @@ void helper_mwait(CPUX86State *env, int next_eip_addend)
     EIP += next_eip_addend;
 
     /* XXX: not complete but not completely erroneous */
-    if (env->cpu_index != 0 || env->next_cpu != NULL) {
+    if (env->cpu_index != 0 || QTAILQ_NEXT(env, node) != NULL) {
         /* more than one CPU: do not sleep because another CPU may
            wake this one */
     } else {
