@@ -176,7 +176,7 @@ static void goldfish_bus_write(void *opaque, hwaddr offset, uint32_t value)
         case PDEV_BUS_GET_NAME:
             if(s->current) {
                 target_ulong name = (target_ulong)(s->name_addr_high | value);
-                safe_memory_rw_debug(cpu_single_env, name, (void*)s->current->name, strlen(s->current->name), 1);
+                safe_memory_rw_debug(current_cpu, name, (void*)s->current->name, strlen(s->current->name), 1);
             }
             break;
         case PDEV_BUS_NAME_ADDR_HIGH:

@@ -795,9 +795,10 @@ int kvm_arch_handle_exit(CPUX86State *env, struct kvm_run *run)
 int kvm_arch_insert_sw_breakpoint(CPUX86State *env, struct kvm_sw_breakpoint *bp)
 {
     const static uint8_t int3 = 0xcc;
+    CPUState *cpu = ENV_GET_CPU(env);
 
-    if (cpu_memory_rw_debug(env, bp->pc, (uint8_t *)&bp->saved_insn, 1, 0) ||
-        cpu_memory_rw_debug(env, bp->pc, (uint8_t *)&int3, 1, 1))
+    if (cpu_memory_rw_debug(cpu, bp->pc, (uint8_t *)&bp->saved_insn, 1, 0) ||
+        cpu_memory_rw_debug(cpu, bp->pc, (uint8_t *)&int3, 1, 1))
         return -EINVAL;
     return 0;
 }
@@ -805,9 +806,10 @@ int kvm_arch_insert_sw_breakpoint(CPUX86State *env, struct kvm_sw_breakpoint *bp
 int kvm_arch_remove_sw_breakpoint(CPUX86State *env, struct kvm_sw_breakpoint *bp)
 {
     uint8_t int3;
+    CPUState *cpu = ENV_GET_CPU(env);
 
-    if (cpu_memory_rw_debug(env, bp->pc, &int3, 1, 0) || int3 != 0xcc ||
-        cpu_memory_rw_debug(env, bp->pc, (uint8_t *)&bp->saved_insn, 1, 1))
+    if (cpu_memory_rw_debug(cpu, bp->pc, &int3, 1, 0) || int3 != 0xcc ||
+        cpu_memory_rw_debug(cpu, bp->pc, (uint8_t *)&bp->saved_insn, 1, 1))
         return -EINVAL;
     return 0;
 }

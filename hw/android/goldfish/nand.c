@@ -404,7 +404,7 @@ static uint32_t nand_dev_read_file(nand_dev *dev, target_ulong data, uint64_t ad
         if(!eof) {
             read_len = do_read(dev->fd, dev->data, read_len);
         }
-        safe_memory_rw_debug(cpu_single_env, data, dev->data, read_len, 1);
+        safe_memory_rw_debug(current_cpu, data, dev->data, read_len, 1);
         data += read_len;
         len -= read_len;
     }
@@ -423,7 +423,7 @@ static uint32_t nand_dev_write_file(nand_dev *dev, target_ulong data, uint64_t a
     while(len > 0) {
         if(len < write_len)
             write_len = len;
-        safe_memory_rw_debug(cpu_single_env, data, dev->data, write_len, 0);
+        safe_memory_rw_debug(current_cpu, data, dev->data, write_len, 0);
         ret = do_write(dev->fd, dev->data, write_len);
         if(ret < write_len) {
             XLOG("nand_dev_write_file, write failed: %s\n", strerror(errno));
@@ -506,7 +506,7 @@ uint32_t nand_dev_do_cmd(nand_dev_controller_state *s, uint32_t cmd)
     case NAND_CMD_GET_DEV_NAME:
         if(size > dev->devname_len)
             size = dev->devname_len;
-        safe_memory_rw_debug(cpu_single_env, s->data, (uint8_t*)dev->devname, size, 1);
+        safe_memory_rw_debug(current_cpu, s->data, (uint8_t*)dev->devname, size, 1);
         return size;
     case NAND_CMD_READ_BATCH:
     case NAND_CMD_READ:
@@ -516,7 +516,7 @@ uint32_t nand_dev_do_cmd(nand_dev_controller_state *s, uint32_t cmd)
             size = dev->max_size - addr;
         if(dev->fd >= 0)
             return nand_dev_read_file(dev, s->data, addr, size);
-        safe_memory_rw_debug(cpu_single_env,s->data, &dev->data[addr], size, 1);
+        safe_memory_rw_debug(current_cpu, s->data, &dev->data[addr], size, 1);
         return size;
     case NAND_CMD_WRITE_BATCH:
     case NAND_CMD_WRITE:
@@ -528,7 +528,7 @@ uint32_t nand_dev_do_cmd(nand_dev_controller_state *s, uint32_t cmd)
             size = dev->max_size - addr;
         if(dev->fd >= 0)
             return nand_dev_write_file(dev, s->data, addr, size);
-        safe_memory_rw_debug(cpu_single_env,s->data, &dev->data[addr], size, 0);
+        safe_memory_rw_debug(current_cpu, s->data, &dev->data[addr], size, 0);
         return size;
     case NAND_CMD_ERASE_BATCH:
     case NAND_CMD_ERASE:

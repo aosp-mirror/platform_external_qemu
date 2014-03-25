@@ -2637,13 +2637,14 @@ void stq_be_phys(hwaddr addr, uint64_t val)
 #endif
 
 /* virtual memory access for debug (includes writing to ROM) */
-int cpu_memory_rw_debug(CPUOldState *env, target_ulong addr,
+int cpu_memory_rw_debug(CPUState *cpu, target_ulong addr,
                         void *buf, int len, int is_write)
 {
     int l;
     hwaddr phys_addr;
     target_ulong page;
     uint8_t* buf8 = (uint8_t*)buf;
+    CPUArchState *env = cpu->env_ptr;
 
     while (len > 0) {
         page = addr & TARGET_PAGE_MASK;

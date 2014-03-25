@@ -134,7 +134,7 @@ static void goldfish_tty_write(void *opaque, hwaddr offset, uint32_t value)
                             if (to_write > len)
                                 to_write = len;
 
-                            safe_memory_rw_debug(cpu_single_env, buf, (uint8_t*)temp, to_write, 0);
+                            safe_memory_rw_debug(current_cpu, buf, (uint8_t*)temp, to_write, 0);
                             qemu_chr_write(s->cs, (const uint8_t*)temp, to_write);
                             buf += to_write;
                             len -= to_write;
@@ -146,7 +146,7 @@ static void goldfish_tty_write(void *opaque, hwaddr offset, uint32_t value)
                 case TTY_CMD_READ_BUFFER:
                     if(s->ptr_len > s->data_count)
                         cpu_abort (cpu_single_env, "goldfish_tty_write: reading more data than available %d %d\n", s->ptr_len, s->data_count);
-                    safe_memory_rw_debug(cpu_single_env, s->ptr, s->data, s->ptr_len,1);
+                    safe_memory_rw_debug(current_cpu, s->ptr, s->data, s->ptr_len,1);
                     //printf("goldfish_tty_write: read %d bytes to %llx\n", s->ptr_len, (unsigned long long)s->ptr);
                     if(s->data_count > s->ptr_len)
                         memmove(s->data, s->data + s->ptr_len, s->data_count - s->ptr_len);

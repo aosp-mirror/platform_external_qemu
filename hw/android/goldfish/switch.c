@@ -95,7 +95,7 @@ static void goldfish_switch_write(void *opaque, hwaddr offset, uint32_t value)
 
     switch(offset) {
         case SW_NAME_PTR:
-            safe_memory_rw_debug(cpu_single_env, value, (void*)s->name, strlen(s->name), 1);
+            safe_memory_rw_debug(current_cpu, value, (void*)s->name, strlen(s->name), 1);
             break;
 
         case SW_STATE:
