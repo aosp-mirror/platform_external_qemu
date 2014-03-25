@@ -127,7 +127,7 @@ static void cpu_common_save(QEMUFile *f, void *opaque)
     CPUOldState *env = opaque;
     CPUState *cpu = ENV_GET_CPU(env);
 
-    cpu_synchronize_state(env, 0);
+    cpu_synchronize_state(cpu, 0);
 
     qemu_put_be32s(f, &cpu->halted);
     qemu_put_be32s(f, &cpu->interrupt_request);
@@ -147,7 +147,7 @@ static int cpu_common_load(QEMUFile *f, void *opaque, int version_id)
        version_id is increased. */
     cpu->interrupt_request &= ~0x01;
     tlb_flush(env, 1);
-    cpu_synchronize_state(env, 1);
+    cpu_synchronize_state(cpu, 1);
 
     return 0;
 }

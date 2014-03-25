@@ -101,13 +101,11 @@ int tcg_has_work(void)
 
 void qemu_init_vcpu(CPUState *cpu)
 {
-    CPUArchState *env = cpu->env_ptr;
-
     if (kvm_enabled())
-        kvm_init_vcpu(env);
+        kvm_init_vcpu(cpu);
 #ifdef CONFIG_HAX
     if (hax_enabled())
-        hax_init_vcpu(env);
+        hax_init_vcpu(cpu->env_ptr);
 #endif
     return;
 }

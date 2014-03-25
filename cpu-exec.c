@@ -319,7 +319,7 @@ int cpu_exec(CPUOldState *env)
 #endif
 
             if (kvm_enabled()) {
-                kvm_cpu_exec(env);
+                kvm_cpu_exec(ENV_GET_CPU(env));
                 longjmp(env->jmp_env, 1);
             }
 
