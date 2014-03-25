@@ -158,9 +158,9 @@ static void pic_irq_request(void *opaque, int irq, int level)
         }
     } else {
         if (level)
-            cpu_interrupt(env, CPU_INTERRUPT_HARD);
+            cpu_interrupt(cpu, CPU_INTERRUPT_HARD);
         else
-            cpu_reset_interrupt(env, CPU_INTERRUPT_HARD);
+            cpu_reset_interrupt(cpu, CPU_INTERRUPT_HARD);
     }
 }
 
@@ -764,7 +764,7 @@ static void load_linux(hwaddr option_rom,
 static void main_cpu_reset(void *opaque)
 {
     CPUOldState *env = opaque;
-    cpu_reset(env);
+    cpu_reset(ENV_GET_CPU(env));
 }
 
 static const int ide_iobase[2] = { 0x1f0, 0x170 };

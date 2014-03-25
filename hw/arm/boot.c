@@ -46,7 +46,7 @@ static void main_cpu_reset(void *opaque)
 {
     CPUARMState *env = opaque;
 
-    cpu_reset(env);
+    cpu_reset(ENV_GET_CPU(env));
     if (env->boot_info)
         arm_load_kernel(env, (struct arm_boot_info*)env->boot_info);
 

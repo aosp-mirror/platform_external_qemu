@@ -293,13 +293,14 @@ static void cpu_reset_model_id(CPUARMState *env, uint32_t id)
     }
 }
 
-void cpu_reset(CPUARMState *env)
+void cpu_reset(CPUState *cpu)
 {
+    CPUARMState *env = cpu->env_ptr;
     uint32_t id;
 
     if (qemu_loglevel_mask(CPU_LOG_RESET)) {
-        qemu_log("CPU Reset (CPU %d)\n", ENV_GET_CPU(env)->cpu_index);
-        log_cpu_state(env, 0);
+        qemu_log("CPU Reset (CPU %d)\n", cpu->cpu_index);
+        log_cpu_state(cpu, 0);
     }
 
     id = env->cp15.c0_cpuid;
@@ -425,15 +426,16 @@ CPUARMState *cpu_arm_init(const char *cpu_model)
     env = &arm_cpu->env;
     ENV_GET_CPU(env)->env_ptr = env;
 
+    CPUState *cpu = ENV_GET_CPU(env);
     cpu_exec_init(env);
     if (!inited) {
         inited = 1;
         arm_translate_init();
     }
 
-    ENV_GET_CPU(env)->cpu_model_str = cpu_model;
+    cpu->cpu_model_str = cpu_model;
     env->cp15.c0_cpuid = id;
-    cpu_reset(env);
+    cpu_reset(cpu);
     if (arm_feature(env, ARM_FEATURE_NEON)) {
         gdb_register_coprocessor(env, vfp_gdb_get_reg, vfp_gdb_set_reg,
                                  51, "arm-neon.xml", 0);
@@ -444,7 +446,7 @@ CPUARMState *cpu_arm_init(const char *cpu_model)
         gdb_register_coprocessor(env, vfp_gdb_get_reg, vfp_gdb_set_reg,
                                  19, "arm-vfp.xml", 0);
     }
-    qemu_init_vcpu(env);
+    qemu_init_vcpu(cpu);
     return env;
 }
 
@@ -1867,7 +1869,7 @@ void HELPER(set_cp15)(CPUARMState *env, uint32_t insn, uint32_t val)
                 env->cp15.c15_threadid = val & 0xffff;
                 break;
             case 8: /* Wait-for-interrupt (deprecated).  */
-                cpu_interrupt(env, CPU_INTERRUPT_HALT);
+                cpu_interrupt(ENV_GET_CPU(env), CPU_INTERRUPT_HALT);
                 break;
             default:
                 goto bad_reg;

@@ -1176,7 +1176,7 @@ void tb_invalidate_phys_page_range(tb_page_addr_t start, tb_page_addr_t end,
             if (env) {
                 env->current_tb = saved_tb;
                 if (cpu->interrupt_request && env->current_tb) {
-                    cpu_interrupt(env, cpu->interrupt_request);
+                    cpu_interrupt(cpu, cpu->interrupt_request);
                 }
             }
         }
@@ -1474,9 +1474,9 @@ void tb_check_watchpoint(CPUArchState *env)
 
 #ifndef CONFIG_USER_ONLY
 /* mask must never be zero, except for A20 change call */
-void cpu_interrupt(CPUArchState *env, int mask)
+void cpu_interrupt(CPUState *cpu, int mask)
 {
-    CPUState *cpu = ENV_GET_CPU(env);
+    CPUArchState *env = cpu->env_ptr;
     int old_mask;
 
     old_mask = cpu->interrupt_request;
@@ -1486,7 +1486,7 @@ void cpu_interrupt(CPUArchState *env, int mask)
      * If called from iothread context, wake the target cpu in
      * case its halted.
      */
-    if (!qemu_cpu_self(cpu)) {
+    if (!qemu_cpu_is_self(cpu)) {
         qemu_cpu_kick(cpu);
         return;
     }

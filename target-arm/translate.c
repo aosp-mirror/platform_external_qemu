@@ -9989,9 +9989,10 @@ static const char *cpu_mode_names[16] = {
   "???", "???", "???", "und", "???", "???", "???", "sys"
 };
 
-void cpu_dump_state(CPUARMState *env, FILE *f, fprintf_function cpu_fprintf,
+void cpu_dump_state(CPUState *cpu, FILE *f, fprintf_function cpu_fprintf,
                     int flags)
 {
+    CPUARMState *env = cpu->env_ptr;
     int i;
 #if 0
     union {

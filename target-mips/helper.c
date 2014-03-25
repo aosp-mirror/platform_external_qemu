@@ -645,7 +645,7 @@ void do_interrupt (CPUMIPSState *env)
         env->active_tc.PC = (int32_t)0xBFC00480;
         break;
     case EXCP_RESET:
-        cpu_reset(env);
+        cpu_reset(ENV_GET_CPU(env));
         break;
     case EXCP_SRESET:
         env->CP0_Status |= (1 << CP0St_SR);

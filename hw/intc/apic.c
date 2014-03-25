@@ -138,6 +138,7 @@ static inline int get_bit(uint32_t *tab, int index)
 
 static void apic_local_deliver(CPUOldState *env, int vector)
 {
+    CPUState *cpu = ENV_GET_CPU(env);
     APICState *s = env->apic_state;
     uint32_t lvt = s->lvt[vector];
     int trigger_mode;
@@ -147,15 +148,15 @@ static void apic_local_deliver(CPUOldState *env, int vector)
 
     switch ((lvt >> 8) & 7) {
     case APIC_DM_SMI:
-        cpu_interrupt(env, CPU_INTERRUPT_SMI);
+        cpu_interrupt(cpu, CPU_INTERRUPT_SMI);
         break;
 
     case APIC_DM_NMI:
-        cpu_interrupt(env, CPU_INTERRUPT_NMI);
+        cpu_interrupt(cpu, CPU_INTERRUPT_NMI);
         break;
 
     case APIC_DM_EXTINT:
-        cpu_interrupt(env, CPU_INTERRUPT_HARD);
+        cpu_interrupt(cpu, CPU_INTERRUPT_HARD);
         break;
 
     case APIC_DM_FIXED:
@@ -182,7 +183,7 @@ void apic_deliver_pic_intr(CPUOldState *env, int level)
             reset_bit(s->irr, lvt & 0xff);
             /* fall through */
         case APIC_DM_EXTINT:
-            cpu_reset_interrupt(env, CPU_INTERRUPT_HARD);
+            cpu_reset_interrupt(ENV_GET_CPU(env), CPU_INTERRUPT_HARD);
             break;
         }
     }
@@ -239,18 +240,18 @@ static void apic_bus_deliver(const uint32_t *deliver_bitmask,
 
         case APIC_DM_SMI:
             foreach_apic(apic_iter, deliver_bitmask,
-                cpu_interrupt(apic_iter->cpu_env, CPU_INTERRUPT_SMI) );
+                cpu_interrupt(ENV_GET_CPU(apic_iter->cpu_env), CPU_INTERRUPT_SMI) );
             return;
 
         case APIC_DM_NMI:
             foreach_apic(apic_iter, deliver_bitmask,
-                cpu_interrupt(apic_iter->cpu_env, CPU_INTERRUPT_NMI) );
+                cpu_interrupt(ENV_GET_CPU(apic_iter->cpu_env), CPU_INTERRUPT_NMI) );
             return;
 
         case APIC_DM_INIT:
             /* normal INIT IPI sent to processors */
             foreach_apic(apic_iter, deliver_bitmask,
-                         cpu_interrupt(apic_iter->cpu_env, CPU_INTERRUPT_INIT) );
+                         cpu_interrupt(ENV_GET_CPU(apic_iter->cpu_env), CPU_INTERRUPT_INIT) );
             return;
 
         case APIC_DM_EXTINT:
@@ -365,7 +366,7 @@ static void apic_update_irq(APICState *s)
     ppr = apic_get_ppr(s);
     if (ppr && (irrv & 0xf0) <= (ppr & 0xf0))
         return;
-    cpu_interrupt(s->cpu_env, CPU_INTERRUPT_HARD);
+    cpu_interrupt(ENV_GET_CPU(s->cpu_env), CPU_INTERRUPT_HARD);
 }
 
 void apic_reset_irq_delivered(void)
@@ -487,14 +488,15 @@ void apic_init_reset(CPUOldState *env)
 static void apic_startup(APICState *s, int vector_num)
 {
     s->sipi_vector = vector_num;
-    cpu_interrupt(s->cpu_env, CPU_INTERRUPT_SIPI);
+    cpu_interrupt(ENV_GET_CPU(s->cpu_env), CPU_INTERRUPT_SIPI);
 }
 
 void apic_sipi(CPUOldState *env)
 {
+    CPUState *cpu = ENV_GET_CPU(env);
     APICState *s = env->apic_state;
 
-    cpu_reset_interrupt(env, CPU_INTERRUPT_SIPI);
+    cpu_reset_interrupt(cpu, CPU_INTERRUPT_SIPI);
 
     if (!s->wait_for_sipi)
         return;
@@ -502,7 +504,7 @@ void apic_sipi(CPUOldState *env)
     env->eip = 0;
     cpu_x86_load_seg_cache(env, R_CS, s->sipi_vector << 8, s->sipi_vector << 12,
                            0xffff, 0);
-    ENV_GET_CPU(env)->halted = 0;
+    cpu->halted = 0;
     s->wait_for_sipi = 0;
 }
 
@@ -908,7 +910,7 @@ static void apic_reset(void *opaque)
     s->apicbase = 0xfee00000 |
         (bsp ? MSR_IA32_APICBASE_BSP : 0) | MSR_IA32_APICBASE_ENABLE;
 
-    cpu_reset(s->cpu_env);
+    cpu_reset(ENV_GET_CPU(s->cpu_env));
     apic_init_reset(s->cpu_env);
 
     if (bsp) {

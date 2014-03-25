@@ -549,7 +549,7 @@ uint32_t do_arm_semihosting(CPUARMState *env)
         exit(0);
     default:
         fprintf(stderr, "qemu: Unsupported SemiHosting SWI 0x%02x\n", nr);
-        cpu_dump_state(env, stderr, fprintf, 0);
+        cpu_dump_state(ENV_GET_CPU(env), stderr, fprintf, 0);
         abort();
     }
 }

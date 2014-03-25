@@ -8317,7 +8317,7 @@ gen_intermediate_code_internal (CPUMIPSState *env, TranslationBlock *tb,
 #ifdef DEBUG_DISAS
     qemu_log_mask(CPU_LOG_TB_CPU, "------------------------------------------------\n");
     /* FIXME: This may print out stale hflags from env... */
-    log_cpu_state_mask(CPU_LOG_TB_CPU, env, 0);
+    log_cpu_state_mask(CPU_LOG_TB_CPU, ENV_GET_CPU(env), 0);
 #endif
     LOG_DISAS("\ntb %p idx %d hflags %04x\n", tb, ctx.mem_idx, ctx.hflags);
     gen_icount_start();
@@ -8503,10 +8503,11 @@ cpu_mips_check_sign_extensions (CPUMIPSState *env, FILE *f,
 }
 #endif
 
-void cpu_dump_state (CPUMIPSState *env, FILE *f,
+void cpu_dump_state (CPUState *cpu, FILE *f,
                      int (*cpu_fprintf)(FILE *f, const char *fmt, ...),
                      int flags)
 {
+    CPUMIPSState *env = cpu->env_ptr;
     int i;
 
     cpu_fprintf(f, "pc=0x" TARGET_FMT_lx " HI=0x" TARGET_FMT_lx " LO=0x" TARGET_FMT_lx " ds %04x " TARGET_FMT_lx " %d\n",
@@ -8604,16 +8605,18 @@ CPUMIPSState *cpu_mips_init (const char *cpu_model)
 #endif
     mvp_init(env, def);
     mips_tcg_init();
-    cpu_reset(env);
-    qemu_init_vcpu(env);
+    cpu_reset(cpu);
+    qemu_init_vcpu(cpu);
     return env;
 }
 
-void cpu_reset (CPUMIPSState *env)
+void cpu_reset(CPUState *cpu)
 {
+    CPUMIPSState *env = cpu->env_ptr;
+
     if (qemu_loglevel_mask(CPU_LOG_RESET)) {
-        qemu_log("CPU Reset (CPU %d)\n", ENV_GET_CPU(env)->cpu_index);
-        log_cpu_state(env, 0);
+        qemu_log("CPU Reset (CPU %d)\n", cpu->cpu_index);
+        log_cpu_state(cpu, 0);
     }
 
     memset(env, 0, offsetof(CPUMIPSState, breakpoints));

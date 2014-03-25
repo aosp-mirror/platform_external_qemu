@@ -99,9 +99,9 @@ int tcg_has_work(void)
     return 0;
 }
 
-void qemu_init_vcpu(void *_env)
+void qemu_init_vcpu(CPUState *cpu)
 {
-    CPUOldState *env = _env;
+    CPUArchState *env = cpu->env_ptr;
 
     if (kvm_enabled())
         kvm_init_vcpu(env);
@@ -112,9 +112,9 @@ void qemu_init_vcpu(void *_env)
     return;
 }
 
-int qemu_cpu_self(void *env)
+bool qemu_cpu_is_self(CPUState *cpu)
 {
-    return 1;
+    return true;
 }
 
 void resume_all_vcpus(void)
@@ -125,7 +125,7 @@ void pause_all_vcpus(void)
 {
 }
 
-void qemu_cpu_kick(void *env)
+void qemu_cpu_kick(CPUState *cpu)
 {
     return;
 }
@@ -140,7 +140,7 @@ void qemu_notify_event(void)
     CPUState *cpu = current_cpu;
 
     if (cpu) {
-        cpu_exit(cpu->env_ptr);
+        cpu_exit(cpu);
     /*
      * This is mainly for the Windows host, where the timer may be in
      * a different thread with vcpu. Thus the timer function needs to
