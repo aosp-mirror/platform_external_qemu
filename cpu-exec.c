@@ -224,7 +224,7 @@ int need_handle_intr_request(CPUOldState *env)
 {
     CPUState *cpu = ENV_GET_CPU(env);
 #ifdef CONFIG_HAX
-    if (!hax_enabled() || hax_vcpu_emulation_mode(env))
+    if (!hax_enabled() || hax_vcpu_emulation_mode(cpu))
         return cpu->interrupt_request;
     return 0;
 #else
@@ -314,12 +314,12 @@ int cpu_exec(CPUOldState *env)
             }
 
 #ifdef CONFIG_HAX
-            if (hax_enabled() && !hax_vcpu_exec(env))
+            if (hax_enabled() && !hax_vcpu_exec(cpu))
                 longjmp(env->jmp_env, 1);
 #endif
 
             if (kvm_enabled()) {
-                kvm_cpu_exec(ENV_GET_CPU(env));
+                kvm_cpu_exec(cpu);
                 longjmp(env->jmp_env, 1);
             }
 
@@ -624,7 +624,7 @@ int cpu_exec(CPUOldState *env)
                 }
                 env->current_tb = NULL;
 #ifdef CONFIG_HAX
-                if (hax_enabled() && hax_stop_emulation(env))
+                if (hax_enabled() && hax_stop_emulation(cpu))
                     cpu_loop_exit(env);
 #endif
                 /* reset soft MMU for next block (it can currently

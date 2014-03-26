@@ -150,7 +150,7 @@ void qemu_notify_event(void)
      */
 #ifdef CONFIG_HAX
         if (hax_enabled())
-            hax_raise_event(env);
+            hax_raise_event(cpu);
      } else {
 #ifdef _WIN32
          if(hax_enabled())

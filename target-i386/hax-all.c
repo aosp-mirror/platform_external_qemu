@@ -40,8 +40,9 @@ int hax_enabled()
 }
 
 /* Currently non-PG modes are emulated by QEMU */
-int hax_vcpu_emulation_mode(CPUX86State *env)
+int hax_vcpu_emulation_mode(CPUState *cpu)
 {
+    CPUX86State *env = cpu->env_ptr;
     return !(env->cr[0] & CR0_PG_MASK);
 }
 
@@ -51,7 +52,7 @@ static int hax_prepare_emulation(CPUX86State *env)
     tlb_flush(env, 1);
     tb_flush(env);
     /* Sync the vcpu state from hax kernel module */
-    hax_vcpu_sync_state(env, 0);
+    hax_vcpu_sync_state(ENV_GET_CPU(env), 0);
     return 0;
 }
 
@@ -59,49 +60,47 @@ static int hax_prepare_emulation(CPUX86State *env)
  * Check whether to break the translation block loop
  * Break tbloop after one MMIO emulation, or after finish emulation mode
  */
-static int hax_stop_tbloop(CPUX86State *env)
+static int hax_stop_tbloop(CPUState *cpu)
 {
-    CPUState *cpu = ENV_GET_CPU(env);
-
     switch (cpu->hax_vcpu->emulation_state)
     {
         case HAX_EMULATE_STATE_MMIO:
             return 1;
         case HAX_EMULATE_STATE_INITIAL:
         case HAX_EMULATE_STATE_REAL:
-            if (!hax_vcpu_emulation_mode(env))
+            if (!hax_vcpu_emulation_mode(cpu))
                 return 1;
             break;
         default:
             dprint("Invalid emulation state in hax_sto_tbloop state %x\n",
-                   cpu->hax_vcpu->emulation_state);
+              cpu->hax_vcpu->emulation_state);
             break;
     }
 
     return 0;
 }
 
-int hax_stop_emulation(CPUX86State *env)
+int hax_stop_emulation(CPUState *cpu)
 {
-    if (hax_stop_tbloop(env))
+    if (hax_stop_tbloop(cpu))
     {
-        ENV_GET_CPU(env)->hax_vcpu->emulation_state =  HAX_EMULATE_STATE_NONE;
+        cpu->hax_vcpu->emulation_state =  HAX_EMULATE_STATE_NONE;
         /*
          * QEMU emulation changes vcpu state,
          * Sync the vcpu state to HAX kernel module
          */
-        hax_vcpu_sync_state(env, 1);
+        hax_vcpu_sync_state(cpu, 1);
         return 1;
     }
 
     return 0;
 }
 
-int hax_stop_translate(CPUX86State *env)
+int hax_stop_translate(CPUState *cpu)
 {
     struct hax_vcpu_state *vstate;
 
-    vstate = ENV_GET_CPU(env)->hax_vcpu;
+    vstate = cpu->hax_vcpu;
     assert(vstate->emulation_state);
     if (vstate->emulation_state == HAX_EMULATE_STATE_MMIO )
         return 1;
@@ -114,9 +113,9 @@ int valid_hax_tunnel_size(uint16_t size)
     return size >= sizeof(struct hax_tunnel);
 }
 
-hax_fd hax_vcpu_get_fd(CPUX86State *env)
+hax_fd hax_vcpu_get_fd(CPUState *cpu)
 {
-    struct hax_vcpu_state *vcpu = ENV_GET_CPU(env)->hax_vcpu;
+    struct hax_vcpu_state *vcpu = cpu->hax_vcpu;
     if (!vcpu)
         return HAX_INVALID_FD;
     return vcpu->fd;
@@ -236,9 +235,9 @@ error:
     return -1;
 }
 
-int hax_vcpu_destroy(CPUX86State *env)
+int hax_vcpu_destroy(CPUState *cpu)
 {
-    struct hax_vcpu_state *vcpu = ENV_GET_CPU(env)->hax_vcpu;
+    struct hax_vcpu_state *vcpu = cpu->hax_vcpu;
 
     if (!hax_global.vm)
     {
@@ -259,10 +258,9 @@ int hax_vcpu_destroy(CPUX86State *env)
     return 0;
 }
 
-int hax_init_vcpu(CPUX86State *env)
+int hax_init_vcpu(CPUState *cpu)
 {
     int ret;
-    CPUState *cpu = ENV_GET_CPU(env);
 
     ret = hax_vcpu_create(cpu->cpu_index);
     if (ret < 0)
@@ -470,11 +468,11 @@ int hax_handle_io(CPUX86State *env, uint32_t df, uint16_t port, int direction,
     return 0;
 }
 
-static int hax_vcpu_interrupt(CPUX86State *env)
+static int hax_vcpu_interrupt(CPUState *cpu)
 {
-    CPUState *cpu = ENV_GET_CPU(env);
     struct hax_vcpu_state *vcpu = cpu->hax_vcpu;
     struct hax_tunnel *ht = vcpu->tunnel;
+    CPUX86State *env = cpu->env_ptr;
 
     /*
      * Try to inject an interrupt if the guest can accept it
@@ -488,7 +486,7 @@ static int hax_vcpu_interrupt(CPUX86State *env)
         cpu->interrupt_request &= ~CPU_INTERRUPT_HARD;
         irq = cpu_get_pic_interrupt(env);
         if (irq >= 0) {
-            hax_inject_interrupt(env, irq);
+            hax_inject_interrupt(cpu, irq);
         }
     }
 
@@ -505,9 +503,9 @@ static int hax_vcpu_interrupt(CPUX86State *env)
     return 0;
 }
 
-void hax_raise_event(CPUX86State *env)
+void hax_raise_event(CPUState *cpu)
 {
-    struct hax_vcpu_state *vcpu = ENV_GET_CPU(env)->hax_vcpu;
+    struct hax_vcpu_state *vcpu = cpu->hax_vcpu;
 
     if (!vcpu)
         return;
@@ -525,14 +523,14 @@ void hax_raise_event(CPUX86State *env)
  * 5. An unknown VMX-exit happens
  */
 extern void qemu_system_reset_request(void);
-static int hax_vcpu_hax_exec(CPUX86State *env)
+static int hax_vcpu_hax_exec(CPUState *cpu)
 {
     int ret = 0;
-    CPUState *cpu = ENV_GET_CPU(env);
+    CPUX86State *env = cpu->env_ptr;
     struct hax_vcpu_state *vcpu = cpu->hax_vcpu;
     struct hax_tunnel *ht = vcpu->tunnel;
 
-    if (hax_vcpu_emulation_mode(env))
+    if (hax_vcpu_emulation_mode(cpu))
     {
         dprint("Trying to vcpu execute at eip:%lx\n", env->eip);
         return  HAX_EMUL_EXITLOOP;
@@ -546,7 +544,7 @@ static int hax_vcpu_hax_exec(CPUX86State *env)
             break;
         }
 
-        hax_vcpu_interrupt(env);
+        hax_vcpu_interrupt(cpu);
 
         hax_ret = hax_vcpu_run(vcpu);
 
@@ -585,14 +583,14 @@ static int hax_vcpu_hax_exec(CPUX86State *env)
                 dprint("VCPU shutdown request\n");
                 qemu_system_reset_request();
                 hax_prepare_emulation(env);
-                cpu_dump_state(env, stderr, fprintf, 0);
+                cpu_dump_state(cpu, stderr, fprintf, 0);
                 ret = HAX_EMUL_EXITLOOP;
                 break;
             case HAX_EXIT_UNKNOWN_VMEXIT:
                 dprint("Unknown VMX exit %x from guest\n", ht->_exit_reason);
                 qemu_system_reset_request();
                 hax_prepare_emulation(env);
-                cpu_dump_state(env, stderr, fprintf, 0);
+                cpu_dump_state(cpu, stderr, fprintf, 0);
                 ret = HAX_EMUL_EXITLOOP;
                 break;
             case HAX_EXIT_HLT:
@@ -613,7 +611,7 @@ static int hax_vcpu_hax_exec(CPUX86State *env)
                 dprint("Unknow exit %x from hax\n", ht->_exit_status);
                 qemu_system_reset_request();
                 hax_prepare_emulation(env);
-                cpu_dump_state(env, stderr, fprintf, 0);
+                cpu_dump_state(cpu, stderr, fprintf, 0);
                 ret = HAX_EMUL_EXITLOOP;
                 break;
         }
@@ -629,17 +627,17 @@ static int hax_vcpu_hax_exec(CPUX86State *env)
 /*
  * return 1 when need to emulate, 0 when need to exit loop
  */
-int hax_vcpu_exec(CPUX86State *env)
+int hax_vcpu_exec(CPUState *cpu)
 {
     int next = 0, ret = 0;
     struct hax_vcpu_state *vcpu;
-    CPUState *cpu = ENV_GET_CPU(env);
+    CPUX86State *env = cpu->env_ptr;
 
     if (cpu->hax_vcpu->emulation_state != HAX_EMULATE_STATE_NONE)
         return 1;
 
     vcpu = cpu->hax_vcpu;
-    next = hax_vcpu_hax_exec(env);
+    next = hax_vcpu_hax_exec(cpu);
     switch (next)
     {
         case HAX_EMUL_ONE:
@@ -830,13 +828,14 @@ static int hax_setup_qemu_emulator(CPUX86State *env)
 
 static int hax_sync_vcpu_register(CPUX86State *env, int set)
 {
+    CPUState *cpu = ENV_GET_CPU(env);
     struct vcpu_state_t regs;
     int ret;
     memset(&regs, 0, sizeof(struct vcpu_state_t));
 
     if (!set)
     {
-        ret = hax_sync_vcpu_state(env, &regs, 0);
+        ret = hax_sync_vcpu_state(cpu, &regs, 0);
         if (ret < 0)
             return -1;
     }
@@ -874,7 +873,7 @@ static int hax_sync_vcpu_register(CPUX86State *env, int set)
 
     if (set)
     {
-        ret = hax_sync_vcpu_state(env, &regs, 1);
+        ret = hax_sync_vcpu_state(cpu, &regs, 1);
         if (ret < 0)
             return -1;
     }
@@ -902,7 +901,7 @@ static int hax_get_msrs(CPUX86State *env)
     msrs[n++].entry = MSR_IA32_SYSENTER_EIP;
     msrs[n++].entry = MSR_IA32_TSC;
     md.nr_msr = n;
-    ret = hax_sync_msr(env, &md, 0);
+    ret = hax_sync_msr(ENV_GET_CPU(env), &md, 0);
     if (ret < 0)
         return ret;
 
@@ -941,7 +940,7 @@ static int hax_set_msrs(CPUX86State *env)
     md.nr_msr = n;
     md.done = 0;
 
-    return hax_sync_msr(env, &md, 1);
+    return hax_sync_msr(ENV_GET_CPU(env), &md, 1);
 
 }
 
@@ -950,7 +949,7 @@ static int hax_get_fpu(CPUX86State *env)
     struct fx_layout fpu;
     int i, ret;
 
-    ret = hax_sync_fpu(env, &fpu, 0);
+    ret = hax_sync_fpu(ENV_GET_CPU(env), &fpu, 0);
     if (ret < 0)
         return ret;
 
@@ -987,11 +986,12 @@ static int hax_set_fpu(CPUX86State *env)
 
     fpu.mxcsr = env->mxcsr;
 
-    return hax_sync_fpu(env, &fpu, 1);
+    return hax_sync_fpu(ENV_GET_CPU(env), &fpu, 1);
 }
 
-int hax_arch_get_registers(CPUX86State *env)
+int hax_arch_get_registers(CPUState *cpu)
 {
+    CPUX86State *env = cpu->env_ptr;
     int ret;
 
     ret = hax_sync_vcpu_register(env, 0);
@@ -1009,9 +1009,10 @@ int hax_arch_get_registers(CPUX86State *env)
     return 0;
 }
 
-static int hax_arch_set_registers(CPUX86State *env)
+static int hax_arch_set_registers(CPUState *cpu)
 {
     int ret;
+    CPUX86State *env = cpu->env_ptr;
     ret = hax_sync_vcpu_register(env, 1);
 
     if (ret < 0)
@@ -1035,13 +1036,13 @@ static int hax_arch_set_registers(CPUX86State *env)
     return 0;
 }
 
-void hax_vcpu_sync_state(CPUX86State *env, int modified)
+void hax_vcpu_sync_state(CPUState *cpu, int modified)
 {
     if (hax_enabled()) {
         if (modified)
-            hax_arch_set_registers(env);
+            hax_arch_set_registers(cpu);
         else
-            hax_arch_get_registers(env);
+            hax_arch_get_registers(cpu);
     }
 }
 
@@ -1055,7 +1056,7 @@ int hax_sync_vcpus(void)
         CPUState *cpu;
 
         CPU_FOREACH(cpu) {
-            int ret = hax_arch_set_registers(cpu->env_ptr);
+            int ret = hax_arch_set_registers(cpu);
             if (ret < 0) {
                 dprint("Failed to sync HAX vcpu context\n");
                 exit(1);

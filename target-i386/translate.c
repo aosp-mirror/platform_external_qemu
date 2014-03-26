@@ -7893,7 +7893,7 @@ static inline void gen_intermediate_code_internal(CPUX86State *env,
         pc_ptr = disas_insn(env, dc, pc_ptr);
         num_insns++;
 #ifdef CONFIG_HAX
-        if (hax_enabled() && hax_stop_translate(env))
+        if (hax_enabled() && hax_stop_translate(ENV_GET_CPU(env)))
         {
             gen_jmp_im(pc_ptr - dc->cs_base);
             gen_eob(dc);
