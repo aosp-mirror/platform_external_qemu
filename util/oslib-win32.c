@@ -205,3 +205,16 @@ qemu_get_local_state_pathname(const char *relative_pathname)
     return g_strdup_printf("%s" G_DIR_SEPARATOR_S "%s", base_path,
                            relative_pathname);
 }
+
+#ifdef CONFIG_ANDROID
+int ffs(int x) {
+    int result = 0;
+    unsigned ux = (unsigned)x;
+    while (ux) {
+        if (ux & 1)
+            return result + 1;
+        ux >>= 1;
+    }
+    return 0;
+}
+#endif

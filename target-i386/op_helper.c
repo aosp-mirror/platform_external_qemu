@@ -3420,9 +3420,14 @@ static void fpu_set_exception(int mask)
 
 static inline CPU86_LDouble helper_fdiv(CPU86_LDouble a, CPU86_LDouble b)
 {
-    if (b == 0.0)
+    // NOTE: work-around to prevent a mysterious crash
+    // This code will be replaced by better one in a future patch.
+    if (float64_is_zero(b)) {
         fpu_set_exception(FPUS_ZE);
-    return a / b;
+        return float64_div(a, b, &env->fp_status);
+    } else {
+        return a / b;
+    }
 }
 
 static void fpu_raise_exception(void)

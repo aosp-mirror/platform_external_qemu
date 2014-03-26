@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 // Print a panic message then exit the program immediately.
@@ -397,16 +398,24 @@ typedef struct {
 #define HASH_MIN_SHIFT  3
 #define HASH_MIN_CAPACITY  (1 << HASH_MIN_SHIFT)
 
+#define HASH_LOAD_SCALE 1024
+#define HASH_MIN_LOAD   256
+#define HASH_MAX_LOAD   768
+
 struct _GHashTable {
   int ref_count;
   int num_items;
   int num_used;  // count of items + tombstones
-  int shift;
   int capacity;
   GHashEntry* entries;
   GHashFunc hash_func;
   GEqualFunc key_equal_func;
 };
+
+// Default hash function for pointers.
+static guint _gpointer_hash(gconstpointer key) {
+    return (guint)(uintptr_t)key;
+}
 
 // Compute the hash value of a given key.
 static inline size_t
@@ -424,7 +433,7 @@ GHashTable* g_hash_table_new(GHashFunc hash_func,
   hash_table->num_items = 0;
   hash_table->capacity = HASH_MIN_CAPACITY;
   hash_table->entries = g_new0(GHashEntry, hash_table->capacity);
-  hash_table->hash_func = hash_func;
+  hash_table->hash_func = hash_func ? hash_func : &_gpointer_hash;
   hash_table->key_equal_func = key_equal_func;
 
   return hash_table;
@@ -552,7 +561,7 @@ gboolean g_hash_table_remove(GHashTable* hash_table,
 static void _g_hash_table_resize(GHashTable* hash_table) {
   guint old_capacity = hash_table->capacity;
 
-  // Compute new shift from new size
+  // Compute new capacity from new size
   guint new_size = hash_table->num_items * 2;
   guint new_capacity = HASH_MIN_CAPACITY;
   while (new_capacity < new_size)
@@ -587,11 +596,22 @@ static void _g_hash_table_resize(GHashTable* hash_table) {
 
 // Resize the hash table if needed.
 static void _g_hash_table_maybe_resize(GHashTable* hash_table) {
-  guint used = hash_table->num_used;
   guint count = hash_table->num_items;
   guint capacity = hash_table->capacity;
-  if ((capacity > count * 4 && capacity > HASH_MIN_CAPACITY) ||
-      capacity < used + (used / 16)) {
+  // Computations explained.
+  //
+  // load < min_load i.e.
+  // => used / capacity < min_load
+  // => used < min_load * capacity
+  // => used * HASH_SCALE < HASH_MIN_LOAD * capacity
+  //
+  // load > max_load
+  // => used / capacity > max_load
+  // => used * HASH_SCALER > HASH_MAX_LOAD * capacity
+  uint64_t load = (uint64_t)count * HASH_LOAD_SCALE;
+  uint64_t min_load = (uint64_t)capacity * HASH_MIN_LOAD;
+  uint64_t max_load = (uint64_t)capacity * HASH_MAX_LOAD;
+  if (load < min_load || load > max_load) {
     _g_hash_table_resize(hash_table);
   }
 }

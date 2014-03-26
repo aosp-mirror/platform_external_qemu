@@ -116,6 +116,14 @@ Each layout can have the following keys (and corresponding values):
             closed" and "keyboard opened" respectively, and would match a
             device like the T-Mobile G1 or the Verizon Droid.
 
+- 'onion' : Specifies an image to overlay on the display. Each such key may
+            contain the following sub-keys:
+            - 'image' [required]: Filename of image to overlay
+            - 'alpha' [optional]: How opaque the image should be, from 0 (not
+              visible at all) to 100 (fully opaque). Default is 50.
+            - 'rotation' [optional]: Integer in the 0..3 range, specifying the
+              rotation of the image in 90-degree increments.
+
 - 'part<n>': Individual part references for the layout. They are named
              in incremental numerical order, starting from 'part1', as in
              'part1', 'part2', 'part3', etc...
@@ -143,6 +151,8 @@ Each layout can have the following keys (and corresponding values):
              mode and will-auto-rotate the D-Pad value. This setting is used
              to counter-effect this correction for certain skins which
              do not rotate the DPad in landscape mode.
+
+
 
 Skin Parts:
 -----------

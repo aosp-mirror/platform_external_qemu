@@ -77,14 +77,22 @@ if [ "$MINGW" ]; then
 fi
 
 echo "Running 32-bit unit test suite."
-UNIT_TEST=objs/emulator_unittests$EXE_SUFFIX
-run $TEST_SHELL $UNIT_TEST ||
-panic "For details, run: $UNIT_TEST"
+FAILURES=""
+for UNIT_TEST in emulator_unittests emugl_common_host_unittests; do
+  echo "   - $UNIT_TEST"
+  run $TEST_SHELL objs/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
+done
 
 if [ "$RUN_64BIT_TESTS" ]; then
     echo "Running 64-bit unit test suite."
-    UNIT_TEST=objs/emulator64_unittests$EXE_SUFFIX
-    run $TEST_SHELL $UNIT_TEST || panic "For details, run: $UNIT_TEST"
+    for UNIT_TEST in emulator64_unittests emugl64_common_host_unittests; do
+        echo "   - $UNIT_TEST"
+        run $TEST_SHELL objs/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
+    done
+fi
+
+if [ "$FAILURES" ]; then
+    panic "Unit test failures: $FAILURES"
 fi
 
 echo "Done. !!"

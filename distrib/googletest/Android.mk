@@ -10,6 +10,7 @@
 ###  Android.mk there, define a module here instead.
 
 EMULATOR_GTEST_SOURCES_DIR ?= $(LOCAL_PATH)/../gtest
+EMULATOR_GTEST_SOURCES_DIR := $(EMULATOR_GTEST_SOURCES_DIR)
 ifeq (,$(strip $(wildcard $(EMULATOR_GTEST_SOURCES_DIR))))
     $(error Cannot find GoogleTest sources directory: $(EMULATOR_GTEST_SOURCES_DIR))
 endif
