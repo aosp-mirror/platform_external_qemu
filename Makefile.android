@@ -21,6 +21,7 @@ CONFIG_INCLUDES := $(CONFIG_DIRS:%=-I%)
 
 MY_CC  := $(HOST_CC)
 MY_CXX := $(HOST_CXX)
+MY_LD  := $(HOST_LD)
 MY_AR  := $(HOST_AR)
 
 MY_CFLAGS := $(CONFIG_INCLUDES) -O2 -g -fno-PIC -falign-functions=0 -fomit-frame-pointer
@@ -34,6 +35,7 @@ ifeq ($(BUILD_DEBUG_EMULATOR),true)
 endif
 
 MY_LDLIBS :=
+MY_LDFLAGS :=
 
 ifeq ($(HOST_OS),freebsd)
   MY_CFLAGS += -I /usr/local/include
@@ -74,6 +76,17 @@ ifeq ($(HOST_OS),darwin)
             MY_CFLAGS := $(filter-out -falign-functions=0,$(MY_CFLAGS))
         endif
     endif
+endif
+
+# NOTE: The following definitions are only used by the standalone build.
+MY_EXEEXT :=
+MY_DLLEXT := .so
+ifeq ($(HOST_OS),windows)
+  MY_EXEEXT := .exe
+  MY_DLLEXT := .dll
+endif
+ifeq ($(HOST_OS),darwin)
+  MY_DLLEXT := .dylib
 endif
 
 # Some CFLAGS below use -Wno-missing-field-initializers but this is not
@@ -121,11 +134,11 @@ endif
 ifneq ($(combo_target)$(TARGET_SIMULATOR),HOST_true)
   ifneq ($(BUILD_HOST_64bit),)
     MY_CFLAGS += -m64
-    MY_LDLIBS += -m64
+    MY_LDFLAGS += -m64
   else
     ifneq ($(HOST_ARCH),x86_64)
       MY_CFLAGS += -m32
-      MY_LDLIBS += -m32
+      MY_LDFLAGS += -m32
     endif
   endif
 
@@ -148,6 +161,12 @@ MY_CFLAGS += -I$(LOCAL_PATH)/include
 # android-configure.sh
 MY_CFLAGS += -I$(LOCAL_PATH)/qapi-auto-generated
 
+ifneq (true,$(BUILD_STANDALONE_EMULATOR))
+my-host-tool = $(MY_$1)
+else
+my-host-tool = $(if $(strip $(LOCAL_HOST_BUILD)),$(BUILD_$1),$(MY_$1))
+endif
+
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.
 # Usage:
@@ -161,16 +180,12 @@ MY_CFLAGS += -I$(LOCAL_PATH)/qapi-auto-generated
 start-emulator-library = \
     $(eval include $(CLEAR_VARS)) \
     $(eval LOCAL_NO_DEFAULT_COMPILER_FLAGS := true) \
-    $(eval LOCAL_CC := $(MY_CC)) \
-    $(eval LOCAL_CXX := $(MY_CXX)) \
-    $(eval LOCAL_CFLAGS := $(MY_CFLAGS)) \
-    $(eval LOCAL_AR := $(MY_AR)) \
-    $(eval LOCAL_LDLIBS := $(MY_LDLIBS)) \
     $(eval LOCAL_MODULE := $1) \
     $(eval LOCAL_MODULE_CLASS := STATIC_LIBRARIES)
 
 # Used with start-emulator-library
 end-emulator-library = \
+    $(eval $(end-emulator-module-ev)) \
     $(eval include $(BUILD_HOST_STATIC_LIBRARY))
 
 # A variant of start-emulator-library to start the definition of a host
@@ -182,8 +197,18 @@ start-emulator-program = \
 # A varient of end-emulator-library for host programs instead
 end-emulator-program = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
+    $(eval $(end-emulator-module-ev)) \
     $(eval include $(BUILD_HOST_EXECUTABLE))
 
+define end-emulator-module-ev
+LOCAL_CC := $$(call my-host-tool,CC)
+LOCAL_CXX := $$(call my-host-tool,CXX)
+LOCAL_AR := $$(call my-host-tool,AR)
+LOCAL_LD := $$(call my-host-tool,LD)
+LOCAL_CFLAGS := $$(call my-host-tool,CFLAGS) $$(LOCAL_CFLAGS)
+LOCAL_LDFLAGS := $$(call my-host-tool,LDFLAGS) $$(LOCAL_LDFLAGS)
+LOCAL_LDLIBS := $$(LOCAL_LDLIBS) $$(call my-host-tool,LDLIBS)
+endef
 
 # The common libraries
 #
@@ -282,6 +307,22 @@ endif
 $(call end-emulator-program)
 
 include $(LOCAL_PATH)/Makefile.tests
+
+##############################################################################
+##############################################################################
+###
+###  GPU emulation libraries
+###
+###  Build directly from sources when using the standalone build.
+###
+ifeq (true,$(BUILD_STANDALONE_EMULATOR))
+  ifeq (,$(strip $(wildcard $(EMULATOR_EMUGL_SOURCES_DIR))))
+    $(error Cannot find GPU emulation sources directory: $(EMULATOR_EMUGL_SOURCES_DIR))
+  endif
+
+  BUILD_EMULATOR_OPENGL := true
+  include $(EMULATOR_EMUGL_SOURCES_DIR)/Android.mk
+endif
 
 ## VOILA!!
 

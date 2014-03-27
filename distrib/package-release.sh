@@ -146,7 +146,8 @@ build_darwin_binaries_on () {
   dump "Retrieving Darwin binaries from: $HOST"
   rm -rf objs/*
   run scp $HOST:$DST_DIR/$PKG_FILE_PREFIX/qemu/objs/emulator* objs/
-  # TODO(digit): Retrieve GPU emulation libraries + PC Bios files.
+  run scp -r $HOST:$DST_DIR/$PKG_FILE_PREFIX/qemu/objs/lib objs/lib
+  # TODO(digit): Retrieve PC BIOS files.
   run ssh $HOST rm -rf $DST_DIR/$PKG_FILE_PREFIX
 }
 
@@ -353,6 +354,12 @@ if [ ! -d "$GTEST_DIR" ]; then
 fi
 log "Found GoogleTest directory: $GTEST_DIR"
 
+EMUGL_DIR=$QEMU_DIR/../../sdk/emulator/opengl
+if [ ! -d "$EMUGL_DIR" ]; then
+  panic "Cannot find GPU emulation source directory: $EMUGL_DIR"
+fi
+log "Found GPU emulation directory: $EMUGL_DIR"
+
 SOURCES_PKG_FILE=
 if [ "$OPT_SOURCES" ]; then
     BUILD_DIR=$TEMP_BUILD_DIR/sources/$PKG_PREFIX-$PKG_REVISION
@@ -362,6 +369,9 @@ if [ "$OPT_SOURCES" ]; then
 
     dump "[$PKG_NAME] Copying Emulator source files."
     copy_directory_git_files "$QEMU_DIR" "$BUILD_DIR"/qemu
+
+    dump "[$PKG_NAME] Copying GPU emulation library sources."
+    copy_directory_git_files "$EMUGL_DIR" "$BUILD_DIR"/opengl
 
     dump "[$PKG_NAME] Generating README file."
     cat > "$BUILD_DIR"/README <<EOF
