@@ -514,7 +514,7 @@ case $TARGET_OS in
 esac
 
 # Strip executables and shared libraries unless --debug is used.
-if [ "$OPTION_DEBUG" != "yes" ]; then
+if [ "$OPTION_DEBUG" != "yes" -a "$OPTION_NO_STRIP" != "yes" ]; then
     case $HOST_OS in
         darwin)
             LDFLAGS="$LDFLAGS -Wl,-S"

@@ -3593,9 +3593,12 @@ int main(int argc, char **argv, char **envp)
 
         snprintf(tmp,sizeof(tmp),"cache,size=0x%" PRIx64, partSize);
 
+<<<<<<< HEAD   (bd6029 Merge "android: avd: add -x86_64 to kernel filename on x86_6)
         // NOTE: Assume the /cache and /data partitions have the same format
         // DON'T. WRONG.
 
+=======
+>>>>>>> BRANCH (496eab Merge "android-configure.sh: Fix --no-strip option." into id)
         if (partPath && *partPath && strcmp(partPath, "<temp>") != 0) {
             if (filelock_create(partPath) == NULL) {
                 fprintf(stderr, "WARNING: Cache partition already in use. Changes will not persist!\n");
@@ -3613,6 +3616,14 @@ int main(int argc, char **argv, char **envp)
                 pstrcat(tmp, sizeof(tmp), partPath);
             }
         }
+        // NOTE: The following line is commented to avoid problems with the
+        // current state of the emulator and AOSP/master. In a nutshell,
+        // take it out of the comment once proper support for generating
+        // EXT4 partitions on demand is added to the emulator, and
+        //  /etc/fstab.goldfish is modified to mount an EXT4, not YAFFS2,
+        // partition for /cache.
+        //
+        // cacheImageIsExt4 = partPath && android_pathIsExt4PartitionImage(partPath);
         if (cacheImageIsExt4) {
             /* Using a nand device to approximate a block device until full
              * support is added */
