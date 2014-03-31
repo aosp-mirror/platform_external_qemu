@@ -804,21 +804,8 @@ void cpu_dump_state(CPUX86State *env, FILE *f,
                     fptag,
                     env->mxcsr);
         for(i=0;i<8;i++) {
-#if defined(USE_X86LDOUBLE)
-            union {
-                long double d;
-                struct {
-                    uint64_t lower;
-                    uint16_t upper;
-                } l;
-            } tmp;
-            tmp.d = env->fpregs[i].d;
-            cpu_fprintf(f, "FPR%d=%016" PRIx64 " %04x",
-                        i, tmp.l.lower, tmp.l.upper);
-#else
             cpu_fprintf(f, "FPR%d=%016" PRIx64,
                         i, env->fpregs[i].mmx.q);
-#endif
             if ((i & 1) == 1)
                 cpu_fprintf(f, "\n");
             else
