@@ -89,41 +89,6 @@ static inline void svm_check_intercept(uint32_t type)
 
 #endif /* !defined(CONFIG_USER_ONLY) */
 
-#ifdef USE_X86LDOUBLE
-/* use long double functions */
-#define floatx_to_int32 floatx80_to_int32
-#define floatx_to_int64 floatx80_to_int64
-#define floatx_to_int32_round_to_zero floatx80_to_int32_round_to_zero
-#define floatx_to_int64_round_to_zero floatx80_to_int64_round_to_zero
-#define int32_to_floatx int32_to_floatx80
-#define int64_to_floatx int64_to_floatx80
-#define float32_to_floatx float32_to_floatx80
-#define float64_to_floatx float64_to_floatx80
-#define floatx_to_float32 floatx80_to_float32
-#define floatx_to_float64 floatx80_to_float64
-#define floatx_abs floatx80_abs
-#define floatx_chs floatx80_chs
-#define floatx_round_to_int floatx80_round_to_int
-#define floatx_compare floatx80_compare
-#define floatx_compare_quiet floatx80_compare_quiet
-#else
-#define floatx_to_int32 float64_to_int32
-#define floatx_to_int64 float64_to_int64
-#define floatx_to_int32_round_to_zero float64_to_int32_round_to_zero
-#define floatx_to_int64_round_to_zero float64_to_int64_round_to_zero
-#define int32_to_floatx int32_to_float64
-#define int64_to_floatx int64_to_float64
-#define float32_to_floatx float32_to_float64
-#define float64_to_floatx(x, e) (x)
-#define floatx_to_float32 float64_to_float32
-#define floatx_to_float64(x, e) (x)
-#define floatx_abs float64_abs
-#define floatx_chs float64_chs
-#define floatx_round_to_int float64_round_to_int
-#define floatx_compare float64_compare
-#define floatx_compare_quiet float64_compare_quiet
-#endif
-
 #define RC_MASK         0xc00
 #define RC_NEAR		0x000
 #define RC_DOWN		0x400
@@ -132,17 +97,6 @@ static inline void svm_check_intercept(uint32_t type)
 
 #define MAXTAN 9223372036854775808.0
 
-#ifdef USE_X86LDOUBLE
-
-/* only for x86 */
-typedef union {
-    long double d;
-    struct {
-        unsigned long long lower;
-        unsigned short upper;
-    } l;
-} CPU86_LDoubleU;
-
 /* the following deal with x86 long double-precision numbers */
 #define MAXEXPD 0x7fff
 #define EXPBIAS 16383
@@ -150,40 +104,6 @@ typedef union {
 #define SIGND(fp)	((fp.l.upper) & 0x8000)
 #define MANTD(fp)       (fp.l.lower)
 #define BIASEXPONENT(fp) fp.l.upper = (fp.l.upper & ~(0x7fff)) | EXPBIAS
-
-#else
-
-/* NOTE: arm is horrible as double 32 bit words are stored in big endian ! */
-typedef union {
-    double d;
-#if !defined(WORDS_BIGENDIAN) && !defined(__arm__)
-    struct {
-        uint32_t lower;
-        int32_t upper;
-    } l;
-#else
-    struct {
-        int32_t upper;
-        uint32_t lower;
-    } l;
-#endif
-#ifndef __arm__
-    int64_t ll;
-#endif
-} CPU86_LDoubleU;
-
-/* the following deal with IEEE double-precision numbers */
-#define MAXEXPD 0x7ff
-#define EXPBIAS 1023
-#define EXPD(fp)	(((fp.l.upper) >> 20) & 0x7FF)
-#define SIGND(fp)	((fp.l.upper) & 0x80000000)
-#ifdef __arm__
-#define MANTD(fp)	(fp.l.lower | ((uint64_t)(fp.l.upper & ((1 << 20) - 1)) << 32))
-#else
-#define MANTD(fp)	(fp.ll & ((1LL << 52) - 1))
-#endif
-#define BIASEXPONENT(fp) fp.l.upper = (fp.l.upper & ~(0x7ff << 20)) | (EXPBIAS << 20)
-#endif
 
 static inline void fpush(void)
 {
@@ -197,64 +117,20 @@ static inline void fpop(void)
     env->fpstt = (env->fpstt + 1) & 7;
 }
 
-#ifndef USE_X86LDOUBLE
-static inline CPU86_LDouble helper_fldt(target_ulong ptr)
+static inline floatx80 helper_fldt(target_ulong ptr)
 {
-    CPU86_LDoubleU temp;
-    int upper, e;
-    uint64_t ll;
+    floatx80 temp;
 
-    /* mantissa */
-    upper = lduw(ptr + 8);
-    /* XXX: handle overflow ? */
-    e = (upper & 0x7fff) - 16383 + EXPBIAS; /* exponent */
-    e |= (upper >> 4) & 0x800; /* sign */
-    ll = (ldq(ptr) >> 11) & ((1LL << 52) - 1);
-#ifdef __arm__
-    temp.l.upper = (e << 20) | (ll >> 32);
-    temp.l.lower = ll;
-#else
-    temp.ll = ll | ((uint64_t)e << 52);
-#endif
-    return temp.d;
+    temp.low = ldq(ptr);
+    temp.high = lduw(ptr + 8);
+    return temp;
 }
 
-static inline void helper_fstt(CPU86_LDouble f, target_ulong ptr)
+static inline void helper_fstt(floatx80 f, target_ulong ptr)
 {
-    CPU86_LDoubleU temp;
-    int e;
-
-    temp.d = f;
-    /* mantissa */
-    stq(ptr, (MANTD(temp) << 11) | (1LL << 63));
-    /* exponent + sign */
-    e = EXPD(temp) - EXPBIAS + 16383;
-    e |= SIGND(temp) >> 16;
-    stw(ptr + 8, e);
+    stq(ptr, f.low);
+    stw(ptr + 8, f.high);
 }
-#else
-
-/* we use memory access macros */
-
-static inline CPU86_LDouble helper_fldt(target_ulong ptr)
-{
-    CPU86_LDoubleU temp;
-
-    temp.l.lower = ldq(ptr);
-    temp.l.upper = lduw(ptr + 8);
-    return temp.d;
-}
-
-static inline void helper_fstt(CPU86_LDouble f, target_ulong ptr)
-{
-    CPU86_LDoubleU temp;
-
-    temp.d = f;
-    stq(ptr, temp.l.lower);
-    stw(ptr + 8, temp.l.upper);
-}
-
-#endif /* USE_X86LDOUBLE */
 
 #define FPUS_IE (1 << 0)
 #define FPUS_DE (1 << 1)
