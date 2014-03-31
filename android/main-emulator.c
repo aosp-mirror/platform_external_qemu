@@ -128,16 +128,16 @@ int main(int argc, char** argv)
      */
     if (avdName != NULL) {
         D("Found AVD name '%s'\n", avdName);
-        avdArch = path_getAvdTargetArch(avdName);
-        D("Found AVD target architecture: %s\n", avdArch);
+        avdArch = path_getAvdEmulatorArch(avdName);
+        D("Found AVD emulator architecture: %s\n", avdArch);
     } else {
         /* Otherwise, using the ANDROID_PRODUCT_OUT directory */
         const char* androidOut = getenv("ANDROID_PRODUCT_OUT");
 
         if (androidOut != NULL) {
             D("Found ANDROID_PRODUCT_OUT: %s\n", androidOut);
-            avdArch = path_getBuildTargetArch(androidOut);
-            D("Found build target architecture: %s\n",
+            avdArch = path_getBuildEmulatorArch(androidOut);
+            D("Found build emulator architecture: %s\n",
               avdArch ? avdArch : "<NULL>");
         }
     }

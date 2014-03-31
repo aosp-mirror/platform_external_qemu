@@ -171,7 +171,6 @@ propertyFile_getTargetArch(const FileData* data) {
         } kData[] = {
             { "armeabi", "arm" },
             { "armeabi-v7a", "arm" },
-            { "x86_64", "x86" },
         };
         size_t n;
         for (n = 0; n < sizeof(kData)/sizeof(kData[0]); ++n) {
@@ -268,9 +267,18 @@ char* path_getBuildBootProp(const char* androidOut) {
     return ASTRDUP(temp);
 }
 
+static char*
+_getEmulatorArch(char *targetArch) {
+    if (!strcmp("x86_64", targetArch)) {
+        AFREE(targetArch);
+        return ASTRDUP("x86");
+    }
+
+    return targetArch;
+}
 
 char*
-path_getBuildTargetArch(const char* androidOut) {
+path_getBuildEmulatorArch(const char* androidOut) {
     char* buildPropPath = path_getBuildBuildProp(androidOut);
     if (!buildPropPath) {
         return NULL;
@@ -281,7 +289,7 @@ path_getBuildTargetArch(const char* androidOut) {
     char* ret = propertyFile_getTargetArch(buildProp);
     fileData_done(buildProp);
     AFREE(buildPropPath);
-    return ret;
+    return _getEmulatorArch(ret);
 }
 
 
@@ -306,11 +314,11 @@ _getAvdTargetArch(const char* avdPath)
 }
 
 char*
-path_getAvdTargetArch( const char* avdName )
+path_getAvdEmulatorArch( const char* avdName )
 {
     char*  avdPath = _getAvdContentPath(avdName);
     char*  avdArch = _getAvdTargetArch(avdPath);
     AFREE(avdPath);
 
-    return avdArch;
+    return _getEmulatorArch(avdArch);
 }

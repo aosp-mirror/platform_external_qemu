@@ -38,10 +38,10 @@ char* path_getSdkRoot( char *pFromEnv );
  */
 char* path_getRootIniPath( const char*  avdName );
 
-/* Return the target architecture for a given AVD.
+/* Return the emulator architecture for a given AVD.
  * Called must free() returned string.
  */
-char* path_getAvdTargetArch( const char* avdName );
+char* path_getAvdEmulatorArch( const char* avdName );
 
 /* Retrieves a string corresponding to the target architecture
  * extracted from a build properties file.
@@ -86,11 +86,11 @@ char* path_getBuildBuildProp( const char* androidOut );
  */
 char* path_getBuildBootProp( const char* androidOut );
 
-/* Return the target architecture from the build properties file
+/* Return the emulator architecture from the build properties file
  *  (build.prop) of an Android platformn build. Return NULL or a new
  * string that must be freed by the caller.
  */
-char* path_getBuildTargetArch( const char* androidOut );
+char* path_getBuildEmulatorArch( const char* androidOut );
 
 ANDROID_END_HEADER
 
