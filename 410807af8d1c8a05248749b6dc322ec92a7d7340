@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79b43fb0_c88faf63",
+        "filename": "android/avd/util.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-04-01T08:07:02Z",
+      "side": 1,
+      "message": "I would prefer if you used something simpler, i.e:\n\n\n- Simply define a new function that takes a target\n  CPU architecture as input, and returns the corresponding\n  \"emulator architecture\" string instead.\n\n\n- Pass it the output of path_getAvdTargetArch() or\n  path_getBuildTargetArch(), in main-emulator.c\n\n\n- I must say I\u0027m not a fan of the term \"emulator\n  architecture\", because it\u0027s slightly confusing (since\n  it doesn\u0027t map to a single CPU architecture).\n\n  Maybe use \"emulator backend\" instead. Also explain\n  what it really is in the comment describing the\n  function.\n\n\nThis should remove coupling and will make the code more explicit, and more testable. Thanks.",
+      "revId": "410807af8d1c8a05248749b6dc322ec92a7d7340",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
