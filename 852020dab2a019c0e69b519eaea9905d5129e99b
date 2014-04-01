@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "99bf338c_8999b9ad",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-04-01T08:07:58Z",
+      "side": 1,
+      "message": "It would be nice if this message contained a modicum amount of motivation for the revert. I.e. explain the context.\n\nThanks.",
+      "revId": "852020dab2a019c0e69b519eaea9905d5129e99b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
