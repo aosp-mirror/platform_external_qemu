@@ -248,12 +248,19 @@ getTargetEmulatorPath(const char* progName, const char* avdArch, const int force
     int search_for_64bit_emulator = !force_32bit && getHostOSBitness() == 64;
 #endif
 
+    const char* emulatorSuffix = emulator_getBackendSuffix(avdArch);
+    if (!emulatorSuffix) {
+        APANIC("This emulator cannot emulate %s CPUs!\n", avdArch);
+    }
+    D("Using emulator-%s to emulate '%s' CPUs\n", emulatorSuffix, avdArch);
+
     /* Get program's directory name in progDir */
     path_split(progName, &progDir, NULL);
 
     if (search_for_64bit_emulator) {
         /* Find 64-bit emulator first */
-        p = bufprint(path, pathEnd, "%s/%s%s%s", progDir, emulator64Prefix, avdArch, exeExt);
+        p = bufprint(path, pathEnd, "%s/%s%s%s", progDir,
+                     emulator64Prefix, emulatorSuffix, exeExt);
         if (p >= pathEnd) {
             APANIC("Path too long: %s\n", progName);
         }
@@ -264,7 +271,8 @@ getTargetEmulatorPath(const char* progName, const char* avdArch, const int force
     }
 
     /* Find 32-bit emulator */
-    p = bufprint(path, pathEnd, "%s/%s%s%s", progDir, emulatorPrefix, avdArch, exeExt);
+    p = bufprint(path, pathEnd, "%s/%s%s%s", progDir, emulatorPrefix,
+                 emulatorSuffix, exeExt);
     free(progDir);
     if (p >= pathEnd) {
         APANIC("Path too long: %s\n", progName);
@@ -283,7 +291,8 @@ getTargetEmulatorPath(const char* progName, const char* avdArch, const int force
     if (strchr(progName, '/') == NULL) {
 #endif
         if (search_for_64bit_emulator) {
-           p = bufprint(path, pathEnd, "%s%s%s", emulator64Prefix, avdArch, exeExt);
+           p = bufprint(path, pathEnd, "%s%s%s", emulator64Prefix,
+                        emulatorSuffix, exeExt);
            if (p < pathEnd) {
                char*  resolved = path_search_exec(path);
                if (resolved != NULL)
@@ -291,7 +300,8 @@ getTargetEmulatorPath(const char* progName, const char* avdArch, const int force
            }
         }
 
-        p = bufprint(path, pathEnd, "%s%s%s", emulatorPrefix, avdArch, exeExt);
+        p = bufprint(path, pathEnd, "%s%s%s", emulatorPrefix,
+                     emulatorSuffix, exeExt);
         if (p < pathEnd) {
             char*  resolved = path_search_exec(path);
             if (resolved != NULL)

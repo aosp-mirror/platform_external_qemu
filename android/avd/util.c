@@ -171,7 +171,6 @@ propertyFile_getTargetArch(const FileData* data) {
         } kData[] = {
             { "armeabi", "arm" },
             { "armeabi-v7a", "arm" },
-            { "x86_64", "x86" },
         };
         size_t n;
         for (n = 0; n < sizeof(kData)/sizeof(kData[0]); ++n) {
@@ -313,4 +312,29 @@ path_getAvdTargetArch( const char* avdName )
     AFREE(avdPath);
 
     return avdArch;
+}
+
+const char*
+emulator_getBackendSuffix(const char* targetArch)
+{
+    if (!targetArch)
+        return NULL;
+
+    static const struct {
+        const char* avd_arch;
+        const char* emulator_suffix;
+    } kPairs[] = {
+        { "arm", "arm" },
+        { "x86", "x86" },
+        { "x86_64", "x86" },
+        { "mips", "mips" },
+        // Add more if needed here.
+    };
+    size_t n;
+    for (n = 0; n < sizeof(kPairs)/sizeof(kPairs[0]); ++n) {
+        if (!strcmp(targetArch, kPairs[n].avd_arch)) {
+            return kPairs[n].emulator_suffix;
+        }
+    }
+    return NULL;
 }
