@@ -1263,6 +1263,22 @@ int main(int argc, char **argv)
         D("Auto-config: -qemu -cpu %s", hw->hw_cpu_model);
     }
 
+    /* If the target architecture is 'x86', ensure that the 'qemu32'
+     * CPU model is used. Otherwise, the default (which is now 'qemu64')
+     * will result in a failure to boot with some kernels under
+     * un-accelerated emulation.
+     */
+    if (hw->hw_cpu_model[0] == '\0') {
+        char* arch = avdInfo_getTargetCpuArch(avd);
+        D("Target arch = '%s'", arch ? arch : "NULL");
+        if (arch != NULL && !strcmp(arch, "x86")) {
+            AFREE(hw->hw_cpu_model);
+            hw->hw_cpu_model = ASTRDUP("qemu32");
+            D("Auto-config: -qemu -cpu %s", hw->hw_cpu_model);
+        }
+        AFREE(arch);
+    }
+
     /* Generate a hardware-qemu.ini for this AVD. The real hardware
      * configuration is ususally stored in several files, e.g. the AVD's
      * config.ini plus the skin-specific hardware.ini.

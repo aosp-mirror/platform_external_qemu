@@ -792,6 +792,8 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
     _avdInfo_getPropertyFile(i, "build.prop", i->buildProperties);
     _avdInfo_getPropertyFile(i, "boot.prop", i->bootProperties);
 
+    _avdInfo_extractBuildProperties(i);
+
     /* don't need this anymore */
     iniFile_free(i->rootIni);
     i->rootIni = NULL;
@@ -1120,6 +1122,11 @@ int
 avdInfo_inAndroidBuild( AvdInfo*  i )
 {
     return i->inAndroidBuild;
+}
+
+char*
+avdInfo_getTargetCpuArch(AvdInfo* i) {
+    return ASTRDUP(i->targetArch);
 }
 
 char*
