@@ -100,6 +100,7 @@ int main(int argc, char** argv)
     /* Parse command-line and look for
      * 1) an avd name either in the form or '-avd <name>' or '@<name>'
      * 2) '-force-32bit' which always use 32-bit emulator on 64-bit platforms
+     * 3) '-verbose', or '-debug-all' or '-debug all' to enable verbose mode.
      */
     int  nn;
     for (nn = 1; nn < argc; nn++) {
@@ -107,6 +108,15 @@ int main(int argc, char** argv)
 
         if (!strcmp(opt,"-qemu"))
             break;
+
+        if (!strcmp(opt,"-verbose") || !strcmp(opt,"-debug-all")) {
+            android_verbose = 1;
+        }
+
+        if (!strcmp(opt,"-debug") && nn + 1 < argc &&
+            !strcmp(argv[nn + 1], "all")) {
+            android_verbose = 1;
+        }
 
         if (!strcmp(opt,"-force-32bit")) {
             force_32bit = 1;
