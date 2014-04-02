@@ -21,6 +21,7 @@
 
 #define CPU_NO_GLOBAL_REGS
 #include "cpu.h"
+#include "qemu/aes.h"
 #include "qemu/host-utils.h"
 #include "exec/cpu-defs.h"
 #include "helper.h"
@@ -4898,16 +4899,6 @@ void helper_boundl(CPUX86State *env, target_ulong a0, int v)
     if (v < low || v > high) {
         raise_exception(env, EXCP05_BOUND);
     }
-}
-
-static float approx_rsqrt(float a)
-{
-    return 1.0 / sqrt(a);
-}
-
-static float approx_rcp(float a)
-{
-    return 1.0 / a;
 }
 
 #if !defined(CONFIG_USER_ONLY)
