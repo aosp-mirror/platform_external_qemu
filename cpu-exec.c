@@ -18,7 +18,6 @@
  */
 #include "config.h"
 #include "cpu.h"
-#include "dyngen-exec.h"
 #include "disas/disas.h"
 #include "tcg.h"
 #include "sysemu/kvm.h"
