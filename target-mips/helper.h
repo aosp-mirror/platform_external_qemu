@@ -1,8 +1,8 @@
 #include "exec/def-helper.h"
 
-DEF_HELPER_2(raise_exception_err, void, i32, int)
-DEF_HELPER_1(raise_exception, void, i32)
-DEF_HELPER_0(interrupt_restart, void)
+DEF_HELPER_3(raise_exception_err, void, env, i32, int)
+DEF_HELPER_2(raise_exception, void, env, i32)
+DEF_HELPER_1(interrupt_restart, void, env)
 
 #ifdef TARGET_MIPS64
 DEF_HELPER_3(ldl, tl, tl, tl, int)
@@ -267,10 +267,10 @@ DEF_HELPER_1(tlbwi, void, env)
 DEF_HELPER_1(tlbwr, void, env)
 DEF_HELPER_1(tlbp, void, env)
 DEF_HELPER_1(tlbr, void, env)
-DEF_HELPER_0(di, tl)
-DEF_HELPER_0(ei, tl)
-DEF_HELPER_0(eret, void)
-DEF_HELPER_0(deret, void)
+DEF_HELPER_1(di, tl, env)
+DEF_HELPER_1(ei, tl, env)
+DEF_HELPER_1(eret, void, env)
+DEF_HELPER_1(deret, void, env)
 #endif /* !CONFIG_USER_ONLY */
 DEF_HELPER_0(rdhwr_cpunum, tl)
 DEF_HELPER_0(rdhwr_synci_step, tl)

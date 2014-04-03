@@ -84,7 +84,8 @@ static inline void compute_hflags(CPUMIPSState *env)
 /*****************************************************************************/
 /* Exceptions processing helpers */
 
-void helper_raise_exception_err (uint32_t exception, int error_code)
+void helper_raise_exception_err (CPUMIPSState *env,
+                                 uint32_t exception, int error_code)
 {
 #if 1
     if (exception < 0x100)
@@ -95,12 +96,12 @@ void helper_raise_exception_err (uint32_t exception, int error_code)
     cpu_loop_exit(env);
 }
 
-void helper_raise_exception (uint32_t exception)
+void helper_raise_exception (CPUMIPSState *env, uint32_t exception)
 {
-    helper_raise_exception_err(exception, 0);
+    helper_raise_exception_err(env, exception, 0);
 }
 
-void helper_interrupt_restart (void)
+void helper_interrupt_restart (CPUMIPSState *env)
 {
     if (!(env->CP0_Status & (1 << CP0St_EXL)) &&
         !(env->CP0_Status & (1 << CP0St_ERL)) &&
@@ -108,12 +109,12 @@ void helper_interrupt_restart (void)
         (env->CP0_Status & (1 << CP0St_IE)) &&
         (env->CP0_Status & env->CP0_Cause & CP0Ca_IP_mask)) {
         env->CP0_Cause &= ~(0x1f << CP0Ca_EC);
-        helper_raise_exception(EXCP_EXT_INTERRUPT);
+        helper_raise_exception(env, EXCP_EXT_INTERRUPT);
     }
 }
 
 #if !defined(CONFIG_USER_ONLY)
-static void do_restore_state (uintptr_t pc)
+static void do_restore_state (CPUMIPSState *env, uintptr_t pc)
 {
     TranslationBlock *tb;
 
@@ -368,7 +369,7 @@ target_ulong helper_##name(target_ulong arg1, target_ulong arg2, int mem_idx) \
                                                                               \
     if (arg2 & almask) {                                                      \
         env->CP0_BadVAddr = arg2;                                             \
-        helper_raise_exception(EXCP_AdES);                                    \
+        helper_raise_exception(env, EXCP_AdES);                               \
     }                                                                         \
     if (do_translate_address(arg2, 1) == env->lladdr) {                       \
         tmp = do_##ld_insn(arg2, mem_idx);                                    \
@@ -1654,13 +1655,13 @@ target_ulong helper_yield(target_ulong arg1)
                 env->active_tc.CP0_TCStatus & (1 << CP0TCSt_DT)) {
                 env->CP0_VPEControl &= ~(0x7 << CP0VPECo_EXCPT);
                 env->CP0_VPEControl |= 4 << CP0VPECo_EXCPT;
-                helper_raise_exception(EXCP_THREAD);
+                helper_raise_exception(env, EXCP_THREAD);
             }
         }
     } else if (arg1 == 0) {
         if (0 /* TODO: TC underflow */) {
             env->CP0_VPEControl &= ~(0x7 << CP0VPECo_EXCPT);
-            helper_raise_exception(EXCP_THREAD);
+            helper_raise_exception(env, EXCP_THREAD);
         } else {
             // TODO: Deallocate TC
         }
@@ -1668,7 +1669,7 @@ target_ulong helper_yield(target_ulong arg1)
         /* Yield qualifier inputs not implemented. */
         env->CP0_VPEControl &= ~(0x7 << CP0VPECo_EXCPT);
         env->CP0_VPEControl |= 2 << CP0VPECo_EXCPT;
-        helper_raise_exception(EXCP_THREAD);
+        helper_raise_exception(env, EXCP_THREAD);
     }
     return env->CP0_YQMask;
 }
@@ -1890,7 +1891,7 @@ void helper_tlbr(CPUMIPSState *env)
 }
 
 /* Specials */
-target_ulong helper_di (void)
+target_ulong helper_di(CPUMIPSState *env)
 {
     target_ulong t0 = env->CP0_Status;
 
@@ -1900,7 +1901,7 @@ target_ulong helper_di (void)
     return t0;
 }
 
-target_ulong helper_ei (void)
+target_ulong helper_ei(CPUMIPSState *env)
 {
     target_ulong t0 = env->CP0_Status;
 
@@ -1910,7 +1911,7 @@ target_ulong helper_ei (void)
     return t0;
 }
 
-static void debug_pre_eret (void)
+static void debug_pre_eret(CPUMIPSState *env)
 {
     if (qemu_loglevel_mask(CPU_LOG_EXEC)) {
         qemu_log("ERET: PC " TARGET_FMT_lx " EPC " TARGET_FMT_lx,
@@ -1923,7 +1924,7 @@ static void debug_pre_eret (void)
     }
 }
 
-static void debug_post_eret (void)
+static void debug_post_eret(CPUMIPSState *env)
 {
     if (qemu_loglevel_mask(CPU_LOG_EXEC)) {
         qemu_log("  =>  PC " TARGET_FMT_lx " EPC " TARGET_FMT_lx,
@@ -1941,9 +1942,9 @@ static void debug_post_eret (void)
     }
 }
 
-void helper_eret (void)
+void helper_eret (CPUMIPSState *env)
 {
-    debug_pre_eret();
+    debug_pre_eret(env);
     if (env->CP0_Status & (1 << CP0St_ERL)) {
         env->active_tc.PC = env->CP0_ErrorEPC;
         env->CP0_Status &= ~(1 << CP0St_ERL);
@@ -1952,17 +1953,17 @@ void helper_eret (void)
         env->CP0_Status &= ~(1 << CP0St_EXL);
     }
     compute_hflags(env);
-    debug_post_eret();
+    debug_post_eret(env);
     env->lladdr = 1;
 }
 
-void helper_deret (void)
+void helper_deret (CPUMIPSState *env)
 {
-    debug_pre_eret();
+    debug_pre_eret(env);
     env->active_tc.PC = env->CP0_DEPC;
     env->hflags &= MIPS_HFLAG_DM;
     compute_hflags(env);
-    debug_post_eret();
+    debug_post_eret(env);
     env->lladdr = 1;
 }
 #endif /* !CONFIG_USER_ONLY */
@@ -1973,7 +1974,7 @@ target_ulong helper_rdhwr_cpunum(void)
         (env->CP0_HWREna & (1 << 0)))
         return env->CP0_EBase & 0x3ff;
     else
-        helper_raise_exception(EXCP_RI);
+        helper_raise_exception(env, EXCP_RI);
 
     return 0;
 }
@@ -1984,7 +1985,7 @@ target_ulong helper_rdhwr_synci_step(void)
         (env->CP0_HWREna & (1 << 1)))
         return env->SYNCI_Step;
     else
-        helper_raise_exception(EXCP_RI);
+        helper_raise_exception(env, EXCP_RI);
 
     return 0;
 }
@@ -1995,7 +1996,7 @@ target_ulong helper_rdhwr_cc(void)
         (env->CP0_HWREna & (1 << 2)))
         return env->CP0_Count;
     else
-        helper_raise_exception(EXCP_RI);
+        helper_raise_exception(env, EXCP_RI);
 
     return 0;
 }
@@ -2006,7 +2007,7 @@ target_ulong helper_rdhwr_ccres(void)
         (env->CP0_HWREna & (1 << 3)))
         return env->CCRes;
     else
-        helper_raise_exception(EXCP_RI);
+        helper_raise_exception(env, EXCP_RI);
 
     return 0;
 }
@@ -2040,7 +2041,7 @@ void helper_pmon (int function)
 void helper_wait (void)
 {
     env->halted = 1;
-    helper_raise_exception(EXCP_HLT);
+    helper_raise_exception(env, EXCP_HLT);
 }
 
 #if !defined(CONFIG_USER_ONLY)
@@ -2070,8 +2071,8 @@ static void do_unaligned_access (CPUMIPSState *env1,
                                  int is_user, uintptr_t retaddr)
 {
     env->CP0_BadVAddr = addr;
-    do_restore_state (retaddr);
-    helper_raise_exception ((is_write == 1) ? EXCP_AdES : EXCP_AdEL);
+    do_restore_state (env, retaddr);
+    helper_raise_exception(env, (is_write == 1) ? EXCP_AdES : EXCP_AdEL);
 }
 
 void tlb_fill (CPUMIPSState* env1, target_ulong addr, int is_write, int mmu_idx,
@@ -2096,7 +2097,7 @@ void tlb_fill (CPUMIPSState* env1, target_ulong addr, int is_write, int mmu_idx,
                 cpu_restore_state(env, retaddr);
             }
         }
-        helper_raise_exception_err(env->exception_index, env->error_code);
+        helper_raise_exception_err(env, env->exception_index, env->error_code);
     }
     env = saved_env;
 }
@@ -2107,9 +2108,9 @@ void cpu_unassigned_access(CPUMIPSState* env1, hwaddr addr,
     env = env1;
 
     if (is_exec)
-        helper_raise_exception(EXCP_IBE);
+        helper_raise_exception(env, EXCP_IBE);
     else
-        helper_raise_exception(EXCP_DBE);
+        helper_raise_exception(env, EXCP_DBE);
 }
 /*
  * The following functions are address translation helper functions
@@ -2271,7 +2272,7 @@ void helper_ctc1 (target_ulong arg1, uint32_t reg)
     RESTORE_FLUSH_MODE;
     set_float_exception_flags(0, &env->active_fpu.fp_status);
     if ((GET_FP_ENABLE(env->active_fpu.fcr31) | 0x20) & GET_FP_CAUSE(env->active_fpu.fcr31))
-        helper_raise_exception(EXCP_FPE);
+        helper_raise_exception(env, EXCP_FPE);
 }
 
 static inline char ieee_ex_to_mips(char xcpt)
@@ -2298,7 +2299,7 @@ static inline void update_fcr31(void)
 
     SET_FP_CAUSE(env->active_fpu.fcr31, tmp);
     if (GET_FP_ENABLE(env->active_fpu.fcr31) & tmp)
-        helper_raise_exception(EXCP_FPE);
+        helper_raise_exception(env, EXCP_FPE);
     else
         UPDATE_FP_FLAGS(env->active_fpu.fcr31, tmp);
 }
