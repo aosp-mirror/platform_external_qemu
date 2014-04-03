@@ -2083,26 +2083,20 @@ static void do_unaligned_access (CPUMIPSState *env1,
 #define SHIFT 3
 #include "exec/softmmu_template.h"
 
-static void do_unaligned_access (CPUMIPSState *env1,
-                                 target_ulong addr, int is_write,
-                                 int is_user, uintptr_t retaddr)
+static void do_unaligned_access(CPUMIPSState *env1, target_ulong addr,
+                                int is_write, int is_user, uintptr_t retaddr)
 {
     env->CP0_BadVAddr = addr;
     do_restore_state (env, retaddr);
     helper_raise_exception(env, (is_write == 1) ? EXCP_AdES : EXCP_AdEL);
 }
 
-void tlb_fill (CPUMIPSState* env1, target_ulong addr, int is_write, int mmu_idx,
+void tlb_fill (CPUMIPSState* env, target_ulong addr, int is_write, int mmu_idx,
                uintptr_t retaddr)
 {
     TranslationBlock *tb;
-    CPUMIPSState *saved_env;
     int ret;
 
-    /* XXX: hack to restore env in all cases, even if not called from
-       generated code */
-    saved_env = env;
-    env = env1;
     ret = cpu_mips_handle_mmu_fault(env, addr, is_write, mmu_idx);
     if (ret) {
         if (retaddr) {
@@ -2116,14 +2110,11 @@ void tlb_fill (CPUMIPSState* env1, target_ulong addr, int is_write, int mmu_idx,
         }
         helper_raise_exception_err(env, env->exception_index, env->error_code);
     }
-    env = saved_env;
 }
 
-void cpu_unassigned_access(CPUMIPSState* env1, hwaddr addr,
+void cpu_unassigned_access(CPUMIPSState* env, hwaddr addr,
                            int is_write, int is_exec, int unused, int size)
 {
-    env = env1;
-
     if (is_exec)
         helper_raise_exception(env, EXCP_IBE);
     else
@@ -2133,7 +2124,7 @@ void cpu_unassigned_access(CPUMIPSState* env1, hwaddr addr,
  * The following functions are address translation helper functions
  * for fast memory access in QEMU.
  */
-static unsigned long v2p_mmu(target_ulong addr, int is_user)
+static unsigned long v2p_mmu(CPUMIPSState *env, target_ulong addr, int is_user)
 {
     int index;
     target_ulong tlb_addr;
@@ -2161,22 +2152,20 @@ redo:
  */
 unsigned long v2p(target_ulong ptr, int is_user)
 {
-    CPUMIPSState *saved_env;
+    CPUMIPSState *env;
     int index;
     target_ulong addr;
     hwaddr physaddr;
 
-    saved_env = env;
     env = cpu_single_env;
     addr = ptr;
     index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
     if (__builtin_expect(env->tlb_table[is_user][index].addr_read !=
                 (addr & TARGET_PAGE_MASK), 0)) {
-        physaddr = v2p_mmu(addr, is_user);
+        physaddr = v2p_mmu(env, addr, is_user);
     } else {
         physaddr = addr + env->tlb_table[is_user][index].addend;
     }
-    env = saved_env;
     return physaddr;
 }
 
