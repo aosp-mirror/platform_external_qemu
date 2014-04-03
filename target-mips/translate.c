@@ -2916,17 +2916,17 @@ static void gen_mfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
             break;
         case 1:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_mvpcontrol(arg);
+            gen_helper_mfc0_mvpcontrol(arg, cpu_env);
             rn = "MVPControl";
             break;
         case 2:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_mvpconf0(arg);
+            gen_helper_mfc0_mvpconf0(arg, cpu_env);
             rn = "MVPConf0";
             break;
         case 3:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_mvpconf1(arg);
+            gen_helper_mfc0_mvpconf1(arg, cpu_env);
             rn = "MVPConf1";
             break;
         default:
@@ -2936,7 +2936,7 @@ static void gen_mfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 1:
         switch (sel) {
         case 0:
-            gen_helper_mfc0_random(arg);
+            gen_helper_mfc0_random(arg, cpu_env);
             rn = "Random";
             break;
         case 1:
@@ -2987,37 +2987,37 @@ static void gen_mfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
             break;
         case 1:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_tcstatus(arg);
+            gen_helper_mfc0_tcstatus(arg, cpu_env);
             rn = "TCStatus";
             break;
         case 2:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_tcbind(arg);
+            gen_helper_mfc0_tcbind(arg, cpu_env);
             rn = "TCBind";
             break;
         case 3:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_tcrestart(arg);
+            gen_helper_mfc0_tcrestart(arg, cpu_env);
             rn = "TCRestart";
             break;
         case 4:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_tchalt(arg);
+            gen_helper_mfc0_tchalt(arg, cpu_env);
             rn = "TCHalt";
             break;
         case 5:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_tccontext(arg);
+            gen_helper_mfc0_tccontext(arg, cpu_env);
             rn = "TCContext";
             break;
         case 6:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_tcschedule(arg);
+            gen_helper_mfc0_tcschedule(arg, cpu_env);
             rn = "TCSchedule";
             break;
         case 7:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_tcschefback(arg);
+            gen_helper_mfc0_tcschefback(arg, cpu_env);
             rn = "TCScheFBack";
             break;
         default:
@@ -3128,7 +3128,7 @@ static void gen_mfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
             /* Mark as an IO operation because we read the time.  */
             if (use_icount)
                 gen_io_start();
-            gen_helper_mfc0_count(arg);
+            gen_helper_mfc0_count(arg, cpu_env);
             if (use_icount) {
                 gen_io_end();
                 ctx->bstate = BS_STOP;
@@ -3258,7 +3258,7 @@ static void gen_mfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 17:
         switch (sel) {
         case 0:
-            gen_helper_mfc0_lladdr(arg);
+            gen_helper_mfc0_lladdr(arg, cpu_env);
             rn = "LLAddr";
             break;
         default:
@@ -3268,7 +3268,7 @@ static void gen_mfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 18:
         switch (sel) {
         case 0 ... 7:
-            gen_helper_1i(mfc0_watchlo, arg, sel);
+            gen_helper_2i(mfc0_watchlo, arg, cpu_env, sel);
             rn = "WatchLo";
             break;
         default:
@@ -3278,7 +3278,7 @@ static void gen_mfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 19:
         switch (sel) {
         case 0 ...7:
-            gen_helper_1i(mfc0_watchhi, arg, sel);
+            gen_helper_2i(mfc0_watchhi, arg, cpu_env, sel);
             rn = "WatchHi";
             break;
         default:
@@ -3317,7 +3317,7 @@ static void gen_mfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 23:
         switch (sel) {
         case 0:
-            gen_helper_mfc0_debug(arg); /* EJTAG support */
+            gen_helper_mfc0_debug(arg, cpu_env); /* EJTAG support */
             rn = "Debug";
             break;
         case 1:
@@ -3491,12 +3491,12 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 0:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_index(arg);
+            gen_helper_mtc0_index(cpu_env, arg);
             rn = "Index";
             break;
         case 1:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_mvpcontrol(arg);
+            gen_helper_mtc0_mvpcontrol(cpu_env, arg);
             rn = "MVPControl";
             break;
         case 2:
@@ -3521,22 +3521,22 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
             break;
         case 1:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_vpecontrol(arg);
+            gen_helper_mtc0_vpecontrol(cpu_env, arg);
             rn = "VPEControl";
             break;
         case 2:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_vpeconf0(arg);
+            gen_helper_mtc0_vpeconf0(cpu_env, arg);
             rn = "VPEConf0";
             break;
         case 3:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_vpeconf1(arg);
+            gen_helper_mtc0_vpeconf1(cpu_env, arg);
             rn = "VPEConf1";
             break;
         case 4:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_yqmask(arg);
+            gen_helper_mtc0_yqmask(cpu_env, arg);
             rn = "YQMask";
             break;
         case 5:
@@ -3551,7 +3551,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
             break;
         case 7:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_vpeopt(arg);
+            gen_helper_mtc0_vpeopt(cpu_env, arg);
             rn = "VPEOpt";
             break;
         default:
@@ -3561,42 +3561,42 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 2:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_entrylo0(arg);
+            gen_helper_mtc0_entrylo0(cpu_env, arg);
             rn = "EntryLo0";
             break;
         case 1:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tcstatus(arg);
+            gen_helper_mtc0_tcstatus(cpu_env, arg);
             rn = "TCStatus";
             break;
         case 2:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tcbind(arg);
+            gen_helper_mtc0_tcbind(cpu_env, arg);
             rn = "TCBind";
             break;
         case 3:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tcrestart(arg);
+            gen_helper_mtc0_tcrestart(cpu_env, arg);
             rn = "TCRestart";
             break;
         case 4:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tchalt(arg);
+            gen_helper_mtc0_tchalt(cpu_env, arg);
             rn = "TCHalt";
             break;
         case 5:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tccontext(arg);
+            gen_helper_mtc0_tccontext(cpu_env, arg);
             rn = "TCContext";
             break;
         case 6:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tcschedule(arg);
+            gen_helper_mtc0_tcschedule(cpu_env, arg);
             rn = "TCSchedule";
             break;
         case 7:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tcschefback(arg);
+            gen_helper_mtc0_tcschefback(cpu_env, arg);
             rn = "TCScheFBack";
             break;
         default:
@@ -3606,7 +3606,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 3:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_entrylo1(arg);
+            gen_helper_mtc0_entrylo1(cpu_env, arg);
             rn = "EntryLo1";
             break;
         default:
@@ -3616,7 +3616,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 4:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_context(arg);
+            gen_helper_mtc0_context(cpu_env, arg);
             rn = "Context";
             break;
         case 1:
@@ -3630,12 +3630,12 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 5:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_pagemask(arg);
+            gen_helper_mtc0_pagemask(cpu_env, arg);
             rn = "PageMask";
             break;
         case 1:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_pagegrain(arg);
+            gen_helper_mtc0_pagegrain(cpu_env, arg);
             rn = "PageGrain";
             break;
         default:
@@ -3645,32 +3645,32 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 6:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_wired(arg);
+            gen_helper_mtc0_wired(cpu_env, arg);
             rn = "Wired";
             break;
         case 1:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_srsconf0(arg);
+            gen_helper_mtc0_srsconf0(cpu_env, arg);
             rn = "SRSConf0";
             break;
         case 2:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_srsconf1(arg);
+            gen_helper_mtc0_srsconf1(cpu_env, arg);
             rn = "SRSConf1";
             break;
         case 3:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_srsconf2(arg);
+            gen_helper_mtc0_srsconf2(cpu_env, arg);
             rn = "SRSConf2";
             break;
         case 4:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_srsconf3(arg);
+            gen_helper_mtc0_srsconf3(cpu_env, arg);
             rn = "SRSConf3";
             break;
         case 5:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_srsconf4(arg);
+            gen_helper_mtc0_srsconf4(cpu_env, arg);
             rn = "SRSConf4";
             break;
         default:
@@ -3681,7 +3681,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
         switch (sel) {
         case 0:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_hwrena(arg);
+            gen_helper_mtc0_hwrena(cpu_env, arg);
             rn = "HWREna";
             break;
         default:
@@ -3695,7 +3695,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 9:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_count(arg);
+            gen_helper_mtc0_count(cpu_env, arg);
             rn = "Count";
             break;
         /* 6,7 are implementation dependent */
@@ -3706,7 +3706,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 10:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_entryhi(arg);
+            gen_helper_mtc0_entryhi(cpu_env, arg);
             rn = "EntryHi";
             break;
         default:
@@ -3716,7 +3716,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 11:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_compare(arg);
+            gen_helper_mtc0_compare(cpu_env, arg);
             rn = "Compare";
             break;
         /* 6,7 are implementation dependent */
@@ -3728,7 +3728,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
         switch (sel) {
         case 0:
             save_cpu_state(ctx, 1);
-            gen_helper_mtc0_status(arg);
+            gen_helper_mtc0_status(cpu_env, arg);
             /* BS_STOP isn't good enough here, hflags may have changed. */
             gen_save_pc(ctx->pc + 4);
             ctx->bstate = BS_EXCP;
@@ -3736,14 +3736,14 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
             break;
         case 1:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_intctl(arg);
+            gen_helper_mtc0_intctl(cpu_env, arg);
             /* Stop translation as we may have switched the execution mode */
             ctx->bstate = BS_STOP;
             rn = "IntCtl";
             break;
         case 2:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_srsctl(arg);
+            gen_helper_mtc0_srsctl(cpu_env, arg);
             /* Stop translation as we may have switched the execution mode */
             ctx->bstate = BS_STOP;
             rn = "SRSCtl";
@@ -3763,7 +3763,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
         switch (sel) {
         case 0:
             save_cpu_state(ctx, 1);
-            gen_helper_mtc0_cause(arg);
+            gen_helper_mtc0_cause(cpu_env, arg);
             rn = "Cause";
             break;
         default:
@@ -3788,7 +3788,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
             break;
         case 1:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_ebase(arg);
+            gen_helper_mtc0_ebase(cpu_env, arg);
             rn = "EBase";
             break;
         default:
@@ -3798,7 +3798,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 16:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_config0(arg);
+            gen_helper_mtc0_config0(cpu_env, arg);
             rn = "Config";
             /* Stop translation as we may have switched the execution mode */
             ctx->bstate = BS_STOP;
@@ -3808,7 +3808,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
             rn = "Config1";
             break;
         case 2:
-            gen_helper_mtc0_config2(arg);
+            gen_helper_mtc0_config2(cpu_env, arg);
             rn = "Config2";
             /* Stop translation as we may have switched the execution mode */
             ctx->bstate = BS_STOP;
@@ -3835,7 +3835,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 17:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_lladdr(arg);
+            gen_helper_mtc0_lladdr(cpu_env, arg);
             rn = "LLAddr";
             break;
         default:
@@ -3845,7 +3845,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 18:
         switch (sel) {
         case 0 ... 7:
-            gen_helper_1i(mtc0_watchlo, arg, sel);
+            gen_helper_2i(mtc0_watchlo, cpu_env, arg, sel);
             rn = "WatchLo";
             break;
         default:
@@ -3855,7 +3855,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 19:
         switch (sel) {
         case 0 ... 7:
-            gen_helper_1i(mtc0_watchhi, arg, sel);
+            gen_helper_2i(mtc0_watchhi, cpu_env, arg, sel);
             rn = "WatchHi";
             break;
         default:
@@ -3867,7 +3867,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
         case 0:
 #if defined(TARGET_MIPS64)
             check_insn(env, ctx, ISA_MIPS3);
-            gen_helper_mtc0_xcontext(arg);
+            gen_helper_mtc0_xcontext(cpu_env, arg);
             rn = "XContext";
             break;
 #endif
@@ -3879,7 +3879,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
        /* Officially reserved, but sel 0 is used for R1x000 framemask */
         switch (sel) {
         case 0:
-            gen_helper_mtc0_framemask(arg);
+            gen_helper_mtc0_framemask(cpu_env, arg);
             rn = "Framemask";
             break;
         default:
@@ -3893,7 +3893,7 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 23:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_debug(arg); /* EJTAG support */
+            gen_helper_mtc0_debug(cpu_env, arg); /* EJTAG support */
             /* BS_STOP isn't good enough here, hflags may have changed. */
             gen_save_pc(ctx->pc + 4);
             ctx->bstate = BS_EXCP;
@@ -3943,35 +3943,35 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
     case 25:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_performance0(arg);
+            gen_helper_mtc0_performance0(cpu_env, arg);
             rn = "Performance0";
             break;
         case 1:
-//            gen_helper_mtc0_performance1(arg);
+//            gen_helper_mtc0_performance1(cpu_env, arg);
             rn = "Performance1";
 //            break;
         case 2:
-//            gen_helper_mtc0_performance2(arg);
+//            gen_helper_mtc0_performance2(cpu_env, arg);
             rn = "Performance2";
 //            break;
         case 3:
-//            gen_helper_mtc0_performance3(arg);
+//            gen_helper_mtc0_performance3(cpu_env, arg);
             rn = "Performance3";
 //            break;
         case 4:
-//            gen_helper_mtc0_performance4(arg);
+//            gen_helper_mtc0_performance4(cpu_env, arg);
             rn = "Performance4";
 //            break;
         case 5:
-//            gen_helper_mtc0_performance5(arg);
+//            gen_helper_mtc0_performance5(cpu_env, arg);
             rn = "Performance5";
 //            break;
         case 6:
-//            gen_helper_mtc0_performance6(arg);
+//            gen_helper_mtc0_performance6(cpu_env, arg);
             rn = "Performance6";
 //            break;
         case 7:
-//            gen_helper_mtc0_performance7(arg);
+//            gen_helper_mtc0_performance7(cpu_env, arg);
             rn = "Performance7";
 //            break;
         default:
@@ -3998,14 +3998,14 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
         case 2:
         case 4:
         case 6:
-            gen_helper_mtc0_taglo(arg);
+            gen_helper_mtc0_taglo(cpu_env, arg);
             rn = "TagLo";
             break;
         case 1:
         case 3:
         case 5:
         case 7:
-            gen_helper_mtc0_datalo(arg);
+            gen_helper_mtc0_datalo(cpu_env, arg);
             rn = "DataLo";
             break;
         default:
@@ -4018,14 +4018,14 @@ static void gen_mtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, i
         case 2:
         case 4:
         case 6:
-            gen_helper_mtc0_taghi(arg);
+            gen_helper_mtc0_taghi(cpu_env, arg);
             rn = "TagHi";
             break;
         case 1:
         case 3:
         case 5:
         case 7:
-            gen_helper_mtc0_datahi(arg);
+            gen_helper_mtc0_datahi(cpu_env, arg);
             rn = "DataHi";
             break;
         default:
@@ -4169,27 +4169,27 @@ static void gen_dmfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
             break;
         case 3:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_dmfc0_tcrestart(arg);
+            gen_helper_dmfc0_tcrestart(arg, cpu_env);
             rn = "TCRestart";
             break;
         case 4:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_dmfc0_tchalt(arg);
+            gen_helper_dmfc0_tchalt(arg, cpu_env);
             rn = "TCHalt";
             break;
         case 5:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_dmfc0_tccontext(arg);
+            gen_helper_dmfc0_tccontext(arg, cpu_env);
             rn = "TCContext";
             break;
         case 6:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_dmfc0_tcschedule(arg);
+            gen_helper_dmfc0_tcschedule(arg, cpu_env);
             rn = "TCSchedule";
             break;
         case 7:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_dmfc0_tcschefback(arg);
+            gen_helper_dmfc0_tcschefback(arg, cpu_env);
             rn = "TCScheFBack";
             break;
         default:
@@ -4424,7 +4424,7 @@ static void gen_dmfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 17:
         switch (sel) {
         case 0:
-            gen_helper_dmfc0_lladdr(arg);
+            gen_helper_dmfc0_lladdr(arg, cpu_env);
             rn = "LLAddr";
             break;
         default:
@@ -4480,7 +4480,7 @@ static void gen_dmfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 23:
         switch (sel) {
         case 0:
-            gen_helper_mfc0_debug(arg); /* EJTAG support */
+            gen_helper_mfc0_debug(arg, cpu_env); /* EJTAG support */
             rn = "Debug";
             break;
         case 1:
@@ -4653,12 +4653,12 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 0:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_index(arg);
+            gen_helper_mtc0_index(cpu_env, arg);
             rn = "Index";
             break;
         case 1:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_mvpcontrol(arg);
+            gen_helper_mtc0_mvpcontrol(cpu_env, arg);
             rn = "MVPControl";
             break;
         case 2:
@@ -4683,22 +4683,22 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
             break;
         case 1:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_vpecontrol(arg);
+            gen_helper_mtc0_vpecontrol(cpu_env, arg);
             rn = "VPEControl";
             break;
         case 2:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_vpeconf0(arg);
+            gen_helper_mtc0_vpeconf0(cpu_env, arg);
             rn = "VPEConf0";
             break;
         case 3:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_vpeconf1(arg);
+            gen_helper_mtc0_vpeconf1(cpu_env, arg);
             rn = "VPEConf1";
             break;
         case 4:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_yqmask(arg);
+            gen_helper_mtc0_yqmask(cpu_env, arg);
             rn = "YQMask";
             break;
         case 5:
@@ -4713,7 +4713,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
             break;
         case 7:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_vpeopt(arg);
+            gen_helper_mtc0_vpeopt(cpu_env, arg);
             rn = "VPEOpt";
             break;
         default:
@@ -4723,42 +4723,42 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 2:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_entrylo0(arg);
+            gen_helper_mtc0_entrylo0(cpu_env, arg);
             rn = "EntryLo0";
             break;
         case 1:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tcstatus(arg);
+            gen_helper_mtc0_tcstatus(cpu_env, arg);
             rn = "TCStatus";
             break;
         case 2:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tcbind(arg);
+            gen_helper_mtc0_tcbind(cpu_env, arg);
             rn = "TCBind";
             break;
         case 3:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tcrestart(arg);
+            gen_helper_mtc0_tcrestart(cpu_env, arg);
             rn = "TCRestart";
             break;
         case 4:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tchalt(arg);
+            gen_helper_mtc0_tchalt(cpu_env, arg);
             rn = "TCHalt";
             break;
         case 5:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tccontext(arg);
+            gen_helper_mtc0_tccontext(cpu_env, arg);
             rn = "TCContext";
             break;
         case 6:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tcschedule(arg);
+            gen_helper_mtc0_tcschedule(cpu_env, arg);
             rn = "TCSchedule";
             break;
         case 7:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mtc0_tcschefback(arg);
+            gen_helper_mtc0_tcschefback(cpu_env, arg);
             rn = "TCScheFBack";
             break;
         default:
@@ -4768,7 +4768,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 3:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_entrylo1(arg);
+            gen_helper_mtc0_entrylo1(cpu_env, arg);
             rn = "EntryLo1";
             break;
         default:
@@ -4778,7 +4778,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 4:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_context(arg);
+            gen_helper_mtc0_context(cpu_env, arg);
             rn = "Context";
             break;
         case 1:
@@ -4792,12 +4792,12 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 5:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_pagemask(arg);
+            gen_helper_mtc0_pagemask(cpu_env, arg);
             rn = "PageMask";
             break;
         case 1:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_pagegrain(arg);
+            gen_helper_mtc0_pagegrain(cpu_env, arg);
             rn = "PageGrain";
             break;
         default:
@@ -4807,32 +4807,32 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 6:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_wired(arg);
+            gen_helper_mtc0_wired(cpu_env, arg);
             rn = "Wired";
             break;
         case 1:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_srsconf0(arg);
+            gen_helper_mtc0_srsconf0(cpu_env, arg);
             rn = "SRSConf0";
             break;
         case 2:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_srsconf1(arg);
+            gen_helper_mtc0_srsconf1(cpu_env, arg);
             rn = "SRSConf1";
             break;
         case 3:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_srsconf2(arg);
+            gen_helper_mtc0_srsconf2(cpu_env, arg);
             rn = "SRSConf2";
             break;
         case 4:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_srsconf3(arg);
+            gen_helper_mtc0_srsconf3(cpu_env, arg);
             rn = "SRSConf3";
             break;
         case 5:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_srsconf4(arg);
+            gen_helper_mtc0_srsconf4(cpu_env, arg);
             rn = "SRSConf4";
             break;
         default:
@@ -4843,7 +4843,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
         switch (sel) {
         case 0:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_hwrena(arg);
+            gen_helper_mtc0_hwrena(cpu_env, arg);
             rn = "HWREna";
             break;
         default:
@@ -4857,7 +4857,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 9:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_count(arg);
+            gen_helper_mtc0_count(cpu_env, arg);
             rn = "Count";
             break;
         /* 6,7 are implementation dependent */
@@ -4870,7 +4870,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 10:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_entryhi(arg);
+            gen_helper_mtc0_entryhi(cpu_env, arg);
             rn = "EntryHi";
             break;
         default:
@@ -4880,7 +4880,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 11:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_compare(arg);
+            gen_helper_mtc0_compare(cpu_env, arg);
             rn = "Compare";
             break;
         /* 6,7 are implementation dependent */
@@ -4894,7 +4894,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
         switch (sel) {
         case 0:
             save_cpu_state(ctx, 1);
-            gen_helper_mtc0_status(arg);
+            gen_helper_mtc0_status(cpu_env, arg);
             /* BS_STOP isn't good enough here, hflags may have changed. */
             gen_save_pc(ctx->pc + 4);
             ctx->bstate = BS_EXCP;
@@ -4902,14 +4902,14 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
             break;
         case 1:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_intctl(arg);
+            gen_helper_mtc0_intctl(cpu_env, arg);
             /* Stop translation as we may have switched the execution mode */
             ctx->bstate = BS_STOP;
             rn = "IntCtl";
             break;
         case 2:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_srsctl(arg);
+            gen_helper_mtc0_srsctl(cpu_env, arg);
             /* Stop translation as we may have switched the execution mode */
             ctx->bstate = BS_STOP;
             rn = "SRSCtl";
@@ -4929,7 +4929,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
         switch (sel) {
         case 0:
             save_cpu_state(ctx, 1);
-            gen_helper_mtc0_cause(arg);
+            gen_helper_mtc0_cause(cpu_env, arg);
             rn = "Cause";
             break;
         default:
@@ -4954,7 +4954,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
             break;
         case 1:
             check_insn(env, ctx, ISA_MIPS32R2);
-            gen_helper_mtc0_ebase(arg);
+            gen_helper_mtc0_ebase(cpu_env, arg);
             rn = "EBase";
             break;
         default:
@@ -4964,7 +4964,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 16:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_config0(arg);
+            gen_helper_mtc0_config0(cpu_env, arg);
             rn = "Config";
             /* Stop translation as we may have switched the execution mode */
             ctx->bstate = BS_STOP;
@@ -4974,7 +4974,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
             rn = "Config1";
             break;
         case 2:
-            gen_helper_mtc0_config2(arg);
+            gen_helper_mtc0_config2(cpu_env, arg);
             rn = "Config2";
             /* Stop translation as we may have switched the execution mode */
             ctx->bstate = BS_STOP;
@@ -4992,7 +4992,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 17:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_lladdr(arg);
+            gen_helper_mtc0_lladdr(cpu_env, arg);
             rn = "LLAddr";
             break;
         default:
@@ -5002,7 +5002,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 18:
         switch (sel) {
         case 0 ... 7:
-            gen_helper_1i(mtc0_watchlo, arg, sel);
+            gen_helper_2i(mtc0_watchlo, cpu_env, arg, sel);
             rn = "WatchLo";
             break;
         default:
@@ -5012,7 +5012,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 19:
         switch (sel) {
         case 0 ... 7:
-            gen_helper_1i(mtc0_watchhi, arg, sel);
+            gen_helper_2i(mtc0_watchhi, cpu_env, arg, sel);
             rn = "WatchHi";
             break;
         default:
@@ -5023,7 +5023,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
         switch (sel) {
         case 0:
             check_insn(env, ctx, ISA_MIPS3);
-            gen_helper_mtc0_xcontext(arg);
+            gen_helper_mtc0_xcontext(cpu_env, arg);
             rn = "XContext";
             break;
         default:
@@ -5034,7 +5034,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
        /* Officially reserved, but sel 0 is used for R1x000 framemask */
         switch (sel) {
         case 0:
-            gen_helper_mtc0_framemask(arg);
+            gen_helper_mtc0_framemask(cpu_env, arg);
             rn = "Framemask";
             break;
         default:
@@ -5048,7 +5048,7 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 23:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_debug(arg); /* EJTAG support */
+            gen_helper_mtc0_debug(cpu_env, arg); /* EJTAG support */
             /* BS_STOP isn't good enough here, hflags may have changed. */
             gen_save_pc(ctx->pc + 4);
             ctx->bstate = BS_EXCP;
@@ -5096,35 +5096,35 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 25:
         switch (sel) {
         case 0:
-            gen_helper_mtc0_performance0(arg);
+            gen_helper_mtc0_performance0(cpu_env, arg);
             rn = "Performance0";
             break;
         case 1:
-//            gen_helper_mtc0_performance1(arg);
+//            gen_helper_mtc0_performance1(cpu_env, arg);
             rn = "Performance1";
 //            break;
         case 2:
-//            gen_helper_mtc0_performance2(arg);
+//            gen_helper_mtc0_performance2(cpu_env, arg);
             rn = "Performance2";
 //            break;
         case 3:
-//            gen_helper_mtc0_performance3(arg);
+//            gen_helper_mtc0_performance3(cpu_env, arg);
             rn = "Performance3";
 //            break;
         case 4:
-//            gen_helper_mtc0_performance4(arg);
+//            gen_helper_mtc0_performance4(cpu_env, arg);
             rn = "Performance4";
 //            break;
         case 5:
-//            gen_helper_mtc0_performance5(arg);
+//            gen_helper_mtc0_performance5(cpu_env, arg);
             rn = "Performance5";
 //            break;
         case 6:
-//            gen_helper_mtc0_performance6(arg);
+//            gen_helper_mtc0_performance6(cpu_env, arg);
             rn = "Performance6";
 //            break;
         case 7:
-//            gen_helper_mtc0_performance7(arg);
+//            gen_helper_mtc0_performance7(cpu_env, arg);
             rn = "Performance7";
 //            break;
         default:
@@ -5151,14 +5151,14 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
         case 2:
         case 4:
         case 6:
-            gen_helper_mtc0_taglo(arg);
+            gen_helper_mtc0_taglo(cpu_env, arg);
             rn = "TagLo";
             break;
         case 1:
         case 3:
         case 5:
         case 7:
-            gen_helper_mtc0_datalo(arg);
+            gen_helper_mtc0_datalo(cpu_env, arg);
             rn = "DataLo";
             break;
         default:
@@ -5171,14 +5171,14 @@ static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
         case 2:
         case 4:
         case 6:
-            gen_helper_mtc0_taghi(arg);
+            gen_helper_mtc0_taghi(cpu_env, arg);
             rn = "TagHi";
             break;
         case 1:
         case 3:
         case 5:
         case 7:
-            gen_helper_mtc0_datahi(arg);
+            gen_helper_mtc0_datahi(cpu_env, arg);
             rn = "DataHi";
             break;
         default:
@@ -5244,25 +5244,25 @@ static void gen_mftr(CPUMIPSState *env, DisasContext *ctx, int rt, int rd,
         case 2:
             switch (sel) {
             case 1:
-                gen_helper_mftc0_tcstatus(t0);
+                gen_helper_mftc0_tcstatus(t0, cpu_env);
                 break;
             case 2:
-                gen_helper_mftc0_tcbind(t0);
+                gen_helper_mftc0_tcbind(t0, cpu_env);
                 break;
             case 3:
-                gen_helper_mftc0_tcrestart(t0);
+                gen_helper_mftc0_tcrestart(t0, cpu_env);
                 break;
             case 4:
-                gen_helper_mftc0_tchalt(t0);
+                gen_helper_mftc0_tchalt(t0, cpu_env);
                 break;
             case 5:
-                gen_helper_mftc0_tccontext(t0);
+                gen_helper_mftc0_tccontext(t0, cpu_env);
                 break;
             case 6:
-                gen_helper_mftc0_tcschedule(t0);
+                gen_helper_mftc0_tcschedule(t0, cpu_env);
                 break;
             case 7:
-                gen_helper_mftc0_tcschefback(t0);
+                gen_helper_mftc0_tcschefback(t0, cpu_env);
                 break;
             default:
                 gen_mfc0(env, ctx, t0, rt, sel);
@@ -5272,7 +5272,7 @@ static void gen_mftr(CPUMIPSState *env, DisasContext *ctx, int rt, int rd,
         case 10:
             switch (sel) {
             case 0:
-                gen_helper_mftc0_entryhi(t0);
+                gen_helper_mftc0_entryhi(t0, cpu_env);
                 break;
             default:
                 gen_mfc0(env, ctx, t0, rt, sel);
@@ -5281,7 +5281,7 @@ static void gen_mftr(CPUMIPSState *env, DisasContext *ctx, int rt, int rd,
         case 12:
             switch (sel) {
             case 0:
-                gen_helper_mftc0_status(t0);
+                gen_helper_mftc0_status(t0, cpu_env);
                 break;
             default:
                 gen_mfc0(env, ctx, t0, rt, sel);
@@ -5290,7 +5290,7 @@ static void gen_mftr(CPUMIPSState *env, DisasContext *ctx, int rt, int rd,
         case 23:
             switch (sel) {
             case 0:
-                gen_helper_mftc0_debug(t0);
+                gen_helper_mftc0_debug(t0, cpu_env);
                 break;
             default:
                 gen_mfc0(env, ctx, t0, rt, sel);
@@ -5409,25 +5409,25 @@ static void gen_mttr(CPUMIPSState *env, DisasContext *ctx, int rd, int rt,
         case 2:
             switch (sel) {
             case 1:
-                gen_helper_mttc0_tcstatus(t0);
+                gen_helper_mttc0_tcstatus(cpu_env, t0);
                 break;
             case 2:
-                gen_helper_mttc0_tcbind(t0);
+                gen_helper_mttc0_tcbind(cpu_env, t0);
                 break;
             case 3:
-                gen_helper_mttc0_tcrestart(t0);
+                gen_helper_mttc0_tcrestart(cpu_env, t0);
                 break;
             case 4:
-                gen_helper_mttc0_tchalt(t0);
+                gen_helper_mttc0_tchalt(cpu_env, t0);
                 break;
             case 5:
-                gen_helper_mttc0_tccontext(t0);
+                gen_helper_mttc0_tccontext(cpu_env, t0);
                 break;
             case 6:
-                gen_helper_mttc0_tcschedule(t0);
+                gen_helper_mttc0_tcschedule(cpu_env, t0);
                 break;
             case 7:
-                gen_helper_mttc0_tcschefback(t0);
+                gen_helper_mttc0_tcschefback(cpu_env, t0);
                 break;
             default:
                 gen_mtc0(env, ctx, t0, rd, sel);
@@ -5437,7 +5437,7 @@ static void gen_mttr(CPUMIPSState *env, DisasContext *ctx, int rd, int rt,
         case 10:
             switch (sel) {
             case 0:
-                gen_helper_mttc0_entryhi(t0);
+                gen_helper_mttc0_entryhi(cpu_env, t0);
                 break;
             default:
                 gen_mtc0(env, ctx, t0, rd, sel);
@@ -5446,7 +5446,7 @@ static void gen_mttr(CPUMIPSState *env, DisasContext *ctx, int rd, int rt,
         case 12:
             switch (sel) {
             case 0:
-                gen_helper_mttc0_status(t0);
+                gen_helper_mttc0_status(cpu_env, t0);
                 break;
             default:
                 gen_mtc0(env, ctx, t0, rd, sel);
@@ -5455,7 +5455,7 @@ static void gen_mttr(CPUMIPSState *env, DisasContext *ctx, int rd, int rt,
         case 23:
             switch (sel) {
             case 0:
-                gen_helper_mttc0_debug(t0);
+                gen_helper_mttc0_debug(cpu_env, t0);
                 break;
             default:
                 gen_mtc0(env, ctx, t0, rd, sel);
