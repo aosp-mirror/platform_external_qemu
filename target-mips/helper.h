@@ -164,41 +164,41 @@ DEF_HELPER_2(fork, void, tl, tl)
 DEF_HELPER_1(yield, tl, tl)
 
 /* CP1 functions */
-DEF_HELPER_1(cfc1, tl, i32)
-DEF_HELPER_2(ctc1, void, tl, i32)
+DEF_HELPER_2(cfc1, tl, env, i32)
+DEF_HELPER_3(ctc1, void, env, tl, i32)
 
-DEF_HELPER_1(float_cvtd_s, i64, i32)
-DEF_HELPER_1(float_cvtd_w, i64, i32)
-DEF_HELPER_1(float_cvtd_l, i64, i64)
-DEF_HELPER_1(float_cvtl_d, i64, i64)
-DEF_HELPER_1(float_cvtl_s, i64, i32)
-DEF_HELPER_1(float_cvtps_pw, i64, i64)
-DEF_HELPER_1(float_cvtpw_ps, i64, i64)
-DEF_HELPER_1(float_cvts_d, i32, i64)
-DEF_HELPER_1(float_cvts_w, i32, i32)
-DEF_HELPER_1(float_cvts_l, i32, i64)
-DEF_HELPER_1(float_cvts_pl, i32, i32)
-DEF_HELPER_1(float_cvts_pu, i32, i32)
-DEF_HELPER_1(float_cvtw_s, i32, i32)
-DEF_HELPER_1(float_cvtw_d, i32, i64)
+DEF_HELPER_2(float_cvtd_s, i64, env, i32)
+DEF_HELPER_2(float_cvtd_w, i64, env, i32)
+DEF_HELPER_2(float_cvtd_l, i64, env, i64)
+DEF_HELPER_2(float_cvtl_d, i64, env, i64)
+DEF_HELPER_2(float_cvtl_s, i64, env, i32)
+DEF_HELPER_2(float_cvtps_pw, i64, env, i64)
+DEF_HELPER_2(float_cvtpw_ps, i64, env, i64)
+DEF_HELPER_2(float_cvts_d, i32, env, i64)
+DEF_HELPER_2(float_cvts_w, i32, env, i32)
+DEF_HELPER_2(float_cvts_l, i32, env, i64)
+DEF_HELPER_2(float_cvts_pl, i32, env, i32)
+DEF_HELPER_2(float_cvts_pu, i32, env, i32)
+DEF_HELPER_2(float_cvtw_s, i32, env, i32)
+DEF_HELPER_2(float_cvtw_d, i32, env, i64)
 
-DEF_HELPER_2(float_addr_ps, i64, i64, i64)
-DEF_HELPER_2(float_mulr_ps, i64, i64, i64)
+DEF_HELPER_3(float_addr_ps, i64, env, i64, i64)
+DEF_HELPER_3(float_mulr_ps, i64, env, i64, i64)
 
-#define FOP_PROTO(op)                       \
-DEF_HELPER_1(float_ ## op ## l_s, i64, i32) \
-DEF_HELPER_1(float_ ## op ## l_d, i64, i64) \
-DEF_HELPER_1(float_ ## op ## w_s, i32, i32) \
-DEF_HELPER_1(float_ ## op ## w_d, i32, i64)
+#define FOP_PROTO(op)                            \
+DEF_HELPER_2(float_ ## op ## l_s, i64, env, i32) \
+DEF_HELPER_2(float_ ## op ## l_d, i64, env, i64) \
+DEF_HELPER_2(float_ ## op ## w_s, i32, env, i32) \
+DEF_HELPER_2(float_ ## op ## w_d, i32, env, i64)
 FOP_PROTO(round)
 FOP_PROTO(trunc)
 FOP_PROTO(ceil)
 FOP_PROTO(floor)
 #undef FOP_PROTO
 
-#define FOP_PROTO(op)                       \
-DEF_HELPER_1(float_ ## op ## _s, i32, i32)  \
-DEF_HELPER_1(float_ ## op ## _d, i64, i64)
+#define FOP_PROTO(op)                            \
+DEF_HELPER_2(float_ ## op ## _s, i32, env, i32)  \
+DEF_HELPER_2(float_ ## op ## _d, i64, env, i64)
 FOP_PROTO(sqrt)
 FOP_PROTO(rsqrt)
 FOP_PROTO(recip)
@@ -210,14 +210,20 @@ DEF_HELPER_1(float_ ## op ## _d, i64, i64)  \
 DEF_HELPER_1(float_ ## op ## _ps, i64, i64)
 FOP_PROTO(abs)
 FOP_PROTO(chs)
+#undef FOP_PROTO
+
+#define FOP_PROTO(op)                       \
+DEF_HELPER_2(float_ ## op ## _s, i32, env, i32)  \
+DEF_HELPER_2(float_ ## op ## _d, i64, env, i64)  \
+DEF_HELPER_2(float_ ## op ## _ps, i64, env, i64)
 FOP_PROTO(recip1)
 FOP_PROTO(rsqrt1)
 #undef FOP_PROTO
 
-#define FOP_PROTO(op)                             \
-DEF_HELPER_2(float_ ## op ## _s, i32, i32, i32)   \
-DEF_HELPER_2(float_ ## op ## _d, i64, i64, i64)   \
-DEF_HELPER_2(float_ ## op ## _ps, i64, i64, i64)
+#define FOP_PROTO(op)                                  \
+DEF_HELPER_3(float_ ## op ## _s, i32, env, i32, i32)   \
+DEF_HELPER_3(float_ ## op ## _d, i64, env, i64, i64)   \
+DEF_HELPER_3(float_ ## op ## _ps, i64, env, i64, i64)
 FOP_PROTO(add)
 FOP_PROTO(sub)
 FOP_PROTO(mul)
@@ -226,23 +232,23 @@ FOP_PROTO(recip2)
 FOP_PROTO(rsqrt2)
 #undef FOP_PROTO
 
-#define FOP_PROTO(op)                                 \
-DEF_HELPER_3(float_ ## op ## _s, i32, i32, i32, i32)  \
-DEF_HELPER_3(float_ ## op ## _d, i64, i64, i64, i64)  \
-DEF_HELPER_3(float_ ## op ## _ps, i64, i64, i64, i64)
+#define FOP_PROTO(op)                                      \
+DEF_HELPER_4(float_ ## op ## _s, i32, env, i32, i32, i32)  \
+DEF_HELPER_4(float_ ## op ## _d, i64, env, i64, i64, i64)  \
+DEF_HELPER_4(float_ ## op ## _ps, i64, env, i64, i64, i64)
 FOP_PROTO(muladd)
 FOP_PROTO(mulsub)
 FOP_PROTO(nmuladd)
 FOP_PROTO(nmulsub)
 #undef FOP_PROTO
 
-#define FOP_PROTO(op)                               \
-DEF_HELPER_3(cmp_d_ ## op, void, i64, i64, int)     \
-DEF_HELPER_3(cmpabs_d_ ## op, void, i64, i64, int)  \
-DEF_HELPER_3(cmp_s_ ## op, void, i32, i32, int)     \
-DEF_HELPER_3(cmpabs_s_ ## op, void, i32, i32, int)  \
-DEF_HELPER_3(cmp_ps_ ## op, void, i64, i64, int)    \
-DEF_HELPER_3(cmpabs_ps_ ## op, void, i64, i64, int)
+#define FOP_PROTO(op)                                    \
+DEF_HELPER_4(cmp_d_ ## op, void, env, i64, i64, int)     \
+DEF_HELPER_4(cmpabs_d_ ## op, void, env, i64, i64, int)  \
+DEF_HELPER_4(cmp_s_ ## op, void, env, i32, i32, int)     \
+DEF_HELPER_4(cmpabs_s_ ## op, void, env, i32, i32, int)  \
+DEF_HELPER_4(cmp_ps_ ## op, void, env, i64, i64, int)    \
+DEF_HELPER_4(cmpabs_ps_ ## op, void, env, i64, i64, int)
 FOP_PROTO(f)
 FOP_PROTO(un)
 FOP_PROTO(eq)
