@@ -2054,9 +2054,11 @@ void helper_wait (void)
 
 #if !defined(CONFIG_USER_ONLY)
 
-static void do_unaligned_access (target_ulong addr, int is_write,
+static void do_unaligned_access (CPUMIPSState *env1,
+                                 target_ulong addr, int is_write,
                                  int is_user, uintptr_t retaddr);
 
+#undef env
 #define MMUSUFFIX _mmu
 #define ALIGNED_ONLY
 
@@ -2072,7 +2074,8 @@ static void do_unaligned_access (target_ulong addr, int is_write,
 #define SHIFT 3
 #include "exec/softmmu_template.h"
 
-static void do_unaligned_access (target_ulong addr, int is_write,
+static void do_unaligned_access (CPUMIPSState *env1,
+                                 target_ulong addr, int is_write,
                                  int is_user, uintptr_t retaddr)
 {
     env->CP0_BadVAddr = addr;
