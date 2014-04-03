@@ -932,7 +932,7 @@ static inline void op_ldst_##insn(TCGv ret, TCGv arg1, DisasContext *ctx)  \
 #define OP_LD_ATOMIC(insn,fname)                                           \
 static inline void op_ldst_##insn(TCGv ret, TCGv arg1, DisasContext *ctx)  \
 {                                                                          \
-    gen_helper_2i(insn, ret, arg1, ctx->mem_idx);                          \
+    gen_helper_3i(insn, ret, cpu_env, arg1, ctx->mem_idx);                 \
 }
 #endif
 OP_LD_ATOMIC(ll,ld32s);
@@ -970,7 +970,7 @@ static inline void op_ldst_##insn(TCGv arg1, TCGv arg2, int rt, DisasContext *ct
 static inline void op_ldst_##insn(TCGv arg1, TCGv arg2, int rt, DisasContext *ctx) \
 {                                                                            \
     TCGv t0 = tcg_temp_new();                                                \
-    gen_helper_3i(insn, t0, arg1, arg2, ctx->mem_idx);                       \
+    gen_helper_4i(insn, t0, cpu_env, arg1, arg2, ctx->mem_idx);              \
     gen_store_gpr(t0, rt);                                                   \
     tcg_temp_free(t0);                                                       \
 }
