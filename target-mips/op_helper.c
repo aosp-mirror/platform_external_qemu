@@ -18,8 +18,6 @@
  */
 #include <stdlib.h>
 #include "cpu.h"
-#include "dyngen-exec.h"
-
 #include "qemu/host-utils.h"
 
 #include "helper.h"
@@ -354,27 +352,28 @@ void helper_dmultu (CPUMIPSState *env, target_ulong arg1, target_ulong arg2)
 
 #ifndef CONFIG_USER_ONLY
 
-static inline hwaddr do_translate_address(CPUMIPSState *env1,
-                                          target_ulong address, int rw)
+static inline hwaddr do_translate_address(CPUMIPSState *env,
+                                                      target_ulong address,
+                                                      int rw)
 {
     hwaddr lladdr;
 
-    lladdr = cpu_mips_translate_address(env1, address, rw);
+    lladdr = cpu_mips_translate_address(env, address, rw);
 
     if (lladdr == (hwaddr)-1LL) {
-        cpu_loop_exit(env1);
+        cpu_loop_exit(env);
     } else {
         return lladdr;
     }
 }
 
 #define HELPER_LD_ATOMIC(name, insn)                                          \
-target_ulong helper_##name(CPUMIPSState *env1, target_ulong arg, int mem_idx)  \
+target_ulong helper_##name(CPUMIPSState *env, target_ulong arg, int mem_idx)  \
 {                                                                             \
-    env1->lladdr = do_translate_address(env1, arg, 0);                        \
+    env->lladdr = do_translate_address(env, arg, 0);                        \
     /* NOTE(digit): Use of 'cpu_single_env' works around compiler bug! */     \
-    cpu_single_env->llval = do_##insn(env1, arg, mem_idx);                    \
-    return env1->llval;                                                       \
+    cpu_single_env->llval = do_##insn(env, arg, mem_idx);                    \
+    return env->llval;                                                       \
 }
 HELPER_LD_ATOMIC(ll, lw)
 #ifdef TARGET_MIPS64
@@ -383,19 +382,19 @@ HELPER_LD_ATOMIC(lld, ld)
 #undef HELPER_LD_ATOMIC
 
 #define HELPER_ST_ATOMIC(name, ld_insn, st_insn, almask)                      \
-target_ulong helper_##name(CPUMIPSState *env1, target_ulong arg1,              \
+target_ulong helper_##name(CPUMIPSState *env, target_ulong arg1,              \
                            target_ulong arg2, int mem_idx)                    \
 {                                                                             \
     target_long tmp;                                                          \
                                                                               \
     if (arg2 & almask) {                                                      \
         env->CP0_BadVAddr = arg2;                                             \
-        helper_raise_exception(env1, EXCP_AdES);                              \
+        helper_raise_exception(env, EXCP_AdES);                               \
     }                                                                         \
-    if (do_translate_address(env1, arg2, 1) == env1->lladdr) {                \
-        tmp = do_##ld_insn(env1, arg2, mem_idx);                              \
+    if (do_translate_address(env, arg2, 1) == env->lladdr) {                  \
+        tmp = do_##ld_insn(env, arg2, mem_idx);                               \
         if (tmp == env->llval) {                                              \
-            do_##st_insn(env1, arg2, arg1, mem_idx);                          \
+            do_##st_insn(env, arg2, arg1, mem_idx);                           \
             return 1;                                                         \
         }                                                                     \
     }                                                                         \
@@ -2066,11 +2065,12 @@ void helper_wait(CPUMIPSState *env)
 
 #if !defined(CONFIG_USER_ONLY)
 
-static void do_unaligned_access (CPUMIPSState *env1,
+static void do_unaligned_access (CPUMIPSState *env,
                                  target_ulong addr, int is_write,
                                  int is_user, uintptr_t retaddr);
 
-#undef env
+#define env cpu_single_env
+
 #define MMUSUFFIX _mmu
 #define ALIGNED_ONLY
 
@@ -2086,7 +2086,9 @@ static void do_unaligned_access (CPUMIPSState *env1,
 #define SHIFT 3
 #include "exec/softmmu_template.h"
 
-static void do_unaligned_access(CPUMIPSState *env1, target_ulong addr,
+#undef env
+
+static void do_unaligned_access(CPUMIPSState *env, target_ulong addr,
                                 int is_write, int is_user, uintptr_t retaddr)
 {
     env->CP0_BadVAddr = addr;
