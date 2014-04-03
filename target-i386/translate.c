@@ -4409,7 +4409,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
                 break;
 #ifdef TARGET_X86_64
             case OT_QUAD:
-                gen_helper_mulq_EAX_T0(cpu_T[0]);
+                gen_helper_mulq_EAX_T0(cpu_env, cpu_T[0]);
                 s->cc_op = CC_OP_MULQ;
                 break;
 #endif
@@ -4479,7 +4479,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
                 break;
 #ifdef TARGET_X86_64
             case OT_QUAD:
-                gen_helper_imulq_EAX_T0(cpu_T[0]);
+                gen_helper_imulq_EAX_T0(cpu_env, cpu_T[0]);
                 s->cc_op = CC_OP_MULQ;
                 break;
 #endif
@@ -4489,21 +4489,21 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
             switch(ot) {
             case OT_BYTE:
                 gen_jmp_im(pc_start - s->cs_base);
-                gen_helper_divb_AL(cpu_T[0]);
+                gen_helper_divb_AL(cpu_env, cpu_T[0]);
                 break;
             case OT_WORD:
                 gen_jmp_im(pc_start - s->cs_base);
-                gen_helper_divw_AX(cpu_T[0]);
+                gen_helper_divw_AX(cpu_env, cpu_T[0]);
                 break;
             default:
             case OT_LONG:
                 gen_jmp_im(pc_start - s->cs_base);
-                gen_helper_divl_EAX(cpu_T[0]);
+                gen_helper_divl_EAX(cpu_env, cpu_T[0]);
                 break;
 #ifdef TARGET_X86_64
             case OT_QUAD:
                 gen_jmp_im(pc_start - s->cs_base);
-                gen_helper_divq_EAX(cpu_T[0]);
+                gen_helper_divq_EAX(cpu_env, cpu_T[0]);
                 break;
 #endif
             }
@@ -4512,21 +4512,21 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
             switch(ot) {
             case OT_BYTE:
                 gen_jmp_im(pc_start - s->cs_base);
-                gen_helper_idivb_AL(cpu_T[0]);
+                gen_helper_idivb_AL(cpu_env, cpu_T[0]);
                 break;
             case OT_WORD:
                 gen_jmp_im(pc_start - s->cs_base);
-                gen_helper_idivw_AX(cpu_T[0]);
+                gen_helper_idivw_AX(cpu_env, cpu_T[0]);
                 break;
             default:
             case OT_LONG:
                 gen_jmp_im(pc_start - s->cs_base);
-                gen_helper_idivl_EAX(cpu_T[0]);
+                gen_helper_idivl_EAX(cpu_env, cpu_T[0]);
                 break;
 #ifdef TARGET_X86_64
             case OT_QUAD:
                 gen_jmp_im(pc_start - s->cs_base);
-                gen_helper_idivq_EAX(cpu_T[0]);
+                gen_helper_idivq_EAX(cpu_env, cpu_T[0]);
                 break;
 #endif
             }
@@ -4743,7 +4743,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
 
 #ifdef TARGET_X86_64
         if (ot == OT_QUAD) {
-            gen_helper_imulq_T0_T1(cpu_T[0], cpu_T[0], cpu_T[1]);
+            gen_helper_imulq_T0_T1(cpu_T[0], cpu_env, cpu_T[0], cpu_T[1]);
         } else
 #endif
         if (ot == OT_LONG) {
@@ -6345,7 +6345,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
         } else {
             if (s->cc_op != CC_OP_DYNAMIC)
                 gen_op_set_cc_op(s->cc_op);
-            gen_helper_read_eflags(cpu_T[0]);
+            gen_helper_read_eflags(cpu_T[0], cpu_env);
             gen_push_T0(s);
         }
         break;
@@ -6357,27 +6357,27 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
             gen_pop_T0(s);
             if (s->cpl == 0) {
                 if (s->dflag) {
-                    gen_helper_write_eflags(cpu_T[0],
+                    gen_helper_write_eflags(cpu_env, cpu_T[0],
                                        tcg_const_i32((TF_MASK | AC_MASK | ID_MASK | NT_MASK | IF_MASK | IOPL_MASK)));
                 } else {
-                    gen_helper_write_eflags(cpu_T[0],
+                    gen_helper_write_eflags(cpu_env, cpu_T[0],
                                        tcg_const_i32((TF_MASK | AC_MASK | ID_MASK | NT_MASK | IF_MASK | IOPL_MASK) & 0xffff));
                 }
             } else {
                 if (s->cpl <= s->iopl) {
                     if (s->dflag) {
-                        gen_helper_write_eflags(cpu_T[0],
+                        gen_helper_write_eflags(cpu_env, cpu_T[0],
                                            tcg_const_i32((TF_MASK | AC_MASK | ID_MASK | NT_MASK | IF_MASK)));
                     } else {
-                        gen_helper_write_eflags(cpu_T[0],
+                        gen_helper_write_eflags(cpu_env, cpu_T[0],
                                            tcg_const_i32((TF_MASK | AC_MASK | ID_MASK | NT_MASK | IF_MASK) & 0xffff));
                     }
                 } else {
                     if (s->dflag) {
-                        gen_helper_write_eflags(cpu_T[0],
+                        gen_helper_write_eflags(cpu_env, cpu_T[0],
                                            tcg_const_i32((TF_MASK | AC_MASK | ID_MASK | NT_MASK)));
                     } else {
-                        gen_helper_write_eflags(cpu_T[0],
+                        gen_helper_write_eflags(cpu_env, cpu_T[0],
                                            tcg_const_i32((TF_MASK | AC_MASK | ID_MASK | NT_MASK) & 0xffff));
                     }
                 }
