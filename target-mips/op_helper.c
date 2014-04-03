@@ -1518,7 +1518,7 @@ void helper_mtc0_datahi(CPUMIPSState *env, target_ulong arg1)
 }
 
 /* MIPS MT functions */
-target_ulong helper_mftgpr(uint32_t sel)
+target_ulong helper_mftgpr(CPUMIPSState *env, uint32_t sel)
 {
     int other_tc = env->CP0_VPEControl & (0xff << CP0VPECo_TargTC);
     CPUMIPSState *other = mips_cpu_map_tc(env, &other_tc);
@@ -1529,7 +1529,7 @@ target_ulong helper_mftgpr(uint32_t sel)
         return other->tcs[other_tc].gpr[sel];
 }
 
-target_ulong helper_mftlo(uint32_t sel)
+target_ulong helper_mftlo(CPUMIPSState *env, uint32_t sel)
 {
     int other_tc = env->CP0_VPEControl & (0xff << CP0VPECo_TargTC);
     CPUMIPSState *other = mips_cpu_map_tc(env, &other_tc);
@@ -1540,7 +1540,7 @@ target_ulong helper_mftlo(uint32_t sel)
         return other->tcs[other_tc].LO[sel];
 }
 
-target_ulong helper_mfthi(uint32_t sel)
+target_ulong helper_mfthi(CPUMIPSState *env, uint32_t sel)
 {
     int other_tc = env->CP0_VPEControl & (0xff << CP0VPECo_TargTC);
     CPUMIPSState *other = mips_cpu_map_tc(env, &other_tc);
@@ -1551,7 +1551,7 @@ target_ulong helper_mfthi(uint32_t sel)
         return other->tcs[other_tc].HI[sel];
 }
 
-target_ulong helper_mftacx(uint32_t sel)
+target_ulong helper_mftacx(CPUMIPSState *env, uint32_t sel)
 {
     int other_tc = env->CP0_VPEControl & (0xff << CP0VPECo_TargTC);
     CPUMIPSState *other = mips_cpu_map_tc(env, &other_tc);
@@ -1562,7 +1562,7 @@ target_ulong helper_mftacx(uint32_t sel)
         return other->tcs[other_tc].ACX[sel];
 }
 
-target_ulong helper_mftdsp(void)
+target_ulong helper_mftdsp(CPUMIPSState *env)
 {
     int other_tc = env->CP0_VPEControl & (0xff << CP0VPECo_TargTC);
     CPUMIPSState *other = mips_cpu_map_tc(env, &other_tc);
@@ -1573,7 +1573,7 @@ target_ulong helper_mftdsp(void)
         return other->tcs[other_tc].DSPControl;
 }
 
-void helper_mttgpr(target_ulong arg1, uint32_t sel)
+void helper_mttgpr(CPUMIPSState *env, target_ulong arg1, uint32_t sel)
 {
     int other_tc = env->CP0_VPEControl & (0xff << CP0VPECo_TargTC);
     CPUMIPSState *other = mips_cpu_map_tc(env, &other_tc);
@@ -1584,7 +1584,7 @@ void helper_mttgpr(target_ulong arg1, uint32_t sel)
         other->tcs[other_tc].gpr[sel] = arg1;
 }
 
-void helper_mttlo(target_ulong arg1, uint32_t sel)
+void helper_mttlo(CPUMIPSState *env, target_ulong arg1, uint32_t sel)
 {
     int other_tc = env->CP0_VPEControl & (0xff << CP0VPECo_TargTC);
     CPUMIPSState *other = mips_cpu_map_tc(env, &other_tc);
@@ -1595,7 +1595,7 @@ void helper_mttlo(target_ulong arg1, uint32_t sel)
         other->tcs[other_tc].LO[sel] = arg1;
 }
 
-void helper_mtthi(target_ulong arg1, uint32_t sel)
+void helper_mtthi(CPUMIPSState *env, target_ulong arg1, uint32_t sel)
 {
     int other_tc = env->CP0_VPEControl & (0xff << CP0VPECo_TargTC);
     CPUMIPSState *other = mips_cpu_map_tc(env, &other_tc);
@@ -1606,7 +1606,7 @@ void helper_mtthi(target_ulong arg1, uint32_t sel)
         other->tcs[other_tc].HI[sel] = arg1;
 }
 
-void helper_mttacx(target_ulong arg1, uint32_t sel)
+void helper_mttacx(CPUMIPSState *env, target_ulong arg1, uint32_t sel)
 {
     int other_tc = env->CP0_VPEControl & (0xff << CP0VPECo_TargTC);
     CPUMIPSState *other = mips_cpu_map_tc(env, &other_tc);
@@ -1617,7 +1617,7 @@ void helper_mttacx(target_ulong arg1, uint32_t sel)
         other->tcs[other_tc].ACX[sel] = arg1;
 }
 
-void helper_mttdsp(target_ulong arg1)
+void helper_mttdsp(CPUMIPSState *env, target_ulong arg1)
 {
     int other_tc = env->CP0_VPEControl & (0xff << CP0VPECo_TargTC);
     CPUMIPSState *other = mips_cpu_map_tc(env, &other_tc);
@@ -1629,40 +1629,28 @@ void helper_mttdsp(target_ulong arg1)
 }
 
 /* MIPS MT functions */
-target_ulong helper_dmt(target_ulong arg1)
+target_ulong helper_dmt(void)
 {
     // TODO
-    arg1 = 0;
-    // rt = arg1
-
-    return arg1;
+     return 0;
 }
 
-target_ulong helper_emt(target_ulong arg1)
+target_ulong helper_emt(void)
 {
     // TODO
-    arg1 = 0;
-    // rt = arg1
-
-    return arg1;
+    return 0;
 }
 
-target_ulong helper_dvpe(target_ulong arg1)
+target_ulong helper_dvpe(CPUMIPSState *env)
 {
     // TODO
-    arg1 = 0;
-    // rt = arg1
-
-    return arg1;
+    return 0;
 }
 
-target_ulong helper_evpe(target_ulong arg1)
+target_ulong helper_evpe(CPUMIPSState *env)
 {
     // TODO
-    arg1 = 0;
-    // rt = arg1
-
-    return arg1;
+    return 0;
 }
 #endif /* !CONFIG_USER_ONLY */
 
@@ -1673,8 +1661,10 @@ void helper_fork(target_ulong arg1, target_ulong arg2)
     // TODO: store to TC register
 }
 
-target_ulong helper_yield(target_ulong arg1)
+target_ulong helper_yield(CPUMIPSState *env, target_ulong arg)
 {
+    target_long arg1 = arg;
+
     if (arg1 < 0) {
         /* No scheduling policy implemented. */
         if (arg1 != -2) {
