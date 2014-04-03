@@ -5,15 +5,15 @@ DEF_HELPER_2(raise_exception, void, env, i32)
 DEF_HELPER_1(interrupt_restart, void, env)
 
 #ifdef TARGET_MIPS64
-DEF_HELPER_3(ldl, tl, tl, tl, int)
-DEF_HELPER_3(ldr, tl, tl, tl, int)
-DEF_HELPER_3(sdl, void, tl, tl, int)
-DEF_HELPER_3(sdr, void, tl, tl, int)
+DEF_HELPER_4(ldl, tl, env, tl, tl, int)
+DEF_HELPER_4(ldr, tl, env, tl, tl, int)
+DEF_HELPER_4(sdl, void, env, tl, tl, int)
+DEF_HELPER_4(sdr, void, env, tl, tl, int)
 #endif
-DEF_HELPER_3(lwl, tl, tl, tl, int)
-DEF_HELPER_3(lwr, tl, tl, tl, int)
-DEF_HELPER_3(swl, void, tl, tl, int)
-DEF_HELPER_3(swr, void, tl, tl, int)
+DEF_HELPER_4(lwl, tl, env, tl, tl, int)
+DEF_HELPER_4(lwr, tl, env, tl, tl, int)
+DEF_HELPER_4(swl, void, env, tl, tl, int)
+DEF_HELPER_4(swr, void, env, tl, tl, int)
 
 #ifndef CONFIG_USER_ONLY
 DEF_HELPER_2(ll, tl, tl, int)
