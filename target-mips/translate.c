@@ -2251,59 +2251,59 @@ static void gen_mul_vr54xx (DisasContext *ctx, uint32_t opc,
 
     switch (opc) {
     case OPC_VR54XX_MULS:
-        gen_helper_muls(t0, t0, t1);
+        gen_helper_muls(t0, cpu_env, t0, t1);
         opn = "muls";
         break;
     case OPC_VR54XX_MULSU:
-        gen_helper_mulsu(t0, t0, t1);
+        gen_helper_mulsu(t0, cpu_env, t0, t1);
         opn = "mulsu";
         break;
     case OPC_VR54XX_MACC:
-        gen_helper_macc(t0, t0, t1);
+        gen_helper_macc(t0, cpu_env, t0, t1);
         opn = "macc";
         break;
     case OPC_VR54XX_MACCU:
-        gen_helper_maccu(t0, t0, t1);
+        gen_helper_maccu(t0, cpu_env, t0, t1);
         opn = "maccu";
         break;
     case OPC_VR54XX_MSAC:
-        gen_helper_msac(t0, t0, t1);
+        gen_helper_msac(t0, cpu_env, t0, t1);
         opn = "msac";
         break;
     case OPC_VR54XX_MSACU:
-        gen_helper_msacu(t0, t0, t1);
+        gen_helper_msacu(t0, cpu_env, t0, t1);
         opn = "msacu";
         break;
     case OPC_VR54XX_MULHI:
-        gen_helper_mulhi(t0, t0, t1);
+        gen_helper_mulhi(t0, cpu_env, t0, t1);
         opn = "mulhi";
         break;
     case OPC_VR54XX_MULHIU:
-        gen_helper_mulhiu(t0, t0, t1);
+        gen_helper_mulhiu(t0, cpu_env, t0, t1);
         opn = "mulhiu";
         break;
     case OPC_VR54XX_MULSHI:
-        gen_helper_mulshi(t0, t0, t1);
+        gen_helper_mulshi(t0, cpu_env, t0, t1);
         opn = "mulshi";
         break;
     case OPC_VR54XX_MULSHIU:
-        gen_helper_mulshiu(t0, t0, t1);
+        gen_helper_mulshiu(t0, cpu_env, t0, t1);
         opn = "mulshiu";
         break;
     case OPC_VR54XX_MACCHI:
-        gen_helper_macchi(t0, t0, t1);
+        gen_helper_macchi(t0, cpu_env, t0, t1);
         opn = "macchi";
         break;
     case OPC_VR54XX_MACCHIU:
-        gen_helper_macchiu(t0, t0, t1);
+        gen_helper_macchiu(t0, cpu_env, t0, t1);
         opn = "macchiu";
         break;
     case OPC_VR54XX_MSACHI:
-        gen_helper_msachi(t0, t0, t1);
+        gen_helper_msachi(t0, cpu_env, t0, t1);
         opn = "msachi";
         break;
     case OPC_VR54XX_MSACHIU:
-        gen_helper_msachiu(t0, t0, t1);
+        gen_helper_msachiu(t0, cpu_env, t0, t1);
         opn = "msachiu";
         break;
     default:
