@@ -820,14 +820,14 @@ static void gen_op_update_neg_cc(void)
 /* compute eflags.C to reg */
 static void gen_compute_eflags_c(TCGv reg)
 {
-    gen_helper_cc_compute_c(cpu_tmp2_i32, cpu_cc_op);
+    gen_helper_cc_compute_c(cpu_tmp2_i32, cpu_env, cpu_cc_op);
     tcg_gen_extu_i32_tl(reg, cpu_tmp2_i32);
 }
 
 /* compute all eflags to cc_src */
 static void gen_compute_eflags(TCGv reg)
 {
-    gen_helper_cc_compute_all(cpu_tmp2_i32, cpu_cc_op);
+    gen_helper_cc_compute_all(cpu_tmp2_i32, cpu_env, cpu_cc_op);
     tcg_gen_extu_i32_tl(reg, cpu_tmp2_i32);
 }
 
@@ -1740,20 +1740,20 @@ static void gen_rotc_rm_T1(DisasContext *s, int ot, int op1,
 
     if (is_right) {
         switch (ot) {
-        case 0: gen_helper_rcrb(cpu_T[0], cpu_T[0], cpu_T[1]); break;
-        case 1: gen_helper_rcrw(cpu_T[0], cpu_T[0], cpu_T[1]); break;
-        case 2: gen_helper_rcrl(cpu_T[0], cpu_T[0], cpu_T[1]); break;
+        case 0: gen_helper_rcrb(cpu_T[0], cpu_env, cpu_T[0], cpu_T[1]); break;
+        case 1: gen_helper_rcrw(cpu_T[0], cpu_env, cpu_T[0], cpu_T[1]); break;
+        case 2: gen_helper_rcrl(cpu_T[0], cpu_env, cpu_T[0], cpu_T[1]); break;
 #ifdef TARGET_X86_64
-        case 3: gen_helper_rcrq(cpu_T[0], cpu_T[0], cpu_T[1]); break;
+        case 3: gen_helper_rcrq(cpu_T[0], cpu_env, cpu_T[0], cpu_T[1]); break;
 #endif
         }
     } else {
         switch (ot) {
-        case 0: gen_helper_rclb(cpu_T[0], cpu_T[0], cpu_T[1]); break;
-        case 1: gen_helper_rclw(cpu_T[0], cpu_T[0], cpu_T[1]); break;
-        case 2: gen_helper_rcll(cpu_T[0], cpu_T[0], cpu_T[1]); break;
+        case 0: gen_helper_rclb(cpu_T[0], cpu_env, cpu_T[0], cpu_T[1]); break;
+        case 1: gen_helper_rclw(cpu_T[0], cpu_env, cpu_T[0], cpu_T[1]); break;
+        case 2: gen_helper_rcll(cpu_T[0], cpu_env, cpu_T[0], cpu_T[1]); break;
 #ifdef TARGET_X86_64
-        case 3: gen_helper_rclq(cpu_T[0], cpu_T[0], cpu_T[1]); break;
+        case 3: gen_helper_rclq(cpu_T[0], cpu_env, cpu_T[0], cpu_T[1]); break;
 #endif
         }
     }
@@ -6566,7 +6566,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
             goto illegal_op;
         if (s->cc_op != CC_OP_DYNAMIC)
             gen_op_set_cc_op(s->cc_op);
-        gen_helper_daa();
+        gen_helper_daa(cpu_env);
         s->cc_op = CC_OP_EFLAGS;
         break;
     case 0x2f: /* das */
@@ -6574,7 +6574,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
             goto illegal_op;
         if (s->cc_op != CC_OP_DYNAMIC)
             gen_op_set_cc_op(s->cc_op);
-        gen_helper_das();
+        gen_helper_das(cpu_env);
         s->cc_op = CC_OP_EFLAGS;
         break;
     case 0x37: /* aaa */
@@ -6582,7 +6582,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
             goto illegal_op;
         if (s->cc_op != CC_OP_DYNAMIC)
             gen_op_set_cc_op(s->cc_op);
-        gen_helper_aaa();
+        gen_helper_aaa(cpu_env);
         s->cc_op = CC_OP_EFLAGS;
         break;
     case 0x3f: /* aas */
@@ -6590,7 +6590,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
             goto illegal_op;
         if (s->cc_op != CC_OP_DYNAMIC)
             gen_op_set_cc_op(s->cc_op);
-        gen_helper_aas();
+        gen_helper_aas(cpu_env);
         s->cc_op = CC_OP_EFLAGS;
         break;
     case 0xd4: /* aam */
@@ -6600,7 +6600,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
         if (val == 0) {
             gen_exception(s, EXCP00_DIVZ, pc_start - s->cs_base);
         } else {
-            gen_helper_aam(tcg_const_i32(val));
+            gen_helper_aam(cpu_env, tcg_const_i32(val));
             s->cc_op = CC_OP_LOGICB;
         }
         break;
@@ -6608,7 +6608,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
         if (CODE64(s))
             goto illegal_op;
         val = cpu_ldub_code(env, s->pc++);
-        gen_helper_aad(tcg_const_i32(val));
+        gen_helper_aad(cpu_env, tcg_const_i32(val));
         s->cc_op = CC_OP_LOGICB;
         break;
         /************************/

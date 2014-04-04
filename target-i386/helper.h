@@ -1,7 +1,7 @@
 #include "exec/def-helper.h"
 
-DEF_HELPER_FLAGS_1(cc_compute_all, TCG_CALL_PURE, i32, int)
-DEF_HELPER_FLAGS_1(cc_compute_c, TCG_CALL_PURE, i32, int)
+DEF_HELPER_FLAGS_2(cc_compute_all, TCG_CALL_PURE, i32, env, int)
+DEF_HELPER_FLAGS_2(cc_compute_c, TCG_CALL_PURE, i32, env, int)
 
 DEF_HELPER_0(lock, void)
 DEF_HELPER_0(unlock, void)
@@ -21,12 +21,12 @@ DEF_HELPER_2(divq_EAX, void, env, tl)
 DEF_HELPER_2(idivq_EAX, void, env, tl)
 #endif
 
-DEF_HELPER_1(aam, void, int)
-DEF_HELPER_1(aad, void, int)
-DEF_HELPER_0(aaa, void)
-DEF_HELPER_0(aas, void)
-DEF_HELPER_0(daa, void)
-DEF_HELPER_0(das, void)
+DEF_HELPER_2(aam, void, env, int)
+DEF_HELPER_2(aad, void, env, int)
+DEF_HELPER_1(aaa, void, env)
+DEF_HELPER_1(aas, void, env)
+DEF_HELPER_1(daa, void, env)
+DEF_HELPER_1(das, void, env)
 
 DEF_HELPER_1(lsl, tl, tl)
 DEF_HELPER_1(lar, tl, tl)
@@ -204,15 +204,15 @@ DEF_HELPER_2(movq, void, ptr, ptr)
 #define SHIFT 1
 #include "ops_sse_header.h"
 
-DEF_HELPER_2(rclb, tl, tl, tl)
-DEF_HELPER_2(rclw, tl, tl, tl)
-DEF_HELPER_2(rcll, tl, tl, tl)
-DEF_HELPER_2(rcrb, tl, tl, tl)
-DEF_HELPER_2(rcrw, tl, tl, tl)
-DEF_HELPER_2(rcrl, tl, tl, tl)
+DEF_HELPER_3(rclb, tl, env, tl, tl)
+DEF_HELPER_3(rclw, tl, env, tl, tl)
+DEF_HELPER_3(rcll, tl, env, tl, tl)
+DEF_HELPER_3(rcrb, tl, env, tl, tl)
+DEF_HELPER_3(rcrw, tl, env, tl, tl)
+DEF_HELPER_3(rcrl, tl, env, tl, tl)
 #ifdef TARGET_X86_64
-DEF_HELPER_2(rclq, tl, tl, tl)
-DEF_HELPER_2(rcrq, tl, tl, tl)
+DEF_HELPER_3(rclq, tl, env, tl, tl)
+DEF_HELPER_3(rcrq, tl, env, tl, tl)
 #endif
 
 #include "exec/def-helper.h"
