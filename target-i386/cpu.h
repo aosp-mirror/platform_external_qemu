@@ -1127,7 +1127,7 @@ void do_cpu_sipi(CPUX86State *env);
 void do_interrupt(CPUArchState *env);
 void do_interrupt_x86_hardirq(CPUArchState *env, int intno, int is_hw);
 //void QEMU_NORETURN raise_exception_err(int exception_index, int error_code);
-void QEMU_NORETURN raise_exception(int exception_index);
+void QEMU_NORETURN raise_exception(CPUArchState *env, int exception_index);
 
 void do_smm_enter(CPUArchState *env1);
 
