@@ -748,9 +748,9 @@ static void gen_check_io(DisasContext *s, int ot, target_ulong cur_eip,
         state_saved = 1;
         tcg_gen_trunc_tl_i32(cpu_tmp2_i32, cpu_T[0]);
         switch (ot) {
-        case 0: gen_helper_check_iob(cpu_tmp2_i32); break;
-        case 1: gen_helper_check_iow(cpu_tmp2_i32); break;
-        case 2: gen_helper_check_iol(cpu_tmp2_i32); break;
+        case 0: gen_helper_check_iob(cpu_env, cpu_tmp2_i32); break;
+        case 1: gen_helper_check_iow(cpu_env, cpu_tmp2_i32); break;
+        case 2: gen_helper_check_iol(cpu_env, cpu_tmp2_i32); break;
         }
     }
     if(s->flags & HF_SVMI_MASK) {
@@ -2710,7 +2710,7 @@ static void gen_eob(DisasContext *s)
     if (s->singlestep_enabled) {
         gen_helper_debug();
     } else if (s->tf) {
-	gen_helper_single_step();
+	gen_helper_single_step(cpu_env);
     } else {
         tcg_gen_exit_tb(0);
     }
@@ -3129,18 +3129,18 @@ static void gen_sse(CPUX86State *env, DisasContext *s, int b, target_ulong pc_st
         if (!(s->cpuid_ext2_features & CPUID_EXT2_3DNOW))
             goto illegal_op;
         /* femms */
-        gen_helper_emms();
+        gen_helper_emms(cpu_env);
         return;
     }
     if (b == 0x77) {
         /* emms */
-        gen_helper_emms();
+        gen_helper_emms(cpu_env);
         return;
     }
     /* prepare MMX state (XXX: optimize by storing fptt and fptags in
        the static cpu state) */
     if (!is_xmm) {
-        gen_helper_enter_mmx();
+        gen_helper_enter_mmx(cpu_env);
     }
 
     modrm = cpu_ldub_code(env, s->pc++);
@@ -3476,7 +3476,7 @@ static void gen_sse(CPUX86State *env, DisasContext *s, int b, target_ulong pc_st
             break;
         case 0x02a: /* cvtpi2ps */
         case 0x12a: /* cvtpi2pd */
-            gen_helper_enter_mmx();
+            gen_helper_enter_mmx(cpu_env);
             if (mod != 3) {
                 gen_lea_modrm(env, s, modrm, &reg_addr, &offset_addr);
                 op2_offset = offsetof(CPUX86State,mmx_t0);
@@ -3516,7 +3516,7 @@ static void gen_sse(CPUX86State *env, DisasContext *s, int b, target_ulong pc_st
         case 0x12c: /* cvttpd2pi */
         case 0x02d: /* cvtps2pi */
         case 0x12d: /* cvtpd2pi */
-            gen_helper_enter_mmx();
+            gen_helper_enter_mmx(cpu_env);
             if (mod != 3) {
                 gen_lea_modrm(env, s, modrm, &reg_addr, &offset_addr);
                 op2_offset = offsetof(CPUX86State,xmm_t0);
@@ -3619,14 +3619,14 @@ static void gen_sse(CPUX86State *env, DisasContext *s, int b, target_ulong pc_st
             }
             break;
         case 0x2d6: /* movq2dq */
-            gen_helper_enter_mmx();
+            gen_helper_enter_mmx(cpu_env);
             rm = (modrm & 7);
             gen_op_movq(offsetof(CPUX86State,xmm_regs[reg].XMM_Q(0)),
                         offsetof(CPUX86State,fpregs[rm].mmx));
             gen_op_movq_env_0(offsetof(CPUX86State,xmm_regs[reg].XMM_Q(1)));
             break;
         case 0x3d6: /* movdq2q */
-            gen_helper_enter_mmx();
+            gen_helper_enter_mmx(cpu_env);
             rm = (modrm & 7) | REX_B(s);
             gen_op_movq(offsetof(CPUX86State,fpregs[reg & 7].mmx),
                         offsetof(CPUX86State,xmm_regs[rm].XMM_Q(0)));
@@ -4877,7 +4877,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
             if (s->cc_op != CC_OP_DYNAMIC)
                 gen_op_set_cc_op(s->cc_op);
             gen_lea_modrm(env, s, modrm, &reg_addr, &offset_addr);
-            gen_helper_cmpxchg16b(cpu_A0);
+            gen_helper_cmpxchg16b(cpu_env, cpu_A0);
         } else
 #endif
         {
@@ -4887,7 +4887,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
             if (s->cc_op != CC_OP_DYNAMIC)
                 gen_op_set_cc_op(s->cc_op);
             gen_lea_modrm(env, s, modrm, &reg_addr, &offset_addr);
-            gen_helper_cmpxchg8b(cpu_A0);
+            gen_helper_cmpxchg8b(cpu_env, cpu_A0);
         }
         s->cc_op = CC_OP_EFLAGS;
         break;
@@ -6717,9 +6717,9 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
         gen_jmp_im(pc_start - s->cs_base);
         tcg_gen_trunc_tl_i32(cpu_tmp2_i32, cpu_T[0]);
         if (ot == OT_WORD)
-            gen_helper_boundw(cpu_A0, cpu_tmp2_i32);
+            gen_helper_boundw(cpu_env, cpu_A0, cpu_tmp2_i32);
         else
-            gen_helper_boundl(cpu_A0, cpu_tmp2_i32);
+            gen_helper_boundl(cpu_env, cpu_A0, cpu_tmp2_i32);
         break;
     case 0x1c8 ... 0x1cf: /* bswap reg */
         reg = (b & 7) | REX_B(s);
@@ -6807,9 +6807,9 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
                 gen_op_set_cc_op(s->cc_op);
             gen_jmp_im(pc_start - s->cs_base);
             if (b & 2) {
-                gen_helper_rdmsr();
+                gen_helper_rdmsr(cpu_env);
             } else {
-                gen_helper_wrmsr();
+                gen_helper_wrmsr(cpu_env);
             }
         }
         break;
@@ -6819,7 +6819,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
         gen_jmp_im(pc_start - s->cs_base);
         if (use_icount)
             gen_io_start();
-        gen_helper_rdtsc();
+        gen_helper_rdtsc(cpu_env);
         if (use_icount) {
             gen_io_end();
             gen_jmp(s, s->pc - s->cs_base);
@@ -6829,7 +6829,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
         if (s->cc_op != CC_OP_DYNAMIC)
             gen_op_set_cc_op(s->cc_op);
         gen_jmp_im(pc_start - s->cs_base);
-        gen_helper_rdpmc();
+        gen_helper_rdpmc(cpu_env);
         break;
     case 0x134: /* sysenter */
         /* For Intel SYSENTER is valid on 64-bit */
@@ -6895,7 +6895,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
         if (s->cc_op != CC_OP_DYNAMIC)
             gen_op_set_cc_op(s->cc_op);
         gen_jmp_im(pc_start - s->cs_base);
-        gen_helper_cpuid();
+        gen_helper_cpuid(cpu_env);
         break;
     case 0xf4: /* hlt */
         if (s->cpl != 0) {

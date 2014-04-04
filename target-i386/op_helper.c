@@ -622,7 +622,7 @@ static void switch_tss(int tss_selector,
 }
 
 /* check if Port I/O is allowed in TSS */
-static inline void check_io(int addr, int size)
+static inline void check_io(CPUX86State *env, int addr, int size)
 {
     int io_offset, val, mask;
 
@@ -646,19 +646,19 @@ static inline void check_io(int addr, int size)
     }
 }
 
-void helper_check_iob(uint32_t t0)
+void helper_check_iob(CPUX86State *env, uint32_t t0)
 {
-    check_io(t0, 1);
+    check_io(env, t0, 1);
 }
 
-void helper_check_iow(uint32_t t0)
+void helper_check_iow(CPUX86State *env, uint32_t t0)
 {
-    check_io(t0, 2);
+    check_io(env, t0, 2);
 }
 
-void helper_check_iol(uint32_t t0)
+void helper_check_iol(CPUX86State *env, uint32_t t0)
 {
-    check_io(t0, 4);
+    check_io(env, t0, 4);
 }
 
 void helper_outb(uint32_t port, uint32_t data)
@@ -2022,7 +2022,7 @@ void helper_into(int next_eip_addend)
     }
 }
 
-void helper_cmpxchg8b(target_ulong a0)
+void helper_cmpxchg8b(CPUX86State *env, target_ulong a0)
 {
     uint64_t d;
     int eflags;
@@ -2043,7 +2043,7 @@ void helper_cmpxchg8b(target_ulong a0)
 }
 
 #ifdef TARGET_X86_64
-void helper_cmpxchg16b(target_ulong a0)
+void helper_cmpxchg16b(CPUX86State *env, target_ulong a0)
 {
     uint64_t d0, d1;
     int eflags;
@@ -2069,7 +2069,7 @@ void helper_cmpxchg16b(target_ulong a0)
 }
 #endif
 
-void helper_single_step(void)
+void helper_single_step(CPUX86State *env)
 {
 #ifndef CONFIG_USER_ONLY
     check_hw_breakpoints(env, 1);
@@ -2078,7 +2078,7 @@ void helper_single_step(void)
     raise_exception(EXCP01_DB);
 }
 
-void helper_cpuid(void)
+void helper_cpuid(CPUX86State *env)
 {
     uint32_t eax, ebx, ecx, edx;
 
@@ -3109,7 +3109,7 @@ void helper_invlpg(target_ulong addr)
     tlb_flush_page(env, addr);
 }
 
-void helper_rdtsc(void)
+void helper_rdtsc(CPUX86State *env)
 {
     uint64_t val;
 
@@ -3123,7 +3123,7 @@ void helper_rdtsc(void)
     EDX = (uint32_t)(val >> 32);
 }
 
-void helper_rdpmc(void)
+void helper_rdpmc(CPUX86State *env)
 {
     if ((env->cr[4] & CR4_PCE_MASK) && ((env->hflags & HF_CPL_MASK) != 0)) {
         raise_exception(EXCP0D_GPF);
@@ -3135,15 +3135,15 @@ void helper_rdpmc(void)
 }
 
 #if defined(CONFIG_USER_ONLY)
-void helper_wrmsr(void)
+void helper_wrmsr(CPUX86State *env)
 {
 }
 
-void helper_rdmsr(void)
+void helper_rdmsr(CPUX86State *env)
 {
 }
 #else
-void helper_wrmsr(void)
+void helper_wrmsr(CPUX86State *env)
 {
     uint64_t val;
 
@@ -3275,7 +3275,7 @@ void helper_wrmsr(void)
     }
 }
 
-void helper_rdmsr(void)
+void helper_rdmsr(CPUX86State *env)
 {
     uint64_t val;
 
@@ -4873,7 +4873,7 @@ void helper_reset_inhibit_irq(void)
     env->hflags &= ~HF_INHIBIT_IRQ_MASK;
 }
 
-void helper_boundw(target_ulong a0, int v)
+void helper_boundw(CPUX86State *env, target_ulong a0, int v)
 {
     int low, high;
     low = cpu_ldsw_data(env, a0);
@@ -4884,7 +4884,7 @@ void helper_boundw(target_ulong a0, int v)
     }
 }
 
-void helper_boundl(target_ulong a0, int v)
+void helper_boundl(CPUX86State *env, target_ulong a0, int v)
 {
     int low, high;
     low = cpu_ldl_data(env, a0);
@@ -5552,13 +5552,13 @@ void helper_vmexit(uint32_t exit_code, uint64_t exit_info_1)
 
 /* MMX/SSE */
 /* XXX: optimize by storing fptt and fptags in the static cpu state */
-void helper_enter_mmx(void)
+void helper_enter_mmx(CPUX86State *env)
 {
     env->fpstt = 0;
     memset(env->fptags, 0, sizeof(env->fptags));
 }
 
-void helper_emms(void)
+void helper_emms(CPUX86State *env)
 {
     /* set to empty state */
     memset(env->fptags, 1, sizeof(env->fptags));
