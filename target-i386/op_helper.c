@@ -21,7 +21,6 @@
 
 #define CPU_NO_GLOBAL_REGS
 #include "cpu.h"
-#include "dyngen-exec.h"
 #include "qemu/host-utils.h"
 #include "exec/cpu-defs.h"
 #include "helper.h"
