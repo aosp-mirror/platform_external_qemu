@@ -21,7 +21,19 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <QTKit/QTKit.h>
+#if 0
+#import <QTKit/QTKit>
+#else
+// QTMovieModernizer.h does not compile with current toolchain.
+// TODO: revert this when toolchain is updated.
+#import <QTKit/QTCaptureConnection.h>
+#import <QTKit/QTCaptureDevice.h>
+#import <QTKit/QTCaptureDeviceInput.h>
+#import <QTKit/QTCaptureSession.h>
+#import <QTKit/QTCaptureVideoPreviewOutput.h>
+#import <QTKit/QTMedia.h>
+#import <QTKit/QTSampleBuffer.h>
+#endif
 #import <CoreAudio/CoreAudio.h>
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
