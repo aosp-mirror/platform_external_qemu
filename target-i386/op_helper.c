@@ -5568,7 +5568,7 @@ void helper_emms(CPUX86State *env)
 }
 
 /* XXX: suppress */
-void helper_movq(void *d, void *s)
+void helper_movq(CPUX86State *env, void *d, void *s)
 {
     *(uint64_t *)d = *(uint64_t *)s;
 }
