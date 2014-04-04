@@ -67,10 +67,12 @@
 #include "android/qemu/memcheck/memcheck_api.h"
 #endif  // CONFIG_ANDROID_MEMCHECK && !OUTSIDE_JIT && !SOFTMMU_CODE_ACCESS
 
-static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
+static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(CPUArchState *env,
+                                                        target_ulong addr,
                                                         int mmu_idx,
                                                         uintptr_t retaddr);
-static inline DATA_TYPE glue(io_read, SUFFIX)(hwaddr physaddr,
+static inline DATA_TYPE glue(io_read, SUFFIX)(CPUArchState *env,
+                                              hwaddr physaddr,
                                               target_ulong addr,
                                               uintptr_t retaddr)
 {
@@ -100,8 +102,9 @@ static inline DATA_TYPE glue(io_read, SUFFIX)(hwaddr physaddr,
 }
 
 /* handle all cases except unaligned access which span two pages */
-DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
-                                                      int mmu_idx)
+DATA_TYPE glue(glue(helper_ld, SUFFIX), MMUSUFFIX)(CPUArchState *env,
+                                                   target_ulong addr,
+                                                   int mmu_idx)
 {
     DATA_TYPE res;
     int index;
@@ -124,7 +127,7 @@ DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
                 goto do_unaligned_access;
             retaddr = GETPC();
             ioaddr = env->iotlb[mmu_idx][index];
-            res = glue(io_read, SUFFIX)(ioaddr, addr, retaddr);
+            res = glue(io_read, SUFFIX)(env, ioaddr, addr, retaddr);
         } else if (((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1) >= TARGET_PAGE_SIZE) {
             /* This is not I/O access: do access verification. */
 #ifdef CONFIG_ANDROID_MEMCHECK_MMU
@@ -143,7 +146,7 @@ DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
 #ifdef ALIGNED_ONLY
             do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
 #endif
-            res = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(addr,
+            res = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(env, addr,
                                                          mmu_idx, retaddr);
         } else {
 #ifdef CONFIG_ANDROID_MEMCHECK_MMU
@@ -193,7 +196,8 @@ DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
 }
 
 /* handle all unaligned cases */
-static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
+static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(CPUArchState *env,
+                                                        target_ulong addr,
                                                         int mmu_idx,
                                                         uintptr_t retaddr)
 {
@@ -211,15 +215,15 @@ static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
             if ((addr & (DATA_SIZE - 1)) != 0)
                 goto do_unaligned_access;
             ioaddr = env->iotlb[mmu_idx][index];
-            res = glue(io_read, SUFFIX)(ioaddr, addr, retaddr);
+            res = glue(io_read, SUFFIX)(env, ioaddr, addr, retaddr);
         } else if (((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1) >= TARGET_PAGE_SIZE) {
         do_unaligned_access:
             /* slow unaligned access (it spans two pages) */
             addr1 = addr & ~(DATA_SIZE - 1);
             addr2 = addr1 + DATA_SIZE;
-            res1 = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(addr1,
+            res1 = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(env, addr1,
                                                           mmu_idx, retaddr);
-            res2 = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(addr2,
+            res2 = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(env, addr2,
                                                           mmu_idx, retaddr);
             shift = (addr & (DATA_SIZE - 1)) * 8;
 #ifdef TARGET_WORDS_BIGENDIAN
@@ -244,12 +248,14 @@ static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
 
 #ifndef SOFTMMU_CODE_ACCESS
 
-static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(target_ulong addr,
+static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(CPUArchState *env,
+                                                   target_ulong addr,
                                                    DATA_TYPE val,
                                                    int mmu_idx,
                                                    uintptr_t retaddr);
 
-static inline void glue(io_write, SUFFIX)(hwaddr physaddr,
+static inline void glue(io_write, SUFFIX)(CPUArchState *env,
+                                          hwaddr physaddr,
                                           DATA_TYPE val,
                                           target_ulong addr,
                                           uintptr_t retaddr)
@@ -277,9 +283,10 @@ static inline void glue(io_write, SUFFIX)(hwaddr physaddr,
 #endif /* SHIFT > 2 */
 }
 
-void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
-                                                 DATA_TYPE val,
-                                                 int mmu_idx)
+void glue(glue(helper_st, SUFFIX), MMUSUFFIX)(CPUArchState *env,
+                                              target_ulong addr,
+                                              DATA_TYPE val,
+                                              int mmu_idx)
 {
     hwaddr ioaddr;
     target_ulong tlb_addr;
@@ -299,7 +306,7 @@ void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
                 goto do_unaligned_access;
             retaddr = GETPC();
             ioaddr = env->iotlb[mmu_idx][index];
-            glue(io_write, SUFFIX)(ioaddr, val, addr, retaddr);
+            glue(io_write, SUFFIX)(env, ioaddr, val, addr, retaddr);
         } else if (((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1) >= TARGET_PAGE_SIZE) {
             /* This is not I/O access: do access verification. */
 #ifdef CONFIG_ANDROID_MEMCHECK_MMU
@@ -318,7 +325,7 @@ void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
 #ifdef ALIGNED_ONLY
             do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
 #endif
-            glue(glue(slow_st, SUFFIX), MMUSUFFIX)(addr, val,
+            glue(glue(slow_st, SUFFIX), MMUSUFFIX)(env, addr, val,
                                                    mmu_idx, retaddr);
         } else {
 #ifdef CONFIG_ANDROID_MEMCHECK_MMU
@@ -368,7 +375,8 @@ void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
 }
 
 /* handles all unaligned cases */
-static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(target_ulong addr,
+static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(CPUArchState *env,
+                                                   target_ulong addr,
                                                    DATA_TYPE val,
                                                    int mmu_idx,
                                                    uintptr_t retaddr)
@@ -386,7 +394,7 @@ static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(target_ulong addr,
             if ((addr & (DATA_SIZE - 1)) != 0)
                 goto do_unaligned_access;
             ioaddr = env->iotlb[mmu_idx][index];
-            glue(io_write, SUFFIX)(ioaddr, val, addr, retaddr);
+            glue(io_write, SUFFIX)(env, ioaddr, val, addr, retaddr);
         } else if (((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1) >= TARGET_PAGE_SIZE) {
         do_unaligned_access:
             /* XXX: not efficient, but simple */
@@ -394,10 +402,12 @@ static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(target_ulong addr,
              * previous page from the TLB cache.  */
             for(i = DATA_SIZE - 1; i >= 0; i--) {
 #ifdef TARGET_WORDS_BIGENDIAN
-                glue(slow_stb, MMUSUFFIX)(addr + i, val >> (((DATA_SIZE - 1) * 8) - (i * 8)),
+                glue(slow_stb, MMUSUFFIX)(env,
+                                          addr + i, val >> (((DATA_SIZE - 1) * 8) - (i * 8)),
                                           mmu_idx, retaddr);
 #else
-                glue(slow_stb, MMUSUFFIX)(addr + i, val >> (i * 8),
+                glue(slow_stb, MMUSUFFIX)(env,
+                                          addr + i, val >> (i * 8),
                                           mmu_idx, retaddr);
 #endif
             }

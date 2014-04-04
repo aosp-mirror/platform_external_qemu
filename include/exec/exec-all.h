@@ -420,7 +420,6 @@ void tlb_fill(CPUArchState *env1, target_ulong addr, int is_write, int mmu_idx,
 
 #define ACCESS_TYPE (NB_MMU_MODES + 1)
 #define MEMSUFFIX _code
-#define env cpu_single_env
 
 #define DATA_SIZE 1
 #include "exec/softmmu_header.h"
@@ -436,7 +435,6 @@ void tlb_fill(CPUArchState *env1, target_ulong addr, int is_write, int mmu_idx,
 
 #undef ACCESS_TYPE
 #undef MEMSUFFIX
-#undef env
 
 #endif
 
