@@ -202,6 +202,7 @@ endif  # EMULATOR_TARGET_ARCH == arm
 
 ifeq ($(EMULATOR_TARGET_ARCH), x86)
 common_LOCAL_SRC_FILES += \
+    target-i386/cc_helper.c \
     target-i386/op_helper.c \
     target-i386/helper.c \
     target-i386/translate.c \
