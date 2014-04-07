@@ -74,7 +74,7 @@
 
 /* global register indexes */
 static TCGv_ptr cpu_env;
-static TCGv cpu_A0, cpu_cc_src, cpu_cc_dst, cpu_cc_tmp;
+static TCGv cpu_A0, cpu_cc_src, cpu_cc_dst;
 static TCGv_i32 cpu_cc_op;
 /* local temps */
 static TCGv cpu_T[2], cpu_T3;
@@ -348,23 +348,23 @@ static inline void gen_op_mov_reg_T1(int ot, int reg)
 static inline void gen_op_mov_reg_A0(int size, int reg)
 {
     switch(size) {
-    case 0:
+    case OT_BYTE:
         tcg_gen_st16_tl(cpu_A0, cpu_env, offsetof(CPUX86State, regs[reg]) + REG_W_OFFSET);
         break;
 #ifdef TARGET_X86_64
-    case 1:
+    case OT_WORD:
         tcg_gen_st32_tl(cpu_A0, cpu_env, offsetof(CPUX86State, regs[reg]) + REG_L_OFFSET);
         /* high part of register set to zero */
         tcg_gen_movi_tl(cpu_tmp0, 0);
         tcg_gen_st32_tl(cpu_tmp0, cpu_env, offsetof(CPUX86State, regs[reg]) + REG_LH_OFFSET);
         break;
     default:
-    case 2:
+    case OT_LONG:
         tcg_gen_st_tl(cpu_A0, cpu_env, offsetof(CPUX86State, regs[reg]));
         break;
 #else
     default:
-    case 1:
+    case OT_WORD:
         tcg_gen_st32_tl(cpu_A0, cpu_env, offsetof(CPUX86State, regs[reg]) + REG_L_OFFSET);
         break;
 #endif
@@ -986,7 +986,7 @@ static int is_fast_jcc_case(DisasContext *s, int b)
 
 /* generate a conditional jump to label 'l1' according to jump opcode
    value 'b'. In the fast case, T0 is guaranted not to be used. */
-static inline void gen_jcc1(DisasContext *s, int cc_op, int b, int l1)
+static inline void gen_jcc1(DisasContext *s, int b, int l1)
 {
     int inv, jcc_op, size, cond;
     TCGv t0;
@@ -994,63 +994,24 @@ static inline void gen_jcc1(DisasContext *s, int cc_op, int b, int l1)
     inv = b & 1;
     jcc_op = (b >> 1) & 7;
 
-    switch(cc_op) {
+    switch(s->cc_op) {
         /* we optimize the cmp/jcc case */
     case CC_OP_SUBB:
     case CC_OP_SUBW:
     case CC_OP_SUBL:
     case CC_OP_SUBQ:
 
-        size = cc_op - CC_OP_SUBB;
+        size = s->cc_op - CC_OP_SUBB;
         switch(jcc_op) {
         case JCC_Z:
         fast_jcc_z:
-            switch(size) {
-            case 0:
-                tcg_gen_andi_tl(cpu_tmp0, cpu_cc_dst, 0xff);
-                t0 = cpu_tmp0;
-                break;
-            case 1:
-                tcg_gen_andi_tl(cpu_tmp0, cpu_cc_dst, 0xffff);
-                t0 = cpu_tmp0;
-                break;
-#ifdef TARGET_X86_64
-            case 2:
-                tcg_gen_andi_tl(cpu_tmp0, cpu_cc_dst, 0xffffffff);
-                t0 = cpu_tmp0;
-                break;
-#endif
-            default:
-                t0 = cpu_cc_dst;
-                break;
-            }
+            t0 = gen_ext_tl(cpu_tmp0, cpu_cc_dst, size, false);
             tcg_gen_brcondi_tl(inv ? TCG_COND_NE : TCG_COND_EQ, t0, 0, l1);
             break;
         case JCC_S:
         fast_jcc_s:
-            switch(size) {
-            case 0:
-                tcg_gen_andi_tl(cpu_tmp0, cpu_cc_dst, 0x80);
-                tcg_gen_brcondi_tl(inv ? TCG_COND_EQ : TCG_COND_NE, cpu_tmp0,
-                                   0, l1);
-                break;
-            case 1:
-                tcg_gen_andi_tl(cpu_tmp0, cpu_cc_dst, 0x8000);
-                tcg_gen_brcondi_tl(inv ? TCG_COND_EQ : TCG_COND_NE, cpu_tmp0,
-                                   0, l1);
-                break;
-#ifdef TARGET_X86_64
-            case 2:
-                tcg_gen_andi_tl(cpu_tmp0, cpu_cc_dst, 0x80000000);
-                tcg_gen_brcondi_tl(inv ? TCG_COND_EQ : TCG_COND_NE, cpu_tmp0,
-                                   0, l1);
-                break;
-#endif
-            default:
-                tcg_gen_brcondi_tl(inv ? TCG_COND_GE : TCG_COND_LT, cpu_cc_dst,
-                                   0, l1);
-                break;
-            }
+            t0 = gen_ext_tl(cpu_tmp0, cpu_cc_dst, size, true);
+            tcg_gen_brcondi_tl(inv ? TCG_COND_GE : TCG_COND_LT, t0, 0, l1);
             break;
 
         case JCC_B:
@@ -1060,28 +1021,8 @@ static inline void gen_jcc1(DisasContext *s, int cc_op, int b, int l1)
             cond = inv ? TCG_COND_GTU : TCG_COND_LEU;
         fast_jcc_b:
             tcg_gen_add_tl(cpu_tmp4, cpu_cc_dst, cpu_cc_src);
-            switch(size) {
-            case 0:
-                t0 = cpu_tmp0;
-                tcg_gen_andi_tl(cpu_tmp4, cpu_tmp4, 0xff);
-                tcg_gen_andi_tl(t0, cpu_cc_src, 0xff);
-                break;
-            case 1:
-                t0 = cpu_tmp0;
-                tcg_gen_andi_tl(cpu_tmp4, cpu_tmp4, 0xffff);
-                tcg_gen_andi_tl(t0, cpu_cc_src, 0xffff);
-                break;
-#ifdef TARGET_X86_64
-            case 2:
-                t0 = cpu_tmp0;
-                tcg_gen_andi_tl(cpu_tmp4, cpu_tmp4, 0xffffffff);
-                tcg_gen_andi_tl(t0, cpu_cc_src, 0xffffffff);
-                break;
-#endif
-            default:
-                t0 = cpu_cc_src;
-                break;
-            }
+            gen_extu(size, cpu_tmp4);
+            t0 = gen_ext_tl(cpu_tmp0, cpu_cc_src, size, false);
             tcg_gen_brcond_tl(cond, cpu_tmp4, t0, l1);
             break;
 
@@ -1092,28 +1033,8 @@ static inline void gen_jcc1(DisasContext *s, int cc_op, int b, int l1)
             cond = inv ? TCG_COND_GT : TCG_COND_LE;
         fast_jcc_l:
             tcg_gen_add_tl(cpu_tmp4, cpu_cc_dst, cpu_cc_src);
-            switch(size) {
-            case 0:
-                t0 = cpu_tmp0;
-                tcg_gen_ext8s_tl(cpu_tmp4, cpu_tmp4);
-                tcg_gen_ext8s_tl(t0, cpu_cc_src);
-                break;
-            case 1:
-                t0 = cpu_tmp0;
-                tcg_gen_ext16s_tl(cpu_tmp4, cpu_tmp4);
-                tcg_gen_ext16s_tl(t0, cpu_cc_src);
-                break;
-#ifdef TARGET_X86_64
-            case 2:
-                t0 = cpu_tmp0;
-                tcg_gen_ext32s_tl(cpu_tmp4, cpu_tmp4);
-                tcg_gen_ext32s_tl(t0, cpu_cc_src);
-                break;
-#endif
-            default:
-                t0 = cpu_cc_src;
-                break;
-            }
+            gen_exts(size, cpu_tmp4);
+            t0 = gen_ext_tl(cpu_tmp0, cpu_cc_src, size, true);
             tcg_gen_brcond_tl(cond, cpu_tmp4, t0, l1);
             break;
 
@@ -1164,10 +1085,10 @@ static inline void gen_jcc1(DisasContext *s, int cc_op, int b, int l1)
     case CC_OP_SARQ:
         switch(jcc_op) {
         case JCC_Z:
-            size = (cc_op - CC_OP_ADDB) & 3;
+            size = (s->cc_op - CC_OP_ADDB) & 3;
             goto fast_jcc_z;
         case JCC_S:
-            size = (cc_op - CC_OP_ADDB) & 3;
+            size = (s->cc_op - CC_OP_ADDB) & 3;
             goto fast_jcc_s;
         default:
             goto slow_jcc;
@@ -1223,6 +1144,7 @@ static inline void gen_scas(DisasContext *s, int ot)
     gen_op_cmpl_T0_T1_cc();
     gen_op_movl_T0_Dshift(ot);
     gen_op_add_reg_T0(s->aflag, R_EDI);
+    s->cc_op = CC_OP_SUBB + ot;
 }
 
 static inline void gen_cmps(DisasContext *s, int ot)
@@ -1235,6 +1157,7 @@ static inline void gen_cmps(DisasContext *s, int ot)
     gen_op_movl_T0_Dshift(ot);
     gen_op_add_reg_T0(s->aflag, R_ESI);
     gen_op_add_reg_T0(s->aflag, R_EDI);
+    s->cc_op = CC_OP_SUBB + ot;
 }
 
 static inline void gen_ins(DisasContext *s, int ot)
@@ -1306,7 +1229,7 @@ static inline void gen_repz_ ## op(DisasContext *s, int ot,                   \
     gen_ ## op(s, ot);                                                        \
     gen_op_add_reg_im(s->aflag, R_ECX, -1);                                   \
     gen_op_set_cc_op(CC_OP_SUBB + ot);                                        \
-    gen_jcc1(s, CC_OP_SUBB + ot, (JCC_Z << 1) | (nz ^ 1), l2);                \
+    gen_jcc1(s, (JCC_Z << 1) | (nz ^ 1), l2);                                 \
     if (!s->jmp_opt)                                                          \
         gen_op_jz_ecx(s->aflag, l2);                                          \
     gen_jmp(s, cur_eip);                                                      \
@@ -1481,6 +1404,7 @@ static void gen_inc(DisasContext *s1, int ot, int d, int c)
         gen_op_ld_T0_A0(ot + s1->mem_index);
     if (s1->cc_op != CC_OP_DYNAMIC)
         gen_op_set_cc_op(s1->cc_op);
+    gen_compute_eflags_c(cpu_cc_src);
     if (c > 0) {
         tcg_gen_addi_tl(cpu_T[0], cpu_T[0], 1);
         s1->cc_op = CC_OP_INCB + ot;
@@ -1492,7 +1416,6 @@ static void gen_inc(DisasContext *s1, int ot, int d, int c)
         gen_op_mov_reg_T0(ot, d);
     else
         gen_op_st_T0_A0(ot + s1->mem_index);
-    gen_compute_eflags_c(cpu_cc_src);
     tcg_gen_mov_tl(cpu_cc_dst, cpu_T[0]);
 }
 
@@ -1687,14 +1610,16 @@ static void gen_rot_rm_T1(DisasContext *s, int ot, int op1, int is_right)
         gen_op_mov_reg_v(ot, op1, t0);
     }
 
-    /* update eflags */
+    /* update eflags.  It is needed anyway most of the time, do it always.  */
     if (s->cc_op != CC_OP_DYNAMIC)
         gen_op_set_cc_op(s->cc_op);
+    gen_compute_eflags(cpu_cc_src);
+    tcg_gen_discard_tl(cpu_cc_dst);
+    s->cc_op = CC_OP_EFLAGS;
 
     label2 = gen_new_label();
     tcg_gen_brcondi_tl(TCG_COND_EQ, t1, 0, label2);
 
-    gen_compute_eflags(cpu_cc_src);
     tcg_gen_andi_tl(cpu_cc_src, cpu_cc_src, ~(CC_O | CC_C));
     tcg_gen_xor_tl(cpu_tmp0, t2, t0);
     tcg_gen_lshift(cpu_tmp0, cpu_tmp0, 11 - (data_bits - 1));
@@ -1706,11 +1631,7 @@ static void gen_rot_rm_T1(DisasContext *s, int ot, int op1, int is_right)
     tcg_gen_andi_tl(t0, t0, CC_C);
     tcg_gen_or_tl(cpu_cc_src, cpu_cc_src, t0);
 
-    tcg_gen_discard_tl(cpu_cc_dst);
-    tcg_gen_movi_i32(cpu_cc_op, CC_OP_EFLAGS);
-
     gen_set_label(label2);
-    s->cc_op = CC_OP_DYNAMIC; /* cannot predict flags after */
 
     tcg_temp_free(t0);
     tcg_temp_free(t1);
@@ -1799,10 +1720,11 @@ static void gen_rot_rm_im(DisasContext *s, int ot, int op1, int op2,
 static void gen_rotc_rm_T1(DisasContext *s, int ot, int op1,
                            int is_right)
 {
-    int label1;
-
     if (s->cc_op != CC_OP_DYNAMIC)
         gen_op_set_cc_op(s->cc_op);
+    gen_compute_eflags(cpu_cc_src);
+    tcg_gen_discard_tl(cpu_cc_dst);
+    s->cc_op = CC_OP_EFLAGS;
 
     /* load */
     if (op1 == OR_TMP0)
@@ -1850,17 +1772,6 @@ static void gen_rotc_rm_T1(DisasContext *s, int ot, int op1,
         gen_op_st_T0_A0(ot + s->mem_index);
     else
         gen_op_mov_reg_T0(ot, op1);
-
-    /* update eflags */
-    label1 = gen_new_label();
-    tcg_gen_brcondi_tl(TCG_COND_EQ, cpu_cc_tmp, -1, label1);
-
-    tcg_gen_mov_tl(cpu_cc_src, cpu_cc_tmp);
-    tcg_gen_discard_tl(cpu_cc_dst);
-    tcg_gen_movi_i32(cpu_cc_op, CC_OP_EFLAGS);
-
-    gen_set_label(label1);
-    s->cc_op = CC_OP_DYNAMIC; /* cannot predict flags after */
 }
 
 /* XXX: add faster immediate case */
@@ -2395,16 +2306,16 @@ static inline void gen_goto_tb(DisasContext *s, int tb_num, target_ulong eip)
 static inline void gen_jcc(DisasContext *s, int b,
                            target_ulong val, target_ulong next_eip)
 {
-    int l1, l2, cc_op;
+    int l1, l2;
 
-    cc_op = s->cc_op;
     if (s->cc_op != CC_OP_DYNAMIC) {
         gen_op_set_cc_op(s->cc_op);
         s->cc_op = CC_OP_DYNAMIC;
     }
     if (s->jmp_opt) {
         l1 = gen_new_label();
-        gen_jcc1(s, cc_op, b, l1);
+        gen_jcc1(s, b, l1);
+        s->cc_op = CC_OP_DYNAMIC;
 
         gen_goto_tb(s, 0, next_eip);
 
@@ -2415,7 +2326,8 @@ static inline void gen_jcc(DisasContext *s, int b,
 
         l1 = gen_new_label();
         l2 = gen_new_label();
-        gen_jcc1(s, cc_op, b, l1);
+        gen_jcc1(s, b, l1);
+        s->cc_op = CC_OP_DYNAMIC;
 
         gen_jmp_im(next_eip);
         tcg_gen_br(l2);
@@ -2438,7 +2350,7 @@ static void gen_setcc(DisasContext *s, int b)
         t0 = tcg_temp_local_new();
         tcg_gen_movi_tl(t0, 0);
         l1 = gen_new_label();
-        gen_jcc1(s, s->cc_op, b ^ 1, l1);
+        gen_jcc1(s, b ^ 1, l1);
         tcg_gen_movi_tl(t0, 1);
         gen_set_label(l1);
         tcg_gen_mov_tl(cpu_T[0], t0);
@@ -6084,7 +5996,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
                     };
                     op1 = fcmov_cc[op & 3] | (((op >> 3) & 1) ^ 1);
                     l1 = gen_new_label();
-                    gen_jcc1(s, s->cc_op, op1, l1);
+                    gen_jcc1(s, op1, l1);
                     gen_helper_fmov_ST0_STN(cpu_env, tcg_const_i32(opreg));
                     gen_set_label(l1);
                 }
@@ -6477,7 +6389,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
             if (ot == OT_LONG) {
                 /* XXX: specific Intel behaviour ? */
                 l1 = gen_new_label();
-                gen_jcc1(s, s->cc_op, b ^ 1, l1);
+                gen_jcc1(s, b ^ 1, l1);
                 tcg_gen_st32_tl(t0, cpu_env, offsetof(CPUX86State, regs[reg]) + REG_L_OFFSET);
                 gen_set_label(l1);
                 tcg_gen_movi_tl(cpu_tmp0, 0);
@@ -6486,7 +6398,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
 #endif
             {
                 l1 = gen_new_label();
-                gen_jcc1(s, s->cc_op, b ^ 1, l1);
+                gen_jcc1(s, b ^ 1, l1);
                 gen_op_mov_reg_v(ot, reg, t0);
                 gen_set_label(l1);
             }
@@ -6572,10 +6484,12 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
         if (s->cc_op != CC_OP_DYNAMIC)
             gen_op_set_cc_op(s->cc_op);
         gen_compute_eflags(cpu_cc_src);
+        tcg_gen_discard_tl(cpu_cc_dst);
+        s->cc_op = CC_OP_EFLAGS;
+
         tcg_gen_andi_tl(cpu_cc_src, cpu_cc_src, CC_O);
         tcg_gen_andi_tl(cpu_T[0], cpu_T[0], CC_S | CC_Z | CC_A | CC_P | CC_C);
         tcg_gen_or_tl(cpu_cc_src, cpu_cc_src, cpu_T[0]);
-        s->cc_op = CC_OP_EFLAGS;
         break;
     case 0x9f: /* lahf */
         if (CODE64(s) && !(s->cpuid_ext3_features & CPUID_EXT3_LAHF_LM))
@@ -6837,7 +6751,7 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s, target_ulong p
 #else
         /* start debug */
         tb_flush(cpu_single_env);
-        cpu_set_log(CPU_LOG_INT | CPU_LOG_TB_IN_ASM);
+        qemu_set_log(CPU_LOG_INT | CPU_LOG_TB_IN_ASM);
 #endif
         break;
 #endif
@@ -7769,8 +7683,6 @@ void optimize_flags_init(void)
                                     "cc_src");
     cpu_cc_dst = tcg_global_mem_new(TCG_AREG0, offsetof(CPUX86State, cc_dst),
                                     "cc_dst");
-    cpu_cc_tmp = tcg_global_mem_new(TCG_AREG0, offsetof(CPUX86State, cc_tmp),
-                                    "cc_tmp");
 }
 
 /* generate intermediate code in tcg_ctx.gen_opc_buf and gen_opparam_buf for
