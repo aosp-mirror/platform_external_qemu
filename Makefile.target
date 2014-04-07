@@ -205,6 +205,7 @@ common_LOCAL_SRC_FILES += \
     target-i386/cc_helper.c \
     target-i386/excp_helper.c \
     target-i386/fpu_helper.c \
+    target-i386/int_helper.c \
     target-i386/op_helper.c \
     target-i386/helper.c \
     target-i386/translate.c \
