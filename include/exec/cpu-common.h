@@ -121,14 +121,26 @@ void *cpu_register_map_client(void *opaque, void (*callback)(void *opaque));
 
 uint32_t ldub_phys(hwaddr addr);
 uint32_t lduw_phys(hwaddr addr);
+uint32_t lduw_le_phys(hwaddr addr);
+uint32_t lduw_be_phys(hwaddr addr);
 uint32_t ldl_phys(hwaddr addr);
+uint32_t ldl_le_phys(hwaddr addr);
+uint32_t ldl_be_phys(hwaddr addr);
 uint64_t ldq_phys(hwaddr addr);
+uint64_t ldq_le_phys(hwaddr addr);
+uint64_t ldq_be_phys(hwaddr addr);
 void stl_phys_notdirty(hwaddr addr, uint32_t val);
 void stq_phys_notdirty(hwaddr addr, uint64_t val);
 void stb_phys(hwaddr addr, uint32_t val);
 void stw_phys(hwaddr addr, uint32_t val);
+void stw_le_phys(hwaddr addr, uint32_t val);
+void stw_be_phys(hwaddr addr, uint32_t val);
 void stl_phys(hwaddr addr, uint32_t val);
+void stl_le_phys(hwaddr addr, uint32_t val);
+void stl_be_phys(hwaddr addr, uint32_t val);
 void stq_phys(hwaddr addr, uint64_t val);
+void stq_le_phys(hwaddr addr, uint64_t val);
+void stq_be_phys(hwaddr addr, uint64_t val);
 
 void cpu_physical_memory_write_rom(hwaddr addr,
                                    const void *buf, int len);
