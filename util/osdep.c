@@ -30,6 +30,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#ifndef _WIN32
+#include <sys/socket.h>
+#endif
+
 /* Needed early for CONFIG_BSD etc. */
 #include "config-host.h"
 
