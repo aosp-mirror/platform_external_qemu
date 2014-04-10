@@ -208,9 +208,9 @@ memcheck_dump_malloc_desc(const MallocDescEx* desc_ex,
            (uint32_t)mallocdesc_get_user_ptr(desc),
             (uint32_t)mallocdesc_get_user_ptr(desc) + desc->requested_bytes,
            desc->requested_bytes);
-    printf("            Prefix guarding area:   0x%08X - 0x%08X, %u bytes\n",
+    printf("            Prefix guarding area:   " TARGET_FMT_lx " - " TARGET_FMT_lx ", %u bytes\n",
            desc->ptr, desc->ptr + desc->prefix_size, desc->prefix_size);
-    printf("            Suffix guarding area:   0x%08X - 0x%08X, %u bytes\n",
+    printf("            Suffix guarding area:   " TARGET_FMT_lx " - " TARGET_FMT_lx ", %u bytes\n",
            mallocdesc_get_user_alloc_end(desc),
            mallocdesc_get_user_alloc_end(desc) + desc->suffix_size,
            desc->suffix_size);

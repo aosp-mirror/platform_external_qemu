@@ -37,6 +37,7 @@
 #include "qemu-common.h"
 #include "tcg.h"
 #include "hw/hw.h"
+#include "hw/qdev.h"
 #include "hw/xen/xen.h"
 #include "qemu/osdep.h"
 #include "sysemu/kvm.h"
