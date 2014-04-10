@@ -383,17 +383,17 @@ void cpu_breakpoint_remove_all(CPUArchState *env, int mask)
 
 /* enable or disable single step mode. EXCP_DEBUG is returned by the
    CPU loop after each instruction */
-void cpu_single_step(CPUOldState *env, int enabled)
+void cpu_single_step(CPUState *cpu, int enabled)
 {
 #if defined(TARGET_HAS_ICE)
-    if (env->singlestep_enabled != enabled) {
-        env->singlestep_enabled = enabled;
+    if (cpu->singlestep_enabled != enabled) {
+        cpu->singlestep_enabled = enabled;
         if (kvm_enabled()) {
-            kvm_update_guest_debug(env, 0);
+            kvm_update_guest_debug(cpu->env_ptr, 0);
         } else {
             /* must flush all the translated code to avoid inconsistencies */
             /* XXX: only flush what is necessary */
-            tb_flush(env);
+            tb_flush(cpu->env_ptr);
         }
     }
 #endif

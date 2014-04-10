@@ -8299,7 +8299,7 @@ gen_intermediate_code_internal (CPUMIPSState *env, TranslationBlock *tb,
     gen_opc_end = tcg_ctx.gen_opc_buf + OPC_MAX_SIZE;
     ctx.pc = pc_start;
     ctx.saved_pc = -1;
-    ctx.singlestep_enabled = env->singlestep_enabled;
+    ctx.singlestep_enabled = ENV_GET_CPU(env)->singlestep_enabled;
     ctx.tb = tb;
     ctx.bstate = BS_NONE;
     /* Restore delay slot state from the tb context.  */
@@ -8359,7 +8359,7 @@ gen_intermediate_code_internal (CPUMIPSState *env, TranslationBlock *tb,
            This is what GDB expects and is consistent with what the
            hardware does (e.g. if a delay slot instruction faults, the
            reported PC is the PC of the branch).  */
-        if (env->singlestep_enabled && (ctx.hflags & MIPS_HFLAG_BMASK) == 0)
+        if (ENV_GET_CPU(env)->singlestep_enabled && (ctx.hflags & MIPS_HFLAG_BMASK) == 0)
             break;
 
         /* Do not split a branch instruction and its delay slot into two
@@ -8379,7 +8379,7 @@ gen_intermediate_code_internal (CPUMIPSState *env, TranslationBlock *tb,
     }
     if (tb->cflags & CF_LAST_IO)
         gen_io_end();
-    if (env->singlestep_enabled && ctx.bstate != BS_BRANCH) {
+    if (ENV_GET_CPU(env)->singlestep_enabled && ctx.bstate != BS_BRANCH) {
         save_cpu_state(&ctx, ctx.bstate == BS_NONE);
         gen_helper_1i(raise_exception, cpu_env, EXCP_DEBUG);
     } else {

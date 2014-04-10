@@ -456,7 +456,7 @@ void cpu_watchpoint_remove_all(CPUArchState *env, int mask);
 #define SSTEP_NOIRQ   0x2  /* Do not use IRQ while single stepping */
 #define SSTEP_NOTIMER 0x4  /* Do not Timers while single stepping */
 
-void cpu_single_step(CPUOldState *env, int enabled);
+void cpu_single_step(CPUState *cpu, int enabled);
 void cpu_reset(CPUOldState *s);
 int cpu_is_stopped(CPUOldState *env);
 void run_on_cpu(CPUOldState *env, void (*func)(void *data), void *data);
