@@ -19,7 +19,7 @@
 
 #include "android/qemu/memcheck/memcheck_common.h"
 #include "elff/elff_api.h"
-#include "exec.h"
+#include "cpu.h"
 
 #ifdef __cplusplus
 extern "C" {

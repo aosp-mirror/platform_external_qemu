@@ -17,7 +17,8 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 #include "config.h"
-#include "exec.h"
+#include "cpu.h"
+#include "dyngen-exec.h"
 #include "disas/disas.h"
 #include "tcg.h"
 #include "sysemu/kvm.h"

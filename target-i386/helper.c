@@ -1413,8 +1413,6 @@ int check_hw_breakpoints(CPUX86State *env, int force_dr6_update)
     return hit_enabled;
 }
 
-void raise_exception(int exception_index);
-
 static void breakpoint_handler(CPUX86State *env)
 {
     CPUBreakpoint *bp;
