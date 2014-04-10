@@ -25,18 +25,19 @@ void irq_info(Monitor *mon)
 static void arm_pic_cpu_handler(void *opaque, int irq, int level)
 {
     CPUOldState *env = (CPUOldState *)opaque;
+    CPUState *cpu = ENV_GET_CPU(env);
     switch (irq) {
     case ARM_PIC_CPU_IRQ:
         if (level)
-            cpu_interrupt(env, CPU_INTERRUPT_HARD);
+            cpu_interrupt(cpu, CPU_INTERRUPT_HARD);
         else
-            cpu_reset_interrupt(env, CPU_INTERRUPT_HARD);
+            cpu_reset_interrupt(cpu, CPU_INTERRUPT_HARD);
         break;
     case ARM_PIC_CPU_FIQ:
         if (level)
-            cpu_interrupt(env, CPU_INTERRUPT_FIQ);
+            cpu_interrupt(cpu, CPU_INTERRUPT_FIQ);
         else
-            cpu_reset_interrupt(env, CPU_INTERRUPT_FIQ);
+            cpu_reset_interrupt(cpu, CPU_INTERRUPT_FIQ);
         break;
     default:
         hw_error("arm_pic_cpu_handler: Bad interrput line %d\n", irq);

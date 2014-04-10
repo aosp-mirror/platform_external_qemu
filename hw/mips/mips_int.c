@@ -6,16 +6,18 @@
    IRQ may change */
 void cpu_mips_update_irq(CPUOldState *env)
 {
+    CPUState *cpu = ENV_GET_CPU(env);
+
     if ((env->CP0_Status & (1 << CP0St_IE)) &&
         !(env->CP0_Status & (1 << CP0St_EXL)) &&
         !(env->CP0_Status & (1 << CP0St_ERL)) &&
         !(env->hflags & MIPS_HFLAG_DM)) {
         if ((env->CP0_Status & env->CP0_Cause & CP0Ca_IP_mask) &&
-            !(ENV_GET_CPU(env)->interrupt_request & CPU_INTERRUPT_HARD)) {
-            cpu_interrupt(env, CPU_INTERRUPT_HARD);
+            !(cpu->interrupt_request & CPU_INTERRUPT_HARD)) {
+            cpu_interrupt(cpu, CPU_INTERRUPT_HARD);
         }
     } else
-        cpu_reset_interrupt(env, CPU_INTERRUPT_HARD);
+        cpu_reset_interrupt(cpu, CPU_INTERRUPT_HARD);
 }
 
 static void cpu_mips_irq_request(void *opaque, int irq, int level)

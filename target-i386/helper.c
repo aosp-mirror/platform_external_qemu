@@ -462,13 +462,14 @@ static int cpu_x86_register (CPUX86State *env, const char *cpu_model)
 }
 
 /* NOTE: must be called outside the CPU execute loop */
-void cpu_reset(CPUX86State *env)
+void cpu_reset(CPUState *cpu)
 {
+    CPUX86State *env = cpu->env_ptr;
     int i;
 
     if (qemu_loglevel_mask(CPU_LOG_RESET)) {
-        qemu_log("CPU Reset (CPU %d)\n", ENV_GET_CPU(env)->cpu_index);
-        log_cpu_state(env, X86_DUMP_FPU | X86_DUMP_CCOP);
+        qemu_log("CPU Reset (CPU %d)\n", cpu->cpu_index);
+        log_cpu_state(cpu, X86_DUMP_FPU | X86_DUMP_CCOP);
     }
 
     memset(env, 0, offsetof(CPUX86State, breakpoints));
@@ -651,10 +652,11 @@ done:
     cpu_fprintf(f, "\n");
 }
 
-void cpu_dump_state(CPUX86State *env, FILE *f,
+void cpu_dump_state(CPUState *cpu, FILE *f,
                     int (*cpu_fprintf)(FILE *f, const char *fmt, ...),
                     int flags)
 {
+    CPUX86State *env = cpu->env_ptr;
     int eflags, i, nb;
     char cc_op_name[32];
     static const char *seg_name[6] = { "ES", "CS", "SS", "DS", "FS", "GS" };
@@ -704,7 +706,7 @@ void cpu_dump_state(CPUX86State *env, FILE *f,
                     (env->hflags >> HF_INHIBIT_IRQ_SHIFT) & 1,
                     (int)(env->a20_mask >> 20) & 1,
                     (env->hflags >> HF_SMM_SHIFT) & 1,
-                    ENV_GET_CPU(env)->halted);
+                    cpu->halted);
     } else
 #endif
     {
@@ -731,7 +733,7 @@ void cpu_dump_state(CPUX86State *env, FILE *f,
                     (env->hflags >> HF_INHIBIT_IRQ_SHIFT) & 1,
                     (int)(env->a20_mask >> 20) & 1,
                     (env->hflags >> HF_SMM_SHIFT) & 1,
-                    ENV_GET_CPU(env)->halted);
+                    cpu->halted);
     }
 
     for(i = 0; i < 6; i++) {
@@ -842,7 +844,7 @@ void cpu_x86_set_a20(CPUX86State *env, int a20_state)
 #endif
         /* if the cpu is currently executing code, we must unlink it and
            all the potentially executing TB */
-        cpu_interrupt(env, CPU_INTERRUPT_EXITTB);
+        cpu_interrupt(ENV_GET_CPU(env), CPU_INTERRUPT_EXITTB);
 
         /* when a20 is changed, all the MMU mappings are invalid, so
            we must flush everything */
@@ -1479,7 +1481,7 @@ void cpu_inject_x86_mce(CPUX86State *cenv, int bank, uint64_t status,
         banks[3] = misc;
         cenv->mcg_status = mcg_status;
         banks[1] = status;
-        cpu_interrupt(cenv, CPU_INTERRUPT_MCE);
+        cpu_interrupt(ENV_GET_CPU(cenv), CPU_INTERRUPT_MCE);
     } else if (!(banks[1] & MCI_STATUS_VAL)
                || !(banks[1] & MCI_STATUS_UC)) {
         if (banks[1] & MCI_STATUS_VAL)
@@ -1751,9 +1753,11 @@ CPUX86State *cpu_x86_init(const char *cpu_model)
     x86_cpu = g_malloc0(sizeof(X86CPU));
     env = &x86_cpu->env;
     ENV_GET_CPU(env)->env_ptr = env;
+    CPUState *cpu = ENV_GET_CPU(env);
 
     cpu_exec_init(env);
-    ENV_GET_CPU(env)->cpu_model_str = cpu_model;
+    cpu->cpu_model_str = cpu_model;
+
 
     /* init various static tables */
     if (!inited) {
@@ -1768,9 +1772,9 @@ CPUX86State *cpu_x86_init(const char *cpu_model)
         return NULL;
     }
     mce_init(env);
-    cpu_reset(env);
+    cpu_reset(cpu);
 
-    qemu_init_vcpu(env);
+    qemu_init_vcpu(cpu);
 
     if (kvm_enabled()) {
         kvm_trim_features(&env->cpuid_features,
@@ -1795,7 +1799,7 @@ void do_cpu_init(CPUX86State *env)
 {
     CPUState *cpu = ENV_GET_CPU(env);
     int sipi = cpu->interrupt_request & CPU_INTERRUPT_SIPI;
-    cpu_reset(env);
+    cpu_reset(cpu);
     cpu->interrupt_request = sipi;
     apic_init_reset(env);
 }

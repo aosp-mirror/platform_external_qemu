@@ -45,9 +45,9 @@ int tb_invalidated_flag;
 //#define CONFIG_DEBUG_EXEC
 //#define DEBUG_SIGNAL
 
-bool qemu_cpu_has_work(CPUOldState *env)
+bool qemu_cpu_has_work(CPUState *cpu)
 {
-    return cpu_has_work(ENV_GET_CPU(env));
+    return cpu_has_work(cpu);
 }
 
 void cpu_loop_exit(CPUArchState* env)
@@ -547,16 +547,16 @@ int cpu_exec(CPUOldState *env)
 #if defined(TARGET_I386)
                     env->eflags = env->eflags | cpu_cc_compute_all(env, CC_OP)
                         | (DF & DF_MASK);
-                    log_cpu_state(env, X86_DUMP_CCOP);
+                    log_cpu_state(cpu, X86_DUMP_CCOP);
                     env->eflags &= ~(DF_MASK | CC_O | CC_S | CC_Z | CC_A | CC_P | CC_C);
 #elif defined(TARGET_M68K)
                     cpu_m68k_flush_flags(env, env->cc_op);
                     env->cc_op = CC_OP_FLAGS;
                     env->sr = (env->sr & 0xffe0)
                               | env->cc_dest | (env->cc_x << 4);
-                    log_cpu_state(env, 0);
+                    log_cpu_state(cpu, 0);
 #else
-                    log_cpu_state(env, 0);
+                    log_cpu_state(cpu, 0);
 #endif
                 }
 #endif /* DEBUG_DISAS || CONFIG_DEBUG_EXEC */

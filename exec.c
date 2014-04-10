@@ -153,15 +153,15 @@ static int cpu_common_load(QEMUFile *f, void *opaque, int version_id)
 }
 #endif
 
-CPUArchState *qemu_get_cpu(int cpu_index)
+CPUState *qemu_get_cpu(int cpu_index)
 {
     CPUState *cpu;
 
     CPU_FOREACH(cpu) {
         if (cpu->cpu_index == cpu_index)
-            break;
+            return cpu;
     }
-    return cpu ? cpu->env_ptr : NULL;
+    return NULL;
 }
 
 void cpu_exec_init(CPUArchState *env)
@@ -457,21 +457,21 @@ void cpu_unlink_tb(CPUOldState *env)
     spin_unlock(&interrupt_lock);
 }
 
-void cpu_reset_interrupt(CPUOldState *env, int mask)
+void cpu_reset_interrupt(CPUState *cpu, int mask)
 {
-    CPUState *cpu = ENV_GET_CPU(env);
     cpu->interrupt_request &= ~mask;
 }
 
-void cpu_exit(CPUOldState *env)
+void cpu_exit(CPUState *cpu)
 {
-    CPUState *cpu = ENV_GET_CPU(env);
     cpu->exit_request = 1;
-    cpu_unlink_tb(env);
+    cpu_unlink_tb(cpu->env_ptr);
 }
 
 void cpu_abort(CPUArchState *env, const char *fmt, ...)
 {
+    CPUState *cpu = ENV_GET_CPU(env);
+
     va_list ap;
     va_list ap2;
 
@@ -481,18 +481,18 @@ void cpu_abort(CPUArchState *env, const char *fmt, ...)
     vfprintf(stderr, fmt, ap);
     fprintf(stderr, "\n");
 #ifdef TARGET_I386
-    cpu_dump_state(env, stderr, fprintf, X86_DUMP_FPU | X86_DUMP_CCOP);
+    cpu_dump_state(cpu, stderr, fprintf, X86_DUMP_FPU | X86_DUMP_CCOP);
 #else
-    cpu_dump_state(env, stderr, fprintf, 0);
+    cpu_dump_state(cpu, stderr, fprintf, 0);
 #endif
     if (qemu_log_enabled()) {
         qemu_log("qemu: fatal: ");
         qemu_log_vprintf(fmt, ap2);
         qemu_log("\n");
 #ifdef TARGET_I386
-        log_cpu_state(env, X86_DUMP_FPU | X86_DUMP_CCOP);
+        log_cpu_state(cpu, X86_DUMP_FPU | X86_DUMP_CCOP);
 #else
-        log_cpu_state(env, 0);
+        log_cpu_state(cpu, 0);
 #endif
         qemu_log_flush();
         qemu_log_close();
@@ -1539,7 +1539,8 @@ static void tb_check_watchpoint(CPUArchState* env)
 /* Generate a debug exception if a watchpoint has been hit.  */
 static void check_watchpoint(int offset, int len_mask, int flags)
 {
-    CPUArchState *env = cpu_single_env;
+    CPUState *cpu = current_cpu;
+    CPUArchState *env = cpu->env_ptr;
     target_ulong pc, cs_base;
     target_ulong vaddr;
     CPUWatchpoint *wp;
@@ -1549,7 +1550,7 @@ static void check_watchpoint(int offset, int len_mask, int flags)
         /* We re-entered the check after replacing the TB. Now raise
          * the debug interrupt so that is will trigger after the
          * current instruction. */
-        cpu_interrupt(env, CPU_INTERRUPT_DEBUG);
+        cpu_interrupt(cpu, CPU_INTERRUPT_DEBUG);
         return;
     }
     vaddr = (env->mem_io_vaddr & TARGET_PAGE_MASK) + offset;

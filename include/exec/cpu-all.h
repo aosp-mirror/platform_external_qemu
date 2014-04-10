@@ -361,16 +361,6 @@ void page_set_flags(target_ulong start, target_ulong end, int flags);
 int page_check_range(target_ulong start, target_ulong len, int flags);
 #endif
 
-CPUArchState *cpu_copy(CPUArchState *env);
-CPUArchState *qemu_get_cpu(int cpu);
-
-#define CPU_DUMP_CODE 0x00010000
-
-void cpu_dump_state(CPUArchState *env, FILE *f, fprintf_function cpu_fprintf,
-                    int flags);
-void cpu_dump_statistics(CPUArchState *env, FILE *f, fprintf_function cpu_fprintf,
-                          int flags);
-
 void QEMU_NORETURN cpu_abort(CPUArchState *env, const char *fmt, ...)
     GCC_FMT_ATTR(2, 3);
 
@@ -424,13 +414,6 @@ void QEMU_NORETURN cpu_abort(CPUArchState *env, const char *fmt, ...)
      | CPU_INTERRUPT_TGT_EXT_3   \
      | CPU_INTERRUPT_TGT_EXT_4)
 
-void cpu_interrupt(CPUOldState *s, int mask);
-void cpu_reset_interrupt(CPUOldState *env, int mask);
-
-void cpu_exit(CPUOldState *s);
-
-bool qemu_cpu_has_work(CPUOldState *env);
-
 /* Breakpoint/watchpoint flags */
 #define BP_MEM_READ           0x01
 #define BP_MEM_WRITE          0x02
@@ -457,9 +440,6 @@ void cpu_watchpoint_remove_all(CPUArchState *env, int mask);
 #define SSTEP_NOTIMER 0x4  /* Do not Timers while single stepping */
 
 void cpu_single_step(CPUState *cpu, int enabled);
-void cpu_reset(CPUOldState *s);
-int cpu_is_stopped(CPUOldState *env);
-void run_on_cpu(CPUOldState *env, void (*func)(void *data), void *data);
 
 /* IO ports API */
 #include "exec/ioport.h"
