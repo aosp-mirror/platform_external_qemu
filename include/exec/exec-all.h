@@ -407,6 +407,18 @@ void phys_mem_set_alloc(void *(*alloc)(size_t));
 
 TranslationBlock *tb_find_pc(uintptr_t pc_ptr);
 
+/* The return address may point to the start of the next instruction.
+   Subtracting one gets us the call instruction itself.  */
+#if defined(__s390__) && !defined(__s390x__)
+# define GETPC() ((void*)(((unsigned long)__builtin_return_address(0) & 0x7fffffffUL) - 1))
+#elif defined(__arm__)
+/* Thumb return addresses have the low bit set, so we need to subtract two.
+   This is still safe in ARM mode because instructions are 4 bytes.  */
+# define GETPC() ((void *)((unsigned long)__builtin_return_address(0) - 2))
+#else
+# define GETPC() ((void *)((unsigned long)__builtin_return_address(0) - 1))
+#endif
+
 extern CPUWriteMemoryFunc *io_mem_write[IO_MEM_NB_ENTRIES][4];
 extern CPUReadMemoryFunc *io_mem_read[IO_MEM_NB_ENTRIES][4];
 extern void *io_mem_opaque[IO_MEM_NB_ENTRIES];
