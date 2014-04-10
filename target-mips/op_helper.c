@@ -1930,9 +1930,11 @@ void tlb_fill (CPUMIPSState* env1, target_ulong addr, int is_write, int mmu_idx,
     env = saved_env;
 }
 
-void do_unassigned_access(hwaddr addr, int is_write, int is_exec,
-                          int unused, int size)
+void cpu_unassigned_access(CPUMIPSState* env1, hwaddr addr,
+                           int is_write, int is_exec, int unused, int size)
 {
+    env = env1;
+
     if (is_exec)
         helper_raise_exception(EXCP_IBE);
     else
