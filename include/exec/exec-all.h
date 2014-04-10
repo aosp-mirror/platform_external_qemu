@@ -398,30 +398,20 @@ extern uintptr_t tci_tb_ptr;
 # define GETPC_ADJ   2
 #endif
 
+#define GETPC()  (GETRA() - GETPC_ADJ)
+
 #if !defined(CONFIG_USER_ONLY)
 
 void phys_mem_set_alloc(void *(*alloc)(size_t));
 
 TranslationBlock *tb_find_pc(uintptr_t pc_ptr);
 
-/* The return address may point to the start of the next instruction.
-   Subtracting one gets us the call instruction itself.  */
-#if defined(__s390__) && !defined(__s390x__)
-# define GETPC() ((void*)(((uintptr_t)__builtin_return_address(0) & 0x7fffffffUL) - 1))
-#elif defined(__arm__)
-/* Thumb return addresses have the low bit set, so we need to subtract two.
-   This is still safe in ARM mode because instructions are 4 bytes.  */
-# define GETPC() ((void *)((uintptr_t)__builtin_return_address(0) - 2))
-#else
-# define GETPC() ((void *)((uintptr_t)__builtin_return_address(0) - 1))
-#endif
-
 extern CPUWriteMemoryFunc *io_mem_write[IO_MEM_NB_ENTRIES][4];
 extern CPUReadMemoryFunc *io_mem_read[IO_MEM_NB_ENTRIES][4];
 extern void *io_mem_opaque[IO_MEM_NB_ENTRIES];
 
-void tlb_fill(CPUArchState* env, target_ulong addr, int is_write, int mmu_idx,
-              void *retaddr);
+void tlb_fill(CPUArchState *env1, target_ulong addr, int is_write, int mmu_idx,
+              uintptr_t retaddr);
 
 #include "exec/softmmu_defs.h"
 
