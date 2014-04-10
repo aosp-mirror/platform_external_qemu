@@ -93,7 +93,7 @@ glue(glue(cpu_ld, USUFFIX), MEMSUFFIX)(CPUArchState *env, target_ulong ptr)
     mmu_idx = CPU_MMU_INDEX;
     if (unlikely(env->tlb_table[mmu_idx][page_index].ADDR_READ !=
                  (addr & (TARGET_PAGE_MASK | (DATA_SIZE - 1))))) {
-        res = glue(glue(__ld, SUFFIX), MMUSUFFIX)(addr, mmu_idx);
+        res = glue(glue(helper_ld, SUFFIX), MMUSUFFIX)(env, addr, mmu_idx);
     } else {
         uintptr_t hostaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
         res = glue(glue(ld, USUFFIX), _raw)(hostaddr);
@@ -114,7 +114,7 @@ glue(glue(cpu_lds, SUFFIX), MEMSUFFIX)(CPUArchState *env, target_ulong ptr)
     mmu_idx = CPU_MMU_INDEX;
     if (unlikely(env->tlb_table[mmu_idx][page_index].ADDR_READ !=
                  (addr & (TARGET_PAGE_MASK | (DATA_SIZE - 1))))) {
-        res = (DATA_STYPE)glue(glue(__ld, SUFFIX), MMUSUFFIX)(addr, mmu_idx);
+        res = (DATA_STYPE)glue(glue(helper_ld, SUFFIX), MMUSUFFIX)(env, addr, mmu_idx);
     } else {
         uintptr_t hostaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
         res = glue(glue(lds, SUFFIX), _raw)(hostaddr);
@@ -140,7 +140,7 @@ glue(glue(cpu_st, SUFFIX), MEMSUFFIX)(CPUArchState *env, target_ulong ptr,
     mmu_idx = CPU_MMU_INDEX;
     if (unlikely(env->tlb_table[mmu_idx][page_index].addr_write !=
                  (addr & (TARGET_PAGE_MASK | (DATA_SIZE - 1))))) {
-        glue(glue(__st, SUFFIX), MMUSUFFIX)(addr, v, mmu_idx);
+        glue(glue(helper_st, SUFFIX), MMUSUFFIX)(env, addr, v, mmu_idx);
     } else {
         uintptr_t hostaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
         glue(glue(st, SUFFIX), _raw)(hostaddr, v);

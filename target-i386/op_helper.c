@@ -4912,7 +4912,6 @@ static float approx_rcp(float a)
 #if !defined(CONFIG_USER_ONLY)
 
 #define MMUSUFFIX _mmu
-#define env cpu_single_env
 
 #define SHIFT 0
 #include "exec/softmmu_template.h"
@@ -4926,7 +4925,6 @@ static float approx_rcp(float a)
 #define SHIFT 3
 #include "exec/softmmu_template.h"
 
-#undef env
 #endif
 
 #if !defined(CONFIG_USER_ONLY)

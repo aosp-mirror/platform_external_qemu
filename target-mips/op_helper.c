@@ -2069,8 +2069,6 @@ static void do_unaligned_access (CPUMIPSState *env,
                                  target_ulong addr, int is_write,
                                  int is_user, uintptr_t retaddr);
 
-#define env cpu_single_env
-
 #define MMUSUFFIX _mmu
 #define ALIGNED_ONLY
 
@@ -2085,8 +2083,6 @@ static void do_unaligned_access (CPUMIPSState *env,
 
 #define SHIFT 3
 #include "exec/softmmu_template.h"
-
-#undef env
 
 static void do_unaligned_access(CPUMIPSState *env, target_ulong addr,
                                 int is_write, int is_user, uintptr_t retaddr)

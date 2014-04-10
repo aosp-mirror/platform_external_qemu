@@ -56,7 +56,6 @@ uint32_t HELPER(neon_tbl)(CPUARMState *env, uint32_t ireg, uint32_t def,
 #include "exec/softmmu_exec.h"
 
 #define MMUSUFFIX _mmu
-#define env cpu_single_env
 
 #define SHIFT 0
 #include "exec/softmmu_template.h"
@@ -69,8 +68,6 @@ uint32_t HELPER(neon_tbl)(CPUARMState *env, uint32_t ireg, uint32_t def,
 
 #define SHIFT 3
 #include "exec/softmmu_template.h"
-
-#undef env
 
 /* try to fill the TLB and return an exception if error. If retaddr is
    NULL, it means that the function was called in C code (i.e. not
@@ -470,14 +467,14 @@ void HELPER(neon_vldst_all)(CPUARMState *env, uint32_t insn)
 #define STQ(addr, val) stq(addr, val)
 #else
     int user = cpu_mmu_index(env);
-#define LDB(addr) slow_ldb_mmu(addr, user, GETPC())
-#define LDW(addr) slow_ldw_mmu(addr, user, GETPC())
-#define LDL(addr) slow_ldl_mmu(addr, user, GETPC())
-#define LDQ(addr) slow_ldq_mmu(addr, user, GETPC())
-#define STB(addr, val) slow_stb_mmu(addr, val, user, GETPC())
-#define STW(addr, val) slow_stw_mmu(addr, val, user, GETPC())
-#define STL(addr, val) slow_stl_mmu(addr, val, user, GETPC())
-#define STQ(addr, val) slow_stq_mmu(addr, val, user, GETPC())
+#define LDB(addr) slow_ldb_mmu(env, addr, user, GETPC())
+#define LDW(addr) slow_ldw_mmu(env, addr, user, GETPC())
+#define LDL(addr) slow_ldl_mmu(env, addr, user, GETPC())
+#define LDQ(addr) slow_ldq_mmu(env, addr, user, GETPC())
+#define STB(addr, val) slow_stb_mmu(env, addr, val, user, GETPC())
+#define STW(addr, val) slow_stw_mmu(env, addr, val, user, GETPC())
+#define STL(addr, val) slow_stl_mmu(env, addr, val, user, GETPC())
+#define STQ(addr, val) slow_stq_mmu(env, addr, val, user, GETPC())
 #endif
     static const struct {
         int nregs;
