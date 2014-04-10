@@ -190,6 +190,10 @@ DEF_HELPER_3(rsqrtps, void, env, XMMReg, XMMReg)
 DEF_HELPER_3(rsqrtss, void, env, XMMReg, XMMReg)
 DEF_HELPER_3(rcpps, void, env, XMMReg, XMMReg)
 DEF_HELPER_3(rcpss, void, env, XMMReg, XMMReg)
+DEF_HELPER_3(extrq_r, void, env, XMMReg, XMMReg)
+DEF_HELPER_4(extrq_i, void, env, XMMReg, int, int)
+DEF_HELPER_3(insertq_r, void, env, XMMReg, XMMReg)
+DEF_HELPER_4(insertq_i, void, env, XMMReg, int, int)
 DEF_HELPER_3(haddps, void, env, XMMReg, XMMReg)
 DEF_HELPER_3(haddpd, void, env, XMMReg, XMMReg)
 DEF_HELPER_3(hsubps, void, env, XMMReg, XMMReg)
@@ -330,6 +334,17 @@ DEF_HELPER_4(glue(pcmpistri, SUFFIX), void, env, Reg, Reg, i32)
 DEF_HELPER_4(glue(pcmpistrm, SUFFIX), void, env, Reg, Reg, i32)
 DEF_HELPER_3(crc32, tl, i32, tl, i32)
 DEF_HELPER_3(popcnt, tl, env, tl, i32)
+#endif
+
+/* AES-NI op helpers */
+#if SHIFT == 1
+DEF_HELPER_3(glue(aesdec, SUFFIX), void, env, Reg, Reg)
+DEF_HELPER_3(glue(aesdeclast, SUFFIX), void, env, Reg, Reg)
+DEF_HELPER_3(glue(aesenc, SUFFIX), void, env, Reg, Reg)
+DEF_HELPER_3(glue(aesenclast, SUFFIX), void, env, Reg, Reg)
+DEF_HELPER_3(glue(aesimc, SUFFIX), void, env, Reg, Reg)
+DEF_HELPER_4(glue(aeskeygenassist, SUFFIX), void, env, Reg, Reg, i32)
+DEF_HELPER_4(glue(pclmulqdq, SUFFIX), void, env, Reg, Reg, i32)
 #endif
 
 #undef SHIFT
