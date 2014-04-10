@@ -662,7 +662,7 @@ void cpu_dump_state(CPUState *cpu, FILE *f,
     static const char *seg_name[6] = { "ES", "CS", "SS", "DS", "FS", "GS" };
 
     if (kvm_enabled())
-        kvm_arch_get_registers(env);
+        kvm_arch_get_registers(cpu);
 
 #ifdef CONFIG_HAX
     if (hax_enabled())
@@ -1778,16 +1778,16 @@ CPUX86State *cpu_x86_init(const char *cpu_model)
 
     if (kvm_enabled()) {
         kvm_trim_features(&env->cpuid_features,
-                          kvm_arch_get_supported_cpuid(env, 1, R_EDX),
+                          kvm_arch_get_supported_cpuid(cpu, 1, R_EDX),
                           feature_name);
         kvm_trim_features(&env->cpuid_ext_features,
-                          kvm_arch_get_supported_cpuid(env, 1, R_ECX),
+                          kvm_arch_get_supported_cpuid(cpu, 1, R_ECX),
                           ext_feature_name);
         kvm_trim_features(&env->cpuid_ext2_features,
-                          kvm_arch_get_supported_cpuid(env, 0x80000001, R_EDX),
+                          kvm_arch_get_supported_cpuid(cpu, 0x80000001, R_EDX),
                           ext2_feature_name);
         kvm_trim_features(&env->cpuid_ext3_features,
-                          kvm_arch_get_supported_cpuid(env, 0x80000001, R_ECX),
+                          kvm_arch_get_supported_cpuid(cpu, 0x80000001, R_ECX),
                           ext3_feature_name);
     }
 

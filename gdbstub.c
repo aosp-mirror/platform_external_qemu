@@ -1467,7 +1467,7 @@ static int gdb_breakpoint_insert(target_ulong addr, target_ulong len, int type)
     int err = 0;
 
     if (kvm_enabled())
-        return kvm_insert_breakpoint(gdbserver_state->c_cpu, addr, len, type);
+        return kvm_insert_breakpoint(ENV_GET_CPU(gdbserver_state->c_cpu), addr, len, type);
 
     switch (type) {
     case GDB_BREAKPOINT_SW:
@@ -1501,7 +1501,7 @@ static int gdb_breakpoint_remove(target_ulong addr, target_ulong len, int type)
     int err = 0;
 
     if (kvm_enabled())
-        return kvm_remove_breakpoint(gdbserver_state->c_cpu, addr, len, type);
+        return kvm_remove_breakpoint(ENV_GET_CPU(gdbserver_state->c_cpu), addr, len, type);
 
     switch (type) {
     case GDB_BREAKPOINT_SW:
@@ -1533,7 +1533,7 @@ static void gdb_breakpoint_remove_all(void)
     CPUState *cpu;
 
     if (kvm_enabled()) {
-        kvm_remove_all_breakpoints(gdbserver_state->c_cpu);
+        kvm_remove_all_breakpoints(ENV_GET_CPU(gdbserver_state->c_cpu));
         return;
     }
 
@@ -1549,7 +1549,7 @@ static void gdb_set_cpu_pc(GDBState *s, target_ulong pc)
 {
 #if defined(TARGET_I386)
     s->c_cpu->eip = pc;
-    cpu_synchronize_state(s->c_cpu, 1);
+    cpu_synchronize_state(ENV_GET_CPU(s->c_cpu), 1);
 #elif defined (TARGET_PPC)
     s->c_cpu->nip = pc;
 #elif defined (TARGET_SPARC)
@@ -1677,7 +1677,7 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
         }
         break;
     case 'g':
-        cpu_synchronize_state(s->g_cpu, 0);
+        cpu_synchronize_state(ENV_GET_CPU(s->g_cpu), 0);
         len = 0;
         for (addr = 0; addr < num_g_regs; addr++) {
             reg_size = gdb_read_register(s->g_cpu, mem_buf + len, addr);
@@ -1695,7 +1695,7 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
             len -= reg_size;
             registers += reg_size;
         }
-        cpu_synchronize_state(s->g_cpu, 1);
+        cpu_synchronize_state(ENV_GET_CPU(s->g_cpu), 1);
         put_packet(s, "OK");
         break;
     case 'm':
@@ -1851,7 +1851,7 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
             thread = strtoull(p+16, (char **)&p, 16);
             env = find_cpu(thread);
             if (env != NULL) {
-                cpu_synchronize_state(env, 0);
+                cpu_synchronize_state(ENV_GET_CPU(env), 0);
                 len = snprintf((char *)mem_buf, sizeof(mem_buf),
                                "CPU#%d [%s]", ENV_GET_CPU(env)->cpu_index,
                                ENV_GET_CPU(env)->halted ? "halted " : "running");
