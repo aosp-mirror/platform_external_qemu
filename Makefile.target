@@ -208,6 +208,7 @@ common_LOCAL_SRC_FILES += \
     target-i386/int_helper.c \
     target-i386/mem_helper.c \
     target-i386/op_helper.c \
+    target-i386/seg_helper.c \
     target-i386/helper.c \
     target-i386/translate.c \
     target-i386/machine.c \
