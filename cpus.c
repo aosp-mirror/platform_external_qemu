@@ -236,7 +236,7 @@ void tcg_cpu_exec(void)
         if (cpu_can_run(env))
             ret = qemu_cpu_exec(env);
         if (ret == EXCP_DEBUG) {
-            gdb_set_stop_cpu(env);
+            gdb_set_stop_cpu(cur_cpu);
             debug_requested = 1;
             break;
         }

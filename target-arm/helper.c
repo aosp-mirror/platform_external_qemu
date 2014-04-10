@@ -437,13 +437,13 @@ CPUARMState *cpu_arm_init(const char *cpu_model)
     env->cp15.c0_cpuid = id;
     cpu_reset(cpu);
     if (arm_feature(env, ARM_FEATURE_NEON)) {
-        gdb_register_coprocessor(env, vfp_gdb_get_reg, vfp_gdb_set_reg,
+        gdb_register_coprocessor(cpu, vfp_gdb_get_reg, vfp_gdb_set_reg,
                                  51, "arm-neon.xml", 0);
     } else if (arm_feature(env, ARM_FEATURE_VFP3)) {
-        gdb_register_coprocessor(env, vfp_gdb_get_reg, vfp_gdb_set_reg,
+        gdb_register_coprocessor(cpu, vfp_gdb_get_reg, vfp_gdb_set_reg,
                                  35, "arm-vfp3.xml", 0);
     } else if (arm_feature(env, ARM_FEATURE_VFP)) {
-        gdb_register_coprocessor(env, vfp_gdb_get_reg, vfp_gdb_set_reg,
+        gdb_register_coprocessor(cpu, vfp_gdb_get_reg, vfp_gdb_set_reg,
                                  19, "arm-vfp.xml", 0);
     }
     qemu_init_vcpu(cpu);
