@@ -19,15 +19,6 @@
 #if !defined(__DYNGEN_EXEC_H__)
 #define __DYNGEN_EXEC_H__
 
-#include "qemu-common.h"
-
-#ifdef __OpenBSD__
-#include <sys/types.h>
-#endif
-
-/* XXX: This may be wrong for 64-bit ILP32 hosts.  */
-typedef void * host_reg_t;
-
 #if defined(__i386__)
 #define AREG0 "ebp"
 #elif defined(__x86_64__)
@@ -65,10 +56,5 @@ typedef void * host_reg_t;
 #endif
 
 register CPUArchState *env asm(AREG0);
-
-#define xglue(x, y) x ## y
-#define glue(x, y) xglue(x, y)
-#define stringify(s)	tostring(s)
-#define tostring(s)	#s
 
 #endif /* !defined(__DYNGEN_EXEC_H__) */
