@@ -17,15 +17,20 @@
 int
 kvm_check_allowed(void)
 {
+
+    char* kvm_device = getenv("KVM_DEVICE");
+    if (NULL == kvm_device) {
+      kvm_device = "/dev/kvm";
+    }
     /* Is there a /dev/kvm device file here? */
-    if (access("/dev/kvm",F_OK)) {
+    if (access(kvm_device,F_OK)) {
         /* no need to print a warning here */
         D("No kvm device file detected");
         return 0;
     }
 
     /* Can we access it? */
-    if (access("/dev/kvm",R_OK)) {
+    if (access(kvm_device,R_OK)) {
         D("KVM device file is not readable for this user.");
         return 0;
     }
