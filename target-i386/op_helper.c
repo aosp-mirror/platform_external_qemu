@@ -42,15 +42,6 @@
 #  define LOG_PCALL_STATE(env) do { } while (0)
 #endif
 
-/* n must be a constant to be efficient */
-static inline target_long lshift(target_long x, int n)
-{
-    if (n >= 0)
-        return x << n;
-    else
-        return x >> (-n);
-}
-
 #define RC_MASK         0xc00
 #define RC_NEAR         0x000
 #define RC_DOWN         0x400
@@ -106,33 +97,6 @@ static inline void helper_fstt(CPUX86State *env, floatx80 f, target_ulong ptr)
 
 #define FPUC_EM 0x3f
 
-static inline uint32_t compute_eflags(CPUX86State *env)
-{
-    return env->eflags | helper_cc_compute_all(env, CC_OP) | (DF & DF_MASK);
-}
-
-/* NOTE: CC_OP must be modified manually to CC_OP_EFLAGS */
-static inline void load_eflags(CPUX86State *env,
-                               int eflags, int update_mask)
-{
-    CC_SRC = eflags & (CC_O | CC_S | CC_Z | CC_A | CC_P | CC_C);
-    DF = 1 - (2 * ((eflags >> 10) & 1));
-    env->eflags = (env->eflags & ~update_mask) |
-        (eflags & update_mask) | 0x2;
-}
-
-/* load efer and update the corresponding hflags. XXX: do consistency
-   checks with cpuid bits ? */
-static inline void cpu_load_efer(CPUX86State *env, uint64_t val)
-{
-    env->efer = val;
-    env->hflags &= ~(HF_LMA_MASK | HF_SVME_MASK);
-    if (env->efer & MSR_EFER_LMA)
-        env->hflags |= HF_LMA_MASK;
-    if (env->efer & MSR_EFER_SVME)
-        env->hflags |= HF_SVME_MASK;
-}
-
 #if 0
 #define raise_exception_err(a, b)\
 do {\
@@ -144,41 +108,6 @@ do {\
 static void QEMU_NORETURN raise_exception_err(CPUX86State *env,
                                               int exception_index,
                                               int error_code);
-
-static const uint8_t parity_table[256] = {
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    CC_P, 0, 0, CC_P, 0, CC_P, CC_P, 0,
-    0, CC_P, CC_P, 0, CC_P, 0, 0, CC_P,
-};
 
 /* modulo 17 table */
 static const uint8_t rclw_table[32] = {
@@ -223,21 +152,6 @@ void helper_lock(void)
 void helper_unlock(void)
 {
     spin_unlock(&global_cpu_lock);
-}
-
-void helper_write_eflags(CPUX86State *env,
-                         target_ulong t0, uint32_t update_mask)
-{
-    load_eflags(env, t0, update_mask);
-}
-
-target_ulong helper_read_eflags(CPUX86State *env)
-{
-    uint32_t eflags;
-    eflags = helper_cc_compute_all(env, CC_OP);
-    eflags |= (DF & DF_MASK);
-    eflags |= env->eflags & ~(VM_MASK | RF_MASK);
-    return eflags;
 }
 
 /* return non zero if error */
@@ -478,7 +392,7 @@ static void switch_tss(CPUX86State *env,
         e2 &= ~DESC_TSS_BUSY_MASK;
         cpu_stl_kernel(env, ptr + 4, e2);
     }
-    old_eflags = compute_eflags(env);
+    old_eflags = cpu_compute_eflags(env);
     if (source == SWITCH_TSS_IRET)
         old_eflags &= ~NT_MASK;
 
@@ -551,7 +465,7 @@ static void switch_tss(CPUX86State *env,
         IF_MASK | IOPL_MASK | VM_MASK | RF_MASK | NT_MASK;
     if (!(type & 8))
         eflags_mask &= 0xffff;
-    load_eflags(env, new_eflags, eflags_mask);
+    cpu_load_eflags(env, new_eflags, eflags_mask);
     /* XXX: what to do in 16 bit case ? */
     EAX = new_regs[0];
     ECX = new_regs[1];
@@ -904,7 +818,7 @@ static void do_interrupt_protected(CPUX86State *env,
             PUSHL(ssp, esp, sp_mask, env->segs[R_SS].selector);
             PUSHL(ssp, esp, sp_mask, ESP);
         }
-        PUSHL(ssp, esp, sp_mask, compute_eflags(env));
+        PUSHL(ssp, esp, sp_mask, cpu_compute_eflags(env));
         PUSHL(ssp, esp, sp_mask, env->segs[R_CS].selector);
         PUSHL(ssp, esp, sp_mask, old_eip);
         if (has_error_code) {
@@ -921,7 +835,7 @@ static void do_interrupt_protected(CPUX86State *env,
             PUSHW(ssp, esp, sp_mask, env->segs[R_SS].selector);
             PUSHW(ssp, esp, sp_mask, ESP);
         }
-        PUSHW(ssp, esp, sp_mask, compute_eflags(env));
+        PUSHW(ssp, esp, sp_mask, cpu_compute_eflags(env));
         PUSHW(ssp, esp, sp_mask, env->segs[R_CS].selector);
         PUSHW(ssp, esp, sp_mask, old_eip);
         if (has_error_code) {
@@ -1078,7 +992,7 @@ static void do_interrupt64(CPUX86State *env,
 
     PUSHQ(esp, env->segs[R_SS].selector);
     PUSHQ(esp, ESP);
-    PUSHQ(esp, compute_eflags(env));
+    PUSHQ(esp, cpu_compute_eflags(env));
     PUSHQ(esp, env->segs[R_CS].selector);
     PUSHQ(esp, old_eip);
     if (has_error_code) {
@@ -1128,7 +1042,7 @@ void helper_syscall(CPUX86State *env, int next_eip_addend)
         int code64;
 
         ECX = env->eip + next_eip_addend;
-        env->regs[11] = compute_eflags(env);
+        env->regs[11] = cpu_compute_eflags(env);
 
         code64 = env->hflags & HF_CS64_MASK;
 
@@ -1144,7 +1058,7 @@ void helper_syscall(CPUX86State *env, int next_eip_addend)
                                DESC_S_MASK |
                                DESC_W_MASK | DESC_A_MASK);
         env->eflags &= ~env->fmask;
-        load_eflags(env, env->eflags, 0);
+        cpu_load_eflags(env, env->eflags, 0);
         if (code64)
             env->eip = env->lstar;
         else
@@ -1205,7 +1119,7 @@ void helper_sysret(CPUX86State *env, int dflag)
                                DESC_G_MASK | DESC_B_MASK | DESC_P_MASK |
                                DESC_S_MASK | (3 << DESC_DPL_SHIFT) |
                                DESC_W_MASK | DESC_A_MASK);
-        load_eflags(env, (uint32_t)(env->regs[11]), TF_MASK | AC_MASK | ID_MASK |
+        cpu_load_eflags(env, (uint32_t)(env->regs[11]), TF_MASK | AC_MASK | ID_MASK |
                     IF_MASK | IOPL_MASK | VM_MASK | RF_MASK | NT_MASK);
         cpu_x86_set_cpl(env, 3);
     } else {
@@ -1252,7 +1166,7 @@ static void do_interrupt_real(CPUX86State *env,
         old_eip = env->eip;
     old_cs = env->segs[R_CS].selector;
     /* XXX: use SS segment size ? */
-    PUSHW(ssp, esp, 0xffff, compute_eflags(env));
+    PUSHW(ssp, esp, 0xffff, cpu_compute_eflags(env));
     PUSHW(ssp, esp, 0xffff, old_cs);
     PUSHW(ssp, esp, 0xffff, old_eip);
 
@@ -1576,7 +1490,7 @@ void do_smm_enter(CPUArchState *env)
     for(i = 8; i < 16; i++)
         stq_phys(sm_state + 0x7ff8 - i * 8, env->regs[i]);
     stq_phys(sm_state + 0x7f78, env->eip);
-    stl_phys(sm_state + 0x7f70, compute_eflags(env));
+    stl_phys(sm_state + 0x7f70, cpu_compute_eflags(env));
     stl_phys(sm_state + 0x7f68, env->dr[6]);
     stl_phys(sm_state + 0x7f60, env->dr[7]);
 
@@ -1589,7 +1503,7 @@ void do_smm_enter(CPUArchState *env)
 #else
     stl_phys(sm_state + 0x7ffc, env->cr[0]);
     stl_phys(sm_state + 0x7ff8, env->cr[3]);
-    stl_phys(sm_state + 0x7ff4, compute_eflags(env));
+    stl_phys(sm_state + 0x7ff4, cpu_compute_eflags(env));
     stl_phys(sm_state + 0x7ff0, env->eip);
     stl_phys(sm_state + 0x7fec, EDI);
     stl_phys(sm_state + 0x7fe8, ESI);
@@ -1639,7 +1553,7 @@ void do_smm_enter(CPUArchState *env)
 #ifdef TARGET_X86_64
     cpu_load_efer(env, 0);
 #endif
-    load_eflags(env, 0, ~(CC_O | CC_S | CC_Z | CC_A | CC_P | CC_C | DF_MASK));
+    cpu_load_eflags(env, 0, ~(CC_O | CC_S | CC_Z | CC_A | CC_P | CC_C | DF_MASK));
     env->eip = 0x00008000;
     cpu_x86_load_seg_cache(env, R_CS, (env->smbase >> 4) & 0xffff, env->smbase,
                            0xffffffff, 0);
@@ -1702,7 +1616,7 @@ void helper_rsm(CPUX86State *env)
     for(i = 8; i < 16; i++)
         env->regs[i] = ldq_phys(sm_state + 0x7ff8 - i * 8);
     env->eip = ldq_phys(sm_state + 0x7f78);
-    load_eflags(env, ldl_phys(sm_state + 0x7f70),
+    cpu_load_eflags(env, ldl_phys(sm_state + 0x7f70),
                 ~(CC_O | CC_S | CC_Z | CC_A | CC_P | CC_C | DF_MASK));
     env->dr[6] = ldl_phys(sm_state + 0x7f68);
     env->dr[7] = ldl_phys(sm_state + 0x7f60);
@@ -1718,7 +1632,7 @@ void helper_rsm(CPUX86State *env)
 #else
     cpu_x86_update_cr0(env, ldl_phys(sm_state + 0x7ffc));
     cpu_x86_update_cr3(env, ldl_phys(sm_state + 0x7ff8));
-    load_eflags(env, ldl_phys(sm_state + 0x7ff4),
+    cpu_load_eflags(env, ldl_phys(sm_state + 0x7ff4),
                 ~(CC_O | CC_S | CC_Z | CC_A | CC_P | CC_C | DF_MASK));
     env->eip = ldl_phys(sm_state + 0x7ff0);
     EDI = ldl_phys(sm_state + 0x7fec);
@@ -2691,7 +2605,7 @@ void helper_iret_real(CPUX86State *env, int shift)
         eflags_mask = TF_MASK | AC_MASK | ID_MASK | IF_MASK | IOPL_MASK | RF_MASK | NT_MASK;
     if (shift == 0)
         eflags_mask &= 0xffff;
-    load_eflags(env, new_eflags, eflags_mask);
+    cpu_load_eflags(env, new_eflags, eflags_mask);
     env->hflags2 &= ~HF2_NMI_MASK;
 }
 
@@ -2886,7 +2800,7 @@ static inline void helper_ret_protected(CPUX86State *env,
             eflags_mask |= IF_MASK;
         if (shift == 0)
             eflags_mask &= 0xffff;
-        load_eflags(env, new_eflags, eflags_mask);
+        cpu_load_eflags(env, new_eflags, eflags_mask);
     }
     return;
 
@@ -2899,7 +2813,7 @@ static inline void helper_ret_protected(CPUX86State *env,
     POPL(ssp, sp, sp_mask, new_gs);
 
     /* modify processor state */
-    load_eflags(env, new_eflags, TF_MASK | AC_MASK | ID_MASK |
+    cpu_load_eflags(env, new_eflags, TF_MASK | AC_MASK | ID_MASK |
                 IF_MASK | IOPL_MASK | VM_MASK | NT_MASK | VIF_MASK | VIP_MASK);
     load_seg_vm(env, R_CS, new_cs & 0xffff);
     cpu_x86_set_cpl(env, 3);
@@ -3101,12 +3015,6 @@ void helper_lmsw(CPUX86State *env, target_ulong t0)
        if already set to one. */
     t0 = (env->cr[0] & ~0xe) | (t0 & 0xf);
     helper_write_crN(env, 0, t0);
-}
-
-void helper_clts(CPUX86State *env)
-{
-    env->cr[0] &= ~CR0_TS_MASK;
-    env->hflags &= ~HF_TS_MASK;
 }
 
 void helper_invlpg(CPUX86State *env, target_ulong addr)
@@ -4829,11 +4737,6 @@ void helper_debug(CPUX86State *env)
     cpu_loop_exit(env);
 }
 
-void helper_reset_rf(CPUX86State *env)
-{
-    env->eflags &= ~RF_MASK;
-}
-
 void helper_raise_interrupt(CPUX86State *env, int intno, int next_eip_addend)
 {
     raise_interrupt(env, intno, 1, 0, next_eip_addend);
@@ -4842,42 +4745,6 @@ void helper_raise_interrupt(CPUX86State *env, int intno, int next_eip_addend)
 void helper_raise_exception(CPUX86State *env, int exception_index)
 {
     raise_exception(env, exception_index);
-}
-
-void helper_cli(CPUX86State *env)
-{
-    env->eflags &= ~IF_MASK;
-}
-
-void helper_sti(CPUX86State *env)
-{
-    env->eflags |= IF_MASK;
-}
-
-#if 0
-/* vm86plus instructions */
-void helper_cli_vm(CPUX86State *env)
-{
-    env->eflags &= ~VIF_MASK;
-}
-
-void helper_sti_vm(CPUX86State *env)
-{
-    env->eflags |= VIF_MASK;
-    if (env->eflags & VIP_MASK) {
-        raise_exception(env, EXCP0D_GPF);
-    }
-}
-#endif
-
-void helper_set_inhibit_irq(CPUX86State *env)
-{
-    env->hflags |= HF_INHIBIT_IRQ_MASK;
-}
-
-void helper_reset_inhibit_irq(CPUX86State *env)
-{
-    env->hflags &= ~HF_INHIBIT_IRQ_MASK;
 }
 
 void helper_boundw(CPUX86State *env, target_ulong a0, int v)
@@ -5053,7 +4920,7 @@ void helper_vmrun(CPUX86State *env, int aflag, int next_eip_addend)
     stq_phys(env->vm_hsave + offsetof(struct vmcb, save.dr7), env->dr[7]);
 
     stq_phys(env->vm_hsave + offsetof(struct vmcb, save.efer), env->efer);
-    stq_phys(env->vm_hsave + offsetof(struct vmcb, save.rflags), compute_eflags(env));
+    stq_phys(env->vm_hsave + offsetof(struct vmcb, save.rflags), cpu_compute_eflags(env));
 
     svm_save_seg(env->vm_hsave + offsetof(struct vmcb, save.es),
                   &env->segs[R_ES]);
@@ -5108,7 +4975,7 @@ void helper_vmrun(CPUX86State *env, int aflag, int next_eip_addend)
     cpu_load_efer(env,
                   ldq_phys(env->vm_vmcb + offsetof(struct vmcb, save.efer)));
     env->eflags = 0;
-    load_eflags(env, ldq_phys(env->vm_vmcb + offsetof(struct vmcb, save.rflags)),
+    cpu_load_eflags(env, ldq_phys(env->vm_vmcb + offsetof(struct vmcb, save.rflags)),
                 ~(CC_O | CC_S | CC_Z | CC_A | CC_P | CC_C | DF_MASK));
     CC_OP = CC_OP_EFLAGS;
 
@@ -5442,7 +5309,7 @@ void helper_vmexit(CPUX86State *env,
         int_ctl |= V_IRQ_MASK;
     stl_phys(env->vm_vmcb + offsetof(struct vmcb, control.int_ctl), int_ctl);
 
-    stq_phys(env->vm_vmcb + offsetof(struct vmcb, save.rflags), compute_eflags(env));
+    stq_phys(env->vm_vmcb + offsetof(struct vmcb, save.rflags), cpu_compute_eflags(env));
     stq_phys(env->vm_vmcb + offsetof(struct vmcb, save.rip), env->eip);
     stq_phys(env->vm_vmcb + offsetof(struct vmcb, save.rsp), ESP);
     stq_phys(env->vm_vmcb + offsetof(struct vmcb, save.rax), EAX);
@@ -5472,7 +5339,7 @@ void helper_vmexit(CPUX86State *env,
     cpu_load_efer(env,
                   ldq_phys(env->vm_hsave + offsetof(struct vmcb, save.efer)));
     env->eflags = 0;
-    load_eflags(env, ldq_phys(env->vm_hsave + offsetof(struct vmcb, save.rflags)),
+    cpu_load_eflags(env, ldq_phys(env->vm_hsave + offsetof(struct vmcb, save.rflags)),
                 ~(CC_O | CC_S | CC_Z | CC_A | CC_P | CC_C | DF_MASK));
     CC_OP = CC_OP_EFLAGS;
 
@@ -5612,159 +5479,3 @@ target_ulong helper_bsr(target_ulong t0)
 }
 
 
-static int compute_all_eflags(CPUX86State *env)
-{
-    return CC_SRC;
-}
-
-static int compute_c_eflags(CPUX86State *env)
-{
-    return CC_SRC & CC_C;
-}
-
-uint32_t helper_cc_compute_all(CPUX86State *env, int op)
-{
-    switch (op) {
-    default: /* should never happen */ return 0;
-
-    case CC_OP_EFLAGS: return compute_all_eflags(env);
-
-    case CC_OP_MULB: return compute_all_mulb(env);
-    case CC_OP_MULW: return compute_all_mulw(env);
-    case CC_OP_MULL: return compute_all_mull(env);
-
-    case CC_OP_ADDB: return compute_all_addb(env);
-    case CC_OP_ADDW: return compute_all_addw(env);
-    case CC_OP_ADDL: return compute_all_addl(env);
-
-    case CC_OP_ADCB: return compute_all_adcb(env);
-    case CC_OP_ADCW: return compute_all_adcw(env);
-    case CC_OP_ADCL: return compute_all_adcl(env);
-
-    case CC_OP_SUBB: return compute_all_subb(env);
-    case CC_OP_SUBW: return compute_all_subw(env);
-    case CC_OP_SUBL: return compute_all_subl(env);
-
-    case CC_OP_SBBB: return compute_all_sbbb(env);
-    case CC_OP_SBBW: return compute_all_sbbw(env);
-    case CC_OP_SBBL: return compute_all_sbbl(env);
-
-    case CC_OP_LOGICB: return compute_all_logicb(env);
-    case CC_OP_LOGICW: return compute_all_logicw(env);
-    case CC_OP_LOGICL: return compute_all_logicl(env);
-
-    case CC_OP_INCB: return compute_all_incb(env);
-    case CC_OP_INCW: return compute_all_incw(env);
-    case CC_OP_INCL: return compute_all_incl(env);
-
-    case CC_OP_DECB: return compute_all_decb(env);
-    case CC_OP_DECW: return compute_all_decw(env);
-    case CC_OP_DECL: return compute_all_decl(env);
-
-    case CC_OP_SHLB: return compute_all_shlb(env);
-    case CC_OP_SHLW: return compute_all_shlw(env);
-    case CC_OP_SHLL: return compute_all_shll(env);
-
-    case CC_OP_SARB: return compute_all_sarb(env);
-    case CC_OP_SARW: return compute_all_sarw(env);
-    case CC_OP_SARL: return compute_all_sarl(env);
-
-#ifdef TARGET_X86_64
-    case CC_OP_MULQ: return compute_all_mulq(env);
-
-    case CC_OP_ADDQ: return compute_all_addq(env);
-
-    case CC_OP_ADCQ: return compute_all_adcq(env);
-
-    case CC_OP_SUBQ: return compute_all_subq(env);
-
-    case CC_OP_SBBQ: return compute_all_sbbq(env);
-
-    case CC_OP_LOGICQ: return compute_all_logicq(env);
-
-    case CC_OP_INCQ: return compute_all_incq(env);
-
-    case CC_OP_DECQ: return compute_all_decq(env);
-
-    case CC_OP_SHLQ: return compute_all_shlq(env);
-
-    case CC_OP_SARQ: return compute_all_sarq(env);
-#endif
-    }
-}
-
-uint32_t cpu_cc_compute_all(CPUArchState *env1, int op)
-{
-    return helper_cc_compute_all(env1, op);
-}
-
-uint32_t helper_cc_compute_c(CPUX86State *env, int op)
-{
-    switch (op) {
-    default: /* should never happen */ return 0;
-
-    case CC_OP_EFLAGS: return compute_c_eflags(env);
-
-    case CC_OP_MULB: return compute_c_mull(env);
-    case CC_OP_MULW: return compute_c_mull(env);
-    case CC_OP_MULL: return compute_c_mull(env);
-
-    case CC_OP_ADDB: return compute_c_addb(env);
-    case CC_OP_ADDW: return compute_c_addw(env);
-    case CC_OP_ADDL: return compute_c_addl(env);
-
-    case CC_OP_ADCB: return compute_c_adcb(env);
-    case CC_OP_ADCW: return compute_c_adcw(env);
-    case CC_OP_ADCL: return compute_c_adcl(env);
-
-    case CC_OP_SUBB: return compute_c_subb(env);
-    case CC_OP_SUBW: return compute_c_subw(env);
-    case CC_OP_SUBL: return compute_c_subl(env);
-
-    case CC_OP_SBBB: return compute_c_sbbb(env);
-    case CC_OP_SBBW: return compute_c_sbbw(env);
-    case CC_OP_SBBL: return compute_c_sbbl(env);
-
-    case CC_OP_LOGICB: return compute_c_logicb(env);
-    case CC_OP_LOGICW: return compute_c_logicw(env);
-    case CC_OP_LOGICL: return compute_c_logicl(env);
-
-    case CC_OP_INCB: return compute_c_incl(env);
-    case CC_OP_INCW: return compute_c_incl(env);
-    case CC_OP_INCL: return compute_c_incl(env);
-
-    case CC_OP_DECB: return compute_c_incl(env);
-    case CC_OP_DECW: return compute_c_incl(env);
-    case CC_OP_DECL: return compute_c_incl(env);
-
-    case CC_OP_SHLB: return compute_c_shlb(env);
-    case CC_OP_SHLW: return compute_c_shlw(env);
-    case CC_OP_SHLL: return compute_c_shll(env);
-
-    case CC_OP_SARB: return compute_c_sarl(env);
-    case CC_OP_SARW: return compute_c_sarl(env);
-    case CC_OP_SARL: return compute_c_sarl(env);
-
-#ifdef TARGET_X86_64
-    case CC_OP_MULQ: return compute_c_mull(env);
-
-    case CC_OP_ADDQ: return compute_c_addq(env);
-
-    case CC_OP_ADCQ: return compute_c_adcq(env);
-
-    case CC_OP_SUBQ: return compute_c_subq(env);
-
-    case CC_OP_SBBQ: return compute_c_sbbq(env);
-
-    case CC_OP_LOGICQ: return compute_c_logicq(env);
-
-    case CC_OP_INCQ: return compute_c_incl(env);
-
-    case CC_OP_DECQ: return compute_c_incl(env);
-
-    case CC_OP_SHLQ: return compute_c_shlq(env);
-
-    case CC_OP_SARQ: return compute_c_sarl(env);
-#endif
-    }
-}
