@@ -76,9 +76,9 @@
 #include "exec/hwaddr.h"
 #include "android/tcpdump.h"
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
 #include "android/qemu/memcheck/memcheck.h"
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -3173,14 +3173,14 @@ int main(int argc, char **argv, char **envp)
                 }
                 break;
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
             case QEMU_OPTION_android_memcheck:
                 android_op_memcheck = (char*)optarg;
                 /* This will set ro.kernel.memcheck system property
                  * to memcheck's tracing flags. */
                 stralloc_add_format(kernel_config, " memcheck=%s", android_op_memcheck);
                 break;
-#endif // CONFIG_MEMCHECK
+#endif // CONFIG_ANDROID_MEMCHECK
 
             case QEMU_OPTION_snapshot_no_time_update:
                 android_snapshot_update_time = 0;
@@ -3579,11 +3579,11 @@ int main(int argc, char **argv, char **envp)
         stralloc_add_format(kernel_config, " ndns=%d", dns_count);
     }
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
     if (android_op_memcheck) {
         memcheck_init(android_op_memcheck);
     }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 
     /* Initialize cache partition, if any */
     if (android_hw->disk_cachePartition != 0) {

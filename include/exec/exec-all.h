@@ -175,7 +175,7 @@ struct TranslationBlock {
     struct TranslationBlock *jmp_first;
     uint32_t icount;
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
     /* Maps PCs in this translation block to corresponding PCs in guest address
      * space. The array is arranged in such way, that every even entry contains
      * PC in the translation block, followed by an odd entry that contains
@@ -185,7 +185,7 @@ struct TranslationBlock {
     uintptr_t*   tpc2gpc;
     /* Number of pairs (pc_tb, pc_guest) in tpc2gpc array. */
     unsigned int    tpc2gpc_pairs;
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 };
 
 #include "exec/spinlock.h"
@@ -227,7 +227,7 @@ static inline unsigned int tb_phys_hash_func(tb_page_addr_t pc)
     return (pc >> 2) & (CODE_GEN_PHYS_HASH_SIZE - 1);
 }
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
 /* Gets translated PC for a given (translated PC, guest PC) pair.
  * Return:
  *  Translated PC, or NULL if pair index was too large.
@@ -279,7 +279,7 @@ tb_search_guest_pc_from_tb_pc(const TranslationBlock* tb, target_ulong tb_pc)
     }
     return 0;
 }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 
 void tb_free(TranslationBlock *tb);
 void tb_flush(CPUArchState *env);

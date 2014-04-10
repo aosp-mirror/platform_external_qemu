@@ -22,9 +22,9 @@
 #include "ui/console.h"
 #include "sysemu/blockdev.h"
 #include "hw/android/goldfish/pipe.h"
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
 #include "android/qemu/memcheck/memcheck_api.h"
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 
 #include "android/utils/debug.h"
 
@@ -138,11 +138,11 @@ static void android_arm_init_(ram_addr_t ram_size,
     goldfish_add_device_no_io(&nand_device);
     nand_dev_init(nand_device.base);
 #endif
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
     if (memcheck_enabled) {
         trace_dev_init();
     }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 
     bool newDeviceNaming =
             (androidHwConfig_getKernelDeviceNaming(android_hw) >= 1);

@@ -53,5 +53,5 @@ There are some tricky things like:
 - etc.
 
 All the code related to memory checking is guarded in emulator's code by
-CONFIG_MEMCHECK macro, making it easy to spot changes related to it in the
+CONFIG_ANDROID_MEMCHECK macro, making it easy to spot changes related to it in the
 sources.

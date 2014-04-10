@@ -20,9 +20,9 @@
 
 /* This file should compile iff qemu is built with memory checking
  * configuration turned on. */
-#ifndef CONFIG_MEMCHECK
-#error CONFIG_MEMCHECK is not defined.
-#endif  // CONFIG_MEMCHECK
+#ifndef CONFIG_ANDROID_MEMCHECK
+#error CONFIG_ANDROID_MEMCHECK is not defined.
+#endif  // CONFIG_ANDROID_MEMCHECK
 
 /* Global flag, indicating whether or not memchecking has been enabled
  * for the current emulator session. 1 means that memchecking has been

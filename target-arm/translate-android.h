@@ -8,7 +8,7 @@
  *****
  *****/
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
 
 /*
  * Memchecker addition in this module is intended to inject qemu callback into
@@ -255,7 +255,7 @@ set_on_ret(target_ulong ret)
         } \
     } while (0)
 
-#else /* !CONFIG_MEMCHECK */
+#else /* !CONFIG_ANDROID_MEMCHECK */
 
 #  define ANDROID_WATCH_CALLSTACK_ARM     ((void)0)
 #  define ANDROID_WATCH_CALLSTACK_THUMB   ((void)0)
@@ -264,4 +264,4 @@ set_on_ret(target_ulong ret)
 #  define ANDROID_CHECK_CODEGEN_PC(s)      (s)
 #  define ANDROID_END_CODEGEN()            ((void)0)
 
-#endif  /* !CONFIG_MEMCHECK */
+#endif  /* !CONFIG_ANDROID_MEMCHECK */
