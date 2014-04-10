@@ -1968,7 +1968,7 @@ void helper_deret (CPUMIPSState *env)
 }
 #endif /* !CONFIG_USER_ONLY */
 
-target_ulong helper_rdhwr_cpunum(void)
+target_ulong helper_rdhwr_cpunum(CPUMIPSState *env)
 {
     if ((env->hflags & MIPS_HFLAG_CP0) ||
         (env->CP0_HWREna & (1 << 0)))
@@ -1979,7 +1979,7 @@ target_ulong helper_rdhwr_cpunum(void)
     return 0;
 }
 
-target_ulong helper_rdhwr_synci_step(void)
+target_ulong helper_rdhwr_synci_step(CPUMIPSState *env)
 {
     if ((env->hflags & MIPS_HFLAG_CP0) ||
         (env->CP0_HWREna & (1 << 1)))
@@ -1990,7 +1990,7 @@ target_ulong helper_rdhwr_synci_step(void)
     return 0;
 }
 
-target_ulong helper_rdhwr_cc(void)
+target_ulong helper_rdhwr_cc(CPUMIPSState *env)
 {
     if ((env->hflags & MIPS_HFLAG_CP0) ||
         (env->CP0_HWREna & (1 << 2)))
@@ -2001,7 +2001,7 @@ target_ulong helper_rdhwr_cc(void)
     return 0;
 }
 
-target_ulong helper_rdhwr_ccres(void)
+target_ulong helper_rdhwr_ccres(CPUMIPSState *env)
 {
     if ((env->hflags & MIPS_HFLAG_CP0) ||
         (env->CP0_HWREna & (1 << 3)))
@@ -2012,7 +2012,7 @@ target_ulong helper_rdhwr_ccres(void)
     return 0;
 }
 
-void helper_pmon (int function)
+void helper_pmon(CPUMIPSState *env, int function)
 {
     function /= 2;
     switch (function) {
@@ -2038,7 +2038,7 @@ void helper_pmon (int function)
     }
 }
 
-void helper_wait (void)
+void helper_wait(CPUMIPSState *env)
 {
     env->halted = 1;
     helper_raise_exception(env, EXCP_HLT);

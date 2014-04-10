@@ -272,11 +272,11 @@ DEF_HELPER_1(ei, tl, env)
 DEF_HELPER_1(eret, void, env)
 DEF_HELPER_1(deret, void, env)
 #endif /* !CONFIG_USER_ONLY */
-DEF_HELPER_0(rdhwr_cpunum, tl)
-DEF_HELPER_0(rdhwr_synci_step, tl)
-DEF_HELPER_0(rdhwr_cc, tl)
-DEF_HELPER_0(rdhwr_ccres, tl)
-DEF_HELPER_1(pmon, void, int)
-DEF_HELPER_0(wait, void)
+DEF_HELPER_1(rdhwr_cpunum, tl, env)
+DEF_HELPER_1(rdhwr_synci_step, tl, env)
+DEF_HELPER_1(rdhwr_cc, tl, env)
+DEF_HELPER_1(rdhwr_ccres, tl, env)
+DEF_HELPER_2(pmon, void, env, int)
+DEF_HELPER_1(wait, void, env)
 
 #include "exec/def-helper.h"

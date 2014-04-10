@@ -5657,7 +5657,7 @@ static void gen_cp0 (CPUMIPSState *env, DisasContext *ctx, uint32_t opc, int rt,
         ctx->pc += 4;
         save_cpu_state(ctx, 1);
         ctx->pc -= 4;
-        gen_helper_wait();
+        gen_helper_wait(cpu_env);
         ctx->bstate = BS_EXCP;
         break;
     default:
@@ -7718,7 +7718,7 @@ static void decode_opc (CPUMIPSState *env, DisasContext *ctx)
             MIPS_INVAL("PMON / selsl");
             generate_exception(ctx, EXCP_RI);
 #else
-            gen_helper_0i(pmon, sa);
+            gen_helper_1i(pmon, cpu_env, sa);
 #endif
             break;
         case OPC_SYSCALL:
@@ -7852,22 +7852,22 @@ static void decode_opc (CPUMIPSState *env, DisasContext *ctx)
                 switch (rd) {
                 case 0:
                     save_cpu_state(ctx, 1);
-                    gen_helper_rdhwr_cpunum(t0);
+                    gen_helper_rdhwr_cpunum(t0, cpu_env);
                     gen_store_gpr(t0, rt);
                     break;
                 case 1:
                     save_cpu_state(ctx, 1);
-                    gen_helper_rdhwr_synci_step(t0);
+                    gen_helper_rdhwr_synci_step(t0, cpu_env);
                     gen_store_gpr(t0, rt);
                     break;
                 case 2:
                     save_cpu_state(ctx, 1);
-                    gen_helper_rdhwr_cc(t0);
+                    gen_helper_rdhwr_cc(t0, cpu_env);
                     gen_store_gpr(t0, rt);
                     break;
                 case 3:
                     save_cpu_state(ctx, 1);
-                    gen_helper_rdhwr_ccres(t0);
+                    gen_helper_rdhwr_ccres(t0, cpu_env);
                     gen_store_gpr(t0, rt);
                     break;
                 case 29:
