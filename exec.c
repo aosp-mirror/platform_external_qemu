@@ -388,9 +388,9 @@ void cpu_single_step(CPUOldState *env, int enabled)
 #if defined(TARGET_HAS_ICE)
     if (env->singlestep_enabled != enabled) {
         env->singlestep_enabled = enabled;
-        if (kvm_enabled())
+        if (kvm_enabled()) {
             kvm_update_guest_debug(env, 0);
-        else {
+        } else {
             /* must flush all the translated code to avoid inconsistencies */
             /* XXX: only flush what is necessary */
             tb_flush(env);
@@ -506,40 +506,6 @@ void cpu_abort(CPUArchState *env, const char *fmt, ...)
     }
 #endif
     abort();
-}
-
-CPUArchState *cpu_copy(CPUOldState *env)
-{
-    CPUArchState *new_env = cpu_init(env->cpu_model_str);
-    CPUArchState *next_cpu = new_env->next_cpu;
-    int cpu_index = new_env->cpu_index;
-#if defined(TARGET_HAS_ICE)
-    CPUBreakpoint *bp;
-    CPUWatchpoint *wp;
-#endif
-
-    memcpy(new_env, env, sizeof(CPUOldState));
-
-    /* Preserve chaining and index. */
-    new_env->next_cpu = next_cpu;
-    new_env->cpu_index = cpu_index;
-
-    /* Clone all break/watchpoints.
-       Note: Once we support ptrace with hw-debug register access, make sure
-       BP_CPU break/watchpoints are handled correctly on clone. */
-    QTAILQ_INIT(&env->breakpoints);
-    QTAILQ_INIT(&env->watchpoints);
-#if defined(TARGET_HAS_ICE)
-    QTAILQ_FOREACH(bp, &env->breakpoints, entry) {
-        cpu_breakpoint_insert(new_env, bp->pc, bp->flags, NULL);
-    }
-    QTAILQ_FOREACH(wp, &env->watchpoints, entry) {
-        cpu_watchpoint_insert(new_env, wp->vaddr, (~wp->len_mask) + 1,
-                              wp->flags, NULL);
-    }
-#endif
-
-    return new_env;
 }
 
 #if !defined(CONFIG_USER_ONLY)
@@ -1555,12 +1521,22 @@ static CPUWriteMemoryFunc * const notdirty_mem_write[3] = {
     notdirty_mem_writel,
 };
 
+static void tb_check_watchpoint(CPUArchState* env)
+{
+    TranslationBlock *tb = tb_find_pc(env->mem_io_pc);
+    if (!tb) {
+        cpu_abort(env, "check_watchpoint: could not find TB for "
+                  "pc=%p", (void *)env->mem_io_pc);
+    }
+    cpu_restore_state(env, env->mem_io_pc);
+    tb_phys_invalidate(tb, -1);
+}
+
 /* Generate a debug exception if a watchpoint has been hit.  */
 static void check_watchpoint(int offset, int len_mask, int flags)
 {
     CPUArchState *env = cpu_single_env;
     target_ulong pc, cs_base;
-    TranslationBlock *tb;
     target_ulong vaddr;
     CPUWatchpoint *wp;
     int cpu_flags;
@@ -1579,13 +1555,7 @@ static void check_watchpoint(int offset, int len_mask, int flags)
             wp->flags |= BP_WATCHPOINT_HIT;
             if (!env->watchpoint_hit) {
                 env->watchpoint_hit = wp;
-                tb = tb_find_pc(env->mem_io_pc);
-                if (!tb) {
-                    cpu_abort(env, "check_watchpoint: could not find TB for "
-                              "pc=%p", (void *)env->mem_io_pc);
-                }
-                cpu_restore_state(env, env->mem_io_pc);
-                tb_phys_invalidate(tb, -1);
+                tb_check_watchpoint(env);
                 if (wp->flags & BP_STOP_BEFORE_ACCESS) {
                     env->exception_index = EXCP_DEBUG;
                     cpu_loop_exit(env);
@@ -2105,7 +2075,7 @@ void *cpu_register_map_client(void *opaque, void (*callback)(void *opaque))
     return client;
 }
 
-void cpu_unregister_map_client(void *_client)
+static void cpu_unregister_map_client(void *_client)
 {
     MapClient *client = (MapClient *)_client;
 
@@ -2120,7 +2090,7 @@ static void cpu_notify_map_clients(void)
     while (!QLIST_EMPTY(&map_client_list)) {
         client = QLIST_FIRST(&map_client_list);
         client->callback(client->opaque);
-        QLIST_REMOVE(client, link);
+        cpu_unregister_map_client(client);
     }
 }
 
@@ -2165,7 +2135,7 @@ void *cpu_physical_memory_map(hwaddr addr,
             bounce.addr = addr;
             bounce.len = l;
             if (!is_write) {
-                cpu_physical_memory_rw(addr, bounce.buffer, l, 0);
+                cpu_physical_memory_read(addr, bounce.buffer, l);
             }
             ptr = bounce.buffer;
         } else {
