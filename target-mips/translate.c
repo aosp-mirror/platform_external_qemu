@@ -789,7 +789,7 @@ generate_exception_err (DisasContext *ctx, int excp, int err)
     TCGv_i32 texcp = tcg_const_i32(excp);
     TCGv_i32 terr = tcg_const_i32(err);
     save_cpu_state(ctx, 1);
-    gen_helper_raise_exception_err(texcp, terr);
+    gen_helper_raise_exception_err(cpu_env, texcp, terr);
     tcg_temp_free_i32(terr);
     tcg_temp_free_i32(texcp);
 }
@@ -798,7 +798,7 @@ static inline void
 generate_exception (DisasContext *ctx, int excp)
 {
     save_cpu_state(ctx, 1);
-    gen_helper_0i(raise_exception, excp);
+    gen_helper_1i(raise_exception, cpu_env, excp);
 }
 
 /* Addresses computation */
@@ -953,7 +953,7 @@ static inline void op_ldst_##insn(TCGv arg1, TCGv arg2, int rt, DisasContext *ct
     tcg_gen_movi_tl(t0, rt | ((almask << 3) & 0x20));                        \
     tcg_gen_st_tl(t0, cpu_env, offsetof(CPUMIPSState, llreg));                   \
     tcg_gen_st_tl(arg1, cpu_env, offsetof(CPUMIPSState, llnewval));              \
-    gen_helper_0i(raise_exception, EXCP_SC);                                 \
+    gen_helper_1i(raise_exception, cpu_env, EXCP_SC);                            \
     gen_set_label(l2);                                                       \
     tcg_gen_movi_tl(t0, 0);                                                  \
     gen_store_gpr(t0, rt);                                                   \
@@ -2457,7 +2457,7 @@ static inline void gen_goto_tb(DisasContext *ctx, int n, target_ulong dest)
         gen_save_pc(dest);
         if (ctx->singlestep_enabled) {
             save_cpu_state(ctx, 0);
-            gen_helper_0i(raise_exception, EXCP_DEBUG);
+            gen_helper_1i(raise_exception, cpu_env, EXCP_DEBUG);
         }
         tcg_gen_exit_tb(0);
     }
@@ -5636,7 +5636,7 @@ static void gen_cp0 (CPUMIPSState *env, DisasContext *ctx, uint32_t opc, int rt,
     case OPC_ERET:
         opn = "eret";
         check_insn(env, ctx, ISA_MIPS2);
-        gen_helper_eret();
+        gen_helper_eret(cpu_env);
         ctx->bstate = BS_EXCP;
         break;
     case OPC_DERET:
@@ -5646,7 +5646,7 @@ static void gen_cp0 (CPUMIPSState *env, DisasContext *ctx, uint32_t opc, int rt,
             MIPS_INVAL(opn);
             generate_exception(ctx, EXCP_RI);
         } else {
-            gen_helper_deret();
+            gen_helper_deret(cpu_env);
             ctx->bstate = BS_EXCP;
         }
         break;
@@ -8004,7 +8004,7 @@ static void decode_opc (CPUMIPSState *env, DisasContext *ctx)
                 case OPC_DI:
                     check_insn(env, ctx, ISA_MIPS32R2);
                     save_cpu_state(ctx, 1);
-                    gen_helper_di(t0);
+                    gen_helper_di(t0, cpu_env);
                     gen_store_gpr(t0, rt);
                     /* Stop translation as we may have switched the execution mode */
                     ctx->bstate = BS_STOP;
@@ -8012,7 +8012,7 @@ static void decode_opc (CPUMIPSState *env, DisasContext *ctx)
                 case OPC_EI:
                     check_insn(env, ctx, ISA_MIPS32R2);
                     save_cpu_state(ctx, 1);
-                    gen_helper_ei(t0);
+                    gen_helper_ei(t0, cpu_env);
                     gen_store_gpr(t0, rt);
                     /* Stop translation as we may have switched the execution mode */
                     ctx->bstate = BS_STOP;
@@ -8263,7 +8263,7 @@ static void decode_opc (CPUMIPSState *env, DisasContext *ctx)
             tcg_gen_mov_tl(cpu_PC, btarget);
             if (ctx->singlestep_enabled) {
                 save_cpu_state(ctx, 0);
-                gen_helper_0i(raise_exception, EXCP_DEBUG);
+                gen_helper_1i(raise_exception, cpu_env, EXCP_DEBUG);
             }
             tcg_gen_exit_tb(0);
             break;
@@ -8321,7 +8321,7 @@ gen_intermediate_code_internal (CPUMIPSState *env, TranslationBlock *tb,
                 if (bp->pc == ctx.pc) {
                     save_cpu_state(&ctx, 1);
                     ctx.bstate = BS_BRANCH;
-                    gen_helper_0i(raise_exception, EXCP_DEBUG);
+                    gen_helper_1i(raise_exception, cpu_env, EXCP_DEBUG);
                     /* Include the breakpoint location or the tb won't
                      * be flushed when it must be.  */
                     ctx.pc += 4;
@@ -8375,11 +8375,11 @@ gen_intermediate_code_internal (CPUMIPSState *env, TranslationBlock *tb,
         gen_io_end();
     if (env->singlestep_enabled && ctx.bstate != BS_BRANCH) {
         save_cpu_state(&ctx, ctx.bstate == BS_NONE);
-        gen_helper_0i(raise_exception, EXCP_DEBUG);
+        gen_helper_1i(raise_exception, cpu_env, EXCP_DEBUG);
     } else {
         switch (ctx.bstate) {
         case BS_STOP:
-            gen_helper_interrupt_restart();
+            gen_helper_interrupt_restart(cpu_env);
             gen_goto_tb(&ctx, 0, ctx.pc);
             break;
         case BS_NONE:
@@ -8387,7 +8387,7 @@ gen_intermediate_code_internal (CPUMIPSState *env, TranslationBlock *tb,
             gen_goto_tb(&ctx, 0, ctx.pc);
             break;
         case BS_EXCP:
-            gen_helper_interrupt_restart();
+            gen_helper_interrupt_restart(cpu_env);
             tcg_gen_exit_tb(0);
             break;
         case BS_BRANCH:
