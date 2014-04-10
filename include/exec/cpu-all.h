@@ -447,7 +447,7 @@ void cpu_single_step(CPUState *cpu, int enabled);
 /* Return the physical page corresponding to a virtual one. Use it
    only for debugging because no protection checks are done. Return -1
    if no page found. */
-hwaddr cpu_get_phys_page_debug(CPUOldState *env, target_ulong addr);
+hwaddr cpu_get_phys_page_debug(CPUArchState *env, target_ulong addr);
 
 /* memory API */
 
@@ -543,7 +543,7 @@ static inline void cpu_physical_memory_mask_dirty_range(ram_addr_t start,
 
 void cpu_physical_memory_reset_dirty(ram_addr_t start, ram_addr_t end,
                                      int dirty_flags);
-void cpu_tlb_update_dirty(CPUOldState *env);
+void cpu_tlb_update_dirty(CPUArchState *env);
 
 int cpu_physical_memory_set_dirty_tracking(int enable);
 
@@ -579,10 +579,10 @@ extern int64_t tlb_flush_time;
 extern int64_t dev_time;
 #endif
 
-int cpu_memory_rw_debug(CPUOldState *env, target_ulong addr,
+int cpu_memory_rw_debug(CPUState *cpu, target_ulong addr,
                         void *buf, int len, int is_write);
 
-void cpu_inject_x86_mce(CPUOldState *cenv, int bank, uint64_t status,
+void cpu_inject_x86_mce(CPUArchState *cenv, int bank, uint64_t status,
                         uint64_t mcg_status, uint64_t addr, uint64_t misc);
 
 #endif /* CPU_ALL_H */

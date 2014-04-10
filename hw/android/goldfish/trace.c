@@ -143,7 +143,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         cmdlen = value;
         break;
     case TRACE_DEV_REG_CMDLINE:         // execve, process cmdline
-        safe_memory_rw_debug(cpu_single_env, value, (uint8_t*)exec_arg, cmdlen, 0);
+        safe_memory_rw_debug(current_cpu, value, (uint8_t*)exec_arg, cmdlen, 0);
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, execve [%.*s]\n", cmdlen, exec_arg);
         }

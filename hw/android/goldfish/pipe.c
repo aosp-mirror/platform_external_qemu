@@ -1020,7 +1020,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         target_ulong        address = dev->address;
         target_ulong        page    = address & TARGET_PAGE_MASK;
         hwaddr  phys;
-        phys = safe_get_phys_page_debug(env, page);
+        phys = safe_get_phys_page_debug(ENV_GET_CPU(env), page);
 #ifdef TARGET_X86_64
         phys = phys & TARGET_PTE_MASK;
 #endif
@@ -1039,7 +1039,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         target_ulong        address = dev->address;
         target_ulong        page    = address & TARGET_PAGE_MASK;
         hwaddr  phys;
-        phys = safe_get_phys_page_debug(env, page);
+        phys = safe_get_phys_page_debug(ENV_GET_CPU(env), page);
 #ifdef TARGET_X86_64
         phys = phys & TARGET_PTE_MASK;
 #endif
