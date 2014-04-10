@@ -572,20 +572,14 @@ int tcg_check_temp_count(void)
 void tcg_register_helper(void *func, const char *name)
 {
     TCGContext *s = &tcg_ctx;
-    int n;
-    if ((s->nb_helpers + 1) > s->allocated_helpers) {
-        n = s->allocated_helpers;
-        if (n == 0) {
-            n = 4;
-        } else {
-            n *= 2;
-        }
-        s->helpers = realloc(s->helpers, n * sizeof(TCGHelperInfo));
-        s->allocated_helpers = n;
+    GHashTable *table = s->helpers;
+
+    if (table == NULL) {
+        table = g_hash_table_new(NULL, NULL);
+        s->helpers = table;
     }
-    s->helpers[s->nb_helpers].func = (tcg_target_ulong)func;
-    s->helpers[s->nb_helpers].name = name;
-    s->nb_helpers++;
+
+    g_hash_table_insert(table, (gpointer)func, (gpointer)name);
 }
 
 /* Note: we convert the 64 bit args to 32 bit and do some alignment
@@ -809,47 +803,14 @@ char *tcg_get_arg_str_i64(TCGContext *s, char *buf, int buf_size, TCGv_i64 arg)
     return tcg_get_arg_str_idx(s, buf, buf_size, GET_TCGV_I64(arg));
 }
 
-static int helper_cmp(const void *p1, const void *p2)
-{
-    const TCGHelperInfo *th1 = p1;
-    const TCGHelperInfo *th2 = p2;
-    if (th1->func < th2->func)
-        return -1;
-    else if (th1->func == th2->func)
-        return 0;
-    else
-        return 1;
-}
-
 /* find helper definition (Note: A hash table would be better) */
-static TCGHelperInfo *tcg_find_helper(TCGContext *s, tcg_target_ulong val)
+static inline const char *tcg_find_helper(TCGContext *s, uintptr_t val)
 {
-    int m, m_min, m_max;
-    TCGHelperInfo *th;
-    tcg_target_ulong v;
-
-    if (unlikely(!s->helpers_sorted)) {
-        qsort(s->helpers, s->nb_helpers, sizeof(TCGHelperInfo),
-              helper_cmp);
-        s->helpers_sorted = 1;
+    const char *ret = NULL;
+    if (s->helpers) {
+        ret = g_hash_table_lookup(s->helpers, (gpointer)val);
     }
-
-    /* binary search */
-    m_min = 0;
-    m_max = s->nb_helpers - 1;
-    while (m_min <= m_max) {
-        m = (m_min + m_max) >> 1;
-        th = &s->helpers[m];
-        v = th->func;
-        if (v == val)
-            return th;
-        else if (val < v) {
-            m_max = m - 1;
-        } else {
-            m_min = m + 1;
-        }
-    }
-    return NULL;
+    return ret;
 }
 
 static const char * const cond_name[] =
@@ -935,7 +896,7 @@ void tcg_dump_ops(TCGContext *s, FILE *outfile)
 #endif
                    ) {
             tcg_target_ulong val;
-            TCGHelperInfo *th;
+            const char *name;
 
             nb_oargs = def->nb_oargs;
             nb_iargs = def->nb_iargs;
@@ -943,9 +904,9 @@ void tcg_dump_ops(TCGContext *s, FILE *outfile)
             fprintf(outfile, " %s %s,$", def->name,
                     tcg_get_arg_str_idx(s, buf, sizeof(buf), args[0]));
             val = args[1];
-            th = tcg_find_helper(s, val);
-            if (th) {
-                fprintf(outfile, "%s", th->name);
+            name = tcg_find_helper(s, val);
+            if (name) {
+                fprintf(outfile, "%s", name);
             } else {
                 if (c == INDEX_op_movi_i32)
                     fprintf(outfile, "0x%x", (uint32_t)val);
