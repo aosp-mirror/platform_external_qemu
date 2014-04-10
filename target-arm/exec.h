@@ -24,15 +24,7 @@ GLOBAL_REGISTER_VARIABLE_DECL struct CPUARMState *env asm(AREG0);
 #include "cpu.h"
 #include "exec/exec-all.h"
 
-static inline void env_to_regs(void)
-{
-}
-
-static inline void regs_to_env(void)
-{
-}
-
-static inline int cpu_has_work(CPUARMState *env)
+static inline bool cpu_has_work(CPUARMState *env)
 {
     return (env->interrupt_request &
             (CPU_INTERRUPT_FIQ | CPU_INTERRUPT_HARD | CPU_INTERRUPT_EXITTB));
