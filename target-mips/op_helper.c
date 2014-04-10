@@ -1972,7 +1972,7 @@ void tlb_fill (CPUMIPSState* env1, target_ulong addr, int is_write, int mmu_idx,
        generated code */
     saved_env = env;
     env = env1;
-    ret = cpu_mips_handle_mmu_fault(env, addr, is_write, mmu_idx, 1);
+    ret = cpu_mips_handle_mmu_fault(env, addr, is_write, mmu_idx);
     if (ret) {
         if (retaddr) {
             /* now we have a real cpu fault */

@@ -108,7 +108,7 @@ QEMU_BUILD_BUG_ON(sizeof(CPUTLBEntry) != (1 << CPU_TLB_ENTRY_BITS));
 #define CPU_COMMON_TLB \
     /* The meaning of the MMU modes is defined in the target code. */   \
     CPUTLBEntry tlb_table[NB_MMU_MODES][CPU_TLB_SIZE];                  \
-    hwaddr iotlb[NB_MMU_MODES][CPU_TLB_SIZE];               \
+    hwaddr iotlb[NB_MMU_MODES][CPU_TLB_SIZE];                           \
     target_ulong tlb_flush_addr;                                        \
     target_ulong tlb_flush_mask;
 

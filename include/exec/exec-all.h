@@ -91,12 +91,9 @@ void tb_invalidate_phys_range(tb_page_addr_t start, tb_page_addr_t end,
 /* cputlb.c */
 void tlb_flush_page(CPUArchState *env, target_ulong addr);
 void tlb_flush(CPUArchState *env, int flush_global);
-int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
-                      hwaddr paddr, int prot,
-                      int mmu_idx, int is_softmmu);
-int tlb_set_page(CPUArchState *env1, target_ulong vaddr,
-                 hwaddr paddr, int prot,
-                 int mmu_idx, int is_softmmu);
+void tlb_set_page(CPUArchState *env, target_ulong vaddr,
+                  hwaddr paddr, int prot,
+                  int mmu_idx, target_ulong size);
 void tb_reset_jump_recursive(TranslationBlock *tb);
 void tb_invalidate_phys_addr(hwaddr addr);
 #else

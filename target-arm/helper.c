@@ -597,7 +597,7 @@ void do_interrupt (CPUARMState *env)
 }
 
 int cpu_arm_handle_mmu_fault (CPUARMState *env, target_ulong address, int rw,
-                              int mmu_idx, int is_softmmu)
+                              int mmu_idx)
 {
     if (rw == 2) {
         env->exception_index = EXCP_PREFETCH_ABORT;
@@ -1303,9 +1303,9 @@ int get_phys_addr(CPUARMState *env, uint32_t address,
 static
 #endif
 int get_phys_addr(CPUARMState *env, uint32_t address,
-                                int access_type, int is_user,
-                                uint32_t *phys_ptr, int *prot,
-                                target_ulong *page_size)
+                  int access_type, int is_user,
+                  uint32_t *phys_ptr, int *prot,
+                  target_ulong *page_size)
 {
     /* Fast Context Switch Extension.  */
     if (address < 0x02000000)
@@ -1319,8 +1319,8 @@ int get_phys_addr(CPUARMState *env, uint32_t address,
         return 0;
     } else if (arm_feature(env, ARM_FEATURE_MPU)) {
         *page_size = TARGET_PAGE_SIZE;
-	return get_phys_addr_mpu(env, address, access_type, is_user, phys_ptr,
-				 prot);
+    return get_phys_addr_mpu(env, address, access_type, is_user, phys_ptr,
+                             prot);
     } else if (env->cp15.c1_sys & (1 << 23)) {
         return get_phys_addr_v6(env, address, access_type, is_user, phys_ptr,
                                 prot, page_size);
@@ -1331,7 +1331,7 @@ int get_phys_addr(CPUARMState *env, uint32_t address,
 }
 
 int cpu_arm_handle_mmu_fault (CPUARMState *env, target_ulong address,
-                              int access_type, int mmu_idx, int is_softmmu)
+                              int access_type, int mmu_idx)
 {
     uint32_t phys_addr;
     target_ulong page_size;
@@ -1345,7 +1345,8 @@ int cpu_arm_handle_mmu_fault (CPUARMState *env, target_ulong address,
         /* Map a single [sub]page.  */
         phys_addr &= ~(uint32_t)0x3ff;
         address &= ~(uint32_t)0x3ff;
-        tlb_set_page (env, address, phys_addr, prot, mmu_idx, page_size);
+        tlb_set_page (env, address, phys_addr, prot | PAGE_EXEC, mmu_idx,
+                      page_size);
         return 0;
     }
 

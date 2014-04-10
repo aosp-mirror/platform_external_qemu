@@ -302,7 +302,7 @@ static inline bool is_a64(CPUARMState *env)
 int cpu_arm_signal_handler(int host_signum, void *pinfo,
                            void *puc);
 int cpu_arm_handle_mmu_fault (CPUARMState *env, target_ulong address, int rw,
-                              int mmu_idx, int is_softmuu);
+                              int mmu_idx);
 #define cpu_handle_mmu_fault cpu_arm_handle_mmu_fault
 
 static inline void cpu_set_tls(CPUARMState *env, target_ulong newtls)

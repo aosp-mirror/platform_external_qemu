@@ -648,7 +648,7 @@ void cpu_mips_update_irq (CPUMIPSState *env);
 
 /* helper.c */
 int cpu_mips_handle_mmu_fault (CPUMIPSState *env, target_ulong address, int rw,
-                               int mmu_idx, int is_softmmu);
+                               int mmu_idx);
 #define cpu_handle_mmu_fault cpu_mips_handle_mmu_fault
 void do_interrupt (CPUMIPSState *env);
 hwaddr cpu_mips_translate_address (CPUMIPSState *env, target_ulong address,
