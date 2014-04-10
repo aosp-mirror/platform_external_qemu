@@ -97,18 +97,6 @@ static inline void helper_fstt(CPUX86State *env, floatx80 f, target_ulong ptr)
 
 #define FPUC_EM 0x3f
 
-#if 0
-#define raise_exception_err(a, b)\
-do {\
-    qemu_log("raise_exception line=%d\n", __LINE__);\
-    (raise_exception_err)(a, b);\
-} while (0)
-#endif
-
-static void QEMU_NORETURN raise_exception_err(CPUX86State *env,
-                                              int exception_index,
-                                              int error_code);
-
 /* modulo 17 table */
 static const uint8_t rclw_table[32] = {
     0, 1, 2, 3, 4, 5, 6, 7,
@@ -1337,85 +1325,6 @@ void do_interrupt_x86_hardirq(CPUX86State *env, int intno, int is_hw)
 
 /* This should come from sysemu.h - if we could include it here... */
 void qemu_system_reset_request(void);
-
-/*
- * Check nested exceptions and change to double or triple fault if
- * needed. It should only be called, if this is not an interrupt.
- * Returns the new exception number.
- */
-static int check_exception(CPUX86State *env, int intno, int *error_code)
-{
-    int first_contributory = env->old_exception == 0 ||
-                              (env->old_exception >= 10 &&
-                               env->old_exception <= 13);
-    int second_contributory = intno == 0 ||
-                               (intno >= 10 && intno <= 13);
-
-    qemu_log_mask(CPU_LOG_INT, "check_exception old: 0x%x new 0x%x\n",
-                env->old_exception, intno);
-
-#if !defined(CONFIG_USER_ONLY)
-    if (env->old_exception == EXCP08_DBLE) {
-        if (env->hflags & HF_SVMI_MASK)
-            helper_vmexit(env, SVM_EXIT_SHUTDOWN, 0); /* does not return */
-
-        qemu_log_mask(CPU_LOG_RESET, "Triple fault\n");
-
-        qemu_system_reset_request();
-        return EXCP_HLT;
-    }
-#endif
-
-    if ((first_contributory && second_contributory)
-        || (env->old_exception == EXCP0E_PAGE &&
-            (second_contributory || (intno == EXCP0E_PAGE)))) {
-        intno = EXCP08_DBLE;
-        *error_code = 0;
-    }
-
-    if (second_contributory || (intno == EXCP0E_PAGE) ||
-        (intno == EXCP08_DBLE))
-        env->old_exception = intno;
-
-    return intno;
-}
-
-/*
- * Signal an interruption. It is executed in the main CPU loop.
- * is_int is TRUE if coming from the int instruction. next_eip is the
- * EIP value AFTER the interrupt instruction. It is only relevant if
- * is_int is TRUE.
- */
-static void QEMU_NORETURN raise_interrupt(CPUX86State *env,
-                                          int intno, int is_int, int error_code,
-                                          int next_eip_addend)
-{
-    if (!is_int) {
-        helper_svm_check_intercept_param(env, SVM_EXIT_EXCP_BASE + intno, error_code);
-        intno = check_exception(env, intno, &error_code);
-    } else {
-        helper_svm_check_intercept_param(env, SVM_EXIT_SWINT, 0);
-    }
-
-    env->exception_index = intno;
-    env->error_code = error_code;
-    env->exception_is_int = is_int;
-    env->exception_next_eip = env->eip + next_eip_addend;
-    cpu_loop_exit(env);
-}
-
-/* shortcuts to generate exceptions */
-
-void raise_exception_err(CPUX86State *env,
-                         int exception_index, int error_code)
-{
-    raise_interrupt(env, exception_index, 0, error_code, 0);
-}
-
-void raise_exception(CPUX86State *env, int exception_index)
-{
-    raise_interrupt(env, exception_index, 0, 0, 0);
-}
 
 /* SMM support */
 
@@ -4735,16 +4644,6 @@ void helper_debug(CPUX86State *env)
 {
     env->exception_index = EXCP_DEBUG;
     cpu_loop_exit(env);
-}
-
-void helper_raise_interrupt(CPUX86State *env, int intno, int next_eip_addend)
-{
-    raise_interrupt(env, intno, 1, 0, next_eip_addend);
-}
-
-void helper_raise_exception(CPUX86State *env, int exception_index)
-{
-    raise_exception(env, exception_index);
 }
 
 void helper_boundw(CPUX86State *env, target_ulong a0, int v)
