@@ -1739,7 +1739,7 @@ void cpu_mips_tlb_flush (CPUMIPSState *env, int flush_global)
     tlb_flush (env, flush_global);
 }
 
-static void r4k_fill_tlb (int idx)
+static void r4k_fill_tlb(CPUMIPSState *env, int idx)
 {
     r4k_tlb_t *tlb;
 
@@ -1762,24 +1762,15 @@ static void r4k_fill_tlb (int idx)
     tlb->PFN[1] = (env->CP0_EntryLo1 >> 6) << 12;
 }
 
-void r4k_helper_ptw_tlbrefill(CPUMIPSState *target_env)
+void r4k_helper_ptw_tlbrefill(CPUMIPSState *env)
 {
-   CPUMIPSState *saved_env;
-
-   /* Save current 'env' value */
-   saved_env = env;
-   env = target_env;
-
    /* Do TLB load on behalf of Page Table Walk */
     int r = cpu_mips_get_random(env);
     r4k_invalidate_tlb_shadow(env, r);
-    r4k_fill_tlb(r);
-
-   /* Restore 'env' value */
-   env = saved_env;
+    r4k_fill_tlb(env, r);
 }
 
-void r4k_helper_tlbwi (void)
+void r4k_helper_tlbwi (CPUMIPSState *env)
 {
     r4k_tlb_t *tlb;
     target_ulong tag;
@@ -1813,18 +1804,18 @@ void r4k_helper_tlbwi (void)
     cpu_mips_tlb_flush (env, 1);
 
     r4k_invalidate_tlb(env, env->CP0_Index % env->tlb->nb_tlb);
-    r4k_fill_tlb(env->CP0_Index % env->tlb->nb_tlb);
+    r4k_fill_tlb(env, env->CP0_Index % env->tlb->nb_tlb);
 }
 
-void r4k_helper_tlbwr (void)
+void r4k_helper_tlbwr (CPUMIPSState *env)
 {
     int r = cpu_mips_get_random(env);
 
     r4k_invalidate_tlb_shadow(env, r);
-    r4k_fill_tlb(r);
+    r4k_fill_tlb(env, r);
 }
 
-void r4k_helper_tlbp (void)
+void r4k_helper_tlbp(CPUMIPSState *env)
 {
     r4k_tlb_t *tlb;
     target_ulong mask;
@@ -1855,7 +1846,7 @@ void r4k_helper_tlbp (void)
     }
 }
 
-void r4k_helper_tlbr (void)
+void r4k_helper_tlbr(CPUMIPSState *env)
 {
     r4k_tlb_t *tlb;
     uint8_t ASID;
@@ -1878,24 +1869,24 @@ void r4k_helper_tlbr (void)
                         (tlb->C1 << 3) | (tlb->PFN[1] >> 6);
 }
 
-void helper_tlbwi(void)
+void helper_tlbwi(CPUMIPSState *env)
 {
-    env->tlb->helper_tlbwi();
+    env->tlb->helper_tlbwi(env);
 }
 
-void helper_tlbwr(void)
+void helper_tlbwr(CPUMIPSState *env)
 {
-    env->tlb->helper_tlbwr();
+    env->tlb->helper_tlbwr(env);
 }
 
-void helper_tlbp(void)
+void helper_tlbp(CPUMIPSState *env)
 {
-    env->tlb->helper_tlbp();
+    env->tlb->helper_tlbp(env);
 }
 
-void helper_tlbr(void)
+void helper_tlbr(CPUMIPSState *env)
 {
-    env->tlb->helper_tlbr();
+    env->tlb->helper_tlbr(env);
 }
 
 /* Specials */

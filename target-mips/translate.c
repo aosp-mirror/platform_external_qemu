@@ -5613,25 +5613,25 @@ static void gen_cp0 (CPUMIPSState *env, DisasContext *ctx, uint32_t opc, int rt,
         opn = "tlbwi";
         if (!env->tlb->helper_tlbwi)
             goto die;
-        gen_helper_tlbwi();
+        gen_helper_tlbwi(cpu_env);
         break;
     case OPC_TLBWR:
         opn = "tlbwr";
         if (!env->tlb->helper_tlbwr)
             goto die;
-        gen_helper_tlbwr();
+        gen_helper_tlbwr(cpu_env);
         break;
     case OPC_TLBP:
         opn = "tlbp";
         if (!env->tlb->helper_tlbp)
             goto die;
-        gen_helper_tlbp();
+        gen_helper_tlbp(cpu_env);
         break;
     case OPC_TLBR:
         opn = "tlbr";
         if (!env->tlb->helper_tlbr)
             goto die;
-        gen_helper_tlbr();
+        gen_helper_tlbr(cpu_env);
         break;
     case OPC_ERET:
         opn = "eret";
