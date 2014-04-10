@@ -127,20 +127,22 @@ static void do_restore_state (CPUMIPSState *env, uintptr_t pc)
 
 #if defined(CONFIG_USER_ONLY)
 #define HELPER_LD(name, insn, type)                                     \
-static inline type do_##name(target_ulong addr, int mem_idx)            \
+static inline type do_##name(CPUMIPSState *env, target_ulong addr,      \
+                             int mem_idx)                               \
 {                                                                       \
     return (type) cpu_##insn##_raw(env, addr);                                     \
 }
 #else
 #define HELPER_LD(name, insn, type)                                     \
-static inline type do_##name(target_ulong addr, int mem_idx)            \
+static inline type do_##name(CPUMIPSState *env, target_ulong addr,      \
+                             int mem_idx)                               \
 {                                                                       \
     switch (mem_idx)                                                    \
     {                                                                   \
-    case 0: return (type) cpu_##insn##_kernel(env, addr); break;                   \
-    case 1: return (type) cpu_##insn##_super(env, addr); break;                    \
+    case 0: return (type) cpu_##insn##_kernel(env, addr); break;        \
+    case 1: return (type) cpu_##insn##_super(env, addr); break;         \
     default:                                                            \
-    case 2: return (type) cpu_##insn##_user(env, addr); break;                     \
+    case 2: return (type) cpu_##insn##_user(env, addr); break;          \
     }                                                                   \
 }
 #endif
@@ -153,20 +155,22 @@ HELPER_LD(ld, ldq, int64_t)
 
 #if defined(CONFIG_USER_ONLY)
 #define HELPER_ST(name, insn, type)                                     \
-static inline void do_##name(target_ulong addr, type val, int mem_idx)  \
+static inline void do_##name(CPUMIPSState *env, target_ulong addr,      \
+                             type val, int mem_idx)                     \
 {                                                                       \
     cpu_##insn##_raw(env, addr, val);                                              \
 }
 #else
 #define HELPER_ST(name, insn, type)                                     \
-static inline void do_##name(target_ulong addr, type val, int mem_idx)  \
+static inline void do_##name(CPUMIPSState *env, target_ulong addr,      \
+                             type val, int mem_idx)                     \
 {                                                                       \
     switch (mem_idx)                                                    \
     {                                                                   \
-    case 0: cpu_##insn##_kernel(env, addr, val); break;                            \
-    case 1: cpu_##insn##_super(env, addr, val); break;                             \
+    case 0: cpu_##insn##_kernel(env, addr, val); break;                 \
+    case 1: cpu_##insn##_super(env, addr, val); break;                  \
     default:                                                            \
-    case 2: cpu_##insn##_user(env, addr, val); break;                              \
+    case 2: cpu_##insn##_user(env, addr, val); break;                   \
     }                                                                   \
 }
 #endif
@@ -353,7 +357,7 @@ static inline hwaddr do_translate_address(target_ulong address, int rw)
 target_ulong helper_##name(target_ulong arg, int mem_idx)                     \
 {                                                                             \
     env->lladdr = do_translate_address(arg, 0);                               \
-    env->llval = do_##insn(arg, mem_idx);                                     \
+    env->llval = do_##insn(env, arg, mem_idx);                                     \
     return env->llval;                                                        \
 }
 HELPER_LD_ATOMIC(ll, lw)
@@ -372,9 +376,9 @@ target_ulong helper_##name(target_ulong arg1, target_ulong arg2, int mem_idx) \
         helper_raise_exception(env, EXCP_AdES);                               \
     }                                                                         \
     if (do_translate_address(arg2, 1) == env->lladdr) {                       \
-        tmp = do_##ld_insn(arg2, mem_idx);                                    \
+        tmp = do_##ld_insn(env, arg2, mem_idx);                                    \
         if (tmp == env->llval) {                                              \
-            do_##st_insn(arg2, arg1, mem_idx);                                \
+            do_##st_insn(env, arg2, arg1, mem_idx);                                \
             return 1;                                                         \
         }                                                                     \
     }                                                                         \
@@ -395,80 +399,84 @@ HELPER_ST_ATOMIC(scd, ld, sd, 0x7)
 #define GET_OFFSET(addr, offset) (addr - (offset))
 #endif
 
-target_ulong helper_lwl(target_ulong arg1, target_ulong arg2, int mem_idx)
+target_ulong helper_lwl(CPUMIPSState *env, target_ulong arg1, target_ulong arg2,
+                        int mem_idx)
 {
     target_ulong tmp;
 
-    tmp = do_lbu(arg2, mem_idx);
+    tmp = do_lbu(env, arg2, mem_idx);
     arg1 = (arg1 & 0x00FFFFFF) | (tmp << 24);
 
     if (GET_LMASK(arg2) <= 2) {
-        tmp = do_lbu(GET_OFFSET(arg2, 1), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, 1), mem_idx);
         arg1 = (arg1 & 0xFF00FFFF) | (tmp << 16);
     }
 
     if (GET_LMASK(arg2) <= 1) {
-        tmp = do_lbu(GET_OFFSET(arg2, 2), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, 2), mem_idx);
         arg1 = (arg1 & 0xFFFF00FF) | (tmp << 8);
     }
 
     if (GET_LMASK(arg2) == 0) {
-        tmp = do_lbu(GET_OFFSET(arg2, 3), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, 3), mem_idx);
         arg1 = (arg1 & 0xFFFFFF00) | tmp;
     }
     return (int32_t)arg1;
 }
 
-target_ulong helper_lwr(target_ulong arg1, target_ulong arg2, int mem_idx)
+target_ulong helper_lwr(CPUMIPSState *env, target_ulong arg1, target_ulong arg2,
+                        int mem_idx)
 {
     target_ulong tmp;
 
-    tmp = do_lbu(arg2, mem_idx);
+    tmp = do_lbu(env, arg2, mem_idx);
     arg1 = (arg1 & 0xFFFFFF00) | tmp;
 
     if (GET_LMASK(arg2) >= 1) {
-        tmp = do_lbu(GET_OFFSET(arg2, -1), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, -1), mem_idx);
         arg1 = (arg1 & 0xFFFF00FF) | (tmp << 8);
     }
 
     if (GET_LMASK(arg2) >= 2) {
-        tmp = do_lbu(GET_OFFSET(arg2, -2), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, -2), mem_idx);
         arg1 = (arg1 & 0xFF00FFFF) | (tmp << 16);
     }
 
     if (GET_LMASK(arg2) == 3) {
-        tmp = do_lbu(GET_OFFSET(arg2, -3), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, -3), mem_idx);
         arg1 = (arg1 & 0x00FFFFFF) | (tmp << 24);
     }
     return (int32_t)arg1;
 }
 
-void helper_swl(target_ulong arg1, target_ulong arg2, int mem_idx)
+void helper_swl(CPUMIPSState *env, target_ulong arg1, target_ulong arg2,
+                int mem_idx)
 {
-    do_sb(arg2, (uint8_t)(arg1 >> 24), mem_idx);
+    do_sb(env, arg2, (uint8_t)(arg1 >> 24), mem_idx);
 
     if (GET_LMASK(arg2) <= 2)
-        do_sb(GET_OFFSET(arg2, 1), (uint8_t)(arg1 >> 16), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, 1), (uint8_t)(arg1 >> 16), mem_idx);
 
     if (GET_LMASK(arg2) <= 1)
-        do_sb(GET_OFFSET(arg2, 2), (uint8_t)(arg1 >> 8), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, 2), (uint8_t)(arg1 >> 8), mem_idx);
 
     if (GET_LMASK(arg2) == 0)
-        do_sb(GET_OFFSET(arg2, 3), (uint8_t)arg1, mem_idx);
+        do_sb(env, GET_OFFSET(arg2, 3), (uint8_t)arg1, mem_idx);
 }
 
-void helper_swr(target_ulong arg1, target_ulong arg2, int mem_idx)
+void helper_swr(CPUMIPSState *env, target_ulong arg1, target_ulong arg2,
+                int mem_idx)
 {
-    do_sb(arg2, (uint8_t)arg1, mem_idx);
+    do_sb(env, arg2, (uint8_t)arg1, mem_idx);
 
     if (GET_LMASK(arg2) >= 1)
-        do_sb(GET_OFFSET(arg2, -1), (uint8_t)(arg1 >> 8), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, -1), (uint8_t)(arg1 >> 8), mem_idx);
 
     if (GET_LMASK(arg2) >= 2)
-        do_sb(GET_OFFSET(arg2, -2), (uint8_t)(arg1 >> 16), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, -2), (uint8_t)(arg1 >> 16), mem_idx);
 
     if (GET_LMASK(arg2) == 3)
-        do_sb(GET_OFFSET(arg2, -3), (uint8_t)(arg1 >> 24), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, -3), (uint8_t)(arg1 >> 24), mem_idx);
 }
 
 #if defined(TARGET_MIPS64)
@@ -481,25 +489,26 @@ void helper_swr(target_ulong arg1, target_ulong arg2, int mem_idx)
 #define GET_LMASK64(v) (((v) & 7) ^ 7)
 #endif
 
-target_ulong helper_ldl(target_ulong arg1, target_ulong arg2, int mem_idx)
+target_ulong helper_ldl(CPUMIPSState *env, target_ulong arg1, target_ulong arg2,
+                        int mem_idx)
 {
     uint64_t tmp;
 
-    tmp = do_lbu(arg2, mem_idx);
+    tmp = do_lbu(env, arg2, mem_idx);
     arg1 = (arg1 & 0x00FFFFFFFFFFFFFFULL) | (tmp << 56);
 
     if (GET_LMASK64(arg2) <= 6) {
-        tmp = do_lbu(GET_OFFSET(arg2, 1), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, 1), mem_idx);
         arg1 = (arg1 & 0xFF00FFFFFFFFFFFFULL) | (tmp << 48);
     }
 
     if (GET_LMASK64(arg2) <= 5) {
-        tmp = do_lbu(GET_OFFSET(arg2, 2), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, 2), mem_idx);
         arg1 = (arg1 & 0xFFFF00FFFFFFFFFFULL) | (tmp << 40);
     }
 
     if (GET_LMASK64(arg2) <= 4) {
-        tmp = do_lbu(GET_OFFSET(arg2, 3), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, 3), mem_idx);
         arg1 = (arg1 & 0xFFFFFF00FFFFFFFFULL) | (tmp << 32);
     }
 
@@ -509,118 +518,121 @@ target_ulong helper_ldl(target_ulong arg1, target_ulong arg2, int mem_idx)
     }
 
     if (GET_LMASK64(arg2) <= 2) {
-        tmp = do_lbu(GET_OFFSET(arg2, 5), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, 5), mem_idx);
         arg1 = (arg1 & 0xFFFFFFFFFF00FFFFULL) | (tmp << 16);
     }
 
     if (GET_LMASK64(arg2) <= 1) {
-        tmp = do_lbu(GET_OFFSET(arg2, 6), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, 6), mem_idx);
         arg1 = (arg1 & 0xFFFFFFFFFFFF00FFULL) | (tmp << 8);
     }
 
     if (GET_LMASK64(arg2) == 0) {
-        tmp = do_lbu(GET_OFFSET(arg2, 7), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, 7), mem_idx);
         arg1 = (arg1 & 0xFFFFFFFFFFFFFF00ULL) | tmp;
     }
 
     return arg1;
 }
 
-target_ulong helper_ldr(target_ulong arg1, target_ulong arg2, int mem_idx)
+target_ulong helper_ldr(CPUMIPSState *env, target_ulong arg1, target_ulong arg2,
+                        int mem_idx)
 {
     uint64_t tmp;
 
-    tmp = do_lbu(arg2, mem_idx);
+    tmp = do_lbu(env, arg2, mem_idx);
     arg1 = (arg1 & 0xFFFFFFFFFFFFFF00ULL) | tmp;
 
     if (GET_LMASK64(arg2) >= 1) {
-        tmp = do_lbu(GET_OFFSET(arg2, -1), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, -1), mem_idx);
         arg1 = (arg1 & 0xFFFFFFFFFFFF00FFULL) | (tmp  << 8);
     }
 
     if (GET_LMASK64(arg2) >= 2) {
-        tmp = do_lbu(GET_OFFSET(arg2, -2), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, -2), mem_idx);
         arg1 = (arg1 & 0xFFFFFFFFFF00FFFFULL) | (tmp << 16);
     }
 
     if (GET_LMASK64(arg2) >= 3) {
-        tmp = do_lbu(GET_OFFSET(arg2, -3), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, -3), mem_idx);
         arg1 = (arg1 & 0xFFFFFFFF00FFFFFFULL) | (tmp << 24);
     }
 
     if (GET_LMASK64(arg2) >= 4) {
-        tmp = do_lbu(GET_OFFSET(arg2, -4), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, -4), mem_idx);
         arg1 = (arg1 & 0xFFFFFF00FFFFFFFFULL) | (tmp << 32);
     }
 
     if (GET_LMASK64(arg2) >= 5) {
-        tmp = do_lbu(GET_OFFSET(arg2, -5), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, -5), mem_idx);
         arg1 = (arg1 & 0xFFFF00FFFFFFFFFFULL) | (tmp << 40);
     }
 
     if (GET_LMASK64(arg2) >= 6) {
-        tmp = do_lbu(GET_OFFSET(arg2, -6), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, -6), mem_idx);
         arg1 = (arg1 & 0xFF00FFFFFFFFFFFFULL) | (tmp << 48);
     }
 
     if (GET_LMASK64(arg2) == 7) {
-        tmp = do_lbu(GET_OFFSET(arg2, -7), mem_idx);
+        tmp = do_lbu(env, GET_OFFSET(arg2, -7), mem_idx);
         arg1 = (arg1 & 0x00FFFFFFFFFFFFFFULL) | (tmp << 56);
     }
 
     return arg1;
 }
 
-void helper_sdl(target_ulong arg1, target_ulong arg2, int mem_idx)
+void helper_sdl(CPUMIPSState *env, target_ulong arg1, target_ulong arg2,
+                 int mem_idx)
 {
-    do_sb(arg2, (uint8_t)(arg1 >> 56), mem_idx);
+    do_sb(env, arg2, (uint8_t)(arg1 >> 56), mem_idx);
 
     if (GET_LMASK64(arg2) <= 6)
-        do_sb(GET_OFFSET(arg2, 1), (uint8_t)(arg1 >> 48), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, 1), (uint8_t)(arg1 >> 48), mem_idx);
 
     if (GET_LMASK64(arg2) <= 5)
-        do_sb(GET_OFFSET(arg2, 2), (uint8_t)(arg1 >> 40), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, 2), (uint8_t)(arg1 >> 40), mem_idx);
 
     if (GET_LMASK64(arg2) <= 4)
-        do_sb(GET_OFFSET(arg2, 3), (uint8_t)(arg1 >> 32), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, 3), (uint8_t)(arg1 >> 32), mem_idx);
 
     if (GET_LMASK64(arg2) <= 3)
-        do_sb(GET_OFFSET(arg2, 4), (uint8_t)(arg1 >> 24), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, 4), (uint8_t)(arg1 >> 24), mem_idx);
 
     if (GET_LMASK64(arg2) <= 2)
-        do_sb(GET_OFFSET(arg2, 5), (uint8_t)(arg1 >> 16), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, 5), (uint8_t)(arg1 >> 16), mem_idx);
 
     if (GET_LMASK64(arg2) <= 1)
-        do_sb(GET_OFFSET(arg2, 6), (uint8_t)(arg1 >> 8), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, 6), (uint8_t)(arg1 >> 8), mem_idx);
 
     if (GET_LMASK64(arg2) <= 0)
-        do_sb(GET_OFFSET(arg2, 7), (uint8_t)arg1, mem_idx);
+        do_sb(env, GET_OFFSET(arg2, 7), (uint8_t)arg1, mem_idx);
 }
 
-void helper_sdr(target_ulong arg1, target_ulong arg2, int mem_idx)
+void helper_sdr(CPUMIPSState *env, target_ulong arg1, target_ulong arg2,
+                 int mem_idx)
 {
-    do_sb(arg2, (uint8_t)arg1, mem_idx);
+    do_sb(env, arg2, (uint8_t)arg1, mem_idx);
 
     if (GET_LMASK64(arg2) >= 1)
-        do_sb(GET_OFFSET(arg2, -1), (uint8_t)(arg1 >> 8), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, -1), (uint8_t)(arg1 >> 8), mem_idx);
 
     if (GET_LMASK64(arg2) >= 2)
-        do_sb(GET_OFFSET(arg2, -2), (uint8_t)(arg1 >> 16), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, -2), (uint8_t)(arg1 >> 16), mem_idx);
 
     if (GET_LMASK64(arg2) >= 3)
-        do_sb(GET_OFFSET(arg2, -3), (uint8_t)(arg1 >> 24), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, -3), (uint8_t)(arg1 >> 24), mem_idx);
 
     if (GET_LMASK64(arg2) >= 4)
-        do_sb(GET_OFFSET(arg2, -4), (uint8_t)(arg1 >> 32), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, -4), (uint8_t)(arg1 >> 32), mem_idx);
 
     if (GET_LMASK64(arg2) >= 5)
-        do_sb(GET_OFFSET(arg2, -5), (uint8_t)(arg1 >> 40), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, -5), (uint8_t)(arg1 >> 40), mem_idx);
 
     if (GET_LMASK64(arg2) >= 6)
-        do_sb(GET_OFFSET(arg2, -6), (uint8_t)(arg1 >> 48), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, -6), (uint8_t)(arg1 >> 48), mem_idx);
 
     if (GET_LMASK64(arg2) == 7)
-        do_sb(GET_OFFSET(arg2, -7), (uint8_t)(arg1 >> 56), mem_idx);
+        do_sb(env, GET_OFFSET(arg2, -7), (uint8_t)(arg1 >> 56), mem_idx);
 }
 #endif /* TARGET_MIPS64 */
 

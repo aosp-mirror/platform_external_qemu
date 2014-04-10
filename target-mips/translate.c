@@ -458,6 +458,12 @@ static TCGv_i32 fpu_fcr0, fpu_fcr31;
     tcg_temp_free_i32(helper_tmp);                                \
     } while(0)
 
+#define gen_helper_4i(name, arg1, arg2, arg3, arg4, arg5) do {    \
+    TCGv_i32 helper_tmp = tcg_const_i32(arg5);                    \
+    gen_helper_##name(arg1, arg2, arg3, arg4, helper_tmp);        \
+    tcg_temp_free_i32(helper_tmp);                                \
+    } while(0)
+
 typedef struct DisasContext {
     struct TranslationBlock *tb;
     target_ulong pc, saved_pc;
@@ -1022,27 +1028,27 @@ static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
     case OPC_LDL:
         save_cpu_state(ctx, 1);
         gen_load_gpr(t1, rt);
-        gen_helper_3i(ldl, t1, t1, t0, ctx->mem_idx);
+        gen_helper_4i(ldl, t1, cpu_env, t1, t0, ctx->mem_idx);
         gen_store_gpr(t1, rt);
         opn = "ldl";
         break;
     case OPC_SDL:
         save_cpu_state(ctx, 1);
         gen_load_gpr(t1, rt);
-        gen_helper_2i(sdl, t1, t0, ctx->mem_idx);
+        gen_helper_3i(sdl, cpu_env, t1, t0, ctx->mem_idx);
         opn = "sdl";
         break;
     case OPC_LDR:
         save_cpu_state(ctx, 1);
         gen_load_gpr(t1, rt);
-        gen_helper_3i(ldr, t1, t1, t0, ctx->mem_idx);
+        gen_helper_4i(ldr, t1, cpu_env, t1, t0, ctx->mem_idx);
         gen_store_gpr(t1, rt);
         opn = "ldr";
         break;
     case OPC_SDR:
         save_cpu_state(ctx, 1);
         gen_load_gpr(t1, rt);
-        gen_helper_2i(sdr, t1, t0, ctx->mem_idx);
+        gen_helper_3i(sdr, cpu_env, t1, t0, ctx->mem_idx);
         opn = "sdr";
         break;
 #endif
@@ -1097,27 +1103,27 @@ static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
     case OPC_LWL:
         save_cpu_state(ctx, 1);
         gen_load_gpr(t1, rt);
-        gen_helper_3i(lwl, t1, t1, t0, ctx->mem_idx);
+        gen_helper_4i(lwl, t1, cpu_env, t1, t0, ctx->mem_idx);
         gen_store_gpr(t1, rt);
         opn = "lwl";
         break;
     case OPC_SWL:
         save_cpu_state(ctx, 1);
         gen_load_gpr(t1, rt);
-        gen_helper_2i(swl, t1, t0, ctx->mem_idx);
-        opn = "swr";
+        gen_helper_3i(swl, cpu_env, t1, t0, ctx->mem_idx);
+        opn = "swl";
         break;
     case OPC_LWR:
         save_cpu_state(ctx, 1);
         gen_load_gpr(t1, rt);
-        gen_helper_3i(lwr, t1, t1, t0, ctx->mem_idx);
+        gen_helper_4i(lwr, t1, cpu_env, t1, t0, ctx->mem_idx);
         gen_store_gpr(t1, rt);
         opn = "lwr";
         break;
     case OPC_SWR:
         save_cpu_state(ctx, 1);
         gen_load_gpr(t1, rt);
-        gen_helper_2i(swr, t1, t0, ctx->mem_idx);
+        gen_helper_3i(swr, cpu_env, t1, t0, ctx->mem_idx);
         opn = "swr";
         break;
     case OPC_LL:
