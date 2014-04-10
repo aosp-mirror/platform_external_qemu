@@ -773,7 +773,7 @@ static void do_interrupt_v7m(CPUARMState *env)
     case EXCP_BKPT:
         if (semihosting_enabled) {
             int nr;
-            nr = lduw_code(env->regs[15]) & 0xff;
+            nr = cpu_lduw_code(env, env->regs[15]) & 0xff;
             if (nr == 0xab) {
                 env->regs[15] += 2;
                 env->regs[0] = do_arm_semihosting(env);
@@ -844,9 +844,9 @@ void do_interrupt(CPUARMState *env)
         if (semihosting_enabled) {
             /* Check for semihosting interrupt.  */
             if (env->thumb) {
-                mask = lduw_code(env->regs[15] - 2) & 0xff;
+                mask = cpu_lduw_code(env, env->regs[15] - 2) & 0xff;
             } else {
-                mask = ldl_code(env->regs[15] - 4) & 0xffffff;
+                mask = cpu_ldl_code(env, env->regs[15] - 4) & 0xffffff;
             }
             /* Only intercept calls from privileged modes, to provide some
                semblance of security.  */
@@ -866,7 +866,7 @@ void do_interrupt(CPUARMState *env)
     case EXCP_BKPT:
         /* See if this is a semihosting syscall.  */
         if (env->thumb && semihosting_enabled) {
-            mask = lduw_code(env->regs[15]) & 0xff;
+            mask = cpu_lduw_code(env, env->regs[15]) & 0xff;
             if (mask == 0xab
                   && (env->uncached_cpsr & CPSR_M) != ARM_CPU_MODE_USR) {
                 env->regs[15] += 2;

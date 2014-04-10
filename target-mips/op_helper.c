@@ -70,7 +70,7 @@ static void do_restore_state (void *pc_ptr)
 #define HELPER_LD(name, insn, type)                                     \
 static inline type do_##name(target_ulong addr, int mem_idx)            \
 {                                                                       \
-    return (type) insn##_raw(addr);                                     \
+    return (type) cpu_##insn##_raw(env, addr);                                     \
 }
 #else
 #define HELPER_LD(name, insn, type)                                     \
@@ -78,10 +78,10 @@ static inline type do_##name(target_ulong addr, int mem_idx)            \
 {                                                                       \
     switch (mem_idx)                                                    \
     {                                                                   \
-    case 0: return (type) insn##_kernel(addr); break;                   \
-    case 1: return (type) insn##_super(addr); break;                    \
+    case 0: return (type) cpu_##insn##_kernel(env, addr); break;                   \
+    case 1: return (type) cpu_##insn##_super(env, addr); break;                    \
     default:                                                            \
-    case 2: return (type) insn##_user(addr); break;                     \
+    case 2: return (type) cpu_##insn##_user(env, addr); break;                     \
     }                                                                   \
 }
 #endif
@@ -96,7 +96,7 @@ HELPER_LD(ld, ldq, int64_t)
 #define HELPER_ST(name, insn, type)                                     \
 static inline void do_##name(target_ulong addr, type val, int mem_idx)  \
 {                                                                       \
-    insn##_raw(addr, val);                                              \
+    cpu_##insn##_raw(env, addr, val);                                              \
 }
 #else
 #define HELPER_ST(name, insn, type)                                     \
@@ -104,10 +104,10 @@ static inline void do_##name(target_ulong addr, type val, int mem_idx)  \
 {                                                                       \
     switch (mem_idx)                                                    \
     {                                                                   \
-    case 0: insn##_kernel(addr, val); break;                            \
-    case 1: insn##_super(addr, val); break;                             \
+    case 0: cpu_##insn##_kernel(env, addr, val); break;                            \
+    case 1: cpu_##insn##_super(env, addr, val); break;                             \
     default:                                                            \
-    case 2: insn##_user(addr, val); break;                              \
+    case 2: cpu_##insn##_user(env, addr, val); break;                              \
     }                                                                   \
 }
 #endif

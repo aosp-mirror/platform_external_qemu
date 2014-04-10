@@ -121,15 +121,15 @@ static inline floatx80 helper_fldt(target_ulong ptr)
 {
     floatx80 temp;
 
-    temp.low = ldq(ptr);
-    temp.high = lduw(ptr + 8);
+    temp.low = cpu_ldq_data(env, ptr);
+    temp.high = cpu_lduw_data(env, ptr + 8);
     return temp;
 }
 
 static inline void helper_fstt(floatx80 f, target_ulong ptr)
 {
-    stq(ptr, f.low);
-    stw(ptr + 8, f.high);
+    cpu_stq_data(env, ptr, f.low);
+    cpu_stw_data(env, ptr + 8, f.high);
 }
 
 #define FPUS_IE (1 << 0)

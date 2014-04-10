@@ -317,7 +317,7 @@ tb_page_addr_t get_page_addr_code(CPUArchState *env1, target_ulong addr)
     mmu_idx = cpu_mmu_index(env1);
     if (unlikely(env1->tlb_table[mmu_idx][page_index].addr_code !=
                  (addr & TARGET_PAGE_MASK))) {
-        ldub_code(addr);
+        cpu_ldub_code(env1, addr);
     }
     pd = env1->tlb_table[mmu_idx][page_index].addr_code & ~TARGET_PAGE_MASK;
     if (pd > IO_MEM_ROM && !(pd & IO_MEM_ROMD)) {
