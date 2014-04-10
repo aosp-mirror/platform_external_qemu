@@ -142,8 +142,6 @@ static void tb_link_page(TranslationBlock *tb, tb_page_addr_t phys_pc,
 void cpu_gen_init(void)
 {
     tcg_context_init(&tcg_ctx);
-    tcg_set_frame(&tcg_ctx, TCG_AREG0, offsetof(CPUOldState, temp_buf),
-                  CPU_TEMP_BUF_NLONGS * sizeof(long));
 }
 
 /* return non zero if the very first instruction is invalid so that
