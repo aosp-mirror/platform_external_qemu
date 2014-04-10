@@ -145,7 +145,7 @@ DEF_HELPER_1(mtc0_taghi, void, tl)
 DEF_HELPER_1(mtc0_datahi, void, tl)
 
 /* MIPS MT functions */
-DEF_HELPER_1(mftgpr, tl, i32);
+DEF_HELPER_1(mftgpr, tl, i32)
 DEF_HELPER_1(mftlo, tl, i32)
 DEF_HELPER_1(mfthi, tl, i32)
 DEF_HELPER_1(mftacx, tl, i32)

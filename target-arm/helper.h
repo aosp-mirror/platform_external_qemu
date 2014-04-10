@@ -255,10 +255,10 @@ DEF_HELPER_2(neon_qshl_u32, i32, i32, i32)
 DEF_HELPER_2(neon_qshl_s32, i32, i32, i32)
 DEF_HELPER_2(neon_qshl_u64, i64, i64, i64)
 DEF_HELPER_2(neon_qshl_s64, i64, i64, i64)
-DEF_HELPER_2(neon_qshlu_s8, i32, i32, i32);
-DEF_HELPER_2(neon_qshlu_s16, i32, i32, i32);
-DEF_HELPER_2(neon_qshlu_s32, i32, i32, i32);
-DEF_HELPER_2(neon_qshlu_s64, i64, i64, i64);
+DEF_HELPER_2(neon_qshlu_s8, i32, i32, i32)
+DEF_HELPER_2(neon_qshlu_s16, i32, i32, i32)
+DEF_HELPER_2(neon_qshlu_s32, i32, i32, i32)
+DEF_HELPER_2(neon_qshlu_s64, i64, i64, i64)
 DEF_HELPER_2(neon_qrshl_u8, i32, i32, i32)
 DEF_HELPER_2(neon_qrshl_s8, i32, i32, i32)
 DEF_HELPER_2(neon_qrshl_u16, i32, i32, i32)

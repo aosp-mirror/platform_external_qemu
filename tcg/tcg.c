@@ -216,12 +216,25 @@ void tcg_pool_reset(TCGContext *s)
     s->pool_current = NULL;
 }
 
+#include "helper.h"
+
+typedef struct TCGHelperInfo {
+        void *func;
+        const char *name;
+} TCGHelperInfo;
+
+static const TCGHelperInfo all_helpers[] = {
+#define GEN_HELPER 2
+#include "helper.h"
+};
+
 void tcg_context_init(TCGContext *s)
 {
-    int op, total_args, n;
+    int op, total_args, n, i;
     TCGOpDef *def;
     TCGArgConstraint *args_ct;
     int *sorted_args;
+    GHashTable *helper_table;
 
     memset(s, 0, sizeof(*s));
     s->temps = s->static_temps;
@@ -246,6 +259,15 @@ void tcg_context_init(TCGContext *s)
         n = def->nb_iargs + def->nb_oargs;
         sorted_args += n;
         args_ct += n;
+    }
+
+    /* Register helpers. */
+    /* Use g_direct_hash/equal for direct pointer comparisons on func. */
+    s->helpers = helper_table = g_hash_table_new(NULL, NULL);
+
+    for (i = 0; i < ARRAY_SIZE(all_helpers); ++i) {
+        g_hash_table_insert(helper_table, (gpointer)all_helpers[i].func,
+                            (gpointer)all_helpers[i].name);
     }
 
     tcg_target_init(s);
@@ -568,19 +590,6 @@ int tcg_check_temp_count(void)
     return 0;
 }
 #endif
-
-void tcg_register_helper(void *func, const char *name)
-{
-    TCGContext *s = &tcg_ctx;
-    GHashTable *table = s->helpers;
-
-    if (table == NULL) {
-        table = g_hash_table_new(NULL, NULL);
-        s->helpers = table;
-    }
-
-    g_hash_table_insert(table, (gpointer)func, (gpointer)name);
-}
 
 /* Note: we convert the 64 bit args to 32 bit and do some alignment
    and endian swap. Maybe it would be better to do the alignment
