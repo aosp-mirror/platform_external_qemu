@@ -666,7 +666,7 @@ void cpu_dump_state(CPUState *cpu, FILE *f,
 
 #ifdef CONFIG_HAX
     if (hax_enabled())
-        hax_arch_get_registers(env);
+        hax_arch_get_registers(cpu);
 #endif
 
     eflags = env->eflags;
