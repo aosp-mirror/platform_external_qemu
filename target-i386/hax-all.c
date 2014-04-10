@@ -1045,20 +1045,12 @@ void hax_vcpu_sync_state(CPUX86State *env, int modified)
  */
 int hax_sync_vcpus(void)
 {
-    if (hax_enabled())
-    {
-        CPUX86State *env;
+    if (hax_enabled()) {
+        CPUState *cpu;
 
-        env = first_cpu;
-        if (!env)
-            return 0;
-
-        for (; env != NULL; env = env->next_cpu) {
-            int ret;
-
-            ret = hax_arch_set_registers(env);
-            if (ret < 0)
-            {
+        CPU_FOREACH(cpu) {
+            int ret = hax_arch_set_registers(cpu);
+            if (ret < 0) {
                 dprint("Failed to sync HAX vcpu context\n");
                 exit(1);
             }
@@ -1070,14 +1062,12 @@ int hax_sync_vcpus(void)
 
 void hax_reset_vcpu_state(void *opaque)
 {
-    CPUX86State *env;
-    for (env = first_cpu; env != NULL; env = env->next_cpu)
-    {
-        if (env->hax_vcpu)
-        {
-            env->hax_vcpu->emulation_state  = HAX_EMULATE_STATE_INITIAL;
-            env->hax_vcpu->tunnel->user_event_pending = 0;
-            env->hax_vcpu->tunnel->ready_for_interrupt_injection = 0;
+    CPUState *cpu;
+    CPU_FOREACH(cpu) {
+        if (cpu->hax_vcpu) {
+            cpu->hax_vcpu->emulation_state  = HAX_EMULATE_STATE_INITIAL;
+            cpu->hax_vcpu->tunnel->user_event_pending = 0;
+            cpu->hax_vcpu->tunnel->ready_for_interrupt_injection = 0;
         }
     }
 }

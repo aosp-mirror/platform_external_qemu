@@ -1363,7 +1363,7 @@ static const char *get_feature_xml(const char *p, const char **newp)
                      "<xi:include href=\"%s\"/>",
                      GDB_CORE_XML);
 
-            for (r = first_cpu->gdb_regs; r; r = r->next) {
+            for (r = QTAILQ_FIRST(&cpus)->gdb_regs; r; r = r->next) {
                 pstrcat(target_xml, sizeof(target_xml), "<xi:include href=\"");
                 pstrcat(target_xml, sizeof(target_xml), r->xml);
                 pstrcat(target_xml, sizeof(target_xml), "\"/>");
@@ -1470,7 +1470,7 @@ static int gdb_breakpoint_insert(target_ulong addr, target_ulong len, int type)
     switch (type) {
     case GDB_BREAKPOINT_SW:
     case GDB_BREAKPOINT_HW:
-        for (env = first_cpu; env != NULL; env = env->next_cpu) {
+        CPU_FOREACH(env) {
             err = cpu_breakpoint_insert(env, addr, BP_GDB, NULL);
             if (err)
                 break;
@@ -1480,7 +1480,7 @@ static int gdb_breakpoint_insert(target_ulong addr, target_ulong len, int type)
     case GDB_WATCHPOINT_WRITE:
     case GDB_WATCHPOINT_READ:
     case GDB_WATCHPOINT_ACCESS:
-        for (env = first_cpu; env != NULL; env = env->next_cpu) {
+        CPU_FOREACH(env) {
             err = cpu_watchpoint_insert(env, addr, len, xlat_gdb_type[type],
                                         NULL);
             if (err)
@@ -1504,7 +1504,7 @@ static int gdb_breakpoint_remove(target_ulong addr, target_ulong len, int type)
     switch (type) {
     case GDB_BREAKPOINT_SW:
     case GDB_BREAKPOINT_HW:
-        for (env = first_cpu; env != NULL; env = env->next_cpu) {
+        CPU_FOREACH(env) {
             err = cpu_breakpoint_remove(env, addr, BP_GDB);
             if (err)
                 break;
@@ -1514,7 +1514,7 @@ static int gdb_breakpoint_remove(target_ulong addr, target_ulong len, int type)
     case GDB_WATCHPOINT_WRITE:
     case GDB_WATCHPOINT_READ:
     case GDB_WATCHPOINT_ACCESS:
-        for (env = first_cpu; env != NULL; env = env->next_cpu) {
+        CPU_FOREACH(env) {
             err = cpu_watchpoint_remove(env, addr, len, xlat_gdb_type[type]);
             if (err)
                 break;
@@ -1535,7 +1535,7 @@ static void gdb_breakpoint_remove_all(void)
         return;
     }
 
-    for (env = first_cpu; env != NULL; env = env->next_cpu) {
+    CPU_FOREACH(env) {
         cpu_breakpoint_remove_all(env, BP_GDB);
 #ifndef CONFIG_USER_ONLY
         cpu_watchpoint_remove_all(env, BP_GDB);
@@ -1581,7 +1581,7 @@ static CPUOldState *find_cpu(uint32_t thread_id)
 {
     CPUOldState *env;
 
-    for (env = first_cpu; env != NULL; env = env->next_cpu) {
+    CPU_FOREACH(env) {
         if (gdb_id(env) == thread_id) {
             return env;
         }
@@ -1834,14 +1834,14 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
             put_packet(s, "QC1");
             break;
         } else if (strcmp(p,"fThreadInfo") == 0) {
-            s->query_cpu = first_cpu;
+            s->query_cpu = QTAILQ_FIRST(&cpus);
             goto report_cpuinfo;
         } else if (strcmp(p,"sThreadInfo") == 0) {
         report_cpuinfo:
             if (s->query_cpu) {
                 snprintf(buf, sizeof(buf), "m%x", gdb_id(s->query_cpu));
                 put_packet(s, buf);
-                s->query_cpu = s->query_cpu->next_cpu;
+                s->query_cpu = QTAILQ_NEXT(s->query_cpu, node);
             } else
                 put_packet(s, "l");
             break;
@@ -2256,8 +2256,8 @@ static void gdb_accept(void)
     qemu_setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *)&val, sizeof(val));
 
     s = g_malloc0(sizeof(GDBState));
-    s->c_cpu = first_cpu;
-    s->g_cpu = first_cpu;
+    s->c_cpu = QTAILQ_FIRST(&cpus);
+    s->g_cpu = QTAILQ_FIRST(&cpus);
     s->fd = fd;
     gdb_has_xml = 0;
 
@@ -2434,8 +2434,8 @@ int gdbserver_start(const char *device)
         mon_chr = s->mon_chr;
         memset(s, 0, sizeof(GDBState));
     }
-    s->c_cpu = first_cpu;
-    s->g_cpu = first_cpu;
+    s->c_cpu = QTAILQ_FIRST(&cpus);
+    s->g_cpu = QTAILQ_FIRST(&cpus);
     s->chr = chr;
     s->state = chr ? RS_IDLE : RS_INACTIVE;
     s->mon_chr = mon_chr;
