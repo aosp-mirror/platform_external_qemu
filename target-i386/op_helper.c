@@ -223,12 +223,13 @@ void helper_unlock(void)
     spin_unlock(&global_cpu_lock);
 }
 
-void helper_write_eflags(target_ulong t0, uint32_t update_mask)
+void helper_write_eflags(CPUX86State *env,
+                         target_ulong t0, uint32_t update_mask)
 {
     load_eflags(t0, update_mask);
 }
 
-target_ulong helper_read_eflags(void)
+target_ulong helper_read_eflags(CPUX86State *env)
 {
     uint32_t eflags;
     eflags = helper_cc_compute_all(CC_OP);
@@ -1778,7 +1779,7 @@ void helper_rsm(void)
 
 /* division, flags are undefined */
 
-void helper_divb_AL(target_ulong t0)
+void helper_divb_AL(CPUX86State *env, target_ulong t0)
 {
     unsigned int num, den, q, r;
 
@@ -1795,7 +1796,7 @@ void helper_divb_AL(target_ulong t0)
     EAX = (EAX & ~0xffff) | (r << 8) | q;
 }
 
-void helper_idivb_AL(target_ulong t0)
+void helper_idivb_AL(CPUX86State *env, target_ulong t0)
 {
     int num, den, q, r;
 
@@ -1812,7 +1813,7 @@ void helper_idivb_AL(target_ulong t0)
     EAX = (EAX & ~0xffff) | (r << 8) | q;
 }
 
-void helper_divw_AX(target_ulong t0)
+void helper_divw_AX(CPUX86State *env, target_ulong t0)
 {
     unsigned int num, den, q, r;
 
@@ -1830,7 +1831,7 @@ void helper_divw_AX(target_ulong t0)
     EDX = (EDX & ~0xffff) | r;
 }
 
-void helper_idivw_AX(target_ulong t0)
+void helper_idivw_AX(CPUX86State *env, target_ulong t0)
 {
     int num, den, q, r;
 
@@ -1848,7 +1849,7 @@ void helper_idivw_AX(target_ulong t0)
     EDX = (EDX & ~0xffff) | r;
 }
 
-void helper_divl_EAX(target_ulong t0)
+void helper_divl_EAX(CPUX86State *env, target_ulong t0)
 {
     unsigned int den, r;
     uint64_t num, q;
@@ -1866,7 +1867,7 @@ void helper_divl_EAX(target_ulong t0)
     EDX = (uint32_t)r;
 }
 
-void helper_idivl_EAX(target_ulong t0)
+void helper_idivl_EAX(CPUX86State *env, target_ulong t0)
 {
     int den, r;
     int64_t num, q;
@@ -4714,7 +4715,7 @@ static int idiv64(uint64_t *plow, uint64_t *phigh, int64_t b)
     return 0;
 }
 
-void helper_mulq_EAX_T0(target_ulong t0)
+void helper_mulq_EAX_T0(CPUX86State *env, target_ulong t0)
 {
     uint64_t r0, r1;
 
@@ -4725,7 +4726,7 @@ void helper_mulq_EAX_T0(target_ulong t0)
     CC_SRC = r1;
 }
 
-void helper_imulq_EAX_T0(target_ulong t0)
+void helper_imulq_EAX_T0(CPUX86State *env, target_ulong t0)
 {
     uint64_t r0, r1;
 
@@ -4736,7 +4737,7 @@ void helper_imulq_EAX_T0(target_ulong t0)
     CC_SRC = ((int64_t)r1 != ((int64_t)r0 >> 63));
 }
 
-target_ulong helper_imulq_T0_T1(target_ulong t0, target_ulong t1)
+target_ulong helper_imulq_T0_T1(CPUX86State *env, target_ulong t0, target_ulong t1)
 {
     uint64_t r0, r1;
 
@@ -4746,7 +4747,7 @@ target_ulong helper_imulq_T0_T1(target_ulong t0, target_ulong t1)
     return r0;
 }
 
-void helper_divq_EAX(target_ulong t0)
+void helper_divq_EAX(CPUX86State *env, target_ulong t0)
 {
     uint64_t r0, r1;
     if (t0 == 0) {
@@ -4760,7 +4761,7 @@ void helper_divq_EAX(target_ulong t0)
     EDX = r1;
 }
 
-void helper_idivq_EAX(target_ulong t0)
+void helper_idivq_EAX(CPUX86State *env, target_ulong t0)
 {
     uint64_t r0, r1;
     if (t0 == 0) {
