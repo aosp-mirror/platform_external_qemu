@@ -262,7 +262,7 @@ int ram_save_live(QEMUFile *f, int stage, void *opaque)
         return 0;
     }
 
-    if (cpu_physical_sync_dirty_bitmap(0, TARGET_PHYS_ADDR_MAX) != 0) {
+    if (cpu_physical_sync_dirty_bitmap(0, UINT64_MAX) != 0) {
         qemu_file_set_error(f, -errno);
         return 0;
     }

@@ -54,7 +54,7 @@ static struct goldfish_device nand_device = {
 
 /* Board init.  */
 
-#define VIRT_TO_PHYS_ADDEND (-((int64_t)(int32_t)0x80000000))
+#define VIRT_TO_PHYS_ADDEND (0xffffffff80000000LL)
 
 #define PHYS_TO_VIRT(x) ((x) | ~(target_ulong)0x7fffffff)
 
@@ -110,7 +110,7 @@ static void android_load_kernel(CPUOldState *env, int ram_size, const char *kern
     cmdline = ram_size - TARGET_PAGE_SIZE;
     char kernel_cmd[1024];
     if (initrd_size > 0)
-        sprintf (kernel_cmd, "%s rd_start=0x" TARGET_FMT_lx " rd_size=%li",
+        sprintf (kernel_cmd, "%s rd_start=0x%" HWADDR_PRIx " rd_size=%li",
                        kernel_cmdline,
                        (hwaddr)PHYS_TO_VIRT(initrd_offset),
                        (long int)initrd_size);

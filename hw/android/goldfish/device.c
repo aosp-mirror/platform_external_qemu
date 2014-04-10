@@ -143,7 +143,9 @@ static uint32_t goldfish_bus_read(void *opaque, hwaddr offset)
         case PDEV_BUS_IRQ_COUNT:
             return s->current ? s->current->irq_count : 0;
     default:
-        cpu_abort (cpu_single_env, "goldfish_bus_read: Bad offset %x\n", offset);
+        cpu_abort(cpu_single_env,
+                  "goldfish_bus_read: Bad offset %" HWADDR_PRIx "\n",
+                  offset);
         return 0;
     }
 }
@@ -170,7 +172,9 @@ static void goldfish_bus_write(void *opaque, hwaddr offset, uint32_t value)
                     goldfish_bus_op_init(s);
                     break;
                 default:
-                    cpu_abort (cpu_single_env, "goldfish_bus_write: Bad PDEV_BUS_OP value %x\n", value);
+                    cpu_abort(cpu_single_env,
+                              "goldfish_bus_write: Bad PDEV_BUS_OP value %x\n",
+                              value);
             };
             break;
         case PDEV_BUS_GET_NAME:
@@ -184,7 +188,9 @@ static void goldfish_bus_write(void *opaque, hwaddr offset, uint32_t value)
             goldfish_64bit_guest = 1;
             break;
         default:
-            cpu_abort (cpu_single_env, "goldfish_bus_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_bus_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
     }
 }
 

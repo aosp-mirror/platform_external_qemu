@@ -588,7 +588,9 @@ static uint32_t goldfish_fb_read(void *opaque, hwaddr offset)
             return goldfish_fb_get_pixel_format(s);
 
         default:
-            cpu_abort (cpu_single_env, "goldfish_fb_read: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_fb_read: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
             return 0;
     }
 }
@@ -630,7 +632,9 @@ static void goldfish_fb_write(void *opaque, hwaddr offset,
             s->need_update = 1;
             break;
         default:
-            cpu_abort (cpu_single_env, "goldfish_fb_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_fb_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
     }
 }
 

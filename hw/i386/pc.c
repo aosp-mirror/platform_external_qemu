@@ -949,7 +949,7 @@ static void pc_init1(ram_addr_t ram_size,
 #if TARGET_PHYS_ADDR_BITS == 32
         hw_error("To much RAM for 32-bit physical address");
 #else
-        ram_addr = qemu_ram_alloc(above_4g_mem_size);
+        ram_addr = qemu_ram_alloc(NULL, "pc.ram.high", above_4g_mem_size);
         cpu_register_physical_memory(0x100000000ULL,
                                      above_4g_mem_size,
                                      ram_addr);
