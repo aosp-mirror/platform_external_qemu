@@ -1086,12 +1086,23 @@ static inline void cpu_clone_regs(CPUX86State *env, target_ulong newsp)
 }
 #endif
 
-//#include "exec/cpu-all.h"
-#include "exec/exec-all.h"
-
-struct TranslationBlock;
-
+#include "exec/cpu-all.h"
 #include "svm.h"
+
+static inline bool cpu_has_work(CPUX86State *env)
+{
+    int work;
+
+    work = (env->interrupt_request & CPU_INTERRUPT_HARD) &&
+           (env->eflags & IF_MASK);
+    work |= env->interrupt_request & CPU_INTERRUPT_NMI;
+    work |= env->interrupt_request & CPU_INTERRUPT_INIT;
+    work |= env->interrupt_request & CPU_INTERRUPT_SIPI;
+
+    return work;
+}
+
+#include "exec/exec-all.h"
 
 static inline void cpu_pc_from_tb(CPUX86State *env, TranslationBlock *tb)
 {

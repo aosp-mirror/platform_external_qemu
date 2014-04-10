@@ -25,17 +25,6 @@ void fpu_dump_state(CPUMIPSState *env, FILE *f,
 void cpu_mips_clock_init (CPUMIPSState *env);
 void cpu_mips_tlb_flush (CPUMIPSState *env, int flush_global);
 
-static inline int cpu_halted(CPUMIPSState *env)
-{
-    if (!env->halted)
-        return 0;
-    if (cpu_has_work(env)) {
-        env->halted = 0;
-        return 0;
-    }
-    return EXCP_HALTED;
-}
-
 static inline void compute_hflags(CPUMIPSState *env)
 {
     env->hflags &= ~(MIPS_HFLAG_COP1X | MIPS_HFLAG_64 | MIPS_HFLAG_CP0 |

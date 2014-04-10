@@ -24,19 +24,6 @@ GLOBAL_REGISTER_VARIABLE_DECL struct CPUARMState *env asm(AREG0);
 #include "cpu.h"
 #include "exec/exec-all.h"
 
-static inline int cpu_halted(CPUARMState *env) {
-    if (!env->halted)
-        return 0;
-    /* An interrupt wakes the CPU even if the I and F CPSR bits are
-       set.  We use EXITTB to silently wake CPU without causing an
-       actual interrupt.  */
-    if (cpu_has_work(env)) {
-        env->halted = 0;
-        return 0;
-    }
-    return EXCP_HALTED;
-}
-
 #if !defined(CONFIG_USER_ONLY)
 #include "exec/softmmu_exec.h"
 #endif
