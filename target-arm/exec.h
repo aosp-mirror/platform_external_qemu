@@ -24,12 +24,6 @@ GLOBAL_REGISTER_VARIABLE_DECL struct CPUARMState *env asm(AREG0);
 #include "cpu.h"
 #include "exec/exec-all.h"
 
-static inline bool cpu_has_work(CPUARMState *env)
-{
-    return (env->interrupt_request &
-            (CPU_INTERRUPT_FIQ | CPU_INTERRUPT_HARD | CPU_INTERRUPT_EXITTB));
-}
-
 static inline int cpu_halted(CPUARMState *env) {
     if (!env->halted)
         return 0;
@@ -48,8 +42,3 @@ static inline int cpu_halted(CPUARMState *env) {
 #endif
 
 void raise_exception(int);
-static inline void cpu_pc_from_tb(CPUARMState *env, TranslationBlock *tb)
-{
-    env->regs[15] = tb->pc;
-}
-

@@ -34,27 +34,6 @@ GLOBAL_REGISTER_VARIABLE_DECL struct CPUX86State *env asm(AREG0);
 #include "qemu-common.h"
 #include "qemu/log.h"
 
-#define EAX (env->regs[R_EAX])
-#define ECX (env->regs[R_ECX])
-#define EDX (env->regs[R_EDX])
-#define EBX (env->regs[R_EBX])
-#define ESP (env->regs[R_ESP])
-#define EBP (env->regs[R_EBP])
-#define ESI (env->regs[R_ESI])
-#define EDI (env->regs[R_EDI])
-#define EIP (env->eip)
-#define DF  (env->df)
-
-#define CC_SRC (env->cc_src)
-#define CC_DST (env->cc_dst)
-#define CC_OP  (env->cc_op)
-
-/* float macros */
-#define FT0    (env->ft0)
-#define ST0    (env->fpregs[env->fpstt].d)
-#define ST(n)  (env->fpregs[(env->fpstt + (n)) & 7].d)
-#define ST1    ST(1)
-
 #include "cpu.h"
 #include "exec/exec-all.h"
 
