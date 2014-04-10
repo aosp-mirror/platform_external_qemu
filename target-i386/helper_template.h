@@ -52,7 +52,7 @@
 
 /* dynamic flags computation */
 
-static int glue(compute_all_add, SUFFIX)(void)
+static int glue(compute_all_add, SUFFIX)(CPUX86State *env)
 {
     int cf, pf, af, zf, sf, of;
     target_long src1, src2;
@@ -67,7 +67,7 @@ static int glue(compute_all_add, SUFFIX)(void)
     return cf | pf | af | zf | sf | of;
 }
 
-static int glue(compute_c_add, SUFFIX)(void)
+static int glue(compute_c_add, SUFFIX)(CPUX86State *env)
 {
     int cf;
     target_long src1;
@@ -76,7 +76,7 @@ static int glue(compute_c_add, SUFFIX)(void)
     return cf;
 }
 
-static int glue(compute_all_adc, SUFFIX)(void)
+static int glue(compute_all_adc, SUFFIX)(CPUX86State *env)
 {
     int cf, pf, af, zf, sf, of;
     target_long src1, src2;
@@ -91,7 +91,7 @@ static int glue(compute_all_adc, SUFFIX)(void)
     return cf | pf | af | zf | sf | of;
 }
 
-static int glue(compute_c_adc, SUFFIX)(void)
+static int glue(compute_c_adc, SUFFIX)(CPUX86State *env)
 {
     int cf;
     target_long src1;
@@ -100,7 +100,7 @@ static int glue(compute_c_adc, SUFFIX)(void)
     return cf;
 }
 
-static int glue(compute_all_sub, SUFFIX)(void)
+static int glue(compute_all_sub, SUFFIX)(CPUX86State *env)
 {
     int cf, pf, af, zf, sf, of;
     target_long src1, src2;
@@ -115,7 +115,7 @@ static int glue(compute_all_sub, SUFFIX)(void)
     return cf | pf | af | zf | sf | of;
 }
 
-static int glue(compute_c_sub, SUFFIX)(void)
+static int glue(compute_c_sub, SUFFIX)(CPUX86State *env)
 {
     int cf;
     target_long src1, src2;
@@ -125,7 +125,7 @@ static int glue(compute_c_sub, SUFFIX)(void)
     return cf;
 }
 
-static int glue(compute_all_sbb, SUFFIX)(void)
+static int glue(compute_all_sbb, SUFFIX)(CPUX86State *env)
 {
     int cf, pf, af, zf, sf, of;
     target_long src1, src2;
@@ -140,7 +140,7 @@ static int glue(compute_all_sbb, SUFFIX)(void)
     return cf | pf | af | zf | sf | of;
 }
 
-static int glue(compute_c_sbb, SUFFIX)(void)
+static int glue(compute_c_sbb, SUFFIX)(CPUX86State *env)
 {
     int cf;
     target_long src1, src2;
@@ -150,7 +150,7 @@ static int glue(compute_c_sbb, SUFFIX)(void)
     return cf;
 }
 
-static int glue(compute_all_logic, SUFFIX)(void)
+static int glue(compute_all_logic, SUFFIX)(CPUX86State *env)
 {
     int cf, pf, af, zf, sf, of;
     cf = 0;
@@ -162,12 +162,12 @@ static int glue(compute_all_logic, SUFFIX)(void)
     return cf | pf | af | zf | sf | of;
 }
 
-static int glue(compute_c_logic, SUFFIX)(void)
+static int glue(compute_c_logic, SUFFIX)(CPUX86State *env)
 {
     return 0;
 }
 
-static int glue(compute_all_inc, SUFFIX)(void)
+static int glue(compute_all_inc, SUFFIX)(CPUX86State *env)
 {
     int cf, pf, af, zf, sf, of;
     target_long src1, src2;
@@ -183,13 +183,13 @@ static int glue(compute_all_inc, SUFFIX)(void)
 }
 
 #if DATA_BITS == 32
-static int glue(compute_c_inc, SUFFIX)(void)
+static int glue(compute_c_inc, SUFFIX)(CPUX86State *env)
 {
     return CC_SRC;
 }
 #endif
 
-static int glue(compute_all_dec, SUFFIX)(void)
+static int glue(compute_all_dec, SUFFIX)(CPUX86State *env)
 {
     int cf, pf, af, zf, sf, of;
     target_long src1, src2;
@@ -204,7 +204,7 @@ static int glue(compute_all_dec, SUFFIX)(void)
     return cf | pf | af | zf | sf | of;
 }
 
-static int glue(compute_all_shl, SUFFIX)(void)
+static int glue(compute_all_shl, SUFFIX)(CPUX86State *env)
 {
     int cf, pf, af, zf, sf, of;
     cf = (CC_SRC >> (DATA_BITS - 1)) & CC_C;
@@ -217,19 +217,19 @@ static int glue(compute_all_shl, SUFFIX)(void)
     return cf | pf | af | zf | sf | of;
 }
 
-static int glue(compute_c_shl, SUFFIX)(void)
+static int glue(compute_c_shl, SUFFIX)(CPUX86State *env)
 {
     return (CC_SRC >> (DATA_BITS - 1)) & CC_C;
 }
 
 #if DATA_BITS == 32
-static int glue(compute_c_sar, SUFFIX)(void)
+static int glue(compute_c_sar, SUFFIX)(CPUX86State *env)
 {
     return CC_SRC & 1;
 }
 #endif
 
-static int glue(compute_all_sar, SUFFIX)(void)
+static int glue(compute_all_sar, SUFFIX)(CPUX86State *env)
 {
     int cf, pf, af, zf, sf, of;
     cf = CC_SRC & 1;
@@ -243,7 +243,7 @@ static int glue(compute_all_sar, SUFFIX)(void)
 }
 
 #if DATA_BITS == 32
-static int glue(compute_c_mul, SUFFIX)(void)
+static int glue(compute_c_mul, SUFFIX)(CPUX86State *env)
 {
     int cf;
     cf = (CC_SRC != 0);
@@ -253,7 +253,7 @@ static int glue(compute_c_mul, SUFFIX)(void)
 
 /* NOTE: we compute the flags like the P4. On olders CPUs, only OF and
    CF are modified and it is slower to do that. */
-static int glue(compute_all_mul, SUFFIX)(void)
+static int glue(compute_all_mul, SUFFIX)(CPUX86State *env)
 {
     int cf, pf, af, zf, sf, of;
     cf = (CC_SRC != 0);
@@ -267,7 +267,8 @@ static int glue(compute_all_mul, SUFFIX)(void)
 
 /* shifts */
 
-target_ulong glue(helper_rcl, SUFFIX)(target_ulong t0, target_ulong t1)
+target_ulong glue(helper_rcl, SUFFIX)(CPUX86State *env,
+                                      target_ulong t0, target_ulong t1)
 {
     int count, eflags;
     target_ulong src;
@@ -280,7 +281,7 @@ target_ulong glue(helper_rcl, SUFFIX)(target_ulong t0, target_ulong t1)
     count = rclb_table[count];
 #endif
     if (count) {
-        eflags = helper_cc_compute_all(CC_OP);
+        eflags = helper_cc_compute_all(env, CC_OP);
         t0 &= DATA_MASK;
         src = t0;
         res = (t0 << count) | ((target_ulong)(eflags & CC_C) << (count - 1));
@@ -296,7 +297,8 @@ target_ulong glue(helper_rcl, SUFFIX)(target_ulong t0, target_ulong t1)
     return t0;
 }
 
-target_ulong glue(helper_rcr, SUFFIX)(target_ulong t0, target_ulong t1)
+target_ulong glue(helper_rcr, SUFFIX)(CPUX86State *env,
+                                      target_ulong t0, target_ulong t1)
 {
     int count, eflags;
     target_ulong src;
@@ -309,7 +311,7 @@ target_ulong glue(helper_rcr, SUFFIX)(target_ulong t0, target_ulong t1)
     count = rclb_table[count];
 #endif
     if (count) {
-        eflags = helper_cc_compute_all(CC_OP);
+        eflags = helper_cc_compute_all(env, CC_OP);
         t0 &= DATA_MASK;
         src = t0;
         res = (t0 >> count) | ((target_ulong)(eflags & CC_C) << (DATA_BITS - count));
