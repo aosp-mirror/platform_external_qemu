@@ -249,8 +249,7 @@ endif
 # memory is within allocated block. This information also allows detecting
 # memory leaks and attempts to free/realloc invalid pointers.
 #
-common_LOCAL_CFLAGS += \
-    -I$(LOCAL_PATH)/elff
+common_LOCAL_CFLAGS += $(ELFF_CFLAGS)
 
 MCHK_SOURCES := \
     memcheck.c \

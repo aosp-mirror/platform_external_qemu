@@ -15,8 +15,8 @@
  * a section of an ELF file, mapped to memory.
  */
 
-#include "elf_defs.h"
-#include "elf_mapped_section.h"
+#include "elff/elf_defs.h"
+#include "elff/elf_mapped_section.h"
 
 ElfMappedSection::ElfMappedSection()
     : mapped_at_(NULL),

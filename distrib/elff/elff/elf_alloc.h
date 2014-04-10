@@ -19,7 +19,7 @@
 #define ELFF_ELF_ALLOC_H_
 
 #include <stdint.h>
-#include "elff-common.h"
+#include "elff/elff-common.h"
 
 class ElfFile;
 

@@ -18,8 +18,8 @@
 #ifndef ELFF_DWARF_CU_H_
 #define ELFF_DWARF_CU_H_
 
-#include "dwarf_defs.h"
-#include "dwarf_die.h"
+#include "elff/dwarf_defs.h"
+#include "elff/dwarf_die.h"
 
 /* Address information descriptor. */
 typedef struct Dwarf_AddressInfo {

@@ -18,8 +18,8 @@
 #ifndef ELFF_ELF_MAPPED_SECTION_H_
 #define ELFF_ELF_MAPPED_SECTION_H_
 
-#include "elf_defs.h"
-#include "android/utils/mapfile.h"
+#include "elff/elf_defs.h"
+#include "elff/elff_map_file.h"
 
 /* Encapsulates a section of an ELF file, mapped to memory. */
 class ElfMappedSection {

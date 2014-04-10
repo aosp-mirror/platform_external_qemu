@@ -15,10 +15,10 @@
  */
 
 #include "string.h"
-#include "elf_file.h"
-#include "elf_alloc.h"
-#include "dwarf_cu.h"
-#include "dwarf_utils.h"
+#include "elff/elf_file.h"
+#include "elff/elf_alloc.h"
+#include "elff/dwarf_cu.h"
+#include "elff/dwarf_utils.h"
 
 #include <fcntl.h>
 #ifndef O_BINARY

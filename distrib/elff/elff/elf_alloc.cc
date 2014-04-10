@@ -15,8 +15,8 @@
  * allocations for DWARF objects.
  */
 
-#include "elf_alloc.h"
-#include "elf_file.h"
+#include "elff/elf_alloc.h"
+#include "elff/elf_file.h"
 
 ElfAllocator::ElfAllocator()
     : current_chunk_(NULL) {

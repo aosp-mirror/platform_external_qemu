@@ -17,7 +17,7 @@
 #ifndef ELFF_DWARF_UTILS_
 #define ELFF_DWARF_UTILS_
 
-#include "dwarf_defs.h"
+#include "elff/dwarf_defs.h"
 
 /* Gets DWARF attribute name string (DW_AT_Xxx) for a given attribute ID.
  * Param:
