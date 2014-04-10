@@ -15,8 +15,8 @@
  * memory mappings in the guest system.
  */
 
-#include "memcheck_mmrange_map.h"
-#include "memcheck_logging.h"
+#include "android/qemu/memcheck/memcheck_mmrange_map.h"
+#include "android/qemu/memcheck/memcheck_logging.h"
 
 /* Memory range descriptor stored in the map. */
 typedef struct MMRangeMapEntry {

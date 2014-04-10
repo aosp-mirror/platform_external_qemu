@@ -14,8 +14,8 @@
  * Contains declarations of logging macros used in memchecker framework.
  */
 
-#ifndef QEMU_MEMCHECK_MEMCHECK_LOGGING_H
-#define QEMU_MEMCHECK_MEMCHECK_LOGGING_H
+#ifndef ANDROID_QEMU_MEMCHECK_MEMCHECK_LOGGING_H
+#define ANDROID_QEMU_MEMCHECK_MEMCHECK_LOGGING_H
 
 #include "qemu-common.h"
 #include "android/utils/debug.h"
@@ -85,4 +85,4 @@ extern uint32_t trace_flags;
 };  /* end of extern "C" */
 #endif
 
-#endif  // QEMU_MEMCHECK_MEMCHECK_LOGGING_H
+#endif  // ANDROID_QEMU_MEMCHECK_MEMCHECK_LOGGING_H

@@ -16,10 +16,10 @@
  */
 
 #include "elff/elff_api.h"
-#include "memcheck.h"
-#include "memcheck_proc_management.h"
-#include "memcheck_logging.h"
-#include "memcheck_util.h"
+#include "android/qemu/memcheck/memcheck.h"
+#include "android/qemu/memcheck/memcheck_proc_management.h"
+#include "android/qemu/memcheck/memcheck_logging.h"
+#include "android/qemu/memcheck/memcheck_util.h"
 
 /* Current thread id.
  * This value is updated with each call to memcheck_switch, saving here

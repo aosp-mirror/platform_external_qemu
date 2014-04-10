@@ -107,7 +107,7 @@ TCGContext tcg_ctx;
  * Memchecker code in this module copies TB PC <-> Guest PC map to the TB
  * descriptor after guest code has been translated in cpu_gen_init routine.
  */
-#include "memcheck/memcheck_api.h"
+#include "android/qemu/memcheck/memcheck_api.h"
 
 /* Array of (tb_pc, guest_pc) pairs, big enough for all translations. This
  * array is used to obtain guest PC address from a translated PC address.

@@ -15,8 +15,8 @@
  * other qemu components.
  */
 
-#ifndef QEMU_MEMCHECK_MEMCHECK_API_H
-#define QEMU_MEMCHECK_MEMCHECK_API_H
+#ifndef ANDROID_QEMU_MEMCHECK_MEMCHECK_API_H
+#define ANDROID_QEMU_MEMCHECK_MEMCHECK_API_H
 
 /* This file should compile iff qemu is built with memory checking
  * configuration turned on. */
@@ -104,4 +104,4 @@ void memcheck_on_call(target_ulong pc, target_ulong ret);
  */
 void memcheck_on_ret(target_ulong pc);
 
-#endif  // QEMU_MEMCHECK_MEMCHECK_API_H
+#endif  // ANDROID_QEMU_MEMCHECK_MEMCHECK_API_H

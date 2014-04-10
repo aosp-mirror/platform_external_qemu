@@ -48,7 +48,7 @@
 #include <qemu.h>
 #endif
 #ifdef CONFIG_MEMCHECK
-#include "memcheck/memcheck_api.h"
+#include "android/qemu/memcheck/memcheck_api.h"
 #endif  // CONFIG_MEMCHECK
 
 //#define DEBUG_SUBPAGE

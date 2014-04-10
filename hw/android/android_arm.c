@@ -23,7 +23,7 @@
 #include "sysemu/blockdev.h"
 #include "hw/android/goldfish/pipe.h"
 #ifdef CONFIG_MEMCHECK
-#include "memcheck/memcheck_api.h"
+#include "android/qemu/memcheck/memcheck_api.h"
 #endif  // CONFIG_MEMCHECK
 
 #include "android/utils/debug.h"

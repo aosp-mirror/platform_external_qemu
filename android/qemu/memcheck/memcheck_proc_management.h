@@ -15,13 +15,13 @@
  * management in memchecker framework.
  */
 
-#ifndef QEMU_MEMCHECK_MEMCHECK_PROC_MANAGEMENT_H
-#define QEMU_MEMCHECK_MEMCHECK_PROC_MANAGEMENT_H
+#ifndef ANDROID_QEMU_MEMCHECK_MEMCHECK_PROC_MANAGEMENT_H
+#define ANDROID_QEMU_MEMCHECK_MEMCHECK_PROC_MANAGEMENT_H
 
 #include "qemu/queue.h"
-#include "memcheck_common.h"
-#include "memcheck_malloc_map.h"
-#include "memcheck_mmrange_map.h"
+#include "android/qemu/memcheck/memcheck_common.h"
+#include "android/qemu/memcheck/memcheck_malloc_map.h"
+#include "android/qemu/memcheck/memcheck_mmrange_map.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -318,4 +318,4 @@ procdesc_get_module_path(const ProcDesc* proc, target_ulong addr)
 };  /* end of extern "C" */
 #endif
 
-#endif  // QEMU_MEMCHECK_MEMCHECK_PROC_MANAGEMENT_H
+#endif  // ANDROID_QEMU_MEMCHECK_MEMCHECK_PROC_MANAGEMENT_H

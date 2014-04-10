@@ -64,7 +64,7 @@
  * that).
  */
 #define CONFIG_MEMCHECK_MMU
-#include "memcheck/memcheck_api.h"
+#include "android/qemu/memcheck/memcheck_api.h"
 #endif  // CONFIG_MEMCHECK && !OUTSIDE_JIT && !SOFTMMU_CODE_ACCESS
 
 static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(target_ulong addr,

@@ -22,7 +22,7 @@
 #include "audio/audio.h"
 #include "sysemu/blockdev.h"
 #ifdef CONFIG_MEMCHECK
-#include "memcheck/memcheck_api.h"
+#include "android/qemu/memcheck/memcheck_api.h"
 #endif  // CONFIG_MEMCHECK
 
 #include "android/utils/debug.h"

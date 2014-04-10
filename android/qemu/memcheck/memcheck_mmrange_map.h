@@ -19,11 +19,11 @@
  * any part.
  */
 
-#ifndef QEMU_MEMCHECK_MEMCHECK_MMRANGE_MAP_H
-#define QEMU_MEMCHECK_MEMCHECK_MMRANGE_MAP_H
+#ifndef ANDROID_QEMU_MEMCHECK_MEMCHECK_MMRANGE_MAP_H
+#define ANDROID_QEMU_MEMCHECK_MEMCHECK_MMRANGE_MAP_H
 
 #include "sys-tree.h"
-#include "memcheck_common.h"
+#include "android/qemu/memcheck/memcheck_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -118,4 +118,4 @@ int mmrangemap_empty(MMRangeMap* map);
 };  /* end of extern "C" */
 #endif
 
-#endif  // QEMU_MEMCHECK_MEMCHECK_MMRANGE_MAP_H
+#endif  // ANDROID_QEMU_MEMCHECK_MEMCHECK_MMRANGE_MAP_H

@@ -77,7 +77,7 @@
 #include "android/tcpdump.h"
 
 #ifdef CONFIG_MEMCHECK
-#include "memcheck/memcheck.h"
+#include "android/qemu/memcheck/memcheck.h"
 #endif  // CONFIG_MEMCHECK
 
 #include <unistd.h>
