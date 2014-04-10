@@ -476,6 +476,8 @@ struct CPUMIPSState {
     struct QEMUTimer *timer; /* Internal timer */
 };
 
+#include "cpu-qom.h"
+
 int no_mmu_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
                         target_ulong address, int rw, int access_type);
 int fixed_mmu_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
@@ -667,19 +669,19 @@ static inline void cpu_set_tls(CPUMIPSState *env, target_ulong newtls)
     env->tls_value = newtls;
 }
 
-static inline bool cpu_has_work(CPUMIPSState *env)
+static inline bool cpu_has_work(CPUState *cpu)
 {
     int has_work = 0;
 
     /* It is implementation dependent if non-enabled interrupts
        wake-up the CPU, however most of the implementations only
        check for interrupts that can be taken. */
-    if ((env->interrupt_request & CPU_INTERRUPT_HARD) &&
-        cpu_mips_hw_interrupts_pending(env)) {
+    if ((cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
+        cpu_mips_hw_interrupts_pending(cpu->env_ptr)) {
         has_work = 1;
     }
 
-    if (env->interrupt_request & CPU_INTERRUPT_TIMER) {
+    if (cpu->interrupt_request & CPU_INTERRUPT_TIMER) {
         has_work = 1;
     }
 

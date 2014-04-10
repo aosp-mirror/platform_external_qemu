@@ -467,7 +467,7 @@ void cpu_reset(CPUX86State *env)
     int i;
 
     if (qemu_loglevel_mask(CPU_LOG_RESET)) {
-        qemu_log("CPU Reset (CPU %d)\n", env->cpu_index);
+        qemu_log("CPU Reset (CPU %d)\n", ENV_GET_CPU(env)->cpu_index);
         log_cpu_state(env, X86_DUMP_FPU | X86_DUMP_CCOP);
     }
 
@@ -704,7 +704,7 @@ void cpu_dump_state(CPUX86State *env, FILE *f,
                     (env->hflags >> HF_INHIBIT_IRQ_SHIFT) & 1,
                     (int)(env->a20_mask >> 20) & 1,
                     (env->hflags >> HF_SMM_SHIFT) & 1,
-                    env->halted);
+                    ENV_GET_CPU(env)->halted);
     } else
 #endif
     {
@@ -731,7 +731,7 @@ void cpu_dump_state(CPUX86State *env, FILE *f,
                     (env->hflags >> HF_INHIBIT_IRQ_SHIFT) & 1,
                     (int)(env->a20_mask >> 20) & 1,
                     (env->hflags >> HF_SMM_SHIFT) & 1,
-                    env->halted);
+                    ENV_GET_CPU(env)->halted);
     }
 
     for(i = 0; i < 6; i++) {
@@ -1744,12 +1744,16 @@ void cpu_x86_cpuid(CPUX86State *env, uint32_t index, uint32_t count,
 
 CPUX86State *cpu_x86_init(const char *cpu_model)
 {
+    X86CPU *x86_cpu;
     CPUX86State *env;
     static int inited;
 
-    env = g_malloc0(sizeof(CPUX86State));
+    x86_cpu = g_malloc0(sizeof(X86CPU));
+    env = &x86_cpu->env;
+    ENV_GET_CPU(env)->env_ptr = env;
+
     cpu_exec_init(env);
-    env->cpu_model_str = cpu_model;
+    ENV_GET_CPU(env)->cpu_model_str = cpu_model;
 
     /* init various static tables */
     if (!inited) {
@@ -1789,9 +1793,10 @@ CPUX86State *cpu_x86_init(const char *cpu_model)
 #if !defined(CONFIG_USER_ONLY)
 void do_cpu_init(CPUX86State *env)
 {
-    int sipi = env->interrupt_request & CPU_INTERRUPT_SIPI;
+    CPUState *cpu = ENV_GET_CPU(env);
+    int sipi = cpu->interrupt_request & CPU_INTERRUPT_SIPI;
     cpu_reset(env);
-    env->interrupt_request = sipi;
+    cpu->interrupt_request = sipi;
     apic_init_reset(env);
 }
 

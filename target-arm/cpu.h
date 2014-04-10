@@ -270,6 +270,8 @@ typedef struct CPUARMState {
     const struct arm_boot_info *boot_info;
 } CPUARMState;
 
+#include "cpu-qom.h"
+
 CPUARMState *cpu_arm_init(const char *cpu_model);
 void arm_translate_init(void);
 int cpu_arm_exec(CPUARMState *s);
@@ -900,9 +902,9 @@ static inline void cpu_get_tb_cpu_state(CPUARMState *env, target_ulong *pc,
     *cs_base = 0;
 }
 
-static inline bool cpu_has_work(CPUARMState *env)
+static inline bool cpu_has_work(CPUState *cpu)
 {
-    return (env->interrupt_request &
+    return (cpu->interrupt_request &
             (CPU_INTERRUPT_FIQ | CPU_INTERRUPT_HARD | CPU_INTERRUPT_EXITTB));
 }
 

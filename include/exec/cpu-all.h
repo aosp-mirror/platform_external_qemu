@@ -374,20 +374,6 @@ void cpu_dump_statistics(CPUArchState *env, FILE *f, fprintf_function cpu_fprint
 void QEMU_NORETURN cpu_abort(CPUArchState *env, const char *fmt, ...)
     GCC_FMT_ATTR(2, 3);
 
-typedef CPUOldState CPUState;
-Q_TAILQ_HEAD(CPUTailQ, CPUState,);
-extern struct CPUTailQ cpus;
-#define CPU_NEXT(cpu) QTAILQ_NEXT(cpu, node)
-#define CPU_FOREACH(cpu) QTAILQ_FOREACH(cpu, &cpus, node)
-#define CPU_FOREACH_SAFE(cpu, next_cpu) \
-    QTAILQ_FOREACH_SAFE(cpu, &cpus, node, next_cpu)
-#define first_cpu QTAILQ_FIRST(&cpus)
-
-DECLARE_TLS(CPUState *, current_cpu);
-#define current_cpu tls_var(current_cpu)
-// TODO(digit): Remove this.
-#define cpu_single_env current_cpu
-
 /* Flags for use in ENV->INTERRUPT_PENDING.
 
    The numbers assigned here are non-sequential in order to preserve

@@ -1,6 +1,7 @@
 #ifndef QDEV_CORE_H
 #define QDEV_CORE_H
 
+#include "hw/irq.h"
 #include "qemu/queue.h"
 
 typedef struct DeviceType DeviceType;

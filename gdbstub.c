@@ -1384,11 +1384,12 @@ static const char *get_feature_xml(const char *p, const char **newp)
 static int gdb_read_register(CPUOldState *env, uint8_t *mem_buf, int reg)
 {
     GDBRegisterState *r;
+    CPUState *cpu = ENV_GET_CPU(env);
 
     if (reg < NUM_CORE_REGS)
         return cpu_gdb_read_register(env, mem_buf, reg);
 
-    for (r = env->gdb_regs; r; r = r->next) {
+    for (r = cpu->gdb_regs; r; r = r->next) {
         if (r->base_reg <= reg && reg < r->base_reg + r->num_regs) {
             return r->get_reg(env, mem_buf, reg - r->base_reg);
         }
@@ -1399,11 +1400,12 @@ static int gdb_read_register(CPUOldState *env, uint8_t *mem_buf, int reg)
 static int gdb_write_register(CPUOldState *env, uint8_t *mem_buf, int reg)
 {
     GDBRegisterState *r;
+    CPUState *cpu = ENV_GET_CPU(env);
 
     if (reg < NUM_CORE_REGS)
         return cpu_gdb_write_register(env, mem_buf, reg);
 
-    for (r = env->gdb_regs; r; r = r->next) {
+    for (r = cpu->gdb_regs; r; r = r->next) {
         if (r->base_reg <= reg && reg < r->base_reg + r->num_regs) {
             return r->set_reg(env, mem_buf, reg - r->base_reg);
         }
@@ -1424,6 +1426,7 @@ void gdb_register_coprocessor(CPUOldState * env,
     GDBRegisterState *s;
     GDBRegisterState **p;
     static int last_reg = NUM_CORE_REGS;
+    CPUState *cpu = ENV_GET_CPU(env);
 
     s = (GDBRegisterState *)g_malloc0(sizeof(GDBRegisterState));
     s->base_reg = last_reg;
@@ -1431,7 +1434,7 @@ void gdb_register_coprocessor(CPUOldState * env,
     s->get_reg = get_reg;
     s->set_reg = set_reg;
     s->xml = xml;
-    p = &env->gdb_regs;
+    p = &cpu->gdb_regs;
     while (*p) {
         /* Check for duplicates.  */
         if (strcmp((*p)->xml, xml) == 0)
@@ -1461,7 +1464,7 @@ static const int xlat_gdb_type[] = {
 
 static int gdb_breakpoint_insert(target_ulong addr, target_ulong len, int type)
 {
-    CPUOldState *env;
+    CPUState *cpu;
     int err = 0;
 
     if (kvm_enabled())
@@ -1470,8 +1473,8 @@ static int gdb_breakpoint_insert(target_ulong addr, target_ulong len, int type)
     switch (type) {
     case GDB_BREAKPOINT_SW:
     case GDB_BREAKPOINT_HW:
-        CPU_FOREACH(env) {
-            err = cpu_breakpoint_insert(env, addr, BP_GDB, NULL);
+        CPU_FOREACH(cpu) {
+            err = cpu_breakpoint_insert(cpu->env_ptr, addr, BP_GDB, NULL);
             if (err)
                 break;
         }
@@ -1480,8 +1483,8 @@ static int gdb_breakpoint_insert(target_ulong addr, target_ulong len, int type)
     case GDB_WATCHPOINT_WRITE:
     case GDB_WATCHPOINT_READ:
     case GDB_WATCHPOINT_ACCESS:
-        CPU_FOREACH(env) {
-            err = cpu_watchpoint_insert(env, addr, len, xlat_gdb_type[type],
+        CPU_FOREACH(cpu) {
+            err = cpu_watchpoint_insert(cpu->env_ptr, addr, len, xlat_gdb_type[type],
                                         NULL);
             if (err)
                 break;
@@ -1495,7 +1498,7 @@ static int gdb_breakpoint_insert(target_ulong addr, target_ulong len, int type)
 
 static int gdb_breakpoint_remove(target_ulong addr, target_ulong len, int type)
 {
-    CPUOldState *env;
+    CPUState *cpu;
     int err = 0;
 
     if (kvm_enabled())
@@ -1504,8 +1507,8 @@ static int gdb_breakpoint_remove(target_ulong addr, target_ulong len, int type)
     switch (type) {
     case GDB_BREAKPOINT_SW:
     case GDB_BREAKPOINT_HW:
-        CPU_FOREACH(env) {
-            err = cpu_breakpoint_remove(env, addr, BP_GDB);
+        CPU_FOREACH(cpu) {
+            err = cpu_breakpoint_remove(cpu->env_ptr, addr, BP_GDB);
             if (err)
                 break;
         }
@@ -1514,8 +1517,8 @@ static int gdb_breakpoint_remove(target_ulong addr, target_ulong len, int type)
     case GDB_WATCHPOINT_WRITE:
     case GDB_WATCHPOINT_READ:
     case GDB_WATCHPOINT_ACCESS:
-        CPU_FOREACH(env) {
-            err = cpu_watchpoint_remove(env, addr, len, xlat_gdb_type[type]);
+        CPU_FOREACH(cpu) {
+            err = cpu_watchpoint_remove(cpu->env_ptr, addr, len, xlat_gdb_type[type]);
             if (err)
                 break;
         }
@@ -1528,17 +1531,17 @@ static int gdb_breakpoint_remove(target_ulong addr, target_ulong len, int type)
 
 static void gdb_breakpoint_remove_all(void)
 {
-    CPUOldState *env;
+    CPUState *cpu;
 
     if (kvm_enabled()) {
         kvm_remove_all_breakpoints(gdbserver_state->c_cpu);
         return;
     }
 
-    CPU_FOREACH(env) {
-        cpu_breakpoint_remove_all(env, BP_GDB);
+    CPU_FOREACH(cpu) {
+        cpu_breakpoint_remove_all(cpu->env_ptr, BP_GDB);
 #ifndef CONFIG_USER_ONLY
-        cpu_watchpoint_remove_all(env, BP_GDB);
+        cpu_watchpoint_remove_all(cpu->env_ptr, BP_GDB);
 #endif
     }
 }
@@ -1571,19 +1574,19 @@ static void gdb_set_cpu_pc(GDBState *s, target_ulong pc)
 static inline int gdb_id(CPUOldState *env)
 {
 #if defined(CONFIG_USER_ONLY) && defined(USE_NPTL)
-    return env->host_tid;
+    return ENV_GET_CPU(env)->host_tid;
 #else
-    return env->cpu_index + 1;
+    return ENV_GET_CPU(env)->cpu_index + 1;
 #endif
 }
 
 static CPUOldState *find_cpu(uint32_t thread_id)
 {
-    CPUOldState *env;
+    CPUState *cpu;
 
-    CPU_FOREACH(env) {
-        if (gdb_id(env) == thread_id) {
-            return env;
+    CPU_FOREACH(cpu) {
+        if (gdb_id(cpu->env_ptr) == thread_id) {
+            return cpu->env_ptr;
         }
     }
 
@@ -1834,14 +1837,14 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
             put_packet(s, "QC1");
             break;
         } else if (strcmp(p,"fThreadInfo") == 0) {
-            s->query_cpu = QTAILQ_FIRST(&cpus);
+            s->query_cpu = QTAILQ_FIRST(&cpus)->env_ptr;
             goto report_cpuinfo;
         } else if (strcmp(p,"sThreadInfo") == 0) {
         report_cpuinfo:
             if (s->query_cpu) {
                 snprintf(buf, sizeof(buf), "m%x", gdb_id(s->query_cpu));
                 put_packet(s, buf);
-                s->query_cpu = QTAILQ_NEXT(s->query_cpu, node);
+                s->query_cpu = QTAILQ_NEXT(ENV_GET_CPU(s->query_cpu), node)->env_ptr;
             } else
                 put_packet(s, "l");
             break;
@@ -1851,8 +1854,8 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
             if (env != NULL) {
                 cpu_synchronize_state(env, 0);
                 len = snprintf((char *)mem_buf, sizeof(mem_buf),
-                               "CPU#%d [%s]", env->cpu_index,
-                               env->halted ? "halted " : "running");
+                               "CPU#%d [%s]", ENV_GET_CPU(env)->cpu_index,
+                               ENV_GET_CPU(env)->halted ? "halted " : "running");
                 memtohex(buf, mem_buf, len);
                 put_packet(s, buf);
             }
@@ -2434,8 +2437,8 @@ int gdbserver_start(const char *device)
         mon_chr = s->mon_chr;
         memset(s, 0, sizeof(GDBState));
     }
-    s->c_cpu = QTAILQ_FIRST(&cpus);
-    s->g_cpu = QTAILQ_FIRST(&cpus);
+    s->c_cpu = QTAILQ_FIRST(&cpus)->env_ptr;
+    s->g_cpu = s->c_cpu;
     s->chr = chr;
     s->state = chr ? RS_IDLE : RS_INACTIVE;
     s->mon_chr = mon_chr;

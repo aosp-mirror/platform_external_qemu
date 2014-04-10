@@ -36,25 +36,25 @@
 
 #include "sysemu/cpus.h"
 
-static CPUOldState *cur_cpu;
-static CPUOldState *next_cpu;
+static CPUState *cur_cpu;
+static CPUState *next_cpu;
 
 /***********************************************************/
 void hw_error(const char *fmt, ...)
 {
     va_list ap;
-    CPUState *env;
+    CPUState *cpu;
 
     va_start(ap, fmt);
     fprintf(stderr, "qemu: hardware error: ");
     vfprintf(stderr, fmt, ap);
     fprintf(stderr, "\n");
-    CPU_FOREACH(env) {
-        fprintf(stderr, "CPU #%d:\n", env->cpu_index);
+    CPU_FOREACH(cpu) {
+        fprintf(stderr, "CPU #%d:\n", cpu->cpu_index);
 #ifdef TARGET_I386
-        cpu_dump_state(env, stderr, fprintf, X86_DUMP_FPU);
+        cpu_dump_state(cpu->env_ptr, stderr, fprintf, X86_DUMP_FPU);
 #else
-        cpu_dump_state(env, stderr, fprintf, 0);
+        cpu_dump_state(cpu->env_ptr, stderr, fprintf, 0);
 #endif
     }
     va_end(ap);
@@ -71,27 +71,28 @@ static void do_vm_stop(int reason)
     }
 }
 
-static int cpu_can_run(CPUOldState *env)
+static int cpu_can_run(CPUArchState *env)
 {
-    if (env->stop)
+    CPUState *cpu = ENV_GET_CPU(env);
+    if (cpu->stop)
         return 0;
-    if (env->stopped)
+    if (cpu->stopped)
         return 0;
     return 1;
 }
 
 int tcg_has_work(void)
 {
-    CPUOldState *env;
+    CPUState *cpu;
 
-    CPU_FOREACH(env) {
-        if (env->stop)
+    CPU_FOREACH(cpu) {
+        if (cpu->stop)
             return 1;
-        if (env->stopped)
+        if (cpu->stopped)
             return 0;
-        if (!env->halted)
+        if (!cpu->halted)
             return 1;
-        if (cpu_has_work(env))
+        if (cpu_has_work(cpu))
             return 1;
         return 0;
     }
@@ -136,10 +137,10 @@ extern HANDLE qemu_event_handle;
 
 void qemu_notify_event(void)
 {
-    CPUOldState *env = cpu_single_env;
+    CPUState *cpu = current_cpu;
 
-    if (env) {
-        cpu_exit(env);
+    if (cpu) {
+        cpu_exit(cpu->env_ptr);
     /*
      * This is mainly for the Windows host, where the timer may be in
      * a different thread with vcpu. Thus the timer function needs to
@@ -223,8 +224,9 @@ void tcg_cpu_exec(void)
 
     if (next_cpu == NULL)
         next_cpu = QTAILQ_FIRST(&cpus);
-    for (; next_cpu != NULL; next_cpu = QTAILQ_NEXT(next_cpu, node)) {
-        CPUOldState *env = cur_cpu = next_cpu;
+    for (; next_cpu != NULL; next_cpu = QTAILQ_NEXT(next_cpu, node)) {\
+        cur_cpu = next_cpu;
+        CPUOldState *env = cur_cpu->env_ptr;
 
         if (!vm_running)
             break;

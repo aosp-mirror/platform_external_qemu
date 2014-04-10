@@ -2309,7 +2309,7 @@ int main(int argc, char **argv, char **envp)
     const char *incoming = NULL;
     const char* log_mask = NULL;
     const char* log_file = NULL;
-    CPUOldState *env;
+    CPUState *cpu;
     int show_vnc_port = 0;
     IniFile*  hw_ini = NULL;
     STRALLOC_DEFINE(kernel_params);
@@ -4080,10 +4080,10 @@ int main(int argc, char **argv, char **envp)
         stralloc_reset(kernel_config);
     }
 
-    CPU_FOREACH(env) {
+    CPU_FOREACH(cpu) {
         for (i = 0; i < nb_numa_nodes; i++) {
-            if (node_cpumask[i] & (1 << env->cpu_index)) {
-                env->numa_node = i;
+            if (node_cpumask[i] & (1 << cpu->cpu_index)) {
+                cpu->numa_node = i;
             }
         }
     }

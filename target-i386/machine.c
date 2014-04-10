@@ -255,7 +255,7 @@ int cpu_load(QEMUFile *f, void *opaque, int version_id)
         qemu_get_be64s(f, &env->pat);
         qemu_get_be32s(f, &env->hflags2);
         if (version_id < 6)
-            qemu_get_be32s(f, &env->halted);
+            qemu_get_be32s(f, &ENV_GET_CPU(env)->halted);
 
         qemu_get_be64s(f, &env->vm_hsave);
         qemu_get_be64s(f, &env->vm_vmcb);

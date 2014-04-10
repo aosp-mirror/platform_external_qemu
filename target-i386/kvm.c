@@ -73,13 +73,14 @@ uint32_t kvm_arch_get_supported_cpuid(CPUX86State *env, uint32_t function, int r
     int i, max;
     uint32_t ret = 0;
     uint32_t cpuid_1_edx;
+    CPUState *cpu = ENV_GET_CPU(env);
 
-    if (!kvm_check_extension(env->kvm_state, KVM_CAP_EXT_CPUID)) {
+    if (!kvm_check_extension(cpu->kvm_state, KVM_CAP_EXT_CPUID)) {
         return -1U;
     }
 
     max = 1;
-    while ((cpuid = try_get_cpuid(env->kvm_state, max)) == NULL) {
+    while ((cpuid = try_get_cpuid(cpu->kvm_state, max)) == NULL) {
         max *= 2;
     }
 
@@ -209,6 +210,7 @@ static int kvm_has_msr_star(CPUX86State *env)
 {
     static int has_msr_star;
     int ret;
+    CPUState *cpu = ENV_GET_CPU(env);
 
     /* first time */
     if (has_msr_star == 0) {
@@ -219,7 +221,7 @@ static int kvm_has_msr_star(CPUX86State *env)
         /* Obtain MSR list from KVM.  These are the MSRs that we must
          * save/restore */
         msr_list.nmsrs = 0;
-        ret = kvm_ioctl(env->kvm_state, KVM_GET_MSR_INDEX_LIST, &msr_list);
+        ret = kvm_ioctl(cpu->kvm_state, KVM_GET_MSR_INDEX_LIST, &msr_list);
         if (ret < 0)
             return 0;
 
@@ -227,7 +229,7 @@ static int kvm_has_msr_star(CPUX86State *env)
                                     msr_list.nmsrs * sizeof(msr_list.indices[0]));
 
         kvm_msr_list->nmsrs = msr_list.nmsrs;
-        ret = kvm_ioctl(env->kvm_state, KVM_GET_MSR_INDEX_LIST, kvm_msr_list);
+        ret = kvm_ioctl(cpu->kvm_state, KVM_GET_MSR_INDEX_LIST, kvm_msr_list);
         if (ret >= 0) {
             int i;
 
@@ -698,7 +700,7 @@ int kvm_arch_vcpu_run(CPUX86State *env)
 {
 #ifdef CONFIG_KVM_GS_RESTORE
     if (gs_need_restore  != KVM_GS_RESTORE_NO)
-        return no_gs_ioctl(env->kvm_fd, KVM_RUN, 0);
+        return no_gs_ioctl(ENV_GET_CPU(env)->kvm_fd, KVM_RUN, 0);
     else
 #endif
         return kvm_vcpu_ioctl(env, KVM_RUN, 0);
@@ -706,13 +708,15 @@ int kvm_arch_vcpu_run(CPUX86State *env)
 
 int kvm_arch_pre_run(CPUX86State *env, struct kvm_run *run)
 {
+    CPUState *cpu = ENV_GET_CPU(env);
+
     /* Try to inject an interrupt if the guest can accept it */
     if (run->ready_for_interrupt_injection &&
-        (env->interrupt_request & CPU_INTERRUPT_HARD) &&
+        (cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
         (env->eflags & IF_MASK)) {
         int irq;
 
-        env->interrupt_request &= ~CPU_INTERRUPT_HARD;
+        cpu->interrupt_request &= ~CPU_INTERRUPT_HARD;
         irq = cpu_get_pic_interrupt(env);
         if (irq >= 0) {
             struct kvm_interrupt intr;
@@ -727,7 +731,7 @@ int kvm_arch_pre_run(CPUX86State *env, struct kvm_run *run)
      * interrupt, request an interrupt window exit.  This will
      * cause a return to userspace as soon as the guest is ready to
      * receive interrupts. */
-    if ((env->interrupt_request & CPU_INTERRUPT_HARD))
+    if ((cpu->interrupt_request & CPU_INTERRUPT_HARD))
         run->request_interrupt_window = 1;
     else
         run->request_interrupt_window = 0;
@@ -760,10 +764,12 @@ int kvm_arch_post_run(CPUX86State *env, struct kvm_run *run)
 
 static int kvm_handle_halt(CPUX86State *env)
 {
-    if (!((env->interrupt_request & CPU_INTERRUPT_HARD) &&
+    CPUState *cpu = ENV_GET_CPU(env);
+
+    if (!((cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
           (env->eflags & IF_MASK)) &&
-        !(env->interrupt_request & CPU_INTERRUPT_NMI)) {
-        env->halted = 1;
+        !(cpu->interrupt_request & CPU_INTERRUPT_NMI)) {
+        cpu->halted = 1;
         env->exception_index = EXCP_HLT;
         return 0;
     }

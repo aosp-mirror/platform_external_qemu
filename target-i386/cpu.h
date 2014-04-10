@@ -859,6 +859,8 @@ typedef struct CPUX86State {
     uint64 *mce_banks;
 } CPUX86State;
 
+#include "cpu-qom.h"
+
 CPUX86State *cpu_x86_init(const char *cpu_model);
 int cpu_x86_exec(CPUX86State *s);
 void cpu_x86_close(CPUX86State *s);
@@ -1089,15 +1091,16 @@ static inline void cpu_clone_regs(CPUX86State *env, target_ulong newsp)
 #include "exec/cpu-all.h"
 #include "svm.h"
 
-static inline bool cpu_has_work(CPUX86State *env)
+static inline bool cpu_has_work(CPUState *cpu)
 {
     int work;
+    CPUX86State *env = cpu->env_ptr;
 
-    work = (env->interrupt_request & CPU_INTERRUPT_HARD) &&
+    work = (cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
            (env->eflags & IF_MASK);
-    work |= env->interrupt_request & CPU_INTERRUPT_NMI;
-    work |= env->interrupt_request & CPU_INTERRUPT_INIT;
-    work |= env->interrupt_request & CPU_INTERRUPT_SIPI;
+    work |= cpu->interrupt_request & CPU_INTERRUPT_NMI;
+    work |= cpu->interrupt_request & CPU_INTERRUPT_INIT;
+    work |= cpu->interrupt_request & CPU_INTERRUPT_SIPI;
 
     return work;
 }

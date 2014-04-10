@@ -8582,15 +8582,21 @@ static void mips_tcg_init(void)
 
 CPUMIPSState *cpu_mips_init (const char *cpu_model)
 {
+    MIPSCPU *mips_cpu;
     CPUMIPSState *env;
+    CPUState *cpu;
     const mips_def_t *def;
 
     def = cpu_mips_find_by_name(cpu_model);
     if (!def)
         return NULL;
-    env = g_malloc0(sizeof(CPUMIPSState));
+    mips_cpu = g_malloc0(sizeof(MIPSCPU));
+    env = &mips_cpu->env;
+    ENV_GET_CPU(env)->env_ptr = env;
+
+    cpu = ENV_GET_CPU(env);
     env->cpu_model = def;
-    env->cpu_model_str = cpu_model;
+    cpu->cpu_model_str = cpu_model;
 
     cpu_exec_init(env);
 #ifndef CONFIG_USER_ONLY
@@ -8606,7 +8612,7 @@ CPUMIPSState *cpu_mips_init (const char *cpu_model)
 void cpu_reset (CPUMIPSState *env)
 {
     if (qemu_loglevel_mask(CPU_LOG_RESET)) {
-        qemu_log("CPU Reset (CPU %d)\n", env->cpu_index);
+        qemu_log("CPU Reset (CPU %d)\n", ENV_GET_CPU(env)->cpu_index);
         log_cpu_state(env, 0);
     }
 

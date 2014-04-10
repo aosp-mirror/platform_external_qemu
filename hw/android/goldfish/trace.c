@@ -253,7 +253,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
 
     case TRACE_DEV_REG_STOP_EMU:        // stop the VM execution
         cpu_single_env->exception_index = EXCP_HLT;
-        cpu_single_env->halted = 1;
+        current_cpu->halted = 1;
         qemu_system_shutdown_request();
         cpu_loop_exit(cpu_single_env);
         break;

@@ -11,9 +11,9 @@ void cpu_mips_update_irq(CPUOldState *env)
         !(env->CP0_Status & (1 << CP0St_ERL)) &&
         !(env->hflags & MIPS_HFLAG_DM)) {
         if ((env->CP0_Status & env->CP0_Cause & CP0Ca_IP_mask) &&
-            !(env->interrupt_request & CPU_INTERRUPT_HARD)) {
+            !(ENV_GET_CPU(env)->interrupt_request & CPU_INTERRUPT_HARD)) {
             cpu_interrupt(env, CPU_INTERRUPT_HARD);
-	}
+        }
     } else
         cpu_reset_interrupt(env, CPU_INTERRUPT_HARD);
 }

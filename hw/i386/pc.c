@@ -119,7 +119,7 @@ uint64_t cpu_get_tsc(CPUX86State *env)
 /* SMM support */
 void cpu_smm_update(CPUOldState *env)
 {
-    if (i440fx_state && env == first_cpu)
+    if (i440fx_state && ENV_GET_CPU(env) == first_cpu)
         i440fx_set_smm(i440fx_state, (env->hflags >> HF_SMM_SHIFT) & 1);
 }
 
@@ -146,13 +146,15 @@ int cpu_get_pic_interrupt(CPUOldState *env)
 
 static void pic_irq_request(void *opaque, int irq, int level)
 {
-    CPUOldState *env = first_cpu;
+    CPUState *cpu = first_cpu;
+    CPUArchState *env = cpu->env_ptr;
 
     if (env->apic_state) {
-        while (env) {
+        while (cpu) {
             if (apic_accept_pic_intr(env))
                 apic_deliver_pic_intr(env, level);
-            env = QTAILQ_NEXT(env, node);
+            cpu = QTAILQ_NEXT(cpu, node);
+            env = cpu ? cpu->env_ptr : NULL;
         }
     } else {
         if (level)
@@ -385,12 +387,13 @@ static void cmos_init(ram_addr_t ram_size, ram_addr_t above_4g_mem_size,
 void ioport_set_a20(int enable)
 {
     /* XXX: send to all CPUs ? */
-    cpu_x86_set_a20(first_cpu, enable);
+    cpu_x86_set_a20(first_cpu->env_ptr, enable);
 }
 
 int ioport_get_a20(void)
 {
-    return ((first_cpu->a20_mask >> 20) & 1);
+    CPUArchState *env = first_cpu->env_ptr;
+    return (env->a20_mask >> 20) & 1;
 }
 
 static void ioport92_write(void *opaque, uint32_t addr, uint32_t val)
@@ -915,7 +918,7 @@ static void pc_init1(ram_addr_t ram_size,
             exit(1);
         }
         if ((env->cpuid_features & CPUID_APIC) || smp_cpus > 1) {
-            env->cpuid_apic_id = env->cpu_index;
+            env->cpuid_apic_id = ENV_GET_CPU(env)->cpu_index;
             apic_init(env);
         }
         qemu_register_reset(main_cpu_reset, 0, env);

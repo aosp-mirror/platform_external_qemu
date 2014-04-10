@@ -298,7 +298,7 @@ void cpu_reset(CPUARMState *env)
     uint32_t id;
 
     if (qemu_loglevel_mask(CPU_LOG_RESET)) {
-        qemu_log("CPU Reset (CPU %d)\n", env->cpu_index);
+        qemu_log("CPU Reset (CPU %d)\n", ENV_GET_CPU(env)->cpu_index);
         log_cpu_state(env, 0);
     }
 
@@ -413,6 +413,7 @@ static int vfp_gdb_set_reg(CPUARMState *env, uint8_t *buf, int reg)
 
 CPUARMState *cpu_arm_init(const char *cpu_model)
 {
+    ARMCPU *arm_cpu;
     CPUARMState *env;
     uint32_t id;
     static int inited = 0;
@@ -420,14 +421,17 @@ CPUARMState *cpu_arm_init(const char *cpu_model)
     id = cpu_arm_find_by_name(cpu_model);
     if (id == 0)
         return NULL;
-    env = g_malloc0(sizeof(CPUARMState));
+    arm_cpu = g_malloc0(sizeof(ARMCPU));
+    env = &arm_cpu->env;
+    ENV_GET_CPU(env)->env_ptr = env;
+
     cpu_exec_init(env);
     if (!inited) {
         inited = 1;
         arm_translate_init();
     }
 
-    env->cpu_model_str = cpu_model;
+    ENV_GET_CPU(env)->cpu_model_str = cpu_model;
     env->cp15.c0_cpuid = id;
     cpu_reset(env);
     if (arm_feature(env, ARM_FEATURE_NEON)) {
@@ -992,7 +996,7 @@ void do_interrupt(CPUARMState *env)
     }
     env->regs[14] = env->regs[15] + offset;
     env->regs[15] = addr;
-    env->interrupt_request |= CPU_INTERRUPT_EXITTB;
+    ENV_GET_CPU(env)->interrupt_request |= CPU_INTERRUPT_EXITTB;
 }
 
 /* Check section/page access permissions.
@@ -1909,7 +1913,7 @@ uint32_t HELPER(get_cp15)(CPUARMState *env, uint32_t insn)
                      */
                     if (arm_feature(env, ARM_FEATURE_V7) ||
                         ARM_CPUID(env) == ARM_CPUID_ARM11MPCORE) {
-                        int mpidr = env->cpu_index;
+                        int mpidr = ENV_GET_CPU(env)->cpu_index;
                         /* We don't support setting cluster ID ([8..11])
                          * so these bits always RAZ.
                          */
