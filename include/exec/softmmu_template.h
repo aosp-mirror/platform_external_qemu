@@ -141,7 +141,7 @@ DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
         do_unaligned_access:
             retaddr = GETPC();
 #ifdef ALIGNED_ONLY
-            do_unaligned_access(addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
+            do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
 #endif
             res = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(addr,
                                                          mmu_idx, retaddr);
@@ -158,7 +158,7 @@ DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
 #ifdef ALIGNED_ONLY
             if ((addr & (DATA_SIZE - 1)) != 0) {
                 retaddr = GETPC();
-                do_unaligned_access(addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
+                do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
             }
 #endif
             uintptr_t addend = env->tlb_table[mmu_idx][index].addend;
@@ -184,7 +184,7 @@ DATA_TYPE REGPARM glue(glue(__ld, SUFFIX), MMUSUFFIX)(target_ulong addr,
         retaddr = GETPC();
 #ifdef ALIGNED_ONLY
         if ((addr & (DATA_SIZE - 1)) != 0)
-            do_unaligned_access(addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
+            do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
 #endif
         tlb_fill(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
         goto redo;
@@ -316,7 +316,7 @@ void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
         do_unaligned_access:
             retaddr = GETPC();
 #ifdef ALIGNED_ONLY
-            do_unaligned_access(addr, 1, mmu_idx, retaddr);
+            do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
 #endif
             glue(glue(slow_st, SUFFIX), MMUSUFFIX)(addr, val,
                                                    mmu_idx, retaddr);
@@ -334,7 +334,7 @@ void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
 #ifdef ALIGNED_ONLY
             if ((addr & (DATA_SIZE - 1)) != 0) {
                 retaddr = GETPC();
-                do_unaligned_access(addr, 1, mmu_idx, retaddr);
+                do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
             }
 #endif
             uintptr_t addend = env->tlb_table[mmu_idx][index].addend;
@@ -360,7 +360,7 @@ void REGPARM glue(glue(__st, SUFFIX), MMUSUFFIX)(target_ulong addr,
         retaddr = GETPC();
 #ifdef ALIGNED_ONLY
         if ((addr & (DATA_SIZE - 1)) != 0)
-            do_unaligned_access(addr, 1, mmu_idx, retaddr);
+            do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
 #endif
         tlb_fill(env, addr, 1, mmu_idx, retaddr);
         goto redo;
