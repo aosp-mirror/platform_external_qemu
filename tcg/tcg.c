@@ -597,7 +597,7 @@ int tcg_check_temp_count(void)
 void tcg_gen_callN(TCGContext *s, TCGv_ptr func, unsigned int flags,
                    int sizemask, TCGArg ret, int nargs, TCGArg *args)
 {
-#ifdef TCG_TARGET_I386
+#if defined(TCG_TARGET_I386) && TCG_TARGET_REG_BITS < 64
     int __attribute__((unused)) call_type;
 #endif
     int i;
@@ -624,7 +624,7 @@ void tcg_gen_callN(TCGContext *s, TCGv_ptr func, unsigned int flags,
 
     *s->gen_opc_ptr++ = INDEX_op_call;
     nparam = s->gen_opparam_ptr++;
-#ifdef TCG_TARGET_I386
+#if defined(TCG_TARGET_I386) && TCG_TARGET_REG_BITS < 64
     call_type = (flags & TCG_CALL_TYPE_MASK);
 #endif
     if (ret != TCG_CALL_DUMMY_ARG) {

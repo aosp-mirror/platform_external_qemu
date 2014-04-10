@@ -3,7 +3,7 @@
 #include "hw/i386/pc.h"
 #include "hw/isa/isa.h"
 
-#include "exec/exec-all.h"
+#include "cpu.h"
 #include "sysemu/kvm.h"
 
 static void cpu_put_seg(QEMUFile *f, SegmentCache *dt)

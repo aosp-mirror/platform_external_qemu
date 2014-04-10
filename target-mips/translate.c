@@ -26,7 +26,6 @@
 #include <inttypes.h>
 
 #include "cpu.h"
-#include "exec/exec-all.h"
 #include "disas/disas.h"
 #include "tcg-op.h"
 #include "qemu-common.h"
