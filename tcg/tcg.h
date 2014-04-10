@@ -528,8 +528,8 @@ TCGv_i32 tcg_const_local_i32(int32_t val);
 TCGv_i64 tcg_const_local_i64(int64_t val);
 
 #if defined(_ARCH_PPC) && !defined(_ARCH_PPC64)
-#define tcg_qemu_tb_exec(tb_ptr) \
-    ((long REGPARM __attribute__ ((longcall)) (*)(void *))tcg_ctx.code_gen_prologue)(tb_ptr)
+#define tcg_qemu_tb_exec(env, tb_ptr) \
+    ((long REGPARM __attribute__ ((longcall)) (*)(void *, void *))tcg_ctx.code_gen_prologue)(env, tb_ptr)
 #else
-#define tcg_qemu_tb_exec(tb_ptr) ((long REGPARM (*)(void *))tcg_ctx.code_gen_prologue)(tb_ptr)
+#define tcg_qemu_tb_exec(env, tb_ptr) ((long REGPARM (*)(void *, void *))tcg_ctx.code_gen_prologue)(env, tb_ptr)
 #endif
