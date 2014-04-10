@@ -281,8 +281,8 @@ struct TCGContext {
     uint16_t *tb_jmp_offset; /* != NULL if USE_DIRECT_JUMP */
 
     /* liveness analysis */
-    uint16_t *op_dead_iargs; /* for each operation, each bit tells if the
-                                corresponding input argument is dead */
+    uint16_t *op_dead_args; /* for each operation, each bit tells if the
+                               corresponding argument is dead */
 
     /* tells in which temporary a given register is. It does not take
        into account fixed registers */
@@ -517,9 +517,7 @@ TCGv_i64 tcg_const_i64(int64_t val);
 TCGv_i32 tcg_const_local_i32(int32_t val);
 TCGv_i64 tcg_const_local_i64(int64_t val);
 
-#if defined(_ARCH_PPC) && !defined(_ARCH_PPC64)
+#if !defined(tcg_qemu_tb_exec)
 #define tcg_qemu_tb_exec(env, tb_ptr) \
-    ((long REGPARM __attribute__ ((longcall)) (*)(void *, void *))tcg_ctx.code_gen_prologue)(env, tb_ptr)
-#else
-#define tcg_qemu_tb_exec(env, tb_ptr) ((long REGPARM (*)(void *, void *))tcg_ctx.code_gen_prologue)(env, tb_ptr)
+    ((tcg_target_ulong REGPARM (*)(void *, void *))tcg_ctx.code_gen_prologue)(env, tb_ptr)
 #endif

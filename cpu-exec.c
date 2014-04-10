@@ -93,7 +93,7 @@ void cpu_resume_from_signal(CPUArchState *env, void *puc)
    could be used if available. */
 static void cpu_exec_nocache(CPUArchState *env, int max_cycles, TranslationBlock *orig_tb)
 {
-    unsigned long next_tb;
+    tcg_target_ulong next_tb;
     TranslationBlock *tb;
 
     /* Should never happen.
@@ -236,7 +236,7 @@ int cpu_exec(CPUOldState *env)
     int ret, interrupt_request;
     TranslationBlock *tb;
     uint8_t *tc_ptr;
-    unsigned long next_tb;
+    tcg_target_ulong next_tb;
 
     if (env->halted) {
         if (!cpu_has_work(env)) {
