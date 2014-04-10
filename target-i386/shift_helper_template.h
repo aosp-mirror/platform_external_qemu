@@ -66,18 +66,16 @@ target_ulong glue(helper_rcl, SUFFIX)(CPUX86State *env,
     count = rclb_table[count];
 #endif
     if (count) {
-        eflags = helper_cc_compute_all(env, CC_OP);
+        eflags = env->cc_src;
         t0 &= DATA_MASK;
         src = t0;
         res = (t0 << count) | ((target_ulong)(eflags & CC_C) << (count - 1));
         if (count > 1)
             res |= t0 >> (DATA_BITS + 1 - count);
         t0 = res;
-        env->cc_tmp = (eflags & ~(CC_C | CC_O)) |
+        env->cc_src = (eflags & ~(CC_C | CC_O)) |
             (lshift(src ^ t0, 11 - (DATA_BITS - 1)) & CC_O) |
             ((src >> (DATA_BITS - count)) & CC_C);
-    } else {
-        env->cc_tmp = -1;
     }
     return t0;
 }
@@ -96,18 +94,16 @@ target_ulong glue(helper_rcr, SUFFIX)(CPUX86State *env,
     count = rclb_table[count];
 #endif
     if (count) {
-        eflags = helper_cc_compute_all(env, CC_OP);
+        eflags = env->cc_src;
         t0 &= DATA_MASK;
         src = t0;
         res = (t0 >> count) | ((target_ulong)(eflags & CC_C) << (DATA_BITS - count));
         if (count > 1)
             res |= t0 << (DATA_BITS + 1 - count);
         t0 = res;
-        env->cc_tmp = (eflags & ~(CC_C | CC_O)) |
+        env->cc_src = (eflags & ~(CC_C | CC_O)) |
             (lshift(src ^ t0, 11 - (DATA_BITS - 1)) & CC_O) |
             ((src >> (count - 1)) & CC_C);
-    } else {
-        env->cc_tmp = -1;
     }
     return t0;
 }
