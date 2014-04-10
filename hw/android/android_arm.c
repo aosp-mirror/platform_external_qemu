@@ -163,6 +163,7 @@ static void android_arm_init_(ram_addr_t ram_size,
     info.kernel_cmdline  = kernel_cmdline;
     info.initrd_filename = initrd_filename;
     info.nb_cpus         = 1;
+    info.is_linux        = 1;
     info.board_id        = 1441;
 
     arm_load_kernel(env, &info);
