@@ -14,4 +14,3 @@ DEF_HELPER_2(on_call, void, i32, i32)
  */
 DEF_HELPER_1(on_ret, void, i32)
 #endif  // CONFIG_ANDROID_MEMCHECK
-#include "exec/def-helper.h"
