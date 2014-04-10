@@ -5303,49 +5303,49 @@ static void gen_mftr(CPUMIPSState *env, DisasContext *ctx, int rt, int rd,
     } else switch (sel) {
     /* GPR registers. */
     case 0:
-        gen_helper_1i(mftgpr, t0, rt);
+        gen_helper_2i(mftgpr, t0, cpu_env, rt);
         break;
     /* Auxiliary CPU registers */
     case 1:
         switch (rt) {
         case 0:
-            gen_helper_1i(mftlo, t0, 0);
+            gen_helper_2i(mftlo, t0, cpu_env, 0);
             break;
         case 1:
-            gen_helper_1i(mfthi, t0, 0);
+            gen_helper_2i(mfthi, t0, cpu_env, 0);
             break;
         case 2:
-            gen_helper_1i(mftacx, t0, 0);
+            gen_helper_2i(mftacx, t0, cpu_env, 0);
             break;
         case 4:
-            gen_helper_1i(mftlo, t0, 1);
+            gen_helper_2i(mftlo, t0, cpu_env, 1);
             break;
         case 5:
-            gen_helper_1i(mfthi, t0, 1);
+            gen_helper_2i(mfthi, t0, cpu_env, 1);
             break;
         case 6:
-            gen_helper_1i(mftacx, t0, 1);
+            gen_helper_2i(mftacx, t0, cpu_env, 1);
             break;
         case 8:
-            gen_helper_1i(mftlo, t0, 2);
+            gen_helper_2i(mftlo, t0, cpu_env, 2);
             break;
         case 9:
-            gen_helper_1i(mfthi, t0, 2);
+            gen_helper_2i(mfthi, t0, cpu_env, 2);
             break;
         case 10:
-            gen_helper_1i(mftacx, t0, 2);
+            gen_helper_2i(mftacx, t0, cpu_env, 2);
             break;
         case 12:
-            gen_helper_1i(mftlo, t0, 3);
+            gen_helper_2i(mftlo, t0, cpu_env, 3);
             break;
         case 13:
-            gen_helper_1i(mfthi, t0, 3);
+            gen_helper_2i(mfthi, t0, cpu_env, 3);
             break;
         case 14:
-            gen_helper_1i(mftacx, t0, 3);
+            gen_helper_2i(mftacx, t0, cpu_env, 3);
             break;
         case 16:
-            gen_helper_mftdsp(t0);
+            gen_helper_mftdsp(t0, cpu_env);
             break;
         default:
             goto die;
@@ -5468,49 +5468,49 @@ static void gen_mttr(CPUMIPSState *env, DisasContext *ctx, int rd, int rt,
     } else switch (sel) {
     /* GPR registers. */
     case 0:
-        gen_helper_1i(mttgpr, t0, rd);
+        gen_helper_2i(mttgpr, cpu_env, t0, rd);
         break;
     /* Auxiliary CPU registers */
     case 1:
         switch (rd) {
         case 0:
-            gen_helper_1i(mttlo, t0, 0);
+            gen_helper_2i(mttlo, cpu_env, t0, 0);
             break;
         case 1:
-            gen_helper_1i(mtthi, t0, 0);
+            gen_helper_2i(mtthi, cpu_env, t0, 0);
             break;
         case 2:
-            gen_helper_1i(mttacx, t0, 0);
+            gen_helper_2i(mttacx, cpu_env, t0, 0);
             break;
         case 4:
-            gen_helper_1i(mttlo, t0, 1);
+            gen_helper_2i(mttlo, cpu_env, t0, 1);
             break;
         case 5:
-            gen_helper_1i(mtthi, t0, 1);
+            gen_helper_2i(mtthi, cpu_env, t0, 1);
             break;
         case 6:
-            gen_helper_1i(mttacx, t0, 1);
+            gen_helper_2i(mttacx, cpu_env, t0, 1);
             break;
         case 8:
-            gen_helper_1i(mttlo, t0, 2);
+            gen_helper_2i(mttlo, cpu_env, t0, 2);
             break;
         case 9:
-            gen_helper_1i(mtthi, t0, 2);
+            gen_helper_2i(mtthi, cpu_env, t0, 2);
             break;
         case 10:
-            gen_helper_1i(mttacx, t0, 2);
+            gen_helper_2i(mttacx, cpu_env, t0, 2);
             break;
         case 12:
-            gen_helper_1i(mttlo, t0, 3);
+            gen_helper_2i(mttlo, cpu_env, t0, 3);
             break;
         case 13:
-            gen_helper_1i(mtthi, t0, 3);
+            gen_helper_2i(mtthi, cpu_env, t0, 3);
             break;
         case 14:
-            gen_helper_1i(mttacx, t0, 3);
+            gen_helper_2i(mttacx, cpu_env, t0, 3);
             break;
         case 16:
-            gen_helper_mttdsp(t0);
+            gen_helper_mttdsp(cpu_env, t0);
             break;
         default:
             goto die;
@@ -7913,7 +7913,7 @@ static void decode_opc (CPUMIPSState *env, DisasContext *ctx)
 
                 save_cpu_state(ctx, 1);
                 gen_load_gpr(t0, rs);
-                gen_helper_yield(t0, t0);
+                gen_helper_yield(t0, cpu_env, t0);
                 gen_store_gpr(t0, rd);
                 tcg_temp_free(t0);
             }
@@ -7989,22 +7989,22 @@ static void decode_opc (CPUMIPSState *env, DisasContext *ctx)
                 switch (op2) {
                 case OPC_DMT:
                     check_insn(env, ctx, ASE_MT);
-                    gen_helper_dmt(t0, t0);
+                    gen_helper_dmt(t0);
                     gen_store_gpr(t0, rt);
                     break;
                 case OPC_EMT:
                     check_insn(env, ctx, ASE_MT);
-                    gen_helper_emt(t0, t0);
+                    gen_helper_emt(t0);
                     gen_store_gpr(t0, rt);
                     break;
                 case OPC_DVPE:
                     check_insn(env, ctx, ASE_MT);
-                    gen_helper_dvpe(t0, t0);
+                    gen_helper_dvpe(t0, cpu_env);
                     gen_store_gpr(t0, rt);
                     break;
                 case OPC_EVPE:
                     check_insn(env, ctx, ASE_MT);
-                    gen_helper_evpe(t0, t0);
+                    gen_helper_evpe(t0, cpu_env);
                     gen_store_gpr(t0, rt);
                     break;
                 case OPC_DI:
