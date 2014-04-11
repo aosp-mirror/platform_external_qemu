@@ -86,15 +86,13 @@ static KVMSlot *kvm_alloc_slot(KVMState *s)
 
 static KVMSlot *kvm_lookup_matching_slot(KVMState *s,
                                          hwaddr start_addr,
-                                         hwaddr end_addr)
+                                         ram_addr_t size)
 {
     int i;
 
     for (i = 0; i < ARRAY_SIZE(s->slots); i++) {
         KVMSlot *mem = &s->slots[i];
-
-        if (start_addr == mem->start_addr &&
-            end_addr == mem->start_addr + mem->memory_size) {
+        if (start_addr == mem->start_addr && size == mem->memory_size) {
             return mem;
         }
     }
@@ -107,7 +105,7 @@ static KVMSlot *kvm_lookup_matching_slot(KVMState *s,
  */
 static KVMSlot *kvm_lookup_overlapping_slot(KVMState *s,
                                             hwaddr start_addr,
-                                            hwaddr end_addr)
+                                            ram_addr_t size)
 {
     KVMSlot *found = NULL;
     int i;
@@ -115,15 +113,29 @@ static KVMSlot *kvm_lookup_overlapping_slot(KVMState *s,
     for (i = 0; i < ARRAY_SIZE(s->slots); i++) {
         KVMSlot *mem = &s->slots[i];
 
-        if (mem->memory_size == 0 ||
-            (found && found->start_addr < mem->start_addr)) {
+        // Skip empty slots.
+        if (!mem->memory_size)
+            continue;
+
+        // Skip non-overlapping slots, conditions are:
+        //    start_addr + size <= mem->start_addr ||
+        //    start_addr >= mem->start_addr + mem->memory_size
+        //
+        // However, we want to avoid wrapping errors, so avoid
+        // additions and only compare positive values.
+        if (start_addr <= mem->start_addr) {
+            if (mem->start_addr - start_addr >= size) {
+                continue;
+            }
+        } else if (start_addr - mem->start_addr >= mem->memory_size) {
             continue;
         }
 
-        if (end_addr > mem->start_addr &&
-            start_addr < mem->start_addr + mem->memory_size) {
-            found = mem;
+        if (found && found->start_addr < mem->start_addr) {
+            continue;
         }
+
+        found = mem;
     }
 
     return found;
@@ -224,7 +236,7 @@ static int kvm_dirty_pages_log_change(hwaddr phys_addr,
                                       ram_addr_t size, int flags, int mask)
 {
     KVMState *s = kvm_state;
-    KVMSlot *mem = kvm_lookup_matching_slot(s, phys_addr, phys_addr + size);
+    KVMSlot *mem = kvm_lookup_matching_slot(s, phys_addr, size);
     int old_flags;
 
     if (mem == NULL)  {
@@ -307,19 +319,19 @@ int kvm_physical_sync_dirty_bitmap(hwaddr start_addr,
 
     d.dirty_bitmap = NULL;
     while (start_addr < end_addr) {
-        mem = kvm_lookup_overlapping_slot(s, start_addr, end_addr);
+        ram_addr_t start_size = (ram_addr_t)(end_addr - start_addr);
+
+        mem = kvm_lookup_overlapping_slot(s, start_addr, start_size);
         if (mem == NULL) {
             break;
         }
 
         size = ((mem->memory_size >> TARGET_PAGE_BITS) + 7) / 8;
-        if (!d.dirty_bitmap) {
-            d.dirty_bitmap = g_malloc(size);
-        } else if (size > allocated_size) {
+        if (size > allocated_size) {
             d.dirty_bitmap = g_realloc(d.dirty_bitmap, size);
+            allocated_size = size;
         }
-        allocated_size = size;
-        memset(d.dirty_bitmap, 0, allocated_size);
+        memset(d.dirty_bitmap, 0, size);
 
         d.slot = mem->slot;
 
@@ -330,7 +342,7 @@ int kvm_physical_sync_dirty_bitmap(hwaddr start_addr,
         }
 
         for (phys_addr = mem->start_addr, addr = mem->phys_offset;
-             phys_addr < mem->start_addr + mem->memory_size;
+             phys_addr - mem->start_addr < mem->memory_size;
              phys_addr += TARGET_PAGE_SIZE, addr += TARGET_PAGE_SIZE) {
             unsigned long *bitmap = (unsigned long *)d.dirty_bitmap;
             unsigned nr = (phys_addr - mem->start_addr) >> TARGET_PAGE_BITS;
@@ -342,6 +354,11 @@ int kvm_physical_sync_dirty_bitmap(hwaddr start_addr,
             }
         }
         start_addr = phys_addr;
+        if (!start_addr) {
+            // Handle wrap-around, which happens when a slot is mapped
+            // at the end of the physical address space.
+            break;
+        }
     }
     g_free(d.dirty_bitmap);
 
@@ -683,8 +700,7 @@ void kvm_set_phys_mem(hwaddr start_addr,
 
     if (start_addr & ~TARGET_PAGE_MASK) {
         if (flags >= IO_MEM_UNASSIGNED) {
-            if (!kvm_lookup_overlapping_slot(s, start_addr,
-                                             start_addr + size)) {
+            if (!kvm_lookup_overlapping_slot(s, start_addr, size)) {
                 return;
             }
             fprintf(stderr, "Unaligned split of a KVM memory slot\n");
@@ -698,7 +714,7 @@ void kvm_set_phys_mem(hwaddr start_addr,
     phys_offset &= ~IO_MEM_ROM;
 
     while (1) {
-        mem = kvm_lookup_overlapping_slot(s, start_addr, start_addr + size);
+        mem = kvm_lookup_overlapping_slot(s, start_addr, size);
         if (!mem) {
             break;
         }
