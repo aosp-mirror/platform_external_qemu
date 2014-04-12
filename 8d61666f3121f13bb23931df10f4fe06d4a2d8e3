@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9a7eb21_85ccd6a6",
+        "filename": "kvm-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-04-12T00:12:42Z",
+      "side": 1,
+      "message": "Does it have to be KVM_DEVICE? Generally speaking, I\u0027d prefer something specific like ANDROID_EMULATOR_KVM_DEVICE instead, this makes it easier to manage the \"environment from hell\" on customized setups :)",
+      "range": {
+        "startLine": 428,
+        "startChar": 31,
+        "endLine": 428,
+        "endChar": 41
+      },
+      "revId": "8d61666f3121f13bb23931df10f4fe06d4a2d8e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
