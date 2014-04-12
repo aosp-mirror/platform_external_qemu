@@ -855,41 +855,6 @@ virtual SDCard device with the Android emulator.
 TODO(digit): Complete this.
 
 
-XI. Goldfish memlog:
-=====================
-
-Relevant files:
-  $QEMU/hw/android/goldfish/memlog.c
-
-Device properties:
-  Name: goldfish_memlog
-  Id: -1
-  IrqCount: 0
-  I/O Registers:
-    ???
-
-Obsolete debugging device. Should be removed from both the kernel and the
-emulator sources.
-
-
-XII. Goldfish switch:
-=====================
-
-Relevant files:
-  $QEMU/hw/android/goldfish/switch.c
-  $KERNEL/arch/arm/mach-goldfish/switch.c
-  $KERNEL/arch/mips/goldfish/switch.c
-
-Device properties:
-  Name: goldfish_switch
-  Id: -1
-  IrqCount: 1
-  I/O Registers:
-
-Obsolete debugging device. Should be removed from both the kernel and the
-emulator sources.
-
-
 XIV. QEMU Pipe device:
 ======================
 
