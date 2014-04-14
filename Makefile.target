@@ -77,11 +77,6 @@ HW_SOURCES := \
     android/goldfish/vmem.c \
     pci/pci.c \
     scsi/scsi-disk.c \
-    usb/dev-hid.c \
-    usb/dev-hub.c \
-    usb/dev-storage.c \
-    usb/hcd-ohci.c \
-    usb/core.c \
     watchdog/watchdog.c
 
 
