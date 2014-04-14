@@ -865,8 +865,6 @@ static struct goldfish_device nand_device = {
     .size = 0x1000
 };
 
-void goldfish_memlog_init(uint32_t base);
-
 /* PC hardware initialisation */
 static void pc_init1(ram_addr_t ram_size,
                      const char *boot_device,
@@ -1039,8 +1037,6 @@ static void pc_init1(ram_addr_t ram_size,
     goldfish_device_bus_init(0xff001000, IRQ_PDEV_BUS);
 
     goldfish_battery_init(android_hw->hw_battery);
-
-    goldfish_memlog_init(0);
 
 #ifdef CONFIG_NAND
     goldfish_add_device_no_io(&nand_device);
