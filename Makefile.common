@@ -411,8 +411,6 @@ common_LOCAL_CFLAGS += $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 CORE_MISC_SOURCES = \
     aio-android.c \
     async.c \
-    bt-host.c \
-    bt-vhci.c \
     iohandler.c \
     ioport.c \
     migration-dummy-android.c \
