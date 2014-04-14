@@ -160,7 +160,6 @@ common_LOCAL_SRC_FILES += \
     memory-android.c \
     monitor-android.c \
     translate-all.c \
-    android/varint.c \
 
 ##############################################################################
 # CPU-specific emulation.
