@@ -76,7 +76,6 @@ HW_SOURCES := \
     android/goldfish/tty.c \
     android/goldfish/vmem.c \
     pci/pci.c \
-    scsi/scsi-disk.c \
     watchdog/watchdog.c
 
 
