@@ -802,6 +802,11 @@ static int32_t scsi_send_command(SCSIDevice *d, uint32_t tag,
         {
             int start_track, format, msf, toclen;
 
+#ifdef CONFIG_ANDROID
+            // Make compiler happy.
+            (void)msf;
+            (void)start_track;
+#endif
             msf = buf[1] & 2;
             format = buf[2] & 0xf;
             start_track = buf[6];
@@ -809,6 +814,7 @@ static int32_t scsi_send_command(SCSIDevice *d, uint32_t tag,
             DPRINTF("Read TOC (track %d format %d msf %d)\n", start_track, format, msf >> 1);
             nb_sectors /= s->cluster_size;
             switch(format) {
+#ifndef CONFIG_ANDROID  // No CD-Rom support on Android.
             case 0:
                 toclen = cdrom_read_toc(nb_sectors, outbuf, msf, start_track);
                 break;
@@ -823,6 +829,7 @@ static int32_t scsi_send_command(SCSIDevice *d, uint32_t tag,
             case 2:
                 toclen = cdrom_read_toc_raw(nb_sectors, outbuf, msf, start_track);
                 break;
+#endif
             default:
                 goto error_cmd;
             }

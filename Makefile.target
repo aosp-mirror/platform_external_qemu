@@ -61,7 +61,6 @@ common_LOCAL_SRC_FILES += \
 #
 
 HW_SOURCES := \
-    block/cdrom.c \
     core/irq.c \
     core/qdev.c \
     core/sysbus.c \
