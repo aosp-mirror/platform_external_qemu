@@ -411,8 +411,6 @@ common_LOCAL_CFLAGS += $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 CORE_MISC_SOURCES = \
     aio-android.c \
     async.c \
-    bt-host.c \
-    bt-vhci.c \
     iohandler.c \
     ioport.c \
     migration-dummy-android.c \
@@ -487,12 +485,9 @@ ifeq ($(HOST_ARCH),ppc)
 endif
 
 ifeq ($(HOST_OS),linux)
-    CORE_MISC_SOURCES += hw/usb/usb-linux.c \
-                         util/compatfd.c \
+    CORE_MISC_SOURCES += util/compatfd.c \
                          util/qemu-thread-posix.c \
                          android/camera/camera-capture-linux.c
-else
-    CORE_MISC_SOURCES += hw/usb/usb-dummy-android.c
 endif
 
 ifeq ($(HOST_OS),windows)
@@ -639,7 +634,6 @@ endif # EMULATOR_BUILD_64BITS
 BLOCK_SOURCES += \
     block.c \
     blockdev.c \
-    block/qcow.c \
     block/qcow2.c \
     block/qcow2-refcount.c \
     block/qcow2-snapshot.c \
