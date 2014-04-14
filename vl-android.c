@@ -572,197 +572,6 @@ int qemu_timedate_diff(struct tm *tm)
 }
 
 /***********************************************************/
-/* Bluetooth support */
-static int nb_hcis;
-static int cur_hci;
-static struct HCIInfo *hci_table[MAX_NICS];
-
-static struct bt_vlan_s {
-    struct bt_scatternet_s net;
-    int id;
-    struct bt_vlan_s *next;
-} *first_bt_vlan;
-
-/* find or alloc a new bluetooth "VLAN" */
-static struct bt_scatternet_s *qemu_find_bt_vlan(int id)
-{
-    struct bt_vlan_s **pvlan, *vlan;
-    for (vlan = first_bt_vlan; vlan != NULL; vlan = vlan->next) {
-        if (vlan->id == id)
-            return &vlan->net;
-    }
-    vlan = g_malloc0(sizeof(struct bt_vlan_s));
-    vlan->id = id;
-    pvlan = &first_bt_vlan;
-    while (*pvlan != NULL)
-        pvlan = &(*pvlan)->next;
-    *pvlan = vlan;
-    return &vlan->net;
-}
-
-static void null_hci_send(struct HCIInfo *hci, const uint8_t *data, int len)
-{
-}
-
-static int null_hci_addr_set(struct HCIInfo *hci, const uint8_t *bd_addr)
-{
-    return -ENOTSUP;
-}
-
-static struct HCIInfo null_hci = {
-    .cmd_send = null_hci_send,
-    .sco_send = null_hci_send,
-    .acl_send = null_hci_send,
-    .bdaddr_set = null_hci_addr_set,
-};
-
-struct HCIInfo *qemu_next_hci(void)
-{
-    if (cur_hci == nb_hcis)
-        return &null_hci;
-
-    return hci_table[cur_hci++];
-}
-
-static struct HCIInfo *hci_init(const char *str)
-{
-    char *endp;
-    struct bt_scatternet_s *vlan = 0;
-
-    if (!strcmp(str, "null"))
-        /* null */
-        return &null_hci;
-    else if (!strncmp(str, "host", 4) && (str[4] == '\0' || str[4] == ':'))
-        /* host[:hciN] */
-        return bt_host_hci(str[4] ? str + 5 : "hci0");
-    else if (!strncmp(str, "hci", 3)) {
-        /* hci[,vlan=n] */
-        if (str[3]) {
-            if (!strncmp(str + 3, ",vlan=", 6)) {
-                vlan = qemu_find_bt_vlan(strtol(str + 9, &endp, 0));
-                if (*endp)
-                    vlan = 0;
-            }
-        } else
-            vlan = qemu_find_bt_vlan(0);
-        if (vlan)
-           return bt_new_hci(vlan);
-    }
-
-    fprintf(stderr, "qemu: Unknown bluetooth HCI `%s'.\n", str);
-
-    return 0;
-}
-
-static int bt_hci_parse(const char *str)
-{
-    struct HCIInfo *hci;
-    bdaddr_t bdaddr;
-
-    if (nb_hcis >= MAX_NICS) {
-        fprintf(stderr, "qemu: Too many bluetooth HCIs (max %i).\n", MAX_NICS);
-        return -1;
-    }
-
-    hci = hci_init(str);
-    if (!hci)
-        return -1;
-
-    bdaddr.b[0] = 0x52;
-    bdaddr.b[1] = 0x54;
-    bdaddr.b[2] = 0x00;
-    bdaddr.b[3] = 0x12;
-    bdaddr.b[4] = 0x34;
-    bdaddr.b[5] = 0x56 + nb_hcis;
-    hci->bdaddr_set(hci, bdaddr.b);
-
-    hci_table[nb_hcis++] = hci;
-
-    return 0;
-}
-
-static void bt_vhci_add(int vlan_id)
-{
-    struct bt_scatternet_s *vlan = qemu_find_bt_vlan(vlan_id);
-
-    if (!vlan->slave)
-        fprintf(stderr, "qemu: warning: adding a VHCI to "
-                        "an empty scatternet %i\n", vlan_id);
-
-    bt_vhci_init(bt_new_hci(vlan));
-}
-
-static struct bt_device_s *bt_device_add(const char *opt)
-{
-    struct bt_scatternet_s *vlan;
-    int vlan_id = 0;
-    char *endp = strstr(opt, ",vlan=");
-    int len = (endp ? endp - opt : strlen(opt)) + 1;
-    char devname[10];
-
-    pstrcpy(devname, MIN(sizeof(devname), len), opt);
-
-    if (endp) {
-        vlan_id = strtol(endp + 6, &endp, 0);
-        if (*endp) {
-            fprintf(stderr, "qemu: unrecognised bluetooth vlan Id\n");
-            return 0;
-        }
-    }
-
-    vlan = qemu_find_bt_vlan(vlan_id);
-
-    if (!vlan->slave)
-        fprintf(stderr, "qemu: warning: adding a slave device to "
-                        "an empty scatternet %i\n", vlan_id);
-
-    if (!strcmp(devname, "keyboard"))
-        return bt_keyboard_init(vlan);
-
-    fprintf(stderr, "qemu: unsupported bluetooth device `%s'\n", devname);
-    return 0;
-}
-
-static int bt_parse(const char *opt)
-{
-    const char *endp, *p;
-    int vlan;
-
-    if (strstart(opt, "hci", &endp)) {
-        if (!*endp || *endp == ',') {
-            if (*endp)
-                if (!strstart(endp, ",vlan=", 0))
-                    opt = endp + 1;
-
-            return bt_hci_parse(opt);
-       }
-    } else if (strstart(opt, "vhci", &endp)) {
-        if (!*endp || *endp == ',') {
-            if (*endp) {
-                if (strstart(endp, ",vlan=", &p)) {
-                    vlan = strtol(p, (char **) &endp, 0);
-                    if (*endp) {
-                        fprintf(stderr, "qemu: bad scatternet '%s'\n", p);
-                        return 1;
-                    }
-                } else {
-                    fprintf(stderr, "qemu: bad parameter '%s'\n", endp + 1);
-                    return 1;
-                }
-            } else
-                vlan = 0;
-
-            bt_vhci_add(vlan);
-            return 0;
-        }
-    } else if (strstart(opt, "device:", &endp))
-        return !bt_device_add(endp);
-
-    fprintf(stderr, "qemu: bad bluetooth parameter '%s'\n", opt);
-    return 1;
-}
-
-/***********************************************************/
 /* QEMU Block devices */
 
 #define HD_ALIAS "index=%d,media=disk"
@@ -1330,219 +1139,6 @@ static void numa_add(const char *optarg)
         nb_numa_nodes++;
     }
     return;
-}
-
-/***********************************************************/
-/* USB devices */
-
-static USBPort *used_usb_ports;
-static USBPort *free_usb_ports;
-
-/* ??? Maybe change this to register a hub to keep track of the topology.  */
-void qemu_register_usb_port(USBPort *port, void *opaque, int index,
-                            usb_attachfn attach)
-{
-    port->opaque = opaque;
-    port->index = index;
-    port->attach = attach;
-    port->next = free_usb_ports;
-    free_usb_ports = port;
-}
-
-int usb_device_add_dev(USBDevice *dev)
-{
-    USBPort *port;
-
-    /* Find a USB port to add the device to.  */
-    port = free_usb_ports;
-    if (!port){
-        USBDevice *hub = usb_hub_init(VM_USB_HUB_SIZE);
-        port = free_usb_ports;
-        usb_attach(port, hub);
-    }
-    else if (!port->next){
-        USBDevice *hub;
-
-        /* Create a new hub and chain it on.  */
-        free_usb_ports = NULL;
-        port->next = used_usb_ports;
-        used_usb_ports = port;
-
-        hub = usb_hub_init(VM_USB_HUB_SIZE);
-        usb_attach(port, hub);
-        port = free_usb_ports;
-    }
-
-    free_usb_ports = port->next;
-    port->next = used_usb_ports;
-    used_usb_ports = port;
-    usb_attach(port, dev);
-    return 0;
-}
-
-#if 0
-static void usb_msd_password_cb(void *opaque, int err)
-{
-    USBDevice *dev = opaque;
-
-    if (!err)
-        usb_device_add_dev(dev);
-    else
-        dev->handle_destroy(dev);
-}
-#endif
-
-static int usb_device_add(const char *devname, int is_hotplug)
-{
-    const char *p;
-    USBDevice *dev;
-
-    if (strstart(devname, "host:", &p)) {
-        dev = usb_host_device_open(p);
-    } else if (!strcmp(devname, "mouse")) {
-        dev = usb_mouse_init();
-    } else if (!strcmp(devname, "tablet")) {
-        dev = usb_tablet_init();
-    } else if (!strcmp(devname, "keyboard")) {
-        dev = usb_keyboard_init();
-    } else if (strstart(devname, "disk:", &p)) {
-#if 0
-        BlockDriverState *bs;
-#endif
-        dev = usb_msd_init(p);
-        if (!dev)
-            return -1;
-#if 0
-        bs = usb_msd_get_bdrv(dev);
-        if (bdrv_key_required(bs)) {
-            autostart = 0;
-            if (is_hotplug) {
-                monitor_read_bdrv_key_start(cur_mon, bs, usb_msd_password_cb,
-                                            dev);
-                return 0;
-            }
-        }
-    } else if (!strcmp(devname, "wacom-tablet")) {
-        dev = usb_wacom_init();
-    } else if (strstart(devname, "serial:", &p)) {
-        dev = usb_serial_init(p);
-#ifdef CONFIG_BRLAPI
-    } else if (!strcmp(devname, "braille")) {
-        dev = usb_baum_init();
-#endif
-    } else if (strstart(devname, "net:", &p)) {
-        int nic = nb_nics;
-
-        if (net_client_init("nic", p) < 0)
-            return -1;
-        nd_table[nic].model = "usb";
-        dev = usb_net_init(&nd_table[nic]);
-    } else if (!strcmp(devname, "bt") || strstart(devname, "bt:", &p)) {
-        dev = usb_bt_init(devname[2] ? hci_init(p) :
-                        bt_new_hci(qemu_find_bt_vlan(0)));
-#endif
-    } else {
-        return -1;
-    }
-    if (!dev)
-        return -1;
-
-    return usb_device_add_dev(dev);
-}
-
-int usb_device_del_addr(int bus_num, int addr)
-{
-    USBPort *port;
-    USBPort **lastp;
-    USBDevice *dev;
-
-    if (!used_usb_ports)
-        return -1;
-
-    if (bus_num != 0)
-        return -1;
-
-    lastp = &used_usb_ports;
-    port = used_usb_ports;
-    while (port && port->dev->addr != addr) {
-        lastp = &port->next;
-        port = port->next;
-    }
-
-    if (!port)
-        return -1;
-
-    dev = port->dev;
-    *lastp = port->next;
-    usb_attach(port, NULL);
-    dev->handle_destroy(dev);
-    port->next = free_usb_ports;
-    free_usb_ports = port;
-    return 0;
-}
-
-static int usb_device_del(const char *devname)
-{
-    int bus_num, addr;
-    const char *p;
-
-    if (strstart(devname, "host:", &p))
-        return usb_host_device_close(p);
-
-    if (!used_usb_ports)
-        return -1;
-
-    p = strchr(devname, '.');
-    if (!p)
-        return -1;
-    bus_num = strtoul(devname, NULL, 0);
-    addr = strtoul(p + 1, NULL, 0);
-
-    return usb_device_del_addr(bus_num, addr);
-}
-
-void do_usb_add(Monitor *mon, const char *devname)
-{
-    usb_device_add(devname, 1);
-}
-
-void do_usb_del(Monitor *mon, const char *devname)
-{
-    usb_device_del(devname);
-}
-
-void usb_info(Monitor *mon)
-{
-    USBDevice *dev;
-    USBPort *port;
-    const char *speed_str;
-
-    if (!usb_enabled) {
-        monitor_printf(mon, "USB support not enabled\n");
-        return;
-    }
-
-    for (port = used_usb_ports; port; port = port->next) {
-        dev = port->dev;
-        if (!dev)
-            continue;
-        switch(dev->speed) {
-        case USB_SPEED_LOW:
-            speed_str = "1.5";
-            break;
-        case USB_SPEED_FULL:
-            speed_str = "12";
-            break;
-        case USB_SPEED_HIGH:
-            speed_str = "480";
-            break;
-        default:
-            speed_str = "?";
-            break;
-        }
-        monitor_printf(mon, "  Device %d.%d, Speed %s Mb/s, Product %s\n",
-                       0, dev->addr, speed_str, dev->devname);
-    }
 }
 
 /***********************************************************/
@@ -2287,8 +1883,6 @@ int main(int argc, char **argv, char **envp)
     QemuOpts *hdb_opts = NULL;
     const char *net_clients[MAX_NET_CLIENTS];
     int nb_net_clients;
-    const char *bt_opts[MAX_BT_CMDLINE];
-    int nb_bt_opts;
     int optind;
     const char *r, *optarg;
     CharDriverState *monitor_hd = NULL;
@@ -2302,8 +1896,6 @@ int main(int argc, char **argv, char **envp)
     const char *loadvm = NULL;
     QEMUMachine *machine;
     const char *cpu_model;
-    const char *usb_devices[MAX_USB_CMDLINE];
-    int usb_devices_index;
     int tb_size;
     const char *pid_file = NULL;
     const char *incoming = NULL;
@@ -2361,10 +1953,7 @@ int main(int argc, char **argv, char **envp)
         node_cpumask[i] = 0;
     }
 
-    usb_devices_index = 0;
-
     nb_net_clients = 0;
-    nb_bt_opts = 0;
 #ifdef MAX_DRIVES
     nb_drives = 0;
     nb_drives_opt = 0;
@@ -2621,12 +2210,6 @@ int main(int argc, char **argv, char **envp)
                 net_slirp_redir(NULL, optarg, NULL);
                 break;
 #endif
-            case QEMU_OPTION_bt:
-                if (nb_bt_opts >= MAX_BT_CMDLINE) {
-                    PANIC("qemu: too many bluetooth options");
-                }
-                bt_opts[nb_bt_opts++] = optarg;
-                break;
 #ifdef HAS_AUDIO
             case QEMU_OPTION_audio_help:
                 AUD_help ();
@@ -2836,17 +2419,6 @@ int main(int argc, char **argv, char **envp)
                 kvm_allowed = 0;
                 break;
 #endif /* CONFIG_KVM */
-            case QEMU_OPTION_usb:
-                usb_enabled = 1;
-                break;
-            case QEMU_OPTION_usbdevice:
-                usb_enabled = 1;
-                if (usb_devices_index >= MAX_USB_CMDLINE) {
-                    PANIC("Too many USB devices");
-                }
-                usb_devices[usb_devices_index] = optarg;
-                usb_devices_index++;
-                break;
             case QEMU_OPTION_smp:
                 smp_cpus = atoi(optarg);
                 if (smp_cpus < 1) {
@@ -3805,12 +3377,6 @@ int main(int argc, char **argv, char **envp)
     }
 #endif
 
-    /* init the bluetooth world */
-    for (i = 0; i < nb_bt_opts; i++)
-        if (bt_parse(bt_opts[i])) {
-            PANIC("Unable to parse bluetooth options");
-        }
-
     /* init the memory */
     if (ram_size == 0) {
         ram_size = android_hw->hw_ramSize * 1024LL * 1024;
@@ -4104,16 +3670,6 @@ int main(int argc, char **argv, char **envp)
     if (hax_enabled())
         hax_sync_vcpus();
 #endif
-
-    /* init USB devices */
-    if (usb_enabled) {
-        for(i = 0; i < usb_devices_index; i++) {
-            if (usb_device_add(usb_devices[i], 0) < 0) {
-                fprintf(stderr, "Warning: could not add USB device %s\n",
-                        usb_devices[i]);
-            }
-        }
-    }
 
     /* just use the first displaystate for the moment */
     ds = get_displaystate();
