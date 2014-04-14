@@ -634,7 +634,6 @@ endif # EMULATOR_BUILD_64BITS
 BLOCK_SOURCES += \
     block.c \
     blockdev.c \
-    block/qcow.c \
     block/qcow2.c \
     block/qcow2-refcount.c \
     block/qcow2-snapshot.c \
