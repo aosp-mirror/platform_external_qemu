@@ -20,6 +20,7 @@
 #include "hw/android/goldfish/pipe.h"
 #include "android/globals.h"
 #include "audio/audio.h"
+#include "exec/ram_addr.h"
 #include "sysemu/blockdev.h"
 
 #include "android/utils/debug.h"

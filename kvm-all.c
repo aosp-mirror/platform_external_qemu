@@ -26,6 +26,7 @@
 #include "hw/hw.h"
 #include "android/kvm.h"
 #include "exec/gdbstub.h"
+#include "exec/ram_addr.h"
 #include "sysemu/kvm.h"
 
 /* KVM uses PAGE_SIZE in it's definition of COALESCED_MMIO_MAX */

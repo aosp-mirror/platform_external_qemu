@@ -25,6 +25,7 @@
 #include "hw/i386/pc.h"
 #include "hw/loader.h"
 #include "hw/pci/pci.h"
+#include "exec/ram_addr.h"
 #include "block/block.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/blockdev.h"

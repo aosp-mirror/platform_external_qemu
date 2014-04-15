@@ -14,6 +14,7 @@
 #include "android/android.h"
 #include "android/utils/debug.h"
 #include "android/utils/duff.h"
+#include "exec/ram_addr.h"
 #include "hw/android/goldfish/device.h"
 #include "hw/hw.h"
 #include "ui/console.h"

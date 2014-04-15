@@ -44,6 +44,7 @@
 #include "sysemu/kvm.h"
 #include "exec/cputlb.h"
 #include "exec/hax.h"
+#include "exec/ram_addr.h"
 #include "qemu/timer.h"
 #if defined(CONFIG_USER_ONLY)
 #include <qemu.h>

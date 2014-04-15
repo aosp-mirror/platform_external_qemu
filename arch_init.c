@@ -41,6 +41,7 @@
 #include "migration/qemu-file.h"
 #include "net/net.h"
 #include "exec/gdbstub.h"
+#include "exec/ram_addr.h"
 #include "hw/i386/smbios.h"
 
 #ifdef TARGET_SPARC
