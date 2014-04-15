@@ -311,6 +311,8 @@ common_LOCAL_SRC_FILES := \
     android/opengles.c \
     android/user-events-qemu.c \
     hw/core/loader.c \
+    util/bitmap.c \
+    util/bitops.c \
     ui/keymaps.c \
     util/qemu-timer-common.c \
     util/iov.c \

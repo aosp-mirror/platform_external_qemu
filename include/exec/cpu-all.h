@@ -470,9 +470,14 @@ typedef struct RAMBlock {
     int fd;
 } RAMBlock;
 
+#define DIRTY_MEMORY_VGA       0
+#define DIRTY_MEMORY_CODE      1
+#define DIRTY_MEMORY_MIGRATION 2
+#define DIRTY_MEMORY_NUM       3        /* num of dirty bits */
+
 typedef struct RAMList {
     QemuMutex mutex;
-    uint8_t *phys_dirty;
+    unsigned long *dirty_memory[DIRTY_MEMORY_NUM];
     RAMBlock *mru_block;
     QTAILQ_HEAD(ram, RAMBlock) blocks;
     uint32_t version;
