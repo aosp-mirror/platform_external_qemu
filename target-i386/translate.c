@@ -85,6 +85,8 @@ static TCGv_i32 cpu_tmp2_i32, cpu_tmp3_i32;
 static TCGv_i64 cpu_tmp1_i64;
 static TCGv cpu_tmp5, cpu_tmp6;
 
+static uint8_t gen_opc_cc_op[OPC_BUF_SIZE];
+
 #include "exec/gen-icount.h"
 
 #ifdef TARGET_X86_64
@@ -7870,7 +7872,7 @@ static inline void gen_intermediate_code_internal(CPUX86State *env,
                     tcg_ctx.gen_opc_instr_start[lj++] = 0;
             }
             tcg_ctx.gen_opc_pc[lj] = pc_ptr;
-            tcg_ctx.gen_opc_cc_op[lj] = dc->cc_op;
+            gen_opc_cc_op[lj] = dc->cc_op;
             tcg_ctx.gen_opc_instr_start[lj] = 1;
             tcg_ctx.gen_opc_icount[lj] = num_insns;
         }
@@ -7979,7 +7981,7 @@ void restore_state_to_opc(CPUX86State *env, TranslationBlock *tb, int pc_pos)
     }
 #endif
     env->eip = tcg_ctx.gen_opc_pc[pc_pos] - tb->cs_base;
-    cc_op = tcg_ctx.gen_opc_cc_op[pc_pos];
+    cc_op = gen_opc_cc_op[pc_pos];
     if (cc_op != CC_OP_DYNAMIC)
         env->cc_op = cc_op;
 }

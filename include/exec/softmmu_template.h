@@ -27,22 +27,38 @@
 
 #if DATA_SIZE == 8
 #define SUFFIX q
-#define USUFFIX q
-#define DATA_TYPE uint64_t
+#define LSUFFIX q
+#define SDATA_TYPE  int64_t
 #elif DATA_SIZE == 4
 #define SUFFIX l
-#define USUFFIX l
-#define DATA_TYPE uint32_t
+#define LSUFFIX l
+#define SDATA_TYPE  int32_t
 #elif DATA_SIZE == 2
 #define SUFFIX w
-#define USUFFIX uw
-#define DATA_TYPE uint16_t
+#define LSUFFIX uw
+#define SDATA_TYPE  int16_t
 #elif DATA_SIZE == 1
 #define SUFFIX b
-#define USUFFIX ub
-#define DATA_TYPE uint8_t
+#define LSUFFIX ub
+#define SDATA_TYPE  int8_t
 #else
 #error unsupported data size
+#endif
+
+#define DATA_TYPE   glue(u, SDATA_TYPE)
+
+/* For the benefit of TCG generated code, we want to avoid the complication
+   of ABI-specific return type promotion and always return a value extended
+   to the register size of the host.  This is tcg_target_long, except in the
+   case of a 32-bit host and 64-bit data, and for that we always have
+   uint64_t.  Don't bother with this widened value for SOFTMMU_CODE_ACCESS.  */
+#if defined(SOFTMMU_CODE_ACCESS) || DATA_SIZE == 8
+# define WORD_TYPE  DATA_TYPE
+# define USUFFIX    SUFFIX
+#else
+# define WORD_TYPE  tcg_target_ulong
+# define USUFFIX    glue(u, SUFFIX)
+# define SSUFFIX    glue(s, SUFFIX)
 #endif
 
 #ifdef SOFTMMU_CODE_ACCESS
@@ -53,7 +69,50 @@
 #define ADDR_READ addr_read
 #endif
 
-#if defined(CONFIG_ANDROID_MEMCHECK) && !defined(OUTSIDE_JIT) && !defined(SOFTMMU_CODE_ACCESS)
+#if DATA_SIZE == 8
+# define BSWAP(X)  bswap64(X)
+#elif DATA_SIZE == 4
+# define BSWAP(X)  bswap32(X)
+#elif DATA_SIZE == 2
+# define BSWAP(X)  bswap16(X)
+#else
+# define BSWAP(X)  (X)
+#endif
+
+#ifdef TARGET_WORDS_BIGENDIAN
+# define TGT_BE(X)  (X)
+# define TGT_LE(X)  BSWAP(X)
+#else
+# define TGT_BE(X)  BSWAP(X)
+# define TGT_LE(X)  (X)
+#endif
+
+#if DATA_SIZE == 1
+# define helper_le_ld_name  glue(glue(helper_ret_ld, USUFFIX), MMUSUFFIX)
+# define helper_be_ld_name  helper_le_ld_name
+# define helper_le_lds_name glue(glue(helper_ret_ld, SSUFFIX), MMUSUFFIX)
+# define helper_be_lds_name helper_le_lds_name
+# define helper_le_st_name  glue(glue(helper_ret_st, SUFFIX), MMUSUFFIX)
+# define helper_be_st_name  helper_le_st_name
+#else
+# define helper_le_ld_name  glue(glue(helper_le_ld, USUFFIX), MMUSUFFIX)
+# define helper_be_ld_name  glue(glue(helper_be_ld, USUFFIX), MMUSUFFIX)
+# define helper_le_lds_name glue(glue(helper_le_ld, SSUFFIX), MMUSUFFIX)
+# define helper_be_lds_name glue(glue(helper_be_ld, SSUFFIX), MMUSUFFIX)
+# define helper_le_st_name  glue(glue(helper_le_st, SUFFIX), MMUSUFFIX)
+# define helper_be_st_name  glue(glue(helper_be_st, SUFFIX), MMUSUFFIX)
+#endif
+
+#ifdef TARGET_WORDS_BIGENDIAN
+# define helper_te_ld_name  helper_be_ld_name
+# define helper_te_st_name  helper_be_st_name
+#else
+# define helper_te_ld_name  helper_le_ld_name
+# define helper_te_st_name  helper_le_st_name
+#endif
+
+
+#if defined(CONFIG_ANDROID_MEMCHECK) && !defined(SOFTMMU_CODE_ACCESS)
 /*
  * Support for memory access checker.
  * We need to instrument __ldx/__stx_mmu routines implemented in this file with
@@ -65,194 +124,293 @@
  */
 #define CONFIG_ANDROID_MEMCHECK_MMU
 #include "android/qemu/memcheck/memcheck_api.h"
-#endif  // CONFIG_ANDROID_MEMCHECK && !OUTSIDE_JIT && !SOFTMMU_CODE_ACCESS
+#endif  // CONFIG_ANDROID_MEMCHECK && !SOFTMMU_CODE_ACCESS
 
-static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(CPUArchState *env,
-                                                        target_ulong addr,
-                                                        int mmu_idx,
-                                                        uintptr_t retaddr);
 static inline DATA_TYPE glue(io_read, SUFFIX)(CPUArchState *env,
                                               hwaddr physaddr,
                                               target_ulong addr,
                                               uintptr_t retaddr)
 {
-    DATA_TYPE res;
-    int index;
-    index = (physaddr >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
+    uint64_t val;
+    int index = (physaddr >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
     physaddr = (physaddr & TARGET_PAGE_MASK) + addr;
     env->mem_io_pc = retaddr;
     if (index > (IO_MEM_NOTDIRTY >> IO_MEM_SHIFT)
             && !can_do_io(env)) {
-        cpu_io_recompile(env, (uintptr_t)retaddr);
+        cpu_io_recompile(env, retaddr);
     }
 
     env->mem_io_vaddr = addr;
 #if SHIFT <= 2
-    res = io_mem_read(index, physaddr, 1 << SHIFT);
+    val = io_mem_read(index, physaddr, 1 << SHIFT);
 #else
 #ifdef TARGET_WORDS_BIGENDIAN
-    res = (uint64_t)io_mem_read(index, physaddr, 4) << 32;
-    res |= io_mem_read(index, physaddr + 4, 4);
+    val = (uint64_t)io_mem_read(index, physaddr, 4) << 32;
+    val |= io_mem_read(index, physaddr + 4, 4);
 #else
-    res = io_mem_read(index, physaddr, 4);
-    res |= (uint64_t)io_mem_read(index, physaddr + 4, 4) << 32;
+    val = io_mem_read(index, physaddr, 4);
+    val |= (uint64_t)io_mem_read(index, physaddr + 4, 4) << 32;
 #endif
 #endif /* SHIFT > 2 */
-    return res;
+    return val;
 }
 
-/* handle all cases except unaligned access which span two pages */
-DATA_TYPE glue(glue(helper_ld, SUFFIX), MMUSUFFIX)(CPUArchState *env,
-                                                   target_ulong addr,
-                                                   int mmu_idx)
+#ifdef SOFTMMU_CODE_ACCESS
+static __attribute__((unused))
+#endif
+WORD_TYPE helper_le_ld_name(CPUArchState *env, target_ulong addr, int mmu_idx,
+                            uintptr_t retaddr)
 {
+    int index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
+    target_ulong tlb_addr = env->tlb_table[mmu_idx][index].ADDR_READ;
+    uintptr_t haddr;
     DATA_TYPE res;
-    int index;
-    target_ulong tlb_addr;
-    hwaddr ioaddr;
-    uintptr_t retaddr;
+
+    /* Adjust the given return address.  */
+    retaddr -= GETPC_ADJ;
 #ifdef CONFIG_ANDROID_MEMCHECK_MMU
     int invalidate_cache = 0;
 #endif  // CONFIG_ANDROID_MEMCHECK_MMU
 
-    /* test if there is match for unaligned or IO access */
-    /* XXX: could done more in memory macro in a non portable way */
-    index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
- redo:
-    tlb_addr = env->tlb_table[mmu_idx][index].ADDR_READ;
-    if ((addr & TARGET_PAGE_MASK) == (tlb_addr & (TARGET_PAGE_MASK | TLB_INVALID_MASK))) {
-        if (tlb_addr & ~TARGET_PAGE_MASK) {
-            /* IO access */
-            if ((addr & (DATA_SIZE - 1)) != 0)
-                goto do_unaligned_access;
-            retaddr = GETPC();
-            ioaddr = env->iotlb[mmu_idx][index];
-            res = glue(io_read, SUFFIX)(env, ioaddr, addr, retaddr);
-        } else if (((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1) >= TARGET_PAGE_SIZE) {
-            /* This is not I/O access: do access verification. */
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-            /* We only validate access to the guest's user space, for which
-             * mmu_idx is set to 1. */
-            if (memcheck_instrument_mmu && mmu_idx == 1 &&
-                memcheck_validate_ld(addr, DATA_SIZE, (target_ulong)(ptrdiff_t)GETPC())) {
-                /* Memory read breaks page boundary. So, if required, we
-                 * must invalidate two caches in TLB. */
-                invalidate_cache = 2;
-            }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
-            /* slow unaligned access (it spans two pages or IO) */
-        do_unaligned_access:
-            retaddr = GETPC();
+    /* If the TLB entry is for a different page, reload and try again.  */
+    if ((addr & TARGET_PAGE_MASK)
+         != (tlb_addr & (TARGET_PAGE_MASK | TLB_INVALID_MASK))) {
 #ifdef ALIGNED_ONLY
+        if ((addr & (DATA_SIZE - 1)) != 0) {
             do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
-#endif
-            res = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(env, addr,
-                                                         mmu_idx, retaddr);
-        } else {
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-            /* We only validate access to the guest's user space, for which
-             * mmu_idx is set to 1. */
-            if (memcheck_instrument_mmu && mmu_idx == 1) {
-                invalidate_cache = memcheck_validate_ld(addr, DATA_SIZE,
-                                                        (target_ulong)(ptrdiff_t)GETPC());
-            }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
-            /* unaligned/aligned access in the same page */
-#ifdef ALIGNED_ONLY
-            if ((addr & (DATA_SIZE - 1)) != 0) {
-                retaddr = GETPC();
-                do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
-            }
-#endif
-            uintptr_t addend = env->tlb_table[mmu_idx][index].addend;
-            res = glue(glue(ld, USUFFIX), _raw)((uint8_t *)(intptr_t)
-                                                (addr+addend));
         }
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-        if (invalidate_cache) {
-            /* Accessed memory is under memchecker control. We must invalidate
-             * containing page(s) in order to make sure that next access to them
-             * will invoke _ld/_st_mmu. */
-            env->tlb_table[mmu_idx][index].addr_read ^= TARGET_PAGE_MASK;
-            env->tlb_table[mmu_idx][index].addr_write ^= TARGET_PAGE_MASK;
-            if ((invalidate_cache == 2) && (index < CPU_TLB_SIZE)) {
-                // Read crossed page boundaris. Invalidate second cache too.
-                env->tlb_table[mmu_idx][index + 1].addr_read ^= TARGET_PAGE_MASK;
-                env->tlb_table[mmu_idx][index + 1].addr_write ^= TARGET_PAGE_MASK;
-            }
-        }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
-    } else {
-        /* the page is not in the TLB : fill it */
-        retaddr = GETPC();
-#ifdef ALIGNED_ONLY
-        if ((addr & (DATA_SIZE - 1)) != 0)
-            do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
 #endif
         tlb_fill(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
-        goto redo;
+        tlb_addr = env->tlb_table[mmu_idx][index].ADDR_READ;
     }
+
+    /* Handle an IO access.  */
+    if (unlikely(tlb_addr & ~TARGET_PAGE_MASK)) {
+        hwaddr ioaddr;
+        if ((addr & (DATA_SIZE - 1)) != 0) {
+            goto do_unaligned_access;
+        }
+        ioaddr = env->iotlb[mmu_idx][index];
+
+        /* ??? Note that the io helpers always read data in the target
+           byte ordering.  We should push the LE/BE request down into io.  */
+        res = glue(io_read, SUFFIX)(env, ioaddr, addr, retaddr);
+        res = TGT_LE(res);
+        return res;
+    }
+
+    /* Handle slow unaligned access (it spans two pages or IO).  */
+    if (DATA_SIZE > 1
+        && unlikely((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1
+                    >= TARGET_PAGE_SIZE)) {
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+        /* We only validate access to the guest's user space, for which
+         * mmu_idx is set to 1. */
+        if (memcheck_instrument_mmu && mmu_idx == 1 &&
+            memcheck_validate_ld(addr, DATA_SIZE, (target_ulong)(retaddr - GETPC_ADJ))) {
+            /* Memory read breaks page boundary. So, if required, we
+             * must invalidate two caches in TLB. */
+            invalidate_cache = 2;
+        }
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
+        target_ulong addr1, addr2;
+        DATA_TYPE res1, res2;
+        unsigned shift;
+    do_unaligned_access:
+#ifdef ALIGNED_ONLY
+        do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
+#endif
+        addr1 = addr & ~(DATA_SIZE - 1);
+        addr2 = addr1 + DATA_SIZE;
+        /* Note the adjustment at the beginning of the function.
+           Undo that for the recursion.  */
+        res1 = helper_le_ld_name(env, addr1, mmu_idx, retaddr + GETPC_ADJ);
+        res2 = helper_le_ld_name(env, addr2, mmu_idx, retaddr + GETPC_ADJ);
+        shift = (addr & (DATA_SIZE - 1)) * 8;
+
+        /* Little-endian combine.  */
+        res = (res1 >> shift) | (res2 << ((DATA_SIZE * 8) - shift));
+        return res;
+    }
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+    if (DATA_SIZE == 1) {
+        if (memcheck_instrument_mmu && mmu_idx == 1) {
+            invalidate_cache = memcheck_validate_ld(addr, DATA_SIZE,
+                                                    (target_ulong)(retaddr + GETPC_ADJ));
+        }
+    }
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
+
+    /* Handle aligned access or unaligned access in the same page.  */
+#ifdef ALIGNED_ONLY
+    if ((addr & (DATA_SIZE - 1)) != 0) {
+        do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
+    }
+#endif
+
+    haddr = addr + env->tlb_table[mmu_idx][index].addend;
+#if DATA_SIZE == 1
+    res = glue(glue(ld, LSUFFIX), _p)((uint8_t *)haddr);
+#else
+    res = glue(glue(ld, LSUFFIX), _le_p)((uint8_t *)haddr);
+#endif
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+    if (invalidate_cache) {
+        /* Accessed memory is under memchecker control. We must invalidate
+         * containing page(s) in order to make sure that next access to them
+         * will invoke _ld/_st_mmu. */
+        env->tlb_table[mmu_idx][index].addr_read ^= TARGET_PAGE_MASK;
+        env->tlb_table[mmu_idx][index].addr_write ^= TARGET_PAGE_MASK;
+        if ((invalidate_cache == 2) && (index < CPU_TLB_SIZE)) {
+            // Read crossed page boundaris. Invalidate second cache too.
+            env->tlb_table[mmu_idx][index + 1].addr_read ^= TARGET_PAGE_MASK;
+            env->tlb_table[mmu_idx][index + 1].addr_write ^= TARGET_PAGE_MASK;
+        }
+    }
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
     return res;
 }
 
-/* handle all unaligned cases */
-static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(CPUArchState *env,
-                                                        target_ulong addr,
-                                                        int mmu_idx,
-                                                        uintptr_t retaddr)
-{
-    DATA_TYPE res, res1, res2;
-    int index, shift;
-    hwaddr ioaddr;
-    target_ulong tlb_addr, addr1, addr2;
-
-    index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
- redo:
-    tlb_addr = env->tlb_table[mmu_idx][index].ADDR_READ;
-    if ((addr & TARGET_PAGE_MASK) == (tlb_addr & (TARGET_PAGE_MASK | TLB_INVALID_MASK))) {
-        if (tlb_addr & ~TARGET_PAGE_MASK) {
-            /* IO access */
-            if ((addr & (DATA_SIZE - 1)) != 0)
-                goto do_unaligned_access;
-            ioaddr = env->iotlb[mmu_idx][index];
-            res = glue(io_read, SUFFIX)(env, ioaddr, addr, retaddr);
-        } else if (((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1) >= TARGET_PAGE_SIZE) {
-        do_unaligned_access:
-            /* slow unaligned access (it spans two pages) */
-            addr1 = addr & ~(DATA_SIZE - 1);
-            addr2 = addr1 + DATA_SIZE;
-            res1 = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(env, addr1,
-                                                          mmu_idx, retaddr);
-            res2 = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(env, addr2,
-                                                          mmu_idx, retaddr);
-            shift = (addr & (DATA_SIZE - 1)) * 8;
-#ifdef TARGET_WORDS_BIGENDIAN
-            res = (res1 << shift) | (res2 >> ((DATA_SIZE * 8) - shift));
-#else
-            res = (res1 >> shift) | (res2 << ((DATA_SIZE * 8) - shift));
+#if DATA_SIZE > 1
+#ifdef SOFTMMU_CODE_ACCESS
+static __attribute__((unused))
 #endif
-            res = (DATA_TYPE)res;
-        } else {
-            /* unaligned/aligned access in the same page */
-            uintptr_t addend = env->tlb_table[mmu_idx][index].addend;
-            res = glue(glue(ld, USUFFIX), _raw)((uint8_t *)(intptr_t)
-                                                (addr + addend));
+WORD_TYPE helper_be_ld_name(CPUArchState *env, target_ulong addr, int mmu_idx,
+                            uintptr_t retaddr)
+{
+    int index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
+    target_ulong tlb_addr = env->tlb_table[mmu_idx][index].ADDR_READ;
+    uintptr_t haddr;
+    DATA_TYPE res;
+
+    /* Adjust the given return address.  */
+    retaddr -= GETPC_ADJ;
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+    int invalidate_cache = 0;
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
+
+    /* If the TLB entry is for a different page, reload and try again.  */
+    if ((addr & TARGET_PAGE_MASK)
+         != (tlb_addr & (TARGET_PAGE_MASK | TLB_INVALID_MASK))) {
+#ifdef ALIGNED_ONLY
+        if ((addr & (DATA_SIZE - 1)) != 0) {
+            do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
         }
-    } else {
-        /* the page is not in the TLB : fill it */
+#endif
         tlb_fill(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
-        goto redo;
+        tlb_addr = env->tlb_table[mmu_idx][index].ADDR_READ;
     }
+
+    /* Handle an IO access.  */
+    if (unlikely(tlb_addr & ~TARGET_PAGE_MASK)) {
+        hwaddr ioaddr;
+        if ((addr & (DATA_SIZE - 1)) != 0) {
+            goto do_unaligned_access;
+        }
+        ioaddr = env->iotlb[mmu_idx][index];
+
+        /* ??? Note that the io helpers always read data in the target
+           byte ordering.  We should push the LE/BE request down into io.  */
+        res = glue(io_read, SUFFIX)(env, ioaddr, addr, retaddr);
+        res = TGT_BE(res);
+        return res;
+    }
+
+    /* Handle slow unaligned access (it spans two pages or IO).  */
+    if (DATA_SIZE > 1
+        && unlikely((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1
+                    >= TARGET_PAGE_SIZE)) {
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+        /* We only validate access to the guest's user space, for which
+         * mmu_idx is set to 1. */
+        if (memcheck_instrument_mmu && mmu_idx == 1 &&
+            memcheck_validate_ld(addr, DATA_SIZE, (target_ulong)(retaddr - GETPC_ADJ))) {
+            /* Memory read breaks page boundary. So, if required, we
+             * must invalidate two caches in TLB. */
+            invalidate_cache = 2;
+        }
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
+        target_ulong addr1, addr2;
+        DATA_TYPE res1, res2;
+        unsigned shift;
+    do_unaligned_access:
+#ifdef ALIGNED_ONLY
+        do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
+#endif
+        addr1 = addr & ~(DATA_SIZE - 1);
+        addr2 = addr1 + DATA_SIZE;
+        /* Note the adjustment at the beginning of the function.
+           Undo that for the recursion.  */
+        res1 = helper_be_ld_name(env, addr1, mmu_idx, retaddr + GETPC_ADJ);
+        res2 = helper_be_ld_name(env, addr2, mmu_idx, retaddr + GETPC_ADJ);
+        shift = (addr & (DATA_SIZE - 1)) * 8;
+
+        /* Big-endian combine.  */
+        res = (res1 << shift) | (res2 >> ((DATA_SIZE * 8) - shift));
+        return res;
+    }
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+    if (DATA_SIZE == 1) {
+        if (memcheck_instrument_mmu && mmu_idx == 1) {
+            invalidate_cache = memcheck_validate_ld(addr, DATA_SIZE,
+                                                    (target_ulong)(retaddr + GETPC_ADJ));
+        }
+    }
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
+
+    /* Handle aligned access or unaligned access in the same page.  */
+#ifdef ALIGNED_ONLY
+    if ((addr & (DATA_SIZE - 1)) != 0) {
+        do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
+    }
+#endif
+
+    haddr = addr + env->tlb_table[mmu_idx][index].addend;
+    res = glue(glue(ld, LSUFFIX), _be_p)((uint8_t *)haddr);
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+    if (invalidate_cache) {
+        /* Accessed memory is under memchecker control. We must invalidate
+         * containing page(s) in order to make sure that next access to them
+         * will invoke _ld/_st_mmu. */
+        env->tlb_table[mmu_idx][index].addr_read ^= TARGET_PAGE_MASK;
+        env->tlb_table[mmu_idx][index].addr_write ^= TARGET_PAGE_MASK;
+        if ((invalidate_cache == 2) && (index < CPU_TLB_SIZE)) {
+            // Read crossed page boundaris. Invalidate second cache too.
+            env->tlb_table[mmu_idx][index + 1].addr_read ^= TARGET_PAGE_MASK;
+            env->tlb_table[mmu_idx][index + 1].addr_write ^= TARGET_PAGE_MASK;
+        }
+    }
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
     return res;
+}
+#endif /* DATA_SIZE > 1 */
+
+DATA_TYPE
+glue(glue(helper_ld, SUFFIX), MMUSUFFIX)(CPUArchState *env, target_ulong addr,
+                                         int mmu_idx)
+{
+    return helper_te_ld_name (env, addr, mmu_idx, GETRA());
 }
 
 #ifndef SOFTMMU_CODE_ACCESS
 
-static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(CPUArchState *env,
-                                                   target_ulong addr,
-                                                   DATA_TYPE val,
-                                                   int mmu_idx,
-                                                   uintptr_t retaddr);
+/* Provide signed versions of the load routines as well.  We can of course
+   avoid this for 64-bit data, or for 32-bit data on 32-bit host.  */
+#if DATA_SIZE * 8 < TCG_TARGET_REG_BITS
+WORD_TYPE helper_le_lds_name(CPUArchState *env, target_ulong addr,
+                             int mmu_idx, uintptr_t retaddr)
+{
+    return (SDATA_TYPE)helper_le_ld_name(env, addr, mmu_idx, retaddr);
+}
+
+# if DATA_SIZE > 1
+WORD_TYPE helper_be_lds_name(CPUArchState *env, target_ulong addr,
+                             int mmu_idx, uintptr_t retaddr)
+{
+    return (SDATA_TYPE)helper_be_ld_name(env, addr, mmu_idx, retaddr);
+}
+# endif
+#endif
 
 static inline void glue(io_write, SUFFIX)(CPUArchState *env,
                                           hwaddr physaddr,
@@ -260,16 +418,15 @@ static inline void glue(io_write, SUFFIX)(CPUArchState *env,
                                           target_ulong addr,
                                           uintptr_t retaddr)
 {
-    int index;
-    index = (physaddr >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
+    int index = (physaddr >> IO_MEM_SHIFT) & (IO_MEM_NB_ENTRIES - 1);
     physaddr = (physaddr & TARGET_PAGE_MASK) + addr;
     if (index > (IO_MEM_NOTDIRTY >> IO_MEM_SHIFT)
             && !can_do_io(env)) {
-        cpu_io_recompile(env, (uintptr_t)retaddr);
+        cpu_io_recompile(env, retaddr);
     }
 
     env->mem_io_vaddr = addr;
-    env->mem_io_pc = (unsigned long)retaddr;
+    env->mem_io_pc = retaddr;
 #if SHIFT <= 2
     io_mem_write(index, physaddr, val, 1 << SHIFT);
 #else
@@ -283,145 +440,239 @@ static inline void glue(io_write, SUFFIX)(CPUArchState *env,
 #endif /* SHIFT > 2 */
 }
 
-void glue(glue(helper_st, SUFFIX), MMUSUFFIX)(CPUArchState *env,
-                                              target_ulong addr,
-                                              DATA_TYPE val,
-                                              int mmu_idx)
+void helper_le_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
+                       int mmu_idx, uintptr_t retaddr)
 {
-    hwaddr ioaddr;
-    target_ulong tlb_addr;
-    uintptr_t retaddr;
-    int index;
+    int index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
+    target_ulong tlb_addr = env->tlb_table[mmu_idx][index].addr_write;
+    uintptr_t haddr;
+
 #ifdef CONFIG_ANDROID_MEMCHECK_MMU
     int invalidate_cache = 0;
 #endif  // CONFIG_ANDROID_MEMCHECK_MMU
 
-    index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
- redo:
-    tlb_addr = env->tlb_table[mmu_idx][index].addr_write;
-    if ((addr & TARGET_PAGE_MASK) == (tlb_addr & (TARGET_PAGE_MASK | TLB_INVALID_MASK))) {
-        if (tlb_addr & ~TARGET_PAGE_MASK) {
-            /* IO access */
-            if ((addr & (DATA_SIZE - 1)) != 0)
-                goto do_unaligned_access;
-            retaddr = GETPC();
-            ioaddr = env->iotlb[mmu_idx][index];
-            glue(io_write, SUFFIX)(env, ioaddr, val, addr, retaddr);
-        } else if (((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1) >= TARGET_PAGE_SIZE) {
-            /* This is not I/O access: do access verification. */
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-            /* We only validate access to the guest's user space, for which
-             * mmu_idx is set to 1. */
-            if (memcheck_instrument_mmu && mmu_idx == 1 &&
-                memcheck_validate_st(addr, DATA_SIZE, (uint64_t)val,
-                                     (target_ulong)(ptrdiff_t)GETPC())) {
-                /* Memory write breaks page boundary. So, if required, we
-                 * must invalidate two caches in TLB. */
-                invalidate_cache = 2;
-            }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
-        do_unaligned_access:
-            retaddr = GETPC();
+    /* Adjust the given return address.  */
+    retaddr -= GETPC_ADJ;
+
+    /* If the TLB entry is for a different page, reload and try again.  */
+    if ((addr & TARGET_PAGE_MASK)
+        != (tlb_addr & (TARGET_PAGE_MASK | TLB_INVALID_MASK))) {
 #ifdef ALIGNED_ONLY
+        if ((addr & (DATA_SIZE - 1)) != 0) {
             do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
-#endif
-            glue(glue(slow_st, SUFFIX), MMUSUFFIX)(env, addr, val,
-                                                   mmu_idx, retaddr);
-        } else {
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-            /* We only validate access to the guest's user space, for which
-             * mmu_idx is set to 1. */
-            if (memcheck_instrument_mmu && mmu_idx == 1) {
-                invalidate_cache = memcheck_validate_st(addr, DATA_SIZE,
-                                                        (uint64_t)val,
-                                                        (target_ulong)(ptrdiff_t)GETPC());
-            }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
-            /* aligned/unaligned access in the same page */
-#ifdef ALIGNED_ONLY
-            if ((addr & (DATA_SIZE - 1)) != 0) {
-                retaddr = GETPC();
-                do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
-            }
-#endif
-            uintptr_t addend = env->tlb_table[mmu_idx][index].addend;
-            glue(glue(st, SUFFIX), _raw)((uint8_t *)(intptr_t)
-                                         (addr + addend), val);
         }
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-        if (invalidate_cache) {
-            /* Accessed memory is under memchecker control. We must invalidate
-             * containing page(s) in order to make sure that next access to them
-             * will invoke _ld/_st_mmu. */
-            env->tlb_table[mmu_idx][index].addr_read ^= TARGET_PAGE_MASK;
-            env->tlb_table[mmu_idx][index].addr_write ^= TARGET_PAGE_MASK;
-            if ((invalidate_cache == 2) && (index < CPU_TLB_SIZE)) {
-                // Write crossed page boundaris. Invalidate second cache too.
-                env->tlb_table[mmu_idx][index + 1].addr_read ^= TARGET_PAGE_MASK;
-                env->tlb_table[mmu_idx][index + 1].addr_write ^= TARGET_PAGE_MASK;
-            }
-        }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
-    } else {
-        /* the page is not in the TLB : fill it */
-        retaddr = GETPC();
-#ifdef ALIGNED_ONLY
-        if ((addr & (DATA_SIZE - 1)) != 0)
-            do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
 #endif
         tlb_fill(env, addr, 1, mmu_idx, retaddr);
-        goto redo;
+        tlb_addr = env->tlb_table[mmu_idx][index].addr_write;
     }
+
+    /* Handle an IO access.  */
+    if (unlikely(tlb_addr & ~TARGET_PAGE_MASK)) {
+        hwaddr ioaddr;
+        if ((addr & (DATA_SIZE - 1)) != 0) {
+            goto do_unaligned_access;
+        }
+        ioaddr = env->iotlb[mmu_idx][index];
+
+        /* ??? Note that the io helpers always read data in the target
+           byte ordering.  We should push the LE/BE request down into io.  */
+        val = TGT_LE(val);
+        glue(io_write, SUFFIX)(env, ioaddr, val, addr, retaddr);
+        return;
+    }
+
+    /* Handle slow unaligned access (it spans two pages or IO).  */
+    if (DATA_SIZE > 1
+        && unlikely((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1
+                     >= TARGET_PAGE_SIZE)) {
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+        /* We only validate access to the guest's user space, for which
+         * mmu_idx is set to 1. */
+        if (memcheck_instrument_mmu && mmu_idx == 1 &&
+            memcheck_validate_st(addr, DATA_SIZE, (uint64_t)val,
+                                 (target_ulong)(retaddr + GETPC_ADJ))) {
+            /* Memory write breaks page boundary. So, if required, we
+             * must invalidate two caches in TLB. */
+            invalidate_cache = 2;
+        }
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
+        int i;
+    do_unaligned_access:
+#ifdef ALIGNED_ONLY
+        do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
+#endif
+        /* XXX: not efficient, but simple */
+        /* Note: relies on the fact that tlb_fill() does not remove the
+         * previous page from the TLB cache.  */
+        for (i = DATA_SIZE - 1; i >= 0; i--) {
+            /* Little-endian extract.  */
+            uint8_t val8 = val >> (i * 8);
+            /* Note the adjustment at the beginning of the function.
+               Undo that for the recursion.  */
+            glue(helper_ret_stb, MMUSUFFIX)(env, addr + i, val8,
+                                            mmu_idx, retaddr + GETPC_ADJ);
+        }
+        return;
+    }
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+    if (DATA_SIZE == 1) {
+        /* We only validate access to the guest's user space, for which
+         * mmu_idx is set to 1. */
+        if (memcheck_instrument_mmu && mmu_idx == 1) {
+            invalidate_cache = memcheck_validate_st(addr, DATA_SIZE,
+                                                    (uint64_t)val,
+                                                    (target_ulong)(retaddr + GETPC_ADJ));
+        }
+    }
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
+
+    /* Handle aligned access or unaligned access in the same page.  */
+#ifdef ALIGNED_ONLY
+    if ((addr & (DATA_SIZE - 1)) != 0) {
+        do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
+    }
+#endif
+
+    haddr = addr + env->tlb_table[mmu_idx][index].addend;
+#if DATA_SIZE == 1
+    glue(glue(st, SUFFIX), _p)((uint8_t *)haddr, val);
+#else
+    glue(glue(st, SUFFIX), _le_p)((uint8_t *)haddr, val);
+#endif
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+    if (invalidate_cache) {
+        /* Accessed memory is under memchecker control. We must invalidate
+         * containing page(s) in order to make sure that next access to them
+         * will invoke _ld/_st_mmu. */
+        env->tlb_table[mmu_idx][index].addr_read ^= TARGET_PAGE_MASK;
+        env->tlb_table[mmu_idx][index].addr_write ^= TARGET_PAGE_MASK;
+        if ((invalidate_cache == 2) && (index < CPU_TLB_SIZE)) {
+            // Write crossed page boundaris. Invalidate second cache too.
+            env->tlb_table[mmu_idx][index + 1].addr_read ^= TARGET_PAGE_MASK;
+            env->tlb_table[mmu_idx][index + 1].addr_write ^= TARGET_PAGE_MASK;
+        }
+    }
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
 }
 
-/* handles all unaligned cases */
-static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(CPUArchState *env,
-                                                   target_ulong addr,
-                                                   DATA_TYPE val,
-                                                   int mmu_idx,
-                                                   uintptr_t retaddr)
+#if DATA_SIZE > 1
+void helper_be_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
+                       int mmu_idx, uintptr_t retaddr)
 {
-    hwaddr ioaddr;
-    target_ulong tlb_addr;
-    int index, i;
+    int index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
+    target_ulong tlb_addr = env->tlb_table[mmu_idx][index].addr_write;
+    uintptr_t haddr;
 
-    index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
- redo:
-    tlb_addr = env->tlb_table[mmu_idx][index].addr_write;
-    if ((addr & TARGET_PAGE_MASK) == (tlb_addr & (TARGET_PAGE_MASK | TLB_INVALID_MASK))) {
-        if (tlb_addr & ~TARGET_PAGE_MASK) {
-            /* IO access */
-            if ((addr & (DATA_SIZE - 1)) != 0)
-                goto do_unaligned_access;
-            ioaddr = env->iotlb[mmu_idx][index];
-            glue(io_write, SUFFIX)(env, ioaddr, val, addr, retaddr);
-        } else if (((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1) >= TARGET_PAGE_SIZE) {
-        do_unaligned_access:
-            /* XXX: not efficient, but simple */
-            /* Note: relies on the fact that tlb_fill() does not remove the
-             * previous page from the TLB cache.  */
-            for(i = DATA_SIZE - 1; i >= 0; i--) {
-#ifdef TARGET_WORDS_BIGENDIAN
-                glue(slow_stb, MMUSUFFIX)(env,
-                                          addr + i, val >> (((DATA_SIZE - 1) * 8) - (i * 8)),
-                                          mmu_idx, retaddr);
-#else
-                glue(slow_stb, MMUSUFFIX)(env,
-                                          addr + i, val >> (i * 8),
-                                          mmu_idx, retaddr);
-#endif
-            }
-        } else {
-            /* aligned/unaligned access in the same page */
-            uintptr_t addend = env->tlb_table[mmu_idx][index].addend;
-            glue(glue(st, SUFFIX), _raw)((uint8_t *)(intptr_t)
-                                         (addr + addend), val);
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+    int invalidate_cache = 0;
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
+
+    /* Adjust the given return address.  */
+    retaddr -= GETPC_ADJ;
+
+    /* If the TLB entry is for a different page, reload and try again.  */
+    if ((addr & TARGET_PAGE_MASK)
+        != (tlb_addr & (TARGET_PAGE_MASK | TLB_INVALID_MASK))) {
+#ifdef ALIGNED_ONLY
+        if ((addr & (DATA_SIZE - 1)) != 0) {
+            do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
         }
-    } else {
-        /* the page is not in the TLB : fill it */
+#endif
         tlb_fill(env, addr, 1, mmu_idx, retaddr);
-        goto redo;
+        tlb_addr = env->tlb_table[mmu_idx][index].addr_write;
     }
+
+    /* Handle an IO access.  */
+    if (unlikely(tlb_addr & ~TARGET_PAGE_MASK)) {
+        hwaddr ioaddr;
+        if ((addr & (DATA_SIZE - 1)) != 0) {
+            goto do_unaligned_access;
+        }
+        ioaddr = env->iotlb[mmu_idx][index];
+
+        /* ??? Note that the io helpers always read data in the target
+           byte ordering.  We should push the LE/BE request down into io.  */
+        val = TGT_BE(val);
+        glue(io_write, SUFFIX)(env, ioaddr, val, addr, retaddr);
+        return;
+    }
+
+    /* Handle slow unaligned access (it spans two pages or IO).  */
+    if (DATA_SIZE > 1
+        && unlikely((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1
+                     >= TARGET_PAGE_SIZE)) {
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+        /* We only validate access to the guest's user space, for which
+         * mmu_idx is set to 1. */
+        if (memcheck_instrument_mmu && mmu_idx == 1 &&
+            memcheck_validate_st(addr, DATA_SIZE, (uint64_t)val,
+                                 (target_ulong)(retaddr + GETPC_ADJ))) {
+            /* Memory write breaks page boundary. So, if required, we
+             * must invalidate two caches in TLB. */
+            invalidate_cache = 2;
+        }
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
+        int i;
+    do_unaligned_access:
+#ifdef ALIGNED_ONLY
+        do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
+#endif
+        /* XXX: not efficient, but simple */
+        /* Note: relies on the fact that tlb_fill() does not remove the
+         * previous page from the TLB cache.  */
+        for (i = DATA_SIZE - 1; i >= 0; i--) {
+            /* Big-endian extract.  */
+            uint8_t val8 = val >> (((DATA_SIZE - 1) * 8) - (i * 8));
+            /* Note the adjustment at the beginning of the function.
+               Undo that for the recursion.  */
+            glue(helper_ret_stb, MMUSUFFIX)(env, addr + i, val8,
+                                            mmu_idx, retaddr + GETPC_ADJ);
+        }
+        return;
+    }
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+    if (DATA_SIZE == 1) {
+        /* We only validate access to the guest's user space, for which
+         * mmu_idx is set to 1. */
+        if (memcheck_instrument_mmu && mmu_idx == 1) {
+            invalidate_cache = memcheck_validate_st(addr, DATA_SIZE,
+                                                    (uint64_t)val,
+                                                    (target_ulong)(retaddr + GETPC_ADJ));
+        }
+    }
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
+
+    /* Handle aligned access or unaligned access in the same page.  */
+#ifdef ALIGNED_ONLY
+    if ((addr & (DATA_SIZE - 1)) != 0) {
+        do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
+    }
+#endif
+
+    haddr = addr + env->tlb_table[mmu_idx][index].addend;
+    glue(glue(st, SUFFIX), _be_p)((uint8_t *)haddr, val);
+#ifdef CONFIG_ANDROID_MEMCHECK_MMU
+    if (invalidate_cache) {
+        /* Accessed memory is under memchecker control. We must invalidate
+         * containing page(s) in order to make sure that next access to them
+         * will invoke _ld/_st_mmu. */
+        env->tlb_table[mmu_idx][index].addr_read ^= TARGET_PAGE_MASK;
+        env->tlb_table[mmu_idx][index].addr_write ^= TARGET_PAGE_MASK;
+        if ((invalidate_cache == 2) && (index < CPU_TLB_SIZE)) {
+            // Write crossed page boundaris. Invalidate second cache too.
+            env->tlb_table[mmu_idx][index + 1].addr_read ^= TARGET_PAGE_MASK;
+            env->tlb_table[mmu_idx][index + 1].addr_write ^= TARGET_PAGE_MASK;
+        }
+    }
+#endif  // CONFIG_ANDROID_MEMCHECK_MMU
+}
+#endif /* DATA_SIZE > 1 */
+
+void
+glue(glue(helper_st, SUFFIX), MMUSUFFIX)(CPUArchState *env, target_ulong addr,
+                                         DATA_TYPE val, int mmu_idx)
+{
+    helper_te_st_name(env, addr, val, mmu_idx, GETRA());
 }
 
 #endif /* !defined(SOFTMMU_CODE_ACCESS) */
@@ -430,6 +681,23 @@ static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(CPUArchState *env,
 #undef SHIFT
 #undef DATA_TYPE
 #undef SUFFIX
-#undef USUFFIX
+#undef LSUFFIX
 #undef DATA_SIZE
 #undef ADDR_READ
+#undef WORD_TYPE
+#undef SDATA_TYPE
+#undef USUFFIX
+#undef SSUFFIX
+#undef BSWAP
+#undef TGT_BE
+#undef TGT_LE
+#undef CPU_BE
+#undef CPU_LE
+#undef helper_le_ld_name
+#undef helper_be_ld_name
+#undef helper_le_lds_name
+#undef helper_be_lds_name
+#undef helper_le_st_name
+#undef helper_be_st_name
+#undef helper_te_ld_name
+#undef helper_te_st_name

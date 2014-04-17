@@ -432,6 +432,8 @@ static TCGv cpu_dspctrl, btarget, bcond;
 static TCGv_i32 hflags;
 static TCGv_i32 fpu_fcr0, fpu_fcr31;
 
+static uint32_t gen_opc_hflags[OPC_BUF_SIZE];
+
 #include "exec/gen-icount.h"
 
 #define gen_helper_0i(name, arg) do {                             \
@@ -8344,7 +8346,7 @@ gen_intermediate_code_internal (CPUMIPSState *env, TranslationBlock *tb,
                     tcg_ctx.gen_opc_instr_start[lj++] = 0;
             }
             tcg_ctx.gen_opc_pc[lj] = ctx.pc;
-            tcg_ctx.gen_opc_hflags[lj] = ctx.hflags & MIPS_HFLAG_BMASK;
+            gen_opc_hflags[lj] = ctx.hflags & MIPS_HFLAG_BMASK;
             tcg_ctx.gen_opc_instr_start[lj] = 1;
             tcg_ctx.gen_opc_icount[lj] = num_insns;
         }
@@ -8720,5 +8722,5 @@ void restore_state_to_opc(CPUMIPSState *env, TranslationBlock *tb, int pc_pos)
 {
     env->active_tc.PC = tcg_ctx.gen_opc_pc[pc_pos];
     env->hflags &= ~MIPS_HFLAG_BMASK;
-    env->hflags |= tcg_ctx.gen_opc_hflags[pc_pos];
+    env->hflags |= gen_opc_hflags[pc_pos];
 }

@@ -18,12 +18,13 @@
 #include "qemu-common.h"
 #include "android/utils/path.h"
 #include "cpu.h"
-#include "exec/softmmu_exec.h"
+#include "exec/cpu-all.h"
 
 #include "android/qemu/memcheck/memcheck_util.h"
 #include "android/qemu/memcheck/memcheck_proc_management.h"
 #include "android/qemu/memcheck/memcheck_logging.h"
 
+#include "exec/softmmu_exec.h"
 
 /* Gets symblos file path for the given module.
  * Param:
