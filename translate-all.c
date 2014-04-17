@@ -1099,7 +1099,7 @@ void tb_invalidate_phys_page_range(tb_page_addr_t start, tb_page_addr_t end,
 {
     TranslationBlock *tb, *tb_next, *saved_tb;
     CPUState *cpu = current_cpu;
-    CPUArchState *env = cpu->env_ptr;
+    CPUArchState *env = cpu ? cpu->env_ptr : NULL;
     tb_page_addr_t tb_start, tb_end;
     PageDesc *p;
     int n;

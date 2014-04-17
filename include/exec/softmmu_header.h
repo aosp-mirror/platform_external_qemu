@@ -114,7 +114,8 @@ glue(glue(cpu_lds, SUFFIX), MEMSUFFIX)(CPUArchState *env, target_ulong ptr)
     mmu_idx = CPU_MMU_INDEX;
     if (unlikely(env->tlb_table[mmu_idx][page_index].ADDR_READ !=
                  (addr & (TARGET_PAGE_MASK | (DATA_SIZE - 1))))) {
-        res = (DATA_STYPE)glue(glue(helper_ld, SUFFIX), MMUSUFFIX)(env, addr, mmu_idx);
+        res = (DATA_STYPE)glue(glue(helper_ld, SUFFIX),
+                               MMUSUFFIX)(env, addr, mmu_idx);
     } else {
         uintptr_t hostaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
         res = glue(glue(lds, SUFFIX), _raw)(hostaddr);

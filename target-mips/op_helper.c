@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include "cpu.h"
 #include "qemu/host-utils.h"
-
+#include "tcg.h"
 #include "helper.h"
 
 #if !defined(CONFIG_USER_ONLY)
