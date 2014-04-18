@@ -657,11 +657,68 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
                 }
             }
             break;
+        CASE_OP_32_64(xor):
+        CASE_OP_32_64(nand):
+            if (temps[args[1]].state != TCG_TEMP_CONST
+                && temps[args[2]].state == TCG_TEMP_CONST
+                && temps[args[2]].val == -1) {
+                i = 1;
+                goto try_not;
+            }
+            break;
+        CASE_OP_32_64(nor):
+            if (temps[args[1]].state != TCG_TEMP_CONST
+                && temps[args[2]].state == TCG_TEMP_CONST
+                && temps[args[2]].val == 0) {
+                i = 1;
+                goto try_not;
+            }
+            break;
+        CASE_OP_32_64(andc):
+            if (temps[args[2]].state != TCG_TEMP_CONST
+                && temps[args[1]].state == TCG_TEMP_CONST
+                && temps[args[1]].val == -1) {
+                i = 2;
+                goto try_not;
+            }
+            break;
+        CASE_OP_32_64(orc):
+        CASE_OP_32_64(eqv):
+            if (temps[args[2]].state != TCG_TEMP_CONST
+                && temps[args[1]].state == TCG_TEMP_CONST
+                && temps[args[1]].val == 0) {
+                i = 2;
+                goto try_not;
+            }
+            break;
+        try_not:
+            {
+                TCGOpcode not_op;
+                bool have_not;
+
+                if (def->flags & TCG_OPF_64BIT) {
+                    not_op = INDEX_op_not_i64;
+                    have_not = TCG_TARGET_HAS_not_i64;
+                } else {
+                    not_op = INDEX_op_not_i32;
+                    have_not = TCG_TARGET_HAS_not_i32;
+                }
+                if (!have_not) {
+                    break;
+                }
+                s->gen_opc_buf[op_index] = not_op;
+                reset_temp(args[0]);
+                gen_args[0] = args[0];
+                gen_args[1] = args[i];
+                args += 3;
+                gen_args += 2;
+                continue;
+            }
         default:
             break;
         }
 
-        /* Simplify expression for "op r, a, 0 => mov r, a" cases */
+        /* Simplify expression for "op r, a, const => mov r, a" cases */
         switch (op) {
         CASE_OP_32_64(add):
         CASE_OP_32_64(sub):
@@ -672,12 +729,23 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
         CASE_OP_32_64(rotr):
         CASE_OP_32_64(or):
         CASE_OP_32_64(xor):
-            if (temps[args[1]].state == TCG_TEMP_CONST) {
-                /* Proceed with possible constant folding. */
-                break;
-            }
-            if (temps[args[2]].state == TCG_TEMP_CONST
+        CASE_OP_32_64(andc):
+            if (temps[args[1]].state != TCG_TEMP_CONST
+                && temps[args[2]].state == TCG_TEMP_CONST
                 && temps[args[2]].val == 0) {
+                goto do_mov3;
+            }
+                break;
+        CASE_OP_32_64(and):
+        CASE_OP_32_64(orc):
+        CASE_OP_32_64(eqv):
+            if (temps[args[1]].state != TCG_TEMP_CONST
+                && temps[args[2]].state == TCG_TEMP_CONST
+                && temps[args[2]].val == -1) {
+                goto do_mov3;
+            }
+            break;
+        do_mov3:
                 if (temps_are_copies(args[0], args[1])) {
                     s->gen_opc_buf[op_index] = INDEX_op_nop;
                 } else {
@@ -687,13 +755,12 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
                 }
                 args += 3;
                 continue;
-            }
-            break;
         default:
             break;
         }
 
-        /* Simplify using known-zero bits */
+        /* Simplify using known-zero bits. Currently only ops with a single
+           output argument is supported. */
         mask = -1;
         affected = -1;
         switch (op) {
@@ -728,16 +795,36 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
             mask = temps[args[1]].mask & mask;
             break;
 
-        CASE_OP_32_64(sar):
+        CASE_OP_32_64(andc):
+            /* Known-zeros does not imply known-ones.  Therefore unless
+               args[2] is constant, we can't infer anything from it.  */
             if (temps[args[2]].state == TCG_TEMP_CONST) {
-                mask = ((tcg_target_long)temps[args[1]].mask
-                        >> temps[args[2]].val);
+                mask = ~temps[args[2]].mask;
+                goto and_const;
+            }
+            /* But we certainly know nothing outside args[1] may be set. */
+            mask = temps[args[1]].mask;
+            break;
+
+        case INDEX_op_sar_i32:
+            if (temps[args[2]].state == TCG_TEMP_CONST) {
+                mask = (int32_t)temps[args[1]].mask >> temps[args[2]].val;
+            }
+            break;
+        case INDEX_op_sar_i64:
+            if (temps[args[2]].state == TCG_TEMP_CONST) {
+                mask = (int64_t)temps[args[1]].mask >> temps[args[2]].val;
             }
             break;
 
-        CASE_OP_32_64(shr):
+        case INDEX_op_shr_i32:
             if (temps[args[2]].state == TCG_TEMP_CONST) {
-                mask = temps[args[1]].mask >> temps[args[2]].val;
+                mask = (uint32_t)temps[args[1]].mask >> temps[args[2]].val;
+            }
+            break;
+        case INDEX_op_shr_i64:
+            if (temps[args[2]].state == TCG_TEMP_CONST) {
+                mask = (uint64_t)temps[args[1]].mask >> temps[args[2]].val;
             }
             break;
 
@@ -771,10 +858,39 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
             mask = temps[args[3]].mask | temps[args[4]].mask;
             break;
 
+        CASE_OP_32_64(ld8u):
+        case INDEX_op_qemu_ld8u:
+            mask = 0xff;
+            break;
+        CASE_OP_32_64(ld16u):
+        case INDEX_op_qemu_ld16u:
+            mask = 0xffff;
+            break;
+        case INDEX_op_ld32u_i64:
+#if TCG_TARGET_REG_BITS == 64
+        case INDEX_op_qemu_ld32u:
+#endif
+            mask = 0xffffffffu;
+            break;
+
+        CASE_OP_32_64(qemu_ld):
+            {
+                TCGMemOp mop = args[def->nb_oargs + def->nb_iargs];
+                if (!(mop & MO_SIGN)) {
+                    mask = (2ULL << ((8 << (mop & MO_SIZE)) - 1)) - 1;
+                }
+            }
+            break;
+
         default:
             break;
         }
 
+        /* 32-bit ops (non 64-bit ops and non load/store ops) generate 32-bit
+           results */
+        if (!(def->flags & (TCG_OPF_CALL_CLOBBER | TCG_OPF_64BIT))) {
+            mask &= 0xffffffffu;
+        }
         if (mask == 0) {
             assert(def->nb_oargs == 1);
             s->gen_opc_buf[op_index] = op_to_movi(op);
@@ -841,6 +957,7 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
 
         /* Simplify expression for "op r, a, a => movi r, 0" cases */
         switch (op) {
+        CASE_OP_32_64(andc):
         CASE_OP_32_64(sub):
         CASE_OP_32_64(xor):
             if (temps_are_copies(args[1], args[2])) {
@@ -1142,6 +1259,11 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
             } else {
                 for (i = 0; i < def->nb_oargs; i++) {
                     reset_temp(args[i]);
+                    /* Save the corresponding known-zero bits mask for the
+                       first output argument (only one supported so far). */
+                    if (i == 0) {
+                        temps[args[i]].mask = mask;
+                    }
                 }
             }
             for (i = 0; i < def->nb_args; i++) {
