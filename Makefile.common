@@ -123,6 +123,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/files/PathUtils.cpp \
 	android/base/Log.cpp \
 	android/base/String.cpp \
+	android/base/StringFormat.cpp \
 	android/base/StringView.cpp \
 	android/filesystems/ext4_utils.cpp \
 	android/utils/assert.c \
