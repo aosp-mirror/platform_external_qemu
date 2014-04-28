@@ -28,24 +28,18 @@
  *  p - Pointer to increment.
  *  n - Number of bytes to increment the pointer with.
  */
-#define INC_PTR(p, n)   (reinterpret_cast<uint8_t*>(p) + (n))
+static inline uint8_t* INC_PTR(void* p, size_t n) {
+    return reinterpret_cast<uint8_t*>(p) + n;
+}
 
 /* Increments a constant pointer by n bytes.
  * Param:
  *  p - Pointer to increment.
  *  n - Number of bytes to increment the pointer with.
  */
-#define INC_CPTR(p, n)  (reinterpret_cast<const uint8_t*>(p) + (n))
-
-/* Increments a pointer of a given type by n bytes.
- * Param:
- *  T - Pointer type
- *  p - Pointer to increment.
- *  n - Number of bytes to increment the pointer with.
- */
-#define INC_PTR_T(T, p, n)                              \
-    reinterpret_cast<T*>                                \
-        (reinterpret_cast<uint8_t*>(p) + (n))
+static inline const uint8_t* INC_CPTR(const void* p, size_t n) {
+    return reinterpret_cast<const uint8_t*>(p) + n;
+}
 
 /* Increments a constant pointer of a given type by n bytes.
  * Param:
@@ -53,9 +47,19 @@
  *  p - Pointer to increment.
  *  n - Number of bytes to increment the pointer with.
  */
-#define INC_CPTR_T(T, p, n)                                 \
-    reinterpret_cast<const T*>                              \
-        (reinterpret_cast<const uint8_t*>(p) + (n))
+template <typename T>
+static inline const T* INC_CPTR_T_INNER_TEMPLATE(const void* p, size_t n) {
+    union {
+        const void* p;
+        const uint8_t* p8;
+        const T* pt;
+    } u;
+    u.p = p;
+    u.p8 += n;
+    return u.pt;
+}
+
+#define INC_CPTR_T(T, p, n) INC_CPTR_T_INNER_TEMPLATE<T>(p, n)
 
 /* Calculates number of entries in a static array.
  * Param:
@@ -71,7 +75,7 @@
  *  T - Structure (or class) type.
  *  f - Name of a field (member variable) for this structure (or class).
  */
-#define ELFF_FIELD_OFFSET(T, f) ((size_t)(size_t*)&(((T *)0)->f))
+#define ELFF_FIELD_OFFSET(T, f)  offsetof(T, f)
 
 //=============================================================================
 // Inline routines.
@@ -131,13 +135,5 @@ is_little_endian_cpu(void) {
   /* Lets see if byte has flipped for little-endian. */
   return get_byte(&tmp, 0) == 0xFF;
 }
-
-/* Use in printf() statements to dump 64-bit values
- */
-#ifdef _WIN32
-#  define FMT_I64  "I64"
-#else
-#  define FMT_I64  "ll"
-#endif
 
 #endif  // ELFF_ELF_DEFS_H_

@@ -104,11 +104,15 @@ EOF
 fi
 
 # On Linux, try to use our prebuilt toolchain to generate binaries
-# that are compatible with Ubuntu 8.04
+# that are compatible with Ubuntu 10.4
 if [ -z "$CC" -a -z "$OPTION_CC" -a "$HOST_OS" = linux ] ; then
-    PROBE_HOST_CC=`dirname $0`/../../prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-gcc
-    if [ ! -f "$PROBE_HOST_CC" ] ; then
-        PROBE_HOST_CC=`dirname $0`/../../prebuilts/tools/gcc-sdk/gcc
+    PREBUILTS_HOST_GCC=$(dirname $0)/../../prebuilts/gcc/linux-x86/host
+    PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
+    if [ ! -f "$PROBE_HOST_CC" ]; then
+        PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-gcc
+        if [ ! -f "$PROBE_HOST_CC" ] ; then
+            PROBE_HOST_CC=$(dirname $0)/../../prebuilts/tools/gcc-sdk/gcc
+        fi
     fi
     if [ -f "$PROBE_HOST_CC" ] ; then
         echo "Using prebuilt toolchain: $PROBE_HOST_CC"
