@@ -349,7 +349,7 @@ void pci_register_bar(PCIDevice *pci_dev, int region_num,
     } else {
         addr = 0x10 + region_num * 4;
     }
-    *(uint32_t *)(pci_dev->config + addr) = cpu_to_le32(type);
+    pci_set_long(pci_dev->config + addr, type);
 }
 
 static void pci_update_mappings(PCIDevice *d)
@@ -358,7 +358,7 @@ static void pci_update_mappings(PCIDevice *d)
     int cmd, i;
     uint32_t last_addr, new_addr, config_ofs;
 
-    cmd = le16_to_cpu(*(uint16_t *)(d->config + PCI_COMMAND));
+    cmd = pci_get_word(d->config + PCI_COMMAND);
     for(i = 0; i < PCI_NUM_REGIONS; i++) {
         r = &d->io_regions[i];
         if (i == PCI_ROM_SLOT) {
@@ -369,8 +369,7 @@ static void pci_update_mappings(PCIDevice *d)
         if (r->size != 0) {
             if (r->type & PCI_ADDRESS_SPACE_IO) {
                 if (cmd & PCI_COMMAND_IO) {
-                    new_addr = le32_to_cpu(*(uint32_t *)(d->config +
-                                                         config_ofs));
+                    new_addr = pci_get_long(d->config + config_ofs);
                     new_addr = new_addr & ~(r->size - 1);
                     last_addr = new_addr + r->size - 1;
                     /* NOTE: we have only 64K ioports on PC */
@@ -383,8 +382,7 @@ static void pci_update_mappings(PCIDevice *d)
                 }
             } else {
                 if (cmd & PCI_COMMAND_MEMORY) {
-                    new_addr = le32_to_cpu(*(uint32_t *)(d->config +
-                                                         config_ofs));
+                    new_addr = pci_get_long(d->config + config_ofs);
                     /* the ROM slot has a specific enable bit */
                     if (i == PCI_ROM_SLOT && !(new_addr & 1))
                         goto no_mem_map;
@@ -441,13 +439,13 @@ uint32_t pci_default_read_config(PCIDevice *d,
     default:
     case 4:
 	if (address <= 0xfc) {
-	    val = le32_to_cpu(*(uint32_t *)(d->config + address));
+	    val = pci_get_long(d->config + address);
 	    break;
 	}
 	/* fall through */
     case 2:
         if (address <= 0xfe) {
-	    val = le16_to_cpu(*(uint16_t *)(d->config + address));
+	    val = pci_get_word(d->config + address);
 	    break;
 	}
 	/* fall through */
@@ -485,7 +483,7 @@ void pci_default_write_config(PCIDevice *d,
             val &= ~(r->size - 1);
             val |= r->type;
         }
-        *(uint32_t *)(d->config + address) = cpu_to_le32(val);
+        pci_set_long(d->config + address, val);
         pci_update_mappings(d);
         return;
     }
@@ -729,7 +727,7 @@ static void pci_info_device(PCIDevice *d)
 
     monitor_printf(mon, "  Bus %2d, device %3d, function %d:\n",
                    d->bus->bus_num, d->devfn >> 3, d->devfn & 7);
-    class = le16_to_cpu(*((uint16_t *)(d->config + PCI_CLASS_DEVICE)));
+    class = pci_get_word(d->config + PCI_CLASS_DEVICE);
     monitor_printf(mon, "    ");
     desc = pci_class_descriptions;
     while (desc->desc && class != desc->class)
