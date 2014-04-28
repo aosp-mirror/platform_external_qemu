@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <android/utils/compiler.h>
 #include <android/utils/panic.h>
 #include <android/utils/path.h>
 #include <android/utils/bufprint.h>
@@ -68,14 +69,14 @@ static char* getTargetEmulatorPath(const char* progName, const char* avdArch, co
 static char* getSharedLibraryPath(const char* progName, const char* libName);
 static void  prependSharedLibraryPath(const char* prefix);
 
-/* The execv() definition in mingw is slightly bogus.
+/* The execv() definition in older mingw is slightly bogus.
  * It takes a second argument of type 'const char* const*'
  * while POSIX mandates char** instead.
  *
  * To avoid compiler warnings, define the safe_execv macro
  * to perform an explicit cast with mingw.
  */
-#ifdef _WIN32
+#if defined(_WIN32) && !ANDROID_GCC_PREREQ(4,4)
 #  define safe_execv(_filepath,_argv)  execv((_filepath),(const char* const*)(_argv))
 #else
 #  define safe_execv(_filepath,_argv)  execv((_filepath),(_argv))

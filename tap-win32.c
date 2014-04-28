@@ -576,7 +576,6 @@ static int tap_win32_open(tap_win32_overlapped_t **phandle,
     } version;
     DWORD version_len;
     DWORD idThread;
-    HANDLE hThread;
 
     if (prefered_name != NULL)
         snprintf(name_buffer, sizeof(name_buffer), "%s", prefered_name);
@@ -620,8 +619,8 @@ static int tap_win32_open(tap_win32_overlapped_t **phandle,
 
     *phandle = &tap_overlapped;
 
-    hThread = CreateThread(NULL, 0, tap_win32_thread_entry,
-                           (LPVOID)&tap_overlapped, 0, &idThread);
+    (void) CreateThread(NULL, 0, tap_win32_thread_entry,
+                        (LPVOID)&tap_overlapped, 0, &idThread);
     return 0;
 }
 

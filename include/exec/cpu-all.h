@@ -325,7 +325,7 @@ extern unsigned long reserved_va;
 #define TARGET_PAGE_MASK ~(TARGET_PAGE_SIZE - 1)
 #define TARGET_PAGE_ALIGN(addr) (((addr) + TARGET_PAGE_SIZE - 1) & TARGET_PAGE_MASK)
 #ifdef TARGET_X86_64
-#define TARGET_PTE_MASK 0x7fffffffffff
+#define TARGET_PTE_MASK 0x7fffffffffffULL
 #endif
 
 /* ??? These should be the larger of uintptr_t and target_ulong.  */

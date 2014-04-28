@@ -642,13 +642,12 @@ int hax_vcpu_exec(CPUState *cpu)
     {
         case HAX_EMUL_ONE:
             ret = 1;
-            cpu->hax_vcpu->emulation_state = HAX_EMULATE_STATE_MMIO;
+            vcpu->emulation_state = HAX_EMULATE_STATE_MMIO;
             hax_prepare_emulation(env);
             break;
         case HAX_EMUL_REAL:
             ret = 1;
-            cpu->hax_vcpu->emulation_state =
-              HAX_EMULATE_STATE_REAL;
+            vcpu->emulation_state = HAX_EMULATE_STATE_REAL;
             hax_prepare_emulation(env);
             break;
         case HAX_EMUL_HLT:
