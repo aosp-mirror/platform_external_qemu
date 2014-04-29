@@ -24,7 +24,7 @@
 #ifndef _SDL_gapidibvideo_h
 #define _SDL_gapidibvideo_h
 
-#define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 
 /* Hidden "this" pointer for the video functions */

@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "cpu.h"
+#include "qemu-common.h"
 #include "migration/qemu-file.h"
 #include "hw/android/goldfish/device.h"
 #include "hw/hw.h"
@@ -266,7 +267,9 @@ static void goldfish_mmc_do_command(struct goldfish_mmc_state *s, uint32_t cmd, 
                 m = (uint32_t)(capacity / (512*1024)) - 1;
                 // m must fit into 22 bits
                 if (m & 0xFFC00000) {
-                    fprintf(stderr, "SD card too big (%lld bytes).  Maximum SDHC card size is 128 gigabytes.\n", (long long)capacity);
+                    fprintf(stderr, "SD card too big (%" PRId64 " bytes).  "
+                            "Maximum SDHC card size is 128 gigabytes.\n",
+                            capacity);
                     abort();
                 }
 
@@ -292,7 +295,9 @@ static void goldfish_mmc_do_command(struct goldfish_mmc_state *s, uint32_t cmd, 
                 exponent = 0;
                 capacity = sector_count * 512;
                 if (capacity > 2147483648U) {
-                    fprintf(stderr, "SD card too big (%lld bytes).  Maximum SD card size is 2 gigabytes.\n", (long long)capacity);
+                    fprintf(stderr, "SD card too big (%" PRIu64 " bytes). "
+                            "Maximum SD card size is 2 gigabytes.\n",
+                            capacity);
                     abort();
                 }
                 capacity >>= 10; // convert to Kbytes

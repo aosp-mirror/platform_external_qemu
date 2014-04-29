@@ -151,6 +151,13 @@ ifneq ($(combo_target)$(TARGET_SIMULATOR),HOST_true)
   endif
 endif
 
+ifeq ($(HOST_OS)-$(BUILD_STANDALONE_EMULATOR),windows-true)
+  # Ensure that printf() et al use GNU printf format specifiers as required
+  # by QEMU. This is important when using the newer Mingw64 cross-toolchain.
+  # See http://sourceforge.net/apps/trac/mingw-w64/wiki/gnu%20printf
+  MY_CFLAGS += -D__USE_MINGW_ANSI_STDIO=1
+endif
+
 # Enable warning, except those related to missing field initializers
 # (the QEMU coding style loves using these).
 #
@@ -218,7 +225,7 @@ endef
 #
 QEMU_SYSTEM_LDLIBS := -lm
 ifeq ($(HOST_OS),windows)
-  QEMU_SYSTEM_LDLIBS += -mno-cygwin -mwindows -mconsole
+  QEMU_SYSTEM_LDLIBS += -mwindows -mconsole
 endif
 
 ifeq ($(HOST_OS),freebsd)

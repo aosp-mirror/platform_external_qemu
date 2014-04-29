@@ -284,7 +284,7 @@ path_mkdir( const char*  path, int  mode )
 {
 #ifdef _WIN32
     (void)mode;
-    return _mkdir(path);
+    return mkdir(path);
 #else
     return HANDLE_EINTR(mkdir(path, mode));
 #endif

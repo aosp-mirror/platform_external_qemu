@@ -1174,7 +1174,7 @@ ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
            0xff, size >> TARGET_PAGE_BITS);
     //cpu_physical_memory_set_dirty_range(new_block->offset, size, 0xff);
 
-    //qemu_ram_setup_dump(new_block->host, size);
+    qemu_ram_setup_dump(new_block->host, size);
     //qemu_madvise(new_block->host, size, QEMU_MADV_HUGEPAGE);
     //qemu_madvise(new_block->host, size, QEMU_MADV_DONTFORK);
 
