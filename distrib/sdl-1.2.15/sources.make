@@ -265,6 +265,7 @@ SDLMAIN_SOURCES := $(SRCS:%=src/main/%)
 
 $(call start-emulator-library,emulator_libSDLmain)
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+LOCAL_CFLAGS += $(SDL_CFLAGS)
 LOCAL_SRC_FILES := $(SDLMAIN_SOURCES)
 $(call end-emulator-library)
 

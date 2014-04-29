@@ -62,8 +62,12 @@ public:
 
     // Return current capacity.
     size_t capacity() const {
-        return (mStr == mStorage) ? kMinCapacity : mCapacity;
+        return (mStr == mStorage) ?
+                static_cast<size_t>(kMinCapacity) : mCapacity;
     }
+
+    // Clear the content of a given instance.
+    void clear() { resize(0); }
 
     // Array indexing operators.
     char& operator[](size_t index) { return mStr[index]; }

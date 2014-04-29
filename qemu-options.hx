@@ -1340,12 +1340,22 @@ Enable KVM full virtualization support. This option is only available
 if KVM support is enabled when compiling.
 ETEXI
 
+#ifdef CONFIG_HAX
+DEF("enable-hax", 0, QEMU_OPTION_enable_hax, \
+    "-enable-hax    Enable HAX full virtualization support\n")
 DEF("disable-hax", 0, QEMU_OPTION_disable_hax, \
     "-disable-hax   Disable HAX full virtualization support\n")
+#endif
+STEXI
+@item -enable-hax
+Enable HAX (Hardware-based Acceleration eXecution) support. This option is
+only supported on Max OS X and Windows platforms, if you have an Intel CPU
+which support the VT-x extension. It does not conflict with KVM.
+ETEXI
+
 STEXI
 @item -disable-hax
-Disable HAX (Hardware-based Acceleration eXecution) support. When HAX
-support is detected, the emulator will enable it by default. This
+Disable HAX (Hardware-based Acceleration eXecution) support. This
 option will disable the default action. HAX is supported only on Mac OS X
 and Windows platforms (if VT is present), and it does not conflict
 with KVM.

@@ -331,6 +331,7 @@ common_LOCAL_SRC_FILES := \
     vl-android.c \
     android/cmdline-option.c \
     android/console.c \
+    android/cpu_accelerator.cpp \
     android/display.c \
     android/display-core.c \
     android/help.c \

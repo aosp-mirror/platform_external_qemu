@@ -734,6 +734,39 @@ help_snapshot_list(stralloc_t*  out)
 }
 
 static void
+help_accel(stralloc_t *out)
+{
+    PRINTF(
+        "  Use '-accel <mode>' to control how CPU emulation can be accelerated\n"
+        "  when launching the Android emulator. Accelerated emulation only works\n"
+        "  for x86 and x86_64 system images. On Linux, it relies on KVM being\n"
+        "  installed. On Windows and OS X, it relies on an Intel CPU and the\n"
+        "  Intel HAXM driver being installed on your development machine.\n"
+        "  Valid values for <mode> are:\n\n"
+
+        "     auto   The default, determines automatically if acceleration\n"
+        "            is supported, and uses it when possible.\n\n"
+
+        "     off    Disables acceleration entirely. Mostly useful for debugging.\n\n"
+
+        "     on     Force acceleration. If KVM/HAXM is not installed or usable,\n"
+        "            the emulator will refuse to start and print an error message.\n\n"
+
+        "  Note that this flag is ignored if you're not emulating an x86 or x86_64\n"
+    );
+}
+
+static void
+help_no_accel(stralloc_t* out)
+{
+    PRINTF(
+        "  Use '-no-accel' as a shortcut to '-accel off', i.e. to disable accelerated\n"
+        "  CPU emulation, when emulating an x86 or x86_64 system image. Only useful\n"
+        "  for debugging.\n"
+    );
+}
+
+static void
 help_skindir(stralloc_t*  out)
 {
     PRINTF(

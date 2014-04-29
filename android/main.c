@@ -36,6 +36,7 @@
 #include "android/utils/debug.h"
 #include "android/config-file.h"
 #include "android/config/config.h"
+#include "android/cpu_accelerator.h"
 
 #include "android/user-config.h"
 #include "android/utils/bufprint.h"
@@ -1201,6 +1202,91 @@ int main(int argc, char **argv)
         args[n++] = "-net";
         args[n++] = "socket,vlan=1,mcast=230.0.0.10:1234";
     }
+
+    /* Handle CPU acceleration options. */
+    if (opts->no_accel) {
+        if (opts->accel) {
+            if (strcmp(opts->accel, "off") != 0) {
+                derror("You cannot use -no-accel and '-accel %s' at the same time",
+                       opts->accel);
+                exit(1);
+            }
+        } else {
+            AFREE(opts->accel);
+            opts->accel = ASTRDUP("off");
+        }
+    }
+
+    enum {
+        ACCEL_OFF = 0,
+        ACCEL_ON = 1,
+        ACCEL_AUTO = 2,
+    } accel_mode = ACCEL_AUTO;
+
+    if (opts->accel) {
+        if (!strcmp(opts->accel, "off")) {
+            accel_mode = ACCEL_OFF;
+        } else if (!strcmp(opts->accel, "on")) {
+            accel_mode = ACCEL_ON;
+        } else if (!strcmp(opts->accel, "auto")) {
+            accel_mode = ACCEL_AUTO;
+        } else {
+            derror("Invalid '-accel %s' parameter, valid values are: on off auto\n",
+                   opts->accel);
+            exit(1);
+        }
+    }
+
+#if defined(TARGET_I386) || defined(TARGET_X86_64)
+    char* accel_status = NULL;
+    bool accel_ok = android_hasCpuAcceleration(&accel_status);
+
+#ifdef __linux__
+    static const char kEnableAccelerator[] = "-enable-kvm";
+    static const char kDisableAccelerator[] = "-disable-kvm";
+#else
+    static const char kEnableAccelerator[] = "-enable-hax";
+    static const char kDisableAccelerator[] = "-disable-hax";
+#endif
+
+    // Dump CPU acceleration status.
+    if (VERBOSE_CHECK(init)) {
+        const char* accel_str = "DISABLED";
+        if (accel_ok) {
+            if (accel_mode == ACCEL_OFF) {
+                accel_str = "working, but disabled by user";
+            } else {
+                accel_str = "working";
+            }
+        }
+        dprint("CPU Acceleration: %s", accel_str);
+        dprint("CPU Acceleration status: %s", accel_status);
+    }
+
+    // CPU acceleration only works for x86 and x86_64 system images.
+    if (accel_mode == ACCEL_OFF && accel_ok) {
+        args[n++] = ASTRDUP(kDisableAccelerator);
+    } else if (accel_mode == ACCEL_ON) {
+        if (!accel_ok) {
+            derror("CPU acceleration not supported on this machine!");
+            derror("Reason: %s", accel_status);
+            exit(1);
+        }
+        args[n++] = ASTRDUP(kEnableAccelerator);
+    } else {
+        args[n++] = accel_ok ? ASTRDUP(kEnableAccelerator)
+                             : ASTRDUP(kDisableAccelerator);
+    }
+
+    AFREE(accel_status);
+#else
+    (void)accel_mode;
+
+    if (VERBOSE_CHECK(init)) {
+        dwarning("CPU acceleration only works with x86/x86_64 "
+            "system images.");
+    }
+#endif
 
     /* Setup screen emulation */
     if (opts->screen) {
