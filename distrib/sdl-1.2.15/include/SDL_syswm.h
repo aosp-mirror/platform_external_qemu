@@ -129,7 +129,7 @@ typedef struct SDL_SysWMinfo {
 } SDL_SysWMinfo;
 
 #elif defined(SDL_VIDEO_DRIVER_WINDIB) || defined(SDL_VIDEO_DRIVER_DDRAW) || defined(SDL_VIDEO_DRIVER_GAPI)
-#define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 
 /** The windows custom event structure */

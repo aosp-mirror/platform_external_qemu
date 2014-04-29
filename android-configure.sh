@@ -487,6 +487,16 @@ feature_check_header HAVE_BYTESWAP_H      "<byteswap.h>"
 feature_check_header HAVE_MACHINE_BSWAP_H "<machine/bswap.h>"
 feature_check_header HAVE_FNMATCH_H       "<fnmatch.h>"
 
+# check for Mingw version.
+MINGW_VERSION=
+if [ "$TARGET_OS" = "windows" ]; then
+log "Mingw      : Probing for GCC version."
+GCC_VERSION=$($CC -v 2>&1 | awk '$1 == "gcc" && $2 == "version" { print $3; }')
+GCC_MAJOR=$(echo "$GCC_VERSION" | cut -f1 -d.)
+GCC_MINOR=$(echo "$GCC_VERSION" | cut -f2 -d.)
+log "Mingw      : Found GCC version $GCC_MAJOR.$GCC_MINOR [$GCC_VERSION]"
+MINGW_GCC_VERSION=$(( $GCC_MAJOR * 100 + $GCC_MINOR ))
+fi
 # Build the config.make file
 #
 
@@ -583,6 +593,7 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     echo "" >> $config_mk
     echo "USE_MINGW := 1" >> $config_mk
     echo "HOST_OS   := windows" >> $config_mk
+    echo "HOST_MINGW_VERSION := $MINGW_GCC_VERSION" >> $config_mk
 fi
 
 if [ "$HOST_OS" = "darwin" ]; then

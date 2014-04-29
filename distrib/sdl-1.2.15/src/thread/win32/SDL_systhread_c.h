@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-#define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 
 typedef HANDLE SYS_ThreadHandle;

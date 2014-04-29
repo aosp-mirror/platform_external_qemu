@@ -494,7 +494,8 @@ writev(int fd, const struct iovec *iov, int iov_cnt)
 }
 #endif
 
-#ifdef WIN32
+#if defined(_WIN32) && !QEMU_GNUC_PREREQ(4,4)
+// Older Mingw32 didn't provide these.
 int asprintf( char **, const char *, ... );
 int vasprintf( char **, const char *, va_list );
 
@@ -516,4 +517,4 @@ int asprintf( char **sptr, const char *fmt, ... )
     va_end( argv );
     return retval;
 }
-#endif
+#endif  // _WIN32 && !QEMU_GNUC_PREREQ(4,4)

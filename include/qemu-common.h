@@ -12,6 +12,7 @@
 #ifndef QEMU_COMMON_H
 #define QEMU_COMMON_H
 
+#include <inttypes.h>
 #include <setjmp.h>
 
 #include "qemu/compiler.h"
@@ -107,12 +108,7 @@ static inline char *realpath(const char *path, char *resolved_path)
     _fullpath(resolved_path, path, _MAX_PATH);
     return resolved_path;
 }
-
-#define PRId64 "I64d"
-#define PRIx64 "I64x"
-#define PRIu64 "I64u"
-#define PRIo64 "I64o"
-#endif
+#endif /* _WIN32 */
 
 /* bottom halves */
 typedef void QEMUBHFunc(void *opaque);

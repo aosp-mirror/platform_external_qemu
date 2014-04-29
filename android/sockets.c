@@ -1210,11 +1210,11 @@ static void socket_cleanup(void)
 int socket_init(void)
 {
     WSADATA Data;
-    int ret, err;
+    int ret;
 
     ret = WSAStartup(MAKEWORD(2,2), &Data);
     if (ret != 0) {
-        err = WSAGetLastError();
+        (void) WSAGetLastError();
         return -1;
     }
     atexit(socket_cleanup);

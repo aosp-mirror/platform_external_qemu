@@ -24,7 +24,7 @@
 #ifndef _SDL_lowvideo_h
 #define _SDL_lowvideo_h
 
-#define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 
 #ifndef SetClassLongPtr
