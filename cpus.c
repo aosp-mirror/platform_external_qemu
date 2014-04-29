@@ -105,7 +105,7 @@ void qemu_init_vcpu(CPUState *cpu)
         kvm_init_vcpu(cpu);
 #ifdef CONFIG_HAX
     if (hax_enabled())
-        hax_init_vcpu(cpu->env_ptr);
+        hax_init_vcpu(cpu);
 #endif
     return;
 }
