@@ -107,7 +107,11 @@ fi
 # that are compatible with Ubuntu 10.4
 if [ -z "$CC" -a -z "$OPTION_CC" -a "$HOST_OS" = linux ] ; then
     PREBUILTS_HOST_GCC=$(dirname $0)/../../prebuilts/gcc/linux-x86/host
-    PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
+    # NOTE: GCC 4.8 is currently disabled because this breaks MIPS emulation
+    # For some odd reason. Remove the 'DISABLED_' prefix below to re-enable it,
+    # e.g. once the MIPS backend has been updated to a more recent version.
+    # This only affects Linux emulator binaries.
+    PROBE_HOST_CC=$PREBUILTS_HOST_GCC/DISABLED_x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
     if [ ! -f "$PROBE_HOST_CC" ]; then
         PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-gcc
         if [ ! -f "$PROBE_HOST_CC" ] ; then
