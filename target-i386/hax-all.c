@@ -848,7 +848,16 @@ static int hax_sync_vcpu_register(CPUX86State *env, int set)
     hax_getput_reg(&regs._rdi, &env->regs[R_EDI], set);
     hax_getput_reg(&regs._rsp, &env->regs[R_ESP], set);
     hax_getput_reg(&regs._rbp, &env->regs[R_EBP], set);
-
+#ifdef TARGET_X86_64
+    hax_getput_reg(&regs._r8, &env->regs[8], set);
+    hax_getput_reg(&regs._r9, &env->regs[9], set);
+    hax_getput_reg(&regs._r10, &env->regs[10], set);
+    hax_getput_reg(&regs._r11, &env->regs[11], set);
+    hax_getput_reg(&regs._r12, &env->regs[12], set);
+    hax_getput_reg(&regs._r13, &env->regs[13], set);
+    hax_getput_reg(&regs._r14, &env->regs[14], set);
+    hax_getput_reg(&regs._r15, &env->regs[15], set);
+#endif
     hax_getput_reg(&regs._rflags, &env->eflags, set);
     hax_getput_reg(&regs._rip, &env->eip, set);
 
@@ -899,6 +908,14 @@ static int hax_get_msrs(CPUX86State *env)
     msrs[n++].entry = MSR_IA32_SYSENTER_ESP;
     msrs[n++].entry = MSR_IA32_SYSENTER_EIP;
     msrs[n++].entry = MSR_IA32_TSC;
+#ifdef TARGET_X86_64
+    msrs[n++].entry = MSR_STAR;
+    msrs[n++].entry = MSR_LSTAR;
+    msrs[n++].entry = MSR_CSTAR;
+    msrs[n++].entry = MSR_FMASK;
+    msrs[n++].entry = MSR_KERNELGSBASE;
+#endif
+
     md.nr_msr = n;
     ret = hax_sync_msr(ENV_GET_CPU(env), &md, 0);
     if (ret < 0)
@@ -918,6 +935,23 @@ static int hax_get_msrs(CPUX86State *env)
             case MSR_IA32_TSC:
                 env->tsc = msrs[i].value;
                 break;
+#ifdef TARGET_X86_64
+            case MSR_STAR:
+                env->star = msrs[i].value;
+                break;
+            case MSR_LSTAR:
+                env->lstar = msrs[i].value;
+                break;
+            case MSR_CSTAR:
+                env->cstar = msrs[i].value;
+                break;
+            case MSR_FMASK:
+                env->fmask = msrs[i].value;
+                break;
+            case MSR_KERNELGSBASE:
+                env->kernelgsbase = msrs[i].value;
+                break;
+#endif
         }
     }
 
@@ -936,6 +970,15 @@ static int hax_set_msrs(CPUX86State *env)
     hax_msr_entry_set(&msrs[n++], MSR_IA32_SYSENTER_ESP, env->sysenter_esp);
     hax_msr_entry_set(&msrs[n++], MSR_IA32_SYSENTER_EIP, env->sysenter_eip);
     hax_msr_entry_set(&msrs[n++], MSR_IA32_TSC, env->tsc);
+#ifdef TARGET_X86_64
+    hax_msr_entry_set(&msrs[n++], MSR_EFER, env->efer);
+    hax_msr_entry_set(&msrs[n++], MSR_STAR, env->star);
+    hax_msr_entry_set(&msrs[n++], MSR_LSTAR, env->lstar);
+    hax_msr_entry_set(&msrs[n++], MSR_CSTAR, env->cstar);
+    hax_msr_entry_set(&msrs[n++], MSR_FMASK, env->fmask);
+    hax_msr_entry_set(&msrs[n++], MSR_KERNELGSBASE, env->kernelgsbase);
+#endif
+
     md.nr_msr = n;
     md.done = 0;
 
