@@ -202,9 +202,9 @@ common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
 BUILD_SDL_FROM_SOURCES := true
 
 # On linux-x86, using the prebuilts avoid installing all the X11
-# development packages on our build servers.
-#
-ifeq ($(QEMU_HOST_TAG),linux-x86)
+# development packages on our build servers. Note: When building 64-bit
+# host binaries, don't use 32-bit SDL prebuilts.
+ifeq ($(strip $(QEMU_HOST_TAG)$(BUILD_HOST_64bit)),linux-x86)
     BUILD_SDL_FROM_SOURCES := false
 endif
 
