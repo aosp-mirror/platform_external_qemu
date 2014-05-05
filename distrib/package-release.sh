@@ -172,6 +172,7 @@ esac
 
 # Command-line parsing.
 DO_HELP=
+OPT_COPY_PREBUILTS=
 OPT_DARWIN_SSH=
 OPT_PKG_DIR=
 OPT_PKG_PREFIX=
@@ -183,6 +184,9 @@ for OPT; do
     case $OPT in
         --help|-?)
             DO_HELP=true
+            ;;
+        --copy-prebuilts=*)
+            OPT_COPY_PREBUILTS=${OPT##--copy-prebuilts=}
             ;;
         --darwin-ssh=*)
             OPT_DARWIN_SSH=${OPT##--darwin-ssh=}
@@ -240,13 +244,20 @@ binaries on a remote host through ssh. Note that this forces --sources
 as well. You can also define ANDROID_EMULATOR_DARWIN_SSH in your
 environment to setup a default value for this option.
 
+Use --copy-prebuilts=<path> to specify the path of an AOSP workspace/checkout,
+and to copy 64-bit prebuilt binaries to <path>/prebuilts/android-emulator/
+for both Linux and Darwin platforms. This option requires the use of
+--darwin-ssh=<host> or ANDROID_EMULATOR_DARWIN_SSH to build the Darwin
+binaries.
+
 Valid options (defaults are inside brackets):
-    --help | -?           Print this message.
-    --package-dir=<path>  Change package output directory [$DEFAULT_PKG_DIR].
-    --revision=<name>     Change revision [$DEFAULT_REVISION].
-    --sources             Also create sources package.
-    --system=<list>       Specify host system list [$DEFAULT_SYSTEMS].
-    --darwin-ssh=<host>   Specify remote Darwin host [$DEFAULT_DARWIN_SSH].
+    --help | -?              Print this message.
+    --package-dir=<path>     Change package output directory [$DEFAULT_PKG_DIR].
+    --revision=<name>        Change revision [$DEFAULT_REVISION].
+    --sources                Also create sources package.
+    --system=<list>          Specify host system list [$DEFAULT_SYSTEMS].
+    --copy-prebuilts=<path>  Copy 64-bit Linux and Darwin binaries to
+                             <path>/prebuilts/android-emulator/
 
 EOF
     exit 0
@@ -296,6 +307,18 @@ if [ "$DARWIN_SSH" ]; then
         log "Auto-config: --sources  (remote Darwin build)."
     fi
     SYSTEMS="$SYSTEMS darwin"
+fi
+
+if [ "$OPT_COPY_PREBUILTS" ]; then
+    if [ -z "$DARWIN_SSH" ]; then
+        panic "The --copy-prebuilts=<dir> option requires --darwin-ssh=<host>."
+    fi
+    TARGET_AOSP=$OPT_COPY_PREBUILTS
+    if [ ! -f "$TARGET_AOSP/build/envsetup.sh" ]; then
+        panic "Not an AOSP checkout / workspace: $TARGET_AOSP"
+    fi
+    TARGET_PREBUILTS_DIR=$TARGET_AOSP/prebuilts/android-emulator
+    mkdir -p "$TARGET_PREBUILTS_DIR"
 fi
 
 case $VERBOSE in
@@ -464,6 +487,29 @@ EOF
     PKG_FILE=$PKG_DIR/$PKG_PREFIX-$PKG_REVISION-$SYSTEM.tar.bz2
     (run cd "$TEMP_BUILD_DIR"/$SYSTEM && run tar cf $PKG_FILE $PKG_PREFIX-$PKG_REVISION)
 done
+
+if [ "$OPT_COPY_PREBUILTS" ]; then
+    for SYSTEM in linux darwin; do
+        SRC_DIR="$TEMP_BUILD_DIR"/$SYSTEM/$PKG_PREFIX-$PKG_REVISION
+        DST_DIR=$TARGET_PREBUILTS_DIR/$SYSTEM-x86_64
+        dump "[$SYSTEM-x86_64] Copying Linux binaries into $DST_DIR"
+        run mkdir -p "$DST_DIR" || panic "Could not create directory: $DST_DIR"
+        case $SYSTEM in
+            linux) DLLEXT=.so;;
+            darwin) DLLEXT=.dylib;;
+            *) panic "Unsupported prebuilt system: $SYSTEM";;
+        esac
+        FILES="emulator"
+        for ARCH in arm x86 mips; do
+            FILES="$FILES emulator64-$ARCH"
+        done
+        for LIB in OpenglRender EGL_translator GLES_CM_translator GLES_V2_translator; do
+            FILES="$FILES lib/lib64$LIB$DLLEXT"
+        done
+        (run cd "$SRC_DIR/tools" && tar cf - $FILES) | (cd $DST_DIR && tar xf -) ||
+                panic "Could not copy binaries to $DST_DIR"
+    done
+fi
 
 dump "Done. See $PKG_DIR"
 ls -lh "$PKG_DIR"/$PKG_PREFIX-$PKG_REVISION*
