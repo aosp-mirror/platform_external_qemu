@@ -91,6 +91,14 @@ TEST(String, size) {
     EXPECT_EQ(kCount, s.size());
 }
 
+TEST(String, clear) {
+    String s("foo bar");
+    EXPECT_FALSE(s.empty());
+    s.clear();
+    EXPECT_TRUE(s.empty());
+    EXPECT_EQ(0U, s.size());
+}
+
 TEST(String, IndexedAccess) {
     String s("foobar");
     EXPECT_EQ('f', s[0]);
