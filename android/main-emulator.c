@@ -52,17 +52,9 @@ int android_verbose;
 #  define DLL_EXTENSION  ".so"
 #endif
 
-#if defined(__x86_64__)
-/* Normally emulator is compiled in 32-bit.  In standalone it can be compiled
-   in 64-bit (with ,/android-configure.sh --try-64).  In this case, emulator-$ARCH
-   are also compiled in 64-bit and will search for lib64*.so instead of lib*so */
-#define  GLES_EMULATION_LIB  "lib64OpenglRender" DLL_EXTENSION
-#elif defined(__i386__)
-#define  GLES_EMULATION_LIB  "libOpenglRender" DLL_EXTENSION
-#else
-#error Unknown architecture for codegen
-#endif
-
+// Name of GPU emulation main library for (32-bit and 64-bit versions)
+#define GLES_EMULATION_LIB    "libOpenglRender" DLL_EXTENSION
+#define GLES_EMULATION_LIB64  "lib64OpenglRender" DLL_EXTENSION
 
 /* Forward declarations */
 static char* getTargetEmulatorPath(const char* progName, const char* avdArch, const int force_32bit);
@@ -170,6 +162,12 @@ int main(int argc, char** argv)
      */
     {
         char*  sharedLibPath = getSharedLibraryPath(emulatorPath, GLES_EMULATION_LIB);
+
+        if (!sharedLibPath) {
+            // Sometimes, only the 64-bit libraries are available, for example
+            // when storing binaries under $AOSP/prebuilts/android-emulator/<system>/
+            sharedLibPath = getSharedLibraryPath(emulatorPath, GLES_EMULATION_LIB64);
+        }
 
         if (sharedLibPath != NULL) {
             D("Found OpenGLES emulation libraries in %s\n", sharedLibPath);
