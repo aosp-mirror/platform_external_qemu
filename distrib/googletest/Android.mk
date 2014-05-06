@@ -30,7 +30,7 @@ LOCAL_CFLAGS += -O0
 LOCAL_SRC_FILES := $(EMULATOR_GTEST_SOURCES)
 $(call end-emulator-library)
 
-ifneq ($(filter linux darwin,$(HOST_OS)),)
+ifdef EMULATOR_BUILD_64BITS
     $(call start-emulator-library, emulator64-libgtest)
     LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES)
     LOCAL_CPP_EXTENSION := .cc
