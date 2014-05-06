@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ae0a8ae_12df2a9c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-05-06T18:05:28Z",
+      "side": 1,
+      "message": "Can I ask you to fix the commit message, i.e. move the Signed-off-by to its own line. Also, can you clarify if this is the complete fix, or more patches are coming after this one. Thanks",
+      "range": {
+        "startLine": 7,
+        "startChar": 21,
+        "endLine": 7,
+        "endChar": 22
+      },
+      "revId": "e9bd2e1eb6370d61ea29e893053e360c8ab63c85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
