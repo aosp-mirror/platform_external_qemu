@@ -39,7 +39,7 @@ LOCAL_STATIC_LIBRARIES += emulator-common emulator-libgtest
 $(call end-emulator-program)
 
 
-ifneq ($(filter linux darwin,$(HOST_OS)),)
+ifdef EMULATOR_BUILD_64BITS
   $(call start-emulator-program, emulator64_unittests)
   LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES)
   LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS)
