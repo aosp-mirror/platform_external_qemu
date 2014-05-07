@@ -11,6 +11,7 @@ how to download the platform sources.
 The following directories will be relevant:
 
   $AOSP/external/qemu        -> The emulator itself.
+  $AOSP/external/getst       -> The GoogleTest sources.
   $AOSP/sdk/emulator/opengl  -> Host GPU emulation libraries.
 
   $AOSP/prebuilts/tools/gcc-sdk           -> host toolchains for SDK tools.
@@ -18,85 +19,60 @@ The following directories will be relevant:
   $AOSP/prebuilts/gcc/darwin-x86/host/
 
 
-I. Building:
-------------
+II. Building:
+-------------
 
-You can only build the emulator on Linux or Darwin. Windows binaries are always
-generated on Linux, and actually run under Wine (you will need to install
-mingw32 and wine packages from your distribution to build and run them).
+You can only build the emulator on Linux or Darwin. Windows binaries are
+always generated on Linux, and actually run under Wine (more on this later).
 
-1) Generate the host GPU emulation libraries:
+There are currently two ways to build the emulator:
 
-  cd $AOSP
-  . build/envsetup.sh
-  lunch sdk-eng
-  make libOpenglRender \
-       libEGL_translator \
-       libGLES_CM_translator \
-       libGLES_V2_translator
+1) Using the standalone build-system:
 
-on Linux and Darwin, also generate the 64-bit host libraries:
+As long as the directories listed in section I. exist, you can build the
+emulator binaries from sources directly by using the android-rebuild.sh
+script, i.e.:
 
-  make lib64OpenglRender \
-       lib64EGL_translator \
-       lib64GLES_CM_translator \
-       lib64GLES_V2_translator
+  cd $AOSP/external/qemu
+  ./android-rebuild.sh
 
-Building 64-bit host binaries is not supported on Windows yet.
+This will build all related binaries, and run the small GoogleTest-based
+unit test suite for your host system.
 
-
-2) Generate emulator binaries:
-
-  # If you haven't done it yet in 1)
-  cd $AOSP
-  . build/envsetup.sh
-  lunch sdk-eng
-  # then
-  cd external/qemu
-  mm
-
-The emulator binaries are placed under $AOSP/host/<system>/bin which is
-already in your path. If you have a local SDK installation, you can start
-an existing AVD with:
+This places everything under the 'objs/' sub-directory, and you can launch
+the emulator directly with something like:
 
   export ANDROID_SDK_ROOT=/path/to/sdk
-  emulator -avd <name>  [other options...]
+  objs/emulator @<avd-name>  [<other-options>...]
+
+Use ./android-rebuild.sh --help for more details and command-line options.
 
 
-3) Optional: build system image:
+2) Using the Android platform build:
 
-You can also use the emulator to run an SDK system image build from your
-AOSP checkout:
+If you have a full checkout of the AOSP source tree, the emulator will be
+built as part of a regular "make" invokation, and the binaries placed under
+out/host/<system>/bin/, allowing you to just run 'emulator' after the build.
+For example, for an ARM-based SDK system image build:
 
-     lunch sdk-eng
-     make
-     emulator
+  cd $AOSP
+  . build/envsetup.sh
+  lunch sdk-eng
+  make -j$NUM_CORES
+  emulator
 
-Use sdk_x86-eng for Android/x86 system images, and sdk_mips-eng for MIPS ones.
+Note that this scheme is _much_slower though, but once you have performed
+a full build, you will be able to only rebuild the emulator quickly by
+doing the following (after the commands above):
 
+  cd external/qemu
+  mm -j$NUM_CORES
 
-4) Optional: standalone emulator builds:
+The 'mm' command is a special function sourced into your environment by
+envsetup.sh
 
-After generating the GPU libraries as in 1), you have the option to use the
-standalone Android build system to generate the emulator binaries. This is
-convenient if you hack a lot on the emulator sources, because it's faster and
-gives your more options:
-
-    cd $AOSP/external/qemu
-    ./android-rebuild.sh
-
-Use --help option when calling android-rebuild.sh for more information.
-Note that 'android-rebuild.sh' is a wrapper script that calls
-'android-configure.sh' and later invokes 'make'.
-
-The generated binaries are placed under external/qemu/objs which is _not_
-in your PATH, but can be invoked directly, e.g.:
-
-    ./android-rebuild.sh
-    objs/emulator -avd <name>
-
-    IMPORTANT: At the moment, the build will fail if you haven't
-    generated GPU emulation libraries with the platform build.
+Note: The default SDK system image maps to an ARMv7-based virtual CPU,
+      use 'sdk_x86-eng' or 'sdk_mips-eng' to build x86 or MIPS based ones.
 
 In all cases, several binaries will be generated:
 
@@ -118,3 +94,72 @@ Windows at the moment, due to issues with the mingw32-w64 cross-toolchains.
 
 Define ANDROID_SDK_ROOT in your environment to point to your SDK installation
 and be able to start AVDs with your freshly built emulator.
+
+
+3) Building Windows emulator binaries:
+
+Windows emulator binaries are always built on Linux, using a cross-toolchain,
+there is no support to build the sources directly on Windows with MSys or
+Cygwin.
+
+Two cross-toolchains are supported:
+
+  1) The Ubuntu 12.04 "mingw32" toolchain, which can only generate Win32
+     executables.
+
+     Note that the "mingw64" toolchain in 12.04 is broken, and conflicts
+     with the mingw32 anyway, so never try to use / install it.
+
+  2) Our own custom w64-based toolchain (x86_64-w64-mingw32), which can
+     generate both Win32 and Win64 executables. You just need to have
+     x86_64-w64-mingw32-gcc in your PATH for it to be used.
+
+     [WARNING: Currently only works in aosp/master branch, not aosp/idea133]
+
+To build the Windows binaries, use the --mingw option, as in:
+
+  cd external/qemu
+  ./android-rebuild.sh --mingw
+
+Again, all files are placed under objs/.
+
+If you have Wine installed, you can launch objs/emulator.exe directly, but
+you need to setup two environment variables first:
+
+  export ANDROID_SDK_ROOT=/path/to/sdk/install
+  export ANDROID_SDK_HOME=$HOME
+
+The latter is required, otherwise the Windows binary will not find your AVDs
+when running under Wine (which does special magic when important variable
+from the environment that map to host file paths).
+
+NOTE: Performance of Windows binaries under Wine is currently pretty bad,
+      unless you add '-qemu -clock dynticks' to your command-line.
+
+      This doesn't affect the exact same binary running under a real Windows
+      installation. For more context, see:
+              https://android-review.googlesource.com/#/c/82661/
+
+
+4) Rebuilding binaries for all host architectures at the same time:
+
+A script under distrib/package-release.sh is provided to rebuild all
+binaries from sources. By default, it will try to rebuild for Linux and
+Windows, but if you have ssh access to a Darwin machine with the command-line
+XCode tools installed, it will also automatically:
+
+  - Pack the sources into a tarball
+  - Upload it through ssh to a temporary directory on the machine.
+  - Perform a Darwin build there, and run GTest-based unit tests.
+  - Retrieve the final binaries in case of success.
+
+You can enable this by using the --darwin-ssh=<host> option, or by setting
+the ANDROID_EMULATOR_DARWIN_SSH variable to the hostname.
+
+In case of success, this creates 4 tarballs under /tmp: One for the set of
+sources used to perform the build, and 3 others for the
+Linux / Darwin / Windows packages.
+
+These packages place the binaries under a top-level tools/ directory, so you
+can uncompress them directly at the top of an existing SDK installation
+(in the case where you want to update the emulator binaries there).
