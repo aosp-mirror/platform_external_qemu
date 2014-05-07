@@ -123,6 +123,18 @@ ifneq ($(BUILD_STANDALONE_EMULATOR),true)
     endif # $(HOST_SDK_TOOLCHAIN_PREFIX)gcc exists
   endif # HOST_OS == linux
 
+  ifeq ($(HOST_OS),windows)
+    # Temporarily fallback to previous toolchain because the new one can't compile global-reg/setjmp
+    # in this branch but removed from aosp/master
+    HOST_SDK_TOOLCHAIN_PREFIX := /usr/bin/i586-mingw32msvc-
+    # Don't do anything if the toolchain is not there
+    ifneq (,$(strip $(wildcard $(HOST_SDK_TOOLCHAIN_PREFIX)gcc)))
+      MY_CC  := $(HOST_SDK_TOOLCHAIN_PREFIX)gcc
+      MY_CXX := $(HOST_SDK_TOOLCHAIN_PREFIX)g++
+      MY_AR  := $(HOST_SDK_TOOLCHAIN_PREFIX)ar
+    endif # $(HOST_SDK_TOOLCHAIN_PREFIX)gcc exists
+  endif # HOST_OS == windows
+
   ifneq ($(USE_CCACHE),)
     ccache := prebuilts/misc/$(HOST_PREBUILT_TAG)/ccache/ccache
     ccache := $(strip $(wildcard $(ccache)))
