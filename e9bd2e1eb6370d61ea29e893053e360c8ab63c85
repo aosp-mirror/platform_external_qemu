@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "6a02a043_a52eb67b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2014-05-08T06:32:05Z",
+      "side": 1,
+      "message": "sorry, digit, somehow a new commit was created. https://android-review.googlesource.com/#/c/93810/ please review the new one, and i will abandon this one.\n\nthis is complete patch. we have tested this patch with running 64-bit system images. full validation for HAXM is ongoing. if any issue, then it might be a bug fix.",
+      "revId": "e9bd2e1eb6370d61ea29e893053e360c8ab63c85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ae0a8ae_12df2a9c",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
