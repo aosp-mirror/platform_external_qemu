@@ -339,7 +339,9 @@ ifeq (true,$(BUILD_STANDALONE_EMULATOR))
     $(error Cannot find GPU emulation sources directory: $(EMULATOR_EMUGL_SOURCES_DIR))
   endif
 
+  # TODO(digit): Remove the line below.
   BUILD_EMULATOR_OPENGL := true
+  BUILD_EMULATOR_HOST_OPENGL := true
   include $(EMULATOR_EMUGL_SOURCES_DIR)/Android.mk
 endif
 
