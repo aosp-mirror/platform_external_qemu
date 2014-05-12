@@ -1,0 +1,90 @@
+apply plugin: 'sdk-files'
+
+// FIXME
+ext.outDir = "$projectDir/objs"
+//ext.outDir = buildDir
+
+
+task buildDefaultEmulator << {
+    Process p = "$projectDir/android-rebuild.sh".execute()
+    println p.text
+}
+
+task buildWindowsEmulator << {
+    Process p = "$projectDir/android-rebuild.sh --mingw".execute()
+    println p.text
+}
+
+sdk {
+    common(mac, linux) {
+        path("$project.ext.outDir/lib") {
+            into 'lib'
+            builtBy buildDefaultEmulator
+        }
+
+        path("$project.ext.outDir/emulator") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+
+        path("$project.ext.outDir/emulator-arm") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+        path("$project.ext.outDir/emulator64-arm") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+
+        path("$project.ext.outDir/emulator-mips") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+        path("$project.ext.outDir/emulator64-mips") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+
+        path("$project.ext.outDir/emulator-x86") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+        path("$project.ext.outDir/emulator64-x86") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+    }
+
+    windows {
+        path("$project.ext.outDir/lib") {
+            into 'lib'
+            builtBy buildWindowsEmulator
+        }
+
+        path("$project.ext.outDir/emulator.exe") {
+            builtBy buildWindowsEmulator
+        }
+
+        path("$project.ext.outDir/emulator-arm.exe") {
+            builtBy buildWindowsEmulator
+        }
+        path("$project.ext.outDir/emulator64-arm.exe") {
+            builtBy buildWindowsEmulator
+        }
+
+        path("$project.ext.outDir/emulator-mips.exe") {
+            builtBy buildWindowsEmulator
+        }
+        path("$project.ext.outDir/emulator64-mips.exe") {
+            builtBy buildWindowsEmulator
+        }
+
+        path("$project.ext.outDir/emulator-x86.exe") {
+            builtBy buildWindowsEmulator
+        }
+        path("$project.ext.outDir/emulator64-x86.exe") {
+            builtBy buildWindowsEmulator
+        }
+    }
+}
+
