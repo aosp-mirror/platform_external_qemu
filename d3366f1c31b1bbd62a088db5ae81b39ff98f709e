@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2abfc8df_f787a001",
+        "filename": "docs/BUILDING.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2014-05-12T18:42:22Z",
+      "side": 1,
+      "message": "did you mean \"invocation\"?",
+      "range": {
+        "startLine": 54,
+        "startChar": 34,
+        "endLine": 54,
+        "endChar": 44
+      },
+      "revId": "d3366f1c31b1bbd62a088db5ae81b39ff98f709e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
