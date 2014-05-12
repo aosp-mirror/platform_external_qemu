@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a862067_94c86a31",
+        "filename": "build.gradle",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-05-12T19:45:08Z",
+      "side": 1,
+      "message": "After https://android-review.googlesource.com/#/c/94169/ is applied, you should be able to change this to:\n\n  Process p \u003d \"$projectDir/android-rebuild.sh --out-dir\u003d$ext.outDir\".execute()\n\n(or is it --out-dir\u003d$project.ext.outDir instead?)",
+      "range": {
+        "startLine": 9,
+        "startChar": 37,
+        "endLine": 9,
+        "endChar": 44
+      },
+      "revId": "da07f61f33242789030ee740621c57018f9637a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa26584d_76adae1f",
+        "filename": "build.gradle",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-05-12T19:45:08Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "da07f61f33242789030ee740621c57018f9637a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
