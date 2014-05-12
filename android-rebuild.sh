@@ -13,6 +13,8 @@ export LC_ALL=C
 VERBOSE=0
 
 MINGW=
+OUT_DIR=objs
+
 for OPT; do
     case $OPT in
         --mingw)
@@ -20,6 +22,9 @@ for OPT; do
             ;;
         --verbose)
             VERBOSE=$(( $VERBOSE + 1 ))
+            ;;
+        --out-dir=*)
+            OUT_DIR=${OPT##--out-dir=}
             ;;
         --help|-?)
             VERBOSE=2
@@ -59,11 +64,11 @@ esac
 cd `dirname $0`
 rm -rf objs
 echo "Configuring build."
-run ./android-configure.sh "$@" ||
+run ./android-configure.sh --out-dir=$OUT_DIR "$@" ||
     panic "Configuration error, please run ./android-configure.sh to see why."
 
 echo "Building sources."
-run make -j$HOST_NUM_CPUS ||
+run make -j$HOST_NUM_CPUS OBJS_DIR="$OUT_DIR" ||
     panic "Could not build sources, please run 'make' to see why."
 
 RUN_64BIT_TESTS=true
@@ -80,14 +85,14 @@ echo "Running 32-bit unit test suite."
 FAILURES=""
 for UNIT_TEST in emulator_unittests emugl_common_host_unittests; do
   echo "   - $UNIT_TEST"
-  run $TEST_SHELL objs/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
+  run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
 done
 
 if [ "$RUN_64BIT_TESTS" ]; then
     echo "Running 64-bit unit test suite."
     for UNIT_TEST in emulator64_unittests emugl64_common_host_unittests; do
         echo "   - $UNIT_TEST"
-        run $TEST_SHELL objs/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
+        run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
     done
 fi
 
