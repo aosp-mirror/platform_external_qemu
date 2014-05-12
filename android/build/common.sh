@@ -538,11 +538,13 @@ locate_android_prebuilt ()
 ## Build configuration file support
 ## you must define $config_mk before calling this function
 ##
+## $1: Optional output directory.
 create_config_mk ()
 {
     # create the directory if needed
     local  config_dir
-    config_mk=${config_mk:-objs/config.make}
+    local out_dir=${1:-objs}
+    config_mk=${config_mk:-$out_dir/config.make}
     config_dir=`dirname $config_mk`
     mkdir -p $config_dir 2> $TMPL
     if [ $? != 0 ] ; then
@@ -566,6 +568,7 @@ create_config_mk ()
     echo "HOST_CC     := $CC" >> $config_mk
     echo "HOST_LD     := $LD" >> $config_mk
     echo "HOST_AR     := $AR" >> $config_mk
+    echo "OBJS_DIR    := $out_dir" >> $config_mk
 }
 
 add_android_config_mk ()
