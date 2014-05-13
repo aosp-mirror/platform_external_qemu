@@ -10,6 +10,7 @@ typedef struct QEMUBH QEMUBH;
 
 typedef struct AioContext AioContext;
 
+typedef struct Visitor Visitor;
 struct Monitor;
 typedef struct Monitor Monitor;
 typedef struct MigrationParams MigrationParams;
