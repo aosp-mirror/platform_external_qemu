@@ -72,6 +72,9 @@ for opt do
   ;;
   --no-pcbios) PCBIOS_PROBE=no
   ;;
+  --no-tests)
+  # Ignore this option, only used by android-rebuild.sh
+  ;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -103,6 +106,7 @@ EOF
     echo "  --gles-dir=PATH          specify path to GLES host emulation sources [auto-detected]"
     echo "  --no-gles                disable GLES emulation support"
     echo "  --no-pcbios              disable copying of PC Bios files"
+    echo "  --no-tests               don't run unit test suite"
     echo ""
     exit 1
 fi
