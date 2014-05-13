@@ -1,83 +1,84 @@
 apply plugin: 'sdk-files'
 
-task buildDefaultEmulator << {
-    Process p = "$projectDir/android-rebuild.sh --out-dir=$project.buildDir".execute()
-    println p.text
+import com.android.tools.internal.emulator.BuildEmulator
+
+task buildDefaultEmulator(type: BuildEmulator) {
+    output = new File(project.buildDir, "default")
 }
 
-task buildWindowsEmulator << {
-    Process p = "$projectDir/android-rebuild.sh --mingw --out-dir=$project.buildDir".execute()
-    println p.text
+task buildWindowsEmulator(type: BuildEmulator) {
+    output = new File(project.buildDir, "windows")
+    windows = true
 }
 
 sdk {
     common(mac, linux) {
-        path("$project.buildDir/lib") {
+        path("$buildDefaultEmulator.output/lib") {
             into 'lib'
             builtBy buildDefaultEmulator
         }
 
-        path("$project.buildDir/emulator") {
+        path("$buildDefaultEmulator.output/emulator") {
             executable true
             builtBy buildDefaultEmulator
         }
 
-        path("$project.buildDir/emulator-arm") {
+        path("$buildDefaultEmulator.output/emulator-arm") {
             executable true
             builtBy buildDefaultEmulator
         }
-        path("$project.buildDir/emulator64-arm") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-
-        path("$project.buildDir/emulator-mips") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-        path("$project.buildDir/emulator64-mips") {
+        path("$buildDefaultEmulator.output/emulator64-arm") {
             executable true
             builtBy buildDefaultEmulator
         }
 
-        path("$project.buildDir/emulator-x86") {
+        path("$buildDefaultEmulator.output/emulator-mips") {
             executable true
             builtBy buildDefaultEmulator
         }
-        path("$project.buildDir/emulator64-x86") {
+        path("$buildDefaultEmulator.output/emulator64-mips") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+
+        path("$buildDefaultEmulator.output/emulator-x86") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+        path("$buildDefaultEmulator.output/emulator64-x86") {
             executable true
             builtBy buildDefaultEmulator
         }
     }
 
     windows {
-        path("$project.buildDir/lib") {
+        path("$buildWindowsEmulator.output/lib") {
             into 'lib'
             builtBy buildWindowsEmulator
         }
 
-        path("$project.buildDir/emulator.exe") {
+        path("$buildWindowsEmulator.output/emulator.exe") {
             builtBy buildWindowsEmulator
         }
 
-        path("$project.buildDir/emulator-arm.exe") {
+        path("$buildWindowsEmulator.output/emulator-arm.exe") {
             builtBy buildWindowsEmulator
         }
-        path("$project.buildDir/emulator64-arm.exe") {
-            builtBy buildWindowsEmulator
-        }
-
-        path("$project.buildDir/emulator-mips.exe") {
-            builtBy buildWindowsEmulator
-        }
-        path("$project.buildDir/emulator64-mips.exe") {
+        path("$buildWindowsEmulator.output/emulator64-arm.exe") {
             builtBy buildWindowsEmulator
         }
 
-        path("$project.buildDir/emulator-x86.exe") {
+        path("$buildWindowsEmulator.output/emulator-mips.exe") {
             builtBy buildWindowsEmulator
         }
-        path("$project.buildDir/emulator64-x86.exe") {
+        path("$buildWindowsEmulator.output/emulator64-mips.exe") {
+            builtBy buildWindowsEmulator
+        }
+
+        path("$buildWindowsEmulator.output/emulator-x86.exe") {
+            builtBy buildWindowsEmulator
+        }
+        path("$buildWindowsEmulator.output/emulator64-x86.exe") {
             builtBy buildWindowsEmulator
         }
     }
