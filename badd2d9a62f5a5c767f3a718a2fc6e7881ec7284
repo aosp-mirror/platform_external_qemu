@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a3da49e_aef8f75f",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-05-15T11:39:46Z",
+      "side": 1,
+      "message": "I suggest removing this comment above, then add a new one that explains that the build directory (out/target/product/\u003cname\u003e/) can have an optional config.ini file to provide more information.",
+      "revId": "badd2d9a62f5a5c767f3a718a2fc6e7881ec7284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
