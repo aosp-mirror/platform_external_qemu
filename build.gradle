@@ -13,72 +13,72 @@ task buildWindowsEmulator(type: BuildEmulator) {
 
 sdk {
     common(mac, linux) {
-        path("$buildDefaultEmulator.output/lib") {
+        item("$buildDefaultEmulator.output/lib") {
             into 'lib'
             builtBy buildDefaultEmulator
         }
 
-        path("$buildDefaultEmulator.output/emulator") {
+        item("$buildDefaultEmulator.output/emulator") {
             executable true
             builtBy buildDefaultEmulator
         }
 
-        path("$buildDefaultEmulator.output/emulator-arm") {
+        item("$buildDefaultEmulator.output/emulator-arm") {
             executable true
             builtBy buildDefaultEmulator
         }
-        path("$buildDefaultEmulator.output/emulator64-arm") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-
-        path("$buildDefaultEmulator.output/emulator-mips") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-        path("$buildDefaultEmulator.output/emulator64-mips") {
+        item("$buildDefaultEmulator.output/emulator64-arm") {
             executable true
             builtBy buildDefaultEmulator
         }
 
-        path("$buildDefaultEmulator.output/emulator-x86") {
+        item("$buildDefaultEmulator.output/emulator-mips") {
             executable true
             builtBy buildDefaultEmulator
         }
-        path("$buildDefaultEmulator.output/emulator64-x86") {
+        item("$buildDefaultEmulator.output/emulator64-mips") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+
+        item("$buildDefaultEmulator.output/emulator-x86") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+        item("$buildDefaultEmulator.output/emulator64-x86") {
             executable true
             builtBy buildDefaultEmulator
         }
     }
 
     windows {
-        path("$buildWindowsEmulator.output/lib") {
+        item("$buildWindowsEmulator.output/lib") {
             into 'lib'
             builtBy buildWindowsEmulator
         }
 
-        path("$buildWindowsEmulator.output/emulator.exe") {
+        item("$buildWindowsEmulator.output/emulator.exe") {
             builtBy buildWindowsEmulator
         }
 
-        path("$buildWindowsEmulator.output/emulator-arm.exe") {
+        item("$buildWindowsEmulator.output/emulator-arm.exe") {
             builtBy buildWindowsEmulator
         }
-        path("$buildWindowsEmulator.output/emulator64-arm.exe") {
-            builtBy buildWindowsEmulator
-        }
-
-        path("$buildWindowsEmulator.output/emulator-mips.exe") {
-            builtBy buildWindowsEmulator
-        }
-        path("$buildWindowsEmulator.output/emulator64-mips.exe") {
+        item("$buildWindowsEmulator.output/emulator64-arm.exe") {
             builtBy buildWindowsEmulator
         }
 
-        path("$buildWindowsEmulator.output/emulator-x86.exe") {
+        item("$buildWindowsEmulator.output/emulator-mips.exe") {
             builtBy buildWindowsEmulator
         }
-        path("$buildWindowsEmulator.output/emulator64-x86.exe") {
+        item("$buildWindowsEmulator.output/emulator64-mips.exe") {
+            builtBy buildWindowsEmulator
+        }
+
+        item("$buildWindowsEmulator.output/emulator-x86.exe") {
+            builtBy buildWindowsEmulator
+        }
+        item("$buildWindowsEmulator.output/emulator64-x86.exe") {
             builtBy buildWindowsEmulator
         }
     }
