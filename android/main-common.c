@@ -424,20 +424,13 @@ load_dynamic_skin(AndroidHwConfig* hwConfig,
     int       i;
     int       max_part_width;
     char      fromEnv;
-    char*     sdkRoot = path_getSdkRoot(&fromEnv);
 
-    if (sdkRoot == NULL) {
-        dwarning("Unable to locate sdk root. Will not use dynamic skin.");
+    *skinDirPath = avdInfo_getDynamicSkinPath(android_avdInfo);
+    if (*skinDirPath == NULL) {
+        dwarning("Unable to locate dynamic skin directory. Will not use dynamic skin.");
         return 0;
     }
 
-    snprintf(tmp, sizeof(tmp), "%s/tools/lib/emulator/skins/dynamic/", sdkRoot);
-    free(sdkRoot);
-
-    if (!path_exists(tmp))
-        return 0;
-
-    *skinDirPath = strdup(tmp);
     snprintf(tmp, sizeof(tmp), "%s/layout", *skinDirPath);
     D("trying to load skin file '%s'", tmp);
 
