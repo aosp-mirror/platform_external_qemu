@@ -899,10 +899,8 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
     /* TODO: find a way to provide better information from the build files */
     i->deviceName = ASTRDUP("<build>");
 
-    /* There is no config.ini in the build */
-    i->configIni = NULL;
-
-    if (_avdInfo_getCoreHwIniPath(i, i->androidOut) < 0 )
+    if (_avdInfo_getConfigIni(i) < 0 ||
+        _avdInfo_getCoreHwIniPath(i, i->androidOut) < 0)
         goto FAIL;
 
     /* Read the build skin's hardware.ini, if any */
