@@ -47,7 +47,7 @@ ifeq ($(HOST_OS),windows)
   MY_CFLAGS += -D_WIN32
   # LARGEADDRESSAWARE gives more address space to 32-bit process
   MY_LDLIBS += -Xlinker --large-address-aware
-  ifneq ($(BUILD_HOST_64bit),)
+  ifneq ($(HOST_IS_64_BIT),)
     # Microsoft 64-bit compiler define both _WIN32 and _WIN64
     MY_CFLAGS += -D_WIN64
     # amd64-mingw32msvc- toolchain still name it vfw32.  May change it once amd64-mingw32msvc-
@@ -106,7 +106,7 @@ endif
 # adequate values for HOST_CC
 #
 ifneq ($(BUILD_STANDALONE_EMULATOR),true)
-  # On Linux, use our custom 32-bit host toolchain (unless BUILD_HOST_64bit=1)
+  # On Linux, use our custom 32-bit host toolchain (unless HOST_IS_64_BIT=true)
   # which contains the relevant headers and 32-bit libraries for audio (The host 64-bit
   # Lucid doesn't provide these anymore, only their 64-bit versions).
   ifeq ($(HOST_OS),linux)
@@ -136,7 +136,7 @@ endif
 
 
 ifneq ($(combo_target)$(TARGET_SIMULATOR),HOST_true)
-  ifneq ($(BUILD_HOST_64bit),)
+  ifneq ($(HOST_IS_64_BIT),)
     MY_CFLAGS += -m64
     MY_LDFLAGS += -m64
   else
