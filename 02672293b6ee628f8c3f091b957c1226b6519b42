@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a58a819_58b111e6",
+        "filename": "android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 901,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-05-16T21:29:36Z",
+      "side": 1,
+      "message": "nit: \"if it exists, provides configuration ...\"",
+      "revId": "02672293b6ee628f8c3f091b957c1226b6519b42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
