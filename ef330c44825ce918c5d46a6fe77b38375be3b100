@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a58a819_38b44dd7",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1286,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-05-16T21:28:39Z",
+      "side": 1,
+      "message": "Please use PATH_MAX here",
+      "range": {
+        "startLine": 1286,
+        "startChar": 13,
+        "endLine": 1286,
+        "endChar": 17
+      },
+      "revId": "ef330c44825ce918c5d46a6fe77b38375be3b100",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
