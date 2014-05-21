@@ -165,8 +165,8 @@ extract_git_commit_description () {
     SHA1=$(cd $GIT_DIR && git log --oneline -1 .) || \
         panic "Not a Git directory: $GIT_DIR"
 
-    SHA1=$(printf "%s" "$SHA1" | tr "'" "\\'")
-    eval $VARNAME=\'$SHA1\'
+    SHA1=$(printf "%s" "$SHA1" | sed -e s/\'/\\\'/g)
+    eval $VARNAME=\"$SHA1\"
 }
 
 # Defaults.
