@@ -1284,6 +1284,23 @@ avdInfo_shouldUseDynamicSkin( AvdInfo* i)
 }
 
 char*
+avdInfo_getDynamicSkinPath( AvdInfo* i)
+{
+    char tmp[PATH_MAX];
+
+    if (i->inAndroidBuild) {
+        snprintf(tmp, sizeof(tmp), "%s/sdk/emulator/skins/dynamic/", i->androidBuildRoot);
+    } else {
+        snprintf(tmp, sizeof(tmp), "%s/tools/lib/emulator/skins/dynamic/", i->sdkRootPath);
+    }
+
+    if (!path_exists(tmp))
+        return NULL;
+
+    return ASTRDUP(tmp);
+}
+
+char*
 avdInfo_getCharmapFile( AvdInfo* i, const char* charmapName )
 {
     char        fileNameBuff[PATH_MAX];
