@@ -158,6 +158,10 @@ else
             echo "WARNING: android-goldfish-$KERNEL_VERSION doesn't build --arch=$ARCH with GCC 4.7"
         fi
     fi
+    if [ "$ARCH" = "arm64" ]; then
+        # There is no GCC 4.7 toolchain to build AARCH64 binaries.
+        GCC_VERSION=4.8
+    fi
     echo "Autoconfig: --gcc-version=$GCC_VERSION"
 fi
 
@@ -185,6 +189,10 @@ else
             ;;
         mips)
             CONFIG=goldfish
+            ;;
+        arm64)
+            # TODO(digit): Provide better config.
+            CONFIG=defconfig
             ;;
         *)
             echo "ERROR: Invalid arch '$ARCH', try one of $VALID_ARCHS"
@@ -220,6 +228,9 @@ else
         mips)
             CROSSPREFIX=mipsel-linux-android-
             ;;
+        arm64)
+            CROSSPREFIX=aarch64-linux-android-
+            ;;
         *)
             echo "ERROR: Unsupported architecture!"
             exit 1
@@ -234,6 +245,9 @@ ZIMAGE=zImage
 case $ARCH in
     x86|x86_64)
         ZIMAGE=bzImage
+        ;;
+    arm64)
+        ZIMAGE=Image.gz
         ;;
     mips)
         ZIMAGE=
@@ -259,6 +273,9 @@ if [ $? != 0 ] ; then
         x86_64)
             # x86_46 binaries are under prebuilts/gcc/<host>/x86 !!
             PREBUILT_ARCH=x86
+            ;;
+        arm64)
+            PREBUILT_ARCH=aarch64
             ;;
         *)
             PREBUILT_ARCH=$ARCH
@@ -300,10 +317,19 @@ if [ "$OPTION_VERBOSE" ]; then
   MAKE_FLAGS="$MAKE_FLAGS V=1"
 fi
 
+case $CONFIG in
+    defconfig)
+        MAKE_DEFCONFIG=$CONFIG
+        ;;
+    *)
+        MAKE_DEFCONFIG=${CONFIG}_defconfig
+        ;;
+esac
+
 # Do the build
 #
 rm -f include/asm &&
-make ${CONFIG}_defconfig &&    # configure the kernel
+make $MAKE_DEFCONFIG &&    # configure the kernel
 make -j$JOBS $MAKE_FLAGS       # build it
 
 if [ $? != 0 ] ; then
