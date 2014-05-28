@@ -165,9 +165,10 @@ extract_git_commit_description () {
     SHA1=$(cd $GIT_DIR && git log --oneline -1 .) || \
         panic "Not a Git directory: $GIT_DIR"
 
-    SHA1=$(printf "%s" "$SHA1" | tr "'" "\\'")
+    SHA1=$(printf "%s" "$SHA1" | sed -e "s/'/\\'/g")
     eval $VARNAME=\'$SHA1\'
 }
+
 # Defaults.
 DEFAULT_REVISION=$(date +%Y%m%d)
 DEFAULT_PKG_PREFIX=android-emulator
@@ -268,11 +269,11 @@ for both Linux and Darwin platforms. This option requires the use of
 binaries.
 
 Valid options (defaults are inside brackets):
-    --help | -?              Print this message.
-    --package-dir=<path>     Change package output directory [$DEFAULT_PKG_DIR].
-    --revision=<name>        Change revision [$DEFAULT_REVISION].
-    --sources                Also create sources package.
-    --system=<list>          Specify host system list [$DEFAULT_SYSTEMS].
+    --help | -?           Print this message.
+    --package-dir=<path>  Change package output directory [$DEFAULT_PKG_DIR].
+    --revision=<name>     Change revision [$DEFAULT_REVISION].
+    --sources             Also create sources package.
+    --system=<list>       Specify host system list [$DEFAULT_SYSTEMS].
     --copy-prebuilts=<path>  Copy 64-bit Linux and Darwin binaries to
                              <path>/prebuilts/android-emulator/
 
