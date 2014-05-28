@@ -24,6 +24,7 @@
 #include "qemu-common.h"
 #include "sysemu/sysemu.h"
 #include "hw/hw.h"
+#include "android/kvm.h"
 #include "exec/gdbstub.h"
 #include "sysemu/kvm.h"
 
@@ -442,8 +443,13 @@ int kvm_init(int smp_cpus)
     for (i = 0; i < ARRAY_SIZE(s->slots); i++)
         s->slots[i].slot = i;
 
+    char* kvm_device = getenv(KVM_DEVICE_NAME_ENV);
+    if (NULL == kvm_device) {
+      kvm_device = "/dev/kvm";
+    }
+
     s->vmfd = -1;
-    s->fd = open("/dev/kvm", O_RDWR);
+    s->fd = open(kvm_device, O_RDWR);
     if (s->fd == -1) {
         ret = -errno;
         fprintf(stderr, "Could not access KVM kernel module: %m\n");
