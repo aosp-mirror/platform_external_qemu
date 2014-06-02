@@ -64,23 +64,23 @@ sdk {
         item("$buildWindowsEmulator.output/emulator-arm.exe") {
             builtBy buildWindowsEmulator
         }
-        item("$buildWindowsEmulator.output/emulator64-arm.exe") {
+/*        item("$buildWindowsEmulator.output/emulator64-arm.exe") {
             builtBy buildWindowsEmulator
-        }
+        }*/
 
         item("$buildWindowsEmulator.output/emulator-mips.exe") {
             builtBy buildWindowsEmulator
         }
-        item("$buildWindowsEmulator.output/emulator64-mips.exe") {
+/*        item("$buildWindowsEmulator.output/emulator64-mips.exe") {
             builtBy buildWindowsEmulator
-        }
+        }*/
 
         item("$buildWindowsEmulator.output/emulator-x86.exe") {
             builtBy buildWindowsEmulator
         }
-        item("$buildWindowsEmulator.output/emulator64-x86.exe") {
+/*        item("$buildWindowsEmulator.output/emulator64-x86.exe") {
             builtBy buildWindowsEmulator
-        }
+        }*/
     }
 }
 
