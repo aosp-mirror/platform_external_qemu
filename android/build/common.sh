@@ -16,6 +16,7 @@
 # It contains common definitions.
 #
 PROGNAME=`basename $0`
+PROGDIR=$(dirname "$0")
 
 ## Logging support
 ##
@@ -204,26 +205,30 @@ enable_linux_mingw ()
         exit 1
     fi
     # Do we have the binaries installed
-    log "Mingw64    : Checking for mingw64 installation"
-    MINGW64_PREFIX=x86_64-w64-mingw32
-    find_program MINGW64_CC $MINGW64_PREFIX-gcc
-    if [ -n "$MINGW64_CC" ]; then
-        MINGW_CC=$MINGW64_CC
-        MINGW_PREFIX=$MINGW64_PREFIX
-    else
-    log "Mingw      : Checking for mingw32 installation"
-    MINGW32_PREFIX=i586-mingw32msvc
-    find_program MINGW32_CC $MINGW32_PREFIX-gcc
-    if [ -z "$MINGW32_CC" ] ; then
-            echo "ERROR: It looks like neither $MINGW64_PREFIX-cc nor $MINGW32_PREFIX-gcc"
-            echo "are in your path. Please install the mingw32 package !"
-        exit 1
-        fi
-        MINGW_CC=$MINGW32_CC
-        MINGW_PREFIX=$MINGW32_PREFIX
-        FORCE_32BIT=no
+    # Always use the prebuilts when they are available, otherwise look
+    # into the current PATH.
+    MINGW_CC=
+    log "Mingw64    : Checking for prebuilt mingw64 installation"
+    local PROBE_DIR=$PROGDIR/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8
+    if [ -d "$PROBE_DIR" ]; then
+        PROBE_DIR=$(cd "$PROBE_DIR" && pwd -P 2>/dev/null)
+        MINGW_PREFIX=$PROBE_DIR/bin/x86_64-w64-mingw32
+        MINGW_CC=$MINGW_PREFIX-gcc
     fi
-    log2 "Mingw      : Found $MINGW32_CC"
+    if [ -z "$MINGW_CC" ]; then
+        log "Mingw64    : Checking for mingw64 installation"
+        MINGW64_PREFIX=x86_64-w64-mingw32
+        find_program MINGW64_CC $MINGW64_PREFIX-gcc
+        if [ -n "$MINGW64_CC" ]; then
+            MINGW_CC=$MINGW64_CC
+            MINGW_PREFIX=$MINGW64_PREFIX
+        fi
+    fi
+    if [ -z "$MINGW_CC" ]; then
+        echo "ERROR: Could not find valid x86_64-w64-mingw32-gcc toolchain!"
+        exit 1
+    fi
+    log2 "Mingw      : Found $MINGW_CC"
     CC=$MINGW_CC
     LD=$MINGW_CC
     AR=$MINGW_PREFIX-ar
