@@ -143,3 +143,22 @@ androidHwConfig_isScreenMultiTouch( AndroidHwConfig* config )
 {
     return strcmp(config->hw_screen, "multi-touch") == 0;
 }
+
+int
+androidHwConfig_getKernelDeviceNaming( AndroidHwConfig* config )
+{
+    if (!strcmp(config->kernel_newDeviceNaming, "no"))
+        return 0;
+    if (!strcmp(config->kernel_newDeviceNaming, "yes"))
+        return 1;
+    return -1;
+}
+
+const char* androidHwConfig_getKernelSerialPrefix(AndroidHwConfig* config )
+{
+    if (androidHwConfig_getKernelDeviceNaming(config) >= 1) {
+        return "ttyGF";
+    } else {
+        return "ttyS";
+    }
+}

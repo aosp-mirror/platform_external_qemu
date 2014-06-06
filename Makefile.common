@@ -127,6 +127,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/StringView.cpp \
 	android/emulation/CpuAccelerator.cpp \
 	android/filesystems/ext4_utils.cpp \
+	android/kernel/kernel_utils.cpp \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
 	android/utils/debug.c \
@@ -203,9 +204,9 @@ common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
 BUILD_SDL_FROM_SOURCES := true
 
 # On linux-x86, using the prebuilts avoid installing all the X11
-# development packages on our build servers.
-#
-ifeq ($(QEMU_HOST_TAG),linux-x86)
+# development packages on our build servers. Note: When building 64-bit
+# host binaries, don't use 32-bit SDL prebuilts.
+ifeq ($(strip $(QEMU_HOST_TAG)$(HOST_IS_64_BIT)),linux-x86)
     BUILD_SDL_FROM_SOURCES := false
 endif
 
@@ -412,8 +413,6 @@ common_LOCAL_CFLAGS += $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 CORE_MISC_SOURCES = \
     aio-android.c \
     async.c \
-    bt-host.c \
-    bt-vhci.c \
     iohandler.c \
     ioport.c \
     migration-dummy-android.c \
@@ -488,12 +487,9 @@ ifeq ($(HOST_ARCH),ppc)
 endif
 
 ifeq ($(HOST_OS),linux)
-    CORE_MISC_SOURCES += hw/usb/usb-linux.c \
-                         util/compatfd.c \
+    CORE_MISC_SOURCES += util/compatfd.c \
                          util/qemu-thread-posix.c \
                          android/camera/camera-capture-linux.c
-else
-    CORE_MISC_SOURCES += hw/usb/usb-dummy-android.c
 endif
 
 ifeq ($(HOST_OS),windows)
@@ -640,7 +636,6 @@ endif # EMULATOR_BUILD_64BITS
 BLOCK_SOURCES += \
     block.c \
     blockdev.c \
-    block/qcow.c \
     block/qcow2.c \
     block/qcow2-refcount.c \
     block/qcow2-snapshot.c \
@@ -707,7 +702,7 @@ endif # EMULATOR_BUILD_64BITS
 common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
 
-ELFF_CFLAGS := -I$(LOCAL_PATH)/elff
+ELFF_CFLAGS := -I$(LOCAL_PATH)/distrib/elff
 ELFF_LDLIBS := -lstdc++
 
 ELFF_SOURCES := \
@@ -719,7 +714,7 @@ ELFF_SOURCES := \
     elf_mapped_section.cc \
     elff_api.cc \
 
-common_LOCAL_SRC_FILES += $(ELFF_SOURCES:%=elff/%)
+common_LOCAL_SRC_FILES += $(ELFF_SOURCES:%=distrib/elff/elff/%)
 
 common_LOCAL_CFLAGS += \
     -fno-exceptions \
@@ -778,4 +773,3 @@ $$(QEMU_HEADER_H): $$(LOCAL_PATH)/$$1 $$(LOCAL_PATH)/hxtool
 LOCAL_GENERATED_SOURCES += $$(QEMU_HEADER_H)
 LOCAL_C_INCLUDES += $$(intermediates)
 endef
-

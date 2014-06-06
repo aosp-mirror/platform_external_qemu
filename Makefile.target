@@ -52,19 +52,17 @@ common_LOCAL_CFLAGS += -I$(GLIB_INCLUDE_DIR)
 common_LOCAL_CFLAGS += $(EMULATOR_TARGET_CFLAGS)
 
 common_LOCAL_SRC_FILES += \
+    tcg/optimize.c \
     tcg/tcg.c \
+    tcg-runtime.c \
+    util/bitops.c \
+    util/host-utils.c \
 
 ##############################################################################
 # Emulated hardware devices.
 #
 
 HW_SOURCES := \
-    bt/core.c \
-    bt/hci.c \
-    bt/hid.c \
-    bt/l2cap.c \
-    bt/sdp.c \
-    block/cdrom.c \
     core/irq.c \
     core/qdev.c \
     core/sysbus.c \
@@ -75,18 +73,11 @@ HW_SOURCES := \
     android/goldfish/fb.c \
     android/goldfish/battery.c \
     android/goldfish/mmc.c   \
-    android/goldfish/memlog.c \
     android/goldfish/nand.c \
     android/goldfish/pipe.c \
     android/goldfish/tty.c \
     android/goldfish/vmem.c \
     pci/pci.c \
-    scsi/scsi-disk.c \
-    usb/dev-hid.c \
-    usb/dev-hub.c \
-    usb/dev-storage.c \
-    usb/hcd-ohci.c \
-    usb/core.c \
     watchdog/watchdog.c
 
 
@@ -96,7 +87,6 @@ HW_SOURCES += \
     arm/pic.c \
     arm/boot.c \
     android/goldfish/interrupt.c \
-    android/goldfish/switch.c \
     android/goldfish/timer.c \
     android/goldfish/trace.c \
 
@@ -142,7 +132,6 @@ HW_SOURCES += \
     android/android_mips.c \
     mips/mips_pic.c \
     android/goldfish/interrupt.c \
-    android/goldfish/switch.c \
     android/goldfish/timer.c \
     android/goldfish/trace.c \
     mips/cputimer.c \
@@ -170,10 +159,9 @@ common_LOCAL_SRC_FILES += \
     cputlb.c \
     exec.c \
     main-loop.c \
+    memory-android.c \
     monitor-android.c \
     translate-all.c \
-    android/varint.c \
-    softmmu_outside_jit.c
 
 ##############################################################################
 # CPU-specific emulation.
@@ -200,7 +188,15 @@ endif  # EMULATOR_TARGET_ARCH == arm
 
 ifeq ($(EMULATOR_TARGET_ARCH), x86)
 common_LOCAL_SRC_FILES += \
-    target-i386/op_helper.c \
+    target-i386/cc_helper.c \
+    target-i386/excp_helper.c \
+    target-i386/fpu_helper.c \
+    target-i386/int_helper.c \
+    target-i386/mem_helper.c \
+    target-i386/misc_helper.c \
+    target-i386/seg_helper.c \
+    target-i386/smm_helper.c \
+    target-i386/svm_helper.c \
     target-i386/helper.c \
     target-i386/translate.c \
     target-i386/machine.c \
@@ -247,9 +243,7 @@ endif
 # memory is within allocated block. This information also allows detecting
 # memory leaks and attempts to free/realloc invalid pointers.
 #
-common_LOCAL_CFLAGS += \
-    -I$(LOCAL_PATH)/memcheck \
-    -I$(LOCAL_PATH)/elff
+common_LOCAL_CFLAGS += $(ELFF_CFLAGS)
 
 MCHK_SOURCES := \
     memcheck.c \
@@ -258,7 +252,7 @@ MCHK_SOURCES := \
     memcheck_mmrange_map.c \
     memcheck_util.c
 
-common_LOCAL_SRC_FILES += $(MCHK_SOURCES:%=memcheck/%)
+common_LOCAL_SRC_FILES += $(MCHK_SOURCES:%=android/qemu/memcheck/%)
 
 common_LOCAL_SRC_FILES += \
     cpus.c \

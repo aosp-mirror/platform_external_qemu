@@ -46,9 +46,21 @@ struct TranslationBlock;
 typedef struct TranslationBlock TranslationBlock;
 
 /* XXX: make safe guess about sizes */
-#define MAX_OP_PER_INSTR 96
-/* A Call op needs up to 6 + 2N parameters (N = number of arguments).  */
-#define MAX_OPC_PARAM 10
+#define MAX_OP_PER_INSTR 208
+
+#if HOST_LONG_BITS == 32
+#define MAX_OPC_PARAM_PER_ARG 2
+#else
+#define MAX_OPC_PARAM_PER_ARG 1
+#endif
+#define MAX_OPC_PARAM_IARGS 5
+#define MAX_OPC_PARAM_OARGS 1
+#define MAX_OPC_PARAM_ARGS (MAX_OPC_PARAM_IARGS + MAX_OPC_PARAM_OARGS)
+
+/* A Call op needs up to 4 + 2N parameters on 32-bit archs,
+ * and up to 4 + N parameters on 64-bit archs
+ * (N = number of input arguments + output arguments).  */
+#define MAX_OPC_PARAM (4 + (MAX_OPC_PARAM_PER_ARG * MAX_OPC_PARAM_ARGS))
 #define OPC_BUF_SIZE 2048
 #define OPC_MAX_SIZE (OPC_BUF_SIZE - MAX_OP_PER_INSTR)
 
@@ -60,14 +72,6 @@ typedef struct TranslationBlock TranslationBlock;
 
 #define OPPARAM_BUF_SIZE (OPC_BUF_SIZE * MAX_OPC_PARAM)
 
-extern target_ulong gen_opc_pc[OPC_BUF_SIZE];
-extern target_ulong gen_opc_npc[OPC_BUF_SIZE];
-extern uint8_t gen_opc_cc_op[OPC_BUF_SIZE];
-extern uint8_t gen_opc_instr_start[OPC_BUF_SIZE];
-extern uint16_t gen_opc_icount[OPC_BUF_SIZE];
-extern target_ulong gen_opc_jump_pc[2];
-extern uint32_t gen_opc_hflags[OPC_BUF_SIZE];
-
 #include "qemu/log.h"
 
 void gen_intermediate_code(CPUArchState *env, struct TranslationBlock *tb);
@@ -77,29 +81,41 @@ void restore_state_to_opc(CPUArchState *env, struct TranslationBlock *tb,
 
 unsigned long code_gen_max_block_size(void);
 void cpu_gen_init(void);
+void tcg_exec_init(unsigned long tb_size);
 int cpu_gen_code(CPUArchState *env, struct TranslationBlock *tb,
                  int *gen_code_size_ptr);
-bool cpu_restore_state(struct TranslationBlock *tb,
-                       CPUArchState *env, uintptr_t searched_pc);
+bool cpu_restore_state(CPUArchState *env, uintptr_t searched_pc);
+
 void QEMU_NORETURN cpu_resume_from_signal(CPUArchState *env1, void *puc);
 void QEMU_NORETURN cpu_io_recompile(CPUArchState *env, uintptr_t retaddr);
-TranslationBlock *tb_gen_code(CPUArchState *env,
+TranslationBlock *tb_gen_code(CPUArchState *env, 
                               target_ulong pc, target_ulong cs_base, int flags,
                               int cflags);
 void cpu_exec_init(CPUArchState *env);
 void QEMU_NORETURN cpu_loop_exit(CPUArchState *env1);
 int page_unprotect(target_ulong address, uintptr_t pc, void *puc);
-void tb_invalidate_phys_page_range(hwaddr start, hwaddr end,
+void tb_invalidate_phys_page_range(tb_page_addr_t start, tb_page_addr_t end,
                                    int is_cpu_write_access);
-void tb_invalidate_page_range(target_ulong start, target_ulong end);
+void tb_invalidate_phys_range(tb_page_addr_t start, tb_page_addr_t end,
+                              int is_cpu_write_access);
+#if !defined(CONFIG_USER_ONLY)
+/* cputlb.c */
 void tlb_flush_page(CPUArchState *env, target_ulong addr);
 void tlb_flush(CPUArchState *env, int flush_global);
-int tlb_set_page_exec(CPUArchState *env, target_ulong vaddr,
-                      hwaddr paddr, int prot,
-                      int mmu_idx, int is_softmmu);
-int tlb_set_page(CPUArchState *env1, target_ulong vaddr,
-                 hwaddr paddr, int prot,
-                 int mmu_idx, int is_softmmu);
+void tlb_set_page(CPUArchState *env, target_ulong vaddr,
+                  hwaddr paddr, int prot,
+                  int mmu_idx, target_ulong size);
+void tb_reset_jump_recursive(TranslationBlock *tb);
+void tb_invalidate_phys_addr(hwaddr addr);
+#else
+static inline void tlb_flush_page(CPUArchState *env, target_ulong addr)
+{
+}
+
+static inline void tlb_flush(CPUArchState *env, int flush_global)
+{
+}
+#endif
 
 typedef struct PhysPageDesc {
     /* offset in host memory of the page + io_index in the low bits */
@@ -108,6 +124,7 @@ typedef struct PhysPageDesc {
 } PhysPageDesc;
 
 PhysPageDesc *phys_page_find(hwaddr index);
+PhysPageDesc *phys_page_find_alloc(hwaddr index, int alloc);
 
 int io_mem_watch;
 
@@ -115,8 +132,6 @@ int io_mem_watch;
 
 #define CODE_GEN_PHYS_HASH_BITS     15
 #define CODE_GEN_PHYS_HASH_SIZE     (1 << CODE_GEN_PHYS_HASH_BITS)
-
-#define MIN_CODE_GEN_BUFFER_SIZE     (1024 * 1024)
 
 /* estimated block size for TB allocation */
 /* XXX: use a per code average code fragment size and modulate it
@@ -168,7 +183,7 @@ struct TranslationBlock {
     struct TranslationBlock *jmp_first;
     uint32_t icount;
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
     /* Maps PCs in this translation block to corresponding PCs in guest address
      * space. The array is arranged in such way, that every even entry contains
      * PC in the translation block, followed by an odd entry that contains
@@ -178,7 +193,26 @@ struct TranslationBlock {
     uintptr_t*   tpc2gpc;
     /* Number of pairs (pc_tb, pc_guest) in tpc2gpc array. */
     unsigned int    tpc2gpc_pairs;
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
+};
+
+#include "exec/spinlock.h"
+
+typedef struct TBContext TBContext;
+
+struct TBContext {
+
+    TranslationBlock *tbs;
+    TranslationBlock *tb_phys_hash[CODE_GEN_PHYS_HASH_SIZE];
+    int nb_tbs;
+    /* any access to the tbs or the page table must use this lock */
+    spinlock_t tb_lock;
+
+    /* statistics */
+    int tb_flush_count;
+    int tb_phys_invalidate_count;
+
+    int tb_invalidated_flag;
 };
 
 static inline unsigned int tb_jmp_cache_hash_page(target_ulong pc)
@@ -201,7 +235,7 @@ static inline unsigned int tb_phys_hash_func(tb_page_addr_t pc)
     return (pc >> 2) & (CODE_GEN_PHYS_HASH_SIZE - 1);
 }
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
 /* Gets translated PC for a given (translated PC, guest PC) pair.
  * Return:
  *  Translated PC, or NULL if pair index was too large.
@@ -253,16 +287,15 @@ tb_search_guest_pc_from_tb_pc(const TranslationBlock* tb, target_ulong tb_pc)
     }
     return 0;
 }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 
-TranslationBlock *tb_alloc(target_ulong pc);
 void tb_free(TranslationBlock *tb);
 void tb_flush(CPUArchState *env);
 void tb_link_phys(TranslationBlock *tb,
                   target_ulong phys_pc, target_ulong phys_page2);
 void tb_phys_invalidate(TranslationBlock *tb, tb_page_addr_t page_addr);
-
-extern TranslationBlock *tb_phys_hash[CODE_GEN_PHYS_HASH_SIZE];
+void tb_invalidate_phys_page_fast0(hwaddr start, int len);
+    
 extern uint8_t *code_gen_ptr;
 extern int code_gen_max_blocks;
 
@@ -353,28 +386,54 @@ static inline void tb_add_jump(TranslationBlock *tb, int n,
     }
 }
 
-TranslationBlock *tb_find_pc(unsigned long pc_ptr);
+/* GETRA is the true target of the return instruction that we'll execute,
+   defined here for simplicity of defining the follow-up macros.  */
+#if defined(CONFIG_TCG_INTERPRETER)
+extern uintptr_t tci_tb_ptr;
+# define GETRA() tci_tb_ptr
+#else
+# define GETRA() \
+    ((uintptr_t)__builtin_extract_return_addr(__builtin_return_address(0)))
+#endif
 
-extern CPUWriteMemoryFunc *io_mem_write[IO_MEM_NB_ENTRIES][4];
-extern CPUReadMemoryFunc *io_mem_read[IO_MEM_NB_ENTRIES][4];
-extern void *io_mem_opaque[IO_MEM_NB_ENTRIES];
+/* The true return address will often point to a host insn that is part of
+   the next translated guest insn.  Adjust the address backward to point to
+   the middle of the call insn.  Subtracting one would do the job except for
+   several compressed mode architectures (arm, mips) which set the low bit
+   to indicate the compressed mode; subtracting two works around that.  It
+   is also the case that there are no host isas that contain a call insn
+   smaller than 4 bytes, so we don't worry about special-casing this.  */
+#if defined(CONFIG_TCG_INTERPRETER)
+# define GETPC_ADJ   0
+#else
+# define GETPC_ADJ   2
+#endif
 
-#include "exec/spinlock.h"
-
-extern spinlock_t tb_lock;
-
-extern int tb_invalidated_flag;
+#define GETPC()  (GETRA() - GETPC_ADJ)
 
 #if !defined(CONFIG_USER_ONLY)
 
-void tlb_fill(target_ulong addr, int is_write, int mmu_idx,
-              void *retaddr);
+void phys_mem_set_alloc(void *(*alloc)(size_t));
 
-#include "exec/softmmu_defs.h"
+TranslationBlock *tb_find_pc(uintptr_t pc_ptr);
+
+uint64_t io_mem_read(int index, hwaddr addr, unsigned size);
+void io_mem_write(int index, hwaddr addr, uint64_t value, unsigned size);
+
+extern CPUWriteMemoryFunc *_io_mem_write[IO_MEM_NB_ENTRIES][4];
+extern CPUReadMemoryFunc *_io_mem_read[IO_MEM_NB_ENTRIES][4];
+extern void *io_mem_opaque[IO_MEM_NB_ENTRIES];
+
+void tlb_fill(CPUArchState *env1, target_ulong addr, int is_write, int mmu_idx,
+              uintptr_t retaddr);
+
+uint8_t helper_ldb_cmmu(CPUArchState *env, target_ulong addr, int mmu_idx);
+uint16_t helper_ldw_cmmu(CPUArchState *env, target_ulong addr, int mmu_idx);
+uint32_t helper_ldl_cmmu(CPUArchState *env, target_ulong addr, int mmu_idx);
+uint64_t helper_ldq_cmmu(CPUArchState *env, target_ulong addr, int mmu_idx);
 
 #define ACCESS_TYPE (NB_MMU_MODES + 1)
 #define MEMSUFFIX _code
-#define env cpu_single_env
 
 #define DATA_SIZE 1
 #include "exec/softmmu_header.h"
@@ -390,50 +449,28 @@ void tlb_fill(target_ulong addr, int is_write, int mmu_idx,
 
 #undef ACCESS_TYPE
 #undef MEMSUFFIX
-#undef env
 
 #endif
 
 #if defined(CONFIG_USER_ONLY)
-static inline target_ulong get_phys_addr_code(CPUArchState *env1, target_ulong addr)
+static inline tb_page_addr_t get_page_addr_code(CPUArchState *env1, target_ulong addr)
 {
     return addr;
 }
 #else
-/* NOTE: this function can trigger an exception */
-/* NOTE2: the returned address is not exactly the physical address: it
-   is the offset relative to phys_ram_base */
-static inline target_ulong get_phys_addr_code(CPUArchState *env1, target_ulong addr)
-{
-    int mmu_idx, page_index, pd;
-    void *p;
-
-    page_index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
-    mmu_idx = cpu_mmu_index(env1);
-    if (unlikely(env1->tlb_table[mmu_idx][page_index].addr_code !=
-                 (addr & TARGET_PAGE_MASK))) {
-        ldub_code(addr);
-    }
-    pd = env1->tlb_table[mmu_idx][page_index].addr_code & ~TARGET_PAGE_MASK;
-    if (pd > IO_MEM_ROM && !(pd & IO_MEM_ROMD)) {
-#if defined(TARGET_SPARC) || defined(TARGET_MIPS)
-        do_unassigned_access(addr, 0, 1, 0, 4);
-#else
-        cpu_abort(env1, "Trying to execute code outside RAM or ROM at 0x" TARGET_FMT_lx "\n", addr);
-#endif
-    }
-    p = (void *)(unsigned long)addr
-        + env1->tlb_table[mmu_idx][page_index].addend;
-    return qemu_ram_addr_from_host_nofail(p);
-}
+/* cputlb.c */
+tb_page_addr_t get_page_addr_code(CPUArchState *env1, target_ulong addr);
 #endif
 
 typedef void (CPUDebugExcpHandler)(CPUArchState *env);
 
-CPUDebugExcpHandler *cpu_set_debug_excp_handler(CPUDebugExcpHandler *handler);
+void cpu_set_debug_excp_handler(CPUDebugExcpHandler *handler);
 
 /* vl.c */
 extern int singlestep;
+
+/* cpu-exec.c */
+extern volatile sig_atomic_t exit_request;
 
 /* Deterministic execution requires that IO only be performed on the last
    instruction of a TB so that interrupts take effect immediately.  */
@@ -443,7 +480,7 @@ static inline int can_do_io(CPUArchState *env)
         return 1;
     }
     /* If not executing code then assume we are ok.  */
-    if (!env->current_tb) {
+    if (env->current_tb == NULL) {
         return 1;
     }
     return env->can_do_io != 0;

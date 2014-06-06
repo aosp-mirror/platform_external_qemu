@@ -178,8 +178,13 @@ void goldfish_battery_init(int has_battery)
 
     goldfish_device_add(&s->dev, goldfish_battery_readfn, goldfish_battery_writefn, s);
 
-    register_savevm( "battery_state", 0, BATTERY_STATE_SAVE_VERSION,
-                     goldfish_battery_save, goldfish_battery_load, s);
+    register_savevm(NULL,
+                    "battery_state",
+                    0,
+                    BATTERY_STATE_SAVE_VERSION,
+                    goldfish_battery_save,
+                    goldfish_battery_load,
+                    s);
 }
 
 void goldfish_battery_set_prop(int ac, int property, int value)

@@ -12,6 +12,7 @@
 #ifndef _HW_GOLDFISH_PIPE_H
 #define _HW_GOLDFISH_PIPE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "hw/hw.h"
 
@@ -158,6 +159,8 @@ extern void goldfish_pipe_wake( void* hwpipe, unsigned flags );
 #define PIPE_REG_PARAMS_ADDR_HIGH    0x1c
 /* write: access with paremeter buffer */
 #define PIPE_REG_ACCESS_PARAMS       0x20
+#define PIPE_REG_CHANNEL_HIGH        0x30 /* read/write: high 32 bit channel id */
+#define PIPE_REG_ADDRESS_HIGH        0x34 /* write: high 32 bit physical address */
 
 /* list of commands for PIPE_REG_COMMAND */
 #define PIPE_CMD_OPEN               1  /* open new channel */
@@ -192,12 +195,22 @@ extern void goldfish_pipe_wake( void* hwpipe, unsigned flags );
 #define PIPE_WAKE_READ         (1 << 1)  /* pipe can now be read from */
 #define PIPE_WAKE_WRITE        (1 << 2)  /* pipe can now be written to */
 
-void pipe_dev_init(void);
+void pipe_dev_init(bool newDeviceNaming);
 
 struct access_params{
     uint32_t channel;
     uint32_t size;
     uint32_t address;
+    uint32_t cmd;
+    uint32_t result;
+    /* reserved for future extension */
+    uint32_t flags;
+};
+
+struct access_params_64 {
+    uint64_t channel;
+    uint32_t size;
+    uint64_t address;
     uint32_t cmd;
     uint32_t result;
     /* reserved for future extension */

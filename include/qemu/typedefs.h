@@ -73,8 +73,7 @@ typedef struct Range Range;
 // NOTE(digit): Remove typedefs below when everything is upstreamed.
 typedef struct DisplayAllocator DisplayAllocator;
 typedef struct IRQState *qemu_irq;
-typedef struct TextConsole TextConsole;
-typedef TextConsole QEMUConsole;
+typedef struct QEMUConsole QEMUConsole;
 typedef struct VLANState VLANState;
 typedef struct VLANClientState VLANClientState;
 

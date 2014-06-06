@@ -537,6 +537,11 @@ void events_dev_init(uint32_t base, qemu_irq irq)
      */
     user_event_register_generic(s, events_put_generic);
 
-    register_savevm( "events_state", 0, EVENTS_STATE_SAVE_VERSION,
-                      events_state_save, events_state_load, s );
+    register_savevm(NULL,
+                    "events_state",
+                    0,
+                    EVENTS_STATE_SAVE_VERSION,
+                    events_state_save,
+                    events_state_load,
+                    s);
 }

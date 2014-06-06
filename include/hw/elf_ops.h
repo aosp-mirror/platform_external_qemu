@@ -73,7 +73,7 @@ static int glue(symfind, SZ)(const void *s0, const void *s1)
     return result;
 }
 
-static const char *glue(lookup_symbol, SZ)(struct syminfo *s, target_ulong orig_addr)
+static const char *glue(lookup_symbol, SZ)(struct syminfo *s, hwaddr orig_addr)
 {
     struct elf_sym *syms = glue(s->disas_symtab.elf, SZ);
     struct elf_sym key;
@@ -143,7 +143,7 @@ static int glue(load_symbols, SZ)(struct elfhdr *ehdr, int fd, int must_swab)
         }
 #if defined(TARGET_ARM) || defined (TARGET_MIPS)
         /* The bottom address bit marks a Thumb or MIPS16 symbol.  */
-        syms[i].st_value &= ~(target_ulong)1;
+        syms[i].st_value &= ~(hwaddr)1;
 #endif
         i++;
     }

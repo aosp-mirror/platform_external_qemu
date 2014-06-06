@@ -47,7 +47,7 @@ ifeq ($(HOST_OS),windows)
   MY_CFLAGS += -D_WIN32
   # LARGEADDRESSAWARE gives more address space to 32-bit process
   MY_LDLIBS += -Xlinker --large-address-aware
-  ifneq ($(BUILD_HOST_64bit),)
+  ifneq ($(HOST_IS_64_BIT),)
     # Microsoft 64-bit compiler define both _WIN32 and _WIN64
     MY_CFLAGS += -D_WIN64
     # amd64-mingw32msvc- toolchain still name it vfw32.  May change it once amd64-mingw32msvc-
@@ -106,7 +106,7 @@ endif
 # adequate values for HOST_CC
 #
 ifneq ($(BUILD_STANDALONE_EMULATOR),true)
-  # On Linux, use our custom 32-bit host toolchain (unless BUILD_HOST_64bit=1)
+  # On Linux, use our custom 32-bit host toolchain (unless HOST_IS_64_BIT=true)
   # which contains the relevant headers and 32-bit libraries for audio (The host 64-bit
   # Lucid doesn't provide these anymore, only their 64-bit versions).
   ifeq ($(HOST_OS),linux)
@@ -136,7 +136,7 @@ endif
 
 
 ifneq ($(combo_target)$(TARGET_SIMULATOR),HOST_true)
-  ifneq ($(BUILD_HOST_64bit),)
+  ifneq ($(HOST_IS_64_BIT),)
     MY_CFLAGS += -m64
     MY_LDFLAGS += -m64
   else
@@ -149,6 +149,13 @@ ifneq ($(combo_target)$(TARGET_SIMULATOR),HOST_true)
   ifneq ($(BUILD_HOST_static),)
     MY_LDLIBS += -static
   endif
+endif
+
+ifeq ($(HOST_OS)-$(BUILD_STANDALONE_EMULATOR),windows-true)
+  # Ensure that printf() et al use GNU printf format specifiers as required
+  # by QEMU. This is important when using the newer Mingw64 cross-toolchain.
+  # See http://sourceforge.net/apps/trac/mingw-w64/wiki/gnu%20printf
+  MY_CFLAGS += -D__USE_MINGW_ANSI_STDIO=1
 endif
 
 # Enable warning, except those related to missing field initializers
@@ -228,7 +235,7 @@ endef
 #
 QEMU_SYSTEM_LDLIBS := -lm
 ifeq ($(HOST_OS),windows)
-  QEMU_SYSTEM_LDLIBS += -mno-cygwin -mwindows -mconsole
+  QEMU_SYSTEM_LDLIBS += -mwindows -mconsole
 endif
 
 ifeq ($(HOST_OS),freebsd)
@@ -304,6 +311,7 @@ endif
 EMULATOR_TARGET_ARCH := arm
 include $(LOCAL_PATH)/Makefile.target
 
+# Note: the same binary handles x86 and x86_64
 EMULATOR_TARGET_ARCH := x86
 include $(LOCAL_PATH)/Makefile.target
 
@@ -341,7 +349,9 @@ ifeq (true,$(BUILD_STANDALONE_EMULATOR))
     $(error Cannot find GPU emulation sources directory: $(EMULATOR_EMUGL_SOURCES_DIR))
   endif
 
+  # TODO(digit): Remove the line below.
   BUILD_EMULATOR_OPENGL := true
+  BUILD_EMULATOR_HOST_OPENGL := true
   include $(EMULATOR_EMUGL_SOURCES_DIR)/Android.mk
 endif
 

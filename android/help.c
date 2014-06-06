@@ -971,7 +971,7 @@ help_trace(stralloc_t*  out)
     );
 }
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
 static void
 help_memcheck(stralloc_t*  out)
 {
@@ -1008,7 +1008,7 @@ help_memcheck(stralloc_t*  out)
     "  to analyze memory allocations and memory access.\n\n"
     );
 }
-#endif  // CONFIG_MEMCHECK
+#endif  // CONFIG_ANDROID_MEMCHECK
 
 #ifdef CONFIG_STANDALONE_UI
 static void

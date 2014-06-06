@@ -92,6 +92,13 @@ char* path_getBuildBootProp( const char* androidOut );
  */
 char* path_getBuildTargetArch( const char* androidOut );
 
+/* Given an AVD's target architecture, return the suffix of the
+ * corresponding emulator backend program, e.g. 'x86' for x86 and x86_64
+ * CPUs, 'arm' for ARM ones (including ARM64 when support is complete),
+ * etc. Returned string must not be freed by the caller.
+ */
+const char* emulator_getBackendSuffix(const char* targetArch);
+
 ANDROID_END_HEADER
 
 #endif /* _ANDROID_AVD_UTIL_H */

@@ -39,6 +39,12 @@ static uint32_t arm1136_cp15_c0_c1[8] =
 static uint32_t arm1136_cp15_c0_c2[8] =
 { 0x00140011, 0x12002111, 0x11231111, 0x01102131, 0x141, 0, 0, 0 };
 
+static uint32_t arm1176_cp15_c0_c1[8] =
+{ 0x111, 0x11, 0x33, 0, 0x01130003, 0x10030302, 0x01222100, 0 };
+
+static uint32_t arm1176_cp15_c0_c2[8] =
+{ 0x0140011, 0x12002111, 0x11231121, 0x01102131, 0x01141, 0, 0, 0 };
+
 static uint32_t cpu_arm_find_by_name(const char *name);
 
 static inline void set_feature(CPUARMState *env, int feature)
@@ -74,18 +80,44 @@ static void cpu_reset_model_id(CPUARMState *env, uint32_t id)
         env->cp15.c0_cachetype = 0x1dd20d2;
         env->cp15.c1_sys = 0x00090078;
         break;
-    case ARM_CPUID_ARM1136_R2:
     case ARM_CPUID_ARM1136:
+        /* This is the 1136 r1, which is a v6K core */
+        set_feature(env, ARM_FEATURE_V6K);
+        /* Fall through */
+    case ARM_CPUID_ARM1136_R2:
+        /* What qemu calls "arm1136_r2" is actually the 1136 r0p2, ie an
+         * older core than plain "arm1136". In particular this does not
+         * have the v6K features.
+         */
         set_feature(env, ARM_FEATURE_V4T);
         set_feature(env, ARM_FEATURE_V5);
         set_feature(env, ARM_FEATURE_V6);
         set_feature(env, ARM_FEATURE_VFP);
         set_feature(env, ARM_FEATURE_AUXCR);
+        /* These ID register values are correct for 1136 but may be wrong
+         * for 1136_r2 (in particular r0p2 does not actually implement most
+         * of the ID registers).
+         */
         env->vfp.xregs[ARM_VFP_FPSID] = 0x410120b4;
         env->vfp.xregs[ARM_VFP_MVFR0] = 0x11111111;
         env->vfp.xregs[ARM_VFP_MVFR1] = 0x00000000;
         memcpy(env->cp15.c0_c1, arm1136_cp15_c0_c1, 8 * sizeof(uint32_t));
         memcpy(env->cp15.c0_c2, arm1136_cp15_c0_c2, 8 * sizeof(uint32_t));
+        env->cp15.c0_cachetype = 0x1dd20d2;
+        env->cp15.c1_sys = 0x00050078;
+        break;
+    case ARM_CPUID_ARM1176:
+        set_feature(env, ARM_FEATURE_V4T);
+        set_feature(env, ARM_FEATURE_V5);
+        set_feature(env, ARM_FEATURE_V6);
+        set_feature(env, ARM_FEATURE_V6K);
+        set_feature(env, ARM_FEATURE_VFP);
+        set_feature(env, ARM_FEATURE_AUXCR);
+        env->vfp.xregs[ARM_VFP_FPSID] = 0x410120b5;
+        env->vfp.xregs[ARM_VFP_MVFR0] = 0x11111111;
+        env->vfp.xregs[ARM_VFP_MVFR1] = 0x00000000;
+        memcpy(env->cp15.c0_c1, arm1176_cp15_c0_c1, 8 * sizeof(uint32_t));
+        memcpy(env->cp15.c0_c2, arm1176_cp15_c0_c2, 8 * sizeof(uint32_t));
         env->cp15.c0_cachetype = 0x1dd20d2;
         env->cp15.c1_sys = 0x00050078;
         break;
@@ -96,6 +128,7 @@ static void cpu_reset_model_id(CPUARMState *env, uint32_t id)
         set_feature(env, ARM_FEATURE_V6K);
         set_feature(env, ARM_FEATURE_VFP);
         set_feature(env, ARM_FEATURE_AUXCR);
+        set_feature(env, ARM_FEATURE_VAPA);
         env->vfp.xregs[ARM_VFP_FPSID] = 0x410120b4;
         env->vfp.xregs[ARM_VFP_MVFR0] = 0x11111111;
         env->vfp.xregs[ARM_VFP_MVFR1] = 0x00000000;
@@ -253,15 +286,21 @@ static void cpu_reset_model_id(CPUARMState *env, uint32_t id)
         cpu_abort(env, "Bad CPU ID: %x\n", id);
         break;
     }
+
+    /* Some features automatically imply others: */
+    if (arm_feature(env, ARM_FEATURE_V7)) {
+        set_feature(env, ARM_FEATURE_VAPA);
+    }
 }
 
-void cpu_reset(CPUARMState *env)
+void cpu_reset(CPUState *cpu)
 {
+    CPUARMState *env = cpu->env_ptr;
     uint32_t id;
 
     if (qemu_loglevel_mask(CPU_LOG_RESET)) {
-        qemu_log("CPU Reset (CPU %d)\n", env->cpu_index);
-        log_cpu_state(env, 0);
+        qemu_log("CPU Reset (CPU %d)\n", cpu->cpu_index);
+        log_cpu_state(cpu, 0);
     }
 
     id = env->cp15.c0_cpuid;
@@ -306,6 +345,10 @@ void cpu_reset(CPUARMState *env)
     }
     env->vfp.xregs[ARM_VFP_FPEXC] = 0;
     env->cp15.c2_base_mask = 0xffffc000u;
+    /* v7 performance monitor control register: same implementor
+     * field as main ID register, and we implement no event counters.
+     */
+    env->cp15.c9_pmcr = (id & 0xff000000);
 #endif
     set_flush_to_zero(1, &env->vfp.standard_fp_status);
     set_flush_inputs_to_zero(1, &env->vfp.standard_fp_status);
@@ -371,6 +414,7 @@ static int vfp_gdb_set_reg(CPUARMState *env, uint8_t *buf, int reg)
 
 CPUARMState *cpu_arm_init(const char *cpu_model)
 {
+    ARMCPU *arm_cpu;
     CPUARMState *env;
     uint32_t id;
     static int inited = 0;
@@ -378,27 +422,31 @@ CPUARMState *cpu_arm_init(const char *cpu_model)
     id = cpu_arm_find_by_name(cpu_model);
     if (id == 0)
         return NULL;
-    env = g_malloc0(sizeof(CPUARMState));
+    arm_cpu = g_malloc0(sizeof(ARMCPU));
+    env = &arm_cpu->env;
+    ENV_GET_CPU(env)->env_ptr = env;
+
+    CPUState *cpu = ENV_GET_CPU(env);
     cpu_exec_init(env);
     if (!inited) {
         inited = 1;
         arm_translate_init();
     }
 
-    env->cpu_model_str = cpu_model;
+    cpu->cpu_model_str = cpu_model;
     env->cp15.c0_cpuid = id;
-    cpu_reset(env);
+    cpu_reset(cpu);
     if (arm_feature(env, ARM_FEATURE_NEON)) {
-        gdb_register_coprocessor(env, vfp_gdb_get_reg, vfp_gdb_set_reg,
+        gdb_register_coprocessor(cpu, vfp_gdb_get_reg, vfp_gdb_set_reg,
                                  51, "arm-neon.xml", 0);
     } else if (arm_feature(env, ARM_FEATURE_VFP3)) {
-        gdb_register_coprocessor(env, vfp_gdb_get_reg, vfp_gdb_set_reg,
+        gdb_register_coprocessor(cpu, vfp_gdb_get_reg, vfp_gdb_set_reg,
                                  35, "arm-vfp3.xml", 0);
     } else if (arm_feature(env, ARM_FEATURE_VFP)) {
-        gdb_register_coprocessor(env, vfp_gdb_get_reg, vfp_gdb_set_reg,
+        gdb_register_coprocessor(cpu, vfp_gdb_get_reg, vfp_gdb_set_reg,
                                  19, "arm-vfp.xml", 0);
     }
-    qemu_init_vcpu(env);
+    qemu_init_vcpu(cpu);
     return env;
 }
 
@@ -413,6 +461,7 @@ static const struct arm_cpu_t arm_cpu_names[] = {
     { ARM_CPUID_ARM1026, "arm1026"},
     { ARM_CPUID_ARM1136, "arm1136"},
     { ARM_CPUID_ARM1136_R2, "arm1136-r2"},
+    { ARM_CPUID_ARM1176, "arm1176"},
     { ARM_CPUID_ARM11MPCORE, "arm11mpcore"},
     { ARM_CPUID_CORTEXM3, "cortex-m3"},
     { ARM_CPUID_CORTEXA8, "cortex-a8"},
@@ -576,7 +625,7 @@ void do_interrupt (CPUARMState *env)
 }
 
 int cpu_arm_handle_mmu_fault (CPUARMState *env, target_ulong address, int rw,
-                              int mmu_idx, int is_softmmu)
+                              int mmu_idx)
 {
     if (rw == 2) {
         env->exception_index = EXCP_PREFETCH_ABORT;
@@ -634,7 +683,7 @@ uint32_t HELPER(get_r13_banked)(CPUARMState *env, uint32_t mode)
 extern int semihosting_enabled;
 
 /* Map CPU modes onto saved register banks.  */
-static inline int bank_number (int mode)
+static inline int bank_number (CPUARMState *env, int mode)
 {
     switch (mode) {
     case ARM_CPU_MODE_USR:
@@ -653,7 +702,7 @@ static inline int bank_number (int mode)
     case ARM_CPU_MODE_SMC:
         return 6;
     }
-    cpu_abort(cpu_single_env, "Bad mode %x\n", mode);
+    cpu_abort(env, "Bad mode %x\n", mode);
     return -1;
 }
 
@@ -674,12 +723,12 @@ void switch_mode(CPUARMState *env, int mode)
         memcpy (env->regs + 8, env->fiq_regs, 5 * sizeof(uint32_t));
     }
 
-    i = bank_number(old_mode);
+    i = bank_number(env, old_mode);
     env->banked_r13[i] = env->regs[13];
     env->banked_r14[i] = env->regs[14];
     env->banked_spsr[i] = env->spsr;
 
-    i = bank_number(mode);
+    i = bank_number(env, mode);
     env->regs[13] = env->banked_r13[i];
     env->regs[14] = env->banked_r14[i];
     env->spsr = env->banked_spsr[i];
@@ -773,7 +822,7 @@ static void do_interrupt_v7m(CPUARMState *env)
     case EXCP_BKPT:
         if (semihosting_enabled) {
             int nr;
-            nr = lduw_code(env->regs[15]) & 0xff;
+            nr = cpu_lduw_code(env, env->regs[15]) & 0xff;
             if (nr == 0xab) {
                 env->regs[15] += 2;
                 env->regs[0] = do_arm_semihosting(env);
@@ -844,9 +893,9 @@ void do_interrupt(CPUARMState *env)
         if (semihosting_enabled) {
             /* Check for semihosting interrupt.  */
             if (env->thumb) {
-                mask = lduw_code(env->regs[15] - 2) & 0xff;
+                mask = cpu_lduw_code(env, env->regs[15] - 2) & 0xff;
             } else {
-                mask = ldl_code(env->regs[15] - 4) & 0xffffff;
+                mask = cpu_ldl_code(env, env->regs[15] - 4) & 0xffffff;
             }
             /* Only intercept calls from privileged modes, to provide some
                semblance of security.  */
@@ -866,7 +915,7 @@ void do_interrupt(CPUARMState *env)
     case EXCP_BKPT:
         /* See if this is a semihosting syscall.  */
         if (env->thumb && semihosting_enabled) {
-            mask = lduw_code(env->regs[15]) & 0xff;
+            mask = cpu_lduw_code(env, env->regs[15]) & 0xff;
             if (mask == 0xab
                   && (env->uncached_cpsr & CPSR_M) != ARM_CPU_MODE_USR) {
                 env->regs[15] += 2;
@@ -949,7 +998,7 @@ void do_interrupt(CPUARMState *env)
     }
     env->regs[14] = env->regs[15] + offset;
     env->regs[15] = addr;
-    env->interrupt_request |= CPU_INTERRUPT_EXITTB;
+    ENV_GET_CPU(env)->interrupt_request |= CPU_INTERRUPT_EXITTB;
 }
 
 /* Check section/page access permissions.
@@ -996,7 +1045,7 @@ static inline int check_ap(CPUARMState *env, int ap, int domain, int access_type
   case 6:
       return prot_ro;
   case 7:
-      if (!arm_feature (env, ARM_FEATURE_V7))
+      if (!arm_feature (env, ARM_FEATURE_V6K))
           return 0;
       return prot_ro;
   default:
@@ -1282,9 +1331,9 @@ int get_phys_addr(CPUARMState *env, uint32_t address,
 static
 #endif
 int get_phys_addr(CPUARMState *env, uint32_t address,
-                                int access_type, int is_user,
-                                uint32_t *phys_ptr, int *prot,
-                                target_ulong *page_size)
+                  int access_type, int is_user,
+                  uint32_t *phys_ptr, int *prot,
+                  target_ulong *page_size)
 {
     /* Fast Context Switch Extension.  */
     if (address < 0x02000000)
@@ -1298,8 +1347,8 @@ int get_phys_addr(CPUARMState *env, uint32_t address,
         return 0;
     } else if (arm_feature(env, ARM_FEATURE_MPU)) {
         *page_size = TARGET_PAGE_SIZE;
-	return get_phys_addr_mpu(env, address, access_type, is_user, phys_ptr,
-				 prot);
+    return get_phys_addr_mpu(env, address, access_type, is_user, phys_ptr,
+                             prot);
     } else if (env->cp15.c1_sys & (1 << 23)) {
         return get_phys_addr_v6(env, address, access_type, is_user, phys_ptr,
                                 prot, page_size);
@@ -1310,7 +1359,7 @@ int get_phys_addr(CPUARMState *env, uint32_t address,
 }
 
 int cpu_arm_handle_mmu_fault (CPUARMState *env, target_ulong address,
-                              int access_type, int mmu_idx, int is_softmmu)
+                              int access_type, int mmu_idx)
 {
     uint32_t phys_addr;
     target_ulong page_size;
@@ -1324,7 +1373,8 @@ int cpu_arm_handle_mmu_fault (CPUARMState *env, target_ulong address,
         /* Map a single [sub]page.  */
         phys_addr &= ~(uint32_t)0x3ff;
         address &= ~(uint32_t)0x3ff;
-        tlb_set_page (env, address, phys_addr, prot, mmu_idx, page_size);
+        tlb_set_page (env, address, phys_addr, prot | PAGE_EXEC, mmu_idx,
+                      page_size);
         return 0;
     }
 
@@ -1563,7 +1613,7 @@ void HELPER(set_cp15)(CPUARMState *env, uint32_t insn, uint32_t val)
             goto bad_reg;
         }
         /* No cache, so nothing to do except VA->PA translations. */
-        if (arm_feature(env, ARM_FEATURE_V6K)) {
+        if (arm_feature(env, ARM_FEATURE_VAPA)) {
             switch (crm) {
             case 4:
                 if (arm_feature(env, ARM_FEATURE_V7)) {
@@ -1660,67 +1710,79 @@ void HELPER(set_cp15)(CPUARMState *env, uint32_t insn, uint32_t val)
         case 2:
             /* Not implemented.  */
             goto bad_reg;
-        case 12: /* performance monitor control */
-            if (arm_feature(env, ARM_FEATURE_V7)) {
-                switch (op2) {
-                case 0: /* performance monitor control */
-                    env->cp15.c9_pmcr_data = val;
-                    break;
-                case 1: /* count enable set */
-                case 2: /* count enable clear */
-                case 3: /* overflow flag status */
-                case 4: /* software increment */
-                case 5: /* performance counter selection */
-                    /* not implemented */
-                    goto bad_reg;
-                default:
-                    goto bad_reg;
-                }
-            } else {
+        case 12: /* Performance monitor control */
+            /* Performance monitors are implementation defined in v7,
+             * but with an ARM recommended set of registers, which we
+             * follow (although we don't actually implement any counters)
+             */
+            if (!arm_feature(env, ARM_FEATURE_V7)) {
+                goto bad_reg;
+            }
+            switch (op2) {
+            case 0: /* performance monitor control register */
+                /* only the DP, X, D and E bits are writable */
+                env->cp15.c9_pmcr &= ~0x39;
+                env->cp15.c9_pmcr |= (val & 0x39);
+                break;
+            case 1: /* Count enable set register */
+                val &= (1 << 31);
+                env->cp15.c9_pmcnten |= val;
+                break;
+            case 2: /* Count enable clear */
+                val &= (1 << 31);
+                env->cp15.c9_pmcnten &= ~val;
+                break;
+            case 3: /* Overflow flag status */
+                env->cp15.c9_pmovsr &= ~val;
+                break;
+            case 4: /* Software increment */
+                /* RAZ/WI since we don't implement the software-count event */
+                break;
+            case 5: /* Event counter selection register */
+                /* Since we don't implement any events, writing to this register
+                 * is actually UNPREDICTABLE. So we choose to RAZ/WI.
+                 */
+                break;
+            default:
                 goto bad_reg;
             }
             break;
-        case 13: /* performance counters */
-            if (arm_feature(env, ARM_FEATURE_V7)) {
-                switch (op2) {
-                case 0: /* cycle count */
-                case 1: /* event selection */
-                case 2: /* performance monitor count */
-                    /* not implemented */
-                    goto bad_reg;
-                default:
-                    goto bad_reg;
-                }
-            } else {
+        case 13: /* Performance counters */
+            if (!arm_feature(env, ARM_FEATURE_V7)) {
+                goto bad_reg;
+            }
+            switch (op2) {
+            case 0: /* Cycle count register: not implemented, so RAZ/WI */
+                break;
+            case 1: /* Event type select */
+                env->cp15.c9_pmxevtyper = val & 0xff;
+                break;
+            case 2: /* Event count register */
+                /* Unimplemented (we have no events), RAZ/WI */
+                break;
+            default:
                 goto bad_reg;
             }
             break;
-        case 14: /* performance monitor control */
-            if (arm_feature(env, ARM_FEATURE_V7)) {
-                switch (op2) {
-                case 0: /* user enable */
-                    if ((env->uncached_cpsr & CPSR_M) == ARM_CPU_MODE_USR) {
-                        goto bad_reg;
-                    }
-                    env->cp15.c9_useren = val & 1;
-                    break;
-                case 1: /* interrupt enable set */
-                    if ((env->uncached_cpsr & CPSR_M) == ARM_CPU_MODE_USR) {
-                        goto bad_reg;
-                    }
-                    env->cp15.c9_inten |= val & 0xf;
-                    break;
-                case 2: /* interrupt enable clear */
-                    if ((env->uncached_cpsr & CPSR_M) == ARM_CPU_MODE_USR) {
-                        goto bad_reg;
-                    }
-                    env->cp15.c9_inten &= ~(val & 0xf);
-                    break;
-                default:
-                    goto bad_reg;
-                }
-            } else {
+        case 14: /* Performance monitor control */
+            if (!arm_feature(env, ARM_FEATURE_V7)) {
                 goto bad_reg;
+            }
+            switch (op2) {
+            case 0: /* user enable */
+                env->cp15.c9_pmuserenr = val & 1;
+                /* changes access rights for cp registers, so flush tbs */
+                tb_flush(env);
+                break;
+            case 1: /* interrupt enable set */
+                /* We have no event counters so only the C bit can be changed */
+                val &= (1 << 31);
+                env->cp15.c9_pminten |= val;
+                break;
+            case 2: /* interrupt enable clear */
+                val &= (1 << 31);
+                env->cp15.c9_pminten &= ~val;
+                break;
             }
             break;
         default:
@@ -1807,7 +1869,7 @@ void HELPER(set_cp15)(CPUARMState *env, uint32_t insn, uint32_t val)
                 env->cp15.c15_threadid = val & 0xffff;
                 break;
             case 8: /* Wait-for-interrupt (deprecated).  */
-                cpu_interrupt(env, CPU_INTERRUPT_HALT);
+                cpu_interrupt(ENV_GET_CPU(env), CPU_INTERRUPT_HALT);
                 break;
             default:
                 goto bad_reg;
@@ -1853,7 +1915,7 @@ uint32_t HELPER(get_cp15)(CPUARMState *env, uint32_t insn)
                      */
                     if (arm_feature(env, ARM_FEATURE_V7) ||
                         ARM_CPUID(env) == ARM_CPUID_ARM11MPCORE) {
-                        int mpidr = env->cpu_index;
+                        int mpidr = ENV_GET_CPU(env)->cpu_index;
                         /* We don't support setting cluster ID ([8..11])
                          * so these bits always RAZ.
                          */
@@ -2063,60 +2125,81 @@ uint32_t HELPER(get_cp15)(CPUARMState *env, uint32_t insn)
         return 0;
     case 8: /* MMU TLB control.  */
         goto bad_reg;
-    case 9: /* Cache lockdown.  */
-        switch (op1) {
-        case 0:
-	    if (arm_feature(env, ARM_FEATURE_OMAPCP))
-		return 0;
-            switch (crm) {
-            case 0: /* L1 cache */
-            switch (op2) {
-            case 0:
-                return env->cp15.c9_data;
-            case 1:
-                return env->cp15.c9_insn;
-            default:
-                goto bad_reg;
-            }
-                break;
-            case 12:
+    case 9:
+        switch (crm) {
+        case 0: /* Cache lockdown */
+            switch (op1) {
+            case 0: /* L1 cache.  */
+                if (arm_feature(env, ARM_FEATURE_OMAPCP)) {
+                    return 0;
+                }
                 switch (op2) {
                 case 0:
-                    return env->cp15.c9_pmcr_data;
+                    return env->cp15.c9_data;
+                case 1:
+                    return env->cp15.c9_insn;
                 default:
                     goto bad_reg;
                 }
-                break;
-            case 14: /* performance monitor control */
-                if (arm_feature(env, ARM_FEATURE_V7)) {
-                    switch (op2) {
-                    case 0: /* user enable */
-                        return env->cp15.c9_useren;
-                    case 1: /* interrupt enable set */
-                    case 2: /* interrupt enable clear */
-                        if ((env->uncached_cpsr & CPSR_M) == ARM_CPU_MODE_USR) {
-                            goto bad_reg;
-                        }
-                        return env->cp15.c9_inten;
-                    default:
-                        goto bad_reg;
-                    }
-                } else {
+            case 1: /* L2 cache */
+                if (crm != 0) {
                     goto bad_reg;
                 }
-                break;
+                /* L2 Lockdown and Auxiliary control.  */
+                return 0;
             default:
                 goto bad_reg;
             }
             break;
-        case 1: /* L2 cache */
-            if (crm != 0)
+        case 12: /* Performance monitor control */
+            if (!arm_feature(env, ARM_FEATURE_V7)) {
                 goto bad_reg;
-            /* L2 Lockdown and Auxiliary control.  */
-            return 0;
+            }
+            switch (op2) {
+            case 0: /* performance monitor control register */
+                return env->cp15.c9_pmcr;
+            case 1: /* count enable set */
+            case 2: /* count enable clear */
+                return env->cp15.c9_pmcnten;
+            case 3: /* overflow flag status */
+                return env->cp15.c9_pmovsr;
+            case 4: /* software increment */
+            case 5: /* event counter selection register */
+                return 0; /* Unimplemented, RAZ/WI */
+            default:
+                goto bad_reg;
+            }
+        case 13: /* Performance counters */
+            if (!arm_feature(env, ARM_FEATURE_V7)) {
+                goto bad_reg;
+            }
+            switch (op2) {
+            case 1: /* Event type select */
+                return env->cp15.c9_pmxevtyper;
+            case 0: /* Cycle count register */
+            case 2: /* Event count register */
+                /* Unimplemented, so RAZ/WI */
+                return 0;
+            default:
+                goto bad_reg;
+            }
+        case 14: /* Performance monitor control */
+            if (!arm_feature(env, ARM_FEATURE_V7)) {
+                goto bad_reg;
+            }
+            switch (op2) {
+            case 0: /* user enable */
+                return env->cp15.c9_pmuserenr;
+            case 1: /* interrupt enable set */
+            case 2: /* interrupt enable clear */
+                return env->cp15.c9_pminten;
+            default:
+                goto bad_reg;
+            }
         default:
             goto bad_reg;
         }
+        break;
     case 10: /* MMU TLB lockdown.  */
         /* ??? TLB lockdown not implemented.  */
         return 0;
@@ -2192,7 +2275,7 @@ void HELPER(set_r13_banked)(CPUARMState *env, uint32_t mode, uint32_t val)
     if ((env->uncached_cpsr & CPSR_M) == mode) {
         env->regs[13] = val;
     } else {
-    env->banked_r13[bank_number(mode)] = val;
+    env->banked_r13[bank_number(env, mode)] = val;
 }
 }
 
@@ -2201,7 +2284,7 @@ uint32_t HELPER(get_r13_banked)(CPUARMState *env, uint32_t mode)
     if ((env->uncached_cpsr & CPSR_M) == mode) {
         return env->regs[13];
     } else {
-    return env->banked_r13[bank_number(mode)];
+    return env->banked_r13[bank_number(env, mode)];
     }
 }
 
@@ -2228,11 +2311,11 @@ uint32_t HELPER(v7m_mrs)(CPUARMState *env, uint32_t reg)
         return env->v7m.current_sp ? env->regs[13] : env->v7m.other_sp;
     case 16: /* PRIMASK */
         return (env->uncached_cpsr & CPSR_I) != 0;
-    case 17: /* FAULTMASK */
-        return (env->uncached_cpsr & CPSR_F) != 0;
-    case 18: /* BASEPRI */
-    case 19: /* BASEPRI_MAX */
+    case 17: /* BASEPRI */
+    case 18: /* BASEPRI_MAX */
         return env->v7m.basepri;
+    case 19: /* FAULTMASK */
+        return (env->uncached_cpsr & CPSR_F) != 0;
     case 20: /* CONTROL */
         return env->v7m.control;
     default:
@@ -2284,19 +2367,19 @@ void HELPER(v7m_msr)(CPUARMState *env, uint32_t reg, uint32_t val)
         else
             env->uncached_cpsr &= ~CPSR_I;
         break;
-    case 17: /* FAULTMASK */
+    case 17: /* BASEPRI */
+        env->v7m.basepri = val & 0xff;
+        break;
+    case 18: /* BASEPRI_MAX */
+        val &= 0xff;
+        if (val != 0 && (val < env->v7m.basepri || env->v7m.basepri == 0))
+            env->v7m.basepri = val;
+        break;
+    case 19: /* FAULTMASK */
         if (val & 1)
             env->uncached_cpsr |= CPSR_F;
         else
             env->uncached_cpsr &= ~CPSR_F;
-        break;
-    case 18: /* BASEPRI */
-        env->v7m.basepri = val & 0xff;
-        break;
-    case 19: /* BASEPRI_MAX */
-        val &= 0xff;
-        if (val != 0 && (val < env->v7m.basepri || env->v7m.basepri == 0))
-            env->v7m.basepri = val;
         break;
     case 20: /* CONTROL */
         env->v7m.control = val & 3;
@@ -2686,13 +2769,15 @@ void vfp_set_fpscr(CPUARMState *env, uint32_t val)
 #define VFP_HELPER(name, p) HELPER(glue(glue(vfp_,name),p))
 
 #define VFP_BINOP(name) \
-float32 VFP_HELPER(name, s)(float32 a, float32 b, CPUARMState *env) \
+float32 VFP_HELPER(name, s)(float32 a, float32 b, void *fpstp) \
 { \
-    return float32_ ## name (a, b, &env->vfp.fp_status); \
+    float_status *fpst = fpstp; \
+    return float32_ ## name (a, b, fpst); \
 } \
-float64 VFP_HELPER(name, d)(float64 a, float64 b, CPUARMState *env) \
+float64 VFP_HELPER(name, d)(float64 a, float64 b, void *fpstp) \
 { \
-    return float64_ ## name (a, b, &env->vfp.fp_status); \
+    float_status *fpst = fpstp; \
+    return float64_ ## name (a, b, fpst); \
 }
 VFP_BINOP(add)
 VFP_BINOP(sub)

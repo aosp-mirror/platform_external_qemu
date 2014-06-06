@@ -495,7 +495,7 @@ PITState *pit_init(int base, qemu_irq irq)
     s->irq_timer = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, pit_irq_timer, s);
     s->irq = irq;
 
-    register_savevm("i8254", base, 1, pit_save, pit_load, pit);
+    register_savevm(NULL, "i8254", base, 1, pit_save, pit_load, pit);
 
     qemu_register_reset(pit_reset, 0, pit);
     register_ioport_write(base, 4, 1, pit_ioport_write, pit);

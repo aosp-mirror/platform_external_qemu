@@ -73,7 +73,7 @@ int hax_set_phys_mem(hwaddr start_addr, ram_addr_t size, ram_addr_t phys_offset)
 
     info.pa_start = start_addr;
     info.size = size;
-    info.va = (uint64_t)qemu_get_ram_ptr(phys_offset);
+    info.va = (uint64_t)(uintptr_t)qemu_get_ram_ptr(phys_offset);
     info.flags = (flags & IO_MEM_ROM) ? 1 : 0;
 
     ret = ioctl(hax_global.vm->fd, HAX_VM_IOCTL_SET_RAM, pinfo);
@@ -252,8 +252,8 @@ int hax_host_setup_vcpu_channel(struct hax_vcpu_state *vcpu)
         return ret;
     }
 
-    vcpu->tunnel = (struct hax_tunnel *)(info.va);
-    vcpu->iobuf = (unsigned char *)(info.io_va);
+    vcpu->tunnel = (struct hax_tunnel *)(uintptr_t)(info.va);
+    vcpu->iobuf = (unsigned char *)(uintptr_t)(info.io_va);
     return 0;
 }
 
@@ -265,11 +265,11 @@ int hax_vcpu_run(struct hax_vcpu_state* vcpu)
     return ret;
 }
 
-int hax_sync_fpu(CPUX86State *env, struct fx_layout *fl, int set)
+int hax_sync_fpu(CPUState *cpu, struct fx_layout *fl, int set)
 {
     int ret, fd;
 
-    fd = hax_vcpu_get_fd(env);
+    fd = hax_vcpu_get_fd(cpu);
     if (fd <= 0)
         return -1;
 
@@ -280,11 +280,11 @@ int hax_sync_fpu(CPUX86State *env, struct fx_layout *fl, int set)
     return ret;
 }
 
-int hax_sync_msr(CPUX86State *env, struct hax_msr_data *msrs, int set)
+int hax_sync_msr(CPUState *cpu, struct hax_msr_data *msrs, int set)
 {
     int ret, fd;
 
-    fd = hax_vcpu_get_fd(env);
+    fd = hax_vcpu_get_fd(cpu);
     if (fd <= 0)
         return -1;
     if (set)
@@ -294,11 +294,11 @@ int hax_sync_msr(CPUX86State *env, struct hax_msr_data *msrs, int set)
     return ret;
 }
 
-int hax_sync_vcpu_state(CPUX86State *env, struct vcpu_state_t *state, int set)
+int hax_sync_vcpu_state(CPUState *cpu, struct vcpu_state_t *state, int set)
 {
     int ret, fd;
 
-    fd = hax_vcpu_get_fd(env);
+    fd = hax_vcpu_get_fd(cpu);
     if (fd <= 0)
         return -1;
 
@@ -309,11 +309,11 @@ int hax_sync_vcpu_state(CPUX86State *env, struct vcpu_state_t *state, int set)
     return ret;
 }
 
-int hax_inject_interrupt(CPUX86State *env, int vector)
+int hax_inject_interrupt(CPUState *cpu, int vector)
 {
     int ret, fd;
 
-    fd = hax_vcpu_get_fd(env);
+    fd = hax_vcpu_get_fd(cpu);
     if (fd <= 0)
         return -1;
 

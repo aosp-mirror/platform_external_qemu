@@ -1,4 +1,14 @@
-/* Common softmmu definitions and inline routines.  */
+/*
+ *  Software MMU support
+ *
+ * Generate inline load/store functions for all MMU modes (typically
+ * at least _user and _kernel) as well as _data versions, for all data
+ * sizes.
+ *
+ * Used by target op helpers.
+ *
+ * MMU mode suffixes are defined in target cpu.h.
+ */
 
 /* XXX: find something cleaner.
  * Furthermore, this is false for 64 bits targets
@@ -9,7 +19,8 @@
 #define ldul_executive  ldl_executive
 #define ldul_supervisor ldl_supervisor
 
-#include "exec/softmmu_defs.h"
+/* The memory helpers for tcg-generated code need tcg_target_long etc.  */
+#include "tcg.h"
 
 #define ACCESS_TYPE 0
 #define MEMSUFFIX MMU_MODE0_SUFFIX

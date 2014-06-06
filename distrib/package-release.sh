@@ -165,8 +165,8 @@ extract_git_commit_description () {
     SHA1=$(cd $GIT_DIR && git log --oneline -1 .) || \
         panic "Not a Git directory: $GIT_DIR"
 
-    SHA1=$(printf "%s" "$SHA1" | sed -e s/\'/\\\'/g)
-    eval $VARNAME=\"$SHA1\"
+    SHA1=$(printf "%s" "$SHA1" | sed -e "s/'/\\'/g")
+    eval $VARNAME=\'$SHA1\'
 }
 
 # Defaults.
@@ -508,6 +508,7 @@ EOF
     PKG_FILE=$PKG_DIR/$PKG_PREFIX-$PKG_REVISION-$SYSTEM.tar.bz2
     (run cd "$TEMP_BUILD_DIR"/$SYSTEM && run tar cjf $PKG_FILE $PKG_PREFIX-$PKG_REVISION)
 done
+
 if [ "$OPT_COPY_PREBUILTS" ]; then
     for SYSTEM in linux darwin; do
         SRC_DIR="$TEMP_BUILD_DIR"/$SYSTEM/$PKG_PREFIX-$PKG_REVISION
