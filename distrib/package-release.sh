@@ -506,7 +506,7 @@ EOF
 
     dump "[$PKG_NAME] Creating tarball."
     PKG_FILE=$PKG_DIR/$PKG_PREFIX-$PKG_REVISION-$SYSTEM.tar.bz2
-    (run cd "$TEMP_BUILD_DIR"/$SYSTEM && run tar cf $PKG_FILE $PKG_PREFIX-$PKG_REVISION)
+    (run cd "$TEMP_BUILD_DIR"/$SYSTEM && run tar cjf $PKG_FILE $PKG_PREFIX-$PKG_REVISION)
 done
 if [ "$OPT_COPY_PREBUILTS" ]; then
     for SYSTEM in linux darwin; do
