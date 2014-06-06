@@ -521,3 +521,10 @@ void do_info_qtree(Monitor *mon)
     if (main_system_bus)
         qbus_print(mon, main_system_bus, 0);
 }
+
+char *qdev_get_dev_path(DeviceState *dev)
+{
+    // TODO(digit): Implement this properly.
+    return NULL;
+}
+

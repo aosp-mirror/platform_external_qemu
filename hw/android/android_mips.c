@@ -21,9 +21,9 @@
 #include "android/globals.h"
 #include "audio/audio.h"
 #include "sysemu/blockdev.h"
-#ifdef CONFIG_MEMCHECK
-#include "memcheck/memcheck_api.h"
-#endif  // CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
+#include "android/qemu/memcheck/memcheck_api.h"
+#endif  // CONFIG_ANDROID_MEMCHECK
 
 #include "android/utils/debug.h"
 
@@ -42,8 +42,6 @@
 
 char* audio_input_source = NULL;
 
-void goldfish_memlog_init(uint32_t base);
-
 static struct goldfish_device event0_device = {
     .name = "goldfish_events",
     .id = 0,
@@ -58,15 +56,6 @@ static struct goldfish_device nand_device = {
 };
 
 /* Board init.  */
-
-#define TEST_SWITCH 1
-#if TEST_SWITCH
-uint32_t switch_test_write(void *opaque, uint32_t state)
-{
-    goldfish_switch_set_state(opaque, state);
-    return state;
-}
-#endif
 
 #define VIRT_TO_PHYS_ADDEND (-((int64_t)(int32_t)0x80000000))
 
@@ -167,7 +156,13 @@ static void android_mips_init_(ram_addr_t ram_size,
 
     env = cpu_init(cpu_model);
 
-    register_savevm( "cpu", 0, MIPS_CPU_SAVE_VERSION, cpu_save, cpu_load, env );
+    register_savevm(NULL,
+                    "cpu",
+                    0,
+                    MIPS_CPU_SAVE_VERSION,
+                    cpu_save,
+                    cpu_load,
+                    env);
 
     if (ram_size > GOLDFISH_IO_SPACE)
         ram_size = GOLDFISH_IO_SPACE;   /* avoid overlap of ram and IO regs */
@@ -222,8 +217,6 @@ static void android_mips_init_(ram_addr_t ram_size,
             goldfish_mmc_init(GOLDFISH_MMC, 0, info->bdrv);
 	}
     }
-    goldfish_memlog_init(GOLDFISH_MEMLOG);
-
     goldfish_battery_init(android_hw->hw_battery);
 
     goldfish_add_device_no_io(&event0_device);
@@ -234,21 +227,14 @@ static void android_mips_init_(ram_addr_t ram_size,
     nand_dev_init(nand_device.base);
 #endif
 
-#ifdef CONFIG_MEMCHECK
+#ifdef CONFIG_ANDROID_MEMCHECK
     if (memcheck_enabled) {
         trace_dev_init();
     }
-#endif  // CONFIG_MEMCHECK
-    pipe_dev_init();
-
-#if TEST_SWITCH
-    {
-        void *sw;
-        sw = goldfish_switch_add("test", NULL, NULL, 0);
-        goldfish_switch_set_state(sw, 1);
-        goldfish_switch_add("test2", switch_test_write, sw, 1);
-    }
-#endif
+#endif  // CONFIG_ANDROID_MEMCHECK
+    bool newDeviceNaming =
+            (androidHwConfig_getKernelDeviceNaming(android_hw) >= 1);
+    pipe_dev_init(newDeviceNaming);
 
     android_load_kernel(env, ram_size, kernel_filename, kernel_cmdline, initrd_filename);
 }

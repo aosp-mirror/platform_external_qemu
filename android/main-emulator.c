@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <android/utils/compiler.h>
 #include <android/utils/panic.h>
 #include <android/utils/path.h>
 #include <android/utils/bufprint.h>
@@ -51,31 +52,23 @@ int android_verbose;
 #  define DLL_EXTENSION  ".so"
 #endif
 
-#if defined(__x86_64__)
-/* Normally emulator is compiled in 32-bit.  In standalone it can be compiled
-   in 64-bit (with ,/android-configure.sh --try-64).  In this case, emulator-$ARCH
-   are also compiled in 64-bit and will search for lib64*.so instead of lib*so */
-#define  GLES_EMULATION_LIB  "lib64OpenglRender" DLL_EXTENSION
-#elif defined(__i386__)
-#define  GLES_EMULATION_LIB  "libOpenglRender" DLL_EXTENSION
-#else
-#error Unknown architecture for codegen
-#endif
-
+// Name of GPU emulation main library for (32-bit and 64-bit versions)
+#define GLES_EMULATION_LIB    "libOpenglRender" DLL_EXTENSION
+#define GLES_EMULATION_LIB64  "lib64OpenglRender" DLL_EXTENSION
 
 /* Forward declarations */
 static char* getTargetEmulatorPath(const char* progName, const char* avdArch, const int force_32bit);
 static char* getSharedLibraryPath(const char* progName, const char* libName);
 static void  prependSharedLibraryPath(const char* prefix);
 
-/* The execv() definition in mingw is slightly bogus.
+/* The execv() definition in older mingw is slightly bogus.
  * It takes a second argument of type 'const char* const*'
  * while POSIX mandates char** instead.
  *
  * To avoid compiler warnings, define the safe_execv macro
  * to perform an explicit cast with mingw.
  */
-#ifdef _WIN32
+#if defined(_WIN32) && !ANDROID_GCC_PREREQ(4,4)
 #  define safe_execv(_filepath,_argv)  execv((_filepath),(const char* const*)(_argv))
 #else
 #  define safe_execv(_filepath,_argv)  execv((_filepath),(_argv))
@@ -100,6 +93,7 @@ int main(int argc, char** argv)
     /* Parse command-line and look for
      * 1) an avd name either in the form or '-avd <name>' or '@<name>'
      * 2) '-force-32bit' which always use 32-bit emulator on 64-bit platforms
+     * 3) '-verbose', or '-debug-all' or '-debug all' to enable verbose mode.
      */
     int  nn;
     for (nn = 1; nn < argc; nn++) {
@@ -107,6 +101,15 @@ int main(int argc, char** argv)
 
         if (!strcmp(opt,"-qemu"))
             break;
+
+        if (!strcmp(opt,"-verbose") || !strcmp(opt,"-debug-all")) {
+            android_verbose = 1;
+        }
+
+        if (!strcmp(opt,"-debug") && nn + 1 < argc &&
+            !strcmp(argv[nn + 1], "all")) {
+            android_verbose = 1;
+        }
 
         if (!strcmp(opt,"-force-32bit")) {
             force_32bit = 1;
@@ -159,6 +162,12 @@ int main(int argc, char** argv)
      */
     {
         char*  sharedLibPath = getSharedLibraryPath(emulatorPath, GLES_EMULATION_LIB);
+
+        if (!sharedLibPath) {
+            // Sometimes, only the 64-bit libraries are available, for example
+            // when storing binaries under $AOSP/prebuilts/android-emulator/<system>/
+            sharedLibPath = getSharedLibraryPath(emulatorPath, GLES_EMULATION_LIB64);
+        }
 
         if (sharedLibPath != NULL) {
             D("Found OpenGLES emulation libraries in %s\n", sharedLibPath);
@@ -238,12 +247,19 @@ getTargetEmulatorPath(const char* progName, const char* avdArch, const int force
     int search_for_64bit_emulator = !force_32bit && getHostOSBitness() == 64;
 #endif
 
+    const char* emulatorSuffix = emulator_getBackendSuffix(avdArch);
+    if (!emulatorSuffix) {
+        APANIC("This emulator cannot emulate %s CPUs!\n", avdArch);
+    }
+    D("Using emulator-%s to emulate '%s' CPUs\n", emulatorSuffix, avdArch);
+
     /* Get program's directory name in progDir */
     path_split(progName, &progDir, NULL);
 
     if (search_for_64bit_emulator) {
         /* Find 64-bit emulator first */
-        p = bufprint(path, pathEnd, "%s/%s%s%s", progDir, emulator64Prefix, avdArch, exeExt);
+        p = bufprint(path, pathEnd, "%s/%s%s%s", progDir,
+                     emulator64Prefix, emulatorSuffix, exeExt);
         if (p >= pathEnd) {
             APANIC("Path too long: %s\n", progName);
         }
@@ -254,7 +270,8 @@ getTargetEmulatorPath(const char* progName, const char* avdArch, const int force
     }
 
     /* Find 32-bit emulator */
-    p = bufprint(path, pathEnd, "%s/%s%s%s", progDir, emulatorPrefix, avdArch, exeExt);
+    p = bufprint(path, pathEnd, "%s/%s%s%s", progDir, emulatorPrefix,
+                 emulatorSuffix, exeExt);
     free(progDir);
     if (p >= pathEnd) {
         APANIC("Path too long: %s\n", progName);
@@ -273,7 +290,8 @@ getTargetEmulatorPath(const char* progName, const char* avdArch, const int force
     if (strchr(progName, '/') == NULL) {
 #endif
         if (search_for_64bit_emulator) {
-           p = bufprint(path, pathEnd, "%s%s%s", emulator64Prefix, avdArch, exeExt);
+           p = bufprint(path, pathEnd, "%s%s%s", emulator64Prefix,
+                        emulatorSuffix, exeExt);
            if (p < pathEnd) {
                char*  resolved = path_search_exec(path);
                if (resolved != NULL)
@@ -281,7 +299,8 @@ getTargetEmulatorPath(const char* progName, const char* avdArch, const int force
            }
         }
 
-        p = bufprint(path, pathEnd, "%s%s%s", emulatorPrefix, avdArch, exeExt);
+        p = bufprint(path, pathEnd, "%s%s%s", emulatorPrefix,
+                     emulatorSuffix, exeExt);
         if (p < pathEnd) {
             char*  resolved = path_search_exec(path);
             if (resolved != NULL)

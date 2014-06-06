@@ -264,7 +264,7 @@ void slirp_init(int restricted, const char *special_ip)
 
     alias_addr_ip = special_addr_ip | CTL_ALIAS;
     getouraddr();
-    register_savevm("slirp", 0, 1, slirp_state_save, slirp_state_load, NULL);
+    register_savevm(NULL, "slirp", 0, 1, slirp_state_save, slirp_state_load, NULL);
 
     slirp_net_forward_init();
 }

@@ -168,9 +168,12 @@ typedef struct CPUARMState {
         uint32_t c7_par;  /* Translation result. */
         uint32_t c9_insn; /* Cache lockdown registers.  */
         uint32_t c9_data;
-        uint32_t c9_pmcr_data; /* Performance Monitor Control Register */
-        uint32_t c9_useren; /* user enable register */
-        uint32_t c9_inten; /* interrupt enable set/clear register */
+        uint32_t c9_pmcr; /* performance monitor control register */
+        uint32_t c9_pmcnten; /* perf monitor counter enables */
+        uint32_t c9_pmovsr; /* perf monitor overflow status */
+        uint32_t c9_pmxevtyper; /* perf monitor event type */
+        uint32_t c9_pmuserenr; /* perf monitor user enable */
+        uint32_t c9_pminten; /* perf monitor interrupt enables */
         uint32_t c12_vbar; /* secure/nonsecure vector base address register. */
         uint32_t c12_mvbar; /* monitor vector base address register. */
         uint32_t c13_fcse; /* FCSE PID.  */
@@ -264,8 +267,10 @@ typedef struct CPUARMState {
         void *opaque;
     } cp[15];
     void *nvic;
-    struct arm_boot_info *boot_info;
+    const struct arm_boot_info *boot_info;
 } CPUARMState;
+
+#include "cpu-qom.h"
 
 CPUARMState *cpu_arm_init(const char *cpu_model);
 void arm_translate_init(void);
@@ -299,7 +304,7 @@ static inline bool is_a64(CPUARMState *env)
 int cpu_arm_signal_handler(int host_signum, void *pinfo,
                            void *puc);
 int cpu_arm_handle_mmu_fault (CPUARMState *env, target_ulong address, int rw,
-                              int mmu_idx, int is_softmuu);
+                              int mmu_idx);
 #define cpu_handle_mmu_fault cpu_arm_handle_mmu_fault
 
 static inline void cpu_set_tls(CPUARMState *env, target_ulong newtls)
@@ -434,6 +439,7 @@ enum arm_features {
     ARM_FEATURE_V4T,
     ARM_FEATURE_V5,
     ARM_FEATURE_STRONGARM,
+    ARM_FEATURE_VAPA, /* cp15 VA to PA lookups */
     ARM_FEATURE_TRUSTZONE, /* TrustZone Security Extensions. */
 };
 
@@ -762,6 +768,7 @@ void cpu_arm_set_cp_io(CPUARMState *env, int cpnum,
 #define ARM_CPUID_PXA270_C5   0x69054117
 #define ARM_CPUID_ARM1136     0x4117b363
 #define ARM_CPUID_ARM1136_R2  0x4107b362
+#define ARM_CPUID_ARM1176     0x410fb767
 #define ARM_CPUID_ARM11MPCORE 0x410fb022
 #define ARM_CPUID_CORTEXA8    0x410fc080
 #define ARM_CPUID_CORTEXA8_R2 0x412fc083
@@ -792,7 +799,7 @@ void cpu_arm_set_cp_io(CPUARMState *env, int cpnum,
 #define cpu_signal_handler cpu_arm_signal_handler
 #define cpu_list arm_cpu_list
 
-#define CPU_SAVE_VERSION 3
+#define CPU_SAVE_VERSION 4
 
 /* MMU modes definitions */
 #define MMU_MODE0_SUFFIX _kernel
@@ -893,6 +900,19 @@ static inline void cpu_get_tb_cpu_state(CPUARMState *env, target_ulong *pc,
     }
 
     *cs_base = 0;
+}
+
+static inline bool cpu_has_work(CPUState *cpu)
+{
+    return (cpu->interrupt_request &
+            (CPU_INTERRUPT_FIQ | CPU_INTERRUPT_HARD | CPU_INTERRUPT_EXITTB));
+}
+
+#include "exec/exec-all.h"
+
+static inline void cpu_pc_from_tb(CPUARMState *env, TranslationBlock *tb)
+{
+    env->regs[15] = tb->pc;
 }
 
 #endif

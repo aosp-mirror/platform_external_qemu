@@ -181,8 +181,13 @@ qemu_irq*  goldfish_interrupt_init(uint32_t base, qemu_irq parent_irq, qemu_irq 
         return NULL;
     }
 
-    register_savevm( "goldfish_int", 0, GOLDFISH_INT_SAVE_VERSION,
-                     goldfish_int_save, goldfish_int_load, s);
+    register_savevm(NULL,
+                    "goldfish_int",
+                    0,
+                    GOLDFISH_INT_SAVE_VERSION,
+                    goldfish_int_save,
+                    goldfish_int_load,
+                    s);
 
     return qi;
 }

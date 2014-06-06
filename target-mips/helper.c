@@ -24,7 +24,6 @@
 #include <signal.h>
 
 #include "cpu.h"
-#include "exec/exec-all.h"
 
 enum {
     TLBRET_DIRTY = -4,
@@ -421,8 +420,8 @@ static inline int cpu_mips_tlb_refill(CPUMIPSState *env, target_ulong address, i
             prot |= PAGE_WRITE;
 
         tlb_set_page(env, address & TARGET_PAGE_MASK,
-                        physical & TARGET_PAGE_MASK, prot,
-                        mmu_idx, is_softmmu);
+                        physical & TARGET_PAGE_MASK, prot | PAGE_EXEC,
+                        mmu_idx, TARGET_PAGE_SIZE);
         ret = TLBRET_MATCH;
         goto out;
     }
@@ -437,7 +436,7 @@ out:
 }
 
 int cpu_mips_handle_mmu_fault (CPUMIPSState *env, target_ulong address, int rw,
-                               int mmu_idx, int is_softmmu)
+                               int mmu_idx)
 {
 #if !defined(CONFIG_USER_ONLY)
     hwaddr physical;
@@ -450,8 +449,8 @@ int cpu_mips_handle_mmu_fault (CPUMIPSState *env, target_ulong address, int rw,
 #if 0
     log_cpu_state(env, 0);
 #endif
-    qemu_log("%s pc " TARGET_FMT_lx " ad " TARGET_FMT_lx " rw %d mmu_idx %d smmu %d\n",
-              __func__, env->active_tc.PC, address, rw, mmu_idx, is_softmmu);
+    qemu_log("%s pc " TARGET_FMT_lx " ad " TARGET_FMT_lx " rw %d mmu_idx %d\n",
+              __func__, env->active_tc.PC, address, rw, mmu_idx);
 
     rw &= 1;
 
@@ -467,12 +466,13 @@ int cpu_mips_handle_mmu_fault (CPUMIPSState *env, target_ulong address, int rw,
     qemu_log("%s address=" TARGET_FMT_lx " ret %d physical " TARGET_FMT_plx " prot %d\n",
               __func__, address, ret, physical, prot);
     if (ret == TLBRET_MATCH) {
-       ret = tlb_set_page(env, address & TARGET_PAGE_MASK,
-                          physical & TARGET_PAGE_MASK, prot,
-                          mmu_idx, is_softmmu);
+       tlb_set_page(env, address & TARGET_PAGE_MASK,
+                    physical & TARGET_PAGE_MASK, prot | PAGE_EXEC,
+                    mmu_idx, TARGET_PAGE_SIZE);
+       ret = 0;
     }
     else if (ret == TLBRET_NOMATCH)
-        ret = cpu_mips_tlb_refill(env,address,rw,mmu_idx,is_softmmu);
+        ret = cpu_mips_tlb_refill(env,address,rw,mmu_idx,1);
     if (ret < 0)
 #endif
     {
@@ -645,7 +645,7 @@ void do_interrupt (CPUMIPSState *env)
         env->active_tc.PC = (int32_t)0xBFC00480;
         break;
     case EXCP_RESET:
-        cpu_reset(env);
+        cpu_reset(ENV_GET_CPU(env));
         break;
     case EXCP_SRESET:
         env->CP0_Status |= (1 << CP0St_SR);

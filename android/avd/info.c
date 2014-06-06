@@ -792,6 +792,8 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
     _avdInfo_getPropertyFile(i, "build.prop", i->buildProperties);
     _avdInfo_getPropertyFile(i, "boot.prop", i->bootProperties);
 
+    _avdInfo_extractBuildProperties(i);
+
     /* don't need this anymore */
     iniFile_free(i->rootIni);
     i->rootIni = NULL;
@@ -977,10 +979,6 @@ avdInfo_getKernelPath( AvdInfo*  i )
             suffix = "-armv7";
         }
 
-        if (!strcmp(i->targetAbi, "x86_64")) {
-            suffix = "-x86_64";
-        }
-
         p = bufprint(temp, end, "%s/kernel", i->androidOut);
         if (p < end && path_exists(temp)) {
             kernelPath = ASTRDUP(temp);
@@ -1123,6 +1121,11 @@ int
 avdInfo_inAndroidBuild( AvdInfo*  i )
 {
     return i->inAndroidBuild;
+}
+
+char*
+avdInfo_getTargetCpuArch(AvdInfo* i) {
+    return ASTRDUP(i->targetArch);
 }
 
 char*

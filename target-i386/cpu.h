@@ -604,7 +604,7 @@ typedef uint32_t FeatureWordArray[FEATURE_WORDS];
 #define CPU_INTERRUPT_TPR       CPU_INTERRUPT_TGT_INT_3
 
 
-enum {
+typedef enum {
     CC_OP_DYNAMIC, /* must use dynamic code to get cc_op */
     CC_OP_EFLAGS,  /* all cc are explicitly computed, CC_SRC = flags */
 
@@ -659,7 +659,7 @@ enum {
     CC_OP_SARQ,
 
     CC_OP_NB,
-};
+} CCOp;
 
 typedef struct SegmentCache {
     uint32_t selector;
@@ -777,7 +777,6 @@ typedef struct CPUX86State {
     XMMReg xmm_regs[CPU_NB_REGS];
     XMMReg xmm_t0;
     MMXReg mmx_t0;
-    target_ulong cc_tmp; /* temporary for rcr/rcl */
 
     /* sysenter registers */
     uint32_t sysenter_cs;
@@ -858,6 +857,8 @@ typedef struct CPUX86State {
     uint64 mcg_ctl;
     uint64 *mce_banks;
 } CPUX86State;
+
+#include "cpu-qom.h"
 
 CPUX86State *cpu_x86_init(const char *cpu_model);
 int cpu_x86_exec(CPUX86State *s);
@@ -956,7 +957,7 @@ int cpu_x86_signal_handler(int host_signum, void *pinfo,
 
 /* helper.c */
 int cpu_x86_handle_mmu_fault(CPUX86State *env, target_ulong addr,
-                             int is_write, int mmu_idx, int is_softmmu);
+                             int is_write, int mmu_idx);
 void cpu_x86_set_a20(CPUX86State *env, int a20_state);
 void cpu_x86_cpuid(CPUX86State *env, uint32_t index, uint32_t count,
                    uint32_t *eax, uint32_t *ebx,
@@ -1033,6 +1034,45 @@ static inline int cpu_mmu_index (CPUX86State *env)
     return (env->hflags & HF_CPL_MASK) == 3 ? 1 : 0;
 }
 
+#undef EAX
+#define EAX (env->regs[R_EAX])
+#undef ECX
+#define ECX (env->regs[R_ECX])
+#undef EDX
+#define EDX (env->regs[R_EDX])
+#undef EBX
+#define EBX (env->regs[R_EBX])
+#undef ESP
+#define ESP (env->regs[R_ESP])
+#undef EBP
+#define EBP (env->regs[R_EBP])
+#undef ESI
+#define ESI (env->regs[R_ESI])
+#undef EDI
+#define EDI (env->regs[R_EDI])
+#undef EIP
+#define EIP (env->eip)
+#define DF  (env->df)
+
+#define CC_SRC (env->cc_src)
+#define CC_DST (env->cc_dst)
+#define CC_OP  (env->cc_op)
+
+/* n must be a constant to be efficient */
+static inline target_long lshift(target_long x, int n)
+{
+    if (n >= 0)
+        return x << n;
+    else
+        return x >> (-n);
+}
+
+/* float macros */
+#define FT0    (env->ft0)
+#define ST0    (env->fpregs[env->fpstt].d)
+#define ST(n)  (env->fpregs[(env->fpstt + (n)) & 7].d)
+#define ST1    ST(1)
+
 /* translate.c */
 void optimize_flags_init(void);
 
@@ -1056,12 +1096,24 @@ static inline void cpu_clone_regs(CPUX86State *env, target_ulong newsp)
 }
 #endif
 
-//#include "exec/cpu-all.h"
-#include "exec/exec-all.h"
-
-struct TranslationBlock;
-
+#include "exec/cpu-all.h"
 #include "svm.h"
+
+static inline bool cpu_has_work(CPUState *cpu)
+{
+    int work;
+    CPUX86State *env = cpu->env_ptr;
+
+    work = (cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
+           (env->eflags & IF_MASK);
+    work |= cpu->interrupt_request & CPU_INTERRUPT_NMI;
+    work |= cpu->interrupt_request & CPU_INTERRUPT_INIT;
+    work |= cpu->interrupt_request & CPU_INTERRUPT_SIPI;
+
+    return work;
+}
+
+#include "exec/exec-all.h"
 
 static inline void cpu_pc_from_tb(CPUX86State *env, TranslationBlock *tb)
 {
@@ -1081,4 +1133,54 @@ void apic_init_reset(CPUX86State *env);
 void apic_sipi(CPUX86State *env);
 void do_cpu_init(CPUX86State *env);
 void do_cpu_sipi(CPUX86State *env);
+
+/* excp_helper.c */
+void do_interrupt(CPUArchState *env);
+void do_interrupt_x86_hardirq(CPUArchState *env, int intno, int is_hw);
+//void QEMU_NORETURN raise_exception_err(int exception_index, int error_code);
+void QEMU_NORETURN raise_exception(CPUArchState *env, int exception_index);
+void QEMU_NORETURN raise_exception_err(CPUX86State *env,
+                                       int exception_index,
+                                       int error_code);
+
+void QEMU_NORETURN raise_interrupt(CPUX86State *env,
+                                   int intno, int is_int, int error_code,
+                                   int next_eip_addend);
+
+void do_smm_enter(CPUArchState *env1);
+
+void svm_check_intercept(CPUArchState *env1, uint32_t type);
+
+/* cc_helper.c */
+const uint8_t parity_table[256];
+uint32_t cpu_cc_compute_all(CPUArchState *env1, int op);
+
+static inline uint32_t cpu_compute_eflags(CPUX86State *env)
+{
+    return env->eflags | cpu_cc_compute_all(env, CC_OP) | (DF & DF_MASK);
+}
+
+/* NOTE: CC_OP must be modified manually to CC_OP_EFLAGS */
+static inline void cpu_load_eflags(CPUX86State *env,
+                                   int eflags, int update_mask)
+{
+    CC_SRC = eflags & (CC_O | CC_S | CC_Z | CC_A | CC_P | CC_C);
+    DF = 1 - (2 * ((eflags >> 10) & 1));
+    env->eflags = (env->eflags & ~update_mask) |
+        (eflags & update_mask) | 0x2;
+}
+
+/* load efer and update the corresponding hflags. XXX: do consistency
+   checks with cpuid bits ? */
+static inline void cpu_load_efer(CPUX86State *env, uint64_t val)
+{
+    env->efer = val;
+    env->hflags &= ~(HF_LMA_MASK | HF_SVME_MASK);
+    if (env->efer & MSR_EFER_LMA)
+        env->hflags |= HF_LMA_MASK;
+    if (env->efer & MSR_EFER_SVME)
+        env->hflags |= HF_SVME_MASK;
+}
+
+
 #endif /* CPU_I386_H */

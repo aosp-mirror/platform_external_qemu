@@ -232,7 +232,7 @@ int audio_bug (const char *funcname, int cond)
         AUD_log (NULL, "Context:\n");
 
 #if defined AUDIO_BREAKPOINT_ON_BUG
-#  if defined HOST_I386
+#  if defined __i386__
 #    if defined __GNUC__
         __asm__ ("int3");
 #    elif defined _MSC_VER
@@ -2047,7 +2047,7 @@ static void audio_init (void)
     initialized = 1;
 
     QLIST_INIT (&s->card_head);
-    register_savevm ("audio", 0, 1, audio_save, audio_load, s);
+    register_savevm(NULL, "audio", 0, 1, audio_save, audio_load, s);
     audio_reset_timer();
 }
 

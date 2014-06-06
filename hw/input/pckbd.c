@@ -370,7 +370,7 @@ void i8042_init(qemu_irq kbd_irq, qemu_irq mouse_irq, uint32_t io_base)
     s->irq_mouse = mouse_irq;
 
     kbd_reset(s);
-    register_savevm("pckbd", 0, 3, kbd_save, kbd_load, s);
+    register_savevm(NULL, "pckbd", 0, 3, kbd_save, kbd_load, s);
     register_ioport_read(io_base, 1, 1, kbd_read_data, s);
     register_ioport_write(io_base, 1, 1, kbd_write_data, s);
     register_ioport_read(io_base + 4, 1, 1, kbd_read_status, s);
@@ -431,7 +431,7 @@ void i8042_mm_init(qemu_irq kbd_irq, qemu_irq mouse_irq,
     s->mask = mask;
 
     kbd_reset(s);
-    register_savevm("pckbd", 0, 3, kbd_save, kbd_load, s);
+    register_savevm(NULL, "pckbd", 0, 3, kbd_save, kbd_load, s);
     s_io_memory = cpu_register_io_memory(kbd_mm_read, kbd_mm_write, s);
     cpu_register_physical_memory(base, size, s_io_memory);
 

@@ -201,7 +201,7 @@ PCIBus *i440fx_init(PCIDevice **pi440fx_state, qemu_irq *pic)
 
     d->config[0x72] = 0x02; /* SMRAM */
 
-    register_savevm("I440FX", 0, 2, i440fx_save, i440fx_load, d);
+    register_savevm(NULL, "I440FX", 0, 2, i440fx_save, i440fx_load, d);
     *pi440fx_state = d;
     return b;
 }
@@ -333,7 +333,7 @@ int piix3_init(PCIBus *bus, int devfn)
 
     d = pci_register_device(bus, "PIIX3", sizeof(PCIDevice),
                                     devfn, NULL, NULL);
-    register_savevm("PIIX3", 0, 2, piix_save, piix_load, d);
+    register_savevm(NULL, "PIIX3", 0, 2, piix_save, piix_load, d);
 
     piix3_dev = d;
     pci_conf = d->config;
@@ -356,7 +356,7 @@ int piix4_init(PCIBus *bus, int devfn)
 
     d = pci_register_device(bus, "PIIX4", sizeof(PCIDevice),
                                     devfn, NULL, NULL);
-    register_savevm("PIIX4", 0, 2, piix_save, piix_load, d);
+    register_savevm(NULL, "PIIX4", 0, 2, piix_save, piix_load, d);
 
     piix4_dev = d;
     pci_conf = d->config;

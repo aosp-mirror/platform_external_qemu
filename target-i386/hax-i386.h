@@ -55,18 +55,18 @@ struct hax_vm
 };
 
 /* Functions exported to host specific mode */
-hax_fd hax_vcpu_get_fd(CPUX86State *env);
+hax_fd hax_vcpu_get_fd(CPUState *cpu);
 int valid_hax_tunnel_size(uint16_t size);
 
 /* Host specific functions */
 int hax_mod_version(struct hax_state *hax, struct hax_module_version *version);
-int hax_inject_interrupt(CPUX86State *env, int vector);
+int hax_inject_interrupt(CPUState *cpu, int vector);
 struct hax_vm *hax_vm_create(struct hax_state *hax);
 int hax_vcpu_run(struct hax_vcpu_state *vcpu);
 int hax_vcpu_create(int id);
-int hax_sync_vcpu_state(CPUX86State *env, struct vcpu_state_t *state, int set);
-int hax_sync_msr(CPUX86State *env, struct hax_msr_data *msrs, int set);
-int hax_sync_fpu(CPUX86State *env, struct fx_layout *fl, int set);
+int hax_sync_vcpu_state(CPUState *cpu, struct vcpu_state_t *state, int set);
+int hax_sync_msr(CPUState *cpu, struct hax_msr_data *msrs, int set);
+int hax_sync_fpu(CPUState *cpu, struct fx_layout *fl, int set);
 int hax_vm_destroy(struct hax_vm *vm);
 int hax_capability(struct hax_state *hax, struct hax_capabilityinfo *cap);
 int hax_notify_qemu_version(hax_fd vm_fd, struct hax_qemu_version *qversion);

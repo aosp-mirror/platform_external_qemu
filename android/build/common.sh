@@ -204,19 +204,29 @@ enable_linux_mingw ()
         exit 1
     fi
     # Do we have the binaries installed
+    log "Mingw64    : Checking for mingw64 installation"
+    MINGW64_PREFIX=x86_64-w64-mingw32
+    find_program MINGW64_CC $MINGW64_PREFIX-gcc
+    if [ -n "$MINGW64_CC" ]; then
+        MINGW_CC=$MINGW64_CC
+        MINGW_PREFIX=$MINGW64_PREFIX
+    else
     log "Mingw      : Checking for mingw32 installation"
     MINGW32_PREFIX=i586-mingw32msvc
     find_program MINGW32_CC $MINGW32_PREFIX-gcc
     if [ -z "$MINGW32_CC" ] ; then
-        echo "ERROR: It looks like $MINGW32_PREFIX-gcc is not in your path"
-        echo "Please install the mingw32 package !"
+            echo "ERROR: It looks like neither $MINGW64_PREFIX-cc nor $MINGW32_PREFIX-gcc"
+            echo "are in your path. Please install the mingw32 package !"
         exit 1
+        fi
+        MINGW_CC=$MINGW32_CC
+        MINGW_PREFIX=$MINGW32_PREFIX
+        FORCE_32BIT=no
     fi
     log2 "Mingw      : Found $MINGW32_CC"
-    CC=$MINGW32_CC
-    LD=$MINGW32_CC
-    AR=$MINGW32_PREFIX-ar
-    FORCE_32BIT=no
+    CC=$MINGW_CC
+    LD=$MINGW_CC
+    AR=$MINGW_PREFIX-ar
 }
 
 # Cygwin is normally not supported, unless you call this function

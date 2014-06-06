@@ -281,7 +281,7 @@ void *fw_cfg_init(uint32_t ctl_port, uint32_t data_port,
     fw_cfg_add_i16(s, FW_CFG_NOGRAPHIC, (uint16_t)(display_type == DT_NOGRAPHIC));
     fw_cfg_add_i16(s, FW_CFG_NB_CPUS, (uint16_t)smp_cpus);
 
-    register_savevm("fw_cfg", -1, 1, fw_cfg_save, fw_cfg_load, s);
+    register_savevm(NULL, "fw_cfg", -1, 1, fw_cfg_save, fw_cfg_load, s);
     qemu_register_reset(fw_cfg_reset, 0, s);
     fw_cfg_reset(s);
 

@@ -91,13 +91,13 @@ filelock_lock( FileLock*  lock )
 #ifdef _WIN32
     int  pidfile_fd = -1;
 
-    ret = _mkdir( lock->lock );
+    ret = mkdir( lock->lock );
     if (ret < 0) {
         if (errno == ENOENT) {
             D( "could not access directory '%s', check path elements", lock->lock );
             return -1;
         } else if (errno != EEXIST) {
-            D( "_mkdir(%s): %s", lock->lock, strerror(errno) );
+            D( "mkdir(%s): %s", lock->lock, strerror(errno) );
             return -1;
         }
 

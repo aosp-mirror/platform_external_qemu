@@ -151,6 +151,17 @@
 /* Define to sizeof(int) */
 #define SIZEOF_INT 4
 
+/* Should come from qemu-common.h - howver there's alot of stuff there. */
+#ifndef HOST_LONG_BITS
+#if UINTPTR_MAX == UINT32_MAX
+# define HOST_LONG_BITS 32
+#elif UINTPTR_MAX == UINT64_MAX
+# define HOST_LONG_BITS 64
+#else
+# error Unknown pointer size
+#endif
+#endif
+
 /* Define to sizeof(char *) */
 #define SIZEOF_CHAR_P (HOST_LONG_BITS / 8)
 

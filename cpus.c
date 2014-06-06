@@ -24,9 +24,9 @@
 #include "config-host.h"
 
 #include "cpu.h"
-#include "exec/exec-all.h"
 #include "monitor/monitor.h"
 #include "sysemu/sysemu.h"
+#include "cpu.h"
 #include "exec/exec-all.h"
 #include "exec/gdbstub.h"
 #include "sysemu/dma.h"
@@ -36,25 +36,25 @@
 
 #include "sysemu/cpus.h"
 
-static CPUOldState *cur_cpu;
-static CPUOldState *next_cpu;
+static CPUState *cur_cpu;
+static CPUState *next_cpu;
 
 /***********************************************************/
 void hw_error(const char *fmt, ...)
 {
     va_list ap;
-    CPUOldState *env;
+    CPUState *cpu;
 
     va_start(ap, fmt);
     fprintf(stderr, "qemu: hardware error: ");
     vfprintf(stderr, fmt, ap);
     fprintf(stderr, "\n");
-    for(env = first_cpu; env != NULL; env = env->next_cpu) {
-        fprintf(stderr, "CPU #%d:\n", env->cpu_index);
+    CPU_FOREACH(cpu) {
+        fprintf(stderr, "CPU #%d:\n", cpu->cpu_index);
 #ifdef TARGET_I386
-        cpu_dump_state(env, stderr, fprintf, X86_DUMP_FPU);
+        cpu_dump_state(cpu->env_ptr, stderr, fprintf, X86_DUMP_FPU);
 #else
-        cpu_dump_state(env, stderr, fprintf, 0);
+        cpu_dump_state(cpu->env_ptr, stderr, fprintf, 0);
 #endif
     }
     va_end(ap);
@@ -71,54 +71,48 @@ static void do_vm_stop(int reason)
     }
 }
 
-static int cpu_can_run(CPUOldState *env)
+static int cpu_can_run(CPUArchState *env)
 {
-    if (env->stop)
+    CPUState *cpu = ENV_GET_CPU(env);
+    if (cpu->stop)
         return 0;
-    if (env->stopped)
+    if (cpu->stopped)
         return 0;
     return 1;
-}
-
-static int cpu_has_work(CPUOldState *env)
-{
-    if (env->stop)
-        return 1;
-    if (env->stopped)
-        return 0;
-    if (!env->halted)
-        return 1;
-    if (qemu_cpu_has_work(env))
-        return 1;
-    return 0;
 }
 
 int tcg_has_work(void)
 {
-    CPUOldState *env;
+    CPUState *cpu;
 
-    for (env = first_cpu; env != NULL; env = env->next_cpu)
-        if (cpu_has_work(env))
+    CPU_FOREACH(cpu) {
+        if (cpu->stop)
             return 1;
+        if (cpu->stopped)
+            return 0;
+        if (!cpu->halted)
+            return 1;
+        if (cpu_has_work(cpu))
+            return 1;
+        return 0;
+    }
     return 0;
 }
 
-void qemu_init_vcpu(void *_env)
+void qemu_init_vcpu(CPUState *cpu)
 {
-    CPUOldState *env = _env;
-
     if (kvm_enabled())
-        kvm_init_vcpu(env);
+        kvm_init_vcpu(cpu);
 #ifdef CONFIG_HAX
     if (hax_enabled())
-        hax_init_vcpu(env);
+        hax_init_vcpu(cpu);
 #endif
     return;
 }
 
-int qemu_cpu_self(void *env)
+bool qemu_cpu_is_self(CPUState *cpu)
 {
-    return 1;
+    return true;
 }
 
 void resume_all_vcpus(void)
@@ -129,7 +123,7 @@ void pause_all_vcpus(void)
 {
 }
 
-void qemu_cpu_kick(void *env)
+void qemu_cpu_kick(CPUState *cpu)
 {
     return;
 }
@@ -141,10 +135,10 @@ extern HANDLE qemu_event_handle;
 
 void qemu_notify_event(void)
 {
-    CPUOldState *env = cpu_single_env;
+    CPUState *cpu = current_cpu;
 
-    if (env) {
-        cpu_exit(env);
+    if (cpu) {
+        cpu_exit(cpu);
     /*
      * This is mainly for the Windows host, where the timer may be in
      * a different thread with vcpu. Thus the timer function needs to
@@ -156,7 +150,7 @@ void qemu_notify_event(void)
      */
 #ifdef CONFIG_HAX
         if (hax_enabled())
-            hax_raise_event(env);
+            hax_raise_event(cpu);
      } else {
 #ifdef _WIN32
          if(hax_enabled())
@@ -227,9 +221,10 @@ void tcg_cpu_exec(void)
     int ret = 0;
 
     if (next_cpu == NULL)
-        next_cpu = first_cpu;
-    for (; next_cpu != NULL; next_cpu = next_cpu->next_cpu) {
-        CPUOldState *env = cur_cpu = next_cpu;
+        next_cpu = QTAILQ_FIRST(&cpus);
+    for (; next_cpu != NULL; next_cpu = QTAILQ_NEXT(next_cpu, node)) {\
+        cur_cpu = next_cpu;
+        CPUOldState *env = cur_cpu->env_ptr;
 
         if (!vm_running)
             break;
@@ -239,7 +234,7 @@ void tcg_cpu_exec(void)
         if (cpu_can_run(env))
             ret = qemu_cpu_exec(env);
         if (ret == EXCP_DEBUG) {
-            gdb_set_stop_cpu(env);
+            gdb_set_stop_cpu(cur_cpu);
             debug_requested = 1;
             break;
         }
@@ -290,7 +285,13 @@ static int timer_load(QEMUFile *f, void *opaque, int version_id)
 TimersState timers_state;
 
 void qemu_timer_register_savevm(void) {
-    register_savevm("timer", 0, 2, timer_save, timer_load, &timers_state);
+    register_savevm(NULL,
+                    "timer",
+                    0,
+                    2,
+                    timer_save,
+                    timer_load,
+                    &timers_state);
 }
 
 /* Return the virtual CPU time, based on the instruction counter.  */

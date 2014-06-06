@@ -27,6 +27,7 @@
 #include <setjmp.h>
 #include <inttypes.h>
 #include <signal.h>
+#include "qemu-common.h"
 #include "qemu/osdep.h"
 #include "qemu/queue.h"
 #include "exec/hwaddr.h"
@@ -94,20 +95,20 @@ typedef struct CPUTLBEntry {
     target_ulong addr_code;
     /* Addend to virtual address to get host address.  IO accesses
        use the corresponding iotlb value.  */
-    size_t addend;
+    uintptr_t addend;
     /* padding to get a power of two size */
     uint8_t dummy[(1 << CPU_TLB_ENTRY_BITS) -
                   (sizeof(target_ulong) * 3 +
-                   ((-sizeof(target_ulong) * 3) & (sizeof(size_t) - 1)) +
-                   sizeof(size_t))];
+                   ((-sizeof(target_ulong) * 3) & (sizeof(uintptr_t) - 1)) +
+                   sizeof(uintptr_t))];
 } CPUTLBEntry;
 
-extern int CPUTLBEntry_wrong_size[sizeof(CPUTLBEntry) == (1 << CPU_TLB_ENTRY_BITS) ? 1 : -1];
+QEMU_BUILD_BUG_ON(sizeof(CPUTLBEntry) != (1 << CPU_TLB_ENTRY_BITS));
 
 #define CPU_COMMON_TLB \
     /* The meaning of the MMU modes is defined in the target code. */   \
     CPUTLBEntry tlb_table[NB_MMU_MODES][CPU_TLB_SIZE];                  \
-    hwaddr iotlb[NB_MMU_MODES][CPU_TLB_SIZE];               \
+    hwaddr iotlb[NB_MMU_MODES][CPU_TLB_SIZE];                           \
     target_ulong tlb_flush_addr;                                        \
     target_ulong tlb_flush_mask;
 
@@ -154,17 +155,12 @@ typedef struct CPUWatchpoint {
     /* in order to avoid passing too many arguments to the MMIO         \
        helpers, we store some rarely used information in the CPU        \
        context) */                                                      \
-    unsigned long mem_io_pc; /* host pc at which the memory was         \
-                                accessed */                             \
+    uintptr_t  mem_io_pc; /* host pc at which the memory was            \
+                             accessed */                                \
     target_ulong mem_io_vaddr; /* target virtual addr at which the      \
                                      memory was accessed */             \
-    uint32_t halted; /* Nonzero if the CPU is in suspend state */       \
-    uint32_t interrupt_request;                                         \
-    volatile sig_atomic_t exit_request;                                 \
     CPU_COMMON_TLB                                                      \
     struct TranslationBlock *tb_jmp_cache[TB_JMP_CACHE_SIZE];           \
-    /* buffer for temporaries in the code generator */                  \
-    long temp_buf[CPU_TEMP_BUF_NLONGS];                                 \
                                                                         \
     int64_t icount_extra; /* Instructions until next timer event.  */   \
     /* Number of cycles left, with interrupt flag in high bit.          \
@@ -179,38 +175,16 @@ typedef struct CPUWatchpoint {
     /* from this point: preserved by CPU reset */                       \
     /* ice debug support */                                             \
     QTAILQ_HEAD(breakpoints_head, CPUBreakpoint) breakpoints;            \
-    int singlestep_enabled;                                             \
                                                                         \
     QTAILQ_HEAD(watchpoints_head, CPUWatchpoint) watchpoints;            \
     CPUWatchpoint *watchpoint_hit;                                      \
-                                                                        \
-    struct GDBRegisterState *gdb_regs;                                  \
                                                                         \
     /* Core interrupt code */                                           \
     jmp_buf jmp_env;                                                    \
     int exception_index;                                                \
                                                                         \
-    CPUOldState *next_cpu; /* next CPU sharing TB cache */                 \
-    int cpu_index; /* CPU index (informative) */                        \
-    uint32_t host_tid; /* host thread ID */                             \
-    int numa_node; /* NUMA node this cpu is belonging to  */            \
-    int nr_cores;  /* number of cores within this CPU package */        \
-    int nr_threads;/* number of threads within this CPU */              \
-    int running; /* Nonzero if cpu is currently running(usermode).  */  \
     /* user data */                                                     \
     void *opaque;                                                       \
                                                                         \
-    uint32_t created;                                                   \
-    uint32_t stop;   /* Stop request */                                 \
-    uint32_t stopped; /* Artificially stopped */                        \
-    struct QemuThread *thread;                                          \
-    struct QemuCond *halt_cond;                                         \
-    struct qemu_work_item *queued_work_first, *queued_work_last;        \
-    const char *cpu_model_str;                                          \
-    struct KVMState *kvm_state;                                         \
-    struct kvm_run *kvm_run;                                            \
-    int kvm_fd;                                                         \
-    int kvm_vcpu_dirty;                                                 \
-    struct hax_vcpu_state *hax_vcpu;
 
 #endif
