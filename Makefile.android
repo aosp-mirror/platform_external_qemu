@@ -156,6 +156,16 @@ endif
 #
 MY_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 
+# When using clang and ccache, disable the spammy warnings about unused
+# parameters during compilation, and re-enable colored output.
+#
+# See http://petereisentraut.blogspot.fr/2011/05/ccache-and-clang.html
+ifneq (,$(filter %ccache,$(MY_CC)))
+  ifneq (,$(filter LLVM,$(shell $(HOST_CC) -v 2>&1)))
+    MY_CFLAGS := -Qunused-arguments -fcolor-diagnostics $(MY_CFLAGS)
+  endif
+endif
+
 # Needed to build block.c on Linux/x86_64.
 MY_CFLAGS += -D_GNU_SOURCE=1
 
