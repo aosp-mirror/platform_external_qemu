@@ -365,6 +365,7 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libjpeg \
     emulator-libelff \
     emulator-common \
+    $(EMULATOR_EXT4_UTILS_STATIC_LIBRARIES) \
     emulator-zlib \
     $(SDL_STATIC_LIBRARIES)
 LOCAL_LDLIBS += $(common_LOCAL_LDLIBS)
@@ -402,6 +403,7 @@ ifdef EMULATOR_BUILD_64BITS
       emulator64-libjpeg \
       emulator64-libelff \
       emulator64-common \
+      $(EMULATOR_EXT4_UTILS_STATIC_LIBRARIES_64) \
       emulator64-zlib \
       $(SDL_STATIC_LIBRARIES_64)
   LOCAL_LDLIBS += $(common_LOCAL_LDLIBS) -m64
