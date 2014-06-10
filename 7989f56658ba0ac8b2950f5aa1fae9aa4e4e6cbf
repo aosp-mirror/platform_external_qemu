@@ -16,6 +16,24 @@
       "revId": "7989f56658ba0ac8b2950f5aa1fae9aa4e4e6cbf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f696874_245dcb21",
+        "filename": "Makefile.common",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1015340
+      },
+      "writtenOn": "2014-06-10T20:10:17Z",
+      "side": 1,
+      "message": "No, Makefile.common means common between target and tests (?), not that it only builds libemulator-common.  It also builds other libraries including the emulator-private SDL.",
+      "parentUuid": "ffa0140a_d156a602",
+      "revId": "7989f56658ba0ac8b2950f5aa1fae9aa4e4e6cbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
