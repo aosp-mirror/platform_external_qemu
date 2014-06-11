@@ -125,22 +125,6 @@ EMULATOR_COMMON_CFLAGS += -I$(GLIB_INCLUDE_DIR)
 common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 
 ###########################################################
-# ext4_utils definitions
-#
-EXT4_UTILS := distrib/ext4_utils
-include $(LOCAL_PATH)/$(EXT4_UTILS)/Android.mk
-EMULATOR_EXT4_UTILS_STATIC_LIBRARIES := \
-      emulator-ext4_utils \
-      emulator-libsparse
-ifneq ($(HOST_OS),windows)
-      EMULATOR_EXT4_UTILS_STATIC_LIBRARIES += emulator-libselinux
-endif
-EMULATOR_EXT4_UTILS_STATIC_LIBRARIES_64 := \
-      $(subst emulator-,emulator64-,$(EMULATOR_EXT4_UTILS_STATIC_LIBRARIES))
-
-common_LOCAL_C_INCLUDES += $(EMULATOR_EXT4_UTILS_INCLUDES)
-
-###########################################################
 # Android utility functions
 #
 common_LOCAL_SRC_FILES += \
@@ -195,7 +179,6 @@ common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 ## one for 32-bit
 $(call start-emulator-library, emulator-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
-LOCAL_C_INCLUDES += $(common_LOCAL_C_INCLUDES)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
@@ -203,7 +186,6 @@ $(call end-emulator-library)
 ifdef EMULATOR_BUILD_64BITS
   $(call start-emulator-library, emulator64-common)
   LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
-  LOCAL_C_INCLUDES += $(common_LOCAL_C_INCLUDES)
   LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
   $(call gen-hw-config-defs)
   $(call end-emulator-library)
