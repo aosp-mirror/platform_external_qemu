@@ -15,8 +15,12 @@
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
+#include <inttypes.h>
 
 ANDROID_BEGIN_HEADER
+
+int android_createExt4Image(const char *filePath, uint64_t size,
+        const char *mountpoint);
 
 // Returns true iff the file at |filePath| is an actual EXT4 partition image.
 bool android_pathIsExt4PartitionImage(const char* filePath);

@@ -14,6 +14,8 @@
 #include "android/base/Log.h"
 #include "android/base/files/ScopedStdioFile.h"
 
+#include "make_ext4fs.h"
+
 #include <stdint.h>
 #include <string.h>
 
@@ -31,6 +33,14 @@ struct Ext4Magic {
 };
 
 const uint8_t Ext4Magic::kExpected[kSize] = { 0x53, 0xef };
+
+int android_createExt4Image(const char *filePath, uint64_t size,
+        const char *mountpoint) {
+    int ret = make_ext4fs(filePath, size, mountpoint, NULL);
+    if (ret < 0)
+        EXT4_ERROR << "Failed to create ext4 image";
+    return ret;
+}
 
 bool android_pathIsExt4PartitionImage(const char* path) {
     if (!path) {
