@@ -1,0 +1,7 @@
+Code-Review+2: JP Abgrall <jpa@google.com>
+Verified+1: Greg Hackmann <ghackmann@google.com>
+Submitted-by: Greg Hackmann <ghackmann@google.com>
+Submitted-at: Wed, 11 Jun 2014 15:50:55 +0000
+Reviewed-on: https://android-review.googlesource.com/97382
+Project: platform/external/qemu
+Branch: refs/heads/master
