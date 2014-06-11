@@ -3178,7 +3178,8 @@ int main(int argc, char **argv, char **envp)
             } else {
                 /* Create the file if needed */
                 if (!path_exists(partPath)) {
-                    if (android_createExt4Image(partPath, partSize, "cache") < 0) {
+                    // TODO(digit): For EXT4, create a real empty ext4 partition image.
+                    if (path_empty_file(partPath) < 0) {
                         PANIC("Could not create cache image file %s: %s", partPath, strerror(errno));
                     }
                 }
@@ -3186,7 +3187,14 @@ int main(int argc, char **argv, char **envp)
                 pstrcat(tmp, sizeof(tmp), partPath);
             }
         }
-        cacheImageIsExt4 = partPath && android_pathIsExt4PartitionImage(partPath);
+        // NOTE: The following line is commented to avoid problems with the
+        // current state of the emulator and AOSP/master. In a nutshell,
+        // take it out of the comment once proper support for generating
+        // EXT4 partitions on demand is added to the emulator, and
+        //  /etc/fstab.goldfish is modified to mount an EXT4, not YAFFS2,
+        // partition for /cache.
+        //
+        // cacheImageIsExt4 = partPath && android_pathIsExt4PartitionImage(partPath);
         if (cacheImageIsExt4) {
             /* Using a nand device to approximate a block device until full
              * support is added */
