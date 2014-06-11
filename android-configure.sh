@@ -493,17 +493,6 @@ EOF
 feature_run_exec HOST_BIGENDIAN
 fi
 
-# check size of host long bits
-HOST_LONGBITS=32
-if [ "$TARGET_OS" = "$OS" ] ; then
-cat > $TMPC << EOF
-int main(void) {
-        return sizeof(void*)*8;
-}
-EOF
-feature_run_exec HOST_LONGBITS
-fi
-
 # check whether we have <byteswap.h>
 #
 feature_check_header HAVE_BYTESWAP_H      "<byteswap.h>"
