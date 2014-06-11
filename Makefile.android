@@ -24,14 +24,18 @@ MY_CXX := $(HOST_CXX)
 MY_LD  := $(HOST_LD)
 MY_AR  := $(HOST_AR)
 
-MY_CFLAGS := $(CONFIG_INCLUDES) -O2 -g -fno-PIC -falign-functions=0 -fomit-frame-pointer
-
-# Overwrite configuration for debug builds.
-#
+MY_CFLAGS := $(CONFIG_INCLUDES) -g -falign-functions=0
 ifeq ($(BUILD_DEBUG_EMULATOR),true)
-    MY_CFLAGS := $(CONFIG_INCLUDES)
-    MY_CFLAGS += -O0 -g
-    MY_CFLAGS += -fno-PIC -falign-functions=0
+    MY_CFLAGS += -O0
+else
+    MY_CFLAGS += -O2
+endif
+
+# Generate position-independent binaries. Don't add -fPIC when targetting
+# Windows, because newer toolchain complain loudly about it, since all
+# Windows code is position-independent.
+ifneq (windows,$(HOST_OS))
+  MY_CFLAGS += -fPIC
 endif
 
 MY_LDLIBS :=
@@ -65,7 +69,6 @@ endif
 ifeq ($(HOST_OS),darwin)
     MY_CFLAGS += -D_DARWIN_C_SOURCE=1
     ifneq ($(host_toolchain_header),)
-        MY_CFLAGS += -mdynamic-no-pic
         MY_CFLAGS += -isystem $(host_toolchain_header)
     else
         ifneq (,$(mac_sdk_root))
