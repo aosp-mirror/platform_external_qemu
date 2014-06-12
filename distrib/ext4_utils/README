@@ -1,0 +1,4 @@
+This directory contains a copy of the $AOSP/system/extras/ext4_utils
+library at the following commit:
+
+    7b4448de8deaef2512fb0b17a30facc47b2f4a87
