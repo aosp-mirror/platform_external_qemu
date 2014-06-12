@@ -169,6 +169,54 @@ ifdef EMULATOR_BUILD_64BITS
   $(call end-emulator-library)
 endif # EMULATOR_BUILD_64BITS
 
+##bohu: begin for android/wear-agent/
+$(call start-emulator-program, wear-agent)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_SRC_FILES += android/wear-agent/main.cpp android/wear-agent/help.cpp android/wear-agent/WearAgent.cpp \
+                   android/wear-agent/PairUpWearPhone.cpp android/looper-generic.c android/iolooper-select.c
+ifneq ($(USE_MINGW),)
+LOCAL_STATIC_LIBRARIES += emulator-common emulator-libqemu emulator-common
+else
+LOCAL_STATIC_LIBRARIES += emulator-common
+endif
+LOCAL_LDLIBS += -lstdc++
+# 23 MY_CXX := $(HOST_CXX)
+#MY_LD  := $(HOST_CXX)
+#LOCAL_STATIC_LIBRARIES += emulator-common emulator-libqemu emulator-common
+$(call end-emulator-program)
+#MY_LD  := $(HOST_LD)
+ifdef EMULATOR_BUILD_64BITS
+$(call start-emulator-program, wear-agent64)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -m64
+LOCAL_LDLIBS += $(common_LOCAL_LDLIBS) -m64
+LOCAL_SRC_FILES += android/wear-agent/main.cpp android/wear-agent/help.cpp android/wear-agent/WearAgent.cpp \
+                   android/wear-agent/PairUpWearPhone.cpp android/looper-generic.c android/iolooper-select.c
+ifneq ($(USE_MINGW),)
+LOCAL_STATIC_LIBRARIES += emulator64-common emulator64-libqemu emulator64-common
+else
+LOCAL_STATIC_LIBRARIES += emulator64-common
+endif
+LOCAL_LDLIBS += -lstdc++
+#MY_LD  := $(HOST_CXX)
+#LOCAL_STATIC_LIBRARIES += emulator64-common emulator64-libqemu emulator64-common
+$(call end-emulator-program)
+#MY_LD  := $(HOST_LD)
+endif # EMULATOR_BUILD_64BITS
+
+#build the library
+$(call start-emulator-library, libandroid-wear-agent)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_SRC_FILES += android/wear-agent/WearAgent.cpp android/wear-agent/help.cpp
+$(call end-emulator-library)
+ifdef EMULATOR_BUILD_64BITS
+$(call start-emulator-library, lib64android-wear-agent)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_SRC_FILES += android/wear-agent/WearAgent.cpp android/wear-agent/help.cpp
+$(call end-emulator-library)
+endif # EMULATOR_BUILD_64BITS
+##bohu: end for android/wear-agent/
+
+
 ##############################################################################
 ##############################################################################
 ###
