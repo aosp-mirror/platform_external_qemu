@@ -31,14 +31,8 @@ LOCAL_CFLAGS := $(strip $(patsubst %,-I%,$(LOCAL_C_INCLUDES)) $(LOCAL_CFLAGS))
 
 # HACK ATTACK: For the Darwin x86 build, we need to add
 # '-read_only_relocs suppress' to the linker command to avoid errors.
-# The only way to detect if we're building 32-bit or 64-bit binaries
-# is to look at -m32 and -m64 statements in the final link line, and
-# only keep the last one.
-ifeq ($(HOST_OS),darwin)
-  my_bitness := $(lastword $(filter -m32 -m64,$(LOCAL_LDFLAGS) $(LOCAL_LDLIBS) $(LOCAL_CFLAGS)))
-  ifeq (-m32,$(my_bitness))
-    LOCAL_LDLIBS += -Wl,-read_only_relocs,suppress
-  endif
+ifeq ($(HOST_OS)-$(LOCAL_MODULE_BITS),darwin-32)
+  LOCAL_LDLIBS += -Wl,-read_only_relocs,suppress
 endif
 
 $(foreach src,$(LOCAL_C_SOURCES), \

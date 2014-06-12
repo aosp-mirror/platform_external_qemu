@@ -236,13 +236,10 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
 LOCAL_SRC_FILES := $(SDL_SOURCES)
 $(call end-emulator-library)
 
-ifdef EMULATOR_BUILD_64BITS
-$(call start-emulator-library,emulator_lib64SDL)
+$(call start-emulator64-library,emulator_lib64SDL)
 LOCAL_SRC_FILES := $(SDL_SOURCES)
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
-LOCAL_CFLAGS += -m64 -fPIC
 $(call end-emulator-library)
-endif  # EMULATOR_BUILD_64BITS
 
 ## Build libSDLmain
 ##
@@ -269,13 +266,10 @@ LOCAL_CFLAGS += $(SDL_CFLAGS)
 LOCAL_SRC_FILES := $(SDLMAIN_SOURCES)
 $(call end-emulator-library)
 
-ifdef EMULATOR_BUILD_64BITS
-  $(call start-emulator-library,emulator_lib64SDLmain)
-  LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
-  LOCAL_SRC_FILES := $(SDLMAIN_SOURCES)
-  LOCAL_CFLAGS += -m64
-  $(call end-emulator-library)
-endif  # EMULATOR_BUILD_64BITS
+$(call start-emulator64-library,emulator_lib64SDLmain)
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+LOCAL_SRC_FILES := $(SDLMAIN_SOURCES)
+$(call end-emulator-library)
 
 # Restore LOCAL_PATH
 LOCAL_PATH := $(SDL_OLD_LOCAL_PATH)
