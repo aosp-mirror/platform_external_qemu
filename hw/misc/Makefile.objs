@@ -14,6 +14,8 @@ common-obj-$(CONFIG_INTEGRATOR_DEBUG) += arm_integrator_debug.o
 common-obj-$(CONFIG_A9SCU) += a9scu.o
 common-obj-$(CONFIG_ARM11SCU) += arm11scu.o
 
+obj-$(CONFIG_ANDROID_PIPE) += android_pipe.o
+
 # PKUnity SoC devices
 common-obj-$(CONFIG_PUV3) += puv3_pm.o
 
