@@ -191,6 +191,13 @@ protected:
         return mTempFilePath.c_str();
     }
 
+    // Create the path of a temporary file, but do not create or
+    // populate it. The file is removed in the destructor.
+    const char* createTempPath() {
+        mTempFilePath = createTempFilePath();
+        return mTempFilePath.c_str();
+    }
+
     std::string mTempFilePath;
     char mImage[kExt4SystemImageSize * 2U];
 };
@@ -221,4 +228,12 @@ TEST_F(Ext4UtilsTest, android_pathIsExt4PartitionImageBadMagic2) {
     mImage[kExt4SystemImageSize - 2] = 0;
     const char* path = createTempFile(sizeof mImage);
     EXPECT_FALSE(android_pathIsExt4PartitionImage(path));
+}
+
+TEST_F(Ext4UtilsTest, android_createEmptyExt4Partition) {
+    const char* tempPath = createTempPath();
+    uint64_t kSize = 32 * 1024 * 1024;
+    int ret = android_createEmptyExt4Image(tempPath, kSize, "cache");
+    EXPECT_EQ(0, ret);
+    EXPECT_TRUE(android_pathIsExt4PartitionImage(tempPath));
 }

@@ -334,6 +334,12 @@ ifeq ($(HOST_OS),darwin)
   endif
 endif
 
+# Build libext4_utils and related modules/
+include $(LOCAL_PATH)/distrib/zlib-1.2.8/sources.make
+include $(LOCAL_PATH)/distrib/libsparse/sources.mk
+include $(LOCAL_PATH)/distrib/libselinux/sources.mk
+include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
+
 include $(LOCAL_PATH)/Makefile.common
 
 ifeq ($(HOST_OS),windows)
@@ -391,11 +397,6 @@ endif
 $(call end-emulator-program)
 
 include $(LOCAL_PATH)/Makefile.tests
-
-# Build libsparse and related executables.
-include $(LOCAL_PATH)/distrib/libsparse/sources.mk
-include $(LOCAL_PATH)/distrib/libselinux/sources.mk
-include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
 
 ##############################################################################
 ##############################################################################

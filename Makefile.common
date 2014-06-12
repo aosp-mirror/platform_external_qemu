@@ -88,8 +88,6 @@ endif
 ###########################################################
 # Zlib sources
 #
-ZLIB_DIR := distrib/zlib-1.2.8
-include $(LOCAL_PATH)/$(ZLIB_DIR)/sources.make
 EMULATOR_COMMON_CFLAGS += -I$(ZLIB_INCLUDES)
 
 ###########################################################
@@ -153,6 +151,7 @@ common_LOCAL_SRC_FILES += \
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
+common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
 
 ## one for 32-bit
 $(call start-emulator-library, emulator-common)
