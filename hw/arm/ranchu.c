@@ -62,6 +62,7 @@ enum {
     RANCHU_GF_FB,
     RANCHU_GF_BATTERY,
     RANCHU_GF_AUDIO,
+    RANCHU_GF_EVDEV,
     RANCHU_MMIO,
 };
 
@@ -104,6 +105,7 @@ static const MemMapEntry memmap[] = {
     [RANCHU_GF_FB] = { 0x9010000, 0x100 },
     [RANCHU_GF_BATTERY] = { 0x9020000, 0x1000 },
     [RANCHU_GF_AUDIO] = { 0x9030000, 0x100 },
+    [RANCHU_GF_EVDEV] = { 0x9040000, 0x1000 },
     [RANCHU_MMIO] = { 0xa000000, 0x200 },
     /* ...repeating for a total of NUM_VIRTIO_TRANSPORTS, each of that size */
     /* 0x10000000 .. 0x40000000 reserved for PCI */
@@ -115,6 +117,7 @@ static const int irqmap[] = {
     [RANCHU_GF_FB] = 2,
     [RANCHU_GF_BATTERY] = 3,
     [RANCHU_GF_AUDIO] = 4,
+    [RANCHU_GF_EVDEV] = 5,
     [RANCHU_MMIO] = 16, /* ...to 16 + NUM_VIRTIO_TRANSPORTS - 1 */
 };
 
@@ -482,6 +485,8 @@ static void ranchu_init(MachineState *machine)
     create_simple_device(vbi, pic, RANCHU_GF_AUDIO, "goldfish_audio",
                          "generic,goldfish-audio", 1, 0, 0);
 #endif
+    create_simple_device(vbi, pic, RANCHU_GF_EVDEV, "goldfish-events",
+                         "generic,goldfish-events-keypad", 1, 0, 0);
 
     /* Create mmio transports, so the user can create virtio backends
      * (which will be automatically plugged in to the transports). If
