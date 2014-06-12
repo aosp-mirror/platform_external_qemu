@@ -154,6 +154,16 @@ androidHwConfig_getKernelDeviceNaming( AndroidHwConfig* config )
     return -1;
 }
 
+int
+androidHwConfig_getKernelYaffs2Support( AndroidHwConfig* config )
+{
+    if (!strcmp(config->kernel_supportsYaffs2, "no"))
+        return 0;
+    if (!strcmp(config->kernel_supportsYaffs2, "yes"))
+        return 1;
+    return -1;
+}
+
 const char* androidHwConfig_getKernelSerialPrefix(AndroidHwConfig* config )
 {
     if (androidHwConfig_getKernelDeviceNaming(config) >= 1) {
