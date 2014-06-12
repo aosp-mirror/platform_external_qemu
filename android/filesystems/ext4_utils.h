@@ -15,8 +15,17 @@
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
+#include <inttypes.h>
 
 ANDROID_BEGIN_HEADER
+
+// Create a new empty EXT4 partition image file at |filePath|
+// of |size| bytes. |mountPoint| is the name of the corresponding
+// mount point, e.g. 'cache' for the cache partition.
+// Returns 0 on success, or -errno on failure.
+int android_createEmptyExt4Image(const char *filePath,
+                                 uint64_t size,
+                                 const char *mountpoint);
 
 // Returns true iff the file at |filePath| is an actual EXT4 partition image.
 bool android_pathIsExt4PartitionImage(const char* filePath);
