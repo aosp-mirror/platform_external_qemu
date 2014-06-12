@@ -90,9 +90,7 @@ endif
 #
 ZLIB_DIR := distrib/zlib-1.2.8
 include $(LOCAL_PATH)/$(ZLIB_DIR)/sources.make
-EMULATOR_COMMON_CFLAGS += -I$(LOCAL_PATH)/$(ZLIB_DIR)
-
-common_LOCAL_SRC_FILES += $(ZLIB_SOURCES)
+EMULATOR_COMMON_CFLAGS += -I$(ZLIB_INCLUDES)
 
 ###########################################################
 # GLib sources
