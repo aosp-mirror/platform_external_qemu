@@ -395,6 +395,7 @@ include $(LOCAL_PATH)/Makefile.tests
 # Build libsparse and related executables.
 include $(LOCAL_PATH)/distrib/libsparse/sources.mk
 include $(LOCAL_PATH)/distrib/libselinux/sources.mk
+include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
 
 ##############################################################################
 ##############################################################################
