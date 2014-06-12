@@ -291,16 +291,9 @@ EOF
     fi
     link
     if [ $? != 0 ] ; then
-        OLD_LD=$LD
-        LD=gcc
-        compile
-        link
-        if [ $? != 0 ] ; then
-            LD=$OLD_LD
-            echo "your linker doesn't seem to work:"
-            cat $TMPL
-            clean_exit
-        fi
+        echo "your linker doesn't seem to work:"
+        cat $TMPL
+        clean_exit
     fi
     log "LD         : linker check ok ($LD)"
 
