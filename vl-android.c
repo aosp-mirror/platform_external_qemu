@@ -2269,6 +2269,10 @@ serial_hds_add(const char* devname)
     return -1;  /* shouldn't happen */
 }
 
+extern void start_wear_agent(Looper* looper);
+extern void stop_wear_agent();
+extern void start_socket_drain_mgr(Looper* looper);
+extern void stop_socket_drain_mgr();
 int main(int argc, char **argv, char **envp)
 {
     const char *gdbstub_dev = NULL;
@@ -2381,6 +2385,9 @@ int main(int argc, char **argv, char **envp)
     boot_property_init_service();
     android_hw_control_init();
     android_net_pipes_init();
+
+    start_wear_agent(looper_newCore());
+    start_socket_drain_mgr(looper_newCore());
 
 #ifdef CONFIG_KVM
     /* By default, force auto-detection for kvm */
@@ -4235,6 +4242,9 @@ int main(int argc, char **argv, char **envp)
     main_loop();
     quit_timers();
     net_cleanup();
+    stop_wear_agent();
+    stop_socket_drain_mgr();
+
     android_emulation_teardown();
     return 0;
 }
