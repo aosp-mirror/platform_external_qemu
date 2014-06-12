@@ -454,15 +454,17 @@ int main(int argc, char **argv)
          }
     }
 
+    KernelType kernelType = KERNEL_TYPE_LEGACY;
+    if (!android_pathProbeKernelType(hw->kernel_path, &kernelType)) {
+        D("WARNING: Could not determine kernel device naming scheme. Assuming legacy\n"
+            "If this AVD doesn't boot, and uses a recent kernel (3.10 or above) try setting\n"
+            "'kernel.newDeviceNaming' to 'yes' in its configuration.\n");
+    }
+
     // Auto-detect kernel device naming scheme if needed.
     if (androidHwConfig_getKernelDeviceNaming(hw) < 0) {
-        KernelType kernelType;
         const char* newDeviceNaming = "no";
-        if (!android_pathProbeKernelType(hw->kernel_path, &kernelType)) {
-            D("WARNING: Could not determine kernel device naming scheme. Assuming legacy\n"
-              "If this AVD doesn't boot, and uses a recent kernel (3.10 or above) try setting\n"
-              "'kernel.newDeviceNaming' to 'yes' in its configuration.\n");
-        } else if (kernelType == KERNEL_TYPE_3_10_OR_ABOVE) {
+        if (kernelType == KERNEL_TYPE_3_10_OR_ABOVE) {
             D("Auto-detect: Kernel image requires new device naming scheme.");
             newDeviceNaming = "yes";
         } else {
@@ -470,6 +472,19 @@ int main(int argc, char **argv)
         }
         AFREE(hw->kernel_newDeviceNaming);
         hw->kernel_newDeviceNaming = ASTRDUP(newDeviceNaming);
+    }
+
+    // Auto-detect YAFFS2 partition support if needed.
+    if (androidHwConfig_getKernelYaffs2Support(hw) < 0) {
+        const char* newYaffs2Support = "no";
+        if (kernelType == KERNEL_TYPE_3_10_OR_ABOVE) {
+            D("Auto-detect: Kernel does not support YAFFS2 partitions.");
+        } else {
+            D("Auto-detect: Kernel does support YAFFS2 partitions.");
+            newYaffs2Support = "yes";
+        }
+        AFREE(hw->kernel_supportsYaffs2);
+        hw->kernel_supportsYaffs2 = ASTRDUP(newYaffs2Support);
     }
 
     if (boot_prop_ip[0]) {
