@@ -48,6 +48,7 @@ typedef struct mon_cmd_t {
 #define MONITOR_USE_CONTROL   0x04
 #define MONITOR_USE_PRETTY    0x08
 #define MONITOR_DYNAMIC_CMDS  0x10
+#define MONITOR_ANDROID_CONSOLE 0x20
 
 /* flags for monitor commands */
 #define MONITOR_CMD_ASYNC       0x0001

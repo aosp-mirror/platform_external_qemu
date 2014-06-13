@@ -2261,6 +2261,8 @@ static int mon_init_func(QemuOpts *opts, void *opaque)
         flags = MONITOR_USE_READLINE;
     } else if (strcmp(mode, "control") == 0) {
         flags = MONITOR_USE_CONTROL;
+    } else if (strcmp(mode, "android-console") == 0) {
+        flags = MONITOR_ANDROID_CONSOLE | MONITOR_USE_READLINE;
     } else {
         fprintf(stderr, "unknown monitor mode \"%s\"\n", mode);
         exit(1);
