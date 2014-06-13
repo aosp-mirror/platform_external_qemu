@@ -3583,19 +3583,41 @@ int main(int argc, char **argv, char **envp)
 
 
     /* Check the CPU Architecture value */
+    {
+        static const char* kSupportedArchs[] = {
 #if defined(TARGET_ARM)
-    if (strcmp(android_hw->hw_cpu_arch,"arm") != 0) {
-        fprintf(stderr, "-- Invalid CPU architecture: %s, expected 'arm'\n",
-                android_hw->hw_cpu_arch);
-        exit(1);
-    }
-#elif defined(TARGET_I386)
-    if (strcmp(android_hw->hw_cpu_arch,"x86") != 0) {
-        fprintf(stderr, "-- Invalid CPU architecture: %s, expected 'x86'\n",
-                android_hw->hw_cpu_arch);
-        exit(1);
-    }
+            "arm",
 #endif
+#if defined(TARGET_I386)
+            "x86",
+#endif
+#if defined(TARGET_X86_64)
+            "x86_64",
+#endif
+#if defined(TARGET_MIPS)
+            "mips",
+#endif
+        };
+        const size_t kNumSupportedArchs =
+                sizeof(kSupportedArchs) / sizeof(kSupportedArchs[0]);
+        bool supported_arch = false;
+        size_t n;
+        for (n = 0; n < kNumSupportedArchs; ++n) {
+            if (!strcmp(android_hw->hw_cpu_arch, kSupportedArchs[n])) {
+                supported_arch = true;
+                break;
+            }
+        }
+        if (!supported_arch) {
+            fprintf(stderr, "-- Invalid CPU architecture: %s, valid values:",
+                    android_hw->hw_cpu_arch);
+            for (n = 0; n < kNumSupportedArchs; ++n) {
+                fprintf(stderr, " %s", kSupportedArchs[n]);
+            }
+            fprintf(stderr, "\n");
+            exit(1);
+        }
+    }
 
     /* Grab CPU model if provided in hardware.ini */
     if (    !cpu_model
