@@ -5212,6 +5212,20 @@ void monitor_resume(Monitor *mon)
         readline_show_prompt(mon->rs);
 }
 
+/**
+ * monitor_disconnect() : Disconnect the monitor connection
+ *
+ * Close this monitor connection, if we can, with the same behaviour
+ * as if the other end itself had closed it (eg, we will go back
+ * to listening on the TCP socket).
+ * File descriptor cleanup happens when the char backend sends us
+ * the CHR_EVENT_CLOSED event.
+ */
+int monitor_disconnect(Monitor *mon)
+{
+    return qemu_chr_del_client(mon->chr);
+}
+
 static QObject *get_qmp_greeting(void)
 {
     QObject *ver = NULL;

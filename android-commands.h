@@ -41,6 +41,13 @@ static mon_cmd_t android_cmds[] = {
         .mhandler.cmd = android_console_kill,
     },
     {
+        .name = "quit|exit",
+        .args_type = "",
+        .params = "",
+        .help = "quit control session",
+        .mhandler.cmd = android_console_quit,
+    },
+    {
         .name = "redir",
         .args_type = "item:s?",
         .params = "",

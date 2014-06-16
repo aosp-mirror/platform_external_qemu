@@ -61,6 +61,8 @@ void monitor_add_command(Monitor *mon, mon_cmd_t *cmd);
 int monitor_suspend(Monitor *mon);
 void monitor_resume(Monitor *mon);
 
+int monitor_disconnect(Monitor *mon);
+
 int monitor_read_bdrv_key_start(Monitor *mon, BlockDriverState *bs,
                                 BlockCompletionFunc *completion_cb,
                                 void *opaque);

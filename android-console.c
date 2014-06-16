@@ -37,6 +37,14 @@ void android_console_kill(Monitor *mon, const QDict *qdict)
     qmp_quit(NULL);
 }
 
+void android_console_quit(Monitor *mon, const QDict *qdict)
+{
+    /* Don't print an OK response for success, just close the connection */
+    if (monitor_disconnect(mon)) {
+        monitor_printf(mon, "KO: this connection doesn't support quitting\n");
+    }
+}
+
 #ifdef CONFIG_SLIRP
 void android_console_redir_list(Monitor *mon, const QDict *qdict)
 {
