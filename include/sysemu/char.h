@@ -65,6 +65,7 @@ struct CharDriverState {
     int (*get_msgfds)(struct CharDriverState *s, int* fds, int num);
     int (*set_msgfds)(struct CharDriverState *s, int *fds, int num);
     int (*chr_add_client)(struct CharDriverState *chr, int fd);
+    int (*chr_del_client)(struct CharDriverState *chr);
     IOEventHandler *chr_event;
     IOCanReadHandler *chr_can_read;
     IOReadHandler *chr_read;
@@ -339,6 +340,16 @@ void qemu_chr_add_handlers(CharDriverState *s,
 void qemu_chr_be_generic_open(CharDriverState *s);
 void qemu_chr_accept_input(CharDriverState *s);
 int qemu_chr_add_client(CharDriverState *s, int fd);
+
+/**
+ * @qemu_chr_del_client:
+ *
+ * Delete (disconnect) the current client from the char backend,
+ * as if the remote end had closed itself. This is most useful for TCP
+ * listening sockets, where it means that we will close the connection to
+ * the current client but remain listening for new ones.
+ */
+int qemu_chr_del_client(CharDriverState *s);
 CharDriverState *qemu_chr_find(const char *name);
 bool chr_is_ringbuf(const CharDriverState *chr);
 

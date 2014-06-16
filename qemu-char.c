@@ -327,6 +327,11 @@ int qemu_chr_add_client(CharDriverState *s, int fd)
     return s->chr_add_client ? s->chr_add_client(s, fd) : -1;
 }
 
+int qemu_chr_del_client(CharDriverState *s)
+{
+    return s->chr_del_client ? s->chr_del_client(s) : -1;
+}
+
 void qemu_chr_accept_input(CharDriverState *s)
 {
     if (s->chr_accept_input)
@@ -2802,9 +2807,13 @@ static GSource *tcp_chr_add_watch(CharDriverState *chr, GIOCondition cond)
     return g_io_create_watch(s->chan, cond);
 }
 
-static void tcp_chr_disconnect(CharDriverState *chr)
+static int tcp_chr_del_client(CharDriverState *chr)
 {
     TCPCharDriver *s = chr->opaque;
+
+    if (!s->connected) {
+        return -1;
+    }
 
     s->connected = 0;
     if (s->listen_chan) {
@@ -2822,6 +2831,7 @@ static void tcp_chr_disconnect(CharDriverState *chr)
     if (s->reconnect_time) {
         qemu_chr_socket_restart_timer(chr);
     }
+    return 0;
 }
 
 static gboolean tcp_chr_read(GIOChannel *chan, GIOCondition cond, void *opaque)
@@ -2833,7 +2843,7 @@ static gboolean tcp_chr_read(GIOChannel *chan, GIOCondition cond, void *opaque)
 
     if (cond & G_IO_HUP) {
         /* connection closed */
-        tcp_chr_disconnect(chr);
+        tcp_chr_del_client(chr);
         return TRUE;
     }
 
@@ -2846,7 +2856,7 @@ static gboolean tcp_chr_read(GIOChannel *chan, GIOCondition cond, void *opaque)
     size = tcp_chr_recv(chr, (void *)buf, len);
     if (size == 0) {
         /* connection closed */
-        tcp_chr_disconnect(chr);
+        tcp_chr_del_client(chr);
     } else if (size > 0) {
         if (s->do_telnetopt)
             tcp_chr_process_IAC_bytes(chr, s, buf, &size);
@@ -2869,7 +2879,7 @@ static int tcp_chr_sync_read(CharDriverState *chr, const uint8_t *buf, int len)
     size = tcp_chr_recv(chr, (void *) buf, len);
     if (size == 0) {
         /* connection closed */
-        tcp_chr_disconnect(chr);
+        tcp_chr_del_client(chr);
     }
 
     return size;
@@ -4140,6 +4150,7 @@ static CharDriverState *qmp_chardev_open_socket(ChardevSocket *sock,
     chr->get_msgfds = tcp_get_msgfds;
     chr->set_msgfds = tcp_set_msgfds;
     chr->chr_add_client = tcp_chr_add_client;
+    chr->chr_del_client = tcp_chr_del_client;
     chr->chr_add_watch = tcp_chr_add_watch;
     chr->chr_update_read_handler = tcp_chr_update_read_handler;
     /* be isn't opened until we get a connection */
