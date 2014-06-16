@@ -84,7 +84,7 @@ const char *legacy_bootp_filename;
 static QTAILQ_HEAD(slirp_stacks, SlirpState) slirp_stacks =
     QTAILQ_HEAD_INITIALIZER(slirp_stacks);
 
-static int slirp_hostfwd(SlirpState *s, const char *redir_str,
+static int slirp_hostfwd(Slirp *s, const char *redir_str,
                          int legacy_format);
 static int slirp_guestfwd(SlirpState *s, const char *config_str,
                           int legacy_format);
@@ -248,7 +248,7 @@ static int net_slirp_init(NetClientState *peer, const char *model,
 
     for (config = slirp_configs; config; config = config->next) {
         if (config->flags & SLIRP_CFG_HOSTFWD) {
-            if (slirp_hostfwd(s, config->str,
+            if (slirp_hostfwd(s->slirp, config->str,
                               config->flags & SLIRP_CFG_LEGACY) < 0)
                 goto error;
         } else {
@@ -274,29 +274,30 @@ error:
     return -1;
 }
 
-static SlirpState *slirp_lookup(Monitor *mon, const char *vlan,
-                                const char *stack)
+Slirp *net_slirp_lookup(const char *vlan, const char *stack, Error **errp)
 {
+    SlirpState *ss;
 
     if (vlan) {
         NetClientState *nc;
         nc = net_hub_find_client_by_name(strtol(vlan, NULL, 0), stack);
         if (!nc) {
-            monitor_printf(mon, "unrecognized (vlan-id, stackname) pair\n");
+            error_setg(errp, "unrecognized (vlan-id, stackname) pair\n");
             return NULL;
         }
         if (strcmp(nc->model, "user")) {
-            monitor_printf(mon, "invalid device specified\n");
+            error_setg(errp, "invalid device specified");
             return NULL;
         }
-        return DO_UPCAST(SlirpState, nc, nc);
+        ss = DO_UPCAST(SlirpState, nc, nc);
     } else {
         if (QTAILQ_EMPTY(&slirp_stacks)) {
-            monitor_printf(mon, "user mode network stack not in use\n");
+            error_setg(errp, "user mode network stack not in use");
             return NULL;
         }
-        return QTAILQ_FIRST(&slirp_stacks);
+        ss = QTAILQ_FIRST(&slirp_stacks);
     }
+    return ss->slirp;
 }
 
 void net_slirp_hostfwd_remove(Monitor *mon, const QDict *qdict)
@@ -305,21 +306,24 @@ void net_slirp_hostfwd_remove(Monitor *mon, const QDict *qdict)
     int host_port;
     char buf[256];
     const char *src_str, *p;
-    SlirpState *s;
+    Slirp *s;
     int is_udp = 0;
     int err;
+    Error *local_err = NULL;
     const char *arg1 = qdict_get_str(qdict, "arg1");
     const char *arg2 = qdict_get_try_str(qdict, "arg2");
     const char *arg3 = qdict_get_try_str(qdict, "arg3");
 
     if (arg2) {
-        s = slirp_lookup(mon, arg1, arg2);
+        s = net_slirp_lookup(arg1, arg2, &local_err);
         src_str = arg3;
     } else {
-        s = slirp_lookup(mon, NULL, NULL);
+        s = net_slirp_lookup(NULL, NULL, &local_err);
         src_str = arg1;
     }
-    if (!s) {
+    if (local_err) {
+        error_report("%s", error_get_pretty(local_err));
+        error_free(local_err);
         return;
     }
 
@@ -345,7 +349,7 @@ void net_slirp_hostfwd_remove(Monitor *mon, const QDict *qdict)
 
     host_port = atoi(p);
 
-    err = slirp_remove_hostfwd(s->slirp, is_udp, host_addr, host_port);
+    err = slirp_remove_hostfwd(s, is_udp, host_addr, host_port);
 
     monitor_printf(mon, "host forwarding rule for %s %s\n", src_str,
                    err ? "not found" : "removed");
@@ -355,7 +359,7 @@ void net_slirp_hostfwd_remove(Monitor *mon, const QDict *qdict)
     monitor_printf(mon, "invalid format\n");
 }
 
-static int slirp_hostfwd(SlirpState *s, const char *redir_str,
+static int slirp_hostfwd(Slirp *s, const char *redir_str,
                          int legacy_format)
 {
     struct in_addr host_addr = { .s_addr = INADDR_ANY };
@@ -407,7 +411,7 @@ static int slirp_hostfwd(SlirpState *s, const char *redir_str,
         goto fail_syntax;
     }
 
-    if (slirp_add_hostfwd(s->slirp, is_udp, host_addr, host_port, guest_addr,
+    if (slirp_add_hostfwd(s, is_udp, host_addr, host_port, guest_addr,
                           guest_port) < 0) {
         error_report("could not set up host forwarding rule '%s'",
                      redir_str);
@@ -423,22 +427,26 @@ static int slirp_hostfwd(SlirpState *s, const char *redir_str,
 void net_slirp_hostfwd_add(Monitor *mon, const QDict *qdict)
 {
     const char *redir_str;
-    SlirpState *s;
+    Slirp *s;
+    Error *err = NULL;
     const char *arg1 = qdict_get_str(qdict, "arg1");
     const char *arg2 = qdict_get_try_str(qdict, "arg2");
     const char *arg3 = qdict_get_try_str(qdict, "arg3");
 
     if (arg2) {
-        s = slirp_lookup(mon, arg1, arg2);
+        s = net_slirp_lookup(arg1, arg2, &err);
         redir_str = arg3;
     } else {
-        s = slirp_lookup(mon, NULL, NULL);
+        s = net_slirp_lookup(NULL, NULL, &err);
         redir_str = arg1;
     }
-    if (s) {
-        slirp_hostfwd(s, redir_str, 0);
+    if (err) {
+        error_report("%s", error_get_pretty(err));
+        error_free(err);
+        return;
     }
 
+    slirp_hostfwd(s, redir_str, 0);
 }
 
 int net_slirp_redir(const char *redir_str)
@@ -454,7 +462,7 @@ int net_slirp_redir(const char *redir_str)
         return 0;
     }
 
-    return slirp_hostfwd(QTAILQ_FIRST(&slirp_stacks), redir_str, 1);
+    return slirp_hostfwd(QTAILQ_FIRST(&slirp_stacks)->slirp, redir_str, 1);
 }
 
 #ifndef _WIN32

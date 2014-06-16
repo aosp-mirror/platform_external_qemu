@@ -42,6 +42,11 @@ int net_slirp_smb(const char *exported_dir);
 
 void do_info_usernet(Monitor *mon, const QDict *qdict);
 
+/* Given a VLAN ID and stack name string, look up the corresponding
+ * Slirp backend.
+ */
+Slirp *net_slirp_lookup(const char *vlan, const char *stack, Error **errp);
+
 #endif
 
 #endif /* QEMU_NET_SLIRP_H */

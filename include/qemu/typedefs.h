@@ -79,4 +79,7 @@ typedef struct PcGuestInfo PcGuestInfo;
 typedef struct Range Range;
 typedef struct AdapterInfo AdapterInfo;
 
+struct Slirp;
+typedef struct Slirp Slirp;
+
 #endif /* QEMU_TYPEDEFS_H */
