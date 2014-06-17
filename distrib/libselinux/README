@@ -1,0 +1,4 @@
+This directory contains the content of $AOSP/external/libselinux taken
+from the following commit:
+
+    e9b58950df18f55a74e3b79bffe7f18556613ad1

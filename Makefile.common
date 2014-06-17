@@ -88,11 +88,7 @@ endif
 ###########################################################
 # Zlib sources
 #
-ZLIB_DIR := distrib/zlib-1.2.8
-include $(LOCAL_PATH)/$(ZLIB_DIR)/sources.make
-EMULATOR_COMMON_CFLAGS += -I$(LOCAL_PATH)/$(ZLIB_DIR)
-
-common_LOCAL_SRC_FILES += $(ZLIB_SOURCES)
+EMULATOR_COMMON_CFLAGS += -I$(ZLIB_INCLUDES)
 
 ###########################################################
 # GLib sources
@@ -127,6 +123,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/StringView.cpp \
 	android/emulation/CpuAccelerator.cpp \
 	android/filesystems/ext4_utils.cpp \
+	android/filesystems/partition_types.cpp \
 	android/kernel/kernel_utils.cpp \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
@@ -155,6 +152,7 @@ common_LOCAL_SRC_FILES += \
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
+common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
 
 ## one for 32-bit
 $(call start-emulator-library, emulator-common)

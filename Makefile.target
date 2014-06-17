@@ -299,7 +299,8 @@ common_LOCAL_STATIC_LIBRARIES := \
     emulator-libqemu \
     emulator-target-$(EMULATOR_TARGET_CPU) \
     emulator-libelff \
-    emulator-common
+    emulator-common \
+    emulator-zlib
 
 common_LOCAL_LDLIBS += \
     $(EMULATOR_COMMON_LDLIBS) \
@@ -363,7 +364,12 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libjpeg \
     emulator-libelff \
     emulator-common \
+    emulator-libext4_utils \
+    emulator-libsparse \
+    emulator-libselinux \
+    emulator-zlib \
     $(SDL_STATIC_LIBRARIES)
+
 LOCAL_LDLIBS += $(common_LOCAL_LDLIBS)
 LOCAL_LDFLAGS += $(common_LOCAL_LDFLAGS)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
@@ -398,7 +404,12 @@ LOCAL_STATIC_LIBRARIES += \
     emulator64-libjpeg \
     emulator64-libelff \
     emulator64-common \
+    emulator64-libext4_utils \
+    emulator64-libsparse \
+    emulator64-libselinux \
+    emulator64-zlib \
     $(SDL_STATIC_LIBRARIES_64)
+
 LOCAL_LDLIBS += $(common_LOCAL_LDLIBS)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
