@@ -25,6 +25,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <android/utils/compiler.h>
+#include <android/utils/host_bitness.h>
 #include <android/utils/panic.h>
 #include <android/utils/path.h>
 #include <android/utils/bufprint.h>
@@ -200,32 +201,6 @@ int main(int argc, char** argv)
     return errno;
 }
 
-#ifndef _WIN32
-static int
-getHostOSBitness()
-{
-  /*
-     This function returns 64 if host is running 64-bit OS, or 32 otherwise.
-
-     It uses the same technique in ndk/build/core/ndk-common.sh.
-     Here are comments from there:
-
-  ## On Linux or Darwin, a 64-bit kernel (*) doesn't mean that the user-land
-  ## is always 32-bit, so use "file" to determine the bitness of the shell
-  ## that invoked us. The -L option is used to de-reference symlinks.
-  ##
-  ## Note that on Darwin, a single executable can contain both x86 and
-  ## x86_64 machine code, so just look for x86_64 (darwin) or x86-64 (Linux)
-  ## in the output.
-
-    (*) ie. The following code doesn't always work:
-        struct utsname u;
-        int host_runs_64bit_OS = (uname(&u) == 0 && strcmp(u.machine, "x86_64") == 0);
-  */
-    return system("file -L \"$SHELL\" | grep -q \"x86[_-]64\"") == 0 ? 64 : 32;
-}
-#endif  // !_WIN32
-
 /* Find the target-specific emulator binary. This will be something
  * like  <programDir>/emulator-<targetArch>, where <programDir> is
  * the directory of the current program.
@@ -244,7 +219,8 @@ getTargetEmulatorPath(const char* progName, const char* avdArch, const int force
     int search_for_64bit_emulator = 0;
 #else
     const char* exeExt = "";
-    int search_for_64bit_emulator = !force_32bit && getHostOSBitness() == 64;
+    int search_for_64bit_emulator =
+            !force_32bit && android_getHostBitness() == 64;
 #endif
 
     const char* emulatorSuffix = emulator_getBackendSuffix(avdArch);
