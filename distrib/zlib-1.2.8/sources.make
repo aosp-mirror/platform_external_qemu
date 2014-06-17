@@ -1,4 +1,6 @@
-# this is included by various Makefiles
+OLD_LOCAL_PATH := $(LOCAL_PATH)
+LOCAL_PATH := $(call my-dir)
+
 ZLIB_SOURCES := \
     adler32.c \
     compress.c \
@@ -16,5 +18,16 @@ ZLIB_SOURCES := \
     uncompr.c \
     zutil.c
 
-ZLIB_SOURCES := $(ZLIB_SOURCES:%=$(ZLIB_DIR)/%)
+ZLIB_INCLUDES := $(LOCAL_PATH)
 
+$(call start-emulator-library,emulator-zlib)
+LOCAL_SRC_FILES := $(ZLIB_SOURCES)
+LOCAL_C_INCLUDES := $(ZLIB_INCLUDES)
+$(call end-emulator-library)
+
+$(call start-emulator64-library,emulator64-zlib)
+LOCAL_SRC_FILES := $(ZLIB_SOURCES)
+LOCAL_C_INCLUDES := $(ZLIB_INCLUDES)
+$(call end-emulator-library)
+
+LOCAL_PATH := $(OLD_LOCAL_PATH)
