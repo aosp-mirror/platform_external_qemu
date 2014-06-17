@@ -240,18 +240,53 @@ void android_console_redir_remove(Monitor *mon, const QDict *qdict)
 }
 #endif
 
+static const char *redir_list_help =
+    "list current port redirections. "
+    "use 'redir add' and 'redir del' to add and remove them\n"
+    "OK\n";
+
+static const char *redir_add_help =
+    "add a new port redirection, arguments must be:\n"
+    "\n"
+    "  redir add <protocol>:<host-port>:<guest-port>\n"
+    "\n"
+    "where:   <protocol>     is either 'tcp' or 'udp'\n"
+    "         <host-port>    a number indicating which "
+    "port on the host to open\n"
+    "         <guest-port>   a number indicating which "
+    "port to route to on the device\n"
+    "\n"
+    "as an example, 'redir  tcp:5000:6000' will allow any packets sent to\n"
+    "the host's TCP port 5000 to be routed to TCP port 6000 of the "
+    "emulated device\n"
+    "OK\n";
+
+static const char *redir_del_help =
+    "remove a port redirecion that was created with 'redir add', "
+    "arguments must be:\n\n"
+    "  redir  del <protocol>:<host-port>\n\n"
+    "see the 'help redir add' for the meaning of <protocol> and <host-port>\n"
+    "OK\n";
+
 void android_console_redir(Monitor *mon, const QDict *qdict)
 {
-    const char *arg = qdict_get_try_str(qdict, "arg");
+    /* This only gets called for bad subcommands and help requests */
+    const char *helptext = qdict_get_try_str(qdict, "helptext");
 
-    if (!arg) {
-        goto fail;
+    monitor_printf(mon, "help text %s\n", helptext ? helptext : "(null)");
+
+    if (helptext) {
+        if (strstr(helptext, "add")) {
+            monitor_printf(mon, "%s", redir_add_help);
+            return;
+        } else if (strstr(helptext, "del")) {
+            monitor_printf(mon, "%s", redir_del_help);
+            return;
+        } else if (strstr(helptext, "list")) {
+            monitor_printf(mon, "%s", redir_list_help);
+            return;
+        }
     }
-
-    monitor_printf(mon, "redir: arg %s\n", arg);
-    return;
-
-fail:
     monitor_printf(mon, "allows you to add, list and remove and/or "
                    "PORT redirection from the host to the device\n"
                    "as an example, 'redir  tcp:5000:6000' will route "
@@ -262,6 +297,6 @@ fail:
                    "    list             list current redirections\n"
                    "    add              add new redirection\n"
                    "    del              remove existing redirection\n"
-                   "\n"
-                   "KO: missing sub-command\n");
+                   "\n%s\n",
+                   helptext ? "OK" : "KO: missing sub-command");
 }
