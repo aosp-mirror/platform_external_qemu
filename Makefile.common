@@ -123,6 +123,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/StringView.cpp \
 	android/emulation/CpuAccelerator.cpp \
 	android/filesystems/ext4_utils.cpp \
+	android/filesystems/partition_types.cpp \
 	android/kernel/kernel_utils.cpp \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
