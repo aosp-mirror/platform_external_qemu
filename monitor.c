@@ -169,6 +169,8 @@ typedef struct MonitorQAPIEventState {
     QObject *data;      /* Event pending delayed dispatch */
 } MonitorQAPIEventState;
 
+typedef void MonitorErrorPrintFn(struct Monitor *mon, const char *fmt, ...);
+
 struct Monitor {
     CharDriverState *chr;
     int reset_seen;
@@ -198,6 +200,7 @@ struct Monitor {
     QError *error;
     const char *prompt;
     const char *banner;
+    MonitorErrorPrintFn *print_error;
     QLIST_HEAD(,mon_fd_t) fds;
     QLIST_ENTRY(Monitor) entry;
 };
@@ -3789,15 +3792,16 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                 if (ret < 0) {
                     switch(c) {
                     case 'F':
-                        monitor_printf(mon, "%s: filename expected\n",
-                                       cmdname);
+                        mon->print_error(mon, "%s: filename expected\n",
+                                         cmdname);
                         break;
                     case 'B':
-                        monitor_printf(mon, "%s: block device name expected\n",
-                                       cmdname);
+                        mon->print_error(mon,
+                                         "%s: block device name expected\n",
+                                         cmdname);
                         break;
                     default:
-                        monitor_printf(mon, "%s: string expected\n", cmdname);
+                        mon->print_error(mon, "%s: string expected\n", cmdname);
                         break;
                     }
                     goto fail;
@@ -3882,8 +3886,8 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                     }
                 next:
                     if (*p != '\0' && !qemu_isspace(*p)) {
-                        monitor_printf(mon, "invalid char in format: '%c'\n",
-                                       *p);
+                        mon->print_error(mon, "invalid char in format: '%c'\n",
+                                         *p);
                         goto fail;
                     }
                     if (format < 0)
@@ -3939,12 +3943,12 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                     goto fail;
                 /* Check if 'i' is greater than 32-bit */
                 if ((c == 'i') && ((val >> 32) & 0xffffffff)) {
-                    monitor_printf(mon, "\'%s\' has failed: ", cmdname);
-                    monitor_printf(mon, "integer is for 32-bit values\n");
+                    mon->print_error(mon, "\'%s\' has failed: ", cmdname);
+                    mon->print_error(mon, "integer is for 32-bit values\n");
                     goto fail;
                 } else if (c == 'M') {
                     if (val < 0) {
-                        monitor_printf(mon, "enter a positive value\n");
+                        mon->print_error(mon, "enter a positive value\n");
                         goto fail;
                     }
                     val <<= 20;
@@ -3968,7 +3972,7 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                 }
                 val = strtosz(p, &end);
                 if (val < 0) {
-                    monitor_printf(mon, "invalid size\n");
+                    mon->print_error(mon, "invalid size\n");
                     goto fail;
                 }
                 qdict_put(qdict, key, qint_from_int(val));
@@ -4001,7 +4005,7 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                     }
                 }
                 if (*p && !qemu_isspace(*p)) {
-                    monitor_printf(mon, "Unknown unit suffix\n");
+                    mon->print_error(mon, "Unknown unit suffix\n");
                     goto fail;
                 }
                 qdict_put(qdict, key, qfloat_from_double(val));
@@ -4024,7 +4028,7 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                 } else if (p - beg == 3 && !memcmp(beg, "off", p - beg)) {
                     val = 0;
                 } else {
-                    monitor_printf(mon, "Expected 'on' or 'off'\n");
+                    mon->print_error(mon, "Expected 'on' or 'off'\n");
                     goto fail;
                 }
                 qdict_put(qdict, key, qbool_from_int(val));
@@ -4045,9 +4049,9 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                     p++;
                     if(c != *p) {
                         if(!is_valid_option(p, typestr)) {
-                  
-                            monitor_printf(mon, "%s: unsupported option -%c\n",
-                                           cmdname, *p);
+                            mon->print_error(mon,
+                                             "%s: unsupported option -%c\n",
+                                             cmdname, *p);
                             goto fail;
                         } else {
                             skip_key = 1;
@@ -4080,8 +4084,8 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
                 }
                 len = strlen(p);
                 if (len <= 0) {
-                    monitor_printf(mon, "%s: string expected\n",
-                                   cmdname);
+                    mon->print_error(mon, "%s: string expected\n",
+                                     cmdname);
                     break;
                 }
                 qdict_put(qdict, key, qstring_from_str(p));
@@ -4090,7 +4094,7 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
             break;
         default:
         bad_type:
-            monitor_printf(mon, "%s: unknown type '%c'\n", cmdname, c);
+            mon->print_error(mon, "%s: unknown type '%c'\n", cmdname, c);
             goto fail;
         }
         g_free(key);
@@ -4100,8 +4104,8 @@ static const mon_cmd_t *monitor_parse_command(Monitor *mon,
     while (qemu_isspace(*p))
         p++;
     if (*p != '\0') {
-        monitor_printf(mon, "%s: extraneous characters at the end of line\n",
-                       cmdname);
+        mon->print_error(mon, "%s: extraneous characters at the end of line\n",
+                         cmdname);
         goto fail;
     }
 
@@ -5416,11 +5420,13 @@ Monitor * monitor_init(CharDriverState *chr, int flags)
     mon->prompt = "(qemu) ";
     mon->banner =
         "QEMU " QEMU_VERSION " monitor - type 'help' for more information";
+    mon->print_error = monitor_printf;
 
     if (flags & MONITOR_ANDROID_CONSOLE) {
         mon->cmd_table = android_cmds;
         mon->prompt = "";
         mon->banner = "Android Console: type 'help' for a list of commands";
+        mon->print_error = android_monitor_print_error;
     }
 
     if (flags & MONITOR_DYNAMIC_CMDS) {

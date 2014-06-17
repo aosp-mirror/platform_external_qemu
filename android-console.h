@@ -28,4 +28,6 @@ void android_console_redir_list(Monitor *mon, const QDict *qdict);
 void android_console_redir_add(Monitor *mon, const QDict *qdict);
 void android_console_redir_del(Monitor *mon, const QDict *qdict);
 
+void android_monitor_print_error(Monitor *mon, const char *fmt, ...);
+
 #endif

@@ -30,6 +30,19 @@ typedef struct {
 
 GList *redir_list;
 
+void android_monitor_print_error(Monitor *mon, const char *fmt, ...)
+{
+    /* Print an error (typically a syntax error from the parser), with
+     * the required "KO: " prefix.
+     */
+    va_list ap;
+
+    monitor_printf(mon, "KO: ");
+    va_start(ap, fmt);
+    monitor_vprintf(mon, fmt, ap);
+    va_end(ap);
+}
+
 void android_console_kill(Monitor *mon, const QDict *qdict)
 {
     monitor_printf(mon, "OK: killing emulator, bye bye\n");
