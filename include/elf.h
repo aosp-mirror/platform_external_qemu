@@ -1515,5 +1515,25 @@ struct elf32_fdpic_loadmap {
 
 #endif /* ELF_CLASS */
 
+typedef struct
+{
+  uint32_t a_type;
+  union
+    {
+      uint32_t a_val;
+      // 32-bit pointer omitted intentionally.
+    } a_un;
+} Elf32_auxv_t;
+
+typedef struct
+{
+  uint64_t a_type;
+  union
+    {
+      uint64_t a_val;           /* Integer value */
+      // 64-bit point omitted intentionally.
+    } a_un;
+} Elf64_auxv_t;
+
 
 #endif /* _QEMU_ELF_H */

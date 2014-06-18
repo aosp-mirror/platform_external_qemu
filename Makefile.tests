@@ -63,3 +63,25 @@ LOCAL_STATIC_LIBRARIES += \
     emulator64-zlib \
     emulator64-libgtest
 $(call end-emulator-program)
+
+
+$(call start-emulator-program, emulator_crash_handler_test)
+LOCAL_SRC_FILES := android/crash-handler/google_breakpad_test.cpp
+LOCAL_STATIC_LIBRARIES += \
+    emulator-crash-handler \
+    emulator-common \
+    libbreakpad_client
+LOCAL_LDLIBS += -lstdc++
+$(call end-emulator-program)
+
+$(call start-emulator64-program, emulator64_crash_handler_test)
+LOCAL_SRC_FILES := android/crash-handler/google_breakpad_test.cpp
+LOCAL_STATIC_LIBRARIES += \
+    emulator64-crash-handler \
+    emulator64-common \
+    lib64breakpad_client
+LOCAL_LDLIBS += -lstdc++
+$(call end-emulator-program)
+
+# Include the breakpad client library unit tests.
+include $(LOCAL_PATH)/distrib/google-breakpad/tests.mk

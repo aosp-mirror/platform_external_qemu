@@ -695,6 +695,34 @@ $(call end-emulator-library)
 ##############################################################################
 ##############################################################################
 ###
+###  emulator-crash_handler: Crash handling library
+###
+###  This is a tiny static library that contains the implementation
+###  of android/crash-handler/. The point is that this depends on
+###  Google Breakpad, and there is no point pushing this dependency
+###  to emulator-common.
+###
+
+# Google Breakpad client library.
+include $(LOCAL_PATH)/distrib/google-breakpad/sources.mk
+
+$(call start-emulator-library, emulator-crash-handler)
+LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS) $(GOOGLE_BREAKPAD_CFLAGS)
+LOCAL_C_INCLUDES += $(GOOGLE_BREAKPAD_INCLUDES)
+LOCAL_SRC_FILES := android/crash-handler/google_breakpad.cpp
+LOCAL_STATIC_LIBRARIES := libbreakpad_client
+$(call end-emulator-library)
+
+$(call start-emulator64-library, emulator64-crash-handler)
+LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS) $(GOOGLE_BREAKPAD_CFLAGS)
+LOCAL_C_INCLUDES += $(GOOGLE_BREAKPAD_INCLUDES_64)
+LOCAL_SRC_FILES := android/crash-handler/google_breakpad.cpp
+LOCAL_STATIC_LIBRARIES := lib64breakpad_client
+$(call end-emulator-library)
+
+##############################################################################
+##############################################################################
+###
 ###  gen-hx-header: Generate headers from .hx file with "hxtool" script.
 ###
 ###  The 'hxtool' script is used to generate header files from an input

@@ -1,0 +1,14 @@
+The sources were taken from an SVN checkout of google-breakpad
+with the following 'svn info' output:
+
+Path: .
+URL: https://google-breakpad.googlecode.com/svn/trunk
+Repository Root: https://google-breakpad.googlecode.com/svn
+Repository UUID: 4c0a9323-5329-0410-9bdc-e9ce6186880e
+Revision: 1339
+Node Kind: directory
+Schedule: normal
+Last Changed Author: mark@chromium.org
+Last Changed Rev: 1339
+Last Changed Date: 2014-06-17 20:03:31 +0200 (Tue, 17 Jun 2014)
+

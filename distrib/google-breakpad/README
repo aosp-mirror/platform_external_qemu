@@ -1,0 +1,10 @@
+This directory contains a subset of the sources for Google Breakpad [1].
+
+More precisely, this only contains the necessary sources used to build
+the client library for all support Android emulator host platforms.
+
+Sources for the tools and processor are not included, you will have
+to build these yourself if you want to process minidumps generated
+by the client library.
+
+[1] https://code.google.com/p/google-breakpad/

@@ -12,11 +12,12 @@
 #ifndef _ANDROID_UTILS_SYSTEM_H
 #define _ANDROID_UTILS_SYSTEM_H
 
-#include <string.h>
-#include <stdint.h>
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS 1
 #endif
+
+#include <string.h>
+#include <stdint.h>
 #include <inttypes.h>  /* for PRId64 et al. */
 #include "android/utils/assert.h"
 #include "android/utils/compiler.h"
