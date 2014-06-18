@@ -13,13 +13,13 @@ task buildWindowsEmulator(type: BuildEmulator) {
 
 sdk {
     common(mac, linux) {
-        item("$buildDefaultEmulator.output/lib") {
-            into 'lib'
+        item("$buildDefaultEmulator.output/emulator") {
+            executable true
             builtBy buildDefaultEmulator
         }
 
-        item("$buildDefaultEmulator.output/emulator") {
-            executable true
+        item("$buildDefaultEmulator.output/lib") {
+            into 'lib'
             builtBy buildDefaultEmulator
         }
 
@@ -52,35 +52,40 @@ sdk {
     }
 
     windows {
-        item("$buildWindowsEmulator.output/lib") {
-            into 'lib'
+        item("$buildWindowsEmulator.output/emulator.exe") {
             builtBy buildWindowsEmulator
         }
 
-        item("$buildWindowsEmulator.output/emulator.exe") {
+        item("$buildWindowsEmulator.output/lib") {
+            into 'lib'
             builtBy buildWindowsEmulator
         }
 
         item("$buildWindowsEmulator.output/emulator-arm.exe") {
             builtBy buildWindowsEmulator
         }
-/*        item("$buildWindowsEmulator.output/emulator64-arm.exe") {
-            builtBy buildWindowsEmulator
-        }*/
-
         item("$buildWindowsEmulator.output/emulator-mips.exe") {
             builtBy buildWindowsEmulator
         }
-/*        item("$buildWindowsEmulator.output/emulator64-mips.exe") {
-            builtBy buildWindowsEmulator
-        }*/
-
         item("$buildWindowsEmulator.output/emulator-x86.exe") {
             builtBy buildWindowsEmulator
         }
-/*        item("$buildWindowsEmulator.output/emulator64-x86.exe") {
+
+
+/*
+XAV: DISABLE win64 exe until it's ready
+        item("$buildWindowsEmulator.output/emulator64-arm.exe") {
             builtBy buildWindowsEmulator
-        }*/
+        }
+
+        item("$buildWindowsEmulator.output/emulator64-mips.exe") {
+            builtBy buildWindowsEmulator
+        }
+
+        item("$buildWindowsEmulator.output/emulator64-x86.exe") {
+            builtBy buildWindowsEmulator
+        }
+*/
     }
 }
 
