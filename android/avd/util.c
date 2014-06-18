@@ -150,7 +150,6 @@ _getAvdContentPath(const char* avdName)
     return avdPath;
 }
 
-
 char*
 propertyFile_getTargetAbi(const FileData* data) {
     return propertyFile_getValue((const char*)data->data,
@@ -186,57 +185,75 @@ propertyFile_getTargetArch(const FileData* data) {
 
 
 int
-propertyFile_getApiLevel(const FileData* data) {
-    char* sdkVersion = propertyFile_getValue((const char*)data->data,
-                                             data->size,
-                                             "ro.build.version.sdk");
-    const int kMinLevel = 3;
-    const int kMaxLevel = 10000;
-    int level = kMinLevel;
-    if (!sdkVersion) {
-        D("Could not find target API sdkVersion / SDK version in build properties!");
-        level = kMaxLevel;
-        D("Default target API sdkVersion: %d", level);
-    } else {
-        char* end = NULL;
-        long levelLong = strtol(sdkVersion, &end, 10);
-        int level = (int)levelLong;
-        if (levelLong == LONG_MIN || levelLong == LONG_MAX ||
-            levelLong < 0 || !end || *end || level != levelLong) {
-            level = kMinLevel;
-            D("Invalid SDK version build property: '%s'", sdkVersion);
-            D("Defaulting to target API sdkVersion %d", level);
-        } else {
-            D("Found target API sdkVersion: %d\n", level);
-        }
-    }
-    free(sdkVersion);
-    return level;
-}
-
-
-int
-propertyFile_getAdbdCommunicationMode(const FileData* data) {
+propertyFile_getInt(const FileData* data, const char* key, int _default,
+                    SearchResult* searchResult) {
     char* prop = propertyFile_getValue((const char*)data->data,
                                        data->size,
-                                       "ro.adb.qemud");
+                                       key);
     if (!prop) {
-        // No ro.adb.qemud means 'legacy' ADBD.
-        return 0;
+        if (searchResult) {
+            *searchResult = RESULT_NOT_FOUND;
+        }
+        return _default;
     }
 
     char* end;
-    long val = strtol(prop, &end, 10);
-    if (end == NULL || *end != '\0' || val != (int)val) {
-        D("Invalid ro.adb.qemud build property: '%s'", prop);
-        val = 0;
-    } else {
-        D("Found ro.adb.qemud build property: %d", val);
+    // long is only 32 bits on windows so it isn't enough to detect int overflow
+    long long val = strtoll(prop, &end, 10);
+    if (val < INT_MIN || val > INT_MAX ||
+        end == prop || *end != '\0') {
+        D("Invalid int property: '%s:%s'", key, prop);
+        AFREE(prop);
+        if (searchResult) {
+            *searchResult = RESULT_INVALID;
+        }
+        return _default;
     }
+
     AFREE(prop);
+
+    if (searchResult) {
+        *searchResult = RESULT_FOUND;
+    }
     return (int)val;
 }
 
+int
+propertyFile_getApiLevel(const FileData* data) {
+    const int kMinLevel = 3;
+    const int kMaxLevel = 10000;
+    SearchResult searchResult;
+    int level = propertyFile_getInt(data, "ro.build.version.sdk", kMinLevel,
+                                    &searchResult);
+    if (searchResult == RESULT_NOT_FOUND) {
+        D("Could not find target API sdkVersion / SDK version in build properties!");
+        level = kMaxLevel;
+        D("Default target API sdkVersion: %d", level);
+    } else if (searchResult == RESULT_INVALID || level < 0) {
+        D("Defaulting to target API sdkVersion %d", level);
+    } else {
+        D("Found target API sdkVersion: %d\n", level);
+    }
+    return level;
+}
+
+int
+propertyFile_getAdbdCommunicationMode(const FileData* data) {
+    if ( propertyFile_getApiLevel(data) < 16 ) {
+        // QEMU pipe for ADB communication was added in android-4.1.1_r1 API 16
+        D("API < 16, forcing ro.adb.qemud==0");
+        return 0;
+    }
+
+    SearchResult searchResult;
+    int qemud = propertyFile_getInt(data, "ro.adb.qemud", 1, &searchResult);
+    if (searchResult == RESULT_FOUND) {
+        D("Found ro.adb.qemud build property: %d", qemud);
+        return qemud;
+    }
+    D("ro.adb.qemud invalid or not found, API >= 16, defaulting ro.adb.qemud==1");
+    return 1;
+}
 
 char* path_getBuildBuildProp(const char* androidOut) {
     char temp[MAX_PATH], *p = temp, *end = p + sizeof(temp);
