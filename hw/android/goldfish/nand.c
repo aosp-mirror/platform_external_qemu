@@ -830,7 +830,7 @@ void nand_add_dev(const char *arg)
                      devname_len, devname, initfilename);
                 exit(1);
             }
-            rwfd = open(rwfilename, O_BINARY | O_TRUNC | O_RDWR);
+            rwfd = open(rwfilename, O_BINARY | O_CREAT | O_TRUNC | O_RDWR, S_IRUSR | S_IWUSR);
         } else {
             rwfd = open(rwfilename, O_BINARY | (read_only ? O_RDONLY : O_RDWR));
         }
