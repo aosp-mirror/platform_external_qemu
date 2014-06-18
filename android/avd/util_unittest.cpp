@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/avd/util.h"
+#include "android/utils/file_data.h"
 
 #include <gtest/gtest.h>
 
@@ -27,3 +28,123 @@ TEST(AvdUtil, emulator_getBackendSuffix) {
   EXPECT_FALSE(emulator_getBackendSuffix(NULL));
   EXPECT_FALSE(emulator_getBackendSuffix("dummy"));
 }
+
+TEST(AvdUtil, propertyFile_getInt) {
+  FileData fd;
+
+  const char* testFile =
+    "nineteen=19\n"
+    "int_min=-2147483648\n"
+    "int_max=2147483647\n"
+    "invalid=2147483648\n"
+    "invalid2=-2147483649\n"
+    "invalid3=bar\n"
+    "empty=\n";
+
+  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile, strlen(testFile)));
+
+  const int kDefault = 1138;
+  int found = 0xdeadbeef;
+
+  EXPECT_EQ(kDefault,propertyFile_getInt(&fd, "invalid", kDefault, &found));
+  EXPECT_EQ(kPropertyFileInvalid,found);
+
+  found = 0xdeadbeef;
+  EXPECT_EQ(kDefault,propertyFile_getInt(&fd, "invalid2", kDefault, &found));
+  EXPECT_EQ(kPropertyFileInvalid,found);
+
+  found = 0xdeadbeef;
+  EXPECT_EQ(kDefault,propertyFile_getInt(&fd, "invalid3", kDefault, &found));
+  EXPECT_EQ(kPropertyFileInvalid,found);
+
+  found = 0xdeadbeef;
+  EXPECT_EQ(kDefault,propertyFile_getInt(&fd, "bar", kDefault, &found));
+  EXPECT_EQ(kPropertyFileNotFound,found);
+
+  found = 0xdeadbeef;
+  EXPECT_EQ(kDefault,propertyFile_getInt(&fd, "empty", kDefault, &found));
+  EXPECT_EQ(kPropertyFileInvalid,found);
+
+  found = 0xdeadbeef;
+  EXPECT_EQ(19,propertyFile_getInt(&fd, "nineteen", kDefault, &found));
+  EXPECT_EQ(kPropertyFileFound,found);
+
+  // check that null "found" parameter is supported
+  EXPECT_EQ(kDefault,propertyFile_getInt(&fd, "bar", kDefault, NULL));
+  EXPECT_EQ(kDefault,propertyFile_getInt(&fd, "invalid", kDefault, NULL));
+  EXPECT_EQ(19,propertyFile_getInt(&fd, "nineteen", kDefault, NULL));
+}
+
+TEST(AvdUtil, propertyFile_getApiLevel) {
+  FileData fd;
+
+  const char* emptyFile =
+    "\n";
+
+  const char* testFile19 =
+    "ro.build.version.sdk=19\n";
+
+  const char* testFileBogus =
+    "ro.build.version.sdk=bogus\n";
+
+  EXPECT_EQ(0,fileData_initFromMemory(&fd, emptyFile, strlen(emptyFile)));
+  EXPECT_EQ(10000,propertyFile_getApiLevel(&fd));
+
+  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile19, strlen(testFile19)));
+  EXPECT_EQ(19,propertyFile_getApiLevel(&fd));
+
+  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFileBogus, strlen(testFileBogus)));
+  EXPECT_EQ(3,propertyFile_getApiLevel(&fd));
+}
+
+TEST(AvdUtil, propertyFile_getAdbdCommunicationMode) {
+  FileData fd;
+
+  const char* emptyFile =
+    "\n";
+
+  const char* testFile16 =
+    "ro.build.version.sdk=16\n";
+
+  const char* testFile17 =
+    "ro.build.version.sdk=17\n";
+
+  const char* testFile16_0 =
+    "ro.build.version.sdk=16\n"
+    "ro.adb.qemud=0";
+
+  const char* testFile16_1 =
+    "ro.build.version.sdk=16\n"
+    "ro.adb.qemud=1";
+
+  const char* testFile17_0 =
+    "ro.build.version.sdk=17\n"
+    "ro.adb.qemud=0";
+
+  const char* testFile17_1 =
+    "ro.build.version.sdk=17\n"
+    "ro.adb.qemud=1";
+
+
+  EXPECT_EQ(0,fileData_initFromMemory(&fd, emptyFile, strlen(emptyFile)));
+  EXPECT_EQ(1,propertyFile_getAdbdCommunicationMode(&fd));
+
+  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile16, strlen(testFile16)));
+  EXPECT_EQ(0,propertyFile_getAdbdCommunicationMode(&fd));
+
+  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile17, strlen(testFile17)));
+  EXPECT_EQ(1,propertyFile_getAdbdCommunicationMode(&fd));
+
+  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile16_0, strlen(testFile16_0)));
+  EXPECT_EQ(0,propertyFile_getAdbdCommunicationMode(&fd));
+
+  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile16_1, strlen(testFile16_1)));
+  EXPECT_EQ(1,propertyFile_getAdbdCommunicationMode(&fd));
+
+  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile17_0, strlen(testFile17_0)));
+  EXPECT_EQ(0,propertyFile_getAdbdCommunicationMode(&fd));
+
+  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile17_1, strlen(testFile17_1)));
+  EXPECT_EQ(1,propertyFile_getAdbdCommunicationMode(&fd));
+}
+
