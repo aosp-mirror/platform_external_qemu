@@ -43,6 +43,23 @@ char* path_getRootIniPath( const char*  avdName );
  */
 char* path_getAvdTargetArch( const char* avdName );
 
+typedef enum {
+    RESULT_INVALID   = -1, // key was found but value contained invalid data
+    RESULT_FOUND     =  0, // key was found and value parsed correctly
+    RESULT_NOT_FOUND =  1, // key was not found (default used)
+} SearchResult;
+
+/* Retrieves an integer value associated with the key parameter
+ *
+ * |data| is a FileData instance
+ * |key| name of key to search for
+ * |searchResult| if non-null, this is set to RESULT_INVALID, RESULT_FOUND,
+ *                or RESULT_NOT_FOUND
+ * Returns valid parsed int value if found, |default| otherwise
+ */
+int propertyFile_getInt(const FileData* data, const char* key, int _default,
+                        SearchResult* searchResult);
+
 /* Retrieves a string corresponding to the target architecture
  * extracted from a build properties file.
  *
