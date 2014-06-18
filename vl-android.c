@@ -395,6 +395,8 @@ char* android_op_ui_settings = NULL;
 /* -android-avdname option value. */
 char* android_op_avd_name = "unknown";
 
+bool android_op_wipe_data = false;
+
 extern int android_display_width;
 extern int android_display_height;
 extern int android_display_bpp;
@@ -1868,6 +1870,24 @@ serial_hds_add(const char* devname)
 }
 
 
+// List of value describing how to handle partition images in
+// android_nand_add_image() below, when no initiali partition image
+// file is provided.
+//
+// MUST_EXIST means that the partition image must exist, otherwise
+// dump an error message and exit.
+//
+// CREATE_IF_NEEDED means that if the partition image doesn't exist, an
+// empty partition file should be created on demand.
+//
+// MUST_WIPE means that the partition image should be wiped cleaned,
+// even if it exists. This is useful to implement the -wipe-data option.
+typedef enum {
+    ANDROID_PARTITION_OPEN_MODE_MUST_EXIST,
+    ANDROID_PARTITION_OPEN_MODE_CREATE_IF_NEEDED,
+    ANDROID_PARTITION_OPEN_MODE_MUST_WIPE,
+} AndroidPartitionOpenMode;
+
 // Add a NAND partition image to the hardware configuration.
 // |part_name| is a string indicating the type of partition, i.e. "system",
 // "userdata" or "cache".
@@ -1908,6 +1928,7 @@ serial_hds_add(const char* devname)
 //
 void android_nand_add_image(const char* part_name,
                             AndroidPartitionType part_type,
+                            AndroidPartitionOpenMode part_mode,
                             uint64_t part_size,
                             const char* part_file,
                             const char* part_init_file)
@@ -1940,51 +1961,52 @@ void android_nand_add_image(const char* part_name,
     // Verify partition type, or probe it if needed.
     {
         const char* image_file = NULL;
-        if (part_init_file && path_exists(part_init_file)) {
-            image_file = part_init_file;
-        } else if (part_file && path_exists(part_file)) {
+        if (part_file && path_exists(part_file)) {
             image_file = part_file;
+        } else if (part_init_file) {
+            image_file = part_init_file;
+        } else if (part_type == ANDROID_PARTITION_TYPE_UNKNOWN) {
+            PANIC("Cannot determine type of %s partition: no image files!",
+                  part_name);
         }
 
         if (part_type == ANDROID_PARTITION_TYPE_UNKNOWN) {
-            if (!image_file) {
-                PANIC("Cannot determine type of %s partition: no image files!",
-                    part_name);
-            }
             VERBOSE_PRINT(init, "Probing %s image file for partition type: %s",
                         part_name, image_file);
 
             part_type = androidPartitionType_probeFile(image_file);
-
-            VERBOSE_PRINT(init, "Found %s image format: %s",
-                        part_name, androidPartitionType_toString(part_type));
         } else {
-            if (!image_file) {
-                PANIC("Cannot find any %s file!", part_name);
-            }
+            // Probe the current image file to check that it is of the
+            // right partition format.
+            if (image_file) {
+                AndroidPartitionType image_type =
+                        androidPartitionType_probeFile(image_file);
+                if (image_type == ANDROID_PARTITION_TYPE_UNKNOWN) {
+                    PANIC("Cannot determine %s partition type of: %s",
+                          part_name,
+                          image_file);
+                }
 
-            AndroidPartitionType image_type =
-                    androidPartitionType_probeFile(image_file);
-            if (image_type == ANDROID_PARTITION_TYPE_UNKNOWN) {
-                PANIC("Cannot determine %s partition type of: %s", part_name,
-                    image_file);
-            }
-
-            if (image_type != part_type) {
-                PANIC("Invalid %s partition image type: %s (expected %s)",
-                    part_name,
-                    androidPartitionType_toString(image_type),
-                    androidPartitionType_toString(part_type));
+                if (image_type != part_type) {
+                    PANIC("Invalid %s partition image type: %s (expected %s)",
+                        part_name,
+                        androidPartitionType_toString(image_type),
+                        androidPartitionType_toString(part_type));
+                }
             }
         }
     }
 
+    VERBOSE_PRINT(init, "%s partition format: %s", part_name,
+                  androidPartitionType_toString(part_type));
+
     snprintf(tmp, sizeof tmp, "%s,size=0x%" PRIx64, part_name, part_size);
 
     bool need_temp_partition = true;
-    bool need_make_empty = false;
+    bool need_make_empty =
+            (part_mode == ANDROID_PARTITION_OPEN_MODE_MUST_WIPE);
 
-    if (part_file && *part_file) {
+    if (part_file) {
         if (filelock_create(part_file) == NULL) {
             fprintf(stderr,
                     "WARNING: %s image already in use, changes will not persist!\n",
@@ -1992,7 +2014,18 @@ void android_nand_add_image(const char* part_name,
         } else {
             need_temp_partition = false;
 
-            if (!path_exists(part_file) && !part_init_file) {
+            // If the partition image is missing, create it.
+            if (!path_exists(part_file)) {
+                if (part_mode == ANDROID_PARTITION_OPEN_MODE_MUST_EXIST) {
+                    PANIC("Missing %s partition image: %s", part_name,
+                          part_file);
+                }
+                if (path_empty_file(part_file) < 0) {
+                    PANIC("Cannot create %s image file at %s: %s",
+                          part_name,
+                          part_file,
+                          strerror(errno));
+                }
                 need_make_empty = true;
             }
         }
@@ -2018,7 +2051,13 @@ void android_nand_add_image(const char* part_name,
     pstrcat(tmp, sizeof tmp, part_file);
 
     // Do we need to make the partition image empty?
+    // Do not do it if there is an initial file though since it will
+    // get copied directly by the NAND code into the image.
     if (need_make_empty && !part_init_file) {
+        VERBOSE_PRINT(init,
+                      "Creating empty %s partition image at: %s",
+                      part_name,
+                      part_file);
         int ret = androidPartitionType_makeEmptyFile(part_type,
                                                      part_size,
                                                      part_file);
@@ -2031,11 +2070,6 @@ void android_nand_add_image(const char* part_name,
     }
 
     if (part_init_file) {
-        if (!path_exists(part_init_file)) {
-            PANIC("Invalid initial %s image path: %s",
-                  part_name,
-                  part_init_file);
-        }
         pstrcat(tmp, sizeof tmp, ",initfile=");
         pstrcat(tmp, sizeof tmp, part_init_file);
     }
@@ -2045,9 +2079,6 @@ void android_nand_add_image(const char* part_name,
         // support is added.
         pstrcat(tmp, sizeof tmp,",pagesize=512,extrasize=0");
     }
-
-    VERBOSE_PRINT(init, "%s partition format: %s", part_name,
-                  androidPartitionType_toString(part_type));
 
     nand_add_dev(tmp);
 }
@@ -3041,17 +3072,19 @@ int main(int argc, char **argv, char **envp)
 
     /* Initialize system partition image */
     android_nand_add_image("system",
-                            ANDROID_PARTITION_TYPE_UNKNOWN,
-                            android_hw->disk_systemPartition_size,
-                            android_hw->disk_systemPartition_path,
-                            android_hw->disk_systemPartition_initPath);
+                           ANDROID_PARTITION_TYPE_UNKNOWN,
+                           ANDROID_PARTITION_OPEN_MODE_MUST_EXIST,
+                           android_hw->disk_systemPartition_size,
+                           android_hw->disk_systemPartition_path,
+                           android_hw->disk_systemPartition_initPath);
 
     /* Initialize data partition image */
     android_nand_add_image("userdata",
-                            ANDROID_PARTITION_TYPE_UNKNOWN,
-                            android_hw->disk_dataPartition_size,
-                            android_hw->disk_dataPartition_path,
-                            android_hw->disk_dataPartition_initPath);
+                           ANDROID_PARTITION_TYPE_UNKNOWN,
+                           ANDROID_PARTITION_OPEN_MODE_CREATE_IF_NEEDED,
+                           android_hw->disk_dataPartition_size,
+                           android_hw->disk_dataPartition_path,
+                           android_hw->disk_dataPartition_initPath);
 
     /* Initialize cache partition image, if any. Its type depends on the
      * kernel version. For anything >= 3.10, it must be EXT4, or
@@ -3063,11 +3096,17 @@ int main(int argc, char **argv, char **envp)
                         ANDROID_PARTITION_TYPE_YAFFS2 :
                         ANDROID_PARTITION_TYPE_EXT4;
 
+        AndroidPartitionOpenMode cache_part_mode =
+                (android_op_wipe_data ?
+                        ANDROID_PARTITION_OPEN_MODE_MUST_WIPE :
+                        ANDROID_PARTITION_OPEN_MODE_CREATE_IF_NEEDED);
+
         android_nand_add_image("cache",
-                                cache_part_type,
-                                android_hw->disk_cachePartition_size,
-                                android_hw->disk_cachePartition_path,
-                                NULL);
+                               cache_part_type,
+                               cache_part_mode,
+                               android_hw->disk_cachePartition_size,
+                               android_hw->disk_cachePartition_path,
+                               NULL);
     }
 
     /* Init SD-Card stuff. For Android, it is always hda */

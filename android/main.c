@@ -78,6 +78,8 @@ extern int  control_console_start( int  port );  /* in control.c */
 
 extern int qemu_milli_needed;
 
+extern bool android_op_wipe_data;
+
 /* the default device DPI if none is specified by the skin
  */
 #define  DEFAULT_DEVICE_DPI  165
@@ -706,6 +708,7 @@ int main(int argc, char **argv)
         } else {
             hw->disk_dataPartition_initPath = NULL;
         }
+        android_op_wipe_data = opts->wipe_data;
 
         uint64_t     defaultBytes =
                 hw->disk_dataPartition_size == 0 ?
