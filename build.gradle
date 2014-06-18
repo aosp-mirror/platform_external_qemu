@@ -18,6 +18,9 @@ sdk {
             builtBy buildDefaultEmulator
         }
 
+/*
+XAV(2014-06-17)
+TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIBS
         item("$buildDefaultEmulator.output/lib") {
             into 'lib'
             builtBy buildDefaultEmulator
@@ -49,13 +52,74 @@ sdk {
             executable true
             builtBy buildDefaultEmulator
         }
+*/
     }
+
+
+// --------------
+// XAV(2014-06-17) TEMPORARY EMULATOR FROM PREBUILTS
+    mac {
+        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/lib") {
+            into 'lib'
+        }
+
+        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator-arm") {
+            executable true
+        }
+        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator64-arm") {
+            executable true
+        }
+
+        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator-mips") {
+            executable true
+        }
+        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator64-mips") {
+            executable true
+        }
+
+        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator-x86") {
+            executable true
+        }
+        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator64-x86") {
+            executable true
+        }
+    }
+    linux {
+        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/lib") {
+            into 'lib'
+        }
+
+        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator-arm") {
+            executable true
+        }
+        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator64-arm") {
+            executable true
+        }
+
+        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator-mips") {
+            executable true
+        }
+        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator64-mips") {
+            executable true
+        }
+
+        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator-x86") {
+            executable true
+        }
+        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator64-x86") {
+            executable true
+        }
+    }
+// --------------
 
     windows {
         item("$buildWindowsEmulator.output/emulator.exe") {
             builtBy buildWindowsEmulator
         }
 
+/*
+XAV(2014-06-17)
+TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIBS
         item("$buildWindowsEmulator.output/lib") {
             into 'lib'
             builtBy buildWindowsEmulator
@@ -70,10 +134,21 @@ sdk {
         item("$buildWindowsEmulator.output/emulator-x86.exe") {
             builtBy buildWindowsEmulator
         }
+*/
 
+// --------------
+// XAV(2014-06-17) TEMPORARY EMULATOR FROM PREBUILTS
+        item("$project.rootDir/../prebuilts/tools/windows/emulator/lib") {
+            into 'lib'
+        }
+
+        item("$project.rootDir/../prebuilts/tools/windows/emulator/emulator-arm.exe")
+        item("$project.rootDir/../prebuilts/tools/windows/emulator/emulator-mips.exe")
+        item("$project.rootDir/../prebuilts/tools/windows/emulator/emulator-x86.exe")
+// --------------
 
 /*
-XAV: DISABLE win64 exe until it's ready
+XAV(2014-06-17): DISABLE win64 exe until it's ready
         item("$buildWindowsEmulator.output/emulator64-arm.exe") {
             builtBy buildWindowsEmulator
         }
