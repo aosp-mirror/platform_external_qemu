@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6471f9c6_5f1fe3f2",
+        "filename": "android/avd/util.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2014-06-18T19:02:39Z",
+      "side": 1,
+      "message": "Smart.  Done.",
+      "parentUuid": "24e0e1ae_0f19450b",
+      "revId": "ed7bf8df4cf8ffbcb33ef7ee434b86048829e46a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "24e0e1ae_8f36956c",
         "filename": "android/avd/util.h",
         "patchSetId": 7
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "846c2df2_e37d003b",
+        "filename": "android/avd/util.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2014-06-18T19:02:39Z",
+      "side": 1,
+      "message": "suggested naming for the enum?",
+      "parentUuid": "24e0e1ae_8f36956c",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 6
+      },
+      "revId": "ed7bf8df4cf8ffbcb33ef7ee434b86048829e46a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "24e0e1ae_2f4f69f3",
         "filename": "android/avd/util.h",
         "patchSetId": 7
@@ -53,6 +95,24 @@
       "writtenOn": "2014-06-18T17:44:26Z",
       "side": 1,
       "message": "nit: Not sure if it is worth exposing this here for now since it is only used internally.\n\nOn the other hand, I\u0027d recommend putting the integer parsing + report error stuff into a standalone component (e.g. android/utils/int_parse.h) with its own unit-tests.",
+      "revId": "ed7bf8df4cf8ffbcb33ef7ee434b86048829e46a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_219bf465",
+        "filename": "android/avd/util.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2014-06-18T19:02:39Z",
+      "side": 1,
+      "message": "Need the definition in the header for unit tests.  \nOne of the reasons I refactored at this level is because one of the error return paths was leaking a string.  This captures the memory management, too.",
+      "parentUuid": "24e0e1ae_2f4f69f3",
       "revId": "ed7bf8df4cf8ffbcb33ef7ee434b86048829e46a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
