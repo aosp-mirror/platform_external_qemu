@@ -214,14 +214,11 @@ getTargetEmulatorPath(const char* progName, const char* avdArch, const int force
     const char* emulator64Prefix = "emulator64-";
 #ifdef _WIN32
     const char* exeExt = ".exe";
-    /* ToDo: currently amd64-mingw32msvc-gcc doesn't work (http://b/issue?id=5949152)
-             which prevents us from generating 64-bit emulator for Windows */
-    int search_for_64bit_emulator = 0;
 #else
     const char* exeExt = "";
+#endif
     int search_for_64bit_emulator =
             !force_32bit && android_getHostBitness() == 64;
-#endif
 
     const char* emulatorSuffix = emulator_getBackendSuffix(avdArch);
     if (!emulatorSuffix) {
