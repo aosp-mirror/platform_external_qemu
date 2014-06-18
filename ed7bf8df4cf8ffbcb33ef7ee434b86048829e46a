@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "24e0e1ae_0f19450b",
+        "filename": "android/avd/util.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T17:44:26Z",
+      "side": 1,
+      "message": "I think it\u0027s a better idea to use the API level first, and only use ro.adb.qemud if it is less than 16. This will let us remove the property from the platform build without risking anything.",
+      "revId": "ed7bf8df4cf8ffbcb33ef7ee434b86048829e46a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24e0e1ae_8f36956c",
+        "filename": "android/avd/util.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T17:44:26Z",
+      "side": 1,
+      "message": "nit: I\u0027m unsure using a static const int in a header is a good idea. Maybe use an enum type instead.\n\nnit: Naming could be clarified a little (e.g. kPropertyFileValueInvalid, kPropertyFileValueOk, kPropertyFileValueMissing).",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 6
+      },
+      "revId": "ed7bf8df4cf8ffbcb33ef7ee434b86048829e46a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24e0e1ae_2f4f69f3",
+        "filename": "android/avd/util.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T17:44:26Z",
+      "side": 1,
+      "message": "nit: Not sure if it is worth exposing this here for now since it is only used internally.\n\nOn the other hand, I\u0027d recommend putting the integer parsing + report error stuff into a standalone component (e.g. android/utils/int_parse.h) with its own unit-tests.",
+      "revId": "ed7bf8df4cf8ffbcb33ef7ee434b86048829e46a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
