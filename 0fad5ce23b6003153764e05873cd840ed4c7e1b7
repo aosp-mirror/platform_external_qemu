@@ -1,0 +1,664 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0452fd22_fab1317f",
+        "filename": "android/utils/refset.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "This is good, but can I ask you to put this in an individual patch first?",
+      "range": {
+        "startLine": 16,
+        "startChar": 9,
+        "endLine": 16,
+        "endChar": 26
+      },
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_cca26f22",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "there is no need for this comment. I recommend keeping the headers in the following order though:\n\n  C++ headers, then C headers, then system headers.\n\nIn each block, try to keep them in lexicographical order, i.e. put android/async-utils.h just after android/android.h",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_0c82a778",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "nit: you are already in android::wear:: so no need for prefix here\n\n+ fix trailing whitespace here and below",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4cbf13b_eb815174",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6471f9c6_e285fcb9",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "please add spacing, i.e. \u0027size \u003d 0\u0027, same for all other assignments and expressions (e.g. \u0027x + 1\u0027, not \u0027x+1\u0027)",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_27dea475",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "there is a memory overwrite here if \u0027size \u003d\u003d sizeof(buff)\u0027 !!",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_07e5a043",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "dangerous: there is no guarantee that buff is zero-terminated. use mreply.append(buff, size) which avoids a needless string creation/copy.",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_ec36531f",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "never use strncpy since it can leave the buffer not zero-terminated!\nuse\n\n  snprintf(buff, sizeof buff, \"%s\", ....)\n\ninstead.",
+      "range": {
+        "startLine": 115,
+        "startChar": 12,
+        "endLine": 115,
+        "endChar": 19
+      },
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4cbf13b_4ed43357",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "are you sure mdevs.back() is not NULL?",
+      "range": {
+        "startLine": 122,
+        "startChar": 33,
+        "endLine": 122,
+        "endChar": 38
+      },
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6471f9c6_e2289ced",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "possible memory overwrite here",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4cbf13b_2ee3e743",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "same as above.",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6471f9c6_a25dc4a5",
+        "filename": "android/wear-agent/PairUpWearPhone.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "try adding a comment that explains what this class does and how to use it before the declaration.",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_feb119e6",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "why does this have to be extern \"C\" if it is declared static exactly?",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_1e940d2c",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "you are already inside android::wear:: so you can drop the prefix here.",
+      "range": {
+        "startLine": 40,
+        "startChar": 13,
+        "endLine": 40,
+        "endChar": 17
+      },
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4cbf13b_6bd241e4",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "nit: I think the Android C++ style guide would recommend this formatting:\n\n  WearAgent::WearAgent(....)\n      : mPort(adbHostPort)\n      : mSo(-1)\n      ...\n      : mPairUp(new PairUpWearPhone(...)) {\n  ...\n  }",
+      "range": {
+        "startLine": 63,
+        "startChar": 7,
+        "endLine": 63,
+        "endChar": 18
+      },
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_8ca9d76c",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "nit: whitespace (here and below)",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_8cfb1759",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "nit: you don\u0027t need this if your latest printf() output ends up with \\n\n\nSee http://stackoverflow.com/questions/3723795/is-stdout-line-buffered-unbuffered-or-indeterminate-by-default\n\nUsing printf() is probably a bad idea in the long term, you should have some sort of macro/function for logging instead :)",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_ccf02f72",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "it\u0027s better to always use braces here.",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4cbf13b_0b9cdd12",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "It\u0027s a bit unfortunate to use dynamic allocation for this field, but I understand that you want to avoid exposing the type in the header. One alternative  is to use a \"PIMPL\" as in:\n\n   struct FooImpl;\n\n   class Foo {\n   public:\n       Foo();\n       ~Foo();\n   private:\n       FooImpl* impl;\n   };\n\nAnd define FooImpl in the source file only, with whatever members you care about. Costs one indirection, but you\u0027re already getting one here anyway.",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_ac5dbba5",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "Why not use loopTimer_startRelative here ?",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_4c289f0c",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "nit: please add space as in:\n\n   mSocket \u003d -1;",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_ec6e5340",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "no need for a copy, and I think your buffer is slightly too large here :-)\nI recommend:\n\n  static const char kTrackDevicesRequest[] \u003d \"0012host:track-devices\";\n  static const size_t kTraceDevicesRequestSize \u003d sizeof(kTrackDevicesRequest) - 1U;",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_ecff3311",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "typo :) sockt -\u003e socket, it might be nice to print strerror(errno) too.",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4cbf13b_8bbbed5b",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "there are no guarantee that your message won\u0027t be fragmented :-/\nAlso at least limit the value of |size| to avoid memory overwrites, e.g.:\n\n  if ((size_t)size \u003e\u003d sizeof(buff)) {\n      size \u003d (int)sizeof(buff) - 1;\n  }\n  buff[size] \u003d \u0027\\0\u0027;\n\nIf the only reason to add a trailing zero is to call printf, use %.*s instead of %s and pass the size directly as a parameter, e.g.:\n\n  printf(\"%.*s\", 5, \"Hello World\\n\");\n\nJust prints \"Hello\" (with no trailing \\n).",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_bed2c102",
+        "filename": "android/wear-agent/WearAgent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "can you remove these?",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6471f9c6_fcd7e57c",
+        "filename": "android/wear-agent/WearAgent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "can you add an empty line after this forward declaration? thanks.",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_3ec7914c",
+        "filename": "android/wear-agent/WearAgent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "I recommend using the Android C++ coding conventions, in this case, member field names should be mCamelCase (i.e. a \"m\" prefix, followed by CamelCase naming). In this example, this would be: mPort, mSo, mLooper, mIo, mTimer,..\n\nPlease change this for all class declarations in this patch, thanks.",
+      "range": {
+        "startLine": 51,
+        "startChar": 16,
+        "endLine": 51,
+        "endChar": 21
+      },
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_ac361b6c",
+        "filename": "android/wear-agent/WearAgent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "prefer explicit names, e.g. \"mSocket\" is clearer than \"mso\"",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6471f9c6_e2e09cae",
+        "filename": "android/wear-agent/WearAgent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "again, I recommend making this clearer, e.g. mRetryAfterSeconds",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "846c2df2_c08472fc",
+        "filename": "android/wear-agent/WearAgent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "probably not needed here :)",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6471f9c6_e2e97c90",
+        "filename": "android/wear-agent/WearAgent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "please stick to a single naming convention, i.e. camelCase for methods, so connectLater()",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6471f9c6_1ce17962",
+        "filename": "android/wear-agent/help.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "nit: this is not needed here I think",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6471f9c6_dcb1c17f",
+        "filename": "android/wear-agent/help.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "nit: whitespace here.",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6471f9c6_7cec355b",
+        "filename": "android/wear-agent/help.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "this could probably go into main.cpp, imho",
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6471f9c6_1cc899e8",
+        "filename": "android/wear-agent/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "please remove trailing whitespace",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 4
+      },
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4466b513_9e525dec",
+        "filename": "android/wear-agent/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T20:32:58Z",
+      "side": 1,
+      "message": "there should be a looper_destroy() here to ensure we don\u0027t leak and all sockets are properly closed :)",
+      "range": {
+        "startLine": 39,
+        "startChar": 4,
+        "endLine": 39,
+        "endChar": 14
+      },
+      "revId": "0fad5ce23b6003153764e05873cd840ed4c7e1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
