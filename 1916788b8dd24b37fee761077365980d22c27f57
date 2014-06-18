@@ -22,6 +22,29 @@
       "revId": "1916788b8dd24b37fee761077365980d22c27f57",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44db1506_93f1de06",
+        "filename": "hw/android/goldfish/nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 833,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-18T17:38:29Z",
+      "side": 1,
+      "message": "This is missing a valid mode value! :-)\n\nBesides, this has been fixed in a different way by https://android-review.googlesource.com/#/c/98498/, and the binaries updated by https://android-review.googlesource.com/#/c/98499/\n\nSorry about the annoyance, but can you abandon this patch? Thanks.",
+      "range": {
+        "startLine": 833,
+        "startChar": 16,
+        "endLine": 833,
+        "endChar": 17
+      },
+      "revId": "1916788b8dd24b37fee761077365980d22c27f57",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
