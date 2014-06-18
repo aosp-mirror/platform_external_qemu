@@ -43,6 +43,20 @@ char* path_getRootIniPath( const char*  avdName );
  */
 char* path_getAvdTargetArch( const char* avdName );
 
+static const int kPropertyFileInvalid  = -1; // key was found but value contained invalid data
+static const int kPropertyFileFound    =  0; // key was found and value parsed correctly
+static const int kPropertyFileNotFound =  1; // key was not found (default used)
+
+/* Retrieves an integer value associated with the key parameter
+ *
+ * |data| is a FileData instance
+ * |key| name of key to search for
+ * |found| if non-null, this is set to kPropertyFileInvalid, kPropertyFileFound, or kPropertyFileNotFound
+ * Returns valid parsed int value if found, |default| otherwise
+ */
+int propertyFile_getInt(const FileData* data, const char* key, int _default,
+			 int* found);
+
 /* Retrieves a string corresponding to the target architecture
  * extracted from a build properties file.
  *
