@@ -478,12 +478,13 @@ int main(int argc, char **argv)
 
     // Auto-detect YAFFS2 partition support if needed.
     if (androidHwConfig_getKernelYaffs2Support(hw) < 0) {
+        // Essentially, anything before API level 20 supports Yaffs2
         const char* newYaffs2Support = "no";
-        if (kernelType == KERNEL_TYPE_3_10_OR_ABOVE) {
-            D("Auto-detect: Kernel does not support YAFFS2 partitions.");
-        } else {
-            D("Auto-detect: Kernel does support YAFFS2 partitions.");
+        if (avdInfo_getApiLevel(avd) < 20) {
             newYaffs2Support = "yes";
+            D("Auto-detect: Kernel does support YAFFS2 partitions.");
+        } else {
+            D("Auto-detect: Kernel does not support YAFFS2 partitions.");
         }
         AFREE(hw->kernel_supportsYaffs2);
         hw->kernel_supportsYaffs2 = ASTRDUP(newYaffs2Support);
