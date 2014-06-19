@@ -487,8 +487,8 @@ _avdInfo_getContentPath( AvdInfo*  i )
     return 0;
 }
 
-static int
-_avdInfo_getApiLevel( AvdInfo*  i )
+int
+avdInfo_getApiLevel( AvdInfo*  i )
 {
     char*       target;
     const char* p;
@@ -781,7 +781,7 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
          _avdInfo_getCoreHwIniPath(i, i->contentPath) < 0 )
         goto FAIL;
 
-    i->apiLevel = _avdInfo_getApiLevel(i);
+    i->apiLevel = avdInfo_getApiLevel(i);
 
     /* look for image search paths. handle post 1.1/pre cupcake
      * obsolete SDKs.
