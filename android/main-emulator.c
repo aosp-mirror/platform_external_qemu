@@ -201,91 +201,155 @@ int main(int argc, char** argv)
     return errno;
 }
 
-/* Find the target-specific emulator binary. This will be something
- * like  <programDir>/emulator-<targetArch>, where <programDir> is
- * the directory of the current program.
+/* Probe the filesystem to check if an emulator executable named like
+ * <progDir>/<prefix><arch> exists.
+ *
+ * |progDir| is an optional program directory. If NULL, the executable
+ * will be searched in the current directory.
+ * |archSuffix| is an architecture-specific suffix, like "arm", or 'x86"
+ * If |search_for_64bit_emulator| is true, lookup for 64-bit emulator first,
+ * then the 32-bit version.
+ * If |try_current_path|, try to look into the current path if no
+ * executable was found under |progDir|.
+ * On success, returns the path of the executable (string must be freed by
+ * the caller). On failure, return NULL.
  */
 static char*
-getTargetEmulatorPath(const char* progName, const char* avdArch, const int force_32bit)
+probeTargetEmulatorPath(const char* progDir,
+                        const char* archSuffix,
+                        bool search_for_64bit_emulator,
+                        bool try_current_path)
 {
-    char*  progDir;
-    char   path[PATH_MAX], *pathEnd=path+sizeof(path), *p;
-    const char* emulatorPrefix = "emulator-";
-    const char* emulator64Prefix = "emulator64-";
+    char path[PATH_MAX], *pathEnd = path + sizeof(path), *p;
+
+    static const char kEmulatorPrefix[] = "emulator-";
+    static const char kEmulator64Prefix[] = "emulator64-";
 #ifdef _WIN32
-    const char* exeExt = ".exe";
-    /* ToDo: currently amd64-mingw32msvc-gcc doesn't work (http://b/issue?id=5949152)
-             which prevents us from generating 64-bit emulator for Windows */
-    int search_for_64bit_emulator = 0;
+    const char kExeExtension[] = ".exe";
 #else
-    const char* exeExt = "";
-    int search_for_64bit_emulator =
-            !force_32bit && android_getHostBitness() == 64;
+    const char kExeExtension[] = "";
 #endif
 
-    const char* emulatorSuffix = emulator_getBackendSuffix(avdArch);
-    if (!emulatorSuffix) {
-        APANIC("This emulator cannot emulate %s CPUs!\n", avdArch);
-    }
-    D("Using emulator-%s to emulate '%s' CPUs\n", emulatorSuffix, avdArch);
-
-    /* Get program's directory name in progDir */
-    path_split(progName, &progDir, NULL);
-
+    // First search for the 64-bit emulator binary.
     if (search_for_64bit_emulator) {
-        /* Find 64-bit emulator first */
-        p = bufprint(path, pathEnd, "%s/%s%s%s", progDir,
-                     emulator64Prefix, emulatorSuffix, exeExt);
-        if (p >= pathEnd) {
-            APANIC("Path too long: %s\n", progName);
+        p = path;
+        if (progDir) {
+            p = bufprint(p, pathEnd, "%s/", progDir);
         }
-        if (path_exists(path)) {
-            free(progDir);
+        p = bufprint(p, pathEnd, "%s%s%s", kEmulator64Prefix,
+                        archSuffix, kExeExtension);
+        D("Probing program: %s\n", path);
+        if (p < pathEnd && path_exists(path)) {
             return strdup(path);
         }
     }
 
-    /* Find 32-bit emulator */
-    p = bufprint(path, pathEnd, "%s/%s%s%s", progDir, emulatorPrefix,
-                 emulatorSuffix, exeExt);
-    free(progDir);
-    if (p >= pathEnd) {
-        APANIC("Path too long: %s\n", progName);
+    // Then for the 32-bit one.
+    p = path;
+    if (progDir) {
+        p = bufprint(p, pathEnd, "%s/", progDir);
     }
-
-    if (path_exists(path)) {
+    p = bufprint(p, pathEnd, "%s%s%s", kEmulatorPrefix,
+                    archSuffix, kExeExtension);
+    D("Probing program: %s\n", path);
+    if (p < pathEnd && path_exists(path)) {
         return strdup(path);
     }
 
-    /* Mmm, the file doesn't exist, If there is no slash / backslash
-     * in our path, we're going to try to search it in our path.
-     */
-#ifdef _WIN32
-    if (strchr(progName, '/') == NULL && strchr(progName, '\\') == NULL) {
-#else
-    if (strchr(progName, '/') == NULL) {
-#endif
+    // Not found, try in the current path then
+    if (try_current_path) {
+        char* result;
+
         if (search_for_64bit_emulator) {
-           p = bufprint(path, pathEnd, "%s%s%s", emulator64Prefix,
-                        emulatorSuffix, exeExt);
-           if (p < pathEnd) {
-               char*  resolved = path_search_exec(path);
-               if (resolved != NULL)
-                   return resolved;
-           }
+            p = bufprint(path, pathEnd, "%s%s%s", kEmulator64Prefix,
+                          archSuffix, kExeExtension);
+            if (p < pathEnd) {
+                D("Probing path for: %s\n", path);
+                result = path_search_exec(path);
+                if (result) {
+                    return result;
+                }
+            }
         }
 
-        p = bufprint(path, pathEnd, "%s%s%s", emulatorPrefix,
-                     emulatorSuffix, exeExt);
+        p = bufprint(path, pathEnd, "%s%s%s", kEmulatorPrefix,
+                      archSuffix, kExeExtension);
         if (p < pathEnd) {
-            char*  resolved = path_search_exec(path);
-            if (resolved != NULL)
-                return resolved;
+            D("Probing path for: %s\n", path);
+            result = path_search_exec(path);
+            if (result) {
+                return result;
+            }
         }
     }
 
+    return NULL;
+}
+
+static char*
+getTargetEmulatorPath(const char* progName,
+                      const char* avdArch,
+                      const int force_32bit)
+{
+    char*  progDir;
+    char*  result;
+#ifdef _WIN32
+    /* TODO: currently amd64-mingw32msvc-gcc doesn't work which prevents
+             generating 64-bit binaries for Windows */
+    bool search_for_64bit_emulator = false;
+#else
+    bool search_for_64bit_emulator =
+            !force_32bit && android_getHostBitness() == 64;
+#endif
+
+    /* Only search in current path if there is no directory separator
+     * in |progName|. */
+#ifdef _WIN32
+    bool try_current_path =
+            (!strchr(progName, '/') && !strchr(progName, '\\'));
+#else
+    bool try_current_path = !strchr(progName, '/');
+#endif
+
+    /* Get program's directory name in progDir */
+    path_split(progName, &progDir, NULL);
+
+    const char* emulatorSuffix;
+
+    // Special case: for x86_64, first try to find emulator-x86_64 before
+    // looking for emulator-x86.
+    if (!strcmp(avdArch, "x86_64")) {
+        emulatorSuffix = "x86_64";
+
+        D("Looking for emulator backend for %s CPU\n", avdArch);
+
+        result = probeTargetEmulatorPath(progDir,
+                                         emulatorSuffix,
+                                         search_for_64bit_emulator,
+                                         try_current_path);
+        if (result) {
+            return result;
+        }
+    }
+
+    // Now for the regular case.
+    emulatorSuffix = emulator_getBackendSuffix(avdArch);
+    if (!emulatorSuffix) {
+        APANIC("This emulator cannot emulate %s CPUs!\n", avdArch);
+    }
+    D("Looking for emulator-%s to emulate '%s' CPU\n", emulatorSuffix,
+      avdArch);
+
+    result = probeTargetEmulatorPath(progDir,
+                                     emulatorSuffix,
+                                     search_for_64bit_emulator,
+                                     try_current_path);
+    if (result) {
+        return result;
+    }
+
     /* Otherwise, the program is missing */
-    APANIC("Missing arch-specific emulator program: %s\n", path);
+    APANIC("Missing emulator engine program for '%s' CPUS.\n", avdArch);
     return NULL;
 }
 
