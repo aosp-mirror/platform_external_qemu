@@ -1,0 +1,311 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4db2937_9de063ae",
+        "filename": "android/wear-agent/PairUpWearPhone.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "if this is under android/wear-agent/ it should start with ANDROID_WEAR_AGENT_, so replace this with:\n\n  ANDROID_WEAR_AGENT_PAIR_UP_WEAR_PHONE_H\n\nthanks.",
+      "range": {
+        "startLine": 12,
+        "startChar": 8,
+        "endLine": 12,
+        "endChar": 36
+      },
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "442075de_1d1a7fd1",
+        "filename": "android/wear-agent/PairUpWearPhone.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "These seem no longer necessary. Can you remove them?",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04df5d24_de682534",
+        "filename": "android/wear-agent/PairUpWearPhone.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "nit: trailing whitespaces\n\nApart from that, the description is a bit ambiguous (what is the \u0027devices\u0027 message?). It\u0027s probably better to use a higher-level description of what\nthe class does, e.g.:\n\n  This class connects to the ADB host server to list which devices\n  (wears and phones) are connected to/running in the host machine.\n  \n  When it detects that both a phone and a wear are listed at the same\n  time, it will automatically setup a network redirection to ensure the\n  wear can receive notifications automatically.\n\n  For simplicity, this only connects the first compatible phone on the\n  list, with wear in it. The \u0027phone\u0027 could be emulator or connected\n  through USB.\n\n  To use this class, simply create an instance as:\n\n    PairUpWearPhone pairup(looper);",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "442075de_fd684b33",
+        "filename": "android/wear-agent/PairUpWearPhone.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "Is this necessary? you could use the \"track-devices\" query to continuously receive updates so the caller doesn\u0027t have to do this at all. That would simplify usage tremendously.",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04df5d24_9ee93d92",
+        "filename": "android/wear-agent/PairUpWearPhone.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "I think this function name is misleading. Try something like \"updateDeviceList()\" instead, which matches the usage.",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "442075de_fdf32b7b",
+        "filename": "android/wear-agent/PairUpWearPhone.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "it\u0027s probably neater to remove the extra spaces between * and the field name here.",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4db2937_fdbec79a",
+        "filename": "android/wear-agent/PairUpWearPhone.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "nit: space between // and namespace.",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04df5d24_1e152da3",
+        "filename": "android/wear-agent/PairUpWearPhone.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "Also use:\n\n  }  // namespace android",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "242541ef_bc837544",
+        "filename": "android/wear-agent/SocketDrainMgr.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "remove this",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "242541ef_41437679",
+        "filename": "android/wear-agent/SocketDrainMgr.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "this should probably be typed properly.\n\nAlso I\u0027m not a fan of abbreviations, please use \u0027manager\u0027 instead of \u0027mgr\u0027 (or \u0027list\u0027 or \u0027set\u0027, whatever describes best the class).",
+      "range": {
+        "startLine": 64,
+        "startChar": 7,
+        "endLine": 64,
+        "endChar": 12
+      },
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "242541ef_dc8aa954",
+        "filename": "android/wear-agent/SocketDrainMgr.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "nit: try spacing this:\n\n  bool done() const { return mDone; }",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "642bb9c3_d57d5f3b",
+        "filename": "android/wear-agent/SocketDrainMgr.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "Try a name that is more explicit because this does some stuff.\nE.g. \"readData\"",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04df5d24_7ee6317c",
+        "filename": "android/wear-agent/SocketDrainMgr.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "nit: Just\n\n  // extern \"C\"\n\nshould be enough.\nAlso please add an empty line between this line and the one above.",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4db2937_5df6db42",
+        "filename": "android/wear-agent/SocketDrainMgr.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "nit: Use a space between // and the text after it. Also start sentences with capital letters.\n\nThe description here is not very helpful, it\u0027s better to start with a more general overview, e.g.:\n\n  This class is used to manage graceful closure of sockets, as described by\n  \"The ultimate SO_LINGER page\", which requires several steps to do properly,\n  some of them blocking.",
+      "range": {
+        "startLine": 24,
+        "startChar": 8,
+        "endLine": 24,
+        "endChar": 9
+      },
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4db2937_3d2e6f1c",
+        "filename": "android/wear-agent/SocketDrainMgr.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "nit: small typo here :) socke_fd -\u003esocket_fd",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04df5d24_2d71d9f2",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "again, try to type this properly :)",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04df5d24_4d7625ec",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-06-21T00:24:58Z",
+      "side": 1,
+      "message": "probably a typo in this name, i.e. EXPCET -\u003eEXPECT",
+      "revId": "167cb7d801a6f19436a448850d93c6984ff7276d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
