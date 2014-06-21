@@ -487,8 +487,8 @@ _avdInfo_getContentPath( AvdInfo*  i )
     return 0;
 }
 
-int
-avdInfo_getApiLevel( AvdInfo*  i )
+static int
+_avdInfo_getApiLevel( AvdInfo*  i )
 {
     char*       target;
     const char* p;
@@ -555,6 +555,12 @@ NOT_A_NUMBER:
     }
     D("Defaulting to API level %d", level);
     goto EXIT;
+}
+
+
+int
+avdInfo_getApiLevel(AvdInfo* i) {
+    return i->apiLevel;
 }
 
 /* Look for a named file inside the AVD's content directory.
@@ -735,11 +741,17 @@ _avdInfo_extractBuildProperties(AvdInfo* i) {
         D("Cannot find target CPU ABI, defaulting to '%s'",
           i->targetAbi);
     }
-    i->apiLevel = propertyFile_getApiLevel(i->buildProperties);
-    if (i->apiLevel < 3) {
-        i->apiLevel = 3;
-        D("Cannot find target API level, defaulting to %d",
-          i->apiLevel);
+    if (!i->apiLevel) {
+        // Note: for regular AVDs, the API level is already extracted
+        // from config.ini, besides, for older SDK platform images,
+        // there is no build.prop file and the following function
+        // would always return 1000, making the AVD unbootable!.
+        i->apiLevel = propertyFile_getApiLevel(i->buildProperties);
+        if (i->apiLevel < 3) {
+            i->apiLevel = 3;
+            D("Cannot find target API level, defaulting to %d",
+            i->apiLevel);
+        }
     }
 }
 
@@ -781,7 +793,7 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
          _avdInfo_getCoreHwIniPath(i, i->contentPath) < 0 )
         goto FAIL;
 
-    i->apiLevel = avdInfo_getApiLevel(i);
+    i->apiLevel = _avdInfo_getApiLevel(i);
 
     /* look for image search paths. handle post 1.1/pre cupcake
      * obsolete SDKs.
@@ -1321,6 +1333,12 @@ avdInfo_getCharmapFile( AvdInfo* i, const char* charmapName )
 
 int avdInfo_getAdbdCommunicationMode( AvdInfo* i )
 {
+    if (i->apiLevel < 16) {
+        // QEMU pipe for ADB communication was added in android-4.1.1_r1 API 16
+        D("API < 16, forcing ro.adb.qemud==0");
+        return 0;
+    }
+
     return propertyFile_getAdbdCommunicationMode(i->buildProperties);
 }
 

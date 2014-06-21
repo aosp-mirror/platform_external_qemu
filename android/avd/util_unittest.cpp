@@ -104,48 +104,27 @@ TEST(AvdUtil, propertyFile_getAdbdCommunicationMode) {
   const char* emptyFile =
     "\n";
 
-  const char* testFile15 =
-    "ro.build.version.sdk=15\n";
-
-  const char* testFile16 =
-    "ro.build.version.sdk=16\n";
-
-  const char* testFile15_0 =
-    "ro.build.version.sdk=15\n"
+  const char* valueIsZero =
     "ro.adb.qemud=0";
 
-  const char* testFile15_1 =
-    "ro.build.version.sdk=15\n"
+  const char* valueIsOne =
     "ro.adb.qemud=1";
 
-  const char* testFile16_0 =
-    "ro.build.version.sdk=16\n"
-    "ro.adb.qemud=0";
+  const char* valueIsBogus =
+    "ro.adb.qemud=bogus";
 
-  const char* testFile16_1 =
-    "ro.build.version.sdk=16\n"
-    "ro.adb.qemud=1";
+  // Empty file -> assume 1
+  EXPECT_EQ(0, fileData_initFromMemory(&fd, emptyFile, strlen(emptyFile)));
+  EXPECT_EQ(1, propertyFile_getAdbdCommunicationMode(&fd));
 
-  // API unspecified -> API level == 10000
-  EXPECT_EQ(0,fileData_initFromMemory(&fd, emptyFile, strlen(emptyFile)));
-  EXPECT_EQ(1,propertyFile_getAdbdCommunicationMode(&fd));
+  EXPECT_EQ(0, fileData_initFromMemory(&fd, valueIsZero, strlen(valueIsZero)));
+  EXPECT_EQ(0, propertyFile_getAdbdCommunicationMode(&fd));
 
-  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile15, strlen(testFile15)));
-  EXPECT_EQ(0,propertyFile_getAdbdCommunicationMode(&fd));
+  EXPECT_EQ(0, fileData_initFromMemory(&fd, valueIsOne, strlen(valueIsOne)));
+  EXPECT_EQ(1, propertyFile_getAdbdCommunicationMode(&fd));
 
-  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile16, strlen(testFile16)));
-  EXPECT_EQ(1,propertyFile_getAdbdCommunicationMode(&fd));
-
-  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile15_0, strlen(testFile15_0)));
-  EXPECT_EQ(0,propertyFile_getAdbdCommunicationMode(&fd));
-
-  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile15_1, strlen(testFile15_1)));
-  EXPECT_EQ(0,propertyFile_getAdbdCommunicationMode(&fd));
-
-  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile16_0, strlen(testFile16_0)));
-  EXPECT_EQ(0,propertyFile_getAdbdCommunicationMode(&fd));
-
-  EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile16_1, strlen(testFile16_1)));
-  EXPECT_EQ(1,propertyFile_getAdbdCommunicationMode(&fd));
+  // BOGUS -> 1
+  EXPECT_EQ(0, fileData_initFromMemory(&fd, valueIsBogus, strlen(valueIsBogus)));
+  EXPECT_EQ(1, propertyFile_getAdbdCommunicationMode(&fd));
 }
 
