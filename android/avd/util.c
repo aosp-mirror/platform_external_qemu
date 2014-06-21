@@ -226,9 +226,8 @@ propertyFile_getApiLevel(const FileData* data) {
     int level = propertyFile_getInt(data, "ro.build.version.sdk", kMinLevel,
                                     &searchResult);
     if (searchResult == RESULT_NOT_FOUND) {
-        D("Could not find target API sdkVersion / SDK version in build properties!");
         level = kMaxLevel;
-        D("Default target API sdkVersion: %d", level);
+        D("Could not find SDK version in build.prop, default is: %d", level);
     } else if (searchResult == RESULT_INVALID || level < 0) {
         D("Defaulting to target API sdkVersion %d", level);
     } else {
@@ -239,12 +238,6 @@ propertyFile_getApiLevel(const FileData* data) {
 
 int
 propertyFile_getAdbdCommunicationMode(const FileData* data) {
-    if ( propertyFile_getApiLevel(data) < 16 ) {
-        // QEMU pipe for ADB communication was added in android-4.1.1_r1 API 16
-        D("API < 16, forcing ro.adb.qemud==0");
-        return 0;
-    }
-
     SearchResult searchResult;
     int qemud = propertyFile_getInt(data, "ro.adb.qemud", 1, &searchResult);
     if (searchResult == RESULT_FOUND) {
