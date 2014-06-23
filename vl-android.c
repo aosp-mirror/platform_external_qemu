@@ -54,7 +54,9 @@
 #include "android/log-rotate.h"
 #include "modem_driver.h"
 #include "android/filesystems/ext4_utils.h"
+#include "android/filesystems/fstab_parser.h"
 #include "android/filesystems/partition_types.h"
+#include "android/filesystems/ramdisk_extractor.h"
 #include "android/gps.h"
 #include "android/hw-kmsg.h"
 #include "android/hw-pipe-net.h"
@@ -1870,6 +1872,36 @@ serial_hds_add(const char* devname)
 }
 
 
+// Extract the partition type/format of a given partition image
+// from the content of fstab.goldfish.
+// |fstab| is the address of the fstab.goldfish data in memory.
+// |fstabSize| is its size in bytes.
+// |partitionName| is the name of the partition for debugging
+// purposes (e.g. 'userdata').
+// |partitionPath| is the partition path as it appears in the
+// fstab file (e.g. '/data').
+// On success, sets |*partitionType| to an appropriate value,
+// on failure (i.e. |partitionPath| does not appear in the fstab
+// file), leave the value untouched.
+void android_extractPartitionFormat(const char* fstab,
+                                    size_t fstabSize,
+                                    const char* partitionName,
+                                    const char* partitionPath,
+                                    AndroidPartitionType* partitionType) {
+    char* partFormat = NULL;
+    if (!android_parseFstabPartitionFormat(fstab, fstabSize, partitionPath,
+                                           &partFormat)) {
+        VERBOSE_PRINT(init, "Could not extract format of %s partition!",
+                      partitionName);
+        return;
+    }
+    VERBOSE_PRINT(init, "Found format of %s partition: '%s'",
+                  partitionName, partFormat);
+    *partitionType = androidPartitionType_fromString(partFormat);
+    free(partFormat);
+}
+
+
 // List of value describing how to handle partition images in
 // android_nand_add_image() below, when no initiali partition image
 // file is provided.
@@ -3070,9 +3102,55 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
+    // Determine format of all partition images, if possible.
+    // Note that _UNKNOWN means the file, if it exists, will be probed.
+    AndroidPartitionType system_partition_type =
+            ANDROID_PARTITION_TYPE_UNKNOWN;
+    AndroidPartitionType userdata_partition_type =
+            ANDROID_PARTITION_TYPE_UNKNOWN;
+    AndroidPartitionType cache_partition_type =
+            ANDROID_PARTITION_TYPE_UNKNOWN;
+
+    {
+        // Starting with Android 4.4.x, the ramdisk.img contains
+        // an fstab.goldfish file that lists the format of each partition.
+        // If the file exists, parse it to get the appropriate values.
+        char* fstab = NULL;
+        size_t fstabSize = 0;
+
+        if (android_extractRamdiskFile(android_hw->disk_ramdisk_path,
+                                       "fstab.goldfish",
+                                       &fstab,
+                                       &fstabSize)) {
+            VERBOSE_PRINT(init, "Ramdisk image contains fstab.goldfish file");
+
+            android_extractPartitionFormat(fstab,
+                                           fstabSize,
+                                           "system",
+                                           "/system",
+                                           &system_partition_type);
+
+            android_extractPartitionFormat(fstab,
+                                           fstabSize,
+                                           "userdata",
+                                           "/data",
+                                           &userdata_partition_type);
+
+            android_extractPartitionFormat(fstab,
+                                           fstabSize,
+                                           "cache",
+                                           "/cache",
+                                           &cache_partition_type);
+
+            free(fstab);
+        } else {
+            VERBOSE_PRINT(init, "No fstab.goldfish file in ramdisk image");
+        }
+    }
+
     /* Initialize system partition image */
     android_nand_add_image("system",
-                           ANDROID_PARTITION_TYPE_UNKNOWN,
+                           system_partition_type,
                            ANDROID_PARTITION_OPEN_MODE_MUST_EXIST,
                            android_hw->disk_systemPartition_size,
                            android_hw->disk_systemPartition_path,
@@ -3080,7 +3158,7 @@ int main(int argc, char **argv, char **envp)
 
     /* Initialize data partition image */
     android_nand_add_image("userdata",
-                           ANDROID_PARTITION_TYPE_UNKNOWN,
+                           userdata_partition_type,
                            ANDROID_PARTITION_OPEN_MODE_CREATE_IF_NEEDED,
                            android_hw->disk_dataPartition_size,
                            android_hw->disk_dataPartition_path,
@@ -3091,19 +3169,21 @@ int main(int argc, char **argv, char **envp)
      * YAFFS2 otherwise.
      */
     if (android_hw->disk_cachePartition != 0) {
-        AndroidPartitionType cache_part_type =
+        if (cache_partition_type == ANDROID_PARTITION_TYPE_UNKNOWN) {
+            cache_partition_type =
                 (androidHwConfig_getKernelYaffs2Support(android_hw) >= 1) ?
                         ANDROID_PARTITION_TYPE_YAFFS2 :
                         ANDROID_PARTITION_TYPE_EXT4;
+        }
 
-        AndroidPartitionOpenMode cache_part_mode =
+        AndroidPartitionOpenMode cache_partition_mode =
                 (android_op_wipe_data ?
                         ANDROID_PARTITION_OPEN_MODE_MUST_WIPE :
                         ANDROID_PARTITION_OPEN_MODE_CREATE_IF_NEEDED);
 
         android_nand_add_image("cache",
-                               cache_part_type,
-                               cache_part_mode,
+                               cache_partition_type,
+                               cache_partition_mode,
                                android_hw->disk_cachePartition_size,
                                android_hw->disk_cachePartition_path,
                                NULL);
