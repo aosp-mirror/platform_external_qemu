@@ -217,4 +217,8 @@ struct access_params_64 {
     uint32_t flags;
 };
 
+extern void android_zero_pipe_init(void);
+extern void android_pingpong_init(void);
+extern void android_throttle_init(void);
+
 #endif /* _HW_ANDROID_PIPE_H */
