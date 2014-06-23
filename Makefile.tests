@@ -23,6 +23,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/StringView_unittest.cpp \
   android/emulation/CpuAccelerator_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
+  android/filesystems/fstab_parser_unittest.cpp \
   android/filesystems/partition_types_unittest.cpp \
   android/filesystems/ramdisk_extractor_unittest.cpp \
   android/filesystems/testing/TestSupport.cpp \
