@@ -29,6 +29,9 @@ typedef enum {
 // Note: this will panic if |part_type| is an invalid value.
 const char* androidPartitionType_toString(AndroidPartitionType part_type);
 
+// Return an AndroidPartitionType from a string description.
+AndroidPartitionType androidPartitionType_fromString(const char* part_type);
+
 // Probe a given image file and return its partition image type.
 // Note: this returns ANDROID_PARTITION_TYPE_UNKNOWN if the file does
 // not exist or cannot be read.

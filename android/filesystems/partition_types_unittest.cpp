@@ -52,9 +52,26 @@ protected:
 }  // namespace
 
 TEST(AndroidPartitionType, ToString) {
-    EXPECT_STREQ("unknown", androidPartitionType_toString(ANDROID_PARTITION_TYPE_UNKNOWN));
-    EXPECT_STREQ("yaffs2", androidPartitionType_toString(ANDROID_PARTITION_TYPE_YAFFS2));
-    EXPECT_STREQ("ext4", androidPartitionType_toString(ANDROID_PARTITION_TYPE_EXT4));
+    EXPECT_STREQ(
+            "unknown",
+            androidPartitionType_toString(ANDROID_PARTITION_TYPE_UNKNOWN));
+    EXPECT_STREQ(
+            "yaffs2",
+            androidPartitionType_toString(ANDROID_PARTITION_TYPE_YAFFS2));
+    EXPECT_STREQ(
+            "ext4",
+            androidPartitionType_toString(ANDROID_PARTITION_TYPE_EXT4));
+}
+
+TEST(AndroidPartitionType, FromString) {
+    EXPECT_EQ(ANDROID_PARTITION_TYPE_YAFFS2,
+              androidPartitionType_fromString("yaffs2"));
+    EXPECT_EQ(ANDROID_PARTITION_TYPE_EXT4,
+              androidPartitionType_fromString("ext4"));
+    EXPECT_EQ(ANDROID_PARTITION_TYPE_UNKNOWN,
+              androidPartitionType_fromString("unknown"));
+    EXPECT_EQ(ANDROID_PARTITION_TYPE_UNKNOWN,
+              androidPartitionType_fromString("foobar"));
 }
 
 TEST(AndroidPartitionType, ProbeFileYaffs2) {
