@@ -17,19 +17,40 @@
 
 #include <errno.h>
 
+namespace {
+
+const struct {
+    const char* name;
+    AndroidPartitionType value;
+} kPartitionTypeMap[] = {
+    { "unknown", ANDROID_PARTITION_TYPE_UNKNOWN },
+    { "yaffs2", ANDROID_PARTITION_TYPE_YAFFS2 },
+    { "ext4", ANDROID_PARTITION_TYPE_EXT4 },
+};
+
+const size_t kPartitionTypeMapSize =
+        sizeof(kPartitionTypeMap) / sizeof(kPartitionTypeMap[0]);
+
+}  // namespace
+
 const char* androidPartitionType_toString(AndroidPartitionType part_type) {
-    switch (part_type) {
-        case ANDROID_PARTITION_TYPE_UNKNOWN:
-            return "unknown";
-        case ANDROID_PARTITION_TYPE_YAFFS2:
-            return "yaffs2";
-        case ANDROID_PARTITION_TYPE_EXT4:
-            return "ext4";
-        default:
-            APANIC("Invalid partition type value %d", part_type);
+    for (size_t n = 0; n < kPartitionTypeMapSize; ++n) {
+        if (kPartitionTypeMap[n].value == part_type) {
+            return kPartitionTypeMap[n].name;
+        }
     }
+    APANIC("Invalid partition type value %d", part_type);
+    return "unknown";
 }
 
+AndroidPartitionType androidPartitionType_fromString(const char* part_type) {
+    for (size_t n = 0; n < kPartitionTypeMapSize; ++n) {
+        if (!strcmp(kPartitionTypeMap[n].name, part_type)) {
+            return kPartitionTypeMap[n].value;
+        }
+    }
+    return ANDROID_PARTITION_TYPE_UNKNOWN;
+}
 
 AndroidPartitionType androidPartitionType_probeFile(const char* image_file) {
     if (!path_exists(image_file)) {
