@@ -1282,9 +1282,11 @@ int main(int argc, char **argv)
     bool accel_ok = android_hasCpuAcceleration(&accel_status);
 
 #ifdef __linux__
+    static const char kAccelerator[] = "KVM";
     static const char kEnableAccelerator[] = "-enable-kvm";
     static const char kDisableAccelerator[] = "-disable-kvm";
 #else
+    static const char kAccelerator[] = "Intel HAXM";
     static const char kEnableAccelerator[] = "-enable-hax";
     static const char kDisableAccelerator[] = "-disable-hax";
 #endif
@@ -1301,6 +1303,28 @@ int main(int argc, char **argv)
         }
         dprint("CPU Acceleration: %s", accel_str);
         dprint("CPU Acceleration status: %s", accel_status);
+    }
+
+    // Special case: x86_64 emulation currently requires hardware
+    // acceleration, so refuse to start in 'auto' mode if it is not
+    // available.
+    {
+        char* abi = avdInfo_getTargetAbi(avd);
+        if (!strcmp(abi, "x86_64")) {
+            if (!accel_ok && accel_mode != ACCEL_OFF) {
+                derror("x86_64 emulation currently requires hardware acceleration!\n"
+                    "Please ensure %s is properly installed and usable.\n"
+                    "CPU acceleration status: %s",
+                    kAccelerator, accel_status);
+                exit(1);
+            }
+            else if (accel_mode == ACCEL_OFF) {
+                // '-no-accel' of '-accel off' was used explicitly. Warn about
+                // the issue but do not exit.
+                dwarning("x86_64 emulation may not work without hardware acceleration!");
+            }
+        }
+        AFREE(abi);
     }
 
     // CPU acceleration only works for x86 and x86_64 system images.
