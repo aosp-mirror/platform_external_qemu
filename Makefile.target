@@ -379,18 +379,10 @@ $(call gen-hw-config-defs)
 
 ifeq ($(HOST_OS),windows)
   $(eval $(call insert-windows-icon))
-  ifneq ($(BUILD_STANDALONE_EMULATOR),)
-    # Special exception for Windows: -lmingw32 must appear before libSDLmain
-    # on the link command-line, because it depends on _WinMain@16 which is
-    # exported by the latter.
-    LOCAL_LDFLAGS += -lmingw32
-  else
-    # The previous trick doesn't work with the platform build system because
-    # it places all linker flags _after_ the actually libraries, so instead
-    # recompiler SDLmain from source so its object file is listed in the link
-    # command, forcing the linker to use it.
-    LOCAL_SRC_FILES += $(SDLMAIN_SOURCES:%=$(SDL_DIR)/%)
-  endif
+  # Special exception for Windows: -lmingw32 must appear before libSDLmain
+  # on the link command-line, because it depends on _WinMain@16 which is
+  # exported by the latter.
+  LOCAL_LDFLAGS += -lmingw32
 endif
 
 $(call end-emulator-program)
@@ -415,4 +407,13 @@ LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
 $(call gen-hw-config-defs)
+
+ifeq ($(HOST_OS),windows)
+  $(eval $(call insert-windows-icon))
+  # Special exception for Windows: -lmingw32 must appear before libSDLmain
+  # on the link command-line, because it depends on _WinMain@16 which is
+  # exported by the latter.
+  LOCAL_LDFLAGS += -lmingw32
+endif
+
 $(call end-emulator-program)
