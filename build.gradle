@@ -13,6 +13,10 @@ task buildWindowsEmulator(type: BuildEmulator) {
 
 sdk {
     common(mac, linux) {
+        item('android/avd/hardware-properties.ini') {
+            into 'lib'
+            notice null
+        }
         item("$buildDefaultEmulator.output/emulator") {
             executable true
             builtBy buildDefaultEmulator
