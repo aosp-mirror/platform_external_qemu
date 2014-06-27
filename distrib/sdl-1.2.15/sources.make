@@ -268,6 +268,7 @@ $(call end-emulator-library)
 
 $(call start-emulator64-library,emulator_lib64SDLmain)
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+LOCAL_CFLAGS += $(SDL_CFLAGS)
 LOCAL_SRC_FILES := $(SDLMAIN_SOURCES)
 $(call end-emulator-library)
 
