@@ -229,7 +229,7 @@ static void android_mips_init_(ram_addr_t ram_size,
 
 #ifdef CONFIG_ANDROID_MEMCHECK
     if (memcheck_enabled) {
-        trace_dev_init();
+//        trace_dev_init();  //disable trace_dev for now
     }
 #endif  // CONFIG_ANDROID_MEMCHECK
     bool newDeviceNaming =

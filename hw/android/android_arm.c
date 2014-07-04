@@ -128,7 +128,7 @@ static void android_arm_init_(ram_addr_t ram_size,
 #endif
 #ifdef CONFIG_ANDROID_MEMCHECK
     if (memcheck_enabled) {
-        trace_dev_init();
+//        trace_dev_init();  //disable trace_dev for now
     }
 #endif  // CONFIG_ANDROID_MEMCHECK
 
