@@ -9808,6 +9808,19 @@ static inline void gen_intermediate_code_internal(CPUARMState *env,
             }
         }
 
+        if (search_pc) {
+            j = tcg_ctx.gen_opc_ptr - tcg_ctx.gen_opc_buf;
+            if (lj < j) {
+                lj++;
+                while (lj < j)
+                    tcg_ctx.gen_opc_instr_start[lj++] = 0;
+            }
+            tcg_ctx.gen_opc_pc[lj] = dc->pc;
+            gen_opc_condexec_bits[lj] = (dc->condexec_cond << 4) | (dc->condexec_mask >> 1);
+            tcg_ctx.gen_opc_instr_start[lj] = 1;
+            tcg_ctx.gen_opc_icount[lj] = num_insns;
+        }
+
         if (num_insns + 1 == max_insns && (tb->cflags & CF_LAST_IO))
             gen_io_start();
 
