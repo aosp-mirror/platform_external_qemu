@@ -177,7 +177,6 @@ common_LOCAL_SRC_FILES += \
     target-arm/iwmmxt_helper.c \
     target-arm/neon_helper.c \
     target-arm/helper.c \
-    target-arm/helper-android.c \
     target-arm/translate.c \
     target-arm/machine.c \
     hw/arm/armv7m.c \
@@ -233,25 +232,6 @@ ifeq ($(QEMU_DO_KVM),true)
         kvm-android.c
 endif
 
-##############################################################################
-# Memory-access checking support.
-# Memory access checker uses information collected by instrumented code in
-# libc.so in order to keep track of memory blocks allocated from heap. Memory
-# checker then uses this information to make sure that every access to allocated
-# memory is within allocated block. This information also allows detecting
-# memory leaks and attempts to free/realloc invalid pointers.
-#
-common_LOCAL_CFLAGS += $(ELFF_CFLAGS)
-
-MCHK_SOURCES := \
-    memcheck.c \
-    memcheck_proc_management.c \
-    memcheck_malloc_map.c \
-    memcheck_mmrange_map.c \
-    memcheck_util.c
-
-common_LOCAL_SRC_FILES += $(MCHK_SOURCES:%=android/qemu/memcheck/%)
-
 common_LOCAL_SRC_FILES += \
     cpus.c \
     arch_init.c
@@ -296,7 +276,6 @@ common_LOCAL_STATIC_LIBRARIES := \
     emulator-libui \
     emulator-libqemu \
     emulator-target-$(EMULATOR_TARGET_CPU) \
-    emulator-libelff \
     emulator-common \
     emulator-zlib
 
@@ -345,6 +324,8 @@ common_LOCAL_CFLAGS    += $(HW_OBJ_CFLAGS)
 common_LOCAL_SRC_FILES += $(BLOCK_SOURCES)
 common_LOCAL_CFLAGS    += $(BLOCK_CFLAGS)
 
+common_LOCAL_LDLIBS += -lstdc++
+
 # Generate a completely static executable if needed.
 # Note that this means no sound and graphics on Linux.
 #
@@ -360,7 +341,6 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libqemu \
     emulator-target-$(EMULATOR_TARGET_CPU) \
     emulator-libjpeg \
-    emulator-libelff \
     emulator-common \
     emulator-libext4_utils \
     emulator-libsparse \
@@ -392,7 +372,6 @@ LOCAL_STATIC_LIBRARIES += \
     emulator64-libqemu \
     emulator64-target-$(EMULATOR_TARGET_CPU) \
     emulator64-libjpeg \
-    emulator64-libelff \
     emulator64-common \
     emulator64-libext4_utils \
     emulator64-libsparse \

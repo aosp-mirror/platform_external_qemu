@@ -470,5 +470,4 @@ DEF_HELPER_3(neon_qzip16, void, env, i32, i32)
 DEF_HELPER_3(neon_qzip32, void, env, i32, i32)
 DEF_HELPER_2(neon_vldst_all, void, env, i32)
 
-#include "helper-android.h"
 #include "exec/def-helper.h"
