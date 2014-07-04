@@ -112,20 +112,6 @@
 #endif
 
 
-#if defined(CONFIG_ANDROID_MEMCHECK) && !defined(SOFTMMU_CODE_ACCESS)
-/*
- * Support for memory access checker.
- * We need to instrument __ldx/__stx_mmu routines implemented in this file with
- * callbacks to access validation routines implemented by the memory checker.
- * Note that (at least for now) we don't do that instrumentation for memory
- * addressing the code (SOFTMMU_CODE_ACCESS controls that). Also, we don't want
- * to instrument code that is used by emulator itself (OUTSIDE_JIT controls
- * that).
- */
-#define CONFIG_ANDROID_MEMCHECK_MMU
-#include "android/qemu/memcheck/memcheck_api.h"
-#endif  // CONFIG_ANDROID_MEMCHECK && !SOFTMMU_CODE_ACCESS
-
 static inline DATA_TYPE glue(io_read, SUFFIX)(CPUArchState *env,
                                               hwaddr physaddr,
                                               target_ulong addr,
@@ -168,9 +154,6 @@ WORD_TYPE helper_le_ld_name(CPUArchState *env, target_ulong addr, int mmu_idx,
 
     /* Adjust the given return address.  */
     retaddr -= GETPC_ADJ;
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-    int invalidate_cache = 0;
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
 
     /* If the TLB entry is for a different page, reload and try again.  */
     if ((addr & TARGET_PAGE_MASK)
@@ -203,16 +186,6 @@ WORD_TYPE helper_le_ld_name(CPUArchState *env, target_ulong addr, int mmu_idx,
     if (DATA_SIZE > 1
         && unlikely((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1
                     >= TARGET_PAGE_SIZE)) {
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-        /* We only validate access to the guest's user space, for which
-         * mmu_idx is set to 1. */
-        if (memcheck_instrument_mmu && mmu_idx == 1 &&
-            memcheck_validate_ld(addr, DATA_SIZE, (target_ulong)(retaddr - GETPC_ADJ))) {
-            /* Memory read breaks page boundary. So, if required, we
-             * must invalidate two caches in TLB. */
-            invalidate_cache = 2;
-        }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
         target_ulong addr1, addr2;
         DATA_TYPE res1, res2;
         unsigned shift;
@@ -232,14 +205,6 @@ WORD_TYPE helper_le_ld_name(CPUArchState *env, target_ulong addr, int mmu_idx,
         res = (res1 >> shift) | (res2 << ((DATA_SIZE * 8) - shift));
         return res;
     }
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-    if (DATA_SIZE == 1) {
-        if (memcheck_instrument_mmu && mmu_idx == 1) {
-            invalidate_cache = memcheck_validate_ld(addr, DATA_SIZE,
-                                                    (target_ulong)(retaddr + GETPC_ADJ));
-        }
-    }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
 
     /* Handle aligned access or unaligned access in the same page.  */
 #ifdef ALIGNED_ONLY
@@ -254,20 +219,6 @@ WORD_TYPE helper_le_ld_name(CPUArchState *env, target_ulong addr, int mmu_idx,
 #else
     res = glue(glue(ld, LSUFFIX), _le_p)((uint8_t *)haddr);
 #endif
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-    if (invalidate_cache) {
-        /* Accessed memory is under memchecker control. We must invalidate
-         * containing page(s) in order to make sure that next access to them
-         * will invoke _ld/_st_mmu. */
-        env->tlb_table[mmu_idx][index].addr_read ^= TARGET_PAGE_MASK;
-        env->tlb_table[mmu_idx][index].addr_write ^= TARGET_PAGE_MASK;
-        if ((invalidate_cache == 2) && (index < CPU_TLB_SIZE)) {
-            // Read crossed page boundaris. Invalidate second cache too.
-            env->tlb_table[mmu_idx][index + 1].addr_read ^= TARGET_PAGE_MASK;
-            env->tlb_table[mmu_idx][index + 1].addr_write ^= TARGET_PAGE_MASK;
-        }
-    }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
     return res;
 }
 
@@ -285,9 +236,6 @@ WORD_TYPE helper_be_ld_name(CPUArchState *env, target_ulong addr, int mmu_idx,
 
     /* Adjust the given return address.  */
     retaddr -= GETPC_ADJ;
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-    int invalidate_cache = 0;
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
 
     /* If the TLB entry is for a different page, reload and try again.  */
     if ((addr & TARGET_PAGE_MASK)
@@ -320,16 +268,6 @@ WORD_TYPE helper_be_ld_name(CPUArchState *env, target_ulong addr, int mmu_idx,
     if (DATA_SIZE > 1
         && unlikely((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1
                     >= TARGET_PAGE_SIZE)) {
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-        /* We only validate access to the guest's user space, for which
-         * mmu_idx is set to 1. */
-        if (memcheck_instrument_mmu && mmu_idx == 1 &&
-            memcheck_validate_ld(addr, DATA_SIZE, (target_ulong)(retaddr - GETPC_ADJ))) {
-            /* Memory read breaks page boundary. So, if required, we
-             * must invalidate two caches in TLB. */
-            invalidate_cache = 2;
-        }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
         target_ulong addr1, addr2;
         DATA_TYPE res1, res2;
         unsigned shift;
@@ -349,14 +287,6 @@ WORD_TYPE helper_be_ld_name(CPUArchState *env, target_ulong addr, int mmu_idx,
         res = (res1 << shift) | (res2 >> ((DATA_SIZE * 8) - shift));
         return res;
     }
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-    if (DATA_SIZE == 1) {
-        if (memcheck_instrument_mmu && mmu_idx == 1) {
-            invalidate_cache = memcheck_validate_ld(addr, DATA_SIZE,
-                                                    (target_ulong)(retaddr + GETPC_ADJ));
-        }
-    }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
 
     /* Handle aligned access or unaligned access in the same page.  */
 #ifdef ALIGNED_ONLY
@@ -367,20 +297,6 @@ WORD_TYPE helper_be_ld_name(CPUArchState *env, target_ulong addr, int mmu_idx,
 
     haddr = addr + env->tlb_table[mmu_idx][index].addend;
     res = glue(glue(ld, LSUFFIX), _be_p)((uint8_t *)haddr);
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-    if (invalidate_cache) {
-        /* Accessed memory is under memchecker control. We must invalidate
-         * containing page(s) in order to make sure that next access to them
-         * will invoke _ld/_st_mmu. */
-        env->tlb_table[mmu_idx][index].addr_read ^= TARGET_PAGE_MASK;
-        env->tlb_table[mmu_idx][index].addr_write ^= TARGET_PAGE_MASK;
-        if ((invalidate_cache == 2) && (index < CPU_TLB_SIZE)) {
-            // Read crossed page boundaris. Invalidate second cache too.
-            env->tlb_table[mmu_idx][index + 1].addr_read ^= TARGET_PAGE_MASK;
-            env->tlb_table[mmu_idx][index + 1].addr_write ^= TARGET_PAGE_MASK;
-        }
-    }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
     return res;
 }
 #endif /* DATA_SIZE > 1 */
@@ -447,10 +363,6 @@ void helper_le_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
     target_ulong tlb_addr = env->tlb_table[mmu_idx][index].addr_write;
     uintptr_t haddr;
 
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-    int invalidate_cache = 0;
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
-
     /* Adjust the given return address.  */
     retaddr -= GETPC_ADJ;
 
@@ -485,17 +397,6 @@ void helper_le_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
     if (DATA_SIZE > 1
         && unlikely((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1
                      >= TARGET_PAGE_SIZE)) {
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-        /* We only validate access to the guest's user space, for which
-         * mmu_idx is set to 1. */
-        if (memcheck_instrument_mmu && mmu_idx == 1 &&
-            memcheck_validate_st(addr, DATA_SIZE, (uint64_t)val,
-                                 (target_ulong)(retaddr + GETPC_ADJ))) {
-            /* Memory write breaks page boundary. So, if required, we
-             * must invalidate two caches in TLB. */
-            invalidate_cache = 2;
-        }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
         int i;
     do_unaligned_access:
 #ifdef ALIGNED_ONLY
@@ -514,17 +415,6 @@ void helper_le_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
         }
         return;
     }
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-    if (DATA_SIZE == 1) {
-        /* We only validate access to the guest's user space, for which
-         * mmu_idx is set to 1. */
-        if (memcheck_instrument_mmu && mmu_idx == 1) {
-            invalidate_cache = memcheck_validate_st(addr, DATA_SIZE,
-                                                    (uint64_t)val,
-                                                    (target_ulong)(retaddr + GETPC_ADJ));
-        }
-    }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
 
     /* Handle aligned access or unaligned access in the same page.  */
 #ifdef ALIGNED_ONLY
@@ -539,20 +429,6 @@ void helper_le_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
 #else
     glue(glue(st, SUFFIX), _le_p)((uint8_t *)haddr, val);
 #endif
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-    if (invalidate_cache) {
-        /* Accessed memory is under memchecker control. We must invalidate
-         * containing page(s) in order to make sure that next access to them
-         * will invoke _ld/_st_mmu. */
-        env->tlb_table[mmu_idx][index].addr_read ^= TARGET_PAGE_MASK;
-        env->tlb_table[mmu_idx][index].addr_write ^= TARGET_PAGE_MASK;
-        if ((invalidate_cache == 2) && (index < CPU_TLB_SIZE)) {
-            // Write crossed page boundaris. Invalidate second cache too.
-            env->tlb_table[mmu_idx][index + 1].addr_read ^= TARGET_PAGE_MASK;
-            env->tlb_table[mmu_idx][index + 1].addr_write ^= TARGET_PAGE_MASK;
-        }
-    }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
 }
 
 #if DATA_SIZE > 1
@@ -562,10 +438,6 @@ void helper_be_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
     int index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
     target_ulong tlb_addr = env->tlb_table[mmu_idx][index].addr_write;
     uintptr_t haddr;
-
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-    int invalidate_cache = 0;
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
 
     /* Adjust the given return address.  */
     retaddr -= GETPC_ADJ;
@@ -601,17 +473,6 @@ void helper_be_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
     if (DATA_SIZE > 1
         && unlikely((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1
                      >= TARGET_PAGE_SIZE)) {
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-        /* We only validate access to the guest's user space, for which
-         * mmu_idx is set to 1. */
-        if (memcheck_instrument_mmu && mmu_idx == 1 &&
-            memcheck_validate_st(addr, DATA_SIZE, (uint64_t)val,
-                                 (target_ulong)(retaddr + GETPC_ADJ))) {
-            /* Memory write breaks page boundary. So, if required, we
-             * must invalidate two caches in TLB. */
-            invalidate_cache = 2;
-        }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
         int i;
     do_unaligned_access:
 #ifdef ALIGNED_ONLY
@@ -630,17 +491,6 @@ void helper_be_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
         }
         return;
     }
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-    if (DATA_SIZE == 1) {
-        /* We only validate access to the guest's user space, for which
-         * mmu_idx is set to 1. */
-        if (memcheck_instrument_mmu && mmu_idx == 1) {
-            invalidate_cache = memcheck_validate_st(addr, DATA_SIZE,
-                                                    (uint64_t)val,
-                                                    (target_ulong)(retaddr + GETPC_ADJ));
-        }
-    }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
 
     /* Handle aligned access or unaligned access in the same page.  */
 #ifdef ALIGNED_ONLY
@@ -651,20 +501,6 @@ void helper_be_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
 
     haddr = addr + env->tlb_table[mmu_idx][index].addend;
     glue(glue(st, SUFFIX), _be_p)((uint8_t *)haddr, val);
-#ifdef CONFIG_ANDROID_MEMCHECK_MMU
-    if (invalidate_cache) {
-        /* Accessed memory is under memchecker control. We must invalidate
-         * containing page(s) in order to make sure that next access to them
-         * will invoke _ld/_st_mmu. */
-        env->tlb_table[mmu_idx][index].addr_read ^= TARGET_PAGE_MASK;
-        env->tlb_table[mmu_idx][index].addr_write ^= TARGET_PAGE_MASK;
-        if ((invalidate_cache == 2) && (index < CPU_TLB_SIZE)) {
-            // Write crossed page boundaris. Invalidate second cache too.
-            env->tlb_table[mmu_idx][index + 1].addr_read ^= TARGET_PAGE_MASK;
-            env->tlb_table[mmu_idx][index + 1].addr_write ^= TARGET_PAGE_MASK;
-        }
-    }
-#endif  // CONFIG_ANDROID_MEMCHECK_MMU
 }
 #endif /* DATA_SIZE > 1 */
 

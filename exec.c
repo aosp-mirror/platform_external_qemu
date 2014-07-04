@@ -48,9 +48,6 @@
 #if defined(CONFIG_USER_ONLY)
 #include <qemu.h>
 #endif
-#ifdef CONFIG_ANDROID_MEMCHECK
-#include "android/qemu/memcheck/memcheck_api.h"
-#endif  // CONFIG_ANDROID_MEMCHECK
 
 //#define DEBUG_SUBPAGE
 
