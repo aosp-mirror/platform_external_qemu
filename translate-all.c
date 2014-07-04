@@ -102,22 +102,6 @@ static void* l1_phys_map[V_L1_SIZE];
 /* code generation context */
 TCGContext tcg_ctx;
 
-#ifdef CONFIG_ANDROID_MEMCHECK
-/*
- * Memchecker code in this module copies TB PC <-> Guest PC map to the TB
- * descriptor after guest code has been translated in cpu_gen_init routine.
- */
-#include "android/qemu/memcheck/memcheck_api.h"
-
-/* Array of (tb_pc, guest_pc) pairs, big enough for all translations. This
- * array is used to obtain guest PC address from a translated PC address.
- * tcg_gen_code_common will fill it up when memchecker is enabled. */
-static void* gen_opc_tpc2gpc[OPC_BUF_SIZE * 2];
-void** gen_opc_tpc2gpc_ptr = &gen_opc_tpc2gpc[0];
-/* Number of (tb_pc, guest_pc) pairs stored in gen_opc_tpc2gpc array. */
-unsigned int gen_opc_tpc2gpc_pairs;
-#endif  // CONFIG_ANDROID_MEMCHECK
-
 /* XXX: suppress that */
 unsigned long code_gen_max_block_size(void)
 {
@@ -197,20 +181,6 @@ int cpu_gen_code(CPUArchState *env, TranslationBlock *tb, int *gen_code_size_ptr
     s->code_in_len += tb->size;
     s->code_out_len += gen_code_size;
 #endif
-
-#ifdef CONFIG_ANDROID_MEMCHECK
-    /* Save translated PC -> guest PC map into TB. */
-    if (memcheck_enabled && gen_opc_tpc2gpc_pairs && is_cpu_user(env)) {
-        tb->tpc2gpc =
-                g_malloc(gen_opc_tpc2gpc_pairs * 2 * sizeof(uintptr_t));
-        if (tb->tpc2gpc != NULL) {
-            memcpy(tb->tpc2gpc, gen_opc_tpc2gpc_ptr,
-                   gen_opc_tpc2gpc_pairs * 2 * sizeof(uintptr_t));
-            tb->tpc2gpc_pairs = gen_opc_tpc2gpc_pairs;
-        }
-
-    }
-#endif  // CONFIG_ANDROID_MEMCHECK
 
 #ifdef DEBUG_DISAS
     if (qemu_loglevel_mask(CPU_LOG_TB_OUT_ASM)) {
@@ -695,10 +665,6 @@ static TranslationBlock *tb_alloc(target_ulong pc)
     tb = &tcg_ctx.tb_ctx.tbs[tcg_ctx.tb_ctx.nb_tbs++];
     tb->pc = pc;
     tb->cflags = 0;
-#ifdef CONFIG_ANDROID_MEMCHECK
-    tb->tpc2gpc = NULL;
-    tb->tpc2gpc_pairs = 0;
-#endif  // CONFIG_ANDROID_MEMCHECK
     return tb;
 }
 
@@ -776,17 +742,6 @@ void tb_flush(CPUArchState *env1)
 
     CPU_FOREACH(cpu) {
         CPUArchState *env = cpu->env_ptr;
-#ifdef CONFIG_ANDROID_MEMCHECK
-        int tb_to_clean;
-        for (tb_to_clean = 0; tb_to_clean < TB_JMP_CACHE_SIZE; tb_to_clean++) {
-            if (env->tb_jmp_cache[tb_to_clean] != NULL &&
-                env->tb_jmp_cache[tb_to_clean]->tpc2gpc != NULL) {
-                g_free(env->tb_jmp_cache[tb_to_clean]->tpc2gpc);
-                env->tb_jmp_cache[tb_to_clean]->tpc2gpc = NULL;
-                env->tb_jmp_cache[tb_to_clean]->tpc2gpc_pairs = 0;
-            }
-        }
-#endif  // CONFIG_ANDROID_MEMCHECK
         memset (env->tb_jmp_cache, 0, TB_JMP_CACHE_SIZE * sizeof (void *));
     }
 
@@ -963,14 +918,6 @@ void tb_phys_invalidate(TranslationBlock *tb, tb_page_addr_t page_addr)
         tb1 = tb2;
     }
     tb->jmp_first = (TranslationBlock *)((uintptr_t)tb | 2); /* fail safe */
-
-#ifdef CONFIG_ANDROID_MEMCHECK
-    if (tb->tpc2gpc != NULL) {
-        g_free(tb->tpc2gpc);
-        tb->tpc2gpc = NULL;
-        tb->tpc2gpc_pairs = 0;
-    }
-#endif  // CONFIG_ANDROID_MEMCHECK
 
     tcg_ctx.tb_ctx.tb_phys_invalidate_count++;
 }

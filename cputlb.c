@@ -22,10 +22,6 @@
 #include "exec/exec-all.h"
 #include "exec/cputlb.h"
 
-#ifdef CONFIG_ANDROID_MEMCHECK
-#include "android/qemu/memcheck/memcheck_api.h"
-#endif
-
 /* statistics */
 int tlb_flush_count;
 
@@ -299,38 +295,6 @@ void tlb_set_page(CPUArchState *env, target_ulong vaddr,
     } else {
         te->addr_write = -1;
     }
-
-#ifdef CONFIG_ANDROID_MEMCHECK
-    /*
-     * If we have memchecker running, we need to make sure that page, cached
-     * into TLB as the result of this operation will comply with our requirement
-     * to cause __ld/__stx_mmu being called for memory access on the pages
-     * containing memory blocks that require access violation checks.
-     *
-     * We need to check with memory checker if we should invalidate this page
-     * iff:
-     *  - Memchecking is enabled.
-     *  - Page that's been cached belongs to the user space.
-     *  - Request to cache this page didn't come from softmmu. We're covered
-     *    there, because after page was cached here we will invalidate it in
-     *    the __ld/__stx_mmu wrapper.
-     *  - Cached page belongs to RAM, not I/O area.
-     *  - Page is cached for read, or write access.
-     */
-#if 0
-    if (memcheck_instrument_mmu && mmu_idx == 1 && 
-        (pd & ~TARGET_PAGE_MASK) == IO_MEM_RAM &&
-        (prot & (PAGE_READ | PAGE_WRITE)) &&
-        memcheck_is_checked(vaddr & TARGET_PAGE_MASK, TARGET_PAGE_SIZE)) {
-        if (prot & PAGE_READ) {
-            te->addr_read ^= TARGET_PAGE_MASK;
-        }
-        if (prot & PAGE_WRITE) {
-            te->addr_write ^= TARGET_PAGE_MASK;
-        }
-    }
-#endif
-#endif  // CONFIG_ANDROID_MEMCHECK
 }
 
 /* NOTE: this function can trigger an exception */

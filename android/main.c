@@ -1161,11 +1161,6 @@ int main(int argc, char **argv)
         hw->hw_keyboard_charmap = ASTRDUP(charmap_name);
     }
 
-    if (opts->memcheck) {
-        args[n++] = "-android-memcheck";
-        args[n++] = opts->memcheck;
-    }
-
     if (opts->gpu) {
         const char* gpu = opts->gpu;
         if (!strcmp(gpu,"on") || !strcmp(gpu,"enable")) {

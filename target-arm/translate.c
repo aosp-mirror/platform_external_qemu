@@ -66,12 +66,8 @@ typedef struct DisasContext {
     int vfp_enabled;
     int vec_len;
     int vec_stride;
-#ifdef CONFIG_ANDROID_MEMCHECK
-    int search_pc;
-#endif
 } DisasContext;
 
-#include "translate-android.h"
 static uint32_t gen_opc_condexec_bits[OPC_BUF_SIZE];
 
 #if defined(CONFIG_USER_ONLY)
@@ -6585,8 +6581,6 @@ static void disas_arm_insn(CPUARMState * env, DisasContext *s)
 
     insn = cpu_ldl_code(env, s->pc);
 
-    ANDROID_WATCH_CALLSTACK_ARM(s);
-
     s->pc += 4;
 
     /* M variants do not implement ARM mode.  */
@@ -9022,8 +9016,6 @@ static void disas_thumb_insn(CPUARMState *env, DisasContext *s)
 
     insn = cpu_lduw_code(env, s->pc);
 
-    ANDROID_WATCH_CALLSTACK_THUMB(s);
-
     s->pc += 2;
 
     switch (insn >> 12) {
@@ -9722,7 +9714,6 @@ static inline void gen_intermediate_code_internal(CPUARMState *env,
 #if !defined(CONFIG_USER_ONLY)
     dc->user = (ARM_TBFLAG_PRIV(tb->flags) == 0);
 #endif
-    ANDROID_START_CODEGEN(search_pc);
     dc->vfp_enabled = ARM_TBFLAG_VFPEN(tb->flags);
     dc->vec_len = ARM_TBFLAG_VECLEN(tb->flags);
     dc->vec_stride = ARM_TBFLAG_VECSTRIDE(tb->flags);
@@ -9815,19 +9806,6 @@ static inline void gen_intermediate_code_internal(CPUARMState *env,
                     break;
                 }
             }
-        }
-
-        if (ANDROID_CHECK_CODEGEN_PC(search_pc)) {
-            j = tcg_ctx.gen_opc_ptr - tcg_ctx.gen_opc_buf;
-            if (lj < j) {
-                lj++;
-                while (lj < j)
-                    tcg_ctx.gen_opc_instr_start[lj++] = 0;
-            }
-            tcg_ctx.gen_opc_pc[lj] = dc->pc;
-            gen_opc_condexec_bits[lj] = (dc->condexec_cond << 4) | (dc->condexec_mask >> 1);
-            tcg_ctx.gen_opc_instr_start[lj] = 1;
-            tcg_ctx.gen_opc_icount[lj] = num_insns;
         }
 
         if (num_insns + 1 == max_insns && (tb->cflags & CF_LAST_IO))
@@ -9969,7 +9947,6 @@ done_generating:
         while (lj <= j)
             tcg_ctx.gen_opc_instr_start[lj++] = 0;
     } else {
-        ANDROID_END_CODEGEN();
         tb->size = dc->pc - pc_start;
         tb->icount = num_insns;
     }

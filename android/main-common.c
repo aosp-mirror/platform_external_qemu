@@ -423,7 +423,6 @@ load_dynamic_skin(AndroidHwConfig* hwConfig,
     AConfig*  node;
     int       i;
     int       max_part_width;
-    char      fromEnv;
 
     *skinDirPath = avdInfo_getDynamicSkinPath(android_avdInfo);
     if (*skinDirPath == NULL) {

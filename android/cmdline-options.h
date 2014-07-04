@@ -150,10 +150,6 @@ OPT_PARAM( shared_net_id, "<number>", "join the shared network, using IP address
 OPT_PARAM( nand_limits, "<nlimits>", "enforce NAND/Flash read/write thresholds" )
 #endif
 
-#ifdef CONFIG_ANDROID_MEMCHECK
-OPT_PARAM( memcheck, "<flags>", "enable memory access checking" )
-#endif  // CONFIG_ANDROID_MEMCHECK
-
 #ifdef CONFIG_STANDALONE_UI
 OPT_PARAM( list_cores, "<host>", "list running core process" )
 OPT_PARAM( attach_core, "<console socket>", "attach to a running core process" )

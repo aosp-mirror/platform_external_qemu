@@ -79,10 +79,6 @@
 #include "exec/hwaddr.h"
 #include "android/tcpdump.h"
 
-#ifdef CONFIG_ANDROID_MEMCHECK
-#include "android/qemu/memcheck/memcheck.h"
-#endif  // CONFIG_ANDROID_MEMCHECK
-
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -3000,15 +2996,6 @@ int main(int argc, char **argv, char **envp)
                 }
                 break;
 
-#ifdef CONFIG_ANDROID_MEMCHECK
-            case QEMU_OPTION_android_memcheck:
-                android_op_memcheck = (char*)optarg;
-                /* This will set ro.kernel.memcheck system property
-                 * to memcheck's tracing flags. */
-                stralloc_add_format(kernel_config, " memcheck=%s", android_op_memcheck);
-                break;
-#endif // CONFIG_ANDROID_MEMCHECK
-
             case QEMU_OPTION_snapshot_no_time_update:
                 android_snapshot_update_time = 0;
                 break;
@@ -3396,12 +3383,6 @@ int main(int argc, char **argv, char **envp)
     if (dns_count) {
         stralloc_add_format(kernel_config, " ndns=%d", dns_count);
     }
-
-#ifdef CONFIG_ANDROID_MEMCHECK
-    if (android_op_memcheck) {
-        memcheck_init(android_op_memcheck);
-    }
-#endif  // CONFIG_ANDROID_MEMCHECK
 
     /* qemu.gles will be read by the OpenGL ES emulation libraries.
      * If set to 0, the software GL ES renderer will be used as a fallback.

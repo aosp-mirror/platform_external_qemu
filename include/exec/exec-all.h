@@ -182,18 +182,6 @@ struct TranslationBlock {
     struct TranslationBlock *jmp_next[2];
     struct TranslationBlock *jmp_first;
     uint32_t icount;
-
-#ifdef CONFIG_ANDROID_MEMCHECK
-    /* Maps PCs in this translation block to corresponding PCs in guest address
-     * space. The array is arranged in such way, that every even entry contains
-     * PC in the translation block, followed by an odd entry that contains
-     * guest PC corresponding to that PC in the translation block. This
-     * arrangement is set by tcg_gen_code_common that initializes this array
-     * when performing guest code translation. */
-    uintptr_t*   tpc2gpc;
-    /* Number of pairs (pc_tb, pc_guest) in tpc2gpc array. */
-    unsigned int    tpc2gpc_pairs;
-#endif  // CONFIG_ANDROID_MEMCHECK
 };
 
 #include "exec/spinlock.h"
@@ -235,67 +223,13 @@ static inline unsigned int tb_phys_hash_func(tb_page_addr_t pc)
     return (pc >> 2) & (CODE_GEN_PHYS_HASH_SIZE - 1);
 }
 
-#ifdef CONFIG_ANDROID_MEMCHECK
-/* Gets translated PC for a given (translated PC, guest PC) pair.
- * Return:
- *  Translated PC, or NULL if pair index was too large.
- */
-static inline target_ulong
-tb_get_tb_pc(const TranslationBlock* tb, unsigned int pair)
-{
-    return (tb->tpc2gpc != NULL && pair < tb->tpc2gpc_pairs) ?
-                                                    tb->tpc2gpc[pair * 2] : 0;
-}
-
-/* Gets guest PC for a given (translated PC, guest PC) pair.
- * Return:
- *  Guest PC, or NULL if pair index was too large.
- */
-static inline target_ulong
-tb_get_guest_pc(const TranslationBlock* tb, unsigned int pair)
-{
-    return (tb->tpc2gpc != NULL && pair < tb->tpc2gpc_pairs) ?
-            tb->tpc2gpc[pair * 2 + 1] : 0;
-}
-
-/* Gets guest PC for a given translated PC.
- * Return:
- *  Guest PC for a given translated PC, or NULL if there was no pair, matching
- *  translated PC in tb's tpc2gpc array.
- */
-static inline target_ulong
-tb_search_guest_pc_from_tb_pc(const TranslationBlock* tb, target_ulong tb_pc)
-{
-    if (tb->tpc2gpc != NULL && tb->tpc2gpc_pairs != 0) {
-        unsigned int m_min = 0;
-        unsigned int m_max = (tb->tpc2gpc_pairs - 1) << 1;
-        /* Make sure that tb_pc is within TB array. */
-        if (tb_pc < tb->tpc2gpc[0]) {
-            return 0;
-        }
-        while (m_min <= m_max) {
-            const unsigned int m = ((m_min + m_max) >> 1) & ~1;
-            if (tb_pc < tb->tpc2gpc[m]) {
-                m_max = m - 2;
-            } else if (m == m_max || tb_pc < tb->tpc2gpc[m + 2]) {
-                return tb->tpc2gpc[m + 1];
-            } else {
-                m_min = m + 2;
-            }
-        }
-        return tb->tpc2gpc[m_max + 1];
-    }
-    return 0;
-}
-#endif  // CONFIG_ANDROID_MEMCHECK
-
 void tb_free(TranslationBlock *tb);
 void tb_flush(CPUArchState *env);
 void tb_link_phys(TranslationBlock *tb,
                   target_ulong phys_pc, target_ulong phys_page2);
 void tb_phys_invalidate(TranslationBlock *tb, tb_page_addr_t page_addr);
 void tb_invalidate_phys_page_fast0(hwaddr start, int len);
-    
+
 extern uint8_t *code_gen_ptr;
 extern int code_gen_max_blocks;
 

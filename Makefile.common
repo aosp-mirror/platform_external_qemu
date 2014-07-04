@@ -686,52 +686,6 @@ $(call end-emulator-library)
 ##############################################################################
 ##############################################################################
 ###
-###  emulator-libelff: TARGET-INDEPENDENT ELF/DWARF PARSER
-###
-###  THESE ARE USED BY EVERYTHING EXCEPT 'emulator-ui', BUT WE CANNOT PUT
-###  THEM IN emulator-libqemu SINCE THE SOURCES ARE C++
-###
-
-common_LOCAL_CFLAGS =
-common_LOCAL_SRC_FILES =
-
-ELFF_CFLAGS := -I$(LOCAL_PATH)/distrib/elff
-ELFF_LDLIBS := -lstdc++
-
-ELFF_SOURCES := \
-    dwarf_cu.cc \
-    dwarf_die.cc \
-    dwarf_utils.cc \
-    elf_alloc.cc \
-    elf_file.cc \
-    elf_mapped_section.cc \
-    elff_api.cc \
-
-common_LOCAL_SRC_FILES += $(ELFF_SOURCES:%=distrib/elff/elff/%)
-
-common_LOCAL_CFLAGS += \
-    -fno-exceptions \
-    $(ELFF_CFLAGS) \
-
-
-## one for 32-bit
-$(call start-emulator-library, emulator-libelff)
-LOCAL_CPP_EXTENSION := .cc
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-$(call end-emulator-library)
-
-
-$(call start-emulator64-library, emulator64-libelff)
-LOCAL_CPP_EXTENSION := .cc
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-$(call end-emulator-library)
-
-
-##############################################################################
-##############################################################################
-###
 ###  gen-hx-header: Generate headers from .hx file with "hxtool" script.
 ###
 ###  The 'hxtool' script is used to generate header files from an input
