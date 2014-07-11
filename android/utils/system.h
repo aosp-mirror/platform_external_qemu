@@ -14,7 +14,9 @@
 
 #include <string.h>
 #include <stdint.h>
+#ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS 1
+#endif
 #include <inttypes.h>  /* for PRId64 et al. */
 #include "android/utils/assert.h"
 #include "android/utils/compiler.h"
