@@ -13,7 +13,11 @@
 #define _ANDROID_GRAPHICS_REFLIST_H
 
 #include <inttypes.h>
+
+#include "android/utils/compiler.h"
 #include <android/utils/system.h>
+
+ANDROID_BEGIN_HEADER
 
 /* Definitions for a smart list of references to generic objects.
  * supports safe deletion and addition while they are being iterated
@@ -204,5 +208,7 @@ void**  _areflist_at(const ARefList*  l, int  n);
        if (item == NULL) _reflist->iteration |= 1; })
 
 void  areflist_copy(ARefList*  dst, const ARefList*  src);
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_GRAPHICS_REFLIST_H */

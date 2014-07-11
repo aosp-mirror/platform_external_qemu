@@ -14,6 +14,10 @@
 
 #include <stdio.h>
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* A LineInput is used to read input text, one line at a time,
  * into a temporary buffer owner by the LineInput object.
  */
@@ -52,5 +56,7 @@ int lineInput_getError( LineInput* input );
 
 /* Free a LineInput object. */
 void lineInput_free( LineInput* input );
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_LINEINPUT_H */

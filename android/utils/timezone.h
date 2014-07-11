@@ -12,6 +12,10 @@
 #ifndef _ANDROID_UTILS_TIMEZONE_H
 #define _ANDROID_UTILS_TIMEZONE_H
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* try to set the default host timezone, returns 0 on success, or -1 if
  * 'tzname' is not in zoneinfo format (e.g. Area/Location)
  */
@@ -27,5 +31,7 @@ extern int  timezone_set( const char*  tzname );
  * if TZ is defined to something like "CET" or "PST", this will return the name "Unknown/Unknown"
  */
 extern char*  bufprint_zoneinfo_timezone( char*  buffer, char*  end );
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_TIMEZONE_H */
