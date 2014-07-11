@@ -54,6 +54,11 @@
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
+void reassign_string(char** string, const char* new_value) {
+    free(*string);
+    *string = ASTRDUP(new_value);
+}
+
 /***  CONFIGURATION
  ***/
 
