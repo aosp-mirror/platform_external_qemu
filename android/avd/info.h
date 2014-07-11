@@ -12,10 +12,13 @@
 #ifndef ANDROID_AVD_INFO_H
 #define ANDROID_AVD_INFO_H
 
+#include "android/utils/compiler.h"
 #include "android/utils/ini.h"
 #include "android/avd/hw-config.h"
 #include "android/config/config.h"
 #include "android/utils/file_data.h"
+
+ANDROID_BEGIN_HEADER
 
 /* An Android Virtual Device (AVD for short) corresponds to a
  * directory containing all kernel/disk images for a given virtual
@@ -284,6 +287,6 @@ int          avdInfo_getAdbdCommunicationMode( AvdInfo* i );
 */
 int          avdInfo_getSnapshotPresent(AvdInfo* i);
 
-/* */
+ANDROID_END_HEADER
 
 #endif /* ANDROID_AVD_INFO_H */
