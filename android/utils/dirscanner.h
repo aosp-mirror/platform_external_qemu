@@ -12,6 +12,10 @@
 #ifndef _ANDROID_UTILS_DIR_H
 #define _ANDROID_UTILS_DIR_H
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* simple utility to parse directories for files            */
 /* needed because Unix and Windows don't use the same stuff */
 
@@ -46,6 +50,6 @@ const char*    dirScanner_next( DirScanner*  s );
  */
 const char*    dirScanner_nextFull( DirScanner*  s );
 
-/* */
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_DIR_H */

@@ -15,9 +15,9 @@
 
 #include <stdarg.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /** FORMATTED BUFFER PRINTING
  **
@@ -77,8 +77,6 @@ extern char*  bufprint_config_file(char*  buffer, char*  buffend, const char*  s
 extern char*  bufprint_temp_dir   (char*  buffer, char*  buffend);
 extern char*  bufprint_temp_file  (char*  buffer, char*  buffend, const char*  suffix);
 
-#ifdef __cplusplus
-}
-#endif
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_BUFPRINT_H */

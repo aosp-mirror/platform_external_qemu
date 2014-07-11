@@ -12,9 +12,9 @@
 #ifndef ANDROID_UTILS_WIN32_CMDLINE_QUOTE_H
 #define ANDROID_UTILS_WIN32_CMDLINE_QUOTE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 // Quote a given command-line command or parameter so that it can be
 // sent to _execv() on Windows, and be received properly by the new
@@ -36,8 +36,6 @@ extern "C" {
 // must free the string with android_free() or AFREE().
 char* win32_cmdline_quote(const char* param);
 
-#ifdef __cplusplus
-}
-#endif
+ANDROID_END_HEADER
 
 #endif  // ANDROID_UTILS_WIN32_CMDLINE_QUOTE_H
