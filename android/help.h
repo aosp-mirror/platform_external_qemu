@@ -12,7 +12,10 @@
 #ifndef _ANDROID_HELP_H
 #define _ANDROID_HELP_H
 
+#include "android/utils/compiler.h"
 #include "android/utils/stralloc.h"
+
+ANDROID_BEGIN_HEADER
 
 /* these values give the maximum length of system property
  * names and values. They must match the definitions for PROPERTY_MAX_NAME and
@@ -40,5 +43,7 @@ extern int  android_help_for_option( const char*  option, stralloc_t*  out );
  * returns 0 on success, or -1 on error (i.e. unknown topic)
  */
 extern int  android_help_for_topic( const char*  topic, stralloc_t*  out );
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_HELP_H */

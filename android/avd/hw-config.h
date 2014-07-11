@@ -13,7 +13,10 @@
 #define _ANDROID_AVD_HW_CONFIG_H
 
 #include <stdint.h>
+#include "android/utils/compiler.h"
 #include "android/utils/ini.h"
+
+ANDROID_BEGIN_HEADER
 
 typedef char      hw_bool_t;
 typedef int       hw_int_t;
@@ -85,5 +88,7 @@ int androidHwConfig_getKernelYaffs2Support( AndroidHwConfig* config );
 // Return the kernel device prefix for serial ports, depending on
 // kernel.newDeviceNaming.
 const char* androidHwConfig_getKernelSerialPrefix( AndroidHwConfig* config );
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_AVD_HW_CONFIG_H */
