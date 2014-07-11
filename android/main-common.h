@@ -13,10 +13,13 @@
 #define ANDROID_MAIN_COMMON_H
 
 #include <stdint.h>
-#include "android/cmdline-option.h"
-#include "android/skin/keyset.h"
-#include "android/config-file.h"
 #include "android/avd/hw-config.h"
+#include "android/cmdline-option.h"
+#include "android/config-file.h"
+#include "android/skin/keyset.h"
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /* Common routines used by both android/main.c and android/main-ui.c */
 
@@ -102,5 +105,7 @@ void handle_ui_options( AndroidOptions* opts );
  * standalone UI program. This is a no-op otherwise.
  */
 int attach_ui_to_core( AndroidOptions* opts );
+
+ANDROID_END_HEADER
 
 #endif /* ANDROID_MAIN_COMMON_H */
