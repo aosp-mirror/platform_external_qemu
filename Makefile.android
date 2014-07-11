@@ -379,6 +379,9 @@ include $(LOCAL_PATH)/Makefile.target
 EMULATOR_TARGET_ARCH := mips
 include $(LOCAL_PATH)/Makefile.target
 
+EMULATOR_TARGET_ARCH := arm64
+include $(LOCAL_PATH)/Makefile.qemu-launcher
+
 ##############################################################################
 ##############################################################################
 ###
