@@ -4,13 +4,13 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
+#ifndef NO_SKIN
 #include "android/skin/keyset.h"
+#endif
 #include "android/android.h"
 #include <stdint.h>
-#include "audio/audio.h"
 #include <string.h>
 #include <stdlib.h>
-#include "android/protocol/core-commands-api.h"
 
 /* XXX: TODO: put most of the help stuff in auto-generated files */
 
@@ -208,6 +208,7 @@ help_disk_images( stralloc_t*  out )
 static void
 help_keys(stralloc_t*  out)
 {
+#ifndef NO_SKIN
     int  pass, maxw = 0;
 
     stralloc_add_str( out, "  When running the emulator, use the following keypresses:\n\n");
@@ -244,6 +245,7 @@ help_keys(stralloc_t*  out)
     }
     PRINTF( "\n" );
     PRINTF( "  note that NumLock must be deactivated for keypad keys to work\n\n" );
+#endif  // !NO_SKIN
 }
 
 
@@ -281,6 +283,7 @@ help_environment(stralloc_t*  out)
 static void
 help_keyset_file(stralloc_t*  out)
 {
+#ifndef NO_SKIN
     int           n, count;
     const char**  strings;
     char          temp[MAX_PATH];
@@ -346,6 +349,7 @@ help_keyset_file(stralloc_t*  out)
     "    CHANGE_LAYOUT_PREV  Keypad_7,Ctrl-J   # switch to a previous skin layout\n"
     "\n"
     );
+#endif  // !NO_SKIN
 }
 
 
@@ -809,8 +813,6 @@ static void
 help_shaper(stralloc_t*  out)
 {
     int  n;
-    NetworkSpeed* android_netspeed;
-    NetworkLatency* android_netdelay;
     PRINTF(
     "  the Android emulator supports network throttling, i.e. slower network\n"
     "  bandwidth as well as higher connection latencies. this is done either through\n"
@@ -818,24 +820,30 @@ help_shaper(stralloc_t*  out)
 
     "  the format of -netspeed is one of the following (numbers are kbits/s):\n\n" );
 
-    for (n = 0; !corecmd_get_netspeed(n, &android_netspeed); n++) {
+    for (n = 0;; ++n) {
+        const NetworkSpeed* android_netspeed = &android_netspeeds[n];
+        if (!android_netspeed->name) {
+            break;
+        }
         PRINTF( "    -netspeed %-12s %-15s  (up: %.1f, down: %.1f)\n",
                         android_netspeed->name,
                         android_netspeed->display,
                         android_netspeed->upload/1000.,
                         android_netspeed->download/1000. );
-        free(android_netspeed);
     }
     PRINTF( "\n" );
     PRINTF( "    -netspeed %-12s %s", "<num>", "select both upload and download speed\n");
     PRINTF( "    -netspeed %-12s %s", "<up>:<down>", "select individual up and down speed\n");
 
     PRINTF( "\n  The format of -netdelay is one of the following (numbers are msec):\n\n" );
-    for (n = 0; !corecmd_get_netdelay(n, &android_netdelay); n++) {
+    for (n = 0; ; ++n) {
+        const NetworkLatency* android_netdelay = &android_netdelays[n];
+        if (!android_netdelay->name) {
+            break;
+        }
         PRINTF( "    -netdelay %-10s   %-15s  (min %d, max %d)\n",
                         android_netdelay->name, android_netdelay->display,
                         android_netdelay->min_ms, android_netdelay->max_ms );
-        free(android_netdelay);
     }
     PRINTF( "    -netdelay %-10s   %s", "<num>", "select exact latency\n");
     PRINTF( "    -netdelay %-10s   %s", "<min>:<max>", "select min and max latencies\n\n");
