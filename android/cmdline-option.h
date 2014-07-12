@@ -12,6 +12,10 @@
 #ifndef _ANDROID_OPTION_H
 #define _ANDROID_OPTION_H
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* a structure used to model a linked list of parameters
  */
 typedef struct ParamList {
@@ -42,5 +46,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt );
 /* the default device DPI if none is specified by the skin
  */
 #define  DEFAULT_DEVICE_DPI  165
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_OPTION_H */

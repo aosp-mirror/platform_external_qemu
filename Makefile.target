@@ -306,6 +306,7 @@ common_LOCAL_SRC_FILES := \
     android/display-core.c \
     android/help.c \
     android/main-common.c \
+    android/main-common-ui.c \
     android/main.c \
     android/opengles.c \
     android/protocol/core-commands-qemu.c \

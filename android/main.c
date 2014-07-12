@@ -405,14 +405,11 @@ int main(int argc, char **argv)
     /* Update CPU architecture for HW configs created from build dir. */
     if (inAndroidBuild) {
 #if defined(TARGET_ARM)
-        free(android_hw->hw_cpu_arch);
-        android_hw->hw_cpu_arch = ASTRDUP("arm");
+        reassign_string(&android_hw->hw_cpu_arch, "arm");
 #elif defined(TARGET_I386)
-        free(android_hw->hw_cpu_arch);
-        android_hw->hw_cpu_arch = ASTRDUP("x86");
+        reassign_string(&android_hw->hw_cpu_arch, "x86");
 #elif defined(TARGET_MIPS)
-        free(android_hw->hw_cpu_arch);
-        android_hw->hw_cpu_arch = ASTRDUP("mips");
+        reassign_string(&android_hw->hw_cpu_arch, "mips");
 #endif
     }
 
@@ -472,8 +469,7 @@ int main(int argc, char **argv)
         } else {
             D("Auto-detect: Kernel image requires legacy device naming scheme.");
         }
-        AFREE(hw->kernel_newDeviceNaming);
-        hw->kernel_newDeviceNaming = ASTRDUP(newDeviceNaming);
+        reassign_string(&hw->kernel_newDeviceNaming, newDeviceNaming);
     }
 
     // Auto-detect YAFFS2 partition support if needed.
@@ -486,8 +482,7 @@ int main(int argc, char **argv)
         } else {
             D("Auto-detect: Kernel does not support YAFFS2 partitions.");
         }
-        AFREE(hw->kernel_supportsYaffs2);
-        hw->kernel_supportsYaffs2 = ASTRDUP(newYaffs2Support);
+        reassign_string(&hw->kernel_supportsYaffs2, newYaffs2Support);
     }
 
     if (boot_prop_ip[0]) {
@@ -541,8 +536,7 @@ int main(int argc, char **argv)
 
     /* opts->ramdisk is never NULL (see createAVD) here */
     if (opts->ramdisk) {
-        AFREE(hw->disk_ramdisk_path);
-        hw->disk_ramdisk_path = ASTRDUP(opts->ramdisk);
+        reassign_string(&hw->disk_ramdisk_path, opts->ramdisk);
     }
     else if (!hw->disk_ramdisk_path[0]) {
         hw->disk_ramdisk_path = avdInfo_getRamdiskPath(avd);
@@ -1157,8 +1151,7 @@ int main(int argc, char **argv)
          */
         kcm_extract_charmap_name(opts->charmap, charmap_name,
                                  sizeof(charmap_name));
-        AFREE(hw->hw_keyboard_charmap);
-        hw->hw_keyboard_charmap = ASTRDUP(charmap_name);
+        reassign_string(&hw->hw_keyboard_charmap, charmap_name);
     }
 
     if (opts->gpu) {
@@ -1247,8 +1240,7 @@ int main(int argc, char **argv)
                 exit(1);
             }
         } else {
-            AFREE(opts->accel);
-            opts->accel = ASTRDUP("off");
+            reassign_string(&opts->accel, "off");
         }
     }
 
@@ -1382,8 +1374,7 @@ int main(int argc, char **argv)
     }
 
     if (forceArmv7 != 0) {
-        AFREE(hw->hw_cpu_model);
-        hw->hw_cpu_model = ASTRDUP("cortex-a8");
+        reassign_string(&hw->hw_cpu_model, "cortex-a8");
         D("Auto-config: -qemu -cpu %s", hw->hw_cpu_model);
     }
 
@@ -1396,8 +1387,7 @@ int main(int argc, char **argv)
         char* arch = avdInfo_getTargetCpuArch(avd);
         D("Target arch = '%s'", arch ? arch : "NULL");
         if (arch != NULL && !strcmp(arch, "x86")) {
-            AFREE(hw->hw_cpu_model);
-            hw->hw_cpu_model = ASTRDUP("qemu32");
+            reassign_string(&hw->hw_cpu_model, "qemu32");
             D("Auto-config: -qemu -cpu %s", hw->hw_cpu_model);
         }
         AFREE(arch);
