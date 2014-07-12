@@ -14,6 +14,10 @@
 
 #include <inttypes.h>
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* Encapsulates a double-linked, circular list.
  * The list is organized in the following way:
  * - List entries contain references to the next, and the previous entry in the
@@ -108,5 +112,7 @@ alist_remove_tail(ACList* list)
     }
     return entry;
 }
+
+ANDROID_END_HEADER
 
 #endif  /* _ANDROID_UTILS_LIST_H */

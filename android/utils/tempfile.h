@@ -13,6 +13,10 @@
 #ifndef _ANDROID_UTILS_TEMPFILE_H
 #define _ANDROID_UTILS_TEMPFILE_H
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /** TEMP FILE SUPPORT
  **
  ** simple interface to create an empty temporary file on the system.
@@ -48,5 +52,7 @@ extern  void         tempfile_close( TempFile*  temp );
  **/
 extern void          atexit_close_fd(int  fd);
 extern void          atexit_close_fd_remove(int  fd);
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_TEMPFILE_H */
