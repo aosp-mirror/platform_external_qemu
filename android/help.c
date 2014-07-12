@@ -979,33 +979,6 @@ help_trace(stralloc_t*  out)
     );
 }
 
-#ifdef CONFIG_STANDALONE_UI
-static void
-help_list_cores(stralloc_t*  out)
-{
-    PRINTF(
-    "  use '-list-cores localhost to list emulator core processes running on this machine.\n"
-    "  use '-list-cores host_name, or IP address to list emulator core processes running on\n"
-    "  a remote machine.\n"
-    );
-}
-
-static void
-help_attach_core(stralloc_t*  out)
-{
-    PRINTF(
-    "  the -attach-core <console socket> options attaches the UI to a running emulator core process.\n\n"
-
-    "  the <console socket> parameter must be in the form [host:]port, where 'host' addresses the\n"
-    "  machine on which the core process is running, and 'port' addresses the console port number for\n"
-    "  the running core process. Note that 'host' value must be in the form that can be resolved\n"
-    "  into an IP address.\n\n"
-
-    "  Use -list-cores to enumerate console ports for all currently running core processes.\n"
-    );
-}
-#endif  // CONFIG_STANDALONE_UI
-
 static void
 help_show_kernel(stralloc_t*  out)
 {

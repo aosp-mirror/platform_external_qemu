@@ -13,10 +13,10 @@
 #include "android/skin/image.h"
 #include "android/skin/scaler.h"
 #include "android/charmap.h"
+#include "android/hw-sensors.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 #include "android/utils/duff.h"
-#include "android/protocol/core-commands-api.h"
 #include <SDL_syswm.h>
 #include "android/user-events.h"
 #include <math.h>
@@ -1465,9 +1465,9 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
         user_event_generic( slayout->event_type, slayout->event_code, slayout->event_value );
         /* XXX: hack, replace by better code here */
         if (slayout->event_value != 0)
-            corecmd_set_coarse_orientation( ANDROID_COARSE_PORTRAIT );
+            android_sensors_set_coarse_orientation(ANDROID_COARSE_PORTRAIT);
         else
-            corecmd_set_coarse_orientation( ANDROID_COARSE_LANDSCAPE );
+            android_sensors_set_coarse_orientation(ANDROID_COARSE_LANDSCAPE);
     }
 
     return 0;

@@ -150,11 +150,6 @@ OPT_PARAM( shared_net_id, "<number>", "join the shared network, using IP address
 OPT_PARAM( nand_limits, "<nlimits>", "enforce NAND/Flash read/write thresholds" )
 #endif
 
-#ifdef CONFIG_STANDALONE_UI
-OPT_PARAM( list_cores, "<host>", "list running core process" )
-OPT_PARAM( attach_core, "<console socket>", "attach to a running core process" )
-#endif  // CONFIG_STANDALONE_UI
-
 OPT_PARAM( gpu, "<mode>", "set hardware OpenGLES emulation mode" )
 
 OPT_PARAM( camera_back, "<mode>", "set emulation mode for a camera facing back" )

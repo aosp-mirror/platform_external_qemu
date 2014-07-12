@@ -67,29 +67,16 @@ static kbd_layout_t *parse_keyboard_layout(const name2keysym_t *table,
     /* This file is used by both, UI and core components. There are differences
      * in the way how keymap file path is obtained for these two different
      * configurations. */
-#if defined(CONFIG_STANDALONE_UI)
-    char filename[2048];
-#else
     char * filename;
-#endif  // CONFIG_STANDALONE_UI
     char line[1024];
     int len;
 
-#if defined(CONFIG_STANDALONE_UI)
-    if (android_core_qemu_find_file(QEMU_FILE_TYPE_KEYMAP, language,
-                                    filename, sizeof(filename))) {
-        fprintf(stderr,
-            "Could not read keymap file: '%s'\n", language);
-        return NULL;
-    }
-#else
     filename = qemu_find_file(QEMU_FILE_TYPE_KEYMAP, language);
     if (!filename) {
         fprintf(stderr,
             "Could not read keymap file: '%s'\n", language);
         return NULL;
     }
-#endif  // CONFIG_STANDALONE_UI
 
     if (!k)
 	k = g_malloc0(sizeof(kbd_layout_t));
@@ -98,9 +85,6 @@ static kbd_layout_t *parse_keyboard_layout(const name2keysym_t *table,
 		"Could not read keymap file: '%s'\n", language);
 	return NULL;
     }
-#if defined(CONFIG_STANDALONE_UI)
-    g_free(filename);
-#endif  // CONFIG_STANDALONE_UI
     for(;;) {
 	if (fgets(line, 1024, f) == NULL)
             break;
