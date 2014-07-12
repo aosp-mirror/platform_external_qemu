@@ -332,6 +332,22 @@ getTargetEmulatorPath(const char* progName,
         }
     }
 
+    // Special case: for arm64, first try to find emulator-arm64 before
+    // looking for emulator-arm.
+    if (!strcmp(avdArch, "arm64")) {
+        emulatorSuffix = "arm64";
+
+        D("Looking for emulator backend for %s CPU\n", avdArch);
+
+        result = probeTargetEmulatorPath(progDir,
+                                         emulatorSuffix,
+                                         search_for_64bit_emulator,
+                                         try_current_path);
+        if (result) {
+            return result;
+        }
+    }
+
     // Now for the regular case.
     emulatorSuffix = emulator_getBackendSuffix(avdArch);
     if (!emulatorSuffix) {
