@@ -1,0 +1,42 @@
+##############################################################################
+##############################################################################
+###
+###  emulator-$ARCH: Standalone launcher for QEMU executable.
+###
+###
+EMULATOR_TARGET_CPU := $(EMULATOR_TARGET_ARCH)
+ifeq ($(EMULATOR_TARGET_CPU),x86)
+  EMULATOR_TARGET_CPU := i386
+endif
+
+ifeq ($(EMULATOR_TARGET_CPU),arm64)
+
+qemu_launcher_SOURCES := \
+    android/qemu-launcher/emulator-qemu.cpp \
+    android/cmdline-option.c \
+    android/help.c \
+    android/main-common.c \
+
+qemu_launcher_CFLAGS := -DNO_SKIN=1
+
+qemu_launcher_LDLIBS := -lstdc++
+
+$(call start-emulator-program, emulator-arm64)
+LOCAL_SRC_FILES := $(qemu_launcher_SOURCES)
+LOCAL_CFLAGS := $(qemu_launcher_CFLAGS)
+LOCAL_STATIC_LIBRARIES := \
+    emulator-common
+LOCAL_LDLIBS := $(qemu_launcher_LDLIBS)
+$(call gen-hw-config-defs)
+$(call end-emulator-program)
+
+$(call start-emulator64-program, emulator64-arm64)
+LOCAL_SRC_FILES := $(qemu_launcher_SOURCES)
+LOCAL_CFLAGS := $(qemu_launcher_CFLAGS)
+LOCAL_STATIC_LIBRARIES := \
+    emulator64-common
+LOCAL_LDLIBS := $(qemu_launcher_LDLIBS)
+$(call gen-hw-config-defs)
+$(call end-emulator-program)
+
+endif  # EMULATOR_TARGET_CPU == arm64
