@@ -13,10 +13,10 @@
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
 #include "android/globals.h"
+#include "android/hw-control.h"
 #include "android/qemulator.h"
-#include "android/protocol/core-commands-api.h"
-#include "android/protocol/ui-commands-api.h"
 #include "android/user-events.h"
+#include "telephony/modem_driver.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 static double get_default_scale( AndroidOptions*  opts );
@@ -89,8 +89,9 @@ qemulator_setup( QEmulator*  emulator )
     }
 
     /* initialize hardware control support */
-    uicmd_set_brightness_change_callback(qemulator_light_brightness,
-                                         emulator);
+    AndroidHwControlFuncs funcs;
+    funcs.light_brightness = qemulator_light_brightness;
+    android_hw_control_set(emulator, &funcs);
 }
 
 static void
@@ -252,7 +253,7 @@ qemulator_set_title(QEmulator* emulator)
 static int
 get_device_dpi( AndroidOptions*  opts )
 {
-    int    dpi_device  = corecmd_get_hw_lcd_density();
+    int dpi_device = android_hw->hw_lcd_density;
 
     if (opts->dpi_device != NULL) {
         char*  end;
@@ -393,8 +394,14 @@ handle_key_command( void*  opaque, SkinKeyCommand  command, int  down )
     {
     case SKIN_KEY_COMMAND_TOGGLE_NETWORK:
         {
-            corecmd_toggle_network();
-            D( "network is now %s", corecmd_is_network_disabled() ?
+            qemu_net_disable = !qemu_net_disable;
+            if (android_modem) {
+                amodem_set_data_registration(
+                        android_modem,
+                qemu_net_disable ? A_REGISTRATION_UNREGISTERED
+                    : A_REGISTRATION_HOME);
+            }
+            D( "network is now %s", qemu_net_disable ?
                                     "disconnected" : "connected" );
         }
         break;
@@ -588,7 +595,7 @@ android_emulator_get_keyboard(void)
 }
 
 void
-android_emulator_set_window_scale( double  scale, int  is_dpi )
+android_emulator_set_window_scale(double  scale, int  is_dpi)
 {
     QEmulator*  emulator = qemulator;
 

@@ -309,8 +309,6 @@ common_LOCAL_SRC_FILES := \
     android/main-common-ui.c \
     android/main.c \
     android/opengles.c \
-    android/protocol/core-commands-qemu.c \
-    android/protocol/ui-commands-qemu.c \
     android/user-events-qemu.c \
     hw/core/loader.c \
     ui/keymaps.c \
