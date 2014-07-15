@@ -13,6 +13,8 @@
 #define ANDROID_KERNEL_KERNEL_UTILS_H
 
 #include "android/utils/compiler.h"
+
+#include <stddef.h>
 #include <stdint.h>
 
 ANDROID_BEGIN_HEADER
@@ -20,24 +22,36 @@ ANDROID_BEGIN_HEADER
 // An enum used to list of the types of Linux kernel images we need to
 // handle. Unfortunately, this affects how we setup the kernel command-line
 // when launching the system.
-//
-// KERNEL_TYPE_LEGACY is any Linux kernel image before 3.10
-// KERNEL_TYPE_3_10_OR_ABOVE is anything at 3.10 or above.
 typedef enum {
-    KERNEL_TYPE_LEGACY = 0,
-    KERNEL_TYPE_3_10_OR_ABOVE = 1,
-} KernelType;
+    KERNEL_VERSION_2_6_29 = 0x02061d,
+    KERNEL_VERSION_3_4_0  = 0x030400,
+    KERNEL_VERSION_3_4_67 = 0x030443,
+    KERNEL_VERSION_3_10_0 = 0x030a00,
+} KernelVersion;
 
-// Probe the kernel image at |kernelPath| and returns the corresponding
-// KernelType value. On success, returns true and sets |*ktype| appropriately.
+// Converts a string at |versionString| in the format "Linux version MM.mm.rr..."
+// into a hex value 0x00MMmmrr.  On success, returns true and sets |*kernelVersion|
+// appropriately
+// On failure, returns false and doesn't touch |*kernelVersion|.
+bool android_parseLinuxVersionString(const char* versionString,
+                                     KernelVersion* kernelVersion);
+
+// Probe the kernel image at |kernelPath| and copy the corresponding
+// 'Linux version ' string into the |dst| buffer.  On success, returns true
+// and copies up to |dstLen-1| characters into dst.  dst will always be NUL
+// terminated if |dstLen| >= 1
+//
 // On failure (e.g. if the file doesn't exist or cannot be probed), return
-// false and doesn't touch |*ktype|.
-bool android_pathProbeKernelType(const char* kernelPath, KernelType *ktype);
+// false and doesn't touch |dst| buffer.
+bool android_pathProbeKernelVersionString(const char* kernelPath,
+                                          char* dst,
+                                          size_t dstLen);
 
-// Return the serial device name prefix matching a given kernel type |ktype|.
-// I.e. this should be "/dev/ttyS" for KERNEL_TYPE_LEGACY, and
-// "/dev/ttyGF" for KERNEL_TYPE_3_10_OR_ABOVE.
-const char* android_kernelSerialDevicePrefix(KernelType ktype);
+// Return the serial device name prefix matching a given kernel type 
+// |kernelVersion|.  I.e. this should be "/dev/ttyS" for before 3.10.0 and 
+// "/dev/ttyGF" for 3.10.0 and later.
+const char* android_kernelSerialDevicePrefix(KernelVersion kernelVersion);
+
 
 ANDROID_END_HEADER
 
