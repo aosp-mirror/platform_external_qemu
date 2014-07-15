@@ -150,6 +150,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/stralloc.c \
 	android/utils/system.c \
 	android/utils/tempfile.c \
+	android/utils/uncompress.cpp \
 	android/utils/vector.c \
 	android/utils/win32_cmdline_quote.c \
 
