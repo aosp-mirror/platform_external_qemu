@@ -1,0 +1,209 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "19dfc824_5ea0958f",
+        "filename": "android/looper-generic.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-15T08:40:39Z",
+      "side": 1,
+      "message": "note: I\u0027ve added proper C++ inclusion guards to the headers under android/utils/ so this extern \"C\" should no longer be necessary (see commit f0c747e01328e713891f2fa66c4f9df64f580dc2)",
+      "revId": "d987057d968fb25b7863d5e469f6d3f5df537282",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19dfc824_7ea5519e",
+        "filename": "android/looper-generic.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-15T08:40:39Z",
+      "side": 1,
+      "message": "I see what you did here. Can you put this change into its own patch though. lgtm after all.",
+      "revId": "d987057d968fb25b7863d5e469f6d3f5df537282",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9dbd436_dd83cb7a",
+        "filename": "android/utils/refset.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-15T08:40:39Z",
+      "side": 1,
+      "message": "please put also this change in its own patch :)",
+      "range": {
+        "startLine": 120,
+        "startChar": 8,
+        "endLine": 120,
+        "endChar": 26
+      },
+      "revId": "d987057d968fb25b7863d5e469f6d3f5df537282",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19dfc824_deb3c5e8",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-15T08:40:39Z",
+      "side": 1,
+      "message": "mDevices might be a better name here (it is style compliant and more explicit).",
+      "revId": "d987057d968fb25b7863d5e469f6d3f5df537282",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39dacc33_5f288b08",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-15T08:40:39Z",
+      "side": 1,
+      "message": "Don\u0027t use MACRO_CAPITALS for types, even if they are enum, just use CamelCase as usual, and try to make the name more explicit, as in \"CommunicationState\"\n\nIt\u0027s also generally a good idea to document the values of an enum when there are more than 2 or 3 of them. Especially since this is a state-machine, document the possible transitions between these values, this will help better understand the rest of the code.",
+      "range": {
+        "startLine": 63,
+        "startChar": 9,
+        "endLine": 63,
+        "endChar": 19
+      },
+      "revId": "d987057d968fb25b7863d5e469f6d3f5df537282",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39dacc33_7f2d4f17",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-15T08:40:39Z",
+      "side": 1,
+      "message": "I would stick to the default style which puts the comma at the end of the value declaration instead.",
+      "revId": "d987057d968fb25b7863d5e469f6d3f5df537282",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9dbd436_3d62ef19",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-15T08:40:39Z",
+      "side": 1,
+      "message": "MessageType would be better.",
+      "revId": "d987057d968fb25b7863d5e469f6d3f5df537282",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9dbd436_5d67bb28",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-15T08:40:39Z",
+      "side": 1,
+      "message": "\"Talks\" is a bit generic, and the function\u0027s name doesn\u0027t convey enough meaning. Maybe change this to:\n\n  static void _handle_adb_fd_events(...) {\n      ...\n  }\n\nAnd below:\n\n  static void _handle_console_fd_events(...) {\n  }",
+      "revId": "d987057d968fb25b7863d5e469f6d3f5df537282",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39dacc33_9f4133c0",
+        "filename": "android/wear-agent/PairUpWearPhone.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-15T08:40:39Z",
+      "side": 1,
+      "message": "be wary of using asserts(), since you\u0027re communicating with a third-party process which behaviour you don\u0027t strictly control. It might be better to detect an inconsistent state and fallback on something safer that doesn\u0027t risk crashing the emulator.",
+      "revId": "d987057d968fb25b7863d5e469f6d3f5df537282",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19dfc824_feb081de",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-15T08:40:39Z",
+      "side": 1,
+      "message": "nit: Prefer kDefaultReadBufferSize here.\n\nTechnically, you cannot define a static member variable in a C++ class definition (this is a GCC extension, IIRC), and the right way to do it for integers is to use an enum as in:\n\n  enum {\n    kDefaultReadBufferSize \u003d 1024;\n  }\n\nBut I wouldn\u0027t worry about it, just mentioning it in passing (I\u0027m sure my own C++ code isn\u0027t too clean too :-))",
+      "range": {
+        "startLine": 61,
+        "startChar": 21,
+        "endLine": 61,
+        "endChar": 45
+      },
+      "revId": "d987057d968fb25b7863d5e469f6d3f5df537282",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39dacc33_bf3ef742",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-15T08:40:39Z",
+      "side": 1,
+      "message": "try putting the start near the type instead.",
+      "revId": "d987057d968fb25b7863d5e469f6d3f5df537282",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
