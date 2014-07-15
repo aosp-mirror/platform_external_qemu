@@ -76,6 +76,26 @@ run2 () {
     esac
 }
 
+# Return the value of a given named variable.
+# $1: Variable name.
+# Out: Variable value as single string
+var_value () {
+    eval printf %s \"\$$1\"
+}
+
+# Assign a named variable to a specific value.
+# $1: Variable name
+# $2+: Variable value
+var_assign () {
+    local __var_assign_name=$1
+    local __var_assign_value
+    shift
+    # Escape any single quote in the value.
+    __var_assign_value=$(printf "%s" "$*" | sed -e "s/'/\\'/g")
+    # Assign the value to the variable.
+    eval $__var_assign_name=\'"$__var_assign_value"\'
+}
+
 # $1: Source directory.
 # $2: Destination directory.
 # $3: List of files to copy, relative to $1 (if empty, all files will be copied).
@@ -162,11 +182,12 @@ extract_git_commit_description () {
     VARNAME=$1
     GIT_DIR=$2
     # Extract the commit description, then escape (') characters in it.
-    SHA1=$(cd $GIT_DIR && git log --oneline -1 .) || \
+    SHA1=$(cd $GIT_DIR && git log --oneline --no-merges -1 .) || \
         panic "Not a Git directory: $GIT_DIR"
 
-    SHA1=$(printf "%s" "$SHA1" | sed -e "s/'/\\'/g")
-    eval $VARNAME=\'$SHA1\'
+    var_assign ${VARNAME}__TEXT "$SHA1"
+    SHA1=$(echo "$SHA1" | awk '{ print $1; }')
+    var_assign ${VARNAME} $SHA1
 }
 
 # Defaults.
@@ -327,6 +348,7 @@ if [ "$DARWIN_SSH" ]; then
     SYSTEMS="$SYSTEMS darwin"
 fi
 
+TARGET_AOSP=
 if [ "$OPT_COPY_PREBUILTS" ]; then
     if [ -z "$DARWIN_SSH" ]; then
         panic "The --copy-prebuilts=<dir> option requires --darwin-ssh=<host>."
@@ -336,7 +358,15 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
         panic "Not an AOSP checkout / workspace: $TARGET_AOSP"
     fi
     TARGET_PREBUILTS_DIR=$TARGET_AOSP/prebuilts/android-emulator
+    log "Using AOSP prebuilts directory: $TARGET_PREBUILTS_DIR"
     mkdir -p "$TARGET_PREBUILTS_DIR"
+elif [ -f "$PROGDIR/../../../build/envsetup.sh" ]; then
+    TARGET_AOSP=$(cd $PROGDIR/../../.. && pwd -P)
+    log "Found AOSP checkout directory: $TARGET_AOSP"
+    TARGET_PREBUILTS_DIR=$TARGET_AOSP/prebuilts/android-emulator
+    if [ ! -d "$TARGET_PREBUILTS_DIR" ]; then
+        TARGET_PREBUILTS_DIR=
+    fi
 fi
 
 case $VERBOSE in
@@ -389,33 +419,66 @@ if [ "$UNCHECKED_FILES" ]; then
     exit 1
 fi
 
-extract_git_commit_description QEMU_GIT_COMMIT "$QEMU_DIR"
-GTEST_DIR=$(dirname $QEMU_DIR)/gtest
-if [ ! -d "$GTEST_DIR" ]; then
-  panic "Cannot find GoogleTest source directory: $GTEST_DIR"
-fi
-log "Found GoogleTest directory: $GTEST_DIR"
-extract_git_commit_description GTEST_GIT_COMMIT "$GTEST_DIR"
+get_aosp_subdir_varname () {
+    local __aosp_subdir="$1"
+    echo "AOSP_COMMIT_$(printf "%s" "$__aosp_subdir" | tr '/' '_')"
+}
 
-EMUGL_DIR=$QEMU_DIR/../../sdk/emulator/opengl
-if [ ! -d "$EMUGL_DIR" ]; then
-  panic "Cannot find GPU emulation source directory: $EMUGL_DIR"
-fi
-log "Found GPU emulation directory: $EMUGL_DIR"
-extract_git_commit_description EMUGL_GIT_COMMIT "$EMUGL_DIR"
+get_aosp_subdir_commit () {
+    var_value $(get_aosp_subdir_varname $1)
+}
+
+get_aosp_subdir_commit_description () {
+    var_value $(get_aosp_subdir_varname $1)__TEXT
+}
+
+# $1: Variable name
+# $2: Path to README file
+# $3: AOSP source sub-directory (e.g. external/qemu)
+extract_previous_git_commit_from_readme () {
+    local SHA1
+    SHA1=$(awk '$1 == "'$3'" { print $2; }' "$2")
+    var_assign $1 "$SHA1"
+}
+
+# $1: AOSP sub-directory.
+extract_subdir_git_history () {
+    local VARNAME="$(get_aosp_subdir_varname $1)"
+    local SUBDIR="$TARGET_AOSP/$1"
+    if [ ! -d "$SUBDIR" ]; then
+        panic "Missing required source directory: $SUBDIR"
+    fi
+    log "Found source directory: $SUBDIR"
+    extract_git_commit_description $VARNAME "$SUBDIR"
+    log "Found current $1 commit: $(var_value $VARNAME)"
+    # If there is an old prebuilts directory somewhere, read
+    # the old README file to extract the previous commits there.
+    if [ "$TARGET_PREBUILTS_DIR" ]; then
+        README_FILE=$TARGET_PREBUILTS_DIR/README
+        if [ -f "$README_FILE" ]; then
+            extract_previous_git_commit_from_readme \
+                PREV_$VARNAME "$README_FILE" "$1"
+            log "Found previous $1 commit: $(var_value PREV_$VARNAME)"
+        fi
+    fi
+}
+
+# The list of AOSP directories that contain relevant sources for this
+# script.
+AOSP_SOURCE_SUBDIRS="external/qemu sdk/emulator/opengl external/gtest"
+
+for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
+    extract_subdir_git_history $AOSP_SUBDIR
+done
 
 SOURCES_PKG_FILE=
 if [ "$OPT_SOURCES" ]; then
     BUILD_DIR=$TEMP_BUILD_DIR/sources/$PKG_PREFIX-$PKG_REVISION
     PKG_NAME="$PKG_REVISION-sources"
-    dump "[$PKG_NAME] Copying GoogleTest source files."
-    copy_directory_git_files "$GTEST_DIR" "$BUILD_DIR"/gtest
-
-    dump "[$PKG_NAME] Copying Emulator source files."
-    copy_directory_git_files "$QEMU_DIR" "$BUILD_DIR"/qemu
-
-    dump "[$PKG_NAME] Copying GPU emulation library sources."
-    copy_directory_git_files "$EMUGL_DIR" "$BUILD_DIR"/opengl
+    for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
+        dump "[$PKG_NAME] Copying $AOSP_SUBDIR source files."
+        copy_directory_git_files "$TARGET_AOSP/$AOSP_SUBDIR" "$BUILD_DIR"/$(basename $AOSP_SUBDIR)
+    done
 
     dump "[$PKG_NAME] Generating README file."
     cat > "$BUILD_DIR"/README <<EOF
@@ -428,16 +491,13 @@ EOF
 #!/bin/sh
 
 # Auto-generated script used to rebuild the Android emulator binaries
-# from sources. Note that this does not include the GLES emulation
-# libraries.
+# from sources.
 
 cd \$(dirname "\$0") &&
 (cd qemu && ./android-rebuild.sh --ignore-audio) &&
 mkdir -p bin/ &&
 cp -rfp qemu/objs/emulator* bin/ &&
 echo "Emulator binaries are under \$(pwd -P)/bin/"
-echo "IMPORTANT: The GLES emulation libraries must be copied to:"
-echo "    \$(pwd -P)/bin/lib"
 EOF
 
     chmod +x "$BUILD_DIR"/rebuild.sh
@@ -524,13 +584,19 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
         for ARCH in arm x86 mips; do
             FILES="$FILES emulator64-$ARCH"
         done
+        for ARCH in x86_64 arm64; do
+            if [ -f "$SRC_DIR/tools/emulator64-$ARCH" ]; then
+                FILES="$FILES emulator64-$ARCH"
+            fi
+        done
         for LIB in OpenglRender EGL_translator GLES_CM_translator GLES_V2_translator; do
             FILES="$FILES lib/lib64$LIB$DLLEXT"
         done
-        (run cd "$SRC_DIR/tools" && tar cf - $FILES) | (cd $DST_DIR && tar xf -) ||
+        (cd "$SRC_DIR/tools" && tar cf - $FILES) | (cd $DST_DIR && tar xf -) ||
                 panic "Could not copy binaries to $DST_DIR"
     done
-    cat > $TARGET_PREBUILTS_DIR/README <<EOF
+    README_FILE=$TARGET_PREBUILTS_DIR/README
+    cat > $README_FILE <<EOF
 This directory contains prebuilt emulator binaries that were generated by
 running the following command on a 64-bit Linux machine:
 
@@ -543,11 +609,33 @@ path of this AOSP repo workspace.
 
 Below is the list of specific commits for each input directory used:
 
-external/gtest       $GTEST_GIT_COMMIT
-external/qemu        $QEMU_GIT_COMMIT
-sdk/emulator/opengl  $EMUGL_GIT_COMMIT
+EOF
+    for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
+        printf "%-20s %s\n" "$AOSP_SUBDIR" "$(get_aosp_subdir_commit_description $AOSP_SUBDIR)" >> $README_FILE
+    done
+
+    cat >> $README_FILE <<EOF
+
+Summary of changes:
 
 EOF
+    for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
+        VARNAME=$(get_aosp_subdir_varname $AOSP_SUBDIR)
+        CUR_SHA1=$(var_value $VARNAME)
+        PREV_SHA1=$(var_value PREV_$VARNAME)
+        if [ "$CUR_SHA1" != "$PREV_SHA1" ]; then
+            GIT_LOG_COMMAND="cd $AOSP_SUBDIR && git log --oneline --no-merges $PREV_SHA1..$CUR_SHA1"
+            printf "    $ %s\n" "$GIT_LOG_COMMAND" >> $README_FILE
+            (cd $TARGET_AOSP && eval $GIT_LOG_COMMAND) | while read LINE; do
+                printf "        %s\n" "$LINE" >> $README_FILE
+            done
+            printf "\n" >> $README_FILE
+        else
+            cat >> $README_FILE <<EOF
+    # No changes to $AOSP_SUBDIR
+EOF
+        fi
+    done
 fi
 
 dump "Done. See $PKG_DIR"
