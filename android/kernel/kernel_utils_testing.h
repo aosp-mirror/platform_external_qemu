@@ -12,36 +12,17 @@
 #ifndef ANDROID_KERNEL_KERNEL_UTILS_TESTING_H
 #define ANDROID_KERNEL_KERNEL_UTILS_TESTING_H
 
-namespace android {
-
-namespace base {
-class String;
-}  // namespace base
-
-namespace kernel {
-
-// Type of a function used to retrieve the textual description of a given
-// file at |filePath|. On success, return true and sets |*text| to the
-// description text, as if running through the 'file' command on Unix.
-// |opaque| is a client-provided value set by calling
-// setFileDescriptionFunction() below.
-typedef bool (GetFileDescriptionFunction)(void* opaque,
-                                          const char* filePath,
-                                          android::base::String* text);
-
-// Change the implementation of the function that extracts textual
-// descriptions from a given file. |file_func| is a pointer to the
-// new function, and |file_opaque| is the value that will be passed
-// as its first parameter. Note that if |file_func| is NULL, the
-// default implementation will be selected instead.
+// Probe the kernel image at |kernelPath| and copy the corresponding
+// 'Linux version ' string into the |dst| buffer.  On success, returns true
+// and copies up to |dstLen-1| characters into dst.  dst will always be NUL
+// terminated if |dstLen| >= 1
 //
-// Only use this during unit-testing to force different description
-// values on arbitrary file content.
-void setFileDescriptionFunction(GetFileDescriptionFunction* file_func,
-                                void* file_opaque);
+// On failure (e.g. if the file doesn't exist or cannot be probed), return
+// false and doesn't touch |dst| buffer.
+bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
+                                           size_t kernelFileSize,
+                                           char* dst,
+                                           size_t dstLen);
 
-}  // namespace kernel
-
-}  // namespace android
 
 #endif  // ANDROID_KERNEL_KERNEL_UTILS_TESTING_H
