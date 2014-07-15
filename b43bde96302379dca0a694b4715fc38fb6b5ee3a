@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "19dfc824_7ece316a",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-15T07:32:48Z",
+      "side": 1,
+      "message": "\"\u003d\u003d\" is a bash-ism, and I\u0027d like to keep this script strictly Posix (I know, I know). Can you replace that with \"\u003d\" instead.\n\nApart from that, lgtm :)",
+      "range": {
+        "startLine": 241,
+        "startChar": 20,
+        "endLine": 241,
+        "endChar": 22
+      },
+      "revId": "b43bde96302379dca0a694b4715fc38fb6b5ee3a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
