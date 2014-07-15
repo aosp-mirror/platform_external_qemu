@@ -80,6 +80,20 @@ TEST_F(RamdiskExtractorTest, FindBar2) {
     free(out);
 }
 
+TEST_F(RamdiskExtractorTest, FindZoo) {
+    static const char kExpected[] = "Meow!!\n";
+    static const size_t kExpectedSize = sizeof(kExpected) - 1U;
+    char* out = NULL;
+    size_t outSize = 0;
+
+    EXPECT_TRUE(fillData(kTestRamdiskImage, kTestRamdiskImageSize));
+    EXPECT_TRUE(android_extractRamdiskFile(path(), "zoo", &out, &outSize));
+    EXPECT_EQ(kExpectedSize, outSize);
+    EXPECT_TRUE(out);
+    EXPECT_TRUE(!memcmp(out, kExpected, outSize));
+    free(out);
+}
+
 TEST_F(RamdiskExtractorTest, MissingFile) {
     char* out = NULL;
     size_t outSize = 0;

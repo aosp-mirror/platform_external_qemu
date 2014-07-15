@@ -258,7 +258,7 @@ bool android_extractRamdiskFile(const char* ramdiskPath,
 
         // The file data is 4-byte padded with NUL bytes too.
         size_t skipFile = (entrySize + 3) & ~3;
-        size_t skipCount = 0;
+        size_t skipCount = skipName + skipFile;
 
         // Last record is named 'TRAILER!!!' and indicates end of archive.
         static const char kTrailer[] = "TRAILER!!!";
@@ -267,7 +267,6 @@ bool android_extractRamdiskFile(const char* ramdiskPath,
         if ((entrySize == 0 || nameSize != fileNameLen + 1U) &&
             nameSize != kTrailerSize + 1U) {
             D("---- %d Skipping\n", __LINE__);
-            skipCount = skipName + skipFile;
         } else {
             // Read the name and compare it.
             nameSize -= 1U;
