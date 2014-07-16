@@ -50,6 +50,7 @@
 
 #include "migration/qemu-file.h"
 #include "android/android.h"
+#include "android/base/SocketDrainer.h"
 #include "android/charpipe.h"
 #include "android/log-rotate.h"
 #include "modem_driver.h"
@@ -2382,6 +2383,8 @@ int main(int argc, char **argv, char **envp)
     android_hw_control_init();
     android_net_pipes_init();
 
+    start_socket_drainer(looper_newCore());
+
 #ifdef CONFIG_KVM
     /* By default, force auto-detection for kvm */
     kvm_allowed = -1;
@@ -4235,6 +4238,8 @@ int main(int argc, char **argv, char **envp)
     main_loop();
     quit_timers();
     net_cleanup();
+    stop_socket_drainer();
+
     android_emulation_teardown();
     return 0;
 }
