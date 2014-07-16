@@ -146,7 +146,7 @@ static x86_def_t x86_defs[] = {
             CPUID_MTRR | CPUID_CLFLUSH | CPUID_MCA |
         /* this feature is needed for Solaris and isn't fully implemented */
             CPUID_PSE36,
-        .ext_features = CPUID_EXT_SSE3,
+        .ext_features = CPUID_EXT_SSE3 | CPUID_EXT_SSSE3,
         .ext2_features = (PPRO_FEATURES & 0x0183F3FF) |
             CPUID_EXT2_LM | CPUID_EXT2_SYSCALL | CPUID_EXT2_NX |
             CPUID_EXT2_3DNOW | CPUID_EXT2_3DNOWEXT,
