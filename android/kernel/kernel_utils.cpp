@@ -9,14 +9,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/kernel/kernel_utils.h"
-
+#include "android/base/containers/PodVector.h"
+#include "android/base/Limits.h"
 #include "android/base/Log.h"
-#include "android/base/files/ScopedStdioFile.h"
-#include "android/base/String.h"
+#include "android/kernel/kernel_utils.h"
 #include "android/kernel/kernel_utils_testing.h"
+#include "android/utils/file_data.h"
 #include "android/utils/path.h"
+#include "android/utils/uncompress.h"
 
+#include <algorithm>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,144 +32,179 @@
 #define KERNEL_ERROR   LOG_IF(ERROR, DEBUG_KERNEL)
 #define KERNEL_PERROR  PLOG_IF(ERROR, DEBUG_KERNEL)
 
-using android::base::String;
-
-namespace {
-
-#ifndef _WIN32
-// Helper class to perform launch a command through popen() and call
-// pclose() on destruction.
-class ScopedPopenFile {
-public:
-    ScopedPopenFile(const char* command) {
-        mFile = ::popen(command, "r");
-    }
-
-    FILE* get() const { return mFile; }
-
-    ~ScopedPopenFile() {
-        if (mFile) {
-            ::pclose(mFile);
-        }
-    }
-
-private:
-    FILE* mFile;
-};
-#endif  // !_WIN32
-
-bool getFileDescription(void* opaque, const char* filePath, String* text) {
-    if (!filePath) {
-        KERNEL_ERROR << "NULL path parameter";
-        return false;
-    }
-
-    if (!path_exists(filePath)) {
-        KERNEL_ERROR << "Kernel file doesn't exist: " << filePath;
-        return false;
-    }
-
-#ifdef _WIN32
-    // TODO(digit): Better/portable detection based on libmagic or something.
-    KERNEL_ERROR << "Can't detect kernel version on Windows!";
-    return false;
-#else
-    // NOTE: Use /usr/bin/file instead of 'file' because the latter can
-    // be broken in certain environments (e.g. some versions of MacPorts).
-    String command("/usr/bin/file ");
-    command += filePath;
-
-    ScopedPopenFile file(command.c_str());
-    if (!file.get()) {
-        KERNEL_PERROR << "Could not launch command: " << command.c_str();
-        return false;
-    }
-
-    String result;
-    const size_t kReserveSize = 256U;
-    result.resize(kReserveSize);
-
-    int ret = ::fread(&result[0], 1, kReserveSize, file.get());
-    if (ret < static_cast<int>(kReserveSize) && ferror(file.get())) {
-        KERNEL_ERROR << "Could not read file command output!?";
-        return false;
-    }
-    result.resize(ret);
-    text->assign(result);
-    return true;
-#endif
-}
-
-android::kernel::GetFileDescriptionFunction* sGetFileDescription =
-        getFileDescription;
-
-void* sGetFileDescriptionOpaque = NULL;
-
-}  // namespace
+using android::base::PodVector;
 
 namespace android {
 namespace kernel {
 
-void setFileDescriptionFunction(GetFileDescriptionFunction* file_func,
-                                void* file_opaque) {
-    sGetFileDescription = file_func ? file_func : &getFileDescription;
-    sGetFileDescriptionOpaque = file_func ? file_opaque : NULL;
-}
+static const char kVersionStringPrefix[] = "Linux version ";
+static const size_t kVersionStringPrefixLen = sizeof(kVersionStringPrefix) - 1U;
 
 }  // namespace kernel
 }  // namespace android
 
-bool android_pathProbeKernelType(const char* kernelPath, KernelType* ktype) {
-    String description;
+#ifndef __APPLE__
+size_t strlcpy(char* dst, const char * src, size_t size)
+{
+    size_t srcLen = strlen(src);
+    if (size > 0) {
+        size_t copyLen = std::min(srcLen, size-1);
+        memcpy(dst, src, copyLen);
+        dst[copyLen] = 0;
+    }
+    return srcLen;
+}
+#endif
 
-    if (!sGetFileDescription(sGetFileDescriptionOpaque,
-                             kernelPath,
-                             &description)) {
-        return false;
+#ifdef _WIN32
+// TODO: (vharron) move somewhere more generally useful?
+// Returns a pointer to the first occurrence of |needle| in |haystack|, or a 
+// NULL pointer if |needle| is not part of |haystack|.
+const void* memmem(const void* haystack, size_t haystackLen,
+                   const void* needle, size_t needleLen) {
+    if (needleLen == 0 ) {
+        return haystack;
     }
-    const char* bzImage = ::strstr(description.c_str(), "bzImage");
-    if (!bzImage) {
-        KERNEL_ERROR << "Not a compressed Linux kernel image!";
-        return false;
-    }
-    const char* version = ::strstr(bzImage, "version ");
-    if (!version) {
-        KERNEL_ERROR << "Could not determine version!";
-        return false;
-    }
-    version += ::strlen("version ");
-    KERNEL_LOG << "Found kernel version " << version;
 
-    char* end;
-    unsigned long major = ::strtoul(version, &end, 10);
-    if (end == version || *end != '.') {
-        KERNEL_ERROR << "Could not find kernel major version!";
+    if (haystackLen < needleLen) {
+        return NULL;
+    }
+
+    const char* haystackPos = (const char*)haystack;
+    const char* haystackEnd = haystackPos + (haystackLen - needleLen);
+    for (; haystackPos < haystackEnd; haystackPos++) {
+        if (0==memcmp(haystackPos, needle, needleLen)) {
+            return haystackPos;
+        }
+    }
+    return NULL;
+}
+#endif
+
+
+bool android_parseLinuxVersionString(const char* versionString,
+                                     KernelVersion* kernelVersion) {
+    if (strncmp(versionString, android::kernel::kVersionStringPrefix,
+                android::kernel::kVersionStringPrefixLen)) {
+        KERNEL_ERROR << "unsupported kernel version string:" << versionString;
         return false;
     }
-    KERNEL_LOG << "Kernel major version: " << major;
-    if (major > 3) {
-        *ktype = KERNEL_TYPE_3_10_OR_ABOVE;
-    } else if (major < 3) {
-        *ktype = KERNEL_TYPE_LEGACY;
-    } else /* major == 3 */ {
-        version = end + 1;
-        unsigned long minor = ::strtoul(version, &end, 10);
-        if (end == version) {
-            KERNEL_ERROR << "Could not find kernel minor version!";
+    // skip past the prefix to the version number
+    versionString += android::kernel::kVersionStringPrefixLen;
+
+    uint32_t temp = 0;
+    for (int i = 0; i < 3; i++) {
+        // skip '.' delimeters
+        while (i > 0 && *versionString == '.') {
+            versionString++;
+        }
+
+        char* end;
+        unsigned long number = ::strtoul(versionString, &end, 10);
+        if (end == versionString || number > 0xff) {
+            KERNEL_ERROR << "unsupported kernel version string:"
+                         << versionString;
             return false;
         }
-        KERNEL_LOG << "Kernel minor version: " << minor;
-
-        *ktype = (minor >= 10)
-                ? KERNEL_TYPE_3_10_OR_ABOVE : KERNEL_TYPE_LEGACY;
+        temp <<= 8;
+        temp |= number;
+        versionString = end;
     }
+    *kernelVersion = (KernelVersion)temp;
+
+    KERNEL_LOG << android::base::LogString("Kernel version hex 0x%06x", temp);
     return true;
 }
 
-const char* android_kernelSerialDevicePrefix(KernelType ktype) {
-    switch (ktype) {
-        case KERNEL_TYPE_LEGACY: return "ttyS";
-        case KERNEL_TYPE_3_10_OR_ABOVE: return "ttyGF";
-        default: return "";
+const char* android_kernelSerialDevicePrefix(KernelVersion kernelVersion) {
+    if (kernelVersion >= KERNEL_VERSION_3_10_0) {
+        return "ttyGF";
     }
+    return "ttyS";
+}
+
+bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
+                                           size_t kernelFileSize,
+                                           char* dst/*[dstLen]*/,
+                                           size_t dstLen) {
+    PodVector<uint8_t> uncompressed;
+
+    const uint8_t* uncompressedKernel = NULL;
+    size_t uncompressedKernelLen = 0;
+
+    const char kElfHeader[] = { 0x7f, 'E', 'L', 'F' };
+
+    if (kernelFileSize < sizeof(kElfHeader)) {
+        KERNEL_ERROR << "Kernel image too short";
+        return false;
+    }
+
+    if (0 == memcmp(kElfHeader, kernelFileData, sizeof(kElfHeader))) {
+        // this is an uncompressed ELF file (probably mips)
+        uncompressedKernel = kernelFileData;
+        uncompressedKernelLen = kernelFileSize;
+    }
+    else {
+        // handle compressed kernels here
+        const uint8_t kGZipMagic[4] = { 0x1f, 0x8b, 0x08, 0x00 };
+        const uint8_t* compressedKernel = (const uint8_t*)memmem(kernelFileData,
+                                                                 kernelFileSize,
+                                                                 kGZipMagic,
+                                                                 sizeof(kGZipMagic));
+        if (!compressedKernel) {
+            KERNEL_ERROR << "Could not find gzip header in kernel file!";
+            return false;
+        }
+
+        size_t compressedKernelLen = kernelFileSize -
+            (compressedKernel - kernelFileData);
+
+        // inflate ratios for all prebuilt kernels on 2014-07-14 is 1.9:1 ~
+        // 3.43:1 not sure how big the uncompressed size is, so make an
+        // absurdly large buffer
+        uncompressedKernelLen = compressedKernelLen * 10;
+        uncompressed.resize(uncompressedKernelLen);
+        uncompressedKernel = uncompressed.begin();
+
+        bool zOk = uncompress_gzipStream(uncompressed.begin(),
+                                         &uncompressedKernelLen,
+                                         compressedKernel,
+                                         compressedKernelLen);
+        if (!zOk) {
+            KERNEL_ERROR << "Kernel decompression error";
+            // it may have been partially decompressed, so we're going to 
+            // try to find the version string anyway
+        }
+    }
+
+    // okay, now we have a pointer to an uncompressed kernel, let's find the
+    // version string
+    const char* versionStringStart = (const char*)memmem(
+        uncompressedKernel,
+        uncompressedKernelLen,
+        android::kernel::kVersionStringPrefix,
+        android::kernel::kVersionStringPrefixLen);
+    if (!versionStringStart) {
+        KERNEL_ERROR << "Could not find 'Linux version ' in kernel!";
+        return false;
+    }
+
+    strlcpy(dst, versionStringStart, dstLen);
+
+    return true;
+}
+
+bool android_pathProbeKernelVersionString(const char* kernelPath,
+                                          char* dst/*[dstLen]*/,
+                                          size_t dstLen) {
+    FileData kernelFileData;
+    if (fileData_initFromFile(&kernelFileData, kernelPath) < 0) {
+        KERNEL_ERROR << "Could not open kernel file!";
+        return false;
+    }
+
+    return android_imageProbeKernelVersionString(kernelFileData.data,
+                                                 kernelFileData.size,
+                                                 dst,
+                                                 dstLen);
 }

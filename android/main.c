@@ -453,17 +453,26 @@ int main(int argc, char **argv)
          }
     }
 
-    KernelType kernelType = KERNEL_TYPE_LEGACY;
-    if (!android_pathProbeKernelType(hw->kernel_path, &kernelType)) {
-        D("WARNING: Could not determine kernel device naming scheme. Assuming legacy\n"
-            "If this AVD doesn't boot, and uses a recent kernel (3.10 or above) try setting\n"
-            "'kernel.newDeviceNaming' to 'yes' in its configuration.\n");
+    char versionString[256];
+    if (!android_pathProbeKernelVersionString(hw->kernel_path,
+                                              versionString,
+                                              sizeof(versionString))) {
+        derror("Can't find 'Linux version ' string in kernel image file: %s",
+               hw->kernel_path);
+        exit(2);
+    }
+
+    KernelVersion kernelVersion = 0;
+    if (!android_parseLinuxVersionString(versionString, &kernelVersion)) {
+        derror("Can't parse 'Linux version ' string in kernel image file: '%s'",
+               versionString);
+        exit(2);
     }
 
     // Auto-detect kernel device naming scheme if needed.
     if (androidHwConfig_getKernelDeviceNaming(hw) < 0) {
         const char* newDeviceNaming = "no";
-        if (kernelType == KERNEL_TYPE_3_10_OR_ABOVE) {
+        if (kernelVersion >= KERNEL_VERSION_3_10_0) {
             D("Auto-detect: Kernel image requires new device naming scheme.");
             newDeviceNaming = "yes";
         } else {
