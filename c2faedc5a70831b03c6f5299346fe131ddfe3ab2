@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39a64cd4_7f15af5a",
+        "filename": "android/kernel/kernel_utils.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T21:16:53Z",
+      "side": 1,
+      "message": "Argh, seriously, didn\u0027t know that the Windows runtime didn\u0027t provide this function. Thanks for adding this.",
+      "revId": "c2faedc5a70831b03c6f5299346fe131ddfe3ab2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99c0186a_1a1c7d84",
+        "filename": "android/kernel/testing/print_mock_kernel_data.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T21:16:53Z",
+      "side": 1,
+      "message": "nice, thanks ! :-)",
+      "range": {
+        "startLine": 25,
+        "startChar": 57,
+        "endLine": 25,
+        "endChar": 61
+      },
+      "revId": "c2faedc5a70831b03c6f5299346fe131ddfe3ab2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
