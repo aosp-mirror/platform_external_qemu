@@ -1,0 +1,300 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "198d0845_8ee49bb3",
+        "filename": "android/kernel/kernel_utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "nit: This looks like a reimplementation of memmem(), why not just use it instead ?",
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9961058_2ca81361",
+        "filename": "android/kernel/kernel_utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "nit: Use a static const array instead, as in:\n\n  static const char kVersionStringPrefix[] \u003d \"Linux version \";\n  static const size_t kVersionStringPrefixLen \u003d sizeof(kVersionStringPrefix) - 1U;\n\nThis avoids a static C++ constructor on the line below.",
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9961058_6cb21bd3",
+        "filename": "android/kernel/kernel_utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "Oops: if |size| is 0, this will overwrite the buffer with |srcLen| bytes. You probably want something different, as in:\n\n  size_t srcLen \u003d strlen(src);\n  if (size \u003e 0) {\n    size_t copyLen \u003d std::min(srcLen, size - 1U);\n    memcpy(dst, src, copyLen);\n    dst[copyLen] \u003d 0;\n  }\n  return srcLen;",
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "198d0845_4efb9357",
+        "filename": "android/kernel/kernel_utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "It looks like this code assumes that the version string prefix is at the start of |versionString|, but strstr() will return non-NULL if it appears later in the string.\n\nI\u0027d suggest either use strncmp() instead of strstr() to enforce the \"version string must be at start of string\" contract, or increment the result of strstr() instead. Probably the former is better.",
+      "range": {
+        "startLine": 92,
+        "startChar": 4,
+        "endLine": 92,
+        "endChar": 17
+      },
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9961058_4cad5f70",
+        "filename": "android/kernel/kernel_utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "nit: avoid using sprintf() here to keep security auditors happy :-)\n\nMore generally, you can use LogString() to perform formatted output in log statements (this should avoid allocating temporary variables when logs are disabled). As in:\n\n  KERNEL_LOG \u003c\u003c android::base::LogString(\"Kernel version hex 0x%06x\", temp);",
+      "range": {
+        "startLine": 115,
+        "startChar": 4,
+        "endLine": 115,
+        "endChar": 11
+      },
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "198d0845_6e004f9b",
+        "filename": "android/kernel/kernel_utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "Off-topic: Technically speaking, the prefix to use also depends on the target architecture, i.e. for ARM64, which is not currently supported by the Android emulator, this must be \u0027ttyAMA\u0027 with kernel 3.10.\n\nDon\u0027t bother about this for now, because ARM64 will happen through a QEMU executable for now, but we will have to modify the API at some point.",
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9961058_8cb667c3",
+        "filename": "android/kernel/kernel_utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "nit: use sizeof(kElfHeader) here to be consistent.",
+      "range": {
+        "startLine": 143,
+        "startChar": 48,
+        "endLine": 143,
+        "endChar": 49
+      },
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9961058_acb323d2",
+        "filename": "android/kernel/kernel_utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "This branch will never be taken given that fileData_initFromFile() never returns a strictly positive value. How about:\n\n  if (fileData_initFromFile(...) \u003c 0) {\n     ...\n  }\n\nInstead?",
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39a80c90_af223903",
+        "filename": "android/kernel/kernel_utils.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "can I ask you to keep the headers in alphanumerical order, i.e. \u003cstddef.h\u003e before \u003cstdint.h\u003e here ?",
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "198d0845_aee157a2",
+        "filename": "android/kernel/kernel_utils.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "nit: comment is probably out of date and should refer to |kernelVersion| instead.",
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39a80c90_8f257510",
+        "filename": "android/kernel/kernel_utils.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "nit: There is no /dev/ prefix in the result returned by this function\u0027s implementation.",
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39a80c90_4fc38dd0",
+        "filename": "android/kernel/kernel_utils_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "what\u0027s the easiest way to regenerate these constant data tables if we need to update the unit tests?\n\nI.e. for the ramdisk extractor, I wrote android/filesystems/testing/create_ramdisk_test_data.sh which can be used to regenerate the tables. It would be nice to have something similar under android/kernel/testing/",
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "198d0845_8e5adbb3",
+        "filename": "android/kernel/kernel_utils_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "nit: make these tables \u0027static const\u0027, otherwise you\u0027re creating local mutable arrays and copying data into them in each invokation (not terribly important for tests, but still a good practice to maintain).",
+      "range": {
+        "startLine": 40,
+        "startChar": 4,
+        "endLine": 40,
+        "endChar": 12
+      },
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39a80c90_0fb98568",
+        "filename": "android/utils/uncompress.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "alternatively consider using gzopen() / gzread() / gzclose() here.",
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39a80c90_ef1c41d0",
+        "filename": "android/utils/uncompress.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "mmm, why do both branches return the same value?",
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "198d0845_eeeb5f7e",
+        "filename": "android/utils/uncompress.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T07:11:17Z",
+      "side": 1,
+      "message": "nit: I\u0027d suggest that exposing the zlib return values here is overkill. The client of such a function is only concerned about uncompressing the whole file (otherwise it would be using the gzxxx() functions directly), so just make it return a boolean (true for success, false for failure).",
+      "revId": "7ce5442271c52c6f5dd1184103703dc19d3bbdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
