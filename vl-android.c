@@ -2269,6 +2269,8 @@ serial_hds_add(const char* devname)
     return -1;  /* shouldn't happen */
 }
 
+extern void start_socket_drainer(Looper* looper);
+extern void stop_socket_drainer();
 int main(int argc, char **argv, char **envp)
 {
     const char *gdbstub_dev = NULL;
@@ -2381,6 +2383,8 @@ int main(int argc, char **argv, char **envp)
     boot_property_init_service();
     android_hw_control_init();
     android_net_pipes_init();
+
+    start_socket_drainer(looper_newCore());
 
 #ifdef CONFIG_KVM
     /* By default, force auto-detection for kvm */
@@ -4235,6 +4239,8 @@ int main(int argc, char **argv, char **envp)
     main_loop();
     quit_timers();
     net_cleanup();
+    stop_socket_drainer();
+
     android_emulation_teardown();
     return 0;
 }
