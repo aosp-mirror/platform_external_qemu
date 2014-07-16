@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "198d0845_512b369d",
+        "filename": "android/looper-generic.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T09:46:30Z",
+      "side": 1,
+      "message": "You must add an explicit constructor here to ensure that all fields are properly initialized after the \u0027new\u0027 call (see comment below).",
+      "revId": "e371fa5626ab7e514317ff32ba01f4ac063860f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9961058_ec57eb37",
+        "filename": "android/looper-generic.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 495,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-16T09:46:30Z",
+      "side": 1,
+      "message": "Are you sure this is correct ? The ANEW0 has the benefit of setting all bytes in the object to 0, which doesn\u0027t happen with \u0027new GLooper()\u0027 since the structure doesn\u0027t have a constructor.\n\nThe messy alternative is to initialize the POD members in this function, relying on the default constructor to init the std::set\u003c\u003e members, but I find it confusing / ugly.",
+      "revId": "e371fa5626ab7e514317ff32ba01f4ac063860f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
