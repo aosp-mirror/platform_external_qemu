@@ -237,9 +237,16 @@ else
     fi
 fi  # IN_ANDROID_BUILD = no
 
-if [ -n "$CCACHE" -a -f "$CCACHE" ] ; then
-    CC="$CCACHE $CC"
-    log "Prebuilt   : CCACHE=$CCACHE"
+if [ -n "$CCACHE" -a -f "$CCACHE" ]; then
+    if [ "$HOST_OS" == "darwin" -a "$OPTION_DEBUG" == "yes" ]; then
+        # http://llvm.org/bugs/show_bug.cgi?id=20297
+        # ccache works for mingw/gdb, therefore probably works for gcc/gdb
+        log "Prebuilt   : CCACHE disabled for OSX debug builds"
+        CCACHE=
+    else
+        CC="$CCACHE $CC"
+        log "Prebuilt   : CCACHE=$CCACHE"
+    fi
 else
     log "Prebuilt   : CCACHE can't be found"
     CCACHE=

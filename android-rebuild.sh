@@ -75,12 +75,9 @@ echo "Building sources."
 run make -j$HOST_NUM_CPUS OBJS_DIR="$OUT_DIR" ||
     panic "Could not build sources, please run 'make' to see why."
 
-RUN_64BIT_TESTS=true
-
 TEST_SHELL=
 EXE_SUFFIX=
 if [ "$MINGW" ]; then
-  RUN_64BIT_TESTS=
   TEST_SHELL=wine
   EXE_SUFFIX=.exe
 
@@ -100,13 +97,11 @@ if [ -z "$NO_TESTS" ]; then
     run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
     done
 
-    if [ "$RUN_64BIT_TESTS" ]; then
-        echo "Running 64-bit unit test suite."
-        for UNIT_TEST in emulator64_unittests emugl64_common_host_unittests; do
-            echo "   - $UNIT_TEST"
-            run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
-        done
-    fi
+    echo "Running 64-bit unit test suite."
+    for UNIT_TEST in emulator64_unittests emugl64_common_host_unittests; do
+        echo "   - $UNIT_TEST"
+        run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
+    done
 
     if [ "$FAILURES" ]; then
         panic "Unit test failures: $FAILURES"
