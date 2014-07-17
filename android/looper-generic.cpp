@@ -9,17 +9,19 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-
+#include <android/base/Limits.h>
+#include "android/iolooper.h"
+#include "android/looper.h"
+#include "android/sockets.h"
 #include "android/utils/assert.h"
 #include "android/utils/reflist.h"
-#include "android/utils/refset.h"
 #include "android/utils/system.h"
-#include "android/looper.h"
-#include "android/iolooper.h"
-#include "android/sockets.h"
+
 #include <inttypes.h>
 #include <limits.h>
 #include <errno.h>
+
+#include <set>
 
 /**********************************************************************
  **********************************************************************
@@ -51,7 +53,7 @@ static void glooper_delTimer(GLooper* looper, GLoopTimer* timer);
 static void
 glooptimer_stop(void* impl)
 {
-    GLoopTimer*  tt = impl;
+    GLoopTimer*  tt = (GLoopTimer*)impl;
     if (tt->deadline != DURATION_INFINITE) {
         glooper_delActiveTimer(tt->looper, tt);
         tt->deadline = DURATION_INFINITE;
@@ -61,7 +63,7 @@ glooptimer_stop(void* impl)
 static void
 glooptimer_startAbsolute(void* impl, Duration deadline_ms)
 {
-    GLoopTimer*  tt = impl;
+    GLoopTimer*  tt = (GLoopTimer*)impl;
 
     /* Stop the timer if it was active */
     if (tt->deadline != DURATION_INFINITE)
@@ -78,7 +80,7 @@ glooptimer_startAbsolute(void* impl, Duration deadline_ms)
 static void
 glooptimer_startRelative(void* impl, Duration  timeout_ms)
 {
-    GLoopTimer*  tt = impl;
+    GLoopTimer*  tt = (GLoopTimer*)impl;
 
     if (timeout_ms == DURATION_INFINITE) {  /* another way to stop the timer */
         glooptimer_stop(tt);
@@ -90,14 +92,14 @@ glooptimer_startRelative(void* impl, Duration  timeout_ms)
 static int
 glooptimer_isActive(void* impl)
 {
-    GLoopTimer*  tt = impl;
+    GLoopTimer*  tt = (GLoopTimer*)impl;
     return (tt->deadline != DURATION_INFINITE);
 }
 
 static void
 glooptimer_free(void* impl)
 {
-    GLoopTimer*  tt = impl;
+    GLoopTimer*  tt = (GLoopTimer*)impl;
 
     if (tt->deadline != DURATION_INFINITE)
         glooptimer_stop(tt);
@@ -120,9 +122,8 @@ glooper_timer_init(Looper*       looper,
                    LoopTimerFunc callback,
                    void*         opaque)
 {
-    GLoopTimer* tt;
+    GLoopTimer* tt = (GLoopTimer*)android_alloc0(sizeof(*tt));
 
-    ANEW0(tt);
 
     tt->deadline = DURATION_INFINITE;
     tt->callback = callback;
@@ -178,42 +179,42 @@ gloopio_modify(GLoopIo* io, unsigned wanted)
 static void
 gloopio_wantRead(void* impl)
 {
-    GLoopIo* io = impl;
+    GLoopIo* io = (GLoopIo*)impl;
     gloopio_modify(io, io->wanted | LOOP_IO_READ);
 }
 
 static void
 gloopio_wantWrite(void* impl)
 {
-    GLoopIo* io = impl;
+    GLoopIo* io = (GLoopIo*)impl;
     gloopio_modify(io, io->wanted | LOOP_IO_WRITE);
 }
 
 static void
 gloopio_dontWantRead(void* impl)
 {
-    GLoopIo* io = impl;
+    GLoopIo* io = (GLoopIo*)impl;
     gloopio_modify(io, io->wanted & ~LOOP_IO_READ);
 }
 
 static void
 gloopio_dontWantWrite(void* impl)
 {
-    GLoopIo* io = impl;
+    GLoopIo* io = (GLoopIo*)impl;
     gloopio_modify(io, io->wanted & ~LOOP_IO_WRITE);
 }
 
 static unsigned
 gloopio_poll(void* impl)
 {
-    GLoopIo* io = impl;
+    GLoopIo* io = (GLoopIo*)impl;
     return io->ready;
 }
 
 static void
 gloopio_free(void* impl)
 {
-    GLoopIo* io = impl;
+    GLoopIo* io = (GLoopIo*)impl;
     if (io->ready != 0)
         glooper_delPendingIo(io->looper, io);
 
@@ -234,9 +235,8 @@ static void
 glooper_io_init(Looper* looper, LoopIo* user, int fd, LoopIoFunc callback, void* opaque)
 {
     GLooper*  gg = (GLooper*)looper;
-    GLoopIo*  io;
+    GLoopIo*  io = (GLoopIo*)android_alloc0(sizeof(*io));
 
-    ANEW0(io);
     io->fd       = fd;
     io->callback = callback;
     io->opaque   = opaque;
@@ -261,12 +261,14 @@ glooper_io_init(Looper* looper, LoopIo* user, int fd, LoopIoFunc callback, void*
  **********************************************************************/
 
 struct GLooper {
-    Looper       looper;
-    ARefSet      timers[1];    /* set of all timers */
-    GLoopTimer*  activeTimers; /* sorted list of active timers */
+    GLooper();
+    ~GLooper();
+    Looper                    looper;
+    std::set<GLoopTimer*>     timers;    /* set of all timers */
+    GLoopTimer*               activeTimers; /* sorted list of active timers */
 
-    ARefSet      ios[1];        /* set of all i/o waiters */
-    ARefSet      pendingIos[1]; /* list of pending i/o waiters */
+    std::set<GLoopIo*>       ios;        /* set of all i/o waiters */
+    std::set<GLoopIo*>       pendingIos; /* list of pending i/o waiters */
     int          numActiveIos;  /* number of active LoopIo objects */
 
     IoLooper*    iolooper;
@@ -276,13 +278,13 @@ struct GLooper {
 static void
 glooper_addTimer(GLooper* looper, GLoopTimer* tt)
 {
-    arefSet_add(looper->timers, tt);
+    looper->timers.insert(tt);
 }
 
 static void
 glooper_delTimer(GLooper* looper, GLoopTimer* tt)
 {
-    arefSet_del(looper->timers, tt);
+    looper->timers.erase(tt);
 }
 
 static void
@@ -319,19 +321,25 @@ glooper_delActiveTimer(GLooper* looper, GLoopTimer* tt)
 static void
 glooper_addIo(GLooper* looper, GLoopIo* io)
 {
-    arefSet_add(looper->ios, io);
+    looper->ios.insert(io);
 }
 
 static void
 glooper_delIo(GLooper* looper, GLoopIo* io)
 {
-    arefSet_del(looper->ios, io);
+    looper->ios.erase(io);
+}
+
+static void
+glooper_addPendingIo(GLooper* looper, GLoopIo* io)
+{
+    looper->pendingIos.insert(io);
 }
 
 static void
 glooper_delPendingIo(GLooper* looper, GLoopIo* io)
 {
-    arefSet_del(looper->pendingIos, io);
+    looper->pendingIos.erase(io);
 }
 
 static void
@@ -395,7 +403,9 @@ glooper_run(Looper*  ll, Duration loop_deadline_ms)
             GLoopIo* io;
 
             /* Add io waiters to the pending list */
-            AREFSET_FOREACH(looper->ios, io, {
+            for (std::set<GLoopIo*>::iterator it = looper->ios.begin();
+                    it != looper->ios.end(); ++it) {
+                io = *it;
                 if (io->wanted == 0)
                     continue;
 
@@ -409,9 +419,9 @@ glooper_run(Looper*  ll, Duration loop_deadline_ms)
 
                 io->ready = ready;
                 if (ready != 0) {
-                    arefSet_add(looper->pendingIos, io);
+                    glooper_addPendingIo(looper, io);
                 }
-            });
+            }
         }
 
         /* Do we have any expired timers here ? */
@@ -449,10 +459,15 @@ glooper_run(Looper*  ll, Duration loop_deadline_ms)
         /* Now fire the pending ios */
         {
             GLoopIo* io;
-            AREFSET_FOREACH(looper->pendingIos,io,{
-                io->callback(io->opaque,io->fd,io->ready);
-            });
-            arefSet_clear(looper->pendingIos);
+            std::set<GLoopIo*> duplicates(looper->pendingIos);
+            for (std::set<GLoopIo*>::iterator iter = duplicates.begin();
+                    iter != duplicates.end(); ++iter) {
+                io = *iter;
+                if (looper->pendingIos.find(io) != looper->pendingIos.end()) {
+                    io->callback(io->opaque,io->fd,io->ready);
+                }
+            }
+            looper->pendingIos.clear();
         }
 
         if (deadline > loop_deadline_ms)
@@ -461,37 +476,18 @@ glooper_run(Looper*  ll, Duration loop_deadline_ms)
     return 0;
 }
 
+
 static void
 glooper_free(Looper* ll)
 {
     GLooper* looper = (GLooper*)ll;
-
-    arefSet_done(looper->timers);
-    looper->activeTimers = NULL;
-
-    arefSet_done(looper->ios);
-    arefSet_done(looper->pendingIos);
-
-    iolooper_free(looper->iolooper);
-    looper->iolooper = NULL;
-
-    AFREE(looper);
+    delete looper;
 }
+
 
 Looper*  looper_newGeneric(void)
 {
-    GLooper*  looper;
-
-    ANEW0(looper);
-
-    looper->iolooper = iolooper_new();
-
-    looper->looper.now        = glooper_now;
-    looper->looper.timer_init = glooper_timer_init;
-    looper->looper.io_init    = glooper_io_init;
-    looper->looper.run        = glooper_run;
-    looper->looper.forceQuit  = glooper_forceQuit;
-    looper->looper.destroy    = glooper_free;
+    GLooper*  looper = new GLooper();
 
     /* Our implementation depends on these values being equal */
     AASSERT_INT(LOOP_IO_READ,  IOLOOPER_READ);
@@ -499,3 +495,22 @@ Looper*  looper_newGeneric(void)
 
     return &looper->looper;
 }
+
+GLooper::GLooper() : looper(), timers(), activeTimers(NULL), ios(), pendingIos(),
+        numActiveIos(0), iolooper(iolooper_new()), running(0) {
+    looper.now        = glooper_now;
+    looper.timer_init = glooper_timer_init;
+    looper.io_init    = glooper_io_init;
+    looper.run        = glooper_run;
+    looper.forceQuit  = glooper_forceQuit;
+    looper.destroy    = glooper_free;
+}
+
+GLooper::~GLooper() {
+    activeTimers = NULL;
+    numActiveIos = 0;
+    iolooper_free(iolooper);
+    iolooper = NULL;
+    running = 0;
+}
+
