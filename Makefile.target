@@ -12,6 +12,10 @@ ifeq ($(EMULATOR_TARGET_CPU),x86)
   EMULATOR_TARGET_CPU := i386
 endif
 
+ifeq ($(EMULATOR_TARGET_CPU),mips64)
+  EMULATOR_TARGET_CPU := mips
+endif
+
 ##############################################################################
 ##############################################################################
 ###
@@ -126,7 +130,7 @@ HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
 
 endif
 
-ifeq ($(EMULATOR_TARGET_ARCH),mips)
+ifeq ($(EMULATOR_TARGET_CPU),mips)
 HW_SOURCES += \
     android/android_mips.c \
     mips/mips_pic.c \
@@ -211,7 +215,7 @@ common_LOCAL_SRC_FILES += \
 endif
 endif  # EMULATOR_TARGET_ARCH == x86
 
-ifeq ($(EMULATOR_TARGET_ARCH), mips)
+ifeq ($(EMULATOR_TARGET_CPU), mips)
 common_LOCAL_SRC_FILES += \
     target-mips/op_helper.c \
     target-mips/helper.c \
@@ -246,14 +250,14 @@ endif
 
 
 ## one for 32-bit
-$(call start-emulator-library, emulator-target-$(EMULATOR_TARGET_CPU))
+$(call start-emulator-library, emulator-target-$(EMULATOR_TARGET_ARCH))
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
 $(call end-emulator-library)
 
-$(call start-emulator64-library, emulator64-target-$(EMULATOR_TARGET_CPU))
+$(call start-emulator64-library, emulator64-target-$(EMULATOR_TARGET_ARCH))
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hw-config-defs)
@@ -275,7 +279,7 @@ common_LOCAL_SRC_FILES =
 common_LOCAL_STATIC_LIBRARIES := \
     emulator-libui \
     emulator-libqemu \
-    emulator-target-$(EMULATOR_TARGET_CPU) \
+    emulator-target-$(EMULATOR_TARGET_ARCH) \
     emulator-common \
     emulator-zlib
 
@@ -338,7 +342,7 @@ $(call start-emulator-program, emulator-$(EMULATOR_TARGET_ARCH))
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     emulator-libqemu \
-    emulator-target-$(EMULATOR_TARGET_CPU) \
+    emulator-target-$(EMULATOR_TARGET_ARCH) \
     emulator-libjpeg \
     emulator-common \
     emulator-libext4_utils \
@@ -369,7 +373,7 @@ $(call start-emulator64-program, emulator64-$(EMULATOR_TARGET_ARCH))
 LOCAL_STATIC_LIBRARIES += \
     emulator64-libui \
     emulator64-libqemu \
-    emulator64-target-$(EMULATOR_TARGET_CPU) \
+    emulator64-target-$(EMULATOR_TARGET_ARCH) \
     emulator64-libjpeg \
     emulator64-common \
     emulator64-libext4_utils \
