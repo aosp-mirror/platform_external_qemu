@@ -85,6 +85,16 @@ static const char kHostOs[] = "windows";
 // The target CPU architecture.
 const char kTargetArch[] = "aarch64";
 
+String getNthParentDir(const char* path, size_t n) {
+    StringVector dir = PathUtils::decompose(path);
+    PathUtils::simplifyComponents(&dir);
+    if (dir.size() < n + 1U) {
+        return String("");
+    }
+    dir.resize(dir.size() - n);
+    return PathUtils::recompose(dir);
+}
+
 // Return the path of the QEMU executable
 String getQemuExecutablePath(const char* programPath) {
     StringVector path = PathUtils::decompose(programPath);
@@ -702,6 +712,23 @@ extern "C" int main(int argc, char **argv, char **envp) {
     String qemuExecutable = getQemuExecutablePath(argv[0]);
     D("QEMU EXECUTABLE=%s\n", qemuExecutable.c_str());
 
+    // Create userdata file from init version if needed.
+    if (!path_exists(hw->disk_dataPartition_path)) {
+        if (!path_exists(hw->disk_dataPartition_initPath)) {
+            derror("Missing initial data partition file: %s",
+                   hw->disk_dataPartition_initPath);
+            exit(1);
+        }
+        D("Creating: %s\n", hw->disk_dataPartition_path);
+
+        if (path_copy_file(hw->disk_dataPartition_path,
+                           hw->disk_dataPartition_initPath) < 0) {
+            derror("Could not create %s: %s", hw->disk_dataPartition_path,
+                   strerror(errno));
+            exit(1);
+        }
+    }
+
     // Now build the QEMU parameters.
     const char* args[128];
     int n = 0;
@@ -768,6 +795,12 @@ extern "C" int main(int argc, char **argv, char **envp) {
     args[n++] = "-device";
     args[n++] = "virtio-net-device,netdev=mynet";
     args[n++] = "-show-cursor";
+
+    // Data directory (for keymaps and PC Bios).
+    args[n++] = "-L";
+    String dataDir = getNthParentDir(qemuExecutable.c_str(), 2U);
+    dataDir += "/pc-bios";
+    args[n++] = dataDir.c_str();
 
     if(VERBOSE_CHECK(init)) {
         int i;
