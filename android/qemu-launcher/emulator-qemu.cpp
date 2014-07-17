@@ -23,6 +23,7 @@
 #include "android/cmdline-option.h"
 #include "android/globals.h"
 #include "android/help.h"
+#include "android/filesystems/ext4_utils.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/main-common.h"
 #include "android/utils/bufprint.h"
@@ -725,6 +726,21 @@ extern "C" int main(int argc, char **argv, char **envp) {
                            hw->disk_dataPartition_initPath) < 0) {
             derror("Could not create %s: %s", hw->disk_dataPartition_path,
                    strerror(errno));
+            exit(1);
+        }
+    }
+
+    // Create cache partition image if it doesn't exist already.
+    if (!path_exists(hw->disk_cachePartition_path)) {
+        D("Creating empty ext4 cache partition: %s",
+          hw->disk_cachePartition_path);
+        int ret = android_createEmptyExt4Image(
+                hw->disk_cachePartition_path,
+                hw->disk_cachePartition_size,
+                "cache");
+        if (ret < 0) {
+            derror("Could not create %s: %s", hw->disk_cachePartition_path,
+                   strerror(-ret));
             exit(1);
         }
     }
