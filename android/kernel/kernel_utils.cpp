@@ -25,7 +25,7 @@
 #include <string.h>
 #include <strings.h>
 
-#define DEBUG_KERNEL  1
+#define DEBUG_KERNEL  0
 
 #define KERNEL_LOG     LOG_IF(INFO, DEBUG_KERNEL)
 #define KERNEL_PLOG    PLOG_IF(INFO, DEBUG_KERNEL)
