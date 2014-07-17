@@ -170,6 +170,7 @@ propertyFile_getTargetArch(const FileData* data) {
         } kData[] = {
             { "armeabi", "arm" },
             { "armeabi-v7a", "arm" },
+            { "arm64-v8a", "arm64" },
         };
         size_t n;
         for (n = 0; n < sizeof(kData)/sizeof(kData[0]); ++n) {
