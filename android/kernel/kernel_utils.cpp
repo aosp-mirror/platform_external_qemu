@@ -25,7 +25,7 @@
 #include <string.h>
 #include <strings.h>
 
-#define DEBUG_KERNEL  0
+#define DEBUG_KERNEL  1
 
 #define KERNEL_LOG     LOG_IF(INFO, DEBUG_KERNEL)
 #define KERNEL_PLOG    PLOG_IF(INFO, DEBUG_KERNEL)
@@ -34,14 +34,13 @@
 
 using android::base::PodVector;
 
-namespace android {
-namespace kernel {
+namespace {
 
-static const char kVersionStringPrefix[] = "Linux version ";
-static const size_t kVersionStringPrefixLen = sizeof(kVersionStringPrefix) - 1U;
+const char kLinuxVersionStringPrefix[] = "Linux version ";
+const size_t kLinuxVersionStringPrefixLen =
+        sizeof(kLinuxVersionStringPrefix) - 1U;
 
-}  // namespace kernel
-}  // namespace android
+}  // namespace
 
 #ifndef __APPLE__
 size_t strlcpy(char* dst, const char * src, size_t size)
@@ -84,13 +83,13 @@ const void* memmem(const void* haystack, size_t haystackLen,
 
 bool android_parseLinuxVersionString(const char* versionString,
                                      KernelVersion* kernelVersion) {
-    if (strncmp(versionString, android::kernel::kVersionStringPrefix,
-                android::kernel::kVersionStringPrefixLen)) {
+    if (strncmp(versionString, kLinuxVersionStringPrefix,
+            kLinuxVersionStringPrefixLen)) {
         KERNEL_ERROR << "unsupported kernel version string:" << versionString;
         return false;
     }
     // skip past the prefix to the version number
-    versionString += android::kernel::kVersionStringPrefixLen;
+    versionString += kLinuxVersionStringPrefixLen;
 
     uint32_t temp = 0;
     for (int i = 0; i < 3; i++) {
@@ -139,6 +138,8 @@ bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
         return false;
     }
 
+    const char* versionStringStart = NULL;
+
     if (0 == memcmp(kElfHeader, kernelFileData, sizeof(kElfHeader))) {
         // this is an uncompressed ELF file (probably mips)
         uncompressedKernel = kernelFileData;
@@ -156,37 +157,49 @@ bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
             return false;
         }
 
-        size_t compressedKernelLen = kernelFileSize -
-            (compressedKernel - kernelFileData);
+        // Special case: certain images, like the ARM64 one, contain a GZip
+        // header _after_ the actual Linux version string. So first try to
+        // see if there is something before the header.
+        versionStringStart = (const char*)memmem(
+                kernelFileData,
+                (compressedKernel - kernelFileData),
+                kLinuxVersionStringPrefix,
+                kLinuxVersionStringPrefixLen);
 
-        // inflate ratios for all prebuilt kernels on 2014-07-14 is 1.9:1 ~
-        // 3.43:1 not sure how big the uncompressed size is, so make an
-        // absurdly large buffer
-        uncompressedKernelLen = compressedKernelLen * 10;
-        uncompressed.resize(uncompressedKernelLen);
-        uncompressedKernel = uncompressed.begin();
+        if (!versionStringStart) {
+            size_t compressedKernelLen = kernelFileSize -
+                (compressedKernel - kernelFileData);
 
-        bool zOk = uncompress_gzipStream(uncompressed.begin(),
-                                         &uncompressedKernelLen,
-                                         compressedKernel,
-                                         compressedKernelLen);
-        if (!zOk) {
-            KERNEL_ERROR << "Kernel decompression error";
-            // it may have been partially decompressed, so we're going to 
-            // try to find the version string anyway
+            // inflate ratios for all prebuilt kernels on 2014-07-14 is 1.9:1 ~
+            // 3.43:1 not sure how big the uncompressed size is, so make an
+            // absurdly large buffer
+            uncompressedKernelLen = compressedKernelLen * 10;
+            uncompressed.resize(uncompressedKernelLen);
+            uncompressedKernel = uncompressed.begin();
+
+            bool zOk = uncompress_gzipStream(uncompressed.begin(),
+                                            &uncompressedKernelLen,
+                                            compressedKernel,
+                                            compressedKernelLen);
+            if (!zOk) {
+                KERNEL_ERROR << "Kernel decompression error";
+                // it may have been partially decompressed, so we're going to
+                // try to find the version string anyway
+            }
         }
     }
 
-    // okay, now we have a pointer to an uncompressed kernel, let's find the
-    // version string
-    const char* versionStringStart = (const char*)memmem(
-        uncompressedKernel,
-        uncompressedKernelLen,
-        android::kernel::kVersionStringPrefix,
-        android::kernel::kVersionStringPrefixLen);
     if (!versionStringStart) {
-        KERNEL_ERROR << "Could not find 'Linux version ' in kernel!";
-        return false;
+        versionStringStart = (const char*)memmem(
+                uncompressedKernel,
+                uncompressedKernelLen,
+                kLinuxVersionStringPrefix,
+                kLinuxVersionStringPrefixLen);
+
+        if (!versionStringStart) {
+            KERNEL_ERROR << "Could not find 'Linux version ' in kernel!";
+            return false;
+        }
     }
 
     strlcpy(dst, versionStringStart, dstLen);

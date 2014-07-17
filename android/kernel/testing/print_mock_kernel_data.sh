@@ -26,6 +26,15 @@ printf '\x7f'ELF0123456789"${LINUX_VERSION}"0123456789 | gzip >> $TMP_FILE
 cat $TMP_FILE | xxd -i
 printf "};\n\n"
 
+printf "// a mock semi-compressed kernel\n"
+printf "// an unspecified number of bytes, followed by a version string,\n"
+printf "// followed by a gzip header\n"
+printf "static const unsigned char kMockKernelSemiCompressed[] = {\n"
+printf "01234567899abcdef${LINUX_VERSION}0123455789" > $TMP_FILE
+printf "WHATEVER" | gzip >> $TMP_FILE
+cat $TMP_FILE | xxd -i
+printf "};\n\n"
+
 rm $TMP_FILE
 
 
