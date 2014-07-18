@@ -1404,6 +1404,7 @@ void tb_invalidate_phys_addr(hwaddr addr)
     tb_invalidate_phys_page_range(ram_addr, ram_addr + 1, 0);
 }
 #endif /* TARGET_HAS_ICE && !defined(CONFIG_USER_ONLY) */
+#endif  // !CONFIG_ANDROID
 
 void tb_check_watchpoint(CPUArchState *env)
 {
@@ -1417,7 +1418,6 @@ void tb_check_watchpoint(CPUArchState *env)
     cpu_restore_state_from_tb(tb, env, env->mem_io_pc);
     tb_phys_invalidate(tb, -1);
 }
-#endif  // !CONFIG_ANDROID
 
 #ifndef CONFIG_USER_ONLY
 /* mask must never be zero, except for A20 change call */

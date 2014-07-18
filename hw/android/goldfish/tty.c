@@ -84,7 +84,9 @@ static uint32_t goldfish_tty_read(void *opaque, hwaddr offset)
         case TTY_BYTES_READY:
             return s->data_count;
     default:
-        cpu_abort (cpu_single_env, "goldfish_tty_read: Bad offset %x\n", offset);
+        cpu_abort(cpu_single_env,
+                  "goldfish_tty_read: Bad offset %" HWADDR_PRIx "\n",
+                  offset);
         return 0;
     }
 }
@@ -173,7 +175,9 @@ static void goldfish_tty_write(void *opaque, hwaddr offset, uint32_t value)
             break;
 
         default:
-            cpu_abort (cpu_single_env, "goldfish_tty_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_tty_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
     }
 }
 

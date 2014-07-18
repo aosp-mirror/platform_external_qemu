@@ -39,15 +39,18 @@
 #include "hw/hw.h"
 #include "hw/qdev.h"
 #include "hw/xen/xen.h"
+#include "qemu/bitmap.h"
 #include "qemu/osdep.h"
 #include "qemu/tls.h"
 #include "sysemu/kvm.h"
 #include "exec/cputlb.h"
 #include "exec/hax.h"
+#include "exec/ram_addr.h"
 #include "qemu/timer.h"
 #if defined(CONFIG_USER_ONLY)
 #include <qemu.h>
 #endif
+#include "translate-all.h"
 
 //#define DEBUG_SUBPAGE
 
@@ -531,41 +534,28 @@ found:
     return block;
 }
 
-/* Note: start and end must be within the same ram block.  */
-void cpu_physical_memory_reset_dirty(ram_addr_t start, ram_addr_t end,
-                                     int dirty_flags)
+static void tlb_reset_dirty_range_all(ram_addr_t start, ram_addr_t length)
 {
-    unsigned long length, start1;
-    int i;
+    ram_addr_t end = TARGET_PAGE_ALIGN(start + length);
 
     start &= TARGET_PAGE_MASK;
-    end = TARGET_PAGE_ALIGN(end);
 
-    length = end - start;
+    RAMBlock* block = qemu_get_ram_block(start);
+    assert(block == qemu_get_ram_block(end - 1));
+    uintptr_t start1 = (uintptr_t)block->host + (start - block->offset);
+    cpu_tlb_reset_dirty_all(start1, length);
+}
+
+/* Note: start and end must be within the same ram block.  */
+void cpu_physical_memory_reset_dirty(ram_addr_t start, ram_addr_t length,
+                                     unsigned client)
+{
     if (length == 0)
         return;
-    cpu_physical_memory_mask_dirty_range(start, length, dirty_flags);
+    cpu_physical_memory_clear_dirty_range(start, length, client);
 
-    /* we modify the TLB cache so that the dirty bit will be set again
-       when accessing the range */
-    start1 = (unsigned long)qemu_safe_ram_ptr(start);
-    /* Chek that we don't span multiple blocks - this breaks the
-       address comparisons below.  */
-    if ((unsigned long)qemu_safe_ram_ptr(end - 1) - start1
-            != (end - 1) - start) {
-        abort();
-    }
-
-    CPUState *cpu;
-    CPU_FOREACH(cpu) {
-        int mmu_idx;
-        for (mmu_idx = 0; mmu_idx < NB_MMU_MODES; mmu_idx++) {
-            for(i = 0; i < CPU_TLB_SIZE; i++) {
-                CPUArchState* env = cpu->env_ptr;
-                tlb_reset_dirty_range(&env->tlb_table[mmu_idx][i],
-                                      start1, length);
-            }
-        }
+    if (tcg_enabled()) {
+        tlb_reset_dirty_range_all(start, length);
     }
 }
 
@@ -602,7 +592,7 @@ static inline void tlb_update_dirty(CPUTLBEntry *tlb_entry)
         p = (void *)(unsigned long)((tlb_entry->addr_write & TARGET_PAGE_MASK)
             + tlb_entry->addend);
         ram_addr = qemu_ram_addr_from_host_nofail(p);
-        if (!cpu_physical_memory_is_dirty(ram_addr)) {
+        if (cpu_physical_memory_is_clean(ram_addr)) {
             tlb_entry->addr_write |= TLB_NOTDIRTY;
         }
     }
@@ -1078,6 +1068,9 @@ ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
                                    ram_addr_t size, void *host)
 {
     RAMBlock *block, *new_block;
+    ram_addr_t old_ram_size, new_ram_size;
+
+    old_ram_size = last_ram_offset() >> TARGET_PAGE_BITS;
 
     size = TARGET_PAGE_ALIGN(size);
     new_block = g_malloc0(sizeof(*new_block));
@@ -1165,11 +1158,17 @@ ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
     ram_list.version++;
     qemu_mutex_unlock_ramlist();
 
-    ram_list.phys_dirty = g_realloc(ram_list.phys_dirty,
-                                       last_ram_offset() >> TARGET_PAGE_BITS);
-    memset(ram_list.phys_dirty + (new_block->offset >> TARGET_PAGE_BITS),
-           0xff, size >> TARGET_PAGE_BITS);
-    //cpu_physical_memory_set_dirty_range(new_block->offset, size, 0xff);
+    new_ram_size = last_ram_offset() >> TARGET_PAGE_BITS;
+
+    if (new_ram_size > old_ram_size) {
+        int i;
+        for (i = 0; i < DIRTY_MEMORY_NUM; i++) {
+            ram_list.dirty_memory[i] =
+                bitmap_zero_extend(ram_list.dirty_memory[i],
+                                   old_ram_size, new_ram_size);
+       }
+    }
+    cpu_physical_memory_set_dirty_range(new_block->offset, size);
 
     qemu_ram_setup_dump(new_block->host, size);
     //qemu_madvise(new_block->host, size, QEMU_MADV_HUGEPAGE);
@@ -1462,61 +1461,52 @@ static CPUWriteMemoryFunc * const unassigned_mem_write[3] = {
 static void notdirty_mem_writeb(void *opaque, hwaddr ram_addr,
                                 uint32_t val)
 {
-    int dirty_flags;
-    dirty_flags = cpu_physical_memory_get_dirty_flags(ram_addr);
-    if (!(dirty_flags & CODE_DIRTY_FLAG)) {
-#if !defined(CONFIG_USER_ONLY)
+    if (!cpu_physical_memory_get_dirty_flag(ram_addr, DIRTY_MEMORY_CODE)) {
         tb_invalidate_phys_page_fast0(ram_addr, 1);
-        dirty_flags = cpu_physical_memory_get_dirty_flags(ram_addr);
-#endif
     }
     stb_p(qemu_get_ram_ptr(ram_addr), val);
-    dirty_flags |= (0xff & ~CODE_DIRTY_FLAG);
-    cpu_physical_memory_set_dirty_flags(ram_addr, dirty_flags);
+    cpu_physical_memory_set_dirty_flag(ram_addr, DIRTY_MEMORY_MIGRATION);
+    cpu_physical_memory_set_dirty_flag(ram_addr, DIRTY_MEMORY_VGA);
     /* we remove the notdirty callback only if the code has been
        flushed */
-    if (dirty_flags == 0xff)
-        tlb_set_dirty(cpu_single_env, cpu_single_env->mem_io_vaddr);
+    if (!cpu_physical_memory_is_clean(ram_addr)) {
+        CPUArchState *env = current_cpu->env_ptr;
+        tlb_set_dirty(env, env->mem_io_vaddr);
+    }
 }
 
 static void notdirty_mem_writew(void *opaque, hwaddr ram_addr,
                                 uint32_t val)
 {
-    int dirty_flags;
-    dirty_flags = cpu_physical_memory_get_dirty_flags(ram_addr);
-    if (!(dirty_flags & CODE_DIRTY_FLAG)) {
-#if !defined(CONFIG_USER_ONLY)
-        tb_invalidate_phys_page_fast0(ram_addr, 2);
-        dirty_flags = cpu_physical_memory_get_dirty_flags(ram_addr);
-#endif
+    if (!cpu_physical_memory_get_dirty_flag(ram_addr, DIRTY_MEMORY_CODE)) {
+        tb_invalidate_phys_page_fast0(ram_addr, 1);
     }
     stw_p(qemu_get_ram_ptr(ram_addr), val);
-    dirty_flags |= (0xff & ~CODE_DIRTY_FLAG);
-    cpu_physical_memory_set_dirty_flags(ram_addr, dirty_flags);
+    cpu_physical_memory_set_dirty_flag(ram_addr, DIRTY_MEMORY_MIGRATION);
+    cpu_physical_memory_set_dirty_flag(ram_addr, DIRTY_MEMORY_VGA);
     /* we remove the notdirty callback only if the code has been
        flushed */
-    if (dirty_flags == 0xff)
-        tlb_set_dirty(cpu_single_env, cpu_single_env->mem_io_vaddr);
+    if (!cpu_physical_memory_is_clean(ram_addr)) {
+        CPUArchState *env = current_cpu->env_ptr;
+        tlb_set_dirty(env, env->mem_io_vaddr);
+    }
 }
 
 static void notdirty_mem_writel(void *opaque, hwaddr ram_addr,
                                 uint32_t val)
 {
-    int dirty_flags;
-    dirty_flags = cpu_physical_memory_get_dirty_flags(ram_addr);
-    if (!(dirty_flags & CODE_DIRTY_FLAG)) {
-#if !defined(CONFIG_USER_ONLY)
-        tb_invalidate_phys_page_fast0(ram_addr, 4);
-        dirty_flags = cpu_physical_memory_get_dirty_flags(ram_addr);
-#endif
+    if (!cpu_physical_memory_get_dirty_flag(ram_addr, DIRTY_MEMORY_CODE)) {
+        tb_invalidate_phys_page_fast0(ram_addr, 1);
     }
     stl_p(qemu_get_ram_ptr(ram_addr), val);
-    dirty_flags |= (0xff & ~CODE_DIRTY_FLAG);
-    cpu_physical_memory_set_dirty_flags(ram_addr, dirty_flags);
+    cpu_physical_memory_set_dirty_flag(ram_addr, DIRTY_MEMORY_MIGRATION);
+    cpu_physical_memory_set_dirty_flag(ram_addr, DIRTY_MEMORY_VGA);
     /* we remove the notdirty callback only if the code has been
        flushed */
-    if (dirty_flags == 0xff)
-        tlb_set_dirty(cpu_single_env, cpu_single_env->mem_io_vaddr);
+    if (!cpu_physical_memory_is_clean(ram_addr)) {
+        CPUArchState *env = current_cpu->env_ptr;
+        tlb_set_dirty(env, env->mem_io_vaddr);
+    }
 }
 
 static CPUReadMemoryFunc * const error_mem_read[3] = {
@@ -1531,16 +1521,6 @@ static CPUWriteMemoryFunc * const notdirty_mem_write[3] = {
     notdirty_mem_writel,
 };
 
-static void tb_check_watchpoint(CPUArchState* env)
-{
-    TranslationBlock *tb = tb_find_pc(env->mem_io_pc);
-    if (!tb) {
-        cpu_abort(env, "check_watchpoint: could not find TB for "
-                  "pc=%p", (void *)env->mem_io_pc);
-    }
-    cpu_restore_state(env, env->mem_io_pc);
-    tb_phys_invalidate(tb, -1);
-}
 
 /* Generate a debug exception if a watchpoint has been hit.  */
 static void check_watchpoint(int offset, int len_mask, int flags)
@@ -1918,11 +1898,12 @@ void cpu_physical_memory_rw(hwaddr addr, void *buf,
 static void invalidate_and_set_dirty(hwaddr addr,
                                      hwaddr length)
 {
-    if (!cpu_physical_memory_is_dirty(addr)) {
+    if (cpu_physical_memory_is_clean(addr)) {
         /* invalidate code */
         tb_invalidate_phys_page_range(addr, addr + length, 0);
         /* set dirty bit */
-        cpu_physical_memory_set_dirty_flags(addr, (0xff & ~CODE_DIRTY_FLAG));
+        cpu_physical_memory_set_dirty_flag(addr, DIRTY_MEMORY_VGA);
+        cpu_physical_memory_set_dirty_flag(addr, DIRTY_MEMORY_MIGRATION);
     }
 }
 
@@ -2434,12 +2415,13 @@ void stl_phys_notdirty(hwaddr addr, uint32_t val)
         stl_p(ptr, val);
 
         if (unlikely(in_migration)) {
-            if (!cpu_physical_memory_is_dirty(addr1)) {
+            if (cpu_physical_memory_is_clean(addr1)) {
                 /* invalidate code */
                 tb_invalidate_phys_page_range(addr1, addr1 + 4, 0);
                 /* set dirty bit */
-                cpu_physical_memory_set_dirty_flags(
-                    addr1, (0xff & ~CODE_DIRTY_FLAG));
+                cpu_physical_memory_set_dirty_flag(addr1,
+                                                   DIRTY_MEMORY_MIGRATION);
+                cpu_physical_memory_set_dirty_flag(addr1, DIRTY_MEMORY_VGA);
             }
         }
     }
@@ -2595,12 +2577,12 @@ static inline void stw_phys_internal(hwaddr addr, uint32_t val,
             stw_p(ptr, val);
             break;
         }
-        if (!cpu_physical_memory_is_dirty(addr1)) {
+        if (cpu_physical_memory_is_clean(addr1)) {
             /* invalidate code */
             tb_invalidate_phys_page_range(addr1, addr1 + 2, 0);
             /* set dirty bit */
-            cpu_physical_memory_set_dirty_flags(addr1,
-                (0xff & ~CODE_DIRTY_FLAG));
+            cpu_physical_memory_set_dirty_flag(addr1, DIRTY_MEMORY_MIGRATION);
+            cpu_physical_memory_set_dirty_flag(addr1, DIRTY_MEMORY_VGA);
         }
     }
 }

@@ -26,6 +26,7 @@
 #include "hw/hw.h"
 #include "android/kvm.h"
 #include "exec/gdbstub.h"
+#include "exec/ram_addr.h"
 #include "sysemu/kvm.h"
 
 /* KVM uses PAGE_SIZE in it's definition of COALESCED_MMIO_MAX */
@@ -299,6 +300,8 @@ int kvm_set_migration_log(int enable)
     return 0;
 }
 
+#define ALIGN(x, y)  (((x)+(y)-1) & ~((y)-1))
+
 /**
  * kvm_physical_sync_dirty_bitmap - Grab dirty bitmap from kernel space
  * This function updates qemu's dirty bitmap using cpu_physical_memory_set_dirty().
@@ -311,9 +314,7 @@ int kvm_physical_sync_dirty_bitmap(hwaddr start_addr,
                                    hwaddr end_addr)
 {
     KVMState *s = kvm_state;
-    unsigned long size, allocated_size = 0;
-    hwaddr phys_addr;
-    ram_addr_t addr;
+    size_t size, allocated_size = 0;
     KVMDirtyLog d;
     KVMSlot *mem;
     int ret = 0;
@@ -327,12 +328,13 @@ int kvm_physical_sync_dirty_bitmap(hwaddr start_addr,
             break;
         }
 
-        size = ((mem->memory_size >> TARGET_PAGE_BITS) + 7) / 8;
+        size = ALIGN(((mem->memory_size) >> TARGET_PAGE_BITS),
+                     /*HOST_LONG_BITS*/ 64) / 8;
         if (size > allocated_size) {
             d.dirty_bitmap = g_realloc(d.dirty_bitmap, size);
             allocated_size = size;
         }
-        memset(d.dirty_bitmap, 0, size);
+        memset(d.dirty_bitmap, 0, allocated_size);
 
         d.slot = mem->slot;
 
@@ -342,19 +344,10 @@ int kvm_physical_sync_dirty_bitmap(hwaddr start_addr,
             break;
         }
 
-        for (phys_addr = mem->start_addr, addr = mem->phys_offset;
-             phys_addr - mem->start_addr < mem->memory_size;
-             phys_addr += TARGET_PAGE_SIZE, addr += TARGET_PAGE_SIZE) {
-            unsigned long *bitmap = (unsigned long *)d.dirty_bitmap;
-            unsigned nr = (phys_addr - mem->start_addr) >> TARGET_PAGE_BITS;
-            unsigned word = nr / (sizeof(*bitmap) * 8);
-            unsigned bit = nr % (sizeof(*bitmap) * 8);
-
-            if ((bitmap[word] >> bit) & 1) {
-                cpu_physical_memory_set_dirty(addr);
-            }
-        }
-        start_addr = phys_addr;
+        cpu_physical_memory_set_dirty_lebitmap(d.dirty_bitmap,
+                                               mem->phys_offset,
+                                               mem->memory_size / getpagesize());
+        start_addr += mem->memory_size;
         if (!start_addr) {
             // Handle wrap-around, which happens when a slot is mapped
             // at the end of the physical address space.

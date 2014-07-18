@@ -81,19 +81,6 @@ static inline void cpu_register_physical_memory(hwaddr start_addr,
 }
 
 ram_addr_t cpu_get_physical_page_desc(hwaddr addr);
-ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
-                        ram_addr_t size, void *host);
-ram_addr_t qemu_ram_alloc(DeviceState *dev, const char *name, ram_addr_t size);
-void qemu_ram_free(ram_addr_t addr);
-void qemu_ram_remap(ram_addr_t addr, ram_addr_t length);
-/* This should only be used for ram local to a device.  */
-void *qemu_get_ram_ptr(ram_addr_t addr);
-/* Same but slower, to use for migration, where the order of
- * RAMBlocks must not change. */
-void *qemu_safe_ram_ptr(ram_addr_t addr);
-/* This should not be used by devices.  */
-int qemu_ram_addr_from_host(void *ptr, ram_addr_t *ram_addr);
-ram_addr_t qemu_ram_addr_from_host_nofail(void *ptr);
 
 int cpu_register_io_memory(CPUReadMemoryFunc * const *mem_read,
                            CPUWriteMemoryFunc * const *mem_write,

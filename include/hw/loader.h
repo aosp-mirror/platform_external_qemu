@@ -13,7 +13,7 @@ int load_image_targphys(const char *filename, hwaddr,
 int load_elf(const char *filename, int64_t address_offset,
              uint64_t *pentry, uint64_t *lowaddr, uint64_t *highaddr);
 int load_aout(const char *filename, hwaddr addr, int max_sz);
-int load_uimage(const char *filename, target_ulong *ep, target_ulong *loadaddr,
+int load_uimage(const char *filename, hwaddr *ep, target_ulong *loadaddr,
                 int *is_linux);
 
 /**

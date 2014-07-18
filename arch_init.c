@@ -41,6 +41,7 @@
 #include "migration/qemu-file.h"
 #include "net/net.h"
 #include "exec/gdbstub.h"
+#include "exec/ram_addr.h"
 #include "hw/i386/smbios.h"
 
 #ifdef TARGET_SPARC
@@ -125,13 +126,14 @@ static int ram_save_block(QEMUFile *f)
     current_addr = block->offset + offset;
 
     do {
-        if (cpu_physical_memory_get_dirty(current_addr, MIGRATION_DIRTY_FLAG)) {
+        if (cpu_physical_memory_get_dirty(current_addr, TARGET_PAGE_SIZE,
+                                          DIRTY_MEMORY_MIGRATION)) {
             uint8_t *p;
             int cont = (block == last_block) ? RAM_SAVE_FLAG_CONTINUE : 0;
 
             cpu_physical_memory_reset_dirty(current_addr,
-                                            current_addr + TARGET_PAGE_SIZE,
-                                            MIGRATION_DIRTY_FLAG);
+                                            TARGET_PAGE_SIZE,
+                                            DIRTY_MEMORY_MIGRATION);
 
             p = block->host + offset;
 
@@ -187,7 +189,8 @@ static ram_addr_t ram_save_remaining(void)
         ram_addr_t addr;
         for (addr = block->offset; addr < block->offset + block->length;
              addr += TARGET_PAGE_SIZE) {
-            if (cpu_physical_memory_get_dirty(addr, MIGRATION_DIRTY_FLAG)) {
+            if (cpu_physical_memory_get_dirty(addr, TARGET_PAGE_SIZE,
+                                              DIRTY_MEMORY_MIGRATION)) {
                 count++;
             }
         }
@@ -262,7 +265,7 @@ int ram_save_live(QEMUFile *f, int stage, void *opaque)
         return 0;
     }
 
-    if (cpu_physical_sync_dirty_bitmap(0, TARGET_PHYS_ADDR_MAX) != 0) {
+    if (cpu_physical_sync_dirty_bitmap(0, UINT64_MAX) != 0) {
         qemu_file_set_error(f, -errno);
         return 0;
     }
@@ -278,9 +281,10 @@ int ram_save_live(QEMUFile *f, int stage, void *opaque)
         QTAILQ_FOREACH(block, &ram_list.blocks, next) {
             for (addr = block->offset; addr < block->offset + block->length;
                  addr += TARGET_PAGE_SIZE) {
-                if (!cpu_physical_memory_get_dirty(addr,
-                                                   MIGRATION_DIRTY_FLAG)) {
-                    cpu_physical_memory_set_dirty(addr);
+                if (!cpu_physical_memory_get_dirty(addr, TARGET_PAGE_SIZE,
+                                                   DIRTY_MEMORY_MIGRATION)) {
+                    cpu_physical_memory_set_dirty_flag(
+                            addr, DIRTY_MEMORY_MIGRATION);
                 }
             }
         }

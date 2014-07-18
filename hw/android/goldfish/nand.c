@@ -604,7 +604,9 @@ static void nand_dev_write(void *opaque, hwaddr offset, uint32_t value)
         }
         break;
     default:
-        cpu_abort(cpu_single_env, "nand_dev_write: Bad offset %x\n", offset);
+        cpu_abort(cpu_single_env,
+                  "nand_dev_write: Bad offset %" HWADDR_PRIx "\n",
+                  offset);
         break;
     }
 }
@@ -652,7 +654,9 @@ static uint32_t nand_dev_read(void *opaque, hwaddr offset)
         return (uint32_t)(dev->max_size >> 32);
 
     default:
-        cpu_abort(cpu_single_env, "nand_dev_read: Bad offset %x\n", offset);
+        cpu_abort(cpu_single_env,
+                  "nand_dev_read: Bad offset %" HWADDR_PRIx "\n",
+                  offset);
         return 0;
     }
 }
