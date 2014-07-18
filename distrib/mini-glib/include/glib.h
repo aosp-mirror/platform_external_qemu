@@ -25,6 +25,9 @@ typedef int gboolean;
 typedef void* gpointer;
 typedef const void* gconstpointer;
 
+#define TRUE  1
+#define FALSE 0
+
 typedef void (*GFunc)(gpointer data, gpointer user_data);
 
 typedef int (*GCompareFunc)(gconstpointer a,

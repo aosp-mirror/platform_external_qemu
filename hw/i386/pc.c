@@ -23,7 +23,6 @@
  */
 #include "hw/hw.h"
 #include "hw/i386/pc.h"
-#include "hw/block/fdc.h"
 #include "hw/loader.h"
 #include "hw/pci/pci.h"
 #include "block/block.h"

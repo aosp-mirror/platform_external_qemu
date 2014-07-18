@@ -10,6 +10,7 @@ typedef struct QEMUBH QEMUBH;
 
 typedef struct AioContext AioContext;
 
+typedef struct Visitor Visitor;
 struct Monitor;
 typedef struct Monitor Monitor;
 typedef struct MigrationParams MigrationParams;
@@ -36,7 +37,7 @@ typedef struct DisplayState DisplayState;
 typedef struct DisplayChangeListener DisplayChangeListener;
 typedef struct DisplaySurface DisplaySurface;
 typedef struct PixelFormat PixelFormat;
-//typedef struct QemuConsole QemuConsole;  (see below)
+typedef struct QemuConsole QemuConsole;
 typedef struct CharDriverState CharDriverState;
 typedef struct MACAddr MACAddr;
 typedef struct NetClientState NetClientState;
@@ -73,7 +74,6 @@ typedef struct Range Range;
 // NOTE(digit): Remove typedefs below when everything is upstreamed.
 typedef struct DisplayAllocator DisplayAllocator;
 typedef struct IRQState *qemu_irq;
-typedef struct QEMUConsole QEMUConsole;
 typedef struct VLANState VLANState;
 typedef struct VLANClientState VLANClientState;
 
