@@ -988,8 +988,10 @@ static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
                       int base, int16_t offset)
 {
     const char * __attribute__((unused)) opn = "ldst";
-    TCGv t0 = tcg_temp_new();
-    TCGv t1 = tcg_temp_new();
+    TCGv t0, t1, t2;
+
+    t0 = tcg_temp_new();
+    t1 = tcg_temp_new();
 
     if (base == 0) {
         tcg_gen_movi_tl(t0, offset);
@@ -1028,10 +1030,22 @@ static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
         opn = "sd";
         break;
     case OPC_LDL:
-        save_cpu_state(ctx, 1);
+        tcg_gen_andi_tl(t1, t0, 7);
+#ifndef TARGET_WORDS_BIGENDIAN
+        tcg_gen_xori_tl(t1, t1, 7);
+#endif
+        tcg_gen_shli_tl(t1, t1, 3);
+        tcg_gen_andi_tl(t0, t0, ~7);
+        tcg_gen_qemu_ld64(t0, t0, ctx->mem_idx);
+        tcg_gen_shl_tl(t0, t0, t1);
+        tcg_gen_xori_tl(t1, t1, 63);
+        t2 = tcg_const_tl(0x7fffffffffffffffull);
+        tcg_gen_shr_tl(t2, t2, t1);
         gen_load_gpr(t1, rt);
-        gen_helper_4i(ldl, t1, cpu_env, t1, t0, ctx->mem_idx);
-        gen_store_gpr(t1, rt);
+        tcg_gen_and_tl(t1, t1, t2);
+        tcg_temp_free(t2);
+        tcg_gen_or_tl(t0, t0, t1);
+        gen_store_gpr(t0, rt);
         opn = "ldl";
         break;
     case OPC_SDL:
@@ -1041,10 +1055,22 @@ static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
         opn = "sdl";
         break;
     case OPC_LDR:
-        save_cpu_state(ctx, 1);
+        tcg_gen_andi_tl(t1, t0, 7);
+#ifdef TARGET_WORDS_BIGENDIAN
+        tcg_gen_xori_tl(t1, t1, 7);
+#endif
+        tcg_gen_shli_tl(t1, t1, 3);
+        tcg_gen_andi_tl(t0, t0, ~7);
+        tcg_gen_qemu_ld64(t0, t0, ctx->mem_idx);
+        tcg_gen_shr_tl(t0, t0, t1);
+        tcg_gen_xori_tl(t1, t1, 63);
+        t2 = tcg_const_tl(0xfffffffffffffffeull);
+        tcg_gen_shl_tl(t2, t2, t1);
         gen_load_gpr(t1, rt);
-        gen_helper_4i(ldr, t1, cpu_env, t1, t0, ctx->mem_idx);
-        gen_store_gpr(t1, rt);
+        tcg_gen_and_tl(t1, t1, t2);
+        tcg_temp_free(t2);
+        tcg_gen_or_tl(t0, t0, t1);
+        gen_store_gpr(t0, rt);
         opn = "ldr";
         break;
     case OPC_SDR:
@@ -1103,10 +1129,23 @@ static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
         opn = "lbu";
         break;
     case OPC_LWL:
-        save_cpu_state(ctx, 1);
+        tcg_gen_andi_tl(t1, t0, 3);
+#ifndef TARGET_WORDS_BIGENDIAN
+        tcg_gen_xori_tl(t1, t1, 3);
+#endif
+        tcg_gen_shli_tl(t1, t1, 3);
+        tcg_gen_andi_tl(t0, t0, ~3);
+        tcg_gen_qemu_ld32u(t0, t0, ctx->mem_idx);
+        tcg_gen_shl_tl(t0, t0, t1);
+        tcg_gen_xori_tl(t1, t1, 31);
+        t2 = tcg_const_tl(0x7fffffffull);
+        tcg_gen_shr_tl(t2, t2, t1);
         gen_load_gpr(t1, rt);
-        gen_helper_4i(lwl, t1, cpu_env, t1, t0, ctx->mem_idx);
-        gen_store_gpr(t1, rt);
+        tcg_gen_and_tl(t1, t1, t2);
+        tcg_temp_free(t2);
+        tcg_gen_or_tl(t0, t0, t1);
+        tcg_gen_ext32s_tl(t0, t0);
+        gen_store_gpr(t0, rt);
         opn = "lwl";
         break;
     case OPC_SWL:
@@ -1116,10 +1155,22 @@ static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
         opn = "swl";
         break;
     case OPC_LWR:
-        save_cpu_state(ctx, 1);
+        tcg_gen_andi_tl(t1, t0, 3);
+#ifdef TARGET_WORDS_BIGENDIAN
+        tcg_gen_xori_tl(t1, t1, 3);
+#endif
+        tcg_gen_shli_tl(t1, t1, 3);
+        tcg_gen_andi_tl(t0, t0, ~3);
+        tcg_gen_qemu_ld32u(t0, t0, ctx->mem_idx);
+        tcg_gen_shr_tl(t0, t0, t1);
+        tcg_gen_xori_tl(t1, t1, 31);
+        t2 = tcg_const_tl(0xfffffffeull);
+        tcg_gen_shl_tl(t2, t2, t1);
         gen_load_gpr(t1, rt);
-        gen_helper_4i(lwr, t1, cpu_env, t1, t0, ctx->mem_idx);
-        gen_store_gpr(t1, rt);
+        tcg_gen_and_tl(t1, t1, t2);
+        tcg_temp_free(t2);
+        tcg_gen_or_tl(t0, t0, t1);
+        gen_store_gpr(t0, rt);
         opn = "lwr";
         break;
     case OPC_SWR:
@@ -2138,11 +2189,11 @@ static void gen_muldiv (DisasContext *ctx, uint32_t opc,
         opn = "ddivu";
         break;
     case OPC_DMULT:
-        gen_helper_dmult(t0, t1);
+        gen_helper_dmult(cpu_env, t0, t1);
         opn = "dmult";
         break;
     case OPC_DMULTU:
-        gen_helper_dmultu(t0, t1);
+        gen_helper_dmultu(cpu_env, t0, t1);
         opn = "dmultu";
         break;
 #endif
@@ -4091,17 +4142,17 @@ static void gen_dmfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
             break;
         case 1:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_mvpcontrol(arg);
+            gen_helper_mfc0_mvpcontrol(arg, cpu_env);
             rn = "MVPControl";
             break;
         case 2:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_mvpconf0(arg);
+            gen_helper_mfc0_mvpconf0(arg, cpu_env);
             rn = "MVPConf0";
             break;
         case 3:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_mvpconf1(arg);
+            gen_helper_mfc0_mvpconf1(arg, cpu_env);
             rn = "MVPConf1";
             break;
         default:
@@ -4111,7 +4162,7 @@ static void gen_dmfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 1:
         switch (sel) {
         case 0:
-            gen_helper_mfc0_random(arg);
+            gen_helper_mfc0_random(arg, cpu_env);
             rn = "Random";
             break;
         case 1:
@@ -4161,12 +4212,12 @@ static void gen_dmfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
             break;
         case 1:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_tcstatus(arg);
+            gen_helper_mfc0_tcstatus(arg, cpu_env);
             rn = "TCStatus";
             break;
         case 2:
             check_insn(env, ctx, ASE_MT);
-            gen_helper_mfc0_tcbind(arg);
+            gen_helper_mfc0_tcbind(arg, cpu_env);
             rn = "TCBind";
             break;
         case 3:
@@ -4299,7 +4350,7 @@ static void gen_dmfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
             /* Mark as an IO operation because we read the time.  */
             if (use_icount)
                 gen_io_start();
-            gen_helper_mfc0_count(arg);
+            gen_helper_mfc0_count(arg, cpu_env);
             if (use_icount) {
                 gen_io_end();
                 ctx->bstate = BS_STOP;
@@ -4436,7 +4487,7 @@ static void gen_dmfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 18:
         switch (sel) {
         case 0 ... 7:
-            gen_helper_1i(dmfc0_watchlo, arg, sel);
+            gen_helper_2i(dmfc0_watchlo, arg, cpu_env, sel);
             rn = "WatchLo";
             break;
         default:
@@ -4446,7 +4497,7 @@ static void gen_dmfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, 
     case 19:
         switch (sel) {
         case 0 ... 7:
-            gen_helper_1i(mfc0_watchhi, arg, sel);
+            gen_helper_2i(mfc0_watchhi, arg, cpu_env, sel);
             rn = "WatchHi";
             break;
         default:

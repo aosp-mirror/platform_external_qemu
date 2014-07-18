@@ -268,6 +268,28 @@ static struct {
     int softshift;
 } linux_pte_info = {0};
 
+static inline void pagetable_walk(CPUMIPSState *env,
+                                  target_ulong pgd_addr, target_ulong vaddr,
+                                  target_ulong *entrylo0, target_ulong *entrylo1)
+{
+    target_ulong ptw_phys, pt_addr, index;
+
+    /* 32bit PTE lookup */
+    ptw_phys = pgd_addr & 0x1fffffffUL; /* Assume pgd is in KSEG0/KSEG1 */
+    index = (vaddr >> 22) << 2;         /* Use bits 31..22 to index pgd */
+    ptw_phys += index;
+
+    pt_addr = ldl_phys(ptw_phys);
+
+    ptw_phys = pt_addr & 0x1fffffffUL;    /* Assume pgt is in KSEG0/KSEG1 */
+    index = ((vaddr >> 13) & 0x1ff) << 3; /* Use bits 21..13 to index pgt */
+    ptw_phys += index;
+
+    /* Get the entrylo values from pgt */
+    *entrylo0 = ldl_phys(ptw_phys)   >> linux_pte_info.softshift;
+    *entrylo1 = ldl_phys(ptw_phys+4) >> linux_pte_info.softshift;
+}
+
 static inline target_ulong cpu_mips_get_pgd(CPUMIPSState *env)
 {
     if (unlikely(linux_pte_info.pgd_current_p == 0)) {
@@ -342,16 +364,20 @@ static inline target_ulong cpu_mips_get_pgd(CPUMIPSState *env)
 // in target-mips/op_helper.c
 extern void r4k_helper_ptw_tlbrefill(CPUMIPSState*);
 
-static inline int cpu_mips_tlb_refill(CPUMIPSState *env, target_ulong address, int rw ,
+static inline int cpu_mips_tlb_refill(CPUMIPSState *env, target_ulong address, int rw,
                                       int mmu_idx, int is_softmmu)
 {
     int32_t saved_hflags;
     target_ulong saved_badvaddr,saved_entryhi,saved_context;
-
-    target_ulong pgd_addr,pt_addr,index;
-    target_ulong fault_addr, ptw_phys;
-    target_ulong elo_even,elo_odd;
+    target_ulong pgd_addr;
+    target_ulong fault_addr;
+    target_ulong entrylo0, entrylo1;
     int ret;
+
+    pgd_addr = cpu_mips_get_pgd(env);
+    // if pgd_addr is unknown return TLBRET_NOMATCH to allow software handler to run
+    if (unlikely(pgd_addr == 0))
+        return TLBRET_NOMATCH;
 
     saved_badvaddr = env->CP0_BadVAddr;
     saved_context = env->CP0_Context;
@@ -368,55 +394,33 @@ static inline int cpu_mips_tlb_refill(CPUMIPSState *env, target_ulong address, i
 
     fault_addr = env->CP0_BadVAddr;
 
-    pgd_addr = cpu_mips_get_pgd(env);
-    if (unlikely(!pgd_addr))
-    {
-        /*not valid pgd_addr,just return.*/
-        //return TLBRET_NOMATCH;
-        ret = TLBRET_NOMATCH;
-        goto out;
-    }
+    pagetable_walk(env, pgd_addr, fault_addr, &entrylo0, &entrylo1);
 
-    ptw_phys = pgd_addr - (int32_t)0x80000000UL;
-    index = (fault_addr>>22)<<2;
-    ptw_phys += index;
-
-    pt_addr = ldl_phys(ptw_phys);
-
-    ptw_phys = pt_addr - (int32_t)0x80000000UL;
-    index = (env->CP0_Context>>1)&0xff8;
-    ptw_phys += index;
-
-    /* get the page table entry*/
-    elo_even = ldl_phys(ptw_phys);
-    elo_odd  = ldl_phys(ptw_phys+4);
-    elo_even = elo_even >> linux_pte_info.softshift;
-    elo_odd = elo_odd >> linux_pte_info.softshift;
-    env->CP0_EntryLo0 = elo_even;
-    env->CP0_EntryLo1 = elo_odd;
-    /* Done. refill the TLB */
+    /* Refill the TLB */
+    env->CP0_EntryLo0 = entrylo0;
+    env->CP0_EntryLo1 = entrylo1;
     r4k_helper_ptw_tlbrefill(env);
 
-    /* Since we know the value of TLB entry, we can
+    /* Since we know the TLB contents, we can
      * return the TLB lookup value here.
      */
 
     env->hflags = saved_hflags;
 
     target_ulong mask = env->CP0_PageMask | ~(TARGET_PAGE_MASK << 1);
-    int n = !!(address & mask & ~(mask >> 1));
-    /* Check access rights */
-    if (!(n ? (elo_odd & 2) != 0 : (elo_even & 2) != 0))
-    {
+    target_ulong lo = (address & mask & ~(mask >> 1)) ? entrylo1 : entrylo0;
+    /* Is the TLB entry valid? */
+    if ((lo & (1 << CP0ENTRYLO_V)) == 0) {
         ret = TLBRET_INVALID;
         goto out;
     }
 
-    if (rw == 0 || (n ? (elo_odd & 4) != 0 : (elo_even & 4) != 0)) {
-        target_ulong physical = (n?(elo_odd >> 6) << 12 : (elo_even >> 6) << 12);
-        physical |= (address & (mask >> 1));
+    /* Is this a read access or a write to a modifiable page? */
+    if (rw == 0 || (lo & (1 << CP0ENTRYLO_D))) {
+        target_ulong physical = (lo >> CP0ENTRYLO_PFN) << 12;
+        physical |= address & (mask >> 1);
         int prot = PAGE_READ;
-        if (n ? (elo_odd & 4) != 0 : (elo_even & 4) != 0)
+        if (lo & (1 << CP0ENTRYLO_D))
             prot |= PAGE_WRITE;
 
         tlb_set_page(env, address & TARGET_PAGE_MASK,
@@ -516,33 +520,16 @@ hwaddr cpu_get_phys_page_debug(CPUMIPSState *env, target_ulong addr)
 
     ret = get_physical_address(env, &phys_addr, &prot, addr, 0, ACCESS_INT);
     if (ret != TLBRET_MATCH && ret != TLBRET_DIRTY) {
-	    target_ulong pgd_addr = cpu_mips_get_pgd(env);
-	    if (unlikely(!pgd_addr)) {
-		    phys_addr = -1;
-	    }
-	    else {
-		    target_ulong pgd_phys, pgd_index;
-		    target_ulong pt_addr, pt_phys, pt_index;
-		    target_ulong lo;
-		    /* Mimic the steps taken for a TLB refill */
-		    pgd_phys = pgd_addr - (int32_t)0x80000000UL;
-		    pgd_index = (addr >> 22) << 2;
-		    pt_addr = ldl_phys(pgd_phys + pgd_index);
-		    pt_phys = pt_addr - (int32_t)0x80000000UL;
-		    pt_index = (((addr >> 9) & 0x007ffff0) >> 1) & 0xff8;
-		    /* get the entrylo value */
-		    if (addr & 0x1000)
-			    lo = ldl_phys(pt_phys + pt_index + 4);
-		    else
-			    lo = ldl_phys(pt_phys + pt_index);
-		    /* convert software TLB entry to hardware value */
-                    lo >>= linux_pte_info.softshift;
-		    if (lo & 0x00000002)
-			    /* It is valid */
-			    phys_addr = (lo >> 6) << 12;
-		    else
-			    phys_addr = -1;
-	    }
+        target_ulong pgd_addr = cpu_mips_get_pgd(env);
+        phys_addr = -1;
+        if (likely(pgd_addr)) {
+            target_ulong entrylo0, entrylo1;
+            pagetable_walk(env, pgd_addr, addr, &entrylo0, &entrylo1);
+            target_ulong mask = env->CP0_PageMask | ~(TARGET_PAGE_MASK << 1);
+            target_ulong lo = (addr & mask & ~(mask >> 1)) ? entrylo1 : entrylo0;
+            if (lo & (1 << CP0ENTRYLO_V))
+                phys_addr = (lo >> CP0ENTRYLO_PFN) << 12;
+        }
     }
     return phys_addr;
 #endif
