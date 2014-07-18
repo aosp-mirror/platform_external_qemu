@@ -5,13 +5,9 @@ DEF_HELPER_2(raise_exception, void, env, i32)
 DEF_HELPER_1(interrupt_restart, void, env)
 
 #ifdef TARGET_MIPS64
-DEF_HELPER_4(ldl, tl, env, tl, tl, int)
-DEF_HELPER_4(ldr, tl, env, tl, tl, int)
 DEF_HELPER_4(sdl, void, env, tl, tl, int)
 DEF_HELPER_4(sdr, void, env, tl, tl, int)
 #endif
-DEF_HELPER_4(lwl, tl, env, tl, tl, int)
-DEF_HELPER_4(lwr, tl, env, tl, tl, int)
 DEF_HELPER_4(swl, void, env, tl, tl, int)
 DEF_HELPER_4(swr, void, env, tl, tl, int)
 
@@ -29,8 +25,8 @@ DEF_HELPER_FLAGS_1(clz, TCG_CALL_NO_RWG_SE, tl, tl)
 #ifdef TARGET_MIPS64
 DEF_HELPER_FLAGS_1(dclo, TCG_CALL_NO_RWG_SE, tl, tl)
 DEF_HELPER_FLAGS_1(dclz, TCG_CALL_NO_RWG_SE, tl, tl)
-DEF_HELPER_2(dmult, void, tl, tl)
-DEF_HELPER_2(dmultu, void, tl, tl)
+DEF_HELPER_3(dmult, void, env, tl, tl)
+DEF_HELPER_3(dmultu, void, env, tl, tl)
 #endif
 
 DEF_HELPER_3(muls, tl, env, tl, tl)
