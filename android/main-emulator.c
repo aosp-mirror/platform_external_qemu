@@ -293,14 +293,9 @@ getTargetEmulatorPath(const char* progName,
 {
     char*  progDir;
     char*  result;
-#ifdef _WIN32
-    /* TODO: currently amd64-mingw32msvc-gcc doesn't work which prevents
-             generating 64-bit binaries for Windows */
-    bool search_for_64bit_emulator = false;
-#else
+
     bool search_for_64bit_emulator =
             !force_32bit && android_getHostBitness() == 64;
-#endif
 
     /* Only search in current path if there is no directory separator
      * in |progName|. */
