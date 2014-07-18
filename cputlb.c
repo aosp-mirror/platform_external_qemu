@@ -21,6 +21,7 @@
 #include "cpu.h"
 #include "exec/exec-all.h"
 #include "exec/cputlb.h"
+#include "exec/ram_addr.h"
 
 /* statistics */
 int tlb_flush_count;
@@ -117,9 +118,8 @@ void tlb_flush_page(CPUArchState *env, target_ulong addr)
    can be detected */
 void tlb_protect_code(ram_addr_t ram_addr)
 {
-    cpu_physical_memory_reset_dirty(ram_addr,
-                                    ram_addr + TARGET_PAGE_SIZE,
-                                    CODE_DIRTY_FLAG);
+    cpu_physical_memory_reset_dirty(ram_addr, TARGET_PAGE_SIZE,
+                                    DIRTY_MEMORY_CODE);
 }
 
 /* update the TLB so that writes in physical page 'phys_addr' are no longer
@@ -127,7 +127,7 @@ void tlb_protect_code(ram_addr_t ram_addr)
 void tlb_unprotect_code_phys(CPUArchState *env, ram_addr_t ram_addr,
                              target_ulong vaddr)
 {
-    cpu_physical_memory_set_dirty_flags(ram_addr, CODE_DIRTY_FLAG);
+    cpu_physical_memory_set_dirty_flag(ram_addr, DIRTY_MEMORY_CODE);
 }
 
 static bool tlb_is_dirty_ram(CPUTLBEntry *tlbe)
@@ -145,6 +145,26 @@ void tlb_reset_dirty_range(CPUTLBEntry *tlb_entry, uintptr_t start,
         if ((addr - start) < length) {
             tlb_entry->addr_write &= TARGET_PAGE_MASK;
             tlb_entry->addr_write |= TLB_NOTDIRTY;
+        }
+    }
+}
+
+void cpu_tlb_reset_dirty_all(ram_addr_t start1, ram_addr_t length)
+{
+    CPUState *cpu;
+    CPUArchState *env;
+
+    CPU_FOREACH(cpu) {
+        int mmu_idx;
+
+        env = cpu->env_ptr;
+        for (mmu_idx = 0; mmu_idx < NB_MMU_MODES; mmu_idx++) {
+            unsigned int i;
+
+            for (i = 0; i < CPU_TLB_SIZE; i++) {
+                tlb_reset_dirty_range(&env->tlb_table[mmu_idx][i],
+                                      start1, length);
+            }
         }
     }
 }
@@ -287,7 +307,7 @@ void tlb_set_page(CPUArchState *env, target_ulong vaddr,
             /* Write access calls the I/O callback.  */
             te->addr_write = address | TLB_MMIO;
         } else if ((pd & ~TARGET_PAGE_MASK) == IO_MEM_RAM &&
-                   !cpu_physical_memory_is_dirty(pd)) {
+                   cpu_physical_memory_is_clean(pd)) {
             te->addr_write = address | TLB_NOTDIRTY;
         } else {
             te->addr_write = address;

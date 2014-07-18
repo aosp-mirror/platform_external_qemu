@@ -9,6 +9,7 @@
 
 #include "hw/sysbus.h"
 #include "hw/arm/arm.h"
+#include "exec/ram_addr.h"
 #include "sysemu/sysemu.h"
 
 /* Bitbanded IO.  Each word corresponds to a single bit.  */

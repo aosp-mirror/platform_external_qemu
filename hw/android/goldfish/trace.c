@@ -229,7 +229,9 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
 
     default:
         if (offset < 4096) {
-            cpu_abort(cpu_single_env, "trace_dev_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "trace_dev_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
         } else {
             D("%s: offset=%d (0x%x) value=%d (0x%x)\n", __FUNCTION__, offset,
               offset, value, value);
@@ -251,7 +253,9 @@ static uint32_t trace_dev_read(void *opaque, hwaddr offset)
 
     default:
         if (offset < 4096) {
-            cpu_abort(cpu_single_env, "trace_dev_read: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "trace_dev_read: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
         } else {
             D("%s: offset=%d (0x%x)\n", __FUNCTION__, offset, offset);
         }

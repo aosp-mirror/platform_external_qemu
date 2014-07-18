@@ -83,7 +83,9 @@ static uint32_t goldfish_timer_read(void *opaque, hwaddr offset)
         case TIMER_TIME_HIGH:
             return s->now_ns >> 32;
         default:
-            cpu_abort (cpu_single_env, "goldfish_timer_read: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_timer_read: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
             return 0;
     }
 }
@@ -115,7 +117,9 @@ static void goldfish_timer_write(void *opaque, hwaddr offset, uint32_t value_ns)
             goldfish_device_set_irq(&s->dev, 0, 0);
             break;
         default:
-            cpu_abort (cpu_single_env, "goldfish_timer_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_timer_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
     }
 }
 
@@ -167,7 +171,9 @@ static uint32_t goldfish_rtc_read(void *opaque, hwaddr offset)
         case 0x4:
             return s->now >> 32;
         default:
-            cpu_abort (cpu_single_env, "goldfish_rtc_read: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_rtc_read: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
             return 0;
     }
 }
@@ -186,7 +192,9 @@ static void goldfish_rtc_write(void *opaque, hwaddr offset, uint32_t value)
             goldfish_device_set_irq(&s->dev, 0, 0);
             break;
         default:
-            cpu_abort (cpu_single_env, "goldfish_rtc_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_rtc_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
     }
 }
 

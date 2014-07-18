@@ -14,6 +14,7 @@
 #include "android/android.h"
 #include "android/utils/debug.h"
 #include "android/utils/duff.h"
+#include "exec/ram_addr.h"
 #include "hw/android/goldfish/device.h"
 #include "hw/hw.h"
 #include "ui/console.h"
@@ -291,20 +292,9 @@ compute_fb_update_rect_linear(FbUpdateState*  fbs,
          * changed pixels.
          */
         if (dirty_addr != 0) {
-            int  dirty = 0;
-            int  len   = fbs->src_pitch;
-
-            while (len > 0) {
-                int  len2 = TARGET_PAGE_SIZE - (dirty_addr & (TARGET_PAGE_SIZE-1));
-
-                if (len2 > len)
-                    len2 = len;
-
-                dirty |= cpu_physical_memory_get_dirty(dirty_addr, VGA_DIRTY_FLAG);
-                dirty_addr  += len2;
-                len         -= len2;
-            }
-
+            int  dirty = cpu_physical_memory_get_dirty(dirty_addr,
+                                                       fbs->src_pitch,
+                                                       DIRTY_MEMORY_VGA);
             if (!dirty) { /* this line was not modified, skip to next one */
                 goto NEXT_LINE;
             }
@@ -444,8 +434,8 @@ compute_fb_update_rect_linear(FbUpdateState*  fbs,
 
     /* Always clear the dirty VGA bits */
     cpu_physical_memory_reset_dirty(dirty_base + rect->ymin * fbs->src_pitch,
-                                    dirty_base + (rect->ymax+1)* fbs->src_pitch,
-                                    VGA_DIRTY_FLAG);
+                                    (rect->ymax - rect->ymin + 1) * fbs->src_pitch,
+                                    DIRTY_MEMORY_VGA);
     return 1;
 }
 
@@ -588,7 +578,9 @@ static uint32_t goldfish_fb_read(void *opaque, hwaddr offset)
             return goldfish_fb_get_pixel_format(s);
 
         default:
-            cpu_abort (cpu_single_env, "goldfish_fb_read: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_fb_read: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
             return 0;
     }
 }
@@ -630,7 +622,9 @@ static void goldfish_fb_write(void *opaque, hwaddr offset,
             s->need_update = 1;
             break;
         default:
-            cpu_abort (cpu_single_env, "goldfish_fb_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_fb_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
     }
 }
 

@@ -14,6 +14,7 @@
 #include "hw/android/goldfish/pipe.h"
 #include "hw/android/goldfish/device.h"
 #include "hw/android/goldfish/vmem.h"
+#include "exec/ram_addr.h"
 #include "qemu/timer.h"
 
 #define  DEBUG 0

@@ -419,7 +419,9 @@ static uint32_t goldfish_audio_read(void *opaque, hwaddr offset)
 	    return s->read_buffer_available;
 
         default:
-            cpu_abort (cpu_single_env, "goldfish_audio_read: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_audio_read: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
             return 0;
     }
 }
@@ -494,7 +496,9 @@ static void goldfish_audio_write(void *opaque, hwaddr offset, uint32_t val)
             break;
 
         default:
-            cpu_abort (cpu_single_env, "goldfish_audio_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_audio_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
     }
 }
 
