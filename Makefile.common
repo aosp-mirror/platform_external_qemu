@@ -124,10 +124,14 @@ common_LOCAL_SRC_FILES += \
 	android/base/StringView.cpp \
 	android/emulation/CpuAccelerator.cpp \
 	android/filesystems/ext4_utils.cpp \
+<<<<<<< HEAD   (a2049e Merge "prevent set size from going below its init size" into)
 	android/filesystems/fstab_parser.cpp \
 	android/filesystems/partition_types.cpp \
 	android/filesystems/ramdisk_extractor.cpp \
 	android/kernel/kernel_utils.cpp \
+=======
+	android/looper-generic.cpp \
+>>>>>>> BRANCH (dd106a Merge "replace refset with std::set and fix crashes" into id)
 	android/utils/assert.c \
 	android/utils/bufprint.c \
 	android/utils/debug.c \
