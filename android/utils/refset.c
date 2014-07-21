@@ -13,6 +13,7 @@
 #include <stddef.h>
 
 #define  AREFSET_STEP    5
+#define  AREFSET_INIT_SIZE    4
 
 AINLINED uint32_t
 _arefSet_hashItem( void*  item )
@@ -115,7 +116,7 @@ arefSet_add( ARefSet*  s, void*  item )
     AASSERT(s->iteration == 0);
 
     if (s->max_buckets == 0)
-        AVECTOR_INIT_ALLOC(s,buckets,4);
+        AVECTOR_INIT_ALLOC(s,buckets,AREFSET_INIT_SIZE);
 
     lookup = _arefSet_lookupInsert(s, item);
     if (*lookup == item)
@@ -172,6 +173,8 @@ _arefSet_removeDeferred( ARefSet*  s )
     while (s->num_buckets < newSize*0.25)
         newSize /= 2;
 
+    if (newSize < AREFSET_INIT_SIZE)
+        newSize = AREFSET_INIT_SIZE;
     if (newSize != s->max_buckets)
         _arefSet_resize(s, newSize);
 }
