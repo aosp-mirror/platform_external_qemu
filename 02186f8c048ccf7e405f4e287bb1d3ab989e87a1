@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f95af4db_9f272b38",
+        "filename": "android/base/SocketDrainer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-22T17:00:12Z",
+      "side": 1,
+      "message": "nit: It probably makes sense to put this under android/base/sockets/SocketDrainer.h instead.",
+      "revId": "02186f8c048ccf7e405f4e287bb1d3ab989e87a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d957f0b2_73586abc",
+        "filename": "android/base/SocketDrainer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-22T17:00:12Z",
+      "side": 1,
+      "message": "nit: Add an empy line above for spacing.",
+      "revId": "02186f8c048ccf7e405f4e287bb1d3ab989e87a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d957f0b2_1365766b",
+        "filename": "android/base/SocketDrainer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-22T17:00:12Z",
+      "side": 1,
+      "message": "nit: \"call following\" -\u003e \"call the following\"",
+      "revId": "02186f8c048ccf7e405f4e287bb1d3ab989e87a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f95af4db_3f62b764",
+        "filename": "android/base/SocketDrainer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-22T17:00:12Z",
+      "side": 1,
+      "message": "same here :)",
+      "revId": "02186f8c048ccf7e405f4e287bb1d3ab989e87a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d957f0b2_3362f264",
+        "filename": "android/base/SocketDrainer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-22T17:00:12Z",
+      "side": 1,
+      "message": "and here.",
+      "revId": "02186f8c048ccf7e405f4e287bb1d3ab989e87a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f95af4db_ff32df7a",
+        "filename": "android/base/SocketDrainer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-22T17:00:12Z",
+      "side": 1,
+      "message": "nit: Add a line of spacing above.",
+      "revId": "02186f8c048ccf7e405f4e287bb1d3ab989e87a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d957f0b2_d32d9e1b",
+        "filename": "android/base/SocketDrainer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-22T17:00:12Z",
+      "side": 1,
+      "message": "nit: explain what happens on scope exit.",
+      "revId": "02186f8c048ccf7e405f4e287bb1d3ab989e87a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
