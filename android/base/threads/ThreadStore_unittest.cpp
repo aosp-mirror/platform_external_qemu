@@ -16,6 +16,7 @@
 
 #include "android/base/synchronization/Lock.h"
 #include "android/base/testing/TestThread.h"
+#include "android/base/threads/Thread.h"
 
 #include <gtest/gtest.h>
 
@@ -77,6 +78,18 @@ Lock StaticCounter::mLock;
 size_t StaticCounter::mCreationCount = 0;
 size_t StaticCounter::mDestructionCount = 0;
 StaticCounter* StaticCounter::mInstances[kMaxInstances];
+
+class MyThread : public Thread {
+public:
+    MyThread(StaticCounterStore* store) : mStore(store) {}
+
+    virtual intptr_t main() {
+        mStore->set(new StaticCounter());
+        return 0;
+    }
+private:
+    StaticCounterStore* mStore;
+};
 
 }  // namespace
 
@@ -161,23 +174,19 @@ TEST(ThreadStore, MainThread) {
     EXPECT_EQ(1U, StaticCounter::getDestructionCount());
 }
 
-static void* threadFunc(void* param) {
-    StaticCounterStore* store = static_cast<StaticCounterStore*>(param);
-    store->set(new StaticCounter());
-    return NULL;
-}
-
 TEST(ThreadStore, Threads) {
     StaticCounterStore store;
-    const size_t kNumThreads = 1000;
-    TestThread* threads[kNumThreads];
+    const size_t kNumThreads = 100;
+    MyThread* threads[kNumThreads];
     StaticCounter::reset();
 
     for (size_t n = 0; n < kNumThreads; ++n) {
-        threads[n] = new TestThread(&threadFunc, &store);
+        threads[n] = new MyThread(&store);
+        threads[n]->start();
     }
+
     for (size_t n = 0; n < kNumThreads; ++n) {
-        threads[n]->join();
+        EXPECT_TRUE(threads[n]->wait(NULL)) << "Thread " << n;
     }
 
     EXPECT_EQ(kNumThreads, StaticCounter::getCreationCount());

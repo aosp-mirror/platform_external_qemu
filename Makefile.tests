@@ -26,6 +26,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/StringFormat_unittest.cpp \
   android/base/StringView_unittest.cpp \
   android/base/synchronization/Lock_unittest.cpp \
+  android/base/threads/Thread_unittest.cpp \
   android/base/threads/ThreadStore_unittest.cpp \
   android/emulation/CpuAccelerator_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \

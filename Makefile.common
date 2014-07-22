@@ -184,6 +184,12 @@ common_LOCAL_SRC_FILES += \
 	android/utils/vector.c \
 	android/utils/win32_cmdline_quote.c \
 
+ifeq (windows,$(HOST_OS))
+common_LOCAL_SRC_FILES += android/base/threads/Thread_win32.cpp
+else
+common_LOCAL_SRC_FILES += android/base/threads/Thread_pthread.cpp
+endif
+
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
 common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
