@@ -142,6 +142,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/String.cpp \
 	android/base/StringFormat.cpp \
 	android/base/StringView.cpp \
+	android/base/threads/ThreadStore.cpp \
 	android/emulation/CpuAccelerator.cpp \
 	android/filesystems/ext4_utils.cpp \
 	android/filesystems/fstab_parser.cpp \
