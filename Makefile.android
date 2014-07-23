@@ -31,21 +31,21 @@ include-if-bitness-64 = $(if $(strip $(EMULATOR_BUILD_64BITS)),$(eval include $1
 
 # determine the location of platform-specific directories
 #
-CONFIG_DIRS     := \
+QEMU_CONFIG_DIRS     := \
     $(LOCAL_PATH)/android/config/$(QEMU_HOST_TAG)
 
 ifeq ($(BUILD_STANDALONE_EMULATOR),true)
-    CONFIG_DIRS := $(LOCAL_PATH)/objs $(CONFIG_DIRS)
+    QEMU_CONFIG_DIRS := $(LOCAL_PATH)/objs $(QEMU_CONFIG_DIRS)
 endif
 
-CONFIG_INCLUDES := $(CONFIG_DIRS:%=-I%)
+QEMU_CONFIG_INCLUDES := $(QEMU_CONFIG_DIRS:%=-I%)
 
 MY_CC  := $(HOST_CC)
 MY_CXX := $(HOST_CXX)
 MY_LD  := $(HOST_LD)
 MY_AR  := $(HOST_AR)
 
-MY_CFLAGS := $(CONFIG_INCLUDES) -g -falign-functions=0
+MY_CFLAGS := -g -falign-functions=0
 ifeq ($(BUILD_DEBUG_EMULATOR),true)
     MY_CFLAGS += -O0
 else
@@ -198,12 +198,6 @@ endif
 
 # Needed to build block.c on Linux/x86_64.
 MY_CFLAGS += -D_GNU_SOURCE=1
-
-MY_CFLAGS += -I$(LOCAL_PATH)/include
-
-# Need to include "qapi-types.h" and other auto-generated files from
-# android-configure.sh
-MY_CFLAGS += -I$(LOCAL_PATH)/qapi-auto-generated
 
 ifneq (true,$(BUILD_STANDALONE_EMULATOR))
 my-host-tool = $(MY_$1)

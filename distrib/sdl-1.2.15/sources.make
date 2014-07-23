@@ -6,7 +6,7 @@ SDL_OLD_LOCAL_PATH := $(LOCAL_PATH)
 
 LOCAL_PATH := $(call my-dir)
 
-SDL_CFLAGS := -I$(LOCAL_PATH)/include
+SDL_CFLAGS := -I$(LOCAL_PATH)/include -I$(LOCAL_PATH)/configs/$(QEMU_HOST_TAG)
 SDL_LDLIBS :=
 SDL_STATIC_LIBRARIES :=
 
@@ -232,13 +232,13 @@ endif
 SDL_SOURCES += $(SRCS:%=src/video/%)
 
 $(call start-emulator-library,emulator_libSDL)
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
 LOCAL_SRC_FILES := $(SDL_SOURCES)
+LOCAL_CFLAGS += $(SDL_CFLAGS)
 $(call end-emulator-library)
 
 $(call start-emulator64-library,emulator_lib64SDL)
 LOCAL_SRC_FILES := $(SDL_SOURCES)
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+LOCAL_CFLAGS += $(SDL_CFLAGS)
 $(call end-emulator-library)
 
 ## Build libSDLmain
@@ -261,14 +261,12 @@ endif
 SDLMAIN_SOURCES := $(SRCS:%=src/main/%)
 
 $(call start-emulator-library,emulator_libSDLmain)
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
 LOCAL_CFLAGS += $(SDL_CFLAGS)
 LOCAL_SRC_FILES := $(SDLMAIN_SOURCES)
 $(call end-emulator-library)
 
 $(call start-emulator64-library,emulator_lib64SDLmain)
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
-LOCAL_CFLAGS += $(SDL_CFLAGS)
+LOCAL_CFLAGS := $(SDL_CFLAGS)
 LOCAL_SRC_FILES := $(SDLMAIN_SOURCES)
 $(call end-emulator-library)
 

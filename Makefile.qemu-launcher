@@ -17,7 +17,9 @@ qemu_launcher_SOURCES := \
     android/help.c \
     android/main-common.c \
 
-qemu_launcher_CFLAGS := -DNO_SKIN=1
+qemu_launcher_CFLAGS := \
+    -DNO_SKIN=1 \
+    -I$(OBJS_DIR)
 
 qemu_launcher_LDLIBS := -lstdc++
 
