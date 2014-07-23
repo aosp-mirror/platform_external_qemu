@@ -2,6 +2,9 @@
 #define IOLOOPER_H
 
 #include <stdint.h>
+#include <android/utils/compiler.h>
+
+ANDROID_BEGIN_HEADER
 
 /* An IOLooper is an abstraction for select() */
 
@@ -64,5 +67,7 @@ int64_t    iolooper_now(void);
  *  occurred before the deadline, or -1 on error.
  */
 int iolooper_wait_absolute(IoLooper* iol, int64_t deadline);
+
+ANDROID_END_HEADER
 
 #endif /* IOLOOPER_H */
