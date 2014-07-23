@@ -1848,7 +1848,7 @@ void android_extractPartitionFormat(const char* fstab,
 
 
 // List of value describing how to handle partition images in
-// android_nand_add_image() below, when no initiali partition image
+// android_nand_add_image() below, when no initial partition image
 // file is provided.
 //
 // MUST_EXIST means that the partition image must exist, otherwise
@@ -1866,18 +1866,20 @@ typedef enum {
 } AndroidPartitionOpenMode;
 
 // Add a NAND partition image to the hardware configuration.
+//
 // |part_name| is a string indicating the type of partition, i.e. "system",
 // "userdata" or "cache".
 // |part_type| is an enum describing the type of partition. If it is
 // DISK_PARTITION_TYPE_PROBE, then try to auto-detect the type directly
 // from the content of |part_file| or |part_init_file|.
+// |part_mode| is an enum describing how to handle the partition image,
+// see AndroidPartitionOpenMode for details.
 // |part_size| is the partition size in bytes.
 // |part_file| is the partition file path, can be NULL if |path_init_file|
 // is not NULL.
 // |part_init_file| is an optional path to the initialization partition file.
-// |is_ext4| is true if the partition is formatted as EXT4, false for YAFFS2.
 //
-// The NAND partition will be backed by |path_file|, except in the following
+// The NAND partition will be backed by |part_file|, except in the following
 // cases:
 //    - |part_file| is NULL, or its value is "<temp>", indicating that a
 //      new temporary image file must be used instead.
@@ -1889,15 +1891,6 @@ typedef enum {
 //
 // If |part_file| is not NULL and can be locked, if the partition image does
 // not exit, then the file must be created as an empty partition.
-//
-// When a new partition image is created, what happens depends on the
-// value of |is_ext4|:
-//
-//    - If |is_ext4| is false, a simple empty file is created, since that's
-//      enough to create an empty YAFFS2 partition.
-//
-//    - If |is_ext4| is true, an "empty ext4" partition image is created
-//      instead, which will _not_ be backed by an empty file.
 //
 // If |part_init_file| is not NULL, its content will be used to erase
 // the content of the main partition image. This is automatically handled
@@ -1937,6 +1930,7 @@ void android_nand_add_image(const char* part_name,
 
     // Verify partition type, or probe it if needed.
     {
+        // First determine which image file to probe.
         const char* image_file = NULL;
         if (part_file && path_exists(part_file)) {
             image_file = part_file;
@@ -1952,24 +1946,42 @@ void android_nand_add_image(const char* part_name,
                         part_name, image_file);
 
             part_type = androidPartitionType_probeFile(image_file);
-        } else {
+        } else if (image_file) {
             // Probe the current image file to check that it is of the
             // right partition format.
-            if (image_file) {
-                AndroidPartitionType image_type =
-                        androidPartitionType_probeFile(image_file);
-                if (image_type == ANDROID_PARTITION_TYPE_UNKNOWN) {
-                    PANIC("Cannot determine %s partition type of: %s",
-                          part_name,
-                          image_file);
-                }
+            AndroidPartitionType image_type =
+                    androidPartitionType_probeFile(image_file);
+            if (image_type == ANDROID_PARTITION_TYPE_UNKNOWN) {
+                PANIC("Cannot determine %s partition type of: %s",
+                    part_name,
+                    image_file);
+            }
 
-                if (image_type != part_type) {
+            if (image_type != part_type) {
+                // The image file exists, but is not in the proper format!
+                // This can happen in certain cases, e.g. a KitKat/x86 AVD
+                // created with SDK 23.0.2 and started with the
+                // corresponding emulator will create a cache.img in 'yaffs2'
+                // format, while the system really expect it to be 'ext4',
+                // as listed in the ramdisk.img.
+                //
+                // To work-around the problem, simply re-create the file
+                // by wiping it when allowed.
+
+                if (part_mode == ANDROID_PARTITION_OPEN_MODE_MUST_EXIST) {
                     PANIC("Invalid %s partition image type: %s (expected %s)",
                         part_name,
                         androidPartitionType_toString(image_type),
                         androidPartitionType_toString(part_type));
                 }
+                VERBOSE_PRINT(init,
+                    "Image type mismatch for %s partition: "
+                    "%s (expected %s)",
+                    part_name,
+                    androidPartitionType_toString(image_type),
+                    androidPartitionType_toString(part_type));
+
+                part_mode = ANDROID_PARTITION_OPEN_MODE_MUST_WIPE;
             }
         }
     }
