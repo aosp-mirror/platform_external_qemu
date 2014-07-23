@@ -8,9 +8,9 @@ VARIANT=goldfish
 OUTPUT=/tmp/kernel-qemu
 CROSSPREFIX=arm-linux-androideabi-
 CONFIG=goldfish
-GCC_VERSION=4.7
+GCC_VERSION=4.8
 
-VALID_ARCHS="arm x86 x86_64 mips"
+VALID_ARCHS="arm x86 x86_64 mips arm64"
 
 # Determine the host architecture, and which default prebuilt tag we need.
 # For the toolchain auto-detection.
@@ -171,7 +171,7 @@ else
     case $ARCH in
         arm)
             CONFIG=goldfish_armv7
-            if  [ "$OPTION_ARMV5" = "yes" ]; then
+            if  [ "$OPTION_ARMV7" = "no" ]; then
                 CONFIG=goldfish
             fi
             ;;
@@ -220,7 +220,8 @@ else
             CROSSPREFIX=arm-linux-androideabi-
             ;;
         x86)
-            CROSSPREFIX=i686-linux-android-
+            CROSSPREFIX=x86_64-linux-android-
+            # NOTE: kernel-toolchain/toolbox.sh will add -m32
             ;;
         x86_64)
             CROSSPREFIX=x86_64-linux-android-
@@ -247,7 +248,7 @@ case $ARCH in
         ZIMAGE=bzImage
         ;;
     arm64)
-        ZIMAGE=Image.gz
+        ZIMAGE=Image
         ;;
     mips)
         ZIMAGE=

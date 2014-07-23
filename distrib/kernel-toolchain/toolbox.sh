@@ -46,10 +46,12 @@ EXTRA_FLAGS=
 if [ "$PROGSUFFIX" = gcc ]; then
     # Special case #1: For all, disable PIC code
     EXTRA_FLAGS=$EXTRA_FLAGS" -fno-pic"
-    if [ "$ARCH" = "x86" ]; then
-        # Special case #2: For x86, disable SSE FPU arithmetic too
-        EXTRA_FLAGS=$EXTRA_FLAGS" -mfpmath=387"
-    fi
+    case $ARCH in
+        x86)
+            # Special case #2: For x86, disable SSE FPU arithmetic too
+            EXTRA_FLAGS=$EXTRA_FLAGS" -m32 -mfpmath=387"
+            ;;
+    esac
 fi
 
 # Invoke real cross-compiler toolchain program now
