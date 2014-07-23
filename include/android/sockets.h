@@ -13,9 +13,12 @@
 #ifndef QEMU_SOCKET_H
 #define QEMU_SOCKET_H
 
+#include <android/utils/compiler.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <errno.h>
+
+ANDROID_BEGIN_HEADER
 
 /* we're going to hide the implementation details of sockets behind
  * a simple wrapper interface declared here.
@@ -419,5 +422,7 @@ int  socket_mcast_inet_add_membership( int  s, uint32_t  ip );
 int  socket_mcast_inet_drop_membership( int  s, uint32_t  ip );
 int  socket_mcast_inet_set_loop( int  s, int  enabled );
 int  socket_mcast_inet_set_ttl( int  s, int  ttl );
+
+ANDROID_END_HEADER
 
 #endif /* QEMU_SOCKET_H */
