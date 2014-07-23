@@ -45,7 +45,7 @@ EMULATOR_TARGET_CFLAGS += \
 common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
 
-common_LOCAL_CFLAGS += -I$(GLIB_INCLUDE_DIR)
+common_LOCAL_CFLAGS += -I$(GLIB_INCLUDE_DIR) $(EMULATOR_COMMON_CFLAGS)
 
 # The following is to ensure that "config.h" will map to a target-specific
 # configuration file header.
