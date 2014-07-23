@@ -624,7 +624,7 @@ EOF
         CUR_SHA1=$(var_value $VARNAME)
         PREV_SHA1=$(var_value PREV_$VARNAME)
         if [ "$CUR_SHA1" != "$PREV_SHA1" ]; then
-            GIT_LOG_COMMAND="cd $AOSP_SUBDIR && git log --oneline --no-merges $PREV_SHA1..$CUR_SHA1"
+            GIT_LOG_COMMAND="cd $AOSP_SUBDIR && git log --oneline --no-merges $PREV_SHA1..$CUR_SHA1 ."
             printf "    $ %s\n" "$GIT_LOG_COMMAND" >> $README_FILE
             (cd $TARGET_AOSP && eval $GIT_LOG_COMMAND) | while read LINE; do
                 printf "        %s\n" "$LINE" >> $README_FILE
