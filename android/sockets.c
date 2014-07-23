@@ -21,6 +21,7 @@
 #include "sysemu/char.h"
 #include <stdlib.h>
 #include <string.h>
+#include "android/base/sockets/SocketDrainer.h"
 #include "android/utils/path.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
@@ -1230,56 +1231,11 @@ int socket_init(void)
 
 #endif /* !_WIN32 */
 
-#ifdef _WIN32
-
-static void
-socket_close_handler( void*  _fd )
-{
-    int   fd = (int)_fd;
-    int   ret;
-    char  buff[64];
-
-    /* we want to drain the read side of the socket before closing it */
-    do {
-        ret = recv( fd, buff, sizeof(buff), 0 );
-    } while (ret < 0 && WSAGetLastError() == WSAEINTR);
-
-    if (ret < 0 && WSAGetLastError() == EWOULDBLOCK)
-        return;
-
-    qemu_set_fd_handler( fd, NULL, NULL, NULL );
-    closesocket( fd );
-}
 
 void
-socket_close( int  fd )
-{
-    int  old_errno = errno;
-
-    shutdown( fd, SD_BOTH );
-    /* we want to drain the socket before closing it */
-    qemu_set_fd_handler( fd, socket_close_handler, NULL, (void*)fd );
-
-    errno = old_errno;
+socket_close( int  fd ) {
+    socket_drainer_drain_and_close(fd);
 }
-
-#else /* !_WIN32 */
-
-#include <unistd.h>
-
-void
-socket_close( int  fd )
-{
-    int  old_errno = errno;
-
-    shutdown( fd, SHUT_RDWR );
-    IGNORE_EINTR(close( fd ));
-
-    errno = old_errno;
-}
-
-#endif /* !_WIN32 */
-
 
 static int
 socket_bind_server( int  s, const SockAddress*  to, SocketType  type )
