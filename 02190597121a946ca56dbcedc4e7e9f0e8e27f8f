@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b9431c33_6bee0122",
+        "filename": "distrib/sdl-1.2.15/configs/darwin-x86_64/SDL_config.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-23T20:02:45Z",
+      "side": 1,
+      "message": "Ah ah, that\u0027s because it\u0027s actually a reference to distrib/sdl-1.2.15/android-configure.sh, not the top-level one, which doesn\u0027t generate these files :-)\n\nIn other words, everything\u0027s good here, though I recognize it\u0027s slightly misleading :-)",
+      "parentUuid": "997bb85f_e575d00a",
+      "revId": "02190597121a946ca56dbcedc4e7e9f0e8e27f8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "997bb85f_456d9c3c",
         "filename": "distrib/sdl-1.2.15/configs/freebsd-x86/SDL_config.h",
         "patchSetId": 1
