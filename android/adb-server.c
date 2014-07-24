@@ -19,6 +19,7 @@
 #include "android/iolooper.h"
 #include "android/async-utils.h"
 #include "android/utils/debug.h"
+#include "android/utils/format.h"
 #include "android/utils/list.h"
 #include "android/utils/misc.h"
 #include "android/adb-server.h"
@@ -27,7 +28,8 @@
 #define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)    VERBOSE_PRINT(adbserver,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(adbserver)
-#define  QB(b, s)  quote_bytes((const char*)b, (s < 32) ? s : 32)
+#define  FHP(dst, dstLen, src, srcLen)  format_hex_printable2(dst, dstLen, src, (srcLen < 32) ? srcLen : 32)
+#define  FHP_MAX (9*(32/4) + 4 + 9*(32/8)) // format_hex_printable2 output len for 32 src bytes
 
 typedef struct AdbServer    AdbServer;
 typedef struct AdbHost      AdbHost;
@@ -221,6 +223,7 @@ _on_adb_host_disconnected(AdbHost* adb_host)
 static void
 _on_adb_host_read(AdbHost* adb_host)
 {
+    char tmp[FHP_MAX];
     char buff[4096];
 
     /* Read data from the socket. */
@@ -234,7 +237,7 @@ _on_adb_host_read(AdbHost* adb_host)
     } else {
         D("%s %d bytes received from ADB host %p(so=%d): %s",
            adb_host->adb_guest ? "Transfer" : "Pend", size, adb_host,
-           adb_host->host_so, QB(buff, size));
+           adb_host->host_so, FHP(tmp, sizeof(tmp), buff, size));
 
         /* Lets see if there is an ADB guest associated with this host, and it
          * is ready to receive host data. */
@@ -514,9 +517,10 @@ adb_server_on_guest_message(void* opaque, const uint8_t* msg, int msglen)
 {
     AdbGuest* const adb_guest = (AdbGuest*)opaque;
     AdbHost* const adb_host = adb_guest->adb_host;
+    char tmp[FHP_MAX];
 
     if (adb_host != NULL) {
-        D("Sending %d bytes to the ADB host: %s", msglen, QB(msg, msglen));
+        D("Sending %d bytes to the ADB host: %s", msglen, FHP(tmp, sizeof(tmp), msg, msglen));
 
         /* Lets see if we can send the data immediatelly... */
         if (adb_host->pending_send_buffer == NULL) {
@@ -542,7 +546,7 @@ adb_server_on_guest_message(void* opaque, const uint8_t* msg, int msglen)
         }
     } else {
         D("ADB host is disconneted and can't accept %d bytes in %s",
-          msglen, QB(msg, msglen));
+          msglen, FHP(tmp, sizeof(tmp), msg, msglen));
     }
 }
 

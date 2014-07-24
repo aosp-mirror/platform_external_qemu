@@ -16,9 +16,9 @@
 #include "android/kernel/kernel_utils_testing.h"
 #include "android/utils/file_data.h"
 #include "android/utils/path.h"
+#include "android/utils/string.h"
 #include "android/utils/uncompress.h"
 
-#include <algorithm>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,19 +41,6 @@ const size_t kLinuxVersionStringPrefixLen =
         sizeof(kLinuxVersionStringPrefix) - 1U;
 
 }  // namespace
-
-#ifndef __APPLE__
-size_t strlcpy(char* dst, const char * src, size_t size)
-{
-    size_t srcLen = strlen(src);
-    if (size > 0) {
-        size_t copyLen = std::min(srcLen, size-1);
-        memcpy(dst, src, copyLen);
-        dst[copyLen] = 0;
-    }
-    return srcLen;
-}
-#endif
 
 #ifdef _WIN32
 // TODO: (vharron) move somewhere more generally useful?

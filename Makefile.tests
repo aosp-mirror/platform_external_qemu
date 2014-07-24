@@ -3,12 +3,6 @@ include $(LOCAL_PATH)/distrib/googletest/Android.mk
 
 EMULATOR_UNITTESTS_SOURCES := \
   android/avd/util_unittest.cpp \
-  android/utils/bufprint_unittest.cpp \
-  android/utils/eintr_wrapper_unittest.cpp \
-  android/utils/file_data_unittest.cpp \
-  android/utils/host_bitness_unittest.cpp \
-  android/utils/property_file_unittest.cpp \
-  android/utils/win32_cmdline_quote_unittest.cpp \
   android/base/containers/PodVector_unittest.cpp \
   android/base/containers/StringVector_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
@@ -28,6 +22,13 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/filesystems/ramdisk_extractor_unittest.cpp \
   android/filesystems/testing/TestSupport.cpp \
   android/kernel/kernel_utils_unittest.cpp \
+  android/utils/bufprint_unittest.cpp \
+  android/utils/eintr_wrapper_unittest.cpp \
+  android/utils/file_data_unittest.cpp \
+  android/utils/format_unittest.cpp \
+  android/utils/host_bitness_unittest.cpp \
+  android/utils/property_file_unittest.cpp \
+  android/utils/win32_cmdline_quote_unittest.cpp \
 
 ifeq (windows,$(HOST_OS))
 EMULATOR_UNITTESTS_SOURCES += \
