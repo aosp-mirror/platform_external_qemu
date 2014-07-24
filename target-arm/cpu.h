@@ -1766,10 +1766,17 @@ bool write_cpustate_to_list(ARMCPU *cpu);
 #if defined(CONFIG_USER_ONLY)
 #define TARGET_PAGE_BITS 12
 #else
-/* The ARM MMU allows 1k pages.  */
-/* ??? Linux doesn't actually use these, and they're deprecated in recent
-   architecture revisions.  Maybe a configure option to disable them.  */
+#if defined(TARGET_AARCH64)
+/* You can't configure 1k pages on AArch64 hardware */
+#define TARGET_PAGE_BITS 12
+#else
+/* The ARM MMU allows 1k pages - although they are not used by Linux
+ * FIXME?: they're deprecated in recent architecture revisions and
+ * this does create a performance hit. Maybe a configure option to
+ * disable them?
+ */
 #define TARGET_PAGE_BITS 10
+#endif
 #endif
 
 #if defined(TARGET_AARCH64)
