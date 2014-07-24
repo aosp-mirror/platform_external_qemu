@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9431c33_4b9a2595",
+        "filename": "android/base/sockets/SocketDrainer_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-24T09:08:33Z",
+      "side": 1,
+      "message": "For some reason, this include doesn\u0027t compile. a -I$(LOCAL_PATH)/include is probably missing from the Makefile.",
+      "revId": "598f96cb869e7f1d03563052c37af2fa58395435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9431c33_6bc0c15f",
+        "filename": "android/base/sockets/SocketDrainer_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-24T09:08:33Z",
+      "side": 1,
+      "message": "nit: All the android/utils/ header should not require the extern \"C\" before including them anymore (if not this is a bug, and I\u0027d prefer you fix the header).",
+      "revId": "598f96cb869e7f1d03563052c37af2fa58395435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9431c33_0ba01dbd",
+        "filename": "android/base/sockets/SocketDrainer_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-24T09:08:33Z",
+      "side": 1,
+      "message": "I\u0027d recommend adding a comment above explaining that the code belows relies on fork(), which doesn\u0027t exist on Windows.\n\nAn alternative would be to write a helper executable and invoke directly, but this is clearly a lot more work. I think the current patch is pretty ok for now.",
+      "range": {
+        "startLine": 22,
+        "startChar": 8,
+        "endLine": 22,
+        "endChar": 14
+      },
+      "revId": "598f96cb869e7f1d03563052c37af2fa58395435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7937e4c3_a9463d37",
+        "filename": "android/base/sockets/SocketDrainer_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-24T09:08:33Z",
+      "side": 1,
+      "message": "nit: please add empty lines for better spacing.",
+      "revId": "598f96cb869e7f1d03563052c37af2fa58395435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9932d8d1_ea40271d",
+        "filename": "android/base/sockets/SocketDrainer_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-24T09:08:33Z",
+      "side": 1,
+      "message": "nit: I believe you need to check for both EAGAIN and EWOULDBLOCK to be completely portable (even if they have the same values on Linux).",
+      "revId": "598f96cb869e7f1d03563052c37af2fa58395435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9932d8d1_0a565be8",
+        "filename": "android/base/sockets/SocketDrainer_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-24T09:08:33Z",
+      "side": 1,
+      "message": "nit: Again, try to add spacing lines :-)",
+      "revId": "598f96cb869e7f1d03563052c37af2fa58395435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
