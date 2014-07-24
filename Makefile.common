@@ -57,7 +57,7 @@ gen-hw-config-defs = \
 common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
 
-EMULATOR_COMMON_CFLAGS :=
+EMULATOR_COMMON_CFLAGS := -Werror=implicit-function-declaration
 
 # Needed by everything about the host
 EMULATOR_COMMON_CFLAGS += \

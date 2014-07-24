@@ -361,9 +361,6 @@ void page_set_flags(target_ulong start, target_ulong end, int flags);
 int page_check_range(target_ulong start, target_ulong len, int flags);
 #endif
 
-void QEMU_NORETURN cpu_abort(CPUArchState *env, const char *fmt, ...)
-    GCC_FMT_ATTR(2, 3);
-
 /* Flags for use in ENV->INTERRUPT_PENDING.
 
    The numbers assigned here are non-sequential in order to preserve
@@ -423,6 +420,10 @@ void QEMU_NORETURN cpu_abort(CPUArchState *env, const char *fmt, ...)
 #define BP_GDB                0x10
 #define BP_CPU                0x20
 
+// several functions below depend on cpu.h
+// cpu.h depends on CPU_INTERRUPT_* definitions (above)
+#include "cpu.h"
+
 int cpu_breakpoint_insert(CPUArchState *env, target_ulong pc, int flags,
                           CPUBreakpoint **breakpoint);
 int cpu_breakpoint_remove(CPUArchState *env, target_ulong pc, int flags);
@@ -439,7 +440,11 @@ void cpu_watchpoint_remove_all(CPUArchState *env, int mask);
 #define SSTEP_NOIRQ   0x2  /* Do not use IRQ while single stepping */
 #define SSTEP_NOTIMER 0x4  /* Do not Timers while single stepping */
 
+void QEMU_NORETURN cpu_abort(CPUArchState *env, const char *fmt, ...)
+GCC_FMT_ATTR(2, 3);
+
 void cpu_single_step(CPUState *cpu, int enabled);
+
 
 /* IO ports API */
 #include "exec/ioport.h"
