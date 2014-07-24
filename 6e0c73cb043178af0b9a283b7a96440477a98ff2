@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f974b47c_bb992f2e",
+        "filename": "android/utils/format.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-24T08:59:53Z",
+      "side": 1,
+      "message": "nit: I believe this is not needed anymore",
+      "range": {
+        "startLine": 14,
+        "startChar": 10,
+        "endLine": 14,
+        "endChar": 19
+      },
+      "revId": "6e0c73cb043178af0b9a283b7a96440477a98ff2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f922f488_2558aebb",
+        "filename": "android/utils/format_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-24T08:59:53Z",
+      "side": 1,
+      "message": "nit: Probably not needed anymore here :)",
+      "range": {
+        "startLine": 16,
+        "startChar": 10,
+        "endLine": 16,
+        "endChar": 19
+      },
+      "revId": "6e0c73cb043178af0b9a283b7a96440477a98ff2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
