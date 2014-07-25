@@ -420,7 +420,7 @@ static const mips_def_t mips_defs[] =
         /* A generic CPU providing MIPS64 Release 2 features.
            FIXME: Eventually this should be replaced by a real CPU model. */
         .name = "MIPS64R2-generic",
-        .CP0_PRid = 0x00010000,
+        .CP0_PRid = 0x00018900,
         .CP0_Config0 = MIPS_CONFIG0 | (0x1 << CP0C0_AR) | (0x2 << CP0C0_AT) |
                        (MMU_TYPE_R4000 << CP0C0_MT),
         .CP0_Config1 = MIPS_CONFIG1 | (1 << CP0C1_FP) | (63 << CP0C1_MMU) |

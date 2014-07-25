@@ -1129,13 +1129,14 @@ static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
         opn = "lbu";
         break;
     case OPC_LWL:
+        t1 = tcg_temp_new();
         tcg_gen_andi_tl(t1, t0, 3);
 #ifndef TARGET_WORDS_BIGENDIAN
         tcg_gen_xori_tl(t1, t1, 3);
 #endif
         tcg_gen_shli_tl(t1, t1, 3);
         tcg_gen_andi_tl(t0, t0, ~3);
-        tcg_gen_qemu_ld32u(t0, t0, ctx->mem_idx);
+        tcg_gen_qemu_ld_tl(t0, t0, ctx->mem_idx, MO_TEUL);
         tcg_gen_shl_tl(t0, t0, t1);
         tcg_gen_xori_tl(t1, t1, 31);
         t2 = tcg_const_tl(0x7fffffffull);
@@ -1144,6 +1145,7 @@ static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
         tcg_gen_and_tl(t1, t1, t2);
         tcg_temp_free(t2);
         tcg_gen_or_tl(t0, t0, t1);
+        tcg_temp_free(t1);
         tcg_gen_ext32s_tl(t0, t0);
         gen_store_gpr(t0, rt);
         opn = "lwl";
@@ -1155,13 +1157,14 @@ static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
         opn = "swl";
         break;
     case OPC_LWR:
+        t1 = tcg_temp_new();
         tcg_gen_andi_tl(t1, t0, 3);
 #ifdef TARGET_WORDS_BIGENDIAN
         tcg_gen_xori_tl(t1, t1, 3);
 #endif
         tcg_gen_shli_tl(t1, t1, 3);
         tcg_gen_andi_tl(t0, t0, ~3);
-        tcg_gen_qemu_ld32u(t0, t0, ctx->mem_idx);
+        tcg_gen_qemu_ld_tl(t0, t0, ctx->mem_idx, MO_TEUL);
         tcg_gen_shr_tl(t0, t0, t1);
         tcg_gen_xori_tl(t1, t1, 31);
         t2 = tcg_const_tl(0xfffffffeull);
@@ -1170,6 +1173,8 @@ static void gen_ldst (DisasContext *ctx, uint32_t opc, int rt,
         tcg_gen_and_tl(t1, t1, t2);
         tcg_temp_free(t2);
         tcg_gen_or_tl(t0, t0, t1);
+        tcg_temp_free(t1);
+        tcg_gen_ext32s_tl(t0, t0);
         gen_store_gpr(t0, rt);
         opn = "lwr";
         break;
@@ -8740,6 +8745,7 @@ void cpu_reset(CPUState *cpu)
     }
     env->active_tc.PC = (int32_t)0xBFC00000;
     env->CP0_Random = env->tlb->nb_tlb - 1;
+    env->tlb->tlb_in_use = env->tlb->nb_tlb;
     env->CP0_Wired = 0;
     /* SMP not implemented */
     env->CP0_EBase = 0x80000000;
