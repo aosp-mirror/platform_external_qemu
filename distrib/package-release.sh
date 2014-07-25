@@ -367,6 +367,8 @@ elif [ -f "$PROGDIR/../../../build/envsetup.sh" ]; then
     if [ ! -d "$TARGET_PREBUILTS_DIR" ]; then
         TARGET_PREBUILTS_DIR=
     fi
+else
+    TARGET_AOSP=$(cd $PROGDIR/../../.. && pwd -P)
 fi
 
 case $VERBOSE in
