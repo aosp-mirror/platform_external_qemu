@@ -18,7 +18,9 @@
 #include <errno.h>
 #include <sys/ioctl.h>
 
+#include "exec/ram_addr.h"
 #include "target-i386/hax-i386.h"
+
 hax_fd hax_mod_open(void)
 {
     int fd = open("/dev/HAX", O_RDWR);
