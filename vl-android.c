@@ -30,13 +30,10 @@
 #include "qemu-common.h"
 #include "hw/hw.h"
 #include "hw/boards.h"
-#include "hw/usb.h"
-#include "hw/pcmcia.h"
 #include "hw/i386/pc.h"
 #include "hw/audiodev.h"
 #include "hw/isa/isa.h"
 #include "hw/loader.h"
-#include "hw/baum.h"
 #include "hw/android/goldfish/nand.h"
 #include "net/net.h"
 #include "ui/console.h"
@@ -55,6 +52,9 @@
 #include "android/log-rotate.h"
 #include "modem_driver.h"
 #include "android/filesystems/ext4_utils.h"
+#include "android/filesystems/fstab_parser.h"
+#include "android/filesystems/partition_types.h"
+#include "android/filesystems/ramdisk_extractor.h"
 #include "android/gps.h"
 #include "android/hw-kmsg.h"
 #include "android/hw-pipe-net.h"
@@ -76,10 +76,6 @@
 #include "android/multitouch-screen.h"
 #include "exec/hwaddr.h"
 #include "android/tcpdump.h"
-
-#ifdef CONFIG_MEMCHECK
-#include "memcheck/memcheck.h"
-#endif  // CONFIG_MEMCHECK
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -182,16 +178,11 @@ int qemu_main(int argc, char **argv, char **envp);
 
 #include "hw/hw.h"
 #include "hw/boards.h"
-#include "hw/usb.h"
-#include "hw/pcmcia.h"
 #include "hw/i386/pc.h"
 #include "hw/isa/isa.h"
-#include "hw/baum.h"
-#include "hw/bt.h"
 #include "sysemu/watchdog.h"
 #include "hw/i386/smbios.h"
 #include "hw/xen/xen.h"
-#include "sysemu/bt.h"
 #include "net/net.h"
 #include "monitor/monitor.h"
 #include "ui/console.h"
@@ -262,6 +253,7 @@ DisplayType display_type = DT_DEFAULT;
 const char* keyboard_layout = NULL;
 int64_t ticks_per_sec;
 ram_addr_t ram_size;
+bool xen_allowed;
 const char *mem_path = NULL;
 #ifdef MAP_POPULATE
 int mem_prealloc = 0; /* force preallocation of physical target memory */
@@ -393,6 +385,8 @@ char* android_op_ui_settings = NULL;
 
 /* -android-avdname option value. */
 char* android_op_avd_name = "unknown";
+
+bool android_op_wipe_data = false;
 
 extern int android_display_width;
 extern int android_display_height;
@@ -569,197 +563,6 @@ int qemu_timedate_diff(struct tm *tm)
         seconds = mktimegm(tm) + rtc_date_offset;
 
     return seconds - time(NULL);
-}
-
-/***********************************************************/
-/* Bluetooth support */
-static int nb_hcis;
-static int cur_hci;
-static struct HCIInfo *hci_table[MAX_NICS];
-
-static struct bt_vlan_s {
-    struct bt_scatternet_s net;
-    int id;
-    struct bt_vlan_s *next;
-} *first_bt_vlan;
-
-/* find or alloc a new bluetooth "VLAN" */
-static struct bt_scatternet_s *qemu_find_bt_vlan(int id)
-{
-    struct bt_vlan_s **pvlan, *vlan;
-    for (vlan = first_bt_vlan; vlan != NULL; vlan = vlan->next) {
-        if (vlan->id == id)
-            return &vlan->net;
-    }
-    vlan = g_malloc0(sizeof(struct bt_vlan_s));
-    vlan->id = id;
-    pvlan = &first_bt_vlan;
-    while (*pvlan != NULL)
-        pvlan = &(*pvlan)->next;
-    *pvlan = vlan;
-    return &vlan->net;
-}
-
-static void null_hci_send(struct HCIInfo *hci, const uint8_t *data, int len)
-{
-}
-
-static int null_hci_addr_set(struct HCIInfo *hci, const uint8_t *bd_addr)
-{
-    return -ENOTSUP;
-}
-
-static struct HCIInfo null_hci = {
-    .cmd_send = null_hci_send,
-    .sco_send = null_hci_send,
-    .acl_send = null_hci_send,
-    .bdaddr_set = null_hci_addr_set,
-};
-
-struct HCIInfo *qemu_next_hci(void)
-{
-    if (cur_hci == nb_hcis)
-        return &null_hci;
-
-    return hci_table[cur_hci++];
-}
-
-static struct HCIInfo *hci_init(const char *str)
-{
-    char *endp;
-    struct bt_scatternet_s *vlan = 0;
-
-    if (!strcmp(str, "null"))
-        /* null */
-        return &null_hci;
-    else if (!strncmp(str, "host", 4) && (str[4] == '\0' || str[4] == ':'))
-        /* host[:hciN] */
-        return bt_host_hci(str[4] ? str + 5 : "hci0");
-    else if (!strncmp(str, "hci", 3)) {
-        /* hci[,vlan=n] */
-        if (str[3]) {
-            if (!strncmp(str + 3, ",vlan=", 6)) {
-                vlan = qemu_find_bt_vlan(strtol(str + 9, &endp, 0));
-                if (*endp)
-                    vlan = 0;
-            }
-        } else
-            vlan = qemu_find_bt_vlan(0);
-        if (vlan)
-           return bt_new_hci(vlan);
-    }
-
-    fprintf(stderr, "qemu: Unknown bluetooth HCI `%s'.\n", str);
-
-    return 0;
-}
-
-static int bt_hci_parse(const char *str)
-{
-    struct HCIInfo *hci;
-    bdaddr_t bdaddr;
-
-    if (nb_hcis >= MAX_NICS) {
-        fprintf(stderr, "qemu: Too many bluetooth HCIs (max %i).\n", MAX_NICS);
-        return -1;
-    }
-
-    hci = hci_init(str);
-    if (!hci)
-        return -1;
-
-    bdaddr.b[0] = 0x52;
-    bdaddr.b[1] = 0x54;
-    bdaddr.b[2] = 0x00;
-    bdaddr.b[3] = 0x12;
-    bdaddr.b[4] = 0x34;
-    bdaddr.b[5] = 0x56 + nb_hcis;
-    hci->bdaddr_set(hci, bdaddr.b);
-
-    hci_table[nb_hcis++] = hci;
-
-    return 0;
-}
-
-static void bt_vhci_add(int vlan_id)
-{
-    struct bt_scatternet_s *vlan = qemu_find_bt_vlan(vlan_id);
-
-    if (!vlan->slave)
-        fprintf(stderr, "qemu: warning: adding a VHCI to "
-                        "an empty scatternet %i\n", vlan_id);
-
-    bt_vhci_init(bt_new_hci(vlan));
-}
-
-static struct bt_device_s *bt_device_add(const char *opt)
-{
-    struct bt_scatternet_s *vlan;
-    int vlan_id = 0;
-    char *endp = strstr(opt, ",vlan=");
-    int len = (endp ? endp - opt : strlen(opt)) + 1;
-    char devname[10];
-
-    pstrcpy(devname, MIN(sizeof(devname), len), opt);
-
-    if (endp) {
-        vlan_id = strtol(endp + 6, &endp, 0);
-        if (*endp) {
-            fprintf(stderr, "qemu: unrecognised bluetooth vlan Id\n");
-            return 0;
-        }
-    }
-
-    vlan = qemu_find_bt_vlan(vlan_id);
-
-    if (!vlan->slave)
-        fprintf(stderr, "qemu: warning: adding a slave device to "
-                        "an empty scatternet %i\n", vlan_id);
-
-    if (!strcmp(devname, "keyboard"))
-        return bt_keyboard_init(vlan);
-
-    fprintf(stderr, "qemu: unsupported bluetooth device `%s'\n", devname);
-    return 0;
-}
-
-static int bt_parse(const char *opt)
-{
-    const char *endp, *p;
-    int vlan;
-
-    if (strstart(opt, "hci", &endp)) {
-        if (!*endp || *endp == ',') {
-            if (*endp)
-                if (!strstart(endp, ",vlan=", 0))
-                    opt = endp + 1;
-
-            return bt_hci_parse(opt);
-       }
-    } else if (strstart(opt, "vhci", &endp)) {
-        if (!*endp || *endp == ',') {
-            if (*endp) {
-                if (strstart(endp, ",vlan=", &p)) {
-                    vlan = strtol(p, (char **) &endp, 0);
-                    if (*endp) {
-                        fprintf(stderr, "qemu: bad scatternet '%s'\n", p);
-                        return 1;
-                    }
-                } else {
-                    fprintf(stderr, "qemu: bad parameter '%s'\n", endp + 1);
-                    return 1;
-                }
-            } else
-                vlan = 0;
-
-            bt_vhci_add(vlan);
-            return 0;
-        }
-    } else if (strstart(opt, "device:", &endp))
-        return !bt_device_add(endp);
-
-    fprintf(stderr, "qemu: bad bluetooth parameter '%s'\n", opt);
-    return 1;
 }
 
 /***********************************************************/
@@ -1330,262 +1133,6 @@ static void numa_add(const char *optarg)
         nb_numa_nodes++;
     }
     return;
-}
-
-/***********************************************************/
-/* USB devices */
-
-static USBPort *used_usb_ports;
-static USBPort *free_usb_ports;
-
-/* ??? Maybe change this to register a hub to keep track of the topology.  */
-void qemu_register_usb_port(USBPort *port, void *opaque, int index,
-                            usb_attachfn attach)
-{
-    port->opaque = opaque;
-    port->index = index;
-    port->attach = attach;
-    port->next = free_usb_ports;
-    free_usb_ports = port;
-}
-
-int usb_device_add_dev(USBDevice *dev)
-{
-    USBPort *port;
-
-    /* Find a USB port to add the device to.  */
-    port = free_usb_ports;
-    if (!port){
-        USBDevice *hub = usb_hub_init(VM_USB_HUB_SIZE);
-        port = free_usb_ports;
-        usb_attach(port, hub);
-    }
-    else if (!port->next){
-        USBDevice *hub;
-
-        /* Create a new hub and chain it on.  */
-        free_usb_ports = NULL;
-        port->next = used_usb_ports;
-        used_usb_ports = port;
-
-        hub = usb_hub_init(VM_USB_HUB_SIZE);
-        usb_attach(port, hub);
-        port = free_usb_ports;
-    }
-
-    free_usb_ports = port->next;
-    port->next = used_usb_ports;
-    used_usb_ports = port;
-    usb_attach(port, dev);
-    return 0;
-}
-
-#if 0
-static void usb_msd_password_cb(void *opaque, int err)
-{
-    USBDevice *dev = opaque;
-
-    if (!err)
-        usb_device_add_dev(dev);
-    else
-        dev->handle_destroy(dev);
-}
-#endif
-
-static int usb_device_add(const char *devname, int is_hotplug)
-{
-    const char *p;
-    USBDevice *dev;
-
-    if (strstart(devname, "host:", &p)) {
-        dev = usb_host_device_open(p);
-    } else if (!strcmp(devname, "mouse")) {
-        dev = usb_mouse_init();
-    } else if (!strcmp(devname, "tablet")) {
-        dev = usb_tablet_init();
-    } else if (!strcmp(devname, "keyboard")) {
-        dev = usb_keyboard_init();
-    } else if (strstart(devname, "disk:", &p)) {
-#if 0
-        BlockDriverState *bs;
-#endif
-        dev = usb_msd_init(p);
-        if (!dev)
-            return -1;
-#if 0
-        bs = usb_msd_get_bdrv(dev);
-        if (bdrv_key_required(bs)) {
-            autostart = 0;
-            if (is_hotplug) {
-                monitor_read_bdrv_key_start(cur_mon, bs, usb_msd_password_cb,
-                                            dev);
-                return 0;
-            }
-        }
-    } else if (!strcmp(devname, "wacom-tablet")) {
-        dev = usb_wacom_init();
-    } else if (strstart(devname, "serial:", &p)) {
-        dev = usb_serial_init(p);
-#ifdef CONFIG_BRLAPI
-    } else if (!strcmp(devname, "braille")) {
-        dev = usb_baum_init();
-#endif
-    } else if (strstart(devname, "net:", &p)) {
-        int nic = nb_nics;
-
-        if (net_client_init("nic", p) < 0)
-            return -1;
-        nd_table[nic].model = "usb";
-        dev = usb_net_init(&nd_table[nic]);
-    } else if (!strcmp(devname, "bt") || strstart(devname, "bt:", &p)) {
-        dev = usb_bt_init(devname[2] ? hci_init(p) :
-                        bt_new_hci(qemu_find_bt_vlan(0)));
-#endif
-    } else {
-        return -1;
-    }
-    if (!dev)
-        return -1;
-
-    return usb_device_add_dev(dev);
-}
-
-int usb_device_del_addr(int bus_num, int addr)
-{
-    USBPort *port;
-    USBPort **lastp;
-    USBDevice *dev;
-
-    if (!used_usb_ports)
-        return -1;
-
-    if (bus_num != 0)
-        return -1;
-
-    lastp = &used_usb_ports;
-    port = used_usb_ports;
-    while (port && port->dev->addr != addr) {
-        lastp = &port->next;
-        port = port->next;
-    }
-
-    if (!port)
-        return -1;
-
-    dev = port->dev;
-    *lastp = port->next;
-    usb_attach(port, NULL);
-    dev->handle_destroy(dev);
-    port->next = free_usb_ports;
-    free_usb_ports = port;
-    return 0;
-}
-
-static int usb_device_del(const char *devname)
-{
-    int bus_num, addr;
-    const char *p;
-
-    if (strstart(devname, "host:", &p))
-        return usb_host_device_close(p);
-
-    if (!used_usb_ports)
-        return -1;
-
-    p = strchr(devname, '.');
-    if (!p)
-        return -1;
-    bus_num = strtoul(devname, NULL, 0);
-    addr = strtoul(p + 1, NULL, 0);
-
-    return usb_device_del_addr(bus_num, addr);
-}
-
-void do_usb_add(Monitor *mon, const char *devname)
-{
-    usb_device_add(devname, 1);
-}
-
-void do_usb_del(Monitor *mon, const char *devname)
-{
-    usb_device_del(devname);
-}
-
-void usb_info(Monitor *mon)
-{
-    USBDevice *dev;
-    USBPort *port;
-    const char *speed_str;
-
-    if (!usb_enabled) {
-        monitor_printf(mon, "USB support not enabled\n");
-        return;
-    }
-
-    for (port = used_usb_ports; port; port = port->next) {
-        dev = port->dev;
-        if (!dev)
-            continue;
-        switch(dev->speed) {
-        case USB_SPEED_LOW:
-            speed_str = "1.5";
-            break;
-        case USB_SPEED_FULL:
-            speed_str = "12";
-            break;
-        case USB_SPEED_HIGH:
-            speed_str = "480";
-            break;
-        default:
-            speed_str = "?";
-            break;
-        }
-        monitor_printf(mon, "  Device %d.%d, Speed %s Mb/s, Product %s\n",
-                       0, dev->addr, speed_str, dev->devname);
-    }
-}
-
-/***********************************************************/
-/* PCMCIA/Cardbus */
-
-static struct pcmcia_socket_entry_s {
-    PCMCIASocket *socket;
-    struct pcmcia_socket_entry_s *next;
-} *pcmcia_sockets = 0;
-
-void pcmcia_socket_register(PCMCIASocket *socket)
-{
-    struct pcmcia_socket_entry_s *entry;
-
-    entry = g_malloc(sizeof(struct pcmcia_socket_entry_s));
-    entry->socket = socket;
-    entry->next = pcmcia_sockets;
-    pcmcia_sockets = entry;
-}
-
-void pcmcia_socket_unregister(PCMCIASocket *socket)
-{
-    struct pcmcia_socket_entry_s *entry, **ptr;
-
-    ptr = &pcmcia_sockets;
-    for (entry = *ptr; entry; ptr = &entry->next, entry = *ptr)
-        if (entry->socket == socket) {
-            *ptr = entry->next;
-            g_free(entry);
-        }
-}
-
-void pcmcia_info(Monitor *mon)
-{
-    struct pcmcia_socket_entry_s *iter;
-
-    if (!pcmcia_sockets)
-        monitor_printf(mon, "No PCMCIA sockets\n");
-
-    for (iter = pcmcia_sockets; iter; iter = iter->next)
-        monitor_printf(mon, "%s: %s\n", iter->socket->slot_string,
-                       iter->socket->attached ? iter->socket->card_string :
-                       "Empty");
 }
 
 /***********************************************************/
@@ -2270,6 +1817,263 @@ serial_hds_add(const char* devname)
     return -1;  /* shouldn't happen */
 }
 
+
+// Extract the partition type/format of a given partition image
+// from the content of fstab.goldfish.
+// |fstab| is the address of the fstab.goldfish data in memory.
+// |fstabSize| is its size in bytes.
+// |partitionName| is the name of the partition for debugging
+// purposes (e.g. 'userdata').
+// |partitionPath| is the partition path as it appears in the
+// fstab file (e.g. '/data').
+// On success, sets |*partitionType| to an appropriate value,
+// on failure (i.e. |partitionPath| does not appear in the fstab
+// file), leave the value untouched.
+void android_extractPartitionFormat(const char* fstab,
+                                    size_t fstabSize,
+                                    const char* partitionName,
+                                    const char* partitionPath,
+                                    AndroidPartitionType* partitionType) {
+    char* partFormat = NULL;
+    if (!android_parseFstabPartitionFormat(fstab, fstabSize, partitionPath,
+                                           &partFormat)) {
+        VERBOSE_PRINT(init, "Could not extract format of %s partition!",
+                      partitionName);
+        return;
+    }
+    VERBOSE_PRINT(init, "Found format of %s partition: '%s'",
+                  partitionName, partFormat);
+    *partitionType = androidPartitionType_fromString(partFormat);
+    free(partFormat);
+}
+
+
+// List of value describing how to handle partition images in
+// android_nand_add_image() below, when no initial partition image
+// file is provided.
+//
+// MUST_EXIST means that the partition image must exist, otherwise
+// dump an error message and exit.
+//
+// CREATE_IF_NEEDED means that if the partition image doesn't exist, an
+// empty partition file should be created on demand.
+//
+// MUST_WIPE means that the partition image should be wiped cleaned,
+// even if it exists. This is useful to implement the -wipe-data option.
+typedef enum {
+    ANDROID_PARTITION_OPEN_MODE_MUST_EXIST,
+    ANDROID_PARTITION_OPEN_MODE_CREATE_IF_NEEDED,
+    ANDROID_PARTITION_OPEN_MODE_MUST_WIPE,
+} AndroidPartitionOpenMode;
+
+// Add a NAND partition image to the hardware configuration.
+//
+// |part_name| is a string indicating the type of partition, i.e. "system",
+// "userdata" or "cache".
+// |part_type| is an enum describing the type of partition. If it is
+// DISK_PARTITION_TYPE_PROBE, then try to auto-detect the type directly
+// from the content of |part_file| or |part_init_file|.
+// |part_mode| is an enum describing how to handle the partition image,
+// see AndroidPartitionOpenMode for details.
+// |part_size| is the partition size in bytes.
+// |part_file| is the partition file path, can be NULL if |path_init_file|
+// is not NULL.
+// |part_init_file| is an optional path to the initialization partition file.
+//
+// The NAND partition will be backed by |part_file|, except in the following
+// cases:
+//    - |part_file| is NULL, or its value is "<temp>", indicating that a
+//      new temporary image file must be used instead.
+//
+//    - |part_file| is not NULL, but the function fails to lock the file,
+//      indicating it's already used by another instance. A warning should
+//      be printed to warn the user, and a new temporary image should be
+//      used.
+//
+// If |part_file| is not NULL and can be locked, if the partition image does
+// not exit, then the file must be created as an empty partition.
+//
+// If |part_init_file| is not NULL, its content will be used to erase
+// the content of the main partition image. This is automatically handled
+// by the NAND code though.
+//
+void android_nand_add_image(const char* part_name,
+                            AndroidPartitionType part_type,
+                            AndroidPartitionOpenMode part_mode,
+                            uint64_t part_size,
+                            const char* part_file,
+                            const char* part_init_file)
+{
+    char tmp[PATH_MAX * 2 + 32];
+
+    // Sanitize parameters, an empty string must be the same as NULL.
+    if (part_file && !*part_file) {
+        part_file = NULL;
+    }
+    if (part_init_file && !*part_init_file) {
+        part_init_file = NULL;
+    }
+
+    // Sanity checks.
+    if (part_size == 0) {
+        PANIC("Invalid %s partition size 0x%" PRIx64, part_size);
+    }
+
+    if (part_init_file && !path_exists(part_init_file)) {
+        PANIC("Missing initial %s image: %s", part_name, part_init_file);
+    }
+
+    // As a special case, a |part_file| of '<temp>' means a temporary
+    // partition is needed.
+    if (part_file && !strcmp(part_file, "<temp>")) {
+        part_file = NULL;
+    }
+
+    // Verify partition type, or probe it if needed.
+    {
+        // First determine which image file to probe.
+        const char* image_file = NULL;
+        if (part_file && path_exists(part_file)) {
+            image_file = part_file;
+        } else if (part_init_file) {
+            image_file = part_init_file;
+        } else if (part_type == ANDROID_PARTITION_TYPE_UNKNOWN) {
+            PANIC("Cannot determine type of %s partition: no image files!",
+                  part_name);
+        }
+
+        if (part_type == ANDROID_PARTITION_TYPE_UNKNOWN) {
+            VERBOSE_PRINT(init, "Probing %s image file for partition type: %s",
+                        part_name, image_file);
+
+            part_type = androidPartitionType_probeFile(image_file);
+        } else if (image_file) {
+            // Probe the current image file to check that it is of the
+            // right partition format.
+            AndroidPartitionType image_type =
+                    androidPartitionType_probeFile(image_file);
+            if (image_type == ANDROID_PARTITION_TYPE_UNKNOWN) {
+                PANIC("Cannot determine %s partition type of: %s",
+                    part_name,
+                    image_file);
+            }
+
+            if (image_type != part_type) {
+                // The image file exists, but is not in the proper format!
+                // This can happen in certain cases, e.g. a KitKat/x86 AVD
+                // created with SDK 23.0.2 and started with the
+                // corresponding emulator will create a cache.img in 'yaffs2'
+                // format, while the system really expect it to be 'ext4',
+                // as listed in the ramdisk.img.
+                //
+                // To work-around the problem, simply re-create the file
+                // by wiping it when allowed.
+
+                if (part_mode == ANDROID_PARTITION_OPEN_MODE_MUST_EXIST) {
+                    PANIC("Invalid %s partition image type: %s (expected %s)",
+                        part_name,
+                        androidPartitionType_toString(image_type),
+                        androidPartitionType_toString(part_type));
+                }
+                VERBOSE_PRINT(init,
+                    "Image type mismatch for %s partition: "
+                    "%s (expected %s)",
+                    part_name,
+                    androidPartitionType_toString(image_type),
+                    androidPartitionType_toString(part_type));
+
+                part_mode = ANDROID_PARTITION_OPEN_MODE_MUST_WIPE;
+            }
+        }
+    }
+
+    VERBOSE_PRINT(init, "%s partition format: %s", part_name,
+                  androidPartitionType_toString(part_type));
+
+    snprintf(tmp, sizeof tmp, "%s,size=0x%" PRIx64, part_name, part_size);
+
+    bool need_temp_partition = true;
+    bool need_make_empty =
+            (part_mode == ANDROID_PARTITION_OPEN_MODE_MUST_WIPE);
+
+    if (part_file) {
+        if (filelock_create(part_file) == NULL) {
+            fprintf(stderr,
+                    "WARNING: %s image already in use, changes will not persist!\n",
+                    part_name);
+        } else {
+            need_temp_partition = false;
+
+            // If the partition image is missing, create it.
+            if (!path_exists(part_file)) {
+                if (part_mode == ANDROID_PARTITION_OPEN_MODE_MUST_EXIST) {
+                    PANIC("Missing %s partition image: %s", part_name,
+                          part_file);
+                }
+                if (path_empty_file(part_file) < 0) {
+                    PANIC("Cannot create %s image file at %s: %s",
+                          part_name,
+                          part_file,
+                          strerror(errno));
+                }
+                need_make_empty = true;
+            }
+        }
+    }
+
+    // Do we need a temporary partition image ?
+    if (need_temp_partition) {
+        TempFile* temp_file = tempfile_create();
+        if (temp_file == NULL) {
+            PANIC("Could not create temp file for %s partition image: %s\n",
+                   part_name);
+        }
+        part_file = tempfile_path(temp_file);
+        VERBOSE_PRINT(init,
+                      "Mapping '%s' partition image to %s",
+                      part_name,
+                      part_file);
+
+        need_make_empty = true;
+    }
+
+    pstrcat(tmp, sizeof tmp, ",file=");
+    pstrcat(tmp, sizeof tmp, part_file);
+
+    // Do we need to make the partition image empty?
+    // Do not do it if there is an initial file though since it will
+    // get copied directly by the NAND code into the image.
+    if (need_make_empty && !part_init_file) {
+        VERBOSE_PRINT(init,
+                      "Creating empty %s partition image at: %s",
+                      part_name,
+                      part_file);
+        int ret = androidPartitionType_makeEmptyFile(part_type,
+                                                     part_size,
+                                                     part_file);
+        if (ret < 0) {
+            PANIC("Could not create %s image file at %s: %s",
+                  part_name,
+                  part_file,
+                  strerror(-ret));
+        }
+    }
+
+    if (part_init_file) {
+        pstrcat(tmp, sizeof tmp, ",initfile=");
+        pstrcat(tmp, sizeof tmp, part_init_file);
+    }
+
+    if (part_type == ANDROID_PARTITION_TYPE_EXT4) {
+        // Using a nand device to approximate a block device until full
+        // support is added.
+        pstrcat(tmp, sizeof tmp,",pagesize=512,extrasize=0");
+    }
+
+    nand_add_dev(tmp);
+}
+
+
 int main(int argc, char **argv, char **envp)
 {
     const char *gdbstub_dev = NULL;
@@ -2287,8 +2091,6 @@ int main(int argc, char **argv, char **envp)
     QemuOpts *hdb_opts = NULL;
     const char *net_clients[MAX_NET_CLIENTS];
     int nb_net_clients;
-    const char *bt_opts[MAX_BT_CMDLINE];
-    int nb_bt_opts;
     int optind;
     const char *r, *optarg;
     CharDriverState *monitor_hd = NULL;
@@ -2302,14 +2104,12 @@ int main(int argc, char **argv, char **envp)
     const char *loadvm = NULL;
     QEMUMachine *machine;
     const char *cpu_model;
-    const char *usb_devices[MAX_USB_CMDLINE];
-    int usb_devices_index;
     int tb_size;
     const char *pid_file = NULL;
     const char *incoming = NULL;
     const char* log_mask = NULL;
     const char* log_file = NULL;
-    CPUOldState *env;
+    CPUState *cpu;
     int show_vnc_port = 0;
     IniFile*  hw_ini = NULL;
     STRALLOC_DEFINE(kernel_params);
@@ -2361,10 +2161,7 @@ int main(int argc, char **argv, char **envp)
         node_cpumask[i] = 0;
     }
 
-    usb_devices_index = 0;
-
     nb_net_clients = 0;
-    nb_bt_opts = 0;
 #ifdef MAX_DRIVES
     nb_drives = 0;
     nb_drives_opt = 0;
@@ -2623,12 +2420,6 @@ int main(int argc, char **argv, char **envp)
                 net_slirp_redir(NULL, optarg, NULL);
                 break;
 #endif
-            case QEMU_OPTION_bt:
-                if (nb_bt_opts >= MAX_BT_CMDLINE) {
-                    PANIC("qemu: too many bluetooth options");
-                }
-                bt_opts[nb_bt_opts++] = optarg;
-                break;
 #ifdef HAS_AUDIO
             case QEMU_OPTION_audio_help:
                 AUD_help ();
@@ -2838,17 +2629,6 @@ int main(int argc, char **argv, char **envp)
                 kvm_allowed = 0;
                 break;
 #endif /* CONFIG_KVM */
-            case QEMU_OPTION_usb:
-                usb_enabled = 1;
-                break;
-            case QEMU_OPTION_usbdevice:
-                usb_enabled = 1;
-                if (usb_devices_index >= MAX_USB_CMDLINE) {
-                    PANIC("Too many USB devices");
-                }
-                usb_devices[usb_devices_index] = optarg;
-                usb_devices_index++;
-                break;
             case QEMU_OPTION_smp:
                 smp_cpus = atoi(optarg);
                 if (smp_cpus < 1) {
@@ -3180,15 +2960,6 @@ int main(int argc, char **argv, char **envp)
                 }
                 break;
 
-#ifdef CONFIG_MEMCHECK
-            case QEMU_OPTION_android_memcheck:
-                android_op_memcheck = (char*)optarg;
-                /* This will set ro.kernel.memcheck system property
-                 * to memcheck's tracing flags. */
-                stralloc_add_format(kernel_config, " memcheck=%s", android_op_memcheck);
-                break;
-#endif // CONFIG_MEMCHECK
-
             case QEMU_OPTION_snapshot_no_time_update:
                 android_snapshot_update_time = 0;
                 break;
@@ -3244,6 +3015,11 @@ int main(int argc, char **argv, char **envp)
 
     iniFile_free(hw_ini);
 
+    const char* kernelSerialDevicePrefix =
+            androidHwConfig_getKernelSerialPrefix(android_hw);
+    VERBOSE_PRINT(init, "Using kernel serial device prefix: %s",
+                  kernelSerialDevicePrefix);
+
     {
         int width  = android_hw->hw_lcd_width;
         int height = android_hw->hw_lcd_height;
@@ -3277,100 +3053,91 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
-    bool systemImageIsExt4 = false;
-    bool dataImageIsExt4 = false;
-    bool cacheImageIsExt4 = false;
+    // Determine format of all partition images, if possible.
+    // Note that _UNKNOWN means the file, if it exists, will be probed.
+    AndroidPartitionType system_partition_type =
+            ANDROID_PARTITION_TYPE_UNKNOWN;
+    AndroidPartitionType userdata_partition_type =
+            ANDROID_PARTITION_TYPE_UNKNOWN;
+    AndroidPartitionType cache_partition_type =
+            ANDROID_PARTITION_TYPE_UNKNOWN;
 
-    /* Initialize system partition image */
     {
-        char        tmp[PATH_MAX+32];
-        const char* sysImage = android_hw->disk_systemPartition_path;
-        const char* initImage = android_hw->disk_systemPartition_initPath;
-        uint64_t    sysBytes = android_hw->disk_systemPartition_size;
+        // Starting with Android 4.4.x, the ramdisk.img contains
+        // an fstab.goldfish file that lists the format of each partition.
+        // If the file exists, parse it to get the appropriate values.
+        char* fstab = NULL;
+        size_t fstabSize = 0;
 
-        if (sysBytes == 0) {
-            PANIC("Invalid system partition size: %" PRIu64, sysBytes);
-        }
+        if (android_extractRamdiskFile(android_hw->disk_ramdisk_path,
+                                       "fstab.goldfish",
+                                       &fstab,
+                                       &fstabSize)) {
+            VERBOSE_PRINT(init, "Ramdisk image contains fstab.goldfish file");
 
-        snprintf(tmp,sizeof(tmp),"system,size=0x%" PRIx64, sysBytes);
+            android_extractPartitionFormat(fstab,
+                                           fstabSize,
+                                           "system",
+                                           "/system",
+                                           &system_partition_type);
 
-        const char* imageFile = NULL;
-        if (sysImage && *sysImage) {
-            imageFile = sysImage;
-            if (filelock_create(sysImage) == NULL) {
-                fprintf(stderr,"WARNING: System image already in use, changes will not persist!\n");
-                /* If there is no file= parameters, nand_add_dev will create
-                 * a temporary file to back the partition image. */
-            } else {
-                pstrcat(tmp,sizeof(tmp),",file=");
-                pstrcat(tmp,sizeof(tmp),sysImage);
-            }
-        }
-        if (initImage && *initImage) {
-            imageFile = initImage;
-            if (!path_exists(initImage)) {
-                PANIC("Invalid initial system image path: %s", initImage);
-            }
-            pstrcat(tmp,sizeof(tmp),",initfile=");
-            pstrcat(tmp,sizeof(tmp),initImage);
+            android_extractPartitionFormat(fstab,
+                                           fstabSize,
+                                           "userdata",
+                                           "/data",
+                                           &userdata_partition_type);
+
+            android_extractPartitionFormat(fstab,
+                                           fstabSize,
+                                           "cache",
+                                           "/cache",
+                                           &cache_partition_type);
+
+            free(fstab);
         } else {
-            PANIC("Missing initial system image path!");
+            VERBOSE_PRINT(init, "No fstab.goldfish file in ramdisk image");
         }
-        systemImageIsExt4 = imageFile && android_pathIsExt4PartitionImage(imageFile);
-        if (systemImageIsExt4) {
-            /* Using a nand device to approximate a block device until full
-             * support is added */
-            pstrcat(tmp,sizeof(tmp),",pagesize=512,extrasize=0");
-        }
-        VERBOSE_PRINT(init, "System partition format: %s",
-               systemImageIsExt4 ? "ext4" : "yaffs2");
-        nand_add_dev(tmp);
     }
 
+    /* Initialize system partition image */
+    android_nand_add_image("system",
+                           system_partition_type,
+                           ANDROID_PARTITION_OPEN_MODE_MUST_EXIST,
+                           android_hw->disk_systemPartition_size,
+                           android_hw->disk_systemPartition_path,
+                           android_hw->disk_systemPartition_initPath);
+
     /* Initialize data partition image */
-    {
-        char        tmp[PATH_MAX+32];
-        const char* dataImage = android_hw->disk_dataPartition_path;
-        const char* initImage = android_hw->disk_dataPartition_initPath;
-        uint64_t    dataBytes = android_hw->disk_dataPartition_size;
+    android_nand_add_image("userdata",
+                           userdata_partition_type,
+                           ANDROID_PARTITION_OPEN_MODE_CREATE_IF_NEEDED,
+                           android_hw->disk_dataPartition_size,
+                           android_hw->disk_dataPartition_path,
+                           android_hw->disk_dataPartition_initPath);
 
-        if (dataBytes == 0) {
-            PANIC("Invalid data partition size: %" PRIu64, dataBytes);
+    /* Initialize cache partition image, if any. Its type depends on the
+     * kernel version. For anything >= 3.10, it must be EXT4, or
+     * YAFFS2 otherwise.
+     */
+    if (android_hw->disk_cachePartition != 0) {
+        if (cache_partition_type == ANDROID_PARTITION_TYPE_UNKNOWN) {
+            cache_partition_type =
+                (androidHwConfig_getKernelYaffs2Support(android_hw) >= 1) ?
+                        ANDROID_PARTITION_TYPE_YAFFS2 :
+                        ANDROID_PARTITION_TYPE_EXT4;
         }
 
-        snprintf(tmp,sizeof(tmp),"userdata,size=0x%" PRIx64, dataBytes);
+        AndroidPartitionOpenMode cache_partition_mode =
+                (android_op_wipe_data ?
+                        ANDROID_PARTITION_OPEN_MODE_MUST_WIPE :
+                        ANDROID_PARTITION_OPEN_MODE_CREATE_IF_NEEDED);
 
-        const char* imageFile = dataImage;
-        if (dataImage && *dataImage) {
-            if (filelock_create(dataImage) == NULL) {
-                fprintf(stderr, "WARNING: Data partition already in use. Changes will not persist!\n");
-                /* Note: if there is no file= parameters, nand_add_dev() will
-                 *       create a temporary file to back the partition image. */
-            } else {
-                /* Create the file if needed */
-                if (!path_exists(dataImage)) {
-                    if (path_empty_file(dataImage) < 0) {
-                        PANIC("Could not create data image file %s: %s", dataImage, strerror(errno));
-                    }
-                }
-                pstrcat(tmp, sizeof(tmp), ",file=");
-                pstrcat(tmp, sizeof(tmp), dataImage);
-            }
-        }
-        if (initImage && *initImage) {
-            imageFile = initImage;
-            pstrcat(tmp, sizeof(tmp), ",initfile=");
-            pstrcat(tmp, sizeof(tmp), initImage);
-        }
-        dataImageIsExt4 = imageFile && android_pathIsExt4PartitionImage(imageFile);
-        if (dataImageIsExt4) {
-            /* Using a nand device to approximate a block device until full
-             * support is added */
-            pstrcat(tmp, sizeof(tmp), ",pagesize=512,extrasize=0");
-        }
-        VERBOSE_PRINT(init, "Data partition format: %s",
-               dataImageIsExt4 ? "ext4" : "yaffs2");
-        nand_add_dev(tmp);
+        android_nand_add_image("cache",
+                               cache_partition_type,
+                               cache_partition_mode,
+                               android_hw->disk_cachePartition_size,
+                               android_hw->disk_cachePartition_path,
+                               NULL);
     }
 
     /* Init SD-Card stuff. For Android, it is always hda */
@@ -3581,55 +3348,6 @@ int main(int argc, char **argv, char **envp)
         stralloc_add_format(kernel_config, " ndns=%d", dns_count);
     }
 
-#ifdef CONFIG_MEMCHECK
-    if (android_op_memcheck) {
-        memcheck_init(android_op_memcheck);
-    }
-#endif  // CONFIG_MEMCHECK
-
-    /* Initialize cache partition, if any */
-    if (android_hw->disk_cachePartition != 0) {
-        char        tmp[PATH_MAX+32];
-        const char* partPath = android_hw->disk_cachePartition_path;
-        uint64_t    partSize = android_hw->disk_cachePartition_size;
-
-        snprintf(tmp,sizeof(tmp),"cache,size=0x%" PRIx64, partSize);
-
-        if (partPath && *partPath && strcmp(partPath, "<temp>") != 0) {
-            if (filelock_create(partPath) == NULL) {
-                fprintf(stderr, "WARNING: Cache partition already in use. Changes will not persist!\n");
-                /* Note: if there is no file= parameters, nand_add_dev() will
-                 *       create a temporary file to back the partition image. */
-            } else {
-                /* Create the file if needed */
-                if (!path_exists(partPath)) {
-                    // TODO(digit): For EXT4, create a real empty ext4 partition image.
-                    if (path_empty_file(partPath) < 0) {
-                        PANIC("Could not create cache image file %s: %s", partPath, strerror(errno));
-                    }
-                }
-                pstrcat(tmp, sizeof(tmp), ",file=");
-                pstrcat(tmp, sizeof(tmp), partPath);
-            }
-        }
-        // NOTE: The following line is commented to avoid problems with the
-        // current state of the emulator and AOSP/master. In a nutshell,
-        // take it out of the comment once proper support for generating
-        // EXT4 partitions on demand is added to the emulator, and
-        //  /etc/fstab.goldfish is modified to mount an EXT4, not YAFFS2,
-        // partition for /cache.
-        //
-        // cacheImageIsExt4 = partPath && android_pathIsExt4PartitionImage(partPath);
-        if (cacheImageIsExt4) {
-            /* Using a nand device to approximate a block device until full
-             * support is added */
-            pstrcat(tmp, sizeof(tmp), ",pagesize=512,extrasize=0");
-        }
-        VERBOSE_PRINT(init, "Cache partition format: %s",
-               cacheImageIsExt4 ? "ext4" : "yaffs2");
-        nand_add_dev(tmp);
-    }
-
     /* qemu.gles will be read by the OpenGL ES emulation libraries.
      * If set to 0, the software GL ES renderer will be used as a fallback.
      * If the parameter is undefined, this means the system image runs
@@ -3669,12 +3387,16 @@ int main(int argc, char **argv, char **envp)
     /* We always initialize the first serial port for the android-kmsg
      * character device (used to send kernel messages) */
     serial_hds_add_at(0, "android-kmsg");
-    stralloc_add_str(kernel_params, " console=ttyS0");
+    stralloc_add_format(kernel_params,
+                        " console=%s0",
+                        kernelSerialDevicePrefix);
 
     /* We always initialize the second serial port for the android-qemud
      * character device as well */
     serial_hds_add_at(1, "android-qemud");
-    stralloc_add_str(kernel_params, " android.qemud=ttyS1");
+    stralloc_add_format(kernel_params,
+                        " android.qemud=%s1",
+                        kernelSerialDevicePrefix);
 
     if (pid_file && qemu_create_pidfile(pid_file) != 0) {
         os_pidfile_error();
@@ -3803,12 +3525,6 @@ int main(int argc, char **argv, char **envp)
     }
 #endif
 
-    /* init the bluetooth world */
-    for (i = 0; i < nb_bt_opts; i++)
-        if (bt_parse(bt_opts[i])) {
-            PANIC("Unable to parse bluetooth options");
-        }
-
     /* init the memory */
     if (ram_size == 0) {
         ram_size = android_hw->hw_ramSize * 1024LL * 1024;
@@ -3874,8 +3590,18 @@ int main(int argc, char **argv, char **envp)
     if (qemu_opts_foreach(qemu_find_opts("drive"), drive_init_func, &machine->use_scsi, 1) != 0)
         exit(1);
 
-    //register_savevm("timer", 0, 2, timer_save, timer_load, &timers_state);
-    register_savevm_live("ram", 0, 3, ram_save_live, NULL, ram_load, NULL);
+    //register_savevm(NULL, "timer", 0, 2, timer_save, timer_load, &timers_state);
+
+    SaveVMHandlers* ops = g_malloc0(sizeof(*ops));
+    ops->save_live_state = ram_save_live;
+    ops->load_state = ram_load;
+
+    register_savevm_live(NULL,
+                         "ram",
+                         0,
+                         3,
+                         ops,
+                         NULL);
 
     /* must be after terminal init, SDL library changes signal handlers */
     os_setup_signal_handling();
@@ -4000,19 +3726,41 @@ int main(int argc, char **argv, char **envp)
 
 
     /* Check the CPU Architecture value */
+    {
+        static const char* kSupportedArchs[] = {
 #if defined(TARGET_ARM)
-    if (strcmp(android_hw->hw_cpu_arch,"arm") != 0) {
-        fprintf(stderr, "-- Invalid CPU architecture: %s, expected 'arm'\n",
-                android_hw->hw_cpu_arch);
-        exit(1);
-    }
-#elif defined(TARGET_I386)
-    if (strcmp(android_hw->hw_cpu_arch,"x86") != 0) {
-        fprintf(stderr, "-- Invalid CPU architecture: %s, expected 'x86'\n",
-                android_hw->hw_cpu_arch);
-        exit(1);
-    }
+            "arm",
 #endif
+#if defined(TARGET_I386)
+            "x86",
+#endif
+#if defined(TARGET_X86_64)
+            "x86_64",
+#endif
+#if defined(TARGET_MIPS)
+            "mips",
+#endif
+        };
+        const size_t kNumSupportedArchs =
+                sizeof(kSupportedArchs) / sizeof(kSupportedArchs[0]);
+        bool supported_arch = false;
+        size_t n;
+        for (n = 0; n < kNumSupportedArchs; ++n) {
+            if (!strcmp(android_hw->hw_cpu_arch, kSupportedArchs[n])) {
+                supported_arch = true;
+                break;
+            }
+        }
+        if (!supported_arch) {
+            fprintf(stderr, "-- Invalid CPU architecture: %s, valid values:",
+                    android_hw->hw_cpu_arch);
+            for (n = 0; n < kNumSupportedArchs; ++n) {
+                fprintf(stderr, " %s", kSupportedArchs[n]);
+            }
+            fprintf(stderr, "\n");
+            exit(1);
+        }
+    }
 
     /* Grab CPU model if provided in hardware.ini */
     if (    !cpu_model
@@ -4068,10 +3816,10 @@ int main(int argc, char **argv, char **envp)
         stralloc_reset(kernel_config);
     }
 
-    for (env = first_cpu; env != NULL; env = env->next_cpu) {
+    CPU_FOREACH(cpu) {
         for (i = 0; i < nb_numa_nodes; i++) {
-            if (node_cpumask[i] & (1 << env->cpu_index)) {
-                env->numa_node = i;
+            if (node_cpumask[i] & (1 << cpu->cpu_index)) {
+                cpu->numa_node = i;
             }
         }
     }
@@ -4092,16 +3840,6 @@ int main(int argc, char **argv, char **envp)
     if (hax_enabled())
         hax_sync_vcpus();
 #endif
-
-    /* init USB devices */
-    if (usb_enabled) {
-        for(i = 0; i < usb_devices_index; i++) {
-            if (usb_device_add(usb_devices[i], 0) < 0) {
-                fprintf(stderr, "Warning: could not add USB device %s\n",
-                        usb_devices[i]);
-            }
-        }
-    }
 
     /* just use the first displaystate for the moment */
     ds = get_displaystate();

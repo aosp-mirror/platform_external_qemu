@@ -1,0 +1,6 @@
+This directory contains a copy of the sources of the AOSP libsparse library.
+
+For reference, the files were taken from $AOSP/system/core/libsparse with
+the following commit:
+
+               252b0e2b46e3d5e71a8b5c55928dc9ca62811f0a

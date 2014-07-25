@@ -41,6 +41,9 @@ typedef struct {
 QEmulator*
 qemulator_get(void);
 
+void
+android_emulator_set_window_scale(double  scale, int  is_dpi);
+
 /* Initializes QEmulator structure instance. */
 int
 qemulator_init( QEmulator*       emulator,

@@ -110,7 +110,9 @@ static uint32_t goldfish_int_read(void *opaque, hwaddr offset)
         return 0;
     }
     default:
-        cpu_abort (cpu_single_env, "goldfish_int_read: Bad offset %x\n", offset);
+        cpu_abort(cpu_single_env,
+                  "goldfish_int_read: Bad offset %" HWADDR_PRIx "\n",
+                  offset);
         return 0;
     }
 }
@@ -142,7 +144,9 @@ static void goldfish_int_write(void *opaque, hwaddr offset, uint32_t value)
             break;
 
     default:
-        cpu_abort (cpu_single_env, "goldfish_int_write: Bad offset %x\n", offset);
+        cpu_abort(cpu_single_env,
+                  "goldfish_int_write: Bad offset %" HWADDR_PRIx "\n",
+                  offset);
         return;
     }
     goldfish_int_update(s);
@@ -181,8 +185,13 @@ qemu_irq*  goldfish_interrupt_init(uint32_t base, qemu_irq parent_irq, qemu_irq 
         return NULL;
     }
 
-    register_savevm( "goldfish_int", 0, GOLDFISH_INT_SAVE_VERSION,
-                     goldfish_int_save, goldfish_int_load, s);
+    register_savevm(NULL,
+                    "goldfish_int",
+                    0,
+                    GOLDFISH_INT_SAVE_VERSION,
+                    goldfish_int_save,
+                    goldfish_int_load,
+                    s);
 
     return qi;
 }

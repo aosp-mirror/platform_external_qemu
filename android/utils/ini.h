@@ -14,6 +14,10 @@
 
 #include <stdint.h>
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* the emulator supports a simple .ini file format for its configuration
  * files. See docs/ANDROID-CONFIG-FILES.TXT for details.
  */
@@ -107,6 +111,6 @@ void iniFile_setDouble( IniFile* f, const char* key, double value );
 void iniFile_setBoolean( IniFile* f, const char* key, int value );
 void iniFile_setDiskSize( IniFile* f, const char* key, int64_t size );
 
-/* */
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_INI_H */

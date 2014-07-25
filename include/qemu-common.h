@@ -12,6 +12,7 @@
 #ifndef QEMU_COMMON_H
 #define QEMU_COMMON_H
 
+#include <inttypes.h>
 #include <setjmp.h>
 
 #include "qemu/compiler.h"
@@ -80,6 +81,15 @@
 #define TIME_MAX LONG_MAX
 #endif
 
+/* HOST_LONG_BITS is the size of a native pointer in bits. */
+#if UINTPTR_MAX == UINT32_MAX
+# define HOST_LONG_BITS 32
+#elif UINTPTR_MAX == UINT64_MAX
+# define HOST_LONG_BITS 64
+#else
+# error Unknown pointer size
+#endif
+
 typedef int (*fprintf_function)(FILE *f, const char *fmt, ...)
     GCC_FMT_ATTR(2, 3);
 
@@ -98,12 +108,7 @@ static inline char *realpath(const char *path, char *resolved_path)
     _fullpath(resolved_path, path, _MAX_PATH);
     return resolved_path;
 }
-
-#define PRId64 "I64d"
-#define PRIx64 "I64x"
-#define PRIu64 "I64u"
-#define PRIo64 "I64o"
-#endif
+#endif /* _WIN32 */
 
 /* bottom halves */
 typedef void QEMUBHFunc(void *opaque);
@@ -310,10 +315,6 @@ int cpu_load(QEMUFile *f, void *opaque, int version_id);
 /* Force QEMU to process pending events */
 void qemu_notify_event(void);
 
-/* Unblock cpu */
-void qemu_cpu_kick(void *env);
-int qemu_cpu_self(void *env);
-
 /* work queue */
 struct qemu_work_item {
     struct qemu_work_item *next;
@@ -321,12 +322,6 @@ struct qemu_work_item {
     void *data;
     int done;
 };
-
-#ifdef CONFIG_USER_ONLY
-#define qemu_init_vcpu(env) do { } while (0)
-#else
-void qemu_init_vcpu(void *env);
-#endif
 
 typedef struct QEMUIOVector {
     struct iovec *iov;

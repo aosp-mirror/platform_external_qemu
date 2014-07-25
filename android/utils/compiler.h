@@ -20,4 +20,13 @@
 #define ANDROID_END_HEADER  /* nothing */
 #endif
 
+// ANDROID_GCC_PREREQ(<major>,<minor>) will evaluate to true
+// iff the current version of GCC is <major>.<minor> or higher.
+#if defined(__GNUC__) && defined(__GNUC_MINOR__)
+# define ANDROID_GCC_PREREQ(maj, min) \
+         ((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
+#else
+# define ANDROID_GCC_PREREQ(maj, min) 0
+#endif
+
 #endif  // ANDROID_UTILS_COMPILER_H

@@ -504,7 +504,7 @@ static inline void ne2000_mem_writew(NE2000State *s, uint32_t addr,
     addr &= ~1; /* XXX: check exact behaviour if not even */
     if (addr < 32 ||
         (addr >= NE2000_PMEM_START && addr < NE2000_MEM_SIZE)) {
-        *(uint16_t *)(s->mem + addr) = cpu_to_le16(val);
+        stw_le_p(s->mem + addr, val);
     }
 }
 
@@ -533,7 +533,7 @@ static inline uint32_t ne2000_mem_readw(NE2000State *s, uint32_t addr)
     addr &= ~1; /* XXX: check exact behaviour if not even */
     if (addr < 32 ||
         (addr >= NE2000_PMEM_START && addr < NE2000_MEM_SIZE)) {
-        return le16_to_cpu(*(uint16_t *)(s->mem + addr));
+        return lduw_le_p(s->mem + addr);
     } else {
         return 0xffff;
     }
@@ -726,7 +726,7 @@ static void isa_ne2000_cleanup(VLANClientState *vc)
 {
     NE2000State *s = vc->opaque;
 
-    unregister_savevm("ne2000", s);
+    unregister_savevm(NULL, "ne2000", s);
 
     isa_unassign_ioport(s->isa_io_base, 16);
     isa_unassign_ioport(s->isa_io_base + 0x10, 2);
@@ -765,7 +765,7 @@ void isa_ne2000_init(int base, qemu_irq irq, NICInfo *nd)
 
     qemu_format_nic_info_str(s->vc, s->macaddr);
 
-    register_savevm("ne2000", -1, 2, ne2000_save, ne2000_load, s);
+    register_savevm(NULL, "ne2000", -1, 2, ne2000_save, ne2000_load, s);
 }
 
 /***********************************************************/
@@ -800,7 +800,7 @@ static void ne2000_cleanup(VLANClientState *vc)
 {
     NE2000State *s = vc->opaque;
 
-    unregister_savevm("ne2000", s);
+    unregister_savevm(NULL, "ne2000", s);
 }
 
 static void pci_ne2000_init(PCIDevice *pci_dev)
@@ -829,7 +829,7 @@ static void pci_ne2000_init(PCIDevice *pci_dev)
 
     qemu_format_nic_info_str(s->vc, s->macaddr);
 
-    register_savevm("ne2000", -1, 3, ne2000_save, ne2000_load, s);
+    register_savevm(NULL, "ne2000", -1, 3, ne2000_save, ne2000_load, s);
 }
 
 static void ne2000_register_devices(void)

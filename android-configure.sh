@@ -31,6 +31,8 @@ GLES_PROBE=yes
 
 PCBIOS_PROBE=yes
 
+QEMU_PREBUILTS_DIR=
+
 HOST_CC=${CC:-gcc}
 OPTION_CC=
 
@@ -68,6 +70,8 @@ for opt do
   ;;
   --gles-dir=*) GLES_DIR=$optarg
   ;;
+  --qemu-prebuilts-dir=*) QEMU_PREBUILTS_DIR=$optarg
+  ;;
   --no-gles) GLES_PROBE=no
   ;;
   --no-pcbios) PCBIOS_PROBE=no
@@ -90,33 +94,42 @@ Usage: rebuild.sh [options]
 Options: [defaults in brackets after descriptions]
 EOF
     echo "Standard options:"
-    echo "  --help                   print this message"
-    echo "  --install=FILEPATH       copy emulator executable to FILEPATH [$TARGETS]"
-    echo "  --cc=PATH                specify C compiler [$HOST_CC]"
-    echo "  --sdl-config=FILE        use specific sdl-config script [$SDL_CONFIG]"
-    echo "  --no-strip               do not strip emulator executable"
-    echo "  --debug                  enable debug (-O0 -g) build"
-    echo "  --ignore-audio           ignore audio messages (may build sound-less emulator)"
-    echo "  --no-prebuilts           do not use prebuilt libraries and compiler"
-    echo "  --out-dir=<path>         use specific output directory [objs/]"
-    echo "  --mingw                  build Windows executable on Linux"
-    echo "  --static                 build a completely static executable"
-    echo "  --verbose                verbose configuration"
-    echo "  --debug                  build debug version of the emulator"
-    echo "  --gles-dir=PATH          specify path to GLES host emulation sources [auto-detected]"
-    echo "  --no-gles                disable GLES emulation support"
-    echo "  --no-pcbios              disable copying of PC Bios files"
-    echo "  --no-tests               don't run unit test suite"
+    echo "  --help                      Print this message"
+    echo "  --install=FILEPATH          Copy emulator executable to FILEPATH [$TARGETS]"
+    echo "  --cc=PATH                   Specify C compiler [$HOST_CC]"
+    echo "  --sdl-config=FILE           Use specific sdl-config script [$SDL_CONFIG]"
+    echo "  --no-strip                  Do not strip emulator executable"
+    echo "  --debug                     Enable debug (-O0 -g) build"
+    echo "  --ignore-audio              Ignore audio messages (may build sound-less emulator)"
+    echo "  --no-prebuilts              Do not use prebuilt libraries and compiler"
+    echo "  --out-dir=<path>            Use specific output directory [objs/]"
+    echo "  --mingw                     Build Windows executable on Linux"
+    echo "  --static                    Build a completely static executable"
+    echo "  --verbose                   Verbose configuration"
+    echo "  --debug                     Build debug version of the emulator"
+    echo "  --gles-dir=PATH             Specify path to GLES host emulation sources [auto-detected]"
+    echo "  --qemu-prebuilts-dir=PATH   Specify path to QEMU prebuilt binaries"
+    echo "  --no-gles                   Disable GLES emulation support"
+    echo "  --no-pcbios                 Disable copying of PC Bios files"
+    echo "  --no-tests                  Don't run unit test suite"
     echo ""
     exit 1
 fi
 
 # On Linux, try to use our prebuilt toolchain to generate binaries
-# that are compatible with Ubuntu 8.04
+# that are compatible with Ubuntu 10.4
 if [ -z "$CC" -a -z "$OPTION_CC" -a "$HOST_OS" = linux ] ; then
-    PROBE_HOST_CC=`dirname $0`/../../prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-gcc
-    if [ ! -f "$PROBE_HOST_CC" ] ; then
-        PROBE_HOST_CC=`dirname $0`/../../prebuilts/tools/gcc-sdk/gcc
+    PREBUILTS_HOST_GCC=$(dirname $0)/../../prebuilts/gcc/linux-x86/host
+    # NOTE: GCC 4.8 is currently disabled because this breaks MIPS emulation
+    # For some odd reason. Remove the 'DISABLED_' prefix below to re-enable it,
+    # e.g. once the MIPS backend has been updated to a more recent version.
+    # This only affects Linux emulator binaries.
+    PROBE_HOST_CC=$PREBUILTS_HOST_GCC/DISABLED_x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
+    if [ ! -f "$PROBE_HOST_CC" ]; then
+        PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-gcc
+        if [ ! -f "$PROBE_HOST_CC" ] ; then
+            PROBE_HOST_CC=$(dirname $0)/../../prebuilts/tools/gcc-sdk/gcc
+        fi
     fi
     if [ -f "$PROBE_HOST_CC" ] ; then
         echo "Using prebuilt toolchain: $PROBE_HOST_CC"
@@ -229,9 +242,16 @@ else
     fi
 fi  # IN_ANDROID_BUILD = no
 
-if [ -n "$CCACHE" -a -f "$CCACHE" ] ; then
-    CC="$CCACHE $CC"
-    log "Prebuilt   : CCACHE=$CCACHE"
+if [ -n "$CCACHE" -a -f "$CCACHE" ]; then
+    if [ "$HOST_OS" == "darwin" -a "$OPTION_DEBUG" == "yes" ]; then
+        # http://llvm.org/bugs/show_bug.cgi?id=20297
+        # ccache works for mingw/gdb, therefore probably works for gcc/gdb
+        log "Prebuilt   : CCACHE disabled for OSX debug builds"
+        CCACHE=
+    else
+        CC="$CCACHE $CC"
+        log "Prebuilt   : CCACHE=$CCACHE"
+    fi
 else
     log "Prebuilt   : CCACHE can't be found"
     CCACHE=
@@ -499,6 +519,16 @@ feature_check_header HAVE_BYTESWAP_H      "<byteswap.h>"
 feature_check_header HAVE_MACHINE_BSWAP_H "<machine/bswap.h>"
 feature_check_header HAVE_FNMATCH_H       "<fnmatch.h>"
 
+# check for Mingw version.
+MINGW_VERSION=
+if [ "$TARGET_OS" = "windows" ]; then
+log "Mingw      : Probing for GCC version."
+GCC_VERSION=$($CC -v 2>&1 | awk '$1 == "gcc" && $2 == "version" { print $3; }')
+GCC_MAJOR=$(echo "$GCC_VERSION" | cut -f1 -d.)
+GCC_MINOR=$(echo "$GCC_VERSION" | cut -f2 -d.)
+log "Mingw      : Found GCC version $GCC_MAJOR.$GCC_MINOR [$GCC_VERSION]"
+MINGW_GCC_VERSION=$(( $GCC_MAJOR * 100 + $GCC_MINOR ))
+fi
 # Build the config.make file
 #
 
@@ -595,6 +625,7 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     echo "" >> $config_mk
     echo "USE_MINGW := 1" >> $config_mk
     echo "HOST_OS   := windows" >> $config_mk
+    echo "HOST_MINGW_VERSION := $MINGW_GCC_VERSION" >> $config_mk
 fi
 
 if [ "$HOST_OS" = "darwin" ]; then
@@ -609,16 +640,6 @@ cat > $config_h <<EOF
 /* This file was autogenerated by '$PROGNAME' */
 
 #define CONFIG_QEMU_SHAREDIR   "/usr/local/share/qemu"
-
-#if defined(__x86_64__)
-#define HOST_X86_64    1
-#define HOST_LONG_BITS  64
-#elif defined(__i386__)
-#define HOST_I386    1
-#define HOST_LONG_BITS  32
-#else
-#error Unknown architecture for codegen
-#endif
 
 EOF
 
@@ -736,6 +757,15 @@ python scripts/qapi-types.py qapi.types --output-dir=$AUTOGENERATED_DIR -b < qap
 python scripts/qapi-visit.py --output-dir=$AUTOGENERATED_DIR -b < qapi-schema.json
 python scripts/qapi-commands.py --output-dir=$AUTOGENERATED_DIR -m < qapi-schema.json
 log "Generate   : $AUTOGENERATED_DIR"
+
+if [ "$QEMU_PREBUILTS_DIR" ]; then
+    if [ ! -d "$QEMU_PREBUILTS_DIR/binaries" ]; then
+        panic "Missing QEMU prebuilts directory: $QEMU_PREBUILTS_DIR/binaries"
+    fi
+    log "Copying QEMU prebuilt binaries to: $OUT_DIR/qemu"
+    mkdir -p "$OUT_DIR"/qemu || panic "Could not create $OUT_DIR/qemu"
+    cp -rp "$QEMU_PREBUILTS_DIR/binaries"/* "$OUT_DIR/qemu"
+fi
 
 clean_temp
 

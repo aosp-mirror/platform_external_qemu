@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-#define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 
 /* Make sure XBUTTON stuff is defined that isn't in older Platform SDKs... */

@@ -12,8 +12,11 @@
 #ifndef _ANDROID_UTILS_PATH_H
 #define _ANDROID_UTILS_PATH_H
 
+#include <android/utils/compiler.h>
 #include <android/utils/system.h>
 #include <stdint.h>  /* for uint64_t */
+
+ANDROID_BEGIN_HEADER
 
 /** MISC FILE AND DIRECTORY HANDLING
  **/
@@ -165,5 +168,6 @@ extern APosixStatus   path_delete_file( const char*  path );
 extern void*          path_load_file( const char*  path, size_t  *pSize );
 
 /* */
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_PATH_H */

@@ -14,6 +14,10 @@
 
 #include <stdarg.h>
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 #define  VERBOSE_TAG_LIST    \
     _VERBOSE_TAG(init,         "emulator initialization")  \
     _VERBOSE_TAG(console,      "control console")  \
@@ -99,6 +103,6 @@ extern void   derror( const char*  format, ... );
 extern void  stdio_disable( void );
 extern void  stdio_enable( void );
 
-/* */
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_DEBUG_H */

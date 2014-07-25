@@ -74,7 +74,7 @@ static void qemu_event_read(void *opaque)
     } while ((len == -1 && errno == EINTR) || len > 0);
 }
 
-static int qemu_event_init(void)
+static int qemu_main_loop_event_init(void)
 {
     int err;
     int fds[2];
@@ -109,7 +109,7 @@ static void dummy_event_handler(void *opaque)
 {
 }
 
-static int qemu_event_init(void)
+static int qemu_main_loop_event_init(void)
 {
     qemu_event_handle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if (!qemu_event_handle) {
@@ -123,7 +123,7 @@ static int qemu_event_init(void)
 
 int qemu_init_main_loop(void)
 {
-    return qemu_event_init();
+    return qemu_main_loop_event_init();
 }
 
 #ifndef _WIN32

@@ -29,37 +29,44 @@
 #  include <signal.h>
 #endif
 
-#define  D(...)  ((void)0)
+// Set to 1 to enable debug traces here.
+#if 0
+#define  D(...)  printf(__VA_ARGS__), printf("\n"), fflush(stdout)
+#else
+#define D(...) ((void)0)
+#endif
 
 /** FILE LOCKS SUPPORT
  **
- ** a FileLock is useful to prevent several emulator instances from using the same
- ** writable file (e.g. the userdata.img disk images).
+ ** A FileLock is useful to prevent several emulator instances from using
+ ** the same writable file (e.g. the userdata.img disk images).
  **
- ** create a FileLock object with filelock_create(), ithis function should return NULL
- ** only if the corresponding file path could not be locked.
+ ** Create a FileLock object with filelock_create(), this function should
+ ** return NULL only if the corresponding file path could not be locked.
  **
- ** all file locks are automatically released and destroyed when the program exits.
- ** the filelock_lock() function can also detect stale file locks that can linger
- ** when the emulator crashes unexpectedly, and will happily clean them for you
+ ** All file locks are automatically released and destroyed when the program
+ ** exits. The filelock_lock() function can also detect stale file locks
+ ** that can linger when the emulator crashes unexpectedly, and will happily
+ ** clean them for you
  **
- **  here's how it works, three files are used:
+ ** Here's how it works, three files are used:
  **     file  - the data file accessed by the emulator
  **     lock  - a lock file  (file + '.lock')
- **     temp  - a temporary file make unique with mkstemp
+ **     temp  - a temporary file made unique with mkstemp
  **
- **  when locking:
+ ** When locking:
  **      create 'temp' and store our pid in it
  **      attemp to link 'lock' to 'temp'
  **         if the link succeeds, we obtain the lock
  **      unlink 'temp'
  **
- **  when unlocking:
+ ** When unlocking:
  **      unlink 'lock'
  **
  **
- **  on Windows, 'lock' is a directory name. locking is equivalent to
- **  creating it...
+ ** On Windows, 'lock' is a directory name. locking is equivalent to
+ ** creating it. The directory will contain a file named 'pid' that
+ ** contains the locking process' PID.
  **
  **/
 
@@ -91,13 +98,13 @@ filelock_lock( FileLock*  lock )
 #ifdef _WIN32
     int  pidfile_fd = -1;
 
-    ret = _mkdir( lock->lock );
+    ret = mkdir( lock->lock );
     if (ret < 0) {
         if (errno == ENOENT) {
             D( "could not access directory '%s', check path elements", lock->lock );
             return -1;
         } else if (errno != EEXIST) {
-            D( "_mkdir(%s): %s", lock->lock, strerror(errno) );
+            D( "mkdir(%s): %s", lock->lock, strerror(errno) );
             return -1;
         }
 
@@ -211,119 +218,139 @@ filelock_lock( FileLock*  lock )
 #else
     int    temp_fd = -1;
     int    lock_fd = -1;
-    int    rc, tries, _sleep;
+    int    rc, tries;
     FILE*  f = NULL;
     char   pid[8];
     struct stat  st_temp;
 
-    strcpy( lock->temp, lock->file );
-    strcat( lock->temp, TEMP_NAME );
-    temp_fd = mkstemp( lock->temp );
+    temp_fd = mkstemp(lock->temp);
 
     if (temp_fd < 0) {
-        D("cannot create locking temp file '%s'", lock->temp );
+        D("Cannot create locking temp file '%s'", lock->temp);
         goto Fail;
     }
 
-    sprintf( pid, "%d", getpid() );
-    ret = write( temp_fd, pid, strlen(pid)+1 );
+    snprintf(pid, sizeof pid, "%d", getpid());
+    ret = HANDLE_EINTR(write(temp_fd, pid, strlen(pid) + 1));
     if (ret < 0) {
-        D( "cannot write to locking temp file '%s'", lock->temp);
+        D("Cannot write to locking temp file '%s'", lock->temp);
         goto Fail;
     }
-    close( temp_fd );
+    close(temp_fd);
     temp_fd = -1;
 
-    rc = HANDLE_EINTR(lstat( lock->temp, &st_temp ));
+    rc = HANDLE_EINTR(lstat(lock->temp, &st_temp));
     if (rc < 0) {
-        D( "can't properly stat our locking temp file '%s'", lock->temp );
+        D("Can't properly stat our locking temp file '%s'", lock->temp);
         goto Fail;
     }
 
     /* now attempt to link the temp file to the lock file */
-    _sleep = 0;
-    for ( tries = 4; tries > 0; tries-- )
+    int sleep_duration_us = 0;
+    for (tries = 4; tries > 0; tries--)
     {
-        struct stat  st_lock;
-        int          rc;
+        const int kSleepDurationUsMax = 2000000;  // 2 seconds.
+        const int kSleepDurationUsIncrement = 200000;  // 0.2 seconds
 
-        if (_sleep > 0) {
-            if (_sleep > 2000000) {
-                D( "cannot acquire lock file '%s'", lock->lock );
+        if (sleep_duration_us > 0) {
+            if (sleep_duration_us > kSleepDurationUsMax) {
+                D("Cannot acquire lock file '%s'", lock->lock);
                 goto Fail;
             }
-            usleep( _sleep );
+            usleep(sleep_duration_us);
         }
-        _sleep += 200000;
+        sleep_duration_us += kSleepDurationUsIncrement;
 
-        /* the return value of link() is buggy on NFS */
-        rc = HANDLE_EINTR(link( lock->temp, lock->lock ));
+        // The return value of link() is buggy on NFS, so ignore it.
+        // and use lstat() to look at the result.
+        rc = HANDLE_EINTR(link(lock->temp, lock->lock));
 
-        rc = HANDLE_EINTR(lstat( lock->lock, &st_lock ));
-        if (rc == 0 &&
-            st_temp.st_rdev == st_lock.st_rdev &&
-            st_temp.st_ino  == st_lock.st_ino  )
-        {
-            /* SUCCESS */
+        struct stat st_lock;
+        rc = HANDLE_EINTR(lstat(lock->lock, &st_lock));
+        if (rc != 0) {
+            // Try again after sleeping a little.
+            continue;
+        }
+
+        if (st_temp.st_rdev == st_lock.st_rdev &&
+            st_temp.st_ino  == st_lock.st_ino  ) {
+            /* The link() operation suceeded */
             lock->locked = 1;
-            rc = HANDLE_EINTR(unlink( lock->temp ));
+            rc = HANDLE_EINTR(unlink(lock->temp));
             return 0;
+        }
+
+        if (S_ISDIR(st_lock.st_mode)) {
+            // The .lock file is a directory. This can only happen
+            // when the AVD was previously used by a Win32 emulator
+            // instance running under Wine on the same machine.
+            fprintf(stderr,
+                    "Stale Win32 lock file detected: %s\n",
+                    lock->lock);
+            goto Fail;
         }
 
         /* if we get there, it means that the link() call failed */
         /* check the lockfile to see if it is stale              */
-        if (rc == 0) {
-            char    buf[16];
-            time_t  now;
-            int     lockpid = 0;
-            int     lockfd;
-            int     stale = 2;  /* means don't know */
-            struct stat  st;
+        typedef enum {
+            FRESHNESS_UNKNOWN = 0,
+            FRESHNESS_FRESH,
+            FRESHNESS_STALE,
+        } Freshness;
 
-            rc = HANDLE_EINTR(time( &now));
-            st.st_mtime = now - 120;
+        Freshness freshness = FRESHNESS_UNKNOWN;
 
-            lockfd = HANDLE_EINTR(open( lock->lock,O_RDONLY ));
-            if ( lockfd >= 0 ) {
-                int  len;
+        struct stat st;
+        time_t now;
+        rc = HANDLE_EINTR(time(&now));
+        st.st_mtime = now - 120;
 
-                len = HANDLE_EINTR(read( lockfd, buf, sizeof(buf)-1 ));
-                buf[len] = 0;
-                lockpid = atoi(buf);
-
-                rc = HANDLE_EINTR(fstat( lockfd, &st ));
-                if (rc == 0)
-                  now = st.st_atime;
-
-                IGNORE_EINTR(close(lockfd));
+        int lockpid = 0;
+        int lockfd = HANDLE_EINTR(open(lock->lock,O_RDONLY));
+        if (lockfd >= 0) {
+            char buf[16];
+            int len = HANDLE_EINTR(read(lockfd, buf, sizeof(buf) - 1U));
+            if (len < 0) {
+                len = 0;
             }
-            /* if there is a PID, check that it is still alive */
-            if (lockpid > 0) {
-                rc = HANDLE_EINTR(kill( lockpid, 0 ));
-                if (rc == 0 || errno == EPERM) {
-                    stale = 0;
-                } else if (rc < 0 && errno == ESRCH) {
-                    stale = 1;
-                }
-            }
-            if (stale == 2) {
-                /* no pid, stale if the file is older than 1 minute */
-                stale = (now >= st.st_mtime + 60);
-            }
+            buf[len] = 0;
+            lockpid = atoi(buf);
 
-            if (stale) {
-                D( "removing stale lockfile '%s'", lock->lock );
-                rc = HANDLE_EINTR(unlink( lock->lock ));
-                _sleep = 0;
-                tries++;
+            rc = HANDLE_EINTR(fstat(lockfd, &st));
+            if (rc == 0) {
+                now = st.st_atime;
+            }
+            IGNORE_EINTR(close(lockfd));
+        }
+        /* if there is a PID, check that it is still alive */
+        if (lockpid > 0) {
+            rc = HANDLE_EINTR(kill(lockpid, 0));
+            if (rc == 0 || errno == EPERM) {
+                freshness = FRESHNESS_FRESH;
+            } else if (rc < 0 && errno == ESRCH) {
+                freshness = FRESHNESS_STALE;
             }
         }
+        if (freshness == FRESHNESS_UNKNOWN) {
+            /* no pid, stale if the file is older than 1 minute */
+            freshness = (now >= st.st_mtime + 60) ?
+                    FRESHNESS_STALE :
+                    FRESHNESS_FRESH;
+        }
+
+        if (freshness == FRESHNESS_STALE) {
+            D("Removing stale lockfile '%s'", lock->lock);
+            rc = HANDLE_EINTR(unlink(lock->lock));
+            sleep_duration_us = 0;
+            tries++;
+        }
     }
-    D("file '%s' is already in use by another process", lock->file );
+    D("file '%s' is already in use by another process", lock->file);
 
 Fail:
-    if (f)
+    if (f) {
         fclose(f);
+    }
 
     if (temp_fd >= 0) {
         IGNORE_EINTR(close(temp_fd));
@@ -388,7 +415,7 @@ filelock_create( const char*  file )
 #ifdef _WIN32
     snprintf( (char*)lock->temp, temp_len, "%s\\" PIDFILE_NAME, lock->lock );
 #else
-    lock->temp[0] = 0;
+    snprintf((char*)lock->temp, temp_len, "%s%s", lock->file, TEMP_NAME);
 #endif
     lock->locked = 0;
 

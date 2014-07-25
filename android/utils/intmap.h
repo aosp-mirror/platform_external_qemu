@@ -12,6 +12,10 @@
 #ifndef _ANDROID_UTILS_INTMAP_H
 #define _ANDROID_UTILS_INTMAP_H
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* A simple container that can hold a simple mapping from integers to
  * references. I.e. a dictionary where keys are integers, and values
  * are liberal pointer values (NULL is allowed).
@@ -102,5 +106,7 @@ void aintMapIterator_done( AIntMapIterator* iter );
         } \
         aintMapIterator_done(__aintmap_foreach_iter); \
     } while (0)
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_INTMAP_H */

@@ -47,10 +47,10 @@ typedef struct CPUMIPSTLBContext CPUMIPSTLBContext;
 struct CPUMIPSTLBContext {
     uint32_t nb_tlb;
     int (*map_address) (struct CPUMIPSState *env, hwaddr *physical, int *prot, target_ulong address, int rw, int access_type);
-    void (*helper_tlbwi) (void);
-    void (*helper_tlbwr) (void);
-    void (*helper_tlbp) (void);
-    void (*helper_tlbr) (void);
+    void (*helper_tlbwi)(struct CPUMIPSState *env);
+    void (*helper_tlbwr)(struct CPUMIPSState *env);
+    void (*helper_tlbp)(struct CPUMIPSState *env);
+    void (*helper_tlbr)(struct CPUMIPSState *env);
     union {
         struct {
             r4k_tlb_t tlb[MIPS_TLB_MAX];
@@ -234,6 +234,11 @@ struct CPUMIPSState {
 #define CP0VPEOpt_DWX0	0
     target_ulong CP0_EntryLo0;
     target_ulong CP0_EntryLo1;
+#define CP0ENTRYLO_PFN  6
+#define CP0ENTRYLO_C    3
+#define CP0ENTRYLO_D    2
+#define CP0ENTRYLO_V    1
+#define CP0ENTRYLO_G    0
     target_ulong CP0_Context;
     int32_t CP0_PageMask;
     int32_t CP0_PageGrain;
@@ -476,20 +481,22 @@ struct CPUMIPSState {
     struct QEMUTimer *timer; /* Internal timer */
 };
 
+#include "cpu-qom.h"
+
 int no_mmu_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
                         target_ulong address, int rw, int access_type);
 int fixed_mmu_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
                            target_ulong address, int rw, int access_type);
 int r4k_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
                      target_ulong address, int rw, int access_type);
-void r4k_helper_tlbwi (void);
-void r4k_helper_tlbwr (void);
-void r4k_helper_tlbp (void);
-void r4k_helper_tlbr (void);
+void r4k_helper_tlbwi(CPUMIPSState *env);
+void r4k_helper_tlbwr(CPUMIPSState *env);
+void r4k_helper_tlbp(CPUMIPSState *env);
+void r4k_helper_tlbr(CPUMIPSState *env);
 void mips_cpu_list (FILE *f, int (*cpu_fprintf)(FILE *f, const char *fmt, ...));
 
-void do_unassigned_access(hwaddr addr, int is_write, int is_exec,
-                          int unused, int size);
+void cpu_unassigned_access(CPUArchState* env, hwaddr addr,
+                           int is_write, int is_exec, int unused, int size);
 
 #define cpu_init cpu_mips_init
 #define cpu_exec cpu_mips_exec
@@ -648,18 +655,11 @@ void cpu_mips_update_irq (CPUMIPSState *env);
 
 /* helper.c */
 int cpu_mips_handle_mmu_fault (CPUMIPSState *env, target_ulong address, int rw,
-                               int mmu_idx, int is_softmmu);
+                               int mmu_idx);
 #define cpu_handle_mmu_fault cpu_mips_handle_mmu_fault
 void do_interrupt (CPUMIPSState *env);
 hwaddr cpu_mips_translate_address (CPUMIPSState *env, target_ulong address,
 		                               int rw);
-
-static inline void cpu_pc_from_tb(CPUMIPSState *env, TranslationBlock *tb)
-{
-    env->active_tc.PC = tb->pc;
-    env->hflags &= ~MIPS_HFLAG_BMASK;
-    env->hflags |= tb->flags & MIPS_HFLAG_BMASK;
-}
 
 static inline void cpu_get_tb_cpu_state(CPUMIPSState *env, target_ulong *pc,
                                         target_ulong *cs_base, int *flags)
@@ -672,6 +672,32 @@ static inline void cpu_get_tb_cpu_state(CPUMIPSState *env, target_ulong *pc,
 static inline void cpu_set_tls(CPUMIPSState *env, target_ulong newtls)
 {
     env->tls_value = newtls;
+}
+
+static inline bool cpu_has_work(CPUState *cpu)
+{
+    int has_work = 0;
+
+    /* It is implementation dependent if non-enabled interrupts
+       wake-up the CPU, however most of the implementations only
+       check for interrupts that can be taken. */
+    if ((cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
+        cpu_mips_hw_interrupts_pending(cpu->env_ptr)) {
+        has_work = 1;
+    }
+
+    if (cpu->interrupt_request & CPU_INTERRUPT_TIMER) {
+        has_work = 1;
+    }
+
+    return has_work;
+}
+
+static inline void cpu_pc_from_tb(CPUMIPSState *env, TranslationBlock *tb)
+{
+    env->active_tc.PC = tb->pc;
+    env->hflags &= ~MIPS_HFLAG_BMASK;
+    env->hflags |= tb->flags & MIPS_HFLAG_BMASK;
 }
 
 #endif /* !defined (__MIPS_CPU_H__) */

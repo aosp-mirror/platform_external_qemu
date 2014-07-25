@@ -17,10 +17,6 @@
 #include "hw/android/goldfish/trace.h"
 #include "hw/android/goldfish/vmem.h"
 #include "sysemu/sysemu.h"
-#ifdef CONFIG_MEMCHECK
-#include "memcheck/memcheck.h"
-#include "memcheck/memcheck_util.h"
-#endif  // CONFIG_MEMCHECK
 
 /* Set to 1 to debug tracing */
 #define DEBUG   0
@@ -76,11 +72,6 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, context switch %u\n", value);
         }
-#ifdef CONFIG_MEMCHECK
-        if (memcheck_enabled) {
-            memcheck_switch(value);
-        }
-#endif  // CONFIG_MEMCHECK
         tid = (unsigned) value;
         break;
     case TRACE_DEV_REG_TGID:    // save the tgid for the following fork/clone
@@ -95,22 +86,12 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, fork %u\n", value);
         }
-#ifdef CONFIG_MEMCHECK
-        if (memcheck_enabled) {
-            memcheck_fork(tgid, value);
-        }
-#endif  // CONFIG_MEMCHECK
         break;
     case TRACE_DEV_REG_CLONE:    // fork, clone new pid (i.e. thread)
         DPID("QEMU.trace: clone (pid=%d tgid=%d value=%d)\n", pid, tgid, value);
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, clone %u\n", value);
         }
-#ifdef CONFIG_MEMCHECK
-        if (memcheck_enabled) {
-            memcheck_clone(tgid, value);
-        }
-#endif  // CONFIG_MEMCHECK
         break;
     case TRACE_DEV_REG_EXECVE_VMSTART:  // execve, vstart
         vstart = value;
@@ -127,31 +108,16 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
             D("QEMU.trace: kernel, init exec [%lx,%lx]@%lx [%s]\n",
               vstart, vend, eoff, exec_path);
         }
-#ifdef CONFIG_MEMCHECK
-        if (memcheck_enabled) {
-            if (exec_path[0] == '\0') {
-                // vstrcpy may fail to copy path. In this case lets do it
-                // differently.
-                memcheck_get_guest_kernel_string(exec_path, value, CLIENT_PAGE_SIZE);
-            }
-            memcheck_mmap_exepath(vstart, vend, eoff, exec_path);
-        }
-#endif  // CONFIG_MEMCHECK
         exec_path[0] = 0;
         break;
     case TRACE_DEV_REG_CMDLINE_LEN:     // execve, process cmdline length
         cmdlen = value;
         break;
     case TRACE_DEV_REG_CMDLINE:         // execve, process cmdline
-        safe_memory_rw_debug(cpu_single_env, value, (uint8_t*)exec_arg, cmdlen, 0);
+        safe_memory_rw_debug(current_cpu, value, (uint8_t*)exec_arg, cmdlen, 0);
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, execve [%.*s]\n", cmdlen, exec_arg);
         }
-#ifdef CONFIG_MEMCHECK
-        if (memcheck_enabled) {
-            memcheck_set_cmd_line(exec_arg, cmdlen);
-        }
-#endif  // CONFIG_MEMCHECK
 #if DEBUG || DEBUG_PID
         if (trace_filename != NULL) {
             int i;
@@ -168,11 +134,6 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, exit %x\n", value);
         }
-#ifdef CONFIG_MEMCHECK
-        if (memcheck_enabled) {
-            memcheck_exit(value);
-        }
-#endif  // CONFIG_MEMCHECK
         break;
     case TRACE_DEV_REG_NAME:            // record thread name
         vstrcpy(value, exec_path, CLIENT_PAGE_SIZE);
@@ -193,26 +154,11 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, mmap [%lx,%lx]@%lx [%s]\n", vstart, vend, eoff, exec_path);
         }
-#ifdef CONFIG_MEMCHECK
-        if (memcheck_enabled) {
-            if (exec_path[0] == '\0') {
-                // vstrcpy may fail to copy path. In this case lets do it
-                // differently.
-                memcheck_get_guest_kernel_string(exec_path, value, CLIENT_PAGE_SIZE);
-            }
-            memcheck_mmap_exepath(vstart, vend, eoff, exec_path);
-        }
-#endif  // CONFIG_MEMCHECK
         exec_path[0] = 0;
         break;
     case TRACE_DEV_REG_INIT_PID:        // init, name the pid that starts before device registered
         pid = value;
         DPID("QEMU.trace: pid=%d\n", value);
-#ifdef CONFIG_MEMCHECK
-        if (memcheck_enabled) {
-            memcheck_init_pid(value);
-        }
-#endif  // CONFIG_MEMCHECK
         break;
     case TRACE_DEV_REG_INIT_NAME:       // init, the comm of the init pid
         vstrcpy(value, exec_path, CLIENT_PAGE_SIZE);
@@ -253,7 +199,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
 
     case TRACE_DEV_REG_STOP_EMU:        // stop the VM execution
         cpu_single_env->exception_index = EXCP_HLT;
-        cpu_single_env->halted = 1;
+        current_cpu->halted = 1;
         qemu_system_shutdown_request();
         cpu_loop_exit(cpu_single_env);
         break;
@@ -265,11 +211,6 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         unmap_start = value;
         break;
     case TRACE_DEV_REG_UNMAP_END:
-#ifdef CONFIG_MEMCHECK
-        if (memcheck_enabled) {
-            memcheck_unmap(unmap_start, value);
-        }
-#endif  // CONFIG_MEMCHECK
         break;
 
     case TRACE_DEV_REG_METHOD_ENTRY:
@@ -286,41 +227,11 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         }
         break;
 
-#ifdef CONFIG_MEMCHECK
-    case TRACE_DEV_REG_MALLOC:
-        if (memcheck_enabled) {
-            memcheck_guest_alloc(value);
-        }
-        break;
-
-    case TRACE_DEV_REG_FREE_PTR:
-        if (memcheck_enabled) {
-            memcheck_guest_free(value);
-        }
-        break;
-
-    case TRACE_DEV_REG_QUERY_MALLOC:
-        if (memcheck_enabled) {
-            memcheck_guest_query_malloc(value);
-        }
-        break;
-
-    case TRACE_DEV_REG_LIBC_INIT:
-        if (memcheck_enabled) {
-            memcheck_guest_libc_initialized(value);
-        }
-        break;
-
-    case TRACE_DEV_REG_PRINT_USER_STR:
-        if (memcheck_enabled) {
-            memcheck_guest_print_str(value);
-        }
-        break;
-#endif // CONFIG_MEMCHECK
-
     default:
         if (offset < 4096) {
-            cpu_abort(cpu_single_env, "trace_dev_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "trace_dev_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
         } else {
             D("%s: offset=%d (0x%x) value=%d (0x%x)\n", __FUNCTION__, offset,
               offset, value, value);
@@ -342,7 +253,9 @@ static uint32_t trace_dev_read(void *opaque, hwaddr offset)
 
     default:
         if (offset < 4096) {
-            cpu_abort(cpu_single_env, "trace_dev_read: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "trace_dev_read: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
         } else {
             D("%s: offset=%d (0x%x)\n", __FUNCTION__, offset, offset);
         }

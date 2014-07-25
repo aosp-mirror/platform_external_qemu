@@ -14,7 +14,9 @@
 
 #include <string.h>
 #include <stdint.h>
+#ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS 1
+#endif
 #include <inttypes.h>  /* for PRId64 et al. */
 #include "android/utils/assert.h"
 #include "android/utils/compiler.h"
@@ -103,9 +105,9 @@ typedef int  ABool;
 extern char*  win32_strsep(char**  pline, const char*  delim);
 #endif
 
-/** Handle strcasecmp on Windows
+/** Handle strcasecmp on Windows (and older Mingw32 toolchain)
  **/
-#ifdef _WIN32
+#if defined(_WIN32) && !ANDROID_GCC_PREREQ(4,4)
 #  define  strcasecmp  stricmp
 #endif
 

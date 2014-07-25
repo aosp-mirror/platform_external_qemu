@@ -67,12 +67,12 @@ typedef void* FBNativeWindowType;
 #define DD(...) VERBOSE_PRINT(gles,__VA_ARGS__)
 
 /* Name of the GLES rendering library we're going to use */
-#if HOST_LONG_BITS == 32
+#if UINTPTR_MAX == UINT32_MAX
 #define RENDERER_LIB_NAME  "libOpenglRender"
-#elif HOST_LONG_BITS == 64
+#elif UINTPTR_MAX == UINT64_MAX
 #define RENDERER_LIB_NAME  "lib64OpenglRender"
 #else
-#error Unknown HOST_LONG_BITS
+#error Unknown UINTPTR_MAX
 #endif
 
 // Define the corresponding function pointers.
@@ -110,10 +110,8 @@ RENDERER_FUNCTIONS_LIST
 }
 
 
-#ifndef CONFIG_STANDALONE_UI
 /* Defined in android/hw-pipe-net.c */
 extern int android_init_opengles_pipes(void);
-#endif
 
 static ADynamicLibrary*  rendererLib;
 static int               rendererStarted;
@@ -135,10 +133,7 @@ android_initOpenglesEmulation(void)
         return -1;
     }
 
-#ifndef CONFIG_STANDALONE_UI
     android_init_opengles_pipes();
-#endif
-
 
     /* Resolve the functions */
     if (initOpenglesEmulationFuncs(rendererLib) < 0) {

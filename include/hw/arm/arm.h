@@ -34,7 +34,7 @@ struct arm_boot_info {
     hwaddr smp_priv_base;
     int nb_cpus;
     int board_id;
-    int (*atag_board)(struct arm_boot_info *info, void *p);
+    int (*atag_board)(const struct arm_boot_info *info, void *p);
     /* Used internally by arm_boot.c */
     int is_linux;
     hwaddr initrd_size;
