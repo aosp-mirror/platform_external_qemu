@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9431c33_71c0b05f",
+        "filename": "target-i386/hax-darwin.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-25T11:00:37Z",
+      "side": 1,
+      "message": "nit: This should really be \"exec/ram_addr.h\" here",
+      "range": {
+        "startLine": 21,
+        "startChar": 18,
+        "endLine": 21,
+        "endChar": 22
+      },
+      "revId": "fecb2f00d6e36b7741e1cde0c7356330193e23e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9932d8d1_d0c31417",
+        "filename": "target-i386/hax-windows.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-07-25T11:00:37Z",
+      "side": 1,
+      "message": "same here: \"exec/ram_addr.h\"",
+      "range": {
+        "startLine": 14,
+        "startChar": 32,
+        "endLine": 14,
+        "endChar": 33
+      },
+      "revId": "fecb2f00d6e36b7741e1cde0c7356330193e23e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
