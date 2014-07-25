@@ -244,8 +244,11 @@ static int glue(load_elf, SZ)(int fd, int64_t address_offset,
             }
             /* address_offset is hack for kernel images that are
                linked at the wrong physical address.  */
+#if defined(TARGET_MIPS)
+            addr = (int32_t)(ph->p_paddr + address_offset);
+#else
             addr = ph->p_paddr + address_offset;
-
+#endif
             cpu_physical_memory_write_rom(addr, data, mem_size);
 
             total_size += mem_size;
