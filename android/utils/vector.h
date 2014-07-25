@@ -12,8 +12,11 @@
 #ifndef _ANDROID_UTILS_VECTOR_H
 #define _ANDROID_UTILS_VECTOR_H
 
-#include "android/utils/system.h"
 #include "android/utils/assert.h"
+#include "android/utils/compiler.h"
+#include "android/utils/system.h"
+
+ANDROID_BEGIN_HEADER
 
 #define  AVECTOR_DECL(ctype,name)  \
     ctype*    name; \
@@ -80,6 +83,6 @@ extern void  _avector_ensure( void**  items, size_t  itemSize,
         } \
     } while (0);
 
-/* */
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_VECTOR_H */

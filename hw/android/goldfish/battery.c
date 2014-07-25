@@ -114,7 +114,9 @@ static uint32_t goldfish_battery_read(void *opaque, hwaddr offset)
 		    return s->capacity;
 
         default:
-            cpu_abort (cpu_single_env, "goldfish_battery_read: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_battery_read: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
             return 0;
     }
 }
@@ -132,7 +134,9 @@ static void goldfish_battery_write(void *opaque, hwaddr offset, uint32_t val)
             break;
 
         default:
-            cpu_abort (cpu_single_env, "goldfish_audio_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_audio_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
     }
 }
 
@@ -178,8 +182,13 @@ void goldfish_battery_init(int has_battery)
 
     goldfish_device_add(&s->dev, goldfish_battery_readfn, goldfish_battery_writefn, s);
 
-    register_savevm( "battery_state", 0, BATTERY_STATE_SAVE_VERSION,
-                     goldfish_battery_save, goldfish_battery_load, s);
+    register_savevm(NULL,
+                    "battery_state",
+                    0,
+                    BATTERY_STATE_SAVE_VERSION,
+                    goldfish_battery_save,
+                    goldfish_battery_load,
+                    s);
 }
 
 void goldfish_battery_set_prop(int ac, int property, int value)

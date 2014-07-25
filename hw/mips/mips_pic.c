@@ -26,10 +26,10 @@ static void mips_cpu_irq_handler(void *opaque, int irq, int level)
     causebit = 0x00000100 << irq;
     if (level) {
         env->CP0_Cause |= causebit;
-        cpu_interrupt(env, CPU_INTERRUPT_HARD);
+        cpu_interrupt(ENV_GET_CPU(env), CPU_INTERRUPT_HARD);
     } else {
         env->CP0_Cause &= ~causebit;
-        cpu_reset_interrupt(env, CPU_INTERRUPT_HARD);
+        cpu_reset_interrupt(ENV_GET_CPU(env), CPU_INTERRUPT_HARD);
     }
 }
 

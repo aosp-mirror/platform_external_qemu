@@ -7,7 +7,6 @@ PCIBus *pci_gt64120_init(qemu_irq *pic);
 
 /* ds1225y.c */
 void *ds1225y_init(hwaddr mem_base, const char *filename);
-void ds1225y_set_protection(void *opaque, int protection);
 
 /* g364fb.c */
 int g364fb_mm_init(hwaddr vram_base,

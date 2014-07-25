@@ -18,6 +18,7 @@
 #include "version.h"
 #endif
 #include "config-host.h"
+#include <stdint.h>
 #include "slirp_config.h"
 
 #include <stddef.h>

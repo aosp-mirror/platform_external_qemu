@@ -10,12 +10,40 @@
 ** GNU General Public License for more details.
 */
 #include "cpu.h"
+#include "qemu-common.h"
 #include "migration/qemu-file.h"
 #include "hw/android/goldfish/device.h"
 #include "hw/hw.h"
 #include "hw/mmc.h"
-#include "hw/sd.h"
 #include "block/block.h"
+
+// These constants come from $KERNEL/include/linux/mmc/sd.h
+
+#define SD_SEND_RELATIVE_ADDR     3   /* bcr                     R6  */
+#define SD_SEND_IF_COND           8   /* bcr  [11:0] See below   R7  */
+
+#define SD_SWITCH                 6   /* adtc [31:0] See below   R1  */
+
+#define SD_APP_SET_BUS_WIDTH      6   /* ac   [1:0] bus width    R1  */
+#define SD_APP_SEND_NUM_WR_BLKS  22   /* adtc                    R1  */
+#define SD_APP_OP_COND           41   /* bcr  [31:0] OCR         R3  */
+#define SD_APP_SEND_SCR          51   /* adtc                    R1  */
+
+#define SCR_SPEC_VER_0          0       /* Implements system specification 1.0 - 1.01 */
+#define SCR_SPEC_VER_1          1       /* Implements system specification 1.10 */
+#define SCR_SPEC_VER_2          2       /* Implements system specification 2.00 */
+
+#define SD_BUS_WIDTH_1          0
+#define SD_BUS_WIDTH_4          2
+
+#define SD_SWITCH_CHECK         0
+#define SD_SWITCH_SET           1
+
+#define SD_SWITCH_GRP_ACCESS    0
+
+#define SD_SWITCH_ACCESS_DEF    0
+#define SD_SWITCH_ACCESS_HS     1
+
 
 enum {
     /* status register */
@@ -49,6 +77,11 @@ enum {
     /* MMC state flags */
     MMC_STATE               = 0x2C,
 
+    /* 64-bit guest CPUs only */
+
+    /* Set high 32-bits of buffer address */
+    MMC_SET_BUFFER_HIGH     = 0x30,
+
     /* MMC_INT_STATUS bits */
 
     MMC_STAT_END_OF_CMD     = 1U << 0,
@@ -65,7 +98,7 @@ struct goldfish_mmc_state {
     struct goldfish_device dev;
     BlockDriverState *bs;
     // pointer to our buffer
-    uint32_t buffer_address;
+    uint64_t buffer_address;
     // offsets for read and write operations
     uint32_t read_offset, write_offset;
     // buffer status flags
@@ -84,10 +117,13 @@ struct goldfish_mmc_state {
     uint8_t* buf;
 };
 
-#define  GOLDFISH_MMC_SAVE_VERSION  2
+#define  GOLDFISH_MMC_SAVE_VERSION  3
+#define  GOLDFISH_MMC_SAVE_VERSION_LEGACY  2
+
+// Note: This doesn't include |buffer_address| which is saved and loaded
+//       explictly below to support legacy encodings.
 #define  QFIELD_STRUCT  struct goldfish_mmc_state
 QFIELD_BEGIN(goldfish_mmc_fields)
-    QFIELD_INT32(buffer_address),
     QFIELD_INT32(read_offset),
     QFIELD_INT32(write_offset),
     QFIELD_INT32(int_status),
@@ -106,6 +142,7 @@ static void  goldfish_mmc_save(QEMUFile*  f, void*  opaque)
 {
     struct goldfish_mmc_state*  s = opaque;
 
+    qemu_put_be64(f, s->buffer_address);
     qemu_put_struct(f, goldfish_mmc_fields, s);
 }
 
@@ -113,9 +150,14 @@ static int  goldfish_mmc_load(QEMUFile*  f, void*  opaque, int  version_id)
 {
     struct goldfish_mmc_state*  s = opaque;
 
-    if (version_id != GOLDFISH_MMC_SAVE_VERSION)
+    if (version_id == GOLDFISH_MMC_SAVE_VERSION) {
+        s->buffer_address = qemu_get_be64(f);
+    } else if (version_id == GOLDFISH_MMC_SAVE_VERSION_LEGACY) {
+        s->buffer_address = qemu_get_be32(f);
+    } else {
+        // Unsupported version!
         return -1;
-
+    }
     return qemu_get_struct(f, goldfish_mmc_fields, s);
 }
 
@@ -252,7 +294,9 @@ static void goldfish_mmc_do_command(struct goldfish_mmc_state *s, uint32_t cmd, 
                 m = (uint32_t)(capacity / (512*1024)) - 1;
                 // m must fit into 22 bits
                 if (m & 0xFFC00000) {
-                    fprintf(stderr, "SD card too big (%lld bytes).  Maximum SDHC card size is 128 gigabytes.\n", (long long)capacity);
+                    fprintf(stderr, "SD card too big (%" PRId64 " bytes).  "
+                            "Maximum SDHC card size is 128 gigabytes.\n",
+                            capacity);
                     abort();
                 }
 
@@ -278,7 +322,9 @@ static void goldfish_mmc_do_command(struct goldfish_mmc_state *s, uint32_t cmd, 
                 exponent = 0;
                 capacity = sector_count * 512;
                 if (capacity > 2147483648U) {
-                    fprintf(stderr, "SD card too big (%lld bytes).  Maximum SD card size is 2 gigabytes.\n", (long long)capacity);
+                    fprintf(stderr, "SD card too big (%" PRIu64 " bytes). "
+                            "Maximum SD card size is 2 gigabytes.\n",
+                            capacity);
                     abort();
                 }
                 capacity >>= 10; // convert to Kbytes
@@ -438,7 +484,9 @@ static uint32_t goldfish_mmc_read(void *opaque, hwaddr offset)
             return ret;
         }
         default:
-            cpu_abort(cpu_single_env, "goldfish_mmc_read: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_mmc_read: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
             return 0;
     }
 }
@@ -468,7 +516,11 @@ static void goldfish_mmc_write(void *opaque, hwaddr offset, uint32_t val)
             break;
         case MMC_SET_BUFFER:
             /* save pointer to buffer 1 */
-            s->buffer_address = val;
+            uint64_set_low(&s->buffer_address, val);
+            break;
+        case MMC_SET_BUFFER_HIGH:
+            /* save pointer to buffer 1 */
+            uint64_set_high(&s->buffer_address, val);
             break;
         case MMC_CMD:
             goldfish_mmc_do_command(s, val, s->arg);
@@ -484,7 +536,9 @@ static void goldfish_mmc_write(void *opaque, hwaddr offset, uint32_t val)
             break;
 
         default:
-            cpu_abort (cpu_single_env, "goldfish_mmc_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_mmc_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
     }
 }
 
@@ -515,7 +569,12 @@ void goldfish_mmc_init(uint32_t base, int id, BlockDriverState* bs)
 
     goldfish_device_add(&s->dev, goldfish_mmc_readfn, goldfish_mmc_writefn, s);
 
-    register_savevm( "goldfish_mmc", 0, GOLDFISH_MMC_SAVE_VERSION,
-                     goldfish_mmc_save, goldfish_mmc_load, s);
+    register_savevm(NULL,
+                    "goldfish_mmc",
+                    0,
+                    GOLDFISH_MMC_SAVE_VERSION,
+                    goldfish_mmc_save,
+                    goldfish_mmc_load,
+                    s);
 }
 

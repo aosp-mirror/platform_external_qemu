@@ -83,6 +83,11 @@ Device properties:
     0x18 IRQ_BASE    R: Read base IRQ of current device.
     0x1c IRQ_COUNT   R: Read IRQ count of current device.
 
+    # For 64-bit guest architectures only:
+    0x20 NAME_ADDR_HIGH  W: Write high 32-bit of kernel address of name
+                            buffer used by GET_NAME. Must be written to
+                            before the GET_NAME write.
+
 The kernel iterates over the list of current devices with something like:
 
    IO_WRITE(BUS_OP, 0);    // Start iteration, any value other than 0 is invalid.
@@ -103,7 +108,10 @@ The kernel iterates over the list of current devices with something like:
        dev.irq_count = IO_READ(IRQ_COUNT);
 
        dev.name = kalloc(dev.name_len + 1);  // allocate room for device name.
-       IO_WRITE(GET_NAME, dev.name);         // copy to kernel memory.
+    #if 64BIT_GUEST_CPU
+       IO_WRITE(NAME_ADDR_HIGH, (uint32_t)(dev.name >> 32));
+    #endif
+       IO_WRITE(GET_NAME, (uint32_t)dev.name);  // copy to kernel memory.
        dev.name[dev.name_len] = 0;
 
        .. add device to kernel's list.
@@ -294,6 +302,9 @@ Device properties:
     0x10  DATA_PTR      W: Write kernel buffer address.
     0x14  DATA_LEN      W: Write kernel buffer size.
 
+    # For 64-bit guest CPUs only:
+    0x18  DATA_PTR_HIGH    W: Write high 32 bits of kernel buffer address.
+
 This is the first case of a multi-instance goldfish device in this document.
 Each instance implements a virtual serial port that contains a small internal
 buffer where incoming data is stored until the kernel fetches it.
@@ -314,6 +325,9 @@ following:
     if (len == 0) return;      // Nothing to do.
 
     available = get_buffer(len, &buffer);  // Get address of buffer and its size.
+    #if 64BIT_GUEST_CPU
+    IO_WRITE(DATA_PTR_HIGH, buffer >> 32);
+    #endif
     IO_WRITE(DATA_PTR, buffer);            // Write buffer address to device.
     IO_WRITE(DATA_LEN, available);         // Write buffer length to device.
     IO_WRITE(CMD, CMD_READ_BUFFER);        // Read the data into kernel buffer.
@@ -332,6 +346,9 @@ with:
 
 Or use the mode efficient sequence:
 
+  #if 64BIT_GUEST_CPU
+  IO_WRITE(DATA_PTR_HIGH, buffer >> 32)
+  #endif
   IO_WRITE(DATA_PTR, buffer)
   IO_WRITE(DATA_LEN, buffer_len)
   IO_WRITE(CMD, CMD_WRITE_BUFFER)
@@ -494,6 +511,11 @@ Device properties:
     0x20  START_READ
     0x24  READ_BUFFER_AVAILABLE
 
+    # For 64-bit guest CPUs
+    0x28  SET_WRITE_BUFFER_1_HIGH  W: Set high 32 bits of 1st kernel output buffer address.
+    0x30  SET_WRITE_BUFFER_2_HIGH  W: Set high 32 bits  of 2nd kernel output buffer address.
+    0x34  SET_READ_BUFFER_HIGH     W: Set high 32 bits of kernel input buffer address.
+
 This device implements a virtual sound card with the following properties:
 
   - Stereo output at fixed 44.1 kHz frequency, using signed 16-bit samples.
@@ -503,9 +525,14 @@ This device implements a virtual sound card with the following properties:
     Optional.
 
 For output, the kernel driver allocates two internal buffers to hold output
-samples, and passes their physical address with
-IO_WRITE(SET_WRITE_BUFFER_1, <buffer1>) and
-IO_WRITE(SET_WRITE_BUFFER_2, <buffer2>).
+samples, and passes their physical address to the emulator as follows:
+
+  #if 64BIT_GUEST_CPU
+  IO_WRITE(SET_WRITE_BUFFER_1_HIGH, (uint32_t)(buffer1 >> 32));
+  IO_WRITE(SET_WRITE_BUFFER_2_HIGH, (uint32_t)(buffer2 >> 32));
+  #endif
+  IO_WRITE(SET_WRITE_BUFFER_1, (uint32_t)buffer1);
+  IO_WRITE(SET_WRITE_BUFFER_2, (uint32_t)buffer2);
 
 After this, samples will be sent from the driver to the virtual device by
 using one of IO_WRITE(WRITE_BUFFER_1, <length1>) or
@@ -532,9 +559,10 @@ IRQ raise when the corresponding status bit is also set to 1.
 For input, the driver should first IO_READ(READ_SUPPORTED), which will return 1
 if the virtual device supports input, or 0 otherwise. If it does support it,
 the driver must allocate an internal buffer and send its physical address with
-IO_WRITE(SET_READ_BUFFER, <read-buffer>), then perform
-IO_WRITE(START_READ, <read-buffer-length>) to start recording and specify
-the kernel's buffer length.
+IO_WRITE(SET_READ_BUFFER, <read-buffer>) (with a previous write to
+SET_READ_BUFFER_HIGH on 64-bit guest CPUS), then perform
+IO_WRITE(START_READ, <read-buffer-length>) to start recording and
+specify the kernel's buffer length.
 
 Later, the device will raise its IRQ and set bit2 of 'int_status' to indicate
 there are incoming samples to the driver. In its interrupt handler, the latter
@@ -825,41 +853,6 @@ to access the emulated 'flash' memory. This is only used to access the
 virtual SDCard device with the Android emulator.
 
 TODO(digit): Complete this.
-
-
-XI. Goldfish memlog:
-=====================
-
-Relevant files:
-  $QEMU/hw/android/goldfish/memlog.c
-
-Device properties:
-  Name: goldfish_memlog
-  Id: -1
-  IrqCount: 0
-  I/O Registers:
-    ???
-
-Obsolete debugging device. Should be removed from both the kernel and the
-emulator sources.
-
-
-XII. Goldfish switch:
-=====================
-
-Relevant files:
-  $QEMU/hw/android/goldfish/switch.c
-  $KERNEL/arch/arm/mach-goldfish/switch.c
-  $KERNEL/arch/mips/goldfish/switch.c
-
-Device properties:
-  Name: goldfish_switch
-  Id: -1
-  IrqCount: 1
-  I/O Registers:
-
-Obsolete debugging device. Should be removed from both the kernel and the
-emulator sources.
 
 
 XIV. QEMU Pipe device:

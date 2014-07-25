@@ -13,7 +13,10 @@
 #define _ANDROID_AVD_HW_CONFIG_H
 
 #include <stdint.h>
+#include "android/utils/compiler.h"
 #include "android/utils/ini.h"
+
+ANDROID_BEGIN_HEADER
 
 typedef char      hw_bool_t;
 typedef int       hw_int_t;
@@ -63,5 +66,29 @@ int  androidHwConfig_isScreenNoTouch( AndroidHwConfig* config );
 int  androidHwConfig_isScreenTouch( AndroidHwConfig* config );
 /* Checks if screen supports multi-touch. */
 int  androidHwConfig_isScreenMultiTouch( AndroidHwConfig* config );
+
+// Return an integer indicating if the kernel requires a new device
+// naming scheme. More specifically:
+//  -1 -> don't know, caller will need to auto-detect.
+//   0 -> legacy device naming
+//   1 -> new device naming.
+//
+// The new device naming was allegedly introduced in Linux 3.10 and
+// replaces /dev/ttyS<num with /dev/ttyGF<num>. Also see related
+// declarations in android/kernel/kernel_utils.h
+int androidHwConfig_getKernelDeviceNaming( AndroidHwConfig* config );
+
+// Return an integer indicating is the kernel supports YAFFS2 partition
+// images. More specifically:
+//  -1 -> don't know, caller will need to auto-detect.
+//   0 -> does not support YAFFS2 partitions.
+//   1 -> does support YAFFS2 partitions.
+int androidHwConfig_getKernelYaffs2Support( AndroidHwConfig* config );
+
+// Return the kernel device prefix for serial ports, depending on
+// kernel.newDeviceNaming.
+const char* androidHwConfig_getKernelSerialPrefix( AndroidHwConfig* config );
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_AVD_HW_CONFIG_H */

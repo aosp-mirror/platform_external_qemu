@@ -5,6 +5,7 @@
 #include "qemu-common.h"
 #include "hw/irq.h"
 #include "migration/qemu-file.h"
+#include "migration/vmstate.h"
 
 #ifdef NEED_CPU_H
 #include "cpu.h"
@@ -37,27 +38,6 @@ char* qemu_get_string(QEMUFile *f);
 #define qemu_get_sbetls qemu_get_sbe32s
 #endif
 #endif
-
-typedef void SaveStateHandler(QEMUFile *f, void *opaque);
-typedef int SaveLiveStateHandler(QEMUFile *f, int stage, void *opaque);
-typedef int LoadStateHandler(QEMUFile *f, void *opaque, int version_id);
-
-int register_savevm(const char *idstr,
-                    int instance_id,
-                    int version_id,
-                    SaveStateHandler *save_state,
-                    LoadStateHandler *load_state,
-                    void *opaque);
-
-int register_savevm_live(const char *idstr,
-                         int instance_id,
-                         int version_id,
-                         SaveLiveStateHandler *save_live_state,
-                         SaveStateHandler *save_state,
-                         LoadStateHandler *load_state,
-                         void *opaque);
-
-void unregister_savevm(const char *idstr, void *opaque);
 
 typedef void QEMUResetHandler(void *opaque);
 

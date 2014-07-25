@@ -449,9 +449,9 @@ int DMA_write_memory (int nchan, void *buf, int pos, int len)
 /* request the emulator to transfer a new DMA memory block ASAP */
 void DMA_schedule(int nchan)
 {
-    CPUOldState *env = cpu_single_env;
-    if (env)
-        cpu_exit(env);
+    CPUState *cpu = current_cpu;
+    if (cpu)
+        cpu_exit(cpu);
 }
 
 static void dma_reset(void *opaque)
@@ -567,8 +567,21 @@ void DMA_init (int high_page_enable)
               high_page_enable ? 0x480 : -1);
     dma_init2(&dma_controllers[1], 0xc0, 1, 0x88,
               high_page_enable ? 0x488 : -1);
-    register_savevm ("dma", 0, 1, dma_save, dma_load, &dma_controllers[0]);
-    register_savevm ("dma", 1, 1, dma_save, dma_load, &dma_controllers[1]);
+    register_savevm(NULL,
+                    "dma",
+                    0,
+                    1,
+                    dma_save,
+                    dma_load,
+                    &dma_controllers[0]);
+
+    register_savevm(NULL,
+                    "dma",
+                    1,
+                    1,
+                    dma_save,
+                    dma_load,
+                    &dma_controllers[1]);
 
     dma_bh = qemu_bh_new(DMA_run_bh, NULL);
 }

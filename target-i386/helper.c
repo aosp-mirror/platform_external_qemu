@@ -25,7 +25,6 @@
 #include <signal.h>
 
 #include "cpu.h"
-#include "exec/exec-all.h"
 #include "qemu-common.h"
 #include "sysemu/kvm.h"
 #include "exec/hax.h"
@@ -147,7 +146,7 @@ static x86_def_t x86_defs[] = {
             CPUID_MTRR | CPUID_CLFLUSH | CPUID_MCA |
         /* this feature is needed for Solaris and isn't fully implemented */
             CPUID_PSE36,
-        .ext_features = CPUID_EXT_SSE3,
+        .ext_features = CPUID_EXT_SSE3 | CPUID_EXT_SSSE3,
         .ext2_features = (PPRO_FEATURES & 0x0183F3FF) |
             CPUID_EXT2_LM | CPUID_EXT2_SYSCALL | CPUID_EXT2_NX |
             CPUID_EXT2_3DNOW | CPUID_EXT2_3DNOWEXT,
@@ -463,13 +462,14 @@ static int cpu_x86_register (CPUX86State *env, const char *cpu_model)
 }
 
 /* NOTE: must be called outside the CPU execute loop */
-void cpu_reset(CPUX86State *env)
+void cpu_reset(CPUState *cpu)
 {
+    CPUX86State *env = cpu->env_ptr;
     int i;
 
     if (qemu_loglevel_mask(CPU_LOG_RESET)) {
-        qemu_log("CPU Reset (CPU %d)\n", env->cpu_index);
-        log_cpu_state(env, X86_DUMP_FPU | X86_DUMP_CCOP);
+        qemu_log("CPU Reset (CPU %d)\n", cpu->cpu_index);
+        log_cpu_state(cpu, X86_DUMP_FPU | X86_DUMP_CCOP);
     }
 
     memset(env, 0, offsetof(CPUX86State, breakpoints));
@@ -652,20 +652,21 @@ done:
     cpu_fprintf(f, "\n");
 }
 
-void cpu_dump_state(CPUX86State *env, FILE *f,
+void cpu_dump_state(CPUState *cpu, FILE *f,
                     int (*cpu_fprintf)(FILE *f, const char *fmt, ...),
                     int flags)
 {
+    CPUX86State *env = cpu->env_ptr;
     int eflags, i, nb;
     char cc_op_name[32];
     static const char *seg_name[6] = { "ES", "CS", "SS", "DS", "FS", "GS" };
 
     if (kvm_enabled())
-        kvm_arch_get_registers(env);
+        kvm_arch_get_registers(cpu);
 
 #ifdef CONFIG_HAX
     if (hax_enabled())
-        hax_arch_get_registers(env);
+        hax_arch_get_registers(cpu);
 #endif
 
     eflags = env->eflags;
@@ -705,7 +706,7 @@ void cpu_dump_state(CPUX86State *env, FILE *f,
                     (env->hflags >> HF_INHIBIT_IRQ_SHIFT) & 1,
                     (int)(env->a20_mask >> 20) & 1,
                     (env->hflags >> HF_SMM_SHIFT) & 1,
-                    env->halted);
+                    cpu->halted);
     } else
 #endif
     {
@@ -732,7 +733,7 @@ void cpu_dump_state(CPUX86State *env, FILE *f,
                     (env->hflags >> HF_INHIBIT_IRQ_SHIFT) & 1,
                     (int)(env->a20_mask >> 20) & 1,
                     (env->hflags >> HF_SMM_SHIFT) & 1,
-                    env->halted);
+                    cpu->halted);
     }
 
     for(i = 0; i < 6; i++) {
@@ -843,7 +844,7 @@ void cpu_x86_set_a20(CPUX86State *env, int a20_state)
 #endif
         /* if the cpu is currently executing code, we must unlink it and
            all the potentially executing TB */
-        cpu_interrupt(env, CPU_INTERRUPT_EXITTB);
+        cpu_interrupt(ENV_GET_CPU(env), CPU_INTERRUPT_EXITTB);
 
         /* when a20 is changed, all the MMU mappings are invalid, so
            we must flush everything */
@@ -929,7 +930,7 @@ void cpu_x86_update_cr4(CPUX86State *env, uint32_t new_cr4)
 #if defined(CONFIG_USER_ONLY)
 
 int cpu_x86_handle_mmu_fault(CPUX86State *env, target_ulong addr,
-                             int is_write, int mmu_idx, int is_softmmu)
+                             int is_write, int mmu_idx)
 {
     /* user mode only emulation */
     is_write &= 1;
@@ -959,14 +960,13 @@ hwaddr cpu_get_phys_page_debug(CPUX86State *env, target_ulong addr)
    -1 = cannot handle fault
    0  = nothing more to do
    1  = generate PF fault
-   2  = soft MMU activation required for this block
 */
 int cpu_x86_handle_mmu_fault(CPUX86State *env, target_ulong addr,
-                             int is_write1, int mmu_idx, int is_softmmu)
+                             int is_write1, int mmu_idx)
 {
     uint64_t ptep, pte;
     target_ulong pde_addr, pte_addr;
-    int error_code, is_dirty, prot, page_size, ret, is_write, is_user;
+    int error_code, is_dirty, prot, page_size, is_write, is_user;
     hwaddr paddr;
     uint32_t page_offset;
     target_ulong vaddr, virt_addr;
@@ -1227,8 +1227,8 @@ int cpu_x86_handle_mmu_fault(CPUX86State *env, target_ulong addr,
     paddr = (pte & TARGET_PAGE_MASK) + page_offset;
     vaddr = virt_addr + page_offset;
 
-    ret = tlb_set_page_exec(env, vaddr, paddr, prot, mmu_idx, is_softmmu);
-    return ret;
+    tlb_set_page(env, vaddr, paddr, prot, mmu_idx, page_size);
+    return 0;
  do_fault_protect:
     error_code = PG_ERROR_P_MASK;
  do_fault:
@@ -1414,10 +1414,6 @@ int check_hw_breakpoints(CPUX86State *env, int force_dr6_update)
     return hit_enabled;
 }
 
-static CPUDebugExcpHandler *prev_debug_excp_handler;
-
-void raise_exception(int exception_index);
-
 static void breakpoint_handler(CPUX86State *env)
 {
     CPUBreakpoint *bp;
@@ -1426,7 +1422,7 @@ static void breakpoint_handler(CPUX86State *env)
         if (env->watchpoint_hit->flags & BP_CPU) {
             env->watchpoint_hit = NULL;
             if (check_hw_breakpoints(env, 0))
-                raise_exception(EXCP01_DB);
+                raise_exception(env, EXCP01_DB);
             else
                 cpu_resume_from_signal(env, NULL);
         }
@@ -1435,13 +1431,11 @@ static void breakpoint_handler(CPUX86State *env)
             if (bp->pc == env->eip) {
                 if (bp->flags & BP_CPU) {
                     check_hw_breakpoints(env, 1);
-                    raise_exception(EXCP01_DB);
+                    raise_exception(env, EXCP01_DB);
                 }
                 break;
             }
     }
-    if (prev_debug_excp_handler)
-        prev_debug_excp_handler(env);
 }
 
 
@@ -1487,7 +1481,7 @@ void cpu_inject_x86_mce(CPUX86State *cenv, int bank, uint64_t status,
         banks[3] = misc;
         cenv->mcg_status = mcg_status;
         banks[1] = status;
-        cpu_interrupt(cenv, CPU_INTERRUPT_MCE);
+        cpu_interrupt(ENV_GET_CPU(cenv), CPU_INTERRUPT_MCE);
     } else if (!(banks[1] & MCI_STATUS_VAL)
                || !(banks[1] & MCI_STATUS_UC)) {
         if (banks[1] & MCI_STATUS_VAL)
@@ -1752,20 +1746,25 @@ void cpu_x86_cpuid(CPUX86State *env, uint32_t index, uint32_t count,
 
 CPUX86State *cpu_x86_init(const char *cpu_model)
 {
+    X86CPU *x86_cpu;
     CPUX86State *env;
     static int inited;
 
-    env = g_malloc0(sizeof(CPUX86State));
+    x86_cpu = g_malloc0(sizeof(X86CPU));
+    env = &x86_cpu->env;
+    ENV_GET_CPU(env)->env_ptr = env;
+    CPUState *cpu = ENV_GET_CPU(env);
+
     cpu_exec_init(env);
-    env->cpu_model_str = cpu_model;
+    cpu->cpu_model_str = cpu_model;
+
 
     /* init various static tables */
     if (!inited) {
         inited = 1;
         optimize_flags_init();
 #ifndef CONFIG_USER_ONLY
-        prev_debug_excp_handler =
-            cpu_set_debug_excp_handler(breakpoint_handler);
+        cpu_set_debug_excp_handler(breakpoint_handler);
 #endif
     }
     if (cpu_x86_register(env, cpu_model) < 0) {
@@ -1773,22 +1772,22 @@ CPUX86State *cpu_x86_init(const char *cpu_model)
         return NULL;
     }
     mce_init(env);
-    cpu_reset(env);
+    cpu_reset(cpu);
 
-    qemu_init_vcpu(env);
+    qemu_init_vcpu(cpu);
 
     if (kvm_enabled()) {
         kvm_trim_features(&env->cpuid_features,
-                          kvm_arch_get_supported_cpuid(env, 1, R_EDX),
+                          kvm_arch_get_supported_cpuid(cpu, 1, R_EDX),
                           feature_name);
         kvm_trim_features(&env->cpuid_ext_features,
-                          kvm_arch_get_supported_cpuid(env, 1, R_ECX),
+                          kvm_arch_get_supported_cpuid(cpu, 1, R_ECX),
                           ext_feature_name);
         kvm_trim_features(&env->cpuid_ext2_features,
-                          kvm_arch_get_supported_cpuid(env, 0x80000001, R_EDX),
+                          kvm_arch_get_supported_cpuid(cpu, 0x80000001, R_EDX),
                           ext2_feature_name);
         kvm_trim_features(&env->cpuid_ext3_features,
-                          kvm_arch_get_supported_cpuid(env, 0x80000001, R_ECX),
+                          kvm_arch_get_supported_cpuid(cpu, 0x80000001, R_ECX),
                           ext3_feature_name);
     }
 
@@ -1798,9 +1797,10 @@ CPUX86State *cpu_x86_init(const char *cpu_model)
 #if !defined(CONFIG_USER_ONLY)
 void do_cpu_init(CPUX86State *env)
 {
-    int sipi = env->interrupt_request & CPU_INTERRUPT_SIPI;
-    cpu_reset(env);
-    env->interrupt_request = sipi;
+    CPUState *cpu = ENV_GET_CPU(env);
+    int sipi = cpu->interrupt_request & CPU_INTERRUPT_SIPI;
+    cpu_reset(cpu);
+    cpu->interrupt_request = sipi;
     apic_init_reset(env);
 }
 

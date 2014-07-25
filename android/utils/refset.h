@@ -12,7 +12,10 @@
 #ifndef _ANDROID_UTILS_REFSET_H
 #define _ANDROID_UTILS_REFSET_H
 
+#include "android/utils/compiler.h"
 #include <android/utils/vector.h>
+
+ANDROID_BEGIN_HEADER
 
 /* this implements a set of addresses in memory.
  * NULL cannot be stored in the set.
@@ -72,5 +75,7 @@ extern void   _arefSet_removeDeferred( ARefSet* s );
         if ((_set)->iteration == 1) \
             _arefSet_removeDeferred(_set); \
     } while (0)
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_REFSET_H */

@@ -20,6 +20,9 @@
 #define CPU_ALL_H
 
 #include "qemu-common.h"
+#include "qemu/queue.h"
+#include "qemu/thread.h"
+#include "qemu/tls.h"
 #include "exec/cpu-common.h"
 
 /* some important defines:
@@ -321,6 +324,9 @@ extern unsigned long reserved_va;
 #define TARGET_PAGE_SIZE (1 << TARGET_PAGE_BITS)
 #define TARGET_PAGE_MASK ~(TARGET_PAGE_SIZE - 1)
 #define TARGET_PAGE_ALIGN(addr) (((addr) + TARGET_PAGE_SIZE - 1) & TARGET_PAGE_MASK)
+#ifdef TARGET_X86_64
+#define TARGET_PTE_MASK 0x7fffffffffffULL
+#endif
 
 /* ??? These should be the larger of uintptr_t and target_ulong.  */
 extern uintptr_t qemu_real_host_page_size;
@@ -354,21 +360,6 @@ int page_get_flags(target_ulong address);
 void page_set_flags(target_ulong start, target_ulong end, int flags);
 int page_check_range(target_ulong start, target_ulong len, int flags);
 #endif
-
-CPUArchState *cpu_copy(CPUArchState *env);
-CPUArchState *qemu_get_cpu(int cpu);
-
-#define CPU_DUMP_CODE 0x00010000
-
-void cpu_dump_state(CPUArchState *env, FILE *f, fprintf_function cpu_fprintf,
-                    int flags);
-void cpu_dump_statistics(CPUArchState *env, FILE *f, fprintf_function cpu_fprintf,
-                          int flags);
-
-void QEMU_NORETURN cpu_abort(CPUArchState *env, const char *fmt, ...)
-    GCC_FMT_ATTR(2, 3);
-extern CPUArchState *first_cpu;
-extern CPUArchState *cpu_single_env;
 
 /* Flags for use in ENV->INTERRUPT_PENDING.
 
@@ -420,13 +411,6 @@ extern CPUArchState *cpu_single_env;
      | CPU_INTERRUPT_TGT_EXT_3   \
      | CPU_INTERRUPT_TGT_EXT_4)
 
-void cpu_interrupt(CPUOldState *s, int mask);
-void cpu_reset_interrupt(CPUOldState *env, int mask);
-
-void cpu_exit(CPUOldState *s);
-
-int qemu_cpu_has_work(CPUOldState *env);
-
 /* Breakpoint/watchpoint flags */
 #define BP_MEM_READ           0x01
 #define BP_MEM_WRITE          0x02
@@ -435,6 +419,10 @@ int qemu_cpu_has_work(CPUOldState *env);
 #define BP_WATCHPOINT_HIT     0x08
 #define BP_GDB                0x10
 #define BP_CPU                0x20
+
+// several functions below depend on cpu.h
+// cpu.h depends on CPU_INTERRUPT_* definitions (above)
+#include "cpu.h"
 
 int cpu_breakpoint_insert(CPUArchState *env, target_ulong pc, int flags,
                           CPUBreakpoint **breakpoint);
@@ -452,10 +440,11 @@ void cpu_watchpoint_remove_all(CPUArchState *env, int mask);
 #define SSTEP_NOIRQ   0x2  /* Do not use IRQ while single stepping */
 #define SSTEP_NOTIMER 0x4  /* Do not Timers while single stepping */
 
-void cpu_single_step(CPUOldState *env, int enabled);
-void cpu_reset(CPUOldState *s);
-int cpu_is_stopped(CPUOldState *env);
-void run_on_cpu(CPUOldState *env, void (*func)(void *data), void *data);
+void QEMU_NORETURN cpu_abort(CPUArchState *env, const char *fmt, ...)
+GCC_FMT_ATTR(2, 3);
+
+void cpu_single_step(CPUState *cpu, int enabled);
+
 
 /* IO ports API */
 #include "exec/ioport.h"
@@ -463,7 +452,7 @@ void run_on_cpu(CPUOldState *env, void (*func)(void *data), void *data);
 /* Return the physical page corresponding to a virtual one. Use it
    only for debugging because no protection checks are done. Return -1
    if no page found. */
-hwaddr cpu_get_phys_page_debug(CPUOldState *env, target_ulong addr);
+hwaddr cpu_get_phys_page_debug(CPUArchState *env, target_ulong addr);
 
 /* memory API */
 
@@ -479,15 +468,24 @@ typedef struct RAMBlock {
     ram_addr_t length;
     uint32_t flags;
     char idstr[256];
-    QLIST_ENTRY(RAMBlock) next;
-#if defined(__linux__) && !defined(TARGET_S390X)
+    /* Reads can take either the iothread or the ramlist lock.
+     * Writes must take both locks.
+     */
+    QTAILQ_ENTRY(RAMBlock) next;
     int fd;
-#endif
 } RAMBlock;
 
+#define DIRTY_MEMORY_VGA       0
+#define DIRTY_MEMORY_CODE      1
+#define DIRTY_MEMORY_MIGRATION 2
+#define DIRTY_MEMORY_NUM       3        /* num of dirty bits */
+
 typedef struct RAMList {
-    uint8_t *phys_dirty;
-    QLIST_HEAD(ram, RAMBlock) blocks;
+    QemuMutex mutex;
+    unsigned long *dirty_memory[DIRTY_MEMORY_NUM];
+    RAMBlock *mru_block;
+    QTAILQ_HEAD(ram, RAMBlock) blocks;
+    uint32_t version;
 } RAMList;
 extern RAMList ram_list;
 
@@ -510,59 +508,7 @@ extern int mem_prealloc;
 #define CODE_DIRTY_FLAG      0x02
 #define MIGRATION_DIRTY_FLAG 0x08
 
-/* read dirty bit (return 0 or 1) */
-static inline int cpu_physical_memory_is_dirty(ram_addr_t addr)
-{
-    return ram_list.phys_dirty[addr >> TARGET_PAGE_BITS] == 0xff;
-}
-
-static inline int cpu_physical_memory_get_dirty_flags(ram_addr_t addr)
-{
-    return ram_list.phys_dirty[addr >> TARGET_PAGE_BITS];
-}
-
-static inline int cpu_physical_memory_get_dirty(ram_addr_t addr,
-                                                int dirty_flags)
-{
-    return ram_list.phys_dirty[addr >> TARGET_PAGE_BITS] & dirty_flags;
-}
-
-static inline void cpu_physical_memory_set_dirty(ram_addr_t addr)
-{
-    ram_list.phys_dirty[addr >> TARGET_PAGE_BITS] = 0xff;
-}
-
-static inline int cpu_physical_memory_set_dirty_flags(ram_addr_t addr,
-                                                      int dirty_flags)
-{
-    return ram_list.phys_dirty[addr >> TARGET_PAGE_BITS] |= dirty_flags;
-}
-
-static inline void cpu_physical_memory_mask_dirty_range(ram_addr_t start,
-                                                        int length,
-                                                        int dirty_flags)
-{
-    int i, mask, len;
-    uint8_t *p;
-
-    len = length >> TARGET_PAGE_BITS;
-    mask = ~dirty_flags;
-    p = ram_list.phys_dirty + (start >> TARGET_PAGE_BITS);
-    for (i = 0; i < len; i++) {
-        p[i] &= mask;
-    }
-}
-
-void cpu_physical_memory_reset_dirty(ram_addr_t start, ram_addr_t end,
-                                     int dirty_flags);
-void cpu_tlb_update_dirty(CPUOldState *env);
-
-int cpu_physical_memory_set_dirty_tracking(int enable);
-
-int cpu_physical_memory_get_dirty_tracking(void);
-
-int cpu_physical_sync_dirty_bitmap(hwaddr start_addr,
-                                   hwaddr end_addr);
+void cpu_tlb_update_dirty(CPUArchState *env);
 
 void dump_exec_info(FILE *f,
                     int (*cpu_fprintf)(FILE *f, const char *fmt, ...));
@@ -578,7 +524,6 @@ void qemu_unregister_coalesced_mmio(hwaddr addr, ram_addr_t size);
 
 void qemu_flush_coalesced_mmio_buffer(void);
 
-
 /* profiling */
 #ifdef CONFIG_PROFILER
 static inline int64_t profile_getclock(void)
@@ -591,10 +536,10 @@ extern int64_t tlb_flush_time;
 extern int64_t dev_time;
 #endif
 
-int cpu_memory_rw_debug(CPUOldState *env, target_ulong addr,
+int cpu_memory_rw_debug(CPUState *cpu, target_ulong addr,
                         void *buf, int len, int is_write);
 
-void cpu_inject_x86_mce(CPUOldState *cenv, int bank, uint64_t status,
+void cpu_inject_x86_mce(CPUArchState *cenv, int bank, uint64_t status,
                         uint64_t mcg_status, uint64_t addr, uint64_t misc);
 
 #endif /* CPU_ALL_H */

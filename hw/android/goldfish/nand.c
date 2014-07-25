@@ -11,6 +11,7 @@
 */
 #include "migration/qemu-file.h"
 #include "nand_reg.h"
+#include "hw/android/goldfish/device.h"
 #include "hw/android/goldfish/nand.h"
 #include "hw/android/goldfish/vmem.h"
 #include "hw/hw.h"
@@ -127,7 +128,7 @@ typedef struct {
     uint32_t addr_low;
     uint32_t addr_high;
     uint32_t transfer_size;
-    uint32_t data;
+    uint64_t data;
     uint32_t batch_addr_low;
     uint32_t batch_addr_high;
     uint32_t result;
@@ -138,7 +139,8 @@ typedef struct {
  * 2: saving actual disk contents as well
  * 3: use the correct data length and truncate to avoid padding.
  */
-#define  NAND_DEV_STATE_SAVE_VERSION  4
+#define  NAND_DEV_STATE_SAVE_VERSION  5
+#define  NAND_DEV_STATE_SAVE_VERSION_LEGACY  4
 
 #define  QFIELD_STRUCT  nand_dev_controller_state
 QFIELD_BEGIN(nand_dev_controller_state_fields)
@@ -146,12 +148,26 @@ QFIELD_BEGIN(nand_dev_controller_state_fields)
     QFIELD_INT32(addr_low),
     QFIELD_INT32(addr_high),
     QFIELD_INT32(transfer_size),
-    QFIELD_INT32(data),
+    QFIELD_INT64(data),
     QFIELD_INT32(batch_addr_low),
     QFIELD_INT32(batch_addr_high),
     QFIELD_INT32(result),
 QFIELD_END
 
+// Legacy encoding support, split the structure in two halves, with
+// a 32-bit |data| field in the middle to be loaded explictly.
+QFIELD_BEGIN(nand_dev_controller_state_legacy_1_fields)
+    QFIELD_INT32(dev),
+    QFIELD_INT32(addr_low),
+    QFIELD_INT32(addr_high),
+    QFIELD_INT32(transfer_size),
+QFIELD_END
+
+QFIELD_BEGIN(nand_dev_controller_state_legacy_2_fields)
+    QFIELD_INT32(batch_addr_low),
+    QFIELD_INT32(batch_addr_high),
+    QFIELD_INT32(result),
+QFIELD_END
 
 /* EINTR-proof read - due to SIGALRM in use elsewhere */
 static int  do_read(int  fd, void*  buf, size_t  size)
@@ -351,18 +367,24 @@ static int   nand_dev_controller_state_load(QEMUFile *f, void  *opaque, int  ver
     nand_dev_controller_state*  s = opaque;
     int ret;
 
-    if (version_id != NAND_DEV_STATE_SAVE_VERSION)
-        return -1;
-
-    if ((ret = qemu_get_struct(f, nand_dev_controller_state_fields, s)))
-        return ret;
-    if ((ret = nand_dev_load_disks(f)))
-        return ret;
-
-    return 0;
+    if (version_id == NAND_DEV_STATE_SAVE_VERSION) {
+        ret = qemu_get_struct(f, nand_dev_controller_state_fields, s);
+    } else if (version_id == NAND_DEV_STATE_SAVE_VERSION_LEGACY) {
+        ret = qemu_get_struct(f, nand_dev_controller_state_legacy_1_fields, s);
+        if (!ret) {
+            // Read 32-bit data field directly.
+            s->data = (uint64_t)qemu_get_be32(f);
+            ret = qemu_get_struct(
+                    f, nand_dev_controller_state_legacy_2_fields, s);
+        }
+    } else {
+        // Invalid encoding.
+        ret = -1;
+    }
+    return ret ? ret : nand_dev_load_disks(f);
 }
 
-static uint32_t nand_dev_read_file(nand_dev *dev, uint32_t data, uint64_t addr, uint32_t total_len)
+static uint32_t nand_dev_read_file(nand_dev *dev, target_ulong data, uint64_t addr, uint32_t total_len)
 {
     uint32_t len = total_len;
     size_t read_len = dev->erase_size;
@@ -382,14 +404,14 @@ static uint32_t nand_dev_read_file(nand_dev *dev, uint32_t data, uint64_t addr, 
         if(!eof) {
             read_len = do_read(dev->fd, dev->data, read_len);
         }
-        safe_memory_rw_debug(cpu_single_env, data, dev->data, read_len, 1);
+        safe_memory_rw_debug(current_cpu, data, dev->data, read_len, 1);
         data += read_len;
         len -= read_len;
     }
     return total_len;
 }
 
-static uint32_t nand_dev_write_file(nand_dev *dev, uint32_t data, uint64_t addr, uint32_t total_len)
+static uint32_t nand_dev_write_file(nand_dev *dev, target_ulong data, uint64_t addr, uint32_t total_len)
 {
     uint32_t len = total_len;
     size_t write_len = dev->erase_size;
@@ -401,7 +423,7 @@ static uint32_t nand_dev_write_file(nand_dev *dev, uint32_t data, uint64_t addr,
     while(len > 0) {
         if(len < write_len)
             write_len = len;
-        safe_memory_rw_debug(cpu_single_env, data, dev->data, write_len, 0);
+        safe_memory_rw_debug(current_cpu, data, dev->data, write_len, 0);
         ret = do_write(dev->fd, dev->data, write_len);
         if(ret < write_len) {
             XLOG("nand_dev_write_file, write failed: %s\n", strerror(errno));
@@ -456,14 +478,23 @@ uint32_t nand_dev_do_cmd(nand_dev_controller_state *s, uint32_t cmd)
     if (cmd == NAND_CMD_WRITE_BATCH || cmd == NAND_CMD_READ_BATCH ||
         cmd == NAND_CMD_ERASE_BATCH) {
         struct batch_data bd;
+        struct batch_data_64 bd64;
         uint64_t bd_addr = ((uint64_t)s->batch_addr_high << 32) | s->batch_addr_low;
-
-        cpu_physical_memory_read(bd_addr, (void*)&bd, sizeof(struct batch_data));
-        s->dev = bd.dev;
-        s->addr_low = bd.addr_low;
-        s->addr_high = bd.addr_high;
-        s->transfer_size = bd.transfer_size;
-        s->data = bd.data;
+        if (goldfish_guest_is_64bit()) {
+            cpu_physical_memory_read(bd_addr, (void*)&bd64, sizeof(struct batch_data_64));
+            s->dev = bd64.dev;
+            s->addr_low = bd64.addr_low;
+            s->addr_high = bd64.addr_high;
+            s->transfer_size = bd64.transfer_size;
+            s->data = bd64.data;
+        } else {
+            cpu_physical_memory_read(bd_addr, (void*)&bd, sizeof(struct batch_data));
+            s->dev = bd.dev;
+            s->addr_low = bd.addr_low;
+            s->addr_high = bd.addr_high;
+            s->transfer_size = bd.transfer_size;
+            s->data = bd.data;
+        }
     }
     addr = s->addr_low | ((uint64_t)s->addr_high << 32);
     size = s->transfer_size;
@@ -475,7 +506,7 @@ uint32_t nand_dev_do_cmd(nand_dev_controller_state *s, uint32_t cmd)
     case NAND_CMD_GET_DEV_NAME:
         if(size > dev->devname_len)
             size = dev->devname_len;
-        safe_memory_rw_debug(cpu_single_env, s->data, (uint8_t*)dev->devname, size, 1);
+        safe_memory_rw_debug(current_cpu, s->data, (uint8_t*)dev->devname, size, 1);
         return size;
     case NAND_CMD_READ_BATCH:
     case NAND_CMD_READ:
@@ -485,7 +516,7 @@ uint32_t nand_dev_do_cmd(nand_dev_controller_state *s, uint32_t cmd)
             size = dev->max_size - addr;
         if(dev->fd >= 0)
             return nand_dev_read_file(dev, s->data, addr, size);
-        safe_memory_rw_debug(cpu_single_env,s->data, &dev->data[addr], size, 1);
+        safe_memory_rw_debug(current_cpu, s->data, &dev->data[addr], size, 1);
         return size;
     case NAND_CMD_WRITE_BATCH:
     case NAND_CMD_WRITE:
@@ -497,7 +528,7 @@ uint32_t nand_dev_do_cmd(nand_dev_controller_state *s, uint32_t cmd)
             size = dev->max_size - addr;
         if(dev->fd >= 0)
             return nand_dev_write_file(dev, s->data, addr, size);
-        safe_memory_rw_debug(cpu_single_env,s->data, &dev->data[addr], size, 0);
+        safe_memory_rw_debug(current_cpu, s->data, &dev->data[addr], size, 0);
         return size;
     case NAND_CMD_ERASE_BATCH:
     case NAND_CMD_ERASE:
@@ -551,20 +582,31 @@ static void nand_dev_write(void *opaque, hwaddr offset, uint32_t value)
         s->transfer_size = value;
         break;
     case NAND_DATA:
-        s->data = value;
+        uint64_set_low(&s->data, value);
+        break;
+    case NAND_DATA_HIGH:
+        uint64_set_high(&s->data, value);
         break;
     case NAND_COMMAND:
         s->result = nand_dev_do_cmd(s, value);
         if (value == NAND_CMD_WRITE_BATCH || value == NAND_CMD_READ_BATCH ||
             value == NAND_CMD_ERASE_BATCH) {
             struct batch_data bd;
+            struct batch_data_64 bd64;
             uint64_t bd_addr = ((uint64_t)s->batch_addr_high << 32) | s->batch_addr_low;
-            bd.result = s->result;
-            cpu_physical_memory_write(bd_addr, (void*)&bd, sizeof(struct batch_data));
+            if (goldfish_guest_is_64bit()) {
+                bd64.result = s->result;
+                cpu_physical_memory_write(bd_addr, (void*)&bd64, sizeof(struct batch_data_64));
+            } else {
+                bd.result = s->result;
+                cpu_physical_memory_write(bd_addr, (void*)&bd, sizeof(struct batch_data));
+            }
         }
         break;
     default:
-        cpu_abort(cpu_single_env, "nand_dev_write: Bad offset %x\n", offset);
+        cpu_abort(cpu_single_env,
+                  "nand_dev_write: Bad offset %" HWADDR_PRIx "\n",
+                  offset);
         break;
     }
 }
@@ -612,7 +654,9 @@ static uint32_t nand_dev_read(void *opaque, hwaddr offset)
         return (uint32_t)(dev->max_size >> 32);
 
     default:
-        cpu_abort(cpu_single_env, "nand_dev_read: Bad offset %x\n", offset);
+        cpu_abort(cpu_single_env,
+                  "nand_dev_read: Bad offset %" HWADDR_PRIx "\n",
+                  offset);
         return 0;
     }
 }
@@ -641,8 +685,13 @@ void nand_dev_init(uint32_t base)
     cpu_register_physical_memory(base, 0x00000fff, iomemtype);
     s->base = base;
 
-    register_savevm( "nand_dev", instance_id++, NAND_DEV_STATE_SAVE_VERSION,
-                      nand_dev_controller_state_save, nand_dev_controller_state_load, s);
+    register_savevm(NULL,
+                    "nand_dev",
+                    instance_id++,
+                    NAND_DEV_STATE_SAVE_VERSION,
+                    nand_dev_controller_state_save,
+                    nand_dev_controller_state_load,
+                    s);
 }
 
 static int arg_match(const char *a, const char *b, size_t b_len)

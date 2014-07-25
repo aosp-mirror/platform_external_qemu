@@ -16,6 +16,7 @@
 # It contains common definitions.
 #
 PROGNAME=`basename $0`
+PROGDIR=`dirname $0`
 
 ## Logging support
 ##
@@ -203,20 +204,28 @@ enable_linux_mingw ()
         echo "Sorry, but mingw compilation is only supported on Linux !"
         exit 1
     fi
-    # Do we have the binaries installed
-    log "Mingw      : Checking for mingw32 installation"
-    MINGW32_PREFIX=i586-mingw32msvc
-    find_program MINGW32_CC $MINGW32_PREFIX-gcc
-    if [ -z "$MINGW32_CC" ] ; then
-        echo "ERROR: It looks like $MINGW32_PREFIX-gcc is not in your path"
-        echo "Please install the mingw32 package !"
+    # Do we have our prebuilt mingw64 toolchain?
+    log "Mingw      : Looking for prebuilt mingw64 toolchain."
+    MINGW_DIR=$PROGDIR/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8
+    MINGW_CC=
+    if [ -d "$MINGW_DIR" ]; then
+        MINGW_PREFIX=$MINGW_DIR/bin/x86_64-w64-mingw32
+        find_program MINGW_CC "$MINGW_PREFIX-gcc"
+    fi
+    if [ -z "$MINGW_CC" ]; then
+        log "Mingw      : Looking for mingw64 toolchain."
+        MINGW_PREFIX=x86_64-w64-mingw32
+        find_program MINGW_CC $MINGW_PREFIX-gcc
+    fi
+    if [ -z "$MINGW_CC" ]; then
+        echo "ERROR: It looks like no Mingw64 toolchain is available!"
+        echo "Please install x86_64-w64-mingw32 package !"
         exit 1
     fi
-    log2 "Mingw      : Found $MINGW32_CC"
-    CC=$MINGW32_CC
-    LD=$MINGW32_CC
-    AR=$MINGW32_PREFIX-ar
-    FORCE_32BIT=no
+    log2 "Mingw      : Found $MINGW_CC"
+    CC=$MINGW_CC
+    LD=$MINGW_CC
+    AR=$MINGW_PREFIX-ar
 }
 
 # Cygwin is normally not supported, unless you call this function

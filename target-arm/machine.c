@@ -48,9 +48,12 @@ void cpu_save(QEMUFile *f, void *opaque)
     qemu_put_be32(f, env->cp15.c7_par);
     qemu_put_be32(f, env->cp15.c9_insn);
     qemu_put_be32(f, env->cp15.c9_data);
-    qemu_put_be32(f, env->cp15.c9_pmcr_data);
-    qemu_put_be32(f, env->cp15.c9_useren);
-    qemu_put_be32(f, env->cp15.c9_inten);
+    qemu_put_be32(f, env->cp15.c9_pmcr);
+    qemu_put_be32(f, env->cp15.c9_pmcnten);
+    qemu_put_be32(f, env->cp15.c9_pmovsr);
+    qemu_put_be32(f, env->cp15.c9_pmxevtyper);
+    qemu_put_be32(f, env->cp15.c9_pmuserenr);
+    qemu_put_be32(f, env->cp15.c9_pminten);
     qemu_put_be32(f, env->cp15.c13_fcse);
     qemu_put_be32(f, env->cp15.c13_context);
     qemu_put_be32(f, env->cp15.c13_tls1);
@@ -111,13 +114,15 @@ void cpu_save(QEMUFile *f, void *opaque)
     }
 }
 
+#define CPU_SAVE_VERSION_LEGACY  3
+
 int cpu_load(QEMUFile *f, void *opaque, int version_id)
 {
     CPUARMState *env = (CPUARMState *)opaque;
     int i;
     uint32_t val;
 
-    if (version_id != CPU_SAVE_VERSION)
+    if (version_id != CPU_SAVE_VERSION && version_id != CPU_SAVE_VERSION_LEGACY)
         return -EINVAL;
 
     for (i = 0; i < 16; i++) {
@@ -164,9 +169,18 @@ int cpu_load(QEMUFile *f, void *opaque, int version_id)
     env->cp15.c7_par = qemu_get_be32(f);
     env->cp15.c9_insn = qemu_get_be32(f);
     env->cp15.c9_data = qemu_get_be32(f);
-    env->cp15.c9_pmcr_data = qemu_get_be32(f);
-    env->cp15.c9_useren = qemu_get_be32(f);
-    env->cp15.c9_inten = qemu_get_be32(f);
+    if (version_id == CPU_SAVE_VERSION_LEGACY) {
+        (void)qemu_get_be32(f);
+        (void)qemu_get_be32(f);
+        (void)qemu_get_be32(f);
+    } else {
+        env->cp15.c9_pmcr = qemu_get_be32(f);
+        env->cp15.c9_pmcnten = qemu_get_be32(f);
+        env->cp15.c9_pmovsr = qemu_get_be32(f);
+        env->cp15.c9_pmxevtyper = qemu_get_be32(f);
+        env->cp15.c9_pmuserenr = qemu_get_be32(f);
+        env->cp15.c9_pminten = qemu_get_be32(f);
+    }
     env->cp15.c13_fcse = qemu_get_be32(f);
     env->cp15.c13_context = qemu_get_be32(f);
     env->cp15.c13_tls1 = qemu_get_be32(f);

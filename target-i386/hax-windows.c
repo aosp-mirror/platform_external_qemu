@@ -11,6 +11,7 @@
 ** GNU General Public License for more details.
 */
 
+#include "exec/ram_addr.h"
 #include "target-i386/hax-i386.h"
 
 /*
@@ -87,8 +88,9 @@ int hax_populate_ram(uint64_t va, uint32_t size)
       (LPOVERLAPPED) NULL);
 
     if (!ret) {
-        dprint("Failed to allocate %x memory\n", size);
-        return ret;
+        dprint("HAX: Failed to allocate %x memory (address %llx)\n", 
+               size, (unsigned long long)va);
+        return -1;
     }
 
     return 0;
@@ -398,14 +400,14 @@ int hax_vcpu_run(struct hax_vcpu_state* vcpu)
         return 0;
 }
 
-int hax_sync_fpu(CPUX86State *env, struct fx_layout *fl, int set)
+int hax_sync_fpu(CPUState *cpu, struct fx_layout *fl, int set)
 {
     int ret;
     hax_fd fd;
     HANDLE hDeviceVCPU;
     DWORD dSize = 0;
 
-    fd = hax_vcpu_get_fd(env);
+    fd = hax_vcpu_get_fd(cpu);
     if (hax_invalid_fd(fd))
         return -1;
 
@@ -431,14 +433,14 @@ int hax_sync_fpu(CPUX86State *env, struct fx_layout *fl, int set)
         return 0;
 }
 
-int hax_sync_msr(CPUX86State *env, struct hax_msr_data *msrs, int set)
+int hax_sync_msr(CPUState *cpu, struct hax_msr_data *msrs, int set)
 {
     int ret;
     hax_fd fd;
     HANDLE hDeviceVCPU;
     DWORD dSize = 0;
 
-    fd = hax_vcpu_get_fd(env);
+    fd = hax_vcpu_get_fd(cpu);
     if (hax_invalid_fd(fd))
         return -1;
     hDeviceVCPU = fd;
@@ -463,14 +465,14 @@ int hax_sync_msr(CPUX86State *env, struct hax_msr_data *msrs, int set)
         return 0;
 }
 
-int hax_sync_vcpu_state(CPUX86State *env, struct vcpu_state_t *state, int set)
+int hax_sync_vcpu_state(CPUState *cpu, struct vcpu_state_t *state, int set)
 {
     int ret;
     hax_fd fd;
     HANDLE hDeviceVCPU;
     DWORD dSize;
 
-    fd = hax_vcpu_get_fd(env);
+    fd = hax_vcpu_get_fd(cpu);
     if (hax_invalid_fd(fd))
         return -1;
 
@@ -496,14 +498,14 @@ int hax_sync_vcpu_state(CPUX86State *env, struct vcpu_state_t *state, int set)
         return 0;
 }
 
-int hax_inject_interrupt(CPUX86State *env, int vector)
+int hax_inject_interrupt(CPUState *cpu, int vector)
 {
     int ret;
     hax_fd fd;
     HANDLE hDeviceVCPU;
     DWORD dSize;
 
-    fd = hax_vcpu_get_fd(env);
+    fd = hax_vcpu_get_fd(cpu);
     if (hax_invalid_fd(fd))
         return -1;
 

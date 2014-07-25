@@ -83,7 +83,9 @@ static uint32_t goldfish_timer_read(void *opaque, hwaddr offset)
         case TIMER_TIME_HIGH:
             return s->now_ns >> 32;
         default:
-            cpu_abort (cpu_single_env, "goldfish_timer_read: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_timer_read: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
             return 0;
     }
 }
@@ -115,7 +117,9 @@ static void goldfish_timer_write(void *opaque, hwaddr offset, uint32_t value_ns)
             goldfish_device_set_irq(&s->dev, 0, 0);
             break;
         default:
-            cpu_abort (cpu_single_env, "goldfish_timer_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_timer_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
     }
 }
 
@@ -167,7 +171,9 @@ static uint32_t goldfish_rtc_read(void *opaque, hwaddr offset)
         case 0x4:
             return s->now >> 32;
         default:
-            cpu_abort (cpu_single_env, "goldfish_rtc_read: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_rtc_read: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
             return 0;
     }
 }
@@ -186,7 +192,9 @@ static void goldfish_rtc_write(void *opaque, hwaddr offset, uint32_t value)
             goldfish_device_set_irq(&s->dev, 0, 0);
             break;
         default:
-            cpu_abort (cpu_single_env, "goldfish_rtc_write: Bad offset %x\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_rtc_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
     }
 }
 
@@ -238,11 +246,21 @@ void goldfish_timer_and_rtc_init(uint32_t timerbase, int timerirq)
     timer_state.dev.irq = timerirq;
     timer_state.timer = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, goldfish_timer_tick, &timer_state);
     goldfish_device_add(&timer_state.dev, goldfish_timer_readfn, goldfish_timer_writefn, &timer_state);
-    register_savevm( "goldfish_timer", 0, GOLDFISH_TIMER_SAVE_VERSION,
-                     goldfish_timer_save, goldfish_timer_load, &timer_state);
+    register_savevm(NULL,
+                    "goldfish_timer",
+                    0,
+                    GOLDFISH_TIMER_SAVE_VERSION,
+                    goldfish_timer_save,
+                    goldfish_timer_load,
+                    &timer_state);
 
     goldfish_device_add(&rtc_state.dev, goldfish_rtc_readfn, goldfish_rtc_writefn, &rtc_state);
-    register_savevm( "goldfish_rtc", 0, GOLDFISH_RTC_SAVE_VERSION,
-                     goldfish_rtc_save, goldfish_rtc_load, &rtc_state);
+    register_savevm(NULL,
+                    "goldfish_rtc",
+                    0,
+                    GOLDFISH_RTC_SAVE_VERSION,
+                    goldfish_rtc_save,
+                    goldfish_rtc_load,
+                    &rtc_state);
 }
 

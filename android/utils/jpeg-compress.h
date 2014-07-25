@@ -12,6 +12,10 @@
 #ifndef _ANDROID_UTILS_JPEG_COMPRESS_H
 #define _ANDROID_UTILS_JPEG_COMPRESS_H
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /*
  * Contains declaration of utility routines that compress an RGB bitmap into
  * a JPEG image.
@@ -95,5 +99,7 @@ extern void jpeg_compressor_compress_fb(AJPEGDesc* dsc,
                                         const uint8_t* fb,
                                         int jpeg_quality,
                                         int ydir);
+
+ANDROID_END_HEADER
 
 #endif  /* _ANDROID_UTILS_JPEG_COMPRESS_H */

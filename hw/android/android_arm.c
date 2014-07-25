@@ -19,12 +19,10 @@
 #include "android/globals.h"
 #include "audio/audio.h"
 #include "hw/arm/arm.h"
+#include "exec/ram_addr.h"
 #include "ui/console.h"
 #include "sysemu/blockdev.h"
 #include "hw/android/goldfish/pipe.h"
-#ifdef CONFIG_MEMCHECK
-#include "memcheck/memcheck_api.h"
-#endif  // CONFIG_MEMCHECK
 
 #include "android/utils/debug.h"
 
@@ -33,8 +31,6 @@
 #define ARM_CPU_SAVE_VERSION  1
 
 char* audio_input_source = NULL;
-
-void goldfish_memlog_init(uint32_t base);
 
 static struct goldfish_device event0_device = {
     .name = "goldfish_events",
@@ -51,14 +47,6 @@ static struct goldfish_device nand_device = {
 
 /* Board init.  */
 
-#define TEST_SWITCH 1
-#if TEST_SWITCH
-uint32_t switch_test_write(void *opaque, uint32_t state)
-{
-    goldfish_switch_set_state(opaque, state);
-    return state;
-}
-#endif
 static void android_arm_init_(ram_addr_t ram_size,
     const char *boot_device,
     const char *kernel_filename,
@@ -127,8 +115,6 @@ static void android_arm_init_(ram_addr_t ram_size,
         }
     }
 
-    goldfish_memlog_init(0xff006000);
-
     goldfish_battery_init(android_hw->hw_battery);
 
     goldfish_add_device_no_io(&event0_device);
@@ -138,22 +124,10 @@ static void android_arm_init_(ram_addr_t ram_size,
     goldfish_add_device_no_io(&nand_device);
     nand_dev_init(nand_device.base);
 #endif
-#ifdef CONFIG_MEMCHECK
-    if (memcheck_enabled) {
-        trace_dev_init();
-    }
-#endif  // CONFIG_MEMCHECK
 
-    pipe_dev_init();
-
-#if TEST_SWITCH
-    {
-        void *sw;
-        sw = goldfish_switch_add("test", NULL, NULL, 0);
-        goldfish_switch_set_state(sw, 1);
-        goldfish_switch_add("test2", switch_test_write, sw, 1);
-    }
-#endif
+    bool newDeviceNaming =
+            (androidHwConfig_getKernelDeviceNaming(android_hw) >= 1);
+    pipe_dev_init(newDeviceNaming);
 
     memset(&info, 0, sizeof info);
     info.ram_size        = ram_size;
@@ -161,6 +135,7 @@ static void android_arm_init_(ram_addr_t ram_size,
     info.kernel_cmdline  = kernel_cmdline;
     info.initrd_filename = initrd_filename;
     info.nb_cpus         = 1;
+    info.is_linux        = 1;
     info.board_id        = 1441;
 
     arm_load_kernel(env, &info);

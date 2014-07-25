@@ -81,19 +81,6 @@ static inline void cpu_register_physical_memory(hwaddr start_addr,
 }
 
 ram_addr_t cpu_get_physical_page_desc(hwaddr addr);
-ram_addr_t qemu_ram_alloc_from_ptr(DeviceState *dev, const char *name,
-                        ram_addr_t size, void *host);
-ram_addr_t qemu_ram_alloc(DeviceState *dev, const char *name, ram_addr_t size);
-void qemu_ram_free(ram_addr_t addr);
-void qemu_ram_remap(ram_addr_t addr, ram_addr_t length);
-/* This should only be used for ram local to a device.  */
-void *qemu_get_ram_ptr(ram_addr_t addr);
-/* Same but slower, to use for migration, where the order of
- * RAMBlocks must not change. */
-void *qemu_safe_ram_ptr(ram_addr_t addr);
-/* This should not be used by devices.  */
-int qemu_ram_addr_from_host(void *ptr, ram_addr_t *ram_addr);
-ram_addr_t qemu_ram_addr_from_host_nofail(void *ptr);
 
 int cpu_register_io_memory(CPUReadMemoryFunc * const *mem_read,
                            CPUWriteMemoryFunc * const *mem_write,
@@ -118,18 +105,32 @@ void *cpu_physical_memory_map(hwaddr addr,
 void cpu_physical_memory_unmap(void *buffer, hwaddr len,
                                int is_write, hwaddr access_len);
 void *cpu_register_map_client(void *opaque, void (*callback)(void *opaque));
-void cpu_unregister_map_client(void *cookie);
 
 uint32_t ldub_phys(hwaddr addr);
+uint32_t lduw_le_phys(hwaddr addr);
+uint32_t lduw_be_phys(hwaddr addr);
+uint32_t ldl_le_phys(hwaddr addr);
+uint32_t ldl_be_phys(hwaddr addr);
+uint64_t ldq_le_phys(hwaddr addr);
+uint64_t ldq_be_phys(hwaddr addr);
+void stb_phys(hwaddr addr, uint32_t val);
+void stw_le_phys(hwaddr addr, uint32_t val);
+void stw_be_phys(hwaddr addr, uint32_t val);
+void stl_le_phys(hwaddr addr, uint32_t val);
+void stl_be_phys(hwaddr addr, uint32_t val);
+void stq_le_phys(hwaddr addr, uint64_t val);
+void stq_be_phys(hwaddr addr, uint64_t val);
+
+#ifdef NEED_CPU_H
 uint32_t lduw_phys(hwaddr addr);
 uint32_t ldl_phys(hwaddr addr);
 uint64_t ldq_phys(hwaddr addr);
 void stl_phys_notdirty(hwaddr addr, uint32_t val);
 void stq_phys_notdirty(hwaddr addr, uint64_t val);
-void stb_phys(hwaddr addr, uint32_t val);
 void stw_phys(hwaddr addr, uint32_t val);
 void stl_phys(hwaddr addr, uint32_t val);
 void stq_phys(hwaddr addr, uint64_t val);
+#endif
 
 void cpu_physical_memory_write_rom(hwaddr addr,
                                    const void *buf, int len);

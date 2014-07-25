@@ -57,11 +57,17 @@ gen-hw-config-defs = \
 common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
 
-EMULATOR_COMMON_CFLAGS :=
+EMULATOR_COMMON_CFLAGS := -Werror=implicit-function-declaration
 
 # Needed by everything about the host
 EMULATOR_COMMON_CFLAGS += \
-    -I$(LOCAL_PATH)/android/config/$(QEMU_HOST_TAG)
+    -I$(LOCAL_PATH)/android/config/$(QEMU_HOST_TAG) \
+    -I$(LOCAL_PATH)/include
+
+# Need to include "qapi-types.h" and other auto-generated files from
+# android-configure.sh
+EMULATOR_COMMON_CFLAGS += -I$(LOCAL_PATH)/qapi-auto-generated
+
 
 # add the build ID to the default macro definitions
 ifeq ($(BUILD_STANDALONE_EMULATOR),)
@@ -88,11 +94,7 @@ endif
 ###########################################################
 # Zlib sources
 #
-ZLIB_DIR := distrib/zlib-1.2.8
-include $(LOCAL_PATH)/$(ZLIB_DIR)/sources.make
-EMULATOR_COMMON_CFLAGS += -I$(LOCAL_PATH)/$(ZLIB_DIR)
-
-common_LOCAL_SRC_FILES += $(ZLIB_SOURCES)
+EMULATOR_COMMON_CFLAGS += -I$(ZLIB_INCLUDES)
 
 ###########################################################
 # GLib sources
@@ -107,6 +109,7 @@ common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 # Android utility functions
 #
 common_LOCAL_SRC_FILES += \
+	android/android-constants.c \
 	android/async-console.c \
 	android/async-utils.c \
 	android/charmap.c \
@@ -128,6 +131,10 @@ common_LOCAL_SRC_FILES += \
 	android/base/StringView.cpp \
 	android/emulation/CpuAccelerator.cpp \
 	android/filesystems/ext4_utils.cpp \
+	android/filesystems/fstab_parser.cpp \
+	android/filesystems/partition_types.cpp \
+	android/filesystems/ramdisk_extractor.cpp \
+	android/kernel/kernel_utils.cpp \
 	android/looper-generic.cpp \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
@@ -137,6 +144,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/eintr_wrapper.c \
 	android/utils/filelock.c \
 	android/utils/file_data.c \
+	android/utils/format.cpp \
 	android/utils/host_bitness.c \
 	android/utils/ini.c \
 	android/utils/intmap.c \
@@ -149,13 +157,16 @@ common_LOCAL_SRC_FILES += \
 	android/utils/reflist.c \
 	android/utils/refset.c \
 	android/utils/stralloc.c \
+	android/utils/string.cpp \
 	android/utils/system.c \
 	android/utils/tempfile.c \
+	android/utils/uncompress.cpp \
 	android/utils/vector.c \
 	android/utils/win32_cmdline_quote.c \
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
+common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
 
 ## one for 32-bit
 $(call start-emulator-library, emulator-common)
@@ -204,9 +215,9 @@ common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
 BUILD_SDL_FROM_SOURCES := true
 
 # On linux-x86, using the prebuilts avoid installing all the X11
-# development packages on our build servers.
-#
-ifeq ($(QEMU_HOST_TAG),linux-x86)
+# development packages on our build servers. Note: When building 64-bit
+# host binaries, don't use 32-bit SDL prebuilts.
+ifeq ($(strip $(QEMU_HOST_TAG)$(HOST_IS_64_BIT)),linux-x86)
     BUILD_SDL_FROM_SOURCES := false
 endif
 
@@ -411,8 +422,6 @@ common_LOCAL_CFLAGS += $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 CORE_MISC_SOURCES = \
     aio-android.c \
     async.c \
-    bt-host.c \
-    bt-vhci.c \
     iohandler.c \
     ioport.c \
     migration-dummy-android.c \
@@ -487,12 +496,9 @@ ifeq ($(HOST_ARCH),ppc)
 endif
 
 ifeq ($(HOST_OS),linux)
-    CORE_MISC_SOURCES += hw/usb/usb-linux.c \
-                         util/compatfd.c \
+    CORE_MISC_SOURCES += util/compatfd.c \
                          util/qemu-thread-posix.c \
                          android/camera/camera-capture-linux.c
-else
-    CORE_MISC_SOURCES += hw/usb/usb-dummy-android.c
 endif
 
 ifeq ($(HOST_OS),windows)
@@ -637,7 +643,6 @@ $(call end-emulator-library)
 BLOCK_SOURCES += \
     block.c \
     blockdev.c \
-    block/qcow.c \
     block/qcow2.c \
     block/qcow2-refcount.c \
     block/qcow2-snapshot.c \
@@ -693,52 +698,6 @@ $(call end-emulator-library)
 ##############################################################################
 ##############################################################################
 ###
-###  emulator-libelff: TARGET-INDEPENDENT ELF/DWARF PARSER
-###
-###  THESE ARE USED BY EVERYTHING EXCEPT 'emulator-ui', BUT WE CANNOT PUT
-###  THEM IN emulator-libqemu SINCE THE SOURCES ARE C++
-###
-
-common_LOCAL_CFLAGS =
-common_LOCAL_SRC_FILES =
-
-ELFF_CFLAGS := -I$(LOCAL_PATH)/elff
-ELFF_LDLIBS := -lstdc++
-
-ELFF_SOURCES := \
-    dwarf_cu.cc \
-    dwarf_die.cc \
-    dwarf_utils.cc \
-    elf_alloc.cc \
-    elf_file.cc \
-    elf_mapped_section.cc \
-    elff_api.cc \
-
-common_LOCAL_SRC_FILES += $(ELFF_SOURCES:%=elff/%)
-
-common_LOCAL_CFLAGS += \
-    -fno-exceptions \
-    $(ELFF_CFLAGS) \
-
-
-## one for 32-bit
-$(call start-emulator-library, emulator-libelff)
-LOCAL_CPP_EXTENSION := .cc
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-$(call end-emulator-library)
-
-
-$(call start-emulator64-library, emulator64-libelff)
-LOCAL_CPP_EXTENSION := .cc
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-$(call end-emulator-library)
-
-
-##############################################################################
-##############################################################################
-###
 ###  gen-hx-header: Generate headers from .hx file with "hxtool" script.
 ###
 ###  The 'hxtool' script is used to generate header files from an input
@@ -771,4 +730,3 @@ $$(QEMU_HEADER_H): $$(LOCAL_PATH)/$$1 $$(LOCAL_PATH)/hxtool
 LOCAL_GENERATED_SOURCES += $$(QEMU_HEADER_H)
 LOCAL_C_INCLUDES += $$(intermediates)
 endef
-

@@ -14,6 +14,8 @@
 #include "android/base/Log.h"
 #include "android/base/files/ScopedStdioFile.h"
 
+#include "make_ext4fs.h"
+
 #include <stdint.h>
 #include <string.h>
 
@@ -64,4 +66,13 @@ bool android_pathIsExt4PartitionImage(const char* path) {
 
     EXT4_LOG << "Not an Ext4 partition image: " << path;
     return false;
+}
+
+int android_createEmptyExt4Image(const char *filePath,
+                                 uint64_t size,
+                                 const char *mountpoint) {
+    int ret = ::make_ext4fs(filePath, size, mountpoint, NULL);
+    if (ret < 0)
+        EXT4_ERROR << "Failed to create ext4 image at: " << filePath;
+    return ret;
 }

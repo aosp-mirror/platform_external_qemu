@@ -14,6 +14,10 @@
 
 #include <stdint.h>
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /** TABULAR OUTPUT
  **
  ** prints a list of strings in row/column format
@@ -120,5 +124,7 @@ extern int get_token_value_alloc(const char* params, const char* name, char** va
  *  format was bad (i.e. value was not a decimal number).
  */
 extern int get_token_value_int(const char* params, const char* name, int* value);
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_MISC_H */

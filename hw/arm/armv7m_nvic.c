@@ -397,7 +397,7 @@ static void armv7m_nvic_init(SysBusDevice *dev)
     gic_init(&s->gic);
     cpu_register_physical_memory(0xe000e000, 0x1000, s->gic.iomemtype);
     s->systick.timer = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, systick_timer_tick, s);
-    register_savevm("armv7m_nvic", -1, 1, nvic_save, nvic_load, s);
+    register_savevm(NULL, "armv7m_nvic", -1, 1, nvic_save, nvic_load, s);
 }
 
 static void armv7m_nvic_register_devices(void)
