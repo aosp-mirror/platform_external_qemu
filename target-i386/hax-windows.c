@@ -11,6 +11,7 @@
 ** GNU General Public License for more details.
 */
 
+#include "exec/ram_addr.h"
 #include "target-i386/hax-i386.h"
 
 /*

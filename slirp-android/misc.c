@@ -6,7 +6,9 @@
  */
 
 #define WANT_SYS_IOCTL_H
-#include <slirp.h>
+#include "slirp.h"
+
+#include <unistd.h>
 
 u_int curtime, time_fasttimo, last_slowtimo, detach_time;
 u_int detach_wait = 600000;	/* 10 minutes */
@@ -300,7 +302,7 @@ fork_exec(struct socket *so, const char *ex, int do_pty)
 		dup2(s, 0);
 		dup2(s, 1);
 		dup2(s, 2);
-		for (s = getdtablesize() - 1; s >= 3; s--)
+		for (s = sysconf(_SC_OPEN_MAX) - 1; s >= 3; s--)
 		   close(s);
 
 		i = 0;
