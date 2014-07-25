@@ -340,6 +340,7 @@ emulator_getBackendSuffix(const char* targetArch)
         { "x86_64", "x86" },
         { "mips", "mips" },
         { "arm64", "arm" },
+        { "mips64", "mips" },
         // Add more if needed here.
     };
     size_t n;
