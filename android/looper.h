@@ -12,10 +12,14 @@
 #ifndef ANDROID_LOOPER_H
 #define ANDROID_LOOPER_H
 
+#include "android/utils/compiler.h"
+#include "android/utils/system.h"
+
 #include <stddef.h>
 #include <stdint.h>
 #include <limits.h>
-#include <android/utils/system.h>
+
+ANDROID_BEGIN_HEADER
 
 /**********************************************************************
  **********************************************************************
@@ -341,5 +345,7 @@ looper_free(Looper* looper)
 }
 
 /* */
+
+ANDROID_END_HEADER
 
 #endif /* ANDROID_LOOPER_H */
