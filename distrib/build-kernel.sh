@@ -3,6 +3,12 @@
 # A small script used to rebuild the Android goldfish kernel image
 # See docs/KERNEL.TXT for usage instructions.
 #
+
+export LANG=C
+export LC_ALL=C
+
+PROGNAME=$(basename "$0")
+
 MACHINE=goldfish
 VARIANT=goldfish
 OUTPUT=/tmp/kernel-qemu
@@ -191,8 +197,7 @@ else
             CONFIG=goldfish
             ;;
         arm64)
-            # TODO(digit): Provide better config.
-            CONFIG=defconfig
+            CONFIG=ranchu
             ;;
         *)
             echo "ERROR: Invalid arch '$ARCH', try one of $VALID_ARCHS"
@@ -209,6 +214,18 @@ if [ -n "$OPTION_OUT" ] ; then
     fi
     OUTPUT=$OPTION_OUT
 else
+    OUTPUT=$OUTPUT/${ARCH}-${KERNEL_VERSION}
+    case $CONFIG in
+        vbox*)
+            OUTPUT=${OUTPUT}-vbox
+            ;;
+        goldfish)
+            if [ "$ARCH" = "arm" ]; then
+                OUTPUT=${OUTPUT}-armv5
+            fi
+            ;;
+    esac
+    echo "Auto-config: --out=$OUTPUT"
     mkdir -p $OUTPUT
 fi
 
@@ -347,25 +364,20 @@ fi
 #       do not change the definitions lightly.
 KERNEL_PREFIX=kernel-$KERNEL_VERSION
 
-case $CONFIG in
-    vbox*)
-        KERNEL_SUFFIX=vbox
-        ;;
-    goldfish)
-        if [ "$ARCH" = "arm" ]; then
-            KERNEL_SUFFIX=qemu-armv5
-        else
-            KERNEL_SUFFIX=qemu-$ARCH
-        fi
-        ;;
-    goldfish_armv7)
-        KERNEL_SUFFIX=qemu-armv7
-        ;;
-    *)
-        KERNEL_SUFFIX=qemu-$ARCH
-esac
-OUTPUT_KERNEL=$KERNEL_PREFIX-$KERNEL_SUFFIX
-OUTPUT_VMLINUX=vmlinux-${OUTPUT_KERNEL##kernel-}
+# Naming conventions for the kernel image files:
+#
+#   1) The kernel image is called kernel-qemu, except for 32-bit ARM
+#      where it must be called kernel-qemu-armv7
+#
+#   2) The debug symbol file is called vmlinux-qemu, except for 32-bit
+#      ARM where it must be called vmlinux-qemu-armv7
+#
+OUTPUT_KERNEL=kernel-qemu
+OUTPUT_VMLINUX=vmlinux-qemu
+if [ "$CONFIG" = "goldfish_armv7" ]; then
+    OUTPUT_KERNEL=${OUTPUT_KERNEL}-armv7
+    OUTPUT_VMLINUX=${OUTPUT_KERNEL}-armv7
+fi
 
 cp -f vmlinux $OUTPUT/$OUTPUT_VMLINUX
 if [ ! -z $ZIMAGE ]; then
@@ -374,5 +386,16 @@ else
     cp -f vmlinux $OUTPUT/$OUTPUT_KERNEL
 fi
 echo "Kernel $CONFIG prebuilt images ($OUTPUT_KERNEL and $OUTPUT_VMLINUX) copied to $OUTPUT successfully !"
+
+cp COPYING $OUTPUT/LINUX_KERNEL_COPYING
+
+cat > $OUTPUT/README <<EOF
+This directory contains kernel images to be used with the Android emulator
+program, for the $ARCH CPU architecture. It was built with the $PROGNAME
+script. For more details, read:
+
+  \$AOSP/external/qemu/docs/ANDROID-KERNEL.TXT
+
+EOF
 
 exit 0
