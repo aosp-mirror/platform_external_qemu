@@ -8,31 +8,39 @@ We now provide a helper script to rebuild the kernel,
 it is under distrib/rebuild-kernel.sh.
 
 You need the sources in android.googlesource.com/kernel/goldfish.git,
-in branch origin/android-goldfish-2.6.29
+in branch origin/android-goldfish-<version>, where <version> is the
+kernel version that applies to your system image.
 
-To rebuild the ARMv5TE kernel:
+Roughly speaking:
 
-  cd $KERNEL_SOURCES
-  /path/to/rebuild-kernel.sh --out=$ANDROID/prebuilt/android-arm/kernel
+  2.6.27     -> Anything before Gingerbread. (<= Android 2.2)
+  2.6.29     -> For Gingerbread (2.3) until JellyBean MR2 (4.2.x)
+  3.4        -> For KitKat (4.4.x)
+  3.10       -> For L, which isn't completed or named yet (> 4.4.x)
 
 To rebuild the ARMv7-A one:
 
-  cd $KERNEL_SOURCES
-  /path/to/rebuild-kernel.sh --armv7 --out=$ANDROID/prebuilt/android-arm/kernel
+  /path/to/rebuild-kernel.sh --out=$ANDROID/prebuilt/android-arm/kernel
 
 To rebuild the x86 kernel:
 
-  cd $KERNEL_SOURCES
   /path/to/rebuild-kernel.sh --arch=x86 --out=$ANDROID/prebuilt/android-x86/kernel
 
 To rebuild the MIPS kernel:
 
-  cd $KERNEL_SOURCES
   /path/to/rebuild-kernel.sh --arch=mips --out=$ANDROID/prebuilts/qemu-kernel/mips
 
-Note that you will need to have your cross-toolchain in your path.
-If this is not the case, the script will complain and give you the
-expected name. Use --cross=<prefix> to specify a different toolchain.
+To rebuild the x86_64 kernel (version >= 3.10 only):
+
+  /path/to/rebuild-kernel.sh --arch=x86_64 --out=$ANDROID/prebuilts/qemu-kernel/x86_64
+
+To rebuild the ARM64 kernel (version >= 3.10 only):
+
+  /path/to/rebuild-kerenl.sh --arch=arm64 --out=$ANDROID/prebuilts/qemu-kernel/arm64
+
+By default the script tries to find an appropriate toolchain from
+$AOSP/prebuilts/gcc/, but you can specify a different one using the
+--cross=<prefix> option.
 
 See rebuild-kernel.sh --help for more options and details.
 
@@ -42,14 +50,14 @@ II. Rebuilding from scratch:
 
 If you don't or can't use the script, here are manual instructions:
 
-You need to have the Android toolchain in your path
-(i.e. 'arm-eabi-gcc --version' must work)
+You need to have an appropriate cross-toolchain in your path
+(e.g. 'arm-eabi-gcc --version' must work)
 
-then:
+then (for version 2.6.29):
 
 git clone https://android.googlesource.com/kernel/goldfish.git kernel-goldfish
 cd kernel-goldfish
-git checkout origin/android-gldfish-2.6.29
+git checkout origin/android-goldfish-2.6.29
 
 export CROSS_COMPILE=arm-eabi-
 export ARCH=arm
@@ -66,7 +74,7 @@ Now, you can use it with:
   emulator -kernel path/to/your/new/zImage <other-options>
 
 
-You can build an ARMv7-compatible kernel image by using goldfish_armv7_defconfg
+You can build an ARMv7-compatible kernel image by using goldfish_armv7_defconfig
 in the above instructions (instead of goldfish_defconfig). Note that you will
 need to enable ARMv7 emulation by using the -cpu cortex-a8 option, as in:
 
@@ -77,6 +85,5 @@ the emulator binary will automatically enable ARMv7 emulation for you, so doing
 the following should be equivalent
 
   emulator -kernel path/to/your/kernel-armv7 <other-options>
-
 
 Voila !
