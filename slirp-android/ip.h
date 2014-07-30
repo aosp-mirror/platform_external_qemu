@@ -76,11 +76,11 @@ typedef u_int32_t n_long;                 /* long as received from the net */
  */
 struct ip {
 #ifdef HOST_WORDS_BIGENDIAN
-	u_int ip_v:4;		/* version */
-	u_int ip_hl:4;		/* header length */
+	u_int8_t ip_v:4;		/* version */
+	u_int8_t ip_hl:4;		/* header length */
 #else
-	u_int ip_hl:4;		/* header length */
-	u_int ip_v:4;		/* version */
+	u_int8_t ip_hl:4;		/* header length */
+	u_int8_t ip_v:4;		/* version */
 #endif
 	u_int8_t  ip_tos;			/* type of service */
 	u_int16_t	ip_len;			/* total length */
@@ -142,11 +142,11 @@ struct	ip_timestamp {
 	u_int8_t	ipt_len;		/* size of structure (variable) */
 	u_int8_t	ipt_ptr;		/* index of current entry */
 #ifdef HOST_WORDS_BIGENDIAN
-	u_int	ipt_oflw:4,		/* overflow counter */
-		ipt_flg:4;		/* flags, see below */
+	u_int8_t	ipt_oflw:4,		/* overflow counter */
+			ipt_flg:4;		/* flags, see below */
 #else
-	u_int	ipt_flg:4,		/* flags, see below */
-		ipt_oflw:4;		/* overflow counter */
+	u_int8_t	ipt_flg:4,		/* flags, see below */
+			ipt_oflw:4;		/* overflow counter */
 #endif
 	union ipt_timestamp {
 		n_long	ipt_time[1];
