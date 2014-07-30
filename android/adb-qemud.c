@@ -52,6 +52,16 @@ typedef enum AdbClientState {
     ADBC_STATE_GUEST_DISCONNECTED,
 } AdbClientState;
 
+#if DEBUG
+const char* AdbClientStateStr[] = {
+		"ADB client state = ADBC_STATE_WAIT_ON_HOST",
+		"ADB client state = ADBC_STATE_HOST_CONNECTED",
+		"ADB client state = ADBC_STATE_CONNECTED",
+		"ADB client state = ADBC_STATE_HOST_DISCONNECTED",
+		"ADB client state = ADBC_STATE_GUEST_DISCONNECTED"
+};
+#endif
+
 /* ADB client descriptor. */
 typedef struct AdbClient AdbClient;
 struct AdbClient {
@@ -117,6 +127,39 @@ _adb_on_host_disconnect(void* opaque, void* connection)
 
     D("ADB client %p(o=%p) is disconnected from the host %p",
       adb_client, adb_client->opaque, connection);
+
+    /* Dispatch the command SYNC(0,0) to guest in order to close transport */
+    // These defines and structs came from system/core/adb/adb.h
+    #define MAX_PAYLOAD 4096
+    #define A_SYNC 0x434e5953
+    struct amessage {
+        unsigned command;       /* command identifier constant      */
+        unsigned arg0;          /* first argument                   */
+        unsigned arg1;          /* second argument                  */
+        unsigned data_length;   /* length of payload (0 is allowed) */
+        unsigned data_check;    /* checksum of data payload         */
+        unsigned magic;         /* command ^ 0xffffffff             */
+    };
+    struct apacket
+    {
+        struct apacket *next;
+
+        unsigned len;
+        unsigned char *ptr;
+
+        struct amessage msg;
+        unsigned char data[MAX_PAYLOAD];
+    };
+    struct apacket p;
+    memset(&p, 0, sizeof(p));
+    p.msg.command = A_SYNC;
+    p.msg.arg0 = 0;
+    p.msg.arg1 = 0;
+    p.msg.magic = A_SYNC ^ 0xffffffff;
+    qemud_client_send(adb_client->qemud_client, (const uint8_t*)&p, sizeof(p));
+    #undef MAX_PLAYLOAD
+    #undef A_SYNC
+
     adb_client->state = ADBC_STATE_HOST_DISCONNECTED;
 }
 
@@ -216,6 +259,9 @@ _adb_client_recv(void* opaque, uint8_t* msg, int msglen, QemudClient* client)
     adb_client->msg_cur += msglen;
 
     /* Properly dispatch the message, depending on the client state. */
+#if DEBUG
+    D(AdbClientStateStr[(int)adb_client->state]);
+#endif
     switch (adb_client->state) {
         case ADBC_STATE_WAIT_ON_HOST:
             /* At this state the only message that is allowed is 'accept' */
