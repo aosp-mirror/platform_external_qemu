@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6204393_a12f1912",
+        "filename": "android/adb-qemud.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2014-08-01T15:08:51Z",
+      "side": 1,
+      "message": "I think the debug prints are typically built into release and just controlled by the tracemask",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 9
+      },
+      "revId": "2b3528428bad8c00276a505fd885027a976136e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6325ff0_cffa411f",
+        "filename": "android/adb-qemud.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2014-08-01T15:08:51Z",
+      "side": 1,
+      "message": "replace tabs with 4 spaces",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 47
+      },
+      "revId": "2b3528428bad8c00276a505fd885027a976136e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6204393_e163d167",
+        "filename": "android/adb-qemud.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2014-08-01T15:08:51Z",
+      "side": 1,
+      "message": "move repeated \"ADB client state \u003d \" to the debug print below",
+      "range": {
+        "startLine": 60,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 22
+      },
+      "revId": "2b3528428bad8c00276a505fd885027a976136e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "968387c4_e2a1861b",
+        "filename": "android/adb-qemud.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2014-08-01T15:08:51Z",
+      "side": 1,
+      "message": "I can verify that this patch does fix the problem.  However, I\u0027m not super excited about trying to reset the connection with a hand crafted reset message.  Is there some way to send an out-of-band message, like closing the qemu pipe from the emulator side?  This would be analogous to a socket closing and would force the adbd to clean up and get ready for another connection.  Let\u0027s say, for argument\u0027s sake that the emulator already sent half of a message to the target before adb-server was killed and then you send this.  It will probably not fix the problem.",
+      "revId": "2b3528428bad8c00276a505fd885027a976136e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3692db12_bfe2b7e2",
+        "filename": "android/adb-qemud.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2014-08-01T15:08:51Z",
+      "side": 1,
+      "message": "remove DEBUG (unless this is really spammy, in which case the message should be removed.",
+      "revId": "2b3528428bad8c00276a505fd885027a976136e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
