@@ -89,6 +89,8 @@ iolooper_fd_count( IoLooper*  iol )
     if (iol->max_fd_valid)
         return max_fd + 1;
 
+    max_fd = -1;
+
     /* recompute max fd */
     for (fd = 0; fd < FD_SETSIZE; fd++) {
         if (!FD_ISSET(fd, iol->reads) && !FD_ISSET(fd, iol->writes))
