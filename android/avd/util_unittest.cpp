@@ -110,9 +110,9 @@ TEST(AvdUtil, propertyFile_getAdbdCommunicationMode) {
   const char* valueIsBogus =
     "ro.adb.qemud=bogus";
 
-  // Empty file -> assume 1
+  // Empty file -> assume 0
   EXPECT_EQ(0, fileData_initFromMemory(&fd, emptyFile, strlen(emptyFile)));
-  EXPECT_EQ(1, propertyFile_getAdbdCommunicationMode(&fd));
+  EXPECT_EQ(0, propertyFile_getAdbdCommunicationMode(&fd));
 
   EXPECT_EQ(0, fileData_initFromMemory(&fd, valueIsZero, strlen(valueIsZero)));
   EXPECT_EQ(0, propertyFile_getAdbdCommunicationMode(&fd));
@@ -120,8 +120,8 @@ TEST(AvdUtil, propertyFile_getAdbdCommunicationMode) {
   EXPECT_EQ(0, fileData_initFromMemory(&fd, valueIsOne, strlen(valueIsOne)));
   EXPECT_EQ(1, propertyFile_getAdbdCommunicationMode(&fd));
 
-  // BOGUS -> 1
+  // BOGUS -> 0
   EXPECT_EQ(0, fileData_initFromMemory(&fd, valueIsBogus, strlen(valueIsBogus)));
-  EXPECT_EQ(1, propertyFile_getAdbdCommunicationMode(&fd));
+  EXPECT_EQ(0, propertyFile_getAdbdCommunicationMode(&fd));
 }
 
