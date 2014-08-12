@@ -122,6 +122,7 @@ common_LOCAL_SRC_FILES += \
 	android/sockets.c \
 	android/sync-utils.c \
 	android/base/containers/PodVector.cpp \
+	android/base/containers/PointerSet.cpp \
 	android/base/containers/HashUtils.cpp \
 	android/base/containers/StringVector.cpp \
 	android/base/files/PathUtils.cpp \
