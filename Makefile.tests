@@ -3,6 +3,7 @@ include $(LOCAL_PATH)/distrib/googletest/Android.mk
 
 EMULATOR_UNITTESTS_SOURCES := \
   android/avd/util_unittest.cpp \
+  android/base/containers/HashUtils_unittest.cpp \
   android/base/containers/PodVector_unittest.cpp \
   android/base/containers/StringVector_unittest.cpp \
   android/base/containers/TailQueueList_unittest.cpp \
