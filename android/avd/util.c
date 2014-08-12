@@ -239,18 +239,11 @@ propertyFile_getApiLevel(const FileData* data) {
 
 int
 propertyFile_getAdbdCommunicationMode(const FileData* data) {
-    SearchResult searchResult;
-    int qemud = propertyFile_getInt(data, "ro.adb.qemud", 0, &searchResult);
-    if (searchResult == RESULT_FOUND) {
-        D("Found ro.adb.qemud build property: %d", qemud);
-        return qemud;
-    }
-    // adb sporadically hangs when communicating using qemud, so default to
-    // not using qemud.
-    // TODO: Fix the hang with qemud and change the default to use qemud since
-    // the qemud pipe is faster than going through the network port.
-    D("ro.adb.qemud invalid or not found, API >= 16, defaulting "
-      "ro.adb.qemud==0");
+    // adb sporadically hangs when using a pipe to communicate with qemud, so
+    // disable the qemud pipe.
+    // TODO: Fix the hang with qemud and change back to reading the
+    // communication method from the ro.adb.qemud build property.
+    D("Forcing ro.adb.qemud to \"0\".");
     return 0;
 }
 
