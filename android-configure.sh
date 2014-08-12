@@ -124,7 +124,7 @@ if [ -z "$CC" -a -z "$OPTION_CC" -a "$HOST_OS" = linux ] ; then
     # For some odd reason. Remove the 'DISABLED_' prefix below to re-enable it,
     # e.g. once the MIPS backend has been updated to a more recent version.
     # This only affects Linux emulator binaries.
-    PROBE_HOST_CC=$PREBUILTS_HOST_GCC/DISABLED_x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
+    PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
     if [ ! -f "$PROBE_HOST_CC" ]; then
         PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-gcc
         if [ ! -f "$PROBE_HOST_CC" ] ; then
