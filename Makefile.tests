@@ -18,6 +18,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/memory/ScopedPtr_unittest.cpp \
   android/base/sockets/ScopedSocket_unittest.cpp \
   android/base/sockets/SocketDrainer_unittest.cpp \
+  android/base/sockets/SocketWaiter_unittest.cpp \
   android/base/String_unittest.cpp \
   android/base/StringFormat_unittest.cpp \
   android/base/StringView_unittest.cpp \

@@ -128,6 +128,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/files/PathUtils.cpp \
 	android/base/sockets/SocketDrainer.cpp \
 	android/base/sockets/SocketUtils.cpp \
+	android/base/sockets/SocketWaiter.cpp \
 	android/base/Log.cpp \
 	android/base/String.cpp \
 	android/base/StringFormat.cpp \
