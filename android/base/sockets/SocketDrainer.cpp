@@ -9,20 +9,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-
-#include <android/base/Limits.h>
 #include "android/base/sockets/SocketDrainer.h"
 
-#include "android/sockets.h"
-#include "android/utils/eintr_wrapper.h"
-#ifdef _WIN32
-#  include <winsock2.h>
-#else
-#  include <sys/socket.h>
-#endif
-
-#include <unistd.h>
-#include <set>
+#include <android/base/Limits.h>
+#include "android/base/containers/ScopedPointerSet.h"
+#include "android/base/EintrWrapper.h"
+#include "android/base/sockets/SocketUtils.h"
+#include "android/base/async/Looper.h"
 
 // Some implementation whys:
 // When the looper is running, the sockets are non-blocking and are only
@@ -33,8 +26,6 @@
 // When socket is already closed for read, we only need to shutdown writing
 // and close the socket.
 
-static android::base::SocketDrainer *s_socket_drainer = 0;
-
 namespace android {
 namespace base {
 
@@ -43,17 +34,23 @@ class DrainerObject;
 // SocketDrainImpl implements the SocketDrainer and manages all the DrainerObjects
 class SocketDrainerImpl {
 public:
-    SocketDrainerImpl(Looper* looper) : mLooper(looper), mDrainerObjects() { }
-    ~SocketDrainerImpl() { drainAndCloseAllSockets(); }
+    SocketDrainerImpl(Looper* looper) :
+            mLooper(looper), mDrainerObjects() { }
+
+    ~SocketDrainerImpl() {}
+
 public:
     void addSocketToDrain(int socket_fd);
-    void removeDrainerObject(DrainerObject* drainer) { mDrainerObjects.erase(drainer); }
-private:
-    Looper*  mLooper;
-    typedef std::set<DrainerObject*> DrainSet;
-    DrainSet mDrainerObjects;
 
-    void drainAndCloseAllSockets();
+    void removeDrainerObject(DrainerObject* drainer) {
+        mDrainerObjects.remove(drainer);
+    }
+
+private:
+    typedef ScopedPointerSet<DrainerObject> DrainSet;
+
+    Looper*  mLooper;
+    DrainSet mDrainerObjects;
 };
 
 // DrainerObject drains and closes socket
@@ -69,12 +66,17 @@ public:
     bool socketIsDrained() const { return mSocketIsDrained; }
 
     // remove from SocketDrainerImpl
-    void removeFromParent() { if(mParent) mParent->removeDrainerObject(this); }
+    void removeFromParent() {
+        if(mParent) {
+            mParent->removeDrainerObject(this);
+        }
+    }
+
 private:
     int     mSocket;
     Looper* mLooper;
     SocketDrainerImpl* mParent;
-    LoopIo  mIo[1];
+    Looper::FdWatch*  mIo;
     bool    mSocketIsDrained;
 
     void shutdownRead();
@@ -86,22 +88,27 @@ private:
 static void _on_read_socket_fd(void* opaque, int fd, unsigned events) {
     DrainerObject * drainerObject = (DrainerObject*)opaque;
     if (!drainerObject) return;
-    if ((events & LOOP_IO_READ) != 0) {
+    if ((events & Looper::FdWatch::kEventRead) != 0) {
         drainerObject->drainSocket();
     }
     if (drainerObject->socketIsDrained()) {
         drainerObject->removeFromParent();
-        delete drainerObject;
     }
 }
 
-DrainerObject::DrainerObject(int socket_fd, Looper* looper, SocketDrainerImpl* parent) :
-        mSocket(socket_fd), mLooper(looper), mParent(parent), mIo(), mSocketIsDrained(false) {
-    shutdownWrite();
+DrainerObject::DrainerObject(int socket_fd,
+                             Looper* looper,
+                             SocketDrainerImpl* parent) :
+            mSocket(socket_fd),
+            mLooper(looper),
+            mParent(parent),
+            mIo(NULL),
+            mSocketIsDrained(false) {
+    socketShutdownWrites(mSocket);
     if (drainSocket() && mLooper && mParent) {
-        loopIo_init(mIo, mLooper, mSocket, _on_read_socket_fd, this);
-        loopIo_wantRead(mIo);
-        loopIo_dontWantWrite(mIo);
+        mIo = looper->createFdWatch(mSocket, _on_read_socket_fd, this);
+        mIo->wantRead();
+        mIo->dontWantWrite();
     } else {
         // there is nothing to read, the drainer object is done
         mLooper = 0;
@@ -111,16 +118,12 @@ DrainerObject::DrainerObject(int socket_fd, Looper* looper, SocketDrainerImpl* p
 DrainerObject::~DrainerObject() {
     if (!mSocketIsDrained) {
         char buff[1024];
-        while(socket_recv(mSocket, buff, sizeof(buff)) > 0) { ; }
+        while(socketRecv(mSocket, buff, sizeof(buff)) > 0) {}
         mSocketIsDrained = true;
     }
-    shutdownRead();
-    if (mLooper) {
-        loopIo_dontWantRead(mIo);
-        loopIo_done(mIo);
-        mLooper = 0;
-    }
-    closeSocket();
+    socketShutdownReads(mSocket);
+    delete mIo;
+    socketClose(mSocket);
     mSocket = -1;
     mParent = 0;
 }
@@ -128,7 +131,7 @@ DrainerObject::~DrainerObject() {
 bool DrainerObject::drainSocket() {
     errno = 0;
     char buff[1024];
-    int size = socket_recv(mSocket, buff, sizeof(buff));
+    ssize_t size = socketRecv(mSocket, buff, sizeof(buff));
     if (size > 0) {
         return true;
     } else if (size < 0 && errno == EWOULDBLOCK) {
@@ -138,30 +141,6 @@ bool DrainerObject::drainSocket() {
     return false;
 }
 
-void DrainerObject::shutdownWrite() {
-#ifdef _WIN32
-    shutdown(mSocket, SD_SEND);
-#else
-    shutdown(mSocket, SHUT_WR);
-#endif
-}
-
-void DrainerObject::shutdownRead() {
-#ifdef _WIN32
-    shutdown(mSocket, SD_RECEIVE);
-#else
-    shutdown(mSocket, SHUT_RD);
-#endif
-}
-
-void DrainerObject::closeSocket() {
-#ifdef _WIN32
-    closesocket(mSocket);
-#else
-    IGNORE_EINTR(close(mSocket));
-#endif
-}
-
 //--------------------------- SocketDrainerImpl Implementation -------------------------
 
 void SocketDrainerImpl::addSocketToDrain(int socket_fd) {
@@ -169,16 +148,8 @@ void SocketDrainerImpl::addSocketToDrain(int socket_fd) {
     if (drainer->socketIsDrained()) {
         delete drainer;
     } else {
-        mDrainerObjects.insert(drainer);
+        mDrainerObjects.add(drainer);
     }
-}
-
-void SocketDrainerImpl::drainAndCloseAllSockets() {
-    for (DrainSet::iterator it = mDrainerObjects.begin(); it != mDrainerObjects.end(); ++it) {
-        DrainerObject* drainer = *it;
-        delete drainer;
-    }
-    mDrainerObjects.clear();
 }
 
 //--------------------------- SocketDrainer Implementation -----------------------------
@@ -192,10 +163,16 @@ SocketDrainer::~SocketDrainer() {
     mSocketDrainerImpl = 0;
 }
 
-void
-SocketDrainer::drainAndClose(int socket_fd) {
-    if (socket_fd < 0) return;
-    mSocketDrainerImpl->addSocketToDrain(socket_fd);
+void SocketDrainer::drainAndClose(int socketFd) {
+    if (socketFd < 0) {
+        return;
+    }
+    mSocketDrainerImpl->addSocketToDrain(socketFd);
+}
+
+// static
+void SocketDrainer::drainAndCloseBlocking(int socketFd) {
+    DrainerObject drainer(socketFd, 0, 0);
 }
 
 } // namespace base
@@ -203,24 +180,3 @@ SocketDrainer::drainAndClose(int socket_fd) {
 
 // -------------------- extern C functions ---------------------------------------------
 
-void socket_drainer_start(Looper* looper) {
-    if (!looper) return;
-    if (!s_socket_drainer) s_socket_drainer = new android::base::SocketDrainer(looper);
-}
-
-void socket_drainer_drain_and_close(int socket_fd) {
-    if (socket_fd < 0) return;
-    socket_set_nonblock(socket_fd);
-    if (s_socket_drainer) {
-        s_socket_drainer->drainAndClose(socket_fd);
-    } else {
-        android::base::DrainerObject drainerObject(socket_fd, 0, 0);
-    }
-}
-
-void socket_drainer_stop() {
-    if (s_socket_drainer) {
-        delete s_socket_drainer;
-        s_socket_drainer = 0;
-    }
-}

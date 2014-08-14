@@ -194,5 +194,9 @@ GLooper::~GLooper() {
     delete baseLooper;
 }
 
+BaseLooper* toBaseLooper(CLooper* looper) {
+    return asBaseLooper(looper);
+}
+
 }  // namespace internal
 }  // namespace android

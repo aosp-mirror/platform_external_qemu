@@ -163,6 +163,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/property_file.c \
 	android/utils/reflist.c \
 	android/utils/refset.c \
+	android/utils/socket_drainer.cpp \
 	android/utils/stralloc.c \
 	android/utils/string.cpp \
 	android/utils/system.c \

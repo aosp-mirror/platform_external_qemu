@@ -30,6 +30,9 @@ struct GLooper {
     BaseLooper* baseLooper;
 };
 
+// Super gross hack until we get rid of the stuff in socket_drainer.cpp
+BaseLooper* toBaseLooper(CLooper* looper);
+
 }  // namespace internal
 }  // namespace android
 
