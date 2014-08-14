@@ -9,15 +9,28 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/looper-base.h"
+#ifndef ANDROID_LOOPER_BASE_H
+#define ANDROID_LOOPER_BASE_H
 
 #include "android/base/async/Looper.h"
+#include "android/looper.h"
 
-using ::android::internal::GLooper;
+namespace android {
+namespace internal {
 
-::Looper* looper_newGeneric(void) {
-    GLooper* glooper = new GLooper(
-            ::android::base::Looper::create());
+typedef ::Looper CLooper;
+typedef ::android::base::Looper BaseLooper;
 
-    return &glooper->looper;
-}
+// Implemented by looper-base.cpp, but also used by looper-qemu.cpp
+struct GLooper {
+    explicit GLooper(BaseLooper* looper);
+    ~GLooper();
+
+    CLooper looper;
+    BaseLooper* baseLooper;
+};
+
+}  // namespace internal
+}  // namespace android
+
+#endif  // ANDROID_LOOPER_BASE_H
