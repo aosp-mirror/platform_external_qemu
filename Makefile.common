@@ -140,6 +140,7 @@ common_LOCAL_SRC_FILES += \
 	android/filesystems/partition_types.cpp \
 	android/filesystems/ramdisk_extractor.cpp \
 	android/kernel/kernel_utils.cpp \
+	android/qemu/base/async/Looper.cpp \
 	android/looper-base.cpp \
 	android/looper-generic.cpp \
 	android/utils/assert.c \
