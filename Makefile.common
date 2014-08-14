@@ -114,7 +114,7 @@ common_LOCAL_SRC_FILES += \
 	android/async-utils.c \
 	android/charmap.c \
 	android/framebuffer.c \
-	android/iolooper-select.c \
+	android/iolooper.cpp \
 	android/keycode-array.c \
 	android/avd/hw-config.c \
 	android/avd/info.c \
