@@ -127,6 +127,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/async/AsyncReader.cpp \
 	android/base/async/AsyncWriter.cpp \
 	android/base/async/Looper.cpp \
+	android/base/async/ThreadLooper.cpp \
 	android/base/containers/PodVector.cpp \
 	android/base/containers/PointerSet.cpp \
 	android/base/containers/HashUtils.cpp \
