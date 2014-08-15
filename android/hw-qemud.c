@@ -1225,7 +1225,6 @@ qemud_service_save(QEMUFile* f, QemudService* s)
 {
     qemud_service_save_name(f, s);
     qemu_put_be32(f, s->max_clients);
-    qemu_put_be32(f, s->num_clients);
 
     if (s->serv_save)
         s->serv_save(f, s, s->serv_opaque);
@@ -1254,7 +1253,7 @@ qemud_service_load(  QEMUFile*  f, QemudService*  current_services  )
 
     /* reconfigure service as required */
     sv->max_clients = qemu_get_be32(f);
-    sv->num_clients = qemu_get_be32(f);
+    sv->num_clients = 0;
 
     /* load service specific data */
     int ret;
