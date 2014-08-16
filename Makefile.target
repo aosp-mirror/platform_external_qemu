@@ -347,6 +347,7 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libsparse \
     emulator-libselinux \
     emulator-zlib \
+    libandroid-wear-agent \
     $(SDL_STATIC_LIBRARIES)
 
 LOCAL_LDLIBS += $(common_LOCAL_LDLIBS)
@@ -378,6 +379,7 @@ LOCAL_STATIC_LIBRARIES += \
     emulator64-libsparse \
     emulator64-libselinux \
     emulator64-zlib \
+    lib64android-wear-agent \
     $(SDL_STATIC_LIBRARIES_64)
 
 LOCAL_LDLIBS += $(common_LOCAL_LDLIBS)

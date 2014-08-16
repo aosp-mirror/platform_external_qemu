@@ -18,6 +18,9 @@
 
 #include "android/looper.h"
 #include "android/sockets.h"
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /* A set of useful data types to perform asynchronous operations.
  *
@@ -232,5 +235,7 @@ asyncConnector_run(AsyncConnector* ac);
  */
 int
 asyncConnector_stop(AsyncConnector* ac);
+
+ANDROID_END_HEADER
 
 #endif /* ANDROID_ASYNC_UTILS_H */
