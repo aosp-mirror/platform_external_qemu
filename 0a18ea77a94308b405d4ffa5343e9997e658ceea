@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "13fb2935_7e8f7122",
+        "filename": "android/adb-qemud.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-08-18T09:14:02Z",
+      "side": 1,
+      "message": "This is incorrect, i.e. you should not write the full apacket structure into the pipe, adbd expects to read a amessage header instead, followed by |data_length| bytes (if any), see system/core/adb/transport_local.c:remote_read().\n\nIt\u0027s likely that you saw the code in system/core/adb/transport.c:write_packet.c(), but this sends the whole apacket to a different thread in the same process, not to a TCP / PIPE connection.\n \n(and for the record, too many threads and the fact that we force a context switch for _any_ 4KB packet that comes in or out of ADB is one of the reason why performance is pathetic).\n\nThis \u0027works\u0027 because you\u0027re sending data with an invalid message header, i.e. in system/core/adb/transport.c output_thread() exits its loop after receiving an error from read_remote(), which comes from check_header(), and forces the SYNC(0,0) on the connection.\n\nI\u0027d suggest just sending the amessage for the SYNC(0,0) instead. I\u0027ll upload a patch to do this.",
+      "revId": "0a18ea77a94308b405d4ffa5343e9997e658ceea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
