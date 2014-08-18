@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1626b79c_7530921e",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1227,
+      "author": {
+        "id": 1010049
+      },
+      "writtenOn": "2014-08-18T17:54:14Z",
+      "side": 1,
+      "message": "Would it be better to continue to read/write the integer, but ignore the value, for backward compatibility?",
+      "range": {
+        "startLine": 1227,
+        "startChar": 4,
+        "endLine": 1227,
+        "endChar": 17
+      },
+      "revId": "90dbd41b8c73970a3361b3b972c0d395fe6d25ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
