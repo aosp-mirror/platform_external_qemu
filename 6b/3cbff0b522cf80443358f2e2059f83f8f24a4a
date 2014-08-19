@@ -1,0 +1,8 @@
+Code-Review+1: Todd Fiala <tfiala@google.com>
+Code-Review+2: David Turner <digit@android.com>
+Verified+1: David Turner <digit@android.com>
+Submitted-by: David Turner <digit@android.com>
+Submitted-at: Tue, 19 Aug 2014 11:03:46 +0000
+Reviewed-on: https://android-review.googlesource.com/103190
+Project: platform/external/qemu
+Branch: refs/heads/master
