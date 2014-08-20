@@ -47,7 +47,6 @@
 
 #include "migration/qemu-file.h"
 #include "android/android.h"
-#include "android/base/sockets/SocketDrainer.h"
 #include "android/charpipe.h"
 #include "android/log-rotate.h"
 #include "modem_driver.h"
@@ -67,6 +66,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
 #include "android/utils/path.h"
+#include "android/utils/socket_drainer.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/tempfile.h"
 #include "android/display-core.h"

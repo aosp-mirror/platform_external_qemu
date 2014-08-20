@@ -114,17 +114,22 @@ common_LOCAL_SRC_FILES += \
 	android/async-utils.c \
 	android/charmap.c \
 	android/framebuffer.c \
-	android/iolooper-select.c \
+	android/iolooper.cpp \
 	android/keycode-array.c \
 	android/avd/hw-config.c \
 	android/avd/info.c \
 	android/avd/util.c \
 	android/sockets.c \
 	android/sync-utils.c \
+	android/base/async/Looper.cpp \
 	android/base/containers/PodVector.cpp \
+	android/base/containers/PointerSet.cpp \
+	android/base/containers/HashUtils.cpp \
 	android/base/containers/StringVector.cpp \
 	android/base/files/PathUtils.cpp \
 	android/base/sockets/SocketDrainer.cpp \
+	android/base/sockets/SocketUtils.cpp \
+	android/base/sockets/SocketWaiter.cpp \
 	android/base/Log.cpp \
 	android/base/String.cpp \
 	android/base/StringFormat.cpp \
@@ -135,6 +140,8 @@ common_LOCAL_SRC_FILES += \
 	android/filesystems/partition_types.cpp \
 	android/filesystems/ramdisk_extractor.cpp \
 	android/kernel/kernel_utils.cpp \
+	android/qemu/base/async/Looper.cpp \
+	android/looper-base.cpp \
 	android/looper-generic.cpp \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
@@ -156,6 +163,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/property_file.c \
 	android/utils/reflist.c \
 	android/utils/refset.c \
+	android/utils/socket_drainer.cpp \
 	android/utils/stralloc.c \
 	android/utils/string.cpp \
 	android/utils/system.c \
@@ -440,8 +448,9 @@ CORE_MISC_SOURCES = \
     android/hw-control.c \
     android/hw-sensors.c \
     android/hw-qemud.c \
-    android/looper-qemu.c \
+    android/looper-qemu.cpp \
     android/hw-pipe-net.c \
+    android/qemu/base/async/Looper.cpp \
     android/qemu-setup.c \
     android/qemu-tcpdump.c \
     android/shaper.c \
