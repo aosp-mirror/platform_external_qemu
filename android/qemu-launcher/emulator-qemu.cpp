@@ -691,6 +691,15 @@ extern "C" int main(int argc, char **argv, char **envp) {
         hw->hw_ramSize = ramSize;
     }
 
+#if 1
+    // For ARM64, ensure a minimum of 1GB or memory, anything lower is
+    // very painful during the boot process and after that.
+    if (hw->hw_ramSize < 1024) {
+        dwarning("Increasing RAM size to 1GB");
+        hw->hw_ramSize = 1024;
+    }
+#endif
+
     D("Physical RAM size: %dMB\n", hw->hw_ramSize);
 
     if (opts->gpu) {
