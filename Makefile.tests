@@ -3,8 +3,12 @@ include $(LOCAL_PATH)/distrib/googletest/Android.mk
 
 EMULATOR_UNITTESTS_SOURCES := \
   android/avd/util_unittest.cpp \
+  android/base/containers/HashUtils_unittest.cpp \
   android/base/containers/PodVector_unittest.cpp \
+  android/base/containers/PointerSet_unittest.cpp \
+  android/base/containers/ScopedPointerSet_unittest.cpp \
   android/base/containers/StringVector_unittest.cpp \
+  android/base/containers/TailQueueList_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
   android/base/files/PathUtils_unittest.cpp \
   android/base/files/ScopedFd_unittest.cpp \
@@ -12,7 +16,9 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/Log_unittest.cpp \
   android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/ScopedPtr_unittest.cpp \
+  android/base/sockets/ScopedSocket_unittest.cpp \
   android/base/sockets/SocketDrainer_unittest.cpp \
+  android/base/sockets/SocketWaiter_unittest.cpp \
   android/base/String_unittest.cpp \
   android/base/StringFormat_unittest.cpp \
   android/base/StringView_unittest.cpp \

@@ -12,47 +12,29 @@
 #ifndef ANDROID_BASE_SOCKETS_SOCKET_DRAINER_H
 #define ANDROID_BASE_SOCKETS_SOCKET_DRAINER_H
 
-#include <android/utils/compiler.h>
+#include "android/base/Compiler.h"
+#include "android/base/Limits.h"
+#include "android/base/async/Looper.h"
 
-/*
-This class is used to manage graceful closure of sockets, as described by
-"The ultimate SO_LINGER page", which requires several steps to do properly.
+// The following functions are used to manage graceful close of sockets
+// as described by "The ultimate SO_LINGER page" [1], which requires
+// several steps to do properly.
+//
+// To use it, simply create a socketDrainer instance after creating a
+// Looper, as in:
+//
+//      SocketDrainer  socketDrainer(looper);
+//
+// When a socket needs to be gracefully closed, call the following:
+//
+//       socketDrainer.drainAndClose(socketFd);
+//
+// When the drainer is destroyed (e.g. failing out of scope, or through
+// delete), all remaining sockets will be shut down and closed without
+// further draining.
+//
+// [1] http://blog.netherlabs.nl/articles/2009/01/18/the-ultimate-so_linger-page-or-why-is-my-tcp-not-reliable
 
-To use this class from C code, call the following after creating a looper:
-   socket_drainer_start(looper);
-
-When a socket needs to be gracefully closed, call the following:
-   socket_drainer_drain_and_close(socket_fd);
-
-After looper_run completes, call the following:
-   socket_drainer_stop();
-
-Note: the "socket_drainer_drain_and_close" function can be called before
-"socket_drainer_start" or after "socket_drainer_stop" . In those cases,
-the socket is simply shut down and closed without receiving all the pending data.
-
-For C++ code, simply create an object as follows:
-   SocketDrainer socketDrainer(looper);
-
-When a socket needs to be gracefully closed, call the following:
-   socketDrainer.drainAndClose(socket_fd);
-
-When the socketDrainer is destroyed (for example, falling out of scope), all remaining
-sockets will be shut down and closed without futher draining.
-
-*/
-
-ANDROID_BEGIN_HEADER
-
-#include "android/looper.h"
-
-void socket_drainer_start(Looper* looper);
-void socket_drainer_drain_and_close(int socket_fd);
-void socket_drainer_stop();
-
-ANDROID_END_HEADER
-
-#ifdef __cplusplus
 namespace android {
 namespace base {
 
@@ -60,14 +42,19 @@ class SocketDrainerImpl;
 class SocketDrainer {
 public:
     SocketDrainer(Looper* looper);
+
     ~SocketDrainer();
+
     // Add a socket to be drained and closed
-    void drainAndClose(int socket_fd);
+    void drainAndClose(int socketFd);
+
+    static void drainAndCloseBlocking(int socketFd);
+
 private:
     SocketDrainerImpl*  mSocketDrainerImpl;
 };
 
 } // namespace base
 } // namespace android
-#endif
-#endif
+
+#endif  // ANDROID_BASE_SOCKETS_SOCKET_DRAINER_H

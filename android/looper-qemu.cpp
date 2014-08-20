@@ -11,13 +11,13 @@
 
 #include "android/looper-base.h"
 
-#include "android/base/async/Looper.h"
+#include "android/qemu/base/async/Looper.h"
 
 using ::android::internal::GLooper;
 
-::Looper* looper_newGeneric(void) {
+::Looper* looper_newCore(void) {
     GLooper* glooper = new GLooper(
-            ::android::base::Looper::create());
+            ::android::qemu::createLooper());
 
     return &glooper->looper;
 }
