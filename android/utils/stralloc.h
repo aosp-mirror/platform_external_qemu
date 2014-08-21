@@ -66,6 +66,6 @@ extern void   stralloc_tabular( stralloc_t*  s, const char** strings, int  count
 
 extern char*  stralloc_to_tempstr( stralloc_t*  s );
 
-ANDROID_BEGIN_HEADER
+ANDROID_END_HEADER
 
 #endif /* ANDROID_UTILS_STRALLOC_H */
