@@ -229,6 +229,9 @@ public:
             if (mPending) {
                 genLooper()->delPendingTimer(this);
                 mPending = false;
+                // resets mDeadline so it can be added to active timers list again later
+                // without assertion failure inside startAbsolute (genLooper->disableTimer)
+                mDeadline = kDurationInfinite;
             }
         }
 
@@ -310,7 +313,13 @@ public:
             }
 
             // Wait for fd events until next deadline.
-            int ret = mWaiter->wait(nextDeadline);
+            Duration timeOut = INT64_MAX;
+            if (nextDeadline < kDurationInfinite) {
+                timeOut = nextDeadline - nowMs();
+                if (timeOut < 0) timeOut = 0;
+            }
+
+            int ret = mWaiter->wait(timeOut);
             if (ret < 0) {
                 // Error, force stop.
                 break;
@@ -342,9 +351,10 @@ public:
             // Queue pending expired timers.
             DCHECK(mPendingTimers.empty());
 
+            const Duration kNow = nowMs();
             Timer* timer = mActiveTimers.front();
             while (timer) {
-                if (timer->deadline() > nextDeadline) {
+                if (timer->deadline() > kNow) {
                     break;
                 }
 
