@@ -229,6 +229,9 @@ public:
             if (mPending) {
                 genLooper()->delPendingTimer(this);
                 mPending = false;
+                // resets mDeadline so it can be added to active timers list again later
+                // without assertion failure inside startAbsolute (genLooper->disableTimer)
+                mDeadline = kDurationInfinite;
             }
         }
 
@@ -342,9 +345,10 @@ public:
             // Queue pending expired timers.
             DCHECK(mPendingTimers.empty());
 
+            const Duration kNow = nowMs();
             Timer* timer = mActiveTimers.front();
             while (timer) {
-                if (timer->deadline() > nextDeadline) {
+                if (timer->deadline() > kNow) {
                     break;
                 }
 
