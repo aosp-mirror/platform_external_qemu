@@ -29,7 +29,6 @@
 
 static android::wear::WearAgent *s_wear_agent = 0;
 
-extern "C" {
 void wear_agent_start(Looper* looper) {
     if (!s_wear_agent) {
         s_wear_agent = new android::wear::WearAgent(looper);
@@ -43,7 +42,12 @@ void wear_agent_stop() {
     }
 }
 
-} // extern "C"
+/*
+ * Wear Agent listens to adb host server for device list update.
+ * Whenever it receives an update, it will abort current pairing process
+ * and start a new one. When adb host dies, Wear Agent will try to reconnect
+ * every two seconds.
+ */
 
 namespace android {
 namespace wear {
@@ -170,22 +174,6 @@ void WearAgentImpl::onRead() {
     }
 }
 
-void WearAgentImpl::parseAdbDevices(char* buf, std::vector<std::string> & devices) {
-    if (!buf) return;
-
-    static const char* kDelimiters = " \t\r\n";
-
-    char* pch = strtok(buf, kDelimiters);
-    char* prev = NULL;
-    while (pch) {
-        if (!strcmp("device", pch) && prev) {
-            devices.push_back(prev);
-        }
-        prev = pch;
-        pch = strtok(NULL, kDelimiters);
-    }
-}
-
 void WearAgentImpl::onWrite() {
     if (mSocket < 0) return;
 
@@ -245,6 +233,22 @@ void WearAgentImpl::cleanupConnection() {
     if (mPairUpWearPhone) {
         delete mPairUpWearPhone;
         mPairUpWearPhone = 0;
+    }
+}
+
+void WearAgentImpl::parseAdbDevices(char* buf, std::vector<std::string> & devices) {
+    if (!buf) return;
+
+    static const char* kDelimiters = " \t\r\n";
+
+    char* pch = strtok(buf, kDelimiters);
+    char* prev = NULL;
+    while (pch) {
+        if (!strcmp("device", pch) && prev) {
+            devices.push_back(prev);
+        }
+        prev = pch;
+        pch = strtok(NULL, kDelimiters);
     }
 }
 

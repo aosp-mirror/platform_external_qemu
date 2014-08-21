@@ -12,7 +12,10 @@
 #ifndef _ANDROID_SKIN_KEYSET_H_
 #define _ANDROID_SKIN_KEYSET_H_
 
+#include "android/utils/compiler.h"
 #include "android/config-file.h"
+
+ANDROID_BEGIN_HEADER
 
 /* A SkinKeySet maps keystrokes to specific commands. we have a few hard-coded
  * keysets in the emulator binary, and the user can define its own if he wants
@@ -132,5 +135,7 @@ extern const char*      skin_keyset_get_default( void );
 
 /* in android_main.c */
 extern SkinKeyset*      android_keyset;
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_SKIN_KEYSET_H_ */

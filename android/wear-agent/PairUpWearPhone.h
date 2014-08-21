@@ -21,25 +21,23 @@ namespace android {
 namespace wear {
 
 /*
-   This object will set up connection between the first pair of compatible
-wear and phone on the "deviceList" (which comes from "adb devices" command),
-so that the wear can receive notification from the phone.
-
-    To use this class, simply create an instance as follows:
-
-PairUpWearPhone pairup = new PairUpWearPhone(looper, devices);
-
-    Once the pairup->isDone() is true, pairup can be safely deleted; otherwise,
-the pair up might not be completed.
-
-*/
+ *  This object sets up connection between the first pair of compatible
+ *  wear and phone in the "devices" (which comes from "adb devices" command),
+ *  so that the wear can receive notification from the phone.
+ *
+ *  To use this class, simply create an instance as follows:
+ *
+ *  PairUpWearPhone *pairup = new PairUpWearPhone(looper, devices);
+ *
+ *  It is advised to delete the pairup object only after pairup->isDone()
+ *  returns true to avoid aborting the pairing up process.
+ */
 
 class PairUpWearPhoneImpl;
 
 class PairUpWearPhone {
 public:
-    // device could be emulator or real device, for example,
-    // emulator-5554  0123456789abcdef ...
+    // "devices" is a list of serial-ids, could contain both emulators and real devices.
     PairUpWearPhone(Looper* looper, const std::vector<std::string>& devices, int adbHostPort);
     ~PairUpWearPhone();
 

@@ -9,15 +9,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/Limits.h"
+#include <android/base/Limits.h>
+
 #include "android/looper.h"
 #include "android/sockets.h"
 #include "android/utils/debug.h"
 #include "android/wear-agent/PairUpWearPhone.h"
 #include "android/wear-agent/PairUpWearPhone_unittest.h"
 
-#include <sys/unistd.h>
 #include <gtest/gtest.h>
+#include <sys/unistd.h>
 
 #define  DPRINT(...)  do {  if (VERBOSE_CHECK(adb)) dprintn(__VA_ARGS__); } while (0)
 
@@ -28,7 +29,6 @@ namespace android {
 namespace wear {
 
 int testSendToSocket(int socketFd, const char* message) {
-    //VERBOSE_ENABLE(adb);
     DPRINT("---sending message:%s\n", message);
     int size = strlen(message);
     const char* ptr = message;
@@ -99,7 +99,6 @@ int testExpectMessageFromSocket(int socketFd, const char* message, int header) {
 
 int testPairUpWearPhone(int adbServerSocket, int consoleServerSocket, const char* wearDevice,
         const char* phoneDevice, bool usbPhone) {
-    //VERBOSE_ENABLE(adb);
     char buf[1024] = {'\0'};
     // query regarding the watch
     int agentSocketQuery = socket_accept_any(adbServerSocket);

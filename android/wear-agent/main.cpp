@@ -16,7 +16,6 @@
 #include "android/utils/socket_drainer.h"
 #include "android/wear-agent/WearAgent.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -73,9 +72,7 @@ int main(int argc, char** argv)
 }
 
 bool parse_arguments(int argc, char** argv, int& adbHostPort, int& secondsToRun) {
-    if (argc == 1) {
-        return true;
-    }
+    if (argc == 1) return true;
     int i=0;
     while (1) {
         ++ i;
@@ -114,8 +111,6 @@ bool parse_arguments(int argc, char** argv, int& adbHostPort, int& secondsToRun)
 }
 
 void print_help(const char* progname) {
-    assert(progname);
-    // Note: the help message is made to look similar to adb -h message
     printf("Android Wear Connection Agent version 1.0.0\n");
     printf("usage:");
     printf("\t%s     [options]\n", progname);
