@@ -91,7 +91,7 @@ var_assign () {
     local __var_assign_value
     shift
     # Escape any single quote in the value.
-    __var_assign_value=$(printf "%s" "$*" | sed -e "s/'/\\'/g")
+    __var_assign_value=$(printf "%s" "$*" | sed -e "s/'/'\"'\"'/g")
     # Assign the value to the variable.
     eval $__var_assign_name=\'"$__var_assign_value"\'
 }
