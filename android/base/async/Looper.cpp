@@ -313,7 +313,13 @@ public:
             }
 
             // Wait for fd events until next deadline.
-            int ret = mWaiter->wait(nextDeadline);
+            Duration timeOut = INT64_MAX;
+            if (nextDeadline < kDurationInfinite) {
+                timeOut = nextDeadline - nowMs();
+                if (timeOut < 0) timeOut = 0;
+            }
+
+            int ret = mWaiter->wait(timeOut);
             if (ret < 0) {
                 // Error, force stop.
                 break;

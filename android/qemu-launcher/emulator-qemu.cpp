@@ -660,10 +660,6 @@ extern "C" int main(int argc, char **argv, char **envp) {
     } else {
         int ramSize = hw->hw_ramSize;
         if (ramSize <= 0) {
-#if 1
-            // For ARM64, use 1GB by default.
-            ramSize = 1024 * 1024ULL;
-#else
             /* Compute the default RAM size based on the size of screen.
              * This is only used when the skin doesn't provide the ram
              * size through its hardware.ini (i.e. legacy ones) or when
@@ -686,9 +682,9 @@ extern "C" int main(int argc, char **argv, char **envp) {
                 ramSize = 128;
             else
                 ramSize = 256;
+
+            hw->hw_ramSize = ramSize;
         }
-#endif
-        hw->hw_ramSize = ramSize;
     }
 
 #if 1
@@ -876,7 +872,4 @@ extern "C" int main(int argc, char **argv, char **envp) {
             strerror(errno));
 
     return errno;
-}
-}
-}
 }
