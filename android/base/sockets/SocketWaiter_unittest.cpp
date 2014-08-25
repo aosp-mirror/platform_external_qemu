@@ -12,6 +12,7 @@
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/sockets/SocketWaiter.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "include/android/sockets.h"
 
 #include <gtest/gtest.h>
 
@@ -34,6 +35,7 @@ TEST(SocketWaiter, reset) {
 
     int s1, s2;
 
+    ASSERT_EQ(0, socket_init());
     ASSERT_EQ(0, socketCreatePair(&s1, &s2));
 
     waiter->update(s1, SocketWaiter::kEventRead);
@@ -50,6 +52,7 @@ TEST(SocketWaiter, update) {
 
     int s1, s2;
 
+    ASSERT_EQ(0, socket_init());
     ASSERT_EQ(0, socketCreatePair(&s1, &s2));
 
     waiter->update(s1, SocketWaiter::kEventRead);
@@ -84,6 +87,7 @@ TEST(SocketWaiter, waitOnReadEvent) {
 
     int s1, s2;
 
+    ASSERT_EQ(0, socket_init());
     ASSERT_EQ(0, socketCreatePair(&s1, &s2));
 
     waiter->update(s1, SocketWaiter::kEventRead);
@@ -106,6 +110,7 @@ TEST(SocketWaiter, waitOnWriteEvent) {
 
     int s1, s2;
 
+    ASSERT_EQ(0, socket_init());
     ASSERT_EQ(0, socketCreatePair(&s1, &s2));
 
     waiter->update(s2, SocketWaiter::kEventWrite);
