@@ -132,9 +132,9 @@ connection_poll( ProxyConnection*   root,
         case STATE_RECEIVE_ANSWER_LINE2:
             ret = proxy_connection_receive_line(root, root->socket);
             if (ret == DATA_COMPLETED) {
+                const char*  line = root->str->s;
                 if (conn->state == STATE_RECEIVE_ANSWER_LINE1) {
                     int  http1, http2, codenum;
-                    const char*  line = root->str->s;
 
                     if ( sscanf(line, "HTTP/%d.%d %d", &http1, &http2, &codenum) != 3 ) {
                         PROXY_LOG( "%s: invalid answer from proxy: '%s'",
@@ -154,9 +154,13 @@ connection_poll( ProxyConnection*   root,
                     conn->state = STATE_RECEIVE_ANSWER_LINE2;
                     proxy_connection_rewind(root);
                 } else {
-                    /* ok, we're connected */
-                    PROXY_LOG("%s: connection succeeded", root->name);
-                    proxy_connection_free( root, 1, PROXY_EVENT_CONNECTED );
+                    if (line[0] == '\0') { /* end of headers */
+                        /* ok, we're connected */
+                        PROXY_LOG("%s: connection succeeded", root->name);
+                        proxy_connection_free( root, 1, PROXY_EVENT_CONNECTED );
+                    } else {
+                        /* just skip headers */
+                    }
                 }
             }
             break;
