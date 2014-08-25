@@ -201,7 +201,7 @@ int socketCreatePair(int* fd1, int* fd2) {
         return -1;
     }
 
-    socketSetNonBlocking(s0.get());
+    // socketSetNonBlocking(s0.get());
 
     /* now connect a client socket to it, we first need to
      * extract the server socket's port number */

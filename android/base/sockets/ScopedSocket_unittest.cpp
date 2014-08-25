@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/base/sockets/ScopedSocket.h"
+#include "include/android/sockets.h"
 
 #include <gtest/gtest.h>
 
@@ -39,11 +40,13 @@ TEST(ScopedSocket, DefaultConstructor) {
 }
 
 TEST(ScopedSocket, Constructor) {
+    socket_init();
     ScopedSocket f(OpenNull());
     EXPECT_TRUE(f.valid());
 }
 
 TEST(ScopedSocket, Release) {
+    socket_init();
     ScopedSocket f(OpenNull());
     EXPECT_TRUE(f.valid());
     int fd = f.release();
@@ -53,6 +56,7 @@ TEST(ScopedSocket, Release) {
 }
 
 TEST(ScopedSocket, Close) {
+    socket_init();
     ScopedSocket f(OpenNull());
     EXPECT_TRUE(f.valid());
     f.close();
@@ -60,6 +64,7 @@ TEST(ScopedSocket, Close) {
 }
 
 TEST(ScopedSocket, Swap) {
+    socket_init();
     ScopedSocket f1;
     ScopedSocket f2(OpenNull());
     EXPECT_FALSE(f1.valid());
