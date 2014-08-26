@@ -199,15 +199,6 @@ void socketInitWinsock() {
         } while (0);
 #endif  // !_WIN32
 
-int socketCreateTcp() {
-#ifdef _WIN32
-    socketInitWinsock();
-#endif
-    int s = ::socket(AF_INET, SOCK_STREAM, 0);
-    ON_SOCKET_ERROR_RETURN_M1(s);
-    return s;
-}
-
 // Generic union to handle the mess of sockaddr variants without
 // compiler warnings about aliasing.
 union SockAddressStorage {
@@ -445,6 +436,15 @@ int socketCreatePair(int* fd1, int* fd2) {
 
     return 0;
 #endif /* _WIN32 */
+}
+
+int socketCreateTcp() {
+#ifdef _WIN32
+    socketInitWinsock();
+#endif
+    int s = ::socket(AF_INET, SOCK_STREAM, 0);
+    ON_SOCKET_ERROR_RETURN_M1(s);
+    return s;
 }
 
 }  // namespace base
