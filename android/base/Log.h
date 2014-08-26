@@ -180,7 +180,7 @@ LogSeverity getMinLogLevel();
 // DCHECK_IS_ON() is used to indicate whether DCHECK() should do anything.
 #if ENABLE_DCHECK == 0
     // NOTE: Compile-time constant ensures the DCHECK() statements are
-    // note compiled in the final binary.
+    // not compiled in the final binary.
 #  define DCHECK_IS_ON()  false
 #elif ENABLE_DCHECK == 1
 #  define DCHECK_IS_ON()  ::android::base::dcheckIsEnabled()
@@ -198,7 +198,7 @@ bool setDcheckLevel(bool enabled);
 // DLOG() is like LOG() for debug builds, and doesn't do anything for
 // release one. This is useful to add log messages that you don't want
 // to see in the final binaries, but are useful during testing.
-#define DLOG(severity)  LOG_IF(severity, DLOG_IS_ON())
+#define DLOG(severity)  LOG_IF(severity, DLOG_IS_ON(severity))
 
 // DLOG_IF() is like DLOG() for debug builds, and doesn't do anything for
 // release one. See DLOG() comments.
@@ -212,6 +212,17 @@ bool setDcheckLevel(bool enabled);
 #define DCHECK(condition) \
         LOG_IF(FATAL, DCHECK_IS_ON() && !(condition)) \
             << "Check failed: " #condition ". "
+
+// DPLOG() is like DLOG() that also appends the string message corresponding
+// to the current value of 'errno' just before the macro is called. This
+// also preserves the value of 'errno' so it can be tested after the
+// macro call (i.e. any error during log output does not interfere).
+#define DPLOG(severity)  PLOG_IF(severity, DLOG_IS_ON(severity))
+
+// DPLOG_IF() tests whether |condition| is true before calling
+// DPLOG(severity)
+#define DPLOG_IF(severity, condition)  \
+        PLOG_IF(severity, DLOG_IS_ON() && (condition))
 
 // Convenience class used hold a formatted string for logging reasons.
 // Usage example:
