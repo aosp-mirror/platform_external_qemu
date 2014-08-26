@@ -61,6 +61,10 @@ int socketTcpLoopbackClient(int port);
 // Return 0 in success, or -1/errno on error.
 int socketCreatePair(int *s1, int* s2);
 
+// Create a new TCP-based socket. At the moment, this should only be used
+// for unit-testing.
+int socketCreateTcp();
+
 }  // namespace base
 }  // namespace android
 

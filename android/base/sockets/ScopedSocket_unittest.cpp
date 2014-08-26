@@ -10,16 +10,9 @@
 // GNU General Public License for more details.
 
 #include "android/base/sockets/ScopedSocket.h"
+#include "android/base/sockets/SocketUtils.h"
 
 #include <gtest/gtest.h>
-
-#ifdef _WIN32
-#  include <winsock2.h>
-#  include <ws2tcpip.h>
-#else
-#  include <sys/types.h>
-#  include <sys/socket.h>
-#endif
 
 namespace android {
 namespace base {
@@ -27,7 +20,7 @@ namespace base {
 namespace {
 
 int OpenNull() {
-    return ::socket(AF_INET, SOCK_STREAM, 0);
+    return socketCreateTcp();
 }
 
 }  // namespace
