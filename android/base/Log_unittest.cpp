@@ -317,5 +317,27 @@ TEST_F(PLogTest, PLogInfoPreservesErrno) {
     CHECK_EXPECTATIONS();
 }
 
+#if ENABLE_DLOG
+TEST_F(PLogTest, DPlogInfoEmpty) {
+    setExpectedErrno(LOG_INFO, __LINE__ + 2, EINVAL, "");
+    errno = EINVAL;
+    DPLOG(INFO);
+    CHECK_EXPECTATIONS();
+}
+
+TEST_F(PLogTest, DPlogInfoPreservesErrno) {
+    // Select a value that is unlikely to ever be raised by the logging
+    // machinery.
+    const int kErrnoCode = ENOEXEC;
+    setForcedErrno(EINVAL);
+    setExpectedErrno(LOG_INFO, __LINE__ + 2, kErrnoCode, "Hi");
+    errno = kErrnoCode;
+    DPLOG(INFO) << "Hi";
+    EXPECT_EQ(kErrnoCode, errno);
+    CHECK_EXPECTATIONS();
+}
+
+#endif
+
 }  // namespace base
 }  // namespace android
