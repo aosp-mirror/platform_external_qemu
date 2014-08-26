@@ -164,10 +164,11 @@ build_darwin_binaries_on () {
         panic "Can't rebuild binaries on Darwin, use --verbose to see why!"
 
   dump "Retrieving Darwin binaries from: $HOST"
+  # `pwd` == external/qemu
   rm -rf objs/*
-  run scp $HOST:$DST_DIR/$PKG_FILE_PREFIX/qemu/objs/emulator* objs/
-  run scp -r $HOST:$DST_DIR/$PKG_FILE_PREFIX/qemu/objs/lib objs/lib
+  run rsync -haz --delete --exclude=intermediates --exclude=libs $HOST:$DST_DIR/$PKG_FILE_PREFIX/qemu/objs .
   # TODO(digit): Retrieve PC BIOS files.
+  dump "Deleting files off darwin system"
   run ssh $HOST rm -rf $DST_DIR/$PKG_FILE_PREFIX
 }
 
@@ -358,8 +359,8 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
         panic "The --copy-prebuilts=<dir> option requires --darwin-ssh=<host>."
     fi
     TARGET_AOSP=$OPT_COPY_PREBUILTS
-    if [ ! -f "$TARGET_AOSP/build/envsetup.sh" ]; then
-        panic "Not an AOSP checkout / workspace: $TARGET_AOSP"
+    if [ ! -d "$TARGET_AOSP/prebuilts/android-emulator" ]; then
+        panic "Could not find prebuilts/android-emulator in: '$TARGET_AOSP'"
     fi
     TARGET_PREBUILTS_DIR=$TARGET_AOSP/prebuilts/android-emulator
     log "Using AOSP prebuilts directory: $TARGET_PREBUILTS_DIR"
