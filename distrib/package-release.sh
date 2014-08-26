@@ -213,6 +213,7 @@ esac
 DO_HELP=
 OPT_COPY_PREBUILTS=
 OPT_DARWIN_SSH=
+OPT_DEBUG=
 OPT_PKG_DIR=
 OPT_PKG_PREFIX=
 OPT_REVISION=
@@ -229,6 +230,9 @@ for OPT; do
             ;;
         --darwin-ssh=*)
             OPT_DARWIN_SSH=${OPT##--darwin-ssh=}
+            ;;
+        --debug)
+            OPT_DEBUG=true
             ;;
         --package-dir=*)
             OPT_PKG_DIR=${OPT##--package-dir=}
@@ -382,6 +386,10 @@ case $VERBOSE in
     REBUILD_FLAGS="--verbose --verbose"
     ;;
 esac
+
+if [ "$OPT_DEBUG" ]; then
+    REBUILD_FLAGS="$REBUILD_FLAGS --debug"
+fi
 
 # Remove duplicates.
 SYSTEMS=$(echo "$SYSTEMS" | tr ' ' '\n' | sort -u | tr '\n' ' ')
