@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b36c1d49_49a8e5aa",
+        "filename": "android/base/sockets/ScopedSocket_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-08-26T12:25:31Z",
+      "side": 1,
+      "message": "No, we can\u0027t do that because android/base/ shall not depend on anything that isn\u0027t under the same directory.\n\nAlso, if you were to use this header, don\u0027t use the include/ prefix, but \"android/sockets.h\" instead.",
+      "revId": "8eebfa2422b419daf98302ea57dbc9637e21feaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
