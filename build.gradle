@@ -30,25 +30,11 @@ TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIB
             builtBy buildDefaultEmulator
         }
 
-        item("$buildDefaultEmulator.output/emulator-arm") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
         item("$buildDefaultEmulator.output/emulator64-arm") {
             executable true
             builtBy buildDefaultEmulator
         }
-
-        item("$buildDefaultEmulator.output/emulator-mips") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
         item("$buildDefaultEmulator.output/emulator64-mips") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-
-        item("$buildDefaultEmulator.output/emulator-x86") {
             executable true
             builtBy buildDefaultEmulator
         }
@@ -67,21 +53,10 @@ TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIB
             into 'lib'
         }
 
-        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator-arm") {
-            executable true
-        }
         item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator64-arm") {
             executable true
         }
-
-        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator-mips") {
-            executable true
-        }
         item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator64-mips") {
-            executable true
-        }
-
-        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator-x86") {
             executable true
         }
         item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator64-x86") {
@@ -93,21 +68,10 @@ TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIB
             into 'lib'
         }
 
-        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator-arm") {
-            executable true
-        }
         item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator64-arm") {
             executable true
         }
-
-        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator-mips") {
-            executable true
-        }
         item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator64-mips") {
-            executable true
-        }
-
-        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator-x86") {
             executable true
         }
         item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator64-x86") {
