@@ -75,6 +75,9 @@ echo "Building sources."
 run make -j$HOST_NUM_CPUS OBJS_DIR="$OUT_DIR" ||
     panic "Could not build sources, please run 'make' to see why."
 
+RUN_32BIT_TESTS=
+RUN_64BIT_TESTS=true
+
 TEST_SHELL=
 EXE_SUFFIX=
 if [ "$MINGW" ]; then
@@ -87,21 +90,32 @@ if [ "$MINGW" ]; then
     echo "WARNING: Wine is not installed on this machine!! Unit tests will be ignored!!"
     NO_TESTS=true
   fi
+
+  RUN_32BIT_TESTS=true
+fi
+
+if [ "$HOST_OS" = "Linux" ]; then
+    # Linux 32-bit binaries are deprecated but not removed yet!
+    RUN_32BIT_TESTS=true
 fi
 
 if [ -z "$NO_TESTS" ]; then
-    echo "Running 32-bit unit test suite."
-    FAILURES=""
-    for UNIT_TEST in emulator_unittests emugl_common_host_unittests; do
-    echo "   - $UNIT_TEST"
-    run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
-    done
-
-    echo "Running 64-bit unit test suite."
-    for UNIT_TEST in emulator64_unittests emugl64_common_host_unittests; do
+    if [ "$RUN_32BIT_TESTS" ]; then
+        echo "Running 32-bit unit test suite."
+        FAILURES=""
+        for UNIT_TEST in emulator_unittests emugl_common_host_unittests; do
         echo "   - $UNIT_TEST"
         run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
-    done
+        done
+    fi
+
+    if [ "$RUN_64BIT_TESTS" ]; then
+        echo "Running 64-bit unit test suite."
+        for UNIT_TEST in emulator64_unittests emugl64_common_host_unittests; do
+            echo "   - $UNIT_TEST"
+            run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
+        done
+    fi
 
     if [ "$FAILURES" ]; then
         panic "Unit test failures: $FAILURES"
