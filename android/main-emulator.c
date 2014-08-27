@@ -302,6 +302,17 @@ getTargetEmulatorPath(const char* progName,
             !force_32bit && android_getHostBitness() == 64;
 #endif
 
+#if !defined(_WIN32) && !defined(__APPLE__)
+    // Display a deprecation message when running on a 32-bit Linux host.
+    // By default, we will refuse to run on 32-bit Linux, but the -force-32bit
+    // option can be used to allow the emulator to run.
+    if (android_getHostBitness() == 32 && !force_32bit) {
+        APANIC("Emulation on 32-bit Linux hosts is deprecated and untested and\n"
+               "and will be removed in a future release.  Use the option\n"
+               "-force-32bit to ignore this warning and run on 32-bit hosts.\n");
+    }
+#endif
+
     /* Only search in current path if there is no directory separator
      * in |progName|. */
 #ifdef _WIN32
