@@ -67,21 +67,10 @@ TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIB
             into 'lib'
         }
 
-        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator-arm") {
-            executable true
-        }
         item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator64-arm") {
             executable true
         }
-
-        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator-mips") {
-            executable true
-        }
         item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator64-mips") {
-            executable true
-        }
-
-        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator-x86") {
             executable true
         }
         item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator64-x86") {
