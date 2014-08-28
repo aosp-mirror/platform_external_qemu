@@ -17,14 +17,14 @@ sdk {
             into 'lib'
             notice null
         }
-        item("$buildDefaultEmulator.output/emulator") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
 
 /*
 XAV(2014-06-17)
 TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIBS
+        item("$buildDefaultEmulator.output/emulator") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
         item("$buildDefaultEmulator.output/lib") {
             into 'lib'
             builtBy buildDefaultEmulator
@@ -63,8 +63,14 @@ TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIB
 // --------------
 // XAV(2014-06-17) TEMPORARY EMULATOR FROM PREBUILTS
     mac {
+        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator") {
+            executable true
+        }
         item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/lib") {
             into 'lib'
+        }
+        item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/lib/pc-bios") {
+            into 'lib/pc-bios'
         }
 
         item("$project.rootDir/../prebuilts/tools/darwin-x86/emulator/emulator64-arm") {
@@ -78,8 +84,14 @@ TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIB
         }
     }
     linux {
+        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator") {
+            executable true
+        }
         item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/lib") {
             into 'lib'
+        }
+        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/lib/pc-bios") {
+            into 'lib/pc-bios'
         }
 
         item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/emulator-arm") {
@@ -106,13 +118,13 @@ TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIB
 // --------------
 
     windows {
+/*
+XAV(2014-06-17)
+TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIBS
         item("$buildWindowsEmulator.output/emulator.exe") {
             builtBy buildWindowsEmulator
         }
 
-/*
-XAV(2014-06-17)
-TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIBS
         item("$buildWindowsEmulator.output/lib") {
             into 'lib'
             builtBy buildWindowsEmulator
@@ -131,8 +143,12 @@ TEMPORARILY DISABLE BUILD TO USE PREBUILTS FOR DEFAULT 32bit(guest) EMU + GL LIB
 
 // --------------
 // XAV(2014-06-17) TEMPORARY EMULATOR FROM PREBUILTS
+        item("$project.rootDir/../prebuilts/tools/windows/emulator/emulator.exe")
         item("$project.rootDir/../prebuilts/tools/windows/emulator/lib") {
             into 'lib'
+        }
+        item("$project.rootDir/../prebuilts/tools/windows/emulator/lib/pc-bios") {
+            into 'lib/pc-bios'
         }
 
         item("$project.rootDir/../prebuilts/tools/windows/emulator/emulator-arm.exe")
