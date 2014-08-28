@@ -581,28 +581,54 @@ EOF
 done
 
 if [ "$OPT_COPY_PREBUILTS" ]; then
-    for SYSTEM in linux darwin; do
+    for SYSTEM in linux darwin windows; do
         SRC_DIR="$TEMP_BUILD_DIR"/$SYSTEM/$PKG_PREFIX-$PKG_REVISION
-        DST_DIR=$TARGET_PREBUILTS_DIR/$SYSTEM-x86_64
-        dump "[$SYSTEM-x86_64] Copying emulator binaries into $DST_DIR"
+        if [ $SYSTEM = "windows" ]; then
+            SYSTEM_ARCH=$SYSTEM
+            BITNESS=
+        else
+            SYSTEM_ARCH=$SYSTEM-x86_64
+            BITNESS=64
+        fi
+        DST_DIR=$TARGET_PREBUILTS_DIR/$SYSTEM_ARCH
+        dump "[$SYSTEM_ARCH] Copying emulator binaries into $DST_DIR"
         run mkdir -p "$DST_DIR" || panic "Could not create directory: $DST_DIR"
+        EXEEXT=
         case $SYSTEM in
             linux) DLLEXT=.so;;
             darwin) DLLEXT=.dylib;;
+            windows)
+              DLLEXT=.dll
+              EXEEXT=.exe
+              ;;
             *) panic "Unsupported prebuilt system: $SYSTEM";;
         esac
-        FILES="emulator"
+        FILES="emulator$EXEEXT"
         for ARCH in arm x86 mips; do
-            FILES="$FILES emulator64-$ARCH"
+            FILES="$FILES emulator$BITNESS-$ARCH$EXEEXT"
         done
-        for ARCH in x86_64 arm64; do
-            if [ -f "$SRC_DIR/tools/emulator64-$ARCH" ]; then
-                FILES="$FILES emulator64-$ARCH"
+        for ARCH in arm64; do
+            if [ -f "$SRC_DIR/tools/emulator64-$ARCH$EXEEXT" ]; then
+                FILES="$FILES emulator64-$ARCH$EXEEXT"
             fi
         done
+
         for LIB in OpenglRender EGL_translator GLES_CM_translator GLES_V2_translator; do
-            FILES="$FILES lib/lib64$LIB$DLLEXT"
+            FILES="$FILES lib/lib$BITNESS$LIB$DLLEXT"
         done
+
+        # temparily include linux 32 bit binaries
+        if [ $SYSTEM = "linux" ]; then
+            BITNESS=
+            for ARCH in arm x86 mips; do
+                FILES="$FILES emulator$BITNESS-$ARCH$EXEEXT"
+            done
+            for LIB in OpenglRender EGL_translator GLES_CM_translator GLES_V2_translator; do
+                FILES="$FILES lib/lib$BITNESS$LIB$DLLEXT"
+            done
+        fi
+
+
         (cd "$SRC_DIR/tools" && tar cf - $FILES) | (cd $DST_DIR && tar xf -) ||
                 panic "Could not copy binaries to $DST_DIR"
     done
