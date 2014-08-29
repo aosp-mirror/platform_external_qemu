@@ -127,6 +127,38 @@ int main(int argc, char** argv)
         }
     }
 
+    /* If ANDROID_EMULATOR_FORCE_32BIT is set to 'true' or '1' in the
+     * environment, set -force-32bit automatically.
+     */
+    {
+        const char kEnvVar[] = "ANDROID_EMULATOR_FORCE_32BIT";
+        const char* val = getenv(kEnvVar);
+        if (val && (!strcmp(val, "true") || !strcmp(val, "1"))) {
+            if (!force_32bit) {
+                D("Auto-config: -force-32bit (%s=%s)\n", kEnvVar, val);
+                force_32bit = 1;
+            }
+        }
+    }
+
+#if defined(__linux__)
+    if (!force_32bit && android_getHostBitness() == 32) {
+        fprintf(stderr,
+"ERROR: 32-bit Linux Android emulator binaries are DEPRECATED, to use them\n"
+"       you will have to do at least one of the following:\n"
+"\n"
+"       - Use the '-force-32bit' option when invoking 'emulator'.\n"
+"       - Set ANDROID_EMULATOR_FORCE_32BIT to 'true' in your environment.\n"
+"\n"
+"       Either one will allow you to use the 32-bit binaries, but please be\n"
+"       aware that these will disappear in a future Android SDK release.\n"
+"       Consider moving to a 64-bit Linux system before that happens.\n"
+"\n"
+        );
+        exit(1);
+    }
+#endif
+
     /* If there is an AVD name, we're going to extract its target architecture
      * by looking at its config.ini
      */
