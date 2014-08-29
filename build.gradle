@@ -27,8 +27,10 @@ sdk {
             into 'lib'
             builtBy buildDefaultEmulator
         }
-        // prebuilts are the same for all host types
-        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/lib/pc-bios") {
+        item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/bios.bin") {
+            into 'lib/pc-bios'
+        }
+        item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/vgabios-cirrus.bin") {
             into 'lib/pc-bios'
         }
 
@@ -72,8 +74,10 @@ sdk {
             into 'lib'
             builtBy buildWindowsEmulator
         }
-        // prebuilts are the same for all host types
-        item("$project.rootDir/../prebuilts/tools/linux-x86/emulator/lib/pc-bios") {
+        item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/bios.bin") {
+            into 'lib/pc-bios'
+        }
+        item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/vgabios-cirrus.bin") {
             into 'lib/pc-bios'
         }
 
