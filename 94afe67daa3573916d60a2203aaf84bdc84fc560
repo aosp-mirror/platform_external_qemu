@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "135ec9cf_a6c6a627",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-08-29T10:02:36Z",
+      "side": 1,
+      "message": "nit: A #if defined(__linux__) would be more appropriate since it seems people have ported this code to FreeBSD (!) as well.",
+      "range": {
+        "startLine": 305,
+        "startChar": 21,
+        "endLine": 305,
+        "endChar": 23
+      },
+      "revId": "94afe67daa3573916d60a2203aaf84bdc84fc560",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
