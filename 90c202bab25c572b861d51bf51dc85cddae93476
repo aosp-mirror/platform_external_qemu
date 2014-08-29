@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "135ec9cf_e6a57e8b",
+        "filename": "distrib/package-release.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 601,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-08-29T09:47:28Z",
+      "side": 1,
+      "message": "nit: EXEEXT should be reset to an empty value on each loop iteration. The current script only works because \u0027windows\u0027 is the last item on line 584, but that\u0027s dangerous :)\n\nDon\u0027t worry, I\u0027ll fix it myself.",
+      "revId": "90c202bab25c572b861d51bf51dc85cddae93476",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "135ec9cf_86aa8a5a",
+        "filename": "distrib/package-release.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-08-29T09:47:28Z",
+      "side": 1,
+      "message": "Should be emulator64-$ARCH$EXEEXT to handle future Windows binaries.",
+      "revId": "90c202bab25c572b861d51bf51dc85cddae93476",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
