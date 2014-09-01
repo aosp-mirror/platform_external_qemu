@@ -99,10 +99,18 @@ if [ "$HOST_OS" = "Linux" ]; then
     RUN_32BIT_TESTS=true
 fi
 
+
 if [ -z "$NO_TESTS" ]; then
+    FAILURES=""
+
+    echo "Checking for 'emulator' launcher program."
+    if [ ! -f "$OUT_DIR/emulator" ]; then
+        echo "    - FAIL: $OUT_DIR/emulator is missing!"
+        FAILURES="$FAILURES emulator"
+    fi
+
     if [ "$RUN_32BIT_TESTS" ]; then
         echo "Running 32-bit unit test suite."
-        FAILURES=""
         for UNIT_TEST in emulator_unittests emugl_common_host_unittests; do
         echo "   - $UNIT_TEST"
         run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
