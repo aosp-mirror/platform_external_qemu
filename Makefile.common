@@ -180,6 +180,9 @@ common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
 $(call start-emulator-library, emulator-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
+    LOCAL_IGNORE_BITNESS := true
+endif
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
