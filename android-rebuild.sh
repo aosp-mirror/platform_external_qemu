@@ -99,10 +99,35 @@ if [ "$HOST_OS" = "Linux" ]; then
     RUN_32BIT_TESTS=true
 fi
 
+
 if [ -z "$NO_TESTS" ]; then
+    FAILURES=""
+
+    echo "Checking for 'emulator' launcher program."
+    EMULATOR=$OUT_DIR/emulator$EXE_SUFFIX
+    if [ ! -f "$EMULATOR" ]; then
+        echo "    - FAIL: $EMULATOR is missing!"
+        FAILURES="$FAILURES emulator"
+    fi
+
+    echo "Checking that 'emulator' is a 32-bit program."
+    EMULATOR_FILE=$(/usr/bin/file "$EMULATOR" 2>/dev/null)
+    if [ "$MINGW" ]; then
+        EMULATOR_FILE_PATTERN="PE32 (console) Intel 80386"
+    elif [ "$HOST_OS" = "Darwin" ]; then
+        EMULATOR_FILE_PATTERN="Mach-O executable i386"
+    else
+        EMULATOR_FILE_PATTERN="ELF 32-bit LSB executable, Intel 80386"
+    fi
+    if !(printf "%s\n" "$EMULATOR_FILE" | grep -q -F -e "$EMULATOR_FILE_PATTERN"); then
+        echo "    - FAIL: $EMULATOR is not a 32-bit executable!"
+        echo "        File type: $EMULATOR_FILE"
+        echo "        Expected : $EMULATOR_FILE_PATTERN"
+        FAILURES="$FAILURES emulator-32bit-check"
+    fi
+
     if [ "$RUN_32BIT_TESTS" ]; then
         echo "Running 32-bit unit test suite."
-        FAILURES=""
         for UNIT_TEST in emulator_unittests emugl_common_host_unittests; do
         echo "   - $UNIT_TEST"
         run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
