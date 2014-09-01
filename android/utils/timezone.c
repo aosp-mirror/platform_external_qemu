@@ -254,7 +254,11 @@ scan_timezone_dir( ScanDataRec*  scan,
 
             //D( "%s: scanning '%s'\n", __FUNCTION__, scan->path );
 
-            if ( stat( scan->path, &ent_st ) < 0 )
+            // Important: use lstat() instead of stat() because recent
+            // Ubuntu distributions creates directories full of links, e.g.
+            // /usr/share/info/posix/Australia/Sydney -> ../../Australia/Sydney
+            // and we want to ignore them.
+            if ( lstat( scan->path, &ent_st ) < 0 )
                 continue;
 
             if ( S_ISDIR(ent_st.st_mode) && depth < 2 )
