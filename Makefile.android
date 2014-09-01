@@ -19,14 +19,27 @@ EMULATOR_BUILD_32BITS := $(strip $(filter windows linux,$(HOST_OS)))
 # Windows, Linux and Darwin.
 EMULATOR_BUILD_64BITS := $(strip $(filter linux darwin windows,$(HOST_OS)))
 
-# A function that includes a file only if 32-bit binaries are necessary.
-# This is always the case, but later used with include-if-bitness-64.
+# EMULATOR_PROGRAM_BITNESS is the bitness of the 'emulator' launcher program.
+# It will be 32 if we allow 32-bit binaries to be built, 64 otherwise.
+ifneq (,$(EMULATOR_BUILD_32BITS))
+    EMULATOR_PROGRAM_BITNESS := 32
+else
+    EMULATOR_PROGRAM_BITNESS := 64
+endif
+
+# A function that includes a file only if 32-bit binaries are necessary,
+# or if LOCAL_IGNORE_BITNESS is defined for the current module.
 # $1: Build file to include.
-include-if-bitness-32 = $(if $(strip $(EMULATOR_BUILD_32BITS)),$(eval include $1))
+include-if-bitness-32 = \
+    $(if $(strip $(LOCAL_IGNORE_BITNESS)$(EMULATOR_BUILD_32BITS)),\
+        $(eval include $1))
 
 # A function that includes a file only of EMULATOR_BUILD_64BITS is not empty.
+# or if LOCAL_IGNORE_BITNESS is defined for the current module.
 # $1: Build file to include.
-include-if-bitness-64 = $(if $(strip $(EMULATOR_BUILD_64BITS)),$(eval include $1))
+include-if-bitness-64 = \
+    $(if $(strip $(LOCAL_IGNORE_BITNESS)$(EMULATOR_BUILD_64BITS)),\
+        $(eval include $1))
 
 # determine the location of platform-specific directories
 #
@@ -370,11 +383,23 @@ include $(LOCAL_PATH)/Makefile.qemu-launcher
 ###
 ###  emulator: LAUNCHER FOR TARGET-SPECIFIC EMULATOR
 ###
-###
-$(call start-emulator-program, emulator)
 
+# NOTE: Build as 32-bit or 64-bit executable, depending on the value of
+#       EMULATOR_PROGRAM_BITNESS.
+ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
+$(call start-emulator-program, emulator)
+else
+$(call start-emulator64-program, emulator)
+endif
 LOCAL_SRC_FILES := android/main-emulator.c
-LOCAL_STATIC_LIBRARIES := emulator-common
+
+ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
+    LOCAL_STATIC_LIBRARIES := emulator-common
+    # Ensure this is always built, even if 32-bit binaries are disabled.
+    LOCAL_IGNORE_BITNESS := true
+else
+    LOCAL_STATIC_LIBRARIES := emulator64-common
+endif
 
 ifeq ($(HOST_OS),windows)
 $(eval $(call insert-windows-icon))

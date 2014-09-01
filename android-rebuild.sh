@@ -64,6 +64,42 @@ case $HOST_OS in
         HOST_NUM_CPUS=1
 esac
 
+
+# Return the type of a given file, using the /usr/bin/file command.
+# $1: executable path.
+# Out: file type string, or empty if the path is wrong.
+get_file_type () {
+    /usr/bin/file "$1" 2>/dev/null
+}
+
+# Return true iff the file type string |$1| contains the expected
+# substring |$2|.
+# $1: executable file type
+# $2: expected file type substring
+check_file_type_substring () {
+    printf "%s\n" "$1" | grep -q -F -e "$2"
+}
+
+# Define EXPECTED_32BIT_FILE_TYPE and EXPECTED_64BIT_FILE_TYPE depending
+# on the current target platform. Then EXPECTED_EMULATOR_BITNESS and
+# EXPECTED_EMULATOR_FILE_TYPE accordingly.
+if [ "$MINGW" ]; then
+    EXPECTED_32BIT_FILE_TYPE="PE32 executable (console) Intel 80386"
+    EXPECTED_64BIT_FILE_TYPE="PE32+ executable (console) x86-64"
+    EXPECTED_EMULATOR_BITNESS=32
+    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
+elif [ "$HOST_OS" = "Darwin" ]; then
+    EXPECTED_32BIT_FILE_TYPE="Mach-O executable i386"
+    EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable x86_64"
+    EXPECTED_EMULATOR_BITNESS=64
+    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
+else
+    EXPECTED_32BIT_FILE_TYPE="ELF 32-bit LSB executable, Intel 80386"
+    EXPECTED_64BIT_FILE_TYPE="ELF 32-bit LSB executable, x86-64"
+    EXPECTED_EMULATOR_BITNESS=32
+    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
+fi
+
 # Build the binaries from sources.
 cd `dirname $0`
 rm -rf objs
@@ -99,10 +135,28 @@ if [ "$HOST_OS" = "Linux" ]; then
     RUN_32BIT_TESTS=true
 fi
 
+
 if [ -z "$NO_TESTS" ]; then
+    FAILURES=""
+
+    echo "Checking for 'emulator' launcher program."
+    EMULATOR=$OUT_DIR/emulator$EXE_SUFFIX
+    if [ ! -f "$EMULATOR" ]; then
+        echo "    - FAIL: $EMULATOR is missing!"
+        FAILURES="$FAILURES emulator"
+    fi
+
+    echo "Checking that 'emulator' is a $EXPECTED_EMULATOR_BITNESS-bit program."
+    EMULATOR_FILE_TYPE=$(get_file_type "$EMULATOR")
+    if ! check_file_type_substring "$EMULATOR_FILE_TYPE" "$EXPECTED_EMULATOR_FILE_TYPE"; then
+        echo "    - FAIL: $EMULATOR is not a 32-bit executable!"
+        echo "        File type: $EMULATOR_FILE_TYPE"
+        echo "        Expected : $EXPECTED_EMULATOR_FILE_TYPE"
+        FAILURES="$FAILURES emulator-bitness-check"
+    fi
+
     if [ "$RUN_32BIT_TESTS" ]; then
         echo "Running 32-bit unit test suite."
-        FAILURES=""
         for UNIT_TEST in emulator_unittests emugl_common_host_unittests; do
         echo "   - $UNIT_TEST"
         run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
