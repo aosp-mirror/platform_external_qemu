@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f38bf5a0_f7dbc0af",
+        "filename": "android/build/common.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1010055
+      },
+      "writtenOn": "2014-09-02T18:41:00Z",
+      "side": 1,
+      "message": "Confirm that GCC_VERSION_OUT is set somewhere?",
+      "range": {
+        "startLine": 285,
+        "startChar": 48,
+        "endLine": 285,
+        "endChar": 63
+      },
+      "revId": "38b9aa241c7ec51efd602532eb9e928e9a5e23ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
