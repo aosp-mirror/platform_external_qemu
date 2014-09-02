@@ -282,7 +282,9 @@ EOF
         cat $TMPL
         clean_exit
     fi
-    log "CC         : compiler check ok ($CC)"
+    log "CC         : compiler check ok ($CC) ($GCC_VERSION_OUT)"
+    CC_VER=`$CC --version`
+    log "CC_VER     : $CC_VER"
 
     # check that we can link the trivial program into an executable
     if [ -z "$LD" ] ; then
