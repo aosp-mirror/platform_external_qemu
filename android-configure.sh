@@ -118,18 +118,26 @@ fi
 
 # On Linux, try to use our prebuilt toolchain to generate binaries
 # that are compatible with Ubuntu 10.4
-if [ -z "$CC" -a -z "$OPTION_CC" -a "$HOST_OS" = linux ] ; then
-    PREBUILTS_HOST_GCC=$(dirname $0)/../../prebuilts/gcc/linux-x86/host
-    PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
-    if [ ! -f "$PROBE_HOST_CC" ]; then
-        PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-gcc
-        if [ ! -f "$PROBE_HOST_CC" ] ; then
-            PROBE_HOST_CC=$(dirname $0)/../../prebuilts/tools/gcc-sdk/gcc
+if [ -z "$CC" -a -z "$OPTION_CC" ] ; then
+    PROBE_HOST_CC=
+    PROBE_HOST_CFLAGS=
+    if [ "$HOST_OS" = "linux" ] ; then
+        PREBUILTS_HOST_GCC=$(dirname $0)/../../prebuilts/gcc/linux-x86/host
+        PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
+        if [ ! -f "$PROBE_HOST_CC" ]; then
+            PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-gcc
+            if [ ! -f "$PROBE_HOST_CC" ] ; then
+                PROBE_HOST_CC=$(dirname $0)/../../prebuilts/tools/gcc-sdk/gcc
+            fi
         fi
+    elif [ "$HOST_OS" = "darwin" ] ; then
+        PREBUILTS_HOST_GCC=$(dirname $0)/../../prebuilts/clang/darwin-x86/host
+        PROBE_HOST_CC=$PREBUILTS_HOST_GCC/3.5/bin/clang
+        PROBE_HOST_CFLAGS="-target x86_64-apple-darwin11.0.0"
     fi
     if [ -f "$PROBE_HOST_CC" ] ; then
         echo "Using prebuilt toolchain: $PROBE_HOST_CC"
-        CC="$PROBE_HOST_CC"
+        CC="$PROBE_HOST_CC $PROBE_HOST_CFLAGS"
     fi
 fi
 
