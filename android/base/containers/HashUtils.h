@@ -41,7 +41,7 @@ size_t hashShiftAdjust(size_t size, size_t oldShift);
 // Hash a pointer value into something that can be used to implement
 // hash tables.
 inline size_t pointerHash(const void* ptr) {
-    return reinterpret_cast<size_t>(
+    return static_cast<size_t>(
             reinterpret_cast<uintptr_t>(ptr));
 }
 
