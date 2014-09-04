@@ -3313,7 +3313,7 @@ int main(int argc, char **argv, char **envp)
             }
             pstrcat(tmp,sizeof(tmp),",initfile=");
             pstrcat(tmp,sizeof(tmp),initImage);
-        } else {
+        } else if (!imageFile) {
             PANIC("Missing initial system image path!");
         }
         systemImageIsExt4 = imageFile && android_pathIsExt4PartitionImage(imageFile);
@@ -3619,7 +3619,7 @@ int main(int argc, char **argv, char **envp)
         //  /etc/fstab.goldfish is modified to mount an EXT4, not YAFFS2,
         // partition for /cache.
         //
-        // cacheImageIsExt4 = partPath && android_pathIsExt4PartitionImage(partPath);
+        cacheImageIsExt4 = partPath && android_pathIsExt4PartitionImage(partPath);
         if (cacheImageIsExt4) {
             /* Using a nand device to approximate a block device until full
              * support is added */
