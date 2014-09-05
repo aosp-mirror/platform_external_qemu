@@ -211,6 +211,14 @@ union SockAddressStorage {
         inet.sin_port = htons(port);
         inet.sin_addr.s_addr = htonl(0x7f000001);
     }
+
+    int getPort() {
+        if (generic.sa_family == AF_INET) {
+            return ntohs(inet.sin_port);
+        } else {
+            return -1;
+        }
+    }
 };
 
 int socketSetOption(int socket, int  domain, int option, int  _flag) {
@@ -373,6 +381,12 @@ int socketTcpLoopbackClient(int port) {
     return s.release();
 }
 
+int socketAcceptAny(int serverSocket) {
+    int s = HANDLE_EINTR(::accept(serverSocket, NULL, NULL));
+    ON_SOCKET_ERROR_RETURN_M1(s);
+    return s;
+}
+
 int socketCreatePair(int* fd1, int* fd2) {
 #ifndef _WIN32
     int fds[2];
@@ -408,14 +422,8 @@ int socketCreatePair(int* fd1, int* fd2) {
 
     /* now connect a client socket to it, we first need to
      * extract the server socket's port number */
-    SockAddressStorage addr;
-    socklen_t addrLen = sizeof(addr.inet);
-    if (getsockname(s0.get(), &addr.generic, &addrLen) < 0) {
-        DPLOG(ERROR) << "Could not get socket name!\n";
-        return -1;
-    }
+    int port = socketGetPort(s0.get());
 
-    int port = ntohs(addr.inet.sin_port);
     ScopedSocket s2(socketTcpLoopbackClient(port));
     if (!s2.valid()) {
         return -1;
@@ -445,6 +453,16 @@ int socketCreateTcp() {
     int s = ::socket(AF_INET, SOCK_STREAM, 0);
     ON_SOCKET_ERROR_RETURN_M1(s);
     return s;
+}
+
+int socketGetPort(int socket) {
+    SockAddressStorage addr;
+    socklen_t addrLen = sizeof(addr);
+    if (getsockname(socket, &addr.generic, &addrLen) < 0) {
+        DPLOG(ERROR) << "Could not get socket name!\n";
+        return -1;
+    }
+    return addr.getPort();
 }
 
 }  // namespace base

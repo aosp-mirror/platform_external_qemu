@@ -53,6 +53,10 @@ int socketTcpLoopbackServer(int port);
 // Return new socket on success, or -1/errno on error.
 int socketTcpLoopbackClient(int port);
 
+// Accept a connection on server |socket|, and return the new connection
+// socket descriptor, or -1/errno on error.
+int socketAcceptAny(int socket);
+
 // Create a pair of non-blocking sockets connected to each other, this is
 // equivalent to calling the Unix function:
 //     socketpair(AF_LOCAL, SOCK_STREAM, 0, &fds);
@@ -64,6 +68,9 @@ int socketCreatePair(int *s1, int* s2);
 // Create a new TCP-based socket. At the moment, this should only be used
 // for unit-testing.
 int socketCreateTcp();
+
+// Return the port number of a TCP or UDP socket, or -1/errno otherwise.
+int socketGetPort(int socket);
 
 }  // namespace base
 }  // namespace android
