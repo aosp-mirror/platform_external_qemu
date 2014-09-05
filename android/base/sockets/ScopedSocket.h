@@ -45,6 +45,14 @@ public:
         return result;
     }
 
+    void reset(int socket) {
+        int oldSocket = mSocket;
+        mSocket = socket;
+        if (oldSocket >= 0) {
+            socketClose(oldSocket);
+        }
+    }
+
     void swap(ScopedSocket* other) {
         int tmp = mSocket;
         mSocket = other->mSocket;

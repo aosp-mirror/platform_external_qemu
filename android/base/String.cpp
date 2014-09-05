@@ -23,6 +23,30 @@
 namespace android {
 namespace base {
 
+#ifdef _WIN32
+// The Windows CRT doesn't provide memmem().
+static void *memmem(const void *haystack,
+                    size_t haystack_len,
+                    const void *needle,
+                    size_t needle_len){
+    const char *begin = static_cast<const char*>(haystack);
+    const char *last_possible = begin + haystack_len - needle_len;
+
+    if (needle_len == 0) {
+        return (void *)begin;
+    }
+    if (haystack_len < needle_len) {
+        return NULL;
+    }
+    for (; begin <= last_possible; begin++) {
+        if (!memcmp(begin, needle, needle_len)) {
+            return (void *)begin;
+        }
+    }
+    return NULL;
+}
+#endif  // _WIN32
+
 String::String() : mStr(mStorage), mSize(0) {
     mStorage[0] = '\0';
 }
@@ -300,6 +324,26 @@ void String::swap(String* other) {
     // Always swap the sizes.
     mSize = theirSize;
     other->mSize = mySize;
+}
+
+bool String::contains(const char* str) const {
+    if (!str) {
+        return false;
+    }
+    if (!str[0]) {
+        return true;
+    }
+    return ::strstr(mStr, str) != NULL;
+}
+
+bool String::contains(const char* str, size_t strLen) const {
+    if (!str) {
+        return false;
+    }
+    if (strLen == 0) {
+        return true;
+    }
+    return memmem(mStr, mSize, str, strLen) != NULL;
 }
 
 // static

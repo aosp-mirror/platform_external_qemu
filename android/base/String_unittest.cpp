@@ -382,5 +382,30 @@ TEST(String, Swap) {
     }
 }
 
+TEST(String, contains) {
+    const String str("Hello World!");
+
+    EXPECT_FALSE(str.contains(NULL));
+    EXPECT_TRUE(str.contains(""));
+
+    EXPECT_TRUE(str.contains("Hello"));
+    EXPECT_TRUE(str.contains("World"));
+
+    EXPECT_FALSE(str.contains("hell"));
+    EXPECT_FALSE(str.contains("orld!!"));
+
+    EXPECT_FALSE(str.contains(NULL, 10U));
+    EXPECT_TRUE(str.contains("HellO", 4U));
+    EXPECT_FALSE(str.contains("HellO", 5U));
+    EXPECT_TRUE(str.contains("World?", 5U));
+    EXPECT_FALSE(str.contains("World?", 6U));
+
+    EXPECT_TRUE(str.contains(String()));
+    EXPECT_TRUE(str.contains(String("Hello")));
+    EXPECT_TRUE(str.contains(String("World")));
+    EXPECT_FALSE(str.contains(String("hello")));
+    EXPECT_FALSE(str.contains(String("old!!")));
+}
+
 }  // namespace base
 }  // namespace android

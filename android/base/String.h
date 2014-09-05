@@ -179,6 +179,15 @@ public:
     // Swap the content of this string with another one.
     void swap(String* other);
 
+    // Test for containment.
+    bool contains(const char* str, size_t strLen) const;
+
+    bool contains(const char* str) const;
+
+    bool contains(const String& str) const {
+        return contains(str.c_str(), str.size());
+    }
+
 protected:
     friend class StringVector;
 
