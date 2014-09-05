@@ -45,6 +45,15 @@ TEST(ScopedSocket, Release) {
     ::close(fd);
 }
 
+TEST(ScopedSocket, Reset) {
+    ScopedSocket f(OpenNull());
+    int fd2 = OpenNull();
+    EXPECT_TRUE(f.valid());
+    f.reset(fd2);
+    EXPECT_TRUE(f.valid());
+    EXPECT_EQ(fd2, f.get());
+}
+
 TEST(ScopedSocket, Close) {
     ScopedSocket f(OpenNull());
     EXPECT_TRUE(f.valid());
