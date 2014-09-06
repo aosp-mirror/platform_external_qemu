@@ -284,10 +284,10 @@ AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
                 break;
 
             if (!path_exists(out)) {
-                derror("Can't access ANDROID_PRODUCT_OUT as '%s'\n"
+                dwarning("Can't access ANDROID_PRODUCT_OUT as '%s'\n"
                     "You need to build the Android system before launching the emulator",
                     out);
-                exit(2);
+                break;
             }
 
             android_build_root = getenv("ANDROID_BUILD_TOP");

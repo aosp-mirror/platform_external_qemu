@@ -249,16 +249,23 @@ propertyFile_getAdbdCommunicationMode(const FileData* data) {
 
 char* path_getBuildBuildProp(const char* androidOut) {
     char temp[MAX_PATH], *p = temp, *end = p + sizeof(temp);
+    char temp2[MAX_PATH], *p2 = temp2, *end2 = p2 + sizeof(temp2);
     p = bufprint(temp, end, "%s/system/build.prop", androidOut);
-    if (p >= end) {
+    p2 = bufprint(temp2, end2, "%s/build.prop", androidOut);
+    if (p >= end || p2 >= end2) {
         D("ANDROID_BUILD_OUT is too long: %s\n", androidOut);
         return NULL;
     }
     if (!path_exists(temp)) {
-        D("Cannot find build properties file: %s\n", temp);
-        return NULL;
+        if (!path_exists(temp2)) {
+            D("Cannot find build properties file: %s\n", temp);
+            return NULL;
+        } else {
+            return ASTRDUP(temp2);
+        }
+    } else {
+        return ASTRDUP(temp);
     }
-    return ASTRDUP(temp);
 }
 
 
