@@ -74,6 +74,8 @@ public:
         }
 
         virtual ~FdWatch() {
+            dontWantWrite();
+            dontWantRead();
             clearPending();
             genLooper()->delFdWatch(this);
         }
