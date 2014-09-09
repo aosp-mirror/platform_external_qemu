@@ -65,7 +65,7 @@ skin_keyboard_set_keyset( SkinKeyboard*  keyboard, SkinKeyset*  kset )
 {
     if (kset == NULL)
         return;
-    if (keyboard->kset && keyboard->kset != android_keyset) {
+    if (keyboard->kset && keyboard->kset != skin_keyset_get_default()) {
         skin_keyset_free(keyboard->kset);
     }
     keyboard->kset = kset;
@@ -521,11 +521,12 @@ skin_keyboard_create_from_charmap_name(const char*  charmap_name,
     kb->enabled  = 0;
 
     /* add default keyset */
-    if (android_keyset)
-        kb->kset = android_keyset;
-    else
-        kb->kset = skin_keyset_new_from_text( skin_keyset_get_default() );
-
+    if (skin_keyset_get_default()) {
+        kb->kset = skin_keyset_get_default();
+    } else {
+        kb->kset = skin_keyset_new_from_text(
+                skin_keyset_get_default_text());
+    }
     return kb;
 }
 

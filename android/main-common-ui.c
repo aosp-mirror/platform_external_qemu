@@ -82,17 +82,16 @@ user_config_get_window_pos( int *window_x, int *window_y )
 
 #define  KEYSET_FILE    "default.keyset"
 
-SkinKeyset*  android_keyset = NULL;
-
 static int
 load_keyset(const char*  path)
 {
     if (path_can_read(path)) {
         AConfig*  root = aconfig_node("","");
         if (!aconfig_load_file(root, path)) {
-            android_keyset = skin_keyset_new(root);
-            if (android_keyset != NULL) {
+            SkinKeyset* keyset = skin_keyset_new(root);
+            if (keyset != NULL) {
                 D( "keyset loaded from: %s", path);
+                skin_keyset_set_default(keyset);
                 return 0;
             }
         }
@@ -151,7 +150,7 @@ write_default_keyset( void )
     /* only write if there is no file here */
     if (!path_exists(path)) {
         int          fd = open( path, O_WRONLY | O_CREAT, 0666 );
-        const char*  ks = skin_keyset_get_default();
+        const char*  ks = skin_keyset_get_default_text();
 
 
         D( "writing default keyset file to %s", path );

@@ -335,24 +335,29 @@ int main(int argc, char **argv)
         exit(1);
     }
 
+    SkinKeyset* keyset = NULL;
     if (opts->keyset) {
         parse_keyset(opts->keyset, opts);
-        if (!android_keyset) {
+        keyset = skin_keyset_get_default();
+        if (!keyset) {
             fprintf(stderr,
                     "emulator: WARNING: could not find keyset file named '%s',"
                     " using defaults instead\n",
                     opts->keyset);
         }
     }
-    if (!android_keyset) {
+    if (!keyset) {
         parse_keyset("default", opts);
-        if (!android_keyset) {
-            android_keyset = skin_keyset_new_from_text( skin_keyset_get_default() );
-            if (!android_keyset) {
+        keyset = skin_keyset_get_default();
+        if (!keyset) {
+            keyset = skin_keyset_new_from_text(
+                    skin_keyset_get_default_text());
+            if (!keyset) {
                 fprintf(stderr, "PANIC: default keyset file is corrupted !!\n" );
                 fprintf(stderr, "PANIC: please update the code in android/skin/keyset.c\n" );
                 exit(1);
             }
+            skin_keyset_set_default(keyset);
             if (!opts->keyset)
                 write_default_keyset();
         }

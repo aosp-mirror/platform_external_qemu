@@ -217,7 +217,7 @@ qemulator_set_title(QEmulator* emulator)
         SkinKeyBinding  bindings[ SKIN_KEY_COMMAND_MAX_BINDINGS ];
         int             count;
 
-        count = skin_keyset_get_bindings( android_keyset,
+        count = skin_keyset_get_bindings( skin_keyset_get_default(),
                                           SKIN_KEY_COMMAND_TOGGLE_TRACKBALL,
                                           bindings );
 
