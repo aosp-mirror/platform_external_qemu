@@ -145,6 +145,7 @@ common_LOCAL_SRC_FILES += \
 	android/qemu/base/async/Looper.cpp \
 	android/looper-base.cpp \
 	android/looper-generic.cpp \
+	android/utils/aconfig-file.c \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
 	android/utils/debug.c \
@@ -298,7 +299,6 @@ SKIN_SOURCES := rect.c \
                 file.c \
                 window.c \
                 scaler.c \
-                composer.c \
                 surface.c \
 
 common_LOCAL_SRC_FILES += $(SKIN_SOURCES:%=android/skin/%)
@@ -446,7 +446,6 @@ CORE_MISC_SOURCES = \
     android/boot-properties.c \
     android/cbuffer.c \
     android/charpipe.c \
-    android/config-file.c \
     android/core-init-utils.c   \
     android/gps.c \
     android/hw-kmsg.c \
