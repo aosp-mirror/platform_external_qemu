@@ -112,7 +112,6 @@ common_LOCAL_SRC_FILES += \
 	android/android-constants.c \
 	android/async-console.c \
 	android/async-utils.c \
-	android/charmap.c \
 	android/framebuffer.c \
 	android/iolooper.cpp \
 	android/avd/hw-config.c \
@@ -289,7 +288,8 @@ endif
 
 # the skin support sources
 #
-SKIN_SOURCES := rect.c \
+SKIN_SOURCES := charmap.c \
+                rect.c \
                 region.c \
                 image.c \
                 trackball.c \

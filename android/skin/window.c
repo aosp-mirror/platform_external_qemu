@@ -10,15 +10,18 @@
 ** GNU General Public License for more details.
 */
 #include "android/skin/window.h"
+
+#include "android/hw-sensors.h"
+#include "android/skin/charmap.h"
 #include "android/skin/image.h"
 #include "android/skin/scaler.h"
-#include "android/charmap.h"
-#include "android/hw-sensors.h"
+#include "android/user-events.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 #include "android/utils/duff.h"
+
 #include <SDL_syswm.h>
-#include "android/user-events.h"
+
 #include <math.h>
 
 //#include "android/framebuffer.h"

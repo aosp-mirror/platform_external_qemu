@@ -32,11 +32,11 @@
 
 #include "math.h"
 
-#include "android/charmap.h"
 #include "android/config/config.h"
 #include "android/cpu_accelerator.h"
 
 #include "android/kernel/kernel_utils.h"
+#include "android/skin/charmap.h"
 #include "android/user-config.h"
 
 #include "android/utils/aconfig-file.h"
@@ -290,7 +290,7 @@ int main(int argc, char **argv)
 
     /* -charmap is incompatible with -attach-core, because particular
      * charmap gets set up in the running core. */
-    if (android_charmap_setup(opts->charmap)) {
+    if (skin_charmap_setup(opts->charmap)) {
         exit(1);
     }
 
@@ -1154,7 +1154,7 @@ int main(int argc, char **argv)
     }
 
     if (opts->charmap) {
-        char charmap_name[AKEYCHARMAP_NAME_SIZE];
+        char charmap_name[SKIN_CHARMAP_NAME_SIZE];
 
         if (!path_exists(opts->charmap)) {
             derror("Charmap file does not exist: %s", opts->charmap);

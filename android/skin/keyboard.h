@@ -12,11 +12,12 @@
 #ifndef _ANDROID_SKIN_KEYBOARD_H
 #define _ANDROID_SKIN_KEYBOARD_H
 
-#include "android/charmap.h"
-#include "android/utils/aconfig-file.h"
+#include "android/skin/charmap.h"
 #include "android/skin/image.h"  /* for SkinRotation */
 #include "android/skin/keycode-buffer.h"
 #include "android/skin/keyset.h"
+#include "android/utils/aconfig-file.h"
+
 #include <SDL.h>
 
 typedef struct SkinKeyboard   SkinKeyboard;

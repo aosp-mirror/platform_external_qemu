@@ -12,7 +12,7 @@
 #include "android/skin/keyboard.h"
 
 #include "android/android.h"
-#include "android/charmap.h"
+#include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
@@ -42,7 +42,7 @@ typedef struct {
 #define  MAX_LAST_KEYS  16
 
 struct SkinKeyboard {
-    const AKeyCharmap*  charmap;
+    const SkinCharmap*  charmap;
     SkinKeyset*         kset;
     char                enabled;
     char                raw_keys;
@@ -406,7 +406,7 @@ skin_keyboard_do_key_event( SkinKeyboard*   kb,
 int
 skin_keyboard_process_unicode_event( SkinKeyboard*  kb,  unsigned int  unicode, int  down )
 {
-    return android_charmap_reverse_map_unicode(kb->charmap, unicode, down,
+    return skin_charmap_reverse_map_unicode(kb->charmap, unicode, down,
                                             kb->keycodes);
 }
 
@@ -512,10 +512,10 @@ skin_keyboard_create_from_charmap_name(const char* charmap_name,
 
     ANEW0(kb);
 
-    kb->charmap = android_get_charmap_by_name(charmap_name);
+    kb->charmap = skin_charmap_get_by_name(charmap_name);
     if (!kb->charmap) {
         // Charmap name was not found. Default to "qwerty2" */
-        kb->charmap = android_get_charmap_by_name(DEFAULT_ANDROID_CHARMAP);
+        kb->charmap = skin_charmap_get_by_name(DEFAULT_ANDROID_CHARMAP);
         fprintf(stderr, "### warning, skin requires unknown '%s' charmap, reverting to '%s'\n",
                 charmap_name, kb->charmap->name );
     }
@@ -539,7 +539,7 @@ skin_keyboard_create(const char* kcm_file_path,
                      SkinKeyCodeFlushFunc keycode_flush)
 {
     const char* charmap_name = DEFAULT_ANDROID_CHARMAP;
-    char        cmap_buff[AKEYCHARMAP_NAME_SIZE];
+    char        cmap_buff[SKIN_CHARMAP_NAME_SIZE];
 
     if (kcm_file_path != NULL) {
         kcm_extract_charmap_name(kcm_file_path, cmap_buff, sizeof cmap_buff);
