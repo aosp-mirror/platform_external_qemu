@@ -1,0 +1,8 @@
+Code-Review+1: Miodrag Dinic <miodrag.dinic@imgtec.com>
+Code-Review+2: David Turner <digit@android.com>
+Verified+1: David Turner <digit@android.com>
+Submitted-by: David Turner <digit@android.com>
+Submitted-at: Wed, 10 Sep 2014 17:45:36 +0000
+Reviewed-on: https://android-review.googlesource.com/106471
+Project: platform/external/qemu
+Branch: refs/heads/master
