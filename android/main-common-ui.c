@@ -10,20 +10,18 @@
 ** GNU General Public License for more details.
 */
 
-#include <SDL.h>
-#include <SDL_syswm.h>
-
 #include "android/avd/util.h"
+#include "android/display.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/qemulator.h"
-#include "android/display.h"
 #include "android/resource.h"
-#include "android/skin/image.h"
-#include "android/skin/trackball.h"
-#include "android/skin/keyboard.h"
 #include "android/skin/file.h"
+#include "android/skin/image.h"
+#include "android/skin/keyboard.h"
+#include "android/skin/resource.h"
+#include "android/skin/trackball.h"
 #include "android/skin/window.h"
 #include "android/user-config.h"
 #include "android/utils/bufprint.h"
@@ -32,6 +30,9 @@
 #include "android/utils/path.h"
 
 #include "ui/console.h"
+
+#include <SDL.h>
+#include <SDL_syswm.h>
 
 #include <stdlib.h>
 
@@ -665,7 +666,7 @@ DEFAULT_SKIN:
 
         skinName = "<builtin>";
 
-        layout_base = android_resource_find( "layout", &layout_size );
+        layout_base = skin_resource_find( "layout", &layout_size );
         if (layout_base == NULL) {
             fprintf(stderr, "Couldn't load builtin skin\n");
             exit(1);

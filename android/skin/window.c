@@ -21,7 +21,7 @@
 #include "android/user-events.h"
 #include <math.h>
 
-#include "android/framebuffer.h"
+//#include "android/framebuffer.h"
 #include "android/opengles.h"
 
 /* when shrinking, we reduce the pixel ratio by this fixed amount */

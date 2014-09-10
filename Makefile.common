@@ -298,6 +298,7 @@ SKIN_SOURCES := rect.c \
                 keyset.c \
                 file.c \
                 window.c \
+                resource.c \
                 scaler.c \
                 surface.c \
 
