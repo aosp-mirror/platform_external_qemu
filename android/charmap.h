@@ -12,8 +12,8 @@
 #ifndef _android_charmap_h
 #define _android_charmap_h
 
-#include "android/keycode.h"
-#include "android/keycode-array.h"
+#include "android/skin/keycode.h"
+#include "android/skin/keycode-buffer.h"
 
 /* this defines a structure used to describe an Android keyboard charmap */
 typedef struct AKeyEntry {
@@ -88,7 +88,7 @@ int
 android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
                                     unsigned int unicode,
                                     int  down,
-                                    AKeycodeBuffer* keycodes);
+                                    SkinKeycodeBuffer* keycodes);
 
 /* Return a pointer to the active charmap. If android_charmap_setup() was
  * called succesfully, this corresponds to the newly loaded charmap.

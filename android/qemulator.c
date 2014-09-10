@@ -162,7 +162,7 @@ static int qemulator_framebuffer_get_depth(void* opaque) {
 static unsigned qemulator_translate_button_name(const char* name) {
     typedef struct {
         const char*     name;
-        AndroidKeyCode  code;
+        SkinKeyCode  code;
     } KeyInfo;
 
     static const KeyInfo keyinfo_table[] = {
@@ -287,7 +287,9 @@ qemulator_init( QEmulator*       emulator,
                                           &skin_charmap_funcs);
 
     emulator->layout      = emulator->layout_file->layouts;
-    emulator->keyboard    = skin_keyboard_create(opts->charmap, opts->raw_keys);
+    emulator->keyboard    = skin_keyboard_create(opts->charmap,
+                                                 opts->raw_keys,
+                                                 &user_event_keycodes);
     emulator->window      = NULL;
     emulator->win_x       = x;
     emulator->win_y       = y;
@@ -478,7 +480,7 @@ get_default_scale( AndroidOptions*  opts )
 static void
 handle_key_command( void*  opaque, SkinKeyCommand  command, int  down )
 {
-    static const struct { SkinKeyCommand  cmd; AndroidKeyCode  kcode; }  keycodes[] =
+    static const struct { SkinKeyCommand  cmd; SkinKeyCode  kcode; }  keycodes[] =
     {
         { SKIN_KEY_COMMAND_BUTTON_CALL,        kKeyCodeCall },
         { SKIN_KEY_COMMAND_BUTTON_HOME,        kKeyCodeHome },
@@ -688,20 +690,20 @@ static void qemulator_refresh(QEmulator* emulator)
                 if (ev.button.button == 4)
                 {
                     /* scroll-wheel simulates DPad up */
-                    AndroidKeyCode  kcode;
+                    SkinKeyCode  kcode;
 
                     kcode = // qemulator_rotate_keycode(kKeyCodeDpadUp);
-                        android_keycode_rotate(kKeyCodeDpadUp,
+                        skin_keycode_rotate(kKeyCodeDpadUp,
                             skin_layout_get_dpad_rotation(qemulator_get_layout(qemulator_get())));
                     user_event_key( kcode, down );
                 }
                 else if (ev.button.button == 5)
                 {
                     /* scroll-wheel simulates DPad down */
-                    AndroidKeyCode  kcode;
+                    SkinKeyCode  kcode;
 
                     kcode = // qemulator_rotate_keycode(kKeyCodeDpadDown);
-                        android_keycode_rotate(kKeyCodeDpadDown,
+                        skin_keycode_rotate(kKeyCodeDpadDown,
                             skin_layout_get_dpad_rotation(qemulator_get_layout(qemulator_get())));
                     user_event_key( kcode, down );
                 }

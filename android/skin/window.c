@@ -665,7 +665,7 @@ button_init( Button*  button, SkinButton*  sbutton, SkinLocation*  loc, Backgrou
          * this is used as a counter-measure to the fact that the framework always assumes
          * that the physical D-Pad has been rotated when in landscape mode.
          */
-        button->keycode = android_keycode_rotate( button->keycode, -slayout->dpad_rotation );
+        button->keycode = skin_keycode_rotate( button->keycode, -slayout->dpad_rotation );
     }
 
     skin_rect_rotate( &r, &sbutton->rect, loc->rotation );

@@ -9,16 +9,13 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android/keycode.h"
+#include "android/skin/keycode.h"
 
-AndroidKeyCode
-android_keycode_rotate( AndroidKeyCode  code, int  rotation )
-{
-    static const AndroidKeyCode  wheel[4] = { kKeyCodeDpadUp,
-                                              kKeyCodeDpadRight,
-                                              kKeyCodeDpadDown,
-                                              kKeyCodeDpadLeft };
-
+SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
+    static const SkinKeyCode  wheel[4] = { kKeyCodeDpadUp,
+                                           kKeyCodeDpadRight,
+                                           kKeyCodeDpadDown,
+                                           kKeyCodeDpadLeft };
     int  index;
 
     for (index = 0; index < 4; index++) {

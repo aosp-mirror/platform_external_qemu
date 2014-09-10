@@ -50,7 +50,7 @@
 #include "android/hw-events.h"
 #include "android/user-events.h"
 #include "android/hw-sensors.h"
-#include "android/keycode-array.h"
+#include "android/skin/keycode-buffer.h"
 #include "android/charmap.h"
 #include "android/display-core.h"
 
@@ -1957,7 +1957,7 @@ utf8_next( unsigned char* *pp, unsigned char*  end )
 static int
 do_event_text( ControlClient  client, char*  args )
 {
-    AKeycodeBuffer keycodes;
+    SkinKeycodeBuffer keycodes;
     unsigned char*  p   = (unsigned char*) args;
     unsigned char*  end = p + strlen(args);
     int             textlen;
@@ -1975,7 +1975,7 @@ do_event_text( ControlClient  client, char*  args )
         return -1;
     }
 
-    keycodes.keycode_count = 0;
+    skin_keycodes_buffer_init(&keycodes, &user_event_keycodes);
 
     /* un-secape message text into proper utf-8 (conversion happens in-site) */
     textlen = strlen((char*)p);
@@ -1999,7 +1999,7 @@ do_event_text( ControlClient  client, char*  args )
 
         android_charmap_reverse_map_unicode( NULL, (unsigned)c, 1, &keycodes );
         android_charmap_reverse_map_unicode( NULL, (unsigned)c, 0, &keycodes );
-        android_keycodes_flush( &keycodes );
+        skin_keycodes_buffer_flush( &keycodes );
     }
 
     return 0;

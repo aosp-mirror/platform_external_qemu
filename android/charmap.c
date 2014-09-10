@@ -303,7 +303,7 @@ kcm_is_token_comment(const char* token) {
     return '#' == *token;
 }
 
-/* Converts a key name to a key code as defined by AndroidKeyCode enum.
+/* Converts a key name to a key code as defined by SkinKeyCode enum.
  * key_name - Key name to convert.
  * key_code - Upon success contains key code value for the key_name.
  * Returns a zero value on success, or -1 if key code was not found
@@ -664,7 +664,7 @@ int
 android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
                                     unsigned int unicode,
                                     int  down,
-                                    AKeycodeBuffer* keycodes)
+                                    SkinKeycodeBuffer* keycodes)
 {
     int                 n;
 
@@ -674,7 +674,7 @@ android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
     /* check base keys */
     for (n = 0; n < cmap->num_entries; n++) {
         if (cmap->entries[n].base == unicode) {
-            android_keycodes_add_key_event(keycodes, cmap->entries[n].code, down);
+            skin_keycodes_buffer_add(keycodes, cmap->entries[n].code, down);
             return 1;
         }
     }
@@ -683,11 +683,11 @@ android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
     for (n = 0; n < cmap->num_entries; n++) {
         if (cmap->entries[n].caps == unicode) {
             if (down) {
-                android_keycodes_add_key_event(keycodes, kKeyCodeCapLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeCapLeft, down);
             }
-            android_keycodes_add_key_event(keycodes, cmap->entries[n].code, down);
+            skin_keycodes_buffer_add(keycodes, cmap->entries[n].code, down);
             if (!down) {
-                android_keycodes_add_key_event(keycodes, kKeyCodeCapLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeCapLeft, down);
             }
             return 2;
         }
@@ -697,11 +697,11 @@ android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
     for (n = 0; n < cmap->num_entries; n++) {
         if (cmap->entries[n].fn == unicode) {
             if (down) {
-                android_keycodes_add_key_event(keycodes, kKeyCodeAltLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeAltLeft, down);
             }
-            android_keycodes_add_key_event(keycodes, cmap->entries[n].code, down);
+            skin_keycodes_buffer_add(keycodes, cmap->entries[n].code, down);
             if (!down) {
-                android_keycodes_add_key_event(keycodes, kKeyCodeAltLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeAltLeft, down);
             }
             return 2;
         }
@@ -711,13 +711,13 @@ android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
     for (n = 0; n < cmap->num_entries; n++) {
         if (cmap->entries[n].caps_fn == unicode) {
             if (down) {
-                android_keycodes_add_key_event(keycodes, kKeyCodeAltLeft, down);
-                android_keycodes_add_key_event(keycodes, kKeyCodeCapLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeAltLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeCapLeft, down);
             }
-            android_keycodes_add_key_event(keycodes, cmap->entries[n].code, down);
+            skin_keycodes_buffer_add(keycodes, cmap->entries[n].code, down);
             if (!down) {
-                android_keycodes_add_key_event(keycodes, kKeyCodeCapLeft, down);
-                android_keycodes_add_key_event(keycodes, kKeyCodeAltLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeCapLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeAltLeft, down);
             }
             return 3;
         }
