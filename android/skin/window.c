@@ -89,7 +89,7 @@ typedef struct ADisplay {
     SkinRotation   rotation;
     SkinSize       datasize;  /* framebuffer size */
     void*          data;      /* framebuffer pixels */
-    QFrameBuffer*  qfbuff;
+    int            bits_per_pixel;  /* framebuffer depth */
     SkinImage*     onion;       /* onion image */
     SkinRect       onion_rect;  /* onion rect, if any */
     int            brightness;
@@ -99,7 +99,6 @@ static void
 display_done( ADisplay*  disp )
 {
     disp->data   = NULL;
-    disp->qfbuff = NULL;
     skin_image_unref( &disp->onion );
 }
 
@@ -139,8 +138,14 @@ display_init( ADisplay*  disp, SkinDisplay*  sdisp, SkinLocation*  loc, SkinRect
                     disp->rect.size.w, disp->rect.size.h,
                     disp->datasize.w, disp->datasize.h);
 #endif
-    disp->qfbuff = sdisp->qfbuff;
-    disp->data   = sdisp->qfbuff->pixels;
+    disp->data = NULL;
+    disp->bits_per_pixel = 0;
+    if (sdisp->framebuffer_funcs) {
+        disp->data =
+                sdisp->framebuffer_funcs->get_pixels(sdisp->framebuffer);
+        disp->bits_per_pixel =
+                sdisp->framebuffer_funcs->get_depth(sdisp->framebuffer);
+    }
     disp->onion  = NULL;
 
     disp->brightness = LCD_BRIGHTNESS_DEFAULT;
@@ -591,7 +596,7 @@ display_redraw( ADisplay*  disp, SkinRect*  rect, SDL_Surface*  surface )
         }
         else
         {
-            if (disp->qfbuff->bits_per_pixel == 32)
+            if (disp->bits_per_pixel == 32)
                 display_redraw_rect32(disp, &r, surface);
             else
                 display_redraw_rect16(disp, &r, surface);

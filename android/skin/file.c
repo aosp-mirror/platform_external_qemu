@@ -78,13 +78,17 @@ skin_background_init_from( SkinBackground*  background,
  **/
 
 static void
-skin_display_done( SkinDisplay*  display )
+skin_display_done(SkinDisplay*  display)
 {
-    qframebuffer_done( display->qfbuff );
+    if (display->framebuffer_funcs) {
+        display->framebuffer_funcs->free_framebuffer(display->framebuffer);
+    }
 }
 
 static int
-skin_display_init_from( SkinDisplay*  display, AConfig*  node )
+skin_display_init_from(SkinDisplay* display,
+                       AConfig* node,
+                       const SkinFramebufferFuncs* fb_funcs)
 {
     display->rect.pos.x  = aconfig_int(node, "x", 0);
     display->rect.pos.y  = aconfig_int(node, "y", 0);
@@ -94,10 +98,15 @@ skin_display_init_from( SkinDisplay*  display, AConfig*  node )
     display->bpp         = aconfig_int(node, "bpp", 16);
 
     display->valid = ( display->rect.size.w > 0 && display->rect.size.h > 0 );
-
-    if (display->valid) {
+    display->framebuffer_funcs = fb_funcs;
+    if (display->valid && fb_funcs) {
         SkinRect  r;
         skin_rect_rotate( &r, &display->rect, -display->rotation );
+        display->framebuffer = fb_funcs->create_framebuffer(
+                r.size.w,
+                r.size.h,
+                display->bpp);
+#if 0
         qframebuffer_init( display->qfbuff,
                            r.size.w,
                            r.size.h,
@@ -106,6 +115,7 @@ skin_display_init_from( SkinDisplay*  display, AConfig*  node )
                                               : QFRAME_BUFFER_RGB565 );
 
         qframebuffer_fifo_add( display->qfbuff );
+#endif
     }
     return display->valid ? 0 : -1;
 }
@@ -311,7 +321,9 @@ skin_location_create_from_v2( AConfig*  node, SkinPart*  parts )
 }
 
 static SkinPart*
-skin_part_create_from_v1( AConfig*  root, const char*  basepath )
+skin_part_create_from_v1(AConfig* root,
+                         const char* basepath,
+                         const SkinFramebufferFuncs* fb_funcs)
 {
     SkinPart*  part;
     AConfig*  node;
@@ -326,7 +338,7 @@ skin_part_create_from_v1( AConfig*  root, const char*  basepath )
 
     node = aconfig_find(root, "display");
     if (node)
-        skin_display_init_from(part->display, node);
+        skin_display_init_from(part->display, node, fb_funcs);
 
     node = aconfig_find(root, "button");
     if (node) {
@@ -362,7 +374,9 @@ skin_part_create_from_v1( AConfig*  root, const char*  basepath )
 }
 
 static SkinPart*
-skin_part_create_from_v2( AConfig*  root, const char*  basepath )
+skin_part_create_from_v2(AConfig* root,
+                         const char* basepath,
+                         const SkinFramebufferFuncs* fb_funcs)
 {
     SkinPart*  part;
     AConfig*  node;
@@ -377,7 +391,7 @@ skin_part_create_from_v2( AConfig*  root, const char*  basepath )
 
     node = aconfig_find(root, "display");
     if (node)
-        skin_display_init_from(part->display, node);
+        skin_display_init_from(part->display, node, fb_funcs);
 
     node = aconfig_find(root, "buttons");
     if (node) {
@@ -577,7 +591,10 @@ Fail:
  **/
 
 static int
-skin_file_load_from_v1( SkinFile*  file, AConfig*  aconfig, const char*  basepath )
+skin_file_load_from_v1(SkinFile* file,
+                       AConfig* aconfig,
+                       const char* basepath,
+                       const SkinFramebufferFuncs* fb_funcs)
 {
     SkinPart*      part;
     SkinLayout*    layout;
@@ -585,7 +602,8 @@ skin_file_load_from_v1( SkinFile*  file, AConfig*  aconfig, const char*  basepat
     SkinLocation*  location;
     int            nn;
 
-    file->parts = part = skin_part_create_from_v1( aconfig, basepath );
+    file->parts = part = skin_part_create_from_v1(
+            aconfig, basepath, fb_funcs);
     if (part == NULL)
         return -1;
 
@@ -646,7 +664,10 @@ skin_file_load_from_v1( SkinFile*  file, AConfig*  aconfig, const char*  basepat
 }
 
 static int
-skin_file_load_from_v2( SkinFile*  file, AConfig*  aconfig, const char*  basepath )
+skin_file_load_from_v2(SkinFile* file,
+                       AConfig* aconfig,
+                       const char* basepath,
+                       const SkinFramebufferFuncs* fb_funcs)
 {
     AConfig*  node;
 
@@ -659,7 +680,8 @@ skin_file_load_from_v2( SkinFile*  file, AConfig*  aconfig, const char*  basepat
         SkinPart**  ptail = &file->parts;
         for (node = node->first_child; node != NULL; node = node->next)
         {
-            SkinPart*  part = skin_part_create_from_v2( node, basepath );
+            SkinPart*  part = skin_part_create_from_v2(
+                    node, basepath, fb_funcs);
             if (part == NULL) {
                 dprint( "## WARNING: can't load part '%s' from skin\n", node->name ? "<NULL>" : node->name );
                 continue;
@@ -700,14 +722,17 @@ skin_file_load_from_v2( SkinFile*  file, AConfig*  aconfig, const char*  basepat
 }
 
 SkinFile*
-skin_file_create_from_aconfig( AConfig*   aconfig, const char*  basepath )
+skin_file_create_from_aconfig(
+        AConfig* aconfig,
+        const char* basepath,
+        const SkinFramebufferFuncs* fb_funcs)
 {
     SkinFile*  file;
 
     ANEW0(file);
 
     if ( aconfig_find(aconfig, "parts") != NULL) {
-        if (skin_file_load_from_v2( file, aconfig, basepath ) < 0) {
+        if (skin_file_load_from_v2(file, aconfig, basepath, fb_funcs) < 0) {
             goto BAD_FILE;
         }
         file->version = aconfig_int(aconfig, "version", 2);
@@ -718,7 +743,7 @@ skin_file_create_from_aconfig( AConfig*   aconfig, const char*  basepath )
         }
     }
     else {
-        if (skin_file_load_from_v1( file, aconfig, basepath ) < 0) {
+        if (skin_file_load_from_v1(file, aconfig, basepath, fb_funcs) < 0) {
             goto BAD_FILE;
         }
         file->version = 1;

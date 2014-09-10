@@ -10,12 +10,14 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/utils/debug.h"
-#include "android/utils/bufprint.h"
+#include "android/qemulator.h"
+
+#include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/hw-control.h"
-#include "android/qemulator.h"
 #include "android/user-events.h"
+#include "android/utils/debug.h"
+#include "android/utils/bufprint.h"
 #include "telephony/modem_driver.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
@@ -128,6 +130,34 @@ qemulator_get(void)
     return qemulator;
 }
 
+static void qemulator_framebuffer_free(void* opaque) {
+    QFrameBuffer* fb = opaque;
+
+    qframebuffer_done(fb);
+    free(fb);
+}
+
+static void* qemulator_framebuffer_create(int width, int height, int bpp) {
+    QFrameBuffer* fb = calloc(1, sizeof(*fb));
+
+    qframebuffer_init(fb, width, height, 0,
+                      bpp == 32 ? QFRAME_BUFFER_RGBX_8888
+                                : QFRAME_BUFFER_RGB565 );
+
+    qframebuffer_fifo_add(fb);
+    return fb;
+}
+
+static void* qemulator_framebuffer_get_pixels(void* opaque) {
+    QFrameBuffer* fb = opaque;
+    return fb->pixels;
+}
+
+static int qemulator_framebuffer_get_depth(void* opaque) {
+    QFrameBuffer* fb = opaque;
+    return fb->bits_per_pixel;
+}
+
 int
 qemulator_init( QEmulator*       emulator,
                 AConfig*         aconfig,
@@ -136,8 +166,16 @@ qemulator_init( QEmulator*       emulator,
                 int              y,
                 AndroidOptions*  opts )
 {
+    static const SkinFramebufferFuncs skin_fb_funcs = {
+        .create_framebuffer = &qemulator_framebuffer_create,
+        .free_framebuffer = &qemulator_framebuffer_free,
+        .get_pixels = &qemulator_framebuffer_get_pixels,
+        .get_depth = &qemulator_framebuffer_get_depth,
+    };
+
     emulator->aconfig     = aconfig;
-    emulator->layout_file = skin_file_create_from_aconfig(aconfig, basepath);
+    emulator->layout_file =
+            skin_file_create_from_aconfig(aconfig, basepath, &skin_fb_funcs);
     emulator->layout      = emulator->layout_file->layouts;
     emulator->keyboard    = skin_keyboard_create(opts->charmap, opts->raw_keys);
     emulator->window      = NULL;
@@ -149,7 +187,7 @@ qemulator_init( QEmulator*       emulator,
     SKIN_FILE_LOOP_PARTS( emulator->layout_file, part )
         SkinDisplay*  disp = part->display;
         if (disp->valid) {
-            qframebuffer_add_client( disp->qfbuff,
+            qframebuffer_add_client( disp->framebuffer,
                                      emulator,
                                      qemulator_fb_update,
                                      qemulator_fb_rotate,
@@ -199,7 +237,7 @@ qemulator_get_first_framebuffer(QEmulator* emulator)
     SKIN_FILE_LOOP_PARTS( emulator->layout_file, part )
         SkinDisplay*  disp = part->display;
         if (disp->valid) {
-            return disp->qfbuff;
+            return disp->framebuffer;
         }
     SKIN_FILE_LOOP_END_PARTS
     return NULL;

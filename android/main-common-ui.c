@@ -14,6 +14,7 @@
 #include <SDL_syswm.h>
 
 #include "android/avd/util.h"
+#include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/qemulator.h"
