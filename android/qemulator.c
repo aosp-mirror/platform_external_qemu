@@ -12,6 +12,7 @@
 
 #include "android/qemulator.h"
 
+#include "android/android.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/hw-control.h"

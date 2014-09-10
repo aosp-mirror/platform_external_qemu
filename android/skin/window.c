@@ -407,7 +407,7 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
 
     switch ( disp->rotation & 3 )
     {
-    case ANDROID_ROTATION_0:
+    case SKIN_ROTATION_0:
         src_line += x*2 + y*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -425,7 +425,7 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
         }
         break;
 
-    case ANDROID_ROTATION_90:
+    case SKIN_ROTATION_90:
         src_line += y*2 + (disp_w - x - 1)*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -443,7 +443,7 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
         }
         break;
 
-    case ANDROID_ROTATION_180:
+    case SKIN_ROTATION_180:
         src_line += (disp_w -1 - x)*2 + (disp_h-1-y)*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -461,7 +461,7 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
     }
     break;
 
-    default:  /* ANDROID_ROTATION_270 */
+    default:  /* SKIN_ROTATION_270 */
         src_line += (disp_h-1-y)*2 + x*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -501,7 +501,7 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
 
     switch ( disp->rotation & 3 )
     {
-    case ANDROID_ROTATION_0:
+    case SKIN_ROTATION_0:
         src_line += x*4 + y*src_pitch;
 
         for (yy = h; yy > 0; yy--) {
@@ -518,7 +518,7 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
         }
         break;
 
-    case ANDROID_ROTATION_90:
+    case SKIN_ROTATION_90:
         src_line += y*4 + (disp_w - x - 1)*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -536,7 +536,7 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
         }
         break;
 
-    case ANDROID_ROTATION_180:
+    case SKIN_ROTATION_180:
         src_line += (disp_w -1 - x)*4 + (disp_h-1-y)*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -554,7 +554,7 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
     }
     break;
 
-    default:  /* ANDROID_ROTATION_270 */
+    default:  /* SKIN_ROTATION_270 */
         src_line += (disp_h-1-y)*4 + x*src_pitch;
 
         for (yy = h; yy > 0; yy--)

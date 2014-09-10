@@ -62,7 +62,7 @@
 #include "android/framebuffer.h"
 #include "android/iolooper.h"
 
-AndroidRotation  android_framebuffer_rotation;
+SkinRotation  android_framebuffer_rotation;
 
 #define  STRINGIFY(x)   _STRINGIFY(x)
 #define  _STRINGIFY(x)  #x
