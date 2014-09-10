@@ -15,8 +15,8 @@
 #include <stdint.h>
 #include "android/avd/hw-config.h"
 #include "android/cmdline-option.h"
-#include "android/config-file.h"
 #include "android/skin/keyset.h"
+#include "android/utils/aconfig-file.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
