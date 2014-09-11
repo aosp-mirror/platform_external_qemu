@@ -18,6 +18,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "android/skin/rect.h"
+
 /** in vl.c */
 
 /* emulated network up/down speeds, expressed in bits/seconds */
@@ -74,14 +76,7 @@ extern int  android_framebuffer_phys_w;
 extern int  android_framebuffer_phys_h;
 
 /* framebuffer rotation, relative to device */
-typedef enum {
-    ANDROID_ROTATION_0 = 0,
-    ANDROID_ROTATION_90,
-    ANDROID_ROTATION_180,
-    ANDROID_ROTATION_270
-} AndroidRotation;
-
-extern AndroidRotation  android_framebuffer_rotation;
+extern SkinRotation  android_framebuffer_rotation;
 
 /**  in android_main.c */
 

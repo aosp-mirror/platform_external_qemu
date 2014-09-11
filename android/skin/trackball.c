@@ -12,7 +12,6 @@
 #include "android/skin/trackball.h"
 #include "android/skin/image.h"
 #include "android/utils/system.h"
-#include "android/user-events.h"
 #include <math.h>
 
 /***********************************************************************/
@@ -190,6 +189,8 @@ typedef struct SkinTrackBall
     /* rotation applied to events send to the system */
     SkinRotation     rotation;
 
+    SkinTrackBallEventFunc event_func;
+
 } TrackBallRec, *TrackBall;
 
 
@@ -207,16 +208,18 @@ typedef struct SkinTrackBall
 #define  ACC_SCALE      0.2
 
 static void
-trackball_init( TrackBall  ball, int  diameter, int  ring,
-                unsigned   ball_color, unsigned  dot_color,
-                unsigned   ring_color )
-{
+trackball_init(TrackBall  ball, int  diameter, int  ring,
+               unsigned   ball_color, unsigned  dot_color,
+               unsigned   ring_color,
+               SkinTrackBallEventFunc event_func) {
     int  diameter2 = diameter + ring*2;
 
     memset( ball, 0, sizeof(*ball) );
 
     ball->acc_threshold = ACC_THRESHOLD;
     ball->acc_scale     = ACC_SCALE;
+
+    ball->event_func = event_func;
 
     /* init SDL surface */
     ball->diameter   = diameter2;
@@ -449,7 +452,7 @@ trackball_move( TrackBall  ball,  int  dx, int  dy )
             break;
         }
 
-        user_event_mouse(ddx, ddy, 1, 0);
+        ball->event_func(ddx, ddy);
     }
 
     rotator_reset( rot, dx, dy );
@@ -562,7 +565,7 @@ trackball_draw( TrackBall  ball, int  x, int  y, SDL_Surface*  dst )
 
 
 SkinTrackBall*
-skin_trackball_create  ( SkinTrackBallParameters*  params )
+skin_trackball_create  ( const SkinTrackBallParameters*  params )
 {
     TrackBall  ball;
 
@@ -572,7 +575,9 @@ skin_trackball_create  ( SkinTrackBallParameters*  params )
                     params->ring,
                     params->ball_color,
                     params->dot_color,
-                    params->ring_color );
+                    params->ring_color,
+                    params->event_func
+                  );
     return  ball;
 }
 

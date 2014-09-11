@@ -112,10 +112,8 @@ common_LOCAL_SRC_FILES += \
 	android/android-constants.c \
 	android/async-console.c \
 	android/async-utils.c \
-	android/charmap.c \
 	android/framebuffer.c \
 	android/iolooper.cpp \
-	android/keycode-array.c \
 	android/avd/hw-config.c \
 	android/avd/info.c \
 	android/avd/util.c \
@@ -290,14 +288,18 @@ endif
 
 # the skin support sources
 #
-SKIN_SOURCES := rect.c \
+SKIN_SOURCES := charmap.c \
+                rect.c \
                 region.c \
                 image.c \
                 trackball.c \
                 keyboard.c \
+                keycode.c \
+                keycode-buffer.c \
                 keyset.c \
                 file.c \
                 window.c \
+                resource.c \
                 scaler.c \
                 surface.c \
 
@@ -307,7 +309,6 @@ common_LOCAL_SRC_FILES += \
              android/user-config.c \
              android/resource.c \
              android/qemulator.c \
-             android/keycode.c \
 
 # enable MMX code for our skin scaler
 ifeq ($(HOST_ARCH),x86)

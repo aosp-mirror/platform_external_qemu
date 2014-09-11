@@ -12,9 +12,9 @@
 #ifndef _ANDROID_SKIN_IMAGE_H
 #define _ANDROID_SKIN_IMAGE_H
 
-#include "android/android.h"
-#include <SDL.h>
 #include "android/skin/rect.h"
+
+#include <SDL.h>
 
 /* helper functions */
 

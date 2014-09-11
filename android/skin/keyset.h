@@ -131,10 +131,13 @@ extern int              skin_keyset_get_bindings( SkinKeyset*      kset,
 /* return the command for a given keypress - SKIN_KEY_COMMAND_NONE is returned if unknown */
 extern SkinKeyCommand   skin_keyset_get_command( SkinKeyset*  kset, int  sym, int  mod );
 
-extern const char*      skin_keyset_get_default( void );
+extern const char*      skin_keyset_get_default_text( void );
 
-/* in android_main.c */
-extern SkinKeyset*      android_keyset;
+// Set default keyset
+extern void skin_keyset_set_default(SkinKeyset* set);
+
+// Return default keyset.
+extern SkinKeyset* skin_keyset_get_default(void);
 
 ANDROID_END_HEADER
 
