@@ -11,21 +11,17 @@
 */
 #include "android/skin/window.h"
 
-#include "android/hw-sensors.h"
 #include "android/skin/charmap.h"
 #include "android/skin/image.h"
 #include "android/skin/scaler.h"
-#include "android/user-events.h"
 #include "android/utils/debug.h"
+#include "android/utils/setenv.h"
 #include "android/utils/system.h"
 #include "android/utils/duff.h"
 
 #include <SDL_syswm.h>
 
 #include <math.h>
-
-//#include "android/framebuffer.h"
-#include "android/opengles.h"
 
 /* when shrinking, we reduce the pixel ratio by this fixed amount */
 #define  SHRINK_SCALE  0.6
@@ -944,6 +940,7 @@ Fail:
 }
 
 struct SkinWindow {
+    const SkinWindowFuncs* win_funcs;
     SDL_Surface*  surface;
     Layout        layout;
     SkinPos       pos;
@@ -978,14 +975,14 @@ struct SkinWindow {
 };
 
 static void
-add_finger_event(unsigned x, unsigned y, unsigned state)
+add_finger_event(SkinWindow* window,
+                 unsigned x,
+                 unsigned y,
+                 unsigned state)
 {
     //fprintf(stderr, "::: finger %d,%d %d\n", x, y, state);
 
-    /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
-     * differentiate between a touch-screen and a trackball event
-     */
-    user_event_mouse(x, y, 0, state);
+    window->win_funcs->mouse_event(x, y, state);
 }
 
 static void
@@ -1128,7 +1125,7 @@ skin_window_move_mouse( SkinWindow*  window,
 static void
 skin_window_trackball_press( SkinWindow*  window, int  down )
 {
-    user_event_key( BTN_MOUSE, down );
+    window->win_funcs->key_event(BTN_MOUSE, down);
 }
 
 static void
@@ -1164,7 +1161,8 @@ skin_window_show_trackball( SkinWindow*  window, int  enable )
 static void
 skin_window_hide_opengles( SkinWindow* window )
 {
-    android_hideOpenglesWindow();
+    window->win_funcs->opengles_hide();
+    //android_hideOpenglesWindow();
 }
 
 /* Show the OpenGL ES framebuffer window */
@@ -1181,28 +1179,38 @@ skin_window_show_opengles( SkinWindow* window )
         SDL_GetWMInfo(&wminfo);
 #ifdef _WIN32
         winhandle = (void*)wminfo.window;
-#elif defined(CONFIG_DARWIN)
+#elif defined(__APPLE__)
         winhandle = (void*)wminfo.nsWindowPtr;
 #else
         winhandle = (void*)wminfo.info.x11.window;
 #endif
         skin_scaler_get_scaled_rect(window->scaler, &drect, &drect);
 
-        android_showOpenglesWindow(winhandle, drect.pos.x, drect.pos.y,
-                                   drect.size.w, drect.size.h, disp->rotation * -90.);
+        window->win_funcs->opengles_show(winhandle,
+                                         drect.pos.x,
+                                         drect.pos.y,
+                                         drect.size.w,
+                                         drect.size.h,
+                                         disp->rotation * -90.);
     }
 }
 
 static void
 skin_window_redraw_opengles( SkinWindow* window )
 {
-    android_redrawOpenglesWindow();
+    window->win_funcs->opengles_redraw();
+    //android_redrawOpenglesWindow();
 }
 
 static int  skin_window_reset_internal (SkinWindow*, SkinLayout*);
 
 SkinWindow*
-skin_window_create( SkinLayout*  slayout, int  x, int  y, double  scale, int  no_display )
+skin_window_create(SkinLayout* slayout,
+                   int x,
+                   int y,
+                   double scale,
+                   int no_display,
+                   const SkinWindowFuncs* win_funcs)
 {
     SkinWindow*  window;
 
@@ -1238,6 +1246,7 @@ skin_window_create( SkinLayout*  slayout, int  x, int  y, double  scale, int  no
 
     ANEW0(window);
 
+    window->win_funcs    = win_funcs;
     window->shrink_scale = scale;
     window->shrink       = (scale != 1.0);
     window->scaler       = skin_scaler_create();
@@ -1470,12 +1479,10 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
     skin_window_redraw( window, NULL );
 
     if (slayout->event_type != 0) {
-        user_event_generic( slayout->event_type, slayout->event_code, slayout->event_value );
-        /* XXX: hack, replace by better code here */
-        if (slayout->event_value != 0)
-            android_sensors_set_coarse_orientation(ANDROID_COARSE_PORTRAIT);
-        else
-            android_sensors_set_coarse_orientation(ANDROID_COARSE_LANDSCAPE);
+        window->win_funcs->generic_event(
+                slayout->event_type,
+                slayout->event_code,
+                slayout->event_value);
     }
 
     return 0;
@@ -1715,7 +1722,10 @@ skin_window_process_event( SkinWindow*  window, SDL_Event*  ev )
 #endif
         if (window->finger.inside) {
             window->finger.tracking = 1;
-            add_finger_event(window->finger.pos.x, window->finger.pos.y, 1);
+            add_finger_event(window,
+                             window->finger.pos.x,
+                             window->finger.pos.y,
+                             1);
         } else {
             window->button.pressed = NULL;
             button = window->button.hover;
@@ -1724,7 +1734,7 @@ skin_window_process_event( SkinWindow*  window, SDL_Event*  ev )
                 skin_window_redraw( window, &button->rect );
                 window->button.pressed = button;
                 if(button->keycode) {
-                    user_event_key(button->keycode, 1);
+                    window->win_funcs->key_event(button->keycode, 1);
                 }
             }
         }
@@ -1744,7 +1754,7 @@ skin_window_process_event( SkinWindow*  window, SDL_Event*  ev )
             button->down = 0;
             skin_window_redraw( window, &button->rect );
             if(button->keycode) {
-                user_event_key(button->keycode, 0);
+                window->win_funcs->key_event(button->keycode, 0);
             }
             window->button.pressed = NULL;
             window->button.hover   = NULL;
@@ -1754,7 +1764,10 @@ skin_window_process_event( SkinWindow*  window, SDL_Event*  ev )
         {
             skin_window_move_mouse( window, mx, my );
             window->finger.tracking = 0;
-            add_finger_event( window->finger.pos.x, window->finger.pos.y, 0);
+            add_finger_event(window,
+                             window->finger.pos.x,
+                             window->finger.pos.y,
+                             0);
         }
         break;
 
@@ -1770,7 +1783,10 @@ skin_window_process_event( SkinWindow*  window, SDL_Event*  ev )
         {
             skin_window_move_mouse( window, mx, my );
             if ( window->finger.tracking ) {
-                add_finger_event( window->finger.pos.x, window->finger.pos.y, 1 );
+                add_finger_event(window,
+                                 window->finger.pos.x,
+                                 window->finger.pos.y,
+                                 1);
             }
         }
         break;

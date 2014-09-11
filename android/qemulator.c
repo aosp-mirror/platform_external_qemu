@@ -16,6 +16,8 @@
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/hw-control.h"
+#include "android/hw-sensors.h"
+#include "android/opengles.h"
 #include "android/user-events.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
@@ -49,6 +51,30 @@ static void qemulator_trackball_event(int dx, int dy) {
     user_event_mouse(dx, dy, 1, 0);
 }
 
+static void qemulator_window_key_event(unsigned keycode, int down) {
+    user_event_key(keycode, down);
+}
+
+static void qemulator_window_mouse_event(unsigned x,
+                                         unsigned y,
+                                         unsigned state) {
+    /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
+     * differentiate between a touch-screen and a trackball event
+     */
+    user_event_mouse(x, y, 0, state);
+}
+
+static void qemulator_window_generic_event(int event_type,
+                                           int event_code,
+                                           int event_value) {
+    user_event_generic(event_type, event_code, event_value);
+    /* XXX: hack, replace by better code here */
+    if (event_value != 0)
+        android_sensors_set_coarse_orientation(ANDROID_COARSE_PORTRAIT);
+    else
+        android_sensors_set_coarse_orientation(ANDROID_COARSE_LANDSCAPE);
+}
+
 static void
 qemulator_setup( QEmulator*  emulator )
 {
@@ -58,7 +84,21 @@ qemulator_setup( QEmulator*  emulator )
         SkinLayout*  layout = emulator->layout;
         double       scale  = get_default_scale(emulator->opts);
 
-        emulator->window = skin_window_create( layout, emulator->win_x, emulator->win_y, scale, 0);
+        static const SkinWindowFuncs skin_window_funcs = {
+            .key_event = &qemulator_window_key_event,
+            .mouse_event = &qemulator_window_mouse_event,
+            .generic_event = &qemulator_window_generic_event,
+            .opengles_show = &android_showOpenglesWindow,
+            .opengles_hide = &android_hideOpenglesWindow,
+            .opengles_redraw = &android_redrawOpenglesWindow,
+        };
+
+        emulator->window = skin_window_create(layout,
+                                              emulator->win_x,
+                                              emulator->win_y,
+                                              scale,
+                                              0,
+                                              &skin_window_funcs);
         if (emulator->window == NULL)
             return;
 
