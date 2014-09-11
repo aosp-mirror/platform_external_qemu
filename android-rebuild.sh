@@ -77,7 +77,7 @@ get_file_type () {
 # $1: executable file type
 # $2: expected file type substring
 check_file_type_substring () {
-    printf "%s\n" "$1" | grep -q -F -e "$2"
+    printf "%s\n" "$1" | grep -q -E -e "$2"
 }
 
 # Define EXPECTED_32BIT_FILE_TYPE and EXPECTED_64BIT_FILE_TYPE depending
@@ -94,8 +94,8 @@ elif [ "$HOST_OS" = "Darwin" ]; then
     EXPECTED_EMULATOR_BITNESS=64
     EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
 else
-    EXPECTED_32BIT_FILE_TYPE="ELF 32-bit LSB executable, Intel 80386"
-    EXPECTED_64BIT_FILE_TYPE="ELF 32-bit LSB executable, x86-64"
+    EXPECTED_32BIT_FILE_TYPE="ELF 32-bit LSB +executable, Intel 80386"
+    EXPECTED_64BIT_FILE_TYPE="ELF 32-bit LSB +executable, x86-64"
     EXPECTED_EMULATOR_BITNESS=32
     EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
 fi
