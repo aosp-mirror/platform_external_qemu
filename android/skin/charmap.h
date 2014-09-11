@@ -9,30 +9,30 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _android_charmap_h
-#define _android_charmap_h
+#ifndef ANDROID_SKIN_CHARMAP_H
+#define ANDROID_SKIN_CHARMAP_H
 
-#include "android/keycode.h"
-#include "android/keycode-array.h"
+#include "android/skin/keycode.h"
+#include "android/skin/keycode-buffer.h"
 
 /* this defines a structure used to describe an Android keyboard charmap */
-typedef struct AKeyEntry {
+typedef struct SkinKeyEntry {
     unsigned short  code;
     unsigned short  base;
     unsigned short  caps;
     unsigned short  fn;
     unsigned short  caps_fn;
     unsigned short  number;
-} AKeyEntry;
+} SkinKeyEntry;
 
-/* Defines size of name buffer in AKeyCharmap entry. */
-#define AKEYCHARMAP_NAME_SIZE   32
+/* Defines size of name buffer in SkinCharmap entry. */
+#define SKIN_CHARMAP_NAME_SIZE   32
 
-typedef struct AKeyCharmap {
-    const AKeyEntry*  entries;
-    int               num_entries;
-    char              name[ AKEYCHARMAP_NAME_SIZE ];
-} AKeyCharmap;
+typedef struct SkinCharmap {
+    const SkinKeyEntry*  entries;
+    int num_entries;
+    char name[SKIN_CHARMAP_NAME_SIZE];
+} SkinCharmap;
 
 /* Extracts charmap name from .kcm file name.
  * Charmap name, extracted by this routine is a name of the kcm file, trimmed
@@ -52,7 +52,7 @@ void kcm_extract_charmap_name(const char* kcm_file_path,
                               int max_len);
 
 /* Gets a pointer to the default hard-coded charmap */
-const AKeyCharmap* android_get_default_charmap(void);
+const SkinCharmap* android_get_default_charmap(void);
 
 /* Parse a charmap file and add it to our list.
  * Key charmap array always contains two maps: one for qwerty, and
@@ -65,19 +65,19 @@ const AKeyCharmap* android_get_default_charmap(void);
  * two default entries.
  * Returns a zero value on success, or -1 on failure.
  *
- * Note: on success, the charmap will be returned by android_get_charmap()
+ * Note: on success, the charmap will be returned by skin_charmap_get()
  */
-int android_charmap_setup(const char* kcm_file_path);
+int skin_charmap_setup(const char* kcm_file_path);
 
-/* Cleanups initialization performed in android_charmap_setup routine. */
-void android_charmap_done(void);
+/* Cleanups initialization performed in skin_charmap_setup routine. */
+void skin_charmap_done(void);
 
 /* Gets charmap descriptor by its name.
  * This routine tries to find a charmap by name. This will compare the
  * name to the default charmap's name, or any charmap loaded with
- * android_charmap_setup(). Returns NULL on failure.
+ * skin_charmap_setup(). Returns NULL on failure.
  */
-const AKeyCharmap* android_get_charmap_by_name(const char* name);
+const SkinCharmap* skin_charmap_get_by_name(const char* name);
 
 /* Maps given unicode key character into a keycode and adds mapped keycode into
  * keycode array. This routine uses charmap passed as cmap parameter to do the
@@ -85,20 +85,20 @@ const AKeyCharmap* android_get_charmap_by_name(const char* name);
  * keycode.
  */
 int
-android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
-                                    unsigned int unicode,
-                                    int  down,
-                                    AKeycodeBuffer* keycodes);
+skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
+                                 unsigned int unicode,
+                                 int  down,
+                                 SkinKeycodeBuffer* keycodes);
 
-/* Return a pointer to the active charmap. If android_charmap_setup() was
+/* Return a pointer to the active charmap. If skin_charmap_setup() was
  * called succesfully, this corresponds to the newly loaded charmap.
  *
  * Otherwise, return a pointer to the default charmap.
  */
-const AKeyCharmap* android_get_charmap(void);
+const SkinCharmap* skin_charmap_get(void);
 
 /* Return the name of the charmap to be used. Same as
- * android_get_charmap()->name */
-const char* android_get_charmap_name(void);
+ * skin_charmap_get()->name */
+const char* skin_charmap_get_name(void);
 
-#endif /* _android_charmap_h */
+#endif  // ANDROID_SKIN_CHARMAP_H

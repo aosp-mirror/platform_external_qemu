@@ -12,7 +12,6 @@
 #include "android/skin/keyset.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
-#include "android/android.h"
 #include <SDL.h>
 
 #define  DEBUG  1
@@ -506,7 +505,7 @@ skin_keyset_get_command( SkinKeyset*  kset, int  sym, int mod )
 
 
 const char*
-skin_keyset_get_default( void )
+skin_keyset_get_default_text( void )
 {
     return
     "BUTTON_CALL         F3\n"
@@ -539,4 +538,14 @@ skin_keyset_get_default( void )
     "ONION_ALPHA_UP      Keypad_Multiply\n"
     "ONION_ALPHA_DOWN    Keypad_Divide\n"
     ;
+}
+
+static SkinKeyset* s_default = NULL;
+
+SkinKeyset* skin_keyset_get_default(void) {
+    return s_default;
+}
+
+void skin_keyset_set_default(SkinKeyset* set) {
+    s_default = set;
 }
