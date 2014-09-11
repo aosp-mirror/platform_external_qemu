@@ -45,6 +45,10 @@ qemulator_light_brightness( void* opaque, const char*  light, int  value )
     }
 }
 
+static void qemulator_trackball_event(int dx, int dy) {
+    user_event_mouse(dx, dy, 1, 0);
+}
+
 static void
 qemulator_setup( QEmulator*  emulator )
 {
@@ -67,6 +71,7 @@ qemulator_setup( QEmulator*  emulator )
             params.ball_color = 0xffe0e0e0;
             params.dot_color  = 0xff202020;
             params.ring_color = 0xff000000;
+            params.event_func = &qemulator_trackball_event;
 
             ball = skin_trackball_create( &params );
             emulator->trackball = ball;

@@ -11,7 +11,6 @@
 */
 #include "android/skin/keyboard.h"
 
-#include "android/android.h"
 #include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"
 #include "android/utils/debug.h"
