@@ -16,6 +16,8 @@
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/hw-control.h"
+#include "android/hw-sensors.h"
+#include "android/opengles.h"
 #include "android/user-events.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
@@ -49,6 +51,30 @@ static void qemulator_trackball_event(int dx, int dy) {
     user_event_mouse(dx, dy, 1, 0);
 }
 
+static void qemulator_window_key_event(unsigned keycode, int down) {
+    user_event_key(keycode, down);
+}
+
+static void qemulator_window_mouse_event(unsigned x,
+                                         unsigned y,
+                                         unsigned state) {
+    /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
+     * differentiate between a touch-screen and a trackball event
+     */
+    user_event_mouse(x, y, 0, state);
+}
+
+static void qemulator_window_generic_event(int event_type,
+                                           int event_code,
+                                           int event_value) {
+    user_event_generic(event_type, event_code, event_value);
+    /* XXX: hack, replace by better code here */
+    if (event_value != 0)
+        android_sensors_set_coarse_orientation(ANDROID_COARSE_PORTRAIT);
+    else
+        android_sensors_set_coarse_orientation(ANDROID_COARSE_LANDSCAPE);
+}
+
 static void
 qemulator_setup( QEmulator*  emulator )
 {
@@ -58,7 +84,21 @@ qemulator_setup( QEmulator*  emulator )
         SkinLayout*  layout = emulator->layout;
         double       scale  = get_default_scale(emulator->opts);
 
-        emulator->window = skin_window_create( layout, emulator->win_x, emulator->win_y, scale, 0);
+        static const SkinWindowFuncs skin_window_funcs = {
+            .key_event = &qemulator_window_key_event,
+            .mouse_event = &qemulator_window_mouse_event,
+            .generic_event = &qemulator_window_generic_event,
+            .opengles_show = &android_showOpenglesWindow,
+            .opengles_hide = &android_hideOpenglesWindow,
+            .opengles_redraw = &android_redrawOpenglesWindow,
+        };
+
+        emulator->window = skin_window_create(layout,
+                                              emulator->win_x,
+                                              emulator->win_y,
+                                              scale,
+                                              0,
+                                              &skin_window_funcs);
         if (emulator->window == NULL)
             return;
 
@@ -164,106 +204,6 @@ static int qemulator_framebuffer_get_depth(void* opaque) {
     return fb->bits_per_pixel;
 }
 
-static unsigned qemulator_translate_button_name(const char* name) {
-    typedef struct {
-        const char*     name;
-        SkinKeyCode  code;
-    } KeyInfo;
-
-    static const KeyInfo keyinfo_table[] = {
-        { "dpad-up",      kKeyCodeDpadUp },
-        { "dpad-down",    kKeyCodeDpadDown },
-        { "dpad-left",    kKeyCodeDpadLeft },
-        { "dpad-right",   kKeyCodeDpadRight },
-        { "dpad-center",  kKeyCodeDpadCenter },
-        { "soft-left",    kKeyCodeSoftLeft },
-        { "soft-right",   kKeyCodeSoftRight },
-        { "search",       kKeyCodeSearch },
-        { "camera",       kKeyCodeCamera },
-        { "volume-up",    kKeyCodeVolumeUp },
-        { "volume-down",  kKeyCodeVolumeDown },
-        { "power",        kKeyCodePower },
-        { "home",         kKeyCodeHome },
-        { "back",         kKeyCodeBack },
-        { "del",          kKeyCodeDel },
-        { "0",            kKeyCode0 },
-        { "1",            kKeyCode1 },
-        { "2",            kKeyCode2 },
-        { "3",            kKeyCode3 },
-        { "4",            kKeyCode4 },
-        { "5",            kKeyCode5 },
-        { "6",            kKeyCode6 },
-        { "7",            kKeyCode7 },
-        { "8",            kKeyCode8 },
-        { "9",            kKeyCode9 },
-        { "star",         kKeyCodeStar },
-        { "pound",        kKeyCodePound },
-        { "phone-dial",   kKeyCodeCall },
-        { "phone-hangup", kKeyCodeEndCall },
-        { "q",            kKeyCodeQ },
-        { "w",            kKeyCodeW },
-        { "e",            kKeyCodeE },
-        { "r",            kKeyCodeR },
-        { "t",            kKeyCodeT },
-        { "y",            kKeyCodeY },
-        { "u",            kKeyCodeU },
-        { "i",            kKeyCodeI },
-        { "o",            kKeyCodeO },
-        { "p",            kKeyCodeP },
-        { "a",            kKeyCodeA },
-        { "s",            kKeyCodeS },
-        { "d",            kKeyCodeD },
-        { "f",            kKeyCodeF },
-        { "g",            kKeyCodeG },
-        { "h",            kKeyCodeH },
-        { "j",            kKeyCodeJ },
-        { "k",            kKeyCodeK },
-        { "l",            kKeyCodeL },
-        { "DEL",          kKeyCodeDel },
-        { "z",            kKeyCodeZ },
-        { "x",            kKeyCodeX },
-        { "c",            kKeyCodeC },
-        { "v",            kKeyCodeV },
-        { "b",            kKeyCodeB },
-        { "n",            kKeyCodeN },
-        { "m",            kKeyCodeM },
-        { "COMMA",        kKeyCodeComma },
-        { "PERIOD",       kKeyCodePeriod },
-        { "ENTER",        kKeyCodeNewline },
-        { "AT",           kKeyCodeAt },
-        { "SPACE",        kKeyCodeSpace },
-        { "SLASH",        kKeyCodeSlash },
-        { "CAP",          kKeyCodeCapLeft },
-        { "SYM",          kKeyCodeSym },
-        { "ALT",          kKeyCodeAltLeft },
-        { "ALT2",         kKeyCodeAltRight },
-        { "CAP2",         kKeyCodeCapRight },
-        { "tv",           kKeyCodeTV },
-        { "epg",          kKeyCodeEPG },
-        { "dvr",          kKeyCodeDVR },
-        { "prev",         kKeyCodePrevious },
-        { "next",         kKeyCodeNext },
-        { "play",         kKeyCodePlay },
-        { "pause",        kKeyCodePause },
-        { "stop",         kKeyCodeStop },
-        { "rev",          kKeyCodeRewind },
-        { "ffwd",         kKeyCodeFastForward },
-        { "bookmarks",    kKeyCodeBookmarks },
-        { "window",       kKeyCodeCycleWindows },
-        { "channel-up",   kKeyCodeChannelUp },
-        { "channel-down", kKeyCodeChannelDown },
-        { 0, 0 },
-    };
-
-    const KeyInfo *ki = keyinfo_table;
-    while(ki->name) {
-        if(!strcmp(name, ki->name))
-            return ki->code;
-        ki++;
-    }
-    return 0;
-}
-
 int
 qemulator_init( QEmulator*       emulator,
                 AConfig*         aconfig,
@@ -279,17 +219,11 @@ qemulator_init( QEmulator*       emulator,
         .get_depth = &qemulator_framebuffer_get_depth,
     };
 
-    static const SkinCharmapFuncs skin_charmap_funcs = {
-        .translate_name = &qemulator_translate_button_name,
-        .dpad_up_keycode = kKeyCodeDpadUp,
-    };
-
     emulator->aconfig     = aconfig;
     emulator->layout_file =
             skin_file_create_from_aconfig(aconfig,
                                           basepath,
-                                          &skin_fb_funcs,
-                                          &skin_charmap_funcs);
+                                          &skin_fb_funcs);
 
     emulator->layout      = emulator->layout_file->layouts;
     emulator->keyboard    = skin_keyboard_create(opts->charmap,
