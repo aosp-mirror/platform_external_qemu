@@ -204,106 +204,6 @@ static int qemulator_framebuffer_get_depth(void* opaque) {
     return fb->bits_per_pixel;
 }
 
-static unsigned qemulator_translate_button_name(const char* name) {
-    typedef struct {
-        const char*     name;
-        SkinKeyCode  code;
-    } KeyInfo;
-
-    static const KeyInfo keyinfo_table[] = {
-        { "dpad-up",      kKeyCodeDpadUp },
-        { "dpad-down",    kKeyCodeDpadDown },
-        { "dpad-left",    kKeyCodeDpadLeft },
-        { "dpad-right",   kKeyCodeDpadRight },
-        { "dpad-center",  kKeyCodeDpadCenter },
-        { "soft-left",    kKeyCodeSoftLeft },
-        { "soft-right",   kKeyCodeSoftRight },
-        { "search",       kKeyCodeSearch },
-        { "camera",       kKeyCodeCamera },
-        { "volume-up",    kKeyCodeVolumeUp },
-        { "volume-down",  kKeyCodeVolumeDown },
-        { "power",        kKeyCodePower },
-        { "home",         kKeyCodeHome },
-        { "back",         kKeyCodeBack },
-        { "del",          kKeyCodeDel },
-        { "0",            kKeyCode0 },
-        { "1",            kKeyCode1 },
-        { "2",            kKeyCode2 },
-        { "3",            kKeyCode3 },
-        { "4",            kKeyCode4 },
-        { "5",            kKeyCode5 },
-        { "6",            kKeyCode6 },
-        { "7",            kKeyCode7 },
-        { "8",            kKeyCode8 },
-        { "9",            kKeyCode9 },
-        { "star",         kKeyCodeStar },
-        { "pound",        kKeyCodePound },
-        { "phone-dial",   kKeyCodeCall },
-        { "phone-hangup", kKeyCodeEndCall },
-        { "q",            kKeyCodeQ },
-        { "w",            kKeyCodeW },
-        { "e",            kKeyCodeE },
-        { "r",            kKeyCodeR },
-        { "t",            kKeyCodeT },
-        { "y",            kKeyCodeY },
-        { "u",            kKeyCodeU },
-        { "i",            kKeyCodeI },
-        { "o",            kKeyCodeO },
-        { "p",            kKeyCodeP },
-        { "a",            kKeyCodeA },
-        { "s",            kKeyCodeS },
-        { "d",            kKeyCodeD },
-        { "f",            kKeyCodeF },
-        { "g",            kKeyCodeG },
-        { "h",            kKeyCodeH },
-        { "j",            kKeyCodeJ },
-        { "k",            kKeyCodeK },
-        { "l",            kKeyCodeL },
-        { "DEL",          kKeyCodeDel },
-        { "z",            kKeyCodeZ },
-        { "x",            kKeyCodeX },
-        { "c",            kKeyCodeC },
-        { "v",            kKeyCodeV },
-        { "b",            kKeyCodeB },
-        { "n",            kKeyCodeN },
-        { "m",            kKeyCodeM },
-        { "COMMA",        kKeyCodeComma },
-        { "PERIOD",       kKeyCodePeriod },
-        { "ENTER",        kKeyCodeNewline },
-        { "AT",           kKeyCodeAt },
-        { "SPACE",        kKeyCodeSpace },
-        { "SLASH",        kKeyCodeSlash },
-        { "CAP",          kKeyCodeCapLeft },
-        { "SYM",          kKeyCodeSym },
-        { "ALT",          kKeyCodeAltLeft },
-        { "ALT2",         kKeyCodeAltRight },
-        { "CAP2",         kKeyCodeCapRight },
-        { "tv",           kKeyCodeTV },
-        { "epg",          kKeyCodeEPG },
-        { "dvr",          kKeyCodeDVR },
-        { "prev",         kKeyCodePrevious },
-        { "next",         kKeyCodeNext },
-        { "play",         kKeyCodePlay },
-        { "pause",        kKeyCodePause },
-        { "stop",         kKeyCodeStop },
-        { "rev",          kKeyCodeRewind },
-        { "ffwd",         kKeyCodeFastForward },
-        { "bookmarks",    kKeyCodeBookmarks },
-        { "window",       kKeyCodeCycleWindows },
-        { "channel-up",   kKeyCodeChannelUp },
-        { "channel-down", kKeyCodeChannelDown },
-        { 0, 0 },
-    };
-
-    const KeyInfo *ki = keyinfo_table;
-    while(ki->name) {
-        if(!strcmp(name, ki->name))
-            return ki->code;
-        ki++;
-    }
-    return 0;
-}
-
 int
 qemulator_init( QEmulator*       emulator,
                 AConfig*         aconfig,
@@ -319,17 +219,11 @@ qemulator_init( QEmulator*       emulator,
         .get_depth = &qemulator_framebuffer_get_depth,
     };
 
-    static const SkinCharmapFuncs skin_charmap_funcs = {
-        .translate_name = &qemulator_translate_button_name,
-        .dpad_up_keycode = kKeyCodeDpadUp,
-    };
-
     emulator->aconfig     = aconfig;
     emulator->layout_file =
             skin_file_create_from_aconfig(aconfig,
                                           basepath,
-                                          &skin_fb_funcs,
-                                          &skin_charmap_funcs);
+                                          &skin_fb_funcs);
 
     emulator->layout      = emulator->layout_file->layouts;
     emulator->keyboard    = skin_keyboard_create(opts->charmap,
