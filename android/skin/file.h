@@ -27,11 +27,6 @@ typedef struct {
     int (*get_depth)(void* framebuffer);
 } SkinFramebufferFuncs;
 
-typedef struct {
-    unsigned (*translate_name)(const char* key_name);
-    unsigned dpad_up_keycode;
-} SkinCharmapFuncs;
-
 /**  Layout
  **/
 
@@ -154,8 +149,7 @@ typedef struct SkinFile {
 extern SkinFile* skin_file_create_from_aconfig(
         AConfig* aconfig,
         const char* basepath,
-        const SkinFramebufferFuncs* fb_funcs,
-        const SkinCharmapFuncs* charmap_funcs);
+        const SkinFramebufferFuncs* fb_funcs);
 
 extern void       skin_file_free( SkinFile*  file );
 
