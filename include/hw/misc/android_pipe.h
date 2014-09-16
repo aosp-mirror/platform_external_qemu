@@ -221,5 +221,8 @@ extern void android_zero_pipe_init(void);
 extern void android_pingpong_init(void);
 extern void android_throttle_init(void);
 extern void android_adb_dbg_backend_init(void);
+extern void android_adb_backend_init(void);
+
+extern bool adb_server_init(int port);
 
 #endif /* _HW_ANDROID_PIPE_H */
