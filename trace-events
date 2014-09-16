@@ -1388,3 +1388,9 @@ goldfish_fb_memory_write(uint32_t addr, uint32_t value) "addr %08x value %08x"
 goldfish_fb_update_display(int y, int h, int x, int w) "y:%d,h:%d,x=%d,w=%d"
 goldfish_fb_update_stats(float peak, float total) "peak %.2f %%  total %.2f %%"
 
+# hw/audio/goldfish_audio.c
+goldfish_audio_memory_read(const char *regname, uint32_t value) "%s returns %d"
+goldfish_audio_memory_write(const char *regname, uint32_t value) "%s %08x"
+goldfish_audio_buff_recv(int size, int read) "AUD_read (%d) returned %d"
+goldfish_audio_buff_send(int size, int buffer) "sent %5d bytes to audio output (buffer %d)"
+goldfish_audio_buff_full(int available) "AUDIO_INT_READ_BUFFER_FULL available=%d"
