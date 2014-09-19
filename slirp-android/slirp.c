@@ -704,7 +704,7 @@ static void arp_input(const uint8_t *pkt, int pkt_len)
             if ( CTL_IS_DNS(ar_tip_low) || ar_tip_low == CTL_ALIAS)
                 goto arp_ok;
             for (ex_ptr = exec_list; ex_ptr; ex_ptr = ex_ptr->ex_next) {
-                if (ex_ptr->ex_addr == ar_tip_low)
+                if ((uint32_t)ex_ptr->ex_addr == ar_tip_low)
                     goto arp_ok;
             }
             return;
@@ -782,7 +782,7 @@ void if_encap(const uint8_t *ip_data, int ip_data_len)
     uint8_t buf[1600];
     struct ethhdr *eh = (struct ethhdr *)buf;
 
-    if (ip_data_len + ETH_HLEN > sizeof(buf))
+    if (ip_data_len + ETH_HLEN > (int)sizeof(buf))
         return;
 
     if (!memcmp(client_ethaddr, zero_ethaddr, ETH_ALEN)) {
@@ -989,7 +989,7 @@ slirp_log_dns(struct mbuf* m, int dropped) {
         DEBUG_MISC((dfd,"Malformed DNS qeury, length %d \n", (int)m->m_len));
         return -1;
     }
-    for (i = offset; i < m->m_len - trim_bytes && index < sizeof(dns_query); i++, index++) {
+    for (i = offset; i < m->m_len - trim_bytes && index < (int)sizeof(dns_query); i++, index++) {
         c = m->m_data[i];
         if (c < ' ' || c > '~')
             c = '.';
