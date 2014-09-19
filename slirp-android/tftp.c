@@ -108,7 +108,7 @@ static int tftp_read_data(struct tftp_session *spt, u_int16_t block_nr,
 
   n = snprintf(buffer, sizeof(buffer), "%s/%s",
 	       tftp_prefix, spt->filename);
-  if (n >= sizeof(buffer))
+  if (n >= (int)sizeof(buffer))
     return -1;
 
   fd = open(buffer, O_RDONLY | O_BINARY);

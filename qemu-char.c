@@ -1079,6 +1079,10 @@ static CharDriverState *qemu_chr_open_pty(QemuOpts *opts)
     return chr;
 }
 
+#if defined(__linux__) || defined(__sun__) || defined(__FreeBSD__) \
+    || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) \
+    || defined(__FreeBSD_kernel__)
+
 static void tty_serial_init(int fd, int speed,
                             int parity, int data_bits, int stop_bits)
 {
@@ -1297,6 +1301,9 @@ static CharDriverState *qemu_chr_open_tty(QemuOpts *opts)
     chr->chr_close = qemu_chr_close_tty;
     return chr;
 }
+
+#endif  // __linux__ || __bsd__
+
 #else  /* _WIN32 */
 static CharDriverState *qemu_chr_open_pty(QemuOpts *opts)
 {
@@ -2602,7 +2609,7 @@ CharDriverState *qemu_chr_open_opts(QemuOpts *opts,
                 qemu_opts_id(opts));
         return NULL;
     }
-    for (i = 0; i < ARRAY_SIZE(backend_table); i++) {
+    for (i = 0; i < (int)ARRAY_SIZE(backend_table); i++) {
         if (strcmp(backend_table[i].name, qemu_opt_get(opts, "backend")) == 0)
             break;
     }

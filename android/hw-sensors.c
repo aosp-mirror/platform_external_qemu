@@ -432,7 +432,7 @@ _hwSensorClient_receive( HwSensorClient*  cl, uint8_t*  msg, int  msglen )
         else
             cl->enabledMask &= ~(1 << id);
 
-        if (cl->enabledMask != oldEnabledMask) {
+        if (cl->enabledMask != (uint32_t)oldEnabledMask) {
             D("%s: %s %s sensor", __FUNCTION__,
                 (cl->enabledMask & (1 << id))  ? "enabling" : "disabling",  msg);
         }
@@ -568,7 +568,7 @@ _hwSensors_load( QEMUFile*  f, QemudService*  s, void*  opaque)
 
     /* load sensor state */
     AndroidSensor i;
-    for (i = 0 ; i < num_sensors; i++) {
+    for (i = 0 ; i < (AndroidSensor)num_sensors; i++) {
         Sensor* s = &h->sensors[i];
         s->enabled = qemu_get_be32(f);
 

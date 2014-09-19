@@ -2789,7 +2789,7 @@ int main(int argc, char **argv, char **envp)
                               "qemu: syntax: -max-dns-conns max_connections\n");
                       exit(1);
                     }
-                    if (max_dns_conns <= 0 ||  max_dns_conns == LONG_MAX) {
+                    if (max_dns_conns <= 0 ||  max_dns_conns == INT_MAX) {
                       fprintf(stderr,
                               "Invalid arg for max dns connections: %s\n",
                               optarg);

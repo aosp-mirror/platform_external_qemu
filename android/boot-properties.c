@@ -204,7 +204,7 @@ boot_property_load_property( QEMUFile  *f )
     /* load key */
     uint32_t key_buf_len = qemu_get_be32(f);
     char* key = android_alloc(key_buf_len);
-    if ((ret = qemu_get_buffer(f, (uint8_t*)key, key_buf_len) != key_buf_len)) {
+    if ((ret = qemu_get_buffer(f, (uint8_t*)key, key_buf_len) != (int)key_buf_len)) {
         D("%s: key load failed: expected %d bytes, got %d\n",
           __FUNCTION__, key_buf_len, ret);
         goto fail_key;
@@ -213,7 +213,7 @@ boot_property_load_property( QEMUFile  *f )
     /* load value */
     uint32_t value_buf_len = qemu_get_be32(f);
     char* value = android_alloc(value_buf_len);
-    if ((ret = qemu_get_buffer(f, (uint8_t*)value, value_buf_len) != value_buf_len)) {
+    if ((ret = qemu_get_buffer(f, (uint8_t*)value, value_buf_len) != (int)value_buf_len)) {
         D("%s: value load failed: expected %d bytes, got %d\n",
           __FUNCTION__, value_buf_len, ret);
         goto fail_value;

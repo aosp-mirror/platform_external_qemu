@@ -107,7 +107,6 @@ private:
 
     // member related to adb host
     int mAdbHostPort;
-    int mAdbSocket;
     FdWatch mAdbWatch;
 
     // member related to emulator console
