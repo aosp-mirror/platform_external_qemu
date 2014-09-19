@@ -347,8 +347,8 @@ void qemu_event_destroy(QemuEvent *ev)
 
 void qemu_event_set(QemuEvent *ev)
 {
-    if (atomic_mb_read(&ev->value) != EV_SET) {
-        if (atomic_xchg(&ev->value, EV_SET) == EV_BUSY) {
+    if (atomic_mb_read(&ev->value) != (unsigned int)EV_SET) {
+        if (atomic_xchg(&ev->value, EV_SET) == (unsigned int)EV_BUSY) {
             /* There were waiters, wake them up.  */
             futex_wake(ev, INT_MAX);
         }

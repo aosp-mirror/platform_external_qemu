@@ -885,7 +885,7 @@ layout_init( Layout*  layout, SkinLayout*  slayout )
 
         SKIN_PART_LOOP_BUTTONS(part, sbutton)
             n_buttons += 1;
-            sbutton=sbutton;
+            (void)sbutton;
         SKIN_PART_LOOP_END
     SKIN_LAYOUT_LOOP_END
 

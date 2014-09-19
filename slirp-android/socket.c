@@ -114,26 +114,26 @@ size_t sopreprbuf(struct socket *so, struct iovec *iov, int *np)
 	if (sb->sb_wptr < sb->sb_rptr) {
 		iov[0].iov_len = sb->sb_rptr - sb->sb_wptr;
 		/* Should never succeed, but... */
-		if (iov[0].iov_len > len)
-		   iov[0].iov_len = len;
-		if (iov[0].iov_len > mss)
+		if (iov[0].iov_len > (size_t)len)
+		   iov[0].iov_len = (size_t)len;
+		if (iov[0].iov_len > (size_t)mss)
 		   iov[0].iov_len -= iov[0].iov_len%mss;
 		n = 1;
 	} else {
 		iov[0].iov_len = (sb->sb_data + sb->sb_datalen) - sb->sb_wptr;
 		/* Should never succeed, but... */
-		if (iov[0].iov_len > len) iov[0].iov_len = len;
+		if (iov[0].iov_len > (size_t)len) iov[0].iov_len = (size_t)len;
 		len -= iov[0].iov_len;
 		if (len) {
 			iov[1].iov_base = sb->sb_data;
 			iov[1].iov_len = sb->sb_rptr - sb->sb_data;
-			if(iov[1].iov_len > len)
-			   iov[1].iov_len = len;
+			if(iov[1].iov_len > (size_t)len)
+			   iov[1].iov_len = (size_t)len;
 			total = iov[0].iov_len + iov[1].iov_len;
 			if (total > mss) {
 				lss = total%mss;
-				if (iov[1].iov_len > lss) {
-					iov[1].iov_len -= lss;
+				if (iov[1].iov_len > (size_t)lss) {
+					iov[1].iov_len -= (size_t)lss;
 					n = 2;
 				} else {
 					lss -= iov[1].iov_len;
@@ -143,7 +143,7 @@ size_t sopreprbuf(struct socket *so, struct iovec *iov, int *np)
 			} else
 				n = 2;
 		} else {
-			if (iov[0].iov_len > mss)
+			if (iov[0].iov_len > (size_t)mss)
 			   iov[0].iov_len -= iov[0].iov_len%mss;
 			n = 1;
 		}
@@ -202,7 +202,7 @@ soread(struct socket *so)
 	 * a close will be detected on next iteration.
 	 * A return of -1 wont (shouldn't) happen, since it didn't happen above
 	 */
-	if (n == 2 && nn == iov[0].iov_len) {
+	if (n == 2 && (size_t)nn == iov[0].iov_len) {
             int ret;
             ret = socket_recv(so->s, iov[1].iov_base, iov[1].iov_len);
             if (ret > 0)
@@ -233,10 +233,11 @@ int soreadbuf(struct socket *so, const char *buf, int size)
 	 * No need to check if there's enough room to read.
 	 * soread wouldn't have been called if there weren't
 	 */
-	if (sopreprbuf(so, iov, &n) < size)
+	if (sopreprbuf(so, iov, &n) < (size_t)size)
+ 
         goto err;
 
-    nn = MIN(iov[0].iov_len, copy);
+    nn = MIN(iov[0].iov_len, (size_t)copy);
     memcpy(iov[0].iov_base, buf, nn);
 
     copy -= nn;
@@ -384,16 +385,16 @@ sowrite(struct socket *so)
 	if (sb->sb_rptr < sb->sb_wptr) {
 		iov[0].iov_len = sb->sb_wptr - sb->sb_rptr;
 		/* Should never succeed, but... */
-		if (iov[0].iov_len > len) iov[0].iov_len = len;
+		if (iov[0].iov_len > (size_t)len) iov[0].iov_len = (size_t)len;
 		n = 1;
 	} else {
 		iov[0].iov_len = (sb->sb_data + sb->sb_datalen) - sb->sb_rptr;
-		if (iov[0].iov_len > len) iov[0].iov_len = len;
+		if (iov[0].iov_len > (size_t)len) iov[0].iov_len = (size_t)len;
 		len -= iov[0].iov_len;
 		if (len) {
 			iov[1].iov_base = sb->sb_data;
 			iov[1].iov_len = sb->sb_wptr - sb->sb_data;
-			if (iov[1].iov_len > len) iov[1].iov_len = len;
+			if (iov[1].iov_len > (size_t)len) iov[1].iov_len = (size_t)len;
 			n = 2;
 		} else
 			n = 1;
@@ -420,7 +421,7 @@ sowrite(struct socket *so)
 	}
 
 #ifndef HAVE_READV
-	if (n == 2 && nn == iov[0].iov_len) {
+	if (n == 2 && (size_t)nn == iov[0].iov_len) {
             int ret;
             ret = socket_send(so->s, iov[1].iov_base, iov[1].iov_len);
             if (ret > 0)

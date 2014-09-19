@@ -229,7 +229,7 @@ _adb_client_recv(void* opaque, uint8_t* msg, int msglen, QemudClient* client)
      */
 
     /* Make sure tha message doesn't overflow the buffer. */
-    if ((msglen + adb_client->msg_cur) > sizeof(adb_client->msg_buffer)) {
+    if ((msglen + adb_client->msg_cur) > (int)sizeof(adb_client->msg_buffer)) {
         D("Unexpected message in ADB client.");
         adb_client->msg_cur = 0;
         return;

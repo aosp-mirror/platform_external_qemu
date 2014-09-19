@@ -251,7 +251,7 @@ netPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuf
     NetPipe*  pipe = opaque;
     int       count = 0;
     int       ret   = 0;
-    int       buffStart = 0;
+    size_t    buffStart = 0;
     const GoldfishPipeBuffer* buff = buffers;
     const GoldfishPipeBuffer* buffEnd = buff + numBuffers;
 
@@ -309,7 +309,7 @@ netPipe_recvBuffers( void* opaque, GoldfishPipeBuffer*  buffers, int  numBuffers
     NetPipe*  pipe = opaque;
     int       count = 0;
     int       ret   = 0;
-    int       buffStart = 0;
+    size_t    buffStart = 0;
     GoldfishPipeBuffer* buff = buffers;
     GoldfishPipeBuffer* buffEnd = buff + numBuffers;
 

@@ -61,7 +61,7 @@ namespace base {
 //
 class SocketWaiter {
 public:
-    enum {
+    enum Event {
         kEventRead = (1U << 0),
         kEventWrite = (1U << 1),
     };

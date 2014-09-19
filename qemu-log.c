@@ -122,7 +122,7 @@ const QEMULogItem qemu_log_items[] = {
 
 static int cmp1(const char *s1, int n, const char *s2)
 {
-    if (strlen(s2) != n) {
+    if (strlen(s2) != (size_t)n) {
         return 0;
     }
     return memcmp(s1, s2, n) == 0;

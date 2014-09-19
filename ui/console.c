@@ -1169,8 +1169,8 @@ static void kbd_send_chars(void *opaque)
     if (len > s->out_fifo.count)
         len = s->out_fifo.count;
     if (len > 0) {
-        if (len > sizeof(buf))
-            len = sizeof(buf);
+        if (len > (int)sizeof(buf))
+            len = (int)sizeof(buf);
         qemu_fifo_read(&s->out_fifo, buf, len);
         qemu_chr_read(s->chr, buf, len);
     }

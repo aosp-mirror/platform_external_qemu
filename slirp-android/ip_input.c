@@ -84,7 +84,7 @@ ip_input(struct mbuf *m)
 
 	STAT(ipstat.ips_total++);
 
-	if (m->m_len < sizeof (struct ip)) {
+	if (m->m_len < (int)sizeof (struct ip)) {
 		STAT(ipstat.ips_toosmall++);
 		return;
 	}
@@ -97,7 +97,7 @@ ip_input(struct mbuf *m)
 	}
 
 	hlen = ip->ip_hl << 2;
-	if (hlen<sizeof(struct ip ) || hlen>m->m_len) {/* min header length */
+	if (hlen < (int)sizeof(struct ip ) || hlen>m->m_len) {/* min header length */
 	  STAT(ipstat.ips_badhlen++);                     /* or packet too short */
 	  goto bad;
 	}

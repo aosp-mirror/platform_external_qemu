@@ -72,7 +72,7 @@ timezone_set( const char*  tzname )
         return -1;
 
     len = strlen(tzname);
-    if (len > sizeof(android_timezone0)-1)
+    if (len > (int)sizeof(android_timezone0)-1)
         return -1;
 
     strcpy( android_timezone0, tzname );
