@@ -864,13 +864,13 @@ static void qemu_opts_from_qdict_1(const char *key, QObject *obj, void *opaque)
     case QTYPE_QINT:
         n = snprintf(buf, sizeof(buf), "%" PRId64,
                      qint_get_int(qobject_to_qint(obj)));
-        assert(n < sizeof(buf));
+        assert(n < (int)sizeof(buf));
         value = buf;
         break;
     case QTYPE_QFLOAT:
         n = snprintf(buf, sizeof(buf), "%.17g",
                      qfloat_get_double(qobject_to_qfloat(obj)));
-        assert(n < sizeof(buf));
+        assert(n < (int)sizeof(buf));
         value = buf;
         break;
     case QTYPE_QBOOL:
