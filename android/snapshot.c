@@ -247,7 +247,7 @@ snapshot_print_table( int fd, uint32_t nb_snapshots, uint64_t snapshots_offset )
     seek_or_die(fd, snapshots_offset, SEEK_SET);
 
     /* iterate over snapshot records */
-    int i;
+    uint32_t i;
     for (i = 0; i < nb_snapshots; i++) {
         SnapshotInfo *info = snapshot_info_alloc();
         snapshot_info_read(fd, info);
