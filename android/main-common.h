@@ -100,16 +100,6 @@ void findImagePaths( AndroidHwConfig*  hwConfig,
 void updateHwConfigFromAVD(AndroidHwConfig* hwConfig, struct AvdInfo* avd,
                            AndroidOptions* opts, int inAndroidBuild);
 
-/* Called from android/main.c to handle options specific to the standalone
- * UI program. This is a no-op otherwise.
- */
-void handle_ui_options( AndroidOptions* opts );
-
-/* Called from android/main.c to potentially attach to a core from the
- * standalone UI program. This is a no-op otherwise.
- */
-int attach_ui_to_core( AndroidOptions* opts );
-
 ANDROID_END_HEADER
 
 #endif /* ANDROID_MAIN_COMMON_H */
