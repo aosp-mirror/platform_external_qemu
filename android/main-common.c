@@ -412,13 +412,3 @@ AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
 
     return ret;
 }
-
-void handle_ui_options( AndroidOptions* opts )
-{
-    return;
-}
-
-int attach_ui_to_core( AndroidOptions* opts )
-{
-    return 0;
-}

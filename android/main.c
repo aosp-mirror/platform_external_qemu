@@ -191,8 +191,6 @@ int main(int argc, char **argv)
     socket_init();
 #endif
 
-    handle_ui_options(opts);
-
     while (argc-- > 1) {
         opt = (++argv)[0];
 
@@ -1515,11 +1513,6 @@ int main(int argc, char **argv)
 
     /* Setup SDL UI just before calling the code */
     init_sdl_ui(skinConfig, skinPath, opts);
-
-    if (attach_ui_to_core(opts) < 0) {
-        derror("Can't attach to core!");
-        exit(1);
-    }
 
     return qemu_main(n, args);
 }
