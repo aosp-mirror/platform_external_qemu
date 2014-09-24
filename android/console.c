@@ -35,6 +35,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/http_utils.h"
 #include "android/utils/stralloc.h"
 #include "android/config/config.h"
 #include "android/tcpdump.h"
@@ -403,6 +404,8 @@ dump_help( ControlClient  client,
     }
 }
 
+static int do_quit(ControlClient client, char* args);  // forward
+
 static void
 control_client_do_command( ControlClient  client )
 {
@@ -413,7 +416,15 @@ control_client_do_command( ControlClient  client )
     CommandDef  cmd      = find_command( line, commands, &cmdend, &args );
 
     if (cmd == NULL) {
-        control_write( client, "KO: unknown command, try 'help'\r\n" );
+
+        // As a security measure, drop the connection if this command
+        // looks like an HTTP request.
+        if (android_http_is_request_line(line, strlen(line))) {
+            control_write( client, "KO: Forbidden HTTP request. Aborting\r\n");
+            do_quit(client, NULL);
+        } else {
+            control_write( client, "KO: unknown command, try 'help'\r\n" );
+        }
         return;
     }
 
