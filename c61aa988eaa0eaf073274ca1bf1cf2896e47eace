@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "308ae39d_9380cc73",
+        "filename": "android/base/misc/HttpUtils.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1018773
+      },
+      "writtenOn": "2014-09-25T22:01:17Z",
+      "side": 1,
+      "message": "Nit: Missing space between || and memcmp.",
+      "range": {
+        "startLine": 49,
+        "startChar": 32,
+        "endLine": 49,
+        "endChar": 34
+      },
+      "revId": "c61aa988eaa0eaf073274ca1bf1cf2896e47eace",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "308ae39d_53380405",
+        "filename": "android/base/misc/HttpUtils.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1018773
+      },
+      "writtenOn": "2014-09-25T22:01:17Z",
+      "side": 1,
+      "message": "The way isHttpSpace is implemented, this block is happy to accept a method followed by CR or LF. I suggest you redefine isHttpSpace to not match CR or LF. In fact, it should be just SP according to the RFC, but you could include the TAB, just in case.",
+      "revId": "c61aa988eaa0eaf073274ca1bf1cf2896e47eace",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
