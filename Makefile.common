@@ -127,6 +127,8 @@ common_LOCAL_SRC_FILES += \
 	android/base/containers/HashUtils.cpp \
 	android/base/containers/StringVector.cpp \
 	android/base/files/PathUtils.cpp \
+	android/base/misc/HttpUtils.cpp \
+	android/base/misc/Utf8Utils.cpp \
 	android/base/sockets/SocketDrainer.cpp \
 	android/base/sockets/SocketUtils.cpp \
 	android/base/sockets/SocketWaiter.cpp \
@@ -154,6 +156,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/file_data.c \
 	android/utils/format.cpp \
 	android/utils/host_bitness.c \
+	android/utils/http_utils.cpp \
 	android/utils/ini.c \
 	android/utils/intmap.c \
 	android/utils/lineinput.c \
@@ -170,6 +173,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/system.c \
 	android/utils/tempfile.c \
 	android/utils/uncompress.cpp \
+	android/utils/utf8_utils.cpp \
 	android/utils/vector.c \
 	android/utils/win32_cmdline_quote.c \
 
