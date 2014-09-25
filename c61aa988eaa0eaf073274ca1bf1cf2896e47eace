@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "50859788_07dab584",
+        "filename": "android/base/misc/HttpUtils.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-09-25T22:18:18Z",
+      "side": 1,
+      "message": "Thanks. Done.",
+      "parentUuid": "308ae39d_9380cc73",
+      "range": {
+        "startLine": 49,
+        "startChar": 32,
+        "endLine": 49,
+        "endChar": 34
+      },
+      "revId": "c61aa988eaa0eaf073274ca1bf1cf2896e47eace",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "308ae39d_53380405",
         "filename": "android/base/misc/HttpUtils.cpp",
         "patchSetId": 4
@@ -36,6 +60,24 @@
       "writtenOn": "2014-09-25T22:01:17Z",
       "side": 1,
       "message": "The way isHttpSpace is implemented, this block is happy to accept a method followed by CR or LF. I suggest you redefine isHttpSpace to not match CR or LF. In fact, it should be just SP according to the RFC, but you could include the TAB, just in case.",
+      "revId": "c61aa988eaa0eaf073274ca1bf1cf2896e47eace",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "108f9fae_9bb0e4dd",
+        "filename": "android/base/misc/HttpUtils.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-09-25T22:18:18Z",
+      "side": 1,
+      "message": "Thanks. I have kept the TAB, just in case. The spec for the request mentions SP, but the spec for linear white space states that:\n\n  All linear white space, including folding, has the same semantics as SP.\n  A recipient MAY replace any linear white space with a single SP before\n  interpreting the field value or forwarding the message downstream.",
+      "parentUuid": "308ae39d_53380405",
       "revId": "c61aa988eaa0eaf073274ca1bf1cf2896e47eace",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
