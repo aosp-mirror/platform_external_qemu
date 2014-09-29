@@ -14,6 +14,7 @@
 #include "android/skin/charmap.h"
 #include "android/skin/image.h"
 #include "android/skin/scaler.h"
+#include "android/skin/sdl_utils.h"
 #include "android/utils/debug.h"
 #include "android/utils/setenv.h"
 #include "android/utils/system.h"

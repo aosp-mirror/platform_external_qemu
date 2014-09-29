@@ -11,6 +11,7 @@
 */
 #include "android/skin/trackball.h"
 #include "android/skin/image.h"
+#include "android/skin/sdl_utils.h"
 #include "android/utils/system.h"
 #include <math.h>
 

@@ -21,6 +21,7 @@
 #include "android/skin/image.h"
 #include "android/skin/keyboard.h"
 #include "android/skin/resource.h"
+#include "android/skin/sdl_utils.h"
 #include "android/skin/trackball.h"
 #include "android/skin/window.h"
 #include "android/user-config.h"

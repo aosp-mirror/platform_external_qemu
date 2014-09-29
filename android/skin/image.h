@@ -16,10 +16,6 @@
 
 #include <SDL.h>
 
-/* helper functions */
-
-extern SDL_Surface*    sdl_surface_from_argb32( void*  base, int  w, int  h );
-
 /* skin image file objects */
 
 /* opaque skin image type. all skin images are placed in a simple MRU cache

@@ -11,6 +11,8 @@
 */
 #include "android/skin/image.h"
 #include "android/skin/resource.h"
+#include "android/skin/sdl_utils.h"
+
 #include <assert.h>
 #include <limits.h>
 
@@ -35,19 +37,6 @@ static void D(const char*  fmt, ...)
 /*****                                                                      *****/
 /********************************************************************************/
 /********************************************************************************/
-
-SDL_Surface*
-sdl_surface_from_argb32( void*  base, int  w, int  h )
-{
-    return SDL_CreateRGBSurfaceFrom(
-                        base, w, h, 32, w*4,
-#if HOST_WORDS_BIGENDIAN
-                        0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000
-#else
-                        0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000
-#endif
-                        );
-}
 
 static void*
 rotate_image( void*  data, unsigned  width, unsigned  height,  SkinRotation  rotation )
