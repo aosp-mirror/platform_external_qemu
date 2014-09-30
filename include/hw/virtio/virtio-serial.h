@@ -98,6 +98,9 @@ typedef struct VirtIOSerialPortClass {
         /* Guest is now ready to accept data (virtqueues set up). */
     void (*guest_ready)(VirtIOSerialPort *port);
 
+        /* Guest vq became writable again */
+    void (*guest_writable)(VirtIOSerialPort *port);
+
     /*
      * Guest wrote some data to the port. This data is handed over to
      * the app via this callback.  The app can return a size less than

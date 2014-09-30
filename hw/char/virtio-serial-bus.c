@@ -465,6 +465,33 @@ static void handle_output(VirtIODevice *vdev, VirtQueue *vq)
 
 static void handle_input(VirtIODevice *vdev, VirtQueue *vq)
 {
+    /*
+     * Users of virtio-serial would like to know when guest becomes
+     * writable again -- i.e. if a vq had stuff queued up and the
+     * guest wasn't reading at all, the host would not be able to
+     * write to the vq anymore.  Once the guest reads off something,
+     * we can start queueing things up again.
+     */
+    VirtIOSerial *vser;
+    VirtIOSerialPort *port;
+    VirtIOSerialPortClass *vsc;
+
+    vser = VIRTIO_SERIAL(vdev);
+    port = find_port_by_vq(vser, vq);
+
+    if (!port) {
+        return;
+    }
+    vsc = VIRTIO_SERIAL_PORT_GET_CLASS(port);
+
+    /*
+     * If guest_connected is false, this call is being made by the
+     * early-boot queueing up of descriptors, which is just noise for
+     * the host apps -- don't disturb them in that case.
+    */
+    if (port->guest_connected && port->host_connected && vsc->guest_writable) {
+        vsc->guest_writable(port);
+    }
 }
 
 static uint32_t get_features(VirtIODevice *vdev, uint32_t features)
