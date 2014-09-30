@@ -319,7 +319,6 @@ SKIN_SOURCES := charmap.c \
                 window.c \
                 resource.c \
                 scaler.c \
-                sdl_utils.c \
                 surface-sdl.c \
                 winsys-sdl.c \
 
