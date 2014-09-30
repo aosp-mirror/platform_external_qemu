@@ -16,6 +16,7 @@
 #include "android/skin/rect.h"
 
 #include <stdbool.h>
+#include <stddef.h>
 
 // Enable/Disable mouse cursor.
 void skin_winsys_show_cursor(bool enabled);
@@ -44,5 +45,22 @@ void skin_winsys_set_window_title(const char* title);
 
 // Return true iff the main window is fully visible
 bool skin_winsys_is_window_fully_visible(void);
+
+// Start main window support. |no_window| must be true to indicate that
+// no window needs to be shown, but that the SDL backend still needs to be
+// initialized.
+void skin_winsys_start(bool no_window, bool raw_keys);
+
+// Set the main window's icon.
+// |icon_data| is the start of the icon in PNG format.
+// |icon_data_size| is its size in bytes.
+//
+// Note: On Windows, the icon data is ignored, and the icon is directly
+//       extracted from the executable.
+void skin_winsys_set_window_icon(const unsigned char* icon_data,
+                                 size_t icon_data_size);
+
+// Stop main window and quit program. Must be called from inside event loop.
+void skin_winsys_quit(void);
 
 #endif  // ANDROID_SKIN_WINSYS_H
