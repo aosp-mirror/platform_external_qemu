@@ -1545,8 +1545,8 @@ static void
 skin_window_update_shrink( SkinWindow*  window, SkinRect*  rect )
 {
     skin_scaler_scale(window->scaler,
-                      skin_surface_get_sdl(window->shrink_surface),
-                      skin_surface_get_sdl(window->surface),
+                      window->shrink_surface,
+                      window->surface,
                       rect->pos.x,
                       rect->pos.y,
                       rect->size.w,

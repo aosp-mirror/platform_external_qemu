@@ -13,8 +13,7 @@
 #define _ANDROID_SKIN_SCALER_H
 
 #include "android/skin/image.h"
-
-#include <SDL.h>
+#include "android/skin/surface.h"
 
 typedef struct SkinScaler   SkinScaler;
 
@@ -37,8 +36,8 @@ extern void         skin_scaler_get_scaled_rect( SkinScaler*  scaler,
 extern void         skin_scaler_free( SkinScaler*  scaler );
 
 extern void         skin_scaler_scale( SkinScaler*   scaler,
-                                       SDL_Surface*  dst,
-                                       SDL_Surface*  src,
+                                       SkinSurface*  dst,
+                                       SkinSurface*  src,
                                        int           sx,
                                        int           sy,
                                        int           sw,

@@ -105,8 +105,8 @@ skin_scaler_get_scaled_rect( SkinScaler*  scaler,
 
 void
 skin_scaler_scale( SkinScaler*   scaler,
-                   SDL_Surface*  dst_surface,
-                   SDL_Surface*  src_surface,
+                   SkinSurface*  dst_surface,
+                   SkinSurface*  src_surface,
                    int           sx,
                    int           sy,
                    int           sw,
@@ -117,16 +117,19 @@ skin_scaler_scale( SkinScaler*   scaler,
     if ( !scaler->valid )
         return;
 
-    SDL_LockSurface( src_surface );
-    SDL_LockSurface( dst_surface );
+    SkinSurfacePixels src_pix;
+    SkinSurfacePixels dst_pix;
+
+    skin_surface_lock(src_surface, &src_pix);
+    skin_surface_lock(dst_surface, &dst_pix);
     {
         op.scale     = scaler->scale;
-        op.src_pitch = src_surface->pitch;
-        op.src_line  = src_surface->pixels;
-        op.src_w     = src_surface->w;
-        op.src_h     = src_surface->h;
-        op.dst_pitch = dst_surface->pitch;
-        op.dst_line  = dst_surface->pixels;
+        op.src_pitch = src_pix.pitch;
+        op.src_line  = (uint8_t*)src_pix.pixels;
+        op.src_w     = src_pix.w;
+        op.src_h     = src_pix.h;
+        op.dst_pitch = dst_pix.pitch;
+        op.dst_line  = (uint8_t*)dst_pix.pixels;
 
         /* compute the destination rectangle */
         op.rd.pos.x = (int)(sx * scaler->scale + scaler->xdisp);
@@ -154,15 +157,18 @@ skin_scaler_scale( SkinScaler*   scaler,
 
     // The optimized scale functions in argb.h assume the destination is ARGB.
     // If that's not the case, do a channel reorder now.
-    if (dst_surface->format->Rshift != 16 ||
-        dst_surface->format->Gshift !=  8 ||
-        dst_surface->format->Bshift !=  0)
+    SkinSurfacePixelFormat dst_format;
+    skin_surface_get_format(dst_surface, &dst_format);
+
+    if (dst_format.r_shift != 16 ||
+        dst_format.g_shift !=  8 ||
+        dst_format.b_shift !=  0)
     {
-        uint32_t rshift = dst_surface->format->Rshift;
-        uint32_t gshift = dst_surface->format->Gshift;
-        uint32_t bshift = dst_surface->format->Bshift;
-        uint32_t ashift = dst_surface->format->Ashift;
-        uint32_t amask  = dst_surface->format->Amask; // may be 0x00
+        uint32_t rshift = dst_format.r_shift;
+        uint32_t gshift = dst_format.g_shift;
+        uint32_t bshift = dst_format.b_shift;
+        uint32_t ashift = dst_format.a_shift;
+        uint32_t amask  = dst_format.a_mask; // may be 0x00
         int x, y;
 
         for (y = 0; y < op.rd.size.h; y++)
@@ -179,13 +185,8 @@ skin_scaler_scale( SkinScaler*   scaler,
         }
     }
 
-    SDL_UnlockSurface( dst_surface );
-    SDL_UnlockSurface( src_surface );
+    skin_surface_unlock(dst_surface);
+    skin_surface_unlock(src_surface);
 
-    SDL_Rect rd;
-    rd.x = op.rd.pos.x;
-    rd.y = op.rd.pos.y;
-    rd.w = op.rd.size.w;
-    rd.h = op.rd.size.h;
-    SDL_UpdateRects( dst_surface, 1, &rd );
+    skin_surface_update(dst_surface, &op.rd);
 }
