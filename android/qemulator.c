@@ -18,6 +18,7 @@
 #include "android/hw-control.h"
 #include "android/hw-sensors.h"
 #include "android/opengles.h"
+#include "android/skin/winsys.h"
 #include "android/user-events.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
@@ -374,7 +375,7 @@ get_default_scale( AndroidOptions*  opts )
             /* we need to get the host dpi resolution ? */
             int   xdpi, ydpi;
 
-            if ( SDL_WM_GetMonitorDPI( &xdpi, &ydpi ) < 0 ) {
+            if (skin_winsys_get_monitor_dpi(&xdpi, &ydpi) < 0) {
                 fprintf(stderr, "could not get monitor DPI resolution from system. please use -dpi-monitor to specify one\n" );
                 exit(1);
             }

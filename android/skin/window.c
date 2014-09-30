@@ -14,14 +14,11 @@
 #include "android/skin/charmap.h"
 #include "android/skin/image.h"
 #include "android/skin/scaler.h"
-#include "android/skin/sdl_utils.h"
+#include "android/skin/winsys.h"
 #include "android/utils/debug.h"
 #include "android/utils/setenv.h"
 #include "android/utils/system.h"
 #include "android/utils/duff.h"
-
-#include <SDL.h>
-#include <SDL_syswm.h>
 
 #include <math.h>
 
@@ -788,16 +785,16 @@ ball_state_show( BallState*  state, int  enable )
     if (enable) {
         if ( !state->tracking ) {
             state->tracking = 1;
-            SDL_ShowCursor(0);
-            SDL_WM_GrabInput( SDL_GRAB_ON );
+            skin_winsys_show_cursor(false);
+            skin_winsys_grab_input(true);
             skin_trackball_refresh( state->ball );
             skin_window_redraw( state->window, &state->rect );
         }
     } else {
         if ( state->tracking ) {
             state->tracking = 0;
-            SDL_WM_GrabInput( SDL_GRAB_OFF );
-            SDL_ShowCursor(1);
+            skin_winsys_grab_input(false);
+            skin_winsys_show_cursor(true);
             skin_window_redraw( state->window, &state->rect );
         }
     }
@@ -1185,20 +1182,10 @@ static void
 skin_window_show_opengles( SkinWindow* window )
 {
     {
-        SDL_SysWMinfo  wminfo;
-        void*          winhandle;
-        ADisplay*      disp = window->layout.displays;
-        SkinRect       drect = disp->rect;
+        ADisplay* disp = window->layout.displays;
+        SkinRect drect = disp->rect;
+        void* winhandle = skin_winsys_get_window_handle();
 
-        memset(&wminfo, 0, sizeof(wminfo));
-        SDL_GetWMInfo(&wminfo);
-#ifdef _WIN32
-        winhandle = (void*)wminfo.window;
-#elif defined(__APPLE__)
-        winhandle = (void*)wminfo.nsWindowPtr;
-#else
-        winhandle = (void*)wminfo.info.x11.window;
-#endif
         skin_scaler_get_scaled_rect(window->scaler, &drect, &drect);
 
         window->win_funcs->opengles_show(winhandle,
@@ -1234,7 +1221,7 @@ skin_window_create(SkinLayout* slayout,
      * a new scale to ensure it is.
      */
     if (scale <= 0) {
-        SDL_Rect  monitor;
+        SkinRect  monitor;
         int       screen_w, screen_h;
         int       win_w = slayout->size.w;
         int       win_h = slayout->size.h;
@@ -1242,9 +1229,9 @@ skin_window_create(SkinLayout* slayout,
 
         /* To account for things like menu bars, window decorations etc..
          * We only compute 95% of the real screen size. */
-        SDL_WM_GetMonitorRect(&monitor);
-        screen_w = monitor.w * 0.95;
-        screen_h = monitor.h * 0.95;
+        skin_winsys_get_monitor_rect(&monitor);
+        screen_w = monitor.size.w * 0.95;
+        screen_h = monitor.size.h * 0.95;
 
         scale_w = 1.0;
         scale_h = 1.0;
@@ -1280,29 +1267,30 @@ skin_window_create(SkinLayout* slayout,
         skin_window_free(window);
         return NULL;
     }
-    SDL_WM_SetPos( x, y );
+    skin_winsys_set_window_pos(x, y);
 
     /* Check that the window is fully visible */
-    if ( !window->no_display && !SDL_WM_IsFullyVisible(0) ) {
-        SDL_Rect  monitor;
-        int       win_x, win_y, win_w, win_h;
-        int       new_x, new_y;
+    if (!window->no_display && !skin_winsys_is_window_fully_visible()) {
+        SkinRect monitor;
+        int win_x, win_y, win_w, win_h;
+        int new_x, new_y;
 
-        SDL_WM_GetMonitorRect(&monitor);
-        SDL_WM_GetPos(&win_x, &win_y);
+        skin_winsys_get_monitor_rect(&monitor);
+
+        skin_winsys_get_window_pos(&win_x, &win_y);
         win_w = skin_surface_width(window->surface);
         win_h = skin_surface_height(window->surface);
 
         /* First, we recenter the window */
-        new_x = (monitor.w - win_w)/2;
-        new_y = (monitor.h - win_h)/2;
+        new_x = (monitor.size.w - win_w)/2;
+        new_y = (monitor.size.h - win_h)/2;
 
         /* If it is still too large, we ensure the top-border is visible */
         if (new_y < 0)
             new_y = 0;
 
         /* Done */
-        SDL_WM_SetPos(new_x, new_y);
+        skin_winsys_set_window_pos(new_x, new_y);
         dprint( "emulator window was out of view and was recentered\n" );
     }
 
@@ -1338,8 +1326,9 @@ skin_window_enable_qwerty( SkinWindow*  window, int  enabled )
 void
 skin_window_set_title( SkinWindow*  window, const char*  title )
 {
-    if (window && title)
-        SDL_WM_SetCaption( title, title );
+    if (window && title) {
+        skin_winsys_set_window_title(title);
+    }
 }
 
 static void
@@ -1364,22 +1353,19 @@ skin_window_resize( SkinWindow*  window )
         int           fullscreen = window->fullscreen;
 
         if (fullscreen) {
-            SDL_Rect  r;
-            if (SDL_WM_GetMonitorRect(&r) < 0) {
-                fullscreen = 0;
-            } else {
-                double  x_scale, y_scale;
+            SkinRect r;
+            skin_winsys_get_monitor_rect(&r);
+            double  x_scale, y_scale;
 
-                window_x = r.x;
-                window_y = r.y;
-                window_w = r.w;
-                window_h = r.h;
+            window_x = r.pos.x;
+            window_y = r.pos.y;
+            window_w = r.size.w;
+            window_h = r.size.h;
 
-                x_scale = window_w * 1.0 / layout_w;
-                y_scale = window_h * 1.0 / layout_h;
+            x_scale = window_w * 1.0 / layout_w;
+            y_scale = window_h * 1.0 / layout_h;
 
-                scale = (x_scale <= y_scale) ? x_scale : y_scale;
-            }
+            scale = (x_scale <= y_scale) ? x_scale : y_scale;
         }
         else if (window->shrink) {
             scale = window->shrink_scale;
@@ -1414,7 +1400,7 @@ skin_window_resize( SkinWindow*  window )
             window->shrink_surface = surface;
             window->surface = skin_surface_create_slow(window_w, window_h);
             if (window->surface == NULL) {
-                fprintf(stderr, "### Error: could not create or resize SDL window: %s\n", SDL_GetError() );
+                fprintf(stderr, "### Error: could not create or resize SDL window\n");
                 exit(1);
             }
             skin_scaler_set( window->scaler, scale, window->effective_x, window->effective_y );
@@ -1475,7 +1461,7 @@ int
 skin_window_reset ( SkinWindow*  window, SkinLayout*  slayout )
 {
     if (!window->fullscreen) {
-        SDL_WM_GetPos(&window->x_pos, &window->y_pos);
+        skin_winsys_get_window_pos(&window->x_pos, &window->y_pos);
     }
     if (skin_window_reset_internal( window, slayout ) < 0)
         return -1;
@@ -1614,9 +1600,9 @@ void
 skin_window_toggle_fullscreen( SkinWindow*  window )
 {
     if (window && window->surface) {
-        if (!window->fullscreen)
-            SDL_WM_GetPos( &window->x_pos, &window->y_pos );
-
+        if (!window->fullscreen) {
+            skin_winsys_get_window_pos(&window->x_pos, &window->y_pos);
+        }
         window->fullscreen = !window->fullscreen;
         skin_window_resize( window );
         skin_window_redraw( window, NULL );

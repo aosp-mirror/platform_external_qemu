@@ -28,7 +28,6 @@
 #include "android/user-events.h"
 
 #include <SDL.h>
-#include <SDL_syswm.h>
 
 #include "math.h"
 
