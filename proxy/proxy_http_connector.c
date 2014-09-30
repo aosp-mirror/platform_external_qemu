@@ -160,6 +160,7 @@ connection_poll( ProxyConnection*   root,
                         proxy_connection_free( root, 1, PROXY_EVENT_CONNECTED );
                     } else {
                         /* just skip headers */
+                        proxy_connection_rewind(root);
                     }
                 }
             }
