@@ -11,6 +11,7 @@
 */
 #include "android/skin/surface.h"
 #include "android/skin/argb.h"
+#include "android/utils/setenv.h"
 #include <SDL.h>
 
 #define  DEBUG  1
@@ -66,6 +67,16 @@ skin_surface_unrefp( SkinSurface*  *psurface )
 SDL_Surface*
 skin_surface_get_sdl(SkinSurface* s) {
   return s->surface;
+}
+
+extern int
+skin_surface_width(SkinSurface* s) {
+    return s->surface->w;
+}
+
+extern int
+skin_surface_height(SkinSurface* s) {
+    return s->surface->h;
 }
 
 void
@@ -223,8 +234,33 @@ skin_surface_create_argb32_from(
     return _skin_surface_create( surface, pixcopy );
 }
 
+extern SkinSurface*
+skin_surface_create_window(int x,
+                           int y,
+                           int w,
+                           int h,
+                           int is_fullscreen)
+{
+    char temp[32];
+    sprintf(temp, "%d,%d", x, y);
+    setenv("SDL_VIDEO_WINDOW_POS", temp, 1);
+    setenv("SDL_VIDEO_WINDOW_FORCE_VISIBLE", "1", 1);
 
+    int flags = SDL_SWSURFACE;
+    if (is_fullscreen) {
+        flags |= SDL_FULLSCREEN;
+    }
 
+    SDL_Surface* surface = SDL_SetVideoMode(w, h, 32, flags);
+    if (!surface) {
+        fprintf(stderr, "### Error: could not create or resize SDL window: %s\n", SDL_GetError() );
+        exit(1);
+    }
+
+    SDL_WM_SetPos(x, y);
+
+    return _skin_surface_create(surface, NULL);
+}
 
 extern int
 skin_surface_lock( SkinSurface*  s, SkinSurfacePixels  *pix )
@@ -252,6 +288,22 @@ skin_surface_unlock( SkinSurface*  s )
         SDL_UnlockSurface( s->surface );
 }
 
+
+extern void
+skin_surface_get_format(SkinSurface* s,
+                        SkinSurfacePixelFormat* format)
+{
+    format->r_shift = s->surface->format->Rshift;
+    format->g_shift = s->surface->format->Gshift;
+    format->b_shift = s->surface->format->Bshift;
+    format->a_shift = s->surface->format->Ashift;
+
+    format->r_mask = s->surface->format->Rmask;
+    format->g_mask = s->surface->format->Gmask;
+    format->b_mask = s->surface->format->Bmask;
+    format->a_mask = s->surface->format->Amask;
+}
+
 extern void
 skin_surface_set_alpha_blending(SkinSurface*  s, int alpha)
 {
@@ -260,6 +312,12 @@ skin_surface_set_alpha_blending(SkinSurface*  s, int alpha)
     }
 }
 
+extern void
+skin_surface_update(SkinSurface* s, SkinRect* r) {
+    if (s && s->surface) {
+        SDL_UpdateRect(s->surface, r->pos.x, r->pos.y, r->size.w, r->size.h);
+    }
+}
 
 #if 0
 static uint32_t

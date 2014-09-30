@@ -11,7 +11,6 @@
 */
 #include "android/skin/image.h"
 #include "android/skin/resource.h"
-#include "android/skin/sdl_utils.h"
 
 #include <assert.h>
 #include <limits.h>
@@ -698,7 +697,7 @@ skin_image_blend_clone( SkinImage*  clone, SkinImage*  source, int  blend )
 {
     SkinSurfacePixels pix;
     skin_surface_lock(clone->surface, &pix);
-    blend_image(clone->pixels, source->pixels, source->w, source->h, blend);
+    blend_image(pix.pixels, source->pixels, source->w, source->h, blend);
     skin_surface_unlock(clone->surface);
     skin_surface_set_alpha_blending(clone->surface, 255);
 }
