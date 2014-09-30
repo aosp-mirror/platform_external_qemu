@@ -108,7 +108,6 @@ extern void    skin_surface_update(SkinSurface* surface, SkinRect* rect);
 typedef enum {
     SKIN_BLIT_COPY = 0,
     SKIN_BLIT_SRCOVER,
-    SKIN_BLIT_DSTOVER,
 } SkinBlitOp;
 
 
@@ -120,9 +119,8 @@ extern void    skin_surface_blit( SkinSurface*  dst,
                                   SkinBlitOp    blitop );
 
 /* blit a colored rectangle into a destination surface */
-extern void    skin_surface_fill( SkinSurface*  dst,
-                                  SkinRect*     rect,
-                                  uint32_t      argb_premul,
-                                  SkinBlitOp    blitop );
+extern void    skin_surface_fill(SkinSurface*  dst,
+                                 SkinRect*     rect,
+                                 uint32_t      argb_premul);
 
 #endif /* _ANDROID_SKIN_SURFACE_H */

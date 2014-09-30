@@ -319,7 +319,6 @@ skin_surface_update(SkinSurface* s, SkinRect* r) {
     }
 }
 
-#if 0
 static uint32_t
 skin_surface_map_argb( SkinSurface*  s, uint32_t  c )
 {
@@ -332,320 +331,29 @@ skin_surface_map_argb( SkinSurface*  s, uint32_t  c )
     }
     return 0x00000000;
 }
-#endif
-
-typedef struct {
-    int   x;
-    int   y;
-    int   w;
-    int   h;
-    int   sx;
-    int   sy;
-
-    uint8_t*      dst_line;
-    int           dst_pitch;
-    SDL_Surface*  dst_lock;
-
-    uint8_t*      src_line;
-    int           src_pitch;
-    SDL_Surface*  src_lock;
-    uint32_t      src_color;
-
-} SkinBlit;
-
-
-static int
-skin_blit_init_fill( SkinBlit*     blit,
-                     SkinSurface*  dst,
-                     SkinRect*     dst_rect,
-                     uint32_t      color )
-{
-    int  x = dst_rect->pos.x;
-    int  y = dst_rect->pos.y;
-    int  w = dst_rect->size.w;
-    int  h = dst_rect->size.h;
-    int  delta;
-
-    if (x < 0) {
-        w += x;
-        x  = 0;
-    }
-    delta = (x + w) - dst->surface->w;
-    if (delta > 0)
-        w -= delta;
-
-    if (y < 0) {
-        h += y;
-        y  = 0;
-    }
-    delta = (y + h) - dst->surface->h;
-    if (delta > 0)
-        h -= delta;
-
-    if (w <= 0 || h <= 0)
-        return 0;
-
-    blit->x = x;
-    blit->y = y;
-    blit->w = w;
-    blit->h = h;
-
-    if ( !SDL_LockSurface(dst->surface) )
-        return 0;
-
-    blit->dst_lock  = dst->surface;
-    blit->dst_pitch = dst->surface->pitch;
-    blit->dst_line  = dst->surface->pixels + y*blit->dst_pitch;
-
-    blit->src_lock  = NULL;
-    blit->src_color = color;
-
-    return 1;
-}
-
-static int
-skin_blit_init_blit( SkinBlit*     blit,
-                     SkinSurface*  dst,
-                     SkinPos*      dst_pos,
-                     SkinSurface*  src,
-                     SkinRect*     src_rect )
-{
-    int  x  = dst_pos->x;
-    int  y  = dst_pos->y;
-    int  sx = src_rect->pos.x;
-    int  sy = src_rect->pos.y;
-    int  w  = src_rect->size.w;
-    int  h  = src_rect->size.h;
-    int  delta;
-
-    if (x < 0) {
-        w  += x;
-        sx -= x;
-        x   = 0;
-    }
-    if (sx < 0) {
-        w  += sx;
-        x  -= sx;
-        sx  = 0;
-    }
-
-    delta = (x + w) - dst->surface->w;
-    if (delta > 0)
-        w -= delta;
-
-    delta = (sx + w) - src->surface->w;
-    if (delta > 0)
-        w -= delta;
-
-    if (y < 0) {
-        h  += y;
-        sy += y;
-        y   = 0;
-    }
-    if (sy < 0) {
-        h  += sy;
-        y  -= sy;
-        sy  = 0;
-    }
-    delta = (y + h) - dst->surface->h;
-    if (delta > 0)
-        h -= delta;
-
-    delta = (sy + h) - src->surface->h;
-
-    if (w <= 0 || h <= 0)
-        return 0;
-
-    blit->x = x;
-    blit->y = y;
-    blit->w = w;
-    blit->h = h;
-
-    blit->sx = sx;
-    blit->sy = sy;
-
-    if ( !SDL_LockSurface(dst->surface) )
-        return 0;
-
-    blit->dst_lock  = dst->surface;
-    blit->dst_pitch = dst->surface->pitch;
-    blit->dst_line  = (uint8_t*) dst->surface->pixels + y*blit->dst_pitch;
-
-    if ( !SDL_LockSurface(src->surface) ) {
-        SDL_UnlockSurface(dst->surface);
-        return 0;
-    }
-
-    blit->src_lock  = src->surface;
-    blit->src_pitch = src->surface->pitch;
-    blit->src_line  = (uint8_t*) src->surface->pixels + sy*blit->src_pitch;
-
-    return 1;
-}
-
-static void
-skin_blit_done( SkinBlit*  blit )
-{
-    if (blit->src_lock)
-        SDL_UnlockSurface( blit->src_lock );
-    if (blit->dst_lock)
-        SDL_UnlockSurface( blit->dst_lock );
-    ARGB_DONE;
-}
-
-typedef void (*SkinLineFillFunc)( uint32_t*  dst, uint32_t  color, int  len );
-typedef void (*SkinLineBlitFunc)( uint32_t*  dst, const uint32_t*  src,  int  len );
-
-static void
-skin_line_fill_copy( uint32_t*  dst, uint32_t  color, int  len )
-{
-    uint32_t*  end = dst + len;
-
-    while (dst + 4 <= end) {
-        dst[0] = dst[1] = dst[2] = dst[3] = color;
-        dst   += 4;
-    }
-    while (dst < end) {
-        dst[0] = color;
-        dst   += 1;
-    }
-}
-
-static void
-skin_line_fill_srcover( uint32_t*  dst, uint32_t  color, int  len )
-{
-    uint32_t*  end = dst + len;
-    uint32_t   alpha = (color >> 24);
-
-    if (alpha == 255)
-    {
-        skin_line_fill_copy(dst, color, len);
-    }
-    else
-    {
-        ARGB_DECL(src_c);
-        ARGB_DECL_ZERO();
-
-        alpha  = 255 - alpha;
-        alpha += (alpha >> 7);
-
-        ARGB_UNPACK(src_c,color);
-
-        for ( ; dst < end; dst++ )
-        {
-            ARGB_DECL(dst_c);
-
-            ARGB_READ(dst_c,dst);
-            ARGB_MULSHIFT(dst_c,dst_c,alpha,8);
-            ARGB_ADD(dst_c,src_c);
-            ARGB_WRITE(dst_c,dst);
-        }
-    }
-}
-
-static void
-skin_line_fill_dstover( uint32_t*  dst, uint32_t  color, int  len )
-{
-    uint32_t*  end = dst + len;
-    ARGB_DECL(src_c);
-    ARGB_DECL_ZERO();
-
-    ARGB_UNPACK(src_c,color);
-
-    for ( ; dst < end; dst++ )
-    {
-        ARGB_DECL(dst_c);
-        ARGB_DECL(val);
-
-        uint32_t   alpha;
-
-        ARGB_READ(dst_c,dst);
-        alpha = 256 - (dst[0] >> 24);
-        ARGB_MULSHIFT(val,src_c,alpha,8);
-        ARGB_ADD(val,dst_c);
-        ARGB_WRITE(val,dst);
-    }
-}
 
 extern void
-skin_surface_fill( SkinSurface*  dst,
-                   SkinRect*     rect,
-                   uint32_t      argb_premul,
-                   SkinBlitOp    blitop )
+skin_surface_fill(SkinSurface*  dst,
+                  SkinRect*     rect,
+                  uint32_t      argb_premul)
 {
-    SkinLineFillFunc  fill;
-    SkinBlit          blit[1];
+    SDL_Rect rd;
 
-    switch (blitop) {
-        case SKIN_BLIT_COPY:    fill = skin_line_fill_copy; break;
-        case SKIN_BLIT_SRCOVER: fill = skin_line_fill_srcover; break;
-        case SKIN_BLIT_DSTOVER: fill = skin_line_fill_dstover; break;
-        default: return;
+    if (rect) {
+        rd.x = rect->pos.x;
+        rd.y = rect->pos.y;
+        rd.w = rect->size.w;
+        rd.h = rect->size.h;
+    } else {
+        rd.x = 0;
+        rd.y = 0;
+        rd.w = dst->surface->w;
+        rd.h = dst->surface->h;
     }
+    uint32_t color = skin_surface_map_argb(dst, argb_premul);
 
-    if ( skin_blit_init_fill( blit, dst, rect, argb_premul ) ) {
-        uint8_t*   line  = blit->dst_line;
-        int        pitch = blit->dst_pitch;
-        uint8_t*   end   = line + pitch*blit->h;
-
-        for ( ; line != end; line += pitch )
-            fill( (uint32_t*)line + blit->x, argb_premul, blit->w );
-    }
+    SDL_FillRect(dst->surface, &rd, color);
 }
-
-
-static void
-skin_line_blit_copy( uint32_t*  dst, const uint32_t*  src, int  len )
-{
-    memcpy( (char*)dst, (const char*)src, len*4 );
-}
-
-
-
-static void
-skin_line_blit_srcover( uint32_t*  dst, const uint32_t*  src, int  len )
-{
-    uint32_t*  end = dst + len;
-    ARGB_DECL_ZERO();
-
-    for ( ; dst < end; dst++ ) {
-        ARGB_DECL(d);
-        ARGB_DECL(v);
-        uint32_t  alpha;
-
-        alpha = (src[0] >> 24);
-        if (alpha > 0) {
-            ARGB_READ(d,dst);
-            alpha = 256 - alpha;
-            ARGB_MULSHIFT(v,d,alpha,8);
-            ARGB_ADD(v,d);
-            ARGB_WRITE(v,dst);
-        }
-    }
-}
-
-static void
-skin_line_blit_dstover( uint32_t*  dst, const uint32_t*  src, int  len )
-{
-    uint32_t*  end = dst + len;
-    ARGB_DECL_ZERO();
-
-    for ( ; dst < end; dst++ ) {
-        ARGB_DECL(s);
-        ARGB_DECL(v);
-        uint32_t  alpha;
-
-        alpha = (dst[0] >> 24);
-        if (alpha < 255) {
-            ARGB_READ(s,src);
-            alpha = 256 - alpha;
-            ARGB_MULSHIFT(v,s,alpha,8);
-            ARGB_ADD(v,s);
-            ARGB_WRITE(v,dst);
-        }
-    }
-}
-
 
 extern void
 skin_surface_blit( SkinSurface*  dst,
@@ -654,26 +362,26 @@ skin_surface_blit( SkinSurface*  dst,
                    SkinRect*     src_rect,
                    SkinBlitOp    blitop )
 {
-    SkinLineBlitFunc  func;
-    SkinBlit          blit[1];
+    SDL_Rect dr, sr;
+    dr.x = dst_pos->x;
+    dr.y = dst_pos->y;
+    dr.w = src_rect->size.w;
+    dr.h = src_rect->size.h;
+
+    sr.x = src_rect->pos.x;
+    sr.y = src_rect->pos.y;
+    sr.w = src_rect->size.w;
+    sr.h = src_rect->size.h;
 
     switch (blitop) {
-        case SKIN_BLIT_COPY:    func = skin_line_blit_copy; break;
-        case SKIN_BLIT_SRCOVER: func = skin_line_blit_srcover; break;
-        case SKIN_BLIT_DSTOVER: func = skin_line_blit_dstover; break;
-        default: return;
+        case SKIN_BLIT_COPY:
+            SDL_SetAlpha(src->surface, 0, 255);
+            break;
+        case SKIN_BLIT_SRCOVER:
+            SDL_SetAlpha(src->surface, SDL_SRCALPHA, 255);
+            break;
+        default:
+            return;
     }
-
-    if ( skin_blit_init_blit( blit, dst, dst_pos, src, src_rect ) ) {
-        uint8_t*   line   = blit->dst_line;
-        uint8_t*   sline  = blit->src_line;
-        int        pitch  = blit->dst_pitch;
-        int        spitch = blit->src_pitch;
-        uint8_t*   end    = line + pitch*blit->h;
-
-        for ( ; line != end; line += pitch, sline += spitch )
-            func( (uint32_t*)line + blit->x, (uint32_t*)sline + blit->sx, blit->w );
-
-        skin_blit_done(blit);
-    }
+    SDL_BlitSurface(src->surface, &sr, dst->surface, &dr);
 }
