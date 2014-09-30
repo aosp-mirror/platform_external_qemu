@@ -779,7 +779,7 @@ ball_state_redraw(BallState* state, SkinRect* rect, SkinSurface* surface)
     SkinRect  r;
 
     if (skin_rect_intersect( &r, rect, &state->rect ))
-        skin_trackball_draw( state->ball, 0, 0, skin_surface_get_sdl(surface));
+        skin_trackball_draw(state->ball, 0, 0, surface);
 }
 
 static void
@@ -811,13 +811,7 @@ ball_state_set( BallState*  state, SkinTrackBall*  ball )
 
     state->ball = ball;
     if (ball != NULL) {
-        SDL_Rect  sr;
-
-        skin_trackball_rect( ball, &sr );
-        state->rect.pos.x  = sr.x;
-        state->rect.pos.y  = sr.y;
-        state->rect.size.w = sr.w;
-        state->rect.size.h = sr.h;
+        skin_trackball_rect(ball, &state->rect);
     }
 }
 
