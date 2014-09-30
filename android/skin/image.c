@@ -15,6 +15,9 @@
 
 #include <assert.h>
 #include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define  DEBUG  0
 
@@ -43,7 +46,7 @@ rotate_image( void*  data, unsigned  width, unsigned  height,  SkinRotation  rot
 {
     void*  result;
 
-    result = malloc( width*height*4 );
+    result = malloc(width * height * 4);
     if (result == NULL)
         return NULL;
 
@@ -202,7 +205,7 @@ struct SkinImage {
     int              ref_count;
     SkinImage*       next;
     SkinImage*       prev;
-    SDL_Surface*     surface;
+    SkinSurface*     surface;
     unsigned         flags;
     unsigned         w, h;
     void*            pixels;  /* 32-bit ARGB */
@@ -223,10 +226,7 @@ skin_image_free( SkinImage*  image )
 {
     if (image && image != _no_image)
     {
-        if (image->surface) {
-            SDL_FreeSurface(image->surface);
-            image->surface = NULL;
-        }
+        skin_surface_unrefp(&image->surface);
 
         if (image->pixels) {
             free( image->pixels );
@@ -319,9 +319,9 @@ skin_image_load( SkinImage*  image )
     image->w      = w;
     image->h      = h;
 
-    image->surface = sdl_surface_from_argb32( image->pixels, w, h );
+    image->surface = skin_surface_create_argb32_from(w, h, w * 4, image->pixels, 0);
     if (image->surface == NULL) {
-        fprintf(stderr, "failed to create SDL surface for '%s' image\n", path);
+        fprintf(stderr, "failed to create skin surface for '%s' image\n", path);
         return -1;
     }
     return 0;
@@ -481,7 +481,8 @@ skin_image_create( SkinImageDesc*  desc, unsigned  hash )
         if (parent == SKIN_IMAGE_NONE)
             return SKIN_IMAGE_NONE;
 
-        SDL_LockSurface(parent->surface);
+        SkinSurfacePixels pix;
+        skin_surface_lock(parent->surface, &pix);
 
         if (desc->rotation == SKIN_ROTATION_90 ||
             desc->rotation == SKIN_ROTATION_270)
@@ -493,21 +494,32 @@ skin_image_create( SkinImageDesc*  desc, unsigned  hash )
             node->h = parent->h;
         }
 
-        node->pixels = rotate_image( parent->pixels, parent->w, parent->h,
-                                    desc->rotation );
+        node->pixels = rotate_image(pix.pixels,
+                                    parent->w,
+                                    parent->h,
+                                    desc->rotation);
 
-        SDL_UnlockSurface(parent->surface);
+        skin_surface_unlock(parent->surface);
         skin_image_unref(&parent);
 
-        if (node->pixels  == NULL) {
+        if (node->pixels == NULL) {
             skin_image_free(node);
             return SKIN_IMAGE_NONE;
         }
 
-        if (desc->blend != SKIN_BLEND_FULL)
-            blend_image( node->pixels, node->pixels, node->w, node->h, desc->blend );
+        if (desc->blend != SKIN_BLEND_FULL) {
+            blend_image(node->pixels,
+                        node->pixels,
+                        node->w,
+                        node->h,
+                        desc->blend);
+        }
 
-        node->surface = sdl_surface_from_argb32( node->pixels, node->w, node->h );
+        node->surface = skin_surface_create_argb32_from(node->w,
+                                                        node->h,
+                                                        node->w * 4,
+                                                        node->pixels,
+                                                        0);
         if (node->surface == NULL) {
             skin_image_free(node);
             return SKIN_IMAGE_NONE;
@@ -637,7 +649,11 @@ skin_image_clone( SkinImage*  source )
     if (image->pixels == NULL)
         goto Fail;
 
-    image->surface = sdl_surface_from_argb32( image->pixels, image->w, image->h );
+    image->surface = skin_surface_create_argb32_from(image->w,
+                                                     image->h,
+                                                     image->w * 4,
+                                                     image->pixels,
+                                                     0);
     if (image->surface == NULL)
         goto Fail;
 
@@ -680,10 +696,11 @@ skin_image_clone_full( SkinImage*    source,
 extern void
 skin_image_blend_clone( SkinImage*  clone, SkinImage*  source, int  blend )
 {
-    SDL_LockSurface( clone->surface );
-    blend_image( clone->pixels, source->pixels, source->w, source->h, blend );
-    SDL_UnlockSurface( clone->surface );
-    SDL_SetAlpha( clone->surface, SDL_SRCALPHA, 255 );
+    SkinSurfacePixels pix;
+    skin_surface_lock(clone->surface, &pix);
+    blend_image(clone->pixels, source->pixels, source->w, source->h, blend);
+    skin_surface_unlock(clone->surface);
+    skin_surface_set_alpha_blending(clone->surface, 255);
 }
 
 int
@@ -724,7 +741,7 @@ skin_image_org_h( SkinImage*  image )
     return 0;
 }
 
-SDL_Surface*
+SkinSurface*
 skin_image_surface( SkinImage*  image )
 {
     return image ? image->surface : NULL;

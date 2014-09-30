@@ -14,6 +14,8 @@
 
 #include "android/skin/image.h"
 
+#include <SDL.h>
+
 typedef struct SkinScaler   SkinScaler;
 
 /* create a new image scaler. by default, it uses a scale of 1.0 */

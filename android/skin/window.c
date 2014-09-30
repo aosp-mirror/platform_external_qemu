@@ -77,8 +77,11 @@ background_redraw( Background*  back, SkinRect*  rect, SDL_Surface*  surface )
         rs.w = r.size.w;
         rs.h = r.size.h;
 
-        SDL_BlitSurface( skin_image_surface(back->image), &rs, surface, &rd );
-        //SDL_UpdateRects( surface, 1, &rd );
+        SDL_BlitSurface(
+                skin_surface_get_sdl(skin_image_surface(back->image)),
+                &rs,
+                surface,
+                &rd);
     }
 }
 
@@ -625,7 +628,11 @@ display_redraw( ADisplay*  disp, SkinRect*  rect, SDL_Surface*  surface )
                 rs.w = rd.w;
                 rs.h = rd.h;
 
-                SDL_BlitSurface( skin_image_surface(disp->onion), &rs, surface, &rd );
+                SDL_BlitSurface(
+                        skin_surface_get_sdl(skin_image_surface(disp->onion)),
+                        &rs,
+                        surface,
+                        &rd);
             }
         }
 
@@ -697,9 +704,13 @@ button_redraw( Button*  button, SkinRect*  rect, SDL_Surface*  surface )
             rd.h = r.size.h;
 
             if (button->image != SKIN_IMAGE_NONE) {
-                SDL_BlitSurface( skin_image_surface(button->image), &rs, surface, &rd );
-                if (button->down > 1)
-                    SDL_BlitSurface( skin_image_surface(button->image), &rs, surface, &rd );
+                SDL_Surface* src =
+                        skin_surface_get_sdl(
+                                skin_image_surface(button->image));
+                SDL_BlitSurface(src, &rs, surface, &rd);
+                if (button->down > 1) {
+                    SDL_BlitSurface(src, &rs, surface, &rd);
+                }
             }
         }
     }

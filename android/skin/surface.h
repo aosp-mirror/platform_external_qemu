@@ -77,6 +77,9 @@ extern int     skin_surface_lock  ( SkinSurface*  s, SkinSurfacePixels  *pix );
 /* unlock a slow surface that was previously locked */
 extern void    skin_surface_unlock( SkinSurface*  s );
 
+extern void    skin_surface_set_alpha_blending( SkinSurface*  s, int alpha );
+
+
 /* list of composition operators for the blit routine */
 typedef enum {
     SKIN_BLIT_COPY = 0,

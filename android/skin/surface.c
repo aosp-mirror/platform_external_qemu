@@ -63,6 +63,10 @@ skin_surface_unrefp( SkinSurface*  *psurface )
     }
 }
 
+SDL_Surface*
+skin_surface_get_sdl(SkinSurface* s) {
+  return s->surface;
+}
 
 void
 skin_surface_set_done( SkinSurface*  s, SkinSurfaceDoneFunc  done_func, void*  done_user )
@@ -72,14 +76,14 @@ skin_surface_set_done( SkinSurface*  s, SkinSurfaceDoneFunc  done_func, void*  d
 }
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-#  define  ARGB32_R_MASK  0xff000000
-#  define  ARGB32_G_MASK  0x00ff0000
-#  define  ARGB32_B_MASK  0x0000ff00
-#  define  ARGB32_A_MASK  0x000000ff
-#else
-#  define  ARGB32_R_MASK  0x000000ff
+#  define  ARGB32_R_MASK  0x00ff0000
 #  define  ARGB32_G_MASK  0x0000ff00
-#  define  ARGB32_B_MASK  0x00ff0000
+#  define  ARGB32_B_MASK  0x000000ff
+#  define  ARGB32_A_MASK  0xff000000
+#else
+#  define  ARGB32_R_MASK  0x00ff0000
+#  define  ARGB32_G_MASK  0x0000ff00
+#  define  ARGB32_B_MASK  0x000000ff
 #  define  ARGB32_A_MASK  0xff000000
 #endif
 
@@ -102,7 +106,7 @@ _sdl_surface_create_rgb( int  width,
     } else
         return NULL;
 
-    return SDL_CreateRGBSurface( flags, width, height, depth,
+    return SDL_CreateRGBSurface(flags, width, height, depth,
                                  rmask, gmask, bmask, amask );
 }
 
@@ -127,7 +131,7 @@ _sdl_surface_create_rgb_from( int   width,
     } else
         return NULL;
 
-    return SDL_CreateRGBSurfaceFrom( pixels, width, height, pitch, depth,
+    return SDL_CreateRGBSurfaceFrom( pixels, width, height, depth, pitch,
                                      rmask, gmask, bmask, amask );
 }
 
@@ -246,6 +250,14 @@ skin_surface_unlock( SkinSurface*  s )
 {
     if (s && s->surface)
         SDL_UnlockSurface( s->surface );
+}
+
+extern void
+skin_surface_set_alpha_blending(SkinSurface*  s, int alpha)
+{
+    if (s && s->surface) {
+        SDL_SetAlpha(s->surface, SDL_SRCALPHA, alpha);
+    }
 }
 
 
