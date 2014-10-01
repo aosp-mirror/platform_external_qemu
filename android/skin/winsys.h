@@ -18,11 +18,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-// Enable/Disable mouse cursor.
-void skin_winsys_show_cursor(bool enabled);
-
-// Enable/Disable input grab.
-void skin_winsys_grab_input(bool enabled);
+// Enable/Disable relative mouse mode. Used for trackball emulation.
+// This hides the cursor and grabs the input.
+void skin_winsys_set_relative_mouse_mode(bool enabled);
 
 // Return window handle of main UI.
 void* skin_winsys_get_window_handle(void);

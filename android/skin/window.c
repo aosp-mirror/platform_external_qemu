@@ -785,16 +785,14 @@ ball_state_show( BallState*  state, int  enable )
     if (enable) {
         if ( !state->tracking ) {
             state->tracking = 1;
-            skin_winsys_show_cursor(false);
-            skin_winsys_grab_input(true);
+            skin_winsys_set_relative_mouse_mode(true);
             skin_trackball_refresh( state->ball );
             skin_window_redraw( state->window, &state->rect );
         }
     } else {
         if ( state->tracking ) {
             state->tracking = 0;
-            skin_winsys_grab_input(false);
-            skin_winsys_show_cursor(true);
+            skin_winsys_set_relative_mouse_mode(false);
             skin_window_redraw( state->window, &state->rect );
         }
     }

@@ -17,12 +17,8 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
-void skin_winsys_show_cursor(bool enabled) {
+void skin_winsys_set_relative_mouse_mode(bool enabled) {
     SDL_ShowCursor(enabled ? 1 : 0);
-}
-
-// Enable/Disable input grab.
-void skin_winsys_grab_input(bool enabled) {
     SDL_WM_GrabInput(enabled ? SDL_GRAB_ON : SDL_GRAB_OFF);
 }
 
