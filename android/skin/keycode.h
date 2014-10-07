@@ -153,6 +153,7 @@ typedef enum {
     kKeyModRAlt   = (1U << 3),  // right-alt
     kKeyModLShift = (1U << 4),  // left-shift
     kKeyModRShift = (1U << 5),  // right-shift
+    kKeyModNumLock = (1U << 6),  // numlock
 
 } SkinKeyMod;
 

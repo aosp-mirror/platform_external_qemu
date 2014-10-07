@@ -27,8 +27,6 @@
 #include "ui/console.h"
 #include "android/user-events.h"
 
-#include <SDL.h>
-
 #include "math.h"
 
 #include "android/config/config.h"

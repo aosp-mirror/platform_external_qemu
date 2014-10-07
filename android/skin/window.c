@@ -12,6 +12,7 @@
 #include "android/skin/window.h"
 
 #include "android/skin/charmap.h"
+#include "android/skin/event.h"
 #include "android/skin/image.h"
 #include "android/skin/scaler.h"
 #include "android/skin/winsys.h"
@@ -21,6 +22,8 @@
 #include "android/utils/duff.h"
 
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /* when shrinking, we reduce the pixel ratio by this fixed amount */
 #define  SHRINK_SCALE  0.6
@@ -1398,7 +1401,7 @@ skin_window_resize( SkinWindow*  window )
             window->shrink_surface = surface;
             window->surface = skin_surface_create_slow(window_w, window_h);
             if (window->surface == NULL) {
-                fprintf(stderr, "### Error: could not create or resize SDL window\n");
+                fprintf(stderr, "### Error: could not create or resize window\n");
                 exit(1);
             }
             skin_scaler_set( window->scaler, scale, window->effective_x, window->effective_y );
@@ -1634,7 +1637,7 @@ skin_window_map_to_scale( SkinWindow*  window, int  *x, int  *y )
 }
 
 void
-skin_window_process_event( SkinWindow*  window, SDL_Event*  ev )
+skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
 {
     Button*  button;
     int      mx, my;
@@ -1643,20 +1646,20 @@ skin_window_process_event( SkinWindow*  window, SDL_Event*  ev )
         return;
 
     switch (ev->type) {
-    case SDL_MOUSEBUTTONDOWN:
+    case kEventMouseButtonDown:
         if ( window->ball.tracking ) {
             skin_window_trackball_press( window, 1 );
             break;
         }
 
-        mx = ev->button.x;
-        my = ev->button.y;
+        mx = ev->u.mouse.x;
+        my = ev->u.mouse.y;
         skin_window_map_to_scale( window, &mx, &my );
         skin_window_move_mouse( window, mx, my );
         skin_window_find_finger( window, mx, my );
 #if 0
         printf("down: x=%d y=%d fx=%d fy=%d fis=%d\n",
-               ev->button.x, ev->button.y, window->finger.pos.x,
+               ev->u.mouse.x, ev->u.mouse.y, window->finger.pos.x,
                window->finger.pos.y, window->finger.inside);
 #endif
         if (window->finger.inside) {
@@ -1679,14 +1682,14 @@ skin_window_process_event( SkinWindow*  window, SDL_Event*  ev )
         }
         break;
 
-    case SDL_MOUSEBUTTONUP:
+    case kEventMouseButtonUp:
         if ( window->ball.tracking ) {
             skin_window_trackball_press( window, 0 );
             break;
         }
         button = window->button.pressed;
-        mx = ev->button.x;
-        my = ev->button.y;
+        mx = ev->u.mouse.x;
+        my = ev->u.mouse.y;
         skin_window_map_to_scale( window, &mx, &my );
         if (button)
         {
@@ -1710,13 +1713,15 @@ skin_window_process_event( SkinWindow*  window, SDL_Event*  ev )
         }
         break;
 
-    case SDL_MOUSEMOTION:
+    case kEventMouseMotion:
         if ( window->ball.tracking ) {
-            skin_window_trackball_move( window, ev->motion.xrel, ev->motion.yrel );
+            skin_window_trackball_move(window,
+                                       ev->u.mouse.xrel,
+                                       ev->u.mouse.yrel);
             break;
         }
-        mx = ev->button.x;
-        my = ev->button.y;
+        mx = ev->u.mouse.x;
+        my = ev->u.mouse.y;
         skin_window_map_to_scale( window, &mx, &my );
         if ( !window->button.pressed )
         {
@@ -1730,10 +1735,14 @@ skin_window_process_event( SkinWindow*  window, SDL_Event*  ev )
         }
         break;
 
-    case SDL_VIDEOEXPOSE:
+    case kEventVideoExpose:
         skin_window_redraw_opengles(window);
         break;
+
+    default:
+        ;
     }
+
 }
 
 static ADisplay*

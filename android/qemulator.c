@@ -26,6 +26,7 @@
 #include "telephony/modem_driver.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
+
 static double get_default_scale( AndroidOptions*  opts );
 
 /* QEmulator structure instance. */
@@ -581,7 +582,7 @@ handle_key_command( void*  opaque, SkinKeyCommand  command, int  down )
 /* called periodically to poll for user input events */
 static void qemulator_refresh(QEmulator* emulator)
 {
-    SDL_Event      ev;
+    SkinEvent ev;
     SkinWindow*    window   = emulator->window;
     SkinKeyboard*  keyboard = emulator->keyboard;
 
@@ -592,43 +593,29 @@ static void qemulator_refresh(QEmulator* emulator)
     if (window == NULL)
         return;
 
-    while(SDL_PollEvent(&ev)){
+    while(skin_event_poll(&ev)) {
         switch(ev.type){
-        case SDL_VIDEOEXPOSE:
+        case kEventVideoExpose:
             skin_window_redraw( window, NULL );
             break;
 
-        case SDL_KEYDOWN:
-#ifdef _WIN32
-            /* special code to deal with Alt-F4 properly */
-            if (ev.key.keysym.sym == SDLK_F4 &&
-                ev.key.keysym.mod & KMOD_ALT) {
-              goto CleanExit;
-            }
-#endif
-#ifdef __APPLE__
-            /* special code to deal with Command-Q properly */
-            if (ev.key.keysym.sym == SDLK_q &&
-                ev.key.keysym.mod & KMOD_META) {
-              goto CleanExit;
-            }
-#endif
+        case kEventKeyDown:
             skin_keyboard_process_event( keyboard, &ev, 1 );
             break;
 
-        case SDL_KEYUP:
+        case kEventKeyUp:
             skin_keyboard_process_event( keyboard, &ev, 0 );
             break;
 
-        case SDL_MOUSEMOTION:
+        case kEventMouseMotion:
             skin_window_process_event( window, &ev );
             break;
 
-        case SDL_MOUSEBUTTONDOWN:
-        case SDL_MOUSEBUTTONUP:
+        case kEventMouseButtonDown:
+        case kEventMouseButtonUp:
             {
-                int  down = (ev.type == SDL_MOUSEBUTTONDOWN);
-                if (ev.button.button == 4)
+                int  down = (ev.type == kEventMouseButtonDown);
+                if (ev.u.mouse.button == kMouseButtonScrollUp)
                 {
                     /* scroll-wheel simulates DPad up */
                     SkinKeyCode  kcode;
@@ -638,7 +625,7 @@ static void qemulator_refresh(QEmulator* emulator)
                             skin_layout_get_dpad_rotation(qemulator_get_layout(qemulator_get())));
                     user_event_key( kcode, down );
                 }
-                else if (ev.button.button == 5)
+                else if (ev.u.mouse.button == kMouseButtonScrollDown)
                 {
                     /* scroll-wheel simulates DPad down */
                     SkinKeyCode  kcode;
@@ -648,23 +635,13 @@ static void qemulator_refresh(QEmulator* emulator)
                             skin_layout_get_dpad_rotation(qemulator_get_layout(qemulator_get())));
                     user_event_key( kcode, down );
                 }
-                else if (ev.button.button == SDL_BUTTON_LEFT) {
+                else if (ev.u.mouse.button == kMouseButtonLeft) {
                     skin_window_process_event( window, &ev );
                 }
-#if 0
-                else {
-                fprintf(stderr, "... mouse button %s: button=%d state=%04x x=%d y=%d\n",
-                                down ? "down" : "up  ",
-                                ev.button.button, ev.button.state, ev.button.x, ev.button.y);
-                }
-#endif
             }
             break;
 
-        case SDL_QUIT:
-#if defined _WIN32 || defined __APPLE__
-        CleanExit:
-#endif
+        case kEventQuit:
             /* only save emulator config through clean exit */
             qemulator_done(qemulator_get());
             qemu_system_shutdown_request();

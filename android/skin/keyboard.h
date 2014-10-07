@@ -13,12 +13,11 @@
 #define _ANDROID_SKIN_KEYBOARD_H
 
 #include "android/skin/charmap.h"
+#include "android/skin/event.h"
 #include "android/skin/image.h"  /* for SkinRotation */
 #include "android/skin/keycode-buffer.h"
 #include "android/skin/keyset.h"
 #include "android/utils/aconfig-file.h"
-
-#include <SDL.h>
 
 typedef struct SkinKeyboard   SkinKeyboard;
 
@@ -54,7 +53,7 @@ extern void           skin_keyboard_on_key_press( SkinKeyboard*     keyboard,
                                                   SkinKeyEventFunc  press_func,
                                                   void*             press_opaque );
 
-extern void           skin_keyboard_process_event( SkinKeyboard*  keyboard, SDL_Event*  ev, int  down );
+extern void           skin_keyboard_process_event( SkinKeyboard*  keyboard, SkinEvent*  ev, int  down );
 extern int            skin_keyboard_process_unicode_event( SkinKeyboard*  kb,  unsigned int  unicode, int  down );
 
 extern void           skin_keyboard_add_key_event( SkinKeyboard*  k, unsigned code, unsigned  down );

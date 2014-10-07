@@ -12,9 +12,9 @@
 #ifndef _SKIN_WINDOW_H
 #define _SKIN_WINDOW_H
 
+#include "android/skin/event.h"
 #include "android/skin/file.h"
 #include "android/skin/trackball.h"
-#include <SDL.h>
 
 typedef struct SkinWindow  SkinWindow;
 
@@ -52,7 +52,7 @@ extern void             skin_window_enable_qwerty( SkinWindow*  window, int  ena
 extern int              skin_window_reset ( SkinWindow*  window, SkinLayout*  layout );
 extern void             skin_window_free  ( SkinWindow*  window );
 extern void             skin_window_redraw( SkinWindow*  window, SkinRect*  rect );
-extern void             skin_window_process_event( SkinWindow*  window, SDL_Event*  ev );
+extern void             skin_window_process_event( SkinWindow*  window, SkinEvent*  ev );
 
 extern void             skin_window_set_onion( SkinWindow*   window,
                                                SkinImage*    onion,

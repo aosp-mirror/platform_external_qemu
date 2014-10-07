@@ -307,12 +307,12 @@ endif
 # the skin support sources
 #
 SKIN_SOURCES := charmap.c \
+                event-sdl.c \
                 rect.c \
                 region.c \
                 image.c \
                 trackball.c \
                 keyboard.c \
-                keyboard-sdl.c \
                 keycode.c \
                 keycode-buffer.c \
                 keyset.c \
