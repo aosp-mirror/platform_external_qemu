@@ -312,6 +312,7 @@ SKIN_SOURCES := charmap.c \
                 image.c \
                 trackball.c \
                 keyboard.c \
+                keyboard-sdl.c \
                 keycode.c \
                 keycode-buffer.c \
                 keyset.c \

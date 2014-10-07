@@ -18,6 +18,7 @@
 #include "android/hw-control.h"
 #include "android/hw-sensors.h"
 #include "android/opengles.h"
+#include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
 #include "android/user-events.h"
 #include "android/utils/debug.h"
@@ -322,8 +323,8 @@ qemulator_set_title(QEmulator* emulator)
                         p = bufprint(p, end, " or ");
                 }
                 p = bufprint(p, end, "%s",
-                             skin_key_symmod_to_str( bindings[nn].sym,
-                                                     bindings[nn].mod ) );
+                             skin_key_pair_to_string(bindings[nn].sym,
+                                                     bindings[nn].mod) );
             }
             p = bufprint(p, end, " to leave trackball mode. ");
         }
