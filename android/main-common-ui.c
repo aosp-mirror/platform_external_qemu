@@ -12,10 +12,10 @@
 
 #include "android/avd/util.h"
 #include "android/display.h"
+#include "android/emulator-window.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/main-common.h"
-#include "android/qemulator.h"
 #include "android/resource.h"
 #include "android/skin/file.h"
 #include "android/skin/image.h"

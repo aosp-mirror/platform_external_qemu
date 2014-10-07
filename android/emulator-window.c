@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/qemulator.h"
+#include "android/emulator-window.h"
 
 #include "android/android.h"
 #include "android/framebuffer.h"

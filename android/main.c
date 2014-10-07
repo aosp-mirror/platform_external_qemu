@@ -51,7 +51,6 @@
 
 #include "android/globals.h"
 
-#include "android/qemulator.h"
 #include "android/display.h"
 
 #include "android/snapshot.h"

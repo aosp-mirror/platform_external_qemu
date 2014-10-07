@@ -10,8 +10,8 @@
 ** GNU General Public License for more details.
 */
 
-#ifndef QEMU_ANDROID_QEMULATOR_H
-#define QEMU_ANDROID_QEMULATOR_H
+#ifndef QEMU_ANDROID_EMULATOR_WINDOW_H
+#define QEMU_ANDROID_EMULATOR_WINDOW_H
 
 #include "android/cmdline-option.h"
 #include "android/framebuffer.h"
@@ -70,4 +70,4 @@ emulator_window_get_layout( EmulatorWindow* emulator );
 QFrameBuffer*
 emulator_window_get_first_framebuffer(EmulatorWindow* emulator);
 
-#endif  // QEMU_ANDROID_QEMULATOR_H
+#endif  // QEMU_ANDROID_EMULATOR_WINDOW_H
