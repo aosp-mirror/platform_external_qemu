@@ -181,14 +181,14 @@ const char*  skin_network_delay = NULL;
 static void android_ui_at_exit(void)
 {
     user_config_done();
-    qemulator_done(qemulator_get());
+    emulator_window_done(emulator_window_get());
     skin_winsys_quit();
 }
 
 
 void sdl_display_init(DisplayState *ds, int full_screen, int  no_frame)
 {
-    QEmulator*    emulator = qemulator_get();
+    EmulatorWindow*    emulator = emulator_window_get();
     SkinDisplay*  disp     = skin_layout_get_display(emulator->layout);
     int           width, height;
     char          buf[128];
@@ -650,7 +650,7 @@ init_sdl_ui(AConfig*         skinConfig,
 
     user_config_get_window_pos(&win_x, &win_y);
 
-    if ( qemulator_init(qemulator_get(), skinConfig, skinPath, win_x, win_y, opts) < 0 ) {
+    if ( emulator_window_init(emulator_window_get(), skinConfig, skinPath, win_x, win_y, opts) < 0 ) {
         fprintf(stderr, "### Error: could not load emulator skin from '%s'\n", skinPath);
         exit(1);
     }
@@ -670,8 +670,8 @@ init_sdl_ui(AConfig*         skinConfig,
         } else
             rotate = SKIN_ROTATION_0;
 
-        qemulator_get()->onion          = onion;
-        qemulator_get()->onion_alpha    = alpha;
-        qemulator_get()->onion_rotation = rotate;
+        emulator_window_get()->onion          = onion;
+        emulator_window_get()->onion_alpha    = alpha;
+        emulator_window_get()->onion_rotation = rotate;
     }
 }

@@ -29,17 +29,17 @@
 
 static double get_default_scale( AndroidOptions*  opts );
 
-/* QEmulator structure instance. */
-static QEmulator   qemulator[1];
+/* EmulatorWindow structure instance. */
+static EmulatorWindow   qemulator[1];
 
 static void handle_key_command( void*  opaque, SkinKeyCommand  command, int  param );
-static void qemulator_refresh(QEmulator* emulator);
+static void emulator_window_refresh(EmulatorWindow* emulator);
 extern void qemu_system_shutdown_request(void);
 
 static void
-qemulator_light_brightness( void* opaque, const char*  light, int  value )
+emulator_window_light_brightness( void* opaque, const char*  light, int  value )
 {
-    QEmulator*  emulator = opaque;
+    EmulatorWindow*  emulator = opaque;
 
     VERBOSE_PRINT(hw_control,"%s: light='%s' value=%d window=%p", __FUNCTION__, light, value, emulator->window);
     if ( !strcmp(light, "lcd_backlight") ) {
@@ -50,15 +50,15 @@ qemulator_light_brightness( void* opaque, const char*  light, int  value )
     }
 }
 
-static void qemulator_trackball_event(int dx, int dy) {
+static void emulator_window_trackball_event(int dx, int dy) {
     user_event_mouse(dx, dy, 1, 0);
 }
 
-static void qemulator_window_key_event(unsigned keycode, int down) {
+static void emulator_window_window_key_event(unsigned keycode, int down) {
     user_event_key(keycode, down);
 }
 
-static void qemulator_window_mouse_event(unsigned x,
+static void emulator_window_window_mouse_event(unsigned x,
                                          unsigned y,
                                          unsigned state) {
     /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
@@ -67,7 +67,7 @@ static void qemulator_window_mouse_event(unsigned x,
     user_event_mouse(x, y, 0, state);
 }
 
-static void qemulator_window_generic_event(int event_type,
+static void emulator_window_window_generic_event(int event_type,
                                            int event_code,
                                            int event_value) {
     user_event_generic(event_type, event_code, event_value);
@@ -79,7 +79,7 @@ static void qemulator_window_generic_event(int event_type,
 }
 
 static void
-qemulator_setup( QEmulator*  emulator )
+emulator_window_setup( EmulatorWindow*  emulator )
 {
     AndroidOptions*  opts = emulator->opts;
 
@@ -88,9 +88,9 @@ qemulator_setup( QEmulator*  emulator )
         double       scale  = get_default_scale(emulator->opts);
 
         static const SkinWindowFuncs skin_window_funcs = {
-            .key_event = &qemulator_window_key_event,
-            .mouse_event = &qemulator_window_mouse_event,
-            .generic_event = &qemulator_window_generic_event,
+            .key_event = &emulator_window_window_key_event,
+            .mouse_event = &emulator_window_window_mouse_event,
+            .generic_event = &emulator_window_window_generic_event,
             .opengles_show = &android_showOpenglesWindow,
             .opengles_hide = &android_hideOpenglesWindow,
             .opengles_redraw = &android_redrawOpenglesWindow,
@@ -114,7 +114,7 @@ qemulator_setup( QEmulator*  emulator )
             params.ball_color = 0xffe0e0e0;
             params.dot_color  = 0xff202020;
             params.ring_color = 0xff000000;
-            params.event_func = &qemulator_trackball_event;
+            params.event_func = &emulator_window_trackball_event;
 
             ball = skin_trackball_create( &params );
             emulator->trackball = ball;
@@ -130,7 +130,7 @@ qemulator_setup( QEmulator*  emulator )
                                    emulator->onion_rotation,
                                    emulator->onion_alpha );
 
-        qemulator_set_title(emulator);
+        emulator_window_set_title(emulator);
 
         skin_window_enable_touch ( emulator->window,
                                    !androidHwConfig_isScreenNoTouch(android_hw));
@@ -141,52 +141,52 @@ qemulator_setup( QEmulator*  emulator )
 
     /* initialize hardware control support */
     AndroidHwControlFuncs funcs;
-    funcs.light_brightness = qemulator_light_brightness;
+    funcs.light_brightness = emulator_window_light_brightness;
     android_hw_control_set(emulator, &funcs);
 }
 
 static void
-qemulator_fb_update( void*   _emulator, int  x, int  y, int  w, int  h )
+emulator_window_fb_update( void*   _emulator, int  x, int  y, int  w, int  h )
 {
-    QEmulator*  emulator = _emulator;
+    EmulatorWindow*  emulator = _emulator;
 
     if (!emulator->window) {
         if (emulator->opts->no_window)
             return;
-        qemulator_setup( emulator );
+        emulator_window_setup( emulator );
     }
     skin_window_update_display( emulator->window, x, y, w, h );
 }
 
 static void
-qemulator_fb_rotate( void*  _emulator, int  rotation )
+emulator_window_fb_rotate( void*  _emulator, int  rotation )
 {
-    QEmulator*  emulator = _emulator;
+    EmulatorWindow*  emulator = _emulator;
 
-    qemulator_setup( emulator );
+    emulator_window_setup( emulator );
 }
 
 static void
-qemulator_fb_poll( void* _emulator )
+emulator_window_fb_poll( void* _emulator )
 {
-    QEmulator* emulator = _emulator;
-    qemulator_refresh(emulator);
+    EmulatorWindow* emulator = _emulator;
+    emulator_window_refresh(emulator);
 }
 
-QEmulator*
-qemulator_get(void)
+EmulatorWindow*
+emulator_window_get(void)
 {
     return qemulator;
 }
 
-static void qemulator_framebuffer_free(void* opaque) {
+static void emulator_window_framebuffer_free(void* opaque) {
     QFrameBuffer* fb = opaque;
 
     qframebuffer_done(fb);
     free(fb);
 }
 
-static void* qemulator_framebuffer_create(int width, int height, int bpp) {
+static void* emulator_window_framebuffer_create(int width, int height, int bpp) {
     QFrameBuffer* fb = calloc(1, sizeof(*fb));
 
     qframebuffer_init(fb, width, height, 0,
@@ -197,18 +197,18 @@ static void* qemulator_framebuffer_create(int width, int height, int bpp) {
     return fb;
 }
 
-static void* qemulator_framebuffer_get_pixels(void* opaque) {
+static void* emulator_window_framebuffer_get_pixels(void* opaque) {
     QFrameBuffer* fb = opaque;
     return fb->pixels;
 }
 
-static int qemulator_framebuffer_get_depth(void* opaque) {
+static int emulator_window_framebuffer_get_depth(void* opaque) {
     QFrameBuffer* fb = opaque;
     return fb->bits_per_pixel;
 }
 
 int
-qemulator_init( QEmulator*       emulator,
+emulator_window_init( EmulatorWindow*       emulator,
                 AConfig*         aconfig,
                 const char*      basepath,
                 int              x,
@@ -216,10 +216,10 @@ qemulator_init( QEmulator*       emulator,
                 AndroidOptions*  opts )
 {
     static const SkinFramebufferFuncs skin_fb_funcs = {
-        .create_framebuffer = &qemulator_framebuffer_create,
-        .free_framebuffer = &qemulator_framebuffer_free,
-        .get_pixels = &qemulator_framebuffer_get_pixels,
-        .get_depth = &qemulator_framebuffer_get_depth,
+        .create_framebuffer = &emulator_window_framebuffer_create,
+        .free_framebuffer = &emulator_window_framebuffer_free,
+        .get_pixels = &emulator_window_framebuffer_get_pixels,
+        .get_depth = &emulator_window_framebuffer_get_depth,
     };
 
     emulator->aconfig     = aconfig;
@@ -243,9 +243,9 @@ qemulator_init( QEmulator*       emulator,
         if (disp->valid) {
             qframebuffer_add_client( disp->framebuffer,
                                      emulator,
-                                     qemulator_fb_update,
-                                     qemulator_fb_rotate,
-                                     qemulator_fb_poll,
+                                     emulator_window_fb_update,
+                                     emulator_window_fb_rotate,
+                                     emulator_window_fb_poll,
                                      NULL );
         }
     SKIN_FILE_LOOP_END_PARTS
@@ -257,7 +257,7 @@ qemulator_init( QEmulator*       emulator,
 }
 
 void
-qemulator_done(QEmulator* emulator)
+emulator_window_done(EmulatorWindow* emulator)
 {
     if (emulator->window) {
         skin_window_free(emulator->window);
@@ -279,13 +279,13 @@ qemulator_done(QEmulator* emulator)
 }
 
 SkinLayout*
-qemulator_get_layout(QEmulator* emulator)
+emulator_window_get_layout(EmulatorWindow* emulator)
 {
     return emulator->layout;
 }
 
 QFrameBuffer*
-qemulator_get_first_framebuffer(QEmulator* emulator)
+emulator_window_get_first_framebuffer(EmulatorWindow* emulator)
 {
     /* register as a framebuffer clients for all displays defined in the skin file */
     SKIN_FILE_LOOP_PARTS( emulator->layout_file, part )
@@ -298,7 +298,7 @@ qemulator_get_first_framebuffer(QEmulator* emulator)
 }
 
 void
-qemulator_set_title(QEmulator* emulator)
+emulator_window_set_title(EmulatorWindow* emulator)
 {
     char  temp[128], *p=temp, *end=p+sizeof temp;;
 
@@ -456,7 +456,7 @@ handle_key_command( void*  opaque, SkinKeyCommand  command, int  down )
         { SKIN_KEY_COMMAND_NONE, 0 }
     };
     int          nn;
-    QEmulator*   emulator = opaque;
+    EmulatorWindow*   emulator = opaque;
 
 
     for (nn = 0; keycodes[nn].kcode != 0; nn++) {
@@ -474,7 +474,7 @@ handle_key_command( void*  opaque, SkinKeyCommand  command, int  down )
     if (command == SKIN_KEY_COMMAND_SHOW_TRACKBALL) {
         emulator->show_trackball = (down != 0);
         skin_window_show_trackball( emulator->window, emulator->show_trackball );
-        //qemulator_set_title( emulator );
+        //emulator_window_set_title( emulator );
         return;
     }
 
@@ -507,7 +507,7 @@ handle_key_command( void*  opaque, SkinKeyCommand  command, int  down )
     case SKIN_KEY_COMMAND_TOGGLE_TRACKBALL:
         emulator->show_trackball = !emulator->show_trackball;
         skin_window_show_trackball( emulator->window, emulator->show_trackball );
-        qemulator_set_title(emulator);
+        emulator_window_set_title(emulator);
         break;
 
     case SKIN_KEY_COMMAND_ONION_ALPHA_UP:
@@ -580,7 +580,7 @@ handle_key_command( void*  opaque, SkinKeyCommand  command, int  down )
 }
 
 /* called periodically to poll for user input events */
-static void qemulator_refresh(QEmulator* emulator)
+static void emulator_window_refresh(EmulatorWindow* emulator)
 {
     SkinEvent ev;
     SkinWindow*    window   = emulator->window;
@@ -620,9 +620,9 @@ static void qemulator_refresh(QEmulator* emulator)
                     /* scroll-wheel simulates DPad up */
                     SkinKeyCode  kcode;
 
-                    kcode = // qemulator_rotate_keycode(kKeyCodeDpadUp);
+                    kcode = // emulator_window_rotate_keycode(kKeyCodeDpadUp);
                         skin_keycode_rotate(kKeyCodeDpadUp,
-                            skin_layout_get_dpad_rotation(qemulator_get_layout(qemulator_get())));
+                            skin_layout_get_dpad_rotation(emulator_window_get_layout(emulator_window_get())));
                     user_event_key( kcode, down );
                 }
                 else if (ev.u.mouse.button == kMouseButtonScrollDown)
@@ -630,9 +630,9 @@ static void qemulator_refresh(QEmulator* emulator)
                     /* scroll-wheel simulates DPad down */
                     SkinKeyCode  kcode;
 
-                    kcode = // qemulator_rotate_keycode(kKeyCodeDpadDown);
+                    kcode = // emulator_window_rotate_keycode(kKeyCodeDpadDown);
                         skin_keycode_rotate(kKeyCodeDpadDown,
-                            skin_layout_get_dpad_rotation(qemulator_get_layout(qemulator_get())));
+                            skin_layout_get_dpad_rotation(emulator_window_get_layout(emulator_window_get())));
                     user_event_key( kcode, down );
                 }
                 else if (ev.u.mouse.button == kMouseButtonLeft) {
@@ -643,7 +643,7 @@ static void qemulator_refresh(QEmulator* emulator)
 
         case kEventQuit:
             /* only save emulator config through clean exit */
-            qemulator_done(qemulator_get());
+            emulator_window_done(emulator_window_get());
             qemu_system_shutdown_request();
             return;
         }
@@ -665,7 +665,7 @@ android_emulator_get_keyboard(void)
 void
 android_emulator_set_window_scale(double  scale, int  is_dpi)
 {
-    QEmulator*  emulator = qemulator;
+    EmulatorWindow*  emulator = qemulator;
 
     if (is_dpi)
         scale /= get_device_dpi( emulator->opts );
@@ -679,5 +679,5 @@ void
 android_emulator_set_base_port( int  port )
 {
     /* Base port is already set in the emulator's core. */
-    qemulator_set_title(qemulator);
+    emulator_window_set_title(qemulator);
 }
