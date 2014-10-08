@@ -59,8 +59,5 @@ extern int            skin_keyboard_process_unicode_event( SkinKeyboard*  kb,  u
 extern void           skin_keyboard_add_key_event( SkinKeyboard*  k, unsigned code, unsigned  down );
 extern void           skin_keyboard_flush( SkinKeyboard*  kb );
 
-/* defined in android_main.c */
-extern SkinKeyboard*  android_emulator_get_keyboard( void );
-
 #endif /* _ANDROID_SKIN_KEYBOARD_H */
 

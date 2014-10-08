@@ -656,12 +656,6 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
  * android/console.c helper routines.
  */
 
-SkinKeyboard*
-android_emulator_get_keyboard(void)
-{
-    return qemulator->keyboard;
-}
-
 void
 android_emulator_set_window_scale(double  scale, int  is_dpi)
 {
