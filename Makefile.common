@@ -90,6 +90,11 @@ ifeq ($(HOST_OS),linux)
 EMULATOR_COMMON_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
 endif
 
+ifeq (true,$(BUILD_DEBUG_EMULATOR))
+    EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=1
+else
+    EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=0
+endif
 
 ###########################################################
 # Zlib sources
