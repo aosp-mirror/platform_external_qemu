@@ -39,6 +39,7 @@
 #include "ui/console.h"
 #include "sysemu/sysemu.h"
 #include "exec/gdbstub.h"
+#include "exec/code-profile.h"
 #include "qemu/log.h"
 #include "qemu/timer.h"
 #include "sysemu/char.h"
@@ -2605,6 +2606,10 @@ int main(int argc, char **argv, char **envp)
 #endif
             case QEMU_OPTION_pidfile:
                 pid_file = optarg;
+                break;
+            case QEMU_OPTION_code_profile:
+                code_profile_dirname = optarg;
+                printf("Profile will be stored in %s\n", code_profile_dirname);
                 break;
 #ifdef TARGET_I386
             case QEMU_OPTION_win2k_hack:
