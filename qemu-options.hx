@@ -1681,8 +1681,14 @@ DEF("old-param", 0, QEMU_OPTION_old_param,
 DEF("nand", HAS_ARG, QEMU_OPTION_nand, \
     "-nand <params>  enable NAND Flash partition\n")
 
-#ifdef CONFIG_ANDROID
+DEF("code-profile", HAS_ARG, QEMU_OPTION_code_profile, \
+    "-code-profile name\n" \
+    "Set directory to store code profile data.\n" \
+    "The profile can be further process to generate an AutoFDO profile, " \
+    "which can be used to drive feedback directed optimizations. " \
+    "More details can be found from https://gcc.gnu.org/wiki/AutoFDO.\n")
 
+#ifdef CONFIG_ANDROID
 DEF("savevm-on-exit", HAS_ARG, QEMU_OPTION_savevm_on_exit, \
     "savevm-on-exit [tag|id]\n" \
     "                save state automatically on exit\n")
