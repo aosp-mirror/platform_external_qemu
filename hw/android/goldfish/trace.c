@@ -16,7 +16,10 @@
 #include "migration/qemu-file.h"
 #include "hw/android/goldfish/trace.h"
 #include "hw/android/goldfish/vmem.h"
+#include "hw/android/goldfish/profile.h"
 #include "sysemu/sysemu.h"
+#include "exec/softmmu_exec.h"
+#include "exec/code-profile.h"
 
 /* Set to 1 to debug tracing */
 #define DEBUG   0
@@ -56,8 +59,30 @@ static unsigned tid;            // current thread id (same as pid, most of the t
 static unsigned long dsaddr;    // dynamic symbol address
 static unsigned long unmap_start; // start address to unmap
 
+unsigned get_current_pid() {
+  return tid;
+}
+
 /* for context switch */
 //static unsigned long cs_pid;    // context switch PID
+static size_t get_guest_kernel_string(char* qemu_str,
+                                               target_ulong guest_str,
+                                               size_t qemu_buffer_size)
+{
+    size_t copied = 0;
+
+    if (qemu_buffer_size > 1) {
+        for (copied = 0; copied < qemu_buffer_size - 1; copied++) {
+            qemu_str[copied] = cpu_ldub_kernel(cpu_single_env,
+                                               guest_str + copied);
+            if (qemu_str[copied] == '\0') {
+                return copied;
+            }
+        }
+    }
+    qemu_str[copied] = '\0';
+    return copied;
+}
 
 /* I/O write */
 static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
@@ -103,7 +128,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         eoff = value;
         break;
     case TRACE_DEV_REG_EXECVE_EXEPATH:  // init exec, path of EXE
-        vstrcpy(value, exec_path, CLIENT_PAGE_SIZE);
+        get_guest_kernel_string(exec_path, value, CLIENT_PAGE_SIZE);
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, init exec [%lx,%lx]@%lx [%s]\n",
               vstart, vend, eoff, exec_path);
@@ -131,12 +156,13 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         break;
     case TRACE_DEV_REG_EXIT:            // exit, exit current process with exit code
         DPID("QEMU.trace: exit tid=%u\n", value);
+        release_mmap(value);
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, exit %x\n", value);
         }
         break;
     case TRACE_DEV_REG_NAME:            // record thread name
-        vstrcpy(value, exec_path, CLIENT_PAGE_SIZE);
+        get_guest_kernel_string(exec_path, value, CLIENT_PAGE_SIZE);
         DPID("QEMU.trace: thread name=%s\n", exec_path);
 
         // Remove the trailing newline if it exists
@@ -149,7 +175,9 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         }
         break;
     case TRACE_DEV_REG_MMAP_EXEPATH:    // mmap, path of EXE, the others are same as execve
-        vstrcpy(value, exec_path, CLIENT_PAGE_SIZE);
+        get_guest_kernel_string(exec_path, value, CLIENT_PAGE_SIZE);
+        if (exec_path != NULL)
+          record_mmap(vstart, vend, eoff, exec_path, tid);
         DPID("QEMU.trace: mmap exe=%s\n", exec_path);
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, mmap [%lx,%lx]@%lx [%s]\n", vstart, vend, eoff, exec_path);
@@ -161,7 +189,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         DPID("QEMU.trace: pid=%d\n", value);
         break;
     case TRACE_DEV_REG_INIT_NAME:       // init, the comm of the init pid
-        vstrcpy(value, exec_path, CLIENT_PAGE_SIZE);
+        get_guest_kernel_string(exec_path, value, CLIENT_PAGE_SIZE);
         DPID("QEMU.trace: tgid=%d pid=%d name=%s\n", tgid, pid, exec_path);
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, init name %u [%s]\n", pid, exec_path);
@@ -173,7 +201,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         dsaddr = value;
         break;
     case TRACE_DEV_REG_DYN_SYM:         // add dynamic symbol
-        vstrcpy(value, exec_arg, CLIENT_PAGE_SIZE);
+        get_guest_kernel_string(exec_arg, value, CLIENT_PAGE_SIZE);
         if (trace_filename != NULL) {
             D("QEMU.trace: dynamic symbol %lx:%s\n", dsaddr, exec_arg);
         }
@@ -186,7 +214,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         break;
 
     case TRACE_DEV_REG_PRINT_STR:       // print string
-        vstrcpy(value, exec_arg, CLIENT_PAGE_SIZE);
+        get_guest_kernel_string(exec_arg, value, CLIENT_PAGE_SIZE);
         printf("%s", exec_arg);
         exec_arg[0] = 0;
         break;
@@ -279,6 +307,10 @@ static CPUWriteMemoryFunc *trace_dev_writefn[] = {
 /* initialize the trace device */
 void trace_dev_init()
 {
+    if (code_profile_dirname == NULL)
+      return;
+
+    code_profile_record_func = profile_bb_helper;
     trace_dev_state *s;
 
     s = (trace_dev_state *)g_malloc0(sizeof(trace_dev_state));
