@@ -12,10 +12,10 @@
 
 #include "android/avd/util.h"
 #include "android/display.h"
+#include "android/emulator-window.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/main-common.h"
-#include "android/qemulator.h"
 #include "android/resource.h"
 #include "android/skin/file.h"
 #include "android/skin/image.h"
@@ -23,6 +23,7 @@
 #include "android/skin/resource.h"
 #include "android/skin/trackball.h"
 #include "android/skin/window.h"
+#include "android/skin/winsys.h"
 #include "android/user-config.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -30,9 +31,6 @@
 #include "android/utils/path.h"
 
 #include "ui/console.h"
-
-#include <SDL.h>
-#include <SDL_syswm.h>
 
 #include <stdlib.h>
 
@@ -60,7 +58,7 @@ user_config_done( void )
         return;
     }
 
-    SDL_WM_GetPos( &win_x, &win_y );
+    skin_winsys_get_window_pos(&win_x, &win_y);
     auserConfig_setWindowPos(userConfig, win_x, win_y);
     auserConfig_save(userConfig);
 }
@@ -171,84 +169,6 @@ write_default_keyset( void )
 /***********************************************************************/
 /***********************************************************************/
 /*****                                                             *****/
-/*****            S D L   S U P P O R T                            *****/
-/*****                                                             *****/
-/***********************************************************************/
-/***********************************************************************/
-
-void *readpng(const unsigned char*  base, size_t  size, unsigned *_width, unsigned *_height);
-
-#ifdef CONFIG_DARWIN
-#  define  ANDROID_ICON_PNG  "android_icon_256.png"
-#else
-#  define  ANDROID_ICON_PNG  "android_icon_16.png"
-#endif
-
-static void
-sdl_set_window_icon( void )
-{
-    static int  window_icon_set;
-
-    if (!window_icon_set)
-    {
-#ifdef _WIN32
-        HANDLE         handle = GetModuleHandle( NULL );
-        HICON          icon   = LoadIcon( handle, MAKEINTRESOURCE(1) );
-        SDL_SysWMinfo  wminfo;
-
-        SDL_GetWMInfo(&wminfo);
-
-        SetClassLongPtr( wminfo.window, GCLP_HICON, (LONG)icon );
-#else  /* !_WIN32 */
-        unsigned              icon_w, icon_h;
-        size_t                icon_bytes;
-        const unsigned char*  icon_data;
-        void*                 icon_pixels;
-
-        window_icon_set = 1;
-
-        icon_data = android_icon_find( ANDROID_ICON_PNG, &icon_bytes );
-        if ( !icon_data )
-            return;
-
-        icon_pixels = readpng( icon_data, icon_bytes, &icon_w, &icon_h );
-        if ( !icon_pixels )
-            return;
-
-       /* the data is loaded into memory as RGBA bytes by libpng. we want to manage
-        * the values as 32-bit ARGB pixels, so swap the bytes accordingly depending
-        * on our CPU endianess
-        */
-        {
-            unsigned*  d     = icon_pixels;
-            unsigned*  d_end = d + icon_w*icon_h;
-
-            for ( ; d < d_end; d++ ) {
-                unsigned  pix = d[0];
-#if HOST_WORDS_BIGENDIAN
-                /* R,G,B,A read as RGBA => ARGB */
-                pix = ((pix >> 8) & 0xffffff) | (pix << 24);
-#else
-                /* R,G,B,A read as ABGR => ARGB */
-                pix = (pix & 0xff00ff00) | ((pix >> 16) & 0xff) | ((pix & 0xff) << 16);
-#endif
-                d[0] = pix;
-            }
-        }
-
-        SDL_Surface* icon = sdl_surface_from_argb32( icon_pixels, icon_w, icon_h );
-        if (icon != NULL) {
-            SDL_WM_SetIcon(icon, NULL);
-            SDL_FreeSurface(icon);
-            free( icon_pixels );
-        }
-#endif  /* !_WIN32 */
-    }
-}
-
-/***********************************************************************/
-/***********************************************************************/
-/*****                                                             *****/
 /*****            S K I N   S U P P O R T                          *****/
 /*****                                                             *****/
 /***********************************************************************/
@@ -258,18 +178,19 @@ const char*  skin_network_speed = NULL;
 const char*  skin_network_delay = NULL;
 
 
-static void sdl_at_exit(void)
+static void android_ui_at_exit(void)
 {
     user_config_done();
-    qemulator_done(qemulator_get());
-    SDL_Quit();
+    emulator_window_done(emulator_window_get());
+    skin_winsys_quit();
 }
 
 
 void sdl_display_init(DisplayState *ds, int full_screen, int  no_frame)
 {
-    QEmulator*    emulator = qemulator_get();
-    SkinDisplay*  disp     = skin_layout_get_display(emulator->layout);
+    EmulatorWindow*    emulator = emulator_window_get();
+    SkinDisplay*  disp = 
+            skin_layout_get_display(emulator_window_get_layout(emulator));
     int           width, height;
     char          buf[128];
 
@@ -688,33 +609,16 @@ init_sdl_ui(AConfig*         skinConfig,
             const char*      skinPath,
             AndroidOptions*  opts)
 {
-    int  win_x, win_y, flags;
+    int  win_x, win_y;
 
     signal(SIGINT, SIG_DFL);
 #ifndef _WIN32
     signal(SIGQUIT, SIG_DFL);
 #endif
 
-    /* we're not a game, so allow the screensaver to run */
-    setenv("SDL_VIDEO_ALLOW_SCREENSAVER","1",1);
+    skin_winsys_start(opts->no_window, opts->raw_keys);
 
-    flags = SDL_INIT_NOPARACHUTE;
-    if (!opts->no_window)
-        flags |= SDL_INIT_VIDEO;
-
-    if(SDL_Init(flags)){
-        fprintf(stderr, "SDL init failure, reason is: %s\n", SDL_GetError() );
-        exit(1);
-    }
-
-    if (!opts->no_window) {
-        SDL_EnableUNICODE(!opts->raw_keys);
-        SDL_EnableKeyRepeat(0,0);
-
-        sdl_set_window_icon();
-    }
-    else
-    {
+    if (opts->no_window) {
 #ifndef _WIN32
        /* prevent SIGTTIN and SIGTTOUT from stopping us. this is necessary to be
         * able to run the emulator in the background (e.g. "emulator &").
@@ -725,12 +629,29 @@ init_sdl_ui(AConfig*         skinConfig,
         signal(SIGTTIN, SIG_IGN);
         signal(SIGTTOU, SIG_IGN);
 #endif
+    } else {
+#  ifdef CONFIG_DARWIN
+        static const char kIconFile[] = "android_icon_256.png";
+#  else
+        static const char kIconFile[] = "android_icon_32.png";
+#  endif
+        size_t icon_size;
+        const unsigned char* icon_data =
+                android_icon_find(kIconFile, &icon_size);
+
+        if (icon_data) {
+            skin_winsys_set_window_icon(icon_data, icon_size);
+        } else {
+            fprintf(stderr,
+                    "### Error: could not find emulator icon resource: %s\n",
+                    kIconFile);
+        }
     }
-    atexit(sdl_at_exit);
+    atexit(android_ui_at_exit);
 
     user_config_get_window_pos(&win_x, &win_y);
 
-    if ( qemulator_init(qemulator_get(), skinConfig, skinPath, win_x, win_y, opts) < 0 ) {
+    if ( emulator_window_init(emulator_window_get(), skinConfig, skinPath, win_x, win_y, opts) < 0 ) {
         fprintf(stderr, "### Error: could not load emulator skin from '%s'\n", skinPath);
         exit(1);
     }
@@ -750,8 +671,8 @@ init_sdl_ui(AConfig*         skinConfig,
         } else
             rotate = SKIN_ROTATION_0;
 
-        qemulator_get()->onion          = onion;
-        qemulator_get()->onion_alpha    = alpha;
-        qemulator_get()->onion_rotation = rotate;
+        emulator_window_get()->onion          = onion;
+        emulator_window_get()->onion_alpha    = alpha;
+        emulator_window_get()->onion_rotation = rotate;
     }
 }
