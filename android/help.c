@@ -5,7 +5,6 @@
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #ifndef NO_SKIN
-#include "android/skin/keycode.h"
 #include "android/skin/keyset.h"
 #endif
 #include "android/android.h"
@@ -234,7 +233,7 @@ help_keys(stralloc_t*  out)
 
             for (n = 0; n < count; n++) {
                 p = bufprint(p, end, "%s%s", (n == 0) ? "" : ", ",
-                             skin_key_pair_to_string( bindings[n].sym, bindings[n].mod ) );
+                            skin_key_symmod_to_str( bindings[n].sym, bindings[n].mod ) );
             }
 
             if (pass == 0) {
@@ -332,10 +331,10 @@ help_keyset_file(stralloc_t*  out)
     "\n"
     "  finally <key> is a QWERTY-specific keyboard symbol which can be one of:\n\n"
     );
-    count   = skin_key_code_count();
+    count   = skin_keysym_str_count();
     strings = calloc( count, sizeof(char*) );
     for (n = 0; n < count; n++)
-        strings[n] = skin_key_code_str(n);
+        strings[n] = skin_keysym_str(n);
 
     stralloc_tabular( out, strings, count, "    ", 80-8 );
     free(strings);
@@ -964,21 +963,14 @@ help_scale(stralloc_t*  out)
 }
 
 static void
-help_trace(stralloc_t*  out)
+help_code_profile(stralloc_t*  out)
 {
     PRINTF(
-    "  use '-trace <name>' to start the emulator with runtime code profiling support\n"
-    "  profiling itself will not be enabled unless you press F9 to activate it, or\n"
-    "  the executed code turns it on programmatically.\n\n"
-
-    "  trace information is stored in directory <name>, several files are created\n"
-    "  there, that can later be used with the 'traceview' program that comes with\n"
-    "  the Android SDK for analysis.\n\n"
-
-    "  note that execution will be slightly slower when enabling code profiling,\n"
-    "  this is a necessary requirement of the operations being performed to record\n"
-    "  the execution trace. this slowdown should not affect your system until you\n"
-    "  enable the profiling though...\n\n"
+    "  use '-code_profile <name>' to start the emulator with runtime code profiling support\n\n"
+    "  profiles stored in directory <name>, each executable will have its own profile\n\n"
+    "  The profile can be further process to generate AutoFDO profile, which can be \n"
+    "  used to drive feedback directed optimizations. \n"
+    "  More details can be found from https://gcc.gnu.org/wiki/AutoFDO.\n\n"
     );
 }
 

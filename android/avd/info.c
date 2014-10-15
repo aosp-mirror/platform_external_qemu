@@ -1141,19 +1141,19 @@ avdInfo_getTargetAbi( AvdInfo* i )
 }
 
 char*
-avdInfo_getTracePath( AvdInfo*  i, const char*  traceName )
+avdInfo_getCodeProfilePath( AvdInfo*  i, const char*  profileName )
 {
     char   tmp[MAX_PATH], *p=tmp, *end=p + sizeof(tmp);
 
-    if (i == NULL || traceName == NULL || traceName[0] == 0)
+    if (i == NULL || profileName == NULL || profileName[0] == 0)
         return NULL;
 
     if (i->inAndroidBuild) {
-        p = bufprint( p, end, "%s" PATH_SEP "traces" PATH_SEP "%s",
-                      i->androidOut, traceName );
+        p = bufprint( p, end, "%s" PATH_SEP "profiles" PATH_SEP "%s",
+                      i->androidOut, profileName );
     } else {
-        p = bufprint( p, end, "%s" PATH_SEP "traces" PATH_SEP "%s",
-                      i->contentPath, traceName );
+        p = bufprint( p, end, "%s" PATH_SEP "profiles" PATH_SEP "%s",
+                      i->contentPath, profileName );
     }
     return ASTRDUP(tmp);
 }
