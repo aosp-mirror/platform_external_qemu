@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "cpu.h"
+#include "exec/code-profile.h"
 #include "exec/exec-all.h"
 #include "exec/gdbstub.h"
 #include "helper.h"
@@ -3232,4 +3233,10 @@ void HELPER(set_teecr)(CPUARMState *env, uint32_t val)
         env->teecr = val;
         tb_flush(env);
     }
+}
+
+void HELPER(profileBB)(void *tb)
+{
+    (*code_profile_record_func)(((TranslationBlock *)tb)->pc,
+                                ((TranslationBlock *)tb)->size);
 }
