@@ -16,3 +16,15 @@
 bool android_utf8_is_valid(const char* text, size_t text_len) {
     return android::base::utf8IsValid(text, text_len);
 }
+
+int android_utf8_decode(const uint8_t* text,
+                        size_t text_len,
+                        uint32_t* codepoint) {
+    return android::base::utf8Decode(text, text_len, codepoint);
+}
+
+int android_utf8_encode(uint32_t codepoint,
+                        uint8_t* buffer,
+                        size_t buffer_len) {
+    return android::base::utf8Encode(codepoint, buffer, buffer_len);
+}
