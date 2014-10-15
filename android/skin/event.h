@@ -18,6 +18,7 @@
 typedef enum {
     kEventKeyDown,
     kEventKeyUp,
+    kEventTextInput,
     kEventMouseButtonDown,
     kEventMouseButtonUp,
     kEventMouseMotion,
@@ -36,8 +37,13 @@ typedef enum {
 typedef struct {
     uint32_t keycode;
     uint32_t mod;
-    uint32_t unicode;
+    //uint32_t unicode;
 } SkinEventKeyData;
+
+typedef struct {
+    bool down;
+    uint8_t text[32];
+} SkinEventTextInputData;
 
 typedef struct {
     int x;
@@ -52,6 +58,7 @@ typedef struct {
     union {
         SkinEventKeyData key;
         SkinEventMouseData mouse;
+        SkinEventTextInputData text;
     } u;
 } SkinEvent;
 
