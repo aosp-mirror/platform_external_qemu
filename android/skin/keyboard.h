@@ -46,8 +46,8 @@ extern void           skin_keyboard_on_command( SkinKeyboard*       keyboard,
 extern void           skin_keyboard_set_rotation( SkinKeyboard*     keyboard,
                                                   SkinRotation      rotation );
 
-extern SkinKeyCode skin_keyboard_rotate_keycode( SkinKeyboard*   keyboard,
-                                                  SkinKeyCode  keycode );
+extern SkinKeyCode    skin_keyboard_rotate_keycode( SkinKeyboard*   keyboard,
+                                                    SkinKeyCode  keycode );
 
 extern void           skin_keyboard_on_key_press( SkinKeyboard*     keyboard,
                                                   SkinKeyEventFunc  press_func,

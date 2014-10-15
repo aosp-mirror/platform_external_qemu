@@ -20,17 +20,14 @@
 #include "android/skin/window.h"
 #include "android/utils/aconfig-file.h"
 
+#include "android/skin/ui.h"
+
 typedef struct {
     AConfig*       aconfig;
     SkinFile*      layout_file;
-    SkinLayout*    layout;
-    SkinKeyboard*  keyboard;
-    SkinWindow*    window;
     int            win_x;
     int            win_y;
-    int            show_trackball;
-    SkinTrackBall* trackball;
-    int            lcd_brightness;
+    SkinUI*        ui;
     SkinImage*     onion;
     SkinRotation   onion_rotation;
     int            onion_alpha;
@@ -47,24 +44,24 @@ android_emulator_set_window_scale(double  scale, int  is_dpi);
 
 /* Initializes EmulatorWindow structure instance. */
 int
-emulator_window_init( EmulatorWindow*       emulator,
-                AConfig*         aconfig,
-                const char*      basepath,
-                int              x,
-                int              y,
-                AndroidOptions*  opts );
+emulator_window_init(EmulatorWindow*  emulator,
+                     AConfig*         aconfig,
+                     const char*      basepath,
+                     int              x,
+                     int              y,
+                     AndroidOptions*  opts);
 
 /* Uninitializes EmulatorWindow structure instance on exit. */
 void
-emulator_window_done( EmulatorWindow* emulator );
+emulator_window_done(EmulatorWindow* emulator);
 
 /* Sets title on the emulator's window. */
 void
-emulator_window_set_title( EmulatorWindow* emulator );
+emulator_window_set_title(EmulatorWindow* emulator);
 
 /* Gets emulator's layout. */
 SkinLayout*
-emulator_window_get_layout( EmulatorWindow* emulator );
+emulator_window_get_layout(EmulatorWindow* emulator);
 
 /* Gets framebuffer for the first display. */
 QFrameBuffer*

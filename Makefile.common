@@ -321,6 +321,7 @@ SKIN_SOURCES := charmap.c \
                 resource.c \
                 scaler.c \
                 surface-sdl.c \
+                ui.c \
                 winsys-sdl.c \
 
 common_LOCAL_SRC_FILES += $(SKIN_SOURCES:%=android/skin/%)

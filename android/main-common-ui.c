@@ -189,7 +189,8 @@ static void android_ui_at_exit(void)
 void sdl_display_init(DisplayState *ds, int full_screen, int  no_frame)
 {
     EmulatorWindow*    emulator = emulator_window_get();
-    SkinDisplay*  disp     = skin_layout_get_display(emulator->layout);
+    SkinDisplay*  disp = 
+            skin_layout_get_display(emulator_window_get_layout(emulator));
     int           width, height;
     char          buf[128];
 
