@@ -303,8 +303,19 @@ include $(LOCAL_PATH)/$(SDL2_DIR)/sources.make
 SDL2_STATIC_LIBRARIES := emulator_libSDL2
 SDL2_STATIC_LIBRARIES_64 := emulator_lib64SDL2
 
+ifeq (true,$(EMULATOR_USE_SDL2))
+EMULATOR_LIBUI_CFLAGS += $(SDL2_CFLAGS) $(foreach inc,$(SDL2_INCLUDES),-I$(inc))
+EMULATOR_LIBUI_LDLIBS += $(SDL2_LDLIBS)
+EMULATOR_SDL_STATIC_LIBRARIES := $(SDL2_STATIC_LIBRARIES)
+EMULATOR_SDL_STATIC_LIBRARIES_64 := $(SDL2_STATIC_LIBRARIES_64)
+EMULATOR_SDL_LDLIBS := $(SDL2_LDLIBS)
+else  # EMULATOR_USE_SDL2 != true
 EMULATOR_LIBUI_CFLAGS += $(SDL_CFLAGS) $(foreach inc,$(SDL_INCLUDES),-I$(inc))
 EMULATOR_LIBUI_LDLIBS += $(SDL_LDLIBS)
+EMULATOR_SDL_STATIC_LIBRARIES := $(SDL_STATIC_LIBRARIES)
+EMULATOR_SDL_STATIC_LIBRARIES_64 := $(SDL_STATIC_LIBRARIES_64)
+EMULATOR_SDL_LDLIBS := $(SDL_LDLIBS)
+endif
 
 # The following is needed by SDL_LoadObject
 ifneq ($(HOST_OS),windows)
@@ -314,7 +325,6 @@ endif
 # the skin support sources
 #
 SKIN_SOURCES := charmap.c \
-                event-sdl.c \
                 rect.c \
                 region.c \
                 image.c \
@@ -327,9 +337,19 @@ SKIN_SOURCES := charmap.c \
                 window.c \
                 resource.c \
                 scaler.c \
-                surface-sdl.c \
                 ui.c \
+
+ifeq (true,$(EMULATOR_USE_SDL2))
+SKIN_SOURCES += event-sdl2.c \
+                surface-sdl2.c \
+                winsys-sdl2.c \
+
+else
+SKIN_SOURCES += event-sdl.c \
+                surface-sdl.c \
                 winsys-sdl.c \
+
+endif
 
 common_LOCAL_SRC_FILES += $(SKIN_SOURCES:%=android/skin/%)
 
