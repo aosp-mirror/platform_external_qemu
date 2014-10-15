@@ -8,6 +8,7 @@
 #include "helper.h"
 #include "qemu-common.h"
 #include "qemu/host-utils.h"
+#include "exec/code-profile.h"
 #if !defined(CONFIG_USER_ONLY)
 //#include "hw/loader.h"
 #endif
@@ -3232,4 +3233,10 @@ void HELPER(set_teecr)(CPUARMState *env, uint32_t val)
         env->teecr = val;
         tb_flush(env);
     }
+}
+
+void HELPER(profileBB)(void *tb)
+{
+    (*code_profile_record_func)(((TranslationBlock *)tb)->pc,
+                                ((TranslationBlock *)tb)->size);
 }
