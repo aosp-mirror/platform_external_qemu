@@ -261,6 +261,8 @@ emulator_window_init( EmulatorWindow*       emulator,
                                           basepath,
                                           &skin_fb_funcs);
     emulator->ui = NULL;
+    emulator->win_x = x;
+    emulator->win_y = y;
     emulator->opts[0] = opts[0];
 
     /* register as a framebuffer clients for all displays defined in the skin file */
