@@ -58,6 +58,7 @@
 #include "android/hw-kmsg.h"
 #include "android/hw-pipe-net.h"
 #include "android/hw-qemud.h"
+#include "android/hw-sensors.h"
 #include "android/camera/camera-service.h"
 #include "android/multitouch-port.h"
 #include "android/skin/charmap.h"
@@ -3825,6 +3826,8 @@ int main(int argc, char **argv, char **envp)
             }
         }
     }
+
+    android_hw_sensors_init_remote_controller();
 
     current_machine = machine;
 

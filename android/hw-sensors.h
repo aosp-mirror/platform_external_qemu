@@ -17,6 +17,10 @@
 /* initialize sensor emulation */
 extern void  android_hw_sensors_init( void );
 
+/* initialize remote controller for HW sensors. This must be called after
+ * init_clocks(), i.e. later than android_hw_sensors_init(). */
+extern void android_hw_sensors_init_remote_controller( void );
+
 /* NOTE: Sensor status Error definition, It will be used in the Sensors Command
  *       part in android/console.c. Details:
  *       SENSOR_STATUS_NO_SERVICE: "sensors" qemud service is not available/initiated.
