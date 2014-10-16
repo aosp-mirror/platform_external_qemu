@@ -58,6 +58,7 @@
 #include "android/hw-kmsg.h"
 #include "android/hw-pipe-net.h"
 #include "android/hw-qemud.h"
+#include "android/hw-sensors.h"
 #include "android/camera/camera-service.h"
 #include "android/multitouch-port.h"
 #include "android/skin/charmap.h"
@@ -3826,6 +3827,8 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
+    android_hw_sensors_init_remote_controller();
+
     current_machine = machine;
 
     /* Set KVM's vcpu state to qemu's initial CPUOldState. */
@@ -3951,11 +3954,7 @@ int main(int argc, char **argv, char **envp)
     /* call android-specific setup function */
     android_emulation_setup();
 
-#if !defined(CONFIG_STANDALONE_CORE)
-    // For the standalone emulator (UI+core in one executable) we need to
-    // set the window title here.
     android_emulator_set_base_port(android_base_port);
-#endif
 
     if (loadvm)
         do_loadvm(cur_mon, loadvm);

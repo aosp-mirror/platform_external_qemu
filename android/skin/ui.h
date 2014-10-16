@@ -101,6 +101,10 @@ void skin_ui_set_onion(SkinUI* ui,
 
 void skin_ui_free(SkinUI* ui);
 
+// Reset the name of the emulator window. This corresponds to the value
+// of the |window_name| firled of SkinUIParams.
+void skin_ui_set_name(SkinUI* ui, const char* name);
+
 void skin_ui_set_lcd_brightness(SkinUI* ui, int lcd_brightness);
 
 void skin_ui_set_scale(SkinUI* ui, double scale);
