@@ -3951,11 +3951,7 @@ int main(int argc, char **argv, char **envp)
     /* call android-specific setup function */
     android_emulation_setup();
 
-#if !defined(CONFIG_STANDALONE_CORE)
-    // For the standalone emulator (UI+core in one executable) we need to
-    // set the window title here.
     android_emulator_set_base_port(android_base_port);
-#endif
 
     if (loadvm)
         do_loadvm(cur_mon, loadvm);

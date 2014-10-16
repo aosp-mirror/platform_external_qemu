@@ -24,6 +24,7 @@
 #include "android/utils/system.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -49,8 +50,6 @@ struct SkinUI {
 
 };
 
-static void _skin_ui_setup(SkinUI* ui);
-
 static void _skin_ui_handle_key_command(void* opaque,
                                         SkinKeyCommand command,
                                         int  down);
@@ -75,6 +74,39 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
 
     skin_keyboard_enable(ui->keyboard, 1);
     skin_keyboard_on_command(ui->keyboard, _skin_ui_handle_key_command, ui);
+
+    ui->window = skin_window_create(ui->layout,
+                                    ui->ui_params.window_x,
+                                    ui->ui_params.window_y,
+                                    ui->ui_params.window_scale,
+                                    0,
+                                    ui->ui_funcs->window_funcs);
+    if (!ui->window) {
+        skin_ui_free(ui);
+        return NULL;
+    }
+
+    if (ui->ui_params.enable_trackball) {
+        ui->trackball = skin_trackball_create(ui->ui_funcs->trackball_params);
+        skin_window_set_trackball(ui->window, ui->trackball);
+    }
+
+    ui->lcd_brightness = 128;  /* 50% */
+    skin_window_set_lcd_brightness(ui->window, ui->lcd_brightness );
+
+    if (ui->onion) {
+        skin_window_set_onion(ui->window,
+                              ui->onion,
+                              ui->onion_rotation,
+                              ui->onion_alpha);
+    }
+
+    skin_ui_reset_title(ui);
+
+    skin_window_enable_touch(ui->window, ui->ui_params.enable_touch);
+    skin_window_enable_dpad(ui->window, ui->ui_params.enable_dpad);
+    skin_window_enable_qwerty(ui->window, ui->ui_params.enable_keyboard);
+    skin_window_enable_trackball(ui->window, ui->ui_params.enable_trackball);
 
     return ui;
 }
@@ -166,44 +198,6 @@ void skin_ui_set_onion(SkinUI* ui,
                               onion_rotation,
                               onion_alpha);
     }
-}
-
-static void _skin_ui_setup(SkinUI* ui) {
-    if (ui->window) {
-        return;
-    }
-
-    ui->window = skin_window_create(ui->layout,
-                                    ui->ui_params.window_x,
-                                    ui->ui_params.window_y,
-                                    ui->ui_params.window_scale,
-                                    0,
-                                    ui->ui_funcs->window_funcs);
-    if (!ui->window) {
-        return;
-    }
-
-    if (ui->ui_params.enable_trackball) {
-        ui->trackball = skin_trackball_create(ui->ui_funcs->trackball_params);
-        skin_window_set_trackball(ui->window, ui->trackball);
-    }
-
-    ui->lcd_brightness = 128;  /* 50% */
-    skin_window_set_lcd_brightness(ui->window, ui->lcd_brightness );
-
-    if (ui->onion) {
-        skin_window_set_onion(ui->window,
-                              ui->onion,
-                              ui->onion_rotation,
-                              ui->onion_alpha);
-    }
-
-    skin_ui_reset_title(ui);
-
-    skin_window_enable_touch(ui->window, ui->ui_params.enable_touch);
-    skin_window_enable_dpad(ui->window, ui->ui_params.enable_dpad);
-    skin_window_enable_qwerty(ui->window, ui->ui_params.enable_keyboard);
-    skin_window_enable_trackball(ui->window, ui->ui_params.enable_trackball);
 }
 
 /* used to respond to a given keyboard command shortcut
@@ -420,7 +414,6 @@ bool skin_ui_process_events(SkinUI* ui) {
 }
 
 void skin_ui_update_display(SkinUI* ui, int x, int y, int w, int h) {
-    _skin_ui_setup(ui);
     if (ui->window) {
         skin_window_update_display(ui->window, x, y, w, h);
     }
@@ -428,4 +421,12 @@ void skin_ui_update_display(SkinUI* ui, int x, int y, int w, int h) {
 
 SkinLayout* skin_ui_get_current_layout(SkinUI* ui) {
     return ui->layout;
+}
+
+void skin_ui_set_name(SkinUI* ui, const char* name) {
+    snprintf(ui->ui_params.window_name,
+             sizeof(ui->ui_params.window_name),
+             "%s",
+             name);
+    skin_ui_reset_title(ui);
 }
