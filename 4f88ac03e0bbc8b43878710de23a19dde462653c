@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70ca9cdf_e63ddee7",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-10-17T12:43:55Z",
+      "side": 1,
+      "message": "\"bad -code-profile parameter\"",
+      "revId": "4f88ac03e0bbc8b43878710de23a19dde462653c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70ca9cdf_c6426267",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1027,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-10-17T12:43:55Z",
+      "side": 1,
+      "message": "Should be \"-code-profile\" to be consistent with other QEMU options.",
+      "revId": "4f88ac03e0bbc8b43878710de23a19dde462653c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90d5507b_876fc6ed",
+        "filename": "qemu-options.hx",
+        "patchSetId": 1
+      },
+      "lineNbr": 1684,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-10-17T12:43:55Z",
+      "side": 1,
+      "message": "\"code-profile\" for consistency.",
+      "revId": "4f88ac03e0bbc8b43878710de23a19dde462653c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90d5507b_e73de2e7",
+        "filename": "qemu-options.hx",
+        "patchSetId": 1
+      },
+      "lineNbr": 1686,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-10-17T12:43:55Z",
+      "side": 1,
+      "message": "\".. to store code profile data\\n\" will be clearer.",
+      "revId": "4f88ac03e0bbc8b43878710de23a19dde462653c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90d5507b_c7425e67",
+        "filename": "qemu-options.hx",
+        "patchSetId": 1
+      },
+      "lineNbr": 1687,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-10-17T12:43:55Z",
+      "side": 1,
+      "message": "\".. can be further processed to generate an AutoFDO profile, \"",
+      "revId": "4f88ac03e0bbc8b43878710de23a19dde462653c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
