@@ -62,6 +62,7 @@ TEST(Utf8Utils, utf8Decode) {
         { 3, 0xffff, { 0xef, 0xbf, 0xbf }, 3 },
         { 4, 0x10000, { 0xf0, 0x90, 0x80, 0x80 }, 4 },
         { 4, 0x1fffff, { 0xf7, 0xbf, 0xbf, 0xbf }, 4 },
+        { 1, 32, { 32, 0, }, 32 },
     };
     const size_t kDataSize = ARRAYLEN(kData);
     for (size_t n = 0; n < kDataSize; ++n) {
