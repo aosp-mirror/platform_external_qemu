@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "908ab09b_1f112374",
+        "filename": "hw/android/goldfish/profile.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1049408
+      },
+      "writtenOn": "2014-10-17T16:10:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b0d09489_681b8394",
+      "revId": "68c1b586fb594100abc294dfdb12f7d234011b60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b0d09489_c82b8fa7",
         "filename": "hw/android/goldfish/profile.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-17T10:44:11Z",
       "side": 1,
       "message": "nit: use strdup() instead. strcpy() always make security-conscious developers freak :-)",
+      "revId": "68c1b586fb594100abc294dfdb12f7d234011b60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "908ab09b_9f43736e",
+        "filename": "hw/android/goldfish/profile.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1049408
+      },
+      "writtenOn": "2014-10-17T16:10:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b0d09489_c82b8fa7",
       "revId": "68c1b586fb594100abc294dfdb12f7d234011b60",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "908ab09b_bf6f57ed",
+        "filename": "hw/android/goldfish/trace.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1049408
+      },
+      "writtenOn": "2014-10-17T16:10:13Z",
+      "side": 1,
+      "message": "Done.\n\nThe problem for vstrcpy is:\n\n* its definition does not exist in the head\n* I tried to sync an old version in which trace is still supported, it uses vstrcpy, but it never succeed to copy the string from guest OS. Thus I changed to get_guest_kernel_string instead.",
+      "parentUuid": "b0d09489_a843bb6d",
+      "revId": "68c1b586fb594100abc294dfdb12f7d234011b60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "90d5507b_8748668b",
         "filename": "include/hw/android/goldfish/profile.h",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-10-17T10:44:11Z",
       "side": 1,
       "message": "nit: Add a small comment explaining usage of these functions and what they do.",
+      "revId": "68c1b586fb594100abc294dfdb12f7d234011b60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0db48ab_a96a9ddd",
+        "filename": "include/hw/android/goldfish/profile.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1049408
+      },
+      "writtenOn": "2014-10-17T16:10:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "90d5507b_8748668b",
       "revId": "68c1b586fb594100abc294dfdb12f7d234011b60",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
