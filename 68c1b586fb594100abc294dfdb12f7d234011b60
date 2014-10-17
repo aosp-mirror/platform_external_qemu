@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0d09489_681b8394",
+        "filename": "hw/android/goldfish/profile.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-10-17T10:44:11Z",
+      "side": 1,
+      "message": "strdup() ?",
+      "revId": "68c1b586fb594100abc294dfdb12f7d234011b60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0d09489_c82b8fa7",
+        "filename": "hw/android/goldfish/profile.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-10-17T10:44:11Z",
+      "side": 1,
+      "message": "nit: use strdup() instead. strcpy() always make security-conscious developers freak :-)",
+      "revId": "68c1b586fb594100abc294dfdb12f7d234011b60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0d09489_a843bb6d",
+        "filename": "hw/android/goldfish/trace.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-10-17T10:44:11Z",
+      "side": 1,
+      "message": "nit: since this is a static function, remove the memcheck_ prefix which is misleading here (I understand this comes from historical reasons). Also, can you tell us what\u0027s wrong with vstrcpy() ?",
+      "revId": "68c1b586fb594100abc294dfdb12f7d234011b60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90d5507b_8748668b",
+        "filename": "include/hw/android/goldfish/profile.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-10-17T10:44:11Z",
+      "side": 1,
+      "message": "nit: Add a small comment explaining usage of these functions and what they do.",
+      "revId": "68c1b586fb594100abc294dfdb12f7d234011b60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
