@@ -133,7 +133,7 @@ static BinaryProfile *get_binary_profile(const char *name) {
     curr = curr->next;
   }
   curr = (BinaryProfile *)malloc(sizeof(BinaryProfile));
-  curr->name = strdup(curr->name);
+  curr->name = strdup(name);
   curr->range = NULL;
   curr->branch = NULL;
   curr->next = head_binary;
@@ -194,7 +194,7 @@ void record_mmap(target_ulong vstart, target_ulong vend, target_ulong offset,
   data->start = vstart;
   data->end = vend;
   data->offset = offset;
-  data->name = strdup(data->name);
+  data->name = strdup(path);
   data->next = mmaps[pid];
   mmaps[pid] = data;
 }
