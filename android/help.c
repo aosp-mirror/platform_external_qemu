@@ -964,21 +964,16 @@ help_scale(stralloc_t*  out)
 }
 
 static void
-help_trace(stralloc_t*  out)
+help_code_profile(stralloc_t*  out)
 {
     PRINTF(
-    "  use '-trace <name>' to start the emulator with runtime code profiling support\n"
-    "  profiling itself will not be enabled unless you press F9 to activate it, or\n"
-    "  the executed code turns it on programmatically.\n\n"
-
-    "  trace information is stored in directory <name>, several files are created\n"
-    "  there, that can later be used with the 'traceview' program that comes with\n"
-    "  the Android SDK for analysis.\n\n"
-
-    "  note that execution will be slightly slower when enabling code profiling,\n"
-    "  this is a necessary requirement of the operations being performed to record\n"
-    "  the execution trace. this slowdown should not affect your system until you\n"
-    "  enable the profiling though...\n\n"
+    "  use '-code_profile <name>' to start the emulator with runtime code profiling support.\n\n"
+    "  Profiles are stored in directory <name>, each executable will have its own profile.\n"
+    "  The profile can be further processed to generate an AutoFDO profile, which can be \n"
+    "  used to drive feedback directed optimizations.\n"
+    "  More details can be found from https://gcc.gnu.org/wiki/AutoFDO.\n\n"
+    "  IMPORTANT: This feature is *experimental* and requires a patched kernel.\n"
+    "  as such, it will not work on regular SDK system images.\n\n"
     );
 }
 
