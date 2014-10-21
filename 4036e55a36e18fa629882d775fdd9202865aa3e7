@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f064ccc9_e3c86033",
+        "filename": "android/help.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-10-21T08:34:11Z",
+      "side": 1,
+      "message": "nit: you need to rebase your patch on top of a most recent external/qemu, I\u0027ll do it :-)",
+      "revId": "4036e55a36e18fa629882d775fdd9202865aa3e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1096c0c9_64ed4020",
+        "filename": "qemu-options.hx",
+        "patchSetId": 2
+      },
+      "lineNbr": 1687,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-10-21T08:34:11Z",
+      "side": 1,
+      "message": "nit: \u0027processed\u0027, not \u0027process\u0027 here :)",
+      "revId": "4036e55a36e18fa629882d775fdd9202865aa3e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
