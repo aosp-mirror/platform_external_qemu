@@ -72,7 +72,7 @@ ifeq ($(HOST_OS),windows)
     SDL_CONFIG_MAIN_WIN32 := yes
 
     SDL_CFLAGS += -D_GNU_SOURCE=1 -Dmain=SDL_main -DNO_STDIO_REDIRECT=1
-    SDL_LDLIBS += -luser32 -lgdi32 -lwinmm
+    SDL_LDLIBS += -luser32 -lgdi32 -lwinmm -lvfw32
 endif
 
 
