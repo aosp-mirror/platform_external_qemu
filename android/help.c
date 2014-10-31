@@ -1503,10 +1503,12 @@ help_selinux(stralloc_t* out)
 {
     PRINTF(
     "  Use -selinux to control the SELinux enforcement mode.\n"
-    "  By default, SELinux is in enforcing mode. Other modes available are:\n"
+    "  By default, SELinux is in permissive mode. Other modes available are:\n\n"
+    "     -selinux enforcing    -> Load the SELinux policy, and enforce it.\n"
+    "                              Policy violations are logged AND rejected.\n\n"
     "     -selinux permissive   -> Load the SELinux policy, but do not enforce it.\n"
-    "                              Policy violations are logged, but not rejected.\n"
-    "     -selinux disabled     -> Disable kernel support for SELinux.\n"
+    "                              Policy violations are logged, but not rejected.\n\n"
+    "     -selinux disabled     -> Disable kernel support for SELinux.\n\n"
     );
 }
 
