@@ -146,6 +146,51 @@ _adjustPartitionSize( const char*  description,
     return convertMBToBytes(imageMB);
 }
 
+// Check that the value of |param| is one of the allowed string values
+// listed by the |allowed| array. |allowed_count| is the number of items
+// in the array. Return the allowed string index on success, or -1 on failure.
+static int
+check_parameter_string(const char* param,
+                       const char* const* allowed,
+                       size_t allowed_count) {
+    size_t n;
+    for (n = 0; n < allowed_count; ++n) {
+        if (!strcmp(param, allowed[n])) {
+            return (int)n;
+        }
+    }
+    return -1;
+}
+
+// Check that the value of |param| is one of the allowed string values listed
+// in the |allowed| array. |allowed_count| is the number of items in the array.
+// On success, return the allowed string index, on failure, print an error
+// message then exit the program.
+static int
+hard_check_parameter_string(const char* param,
+                            const char* const* allowed,
+                            size_t allowed_count,
+                            const char* error_prefix) {
+    int ret = check_parameter_string(param, allowed, allowed_count);
+    if (ret >= 0) {
+        return ret;
+    }
+
+    char temp[1024], *p = temp, *end = p + sizeof(temp);
+    p = bufprint(p, end, "%s, use one of: ", error_prefix);
+    size_t n;
+    for (n = 0; n < allowed_count; ++n) {
+        if (n > 0) {
+            p = bufprint(p, end, ", ");
+        }
+        p = bufprint(p, end, "%s", allowed[n]);
+    }
+    p = bufprint(p, end, ".");
+    derror("%s", temp);
+    exit(1);
+    return -1;
+}
+
 int main(int argc, char **argv)
 {
     char   tmp[MAX_PATH];
@@ -947,11 +992,19 @@ int main(int argc, char **argv)
     }
 
     if (opts->selinux) {
-        if ((strcmp(opts->selinux, "permissive") != 0)
-                && (strcmp(opts->selinux, "disabled") != 0)) {
-            derror("-selinux must be \"disabled\" or \"permissive\"");
-            exit(1);
-        }
+        static const char* const kAllowed[] = {
+            "disabled",
+            "permissive",
+            "enforcing",
+        };
+        const size_t kAllowedSize = sizeof(kAllowed) / sizeof(kAllowed[0]);
+        hard_check_parameter_string(opts->selinux,
+                                    kAllowed, 
+                                    kAllowedSize, 
+                                    "Invalid -selinux value");
+    } else {
+        // The default is always permissive.
+        opts->selinux = ASTRDUP("permissive");
     }
 
     if (opts->memory) {
