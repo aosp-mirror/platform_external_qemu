@@ -19,7 +19,8 @@ cd `dirname $0`
 OPTION_TARGETS=""
 OPTION_DEBUG=no
 OPTION_IGNORE_AUDIO=no
-OPTION_NO_PREBUILTS=no
+OPTION_PREBUILTS_DIR=
+OPTION_NO_PREBUILTS=
 OPTION_OUT_DIR=
 OPTION_HELP=no
 OPTION_STATIC=no
@@ -35,6 +36,13 @@ QEMU_PREBUILTS_DIR=
 
 HOST_CC=${CC:-gcc}
 OPTION_CC=
+
+PREBUILTS_DIR=$(dirname "$0")/../../prebuilts
+if [ -d "$PREBUILTS_DIR" ]; then
+    PREBUILTS_DIR=$(cd "$PREBUILTS_DIR" && pwd -P 2>/dev/null)
+else
+    PREBUILTS_DIR=
+fi
 
 for opt do
   optarg=`expr "x$opt" : 'x[^=]*=\(.*\)'`
@@ -65,6 +73,8 @@ for opt do
   --ignore-audio) OPTION_IGNORE_AUDIO=yes
   ;;
   --no-prebuilts) OPTION_NO_PREBUILTS=yes
+  ;;
+  --prebuilts-dir=*) OPTION_PREBUILTS_DIR=$optarg
   ;;
   --static) OPTION_STATIC=yes
   ;;
@@ -102,6 +112,7 @@ EOF
     echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --ignore-audio              Ignore audio messages (may build sound-less emulator)"
     echo "  --no-prebuilts              Do not use prebuilt libraries and compiler"
+    echo "  --prebuilts-dir=<path>      Use specific prebuilts root directory [$PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
     echo "  --mingw                     Build Windows executable on Linux"
     echo "  --static                    Build a completely static executable"
@@ -116,28 +127,50 @@ EOF
     exit 1
 fi
 
+if [ "$OPTION_PREBUILTS_DIR" ]; then
+    if [ "$OPTION_NO_PREBUILTS" ]; then
+        echo "ERROR: You can't use both --no-prebuilts and --prebuilts-dir=<path>."
+        exit 1
+    fi
+    if [ ! -d "$OPTION_PREBUILTS_DIR"/gcc ]; then
+        echo "ERROR: Prebuilts directory does not exist: $OPTION_PREBUILTS_DIR/gcc"
+        exit 1
+    fi
+    PREBUILTS_DIR=$OPTION_PREBUILTS_DIR
+elif [ "$OPTION_NO_PREBUILTS" ]; then
+    PREBUILTS_DIR=""
+fi
+
 # On Linux, try to use our prebuilt toolchain to generate binaries
 # that are compatible with Ubuntu 10.4
-if [ -z "$CC" -a -z "$OPTION_CC" ] ; then
+if [ -z "$CC" -a -z "$OPTION_CC" -a -z "$OPTION_NO_PREBUILTS" ] ; then
     PROBE_HOST_CC=
     PROBE_HOST_CFLAGS=
     if [ "$HOST_OS" = "linux" ] ; then
-        PREBUILTS_HOST_GCC=$(dirname $0)/../../prebuilts/gcc/linux-x86/host
+        PREBUILTS_HOST_GCC=$PREBUILTS_DIR/gcc/linux-x86/host
         PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
         if [ ! -f "$PROBE_HOST_CC" ]; then
             PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-gcc
             if [ ! -f "$PROBE_HOST_CC" ] ; then
-                PROBE_HOST_CC=$(dirname $0)/../../prebuilts/tools/gcc-sdk/gcc
+                PROBE_HOST_CC=$PREBUILTS_DIR/tools/gcc-sdk/gcc
             fi
         fi
     elif [ "$HOST_OS" = "darwin" ] ; then
-        PREBUILTS_HOST_GCC=$(dirname $0)/../../prebuilts/clang/darwin-x86/host
+        PREBUILTS_HOST_GCC=$PREBUILTS_DIR/clang/darwin-x86/host
         PROBE_HOST_CC=$PREBUILTS_HOST_GCC/3.5/bin/clang
         PROBE_HOST_CFLAGS="-target x86_64-apple-darwin11.0.0"
+    else
+        echo "ERROR: Can't build emulator binaries on this platform. Use Linux or Darwin only!"
+        exit 1
     fi
+
     if [ -f "$PROBE_HOST_CC" ] ; then
         echo "Using prebuilt toolchain: $PROBE_HOST_CC"
         CC="$PROBE_HOST_CC $PROBE_HOST_CFLAGS"
+    else
+        echo "ERROR: Cannot find prebuilts toolchain: $PROBE_HOST_CC"
+        echo "Please use --no-prebuilts or --prebuilts-dir=<path>."
+        exit 1
     fi
 fi
 
@@ -204,7 +237,7 @@ check_android_build
 #    - locate and use prebuilt libraries
 #    - copy the new binary to the correct location
 #
-if [ "$OPTION_NO_PREBUILTS" = "yes" ] ; then
+if [ "$OPTION_NO_PREBUILTS" ] ; then
     IN_ANDROID_BUILD=no
 fi
 
@@ -285,7 +318,7 @@ if [ "$GLES_PROBE" = "yes" ]; then
 fi
 
 if [ "$PCBIOS_PROBE" = "yes" ]; then
-    PCBIOS_DIR=$(dirname "$0")/../../prebuilts/qemu-kernel/x86/pc-bios
+    PCBIOS_DIR=$PREBUILTS_DIR/qemu-kernel/x86/pc-bios
     if [ ! -d "$PCBIOS_DIR" ]; then
         log2 "PC Bios    : Probing $PCBIOS_DIR (missing)"
         PCBIOS_DIR=../pc-bios
