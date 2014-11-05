@@ -44,7 +44,7 @@ static const unsigned char _data_android_icon_16_png[460] = {
       0,  0,  0,  0, 73, 69, 78, 68,174, 66, 96,130
 };
 
-#ifdef CONFIG_DARWIN
+#ifdef __APPLE__
 static const unsigned char _data_android_icon_256_png[13369] = {
     137, 80, 78, 71, 13, 10, 26, 10,  0,  0,  0, 13, 73, 72, 68, 82,
       0,  0,  1,  0,  0,  0,  1,  0,  8,  6,  0,  0,  0, 92,114,168,
@@ -883,7 +883,7 @@ static const unsigned char _data_android_icon_256_png[13369] = {
       4, 74,  0,254, 63, 34, 58,182, 52, 79,174,223,189,  0,  0,  0,
       0, 73, 69, 78, 68,174, 66, 96,130
 };
-#endif /* CONFIG_DARWIN */
+#endif /* __APPLE__ */
 
 static const unsigned char _data_android_icon_32_png[1321] = {
     137, 80, 78, 71, 13, 10, 26, 10,  0,  0,  0, 13, 73, 72, 68, 82,
@@ -976,7 +976,7 @@ static const FileEntry  _file_entries[] =
 {
 
     { "android_icon_16.png", _data_android_icon_16_png, 460 },
-#ifdef CONFIG_DARWIN
+#ifdef __APPLE__ 
     { "android_icon_256.png", _data_android_icon_256_png, 13369 },
 #endif
     { "android_icon_32.png", _data_android_icon_32_png, 1321 },
