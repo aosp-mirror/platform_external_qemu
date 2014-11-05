@@ -12,6 +12,11 @@
 
 #include "exec/code-profile.h"
 
-CodeProfileRecordFunc code_profile_record_func;
+// IMPORTANT: Initializers are required to ensure that these
+// variables are properly linked into the final executables on
+// Darwin. Otherwise, the build will succeed, but trying to run
+// a program will result in a dyld failure.
+//
+CodeProfileRecordFunc code_profile_record_func = NULL;
 
-const char *code_profile_dirname;
+const char *code_profile_dirname = NULL;
