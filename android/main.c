@@ -146,6 +146,60 @@ _adjustPartitionSize( const char*  description,
     return convertMBToBytes(imageMB);
 }
 
+/*
+ * _getX86HostCpuid: retrieve x86 CPUID for host CPU.
+ *
+ * Executes the x86 CPUID instruction on the host CPU with the given parameters,
+ * and saves the results in the given locations. Does nothing on non-x86 hosts.
+ * Code is taken from host_cpuid(..) in target-i386/helper.c.
+ *
+ * @function: the 'CPUID leaf' (the EAX parameter to CPUID).
+ * @count: the 'CPUID sub-leaf' (the ECX parameter to CPUID).
+ * @eax: the location where the returned EAX should be saved; can be %NULL.
+ * @ebx: the location where the returned EBX should be saved; can be %NULL.
+ * @ecx: the location where the returned ECX should be saved; can be %NULL.
+ * @edx: the location where the returned EDX should be saved; can be %NULL.
+ */
+static void
+_getX86HostCpuid( uint32_t function, uint32_t count,
+                  uint32_t *eax, uint32_t *ebx,
+                  uint32_t *ecx, uint32_t *edx )
+{
+#if defined(__x86_64__) || defined(__i386__)
+    uint32_t vec[4];
+
+#ifdef __x86_64__
+    asm volatile("cpuid"
+                 : "=a"(vec[0]), "=b"(vec[1]),
+                   "=c"(vec[2]), "=d"(vec[3])
+                 : "0"(function), "c"(count) : "cc");
+#else /* __x86_64__ */
+    asm volatile("pusha \n\t"
+                 "cpuid \n\t"
+                 "mov %%eax, 0(%2) \n\t"
+                 "mov %%ebx, 4(%2) \n\t"
+                 "mov %%ecx, 8(%2) \n\t"
+                 "mov %%edx, 12(%2) \n\t"
+                 "popa"
+                 : : "a"(function), "c"(count), "S"(vec)
+                 : "memory", "cc");
+#endif /* __x86_64__ */
+
+    if (eax) {
+	*eax = vec[0];
+    }
+    if (ebx) {
+	*ebx = vec[1];
+    }
+    if (ecx) {
+	*ecx = vec[2];
+    }
+    if (edx) {
+	*edx = vec[3];
+    }
+#endif /* defined(__x86_64__) || defined(__i386__) */
+}
+
 int main(int argc, char **argv)
 {
     char   tmp[MAX_PATH];
@@ -1308,6 +1362,70 @@ int main(int argc, char **argv)
                 // '-no-accel' of '-accel off' was used explicitly. Warn about
                 // the issue but do not exit.
                 dwarning("%s emulation may not work without hardware acceleration!", abi);
+            }
+            else {
+                /* CPU acceleration is enabled and working, but if the host CPU
+                 * does not support all instruction sets specified in the x86/
+                 * x86_64 ABI, emulation may fail on unsupported instructions.
+                 * Therefore, check the capabilities of the host CPU and warn
+                 * the user if any required features are missing. */
+                enum {
+                    /* The following is based on Table 1 from 'ABI Management'
+                     * section in NDK Programmer's Guide (Android NDK r10c).
+                     * Theoretically, MMX and SSE/2/3 should be checked as well,
+                     * but CPU models that do not support them are probably too
+                     * old to run Android Emulator. */
+                    /* CPUID_EDX_MMX = 1 << 23, */
+                    /* CPUID_EDX_SSE = 1 << 25, */
+                    /* CPUID_EDX_SSE2 = 1 << 26, */
+                    /* CPUID_ECX_SSE3 = 1 << 0, */
+                    CPUID_ECX_SSSE3 = 1 << 9,
+                    CPUID_ECX_SSE41 = 1 << 19,
+                    CPUID_ECX_SSE42 = 1 << 20,
+                    CPUID_ECX_POPCNT = 1 << 23,
+                };
+
+                uint32_t ecx = 0;
+                const char *missing_features[8];
+                int nb_missing_features = 0;
+
+                /* Execute CPUID instruction with EAX=1 and ECX=0 to get CPU
+                 * feature bits (stored in EDX, ECX and EBX). */
+                _getX86HostCpuid(1, 0, NULL, NULL, &ecx, NULL);
+                if (!(ecx & CPUID_ECX_SSSE3)) {
+                    missing_features[nb_missing_features++] = "SSSE3";
+                }
+                if (!strcmp(abi, "x86_64")) {
+                    if (!(ecx & CPUID_ECX_SSE41)) {
+                        missing_features[nb_missing_features++] = "SSE4.1";
+                    }
+                    if (!(ecx & CPUID_ECX_SSE42)) {
+                        missing_features[nb_missing_features++] = "SSE4.2";
+                    }
+                    if (!(ecx & CPUID_ECX_POPCNT)) {
+                        missing_features[nb_missing_features++] = "POPCNT";
+                    }
+                }
+
+                if (nb_missing_features > 0) {
+                    char buf[64];
+                    int i = 0, j = 0;
+
+                    i += sprintf(buf + i, "%s", missing_features[0]);
+                    for (j = 1; j < nb_missing_features; j++) {
+                        i += sprintf(buf + i, ", %s", missing_features[j]);
+                    }
+                    buf[i] = '\0';
+
+                    /* Using dwarning(..) would cause this message to be written
+                     * to stdout and filtered out by AVD Manager. But we want
+                     * the AVD Manager user to see this warning, so we resort to
+                     * fprintf(..). */
+                    fprintf(stderr, "emulator: WARNING: Host CPU is missing the"
+                             " following feature(s) required for %s emulation:"
+                             " %s\nHardware-accelerated emulation may not work"
+                             " properly!\n", abi, buf);
+                }
             }
         }
         AFREE(abi);
