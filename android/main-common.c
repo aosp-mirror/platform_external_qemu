@@ -319,7 +319,7 @@ AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
                 "You did not specify a virtual device name, and the system\n"
                 "directory could not be found.\n\n"
                 "If you are an Android SDK user, please use '@<name>' or '-avd <name>'\n"
-                "to start a given virtual device (see -help-avd for details).\n\n"
+                "to start a given virtual device (use -list-avds to print available ones).\n\n"
 
                 "Otherwise, follow the instructions in -help-disk-images to start the emulator\n"
                 );
