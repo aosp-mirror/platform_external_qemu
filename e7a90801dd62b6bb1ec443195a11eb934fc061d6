@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "95d5427b_8749868f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-11-06T13:46:46Z",
+      "side": 1,
+      "message": "Can you respect the git commit format, i.e.:\n\n\u003cone-short-line-description\u003e\n\u003cempty-line\u003e\n\u003clong-description\u003e\n\nThanks in advance.",
+      "revId": "e7a90801dd62b6bb1ec443195a11eb934fc061d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
