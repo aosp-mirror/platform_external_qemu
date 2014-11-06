@@ -116,6 +116,12 @@ char* path_getBuildTargetArch( const char* androidOut );
  */
 const char* emulator_getBackendSuffix(const char* targetArch);
 
+/* this is the subdirectory of $HOME/.android where all
+ * root configuration files (and default content directories)
+ * are located.
+ */
+#define  ANDROID_AVD_DIR    "avd"
+
 ANDROID_END_HEADER
 
 #endif /* _ANDROID_AVD_UTIL_H */
