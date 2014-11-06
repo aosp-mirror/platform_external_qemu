@@ -25,13 +25,6 @@
 
 #define D(...) VERBOSE_PRINT(init,__VA_ARGS__)
 
-/* this is the subdirectory of $HOME/.android where all
- * root configuration files (and default content directories)
- * are located.
- */
-#define  ANDROID_AVD_DIR    "avd"
-
-
 /* Return the path to the Android SDK root installation.
  *
  * (*pFromEnv) will be set to 1 if it comes from the $ANDROID_SDK_ROOT
