@@ -235,11 +235,11 @@ struct CPUMIPSState {
 #define CP0VPEOpt_DWX0	0
     target_ulong CP0_EntryLo0;
     target_ulong CP0_EntryLo1;
-#define CP0ENTRYLO_PFN  6
-#define CP0ENTRYLO_C    3
-#define CP0ENTRYLO_D    2
-#define CP0ENTRYLO_V    1
-#define CP0ENTRYLO_G    0
+#define CP0EnLo_PFN  6
+#define CP0EnLo_C    3
+#define CP0EnLo_D    2
+#define CP0EnLo_V    1
+#define CP0EnLo_G    0
     target_ulong CP0_Context;
     int32_t CP0_PageMask;
     int32_t CP0_PageGrain;
