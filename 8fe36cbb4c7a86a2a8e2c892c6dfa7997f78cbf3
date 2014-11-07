@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d5697aa3_d9e0b3a7",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2014-11-07T01:48:58Z",
+      "side": 1,
+      "message": "I\u0027d be happy to do both. In fact, I also thought this function should belong to another source file, but just wasn\u0027t sure about its name and location. So thanks for the advice on naming!",
+      "parentUuid": "d5b25a5b_b1f5e032",
+      "revId": "8fe36cbb4c7a86a2a8e2c892c6dfa7997f78cbf3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d5b25a5b_91fa5c1e",
         "filename": "android/main.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-06T13:11:56Z",
       "side": 1,
       "message": "can you remove these tabs?",
+      "revId": "8fe36cbb4c7a86a2a8e2c892c6dfa7997f78cbf3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d5697aa3_f9e577b4",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2014-11-07T01:48:58Z",
+      "side": 1,
+      "message": "Sorry, my mistake. Never meant to use tabs. Will fix.",
+      "parentUuid": "d5b25a5b_91fa5c1e",
       "revId": "8fe36cbb4c7a86a2a8e2c892c6dfa7997f78cbf3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "d5697aa3_19fb0b5a",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1386,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2014-11-07T01:48:58Z",
+      "side": 1,
+      "message": "Sure.",
+      "parentUuid": "95d5427b_0708f64b",
+      "revId": "8fe36cbb4c7a86a2a8e2c892c6dfa7997f78cbf3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "95d5427b_c7f53ee7",
         "filename": "android/main.c",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-11-06T13:11:56Z",
       "side": 1,
       "message": "please do not use sprintf() which doesn\u0027t perform array bounds checks (even if it seems that the buffer is properly sized right now, it\u0027s easy to screw this up later when adding \u0027features\u0027 to the code). Also on Windows, this will return -1 in case of overflow (!).\n\nIf you need to perform multiple appends, the bufprint() functions are probably a better fit for this, i.e. you can use some code like:\n\n  char buf[64], *p \u003d buf, *end \u003d p + sizeof(buf);\n\n  if (!(exc \u0026 CPUID_ECX_SSSE3)) {\n    p \u003d bufprint(p, end, \" SSSE3\");\n  }\n  if (!strcmp(abi, \"x86_64\")) {\n    if (!(ecx \u0026 CPUID_ECX_SSE41)) {\n      p \u003d bufprint(p, end, \" SSE4.1\");\n    }\n    if (!(ecx \u0026 CPUID_ECX_SSE42)) {\n      p \u003d bufprint(p, end, \" SSE4.2\");\n    }\n    if (!(ecx \u0026 CPUID_ECX_POPCNT)) {\n      p \u003d bufprint(p, end, \" POPCNT\");\n    }\n  }\n  if (p \u003e buf) {\n    fprintf(stderr, \"emulator: WARNING: Host CPU is missing the\"\n            \"following feature(s) required for %s emulation:%s\\n\"\n            \"Hardware-accelerated emulation may not work properly!\\n\", abi, buf);\n  }\n\nwhich also avoids the need for a missing_features[] array.",
+      "revId": "8fe36cbb4c7a86a2a8e2c892c6dfa7997f78cbf3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "956382c3_17291426",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1414,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2014-11-07T01:48:58Z",
+      "side": 1,
+      "message": "I see. bufprint() is really handy - I should have used it. Thanks for the detailed explanation!",
+      "parentUuid": "95d5427b_c7f53ee7",
       "revId": "8fe36cbb4c7a86a2a8e2c892c6dfa7997f78cbf3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
