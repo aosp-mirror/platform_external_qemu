@@ -42,7 +42,7 @@ static const char *feature_name[] = {
 };
 static const char *ext_feature_name[] = {
     "pni" /* Intel,AMD sse3 */, NULL, NULL, "monitor", "ds_cpl", "vmx", NULL /* Linux smx */, "est",
-    "tm2", "ssse3", "cid", NULL, NULL, "cx16", "xtpr", NULL,
+    "tm2", "ssse3", "sse4_1", "sse4_2", "cid", NULL, NULL, "cx16", "xtpr", NULL,
     NULL, NULL, "dca", NULL, NULL, NULL, NULL, "popcnt",
        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 };
@@ -146,7 +146,8 @@ static x86_def_t x86_defs[] = {
             CPUID_MTRR | CPUID_CLFLUSH | CPUID_MCA |
         /* this feature is needed for Solaris and isn't fully implemented */
             CPUID_PSE36,
-        .ext_features = CPUID_EXT_SSE3 | CPUID_EXT_SSSE3,
+        .ext_features = CPUID_EXT_SSE3 | CPUID_EXT_SSSE3 |
+            CPUID_EXT_SSE41 | CPUID_EXT_SSE42 | CPUID_EXT_POPCNT,
         .ext2_features = (PPRO_FEATURES & 0x0183F3FF) |
             CPUID_EXT2_LM | CPUID_EXT2_SYSCALL | CPUID_EXT2_NX |
             CPUID_EXT2_3DNOW | CPUID_EXT2_3DNOWEXT,
