@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a0563fe_1c14f531",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-11-09T11:22:52Z",
+      "side": 1,
+      "message": "nit: prefer including system headers after non-system ones, this helps check at compile time that there are no hidden dependencies (e.g. that android/utils/compiler.h can compile correctly if \u003cstdint.h\u003e was not included before).\n\nNote that I\u0027ve fixed it.",
+      "revId": "4e42e81e40bf71bfe919f2c42d5f1155c8b68842",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a0563fe_fc182968",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-11-09T11:22:52Z",
+      "side": 1,
+      "message": "nit: remove this line, the comment here should only document the function and how to use it. Besides, for something so trivial, I don\u0027t think it\u0027s worth mentioning.",
+      "revId": "4e42e81e40bf71bfe919f2c42d5f1155c8b68842",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa358bd2_12786cb2",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-11-09T11:22:52Z",
+      "side": 1,
+      "message": "nit: prefer the Chromium commenting style, where vertical bars are used to denote |parameters| instead.",
+      "revId": "4e42e81e40bf71bfe919f2c42d5f1155c8b68842",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a0563fe_dc156d2e",
+        "filename": "android/utils/x86_cpuid_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-11-09T11:22:52Z",
+      "side": 1,
+      "message": "nit: compatibility :) I\u0027ve fixed it.",
+      "revId": "4e42e81e40bf71bfe919f2c42d5f1155c8b68842",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
