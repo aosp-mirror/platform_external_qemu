@@ -287,6 +287,13 @@ if [ -n "$CCACHE" -a -f "$CCACHE" ]; then
         CCACHE=
     else
         CC="$CCACHE $CC"
+        $CC --version 2>/dev/null
+        if ($CC --version 2>/dev/null | grep -q clang); then
+            # If this is clang, disable ccache-induced warnings and
+            # restore colored diagnostics.
+            # http://petereisentraut.blogspot.fr/2011/05/ccache-and-clang.html
+            CC="$CC -Qunused-arguments -fcolor-diagnostics"
+        fi
         log "Prebuilt   : CCACHE=$CCACHE"
     fi
 else
