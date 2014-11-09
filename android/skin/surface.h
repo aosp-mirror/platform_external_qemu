@@ -19,6 +19,8 @@
  */
 typedef struct SkinSurface  SkinSurface;
 
+struct SkinScaler;
+
 /* increment surface's reference count */
 extern SkinSurface*  skin_surface_ref( SkinSurface*  surface );
 
@@ -103,6 +105,11 @@ extern void    skin_surface_get_format(SkinSurface* s,
 extern void    skin_surface_set_alpha_blending( SkinSurface*  s, int alpha );
 
 extern void    skin_surface_update(SkinSurface* surface, SkinRect* rect);
+
+extern void    skin_surface_update_scaled(SkinSurface* dst_surface,
+                                          struct SkinScaler* scaler,
+                                          SkinSurface* src_surface,
+                                          const SkinRect* src_rect);
 
 /* list of composition operators for the blit routine */
 typedef enum {

@@ -11,6 +11,7 @@
 */
 #include "android/skin/surface.h"
 #include "android/skin/argb.h"
+#include "android/skin/scaler.h"
 #include "android/utils/setenv.h"
 #include <SDL.h>
 
@@ -384,4 +385,31 @@ skin_surface_blit( SkinSurface*  dst,
             return;
     }
     SDL_BlitSurface(src->surface, &sr, dst->surface, &dr);
+}
+
+void
+skin_surface_update_scaled(SkinSurface* dst_surface,
+                           SkinScaler* scaler,
+                           SkinSurface* src_surface,
+                           const SkinRect* src_rect) {
+    SkinSurfacePixels src_pix;
+    skin_surface_lock(src_surface, &src_pix);
+
+    SkinSurfacePixels dst_pix;
+    SkinSurfacePixelFormat dst_format;
+    skin_surface_lock(dst_surface, &dst_pix);
+    skin_surface_get_format(dst_surface, &dst_format);
+
+    skin_scaler_scale(scaler,
+                      &dst_pix,
+                      &dst_format,
+                      &src_pix,
+                      src_rect);
+
+    skin_surface_unlock(dst_surface);
+    skin_surface_unlock(src_surface);
+
+    SkinRect dst_rect;
+    skin_scaler_get_scaled_rect(scaler, src_rect, &dst_rect);
+    skin_surface_update(dst_surface, &dst_rect);
 }
