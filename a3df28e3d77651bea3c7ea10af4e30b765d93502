@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fae74b92_223f8e4e",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2014-11-09T14:45:21Z",
+      "side": 1,
+      "message": "Thanks for fixing the commenting style. This is a good example for me to learn from.",
+      "revId": "a3df28e3d77651bea3c7ea10af4e30b765d93502",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "151dd24d_03548e4b",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2014-11-09T14:45:21Z",
+      "side": 1,
+      "message": "nit: givne --\u003e given :)",
+      "revId": "a3df28e3d77651bea3c7ea10af4e30b765d93502",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "151dd24d_23518a5c",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2014-11-09T14:45:21Z",
+      "side": 1,
+      "message": "nit: This blank line may not be necessary.",
+      "revId": "a3df28e3d77651bea3c7ea10af4e30b765d93502",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "baf15352_23a0b403",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2014-11-09T14:45:21Z",
+      "side": 1,
+      "message": "nit: this parameter --\u003e these parameters :)",
+      "revId": "a3df28e3d77651bea3c7ea10af4e30b765d93502",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
