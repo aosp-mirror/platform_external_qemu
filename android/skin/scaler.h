@@ -29,18 +29,25 @@ extern int          skin_scaler_set( SkinScaler*  scaler,
 
 /* retrieve the position of the scaled source rectangle 'srect' into 'drect'
  * you can use the same pointer for both parameters. */
-extern void         skin_scaler_get_scaled_rect( SkinScaler*  scaler,
-                                                 SkinRect*    srect,
-                                                 SkinRect*    drect );
+extern void         skin_scaler_get_scaled_rect( SkinScaler*     scaler,
+                                                 const SkinRect* srect,
+                                                 SkinRect*       drect );
 
+/* destroy a given SkinScaler instance. */
 extern void         skin_scaler_free( SkinScaler*  scaler );
 
-extern void         skin_scaler_scale( SkinScaler*   scaler,
-                                       SkinSurface*  dst,
-                                       SkinSurface*  src,
-                                       int           sx,
-                                       int           sy,
-                                       int           sw,
-                                       int           sh );
+/* perform a scaling operation with the parameters of a given |scaler|.
+ * |dst_pix| and |dst_format| describe the destination surface, while
+ * |src_pix| describes the source surface.
+ * |src_rect| is the input source rectangle that is going to be scaled into
+ * the destination.
+ * To know which destination pixels were touched, use
+ * skin_scaler_get_scaled_rect().
+ */
+extern void         skin_scaler_scale( SkinScaler* scaler,
+                                       const SkinSurfacePixels* dst_pix,
+                                       const SkinSurfacePixelFormat* dst_format,
+                                       const SkinSurfacePixels* src_pix,
+                                       const SkinRect* src_rect);
 
 #endif /* _ANDROID_SKIN_SCALER_H */
