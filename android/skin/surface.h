@@ -111,6 +111,11 @@ extern void    skin_surface_update_scaled(SkinSurface* dst_surface,
                                           SkinSurface* src_surface,
                                           const SkinRect* src_rect);
 
+extern void    skin_surface_upload(SkinSurface* surface,
+                                   SkinRect* rect,
+                                   const void* pixels,
+                                   int pitch);
+
 /* list of composition operators for the blit routine */
 typedef enum {
     SKIN_BLIT_COPY = 0,
