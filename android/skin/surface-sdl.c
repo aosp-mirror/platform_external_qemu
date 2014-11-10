@@ -413,3 +413,67 @@ skin_surface_update_scaled(SkinSurface* dst_surface,
     skin_scaler_get_scaled_rect(scaler, src_rect, &dst_rect);
     skin_surface_update(dst_surface, &dst_rect);
 }
+
+
+void
+skin_surface_upload(SkinSurface* surface,
+                    SkinRect* rect,
+                    const void* pixels,
+                    int pitch) {
+    // Sanity checks
+    if (!surface || !surface->surface) {
+        return;
+    }
+
+    // Crop rectangle.
+    int dst_w = skin_surface_width(surface);
+    int dst_h = skin_surface_height(surface);
+    int dst_pitch = surface->surface->pitch;
+    int x = 0, y = 0, w = dst_w, h = dst_h;
+
+    if (rect) {
+        x = rect->pos.x;
+        y = rect->pos.y;
+        w = rect->size.w;
+        h = rect->size.h;
+
+        int delta;
+        delta = x + w - dst_w;
+        if (delta > 0) {
+            w -= delta;
+        }
+        delta = y + h - dst_h;
+        if (delta > 0) {
+            h -= delta;
+        }
+        if (x < 0) {
+            w += x;
+            x = 0;
+        }
+        if (y < 0) {
+            h += y;
+            y = 0;
+        }
+    }
+
+    if (w <= 0 || h <= 0) {
+        return;
+    }
+
+    SkinSurfacePixels pix;
+    skin_surface_lock(surface, &pix);
+
+    const uint8_t* src_line = (const uint8_t*)pixels;
+
+    uint8_t* dst_line = (uint8_t*)(
+        (char*)pix.pixels + (pix.pitch * y) + (x * 4));
+
+    for (; h > 0; --h) {
+        memcpy(dst_line, src_line, 4 * w);
+        dst_line += dst_pitch;
+        src_line += pitch;
+    }
+
+    skin_surface_unlock(surface);
+    skin_surface_update(surface, rect);
+}

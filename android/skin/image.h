@@ -81,7 +81,4 @@ extern SkinImage*    skin_image_clone_full( SkinImage*       source,
                                             SkinRotation     rotation,
                                             int              blend );
 
-/* apply blending to a source skin image and copy the result to a target clone image */
-extern void          skin_image_blend_clone( SkinImage*  clone, SkinImage*  source, int  blend );
-
 #endif /* _ANDROID_SKIN_IMAGE_H */

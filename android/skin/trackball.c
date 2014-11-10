@@ -252,11 +252,7 @@ trackball_init(TrackBall  ball, int  diameter, int  ring,
     ball->rotation   = SKIN_ROTATION_0;
 
     ball->pixels   = (unsigned*)calloc( diameter2*diameter2, sizeof(unsigned) );
-    ball->surface  = skin_surface_create_argb32_from(diameter2,
-                                                     diameter2,
-                                                     diameter2 * 4,
-                                                     ball->pixels,
-                                                     0);
+    ball->surface  = skin_surface_create_fast(diameter2, diameter2);
 
     /* init axes */
     ball->axes[0][0] = 1.; ball->axes[0][1] = 0.; ball->axes[0][2] = 0.;
@@ -504,9 +500,6 @@ trackball_refresh( TrackBall  ball )
     Fix16           dot_threshold = DOT_THRESHOLD * diameter;
     int             nn;
 
-    SkinSurfacePixels pix;
-    skin_surface_lock(ball->surface, &pix);
-
     fixedvector_from_vector( (Fix16Vector)&faxes[0], (Vector)&ball->axes[0] );
     fixedvector_from_vector( (Fix16Vector)&faxes[1], (Vector)&ball->axes[1] );
     fixedvector_from_vector( (Fix16Vector)&faxes[2], (Vector)&ball->axes[2] );
@@ -570,7 +563,7 @@ trackball_refresh( TrackBall  ball )
 
         pixels[coord->x + diameter*coord->y] = color;
     }
-    skin_surface_unlock(ball->surface);
+    skin_surface_upload(ball->surface, NULL, pixels, ball->diameter * 4);
 }
 
 void
