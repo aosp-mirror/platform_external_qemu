@@ -128,6 +128,48 @@ void goldfish_battery_display(Monitor *mon)
     monitor_printf(mon, "capacity: %d\n", s->capacity);
 }
 
+void goldfish_battery_set_prop(int ac, int property, int value)
+{
+    DeviceState *dev = qdev_find_recursive(sysbus_get_default(),
+                                           TYPE_GOLDFISH_BATTERY);
+    struct goldfish_battery_state *battery_state = GOLDFISH_BATTERY(dev);
+    int new_status = (ac ? AC_STATUS_CHANGED : BATTERY_STATUS_CHANGED);
+
+    if (!battery_state || !battery_state->hw_has_battery) {
+        return;
+    }
+
+    if (ac) {
+        switch (property) {
+        case POWER_SUPPLY_PROP_ONLINE:
+            battery_state->ac_online = value;
+            break;
+        }
+    } else {
+        switch (property) {
+        case POWER_SUPPLY_PROP_STATUS:
+            battery_state->status = value;
+            break;
+        case POWER_SUPPLY_PROP_HEALTH:
+            battery_state->health = value;
+            break;
+        case POWER_SUPPLY_PROP_PRESENT:
+            battery_state->present = value;
+            break;
+        case POWER_SUPPLY_PROP_CAPACITY:
+            battery_state->capacity = value;
+            break;
+        }
+    }
+
+    if (new_status != battery_state->int_status) {
+        battery_state->int_status |= new_status;
+        qemu_set_irq(battery_state->irq,
+                     (battery_state->int_status &
+                     battery_state->int_enable));
+    }
+}
+
 static uint64_t goldfish_battery_read(void *opaque, hwaddr offset, unsigned size)
 {
     uint64_t ret;
