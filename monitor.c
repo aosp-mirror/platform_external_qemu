@@ -928,7 +928,7 @@ static void android_console_help(Monitor *mon, const QDict *qdict)
             monitor_printf(mon, "    %-15s  %s\n", cmd->name, cmd->help);
         }
         monitor_printf(mon,
-                       "\ntry 'help <command>' for command-specific help\n");
+                       "\ntry 'help <command>' for command-specific help\nOK\n");
         return;
     }
 

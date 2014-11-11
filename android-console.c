@@ -242,8 +242,7 @@ void android_console_redir_remove(Monitor *mon, const QDict *qdict)
 
 static const char *redir_list_help =
     "list current port redirections. "
-    "use 'redir add' and 'redir del' to add and remove them\n"
-    "OK\n";
+    "use 'redir add' and 'redir del' to add and remove them\n";
 
 static const char *redir_add_help =
     "add a new port redirection, arguments must be:\n"
@@ -258,15 +257,13 @@ static const char *redir_add_help =
     "\n"
     "as an example, 'redir  tcp:5000:6000' will allow any packets sent to\n"
     "the host's TCP port 5000 to be routed to TCP port 6000 of the "
-    "emulated device\n"
-    "OK\n";
+    "emulated device\n";
 
 static const char *redir_del_help =
     "remove a port redirecion that was created with 'redir add', "
-    "arguments must be:\n\n"
+    "arguments must be:\n"
     "  redir  del <protocol>:<host-port>\n\n"
-    "see the 'help redir add' for the meaning of <protocol> and <host-port>\n"
-    "OK\n";
+    "see the 'help redir add' for the meaning of <protocol> and <host-port>\n";
 
 void android_console_redir(Monitor *mon, const QDict *qdict)
 {
@@ -291,12 +288,5 @@ void android_console_redir(Monitor *mon, const QDict *qdict)
                    "PORT redirection from the host to the device\n"
                    "as an example, 'redir  tcp:5000:6000' will route "
                    "any packet sent to the host's TCP port 5000\n"
-                   "to TCP port 6000 of the emulated device\n"
-                   "\n"
-                   "available sub-commands:\n"
-                   "    list             list current redirections\n"
-                   "    add              add new redirection\n"
-                   "    del              remove existing redirection\n"
-                   "\n%s\n",
-                   helptext ? "OK" : "KO: missing sub-command");
+                   "to TCP port 6000 of the emulated device\n");
 }
