@@ -391,12 +391,60 @@ void android_console_power_present(Monitor *mon, const QDict *qdict)
     monitor_printf(mon, "KO: Usage: \"present true\" or \"present false\"\n");
 }
 
+void android_console_power_health(Monitor *mon, const QDict *qdict)
+{
+    const char *arg = qdict_get_try_str(qdict, "arg");
+
+    if (arg) {
+        if (strcasecmp(arg, "unknown") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH,
+                                      POWER_SUPPLY_HEALTH_UNKNOWN);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+        if (strcasecmp(arg, "good") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH,
+                                      POWER_SUPPLY_HEALTH_GOOD);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+        if (strcasecmp(arg, "overheat") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH,
+                                      POWER_SUPPLY_HEALTH_OVERHEAT);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+        if (strcasecmp(arg, "dead") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH,
+                                      POWER_SUPPLY_HEALTH_DEAD);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+        if (strcasecmp(arg, "overvoltage") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH,
+                                      POWER_SUPPLY_HEALTH_OVERVOLTAGE);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+        if (strcasecmp(arg, "failure") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH,
+                                      POWER_SUPPLY_HEALTH_UNSPEC_FAILURE);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+    }
+
+    monitor_printf(mon, "KO: Usage: \"health unknown|good|overheat|"
+                   "dead|overvoltage|failure\"\n");
+}
+
 enum {
     CMD_POWER,
     CMD_POWER_DISPLAY,
     CMD_POWER_AC,
     CMD_POWER_STATUS,
     CMD_POWER_PRESENT,
+    CMD_POWER_HEALTH,
 };
 
 static const char *power_help[] = {
@@ -420,6 +468,9 @@ static const char *power_help[] = {
         /* CMD_POWER_PRESENT */
         "'present true|false' allows you to set battery present state to true "
         "or false",
+        /* CMD_POWER_HEALTH */
+        "'health unknown|good|overheat|dead|overvoltage|failure' allows you "
+        "to set battery health state",
 };
 
 void android_console_power(Monitor *mon, const QDict *qdict)
@@ -439,6 +490,8 @@ void android_console_power(Monitor *mon, const QDict *qdict)
             cmd = CMD_POWER_STATUS;
         } else if (strstr(helptext, "present")) {
             cmd = CMD_POWER_PRESENT;
+        } else if (strstr(helptext, "health")) {
+            cmd = CMD_POWER_HEALTH;
         }
     }
 
