@@ -240,11 +240,29 @@ void android_console_redir_remove(Monitor *mon, const QDict *qdict)
 }
 #endif
 
-static const char *redir_list_help =
-    "list current port redirections. "
-    "use 'redir add' and 'redir del' to add and remove them\n";
+enum {
+    CMD_REDIR,
+    CMD_REDIR_LIST,
+    CMD_REDIR_ADD,
+    CMD_REDIR_DEL,
+};
 
-static const char *redir_add_help =
+static const char *redir_help[] = {
+    /* CMD_REDIR */
+    "allows you to add, list and remove UDP and/or PORT redirection "
+    "from the host to the device\n"
+    "as an example, 'redir  tcp:5000:6000' will route any packet sent "
+    "to the host's TCP port 5000\n"
+    "to TCP port 6000 of the emulated device\n"
+    "\n"
+    "available sub-commands:\n"
+    "    list             list current redirections\n"
+    "    add              add new redirection\n"
+    "    del              remove existing redirection\n",
+    /* CMD_REDIR_LIST */
+    "list current port redirections. use 'redir add' and 'redir del' to add "
+    "and remove them",
+    /* CMD_REDIR_ADD */
     "add a new port redirection, arguments must be:\n"
     "\n"
     "  redir add <protocol>:<host-port>:<guest-port>\n"
@@ -257,34 +275,34 @@ static const char *redir_add_help =
     "\n"
     "as an example, 'redir  tcp:5000:6000' will allow any packets sent to\n"
     "the host's TCP port 5000 to be routed to TCP port 6000 of the "
-    "emulated device\n";
-
-static const char *redir_del_help =
+    "emulated device",
+    /* CMD_REDIR_DEL */
     "remove a port redirecion that was created with 'redir add', "
     "arguments must be:\n"
     "  redir  del <protocol>:<host-port>\n\n"
-    "see the 'help redir add' for the meaning of <protocol> and <host-port>\n";
+    "see the 'help redir add' for the meaning of <protocol> and <host-port>",
+};
 
 void android_console_redir(Monitor *mon, const QDict *qdict)
 {
     /* This only gets called for bad subcommands and help requests */
     const char *helptext = qdict_get_try_str(qdict, "helptext");
 
+    /* Default to the first entry which is the parent help message */
+    int cmd = CMD_REDIR;
+
     if (helptext) {
         if (strstr(helptext, "add")) {
-            monitor_printf(mon, "%s", redir_add_help);
-            return;
+            cmd = CMD_REDIR_ADD;
         } else if (strstr(helptext, "del")) {
-            monitor_printf(mon, "%s", redir_del_help);
-            return;
+            cmd = CMD_REDIR_DEL;
         } else if (strstr(helptext, "list")) {
-            monitor_printf(mon, "%s", redir_list_help);
-            return;
+            cmd = CMD_REDIR_LIST;
         }
     }
-    monitor_printf(mon, "allows you to add, list and remove and/or "
-                   "PORT redirection from the host to the device\n"
-                   "as an example, 'redir  tcp:5000:6000' will route "
-                   "any packet sent to the host's TCP port 5000\n"
-                   "to TCP port 6000 of the emulated device\n");
+
+    /* If this is not a help request then we are here with a bad sub-command */
+    monitor_printf(mon, "%s\n%s\n", redir_help[cmd],
+                   helptext ? "OK" : "KO: missing sub-command");
 }
+
