@@ -68,4 +68,6 @@ enum power_supply_property {
     POWER_SUPPLY_PROP_MANUFACTURER,
 };
 
+extern void goldfish_battery_display(Monitor *mon);
+
 #endif /* _HW_GOLDFISH_BATTERY_H */

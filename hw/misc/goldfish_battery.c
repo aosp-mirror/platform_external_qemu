@@ -12,6 +12,7 @@
 #include "hw/hw.h"
 #include "hw/sysbus.h"
 #include "qemu/error-report.h"
+#include "monitor/monitor.h"
 #include "hw/misc/goldfish_battery.h"
 
 enum {
@@ -73,6 +74,59 @@ static const VMStateDescription goldfish_battery_vmsd = {
         VMSTATE_END_OF_LIST()
     }
 };
+
+void goldfish_battery_display(Monitor *mon)
+{
+    DeviceState *dev = qdev_find_recursive(sysbus_get_default(),
+                                           TYPE_GOLDFISH_BATTERY);
+    struct goldfish_battery_state *s = GOLDFISH_BATTERY(dev);
+    const char *value;
+
+    monitor_printf(mon, "AC: %s\n", (s->ac_online) ? "online" : "offline");
+
+    switch (s->status) {
+    case POWER_SUPPLY_STATUS_CHARGING:
+        value = "Charging";
+        break;
+    case POWER_SUPPLY_STATUS_DISCHARGING:
+        value = "Discharging";
+        break;
+    case POWER_SUPPLY_STATUS_NOT_CHARGING:
+        value = "Not charging";
+        break;
+    case POWER_SUPPLY_STATUS_FULL:
+        value = "Full";
+        break;
+    default:
+        value = "Unknown";
+    }
+    monitor_printf(mon, "status: %s\n", value);
+
+    switch (s->health) {
+    case POWER_SUPPLY_HEALTH_GOOD:
+        value = "Good";
+        break;
+    case POWER_SUPPLY_HEALTH_OVERHEAT:
+        value = "Overhead";
+        break;
+    case POWER_SUPPLY_HEALTH_DEAD:
+        value = "Dead";
+        break;
+    case POWER_SUPPLY_HEALTH_OVERVOLTAGE:
+        value = "Overvoltage";
+        break;
+    case POWER_SUPPLY_HEALTH_UNSPEC_FAILURE:
+        value = "Unspecified failure";
+        break;
+    default:
+        value = "Unknown";
+    }
+    monitor_printf(mon, "health: %s\n", value);
+
+    monitor_printf(mon, "present: %s\n", (s->present) ? "true" : "false");
+
+    monitor_printf(mon, "capacity: %d\n", s->capacity);
+}
 
 static uint64_t goldfish_battery_read(void *opaque, hwaddr offset, unsigned size)
 {
