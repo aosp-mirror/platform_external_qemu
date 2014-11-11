@@ -270,8 +270,6 @@ void android_console_redir(Monitor *mon, const QDict *qdict)
     /* This only gets called for bad subcommands and help requests */
     const char *helptext = qdict_get_try_str(qdict, "helptext");
 
-    monitor_printf(mon, "help text %s\n", helptext ? helptext : "(null)");
-
     if (helptext) {
         if (strstr(helptext, "add")) {
             monitor_printf(mon, "%s", redir_add_help);
