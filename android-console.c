@@ -306,3 +306,32 @@ void android_console_redir(Monitor *mon, const QDict *qdict)
                    helptext ? "OK" : "KO: missing sub-command");
 }
 
+enum {
+    CMD_POWER,
+};
+
+static const char *power_help[] = {
+        /* CMD_POWER */
+        "allows to change battery and AC power status\n"
+        "\n"
+        "available sub-commands:\n"
+        "   power display          display battery and charger state\n"
+        "   power ac               set AC charging state\n"
+        "   power status           set battery status\n"
+        "   power present          set battery present state\n"
+        "   power health           set battery health state\n"
+        "   power capacity         set battery capacity state\n",
+};
+
+void android_console_power(Monitor *mon, const QDict *qdict)
+{
+    /* This only gets called for bad subcommands and help requests */
+    const char *helptext = qdict_get_try_str(qdict, "helptext");
+
+    /* Default to the first entry which is the parent help message */
+    int cmd = CMD_POWER;
+
+    /* If this is not a help request then we are here with a bad sub-command */
+    monitor_printf(mon, "%s\n%s\n", power_help[cmd],
+                   helptext ? "OK" : "KO: missing sub-command");
+}

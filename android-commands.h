@@ -25,6 +25,10 @@ static mon_cmd_t android_redir_cmds[] = {
     { NULL, NULL, },
 };
 
+static mon_cmd_t android_power_cmds[] = {
+    { NULL, NULL, },
+};
+
 static mon_cmd_t android_cmds[] = {
     {
         .name = "help|h|?",
@@ -54,6 +58,13 @@ static mon_cmd_t android_cmds[] = {
         .help = "manage port redirections",
         .mhandler.cmd = android_console_redir,
         .sub_cmds.static_table = android_redir_cmds,
+    },
+    {   .name = "power",
+        .args_type = "item:s?",
+        .params = "",
+        .help = "power related commands",
+        .mhandler.cmd = android_console_power,
+        .sub_cmds.static_table = android_power_cmds,
     },
     { NULL, NULL, },
 };
