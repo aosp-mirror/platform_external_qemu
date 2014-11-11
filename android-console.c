@@ -334,10 +334,49 @@ void android_console_power_ac(Monitor *mon, const QDict *qdict)
     monitor_printf(mon, "KO: Usage: \"ac on\" or \"ac off\"\n");
 }
 
+void android_console_power_status(Monitor *mon, const QDict *qdict)
+{
+    const char *arg = qdict_get_try_str(qdict, "arg");
+
+    if (arg) {
+        if (strcasecmp(arg, "unknown") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS,
+                                      POWER_SUPPLY_STATUS_UNKNOWN);
+            monitor_printf(mon, "OK\n");
+            return;
+        } else if (strcasecmp(arg, "charging") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS,
+                                      POWER_SUPPLY_STATUS_CHARGING);
+            monitor_printf(mon, "OK\n");
+            return;
+        } else if (strcasecmp(arg, "discharging") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS,
+                                      POWER_SUPPLY_STATUS_DISCHARGING);
+            monitor_printf(mon, "OK\n");
+            return;
+        } else if (strcasecmp(arg, "not-charging") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS,
+                                      POWER_SUPPLY_STATUS_NOT_CHARGING);
+            monitor_printf(mon, "OK\n");
+            return;
+        } else if (strcasecmp(arg, "full") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS,
+                                      POWER_SUPPLY_STATUS_FULL);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+    }
+
+    monitor_printf(mon, "KO: Usage: \"status unknown|charging|"
+                   "discharging|not-charging|full\"\n");
+}
+
+
 enum {
     CMD_POWER,
     CMD_POWER_DISPLAY,
     CMD_POWER_AC,
+    CMD_POWER_STATUS,
 };
 
 static const char *power_help[] = {
@@ -355,6 +394,9 @@ static const char *power_help[] = {
         "display battery and charger state",
         /* CMD_POWER_AC */
         "'ac on|off' allows you to set the AC charging state to on or off",
+        /* CMD_POWER_STATUS */
+        "'status unknown|charging|discharging|not-charging|full' allows you "
+        "to set battery status",
 };
 
 void android_console_power(Monitor *mon, const QDict *qdict)
@@ -370,6 +412,8 @@ void android_console_power(Monitor *mon, const QDict *qdict)
             cmd = CMD_POWER_DISPLAY;
         } else if (strstr(helptext, "ac")) {
             cmd = CMD_POWER_AC;
+        } else if (strstr(helptext, "status")) {
+            cmd = CMD_POWER_STATUS;
         }
     }
 

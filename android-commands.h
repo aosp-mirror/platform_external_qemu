@@ -40,6 +40,13 @@ static mon_cmd_t android_power_cmds[] = {
         .help = "set AC charging state",
         .mhandler.cmd = android_console_power_ac,
     },
+    {
+        .name = "status",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "set battery status",
+        .mhandler.cmd = android_console_power_status,
+    },
     { NULL, NULL, },
 };
 
