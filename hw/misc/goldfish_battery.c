@@ -141,6 +141,11 @@ static void goldfish_battery_realize(DeviceState *dev, Error **errp)
     SysBusDevice *sbdev = SYS_BUS_DEVICE(dev);
     struct goldfish_battery_state *s = GOLDFISH_BATTERY(dev);
 
+    /* Initialize the device ID so the battery can be looked up during monitor
+     * commands.
+     */
+    dev->id = g_strdup("goldfish_battery");
+
     memory_region_init_io(&s->iomem, OBJECT(s), &goldfish_battery_iomem_ops, s,
             "goldfish_battery", 0x1000);
     sysbus_init_mmio(sbdev, &s->iomem);
