@@ -12,6 +12,7 @@
 #include "hw/hw.h"
 #include "hw/sysbus.h"
 #include "qemu/error-report.h"
+#include "hw/misc/goldfish_battery.h"
 
 enum {
 	/* status register */
@@ -29,9 +30,6 @@ enum {
 	AC_STATUS_CHANGED   	= 1U << 1,
 	BATTERY_INT_MASK        = BATTERY_STATUS_CHANGED | AC_STATUS_CHANGED,
 };
-
-const uint32_t POWER_SUPPLY_STATUS_CHARGING = 1;
-const uint32_t POWER_SUPPLY_HEALTH_GOOD = 1;
 
 #define TYPE_GOLDFISH_BATTERY "goldfish_battery"
 #define GOLDFISH_BATTERY(obj) OBJECT_CHECK(struct goldfish_battery_state, (obj), TYPE_GOLDFISH_BATTERY)
