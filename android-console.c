@@ -314,9 +314,30 @@ void android_console_power_display(Monitor *mon, const QDict *qdict)
     monitor_printf(mon, "OK\n");
 }
 
+void android_console_power_ac(Monitor *mon, const QDict *qdict)
+{
+    const char *arg = qdict_get_try_str(qdict, "arg");
+
+    if (arg) {
+        if (strcasecmp(arg, "on") == 0) {
+            goldfish_battery_set_prop(1, POWER_SUPPLY_PROP_ONLINE, 1);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+        if (strcasecmp(arg, "off") == 0) {
+            goldfish_battery_set_prop(1, POWER_SUPPLY_PROP_ONLINE, 0);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+    }
+
+    monitor_printf(mon, "KO: Usage: \"ac on\" or \"ac off\"\n");
+}
+
 enum {
     CMD_POWER,
     CMD_POWER_DISPLAY,
+    CMD_POWER_AC,
 };
 
 static const char *power_help[] = {
@@ -332,6 +353,8 @@ static const char *power_help[] = {
         "   power capacity         set battery capacity state\n",
         /* CMD_POWER_DISPLAY */
         "display battery and charger state",
+        /* CMD_POWER_AC */
+        "'ac on|off' allows you to set the AC charging state to on or off",
 };
 
 void android_console_power(Monitor *mon, const QDict *qdict)
@@ -345,6 +368,8 @@ void android_console_power(Monitor *mon, const QDict *qdict)
     if (helptext) {
         if (strstr(helptext, "display")) {
             cmd = CMD_POWER_DISPLAY;
+        } else if (strstr(helptext, "ac")) {
+            cmd = CMD_POWER_AC;
         }
     }
 

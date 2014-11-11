@@ -29,6 +29,7 @@ void android_console_redir_add(Monitor *mon, const QDict *qdict);
 void android_console_redir_del(Monitor *mon, const QDict *qdict);
 
 void android_console_power_display(Monitor *mon, const QDict *qdict);
+void android_console_power_ac(Monitor *mon, const QDict *qdict);
 void android_console_power(Monitor *mon, const QDict *qdict);
 
 void android_monitor_print_error(Monitor *mon, const char *fmt, ...);
