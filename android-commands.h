@@ -61,6 +61,13 @@ static mon_cmd_t android_power_cmds[] = {
         .help = "set battery health state",
         .mhandler.cmd = android_console_power_health,
     },
+    {
+        .name = "capacity",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "set battery capacity state",
+        .mhandler.cmd = android_console_power_capacity,
+    },
     { NULL, NULL, },
 };
 

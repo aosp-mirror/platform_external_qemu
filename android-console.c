@@ -438,6 +438,24 @@ void android_console_power_health(Monitor *mon, const QDict *qdict)
                    "dead|overvoltage|failure\"\n");
 }
 
+void android_console_power_capacity(Monitor *mon, const QDict *qdict)
+{
+    const char *arg = qdict_get_try_str(qdict, "arg");
+
+    if (arg) {
+        int capacity;
+
+        if (sscanf(arg, "%d", &capacity) == 1 &&
+            capacity >= 0 && capacity <= 100) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_CAPACITY, capacity);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+    }
+
+    monitor_printf(mon, "KO: Usage: \"capacity <percentage>\"\n");
+}
+
 enum {
     CMD_POWER,
     CMD_POWER_DISPLAY,
@@ -445,6 +463,7 @@ enum {
     CMD_POWER_STATUS,
     CMD_POWER_PRESENT,
     CMD_POWER_HEALTH,
+    CMD_POWER_CAPACITY,
 };
 
 static const char *power_help[] = {
@@ -471,6 +490,9 @@ static const char *power_help[] = {
         /* CMD_POWER_HEALTH */
         "'health unknown|good|overheat|dead|overvoltage|failure' allows you "
         "to set battery health state",
+        /* CMD_POWER_CAPACITY */
+        "'capacity <percentage>' allows you to set battery capacity to a "
+        "value 0 - 100",
 };
 
 void android_console_power(Monitor *mon, const QDict *qdict)
@@ -481,9 +503,14 @@ void android_console_power(Monitor *mon, const QDict *qdict)
     /* Default to the first entry which is the parent help message */
     int cmd = CMD_POWER;
 
+    /* In the below command name parsing, "capacity" has to precede "ac"
+     * otherwise we will hit on "ac" first.
+     */
     if (helptext) {
         if (strstr(helptext, "display")) {
             cmd = CMD_POWER_DISPLAY;
+        } else if (strstr(helptext, "capacity")) {
+            cmd = CMD_POWER_CAPACITY;
         } else if (strstr(helptext, "ac")) {
             cmd = CMD_POWER_AC;
         } else if (strstr(helptext, "status")) {
