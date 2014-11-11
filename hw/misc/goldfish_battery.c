@@ -52,6 +52,7 @@ struct goldfish_battery_state {
     uint32_t health;
     uint32_t present;
     uint32_t capacity;
+    uint32_t hw_has_battery;
 };
 
 /* update this each time you update the battery_state struct */
@@ -70,6 +71,7 @@ static const VMStateDescription goldfish_battery_vmsd = {
         VMSTATE_UINT32(health, struct goldfish_battery_state),
         VMSTATE_UINT32(present, struct goldfish_battery_state),
         VMSTATE_UINT32(capacity, struct goldfish_battery_state),
+        VMSTATE_UINT32(hw_has_battery, struct goldfish_battery_state),
         VMSTATE_END_OF_LIST()
     }
 };
@@ -146,6 +148,11 @@ static void goldfish_battery_realize(DeviceState *dev, Error **errp)
 
     // default values for the battery
     s->ac_online = 1;
+    /* TODO: The Android Emulator gets this attribute from the AVD
+     *       hw-config-defs.h.  For now we hard-code the value to match the
+     *       other values.
+     */
+    s->hw_has_battery = 1;
     s->status = POWER_SUPPLY_STATUS_CHARGING;
     s->health = POWER_SUPPLY_HEALTH_GOOD;
     s->present = 1;     // battery is present
