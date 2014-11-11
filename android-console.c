@@ -371,12 +371,32 @@ void android_console_power_status(Monitor *mon, const QDict *qdict)
                    "discharging|not-charging|full\"\n");
 }
 
+void android_console_power_present(Monitor *mon, const QDict *qdict)
+{
+    const char *arg = qdict_get_try_str(qdict, "arg");
+
+    if (arg) {
+        if (strcasecmp(arg, "true") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_PRESENT, 1);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+        if (strcasecmp(arg, "false") == 0) {
+            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_PRESENT, 0);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+    }
+
+    monitor_printf(mon, "KO: Usage: \"present true\" or \"present false\"\n");
+}
 
 enum {
     CMD_POWER,
     CMD_POWER_DISPLAY,
     CMD_POWER_AC,
     CMD_POWER_STATUS,
+    CMD_POWER_PRESENT,
 };
 
 static const char *power_help[] = {
@@ -397,6 +417,9 @@ static const char *power_help[] = {
         /* CMD_POWER_STATUS */
         "'status unknown|charging|discharging|not-charging|full' allows you "
         "to set battery status",
+        /* CMD_POWER_PRESENT */
+        "'present true|false' allows you to set battery present state to true "
+        "or false",
 };
 
 void android_console_power(Monitor *mon, const QDict *qdict)
@@ -414,6 +437,8 @@ void android_console_power(Monitor *mon, const QDict *qdict)
             cmd = CMD_POWER_AC;
         } else if (strstr(helptext, "status")) {
             cmd = CMD_POWER_STATUS;
+        } else if (strstr(helptext, "present")) {
+            cmd = CMD_POWER_PRESENT;
         }
     }
 

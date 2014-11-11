@@ -47,6 +47,13 @@ static mon_cmd_t android_power_cmds[] = {
         .help = "set battery status",
         .mhandler.cmd = android_console_power_status,
     },
+    {
+        .name = "present",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "set battery present state",
+        .mhandler.cmd = android_console_power_present,
+    },
     { NULL, NULL, },
 };
 
