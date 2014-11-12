@@ -71,6 +71,10 @@ static mon_cmd_t android_power_cmds[] = {
     { NULL, NULL, },
 };
 
+static mon_cmd_t android_event_cmds[] = {
+    { NULL, NULL, },
+};
+
 static mon_cmd_t android_cmds[] = {
     {
         .name = "help|h|?",
@@ -107,6 +111,13 @@ static mon_cmd_t android_cmds[] = {
         .help = "power related commands",
         .mhandler.cmd = android_console_power,
         .sub_cmds.static_table = android_power_cmds,
+    },
+    {   .name = "event",
+        .args_type = "item:s?",
+        .params = "",
+        .help = "simulate hardware events",
+        .mhandler.cmd = android_console_event,
+        .sub_cmds.static_table = android_event_cmds,
     },
     { NULL, NULL, },
 };

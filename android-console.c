@@ -527,3 +527,31 @@ void android_console_power(Monitor *mon, const QDict *qdict)
                    helptext ? "OK" : "KO: missing sub-command");
 
 }
+
+enum {
+    CMD_EVENT,
+};
+
+static const char *event_help[] = {
+        /* CMD_EVENT */
+        "allows you to send fake hardware events to the kernel\n"
+        "\n"
+        "available sub-commands:\n"
+        "   event send             send a series of events to the kernel\n"
+        "   event types            list all <type> aliases\n"
+        "   event codes            list all <code> aliases for a given <type>\n"
+        "   event text             simulate keystrokes from a given text\n",
+};
+
+void android_console_event(Monitor *mon, const QDict *qdict)
+{
+    /* This only gets called for bad subcommands and help requests */
+    const char *helptext = qdict_get_try_str(qdict, "helptext");
+
+    /* Default to the first entry which is the parent help message */
+    int cmd = CMD_EVENT;
+
+    /* If this is not a help request then we are here with a bad sub-command */
+    monitor_printf(mon, "%s\n%s\n", event_help[cmd],
+                   helptext ? "OK" : "KO: missing sub-command");
+}
