@@ -535,6 +535,11 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
 {
     GoldfishEvDevState *s = GOLDFISHEVDEV(dev);
 
+    /* Initialize the device ID so the event dev can be looked up duringi
+     * monitor commands.
+     */
+    dev->id = g_strdup(TYPE_GOLDFISHEVDEV);
+
     /* now set the events capability bits depending on hardware configuration */
     /* apparently, the EV_SYN array is used to indicate which other
      * event classes to consider.
