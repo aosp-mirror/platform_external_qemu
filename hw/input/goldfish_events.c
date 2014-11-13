@@ -19,27 +19,14 @@
 #include "ui/console.h"
 #include "hw/input/linux_keycodes.h"
 
+#include "hw/input/goldfish_events.h"
+
 /* Multitouch specific code is defined out via EVDEV_MULTITOUCH currently,
  * because upstream has no multitouch related APIs.
  */
 /* #define EVDEV_MULTITOUCH */
 
 #define MAX_EVENTS (256 * 4)
-
-/* Event types (as per Linux input event layer) */
-#define EV_SYN                  0x00
-#define EV_KEY                  0x01
-#define EV_REL                  0x02
-#define EV_ABS                  0x03
-#define EV_MSC                  0x04
-#define EV_SW                   0x05
-#define EV_LED                  0x11
-#define EV_SND                  0x12
-#define EV_REP                  0x14
-#define EV_FF                   0x15
-#define EV_PWR                  0x16
-#define EV_FF_STATUS            0x17
-#define EV_MAX                  0x1f
 
 /* Absolute axes */
 #define ABS_X                   0x00
@@ -67,6 +54,44 @@
 #define BTN_TOUCH 0x14a
 #define BTN_MOUSE 0x110
 
+typedef struct {
+    const char *name;
+    int value;
+} GoldfishEventTypeInfo;
+
+/* Event types (as per Linux input event layer) */
+#define EV_SYN                  0x00
+#define EV_KEY                  0x01
+#define EV_REL                  0x02
+#define EV_ABS                  0x03
+#define EV_MSC                  0x04
+#define EV_SW                   0x05
+#define EV_LED                  0x11
+#define EV_SND                  0x12
+#define EV_REP                  0x14
+#define EV_FF                   0x15
+#define EV_PWR                  0x16
+#define EV_FF_STATUS            0x17
+#define EV_MAX                  0x1f
+
+#define EV_TYPE(_type)    {#_type, (_type)}
+#define EV_TYPE_END     {NULL, 0}
+static const GoldfishEventTypeInfo ev_type_table[] = {
+    EV_TYPE(EV_SYN),
+    EV_TYPE(EV_KEY),
+    EV_TYPE(EV_REL),
+    EV_TYPE(EV_ABS),
+    EV_TYPE(EV_MSC),
+    EV_TYPE(EV_SW),
+    EV_TYPE(EV_LED),
+    EV_TYPE(EV_SND),
+    EV_TYPE(EV_REP),
+    EV_TYPE(EV_FF),
+    EV_TYPE(EV_PWR),
+    EV_TYPE(EV_FF_STATUS),
+    EV_TYPE(EV_MAX),
+    EV_TYPE_END
+};
 
 enum {
     REG_READ        = 0x00,
@@ -508,6 +533,53 @@ static void gf_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
     if (lkey) {
         enqueue_event(s, EV_KEY, lkey, evt->key->down);
     }
+}
+
+static const GoldfishEventTypeInfo *gf_get_event_type(const char *typename)
+{
+    const GoldfishEventTypeInfo *type = NULL;
+    int count = 0;
+
+    /* Find the type descriptor by doing a name match */
+    while (ev_type_table[count].name != NULL) {
+        if (typename && !strcmp(ev_type_table[count].name, typename)) {
+            type = &ev_type_table[count];
+            break;
+        }
+        count++;
+    }
+
+    return type;
+}
+
+int gf_get_event_type_count(void)
+{
+    int count = 0;
+
+    while (ev_type_table[count].name != NULL) {
+        count++;
+    }
+
+    return count;
+}
+
+int gf_get_event_type_name(int type, char *buf)
+{
+   g_stpcpy(buf, ev_type_table[type].name);
+
+   return 0;
+}
+
+int gf_get_event_type_value(char *typename)
+{
+    const GoldfishEventTypeInfo *type = gf_get_event_type(typename);
+    int ret = -1;
+
+    if (type) {
+        ret = type->value;
+    }
+
+    return ret;
 }
 
 static QemuInputHandler gf_evdev_key_input_handler = {
