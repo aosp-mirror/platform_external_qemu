@@ -197,25 +197,31 @@ extern void android_pipe_wake( void* hwpipe, unsigned flags );
 #define PIPE_WAKE_READ         (1 << 1)  /* pipe can now be read from */
 #define PIPE_WAKE_WRITE        (1 << 2)  /* pipe can now be written to */
 
-struct access_params{
-    uint32_t channel;
-    uint32_t size;
-    uint32_t address;
-    uint32_t cmd;
-    uint32_t result;
+struct access_params_32 {
+    uint32_t channel;   /* 0x00 */
+    uint32_t size;      /* 0x04 */
+    uint32_t address;   /* 0x08 */
+    uint32_t cmd;       /* 0x0c */
+    uint32_t result;    /* 0x10 */
     /* reserved for future extension */
-    uint32_t flags;
+    uint32_t flags;     /* 0x14 */
 };
 
 struct access_params_64 {
-    uint64_t channel;
-    uint32_t size;
-    uint64_t address;
-    uint32_t cmd;
-    uint32_t result;
+    uint64_t channel;   /* 0x00 */
+    uint32_t size;      /* 0x08 */
+    uint64_t address;   /* 0x0c */
+    uint32_t cmd;       /* 0x14 */
+    uint32_t result;    /* 0x18 */
     /* reserved for future extension */
-    uint32_t flags;
+    uint32_t flags;     /* 0x1c */
 };
+
+union access_params {
+    struct access_params_32 aps32;
+    struct access_params_64 aps64;
+};
+
 
 extern void android_zero_pipe_init(void);
 extern void android_pingpong_init(void);

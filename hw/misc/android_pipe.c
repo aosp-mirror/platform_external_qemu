@@ -87,12 +87,6 @@ static inline void uint64_set_high(uint64_t *addr, uint32 value)
     *addr = (*addr & 0xFFFFFFFFULL) | ((uint64_t)value << 32);
 }
 
-/* FIXME: this is hardcoded for now but will break if used for
- * lionhead/goldfish (32 bit) */
-static inline gboolean android_guest_is_64bit(void) {
-    return TRUE;
-}
-
 #define TYPE_ANDROID_PIPE "android_pipe"
 #define ANDROID_PIPE(obj) \
     OBJECT_CHECK(AndroidPipeState, (obj), TYPE_ANDROID_PIPE)
@@ -660,28 +654,37 @@ static void pipe_dev_write(void *opaque, hwaddr offset, uint64_t value, unsigned
 
     case PIPE_REG_ACCESS_PARAMS:
     {
-        struct access_params aps;
-        struct access_params_64 aps64;
+        union access_params aps;
         uint32_t cmd;
+        bool is_64bit = true;
 
         /* Don't touch aps.result if anything wrong */
         if (s->params_addr == 0)
             break;
 
-        if (android_guest_is_64bit()) {
-            cpu_physical_memory_read(s->params_addr, (void*)&aps64,
-                                     sizeof(aps64));
-            s->channel = aps64.channel;
-            s->size = aps64.size;
-            s->address = aps64.address;
-            cmd = aps64.cmd;
+        cpu_physical_memory_read(s->params_addr, (void*)&aps, sizeof(aps.aps32));
+
+        /* This auto-detection of 32bit/64bit ness relies on the
+         * currently unused flags parameter. As the 32 bit flags
+         * overlaps with the 64 bit cmd parameter. As cmd != 0 if we
+         * find it as 0 it's 32bit
+         */
+        if (aps.aps32.flags == 0) {
+            is_64bit = false;
         } else {
-            cpu_physical_memory_read(s->params_addr, (void*)&aps,
-                                     sizeof(aps));
-            s->channel = aps.channel;
-            s->size = aps.size;
-            s->address = aps.address;
-            cmd = aps.cmd;
+            cpu_physical_memory_read(s->params_addr, (void*)&aps, sizeof(aps.aps64));
+        }
+
+        if (is_64bit) {
+            s->channel = aps.aps64.channel;
+            s->size = aps.aps64.size;
+            s->address = aps.aps64.address;
+            cmd = aps.aps64.cmd;
+        } else {
+            s->channel = aps.aps32.channel;
+            s->size = aps.aps32.size;
+            s->address = aps.aps32.address;
+            cmd = aps.aps32.cmd;
         }
 
         if ((cmd != PIPE_CMD_READ_BUFFER) && (cmd != PIPE_CMD_WRITE_BUFFER))
@@ -689,14 +692,12 @@ static void pipe_dev_write(void *opaque, hwaddr offset, uint64_t value, unsigned
 
         pipeDevice_doCommand(s, cmd);
 
-        if (android_guest_is_64bit()) {
-            aps64.result = s->status;
-            cpu_physical_memory_write(s->params_addr, (void*)&aps64,
-                                      sizeof(aps64));
+        if (is_64bit) {
+            aps.aps64.result = s->status;
+            cpu_physical_memory_write(s->params_addr, (void*)&aps, sizeof(aps.aps64));
         } else {
-            aps.result = s->status;
-            cpu_physical_memory_write(s->params_addr, (void*)&aps,
-                                      sizeof(aps));
+            aps.aps32.result = s->status;
+            cpu_physical_memory_write(s->params_addr, (void*)&aps, sizeof(aps.aps32));
         }
     }
     break;
