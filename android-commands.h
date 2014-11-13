@@ -72,6 +72,13 @@ static mon_cmd_t android_power_cmds[] = {
 };
 
 static mon_cmd_t android_event_cmds[] = {
+    {
+        .name = "types",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "list all <type> aliases",
+        .mhandler.cmd = android_console_event_types,
+    },
     { NULL, NULL, },
 };
 

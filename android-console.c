@@ -22,6 +22,7 @@
 #include "slirp/libslirp.h"
 #include "qmp-commands.h"
 #include "hw/misc/goldfish_battery.h"
+#include "hw/input/goldfish_events.h"
 
 typedef struct {
     int is_udp;
@@ -530,6 +531,7 @@ void android_console_power(Monitor *mon, const QDict *qdict)
 
 enum {
     CMD_EVENT,
+    CMD_EVENT_TYPES,
 };
 
 static const char *event_help[] = {
@@ -541,7 +543,41 @@ static const char *event_help[] = {
         "   event types            list all <type> aliases\n"
         "   event codes            list all <code> aliases for a given <type>\n"
         "   event text             simulate keystrokes from a given text\n",
+        /* CMD_EVENT_TYPES */
+        "'event types' list all <type> string aliases supported by the "
+        "'event' subcommands",
 };
+
+void android_console_event_types(Monitor *mon, const QDict *qdict)
+{
+    int  count = gf_get_event_type_count();
+    int  nn;
+
+    monitor_printf(mon, "event <type> can be an integer or one of the"
+                   "following aliases\n");
+
+    /* Loop through and print out each type found along with the count of alias
+     * codes if any.
+     */
+    for (nn = 0; nn < count; nn++) {
+        char  tmp[16];
+        char *p = tmp;
+        int   code_count;
+        gf_get_event_type_name(nn, p);
+
+        code_count = gf_get_event_code_count(p);
+
+        monitor_printf(mon, "    %-8s", p);
+
+        if (code_count > 0) {
+            monitor_printf(mon, "  (%d code aliases)", code_count);
+        }
+
+        monitor_printf(mon, "\n");
+    }
+
+    monitor_printf(mon, "OK\n");
+}
 
 void android_console_event(Monitor *mon, const QDict *qdict)
 {
@@ -550,6 +586,12 @@ void android_console_event(Monitor *mon, const QDict *qdict)
 
     /* Default to the first entry which is the parent help message */
     int cmd = CMD_EVENT;
+
+    if (helptext) {
+        if (strstr(helptext, "types")) {
+            cmd = CMD_EVENT_TYPES;
+        }
+    }
 
     /* If this is not a help request then we are here with a bad sub-command */
     monitor_printf(mon, "%s\n%s\n", event_help[cmd],
