@@ -219,6 +219,7 @@ void profile_bb_helper(target_ulong pc, uint32_t size) {
   static BinaryProfile *curr_profile;
   if (code_profile_dirname == NULL)
     return;
+  size--;
   if (bb_counter++ == SAMPLE_PERIOD) {
     prev_pid = get_current_pid();
     prev_mmap = get_mmap_data(pc, prev_pid);
@@ -244,8 +245,7 @@ void profile_bb_helper(target_ulong pc, uint32_t size) {
       bb_counter = 0;
       return;
     }
-    add_range_count(curr_profile, pc + data->offset - data->start,
-                    pc + size + data->offset - data->start);
+    add_range_count(curr_profile, pc + data->offset - data->start, size);
     add_branch_count(curr_profile, prev_pc + data->offset - data->start,
                      pc + data->offset - data->start);
     prev_pc = pc + size;
