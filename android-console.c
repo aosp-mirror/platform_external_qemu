@@ -532,6 +532,7 @@ void android_console_power(Monitor *mon, const QDict *qdict)
 enum {
     CMD_EVENT,
     CMD_EVENT_TYPES,
+    CMD_EVENT_CODES,
 };
 
 static const char *event_help[] = {
@@ -546,6 +547,9 @@ static const char *event_help[] = {
         /* CMD_EVENT_TYPES */
         "'event types' list all <type> string aliases supported by the "
         "'event' subcommands",
+        /* CMD_EVENT_CODES */
+        "'event codes <type>' lists all <code> string aliases for a given "
+        "event <type>",
 };
 
 void android_console_event_types(Monitor *mon, const QDict *qdict)
@@ -579,6 +583,41 @@ void android_console_event_types(Monitor *mon, const QDict *qdict)
     monitor_printf(mon, "OK\n");
 }
 
+void android_console_event_codes(Monitor *mon, const QDict *qdict)
+{
+    const char *arg = qdict_get_try_str(qdict, "arg");
+
+    int  count, nn;
+
+    if (!arg) {
+        monitor_printf(mon, "KO: argument missing, try 'event codes <type>'\n");
+        return;
+    }
+
+    count = gf_get_event_code_count(arg);
+
+    /* If the type is invalid then bail */
+    if (count < 0) {
+        monitor_printf(mon,
+                       "KO: bad argument, see 'event types' for valid values\n");
+        return;
+    }
+
+    if (count == 0) {
+        monitor_printf(mon, "no code aliases defined for this type\n");
+    } else {
+        monitor_printf(mon, "type '%s' accepts the following <code> aliases:\n",
+                       arg);
+        for (nn = 0; nn < count; nn++) {
+            char  temp[20], *p = temp;
+            gf_get_event_code_name(arg, nn, p);
+            monitor_printf(mon, "    %-12s\r\n", p);
+        }
+    }
+
+    monitor_printf(mon, "OK\n");
+}
+
 void android_console_event(Monitor *mon, const QDict *qdict)
 {
     /* This only gets called for bad subcommands and help requests */
@@ -590,6 +629,8 @@ void android_console_event(Monitor *mon, const QDict *qdict)
     if (helptext) {
         if (strstr(helptext, "types")) {
             cmd = CMD_EVENT_TYPES;
+        } else if (strstr(helptext, "codes")) {
+            cmd = CMD_EVENT_CODES;
         }
     }
 

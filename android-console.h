@@ -37,6 +37,7 @@ void android_console_power_capacity(Monitor *mon, const QDict *qdict);
 void android_console_power(Monitor *mon, const QDict *qdict);
 
 void android_console_event_types(Monitor *mon, const QDict *qdict);
+void android_console_event_codes(Monitor *mon, const QDict *qdict);
 void android_console_event(Monitor *mon, const QDict *qdict);
 
 void android_monitor_print_error(Monitor *mon, const char *fmt, ...);
