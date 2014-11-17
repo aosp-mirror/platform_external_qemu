@@ -19,5 +19,6 @@ extern int gf_get_event_code_count(const char *typename);
 extern int gf_get_event_code_name(const char *typename, unsigned int code,
                                   char *buf);
 extern int gf_get_event_code_value(int typeval, char *codename);
+extern int gf_event_send(int type, int code, int value);
 
 #endif

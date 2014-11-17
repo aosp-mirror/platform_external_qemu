@@ -716,6 +716,19 @@ static int get_page_data(GoldfishEvDevState *s, int offset)
     return 0;
 }
 
+int gf_event_send(int type, int code, int value)
+{
+    DeviceState *s = qdev_find_recursive(sysbus_get_default(),
+                                           TYPE_GOLDFISHEVDEV);
+    GoldfishEvDevState *dev = GOLDFISHEVDEV(s);
+
+    if (dev) {
+        enqueue_event(dev, type, code, value);
+    }
+
+    return 0;
+}
+
 static uint64_t events_read(void *opaque, hwaddr offset, unsigned size)
 {
     GoldfishEvDevState *s = (GoldfishEvDevState *)opaque;
