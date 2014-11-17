@@ -534,6 +534,7 @@ enum {
     CMD_EVENT_TYPES,
     CMD_EVENT_CODES,
     CMD_EVENT_SEND,
+    CMD_EVENT_TEXT,
 };
 
 static const char *event_help[] = {
@@ -554,7 +555,12 @@ static const char *event_help[] = {
         /* CMD_EVENT_SEND */
         "'event send <type>:<code>:<value> ...' allows your to send one or "
         "more hardware events\nto the Android kernel. you can use text names "
-        "or integers for <type> and <code>"
+        "or integers for <type> and <code>",
+        /* CMD_EVENT_TEXT */
+        "'event text <message>' allows you to simulate keypresses to generate "
+        "a given text\nmessage. <message> must be an utf-8 string. Unicode "
+        "points will be reverse-mapped\naccording to the current device "
+        "keyboard. unsupported characters will be discarded\nsilently",
 };
 
 void android_console_event_types(Monitor *mon, const QDict *qdict)
@@ -683,6 +689,19 @@ out:
     g_strfreev(substr);
 }
 
+void android_console_event_text(Monitor *mon, const QDict *qdict)
+{
+    const char *arg = qdict_get_try_str(qdict, "arg");
+
+    if (!arg) {
+        monitor_printf(mon,
+                       "KO: argument missing, try 'event text <message>'\n");
+        return;
+    }
+
+    monitor_printf(mon, "KO: 'event text' is currently unsupported\n");
+}
+
 void android_console_event(Monitor *mon, const QDict *qdict)
 {
     /* This only gets called for bad subcommands and help requests */
@@ -698,6 +717,8 @@ void android_console_event(Monitor *mon, const QDict *qdict)
             cmd = CMD_EVENT_CODES;
         } else if (strstr(helptext, "send")) {
             cmd = CMD_EVENT_SEND;
+        } else if (strstr(helptext, "text")) {
+            cmd = CMD_EVENT_TEXT;
         }
     }
 

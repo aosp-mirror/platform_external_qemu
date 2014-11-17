@@ -93,6 +93,13 @@ static mon_cmd_t android_event_cmds[] = {
         .help = "send a series of events to the kernel",
         .mhandler.cmd = android_console_event_send,
     },
+    {
+        .name = "text",
+        .args_type  = "arg:S?",
+        .params = "",
+        .help = "simulate keystrokes from a given text",
+        .mhandler.cmd = android_console_event_text,
+    },
     { NULL, NULL, },
 };
 
