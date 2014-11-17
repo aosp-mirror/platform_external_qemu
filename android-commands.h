@@ -86,6 +86,13 @@ static mon_cmd_t android_event_cmds[] = {
         .help = "list all <code> aliases for a given <type>",
         .mhandler.cmd = android_console_event_codes,
     },
+    {
+        .name = "send",
+        .args_type  = "arg:s?",
+        .params = "",
+        .help = "send a series of events to the kernel",
+        .mhandler.cmd = android_console_event_send,
+    },
     { NULL, NULL, },
 };
 

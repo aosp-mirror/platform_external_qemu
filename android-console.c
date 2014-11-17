@@ -533,6 +533,7 @@ enum {
     CMD_EVENT,
     CMD_EVENT_TYPES,
     CMD_EVENT_CODES,
+    CMD_EVENT_SEND,
 };
 
 static const char *event_help[] = {
@@ -550,6 +551,10 @@ static const char *event_help[] = {
         /* CMD_EVENT_CODES */
         "'event codes <type>' lists all <code> string aliases for a given "
         "event <type>",
+        /* CMD_EVENT_SEND */
+        "'event send <type>:<code>:<value> ...' allows your to send one or "
+        "more hardware events\nto the Android kernel. you can use text names "
+        "or integers for <type> and <code>"
 };
 
 void android_console_event_types(Monitor *mon, const QDict *qdict)
@@ -618,6 +623,66 @@ void android_console_event_codes(Monitor *mon, const QDict *qdict)
     monitor_printf(mon, "OK\n");
 }
 
+void android_console_event_send(Monitor *mon, const QDict *qdict)
+{
+    const char *arg = qdict_get_try_str(qdict, "arg");
+    char **substr;
+    int type, code, value = -1;
+
+    if (!arg) {
+        monitor_printf(mon,
+                       "KO: Usage: event send <type>:<code>:<value> ...\n");
+        return;
+    }
+
+    substr = g_strsplit(arg, ":", 3);
+
+    /* The event type can be a symbol or number.  Check that we have a valid
+     * type string and get the value depending on its format.
+     */
+    if (g_ascii_isdigit(*substr[0])) {
+        type = g_ascii_strtoull(substr[0], NULL, 0);
+    } else {
+        type = gf_get_event_type_value(substr[0]);
+    }
+    if (type == -1) {
+        monitor_printf(mon, "KO: invalid event type in '%s', try 'event "
+                       "list types' for valid values\n", arg);
+        goto out;
+    }
+
+    /* The event code can be a symbol or number.  Check that we have a valid
+     * code string and get the value depending on its format.
+     */
+    if (g_ascii_isdigit(*substr[1])) {
+        code = g_ascii_strtoull(substr[1], NULL, 0);
+    } else {
+        code = gf_get_event_code_value(type, substr[1]);
+    }
+    if (code == -1) {
+        monitor_printf(mon, "KO: invalid event code in '%s', try 'event list "
+                       "codes <type>' for valid values\n", arg);
+        goto out;
+    }
+
+    /* The event value can only be a numeric value.  Check that the value
+     * string is value and convert it.
+     */
+    if (!substr[2] || !g_ascii_isdigit(*substr[2])) {
+        monitor_printf(mon, "KO: invalid event value in '%s', must be an "
+                       "integer\n", arg);
+        goto out;
+    }
+    value = g_ascii_strtoull(substr[2], NULL, 0);
+
+    gf_event_send(type, code, value);
+
+    monitor_printf(mon, "OK\n");
+
+out:
+    g_strfreev(substr);
+}
+
 void android_console_event(Monitor *mon, const QDict *qdict)
 {
     /* This only gets called for bad subcommands and help requests */
@@ -631,6 +696,8 @@ void android_console_event(Monitor *mon, const QDict *qdict)
             cmd = CMD_EVENT_TYPES;
         } else if (strstr(helptext, "codes")) {
             cmd = CMD_EVENT_CODES;
+        } else if (strstr(helptext, "send")) {
+            cmd = CMD_EVENT_SEND;
         }
     }
 
