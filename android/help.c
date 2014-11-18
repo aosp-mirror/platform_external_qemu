@@ -5,6 +5,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #ifndef NO_SKIN
+#include "android/skin/keycode.h"
 #include "android/skin/keyset.h"
 #endif
 #include "android/android.h"
@@ -233,7 +234,7 @@ help_keys(stralloc_t*  out)
 
             for (n = 0; n < count; n++) {
                 p = bufprint(p, end, "%s%s", (n == 0) ? "" : ", ",
-                            skin_key_symmod_to_str( bindings[n].sym, bindings[n].mod ) );
+                             skin_key_pair_to_string( bindings[n].sym, bindings[n].mod ) );
             }
 
             if (pass == 0) {
@@ -331,10 +332,10 @@ help_keyset_file(stralloc_t*  out)
     "\n"
     "  finally <key> is a QWERTY-specific keyboard symbol which can be one of:\n\n"
     );
-    count   = skin_keysym_str_count();
+    count   = skin_key_code_count();
     strings = calloc( count, sizeof(char*) );
     for (n = 0; n < count; n++)
-        strings[n] = skin_keysym_str(n);
+        strings[n] = skin_key_code_str(n);
 
     stralloc_tabular( out, strings, count, "    ", 80-8 );
     free(strings);
