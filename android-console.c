@@ -23,6 +23,7 @@
 #include "qmp-commands.h"
 #include "hw/misc/goldfish_battery.h"
 #include "hw/input/goldfish_events.h"
+#include "sysemu/sysemu.h"
 
 typedef struct {
     int is_udp;
@@ -729,6 +730,7 @@ void android_console_event(Monitor *mon, const QDict *qdict)
 
 enum {
     CMD_AVD,
+    CMD_AVD_STATUS,
 };
 
 static const char *avd_help[] = {
@@ -742,7 +744,17 @@ static const char *avd_help[] = {
     "   avd status           query virtual device status\n"
     "   avd name             query virtual device name\n"
     "   avd snapshot         state snapshot commands\n",
+    /* CMD_AVD_STATUS */
+    "'avd status' will indicate whether the virtual device is running or not",
 };
+
+void android_console_avd_status(Monitor *mon, const QDict *qdict)
+{
+    monitor_printf(mon, "virtual device is %s\n",
+                   runstate_is_running() ? "running" : "stopped");
+
+    monitor_printf(mon, "OK\n");
+}
 
 void android_console_avd(Monitor *mon, const QDict *qdict)
 {
@@ -751,6 +763,12 @@ void android_console_avd(Monitor *mon, const QDict *qdict)
 
     /* Default to the first entry which is the parent help message */
     int cmd = CMD_AVD;
+
+    if (helptext) {
+        if (strstr(helptext, "status")) {
+            cmd = CMD_AVD_STATUS;
+        }
+    }
 
     /* If this is not a help request then we are here with a bad sub-command */
     monitor_printf(mon, "%s\n%s\n", avd_help[cmd],

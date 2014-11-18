@@ -104,6 +104,13 @@ static mon_cmd_t android_event_cmds[] = {
 };
 
 static mon_cmd_t android_avd_cmds[] = {
+    {
+        .name = "status",
+        .args_type = "",
+        .params = "",
+        .help = "query virtual device status",
+        .mhandler.cmd = android_console_avd_status,
+    },
     { NULL, NULL, },
 };
 
