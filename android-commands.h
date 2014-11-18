@@ -105,6 +105,13 @@ static mon_cmd_t android_event_cmds[] = {
 
 static mon_cmd_t android_avd_cmds[] = {
     {
+        .name = "stop",
+        .args_type = "",
+        .params = "",
+        .help = "stop the virtual device",
+        .mhandler.cmd = android_console_avd_stop,
+    },
+    {
         .name = "status",
         .args_type = "",
         .params = "",
