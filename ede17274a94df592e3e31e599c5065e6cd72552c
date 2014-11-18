@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa33cb7c_c5d5ec77",
+        "filename": "hw/android/goldfish/profile.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-11-18T19:35:50Z",
+      "side": 1,
+      "message": "that\u0027s pretty subtle, can you add a comment that explains why this is needed. Also please check for size \u003d\u003d 0 and return immediately in this case (or at least add an assert()).",
+      "revId": "ede17274a94df592e3e31e599c5065e6cd72552c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
