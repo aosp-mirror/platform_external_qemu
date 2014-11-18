@@ -852,7 +852,7 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
      * started, and if so, lets see if parameters match. */
     if (cc->video_frame != NULL) {
         /* Already started. Match capture parameters. */
-        if (cc->pixel_format != pix_format ||cc->width != width ||
+        if (cc->pixel_format != (uint32_t)pix_format ||cc->width != width ||
             cc->height != height) {
             /* Parameters match. Succeed the query. */
             W("%s: Camera '%s' is already started", __FUNCTION__, cc->device_name);
@@ -1041,8 +1041,8 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
 
     /* Verify that framebuffer sizes match the ones that the started camera
      * operates with. */
-    if ((video_size != 0 && cc->video_frame_size != video_size) ||
-        (preview_size != 0 && cc->preview_frame_size != preview_size)) {
+    if ((video_size != 0 && cc->video_frame_size != (size_t)video_size) ||
+        (preview_size != 0 && cc->preview_frame_size != (size_t)preview_size)) {
         E("%s: Frame sizes don't match for camera '%s':\n"
           "Expected %d for video, and %d for preview. Requested %d, and %d",
           __FUNCTION__, cc->device_name, cc->video_frame_size,

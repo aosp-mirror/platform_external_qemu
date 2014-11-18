@@ -31,7 +31,6 @@
 #endif
 
 static int sockets_debug = 0;
-static const int on=1, off=0;
 
 /* used temporarely until all users are converted to QemuOpts */
 static QemuOptsList dummy_opts = {

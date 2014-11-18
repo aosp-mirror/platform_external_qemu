@@ -94,11 +94,6 @@ extern void  emulator_help( void );
 #define  VERBOSE_OPT(str,var)   { str, &var }
 
 #define  _VERBOSE_TAG(x,y)   { #x, VERBOSE_##x, y },
-static const struct { const char*  name; int  flag; const char*  text; }
-verbose_options[] = {
-    VERBOSE_TAG_LIST
-    { 0, 0, 0 }
-};
 
 void emulator_help( void )
 {

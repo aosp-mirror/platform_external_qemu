@@ -276,7 +276,7 @@ tcp_input(struct mbuf *m, int iphlen, struct socket *inso)
 	 * Note: IP leaves IP header in first mbuf.
 	 */
 	ti = mtod(m, struct tcpiphdr *);
-	if (iphlen > sizeof(struct ip )) {
+	if (iphlen > (int)sizeof(struct ip )) {
 	  ip_stripoptions(m, (struct mbuf *)0);
 	  iphlen=sizeof(struct ip );
 	}
@@ -313,13 +313,13 @@ tcp_input(struct mbuf *m, int iphlen, struct socket *inso)
 	 * pull out TCP options and adjust length.		XXX
 	 */
 	off = ti->ti_off << 2;
-	if (off < sizeof (struct tcphdr) || off > tlen) {
+	if (off < (int)sizeof (struct tcphdr) || off > tlen) {
 	  STAT(tcpstat.tcps_rcvbadoff++);
 	  goto drop;
 	}
 	tlen -= off;
 	ti->ti_len = tlen;
-	if (off > sizeof (struct tcphdr)) {
+	if (off > (int)sizeof (struct tcphdr)) {
 	  optlen = off - sizeof (struct tcphdr);
 	  optp = mtod(m, caddr_t) + sizeof (struct tcpiphdr);
 
@@ -1197,9 +1197,9 @@ trimthenstep6:
 
 		  if (cw > tp->snd_ssthresh)
 		    incr = incr * incr / cw;
-		  tp->snd_cwnd = min(cw + incr, TCP_MAXWIN<<tp->snd_scale);
+		  tp->snd_cwnd = min(cw + incr, (unsigned)TCP_MAXWIN << tp->snd_scale);
 		}
-		if (acked > so->so_snd.sb_cc) {
+		if ((unsigned)acked > so->so_snd.sb_cc) {
 			tp->snd_wnd -= so->so_snd.sb_cc;
 			sbdrop(&so->so_snd, (int )so->so_snd.sb_cc);
 			ourfinisacked = 1;
@@ -1711,7 +1711,7 @@ tcp_mss(struct tcpcb *tp, u_int offer)
 
 	mss = min(IF_MTU, IF_MRU) - sizeof(struct tcpiphdr);
 	if (offer)
-		mss = min(mss, offer);
+		mss = min(mss, (int)offer);
 	mss = max(mss, 32);
 	if (mss < tp->t_maxseg || offer != 0)
 	   tp->t_maxseg = mss;
