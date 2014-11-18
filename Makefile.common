@@ -182,6 +182,8 @@ common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
 common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
 
+include $(LOCAL_PATH)/android/wear-agent/sources.mk
+
 ## one for 32-bit
 $(call start-emulator-library, emulator-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
