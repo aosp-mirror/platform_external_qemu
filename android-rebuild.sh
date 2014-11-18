@@ -113,6 +113,7 @@ run make -j$HOST_NUM_CPUS OBJS_DIR="$OUT_DIR" ||
 
 RUN_32BIT_TESTS=
 RUN_64BIT_TESTS=true
+RUN_EMUGEN_TESTS=true
 
 TEST_SHELL=
 EXE_SUFFIX=
@@ -169,6 +170,31 @@ if [ -z "$NO_TESTS" ]; then
             echo "   - $UNIT_TEST"
             run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
         done
+    fi
+
+    if [ "$RUN_EMUGEN_TESTS" ]; then
+        echo "Running emugen test suite."
+        # Note that the binary is always built for the 'build' machine type,
+        # I.e. if --mingw is used, it's still a Linux executable.
+        EMUGEN=$OUT_DIR/emugen
+        if [ ! -f "$EMUGEN" ]; then
+            echo "FAIL: Missing 'emugen' binary: $EMUGEN"
+            FAILURES="$FAILURES emugen-binary"
+        else
+            # The first case is for a remote build with package-release.sh
+            TEST_SCRIPT=$(dirname "$0")/../opengl/host/tools/emugen/tests/run-tests.sh
+            if [ ! -f "$TEST_SCRIPT" ]; then
+                # This is the usual location.
+                TEST_SCRIPT=$(dirname "$0")/../../sdk/emulator/opengl/host/tools/emugen/tests/run-tests.sh
+            fi
+            if [ ! -f "$TEST_SCRIPT" ]; then
+                echo " FAIL: Missing script: $TEST_SCRIPT"
+                FAILURES="$FAILURES emugen-test-script"
+            else
+                run $TEST_SCRIPT --emugen=$EMUGEN ||
+                    FAILURES="$FAILURES emugen-test-suit"
+            fi
+        fi
     fi
 
     if [ "$FAILURES" ]; then
