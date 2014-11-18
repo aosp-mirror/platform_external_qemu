@@ -9,11 +9,12 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "android/skin/charmap.h"
+
 #include "android/utils/path.h"
 #include "android/utils/misc.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
-#include "android/charmap.h"
 #include <stdio.h>
 #include <errno.h>
 
@@ -136,7 +137,7 @@ static const AKeycodeMapEntry keycode_map[] = {
  *   gen-charmap.py qwerty2.kcm
  */
 
-static const AKeyEntry  _qwerty2_keys[] =
+static const SkinKeyEntry  _qwerty2_keys[] =
 {
    /* keycode                   base   caps    fn  caps+fn   number */
 
@@ -193,7 +194,7 @@ static const AKeyEntry  _qwerty2_keys[] =
     { kKeyCodeApostrophe    ,  '\'',   '"',  '\'',    '"',  '\'' },
 };
 
-static const AKeyCharmap  _default_charmap =
+static const SkinCharmap  _default_charmap =
 {
     _qwerty2_keys,
     51,
@@ -201,9 +202,9 @@ static const AKeyCharmap  _default_charmap =
 };
 
 /* Custom character map created with -charmap option. */
-static AKeyCharmap android_custom_charmap = { 0 };
+static SkinCharmap android_custom_charmap = { 0 };
 
-static const AKeyCharmap* android_charmap = &_default_charmap;
+static const SkinCharmap* android_charmap = &_default_charmap;
 
 /* Checks if a character represents an end of the line.
  * Returns a non-zero value if ch is an EOL character. Returns
@@ -303,7 +304,7 @@ kcm_is_token_comment(const char* token) {
     return '#' == *token;
 }
 
-/* Converts a key name to a key code as defined by AndroidKeyCode enum.
+/* Converts a key name to a key code as defined by SkinKeyCode enum.
  * key_name - Key name to convert.
  * key_code - Upon success contains key code value for the key_name.
  * Returns a zero value on success, or -1 if key code was not found
@@ -401,7 +402,7 @@ kcm_get_char_or_hex_token_value(const char* line, unsigned short* val) {
 static ParseStatus
 kcm_parse_line(const char* line,
                int line_index,
-               AKeyEntry* key_entry,
+               SkinKeyEntry* key_entry,
                const char* kcm_file_path) {
       char token[KCM_MAX_TOKEN_LEN];
       unsigned short disp;
@@ -529,7 +530,7 @@ kcm_extract_charmap_name(const char* kcm_file_path,
  * and saves it into char_map as its name.
 */
 static void
-kcm_get_charmap_name(const char* kcm_file_path, AKeyCharmap* char_map) {
+kcm_get_charmap_name(const char* kcm_file_path, SkinCharmap* char_map) {
     kcm_extract_charmap_name(kcm_file_path, char_map->name,
                              sizeof(char_map->name));
 }
@@ -547,7 +548,7 @@ kcm_get_charmap_name(const char* kcm_file_path, AKeyCharmap* char_map) {
  * Returns a zero value on success, or -1 on failure.
 */
 static int
-parse_kcm_file(const char* kcm_file_path, AKeyCharmap* char_map) {
+parse_kcm_file(const char* kcm_file_path, SkinCharmap* char_map) {
     // A line read from .kcm file.
     char line[KCM_MAX_LINE_LEN];
     // Return code.
@@ -577,23 +578,23 @@ parse_kcm_file(const char* kcm_file_path, AKeyCharmap* char_map) {
 
     // Line by line parse the file.
     for (; 0 != fgets(line, sizeof(line), kcm_file); cur_line++) {
-        AKeyEntry key_entry;
+        SkinKeyEntry key_entry;
         ParseStatus parse_res =
             kcm_parse_line(line, cur_line, &key_entry, kcm_file_path);
         if (BAD_FORMAT == parse_res) {
             err = -1;
             break;
         } else if (KEY_ENTRY == parse_res) {
-            AKeyEntry* entries;
+            SkinKeyEntry* entries;
             // Key information has been extracted. Add it to the map.
             // Lets see if we need to reallocate map.
             if (map_size == char_map->num_entries) {
-                AKeyEntry* entries = (AKeyEntry*)char_map->entries;
+                SkinKeyEntry* entries = (SkinKeyEntry*)char_map->entries;
                 map_size += 10;
                 AARRAY_RENEW(entries, map_size);
-                char_map->entries = (const AKeyEntry*)entries;
+                char_map->entries = (const SkinKeyEntry*)entries;
             }
-            entries = (AKeyEntry*)char_map->entries;
+            entries = (SkinKeyEntry*)char_map->entries;
             entries[char_map->num_entries] = key_entry;
             char_map->num_entries++;
         }
@@ -626,7 +627,7 @@ parse_kcm_file(const char* kcm_file_path, AKeyCharmap* char_map) {
 }
 
 int
-android_charmap_setup(const char* kcm_file_path) {
+skin_charmap_setup(const char* kcm_file_path) {
 
     /* Return if we already loaded a charmap */
     if (android_charmap != &_default_charmap || kcm_file_path == NULL)
@@ -644,13 +645,13 @@ android_charmap_setup(const char* kcm_file_path) {
 }
 
 void
-android_charmap_done(void) {
+skin_charmap_done(void) {
     if (android_charmap != &_default_charmap)
         AFREE((void*)android_charmap->entries);
 }
 
-const AKeyCharmap*
-android_get_charmap_by_name(const char* name) {
+const SkinCharmap*
+skin_charmap_get_by_name(const char* name) {
     if (name != NULL) {
         if (!strcmp(android_charmap->name, name))
             return android_charmap;
@@ -661,10 +662,10 @@ android_get_charmap_by_name(const char* name) {
 }
 
 int
-android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
+skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
                                     unsigned int unicode,
                                     int  down,
-                                    AKeycodeBuffer* keycodes)
+                                    SkinKeycodeBuffer* keycodes)
 {
     int                 n;
 
@@ -674,7 +675,7 @@ android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
     /* check base keys */
     for (n = 0; n < cmap->num_entries; n++) {
         if (cmap->entries[n].base == unicode) {
-            android_keycodes_add_key_event(keycodes, cmap->entries[n].code, down);
+            skin_keycodes_buffer_add(keycodes, cmap->entries[n].code, down);
             return 1;
         }
     }
@@ -683,11 +684,11 @@ android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
     for (n = 0; n < cmap->num_entries; n++) {
         if (cmap->entries[n].caps == unicode) {
             if (down) {
-                android_keycodes_add_key_event(keycodes, kKeyCodeCapLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeCapLeft, down);
             }
-            android_keycodes_add_key_event(keycodes, cmap->entries[n].code, down);
+            skin_keycodes_buffer_add(keycodes, cmap->entries[n].code, down);
             if (!down) {
-                android_keycodes_add_key_event(keycodes, kKeyCodeCapLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeCapLeft, down);
             }
             return 2;
         }
@@ -697,11 +698,11 @@ android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
     for (n = 0; n < cmap->num_entries; n++) {
         if (cmap->entries[n].fn == unicode) {
             if (down) {
-                android_keycodes_add_key_event(keycodes, kKeyCodeAltLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeAltLeft, down);
             }
-            android_keycodes_add_key_event(keycodes, cmap->entries[n].code, down);
+            skin_keycodes_buffer_add(keycodes, cmap->entries[n].code, down);
             if (!down) {
-                android_keycodes_add_key_event(keycodes, kKeyCodeAltLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeAltLeft, down);
             }
             return 2;
         }
@@ -711,13 +712,13 @@ android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
     for (n = 0; n < cmap->num_entries; n++) {
         if (cmap->entries[n].caps_fn == unicode) {
             if (down) {
-                android_keycodes_add_key_event(keycodes, kKeyCodeAltLeft, down);
-                android_keycodes_add_key_event(keycodes, kKeyCodeCapLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeAltLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeCapLeft, down);
             }
-            android_keycodes_add_key_event(keycodes, cmap->entries[n].code, down);
+            skin_keycodes_buffer_add(keycodes, cmap->entries[n].code, down);
             if (!down) {
-                android_keycodes_add_key_event(keycodes, kKeyCodeCapLeft, down);
-                android_keycodes_add_key_event(keycodes, kKeyCodeAltLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeCapLeft, down);
+                skin_keycodes_buffer_add(keycodes, kKeyCodeAltLeft, down);
             }
             return 3;
         }
@@ -727,17 +728,17 @@ android_charmap_reverse_map_unicode(const AKeyCharmap* cmap,
     return 0;
 }
 
-const AKeyCharmap* android_get_default_charmap(void)
+const SkinCharmap* android_get_default_charmap(void)
 {
     return &_default_charmap;
 }
 
-const AKeyCharmap* android_get_charmap(void)
+const SkinCharmap* skin_charmap_get(void)
 {
     return android_charmap;
 }
 
-const char* android_get_charmap_name(void)
+const char* skin_charmap_get_name(void)
 {
-    return android_get_charmap()->name;
+    return skin_charmap_get()->name;
 }

@@ -213,9 +213,11 @@ help_keys(stralloc_t*  out)
 
     stralloc_add_str( out, "  When running the emulator, use the following keypresses:\n\n");
 
-    if (!android_keyset)
-        android_keyset = skin_keyset_new_from_text( skin_keyset_get_default() );
-
+    SkinKeyset* keyset = skin_keyset_get_default();
+    if (!keyset) {
+        keyset = skin_keyset_new_from_text(
+                skin_keyset_get_default_text());
+    }
     for (pass = 0; pass < 2; pass++) {
         SkinKeyCommand  cmd;
 
@@ -225,7 +227,7 @@ help_keys(stralloc_t*  out)
             int             n, count, len;
             char            temp[32], *p = temp, *end = p + sizeof(temp);
 
-            count = skin_keyset_get_bindings( android_keyset, cmd, bindings );
+            count = skin_keyset_get_bindings( keyset, cmd, bindings );
             if (count <= 0)
                 continue;
 

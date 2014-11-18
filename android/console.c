@@ -52,8 +52,8 @@
 #include "android/hw-events.h"
 #include "android/user-events.h"
 #include "android/hw-sensors.h"
-#include "android/keycode-array.h"
-#include "android/charmap.h"
+#include "android/skin/charmap.h"
+#include "android/skin/keycode-buffer.h"
 #include "android/display-core.h"
 
 #if defined(CONFIG_SLIRP)
@@ -1970,11 +1970,11 @@ utf8_next( unsigned char* *pp, unsigned char*  end )
 static int
 do_event_text( ControlClient  client, char*  args )
 {
-    AKeycodeBuffer keycodes;
+    SkinKeycodeBuffer keycodes;
     unsigned char*  p   = (unsigned char*) args;
     unsigned char*  end = p + strlen(args);
     int             textlen;
-    const AKeyCharmap* charmap;
+    const SkinCharmap* charmap;
 
     if (!args) {
         control_write( client, "KO: argument missing, try 'event text <message>'\r\n" );
@@ -1982,13 +1982,13 @@ do_event_text( ControlClient  client, char*  args )
     }
 
     /* Get active charmap. */
-    charmap = android_get_charmap();
+    charmap = skin_charmap_get();
     if (charmap == NULL) {
         control_write( client, "KO: no character map active in current device layout/config\r\n" );
         return -1;
     }
 
-    keycodes.keycode_count = 0;
+    skin_keycodes_buffer_init(&keycodes, &user_event_keycodes);
 
     /* un-secape message text into proper utf-8 (conversion happens in-site) */
     textlen = strlen((char*)p);
@@ -2010,9 +2010,9 @@ do_event_text( ControlClient  client, char*  args )
         if (c <= 0)
             break;
 
-        android_charmap_reverse_map_unicode( NULL, (unsigned)c, 1, &keycodes );
-        android_charmap_reverse_map_unicode( NULL, (unsigned)c, 0, &keycodes );
-        android_keycodes_flush( &keycodes );
+        skin_charmap_reverse_map_unicode( NULL, (unsigned)c, 1, &keycodes );
+        skin_charmap_reverse_map_unicode( NULL, (unsigned)c, 0, &keycodes );
+        skin_keycodes_buffer_flush( &keycodes );
     }
 
     return 0;
