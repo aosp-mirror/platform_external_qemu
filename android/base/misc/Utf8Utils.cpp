@@ -72,7 +72,7 @@ int utf8Decode(const uint8_t* text, size_t textLen, uint32_t* codepoint) {
         // Invalid input.
         return -1;
     }
-    if (n + 1 < textLen) {
+    if ((size_t)n + 1U > textLen) {
         // Input is too short.
         return -1;
     }
