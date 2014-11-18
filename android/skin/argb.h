@@ -239,10 +239,10 @@ ARGB_SCALE_GENERIC( ScaleOp*   op )
     sx       &= 0xffff;
     sy       &= 0xffff;
 
-    for ( h = op->rd.h; h > 0; h-- ) {
+    for ( h = op->rd.size.h; h > 0; h-- ) {
         uint8_t*  dst = dst_line;
         uint8_t*  src = src_line;
-        uint8_t*  dst_end = dst + 4*op->rd.w;
+        uint8_t*  dst_end = dst + 4 * op->rd.size.w;
         int       sx1 = sx;
         int       sy1 = sy;
 
@@ -335,10 +335,10 @@ scale_05_to_10( ScaleOp*   op )
     sx       &= 0xffff;
     sy       &= 0xffff;
 
-    for ( h = op->rd.h; h > 0; h-- ) {
+    for ( h = op->rd.size.h; h > 0; h-- ) {
         uint8_t*  dst = dst_line;
         uint8_t*  src = src_line;
-        uint8_t*  dst_end = dst + 4*op->rd.w;
+        uint8_t*  dst_end = dst + 4*op->rd.size.w;
         int       sx1 = sx;
         int       sy1 = sy;
 
@@ -481,9 +481,9 @@ scale_up_bilinear( ScaleOp*  op )
 
     sx0 = sx;
 
-    for ( h = op->rd.h; h > 0; h-- ) {
+    for ( h = op->rd.size.h; h > 0; h-- ) {
         uint8_t*  dst = dst_line;
-        uint8_t*  dst_end = dst + 4*op->rd.w;
+        uint8_t*  dst_end = dst + 4*op->rd.size.w;
 
         sx = sx0;
         for ( ; dst < dst_end; ) {
@@ -568,9 +568,9 @@ ARGB_SCALE_UP_QUICK_4x4( ScaleOp*  op )
 
     sx0 = sx;
 
-    for ( h = op->rd.h; h > 0; h-- ) {
+    for ( h = op->rd.size.h; h > 0; h-- ) {
         uint8_t*  dst = dst_line;
-        uint8_t*  dst_end = dst + 4*op->rd.w;
+        uint8_t*  dst_end = dst + 4*op->rd.size.w;
 
         sx = sx0;
         for ( ; dst < dst_end; ) {
@@ -822,9 +822,9 @@ ARGB_SCALE_NEAREST( ScaleOp*  op )
 
     sx0 = sx;
 
-    for ( h = op->rd.h; h > 0; h-- ) {
+    for ( h = op->rd.size.h; h > 0; h-- ) {
         uint8_t*  dst = dst_line;
-        uint8_t*  dst_end = dst + 4*op->rd.w;
+        uint8_t*  dst_end = dst + 4*op->rd.size.w;
 
         sx = sx0;
         for ( ; dst < dst_end; ) {

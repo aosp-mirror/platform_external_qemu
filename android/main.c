@@ -27,9 +27,6 @@
 #include "ui/console.h"
 #include "android/user-events.h"
 
-#include <SDL.h>
-#include <SDL_syswm.h>
-
 #include "math.h"
 
 #include "android/config/config.h"
@@ -54,7 +51,6 @@
 
 #include "android/globals.h"
 
-#include "android/qemulator.h"
 #include "android/display.h"
 
 #include "android/snapshot.h"
