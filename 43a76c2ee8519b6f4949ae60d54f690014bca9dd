@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3afc83c4_a76c442b",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-11-18T19:32:13Z",
+      "side": 1,
+      "message": "nit: Please avoid bash-isms in this script, i.e. use [ ] instead of [[ ]]\nI\u0027m not sure about the *$VAR* thing here.",
+      "revId": "43a76c2ee8519b6f4949ae60d54f690014bca9dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
