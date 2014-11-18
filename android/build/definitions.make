@@ -27,7 +27,7 @@
 .DELETE_ON_ERROR:
 
 # shared definitions
-ifeq ($(strip $(SHOW)),)
+ifeq ($(strip $(SHOW)$(V)),)
 define pretty
 @echo $1
 endef
