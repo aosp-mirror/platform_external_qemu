@@ -630,10 +630,12 @@ init_sdl_ui(AConfig*         skinConfig,
         signal(SIGTTOU, SIG_IGN);
 #endif
     } else {
-#  ifdef CONFIG_DARWIN
+#  if defined(__APPLE__)
         static const char kIconFile[] = "android_icon_256.png";
-#  else
+#  elif defined(_WIN32)
         static const char kIconFile[] = "android_icon_32.png";
+#  else
+        static const char kIconFile[] = "android_icon_128.png";
 #  endif
         size_t icon_size;
         const unsigned char* icon_data =
