@@ -1,0 +1,364 @@
+Android emulator source code organization
+=========================================
+
+Introduction:
+-------------
+
+The Android emulator comes as several executable programs and shared libraries,
+which are built from several separate git repositories.
+
+This document explains where the sources live, how they are maintained, and
+how they are used to rebuild the final binaries.
+
+
+I. General overview:
+--------------------
+
+I.1. Host bitness type:
+-----------------------
+
+The emulator-related sources can be built into either 32-bit or 64-bit host
+binaries. However, depending on the host platform, an SDK release might only
+include binaries for a single bitness, either 32 or 64.
+
+For the record, this is controlled by the definitions of the
+EMULATOR_BUILD_32BITS and EMULATOR_BUILD_64BITS variables in
+external/qemu/Makefile.android.
+
+
+I.2. Old and New codebases:
+---------------------------
+
+The emulator executables are currently nearly all built from the sources under
+$AOSP/external/qemu/, which will be called 'the old codebase' here, or
+'qemu-old' in this document.
+
+There is however a new source tree, based on a more recent version of upstream,
+named 'the new codebase' at qemu-android.googlesource.com (temporary location),
+nicnamed 'qemu-android' here.
+
+Currently qemu-android only supports emulating ARM64, more on this later.
+The executable is named 'qemu-system-aarch64', following upstream qemu
+conventions.
+
+
+I.3. SDK Emulator programs and libraries:
+-----------------------------------------
+
+The Android emulator, as distributed with the Android SDK Tools package, is
+made of the following binaries:
+
+  $SDK/tools/
+      emulator          -> main 'launcher' program
+      emulator-<cpu>    -> 32-bit host emulation engine for virtual <cpu>.
+      emulator64-<cpu>  -> 64-bit host emulation engine for virtual <cpu>.
+
+      emulator64-arm64  -> special launcher for qemu-system-aarch64
+
+      lib/
+          libOpenglRender.so  -> GPU emulation top-level library
+                                 (32-bit version).
+
+          libGLES_CM_translator.so
+          libGLES_V2_translator.so
+          libEGL_translator.so      -> EGL/GLESv1.x/GLESv2 to desktop GL
+                                       translation libraries (32-bit version).
+
+          lib64OpenglRender.so
+          lib64GLES_CM_translator.so
+          lib64GLES_V2_translator.so
+          lib64EGL_translator.so      -> 64-bit host variants of the above
+                                         libraries.
+
+      lib/pc-bios/
+          bios.bin    -> x86 ROM image (required for x86 and x86_64 emulation).
+
+      qemu/
+          linux-x86_64/             -> host system type (can also be
+                                       darwin-x86_64 or windows-x86_64)
+
+               qemu-system-aarch64  -> qemu-android ARM64 emulation engine
+
+Note that on Windows, the executable will use an .exe suffix, and the shared
+libraries a .dll one (e.g. emulator.exe + libOpenglRender.dll). On Darwin,
+the shared libraries use a .dylib suffix. The rest of this document will
+use the Linux naming conventions though.
+
+
+I.4. Other programs:
+--------------------
+
+When building from the external/qemu/ source tree with the android-rebuild.sh
+script, you may find additional binaries under objs/. They correspond to one
+of the following:
+
+  - Unit test suite for the emulator or GPU emulation libraries.
+
+  - The 'emugen' generation tool used to auto-generated the GPU emulation
+    decoder sources (see below).
+
+  - Other test programs.
+
+android-rebuild.sh will automatically run several unit test suites after
+building all binaries, to ensure everything works in order.
+
+
+II. Source repositories:
+------------------------
+
+The following source repositories are currently being used to host
+emulator-related sources and prebuilt binaries:
+
+  * https://android.googlesource.com/platform/external/qemu/
+
+    This repository contains the sources of the existing, or 'old', Android
+    emulator source code. It is used to host the sources for 'emulator' and
+    all emulation-engines except qemu-system-<cpu> (see qemu-android below).
+
+  * https://android.googlesource.com/platform/sdk/
+
+    This repository has an emulator/ directory that contains the sources for
+    various emulator-related sources and binaries:
+
+       sdk/emulator/opengl/
+          Sources for the host-side GPU emulation libraries. Read the
+          DESIGN.TXT document in this directory to learn more about how
+          GPU emulation works.
+
+       sdk/emulator/mksdcard/
+          Sources for the 'mksdcard' SDK host tool, used to generate an empty
+          SDCard partition image that can be used by the emulator. This
+          executable is never called or used by the Android emulator itself,
+          but by the AVD Manager UI tool instead.
+
+       sdk/emulator/skins/
+          Sources for the 'dynamic' skin, i.e. the UI of emulator windows
+          as currently implemented.
+
+       sdk/emulator/snapshot/snapshot.img
+          An empty QCOW2 partition image file, this is copied by the AVD
+          Manager into a new AVD's content directory if the user enables
+          snapshotting.
+
+    The rest of skd/ is not related to emulation and can be ignored here.
+
+  https://android.googlesource.com/platform/device/generic/goldfish/
+
+    Contains emulation support libraries that must be in the system image
+    for emulation to work correctly. Essentially HAL (Hardware Abstraction
+    Layer) modules for various virtual devices, and the GPU EGL/GLES
+    system libraries that communicate with the host-side ones during
+    emulation.
+
+  https://android.googlesource.com/platform/prebuilts/qemu-kernel/
+
+    Prebuilt kernel images configured to run under emulation. Read
+    external/qemu/docs/ANDROID-KERNEL.TXT for more information.
+
+  https://android.googlesource.com/platform/prebuilts/android-emulator/
+
+    Prebuilt emulator and GPU emulation libraries for various host platforms.
+    These are used only when building an emulator-compatible system image
+    with the platform build (e.g. 'aosp_<cpu>-userdebug').
+
+    The 'lunch' command adds this directory to the path so you can just
+    type 'emulator' after a succesful build, and have the corresponding
+    system image started under emulation.
+
+    Updating these binaries requires using the distrib/package-release.sh
+    script with the --copy-prebuilts option (see below).
+
+  https://qemu-android.googlesource.com/qemu-android/
+
+    This is a temporary location for the 'new' emulator code-base, which is
+    based on a much more recent version of QEMU, and thus is much more lightly
+    patched than the 'old' one.
+
+    Note that at the moment, it lacks support for many of the old emulator
+    features, and thus isn't a good replacement for SDK development.
+
+  https://qemu-android.googlesource.com/qemu-ranchu/
+
+    Another temporary location. This contains the sources of all dependency
+    packages for 'qemu-android', as well as a rebuild.sh script that can be
+    used to rebuild everything from scratch. See instructions below.
+
+NOTE: The sources at qemu-android.googlesource.com will likely be moved to
+      android.googlesource.com in the near future.
+
+
+III. 'emulator' launcher program:
+--------------------------------
+
+This is a tiny executable which is in charge of performing the following:
+
+  - Find the virtual CPU of the AVD the user wants to start.
+
+  - Locate the corresponding emulation engine, based on the host system
+    bitness, and the target virtual CPU.
+
+    32-bit emulation engines are named 'emulator-<cpu>', where <cpu> can
+    be one of: arm, x86, mips, arm64.
+
+    64-bit emulation engines are named 'emulator64-<cpu>'.
+
+    Note the special case of 'emulator64-arm64' described below.
+
+  - Modify the LD_LIBRARY_PATH (or equivalent platform-specific variable)
+    before launching the engine. This allows one to prepend $EXEC_DIR/lib/
+    to the shared library search path, allowing the engine to find the
+    GPU emulation libraries.
+
+For debugging purposes, it is possible to mimic the behaviour of 'emulator'
+manually by invoking the emulation engine after altering the library search
+path manually, e.g. on Linux:
+
+  export LD_LIBRARY_PATH=$SDK/tools/lib:$LD_LIBRARY_PATH
+  $SDK/tools/emulator64-arm <options>
+
+On platforms where the SDK distributes both 32-bit and 64-bit binaries,
+'emulator' is always a 32-bit program.
+
+
+IV. 'emulator64-arm64' wrapper program:
+---------------------------------------
+
+ARM64 emulation currently works through the qemu-android binary, which must
+be located under $EXEC_DIR/qemu/$HOST_SYSTEM/qemu-system-aarch64.
+
+Since this is a QEMU-based program, its command-line options are very
+different from the Android emulator ones. The 'emulator64-arm64' program is
+not a real emulation engine. Instead, its purpose is to translate
+emulator-specific command-line options, into the corresponding QEMU-specific
+one, then launch the qemu-android binary with it.
+
+This means a typical double-indirection:
+
+   'emulator' -> 'emulator64-arm' -> 'qemu-system-aarch64'
+
+The source for the wrapper program is under
+external/qemu/android/qemu-launcher/, note that its feature might be merged
+directly into 'emulator' in the future. For now, keeping them separate makes
+maintaining both code bases a little more simple.
+
+
+V. 'qemu-system-<cpu>' engine:
+------------------------------
+
+The qemu-android binary is built from the sources at:
+
+  https://qemu-android.googlesource.com/qemu-android.
+
+Currently, the build requires using the packages and scripts provided by
+
+  https://qemu-android.googlesource.com/qemu-ranchu
+
+Here are full rebuild instructions (as of 2014-11-07):
+
+  1) Have an AOSP checkout ready:
+
+  This is needed to use the prebuilt host toolchains that are known to compile
+  all sources properly.
+
+  If you don't want or need a full AOSP platform checkout, you can use a
+  reduced checkout of the 'ub-tools-master' branch, which only includes
+  sources related to SDK tools, and will thus use a lot less space on your
+  disk:
+
+     repo init -u https://android.googlesource.com/platform/manifest \
+       -b ub-tools-master
+
+  2) Checkout qemu-android:
+
+     git clone https://qemu-android.googlesource.com/qemu-android qemu-android
+     (cd qemu-android && git submodule update --init dtc)
+     (cd qemu-android && git checkout origin/ranchu)
+
+     The second line is necessary to checkout the device-tree library required
+     by QEMU, as a submodule.
+
+  3) Checkout qemu-ranchu:
+
+     This is probably badly named, it contains dependent source packages and
+     a rebuild script:
+
+     git clone https://qemu-android.googlesource.com/qemu-ranchu qemu-ranchu
+
+  4) Rebuild everything from source:
+
+     (cd qemu-ranchu && scripts/rebuild.sh /path/to/qemu-android /path/to/aosp)
+
+     This will likely take a long time, but this script will rebuild all
+     dependent packages (e.g. zlib, libpng, libffi, glib, etc), then the main
+     qemu executable, using the right options and correct toolchain.
+
+     If you intend to perform development on the qemu-android sources, it is
+     highly recommended to use a custom build directory to avoid rebuilding
+     the same dependencies on each script invokation. See the output of
+     qemu-ranchu/scripts/rebuild.sh --help for more details.
+
+     Note: The script will place the binaries under qemu-ranchu/binaries/
+           by default.
+
+To use the new binaries with 'emulator', you need to copy them to the right
+locations. There are two ways to do that:
+
+  A) The 'easy' way is to use the --qemu-prebuilts-dir=<path> option of
+     android-rebuild.sh, i.e. after building the qemu-android binaries
+     as above, do the following:
+
+       cd $AOSP/external/qemu
+       ./android-rebuild.sh --qemu-prebuilts-dir=/path/to/qemu-ranchu/binaries/
+
+     This will copy the relevant files under objs/, so that after the script
+     completes, you can call 'objs/emulator' directly with an ARM64 AVD or
+     platform system image build.
+
+
+  B) The 'manual' way, if you don't want to rely on the script above:
+
+        cd $AOSP/external/qemu
+        ./android-rebuild.sh
+        mkdir -p objs/qemu
+        cp -r /path/to/qemu-ranchu/binaries/* objs/qemu/
+        cp -r pc-bios/keymaps objs/lib/pc-bios/
+
+NOTE: The best way to check ARM64 emulation is to build the
+'aosp_arm64-userdebug' or 'aosp_arm64-eng' system image with the platform
+build, e.g.:
+
+    cd $AOSP
+    lunch aosp_arm64-userdebug
+    make -j8
+    cd external/qemu
+    ./android-rebuild.sh --qemu-prebuilts-dir=$QEMU_RANCHU/binaries/
+    objs/emulator
+
+
+
+VII. Updating prebuilts/android-emulator/ files:
+------------------------------------------------
+
+The qemu-old binaries in this directory can be automatically updated using the
+distrib/package-release.sh script with the --copy-prebuilts option, as in:
+
+   cd $AOSP/prebuilts/android-emulator
+   repo start update-binaries
+   cd $AOSP/external/qemu
+   distrib/package-release.sh --darwin-ssh=<hostname> --copy-prebuilts=$AOSP
+
+Note that this option requires building on Linux, and the ability to perform
+a remote build on a Darwin machine through ssh. See 'package-release.sh --help'
+for more details. This ensures that the binaries for all 3 host platforms are
+updated at the same time.
+
+The biggest advantage of using this script is that it will create a README file
+which contains the git log of all changes since the last update in the target
+directory. This makes writing the corresponding commit message, and tracking
+changes a lot easier.
+
+NOTE: The qemu-android binaries must currently be manually copied at the moment.
+
+Everytime you update the binaries, please make sure you list the SHA1 of the
+various source directories that were used to generate them, this will help
+in case they need to be regenerated, and for general history tracking.
