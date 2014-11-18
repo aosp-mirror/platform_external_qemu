@@ -18,6 +18,12 @@
 #include <process.h>
 #endif
 
+#ifdef __APPLE__
+// This include is currently required to ensure that 'main' is renamed
+// to 'SDL_main' as a macro. This is required by SDL 1.x on OS X.
+#include "SDL.h"
+#endif  // __APPLE__
+
 #include "config.h"
 #include "android/sockets.h"
 
