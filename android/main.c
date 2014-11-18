@@ -50,6 +50,7 @@
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
 #include "android/utils/tempfile.h"
+#include "android/utils/x86_cpuid.h"
 
 #include "android/main-common.h"
 #include "android/help.h"
@@ -1314,6 +1315,48 @@ int main(int argc, char **argv)
                 // '-no-accel' of '-accel off' was used explicitly. Warn about
                 // the issue but do not exit.
                 dwarning("%s emulation may not work without hardware acceleration!", abi);
+            }
+            else {
+                /* CPU acceleration is enabled and working, but if the host CPU
+                 * does not support all instruction sets specified in the x86/
+                 * x86_64 ABI, emulation may fail on unsupported instructions.
+                 * Therefore, check the capabilities of the host CPU and warn
+                 * the user if any required features are missing. */
+                uint32_t ecx = 0;
+                char buf[64], *p = buf, * const end = p + sizeof(buf);
+
+                /* Execute CPUID instruction with EAX=1 and ECX=0 to get CPU
+                 * feature bits (stored in EDX, ECX and EBX). */
+                android_get_x86_cpuid(1, 0, NULL, NULL, &ecx, NULL);
+
+                /* Theoretically, MMX and SSE/2/3 should be checked as well, but
+                 * CPU models that do not support them are probably too old to
+                 * run Android emulator. */
+                if (!(ecx & CPUID_ECX_SSSE3)) {
+                    p = bufprint(p, end, " SSSE3");
+                }
+                if (!strcmp(abi, "x86_64")) {
+                    if (!(ecx & CPUID_ECX_SSE41)) {
+                        p = bufprint(p, end, " SSE4.1");
+                    }
+                    if (!(ecx & CPUID_ECX_SSE42)) {
+                        p = bufprint(p, end, " SSE4.2");
+                    }
+                    if (!(ecx & CPUID_ECX_POPCNT)) {
+                        p = bufprint(p, end, " POPCNT");
+                    }
+                }
+
+                if (p > buf) {
+                    /* Using dwarning(..) would cause this message to be written
+                     * to stdout and filtered out by AVD Manager. But we want
+                     * the AVD Manager user to see this warning, so we resort to
+                     * fprintf(..). */
+                    fprintf(stderr, "emulator: WARNING: Host CPU is missing the"
+                            " following feature(s) required for %s emulation:%s"
+                            "\nHardware-accelerated emulation may not work"
+                            " properly!\n", abi, buf);
+                }
             }
         }
         AFREE(abi);
