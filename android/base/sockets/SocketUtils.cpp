@@ -248,6 +248,15 @@ int socketSetXReuseAddr(int socket) {
 #endif
 }
 
+#ifdef _WIN32
+int socketTcpConnect(int socket, const SockAddressStorage* addr) {
+    int ret = ::connect(socket, &addr->generic,
+                        static_cast<socklen_t>(sizeof(addr->inet)));
+    ON_SOCKET_ERROR_RETURN_M1(ret);
+    return ret;
+}
+#endif  // _WIN32
+
 int socketTcpBindAndListen(int socket, const SockAddressStorage* addr) {
     socklen_t kSize = static_cast<socklen_t>(sizeof(addr->inet));
     int kBacklog = 5;
@@ -260,6 +269,14 @@ int socketTcpBindAndListen(int socket, const SockAddressStorage* addr) {
 
     return 0;
 }
+
+#ifdef _WIN32
+int socketAccept(int socket) {
+    int ret = ::accept(socket, NULL, NULL);
+    ON_SOCKET_ERROR_RETURN_M1(ret);
+    return ret;
+}
+#endif  // _WIN32
 
 }  // namespace
 
