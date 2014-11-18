@@ -103,6 +103,10 @@ static mon_cmd_t android_event_cmds[] = {
     { NULL, NULL, },
 };
 
+static mon_cmd_t android_avd_cmds[] = {
+    { NULL, NULL, },
+};
+
 static mon_cmd_t android_cmds[] = {
     {
         .name = "help|h|?",
@@ -146,6 +150,13 @@ static mon_cmd_t android_cmds[] = {
         .help = "simulate hardware events",
         .mhandler.cmd = android_console_event,
         .sub_cmds.static_table = android_event_cmds,
+    },
+    {   .name = "avd",
+        .args_type = "item:s?",
+        .params = "",
+        .help = "control virtual device execution",
+        .mhandler.cmd = android_console_avd,
+        .sub_cmds.static_table = android_avd_cmds,
     },
     { NULL, NULL, },
 };

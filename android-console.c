@@ -726,3 +726,33 @@ void android_console_event(Monitor *mon, const QDict *qdict)
     monitor_printf(mon, "%s\n%s\n", event_help[cmd],
                    helptext ? "OK" : "KO: missing sub-command");
 }
+
+enum {
+    CMD_AVD,
+};
+
+static const char *avd_help[] = {
+    /* CMD_AVD */
+    "allows you to control (e.g. start/stop) the execution of the virtual "
+    "device\n"
+    "\n"
+    "available sub-commands:\n"
+    "   avd stop             stop the virtual device\n"
+    "   avd start            start/restart the virtual device\n"
+    "   avd status           query virtual device status\n"
+    "   avd name             query virtual device name\n"
+    "   avd snapshot         state snapshot commands\n",
+};
+
+void android_console_avd(Monitor *mon, const QDict *qdict)
+{
+    /* This only gets called for bad subcommands and help requests */
+    const char *helptext = qdict_get_try_str(qdict, "helptext");
+
+    /* Default to the first entry which is the parent help message */
+    int cmd = CMD_AVD;
+
+    /* If this is not a help request then we are here with a bad sub-command */
+    monitor_printf(mon, "%s\n%s\n", avd_help[cmd],
+                   helptext ? "OK" : "KO: missing sub-command");
+}
