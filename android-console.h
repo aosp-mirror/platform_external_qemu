@@ -46,6 +46,11 @@ void android_console_avd_stop(Monitor *mon, const QDict *qdict);
 void android_console_avd_start(Monitor *mon, const QDict *qdict);
 void android_console_avd_status(Monitor *mon, const QDict *qdict);
 void android_console_avd_name(Monitor *mon, const QDict *qdict);
+void android_console_avd_snapshot(Monitor *mon, const QDict *qdict);
+void android_console_avd_snapshot_list(Monitor *mon, const QDict *qdict);
+void android_console_avd_snapshot_save(Monitor *mon, const QDict *qdict);
+void android_console_avd_snapshot_load(Monitor *mon, const QDict *qdict);
+void android_console_avd_snapshot_del(Monitor *mon, const QDict *qdict);
 void android_console_avd(Monitor *mon, const QDict *qdict);
 
 void android_monitor_print_error(Monitor *mon, const char *fmt, ...);

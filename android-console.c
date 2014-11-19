@@ -735,6 +735,11 @@ enum {
     CMD_AVD_START,
     CMD_AVD_STATUS,
     CMD_AVD_NAME,
+    CMD_AVD_SNAPSHOT,
+    CMD_AVD_SNAPSHOT_LIST,
+    CMD_AVD_SNAPSHOT_SAVE,
+    CMD_AVD_SNAPSHOT_LOAD,
+    CMD_AVD_SNAPSHOT_DEL,
 };
 
 static const char *avd_help[] = {
@@ -758,6 +763,26 @@ static const char *avd_help[] = {
     "'avd status' will indicate whether the virtual device is running or not",
     /* CMD_AVD_NAME */
     "'avd name' will return the name of this virtual device",
+    /* CMD_AVD_SNAPSHOT */
+    "allows you to save and restore the virtual device state in snapshots\n"
+    "\n"
+    "available sub-commands:\n"
+    "   avd snapshot list             list available state snapshots\n"
+    "   avd snapshot save             save state snapshot\n"
+    "   avd snapshot load             load state snapshot\n"
+    "   avd snapshot del              delete state snapshot\n",
+    /* CMD_AVD_SNAPSHOT_LIST */
+    "'avd snapshot list' will show a list of all state snapshots that can be "
+    "loaded",
+    /* CMD_AVD_SNAPSHOT_SAVE */
+    "'avd snapshot save <name>' will save the current (run-time) state to a "
+    "snapshot with the given name",
+    /* CMD_AVD_SNAPSHOT_LOAD */
+    "'avd snapshot load <name>' will load the state snapshot of the given "
+    "name",
+    /* CMD_AVD_SNAPSHOT_DEL */
+    "'avd snapshot del <name>' will delete the state snapshot with the given "
+    "name",
 };
 
 void android_console_avd_stop(Monitor *mon, const QDict *qdict)
@@ -795,6 +820,51 @@ void android_console_avd_status(Monitor *mon, const QDict *qdict)
 void android_console_avd_name(Monitor *mon, const QDict *qdict)
 {
     monitor_printf(mon, "KO: 'avd name' is currently unsupported\n");
+}
+
+void android_console_avd_snapshot(Monitor *mon, const QDict *qdict)
+{
+    /* This only gets called for bad subcommands and help requests */
+    const char *helptext = qdict_get_try_str(qdict, "helptext");
+
+    /* Default to the first entry which is the snapshot help message */
+    int cmd = CMD_AVD_SNAPSHOT;
+
+    if (helptext) {
+        if (strstr(helptext, "list")) {
+            cmd = CMD_AVD_SNAPSHOT_LIST;
+        } else if (strstr(helptext, "save")) {
+            cmd = CMD_AVD_SNAPSHOT_SAVE;
+        } else if (strstr(helptext, "load")) {
+            cmd = CMD_AVD_SNAPSHOT_LOAD;
+        } else if (strstr(helptext, "del")) {
+            cmd = CMD_AVD_SNAPSHOT_DEL;
+        }
+    }
+
+    /* If this is not a help request then we are here with a bad sub-command */
+    monitor_printf(mon, "%s\n%s\n", avd_help[cmd],
+                   helptext ? "OK" : "KO: missing sub-command");
+}
+
+void android_console_avd_snapshot_list(Monitor *mon, const QDict *qdict)
+{
+    monitor_printf(mon, "KO: 'avd snapshot list' is currently unsupported\n");
+}
+
+void android_console_avd_snapshot_save(Monitor *mon, const QDict *qdict)
+{
+    monitor_printf(mon, "KO: 'avd snapshot save' is currently unsupported\n");
+}
+
+void android_console_avd_snapshot_load(Monitor *mon, const QDict *qdict)
+{
+    monitor_printf(mon, "KO: 'avd snapshot load' is currently unsupported\n");
+}
+
+void android_console_avd_snapshot_del(Monitor *mon, const QDict *qdict)
+{
+    monitor_printf(mon, "KO: 'avd snapshot del' is currently unsupported\n");
 }
 
 void android_console_avd(Monitor *mon, const QDict *qdict)

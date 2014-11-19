@@ -103,6 +103,42 @@ static mon_cmd_t android_event_cmds[] = {
     { NULL, NULL, },
 };
 
+static mon_cmd_t android_avd_snapshot_cmds[] = {
+    {
+        .name = "list",
+        .args_type = "",
+        .params = "",
+        .help = "'avd snapshot list' will show a list of all state snapshots "
+                "that can be loaded",
+        .mhandler.cmd = android_console_avd_snapshot_list,
+    },
+    {
+        .name = "save",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "'avd snapshot save <name>' will save the current (run-time) "
+                "state to a snapshot with the given name",
+        .mhandler.cmd = android_console_avd_snapshot_save,
+    },
+    {
+        .name = "load",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "'avd snapshot load <name>' will load the state snapshot of "
+                "the given name",
+        .mhandler.cmd = android_console_avd_snapshot_load,
+    },
+    {
+        .name = "del",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "'avd snapshot del <name>' will delete the state snapshot with "
+                "the given name",
+        .mhandler.cmd = android_console_avd_snapshot_del,
+    },
+    { NULL, NULL, },
+};
+
 static mon_cmd_t android_avd_cmds[] = {
     {
         .name = "stop",
@@ -131,6 +167,14 @@ static mon_cmd_t android_avd_cmds[] = {
         .params = "",
         .help = "query virtual device name",
         .mhandler.cmd = android_console_avd_name,
+    },
+    {
+        .name = "snapshot",
+        .args_type = "item:s",
+        .params = "",
+        .help = "state snapshot commands",
+        .mhandler.cmd = android_console_avd_snapshot,
+        .sub_cmds.static_table = android_avd_snapshot_cmds,
     },
     { NULL, NULL, },
 };
