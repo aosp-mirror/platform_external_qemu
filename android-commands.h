@@ -26,6 +26,13 @@ static mon_cmd_t android_redir_cmds[] = {
 };
 
 static mon_cmd_t android_power_cmds[] = {
+    {
+        .name = "display",
+        .args_type = "",
+        .params = "",
+        .help = "display battery and charger state",
+        .mhandler.cmd = android_console_power_display,
+    },
     { NULL, NULL, },
 };
 

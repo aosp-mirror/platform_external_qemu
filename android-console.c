@@ -21,6 +21,7 @@
 #include "net/slirp.h"
 #include "slirp/libslirp.h"
 #include "qmp-commands.h"
+#include "hw/misc/goldfish_battery.h"
 
 typedef struct {
     int is_udp;
@@ -306,8 +307,16 @@ void android_console_redir(Monitor *mon, const QDict *qdict)
                    helptext ? "OK" : "KO: missing sub-command");
 }
 
+void android_console_power_display(Monitor *mon, const QDict *qdict)
+{
+    goldfish_battery_display(mon);
+
+    monitor_printf(mon, "OK\n");
+}
+
 enum {
     CMD_POWER,
+    CMD_POWER_DISPLAY,
 };
 
 static const char *power_help[] = {
@@ -321,6 +330,8 @@ static const char *power_help[] = {
         "   power present          set battery present state\n"
         "   power health           set battery health state\n"
         "   power capacity         set battery capacity state\n",
+        /* CMD_POWER_DISPLAY */
+        "display battery and charger state",
 };
 
 void android_console_power(Monitor *mon, const QDict *qdict)
@@ -331,7 +342,14 @@ void android_console_power(Monitor *mon, const QDict *qdict)
     /* Default to the first entry which is the parent help message */
     int cmd = CMD_POWER;
 
+    if (helptext) {
+        if (strstr(helptext, "display")) {
+            cmd = CMD_POWER_DISPLAY;
+        }
+    }
+
     /* If this is not a help request then we are here with a bad sub-command */
     monitor_printf(mon, "%s\n%s\n", power_help[cmd],
                    helptext ? "OK" : "KO: missing sub-command");
+
 }
