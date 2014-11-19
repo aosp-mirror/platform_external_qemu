@@ -45,6 +45,7 @@ void android_console_event(Monitor *mon, const QDict *qdict);
 void android_console_avd_stop(Monitor *mon, const QDict *qdict);
 void android_console_avd_start(Monitor *mon, const QDict *qdict);
 void android_console_avd_status(Monitor *mon, const QDict *qdict);
+void android_console_avd_name(Monitor *mon, const QDict *qdict);
 void android_console_avd(Monitor *mon, const QDict *qdict);
 
 void android_monitor_print_error(Monitor *mon, const char *fmt, ...);
