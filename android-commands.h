@@ -112,6 +112,13 @@ static mon_cmd_t android_avd_cmds[] = {
         .mhandler.cmd = android_console_avd_stop,
     },
     {
+        .name = "start",
+        .args_type = "",
+        .params = "",
+        .help = "start/restart the virtual device",
+        .mhandler.cmd = android_console_avd_start,
+    },
+    {
         .name = "status",
         .args_type = "",
         .params = "",

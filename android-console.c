@@ -732,6 +732,7 @@ void android_console_event(Monitor *mon, const QDict *qdict)
 enum {
     CMD_AVD,
     CMD_AVD_STOP,
+    CMD_AVD_START,
     CMD_AVD_STATUS,
 };
 
@@ -749,6 +750,9 @@ static const char *avd_help[] = {
     /* CMD_AVD_STOP */
     "'avd stop' stops the virtual device immediately, use 'avd start' to "
     "continue execution",
+    /* CMD_AVD_START */
+    "'avd start' will start or continue the virtual device, use 'avd stop' to "
+    "stop it",
     /* CMD_AVD_STATUS */
     "'avd status' will indicate whether the virtual device is running or not",
 };
@@ -761,6 +765,18 @@ void android_console_avd_stop(Monitor *mon, const QDict *qdict)
     }
 
     qmp_stop(NULL);
+
+    monitor_printf(mon, "OK\n");
+}
+
+void android_console_avd_start(Monitor *mon, const QDict *qdict)
+{
+    if (runstate_is_running()) {
+        monitor_printf(mon, "KO: virtual device already running\n");
+        return;
+    }
+
+    qmp_cont(NULL);
 
     monitor_printf(mon, "OK\n");
 }
@@ -784,6 +800,8 @@ void android_console_avd(Monitor *mon, const QDict *qdict)
     if (helptext) {
         if (strstr(helptext, "stop")) {
             cmd = CMD_AVD_STOP;
+        } else if (strstr(helptext, "start")) {
+            cmd = CMD_AVD_START;
         } else if (strstr(helptext, "status")) {
             cmd = CMD_AVD_STATUS;
         }
