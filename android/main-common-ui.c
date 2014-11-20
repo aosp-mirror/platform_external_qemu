@@ -603,6 +603,36 @@ DEFAULT_SKIN:
     goto FOUND_SKIN;
 }
 
+static void
+setup_initial_screen_orientation(const char* kInitialOrientation) {
+    SkinLayout *currLayout = emulator_window_get()->layout_file->layouts;
+    SkinLayout *prevLayout = NULL;
+
+    // find the layout that matches initial orientation and make
+    // it as the first one in the list
+    while(currLayout) {
+        if (!strcmp(currLayout->name, kInitialOrientation)) {
+            SkinLayout *newLayoutHead = currLayout;
+            SkinLayout *oldLayoutHead = emulator_window_get()->layout_file->layouts;
+            if (oldLayoutHead == newLayoutHead) break;
+            emulator_window_get()->layout_file->layouts = newLayoutHead;
+            prevLayout->next = NULL;
+            while (currLayout) {
+                if (currLayout->next == NULL) {
+                    currLayout->next = oldLayoutHead;
+                    break;
+                }
+                currLayout= currLayout->next;
+            }
+            break;
+        }
+        prevLayout = currLayout;
+        currLayout = currLayout->next;
+    }
+    // do the same for onion rotation
+    emulator_window_get()->onion_rotation =
+        (!strcmp(kInitialOrientation, "portrait")) ?  SKIN_ROTATION_0 : SKIN_ROTATION_270;
+}
 
 void
 init_sdl_ui(AConfig*         skinConfig,
@@ -677,4 +707,6 @@ init_sdl_ui(AConfig*         skinConfig,
         emulator_window_get()->onion_alpha    = alpha;
         emulator_window_get()->onion_rotation = rotate;
     }
+
+    setup_initial_screen_orientation(android_hw->hw_initialOrientation);
 }
