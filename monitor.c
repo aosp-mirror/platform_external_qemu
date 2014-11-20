@@ -965,15 +965,15 @@ static void android_console_help(Monitor *mon, const QDict *qdict)
         sub_cmds = get_command_table(mon, cmd->sub_cmds);
 
         if (thisarg >= nb_args || !sub_cmds) {
-            /* For subtables, the command handler for the entry in the 1st
-             * level of commands deals with help (including "help subcommand"
-             * where there is no following second level command in the help
-             * string). For top level commands, we just print the short text.
+            /* Last in line commands with sub-tables will deal with their own
+             * help messages.  Otherwise, the parent handles the next lower
+             * level sub-command.  Top level commands (no sub-commands) are
+             * dealt with here.
              */
-            if (parent_cmd) {
-                parent_cmd->mhandler.cmd(mon, qdict);
-            } else if (sub_cmds) {
+            if (sub_cmds) {
                 cmd->mhandler.cmd(mon, qdict);
+            } else if (parent_cmd) {
+                parent_cmd->mhandler.cmd(mon, qdict);
             } else {
                 monitor_printf(mon, "%s\nOK\n", cmd->help);
             }
