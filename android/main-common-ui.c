@@ -603,7 +603,6 @@ DEFAULT_SKIN:
     goto FOUND_SKIN;
 }
 
-
 void
 init_sdl_ui(AConfig*         skinConfig,
             const char*      skinPath,
@@ -677,4 +676,5 @@ init_sdl_ui(AConfig*         skinConfig,
         emulator_window_get()->onion_alpha    = alpha;
         emulator_window_get()->onion_rotation = rotate;
     }
+
 }

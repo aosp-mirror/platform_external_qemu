@@ -159,6 +159,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     };
 
     emulator->ui = skin_ui_create(emulator->layout_file,
+                                  android_hw->hw_initialOrientation,
                                   &my_ui_funcs,
                                   &my_ui_params);
     if (!emulator->ui) {
