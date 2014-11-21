@@ -3384,6 +3384,9 @@ int main(int argc, char **argv, char **envp)
         }
         if (qemu_gles) {
             stralloc_add_str(kernel_params, " qemu.gles=1");
+            char  tmp[64];
+            snprintf(tmp, sizeof(tmp), "%d", 0x20000);
+            boot_property_add("ro.opengles.version", tmp);
         } else {
             stralloc_add_str(kernel_params, " qemu.gles=0");
         }
