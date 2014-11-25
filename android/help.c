@@ -287,9 +287,8 @@ help_environment(stralloc_t*  out)
 
     "  If ANDROID_LOG_TAGS is defined, it will be used as in '-logcat <tags>'.\n\n"
 
-    "  If ANDROID_SDK_HOME is defined, it indicates the path of the '.android'\n"
-    "  directory which contains the SDK user data (Android Virtual Devices,\n"
-    "  DDMS preferences, key stores, etc.).\n\n"
+    "  If ANDROID_EMULATOR_HOME is defined, it replaces the path of the '$HOME/.android'\n"
+    "  directory which contains the emulator config data (DDMS preferences, key stores, etc.).\n\n"
 
     "  If ANDROID_SDK_ROOT is defined, it indicates the path of the SDK\n"
     "  installation directory.\n\n"
