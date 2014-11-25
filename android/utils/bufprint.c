@@ -162,30 +162,41 @@ bufprint_app_dir(char*  buff, char*  end)
 }
 #endif
 
-#define  _ANDROID_PATH   ".android"
+#define  _ANDROID_PATH      ".android"
+#define  _ANDROID_AVD_DIR   "avd"
+
+char*
+bufprint_avd_home_path(char*  buff, char*  end)
+{
+    const char*  home = getenv("ANDROID_AVD_HOME");
+    if (home) {
+        return bufprint(buff, end, "%s", home);
+    }
+    buff = bufprint_config_path(buff, end);
+    return bufprint(buff, end, PATH_SEP "%s", _ANDROID_AVD_DIR);
+}
 
 char*
 bufprint_config_path(char*  buff, char*  end)
 {
-#ifdef _WIN32
-    const char*  home = getenv("ANDROID_SDK_HOME");
-    if (home != NULL) {
-        return bufprint(buff, end, "%s\\%s", home, _ANDROID_PATH );
-    } else {
-        char  path[MAX_PATH];
-
-        SHGetFolderPath( NULL, CSIDL_PROFILE,
-                         NULL, 0, path);
-
-        return bufprint(buff, end, "%s\\%s", path, _ANDROID_PATH );
+    const char*  home = getenv("ANDROID_EMULATOR_HOME");
+    if (home) {
+        return bufprint(buff, end, "%s", home);
     }
+    home = getenv("ANDROID_SDK_HOME");
+    if (home) {
+        return bufprint(buff, end, "%s" PATH_SEP "%s", home, _ANDROID_PATH);
+    }
+#ifdef _WIN32
+    char  path[MAX_PATH];
+    SHGetFolderPath( NULL, CSIDL_PROFILE,
+                     NULL, 0, path);
+    return bufprint(buff, end, "%s\\%s", path, _ANDROID_PATH);
 #else
-    const char*  home = getenv("ANDROID_SDK_HOME");
-    if (home == NULL)
-        home = getenv("HOME");
+    home = getenv("HOME");
     if (home == NULL)
         home = "/tmp";
-    return bufprint(buff, end, "%s/%s", home, _ANDROID_PATH );
+    return bufprint(buff, end, "%s/%s", home, _ANDROID_PATH);
 #endif
 }
 

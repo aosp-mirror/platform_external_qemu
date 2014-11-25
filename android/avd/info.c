@@ -467,7 +467,7 @@ _avdInfo_getContentPath( AvdInfo*  i )
         // the relative path if present.
         const char* relPath = iniFile_getString(i->rootIni, ROOT_REL_PATH_KEY, NULL);
         if (relPath != NULL) {
-            p = bufprint_config_path(temp, end);
+            p = bufprint_avd_home_path(temp, end);
             p = bufprint(p, end, PATH_SEP "%s", relPath);
             if (p < end && path_is_dir(temp)) {
                 AFREE(i->contentPath);
