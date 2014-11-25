@@ -81,8 +81,8 @@ path_getRootIniPath( const char*  avdName )
 {
     char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
 
-    p = bufprint_config_path(temp, end);
-    p = bufprint(p, end, PATH_SEP ANDROID_AVD_DIR PATH_SEP "%s.ini", avdName);
+    p = bufprint_avd_home_path(temp, end);
+    p = bufprint(p, end, PATH_SEP "%s.ini", avdName);
     if (p >= end) {
         return NULL;
     }
@@ -91,19 +91,6 @@ path_getRootIniPath( const char*  avdName )
     }
     return ASTRDUP(temp);
 }
-
-
-char*
-path_getSdkHome(void)
-{
-    char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-    p = bufprint_config_path(temp, end);
-    if (p >= end) {
-        APANIC("User path too long!: %s\n", temp);
-    }
-    return strdup(temp);
-}
-
 
 static char*
 _getAvdContentPath(const char* avdName)
@@ -115,11 +102,13 @@ _getAvdContentPath(const char* avdName)
 
     if (iniPath != NULL) {
         ini = iniFile_newFromFile(iniPath);
+        if (ini == NULL) {
+            APANIC("Could not parse file: %s\n", iniPath);
+        }
         AFREE(iniPath);
-    }
-
-    if (ini == NULL) {
-        APANIC("Could not open: %s\n", iniPath == NULL ? avdName : iniPath);
+    } else {
+        APANIC("Could not find %s.ini file in $ANDROID_AVD_HOME nor in $HOME/.android/avd\n",
+                avdName);
     }
 
     avdPath = iniFile_getString(ini, ROOT_ABS_PATH_KEY, NULL);
