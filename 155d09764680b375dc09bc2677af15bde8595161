@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f17698b_48c9df83",
+        "filename": "android/main-common-ui.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-11-27T21:26:56Z",
+      "side": 1,
+      "message": "nit: kCamelCase is reserved for constants, not parameter names. use initial_orientation or initialOrientation instead. Thanks.",
+      "range": {
+        "startLine": 607,
+        "startChar": 45,
+        "endLine": 607,
+        "endChar": 64
+      },
+      "revId": "155d09764680b375dc09bc2677af15bde8595161",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3f147587_e7b71cf8",
+        "filename": "android/main-common-ui.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 608,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-11-27T21:26:56Z",
+      "side": 1,
+      "message": "it\u0027s generally better to put the start near the type, as in:\n\n  SkinLayout* currLayout \u003d ...;",
+      "revId": "155d09764680b375dc09bc2677af15bde8595161",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f633129_5c2d11bc",
+        "filename": "android/main-common-ui.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 618,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-11-27T21:26:56Z",
+      "side": 1,
+      "message": "aargh, no, please don\u0027t modify the content of |layout_file| here.\n\nA SkinFile is supposed to be an immutable data structure once it is loaded, and if in the future we want to support more than 2 layouts / SkinFile, this will become problematic.\n\nA better option is to actually change the |layout| field of the SkinUi type, i.e.:\n\n1) Modify skin_ui_create() to take a direct SkinLayout parameter, following the first one (which is a SkinLayoutFile).\n\n2) Create a skin_file_select_layout() function that will select a SkinLayout from a SkinLayoutFile based on the initialOrientation name.\n\n3) Modify the caller to skin_ui_create() to use skin_file_select_layout() from the hardware property.",
+      "revId": "155d09764680b375dc09bc2677af15bde8595161",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
