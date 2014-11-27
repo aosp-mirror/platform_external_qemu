@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3f147587_47c9d083",
+        "filename": "android/utils/bufprint.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-11-27T20:27:02Z",
+      "side": 1,
+      "message": "That should probably look for ANDROID_EMULATOR_HOME then ANDROID_SDK_HOME instead.",
+      "revId": "7c2d2e22eba0ddf768b815e686f964b2aefe75c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3f147587_67c4cc6f",
+        "filename": "android/utils/bufprint.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-11-27T20:27:02Z",
+      "side": 1,
+      "message": "This has the potential of reading many testing scripts, I\u0027d rather support both variables instead (i.e. first check for ANDROID_EMULATOR_HOME, then ANDROID_SDK_HOME).\n\nWhat\u0027s the justification for this change exactly ?",
+      "revId": "7c2d2e22eba0ddf768b815e686f964b2aefe75c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
