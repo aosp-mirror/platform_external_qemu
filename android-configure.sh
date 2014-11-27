@@ -24,6 +24,7 @@ OPTION_NO_PREBUILTS=
 OPTION_OUT_DIR=
 OPTION_HELP=no
 OPTION_STATIC=no
+OPTION_STRIP=no
 OPTION_MINGW=no
 
 GLES_DIR=
@@ -66,7 +67,9 @@ for opt do
   ;;
   --cc=*) OPTION_CC="$optarg"
   ;;
-  --no-strip) OPTION_NO_STRIP=yes
+  --strip) OPTION_STRIP=yes
+  ;;
+  --no-strip) OPTION_STRIP=no
   ;;
   --out-dir=*) OPTION_OUT_DIR=$optarg
   ;;
@@ -108,7 +111,8 @@ EOF
     echo "  --install=FILEPATH          Copy emulator executable to FILEPATH [$TARGETS]"
     echo "  --cc=PATH                   Specify C compiler [$HOST_CC]"
     echo "  --sdl-config=FILE           Use specific sdl-config script [$SDL_CONFIG]"
-    echo "  --no-strip                  Do not strip emulator executable"
+    echo "  --strip                     Strip emulator executables."
+    echo "  --no-strip                  Do not strip emulator executables (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --ignore-audio              Ignore audio messages (may build sound-less emulator)"
     echo "  --no-prebuilts              Do not use prebuilt libraries and compiler"
@@ -606,8 +610,8 @@ case $TARGET_OS in
         ;;
 esac
 
-# Strip executables and shared libraries unless --debug is used.
-if [ "$OPTION_DEBUG" != "yes" -a "$OPTION_NO_STRIP" != "yes" ]; then
+# Strip executables and shared libraries when needed.
+if [ "$OPTION_DEBUG" != "yes" -a "$OPTION_STRIP" = "yes" ]; then
     case $HOST_OS in
         darwin)
             LDFLAGS="$LDFLAGS -Wl,-S"
