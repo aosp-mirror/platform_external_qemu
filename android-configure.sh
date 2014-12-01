@@ -358,7 +358,14 @@ if [ "$HOST_OS" = darwin ]; then
     log "OSX: Installed SDKs: $OSX_SDK_INSTALLED_LIST"
 
     OSX_SDK_VERSION=$(echo "$OSX_SDK_INSTALLED_LIST" | tr ' ' '\n' | head -1)
-    log "OSX: Using SDK version $OSX_SDK_VERSION"
+
+    if [ "$OSX_SDK_VERSION" = "10.6" -o "$OSX_SDK_VERSION" = "10.7" -o "$OSX_SDK_VERSION" = "10.8" ]; then
+        log "OSX: Using SDK version $OSX_SDK_VERSION"
+    else
+        echo "ERROR: Only OSX SDK $OSX_SDK_SUPPORTED are supported and this machine has $OSX_SDK_VERSION."
+        echo "Please install Xcode 5 on this machine (If you have Xcode 6 installed, downgrade to Xcode 5)"
+        exit 1
+    fi
 
     XCODE_PATH=$(xcode-select -print-path 2>/dev/null)
     log "OSX: XCode path: $XCODE_PATH"
