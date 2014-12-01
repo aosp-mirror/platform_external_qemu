@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f8a0930_ad379d01",
+        "filename": "android/base/containers/PointerSet.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-01T10:34:43Z",
+      "side": 0,
+      "message": "This is weird, because the size of the array is always large enough to ensure that the items in it only use 75% of the slots, at a maximum.\n\nIn other words, this means the only way for get this into an infinite loop would be if all unused slots are TOMBSTONEs, which we don\u0027t check for here. I think a better fix would have to stop after (1U \u003c\u003c shift) tries (meaning all slots were probed), then return the |tombstone| index.\n\nI\u0027ll update a fix.",
+      "revId": "328f2d277db190f5165de7d9525332b0d70e9d87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

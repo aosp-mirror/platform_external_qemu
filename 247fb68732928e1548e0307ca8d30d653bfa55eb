@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ff82dd17_8aad6bae",
+        "filename": "android/base/containers/PointerSet.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-01T10:34:43Z",
+      "side": 1,
+      "message": "fyi: this probing algorithm works but is less efficient (it tends to create longer collision chains), see the graphs at the following page to understand why: http://www.infognition.com/blog/2014/on_robin_hood_hashing.html",
+      "revId": "247fb68732928e1548e0307ca8d30d653bfa55eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
