@@ -42,7 +42,8 @@ size_t probeItems(const void* obj, size_t objHash, void** items, size_t shift) {
     DCHECK(shift < 32U);
 
     size_t probe_mask = ((1U << shift) - 1U);
-    size_t probe_index = (objHash % internal::kPrimes[shift]) & probe_mask;
+    const size_t probe_index0 = (objHash % internal::kPrimes[shift]) & probe_mask;
+    size_t probe_index = probe_index0;
     size_t step = 0;
 
     intptr_t tombstone = -1;
@@ -59,6 +60,9 @@ size_t probeItems(const void* obj, size_t objHash, void** items, size_t shift) {
             tombstone = (intptr_t)probe_index;
         }
         step++;
+        if (step > probe_mask) {
+            break;
+        }
         probe_index = (probe_index + step) & probe_mask;
     }
     if (tombstone >= 0) {
@@ -124,6 +128,7 @@ void* PointerSetBase::addItem(void* obj, HashFunction hashFunc) {
     if (!validValue(obj)) {
         return NULL;
     }
+    if(mCount >= (1U << mShift)) maybeResize(hashFunc);
     size_t objHash = hashFunc(obj);
     size_t pos = probeItems(obj, objHash, mItems, mShift);
     DCHECK(pos < (1U << mShift));
