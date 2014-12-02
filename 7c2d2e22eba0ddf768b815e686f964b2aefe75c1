@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3fce35a4_1a0fdd9e",
+        "filename": "android/utils/bufprint.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2014-12-02T20:50:40Z",
+      "side": 1,
+      "message": "done, now emulator checks ANDROID_AVD_HOME first, then ANDROID_EMULATOR_HOME/.android/avd and ANDROID_SDK_HOME/.android/avd/",
+      "parentUuid": "3f147587_47c9d083",
+      "revId": "7c2d2e22eba0ddf768b815e686f964b2aefe75c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3f147587_67c4cc6f",
         "filename": "android/utils/bufprint.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-27T20:27:02Z",
       "side": 1,
       "message": "This has the potential of reading many testing scripts, I\u0027d rather support both variables instead (i.e. first check for ANDROID_EMULATOR_HOME, then ANDROID_SDK_HOME).\n\nWhat\u0027s the justification for this change exactly ?",
+      "revId": "7c2d2e22eba0ddf768b815e686f964b2aefe75c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1fcb3196_b9c35767",
+        "filename": "android/utils/bufprint.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2014-12-02T20:50:40Z",
+      "side": 1,
+      "message": "done: now emulator checks ANDROID_EMULATOR_HOME first, then ANDROID_SDK_HOME/.android second",
+      "parentUuid": "3f147587_67c4cc6f",
       "revId": "7c2d2e22eba0ddf768b815e686f964b2aefe75c1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
