@@ -16,6 +16,24 @@
       "revId": "160e49eb6cedd6484dde301c3e767ffba82d1ed7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1fe09112_ae8c17c6",
+        "filename": "android/avd/util.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2014-12-03T16:39:34Z",
+      "side": 1,
+      "message": "This is intentional, David; Unfortunately it could break the old avd manager which still uses the $HOME/.android/\n\nJoe, any comments on this ?",
+      "parentUuid": "5f8a0930_969cb243",
+      "revId": "160e49eb6cedd6484dde301c3e767ffba82d1ed7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
