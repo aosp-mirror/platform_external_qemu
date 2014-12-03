@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f8a0930_969cb243",
+        "filename": "android/avd/util.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-03T10:54:53Z",
+      "side": 1,
+      "message": "before the path was relative to config_path(), which is $HOME/.android/\n\nafter the path is relative to avd_home_path(), which is $HOME/.android/avd/\n\nis this intentional?",
+      "revId": "160e49eb6cedd6484dde301c3e767ffba82d1ed7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
