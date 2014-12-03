@@ -215,7 +215,7 @@ static SkinKeyMod sdl_mod_to_key_mod(int sdl_mod) {
     SkinKeyMod mod = 0;
     size_t nn;
     for (nn = 0; nn < kConvertSize; ++nn) {
-        if (sdl_mod && kConvert[nn].sdl_flag) {
+        if (sdl_mod & kConvert[nn].sdl_flag) {
             mod |= kConvert[nn].mod_flag;
         }
     }
