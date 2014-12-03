@@ -1,0 +1,121 @@
+Introduction
+============
+
+This document explains how keyboard emulation works in the Android emulator.
+Short version: it's not pretty.
+
+Guest system view of input keys:
+--------------------------------
+
+The goldfish events virtual device (see GOLDFISH-VIRTUAL-HARDWARE.TXT) is used
+to send keyboard-related events to the kernel. More specifically:
+
+  - Each virtual 'keydown' is sent as a single (EV_KEY, <keycode>, 1) tuple.
+  - Each virtual 'keyup' is sent as a single (EV_KEY, <keycode>, 0) tuple.
+
+Where <keycode> is a 9-bit Linux hardware keycode, as defined in
+android/skin/linux_keycodes.h.
+
+The guest Android system receives Linux keycodes from the kernel, and
+translates them into Unicode values through a 'charmap file'. This file
+acts as a map from (base key code + modifiers) -> unicode point.
+
+An emulated system image normally contains a single charmap named 'qwerty2',
+whose content is duplicated under android/skin/charmap.c (see this file for
+details).
+
+It's possible to load an alternative charmap in the emulator with the
+'-charmap <file>' option, where <file> points to an Android charmap file
+(which typically end in .kcm). This feature has very rarely been used though.
+
+The source file above also contains a function that can perform a reverse
+mapping operation: given a Unicode value, generate the sequence of key strokes
+for the corresponding 'keydown' or 'keyup' event, if possible.
+
+This operation is not always possible, for example, 'qwerty2' doesn't contain
+any entry that allows one to generate an accented letter like 'é'. This is a
+*fundamental* limitation of keyboard emulation as it currently is implemented.
+
+
+Android emulator UI keyboard handling:
+--------------------------------------
+
+When SDL 1.x is being used, it generates SDL_KEYDOWN and SDK_KEYUP events from
+user keypresses, these contain three important fields:
+
+   keycode:    A hardware-agnostic scancode, just like Linux keycodes but with
+               different values.
+
+   mod:        A bitmask of activie modifier keys (e.g. Shift, Ctrl, Meta).
+
+   unicode:    The corresponding Unicode value, if available, or 0. Note that
+               this is only properly populated on KEYDOWN events, it is always
+               0 on KEYUP one, due to the way SDL 1.x is implemented.
+
+
+With SDL 2.x, things are a bit different though, because the |unicode| field
+is no longer part of SDK_KEYDOWN/KEYUP events. Instead, there is a new event
+type SDL_TEXTINPUT that contains a _list_ of Unicode points (to accomodate
+for complex Input Method Engines). These events typically appear after
+SDL_KEYDOWN ones.
+
+When the UI receives a SDL_KEYDOWN event, it must decide what to do with it,
+i.e.:
+
+  1) It must check whether this is one of the UI keyboard shortcuts
+     (e.g. Ctrl-F11 to switch to the previous layout), that must _not_
+     be passed to the guest system. And handle them.
+
+  2) It must rotate DPad / Arrow events based on the layout orientation,
+     because that's what the guest system expects (due to long historical
+     reasons).
+
+  3) It must reverse-map the Unicode value into Linux keycodes using the
+     current charmap.
+
+     When SDL 1.x is used, the |unicode| field from the SDL_KEYDOWN event
+     can be used directly, for SDL 2.x, the SDL_KEYDOWN event must be ignored,
+     and the SDL_TEXTINPUT event must be used instead.
+
+To better match both models, the UI event handling uses a model similar to
+SDL 2.x, where:
+
+  - SDL 2.x events are directly mapped to kEventKeyUp, kEventKeyDown and
+    kEventTextInput as defined in android/skin/event.h
+
+  - SDL 1.x events are translated into the corresponding kEventXXX values,
+    and kEventTextInput events are synthetized automatically from the
+    |unicode| field of SDL_KEYDOWN events.
+
+
+Android emulator keyboard shortcuts:
+------------------------------------
+
+Key presses used to control the emulator UI directly, i.e. those that are not
+passed to the guest, are defined in what is called a 'keyset' file. The default
+one is hard-coded in the emulator binary. Look inside android/skin/keyset.c
+for details.
+
+It is possible to use an alternative one with the '-keyset <file>' option.
+The file format is text-based, where each line must have the following format:
+
+  <command>   <key-list>
+
+Where <command> is the name of an internal UI command (e.g. TOGGLE_FULLSCREEN),
+and <key-list> is a comma-separated list of key combination
+(e.g. 'Alt-Enter').
+
+See android/skin/keyset.c for more details on the parser. This feature is
+very rarely used.
+
+
+Android emulator 'raw' keyboard mode:
+-------------------------------------
+
+As a special exception, pressing Ctrl-K at runtime will switch the emulator
+into 'raw' keyboard mode. Note that this specific sequence is hard-coded in
+the emulator.
+
+Raw mode is used for debugging. It skips the reverse charmap operation and
+sends host keycodes directly to the kernel, which typically never gives
+the results a typical would expect. It may be removed in the future.
