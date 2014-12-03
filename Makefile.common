@@ -121,6 +121,7 @@ common_LOCAL_SRC_FILES += \
 	android/iolooper.cpp \
 	android/avd/hw-config.c \
 	android/avd/info.c \
+	android/avd/scanner.c \
 	android/avd/util.c \
 	android/sockets.c \
 	android/sync-utils.c \
