@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f8a0930_b6b0ced2",
+        "filename": "android/skin/ui.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-03T10:46:03Z",
+      "side": 1,
+      "message": "nit: I\u0027d prefer if you respected the original coding style, but since the latter is a bit wonky anyway, let\u0027s accept this.\n\nWe probably need to use clang-format at some point to reformat stuff on the fly though in the future :)",
+      "revId": "ff2c689d32dabf59b0830f967a4713a2735eae58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
