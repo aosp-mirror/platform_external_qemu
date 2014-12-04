@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f8a0930_7c1c85d3",
+        "filename": "android/avd/info.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-04T15:23:43Z",
+      "side": 1,
+      "message": "that\u0027s also a change from ./android to ./android/avd ?",
+      "revId": "a9c84ee69f52ee1d6baa170d0a013b2d3d35c36a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
