@@ -263,7 +263,7 @@ skin_surface_create_window(int x,
     return _skin_surface_create(surface, NULL);
 }
 
-extern int
+static int
 skin_surface_lock( SkinSurface*  s, SkinSurfacePixels  *pix )
 {
     if (!s || !s->surface) {
@@ -282,7 +282,7 @@ skin_surface_lock( SkinSurface*  s, SkinSurfacePixels  *pix )
 }
 
 /* unlock a slow surface that was previously locked */
-extern void
+static void
 skin_surface_unlock( SkinSurface*  s )
 {
     if (s && s->surface)

@@ -93,18 +93,19 @@ typedef struct ADisplay {
     SkinImage*     onion;       /* onion image */
     SkinRect       onion_rect;  /* onion rect, if any */
     int            brightness;
+    SkinSurface*   surface;     /* displayed surface after rotation + onion */
 } ADisplay;
 
-static void
-display_done( ADisplay*  disp )
-{
-    disp->data   = NULL;
-    skin_image_unref( &disp->onion );
+static void adisplay_done(ADisplay* disp) {
+    skin_surface_unrefp(&disp->surface);
+    disp->data = NULL;
+    skin_image_unref(&disp->onion);
 }
 
-static int
-display_init( ADisplay*  disp, SkinDisplay*  sdisp, SkinLocation*  loc, SkinRect*  frame )
-{
+static int adisplay_init(ADisplay* disp,
+                         SkinDisplay* sdisp,
+                         SkinLocation* loc,
+                         SkinRect* frame) {
     skin_rect_rotate( &disp->rect, &sdisp->rect, loc->rotation );
     disp->rect.pos.x += loc->anchor.x;
     disp->rect.pos.y += loc->anchor.y;
@@ -150,33 +151,30 @@ display_init( ADisplay*  disp, SkinDisplay*  sdisp, SkinLocation*  loc, SkinRect
 
     disp->brightness = LCD_BRIGHTNESS_DEFAULT;
 
+    disp->surface = skin_surface_create_slow(disp->rect.size.w,
+                                             disp->rect.size.h);
+
     return (disp->data == NULL) ? -1 : 0;
 }
 
-static __inline__ uint32_t rgb565_to_rgba32(uint32_t pix,
-        uint32_t rshift, uint32_t gshift, uint32_t bshift, uint32_t amask)
-{
+static __inline__ uint32_t rgb565_to_argb32(uint32_t pix) {
+#if 1
     uint32_t r8 = ((pix & 0xf800) >>  8) | ((pix & 0xe000) >> 13);
     uint32_t g8 = ((pix & 0x07e0) >>  3) | ((pix & 0x0600) >>  9);
     uint32_t b8 = ((pix & 0x001f) <<  3) | ((pix & 0x001c) >>  2);
-    return (r8 << rshift) | (g8 << gshift) | (b8 << bshift) | amask;
+    return (r8 << 16) | (g8 << 8) | (b8 << 0) | 0xff000000U;
+#else
+    uint32_t r8 = ((pix & 0xf800) << 8) | ((pix & 0xe000) >> 5);
+    uint32_t g8 = ((pix & 0x07e0) << 5) | ((pix & 0x0600) >> 1);
+    uint32_t b8 = ((pix & 0x001f) <<  3) | ((pix & 0x001c) >>  2);
+    return r8 | g8 | b8 | 0xff000000U;
+#endif
 }
 
-/* The framebuffer format is R,G,B,X in framebuffer memory, on a
- * little-endian system, this translates to XBGR after a load.
- */
-static __inline__ uint32_t xbgr_to_rgba32(uint32_t pix,
-        uint32_t rshift, uint32_t gshift, uint32_t bshift, uint32_t amask)
-{
-    uint32_t r8 = (pix & 0x00ff0000) >> 16;
-    uint32_t g8 = (pix & 0x0000ff00) >>  8;
-    uint32_t b8 = (pix & 0x000000ff) >>  0;
-    return (r8 << rshift) | (g8 << gshift) | (b8 << bshift) | amask;
-}
-
-static void
-display_set_onion( ADisplay*  disp, SkinImage*  onion, SkinRotation  rotation, int  blend )
-{
+static void adisplay_set_onion(ADisplay* disp,
+                               SkinImage* onion,
+                               SkinRotation rotation,
+                               int  blend) {
     int        onion_w, onion_h;
     SkinRect*  rect  = &disp->rect;
     SkinRect*  orect = &disp->onion_rect;
@@ -212,13 +210,17 @@ display_set_onion( ADisplay*  disp, SkinImage*  onion, SkinRotation  rotation, i
     orect->size.h = onion_h;
 }
 
+// Set to 1 to enable experimental dot-matrix display mode.
 #define  DOT_MATRIX  0
 
 #if DOT_MATRIX
 
-static void
-dotmatrix_dither_argb32( unsigned char*  pixels, int  x, int  y, int  w, int  h, int  pitch )
-{
+static void dotmatrix_dither_argb32(unsigned char* pixels,
+                                    int x,
+                                    int y,
+                                    int w,
+                                    int h,
+                                    int pitch) {
     static const unsigned dotmatrix_argb32[16] = {
         0x003f00, 0x00003f, 0x3f0000, 0x000000,
         0x3f3f3f, 0x000000, 0x3f3f3f, 0x000000,
@@ -226,13 +228,13 @@ dotmatrix_dither_argb32( unsigned char*  pixels, int  x, int  y, int  w, int  h,
         0x3f3f3f, 0x000000, 0x3f3f3f, 0x000000
     };
 
-    int   yy = y & 3;
+    int yy = y & 3;
 
-    pixels += 4*x + y*pitch;
+    pixels += (4 * x) + (y * pitch);
 
-    for ( ; h > 0; h-- ) {
-        unsigned*  line = (unsigned*) pixels;
-        int        nn, xx = x & 3;
+    for (; h > 0; h--) {
+        unsigned* line = (unsigned*) pixels;
+        int nn, xx = x & 3;
 
         for (nn = 0; nn < w; nn++) {
             unsigned  c = line[nn];
@@ -242,8 +244,7 @@ dotmatrix_dither_argb32( unsigned char*  pixels, int  x, int  y, int  w, int  h,
             xx = (xx + 1) & 3;
             line[nn] = c;
         }
-
-        yy      = (yy + 1) & 3;
+        yy = (yy + 1) & 3;
         pixels += pitch;
     }
 }
@@ -295,11 +296,11 @@ dotmatrix_dither_argb32( unsigned char*  pixels, int  x, int  y, int  w, int  h,
 /* treat as special value to turn screen off */
 #define  LCD_BRIGHTNESS_OFF   LCD_BRIGHTNESS_MIN
 
-static void
-lcd_brightness_argb32(uint32_t* pixels,
-                      SkinRect* r,
-                      int pitch,
-                      int brightness)
+static void lcd_brightness_argb32(uint32_t* pixels,
+                                  int w,
+                                  int h,
+                                  int pitch,
+                                  int brightness)
 {
     const unsigned  b_min  = LCD_BRIGHTNESS_MIN;
     const unsigned  b_max  = LCD_BRIGHTNESS_MAX;
@@ -307,34 +308,30 @@ lcd_brightness_argb32(uint32_t* pixels,
     const unsigned  b_high = LCD_BRIGHTNESS_HIGH;
 
     unsigned        alpha = brightness;
-    int             w     = r->size.w;
-    int             h     = r->size.h;
 
     if (alpha <= b_min)
         alpha = b_min;
     else if (alpha > b_max)
         alpha = b_max;
 
-    pixels += 4*r->pos.x + r->pos.y*pitch;
-
     if (alpha < b_low)
     {
-        const unsigned  alpha_min   = (255*LCD_ALPHA_LOW_MIN);
+        const unsigned  alpha_min   = (255 * LCD_ALPHA_LOW_MIN);
         const unsigned  alpha_range = (255 - alpha_min);
 
-        alpha = alpha_min + ((alpha - b_min)*alpha_range) / (b_low - b_min);
+        alpha = alpha_min + ((alpha - b_min) * alpha_range) / (b_low - b_min);
 
-        for ( ; h > 0; h-- ) {
-            unsigned*  line = (unsigned*) pixels;
-            int        nn   = 0;
+        for (; h > 0; h--) {
+            unsigned* line = (unsigned*) pixels;
+            int nn = 0;
 
             DUFF4(w, {
-                unsigned  c  = line[nn];
-                unsigned  ag = (c >> 8) & 0x00ff00ff;
-                unsigned  rb = (c)      & 0x00ff00ff;
+                unsigned c = line[nn];
+                unsigned ag = (c >> 8) & 0x00ff00ff;
+                unsigned rb = (c)      & 0x00ff00ff;
 
-                ag = (ag*alpha)        & 0xff00ff00;
-                rb = ((rb*alpha) >> 8) & 0x00ff00ff;
+                ag = (ag * alpha)        & 0xff00ff00;
+                rb = ((rb * alpha) >> 8) & 0x00ff00ff;
 
                 line[nn] = (unsigned)(ag | rb);
                 nn++;
@@ -344,21 +341,21 @@ lcd_brightness_argb32(uint32_t* pixels,
     }
     else if (alpha > LCD_BRIGHTNESS_HIGH) /* 'superluminous' mode */
     {
-        const unsigned  alpha_max   = (255*LCD_ALPHA_HIGH_MAX);
-        const unsigned  alpha_range = (255-alpha_max);
-        unsigned        ialpha;
+        const unsigned  alpha_max   = (255 * LCD_ALPHA_HIGH_MAX);
+        const unsigned  alpha_range = (255 - alpha_max);
+        unsigned ialpha;
 
-        alpha  = ((alpha - b_high)*alpha_range) / (b_max - b_high);
-        ialpha = 255-alpha;
+        alpha  = ((alpha - b_high) * alpha_range) / (b_max - b_high);
+        ialpha = 255 - alpha;
 
         for ( ; h > 0; h-- ) {
-            unsigned*  line = (unsigned*) pixels;
-            int        nn   = 0;
+            unsigned* line = (unsigned*) pixels;
+            int nn = 0;
 
             DUFF4(w, {
-                unsigned  c  = line[nn];
-                unsigned  ag = (c >> 8) & 0x00ff00ff;
-                unsigned  rb = (c)      & 0x00ff00ff;
+                unsigned c = line[nn];
+                unsigned ag = (c >> 8) & 0x00ff00ff;
+                unsigned rb = (c)      & 0x00ff00ff;
 
                 /* interpolate towards bright white, i.e. 0x00ffffff */
                 ag = ((ag*ialpha + 0x00ff00ff*alpha)) & 0xff00ff00;
@@ -372,58 +369,33 @@ lcd_brightness_argb32(uint32_t* pixels,
     }
 }
 
-
-/* this is called when the LCD framebuffer is off */
-static void
-lcd_off_argb32(uint32_t* pixels, SkinRect* r, int pitch)
-{
-    int  x = r->pos.x;
-    int  y = r->pos.y;
-    int  w = r->size.w;
-    int  h = r->size.h;
-
-    pixels += 4 * x + y*pitch;
-    for ( ; h > 0; h-- ) {
-        memset( pixels, 0, w*4 );
-        pixels += pitch;
-    }
-}
-
-static void
-display_redraw_rect16(ADisplay* disp,
-                      SkinRect* rect,
-                      SkinSurfacePixels* dst,
-                      SkinSurfacePixelFormat* dst_format)
-{
-    int           x  = rect->pos.x - disp->rect.pos.x;
-    int           y  = rect->pos.y - disp->rect.pos.y;
-    int           w  = rect->size.w;
-    int           h  = rect->size.h;
-    int           disp_w    = disp->rect.size.w;
-    int           disp_h    = disp->rect.size.h;
-    int           dst_pitch = dst->pitch;
-    uint8_t*      dst_line  = (uint8_t*)dst->pixels + rect->pos.x*4 + rect->pos.y*dst_pitch;
-    int           src_pitch = disp->datasize.w*2;
+static void adisplay_update_surface_pixels_16(ADisplay* disp,
+                                              SkinRect* dst_rect,
+                                              uint8_t* dst_pixels,
+                                              int dst_pitch) {
+    int           x  = dst_rect->pos.x;
+    int           y  = dst_rect->pos.y;
+    int           w  = dst_rect->size.w;
+    int           h  = dst_rect->size.h;
+    int           src_w    = disp->datasize.w;
+    int           src_h    = disp->datasize.h;
+    int           src_pitch = src_w * 2;
     uint8_t*      src_line  = (uint8_t*)disp->data;
+    uint8_t*      dst_line  = dst_pixels;
     int           yy, xx;
-    uint32_t      rshift = dst_format->r_shift;
-    uint32_t      gshift = dst_format->g_shift;
-    uint32_t      bshift = dst_format->b_shift;
-    uint32_t      amask  = dst_format->a_mask; // may be 0x00 for non-alpha format
 
     switch ( disp->rotation & 3 )
     {
     case SKIN_ROTATION_0:
-        src_line += x*2 + y*src_pitch;
+        src_line += (x * 2) + (y * src_pitch);
 
-        for (yy = h; yy > 0; yy--)
-        {
-            uint32_t*  dst = (uint32_t*)dst_line;
-            uint16_t*  src = (uint16_t*)src_line;
+        for (yy = h; yy > 0; yy--) {
+            uint32_t* dst = (uint32_t*)dst_line;
+            uint16_t* src = (uint16_t*)src_line;
 
             xx = 0;
             DUFF4(w, {
-                dst[xx] = rgb565_to_rgba32(src[xx], rshift, gshift, bshift, amask);
+                dst[xx] = rgb565_to_argb32(src[xx]);
                 xx++;
             });
             src_line += src_pitch;
@@ -432,15 +404,14 @@ display_redraw_rect16(ADisplay* disp,
         break;
 
     case SKIN_ROTATION_90:
-        src_line += y*2 + (disp_w - x - 1)*src_pitch;
+        src_line += (y * 2) + ((src_h - x - 1) * src_pitch);
 
-        for (yy = h; yy > 0; yy--)
-        {
-            uint32_t*  dst = (uint32_t*)dst_line;
-            uint8_t*   src = src_line;
+        for (yy = h; yy > 0; yy--) {
+            uint32_t* dst = (uint32_t*)dst_line;
+            uint8_t* src = src_line;
 
             DUFF4(w, {
-                dst[0] = rgb565_to_rgba32(((uint16_t*)src)[0], rshift, gshift, bshift, amask);
+                dst[0] = rgb565_to_argb32(((uint16_t*)src)[0]);
                 src -= src_pitch;
                 dst += 1;
             });
@@ -450,15 +421,14 @@ display_redraw_rect16(ADisplay* disp,
         break;
 
     case SKIN_ROTATION_180:
-        src_line += (disp_w -1 - x)*2 + (disp_h-1-y)*src_pitch;
+        src_line += ((src_w - 1 - x) * 2) + ((src_h - 1 - y) * src_pitch);
 
-        for (yy = h; yy > 0; yy--)
-        {
-            uint16_t*  src = (uint16_t*)src_line;
-            uint32_t*  dst = (uint32_t*)dst_line;
+        for (yy = h; yy > 0; yy--) {
+            uint16_t* src = (uint16_t*)src_line;
+            uint32_t* dst = (uint32_t*)dst_line;
 
             DUFF4(w, {
-                dst[0] = rgb565_to_rgba32(src[0], rshift, gshift, bshift, amask);
+                dst[0] = rgb565_to_argb32(src[0]);
                 src -= 1;
                 dst += 1;
             });
@@ -468,17 +438,16 @@ display_redraw_rect16(ADisplay* disp,
     break;
 
     default:  /* SKIN_ROTATION_270 */
-        src_line += (disp_h-1-y)*2 + x*src_pitch;
+        src_line += ((src_w - 1 - y) * 2) + (x * src_pitch);
 
-        for (yy = h; yy > 0; yy--)
-        {
-            uint32_t*  dst = (uint32_t*)dst_line;
-            uint8_t*   src = src_line;
+        for (yy = h; yy > 0; yy--) {
+            uint32_t* dst = (uint32_t*)dst_line;
+            uint8_t* src = src_line;
 
             DUFF4(w, {
-                dst[0] = rgb565_to_rgba32(((uint16_t*)src)[0], rshift, gshift, bshift, amask);
-                dst   += 1;
-                src   += src_pitch;
+                dst[0] = rgb565_to_argb32(((uint16_t*)src)[0]);
+                dst += 1;
+                src += src_pitch;
             });
             src_line -= 2;
             dst_line += dst_pitch;
@@ -486,39 +455,32 @@ display_redraw_rect16(ADisplay* disp,
     }
 }
 
-static void
-display_redraw_rect32(ADisplay* disp,
-                      SkinRect* rect,
-                      SkinSurfacePixels* dst,
-                      SkinSurfacePixelFormat* dst_format)
-{
-    int           x  = rect->pos.x - disp->rect.pos.x;
-    int           y  = rect->pos.y - disp->rect.pos.y;
+static void adisplay_update_surface_pixels_32(ADisplay* disp,
+                                              SkinRect* rect,
+                                              uint8_t* dst_pixels,
+                                              int dst_pitch) {
+    int           x  = rect->pos.x;
+    int           y  = rect->pos.y;
     int           w  = rect->size.w;
     int           h  = rect->size.h;
-    int           disp_w    = disp->rect.size.w;
-    int           disp_h    = disp->rect.size.h;
-    int           dst_pitch = dst->pitch;
-    uint8_t*      dst_line  = (uint8_t*)dst->pixels + rect->pos.x*4 + rect->pos.y*dst_pitch;
-    int           src_pitch = disp->datasize.w*4;
+    int           src_w     = disp->datasize.w;
+    int           src_h     = disp->datasize.h;
+    uint8_t*      dst_line  = dst_pixels;
+    int           src_pitch = disp->datasize.w * 4;
     uint8_t*      src_line  = (uint8_t*)disp->data;
     int           yy;
-    uint32_t      rshift = dst_format->r_shift;
-    uint32_t      gshift = dst_format->g_shift;
-    uint32_t      bshift = dst_format->b_shift;
-    uint32_t      amask  = dst_format->a_mask; // may be 0x00 for non-alpha format
 
     switch ( disp->rotation & 3 )
     {
     case SKIN_ROTATION_0:
-        src_line += x*4 + y*src_pitch;
+        src_line += (x * 4) + (y * src_pitch);
 
         for (yy = h; yy > 0; yy--) {
             uint32_t*  src = (uint32_t*)src_line;
             uint32_t*  dst = (uint32_t*)dst_line;
 
             DUFF4(w, {
-                dst[0] = xbgr_to_rgba32(src[0], rshift, gshift, bshift, amask);
+                dst[0] = src[0];
                 dst++;
                 src++;
             });
@@ -528,15 +490,14 @@ display_redraw_rect32(ADisplay* disp,
         break;
 
     case SKIN_ROTATION_90:
-        src_line += y*4 + (disp_w - x - 1)*src_pitch;
+        src_line += (y * 4) + ((src_h - x - 1) * src_pitch);
 
-        for (yy = h; yy > 0; yy--)
-        {
-            uint32_t*  dst = (uint32_t*)dst_line;
-            uint8_t*   src = src_line;
+        for (yy = h; yy > 0; yy--) {
+            uint32_t* dst = (uint32_t*)dst_line;
+            uint8_t*  src = src_line;
 
             DUFF4(w, {
-                dst[0] = xbgr_to_rgba32(*(uint32_t*)src, rshift, gshift, bshift, amask);
+                dst[0] = *(uint32_t*)src;
                 src -= src_pitch;
                 dst += 1;
             });
@@ -546,15 +507,14 @@ display_redraw_rect32(ADisplay* disp,
         break;
 
     case SKIN_ROTATION_180:
-        src_line += (disp_w -1 - x)*4 + (disp_h-1-y)*src_pitch;
+        src_line += ((src_w - 1 - x) * 4) + ((src_h - 1 - y) * src_pitch);
 
-        for (yy = h; yy > 0; yy--)
-        {
+        for (yy = h; yy > 0; yy--) {
             uint32_t*  src = (uint32_t*)src_line;
             uint32_t*  dst = (uint32_t*)dst_line;
 
             DUFF4(w, {
-                dst[0] = xbgr_to_rgba32(src[0], rshift, gshift, bshift, amask);
+                dst[0] = src[0];
                 src -= 1;
                 dst += 1;
             });
@@ -564,7 +524,7 @@ display_redraw_rect32(ADisplay* disp,
     break;
 
     default:  /* SKIN_ROTATION_270 */
-        src_line += (disp_h-1-y)*4 + x*src_pitch;
+        src_line += ((src_w - 1 - y) * 4) + (x * src_pitch);
 
         for (yy = h; yy > 0; yy--)
         {
@@ -572,7 +532,7 @@ display_redraw_rect32(ADisplay* disp,
             uint8_t*   src = src_line;
 
             DUFF4(w, {
-                dst[0] = xbgr_to_rgba32(*(uint32_t*)src, rshift, gshift, bshift, amask);
+                dst[0] = *(uint32_t*)src;
                 dst   += 1;
                 src   += src_pitch;
             });
@@ -582,13 +542,78 @@ display_redraw_rect32(ADisplay* disp,
     }
 }
 
-static void
-display_redraw(ADisplay*  disp, SkinRect*  rect, SkinSurface* surface)
-{
+// Update the content of the display surface from the framebuffer content.
+// |disp| is the target ADisplay instance.
+// |rect| is the rectangle to update, in coordinates relative to the
+// display surface, i.e. (0,0) is always the top-left corner.
+static void adisplay_update_surface(ADisplay* disp,
+                                    SkinRect* rect) {
+    int x = rect->pos.x;
+    int y = rect->pos.y;
+    int w = rect->size.w;
+    int h = rect->size.h;
+
+    // Clip update rectangle for sanity.
+    int delta = (x + w) - disp->rect.size.w;
+    if (delta > 0) {
+        w -= delta;
+    }
+    if (x < 0) {
+        w += x;
+        x = 0;
+    }
+    delta = (y + h) - disp->rect.size.h;
+    if (delta > 0) {
+        h -= delta;
+    }
+    if (y < 0) {
+        h += delta;
+        y = 0;
+    }
+    if (w <= 0 || h <= 0) {
+        return;  // nothing to do.
+    }
+
+    // Allocate a temporary buffer to get the potentially rotated / converted
+    // content.
+    int dst_pitch = 4 * w;
+    uint8_t* dst_pixels = calloc(h, dst_pitch);
+
+    SkinRect dst_r = {
+        .pos.x = x,
+        .pos.y = y,
+        .size.w = w,
+        .size.h = h };
+
+    if (disp->bits_per_pixel == 32) {
+        adisplay_update_surface_pixels_32(disp, &dst_r, dst_pixels, dst_pitch);
+    } else {
+        adisplay_update_surface_pixels_16(disp, &dst_r, dst_pixels, dst_pitch);
+    }
+
+    // Apply brightness modulation.
+    lcd_brightness_argb32((uint32_t*)dst_pixels,
+                          disp->datasize.w,
+                          disp->datasize.h,
+                          dst_pitch,
+                          disp->brightness);
+
+    // Update the display surface content
+    skin_surface_upload(disp->surface, &dst_r, dst_pixels, dst_pitch);
+    free(dst_pixels);
+
+    // Done
+}
+
+static void adisplay_redraw(ADisplay* disp,
+                            SkinRect* rect,
+                            SkinSurface* surface) {
     SkinRect  r;
 
-    if (skin_rect_intersect( &r, rect, &disp->rect ))
-    {
+    if (!skin_rect_intersect(&r, rect, &disp->rect)) {
+        return;
+    }
+
 #if 0
         fprintf(stderr, "--- display redraw r.pos(%d,%d) r.size(%d,%d) "
                         "disp.pos(%d,%d) disp.size(%d,%d) datasize(%d,%d) rect.pos(%d,%d) rect.size(%d,%d)\n",
@@ -597,59 +622,43 @@ display_redraw(ADisplay*  disp, SkinRect*  rect, SkinSurface* surface)
                         disp->rect.size.w, disp->rect.size.h, disp->datasize.w, disp->datasize.h,
                         rect->pos.x, rect->pos.y, rect->size.w, rect->size.h );
 #endif
-        SkinSurfacePixelFormat format;
-        skin_surface_get_format(surface, &format);
 
-        SkinSurfacePixels pix;
-        skin_surface_lock(surface, &pix);
+    // Update the content of the display surface.
+    SkinRect src_r = r;
+    src_r.pos.x -= disp->rect.pos.x;
+    src_r.pos.y -= disp->rect.pos.y;
+    adisplay_update_surface(disp, &src_r);
 
-        if (disp->brightness == LCD_BRIGHTNESS_OFF)
-        {
-            lcd_off_argb32(pix.pixels, &r, pix.pitch);
-        }
-        else
-        {
-            if (disp->bits_per_pixel == 32) {
-                display_redraw_rect32(disp, &r, &pix, &format);
-            } else {
-                display_redraw_rect16(disp, &r, &pix, &format);
-            }
-#if DOT_MATRIX
-            dotmatrix_dither_argb32(pix.pixels,
-                                    r.pos.x,
-                                    r.pos.y,
-                                    r.size.w,
-                                    r.size.h,
-                                    pix.pitch);
-#endif
-            /* apply lightness */
-            lcd_brightness_argb32(pix.pixels,
-                                  &r,
-                                  pix.pitch,
-                                  disp->brightness);
-        }
-        skin_surface_unlock(surface);
-
-        /* Apply onion skin */
-        if (disp->onion != NULL) {
-            SkinRect  r2;
-
-            if ( skin_rect_intersect( &r2, &r, &disp->onion_rect ) ) {
-                SkinRect src_rect;
-                src_rect.pos.x = r2.pos.x - disp->onion_rect.pos.x;
-                src_rect.pos.y = r2.pos.y - disp->onion_rect.pos.y;
-                src_rect.size = r2.size;
-
-                skin_surface_blit(surface,
-                                  &r2.pos,
-                                  skin_image_surface(disp->onion),
-                                  &src_rect,
-                                  SKIN_BLIT_SRCOVER);
-            }
-        }
-
-        skin_surface_update(surface, &r);
+    if (disp->brightness == LCD_BRIGHTNESS_OFF) {
+        // Fill window surface with solid black.
+        skin_surface_fill(surface, &r, 0xff000000);
+    } else {
+        skin_surface_blit(surface,
+                          &r.pos,
+                          disp->surface,
+                          &src_r,
+                          SKIN_BLIT_COPY);
     }
+
+    /* Apply onion skin */
+    if (disp->onion != NULL) {
+        SkinRect  r2;
+
+        if ( skin_rect_intersect( &r2, &r, &disp->onion_rect ) ) {
+            SkinRect src_rect;
+            src_rect.pos.x = r2.pos.x - disp->onion_rect.pos.x;
+            src_rect.pos.y = r2.pos.y - disp->onion_rect.pos.y;
+            src_rect.size = r2.size;
+
+            skin_surface_blit(surface,
+                                &r2.pos,
+                                skin_image_surface(disp->onion),
+                                &src_rect,
+                                SKIN_BLIT_SRCOVER);
+        }
+    }
+
+    skin_surface_update(surface, &r);
 }
 
 
@@ -860,7 +869,7 @@ layout_done( Layout*  layout )
         background_done( &layout->backgrounds[nn] );
 
     for (nn = 0; nn < layout->num_displays; nn++)
-        display_done( &layout->displays[nn] );
+        adisplay_done( &layout->displays[nn] );
 
     AFREE( layout->buttons );
     layout->buttons = NULL;
@@ -935,7 +944,7 @@ layout_init( Layout*  layout, SkinLayout*  slayout )
         }
         if ( part->display->valid ) {
             ADisplay*  disp = layout->displays + n_displays;
-            display_init( disp, part->display, loc, &layout->rect );
+            adisplay_init( disp, part->display, loc, &layout->rect );
             n_displays += 1;
         }
 
@@ -1427,13 +1436,13 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
     if (disp != NULL) {
         if (slayout->onion_image) {
             // Onion was specified in layout file.
-            display_set_onion( disp,
+            adisplay_set_onion(disp,
                                slayout->onion_image,
                                slayout->onion_rotation,
                                slayout->onion_alpha );
         } else if (window->onion) {
             // Onion was specified via command line.
-            display_set_onion( disp,
+            adisplay_set_onion(disp,
                                window->onion,
                                window->onion_rotation,
                                window->onion_alpha );
@@ -1519,7 +1528,7 @@ skin_window_set_onion( SkinWindow*   window,
     disp = window->layout.displays;
 
     if (disp != NULL)
-        display_set_onion( disp, window->onion, onion_rotation, onion_alpha );
+        adisplay_set_onion(disp, window->onion, onion_rotation, onion_alpha);
 }
 
 static void
@@ -1570,8 +1579,9 @@ skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
         {
             ADisplay*  disp = layout->displays;
             ADisplay*  end  = disp + layout->num_displays;
-            for ( ; disp < end; disp++ )
-                display_redraw( disp, rect, window->surface );
+            for (; disp < end; disp++) {
+                adisplay_redraw(disp, rect, window->surface);
+            }
         }
 
         {
@@ -1767,9 +1777,10 @@ skin_window_update_display( SkinWindow*  window, int  x, int  y, int  w, int  h 
         r.pos.x += disp->origin.x;
         r.pos.y += disp->origin.y;
 
-        if (window->effective_scale != 1.0)
-            skin_window_redraw( window, &r );
-        else
-            display_redraw( disp, &r, window->surface );
+        if (window->effective_scale != 1.0) {
+            skin_window_redraw(window, &r);
+        } else {
+            adisplay_redraw(disp, &r, window->surface);
+        }
     }
 }
