@@ -36,7 +36,7 @@ enum {
     FB_INT_STATUS       = 0x08,
     FB_INT_ENABLE       = 0x0c,
     FB_SET_BASE         = 0x10,
-    FB_SET_ROTATION     = 0x14,
+    FB_SET_ROTATION     = 0x14, /* DEPRECATED */
     FB_SET_BLANK        = 0x18,
     FB_GET_PHYS_WIDTH   = 0x1c,
     FB_GET_PHYS_HEIGHT  = 0x20,
@@ -56,7 +56,6 @@ struct goldfish_fb_state {
     uint32_t base_valid : 1;
     uint32_t need_update : 1;
     uint32_t need_int : 1;
-    uint32_t set_rotation : 2;
     uint32_t blank : 1;
     uint32_t int_status;
     uint32_t int_enable;
@@ -64,7 +63,7 @@ struct goldfish_fb_state {
     int      dpi;
 };
 
-#define  GOLDFISH_FB_SAVE_VERSION  2
+#define  GOLDFISH_FB_SAVE_VERSION  3
 
 static void goldfish_fb_save(QEMUFile*  f, void*  opaque)
 {
@@ -81,7 +80,6 @@ static void goldfish_fb_save(QEMUFile*  f, void*  opaque)
     qemu_put_byte(f, s->base_valid);
     qemu_put_byte(f, s->need_update);
     qemu_put_byte(f, s->need_int);
-    qemu_put_byte(f, s->set_rotation);
     qemu_put_byte(f, s->blank);
     qemu_put_be32(f, s->int_status);
     qemu_put_be32(f, s->int_enable);
@@ -119,7 +117,6 @@ static int  goldfish_fb_load(QEMUFile*  f, void*  opaque, int  version_id)
     s->base_valid   = qemu_get_byte(f);
     s->need_update  = qemu_get_byte(f);
     s->need_int     = qemu_get_byte(f);
-    s->set_rotation = qemu_get_byte(f);
     s->blank        = qemu_get_byte(f);
     s->int_status   = qemu_get_be32(f);
     s->int_enable   = qemu_get_be32(f);
@@ -320,10 +317,6 @@ static void goldfish_fb_write(void *opaque, hwaddr offset, uint64_t val,
             s->need_update = 1;
             s->need_int = 1;
             s->base_valid = 1;
-            if(s->set_rotation != s->rotation) {
-                //printf("FB_SET_BASE: rotation : %d => %d\n", s->rotation, s->set_rotation);
-                s->rotation = s->set_rotation;
-            }
             /* The guest is waiting for us to complete an update cycle
              * and notify it, so make sure we do a redraw immediately.
              */
@@ -331,7 +324,7 @@ static void goldfish_fb_write(void *opaque, hwaddr offset, uint64_t val,
             qemu_set_irq(s->irq, s->int_status & s->int_enable);
             break;
         case FB_SET_ROTATION:
-            s->set_rotation = val;
+            error_report("%s: use of deprecated FB_SET_ROTATION %ld", __func__, val);
             break;
         case FB_SET_BLANK:
             s->blank = val;
