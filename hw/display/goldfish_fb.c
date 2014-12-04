@@ -157,7 +157,6 @@ static void goldfish_fb_update_display(void *opaque)
     struct goldfish_fb_state *s = (struct goldfish_fb_state *)opaque;
     DisplaySurface *ds = qemu_console_surface(s->con);
     int full_update = 0;
-    int  width, height, pitch;
 
     if (!s || !s->con || surface_bits_per_pixel(ds) == 0 || !s->fb_base)
         return;
@@ -178,10 +177,9 @@ static void goldfish_fb_update_display(void *opaque)
         s->need_update = 0;
     }
 
-    pitch     = surface_stride(ds);
-    width     = surface_width(ds);
-    height    = surface_height(ds);
-
+    int dest_width = surface_width(ds);
+    int dest_height = surface_height(ds);
+    int dest_pitch = surface_stride(ds);
     int ymin, ymax;
 
 #if STATS
@@ -202,18 +200,50 @@ static void goldfish_fb_update_display(void *opaque)
     if (s->blank)
     {
         void *dst_line = surface_data(ds);
-        memset( dst_line, 0, height*pitch );
+        memset( dst_line, 0, dest_height*dest_pitch );
         ymin = 0;
-        ymax = height-1;
+        ymax = dest_height-1;
     }
     else
     {
         SysBusDevice *dev = SYS_BUS_DEVICE(opaque);
         MemoryRegion *address_space = sysbus_address_space(dev);
-        int src_width = width * 2;
-        int dest_col_pitch = surface_bytes_per_pixel(ds);
-        int dest_row_pitch = surface_stride(ds);
+        int src_width, src_height;
+        int dest_row_pitch, dest_col_pitch;
         drawfn fn;
+
+        /* The source framebuffer is always read in a linear fashion,
+         * we achieve rotation by altering the destination
+         * step-per-pixel.
+         */
+        switch (s->rotation) {
+        case 0: /* Normal, native landscape view */
+            src_width = dest_width;
+            src_height = dest_height;
+            dest_row_pitch = surface_stride(ds);
+            dest_col_pitch = surface_bytes_per_pixel(ds);
+            break;
+        case 1: /* 90 degree, portrait view */
+            src_width = dest_height;
+            src_height = dest_width;
+            dest_row_pitch = -surface_bytes_per_pixel(ds);
+            dest_col_pitch = surface_stride(ds);
+            break;
+        case 2: /* 180 degree, inverted landscape view */
+            src_width = dest_width;
+            src_height = dest_height;
+            dest_row_pitch = -surface_stride(ds);
+            dest_col_pitch = -surface_bytes_per_pixel(ds);
+            break;
+        case 3: /* 270 degree, mirror portrait view */
+            src_width = dest_height;
+            src_height = dest_width;
+            dest_row_pitch = surface_bytes_per_pixel(ds);
+            dest_col_pitch = -surface_stride(ds);
+            break;
+        default:
+            g_assert_not_reached();
+        }
 
         switch (surface_bits_per_pixel(ds)) {
         case 0:
@@ -239,15 +269,26 @@ static void goldfish_fb_update_display(void *opaque)
         }
 
         ymin = 0;
-        framebuffer_update_display(ds, address_space, s->fb_base, width, height,
-                src_width, dest_row_pitch, dest_col_pitch, full_update,
-                fn, ds, &ymin, &ymax);
+        framebuffer_update_display(ds, address_space, s->fb_base,
+                                   src_width, src_height,
+                                   src_width * 2,
+                                   dest_row_pitch, dest_col_pitch,
+                                   full_update,
+                                   fn, ds, &ymin, &ymax);
     }
 
     ymax += 1;
     if (ymin >= 0) {
-        trace_goldfish_fb_update_display(ymin, ymax-ymin, 0, width);
-        dpy_gfx_update(s->con, 0, ymin, width, ymax-ymin);
+        if (s->rotation % 2) {
+            /* In portrait mode we are drawing "sideways" so always
+             * need to update the whole screen */
+            trace_goldfish_fb_update_display(0, dest_height, 0, dest_width);
+            dpy_gfx_update(s->con, 0, 0, dest_width, dest_height);
+
+        } else {
+            trace_goldfish_fb_update_display(ymin, ymax-ymin, 0, dest_width);
+            dpy_gfx_update(s->con, 0, ymin, dest_width, ymax-ymin);
+        }
     }
 }
 

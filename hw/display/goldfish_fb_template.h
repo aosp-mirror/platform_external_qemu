@@ -26,33 +26,29 @@
 #define COPY_PIXEL(to, r, g, b)                    \
     do {                                           \
         *to = rgb_to_pixel8(r, g, b);              \
-        to += 1;                                   \
     } while (0)
 #elif BITS == 15
 #define COPY_PIXEL(to, r, g, b)                    \
     do {                                           \
         *(uint16_t *)to = rgb_to_pixel15(r, g, b); \
-        to += 2;                                   \
     } while (0)
 #elif BITS == 16
 #define COPY_PIXEL(to, r, g, b)                    \
     do {                                           \
         *(uint16_t *)to = rgb_to_pixel16(r, g, b); \
-        to += 2;                                   \
     } while (0)
 #elif BITS == 24
 #define COPY_PIXEL(to, r, g, b)                    \
     do {                                           \
         uint32_t tmp = rgb_to_pixel24(r, g, b);    \
-        *(to++) =         tmp & 0xff;              \
-        *(to++) =  (tmp >> 8) & 0xff;              \
-        *(to++) = (tmp >> 16) & 0xff;              \
+        to[0] =         tmp & 0xff;              \
+        to[1] =  (tmp >> 8) & 0xff;              \
+        to[2] = (tmp >> 16) & 0xff;              \
     } while (0)
 #elif BITS == 32
 #define COPY_PIXEL(to, r, g, b)                    \
     do {                                           \
         *(uint32_t *)to = rgb_to_pixel32(r, g, b); \
-        to += 4;                                   \
     } while (0)
 #else
 #error unknown bit depth
@@ -70,6 +66,7 @@ static void glue(draw_line_, BITS)(void *opaque, uint8_t *d, const uint8_t *s,
         g = ((rgb565 >>  5) & 0x3f) << 2;
         b = ((rgb565 >>  0) & 0x1f) << 3;
         COPY_PIXEL(d, r, g, b);
+        d += deststep;
         s += 2;
     }
 }
