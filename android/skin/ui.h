@@ -79,6 +79,8 @@ typedef struct SkinUIParams {
 
 // Create a new user-interface SkinUI object
 // |layout_file| is the original layout file for the corresponding skin.
+// |initial_orientation| is the initial screen orientation, for example,
+// "portrait" or "landscape".
 // |keyboard| is the corresponding keyboard object, if any.
 // |ui_funcs| points to a set of methods for interacting with the rest of the
 // system.
@@ -89,8 +91,9 @@ typedef struct SkinUIParams {
 // object.
 //
 // |keyboard| will be ignored if |ui_params.enable_keyboard| is false. If
-// it is NULL, 
+// it is NULL.
 SkinUI* skin_ui_create(struct SkinFile* layout_file,
+                       const char* initial_orientation,
                        const SkinUIFuncs* ui_funcs,
                        const SkinUIParams* params);
 
