@@ -72,6 +72,7 @@ extern char*   bufprint (char*  buffer, char*  buffend, const char*  fmt, ... );
  **/
 
 extern char*  bufprint_app_dir    (char*  buffer, char*  buffend);
+extern char*  bufprint_avd_home_path(char*  buffer, char*  buffend);
 extern char*  bufprint_config_path(char*  buffer, char*  buffend);
 extern char*  bufprint_config_file(char*  buffer, char*  buffend, const char*  suffix);
 extern char*  bufprint_temp_dir   (char*  buffer, char*  buffend);
