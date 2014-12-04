@@ -55,7 +55,20 @@ static void _skin_ui_handle_key_command(void* opaque,
                                         SkinKeyCommand command,
                                         int  down);
 
-SkinUI* skin_ui_create(SkinFile* layout_file,
+static SkinLayout* skin_file_select_layout(SkinLayout* layouts,
+        const char* layout_name) {
+    if (!layout_name) return layouts;
+    SkinLayout* currLayout = layouts;
+    while (currLayout) {
+        if (currLayout->name && !strcmp(currLayout->name, layout_name)) {
+            return currLayout;
+        }
+        currLayout = currLayout->next;
+    }
+    return layouts;
+}
+
+SkinUI* skin_ui_create(SkinFile* layout_file, const char* initial_orientation,
                        const SkinUIFuncs* ui_funcs,
                        const SkinUIParams* ui_params) {
     SkinUI* ui;
@@ -63,7 +76,7 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
     ANEW0(ui);
 
     ui->layout_file = layout_file;
-    ui->layout = layout_file->layouts;
+    ui->layout = skin_file_select_layout(layout_file->layouts, initial_orientation);
 
     ui->ui_funcs = ui_funcs;
     ui->ui_params = ui_params[0];
