@@ -92,13 +92,6 @@ typedef struct {
     uint32_t a_mask;
 } SkinSurfacePixelFormat;
 
-/* lock a slow surface, and returns its pixel information.
-   returns 0 in case of success, -1 otherwise */
-extern int     skin_surface_lock  ( SkinSurface*  s, SkinSurfacePixels  *pix );
-
-/* unlock a slow surface that was previously locked */
-extern void    skin_surface_unlock( SkinSurface*  s );
-
 extern void    skin_surface_get_format(SkinSurface* s,
                                        SkinSurfacePixelFormat* format);
 
