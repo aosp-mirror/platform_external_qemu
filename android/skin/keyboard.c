@@ -236,12 +236,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             return;
         }
 
-        if (code == -1) {
-            D("ignoring keycode %d", keycode);
-        } else if (code > 0) {
-            skin_keyboard_do_key_event(kb, code, down);
-            skin_keyboard_flush(kb);
-        }
+        D("ignoring keycode %d", keycode);
     }
 }
 
