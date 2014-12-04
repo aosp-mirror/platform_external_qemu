@@ -16,6 +16,24 @@
       "revId": "a9c84ee69f52ee1d6baa170d0a013b2d3d35c36a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f27b14c_53e0c42c",
+        "filename": "android/avd/info.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2014-12-04T15:34:14Z",
+      "side": 1,
+      "message": "fixed: keep previous behavior (thanks David!)",
+      "parentUuid": "5f8a0930_7c1c85d3",
+      "revId": "a9c84ee69f52ee1d6baa170d0a013b2d3d35c36a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
