@@ -19,6 +19,7 @@ typedef struct SkinScaler   SkinScaler;
 
 /* create a new image scaler. by default, it uses a scale of 1.0 */
 extern SkinScaler*  skin_scaler_create( void );
+extern void         skin_scaler_free(SkinScaler* scaler);
 
 /* change the scale of a given scaler. returns 0 on success, or -1 in case of
  * problem (unsupported scale) */
