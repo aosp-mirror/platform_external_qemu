@@ -28,17 +28,11 @@ struct SkinSurface {
     int                  refcount;
     uint32_t*            pixels;
     SDL_Surface*         surface;
-    SkinSurfaceDoneFunc  done_func;
-    void*                done_user;
 };
 
 static void
 skin_surface_free( SkinSurface*  s )
 {
-    if (s->done_func) {
-        s->done_func( s->done_user );
-        s->done_func = NULL;
-    }
     if (s->surface) {
         SDL_FreeSurface(s->surface);
         s->surface = NULL;
@@ -78,13 +72,6 @@ skin_surface_width(SkinSurface* s) {
 extern int
 skin_surface_height(SkinSurface* s) {
     return s->surface->h;
-}
-
-void
-skin_surface_set_done( SkinSurface*  s, SkinSurfaceDoneFunc  done_func, void*  done_user )
-{
-    s->done_func = done_func;
-    s->done_user = done_user;
 }
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -157,8 +144,6 @@ _skin_surface_create( SDL_Surface*  surface,
         s->refcount = 1;
         s->pixels   = pixels;
         s->surface  = surface;
-        s->done_func = NULL;
-        s->done_user = NULL;
     }
     else {
         SDL_FreeSurface(surface);
