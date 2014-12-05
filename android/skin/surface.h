@@ -63,7 +63,17 @@ extern SkinSurface* skin_surface_create_window(
                             int y,
                             int w,
                             int h,
+                            int original_w,
+                            int original_h,
                             int is_fullscreen);
+
+extern void skin_surface_reverse_map(SkinSurface* surface,
+                                     int* x,
+                                     int* y);
+
+extern void skin_surface_get_scaled_rect(SkinSurface* surface,
+                                         const SkinRect* srect,
+                                         SkinRect* drect);
 
 /* surface pixels information for slow surfaces */
 typedef struct {
