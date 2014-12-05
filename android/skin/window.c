@@ -986,14 +986,7 @@ struct SkinWindow {
     int           x_pos;
     int           y_pos;
 
-    SkinScaler*   scaler;
-    int           shrink;
-    double        shrink_scale;
-    SkinSurface*  shrink_surface;
-
-    double        effective_scale;
-    double        effective_x;
-    double        effective_y;
+    double        scale;
 };
 
 static void
@@ -1196,7 +1189,7 @@ skin_window_show_opengles( SkinWindow* window )
         SkinRect drect = disp->rect;
         void* winhandle = skin_winsys_get_window_handle();
 
-        skin_scaler_get_scaled_rect(window->scaler, &drect, &drect);
+        skin_surface_get_scaled_rect(window->surface, &drect, &drect);
 
         window->win_funcs->opengles_show(winhandle,
                                          drect.pos.x,
@@ -1259,9 +1252,7 @@ skin_window_create(SkinLayout* slayout,
     ANEW0(window);
 
     window->win_funcs    = win_funcs;
-    window->shrink_scale = scale;
-    window->shrink       = (scale != 1.0);
-    window->scaler       = skin_scaler_create();
+    window->scale = scale;
     window->no_display   = no_display;
 
     /* enable everything by default */
@@ -1349,7 +1340,6 @@ skin_window_resize( SkinWindow*  window )
 
     /* now resize window */
     skin_surface_unrefp(&window->surface);
-    skin_surface_unrefp(&window->shrink_surface);
 
     if ( !window->no_display ) {
         int           layout_w = window->layout.rect.size.w;
@@ -1358,63 +1348,21 @@ skin_window_resize( SkinWindow*  window )
         int           window_h = layout_h;
         int           window_x = window->x_pos;
         int           window_y = window->y_pos;
-        SkinSurface*  surface;
-        double        scale = 1.0;
+        double        scale = window->scale;
         int           fullscreen = window->fullscreen;
 
-        if (fullscreen) {
-            SkinRect r;
-            skin_winsys_get_monitor_rect(&r);
-            double  x_scale, y_scale;
-
-            window_x = r.pos.x;
-            window_y = r.pos.y;
-            window_w = r.size.w;
-            window_h = r.size.h;
-
-            x_scale = window_w * 1.0 / layout_w;
-            y_scale = window_h * 1.0 / layout_h;
-
-            scale = (x_scale <= y_scale) ? x_scale : y_scale;
-        }
-        else if (window->shrink) {
-            scale = window->shrink_scale;
-            window_w = (int) ceil(layout_w*scale);
-            window_h = (int) ceil(layout_h*scale);
+        if (scale != 1.0) {
+            window_w = (int) ceil(layout_w * scale);
+            window_h = (int) ceil(layout_h * scale);
         }
 
-        surface = skin_surface_create_window(window_x,
-                                             window_y,
-                                             window_w,
-                                             window_h,
-                                             fullscreen);
-        window->effective_scale = scale;
-        window->effective_x     = 0;
-        window->effective_y     = 0;
-
-        if (fullscreen) {
-            window->effective_x = (window_w - layout_w*scale)*0.5;
-            window->effective_y = (window_h - layout_h*scale)*0.5;
-        }
-
-        if (scale == 1.0)
-        {
-            window->surface = surface;
-            skin_scaler_set( window->scaler, 1.0, 0, 0 );
-        }
-        else
-        {
-            window_w = (int) ceil(window_w / scale );
-            window_h = (int) ceil(window_h / scale );
-
-            window->shrink_surface = surface;
-            window->surface = skin_surface_create_slow(window_w, window_h);
-            if (window->surface == NULL) {
-                fprintf(stderr, "### Error: could not create or resize window\n");
-                exit(1);
-            }
-            skin_scaler_set( window->scaler, scale, window->effective_x, window->effective_y );
-        }
+        window->surface = skin_surface_create_window(window_x,
+                                                     window_y,
+                                                     window_w,
+                                                     window_h,
+                                                     layout_w,
+                                                     layout_h,
+                                                     fullscreen);
 
         skin_window_show_opengles(window);
     }
@@ -1495,15 +1443,10 @@ skin_window_free  ( SkinWindow*  window )
 {
     if (window) {
         skin_surface_unrefp(&window->surface);
-        skin_surface_unrefp(&window->shrink_surface);
 
         if (window->onion) {
-            skin_image_unref( &window->onion );
+            skin_image_unref(&window->onion);
             window->onion_rotation = SKIN_ROTATION_0;
-        }
-        if (window->scaler) {
-            skin_scaler_free(window->scaler);
-            window->scaler = NULL;
         }
         layout_done( &window->layout );
         AFREE(window);
@@ -1531,20 +1474,10 @@ skin_window_set_onion( SkinWindow*   window,
         adisplay_set_onion(disp, window->onion, onion_rotation, onion_alpha);
 }
 
-static void
-skin_window_update_shrink( SkinWindow*  window, SkinRect*  rect )
-{
-    skin_surface_update_scaled(window->shrink_surface,
-                               window->scaler,
-                               window->surface,
-                               rect);
-}
-
 void
-skin_window_set_scale( SkinWindow*  window, double  scale )
+skin_window_set_scale(SkinWindow* window, double scale)
 {
-    window->shrink       = (scale != 1.0);
-    window->shrink_scale = scale;
+    window->scale = scale;
 
     skin_window_resize( window );
     skin_window_redraw( window, NULL );
@@ -1594,12 +1527,7 @@ skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
         if ( window->ball.tracking )
             ball_state_redraw( &window->ball, rect, window->surface );
 
-        if (window->effective_scale != 1.0)
-            skin_window_update_shrink( window, rect );
-        else
-        {
-            skin_surface_update(window->surface, rect);
-        }
+        skin_surface_update(window->surface, rect);
         skin_window_redraw_opengles( window );
     }
 }
@@ -1639,8 +1567,7 @@ skin_window_get_display( SkinWindow*  window, ADisplayInfo  *info )
 static void
 skin_window_map_to_scale( SkinWindow*  window, int  *x, int  *y )
 {
-    *x = (*x - window->effective_x) / window->effective_scale;
-    *y = (*y - window->effective_y) / window->effective_scale;
+    skin_surface_reverse_map(window->surface, x, y);
 }
 
 void
@@ -1777,10 +1704,6 @@ skin_window_update_display( SkinWindow*  window, int  x, int  y, int  w, int  h 
         r.pos.x += disp->origin.x;
         r.pos.y += disp->origin.y;
 
-        if (window->effective_scale != 1.0) {
-            skin_window_redraw(window, &r);
-        } else {
-            adisplay_redraw(disp, &r, window->surface);
-        }
+        adisplay_redraw(disp, &r, window->surface);
     }
 }

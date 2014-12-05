@@ -12,6 +12,7 @@
 #include "android/skin/surface.h"
 #include "android/skin/argb.h"
 #include "android/skin/scaler.h"
+#include "android/skin/winsys.h"
 #include "android/utils/setenv.h"
 #include <SDL.h>
 
@@ -27,11 +28,22 @@
 struct SkinSurface {
     int refcount;
     SDL_Surface* surface;
+    // Only used for scaled window surfaces
+    SkinScaler* scaler;
+    SDL_Surface* scaled_surface;
 };
 
 static void
 skin_surface_free( SkinSurface*  s )
 {
+    if (s->scaled_surface) {
+        SDL_FreeSurface(s->scaled_surface);
+        s->scaled_surface = NULL;
+    }
+    if (s->scaler) {
+        skin_scaler_free(s->scaler);
+        s->scaler = NULL;
+    }
     if (s->surface) {
         SDL_FreeSurface(s->surface);
         s->surface = NULL;
@@ -141,6 +153,8 @@ _skin_surface_create(SDL_Surface* surface)
     if (s != NULL) {
         s->refcount = 1;
         s->surface  = surface;
+        s->scaler = NULL;
+        s->scaled_surface = NULL;
     }
     else {
         SDL_FreeSurface(surface);
@@ -200,6 +214,8 @@ skin_surface_create_window(int x,
                            int y,
                            int w,
                            int h,
+                           int original_w,
+                           int original_h,
                            int is_fullscreen)
 {
     char temp[32];
@@ -210,6 +226,14 @@ skin_surface_create_window(int x,
     int flags = SDL_SWSURFACE;
     if (is_fullscreen) {
         flags |= SDL_FULLSCREEN;
+
+        SkinRect r;
+        skin_winsys_get_monitor_rect(&r);
+
+        x = r.pos.x;
+        y = r.pos.y;
+        w = r.size.w;
+        h = r.size.h;
     }
 
     SDL_Surface* surface = SDL_SetVideoMode(w, h, 32, flags);
@@ -220,49 +244,87 @@ skin_surface_create_window(int x,
 
     SDL_WM_SetPos(x, y);
 
-    return _skin_surface_create(surface);
+    double x_scale = w * 1.0 / original_w;
+    double y_scale = h * 1.0 / original_h;
+    double scale = (x_scale <= y_scale) ? x_scale : y_scale;
+
+    SkinSurface* result = _skin_surface_create(surface);
+    if (result && scale != 1.0) {
+        result->scaler = skin_scaler_create();
+
+        double effective_x = 0.;
+        double effective_y = 0.;
+
+        if (is_fullscreen) {
+            effective_x = (w - original_w * scale) * 0.5;
+            effective_y = (h - original_h * scale) * 0.5;
+        }
+
+        skin_scaler_set(result->scaler,
+                        scale,
+                        effective_x,
+                        effective_y);
+
+        result->scaled_surface = result->surface;
+
+        result->surface = _sdl_surface_create_rgb(original_w,
+                                                  original_h,
+                                                  32,
+                                                  SDL_SWSURFACE);
+        if (!result->surface) {
+            fprintf(stderr,
+                    "### Error: could not create unscaled SDL window: %s\n",
+                    SDL_GetError());
+            exit(1);
+        }
+    }
+    return result;
 }
 
-static int
-skin_surface_lock( SkinSurface*  s, SkinSurfacePixels  *pix )
-{
-    if (!s || !s->surface) {
-        D( "error: trying to lock stale surface %p", s );
-        return -1;
+void
+skin_surface_reverse_map(SkinSurface* surface,
+                         int* x,
+                         int* y) {
+    if (surface && surface->scaler) {
+        skin_scaler_reverse_map(surface->scaler, x, y);
     }
-    if ( SDL_LockSurface( s->surface ) != 0 ) {
+}
+
+void
+skin_surface_get_scaled_rect(SkinSurface* surface,
+                             const SkinRect* srect,
+                             SkinRect* drect) {
+    if (surface && surface->scaler) {
+        skin_scaler_get_scaled_rect(surface->scaler, srect, drect);
+    } else {
+        *drect = *srect;
+    }
+}
+
+static int _sdl_surface_lock(SDL_Surface* s, SkinSurfacePixels  *pix) {
+    if (SDL_LockSurface(s) != 0) {
         D( "could not lock surface %p: %s", s, SDL_GetError() );
         return -1;
     }
-    pix->w      = s->surface->w;
-    pix->h      = s->surface->h;
-    pix->pitch  = s->surface->pitch;
-    pix->pixels = s->surface->pixels;
+    pix->w      = s->w;
+    pix->h      = s->h;
+    pix->pitch  = s->pitch;
+    pix->pixels = s->pixels;
     return 0;
 }
 
-/* unlock a slow surface that was previously locked */
-static void
-skin_surface_unlock( SkinSurface*  s )
+extern void _sdl_surface_get_format(SDL_Surface* s,
+                                    SkinSurfacePixelFormat* format)
 {
-    if (s && s->surface)
-        SDL_UnlockSurface( s->surface );
-}
+    format->r_shift = s->format->Rshift;
+    format->g_shift = s->format->Gshift;
+    format->b_shift = s->format->Bshift;
+    format->a_shift = s->format->Ashift;
 
-
-extern void
-skin_surface_get_format(SkinSurface* s,
-                        SkinSurfacePixelFormat* format)
-{
-    format->r_shift = s->surface->format->Rshift;
-    format->g_shift = s->surface->format->Gshift;
-    format->b_shift = s->surface->format->Bshift;
-    format->a_shift = s->surface->format->Ashift;
-
-    format->r_mask = s->surface->format->Rmask;
-    format->g_mask = s->surface->format->Gmask;
-    format->b_mask = s->surface->format->Bmask;
-    format->a_mask = s->surface->format->Amask;
+    format->r_mask = s->format->Rmask;
+    format->g_mask = s->format->Gmask;
+    format->b_mask = s->format->Bmask;
+    format->a_mask = s->format->Amask;
 }
 
 extern void
@@ -275,10 +337,56 @@ skin_surface_set_alpha_blending(SkinSurface*  s, int alpha)
 
 extern void
 skin_surface_update(SkinSurface* s, SkinRect* r) {
-    if (s && s->surface) {
-        SDL_UpdateRect(s->surface, r->pos.x, r->pos.y, r->size.w, r->size.h);
+    if (!s || !s->surface) {
+        return;
     }
+
+    // First, the unscaled case.
+    if (!s->scaler) {
+        SDL_UpdateRect(s->surface, r->pos.x, r->pos.y, r->size.w, r->size.h);
+        return;
+    }
+
+    // Now, the scaled case.
+    SkinScaler* scaler = s->scaler;
+    SDL_Surface* src_surface = s->surface;
+    SkinSurfacePixels src_pix;
+    _sdl_surface_lock(src_surface, &src_pix);
+
+    SDL_Surface* dst_surface = s->scaled_surface;
+    SkinSurfacePixels dst_pix;
+    SkinSurfacePixelFormat dst_format;
+    _sdl_surface_lock(dst_surface, &dst_pix);
+    _sdl_surface_get_format(dst_surface, &dst_format);
+
+    skin_scaler_scale(scaler,
+                      &dst_pix,
+                      &dst_format,
+                      &src_pix,
+                      r);
+
+    SDL_UnlockSurface(dst_surface);
+    SDL_UnlockSurface(src_surface);
+
+    SkinRect dst_rect;
+    skin_scaler_get_scaled_rect(scaler, r, &dst_rect);
+
+    SDL_UpdateRect(dst_surface,
+                   dst_rect.pos.x,
+                   dst_rect.pos.y,
+                   dst_rect.size.w,
+                   dst_rect.size.h);
 }
+
+void
+skin_surface_update_scaled(SkinSurface* dst_surface,
+                           SkinScaler* scaler,
+                           SkinSurface* src_surface,
+                           const SkinRect* src_rect) {
+}
+
+
+
 
 static uint32_t
 skin_surface_map_argb( SkinSurface*  s, uint32_t  c )
@@ -348,34 +456,6 @@ skin_surface_blit( SkinSurface*  dst,
 }
 
 void
-skin_surface_update_scaled(SkinSurface* dst_surface,
-                           SkinScaler* scaler,
-                           SkinSurface* src_surface,
-                           const SkinRect* src_rect) {
-    SkinSurfacePixels src_pix;
-    skin_surface_lock(src_surface, &src_pix);
-
-    SkinSurfacePixels dst_pix;
-    SkinSurfacePixelFormat dst_format;
-    skin_surface_lock(dst_surface, &dst_pix);
-    skin_surface_get_format(dst_surface, &dst_format);
-
-    skin_scaler_scale(scaler,
-                      &dst_pix,
-                      &dst_format,
-                      &src_pix,
-                      src_rect);
-
-    skin_surface_unlock(dst_surface);
-    skin_surface_unlock(src_surface);
-
-    SkinRect dst_rect;
-    skin_scaler_get_scaled_rect(scaler, src_rect, &dst_rect);
-    skin_surface_update(dst_surface, &dst_rect);
-}
-
-
-void
 skin_surface_upload(SkinSurface* surface,
                     SkinRect* rect,
                     const void* pixels,
@@ -421,7 +501,7 @@ skin_surface_upload(SkinSurface* surface,
     }
 
     SkinSurfacePixels pix;
-    skin_surface_lock(surface, &pix);
+    _sdl_surface_lock(surface->surface, &pix);
 
     const uint8_t* src_line = (const uint8_t*)pixels;
 
@@ -434,6 +514,6 @@ skin_surface_upload(SkinSurface* surface,
         src_line += pitch;
     }
 
-    skin_surface_unlock(surface);
+    SDL_UnlockSurface(surface->surface);
     skin_surface_update(surface, rect);
 }
