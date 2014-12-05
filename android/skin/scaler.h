@@ -28,6 +28,15 @@ extern int          skin_scaler_set( SkinScaler*  scaler,
                                      double       xDisp,
                                      double       yDisp );
 
+/* Compute inverse scaled coordinates.
+ * On input, |*x| and |*y| contain scaled coordinates in pixels.
+ * On output, |*x| and |*y| contain the corresponding unscaled coordinates
+ * in pixels.
+ */
+extern void         skin_scaler_reverse_map(SkinScaler* scaler,
+                                            int* x,
+                                            int* y);
+
 /* retrieve the position of the scaled source rectangle 'srect' into 'drect'
  * you can use the same pointer for both parameters. */
 extern void         skin_scaler_get_scaled_rect( SkinScaler*     scaler,

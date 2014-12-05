@@ -82,6 +82,15 @@ typedef struct {
 
 
 void
+skin_scaler_reverse_map(SkinScaler* scaler,
+                        int* x,
+                        int* y) {
+    // Don't use invscale for maximum accuracy.
+    *x = (*x - scaler->xdisp) / scaler->scale;
+    *y = (*y - scaler->ydisp) / scaler->scale;
+}
+
+void
 skin_scaler_get_scaled_rect( SkinScaler*     scaler,
                              const SkinRect* srect,
                              SkinRect*       drect )
