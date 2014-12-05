@@ -56,8 +56,7 @@ extern SkinSurface*  skin_surface_create_argb32_from(
                             int                  w,
                             int                  h,
                             int                  pitch,
-                            uint32_t*            pixels,
-                            int                  do_copy );
+                            uint32_t*            pixels);
 
 extern SkinSurface* skin_surface_create_window(
                             int x,
