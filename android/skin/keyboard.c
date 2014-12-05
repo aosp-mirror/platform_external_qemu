@@ -236,6 +236,11 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             return;
         }
 
+        if (code == KEY_BACKSPACE) {
+            skin_keyboard_do_key_event(kb, code, down);
+            skin_keyboard_flush(kb);
+            return;
+        }
         D("ignoring keycode %d", keycode);
     }
 }
