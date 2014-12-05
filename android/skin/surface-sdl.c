@@ -25,9 +25,8 @@
 #endif
 
 struct SkinSurface {
-    int                  refcount;
-    uint32_t*            pixels;
-    SDL_Surface*         surface;
+    int refcount;
+    SDL_Surface* surface;
 };
 
 static void
@@ -111,11 +110,11 @@ _sdl_surface_create_rgb( int  width,
 
 
 static SDL_Surface*
-_sdl_surface_create_rgb_from( int   width,
-                              int   height,
-                              int   pitch,
-                              void* pixels,
-                              int   depth )
+_sdl_surface_create_rgb_from(int   width,
+                             int   height,
+                             int   pitch,
+                             void* pixels,
+                             int   depth)
 {
    Uint32   rmask, gmask, bmask, amask;
 
@@ -136,18 +135,15 @@ _sdl_surface_create_rgb_from( int   width,
 
 
 static SkinSurface*
-_skin_surface_create( SDL_Surface*  surface,
-                      void*         pixels )
+_skin_surface_create(SDL_Surface* surface)
 {
-    SkinSurface*  s = malloc(sizeof(*s));
+    SkinSurface* s = malloc(sizeof(*s));
     if (s != NULL) {
         s->refcount = 1;
-        s->pixels   = pixels;
         s->surface  = surface;
     }
     else {
         SDL_FreeSurface(surface);
-        free(pixels);
         D( "not enough memory to allocate new skin surface !" );
     }
     return  s;
@@ -157,9 +153,7 @@ _skin_surface_create( SDL_Surface*  surface,
 SkinSurface*
 skin_surface_create_fast( int  w, int  h )
 {
-    SDL_Surface*  surface;
-
-    surface = _sdl_surface_create_rgb( w, h, 32, SDL_HWSURFACE );
+    SDL_Surface* surface = _sdl_surface_create_rgb(w, h, 32, SDL_HWSURFACE);
     if (surface == NULL) {
         surface = _sdl_surface_create_rgb( w, h, 32, SDL_SWSURFACE );
         if (surface == NULL) {
@@ -168,56 +162,37 @@ skin_surface_create_fast( int  w, int  h )
             return NULL;
         }
     }
-    return _skin_surface_create( surface, NULL );
+    return _skin_surface_create(surface);
 }
 
 
 SkinSurface*
 skin_surface_create_slow( int  w, int  h )
 {
-    SDL_Surface*  surface;
-
-    surface = _sdl_surface_create_rgb( w, h, 32, SDL_SWSURFACE );
+    SDL_Surface* surface = _sdl_surface_create_rgb(w, h, 32, SDL_SWSURFACE);
     if (surface == NULL) {
         D( "could not create slow %dx%d ARGB32 surface: %s",
             w, h, SDL_GetError() );
         return NULL;
     }
-    return _skin_surface_create( surface, NULL );
+    return _skin_surface_create(surface);
 }
 
 
 SkinSurface*
-skin_surface_create_argb32_from(
-                        int                  w,
-                        int                  h,
-                        int                  pitch,
-                        uint32_t*            pixels,
-                        int                  do_copy )
+skin_surface_create_argb32_from(int       w,
+                                int       h,
+                                int       pitch,
+                                uint32_t* pixels)
 {
-    SDL_Surface*  surface;
-    uint32_t*     pixcopy = NULL;
-
-    if (do_copy) {
-        size_t  size = h*pitch;
-        pixcopy = malloc( size );
-        if (pixcopy == NULL && size > 0) {
-            D( "not enough memory to create %dx%d ARGB32 surface",
-               w, h );
-            return NULL;
-        }
-        memcpy( pixcopy, pixels, size );
-    }
-
-    surface = _sdl_surface_create_rgb_from( w, h, pitch,
-                                            pixcopy ? pixcopy : pixels,
-                                            32 );
+    SDL_Surface* surface =
+            _sdl_surface_create_rgb_from(w, h, pitch, pixels, 32);
     if (surface == NULL) {
         D( "could not create %dx%d slow ARGB32 surface: %s",
             w, h, SDL_GetError() );
         return NULL;
     }
-    return _skin_surface_create( surface, pixcopy );
+    return _skin_surface_create(surface);
 }
 
 extern SkinSurface*
@@ -245,7 +220,7 @@ skin_surface_create_window(int x,
 
     SDL_WM_SetPos(x, y);
 
-    return _skin_surface_create(surface, NULL);
+    return _skin_surface_create(surface);
 }
 
 static int
