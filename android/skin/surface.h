@@ -28,13 +28,6 @@ extern SkinSurface*  skin_surface_ref( SkinSurface*  surface );
    it will be set to NULL on exit */
 extern void          skin_surface_unrefp( SkinSurface*  *psurface );
 
-/* sets a callback that will be called when the surface is destroyed.
- * used NULL for done_func to disable it
- */
-typedef void (*SkinSurfaceDoneFunc)( void*  user );
-
-extern void  skin_surface_set_done( SkinSurface*  s, SkinSurfaceDoneFunc  done_func, void*  done_user );
-
 extern int skin_surface_width(SkinSurface* s);
 extern int skin_surface_height(SkinSurface* s);
 
