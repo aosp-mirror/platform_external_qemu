@@ -168,21 +168,18 @@ ifneq ($(BUILD_STANDALONE_EMULATOR),true)
   endif
 endif
 
-
-ifneq ($(combo_target)$(TARGET_SIMULATOR),HOST_true)
-  ifneq ($(HOST_IS_64_BIT),)
-    MY_CFLAGS += -m64
-    MY_LDFLAGS += -m64
-  else
-    ifneq ($(HOST_ARCH),x86_64)
-      MY_CFLAGS += -m32
-      MY_LDFLAGS += -m32
-    endif
+ifneq ($(HOST_IS_64_BIT),)
+  MY_CFLAGS += -m64
+  MY_LDFLAGS += -m64
+else
+  ifneq ($(HOST_ARCH),x86_64)
+    MY_CFLAGS += -m32
+    MY_LDFLAGS += -m32
   endif
+endif
 
-  ifneq ($(BUILD_HOST_static),)
-    MY_LDLIBS += -static
-  endif
+ifneq ($(BUILD_HOST_static),)
+  MY_LDLIBS += -static
 endif
 
 ifeq ($(HOST_OS)-$(BUILD_STANDALONE_EMULATOR),windows-true)
