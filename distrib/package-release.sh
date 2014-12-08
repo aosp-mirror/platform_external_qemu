@@ -524,7 +524,7 @@ extract_subdir_git_history () {
 
 # The list of AOSP directories that contain relevant sources for this
 # script.
-AOSP_SOURCE_SUBDIRS="external/qemu sdk/emulator/opengl external/gtest"
+AOSP_SOURCE_SUBDIRS="external/qemu external/gtest"
 
 for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
     extract_subdir_git_history $AOSP_SUBDIR
