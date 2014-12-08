@@ -412,7 +412,7 @@ only be used during boot. Note that GPU emulation doesn't rely on a specific
 virtual GPU device, however, it uses the "QEMU Pipe" device described below.
 For more information, please read:
 
-  https://android.googlesource.com/platform/sdk/+/master/emulator/opengl/DESIGN
+  external/qemu/distrib/android-emugl/DESIGN
 
 On boot, the kernel will read various properties of the framebuffer:
 

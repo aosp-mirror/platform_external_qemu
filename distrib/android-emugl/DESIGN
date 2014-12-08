@@ -211,10 +211,10 @@ in the Android source trees:
     call $QEMU in the rest of this document.
 
   - The guest libraries are under
-    $ANDROID/development/tools/emulator/opengl, which we'll call $EMUGL_GUEST
+    $ANDROID/device/generic/goldfish/opengl, which we'll call $EMUGL_GUEST
 
   - The host renderer and translator libraries are under
-    $ANDROID/sdk/emulator/opengl, which we'll call $EMUGL_HOST
+    $QEMU/distrib/android-emugl, which we'll call $EMUGL_HOST
 
   - The QEMU Pipe kernel driver is under $KERNEL/drivers/misc/qemupipe
 

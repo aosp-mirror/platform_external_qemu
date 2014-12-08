@@ -1,6 +1,6 @@
 This directory contains the host-side modules related to hardware OpenGL ES
 emulation. The guest-side modules are in
-$ANDROID_BUILD_TOP/development/tools/emulator/opengl.
+$ANDROID_BUILD_TOP/device/generic/goldfish/opengl
 
 I. Overview of components:
 ==========================

@@ -309,7 +309,7 @@ fi
 if [ "$GLES_PROBE" = "yes" ]; then
     GLES_SUPPORT=yes
     if [ -z "$GLES_DIR" ]; then
-        GLES_DIR=../../sdk/emulator/opengl
+        GLES_DIR=distrib/android-emugl
         log2 "GLES       : Probing source dir: $GLES_DIR"
         if [ ! -d "$GLES_DIR" ]; then
             GLES_DIR=../opengl

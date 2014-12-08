@@ -194,7 +194,7 @@ if [ -z "$NO_TESTS" ]; then
             TEST_SCRIPT=$(dirname "$0")/../opengl/host/tools/emugen/tests/run-tests.sh
             if [ ! -f "$TEST_SCRIPT" ]; then
                 # This is the usual location.
-                TEST_SCRIPT=$(dirname "$0")/../../sdk/emulator/opengl/host/tools/emugen/tests/run-tests.sh
+                TEST_SCRIPT=$(dirname "$0")/distrib/android-emugl/host/tools/emugen/tests/run-tests.sh
             fi
             if [ ! -f "$TEST_SCRIPT" ]; then
                 echo " FAIL: Missing script: $TEST_SCRIPT"
