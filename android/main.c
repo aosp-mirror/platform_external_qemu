@@ -438,6 +438,14 @@ int main(int argc, char **argv)
             kernelFile = avdInfo_getKernelPath(avd);
             if (kernelFile == NULL) {
                 derror( "This AVD's configuration is missing a kernel file!!" );
+                const char* sdkRootDir = getenv("ANDROID_SDK_ROOT");
+                if (sdkRootDir) {
+                    derror( "ANDROID_SDK_ROOT is defined (%s) but cannot find kernel file in "
+                            "%s" PATH_SEP "system-images" PATH_SEP
+                            " sub directories", sdkRootDir, sdkRootDir);
+                } else {
+                    derror( "ANDROID_SDK_ROOT is undefined");
+                }
                 exit(2);
             }
             D("autoconfig: -kernel %s", kernelFile);
