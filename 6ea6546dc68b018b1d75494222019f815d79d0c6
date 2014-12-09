@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c488eee4_b451715c",
+        "filename": "android/skin/event-sdl2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1017944
+      },
+      "writtenOn": "2014-12-09T18:54:30Z",
+      "side": 1,
+      "message": "Is this going to have problems on non-US keyboards? Actually, I\u0027m not sure if you normally use a US keyboard or if it\u0027s a French one.",
+      "revId": "6ea6546dc68b018b1d75494222019f815d79d0c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c488eee4_effc00cc",
+        "filename": "android/skin/event-sdl2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1017944
+      },
+      "writtenOn": "2014-12-09T18:54:30Z",
+      "side": 1,
+      "message": "Is it always command-Q on all localizations of MacOS?",
+      "range": {
+        "startLine": 250,
+        "startChar": 4,
+        "endLine": 250,
+        "endChar": 10
+      },
+      "revId": "6ea6546dc68b018b1d75494222019f815d79d0c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4bf0e8b_8939b914",
+        "filename": "android/skin/surface-sdl2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1017944
+      },
+      "writtenOn": "2014-12-09T18:54:30Z",
+      "side": 1,
+      "message": "Nit: update the copyright dates on new files",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "6ea6546dc68b018b1d75494222019f815d79d0c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c488eee4_0f07e48b",
+        "filename": "android/skin/surface-sdl2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1017944
+      },
+      "writtenOn": "2014-12-09T18:54:30Z",
+      "side": 1,
+      "message": "So the texture is already destroyed when this is called? Where does that happen? Is that in skin_surface_create_window below? If so, then I guess that method is also called on window resize.",
+      "revId": "6ea6546dc68b018b1d75494222019f815d79d0c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84b996ac_47972eb1",
+        "filename": "android/skin/surface-sdl2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1017944
+      },
+      "writtenOn": "2014-12-09T18:54:30Z",
+      "side": 1,
+      "message": "Why not use the macro to check the result codes for these SDL calls (also more below)",
+      "range": {
+        "startLine": 498,
+        "startChar": 4,
+        "endLine": 498,
+        "endChar": 16
+      },
+      "revId": "6ea6546dc68b018b1d75494222019f815d79d0c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
