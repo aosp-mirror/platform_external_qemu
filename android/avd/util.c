@@ -107,8 +107,22 @@ _getAvdContentPath(const char* avdName)
         }
         AFREE(iniPath);
     } else {
-        APANIC("Could not find %s.ini file in $ANDROID_AVD_HOME nor in $HOME/.android/avd\n",
-                avdName);
+        static const char kHomeSearchDir[] = "$HOME" PATH_SEP ".android" PATH_SEP "avd";
+        static const char kSdkHomeSearchDir[] = "$ANDROID_SDK_HOME" PATH_SEP ".android"
+            PATH_SEP "avd";
+        const char* envName = "HOME";
+        const char* searchDir = kHomeSearchDir;
+        if (getenv("ANDROID_AVD_HOME")) {
+            envName = "ANDROID_AVD_HOME";
+            searchDir = "$ANDROID_AVD_HOME";
+        } else if (getenv("ANDROID_SDK_HOME")) {
+            envName = "ANDROID_SDK_HOME";
+            searchDir = kSdkHomeSearchDir;
+        }
+        APANIC("%s is defined but could not find %s.ini file in %s\n"
+                "(Note: avd is searched in the order of $ANDROID_AVD_HOME,"
+                "%s and %s)\n",
+                envName, avdName, searchDir, kSdkHomeSearchDir, kHomeSearchDir);
     }
 
     avdPath = iniFile_getString(ini, ROOT_ABS_PATH_KEY, NULL);
