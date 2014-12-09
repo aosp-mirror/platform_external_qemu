@@ -16,7 +16,7 @@ CROSSPREFIX=arm-linux-androideabi-
 CONFIG=goldfish
 GCC_VERSION=4.8
 
-VALID_ARCHS="arm x86 x86_64 mips arm64"
+VALID_ARCHS="arm x86 x86_64 mips arm64 mips64"
 
 # Determine the host architecture, and which default prebuilt tag we need.
 # For the toolchain auto-detection.
@@ -196,6 +196,9 @@ else
         mips)
             CONFIG=goldfish
             ;;
+        mips64)
+            CONFIG=ranchu64
+            ;;
         arm64)
             CONFIG=ranchu
             ;;
@@ -246,6 +249,9 @@ else
         mips)
             CROSSPREFIX=mipsel-linux-android-
             ;;
+        mips64)
+            CROSSPREFIX=mips64el-linux-android-
+            ;;
         arm64)
             CROSSPREFIX=aarch64-linux-android-
             ;;
@@ -268,6 +274,9 @@ case $ARCH in
         ZIMAGE=Image
         ;;
     mips)
+        ZIMAGE=
+        ;;
+    mips64)
         ZIMAGE=
         ;;
 esac
@@ -341,6 +350,13 @@ case $CONFIG in
         ;;
     *)
         MAKE_DEFCONFIG=${CONFIG}_defconfig
+        ;;
+esac
+
+case $ARCH in
+    mips64)
+        # MIPS64 Kernel code base is under arch/mips
+        ARCH=mips
         ;;
 esac
 

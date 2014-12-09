@@ -5,7 +5,7 @@ I. Helper script:
 -----------------
 
 We now provide a helper script to rebuild the kernel,
-it is under distrib/rebuild-kernel.sh.
+it is under distrib/build-kernel.sh.
 
 You need the sources in android.googlesource.com/kernel/goldfish.git,
 in branch origin/android-goldfish-<version>, where <version> is the
@@ -20,19 +20,23 @@ Roughly speaking:
 
 To rebuild the ARMv7-A one:
 
-  /path/to/rebuild-kernel.sh --out=$ANDROID/prebuilt/android-arm/kernel
+  /path/to/build-kernel.sh --out=$ANDROID/prebuilt/android-arm/kernel
 
 To rebuild the x86 kernel:
 
-  /path/to/rebuild-kernel.sh --arch=x86 --out=$ANDROID/prebuilt/android-x86/kernel
+  /path/to/build-kernel.sh --arch=x86 --out=$ANDROID/prebuilt/android-x86/kernel
 
 To rebuild the MIPS kernel:
 
-  /path/to/rebuild-kernel.sh --arch=mips --out=$ANDROID/prebuilts/qemu-kernel/mips
+  /path/to/build-kernel.sh --arch=mips --out=$ANDROID/prebuilts/qemu-kernel/mips
+
+To rebuild the MIPS64 kernel (version >= 3.10 only):
+
+  /path/to/build-kernel.sh --arch=mips64 --out=$ANDROID/prebuilts/qemu-kernel/mips64 --gcc-version=4.9
 
 To rebuild the x86_64 kernel (version >= 3.10 only):
 
-  /path/to/rebuild-kernel.sh --arch=x86_64 --out=$ANDROID/prebuilts/qemu-kernel/x86_64
+  /path/to/build-kernel.sh --arch=x86_64 --out=$ANDROID/prebuilts/qemu-kernel/x86_64
 
 To rebuild the ARM64 kernel (version >= 3.10 only):
 
@@ -42,7 +46,7 @@ By default the script tries to find an appropriate toolchain from
 $AOSP/prebuilts/gcc/, but you can specify a different one using the
 --cross=<prefix> option.
 
-See rebuild-kernel.sh --help for more options and details.
+See build-kernel.sh --help for more options and details.
 
 
 II. Rebuilding from scratch:
