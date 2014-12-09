@@ -425,6 +425,8 @@ int main(int argc, char **argv)
         reassign_string(&android_hw->hw_cpu_arch, "x86");
 #elif defined(TARGET_MIPS)
         reassign_string(&android_hw->hw_cpu_arch, "mips");
+#elif defined(TARGET_MIPS64)
+        reassign_string(&android_hw->hw_cpu_arch, "mips64");
 #endif
     }
 

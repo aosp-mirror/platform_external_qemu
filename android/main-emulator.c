@@ -380,6 +380,22 @@ getTargetEmulatorPath(const char* progName,
         }
     }
 
+    // Special case: for mips64, first try to find emulator-mips64 before
+    // looking for emulator-mips.
+    if (!strcmp(avdArch, "mips64")) {
+        emulatorSuffix = "mips64";
+
+        D("Looking for emulator backend for %s CPU\n", avdArch);
+
+        result = probeTargetEmulatorPath(progDir,
+                                         emulatorSuffix,
+                                         search_for_64bit_emulator,
+                                         try_current_path);
+        if (result) {
+            return result;
+        }
+    }
+
     // Now for the regular case.
     emulatorSuffix = emulator_getBackendSuffix(avdArch);
     if (!emulatorSuffix) {
