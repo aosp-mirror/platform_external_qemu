@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "04ccc652_cecee33f",
+        "filename": "android/skin/event-sdl2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-10T08:31:49Z",
+      "side": 1,
+      "message": "You\u0027re right, this should use the SDL2 scancode instead. Unlike SDL1, the keycode is now localized and I missed that difference. I\u0027ll update a fix.\n\nApart from that, I switch between both keyboard pretty frequently. Because SDL 1.x doesn\u0027t support international layout very well, the emulator never tried to be really smart about this. The current code tries to replicate the current behaviour. We should be able to do much better in the future, either with the new frontend, or by improving the SDL2 one once we drop the SDL1 support code.",
+      "parentUuid": "c488eee4_b451715c",
+      "revId": "6ea6546dc68b018b1d75494222019f815d79d0c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c488eee4_effc00cc",
         "filename": "android/skin/event-sdl2.c",
         "patchSetId": 1
@@ -30,6 +48,30 @@
       "writtenOn": "2014-12-09T18:54:30Z",
       "side": 1,
       "message": "Is it always command-Q on all localizations of MacOS?",
+      "range": {
+        "startLine": 250,
+        "startChar": 4,
+        "endLine": 250,
+        "endChar": 10
+      },
+      "revId": "6ea6546dc68b018b1d75494222019f815d79d0c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04ccc652_8ed8db03",
+        "filename": "android/skin/event-sdl2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-10T08:31:49Z",
+      "side": 1,
+      "message": "I don\u0027t know, but nobody ever complained about that.\n\nThe main issue is that SDL 1.x always catches Command-Q and prevents the command from working correctly. Solving this would require patching the libraries in ways I don\u0027t understand properly. If you have any suggestions, they\u0027re welcomed.",
+      "parentUuid": "c488eee4_effc00cc",
       "range": {
         "startLine": 250,
         "startChar": 4,
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "04ccc652_aed597ca",
+        "filename": "android/skin/surface-sdl2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-10T08:31:49Z",
+      "side": 1,
+      "message": "oops, will do.",
+      "parentUuid": "c4bf0e8b_8939b914",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "6ea6546dc68b018b1d75494222019f815d79d0c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c488eee4_0f07e48b",
         "filename": "android/skin/surface-sdl2.c",
         "patchSetId": 1
@@ -82,6 +148,24 @@
     },
     {
       "key": {
+        "uuid": "84927610_05859698",
+        "filename": "android/skin/surface-sdl2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-10T08:31:49Z",
+      "side": 1,
+      "message": "yes, that happens in _skin_surface_destroy_texture() which is called on line 343 before this function.\n\nThe text is to special case the window surface, which has no surface, and may have a texture. I\u0027ll add a comment.",
+      "parentUuid": "c488eee4_0f07e48b",
+      "revId": "6ea6546dc68b018b1d75494222019f815d79d0c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "84b996ac_47972eb1",
         "filename": "android/skin/surface-sdl2.c",
         "patchSetId": 1
@@ -93,6 +177,30 @@
       "writtenOn": "2014-12-09T18:54:30Z",
       "side": 1,
       "message": "Why not use the macro to check the result codes for these SDL calls (also more below)",
+      "range": {
+        "startLine": 498,
+        "startChar": 4,
+        "endLine": 498,
+        "endChar": 16
+      },
+      "revId": "6ea6546dc68b018b1d75494222019f815d79d0c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04ccc652_0edcebf1",
+        "filename": "android/skin/surface-sdl2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-10T08:31:49Z",
+      "side": 1,
+      "message": "Good idea, the macro was introduced to debug some subtle bugs, and this was added on an as-needed basis, but using it everywhere is a good idea, will do.",
+      "parentUuid": "84b996ac_47972eb1",
       "range": {
         "startLine": 498,
         "startChar": 4,
