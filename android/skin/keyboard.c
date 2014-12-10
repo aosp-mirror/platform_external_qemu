@@ -236,7 +236,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             return;
         }
 
-        if (code == KEY_BACKSPACE) {
+        if (code == KEY_BACKSPACE || code == KEY_ENTER) {
             skin_keyboard_do_key_event(kb, code, down);
             skin_keyboard_flush(kb);
             return;
