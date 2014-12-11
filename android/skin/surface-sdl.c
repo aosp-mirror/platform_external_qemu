@@ -11,6 +11,8 @@
 */
 #include "android/skin/surface.h"
 #include "android/skin/argb.h"
+#include "android/skin/scaler.h"
+#include "android/skin/winsys.h"
 #include "android/utils/setenv.h"
 #include <SDL.h>
 
@@ -24,19 +26,23 @@
 #endif
 
 struct SkinSurface {
-    int                  refcount;
-    uint32_t*            pixels;
-    SDL_Surface*         surface;
-    SkinSurfaceDoneFunc  done_func;
-    void*                done_user;
+    int refcount;
+    SDL_Surface* surface;
+    // Only used for scaled window surfaces
+    SkinScaler* scaler;
+    SDL_Surface* scaled_surface;
 };
 
 static void
 skin_surface_free( SkinSurface*  s )
 {
-    if (s->done_func) {
-        s->done_func( s->done_user );
-        s->done_func = NULL;
+    if (s->scaled_surface) {
+        SDL_FreeSurface(s->scaled_surface);
+        s->scaled_surface = NULL;
+    }
+    if (s->scaler) {
+        skin_scaler_free(s->scaler);
+        s->scaler = NULL;
     }
     if (s->surface) {
         SDL_FreeSurface(s->surface);
@@ -79,13 +85,6 @@ skin_surface_height(SkinSurface* s) {
     return s->surface->h;
 }
 
-void
-skin_surface_set_done( SkinSurface*  s, SkinSurfaceDoneFunc  done_func, void*  done_user )
-{
-    s->done_func = done_func;
-    s->done_user = done_user;
-}
-
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 #  define  ARGB32_R_MASK  0x00ff0000
 #  define  ARGB32_G_MASK  0x0000ff00
@@ -123,11 +122,11 @@ _sdl_surface_create_rgb( int  width,
 
 
 static SDL_Surface*
-_sdl_surface_create_rgb_from( int   width,
-                              int   height,
-                              int   pitch,
-                              void* pixels,
-                              int   depth )
+_sdl_surface_create_rgb_from(int   width,
+                             int   height,
+                             int   pitch,
+                             void* pixels,
+                             int   depth)
 {
    Uint32   rmask, gmask, bmask, amask;
 
@@ -148,20 +147,17 @@ _sdl_surface_create_rgb_from( int   width,
 
 
 static SkinSurface*
-_skin_surface_create( SDL_Surface*  surface,
-                      void*         pixels )
+_skin_surface_create(SDL_Surface* surface)
 {
-    SkinSurface*  s = malloc(sizeof(*s));
+    SkinSurface* s = malloc(sizeof(*s));
     if (s != NULL) {
         s->refcount = 1;
-        s->pixels   = pixels;
         s->surface  = surface;
-        s->done_func = NULL;
-        s->done_user = NULL;
+        s->scaler = NULL;
+        s->scaled_surface = NULL;
     }
     else {
         SDL_FreeSurface(surface);
-        free(pixels);
         D( "not enough memory to allocate new skin surface !" );
     }
     return  s;
@@ -171,9 +167,7 @@ _skin_surface_create( SDL_Surface*  surface,
 SkinSurface*
 skin_surface_create_fast( int  w, int  h )
 {
-    SDL_Surface*  surface;
-
-    surface = _sdl_surface_create_rgb( w, h, 32, SDL_HWSURFACE );
+    SDL_Surface* surface = _sdl_surface_create_rgb(w, h, 32, SDL_HWSURFACE);
     if (surface == NULL) {
         surface = _sdl_surface_create_rgb( w, h, 32, SDL_SWSURFACE );
         if (surface == NULL) {
@@ -182,56 +176,37 @@ skin_surface_create_fast( int  w, int  h )
             return NULL;
         }
     }
-    return _skin_surface_create( surface, NULL );
+    return _skin_surface_create(surface);
 }
 
 
 SkinSurface*
 skin_surface_create_slow( int  w, int  h )
 {
-    SDL_Surface*  surface;
-
-    surface = _sdl_surface_create_rgb( w, h, 32, SDL_SWSURFACE );
+    SDL_Surface* surface = _sdl_surface_create_rgb(w, h, 32, SDL_SWSURFACE);
     if (surface == NULL) {
         D( "could not create slow %dx%d ARGB32 surface: %s",
             w, h, SDL_GetError() );
         return NULL;
     }
-    return _skin_surface_create( surface, NULL );
+    return _skin_surface_create(surface);
 }
 
 
 SkinSurface*
-skin_surface_create_argb32_from(
-                        int                  w,
-                        int                  h,
-                        int                  pitch,
-                        uint32_t*            pixels,
-                        int                  do_copy )
+skin_surface_create_argb32_from(int       w,
+                                int       h,
+                                int       pitch,
+                                uint32_t* pixels)
 {
-    SDL_Surface*  surface;
-    uint32_t*     pixcopy = NULL;
-
-    if (do_copy) {
-        size_t  size = h*pitch;
-        pixcopy = malloc( size );
-        if (pixcopy == NULL && size > 0) {
-            D( "not enough memory to create %dx%d ARGB32 surface",
-               w, h );
-            return NULL;
-        }
-        memcpy( pixcopy, pixels, size );
-    }
-
-    surface = _sdl_surface_create_rgb_from( w, h, pitch,
-                                            pixcopy ? pixcopy : pixels,
-                                            32 );
+    SDL_Surface* surface =
+            _sdl_surface_create_rgb_from(w, h, pitch, pixels, 32);
     if (surface == NULL) {
         D( "could not create %dx%d slow ARGB32 surface: %s",
             w, h, SDL_GetError() );
         return NULL;
     }
-    return _skin_surface_create( surface, pixcopy );
+    return _skin_surface_create(surface);
 }
 
 extern SkinSurface*
@@ -239,6 +214,8 @@ skin_surface_create_window(int x,
                            int y,
                            int w,
                            int h,
+                           int original_w,
+                           int original_h,
                            int is_fullscreen)
 {
     char temp[32];
@@ -249,6 +226,14 @@ skin_surface_create_window(int x,
     int flags = SDL_SWSURFACE;
     if (is_fullscreen) {
         flags |= SDL_FULLSCREEN;
+
+        SkinRect r;
+        skin_winsys_get_monitor_rect(&r);
+
+        x = r.pos.x;
+        y = r.pos.y;
+        w = r.size.w;
+        h = r.size.h;
     }
 
     SDL_Surface* surface = SDL_SetVideoMode(w, h, 32, flags);
@@ -259,49 +244,87 @@ skin_surface_create_window(int x,
 
     SDL_WM_SetPos(x, y);
 
-    return _skin_surface_create(surface, NULL);
+    double x_scale = w * 1.0 / original_w;
+    double y_scale = h * 1.0 / original_h;
+    double scale = (x_scale <= y_scale) ? x_scale : y_scale;
+
+    SkinSurface* result = _skin_surface_create(surface);
+    if (result && scale != 1.0) {
+        result->scaler = skin_scaler_create();
+
+        double effective_x = 0.;
+        double effective_y = 0.;
+
+        if (is_fullscreen) {
+            effective_x = (w - original_w * scale) * 0.5;
+            effective_y = (h - original_h * scale) * 0.5;
+        }
+
+        skin_scaler_set(result->scaler,
+                        scale,
+                        effective_x,
+                        effective_y);
+
+        result->scaled_surface = result->surface;
+
+        result->surface = _sdl_surface_create_rgb(original_w,
+                                                  original_h,
+                                                  32,
+                                                  SDL_SWSURFACE);
+        if (!result->surface) {
+            fprintf(stderr,
+                    "### Error: could not create unscaled SDL window: %s\n",
+                    SDL_GetError());
+            exit(1);
+        }
+    }
+    return result;
 }
 
-extern int
-skin_surface_lock( SkinSurface*  s, SkinSurfacePixels  *pix )
-{
-    if (!s || !s->surface) {
-        D( "error: trying to lock stale surface %p", s );
-        return -1;
+void
+skin_surface_reverse_map(SkinSurface* surface,
+                         int* x,
+                         int* y) {
+    if (surface && surface->scaler) {
+        skin_scaler_reverse_map(surface->scaler, x, y);
     }
-    if ( SDL_LockSurface( s->surface ) != 0 ) {
+}
+
+void
+skin_surface_get_scaled_rect(SkinSurface* surface,
+                             const SkinRect* srect,
+                             SkinRect* drect) {
+    if (surface && surface->scaler) {
+        skin_scaler_get_scaled_rect(surface->scaler, srect, drect);
+    } else {
+        *drect = *srect;
+    }
+}
+
+static int _sdl_surface_lock(SDL_Surface* s, SkinSurfacePixels  *pix) {
+    if (SDL_LockSurface(s) != 0) {
         D( "could not lock surface %p: %s", s, SDL_GetError() );
         return -1;
     }
-    pix->w      = s->surface->w;
-    pix->h      = s->surface->h;
-    pix->pitch  = s->surface->pitch;
-    pix->pixels = s->surface->pixels;
+    pix->w      = s->w;
+    pix->h      = s->h;
+    pix->pitch  = s->pitch;
+    pix->pixels = s->pixels;
     return 0;
 }
 
-/* unlock a slow surface that was previously locked */
-extern void
-skin_surface_unlock( SkinSurface*  s )
+extern void _sdl_surface_get_format(SDL_Surface* s,
+                                    SkinSurfacePixelFormat* format)
 {
-    if (s && s->surface)
-        SDL_UnlockSurface( s->surface );
-}
+    format->r_shift = s->format->Rshift;
+    format->g_shift = s->format->Gshift;
+    format->b_shift = s->format->Bshift;
+    format->a_shift = s->format->Ashift;
 
-
-extern void
-skin_surface_get_format(SkinSurface* s,
-                        SkinSurfacePixelFormat* format)
-{
-    format->r_shift = s->surface->format->Rshift;
-    format->g_shift = s->surface->format->Gshift;
-    format->b_shift = s->surface->format->Bshift;
-    format->a_shift = s->surface->format->Ashift;
-
-    format->r_mask = s->surface->format->Rmask;
-    format->g_mask = s->surface->format->Gmask;
-    format->b_mask = s->surface->format->Bmask;
-    format->a_mask = s->surface->format->Amask;
+    format->r_mask = s->format->Rmask;
+    format->g_mask = s->format->Gmask;
+    format->b_mask = s->format->Bmask;
+    format->a_mask = s->format->Amask;
 }
 
 extern void
@@ -314,10 +337,56 @@ skin_surface_set_alpha_blending(SkinSurface*  s, int alpha)
 
 extern void
 skin_surface_update(SkinSurface* s, SkinRect* r) {
-    if (s && s->surface) {
-        SDL_UpdateRect(s->surface, r->pos.x, r->pos.y, r->size.w, r->size.h);
+    if (!s || !s->surface) {
+        return;
     }
+
+    // First, the unscaled case.
+    if (!s->scaler) {
+        SDL_UpdateRect(s->surface, r->pos.x, r->pos.y, r->size.w, r->size.h);
+        return;
+    }
+
+    // Now, the scaled case.
+    SkinScaler* scaler = s->scaler;
+    SDL_Surface* src_surface = s->surface;
+    SkinSurfacePixels src_pix;
+    _sdl_surface_lock(src_surface, &src_pix);
+
+    SDL_Surface* dst_surface = s->scaled_surface;
+    SkinSurfacePixels dst_pix;
+    SkinSurfacePixelFormat dst_format;
+    _sdl_surface_lock(dst_surface, &dst_pix);
+    _sdl_surface_get_format(dst_surface, &dst_format);
+
+    skin_scaler_scale(scaler,
+                      &dst_pix,
+                      &dst_format,
+                      &src_pix,
+                      r);
+
+    SDL_UnlockSurface(dst_surface);
+    SDL_UnlockSurface(src_surface);
+
+    SkinRect dst_rect;
+    skin_scaler_get_scaled_rect(scaler, r, &dst_rect);
+
+    SDL_UpdateRect(dst_surface,
+                   dst_rect.pos.x,
+                   dst_rect.pos.y,
+                   dst_rect.size.w,
+                   dst_rect.size.h);
 }
+
+void
+skin_surface_update_scaled(SkinSurface* dst_surface,
+                           SkinScaler* scaler,
+                           SkinSurface* src_surface,
+                           const SkinRect* src_rect) {
+}
+
+
+
 
 static uint32_t
 skin_surface_map_argb( SkinSurface*  s, uint32_t  c )
@@ -384,4 +453,67 @@ skin_surface_blit( SkinSurface*  dst,
             return;
     }
     SDL_BlitSurface(src->surface, &sr, dst->surface, &dr);
+}
+
+void
+skin_surface_upload(SkinSurface* surface,
+                    SkinRect* rect,
+                    const void* pixels,
+                    int pitch) {
+    // Sanity checks
+    if (!surface || !surface->surface) {
+        return;
+    }
+
+    // Crop rectangle.
+    int dst_w = skin_surface_width(surface);
+    int dst_h = skin_surface_height(surface);
+    int dst_pitch = surface->surface->pitch;
+    int x = 0, y = 0, w = dst_w, h = dst_h;
+
+    if (rect) {
+        x = rect->pos.x;
+        y = rect->pos.y;
+        w = rect->size.w;
+        h = rect->size.h;
+
+        int delta;
+        delta = x + w - dst_w;
+        if (delta > 0) {
+            w -= delta;
+        }
+        delta = y + h - dst_h;
+        if (delta > 0) {
+            h -= delta;
+        }
+        if (x < 0) {
+            w += x;
+            x = 0;
+        }
+        if (y < 0) {
+            h += y;
+            y = 0;
+        }
+    }
+
+    if (w <= 0 || h <= 0) {
+        return;
+    }
+
+    SkinSurfacePixels pix;
+    _sdl_surface_lock(surface->surface, &pix);
+
+    const uint8_t* src_line = (const uint8_t*)pixels;
+
+    uint8_t* dst_line = (uint8_t*)(
+        (char*)pix.pixels + (pix.pitch * y) + (x * 4));
+
+    for (; h > 0; --h) {
+        memcpy(dst_line, src_line, 4 * w);
+        dst_line += dst_pitch;
+        src_line += pitch;
+    }
+
+    SDL_UnlockSurface(surface->surface);
+    skin_surface_update(surface, rect);
 }

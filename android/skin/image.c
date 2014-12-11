@@ -40,25 +40,32 @@ static void D(const char*  fmt, ...)
 /********************************************************************************/
 /********************************************************************************/
 
+// Create a rotated copy of an input image. |data| is the address of the
+// source image pixel buffer, while |width| and |height| are its pixel
+// dimensions. This function assumes 32-bit pixel values, and a pitch of
+// exactly |4 * width| bytes.
+// |rotation| is a SkinRotation value indicating which rotation to apply,
+// in clockwise-90-degrees increments.
+// Returns the address of a new pixel buffer containing the rotated
+// pixels of the copy.
 static void*
-rotate_image( void*  data, unsigned  width, unsigned  height,  SkinRotation  rotation )
-{
-    void*  result;
-
-    result = malloc(width * height * 4);
-    if (result == NULL)
+rotate_image(void* data,
+             unsigned width,
+             unsigned height,
+             SkinRotation rotation) {
+    void* result = malloc(width * height * 4);
+    if (result == NULL) {
         return NULL;
+    }
 
-    switch (rotation & 3)
-    {
-    case SKIN_ROTATION_0:
-        memcpy( (char*)result, (const char*)data, width*height*4 );
-        break;
+    switch (rotation & 3) {
+        case SKIN_ROTATION_0:
+            memcpy((char*)result, (const char*)data, width * height *4);
+            break;
 
-    case SKIN_ROTATION_270:
-        {
+        case SKIN_ROTATION_270: {
             unsigned*  start    = (unsigned*)data;
-            unsigned*  src_line = start + (width-1);
+            unsigned*  src_line = start + (width - 1);
             unsigned*  dst_line = (unsigned*)result;
             unsigned   hh;
 
@@ -70,46 +77,42 @@ rotate_image( void*  data, unsigned  width, unsigned  height,  SkinRotation  rot
 
                 for ( ; count > 0; count-- ) {
                     dst[0] = src[0];
-                    dst   += 1;
-                    src   += width;
+                    dst += 1;
+                    src += width;
                 }
 
                 src_line -= 1;
                 dst_line += height;
             }
+            break;
         }
-        break;
 
-    case SKIN_ROTATION_180:
-        {
+        case SKIN_ROTATION_180: {
             unsigned*  start    = (unsigned*)data;
-            unsigned*  src_line = start + width*(height-1);
+            unsigned*  src_line = start + width * (height - 1);
             unsigned*  dst_line = (unsigned*)result;
             unsigned   hh;
 
-            for (hh = height; hh > 0; hh--)
-            {
-                unsigned*  src = src_line + (width-1);
+            for (hh = height; hh > 0; hh--) {
+                unsigned*  src = src_line + (width - 1);
                 unsigned*  dst = dst_line;
 
-                while (src >= src_line)
+                while (src >= src_line) {
                     *dst++ = *src--;
-
+                }
                 dst_line += width;
                 src_line -= width;
             }
+            break;
         }
-        break;
 
-    case SKIN_ROTATION_90:
-        {
+        case SKIN_ROTATION_90: {
             unsigned*  start    = (unsigned*)data;
-            unsigned*  src_line = start + width*(height-1);
-            unsigned*  dst_line = (unsigned*)result ;
+            unsigned*  src_line = start + width * (height - 1);
+            unsigned*  dst_line = (unsigned*)result;
             unsigned   hh;
 
-            for (hh = width; hh > 0; hh--)
-            {
+            for (hh = width; hh > 0; hh--) {
                 unsigned*  src = src_line;
                 unsigned*  dst = dst_line;
                 unsigned   count;
@@ -123,54 +126,62 @@ rotate_image( void*  data, unsigned  width, unsigned  height,  SkinRotation  rot
                 dst_line += height;
                 src_line += 1;
             }
+            break;
         }
-        break;
 
-    default:
-        ;
+        default:
+            ;
     }
 
     return result;
 }
 
 
+// Compute the blended (alpha-attenuated) pixels of a given source image.
+// |dst_pixels| and |src_pixels| are the address of the destination and
+// source pixel buffers, respectively. |w| and |h| are the width and height
+// of both input and output images. |alpha| is an attenuation factor.
+//
+// This function assumes 32-bit ARGB or BGRA pixels, and a pitch of exactly
+// |4 * w| for both buffers. For each pixel, it will compute:
+//
+//        dst_pixels[n].R = (src_pixels[n].R * alpha) >> 8;
+//        dst_pixels[n].G = (src_pixels[n].G * alpha) >> 8;
+//        dst_pixels[n].B = (src_pixels[n].B * alpha) >> 8;
+//        dst_pixels[n].A = (src_pixels[n].A * alpha) >> 8;
+//
 static void
-blend_image( unsigned*  dst_pixels,
-             unsigned*  src_pixels,
-             unsigned   w,
-             unsigned   h,
-             int        alpha )
-{
+blend_image(unsigned*  dst_pixels,
+            unsigned*  src_pixels,
+            unsigned   w,
+            unsigned   h,
+            int        alpha) {
     unsigned*  dst     = dst_pixels;
-    unsigned*  dst_end = dst + w*h;
+    unsigned*  dst_end = dst + w * h;
     unsigned*  src     = src_pixels;
 
-    for ( ; dst < dst_end; dst++, src++ )
-    {
-        {
-            unsigned  ag = (src[0] >> 8) & 0xff00ff;
-            unsigned  rb =  src[0]       & 0xff00ff;
+    for ( ; dst < dst_end; dst++, src++ ) {
+        unsigned  ag = (src[0] >> 8) & 0xff00ff;
+        unsigned  rb =  src[0]       & 0xff00ff;
 
-            ag = (ag*alpha) & 0xff00ff00;
-            rb = ((rb*alpha) >> 8) & 0x00ff00ff;
+        ag = (ag * alpha) & 0xff00ff00;
+        rb = ((rb * alpha) >> 8) & 0x00ff00ff;
 
-            dst[0] = ag | rb;
-        }
+        dst[0] = ag | rb;
     }
 }
 
 
 static unsigned
-skin_image_desc_hash( SkinImageDesc*  desc )
-{
+skin_image_desc_hash(const SkinImageDesc* desc) {
     unsigned  h = 0;
     int       n;
 
     for (n = 0; desc->path[n] != 0; n++) {
         int  c = desc->path[n];
-        h = h*33 + c;
+        h = h * 33 + c;
     }
-    h += desc->rotation*1573;
+    h += desc->rotation * 1573;
     h += desc->blend * 7;
 
     return  h;
@@ -178,8 +189,8 @@ skin_image_desc_hash( SkinImageDesc*  desc )
 
 
 static int
-skin_image_desc_equal( SkinImageDesc*  a,
-                       SkinImageDesc*  b )
+skin_image_desc_equal(const SkinImageDesc* a,
+                      const SkinImageDesc* b)
 {
     return (a->rotation == b->rotation &&
             a->blend    == b->blend    &&
@@ -212,13 +223,27 @@ struct SkinImage {
 };
 
 
-
-
-static const SkinImage  _no_image[1] = {
-    { 0, NULL, 0, NULL, NULL, NULL, 0, 0, 0, NULL, { "<none>", SKIN_ROTATION_0, 0 } }
+static const SkinImage _no_image[1] = {
+    {
+        .hash = 0,
+        .link = NULL,
+        .ref_count = 0,
+        .next = NULL,
+        .prev = NULL,
+        .surface = NULL,
+        .flags = 0,
+        .w = 0,
+        .h = 0,
+        .pixels = NULL,
+        .desc = (SkinImageDesc){
+            .path = "<none>",
+            .rotation = SKIN_ROTATION_0,
+            .blend = 0,
+        }
+    }
 };
 
-SkinImage*  SKIN_IMAGE_NONE = (SkinImage*)&_no_image;
+SkinImage* SKIN_IMAGE_NONE = (SkinImage*)&_no_image;
 
 static void
 skin_image_free( SkinImage*  image )
@@ -318,7 +343,7 @@ skin_image_load( SkinImage*  image )
     image->w      = w;
     image->h      = h;
 
-    image->surface = skin_surface_create_argb32_from(w, h, w * 4, image->pixels, 0);
+    image->surface = skin_surface_create_argb32_from(w, h, w * 4, image->pixels);
     if (image->surface == NULL) {
         fprintf(stderr, "failed to create skin surface for '%s' image\n", path);
         return -1;
@@ -480,9 +505,6 @@ skin_image_create( SkinImageDesc*  desc, unsigned  hash )
         if (parent == SKIN_IMAGE_NONE)
             return SKIN_IMAGE_NONE;
 
-        SkinSurfacePixels pix;
-        skin_surface_lock(parent->surface, &pix);
-
         if (desc->rotation == SKIN_ROTATION_90 ||
             desc->rotation == SKIN_ROTATION_270)
         {
@@ -493,12 +515,11 @@ skin_image_create( SkinImageDesc*  desc, unsigned  hash )
             node->h = parent->h;
         }
 
-        node->pixels = rotate_image(pix.pixels,
+        node->pixels = rotate_image(parent->pixels,
                                     parent->w,
                                     parent->h,
                                     desc->rotation);
 
-        skin_surface_unlock(parent->surface);
         skin_image_unref(&parent);
 
         if (node->pixels == NULL) {
@@ -517,8 +538,7 @@ skin_image_create( SkinImageDesc*  desc, unsigned  hash )
         node->surface = skin_surface_create_argb32_from(node->w,
                                                         node->h,
                                                         node->w * 4,
-                                                        node->pixels,
-                                                        0);
+                                                        node->pixels);
         if (node->surface == NULL) {
             skin_image_free(node);
             return SKIN_IMAGE_NONE;
@@ -634,7 +654,7 @@ skin_image_clone( SkinImage*  source )
     if (source == NULL || source == _no_image)
         return SKIN_IMAGE_NONE;
 
-    image = calloc(1,sizeof(*image));
+    image = calloc(1, sizeof(*image));
     if (image == NULL)
         goto Fail;
 
@@ -651,8 +671,7 @@ skin_image_clone( SkinImage*  source )
     image->surface = skin_surface_create_argb32_from(image->w,
                                                      image->h,
                                                      image->w * 4,
-                                                     image->pixels,
-                                                     0);
+                                                     image->pixels);
     if (image->surface == NULL)
         goto Fail;
 
@@ -689,17 +708,6 @@ skin_image_clone_full( SkinImage*    source,
         clone->flags |= SKIN_IMAGE_CLONE;
 
     return clone;
-}
-
-/* apply blending to a source skin image and copy the result to a target clone image */
-extern void
-skin_image_blend_clone( SkinImage*  clone, SkinImage*  source, int  blend )
-{
-    SkinSurfacePixels pix;
-    skin_surface_lock(clone->surface, &pix);
-    blend_image(pix.pixels, source->pixels, source->w, source->h, blend);
-    skin_surface_unlock(clone->surface);
-    skin_surface_set_alpha_blending(clone->surface, 255);
 }
 
 int

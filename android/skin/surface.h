@@ -19,19 +19,14 @@
  */
 typedef struct SkinSurface  SkinSurface;
 
+struct SkinScaler;
+
 /* increment surface's reference count */
 extern SkinSurface*  skin_surface_ref( SkinSurface*  surface );
 
 /* decrement a surface's reference count. takes the surface's address as parameter.
    it will be set to NULL on exit */
 extern void          skin_surface_unrefp( SkinSurface*  *psurface );
-
-/* sets a callback that will be called when the surface is destroyed.
- * used NULL for done_func to disable it
- */
-typedef void (*SkinSurfaceDoneFunc)( void*  user );
-
-extern void  skin_surface_set_done( SkinSurface*  s, SkinSurfaceDoneFunc  done_func, void*  done_user );
 
 extern int skin_surface_width(SkinSurface* s);
 extern int skin_surface_height(SkinSurface* s);
@@ -61,15 +56,24 @@ extern SkinSurface*  skin_surface_create_argb32_from(
                             int                  w,
                             int                  h,
                             int                  pitch,
-                            uint32_t*            pixels,
-                            int                  do_copy );
+                            uint32_t*            pixels);
 
 extern SkinSurface* skin_surface_create_window(
                             int x,
                             int y,
                             int w,
                             int h,
+                            int original_w,
+                            int original_h,
                             int is_fullscreen);
+
+extern void skin_surface_reverse_map(SkinSurface* surface,
+                                     int* x,
+                                     int* y);
+
+extern void skin_surface_get_scaled_rect(SkinSurface* surface,
+                                         const SkinRect* srect,
+                                         SkinRect* drect);
 
 /* surface pixels information for slow surfaces */
 typedef struct {
@@ -90,19 +94,22 @@ typedef struct {
     uint32_t a_mask;
 } SkinSurfacePixelFormat;
 
-/* lock a slow surface, and returns its pixel information.
-   returns 0 in case of success, -1 otherwise */
-extern int     skin_surface_lock  ( SkinSurface*  s, SkinSurfacePixels  *pix );
-
-/* unlock a slow surface that was previously locked */
-extern void    skin_surface_unlock( SkinSurface*  s );
-
 extern void    skin_surface_get_format(SkinSurface* s,
                                        SkinSurfacePixelFormat* format);
 
 extern void    skin_surface_set_alpha_blending( SkinSurface*  s, int alpha );
 
 extern void    skin_surface_update(SkinSurface* surface, SkinRect* rect);
+
+extern void    skin_surface_update_scaled(SkinSurface* dst_surface,
+                                          struct SkinScaler* scaler,
+                                          SkinSurface* src_surface,
+                                          const SkinRect* src_rect);
+
+extern void    skin_surface_upload(SkinSurface* surface,
+                                   SkinRect* rect,
+                                   const void* pixels,
+                                   int pitch);
 
 /* list of composition operators for the blit routine */
 typedef enum {
