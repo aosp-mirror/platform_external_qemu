@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e497b25c_022aca6b",
+        "filename": "Makefile.qemu-launcher",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-11T10:58:42Z",
+      "side": 1,
+      "message": "I propose to simplify this patch by using EMULATOR_TARGET_CPU directly, and using a single module definition as in:\n\n  \n  # Check EMULATOR_TARGET_CPU value and determine\n  # corresponding TARGET_XXX macro at the same time\n  TARGET_VARNAME_arm64  :\u003d TARGET_ARM64\n  TARGET_VARNAME_mips64 :\u003d TARGET_MIPS64\n  ifeq (,$(strip $(TARGET_VARNAME_$(EMULATOR_TARGET_CPU))))\n    $(error Unrecognized EMULATOR_TARGET_CPU value: [$(EMULATOR_TARGET_CPU)])\n  endif\n  \n  ...\n   \n  qemu_launcher_CFLAGS :\u003d \\\n    -DNO_SKIN\u003d1 \\\n    -D$(TARGET_VARNAME_$(EMULATOR_TARGET_CPU))\u003d1 \\\n    -I$(OBJS_DIR)\n  \n  ...\n  \n  $(call start-emulator-program, emulator-$(EMULATOR_TARGET_CPU))\n  ...\n  $(call end-emulator-program)\n  \n  $(call start-emulator-program, emulator64-$(EMULATOR_TARGET_CPU))\n  ...\n  $(call end-emulator-program)\n  \n\nThis will reduce code duplication and make it easier to support more CPU architectures in the near future.",
+      "revId": "c262edcd6eaaf3fd1383e7dc9359b571133f4066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44731e24_e5cb765a",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-11T10:58:42Z",
+      "side": 1,
+      "message": "is this still needed now that you\u0027ve modified android/util/avd.c to return \"mips64\" as the suffix for mips64 system images anyway?",
+      "revId": "c262edcd6eaaf3fd1383e7dc9359b571133f4066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e497b25c_4238d2be",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-11T10:58:42Z",
+      "side": 1,
+      "message": "It\u0027s probably better to use #ifdef here for consistency, and avoid warnings with some compilers / preprocessors when the macro is not defined.",
+      "revId": "c262edcd6eaaf3fd1383e7dc9359b571133f4066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
