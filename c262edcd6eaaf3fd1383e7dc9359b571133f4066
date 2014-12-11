@@ -50,6 +50,23 @@
       "revId": "c262edcd6eaaf3fd1383e7dc9359b571133f4066",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e497b25c_a2df9e1d",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 785,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2014-12-11T10:59:37Z",
+      "side": 1,
+      "message": "any specific reason not to use keep_bootcon and earlyprintk here? I believe these could be useful for debugging the kernel boot at this point (we might also want to modify their addition based on -show-kernel in a future patch).",
+      "revId": "c262edcd6eaaf3fd1383e7dc9359b571133f4066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
