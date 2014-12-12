@@ -20,7 +20,7 @@ TEST(AvdUtil, emulator_getBackendSuffix) {
   EXPECT_STREQ("x86", emulator_getBackendSuffix("x86_64"));
   EXPECT_STREQ("mips", emulator_getBackendSuffix("mips"));
   EXPECT_STREQ("arm", emulator_getBackendSuffix("arm64"));
-  EXPECT_STREQ("mips", emulator_getBackendSuffix("mips64"));
+  EXPECT_STREQ("mips64", emulator_getBackendSuffix("mips64"));
 
   EXPECT_FALSE(emulator_getBackendSuffix(NULL));
   EXPECT_FALSE(emulator_getBackendSuffix("dummy"));
