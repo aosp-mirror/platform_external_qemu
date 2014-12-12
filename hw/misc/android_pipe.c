@@ -789,6 +789,7 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     android_zero_pipe_init();
     android_pingpong_init();
     android_throttle_init();
+    android_sensors_init();
 
     /* TODO: This may be a complete hack and there may be beautiful QOM ways
      * to accomplish this.
@@ -796,6 +797,7 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
      * Initialize android pipe backends
      */
     android_adb_dbg_backend_init();
+
 }
 
 void
