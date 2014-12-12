@@ -84,7 +84,11 @@ static const char kHostOs[] = "windows";
 #endif
 
 // The target CPU architecture.
+#ifdef TARGET_ARM64
 const char kTargetArch[] = "aarch64";
+#elif TARGET_MIPS64
+const char kTargetArch[] = "mips64el";
+#endif
 
 String getNthParentDir(const char* path, size_t n) {
     StringVector dir = PathUtils::decompose(path);
@@ -285,6 +289,8 @@ extern "C" int main(int argc, char **argv, char **envp) {
         reassign_string(&android_hw->hw_cpu_arch, "x86");
 #elif defined(TARGET_MIPS)
         reassign_string(&android_hw->hw_cpu_arch, "mips");
+#elif defined(TARGET_MIPS64)
+        reassign_string(&android_hw->hw_cpu_arch, "mips64");
 #elif defined(TARGET_ARM64)
         reassign_string(&android_hw->hw_cpu_arch, "arm64");
 #endif
@@ -757,7 +763,12 @@ extern "C" int main(int argc, char **argv, char **envp) {
     args[n++] = qemuExecutable.c_str();
 
     args[n++] = "-cpu";
+
+#if defined(TARGET_MIPS64)
+    args[n++] = "MIPS64R6-generic";
+#elif defined(TARGET_ARM64)
     args[n++] = "cortex-a57";
+#endif
     args[n++] = "-machine";
     args[n++] = "type=ranchu";
 
@@ -768,8 +779,11 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     // Command-line
     args[n++] = "-append";
-    String kernelCommandLine =
-            "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0";
+#if defined(TARGET_ARM64)
+    String kernelCommandLine = "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0";
+#elif defined(TARGET_MIPS64)
+    String kernelCommandLine = "console=ttyGF0,38400";
+#endif
     args[n++] = kernelCommandLine.c_str();
 
     args[n++] = "-serial";
