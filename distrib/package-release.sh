@@ -655,7 +655,7 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
         for ARCH in arm x86 mips; do
             FILES="$FILES emulator$BITNESS-$ARCH$EXEEXT"
         done
-        for ARCH in arm64; do
+        for ARCH in arm64 mips64; do
             if [ -f "$SRC_DIR/tools/emulator64-$ARCH$EXEEXT" ]; then
                 FILES="$FILES emulator64-$ARCH$EXEEXT"
             fi
