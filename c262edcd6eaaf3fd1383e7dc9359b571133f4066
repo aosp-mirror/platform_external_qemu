@@ -67,6 +67,24 @@
       "revId": "c262edcd6eaaf3fd1383e7dc9359b571133f4066",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e433327d_a2dbfefa",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 785,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2014-12-12T11:33:11Z",
+      "side": 1,
+      "message": "We have removed keep_bootcon because it was actually producing duplicate outputs. Boot console for MIPS uses prom_putchar() function which is implemented for each MIPS platform separately. It has a direct access to specific serial device. For Ranchu kernel it is set to use ttyGF0.\nSo if you set \"keep_bootcon\", \"cosole\u003dttyGF0\" will dispatch another console and produce double outputs.\n\nWe have tested keep_bootcon for ARM64 and it actually has no effect.",
+      "parentUuid": "e497b25c_a2df9e1d",
+      "revId": "c262edcd6eaaf3fd1383e7dc9359b571133f4066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
