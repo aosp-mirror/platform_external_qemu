@@ -39,7 +39,7 @@ void myFlushFunc(int* codes, int count) {
 
 }  // namespace
 
-TEST(keycode_buffer,skin_keycodes_buffer_flush) {
+TEST(keycode_buffer,skin_keycode_buffer_flush) {
     static const struct {
         int expected;
         unsigned code;
@@ -54,11 +54,11 @@ TEST(keycode_buffer,skin_keycodes_buffer_flush) {
 
     SkinKeycodeBuffer buffer;
 
-    skin_keycodes_buffer_init(&buffer, &myFlushFunc);
+    skin_keycode_buffer_init(&buffer, &myFlushFunc);
     for (size_t nn = 0U; nn < kDataLen; ++nn) {
-        skin_keycodes_buffer_add(&buffer, kData[nn].code, kData[nn].down);
+        skin_keycode_buffer_add(&buffer, kData[nn].code, kData[nn].down);
     }
-    skin_keycodes_buffer_flush(&buffer);
+    skin_keycode_buffer_flush(&buffer);
 
     EXPECT_EQ(kDataLen, static_cast<size_t>(sCodesCount));
     for (size_t nn = 0U; nn < kDataLen; ++nn) {
