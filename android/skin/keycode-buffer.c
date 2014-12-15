@@ -24,7 +24,7 @@ void skin_keycodes_buffer_init(SkinKeycodeBuffer* buffer,
 
 void skin_keycodes_buffer_add(SkinKeycodeBuffer* keycodes,
                               unsigned code,
-                              unsigned down) {
+                              bool down) {
     if (code != 0 && keycodes->keycode_count < MAX_KEYCODES) {
         keycodes->keycodes[(int)keycodes->keycode_count++] =
                 ( (code & 0x1ff) | (down ? 0x200 : 0) );
