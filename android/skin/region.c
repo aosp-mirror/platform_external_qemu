@@ -80,21 +80,18 @@ typedef SkinRegion      Region;
 #define  RUNS_EMPTY   ((Run*)(void*)(-1))
 #define  RUNS_RECT    ((Run*)(void*)(0))
 
-static __inline__ int
-region_isEmpty( Region*  r )
-{
+static __inline__ bool
+region_isEmpty(const Region*  r) {
     return r->runs == RUNS_EMPTY;
 }
 
-static __inline__ int
-region_isRect( Region*  r )
-{
+static __inline__ bool
+region_isRect(const Region* r) {
     return r->runs == RUNS_RECT;
 }
 
-static __inline__ int
-region_isComplex( Region*  r )
-{
+static __inline__ bool
+region_isComplex(const Region* r) {
     return r->runs != RUNS_EMPTY && r->runs != RUNS_RECT;
 }
 
@@ -158,8 +155,7 @@ runstore_ref( RunStore*  s )
 }
 
 static __inline__ RunStore*
-runstore_from_runs( Run*  runs )
-{
+runstore_from_runs(const Run* runs) {
     RASSERT(runs != RUNS_EMPTY);
     RASSERT(runs != RUNS_RECT);
     return (RunStore*)runs - 1;
@@ -216,9 +212,7 @@ runs_find_y( Run*  runs, int  y )
     return NULL;
 }
 
-static void
-runs_set_rect( Run*  runs, SkinRect*  rect )
-{
+static void runs_set_rect(Run* runs, const SkinRect* rect) {
     runs[0] = rect->pos.y;
     runs[1] = rect->pos.y + rect->size.h;
     runs[2] = rect->pos.x;
@@ -227,9 +221,7 @@ runs_set_rect( Run*  runs, SkinRect*  rect )
     runs[5] = YSENTINEL;
 }
 
-static Run*
-runs_copy_scanline( Run*  dst, Run*  src )
-{
+static Run* runs_copy_scanline(Run* dst, const Run* src) {
     RASSERT(src[0] != YSENTINEL);
     RASSERT(src[1] != YSENTINEL);
     dst[0] = src[0];
@@ -240,9 +232,7 @@ runs_copy_scanline( Run*  dst, Run*  src )
     return dst;
 }
 
-static Run*
-runs_copy_scanline_adj( Run*  dst, Run*  src, int  ytop, int  ybot )
-{
+static Run* runs_copy_scanline_adj(Run* dst, const Run* src, int ytop, int ybot ) {
     Run*  runs2 = runs_copy_scanline( dst, src );
     dst[0] = (Run) ytop;
     dst[1] = (Run) ybot;
@@ -257,9 +247,7 @@ runs_add_span( Run*  dst, int  left, int  right )
     return dst + 2;
 }
 
-static __inline__ int
-runs_get_count( Run*  runs )
-{
+static __inline__ int runs_get_count(const Run* runs) {
     RunStore*  s = runstore_from_runs(runs);
     return s->count;
 }
@@ -363,18 +351,14 @@ runs_coalesce( Run*  dst, Run*  src, SkinBox*  minmax )
  ****
  ****/
 
-void
-skin_region_init_empty( SkinRegion*  r )
-{
+void skin_region_init_empty(SkinRegion* r) {
     /* empty region */
     r->bounds.pos.x  = r->bounds.pos.y = 0;
     r->bounds.size.w = r->bounds.size.h = 0;
     r->runs = RUNS_EMPTY;
 }
 
-void
-skin_region_init( SkinRegion*  r, int  x1, int  y1, int  x2, int  y2 )
-{
+void skin_region_init(SkinRegion* r, int x1, int y1, int x2, int y2) {
     if (x1 >= x2 || y1 >= y2) {
         skin_region_init_empty(r);
         return;
@@ -386,9 +370,7 @@ skin_region_init( SkinRegion*  r, int  x1, int  y1, int  x2, int  y2 )
     r->runs = RUNS_RECT;
 }
 
-void
-skin_region_init_rect( SkinRegion*  r, SkinRect*  rect )
-{
+void skin_region_init_rect(SkinRegion* r, const SkinRect* rect) {
     if (rect == NULL || rect->size.w <= 0 || rect->size.h <= 0) {
         skin_region_init_empty(r);
         return;
@@ -397,9 +379,7 @@ skin_region_init_rect( SkinRegion*  r, SkinRect*  rect )
     r->runs   = RUNS_RECT;
 }
 
-void
-skin_region_init_box( SkinRegion*  r, SkinBox*  box )
-{
+void skin_region_init_box(SkinRegion* r, const SkinBox* box) {
     if (box == NULL || box->x1 >= box->x2 || box->y1 >= box->y2) {
         skin_region_init_empty(r);
         return;
@@ -411,9 +391,7 @@ skin_region_init_box( SkinRegion*  r, SkinBox*  box )
     r->runs = RUNS_RECT;
 }
 
-void
-skin_region_init_copy( SkinRegion*  r, SkinRegion*  src )
-{
+void skin_region_init_copy(SkinRegion* r, const SkinRegion* src) {
     if (src == NULL || region_isEmpty(src))
         skin_region_init_empty(r);
     else {
@@ -426,9 +404,7 @@ skin_region_init_copy( SkinRegion*  r, SkinRegion*  src )
 }
 
 
-void
-skin_region_reset( SkinRegion*  r )
-{
+void skin_region_reset(SkinRegion* r) {
     if (r != NULL) {
         if (region_isComplex(r)) {
             RunStore*  s = runstore_from_runs(r->runs);
@@ -440,17 +416,13 @@ skin_region_reset( SkinRegion*  r )
 
 
 
-void
-skin_region_copy( SkinRegion*  r, SkinRegion*  src )
-{
+void skin_region_copy(SkinRegion* r, const SkinRegion* src) {
     skin_region_reset(r);
     skin_region_init_copy(r, src);
 }
 
 
-int
-skin_region_equals( SkinRegion*  r1, SkinRegion*  r2 )
-{
+bool skin_region_equals(const SkinRegion*  r1, const SkinRegion*  r2) {
     Run       *runs1, *runs2;
     RunStore  *store1, *store2;
 

@@ -14,23 +14,29 @@
 
 #include "android/skin/rect.h"
 
+#include "android/utils/compiler.h"
+
+#include <stdbool.h>
+
+ANDROID_BEGIN_HEADER
+
 typedef struct SkinRegion  SkinRegion;
 
-extern void  skin_region_init_empty( SkinRegion*  r );
-extern void  skin_region_init( SkinRegion*  r, int  x1, int  y1, int  x2, int  y2 );
-extern void  skin_region_init_rect( SkinRegion*  r, SkinRect*  rect );
-extern void  skin_region_init_box( SkinRegion*  r, SkinBox*  box );
-extern void  skin_region_init_copy( SkinRegion*  r, SkinRegion*  r2 );
-extern void  skin_region_reset( SkinRegion*  r );
+extern void skin_region_init_empty(SkinRegion* r);
+extern void skin_region_init(SkinRegion* r, int x1, int y1, int x2, int y2);
+extern void skin_region_init_rect(SkinRegion* r, const SkinRect* rect);
+extern void skin_region_init_box(SkinRegion* r, const SkinBox* box);
+extern void skin_region_init_copy(SkinRegion* r, const SkinRegion* r2);
+extern void skin_region_reset(SkinRegion* r);
 
 /* finalize region, then copy src into it */
-extern void  skin_region_copy( SkinRegion*  r, SkinRegion*  src );
+extern void skin_region_copy(SkinRegion* r, const SkinRegion* src);
 
 /* compare two regions for equality */
-extern int   skin_region_equals( SkinRegion*  r1, SkinRegion*  r2 );
+extern bool skin_region_equals(const SkinRegion* r1, const SkinRegion* r2);
 
 /* swap two regions */
-extern void  skin_region_swap( SkinRegion*  r, SkinRegion*  r2 );
+extern void  skin_region_swap(SkinRegion* r, SkinRegion* r2);
 
 extern int   skin_region_is_empty( SkinRegion*  r );
 extern int   skin_region_is_rect( SkinRegion*  r );
@@ -99,5 +105,7 @@ struct SkinRegionIterator
     SkinRegionRun*  band;
     SkinRegionRun*  span;
 };
+
+ANDROID_END_HEADER
 
 #endif /* _ANDROID_SKIN_REGION_H */

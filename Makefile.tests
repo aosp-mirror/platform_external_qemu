@@ -91,6 +91,7 @@ ANDROID_SKIN_UNITTESTS := \
     android/skin/keycode_unittest.cpp \
     android/skin/keycode-buffer_unittest.cpp \
     android/skin/rect_unittest.cpp \
+    android/skin/region_unittest.cpp \
 
 $(call start-emulator-program, android_skin_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include
