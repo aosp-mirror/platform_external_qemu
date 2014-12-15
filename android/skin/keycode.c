@@ -111,6 +111,7 @@ SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     _KEYSYM_(RIGHT,Right) \
     _KEYSYM_(LEFT,Left) \
     _KEYSYM_(INSERT,Insert) \
+    _KEYSYM_(DELETE,Delete) \
     _KEYSYM_(HOME,Home) \
     _KEYSYM_(END,End) \
     _KEYSYM_(PAGEUP,PageUp) \
@@ -249,8 +250,8 @@ bool skin_key_pair_from_string(const char* str,
         {
             *pkeycode = keysym_names[nn]._sym;
             *pmod = mod;
-            return 0;
+            return true;
         }
     }
-    return -1;
+    return false;
 }
