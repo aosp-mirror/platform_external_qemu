@@ -16,13 +16,13 @@
 
 #include <stdio.h>
 
-void skin_keycodes_buffer_init(SkinKeycodeBuffer* buffer,
+void skin_keycode_buffer_init(SkinKeycodeBuffer* buffer,
                                SkinKeyCodeFlushFunc flush_func) {
     buffer->keycode_flush = flush_func;
     buffer->keycode_count = 0;
 }
 
-void skin_keycodes_buffer_add(SkinKeycodeBuffer* keycodes,
+void skin_keycode_buffer_add(SkinKeycodeBuffer* keycodes,
                               unsigned code,
                               bool down) {
     if (code != 0 && keycodes->keycode_count < MAX_KEYCODES) {
@@ -31,7 +31,7 @@ void skin_keycodes_buffer_add(SkinKeycodeBuffer* keycodes,
     }
 }
 
-void skin_keycodes_buffer_flush(SkinKeycodeBuffer* keycodes) {
+void skin_keycode_buffer_flush(SkinKeycodeBuffer* keycodes) {
     if (keycodes->keycode_count > 0) {
         if (VERBOSE_CHECK(keys)) {
             int  nn;

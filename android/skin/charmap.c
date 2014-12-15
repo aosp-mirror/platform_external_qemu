@@ -675,7 +675,7 @@ skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
     /* check base keys */
     for (n = 0; n < cmap->num_entries; n++) {
         if (cmap->entries[n].base == unicode) {
-            skin_keycodes_buffer_add(keycodes, cmap->entries[n].code, down);
+            skin_keycode_buffer_add(keycodes, cmap->entries[n].code, down);
             return 1;
         }
     }
@@ -684,11 +684,11 @@ skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
     for (n = 0; n < cmap->num_entries; n++) {
         if (cmap->entries[n].caps == unicode) {
             if (down) {
-                skin_keycodes_buffer_add(keycodes, kKeyCodeCapLeft, down);
+                skin_keycode_buffer_add(keycodes, kKeyCodeCapLeft, down);
             }
-            skin_keycodes_buffer_add(keycodes, cmap->entries[n].code, down);
+            skin_keycode_buffer_add(keycodes, cmap->entries[n].code, down);
             if (!down) {
-                skin_keycodes_buffer_add(keycodes, kKeyCodeCapLeft, down);
+                skin_keycode_buffer_add(keycodes, kKeyCodeCapLeft, down);
             }
             return 2;
         }
@@ -698,11 +698,11 @@ skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
     for (n = 0; n < cmap->num_entries; n++) {
         if (cmap->entries[n].fn == unicode) {
             if (down) {
-                skin_keycodes_buffer_add(keycodes, kKeyCodeAltLeft, down);
+                skin_keycode_buffer_add(keycodes, kKeyCodeAltLeft, down);
             }
-            skin_keycodes_buffer_add(keycodes, cmap->entries[n].code, down);
+            skin_keycode_buffer_add(keycodes, cmap->entries[n].code, down);
             if (!down) {
-                skin_keycodes_buffer_add(keycodes, kKeyCodeAltLeft, down);
+                skin_keycode_buffer_add(keycodes, kKeyCodeAltLeft, down);
             }
             return 2;
         }
@@ -712,13 +712,13 @@ skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
     for (n = 0; n < cmap->num_entries; n++) {
         if (cmap->entries[n].caps_fn == unicode) {
             if (down) {
-                skin_keycodes_buffer_add(keycodes, kKeyCodeAltLeft, down);
-                skin_keycodes_buffer_add(keycodes, kKeyCodeCapLeft, down);
+                skin_keycode_buffer_add(keycodes, kKeyCodeAltLeft, down);
+                skin_keycode_buffer_add(keycodes, kKeyCodeCapLeft, down);
             }
-            skin_keycodes_buffer_add(keycodes, cmap->entries[n].code, down);
+            skin_keycode_buffer_add(keycodes, cmap->entries[n].code, down);
             if (!down) {
-                skin_keycodes_buffer_add(keycodes, kKeyCodeCapLeft, down);
-                skin_keycodes_buffer_add(keycodes, kKeyCodeAltLeft, down);
+                skin_keycode_buffer_add(keycodes, kKeyCodeCapLeft, down);
+                skin_keycode_buffer_add(keycodes, kKeyCodeAltLeft, down);
             }
             return 3;
         }
