@@ -12,10 +12,13 @@
 #ifndef ANDROID_SKIN_KEYCODE_H
 #define ANDROID_SKIN_KEYCODE_H
 
+#include "android/utils/compiler.h"
 #include "android/skin/linux_keycodes.h"
 
 #include <stdbool.h>
 #include <stdint.h>
+
+ANDROID_BEGIN_HEADER
 
 /* Define layout-independent key codes. Think of it as "the user pressed
  * the key that corresponds to Q on a US QWERTY keyboard".
@@ -170,5 +173,7 @@ extern const char* skin_key_pair_to_string(uint32_t keycode, uint32_t mod);
 extern bool skin_key_pair_from_string(const char* str,
                                       uint32_t* keycode,
                                       uint32_t* mod);
+
+ANDROID_END_HEADER
 
 #endif /* ANDROID_SKIN_KEYCODE_H */
