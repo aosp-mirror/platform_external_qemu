@@ -48,7 +48,6 @@ emugl-begin-module = \
     $(eval LOCAL_C_INCLUDES += $(EMUGL_COMMON_INCLUDES)) \
     $(eval LOCAL_CFLAGS += $(EMUGL_COMMON_CFLAGS)) \
     $(eval LOCAL_LDLIBS += -lstdc++) \
-    $(eval LOCAL_PRELINK_MODULE := false)\
     $(eval _EMUGL_INCLUDE_TYPE := $(BUILD_$2)) \
     $(eval LOCAL_MODULE_BITS := 32) \
     $(call _emugl-init-module,$1,$2,$3)
