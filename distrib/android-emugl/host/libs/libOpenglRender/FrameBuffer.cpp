@@ -366,6 +366,7 @@ FrameBuffer::FrameBuffer(int p_width, int p_height) :
     m_eglSurface(EGL_NO_SURFACE),
     m_eglContext(EGL_NO_CONTEXT),
     m_pbufContext(EGL_NO_CONTEXT),
+    m_prevDisplay(EGL_NO_DISPLAY),
     m_prevContext(EGL_NO_CONTEXT),
     m_prevReadSurf(EGL_NO_SURFACE),
     m_prevDrawSurf(EGL_NO_SURFACE),
@@ -753,6 +754,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
 //
 bool FrameBuffer::bind_locked()
 {
+    EGLDisplay prevDisplay = s_egl.eglGetCurrentDisplay();
     EGLContext prevContext = s_egl.eglGetCurrentContext();
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
@@ -763,6 +765,7 @@ bool FrameBuffer::bind_locked()
         return false;
     }
 
+    m_prevDisplay = prevDisplay;
     m_prevContext = prevContext;
     m_prevReadSurf = prevReadSurf;
     m_prevDrawSurf = prevDrawSurf;
@@ -771,6 +774,7 @@ bool FrameBuffer::bind_locked()
 
 bool FrameBuffer::bindSubwin_locked()
 {
+    EGLDisplay prevDisplay = s_egl.eglGetCurrentDisplay();
     EGLContext prevContext = s_egl.eglGetCurrentContext();
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
@@ -789,6 +793,7 @@ bool FrameBuffer::bindSubwin_locked()
         m_eglContextInitialized = true;
     }
 
+    m_prevDisplay = prevDisplay;
     m_prevContext = prevContext;
     m_prevReadSurf = prevReadSurf;
     m_prevDrawSurf = prevDrawSurf;
@@ -797,11 +802,17 @@ bool FrameBuffer::bindSubwin_locked()
 
 bool FrameBuffer::unbind_locked()
 {
-    if (!s_egl.eglMakeCurrent(m_eglDisplay, m_prevDrawSurf,
-                              m_prevReadSurf, m_prevContext)) {
+    EGLDisplay prevDisplay =
+            (m_prevDisplay != EGL_NO_DISPLAY) ? m_prevDisplay : m_eglDisplay;
+
+    if (!s_egl.eglMakeCurrent(prevDisplay,
+                              m_prevDrawSurf,
+                              m_prevReadSurf,
+                              m_prevContext)) {
         return false;
     }
 
+    m_prevDisplay = EGL_NO_DISPLAY;
     m_prevContext = EGL_NO_CONTEXT;
     m_prevReadSurf = EGL_NO_SURFACE;
     m_prevDrawSurf = EGL_NO_SURFACE;
