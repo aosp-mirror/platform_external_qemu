@@ -27,6 +27,9 @@ endif
 #
 EMUGL_COMMON_CFLAGS := -DWITH_GLES2
 
+# Needed to ensure SIZE_MAX is properly defined when including <stdint.h>
+EMUGL_COMMON_CFLAGS += -D__STDC_LIMIT_MACROS=1
+
 # Define EMUGL_BUILD_DEBUG=1 in your environment to build a
 # debug version of the EmuGL host binaries.
 ifneq (,$(strip $(EMUGL_BUILD_DEBUG)))

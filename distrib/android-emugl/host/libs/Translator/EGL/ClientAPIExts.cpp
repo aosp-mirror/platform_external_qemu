@@ -63,7 +63,7 @@ static struct _ext_table
 // This function initialized each entry in the s_client_extensions
 // struct at the givven index using the givven client interface
 //
-void initClientFuncs(GLESiface *iface, int idx)
+void initClientFuncs(const GLESiface *iface, int idx)
 {
 #define API_ENTRY(fname,params,args) \
     s_client_extensions[idx].fname = \

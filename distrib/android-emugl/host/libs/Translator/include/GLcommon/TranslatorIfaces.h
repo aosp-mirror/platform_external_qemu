@@ -92,11 +92,11 @@ typedef struct {
 
 typedef struct {
     GLEScontext* (*getGLESContext)();
-    EglImage* (*eglAttachEGLImage)(unsigned int imageId);
-    void        (*eglDetachEGLImage)(unsigned int imageId);
+    EglImage*    (*eglAttachEGLImage)(unsigned int imageId);
+    void         (*eglDetachEGLImage)(unsigned int imageId);
 }EGLiface;
 
-typedef GLESiface* (*__translator_getGLESIfaceFunc)(EGLiface*);
+typedef GLESiface* (*__translator_getGLESIfaceFunc)(const EGLiface*);
 
 }
 #endif
