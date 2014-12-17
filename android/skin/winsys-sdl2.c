@@ -23,6 +23,8 @@
 static SDL_Window* s_window = NULL;
 static SDL_Renderer* s_renderer = NULL;
 static SDL_Surface* s_window_icon = NULL;
+static SDL_GLContext* s_gl_context = NULL;
+static SDL_GLContext* s_prev_gl_context = NULL;
 
 static void set_window_icon(void) {
     if (s_window && s_window_icon) {
@@ -239,6 +241,25 @@ void skin_winsys_start(bool no_window, bool raw_keys) {
         fprintf(stderr, "SDL init failure, reason is: %s\n", SDL_GetError() );
         exit(1);
     }
+}
+
+void skin_winsys_opengl_begin(void) {
+    if (!s_window) {
+        return;
+    }
+    s_prev_gl_context = SDL_GL_GetCurrentContext();
+    s_gl_context = SDL_GL_CreateContext(s_window);
+    SDL_GL_MakeCurrent(s_window, s_gl_context);
+}
+
+void skin_winsys_opengl_end(void) {
+    if (!s_gl_context) {
+        return;
+    }
+    SDL_GL_MakeCurrent(s_window, s_prev_gl_context);
+    SDL_GL_DeleteContext(s_gl_context);
+    s_prev_gl_context = NULL;
+    s_gl_context = NULL;
 }
 
 void skin_winsys_quit(void) {

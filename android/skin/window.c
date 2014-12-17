@@ -1176,8 +1176,9 @@ skin_window_show_trackball( SkinWindow*  window, int  enable )
 static void
 skin_window_hide_opengles( SkinWindow* window )
 {
+    skin_winsys_opengl_begin();
     window->win_funcs->opengles_hide();
-    //android_hideOpenglesWindow();
+    skin_winsys_opengl_end();
 }
 
 /* Show the OpenGL ES framebuffer window */
@@ -1191,20 +1192,23 @@ skin_window_show_opengles( SkinWindow* window )
 
         skin_surface_get_scaled_rect(window->surface, &drect, &drect);
 
+        skin_winsys_opengl_begin();
         window->win_funcs->opengles_show(winhandle,
                                          drect.pos.x,
                                          drect.pos.y,
                                          drect.size.w,
                                          drect.size.h,
                                          disp->rotation * -90.);
+        skin_winsys_opengl_end();
     }
 }
 
 static void
 skin_window_redraw_opengles( SkinWindow* window )
 {
+    skin_winsys_opengl_begin();
     window->win_funcs->opengles_redraw();
-    //android_redrawOpenglesWindow();
+    skin_winsys_opengl_end();
 }
 
 static int  skin_window_reset_internal (SkinWindow*, SkinLayout*);

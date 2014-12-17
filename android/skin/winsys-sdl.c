@@ -161,6 +161,14 @@ void skin_winsys_start(bool no_window, bool raw_keys) {
     }
 }
 
+void skin_winsys_opengl_begin(void) {
+    // Nothing to do here.
+}
+
+void skin_winsys_opengl_end(void) {
+    // Nothing to do here.
+}
+
 void skin_winsys_quit(void) {
     SDL_Quit();
 }

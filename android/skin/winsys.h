@@ -58,6 +58,22 @@ void skin_winsys_start(bool no_window, bool raw_keys);
 void skin_winsys_set_window_icon(const unsigned char* icon_data,
                                  size_t icon_data_size);
 
+// Because SDL2 assume that it is the only thing that talks to GL in the
+// main thread, conflicts arise when GPU emulation is turned on (because
+// the GPU emulation library creates its own GLDisplay and GLContext).
+//
+// To work-around, this function will be called before any call to the
+// GPU emulation library. Its purpose is to ensure that the backend
+// saves the current GL context, and creates a new dummy one.
+//
+// After the library, call, skin_winsys_opengl_end() will be called to
+// restore the original GLContext in the current thread.
+void skin_winsys_opengl_begin(void);
+
+// Used after skin_winsys_opengl_begin(), see comment above.
+// This will restore the previous GLContext, and destroy the dummy one.
+void skin_winsys_opengl_end(void);
+
 // Stop main window and quit program. Must be called from inside event loop.
 void skin_winsys_quit(void);
 
