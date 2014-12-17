@@ -18,10 +18,6 @@
 #define EGLAPI __declspec(dllexport)
 #endif
 
-#include <EGL/egl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <stdio.h>
 #include "ThreadInfo.h"
 #include <GLcommon/TranslatorIfaces.h>
 #include "emugl/common/shared_library.h"
@@ -37,6 +33,12 @@
 #include "EglConfig.h"
 #include "EglOsApi.h"
 #include "ClientAPIExts.h"
+
+#include <EGL/egl.h>
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #define MAJOR          1
 #define MINOR          4
@@ -60,10 +62,10 @@ void initGlobalInfo()
     } 
 }
 
-static EGLiface            s_eglIface = {
-    getGLESContext    : getGLESContext,
-    eglAttachEGLImage:attachEGLImage,
-    eglDetachEGLImage:detachEGLImage
+static const EGLiface s_eglIface = {
+    .getGLESContext = getGLESContext,
+    .eglAttachEGLImage = attachEGLImage,
+    .eglDetachEGLImage = detachEGLImage,
 };
 
 /*****************************************  supported extentions  ***********************************************************************/
@@ -629,7 +631,7 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
             i+=2;
         }
     }
-    GLESiface* iface = g_eglInfo->getIface(version);
+    const GLESiface* iface = g_eglInfo->getIface(version);
     GLEScontext* glesCtx = NULL;
     if(iface) {
         glesCtx = iface->createGLESContext();
