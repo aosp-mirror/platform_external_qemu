@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include <stdio.h>
 
 typedef enum {
     GLES_1_1 = 1,
@@ -43,9 +44,18 @@ inline void* SafePointerFromUInt(unsigned int handle) {
 }
 
 inline unsigned int SafeUIntFromPointer(const void* ptr) {
+#if 1
+    // Ignore the assert below to avoid crashing when running older
+    // system images, which might have buggy encoder libraries. Print
+    // an error message though.
+    if ((uintptr_t)(ptr) != (unsigned int)(uintptr_t)(ptr)) {
+        fprintf(stderr, "EmuGL:WARNING: bad generic pointer %p\n", ptr);
+    }
+#else
     // Assertion error if the pointer contains a value that does not fit
     // in an unsigned integer!
     assert((uintptr_t)(ptr) == (unsigned int)(uintptr_t)(ptr));
+#endif
     return (unsigned int)(uintptr_t)(ptr);
 }
 
