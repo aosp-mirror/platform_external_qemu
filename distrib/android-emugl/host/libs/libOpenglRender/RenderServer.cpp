@@ -128,6 +128,7 @@ intptr_t RenderServer::main()
             // delete and erase the current iterator
             // if thread is no longer running
             if ((*t)->isFinished()) {
+                (*t)->wait(NULL);
                 delete (*t);
                 threads.erase(t);
             }

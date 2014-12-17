@@ -68,6 +68,8 @@ bool Thread::wait(intptr_t *exitStatus) {
             if (exitStatus) {
                 *exitStatus = mExitStatus;
             }
+            void *retval;
+            pthread_join(mThread, &retval);
             return true;
         }
     }
