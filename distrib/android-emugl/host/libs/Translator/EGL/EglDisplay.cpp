@@ -48,13 +48,15 @@ EglDisplay::~EglDisplay() {
     }
 
 
-    for(ConfigsList::iterator it = m_configs.begin(); it != m_configs.end(); it++) {
-        EglConfig* pConfig = *it;
-        if(pConfig) delete pConfig;
+    for(ConfigsList::iterator it = m_configs.begin();
+        it != m_configs.end();
+        it++) {
+        delete *it;
     }
 
     delete m_manager[GLES_1_1];
     delete m_manager[GLES_2_0];
+
     EglOS::deleteDisplay(m_idpy);
 }
 
@@ -83,12 +85,29 @@ void EglDisplay::addMissingConfigs(void)
     m_configs.sort(compareEglConfigsPtrs);
 
     EGLConfig match;
+
     EGLNativePixelFormatType tmpfrmt = PIXEL_FORMAT_INITIALIZER;
+
     EglConfig dummy(5, 6, 5, 0,  // RGB_565
-                    EGL_DONT_CARE,EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
                     16, // Depth
-                    EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,
-                    EGL_DONT_CARE, EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,tmpfrmt);
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    tmpfrmt);
 
     if(!doChooseConfigs(dummy, &match, 1))
     {
@@ -120,8 +139,10 @@ void EglDisplay::addMissingConfigs(void)
 }
 
 void EglDisplay::initConfigurations(int renderableType) {
-    if(m_configInitialized) return;
-    EglOS::queryConfigs(m_idpy,renderableType,m_configs);
+    if (m_configInitialized) {
+        return;
+    }
+    EglOS::queryConfigs(m_idpy, renderableType, m_configs);
 
     addMissingConfigs();
     m_configs.sort(compareEglConfigsPtrs);
@@ -256,7 +277,7 @@ int EglDisplay::doChooseConfigs(const EglConfig& dummy,
     for(ConfigsList::const_iterator it = m_configs.begin();
         it != m_configs.end() && (added < config_size || !configs);
         it++) {
-        if( (*it)->choosen(dummy)){
+        if( (*it)->chosen(dummy)){
             if(configs) {
                 configs[added] = static_cast<EGLConfig>(*it);
             }

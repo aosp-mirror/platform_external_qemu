@@ -57,13 +57,20 @@ public:
     // Return the number if values written.
     int getConfigs(EGLConfig* configs,int config_size) const;
 
-    // 
+    // Select all display configurations that match at least the values
+    // in |dummy|. If |configs| is NULL, this returns the number of all
+    // matching configs. Otherwise, this writes into |configs| up to
+    // |config_size| matching EGLConfig values, and returns their number.
     int chooseConfigs(const EglConfig& dummy,
                       EGLConfig* configs,
                       int config_size) const;
 
+    // Return the EglConfig value that matches a given EGLConfig |conf|.
     EglConfig* getConfig(EGLConfig conf) const;
-    EglConfig* getConfig(EGLint id ) const;
+
+    // Return the EglConfig value that matches a given EGLConfig with
+    // EGL_CONFIG_ID value |id|.
+    EglConfig* getConfig(EGLint id) const;
 
     EGLSurface addSurface(SurfacePtr s );
     SurfacePtr getSurface(EGLSurface surface) const;

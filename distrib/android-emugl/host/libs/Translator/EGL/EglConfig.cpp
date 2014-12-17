@@ -38,73 +38,73 @@ EglConfig::EglConfig(EGLint     red_size,
                      EGLint     trans_green_val,
                      EGLint     trans_blue_val,
                      EGLNativePixelFormatType frmt):
+        m_buffer_size(red_size + green_size + blue_size + alpha_size),
+        m_red_size(red_size),
+        m_green_size(green_size),
+        m_blue_size(blue_size),
+        m_alpha_size(alpha_size),
+        m_bind_to_tex_rgb(EGL_FALSE), //not supported for now
+        m_bind_to_tex_rgba(EGL_FALSE), //not supported for now
+        m_caveat(caveat),
+        m_config_id(config_id),
+        m_native_config_id(config_id),
+        m_frame_buffer_level(frame_buffer_level),
+        m_depth_size(depth_size),
+        m_max_pbuffer_width(max_pbuffer_width),
+        m_max_pbuffer_height(max_pbuffer_height),
+        m_max_pbuffer_size(max_pbuffer_size),
+        m_max_swap_interval(MAX_SWAP_INTERVAL),
+        m_min_swap_interval(MIN_SWAP_INTERVAL),
+        m_native_renderable(native_renderable),
+        m_renderable_type(renderable_type),
+        m_native_visual_id(native_visual_id),
+        m_native_visual_type(native_visual_type),
+        m_sample_buffers_num(samples_per_pixel > 0 ? 1 : 0),
+        m_samples_per_pixel(samples_per_pixel),
+        m_stencil_size(stencil_size),
+        m_surface_type(surface_type),
+        m_transparent_type(transparent_type),
+        m_trans_red_val(trans_red_val),
+        m_trans_green_val(trans_green_val),
+        m_trans_blue_val(trans_blue_val),
+        m_conformant(((red_size + green_size + blue_size + alpha_size > 0)  &&
+                     (caveat != EGL_NON_CONFORMANT_CONFIG)) ?
+                     m_renderable_type : 0),
+        m_nativeFormat(frmt) {}
 
-                     m_buffer_size(red_size + green_size + blue_size + alpha_size),
-                     m_red_size(red_size),
-                     m_green_size(green_size),
-                     m_blue_size(blue_size),
-                     m_alpha_size(alpha_size),
-                     m_bind_to_tex_rgb(EGL_FALSE), //not supported for now
-                     m_bind_to_tex_rgba(EGL_FALSE), //not supported for now
-                     m_caveat(caveat),
-                     m_config_id(config_id),
-                     m_native_config_id(config_id),
-                     m_frame_buffer_level(frame_buffer_level),
-                     m_depth_size(depth_size),
-                     m_max_pbuffer_width(max_pbuffer_width),
-                     m_max_pbuffer_height(max_pbuffer_height),
-                     m_max_pbuffer_size(max_pbuffer_size),
-                     m_max_swap_interval(MAX_SWAP_INTERVAL),
-                     m_min_swap_interval(MIN_SWAP_INTERVAL),
-                     m_native_renderable(native_renderable),
-                     m_renderable_type(renderable_type),
-                     m_native_visual_id(native_visual_id),
-                     m_native_visual_type(native_visual_type),
-                     m_sample_buffers_num(samples_per_pixel > 0 ?1:0),
-                     m_samples_per_pixel(samples_per_pixel),
-                     m_stencil_size(stencil_size),
-                     m_surface_type(surface_type),
-                     m_transparent_type(transparent_type),
-                     m_trans_red_val(trans_red_val),
-                     m_trans_green_val(trans_green_val),
-                     m_trans_blue_val(trans_blue_val),
-                     m_conformant(((red_size + green_size + blue_size + alpha_size > 0)  &&
-                                  (caveat!=EGL_NON_CONFORMANT_CONFIG)) ?
-                                    m_renderable_type : 0),
-                     m_nativeFormat(frmt) {};
 
-
-    EglConfig::EglConfig(const EglConfig& conf):m_buffer_size(conf.m_buffer_size),
-                                                m_red_size(conf.m_red_size),
-                                                m_green_size(conf.m_green_size),
-                                                m_blue_size(conf.m_blue_size),
-                                                m_alpha_size(conf.m_alpha_size),
-                                                m_bind_to_tex_rgb(conf.m_bind_to_tex_rgb),
-                                                m_bind_to_tex_rgba(conf.m_bind_to_tex_rgba),
-                                                m_caveat(conf.m_caveat),
-                                                m_config_id(conf.m_config_id),
-                                                m_native_config_id(conf.m_native_config_id),
-                                                m_frame_buffer_level(conf.m_frame_buffer_level),
-                                                m_depth_size(conf.m_depth_size),
-                                                m_max_pbuffer_width(conf.m_max_pbuffer_width),
-                                                m_max_pbuffer_height(conf.m_max_pbuffer_height),
-                                                m_max_pbuffer_size(conf.m_max_pbuffer_size),
-                                                m_max_swap_interval(conf.m_max_swap_interval),
-                                                m_min_swap_interval(conf.m_min_swap_interval),
-                                                m_native_renderable(conf.m_native_renderable),
-                                                m_renderable_type(conf.m_renderable_type),
-                                                m_native_visual_id(conf.m_native_visual_id),
-                                                m_native_visual_type(conf.m_native_visual_type),
-                                                m_sample_buffers_num(conf.m_sample_buffers_num),
-                                                m_samples_per_pixel(conf.m_samples_per_pixel),
-                                                m_stencil_size(conf.m_stencil_size),
-                                                m_surface_type(conf.m_surface_type),
-                                                m_transparent_type(conf.m_transparent_type),
-                                                m_trans_red_val(conf.m_trans_red_val),
-                                                m_trans_green_val(conf.m_trans_green_val),
-                                                m_trans_blue_val(conf.m_trans_blue_val),
-                                                m_conformant(conf.m_conformant),
-                                                m_nativeFormat(conf.m_nativeFormat) {};
+EglConfig::EglConfig(const EglConfig& conf) :
+        m_buffer_size(conf.m_buffer_size),
+        m_red_size(conf.m_red_size),
+        m_green_size(conf.m_green_size),
+        m_blue_size(conf.m_blue_size),
+        m_alpha_size(conf.m_alpha_size),
+        m_bind_to_tex_rgb(conf.m_bind_to_tex_rgb),
+        m_bind_to_tex_rgba(conf.m_bind_to_tex_rgba),
+        m_caveat(conf.m_caveat),
+        m_config_id(conf.m_config_id),
+        m_native_config_id(conf.m_native_config_id),
+        m_frame_buffer_level(conf.m_frame_buffer_level),
+        m_depth_size(conf.m_depth_size),
+        m_max_pbuffer_width(conf.m_max_pbuffer_width),
+        m_max_pbuffer_height(conf.m_max_pbuffer_height),
+        m_max_pbuffer_size(conf.m_max_pbuffer_size),
+        m_max_swap_interval(conf.m_max_swap_interval),
+        m_min_swap_interval(conf.m_min_swap_interval),
+        m_native_renderable(conf.m_native_renderable),
+        m_renderable_type(conf.m_renderable_type),
+        m_native_visual_id(conf.m_native_visual_id),
+        m_native_visual_type(conf.m_native_visual_type),
+        m_sample_buffers_num(conf.m_sample_buffers_num),
+        m_samples_per_pixel(conf.m_samples_per_pixel),
+        m_stencil_size(conf.m_stencil_size),
+        m_surface_type(conf.m_surface_type),
+        m_transparent_type(conf.m_transparent_type),
+        m_trans_red_val(conf.m_trans_red_val),
+        m_trans_green_val(conf.m_trans_green_val),
+        m_trans_blue_val(conf.m_trans_blue_val),
+        m_conformant(conf.m_conformant),
+        m_nativeFormat(conf.m_nativeFormat) {}
 
 
 EglConfig::EglConfig(const EglConfig& conf,
@@ -112,39 +112,38 @@ EglConfig::EglConfig(const EglConfig& conf,
                      EGLint red_size,
                      EGLint green_size,
                      EGLint blue_size,
-                     EGLint alpha_size):
-
-                     m_buffer_size(red_size + green_size + blue_size + alpha_size),
-                     m_red_size(red_size),
-                     m_green_size(green_size),
-                     m_blue_size(blue_size),
-                     m_alpha_size(alpha_size),
-                     m_bind_to_tex_rgb(conf.m_bind_to_tex_rgb),
-                     m_bind_to_tex_rgba(conf.m_bind_to_tex_rgba),
-                     m_caveat(conf.m_caveat),
-                     m_config_id(config_id),
-                     m_native_config_id(conf.m_native_config_id),
-                     m_frame_buffer_level(conf.m_frame_buffer_level),
-                     m_depth_size(conf.m_depth_size),
-                     m_max_pbuffer_width(conf.m_max_pbuffer_width),
-                     m_max_pbuffer_height(conf.m_max_pbuffer_height),
-                     m_max_pbuffer_size(conf.m_max_pbuffer_size),
-                     m_max_swap_interval(conf.m_max_swap_interval),
-                     m_min_swap_interval(conf.m_min_swap_interval),
-                     m_native_renderable(conf.m_native_renderable),
-                     m_renderable_type(conf.m_renderable_type),
-                     m_native_visual_id(conf.m_native_visual_id),
-                     m_native_visual_type(conf.m_native_visual_type),
-                     m_sample_buffers_num(conf.m_sample_buffers_num),
-                     m_samples_per_pixel(conf.m_samples_per_pixel),
-                     m_stencil_size(conf.m_stencil_size),
-                     m_surface_type(conf.m_surface_type),
-                     m_transparent_type(conf.m_transparent_type),
-                     m_trans_red_val(conf.m_trans_red_val),
-                     m_trans_green_val(conf.m_trans_green_val),
-                     m_trans_blue_val(conf.m_trans_blue_val),
-                     m_conformant(conf.m_conformant),
-                     m_nativeFormat(conf.m_nativeFormat) {};
+                     EGLint alpha_size) :
+        m_buffer_size(red_size + green_size + blue_size + alpha_size),
+        m_red_size(red_size),
+        m_green_size(green_size),
+        m_blue_size(blue_size),
+        m_alpha_size(alpha_size),
+        m_bind_to_tex_rgb(conf.m_bind_to_tex_rgb),
+        m_bind_to_tex_rgba(conf.m_bind_to_tex_rgba),
+        m_caveat(conf.m_caveat),
+        m_config_id(config_id),
+        m_native_config_id(conf.m_native_config_id),
+        m_frame_buffer_level(conf.m_frame_buffer_level),
+        m_depth_size(conf.m_depth_size),
+        m_max_pbuffer_width(conf.m_max_pbuffer_width),
+        m_max_pbuffer_height(conf.m_max_pbuffer_height),
+        m_max_pbuffer_size(conf.m_max_pbuffer_size),
+        m_max_swap_interval(conf.m_max_swap_interval),
+        m_min_swap_interval(conf.m_min_swap_interval),
+        m_native_renderable(conf.m_native_renderable),
+        m_renderable_type(conf.m_renderable_type),
+        m_native_visual_id(conf.m_native_visual_id),
+        m_native_visual_type(conf.m_native_visual_type),
+        m_sample_buffers_num(conf.m_sample_buffers_num),
+        m_samples_per_pixel(conf.m_samples_per_pixel),
+        m_stencil_size(conf.m_stencil_size),
+        m_surface_type(conf.m_surface_type),
+        m_transparent_type(conf.m_transparent_type),
+        m_trans_red_val(conf.m_trans_red_val),
+        m_trans_green_val(conf.m_trans_green_val),
+        m_trans_blue_val(conf.m_trans_blue_val),
+        m_conformant(conf.m_conformant),
+        m_nativeFormat(conf.m_nativeFormat) {};
 
 
 bool EglConfig::getConfAttrib(EGLint attrib,EGLint* val) const {
@@ -244,16 +243,14 @@ bool EglConfig::getConfAttrib(EGLint attrib,EGLint* val) const {
 
 // checking compitabilty between *this configuration and another configuration
 // the compitability is checked againsed red,green,blue,buffer stencil and depth sizes
-bool EglConfig::compitableWith(const EglConfig& conf) const {
+bool EglConfig::compatibleWith(const EglConfig& conf) const {
 
-    if(m_buffer_size != conf.m_buffer_size) return false;
-    if(m_red_size != conf.m_red_size) return false;
-    if(m_green_size != conf.m_green_size) return false;
-    if(m_blue_size != conf.m_blue_size) return false;
-    if(m_depth_size != conf.m_depth_size) return false;
-    if(m_stencil_size != conf.m_stencil_size) return false;
-
-    return true;
+    return m_buffer_size == conf.m_buffer_size &&
+           m_red_size == conf.m_red_size &&
+           m_green_size == conf.m_green_size &&
+           m_blue_size == conf.m_blue_size &&
+           m_depth_size == conf.m_depth_size &&
+           m_stencil_size == conf.m_stencil_size;
 }
 
 //following the sorting EGLconfig as in spec
@@ -304,7 +301,7 @@ bool EglConfig::operator>=(const EglConfig& conf) const {
 #define CHECK_PROP_CAST(dummy,prop_name,op) \
                   if((((EGLint)dummy.prop_name) != EGL_DONT_CARE) && (dummy.prop_name op prop_name)) return false;
 //checking if config stands for all the selection crateria of dummy as defined by EGL spec
-bool EglConfig::choosen(const EglConfig& dummy) {
+bool EglConfig::chosen(const EglConfig& dummy) const {
 
    //atleast
    CHECK_PROP(dummy,m_buffer_size,>);
