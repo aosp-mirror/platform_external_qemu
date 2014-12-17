@@ -17,27 +17,33 @@
 #define EGL_THREAD_INFO_H
 
 #include <EGL/egl.h>
-#include "EglDisplay.h"
-#include "EglContext.h"
-#include "EglSurface.h"
-#include "EglPbufferSurface.h"
 
+// Model thread-specific EGL state.
 class EglThreadInfo {
 public:
+    // Return the thread-specific instance of EglThreadInfo to the caller.
+    // The instance will be created on first call, and destroyed automatically
+    // when the thread exits.
+    static EglThreadInfo* get(void) __attribute__((const));
 
-    EglThreadInfo();
-    void       setError(EGLint err) { m_err = err;}
-    EGLint     getError(){ return m_err;}
-    void       destroyContextIfNotCurrent(ContextPtr context );
-    void       setApi(EGLenum api){m_api = api;}
-    EGLenum    getApi(){return m_api;}
+    // Set the error code |err|. Default value is EGL_NO_ERROR.
+    void setError(EGLint err) { m_err = err; }
 
-    static EglThreadInfo*  get(void) __attribute__((const));
+    // Get the error code. Note that this doesn't change the value,
+    // unlike eglGetError() which resets it to EGL_NO_ERROR.
+    EGLint getError() const { return m_err; }
+
+    // Change the |api| value. Default is EGL_OPENGL_ES
+    void setApi(EGLenum api) { m_api = api; }
+
+    // Get the current API value.
+    EGLenum getApi() const { return m_api; }
 
 private:
-    EglDisplay*     m_currentDisplay;
-    EGLint          m_err;
-    EGLenum         m_api;
+    EglThreadInfo();
+
+    EGLint m_err;
+    EGLenum m_api;
 };
 
 #endif
