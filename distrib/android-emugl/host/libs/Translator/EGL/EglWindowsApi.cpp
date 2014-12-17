@@ -449,8 +449,8 @@ bool checkWindowPixelFormatMatch(EGLNativeInternalDisplayType dpy,EGLNativeWindo
    *width  = r.right  - r.left;
    *height = r.bottom - r.top;
    HDC dc = GetDC(win);
-   EGLNativePixelFormatType nativeConfig = cfg->nativeConfig();
-   bool ret = SetPixelFormat(dc,cfg->nativeId(),&nativeConfig);
+   EGLNativePixelFormatType nativeFormat = cfg->nativeFormat();
+   bool ret = SetPixelFormat(dc,cfg->nativeId(),&nativeFormat);
    DeleteDC(dc);
    return ret;
 }
@@ -517,8 +517,8 @@ EGLNativeContextType createContext(EGLNativeInternalDisplayType display,EglConfi
     HDC  dpy  = getDummyDC(display,cfg->nativeId());
 
     if(!display->isPixelFormatSet(cfg->nativeId())){
-        EGLNativePixelFormatType nativeConfig = cfg->nativeConfig();
-        if(!SetPixelFormat(dpy,cfg->nativeId(),&nativeConfig)){
+        EGLNativePixelFormatType nativeFormat = cfg->nativeFormat();
+        if(!SetPixelFormat(dpy,cfg->nativeId(),&nativeFormat)){
             return NULL;
         }
         display->pixelFormatWasSet(cfg->nativeId());

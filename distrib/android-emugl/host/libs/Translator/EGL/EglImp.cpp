@@ -712,9 +712,9 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display, EGLSurface draw
             }
         }
 
-        //surfaces compitability check
-        if(!((*ctx->getConfig()).compitableWith((*newDrawPtr->getConfig()))) ||
-           !((*ctx->getConfig()).compitableWith((*newReadPtr->getConfig())))) {
+        //surfaces compatibility check
+        if(!((*ctx->getConfig()).compatibleWith((*newDrawPtr->getConfig()))) ||
+           !((*ctx->getConfig()).compatibleWith((*newReadPtr->getConfig())))) {
             RETURN_ERROR(EGL_FALSE,EGL_BAD_MATCH);
         }
 
