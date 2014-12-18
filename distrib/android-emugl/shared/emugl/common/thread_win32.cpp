@@ -91,8 +91,7 @@ bool Thread::wait(intptr_t* exitStatus) {
 bool Thread::tryWait(intptr_t* exitStatus) {
     ScopedLocker locker(&mLock);
 
-    if (!mIsRunning ||
-        WaitForSingleObject(mThread, 0) != WAIT_OBJECT_0) {
+    if (mIsRunning && WaitForSingleObject(mThread, 0) != WAIT_OBJECT_0) {
         return false;
     }
 

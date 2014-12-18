@@ -16,6 +16,7 @@
 
 #include "emugl/common/thread_store.h"
 
+#include <assert.h>
 #include <stdio.h>
 
 namespace emugl {
@@ -39,12 +40,16 @@ private:
 
 Thread::Thread() :
     mThread((pthread_t)NULL),
+    mLock(),
+    mJoined(false),
     mExitStatus(0),
     mIsRunning(false) {
     pthread_mutex_init(&mLock, NULL);
 }
 
 Thread::~Thread() {
+    assert(!mIsRunning);
+    assert(mJoined);
     pthread_mutex_destroy(&mLock);
 }
 
@@ -68,6 +73,11 @@ bool Thread::wait(intptr_t *exitStatus) {
             if (exitStatus) {
                 *exitStatus = mExitStatus;
             }
+            if (!mJoined) {
+                // reclaim thread stack
+                pthread_join(mThread, NULL);
+                mJoined = true;
+            }
             return true;
         }
     }
@@ -82,13 +92,25 @@ bool Thread::wait(intptr_t *exitStatus) {
     if (exitStatus) {
         *exitStatus = (intptr_t)retval;
     }
+    // Note: Updating mJoined must be performed inside the lock to avoid
+    //       race conditions between two threads waiting for the same thread
+    //       that just completed its execution.
+    {
+        ScopedLocker locker(&mLock);
+        mJoined = true;
+    }
     return true;
 }
 
 bool Thread::tryWait(intptr_t *exitStatus) {
     ScopedLocker locker(&mLock);
-    if (!mIsRunning) {
+    if (mIsRunning) {
         return false;
+    }
+    if (!mJoined) {
+        // Reclaim stack.
+        pthread_join(mThread, NULL);
+        mJoined = true;
     }
     if (exitStatus) {
         *exitStatus = mExitStatus;
