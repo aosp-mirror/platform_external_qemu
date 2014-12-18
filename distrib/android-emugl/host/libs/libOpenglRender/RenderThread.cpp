@@ -14,14 +14,15 @@
 * limitations under the License.
 */
 #include "RenderThread.h"
-#include "RenderControl.h"
-#include "ThreadInfo.h"
-#include "ReadBuffer.h"
-#include "TimeUtils.h"
-#include "GLDispatch.h"
-#include "GL2Dispatch.h"
+
 #include "EGLDispatch.h"
 #include "FrameBuffer.h"
+#include "GL2Dispatch.h"
+#include "GLDispatch.h"
+#include "ReadBuffer.h"
+#include "RenderControl.h"
+#include "RenderThreadInfo.h"
+#include "TimeUtils.h"
 
 #define STREAM_BUFFER_SIZE 4*1024*1024
 

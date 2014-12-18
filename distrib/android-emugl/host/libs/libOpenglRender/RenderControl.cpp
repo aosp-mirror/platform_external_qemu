@@ -13,13 +13,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include "renderControl_dec.h"
-#include "FrameBuffer.h"
+#include "RenderControl.h"
+
 #include "FBConfig.h"
+#include "FrameBuffer.h"
 #include "EGLDispatch.h"
-#include "GLDispatch.h"
 #include "GL2Dispatch.h"
-#include "ThreadInfo.h"
+#include "GLDispatch.h"
+#include "RenderThreadInfo.h"
 
 static const GLint rendererVersion = 1;
 

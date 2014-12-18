@@ -14,7 +14,8 @@
 * limitations under the License.
 */
 
-#include "ThreadInfo.h"
+#include "RenderThreadInfo.h"
+
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/thread_store.h"
 
