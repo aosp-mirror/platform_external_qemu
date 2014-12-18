@@ -20,18 +20,30 @@
 #include "WindowSurface.h"
 #include "GLDecoder.h"
 #include "GL2Decoder.h"
+#include "renderControl_dec.h"
 
-struct RenderThreadInfo
-{
+// A class used to model the state of each RenderThread related
+struct RenderThreadInfo {
+    // Create new instance. Only call this once per thread.
+    // Future callls to get() will return this instance until
+    // it is destroyed.
     RenderThreadInfo();
+
+    // Destructor.
     ~RenderThreadInfo();
+
+    // Return the current thread's instance, if any, or NULL.
     static RenderThreadInfo* get();
 
+    // Current EGL context, draw surface and read surface.
     RenderContextPtr currContext;
     WindowSurfacePtr currDrawSurf;
     WindowSurfacePtr currReadSurf;
-    GLDecoder        m_glDec;
-    GL2Decoder       m_gl2Dec;
+
+    // Decoder states.
+    GLDecoder                       m_glDec;
+    GL2Decoder                      m_gl2Dec;
+    renderControl_decoder_context_t m_rcDec;
 };
 
 #endif
