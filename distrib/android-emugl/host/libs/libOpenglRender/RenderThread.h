@@ -28,7 +28,7 @@ class RenderThread : public emugl::Thread
 public:
     static RenderThread* create(IOStream* p_stream, emugl::Mutex* mutex);
     virtual ~RenderThread();
-    bool isFinished() const { return m_finished; }
+    bool isFinished() { return tryWait(NULL); }
 
 private:
     RenderThread(IOStream* p_stream, emugl::Mutex* mutex);
@@ -38,7 +38,6 @@ private:
     emugl::Mutex *m_lock;
     IOStream *m_stream;
     renderControl_decoder_context_t m_rcDec;
-    bool m_finished;
 };
 
 #endif
