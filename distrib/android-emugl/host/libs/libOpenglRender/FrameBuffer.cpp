@@ -15,13 +15,15 @@
 */
 
 #include "FrameBuffer.h"
-#include "NativeSubWindow.h"
-#include "FBConfig.h"
+
 #include "EGLDispatch.h"
+#include "FBConfig.h"
 #include "GLDispatch.h"
 #include "GL2Dispatch.h"
-#include "ThreadInfo.h"
+#include "NativeSubWindow.h"
+#include "RenderThreadInfo.h"
 #include "TimeUtils.h"
+
 #include <stdio.h>
 
 FrameBuffer *FrameBuffer::s_theFrameBuffer = NULL;
