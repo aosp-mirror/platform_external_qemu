@@ -14,91 +14,101 @@
 * limitations under the License.
 */
 #include "EglGlobalInfo.h"
-#include "EglOsApi.h"
-#include <string.h>
+
 #include "ClientAPIExts.h"
+#include "EglDisplay.h"
+#include "EglOsApi.h"
 
-int EglGlobalInfo::m_refCount = 0;
-EglGlobalInfo* EglGlobalInfo::m_singleton = NULL;
+#include "emugl/common/lazy_instance.h"
 
+#include <string.h>
 
-EglGlobalInfo::EglGlobalInfo(){
-    m_default = EglOS::getDefaultDisplay();
+namespace {
+
+// Use a LazyInstance to ensure thread-safe initialization.
+emugl::LazyInstance<EglGlobalInfo> sSingleton = LAZY_INSTANCE_INIT;
+
+}  // namespace
+
+// static
+EglGlobalInfo* EglGlobalInfo::getInstance() {
+    return sSingleton.ptr();
+}
+
+EglGlobalInfo::EglGlobalInfo() :
+        m_displays(),
+        m_default(EglOS::getDefaultDisplay()),
+        m_lock() {
 #ifdef _WIN32
     EglOS::initPtrToWglFunctions();
 #endif
-    memset(m_gles_ifaces,0,sizeof(m_gles_ifaces));
-    memset(m_gles_extFuncs_inited,0,sizeof(m_gles_extFuncs_inited));
+    memset(m_gles_ifaces, 0, sizeof(m_gles_ifaces));
+    memset(m_gles_extFuncs_inited, 0, sizeof(m_gles_extFuncs_inited));
 }
 
-EglGlobalInfo* EglGlobalInfo::getInstance() {
-    if(!m_singleton) {
-        m_singleton = new EglGlobalInfo();
-        m_refCount = 0;
+EglGlobalInfo::~EglGlobalInfo() {
+    for (size_t n = 0; n < m_displays.size(); ++n) {
+        delete m_displays[n];
     }
-    m_refCount++;
-    return m_singleton;
 }
 
-void EglGlobalInfo::delInstance() {
-    m_refCount--;
-    if(m_refCount <= 0 && m_singleton) {
-        delete m_singleton;
-        m_singleton = NULL;
-    }
-
-}
-
-EglDisplay* EglGlobalInfo::addDisplay(EGLNativeDisplayType dpy,EGLNativeInternalDisplayType idpy) {
-    //search if it is not already exists
+EglDisplay* EglGlobalInfo::addDisplay(EGLNativeDisplayType dpy,
+                                      EGLNativeInternalDisplayType idpy) {
+    //search if it already exists.
     emugl::Mutex::AutoLock mutex(m_lock);
-    for(DisplaysMap::iterator it = m_displays.begin(); it != m_displays.end() ;it++) {
-        if((*it).second == dpy) return (*it).first;
+    for (size_t n = 0; n < m_displays.size(); ++n) {
+        if (m_displays[n]->getNativeDisplay() == dpy) {
+            return m_displays[n];
+        }
     }
 
-    if (!EglOS::validNativeDisplay(idpy))
+    if (!EglOS::validNativeDisplay(idpy)) {
         return NULL;
-
-    EglDisplay* p_dpy = new EglDisplay(idpy);
-    if(p_dpy) {
-        m_displays[p_dpy] = dpy;
-        return p_dpy;
     }
-    return NULL;
+    EglDisplay* result = new EglDisplay(dpy, idpy);
+    m_displays.push_back(result);
+    return result;
 }
 
 bool  EglGlobalInfo::removeDisplay(EGLDisplay dpy) {
     emugl::Mutex::AutoLock mutex(m_lock);
-    for(DisplaysMap::iterator it = m_displays.begin(); it != m_displays.end() ;it++) {
-        if(static_cast<EGLDisplay>((*it).first) == dpy) {
-            delete (*it).first;
-            m_displays.erase(it);
+    for (size_t n = 0; n < m_displays.size(); ++n) {
+        if (m_displays[n] == static_cast<EglDisplay*>(dpy)) {
+            delete m_displays[n];
+            m_displays.remove(n);
             return true;
         }
     }
     return false;
 }
 
-EglDisplay* EglGlobalInfo::getDisplay(EGLNativeDisplayType dpy) {
+EglDisplay* EglGlobalInfo::getDisplay(EGLNativeDisplayType dpy) const {
     emugl::Mutex::AutoLock mutex(m_lock);
-    for(DisplaysMap::iterator it = m_displays.begin(); it != m_displays.end() ;it++) {
-        if((*it).second == dpy) return (*it).first;
+    for (size_t n = 0; n < m_displays.size(); ++n) {
+        if (m_displays[n]->getNativeDisplay() == dpy) {
+            return m_displays[n];
+        }
     }
     return NULL;
 }
 
-EglDisplay* EglGlobalInfo::getDisplay(EGLDisplay dpy) {
+EglDisplay* EglGlobalInfo::getDisplay(EGLDisplay dpy) const {
     emugl::Mutex::AutoLock mutex(m_lock);
-    DisplaysMap::iterator it = m_displays.find(static_cast<EglDisplay*>(dpy));
-    return (it != m_displays.end() ? (*it).first : NULL);
+    for (size_t n = 0; n < m_displays.size(); ++n) {
+        if (m_displays[n] == static_cast<EglDisplay*>(dpy)) {
+            return m_displays[n];
+        }
+    }
+    return NULL;
 }
 
-EGLNativeInternalDisplayType EglGlobalInfo::generateInternalDisplay(EGLNativeDisplayType dpy){
+// static
+EGLNativeInternalDisplayType EglGlobalInfo::generateInternalDisplay(
+        EGLNativeDisplayType dpy) {
     return EglOS::getInternalDisplay(dpy);
 }
 
-void EglGlobalInfo::initClientExtFuncTable(GLESVersion ver)
-{
+void EglGlobalInfo::initClientExtFuncTable(GLESVersion ver) {
     emugl::Mutex::AutoLock mutex(m_lock);
     if (!m_gles_extFuncs_inited[ver]) {
         ClientAPIExts::initClientFuncs(m_gles_ifaces[ver], (int)ver - 1);

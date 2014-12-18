@@ -19,7 +19,7 @@
 
 namespace EglOS {
 
-static std::list<EGLNativePixelFormatType> s_nativeConfigs;
+static std::list<EGLNativePixelFormatType> s_nativeFormats;
 
 EGLNativeDisplayType getDefaultDisplay() {return 0;}
 
@@ -89,11 +89,11 @@ static EglConfig* pixelFormatToConfig(int index,int renderableType,EGLNativePixe
 
 static void initNativeConfigs(){
     int nConfigs = getNumPixelFormats();
-    if(s_nativeConfigs.empty()){
+    if(s_nativeFormats.empty()){
         for(int i=0; i < nConfigs ;i++){
              EGLNativePixelFormatType frmt = getPixelFormat(i);
              if(frmt){
-                 s_nativeConfigs.push_back(frmt);
+                 s_nativeFormats.push_back(frmt);
              }
         }
     }
@@ -102,7 +102,7 @@ static void initNativeConfigs(){
 void queryConfigs(EGLNativeDisplayType dpy,int renderableType,ConfigsList& listOut) {
     int i = 0 ;
     initNativeConfigs();
-    for(std::list<EGLNativePixelFormatType>::iterator it = s_nativeConfigs.begin(); it != s_nativeConfigs.end();it++){
+    for(std::list<EGLNativePixelFormatType>::iterator it = s_nativeFormats.begin(); it != s_nativeFormats.end();it++){
          EGLNativePixelFormatType frmt = *it;
          EglConfig* conf = pixelFormatToConfig(i++,renderableType,&frmt);
          if(conf){
@@ -172,7 +172,7 @@ bool releasePbuffer(EGLNativeDisplayType dis,EGLNativeSurfaceType pb) {
 }
 
 EGLNativeContextType createContext(EGLNativeDisplayType dpy,EglConfig* cfg,EGLNativeContextType sharedContext) {
- return nsCreateContext(cfg->nativeConfig(),sharedContext);
+ return nsCreateContext(cfg->nativeFormat(),sharedContext);
 }
 
 bool destroyContext(EGLNativeDisplayType dpy,EGLNativeContextType ctx) {

@@ -12,6 +12,12 @@
 #ifndef QEMU_ANDROID_KEYCODE_BUFFER_H
 #define QEMU_ANDROID_KEYCODE_BUFFER_H
 
+#include "android/utils/compiler.h"
+
+#include <stdbool.h>
+
+ANDROID_BEGIN_HEADER
+
 /* Contains declarations for routines that manage keycode sequence that needs
  * to be transferred to the emulator core for further processing.
  */
@@ -29,15 +35,17 @@ typedef struct SkinKeycodeBuffer {
     int keycodes[MAX_KEYCODES];
 } SkinKeycodeBuffer;
 
-void skin_keycodes_buffer_init(SkinKeycodeBuffer* buffer,
-                               SkinKeyCodeFlushFunc flush_func);
+void skin_keycode_buffer_init(SkinKeycodeBuffer* buffer,
+                              SkinKeyCodeFlushFunc flush_func);
 
 /* Adds a key event to the array of keycodes. */
-void skin_keycodes_buffer_add(SkinKeycodeBuffer* buffer,
-                              unsigned code,
-                              unsigned down);
+void skin_keycode_buffer_add(SkinKeycodeBuffer* buffer,
+                             unsigned code,
+                             bool down);
 
 /* Flushes (transfers) collected keycodes to the core. */
-void skin_keycodes_buffer_flush(SkinKeycodeBuffer* buffer);
+void skin_keycode_buffer_flush(SkinKeycodeBuffer* buffer);
+
+ANDROID_END_HEADER
 
 #endif /* QEMU_ANDROID_KEYCODE_BUFFER_H */

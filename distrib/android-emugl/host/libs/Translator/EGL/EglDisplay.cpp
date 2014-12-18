@@ -17,8 +17,11 @@
 #include "EglOsApi.h"
 #include <GLcommon/GLutils.h>
 
-EglDisplay::EglDisplay(EGLNativeInternalDisplayType dpy,bool isDefault) :
+EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
+                       EGLNativeInternalDisplayType idpy,
+                       bool isDefault) :
     m_dpy(dpy),
+    m_idpy(idpy),
     m_initialized(false),
     m_configInitialized(false),
     m_isDefault(isDefault),
@@ -37,25 +40,25 @@ EglDisplay::~EglDisplay() {
     // (should be true for windows platform only)
     //
     if (m_globalSharedContext != NULL) {
-        EglOS::destroyContext( m_dpy, m_globalSharedContext);
+        EglOS::destroyContext(m_idpy, m_globalSharedContext);
     }
 
     if(m_isDefault) {
-        EglOS::releaseDisplay(m_dpy);
+        EglOS::releaseDisplay(m_idpy);
     }
 
 
-    for(ConfigsList::iterator it = m_configs.begin(); it != m_configs.end(); it++) {
-        EglConfig* pConfig = *it;
-        if(pConfig) delete pConfig;
+    for(ConfigsList::iterator it = m_configs.begin();
+        it != m_configs.end();
+        it++) {
+        delete *it;
     }
 
     delete m_manager[GLES_1_1];
     delete m_manager[GLES_2_0];
-    EglOS::deleteDisplay(m_dpy);
-}
 
-EGLNativeInternalDisplayType EglDisplay::nativeType(){return m_dpy;}
+    EglOS::deleteDisplay(m_idpy);
+}
 
 void EglDisplay::initialize(int renderableType) {
     emugl::Mutex::AutoLock mutex(m_lock);
@@ -82,12 +85,29 @@ void EglDisplay::addMissingConfigs(void)
     m_configs.sort(compareEglConfigsPtrs);
 
     EGLConfig match;
+
     EGLNativePixelFormatType tmpfrmt = PIXEL_FORMAT_INITIALIZER;
+
     EglConfig dummy(5, 6, 5, 0,  // RGB_565
-                    EGL_DONT_CARE,EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
                     16, // Depth
-                    EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,
-                    EGL_DONT_CARE, EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,EGL_DONT_CARE,tmpfrmt);
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    tmpfrmt);
 
     if(!doChooseConfigs(dummy, &match, 1))
     {
@@ -119,40 +139,43 @@ void EglDisplay::addMissingConfigs(void)
 }
 
 void EglDisplay::initConfigurations(int renderableType) {
-    if(m_configInitialized) return;
-    EglOS::queryConfigs(m_dpy,renderableType,m_configs);
+    if (m_configInitialized) {
+        return;
+    }
+    EglOS::queryConfigs(m_idpy, renderableType, m_configs);
 
     addMissingConfigs();
     m_configs.sort(compareEglConfigsPtrs);
 }
 
-EglConfig* EglDisplay::getConfig(EGLConfig conf) {
+EglConfig* EglDisplay::getConfig(EGLConfig conf) const {
     emugl::Mutex::AutoLock mutex(m_lock);
 
-    for(ConfigsList::iterator it = m_configs.begin(); it != m_configs.end() ;it++) {
+    for(ConfigsList::const_iterator it = m_configs.begin();
+        it != m_configs.end();
+        it++) {
         if(static_cast<EGLConfig>(*it) == conf) {
             return (*it);
-
         }
     }
     return NULL;
 }
 
-SurfacePtr EglDisplay::getSurface(EGLSurface surface) {
+SurfacePtr EglDisplay::getSurface(EGLSurface surface) const {
     emugl::Mutex::AutoLock mutex(m_lock);
     /* surface is "key" in map<unsigned int, SurfacePtr>. */
     unsigned int hndl = SafeUIntFromPointer(surface);
-    SurfacesHndlMap::iterator it = m_surfaces.find(hndl);
+    SurfacesHndlMap::const_iterator it = m_surfaces.find(hndl);
     return it != m_surfaces.end() ?
                                   (*it).second :
                                    SurfacePtr(NULL);
 }
 
-ContextPtr EglDisplay::getContext(EGLContext ctx) {
+ContextPtr EglDisplay::getContext(EGLContext ctx) const {
     emugl::Mutex::AutoLock mutex(m_lock);
     /* ctx is "key" in map<unsigned int, ContextPtr>. */
     unsigned int hndl = SafeUIntFromPointer(ctx);
-    ContextsHndlMap::iterator it = m_contexts.find(hndl);
+    ContextsHndlMap::const_iterator it = m_contexts.find(hndl);
     return it != m_contexts.end() ?
                                   (*it).second :
                                    ContextPtr(NULL);
@@ -215,10 +238,12 @@ bool EglDisplay::removeContext(ContextPtr ctx) {
     return false;
 }
 
-EglConfig* EglDisplay::getConfig(EGLint id) {
+EglConfig* EglDisplay::getConfig(EGLint id) const {
     emugl::Mutex::AutoLock mutex(m_lock);
 
-    for(ConfigsList::iterator it = m_configs.begin(); it != m_configs.end() ;it++) {
+    for(ConfigsList::const_iterator it = m_configs.begin();
+        it != m_configs.end();
+        it++) {
         if((*it)->id() == id) {
             return (*it);
 
@@ -227,25 +252,32 @@ EglConfig* EglDisplay::getConfig(EGLint id) {
     return NULL;
 }
 
-int EglDisplay::getConfigs(EGLConfig* configs,int config_size) {
+int EglDisplay::getConfigs(EGLConfig* configs,int config_size) const {
     emugl::Mutex::AutoLock mutex(m_lock);
     int i = 0;
-    for(ConfigsList::iterator it = m_configs.begin(); it != m_configs.end() && i < config_size ;i++,it++) {
+    for(ConfigsList::const_iterator it = m_configs.begin();
+        it != m_configs.end() && i < config_size;
+        i++, it++) {
         configs[i] = static_cast<EGLConfig>(*it);
     }
     return i;
 }
 
-int EglDisplay::chooseConfigs(const EglConfig& dummy,EGLConfig* configs,int config_size) {
+int EglDisplay::chooseConfigs(const EglConfig& dummy,
+                              EGLConfig* configs,
+                              int config_size) const {
     emugl::Mutex::AutoLock mutex(m_lock);
     return doChooseConfigs(dummy, configs, config_size);
 }
 
-int EglDisplay::doChooseConfigs(const EglConfig& dummy,EGLConfig* configs,int config_size) {
+int EglDisplay::doChooseConfigs(const EglConfig& dummy,
+                                EGLConfig* configs,
+                                int config_size) const {
     int added = 0;
-    for(ConfigsList::iterator it = m_configs.begin(); it != m_configs.end() && (added < config_size || !configs);it++) {
-
-       if( (*it)->choosen(dummy)){
+    for(ConfigsList::const_iterator it = m_configs.begin();
+        it != m_configs.end() && (added < config_size || !configs);
+        it++) {
+        if( (*it)->chosen(dummy)){
             if(configs) {
                 configs[added] = static_cast<EGLConfig>(*it);
             }
@@ -291,11 +323,11 @@ EGLImageKHR EglDisplay::addImageKHR(ImagePtr img) {
     return reinterpret_cast<EGLImageKHR>(m_nextEglImageId);
 }
 
-ImagePtr EglDisplay::getImage(EGLImageKHR img) {
+ImagePtr EglDisplay::getImage(EGLImageKHR img) const {
     emugl::Mutex::AutoLock mutex(m_lock);
     /* img is "key" in map<unsigned int, ImagePtr>. */
     unsigned int hndl = SafeUIntFromPointer(img);
-    ImagesHndlMap::iterator i( m_eglImages.find(hndl) );
+    ImagesHndlMap::const_iterator i( m_eglImages.find(hndl) );
     return (i != m_eglImages.end()) ? (*i).second :ImagePtr(NULL);
 }
 
@@ -312,7 +344,7 @@ bool EglDisplay:: destroyImageKHR(EGLImageKHR img) {
     return false;
 }
 
-EGLNativeContextType EglDisplay::getGlobalSharedContext(){
+EGLNativeContextType EglDisplay::getGlobalSharedContext() const {
     emugl::Mutex::AutoLock mutex(m_lock);
 #ifndef _WIN32
     // find an existing OpenGL context to share with, if exist
@@ -335,7 +367,7 @@ EGLNativeContextType EglDisplay::getGlobalSharedContext(){
             return NULL;
         }
         EglConfig *cfg = (*m_configs.begin());
-        m_globalSharedContext = EglOS::createContext(m_dpy,cfg,NULL);
+        m_globalSharedContext = EglOS::createContext(m_idpy,cfg,NULL);
     }
 
     return m_globalSharedContext;

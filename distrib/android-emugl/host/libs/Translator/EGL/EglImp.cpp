@@ -18,10 +18,6 @@
 #define EGLAPI __declspec(dllexport)
 #endif
 
-#include <EGL/egl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <stdio.h>
 #include "ThreadInfo.h"
 #include <GLcommon/TranslatorIfaces.h>
 #include "emugl/common/shared_library.h"
@@ -37,6 +33,12 @@
 #include "EglConfig.h"
 #include "EglOsApi.h"
 #include "ClientAPIExts.h"
+
+#include <EGL/egl.h>
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #define MAJOR          1
 #define MINOR          4
@@ -60,10 +62,10 @@ void initGlobalInfo()
     } 
 }
 
-static EGLiface            s_eglIface = {
-    getGLESContext    : getGLESContext,
-    eglAttachEGLImage:attachEGLImage,
-    eglDetachEGLImage:detachEGLImage
+static const EGLiface s_eglIface = {
+    .getGLESContext = getGLESContext,
+    .eglAttachEGLImage = attachEGLImage,
+    .eglDetachEGLImage = detachEGLImage,
 };
 
 /*****************************************  supported extentions  ***********************************************************************/
@@ -76,12 +78,15 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
 
 // extentions descriptors
-static ExtentionDescriptor s_eglExtentions[] = {
-                                                   {"eglCreateImageKHR" ,(__eglMustCastToProperFunctionPointerType)eglCreateImageKHR},
-                                                   {"eglDestroyImageKHR",(__eglMustCastToProperFunctionPointerType)eglDestroyImageKHR}
-                                               };
-static int s_eglExtentionsSize = sizeof(s_eglExtentions) /
-                                 sizeof(ExtentionDescriptor);
+static const ExtentionDescriptor s_eglExtentions[] = {
+        {"eglCreateImageKHR" ,
+                (__eglMustCastToProperFunctionPointerType)eglCreateImageKHR },
+        {"eglDestroyImageKHR",
+                (__eglMustCastToProperFunctionPointerType)eglDestroyImageKHR },
+};
+
+static const int s_eglExtentionsSize =
+        sizeof(s_eglExtentions) / sizeof(ExtentionDescriptor);
 
 /****************************************************************************************************************************************/
 //macros for accessing global egl info & tls objects
@@ -502,21 +507,22 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreateWindowSurface(EGLDisplay display, EGLConf
     return dpy->addSurface(wSurface);
 }
 
-EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(EGLDisplay display, EGLConfig config,
-                   const EGLint *attrib_list) {
+EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
+        EGLDisplay display,
+        EGLConfig config,
+        const EGLint *attrib_list) {
     VALIDATE_DISPLAY_RETURN(display,EGL_NO_SURFACE);
     VALIDATE_CONFIG_RETURN(config,EGL_NO_SURFACE);
     if(!(cfg->surfaceType() & EGL_PBUFFER_BIT)) {
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_MATCH);
     }
 
-
     SurfacePtr pbSurface(new EglPbufferSurface(dpy,cfg));
     if(!pbSurface.Ptr()) {
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ALLOC);
     }
 
-    if(!EglValidate::noAttribs(attrib_list)) { //there are attribs
+    if(!EglValidate::noAttribs(attrib_list)) { // There are attribs.
         int i = 0 ;
         while(attrib_list[i] != EGL_NONE) {
             if(!pbSurface->setAttrib(attrib_list[i],attrib_list[i+1])) {
@@ -526,12 +532,17 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(EGLDisplay display, EGLCon
         }
     }
 
-    EGLint width,height,largest,texTarget,texFormat;
-    EglPbufferSurface* tmpPbSurfacePtr = static_cast<EglPbufferSurface*>(pbSurface.Ptr());
-    tmpPbSurfacePtr->getDim(&width,&height,&largest);
-    tmpPbSurfacePtr->getTexInfo(&texTarget,&texFormat);
+    EGLint width, height, largest, texTarget, texFormat;
+    EglPbufferSurface* tmpPbSurfacePtr =
+            static_cast<EglPbufferSurface*>(pbSurface.Ptr());
 
-    if(!EglValidate::pbufferAttribs(width,height,texFormat == EGL_NO_TEXTURE,texTarget == EGL_NO_TEXTURE)) {
+    tmpPbSurfacePtr->getDim(&width, &height, &largest);
+    tmpPbSurfacePtr->getTexInfo(&texTarget, &texFormat);
+
+    if(!EglValidate::pbufferAttribs(width,
+                                    height,
+                                    texFormat == EGL_NO_TEXTURE,
+                                    texTarget == EGL_NO_TEXTURE)) {
         //TODO: RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_VALUE); dont have bad_value
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ATTRIBUTE);
     }
@@ -629,7 +640,7 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
             i+=2;
         }
     }
-    GLESiface* iface = g_eglInfo->getIface(version);
+    const GLESiface* iface = g_eglInfo->getIface(version);
     GLEScontext* glesCtx = NULL;
     if(iface) {
         glesCtx = iface->createGLESContext();
@@ -666,18 +677,19 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyContext(EGLDisplay display, EGLContext c
     return EGL_TRUE;
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display, EGLSurface draw,
-              EGLSurface read, EGLContext context) {
+EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
+                                             EGLSurface draw,
+                                             EGLSurface read,
+                                             EGLContext context) {
     VALIDATE_DISPLAY(display);
 
-
-    bool releaseContext = EglValidate::releaseContext(context,read,draw);
-    if(!releaseContext && EglValidate::badContextMatch(context,read,draw)) {
-        RETURN_ERROR(EGL_FALSE,EGL_BAD_MATCH);
+    bool releaseContext = EglValidate::releaseContext(context, read, draw);
+    if(!releaseContext && EglValidate::badContextMatch(context, read, draw)) {
+        RETURN_ERROR(EGL_FALSE, EGL_BAD_MATCH);
     }
 
-    ThreadInfo* thread     = getThreadInfo();
-    ContextPtr  prevCtx    = thread->eglContext;
+    ThreadInfo* thread = getThreadInfo();
+    ContextPtr prevCtx = thread->eglContext;
 
     if(releaseContext) { //releasing current context
        if(prevCtx.Ptr()) {
@@ -710,9 +722,9 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display, EGLSurface draw
             }
         }
 
-        //surfaces compitability check
-        if(!((*ctx->getConfig()).compitableWith((*newDrawPtr->getConfig()))) ||
-           !((*ctx->getConfig()).compitableWith((*newReadPtr->getConfig())))) {
+        //surfaces compatibility check
+        if(!((*ctx->getConfig()).compatibleWith((*newDrawPtr->getConfig()))) ||
+           !((*ctx->getConfig()).compatibleWith((*newReadPtr->getConfig())))) {
             RETURN_ERROR(EGL_FALSE,EGL_BAD_MATCH);
         }
 
@@ -826,7 +838,9 @@ EGLAPI EGLContext EGLAPIENTRY eglGetCurrentContext(void) {
 }
 
 EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface(EGLint readdraw) {
-    if(!EglValidate::surfaceTarget(readdraw)) return EGL_NO_SURFACE;
+    if (!EglValidate::surfaceTarget(readdraw)) {
+        return EGL_NO_SURFACE;
+    }
 
     ThreadInfo* thread = getThreadInfo();
     EglDisplay* dpy    = static_cast<EglDisplay*>(thread->eglDisplay);
@@ -852,7 +866,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface(EGLint readdraw) {
 }
 
 EGLAPI EGLDisplay EGLAPIENTRY eglGetCurrentDisplay(void) {
-    ThreadInfo* thread     = getThreadInfo();
+    ThreadInfo* thread = getThreadInfo();
     return (thread->eglContext.Ptr()) ? thread->eglDisplay : EGL_NO_DISPLAY;
 }
 
