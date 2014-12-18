@@ -21,10 +21,12 @@
  * GNU General Public License for more details.
  */
 
+#include <math.h>
 #include "sysemu/char.h"
 #include "qemu/error-report.h"
 #include "qemu/timer.h"
 #include "trace.h"
+#include "hw/input/goldfish_sensors.h"
 #include "hw/misc/android_pipe.h"
 #include "hw/misc/android_qemud.h"
 
@@ -82,6 +84,57 @@ typedef struct SensorsPipe {
     GString   *recv_outstanding;
 } SensorsPipe;
 
+#define RADIANS_PER_DEGREE (M_PI / 180.0)
+
+void goldfish_sensors_set_rotation(int rotation)
+{
+    /* The Android framework computes the orientation by looking at
+     * the accelerometer sensor (*not* the orientation sensor !)
+     *
+     * That's because the gravity is a constant 9.81 vector that
+     * can be determined quite easily.
+     *
+     * Also, for some reason, the framework code considers that the phone should
+     * be inclined by 30 degrees along the phone's X axis to be considered
+     * in its ideal "vertical" position.
+     *
+     * If the phone is completely vertical, rotating it will not do anything !
+     */
+    const double  g      = 9.81;
+    const double  angle  = 20.0;
+    const double  cos_angle = cos(angle * RADIANS_PER_DEGREE);
+    const double  sin_angle = sin(angle * RADIANS_PER_DEGREE);
+
+    switch (rotation) {
+    case 0:
+        /* Natural layout */
+        sensor_config.sensors.acceleration.x = 0.0;
+        sensor_config.sensors.acceleration.y = g*cos_angle;
+        sensor_config.sensors.acceleration.z = g*sin_angle;
+        break;
+    case 1:
+        /* Rotate 90 degrees clockwise */
+        sensor_config.sensors.acceleration.x = g*cos_angle;
+        sensor_config.sensors.acceleration.y = 0.0;
+        sensor_config.sensors.acceleration.z = g*sin_angle;
+        break;
+    case 2:
+        /* Rotate 180 degrees clockwise */
+        sensor_config.sensors.acceleration.x = 0.0;
+        sensor_config.sensors.acceleration.y = -1.0 * g*cos_angle;
+        sensor_config.sensors.acceleration.z = g*sin_angle;
+        break;
+    case 3:
+        /* Rotate 270 degrees clockwise */
+        sensor_config.sensors.acceleration.x = -1.0 * g*cos_angle;
+        sensor_config.sensors.acceleration.y = 0.0;
+        sensor_config.sensors.acceleration.z = g*sin_angle;
+        break;
+    default:
+        g_assert_not_reached();
+        break;
+    }
+}
 
 /* I'll just append to a GString holding our data here, which we
  * truncate as we page back out....

@@ -40,6 +40,7 @@
 #include "monitor/monitor.h"
 #include "hw/misc/android_pipe.h"
 #include "hw/display/goldfish_fb.h"
+#include "hw/input/goldfish_sensors.h"
 
 /* Maximum number of emulators that can run at once (affects how
  * far through the TCP port space from 5554 we will scan to find
@@ -471,6 +472,7 @@ static int ranchu_rotation_state = 0;       /* 0-3 */
 static void android_console_rotate_screen(Monitor *mon, const QDict *qdict)
 {
     ranchu_rotation_state = ((ranchu_rotation_state + 1) % 4);
+    goldfish_sensors_set_rotation(ranchu_rotation_state);
     /* The mapping between QEMU and Android's idea of rotation are
        reversed */
     switch (ranchu_rotation_state) {
