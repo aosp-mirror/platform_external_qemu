@@ -28,8 +28,7 @@
 RenderThread::RenderThread(IOStream *stream, emugl::Mutex *lock) :
     emugl::Thread(),
     m_lock(lock),
-    m_stream(stream),
-    m_finished(false)
+    m_stream(stream)
 {
 }
 
@@ -153,10 +152,6 @@ intptr_t RenderThread::main()
     if (tInfo.currContext || tInfo.currDrawSurf || tInfo.currReadSurf) {
         fprintf(stderr, "ERROR: RenderThread exiting with current context/surfaces\n");
     }
-
-    //
-    // flag that this thread has finished execution
-    m_finished = true;
 
     return 0;
 }
