@@ -39,6 +39,7 @@
 #include "sysemu/char.h"
 #include "monitor/monitor.h"
 #include "hw/misc/android_pipe.h"
+#include "hw/display/goldfish_fb.h"
 
 /* Maximum number of emulators that can run at once (affects how
  * far through the TCP port space from 5554 we will scan to find
@@ -470,6 +471,24 @@ static int ranchu_rotation_state = 0;       /* 0-3 */
 static void android_console_rotate_screen(Monitor *mon, const QDict *qdict)
 {
     ranchu_rotation_state = ((ranchu_rotation_state + 1) % 4);
+    /* The mapping between QEMU and Android's idea of rotation are
+       reversed */
+    switch (ranchu_rotation_state) {
+    case 0:
+        goldfish_fb_set_rotation(0);
+        break;
+    case 1:
+        goldfish_fb_set_rotation(3);
+        break;
+    case 2:
+        goldfish_fb_set_rotation(2);
+        break;
+    case 3:
+        goldfish_fb_set_rotation(1);
+        break;
+    default:
+        g_assert_not_reached();
+    }
 }
 
 static mon_cmd_t rotate_cmd = {
