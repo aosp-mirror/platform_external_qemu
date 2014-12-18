@@ -195,7 +195,8 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
                 if (len < 0) {
                     break;
                 }
-                skin_keyboard_process_unicode_event(kb, codepoint, down);
+                skin_keyboard_process_unicode_event(kb, codepoint, 1);
+                skin_keyboard_process_unicode_event(kb, codepoint, 0);
                 text += len;
             }
             skin_keyboard_flush(kb);
