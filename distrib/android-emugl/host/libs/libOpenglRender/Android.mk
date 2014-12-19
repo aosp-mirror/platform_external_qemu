@@ -19,20 +19,20 @@ endif
 
 host_common_SRC_FILES := \
     $(host_OS_SRCS) \
-    render_api.cpp \
     ColorBuffer.cpp \
     EGLDispatch.cpp \
     FBConfig.cpp \
     FrameBuffer.cpp \
     GLDispatch.cpp \
     GL2Dispatch.cpp \
-    RenderContext.cpp \
-    WindowSurface.cpp \
-    RenderControl.cpp \
-    ThreadInfo.cpp \
-    RenderThread.cpp \
     ReadBuffer.cpp \
-    RenderServer.cpp
+    RenderContext.cpp \
+    RenderControl.cpp \
+    RenderServer.cpp \
+    RenderThread.cpp \
+    RenderThreadInfo.cpp \
+    render_api.cpp \
+    WindowSurface.cpp \
 
 host_common_CFLAGS :=
 
