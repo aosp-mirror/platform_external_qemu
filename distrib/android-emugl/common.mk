@@ -59,7 +59,7 @@ emugl-begin-module64 = \
 # Used to end a module definition, see function definitions above
 emugl-end-module = \
     $(eval $(EMUGL_LOCAL_EXTRAS)) \
-    $(eval include $(_EMUGL_INCLUDE_TYPE))\
+    $(call include-if-bitness-$(LOCAL_MODULE_BITS), $(_EMUGL_INCLUDE_TYPE))\
     $(eval _EMUGL_INCLUDE_TYPE :=) \
     $(eval _emugl_$(_emugl_HOST)modules += $(_emugl_MODULE))\
     $(if $(EMUGL_DEBUG),$(call emugl-dump-module))
