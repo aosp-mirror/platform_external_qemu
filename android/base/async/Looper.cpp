@@ -15,6 +15,7 @@
 #include "android/base/containers/TailQueueList.h"
 #include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/sockets/SocketErrors.h"
 #include "android/base/sockets/SocketWaiter.h"
 
 #include <sys/time.h>
