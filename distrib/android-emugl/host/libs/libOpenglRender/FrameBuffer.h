@@ -16,14 +16,16 @@
 #ifndef _LIBRENDER_FRAMEBUFFER_H
 #define _LIBRENDER_FRAMEBUFFER_H
 
-#include "libOpenglRender/render_api.h"
 #include "ColorBuffer.h"
-#include "RenderContext.h"
-#include "WindowSurface.h"
 #include "emugl/common/mutex.h"
+#include "RenderContext.h"
+#include "render_api.h"
+#include "WindowSurface.h"
+
+#include <EGL/egl.h>
 
 #include <map>
-#include <EGL/egl.h>
+
 #include <stdint.h>
 
 typedef uint32_t HandleType;

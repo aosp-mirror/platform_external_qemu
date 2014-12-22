@@ -548,7 +548,7 @@ Host Renderer:
 
 The host renderer library is located under
 $EMUGL_HOST/host/libs/libOpenglRender, and it provides an interface described
-by the headers under $EMUGL_HOST/host/include/libOpenglRender/render_api.h
+by the headers under $EMUGL_HOST/host/libs/libOpenglRender/render_api.h
 (e.g. for use by the emulator).
 
 In a nutshell, the rendering library is responsible for the following:
