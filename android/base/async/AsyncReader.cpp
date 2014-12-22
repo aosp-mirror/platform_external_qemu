@@ -11,9 +11,8 @@
 
 #include "android/base/async/AsyncReader.h"
 
+#include "android/base/sockets/SocketErrors.h"
 #include "android/base/sockets/SocketUtils.h"
-
-#include <errno.h>
 
 namespace android {
 namespace base {

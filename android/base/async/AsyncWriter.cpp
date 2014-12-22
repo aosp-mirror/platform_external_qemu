@@ -1,8 +1,7 @@
 #include "android/base/async/AsyncWriter.h"
 
+#include "android/base/sockets/SocketErrors.h"
 #include "android/base/sockets/SocketUtils.h"
-
-#include <errno.h>
 
 namespace android {
 namespace base {

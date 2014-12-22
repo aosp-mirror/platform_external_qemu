@@ -20,6 +20,7 @@
 #include <android/base/Limits.h>
 #include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/sockets/SocketErrors.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/String.h"
 #include "android/utils/debug.h"
