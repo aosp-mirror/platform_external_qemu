@@ -298,7 +298,11 @@ else # BUILD_SDL_FROM_SOURCES
 endif # BUILD_SDL_FROM_SOURCES
 
 SDL2_DIR := distrib/sdl2-2.0.3
+
+ifndef EMULATOR_USE_OLD_MINGW32
+# NOTE: SDL2 doesn't compile with the old Mingw32 toolchain
 include $(LOCAL_PATH)/$(SDL2_DIR)/sources.make
+endif
 
 SDL2_STATIC_LIBRARIES := emulator_libSDL2
 SDL2_STATIC_LIBRARIES_64 := emulator_lib64SDL2

@@ -198,6 +198,8 @@ force_32bit_binaries ()
 # windows executables on a Linux machine, which is considerably
 # faster than using Cygwin / MSys to do the same job.
 #
+# $1: If not empty, then use the old mingw32 toolchain (i586-mingw32msvc) only.
+#
 enable_linux_mingw ()
 {
     # Are we on Linux ?
@@ -206,23 +208,34 @@ enable_linux_mingw ()
         echo "Sorry, but mingw compilation is only supported on Linux !"
         exit 1
     fi
-    # Do we have our prebuilt mingw64 toolchain?
-    log "Mingw      : Looking for prebuilt mingw64 toolchain."
-    MINGW_DIR=$PROGDIR/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8
-    MINGW_CC=
-    if [ -d "$MINGW_DIR" ]; then
-        MINGW_PREFIX=$MINGW_DIR/bin/x86_64-w64-mingw32
-        find_program MINGW_CC "$MINGW_PREFIX-gcc"
-    fi
-    if [ -z "$MINGW_CC" ]; then
-        log "Mingw      : Looking for mingw64 toolchain."
-        MINGW_PREFIX=x86_64-w64-mingw32
+    if [ "$1" ]; then
+        log "Mingw      : Looking for mingw32 toolchain."
+        MINGW_PREFIX=i586-mingw32msvc
         find_program MINGW_CC $MINGW_PREFIX-gcc
-    fi
-    if [ -z "$MINGW_CC" ]; then
-        echo "ERROR: It looks like no Mingw64 toolchain is available!"
-        echo "Please install x86_64-w64-mingw32 package !"
-        exit 1
+        if [ -z "$MINGW_CC" ]; then
+            echo "ERROR: It looks like no Mingw32 toolchain is available!"
+            echo "Please install mingw32 package !"
+            exit 1
+        fi
+    else
+        # Do we have our prebuilt mingw64 toolchain?
+        log "Mingw      : Looking for prebuilt mingw64 toolchain."
+        MINGW_DIR=$PROGDIR/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8
+        MINGW_CC=
+        if [ -d "$MINGW_DIR" ]; then
+            MINGW_PREFIX=$MINGW_DIR/bin/x86_64-w64-mingw32
+            find_program MINGW_CC "$MINGW_PREFIX-gcc"
+        fi
+        if [ -z "$MINGW_CC" ]; then
+            log "Mingw      : Looking for mingw64 toolchain."
+            MINGW_PREFIX=x86_64-w64-mingw32
+            find_program MINGW_CC $MINGW_PREFIX-gcc
+        fi
+        if [ -z "$MINGW_CC" ]; then
+            echo "ERROR: It looks like no Mingw64 toolchain is available!"
+            echo "Please install x86_64-w64-mingw32 package !"
+            exit 1
+        fi
     fi
     log2 "Mingw      : Found $MINGW_CC"
     CC=$MINGW_CC

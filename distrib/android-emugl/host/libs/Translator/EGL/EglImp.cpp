@@ -63,9 +63,9 @@ void initGlobalInfo()
 }
 
 static const EGLiface s_eglIface = {
-    .getGLESContext = getGLESContext,
-    .eglAttachEGLImage = attachEGLImage,
-    .eglDetachEGLImage = detachEGLImage,
+    getGLESContext,  // .getGLESContext
+    attachEGLImage,  // .eglAttachEGLImage
+    detachEGLImage,  // .eglDetachEGLImage
 };
 
 /*****************************************  supported extentions  ***********************************************************************/
