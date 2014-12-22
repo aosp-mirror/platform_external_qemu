@@ -16,8 +16,9 @@
 #ifndef NATIVE_SUB_WINDOW_H
 #define NATIVE_SUB_WINDOW_H
 
+#include "render_api_platform_types.h"
+
 #include <EGL/egl.h>
-#include "libOpenglRender/render_api_platform_types.h"
 
 #ifdef __cplusplus
 extern "C" {
