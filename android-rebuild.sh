@@ -14,12 +14,17 @@ VERBOSE=0
 
 MINGW=
 NO_TESTS=
+OLD_MINGW32=
 OUT_DIR=objs
 
 for OPT; do
     case $OPT in
         --mingw)
             MINGW=true
+            ;;
+        --old-mingw32)
+            MINGW=true
+            OLD_MINGW32=true
             ;;
         --verbose)
             VERBOSE=$(( $VERBOSE + 1 ))
@@ -115,11 +120,16 @@ RUN_32BIT_TESTS=
 RUN_64BIT_TESTS=true
 RUN_EMUGEN_TESTS=true
 
+
 TEST_SHELL=
 EXE_SUFFIX=
 if [ "$MINGW" ]; then
   TEST_SHELL=wine
   EXE_SUFFIX=.exe
+  if [ "$OLD_MINGW32" ]; then
+    # The old Mingw32 toolchain doesn't support Win64.
+    RUN_64BIT_TESTS=
+  fi
 
   # Check for Wine on this machine.
   WINE_CMD=$(which $TEST_SHELL 2>/dev/null || true)

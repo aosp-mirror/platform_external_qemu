@@ -26,6 +26,7 @@ OPTION_HELP=no
 OPTION_STATIC=no
 OPTION_STRIP=no
 OPTION_MINGW=no
+OPTION_OLD_MINGW32=no
 
 GLES_DIR=
 GLES_SUPPORT=no
@@ -34,6 +35,9 @@ GLES_PROBE=yes
 PCBIOS_PROBE=yes
 
 QEMU_PREBUILTS_DIR=
+
+USE_MING=
+USE_OLD_MINGW32=
 
 HOST_CC=${CC:-gcc}
 OPTION_CC=
@@ -76,6 +80,8 @@ for opt do
   --ignore-audio) OPTION_IGNORE_AUDIO=yes
   ;;
   --no-prebuilts) OPTION_NO_PREBUILTS=yes
+  ;;
+  --old-mingw32) OPTION_OLD_MINGW32=yes
   ;;
   --prebuilts-dir=*) OPTION_PREBUILTS_DIR=$optarg
   ;;
@@ -256,8 +262,15 @@ BUILD_CFLAGS=$CFLAGS
 BUILD_CXXFLAGS=$CXXFLAGS
 BUILD_LDFLAGS=$LDFLAGS
 
-if [ "$OPTION_MINGW" = "yes" ] ; then
-    enable_linux_mingw
+if [ "$OPTION_MINGW" = "yes" ]; then
+    USE_MINGW=true
+elif [ "$OPTION_OLD_MINGW32" = "yes" ]; then
+    USE_MINGW=true
+    USE_OLD_MINGW32=true
+fi
+
+if [ "$USE_MINGW" ]; then
+    enable_linux_mingw "$USE_OLD_MINGW32"
     TARGET_OS=windows
     TARGET_DLL_SUFFIX=.dll
 else
@@ -581,12 +594,12 @@ feature_check_header HAVE_FNMATCH_H       "<fnmatch.h>"
 # check for Mingw version.
 MINGW_VERSION=
 if [ "$TARGET_OS" = "windows" ]; then
-log "Mingw      : Probing for GCC version."
-GCC_VERSION=$($CC -v 2>&1 | awk '$1 == "gcc" && $2 == "version" { print $3; }')
-GCC_MAJOR=$(echo "$GCC_VERSION" | cut -f1 -d.)
-GCC_MINOR=$(echo "$GCC_VERSION" | cut -f2 -d.)
-log "Mingw      : Found GCC version $GCC_MAJOR.$GCC_MINOR [$GCC_VERSION]"
-MINGW_GCC_VERSION=$(( $GCC_MAJOR * 100 + $GCC_MINOR ))
+    log "Mingw      : Probing for GCC version."
+    GCC_VERSION=$($CC -v 2>&1 | awk '$1 == "gcc" && $2 == "version" { print $3; }')
+    GCC_MAJOR=$(echo "$GCC_VERSION" | cut -f1 -d.)
+    GCC_MINOR=$(echo "$GCC_VERSION" | cut -f2 -d.)
+    log "Mingw      : Found GCC version $GCC_MAJOR.$GCC_MINOR [$GCC_VERSION]"
+    MINGW_GCC_VERSION=$(( $GCC_MAJOR * 100 + $GCC_MINOR ))
 fi
 # Build the config.make file
 #
@@ -680,9 +693,10 @@ if [ -n "$ANDROID_SDK_TOOLS_REVISION" ] ; then
     echo "ANDROID_SDK_TOOLS_REVISION := $ANDROID_SDK_TOOLS_REVISION" >> $config_mk
 fi
 
-if [ "$OPTION_MINGW" = "yes" ] ; then
+if [ "$USE_MINGW" ] ; then
     echo "" >> $config_mk
     echo "USE_MINGW := 1" >> $config_mk
+    echo "USE_OLD_MINGW32 := $USE_OLD_MINGW32" >> $config_mk
     echo "HOST_OS   := windows" >> $config_mk
     echo "HOST_MINGW_VERSION := $MINGW_GCC_VERSION" >> $config_mk
 fi
