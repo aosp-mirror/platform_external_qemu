@@ -31,14 +31,14 @@ endif
 # or if LOCAL_IGNORE_BITNESS is defined for the current module.
 # $1: Build file to include.
 include-if-bitness-32 = \
-    $(if $(strip $(LOCAL_IGNORE_BITNESS)$(EMULATOR_BUILD_32BITS)),\
+    $(if $(strip $(LOCAL_IGNORE_BITNESS)$(filter true,$(LOCAL_HOST_BUILD))$(EMULATOR_BUILD_32BITS)),\
         $(eval include $1))
 
 # A function that includes a file only of EMULATOR_BUILD_64BITS is not empty.
 # or if LOCAL_IGNORE_BITNESS is defined for the current module.
 # $1: Build file to include.
 include-if-bitness-64 = \
-    $(if $(strip $(LOCAL_IGNORE_BITNESS)$(EMULATOR_BUILD_64BITS)),\
+    $(if $(strip $(LOCAL_IGNORE_BITNESS)$(filter true,$(LOCAL_HOST_BUILD))$(EMULATOR_BUILD_64BITS)),\
         $(eval include $1))
 
 # determine the location of platform-specific directories
