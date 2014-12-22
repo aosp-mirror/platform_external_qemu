@@ -28,9 +28,6 @@ namespace internal {
 namespace {
 
 typedef ::Duration CDuration;
-typedef ::android::internal::GLooper GLooper;
-typedef ::Looper CLooper;
-typedef ::android::base::Looper BaseLooper;
 typedef ::android::base::Looper::Duration BaseDuration;
 typedef ::android::base::Looper::Timer BaseTimer;
 typedef ::android::base::Looper::FdWatch BaseFdWatch;
