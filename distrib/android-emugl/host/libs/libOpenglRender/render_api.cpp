@@ -16,8 +16,8 @@
 #include "render_api.h"
 
 #include "IOStream.h"
-#include "FrameBuffer.h"
 #include "RenderServer.h"
+#include "RenderWindow.h"
 #include "TimeUtils.h"
 
 #include "TcpStream.h"
@@ -31,8 +31,12 @@
 #include "GLDispatch.h"
 #include "GL2Dispatch.h"
 
-static RenderServer *s_renderThread = NULL;
+#include <string.h>
+
+static RenderServer* s_renderThread = NULL;
 static char s_renderAddr[256];
+
+static RenderWindow* s_renderWindow = NULL;
 
 static IOStream *createRenderThread(int p_stream_buffer_size,
                                     unsigned int clientFlags);
@@ -65,7 +69,6 @@ int initLibrary(void)
 
 int initOpenGLRenderer(int width, int height, char* addr, size_t addrLen)
 {
-
     //
     // Fail if renderer is already initialized
     //
@@ -77,8 +80,14 @@ int initOpenGLRenderer(int width, int height, char* addr, size_t addrLen)
     // initialize the renderer and listen to connections
     // on a thread in the current process.
     //
-    bool inited = FrameBuffer::initialize(width, height);
-    if (!inited) {
+    s_renderWindow = new RenderWindow(width, height);
+    if (!s_renderWindow) {
+        ERR("Could not create rendering window class");
+        return false;
+    }
+    if (!s_renderWindow->isValid()) {
+        ERR("Could not initialize emulated framebuffer");
+        delete s_renderWindow;
         return false;
     }
 
@@ -95,20 +104,21 @@ int initOpenGLRenderer(int width, int height, char* addr, size_t addrLen)
 
 void setPostCallback(OnPostFn onPost, void* onPostContext)
 {
-    FrameBuffer* fb = FrameBuffer::getFB();
-    if (fb) {
-        fb->setPostCallback(onPost, onPostContext);
+    if (s_renderWindow) {
+        s_renderWindow->setPostCallback(onPost, onPostContext);
+    } else {
+        ERR("Calling setPostCallback() before creating render window!");
     }
 }
 
-void getHardwareStrings(const char** vendor, const char** renderer, const char** version)
-{
-    FrameBuffer* fb = FrameBuffer::getFB();
-    if (fb) {
-        fb->getGLStrings(vendor, renderer, version);
-    } else {
-        *vendor = *renderer = *version = NULL;
+void getHardwareStrings(const char** vendor,
+                        const char** renderer,
+                        const char** version) {
+    if (s_renderWindow &&
+        s_renderWindow->getHardwareStrings(vendor, renderer, version)) {
+        return;
     }
+    *vendor = *renderer = *version = NULL;
 }
 
 int stopOpenGLRenderer(void)
@@ -130,72 +140,70 @@ int stopOpenGLRenderer(void)
         s_renderThread = NULL;
     }
 
+    if (s_renderWindow) {
+        delete s_renderWindow;
+        s_renderWindow = NULL;
+    }
+
     return ret;
 }
 
-int createOpenGLSubwindow(FBNativeWindowType window,
+int createOpenGLSubwindow(FBNativeWindowType window_id,
                            int x, int y, int width, int height, float zRot)
 {
-    if (s_renderThread) {
-        return FrameBuffer::setupSubWindow(window,x,y,width,height, zRot);
+    RenderWindow* window = s_renderWindow;
+
+    if (window) {
+       return window->setupSubWindow(window_id,x,y,width,height, zRot);
     }
-    else {
-        //
-        // XXX: should be implemented by sending the renderer process
-        //      a request
-        ERR("%s not implemented for separate renderer process !!!\n",
-            __FUNCTION__);
-    }
+    // XXX: should be implemented by sending the renderer process
+    //      a request
+    ERR("%s not implemented for separate renderer process !!!\n",
+        __FUNCTION__);
     return false;
 }
 
 int destroyOpenGLSubwindow(void)
 {
-    if (s_renderThread) {
-        return FrameBuffer::removeSubWindow();
+    RenderWindow* window = s_renderWindow;
+
+    if (window) {
+        return window->removeSubWindow();
     }
-    else {
-        //
-        // XXX: should be implemented by sending the renderer process
-        //      a request
-        ERR("%s not implemented for separate renderer process !!!\n",
-                __FUNCTION__);
-        return false;
-    }
+
+    // XXX: should be implemented by sending the renderer process
+    //      a request
+    ERR("%s not implemented for separate renderer process !!!\n",
+            __FUNCTION__);
+    return false;
 }
 
 void setOpenGLDisplayRotation(float zRot)
 {
-    if (s_renderThread) {
-        FrameBuffer *fb = FrameBuffer::getFB();
-        if (fb) {
-            fb->setDisplayRotation(zRot);
-        }
+    RenderWindow* window = s_renderWindow;
+
+    if (window) {
+        window->setRotation(zRot);
+        return;
     }
-    else {
-        //
-        // XXX: should be implemented by sending the renderer process
-        //      a request
-        ERR("%s not implemented for separate renderer process !!!\n",
-                __FUNCTION__);
-    }
+    // XXX: should be implemented by sending the renderer process
+    //      a request
+    ERR("%s not implemented for separate renderer process !!!\n",
+            __FUNCTION__);
 }
 
 void repaintOpenGLDisplay(void)
 {
-    if (s_renderThread) {
-        FrameBuffer *fb = FrameBuffer::getFB();
-        if (fb) {
-            fb->repost();
-        }
+    RenderWindow* window = s_renderWindow;
+
+    if (window) {
+        window->repaint();
+        return;
     }
-    else {
-        //
-        // XXX: should be implemented by sending the renderer process
-        //      a request
-        ERR("%s not implemented for separate renderer process !!!\n",
-                __FUNCTION__);
-    }
+    // XXX: should be implemented by sending the renderer process
+    //      a request
+    ERR("%s not implemented for separate renderer process !!!\n",
+            __FUNCTION__);
 }
 
 
