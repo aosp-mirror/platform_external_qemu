@@ -8,6 +8,7 @@ LOCAL_PATH := $(call my-dir)
 commonSources := \
         id_to_object_map.cpp \
         lazy_instance.cpp \
+        message_channel.cpp \
         pod_vector.cpp \
         shared_library.cpp \
         smart_ptr.cpp \
@@ -50,6 +51,7 @@ host_commonSources := \
     id_to_object_map_unittest.cpp \
     lazy_instance_unittest.cpp \
     pod_vector_unittest.cpp \
+    message_channel_unittest.cpp \
     mutex_unittest.cpp \
     shared_library_unittest.cpp \
     smart_ptr_unittest.cpp \
