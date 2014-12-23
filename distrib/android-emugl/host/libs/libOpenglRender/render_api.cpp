@@ -132,7 +132,6 @@ int stopOpenGLRenderer(void)
     if (!dummy) return false;
 
     if (s_renderThread) {
-
         // wait for the thread to exit
         ret = s_renderThread->wait(NULL);
 

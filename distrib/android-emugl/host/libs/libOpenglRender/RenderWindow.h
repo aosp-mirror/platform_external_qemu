@@ -17,6 +17,12 @@
 
 #include "render_api.h"
 
+namespace emugl {
+class Thread;
+}  // namespace emugl
+
+class RenderWindowChannel;
+
 // Helper class used to manage the sub-window that displays the emulated GPU
 // output. To use it, do the following:
 //
@@ -98,6 +104,8 @@ public:
 private:
     bool mValid;
     bool mHasSubWindow;
+    emugl::Thread* mThread;
+    RenderWindowChannel* mChannel;
 };
 
 #endif  // ANDROID_EMUGL_LIBRENDER_RENDER_WINDOW_H
