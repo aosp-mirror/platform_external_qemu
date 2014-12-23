@@ -14,39 +14,317 @@
 
 #include "RenderWindow.h"
 
+#include "emugl/common/message_channel.h"
+#include "emugl/common/mutex.h"
+#include "emugl/common/thread.h"
 #include "FrameBuffer.h"
 
-// TODO(digit): This implementation just proxies the method calls directly
-//              to the FrameBuffer class. In the future, everything will be
-//              moved to a dedicated thread to ensure there is no conflict
-//              between the display/context of the main window and the one
-//              from the sub-window.
+#include <stdarg.h>
+#include <stdio.h>
 
-RenderWindow::RenderWindow(int width, int height) :
+#define DEBUG 0
+
+#if DEBUG
+#  define D(...) my_debug(__PRETTY_FUNCTION__, __LINE__, __VA_ARGS__)
+#else
+#  define D(...) ((void)0)
+#endif
+
+namespace {
+
+#if DEBUG
+void my_debug(const char* function, int line, const char* format, ...) {
+    static ::emugl::Mutex mutex;
+    va_list args;
+    va_start(args, format);
+    mutex.lock();
+    fprintf(stderr, "%s:%d:", function, line);
+    vfprintf(stderr, format, args);
+    mutex.unlock();
+    va_end(args);
+}
+#endif
+
+// List of possible commands to send to the render window thread from
+// the main one.
+enum Command {
+    CMD_INITIALIZE,
+    CMD_SET_POST_CALLBACK,
+    CMD_SETUP_SUBWINDOW,
+    CMD_REMOVE_SUBWINDOW,
+    CMD_SET_ROTATION,
+    CMD_REPAINT,
+    CMD_FINALIZE,
+};
+
+}  // namespace
+
+// A single message sent from the main thread to the render window thread.
+// |cmd| determines which fields are valid to read.
+struct RenderWindowMessage {
+    Command cmd;
+    union {
+        // CMD_INITIALIZE
+        struct {
+            int width;
+            int height;
+        } init;
+
+        // CMD_SET_POST_CALLBACK
+        struct {
+            OnPostFn on_post;
+            void* on_post_context;
+        } set_post_callback;
+
+        // CMD_SETUP_SUBWINDOW
+        struct {
+            FBNativeWindowType parent;
+            int x;
+            int y;
+            int w;
+            int h;
+            float rotation;
+        } subwindow;
+
+        // CMD_SET_ROTATION
+        float rotation;
+
+        // result of operations.
+        bool result;
+    };
+
+    // Process the current message, and updates its |result| field.
+    // Returns true on success, or false on failure.
+    bool process() const {
+        const RenderWindowMessage& msg = *this;
+        FrameBuffer* fb;
+        bool result = false;
+        switch (msg.cmd) {
+            case CMD_INITIALIZE:
+                D("CMD_INITIALIZE w=%d h=%d\n", msg.init.width, msg.init.height);
+                result = FrameBuffer::initialize(msg.init.width,
+                                                 msg.init.height);
+                break;
+
+            case CMD_FINALIZE:
+                D("CMD_FINALIZE\n");
+                FrameBuffer::finalize();
+                result = true;
+                break;
+
+            case CMD_SET_POST_CALLBACK:
+                D("CMD_SET_POST_CALLBACK\n");
+                fb = FrameBuffer::getFB();
+                fb->setPostCallback(msg.set_post_callback.on_post,
+                                    msg.set_post_callback.on_post_context);
+                result = true;
+                break;
+
+            case CMD_SETUP_SUBWINDOW:
+                D("CMD_SETUP_SUBWINDOW: parent=%p x=%d y=%d w=%d h=%d rotation=%f\n",
+                    (void*)msg.subwindow.parent,
+                    msg.subwindow.x,
+                    msg.subwindow.y,
+                    msg.subwindow.w,
+                    msg.subwindow.h,
+                    msg.subwindow.rotation);
+                result = FrameBuffer::setupSubWindow(msg.subwindow.parent,
+                                                        msg.subwindow.x,
+                                                        msg.subwindow.y,
+                                                        msg.subwindow.w,
+                                                        msg.subwindow.h,
+                                                        msg.subwindow.rotation);
+                break;
+
+            case CMD_REMOVE_SUBWINDOW:
+                D("CMD_REMOVE_SUBWINDOW\n");
+                result = FrameBuffer::removeSubWindow();
+                break;
+
+            case CMD_SET_ROTATION:
+                D("CMD_SET_ROTATION rotation=%f\n", msg.rotation);
+                fb = FrameBuffer::getFB();
+                if (fb) {
+                    fb->setDisplayRotation(msg.rotation);
+                    result = true;
+                }
+                break;
+
+            case CMD_REPAINT:
+                D("CMD_REPAINT\n");
+                fb = FrameBuffer::getFB();
+                if (fb) {
+                    fb->repost();
+                    result = true;
+                }
+                break;
+
+            default:
+                ;
+        }
+        return result;
+    }
+};
+
+// Simple synchronization structure used to exchange data between the
+// main and render window threads. Usage is the following:
+//
+// The main thread does the following in a loop:
+//
+//      canWriteCmd.wait()
+//      updates |message| by writing a new |cmd| value and appropriate
+//      parameters.
+//      canReadCmd.signal()
+//      canReadResult.wait()
+//      reads |message.result|
+//      canWriteResult.signal()
+//
+// The render window thread will do the following:
+//
+//      canReadCmd.wait()
+//      reads |message.cmd| and acts upon it.
+//      canWriteResult.wait()
+//      writes |message.result|
+//      canReadResult.signal()
+//      canWriteCmd.signal()
+//
+class RenderWindowChannel {
+public:
+    RenderWindowChannel() : mIn(), mOut() {}
+    ~RenderWindowChannel() {}
+
+    // Send a message from the main thread.
+    // Note that the content of |msg| is copied into the channel.
+    // Returns with the command's result (true or false).
+    bool sendMessageAndGetResult(const RenderWindowMessage& msg) {
+        D("msg.cmd=%d\n", msg.cmd);
+        mIn.send(msg);
+        D("waiting for result\n");
+        bool result = false;
+        mOut.receive(&result);
+        D("result=%s\n", result ? "success" : "failure");
+        return result;
+    }
+
+    // Receive a message from the render window thread.
+    // On exit, |*msg| gets a copy of the message. The caller
+    // must always call sendResult() after processing the message.
+    void receiveMessage(RenderWindowMessage* msg) {
+        D("entering\n");
+        mIn.receive(msg);
+        D("message cmd=%d\n", msg->cmd);
+    }
+
+    // Send result from the render window thread to the main one.
+    // Must always be called after receiveMessage().
+    void sendResult(bool result) {
+        D("waiting to send result (%s)\n", result ? "success" : "failure");
+        mOut.send(result);
+        D("result sent\n");
+    }
+
+private:
+    emugl::MessageChannel<RenderWindowMessage, 16U> mIn;
+    emugl::MessageChannel<bool, 16U> mOut;
+};
+
+namespace {
+
+// This class implements the window render thread.
+// Its purpose is to listen for commands from the main thread in a loop,
+// process them, then return a boolean result for each one of them.
+//
+// The thread ends with a CMD_FINALIZE.
+//
+class RenderWindowThread : public emugl::Thread {
+public:
+    RenderWindowThread(RenderWindowChannel* channel) : mChannel(channel) {}
+
+    virtual intptr_t main() {
+        D("Entering render window thread thread\n");
+        bool running = true;
+        while (running) {
+            RenderWindowMessage msg;
+
+            D("Waiting for message from main thread\n");
+            mChannel->receiveMessage(&msg);
+
+            bool result = msg.process();
+            if (msg.cmd == CMD_FINALIZE) {
+                running = false;
+            }
+
+            D("Sending result (%s) to main thread\n", result ? "success" : "failure");
+            mChannel->sendResult(result);
+        }
+        D("Exiting thread\n");
+        return 0;
+    }
+
+private:
+    RenderWindowChannel* mChannel;
+};
+
+}  // namespace
+
+RenderWindow::RenderWindow(int width, int height, bool use_thread) :
         mValid(false),
-        mHasSubWindow(false) {
-    mValid = FrameBuffer::initialize(width, height);
+        mHasSubWindow(false),
+        mThread(NULL),
+        mChannel(NULL) {
+    if (use_thread) {
+        mChannel = new RenderWindowChannel();
+        mThread = new RenderWindowThread(mChannel);
+        mThread->start();
+    }
+
+    RenderWindowMessage msg;
+    msg.cmd = CMD_INITIALIZE;
+    msg.init.width = width;
+    msg.init.height = height;
+    mValid = processMessage(msg);
 }
 
 RenderWindow::~RenderWindow() {
+    D("Entering\n");
     removeSubWindow();
-    FrameBuffer::finalize();
+    D("Sending CMD_FINALIZE\n");
+    RenderWindowMessage msg;
+    msg.cmd = CMD_FINALIZE;
+    (void) processMessage(msg);
+
+    if (mThread) {
+        mThread->wait(NULL);
+        delete mThread;
+        delete mChannel;
+    }
 }
 
 bool RenderWindow::getHardwareStrings(const char** vendor,
                                       const char** renderer,
                                       const char** version) {
+    D("Entering\n");
+    // TODO(digit): Move this to render window thread.
     FrameBuffer* fb = FrameBuffer::getFB();
     if (!fb) {
+        D("No framebuffer!\n");
         return false;
     }
     fb->getGLStrings(vendor, renderer, version);
+    D("Exiting vendor=[%s] renderer=[%s] version=[%s]\n",
+      *vendor, *renderer, *version);
+
     return true;
 }
 
 void RenderWindow::setPostCallback(OnPostFn onPost, void* onPostContext) {
-    FrameBuffer* fb = FrameBuffer::getFB();
-    fb->setPostCallback(onPost, onPostContext);
+    D("Entering\n");
+    RenderWindowMessage msg;
+    msg.cmd = CMD_SET_POST_CALLBACK;
+    msg.set_post_callback.on_post = onPost;
+    msg.set_post_callback.on_post_context = onPostContext;
+    (void) processMessage(msg);
+    D("Exiting\n");
 }
 
 bool RenderWindow::setupSubWindow(FBNativeWindowType window,
@@ -55,33 +333,60 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   int width,
                                   int height,
                                   float zRot) {
+    D("Entering mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
     if (mHasSubWindow) {
         return false;
     }
-    mHasSubWindow = FrameBuffer::setupSubWindow(
-            window, x, y, width, height, zRot);
 
+    RenderWindowMessage msg;
+    msg.cmd = CMD_SETUP_SUBWINDOW;
+    msg.subwindow.parent = window;
+    msg.subwindow.x = x;
+    msg.subwindow.y = y;
+    msg.subwindow.w = width;
+    msg.subwindow.h = height;
+    msg.subwindow.rotation = zRot;
+
+    mHasSubWindow = processMessage(msg);
+    D("Exiting mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
     return mHasSubWindow;
 }
 
 bool RenderWindow::removeSubWindow() {
+    D("Entering mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
     if (!mHasSubWindow) {
         return false;
     }
     mHasSubWindow = false;
-    return FrameBuffer::removeSubWindow();
+
+    RenderWindowMessage msg;
+    msg.cmd = CMD_REMOVE_SUBWINDOW;
+    bool result = processMessage(msg);
+    D("Exiting result=%s\n", result ? "success" : "failure");
+    return result;
 }
 
 void RenderWindow::setRotation(float zRot) {
-    FrameBuffer* fb = FrameBuffer::getFB();
-    if (fb) {
-        fb->setDisplayRotation(zRot);
-    }
+    D("Entering rotation=%f\n", zRot);
+    RenderWindowMessage msg;
+    msg.cmd = CMD_SET_ROTATION;
+    msg.rotation = zRot;
+    (void) processMessage(msg);
+    D("Exiting\n");
 }
 
 void RenderWindow::repaint() {
-    FrameBuffer* fb = FrameBuffer::getFB();
-    if (fb) {
-        fb->repost();
+    D("Entering\n");
+    RenderWindowMessage msg;
+    msg.cmd = CMD_REPAINT;
+    (void) processMessage(msg);
+    D("Exiting\n");
+}
+
+bool RenderWindow::processMessage(const RenderWindowMessage& msg) {
+    if (mChannel) {
+        return mChannel->sendMessageAndGetResult(msg);
+    } else {
+        return msg.process();
     }
 }

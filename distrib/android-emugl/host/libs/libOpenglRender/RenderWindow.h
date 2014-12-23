@@ -17,6 +17,13 @@
 
 #include "render_api.h"
 
+namespace emugl {
+class Thread;
+}  // namespace emugl
+
+class RenderWindowChannel;
+class RenderWindowMessage;
+
 // Helper class used to manage the sub-window that displays the emulated GPU
 // output. To use it, do the following:
 //
@@ -42,12 +49,14 @@
 class RenderWindow {
 public:
     // Create new instance. |width| and |height| are the dimensions of the
-    // emulated accelerated framebuffer. Call isValid() after construction
-    // to verify that it worked properly.
+    // emulated accelerated framebuffer. |use_thread| can be true to force
+    // the use of a separate thread, which might be required on some platforms
+    // to avoid GL-realted corruption issues in the main window. Call
+    // isValid() after construction to verify that it worked properly.
     //
     // Note that this call doesn't display anything, it just initializes
     // the library, use setupSubWindow() to display something.
-    RenderWindow(int width, int height);
+    RenderWindow(int width, int height, bool use_thread);
 
     // Destructor. This will automatically call removeSubWindow() is needed.
     ~RenderWindow();
@@ -71,7 +80,7 @@ public:
     // Start displaying the emulated framebuffer using a sub-window of a
     // parent |window| id. |x|, |y|, |width| and |height| are the position
     // and dimension of the sub-window, relative to its parent.
-    // |zRot| is a clockwise-rotation for the content. Only multiples of
+    // |rotation| is a clockwise-rotation for the content. Only multiples of
     // 90. are accepted. Returns true on success, false otherwise.
     //
     // One can call removeSubWindow() to remove the sub-window.
@@ -80,7 +89,7 @@ public:
                         int y,
                         int width,
                         int height,
-                        float zRot);
+                        float rotation);
 
     // Remove the sub-window created by calling setupSubWindow().
     // Note that this doesn't discard the content of the emulated framebuffer,
@@ -96,8 +105,12 @@ public:
     void repaint();
 
 private:
+    bool processMessage(const RenderWindowMessage& msg);
+
     bool mValid;
     bool mHasSubWindow;
+    emugl::Thread* mThread;
+    RenderWindowChannel* mChannel;
 };
 
 #endif  // ANDROID_EMUGL_LIBRENDER_RENDER_WINDOW_H

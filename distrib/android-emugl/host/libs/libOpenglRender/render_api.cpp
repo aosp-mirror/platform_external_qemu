@@ -76,11 +76,32 @@ int initOpenGLRenderer(int width, int height, char* addr, size_t addrLen)
         return false;
     }
 
+    // kUseThread is used to determine whether the RenderWindow should use
+    // a separate thread to manage its subwindow GL/GLES context.
+    // Experience shows that:
+    //
+    // - It is necessary on Linux/XGL and OSX/Cocoa to avoid corruption
+    //   issues with the GL state of the main window, resulting in garbage
+    //   or black content of the non-framebuffer UI parts.
+    //
+    // - It must be disabled on Windows, otherwise the main window becomes
+    //   unresponsive after a few seconds of user interaction (e.g. trying to
+    //   move it over the desktop). Probably due to the subtle issues around
+    //   input on this platform (input-queue is global, message-queue is
+    //   per-thread). Also, this messes considerably the display of the
+    //   main window when running the executable under Wine.
+    //
+#ifdef _WIN32
+    bool kUseThread = false;
+#else
+    bool kUseThread = true;
+#endif
+
     //
     // initialize the renderer and listen to connections
     // on a thread in the current process.
     //
-    s_renderWindow = new RenderWindow(width, height);
+    s_renderWindow = new RenderWindow(width, height, kUseThread);
     if (!s_renderWindow) {
         ERR("Could not create rendering window class");
         return false;
@@ -132,7 +153,6 @@ int stopOpenGLRenderer(void)
     if (!dummy) return false;
 
     if (s_renderThread) {
-
         // wait for the thread to exit
         ret = s_renderThread->wait(NULL);
 
