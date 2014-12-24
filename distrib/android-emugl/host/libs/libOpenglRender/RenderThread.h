@@ -42,6 +42,9 @@ public:
     // Note that this also means that the thread's stack has been
     bool isFinished() { return tryWait(NULL); }
 
+    // Force a thread to stop.
+    void forceStop();
+
 private:
     RenderThread();  // No default constructor
 
