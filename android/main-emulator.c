@@ -233,11 +233,32 @@ int main(int argc, char** argv)
     return errno;
 }
 
+static char* bufprint_emulatorName(char* p,
+                                   char* end,
+                                   const char* progDir,
+                                   const char* prefix,
+                                   const char* variant,
+                                   const char* archSuffix,
+                                   const char* exeExtension) {
+    if (progDir) {
+        p = bufprint(p, end, "%s/", progDir);
+    }
+    p = bufprint(p, end, "%s", prefix);
+    if (variant) {
+        p = bufprint(p, end, "%s-", variant);
+    }
+    p = bufprint(p, end, "%s%s", archSuffix, exeExtension);
+    return p;
+}
+
 /* Probe the filesystem to check if an emulator executable named like
  * <progDir>/<prefix><arch> exists.
  *
  * |progDir| is an optional program directory. If NULL, the executable
  * will be searched in the current directory.
+ * |variant| is an optional variant. If not NULL, then a name like
+ * 'emulator-<variant>-<archSuffix>' will be searched, instead of
+ * 'emulator-<archSuffix>'.
  * |archSuffix| is an architecture-specific suffix, like "arm", or 'x86"
  * If |search_for_64bit_emulator| is true, lookup for 64-bit emulator first,
  * then the 32-bit version.
@@ -248,6 +269,7 @@ int main(int argc, char** argv)
  */
 static char*
 probeTargetEmulatorPath(const char* progDir,
+                        const char* variant,
                         const char* archSuffix,
                         bool search_for_64bit_emulator,
                         bool try_current_path)
@@ -264,12 +286,13 @@ probeTargetEmulatorPath(const char* progDir,
 
     // First search for the 64-bit emulator binary.
     if (search_for_64bit_emulator) {
-        p = path;
-        if (progDir) {
-            p = bufprint(p, pathEnd, "%s/", progDir);
-        }
-        p = bufprint(p, pathEnd, "%s%s%s", kEmulator64Prefix,
-                        archSuffix, kExeExtension);
+        p = bufprint_emulatorName(path,
+                                  pathEnd,
+                                  progDir,
+                                  kEmulator64Prefix,
+                                  variant,
+                                  archSuffix,
+                                  kExeExtension);
         D("Probing program: %s\n", path);
         if (p < pathEnd && path_exists(path)) {
             return strdup(path);
@@ -277,12 +300,13 @@ probeTargetEmulatorPath(const char* progDir,
     }
 
     // Then for the 32-bit one.
-    p = path;
-    if (progDir) {
-        p = bufprint(p, pathEnd, "%s/", progDir);
-    }
-    p = bufprint(p, pathEnd, "%s%s%s", kEmulatorPrefix,
-                    archSuffix, kExeExtension);
+    p = bufprint_emulatorName(path,
+                                pathEnd,
+                                progDir,
+                                kEmulatorPrefix,
+                                variant,
+                                archSuffix,
+                                kExeExtension);
     D("Probing program: %s\n", path);
     if (p < pathEnd && path_exists(path)) {
         return strdup(path);
@@ -293,8 +317,13 @@ probeTargetEmulatorPath(const char* progDir,
         char* result;
 
         if (search_for_64bit_emulator) {
-            p = bufprint(path, pathEnd, "%s%s%s", kEmulator64Prefix,
-                          archSuffix, kExeExtension);
+            p = bufprint_emulatorName(path,
+                                      pathEnd,
+                                      NULL,
+                                      kEmulator64Prefix,
+                                      variant,
+                                      archSuffix,
+                                      kExeExtension);
             if (p < pathEnd) {
                 D("Probing path for: %s\n", path);
                 result = path_search_exec(path);
@@ -304,8 +333,13 @@ probeTargetEmulatorPath(const char* progDir,
             }
         }
 
-        p = bufprint(path, pathEnd, "%s%s%s", kEmulatorPrefix,
-                      archSuffix, kExeExtension);
+        p = bufprint_emulatorName(path,
+                                    pathEnd,
+                                    NULL,
+                                    kEmulatorPrefix,
+                                    variant,
+                                    archSuffix,
+                                    kExeExtension);
         if (p < pathEnd) {
             D("Probing path for: %s\n", path);
             result = path_search_exec(path);
@@ -348,6 +382,17 @@ getTargetEmulatorPath(const char* progName,
 
     const char* emulatorSuffix;
 
+    // Special case: try to find emulator-ranchu-<arch> before emulator-<arch>
+    D("Looking for ranchu emulator backed for %s CPU\n", avdArch);
+    result = probeTargetEmulatorPath(progDir,
+                                     "ranchu",
+                                     avdArch,
+                                     search_for_64bit_emulator,
+                                     try_current_path);
+    if (result) {
+        return result;
+    }
+
     // Special case: for x86_64, first try to find emulator-x86_64 before
     // looking for emulator-x86.
     if (!strcmp(avdArch, "x86_64")) {
@@ -356,6 +401,7 @@ getTargetEmulatorPath(const char* progName,
         D("Looking for emulator backend for %s CPU\n", avdArch);
 
         result = probeTargetEmulatorPath(progDir,
+                                         NULL,
                                          emulatorSuffix,
                                          search_for_64bit_emulator,
                                          try_current_path);
@@ -372,6 +418,7 @@ getTargetEmulatorPath(const char* progName,
         D("Looking for emulator backend for %s CPU\n", avdArch);
 
         result = probeTargetEmulatorPath(progDir,
+                                         NULL,
                                          emulatorSuffix,
                                          search_for_64bit_emulator,
                                          try_current_path);
@@ -389,6 +436,7 @@ getTargetEmulatorPath(const char* progName,
       avdArch);
 
     result = probeTargetEmulatorPath(progDir,
+                                     NULL,
                                      emulatorSuffix,
                                      search_for_64bit_emulator,
                                      try_current_path);
