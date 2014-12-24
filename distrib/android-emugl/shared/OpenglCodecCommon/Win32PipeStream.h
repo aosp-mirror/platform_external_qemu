@@ -30,6 +30,7 @@ public:
     virtual int commitBuffer(size_t size);
     virtual const unsigned char *readFully(void *buf, size_t len);
     virtual const unsigned char *read(void *buf, size_t *inout_len);
+    virtual void forceStop();
 
 private:
     Win32PipeStream(HANDLE pipe, size_t bufSize);
