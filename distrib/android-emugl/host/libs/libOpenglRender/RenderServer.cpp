@@ -14,14 +14,17 @@
 * limitations under the License.
 */
 #include "RenderServer.h"
+
+#include "RenderThread.h"
+#include "render_api.h"
 #include "TcpStream.h"
-#ifdef _WIN32
-#include "Win32PipeStream.h"
-#else
+#ifndef _WIN32
 #include "UnixStream.h"
 #endif
-#include "RenderThread.h"
-#include "FrameBuffer.h"
+#ifdef _WIN32
+#include "Win32PipeStream.h"
+#endif
+
 #include <set>
 
 typedef std::set<RenderThread *> RenderThreadsSet;
@@ -146,14 +149,11 @@ intptr_t RenderServer::main()
     for (RenderThreadsSet::iterator t = threads.begin();
          t != threads.end();
          t++) {
+        (*t)->forceStop();
         (*t)->wait(NULL);
         delete (*t);
     }
     threads.clear();
 
-    //
-    // de-initialize the FrameBuffer object
-    //
-    FrameBuffer::finalize();
     return 0;
 }

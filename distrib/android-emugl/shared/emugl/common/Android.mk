@@ -8,6 +8,7 @@ LOCAL_PATH := $(call my-dir)
 commonSources := \
         id_to_object_map.cpp \
         lazy_instance.cpp \
+        message_channel.cpp \
         pod_vector.cpp \
         shared_library.cpp \
         smart_ptr.cpp \
@@ -19,10 +20,15 @@ host_commonSources := $(commonSources)
 host_commonLdLibs := -lstdc++
 
 ifneq (windows,$(HOST_OS))
-    host_commonSources += thread_pthread.cpp
+    host_commonSources += \
+        thread_pthread.cpp \
+
     host_commonLdLibs += -ldl -lpthread
 else
-    host_commonSources += thread_win32.cpp
+    host_commonSources += \
+        condition_variable_win32.cpp \
+        thread_win32.cpp \
+
 endif
 
 $(call emugl-begin-host-static-library,libemugl_common)
@@ -41,9 +47,11 @@ $(call emugl-end-module)
 ### emugl_common_unittests ##############################################
 
 host_commonSources := \
+    condition_variable_unittest.cpp \
     id_to_object_map_unittest.cpp \
     lazy_instance_unittest.cpp \
     pod_vector_unittest.cpp \
+    message_channel_unittest.cpp \
     mutex_unittest.cpp \
     shared_library_unittest.cpp \
     smart_ptr_unittest.cpp \
