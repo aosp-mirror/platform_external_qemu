@@ -40,6 +40,10 @@ RenderThread* RenderThread::create(IOStream *stream, emugl::Mutex *lock) {
     return new RenderThread(stream, lock);
 }
 
+void RenderThread::forceStop() {
+    m_stream->forceStop();
+}
+
 intptr_t RenderThread::main() {
     RenderThreadInfo tInfo;
 
