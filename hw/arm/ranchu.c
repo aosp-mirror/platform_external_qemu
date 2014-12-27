@@ -476,15 +476,19 @@ static void android_console_rotate_screen(Monitor *mon, const QDict *qdict)
     switch (ranchu_rotation_state) {
     case 0:
         goldfish_fb_set_rotation(0);
+        graphic_rotate = 0;
         break;
     case 1:
         goldfish_fb_set_rotation(3);
+        graphic_rotate = 90;
         break;
     case 2:
         goldfish_fb_set_rotation(2);
+        graphic_rotate = 180;
         break;
     case 3:
         goldfish_fb_set_rotation(1);
+        graphic_rotate = 270;
         break;
     default:
         g_assert_not_reached();
