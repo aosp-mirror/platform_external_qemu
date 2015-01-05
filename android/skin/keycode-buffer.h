@@ -35,16 +35,16 @@ typedef struct SkinKeycodeBuffer {
     int keycodes[MAX_KEYCODES];
 } SkinKeycodeBuffer;
 
-void skin_keycodes_buffer_init(SkinKeycodeBuffer* buffer,
-                               SkinKeyCodeFlushFunc flush_func);
+void skin_keycode_buffer_init(SkinKeycodeBuffer* buffer,
+                              SkinKeyCodeFlushFunc flush_func);
 
 /* Adds a key event to the array of keycodes. */
-void skin_keycodes_buffer_add(SkinKeycodeBuffer* buffer,
-                              unsigned code,
-                              bool down);
+void skin_keycode_buffer_add(SkinKeycodeBuffer* buffer,
+                             unsigned code,
+                             bool down);
 
 /* Flushes (transfers) collected keycodes to the core. */
-void skin_keycodes_buffer_flush(SkinKeycodeBuffer* buffer);
+void skin_keycode_buffer_flush(SkinKeycodeBuffer* buffer);
 
 ANDROID_END_HEADER
 
