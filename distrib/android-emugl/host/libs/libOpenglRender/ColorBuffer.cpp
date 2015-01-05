@@ -14,14 +14,15 @@
 * limitations under the License.
 */
 #include "ColorBuffer.h"
-#include "FrameBuffer.h"
+
 #include "EGLDispatch.h"
+#include "FrameBuffer.h"
 #include "GLDispatch.h"
-#include "ThreadInfo.h"
 #include "GLcommon/GLutils.h"
 #ifdef WITH_GLES2
 #include "GL2Dispatch.h"
 #endif
+#include "RenderThreadInfo.h"
 #include <stdio.h>
 
 ColorBuffer *ColorBuffer::create(int p_width, int p_height,
