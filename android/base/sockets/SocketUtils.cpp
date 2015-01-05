@@ -13,12 +13,10 @@
 
 #include "android/base/EintrWrapper.h"
 #include "android/base/sockets/ScopedSocket.h"
+#include "android/base/sockets/SocketErrors.h"
 
 #ifdef _WIN32
-#  include <stdlib.h>
-#  include <winsock2.h>
-#  include <ws2tcpip.h>
-#  undef ERROR  // necessary to compile LOG(ERROR) statements.
+#include "android/base/sockets/Winsock.h"
 #else
 #  include <sys/socket.h>
 #  include <unistd.h>
@@ -27,6 +25,7 @@
 #  include <netinet/tcp.h>
 #endif
 
+#include <stdlib.h>
 #include <string.h>
 
 namespace android {
