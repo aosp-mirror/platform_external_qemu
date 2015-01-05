@@ -91,6 +91,7 @@ private:
 
     pthread_t mThread;
     pthread_mutex_t mLock;
+    bool mJoined;
 #endif
     intptr_t mExitStatus;
     bool mIsRunning;

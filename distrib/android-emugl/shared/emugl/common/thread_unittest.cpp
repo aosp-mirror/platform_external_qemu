@@ -65,9 +65,25 @@ private:
     State* mState;
 };
 
+class WaitingThread : public ::emugl::Thread {
+public:
+    WaitingThread(Mutex* lock) : mLock(lock) {}
+
+    intptr_t main() {
+        // Try to acquire lock.
+        mLock->lock();
+
+        // Then try to release it.
+        mLock->unlock();
+        return 0;
+    }
+private:
+    Mutex* mLock;
+};
+
 }  // namespace
 
-TEST(ThreadTest, SimpleThread) {
+TEST(ThreadTest, WaitForSimpleThread) {
     Thread* thread = new EmptyThread();
     EXPECT_TRUE(thread);
     EXPECT_TRUE(thread->start());
@@ -76,7 +92,7 @@ TEST(ThreadTest, SimpleThread) {
     EXPECT_EQ(42, status);
 }
 
-TEST(ThreadTest, MultipleThreads) {
+TEST(ThreadTest, WaitForMultipleThreads) {
     CountingThread::State state;
     const size_t kMaxThreads = 100;
     Thread* threads[kMaxThreads];
@@ -99,6 +115,45 @@ TEST(ThreadTest, MultipleThreads) {
 
     // Check state.
     EXPECT_EQ((int)kMaxThreads, state.count());
+
+    // Delete them all.
+    for (size_t n = 0; n < kMaxThreads; ++n) {
+        delete threads[n];
+    }
+}
+
+TEST(ThreadTest, TryWaitForMultipleThreads) {
+    Mutex lock;
+    const size_t kMaxThreads = 100;
+    Thread* threads[kMaxThreads];
+
+    // Create all threads.
+    for (size_t n = 0; n < kMaxThreads; ++n) {
+        threads[n] = new WaitingThread(&lock);
+        EXPECT_TRUE(threads[n]) << "thread " << n;
+    }
+
+    // Acquire the lock, this will block all threads.
+    lock.lock();
+
+    // Start them all.
+    for (size_t n = 0; n < kMaxThreads; ++n) {
+        EXPECT_TRUE(threads[n]->start()) << "thread " << n;
+    }
+
+    // Check that tryWait() fails for all threads.
+    for (size_t n = 0; n < kMaxThreads; ++n) {
+        EXPECT_FALSE(threads[n]->tryWait(NULL)) << "thread" << n;
+    }
+
+    // Release the lock, this will unblock all threads.
+    lock.unlock();
+
+    // Wait for them all.
+    for (size_t n = 0; n < kMaxThreads; ++n) {
+        EXPECT_TRUE(threads[n]->wait(NULL)) << "thread " << n;
+        EXPECT_TRUE(threads[n]->tryWait(NULL)) << "thread " << n;
+    }
 
     // Delete them all.
     for (size_t n = 0; n < kMaxThreads; ++n) {
