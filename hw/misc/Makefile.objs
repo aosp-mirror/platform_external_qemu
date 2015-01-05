@@ -18,6 +18,7 @@ obj-$(CONFIG_ANDROID_PIPE) += android_pipe.o
 obj-$(CONFIG_ANDROID_PIPE) += android_pipe_test.o
 obj-$(CONFIG_ANDROID_PIPE) += android_adb_dbg.o
 obj-$(CONFIG_ANDROID_PIPE) += android_adb.o
+obj-$(CONFIG_ANDROID_PIPE) += android_qemud.o
 
 # PKUnity SoC devices
 common-obj-$(CONFIG_PUV3) += puv3_pm.o
