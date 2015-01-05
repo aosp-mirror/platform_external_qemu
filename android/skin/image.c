@@ -343,7 +343,7 @@ skin_image_load( SkinImage*  image )
     image->w      = w;
     image->h      = h;
 
-    image->surface = skin_surface_create_argb32_from(w, h, w * 4, image->pixels, 0);
+    image->surface = skin_surface_create_argb32_from(w, h, w * 4, image->pixels);
     if (image->surface == NULL) {
         fprintf(stderr, "failed to create skin surface for '%s' image\n", path);
         return -1;
@@ -538,8 +538,7 @@ skin_image_create( SkinImageDesc*  desc, unsigned  hash )
         node->surface = skin_surface_create_argb32_from(node->w,
                                                         node->h,
                                                         node->w * 4,
-                                                        node->pixels,
-                                                        0);
+                                                        node->pixels);
         if (node->surface == NULL) {
             skin_image_free(node);
             return SKIN_IMAGE_NONE;
@@ -672,8 +671,7 @@ skin_image_clone( SkinImage*  source )
     image->surface = skin_surface_create_argb32_from(image->w,
                                                      image->h,
                                                      image->w * 4,
-                                                     image->pixels,
-                                                     0);
+                                                     image->pixels);
     if (image->surface == NULL)
         goto Fail;
 
