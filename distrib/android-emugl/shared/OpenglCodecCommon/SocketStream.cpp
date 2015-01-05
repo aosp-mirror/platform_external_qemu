@@ -165,3 +165,12 @@ int SocketStream::recv(void *buf, size_t len)
     }
     return res;
 }
+
+void SocketStream::forceStop() {
+    // Shutdown socket to force read/write errors.
+#ifdef _WIN32
+    ::shutdown(m_sock, SD_BOTH);
+#else
+    ::shutdown(m_sock, SHUT_RDWR);
+#endif
+}
