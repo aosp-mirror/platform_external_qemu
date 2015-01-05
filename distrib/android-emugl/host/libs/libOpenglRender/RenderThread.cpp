@@ -26,32 +26,28 @@
 #define STREAM_BUFFER_SIZE 4*1024*1024
 
 RenderThread::RenderThread(IOStream *stream, emugl::Mutex *lock) :
-    emugl::Thread(),
-    m_lock(lock),
-    m_stream(stream)
-{
-}
+        emugl::Thread(),
+        m_lock(lock),
+        m_stream(stream) {}
 
-RenderThread::~RenderThread()
-{
+RenderThread::~RenderThread() {
     delete m_stream;
 }
 
-RenderThread *RenderThread::create(IOStream *p_stream, emugl::Mutex *lock)
-{
-    return new RenderThread(p_stream, lock);
+// static
+RenderThread* RenderThread::create(IOStream *stream, emugl::Mutex *lock) {
+    return new RenderThread(stream, lock);
 }
 
-intptr_t RenderThread::main()
-{
+intptr_t RenderThread::main() {
     RenderThreadInfo tInfo;
 
     //
     // initialize decoders
     //
-    tInfo.m_glDec.initGL( gl_dispatch_get_proc_func, NULL );
-    tInfo.m_gl2Dec.initGL( gl2_dispatch_get_proc_func, NULL );
-    initRenderControlContext( &m_rcDec );
+    tInfo.m_glDec.initGL(gl_dispatch_get_proc_func, NULL);
+    tInfo.m_gl2Dec.initGL(gl2_dispatch_get_proc_func, NULL);
+    initRenderControlContext(&tInfo.m_rcDec);
 
     ReadBuffer readBuf(m_stream, STREAM_BUFFER_SIZE);
 
@@ -129,7 +125,7 @@ intptr_t RenderThread::main()
             // try to process some of the command buffer using the
             // renderControl decoder
             //
-            last = m_rcDec.decode(readBuf.buf(), readBuf.validData(), m_stream);
+            last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(), m_stream);
             if (last > 0) {
                 readBuf.consume(last);
                 progress = true;
