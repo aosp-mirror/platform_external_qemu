@@ -1525,13 +1525,10 @@ skin_window_set_onion( SkinWindow*   window,
 static void
 skin_window_update_shrink( SkinWindow*  window, SkinRect*  rect )
 {
-    skin_scaler_scale(window->scaler,
-                      window->shrink_surface,
-                      window->surface,
-                      rect->pos.x,
-                      rect->pos.y,
-                      rect->size.w,
-                      rect->size.h);
+    skin_surface_update_scaled(window->shrink_surface,
+                               window->scaler,
+                               window->surface,
+                               rect);
 }
 
 void
