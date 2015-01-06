@@ -2524,7 +2524,7 @@ static inline void gen_goto_tb(DisasContext *ctx, int n, target_ulong dest)
         likely(!ctx->singlestep_enabled)) {
         tcg_gen_goto_tb(n);
         gen_save_pc(dest);
-        tcg_gen_exit_tb((long)tb + n);
+        tcg_gen_exit_tb((uintptr_t)tb + n);
     } else {
         gen_save_pc(dest);
         if (ctx->singlestep_enabled) {
@@ -4141,7 +4141,7 @@ die:
 #if defined(TARGET_MIPS64)
 static void gen_dmfc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, int sel)
 {
-    const char *rn = "invalid";
+    const char* __attribute__((unused)) rn = "invalid";
 
     if (sel != 0)
         check_insn(env, ctx, ISA_MIPS64);
@@ -4707,7 +4707,7 @@ die:
 
 static void gen_dmtc0 (CPUMIPSState *env, DisasContext *ctx, TCGv arg, int reg, int sel)
 {
-    const char *rn = "invalid";
+    const char* __attribute__((unused)) rn = "invalid";
 
     if (sel != 0)
         check_insn(env, ctx, ISA_MIPS64);

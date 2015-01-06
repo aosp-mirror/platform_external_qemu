@@ -62,6 +62,7 @@
 #endif
 
 #ifdef _WIN32
+#include <winsock2.h>
 #include <windows.h>
 #include <malloc.h>
 #include <sys/timeb.h>

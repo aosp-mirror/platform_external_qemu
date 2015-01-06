@@ -589,7 +589,7 @@ static inline void tlb_update_dirty(CPUTLBEntry *tlb_entry)
     void *p;
 
     if ((tlb_entry->addr_write & ~TARGET_PAGE_MASK) == IO_MEM_RAM) {
-        p = (void *)(unsigned long)((tlb_entry->addr_write & TARGET_PAGE_MASK)
+        p = (void *)(uintptr_t)((tlb_entry->addr_write & TARGET_PAGE_MASK)
             + tlb_entry->addend);
         ram_addr = qemu_ram_addr_from_host_nofail(p);
         if (cpu_physical_memory_is_clean(ram_addr)) {
