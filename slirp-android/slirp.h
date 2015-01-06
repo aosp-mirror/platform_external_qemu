@@ -33,6 +33,7 @@ typedef uint32_t u_int32_t;
 typedef uint64_t u_int64_t;
 typedef char *caddr_t;
 
+# include <winsock2.h>
 # include <windows.h>
 # include <sys/timeb.h>
 # include <iphlpapi.h>
