@@ -206,6 +206,36 @@ if [ -z "$NO_TESTS" ]; then
         fi
     fi
 
+    # Check that the windows executables all have icons.
+    # First need to locate the windres tool.
+    if [ "$MINGW" ]; then
+        echo "Checking windows executables icons."
+        if [ ! -f "$OUT_DIR/config.make" ]; then
+            echo "FAIL: Could not find \$OUT_DIR/config.make !?"
+            FAILURES="$FAILURES out-dir-config-make"
+        else
+            WINDRES=$(awk '/^HOST_WINDRES:=/ { print $2; } $1 == "HOST_WINDRES" { print $3; }' $OUT_DIR/config.make) ||
+            if true; then
+                echo "FAIL: Could not find host 'windres' program"
+                FAILURES="$FAILURES host-windres"
+            fi
+            EXECUTABLES="emulator.exe emulator-arm.exe emulator-x86.exe emulator-mips.exe"
+            EXECUTABLES="$EXECUTABLES emulator64-arm.exe emulator64-x86.exe emulator64-mips.exe"
+            EXPECTED_ICONS=14
+            for EXEC in $EXECUTABLES; do
+                if [ ! -f "$OUT_DIR"/$EXEC ]; then
+                    echo "FAIL: Missing windows executable: $EXEC"
+                    FAILURES="$FAILURES windows-$EXEC"
+                else
+                    NUM_ICONS=$($WINDRES --input-format=coff --output-format=rc $OUT_DIR/$EXEC | grep RT_ICON | wc -l)
+                    if [ "$NUM_ICONS" != "$EXPECTED_ICONS" ]; then
+                        echo "FAIL: Invalid icon count in $EXEC ($NUM_ICONS, expected $EXPECTED_ICONS)"
+                        FAILURES="$FAILURES windows-$EXEC-icons"
+                    fi
+                fi
+            done
+        fi
+    fi
     if [ "$FAILURES" ]; then
         panic "Unit test failures: $FAILURES"
     fi

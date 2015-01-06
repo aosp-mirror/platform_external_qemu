@@ -351,7 +351,7 @@ ifeq ($(HOST_OS),windows)
 # us to put the object file in the source directory.
 $(LOCAL_PATH)/images/emulator_icon32.o: $(LOCAL_PATH)/images/android_icon.rc
 	@echo "Windres (x86): $@"
-	$(MY_WINDRES) --target=pe-386 $< -I $(LOCAL_PATH)/images -o $@
+	$(MY_WINDRES) --target=pe-i386 $< -I $(LOCAL_PATH)/images -o $@
 
 $(LOCAL_PATH)/images/emulator_icon64.o: $(LOCAL_PATH)/images/android_icon.rc
 	@echo "Windres (x86_64): $@"
