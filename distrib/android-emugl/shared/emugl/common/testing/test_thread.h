@@ -39,7 +39,7 @@ public:
                             16384,
                             (DWORD WINAPI (*)(void*))func,
                             funcParam,
-                            NULL,
+                            0,
                             NULL);
 #else
         pthread_attr_t attr;
