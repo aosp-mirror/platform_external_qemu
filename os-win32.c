@@ -22,7 +22,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <windows.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>

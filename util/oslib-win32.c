@@ -25,6 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include <winsock2.h>
 #include <windows.h>
 #include <glib.h>
 #include <stdlib.h>

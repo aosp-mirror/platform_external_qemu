@@ -17,6 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 #ifdef _WIN32
+#include <winsock2.h>
 #include <windows.h>
 #else
 #include <sys/types.h>
