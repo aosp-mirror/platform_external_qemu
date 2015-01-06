@@ -1864,7 +1864,7 @@ void helper_pmon(CPUMIPSState *env, int function)
         break;
     case 158:
         {
-            unsigned char *fmt = (void *)(unsigned long)env->active_tc.gpr[4];
+            unsigned char *fmt = (void *)(uintptr_t)env->active_tc.gpr[4];
             printf("%s", fmt);
         }
         break;
@@ -1939,11 +1939,11 @@ void cpu_unassigned_access(CPUMIPSState* env, hwaddr addr,
  * The following functions are address translation helper functions
  * for fast memory access in QEMU.
  */
-static unsigned long v2p_mmu(CPUMIPSState *env, target_ulong addr, int is_user)
+static uintptr_t v2p_mmu(CPUMIPSState *env, target_ulong addr, int is_user)
 {
     int index;
     target_ulong tlb_addr;
-    hwaddr physaddr;
+    uintptr_t physaddr;
     uintptr_t retaddr;
 
     index = (addr >> TARGET_PAGE_BITS) & (CPU_TLB_SIZE - 1);
@@ -1965,12 +1965,12 @@ redo:
  * to the address of simulation host (not the physical
  * address of simulated OS.
  */
-unsigned long v2p(target_ulong ptr, int is_user)
+uintptr_t v2p(target_ulong ptr, int is_user)
 {
     CPUMIPSState *env;
     int index;
     target_ulong addr;
-    hwaddr physaddr;
+    uintptr_t physaddr;
 
     env = cpu_single_env;
     addr = ptr;

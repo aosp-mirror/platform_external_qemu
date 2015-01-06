@@ -597,7 +597,7 @@ int cpu_exec(CPUOldState *env)
                     if ((next_tb & 3) == 2) {
                         /* Instruction counter expired.  */
                         int insns_left;
-                        tb = (TranslationBlock *)(long)(next_tb & ~3);
+                        tb = (TranslationBlock *)(intptr_t)(next_tb & ~3);
                         /* Restore PC.  */
                         cpu_pc_from_tb(env, tb);
                         insns_left = env->icount_decr.u32;
