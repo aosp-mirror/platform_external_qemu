@@ -154,6 +154,8 @@ compute_host_tag
 #### Toolchain support
 ####
 
+WINDRES=
+
 # Various probes are going to need to run a small C program
 TMPC=/tmp/android-$$-test.c
 TMPO=/tmp/android-$$-test.o
@@ -225,6 +227,7 @@ enable_linux_mingw ()
     log2 "Mingw      : Found $MINGW_CC"
     CC=$MINGW_CC
     LD=$MINGW_CC
+    WINDRES=$MINGW_PREFIX-windres
     AR=$MINGW_PREFIX-ar
 }
 
@@ -572,6 +575,7 @@ create_config_mk ()
     echo "HOST_CC     := $CC" >> $config_mk
     echo "HOST_LD     := $LD" >> $config_mk
     echo "HOST_AR     := $AR" >> $config_mk
+    echo "HOST_WINDRES:= $WINDRES" >> $config_mk
     echo "OBJS_DIR    := $out_dir" >> $config_mk
 }
 

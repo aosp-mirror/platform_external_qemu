@@ -58,4 +58,6 @@ $(foreach src,$(LOCAL_OBJC_SOURCES), \
 # Ensure that we build all generated sources before the objects
 $(LOCAL_OBJECTS): | $(LOCAL_GENERATED_SOURCES) $(LOCAL_ADDITIONAL_DEPENDENCIES)
 
+LOCAL_OBJECTS += $(LOCAL_PREBUILT_OBJ_FILES)
+
 CLEAN_OBJS_DIRS += $(LOCAL_OBJS_DIR)
