@@ -243,6 +243,10 @@ common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
 # SDL-related definitions
 #
 
+# Set EMULATOR_USE_SDL2 to 'true' to use SDL 2.x instead of SDL 1.x as
+# the UI library backend.
+EMULATOR_USE_SDL2 ?= true
+
 # Build SDL from sources except in certain cases where we use
 # prebuilt libraries instead.
 #
