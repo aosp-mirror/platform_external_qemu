@@ -2011,8 +2011,8 @@ do_event_text( ControlClient  client, char*  args )
         if (c <= 0)
             break;
 
-        skin_charmap_reverse_map_unicode( NULL, (unsigned)c, 1, &keycodes );
-        skin_charmap_reverse_map_unicode( NULL, (unsigned)c, 0, &keycodes );
+        skin_charmap_reverse_map_unicode( charmap, (unsigned)c, 1, &keycodes );
+        skin_charmap_reverse_map_unicode( charmap, (unsigned)c, 0, &keycodes );
         skin_keycode_buffer_flush( &keycodes );
     }
 
