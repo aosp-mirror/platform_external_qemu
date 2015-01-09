@@ -153,6 +153,8 @@ void GLESv2Context::initExtensionString() {
         *s_glExtensions+="GL_OES_vertex_half_float ";
     if (s_glSupport.GL_OES_STANDARD_DERIVATIVES)
         *s_glExtensions+="GL_OES_standard_derivatives ";
+    if (s_glSupport.GL_OES_TEXTURE_NPOT)
+        *s_glExtensions+="GL_OES_texture_npot";
 }
 
 int GLESv2Context::getMaxTexUnits() {
