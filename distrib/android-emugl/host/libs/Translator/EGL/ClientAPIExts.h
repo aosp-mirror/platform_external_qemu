@@ -21,7 +21,7 @@
 namespace ClientAPIExts
 {
 
-void initClientFuncs(GLESiface *iface, int idx);
+void initClientFuncs(const GLESiface *iface, int idx);
 __translatorMustCastToProperFunctionPointerType getProcAddress(const char *fname);
 
 } // of namespace ClientAPIExts
