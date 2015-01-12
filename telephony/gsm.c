@@ -408,7 +408,7 @@ utf8_next( cbytes_t  *pp, cbytes_t  end )
 }
 
 
-__inline__ int
+static __inline__ int
 utf8_write( bytes_t  utf8, int  offset, int  v )
 {
     int  result;
