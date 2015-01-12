@@ -16,6 +16,7 @@
 #include "EglValidate.h"
 #include <GLcommon/GLutils.h>
 
+// static
 bool EglValidate::confAttrib(EGLint attrib) {
     switch(attrib) {
     case EGL_BUFFER_SIZE:
@@ -52,42 +53,60 @@ bool EglValidate::confAttrib(EGLint attrib) {
     return false;
 }
 
+// static
 bool EglValidate::noAttribs(const EGLint* attrib) {
     return !attrib || attrib[0] == EGL_NONE ;
 }
 
-bool EglValidate::pbufferAttribs(EGLint width,EGLint height,bool isTexFormatNoTex,bool isTexTargetNoTex) {
+// static
+bool EglValidate::pbufferAttribs(EGLint width,
+                                 EGLint height,
+                                 bool isTexFormatNoTex,
+                                 bool isTexTargetNoTex) {
     if(!isTexFormatNoTex) {
-      if (!(isPowerOf2(width) && isPowerOf2(height))) return false;
+        if (!(isPowerOf2(width) && isPowerOf2(height))) {
+            return false;
+        }
     }
     return isTexFormatNoTex == isTexTargetNoTex ;
 }
 
-bool EglValidate::releaseContext(EGLContext ctx,EGLSurface s1,EGLSurface s2) {
+// static
+bool EglValidate::releaseContext(EGLContext ctx,
+                                 EGLSurface s1,
+                                 EGLSurface s2) {
     return (ctx == EGL_NO_CONTEXT) &&
            (s1 == EGL_NO_SURFACE)  &&
            (s2 == EGL_NO_SURFACE);
 }
 
-bool EglValidate::badContextMatch(EGLContext ctx,EGLSurface s1,EGLSurface s2) {
-    return ctx != EGL_NO_CONTEXT ? (s1 == EGL_NO_SURFACE || s2 == EGL_NO_SURFACE):
-                                   (s1 != EGL_NO_SURFACE || s2 != EGL_NO_SURFACE);
+// static
+bool EglValidate::badContextMatch(EGLContext ctx,
+                                  EGLSurface s1,
+                                  EGLSurface s2) {
+    return (ctx != EGL_NO_CONTEXT)
+            ? (s1 == EGL_NO_SURFACE || s2 == EGL_NO_SURFACE)
+            : (s1 != EGL_NO_SURFACE || s2 != EGL_NO_SURFACE);
 }
 
+// static
 bool EglValidate::surfaceTarget(EGLint target) {
     return target == EGL_READ || target == EGL_DRAW;
 }
 
+// static
 bool EglValidate::engine(EGLint engine) {
     return engine == EGL_CORE_NATIVE_ENGINE;
 }
 
+// static
 bool EglValidate::stringName(EGLint name) {
     return name == EGL_VENDOR  ||
            name == EGL_VERSION ||
            name == EGL_EXTENSIONS;
 }
 
+// static
 bool EglValidate::supportedApi(EGLenum api) {
     return api == EGL_OPENGL_ES_API;
 }
