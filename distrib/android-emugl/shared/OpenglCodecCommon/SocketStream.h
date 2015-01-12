@@ -40,6 +40,8 @@ public:
     virtual int recv(void *buf, size_t len);
     virtual int writeFully(const void *buf, size_t len);
 
+    virtual void forceStop();
+
 protected:
     int            m_sock;
     size_t         m_bufsize;

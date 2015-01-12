@@ -232,3 +232,10 @@ const unsigned char *Win32PipeStream::read( void *buf, size_t *inout_len)
     *inout_len = (size_t)readcount;
     return (const unsigned char *)buf;
 }
+
+void Win32PipeStream::forceStop()
+{
+    HANDLE handle = m_pipe;
+    m_pipe = INVALID_HANDLE_VALUE;
+    CloseHandle(handle);
+}
