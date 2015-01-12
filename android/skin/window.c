@@ -1439,9 +1439,11 @@ skin_window_set_lcd_brightness( SkinWindow*  window, int  brightness )
 }
 
 void
-skin_window_free  ( SkinWindow*  window )
+skin_window_free( SkinWindow*  window )
 {
     if (window) {
+        window->win_funcs->opengles_free();
+
         skin_surface_unrefp(&window->surface);
 
         if (window->onion) {

@@ -30,6 +30,7 @@ typedef struct SkinWindowFuncs {
                          float rotation_degrees);
     int (*opengles_hide)(void);
     void (*opengles_redraw)(void);
+    void (*opengles_free)(void);
 } SkinWindowFuncs;
 
 /* Note: if scale is <= 0, we interpret this as 'auto-detect'.
