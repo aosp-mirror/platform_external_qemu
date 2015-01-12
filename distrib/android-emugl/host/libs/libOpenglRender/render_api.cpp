@@ -13,7 +13,8 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include "libOpenglRender/render_api.h"
+#include "render_api.h"
+
 #include "IOStream.h"
 #include "FrameBuffer.h"
 #include "RenderServer.h"
