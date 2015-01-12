@@ -121,9 +121,10 @@ emulator-related sources and prebuilt binaries:
     various emulator-related sources and binaries:
 
        sdk/emulator/opengl/
-          Sources for the host-side GPU emulation libraries. Read the
-          DESIGN.TXT document in this directory to learn more about how
-          GPU emulation works.
+          No longer exists, but used to host the sources for the host-side
+          GPU emulation libraries. These are now located under
+          external/qemu/android-emugl instead. Read the DESIGN.TXT document
+          in this directory to learn more about how GPU emulation works.
 
        sdk/emulator/mksdcard/
           Sources for the 'mksdcard' SDK host tool, used to generate an empty
@@ -140,7 +141,7 @@ emulator-related sources and prebuilt binaries:
           Manager into a new AVD's content directory if the user enables
           snapshotting.
 
-    The rest of skd/ is not related to emulation and can be ignored here.
+    The rest of sdk/ is not related to emulation and can be ignored here.
 
   https://android.googlesource.com/platform/device/generic/goldfish/
 

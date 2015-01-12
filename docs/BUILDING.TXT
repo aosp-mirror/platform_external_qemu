@@ -12,7 +12,6 @@ The following directories will be relevant:
 
   $AOSP/external/qemu        -> The emulator itself.
   $AOSP/external/getst       -> The GoogleTest sources.
-  $AOSP/sdk/emulator/opengl  -> Host GPU emulation libraries.
 
   $AOSP/prebuilts/tools/gcc-sdk           -> host toolchains for SDK tools.
   $AOSP/prebuilts/gcc/linux-x86/host/
