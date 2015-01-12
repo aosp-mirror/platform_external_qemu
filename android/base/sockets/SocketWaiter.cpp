@@ -9,16 +9,15 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+// special-case: include before SocketWaiter.h.
 #include "android/base/Limits.h"
 #include "android/base/sockets/SocketWaiter.h"
 
 #include "android/base/Log.h"
+#include "android/base/sockets/SocketErrors.h"
 
 #ifdef _WIN32
-// Default FD_SETSIZE is 64 which is not enough for us.
-#  define FD_SETSIZE 1024
-#  include <winsock2.h>
-#  undef ERROR  // needed to compile LOG() on Windows :-(
+#include "android/base/sockets/Winsock.h"
 #else
 #  include <sys/types.h>
 #  include <sys/select.h>
