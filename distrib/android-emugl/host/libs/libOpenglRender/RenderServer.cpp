@@ -146,6 +146,7 @@ intptr_t RenderServer::main()
     for (RenderThreadsSet::iterator t = threads.begin();
          t != threads.end();
          t++) {
+        (*t)->forceStop();
         (*t)->wait(NULL);
         delete (*t);
     }
