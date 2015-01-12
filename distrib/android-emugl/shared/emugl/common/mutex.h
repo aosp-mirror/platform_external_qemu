@@ -24,6 +24,8 @@
 
 namespace emugl {
 
+class ConditionVariable;
+
 // Simple wrapper class for mutexes.
 class Mutex {
 public:
@@ -82,6 +84,7 @@ private:
 #ifdef _WIN32
     CRITICAL_SECTION mLock;
 #else
+    friend class ConditionVariable;
     pthread_mutex_t mLock;
 #endif
 
