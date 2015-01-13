@@ -1,0 +1,8 @@
+Code-Review+2: David Turner <digit@google.com>
+Code-Review+1: Tina Zhang <tina.zhang@intel.com>
+Verified+1: Bo Hu <bohu@google.com>
+Submitted-by: Bo Hu <bohu@google.com>
+Submitted-at: Tue, 13 Jan 2015 07:19:28 +0000
+Reviewed-on: https://android-review.googlesource.com/122492
+Project: platform/external/qemu
+Branch: refs/heads/master
