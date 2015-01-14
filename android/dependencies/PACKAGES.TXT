@@ -1,0 +1,15 @@
+# This file is used to list of the dependency libraries that are needed
+# to rebuild the Android emulator binaries from sources.
+
+# qemu-android dependencies.
+SHA1=a4d316c404ff54ca545ea71a27af7dbc29817088    URL=http://zlib.net/zlib-1.2.8.tar.gz
+SHA1=31855a8438ae795d249574b0da15b34eb0922e13    URL=http://sourceforge.net/projects/libpng/files/libpng16/1.6.16/libpng-1.6.16.tar.xz
+SHA1=280c265b789e041c02e5c97815793dfc283fb1e6    URL=ftp://sourceware.org/pub/libffi/libffi-3.2.1.tar.gz
+SHA1=b08197d146930a5543a7b99e871cba3da614f6f0    URL=http://downloads.sourceforge.net/project/expat/expat/2.1.0/expat-2.1.0.tar.gz
+SHA1=be7d67e50d72ff067b2c0291311bc283add36965    URL=https://ftp.gnu.org/gnu/libiconv/libiconv-1.14.tar.gz
+SHA1=e0d425de1bd1a16993b262ff37eaf08abee8f953    URL=https://ftp.gnu.org/gnu/gettext/gettext-0.19.1.tar.xz
+SHA1=685c5a4215b776b83dd5330ab9084c5dcb0a51b8    URL=http://ftp.gnome.org/pub/gnome/sources/glib/2.38/glib-2.38.2.tar.xz   PATCHES=glib-2.38.2-patches.tar.xz
+SHA1=54be89b3453109be0930400e5b13c35c9e9d5e3a    URL=http://cairographics.org/releases/pixman-0.32.4.tar.gz
+SHA1=71853779b12f958777bffcb8ca6d849b4d3bed46    URL=http://pkgconfig.freedesktop.org/releases/pkg-config-0.28.tar.gz
+SHA1=0c5f193ced810b0d7ce3ab06d808cbb5eef03a2c    URL=http://www.libsdl.org/release/SDL-1.2.15.tar.gz
+SHA1=21c45586a4e94d7622e371340edec5da40d06ecc    URL=http://www.libsdl.org/release/SDL2-2.0.3.tar.gz
