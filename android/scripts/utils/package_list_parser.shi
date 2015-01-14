@@ -1,0 +1,155 @@
+# Copyright 2015 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Functions used to parse a package list file.
+
+# Parse the package list file, and for each listed package, call a specific
+# callback after defining several local variables named:
+#
+#   PKG_NAME     -> package name (including version and extension)
+#   PKG_URL      -> package URL, if any.
+#   PKG_SHA1     -> package SHA1, if any.
+#   PKG_PATCHES  -> package patches file, if any.
+#   LINE_NUMBER  -> line number in package list file (for error reporting).
+#
+# $1: package list file.
+# $2: callback function.
+package_list_parse () {
+    local LINE LINE_NUMBER PKG_URL PKG_SHA1 PKG_PATCHES PKG_NAME PKG_FILE
+    local OLD_IFS="$IFS"
+    local IFS="$OLD_IFS"
+
+    LINE_NUMBER=0
+    IFS=$'\n'
+    for LINE in $(cat "$1"); do
+        IFS=$OLD_IFS
+        LINE_NUMBER=$(( $LINE_NUMBER + 1 ))
+        PKG_URL=
+        PKG_NAME=
+        PKG_SHA1=
+        PKG_FILE=
+        PKG_PATCHES=
+
+        # Skip empty lines, and comment lines that start with #
+        if [ -z "$LINE" -o "${LINE##\#}" != "${LINE}" ]; then
+            continue
+        fi
+
+        local FIELD
+        for FIELD in $LINE; do
+            case $FIELD in
+                SHA1=*)
+                    PKG_SHA1=${FIELD#SHA1=}
+                    ;;
+                URL=*)
+                    PKG_URL=${FIELD#URL=}
+                    ;;
+                PATCHES=*)
+                    PKG_PATCHES=${FIELD#PATCHES=}
+                    ;;
+                *)
+                    dump "WARNING: Unknown package field [$FIELD] on line $LINE_NUMBER: $1"
+                    ;;
+            esac
+        done
+
+        if [ "$PKG_URL" ]; then
+            PKG_NAME=$(basename "$PKG_URL")
+        else
+            panic "Missing URL=<url> field in package list line $LINE_NUMBER: $1"
+        fi
+        eval $2
+    done
+}
+
+# Return the base name of a package without its extension (.zip/.tar.gz/etc).
+# $1: Package name.
+# Out: Package name without extension.
+_shu_package_name_strip_ext () {
+    case $1 in
+        *.zip)
+            printf %s "${1%.zip}"
+            ;;
+        *.tar.gz)
+            printf %s "${1%.tar.gz}"
+            ;;
+        *.tar.bz2)
+            printf %s "${1%.tar.bz2}"
+            ;;
+        *.tar.xz)
+            printf %s "${1%.tar.xz}"
+            ;;
+        *)
+            printf %s "$1"
+    esac
+}
+
+# Extract the version of a given package-name. Assumes the following format:
+#   <name>-<version><extension>
+#
+# Where <name> can contain hyphens (-) but not <version> or <extension>,
+# and <extension> is one of the extensions known to _shu_package_name_strip_ext
+# $1: Package name (e.g. 'zlib-1.2.8.tar.gz')
+# Out: Package version number (e.g. '1.2.8')
+_shu_package_name_extract_version () {
+    _shu_package_name_strip_ext "$1" | sed -e 's|.*-\([^-]*\)$|\1|g'
+}
+
+# Extract the base name of a given package file. Assumes the same format as
+# _shu_package_name_extract_basename.
+# $1: Package name (e.g. 'zlib-1.2.8.tar.gz')
+# Out: Package base name (e.g. 'zlib')
+_shu_package_name_extract_basename () {
+    _shu_package_name_strip_ext "$1" | sed -e 's|^\(.*\)-[^-]*$|\1|g'
+}
+
+_shu_package_list_filter_version () {
+    local BASE_NAME
+    BASE_NAME=$(_shu_package_name_extract_basename "$PKG_NAME")
+    if [ "$BASE_NAME" = "$WANTED_PACKAGE" ]; then
+        WANTED_VERSION=$(_shu_package_name_extract_version "$PKG_NAME")
+    fi
+}
+
+# Return the version of a given package listed in $1.
+#
+# $1: package list file.
+# $2: unversioned and un-suffixed package prefix (e.g. 'zlib')
+# Out: package version (e.g. '1.2.8')
+package_list_get_package_version () {
+    local WANTED_PACKAGE WANTED_VERSION
+    WANTED_PACKAGE=$2
+    package_list_parse "$1" _shu_package_list_filter_version
+    printf %s "$WANTED_VERSION"
+}
+
+_shu_package_list_filter_file () {
+    local BASE_NAME
+    BASE_NAME=$(_shu_package_name_extract_basename "$PKG_NAME")
+    if [ "$BASE_NAME" = "$WANTED_PACKAGE" ]; then
+        WANTED_FILE=$PKG_NAME
+    fi
+}
+
+# Return the archive file name of a given package listed in $1.
+#
+# $1: package list file
+# $2: unversioned and un-suffixed package prefix (e.g. 'zlib')
+# Out: package tarball name (e.g. 'zlib-1.2.8.tar.gz')
+package_list_get_package_filename () {
+    local WANTED_PACKAGE WANTED_FILE
+    WANTED_PACKAGE=$2
+    package_list_parse "$1" _shu_package_list_filter_file
+    printf %s "$WANTED_FILE"
+}
