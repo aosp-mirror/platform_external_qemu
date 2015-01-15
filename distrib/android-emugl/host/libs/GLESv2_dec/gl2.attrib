@@ -84,8 +84,10 @@ glGetActiveAttrib
 	var_flag length nullAllowed
 	dir size out
 	len size (sizeof(GLint))
+	var_flag size nullAllowed
 	dir type out
 	len type (sizeof(GLenum))
+	var_flag type nullAllowed
 	
 #void glGetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, GLsizei *length, GLint *size, GLenum *type, GLchar *name)
 glGetActiveUniform
@@ -97,8 +99,10 @@ glGetActiveUniform
 	var_flag length nullAllowed
 	dir size out
 	len size (sizeof(GLint))
+	var_flag size nullAllowed
 	dir type out
 	len type (sizeof(GLenum))
+	var_flag type nullAllowed
 
 
 #void glGetAttachedShaders(GLuint program, GLsizei maxcount, GLsizei *count, GLuint *shaders)
