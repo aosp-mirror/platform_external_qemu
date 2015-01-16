@@ -13,3 +13,23 @@ SHA1=54be89b3453109be0930400e5b13c35c9e9d5e3a    URL=http://cairographics.org/re
 SHA1=71853779b12f958777bffcb8ca6d849b4d3bed46    URL=http://pkgconfig.freedesktop.org/releases/pkg-config-0.28.tar.gz
 SHA1=0c5f193ced810b0d7ce3ab06d808cbb5eef03a2c    URL=http://www.libsdl.org/release/SDL-1.2.15.tar.gz
 SHA1=21c45586a4e94d7622e371340edec5da40d06ecc    URL=http://www.libsdl.org/release/SDL2-2.0.3.tar.gz
+
+# LLVM and Mesa are used to implement software-based GPU emulation.
+SHA1=79638cf00584b08fd6eeb1e73ea69b331561e7f6    URL=http://llvm.org/releases/3.5.1/llvm-3.5.1.src.tar.xz
+SHA1=20e061c463bed415051f0f89e968e331a2078551    URL=http://xorg.freedesktop.org/releases/individual/proto/glproto-1.4.17.tar.bz2
+SHA1=5d812cbf7c4571879fd83bd8c7a753071f02966c    URL=http://xlibs.freedesktop.org/release/libXau-0.1.1.tar.bz2
+SHA1=b8d736342dcb73b71584d99a1cb9806d93c25ff8    URL=http://xorg.freedesktop.org/releases/individual/proto/xextproto-7.3.0.tar.bz2
+SHA1=43abab84101159563e68d9923353cc0b3af44f07    URL=http://xorg.freedesktop.org/releases/individual/lib/libXext-1.3.3.tar.bz2
+SHA1=b34e7438623c8016cc8338549e5fcc29e2f64034    URL=http://xorg.freedesktop.org/releases/individual/proto/xproto-7.0.27.tar.bz2
+SHA1=8343b417d7eeb2a2c6b6c4a87a03a4fd0fc65c46    URL=http://xcb.freedesktop.org/dist/libxcb-1.11.tar.bz2
+SHA1=608bd60663e223464d38acec0183ddb827776401    URL=http://xcb.freedesktop.org/dist/xcb-proto-1.11.tar.bz2
+SHA1=0dd74854e6f6bb8a322e88ba3e89f87c3dcf9e08    URL=http://xorg.freedesktop.org/releases/individual/lib/libX11-1.6.2.tar.bz2
+SHA1=7fc486ad0ec54938f8b781cc374218f50eac8b99    URL=http://xcb.freedesktop.org/dist/libpthread-stubs-0.3.tar.bz2
+SHA1=00cfc636694000112924198e6b9e4d72f1601338    URL=http://xorg.freedesktop.org/releases/individual/util/util-macros-1.19.0.tar.bz2
+SHA1=2d3ae1839d841f568bc481c6116af7d2a9f9ba59    URL=http://xorg.freedesktop.org/releases/individual/lib/xtrans-1.3.5.tar.bz2
+SHA1=53ec316946bce7b63327f73c40ac9be1f50e31b2    URL=ftp://ftp.freedesktop.org/pub/mesa/10.4.2/MesaLib-10.4.2.tar.bz2  SRCDIR=Mesa-10.4.2 PATCHES=MesaLib-10.4.2-patches.tar.xz
+SHA1=20e061c463bed415051f0f89e968e331a2078551    URL=http://xorg.freedesktop.org/releases/individual/proto/glproto-1.4.17.tar.bz2
+SHA1=ab605af5da8c98c0c2f8b2c578fed7c864ee996a    URL=http://xorg.freedesktop.org/releases/individual/proto/fixesproto-5.0.tar.bz2
+SHA1=e14fa072bd70b30eef47391cac637bdb4de9e8a3    URL=http://xorg.freedesktop.org/releases/individual/lib/libXfixes-5.0.1.tar.bz2
+SHA1=c3fc0f4b02dce2239bf46c82a5f06b06585720ae    URL=http://xorg.freedesktop.org/releases/individual/lib/libXdamage-1.1.4.tar.bz2
+SHA1=bd0f0f4dc8f37eaabd9279d10fe2889710507358    URL=http://xorg.freedesktop.org/releases/individual/proto/damageproto-1.2.1.tar.bz2
