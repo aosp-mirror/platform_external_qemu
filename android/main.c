@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/time.h>
+#include <pthread.h>
 #ifdef _WIN32
 #include <process.h>
 #endif
@@ -154,7 +155,30 @@ _adjustPartitionSize( const char*  description,
     return convertMBToBytes(imageMB);
 }
 
-int main(int argc, char **argv)
+int real_main();
+
+typedef struct {
+    int argc;
+    char **argv;
+} CmdLine;
+
+void* thread_start(void *arg) {
+    CmdLine *cmd_line = (CmdLine*)arg;
+    real_main(cmd_line->argc, cmd_line->argv);
+    return NULL;
+}
+
+int main(int argc, char **argv) {
+    pthread_t thread;
+    CmdLine* cmd_line = (CmdLine*)malloc(sizeof(CmdLine));
+    cmd_line->argc = argc;
+    cmd_line->argv = argv;
+    int err = pthread_create(&thread, NULL, thread_start, cmd_line);
+    pthread_join(thread, NULL);
+    return 0;
+}
+
+int real_main(int argc, char **argv)
 {
     char   tmp[MAX_PATH];
     char*  tmpend = tmp + sizeof(tmp);
