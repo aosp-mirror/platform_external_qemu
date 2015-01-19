@@ -295,6 +295,11 @@ struct CPUMIPSState {
 # define CP0EnLo_RI 31
 # define CP0EnLo_XI 30
 #endif
+#define CP0EnLo_PFN  6
+#define CP0EnLo_C    3
+#define CP0EnLo_D    2
+#define CP0EnLo_V    1
+#define CP0EnLo_G    0
     int32_t CP0_GlobalNumber;
 #define CP0GN_VPId 0
     target_ulong CP0_Context;
