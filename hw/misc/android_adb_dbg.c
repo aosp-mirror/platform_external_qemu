@@ -72,7 +72,7 @@ static int adb_dbg_pipe_send(void *opaque, const AndroidPipeBuffer *buffers,
                              int cnt)
 {
     int ret = 0;
-    char *data;
+    char *data, *head;
     unsigned total_len = pipe_buffers_len(buffers, cnt);
 
     DPRINTF("%s: something is coming over the wire....\n", __func__);
@@ -82,6 +82,7 @@ static int adb_dbg_pipe_send(void *opaque, const AndroidPipeBuffer *buffers,
     }
 
     data = g_malloc(total_len);
+    head = data;
 
     while (cnt > 0) {
         memcpy(data, buffers[0].data, buffers[0].size);
@@ -92,7 +93,7 @@ static int adb_dbg_pipe_send(void *opaque, const AndroidPipeBuffer *buffers,
         buffers++;
     }
 
-    fprintf(stderr, "ADB: %s", data);
+    fprintf(stderr, "ADB: %s", head);
 
     return ret;
 }
