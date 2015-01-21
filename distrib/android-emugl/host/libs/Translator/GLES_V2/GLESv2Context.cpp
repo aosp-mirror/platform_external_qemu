@@ -155,6 +155,9 @@ void GLESv2Context::initExtensionString() {
         *s_glExtensions+="GL_OES_standard_derivatives ";
     if (s_glSupport.GL_OES_TEXTURE_NPOT)
         *s_glExtensions+="GL_OES_texture_npot";
+    if (s_glSupport.GL_OES_RGB8_RGBA8) {
+        *s_glExtensions+=" GL_OES_rgb8_rgba8";
+    }
 }
 
 int GLESv2Context::getMaxTexUnits() {
