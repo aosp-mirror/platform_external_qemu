@@ -344,8 +344,8 @@ package_list_unpack_and_patch () {
     PKG_PATCHES_FILE=$SRC_DIR/${PKG_PATCHES_DIR}.tar.xz
     if [ -f "$PKG_PATCHES_FILE" ]; then
         log "Patching $PKG_FULLNAME"
-        unpack_archive "$PKG_PATCHES_FILE" "$SRC_DIR"
-        for PATCH in $(cd "$SRC_DIR" && ls "$PKG_PATCHES_DIR"/*.patch); do
+        unpack_archive "$PKG_PATCHES_FILE" "$DST_DIR"
+        for PATCH in $(cd "$DST_DIR" && ls "$PKG_PATCHES_DIR"/*.patch); do
             log "Applying patch: $PATCH"
             (cd "$PKG_DIR" && run patch -p1 < "../$PATCH") ||
                     panic "Could not apply $PATCH"
