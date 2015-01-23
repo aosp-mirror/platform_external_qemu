@@ -25,6 +25,7 @@
 #include <EGL/egl.h>
 
 #include <map>
+#include <set>
 
 #include <stdint.h>
 
@@ -36,6 +37,7 @@ struct ColorBufferRef {
 typedef std::map<HandleType, RenderContextPtr> RenderContextMap;
 typedef std::map<HandleType, WindowSurfacePtr> WindowSurfaceMap;
 typedef std::map<HandleType, ColorBufferRef> ColorBufferMap;
+typedef std::map<void*, std::set<HandleType> > ThreadContextSetMap;
 
 struct FrameBufferCaps
 {
@@ -73,6 +75,10 @@ public:
     HandleType createRenderContext(int p_config, HandleType p_share, bool p_isGL2 = false);
     HandleType createWindowSurface(int p_config, int p_width, int p_height);
     HandleType createColorBuffer(int p_width, int p_height, GLenum p_internalFormat);
+
+    // Destroy all the remaining contexts that are created by current render thread
+    void drainRenderContext();
+
     void DestroyRenderContext(HandleType p_context);
     void DestroyWindowSurface(HandleType p_surface);
     int openColorBuffer(HandleType p_colorbuffer);
@@ -121,6 +127,7 @@ private:
     RenderContextMap m_contexts;
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
+    ThreadContextSetMap m_threadContexts;
 
     EGLSurface m_eglSurface;
     EGLContext m_eglContext;

@@ -523,6 +523,8 @@ HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
     if (rctx.Ptr() != NULL) {
         ret = genHandle();
         m_contexts[ret] = rctx;
+        RenderThreadInfo *tinfo = RenderThreadInfo::get();
+        m_threadContexts[tinfo].insert(ret);
     }
     return ret;
 }
@@ -541,10 +543,26 @@ HandleType FrameBuffer::createWindowSurface(int p_config, int p_width, int p_hei
     return ret;
 }
 
+void FrameBuffer::drainRenderContext()
+{
+    emugl::Mutex::AutoLock mutex(m_lock);
+    RenderThreadInfo *tinfo = RenderThreadInfo::get();
+    if (m_threadContexts.find(tinfo) == m_threadContexts.end()) return;
+    for (std::set<HandleType>::iterator it = m_threadContexts[tinfo].begin();
+            it != m_threadContexts[tinfo].end(); ++it) {
+        HandleType contextHandle = *it;
+        m_contexts.erase(contextHandle);
+    }
+    m_threadContexts.erase(tinfo);
+}
+
 void FrameBuffer::DestroyRenderContext(HandleType p_context)
 {
     emugl::Mutex::AutoLock mutex(m_lock);
     m_contexts.erase(p_context);
+    RenderThreadInfo *tinfo = RenderThreadInfo::get();
+    if (m_threadContexts.find(tinfo) == m_threadContexts.end()) return;
+    m_threadContexts[tinfo].erase(p_context);
 }
 
 void FrameBuffer::DestroyWindowSurface(HandleType p_surface)
