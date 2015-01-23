@@ -68,7 +68,7 @@ a valid AOSP checkout directory.
 The source tarball are searched in <prebuilts>/archive, where <prebuilts>
 has the following default value:
 
-    $DEFAULT_EMULATOR_PREBUILTS_DIR
+    $DEFAULT_PREBUILTS_DIR
 
 Use --prebuilt-dir=<path> or define ANDROID_EMULATOR_PREBUILTS_DIR in your
 environment to change its value.
@@ -83,8 +83,8 @@ By default, this script builds binaries for the following host sytems:
 
 You can use --host=<list> to change this.
 
-Final binaries are installed into <prebuilts>/build-prefix/<host>/
-where <host> is a name like 'linux-x86_64' or 'windows-x86'.
+Final binaries are installed into <prebuilts>/$DEFAULT_INSTALL_SUBDIR by
+default, but you can change this location with --install-dir=<dir>.
 
 By default, everything is rebuilt in a temporary directory that is
 automatically removed after script completion (and after the binaries are
