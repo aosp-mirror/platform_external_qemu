@@ -73,6 +73,10 @@ public:
     HandleType createRenderContext(int p_config, HandleType p_share, bool p_isGL2 = false);
     HandleType createWindowSurface(int p_config, int p_width, int p_height);
     HandleType createColorBuffer(int p_width, int p_height, GLenum p_internalFormat);
+
+    // Destroy all the remaining contexts that are created by current render thread
+    void drainRenderContext();
+
     void DestroyRenderContext(HandleType p_context);
     void DestroyWindowSurface(HandleType p_surface);
     int openColorBuffer(HandleType p_colorbuffer);
