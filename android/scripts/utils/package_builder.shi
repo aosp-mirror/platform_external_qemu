@@ -162,6 +162,18 @@ package_builder_process_options () {
         fi
     fi
 
+    # Detect bad host system names, and list the good ones in case of error.
+    local BAD_SYSTEMS SYSTEM
+    for SYSTEM in $HOST_SYSTEMS; do
+        if ! list_contains "$_SHU_VALID_HOST_SYSTEMS" "$SYSTEM"; then
+            BAD_SYSTEMS="$BAD_SYSTEMS $SYSTEM"
+        fi
+    done
+    if [ "$BAD_SYSTEMS" ]; then
+        panic "Invalid host system name(s): [$BAD_SYSTEMS], use one of: $_SHU_VALID_HOST_SYSTEMS"
+    fi
+
+    # Compute the list of darwin host systems.
     DARWIN_SYSTEMS=
     for SYSTEM in $HOST_SYSTEMS; do
         case $SYSTEM in
@@ -171,14 +183,23 @@ package_builder_process_options () {
         esac
     done
 
-    local BAD_SYSTEMS SYSTEM
-    for SYSTEM in $HOST_SYSTEMS; do
-        if ! list_contains "$_SHU_VALID_HOST_SYSTEMS" "$SYSTEM"; then
-            BAD_SYSTEMS="$BAD_SYSTEMS $SYSTEM"
+    # Compute the list of local host systems, i.e. the ones that will be built
+    # on the machine running this script, as opposed to remotely with SSH.
+    LOCAL_HOST_SYSTEMS=$HOST_SYSTEMS
+    if [ "$DARWIN_SYSTEMS" -a "$(get_build_os)" != "darwin" ]; then
+        if [ -z "$DARWIN_SSH" ]; then
+            panic "Cannot build Darwin binaries on this machine, please use --darwin-ssh=<host>."
         fi
-    done
-    if [ "$BAD_SYSTEMS" ]; then
-        panic "Invalid host system name(s): [$BAD_SYSTEMS], use one of: $_SHU_VALID_HOST_SYSTEMS"
+        LOCAL_HOST_SYSTEMS=
+        for SYSTEM in $HOST_SYSTEMS; do
+            case $SYSTEM in
+                darwin-*)
+                    ;;
+                *)
+                    var_append LOCAL_HOST_SYSTEMS "$SYSTEM"
+                    ;;
+            esac
+        done
     fi
 
     # Save original path.

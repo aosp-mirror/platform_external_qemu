@@ -420,25 +420,9 @@ if [ "$BAD_PREBUILTS" ]; then
 fi
 
 if [ "$DARWIN_SSH" ]; then
-    # Perform remote Darwin build first.
-    if [ "$DARWIN_SYSTEMS" ]; then
-        do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
-    elif [ "$OPT_DARWIN_SSH" ]; then
-        panic "--darwin-ssh=<host> used, but --host does not list Darwin systems."
-    fi
-elif [ "$DARWIN_SYSTEMS" -a "$(get_build_os)" != "darwin" ]; then
-    panic "Cannot build darwin binaries on this machine. Use --darwin-ssh=<host>."
+    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
-for SYSTEM in $HOST_SYSTEMS; do
-    # Ignore darwin builds if we're not on a Darwin
-    if [ "$(get_build_os)" != "darwin" ]; then
-        case "$SYSTEM" in
-            darwin-*)
-                continue
-                ;;
-        esac
-    fi
-
+for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     build_qemu_android $SYSTEM "$AOSP_DIR"
 done
