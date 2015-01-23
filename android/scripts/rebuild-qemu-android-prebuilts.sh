@@ -502,6 +502,8 @@ do_autotools_package () {
 build_qemu_android_deps () {
     prepare_build_for_host "$1" "$2"
 
+    timestamp_clear "$INSTALL_DIR/$CURRENT_HOST" qemu-android-deps
+
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
     # Handle zlib for Windows
     case $1 in
@@ -674,6 +676,8 @@ EOF
 
     unset PKG_CONFIG PKG_CONFIG_PATH PKG_CONFIG_LIBDIR SDL_CONFIG
     unset LIBFFI_CFLAGS LIBFFI_LIBS GLIB_CFLAGS GLIB_LIBS
+
+    timestamp_set "$INSTALL_DIR/$CURRENT_HOST" qemu-android-deps
 }
 
 # Perform a Darwin build through ssh to a remote machine.
@@ -743,6 +747,8 @@ EOF
     for SYSTEM in $DARWIN_SYSTEMS; do
         run scp -r "$DARWIN_SSH":/tmp/$PKG_SUFFIX/install-prefix/$SYSTEM $BINARY_DIR/
     done
+
+    run rm -rf "$PKG_TMP"
 }
 
 # Special handling for Darwin target systems.

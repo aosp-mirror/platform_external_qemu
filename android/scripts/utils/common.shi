@@ -427,3 +427,23 @@ compute_file_sha1 () {
 $(get_build_os)"
     esac
 }
+
+# Return the file path of a given timestamp
+# $1: Installation directory
+# $2: Timestamp group name
+_shu_timestamp_file () {
+    printf %s "$1/timestamps/$2"
+}
+
+timestamp_check () {
+    test -f "$(_shu_timestamp_file "$1" "$2")"
+}
+
+timestamp_set () {
+    local TIMESTAMP="$(_shu_timestamp_file "$1" "$2")"
+    run mkdir -p "$(dirname $TIMESTAMP)" && run touch "$TIMESTAMP"
+}
+
+timestamp_clear () {
+    run rm -f "$(_shu_timestamp_file "$1" "$2")"
+}
