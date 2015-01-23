@@ -18,6 +18,7 @@
 
 shell_import utils/aosp_dir.shi
 shell_import utils/emulator_prebuilts.shi
+shell_import utils/install_dir.shi
 shell_import utils/option_parser.shi
 shell_import utils/package_builder.shi
 shell_import utils/package_list_parser.shi
@@ -58,10 +59,7 @@ option_register_var "--use-sdl1" "Use SDL 1.x instead of SDL 2.x"
 
 prebuilts_dir_register_option
 aosp_dir_register_option
-
-OPT_INSTALL_DIR=
-option_register_var "--install-dir=<dir>" OPT_INSTALL_DIR \
-        "Install binaries to <dir>  [<prebuilts>/qemu-android/]"
+install_dir_register_option qemu-android
 
 option_parse "$@"
 
@@ -91,14 +89,7 @@ fi
 
 prebuilts_dir_parse_option
 aosp_dir_parse_option
-
-if [ "$OPT_INSTALL_DIR" ]; then
-    INSTALL_DIR=$OPT_INSTALL_DIR
-    log "Using install dir: $INSTALL_DIR"
-else
-    INSTALL_DIR=$PREBUILTS_DIR/qemu-android
-    log "Auto-config: --install-dir=$INSTALL_DIR  [default]"
-fi
+install_dir_parse_option
 
 package_builder_process_options qemu-android
 

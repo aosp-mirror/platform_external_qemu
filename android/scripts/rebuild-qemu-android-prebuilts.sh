@@ -18,6 +18,7 @@
 
 shell_import utils/aosp_dir.shi
 shell_import utils/emulator_prebuilts.shi
+shell_import utils/install_dir.shi
 shell_import utils/option_parser.shi
 shell_import utils/package_list_parser.shi
 
@@ -55,10 +56,7 @@ option_register_var "--host=<list>" OPT_SYSTEM "List of target systems [$DEFAULT
 
 aosp_dir_register_option
 prebuilts_dir_register_option
-
-DEFAULT_INSTALL_SUBDIR=install
-option_register_var "--install-dir=<dir>" OPT_INSTALL_DIR \
-    "Set installation directory [<prebuilts>/$DEFAULT_INSTALL_SUBDIR]"
+install_dir_register_option qemu-android
 
 PROGRAM_PARAMETERS=""
 
@@ -166,13 +164,7 @@ if [ ! -f "$PACKAGE_LIST" ]; then
     panic "Missing package list file from archive: $PACKAGE_LIST"
 fi
 
-if [ "$OPT_INSTALL_DIR" ]; then
-    INSTALL_DIR=$OPT_INSTALL_DIR
-    log "Using install dir: $INSTALL_DIR"
-else
-    INSTALL_DIR=$PREBUILTS_DIR/$DEFAULT_INSTALL_SUBDIR
-    log "Auto-config: --install-dir=$INSTALL_DIR  [default]"
-fi
+install_dir_parse_option
 
 # Do we have ccache ?
 if [ -z "$OPT_NO_CCACHE" ]; then
