@@ -261,6 +261,8 @@ builder_prepare_for_host () {
     log "$_SHU_BUILDER_CURRENT_TEXT Creating build directory: $_SHU_BUILDER_BUILD_DIR"
     run mkdir -p "$_SHU_BUILDER_BUILD_DIR"
 
+    _SHU_BUILDER_SRC_DIR=$TEMP_DIR/src
+
     _SHU_BUILDER_ENV_SH=$_SHU_BUILDER_BUILD_DIR/env.sh
 
     _SHU_BUILDER_PREFIX=$TEMP_DIR/install-$_SHU_BUILDER_CURRENT_HOST
@@ -296,6 +298,7 @@ export PATH \
     _SHU_BUILDER_GNU_CONFIG_HOST_PREFIX \
     _SHU_BUILDER_GNU_CONFIG_HOST_FLAG \
     _SHU_BUILDER_BUILD_DIR \
+    _SHU_BUILDER_SRC_DIR \
     _SHU_BUILDER_PREFIX \
     _SHU_BUILDER_PKG_CONFIG_PATH \
     _SHU_BUILDER_CONFIGURE_FLAGS
@@ -348,6 +351,14 @@ builder_host_exe_extension () {
     printf %s "$_SHU_BUILDER_HOST_EXE_EXTENSION"
 }
 
+builder_build_dir () {
+    printf %s "$_SHU_BUILDER_BUILD_DIR"
+}
+
+builder_src_dir () {
+    printf %s "$_SHU_BUILDER_SRC_DIR"
+}
+
 builder_install_prefix () {
     printf %s "$_SHU_BUILDER_PREFIX"
 }
@@ -358,6 +369,10 @@ builder_gnu_config () {
 
 builder_gnu_config_host_prefix () {
     printf %s "$_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX"
+}
+
+builder_gnu_config_host_flag () {
+    printf %s "$_SHU_BUILDER_GNU_CONFIG_HOST_FLAG"
 }
 
 builder_host_ext () {
@@ -372,8 +387,11 @@ builder_add_configure_flags () {
     var_append _SHU_BUILDER_CONFIGURE_FLAGS "$*"
 }
 
+# Build a given autotools based package
+#
 # $1: Source directory.
 # $2: Build directory.
+# $3+: Additional configure options.
 builder_build_autotools_package () {
     local PKG_FULLNAME="$(basename "$1")"
     dump "$(builder_text) Building $PKG_FULLNAME"
