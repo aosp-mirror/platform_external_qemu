@@ -704,23 +704,13 @@ do_remote_darwin_build () {
     run cp -rp "$ARCHIVE_DIR" "$PKG_DIR/archive"
     local EXTRA_FLAGS=""
 
-    case $(get_verbosity) in
-        0)
-            # pass
-            ;;
-        1)
-            EXTRA_FLAGS="$EXTRA_FLAGS --verbose"
-            ;;
-        *)
-            EXTRA_FLAGS="$EXTRA_FLAGS --verbose --verbose"
-            ;;
-    esac
+    var_append EXTRA_FLAGS "--verbosity=$(get_verbosity)"
 
     if [ "$OPT_NUM_JOBS" ]; then
-        EXTRA_FLAGS="$EXTRA_FLAGS -j$OPT_NUM_JOBS"
+        var_append EXTRA_FLAGS "-j$OPT_NUM_JOBS"
     fi
     if [ "$OPT_NO_CCACHE" ]; then
-        EXTRA_FLAGS="$EXTRA_FLAGS --no-ccache"
+        var_append EXTRA_FLAGS "--no-ccache"
     fi
 
     # Generate a script to rebuild all binaries from sources.

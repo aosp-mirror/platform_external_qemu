@@ -354,11 +354,7 @@ do_remote_darwin_build () {
 
     local EXTRA_FLAGS=""
 
-    VERBOSITY=$(get_verbosity)
-    while [ "$VERBOSITY" -gt "1" ]; do
-        var_append EXTRA_FLAGS "--verbose"
-        VERBOSITY=$(( $VERBOSITY - 1 ))
-    done
+    var_append "--verbosity=$(get_verbosity)"
 
     if [ "$OPT_NUM_JOBS" ]; then
         var_append EXTRA_FLAGS "-j$OPT_NUM_JOBS"
