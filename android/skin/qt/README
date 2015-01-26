@@ -1,0 +1,33 @@
+BUILDING AND RUNNING A QT EMULATOR
+
+BUILDING:
+
+All platforms:
+
+In the android/skin/qt directory,
+
+    find . | grep Makefile | xargs rm
+    /path/to/Qt/5.4/<qt-architecture>/bin/qmake
+    make
+
+In Makefile.common,
+
+    EMULATOR_USE_QT ?= true
+    EMULATOR_USE_SDL2 ?= false
+
+    adjust QT_HOME
+
+In android/config.h:
+
+    //#define CONFIG_SDL 0
+    #define CONFIG_QT 1
+
+On your platform, you may need to set LD_LIBRARY_PATH or DYLD_LIBRARY_PATH to point to the Qt libs and/or platform directories.
+
+CURRENT STATE:
+
+On MacOS, it runs, with and without hardware acceleration.
+
+On Linux, the emulation locks up during boot. Previously this was due to pthread_sigmask not being properly set, and the wrong (i.e. Qt) thread receiving Qemu's signals. Without those signals it never dropped out of emulated code to handle emulator housekeeping, and it would grind to a halt. I got that working, but recently the error started occurring again, and a quick check showed that the sigmask calls were being made. Perhaps it's something simple, and the sigmask settings are messed up, or perhaps it's something more subtle.
+
+On Windows, non-GPU-accelerated images would work, but accelerated images would be unresponsive to user input. I did lengthy investigation and didn't figure out the cause. I don't think it's due to multiple threads sharing a single Windows message queue and jamming it up due to unhandled messages. My current theory is that the GL window needs to respond with HTTPTRANSPARENT to the WM_NC_HITTEST message so that user events in it will pass through to the window underneath it on the window stack (i.e. the Qt window). I didn't test this theory. Setting the WS_EX_TRANSPARENT window style was ineffective.

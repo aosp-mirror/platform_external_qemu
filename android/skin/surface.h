@@ -15,6 +15,10 @@
 #include "android/skin/region.h"
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* a SkinSurface models a 32-bit ARGB pixel image that can be blitted to or from
  */
 typedef struct SkinSurface  SkinSurface;
@@ -129,5 +133,9 @@ extern void    skin_surface_blit( SkinSurface*  dst,
 extern void    skin_surface_fill(SkinSurface*  dst,
                                  SkinRect*     rect,
                                  uint32_t      argb_premul);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _ANDROID_SKIN_SURFACE_H */
