@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "abd02b89_6e954b48",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-01-26T20:40:28Z",
+      "side": 1,
+      "message": "Can you explain why you\u0027re using this data structure? To me it looks like it would be simpler to just make the std::set\u003cHandleType\u003e part of the RenderThreadInfo.",
+      "revId": "ff96bc5cad9d3e532050d35f131d2f7d30f79c5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
