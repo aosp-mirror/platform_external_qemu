@@ -1,4 +1,17 @@
+android/skin/qt/.qmake.stash
+android/skin/qt/Makefile
+android/skin/qt/qemu-qt.pro.user
+android/skin/ui_emulator-window.h
+android/skin/qrc_resources.cpp
 images/emulator_icon.o
+emulator.config
+emulator.creator
+emulator.creator.user
+emulator.creator.user.3.2-pre1
+emulator.files
+emulator.includes
+CMakeLists.txt
 objs/*
+.*
 *.*~
 

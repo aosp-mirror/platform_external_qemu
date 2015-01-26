@@ -314,8 +314,18 @@ EMULATOR_LIBUI_CFLAGS += $(SDL_CFLAGS) $(foreach inc,$(SDL_INCLUDES),-I$(inc))
 EMULATOR_LIBUI_CFLAGS += -I/usr/local/google/home/sbarta/Qt/5.4src/qtbase/include
 # include $(LOCAL_PATH)/skin-qt/Makefile
 EMULATOR_LIBUI_LDLIBS += $(SDL_LDLIBS)
-EMULATOR_SDL_STATIC_LIBRARIES := $(SDL_STATIC_LIBRARIES) 
-EMULATOR_SDL_STATIC_LIBRARIES_64 := $(SDL_STATIC_LIBRARIES_64) 
+EMULATOR_LIBUI_LDLIBS += \
+    -lQt5Core \
+    -lQt5Gui \
+    -lQt5Widgets \
+    -L /usr/local/google/home/sbarta/Qt/5.4/mingw64/lib/
+#    -L /usr/local/google/home/sbarta/Qt/5.4/Src/qtbase/lib/
+#    -lqcocoa \
+#    -L /Users/sbarta/Qt/5.4/clang_64/plugins/platforms
+#   -Wl,-framework,libqcocoa.dylib \
+#   -Wl,-F,/Users/sbarta/Qt/5.4/clang_64/plugins/platforms
+EMULATOR_SDL_STATIC_LIBRARIES := $(SDL_STATIC_LIBRARIES)
+EMULATOR_SDL_STATIC_LIBRARIES_64 := $(SDL_STATIC_LIBRARIES_64)
 EMULATOR_SDL_LDLIBS := $(SDL_LDLIBS)
 endif
 

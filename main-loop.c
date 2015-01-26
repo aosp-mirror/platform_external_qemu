@@ -310,6 +310,52 @@ void main_loop_wait(int timeout)
 
 }
 
+int foo = 0;
+
+LRESULT CALLBACK transparentWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
+{
+  fprintf(stderr, "windproc\n");
+  if (uMsg == WM_NCHITTEST) {
+    fprintf(stderr, "Returning HTTRANSPARENT\n");
+    return HTTRANSPARENT;
+  }
+  return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+BOOL CALLBACK EnumChildWindowsProc(HWND hwnd, LPARAM lParam) {
+  char text[256];
+  GetClassName(hwnd, text, 255);
+    if (strcmp("subWin", text) != 0) {
+    return TRUE;
+  }
+    //  fprintf(stderr, "Window class is %s\n", text);
+
+    // Now we have our actual OpenGL window.
+    int exstyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+    exstyle |= WS_EX_TRANSPARENT;
+    SetLastError(0);
+    SetWindowLong(hwnd, GWL_EXSTYLE, exstyle);
+    LONG_PTR result = SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)transparentWndProc);
+    fprintf(stderr, "Settng windproc to %llx, result %llx, error %ld\n", (LONG_PTR)transparentWndProc, result, GetLastError());
+
+  return TRUE;
+
+}
+
+BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
+  if (foo++ % 10000 != 0) {
+  return TRUE;
+}
+  char text[256];
+  GetClassName(hwnd, text, 255);
+    if (strcmp("Qt5QWindowIcon", text) != 0) {
+    return TRUE;
+  }
+    EnumChildWindows(hwnd, EnumChildWindowsProc, lParam);
+    //  fprintf(stderr, "Window class is %s\n", text);
+  return TRUE;
+}
+
 void main_loop(void)
 {
     int r;
@@ -321,6 +367,10 @@ void main_loop(void)
 
     for (;;) {
         do {
+  EnumWindows(EnumWindowsProc, 0);
+
+
+
 #ifdef CONFIG_PROFILER
             int64_t ti;
 #endif
@@ -558,12 +608,18 @@ static int64_t qemu_next_alarm_deadline(void)
 }
 #endif  // __linux__ || _WIN32
 
+int qemu_number_alarms = 0;
+int alarm_tid;
+extern __thread int thread_id;
+
 #ifdef _WIN32
 static void CALLBACK host_alarm_handler(PVOID lpParam, BOOLEAN unused)
 #else
 static void host_alarm_handler(int host_signum)
 #endif
 {
+    qemu_number_alarms++;
+    alarm_tid = thread_id;
     struct qemu_alarm_timer *t = alarm_timer;
     if (!t)
         return;

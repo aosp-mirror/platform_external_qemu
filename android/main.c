@@ -14,6 +14,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/time.h>
+#ifdef CONFIG_POSIX
+#include <pthread.h>
+#endif
 #ifdef _WIN32
 #include <process.h>
 #endif
@@ -65,6 +68,10 @@
 
 #include "android/framebuffer.h"
 #include "android/iolooper.h"
+
+#include "android/skin/winsys.h"
+
+///#include <syscall.h>
 
 SkinRotation  android_framebuffer_rotation;
 
@@ -154,8 +161,38 @@ _adjustPartitionSize( const char*  description,
     return convertMBToBytes(imageMB);
 }
 
-int main(int argc, char **argv)
-{
+int static_n;
+char** static_args;
+AndroidOptions* static_opts;
+AConfig*          static_skinConfig;
+char*             static_skinPath;
+char **static_argv;
+int static_argc;
+
+__thread int thread_id;
+
+#ifdef _WIN32
+DWORD main_windows_thread_id;
+#endif
+
+void do_continuation(void) {
+#ifndef _WIN32
+    sigset_t set;
+    int s;
+    sigemptyset(&set);
+    pthread_sigmask(SIG_SETMASK, &set, NULL);
+#else
+    fprintf(stderr, "Attaching thread ID %d to %d\n", GetCurrentThreadId(), main_windows_thread_id);
+    AttachThreadInput(GetCurrentThreadId(), main_windows_thread_id, TRUE);
+#endif
+
+    fprintf(stderr, "Starting QEMU main loop\n");
+    qemu_main(static_n, static_args);
+    fprintf(stderr, "Done with QEMU main loop\n");
+    exit(0);
+}
+
+int main(int argc, char **argv) {
     char   tmp[MAX_PATH];
     char*  tmpend = tmp + sizeof(tmp);
     char*  args[128];
@@ -178,6 +215,7 @@ int main(int argc, char **argv)
     uint64_t          defaultPartitionSize = convertMBToBytes(200);
 
     AndroidOptions  opts[1];
+
     /* net.shared_net_ip boot property value. */
     char boot_prop_ip[64];
     boot_prop_ip[0] = '\0';
@@ -190,6 +228,7 @@ int main(int argc, char **argv)
 
 #ifdef _WIN32
     socket_init();
+    main_windows_thread_id =  GetCurrentThreadId();
 #endif
 
     while (argc-- > 1) {
@@ -1536,7 +1575,29 @@ int main(int argc, char **argv)
     }
 
     /* Setup SDL UI just before calling the code */
+    static_n = n;
+    static_args = args;
+    static_opts = opts;
+    static_skinConfig = skinConfig;
+    static_skinPath = skinPath;
+#if defined(CONFIG_SDL)
     init_sdl_ui(skinConfig, skinPath, opts);
+    do_continuation(NULL);
+#elif defined(CONFIG_QT)
+    init_sdl_ui(skinConfig, skinPath, opts);
+    skin_spawn_thread(do_continuation);
+//    skin_winsys_start(opts->no_window, opts->raw_keys);
 
-    return qemu_main(n, args);
+#ifndef _WIN32
+    sigset_t set;
+    int s;
+    sigfillset(&set);
+    pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif
+
+//    do_continuation();
+    skin_enter_main_loop();
+//    init_qt_ui(skinConfig, skinPath, opts);
+#endif
+    return 0;
 }

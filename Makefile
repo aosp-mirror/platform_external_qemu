@@ -64,6 +64,13 @@ $(foreach lib,$(SDL_LIBS), \
 )
 endif
 
+#clean-skin-qt:
+#	cd android/skin/qt && $(MAKE) clean
+
+#skin-qt:
+#	cd android/skin/qt && ~/Qt/5.4/gcc_64/bin/qmake && $(MAKE)
+
+#clean: clean-intermediates clean-skin-qt
 clean: clean-intermediates
 
 distclean: clean clean-config
@@ -71,7 +78,9 @@ distclean: clean clean-config
 # let's roll
 include Makefile.android
 
-libraries: $(LIBRARIES)
+#libraries: $(LIBRARIES) skin-qt
+libraries: $(LIBRARIES)QMAKE_ARCH=64bit ~/Qt/5.4/i686-w64-mingw32/bin/qmake -spec win32-g++ && make clean && make -j80
+
 executables: $(EXECUTABLES)
 
 clean-intermediates:
