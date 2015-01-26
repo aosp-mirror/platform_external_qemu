@@ -323,7 +323,12 @@ static void rcReadColorBuffer(uint32_t colorBuffer,
                               GLint width, GLint height,
                               GLenum format, GLenum type, void* pixels)
 {
-   // XXX: TBD - should be implemented
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+
+    fb->readColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 }
 
 static int rcUpdateColorBuffer(uint32_t colorBuffer,
