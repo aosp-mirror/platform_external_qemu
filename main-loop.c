@@ -321,6 +321,9 @@ void main_loop(void)
 
     for (;;) {
         do {
+
+
+
 #ifdef CONFIG_PROFILER
             int64_t ti;
 #endif
@@ -558,12 +561,18 @@ static int64_t qemu_next_alarm_deadline(void)
 }
 #endif  // __linux__ || _WIN32
 
+int qemu_number_alarms = 0;
+int alarm_tid;
+extern __thread int thread_id;
+
 #ifdef _WIN32
 static void CALLBACK host_alarm_handler(PVOID lpParam, BOOLEAN unused)
 #else
 static void host_alarm_handler(int host_signum)
 #endif
 {
+    qemu_number_alarms++;
+    alarm_tid = thread_id;
     struct qemu_alarm_timer *t = alarm_timer;
     if (!t)
         return;

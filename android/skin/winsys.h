@@ -18,28 +18,32 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Enable/Disable relative mouse mode. Used for trackball emulation.
 // This hides the cursor and grabs the input.
 void skin_winsys_set_relative_mouse_mode(bool enabled);
 
 // Return window handle of main UI.
-void* skin_winsys_get_window_handle(void);
+void *skin_winsys_get_window_handle(void);
 
 // Return rectangle of current monitor in pixels.
-void skin_winsys_get_monitor_rect(SkinRect* rect);
+void skin_winsys_get_monitor_rect(SkinRect *rect);
 
 // Return the monitor's horizontal and vertical resolution in dots per
 // inches. Return 0 in case of success, -1 in case of failure.
-int skin_winsys_get_monitor_dpi(int* x_dpi, int* y_dpi);
+int skin_winsys_get_monitor_dpi(int *x_dpi, int *y_dpi);
 
 // Set main window position.
 void skin_winsys_set_window_pos(int window_x, int window_y);
 
 // Get main window position.
-void skin_winsys_get_window_pos(int* window_x, int* window_y);
+void skin_winsys_get_window_pos(int *window_x, int *window_y);
 
 // Set window title.
-void skin_winsys_set_window_title(const char* title);
+void skin_winsys_set_window_title(const char *title);
 
 // Return true iff the main window is fully visible
 bool skin_winsys_is_window_fully_visible(void);
@@ -55,10 +59,20 @@ void skin_winsys_start(bool no_window, bool raw_keys);
 //
 // Note: On Windows, the icon data is ignored, and the icon is directly
 //       extracted from the executable.
-void skin_winsys_set_window_icon(const unsigned char* icon_data,
-                                 size_t icon_data_size);
+void skin_winsys_set_window_icon(const unsigned char *icon_data,
+        size_t icon_data_size);
 
 // Stop main window and quit program. Must be called from inside event loop.
 void skin_winsys_quit(void);
+
+typedef void (*StartFunction)(void);
+
+void skin_spawn_thread(StartFunction f);
+
+void skin_enter_main_loop();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // ANDROID_SKIN_WINSYS_H

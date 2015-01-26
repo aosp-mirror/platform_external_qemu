@@ -175,6 +175,9 @@ void vm_stop(int reason)
     do_vm_stop(reason);
 }
 
+extern int qemu_number_alarms;
+extern int alarm_tid;
+extern __thread int thread_id;
 static int qemu_cpu_exec(CPUOldState *env)
 {
     int ret;
@@ -200,6 +203,7 @@ static int qemu_cpu_exec(CPUOldState *env)
     }
 #endif
     ret = cpu_exec(env);
+//    fprintf(stderr, "Returned from cpu_exec. Number of alarms: %d, last TID %d, this TID %d\n", qemu_number_alarms, alarm_tid, thread_id);
 #ifdef CONFIG_PROFILER
     qemu_time += profile_getclock() - ti;
 #endif

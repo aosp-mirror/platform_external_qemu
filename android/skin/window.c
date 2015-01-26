@@ -320,9 +320,13 @@ static void lcd_brightness_argb32(uint32_t* pixels,
         const unsigned  alpha_range = (255 - alpha_min);
 
         alpha = alpha_min + ((alpha - b_min) * alpha_range) / (b_low - b_min);
-
+void* orig_pixels = pixels;
+void* max_pixel;
+int orig_h = h;
         for (; h > 0; h--) {
             unsigned* line = (unsigned*) pixels;
+            void *the_line = line;
+long diff = (long)the_line - (long)orig_pixels;
             int nn = 0;
 
             DUFF4(w, {
@@ -334,10 +338,14 @@ static void lcd_brightness_argb32(uint32_t* pixels,
                 rb = ((rb * alpha) >> 8) & 0x00ff00ff;
 
                 line[nn] = (unsigned)(ag | rb);
+                void *blah = &line[nn];
+                if (blah > max_pixel) max_pixel = blah;
                 nn++;
             });
-            pixels += pitch;
+            pixels += (pitch / sizeof(uint32_t));
         }
+        long diff = max_pixel - orig_pixels;
+//        fprintf(stderr, "max offset was %ld\n", diff);
     }
     else if (alpha > LCD_BRIGHTNESS_HIGH) /* 'superluminous' mode */
     {
@@ -364,7 +372,7 @@ static void lcd_brightness_argb32(uint32_t* pixels,
                 line[nn] = (unsigned)(ag | rb);
                 nn++;
             });
-            pixels += pitch;
+            pixels += (pitch / sizeof(uint32_t));
         }
     }
 }
@@ -576,8 +584,8 @@ static void adisplay_update_surface(ADisplay* disp,
 
     // Allocate a temporary buffer to get the potentially rotated / converted
     // content.
-    int dst_pitch = 4 * w;
-    uint8_t* dst_pixels = calloc(h, dst_pitch);
+    int dst_pitch = 4 * disp->datasize.w;
+    uint8_t* dst_pixels = calloc(disp->datasize.h, dst_pitch);
 
     SkinRect dst_r = {
         .pos.x = x,
@@ -590,7 +598,7 @@ static void adisplay_update_surface(ADisplay* disp,
     } else {
         adisplay_update_surface_pixels_16(disp, &dst_r, dst_pixels, dst_pitch);
     }
-
+//fprintf(stderr, "Calling brightness disp.w %d disp.h %d pitch %d h %d\n", disp->datasize.w, disp->datasize.h, dst_pitch, h);
     // Apply brightness modulation.
     lcd_brightness_argb32((uint32_t*)dst_pixels,
                           disp->datasize.w,

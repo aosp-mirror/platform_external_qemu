@@ -1,5 +1,18 @@
 images/emulator_icon32.o
 images/emulator_icon64.o
+android/skin/qt/**/Makefile*
+android/skin/qt/**/ui_emulator-window.h
+android/skin/qt/**/qrc_resources.cpp
+android/skin/qt/**/*.user
+images/emulator_icon.o
+emulator.config
+emulator.creator
+emulator.creator.user
+emulator.creator.user.3.2-pre1
+emulator.files
+emulator.includes
+CMakeLists.txt
 objs/*
+.*
 *.*~
 

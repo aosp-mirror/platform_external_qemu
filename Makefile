@@ -72,6 +72,7 @@ distclean: clean clean-config
 include Makefile.android
 
 libraries: $(LIBRARIES)
+
 executables: $(EXECUTABLES)
 
 clean-intermediates:
