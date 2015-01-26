@@ -32,6 +32,7 @@ public:
     GLuint getWidth() const { return m_width; }
     GLuint getHeight() const { return m_height; }
 
+    void readPixels(int x, int y, int width, int height, GLenum p_format, GLenum p_type, void *pixels);
     void subUpdate(int x, int y, int width, int height, GLenum p_format, GLenum p_type, void *pixels);
     bool post();
     bool bindToTexture();
