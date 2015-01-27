@@ -32,7 +32,11 @@ qemu_launcher_CFLAGS := \
 
 qemu_launcher_LDLIBS := -lstdc++
 
+<<<<<<< HEAD   (91ec77 Merge "Cleanup Obsolete LOCAL_PRELINK_MODULE." automerge: c2)
 $(call start-emulator-program, emulator-ranchu-$(EMULATOR_TARGET_CPU))
+=======
+$(call start-emulator-program, emulator-$(EMULATOR_TARGET_CPU))
+>>>>>>> BRANCH (7916a5 Merge "[MIPS64] Create a wrapper for running MIPS64 ranchu Q)
 LOCAL_SRC_FILES := $(qemu_launcher_SOURCES)
 LOCAL_CFLAGS := $(qemu_launcher_CFLAGS)
 LOCAL_STATIC_LIBRARIES := \
@@ -45,7 +49,11 @@ LOCAL_LDLIBS := $(qemu_launcher_LDLIBS)
 $(call gen-hw-config-defs)
 $(call end-emulator-program)
 
+<<<<<<< HEAD   (91ec77 Merge "Cleanup Obsolete LOCAL_PRELINK_MODULE." automerge: c2)
 $(call start-emulator64-program, emulator64-ranchu-$(EMULATOR_TARGET_CPU))
+=======
+$(call start-emulator64-program, emulator64-$(EMULATOR_TARGET_CPU))
+>>>>>>> BRANCH (7916a5 Merge "[MIPS64] Create a wrapper for running MIPS64 ranchu Q)
 LOCAL_SRC_FILES := $(qemu_launcher_SOURCES)
 LOCAL_CFLAGS := $(qemu_launcher_CFLAGS)
 LOCAL_STATIC_LIBRARIES := \

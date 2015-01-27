@@ -83,6 +83,7 @@ static const char kHostOs[] = "darwin";
 static const char kHostOs[] = "windows";
 #endif
 
+<<<<<<< HEAD   (91ec77 Merge "Cleanup Obsolete LOCAL_PRELINK_MODULE." automerge: c2)
 // A structure used to model information about a given target CPU architecture.
 // |androidArch| is the architecture name, following Android conventions.
 // |qemuArch| is the same name, following QEMU conventions, used to locate
@@ -116,6 +117,14 @@ const TargetInfo kTarget = {
     NULL,
 #endif
 };
+=======
+// The target CPU architecture.
+#ifdef TARGET_ARM64
+const char kTargetArch[] = "aarch64";
+#elif TARGET_MIPS64
+const char kTargetArch[] = "mips64el";
+#endif
+>>>>>>> BRANCH (7916a5 Merge "[MIPS64] Create a wrapper for running MIPS64 ranchu Q)
 
 String getNthParentDir(const char* path, size_t n) {
     StringVector dir = PathUtils::decompose(path);
@@ -310,7 +319,21 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     /* Update CPU architecture for HW configs created from build dir. */
     if (inAndroidBuild) {
+<<<<<<< HEAD   (91ec77 Merge "Cleanup Obsolete LOCAL_PRELINK_MODULE." automerge: c2)
         reassign_string(&android_hw->hw_cpu_arch, kTarget.androidArch);
+=======
+#if defined(TARGET_ARM)
+        reassign_string(&android_hw->hw_cpu_arch, "arm");
+#elif defined(TARGET_I386)
+        reassign_string(&android_hw->hw_cpu_arch, "x86");
+#elif defined(TARGET_MIPS)
+        reassign_string(&android_hw->hw_cpu_arch, "mips");
+#elif defined(TARGET_MIPS64)
+        reassign_string(&android_hw->hw_cpu_arch, "mips64");
+#elif defined(TARGET_ARM64)
+        reassign_string(&android_hw->hw_cpu_arch, "arm64");
+#endif
+>>>>>>> BRANCH (7916a5 Merge "[MIPS64] Create a wrapper for running MIPS64 ranchu Q)
     }
 
     /* generate arguments for the underlying qemu main() */
@@ -780,7 +803,16 @@ extern "C" int main(int argc, char **argv, char **envp) {
     args[n++] = qemuExecutable.c_str();
 
     args[n++] = "-cpu";
+<<<<<<< HEAD   (91ec77 Merge "Cleanup Obsolete LOCAL_PRELINK_MODULE." automerge: c2)
     args[n++] = kTarget.qemuCpu;
+=======
+
+#if defined(TARGET_MIPS64)
+    args[n++] = "MIPS64R6-generic";
+#elif defined(TARGET_ARM64)
+    args[n++] = "cortex-a57";
+#endif
+>>>>>>> BRANCH (7916a5 Merge "[MIPS64] Create a wrapper for running MIPS64 ranchu Q)
     args[n++] = "-machine";
     args[n++] = "type=ranchu";
 
@@ -791,12 +823,20 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     // Command-line
     args[n++] = "-append";
+<<<<<<< HEAD   (91ec77 Merge "Cleanup Obsolete LOCAL_PRELINK_MODULE." automerge: c2)
 
     String kernelCommandLine = StringFormat("console=%s0,38400",
                                             kTarget.ttyPrefix);
     if (kTarget.kernelExtraArgs) {
         kernelCommandLine += kTarget.kernelExtraArgs;
     }
+=======
+#if defined(TARGET_ARM64)
+    String kernelCommandLine = "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0";
+#elif defined(TARGET_MIPS64)
+    String kernelCommandLine = "console=ttyGF0,38400";
+#endif
+>>>>>>> BRANCH (7916a5 Merge "[MIPS64] Create a wrapper for running MIPS64 ranchu Q)
     args[n++] = kernelCommandLine.c_str();
 
     args[n++] = "-serial";
