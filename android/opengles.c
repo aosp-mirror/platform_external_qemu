@@ -244,6 +244,10 @@ android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
     if (!rendererSrc) rendererSrc = "";
     if (!versionSrc) versionSrc = "";
 
+    D("OpenGL Vendor=[%s]", vendorSrc);
+    D("OpenGL Renderer=[%s]", rendererSrc);
+    D("OpenGL Version=[%s]", versionSrc);
+
     /* Special case for the default ES to GL translators: extract the strings
      * of the underlying OpenGL implementation. */
     if (strncmp(vendorSrc, "Google", 6) == 0 &&

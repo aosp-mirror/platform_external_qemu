@@ -13,3 +13,8 @@ SHA1=54be89b3453109be0930400e5b13c35c9e9d5e3a    URL=http://cairographics.org/re
 SHA1=71853779b12f958777bffcb8ca6d849b4d3bed46    URL=http://pkgconfig.freedesktop.org/releases/pkg-config-0.28.tar.gz
 SHA1=0c5f193ced810b0d7ce3ab06d808cbb5eef03a2c    URL=http://www.libsdl.org/release/SDL-1.2.15.tar.gz
 SHA1=21c45586a4e94d7622e371340edec5da40d06ecc    URL=http://www.libsdl.org/release/SDL2-2.0.3.tar.gz
+
+# LLVM and Mesa are used to implement software-based GPU emulation.
+SHA1=20e061c463bed415051f0f89e968e331a2078551    URL=http://xorg.freedesktop.org/releases/individual/proto/glproto-1.4.17.tar.bz2
+SHA1=79638cf00584b08fd6eeb1e73ea69b331561e7f6    URL=http://llvm.org/releases/3.5.1/llvm-3.5.1.src.tar.xz
+SHA1=53ec316946bce7b63327f73c40ac9be1f50e31b2    URL=ftp://ftp.freedesktop.org/pub/mesa/10.4.2/MesaLib-10.4.2.tar.bz2  SRCDIR=Mesa-10.4.2 PATCHES=MesaLib-10.4.2-patches.tar.xz
