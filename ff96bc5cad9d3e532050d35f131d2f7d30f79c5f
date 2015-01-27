@@ -16,6 +16,24 @@
       "revId": "ff96bc5cad9d3e532050d35f131d2f7d30f79c5f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57fbd733_c785941d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2015-01-27T17:04:33Z",
+      "side": 1,
+      "message": "Agreed, making it part of RenderThreadInfo is better idea.\nThanks David :)\nWill submit another one later on.",
+      "parentUuid": "abd02b89_6e954b48",
+      "revId": "ff96bc5cad9d3e532050d35f131d2f7d30f79c5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
