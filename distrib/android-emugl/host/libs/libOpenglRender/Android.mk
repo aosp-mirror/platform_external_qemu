@@ -32,7 +32,10 @@ host_common_SRC_FILES := \
     RenderThread.cpp \
     RenderThreadInfo.cpp \
     render_api.cpp \
+<<<<<<< HEAD   (c422ba Merge changes I9650ac8e,Ia8500325,I18c7d52d,Id55eff34,I6691e)
     RenderWindow.cpp \
+=======
+>>>>>>> BRANCH (253613 Merge changes I1af5dd3c,I1c84e2bf)
     WindowSurface.cpp \
 
 host_common_CFLAGS :=

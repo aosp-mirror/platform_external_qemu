@@ -42,9 +42,19 @@ public:
     // Note that this also means that the thread's stack has been
     bool isFinished() { return tryWait(NULL); }
 
+<<<<<<< HEAD   (c422ba Merge changes I9650ac8e,Ia8500325,I18c7d52d,Id55eff34,I6691e)
     // Force a thread to stop.
     void forceStop();
+=======
+private:
+    RenderThread();  // No default constructor
 
+    RenderThread(IOStream* stream, emugl::Mutex* mutex);
+
+    virtual intptr_t main();
+>>>>>>> BRANCH (253613 Merge changes I1af5dd3c,I1c84e2bf)
+
+<<<<<<< HEAD   (c422ba Merge changes I9650ac8e,Ia8500325,I18c7d52d,Id55eff34,I6691e)
 private:
     RenderThread();  // No default constructor
 
@@ -52,6 +62,8 @@ private:
 
     virtual intptr_t main();
 
+=======
+>>>>>>> BRANCH (253613 Merge changes I1af5dd3c,I1c84e2bf)
     emugl::Mutex* m_lock;
     IOStream* m_stream;
 };

@@ -40,10 +40,13 @@ RenderThread* RenderThread::create(IOStream *stream, emugl::Mutex *lock) {
     return new RenderThread(stream, lock);
 }
 
+<<<<<<< HEAD   (c422ba Merge changes I9650ac8e,Ia8500325,I18c7d52d,Id55eff34,I6691e)
 void RenderThread::forceStop() {
     m_stream->forceStop();
 }
 
+=======
+>>>>>>> BRANCH (253613 Merge changes I1af5dd3c,I1c84e2bf)
 intptr_t RenderThread::main() {
     RenderThreadInfo tInfo;
 
