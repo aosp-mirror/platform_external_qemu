@@ -165,6 +165,7 @@ int SocketStream::recv(void *buf, size_t len)
     }
     return res;
 }
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 
 void SocketStream::forceStop() {
     // Shutdown socket to force read/write errors.
@@ -174,3 +175,5 @@ void SocketStream::forceStop() {
     ::shutdown(m_sock, SHUT_RDWR);
 #endif
 }
+=======
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)

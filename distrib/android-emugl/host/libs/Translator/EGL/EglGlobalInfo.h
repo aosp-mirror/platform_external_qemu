@@ -20,6 +20,7 @@
 #include "EglConfig.h"
 #include "EglContext.h"
 
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/pod_vector.h"
 #include "emugl/common/mutex.h"
@@ -106,6 +107,48 @@ private:
     const GLESiface*               m_gles_ifaces[MAX_GLES_VERSION];
     bool                           m_gles_extFuncs_inited[MAX_GLES_VERSION];
     mutable emugl::Mutex           m_lock;
+=======
+#include <GLcommon/TranslatorIfaces.h>
+#include "emugl/common/mutex.h"
+#include <list>
+#include <EGL/egl.h>
+
+typedef std::map<EglDisplay*,EGLNativeDisplayType>DisplaysMap;
+
+
+class EglGlobalInfo {
+
+public:
+    EglDisplay* addDisplay(EGLNativeDisplayType dpy,EGLNativeInternalDisplayType idpy);
+    EglDisplay* getDisplay(EGLNativeDisplayType dpy);
+    EglDisplay* getDisplay(EGLDisplay dpy);
+    bool removeDisplay(EGLDisplay dpy);
+    EGLNativeInternalDisplayType getDefaultNativeDisplay(){ return m_default;};
+    EGLNativeInternalDisplayType generateInternalDisplay(EGLNativeDisplayType dpy);
+
+    void setIface(GLESiface* iface,GLESVersion ver) { m_gles_ifaces[ver] = iface;};
+    GLESiface* getIface(GLESVersion ver){ return m_gles_ifaces[ver];}
+
+    int  nDisplays() const { return m_displays.size();};
+
+    void initClientExtFuncTable(GLESVersion ver);
+
+    static EglGlobalInfo* getInstance();
+    static void delInstance();
+
+private:
+    EglGlobalInfo();
+    ~EglGlobalInfo(){};
+
+    static EglGlobalInfo*          m_singleton;
+    static int                     m_refCount;
+
+    DisplaysMap                    m_displays;
+    EGLNativeInternalDisplayType   m_default;
+    GLESiface*                     m_gles_ifaces[MAX_GLES_VERSION];
+    bool                           m_gles_extFuncs_inited[MAX_GLES_VERSION];
+    emugl::Mutex                   m_lock;
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 };
 
 #endif

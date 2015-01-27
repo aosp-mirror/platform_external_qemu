@@ -40,8 +40,11 @@ public:
     virtual int recv(void *buf, size_t len);
     virtual int writeFully(const void *buf, size_t len);
 
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
     virtual void forceStop();
 
+=======
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 protected:
     int            m_sock;
     size_t         m_bufsize;

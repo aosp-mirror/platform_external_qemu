@@ -16,6 +16,7 @@
 #include "EglValidate.h"
 #include <GLcommon/GLutils.h>
 
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 // static
 bool EglValidate::confAttrib(EGLint attrib) {
     switch(attrib) {
@@ -107,6 +108,80 @@ bool EglValidate::stringName(EGLint name) {
 }
 
 // static
+=======
+bool EglValidate::confAttrib(EGLint attrib) {
+    switch(attrib) {
+    case EGL_BUFFER_SIZE:
+    case EGL_RED_SIZE:
+    case EGL_GREEN_SIZE:
+    case EGL_BLUE_SIZE:
+    case EGL_ALPHA_SIZE:
+    case EGL_BIND_TO_TEXTURE_RGB:
+    case EGL_BIND_TO_TEXTURE_RGBA:
+    case EGL_CONFIG_CAVEAT:
+    case EGL_CONFIG_ID:
+    case EGL_DEPTH_SIZE:
+    case EGL_LEVEL:
+    case EGL_MAX_PBUFFER_WIDTH:
+    case EGL_MAX_PBUFFER_HEIGHT:
+    case EGL_MAX_PBUFFER_PIXELS:
+    case EGL_MAX_SWAP_INTERVAL:
+    case EGL_MIN_SWAP_INTERVAL:
+    case EGL_RENDERABLE_TYPE:
+    case EGL_NATIVE_RENDERABLE:
+    case EGL_NATIVE_VISUAL_ID:
+    case EGL_NATIVE_VISUAL_TYPE:
+    case EGL_SAMPLE_BUFFERS:
+    case EGL_SAMPLES:
+    case EGL_STENCIL_SIZE:
+    case EGL_SURFACE_TYPE:
+    case EGL_TRANSPARENT_TYPE:
+    case EGL_TRANSPARENT_RED_VALUE:
+    case EGL_TRANSPARENT_GREEN_VALUE:
+    case EGL_TRANSPARENT_BLUE_VALUE:
+    case EGL_CONFORMANT:
+        return true;
+    }
+    return false;
+}
+
+bool EglValidate::noAttribs(const EGLint* attrib) {
+    return !attrib || attrib[0] == EGL_NONE ;
+}
+
+bool EglValidate::pbufferAttribs(EGLint width,EGLint height,bool isTexFormatNoTex,bool isTexTargetNoTex) {
+    if(!isTexFormatNoTex) {
+      if (!(isPowerOf2(width) && isPowerOf2(height))) return false;
+    }
+    return isTexFormatNoTex == isTexTargetNoTex ;
+}
+
+bool EglValidate::releaseContext(EGLContext ctx,EGLSurface s1,EGLSurface s2) {
+    return (ctx == EGL_NO_CONTEXT) &&
+           (s1 == EGL_NO_SURFACE)  &&
+           (s2 == EGL_NO_SURFACE);
+}
+
+bool EglValidate::badContextMatch(EGLContext ctx,EGLSurface s1,EGLSurface s2) {
+    return ctx != EGL_NO_CONTEXT ? (s1 == EGL_NO_SURFACE || s2 == EGL_NO_SURFACE):
+                                   (s1 != EGL_NO_SURFACE || s2 != EGL_NO_SURFACE);
+}
+
+bool EglValidate::surfaceTarget(EGLint target) {
+    return target == EGL_READ || target == EGL_DRAW;
+}
+
+bool EglValidate::engine(EGLint engine) {
+    return engine == EGL_CORE_NATIVE_ENGINE;
+}
+
+bool EglValidate::stringName(EGLint name) {
+    return name == EGL_VENDOR  ||
+           name == EGL_VERSION ||
+           name == EGL_EXTENSIONS;
+}
+
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 bool EglValidate::supportedApi(EGLenum api) {
     return api == EGL_OPENGL_ES_API;
 }

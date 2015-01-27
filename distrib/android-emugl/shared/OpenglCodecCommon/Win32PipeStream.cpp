@@ -232,6 +232,7 @@ const unsigned char *Win32PipeStream::read( void *buf, size_t *inout_len)
     *inout_len = (size_t)readcount;
     return (const unsigned char *)buf;
 }
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 
 void Win32PipeStream::forceStop()
 {
@@ -239,3 +240,5 @@ void Win32PipeStream::forceStop()
     m_pipe = INVALID_HANDLE_VALUE;
     CloseHandle(handle);
 }
+=======
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)

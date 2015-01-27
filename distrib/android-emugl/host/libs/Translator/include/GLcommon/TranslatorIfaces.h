@@ -92,11 +92,19 @@ typedef struct {
 
 typedef struct {
     GLEScontext* (*getGLESContext)();
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
     EglImage*    (*eglAttachEGLImage)(unsigned int imageId);
     void         (*eglDetachEGLImage)(unsigned int imageId);
 }EGLiface;
 
 typedef GLESiface* (*__translator_getGLESIfaceFunc)(const EGLiface*);
+=======
+    EglImage* (*eglAttachEGLImage)(unsigned int imageId);
+    void        (*eglDetachEGLImage)(unsigned int imageId);
+}EGLiface;
+
+typedef GLESiface* (*__translator_getGLESIfaceFunc)(EGLiface*);
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 
 }
 #endif

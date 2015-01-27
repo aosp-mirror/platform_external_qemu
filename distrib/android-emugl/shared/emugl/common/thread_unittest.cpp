@@ -65,6 +65,7 @@ private:
     State* mState;
 };
 
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 class WaitingThread : public ::emugl::Thread {
 public:
     WaitingThread(Mutex* lock) : mLock(lock) {}
@@ -154,6 +155,42 @@ TEST(ThreadTest, TryWaitForMultipleThreads) {
         EXPECT_TRUE(threads[n]->wait(NULL)) << "thread " << n;
         EXPECT_TRUE(threads[n]->tryWait(NULL)) << "thread " << n;
     }
+=======
+}  // namespace
+
+TEST(ThreadTest, SimpleThread) {
+    Thread* thread = new EmptyThread();
+    EXPECT_TRUE(thread);
+    EXPECT_TRUE(thread->start());
+    intptr_t status;
+    EXPECT_TRUE(thread->wait(&status));
+    EXPECT_EQ(42, status);
+}
+
+TEST(ThreadTest, MultipleThreads) {
+    CountingThread::State state;
+    const size_t kMaxThreads = 100;
+    Thread* threads[kMaxThreads];
+
+    // Create all threads.
+    for (size_t n = 0; n < kMaxThreads; ++n) {
+        threads[n] = new CountingThread(&state);
+        EXPECT_TRUE(threads[n]) << "thread " << n;
+    }
+
+    // Start them all.
+    for (size_t n = 0; n < kMaxThreads; ++n) {
+        EXPECT_TRUE(threads[n]->start()) << "thread " << n;
+    }
+
+    // Wait for them all.
+    for (size_t n = 0; n < kMaxThreads; ++n) {
+        EXPECT_TRUE(threads[n]->wait(NULL)) << "thread " << n;
+    }
+
+    // Check state.
+    EXPECT_EQ((int)kMaxThreads, state.count());
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 
     // Delete them all.
     for (size_t n = 0; n < kMaxThreads; ++n) {

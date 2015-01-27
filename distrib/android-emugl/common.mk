@@ -48,6 +48,7 @@ emugl-begin-module = \
     $(eval LOCAL_C_INCLUDES += $(EMUGL_COMMON_INCLUDES)) \
     $(eval LOCAL_CFLAGS += $(EMUGL_COMMON_CFLAGS)) \
     $(eval LOCAL_LDLIBS += -lstdc++) \
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
     $(eval _EMUGL_INCLUDE_TYPE := $(BUILD_$2)) \
     $(eval LOCAL_MODULE_BITS := 32) \
     $(call _emugl-init-module,$1,$2,$3)
@@ -60,6 +61,21 @@ emugl-begin-module64 = \
 emugl-end-module = \
     $(eval $(EMUGL_LOCAL_EXTRAS)) \
     $(call include-if-bitness-$(LOCAL_MODULE_BITS), $(_EMUGL_INCLUDE_TYPE))\
+=======
+    $(eval LOCAL_PRELINK_MODULE := false)\
+    $(eval _EMUGL_INCLUDE_TYPE := $(BUILD_$2)) \
+    $(eval LOCAL_MODULE_BITS := 32) \
+    $(call _emugl-init-module,$1,$2,$3)
+
+emugl-begin-module64 = \
+    $(call emugl-begin-module,$1,$2,$3) \
+    $(eval LOCAL_MODULE_BITS := 64) \
+
+# Used to end a module definition, see function definitions above
+emugl-end-module = \
+    $(eval $(EMUGL_LOCAL_EXTRAS)) \
+    $(eval include $(_EMUGL_INCLUDE_TYPE))\
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
     $(eval _EMUGL_INCLUDE_TYPE :=) \
     $(eval _emugl_$(_emugl_HOST)modules += $(_emugl_MODULE))\
     $(if $(EMUGL_DEBUG),$(call emugl-dump-module))

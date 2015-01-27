@@ -19,6 +19,7 @@ endif
 
 host_common_SRC_FILES := \
     $(host_OS_SRCS) \
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
     ColorBuffer.cpp \
     EGLDispatch.cpp \
     FBConfig.cpp \
@@ -34,6 +35,22 @@ host_common_SRC_FILES := \
     render_api.cpp \
     RenderWindow.cpp \
     WindowSurface.cpp \
+=======
+    render_api.cpp \
+    ColorBuffer.cpp \
+    EGLDispatch.cpp \
+    FBConfig.cpp \
+    FrameBuffer.cpp \
+    GLDispatch.cpp \
+    GL2Dispatch.cpp \
+    RenderContext.cpp \
+    WindowSurface.cpp \
+    RenderControl.cpp \
+    ThreadInfo.cpp \
+    RenderThread.cpp \
+    ReadBuffer.cpp \
+    RenderServer.cpp
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 
 host_common_CFLAGS :=
 

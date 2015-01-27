@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 #include "RenderThread.h"
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 
 #include "EGLDispatch.h"
 #include "FrameBuffer.h"
@@ -153,6 +154,151 @@ intptr_t RenderThread::main() {
     if (tInfo.currContext || tInfo.currDrawSurf || tInfo.currReadSurf) {
         fprintf(stderr, "ERROR: RenderThread exiting with current context/surfaces\n");
     }
+=======
+#include "RenderControl.h"
+#include "ThreadInfo.h"
+#include "ReadBuffer.h"
+#include "TimeUtils.h"
+#include "GLDispatch.h"
+#include "GL2Dispatch.h"
+#include "EGLDispatch.h"
+#include "FrameBuffer.h"
+
+#define STREAM_BUFFER_SIZE 4*1024*1024
+
+RenderThread::RenderThread(IOStream *stream, emugl::Mutex *lock) :
+    emugl::Thread(),
+    m_lock(lock),
+    m_stream(stream),
+    m_finished(false)
+{
+}
+
+RenderThread::~RenderThread()
+{
+    delete m_stream;
+}
+
+RenderThread *RenderThread::create(IOStream *p_stream, emugl::Mutex *lock)
+{
+    return new RenderThread(p_stream, lock);
+}
+
+intptr_t RenderThread::main()
+{
+    RenderThreadInfo tInfo;
+
+    //
+    // initialize decoders
+    //
+    tInfo.m_glDec.initGL( gl_dispatch_get_proc_func, NULL );
+    tInfo.m_gl2Dec.initGL( gl2_dispatch_get_proc_func, NULL );
+    initRenderControlContext( &m_rcDec );
+
+    ReadBuffer readBuf(m_stream, STREAM_BUFFER_SIZE);
+
+    int stats_totalBytes = 0;
+    long long stats_t0 = GetCurrentTimeMS();
+
+    //
+    // open dump file if RENDER_DUMP_DIR is defined
+    //
+    const char *dump_dir = getenv("RENDERER_DUMP_DIR");
+    FILE *dumpFP = NULL;
+    if (dump_dir) {
+        size_t bsize = strlen(dump_dir) + 32;
+        char *fname = new char[bsize];
+        snprintf(fname,bsize,"%s/stream_%p", dump_dir, this);
+        dumpFP = fopen(fname, "wb");
+        if (!dumpFP) {
+            fprintf(stderr,"Warning: stream dump failed to open file %s\n",fname);
+        }
+        delete [] fname;
+    }
+
+    while (1) {
+
+        int stat = readBuf.getData();
+        if (stat <= 0) {
+            break;
+        }
+
+        //
+        // log received bandwidth statistics
+        //
+        stats_totalBytes += readBuf.validData();
+        long long dt = GetCurrentTimeMS() - stats_t0;
+        if (dt > 1000) {
+            //float dts = (float)dt / 1000.0f;
+            //printf("Used Bandwidth %5.3f MB/s\n", ((float)stats_totalBytes / dts) / (1024.0f*1024.0f));
+            stats_totalBytes = 0;
+            stats_t0 = GetCurrentTimeMS();
+        }
+
+        //
+        // dump stream to file if needed
+        //
+        if (dumpFP) {
+            int skip = readBuf.validData() - stat;
+            fwrite(readBuf.buf()+skip, 1, readBuf.validData()-skip, dumpFP);
+            fflush(dumpFP);
+        }
+
+        bool progress;
+        do {
+            progress = false;
+
+            m_lock->lock();
+            //
+            // try to process some of the command buffer using the GLESv1 decoder
+            //
+            size_t last = tInfo.m_glDec.decode(readBuf.buf(), readBuf.validData(), m_stream);
+            if (last > 0) {
+                progress = true;
+                readBuf.consume(last);
+            }
+
+            //
+            // try to process some of the command buffer using the GLESv2 decoder
+            //
+            last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(), m_stream);
+            if (last > 0) {
+                progress = true;
+                readBuf.consume(last);
+            }
+
+            //
+            // try to process some of the command buffer using the
+            // renderControl decoder
+            //
+            last = m_rcDec.decode(readBuf.buf(), readBuf.validData(), m_stream);
+            if (last > 0) {
+                readBuf.consume(last);
+                progress = true;
+            }
+
+            m_lock->unlock();
+
+        } while( progress );
+
+    }
+
+    if (dumpFP) {
+        fclose(dumpFP);
+    }
+
+    //
+    // Release references to the current thread's context/surfaces if any
+    //
+    FrameBuffer::getFB()->bindContext(0, 0, 0);
+    if (tInfo.currContext || tInfo.currDrawSurf || tInfo.currReadSurf) {
+        fprintf(stderr, "ERROR: RenderThread exiting with current context/surfaces\n");
+    }
+
+    //
+    // flag that this thread has finished execution
+    m_finished = true;
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 
     return 0;
 }

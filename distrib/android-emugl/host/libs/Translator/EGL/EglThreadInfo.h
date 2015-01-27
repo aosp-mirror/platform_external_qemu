@@ -17,6 +17,7 @@
 #define EGL_THREAD_INFO_H
 
 #include <EGL/egl.h>
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 
 // Model thread-specific EGL state.
 class EglThreadInfo {
@@ -44,6 +45,29 @@ private:
 
     EGLint m_err;
     EGLenum m_api;
+=======
+#include "EglDisplay.h"
+#include "EglContext.h"
+#include "EglSurface.h"
+#include "EglPbufferSurface.h"
+
+class EglThreadInfo {
+public:
+
+    EglThreadInfo();
+    void       setError(EGLint err) { m_err = err;}
+    EGLint     getError(){ return m_err;}
+    void       destroyContextIfNotCurrent(ContextPtr context );
+    void       setApi(EGLenum api){m_api = api;}
+    EGLenum    getApi(){return m_api;}
+
+    static EglThreadInfo*  get(void) __attribute__((const));
+
+private:
+    EglDisplay*     m_currentDisplay;
+    EGLint          m_err;
+    EGLenum         m_api;
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 };
 
 #endif

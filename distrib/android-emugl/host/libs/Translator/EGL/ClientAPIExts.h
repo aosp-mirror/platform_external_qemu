@@ -21,7 +21,11 @@
 namespace ClientAPIExts
 {
 
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 void initClientFuncs(const GLESiface *iface, int idx);
+=======
+void initClientFuncs(GLESiface *iface, int idx);
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 __translatorMustCastToProperFunctionPointerType getProcAddress(const char *fname);
 
 } // of namespace ClientAPIExts

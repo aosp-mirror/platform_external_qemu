@@ -142,7 +142,11 @@ bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei 
 }
 
 void GLESv2Context::initExtensionString() {
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
     *s_glExtensions = "GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint "
+=======
+    *s_glExtensions = "GL_OES_EGL_image GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint "
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
                       "GL_OES_texture_float GL_OES_texture_float_linear "
                       "GL_OES_compressed_paletted_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth_texture ";
     if (s_glSupport.GL_ARB_HALF_FLOAT_PIXEL || s_glSupport.GL_NV_HALF_FLOAT)

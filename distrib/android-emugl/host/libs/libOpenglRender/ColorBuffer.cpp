@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 #include "ColorBuffer.h"
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 
 #include "EGLDispatch.h"
 #include "FrameBuffer.h"
@@ -23,6 +24,16 @@
 #include "GL2Dispatch.h"
 #endif
 #include "RenderThreadInfo.h"
+=======
+#include "FrameBuffer.h"
+#include "EGLDispatch.h"
+#include "GLDispatch.h"
+#include "ThreadInfo.h"
+#include "GLcommon/GLutils.h"
+#ifdef WITH_GLES2
+#include "GL2Dispatch.h"
+#endif
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 #include <stdio.h>
 
 ColorBuffer *ColorBuffer::create(int p_width, int p_height,

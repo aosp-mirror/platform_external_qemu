@@ -16,6 +16,7 @@
 
 #include "emugl/common/thread_store.h"
 
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 #include <assert.h>
 #include <stdio.h>
 
@@ -111,6 +112,81 @@ bool Thread::tryWait(intptr_t *exitStatus) {
         // Reclaim stack.
         pthread_join(mThread, NULL);
         mJoined = true;
+=======
+#include <stdio.h>
+
+namespace emugl {
+
+namespace {
+
+class ScopedLocker {
+public:
+    ScopedLocker(pthread_mutex_t* mutex) : mMutex(mutex) {
+        pthread_mutex_lock(mMutex);
+    }
+
+    ~ScopedLocker() {
+        pthread_mutex_unlock(mMutex);
+    }
+private:
+    pthread_mutex_t* mMutex;
+};
+
+}  // namespace
+
+Thread::Thread() :
+    mThread((pthread_t)NULL),
+    mExitStatus(0),
+    mIsRunning(false) {
+    pthread_mutex_init(&mLock, NULL);
+}
+
+Thread::~Thread() {
+    pthread_mutex_destroy(&mLock);
+}
+
+bool Thread::start() {
+    bool ret = true;
+    pthread_mutex_lock(&mLock);
+    mIsRunning = true;
+    if (pthread_create(&mThread, NULL, thread_main, this)) {
+        ret = false;
+        mIsRunning = false;
+    }
+    pthread_mutex_unlock(&mLock);
+    return ret;
+}
+
+bool Thread::wait(intptr_t *exitStatus) {
+    {
+        ScopedLocker locker(&mLock);
+        if (!mIsRunning) {
+            // Thread already stopped.
+            if (exitStatus) {
+                *exitStatus = mExitStatus;
+            }
+            return true;
+        }
+    }
+
+    // NOTE: Do not hold the lock when waiting for the thread to ensure
+    // it can update mIsRunning and mExitStatus properly in thread_main
+    // without blocking.
+    void *retval;
+    if (pthread_join(mThread, &retval)) {
+        return false;
+    }
+    if (exitStatus) {
+        *exitStatus = (intptr_t)retval;
+    }
+    return true;
+}
+
+bool Thread::tryWait(intptr_t *exitStatus) {
+    ScopedLocker locker(&mLock);
+    if (!mIsRunning) {
+        return false;
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
     }
     if (exitStatus) {
         *exitStatus = mExitStatus;

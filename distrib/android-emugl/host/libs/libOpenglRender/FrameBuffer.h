@@ -16,6 +16,7 @@
 #ifndef _LIBRENDER_FRAMEBUFFER_H
 #define _LIBRENDER_FRAMEBUFFER_H
 
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
 #include "RenderContext.h"
@@ -26,6 +27,16 @@
 
 #include <map>
 
+=======
+#include "libOpenglRender/render_api.h"
+#include "ColorBuffer.h"
+#include "RenderContext.h"
+#include "WindowSurface.h"
+#include "emugl/common/mutex.h"
+
+#include <map>
+#include <EGL/egl.h>
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 #include <stdint.h>
 
 typedef uint32_t HandleType;

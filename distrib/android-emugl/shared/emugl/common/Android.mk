@@ -8,6 +8,7 @@ LOCAL_PATH := $(call my-dir)
 commonSources := \
         id_to_object_map.cpp \
         lazy_instance.cpp \
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
         message_channel.cpp \
         pod_vector.cpp \
         shared_library.cpp \
@@ -52,6 +53,44 @@ host_commonSources := \
     lazy_instance_unittest.cpp \
     pod_vector_unittest.cpp \
     message_channel_unittest.cpp \
+=======
+        pod_vector.cpp \
+        shared_library.cpp \
+        smart_ptr.cpp \
+        sockets.cpp \
+        thread_store.cpp \
+
+host_commonSources := $(commonSources)
+
+host_commonLdLibs := -lstdc++
+
+ifneq (windows,$(HOST_OS))
+    host_commonSources += thread_pthread.cpp
+    host_commonLdLibs += -ldl -lpthread
+else
+    host_commonSources += thread_win32.cpp
+endif
+
+$(call emugl-begin-host-static-library,libemugl_common)
+LOCAL_SRC_FILES := $(host_commonSources)
+$(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/shared)
+$(call emugl-export,LDLIBS,$(host_commonLdLibs))
+$(call emugl-end-module)
+
+$(call emugl-begin-host64-static-library,lib64emugl_common)
+LOCAL_SRC_FILES := $(host_commonSources)
+$(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/shared)
+$(call emugl-export,LDLIBS,$(host_commonLdLibs))
+$(call emugl-end-module)
+
+
+### emugl_common_unittests ##############################################
+
+host_commonSources := \
+    id_to_object_map_unittest.cpp \
+    lazy_instance_unittest.cpp \
+    pod_vector_unittest.cpp \
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
     mutex_unittest.cpp \
     shared_library_unittest.cpp \
     smart_ptr_unittest.cpp \

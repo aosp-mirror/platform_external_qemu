@@ -35,7 +35,10 @@ public:
     virtual const unsigned char *readFully( void *buf, size_t len) = 0;
     virtual const unsigned char *read( void *buf, size_t *inout_len) = 0;
     virtual int writeFully(const void* buf, size_t len) = 0;
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
     virtual void forceStop() = 0;
+=======
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 
     virtual ~IOStream() {
 

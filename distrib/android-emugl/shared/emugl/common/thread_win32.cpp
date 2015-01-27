@@ -91,7 +91,12 @@ bool Thread::wait(intptr_t* exitStatus) {
 bool Thread::tryWait(intptr_t* exitStatus) {
     ScopedLocker locker(&mLock);
 
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
     if (mIsRunning && WaitForSingleObject(mThread, 0) != WAIT_OBJECT_0) {
+=======
+    if (!mIsRunning ||
+        WaitForSingleObject(mThread, 0) != WAIT_OBJECT_0) {
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
         return false;
     }
 

@@ -27,9 +27,12 @@ endif
 #
 EMUGL_COMMON_CFLAGS := -DWITH_GLES2
 
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 # Needed to ensure SIZE_MAX is properly defined when including <stdint.h>
 EMUGL_COMMON_CFLAGS += -D__STDC_LIMIT_MACROS=1
 
+=======
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 # Define EMUGL_BUILD_DEBUG=1 in your environment to build a
 # debug version of the EmuGL host binaries.
 ifneq (,$(strip $(EMUGL_BUILD_DEBUG)))

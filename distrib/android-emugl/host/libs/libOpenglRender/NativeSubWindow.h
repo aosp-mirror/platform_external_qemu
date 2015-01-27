@@ -16,9 +16,14 @@
 #ifndef NATIVE_SUB_WINDOW_H
 #define NATIVE_SUB_WINDOW_H
 
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 #include "render_api_platform_types.h"
 
 #include <EGL/egl.h>
+=======
+#include <EGL/egl.h>
+#include "libOpenglRender/render_api_platform_types.h"
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 
 #ifdef __cplusplus
 extern "C" {

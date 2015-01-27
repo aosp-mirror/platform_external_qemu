@@ -37,6 +37,7 @@ typedef  std::map< unsigned int, SurfacePtr>     SurfacesHndlMap;
 
 class EglDisplay {
 public:
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
     // Create new EglDisplay instance from a given native display |dpy|,
     // with matching internal display |idpy|. If |isDefault| is true,
     // this will be considered the default diplay.
@@ -112,6 +113,57 @@ private:
    ImagesHndlMap                  m_eglImages;
    unsigned int                   m_nextEglImageId;
    mutable EGLNativeContextType           m_globalSharedContext;
+=======
+
+
+    EglDisplay(EGLNativeInternalDisplayType dpy,bool isDefault = true);
+    EGLNativeInternalDisplayType nativeType();
+    int nConfigs(){ return m_configs.size();}
+    int getConfigs(EGLConfig* configs,int config_size);
+    int chooseConfigs(const EglConfig& dummy,EGLConfig* configs,int config_size);
+    EglConfig* getConfig(EGLConfig conf);
+    EglConfig* getConfig(EGLint id );
+
+    EGLSurface addSurface(SurfacePtr s );
+    SurfacePtr getSurface(EGLSurface surface);
+    bool removeSurface(EGLSurface s);
+    bool removeSurface(SurfacePtr s);
+
+    EGLContext addContext(ContextPtr ctx );
+    ContextPtr getContext(EGLContext ctx);
+    bool removeContext(EGLContext ctx);
+    bool removeContext(ContextPtr ctx);
+    ObjectNameManager* getManager(GLESVersion ver){ return m_manager[ver];}
+
+    ~EglDisplay();
+    void initialize(int renderableType);
+    void terminate();
+    bool isInitialize();
+
+    ImagePtr getImage(EGLImageKHR img);
+    EGLImageKHR addImageKHR(ImagePtr);
+    bool destroyImageKHR(EGLImageKHR img);
+    EGLNativeContextType getGlobalSharedContext();
+
+private:
+   int doChooseConfigs(const EglConfig& dummy,EGLConfig* configs,int config_size);
+   void addMissingConfigs(void);
+   void initConfigurations(int renderableType);
+
+   EGLNativeInternalDisplayType   m_dpy;
+   bool                           m_initialized;
+   bool                           m_configInitialized;
+   bool                           m_isDefault;
+   ConfigsList                    m_configs;
+   ContextsHndlMap                m_contexts;
+   SurfacesHndlMap                m_surfaces;
+   GlobalNameSpace                m_globalNameSpace;
+   ObjectNameManager              *m_manager[MAX_GLES_VERSION];
+   emugl::Mutex                   m_lock;
+   ImagesHndlMap                  m_eglImages;
+   unsigned int                   m_nextEglImageId;
+   EGLNativeContextType           m_globalSharedContext;
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 };
 
 #endif

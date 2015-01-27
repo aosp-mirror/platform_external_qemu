@@ -20,6 +20,7 @@
 
 class EglValidate {
 public:
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
     // Return true iff |attrib| is a valid EGLConfig attribute name.
     static bool confAttrib(EGLint attrib);
 
@@ -70,6 +71,16 @@ public:
 
     // Returns true iff |api| is the value of a supported API, e.g.
     // EGL_OPENGL_ES_API.
+=======
+    static bool confAttrib(EGLint attrib);
+    static bool noAttribs(const EGLint* attrib);
+    static bool pbufferAttribs(EGLint width,EGLint height,bool texFormatIsNoTex,bool texTargetIsNoTex);
+    static bool releaseContext(EGLContext ctx,EGLSurface s1,EGLSurface s2);
+    static bool badContextMatch(EGLContext ctx,EGLSurface s1,EGLSurface s2);
+    static bool surfaceTarget(EGLint target);
+    static bool engine(EGLint engine);
+    static bool stringName(EGLint name);
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
     static bool supportedApi(EGLenum api);
 };
 #endif

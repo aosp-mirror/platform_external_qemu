@@ -13,14 +13,30 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _RENDER_CONTROL_H
-#define _RENDER_CONTROL_H
 
-<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
-#include "renderControl_dec.h"
+#include "ThreadInfo.h"
+#include "emugl/common/lazy_instance.h"
+#include "emugl/common/thread_store.h"
 
-=======
->>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
-void initRenderControlContext(renderControl_decoder_context_t *dec);
+namespace {
 
-#endif
+class ThreadInfoStore : public ::emugl::ThreadStore {
+public:
+    ThreadInfoStore() : ::emugl::ThreadStore(NULL) {}
+};
+
+}  // namespace
+
+static ::emugl::LazyInstance<ThreadInfoStore> s_tls = LAZY_INSTANCE_INIT;
+
+RenderThreadInfo::RenderThreadInfo() {
+    s_tls->set(this);
+}
+
+RenderThreadInfo::~RenderThreadInfo() {
+    s_tls->set(NULL);
+}
+
+RenderThreadInfo* RenderThreadInfo::get() {
+    return static_cast<RenderThreadInfo*>(s_tls->get());
+}

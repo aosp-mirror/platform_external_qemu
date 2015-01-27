@@ -449,6 +449,7 @@ bool checkWindowPixelFormatMatch(EGLNativeInternalDisplayType dpy,EGLNativeWindo
    *width  = r.right  - r.left;
    *height = r.bottom - r.top;
    HDC dc = GetDC(win);
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
    EGLNativePixelFormatType nativeFormat = cfg->nativeFormat();
    bool ret = SetPixelFormat(dc,cfg->nativeId(),&nativeFormat);
    DeleteDC(dc);
@@ -519,6 +520,78 @@ EGLNativeContextType createContext(EGLNativeInternalDisplayType display,EglConfi
     if(!display->isPixelFormatSet(cfg->nativeId())){
         EGLNativePixelFormatType nativeFormat = cfg->nativeFormat();
         if(!SetPixelFormat(dpy,cfg->nativeId(),&nativeFormat)){
+=======
+   EGLNativePixelFormatType nativeConfig = cfg->nativeConfig();
+   bool ret = SetPixelFormat(dc,cfg->nativeId(),&nativeConfig);
+   DeleteDC(dc);
+   return ret;
+}
+
+bool checkPixmapPixelFormatMatch(EGLNativeInternalDisplayType dpy,EGLNativePixmapType pix,EglConfig* cfg,unsigned int* width,unsigned int* height){
+
+    BITMAP bm;
+    if(!GetObject(pix, sizeof(BITMAP), (LPSTR)&bm)) return false;
+
+    *width  = bm.bmWidth;
+    *height = bm.bmHeight;
+
+    return true;
+}
+
+EGLNativeSurfaceType createPbufferSurface(EGLNativeInternalDisplayType display,EglConfig* cfg,EglPbufferSurface* pbSurface) {
+
+
+    HDC dpy = getDummyDC(display,cfg->nativeId());
+    EGLint width,height,largest,texTarget,texFormat;
+    pbSurface->getDim(&width,&height,&largest);
+    pbSurface->getTexInfo(&texTarget,&texFormat);
+
+    int wglTexFormat = WGL_NO_TEXTURE_ARB;
+    int wglTexTarget = (texTarget == EGL_TEXTURE_2D)? WGL_TEXTURE_2D_ARB:
+                                                      WGL_NO_TEXTURE_ARB;
+
+    switch(texFormat) {
+    case EGL_TEXTURE_RGB:
+        wglTexFormat = WGL_TEXTURE_RGB_ARB;
+        break;
+    case EGL_TEXTURE_RGBA:
+        wglTexFormat = WGL_TEXTURE_RGBA_ARB;
+        break;
+    }
+
+    int pbAttribs[] = {
+                       WGL_TEXTURE_TARGET_ARB   ,wglTexTarget,
+                       WGL_TEXTURE_FORMAT_ARB   ,wglTexFormat,
+                       0
+                      };
+    if(!s_wglExtProcs->wglCreatePbufferARB) return NULL;
+    EGLNativePbufferType pb = s_wglExtProcs->wglCreatePbufferARB(dpy,cfg->nativeId(),width,height,pbAttribs);
+    if(!pb) {
+        GetLastError();
+        return NULL;
+    }
+    return new SrfcInfo(pb);
+}
+
+bool releasePbuffer(EGLNativeInternalDisplayType display,EGLNativeSurfaceType pb) {
+    if (!pb) return false;
+    if(!s_wglExtProcs->wglReleasePbufferDCARB || !s_wglExtProcs->wglDestroyPbufferARB) return false;
+    if(!s_wglExtProcs->wglReleasePbufferDCARB(pb->getPbuffer(),pb->getDC()) || !s_wglExtProcs->wglDestroyPbufferARB(pb->getPbuffer())){
+        GetLastError();
+        return false;
+    }
+    return true;
+}
+
+EGLNativeContextType createContext(EGLNativeInternalDisplayType display,EglConfig* cfg,EGLNativeContextType sharedContext) {
+
+    EGLNativeContextType ctx = NULL;
+    HDC  dpy  = getDummyDC(display,cfg->nativeId());
+
+    if(!display->isPixelFormatSet(cfg->nativeId())){
+        EGLNativePixelFormatType nativeConfig = cfg->nativeConfig();
+        if(!SetPixelFormat(dpy,cfg->nativeId(),&nativeConfig)){
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
             return NULL;
         }
         display->pixelFormatWasSet(cfg->nativeId());

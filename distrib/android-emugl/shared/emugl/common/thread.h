@@ -91,7 +91,10 @@ private:
 
     pthread_t mThread;
     pthread_mutex_t mLock;
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
     bool mJoined;
+=======
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 #endif
     intptr_t mExitStatus;
     bool mIsRunning;

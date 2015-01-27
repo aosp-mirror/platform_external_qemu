@@ -13,14 +13,25 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _RENDER_CONTROL_H
-#define _RENDER_CONTROL_H
+#ifndef _LIB_OPENGL_RENDER_THREAD_INFO_H
+#define _LIB_OPENGL_RENDER_THREAD_INFO_H
 
-<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
-#include "renderControl_dec.h"
+#include "RenderContext.h"
+#include "WindowSurface.h"
+#include "GLDecoder.h"
+#include "GL2Decoder.h"
 
-=======
->>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
-void initRenderControlContext(renderControl_decoder_context_t *dec);
+struct RenderThreadInfo
+{
+    RenderThreadInfo();
+    ~RenderThreadInfo();
+    static RenderThreadInfo* get();
+
+    RenderContextPtr currContext;
+    WindowSurfacePtr currDrawSurf;
+    WindowSurfacePtr currReadSurf;
+    GLDecoder        m_glDec;
+    GL2Decoder       m_gl2Dec;
+};
 
 #endif

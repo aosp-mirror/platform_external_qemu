@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 #include <stdio.h>
 
 typedef enum {
@@ -56,6 +57,36 @@ inline unsigned int SafeUIntFromPointer(const void* ptr) {
     // in an unsigned integer!
     assert((uintptr_t)(ptr) == (unsigned int)(uintptr_t)(ptr));
 #endif
+=======
+
+typedef enum {
+    GLES_1_1 = 1,
+    GLES_2_0 = 2,
+    MAX_GLES_VERSION //Must be last
+} GLESVersion;
+
+template <class T>
+void swap(T& x,T& y) {
+     T temp;
+     temp = x;
+     x = y;
+     y = temp;
+}
+
+bool isPowerOf2(int num);
+
+// <EGL/egl.h> defines many types as 'void*' while they're really
+// implemented as unsigned integers. These convenience template functions
+// help casting between them safely without generating compiler warnings.
+inline void* SafePointerFromUInt(unsigned int handle) {
+    return (void*)(uintptr_t)(handle);
+}
+
+inline unsigned int SafeUIntFromPointer(const void* ptr) {
+    // Assertion error if the pointer contains a value that does not fit
+    // in an unsigned integer!
+    assert((uintptr_t)(ptr) == (unsigned int)(uintptr_t)(ptr));
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
     return (unsigned int)(uintptr_t)(ptr);
 }
 

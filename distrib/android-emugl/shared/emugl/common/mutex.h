@@ -24,6 +24,7 @@
 
 namespace emugl {
 
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 class ConditionVariable;
 
 // Simple wrapper class for mutexes.
@@ -85,6 +86,66 @@ private:
     CRITICAL_SECTION mLock;
 #else
     friend class ConditionVariable;
+=======
+// Simple wrapper class for mutexes.
+class Mutex {
+public:
+    // Constructor.
+    Mutex() {
+#ifdef _WIN32
+        ::InitializeCriticalSection(&mLock);
+#else
+        ::pthread_mutex_init(&mLock, NULL);
+#endif
+    }
+
+    // Destructor.
+    ~Mutex() {
+#ifdef _WIN32
+        ::DeleteCriticalSection(&mLock);
+#else
+        ::pthread_mutex_destroy(&mLock);
+#endif
+    }
+
+    // Acquire the mutex.
+    void lock() {
+#ifdef _WIN32
+      ::EnterCriticalSection(&mLock);
+#else
+      ::pthread_mutex_lock(&mLock);
+#endif
+    }
+
+    // Release the mutex.
+    void unlock() {
+#ifdef _WIN32
+       ::LeaveCriticalSection(&mLock);
+#else
+       ::pthread_mutex_unlock(&mLock);
+#endif
+    }
+
+    // Helper class to lock / unlock a mutex automatically on scope
+    // entry and exit.
+    class AutoLock {
+    public:
+        AutoLock(Mutex& mutex) : mMutex(&mutex) {
+            mMutex->lock();
+        }
+
+        ~AutoLock() {
+            mMutex->unlock();
+        }
+    private:
+        Mutex* mMutex;
+    };
+
+private:
+#ifdef _WIN32
+    CRITICAL_SECTION mLock;
+#else
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
     pthread_mutex_t mLock;
 #endif
 

@@ -63,7 +63,11 @@ static struct _ext_table
 // This function initialized each entry in the s_client_extensions
 // struct at the givven index using the givven client interface
 //
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 void initClientFuncs(const GLESiface *iface, int idx)
+=======
+void initClientFuncs(GLESiface *iface, int idx)
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 {
 #define API_ENTRY(fname,params,args) \
     s_client_extensions[idx].fname = \

@@ -202,6 +202,7 @@ bool checkWindowPixelFormatMatch(EGLNativeDisplayType dpy,EGLNativeWindowType wi
 //TODO: to check what does ATI & NVIDIA enforce on win pixelformat
    unsigned int depth,configDepth,border;
    int r,g,b,x,y;
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
    IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeFormat(),GLX_RED_SIZE,&r));
    IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeFormat(),GLX_GREEN_SIZE,&g));
    IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeFormat(),GLX_BLUE_SIZE,&b));
@@ -247,6 +248,53 @@ bool releasePbuffer(EGLNativeDisplayType dis,EGLNativeSurfaceType pb) {
 EGLNativeContextType createContext(EGLNativeDisplayType dpy,EglConfig* cfg,EGLNativeContextType sharedContext) {
  ErrorHandler handler(dpy);
  EGLNativeContextType retVal = glXCreateNewContext(dpy,cfg->nativeFormat(),GLX_RGBA_TYPE,sharedContext,true);
+=======
+   IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeConfig(),GLX_RED_SIZE,&r));
+   IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeConfig(),GLX_GREEN_SIZE,&g));
+   IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeConfig(),GLX_BLUE_SIZE,&b));
+   configDepth = r + g + b;
+   Window root;
+   if(!XGetGeometry(dpy,win,&root,&x,&y,width,height,&border,&depth)) return false;
+   return depth >= configDepth;
+}
+
+bool checkPixmapPixelFormatMatch(EGLNativeDisplayType dpy,EGLNativePixmapType pix,EglConfig* cfg,unsigned int* width,unsigned int* height) {
+   unsigned int depth,configDepth,border;
+   int r,g,b,x,y;
+   IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeConfig(),GLX_RED_SIZE,&r));
+   IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeConfig(),GLX_GREEN_SIZE,&g));
+   IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeConfig(),GLX_BLUE_SIZE,&b));
+   configDepth = r + g + b;
+   Window root;
+   if(!XGetGeometry(dpy,pix,&root,&x,&y,width,height,&border,&depth)) return false;
+   return depth >= configDepth;
+}
+
+EGLNativeSurfaceType createPbufferSurface(EGLNativeDisplayType dpy,EglConfig* cfg,EglPbufferSurface* srfc){
+    EGLint width,height,largest;
+    srfc->getDim(&width,&height,&largest);
+
+    int attribs[] = {
+                     GLX_PBUFFER_WIDTH           ,width,
+                     GLX_PBUFFER_HEIGHT          ,height,
+                     GLX_LARGEST_PBUFFER         ,largest,
+                     None
+                    };
+    GLXPbuffer pb = glXCreatePbuffer(dpy,cfg->nativeConfig(),attribs);
+    return pb ? new SrfcInfo(pb,SrfcInfo::PBUFFER) : NULL;
+}
+
+bool releasePbuffer(EGLNativeDisplayType dis,EGLNativeSurfaceType pb) {
+    if (!pb) return false;
+    glXDestroyPbuffer(dis,pb->srfc());
+
+    return true;
+}
+
+EGLNativeContextType createContext(EGLNativeDisplayType dpy,EglConfig* cfg,EGLNativeContextType sharedContext) {
+ ErrorHandler handler(dpy);
+ EGLNativeContextType retVal = glXCreateNewContext(dpy,cfg->nativeConfig(),GLX_RGBA_TYPE,sharedContext,true);
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
  return handler.getLastError() == 0 ? retVal : NULL;
 }
 

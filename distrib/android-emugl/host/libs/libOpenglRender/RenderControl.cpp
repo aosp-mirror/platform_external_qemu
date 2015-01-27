@@ -13,6 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 #include "RenderControl.h"
 
 #include "FBConfig.h"
@@ -21,6 +22,15 @@
 #include "GL2Dispatch.h"
 #include "GLDispatch.h"
 #include "RenderThreadInfo.h"
+=======
+#include "renderControl_dec.h"
+#include "FrameBuffer.h"
+#include "FBConfig.h"
+#include "EGLDispatch.h"
+#include "GLDispatch.h"
+#include "GL2Dispatch.h"
+#include "ThreadInfo.h"
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 
 static const GLint rendererVersion = 1;
 

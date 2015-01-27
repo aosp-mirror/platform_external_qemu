@@ -30,7 +30,10 @@ public:
     virtual int commitBuffer(size_t size);
     virtual const unsigned char *readFully(void *buf, size_t len);
     virtual const unsigned char *read(void *buf, size_t *inout_len);
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
     virtual void forceStop();
+=======
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 
 private:
     Win32PipeStream(HANDLE pipe, size_t bufSize);

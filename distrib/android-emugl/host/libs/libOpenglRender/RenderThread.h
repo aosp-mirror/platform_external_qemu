@@ -18,6 +18,7 @@
 
 #include "IOStream.h"
 #include "GLDecoder.h"
+<<<<<<< HEAD   (defcbc Merge "Fix missing backspace key" automerge: 35c966c  -s our)
 
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"
@@ -54,6 +55,29 @@ private:
 
     emugl::Mutex* m_lock;
     IOStream* m_stream;
+=======
+#include "renderControl_dec.h"
+
+#include "emugl/common/mutex.h"
+#include "emugl/common/thread.h"
+
+class RenderThread : public emugl::Thread
+{
+public:
+    static RenderThread* create(IOStream* p_stream, emugl::Mutex* mutex);
+    virtual ~RenderThread();
+    bool isFinished() const { return m_finished; }
+
+private:
+    RenderThread(IOStream* p_stream, emugl::Mutex* mutex);
+    virtual intptr_t main();
+
+private:
+    emugl::Mutex *m_lock;
+    IOStream *m_stream;
+    renderControl_decoder_context_t m_rcDec;
+    bool m_finished;
+>>>>>>> BRANCH (1556aa Merge changes I8781cc8c,If2010577)
 };
 
 #endif
