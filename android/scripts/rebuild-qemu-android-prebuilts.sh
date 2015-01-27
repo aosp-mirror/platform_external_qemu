@@ -18,47 +18,16 @@
 
 shell_import utils/aosp_dir.shi
 shell_import utils/emulator_prebuilts.shi
+shell_import utils/install_dir.shi
 shell_import utils/option_parser.shi
+shell_import utils/package_builder.shi
 shell_import utils/package_list_parser.shi
 
-BUILD_OS=$(get_build_os)
-case $BUILD_OS in
-    linux)
-        DEFAULT_SYSTEMS="linux-x86_64,windows-x86_64"
-        ;;
-    darwin)
-        DEFAULT_SYSTEMS="darwin-x86_64"
-        ;;
-    *)
-        panic "Your operating system is not supported!"
-        ;;
-esac
-
-# List of valid target systems.
-VALID_SYSTEMS="linux-x86,linux-x86_64,windows-x86,windows-x86_64,darwin-x86,darwin-x86_64"
-
-OPT_BUILD_DIR=
-option_register_var "--build-dir=<dir>" OPT_BUILD_DIR "Specify build directory"
-
-OPT_DARWIN_SSH=
-option_register_var "--darwin-ssh=<host>" OPT_DARWIN_SSH "Perform remote build through SSH."
-
-OPT_NUM_JOBS=$(get_build_num_cores)
-option_register_var "-j<count>" OPT_NUM_JOBS "Run <count> parallel build jobs."
-option_register_var "--jobs=<count>" OPT_NUM_JOBS "Same as -j<count>."
-
-OPT_NO_CCACHE=
-option_register_var "--no-ccache" OPT_NO_CCACHE "Don't try to probe and use ccache during build."
-
-OPT_SYSTEM=
-option_register_var "--host=<list>" OPT_SYSTEM "List of target systems [$DEFAULT_SYSTEMS]"
+package_builder_register_options
 
 aosp_dir_register_option
 prebuilts_dir_register_option
-
-DEFAULT_INSTALL_SUBDIR=install
-option_register_var "--install-dir=<dir>" OPT_INSTALL_DIR \
-    "Set installation directory [<prebuilts>/$DEFAULT_INSTALL_SUBDIR]"
+install_dir_register_option qemu-android
 
 PROGRAM_PARAMETERS=""
 
@@ -70,7 +39,7 @@ a valid AOSP checkout directory.
 The source tarball are searched in <prebuilts>/archive, where <prebuilts>
 has the following default value:
 
-    $DEFAULT_EMULATOR_PREBUILTS_DIR
+    $DEFAULT_PREBUILTS_DIR
 
 Use --prebuilt-dir=<path> or define ANDROID_EMULATOR_PREBUILTS_DIR in your
 environment to change its value.
@@ -81,12 +50,12 @@ environment to override this.
 
 By default, this script builds binaries for the following host sytems:
 
-    $DEFAULT_SYSTEMS
+    $DEFAULT_HOST_SYSTEMS
 
 You can use --host=<list> to change this.
 
-Final binaries are installed into <prebuilts>/build-prefix/<host>/
-where <host> is a name like 'linux-x86_64' or 'windows-x86'.
+Final binaries are installed into <prebuilts>/$DEFAULT_INSTALL_SUBDIR by
+default, but you can change this location with --install-dir=<dir>.
 
 By default, everything is rebuilt in a temporary directory that is
 automatically removed after script completion (and after the binaries are
@@ -97,60 +66,17 @@ allowing one to inspect build failures easily."
 option_parse "$@"
 
 ##
-## Handle target system list
-##
-if [ "$OPT_SYSTEM" ]; then
-    SYSTEMS=$(commas_to_spaces "$OPT_SYSTEM")
-else
-    SYSTEMS=$(commas_to_spaces "$DEFAULT_SYSTEMS")
-    log "Auto-config: --system='$SYSTEMS'"
-fi
-
-BAD_SYSTEMS=
-for SYSTEM in $SYSTEMS; do
-    if ! list_contains "$VALID_SYSTEMS" "$SYSTEM"; then
-        BAD_SYSTEMS="$BAD_SYSTEMS $SYSTEM"
-    fi
-done
-if [ "$BAD_SYSTEMS" ]; then
-    panic "Invalid system name(s): [$BAD_SYSTEMS], use one of: $VALID_SYSTEMS"
-fi
-
-##
-## Handle remote darwin build
-##
-DARWIN_SSH=
-if [ "$OPT_DARWIN_SSH" ]; then
-    DARWIN_SSH=$OPT_DARWIN_SSH
-elif [ "$ANDROID_EMULATOR_DARWIN_SSH" ]; then
-    DARWIN_SSH=$ANDROID_EMULATOR_DARWIN_SSH
-    log "Auto-config: --darwin-ssh=$DARWIN_SSH  [ANDROID_EMULATOR_DARWIN_SSH]"
-fi
-
-if [ "$DARWIN_SSH" ]; then
-    HAS_DARWIN=
-    for SYSTEM in $(commas_to_spaces "$SYSTEMS"); do
-        case $SYSTEM in
-            darwin-*)
-                HAS_DARWIN=true
-                ;;
-        esac
-    done
-    if [ -z "$HAS_DARWIN" ]; then
-        SYSTEMS="$SYSTEMS darwin-x86_64"
-        log "Auto-config: --system='$SYSTEMS'  [darwin-ssh]"
-    fi
-fi
-
-##
 ##  Parameters checks
 ##
 if [ "$PARAMETER_COUNT" != "0" ]; then
     panic "This script doesn't take arguments, see --help for details."
 fi
 
+package_builder_process_options
+
 aosp_dir_parse_option
 prebuilts_dir_parse_option
+install_dir_parse_option
 
 ARCHIVE_DIR=$PREBUILTS_DIR/archive
 if [ ! -d "$ARCHIVE_DIR" ]; then
@@ -166,58 +92,6 @@ if [ ! -f "$PACKAGE_LIST" ]; then
     panic "Missing package list file from archive: $PACKAGE_LIST"
 fi
 
-if [ "$OPT_INSTALL_DIR" ]; then
-    INSTALL_DIR=$OPT_INSTALL_DIR
-    log "Using install dir: $INSTALL_DIR"
-else
-    INSTALL_DIR=$PREBUILTS_DIR/$DEFAULT_INSTALL_SUBDIR
-    log "Auto-config: --install-dir=$INSTALL_DIR  [default]"
-fi
-
-# Do we have ccache ?
-if [ -z "$OPT_NO_CCACHE" ]; then
-    CCACHE=$(which ccache 2>/dev/null || true)
-    if [ "$CCACHE" ]; then
-        log "Found ccache as: $CCACHE"
-    else
-        log "Cannot find ccache in PATH."
-    fi
-fi
-
-if [ "$OPT_BUILD_DIR" ]; then
-    TEMP_DIR=$OPT_BUILD_DIR
-else
-    TEMP_DIR=/tmp/$USER-build-android-emulator-prebuilts-$$
-    log "Auto-config: --build-dir=$TEMP_DIR"
-fi
-run mkdir -p "$TEMP_DIR" ||
-panic "Could not create build directory: $TEMP_DIR"
-
-cleanup_temp_dir () {
-    rm -rf "$TEMP_DIR"
-    exit $1
-}
-
-if [ -z "$OPT_BUILD_DIR" ]; then
-    # Ensure temporary directory is deleted on script exit, unless
-    # --build-dir=<path> was used.
-    trap "cleanup_temp_dir 0" EXIT
-    trap "cleanup_temp_dir \$?" QUIT INT HUP
-fi
-
-log "Cleaning up build directory."
-run rm -rf "$TEMP_DIR"/build-*
-
-if [ "$OPT_NUM_JOBS" ]; then
-    NUM_JOBS=$OPT_NUM_JOBS
-    log "Parallel jobs count: $NUM_JOBS"
-else
-    NUM_JOBS=$(get_build_num_cores)
-    log "Auto-config: --jobs=$NUM_JOBS"
-fi
-
-ORIGINAL_PATH=$PATH
-
 package_list_parse_file "$PACKAGE_LIST"
 
 export PKG_CONFIG=$(which pkg-config 2>/dev/null)
@@ -227,118 +101,14 @@ else
     log "pkg-config is not installed on this system."
 fi
 
-# Generate a small shell script that can be sourced to prepare the
-# build for a given host system.
-# $1: Host system name (e.g. linux-x86_64)
-# $2: Target script name.
-prepare_build_for_host () {
-    CURRENT_HOST=$1
-
-    CURRENT_TEXT="[$CURRENT_HOST]"
-
-    HOST_EXE_EXTENSION=
-    case $CURRENT_HOST in
-        windows-*)
-            HOST_EXE_EXTENSION=.exe
-            ;;
-        *)
-            ;;
-    esac
-
-    case $CURRENT_HOST in
-        linux-x86_64)
-            GNU_CONFIG_HOST=x86_64-linux
-            ;;
-        linux-x86)
-            GNU_CONFIG_HOST=i686-linux
-            ;;
-        windows-x86)
-            GNU_CONFIG_HOST=i686-w64-mingw32
-            ;;
-        windows-x86_64)
-            GNU_CONFIG_HOST=x86_64-w64-mingw32
-            ;;
-        darwin-*)
-            # Use host compiler.
-            GNU_CONFIG_HOST=
-            ;;
-        *)
-            panic "Host system '$CURRENT_HOST' is not supported by this script!"
-            ;;
-    esac
-
-    if [ "$GNU_CONFIG_HOST" ]; then
-        GNU_CONFIG_HOST_FLAG="--host=$GNU_CONFIG_HOST"
-        GNU_CONFIG_HOST_PREFIX=${GNU_CONFIG_HOST}-
-    else
-        GNU_CONFIG_HOST_FLAG=
-        GNU_CONFIG_HOST_PREFIX=
-    fi
-
-    PATH=$ORIGINAL_PATH
-
-    BUILD_DIR=$TEMP_DIR/build-$CURRENT_HOST
-    log "$CURRENT_TEXT Creating build directory: $BUILD_DIR"
-    run mkdir -p "$BUILD_DIR"
-    run rm -rf "$BUILD_DIR"/*
-
-    PREFIX=$TEMP_DIR/install-$CURRENT_HOST
-    log "$CURRENT_TEXT Using build prefix: $PREFIX"
-
-    cat > $2 <<EOF
-# Auto-generated - DO NOT EDIT!
-# Source this shell script to prepare the build for $CURRENT_HOST systems.
-CURRENT_HOST="$CURRENT_HOST"
-CURRENT_TEXT="$CURRENT_TEXT"
-GNU_CONFIG_HOST=$GNU_CONFIG_HOST
-GNU_CONFIG_HOST_PREFIX=$GNU_CONFIG_HOST_PREFIX
-GNU_CONFIG_HOST_FLAG=$GNU_CONFIG_HOST_FLAG
-BUILD_DIR="$BUILD_DIR"
-PREFIX="$PREFIX"
-export CURRENT_HOST CURRENT_TEXT PATH GNU_CONFIG_HOST GNU_CONFIG_HOST_PREFIX GNU_CONFIG_HOST_FLAG BUILD_DIR PREFIX
-EOF
-    if [ "$GNU_CONFIG_HOST" ]; then
-        log "$CURRENT_TEXT Generating $GNU_CONFIG_HOST wrapper toolchain in $TOOLCHAIN_WRAPPER_DIR"
-        TOOLCHAIN_WRAPPER_DIR=$BUILD_DIR/toolchain-wrapper
-        if [ "$CCACHE" ]; then
-            CCACHE_FLAGS="--ccache=$CCACHE"
-        else
-            CCACHE_FLAGS="--no-ccache"
-        fi
-        run $(program_directory)/gen-android-sdk-toolchain.sh \
-                --aosp-dir=$AOSP_DIR \
-                --host=$CURRENT_HOST \
-                --binprefix=$GNU_CONFIG_HOST \
-                --prefix=$PREFIX \
-                $CCACHE_FLAGS \
-                $TOOLCHAIN_WRAPPER_DIR
-        cat >> $2 <<EOF
-PATH=$TOOLCHAIN_WRAPPER_DIR:\$PATH
-export PATH
-EOF
-        PATH=$TOOLCHAIN_WRAPPER_DIR:$PATH
-        log "$CURRENT_TEXT Path: $(echo \"$PATH\" | tr ' ' '\n')"
-    elif [ "$BUILD_OS" = "darwin" ]; then
-        # Force the use of the 10.8 SDK on OS X, this
-        # ensures that the generated binaries run properly
-        # on that platform, and also avoids build failures
-        # in SDL!!
-        cat > $2 <<EOF
-# Force the use of the 10.8 SDK
-export SDKROOT=macosx10.8
-EOF
-    fi
-
-    # Read the source script.
-    . $2
-}
-
 # Handle zlib, only on Win32 because the zlib configure script
 # doesn't know how to generate a static library with -fPIC!
 do_windows_zlib_package () {
     local ZLIB_VERSION ZLIB_PACKAGE
     local LOC LDFLAGS
-    case $CURRENT_HOST in
+    local PREFIX=$(builder_install_prefix)
+    local BUILD_DIR=$(builder_build_dir)
+    case $(builder_host) in
         windows-x86)
             LOC=-m32
             LDFLAGS=-m32
@@ -349,7 +119,7 @@ do_windows_zlib_package () {
             ;;
     esac
     ZLIB_VERSION=$(package_list_get_version zlib)
-    dump "$CURRENT_TEXT Building zlib-$ZLIB_VERSION"
+    dump "$(builder_text) Building zlib-$ZLIB_VERSION"
     ZLIB_PACKAGE=$(package_list_get_filename zlib)
     unpack_archive "$ARCHIVE_DIR/$ZLIB_PACKAGE" "$BUILD_DIR"
     (
@@ -357,14 +127,18 @@ do_windows_zlib_package () {
         export BINARY_PATH=$PREFIX/bin &&
         export INCLUDE_PATH=$PREFIX/include &&
         export LIBRARY_PATH=$PREFIX/lib &&
-        run make -fwin32/Makefile.gcc install PREFIX=$GNU_CONFIG_HOST_PREFIX LOC=$LOC LDFLAGS=$LDFLAGS
+        run make -fwin32/Makefile.gcc install \
+                PREFIX=$(builder_gnu_config_host_prefix) \
+                LOC=$LOC \
+                LDFLAGS=$LDFLAGS
     )
 }
 
 do_zlib_package () {
     local ZLIB_VERSION ZLIB_PACKAGE
     local LOC LDFLAGS
-    case $CURRENT_HOST in
+    local BUILD_DIR=$(builder_build_dir)
+    case $(builder_host) in
         *-x86)
             LOC=-m32
             LDFLAGS=-m32
@@ -375,13 +149,13 @@ do_zlib_package () {
             ;;
     esac
     ZLIB_VERSION=$(package_list_get_version zlib)
-    dump "$CURRENT_TEXT Building zlib-$ZLIB_VERSION"
+    dump "$(builder_text) Building zlib-$ZLIB_VERSION"
     ZLIB_PACKAGE=$(package_list_get_filename zlib)
     unpack_archive "$ARCHIVE_DIR/$ZLIB_PACKAGE" "$BUILD_DIR"
     (
         run cd "$BUILD_DIR/zlib-$ZLIB_VERSION" &&
-        export CROSS_PREFIX=${GNU_CONFIG_HOST_PREFIX} &&
-        run ./configure --prefix=$PREFIX &&
+        export CROSS_PREFIX=$(builder_gnu_config_host_prefix) &&
+        run ./configure --prefix=$(builder_install_prefix) &&
         run make -j$NUM_JOBS &&
         run make install
     )
@@ -402,6 +176,7 @@ require_program () {
 # $1: Unversioned package name (e.g. 'glib')
 unpack_and_patch () {
     local PKG_NAME="$1"
+    local BUILD_DIR=$(builder_build_dir)
     local PKG_VERSION PKG_PACKAGE PKG_PATCHES_DIR PKG_PATCHES_PACKAGE
     local PKG_DIR PATCH
     PKG_VERSION=$(package_list_get_version $PKG_NAME)
@@ -431,11 +206,13 @@ unpack_and_patch () {
 # The following was inspired by the glib.mk from MXE (http://mxe.cc/)
 # $1: bitness (32 or 64)
 do_windows_glib_package () {
+    local PREFIX=$(builder_install_prefix)
+    local GNU_CONFIG_HOST_PREFIX=$(builder_gnu_config_host_prefix)
     unpack_and_patch glib
     local GLIB_VERSION GLIB_PACKAGE GLIB_DIR
     GLIB_VERSION=$(package_list_get_version glib)
-    GLIB_DIR=$BUILD_DIR/glib-$GLIB_VERSION
-    dump "$CURRENT_TEXT Building glib-$GLIB_VERSION"
+    GLIB_DIR=$(builder_build_dir)/glib-$GLIB_VERSION
+    dump "$(builder_text) Building glib-$GLIB_VERSION"
     require_program GLIB_GENMARSHAL glib-genmarshal
     require_program GLIB_COMPILE_SCHEMAS glib-compile-schemas
     require_program GLIB_COMPILE_RESOURCES glib-compile-resources
@@ -449,7 +226,7 @@ do_windows_glib_package () {
         export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig &&
         run ./configure \
             --prefix=$PREFIX \
-            $GNU_CONFIG_HOST_FLAG \
+            $(builder_gnu_config_host_flag) \
             --disable-shared \
             --with-threads=win32 \
             --with-pcre=internal \
@@ -482,20 +259,21 @@ do_windows_glib_package () {
 # $2+: extra configuration flags
 do_autotools_package () {
     local PKG PKG_VERSION PKG_NAME
+    local PREFIX=$(builder_install_prefix)
     PKG=$1
     shift
     unpack_and_patch $PKG
     PKG_VERSION=$(package_list_get_version $PKG)
     PKG_NAME=$(package_list_get_filename $PKG)
-    dump "$CURRENT_TEXT Building $PKG-$PKG_VERSION"
+    dump "$(builder_text) Building $PKG-$PKG_VERSION"
     (
-        run cd "$BUILD_DIR/$PKG-$PKG_VERSION" &&
+        run cd "$(builder_build_dir)/$PKG-$PKG_VERSION" &&
         export LDFLAGS="-L$PREFIX/lib" &&
         export CPPFLAGS="-I$PREFIX/include" &&
         export PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig" &&
         run ./configure \
             --prefix=$PREFIX \
-            $GNU_CONFIG_HOST_FLAG \
+            $(builder_gnu_config_host_flag) \
             --disable-shared \
             --with-pic \
             "$@" &&
@@ -508,7 +286,11 @@ do_autotools_package () {
 # $1: host os name.
 # $2: environment shell script.
 build_qemu_android_deps () {
-    prepare_build_for_host "$1" "$2"
+    builder_prepare_for_host "$1"
+
+    timestamp_clear "$INSTALL_DIR/$(builder_host)" qemu-android-deps
+
+    local PREFIX=$(builder_install_prefix)
 
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
     # Handle zlib for Windows
@@ -586,7 +368,7 @@ build_qemu_android_deps () {
     # Export these to ensure that pkg-config picks them up properly.
     export GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include"
     export GLIB_LIBS="$PREFIX/lib/libglib-2.0.la"
-    case $BUILD_OS in
+    case $(get_build_os) in
         darwin)
             GLIB_LIBS="$GLIB_LIBS -Wl,-framework,Carbon -Wl,-framework,Foundation"
             ;;
@@ -607,7 +389,7 @@ build_qemu_android_deps () {
 
     # Handle SDL1
     EXTRA_SDL_FLAGS=
-    case $BUILD_OS in
+    case $(get_build_os) in
         darwin)
             EXTRA_SDL_FLAGS="--disable-video-x11"
             ;;
@@ -649,7 +431,7 @@ build_qemu_android_deps () {
 
     # Create script to setup the environment correctly for the
     # later qemu-android build.
-    ENV_SH=$BUILD_DIR/env-qemu-prebuilts-$CURRENT_HOST.sh
+    ENV_SH=$(builder_build_dir)/env-qemu-prebuilts-$(builder_host).sh
     cat > $ENV_SH <<EOF
 # Auto-generated automatically - DO NOT EDIT
 export PREFIX=$PREFIX
@@ -664,9 +446,9 @@ export PKG_CONFIG_PATH=$PKG_CONFIG_PATH
 export PATH=$PATH
 EOF
 
-    dump "$CURRENT_TEXT Copying prebuilts to $INSTALL_DIR/$CURRENT_HOST"
+    dump "$(builder_text) Copying prebuilts to $INSTALL_DIR/$(builder_host)"
 
-    BINARY_DIR=$INSTALL_DIR/$CURRENT_HOST
+    BINARY_DIR=$INSTALL_DIR/$(builder_host)
     run mkdir -p "$BINARY_DIR" ||
     panic "Could not create final directory: $BINARY_DIR"
 
@@ -678,10 +460,10 @@ EOF
         run copy_directory "$PREFIX/$SUBDIR" "$BINARY_DIR/$SUBDIR"
     done
 
-    touch "$TEMP_DIR/done-$CURRENT_HOST"
-
     unset PKG_CONFIG PKG_CONFIG_PATH PKG_CONFIG_LIBDIR SDL_CONFIG
     unset LIBFFI_CFLAGS LIBFFI_LIBS GLIB_CFLAGS GLIB_LIBS
+
+    timestamp_set "$INSTALL_DIR/$(builder_host)" qemu-android-deps
 }
 
 # Perform a Darwin build through ssh to a remote machine.
@@ -704,23 +486,13 @@ do_remote_darwin_build () {
     run cp -rp "$ARCHIVE_DIR" "$PKG_DIR/archive"
     local EXTRA_FLAGS=""
 
-    case $(get_verbosity) in
-        0)
-            # pass
-            ;;
-        1)
-            EXTRA_FLAGS="$EXTRA_FLAGS --verbose"
-            ;;
-        *)
-            EXTRA_FLAGS="$EXTRA_FLAGS --verbose --verbose"
-            ;;
-    esac
+    var_append EXTRA_FLAGS "--verbosity=$(get_verbosity)"
 
     if [ "$OPT_NUM_JOBS" ]; then
-        EXTRA_FLAGS="$EXTRA_FLAGS -j$OPT_NUM_JOBS"
+        var_append EXTRA_FLAGS "-j$OPT_NUM_JOBS"
     fi
     if [ "$OPT_NO_CCACHE" ]; then
-        EXTRA_FLAGS="$EXTRA_FLAGS --no-ccache"
+        var_append EXTRA_FLAGS "--no-ccache"
     fi
 
     # Generate a script to rebuild all binaries from sources.
@@ -761,43 +533,17 @@ EOF
     for SYSTEM in $DARWIN_SYSTEMS; do
         run scp -r "$DARWIN_SSH":/tmp/$PKG_SUFFIX/install-prefix/$SYSTEM $BINARY_DIR/
     done
-}
 
-# Special handling for Darwin target systems.
-DARWIN_SYSTEMS=
-for SYSTEM in $SYSTEMS; do
-    case $SYSTEM in
-        darwin-*)
-            DARWIN_SYSTEMS="$DARWIN_SYSTEMS $SYSTEM"
-            ;;
-    esac
-done
+    run rm -rf "$PKG_TMP"
+}
 
 if [ "$DARWIN_SSH" ]; then
     # Perform remote Darwin build first.
-    if [ "$DARWIN_SYSTEMS" ]; then
-        do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
-    elif [ "$OPT_DARWIN_SSH" ]; then
-        panic "--darwin-ssh=<host> used, but --system does not list Darwin systems."
-    fi
-elif [ "$DARWIN_SYSTEMS" -a "$BUILD_OS" != "darwin" ]; then
-    panic "Cannot build darwin binaries on this machine. Use --darwin-ssh=<host>."
+    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
-for SYSTEM in $SYSTEMS; do
-    # Ignore darwin builds if we're not on a Darwin
-    if [ "$BUILD_OS" != "darwin" ]; then
-        case "$SYSTEM" in
-            darwin-*)
-                continue
-                ;;
-        esac
-    fi
-
-    ENV_SH=$TEMP_DIR/build-$SYSTEM/env.sh
-    if [ ! -f "$TEMP_DIR/done-$SYSTEM" ]; then
-        build_qemu_android_deps $SYSTEM $ENV_SH
-    fi
+for SYSTEM in $LOCAL_HOST_SYSTEMS; do
+    build_qemu_android_deps $SYSTEM
 done
 
 echo "Done!"

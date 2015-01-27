@@ -141,7 +141,8 @@ else
     run mkdir -p $OUT_DIR/qemu
     for HOST_PREFIX in $QEMU_ANDROID_HOSTS; do
         echo "Copying prebuilt $HOST_PREFIX qemu-android binaries to $OUT_DIR/qemu/"
-        run cp -r "$PREBUILTS_DIR"/qemu-android/${HOST_PREFIX} $OUT_DIR/qemu/ ||
+        mkdir -p "$OUT_DIR"/qemu/$HOST_PREFIX &&
+        run cp -f "$PREBUILTS_DIR"/qemu-android/$HOST_PREFIX/qemu-system-* "$OUT_DIR"/qemu/$HOST_PREFIX/ ||
             panic "Could not copy $HOST_PREFIX qemu-android binaries!?"
     done
 fi

@@ -344,4 +344,5 @@ _shu_do_option_help () {
 
 option_register "--help"     _shu_do_option_help   "Print this help."
 option_register "--verbose"  increment_verbosity   "Increment verbosity."
+option_register "--verbosity=<level>" set_verbosity      "Set verbosity level."
 option_register "--quiet"    decrement_verbosity   "Decrement verbosity."

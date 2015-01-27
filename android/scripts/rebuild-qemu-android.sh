@@ -18,6 +18,7 @@
 
 shell_import utils/aosp_dir.shi
 shell_import utils/emulator_prebuilts.shi
+shell_import utils/install_dir.shi
 shell_import utils/option_parser.shi
 shell_import utils/package_builder.shi
 shell_import utils/package_list_parser.shi
@@ -58,10 +59,7 @@ option_register_var "--use-sdl1" "Use SDL 1.x instead of SDL 2.x"
 
 prebuilts_dir_register_option
 aosp_dir_register_option
-
-OPT_INSTALL_DIR=
-option_register_var "--install-dir=<dir>" OPT_INSTALL_DIR \
-        "Install binaries to <dir>  [<prebuilts>/qemu-android/]"
+install_dir_register_option qemu-android
 
 option_parse "$@"
 
@@ -91,14 +89,7 @@ fi
 
 prebuilts_dir_parse_option
 aosp_dir_parse_option
-
-if [ "$OPT_INSTALL_DIR" ]; then
-    INSTALL_DIR=$OPT_INSTALL_DIR
-    log "Using install dir: $INSTALL_DIR"
-else
-    INSTALL_DIR=$PREBUILTS_DIR/qemu-android
-    log "Auto-config: --install-dir=$INSTALL_DIR  [default]"
-fi
+install_dir_parse_option
 
 package_builder_process_options qemu-android
 
@@ -165,7 +156,7 @@ build_qemu_android () {
 
     BUILD_DIR=$TEMP_DIR/build-$1/qemu-android
     (
-        PREFIX=$PREBUILTS_DIR/install/$1
+        PREFIX=$INSTALL_DIR/$1
 
         BUILD_FLAGS=
         if [ "$(get_verbosity)" -gt 3 ]; then
@@ -340,25 +331,21 @@ do_remote_darwin_build () {
 
     dump "Creating tarball for remote darwin build."
     run mkdir -p "$PKG_DIR" && run rm -rf "$PKG_DIR"/*
-    run cp -rp "$QEMU_ANDROID" "$PKG_DIR/qemu-android"
+    copy_directory "$QEMU_ANDROID" "$PKG_DIR/qemu-android-src"
     run mkdir -p "$PKG_DIR/aosp/prebuilts/gcc"
-    run cp -rp "$(program_directory)" "$PKG_DIR/scripts"
-    run cp -rp "$(program_directory)"/../dependencies "$PKG_DIR"/dependencies
+    copy_directory "$(program_directory)" "$PKG_DIR/scripts"
+    copy_directory "$(program_directory)"/../dependencies "$PKG_DIR"/dependencies
 
     run mkdir -p "$PKG_DIR/prebuilts"
     for SYSTEM in $DARWIN_SYSTEMS; do
-        run cp -rp "$PREBUILTS_DIR"/install/$SYSTEM \
-               "$PKG_DIR/prebuilts/$SYSTEM"
+        copy_directory "$INSTALL_DIR/$SYSTEM" \
+                "$PKG_DIR/prebuilts/qemu-android/$SYSTEM"
     done
-    run cp -rp "$PREBUILTS_DIR"/archive "$PKG_DIR/prebuilts/archive"
+    copy_directory "$PREBUILTS_DIR"/archive "$PKG_DIR/prebuilts/archive"
 
-    local EXTRA_FLAGS=""
+    local EXTRA_FLAGS
 
-    VERBOSITY=$(get_verbosity)
-    while [ "$VERBOSITY" -gt "1" ]; do
-        var_append EXTRA_FLAGS "--verbose"
-        VERBOSITY=$(( $VERBOSITY - 1 ))
-    done
+    var_append EXTRA_FLAGS "--verbosity=$(get_verbosity)"
 
     if [ "$OPT_NUM_JOBS" ]; then
         var_append EXTRA_FLAGS "-j$OPT_NUM_JOBS"
@@ -385,11 +372,11 @@ PROGDIR=\$(dirname \$0)
     --build-dir=/tmp/$PKG_SUFFIX/build \\
     --prebuilts-dir=/tmp/$PKG_SUFFIX/prebuilts \\
     --aosp-dir=/tmp/$PKG_SUFFIX/aosp \\
-    --install-dir=/tmp/$PKG_SUFFIX/qemu-android-install \\
+    --install-dir=/tmp/$PKG_SUFFIX/prebuilts/qemu-android \\
     --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
     --target=$(spaces_to_commas "$TARGETS") \\
     $EXTRA_FLAGS \\
-    /tmp/$PKG_SUFFIX/qemu-android
+    /tmp/$PKG_SUFFIX/qemu-android-src
 EOF
     chmod a+x $PKG_DIR/build.sh
     run tar cjf "$PKG_TMP/$PKG_TARBALL" -C "$PKG_TMP" "$PKG_SUFFIX"
@@ -399,7 +386,8 @@ EOF
     run ssh "$DARWIN_SSH" tar xf /tmp/$PKG_SUFFIX.tar.bz2 -C /tmp
 
     dump "Performing remote darwin build."
-    run ssh "$DARWIN_SSH" /tmp/$PKG_SUFFIX/build.sh
+    log "COMMAND: ssh \"$DARWIN_SSH\" /tmp/$PKG_SUFFIX/build.sh"
+    ssh "$DARWIN_SSH" /tmp/$PKG_SUFFIX/build.sh
 
     dump "Retrieving darwin binaries."
 
@@ -407,14 +395,14 @@ EOF
         local BINARY_DIR="$INSTALL_DIR/$SYSTEM"
         run mkdir -p "$BINARY_DIR" ||
                 panic "Could not create installation directory: $BINARY_DIR"
-        run scp -r "$DARWIN_SSH":/tmp/$PKG_SUFFIX/qemu-android-install/$SYSTEM/qemu-system-* $BINARY_DIR/
+        run scp -r "$DARWIN_SSH":/tmp/$PKG_SUFFIX/prebuilts/qemu-android/$SYSTEM/qemu-system-* $BINARY_DIR/
     done
 }
 
 # Check that we have the right prebuilts
 BAD_PREBUILTS=
 for SYSTEM in $HOST_SYSTEMS; do
-    if [ ! -d "$PREBUILTS_DIR/install/$SYSTEM" ]; then
+    if ! timestamp_check "$INSTALL_DIR/$SYSTEM" qemu-android-deps; then
         var_append BAD_PREBUILTS "$SYSTEM"
     fi
 done
@@ -433,25 +421,9 @@ if [ "$BAD_PREBUILTS" ]; then
 fi
 
 if [ "$DARWIN_SSH" ]; then
-    # Perform remote Darwin build first.
-    if [ "$DARWIN_SYSTEMS" ]; then
-        do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
-    elif [ "$OPT_DARWIN_SSH" ]; then
-        panic "--darwin-ssh=<host> used, but --host does not list Darwin systems."
-    fi
-elif [ "$DARWIN_SYSTEMS" -a "$(get_build_os)" != "darwin" ]; then
-    panic "Cannot build darwin binaries on this machine. Use --darwin-ssh=<host>."
+    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
-for SYSTEM in $HOST_SYSTEMS; do
-    # Ignore darwin builds if we're not on a Darwin
-    if [ "$(get_build_os)" != "darwin" ]; then
-        case "$SYSTEM" in
-            darwin-*)
-                continue
-                ;;
-        esac
-    fi
-
+for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     build_qemu_android $SYSTEM "$AOSP_DIR"
 done
