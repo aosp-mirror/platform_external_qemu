@@ -553,6 +553,8 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (strstr(cstring,"GL_OES_standard_derivatives ")!=NULL)
         s_glSupport.GL_OES_STANDARD_DERIVATIVES = true;
 
+    if (strstr(cstring,"GL_ARB_texture_non_power_of_two")!=NULL)
+        s_glSupport.GL_OES_TEXTURE_NPOT = true;
 }
 
 void GLEScontext::buildStrings(const char* baseVendor,
