@@ -210,7 +210,31 @@ package_builder_process_options () {
 # build for a given host system.
 # $1: Host system name (e.g. linux-x86_64)
 # $2: AOSP source directory.
+# $3: Optional list of prefix directories (space-separated)
 builder_prepare_for_host () {
+    _shu_builder_prepare_for_host "$1" "$2" "auto" "$3"
+}
+
+# Same as builder_prepare_for_host, but ensures that the toolchain wrapper
+# doesn't use a host-specific binprefix, i.e. it will be named 'gcc' instead
+# of 'x86_64-linux-gcc'. This is required to build certain modules.
+# $1: Host system name
+# $2: AOSP source directory.
+# $3: Optional list of prefix directories (space-separated)
+builder_prepare_for_host_no_binprefix () {
+    _shu_builder_prepare_for_host "$1" "$2" "none" "$3"
+}
+
+
+# Generate a small shell script that can be sourced to prepare the
+# build for a given host system.
+# $1: Host system name (e.g. linux-x86_64)
+# $2: AOSP source directory.
+# $3: Binprefix, special values 'auto' and 'none' are recognized.
+# 'auto' means the binprefix will depend on $1, and 'none' that no
+# binprefix should be used.
+# $4: Optional list of prefix directories (space-separated)
+_shu_builder_prepare_for_host () {
     _SHU_BUILDER_CURRENT_HOST=$1
 
     _SHU_BUILDER_CURRENT_TEXT="[$_SHU_BUILDER_CURRENT_HOST]"
@@ -255,6 +279,17 @@ builder_prepare_for_host () {
         _SHU_BUILDER_GNU_CONFIG_HOST_PREFIX=
     fi
 
+    case $3 in
+        auto) # Nothing to do.
+            ;;
+        none)
+            _SHU_BUILDER_GNU_CONFIG_HOST_PREFIX=
+            ;;
+        *)
+            _SHU_BUILDER_GNU_CONFIG_HOST_PREFIX=$3
+            ;;
+    esac
+    log "$_SHU_BUILDER_CURRENT_TEXT Using binprefix [$_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX]"
     PATH=$ORIGINAL_PATH
 
     _SHU_BUILDER_BUILD_DIR=$TEMP_DIR/build-$_SHU_BUILDER_CURRENT_HOST
@@ -266,7 +301,12 @@ builder_prepare_for_host () {
     _SHU_BUILDER_ENV_SH=$_SHU_BUILDER_BUILD_DIR/env.sh
 
     _SHU_BUILDER_PREFIX=$TEMP_DIR/install-$_SHU_BUILDER_CURRENT_HOST
-    log "$_SHU_BUILDER_CURRENT_TEXT Using build prefix: $_SHU_BUILDER_PREFIX"
+    _SHU_BUILDER_TOOLCHAIN_PREFIX=$_SHU_BUILDER_PREFIX
+    local _PREFIX
+    for _PREFIX in $4; do
+        var_append _SHU_BUILDER_TOOLCHAIN_PREFIX "$_PREFIX"
+    done
+    log "$_SHU_BUILDER_CURRENT_TEXT Using toolchain build prefix: $_SHU_BUILDER_TOOLCHAIN_PREFIX"
 
     _SHU_BUILDER_PKG_CONFIG_PATH=$_SHU_BUILDER_PREFIX/share/pkgconfig:$PKG_CONFIG_PATH
 
@@ -306,18 +346,22 @@ EOF
     if [ "$_SHU_BUILDER_GNU_CONFIG_HOST" ]; then
         TOOLCHAIN_WRAPPER_DIR=$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper
         log "$_SHU_BUILDER_CURRENT_TEXT Generating $_SHU_BUILDER_GNU_CONFIG_HOST wrapper toolchain in $TOOLCHAIN_WRAPPER_DIR"
+        local EXTRA_FLAGS
         if [ "$CCACHE" ]; then
-            CCACHE_FLAGS="--ccache=$CCACHE"
+            var_append EXTRA_FLAGS "--ccache=$CCACHE"
         else
-            CCACHE_FLAGS="--no-ccache"
+            var_append EXTRA_FLAGS "--no-ccache"
         fi
+        for _PREFIX in $_SHU_BUILDER_TOOLCHAIN_PREFIX; do
+            var_append EXTRA_FLAGS "--prefix=$_PREFIX"
+        done
         run $(program_directory)/gen-android-sdk-toolchain.sh \
                 --aosp-dir="$2" \
                 --host=$_SHU_BUILDER_CURRENT_HOST \
-                --binprefix=$_SHU_BUILDER_GNU_CONFIG_HOST \
-                --prefix=$_SHU_BUILDER_PREFIX \
-                $CCACHE_FLAGS \
-                $TOOLCHAIN_WRAPPER_DIR
+                --binprefix=${_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX:--} \
+                $EXTRA_FLAGS \
+                $TOOLCHAIN_WRAPPER_DIR ||
+                panic "Cannot generate toolchain wrapper!"
         cat >> "$_SHU_BUILDER_ENV_SH" <<EOF
 PATH=$TOOLCHAIN_WRAPPER_DIR:\$PATH
 export PATH
