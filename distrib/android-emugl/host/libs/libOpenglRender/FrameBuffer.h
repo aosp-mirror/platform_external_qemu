@@ -83,6 +83,9 @@ public:
     bool  flushWindowSurfaceColorBuffer(HandleType p_surface);
     bool  bindColorBufferToTexture(HandleType p_colorbuffer);
     bool  bindColorBufferToRenderbuffer(HandleType p_colorbuffer);
+    void  readColorBuffer(HandleType p_colorbuffer,
+                           int x, int y, int width, int height,
+                           GLenum format, GLenum type, void *pixels);
     bool updateColorBuffer(HandleType p_colorbuffer,
                            int x, int y, int width, int height,
                            GLenum format, GLenum type, void *pixels);

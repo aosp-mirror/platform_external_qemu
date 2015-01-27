@@ -145,6 +145,16 @@ ColorBuffer::~ColorBuffer()
     fb->unbind_locked();
 }
 
+void ColorBuffer::readPixels(int x, int y, int width, int height, GLenum p_format, GLenum p_type, void *pixels)
+{
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb->bind_locked()) return;
+    if (bind_fbo()) {
+        s_gl.glReadPixels(x, y, width, height, p_format, p_type, pixels);
+    }
+    fb->unbind_locked();
+}
+
 void ColorBuffer::subUpdate(int x, int y, int width, int height, GLenum p_format, GLenum p_type, void *pixels)
 {
     FrameBuffer *fb = FrameBuffer::getFB();

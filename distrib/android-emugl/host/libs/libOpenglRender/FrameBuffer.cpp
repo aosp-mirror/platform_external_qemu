@@ -618,6 +618,21 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     return true;
 }
 
+void FrameBuffer::readColorBuffer(HandleType p_colorbuffer,
+                                    int x, int y, int width, int height,
+                                    GLenum format, GLenum type, void *pixels)
+{
+    emugl::Mutex::AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c( m_colorbuffers.find(p_colorbuffer) );
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        return;
+    }
+
+    (*c).second.cb->readPixels(x, y, width, height, format, type, pixels);
+}
+
 bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
                                     int x, int y, int width, int height,
                                     GLenum format, GLenum type, void *pixels)
