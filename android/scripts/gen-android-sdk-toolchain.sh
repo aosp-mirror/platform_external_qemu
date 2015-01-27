@@ -385,7 +385,7 @@ prepare_build_for_host () {
         # Create pkgconfig link for other scripts.
         case $CURRENT_HOST in
             linux-*)
-                ln -s "$PREBUILT_TOOLCHAIN_DIR"/sysroot/usr/lib/pkgconfig "$INSTALL_DIR"/pkgconfig
+                ln -sf "$PREBUILT_TOOLCHAIN_DIR"/sysroot/usr/lib/pkgconfig "$INSTALL_DIR"/pkgconfig
                 ;;
         esac
     fi
