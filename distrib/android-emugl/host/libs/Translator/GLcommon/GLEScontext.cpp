@@ -516,6 +516,7 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS,&s_glSupport.maxTexImageUnits);
     const GLubyte* glslVersion = s_glDispatch.glGetString(GL_SHADING_LANGUAGE_VERSION);
     s_glSupport.glslVersion = Version((const  char*)(glslVersion));
+    const GLubyte* glVersion = s_glDispatch.glGetString(GL_VERSION);
 
     if (strstr(cstring,"GL_EXT_bgra ")!=NULL)
         s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888 = true;
@@ -555,6 +556,9 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
 
     if (strstr(cstring,"GL_ARB_texture_non_power_of_two")!=NULL)
         s_glSupport.GL_OES_TEXTURE_NPOT = true;
+
+    if (!(Version((const char*)glVersion) < Version("3.0")) || strstr(cstring,"GL_OES_rgb8_rgba8")!=NULL)
+        s_glSupport.GL_OES_RGB8_RGBA8 = true;
 }
 
 void GLEScontext::buildStrings(const char* baseVendor,
