@@ -111,6 +111,41 @@ echo "Building sources."
 run make -j$HOST_NUM_CPUS OBJS_DIR="$OUT_DIR" ||
     panic "Could not build sources, please run 'make' to see why."
 
+# Copy qemu-android binaries, if any.
+PREBUILTS_DIR=$ANDROID_EMULATOR_PREBUILTS_DIR
+if [ -z "$PREBUILTS_DIR" ]; then
+  PREBUILTS_DIR=/tmp/$USER-emulator-prebuilts
+fi
+QEMU_ANDROID_HOSTS=
+if [ -d "$PREBUILTS_DIR/qemu-android" ]; then
+    HOST_PREFIX=
+    if [ "$MINGW" ]; then
+      HOST_PREFIX=windows
+    else
+      case $HOST_OS in
+        Linux)
+          HOST_PREFIX=linux
+          ;;
+        Darwin)
+          HOST_PREFIX=darwin
+          ;;
+      esac
+    fi
+    if [ "$HOST_PREFIX" ]; then
+        QEMU_ANDROID_HOSTS=$(cd "$PREBUILTS_DIR"/qemu-android && ls -d $HOST_PREFIX-* 2>/dev/null)
+    fi
+fi
+if [ -z "$QEMU_ANDROID_HOSTS" ]; then
+    echo "WARNING: Missing qemu-android prebuilts. Please run rebuild-qemu-android.sh!"
+else
+    run mkdir -p $OUT_DIR/qemu
+    for HOST_PREFIX in $QEMU_ANDROID_HOSTS; do
+        echo "Copying prebuilt $HOST_PREFIX qemu-android binaries to $OUT_DIR/qemu/"
+        run cp -r "$PREBUILTS_DIR"/qemu-android/${HOST_PREFIX} $OUT_DIR/qemu/ ||
+            panic "Could not copy $HOST_PREFIX qemu-android binaries!?"
+    done
+fi
+
 RUN_32BIT_TESTS=
 RUN_64BIT_TESTS=true
 RUN_EMUGEN_TESTS=true

@@ -1,0 +1,379 @@
+# Copyright 2015 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Common functions used to help build source packages for the Android emulator.
+
+shell_import utils/option_parser.shi
+shell_import utils/package_list_parser.shi
+
+# List of valid host systems.
+_SHU_VALID_HOST_SYSTEMS="linux-x86,linux-x86_64,windows-x86,windows-x86_64,darwin-x86,darwin-x86_64"
+
+# Call this function before 'option_parse' to register options related to
+# building packages. This registers the following options:
+#
+#   --build-dir=<dir>
+#   --jobs=<count>
+#   -j<count>
+#
+package_builder_register_options () {
+  OPT_BUILD_DIR=
+  option_register_var "--build-dir=<dir>" OPT_BUILD_DIR "Specify build directory"
+
+  OPT_NUM_JOBS=
+  option_register_var "-j<count>" OPT_NUM_JOBS "Run <count> parallel build jobs [$(get_build_num_cores)]"
+  option_register_var "--jobs=<count>" OPT_NUM_JOBS "Same as -j<count>."
+
+  OPT_CCACHE=
+  option_register_var "--ccache=<program>" OPT_CCACHE "Use specific ccache program [autodetect]"
+
+  OPT_NO_CCACHE=
+  option_register_var "--no-ccache" OPT_NO_CCACHE "Disable ccache usage."
+
+  if [ -z "$DEFAULT_HOST_SYSTEMS" ]; then
+    case $(get_build_os) in
+      linux)
+        DEFAULT_HOST_SYSTEMS="linux-x86_64,windows-x86_64"
+        ;;
+      darwin)
+        DEFAULT_HOST_SYSTEMS="darwin-x86_64"
+        ;;
+      *)
+        panic "Don't know how to build binaries on this system [$(get_build_os)]"
+    esac
+  fi
+
+  OPT_DARWIN_SSH=
+  option_register_var "--darwin-ssh=<host>" OPT_DARWIN_SSH "Perform remote build through SSH."
+
+  OPT_FORCE=
+  option_register_var "--force" OPT_FORCE "Always rebuild all."
+
+  OPT_HOST=
+  option_register_var "--host=<host>" OPT_HOST "Specify host system of generated binaries [$DEFAULT_HOST_SYSTEMS]"
+}
+
+_shu_builder_cleanup_temp_dir () {
+    rm -rf "$TEMP_DIR"
+    exit $1
+}
+
+
+# Call this after 'option_parse' to process the build-related options.
+# This also defines the following global variables:
+#  - TEMP_DIR: Temporary build directory.
+#  - HOST_SYSTEMS: List of host systems to build binaries for.
+#  - NUM_JOBS: Number of concurrent build jobs to perform.
+#  - CCACHE: Path to 'ccache' program is usable.
+#  - OLD_PATH: Value of $PATH before calling this function.
+#
+# This also ensures that if --build-dir=<dir> was not used, the temporary
+# directory is properly removed when the script exits.
+#
+# $1: suffix for temporary build directories (e.g. 'android-emulator')
+package_builder_process_options () {
+    if [ "$OPT_BUILD_DIR" ]; then
+        TEMP_DIR=$OPT_BUILD_DIR
+    else
+        TEMP_DIR=/tmp/$USER-build-${1:-temp}-$$
+        log "Auto-config: --build-dir=$TEMP_DIR"
+    fi
+    run mkdir -p "$TEMP_DIR" ||
+    panic "Could not create build directory: $TEMP_DIR"
+
+    if [ -z "$OPT_BUILD_DIR" ]; then
+        # Ensure temporary directory is deleted on script exit, unless
+        # --build-dir=<path> was used.
+        trap "_shu_builder_cleanup_temp_dir 0" EXIT
+        trap "_shu_builder_cleanup_temp_dir \$?" QUIT INT HUP
+    fi
+
+    if [ "$OPT_FORCE" ]; then
+        log "Cleaning up build directory."
+        run rm -rf "$TEMP_DIR"/build-*
+    fi
+
+    if [ "$OPT_NUM_JOBS" ]; then
+        NUM_JOBS=$OPT_NUM_JOBS
+        log "Parallel jobs count: $NUM_JOBS"
+    else
+        NUM_JOBS=$(get_build_num_cores)
+        log "Auto-config: --jobs=$NUM_JOBS"
+    fi
+
+    if [ "$OPT_NO_CCACHE" ]; then
+        if [ "$OPT_CCACHE" ]; then
+            panic "You can't use both --cache=<program> and --no-ccache at the same time!"
+        fi
+        CCACHE=
+    elif [ -z "$OPT_CCACHE" ]; then
+        CCACHE=$(which ccache 2>/dev/null)
+        if [ "$CCACHE" ]; then
+            log "Auto-config: --ccache=$CCACHE"
+        else
+            log "Auto-config: --no-ccache"
+        fi
+    else
+        log "Using ccache: $OPT_CCACHE"
+    fi
+
+    # Check host system(s).
+    if [ "$OPT_HOST" ]; then
+        HOST_SYSTEMS=$(commas_to_spaces "$OPT_HOST")
+    else
+        HOST_SYSTEMS=$DEFAULT_HOST_SYSTEMS
+        log "Auto-config: --host=$(spaces_to_commas "$HOST_SYSTEMS")  [default]"
+    fi
+    HOST_SYSTEMS=$(commas_to_spaces "$HOST_SYSTEMS")
+
+    # Special handling for Darwin target systems.
+    ## Handle remote darwin build
+    DARWIN_SSH=
+    if [ "$OPT_DARWIN_SSH" ]; then
+        DARWIN_SSH=$OPT_DARWIN_SSH
+    elif [ "$ANDROID_EMULATOR_DARWIN_SSH" ]; then
+        DARWIN_SSH=$ANDROID_EMULATOR_DARWIN_SSH
+        log "Auto-config: --darwin-ssh=$DARWIN_SSH  [ANDROID_EMULATOR_DARWIN_SSH]"
+    fi
+
+    if [ "$DARWIN_SSH" ]; then
+        HAS_DARWIN=
+        for SYSTEM in $(commas_to_spaces "$HOST_SYSTEMS"); do
+            case $SYSTEM in
+                darwin-*)
+                    HAS_DARWIN=true
+                    ;;
+            esac
+        done
+        if [ -z "$HAS_DARWIN" ]; then
+            var_append HOST_SYSTEMS "darwin-x86_64"
+            log "Auto-config: --host=$(spaces_to_commas "$HOST_SYSTEMS")'  [darwin-ssh!]"
+        fi
+    fi
+
+    DARWIN_SYSTEMS=
+    for SYSTEM in $HOST_SYSTEMS; do
+        case $SYSTEM in
+            darwin-*)
+                var_append DARWIN_SYSTEMS "$SYSTEM"
+                ;;
+        esac
+    done
+
+    local BAD_SYSTEMS SYSTEM
+    for SYSTEM in $HOST_SYSTEMS; do
+        if ! list_contains "$_SHU_VALID_HOST_SYSTEMS" "$SYSTEM"; then
+            BAD_SYSTEMS="$BAD_SYSTEMS $SYSTEM"
+        fi
+    done
+    if [ "$BAD_SYSTEMS" ]; then
+        panic "Invalid host system name(s): [$BAD_SYSTEMS], use one of: $_SHU_VALID_HOST_SYSTEMS"
+    fi
+
+    # Save original path.
+    ORIGINAL_PATH=$PATH
+}
+
+# Generate a small shell script that can be sourced to prepare the
+# build for a given host system.
+# $1: Host system name (e.g. linux-x86_64)
+# $2: AOSP source directory.
+builder_prepare_for_host () {
+    _SHU_BUILDER_CURRENT_HOST=$1
+
+    _SHU_BUILDER_CURRENT_TEXT="[$_SHU_BUILDER_CURRENT_HOST]"
+
+    _SHU_BUILDER_CONFIGURE_FLAGS=
+    _SHU_BUILDER_HOST_EXE_EXTENSION=
+    case $_SHU_BUILDER_CURRENT_HOST in
+        windows-*)
+            _SHU_BUILDER_HOST_EXE_EXTENSION=.exe
+            ;;
+        *)
+            ;;
+    esac
+
+    case $_SHU_BUILDER_CURRENT_HOST in
+        linux-x86_64)
+            _SHU_BUILDER_GNU_CONFIG_HOST=x86_64-linux
+            ;;
+        linux-x86)
+            _SHU_BUILDER_GNU_CONFIG_HOST=i686-linux
+            ;;
+        windows-x86)
+            _SHU_BUILDER_GNU_CONFIG_HOST=i686-w64-mingw32
+            ;;
+        windows-x86_64)
+            _SHU_BUILDER_GNU_CONFIG_HOST=x86_64-w64-mingw32
+            ;;
+        darwin-*)
+            # Use host compiler.
+            _SHU_BUILDER_GNU_CONFIG_HOST=
+            ;;
+        *)
+            panic "Host system '$CURRENT_HOST' is not supported by this script!"
+            ;;
+    esac
+
+    if [ "$_SHU_BUILDER_GNU_CONFIG_HOST" ]; then
+        _SHU_BUILDER_GNU_CONFIG_HOST_FLAG="--host=$_SHU_BUILDER_GNU_CONFIG_HOST"
+        _SHU_BUILDER_GNU_CONFIG_HOST_PREFIX=${_SHU_BUILDER_GNU_CONFIG_HOST}-
+    else
+        _SHU_BUILDER_GNU_CONFIG_HOST_FLAG=
+        _SHU_BUILDER_GNU_CONFIG_HOST_PREFIX=
+    fi
+
+    PATH=$ORIGINAL_PATH
+
+    _SHU_BUILDER_BUILD_DIR=$TEMP_DIR/build-$_SHU_BUILDER_CURRENT_HOST
+    log "$_SHU_BUILDER_CURRENT_TEXT Creating build directory: $_SHU_BUILDER_BUILD_DIR"
+    run mkdir -p "$_SHU_BUILDER_BUILD_DIR"
+
+    _SHU_BUILDER_ENV_SH=$_SHU_BUILDER_BUILD_DIR/env.sh
+
+    _SHU_BUILDER_PREFIX=$TEMP_DIR/install-$_SHU_BUILDER_CURRENT_HOST
+    log "$_SHU_BUILDER_CURRENT_TEXT Using build prefix: $_SHU_BUILDER_PREFIX"
+
+    _SHU_BUILDER_PKG_CONFIG_PATH=$_SHU_BUILDER_PREFIX/share/pkgconfig:$PKG_CONFIG_PATH
+
+    TOOLCHAIN_WRAPPER_DIR=$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper
+
+    case $_SHU_BUILDER_CURRENT_HOST in
+        linux-*)
+            _SHU_BUILDER_PKG_CONFIG_PATH=$TOOLCHAIN_WRAPPER_DIR/pkgconfig:$_SHU_BUILDER_PKG_CONFIG_PATH
+            ;;
+    esac
+
+    cat > "$_SHU_BUILDER_ENV_SH" <<EOF
+# Auto-generated - DO NOT EDIT!
+# Source this shell script to prepare the build for $CURRENT_HOST systems.
+_SHU_BUILDER_CURRENT_HOST="$_SHU_BUILDER_CURRENT_HOST"
+_SHU_BUILDER_CURRENT_TEXT="$_SHU_BUILDER_CURRENT_TEXT"
+_SHU_BUILDER_GNU_CONFIG_HOST=$_SHU_BUILDER_GNU_CONFIG_HOST
+_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX=$_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX
+_SHU_BUILDER_GNU_CONFIG_HOST_FLAG=$_SHU_BUILDER_GNU_CONFIG_HOST_FLAG
+_SHU_BUILDER_BUILD_DIR="$_SHU_BUILDER_BUILD_DIR"
+_SHU_BUILDER_PREFIX="$_SHU_BUILDER_PREFIX"
+_SHU_BUILDER_PKG_CONFIG_PATH="$_SHU_BUILDER_PKG_CONFIG_PATH"
+_SHU_BUILDER_CONFIGURE_FLAGS="$_SHU_BUILDER_CONFIGURE_FLAGS"
+PATH="$PATH"
+export PATH \
+    _SHU_BUILDER_CURRENT_HOST \
+    _SHU_BUILDER_CURRENT_TEXT \
+    _SHU_BUILDER_GNU_CONFIG_HOST \
+    _SHU_BUILDER_GNU_CONFIG_HOST_PREFIX \
+    _SHU_BUILDER_GNU_CONFIG_HOST_FLAG \
+    _SHU_BUILDER_BUILD_DIR \
+    _SHU_BUILDER_PREFIX \
+    _SHU_BUILDER_PKG_CONFIG_PATH \
+    _SHU_BUILDER_CONFIGURE_FLAGS
+EOF
+    if [ "$_SHU_BUILDER_GNU_CONFIG_HOST" ]; then
+        TOOLCHAIN_WRAPPER_DIR=$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper
+        log "$_SHU_BUILDER_CURRENT_TEXT Generating $_SHU_BUILDER_GNU_CONFIG_HOST wrapper toolchain in $TOOLCHAIN_WRAPPER_DIR"
+        if [ "$CCACHE" ]; then
+            CCACHE_FLAGS="--ccache=$CCACHE"
+        else
+            CCACHE_FLAGS="--no-ccache"
+        fi
+        run $(program_directory)/gen-android-sdk-toolchain.sh \
+                --aosp-dir="$2" \
+                --host=$_SHU_BUILDER_CURRENT_HOST \
+                --binprefix=$_SHU_BUILDER_GNU_CONFIG_HOST \
+                --prefix=$_SHU_BUILDER_PREFIX \
+                $CCACHE_FLAGS \
+                $TOOLCHAIN_WRAPPER_DIR
+        cat >> "$_SHU_BUILDER_ENV_SH" <<EOF
+PATH=$TOOLCHAIN_WRAPPER_DIR:\$PATH
+export PATH
+EOF
+        PATH=$TOOLCHAIN_WRAPPER_DIR:$PATH
+        log "$_SHU_BUILDER_CURRENT_TEXT Path: $(echo \"$PATH\" | tr ' ' '\n')"
+    elif [ "$(get_build_os)" = "darwin" ]; then
+        # Force the use of the 10.8 SDK on OS X, this
+        # ensures that the generated binaries run properly
+        # on that platform, and also avoids build failures
+        # in SDL!!
+        cat >> "$_SHU_BUILDER_ENV_SH" <<EOF
+# Force the use of the 10.8 SDK
+export SDKROOT=macosx10.8
+EOF
+    fi
+
+    # Read the source script.
+    . "$_SHU_BUILDER_ENV_SH"
+}
+
+builder_text () {
+    printf %s "$_SHU_BUILDER_CURRENT_TEXT"
+}
+
+builder_host () {
+    printf %s "$_SHU_BUILDER_CURRENT_HOST"
+}
+
+builder_host_exe_extension () {
+    printf %s "$_SHU_BUILDER_HOST_EXE_EXTENSION"
+}
+
+builder_install_prefix () {
+    printf %s "$_SHU_BUILDER_PREFIX"
+}
+
+builder_gnu_config () {
+    printf %s "$_SHU_BUILDER_GNU_CONFIG"
+}
+
+builder_gnu_config_host_prefix () {
+    printf %s "$_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX"
+}
+
+builder_host_ext () {
+    printf %s "$_SHU_BUILDER_HOST_EXE_EXTENSION"
+}
+
+builder_reset_configure_flags () {
+    _SHU_BUILDER_CONFIGURE_FLAGS="$*"
+}
+
+builder_add_configure_flags () {
+    var_append _SHU_BUILDER_CONFIGURE_FLAGS "$*"
+}
+
+# $1: Source directory.
+# $2: Build directory.
+builder_build_autotools_package () {
+    local PKG_FULLNAME="$(basename "$1")"
+    dump "$(builder_text) Building $PKG_FULLNAME"
+
+    local PKG_SRC_DIR="$1"
+    local PKG_BUILD_DIR="$2"
+    shift; shift;
+    (
+        run mkdir -p "$PKG_BUILD_DIR" &&
+        run cd "$PKG_BUILD_DIR" &&
+        export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
+        export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
+        export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
+        export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
+        run "$PKG_SRC_DIR"/configure \
+            --prefix=$_SHU_BUILDER_PREFIX \
+            $_SHU_BUILDER_GNU_CONFIG_HOST_FLAG \
+            $_SHU_BUILDER_CONFIGURE_FLAGS \
+            "$@" &&
+        run make -j$NUM_JOBS V=1 &&
+        run make install -j$NUM_JOBS V=1
+    ) ||
+    panic "Could not build and install $PKG_FULLNAME"
+}
