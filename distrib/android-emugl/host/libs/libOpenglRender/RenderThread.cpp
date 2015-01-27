@@ -27,9 +27,17 @@
 #define STREAM_BUFFER_SIZE 4*1024*1024
 
 RenderThread::RenderThread(IOStream *stream, emugl::Mutex *lock) :
+<<<<<<< HEAD   (2170a3 Merge "android/skin/keyboard: Fix SDL2 keyboard handling." a)
         emugl::Thread(),
         m_lock(lock),
         m_stream(stream) {}
+=======
+    emugl::Thread(),
+    m_lock(lock),
+    m_stream(stream)
+{
+}
+>>>>>>> BRANCH (1e5717 Merge changes I46691db5,If83f871e)
 
 RenderThread::~RenderThread() {
     delete m_stream;

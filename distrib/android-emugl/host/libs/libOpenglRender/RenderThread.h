@@ -37,6 +37,7 @@ public:
 
     // Destructor.
     virtual ~RenderThread();
+<<<<<<< HEAD   (2170a3 Merge "android/skin/keyboard: Fix SDL2 keyboard handling." a)
 
     // Returns true iff the thread has finished.
     // Note that this also means that the thread's stack has been
@@ -44,6 +45,9 @@ public:
 
     // Force a thread to stop.
     void forceStop();
+=======
+    bool isFinished() { return tryWait(NULL); }
+>>>>>>> BRANCH (1e5717 Merge changes I46691db5,If83f871e)
 
 private:
     RenderThread();  // No default constructor
@@ -52,8 +56,15 @@ private:
 
     virtual intptr_t main();
 
+<<<<<<< HEAD   (2170a3 Merge "android/skin/keyboard: Fix SDL2 keyboard handling." a)
     emugl::Mutex* m_lock;
     IOStream* m_stream;
+=======
+private:
+    emugl::Mutex *m_lock;
+    IOStream *m_stream;
+    renderControl_decoder_context_t m_rcDec;
+>>>>>>> BRANCH (1e5717 Merge changes I46691db5,If83f871e)
 };
 
 #endif
