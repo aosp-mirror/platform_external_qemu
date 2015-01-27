@@ -34,6 +34,7 @@
 
 #ifdef _WIN32
 #  include <winsock2.h>  /* for ntohl */
+#  include <windows.h>
 #endif
 
 typedef union {

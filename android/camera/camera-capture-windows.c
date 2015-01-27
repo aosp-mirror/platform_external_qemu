@@ -19,6 +19,7 @@
  * This code uses capXxx API, available via capCreateCaptureWindow.
  */
 
+#include <winsock2.h>
 #include <windows.h>
 #include <vfw.h>
 #include "android/camera/camera-capture.h"
