@@ -415,7 +415,7 @@ compute_file_sha1 () {
             (sha1sum "$1" | awk '{ print $1; }') 2>/dev/null
             ;;
         darwin)
-            (openssl sha1 "$1") 2>/dev/null
+            (openssl sha1 "$1" | awk '{ print $2; }') 2>/dev/null
             ;;
         *)
             panic "Don't know how to compute a SHA-1 sum on this platform: \
