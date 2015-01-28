@@ -283,6 +283,36 @@ do_autotools_package () {
     panic "Could not build and install $PKG_NAME"
 }
 
+do_dtc_package () {
+    local PKG=dtc
+    unpack_and_patch $PKG
+    PKG_VERSION=$(package_list_get_version $PKG)
+    PKG_NAME=$(package_list_get_filename $PKG)
+    dump "$(builder_text) Building libfdt from $PKG-$PKG_VERSION"
+    # NOTE: Cannot use the dtc Makefiles here, but since the library is
+    #       really simple, just compile the source files straight into a
+    #       library, then 'install' it manually !!
+    (
+        run cd "$(builder_build_dir)/$PKG-$PKG_VERSION" &&
+        CC=$(builder_gnu_config_host_prefix)gcc
+        AR=$(builder_gnu_config_host_prefix)ar
+        CCFLAGS=
+        LIBNAME=libfdt.a
+        var_append CCFLAGS "-Ilibfdt"
+        case $(builder_host) in
+            linux-*|darwin-*)
+                var_append CCFLAGS "-fPIC"
+                ;;
+        esac
+        run $CC -c $CCFLAGS libfdt/*.c
+        run $AR crs $LIBNAME *.o
+        run mkdir -p "$PREFIX/include"
+        run cp libfdt/*.h "$PREFIX"/include/
+        run mkdir -p "$PREFIX/lib"
+        run cp $LIBNAME "$PREFIX/lib"
+    ) || panic "Cannot rebuild libfdt"
+}
+
 # $1: host os name.
 # $2: environment shell script.
 build_qemu_android_deps () {
@@ -302,6 +332,9 @@ build_qemu_android_deps () {
             do_zlib_package
             ;;
     esac
+
+    # libfdt, from the dtc package, is needed.
+    do_dtc_package dtc
 
     # libffi is required by glib.
     do_autotools_package libffi
