@@ -24,6 +24,28 @@ shell_import utils/package_list_parser.shi
 ###  Utilities
 ###
 
+# Create temporary directory and ensure it is destroyed on script exit.
+_cleanup_temp_dir () {
+    rm -rf "$TEMP_DIR"
+    exit $1
+}
+
+_TEMP_DIR=
+
+# Return a temporary directory for this script. This creates the directory
+# lazily and ensures it is always destroyed on script exit.
+# Out: temporary directory path.
+temp_dir () {
+    if [ -z "$_TEMP_DIR" ]; then
+        _TEMP_DIR=/tmp/$USER-download-sources-temp-$$
+        run mkdir -p "$_TEMP_DIR" || panic "Could not create temporary directory: $_TEMP_DIR"
+        # Ensure temporary directory is deleted on script exit
+        trap "_cleanup_temp_dir 0" EXIT
+        trap "_cleanup_temp_dir \$?" QUIT INT HUP
+    fi
+    printf %s "$_TEMP_DIR"
+}
+
 # Download a file.
 # $1: Source URL
 # $2: Destination directory.
@@ -176,38 +198,76 @@ get_package () {
 package_list_parse_file "$PACKAGE_LIST"
 for PACKAGE in $(package_list_get_packages); do
     PKG_URL=$(package_list_get_url $PACKAGE)
-    if [ "$PKG_URL" ]; then
-        PKG_FILE=$ARCHIVE_DIR/$(package_list_get_filename $PACKAGE)
-        PKG_SHA1=$(package_list_get_sha1 $PACKAGE)
-        if [ -f "$PKG_FILE" -a "$OPT_FORCE" ]; then
+    PKG_GIT=$(package_list_get_git_url $PACKAGE)
+
+    # Check existing file archive, if any.
+    PKG_FILE=$ARCHIVE_DIR/$(package_list_get_filename $PACKAGE)
+    PKG_SHA1=$(package_list_get_sha1 $PACKAGE)
+    if [ -f "$PKG_FILE" -a "$OPT_FORCE" ]; then
+        run rm -f "$PKG_FILE"
+    fi
+    if [ -f "$PKG_FILE" -a -n "$PKG_SHA1" ]; then
+        dump "Checking existing file: $PKG_FILE"
+        ARCHIVE_SHA1=$(compute_file_sha1 "$PKG_FILE")
+        if [ "$ARCHIVE_SHA1" != "$PKG_SHA1" ]; then
+            dump "WARNING: Re-downloading existing file due to bad SHA-1 ($ARCHIVE_SHA1, expected $PKG_SHA1): $PKG_FILE"
             run rm -f "$PKG_FILE"
         fi
-        if [ -f "$PKG_FILE" -a -n "$PKG_SHA1" ]; then
-            dump "Checking existing file: $PKG_FILE"
-            ARCHIVE_SHA1=$(compute_file_sha1 "$PKG_FILE")
-            if [ "$ARCHIVE_SHA1" != "$PKG_SHA1" ]; then
-                dump "WARNING: Re-downloading existing file due to bad SHA-1 ($ARCHIVE_SHA1, expected $PKG_SHA1): $PKG_FILE"
-                run rm -f "$PKG_FILE"
-            fi
-        fi
-        if [ ! -f "$PKG_FILE" ]; then
+    fi
+
+    # Re-download archive or git repository if needed.
+    if [ ! -f "$PKG_FILE" ]; then
+        if [ "$PKG_URL" ]; then
             dump "Downloading $PKG_URL"
             download_package "$PKG_URL" "$ARCHIVE_DIR" "$PKG_SHA1"
-        fi
-        PKG_PATCHES=$(package_list_get_patches $PACKAGE)
-        if [ "$PKG_PATCHES" ]; then
-            PKG_PATCHES_SRC=$PACKAGE_DIR/$PKG_PATCHES
-            PKG_PATCHES_DST=$ARCHIVE_DIR/$(basename "$PKG_PATCHES")
-            dump "Copying patches file: $PKG_PATCHES_DST"
-            if [ ! -f "$PKG_PATCHES_SRC" ]; then
-                panic "Missing patches file from line $COUNT: $PKG_PATCHES_SRC"
+        elif [ "$PKG_GIT" ]; then
+            PKG_FILE=$(package_list_get_full_name $PACKAGE)
+            PKG_BRANCH=$(package_list_get_version $PACKAGE)
+            dump "Cloning $PKG_GIT"
+            TEMP_DIR=$(temp_dir)
+            if [ -d "$TEMP_DIR/$PKG_FILE" ]; then
+                run rm -rf "$TEMP_DIR/$PKG_FILE"
             fi
-            run mkdir -p $(dirname "$PKG_PATCHES_DST") &&
-            run cp -f "$PKG_PATCHES_SRC" "$PKG_PATCHES_DST" ||
-                    panic "Could not copy: $PKG_PATCHES_SRC to $PKG_PATCHES_DST"
+            git_clone_depth1 "$PKG_GIT" "$TEMP_DIR/$PKG_FILE" "$PKG_BRANCH"
+            run rm -rf "$TEMP_DIR/$PKG_FILE"/.git*
+            # To ensure that the tarball has reproducible results, we need to:
+            # - Force the mtime of all files.
+            # - Force the user/group names
+            # - Ensure consistent order for files in the archive.
+            FILES=$(cd "$TEMP_DIR" && find "$PKG_FILE" -type f | sort | tr '\n' ' ')
+            run tar cJf "$ARCHIVE_DIR/$PKG_FILE.tar.xz" \
+                    --owner=android \
+                    --group=android \
+                    --mtime=2015-01-01 \
+                    -C "$TEMP_DIR" \
+                    $FILES \
+                    || panic "Could not create archive"
+            PKG_FILE=$ARCHIVE_DIR/$PKG_FILE.tar.xz
+        else
+            panic "Missing GIT=<url> or URL=<url> for package $PACKAGE"
         fi
-    else  # no PKG_URL
-        panic "Missing URL=<url> field for package $PACKAGE"
+    fi
+
+    # Time to check the new archive SHA-1
+    if [ "$PKG_SHA1" ]; then
+        ARCHIVE_SHA1=$(compute_file_sha1 "$PKG_FILE")
+        if [ "$ARCHIVE_SHA1" != "$PKG_SHA1" ]; then
+            panic "SHA-1 mismatch for $PKG_FILE: $ARCHIVE_SHA1 expected $PKG_SHA1"
+        fi
+    fi
+
+    # Copy patches file if any.
+    PKG_PATCHES=$(package_list_get_patches $PACKAGE)
+    if [ "$PKG_PATCHES" ]; then
+        PKG_PATCHES_SRC=$PACKAGE_DIR/$PKG_PATCHES
+        PKG_PATCHES_DST=$ARCHIVE_DIR/$(basename "$PKG_PATCHES")
+        dump "Copying patches file: $PKG_PATCHES_DST"
+        if [ ! -f "$PKG_PATCHES_SRC" ]; then
+            panic "Missing patches file from line $COUNT: $PKG_PATCHES_SRC"
+        fi
+        run mkdir -p $(dirname "$PKG_PATCHES_DST") &&
+        run cp -f "$PKG_PATCHES_SRC" "$PKG_PATCHES_DST" ||
+                panic "Could not copy: $PKG_PATCHES_SRC to $PKG_PATCHES_DST"
     fi
 done
 
