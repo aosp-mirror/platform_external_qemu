@@ -154,5 +154,11 @@ intptr_t RenderThread::main() {
         fprintf(stderr, "ERROR: RenderThread exiting with current context/surfaces\n");
     }
 
+    FrameBuffer::getFB()->drainColorBuffer();
+
+    FrameBuffer::getFB()->drainWindowSurface();
+
+    FrameBuffer::getFB()->drainRenderContext();
+
     return 0;
 }

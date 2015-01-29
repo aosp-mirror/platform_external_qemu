@@ -523,6 +523,8 @@ HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
     if (rctx.Ptr() != NULL) {
         ret = genHandle();
         m_contexts[ret] = rctx;
+        RenderThreadInfo *tinfo = RenderThreadInfo::get();
+        tinfo->m_contextSet.insert(ret);
     }
     return ret;
 }
@@ -536,21 +538,72 @@ HandleType FrameBuffer::createWindowSurface(int p_config, int p_width, int p_hei
     if (win.Ptr() != NULL) {
         ret = genHandle();
         m_windows[ret] = win;
+        RenderThreadInfo *tinfo = RenderThreadInfo::get();
+        tinfo->m_windowSet.insert(ret);
     }
 
     return ret;
+}
+
+void FrameBuffer::drainRenderContext()
+{
+    emugl::Mutex::AutoLock mutex(m_lock);
+    RenderThreadInfo *tinfo = RenderThreadInfo::get();
+    if (tinfo->m_contextSet.empty()) return;
+    for (std::set<HandleType>::iterator it = tinfo->m_contextSet.begin();
+            it != tinfo->m_contextSet.end(); ++it) {
+        HandleType contextHandle = *it;
+        m_contexts.erase(contextHandle);
+    }
+    tinfo->m_contextSet.clear();
+}
+
+void FrameBuffer::drainColorBuffer()
+{
+    emugl::Mutex::AutoLock mutex(m_lock);
+    RenderThreadInfo *tinfo = RenderThreadInfo::get();
+    if (tinfo->m_colorBufferSet.empty()) return;
+    for (std::set<HandleType>::iterator it = tinfo->m_colorBufferSet.begin();
+            it != tinfo->m_colorBufferSet.end(); ++it) {
+        HandleType colorHandle = *it;
+        m_colorbuffers.erase(colorHandle);
+    }
+    tinfo->m_colorBufferSet.clear();
+}
+
+void FrameBuffer::drainWindowSurface()
+{
+    emugl::Mutex::AutoLock mutex(m_lock);
+    RenderThreadInfo *tinfo = RenderThreadInfo::get();
+    if (tinfo->m_windowSet.empty()) return;
+    for (std::set<HandleType>::iterator it = tinfo->m_windowSet.begin();
+            it != tinfo->m_windowSet.end(); ++it) {
+        HandleType windowHandle = *it;
+        if (m_windows.find(windowHandle) != m_windows.end()) {
+            m_windows.erase(windowHandle);
+        }
+    }
+    tinfo->m_windowSet.clear();
 }
 
 void FrameBuffer::DestroyRenderContext(HandleType p_context)
 {
     emugl::Mutex::AutoLock mutex(m_lock);
     m_contexts.erase(p_context);
+    RenderThreadInfo *tinfo = RenderThreadInfo::get();
+    if (tinfo->m_contextSet.empty()) return;
+    tinfo->m_contextSet.erase(p_context);
 }
 
 void FrameBuffer::DestroyWindowSurface(HandleType p_surface)
 {
     emugl::Mutex::AutoLock mutex(m_lock);
-    m_windows.erase(p_surface);
+    if (m_windows.find(p_surface) != m_windows.end()) {
+        m_windows.erase(p_surface);
+        RenderThreadInfo *tinfo = RenderThreadInfo::get();
+        if (tinfo->m_windowSet.empty()) return;
+        tinfo->m_windowSet.erase(p_surface);
+    }
 }
 
 int FrameBuffer::openColorBuffer(HandleType p_colorbuffer)
@@ -571,8 +624,10 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer)
     emugl::Mutex::AutoLock mutex(m_lock);
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
-        ERR("FB: closeColorBuffer cb handle %#x not found\n", p_colorbuffer);
-        // bad colorbuffer handle
+        // when render thread exits, we automatically de-reference color buffer
+        // to prevent memory leak due to un-deleted color buffer
+        // it is normal for guest system to issue closeColorBuffer command
+        // when the color buffer is already deleted on host
         return;
     }
     if (--(*c).second.refcount == 0) {
@@ -614,6 +669,9 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     }
 
     (*w).second->setColorBuffer( (*c).second.cb );
+
+    RenderThreadInfo *tinfo = RenderThreadInfo::get();
+    tinfo->m_colorBufferSet.insert(p_colorbuffer);
 
     return true;
 }
