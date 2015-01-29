@@ -24,6 +24,8 @@
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 
+typedef uint32_t HandleType;
+
 enum SurfaceBindType {
     SURFACE_BIND_READ,
     SURFACE_BIND_DRAW,
@@ -37,10 +39,10 @@ public:
     ~WindowSurface();
     EGLSurface getEGLSurface() const { return m_eglSurface; }
 
-    void setColorBuffer(ColorBufferPtr p_colorBuffer);
+    void setColorBuffer(ColorBufferPtr p_colorBuffer, HandleType p_colorBufferHandle);
     bool flushColorBuffer();
     void bind(RenderContextPtr p_ctx, SurfaceBindType p_bindType);
-
+    HandleType getColorBufferHandle() const { return m_attachedColorBufferHandle; }
 private:
     WindowSurface();
 
@@ -53,6 +55,7 @@ private:
     GLuint m_stencilRB;
     EGLSurface m_eglSurface;
     ColorBufferPtr m_attachedColorBuffer;
+    HandleType  m_attachedColorBufferHandle;
     RenderContextPtr m_readContext;
     RenderContextPtr m_drawContext;
     GLuint m_width;

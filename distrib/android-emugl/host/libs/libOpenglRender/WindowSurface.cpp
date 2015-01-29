@@ -30,6 +30,7 @@ WindowSurface::WindowSurface() :
     m_stencilRB(0),
     m_eglSurface(NULL),
     m_attachedColorBuffer(NULL),
+    m_attachedColorBufferHandle(0),
     m_readContext(NULL),
     m_drawContext(NULL),
     m_width(0),
@@ -91,9 +92,10 @@ bool WindowSurface::flushColorBuffer()
 //    be attached to the surface. The function doesn't make sure that the
 //    previous attached color buffer is updated, this is done by flushColorBuffer
 //
-void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer)
+void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer, HandleType p_colorBufferHandle)
 {
     m_attachedColorBuffer = p_colorBuffer;
+    m_attachedColorBufferHandle = p_colorBufferHandle;
 
     //
     // resize the window if the attached color buffer is of different
