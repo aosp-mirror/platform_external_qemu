@@ -57,20 +57,35 @@ option_register_var "--target=<list>" OPT_TARGET \
 OPT_USE_SDL1=
 option_register_var "--use-sdl1" "Use SDL 1.x instead of SDL 2.x"
 
+OPT_SRC_DIR=
+option_register_var "--src-dir=<dir>" OPT_SRC_DIR \
+        "Set qemu-android source directory [autodetect]"
+
 prebuilts_dir_register_option
 aosp_dir_register_option
 install_dir_register_option qemu-android
 
 option_parse "$@"
 
-if [ "$PARAMETER_COUNT" != 1 ]; then
-    panic "This script takes 1 argument. See --help for details."
+if [ "$PARAMETER_COUNT" != 0 ]; then
+    panic "This script takes no arguments. See --help for details."
 fi
 
-QEMU_ANDROID=$PARAMETER_1
+if [ "$OPT_SRC_DIR" ]; then
+    QEMU_ANDROID=$OPT_SRC_DIR
+else
+    DEFAULT_SRC_DIR=$(cd $(program_directory)/../../../qemu-android && pwd -P 2>/dev/null || true)
+    if [ "$DEFAULT_SRC_DIR" ]; then
+        QEMU_ANDROID=$DEFAULT_SRC_DIR
+        log "Auto-config: --src-dir=$QEMU_ANDROID"
+    else
+        panic "Could not find qemu-android sources. Please use --src-dir=<dir>."
+    fi
+fi
 if [ ! -f "$QEMU_ANDROID/include/qemu-common.h" ]; then
     panic "Not a valid qemu-android source directory: $QEMU_ANDROID"
 fi
+QEMU_ANDROID=$(cd "$QEMU_ANDROID" && pwd -P)
 
 prebuilts_dir_parse_option
 aosp_dir_parse_option
@@ -261,9 +276,8 @@ EOF
                     sed -i -e '/^ROMS=/d' config-host.mak
 
                     # For Windows, config-host.h must be created after
-                    # libfdt but before the rest, or the parallel build will
+                    # before the rest, or the parallel build will
                     # fail miserably.
-                    run make -j$NUM_JOBS libfdt $BUILD_FLAGS
                     run make config-host.h $BUILD_FLAGS
                     run make version.o version.lo $BUILD_FLAGS
                     ;;
@@ -360,8 +374,8 @@ PROGDIR=\$(dirname \$0)
     --install-dir=/tmp/$PKG_SUFFIX/prebuilts/qemu-android \\
     --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
     --target=$(spaces_to_commas "$TARGETS") \\
-    $EXTRA_FLAGS \\
-    /tmp/$PKG_SUFFIX/qemu-android-src
+    --src-dir=/tmp/$PKG_SUFFIX/qemu-android-src \\
+    $EXTRA_FLAGS
 EOF
     chmod a+x $PKG_DIR/build.sh
     run tar cjf "$PKG_TMP/$PKG_TARBALL" -C "$PKG_TMP" "$PKG_SUFFIX"
