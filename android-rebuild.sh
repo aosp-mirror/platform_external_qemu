@@ -132,17 +132,18 @@ if [ -d "$PREBUILTS_DIR/qemu-android" ]; then
       esac
     fi
     if [ "$HOST_PREFIX" ]; then
-        QEMU_ANDROID_HOSTS=$(cd "$PREBUILTS_DIR"/qemu-android && ls -d $HOST_PREFIX-* 2>/dev/null)
+        QEMU_ANDROID_BINARIES=$(cd "$PREBUILTS_DIR"/qemu-android && ls $HOST_PREFIX-*/qemu-system-* 2>/dev/null || true)
     fi
 fi
-if [ -z "$QEMU_ANDROID_HOSTS" ]; then
+if [ -z "$QEMU_ANDROID_BINARIES" ]; then
     echo "WARNING: Missing qemu-android prebuilts. Please run rebuild-qemu-android.sh!"
 else
-    run mkdir -p $OUT_DIR/qemu
-    for HOST_PREFIX in $QEMU_ANDROID_HOSTS; do
-        echo "Copying prebuilt $HOST_PREFIX qemu-android binaries to $OUT_DIR/qemu/"
-        run cp -r "$PREBUILTS_DIR"/qemu-android/${HOST_PREFIX} $OUT_DIR/qemu/ ||
-            panic "Could not copy $HOST_PREFIX qemu-android binaries!?"
+    echo "Copying prebuilt $HOST_PREFIX qemu-android binaries to $OUT_DIR/qemu/"
+    for QEMU_ANDROID_BINARY in $QEMU_ANDROID_BINARIES; do
+        run mkdir -p "$OUT_DIR/qemu/$(dirname "$QEMU_ANDROID_BINARY")" &&
+        run cp "$PREBUILTS_DIR"/qemu-android/$QEMU_ANDROID_BINARY \
+                $OUT_DIR/qemu/$QEMU_ANDROID_BINARY ||
+            panic "Could not copy $HOST_PREFIX/$QEMU_ANDROID_BINARY !?"
     done
 fi
 
