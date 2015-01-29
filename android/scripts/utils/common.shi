@@ -42,6 +42,11 @@ decrement_verbosity () {
     _SHU_VERBOSE=$(( $_SHU_VERBOSE - 1 ))
 }
 
+# Set the verbosity to a given level.
+set_verbosity () {
+    _SHU_VERBOSE=$1
+}
+
 # Return internal verbosity level, clamped to 0 as a minimum bound.
 get_verbosity () {
     local RET=$_SHU_VERBOSE
@@ -421,4 +426,24 @@ compute_file_sha1 () {
             panic "Don't know how to compute a SHA-1 sum on this platform: \
 $(get_build_os)"
     esac
+}
+
+# Return the file path of a given timestamp
+# $1: Installation directory
+# $2: Timestamp group name
+_shu_timestamp_file () {
+    printf %s "$1/timestamps/$2"
+}
+
+timestamp_check () {
+    test -f "$(_shu_timestamp_file "$1" "$2")"
+}
+
+timestamp_set () {
+    local TIMESTAMP="$(_shu_timestamp_file "$1" "$2")"
+    run mkdir -p "$(dirname $TIMESTAMP)" && run touch "$TIMESTAMP"
+}
+
+timestamp_clear () {
+    run rm -f "$(_shu_timestamp_file "$1" "$2")"
 }
