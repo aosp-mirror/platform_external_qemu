@@ -162,15 +162,7 @@ package_builder_process_options () {
         fi
     fi
 
-    DARWIN_SYSTEMS=
-    for SYSTEM in $HOST_SYSTEMS; do
-        case $SYSTEM in
-            darwin-*)
-                var_append DARWIN_SYSTEMS "$SYSTEM"
-                ;;
-        esac
-    done
-
+    # Detect bad host system names, and list the good ones in case of error.
     local BAD_SYSTEMS SYSTEM
     for SYSTEM in $HOST_SYSTEMS; do
         if ! list_contains "$_SHU_VALID_HOST_SYSTEMS" "$SYSTEM"; then
@@ -181,6 +173,35 @@ package_builder_process_options () {
         panic "Invalid host system name(s): [$BAD_SYSTEMS], use one of: $_SHU_VALID_HOST_SYSTEMS"
     fi
 
+    # Compute the list of darwin host systems.
+    DARWIN_SYSTEMS=
+    for SYSTEM in $HOST_SYSTEMS; do
+        case $SYSTEM in
+            darwin-*)
+                var_append DARWIN_SYSTEMS "$SYSTEM"
+                ;;
+        esac
+    done
+
+    # Compute the list of local host systems, i.e. the ones that will be built
+    # on the machine running this script, as opposed to remotely with SSH.
+    LOCAL_HOST_SYSTEMS=$HOST_SYSTEMS
+    if [ "$DARWIN_SYSTEMS" -a "$(get_build_os)" != "darwin" ]; then
+        if [ -z "$DARWIN_SSH" ]; then
+            panic "Cannot build Darwin binaries on this machine, please use --darwin-ssh=<host>."
+        fi
+        LOCAL_HOST_SYSTEMS=
+        for SYSTEM in $HOST_SYSTEMS; do
+            case $SYSTEM in
+                darwin-*)
+                    ;;
+                *)
+                    var_append LOCAL_HOST_SYSTEMS "$SYSTEM"
+                    ;;
+            esac
+        done
+    fi
+
     # Save original path.
     ORIGINAL_PATH=$PATH
 }
@@ -189,7 +210,31 @@ package_builder_process_options () {
 # build for a given host system.
 # $1: Host system name (e.g. linux-x86_64)
 # $2: AOSP source directory.
+# $3: Optional list of prefix directories (space-separated)
 builder_prepare_for_host () {
+    _shu_builder_prepare_for_host "$1" "$2" "auto" "$3"
+}
+
+# Same as builder_prepare_for_host, but ensures that the toolchain wrapper
+# doesn't use a host-specific binprefix, i.e. it will be named 'gcc' instead
+# of 'x86_64-linux-gcc'. This is required to build certain modules.
+# $1: Host system name
+# $2: AOSP source directory.
+# $3: Optional list of prefix directories (space-separated)
+builder_prepare_for_host_no_binprefix () {
+    _shu_builder_prepare_for_host "$1" "$2" "none" "$3"
+}
+
+
+# Generate a small shell script that can be sourced to prepare the
+# build for a given host system.
+# $1: Host system name (e.g. linux-x86_64)
+# $2: AOSP source directory.
+# $3: Binprefix, special values 'auto' and 'none' are recognized.
+# 'auto' means the binprefix will depend on $1, and 'none' that no
+# binprefix should be used.
+# $4: Optional list of prefix directories (space-separated)
+_shu_builder_prepare_for_host () {
     _SHU_BUILDER_CURRENT_HOST=$1
 
     _SHU_BUILDER_CURRENT_TEXT="[$_SHU_BUILDER_CURRENT_HOST]"
@@ -234,16 +279,34 @@ builder_prepare_for_host () {
         _SHU_BUILDER_GNU_CONFIG_HOST_PREFIX=
     fi
 
+    case $3 in
+        auto) # Nothing to do.
+            ;;
+        none)
+            _SHU_BUILDER_GNU_CONFIG_HOST_PREFIX=
+            ;;
+        *)
+            _SHU_BUILDER_GNU_CONFIG_HOST_PREFIX=$3
+            ;;
+    esac
+    log "$_SHU_BUILDER_CURRENT_TEXT Using binprefix [$_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX]"
     PATH=$ORIGINAL_PATH
 
     _SHU_BUILDER_BUILD_DIR=$TEMP_DIR/build-$_SHU_BUILDER_CURRENT_HOST
     log "$_SHU_BUILDER_CURRENT_TEXT Creating build directory: $_SHU_BUILDER_BUILD_DIR"
     run mkdir -p "$_SHU_BUILDER_BUILD_DIR"
 
+    _SHU_BUILDER_SRC_DIR=$TEMP_DIR/src
+
     _SHU_BUILDER_ENV_SH=$_SHU_BUILDER_BUILD_DIR/env.sh
 
     _SHU_BUILDER_PREFIX=$TEMP_DIR/install-$_SHU_BUILDER_CURRENT_HOST
-    log "$_SHU_BUILDER_CURRENT_TEXT Using build prefix: $_SHU_BUILDER_PREFIX"
+    _SHU_BUILDER_TOOLCHAIN_PREFIX=$_SHU_BUILDER_PREFIX
+    local _PREFIX
+    for _PREFIX in $4; do
+        var_append _SHU_BUILDER_TOOLCHAIN_PREFIX "$_PREFIX"
+    done
+    log "$_SHU_BUILDER_CURRENT_TEXT Using toolchain build prefix: $_SHU_BUILDER_TOOLCHAIN_PREFIX"
 
     _SHU_BUILDER_PKG_CONFIG_PATH=$_SHU_BUILDER_PREFIX/share/pkgconfig:$PKG_CONFIG_PATH
 
@@ -275,6 +338,7 @@ export PATH \
     _SHU_BUILDER_GNU_CONFIG_HOST_PREFIX \
     _SHU_BUILDER_GNU_CONFIG_HOST_FLAG \
     _SHU_BUILDER_BUILD_DIR \
+    _SHU_BUILDER_SRC_DIR \
     _SHU_BUILDER_PREFIX \
     _SHU_BUILDER_PKG_CONFIG_PATH \
     _SHU_BUILDER_CONFIGURE_FLAGS
@@ -282,18 +346,22 @@ EOF
     if [ "$_SHU_BUILDER_GNU_CONFIG_HOST" ]; then
         TOOLCHAIN_WRAPPER_DIR=$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper
         log "$_SHU_BUILDER_CURRENT_TEXT Generating $_SHU_BUILDER_GNU_CONFIG_HOST wrapper toolchain in $TOOLCHAIN_WRAPPER_DIR"
+        local EXTRA_FLAGS
         if [ "$CCACHE" ]; then
-            CCACHE_FLAGS="--ccache=$CCACHE"
+            var_append EXTRA_FLAGS "--ccache=$CCACHE"
         else
-            CCACHE_FLAGS="--no-ccache"
+            var_append EXTRA_FLAGS "--no-ccache"
         fi
+        for _PREFIX in $_SHU_BUILDER_TOOLCHAIN_PREFIX; do
+            var_append EXTRA_FLAGS "--prefix=$_PREFIX"
+        done
         run $(program_directory)/gen-android-sdk-toolchain.sh \
                 --aosp-dir="$2" \
                 --host=$_SHU_BUILDER_CURRENT_HOST \
-                --binprefix=$_SHU_BUILDER_GNU_CONFIG_HOST \
-                --prefix=$_SHU_BUILDER_PREFIX \
-                $CCACHE_FLAGS \
-                $TOOLCHAIN_WRAPPER_DIR
+                --binprefix=${_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX:--} \
+                $EXTRA_FLAGS \
+                $TOOLCHAIN_WRAPPER_DIR ||
+                panic "Cannot generate toolchain wrapper!"
         cat >> "$_SHU_BUILDER_ENV_SH" <<EOF
 PATH=$TOOLCHAIN_WRAPPER_DIR:\$PATH
 export PATH
@@ -327,6 +395,14 @@ builder_host_exe_extension () {
     printf %s "$_SHU_BUILDER_HOST_EXE_EXTENSION"
 }
 
+builder_build_dir () {
+    printf %s "$_SHU_BUILDER_BUILD_DIR"
+}
+
+builder_src_dir () {
+    printf %s "$_SHU_BUILDER_SRC_DIR"
+}
+
 builder_install_prefix () {
     printf %s "$_SHU_BUILDER_PREFIX"
 }
@@ -337,6 +413,10 @@ builder_gnu_config () {
 
 builder_gnu_config_host_prefix () {
     printf %s "$_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX"
+}
+
+builder_gnu_config_host_flag () {
+    printf %s "$_SHU_BUILDER_GNU_CONFIG_HOST_FLAG"
 }
 
 builder_host_ext () {
@@ -351,8 +431,11 @@ builder_add_configure_flags () {
     var_append _SHU_BUILDER_CONFIGURE_FLAGS "$*"
 }
 
+# Build a given autotools based package
+#
 # $1: Source directory.
 # $2: Build directory.
+# $3+: Additional configure options.
 builder_build_autotools_package () {
     local PKG_FULLNAME="$(basename "$1")"
     dump "$(builder_text) Building $PKG_FULLNAME"
