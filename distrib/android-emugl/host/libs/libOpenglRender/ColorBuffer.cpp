@@ -24,7 +24,7 @@
 #endif
 #include "RenderThreadInfo.h"
 #include <stdio.h>
-
+static int s_my_num_cb = 0;
 ColorBuffer *ColorBuffer::create(int p_width, int p_height,
                                  GLenum p_internalFormat)
 {
@@ -121,6 +121,8 @@ ColorBuffer::ColorBuffer() :
     m_fbo(0),
     m_internalFormat(0)
 {
+    ++ s_my_num_cb;
+    fprintf(stderr, "cb %d\n", s_my_num_cb);
 }
 
 ColorBuffer::~ColorBuffer()
@@ -142,6 +144,8 @@ ColorBuffer::~ColorBuffer()
     GLuint tex[2] = {m_tex, m_blitTex};
     s_gl.glDeleteTextures(2, tex);
 
+    -- s_my_num_cb;
+    fprintf(stderr, "cb %d\n", s_my_num_cb);
     fb->unbind_locked();
 }
 
