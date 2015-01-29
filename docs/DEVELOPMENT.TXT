@@ -24,6 +24,22 @@ II. Overall source layout:
 The Android emulator sources contains many, heavily-modified, sources from the
 upstream QEMU project (http://www.qemu.org). It adds the following directories:
 
+  android/scripts/
+    Various helper scripts used to rebuild emulator binaries.
+    E.g. build-qemu-android.sh can be used to rebuild the new emulator
+    code base under external/qemu-android/, and build-mesa.sh will rebuild
+    the Mesa3D library from sources to implement software-based GPU
+    emulation.
+
+  android/dependencies/
+    This directory contains a PACKAGES.TXT file listing all source packages
+    to download from third-party sites. This is useful for depedency libraries
+    used by the emulator codebase(s), whose sources do not change often.
+    This directory may also contain patch tarballs to apply on top of the
+    downloaded packages.
+
+    Scripts are provided under android/scripts/ to rebuild these packages.
+
   android/
     Android-specific code, used to implement a UI and functional layer on
     top of the QEMU code base. Ideally, anything that shouldn't impact the

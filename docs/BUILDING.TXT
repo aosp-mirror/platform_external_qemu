@@ -10,23 +10,20 @@ how to download the platform sources.
 
 The following directories will be relevant:
 
-  $AOSP/external/qemu        -> The emulator itself.
-  $AOSP/external/getst       -> The GoogleTest sources.
+  $AOSP/external/qemu         -> The 'classic' emulator itself.
+  $AOSP/external/qemu-android -> The new emulator based on QEMU 2.x.
+  $AOSP/external/getst        -> The GoogleTest sources.
 
   $AOSP/prebuilts/tools/gcc-sdk           -> host toolchains for SDK tools.
   $AOSP/prebuilts/gcc/linux-x86/host/
   $AOSP/prebuilts/gcc/darwin-x86/host/
 
 
-II. Building:
--------------
+II. Building the 'classic' emulator:
+------------------------------------
 
 You can only build the emulator on Linux or Darwin. Windows binaries are
 always generated on Linux, and actually run under Wine (more on this later).
-
-There are currently two ways to build the emulator:
-
-1) Using the standalone build-system:
 
 As long as the directories listed in section I. exist, you can build the
 emulator binaries from sources directly by using the android-rebuild.sh
@@ -35,8 +32,8 @@ script, i.e.:
   cd $AOSP/external/qemu
   ./android-rebuild.sh
 
-This will build all related binaries, and run the small GoogleTest-based
-unit test suite for your host system.
+This will build all related classic binaries, and run the small
+GoogleTest-based unit test suite for your host system.
 
 This places everything under the 'objs/' sub-directory, and you can launch
 the emulator directly with something like:
@@ -47,31 +44,6 @@ the emulator directly with something like:
 Use ./android-rebuild.sh --help for more details and command-line options.
 
 
-2) Using the Android platform build:
-
-If you have a full checkout of the AOSP source tree, the emulator will be
-built as part of a regular "make" invokation, and the binaries placed under
-out/host/<system>/bin/, allowing you to just run 'emulator' after the build.
-For example, for an ARM-based SDK system image build:
-
-  cd $AOSP
-  . build/envsetup.sh
-  lunch sdk-eng
-  make -j$NUM_CORES
-  emulator
-
-Note that this scheme is _much_slower though, but once you have performed
-a full build, you will be able to only rebuild the emulator quickly by
-doing the following (after the commands above):
-
-  cd external/qemu
-  mm -j$NUM_CORES
-
-The 'mm' command is a special function sourced into your environment by
-envsetup.sh
-
-Note: The default SDK system image maps to an ARMv7-based virtual CPU,
-      use 'sdk_x86-eng' or 'sdk_mips-eng' to build x86 or MIPS based ones.
 
 In all cases, several binaries will be generated:
 
@@ -100,20 +72,6 @@ and be able to start AVDs with your freshly built emulator.
 Windows emulator binaries are always built on Linux, using a cross-toolchain,
 there is no support to build the sources directly on Windows with MSys or
 Cygwin.
-
-Two cross-toolchains are supported:
-
-  1) The Ubuntu 12.04 "mingw32" toolchain, which can only generate Win32
-     executables.
-
-     Note that the "mingw64" toolchain in 12.04 is broken, and conflicts
-     with the mingw32 anyway, so never try to use / install it.
-
-  2) Our own custom w64-based toolchain (x86_64-w64-mingw32), which can
-     generate both Win32 and Win64 executables. You just need to have
-     x86_64-w64-mingw32-gcc in your PATH for it to be used.
-
-     [WARNING: Currently only works in aosp/master branch, not aosp/idea133]
 
 To build the Windows binaries, use the --mingw option, as in:
 
