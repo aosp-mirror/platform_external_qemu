@@ -24,10 +24,23 @@
 #          Download URL for the source package. The package's
 #          basename and version number will be extracted from it.
 #
+#      GIT=<url>
+#          GIT URL to be cloned and packed as a tarball in the
+#          archive directory. Package name will be <basename>-<revision>.tar.xz
+#          where <basename> is the GIT url basename, and <revision> is the
+#          branch or commit SHA1.
+#
+#      BRANCH=<name>
+#          GIT branch name, only needed when GIT=<url> is also used, ignored
+#          otherwise.
+#
 #      SHA1=<sha1>
-#          Optional SHA-1 hash for the source package. If present,
-#          the content of the downloaded package will be checked
-#          against this value.
+#          Optional SHA-1 hash for the source package. If URL=<url> is used,
+#          this is optional, and if present, the content of the downloaded
+#          package will be checked against this value.
+#
+#          If GIT=<url> is used, this is the SHA1 of the tarball created by
+#          the downloader. The commit itself is specified through BRANCH=<name>
 #
 #      SRCDIR=<subdir>
 #          Optional source sub-directory after extraction of the
@@ -164,7 +177,7 @@ package_list_parse_file () {
     fi
 
     local PKG_BASENAME PKG_URL PKG_SHA1 PKG_PATCHES PKG_FILE PKG_VERSION
-    local PKG_LIST PKG_SRC_DIR
+    local PKG_LIST PKG_SRC_DIR PKG_GIT PKG_BRANCH
     local OLD_IFS="$IFS"
     local IFS="$OLD_IFS"
     local COUNT=0
@@ -176,6 +189,8 @@ package_list_parse_file () {
         LINE_NUMBER=$(( $LINE_NUMBER + 1 ))
         _shu_parser_log "$LINE_NUMBER: LINE=[$LINE]"
         PKG_URL=
+        PKG_GIT=
+        PKG_BRANCH=
         PKG_BASENAME=
         PKG_SHA1=
         PKG_FILE=
@@ -198,6 +213,12 @@ package_list_parse_file () {
                 URL=*)
                     PKG_URL=${FIELD#URL=}
                     ;;
+                BRANCH=*)
+                    PKG_BRANCH=${FIELD#BRANCH=}
+                    ;;
+                GIT=*)
+                    PKG_GIT=${FIELD#GIT=}
+                    ;;
                 PATCHES=*)
                     PKG_PATCHES=${FIELD#PATCHES=}
                     ;;
@@ -211,13 +232,26 @@ package_list_parse_file () {
         done
 
         if [ "$PKG_URL" ]; then
+            if [ "$PKG_GIT" ]; then
+                panic "Cannot used bot URL=<url> and GIT=<url> on line $LINE_NUMBER: $1"
+            fi
             PKG_FILE=$(basename "$PKG_URL")
             PKG_BASENAME=$(package_file_get_basename "$PKG_URL")
             PKG_VERSION=$(package_file_get_version "$PKG_URL")
+        elif [ "$PKG_GIT" ]; then
+            if [ -z "$PKG_BRANCH" ]; then
+                panic "Missing BRANCH=<name> on line $LINE_NUMBER: $1"
+            fi
+            PKG_FILE=$(basename "$PKG_GIT")
+            PKG_FILE=${PKG_FILE%.git}  # Remove any .git suffix.
+            PKG_BASENAME=$PKG_FILE
+            PKG_FILE=$PKG_FILE-$PKG_BRANCH.tar.xz
+            PKG_VERSION=$PKG_BRANCH
         else
-            panic "Missing URL=<url> field in package list line $LINE_NUMBER: $1"
+            panic "Missing URL=<url> or GIT=<url> field in package list line $LINE_NUMBER: $1"
         fi
 
+        _shu_parser_log "    FILE=$PKG_FILE"
         if [ -z "$PKG_SRC_DIR" ]; then
             PKG_SRC_DIR=$PKG_BASENAME-$PKG_VERSION
             _shu_parser_log "    SRC_DIR=$PKG_SRC_DIR"
@@ -230,6 +264,7 @@ package_list_parse_file () {
         _shu_pkg_set_var $COUNT FILE "$PKG_FILE"
         _shu_pkg_set_var $COUNT SRC_DIR "$PKG_SRC_DIR"
         _shu_pkg_set_var $COUNT URL "$PKG_URL"
+        _shu_pkg_set_var $COUNT GIT "$PKG_GIT"
         _shu_pkg_set_var $COUNT SHA1 "$PKG_SHA1"
         _shu_pkg_set_var $COUNT PATCHES "$PKG_PATCHES"
 
@@ -287,6 +322,17 @@ package_list_get_filename () {
 # Out: package URL (e.g. 'ftp://someserver/somepath/zlib-1.2.8.tar.gz')
 package_list_get_url () {
     _shu_package_list_get_field "$1" URL
+}
+
+# Return the git URL of a given package, if any.
+# $1: unversioned and un-suffixed package prefix (e.g. 'zlib')
+# Out: package URL (e.g. 'git://git.qemu-project.org/dtc.git')
+package_list_get_git_url () {
+    _shu_package_list_get_field "$1" GIT
+}
+
+package_list_get_git_branch () {
+    _shu_package_list_get_field "$1" BRANCH
 }
 
 # Return the SHA1 of a given package, if any.

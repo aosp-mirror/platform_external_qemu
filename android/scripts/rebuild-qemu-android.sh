@@ -72,21 +72,6 @@ if [ ! -f "$QEMU_ANDROID/include/qemu-common.h" ]; then
     panic "Not a valid qemu-android source directory: $QEMU_ANDROID"
 fi
 
-# TODO(digit): Add libfdt to the dependencies to avoid this.
-# Sanity check: a fresh qemu-android checkout is missing the libfdt
-# sub-module and won't compile without it
-if [ ! -f "$QEMU_ANDROID/dtc/Makefile" ]; then
-    >&2 cat <<EOF
-ERROR: Your qemu-android checkout does not have the device-tree library
-       submodule (libfdt, a.k.a. DTC) checked out. Please run the
-       following command, then re-run this script:
-
-  (cd $QEMU_ANDROID && git submodule update --init dtc)
-
-EOF
-    exit 1
-fi
-
 prebuilts_dir_parse_option
 aosp_dir_parse_option
 install_dir_parse_option
