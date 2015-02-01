@@ -131,7 +131,8 @@ if [ "$OPTION_AOSP_PREBUILTS_DIR" ]; then
         echo "ERROR: You can't use both --no-aosp-prebuilts and --aosp-prebuilts-dir=<path>."
         exit 1
     fi
-    if [ ! -d "$OPTION_AOSP_PREBUILTS_DIR"/gcc ]; then
+    if [ ! -d "$OPTION_AOSP_PREBUILTS_DIR"/gcc -a \
+         ! -d "$OPTION_AOSP_PREBUILTS_DIR"/clang ]; then
         echo "ERROR: Prebuilts directory does not exist: $OPTION_AOSP_PREBUILTS_DIR/gcc"
         exit 1
     fi

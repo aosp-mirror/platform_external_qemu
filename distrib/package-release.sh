@@ -162,10 +162,22 @@ build_darwin_binaries_on () {
   run ssh $HOST "mkdir -p $DST_DIR && rm -rf $DST_DIR/$PKG_FILE_BASENAME"
   cat "$PKG_FILE" | ssh $HOST "cd $DST_DIR && tar x${TARGFLAGS}f -"
 
+  # Copy clang toolchain to remote host.
+  if [ "$AOSP_PREBUILTS_DIR" ]; then
+    CLANG_PREBUILTS_SUBDIR=clang/darwin-x86/host/3.5
+    CLANG_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/$CLANG_PREBUILTS_SUBDIR
+    if [ ! -d "$CLANG_PREBUILTS_DIR" ]; then
+        panic "Missing prebuilts directory: $CLANG_PREBUILTS_DIR"
+    fi
+    dump "Copying Darwin prebuilt toolchain to Darwin host: $HOST"
+    (tar cf - -C "$AOSP_PREBUILTS_DIR" "$CLANG_PREBUILTS_SUBDIR") | \
+            (ssh $HOST tar x${TARFLAGS}f - -C "$DST_DIR")
+  fi
+
   dump "Rebuilding Darwin binaries remotely."
   DARWIN_FLAGS=$REBUILD_FLAGS
   if [ "$AOSP_PREBUILTS_DIR" ]; then
-    DARWIN_FLAGS="$DARWIN_FLAGS --aosp-prebuilts-dir=$AOSP_PREBUILTS_DIR"
+    DARWIN_FLAGS="$DARWIN_FLAGS --aosp-prebuilts-dir=$DST_DIR"
   else
     DARWIN_FLAGS="$DARWIN_FLAGS --no-aosp-prebuilts"
   fi
@@ -205,6 +217,7 @@ DEFAULT_REVISION=$(date +%Y%m%d)
 DEFAULT_PKG_PREFIX=android-emulator
 DEFAULT_PKG_DIR=/tmp
 DEFAULT_DARWIN_SSH=$ANDROID_EMULATOR_DARWIN_SSH
+AOSP_PREBUILTS_DIR=
 
 case $(uname -s) in
     Linux)
@@ -219,16 +232,13 @@ case $(uname -s) in
         panic "Unsupported system! This can only run on Linux and Darwin."
 esac
 
-# Default location of $AOSP/prebuilts on the remote Darwin machine.
-DARWIN_AOSP_PREBUILTS_DIR=/Volumes/Android/repo/aosp/prebuilts
-
 # Command-line parsing.
 DO_HELP=
+OPT_AOSP_PREBUILTS_DIR=
 OPT_COPY_PREBUILTS=
-OPT_DARWIN_NO_AOSP_PREBUILTS=
-OPT_DARWIN_AOSP_PREBUILTS_DIR=
 OPT_DARWIN_SSH=
 OPT_DEBUG=
+OPT_NO_AOSP_PREBUILTS=
 OPT_PKG_DIR=
 OPT_PKG_PREFIX=
 OPT_REVISION=
@@ -240,20 +250,20 @@ for OPT; do
         --help|-?)
             DO_HELP=true
             ;;
+        --aosp-prebuilts-dir=*)
+            OPT_AOSP_PREBUILTS_DIR=${OPT##--aosp-prebuilts-dir=}
+            ;;
         --copy-prebuilts=*)
             OPT_COPY_PREBUILTS=${OPT##--copy-prebuilts=}
             ;;
         --darwin-ssh=*)
             OPT_DARWIN_SSH=${OPT##--darwin-ssh=}
             ;;
-        --darwin-no-aosp-prebuilts)
-            OPT_DARWIN_NO_AOSP_PREBUILTS=true
-            ;;
-        --darwin-aosp-prebuilts-dir=*)
-            OPT_DARWIN_AOSP_PREBUILTS_DIR=${OPT##--darwin-aosp-prebuilts-dir=}
-            ;;
         --debug)
             OPT_DEBUG=true
+            ;;
+        --no-aosp-prebuilts)
+            OPT_NO_AOSP_PREBUILTS=true
             ;;
         --package-dir=*)
             OPT_PKG_DIR=${OPT##--package-dir=}
@@ -308,12 +318,6 @@ binaries on a remote host through ssh. Note that this forces --sources
 as well. You can also define ANDROID_EMULATOR_DARWIN_SSH in your
 environment to setup a default value for this option.
 
-The remote build requires a valid checkout of \$AOSP/prebuilts on the
-remote machine, which location can be specified with
---darwin-prebuilts-dir=<path>. If you don't want to use prebuilts, use
---darwin-no-prebuilts instead, but be aware that the resulting binaries
-may NOT run or work properly!!
-
 Use --copy-prebuilts=<path> to specify the path of an AOSP workspace/checkout,
 and to copy 64-bit prebuilt binaries to <path>/prebuilts/android-emulator/
 for both Linux and Darwin platforms. This option requires the use of
@@ -332,15 +336,6 @@ Valid options (defaults are inside brackets):
 
     --darwin-ssh=<hostname>
                           Perform remote build on a Darwin machine through SSH.
-
-    --darwin-aosp-prebuilts-dir=<path>
-                          Location of AOSP/prebuilts directory on remote
-                          darwin machine [$DARWIN_AOSP_PREBUILTS_DIR]
-
-    --darwin-no-aosp-prebuilts
-                          Don't use AOSP prebuilts toolchain to perform
-                          Darwin remote build. WARNING: The result binaries may
-                          not work correctly!
 EOF
     exit 0
 fi
@@ -383,24 +378,31 @@ else
   DARWIN_SSH=$OPT_DARWIN_SSH
 fi
 
-if [ "$OPT_DARWIN_NO_AOSP_PREBUILTS" ]; then
-  if [ "$OPT_DARWIN_AOSP_PREBUILTS_DIR" ]; then
-    echo "ERROR: Cannot use both --darwin-no-prebuilts and --darwin-prebuilts-dir=<path>."
-    exit 1
-  fi
-  DARWIN_AOSP_PREBUILTS_DIR=
-elif  [ -z "$OPT_DARWIN_AOSP_PREBUILTS_DIR" ]; then
-  log "Auto-config: --darwin-prebuilts-dir=$DARWIN_AOSP_PREBUILTS_DIR  (default)."
-else
-  DARWIN_AOSP_PREBUILTS_DIR=$OPT_DARWIN_AOSP_PREBUILTS_DIR
-fi
-
 if [ "$DARWIN_SSH" ]; then
     if [ -z "$OPT_SOURCES" ]; then
         OPT_SOURCES=true
         log "Auto-config: --sources  (remote Darwin build)."
     fi
     SYSTEMS="$SYSTEMS darwin"
+fi
+
+if [ "$OPT_AOSP_PREBUILTS_DIR" ]; then
+    if [ "$OPT_NO_AOSP_PREBUILTS" ]; then
+        panic "One cannot use --aosp-prebuilts-dir and --no-aosp-prebuilts at the same time!"
+    fi
+    AOSP_PREBUILTS_DIR=$OPT_AOSP_PREBUILTS_DIR
+    if [ ! -d "$AOSP_PREBUILTS_DIR" ]; then
+        panic "Directory does not exist: $AOSP_PREBUILTS_DIR"
+    fi
+elif [ "$OPT_NO_AOSP_PREBUILTS" ]; then
+    AOSP_PREBUILTS_DIR=
+else
+    AOSP_PREBUILTS_DIR=$PROGDIR/../../../prebuilts
+    if [ -d "$AOSP_PREBUILTS_DIR" ]; then
+        log "Auto-config: --aosp-prebuilts-dir=$AOSP_PREBUILTS_DIR"
+    else
+        panic "Can't find <AOSP>/prebuilts/ dir, please use --aosp-prebuilts-dir=<dir> or --no-aosp-prebuilts."
+    fi
 fi
 
 TARGET_AOSP=
@@ -586,7 +588,7 @@ for SYSTEM in $SYSTEMS; do
             if [ -z "$SOURCES_PKG_FILE" ]; then
                 panic "You must use --sources to build Darwin binaries through ssh"
             fi
-            build_darwin_binaries_on "$DARWIN_SSH" "$SOURCES_PKG_FILE" "$DARWIN_AOSP_PREBUILTS_DIR"
+            build_darwin_binaries_on "$DARWIN_SSH" "$SOURCES_PKG_FILE" "$AOSP_PREBUILTS_DIR"
             ;;
         windows)
             if [ "$HOST_SYSTEM" != "linux" ]; then
