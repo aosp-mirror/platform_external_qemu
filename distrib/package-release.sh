@@ -327,7 +327,7 @@ Valid options (defaults are inside brackets):
     --sources             Also create sources package.
     --system=<list>       Specify host system list [$DEFAULT_SYSTEMS].
     --copy-prebuilts=<path>
-                          Copy 64-bit Linux and Darwin binaries to
+                          Copy final emulator binaries to
                           <path>/prebuilts/android-emulator/
 
     --darwin-ssh=<hostname>
