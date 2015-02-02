@@ -33,7 +33,7 @@ PROGRAM_PARAMETERS=""
 
 PROGRAM_DESCRIPTION=\
 "Rebuild qemu-android prebuilt libraries from scratch. This requires the
-source tarbals downloaded through 'download-dependencies-sources.sh' and
+source tarbals downloaded through 'download-sources.sh' and
 a valid AOSP checkout directory.
 
 The source tarball are searched in <prebuilts>/archive, where <prebuilts>
@@ -81,7 +81,7 @@ install_dir_parse_option
 ARCHIVE_DIR=$PREBUILTS_DIR/archive
 if [ ! -d "$ARCHIVE_DIR" ]; then
     dump "Downloading dependencies sources first."
-    $(program_directory)/download-dependencies-sources.sh \
+    $(program_directory)/download-sources.sh \
         --prebuilts-dir=$PREBUILTS_DIR
 fi
 ARCHIVE_DIR=$(cd "$ARCHIVE_DIR" && pwd -P)
