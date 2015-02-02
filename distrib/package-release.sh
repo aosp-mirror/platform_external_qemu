@@ -249,7 +249,7 @@ for OPT; do
             OPT_DARWIN_NO_PREBUILTS=true
             ;;
         --darwin-prebuilts-dir=*)
-            OPT_DARWIN_PREBUILTS_DIR=${OPT##--darwin-prebuilts-dir=*}
+            OPT_DARWIN_PREBUILTS_DIR=${OPT##--darwin-prebuilts-dir=}
             ;;
         --debug)
             OPT_DEBUG=true
