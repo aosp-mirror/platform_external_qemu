@@ -19,8 +19,8 @@ cd `dirname $0`
 OPTION_TARGETS=""
 OPTION_DEBUG=no
 OPTION_IGNORE_AUDIO=no
-OPTION_PREBUILTS_DIR=
-OPTION_NO_PREBUILTS=
+OPTION_AOSP_PREBUILTS_DIR=
+OPTION_NO_AOSP_PREBUILTS=
 OPTION_OUT_DIR=
 OPTION_HELP=no
 OPTION_STATIC=no
@@ -33,16 +33,14 @@ GLES_PROBE=yes
 
 PCBIOS_PROBE=yes
 
-QEMU_PREBUILTS_DIR=
-
 HOST_CC=${CC:-gcc}
 OPTION_CC=
 
-PREBUILTS_DIR=$(dirname "$0")/../../prebuilts
-if [ -d "$PREBUILTS_DIR" ]; then
-    PREBUILTS_DIR=$(cd "$PREBUILTS_DIR" && pwd -P 2>/dev/null)
+AOSP_PREBUILTS_DIR=$(dirname "$0")/../../prebuilts
+if [ -d "$AOSP_PREBUILTS_DIR" ]; then
+    AOSP_PREBUILTS_DIR=$(cd "$AOSP_PREBUILTS_DIR" && pwd -P 2>/dev/null)
 else
-    PREBUILTS_DIR=
+    AOSP_PREBUILTS_DIR=
 fi
 
 for opt do
@@ -75,15 +73,13 @@ for opt do
   ;;
   --ignore-audio) OPTION_IGNORE_AUDIO=yes
   ;;
-  --no-prebuilts) OPTION_NO_PREBUILTS=yes
+  --no-aosp-prebuilts) OPTION_NO_AOSP_PREBUILTS=yes
   ;;
-  --prebuilts-dir=*) OPTION_PREBUILTS_DIR=$optarg
+  --aosp-prebuilts-dir=*) OPTION_AOSP_PREBUILTS_DIR=$optarg
   ;;
   --static) OPTION_STATIC=yes
   ;;
   --gles-dir=*) GLES_DIR=$optarg
-  ;;
-  --qemu-prebuilts-dir=*) QEMU_PREBUILTS_DIR=$optarg
   ;;
   --no-gles) GLES_PROBE=no
   ;;
@@ -115,15 +111,14 @@ EOF
     echo "  --no-strip                  Do not strip emulator executables (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --ignore-audio              Ignore audio messages (may build sound-less emulator)"
-    echo "  --no-prebuilts              Do not use prebuilt libraries and compiler"
-    echo "  --prebuilts-dir=<path>      Use specific prebuilts root directory [$PREBUILTS_DIR]"
+    echo "  --no-aosp-prebuilts         Do not use prebuilt toolchain"
+    echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
     echo "  --mingw                     Build Windows executable on Linux"
     echo "  --static                    Build a completely static executable"
     echo "  --verbose                   Verbose configuration"
     echo "  --debug                     Build debug version of the emulator"
     echo "  --gles-dir=PATH             Specify path to GLES host emulation sources [auto-detected]"
-    echo "  --qemu-prebuilts-dir=PATH   Specify path to QEMU prebuilt binaries"
     echo "  --no-gles                   Disable GLES emulation support"
     echo "  --no-pcbios                 Disable copying of PC Bios files"
     echo "  --no-tests                  Don't run unit test suite"
@@ -131,18 +126,18 @@ EOF
     exit 1
 fi
 
-if [ "$OPTION_PREBUILTS_DIR" ]; then
-    if [ "$OPTION_NO_PREBUILTS" ]; then
-        echo "ERROR: You can't use both --no-prebuilts and --prebuilts-dir=<path>."
+if [ "$OPTION_AOSP_PREBUILTS_DIR" ]; then
+    if [ "$OPTION_NO_AOSP_PREBUILTS" ]; then
+        echo "ERROR: You can't use both --no-aosp-prebuilts and --aosp-prebuilts-dir=<path>."
         exit 1
     fi
-    if [ ! -d "$OPTION_PREBUILTS_DIR"/gcc ]; then
-        echo "ERROR: Prebuilts directory does not exist: $OPTION_PREBUILTS_DIR/gcc"
+    if [ ! -d "$OPTION_AOSP_PREBUILTS_DIR"/gcc ]; then
+        echo "ERROR: Prebuilts directory does not exist: $OPTION_AOSP_PREBUILTS_DIR/gcc"
         exit 1
     fi
-    PREBUILTS_DIR=$OPTION_PREBUILTS_DIR
-elif [ "$OPTION_NO_PREBUILTS" ]; then
-    PREBUILTS_DIR=""
+    AOSP_PREBUILTS_DIR=$OPTION_AOSP_PREBUILTS_DIR
+elif [ "$OPTION_NO_AOSP_PREBUILTS" ]; then
+    AOSP_PREBUILTS_DIR=""
 fi
 
 # For OS X, detect the location of the SDK to use.
@@ -188,20 +183,20 @@ fi
 
 # On Linux, try to use our prebuilt toolchain to generate binaries
 # that are compatible with Ubuntu 10.4
-if [ -z "$CC" -a -z "$OPTION_CC" -a -z "$OPTION_NO_PREBUILTS" ] ; then
+if [ -z "$CC" -a -z "$OPTION_CC" -a -z "$OPTION_NO_AOSP_PREBUILTS" ] ; then
     PROBE_HOST_CC=
     PROBE_HOST_CFLAGS=
     if [ "$HOST_OS" = "linux" ] ; then
-        PREBUILTS_HOST_GCC=$PREBUILTS_DIR/gcc/linux-x86/host
+        PREBUILTS_HOST_GCC=$AOSP_PREBUILTS_DIR/gcc/linux-x86/host
         PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
         if [ ! -f "$PROBE_HOST_CC" ]; then
             PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-gcc
             if [ ! -f "$PROBE_HOST_CC" ] ; then
-                PROBE_HOST_CC=$PREBUILTS_DIR/tools/gcc-sdk/gcc
+                PROBE_HOST_CC=$AOSP_PREBUILTS_DIR/tools/gcc-sdk/gcc
             fi
         fi
     elif [ "$HOST_OS" = "darwin" ] ; then
-        PREBUILTS_HOST_GCC=$PREBUILTS_DIR/clang/darwin-x86/host
+        PREBUILTS_HOST_GCC=$AOSP_PREBUILTS_DIR/clang/darwin-x86/host
         PROBE_HOST_CC=$PREBUILTS_HOST_GCC/3.5/bin/clang
         PROBE_HOST_CFLAGS="-target x86_64-apple-darwin11.0.0"
     else
@@ -214,7 +209,7 @@ if [ -z "$CC" -a -z "$OPTION_CC" -a -z "$OPTION_NO_PREBUILTS" ] ; then
         CC="$PROBE_HOST_CC $PROBE_HOST_CFLAGS"
     else
         echo "ERROR: Cannot find prebuilts toolchain: $PROBE_HOST_CC"
-        echo "Please use --no-prebuilts or --prebuilts-dir=<path>."
+        echo "Please use --no-aosp-prebuilts or --aosp-prebuilts-dir=<path>."
         exit 1
     fi
 fi
@@ -282,7 +277,7 @@ check_android_build
 #    - locate and use prebuilt libraries
 #    - copy the new binary to the correct location
 #
-if [ "$OPTION_NO_PREBUILTS" ] ; then
+if [ "$OPTION_NO_AOSP_PREBUILTS" ] ; then
     IN_ANDROID_BUILD=no
 fi
 
@@ -370,7 +365,7 @@ if [ "$GLES_PROBE" = "yes" ]; then
 fi
 
 if [ "$PCBIOS_PROBE" = "yes" ]; then
-    PCBIOS_DIR=$PREBUILTS_DIR/qemu-kernel/x86/pc-bios
+    PCBIOS_DIR=$AOSP_PREBUILTS_DIR/qemu-kernel/x86/pc-bios
     if [ ! -d "$PCBIOS_DIR" ]; then
         log2 "PC Bios    : Probing $PCBIOS_DIR (missing)"
         PCBIOS_DIR=../pc-bios
@@ -816,15 +811,6 @@ python scripts/qapi-types.py qapi.types --output-dir=$AUTOGENERATED_DIR -b < qap
 python scripts/qapi-visit.py --output-dir=$AUTOGENERATED_DIR -b < qapi-schema.json
 python scripts/qapi-commands.py --output-dir=$AUTOGENERATED_DIR -m < qapi-schema.json
 log "Generate   : $AUTOGENERATED_DIR"
-
-if [ "$QEMU_PREBUILTS_DIR" ]; then
-    if [ ! -d "$QEMU_PREBUILTS_DIR/binaries" ]; then
-        panic "Missing QEMU prebuilts directory: $QEMU_PREBUILTS_DIR/binaries"
-    fi
-    log "Copying QEMU prebuilt binaries to: $OUT_DIR/qemu"
-    mkdir -p "$OUT_DIR"/qemu || panic "Could not create $OUT_DIR/qemu"
-    cp -rp "$QEMU_PREBUILTS_DIR/binaries"/* "$OUT_DIR/qemu"
-fi
 
 clean_temp
 

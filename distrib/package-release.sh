@@ -136,10 +136,11 @@ commas_to_spaces () {
 # $2: Source package file.
 # $3: Darwin prebuilts directory.
 build_darwin_binaries_on () {
-  local HOST PKG_FILE PKG_FILE_BASENAME DST_DIR TARFLAGS PREBUILTS_DIR DARWIN_FLAGS
+  local HOST PKG_FILE PKG_FILE_BASENAME DST_DIR TARFLAGS
+  local AOSP_PREBUILTS_DIR DARWIN_FLAGS
   HOST=$1
   PKG_FILE=$2
-  PREBUILTS_DIR=$3
+  AOSP_PREBUILTS_DIR=$3
 
   # The package file is ....../something-darwin.tar.bz2
   # And should unpack to a single directory named 'something/'
@@ -163,10 +164,10 @@ build_darwin_binaries_on () {
 
   dump "Rebuilding Darwin binaries remotely."
   DARWIN_FLAGS=$REBUILD_FLAGS
-  if [ "$PREBUILTS_DIR" ]; then
-    DARWIN_FLAGS="$DARWIN_FLAGS --prebuilts-dir=$PREBUILTS_DIR"
+  if [ "$AOSP_PREBUILTS_DIR" ]; then
+    DARWIN_FLAGS="$DARWIN_FLAGS --aosp-prebuilts-dir=$AOSP_PREBUILTS_DIR"
   else
-    DARWIN_FLAGS="$DARWIN_FLAGS --no-prebuilts"
+    DARWIN_FLAGS="$DARWIN_FLAGS --no-aosp-prebuilts"
   fi
   run ssh $HOST "bash -l -c \"cd $DST_DIR/$PKG_FILE_PREFIX/qemu && ./android-rebuild.sh $DARWIN_FLAGS\"" ||
         panic "Can't rebuild binaries on Darwin, use --verbose to see why!"
@@ -219,13 +220,13 @@ case $(uname -s) in
 esac
 
 # Default location of $AOSP/prebuilts on the remote Darwin machine.
-DARWIN_PREBUILTS_DIR=/Volumes/Android/repo/aosp/prebuilts
+DARWIN_AOSP_PREBUILTS_DIR=/Volumes/Android/repo/aosp/prebuilts
 
 # Command-line parsing.
 DO_HELP=
 OPT_COPY_PREBUILTS=
-OPT_DARWIN_NO_PREBUILTS=
-OPT_DARWIN_PREBUILTS_DIR=
+OPT_DARWIN_NO_AOSP_PREBUILTS=
+OPT_DARWIN_AOSP_PREBUILTS_DIR=
 OPT_DARWIN_SSH=
 OPT_DEBUG=
 OPT_PKG_DIR=
@@ -245,11 +246,11 @@ for OPT; do
         --darwin-ssh=*)
             OPT_DARWIN_SSH=${OPT##--darwin-ssh=}
             ;;
-        --darwin-no-prebuilts)
-            OPT_DARWIN_NO_PREBUILTS=true
+        --darwin-no-aosp-prebuilts)
+            OPT_DARWIN_NO_AOSP_PREBUILTS=true
             ;;
-        --darwin-prebuilts-dir=*)
-            OPT_DARWIN_PREBUILTS_DIR=${OPT##--darwin-prebuilts-dir=}
+        --darwin-aosp-prebuilts-dir=*)
+            OPT_DARWIN_AOSP_PREBUILTS_DIR=${OPT##--darwin-aosp-prebuilts-dir=}
             ;;
         --debug)
             OPT_DEBUG=true
@@ -332,11 +333,12 @@ Valid options (defaults are inside brackets):
     --darwin-ssh=<hostname>
                           Perform remote build on a Darwin machine through SSH.
 
-    --darwin-prebuilts-dir=<path>
+    --darwin-aosp-prebuilts-dir=<path>
                           Location of AOSP/prebuilts directory on remote
-                          darwin machine [$DARWIN_PREBUILTS_DIR]
+                          darwin machine [$DARWIN_AOSP_PREBUILTS_DIR]
 
-    --darwin-no-prebuilts Don't use AOSP prebuilts toolchain to perform
+    --darwin-no-aosp-prebuilts
+                          Don't use AOSP prebuilts toolchain to perform
                           Darwin remote build. WARNING: The result binaries may
                           not work correctly!
 EOF
@@ -381,16 +383,16 @@ else
   DARWIN_SSH=$OPT_DARWIN_SSH
 fi
 
-if [ "$OPT_DARWIN_NO_PREBUILTS" ]; then
-  if [ "$OPT_DARWIN_PREBUILTS_DIR" ]; then
+if [ "$OPT_DARWIN_NO_AOSP_PREBUILTS" ]; then
+  if [ "$OPT_DARWIN_AOSP_PREBUILTS_DIR" ]; then
     echo "ERROR: Cannot use both --darwin-no-prebuilts and --darwin-prebuilts-dir=<path>."
     exit 1
   fi
-  DARWIN_PREBUILTS_DIR=
-elif  [ -z "$OPT_DARWIN_PREBUILTS_DIR" ]; then
-  log "Auto-config: --darwin-prebuilts-dir=$DARWIN_PREBUILTS_DIR  (default)."
+  DARWIN_AOSP_PREBUILTS_DIR=
+elif  [ -z "$OPT_DARWIN_AOSP_PREBUILTS_DIR" ]; then
+  log "Auto-config: --darwin-prebuilts-dir=$DARWIN_AOSP_PREBUILTS_DIR  (default)."
 else
-  DARWIN_PREBUILTS_DIR=$OPT_DARWIN_PREBUILTS_DIR
+  DARWIN_AOSP_PREBUILTS_DIR=$OPT_DARWIN_AOSP_PREBUILTS_DIR
 fi
 
 if [ "$DARWIN_SSH" ]; then
@@ -584,7 +586,7 @@ for SYSTEM in $SYSTEMS; do
             if [ -z "$SOURCES_PKG_FILE" ]; then
                 panic "You must use --sources to build Darwin binaries through ssh"
             fi
-            build_darwin_binaries_on "$DARWIN_SSH" "$SOURCES_PKG_FILE" "$DARWIN_PREBUILTS_DIR"
+            build_darwin_binaries_on "$DARWIN_SSH" "$SOURCES_PKG_FILE" "$DARWIN_AOSP_PREBUILTS_DIR"
             ;;
         windows)
             if [ "$HOST_SYSTEM" != "linux" ]; then
