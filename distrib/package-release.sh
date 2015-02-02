@@ -212,6 +212,65 @@ extract_git_commit_description () {
     var_assign ${VARNAME} $SHA1
 }
 
+# Create archive
+# $1: Package file
+# $2: Source directory
+# $3+: List of files/directories to package.
+package_archive_files () {
+    local PKG_FILE PKG_DIR TMP_FILE_LIST TARFLAGS RET FILTER FILE FILES
+    PKG_FILE=$1
+    PKG_DIR=$2
+    shift; shift;
+    # Try to make reproduceable tarballs by forcing the order of files
+    # within the archive, as well as setting the user/group names and
+    # date to fixed values.
+    TMP_FILE_LIST=$(mktemp)
+    rm -f $TMP_FILE_LIST
+    for FILTER; do
+        FILES=$(cd "$PKG_DIR" && ls -d "$FILTER" 2>/dev/null || true)
+        if [ -z "$FILES" ]; then
+            panic "Cannot find files matching filter: $FILTER"
+        fi
+        for FILE in $FILES; do
+            (cd "$PKG_DIR" && find $FILE -type f 2>/dev/null || true) >> $TMP_FILE_LIST
+        done
+    done
+    cat $TMP_FILE_LIST | sort -u > $TMP_FILE_LIST.tmp
+    rm -f $TMP_FILE_LIST
+    mv $TMP_FILE_LIST.tmp $TMP_FILE_LIST
+    case $PKG_FILE in
+        *.tar)
+            TARFLAGS=""
+            ;;
+        *.tar.gz)
+            TARFLAGS=z
+            ;;
+        *.tar.bz2)
+            TARFLAGS=j
+            ;;
+        *.tar.xz)
+            TARFLAGS=J
+            ;;
+        *)
+            panic "Don't know how to create package: $PKG_FILE"
+            ;;
+    esac
+    if [ $VERBOSE -gt 2 ]; then
+        TARFLAGS=${TARFLAGS}v
+    fi
+
+    RET=0
+    run tar c${TARFLAGS}f "$PKG_FILE" \
+            -C "$PKG_DIR" \
+            -T "$TMP_FILE_LIST" \
+            --owner=android \
+            --group=android \
+            --mtime="2015-01-01 00:00:00" \
+        || RET=$?
+    rm -f "$TMP_FILE_LIST"
+    return $RET
+}
+
 # Defaults.
 DEFAULT_REVISION=$(date +%Y%m%d)
 DEFAULT_PKG_PREFIX=android-emulator
@@ -568,7 +627,7 @@ EOF
     PKG_FILE=$PKG_DIR/$PKG_PREFIX-$PKG_REVISION-sources.tar.bz2
     SOURCES_PKG_FILE=$PKG_FILE
     dump "[$PKG_NAME] Creating tarball..."
-    (run cd "$BUILD_DIR"/.. && run tar cjf "$PKG_FILE" $PKG_PREFIX-$PKG_REVISION)
+    package_archive_files "$PKG_FILE" "$BUILD_DIR"/.. $PKG_PREFIX-$PKG_REVISION
 fi
 
 for SYSTEM in $SYSTEMS; do
@@ -629,7 +688,10 @@ EOF
 
     dump "[$PKG_NAME] Creating tarball."
     PKG_FILE=$PKG_DIR/$PKG_PREFIX-$PKG_REVISION-$SYSTEM.tar.bz2
-    (run cd "$TEMP_BUILD_DIR"/$SYSTEM && run tar cjf $PKG_FILE $PKG_PREFIX-$PKG_REVISION)
+    package_archive_files \
+        "$PKG_FILE" \
+        "$TEMP_BUILD_DIR"/$SYSTEM \
+        $PKG_PREFIX-$PKG_REVISION
 done
 
 if [ "$OPT_COPY_PREBUILTS" ]; then
@@ -681,7 +743,7 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
         fi
 
 
-        (cd "$SRC_DIR/tools" && tar cf - $FILES) | (cd $DST_DIR && tar xf -) ||
+        copy_directory_files "$SRC_DIR"/tools "$DST_DIR" "$FILES" ||
                 panic "Could not copy binaries to $DST_DIR"
     done
     README_FILE=$TARGET_PREBUILTS_DIR/README
