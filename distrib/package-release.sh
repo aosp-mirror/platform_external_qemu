@@ -507,7 +507,7 @@ extract_previous_git_commit_from_readme () {
 # $1: AOSP sub-directory.
 extract_subdir_git_history () {
     local VARNAME="$(get_aosp_subdir_varname $1)"
-    local SUBDIR="$TARGET_AOSP/$1"
+    local SUBDIR="$QEMU_DIR/../../$1"
     if [ ! -d "$SUBDIR" ]; then
         panic "Missing required source directory: $SUBDIR"
     fi
@@ -540,7 +540,7 @@ if [ "$OPT_SOURCES" ]; then
     PKG_NAME="$PKG_REVISION-sources"
     for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
         dump "[$PKG_NAME] Copying $AOSP_SUBDIR source files."
-        copy_directory_git_files "$TARGET_AOSP/$AOSP_SUBDIR" "$BUILD_DIR"/$(basename $AOSP_SUBDIR)
+        copy_directory_git_files "$QEMU_DIR/../../$AOSP_SUBDIR" "$BUILD_DIR"/$(basename $AOSP_SUBDIR)
     done
 
     dump "[$PKG_NAME] Generating README file."
@@ -715,7 +715,7 @@ EOF
         if [ "$CUR_SHA1" != "$PREV_SHA1" ]; then
             GIT_LOG_COMMAND="cd $AOSP_SUBDIR && git log --oneline --no-merges $PREV_SHA1..$CUR_SHA1 ."
             printf "    $ %s\n" "$GIT_LOG_COMMAND" >> $README_FILE
-            (cd $TARGET_AOSP && eval $GIT_LOG_COMMAND) | while read LINE; do
+            (cd $QEMU_DIR/../.. && eval $GIT_LOG_COMMAND) | while read LINE; do
                 printf "        %s\n" "$LINE" >> $README_FILE
             done
             printf "\n" >> $README_FILE
