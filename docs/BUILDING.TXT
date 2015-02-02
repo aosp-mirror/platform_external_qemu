@@ -142,7 +142,7 @@ NOTE: Performance of Windows binaries under Wine is currently pretty bad,
 
 4) Rebuilding binaries for all host architectures at the same time:
 
-A script under distrib/package-release.sh is provided to rebuild all
+A script under android/scripts/package-release.sh is provided to rebuild all
 binaries from sources. By default, it will try to rebuild for Linux and
 Windows, but if you have ssh access to a Darwin machine with the command-line
 XCode tools installed, it will also automatically:

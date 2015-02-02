@@ -55,6 +55,15 @@ for opt do
         VERBOSE=yes
     fi
   ;;
+  --verbosity=*)
+    if [ "$optarg" -gt 1 ]; then
+        VERBOSE=yes
+        if [ "$optarg" -gt 2 ]; then
+            VERBOSE2=yes
+        fi
+    fi
+    ;;
+
   --debug) OPTION_DEBUG=yes
   ;;
   --install=*) OPTION_TARGETS="$OPTION_TARGETS $optarg";
@@ -131,7 +140,8 @@ if [ "$OPTION_AOSP_PREBUILTS_DIR" ]; then
         echo "ERROR: You can't use both --no-aosp-prebuilts and --aosp-prebuilts-dir=<path>."
         exit 1
     fi
-    if [ ! -d "$OPTION_AOSP_PREBUILTS_DIR"/gcc ]; then
+    if [ ! -d "$OPTION_AOSP_PREBUILTS_DIR"/gcc -a \
+         ! -d "$OPTION_AOSP_PREBUILTS_DIR"/clang ]; then
         echo "ERROR: Prebuilts directory does not exist: $OPTION_AOSP_PREBUILTS_DIR/gcc"
         exit 1
     fi
