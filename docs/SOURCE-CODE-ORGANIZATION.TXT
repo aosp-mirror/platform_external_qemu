@@ -166,8 +166,9 @@ emulator-related sources and prebuilt binaries:
     type 'emulator' after a succesful build, and have the corresponding
     system image started under emulation.
 
-    Updating these binaries requires using the distrib/package-release.sh
-    script with the --copy-prebuilts option (see below).
+    Updating these binaries requires using the script under
+    android/scripts/package-release.sh with the --copy-prebuilts option
+    (see below).
 
   https://qemu-android.googlesource.com/qemu-android/
 
@@ -341,12 +342,13 @@ VII. Updating prebuilts/android-emulator/ files:
 ------------------------------------------------
 
 The qemu-old binaries in this directory can be automatically updated using the
-distrib/package-release.sh script with the --copy-prebuilts option, as in:
+android/scripts/package-release.sh script with the --copy-prebuilts option,
+as in:
 
    cd $AOSP/prebuilts/android-emulator
    repo start update-binaries
    cd $AOSP/external/qemu
-   distrib/package-release.sh --darwin-ssh=<hostname> --copy-prebuilts=$AOSP
+   android/scripts/package-release.sh --darwin-ssh=<hostname> --copy-prebuilts=$AOSP
 
 Note that this option requires building on Linux, and the ability to perform
 a remote build on a Darwin machine through ssh. See 'package-release.sh --help'

@@ -55,6 +55,15 @@ for opt do
         VERBOSE=yes
     fi
   ;;
+  --verbosity=*)
+    if [ "$optarg" -gt 1 ]; then
+        VERBOSE=yes
+        if [ "$optarg" -gt 2 ]; then
+            VERBOSE2=yes
+        fi
+    fi
+    ;;
+
   --debug) OPTION_DEBUG=yes
   ;;
   --install=*) OPTION_TARGETS="$OPTION_TARGETS $optarg";
