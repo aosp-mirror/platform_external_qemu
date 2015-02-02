@@ -58,7 +58,7 @@ if [ ! -d "$ARCHIVE_DIR" ]; then
 fi
 PACKAGE_LIST=$ARCHIVE_DIR/PACKAGES.TXT
 if [ ! -f "$PACKAGE_LIST" ]; then
-    panic "Missing package list file, run download-dependencies-sources.sh: $PACKAGE_LIST"
+    panic "Missing package list file, run download-sources.sh: $PACKAGE_LIST"
 fi
 
 
