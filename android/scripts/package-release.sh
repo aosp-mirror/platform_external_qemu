@@ -241,6 +241,35 @@ convert_host_list_to_os_list () {
     printf %s "$RET" | tr ' ' '\n' | sort -u | tr '\n' ' '
 }
 
+# Return shared library extension for a given host sytem
+# $1: host os name (e.g. 'windows' or 'windows-x86_64')
+# Out: DLL extension (e.g. '.dll')
+dll_ext_for () {
+    case $1 in
+        windows*)
+            printf ".dll"
+            ;;
+        darwin*)
+            printf ".dylib"
+            ;;
+        *)
+            printf ".so"
+    esac
+}
+
+# Return executable extension for a given host system
+# $1: host os name (e.g. 'windows' or 'windows-x86_64')
+# Out: exe extension (e.g. '.exe')
+exe_ext_for () {
+    case $1 in
+        windows*)
+            printf ".exe"
+            ;;
+        *)
+            printf ""
+    esac
+}
+
 ###
 ###  COMMAND LINE PARSING
 ###
@@ -437,9 +466,14 @@ create_binaries_package () {
 
     run cp -p objs/emulator* "$TEMP_PKG_DIR"/tools
     if [ -d "objs/lib" ]; then
-        dump "[$PKG_NAME] Copying GLES emulation libraries."
+        dump "[$PKG_NAME] Copying 32-bit GLES emulation libraries."
         run mkdir -p "$TEMP_PKG_DIR"/tools/lib
         run cp -rp objs/lib/* "$TEMP_PKG_DIR"/tools/lib/
+    fi
+    if [ -d "objs/lib64" ]; then
+        dump "[$PKG_NAME] Copying 64-bit GLES emulation libraries."
+        run mkdir -p "$TEMP_PKG_DIR"/tools/lib64
+        run cp -rp objs/lib64/* "$TEMP_PKG_DIR"/tools/lib64/
     fi
 
     dump "[$PKG_NAME] Creating README file."
@@ -580,38 +614,32 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
         DST_DIR=$TARGET_PREBUILTS_DIR/$SYSTEM_ARCH
         dump "[$SYSTEM_ARCH] Copying emulator binaries into $DST_DIR"
         run mkdir -p "$DST_DIR" || panic "Could not create directory: $DST_DIR"
-        EXEEXT=
-        case $SYSTEM in
-            linux) DLLEXT=.so;;
-            darwin) DLLEXT=.dylib;;
-            windows)
-              DLLEXT=.dll
-              EXEEXT=.exe
-              ;;
-            *) panic "Unsupported prebuilt system: $SYSTEM";;
-        esac
+        DLLEXT=$(dll_ext_for $SYSTEM)
+        EXEEXT=$(exe_ext_for $SYSTEM)
         FILES="emulator$EXEEXT"
         for ARCH in arm x86 mips; do
-            FILES="$FILES emulator$BITNESS-$ARCH$EXEEXT"
+            var_append FILES "emulator$BITNESS-$ARCH$EXEEXT"
         done
         for ARCH in arm64 mips64; do
             if [ -f "$SRC_DIR/tools/emulator64-$ARCH$EXEEXT" ]; then
-                FILES="$FILES emulator64-$ARCH$EXEEXT"
+                var_append FILES "emulator64-$ARCH$EXEEXT"
             fi
         done
 
-        for LIB in $EMUGL_LIBRARIES; do
-            FILES="$FILES lib/lib$BITNESS$LIB$DLLEXT"
-        done
+        if [ -d "$SRC_DIR/tools/lib$BITNESS" ]; then
+            for LIB in $EMUGL_LIBRARIES; do
+                var_append FILES "lib$BITNESS/lib$BITNESS$LIB$DLLEXT"
+            done
+        fi
 
         # temparily include linux 32 bit binaries
         if [ $SYSTEM = "linux" ]; then
             BITNESS=
             for ARCH in arm x86 mips; do
-                FILES="$FILES emulator$BITNESS-$ARCH$EXEEXT"
+                FILES="$FILES emulator-$ARCH$EXEEXT"
             done
             for LIB in $EMUGL_LIBRARIES; do
-                FILES="$FILES lib/lib$BITNESS$LIB$DLLEXT"
+                var_append FILES "lib/lib$LIB$DLLEXT"
             done
         fi
 
