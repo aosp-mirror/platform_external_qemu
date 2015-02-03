@@ -27,7 +27,7 @@ shell_import utils/package_builder.shi
 
 # The list of AOSP directories that contain relevant sources for this
 # script.
-AOSP_SOURCE_SUBDIRS="external/qemu external/gtest"
+AOSP_SOURCE_SUBDIRS="external/qemu external/qemu-android external/gtest"
 
 # Default package output directory.
 DEFAULT_PKG_DIR=/tmp
@@ -50,7 +50,7 @@ EMUGL_LIBRARIES="OpenglRender EGL_translator GLES_CM_translator GLES_V2_translat
 # Out: variable name (e.g. 'AOSP_COMMIT_external_qemu_android')
 _get_aosp_subdir_varname () {
     local __aosp_subdir="$1"
-    echo "AOSP_COMMIT_$(printf "%s" "$__aosp_subdir" | tr '/' '_')"
+    echo "AOSP_COMMIT_$(printf "%s" "$__aosp_subdir" | tr '/' '_' | tr '-' '_')"
 }
 
 # Get the commit corresponding to a given AOSP source sub-directory.
@@ -121,6 +121,19 @@ extract_subdir_git_history () {
     fi
 }
 
+# Copy a file to a destination, creating the output directory if needed.
+# $1: Source file path
+# $2: Destination file path
+copy_file_into () {
+    local SRCFILE="$1"
+    local DSTDIR="${2%%/}"
+    if [ ! -d "$DSTDIR" ]; then
+        run mkdir -p "$DSTDIR" ||
+                panic "Cannot create destination directory for: $DSTDIR"
+    fi
+    run cp -p "$SRCFILE" "$DSTDIR/$(basename "$SRCFILE")"
+}
+
 # Copy a list of files from one source directory to a destination one.
 # $1: Source directory.
 # $2: Destination directory.
@@ -157,6 +170,32 @@ copy_directory_git_files () {
   return $RET
 }
 
+# Return a sorted list of all files under a given top-level directory,
+# Matching one or more filters.
+# $1: top-level directory
+# $2+: option file filters. If empty, all files under $1 are taken.
+list_files_under () {
+    local TOP_DIR="$1"
+    shift
+    local FILTERS="$*"
+    if [ -z "$FILTERS" ]; then
+        FILTERS="*"
+    fi
+    local FILTER FILE FILES TMP_LIST
+    TMP_LIST=$(mktemp)
+    for FILTER in $FILTERS; do
+        FILES=$((cd "$TOP_DIR" && ls -d $FILTER) 2>/dev/null || true)
+        for FILE in $FILES; do
+            (cd "$TOP_DIR" && find "$FILE" -type f 2>/dev/null || true) >> $TMP_LIST
+        done
+    done
+    cat $TMP_LIST | sort -u > $TMP_LIST.tmp
+    rm -f $TMP_LIST
+    mv $TMP_LIST.tmp $TMP_LIST
+    cat "$TMP_LIST"
+    rm -f "$TMP_LIST"
+}
+
 # Create archive
 # $1: Package file
 # $2: Source directory
@@ -170,19 +209,7 @@ package_archive_files () {
     # within the archive, as well as setting the user/group names and
     # date to fixed values.
     TMP_FILE_LIST=$(mktemp)
-    rm -f $TMP_FILE_LIST
-    for FILTER; do
-        FILES=$(cd "$PKG_DIR" && ls -d "$FILTER" 2>/dev/null || true)
-        if [ -z "$FILES" ]; then
-            panic "Cannot find files matching filter: $FILTER"
-        fi
-        for FILE in $FILES; do
-            (cd "$PKG_DIR" && find $FILE -type f 2>/dev/null || true) >> $TMP_FILE_LIST
-        done
-    done
-    cat $TMP_FILE_LIST | sort -u > $TMP_FILE_LIST.tmp
-    rm -f $TMP_FILE_LIST
-    mv $TMP_FILE_LIST.tmp $TMP_FILE_LIST
+    list_files_under "$PKG_DIR" "$@" > "$TMP_FILE_LIST"
     case $PKG_FILE in
         *.tar)
             TARFLAGS=""
@@ -294,6 +321,7 @@ option_register_var "--copy-prebuilts=<dir>" OPT_COPY_PREBUILTS \
 
 package_builder_register_options
 aosp_prebuilts_dir_register_options
+prebuilts_dir_register_option
 
 PROGRAM_PARAMETERS=
 
@@ -348,6 +376,7 @@ fi
 
 package_builder_process_options qemu-package-binaries
 aosp_prebuilts_dir_parse_options
+prebuilts_dir_parse_option
 
 if [ -z "$OPT_SOURCES" -a "$DARWIN_SSH" ]; then
     OPT_SOURCES=true
@@ -460,20 +489,44 @@ fi
 create_binaries_package () {
     local SYSTEM=$1
     local PKG_NAME=$PKG_REVISION-$SYSTEM
+    local DLLEXT=$(dll_ext_for $SYSTEM)
+    local EXEEXT=$(exe_ext_for $SYSTEM)
+    local FILE LIB
     dump "[$PKG_NAME] Copying emulator binaries."
     TEMP_PKG_DIR=$TEMP_DIR/$SYSTEM/$PKG_PREFIX-$PKG_REVISION
-    run mkdir -p "$TEMP_PKG_DIR"/tools
 
-    run cp -p objs/emulator* "$TEMP_PKG_DIR"/tools
+    FILE=emulator$EXEEXT
+    copy_file_into objs/$FILE "$TEMP_PKG_DIR"/tools/
     if [ -d "objs/lib" ]; then
+        for FILE in objs/emulator-*; do
+            copy_file_into $FILE "$TEMP_PKG_DIR"/tools/
+        done
         dump "[$PKG_NAME] Copying 32-bit GLES emulation libraries."
-        run mkdir -p "$TEMP_PKG_DIR"/tools/lib
-        run cp -rp objs/lib/* "$TEMP_PKG_DIR"/tools/lib/
+        for LIB in $EMUGL_LIBRARIES; do
+            copy_file_into objs/lib/lib$LIB$DLLEXT \
+                           "$TEMP_PKG_DIR"/tools/lib/
+        done
     fi
     if [ -d "objs/lib64" ]; then
+        for FILE in objs/emulator64-*; do
+            copy_file_into $FILE "$TEMP_PKG_DIR"/tools/
+        done
         dump "[$PKG_NAME] Copying 64-bit GLES emulation libraries."
-        run mkdir -p "$TEMP_PKG_DIR"/tools/lib64
-        run cp -rp objs/lib64/* "$TEMP_PKG_DIR"/tools/lib64/
+        for LIB in $EMUGL_LIBRARIES; do
+            copy_file_into objs/lib64/lib64$LIB$DLLEXT \
+                           "$TEMP_PKG_DIR"/tools/lib64/
+        done
+    fi
+    if [ -d "objs/qemu" ]; then
+        QEMU_BINARIES=$(list_files_under objs/qemu "$SYSTEM-*/qemu-system-*")
+        if [ "$QEMU_BINARIES" ]; then
+            for QEMU_BINARY in $QEMU_BINARIES; do
+                dump "[$PKG_NAME] Copying $QEMU_BINARY."
+                copy_file_into \
+                        objs/qemu/$QEMU_BINARY \
+                        "$TEMP_PKG_DIR"/tools/qemu/$(dirname $QEMU_BINARY)
+            done
+        fi
     fi
 
     dump "[$PKG_NAME] Creating README file."
@@ -558,6 +611,18 @@ build_darwin_binaries_on () {
     dump "Deleting files off darwin system"
     run ssh $HOST rm -rf $DST_DIR/$PKG_FILE_PREFIX
 
+    if [ ! -d "obj/qemu" ]; then
+        QEMU_PREBUILTS_DIR=$PREBUILTS_DIR/qemu-android
+        QEMU_BINARIES=$(list_files_under "$QEMU_PREBUILTS_DIR" "darwin-*/qemu-system-*")
+        if [ "$QEMU_BINARIES" ]; then
+            for QEMU_BINARY in $QEMU_BINARIES; do
+                dump "[$PKG_NAME] Copying $QEMU_BINARY"
+                copy_file_into "$QEMU_PREBUILTS_DIR"/$QEMU_BINARY \
+                               objs/qemu/$(dirname $QEMU_BINARY)
+            done
+        fi
+    fi
+
     create_binaries_package darwin
 }
 
@@ -583,6 +648,7 @@ for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do
     PKG_NAME="$PKG_REVISION-$SYSTEM"
     dump "[$PKG_NAME] Rebuilding binaries from sources."
     run cd $QEMU_DIR
+
     case $SYSTEM in
         windows)
             run ./android-rebuild.sh --mingw $REBUILD_FLAGS ||
@@ -632,7 +698,11 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
             done
         fi
 
-        # temparily include linux 32 bit binaries
+        if [ -d "$SRC_DIR/tools/qemu" ]; then
+            var_append FILES $(list_files_under "$SRC_DIR/tools/qemu" "*")
+        fi
+
+        # temporarily include linux 32 bit binaries
         if [ $SYSTEM = "linux" ]; then
             BITNESS=
             for ARCH in arm x86 mips; do
