@@ -10,14 +10,19 @@ set -e
 export LANG=C
 export LC_ALL=C
 
+PROGDIR=$(dirname "$0")
 VERBOSE=0
 
+BUILD_QEMU_ANDROID=
 MINGW=
 NO_TESTS=
 OUT_DIR=objs
 
 for OPT; do
     case $OPT in
+        --build-qemu-android)
+            BUILD_QEMU_ANDROID=true
+            ;;
         --mingw)
             MINGW=true
             ;;
@@ -57,7 +62,7 @@ case $HOST_OS in
     Linux)
         HOST_NUM_CPUS=`cat /proc/cpuinfo | grep processor | wc -l`
         ;;
-    Darwin|FreeBsd)
+    Darwin|FreeBSD)
         HOST_NUM_CPUS=`sysctl -n hw.ncpu`
         ;;
     CYGWIN*|*_NT-*)
@@ -67,6 +72,22 @@ case $HOST_OS in
         HOST_NUM_CPUS=1
 esac
 
+case $HOST_OS in
+    Linux)
+        HOST_SYSTEM=linux
+        ;;
+    Darwin)
+        HOST_SYSTEM=darwin
+        ;;
+    FreeBSD)
+        HOST_SYSTEM=freebsd
+        ;;
+    CYGWIN*|*_NT-*)
+        HOST_SYSTEM=windows
+        ;;
+    *)
+        panic "Host system is not supported: $HOST_OS"
+esac
 
 # Return the type of a given file, using the /usr/bin/file command.
 # $1: executable path.
@@ -104,9 +125,10 @@ else
 fi
 
 # Build the binaries from sources.
-cd `dirname $0`
+cd "$PROGDIR"
 rm -rf objs
 echo "Configuring build."
+export IN_ANDROID_REBUILD_SH=1
 run ./android-configure.sh --out-dir=$OUT_DIR "$@" ||
     panic "Configuration error, please run ./android-configure.sh to see why."
 
@@ -114,25 +136,27 @@ echo "Building sources."
 run make -j$HOST_NUM_CPUS OBJS_DIR="$OUT_DIR" ||
     panic "Could not build sources, please run 'make' to see why."
 
+if [ "$BUILD_QEMU_ANDROID" ]; then
+    # Rebuild qemu-android binaries.
+    echo "Building qemu-android binaries."
+    unset ANDROID_EMULATOR_DARWIN_SSH &&
+    $PROGDIR/android/scripts/build-qemu-android.sh \
+        --verbosity=$VERBOSE \
+        --host=$HOST_SYSTEM-x86_64
+fi
+
 # Copy qemu-android binaries, if any.
 PREBUILTS_DIR=$ANDROID_EMULATOR_PREBUILTS_DIR
 if [ -z "$PREBUILTS_DIR" ]; then
-  PREBUILTS_DIR=/tmp/$USER-emulator-prebuilts
+PREBUILTS_DIR=/tmp/$USER-emulator-prebuilts
 fi
 QEMU_ANDROID_HOSTS=
 if [ -d "$PREBUILTS_DIR/qemu-android" ]; then
     HOST_PREFIX=
     if [ "$MINGW" ]; then
-      HOST_PREFIX=windows
+        HOST_PREFIX=windows
     else
-      case $HOST_OS in
-        Linux)
-          HOST_PREFIX=linux
-          ;;
-        Darwin)
-          HOST_PREFIX=darwin
-          ;;
-      esac
+        HOST_PREFIX=$HOST_SYSTEM
     fi
     if [ "$HOST_PREFIX" ]; then
         QEMU_ANDROID_BINARIES=$(cd "$PREBUILTS_DIR"/qemu-android && ls $HOST_PREFIX-*/qemu-system-* 2>/dev/null || true)
@@ -230,10 +254,10 @@ if [ -z "$NO_TESTS" ]; then
             FAILURES="$FAILURES emugen-binary"
         else
             # The first case is for a remote build with package-release.sh
-            TEST_SCRIPT=$(dirname "$0")/../opengl/host/tools/emugen/tests/run-tests.sh
+            TEST_SCRIPT=$PROGDIR/../opengl/host/tools/emugen/tests/run-tests.sh
             if [ ! -f "$TEST_SCRIPT" ]; then
                 # This is the usual location.
-                TEST_SCRIPT=$(dirname "$0")/distrib/android-emugl/host/tools/emugen/tests/run-tests.sh
+                TEST_SCRIPT=$PROGDIR/distrib/android-emugl/host/tools/emugen/tests/run-tests.sh
             fi
             if [ ! -f "$TEST_SCRIPT" ]; then
                 echo " FAIL: Missing script: $TEST_SCRIPT"
