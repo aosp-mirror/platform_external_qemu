@@ -557,10 +557,11 @@ EOF
 # $3: Darwin prebuilts directory.
 build_darwin_binaries_on () {
     local HOST PKG_FILE PKG_FILE_BASENAME DST_DIR TARFLAGS
-    local AOSP_PREBUILTS_DIR DARWIN_FLAGS
+    local AOSP_DIR AOSP_PREBUILTS_DIR DARWIN_FLAGS SYSTEM
     HOST=$1
     PKG_FILE=$2
     AOSP_PREBUILTS_DIR=$3
+    AOSP_DIR=$AOSP_PREBUILTS_DIR/..
 
     # The package file is ....../something-darwin.tar.bz2
     # And should unpack to a single directory named 'something/'
@@ -573,44 +574,32 @@ build_darwin_binaries_on () {
     fi
 
     # Where to do the work on the remote host.
-    DST_DIR=/tmp/android-emulator-build
+    builder_prepare_remote_darwin_build \
+            /tmp/$USER-android-emulator/$PKG_FILE_PREFIX
 
-    if [ "$(get_verbosity)" -ge 3 ]; then
-        TARFLAGS="v"
-    fi
-    dump "Copying sources to Darwin host: $HOST"
-    run ssh $HOST "mkdir -p $DST_DIR && rm -rf $DST_DIR/$PKG_FILE_BASENAME"
-    cat "$PKG_FILE" | ssh $HOST "cd $DST_DIR && tar x${TARGFLAGS}f -"
+    run tar xf "$PKG_FILE" -C "$DARWIN_PKG_DIR"/..
 
-    # Copy clang toolchain to remote host.
     if [ "$AOSP_PREBUILTS_DIR" ]; then
-        CLANG_PREBUILTS_SUBDIR=$(aosp_prebuilt_toolchain_subdir_for darwin)
-        CLANG_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/../$CLANG_PREBUILTS_SUBDIR
-        if [ ! -d "$CLANG_PREBUILTS_DIR" ]; then
-            panic "Missing prebuilts directory: $CLANG_PREBUILTS_DIR"
-        fi
-        dump "Copying Darwin prebuilt toolchain to Darwin host: $HOST"
-        (tar cf - -C "$AOSP_PREBUILTS_DIR" "$CLANG_PREBUILTS_SUBDIR") | \
-                (ssh $HOST tar x${TARFLAGS}f - -C "$DST_DIR")
-    fi
-
-    dump "Rebuilding Darwin binaries remotely."
-    DARWIN_FLAGS=$REBUILD_FLAGS
-    if [ "$AOSP_PREBUILTS_DIR" ]; then
-        DARWIN_FLAGS="$DARWIN_FLAGS --aosp-prebuilts-dir=$DST_DIR"
+        var_append DARWIN_BUILD_FLAGS "--aosp-prebuilts-dir=$DARWIN_REMOTE_DIR/aosp/prebuilts"
     else
-        DARWIN_FLAGS="$DARWIN_FLAGS --no-aosp-prebuilts"
+        var_append DARWIN_BUILD_FLAGS "--no-aosp-prebuilts"
     fi
-    run ssh $HOST "bash -l -c \"cd $DST_DIR/$PKG_FILE_PREFIX/qemu && ./android-rebuild.sh $DARWIN_FLAGS\"" ||
+
+    cat > $DARWIN_PKG_DIR/build.sh <<EOF
+#!/bin/bash -l
+cd $DARWIN_REMOTE_DIR/qemu &&
+./android-rebuild.sh $DARWIN_BUILD_FLAGS
+EOF
+    builder_run_remote_darwin_build ||
         panic "Can't rebuild binaries on Darwin, use --verbose to see why!"
 
     dump "Retrieving Darwin binaries from: $HOST"
     # `pwd` == external/qemu
     rm -rf objs/*
-    run rsync -haz --delete --exclude=intermediates --exclude=libs $HOST:$DST_DIR/$PKG_FILE_PREFIX/qemu/objs .
+    run rsync -haz --delete --exclude=intermediates --exclude=libs $HOST:$DARWIN_REMOTE_DIR/qemu/objs .
     # TODO(digit): Retrieve PC BIOS files.
     dump "Deleting files off darwin system"
-    run ssh $HOST rm -rf $DST_DIR/$PKG_FILE_PREFIX
+    run ssh $HOST rm -rf $DARWIN_REMOTE_DIR
 
     if [ ! -d "obj/qemu" ]; then
         QEMU_PREBUILTS_DIR=$PREBUILTS_DIR/qemu-android

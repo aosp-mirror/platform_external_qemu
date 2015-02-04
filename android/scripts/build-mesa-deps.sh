@@ -92,7 +92,57 @@ build_package () {
     fi
 }
 
-for SYSTEM in $HOST_SYSTEMS; do
+# Perform a Darwin build through ssh to a remote machine.
+# $1: Darwin host name.
+# $2: List of darwin target systems to build for.
+do_remote_darwin_build () {
+    builder_prepare_remote_darwin_build \
+            "/tmp/$USER-rebuild-darwin-ssh-$$/mesa-deps-build"
+
+    copy_directory "$ARCHIVE_DIR" "$DARWIN_PKG_DIR"/archive
+
+    local PKG_DIR="$DARWIN_PKG_DIR"
+    local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
+    # Generate a script to rebuild all binaries from sources.
+    # Note that the use of the '-l' flag is important to ensure
+    # that this is run under a login shell. This ensures that
+    # ~/.bash_profile is sourced before running the script, which
+    # puts MacPorts' /opt/local/bin in the PATH properly.
+    #
+    # If not, the build is likely to fail with a cryptic error message
+    # like "readlink: illegal option -- f"
+    cat > $PKG_DIR/build.sh <<EOF
+#!/bin/bash -l
+PROGDIR=\$(dirname \$0)
+\$PROGDIR/scripts/$(program_name) \\
+    --build-dir=$REMOTE_DIR/build \\
+    --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
+    --install-dir=$REMOTE_DIR/install-prefix \\
+    --prebuilts-dir=$REMOTE_DIR \\
+    --aosp-dir=$REMOTE_DIR/aosp \\
+    $DARWIN_BUILD_FLAGS
+EOF
+    builder_run_remote_darwin_build
+
+    dump "Retrieving darwin binaries."
+    local BINARY_DIR=$INSTALL_DIR
+    run mkdir -p "$BINARY_DIR" ||
+            panic "Could not create final directory: $BINARY_DIR"
+
+    for SYSTEM in $DARWIN_SYSTEMS; do
+        run scp -r "$DARWIN_SSH":$REMOTE_DIR/install-prefix/$SYSTEM \
+                $BINARY_DIR/
+    done
+
+    run rm -rf "$DARWIN_PKG_DIR"
+}
+
+if [ "$DARWIN_SSH" ]; then
+    # Perform remote Darwin build first.
+    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
+fi
+
+for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     (
         builder_prepare_for_host "$SYSTEM" "$AOSP_DIR" "$INSTALL_DIR/$SYSTEM"
 

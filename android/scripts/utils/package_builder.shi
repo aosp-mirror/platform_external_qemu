@@ -14,6 +14,7 @@
 
 # Common functions used to help build source packages for the Android emulator.
 
+shell_import utils/aosp_dir.shi
 shell_import utils/option_parser.shi
 shell_import utils/package_list_parser.shi
 
@@ -204,6 +205,81 @@ package_builder_process_options () {
 
     # Save original path.
     ORIGINAL_PATH=$PATH
+}
+
+# Prepare for a remote darwin build. This takes as a parameter the
+# name of a temporary directory, e..g '/tmp/foo/bar/'.
+# This function populates the directory with some scripts and
+# prebuilt toolchain binaries if necessary, then defines the
+# following variables:
+#    DARWIN_PKG_DIR: temporary package directory (e.g. '/tmp/foo/bar')
+#    DARWIN_PKG_NAME: temporary package name (e.g. 'bar')
+#    DARWIN_REMOTE_DIR: remote build directory to use.
+#    DARWIN_BUILD_FLAGS: common build flags to use with build.sh
+#
+# The caller should then add any appropriate sources or binaries, then
+# create a 'build.sh' script in the directory. Then call the function
+# builder_run_remote_build declared below to actually perform the
+# remote build through SSH
+#
+# NOTE: Only call this when --darwin-ssh or equivalent is used.
+#
+# $1: Package directory (e.g. '/tmp/foo/bar')
+#
+# On exit, defines the following variables:
+builder_prepare_remote_darwin_build () {
+    local PKG_DIR=${1%%/}
+    local PKG_NAME=$(basename "$PKG_DIR")
+    DARWIN_PKG_NAME=$PKG_NAME
+    DARWIN_PKG_DIR="$PKG_DIR"
+    DARWIN_REMOTE_DIR=/tmp/$PKG_NAME
+    local TOOLCHAIN_SUBDIR=$(aosp_prebuilt_toolchain_subdir_for darwin)
+
+    if [ -z "$DARWIN_SSH" ]; then
+        # Sanity check
+        panic "builder_prepare_remote_darwin_build: No DARWIN_SSH defined!"
+    fi
+
+    DARWIN_SYSTEMS=$(commas_to_spaces "$DARWIN_SYSTEMS")
+
+    dump "Preparing remote darwin build."
+    run mkdir -p "$PKG_DIR" && run rm -rf "$PKG_DIR"/*
+    run mkdir -p "$PKG_DIR/aosp/prebuilts/gcc"
+    copy_directory "$AOSP_DIR"/$TOOLCHAIN_SUBDIR \
+            "$PKG_DIR"/aosp/$TOOLCHAIN_SUBDIR
+    copy_directory "$(program_directory)" "$PKG_DIR/scripts"
+    copy_directory "$(program_directory)"/../dependencies "$PKG_DIR"/dependencies
+
+    DARWIN_BUILD_FLAGS="--verbosity=$(get_verbosity)"
+
+    if [ "$OPT_NUM_JOBS" ]; then
+        var_append DARWIN_BUILD_FLAGS "-j$OPT_NUM_JOBS"
+    fi
+    if [ "$OPT_NO_CCACHE" ]; then
+        var_append DARWIN_BUILD_FLAGS "--no-ccache"
+    fi
+}
+
+# Call this after builder_prepare_remote_darwin_build and populating
+# $DARWIN_PKG_DIR with build.sh and any other required files to run
+# a remote darwin build through SSH.
+builder_run_remote_darwin_build () {
+    local BUILD_SH="$DARWIN_PKG_DIR"/build.sh
+    if [ ! -f "$BUILD_SH" ]; then
+        panic "Missing file: $BUILD_SH !!"
+    fi
+    chmod a+x "$BUILD_SH"
+
+    dump "Copying files to remote darwin host"
+    (tar cf - -C "$DARWIN_PKG_DIR"/.. "$DARWIN_PKG_NAME") |
+        (ssh "$DARWIN_SSH" tar xf - -C /tmp) ||
+            panic "Could not send files to remote darwin host"
+
+    rm -rf "$DARWIN_PKG_DIR"
+
+    dump "Performing remote darwin build."
+    log "COMMAND: ssh $DARWIN_SSH /tmp/$DARWIN_PKG_NAME/build.sh"
+    ssh "$DARWIN_SSH" $DARWIN_REMOTE_DIR/build.sh
 }
 
 # Generate a small shell script that can be sourced to prepare the
