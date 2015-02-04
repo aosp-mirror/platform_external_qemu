@@ -1,5 +1,6 @@
 /* Copyright (C) 2011 The Android Open Source Project
 ** Copyright (C) 2014 Linaro Limited
+** Copyright (C) 2015 Intel Corporation
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -470,28 +471,20 @@ struct PipeDevice {
     uint64_t  params_addr;
 };
 
-/* Map the guest buffer specified by the guest vaddr 'address'.
+/* Update this version number if the device's interface changes. */
+#define PIPE_DEVICE_VERSION  1
+
+/* Map the guest buffer specified by the guest paddr 'phys'.
  * Returns a host pointer which should be unmapped later via
  * cpu_physical_memory_unmap(), or NULL if mapping failed (likely
- * because the vaddr doesn't actually point at RAM).
+ * because the paddr doesn't actually point at RAM).
  * Note that for RAM the "mapping" process doesn't actually involve a
  * data copy.
- *
- * TODO: using cpu_get_phys_page_debug() is a bit bogus, and we could
- * avoid it if we fixed the driver to do the sane thing and pass us
- * physical addresses rather than virtual ones.
  */
-static void *map_guest_buffer(target_ulong address, size_t size, int is_write)
+static void *map_guest_buffer(hwaddr phys, size_t size, int is_write)
 {
     hwaddr l = size;
     void *ptr;
-
-    /* Convert virtual address to physical address */
-    hwaddr phys = cpu_get_phys_page_debug(current_cpu, address);
-
-    if (phys == -1) {
-        return NULL;
-    }
 
     ptr = cpu_physical_memory_map(phys, &l, is_write);
     if (!ptr) {
@@ -556,7 +549,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         break;
 
     case PIPE_CMD_READ_BUFFER: {
-        /* Translate virtual address into physical one, into emulator memory. */
+        /* Translate guest physical address into emulator memory. */
         AndroidPipeBuffer  buffer;
         buffer.data = map_guest_buffer(dev->address, dev->size, 1);
         if (!buffer.data) {
@@ -573,7 +566,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
     }
 
     case PIPE_CMD_WRITE_BUFFER: {
-        /* Translate virtual address into physical one, into emulator memory. */
+        /* Translate guest physical address into emulator memory. */
         AndroidPipeBuffer  buffer;
         buffer.data = map_guest_buffer(dev->address, dev->size, 0);
         if (!buffer.data) {
@@ -759,6 +752,9 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
 
     case PIPE_REG_PARAMS_ADDR_LOW:
         return (uint32_t)(dev->params_addr & 0xFFFFFFFFUL);
+
+    case PIPE_REG_VERSION:
+        return PIPE_DEVICE_VERSION;
 
     default:
         qemu_log_mask(LOG_GUEST_ERROR, "%s: unknown register %" HWADDR_PRId
