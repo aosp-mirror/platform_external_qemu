@@ -16,6 +16,7 @@
 
 . $(dirname "$0")/utils/common.shi
 
+shell_import utils/aosp_dir.shi
 shell_import utils/aosp_prebuilts_dir.shi
 shell_import utils/emulator_prebuilts.shi
 shell_import utils/option_parser.shi
@@ -583,11 +584,11 @@ build_darwin_binaries_on () {
 
     # Copy clang toolchain to remote host.
     if [ "$AOSP_PREBUILTS_DIR" ]; then
-    CLANG_PREBUILTS_SUBDIR=clang/darwin-x86/host/3.5
-    CLANG_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/$CLANG_PREBUILTS_SUBDIR
-    if [ ! -d "$CLANG_PREBUILTS_DIR" ]; then
-        panic "Missing prebuilts directory: $CLANG_PREBUILTS_DIR"
-    fi
+        CLANG_PREBUILTS_SUBDIR=$(aosp_prebuilt_toolchain_subdir_for darwin)
+        CLANG_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/../$CLANG_PREBUILTS_SUBDIR
+        if [ ! -d "$CLANG_PREBUILTS_DIR" ]; then
+            panic "Missing prebuilts directory: $CLANG_PREBUILTS_DIR"
+        fi
         dump "Copying Darwin prebuilt toolchain to Darwin host: $HOST"
         (tar cf - -C "$AOSP_PREBUILTS_DIR" "$CLANG_PREBUILTS_SUBDIR") | \
                 (ssh $HOST tar x${TARFLAGS}f - -C "$DST_DIR")
