@@ -5,7 +5,11 @@ I. Helper script:
 -----------------
 
 We now provide a helper script to rebuild the kernel,
-it is under distrib/build-kernel.sh.
+it is under $AOSP/prebuilts/qemu-kernel/build-kernel.sh.
+
+Make sure to use a checkout of aosp/master, not one of the aosp/studio-XXX
+branches, the latter do not contain the prebuilt target toolchain binaries
+required to rebuild the kernel.
 
 You need the sources in android.googlesource.com/kernel/goldfish.git,
 in branch origin/android-goldfish-<version>, where <version> is the
@@ -15,8 +19,8 @@ Roughly speaking:
 
   2.6.27     -> Anything before Gingerbread. (<= Android 2.2)
   2.6.29     -> For Gingerbread (2.3) until JellyBean MR2 (4.2.x)
-  3.4        -> For KitKat (4.4.x)
-  3.10       -> For L, which isn't completed or named yet (> 4.4.x)
+  3.4        -> For KitKat (4.4.x) and Lollipop (5.0)
+  3.10       -> For M, which is not available yet.
 
 To rebuild the ARMv7-A one:
 
