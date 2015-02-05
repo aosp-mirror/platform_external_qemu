@@ -23,30 +23,31 @@ shell_import utils/option_parser.shi
 shell_import utils/package_builder.shi
 shell_import utils/package_list_parser.shi
 
-package_builder_register_options
+package_builder_register_options qemu-android
 
 aosp_dir_register_option
 prebuilts_dir_register_option
-install_dir_register_option qemu-android
+install_dir_register_option
+
+DEFAULT_INSTALL_SUBDIR=qemu-android
 
 PROGRAM_PARAMETERS=""
 
 PROGRAM_DESCRIPTION=\
-"Rebuild qemu-android prebuilt libraries from scratch. This requires the
-source tarbals downloaded through 'download-sources.sh' and
-a valid AOSP checkout directory.
+"Build qemu-android dependency libraries if needed. This script probes
+<prebuilts>/$DEFAULT_INSTALL_SUBDIR/ and will rebuild the libraries from sources
+if they are not available.
 
-The source tarball are searched in <prebuilts>/archive, where <prebuilts>
-has the following default value:
+The default value of <prebuilts> is: $DEFAULT_PREBUILTS_DIR
+Use --prebuilts-dir=<path> or define ANDROID_EMULATOR_PREBUILTS_DIR in your
+environment to change it.
 
-    $DEFAULT_PREBUILTS_DIR
+Source tarball are probed under <prebuilts>/archive/. If not available,
+the 'download-sources.sh' script will be invoked automatically.
 
-Use --prebuilt-dir=<path> or define ANDROID_EMULATOR_PREBUILTS_DIR in your
-environment to change its value.
-
-Similarly, the script will try to auto-detect the AOSP source tree, but you
-can use --aosp-dir=<path> or define ANDROID_EMULATOR_AOSP_DIR in your
-environment to override this.
+Similarly, the script will try to auto-detect the AOSP source tree, to use
+prebuilt SDK-compatible toolchains, but you can use --aosp-dir=<path> or
+define ANDROID_EMULATOR_AOSP_DIR in your environment to override this.
 
 By default, this script builds binaries for the following host sytems:
 
@@ -54,7 +55,7 @@ By default, this script builds binaries for the following host sytems:
 
 You can use --host=<list> to change this.
 
-Final binaries are installed into <prebuilts>/$DEFAULT_INSTALL_SUBDIR by
+Final binaries are installed into <prebuilts>/$DEFAULT_INSTALL_SUBDIR/ by
 default, but you can change this location with --install-dir=<dir>.
 
 By default, everything is rebuilt in a temporary directory that is
@@ -318,7 +319,13 @@ do_dtc_package () {
 build_qemu_android_deps () {
     builder_prepare_for_host "$1"
 
-    timestamp_clear "$INSTALL_DIR/$(builder_host)" qemu-android-deps
+    if [ -z "$OPT_FORCE" ]; then
+        if timestamp_check \
+                "$INSTALL_DIR/$(builder_host)" qemu-android-deps; then
+            log "$(builder_text) Already built."
+            return 0
+        fi
+    fi
 
     local PREFIX=$(builder_install_prefix)
 
@@ -508,6 +515,9 @@ do_remote_darwin_build () {
 
     copy_directory "$ARCHIVE_DIR" "$DARWIN_PKG_DIR"/archive
 
+    if [ "$OPT_FORCE" ]; then
+        var_append DARWIN_BUILD_FLAGS "--force"
+    fi
     local PKG_DIR="$DARWIN_PKG_DIR"
     local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
     # Generate a script to rebuild all binaries from sources.
@@ -531,21 +541,27 @@ PROGDIR=\$(dirname \$0)
 EOF
     builder_run_remote_darwin_build
 
-    dump "Retrieving darwin binaries."
     local BINARY_DIR=$INSTALL_DIR
     run mkdir -p "$BINARY_DIR" ||
             panic "Could not create final directory: $BINARY_DIR"
 
     for SYSTEM in $DARWIN_SYSTEMS; do
+        dump "[$SYSTEM] Retrieving remote darwin binaries"
         run scp -r "$DARWIN_SSH":$REMOTE_DIR/install-prefix/$SYSTEM \
                 $BINARY_DIR/
+        timestamp_set "$INSTALL_DIR/$SYSTEM" qemu-android-deps
     done
 
-    run rm -rf "$DARWIN_PKG_DIR"
 }
 
-if [ "$DARWIN_SSH" ]; then
+# Ignore prebuilt Darwin binaries if --force is not used.
+if [ -z "$OPT_FORCE" ]; then
+    builder_check_all_timestamps "$INSTALL_DIR" qemu-android-deps
+fi
+
+if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
+    dump "Remote qemu-android-deps build for: $DARWIN_SYSTEMS"
     do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
@@ -553,4 +569,4 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     build_qemu_android_deps $SYSTEM
 done
 
-echo "Done!"
+log "Done building qemu-android dependencies."
