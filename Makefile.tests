@@ -17,6 +17,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/memory/LazyInstance_unittest.cpp \
   android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/ScopedPtr_unittest.cpp \
+  android/base/memory/QSort_unittest.cpp \
   android/base/misc/HttpUtils_unittest.cpp \
   android/base/misc/Utf8Utils_unittest.cpp \
   android/base/sockets/ScopedSocket_unittest.cpp \
