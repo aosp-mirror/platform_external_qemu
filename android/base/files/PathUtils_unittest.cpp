@@ -75,6 +75,44 @@ TEST(PathUtils, isPathSeparator) {
     }
 }
 
+TEST(PathUtils, removeTrailingDirSeparator) {
+    static const struct {
+        const char* path;
+        const char* expected[kHostTypeCount];
+    } kData[] = {
+        { "/", { "/", "/" } },
+        { "\\", { "\\", "\\" } },
+        { "foo", { "foo", "foo" } },
+        { "foo/bar", { "foo/bar", "foo/bar" } },
+        { "foo\\bar", { "foo\\bar", "foo\\bar" } },
+        { "foo/bar/", { "foo/bar", "foo/bar" } },
+        { "foo\\bar\\", { "foo\\bar\\", "foo\\bar" } },
+        { "/foo", { "/foo", "/foo" } },
+        { "/foo/", { "/foo", "/foo" } },
+        { "/foo/bar", { "/foo/bar", "/foo/bar" } },
+        { "/foo/bar/", { "/foo/bar", "/foo/bar" } },
+        { "\\foo", { "\\foo", "\\foo" } },
+        { "\\foo\\bar", { "\\foo\\bar", "\\foo\\bar" } },
+        { "\\foo\\bar\\", { "\\foo\\bar\\", "\\foo\\bar" } }
+    };
+
+    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
+        String path;
+        String input = kData[n].path;
+        path = PathUtils::removeTrailingDirSeparator(input, kHostPosix);
+        EXPECT_STREQ(kData[n].expected[kHostPosix], path.c_str())
+                << "Testing '" << input.c_str() << "'";
+
+        path = PathUtils::removeTrailingDirSeparator(input, kHostWin32);
+        EXPECT_STREQ(kData[n].expected[kHostWin32], path.c_str())
+                << "Testing '" << input.c_str() << "'";
+
+        path = PathUtils::removeTrailingDirSeparator(input);
+        EXPECT_STREQ(kData[n].expected[kHostType], path.c_str())
+                << "Testing '" << input.c_str() << "'";
+    }
+}
+
 TEST(PathUtils, rootPrefixSize) {
     static const struct {
         const char* path;

@@ -72,6 +72,29 @@ bool PathUtils::isAbsolute(const char* path, HostType hostType) {
 }
 
 // static
+String PathUtils::removeTrailingDirSeparator(const String& path,
+                                             HostType hostType) {
+    String result = path;
+    size_t pathLen = result.size();
+    // NOTE: Don't remove initial path separator for absolute paths.
+    while (pathLen > 1U && isDirSeparator(result[pathLen - 1U], hostType)) {
+        pathLen--;
+    }
+    result.resize(pathLen);
+    return result;
+}
+
+// static
+String PathUtils::addTrailingDirSeparator(const String& path,
+                                          HostType hostType) {
+    String result = path;
+    if (result.size() > 0 && !isDirSeparator(result[result.size() - 1U])) {
+        result += (hostType == HOST_WIN32) ? '\\' : '/';
+    }
+    return result;
+}
+
+// static
 StringVector PathUtils::decompose(const char* path, HostType hostType) {
     StringVector result;
     if (!path || !path[0])
