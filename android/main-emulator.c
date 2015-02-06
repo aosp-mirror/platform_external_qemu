@@ -58,8 +58,15 @@ int android_verbose;
 #define GLES_EMULATION_LIB64  "lib64OpenglRender" DLL_EXTENSION
 
 /* Forward declarations */
-static char* getTargetEmulatorPath(const char* progName, const char* avdArch, const int force_32bit);
-static char* getSharedLibraryPath(const char* progName, const char* libName);
+static char* getTargetEmulatorPath(const char* progName,
+                                   const char* avdArch,
+                                   const int force_32bit,
+                                   bool* is_64bit);
+
+static char* getSharedLibraryPath(const char* progName,
+                                  bool is_64bit,
+                                  const char* libName);
+
 static void  prependSharedLibraryPath(const char* prefix);
 
 /* The execv() definition in older mingw is slightly bogus.
@@ -184,7 +191,11 @@ int main(int argc, char** argv)
     }
 
     /* Find the architecture-specific program in the same directory */
-    emulatorPath = getTargetEmulatorPath(argv[0], avdArch, force_32bit);
+    bool is_64bit = false;
+    emulatorPath = getTargetEmulatorPath(argv[0],
+                                         avdArch,
+                                         force_32bit,
+                                         &is_64bit);
     D("Found target-specific emulator binary: %s\n", emulatorPath);
 
     /* Replace it in our command-line */
@@ -194,14 +205,12 @@ int main(int argc, char** argv)
      * and modify either LD_LIBRARY_PATH or PATH accordingly
      */
     {
-        char*  sharedLibPath = getSharedLibraryPath(emulatorPath, GLES_EMULATION_LIB);
+        const char* libName = is_64bit ? GLES_EMULATION_LIB64
+                                       : GLES_EMULATION_LIB;
 
-        if (!sharedLibPath) {
-            // Sometimes, only the 64-bit libraries are available, for example
-            // when storing binaries under $AOSP/prebuilts/android-emulator/<system>/
-            sharedLibPath = getSharedLibraryPath(emulatorPath, GLES_EMULATION_LIB64);
-        }
-
+        char* sharedLibPath = getSharedLibraryPath(emulatorPath,
+                                                   is_64bit,
+                                                   libName);
         if (sharedLibPath != NULL) {
             D("Found OpenGLES emulation libraries in %s\n", sharedLibPath);
             prependSharedLibraryPath(sharedLibPath);
@@ -265,14 +274,16 @@ static char* bufprint_emulatorName(char* p,
  * If |try_current_path|, try to look into the current path if no
  * executable was found under |progDir|.
  * On success, returns the path of the executable (string must be freed by
- * the caller). On failure, return NULL.
+ * the caller) and sets |*is_64bit| to indicate whether the binary is a
+ * 64-bit executable. On failure, return NULL.
  */
 static char*
 probeTargetEmulatorPath(const char* progDir,
                         const char* variant,
                         const char* archSuffix,
                         bool search_for_64bit_emulator,
-                        bool try_current_path)
+                        bool try_current_path,
+                        bool* is_64bit)
 {
     char path[PATH_MAX], *pathEnd = path + sizeof(path), *p;
 
@@ -295,6 +306,7 @@ probeTargetEmulatorPath(const char* progDir,
                                   kExeExtension);
         D("Probing program: %s\n", path);
         if (p < pathEnd && path_exists(path)) {
+            *is_64bit = true;
             return strdup(path);
         }
     }
@@ -309,6 +321,7 @@ probeTargetEmulatorPath(const char* progDir,
                                 kExeExtension);
     D("Probing program: %s\n", path);
     if (p < pathEnd && path_exists(path)) {
+        *is_64bit = false;
         return strdup(path);
     }
 
@@ -328,6 +341,7 @@ probeTargetEmulatorPath(const char* progDir,
                 D("Probing path for: %s\n", path);
                 result = path_search_exec(path);
                 if (result) {
+                    *is_64bit = true;
                     return result;
                 }
             }
@@ -344,6 +358,7 @@ probeTargetEmulatorPath(const char* progDir,
             D("Probing path for: %s\n", path);
             result = path_search_exec(path);
             if (result) {
+                *is_64bit = false;
                 return result;
             }
         }
@@ -355,7 +370,8 @@ probeTargetEmulatorPath(const char* progDir,
 static char*
 getTargetEmulatorPath(const char* progName,
                       const char* avdArch,
-                      const int force_32bit)
+                      const int force_32bit,
+                      bool* is_64bit)
 {
     char*  progDir;
     char*  result;
@@ -388,7 +404,8 @@ getTargetEmulatorPath(const char* progName,
                                      "ranchu",
                                      avdArch,
                                      search_for_64bit_emulator,
-                                     try_current_path);
+                                     try_current_path,
+                                     is_64bit);
     if (result) {
         return result;
     }
@@ -404,7 +421,8 @@ getTargetEmulatorPath(const char* progName,
                                          NULL,
                                          emulatorSuffix,
                                          search_for_64bit_emulator,
-                                         try_current_path);
+                                         try_current_path,
+                                         is_64bit);
         if (result) {
             return result;
         }
@@ -421,7 +439,8 @@ getTargetEmulatorPath(const char* progName,
                                          NULL,
                                          emulatorSuffix,
                                          search_for_64bit_emulator,
-                                         try_current_path);
+                                         try_current_path,
+                                         is_64bit);
         if (result) {
             return result;
         }
@@ -439,7 +458,8 @@ getTargetEmulatorPath(const char* progName,
                                      NULL,
                                      emulatorSuffix,
                                      search_for_64bit_emulator,
-                                     try_current_path);
+                                     try_current_path,
+                                     is_64bit);
     if (result) {
         return result;
     }
@@ -467,29 +487,21 @@ probePathForFile(const char* path, const char* filename)
  */
 
 static char*
-getSharedLibraryPath(const char* progName, const char* libName)
+getSharedLibraryPath(const char* progName, bool is_64bit, const char* libName)
 {
     char* progDir;
     char* result = NULL;
     char  temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
+    const char* libDir = is_64bit ? "lib64" : "lib";
 
     /* Get program's directory name */
     path_split(progName, &progDir, NULL);
-
-    /* First, try to probe the program's directory itself, this corresponds
-     * to the standalone build with ./android-configure.sh where the script
-     * will copy the host shared library under external/qemu/objs where
-     * the binaries are located.
-     */
-    if (probePathForFile(progDir, libName)) {
-        return progDir;
-    }
 
     /* Try under $progDir/lib/, this should correspond to the SDK installation
      * where the binary is under tools/, and the libraries under tools/lib/
      */
     {
-        p = bufprint(temp, end, "%s/lib", progDir);
+        p = bufprint(temp, end, "%s/%s", progDir, libDir);
         if (p < end && probePathForFile(temp, libName)) {
             result = strdup(temp);
             goto EXIT;
@@ -506,7 +518,7 @@ getSharedLibraryPath(const char* progName, const char* libName)
         if (parentDir == NULL) {
             parentDir = strdup(".");
         }
-        p = bufprint(temp, end, "%s/lib", parentDir);
+        p = bufprint(temp, end, "%s/%s", parentDir, libDir);
         free(parentDir);
         if (p < end && probePathForFile(temp, libName)) {
             result = strdup(temp);
