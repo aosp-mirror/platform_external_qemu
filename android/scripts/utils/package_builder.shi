@@ -70,6 +70,40 @@ _shu_builder_cleanup_temp_dir () {
     exit $1
 }
 
+# Setup DARWIN_SYSTEMS and LOCAL_HOST_SYSTEMS
+# $1: List of host sytems.
+_shu_builder_setup_local_systems () {
+    local HOST_SYSTEMS="$(commas_to_spaces "$1")"
+    local SYSTEM
+    # Compute the list of darwin host systems.
+    DARWIN_SYSTEMS=
+    for SYSTEM in $HOST_SYSTEMS; do
+        case $SYSTEM in
+            darwin*)
+                var_append DARWIN_SYSTEMS "$SYSTEM"
+                ;;
+        esac
+    done
+
+    # Compute the list of local host systems, i.e. the ones that will be built
+    # on the machine running this script, as opposed to remotely with SSH.
+    LOCAL_HOST_SYSTEMS=$HOST_SYSTEMS
+    if [ "$DARWIN_SYSTEMS" -a "$(get_build_os)" != "darwin" ]; then
+        if [ -z "$DARWIN_SSH" ]; then
+            panic "Cannot build Darwin binaries on this machine, please use --darwin-ssh=<host>."
+        fi
+        LOCAL_HOST_SYSTEMS=
+        for SYSTEM in $HOST_SYSTEMS; do
+            case $SYSTEM in
+                darwin*)
+                    ;;
+                *)
+                    var_append LOCAL_HOST_SYSTEMS "$SYSTEM"
+                    ;;
+            esac
+        done
+    fi
+}
 
 # Call this after 'option_parse' to process the build-related options.
 # This also defines the following global variables:
@@ -175,36 +209,28 @@ package_builder_process_options () {
     fi
 
     # Compute the list of darwin host systems.
-    DARWIN_SYSTEMS=
-    for SYSTEM in $HOST_SYSTEMS; do
-        case $SYSTEM in
-            darwin-*)
-                var_append DARWIN_SYSTEMS "$SYSTEM"
-                ;;
-        esac
-    done
-
-    # Compute the list of local host systems, i.e. the ones that will be built
-    # on the machine running this script, as opposed to remotely with SSH.
-    LOCAL_HOST_SYSTEMS=$HOST_SYSTEMS
-    if [ "$DARWIN_SYSTEMS" -a "$(get_build_os)" != "darwin" ]; then
-        if [ -z "$DARWIN_SSH" ]; then
-            panic "Cannot build Darwin binaries on this machine, please use --darwin-ssh=<host>."
-        fi
-        LOCAL_HOST_SYSTEMS=
-        for SYSTEM in $HOST_SYSTEMS; do
-            case $SYSTEM in
-                darwin-*)
-                    ;;
-                *)
-                    var_append LOCAL_HOST_SYSTEMS "$SYSTEM"
-                    ;;
-            esac
-        done
-    fi
+    _shu_builder_setup_local_systems "$HOST_SYSTEMS"
 
     # Save original path.
     ORIGINAL_PATH=$PATH
+}
+
+# Check all timestamps and adjust HOST_SYSTEMS / DARWIN_SYSTEMS /
+# LOCAL_HOST_SYSTEMS accordingly for all the things.
+# $1: top-level install directory
+# $2: timestamp label
+builder_check_all_timestamps () {
+    local NEW_HOST_SYSTEMS
+    local SYSTEM
+    for SYSTEM in $(commas_to_spaces "$HOST_SYSTEMS"); do
+        if timestamp_check "$1"/$SYSTEM "$2"; then
+            log "[$SYSTEM] Already built."
+        else
+            var_append NEW_HOST_SYSTEMS "$SYSTEM"
+        fi
+    done
+    HOST_SYSTEMS=$NEW_HOST_SYSTEMS
+    _shu_builder_setup_local_systems "$HOST_SYSTEMS"
 }
 
 # Prepare for a remote darwin build. This takes as a parameter the
@@ -242,7 +268,7 @@ builder_prepare_remote_darwin_build () {
 
     DARWIN_SYSTEMS=$(commas_to_spaces "$DARWIN_SYSTEMS")
 
-    dump "Preparing remote darwin build."
+    log "Preparing remote darwin build."
     run mkdir -p "$PKG_DIR" && run rm -rf "$PKG_DIR"/*
     run mkdir -p "$PKG_DIR/aosp/prebuilts/gcc"
     copy_directory "$AOSP_DIR"/$TOOLCHAIN_SUBDIR \
@@ -270,14 +296,14 @@ builder_run_remote_darwin_build () {
     fi
     chmod a+x "$BUILD_SH"
 
-    dump "Copying files to remote darwin host"
+    log "Copying files to remote darwin host"
     (tar cf - -C "$DARWIN_PKG_DIR"/.. "$DARWIN_PKG_NAME") |
         (ssh "$DARWIN_SSH" tar xf - -C /tmp) ||
             panic "Could not send files to remote darwin host"
 
     rm -rf "$DARWIN_PKG_DIR"
 
-    dump "Performing remote darwin build."
+    log "Performing remote darwin build."
     log "COMMAND: ssh $DARWIN_SSH /tmp/$DARWIN_PKG_NAME/build.sh"
     ssh "$DARWIN_SSH" $DARWIN_REMOTE_DIR/build.sh
 }

@@ -26,8 +26,7 @@ shell_import utils/package_builder.shi
 PROGRAM_PARAMETERS=""
 
 PROGRAM_DESCRIPTION=\
-"A script used to rebuild the dependencies of the Mesa software GL graphics
-library from sources."
+"Build Mesa3D library dependencies if needed."
 
 package_builder_register_options
 
@@ -124,29 +123,32 @@ PROGDIR=\$(dirname \$0)
 EOF
     builder_run_remote_darwin_build
 
-    dump "Retrieving darwin binaries."
     local BINARY_DIR=$INSTALL_DIR
     run mkdir -p "$BINARY_DIR" ||
             panic "Could not create final directory: $BINARY_DIR"
 
     for SYSTEM in $DARWIN_SYSTEMS; do
+        dump "[$SYSTEM] Retrieving remote darwin binaries"
         run scp -r "$DARWIN_SSH":$REMOTE_DIR/install-prefix/$SYSTEM \
                 $BINARY_DIR/
-    done
 
-    run rm -rf "$DARWIN_PKG_DIR"
+        timestamp_set "$INSTALL_DIR/$SYSTEM" mesa-deps
+    done
 }
 
-if [ "$DARWIN_SSH" ]; then
+if [ -z "$OPT_FORCE" ]; then
+    builder_check_all_timestamps "$INSTALL_DIR" mesa-deps
+fi
+
+if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
+    dump "Remote mesa-deps build for: $DARWIN_SYSTEMS"
     do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     (
         builder_prepare_for_host "$SYSTEM" "$AOSP_DIR" "$INSTALL_DIR/$SYSTEM"
-
-        timestamp_clear "$INSTALL_DIR/$SYSTEM" mesa-deps
 
         case $SYSTEM in
             linux-*)
@@ -200,4 +202,4 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
 done
 
-dump "Done."
+log "Done building mesa dependencies."
