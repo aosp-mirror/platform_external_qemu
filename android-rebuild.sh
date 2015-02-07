@@ -142,7 +142,8 @@ if [ "$BUILD_QEMU_ANDROID" ]; then
     unset ANDROID_EMULATOR_DARWIN_SSH &&
     $PROGDIR/android/scripts/build-qemu-android.sh \
         --verbosity=$VERBOSE \
-        --host=$HOST_SYSTEM-x86_64
+        --host=$HOST_SYSTEM-x86_64 \
+        --force
 fi
 
 # Copy qemu-android binaries, if any.
