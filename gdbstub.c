@@ -758,6 +758,14 @@ static CPUState *find_cpu(uint32_t thread_id)
     return NULL;
 }
 
+static int is_query_packet(const char *p, const char *query, char separator)
+{
+    unsigned int query_len = strlen(query);
+
+    return strncmp(p, query, query_len) == 0 &&
+        (p[query_len] == '\0' || p[query_len] == separator);
+}
+
 static int gdb_handle_packet(GDBState *s, const char *line_buf)
 {
     CPUState *cpu;
@@ -1051,7 +1059,7 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
                      SSTEP_NOTIMER);
             put_packet(s, buf);
             break;
-        } else if (strncmp(p,"qemu.sstep",10) == 0) {
+        } else if (is_query_packet(p, "qemu.sstep", '=')) {
             /* Display or change the sstep_flags */
             p += 10;
             if (*p != '=') {
@@ -1124,7 +1132,7 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
             break;
         }
 #endif /* !CONFIG_USER_ONLY */
-        if (strncmp(p, "Supported", 9) == 0) {
+        if (is_query_packet(p, "Supported", ':')) {
             snprintf(buf, sizeof(buf), "PacketSize=%x", MAX_PACKET_LENGTH);
             cc = CPU_GET_CLASS(first_cpu);
             if (cc->gdb_core_xml_file != NULL) {
