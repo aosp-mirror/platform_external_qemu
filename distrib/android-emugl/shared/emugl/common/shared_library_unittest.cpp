@@ -39,11 +39,12 @@ namespace {
 // This assumes that the test shared library is under the lib/ sub-directory
 // of the current executable's path!
 std::string GetTestLibraryName() {
-    static const char kSubDir[] = "lib/";
 #ifdef __x86_64__
     static const char kLibraryPrefix[] = "lib64";
+    static const char kSubDir[] = "lib64/";
 #else
     static const char kLibraryPrefix[] = "lib";
+    static const char kSubDir[] = "lib/";
 #endif
     static const char kTestLibrarySuffix[] = "emugl_test_shared_library";
 

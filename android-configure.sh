@@ -86,6 +86,8 @@ for opt do
   ;;
   --aosp-prebuilts-dir=*) OPTION_AOSP_PREBUILTS_DIR=$optarg
   ;;
+  --build-qemu-android) true # Ignored, used by android-rebuild.sh only.
+  ;;
   --static) OPTION_STATIC=yes
   ;;
   --gles-dir=*) GLES_DIR=$optarg
@@ -131,6 +133,9 @@ EOF
     echo "  --no-gles                   Disable GLES emulation support"
     echo "  --no-pcbios                 Disable copying of PC Bios files"
     echo "  --no-tests                  Don't run unit test suite"
+    if [ "$IN_ANDROID_REBUILD_SH" ]; then
+        echo "  --build-qemu-android        Also build qemu-android binaries"
+    fi
     echo ""
     exit 1
 fi

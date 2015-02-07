@@ -58,7 +58,42 @@ aosp_dir_parse_option () {
 
     AOSP_DIR=$(cd "$AOSP_DIR" && pwd -P 2>/dev/null)
     AOSP_PREBUILTS_GCC_DIR=$AOSP_DIR/prebuilts/gcc
+    AOSP_PREBUILTS_CLANG_DIR=$AOSP_DIR/prebuilts/clang
     if [ ! -d "$AOSP_PREBUILTS_GCC_DIR" ]; then
         panic "Not a valid AOSP tree: missing directory: $AOSP_PREBUILTS_GCC_DIR"
     fi
+    if [ ! -d "$AOSP_PREBUILTS_CLANG_DIR" ]; then
+        panic "Not a valid AOSP tree: missing directory: $AOSP_PREBUILTS_CLANG_DIR"
+    fi
+}
+
+# Return the AOSP subdirectory that contains the prebuilt toolchain to be
+# used for a given host system.
+# $1: System name (e.g. 'linux' or 'linux-x86_64')
+aosp_prebuilt_toolchain_subdir_for () {
+    case $1 in
+        linux*)
+            printf "prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.8"
+            ;;
+        darwin*)
+            printf "prebuilts/clang/darwin-x86/host/3.5"
+            ;;
+        windows*)
+            printf "prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8"
+            ;;
+    esac
+}
+
+aosp_prebuilt_toolchain_prefix_for () {
+    case $1 in
+        linux*)
+            printf "x86_64-linux-"
+            ;;
+        darwin*)
+            printf ""
+            ;;
+        windows*)
+            printf "x86_64-w64-mingw32-"
+            ;;
+    esac
 }
