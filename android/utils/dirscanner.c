@@ -13,7 +13,11 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/system.h"
 #include "android/utils/path.h"
+
+#include <stdbool.h>
 #include <stddef.h>
+
+#include <stdio.h>  // DEBUG
 
 #define  DIRSCANNER_BASE     \
     char  root[PATH_MAX];    \
@@ -27,7 +31,8 @@
 
 struct DirScanner {
     DIRSCANNER_BASE
-    intptr_t            findIndex1;
+    bool                started;
+    intptr_t            findIndex;
     struct _finddata_t  findData;
 };
 
@@ -40,25 +45,22 @@ _dirScannerInit( DirScanner*  s )
 {
     char*  p   = s->root + s->rootLen;
     char*  end = s->root + sizeof s->root;
-    int    ret;
 
     /* create file spec by appending \* to root */
     p = bufprint(p, end, "\\*");
     if (p >= end)
         return -1;
 
-    ret = _findfirst(s->root, &s->findData);
-
-    s->findIndex1 = ret+1;
-    return ret;
+    s->started = false;
+    s->findIndex = -1;
+    return 0;
 }
 
 static void
 _dirScanner_done( DirScanner*  s )
 {
-    if (s->findIndex1 > 0) {
-        _findclose(s->findIndex1-1);
-        s->findIndex1 = 0;
+    if (s->started) {
+        _findclose(s->findIndex);
     }
 }
 
@@ -67,23 +69,27 @@ dirScanner_next( DirScanner*  s )
 {
     char*  ret = NULL;
 
-    if (!s || s->findIndex1 <= 0)
+    if (!s) {
         return NULL;
+    }
 
-    while (ret == NULL) {
-        ret = s->findData.name;
-
-        /* ignore special directories */
-        if (!strcmp(ret, ".") || !strcmp(ret, "..")) {
-            ret = NULL;
+    for (;;) {
+        if (!s->started) {
+            s->findIndex = _findfirst(s->root, &s->findData);
+            if (s->findIndex < 0) {
+                return NULL;
+            }
+            s->started = true;
+        } else if (_findnext(s->findIndex, &s->findData) < 0) {
+            _findclose(s->findIndex);
+            s->started = false;
+            return NULL;
         }
-        /* find next one */
-        if (_findnext(s->findIndex1-1, &s->findData) < 0) {
-            _dirScanner_done(s);
-            break;
+        ret = s->findData.name;
+        if (strcmp(ret, ".") != 0 && strcmp(ret, "..") != 0) {
+            return ret;
         }
     }
-    return ret;
 }
 
 #else /* !_WIN32 */
