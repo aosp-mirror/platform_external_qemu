@@ -76,6 +76,7 @@
 #include "android/utils/timezone.h"
 #include "android/snapshot.h"
 #include "android/opengles.h"
+#include "android/opengl/emugl_config.h"
 #include "android/multitouch-screen.h"
 #include "exec/hwaddr.h"
 #include "android/tcpdump.h"
@@ -3366,6 +3367,7 @@ int main(int argc, char **argv, char **envp)
      * we just shut it down again once we have the strings. */
     {
         int qemu_gles = 0;
+
         if (android_initOpenglesEmulation() == 0 &&
             android_startOpenglesRenderer(android_hw->hw_lcd_width, android_hw->hw_lcd_height) == 0)
         {
