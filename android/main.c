@@ -64,6 +64,7 @@
 #include "android/snapshot.h"
 
 #include "android/framebuffer.h"
+#include "android/opengl/emugl_config.h"
 #include "android/iolooper.h"
 
 SkinRotation  android_framebuffer_rotation;
@@ -1182,19 +1183,20 @@ int main(int argc, char **argv)
         reassign_string(&hw->hw_keyboard_charmap, charmap_name);
     }
 
-    if (opts->gpu) {
-        const char* gpu = opts->gpu;
-        if (!strcmp(gpu,"on") || !strcmp(gpu,"enable")) {
-            hw->hw_gpu_enabled = 1;
-        } else if (!strcmp(gpu,"off") || !strcmp(gpu,"disable")) {
-            hw->hw_gpu_enabled = 0;
-        } else if (!strcmp(gpu,"auto")) {
-            /* Nothing to do */
-        } else {
-            derror("Invalid value for -gpu <mode> parameter: %s\n", gpu);
-            derror("Valid values are: on, off or auto\n");
+    {
+        EmuglConfig config;
+
+        if (!emuglConfig_init(&config,
+                              hw->hw_gpu_enabled,
+                              hw->hw_gpu_mode,
+                              opts->gpu,
+                              0)) {
+            derror("%s", config.status);
             exit(1);
         }
+        hw->hw_gpu_enabled = config.enabled;
+        reassign_string(&hw->hw_gpu_mode, config.backend);
+        dprint("%s", config.status);
     }
 
     /* Quit emulator on condition that both, gpu and snapstorage are on. This is
