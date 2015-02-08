@@ -290,11 +290,13 @@ path_getBuildTargetArch(const char* androidOut) {
 
 
 static char*
-_getAvdTargetArch(const char* avdPath)
+_getAvdConfigValue(const char* avdPath,
+                   const char* key,
+                   const char* defaultValue)
 {
     IniFile* ini;
-    char*    targetArch = NULL;
-    char     temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
+    char* result = NULL;
+    char temp[PATH_MAX], *p = temp, *end = p + sizeof(temp);
     p = bufprint(temp, end, "%s" PATH_SEP "config.ini", avdPath);
     if (p >= end) {
         APANIC("AVD path too long: %s\n", avdPath);
@@ -303,20 +305,36 @@ _getAvdTargetArch(const char* avdPath)
     if (ini == NULL) {
         APANIC("Could not open AVD config file: %s\n", temp);
     }
-    targetArch = iniFile_getString(ini, "hw.cpu.arch", "arm");
+    result = iniFile_getString(ini, key, defaultValue);
     iniFile_free(ini);
 
-    return targetArch;
+    return result;
 }
 
 char*
 path_getAvdTargetArch( const char* avdName )
 {
     char*  avdPath = _getAvdContentPath(avdName);
-    char*  avdArch = _getAvdTargetArch(avdPath);
+    char*  avdArch = _getAvdConfigValue(avdPath, "hw.cpu.arch", "arm");
     AFREE(avdPath);
 
     return avdArch;
+}
+
+char*
+path_getAvdGpuMode(const char* avdName)
+{
+    char* avdPath = _getAvdContentPath(avdName);
+    char* gpuEnabled = _getAvdConfigValue(avdPath, "hw.gpu.enabled", "no");
+    bool enabled = !strcmp(gpuEnabled, "yes");
+    AFREE(gpuEnabled);
+
+    char* gpuMode = NULL;
+    if (enabled) {
+        gpuMode = _getAvdConfigValue(avdPath, "hw.gpu.mode", "host");
+    }
+    AFREE(avdPath);
+    return gpuMode;
 }
 
 const char*
