@@ -158,6 +158,7 @@ common_LOCAL_SRC_FILES += \
 	android/looper-generic.cpp \
 	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
+	android/opengl/emugl_config.cpp \
 	android/utils/aconfig-file.c \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
