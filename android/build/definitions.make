@@ -68,10 +68,12 @@ local-host-define = $(if $(strip $(LOCAL_$1)),,$(eval LOCAL_$1 := $$(call local-
 # module. LOCAL_MODULE must be defined before calling this.
 local-intermediates-dir = $(OBJS_DIR)/intermediates/$(LOCAL_MODULE)
 
-local-library-path = $(OBJS_DIR)/libs/$(1).a
-local-executable-path = $(OBJS_DIR)/$(1)$(call local-host-tool,EXEEXT)
-local-shared-library-path = $(OBJS_DIR)/lib/$(1)$(call local-host-tool,DLLEXT)
+# Return $1, except if LOCAL_MODULE_BITS is 64, where $2 is returned.
+local-bits-choice = $(strip $(if $(filter 64,$(LOCAL_MODULE_BITS)),$2,$1))
 
+local-library-path = $(OBJS_DIR)/$(call local-bits-choice,libs,libs64)/$(1).a
+local-executable-path = $(OBJS_DIR)/$(1)$(call local-host-tool,EXEEXT)
+local-shared-library-path = $(OBJS_DIR)/$(call local-bits-choice,lib,lib64)/$(1)$(call local-host-tool,DLLEXT)
 
 # Toolchain control support.
 # It's possible to switch between the regular toolchain and the host one

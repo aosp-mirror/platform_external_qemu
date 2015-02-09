@@ -258,19 +258,10 @@ prepare_build_for_host () {
     PREBUILT_TOOLCHAIN_DIR=
     TOOLCHAIN_PREFIX=
     EXTRA_ENV_SETUP=
+    PREBUILT_TOOLCHAIN_DIR=$AOSP_DIR/$(aosp_prebuilt_toolchain_subdir_for $CURRENT_HOST)
+    TOOLCHAIN_PREFIX=$(aosp_prebuilt_toolchain_prefix_for $CURRENT_HOST)
     case $CURRENT_HOST in
-        linux-*)
-            PREBUILT_TOOLCHAIN_DIR=$AOSP_PREBUILTS_GCC_DIR/linux-x86/host/x86_64-linux-glibc2.11-4.8
-            TOOLCHAIN_PREFIX=x86_64-linux-
-            ;;
-        windows-*)
-            PREBUILT_TOOLCHAIN_DIR=$AOSP_PREBUILTS_GCC_DIR/linux-x86/host/x86_64-w64-mingw32-4.8
-            TOOLCHAIN_PREFIX=x86_64-w64-mingw32-
-            ;;
         darwin-*)
-            # Use host GCC for now.
-            PREBUILT_TOOLCHAIN_DIR=
-            TOOLCHAIN_PREFIX=
             # Ensure we use the 10.8 SDK or else.
             OSX_VERSION=$(sw_vers -productVersion)
             OSX_SDK_SUPPORTED="10.6 10.7 10.8"
@@ -297,9 +288,6 @@ prepare_build_for_host () {
             fi
             log "OSX: Using SDK at $OSX_SDK_ROOT"
             EXTRA_ENV_SETUP="export SDKROOT=$OSX_SDK_ROOT"
-            ;;
-        *)
-            panic "Host system '$CURRENT_HOST' is not supported by this script!"
             ;;
     esac
 
