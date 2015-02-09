@@ -42,6 +42,9 @@ DEFAULT_REVISION=$(date +%Y%m%d)
 # The list of GPU emulation libraries.
 EMUGL_LIBRARIES="OpenglRender EGL_translator GLES_CM_translator GLES_V2_translator"
 
+# The list of Emugl backend directories under $EXEC_DIR/<lib>/
+EMUGL_BACKEND_DIRS="gles_mesa"
+
 ###
 ###  UTILITY FUNCTIONS
 ###
@@ -184,10 +187,10 @@ list_files_under () {
     fi
     local FILTER FILE FILES TMP_LIST
     TMP_LIST=$(mktemp)
-    for FILTER in $FILTERS; do
+    for FILTER in "$FILTERS"; do
         FILES=$((cd "$TOP_DIR" && ls -d $FILTER) 2>/dev/null || true)
         for FILE in $FILES; do
-            (cd "$TOP_DIR" && find "$FILE" -type f 2>/dev/null || true) >> $TMP_LIST
+            (cd "$TOP_DIR" && find "$FILE" -type f -o -type l 2>/dev/null || true) >> $TMP_LIST
         done
     done
     cat $TMP_LIST | sort -u > $TMP_LIST.tmp
@@ -530,6 +533,32 @@ create_binaries_package () {
         fi
     fi
 
+    # Copy Emugl backend directories, if any.
+    for EMUGL_BACKEND in $EMUGL_BACKEND_DIRS; do
+        MESA_LIBDIR=objs/lib/$EMUGL_BACKEND
+        if [ -d "$MESA_LIBDIR" ]; then
+            MESA_BINARIES=$(list_files_under "$MESA_LIBDIR" "")
+            if [ "$MESA_BINARIES" ] ;then
+                dump "[$PKG_NAME] Copying $EMUGL_BACKEND 32-bit binaries"
+                copy_directory_files \
+                        "$MESA_LIBDIR" \
+                        "$TEMP_PKG_DIR/tools/${MESA_LIBDIR#objs/}" \
+                        $MESA_BINARIES
+            fi
+        fi
+        MESA_LIBDIR=objs/lib64/$EMUGL_BACKEND
+        if [ -d "$MESA_LIBDIR" ]; then
+            MESA_BINARIES=$(list_files_under "$MESA_LIBDIR")
+            if [ "$MESA_BINARIES" ] ;then
+                dump "[$PKG_NAME] Copying $EMUGL_BACKEND 64-bit binaries"
+                copy_directory_files \
+                        "$MESA_LIBDIR" \
+                        "$TEMP_PKG_DIR/tools/${MESA_LIBDIR#objs/}" \
+                        $MESA_BINARIES
+            fi
+        fi
+    done
+
     dump "[$PKG_NAME] Creating README file."
     cat > $TEMP_PKG_DIR/README <<EOF
 This directory contains Android emulator binaries. You can use them directly
@@ -689,7 +718,7 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
         fi
 
         if [ -d "$SRC_DIR/tools/qemu" ]; then
-            var_append FILES $(list_files_under "$SRC_DIR/tools/qemu" "*")
+            var_append FILES $(list_files_under "$SRC_DIR/tools" "qemu/*")
         fi
 
         # temporarily include linux 32 bit binaries
@@ -702,6 +731,18 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
                 var_append FILES "lib/lib$LIB$DLLEXT"
             done
         fi
+
+        # Copy Emugl backend files too.
+        for EMUGL_BACKEND in $EMUGL_BACKEND_DIRS; do
+            EMUGL_LIBDIR=lib/$EMUGL_BACKEND
+            for LIB in $(list_files_under "$SRC_DIR/tools/$EMUGL_LIBDIR"); do
+                var_append FILES "$EMUGL_LIBDIR/$LIB"
+            done
+            EMUGL_LIBDIR=lib64/$EMUGL_BACKEND
+            for LIB in $(list_files_under "$SRC_DIR/tools/$EMUGL_LIBDIR"); do
+                var_append FILES "$EMUGL_LIBDIR/$LIB"
+            done
+        done
 
         copy_directory_files "$SRC_DIR/tools" "$DST_DIR" "$FILES" ||
                 panic "Could not copy binaries to $DST_DIR"
