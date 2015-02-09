@@ -156,6 +156,7 @@ common_LOCAL_SRC_FILES += \
 	android/qemu/base/async/Looper.cpp \
 	android/looper-base.cpp \
 	android/looper-generic.cpp \
+	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
 	android/utils/aconfig-file.c \
 	android/utils/assert.c \
