@@ -361,7 +361,7 @@ get_build_num_cores () {
 # $1: input string
 # Out: input string, with each comma replaced by a space.
 commas_to_spaces () {
-    printf "%s" "$1" | tr ',' ' '
+    printf "%s" "$@" | tr ',' ' '
 }
 
 # Convert spaces into commas

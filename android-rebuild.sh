@@ -24,6 +24,9 @@ for OPT; do
         --verbose)
             VERBOSE=$(( $VERBOSE + 1 ))
             ;;
+        --verbosity=*)
+            VERBOSE=${OPT##--verbosity=}
+            ;;
         --no-tests)
             NO_TESTS=true
             ;;
