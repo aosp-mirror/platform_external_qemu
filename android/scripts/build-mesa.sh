@@ -74,6 +74,19 @@ fi
 
 package_list_parse_file "$PACKAGE_LIST"
 
+# Check that we have the right prebuilts
+EXTRA_FLAGS=
+if [ "$DARWIN_SSH" ]; then
+    var_append EXTRA_FLAGS "--darwin-ssh=$DARWIN_SSH"
+fi
+$(program_directory)/build-mesa-deps.sh \
+    --verbosity=$(get_verbosity) \
+    --prebuilts-dir=$PREBUILTS_DIR \
+    --aosp-dir=$AOSP_DIR \
+    --host=$(spaces_to_commas "$HOST_SYSTEMS") \
+    $EXTRA_FLAGS \
+        || panic "could not check or rebuild mesa dependencies."
+
 BUILD_SRC_DIR=$TEMP_DIR/src
 
 # Unpack package source into $BUILD_SRC_DIR if needed.
@@ -177,6 +190,7 @@ build_linux_mesa () {
     fi
 }
 
+# TODO(digit): Implement Mesa darwin builds?
 if [ "$DARWIN_SYSTEMS" ]; then
     panic "Sorry, I don't know how to build Darwin Mesa binaries for now!"
 fi
