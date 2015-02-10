@@ -705,11 +705,9 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
         for ARCH in arm x86 mips; do
             var_append FILES "emulator$BITNESS-$ARCH$EXEEXT"
         done
-        for ARCH in arm64 mips64; do
-            if [ -f "$SRC_DIR/tools/emulator64-$ARCH$EXEEXT" ]; then
-                var_append FILES "emulator64-$ARCH$EXEEXT"
-            fi
-        done
+        var_append FILES $(list_files_under "$SRC_DIR/tools" \
+                "emulator-ranchu-*$EXEEXT" \
+                "emulator64-ranchu-*$EXEEXT")
 
         if [ -d "$SRC_DIR/tools/lib$BITNESS" ]; then
             for LIB in $EMUGL_LIBRARIES; do
