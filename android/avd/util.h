@@ -39,9 +39,16 @@ char* path_getSdkRoot( char *pFromEnv );
 char* path_getRootIniPath( const char*  avdName );
 
 /* Return the target architecture for a given AVD.
- * Called must free() returned string.
+ * Caller must free() returned string.
  */
 char* path_getAvdTargetArch( const char* avdName );
+
+/* Return the value of hw.gpu.mode for a given AVD.
+ * Caller must free() returned string.
+ *
+ * NOTE: If hw.gpu.enabled is false, then this returns NULL
+ */
+char* path_getAvdGpuMode(const char* avdName);
 
 typedef enum {
     RESULT_INVALID   = -1, // key was found but value contained invalid data

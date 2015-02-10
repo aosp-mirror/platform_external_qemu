@@ -12,6 +12,7 @@
 #include "android/utils/dirscanner.h"
 
 #include "android/base/containers/StringVector.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/base/String.h"
@@ -26,6 +27,7 @@
 using android::base::TestTempDir;
 using android::base::String;
 using android::base::StringVector;
+using android::base::PathUtils;
 
 static void make_subfile(const String& dir, const char* file) {
     String path = dir;
@@ -116,8 +118,9 @@ TEST(DirScanner, scanFull) {
 
     EXPECT_EQ(kCount, entries.size());
     for (size_t n = 0; n < kCount; ++n) {
-        String expected(myDir.path());
-        expected += "/";
+        String expected =
+                android::base::PathUtils::addTrailingDirSeparator(
+                        String(myDir.path()));
         expected += kExpected[n];
         EXPECT_STREQ(expected.c_str(), entries[n].c_str()) << "#" << n;
     }
