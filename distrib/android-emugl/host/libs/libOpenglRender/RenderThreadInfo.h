@@ -26,6 +26,7 @@
 
 typedef uint32_t HandleType;
 typedef std::set<HandleType> ThreadContextSet;
+typedef std::set<HandleType> WindowSurfaceSet;
 
 // A class used to model the state of each RenderThread related
 struct RenderThreadInfo {
@@ -52,6 +53,8 @@ struct RenderThreadInfo {
 
     // all the contexts that are created by this render thread
     ThreadContextSet                m_contextSet;
+    // all the window surfaces that are created by this render thread
+    WindowSurfaceSet                m_windowSet;
 };
 
 #endif

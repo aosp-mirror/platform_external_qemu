@@ -77,6 +77,9 @@ public:
     // Destroy all the remaining contexts that are created by current render thread
     void drainRenderContext();
 
+    // Destroy all the remaining window surfaces that are created by current render thread
+    void drainWindowSurface();
+
     void DestroyRenderContext(HandleType p_context);
     void DestroyWindowSurface(HandleType p_surface);
     int openColorBuffer(HandleType p_colorbuffer);

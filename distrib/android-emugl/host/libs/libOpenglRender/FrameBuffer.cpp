@@ -538,6 +538,8 @@ HandleType FrameBuffer::createWindowSurface(int p_config, int p_width, int p_hei
     if (win.Ptr() != NULL) {
         ret = genHandle();
         m_windows[ret] = win;
+        RenderThreadInfo *tinfo = RenderThreadInfo::get();
+        tinfo->m_windowSet.insert(ret);
     }
 
     return ret;
@@ -556,6 +558,21 @@ void FrameBuffer::drainRenderContext()
     tinfo->m_contextSet.clear();
 }
 
+void FrameBuffer::drainWindowSurface()
+{
+    emugl::Mutex::AutoLock mutex(m_lock);
+    RenderThreadInfo *tinfo = RenderThreadInfo::get();
+    if (tinfo->m_windowSet.empty()) return;
+    for (std::set<HandleType>::iterator it = tinfo->m_windowSet.begin();
+            it != tinfo->m_windowSet.end(); ++it) {
+        HandleType windowHandle = *it;
+        if (m_windows.find(windowHandle) != m_windows.end()) {
+            m_windows.erase(windowHandle);
+        }
+    }
+    tinfo->m_windowSet.clear();
+}
+
 void FrameBuffer::DestroyRenderContext(HandleType p_context)
 {
     emugl::Mutex::AutoLock mutex(m_lock);
@@ -568,7 +585,12 @@ void FrameBuffer::DestroyRenderContext(HandleType p_context)
 void FrameBuffer::DestroyWindowSurface(HandleType p_surface)
 {
     emugl::Mutex::AutoLock mutex(m_lock);
-    m_windows.erase(p_surface);
+    if (m_windows.find(p_surface) != m_windows.end()) {
+        m_windows.erase(p_surface);
+        RenderThreadInfo *tinfo = RenderThreadInfo::get();
+        if (tinfo->m_windowSet.empty()) return;
+        tinfo->m_windowSet.erase(p_surface);
+    }
 }
 
 int FrameBuffer::openColorBuffer(HandleType p_colorbuffer)
