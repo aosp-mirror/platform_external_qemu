@@ -399,6 +399,8 @@ else
     LOCAL_STATIC_LIBRARIES := emulator64-common
 endif
 
+LOCAL_LDLIBS += -lstdc++
+
 ifeq ($(HOST_OS),windows)
 $(eval $(call insert-windows-icon))
 endif
