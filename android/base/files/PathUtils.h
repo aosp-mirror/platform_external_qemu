@@ -56,6 +56,24 @@ public:
         return isPathSeparator(ch, HOST_TYPE);
     }
 
+    // Remove trailing separators from a |path| string, for a given |hostType|.
+    static String removeTrailingDirSeparator(const String& path,
+                                             HostType hostType);
+
+    // Remove trailing separators from a |path| string for the current host.
+    static inline String removeTrailingDirSeparator(const String& path) {
+        return removeTrailingDirSeparator(path, HOST_TYPE);
+    }
+
+    // Add a trailing separator if needed.
+    static String addTrailingDirSeparator(const String& path,
+                                          HostType hostType);
+
+    // Add a trailing separator if needed.
+    static String addTrailingDirSeparator(const String& path) {
+        return addTrailingDirSeparator(path, HOST_TYPE);
+    }
+
     // If |path} starts with a root prefix, return its size in bytes, or
     // 0 otherwise. The definition of valid root prefixes depends on the
     // value of |hostType|. For HOST_POSIX, it's any path that begins
