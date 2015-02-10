@@ -52,6 +52,9 @@
 #ifdef CONFIG_XEN
 #  include <xen/hvm/hvm_info_table.h>
 #endif
+#if 1  /* #ifdef CONFIG_ANDROID */
+#  include "hw/acpi/goldfish_defs.h"
+#endif  /* CONFIG_ANDROID */
 
 #define MAX_IDE_BUS 2
 
@@ -231,6 +234,11 @@ static void pc_init1(MachineState *machine,
     qdev_init_nofail(icc_bridge);
 
     pc_register_ferr_irq(gsi[13]);
+
+#if 1  /* #ifdef CONFIG_ANDROID */
+    sysbus_create_simple("goldfish_battery", GF_BATTERY_IOMEM_BASE,
+                         gsi[GF_BATTERY_IRQ]);
+#endif  /* CONFIG_ANDROID */
 
     pc_vga_init(isa_bus, pci_enabled ? pci_bus : NULL);
 

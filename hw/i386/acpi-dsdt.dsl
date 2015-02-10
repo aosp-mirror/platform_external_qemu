@@ -31,6 +31,9 @@ DefinitionBlock (
 
 #include "acpi-dsdt-dbug.dsl"
 
+/* Definitions for Android-specific virtual hardware */
+#include "acpi-dsdt-goldfish.dsl"
+
 
 /****************************************************************
  * PCI Bus definition
