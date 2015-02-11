@@ -1196,7 +1196,7 @@ int main(int argc, char **argv)
         }
         hw->hw_gpu_enabled = config.enabled;
         reassign_string(&hw->hw_gpu_mode, config.backend);
-        dprint("%s", config.status);
+        D("%s", config.status);
     }
 
     /* Quit emulator on condition that both, gpu and snapstorage are on. This is
