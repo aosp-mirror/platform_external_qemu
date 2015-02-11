@@ -3362,36 +3362,32 @@ int main(int argc, char **argv, char **envp)
      * If the parameter is undefined, this means the system image runs
      * inside an emulator that doesn't support GPU emulation at all.
      *
-     * We always start the GL ES renderer so we can gather stats on the
-     * underlying GL implementation. If GL ES acceleration is disabled,
-     * we just shut it down again once we have the strings. */
-    {
-        int qemu_gles = 0;
-
+     * The GL ES renderer cannot start properly if GPU emulation is disabled
+     * because this requires changing the LD_LIBRARY_PATH before launching
+     * the emulation engine. */
+    int qemu_gles = 0;
+    if (android_hw->hw_gpu_enabled) {
         if (android_initOpenglesEmulation() == 0 &&
-            android_startOpenglesRenderer(android_hw->hw_lcd_width, android_hw->hw_lcd_height) == 0)
+            android_startOpenglesRenderer(android_hw->hw_lcd_width,
+                                          android_hw->hw_lcd_height) == 0)
         {
             android_getOpenglesHardwareStrings(
                     android_gl_vendor, sizeof(android_gl_vendor),
                     android_gl_renderer, sizeof(android_gl_renderer),
                     android_gl_version, sizeof(android_gl_version));
-            if (android_hw->hw_gpu_enabled) {
-                qemu_gles = 1;
-            } else {
-                android_stopOpenglesRenderer();
-                qemu_gles = 0;
-            }
+            qemu_gles = 1;
         } else {
-            dwarning("Could not initialize OpenglES emulation, using software renderer.");
+            derror("Could not initialize OpenglES emulation, use '-gpu off' to disable it.");
+            exit(1);
         }
-        if (qemu_gles) {
-            stralloc_add_str(kernel_params, " qemu.gles=1");
-            char  tmp[64];
-            snprintf(tmp, sizeof(tmp), "%d", 0x20000);
-            boot_property_add("ro.opengles.version", tmp);
-        } else {
-            stralloc_add_str(kernel_params, " qemu.gles=0");
-        }
+    }
+    if (qemu_gles) {
+        stralloc_add_str(kernel_params, " qemu.gles=1");
+        char  tmp[64];
+        snprintf(tmp, sizeof(tmp), "%d", 0x20000);
+        boot_property_add("ro.opengles.version", tmp);
+    } else {
+        stralloc_add_str(kernel_params, " qemu.gles=0");
     }
 
     /* We always force qemu=1 when running inside QEMU */
