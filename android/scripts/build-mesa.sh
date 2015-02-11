@@ -28,14 +28,6 @@ PROGRAM_PARAMETERS=""
 PROGRAM_DESCRIPTION=\
 "A script used to rebuild the Mesa software GL graphics library from sources."
 
-# NOTE: Cross-building for windows doesn't work yet, so ensure that
-#       on Linux, the default host systems is only 'linux-x86_64'
-case $(get_build_os) in
-    XXlinux)
-        DEFAULT_HOST_SYSTEMS="linux-x86_64"
-        ;;
-esac
-
 package_builder_register_options
 
 aosp_dir_register_option
