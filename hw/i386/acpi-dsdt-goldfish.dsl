@@ -33,4 +33,20 @@ Scope(\_SB) {
             }
         })
     }
+
+    /* Events */
+    Device(GFEV) {
+        Name(_HID, "GFSH0002")
+        Name(_STR, Unicode("goldfish events"))
+        Name(_CRS, ResourceTemplate() {
+            Memory32Fixed(ReadWrite,
+                GF_EVENTS_IOMEM_BASE,
+                GF_EVENTS_IOMEM_SIZE
+                )
+            Interrupt(, Edge, ActiveHigh) {
+                GF_EVENTS_IRQ
+            }
+        })
+    }
+
 }

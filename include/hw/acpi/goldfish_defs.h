@@ -27,4 +27,9 @@
 #define GF_BATTERY_IOMEM_SIZE   0x00001000
 #define GF_BATTERY_IRQ          16
 
+/* goldfish events */
+#define GF_EVENTS_IOMEM_BASE    0xff011000
+#define GF_EVENTS_IOMEM_SIZE    0x00001000
+#define GF_EVENTS_IRQ           17
+
 #endif  /* !ACPI_GOLDFISH_DEFS_H */
