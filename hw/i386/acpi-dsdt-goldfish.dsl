@@ -49,4 +49,18 @@ Scope(\_SB) {
         })
     }
 
+    /* Pipe */
+    Device(GFPP) {
+        Name(_HID, "GFSH0003")
+        Name(_STR, Unicode("android pipe"))
+        Name(_CRS, ResourceTemplate() {
+            Memory32Fixed(ReadWrite,
+                GF_PIPE_IOMEM_BASE,
+                GF_PIPE_IOMEM_SIZE
+                )
+            Interrupt(, Edge, ActiveHigh) {
+                GF_PIPE_IRQ
+            }
+        })
+    }
 }

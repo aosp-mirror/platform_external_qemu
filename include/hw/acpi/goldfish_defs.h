@@ -32,4 +32,9 @@
 #define GF_EVENTS_IOMEM_SIZE    0x00001000
 #define GF_EVENTS_IRQ           17
 
+/* android pipe */
+#define GF_PIPE_IOMEM_BASE      0xff001000
+#define GF_PIPE_IOMEM_SIZE      0x00002000
+#define GF_PIPE_IRQ             18
+
 #endif  /* !ACPI_GOLDFISH_DEFS_H */
