@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56783d6f_76f890cf",
+        "filename": "docs/DEVELOPMENT.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-02-12T19:20:49Z",
+      "side": 1,
+      "message": "You need to add android/scripts/download-sources.sh to create the archive folder\n\ndownload-sources.sh errors out here:\n\nDownloading http://www.libsdl.org/release/SDL2-2.0.3.tar.gz\nCloning git://git.qemu-project.org/dtc.git\nERROR: SHA-1 mismatch for /tmp/vharron-emulator-prebuilts/archive/dtc-v1.4.0.tar.xz: f9ea69acebd9865994e5efb2c4deff1e6fc5d7d2 expected 23e61b9a1a99740bde7311e5e7f6b2c0c9b2834d\nvharron@tifa:~/a/studio-1.2-dev/external/qemu$",
+      "revId": "84e86f06669fdc866a0f50d37c4c961597356cd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6642dca_fa6e49e8",
+        "filename": "docs/DEVELOPMENT.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-02-12T19:20:49Z",
+      "side": 1,
+      "message": "Fails with an error message saying that the archive folder doesn\u0027t exist, please run download-sources.sh",
+      "revId": "84e86f06669fdc866a0f50d37c4c961597356cd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
