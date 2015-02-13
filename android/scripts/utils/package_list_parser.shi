@@ -39,8 +39,9 @@
 #          this is optional, and if present, the content of the downloaded
 #          package will be checked against this value.
 #
-#          If GIT=<url> is used, this is the SHA1 of the tarball created by
-#          the downloader. The commit itself is specified through BRANCH=<name>
+#          If GIT=<url> is used, this is the SHA1 of the list of files inside
+#          the tarball created by the downloader. The commit itself is
+#          specified through BRANCH=<name>
 #
 #      SRCDIR=<subdir>
 #          Optional source sub-directory after extraction of the
