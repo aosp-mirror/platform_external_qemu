@@ -1,0 +1,132 @@
+An overview of GPU Emulation for Android:
+-----------------------------------------
+
+GPU emulation is controlled by the followind AVD hardware properties:
+
+  hw.gpu.enabled    Boolean indicating whether GPU emulation is enabled.
+                    If 'false', the builtin guest software renderer will be
+                    used instead. Note that the latter is very slow and only
+                    supports GLES 1.x, so most applications will not run with
+                    it properly.
+
+  hw.gpu.mode       Only used when hw.gpu.enabled is on. This is a string that
+                    describes which emulation mode to support.
+
+At this time, the following modes are supported:
+
+  'host'    The default mode, uses specific translator libraries to convert
+            guest EGL/GLES commands into host desktop GL ones. This requires
+            valid OpenGL drivers installed on the development machine, and
+            of course a display connection.
+
+            Note that on some platforms (Windows in particular), OpenGL drivers
+            can be buggy, resulting in poor performance, rendering artefacts
+            or even crashes. To work-around this, use the 'mesa' mode instead.
+
+  'mesa'    Software-based desktop GL renderer, based on the Mesa3D library.
+            This is slower than 'host' mode by a large margin, but works
+            equally well on all supported platforms. This is recommended if
+            there are issues with 'host' mode.
+
+            Another benefit of 'mesa' mode is that it can be run on headless
+            servers which do not have a GPU, or OpenGL libraries installed.
+
+Alternatively, one can use the '-gpu <mode>' option to force a specific mode.
+Values 'on', 'off' and 'auto' are also recognized. See -help-gpu for details.
+
+Host mode libraries are installed at the following locations:
+
+        $EXEC_DIR/lib/
+                libOpenglRender.so
+                libEGL_translator.so
+                libGLES_CM_translator.so
+                libGLESv2_translator.so
+
+        $EXEC_DIR/lib64/
+                lib64OpenglRender.so
+                lib64EGL_translator.so
+                lib64GLES_CM_translator.so
+                lib64GLESv2_translator.so
+
+The example above is for Linux, the shared libraries' extension will vary
+with the host platform (i.e. .dylib for Darwin, and .dll for Windows).
+
+Please read the distrib/android-emugl/DESIGN document first, which describes
+host mode emulation in detail.
+
+The Mesa libraries are built using the android/scripts/build-mesa.sh script,
+and installed differently, depending on the platform. For Linux, this will be:
+
+        $EXEC_DIR/lib/
+                gles_mesa/
+                    libGL.so
+                    libGL.so.1 -> libGL.so
+
+        $EXEC_DIR/lib64/
+                gles_mesa/
+                    libGL.so
+                    libGL.so.1 -> libGL.so
+
+For Windows:
+
+        $EXEC_DIR/lib/
+                gles_mesa/
+                    opengl32.dll
+
+        $EXEC_DIR/lib64/
+                gles_mesa/
+                    opengl32.dll
+
+
+The 'emulator' launcher program works as follows:
+
+  - Parse the AVD configuration to see if GPU emulation is enabled.
+
+  - If enabled, prepend $EXEC_DIR/<lib>/ to LD_LIBRARY_PATH (or PATH on
+    Windows). This ensures that the host libraries will always be loaded
+    properly through dlopen() / LoadLibrary() later.
+
+  - If 'mesa' mode is enabled, it will also prepend $EXEC_DIR/<lib>/gles_mesa/
+    to LD_LIBRARY_PATH / PATH, to ensure the corresponding library is loaded.
+
+Note that on Linux, the mesa sub-directory includes a link from libGL.so.1
+to libGL.so. The latter is the Mesa rendering library. The former is a link
+which is needed because the Android UI uses SDL2 which links against this
+specific version of the library.
+
+Without the symlink, creating the UI window will load the system version of
+libGL.so.1, which will later prevent the load of Mesa's libGL.so.
+
+IMPORTANT NOTE:
+
+    At this time, Mesa doesn't build for OS X, and the resulting library
+    still depends on XLib / Win32 GDI. This means that for true headless
+    emulation on Linux, one should run an Xvfb server and set DISPLAY
+    appropriately.
+
+
+An experimental feature is the ability to add new "GPU emulation backends".
+The 'emulator' program will look for the following libraries:
+
+   $EXEC_DIR/<lib>/gles_<name>/
+        libEGL.so            -> desktop EGL library
+        libGLES_CM.so        -> desktop GLESv1 library
+        libGLESv2.co         -> desktop GLESv2 library
+
+Where <name> is an arbitrary backend name.
+
+If one of these libraries is defined, then it sets the appropriate environment
+variable (e.g. ANDROID_EGL_LIB / ANDROID_GLESv1_LIB / ANDROID_GLESv2_LIB) to
+ensure that libOpenglRender will use it, instead of the corresponding host
+translation library.
+
+
+The source code related to these features is located under:
+
+  android/opengles.c   -> GPU emulation low-level initialization which happens
+                          after the emulation engine is started.
+
+  android/opengl/      -> GPU emulation support code that is used by 'emulator'
+                          to probe installed backends and select the correct
+                          one based on AVD configuration / command-line
+                          options, as well as setup the environment.
