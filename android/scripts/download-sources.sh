@@ -208,7 +208,14 @@ for PACKAGE in $(package_list_get_packages); do
     fi
     if [ -f "$PKG_FILE" -a -n "$PKG_SHA1" ]; then
         dump "Checking existing file: $PKG_FILE"
-        ARCHIVE_SHA1=$(compute_file_sha1 "$PKG_FILE")
+        if [ "$PKG_GIT" ]; then
+            # IMPORTANT: Git tarballs are not built in a reproducible way on
+            # Darwin, so check the SHA-1 of files within the archive,
+            # instead of the archive file instead.
+            ARCHIVE_SHA1=$(compute_archive_sha1 "$PKG_FILE")
+        else
+            ARCHIVE_SHA1=$(compute_file_sha1 "$PKG_FILE")
+        fi
         if [ "$ARCHIVE_SHA1" != "$PKG_SHA1" ]; then
             dump "WARNING: Re-downloading existing file due to bad SHA-1 ($ARCHIVE_SHA1, expected $PKG_SHA1): $PKG_FILE"
             run rm -f "$PKG_FILE"
@@ -235,10 +242,14 @@ for PACKAGE in $(package_list_get_packages); do
             # - Force the user/group names
             # - Ensure consistent order for files in the archive.
             FILES=$(cd "$TEMP_DIR" && find "$PKG_FILE" -type f | sort | tr '\n' ' ')
+            TARFLAGS=
+            case $(get_build_os) in
+                linux)
+                    var_append TARFLAGS "--owner=android --group=android"
+                    var_append TARFLAGS "--mtime=2015-01-01"
+            esac
             run tar cJf "$ARCHIVE_DIR/$PKG_FILE.tar.xz" \
-                    --owner=android \
-                    --group=android \
-                    --mtime=2015-01-01 \
+                    $TARFLAGS \
                     -C "$TEMP_DIR" \
                     $FILES \
                     || panic "Could not create archive"
@@ -250,7 +261,11 @@ for PACKAGE in $(package_list_get_packages); do
 
     # Time to check the new archive SHA-1
     if [ "$PKG_SHA1" ]; then
-        ARCHIVE_SHA1=$(compute_file_sha1 "$PKG_FILE")
+        if [ "$PKG_GIT" ]; then
+            ARCHIVE_SHA1=$(compute_archive_sha1 "$PKG_FILE")
+        else
+            ARCHIVE_SHA1=$(compute_file_sha1 "$PKG_FILE")
+        fi
         if [ "$ARCHIVE_SHA1" != "$PKG_SHA1" ]; then
             panic "SHA-1 mismatch for $PKG_FILE: $ARCHIVE_SHA1 expected $PKG_SHA1"
         fi

@@ -428,6 +428,32 @@ $(get_build_os)"
     esac
 }
 
+# Compute the SHA-1 sum of a given zip or tarball archive. This is done by
+# generated a sorted list of all files from the archive, and their SHA-1, then
+# computing the SHA-1 of the result. This means the output is only dependent
+# on the archive's content, not on any user/group/mtime field present in the
+# actual archive file. Required because the Darwin 'tar' command doesn't seem
+# to be able to generate reproducible archives (and even if it could, they
+# would probably be slightly different from the ones generated on Linux).
+# $1: Archive file path
+# Out: SHA-1 sum as an hexadecimal string.
+compute_archive_sha1 () {
+    local LIST_FILE LIST_DIR RET
+    LIST_DIR=$(mktemp -d /tmp/sha1_archive.XXXXXX)
+    LIST_FILE=$(mktemp /tmp/sha1_list.XXXXXX)
+    unpack_archive "$1" "$LIST_DIR"
+    RET=0
+    (
+        unpack_archive "$1" "$LIST_DIR" &&
+        cd "$LIST_DIR" &&
+        LANG=C LC_ALL=C find . -type f -o -type l | sort -u -s | xargs openssl sha1 > "$LIST_FILE"
+        compute_file_sha1 "$LIST_FILE"
+    ) || RET=$?
+    rm -rf "$LIST_DIR"
+    rm -rf "$LIST_FILE"
+    return $RET
+}
+
 # Return the file path of a given timestamp
 # $1: Installation directory
 # $2: Timestamp group name
