@@ -196,10 +196,10 @@ void emuglConfig_setupEnv(const char* backend, int bitness) {
     }
     if (sBackendList->getBackendLibPath(
             backend, EmuglBackendList::LIBRARY_GLESv1, &lib)) {
-        setenv("ANDROID_EGL_LIB", lib.c_str(), 1);
+        setenv("ANDROID_GLESv1_LIB", lib.c_str(), 1);
     }
     if (sBackendList->getBackendLibPath(
             backend, EmuglBackendList::LIBRARY_GLESv2, &lib)) {
-        setenv("ANDROID_EGL_LIB", lib.c_str(), 1);
+        setenv("ANDROID_GLESv2_LIB", lib.c_str(), 1);
     }
 }
