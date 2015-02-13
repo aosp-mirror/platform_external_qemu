@@ -83,6 +83,7 @@ ARCHIVE_DIR=$PREBUILTS_DIR/archive
 if [ ! -d "$ARCHIVE_DIR" ]; then
     dump "Downloading dependencies sources first."
     $(program_directory)/download-sources.sh \
+        --verbosity=$(get_verbosity) \
         --prebuilts-dir=$PREBUILTS_DIR
 fi
 ARCHIVE_DIR=$(cd "$ARCHIVE_DIR" && pwd -P)
