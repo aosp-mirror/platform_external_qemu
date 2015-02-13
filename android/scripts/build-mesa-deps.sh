@@ -46,6 +46,13 @@ install_dir_parse_option
 
 ARCHIVE_DIR=$PREBUILTS_DIR/archive
 if [ ! -d "$ARCHIVE_DIR" ]; then
+    dump "Downloading dependencies sources first."
+    $(program_directory)/download-sources.sh \
+        --verbosity=$(get_verbosity) \
+        --prebuilts-dir="$PREBUILTS_DIR" ||
+            panic "Could not download source archives!"
+fi
+if [ ! -d "$ARCHIVE_DIR" ]; then
     panic "Missing archive directory: $ARCHIVE_DIR"
 fi
 PACKAGE_LIST=$ARCHIVE_DIR/PACKAGES.TXT

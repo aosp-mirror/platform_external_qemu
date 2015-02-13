@@ -44,27 +44,7 @@ prebuilts_dir_parse_option
 aosp_dir_parse_option
 install_dir_parse_option
 
-ARCHIVE_DIR=$PREBUILTS_DIR/archive
-if [ ! -d "$ARCHIVE_DIR" ]; then
-    panic "Missing archive directory: $ARCHIVE_DIR"
-fi
-PACKAGE_LIST=$ARCHIVE_DIR/PACKAGES.TXT
-if [ ! -f "$PACKAGE_LIST" ]; then
-    panic "Missing package list file, run download-sources.sh: $PACKAGE_LIST"
-fi
-
-
 package_builder_process_options mesa
-
-if [ "$OPT_INSTALL_DIR" ]; then
-    INSTALL_DIR=$OPT_INSTALL_DIR
-    log "Using install dir: $INSTALL_DIR"
-else
-    INSTALL_DIR=$PREBUILTS_DIR/$DEFAULT_INSTALL_SUBDIR
-    log "Auto-config: --install-dir=$INSTALL_DIR  [default]"
-fi
-
-package_list_parse_file "$PACKAGE_LIST"
 
 # Check that we have the right prebuilts
 EXTRA_FLAGS=
@@ -78,6 +58,28 @@ $(program_directory)/build-mesa-deps.sh \
     --host=$(spaces_to_commas "$HOST_SYSTEMS") \
     $EXTRA_FLAGS \
         || panic "could not check or rebuild mesa dependencies."
+
+if [ "$OPT_INSTALL_DIR" ]; then
+    INSTALL_DIR=$OPT_INSTALL_DIR
+    log "Using install dir: $INSTALL_DIR"
+else
+    INSTALL_DIR=$PREBUILTS_DIR/$DEFAULT_INSTALL_SUBDIR
+    log "Auto-config: --install-dir=$INSTALL_DIR  [default]"
+fi
+
+ARCHIVE_DIR=$PREBUILTS_DIR/archive
+if [ ! -d "$ARCHIVE_DIR" ]; then
+    panic "Missing archive directory: $ARCHIVE_DIR"
+fi
+if [ ! -d "$ARCHIVE_DIR" ]; then
+    panic "Missing archive directory: $ARCHIVE_DIR"
+fi
+PACKAGE_LIST=$ARCHIVE_DIR/PACKAGES.TXT
+if [ ! -f "$PACKAGE_LIST" ]; then
+    panic "Missing package list file, run download-sources.sh: $PACKAGE_LIST"
+fi
+
+package_list_parse_file "$PACKAGE_LIST"
 
 BUILD_SRC_DIR=$TEMP_DIR/src
 
