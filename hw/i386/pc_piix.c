@@ -241,6 +241,7 @@ static void pc_init1(MachineState *machine,
     sysbus_create_simple("goldfish-events", GF_EVENTS_IOMEM_BASE,
                          gsi[GF_EVENTS_IRQ]);
     sysbus_create_simple("android_pipe", GF_PIPE_IOMEM_BASE, gsi[GF_PIPE_IRQ]);
+    sysbus_create_simple("goldfish_fb", GF_FB_IOMEM_BASE, gsi[GF_FB_IRQ]);
 #endif  /* CONFIG_ANDROID */
 
     pc_vga_init(isa_bus, pci_enabled ? pci_bus : NULL);

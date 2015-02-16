@@ -37,4 +37,9 @@
 #define GF_PIPE_IOMEM_SIZE      0x00002000
 #define GF_PIPE_IRQ             18
 
+/* goldfish framebuffer */
+#define GF_FB_IOMEM_BASE        0xff012000
+#define GF_FB_IOMEM_SIZE        0x00000100
+#define GF_FB_IRQ               19
+
 #endif  /* !ACPI_GOLDFISH_DEFS_H */

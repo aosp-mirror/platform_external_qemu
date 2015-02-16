@@ -63,4 +63,19 @@ Scope(\_SB) {
             }
         })
     }
+
+    /* Framebuffer */
+    Device(GFFB) {
+        Name(_HID, "GFSH0004")
+        Name(_STR, Unicode("goldfish framebuffer"))
+        Name(_CRS, ResourceTemplate() {
+            Memory32Fixed(ReadWrite,
+                GF_FB_IOMEM_BASE,
+                GF_FB_IOMEM_SIZE
+                )
+            Interrupt(, Edge, ActiveHigh) {
+                GF_FB_IRQ
+            }
+        })
+    }
 }
