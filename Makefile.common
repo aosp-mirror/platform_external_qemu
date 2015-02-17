@@ -451,16 +451,19 @@ endif
 
 ifeq ($(CONFIG_PULSEAUDIO),yes)
   AUDIO_SOURCES += paaudio.c audio_pt_int.c
+  AUDIO_SOURCES += wrappers/pulse-audio.c
   AUDIO_CFLAGS  += -DCONFIG_PULSEAUDIO
 endif
 
 ifeq ($(CONFIG_ALSA),yes)
   AUDIO_SOURCES += alsaaudio.c audio_pt_int.c
+  AUDIO_SOURCES += wrappers/alsa.c
   AUDIO_CFLAGS  += -DCONFIG_ALSA
 endif
 
 ifeq ($(CONFIG_ESD),yes)
   AUDIO_SOURCES += esdaudio.c
+  AUDIO_SOURCES += wrappers/esound.c
   AUDIO_CFLAGS  += -DCONFIG_ESD
 endif
 

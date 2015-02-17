@@ -53,18 +53,7 @@
 #include <dlfcn.h>
 /* link dynamically to the libesd.so */
 
-#define  DYNLINK_FUNCTIONS   \
-    DYNLINK_FUNC(int,esd_play_stream,(esd_format_t,int,const char*,const char*))   \
-    DYNLINK_FUNC(int,esd_record_stream,(esd_format_t,int,const char*,const char*)) \
-    DYNLINK_FUNC(int,esd_open_sound,( const char *host )) \
-    DYNLINK_FUNC(int,esd_close,(int)) \
-
-#define  DYNLINK_FUNCTIONS_INIT \
-    esd_dynlink_init
-
-#include "android/dynlink.h"
-
-static void*    esd_lib;
+static void* esd_lib;
 
 
 typedef struct {
@@ -264,7 +253,7 @@ static int qesd_init_out (HWVoiceOut *hw, struct audsettings *as)
         return -1;
     }
 
-    esd->fd = FF(esd_play_stream) (esdfmt, as->freq, conf.dac_host, NULL);
+    esd->fd = esd_play_stream (esdfmt, as->freq, conf.dac_host, NULL);
     if (esd->fd < 0) {
         qesd_logerr (errno, "esd_play_stream failed\n");
         goto fail1;
@@ -472,7 +461,7 @@ static int qesd_init_in (HWVoiceIn *hw, struct audsettings *as)
         return -1;
     }
 
-    esd->fd = FF(esd_record_stream) (esdfmt, as->freq, conf.adc_host, NULL);
+    esd->fd = esd_record_stream (esdfmt, as->freq, conf.adc_host, NULL);
     if (esd->fd < 0) {
         qesd_logerr (errno, "esd_record_stream failed\n");
         goto fail1;
@@ -527,6 +516,8 @@ static int qesd_ctl_in (HWVoiceIn *hw, int cmd, ...)
     return 0;
 }
 
+extern int esound_dynlink_init(void* lib);
+
 /* common */
 static void *qesd_audio_init (void)
 {
@@ -546,14 +537,14 @@ static void *qesd_audio_init (void)
             goto Exit;
         }
 
-        if (esd_dynlink_init(esd_lib) < 0)
+        if (esound_dynlink_init(esd_lib) < 0)
             goto Fail;
 
-        fd = FF(esd_open_sound)(conf.dac_host);
+        fd = esd_open_sound(conf.dac_host);
         if (fd < 0) {
             D("%s: could not open direct sound server connection, trying localhost",
               __FUNCTION__);
-            fd = FF(esd_open_sound)("localhost");
+            fd = esd_open_sound("localhost");
             if (fd < 0) {
                 D("%s: could not open localhost sound server connection", __FUNCTION__);
                 goto Fail;
@@ -561,7 +552,7 @@ static void *qesd_audio_init (void)
         }
 
         D("%s: EsounD server connection succeeded", __FUNCTION__);
-        /* FF(esd_close)(fd); */
+        /* esd_close(fd); */
     }
     result = &conf;
     goto Exit;

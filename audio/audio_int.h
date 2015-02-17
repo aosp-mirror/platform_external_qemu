@@ -233,6 +233,9 @@ void audio_run (const char *msg);
 
 #define VOICE_ENABLE 1
 #define VOICE_DISABLE 2
+#define VOICE_VOLUME 3
+
+#define VOICE_VOLUME_CAP (1 << VOICE_VOLUME)
 
 static inline int audio_ring_dist (int dst, int src, int len)
 {
