@@ -28,6 +28,7 @@ ANDROID_BEGIN_HEADER
 typedef struct {
     bool enabled;
     bool use_backend;
+    int bitness;
     char backend[64];
     char status[256];
 } EmuglConfig;
@@ -52,7 +53,7 @@ bool emuglConfig_init(EmuglConfig* config,
 
 // Setup GPU emulation according to a given |backend|.
 // |bitness| is the host bitness, and can be 0 (autodetect), 32 or 64.
-void emuglConfig_setupEnv(const char* backend, int bitness);
+void emuglConfig_setupEnv(const EmuglConfig* config);
 
 ANDROID_END_HEADER
 

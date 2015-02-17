@@ -133,6 +133,70 @@ TEST(EmuglConfig, init) {
     }
 }
 
+TEST(EmuglConfig, initNxWithMesa) {
+    TestSystem testSys("foo", System::kProgramBitness);
+    TestTempDir* myDir = testSys.getTempRoot();
+    myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
+    makeLibSubDir(myDir, "");
+
+    makeLibSubDir(myDir, "gles_mesa");
+    makeLibSubFile(myDir, "gles_mesa/libGLES.so");
+
+    testSys.envSet("NX_TEMP", "/tmp/nx");
+
+    EmuglConfig config;
+    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0));
+    EXPECT_TRUE(config.enabled);
+    EXPECT_STREQ("mesa", config.backend);
+    EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
+}
+
+TEST(EmuglConfig, initNxWithoutMesa) {
+    TestSystem testSys("foo", System::kProgramBitness);
+    TestTempDir* myDir = testSys.getTempRoot();
+    myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
+    makeLibSubDir(myDir, "");
+
+    testSys.envSet("NX_TEMP", "/tmp/nx");
+
+    EmuglConfig config;
+    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0));
+    EXPECT_FALSE(config.enabled);
+    EXPECT_STREQ("GPU emulation is disabled under NX without Mesa", config.status);
+}
+
+TEST(EmuglConfig, initChromeRemoteDesktopWithMesa) {
+    TestSystem testSys("foo", System::kProgramBitness);
+    TestTempDir* myDir = testSys.getTempRoot();
+    myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
+    makeLibSubDir(myDir, "");
+
+    makeLibSubDir(myDir, "gles_mesa");
+    makeLibSubFile(myDir, "gles_mesa/libGLES.so");
+
+    testSys.envSet("CHROME_REMOTE_DESKTOP_SESSION", "1");
+
+    EmuglConfig config;
+    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0));
+    EXPECT_TRUE(config.enabled);
+    EXPECT_STREQ("mesa", config.backend);
+    EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
+}
+
+TEST(EmuglConfig, initChromeRemoteDesktopWithoutMesa) {
+    TestSystem testSys("foo", System::kProgramBitness);
+    TestTempDir* myDir = testSys.getTempRoot();
+    myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
+    makeLibSubDir(myDir, "");
+
+    testSys.envSet("CHROME_REMOTE_DESKTOP_SESSION", "1");
+
+    EmuglConfig config;
+    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0));
+    EXPECT_FALSE(config.enabled);
+    EXPECT_STREQ("GPU emulation is disabled under Chrome Remote Desktop without Mesa", config.status);
+}
+
 TEST(EmuglConfig, setupEnv) {
 }
 

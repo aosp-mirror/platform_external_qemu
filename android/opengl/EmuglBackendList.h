@@ -35,6 +35,9 @@ public:
     // Return the list of installed Emugl backends.
     const StringVector& names() const { return mNames; }
 
+    // Returns true if |name| is part of names().
+    bool contains(const char* name) const;
+
     // Convert the name of an Emugl backend into the path of the
     // corresponding sub-directory, if it exits, or NULL otherwise.
     String getLibDirPath(const char* name);
