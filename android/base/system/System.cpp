@@ -31,6 +31,7 @@
 #include <dirent.h>
 #endif
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -145,6 +146,28 @@ public:
             }
         }
         return result;
+    }
+
+    virtual const char* envGet(const char* varname) const {
+        return getenv(varname);
+    }
+
+    virtual void envSet(const char* varname, const char* varvalue) {
+#ifdef _WIN32
+        if (!varvalue || !varvalue[0]) {
+            varvalue = "";
+        }
+        size_t length = ::strlen(varname) + ::strlen(varvalue) + 2;
+        char* string = static_cast<char*>(malloc(length));
+        snprintf(string, length, "%s=%s", varname, varvalue);
+        putenv(string);
+#else
+        if (!varvalue || !varvalue[0]) {
+            unsetenv(varname);
+        } else {
+            setenv(varname, varvalue, 1);
+        }
+#endif
     }
 
     virtual bool pathExists(const char* path) {
