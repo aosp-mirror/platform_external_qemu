@@ -15,6 +15,7 @@
 #ifndef ANDROID_TESTING_TEST_SYSTEM_H
 #define ANDROID_TESTING_TEST_SYSTEM_H
 
+#include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
@@ -31,6 +32,7 @@ public:
             mHostBitness(hostBitness),
             mTempDir(NULL),
             mTempRootPrefix(),
+            mEnvPairs(),
             mPrevSystem(System::setForTesting(this)) {}
 
     virtual ~TestSystem() {
@@ -48,6 +50,43 @@ public:
 
     virtual int getHostBitness() const {
         return mHostBitness;
+    }
+
+    virtual const char* envGet(const char* varname) const {
+        for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
+            const String& name = mEnvPairs[n];
+            if (name == varname) {
+                return mEnvPairs[n + 1].c_str();
+            }
+        }
+        return NULL;
+    }
+
+    virtual void envSet(const char* varname, const char* varvalue) {
+        // First, find if the name is in the array.
+        int index = -1;
+        for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
+            if (mEnvPairs[n] == varname) {
+                index = static_cast<int>(n);
+                break;
+            }
+        }
+        if (!varvalue || !varvalue[0]) {
+            // Remove definition, if any.
+            if (index >= 0) {
+                mEnvPairs.remove(index);
+                mEnvPairs.remove(index);
+            }
+        } else {
+            if (index >= 0) {
+                // Replacement.
+                mEnvPairs[index + 1] = String(varvalue);
+            } else {
+                // Addition.
+                mEnvPairs.append(String(varname));
+                mEnvPairs.append(String(varvalue));
+            }
+        }
     }
 
     virtual bool pathExists(const char* path) {
@@ -110,6 +149,7 @@ private:
     int mHostBitness;
     mutable TestTempDir* mTempDir;
     mutable String mTempRootPrefix;
+    StringVector mEnvPairs;
     System* mPrevSystem;
 };
 

@@ -58,6 +58,15 @@ public:
 
     static int getProgramBitness() { return kProgramBitness; }
 
+    // Retrieve the value of a given environment variable.
+    // Equivalent to getenv().
+    virtual const char* envGet(const char* varname) const = 0;
+
+    // Set the value of a given environment variable.
+    // If |varvalue| is NULL or empty, this unsets the variable.
+    // Equivalent to setenv().
+    virtual void envSet(const char* varname, const char* varvalue) = 0;
+
     // Return true iff |path| exists on the file system.
     virtual bool pathExists(const char* path) = 0;
 
