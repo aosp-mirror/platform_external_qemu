@@ -29,20 +29,6 @@
 #endif
 
 
-#ifdef _WIN32
-static int setenv(const char *name, const char *value, int overwrite)
-{
-    int result = 0;
-    if (overwrite || !getenv(name)) {
-        size_t length = strlen(name) + strlen(value) + 2;
-        char *string = static_cast<char*>(malloc(length));
-        snprintf(string, length, "%s=%s", name, value);
-        result = putenv(string);
-    }
-    return result;
-}
-#endif  // _WIN32
-
 using android::base::String;
 using android::base::StringFormat;
 using android::base::StringVector;
@@ -75,7 +61,7 @@ bool emuglConfig_init(EmuglConfig* config,
                    !strcmp(gpu_option, "disable")) {
             gpu_enabled = false;
         } else if (!strcmp(gpu_option, "auto")) {
-            // Npthing to do
+            // Nothing to do
         } else {
             gpu_enabled = true;
             gpu_mode = gpu_option;
@@ -89,11 +75,48 @@ bool emuglConfig_init(EmuglConfig* config,
         return true;
     }
 
+    if (!bitness) {
+        bitness = System::kProgramBitness;
+    }
+    config->bitness = bitness;
     resetBackendList(bitness);
 
-    // Check that the GPU mode is a valid value. 'host' is a special
-    // value corresponding to the default translation to desktop GL,
-    // anything else must be checked against existing backends.
+    // Check that the GPU mode is a valid value. 'auto' means determine
+    // the best mode depending on the environment. Its purpose is to
+    // enable 'mesa' mode automatically when NX or Chrome Remote Desktop
+    // is detected.
+    if (!strcmp(gpu_mode, "auto") && !gpu_option) {
+        // The default will be 'host' unless NX or Chrome Remote Desktop
+        // is detected.
+        if (System::get()->envGet("NX_TEMP") != NULL) {
+            D("%s: NX session detected\n", __FUNCTION__);
+            if (!sBackendList->contains("mesa")) {
+                config->enabled = false;
+                snprintf(config->status, sizeof(config->status),
+                        "GPU emulation is disabled under NX without Mesa");
+                return true;
+            }
+            D("%s: 'mesa' mode auto-selected\n", __FUNCTION__);
+            gpu_mode = "mesa";
+        } else if (System::get()->envGet(
+                "CHROME_REMOTE_DESKTOP_SESSION") != NULL) {
+            D("%s: Chrome Remote Desktop session detected\n", __FUNCTION__);
+            if (!sBackendList->contains("mesa")) {
+                config->enabled = false;
+                snprintf(config->status, sizeof(config->status),
+                        "GPU emulation is disabled under Chrome Remote Desktop without Mesa");
+                return true;
+            }
+            D("%s: 'mesa' mode auto-selected\n", __FUNCTION__);
+            gpu_mode = "mesa";
+        } else {
+            D("%s: 'host' mode auto-selected\n", __FUNCTION__);
+            gpu_mode = "host";
+        }
+    }
+
+    // 'host' is a special value corresponding to the default translation
+    // to desktop GL, anything else must be checked against existing backends.
     if (strcmp(gpu_mode, "host") != 0) {
         const StringVector& backends = sBackendList->names();
         const char* backend = NULL;
@@ -123,22 +146,24 @@ bool emuglConfig_init(EmuglConfig* config,
     return true;
 }
 
-void emuglConfig_setupEnv(const char* backend, int bitness) {
+void emuglConfig_setupEnv(const EmuglConfig* config) {
+    System* system = System::get();
 
-    if (!backend) {
-        // Nothing to do if there is no GPU emulation.
+    if (!config->enabled) {
+        // There is no GPU emulation. As a special case, define
+        // SDL_RENDER_DRIVER to 'software' to ensure that the
+        // software SDL renderer is being used. This allows one
+        // to run with '-gpu off' under NX and Chrome Remote Desktop
+        // properly.
+        system->envSet("SDL_RENDER_DRIVER", "software");
         return;
     }
 
     // Prepend $EXEC_DIR/<lib>/ to LD_LIBRARY_PATH to ensure that
     // the EmuGL libraries are found here.
-    if (!bitness) {
-        bitness = System::kProgramBitness;
-    }
+    resetBackendList(config->bitness);
 
-    resetBackendList(bitness);
-
-    const char* libSubDir = (bitness == 64) ? "lib64" : "lib";
+    const char* libSubDir = (config->bitness == 64) ? "lib64" : "lib";
 
     String newDirs = StringFormat("%s/%s",
                                   System::get()->getProgramDirectory().c_str(),
@@ -149,10 +174,10 @@ void emuglConfig_setupEnv(const char* backend, int bitness) {
     const char kPathSeparator = ':';
 #endif
 
-    if (strcmp(backend, "host") != 0) {
+    if (strcmp(config->backend, "host") != 0) {
         // If the backend is not 'host', we also need to add the
         // backend directory.
-        String dir = sBackendList->getLibDirPath(backend);
+        String dir = sBackendList->getLibDirPath(config->backend);
         if (dir.size()) {
             newDirs += kPathSeparator;
             newDirs += dir;
@@ -164,7 +189,7 @@ void emuglConfig_setupEnv(const char* backend, int bitness) {
 #else  // !_WIN32
     static const char kEnvPathVar[] = "LD_LIBRARY_PATH";
 #endif  // !_WIN32
-    String path = getenv(kEnvPathVar);
+    String path = system->envGet(kEnvPathVar);
     if (path.size()) {
         path = StringFormat("%s%c%s",
                             newDirs.c_str(),
@@ -174,9 +199,9 @@ void emuglConfig_setupEnv(const char* backend, int bitness) {
         path = newDirs;
     }
     D("Setting %s=%s\n", kEnvPathVar, path.c_str());
-    setenv(kEnvPathVar, path.c_str(), 1);
+    system->envSet(kEnvPathVar, path.c_str());
 
-    if (!strcmp(backend, "host")) {
+    if (!strcmp(config->backend, "host")) {
         // Nothing more to do for the 'host' backend.
         return;
     }
@@ -191,15 +216,15 @@ void emuglConfig_setupEnv(const char* backend, int bitness) {
     // If a backend provides one of these libraries, use it.
     String lib;
     if (sBackendList->getBackendLibPath(
-            backend, EmuglBackendList::LIBRARY_EGL, &lib)) {
-        setenv("ANDROID_EGL_LIB", lib.c_str(), 1);
+            config->backend, EmuglBackendList::LIBRARY_EGL, &lib)) {
+        system->envSet("ANDROID_EGL_LIB", lib.c_str());
     }
     if (sBackendList->getBackendLibPath(
-            backend, EmuglBackendList::LIBRARY_GLESv1, &lib)) {
-        setenv("ANDROID_GLESv1_LIB", lib.c_str(), 1);
+            config->backend, EmuglBackendList::LIBRARY_GLESv1, &lib)) {
+        system->envSet("ANDROID_GLESv1_LIB", lib.c_str());
     }
     if (sBackendList->getBackendLibPath(
-            backend, EmuglBackendList::LIBRARY_GLESv2, &lib)) {
-        setenv("ANDROID_GLESv2_LIB", lib.c_str(), 1);
+            config->backend, EmuglBackendList::LIBRARY_GLESv2, &lib)) {
+        system->envSet("ANDROID_GLESv2_LIB", lib.c_str());
     }
 }

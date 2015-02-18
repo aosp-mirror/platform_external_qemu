@@ -68,6 +68,7 @@ TEST(EmuglBackendList, init) {
     EXPECT_EQ(static_cast<int>(kExpectedLen), names.size());
     for (size_t n = 0; n < kExpectedLen; ++n) {
         EXPECT_STREQ(kExpected[n], names[n].c_str()) << "#" << n;
+        EXPECT_TRUE(list.contains(kExpected[n]));
     }
 }
 
@@ -118,13 +119,15 @@ TEST(EmuglBackendList, getBackendLibPath) {
                                        kData[n].libName);
         String libdir;
         EXPECT_TRUE(list.getBackendLibPath("bar", kData[n].library, &libdir));
+        EXPECT_TRUE(list.contains("bar"));
+        EXPECT_FALSE(list.contains("foo"));
         EXPECT_STREQ(expected.c_str(), libdir.c_str());
     }
 }
 
 TEST(EmuglBackend, defaultName) {
     EmuglBackendList list("foo", 0);
-    EXPECT_STREQ("host", list.defaultName().c_str());
+    EXPECT_STREQ("auto", list.defaultName().c_str());
 }
 
 }  // namespace opengl

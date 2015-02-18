@@ -102,6 +102,18 @@ TEST(System, scandDirEntries) {
     }
 }
 
+TEST(System, envGetAndSet) {
+    System* sys = System::get();
+    const char kVarName[] = "FOO_BAR_TESTING_STUFF";
+    const char kVarValue[] = "SomethingCompletelyRandomForYou!";
+
+    EXPECT_FALSE(sys->envGet(kVarName));
+    sys->envSet(kVarName, kVarValue);
+    EXPECT_STREQ(kVarValue, sys->envGet(kVarName));
+    sys->envSet(kVarName, NULL);
+    EXPECT_FALSE(sys->envGet(kVarName));
+}
+
 TEST(System, scanDirEntriesWithFullPaths) {
     static const char* const kExpected[] = {
         "fifth", "first", "fourth", "second", "sixth", "third"
