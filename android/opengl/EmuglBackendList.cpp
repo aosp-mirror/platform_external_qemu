@@ -34,7 +34,7 @@ using android::base::System;
 
 EmuglBackendList::EmuglBackendList(const char* execDir,
                                    int hostBitness) :
-        mDefaultName("host"), mNames(), mHostBitness(0), mExecDir(execDir) {
+        mDefaultName("auto"), mNames(), mHostBitness(0), mExecDir(execDir) {
     // Fix host bitness if needed.
     if (!hostBitness) {
         hostBitness = System::kProgramBitness;
@@ -42,6 +42,15 @@ EmuglBackendList::EmuglBackendList(const char* execDir,
     mHostBitness = hostBitness;
 
     mNames = EmuglBackendScanner::scanDir(execDir, hostBitness);
+}
+
+bool EmuglBackendList::contains(const char* name) const {
+    for (size_t n = 0; n < mNames.size(); ++n) {
+        if (mNames[n] == name) {
+            return true;
+        }
+    }
+    return false;
 }
 
 String EmuglBackendList::getLibDirPath(const char* name) {

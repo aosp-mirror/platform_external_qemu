@@ -331,7 +331,7 @@ path_getAvdGpuMode(const char* avdName)
 
     char* gpuMode = NULL;
     if (enabled) {
-        gpuMode = _getAvdConfigValue(avdPath, "hw.gpu.mode", "host");
+        gpuMode = _getAvdConfigValue(avdPath, "hw.gpu.mode", "auto");
     }
     AFREE(avdPath);
     return gpuMode;

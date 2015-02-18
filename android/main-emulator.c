@@ -221,9 +221,7 @@ int main(int argc, char** argv)
     }
     D("%s\n", config.status);
 
-    if (config.enabled) {
-        emuglConfig_setupEnv(config.backend, bitness);
-    }
+    emuglConfig_setupEnv(&config);
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().
