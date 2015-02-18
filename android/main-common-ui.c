@@ -552,10 +552,9 @@ FOUND_SKIN:
         int  depth  = aconfig_int(n, "bpp", hwConfig->hw_lcd_depth);
 
         if (width > 0 && height > 0) {
-            /* The emulated framebuffer wants sizes that are multiples of 4 */
-            if (((width|height) & 3) != 0) {
-                width  = (width+3) & ~3;
-                height = (height+3) & ~3;
+            /* The emulated framebuffer wants a width that is a multiple of 2 */
+            if ((width & 1) != 0) {
+                width  = (width + 1) & ~1;
                 D("adjusting LCD dimensions to (%dx%dx)", width, height);
             }
 

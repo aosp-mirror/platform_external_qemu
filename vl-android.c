@@ -3037,7 +3037,7 @@ int main(int argc, char **argv, char **envp)
         /* A bit of sanity checking */
         if (width <= 0 || height <= 0    ||
             (depth != 16 && depth != 32) ||
-            (((width|height) & 3) != 0)  )
+            ((width & 1) != 0)  )
         {
             PANIC("Invalid display configuration (%d,%d,%d)",
                   width, height, depth);
