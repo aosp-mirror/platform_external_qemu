@@ -417,6 +417,7 @@ static void raise_mmu_exception(CPUMIPSState *env, target_ulong address,
 #define KERNEL_PGD_C0_CONTEXT   (1 << 1)
 #define KERNEL_HUGE_TLB         (1 << 2)
 #define KERNEL_RIXI             (1 << 3)
+#define KERNEL_HIGHMEM          (1 << 4)
 
 /* TLB maintenance PTE software flags.
  *
@@ -469,12 +470,63 @@ static struct {
     int softshift;
 } linux_pte_info = {0};
 
+static inline target_ulong cpu_debug_translate_address(CPUMIPSState *env, target_ulong address) {
+
+#if defined(TARGET_MIPS64)
+    if (!(linux_pte_info.config & KERNEL_64_BIT))
+        address = (int32_t)address;
+#endif
+
+    if (address <= USEG_LIMIT) {
+        /* useg */
+        if (env->CP0_Status & (1 << CP0St_ERL)) {
+            return address & 0xFFFFFFFF;
+        } else {
+            return address;
+        }
+#if defined(TARGET_MIPS64)
+    } else if (address < 0x4000000000000000ULL) {
+        return address;
+    } else if (address < 0x8000000000000000ULL) {
+        return address;
+    } else if (address < 0xC000000000000000ULL) {
+        /* xkphys */
+        if ((address & 0x07FFFFFFFFFFFFFFULL) <= env->PAMask) {
+            return address & env->PAMask;
+        } else {
+            return address;
+        }
+    } else if (address < 0xFFFFFFFF80000000ULL) {
+        /* xkseg */
+        return address;
+#endif
+    } else if (address < (int32_t)KSEG1_BASE) {
+        /* kseg0 */
+        return address - (int32_t)KSEG0_BASE;
+    } else if (address < (int32_t)KSEG2_BASE) {
+        /* kseg1 */
+        return address - (int32_t)KSEG1_BASE;
+    } else
+        return address;
+}
+
+static inline target_ulong get_mtc0_entrylo_mask(const CPUMIPSState *env)
+{
+#if defined(TARGET_MIPS64)
+    return env->PAMask >> 6;
+#else
+    return (env->PAMask >> 6) & 0x3FFFFFFF;
+#endif
+}
+
 static inline void pagetable_walk32(CPUState *cs,
                                   target_ulong pgd_addr, target_ulong vaddr,
                                   target_ulong *entrylo0, target_ulong *entrylo1,
                                   target_ulong *sw_pte_lo0, target_ulong *sw_pte_lo1)
 {
     target_ulong ptw_phys, pt_addr, index;
+    MIPSCPU *cpu = MIPS_CPU(cs);
+    CPUMIPSState *env = &cpu->env;
 
 #if defined(TARGET_MIPS64)
     /* workaround when running a 32bit
@@ -483,29 +535,63 @@ static inline void pagetable_walk32(CPUState *cs,
     vaddr = (uint32_t)vaddr;
 #endif
 
-    ptw_phys = pgd_addr & 0x1fffffffUL; /* Assume pgd is in KSEG0/KSEG1 */
     /* 32bit PTE lookup */
+    ptw_phys = cpu_debug_translate_address(env, pgd_addr);
     index = (vaddr >> 22) << 2; /* Use bits 31..22 to index pgd */
     ptw_phys += index;
 
     pt_addr = ldl_phys(cs->as, ptw_phys);
 
-    ptw_phys = pt_addr & 0x1fffffffUL; /* Assume pgt is in KSEG0/KSEG1 */
+    ptw_phys = cpu_debug_translate_address(env, pt_addr);
     index = ((vaddr >> 13) & 0x1ff) << 3; /* Use bits 21..13 to index pgt */
     ptw_phys += index;
 
     /* Get the entrylo values from pgt */
-    *entrylo0 = ldl_phys(cs->as, ptw_phys);
-    if (sw_pte_lo0) {
-        *sw_pte_lo0 = *entrylo0 & ((target_ulong)(1 << linux_pte_info.softshift) - 1);
-    }
-    *entrylo0 >>= linux_pte_info.softshift;
+    if (linux_pte_info.config & KERNEL_RIXI) {
+        target_ulong mask = ~(-1 << linux_pte_info.softshift);
 
-    *entrylo1 = ldl_phys(cs->as, ptw_phys + 4);
-    if (sw_pte_lo1) {
-        *sw_pte_lo1 = *entrylo1 & ((target_ulong)(1 << linux_pte_info.softshift) - 1);
+        *entrylo0 = ldl_phys(cs->as, ptw_phys);
+        if (sw_pte_lo0) {
+            if (linux_pte_info.config & KERNEL_HIGHMEM)
+                *sw_pte_lo0 = *entrylo0 & ~(-1 << (linux_pte_info.softshift + 4));
+            else
+                *sw_pte_lo0 = *entrylo0 & ~(-1 << (linux_pte_info.softshift));
+        }
+        if (linux_pte_info.config & KERNEL_HIGHMEM)
+            *entrylo0 = (*entrylo0) >> 4;
+        *entrylo0 = ((*entrylo0 & mask) << (32 - linux_pte_info.softshift)) |
+                    ((uint32_t)*entrylo0 >> linux_pte_info.softshift);
+        *entrylo0 = (*entrylo0 & get_mtc0_entrylo_mask(env)) |
+                    ((*entrylo0 & (env->CP0_PageGrain & (3u << CP0PG_XIE))) <<
+                    (CP0EnLo_XI - 30));
+
+        *entrylo1 = ldl_phys(cs->as, ptw_phys + 4);
+        if (sw_pte_lo1) {
+            if (linux_pte_info.config & KERNEL_HIGHMEM)
+                *sw_pte_lo1 = *entrylo1 & ~(-1 << (linux_pte_info.softshift + 4));
+            else
+                *sw_pte_lo1 = *entrylo1 & ~(-1 << (linux_pte_info.softshift));
+        }
+        if (linux_pte_info.config & KERNEL_HIGHMEM)
+            *entrylo1 = (*entrylo1) >> 4;
+        *entrylo1 = ((*entrylo1 & mask) << (32 - linux_pte_info.softshift)) |
+                    ((uint32_t)*entrylo1 >> linux_pte_info.softshift);
+        *entrylo1 = (*entrylo1 & get_mtc0_entrylo_mask(env)) |
+                    ((*entrylo1 & (env->CP0_PageGrain & (3u << CP0PG_XIE))) <<
+                    (CP0EnLo_XI - 30));
+    } else {
+        *entrylo0 = ldl_phys(cs->as, ptw_phys);
+        if (sw_pte_lo0) {
+            *sw_pte_lo0 = *entrylo0 & ((target_ulong)(1 << linux_pte_info.softshift) - 1);
+        }
+        *entrylo0 >>= linux_pte_info.softshift;
+
+        *entrylo1 = ldl_phys(cs->as, ptw_phys + 4);
+        if (sw_pte_lo1) {
+            *sw_pte_lo1 = *entrylo1 & ((target_ulong)(1 << linux_pte_info.softshift) - 1);
+        }
+        *entrylo1 >>= linux_pte_info.softshift;
     }
-    *entrylo1 >>= linux_pte_info.softshift;
 }
 
 static inline void pagetable_walk64(CPUState *cs,
@@ -515,22 +601,21 @@ static inline void pagetable_walk64(CPUState *cs,
 {
     MIPSCPU *cpu = MIPS_CPU(cs);
     CPUMIPSState *env = &cpu->env;
-
     target_ulong ptw_phys, pt_addr, index;
 
-    pgd_addr = pgd_addr & 0x1fffffffUL;
+    pgd_addr = cpu_debug_translate_address(env, pgd_addr);
     index = ((uint64_t)vaddr >> 0x1b) & 0x1ff8;
     pgd_addr += index;
 
-    pgd_addr = ldl_phys(cs->as, pgd_addr);
+    pgd_addr = ldq_phys(cs->as, pgd_addr);
 
-    ptw_phys = pgd_addr & 0x1fffffffUL;
+    ptw_phys = cpu_debug_translate_address(env, pgd_addr);
     index = ((uint64_t)vaddr >> 0x12) & 0xff8;
     ptw_phys += index;
 
-    pt_addr = ldl_phys(cs->as, ptw_phys);
+    pt_addr = ldq_phys(cs->as, ptw_phys);
 
-    ptw_phys = pt_addr & 0x1fffffffUL;
+    ptw_phys = cpu_debug_translate_address(env, pt_addr);
     index = (((vaddr & 0xC00000000000ULL) >> (55 - env->SEGBITS)) |
              ((vaddr & ((1ULL << env->SEGBITS) - 1) & 0xFFFFFFFFFFFFE000ULL) >> 9)) & 0xff0;
     ptw_phys += index;
@@ -538,32 +623,32 @@ static inline void pagetable_walk64(CPUState *cs,
     if (linux_pte_info.config & KERNEL_RIXI) {
         target_ulong mask = ~(-1 << linux_pte_info.softshift);
 
-        *entrylo0 = ldl_phys(cs->as, ptw_phys);
+        *entrylo0 = ldq_phys(cs->as, ptw_phys);
         if (sw_pte_lo0) {
             *sw_pte_lo0 = *entrylo0 & ((target_ulong)(1 << linux_pte_info.softshift) - 1);
         }
         *entrylo0 = ((*entrylo0 & mask) << (64 - linux_pte_info.softshift)) |
                      ((uint64_t)*entrylo0 >> linux_pte_info.softshift);
-        *entrylo0 = (*entrylo0 & 0x3FFFFFFF) |
+        *entrylo0 = (*entrylo0 & get_mtc0_entrylo_mask(env)) |
                     (*entrylo0 & ((env->CP0_PageGrain & (3ull << CP0PG_XIE)) << 32));
 
-        *entrylo1 = ldl_phys(cs->as, ptw_phys + 8);
+        *entrylo1 = ldq_phys(cs->as, ptw_phys + 8);
         if (sw_pte_lo1) {
             *sw_pte_lo1 = *entrylo1 & ((target_ulong)(1 << linux_pte_info.softshift) - 1);
         }
         *entrylo1 = ((*entrylo1 & mask) << (64 - linux_pte_info.softshift)) |
                      ((uint64_t)*entrylo1 >> linux_pte_info.softshift);
-        *entrylo1 = (*entrylo1 & 0x3FFFFFFF) |
+        *entrylo1 = (*entrylo1 & get_mtc0_entrylo_mask(env)) |
                     (*entrylo1 & ((env->CP0_PageGrain & (3ull << CP0PG_XIE)) << 32));
     } else {
         /* Get the entrylo values from pgt */
-        *entrylo0 = ldl_phys(cs->as, ptw_phys);
+        *entrylo0 = ldq_phys(cs->as, ptw_phys);
         if (sw_pte_lo0) {
             *sw_pte_lo0 = *entrylo0 & ((target_ulong)(1 << linux_pte_info.softshift) - 1);
         }
         *entrylo0 >>= linux_pte_info.softshift;
 
-        *entrylo1 = ldl_phys(cs->as, ptw_phys + 8);
+        *entrylo1 = ldq_phys(cs->as, ptw_phys + 8);
         if (sw_pte_lo1) {
             *sw_pte_lo1 = *entrylo1 & ((target_ulong)(1 << linux_pte_info.softshift) - 1);
         }
@@ -596,12 +681,33 @@ static inline target_ulong cpu_mips_get_pgd(CPUState *cs, target_long bad_vaddr)
                 uint32_t mask;
             } lui, lw, srl;
         } handlers[] = {
-            /* 2.6.29+ 32-bit Kernel */
+            /* 3.10+ 32-bit R6 Kernel */
+            {
+                KERNEL_RIXI,
+                {0x00, 0x3c1b0000, 0xffff0000}, /* 0x3c1b803f : lui k1,%hi(pgd_current_p) */
+                {0x08, 0x8f7b0000, 0xffff0000}, /* 0x8f7b3000 : lw  k1,%lo(k1) */
+                {0x2c, 0x003ad002, 0xfffff83f}  /* 0x003ad082 : ror k0,k0,#shift */
+            },
+            /* 3.10+ 32-bit R6 Kernel */
+            {
+                KERNEL_RIXI | KERNEL_HIGHMEM,
+                {0x00, 0x3c1b0000, 0xffff0000}, /* 0x3c1b803f : lui k1,%hi(pgd_current_p) */
+                {0x08, 0x8f7b0000, 0xffff0000}, /* 0x8f7b3000 : lw  k1,%lo(k1) */
+                {0x34, 0x003ad002, 0xfffff83f}  /* 0x003ad082 : ror k0,k0,#shift */
+            },
+            /* 3.10+ 32-bit R6 Kernel */
+            {
+                KERNEL_RIXI | KERNEL_HIGHMEM,
+                {0x00, 0x3c1b0000, 0xffff0000}, /* 0x3c1b803f : lui k1,%hi(pgd_current_p) */
+                {0x08, 0x8f7b0000, 0xffff0000}, /* 0x8f7b3000 : lw  k1,%lo(k1) */
+                {0x38, 0x003ad002, 0xfffff83f}  /* 0x003ad082 : ror k0,k0,#shift */
+            },
+            /* 3.10+ 32-bit R2 Kernel */
             {
                 0,
                 {0x00, 0x3c1b0000, 0xffff0000}, /* 0x3c1b803f : lui k1,%hi(pgd_current_p) */
                 {0x08, 0x8f7b0000, 0xffff0000}, /* 0x8f7b3000 : lw  k1,%lo(k1) */
-                {0x34, 0x001ad002, 0xfffff83f}  /* 0x001ad002 : srl k0,k0,#shift */
+                {0x2c, 0x001ad002, 0xfffff83f}  /* 0x001ad002 : srl k0,k0,#shift */
             },
             /* 3.10+ 64-bit R2 Kernel */
             {
@@ -655,20 +761,13 @@ static inline target_ulong cpu_mips_get_pgd(CPUState *cs, target_long bad_vaddr)
             linux_pte_info.pagetable_walk = &pagetable_walk32;
         }
 
-        if (config & KERNEL_PGD_C0_CONTEXT) {
-            /* swapper_pg_dir address */
-            address = (lui_ins & 0xffff) << 16;
-            linux_pte_info.swapper_pg_dir = address;
-        } else {
-            address = (lui_ins & 0xffff) << 16;
-            linux_pte_info.swapper_pg_dir = address;
+        /* swapper_pg_dir address */
+        address = (int32_t)((lui_ins & 0xffff) << 16);
+        linux_pte_info.swapper_pg_dir = cpu_debug_translate_address(env, address);
+
+        if (!(config & KERNEL_PGD_C0_CONTEXT)) {
             address += (((int32_t)(lw_ins & 0xffff)) << 16) >> 16;
-            if (address >= 0x80000000 && address < 0xa0000000)
-                address -= 0x80000000;
-            else if (address >= 0xa0000000 && address <= 0xc0000000)
-                address -= 0xa0000000;
-            else
-                cpu_abort(cs, "pgd_current_p not in KSEG0/KSEG1\n");
+            address = cpu_debug_translate_address(env, address);
         }
 
         linux_pte_info.state = USEFASTTLB;
@@ -843,10 +942,10 @@ hwaddr mips_cpu_get_phys_page_debug(CPUState *cs, vaddr addr)
     int prot, ret;
 
 #if defined(TARGET_MIPS64)
-    if (!(linux_pte_info.config & KERNEL_64_BIT) &&
-         (linux_pte_info.state == USEFASTTLB))
-        addr = ((int64_t)addr << 32) >> 32;
+    if (!(linux_pte_info.config & KERNEL_64_BIT))
+        addr = (int32_t)addr;
 #endif
+
     ret = get_physical_address(env, &phys_addr, &prot, addr, 0, ACCESS_INT);
     if (ret != TLBRET_MATCH) {
         target_ulong pgd_addr = cpu_mips_get_pgd(cs, addr);
