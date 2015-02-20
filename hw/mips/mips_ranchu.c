@@ -41,6 +41,8 @@ typedef struct {
     qemu_irq *gfpic;
 } RanchuState;
 
+#define MAX_RAM_SIZE_MB 4079UL
+
 enum {
     RANCHU_GF_PIC,
     RANCHU_GF_TTY,
@@ -95,7 +97,6 @@ static DevMapEntry devmap[] = {
 
 struct machine_params {
     uint64_t kernel_entry;
-    uint64_t ram_size;
     uint64_t cmdline_ptr;
     MIPSCPU *cpu;
 } ranchu_params;
@@ -109,7 +110,7 @@ static void main_cpu_reset(void* opaque1)
 
     cpu->env.active_tc.PC = opaque->kernel_entry;
     cpu->env.active_tc.gpr[4] = opaque->cmdline_ptr; /* a0 */
-    cpu->env.active_tc.gpr[5] = opaque->ram_size;    /* a1 */
+    cpu->env.active_tc.gpr[5] = 0;                   /* a1 */
     cpu->env.active_tc.gpr[6] = 0;                   /* a2 */
     cpu->env.active_tc.gpr[7] = 0;                   /* a3 */
 
@@ -286,7 +287,7 @@ static void create_device(void* fdt, DevMapEntry* dev, qemu_irq* pic,
         qemu_fdt_setprop(fdt, nodename, "compatible",
                          dev->dt_compatible,
                          strlen(dev->dt_compatible) + 1);
-        qemu_fdt_setprop_sized_cells(fdt, nodename, "reg", 1, base, 1, dev->size);
+        qemu_fdt_setprop_sized_cells(fdt, nodename, "reg", 1, base, 2, dev->size);
 
         if (pic == NULL) {
             qemu_fdt_setprop(fdt, nodename, "interrupt-controller", NULL, 0);
@@ -323,7 +324,8 @@ static void ranchu_init(MachineState *machine)
     DeviceState *dev = qdev_create(NULL, TYPE_MIPS_RANCHU);
     RanchuState *s = MIPS_RANCHU(dev);
 
-    MemoryRegion *ram = g_new(MemoryRegion, 1);
+    MemoryRegion *ram_lo = g_new(MemoryRegion, 1);
+    MemoryRegion *ram_hi = g_new(MemoryRegion, 1);
 
     /* init CPUs */
     if (machine->cpu_model == NULL) {
@@ -351,9 +353,11 @@ static void ranchu_init(MachineState *machine)
 
     qemu_register_reset(main_cpu_reset, &ranchu_params);
 
-    /* avoid overlap of ram and IO regs */
-    if (ram_size > GOLDFISH_IO_SPACE)
-        ram_size = GOLDFISH_IO_SPACE;
+    if (ram_size > (MAX_RAM_SIZE_MB << 20)) {
+        fprintf(stderr, "qemu: Too much memory for this machine. "
+                        "RAM size reduced to %lu MB\n", MAX_RAM_SIZE_MB);
+        ram_size = MAX_RAM_SIZE_MB << 20;
+    }
 
     fdt = create_device_tree(&fdt_size);
 
@@ -362,11 +366,19 @@ static void ranchu_init(MachineState *machine)
         exit(1);
     }
 
-    memory_region_init_ram(ram, NULL, "ranchu.ram", ram_size, &error_abort);
-    vmstate_register_ram_global(ram);
-    memory_region_add_subregion(get_system_memory(), 0, ram);
+    memory_region_init_ram(ram_lo, NULL, "ranchu_low.ram",
+        MIN(ram_size, GOLDFISH_IO_SPACE), &error_abort);
+    vmstate_register_ram_global(ram_lo);
+    memory_region_add_subregion(get_system_memory(), 0, ram_lo);
 
-    ranchu_params.ram_size = ram_size;
+    /* post IO hole, if there is enough RAM */
+    if (ram_size > GOLDFISH_IO_SPACE) {
+        memory_region_init_ram(ram_hi, NULL, "ranchu_high.ram",
+            ram_size - GOLDFISH_IO_SPACE, &error_abort);
+        vmstate_register_ram_global(ram_hi);
+        memory_region_add_subregion(get_system_memory(), 0x20000000, ram_hi);
+    }
+
     ranchu_params.cpu = cpu;
 
     cpu_mips_irq_init_cpu(env);
@@ -381,7 +393,7 @@ static void ranchu_init(MachineState *machine)
     qemu_fdt_setprop_string(fdt, "/", "model", "ranchu");
     qemu_fdt_setprop_string(fdt, "/", "compatible", "mti,goldfish");
     qemu_fdt_setprop_cell(fdt, "/", "#address-cells", 0x1);
-    qemu_fdt_setprop_cell(fdt, "/", "#size-cells", 0x1);
+    qemu_fdt_setprop_cell(fdt, "/", "#size-cells", 0x2);
     qemu_fdt_setprop_cell(fdt, "/", "interrupt-parent", devmap[RANCHU_GF_PIC].irq);
 
     /* CPU node */
@@ -393,7 +405,13 @@ static void ranchu_init(MachineState *machine)
     /* Memory node */
     qemu_fdt_add_subnode(fdt, "/memory");
     qemu_fdt_setprop_string(fdt, "/memory", "device_type", "memory");
-    qemu_fdt_setprop_sized_cells(fdt, "/memory", "reg", 1, 0, 1, ram_size);
+    if (ram_size > GOLDFISH_IO_SPACE) {
+        qemu_fdt_setprop_sized_cells(fdt, "/memory", "reg",
+                    1, 0, 2, GOLDFISH_IO_SPACE,
+                    1, 0x20000000, 2, ram_size - GOLDFISH_IO_SPACE);
+    } else {
+        qemu_fdt_setprop_sized_cells(fdt, "/memory", "reg", 1, 0, 2, ram_size);
+    }
 
     /* Create goldfish_pic controller node in dt */
     create_device(fdt, &devmap[RANCHU_GF_PIC], NULL, 1, 0);
@@ -411,10 +429,13 @@ static void ranchu_init(MachineState *machine)
 
     initialize_console_and_adb();
 
-    android_load_kernel(env, ram_size, machine->kernel_filename,
-                                       machine->kernel_cmdline,
-                                       machine->initrd_filename,
-                                       fdt, fdt_size);
+    qemu_fdt_dumpdtb(fdt, fdt_size);
+
+    android_load_kernel(env, MIN(ram_size, GOLDFISH_IO_SPACE),
+                        machine->kernel_filename,
+                        machine->kernel_cmdline,
+                        machine->initrd_filename,
+                        fdt, fdt_size);
 }
 
 static int mips_ranchu_sysbus_device_init(SysBusDevice *sysbusdev)
