@@ -141,7 +141,6 @@ private:
     EGLSurface m_prevReadSurf;
     EGLSurface m_prevDrawSurf;
     EGLNativeWindowType m_subWin;
-    EGLNativeDisplayType m_subWinDisplay;
     EGLConfig  m_eglConfig;
     HandleType m_lastPostedColorBuffer;
     float      m_zRot;

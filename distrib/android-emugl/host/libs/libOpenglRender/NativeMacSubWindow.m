@@ -34,8 +34,10 @@
 
 
 EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
-                                    EGLNativeDisplayType* display_out,
-                                    int x, int y,int width, int height){
+                                    int x,
+                                    int y,
+                                    int width,
+                                    int height) {
     NSWindow *win = (NSWindow *)p_window;
     if (!win) {
         return NULL;
@@ -55,7 +57,7 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
     return (EGLNativeWindowType)glView;
 }
 
-void destroySubWindow(EGLNativeDisplayType dis,EGLNativeWindowType win){
+void destroySubWindow(EGLNativeWindowType win) {
     if(win){
         NSView *glView = (NSView *)win;
         [glView removeFromSuperview];

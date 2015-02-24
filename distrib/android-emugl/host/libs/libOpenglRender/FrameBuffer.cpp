@@ -372,7 +372,6 @@ FrameBuffer::FrameBuffer(int p_width, int p_height) :
     m_prevReadSurf(EGL_NO_SURFACE),
     m_prevDrawSurf(EGL_NO_SURFACE),
     m_subWin((EGLNativeWindowType)0),
-    m_subWinDisplay(NULL),
     m_lastPostedColorBuffer(0),
     m_zRot(0.0f),
     m_eglContextInitialized(false),
@@ -422,7 +421,6 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
 
             // create native subwindow for FB display output
             fb->m_subWin = createSubWindow(p_window,
-                                           &fb->m_subWinDisplay,
                                            p_x,p_y,p_width,p_height);
             if (fb->m_subWin) {
                 fb->m_nativeWindow = p_window;
@@ -435,7 +433,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
 
                 if (fb->m_eglSurface == EGL_NO_SURFACE) {
                     ERR("Failed to create surface\n");
-                    destroySubWindow(fb->m_subWinDisplay, fb->m_subWin);
+                    destroySubWindow(fb->m_subWin);
                     fb->m_subWin = (EGLNativeWindowType)0;
                 }
                 else if (fb->bindSubwin_locked()) {
@@ -465,8 +463,7 @@ bool FrameBuffer::removeSubWindow()
             s_egl.eglMakeCurrent(s_theFrameBuffer->m_eglDisplay, NULL, NULL, NULL);
             s_egl.eglDestroySurface(s_theFrameBuffer->m_eglDisplay,
                                     s_theFrameBuffer->m_eglSurface);
-            destroySubWindow(s_theFrameBuffer->m_subWinDisplay,
-                             s_theFrameBuffer->m_subWin);
+            destroySubWindow(s_theFrameBuffer->m_subWin);
 
             s_theFrameBuffer->m_eglSurface = EGL_NO_SURFACE;
             s_theFrameBuffer->m_subWin = (EGLNativeWindowType)0;
