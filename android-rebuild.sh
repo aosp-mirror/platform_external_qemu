@@ -184,27 +184,30 @@ if [ -d "$PREBUILTS_DIR/mesa" ]; then
     case $MESA_HOST in
         windows)
             MESA_LIBNAME=opengl32.dll
+            OSMESA_LIBNAME=osmesa.dll
             ;;
         linux)
             MESA_LIBNAME=libGL.so
+            OSMESA_LIBNAME=libosmesa.so
             ;;
         *)
             MESA_LIBNAME=
+            OSMESA_LIBNAME=
     esac
-    if [ "$MESA_LIBNAME" ]; then
+    for LIBNAME in $MESA_LIBNAME $OSMESA_LIBNAME; do
         for MESA_ARCH in x86 x86_64; do
             if [ "$MESA_ARCH" = "x86" ]; then
                 MESA_LIBDIR=lib
             else
                 MESA_LIBDIR=lib64
             fi
-            MESA_LIBRARY=$(ls "$PREBUILTS_DIR/mesa/$MESA_HOST-$MESA_ARCH/lib/$MESA_LIBNAME" 2>/dev/null || true)
+            MESA_LIBRARY=$(ls "$PREBUILTS_DIR/mesa/$MESA_HOST-$MESA_ARCH/lib/$LIBNAME" 2>/dev/null || true)
             if [ "$MESA_LIBRARY" ]; then
                 MESA_DSTDIR="$OUT_DIR/$MESA_LIBDIR/gles_mesa"
-                echo "Copying $MESA_HOST-$MESA_ARCH Mesa library to $MESA_DSTDIR"
+                echo "Copying $MESA_HOST-$MESA_ARCH $LIBNAME library to $MESA_DSTDIR"
                 run mkdir -p "$MESA_DSTDIR" &&
                 run cp -f "$MESA_LIBRARY" "$MESA_DSTDIR/$MESA_LIBNAME"
-                if [ "$MESA_HOST" = "linux" ]; then
+                if [ "$MESA_HOST" = "linux" -a "$LIBNAME" = "libGL.so" ]; then
                     # Special handling for Linux, this is needed because SDL
                     # will actually try to load libGL.so.1 before GPU emulation
                     # is initialized. This is actually a link to the system's
@@ -215,7 +218,7 @@ if [ -d "$PREBUILTS_DIR/mesa" ]; then
                 fi
             fi
         done
-    fi
+    done
 fi
 
 RUN_32BIT_TESTS=
