@@ -223,18 +223,17 @@ bool checkPixmapPixelFormatMatch(EGLNativeDisplayType dpy,EGLNativePixmapType pi
    return depth >= configDepth;
 }
 
-EGLNativeSurfaceType createPbufferSurface(EGLNativeDisplayType dpy,EglConfig* cfg,EglPbufferSurface* srfc){
-    EGLint width,height,largest;
-    srfc->getDim(&width,&height,&largest);
-
-    int attribs[] = {
-                     GLX_PBUFFER_WIDTH           ,width,
-                     GLX_PBUFFER_HEIGHT          ,height,
-                     GLX_LARGEST_PBUFFER         ,largest,
-                     None
-                    };
-    GLXPbuffer pb = glXCreatePbuffer(dpy,cfg->nativeFormat(),attribs);
-    return pb ? new SrfcInfo(pb,SrfcInfo::PBUFFER) : NULL;
+EGLNativeSurfaceType createPbufferSurface(EGLNativeDisplayType dpy,
+                                          EglConfig* cfg,
+                                          const PbufferInfo* info) {
+    const int attribs[] = {
+        GLX_PBUFFER_WIDTH, info->width,
+        GLX_PBUFFER_HEIGHT, info->height,
+        GLX_LARGEST_PBUFFER, info->largest,
+        None
+    };
+    GLXPbuffer pb = glXCreatePbuffer(dpy, cfg->nativeFormat(), attribs);
+    return pb ? new SrfcInfo(pb, SrfcInfo::PBUFFER) : NULL;
 }
 
 bool releasePbuffer(EGLNativeDisplayType dis,EGLNativeSurfaceType pb) {

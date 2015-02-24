@@ -547,7 +547,18 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ATTRIBUTE);
     }
 
-    EGLNativeSurfaceType pb = EglOS::createPbufferSurface(dpy->nativeType(),cfg,tmpPbSurfacePtr);
+    EglOS::PbufferInfo pbinfo;
+
+    pbinfo.width = width;
+    pbinfo.height = height;
+    pbinfo.largest = largest;
+    pbinfo.target = texTarget;
+    pbinfo.format = texFormat;
+
+    tmpPbSurfacePtr->getAttrib(EGL_MIPMAP_TEXTURE, &pbinfo.hasMipmap);
+
+    EGLNativeSurfaceType pb = EglOS::createPbufferSurface(
+            dpy->nativeType(), cfg, &pbinfo);
     if(!pb) {
         //TODO: RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_VALUE); dont have bad value
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ATTRIBUTE);

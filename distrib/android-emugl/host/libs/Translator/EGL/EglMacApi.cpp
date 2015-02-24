@@ -147,13 +147,11 @@ bool checkPixmapPixelFormatMatch(EGLNativeDisplayType dpy,EGLNativePixmapType pi
     return false;
 }
 
-EGLNativeSurfaceType createPbufferSurface(EGLNativeDisplayType dpy,EglConfig* cfg,EglPbufferSurface* srfc){
-    EGLint width,height,hasMipmap,tmp;
-    EGLint target,format;
+EGLNativeSurfaceType createPbufferSurface(EGLNativeDisplayType dpy,
+                                          EglConfig* cfg,
+                                          const PbufferInfo* info) {
     GLenum glTexFormat = GL_RGBA, glTexTarget = GL_TEXTURE_2D;
-    srfc->getDim(&width,&height,&tmp);
-    srfc->getTexInfo(&format,&target);
-    switch (format) {
+    switch (info->format) {
     case EGL_TEXTURE_RGB:
         glTexFormat = GL_RGB;
         break;
@@ -161,9 +159,9 @@ EGLNativeSurfaceType createPbufferSurface(EGLNativeDisplayType dpy,EglConfig* cf
         glTexFormat = GL_RGBA;
         break;
     }
-    srfc->getAttrib(EGL_MIPMAP_TEXTURE,&hasMipmap);
-    EGLint maxMipmap = hasMipmap ? MAX_PBUFFER_MIPMAP_LEVEL:0;
-    return (EGLNativeSurfaceType)nsCreatePBuffer(glTexTarget,glTexFormat,maxMipmap,width,height);
+    EGLint maxMipmap = info->hasMipmap ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
+    return (EGLNativeSurfaceType)nsCreatePBuffer(
+            glTexTarget, glTexFormat, maxMipmap, info->width, info->height);
 }
 
 bool releasePbuffer(EGLNativeDisplayType dis,EGLNativeSurfaceType pb) {

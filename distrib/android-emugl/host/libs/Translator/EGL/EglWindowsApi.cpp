@@ -466,19 +466,15 @@ bool checkPixmapPixelFormatMatch(EGLNativeInternalDisplayType dpy,EGLNativePixma
     return true;
 }
 
-EGLNativeSurfaceType createPbufferSurface(EGLNativeInternalDisplayType display,EglConfig* cfg,EglPbufferSurface* pbSurface) {
-
-
+EGLNativeSurfaceType createPbufferSurface(EGLNativeInternalDisplayType display,
+                                          EglConfig* cfg,
+                                          const PbufferInfo* info) {
     HDC dpy = getDummyDC(display,cfg->nativeId());
-    EGLint width,height,largest,texTarget,texFormat;
-    pbSurface->getDim(&width,&height,&largest);
-    pbSurface->getTexInfo(&texTarget,&texFormat);
 
     int wglTexFormat = WGL_NO_TEXTURE_ARB;
-    int wglTexTarget = (texTarget == EGL_TEXTURE_2D)? WGL_TEXTURE_2D_ARB:
-                                                      WGL_NO_TEXTURE_ARB;
-
-    switch(texFormat) {
+    int wglTexTarget = (info->target == EGL_TEXTURE_2D) ? WGL_TEXTURE_2D_ARB:
+                                                          WGL_NO_TEXTURE_ARB;
+    switch (info->format) {
     case EGL_TEXTURE_RGB:
         wglTexFormat = WGL_TEXTURE_RGB_ARB;
         break;
@@ -487,13 +483,17 @@ EGLNativeSurfaceType createPbufferSurface(EGLNativeInternalDisplayType display,E
         break;
     }
 
-    int pbAttribs[] = {
-                       WGL_TEXTURE_TARGET_ARB   ,wglTexTarget,
-                       WGL_TEXTURE_FORMAT_ARB   ,wglTexFormat,
-                       0
-                      };
-    if(!s_wglExtProcs->wglCreatePbufferARB) return NULL;
-    EGLNativePbufferType pb = s_wglExtProcs->wglCreatePbufferARB(dpy,cfg->nativeId(),width,height,pbAttribs);
+    const int pbAttribs[] = {
+        WGL_TEXTURE_TARGET_ARB, wglTexTarget,
+        WGL_TEXTURE_FORMAT_ARB, wglTexFormat,
+        0
+    };
+
+    if (!s_wglExtProcs->wglCreatePbufferARB) {
+        return NULL;
+    }
+    EGLNativePbufferType pb = s_wglExtProcs->wglCreatePbufferARB(
+            dpy, cfg->nativeId(), info->width, info->height, pbAttribs);
     if(!pb) {
         GetLastError();
         return NULL;
