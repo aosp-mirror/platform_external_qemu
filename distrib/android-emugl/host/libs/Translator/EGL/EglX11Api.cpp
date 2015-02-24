@@ -254,8 +254,10 @@ bool destroyContext(EGLNativeDisplayType dpy,EGLNativeContextType ctx) {
     return true;
 }
 
-bool makeCurrent(EGLNativeDisplayType dpy,EglSurface* read,EglSurface* draw,EGLNativeContextType ctx){
-
+bool makeCurrent(EGLNativeDisplayType dpy,
+                 EGLNativeSurfaceType read,
+                 EGLNativeSurfaceType draw,
+                 EGLNativeContextType ctx) {
     ErrorHandler handler(dpy);
     bool retval = false;
     if (!ctx && !read && !draw) {
@@ -263,7 +265,7 @@ bool makeCurrent(EGLNativeDisplayType dpy,EglSurface* read,EglSurface* draw,EGLN
         retval = glXMakeContextCurrent(dpy, 0, 0, NULL);
     }
     else if (ctx && read && draw) {
-        retval = glXMakeContextCurrent(dpy,draw->native()->srfc(),read->native()->srfc(),ctx);
+        retval = glXMakeContextCurrent(dpy, draw->srfc(), read->srfc(), ctx);
     }
     return (handler.getLastError() == 0) && retval;
 }

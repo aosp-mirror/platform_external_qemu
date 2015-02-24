@@ -17,6 +17,30 @@
 #include "MacNative.h"
 #define MAX_PBUFFER_MIPMAP_LEVEL 1
 
+class SrfcInfo {
+public:
+    typedef enum {
+        WINDOW  = 0,
+        PBUFFER = 1,
+        PIXMAP
+    } SurfaceType;
+
+    SrfcInfo(void* handle, SurfaceType type) :
+            m_type(type), m_handle(handle), m_hasMipmap(false) {}
+
+    SurfaceType type() const { return m_type; }
+
+    void* handle() const { return m_handle; }
+
+    bool hasMipmap() const { return m_hasMipmap; }
+    void setHasMipmap(bool value) { m_hasMipmap = value; }
+
+private:
+    SurfaceType m_type;
+    void* m_handle;
+    bool m_hasMipmap;
+};
+
 namespace EglOS {
 
 static std::list<EGLNativePixelFormatType> s_nativeFormats;
@@ -35,7 +59,7 @@ static EglConfig* pixelFormatToConfig(int index,int renderableType,EGLNativePixe
     EGLint  transparentType,samples;
     EGLint  tRed,tGreen,tBlue;
     EGLint  pMaxWidth,pMaxHeight,pMaxPixels;
-    EGLint  configId,level;
+    EGLint  level;
     EGLint  window,pbuffer;
     EGLint  doubleBuffer,colorSize;
 
@@ -121,12 +145,15 @@ bool validNativeWin(EGLNativeDisplayType dpy, EGLNativeWindowType win) {
 }
 
 bool validNativeWin(EGLNativeDisplayType dpy, EGLNativeSurfaceType win) {
-    return validNativeWin(dpy,(EGLNativeWindowType)win);
+    if (win->type() != SrfcInfo::WINDOW) {
+        return false;
+    } else {
+        return validNativeWin(dpy, win->handle());
+    }
 }
 
 //no support for pixmap in mac
 bool validNativePixmap(EGLNativeDisplayType dpy, EGLNativeSurfaceType pix) {
-
    return true;
 }
 
@@ -160,12 +187,24 @@ EGLNativeSurfaceType createPbufferSurface(EGLNativeDisplayType dpy,
         break;
     }
     EGLint maxMipmap = info->hasMipmap ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
-    return (EGLNativeSurfaceType)nsCreatePBuffer(
-            glTexTarget, glTexFormat, maxMipmap, info->width, info->height);
+
+    EGLNativeSurfaceType result = new SrfcInfo(
+            nsCreatePBuffer(
+                    glTexTarget,
+                    glTexFormat,
+                    maxMipmap,
+                    info->width,
+                    info->height),
+                    SrfcInfo::PBUFFER);
+
+    result->setHasMipmap(info->hasMipmap);
+    return result;
 }
 
 bool releasePbuffer(EGLNativeDisplayType dis,EGLNativeSurfaceType pb) {
-    nsDestroyPBuffer(pb);
+    if (pb) {
+        nsDestroyPBuffer(pb->handle());
+    }
     return true;
 }
 
@@ -178,8 +217,10 @@ bool destroyContext(EGLNativeDisplayType dpy,EGLNativeContextType ctx) {
     return true;
 }
 
-bool makeCurrent(EGLNativeDisplayType dpy,EglSurface* read,EglSurface* draw,EGLNativeContextType ctx){
-
+bool makeCurrent(EGLNativeDisplayType dpy,
+                 EGLNativeSurfaceType read,
+                 EGLNativeSurfaceType draw,
+                 EGLNativeContextType ctx) {
     // check for unbind
     if (ctx == NULL && read == NULL && draw == NULL) {
         nsWindowMakeCurrent(NULL, NULL);
@@ -191,20 +232,21 @@ bool makeCurrent(EGLNativeDisplayType dpy,EglSurface* read,EglSurface* draw,EGLN
     }
 
     //dont supporting diffrent read & draw surfaces on Mac
-    if(read->native() != draw->native()) return false;
-    switch(draw->type()){
-    case EglSurface::WINDOW:
-        nsWindowMakeCurrent(ctx,draw->native());
+    if (read != draw) {
+        return false;
+    }
+    switch (draw->type()) {
+    case SrfcInfo::WINDOW:
+        nsWindowMakeCurrent(ctx, draw->handle());
         break;
-    case EglSurface::PBUFFER:
+    case SrfcInfo::PBUFFER:
     {
         EGLint hasMipmap;
-        draw->getAttrib(EGL_MIPMAP_TEXTURE,&hasMipmap);
-        int mipmapLevel = hasMipmap ? MAX_PBUFFER_MIPMAP_LEVEL:0;
-        nsPBufferMakeCurrent(ctx,draw->native(),mipmapLevel);
+        int mipmapLevel = draw->hasMipmap() ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
+        nsPBufferMakeCurrent(ctx, draw->handle(), mipmapLevel);
         break;
     }
-    case EglSurface::PIXMAP: // not supported on Mac
+    case SrfcInfo::PIXMAP:
     default:
         return false;
     }
@@ -222,14 +264,15 @@ void swapInterval(EGLNativeDisplayType dpy,EGLNativeSurfaceType win,int interval
 }
 
 EGLNativeSurfaceType createWindowSurface(EGLNativeWindowType wnd){
-    return (EGLNativeSurfaceType)wnd;
+    return new SrfcInfo(wnd, SrfcInfo::WINDOW);
 }
 
 EGLNativeSurfaceType createPixmapSurface(EGLNativePixmapType pix){
-    return (EGLNativeSurfaceType)pix;
+    return new SrfcInfo(pix, SrfcInfo::PIXMAP);
 }
 
 void destroySurface(EGLNativeSurfaceType srfc){
+    delete srfc;
 }
 
 EGLNativeInternalDisplayType getInternalDisplay(EGLNativeDisplayType dpy){

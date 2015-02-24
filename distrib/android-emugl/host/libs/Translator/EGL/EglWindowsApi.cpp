@@ -17,6 +17,9 @@
 #include <windows.h>
 #include <wingdi.h>
 #include <GL/wglext.h>
+
+#include <map>
+
 #include <stdio.h>
 
 #define IS_TRUE(a) \
@@ -544,21 +547,20 @@ bool destroyContext(EGLNativeInternalDisplayType dpy,EGLNativeContextType ctx) {
 }
 
 
-bool makeCurrent(EGLNativeInternalDisplayType display,EglSurface* read,EglSurface* draw,EGLNativeContextType ctx) {
-
-    HDC hdcRead = read ? read->native()->getDC(): NULL;
-    HDC hdcDraw = draw ? draw->native()->getDC(): NULL;
-    bool retVal = false;
-
+bool makeCurrent(EGLNativeInternalDisplayType display,
+                 EGLNativeSurfaceType read,
+                 EGLNativeSurfaceType draw,
+                 EGLNativeContextType ctx) {
+    HDC hdcRead = read ? read->getDC(): NULL;
+    HDC hdcDraw = draw ? draw->getDC(): NULL;
 
     if(hdcRead == hdcDraw){
-            bool ret =  wglMakeCurrent(hdcDraw,ctx);
-            return ret;
-    } else if (!s_wglExtProcs->wglMakeContextCurrentARB ) {
+        return wglMakeCurrent(hdcDraw, ctx);
+    } else if (!s_wglExtProcs->wglMakeContextCurrentARB) {
         return false;
     }
-    retVal = s_wglExtProcs->wglMakeContextCurrentARB(hdcDraw,hdcRead,ctx);
-
+    bool retVal = s_wglExtProcs->wglMakeContextCurrentARB(
+            hdcDraw, hdcRead, ctx);
     return retVal;
 }
 

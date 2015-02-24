@@ -760,7 +760,10 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         if(prevCtx.Ptr()) {
             g_eglInfo->getIface(prevCtx->version())->flush();
         }
-        if(!EglOS::makeCurrent(dpy->nativeType(),newReadPtr,newDrawPtr,newCtx->nativeType())) {
+        if(!EglOS::makeCurrent(dpy->nativeType(),
+                               newReadPtr->native(),
+                               newDrawPtr->native(),
+                               newCtx->nativeType())) {
                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
         }
         //TODO: handle the following errors

@@ -61,7 +61,7 @@ protected:
        m_height(height),
        m_native(NULL),
        m_dpy(dpy)
-    { 
+    {
         m_hndl = ++s_nextSurfaceHndl;
     }
 

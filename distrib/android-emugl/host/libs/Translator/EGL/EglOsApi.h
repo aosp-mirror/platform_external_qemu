@@ -24,7 +24,6 @@
 #include <GL/gl.h>
 #endif
 #include "EglConfig.h"
-#include "EglSurface.h"
 
 #define PBUFFER_MAX_WIDTH  32767
 #define PBUFFER_MAX_HEIGHT 32767
@@ -57,7 +56,7 @@ bool validNativeWin(EGLNativeInternalDisplayType dpy,EGLNativeWindowType win);
 bool validNativePixmap(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType pix);
 bool checkWindowPixelFormatMatch(EGLNativeInternalDisplayType dpy,EGLNativeWindowType win,EglConfig* cfg,unsigned int* width,unsigned int* height);
 bool checkPixmapPixelFormatMatch(EGLNativeInternalDisplayType dpy,EGLNativePixmapType pix,EglConfig* cfg,unsigned int* width,unsigned int* height);
-bool makeCurrent(EGLNativeInternalDisplayType dpy,EglSurface* read, EglSurface* draw,EGLNativeContextType);
+bool makeCurrent(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType read, EGLNativeSurfaceType draw,EGLNativeContextType);
 void swapBuffers(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType srfc);
 void swapInterval(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType win,int interval);
 void waitNative();
