@@ -354,7 +354,7 @@ prepare_build_for_host () {
 
     if [ "$OSX_SDK_ROOT" ]; then
         var_append EXTRA_CFLAGS "-isysroot $OSX_SDK_ROOT -mmacosx-version-min=$OSX_SDK_VERSION"
-        var_append EXTRA_CXXFLAGS "-isysroot $OSX_SDK_ROOT -mmacosx-version-min=$OSX_SDK_VERSION"
+        var_append EXTRA_CXXFLAGS "-isysroot $OSX_SDK_ROOT -mmacosx-version-min=$OSX_SDK_VERSION -stdlib=libc++"
         var_append EXTRA_LDFLAGS "-isysroot $OSX_SDK_ROOT -Wl,-syslibroot,$OSX_SDK_ROOT -mmacosx-version-min=$OSX_SDK_VERSION"
     fi
 
