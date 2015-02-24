@@ -19,6 +19,8 @@
 #include<EGL/egl.h>
 #include<EGL/eglinternalplatform.h>
 
+#include <list>
+
 #define MIN_SWAP_INTERVAL 1
 #define MAX_SWAP_INTERVAL 10
 
@@ -135,5 +137,7 @@ private:
 
     const EGLNativePixelFormatType  m_nativeFormat;
 };
+
+typedef std::list<EglConfig*> ConfigsList;
 
 #endif

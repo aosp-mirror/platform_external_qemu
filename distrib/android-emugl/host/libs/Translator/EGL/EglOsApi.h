@@ -24,14 +24,13 @@
 #include <GL/gl.h>
 #endif
 #include "EglConfig.h"
-#include "EglDisplay.h"
 #include "EglPbufferSurface.h"
 
 #define PBUFFER_MAX_WIDTH  32767
 #define PBUFFER_MAX_HEIGHT 32767
 #define PBUFFER_MAX_PIXELS 32767*32767
 
-namespace EglOS{
+namespace EglOS {
 
     void queryConfigs(EGLNativeInternalDisplayType dpy,int renderable_type,ConfigsList& listOut);
     bool releasePbuffer(EGLNativeInternalDisplayType dis,EGLNativeSurfaceType pb);
@@ -59,6 +58,7 @@ namespace EglOS{
 #ifdef _WIN32
     void initPtrToWglFunctions();
 #endif
-};
+
+}  // namespace EglOS
 
 #endif

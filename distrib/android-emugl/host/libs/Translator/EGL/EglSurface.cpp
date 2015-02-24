@@ -14,6 +14,8 @@
 * limitations under the License.
 */
 #include "EglSurface.h"
+
+#include "EglDisplay.h"
 #include "EglOsApi.h"
 
 unsigned int EglSurface::s_nextSurfaceHndl = 0;

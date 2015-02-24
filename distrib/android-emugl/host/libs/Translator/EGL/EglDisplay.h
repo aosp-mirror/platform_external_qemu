@@ -31,7 +31,6 @@
 
 
 
-typedef  std::list<EglConfig*>  ConfigsList;
 typedef  std::map< unsigned int, ContextPtr>     ContextsHndlMap;
 typedef  std::map< unsigned int, SurfacePtr>     SurfacesHndlMap;
 
