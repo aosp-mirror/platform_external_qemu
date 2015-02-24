@@ -57,6 +57,7 @@ bool emuglConfig_init(EmuglConfig* config,
     if (gpu_option) {
         if (!strcmp(gpu_option, "on") || !strcmp(gpu_option, "enable")) {
             gpu_enabled = true;
+            gpu_mode = "host";
         } else if (!strcmp(gpu_option, "off") ||
                    !strcmp(gpu_option, "disable")) {
             gpu_enabled = false;
