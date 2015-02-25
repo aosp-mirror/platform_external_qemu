@@ -585,7 +585,7 @@ public:
         if (!s_wglExtProcs->wglCreatePbufferARB) {
             return NULL;
         }
-        EGLNativePbufferType pb = s_wglExtProcs->wglCreatePbufferARB(
+        HPBUFFERARB pb = s_wglExtProcs->wglCreatePbufferARB(
                 dpy, cfg->nativeId(), info->width, info->height, pbAttribs);
         if (!pb) {
             GetLastError();

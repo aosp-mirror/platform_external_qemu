@@ -33,14 +33,12 @@ class WinDisplay; //defined in EglOsApi_wgl.cpp
 typedef PIXELFORMATDESCRIPTOR  EGLNativePixelFormatType;
 #define PIXEL_FORMAT_INITIALIZER {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 typedef HGLRC                  EGLNativeContextType;
-typedef HPBUFFERARB            EGLNativePbufferType;
 
 #elif defined(__APPLE__)
 
 typedef void*                  EGLNativePixelFormatType;
 #define PIXEL_FORMAT_INITIALIZER NULL
 typedef void*                  EGLNativeContextType;
-typedef void*                  EGLNativePbufferType;
 
 
 #elif defined(__unix__)
@@ -53,7 +51,6 @@ typedef void*                  EGLNativePbufferType;
 typedef GLXFBConfig           EGLNativePixelFormatType;
 #define PIXEL_FORMAT_INITIALIZER 0;
 typedef GLXContext            EGLNativeContextType;
-typedef GLXPbuffer            EGLNativePbufferType;
 
 #else
 #error "Platform not recognized"
