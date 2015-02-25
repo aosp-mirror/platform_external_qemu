@@ -57,6 +57,9 @@ bool emuglConfig_init(EmuglConfig* config,
     if (gpu_option) {
         if (!strcmp(gpu_option, "on") || !strcmp(gpu_option, "enable")) {
             gpu_enabled = true;
+            if (!gpu_mode || !strcmp(gpu_mode, "auto")) {
+                gpu_mode = "host";
+            }
         } else if (!strcmp(gpu_option, "off") ||
                    !strcmp(gpu_option, "disable")) {
             gpu_enabled = false;
@@ -189,7 +192,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
 #else  // !_WIN32
     static const char kEnvPathVar[] = "LD_LIBRARY_PATH";
 #endif  // !_WIN32
-    String path = system->envGet(kEnvPathVar);
+    String path = system->envGet(kEnvPathVar) ?: "";
     if (path.size()) {
         path = StringFormat("%s%c%s",
                             newDirs.c_str(),
