@@ -17,9 +17,10 @@
 #ifndef EGL_INTERNAL_PLATFORM_H
 #define EGL_INTERNAL_PLATFORM_H
 
+#include <EGL/egl.h>
+
 class SrfcInfo; //defined in Egl{$platform}Api.cpp
-typedef SrfcInfo* SURFACE;
-typedef SURFACE EGLNativeSurfaceType;
+typedef SrfcInfo* EGLNativeSurfaceType;
 
 #if defined(_WIN32) || defined(__VC32__) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__) /* Win32 and WinCE */
 #ifndef WIN32_LEAN_AND_MEAN
@@ -30,14 +31,13 @@ typedef SURFACE EGLNativeSurfaceType;
 #define WGL_WGLEXT_PROTOTYPES
 #include <GL/wglext.h>
 
-class WinDisplay; //defined in EglWindows.cpp
-typedef WinDisplay* DISPLAY;
+class WinDisplay; //defined in EglOsApi_wgl.cpp
 
 typedef PIXELFORMATDESCRIPTOR  EGLNativePixelFormatType;
 #define PIXEL_FORMAT_INITIALIZER {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 typedef HGLRC                  EGLNativeContextType;
 typedef HPBUFFERARB            EGLNativePbufferType;
-typedef DISPLAY                EGLNativeInternalDisplayType;
+typedef WinDisplay*            EGLNativeInternalDisplayType;
 
 #elif defined(__APPLE__)
 
@@ -45,7 +45,7 @@ typedef void*                  EGLNativePixelFormatType;
 #define PIXEL_FORMAT_INITIALIZER NULL
 typedef void*                  EGLNativeContextType;
 typedef void*                  EGLNativePbufferType;
-typedef EGLNativeDisplayType   EGLNativeInternalDisplayType;
+typedef EGLNativeDisplayType   EGLNativeInternalDisplayType;  // really 'unsigned int'
 
 
 #elif defined(__unix__)
@@ -59,11 +59,10 @@ typedef GLXFBConfig           EGLNativePixelFormatType;
 #define PIXEL_FORMAT_INITIALIZER 0;
 typedef GLXContext            EGLNativeContextType;
 typedef GLXPbuffer            EGLNativePbufferType;
-typedef EGLNativeDisplayType  EGLNativeInternalDisplayType;
+typedef EGLNativeDisplayType  EGLNativeInternalDisplayType;  // really 'Display*'
 
 #else
 #error "Platform not recognized"
 #endif
 
-
-#endif
+#endif  // EGL_INTERNAL_PLATFORM_H

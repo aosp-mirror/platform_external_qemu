@@ -17,6 +17,8 @@
 #ifndef  MAC_NATIVE_H
 #define  MAC_NATIVE_H
 
+#include <OpenGL/gl.h>
+
 typedef enum {                               // Mac equivalence
                  MAC_HAS_DOUBLE_BUFFER = 5,  // NSOpenGLPFADoubleBuffer
                  MAC_DRAW_TO_WINDOW    = 80, // NSOpenGLPFAWindow

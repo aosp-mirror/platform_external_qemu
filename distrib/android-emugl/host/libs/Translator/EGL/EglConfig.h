@@ -16,8 +16,9 @@
 #ifndef EGL_CONFIG_H
 #define EGL_CONFIG_H
 
-#include<EGL/egl.h>
-#include<EGL/eglinternalplatform.h>
+#include "EglInternal.h"
+
+#include <EGL/egl.h>
 
 #include <list>
 

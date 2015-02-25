@@ -16,14 +16,10 @@
 #ifndef EGL_OS_API_H
 #define EGL_OS_API_H
 
-#include <EGL/egl.h>
-#include <EGL/eglinternalplatform.h>
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
+#include "EglInternal.h"
 #include "EglConfig.h"
+
+#include <EGL/egl.h>
 
 #define PBUFFER_MAX_WIDTH  32767
 #define PBUFFER_MAX_HEIGHT 32767

@@ -18,10 +18,12 @@
 
 #include <map>
 
-#include <EGL/egl.h>
-#include <EGL/eglinternalplatform.h>
-#include "emugl/common/smart_ptr.h"
 #include "EglConfig.h"
+#include "EglInternal.h"
+
+#include "emugl/common/smart_ptr.h"
+
+#include <EGL/egl.h>
 
 class EglSurface;
 typedef emugl::SmartPtr<EglSurface> SurfacePtr;
@@ -72,4 +74,5 @@ protected:
     EGLNativeSurfaceType  m_native;
     EglDisplay           *m_dpy;
 };
-#endif
+
+#endif  // EGL_SURFACE_H
