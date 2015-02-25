@@ -62,7 +62,7 @@ EglDisplay* EglGlobalInfo::addDisplay(EGLNativeDisplayType dpy,
         }
     }
 
-    if (!EglOS::validNativeDisplay(idpy)) {
+    if (!idpy) {
         return NULL;
     }
     EglDisplay* result = new EglDisplay(dpy, idpy);

@@ -383,94 +383,13 @@ EGLNativeInternalDisplayType EglOS::getDefaultDisplay() {
     return new GlxDisplay(XOpenDisplay(0));
 }
 
-bool EglOS::releaseDisplay(EGLNativeInternalDisplayType dpy) {
-    return dpy->release();
-}
-
-void EglOS::queryConfigs(EGLNativeInternalDisplayType dpy,
-                         int renderableType,
-                         ConfigsList& listOut) {
-    dpy->queryConfigs(renderableType, listOut);
-}
-
-bool EglOS::validNativeDisplay(EGLNativeInternalDisplayType dpy) {
-    return dpy != NULL;
-}
-
-bool EglOS::validNativeWin(EGLNativeInternalDisplayType dpy,
-                           EGLNativeWindowType win) {
-    return dpy->isValidNativeWin(win);
-}
-
-bool EglOS::validNativeWin(EGLNativeInternalDisplayType dpy,
-                           EGLNativeSurfaceType win) {
-    return dpy->isValidNativeWin(win);
-}
-
-bool EglOS::validNativePixmap(EGLNativeInternalDisplayType dpy,
-                              EGLNativeSurfaceType pix) {
-    return dpy->isValidNativePixmap(pix);
-}
-
-bool EglOS::checkWindowPixelFormatMatch(EGLNativeInternalDisplayType dpy,
-                                        EGLNativeWindowType win,
-                                        EglConfig* cfg,
-                                        unsigned int* width,
-                                        unsigned int* height) {
-    return dpy->checkWindowPixelFormatMatch(win, cfg, width, height);
-}
-
-bool EglOS::checkPixmapPixelFormatMatch(EGLNativeInternalDisplayType dpy,
-                                        EGLNativePixmapType pix,
-                                        EglConfig* cfg,
-                                        unsigned int* width,
-                                        unsigned int* height) {
-    return dpy->checkPixmapPixelFormatMatch(pix, cfg, width, height);
-}
-
-EGLNativeSurfaceType EglOS::createPbufferSurface(
-        EGLNativeInternalDisplayType dpy,
-        EglConfig* cfg,
-        const PbufferInfo* info) {
-    return dpy->createPbufferSurface(cfg, info);
-}
-
-bool EglOS::releasePbuffer(EGLNativeInternalDisplayType dpy,
-                           EGLNativeSurfaceType pb) {
-    return dpy->releasePbuffer(pb);
-}
-
-EGLNativeContextType EglOS::createContext(EGLNativeInternalDisplayType dpy,
-                                          EglConfig* cfg,
-                                          EGLNativeContextType sharedContext) {
-    return dpy->createContext(cfg, sharedContext);
-}
-
-bool EglOS::destroyContext(EGLNativeInternalDisplayType dpy,
-                           EGLNativeContextType ctx) {
-    return dpy->destroyContext(ctx);
-}
-
-bool EglOS::makeCurrent(EGLNativeInternalDisplayType dpy,
-                        EGLNativeSurfaceType read,
-                        EGLNativeSurfaceType draw,
-                        EGLNativeContextType ctx) {
-    return dpy->makeCurrent(read, draw, ctx);
-}
-
-void EglOS::swapBuffers(EGLNativeInternalDisplayType dpy,
-                        EGLNativeSurfaceType srfc){
-    dpy->swapBuffers(srfc);
+EGLNativeInternalDisplayType EglOS::getInternalDisplay(
+        EGLNativeDisplayType dpy) {
+    return new GlxDisplay(dpy);
 }
 
 void EglOS::waitNative() {
     glXWaitX();
-}
-
-void EglOS::swapInterval(EGLNativeInternalDisplayType dpy,
-                         EGLNativeSurfaceType win,
-                         int interval) {
-    dpy->swapInterval(win, interval);
 }
 
 EGLNativeSurfaceType EglOS::createWindowSurface(EGLNativeWindowType wnd) {
@@ -484,12 +403,3 @@ EGLNativeSurfaceType EglOS::createPixmapSurface(EGLNativePixmapType pix) {
 void EglOS::destroySurface(EGLNativeSurfaceType srfc) {
     delete srfc;
 };
-
-EGLNativeInternalDisplayType EglOS::getInternalDisplay(
-        EGLNativeDisplayType dpy) {
-    return new GlxDisplay(dpy);
-}
-
-void EglOS::deleteDisplay(EGLNativeInternalDisplayType idpy) {
-    delete idpy;
-}

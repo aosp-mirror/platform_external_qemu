@@ -45,11 +45,10 @@ m_mngr(mngr)
 
 EglContext::~EglContext()
 {
-  
     //
     // remove the context in the underlying OS layer
-    // 
-    EglOS::destroyContext(m_dpy->nativeType(),m_native);
+    //
+    m_dpy->nativeType()->destroyContext(m_native);
 
     //
     // call the client-api to remove the GLES context

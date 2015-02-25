@@ -38,10 +38,10 @@ EglDisplay::~EglDisplay() {
     // (should be true for windows platform only)
     //
     if (m_globalSharedContext != NULL) {
-        EglOS::destroyContext(m_idpy, m_globalSharedContext);
+        m_idpy->destroyContext(m_globalSharedContext);
     }
 
-    EglOS::releaseDisplay(m_idpy);
+    m_idpy->release();
 
     for(ConfigsList::iterator it = m_configs.begin();
         it != m_configs.end();
@@ -52,7 +52,7 @@ EglDisplay::~EglDisplay() {
     delete m_manager[GLES_1_1];
     delete m_manager[GLES_2_0];
 
-    EglOS::deleteDisplay(m_idpy);
+    delete m_idpy;
 }
 
 void EglDisplay::initialize(int renderableType) {
@@ -137,7 +137,7 @@ void EglDisplay::initConfigurations(int renderableType) {
     if (m_configInitialized) {
         return;
     }
-    EglOS::queryConfigs(m_idpy, renderableType, m_configs);
+    m_idpy->queryConfigs(renderableType, m_configs);
 
     addMissingConfigs();
     m_configs.sort(compareEglConfigsPtrs);
@@ -362,7 +362,7 @@ EGLNativeContextType EglDisplay::getGlobalSharedContext() const {
             return NULL;
         }
         EglConfig *cfg = (*m_configs.begin());
-        m_globalSharedContext = EglOS::createContext(m_idpy,cfg,NULL);
+        m_globalSharedContext = m_idpy->createContext(cfg, NULL);
     }
 
     return m_globalSharedContext;

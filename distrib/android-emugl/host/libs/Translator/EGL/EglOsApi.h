@@ -86,26 +86,11 @@ public:
     virtual void swapInterval(EGLNativeSurfaceType win, int interval) = 0;
 };
 
-void queryConfigs(EGLNativeInternalDisplayType dpy,int renderable_type,ConfigsList& listOut);
-bool releasePbuffer(EGLNativeInternalDisplayType dis,EGLNativeSurfaceType pb);
-bool destroyContext(EGLNativeInternalDisplayType dpy,EGLNativeContextType ctx);
-bool releaseDisplay(EGLNativeInternalDisplayType dpy);
-bool validNativeDisplay(EGLNativeInternalDisplayType dpy);
-bool validNativeWin(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType win);
-bool validNativeWin(EGLNativeInternalDisplayType dpy,EGLNativeWindowType win);
-bool validNativePixmap(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType pix);
-bool checkWindowPixelFormatMatch(EGLNativeInternalDisplayType dpy,EGLNativeWindowType win,EglConfig* cfg,unsigned int* width,unsigned int* height);
-bool checkPixmapPixelFormatMatch(EGLNativeInternalDisplayType dpy,EGLNativePixmapType pix,EglConfig* cfg,unsigned int* width,unsigned int* height);
-bool makeCurrent(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType read, EGLNativeSurfaceType draw,EGLNativeContextType);
-void swapBuffers(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType srfc);
-void swapInterval(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType win,int interval);
 void waitNative();
 
-EGLNativeInternalDisplayType getDefaultDisplay();
-EGLNativeInternalDisplayType getInternalDisplay(EGLNativeDisplayType dpy);
-void deleteDisplay(EGLNativeInternalDisplayType idpy);
-EGLNativeSurfaceType createPbufferSurface(EGLNativeInternalDisplayType dpy,EglConfig* cfg, const PbufferInfo* pb);
-EGLNativeContextType createContext(EGLNativeInternalDisplayType dpy,EglConfig* cfg,EGLNativeContextType sharedContext);
+EglOS::Display* getDefaultDisplay();
+EglOS::Display* getInternalDisplay(EGLNativeDisplayType dpy);
+
 EGLNativeSurfaceType createWindowSurface(EGLNativeWindowType wnd);
 EGLNativeSurfaceType createPixmapSurface(EGLNativePixmapType pix);
 void destroySurface(EGLNativeSurfaceType srfc);
