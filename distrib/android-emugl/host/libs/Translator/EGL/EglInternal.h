@@ -22,6 +22,10 @@
 class SrfcInfo; //defined in Egl{$platform}Api.cpp
 typedef SrfcInfo* EGLNativeSurfaceType;
 
+namespace EglOS {
+class Display;
+}  // namespace EglOS
+
 #if defined(_WIN32) || defined(__VC32__) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__) /* Win32 and WinCE */
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
@@ -37,7 +41,7 @@ typedef PIXELFORMATDESCRIPTOR  EGLNativePixelFormatType;
 #define PIXEL_FORMAT_INITIALIZER {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 typedef HGLRC                  EGLNativeContextType;
 typedef HPBUFFERARB            EGLNativePbufferType;
-typedef WinDisplay*            EGLNativeInternalDisplayType;
+typedef EglOS::Display*        EGLNativeInternalDisplayType;
 
 #elif defined(__APPLE__)
 
@@ -59,10 +63,6 @@ typedef GLXFBConfig           EGLNativePixelFormatType;
 #define PIXEL_FORMAT_INITIALIZER 0;
 typedef GLXContext            EGLNativeContextType;
 typedef GLXPbuffer            EGLNativePbufferType;
-
-namespace EglOS {
-class Display;
-}  // namespace EglOS
 
 typedef EglOS::Display*  EGLNativeInternalDisplayType;
 
