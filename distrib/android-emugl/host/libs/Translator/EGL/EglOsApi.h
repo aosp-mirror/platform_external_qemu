@@ -27,7 +27,7 @@
 
 namespace EglOS {
 
-// Base class used to wrap various EGL Surface types.
+// Base class used to wrap various GL Surface types.
 class Surface {
 public:
     typedef enum {
@@ -46,6 +46,13 @@ protected:
     SurfaceType mType;
 };
 
+// An interface class for engine-specific implementation of a GL context.
+class Context {
+public:
+    Context() {}
+    virtual ~Context() {}
+};
+
 // Pbuffer description.
 // |width| and |height| are its dimensions.
 // |largest| is set to ask the largest pixek buffer (see GLX_LARGEST_PBUFFER).
@@ -61,7 +68,7 @@ struct PbufferInfo {
     EGLint hasMipmap;
 };
 
-// A class to model the engine-specific implementation of an EGL display
+// A class to model the engine-specific implementation of a GL display
 // connection.
 class Display {
 public:
@@ -86,10 +93,10 @@ public:
                                              unsigned int* width,
                                              unsigned int* height) = 0;
 
-    virtual EGLNativeContextType createContext(
-            const EglConfig* config, EGLNativeContextType sharedContext) = 0;
+    virtual Context* createContext(
+            const EglConfig* config, Context* sharedContext) = 0;
 
-    virtual bool destroyContext(EGLNativeContextType context) = 0;
+    virtual bool destroyContext(Context* context) = 0;
 
     virtual Surface* createPbufferSurface(
             const EglConfig* config, const PbufferInfo* info) = 0;
@@ -98,7 +105,7 @@ public:
 
     virtual bool makeCurrent(Surface* read,
                              Surface* draw,
-                             EGLNativeContextType context) = 0;
+                             Context* context) = 0;
 
     virtual void swapBuffers(Surface* srfc) = 0;
 

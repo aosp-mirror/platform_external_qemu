@@ -88,7 +88,7 @@ public:
     ImagePtr getImage(EGLImageKHR img) const;
     EGLImageKHR addImageKHR(ImagePtr);
     bool destroyImageKHR(EGLImageKHR img);
-    EGLNativeContextType getGlobalSharedContext() const;
+    EglOS::Context* getGlobalSharedContext() const;
 
 private:
    int doChooseConfigs(const EglConfig& dummy,EGLConfig* configs,int config_size) const;
@@ -107,7 +107,7 @@ private:
    mutable emugl::Mutex                   m_lock;
    ImagesHndlMap                  m_eglImages;
    unsigned int                   m_nextEglImageId;
-   mutable EGLNativeContextType           m_globalSharedContext;
+   mutable EglOS::Context*        m_globalSharedContext;
 };
 
 #endif

@@ -116,60 +116,19 @@ private:
     HDC         m_hdc;
 };
 
-}  // namespace
+class WinContext : public EglOS::Context {
+public:
+    explicit WinContext(HGLRC ctx) : mCtx(ctx) {}
 
-// class SrfcInfo {
-// public:
-//     typedef enum {
-//         WINDOW  = 0,
-//         PBUFFER = 1,
-//         PIXMAP  = 2
-//     } SurfaceType;
-//
-//     explicit SrfcInfo(HWND wnd) :
-//             m_hwnd(wnd),
-//             m_pb(NULL),
-//             m_bmap(NULL),
-//             m_hdc(GetDC(wnd)),
-//             m_type(WINDOW) {}
-//
-//     explicit SrfcInfo(HPBUFFERARB pb) :
-//             m_hwnd(NULL),
-//             m_pb(pb),
-//             m_bmap(NULL),
-//             m_hdc(NULL),
-//             m_type(PBUFFER) {
-//         if (s_wglExtProcs->wglGetPbufferDCARB) {
-//             m_hdc =  s_wglExtProcs->wglGetPbufferDCARB(pb);
-//         }
-//     }
-//
-//     explicit SrfcInfo(HBITMAP bmap) :
-//         m_hwnd(NULL), m_pb(NULL), m_bmap(bmap), m_hdc(NULL), m_type(PIXMAP) {}
-//
-//     ~SrfcInfo() {
-//         if (m_type == WINDOW) {
-//             ReleaseDC(m_hwnd, m_hdc);
-//         }
-//     }
-//
-//     HWND getHwnd() const { return m_hwnd; }
-//
-//     HDC  getDC() const { return m_hdc; }
-//
-//     HBITMAP getBmap() const { return m_bmap; }
-//
-//     HPBUFFERARB getPbuffer() const { return m_pb; }
-//
-// private:
-//     HWND        m_hwnd;
-//     HPBUFFERARB m_pb;
-//     HBITMAP     m_bmap;
-//     HDC         m_hdc;
-//     SurfaceType m_type;
-// };
+    HGLRC context() const { return mCtx; }
 
-namespace {
+    static HGLRC from(const EglOS::Context* c) {
+        return static_cast<const WinContext*>(c)->context();
+    }
+
+private:
+    HGLRC mCtx;
+};
 
 struct DisplayInfo {
     DisplayInfo() : dc(NULL), hwnd(NULL), isPixelFormatSet(false) {}
@@ -528,9 +487,8 @@ public:
         return true;
     }
 
-    virtual EGLNativeContextType createContext(
-            const EglConfig* cfg, EGLNativeContextType sharedContext) {
-        EGLNativeContextType ctx = NULL;
+    virtual EglOS::Context* createContext(
+            const EglConfig* cfg, EglOS::Context* sharedContext) {
         HDC dpy = getDummyDC(mDpy, cfg->nativeId());
 
         if (!mDpy->isPixelFormatSet(cfg->nativeId())) {
@@ -541,22 +499,26 @@ public:
             mDpy->pixelFormatWasSet(cfg->nativeId());
         }
 
-        ctx = wglCreateContext(dpy);
+        HGLRC ctx = wglCreateContext(dpy);
 
         if (ctx && sharedContext) {
-            if (!wglShareLists(sharedContext, ctx)) {
+            if (!wglShareLists(WinContext::from(sharedContext), ctx)) {
                 wglDeleteContext(ctx);
                 return NULL;
             }
         }
-        return ctx;
+        return new WinContext(ctx);
     }
 
-    virtual bool destroyContext(EGLNativeContextType context) {
-        if (!wglDeleteContext(context)) {
+    virtual bool destroyContext(EglOS::Context* context) {
+        if (!context) {
+            return false;
+        }
+        if (!wglDeleteContext(WinContext::from(context))) {
             GetLastError();
             return false;
         }
+        delete context;
         return true;
     }
 
@@ -614,17 +576,18 @@ public:
 
     virtual bool makeCurrent(EglOS::Surface* read,
                              EglOS::Surface* draw,
-                             EGLNativeContextType context) {
+                             EglOS::Context* context) {
         HDC hdcRead = read ? WinSurface::from(read)->getDC() : NULL;
         HDC hdcDraw = draw ? WinSurface::from(draw)->getDC() : NULL;
+        HGLRC hdcContext = context ? WinContext::from(context) : 0;
 
         if (hdcRead == hdcDraw){
-            return wglMakeCurrent(hdcDraw, context);
+            return wglMakeCurrent(hdcDraw, hdcContext);
         } else if (!s_wglExtProcs->wglMakeContextCurrentARB) {
             return false;
         }
         bool retVal = s_wglExtProcs->wglMakeContextCurrentARB(
-                hdcDraw, hdcRead, context);
+                hdcDraw, hdcRead, hdcContext);
         return retVal;
     }
 
@@ -711,7 +674,7 @@ void EglOS::initPtrToWglFunctions(){
     }
 
     int err;
-    EGLNativeContextType ctx = wglCreateContext(dpy);
+    HGLRC ctx = wglCreateContext(dpy);
     if (!ctx){
         err =  GetLastError();
         fprintf(stderr,"error while creating dummy context %d\n", err);
@@ -782,6 +745,7 @@ void EglOS::initPtrToWglFunctions(){
     }
 
     wglMakeCurrent(dpy, NULL);
+    wglDeleteContext(ctx);
     DestroyWindow(hwnd);
     DeleteDC(dpy);
 }

@@ -26,17 +26,21 @@ bool EglContext::usingSurface(SurfacePtr surface) {
   return surface.Ptr() == m_read.Ptr() || surface.Ptr() == m_draw.Ptr();
 }
 
-EglContext::EglContext(EglDisplay *dpy, EGLNativeContextType context,ContextPtr shared_context,
-            EglConfig* config,GLEScontext* glesCtx,GLESVersion ver,ObjectNameManager* mngr):
-m_dpy(dpy),
-m_native(context),
-m_config(config),
-m_glesContext(glesCtx),
-m_read(NULL),
-m_draw(NULL),
-m_version(ver),
-m_mngr(mngr)
-{
+EglContext::EglContext(EglDisplay *dpy,
+                       EglOS::Context* context,
+                       ContextPtr shared_context,
+                       EglConfig* config,
+                       GLEScontext* glesCtx,
+                       GLESVersion ver,
+                       ObjectNameManager* mngr) :
+        m_dpy(dpy),
+        m_native(context),
+        m_config(config),
+        m_glesContext(glesCtx),
+        m_read(NULL),
+        m_draw(NULL),
+        m_version(ver),
+        m_mngr(mngr) {
     m_shareGroup = shared_context.Ptr()?
                    mngr->attachShareGroup(context,shared_context->nativeType()):
                    mngr->createShareGroup(context);
