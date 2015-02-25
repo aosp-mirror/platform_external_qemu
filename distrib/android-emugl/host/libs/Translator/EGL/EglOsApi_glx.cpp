@@ -20,25 +20,6 @@
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 
-
-class SrfcInfo {
-public:
-    typedef enum {
-        WINDOW  = 0,
-        PBUFFER = 1,
-        PIXMAP
-    } SurfaceType;
-
-    SrfcInfo(GLXDrawable drawable, SurfaceType type) :
-            m_type(type), m_srfc(drawable) {}
-
-    GLXDrawable srfc() const { return m_srfc; }
-
-private:
-    SurfaceType m_type;
-    GLXDrawable m_srfc;
-};
-
 namespace {
 
 typedef Display X11Display;
@@ -201,6 +182,24 @@ EglConfig* pixelFormatToConfig(EGLNativeDisplayType dpy,
             frmt);
 }
 
+// Implementation of EglOS::Surface based on GLX.
+class GlxSurface : public EglOS::Surface {
+public:
+    GlxSurface(GLXDrawable drawable, SurfaceType type) :
+            Surface(type), mDrawable(drawable) {}
+
+    GLXDrawable drawable() const { return mDrawable; }
+
+    // Helper routine to down-cast an EglOS::Surface and extract
+    // its drawable.
+    static GLXDrawable drawableFor(EglOS::Surface* surface) {
+        return static_cast<GlxSurface*>(surface)->drawable();
+    }
+
+private:
+    GLXDrawable mDrawable;
+};
+
 // Implementation of EglOS::Display based on GLX.
 class GlxDisplay : public EglOS::Display {
 public:
@@ -223,11 +222,11 @@ public:
         XFree(frmtList);
     }
 
-    virtual bool isValidNativeWin(EGLNativeSurfaceType win) {
+    virtual bool isValidNativeWin(EglOS::Surface* win) {
         if (!win) {
             return false;
         } else {
-            return isValidNativeWin(win->srfc());
+            return isValidNativeWin(GlxSurface::drawableFor(win));
         }
     }
 
@@ -242,12 +241,12 @@ public:
         return handler.getLastError() == 0;
     }
 
-    virtual bool isValidNativePixmap(EGLNativeSurfaceType pix) {
+    virtual bool isValidNativePixmap(EglOS::Surface* pix) {
         Window root;
         int t;
         unsigned int u;
         ErrorHandler handler(mDisplay);
-        GLXDrawable surface = pix ? pix->srfc() : 0;
+        GLXDrawable surface = pix ? GlxSurface::drawableFor(pix) : 0;
         if (!XGetGeometry(mDisplay, surface, &root, &t, &t, &u, &u, &u, &u)) {
             return false;
         }
@@ -314,7 +313,7 @@ public:
         return true;
     }
 
-    virtual EGLNativeSurfaceType createPbufferSurface(
+    virtual EglOS::Surface* createPbufferSurface(
             const EglConfig* config, const EglOS::PbufferInfo* info) {
         const int attribs[] = {
             GLX_PBUFFER_WIDTH, info->width,
@@ -324,20 +323,20 @@ public:
         };
         GLXPbuffer pb = glXCreatePbuffer(
                 mDisplay, config->nativeFormat(), attribs);
-        return pb ? new SrfcInfo(pb, SrfcInfo::PBUFFER) : NULL;
+        return pb ? new GlxSurface(pb, GlxSurface::PBUFFER) : NULL;
     }
 
-    virtual bool releasePbuffer(EGLNativeSurfaceType pb) {
+    virtual bool releasePbuffer(EglOS::Surface* pb) {
         if (!pb) {
             return false;
         } else {
-            glXDestroyPbuffer(mDisplay, pb->srfc());
+            glXDestroyPbuffer(mDisplay, GlxSurface::drawableFor(pb));
             return true;
         }
     }
 
-    virtual bool makeCurrent(EGLNativeSurfaceType read,
-                             EGLNativeSurfaceType draw,
+    virtual bool makeCurrent(EglOS::Surface* read,
+                             EglOS::Surface* draw,
                              EGLNativeContextType context) {
         ErrorHandler handler(mDisplay);
         bool retval = false;
@@ -347,18 +346,21 @@ public:
         }
         else if (context && read && draw) {
             retval = glXMakeContextCurrent(
-                    mDisplay, draw->srfc(), read->srfc(), context);
+                    mDisplay,
+                    GlxSurface::drawableFor(draw),
+                    GlxSurface::drawableFor(read),
+                    context);
         }
         return (handler.getLastError() == 0) && retval;
     }
 
-    virtual void swapBuffers(EGLNativeSurfaceType srfc) {
+    virtual void swapBuffers(EglOS::Surface* srfc) {
         if (srfc) {
-            glXSwapBuffers(mDisplay, srfc->srfc());
+            glXSwapBuffers(mDisplay, GlxSurface::drawableFor(srfc));
         }
     }
 
-    virtual void swapInterval(EGLNativeSurfaceType win, int interval) {
+    virtual void swapInterval(EglOS::Surface* win, int interval) {
         const char* extensions = glXQueryExtensionsString(
                 mDisplay, DefaultScreen(mDisplay));
         typedef void (*GLXSWAPINTERVALEXT)(X11Display*,GLXDrawable,int);
@@ -369,7 +371,9 @@ public:
                     (const GLubyte*)"glXSwapIntervalEXT");
         }
         if (glXSwapIntervalEXT && win) {
-            glXSwapIntervalEXT(mDisplay, win->srfc(), interval);
+            glXSwapIntervalEXT(mDisplay,
+                               GlxSurface::drawableFor(win),
+                               interval);
         }
     }
 
@@ -392,14 +396,10 @@ void EglOS::waitNative() {
     glXWaitX();
 }
 
-EGLNativeSurfaceType EglOS::createWindowSurface(EGLNativeWindowType wnd) {
-    return new SrfcInfo(wnd,SrfcInfo::WINDOW);
+EglOS::Surface* EglOS::createWindowSurface(EGLNativeWindowType wnd) {
+    return new GlxSurface(wnd, GlxSurface::WINDOW);
 }
 
-EGLNativeSurfaceType EglOS::createPixmapSurface(EGLNativePixmapType pix) {
-    return new SrfcInfo(pix,SrfcInfo::PIXMAP);
+EglOS::Surface* EglOS::createPixmapSurface(EGLNativePixmapType pix) {
+    return new GlxSurface(pix, GlxSurface::PIXMAP);
 }
-
-void EglOS::destroySurface(EGLNativeSurfaceType srfc) {
-    delete srfc;
-};

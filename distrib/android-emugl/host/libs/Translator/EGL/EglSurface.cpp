@@ -26,7 +26,7 @@ EglSurface::~EglSurface(){
         m_dpy->nativeType()->releasePbuffer(m_native);
     }
 
-    if(m_native) EglOS::destroySurface(m_native);
+    delete m_native;
 }
 
 bool  EglSurface::setAttrib(EGLint attrib,EGLint val) {

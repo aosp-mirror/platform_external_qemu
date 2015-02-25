@@ -558,7 +558,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
 
     tmpPbSurfacePtr->getAttrib(EGL_MIPMAP_TEXTURE, &pbinfo.hasMipmap);
 
-    EGLNativeSurfaceType pb = dpy->nativeType()->createPbufferSurface(
+    EglOS::Surface* pb = dpy->nativeType()->createPbufferSurface(
             cfg, &pbinfo);
     if(!pb) {
         //TODO: RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_VALUE); dont have bad value
@@ -743,8 +743,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         }
 
          EglOS::Display* nativeDisplay = dpy->nativeType();
-         EGLNativeSurfaceType nativeRead = newReadPtr->native();
-         EGLNativeSurfaceType nativeDraw = newDrawPtr->native();
+         EglOS::Surface* nativeRead = newReadPtr->native();
+         EglOS::Surface* nativeDraw = newDrawPtr->native();
         //checking native window validity
         if(newReadPtr->type() == EglSurface::WINDOW &&
                 !nativeDisplay->isValidNativeWin(nativeRead)) {

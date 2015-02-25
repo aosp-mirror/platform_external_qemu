@@ -29,7 +29,7 @@ public:
                                          m_texMipmap(EGL_FALSE),
                                          m_largest(EGL_FALSE){};
 
-    void  setNativePbuffer(EGLNativeSurfaceType srfc){ m_native = srfc;};
+    void  setNativePbuffer(EglOS::Surface* srfc) { m_native = srfc; }
     bool  setAttrib(EGLint attrib,EGLint val);
     bool  getAttrib(EGLint attrib,EGLint* val);
     void  getDim(EGLint* width,EGLint* height,EGLint* largest){

@@ -67,58 +67,107 @@ PROC wglGetExtentionsProcAddress(HDC hdc,
     return wglGetProcAddress(proc_name);
 }
 
-}  // namespace
-
-class SrfcInfo {
+class WinSurface : public EglOS::Surface {
 public:
-    typedef enum {
-        WINDOW  = 0,
-        PBUFFER = 1,
-        PIXMAP  = 2
-    } SurfaceType;
-
-    explicit SrfcInfo(HWND wnd) :
+    explicit WinSurface(HWND wnd) :
+            Surface(WINDOW),
             m_hwnd(wnd),
             m_pb(NULL),
             m_bmap(NULL),
-            m_hdc(GetDC(wnd)),
-            m_type(WINDOW) {}
+            m_hdc(GetDC(wnd)) {}
 
-    explicit SrfcInfo(HPBUFFERARB pb) :
+    explicit WinSurface(HPBUFFERARB pb) :
+            Surface(PBUFFER),
             m_hwnd(NULL),
             m_pb(pb),
             m_bmap(NULL),
-            m_hdc(NULL),
-            m_type(PBUFFER) {
+            m_hdc(NULL) {
         if (s_wglExtProcs->wglGetPbufferDCARB) {
-            m_hdc =  s_wglExtProcs->wglGetPbufferDCARB(pb);
+            m_hdc = s_wglExtProcs->wglGetPbufferDCARB(pb);
         }
     }
 
-    explicit SrfcInfo(HBITMAP bmap) :
-        m_hwnd(NULL), m_pb(NULL), m_bmap(bmap), m_hdc(NULL), m_type(PIXMAP) {}
+    explicit WinSurface(HBITMAP bmap) :
+            Surface(PIXMAP),
+            m_hwnd(NULL),
+            m_pb(NULL),
+            m_bmap(bmap),
+            m_hdc(NULL) {}
 
-    ~SrfcInfo() {
-        if (m_type == WINDOW) {
+    ~WinSurface() {
+        if (type() == WINDOW) {
             ReleaseDC(m_hwnd, m_hdc);
         }
     }
 
     HWND getHwnd() const { return m_hwnd; }
-
     HDC  getDC() const { return m_hdc; }
-
     HBITMAP getBmap() const { return m_bmap; }
-
     HPBUFFERARB getPbuffer() const { return m_pb; }
+
+    static WinSurface* from(EglOS::Surface* s) {
+        return static_cast<WinSurface*>(s);
+    }
 
 private:
     HWND        m_hwnd;
     HPBUFFERARB m_pb;
     HBITMAP     m_bmap;
     HDC         m_hdc;
-    SurfaceType m_type;
 };
+
+}  // namespace
+
+// class SrfcInfo {
+// public:
+//     typedef enum {
+//         WINDOW  = 0,
+//         PBUFFER = 1,
+//         PIXMAP  = 2
+//     } SurfaceType;
+//
+//     explicit SrfcInfo(HWND wnd) :
+//             m_hwnd(wnd),
+//             m_pb(NULL),
+//             m_bmap(NULL),
+//             m_hdc(GetDC(wnd)),
+//             m_type(WINDOW) {}
+//
+//     explicit SrfcInfo(HPBUFFERARB pb) :
+//             m_hwnd(NULL),
+//             m_pb(pb),
+//             m_bmap(NULL),
+//             m_hdc(NULL),
+//             m_type(PBUFFER) {
+//         if (s_wglExtProcs->wglGetPbufferDCARB) {
+//             m_hdc =  s_wglExtProcs->wglGetPbufferDCARB(pb);
+//         }
+//     }
+//
+//     explicit SrfcInfo(HBITMAP bmap) :
+//         m_hwnd(NULL), m_pb(NULL), m_bmap(bmap), m_hdc(NULL), m_type(PIXMAP) {}
+//
+//     ~SrfcInfo() {
+//         if (m_type == WINDOW) {
+//             ReleaseDC(m_hwnd, m_hdc);
+//         }
+//     }
+//
+//     HWND getHwnd() const { return m_hwnd; }
+//
+//     HDC  getDC() const { return m_hdc; }
+//
+//     HBITMAP getBmap() const { return m_bmap; }
+//
+//     HPBUFFERARB getPbuffer() const { return m_pb; }
+//
+// private:
+//     HWND        m_hwnd;
+//     HPBUFFERARB m_pb;
+//     HBITMAP     m_bmap;
+//     HDC         m_hdc;
+//     SurfaceType m_type;
+// };
 
 namespace {
 
@@ -426,11 +475,11 @@ public:
         }
     }
 
-    virtual bool isValidNativeWin(EGLNativeSurfaceType win) {
+    virtual bool isValidNativeWin(EglOS::Surface* win) {
         if (!win) {
             return false;
         } else {
-            return isValidNativeWin(win->getHwnd());
+            return isValidNativeWin(WinSurface::from(win)->getHwnd());
         }
     }
 
@@ -438,12 +487,14 @@ public:
         return IsWindow(win);
     }
 
-    virtual bool isValidNativePixmap(EGLNativeSurfaceType pix) {
+    virtual bool isValidNativePixmap(EglOS::Surface* pix) {
         if (!pix) {
             return false;
         } else {
             BITMAP bm;
-            return GetObject(pix->getBmap(), sizeof(BITMAP), (LPSTR)&bm);
+            return GetObject(WinSurface::from(pix)->getBmap(),
+                             sizeof(BITMAP),
+                             (LPSTR)&bm);
         }
     }
 
@@ -509,7 +560,7 @@ public:
         return true;
     }
 
-    virtual EGLNativeSurfaceType createPbufferSurface(
+    virtual EglOS::Surface* createPbufferSurface(
             const EglConfig* cfg, const EglOS::PbufferInfo* info) {
         HDC dpy = getDummyDC(mDpy, cfg->nativeId());
 
@@ -540,10 +591,10 @@ public:
             GetLastError();
             return NULL;
         }
-        return new SrfcInfo(pb);
+        return new WinSurface(pb);
     }
 
-    virtual bool releasePbuffer(EGLNativeSurfaceType pb) {
+    virtual bool releasePbuffer(EglOS::Surface* pb) {
         if (!pb) {
             return false;
         }
@@ -551,20 +602,21 @@ public:
             !s_wglExtProcs->wglDestroyPbufferARB) {
             return false;
         }
+        WinSurface* winpb = WinSurface::from(pb);
         if (!s_wglExtProcs->wglReleasePbufferDCARB(
-                pb->getPbuffer(), pb->getDC()) ||
-            !s_wglExtProcs->wglDestroyPbufferARB(pb->getPbuffer())) {
+                winpb->getPbuffer(), winpb->getDC()) ||
+            !s_wglExtProcs->wglDestroyPbufferARB(winpb->getPbuffer())) {
             GetLastError();
             return false;
         }
         return true;
     }
 
-    virtual bool makeCurrent(EGLNativeSurfaceType read,
-                             EGLNativeSurfaceType draw,
+    virtual bool makeCurrent(EglOS::Surface* read,
+                             EglOS::Surface* draw,
                              EGLNativeContextType context) {
-        HDC hdcRead = read ? read->getDC() : NULL;
-        HDC hdcDraw = draw ? draw->getDC() : NULL;
+        HDC hdcRead = read ? WinSurface::from(read)->getDC() : NULL;
+        HDC hdcDraw = draw ? WinSurface::from(draw)->getDC() : NULL;
 
         if (hdcRead == hdcDraw){
             return wglMakeCurrent(hdcDraw, context);
@@ -576,13 +628,13 @@ public:
         return retVal;
     }
 
-    virtual void swapBuffers(EGLNativeSurfaceType srfc) {
-        if (srfc && !SwapBuffers(srfc->getDC())) {
+    virtual void swapBuffers(EglOS::Surface* srfc) {
+        if (srfc && !SwapBuffers(WinSurface::from(srfc)->getDC())) {
             GetLastError();
         }
     }
 
-    virtual void swapInterval(EGLNativeSurfaceType win, int interval) {
+    virtual void swapInterval(EglOS::Surface* win, int interval) {
         if (s_wglExtProcs->wglSwapIntervalEXT){
             s_wglExtProcs->wglSwapIntervalEXT(interval);
         }
@@ -736,14 +788,10 @@ void EglOS::initPtrToWglFunctions(){
 
 void EglOS::waitNative(){}
 
-EGLNativeSurfaceType EglOS::createWindowSurface(EGLNativeWindowType wnd) {
-    return new SrfcInfo(wnd);
+EglOS::Surface* EglOS::createWindowSurface(EGLNativeWindowType wnd) {
+    return new WinSurface(wnd);
 }
 
-EGLNativeSurfaceType EglOS::createPixmapSurface(EGLNativePixmapType pix) {
-    return new SrfcInfo(pix);
-}
-
-void EglOS::destroySurface(EGLNativeSurfaceType srfc){
-    delete srfc;
+EglOS::Surface* EglOS::createPixmapSurface(EGLNativePixmapType pix) {
+    return new WinSurface(pix);
 }

@@ -17,31 +17,50 @@
 #include "MacNative.h"
 #define MAX_PBUFFER_MIPMAP_LEVEL 1
 
-class SrfcInfo {
+// class SrfcInfo {
+// public:
+//     typedef enum {
+//         WINDOW  = 0,
+//         PBUFFER = 1,
+//         PIXMAP
+//     } SurfaceType;
+//
+//     SrfcInfo(void* handle, SurfaceType type) :
+//             m_type(type), m_handle(handle), m_hasMipmap(false) {}
+//
+//     SurfaceType type() const { return m_type; }
+//
+//     void* handle() const { return m_handle; }
+//
+//     bool hasMipmap() const { return m_hasMipmap; }
+//     void setHasMipmap(bool value) { m_hasMipmap = value; }
+//
+// private:
+//     SurfaceType m_type;
+//     void* m_handle;
+//     bool m_hasMipmap;
+// };
+
+namespace {
+
+class MacSurface : public EglOS::Surface {
 public:
-    typedef enum {
-        WINDOW  = 0,
-        PBUFFER = 1,
-        PIXMAP
-    } SurfaceType;
-
-    SrfcInfo(void* handle, SurfaceType type) :
-            m_type(type), m_handle(handle), m_hasMipmap(false) {}
-
-    SurfaceType type() const { return m_type; }
+    MacSurface(void* handle, SurfaceType type) :
+            Surface(type), m_handle(handle), m_hasMipmap(false) {}
 
     void* handle() const { return m_handle; }
 
     bool hasMipmap() const { return m_hasMipmap; }
     void setHasMipmap(bool value) { m_hasMipmap = value; }
 
+    static MacSurface* from(EglOS::Surface* s) {
+        return static_cast<MacSurface*>(s);
+    }
+
 private:
-    SurfaceType m_type;
     void* m_handle;
     bool m_hasMipmap;
 };
-
-namespace {
 
 std::list<EGLNativePixelFormatType> s_nativeFormats;
 
@@ -140,11 +159,11 @@ public:
         }
     }
 
-    virtual bool isValidNativeWin(EGLNativeSurfaceType win) {
-        if (win->type() != SrfcInfo::WINDOW) {
+    virtual bool isValidNativeWin(EglOS::Surface* win) {
+        if (win->type() != MacSurface::WINDOW) {
             return false;
         } else {
-            return isValidNativeWin(win->handle());
+            return isValidNativeWin(MacSurface::from(win)->handle());
         }
     }
 
@@ -153,7 +172,7 @@ public:
         return nsGetWinDims(win, &width, &height);
     }
 
-    virtual bool isValidNativePixmap(EGLNativeSurfaceType pix) {
+    virtual bool isValidNativePixmap(EglOS::Surface* pix) {
         // no support for pixmap in mac
         return true;
     }
@@ -190,7 +209,7 @@ public:
         return true;
     }
 
-    virtual EGLNativeSurfaceType createPbufferSurface(
+    virtual EglOS::Surface* createPbufferSurface(
             const EglConfig* cfg, const EglOS::PbufferInfo* info) {
         GLenum glTexFormat = GL_RGBA, glTexTarget = GL_TEXTURE_2D;
         switch (info->format) {
@@ -203,28 +222,28 @@ public:
         }
         EGLint maxMipmap = info->hasMipmap ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
 
-        EGLNativeSurfaceType result = new SrfcInfo(
+        MacSurface* result = new MacSurface(
                 nsCreatePBuffer(
                         glTexTarget,
                         glTexFormat,
                         maxMipmap,
                         info->width,
                         info->height),
-                        SrfcInfo::PBUFFER);
+                MacSurface::PBUFFER);
 
         result->setHasMipmap(info->hasMipmap);
         return result;
     }
 
-    virtual bool releasePbuffer(EGLNativeSurfaceType pb) {
+    virtual bool releasePbuffer(EglOS::Surface* pb) {
         if (pb) {
-            nsDestroyPBuffer(pb->handle());
+            nsDestroyPBuffer(MacSurface::from(pb)->handle());
         }
         return true;
     }
 
-    virtual bool makeCurrent(EGLNativeSurfaceType read,
-                             EGLNativeSurfaceType draw,
+    virtual bool makeCurrent(EglOS::Surface* read,
+                             EglOS::Surface* draw,
                              EGLNativeContextType ctx) {
         // check for unbind
         if (ctx == NULL && read == NULL && draw == NULL) {
@@ -241,27 +260,28 @@ public:
             return false;
         }
         switch (draw->type()) {
-        case SrfcInfo::WINDOW:
-            nsWindowMakeCurrent(ctx, draw->handle());
+        case MacSurface::WINDOW:
+            nsWindowMakeCurrent(ctx, MacSurface::from(draw)->handle());
             break;
-        case SrfcInfo::PBUFFER:
+        case MacSurface::PBUFFER:
         {
-            int mipmapLevel = draw->hasMipmap() ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
-            nsPBufferMakeCurrent(ctx, draw->handle(), mipmapLevel);
+            MacSurface* macdraw = MacSurface::from(draw);
+            int mipmapLevel = macdraw->hasMipmap() ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
+            nsPBufferMakeCurrent(ctx, macdraw->handle(), mipmapLevel);
             break;
         }
-        case SrfcInfo::PIXMAP:
+        case MacSurface::PIXMAP:
         default:
             return false;
         }
         return true;
     }
 
-    virtual void swapBuffers(EGLNativeSurfaceType srfc) {
+    virtual void swapBuffers(EglOS::Surface* srfc) {
         nsSwapBuffers();
     }
 
-    virtual void swapInterval(EGLNativeSurfaceType win, int interval) {
+    virtual void swapInterval(EglOS::Surface* win, int interval) {
         nsSwapInterval(&interval);
     }
 
@@ -285,14 +305,10 @@ EglOS::Display* EglOS::getInternalDisplay(
 
 void EglOS::waitNative() {}
 
-EGLNativeSurfaceType EglOS::createWindowSurface(EGLNativeWindowType wnd) {
-    return new SrfcInfo(wnd, SrfcInfo::WINDOW);
+EglOS::Surface* EglOS::createWindowSurface(EGLNativeWindowType wnd) {
+    return new MacSurface(wnd, MacSurface::WINDOW);
 }
 
-EGLNativeSurfaceType EglOS::createPixmapSurface(EGLNativePixmapType pix) {
-    return new SrfcInfo(pix, SrfcInfo::PIXMAP);
-}
-
-void EglOS::destroySurface(EGLNativeSurfaceType srfc) {
-    delete srfc;
+EglOS::Surface* EglOS::createPixmapSurface(EGLNativePixmapType pix) {
+    return new MacSurface(pix, MacSurface::PIXMAP);
 }

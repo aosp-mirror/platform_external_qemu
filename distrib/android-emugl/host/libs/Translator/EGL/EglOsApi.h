@@ -27,6 +27,25 @@
 
 namespace EglOS {
 
+// Base class used to wrap various EGL Surface types.
+class Surface {
+public:
+    typedef enum {
+        WINDOW = 0,
+        PBUFFER = 1,
+        PIXMAP,
+    } SurfaceType;
+
+    explicit Surface(SurfaceType type) : mType(type) {}
+
+    virtual ~Surface() {}
+
+    SurfaceType type() const { return mType; }
+
+protected:
+    SurfaceType mType;
+};
+
 // Pbuffer description.
 // |width| and |height| are its dimensions.
 // |largest| is set to ask the largest pixek buffer (see GLX_LARGEST_PBUFFER).
@@ -53,9 +72,9 @@ public:
 
     virtual void queryConfigs(int renderableType, ConfigsList& listOut) = 0;
 
-    virtual bool isValidNativeWin(EGLNativeSurfaceType win) = 0;
+    virtual bool isValidNativeWin(Surface* win) = 0;
     virtual bool isValidNativeWin(EGLNativeWindowType win) = 0;
-    virtual bool isValidNativePixmap(EGLNativeSurfaceType pix) = 0;
+    virtual bool isValidNativePixmap(Surface* pix) = 0;
 
     virtual bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
                                              const EglConfig* config,
@@ -72,18 +91,18 @@ public:
 
     virtual bool destroyContext(EGLNativeContextType context) = 0;
 
-    virtual EGLNativeSurfaceType createPbufferSurface(
+    virtual Surface* createPbufferSurface(
             const EglConfig* config, const PbufferInfo* info) = 0;
 
-    virtual bool releasePbuffer(EGLNativeSurfaceType pb) = 0;
+    virtual bool releasePbuffer(Surface* pb) = 0;
 
-    virtual bool makeCurrent(EGLNativeSurfaceType read,
-                             EGLNativeSurfaceType draw,
+    virtual bool makeCurrent(Surface* read,
+                             Surface* draw,
                              EGLNativeContextType context) = 0;
 
-    virtual void swapBuffers(EGLNativeSurfaceType srfc) = 0;
+    virtual void swapBuffers(Surface* srfc) = 0;
 
-    virtual void swapInterval(EGLNativeSurfaceType win, int interval) = 0;
+    virtual void swapInterval(Surface* win, int interval) = 0;
 };
 
 void waitNative();
@@ -91,9 +110,9 @@ void waitNative();
 EglOS::Display* getDefaultDisplay();
 EglOS::Display* getInternalDisplay(EGLNativeDisplayType dpy);
 
-EGLNativeSurfaceType createWindowSurface(EGLNativeWindowType wnd);
-EGLNativeSurfaceType createPixmapSurface(EGLNativePixmapType pix);
-void destroySurface(EGLNativeSurfaceType srfc);
+EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd);
+EglOS::Surface* createPixmapSurface(EGLNativePixmapType pix);
+
 #ifdef _WIN32
 void initPtrToWglFunctions();
 #endif
