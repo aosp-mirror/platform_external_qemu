@@ -14,6 +14,9 @@
 * limitations under the License.
 */
 #include "EglOsApi.h"
+
+#include "EglConfig.h"
+
 #include "emugl/common/mutex.h"
 
 #include <string.h>
@@ -65,9 +68,28 @@ int ErrorHandler::errorHandlerProc(EGLNativeDisplayType dpy,
 #define IS_SUCCESS(a) \
         if(a != Success) return 0;
 
+// Implementation of EglOS::PixelFormat based on GLX.
+class GlxPixelFormat : public EglOS::PixelFormat {
+public:
+    explicit GlxPixelFormat(GLXFBConfig fbconfig) : mFbConfig(fbconfig) {}
+
+    virtual EglOS::PixelFormat* clone() {
+        return new GlxPixelFormat(mFbConfig);
+    }
+
+    GLXFBConfig fbConfig() const { return mFbConfig; }
+
+    static GLXFBConfig from(EglOS::PixelFormat* f) {
+        return static_cast<GlxPixelFormat*>(f)->fbConfig();
+    }
+
+private:
+    GLXFBConfig mFbConfig;
+};
+
 EglConfig* pixelFormatToConfig(EGLNativeDisplayType dpy,
                                int renderableType,
-                               EGLNativePixelFormatType frmt) {
+                               GLXFBConfig frmt) {
     int  bSize, red, green, blue, alpha, depth, stencil;
     int  supportedSurfaces, visualType, visualId;
     int  caveat, transparentType, samples;
@@ -179,7 +201,7 @@ EglConfig* pixelFormatToConfig(EGLNativeDisplayType dpy,
             tRed,
             tGreen,
             tBlue,
-            frmt);
+            new GlxPixelFormat(frmt));
 }
 
 // Implementation of EglOS::Surface based on GLX.
@@ -225,7 +247,7 @@ public:
 
     virtual void queryConfigs(int renderableType, ConfigsList& listOut) {
         int n;
-        EGLNativePixelFormatType* frmtList = glXGetFBConfigs(mDisplay, 0, &n);
+        GLXFBConfig* frmtList = glXGetFBConfigs(mDisplay, 0, &n);
         for(int i = 0; i < n; i++) {
             EglConfig* conf = pixelFormatToConfig(
                     mDisplay, renderableType, frmtList[i]);
@@ -274,12 +296,14 @@ public:
         //TODO: to check what does ATI & NVIDIA enforce on win pixelformat
         unsigned int depth, configDepth, border;
         int r, g, b, x, y;
+        GLXFBConfig fbconfig = GlxPixelFormat::from(cfg->nativeFormat());
+
         IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, cfg->nativeFormat(), GLX_RED_SIZE, &r));
+                mDisplay, fbconfig, GLX_RED_SIZE, &r));
         IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, cfg->nativeFormat(), GLX_GREEN_SIZE, &g));
+                mDisplay, fbconfig, GLX_GREEN_SIZE, &g));
         IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, cfg->nativeFormat(), GLX_BLUE_SIZE, &b));
+                mDisplay, fbconfig, GLX_BLUE_SIZE, &b));
         configDepth = r + g + b;
         Window root;
         if (!XGetGeometry(
@@ -295,12 +319,14 @@ public:
                                              unsigned int* height) {
         unsigned int depth, configDepth, border;
         int r, g, b, x, y;
+        GLXFBConfig fbconfig = GlxPixelFormat::from(cfg->nativeFormat());
+
         IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, cfg->nativeFormat(), GLX_RED_SIZE, &r));
+                mDisplay, fbconfig, GLX_RED_SIZE, &r));
         IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, cfg->nativeFormat(), GLX_GREEN_SIZE, &g));
+                mDisplay, fbconfig, GLX_GREEN_SIZE, &g));
         IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, cfg->nativeFormat(), GLX_BLUE_SIZE, &b));
+                mDisplay, fbconfig, GLX_BLUE_SIZE, &b));
         configDepth = r + g + b;
         Window root;
         if (!XGetGeometry(
@@ -315,7 +341,7 @@ public:
         ErrorHandler handler(mDisplay);
         GLXContext ctx = glXCreateNewContext(
                 mDisplay,
-                config->nativeFormat(),
+                GlxPixelFormat::from(config->nativeFormat()),
                 GLX_RGBA_TYPE,
                 sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
                 true);
@@ -341,7 +367,9 @@ public:
             None
         };
         GLXPbuffer pb = glXCreatePbuffer(
-                mDisplay, config->nativeFormat(), attribs);
+                mDisplay,
+                GlxPixelFormat::from(config->nativeFormat()),
+                attribs);
         return pb ? new GlxSurface(pb, GlxSurface::PBUFFER) : NULL;
     }
 

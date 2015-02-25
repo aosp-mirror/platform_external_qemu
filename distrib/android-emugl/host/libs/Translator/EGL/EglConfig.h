@@ -16,8 +16,7 @@
 #ifndef EGL_CONFIG_H
 #define EGL_CONFIG_H
 
-#include "EglInternal.h"
-
+#include "EglOsApi.h"
 #include <EGL/egl.h>
 
 #include <list>
@@ -63,7 +62,7 @@ public:
     EGLint nativeId() const { return m_native_config_id; }
 
     // Return the native pixel format for this config.
-    EGLNativePixelFormatType nativeFormat() const { return m_nativeFormat; }
+    EglOS::PixelFormat* nativeFormat() const { return m_nativeFormat; }
 
     // Constructor for a new instance, all values explicitly defined.
     EglConfig(EGLint red_size,
@@ -88,7 +87,7 @@ public:
               EGLint trans_red_val,
               EGLint trans_green_val,
               EGLint trans_blue_val,
-              EGLNativePixelFormatType frmt);
+              EglOS::PixelFormat* frmt);
 
     // Copy-constructor.
     EglConfig(const EglConfig& conf);
@@ -103,6 +102,11 @@ public:
               EGLint green_size,
               EGLint blue_size,
               EGLint alpha_size);
+
+    // Destructor is required to get id of pixel format instance.
+    ~EglConfig() {
+        delete m_nativeFormat;
+    }
 
 private:
     const EGLint      m_buffer_size;
@@ -136,7 +140,7 @@ private:
     const EGLint      m_trans_blue_val;
     const EGLenum     m_conformant;
 
-    const EGLNativePixelFormatType  m_nativeFormat;
+    EglOS::PixelFormat*  m_nativeFormat;
 };
 
 typedef std::list<EglConfig*> ConfigsList;

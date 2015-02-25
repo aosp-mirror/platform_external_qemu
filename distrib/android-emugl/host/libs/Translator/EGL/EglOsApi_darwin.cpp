@@ -14,7 +14,11 @@
 * limitations under the License.
 */
 #include "EglOsApi.h"
+
+#include "EglConfig.h"
+
 #include "MacNative.h"
+
 #define MAX_PBUFFER_MIPMAP_LEVEL 1
 
 // class SrfcInfo {
@@ -80,11 +84,44 @@ private:
     void* mContext;
 };
 
-std::list<EGLNativePixelFormatType> s_nativeFormats;
+typedef std::list<void*> NativeFormatList;
+
+NativeFormatList s_nativeFormats;
+
+void initNativeConfigs(){
+    int nConfigs = getNumPixelFormats();
+    if (s_nativeFormats.empty()) {
+        for(int i = 0; i < nConfigs; i++) {
+             void* frmt = getPixelFormat(i);
+             if (frmt) {
+                 s_nativeFormats.push_back(frmt);
+             }
+        }
+    }
+}
+
+class MacPixelFormat : public EglOS::PixelFormat {
+public:
+    explicit MacPixelFormat(void* format) : mFormat(format) {}
+
+    EglOS::PixelFormat* clone() {
+        return new MacPixelFormat(mFormat);
+    }
+
+    void* format() const { return mFormat; }
+
+    static void* from(EglOS::PixelFormat* f) {
+        return static_cast<MacPixelFormat*>(f)->format();
+    }
+
+private:
+    void* mFormat;
+};
+
 
 EglConfig* pixelFormatToConfig(int index,
                                int renderableType,
-                               EGLNativePixelFormatType frmt) {
+                               void* frmt) {
     EGLint  red,green,blue,alpha,depth,stencil;
     EGLint  supportedSurfaces,visualType,visualId;
     EGLint  transparentType,samples;
@@ -137,22 +174,32 @@ EglConfig* pixelFormatToConfig(int index,
 
     red = green = blue = (colorSize / 4); //TODO: ask guy if it is OK
 
-    return new EglConfig(red,green,blue,alpha,caveat,(EGLint)index,depth,level,pMaxWidth,pMaxHeight,pMaxPixels,renderable,renderableType,
-                         visualId,visualType,samples,stencil,supportedSurfaces,transparentType,tRed,tGreen,tBlue,frmt);
+    return new EglConfig(
+            red,
+            green,
+            blue,
+            alpha,
+            caveat,
+            (EGLint)index,
+            depth,
+            level,
+            pMaxWidth,
+            pMaxHeight,
+            pMaxPixels,
+            renderable,
+            renderableType,
+            visualId,
+            visualType,
+            samples,
+            stencil,
+            supportedSurfaces,
+            transparentType,
+            tRed,
+            tGreen,
+            tBlue,
+            new MacPixelFormat(frmt));
 }
 
-
-void initNativeConfigs(){
-    int nConfigs = getNumPixelFormats();
-    if(s_nativeFormats.empty()){
-        for(int i = 0; i < nConfigs; i++) {
-             EGLNativePixelFormatType frmt = getPixelFormat(i);
-             if(frmt){
-                 s_nativeFormats.push_back(frmt);
-             }
-        }
-    }
-}
 
 class MacDisplay : public EglOS::Display {
 public:
@@ -165,12 +212,10 @@ public:
     virtual void queryConfigs(int renderableType, ConfigsList& listOut) {
         initNativeConfigs();
         int i = 0;
-        for (std::list<EGLNativePixelFormatType>::iterator it =
-                s_nativeFormats.begin();
-            it != s_nativeFormats.end();
-            it++) {
-            EGLNativePixelFormatType frmt = *it;
-            EglConfig* conf = pixelFormatToConfig(i++, renderableType, frmt);
+        for (NativeFormatList::iterator it = s_nativeFormats.begin();
+                it != s_nativeFormats.end();
+                it++) {
+            EglConfig* conf = pixelFormatToConfig(i++, renderableType, *it);
             if(conf) {
                 listOut.push_front(conf);
             }
@@ -222,7 +267,8 @@ public:
         void* macSharedContext =
                 sharedContext ? MacContext::from(sharedContext) : NULL;
         return new MacContext(
-                nsCreateContext(config->nativeFormat(), macSharedContext));
+                nsCreateContext(MacPixelFormat::from(config->nativeFormat()),
+                                macSharedContext));
     }
 
     virtual bool destroyContext(EglOS::Context* context) {

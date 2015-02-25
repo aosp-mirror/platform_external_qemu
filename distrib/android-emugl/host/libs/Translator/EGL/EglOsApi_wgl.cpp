@@ -14,8 +14,13 @@
 * limitations under the License.
 */
 #include "EglOsApi.h"
+
+#include "EglConfig.h"
+
 #include <windows.h>
 #include <wingdi.h>
+
+#include <GL/gl.h>
 #include <GL/wglext.h>
 
 #include <map>
@@ -66,6 +71,26 @@ PROC wglGetExtentionsProcAddress(HDC hdc,
     // extension is supported
     return wglGetProcAddress(proc_name);
 }
+
+class WinPixelFormat : public EglOS::PixelFormat {
+public:
+    explicit WinPixelFormat(const PIXELFORMATDESCRIPTOR* desc) {
+        mDesc = *desc;
+    }
+
+    EglOS::PixelFormat* clone() {
+        return new WinPixelFormat(&mDesc);
+    }
+
+    const PIXELFORMATDESCRIPTOR* desc() const { return &mDesc; }
+
+    static const PIXELFORMATDESCRIPTOR* from(EglOS::PixelFormat* f) {
+        return static_cast<WinPixelFormat*>(f)->desc();
+    }
+
+private:
+    PIXELFORMATDESCRIPTOR mDesc;
+};
 
 class WinSurface : public EglOS::Surface {
 public:
@@ -281,7 +306,7 @@ bool initPixelFormat(HDC dc) {
 
 EglConfig* pixelFormatToConfig(WinDisplay* display,
                                int renderableType,
-                               EGLNativePixelFormatType* frmt,
+                               const PIXELFORMATDESCRIPTOR* frmt,
                                int index) {
     EGLint  red,green,blue,alpha,depth,stencil;
     EGLint  supportedSurfaces,visualType,visualId;
@@ -392,7 +417,7 @@ EglConfig* pixelFormatToConfig(WinDisplay* display,
             tRed,
             tGreen,
             tBlue,
-            *frmt);
+            new WinPixelFormat(frmt));
 }
 
 class WglDisplay : public EglOS::Display {
@@ -468,8 +493,9 @@ public:
         *width  = r.right  - r.left;
         *height = r.bottom - r.top;
         HDC dc = GetDC(win);
-        EGLNativePixelFormatType nativeFormat = cfg->nativeFormat();
-        bool ret = SetPixelFormat(dc, cfg->nativeId(), &nativeFormat);
+        const PIXELFORMATDESCRIPTOR* nativeFormat =
+                WinPixelFormat::from(cfg->nativeFormat());
+        bool ret = SetPixelFormat(dc, cfg->nativeId(), nativeFormat);
         DeleteDC(dc);
         return ret;
     }
@@ -492,8 +518,9 @@ public:
         HDC dpy = getDummyDC(mDpy, cfg->nativeId());
 
         if (!mDpy->isPixelFormatSet(cfg->nativeId())) {
-            EGLNativePixelFormatType nativeFormat = cfg->nativeFormat();
-            if (!SetPixelFormat(dpy, cfg->nativeId(), &nativeFormat)){
+            const PIXELFORMATDESCRIPTOR* nativeFormat =
+                    WinPixelFormat::from(cfg->nativeFormat());
+            if (!SetPixelFormat(dpy, cfg->nativeId(), nativeFormat)){
                 return NULL;
             }
             mDpy->pixelFormatWasSet(cfg->nativeId());
