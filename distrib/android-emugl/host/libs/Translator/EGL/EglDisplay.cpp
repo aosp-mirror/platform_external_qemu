@@ -18,7 +18,7 @@
 #include <GLcommon/GLutils.h>
 
 EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
-                       EGLNativeInternalDisplayType idpy) :
+                       EglOS::Display* idpy) :
     m_dpy(dpy),
     m_idpy(idpy),
     m_initialized(false),

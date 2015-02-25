@@ -273,12 +273,12 @@ private:
 
 }  // namespace
 
-EGLNativeInternalDisplayType EglOS::getDefaultDisplay() {
+EglOS::Display* EglOS::getDefaultDisplay() {
     return new MacDisplay(0);
 }
 
 
-EGLNativeInternalDisplayType EglOS::getInternalDisplay(
+EglOS::Display* EglOS::getInternalDisplay(
         EGLNativeDisplayType dpy) {
     return new MacDisplay(dpy);
 }

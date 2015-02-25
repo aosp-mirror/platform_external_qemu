@@ -594,7 +594,7 @@ private:
 
 }  // namespace
 
-EGLNativeInternalDisplayType EglOS::getDefaultDisplay() {
+EglOS::Display* EglOS::getDefaultDisplay() {
     if (!s_tlsIndex) {
         s_tlsIndex = TlsAlloc();
     }
@@ -607,7 +607,7 @@ EGLNativeInternalDisplayType EglOS::getDefaultDisplay() {
     return new WglDisplay(dpy);
 }
 
-EGLNativeInternalDisplayType EglOS::getInternalDisplay(
+EglOS::Display* EglOS::getInternalDisplay(
         EGLNativeDisplayType display){
     if (!s_tlsIndex) {
         s_tlsIndex = TlsAlloc();

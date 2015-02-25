@@ -19,6 +19,7 @@
 #include "EglDisplay.h"
 #include "EglConfig.h"
 #include "EglContext.h"
+#include "EglOsApi.h"
 
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/pod_vector.h"
@@ -34,7 +35,7 @@ class EglDisplay;
 // process. This really amounts to:
 //
 //   - A list of EglDisplay instances, each identified by an
-//     EGLNativeDisplayType and EGLNativeInternalDisplayType.
+//     EGLNativeDisplayType and EglOS::Display*.
 //
 //   - GLES interface function pointers for all supported GLES versions.
 
@@ -50,7 +51,7 @@ public:
     // |idpy| is the corresponding native internal display type. See
     // generateInternalDisplay() below to understand how they differ.
     EglDisplay* addDisplay(EGLNativeDisplayType dpy,
-                           EGLNativeInternalDisplayType idpy);
+                           EglOS::Display* idpy);
 
     // Return the EglDisplay instance corresponding to a given native |dpy|
     // value.
@@ -64,7 +65,7 @@ public:
     bool removeDisplay(EGLDisplay dpy);
 
     // Return the default native internal display handle.
-    EGLNativeInternalDisplayType getDefaultNativeDisplay() const {
+    EglOS::Display* getDefaultNativeDisplay() const {
         return m_default;
     };
 
@@ -73,7 +74,7 @@ public:
     // on Windows, where |dpy| corresponds to a HDC, while the internal
     // handle corresponds to a WGL DISPLAY value, which is different.
     // For other platforms, this is likely to return the input |dpy|.
-    static EGLNativeInternalDisplayType generateInternalDisplay(
+    static EglOS::Display* generateInternalDisplay(
             EGLNativeDisplayType dpy);
 
     // Set the GLES interface pointer corresponding to a given GLES version.
@@ -102,7 +103,7 @@ private:
     friend class emugl::LazyInstance<EglGlobalInfo>;
 
     emugl::PodVector<EglDisplay*>  m_displays;
-    EGLNativeInternalDisplayType   m_default;
+    EglOS::Display*   m_default;
     const GLESiface*               m_gles_ifaces[MAX_GLES_VERSION];
     bool                           m_gles_extFuncs_inited[MAX_GLES_VERSION];
     mutable emugl::Mutex           m_lock;

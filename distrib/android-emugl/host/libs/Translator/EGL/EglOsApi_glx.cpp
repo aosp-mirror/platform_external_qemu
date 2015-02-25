@@ -379,11 +379,11 @@ private:
 
 }  // namespace
 
-EGLNativeInternalDisplayType EglOS::getDefaultDisplay() {
+EglOS::Display* EglOS::getDefaultDisplay() {
     return new GlxDisplay(XOpenDisplay(0));
 }
 
-EGLNativeInternalDisplayType EglOS::getInternalDisplay(
+EglOS::Display* EglOS::getInternalDisplay(
         EGLNativeDisplayType dpy) {
     return new GlxDisplay(dpy);
 }

@@ -25,9 +25,9 @@
 
 #include "EglConfig.h"
 #include "EglContext.h"
+#include "EglOsApi.h"
 #include "EglSurface.h"
 #include "EglWindowSurface.h"
-
 
 
 
@@ -39,14 +39,13 @@ public:
     // Create new EglDisplay instance from a given native display |dpy|,
     // with matching internal display |idpy|. If |isDefault| is true,
     // this will be considered the default diplay.
-    EglDisplay(EGLNativeDisplayType dpy,
-               EGLNativeInternalDisplayType idpy);
+    EglDisplay(EGLNativeDisplayType dpy, EglOS::Display* idpy);
 
     // Return the native display handle for this EglDisplay.
     EGLNativeDisplayType getNativeDisplay() const { return m_dpy; }
 
     // Return the native internal display handle for this EglDisplay.
-    EGLNativeInternalDisplayType nativeType() const { return m_idpy; }
+    EglOS::Display* nativeType() const { return m_idpy; }
 
     // Return the number of known configurations for this EglDisplay.
     int nConfigs() const { return m_configs.size(); }
@@ -97,7 +96,7 @@ private:
    void initConfigurations(int renderableType);
 
    EGLNativeDisplayType           m_dpy;
-   EGLNativeInternalDisplayType   m_idpy;
+   EglOS::Display*                m_idpy;
    bool                           m_initialized;
    bool                           m_configInitialized;
    ConfigsList                    m_configs;

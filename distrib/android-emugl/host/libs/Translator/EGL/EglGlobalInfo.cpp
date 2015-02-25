@@ -53,7 +53,7 @@ EglGlobalInfo::~EglGlobalInfo() {
 }
 
 EglDisplay* EglGlobalInfo::addDisplay(EGLNativeDisplayType dpy,
-                                      EGLNativeInternalDisplayType idpy) {
+                                      EglOS::Display* idpy) {
     //search if it already exists.
     emugl::Mutex::AutoLock mutex(m_lock);
     for (size_t n = 0; n < m_displays.size(); ++n) {
@@ -103,7 +103,7 @@ EglDisplay* EglGlobalInfo::getDisplay(EGLDisplay dpy) const {
 }
 
 // static
-EGLNativeInternalDisplayType EglGlobalInfo::generateInternalDisplay(
+EglOS::Display* EglGlobalInfo::generateInternalDisplay(
         EGLNativeDisplayType dpy) {
     return EglOS::getInternalDisplay(dpy);
 }
