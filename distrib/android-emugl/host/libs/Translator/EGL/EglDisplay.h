@@ -40,8 +40,7 @@ public:
     // with matching internal display |idpy|. If |isDefault| is true,
     // this will be considered the default diplay.
     EglDisplay(EGLNativeDisplayType dpy,
-               EGLNativeInternalDisplayType idpy,
-               bool isDefault = true);
+               EGLNativeInternalDisplayType idpy);
 
     // Return the native display handle for this EglDisplay.
     EGLNativeDisplayType getNativeDisplay() const { return m_dpy; }
@@ -101,7 +100,6 @@ private:
    EGLNativeInternalDisplayType   m_idpy;
    bool                           m_initialized;
    bool                           m_configInitialized;
-   bool                           m_isDefault;
    ConfigsList                    m_configs;
    ContextsHndlMap                m_contexts;
    SurfacesHndlMap                m_surfaces;

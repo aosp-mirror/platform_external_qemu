@@ -18,13 +18,11 @@
 #include <GLcommon/GLutils.h>
 
 EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
-                       EGLNativeInternalDisplayType idpy,
-                       bool isDefault) :
+                       EGLNativeInternalDisplayType idpy) :
     m_dpy(dpy),
     m_idpy(idpy),
     m_initialized(false),
     m_configInitialized(false),
-    m_isDefault(isDefault),
     m_nextEglImageId(0),
     m_globalSharedContext(NULL)
 {
@@ -43,10 +41,7 @@ EglDisplay::~EglDisplay() {
         EglOS::destroyContext(m_idpy, m_globalSharedContext);
     }
 
-    if(m_isDefault) {
-        EglOS::releaseDisplay(m_idpy);
-    }
-
+    EglOS::releaseDisplay(m_idpy);
 
     for(ConfigsList::iterator it = m_configs.begin();
         it != m_configs.end();
