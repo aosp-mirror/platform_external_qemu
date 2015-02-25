@@ -200,6 +200,20 @@ private:
     GLXDrawable mDrawable;
 };
 
+// Implementation of EglOS::Context based on GLX.
+class GlxContext : public EglOS::Context {
+public:
+    explicit GlxContext(GLXContext context) : mContext(context) {}
+
+    GLXContext context() const { return mContext; }
+
+    static GLXContext contextFor(EglOS::Context* context) {
+        return static_cast<GlxContext*>(context)->context();
+    }
+private:
+    GLXContext mContext;
+};
+
 // Implementation of EglOS::Display based on GLX.
 class GlxDisplay : public EglOS::Display {
 public:
@@ -296,20 +310,25 @@ public:
         return depth >= configDepth;
     }
 
-    virtual EGLNativeContextType createContext(
-            const EglConfig* config, EGLNativeContextType sharedContext) {
+    virtual EglOS::Context* createContext(
+            const EglConfig* config, EglOS::Context* sharedContext) {
         ErrorHandler handler(mDisplay);
-        EGLNativeContextType retVal = glXCreateNewContext(
+        GLXContext ctx = glXCreateNewContext(
                 mDisplay,
                 config->nativeFormat(),
                 GLX_RGBA_TYPE,
-                sharedContext,
+                sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
                 true);
-        return handler.getLastError() == 0 ? retVal : NULL;
+
+        if (handler.getLastError()) {
+            return NULL;
+        }
+
+        return new GlxContext(ctx);
     }
 
-    virtual bool destroyContext(EGLNativeContextType context) {
-        glXDestroyContext(mDisplay, context);
+    virtual bool destroyContext(EglOS::Context* context) {
+        glXDestroyContext(mDisplay, GlxContext::contextFor(context));
         return true;
     }
 
@@ -337,7 +356,7 @@ public:
 
     virtual bool makeCurrent(EglOS::Surface* read,
                              EglOS::Surface* draw,
-                             EGLNativeContextType context) {
+                             EglOS::Context* context) {
         ErrorHandler handler(mDisplay);
         bool retval = false;
         if (!context && !read && !draw) {
@@ -349,7 +368,7 @@ public:
                     mDisplay,
                     GlxSurface::drawableFor(draw),
                     GlxSurface::drawableFor(read),
-                    context);
+                    GlxContext::contextFor(context));
         }
         return (handler.getLastError() == 0) && retval;
     }

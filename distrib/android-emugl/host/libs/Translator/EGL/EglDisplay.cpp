@@ -339,14 +339,14 @@ bool EglDisplay:: destroyImageKHR(EGLImageKHR img) {
     return false;
 }
 
-EGLNativeContextType EglDisplay::getGlobalSharedContext() const {
+EglOS::Context* EglDisplay::getGlobalSharedContext() const {
     emugl::Mutex::AutoLock mutex(m_lock);
 #ifndef _WIN32
     // find an existing OpenGL context to share with, if exist
-    EGLNativeContextType ret = 
-        (EGLNativeContextType)m_manager[GLES_1_1]->getGlobalContext();
+    EglOS::Context* ret =
+        (EglOS::Context*)m_manager[GLES_1_1]->getGlobalContext();
     if (!ret)
-        ret = (EGLNativeContextType)m_manager[GLES_2_0]->getGlobalContext();
+        ret = (EglOS::Context*)m_manager[GLES_2_0]->getGlobalContext();
     return ret;
 #else
     if (!m_globalSharedContext) {

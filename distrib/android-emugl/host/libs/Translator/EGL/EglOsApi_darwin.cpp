@@ -62,6 +62,24 @@ private:
     bool m_hasMipmap;
 };
 
+class MacContext : public EglOS::Context {
+public:
+    explicit MacContext(void* context) : mContext(context) {}
+
+    virtual ~MacContext() {
+        nsDestroyContext(mContext);
+    }
+
+    void* context() const { return mContext; }
+
+    static void* from(EglOS::Context* c) {
+        return static_cast<MacContext*>(c)->context();
+    }
+
+private:
+    void* mContext;
+};
+
 std::list<EGLNativePixelFormatType> s_nativeFormats;
 
 EglConfig* pixelFormatToConfig(int index,
@@ -199,13 +217,16 @@ public:
         return false;
     }
 
-    virtual EGLNativeContextType createContext(
-            const EglConfig* config, EGLNativeContextType sharedContext) {
-        return nsCreateContext(config->nativeFormat(), sharedContext);
+    virtual EglOS::Context* createContext(
+            const EglConfig* config, EglOS::Context* sharedContext) {
+        void* macSharedContext =
+                sharedContext ? MacContext::from(sharedContext) : NULL;
+        return new MacContext(
+                nsCreateContext(config->nativeFormat(), macSharedContext));
     }
 
-    virtual bool destroyContext(EGLNativeContextType context) {
-        nsDestroyContext(context);
+    virtual bool destroyContext(EglOS::Context* context) {
+        delete context;
         return true;
     }
 
@@ -244,7 +265,7 @@ public:
 
     virtual bool makeCurrent(EglOS::Surface* read,
                              EglOS::Surface* draw,
-                             EGLNativeContextType ctx) {
+                             EglOS::Context* ctx) {
         // check for unbind
         if (ctx == NULL && read == NULL && draw == NULL) {
             nsWindowMakeCurrent(NULL, NULL);
@@ -261,13 +282,15 @@ public:
         }
         switch (draw->type()) {
         case MacSurface::WINDOW:
-            nsWindowMakeCurrent(ctx, MacSurface::from(draw)->handle());
+            nsWindowMakeCurrent(MacContext::from(ctx),
+                                MacSurface::from(draw)->handle());
             break;
         case MacSurface::PBUFFER:
         {
             MacSurface* macdraw = MacSurface::from(draw);
             int mipmapLevel = macdraw->hasMipmap() ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
-            nsPBufferMakeCurrent(ctx, macdraw->handle(), mipmapLevel);
+            nsPBufferMakeCurrent(MacContext::from(ctx),
+                                 macdraw->handle(), mipmapLevel);
             break;
         }
         case MacSurface::PIXMAP:

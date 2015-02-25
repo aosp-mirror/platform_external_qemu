@@ -669,8 +669,8 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
         }
     }
 
-    EGLNativeContextType globalSharedContext = dpy->getGlobalSharedContext();
-    EGLNativeContextType nativeContext = dpy->nativeType()->createContext(
+    EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
+    EglOS::Context* nativeContext = dpy->nativeType()->createContext(
             cfg, globalSharedContext);
 
     if(nativeContext) {

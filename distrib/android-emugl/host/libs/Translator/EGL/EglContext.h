@@ -16,18 +16,19 @@
 #ifndef EGL_CONTEXT_H
 #define EGL_CONTEXT_H
 
-#include <map>
-#include <EGL/egl.h>
+#include "EglConfig.h"
+#include "EglOsApi.h"
+#include "EglSurface.h"
+
 #include <GLcommon/GLutils.h>
 #include <GLcommon/TranslatorIfaces.h>
 #include <GLcommon/objectNameManager.h>
 
 #include "emugl/common/smart_ptr.h"
 
-#include "EglConfig.h"
-#include "EglSurface.h"
+#include <EGL/egl.h>
 
-
+#include <map>
 
 class EglContext;
 typedef  emugl::SmartPtr<EglContext> ContextPtr;
@@ -38,9 +39,9 @@ class EglContext {
 
 public:
 
-    EglContext(EglDisplay *dpy, EGLNativeContextType context,ContextPtr shared_context,EglConfig* config,GLEScontext* glesCtx,GLESVersion ver,ObjectNameManager* mngr);
+    EglContext(EglDisplay *dpy, EglOS::Context* context,ContextPtr shared_context,EglConfig* config,GLEScontext* glesCtx,GLESVersion ver,ObjectNameManager* mngr);
     bool usingSurface(SurfacePtr surface);
-    EGLNativeContextType nativeType(){return m_native;};
+    EglOS::Context* nativeType() const { return m_native; }
     bool getAttrib(EGLint attrib,EGLint* value);
     SurfacePtr read(){ return m_read;};
     SurfacePtr draw(){ return m_draw;};
@@ -58,7 +59,7 @@ public:
 private:
     static unsigned int  s_nextContextHndl;
     EglDisplay          *m_dpy;
-    EGLNativeContextType m_native;
+    EglOS::Context*      m_native;
     EglConfig*           m_config;
     GLEScontext*         m_glesContext;
     ShareGroupPtr        m_shareGroup;
