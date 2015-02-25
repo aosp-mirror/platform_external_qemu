@@ -42,6 +42,50 @@ struct PbufferInfo {
     EGLint hasMipmap;
 };
 
+// A class to model the engine-specific implementation of an EGL display
+// connection.
+class Display {
+public:
+    Display() {}
+    virtual ~Display() {}
+
+    virtual bool release() = 0;
+
+    virtual void queryConfigs(int renderableType, ConfigsList& listOut) = 0;
+
+    virtual bool isValidNativeWin(EGLNativeSurfaceType win) = 0;
+    virtual bool isValidNativeWin(EGLNativeWindowType win) = 0;
+    virtual bool isValidNativePixmap(EGLNativeSurfaceType pix) = 0;
+
+    virtual bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
+                                             const EglConfig* config,
+                                             unsigned int* width,
+                                             unsigned int* height) = 0;
+
+    virtual bool checkPixmapPixelFormatMatch(EGLNativePixmapType pix,
+                                             const EglConfig* config,
+                                             unsigned int* width,
+                                             unsigned int* height) = 0;
+
+    virtual EGLNativeContextType createContext(
+            const EglConfig* config, EGLNativeContextType sharedContext) = 0;
+
+    virtual bool destroyContext(EGLNativeContextType context) = 0;
+
+    virtual EGLNativeSurfaceType createPbufferSurface(
+            const EglConfig* config, const PbufferInfo* info) = 0;
+
+    virtual bool releasePbuffer(EGLNativeSurfaceType pb) = 0;
+
+    virtual bool makeCurrent(EGLNativeSurfaceType read,
+                             EGLNativeSurfaceType draw,
+                             EGLNativeContextType context) = 0;
+
+    virtual void swapBuffers(EGLNativeSurfaceType srfc) = 0;
+
+    virtual void swapInternal(EGLNativeSurfaceType win, int interval) = 0;
+};
+
 void queryConfigs(EGLNativeInternalDisplayType dpy,int renderable_type,ConfigsList& listOut);
 bool releasePbuffer(EGLNativeInternalDisplayType dis,EGLNativeSurfaceType pb);
 bool destroyContext(EGLNativeInternalDisplayType dpy,EGLNativeContextType ctx);
