@@ -102,6 +102,14 @@ TEST(EmuglConfig, init) {
 
     {
         EmuglConfig config;
+        EXPECT_TRUE(emuglConfig_init(&config, false, NULL, "on", 0));
+        EXPECT_TRUE(config.enabled);
+        EXPECT_STREQ("host", config.backend);
+        EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
+    }
+
+    {
+        EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(&config, false, "mesa", "enable", 0));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("mesa", config.backend);
