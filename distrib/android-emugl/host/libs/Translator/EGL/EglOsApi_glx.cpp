@@ -41,6 +41,8 @@ private:
 
 namespace {
 
+typedef Display X11Display;
+
 class ErrorHandler{
 public:
     ErrorHandler(EGLNativeDisplayType dpy);
@@ -199,179 +201,276 @@ EglConfig* pixelFormatToConfig(EGLNativeDisplayType dpy,
             frmt);
 }
 
+// Implementation of EglOS::Display based on GLX.
+class GlxDisplay : public EglOS::Display {
+public:
+    explicit GlxDisplay(X11Display* disp) : mDisplay(disp) {}
+
+    virtual bool release() {
+        return XCloseDisplay(mDisplay);
+    }
+
+    virtual void queryConfigs(int renderableType, ConfigsList& listOut) {
+        int n;
+        EGLNativePixelFormatType* frmtList = glXGetFBConfigs(mDisplay, 0, &n);
+        for(int i = 0; i < n; i++) {
+            EglConfig* conf = pixelFormatToConfig(
+                    mDisplay, renderableType, frmtList[i]);
+            if(conf) {
+                listOut.push_back(conf);
+            }
+        }
+        XFree(frmtList);
+    }
+
+    virtual bool isValidNativeWin(EGLNativeSurfaceType win) {
+        if (!win) {
+            return false;
+        } else {
+            return isValidNativeWin(win->srfc());
+        }
+    }
+
+    virtual bool isValidNativeWin(EGLNativeWindowType win) {
+        Window root;
+        int t;
+        unsigned int u;
+        ErrorHandler handler(mDisplay);
+        if (!XGetGeometry(mDisplay, win, &root, &t, &t, &u, &u, &u, &u)) {
+            return false;
+        }
+        return handler.getLastError() == 0;
+    }
+
+    virtual bool isValidNativePixmap(EGLNativeSurfaceType pix) {
+        Window root;
+        int t;
+        unsigned int u;
+        ErrorHandler handler(mDisplay);
+        GLXDrawable surface = pix ? pix->srfc() : 0;
+        if (!XGetGeometry(mDisplay, surface, &root, &t, &t, &u, &u, &u, &u)) {
+            return false;
+        }
+        return handler.getLastError() == 0;
+    }
+
+    virtual bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
+                                             const EglConfig* cfg,
+                                             unsigned int* width,
+                                             unsigned int* height) {
+        //TODO: to check what does ATI & NVIDIA enforce on win pixelformat
+        unsigned int depth, configDepth, border;
+        int r, g, b, x, y;
+        IS_SUCCESS(glXGetFBConfigAttrib(
+                mDisplay, cfg->nativeFormat(), GLX_RED_SIZE, &r));
+        IS_SUCCESS(glXGetFBConfigAttrib(
+                mDisplay, cfg->nativeFormat(), GLX_GREEN_SIZE, &g));
+        IS_SUCCESS(glXGetFBConfigAttrib(
+                mDisplay, cfg->nativeFormat(), GLX_BLUE_SIZE, &b));
+        configDepth = r + g + b;
+        Window root;
+        if (!XGetGeometry(
+                mDisplay, win, &root, &x, &y, width, height, &border, &depth)) {
+            return false;
+        }
+        return depth >= configDepth;
+    }
+
+    virtual bool checkPixmapPixelFormatMatch(EGLNativePixmapType pix,
+                                             const EglConfig* cfg,
+                                             unsigned int* width,
+                                             unsigned int* height) {
+        unsigned int depth, configDepth, border;
+        int r, g, b, x, y;
+        IS_SUCCESS(glXGetFBConfigAttrib(
+                mDisplay, cfg->nativeFormat(), GLX_RED_SIZE, &r));
+        IS_SUCCESS(glXGetFBConfigAttrib(
+                mDisplay, cfg->nativeFormat(), GLX_GREEN_SIZE, &g));
+        IS_SUCCESS(glXGetFBConfigAttrib(
+                mDisplay, cfg->nativeFormat(), GLX_BLUE_SIZE, &b));
+        configDepth = r + g + b;
+        Window root;
+        if (!XGetGeometry(
+                mDisplay, pix, &root, &x, &y, width, height, &border, &depth)) {
+            return false;
+        }
+        return depth >= configDepth;
+    }
+
+    virtual EGLNativeContextType createContext(
+            const EglConfig* config, EGLNativeContextType sharedContext) {
+        ErrorHandler handler(mDisplay);
+        EGLNativeContextType retVal = glXCreateNewContext(
+                mDisplay,
+                config->nativeFormat(),
+                GLX_RGBA_TYPE,
+                sharedContext,
+                true);
+        return handler.getLastError() == 0 ? retVal : NULL;
+    }
+
+    virtual bool destroyContext(EGLNativeContextType context) {
+        glXDestroyContext(mDisplay, context);
+        return true;
+    }
+
+    virtual EGLNativeSurfaceType createPbufferSurface(
+            const EglConfig* config, const EglOS::PbufferInfo* info) {
+        const int attribs[] = {
+            GLX_PBUFFER_WIDTH, info->width,
+            GLX_PBUFFER_HEIGHT, info->height,
+            GLX_LARGEST_PBUFFER, info->largest,
+            None
+        };
+        GLXPbuffer pb = glXCreatePbuffer(
+                mDisplay, config->nativeFormat(), attribs);
+        return pb ? new SrfcInfo(pb, SrfcInfo::PBUFFER) : NULL;
+    }
+
+    virtual bool releasePbuffer(EGLNativeSurfaceType pb) {
+        if (!pb) {
+            return false;
+        } else {
+            glXDestroyPbuffer(mDisplay, pb->srfc());
+            return true;
+        }
+    }
+
+    virtual bool makeCurrent(EGLNativeSurfaceType read,
+                             EGLNativeSurfaceType draw,
+                             EGLNativeContextType context) {
+        ErrorHandler handler(mDisplay);
+        bool retval = false;
+        if (!context && !read && !draw) {
+            // unbind
+            retval = glXMakeContextCurrent(mDisplay, 0, 0, NULL);
+        }
+        else if (context && read && draw) {
+            retval = glXMakeContextCurrent(
+                    mDisplay, draw->srfc(), read->srfc(), context);
+        }
+        return (handler.getLastError() == 0) && retval;
+    }
+
+    virtual void swapBuffers(EGLNativeSurfaceType srfc) {
+        if (srfc) {
+            glXSwapBuffers(mDisplay, srfc->srfc());
+        }
+    }
+
+    virtual void swapInterval(EGLNativeSurfaceType win, int interval) {
+        const char* extensions = glXQueryExtensionsString(
+                mDisplay, DefaultScreen(mDisplay));
+        typedef void (*GLXSWAPINTERVALEXT)(X11Display*,GLXDrawable,int);
+        GLXSWAPINTERVALEXT glXSwapIntervalEXT = NULL;
+
+        if(strstr(extensions,"EXT_swap_control")) {
+            glXSwapIntervalEXT = (GLXSWAPINTERVALEXT)glXGetProcAddress(
+                    (const GLubyte*)"glXSwapIntervalEXT");
+        }
+        if (glXSwapIntervalEXT && win) {
+            glXSwapIntervalEXT(mDisplay, win->srfc(), interval);
+        }
+    }
+
+private:
+    X11Display* mDisplay;
+};
+
 }  // namespace
 
-EGLNativeDisplayType EglOS::getDefaultDisplay() {return XOpenDisplay(0);}
-
-bool EglOS::releaseDisplay(EGLNativeDisplayType dpy) {
-    return XCloseDisplay(dpy);
+EGLNativeInternalDisplayType EglOS::getDefaultDisplay() {
+    return new GlxDisplay(XOpenDisplay(0));
 }
 
-void EglOS::queryConfigs(EGLNativeDisplayType dpy,
+bool EglOS::releaseDisplay(EGLNativeInternalDisplayType dpy) {
+    return dpy->release();
+}
+
+void EglOS::queryConfigs(EGLNativeInternalDisplayType dpy,
                          int renderableType,
                          ConfigsList& listOut) {
-    int n;
-    EGLNativePixelFormatType*  frmtList =  glXGetFBConfigs(dpy,0,&n);
-    for(int i =0 ;i < n ; i++) {
-        EglConfig* conf = pixelFormatToConfig(
-                dpy, renderableType, frmtList[i]);
-        if(conf) listOut.push_back(conf);
-    }
-    XFree(frmtList);
+    dpy->queryConfigs(renderableType, listOut);
 }
 
 bool EglOS::validNativeDisplay(EGLNativeInternalDisplayType dpy) {
     return dpy != NULL;
 }
 
-bool EglOS::validNativeWin(EGLNativeDisplayType dpy, EGLNativeWindowType win) {
-   Window root;
-   int tmp;
-   unsigned int utmp;
-   ErrorHandler handler(dpy);
-   if(!XGetGeometry(dpy,win,&root,&tmp,&tmp,&utmp,&utmp,&utmp,&utmp)) {
-       return false;
-   }
-   return handler.getLastError() == 0;
+bool EglOS::validNativeWin(EGLNativeInternalDisplayType dpy,
+                           EGLNativeWindowType win) {
+    return dpy->isValidNativeWin(win);
 }
 
-bool EglOS::validNativeWin(EGLNativeDisplayType dpy,
+bool EglOS::validNativeWin(EGLNativeInternalDisplayType dpy,
                            EGLNativeSurfaceType win) {
-    if (!win) return false;
-    return validNativeWin(dpy,win->srfc());
+    return dpy->isValidNativeWin(win);
 }
 
-bool EglOS::validNativePixmap(EGLNativeDisplayType dpy,
+bool EglOS::validNativePixmap(EGLNativeInternalDisplayType dpy,
                               EGLNativeSurfaceType pix) {
-   Window root;
-   int tmp;
-   unsigned int utmp;
-   ErrorHandler handler(dpy);
-   if(!XGetGeometry(dpy,
-                    pix ? pix->srfc() : 0,
-                    &root,
-                    &tmp,
-                    &tmp,
-                    &utmp,
-                    &utmp,
-                    &utmp,
-                    &utmp)) {
-       return false;
-   }
-   return handler.getLastError() == 0;
+    return dpy->isValidNativePixmap(pix);
 }
 
-bool EglOS::checkWindowPixelFormatMatch(EGLNativeDisplayType dpy,
+bool EglOS::checkWindowPixelFormatMatch(EGLNativeInternalDisplayType dpy,
                                         EGLNativeWindowType win,
                                         EglConfig* cfg,
                                         unsigned int* width,
                                         unsigned int* height) {
-//TODO: to check what does ATI & NVIDIA enforce on win pixelformat
-   unsigned int depth,configDepth,border;
-   int r,g,b,x,y;
-   IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeFormat(),GLX_RED_SIZE,&r));
-   IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeFormat(),GLX_GREEN_SIZE,&g));
-   IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeFormat(),GLX_BLUE_SIZE,&b));
-   configDepth = r + g + b;
-   Window root;
-   if (!XGetGeometry(dpy,win,&root,&x,&y,width,height,&border,&depth)) {
-       return false;
-   }
-   return depth >= configDepth;
+    return dpy->checkWindowPixelFormatMatch(win, cfg, width, height);
 }
 
-bool EglOS::checkPixmapPixelFormatMatch(EGLNativeDisplayType dpy,
+bool EglOS::checkPixmapPixelFormatMatch(EGLNativeInternalDisplayType dpy,
                                         EGLNativePixmapType pix,
                                         EglConfig* cfg,
                                         unsigned int* width,
                                         unsigned int* height) {
-   unsigned int depth,configDepth,border;
-   int r,g,b,x,y;
-   IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeFormat(),GLX_RED_SIZE,&r));
-   IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeFormat(),GLX_GREEN_SIZE,&g));
-   IS_SUCCESS(glXGetFBConfigAttrib(dpy,cfg->nativeFormat(),GLX_BLUE_SIZE,&b));
-   configDepth = r + g + b;
-   Window root;
-   if (!XGetGeometry(dpy,pix,&root,&x,&y,width,height,&border,&depth)) {
-       return false;
-   }
-   return depth >= configDepth;
+    return dpy->checkPixmapPixelFormatMatch(pix, cfg, width, height);
 }
 
-EGLNativeSurfaceType EglOS::createPbufferSurface(EGLNativeDisplayType dpy,
-                                                 EglConfig* cfg,
-                                                 const PbufferInfo* info) {
-    const int attribs[] = {
-        GLX_PBUFFER_WIDTH, info->width,
-        GLX_PBUFFER_HEIGHT, info->height,
-        GLX_LARGEST_PBUFFER, info->largest,
-        None
-    };
-    GLXPbuffer pb = glXCreatePbuffer(dpy, cfg->nativeFormat(), attribs);
-    return pb ? new SrfcInfo(pb, SrfcInfo::PBUFFER) : NULL;
+EGLNativeSurfaceType EglOS::createPbufferSurface(
+        EGLNativeInternalDisplayType dpy,
+        EglConfig* cfg,
+        const PbufferInfo* info) {
+    return dpy->createPbufferSurface(cfg, info);
 }
 
-bool EglOS::releasePbuffer(EGLNativeDisplayType dis, EGLNativeSurfaceType pb) {
-    if (!pb) return false;
-    glXDestroyPbuffer(dis,pb->srfc());
-
-    return true;
+bool EglOS::releasePbuffer(EGLNativeInternalDisplayType dpy,
+                           EGLNativeSurfaceType pb) {
+    return dpy->releasePbuffer(pb);
 }
 
-EGLNativeContextType EglOS::createContext(EGLNativeDisplayType dpy,
+EGLNativeContextType EglOS::createContext(EGLNativeInternalDisplayType dpy,
                                           EglConfig* cfg,
                                           EGLNativeContextType sharedContext) {
-    ErrorHandler handler(dpy);
-    EGLNativeContextType retVal = glXCreateNewContext(
-            dpy, cfg->nativeFormat(), GLX_RGBA_TYPE, sharedContext, true);
-    return handler.getLastError() == 0 ? retVal : NULL;
+    return dpy->createContext(cfg, sharedContext);
 }
 
-bool EglOS::destroyContext(EGLNativeDisplayType dpy,EGLNativeContextType ctx) {
-    glXDestroyContext(dpy,ctx);
-    return true;
+bool EglOS::destroyContext(EGLNativeInternalDisplayType dpy,
+                           EGLNativeContextType ctx) {
+    return dpy->destroyContext(ctx);
 }
 
-bool EglOS::makeCurrent(EGLNativeDisplayType dpy,
+bool EglOS::makeCurrent(EGLNativeInternalDisplayType dpy,
                         EGLNativeSurfaceType read,
                         EGLNativeSurfaceType draw,
                         EGLNativeContextType ctx) {
-    ErrorHandler handler(dpy);
-    bool retval = false;
-    if (!ctx && !read && !draw) {
-        // unbind
-        retval = glXMakeContextCurrent(dpy, 0, 0, NULL);
-    }
-    else if (ctx && read && draw) {
-        retval = glXMakeContextCurrent(dpy, draw->srfc(), read->srfc(), ctx);
-    }
-    return (handler.getLastError() == 0) && retval;
+    return dpy->makeCurrent(read, draw, ctx);
 }
 
-void EglOS::swapBuffers(EGLNativeDisplayType dpy,EGLNativeSurfaceType srfc){
-    if (srfc) {
-        glXSwapBuffers(dpy,srfc->srfc());
-    }
+void EglOS::swapBuffers(EGLNativeInternalDisplayType dpy,
+                        EGLNativeSurfaceType srfc){
+    dpy->swapBuffers(srfc);
 }
 
 void EglOS::waitNative() {
     glXWaitX();
 }
 
-void EglOS::swapInterval(EGLNativeDisplayType dpy,
+void EglOS::swapInterval(EGLNativeInternalDisplayType dpy,
                          EGLNativeSurfaceType win,
                          int interval) {
-    const char* extensions = glXQueryExtensionsString(dpy,DefaultScreen(dpy));
-    typedef void (*GLXSWAPINTERVALEXT)(Display*,GLXDrawable,int);
-    GLXSWAPINTERVALEXT glXSwapIntervalEXT = NULL;
-
-    if(strstr(extensions,"EXT_swap_control")) {
-        glXSwapIntervalEXT = (GLXSWAPINTERVALEXT)glXGetProcAddress(
-                (const GLubyte*)"glXSwapIntervalEXT");
-    }
-    if(glXSwapIntervalEXT && win) {
-        glXSwapIntervalEXT(dpy,win->srfc(),interval);
-    }
+    dpy->swapInterval(win, interval);
 }
 
 EGLNativeSurfaceType EglOS::createWindowSurface(EGLNativeWindowType wnd) {
@@ -388,8 +487,9 @@ void EglOS::destroySurface(EGLNativeSurfaceType srfc) {
 
 EGLNativeInternalDisplayType EglOS::getInternalDisplay(
         EGLNativeDisplayType dpy) {
-    return dpy;
+    return new GlxDisplay(dpy);
 }
 
 void EglOS::deleteDisplay(EGLNativeInternalDisplayType idpy) {
+    delete idpy;
 }

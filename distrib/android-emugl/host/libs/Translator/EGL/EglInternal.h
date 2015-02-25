@@ -59,7 +59,12 @@ typedef GLXFBConfig           EGLNativePixelFormatType;
 #define PIXEL_FORMAT_INITIALIZER 0;
 typedef GLXContext            EGLNativeContextType;
 typedef GLXPbuffer            EGLNativePbufferType;
-typedef EGLNativeDisplayType  EGLNativeInternalDisplayType;  // really 'Display*'
+
+namespace EglOS {
+class Display;
+}  // namespace EglOS
+
+typedef EglOS::Display*  EGLNativeInternalDisplayType;
 
 #else
 #error "Platform not recognized"

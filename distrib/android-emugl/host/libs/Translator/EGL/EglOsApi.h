@@ -83,7 +83,7 @@ public:
 
     virtual void swapBuffers(EGLNativeSurfaceType srfc) = 0;
 
-    virtual void swapInternal(EGLNativeSurfaceType win, int interval) = 0;
+    virtual void swapInterval(EGLNativeSurfaceType win, int interval) = 0;
 };
 
 void queryConfigs(EGLNativeInternalDisplayType dpy,int renderable_type,ConfigsList& listOut);
