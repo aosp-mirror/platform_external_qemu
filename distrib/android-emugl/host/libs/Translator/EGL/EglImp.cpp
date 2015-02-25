@@ -455,11 +455,10 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
             }
         }
     }
-    EGLNativePixelFormatType tmpfrmt = PIXEL_FORMAT_INITIALIZER;
     EglConfig dummy(red_size,green_size,blue_size,alpha_size,caveat,config_id,depth_size,
                     frame_buffer_level,0,0,0,native_renderable,renderable_type,0,native_visual_type,
                     samples_per_pixel,stencil_size,surface_type,transparent_type,
-                    trans_red_val,trans_green_val,trans_blue_val,tmpfrmt);
+                    trans_red_val,trans_green_val,trans_blue_val,NULL);
 
     *num_config = dpy->chooseConfigs(dummy,configs,config_size);
 

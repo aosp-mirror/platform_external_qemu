@@ -19,7 +19,6 @@
 #include <map>
 
 #include "EglConfig.h"
-#include "EglInternal.h"
 #include "EglOsApi.h"
 
 #include "emugl/common/smart_ptr.h"

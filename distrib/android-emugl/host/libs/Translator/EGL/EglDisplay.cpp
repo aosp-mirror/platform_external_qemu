@@ -81,8 +81,6 @@ void EglDisplay::addMissingConfigs(void)
 
     EGLConfig match;
 
-    EGLNativePixelFormatType tmpfrmt = PIXEL_FORMAT_INITIALIZER;
-
     EglConfig dummy(5, 6, 5, 0,  // RGB_565
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
@@ -102,7 +100,7 @@ void EglDisplay::addMissingConfigs(void)
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
-                    tmpfrmt);
+                    NULL);
 
     if(!doChooseConfigs(dummy, &match, 1))
     {

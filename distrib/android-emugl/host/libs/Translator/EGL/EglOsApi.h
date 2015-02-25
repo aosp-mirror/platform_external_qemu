@@ -16,14 +16,15 @@
 #ifndef EGL_OS_API_H
 #define EGL_OS_API_H
 
-#include "EglInternal.h"
-#include "EglConfig.h"
-
 #include <EGL/egl.h>
+
+#include <list>
 
 #define PBUFFER_MAX_WIDTH  32767
 #define PBUFFER_MAX_HEIGHT 32767
 #define PBUFFER_MAX_PIXELS 32767*32767
+
+class EglConfig;
 
 namespace EglOS {
 
@@ -53,6 +54,16 @@ public:
     virtual ~Context() {}
 };
 
+// Base class used to wrap engine-specific pixel format descriptors.
+class PixelFormat {
+public:
+    PixelFormat() {}
+
+    virtual ~PixelFormat() {}
+
+    virtual PixelFormat* clone() = 0;
+};
+
 // Pbuffer description.
 // |width| and |height| are its dimensions.
 // |largest| is set to ask the largest pixek buffer (see GLX_LARGEST_PBUFFER).
@@ -77,7 +88,8 @@ public:
 
     virtual bool release() = 0;
 
-    virtual void queryConfigs(int renderableType, ConfigsList& listOut) = 0;
+    virtual void queryConfigs(int renderableType,
+                              std::list<EglConfig*>& listOut) = 0;
 
     virtual bool isValidNativeWin(Surface* win) = 0;
     virtual bool isValidNativeWin(EGLNativeWindowType win) = 0;
