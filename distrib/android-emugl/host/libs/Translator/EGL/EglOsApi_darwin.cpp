@@ -108,7 +108,7 @@ EglConfig* pixelFormatToConfig(int index,
 void initNativeConfigs(){
     int nConfigs = getNumPixelFormats();
     if(s_nativeFormats.empty()){
-        for(int i=0; i < nConfigs ;i++){
+        for(int i = 0; i < nConfigs; i++) {
              EGLNativePixelFormatType frmt = getPixelFormat(i);
              if(frmt){
                  s_nativeFormats.push_back(frmt);
@@ -117,173 +117,253 @@ void initNativeConfigs(){
     }
 }
 
-}  // namespace
+class MacDisplay : public EglOS::Display {
+public:
+    explicit MacDisplay(EGLNativeDisplayType dpy) : mDpy(dpy) {}
 
-EGLNativeDisplayType EglOS::getDefaultDisplay() {
-    return 0;
-}
+    virtual bool release() {
+        return true;
+    }
 
-bool EglOS::releaseDisplay(EGLNativeDisplayType dpy) {
-    return true;
-}
-
-void EglOS::queryConfigs(EGLNativeDisplayType dpy,
-                         int renderableType,
-                         ConfigsList& listOut) {
-    int i = 0 ;
-    initNativeConfigs();
-    for (std::list<EGLNativePixelFormatType>::iterator it =
-            s_nativeFormats.begin();
-         it != s_nativeFormats.end();
-         it++) {
-        EGLNativePixelFormatType frmt = *it;
-        EglConfig* conf = pixelFormatToConfig(i++, renderableType, frmt);
-        if(conf) {
-            listOut.push_front(conf);
+    virtual void queryConfigs(int renderableType, ConfigsList& listOut) {
+        initNativeConfigs();
+        int i = 0;
+        for (std::list<EGLNativePixelFormatType>::iterator it =
+                s_nativeFormats.begin();
+            it != s_nativeFormats.end();
+            it++) {
+            EGLNativePixelFormatType frmt = *it;
+            EglConfig* conf = pixelFormatToConfig(i++, renderableType, frmt);
+            if(conf) {
+                listOut.push_front(conf);
+            }
         }
     }
+
+    virtual bool isValidNativeWin(EGLNativeSurfaceType win) {
+        if (win->type() != SrfcInfo::WINDOW) {
+            return false;
+        } else {
+            return isValidNativeWin(win->handle());
+        }
+    }
+
+    virtual bool isValidNativeWin(EGLNativeWindowType win) {
+        unsigned int width,height;
+        return nsGetWinDims(win, &width, &height);
+    }
+
+    virtual bool isValidNativePixmap(EGLNativeSurfaceType pix) {
+        // no support for pixmap in mac
+        return true;
+    }
+
+    virtual bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
+                                             const EglConfig* cfg,
+                                             unsigned int* width,
+                                             unsigned int* height) {
+        int r,g,b;
+        bool ret = nsGetWinDims(win, width, height);
+
+        cfg->getConfAttrib(EGL_RED_SIZE, &r);
+        cfg->getConfAttrib(EGL_GREEN_SIZE, &g);
+        cfg->getConfAttrib(EGL_BLUE_SIZE, &b);
+        bool match = nsCheckColor(win, r + g + b);
+
+        return ret && match;
+    }
+
+    virtual bool checkPixmapPixelFormatMatch(EGLNativePixmapType pix,
+                                             const EglConfig* config,
+                                             unsigned int* width,
+                                             unsigned int* height) {
+        return false;
+    }
+
+    virtual EGLNativeContextType createContext(
+            const EglConfig* config, EGLNativeContextType sharedContext) {
+        return nsCreateContext(config->nativeFormat(), sharedContext);
+    }
+
+    virtual bool destroyContext(EGLNativeContextType context) {
+        nsDestroyContext(context);
+        return true;
+    }
+
+    virtual EGLNativeSurfaceType createPbufferSurface(
+            const EglConfig* cfg, const EglOS::PbufferInfo* info) {
+        GLenum glTexFormat = GL_RGBA, glTexTarget = GL_TEXTURE_2D;
+        switch (info->format) {
+        case EGL_TEXTURE_RGB:
+            glTexFormat = GL_RGB;
+            break;
+        case EGL_TEXTURE_RGBA:
+            glTexFormat = GL_RGBA;
+            break;
+        }
+        EGLint maxMipmap = info->hasMipmap ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
+
+        EGLNativeSurfaceType result = new SrfcInfo(
+                nsCreatePBuffer(
+                        glTexTarget,
+                        glTexFormat,
+                        maxMipmap,
+                        info->width,
+                        info->height),
+                        SrfcInfo::PBUFFER);
+
+        result->setHasMipmap(info->hasMipmap);
+        return result;
+    }
+
+    virtual bool releasePbuffer(EGLNativeSurfaceType pb) {
+        if (pb) {
+            nsDestroyPBuffer(pb->handle());
+        }
+        return true;
+    }
+
+    virtual bool makeCurrent(EGLNativeSurfaceType read,
+                             EGLNativeSurfaceType draw,
+                             EGLNativeContextType ctx) {
+        // check for unbind
+        if (ctx == NULL && read == NULL && draw == NULL) {
+            nsWindowMakeCurrent(NULL, NULL);
+            return true;
+        }
+        else if (ctx == NULL || read == NULL || draw == NULL) {
+            // error !
+            return false;
+        }
+
+        //dont supporting diffrent read & draw surfaces on Mac
+        if (read != draw) {
+            return false;
+        }
+        switch (draw->type()) {
+        case SrfcInfo::WINDOW:
+            nsWindowMakeCurrent(ctx, draw->handle());
+            break;
+        case SrfcInfo::PBUFFER:
+        {
+            int mipmapLevel = draw->hasMipmap() ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
+            nsPBufferMakeCurrent(ctx, draw->handle(), mipmapLevel);
+            break;
+        }
+        case SrfcInfo::PIXMAP:
+        default:
+            return false;
+        }
+        return true;
+    }
+
+    virtual void swapBuffers(EGLNativeSurfaceType srfc) {
+        nsSwapBuffers();
+    }
+
+    virtual void swapInterval(EGLNativeSurfaceType win, int interval) {
+        nsSwapInterval(&interval);
+    }
+
+    EGLNativeDisplayType dpy() const { return mDpy; }
+
+private:
+    EGLNativeDisplayType mDpy;
+};
+
+}  // namespace
+
+EGLNativeInternalDisplayType EglOS::getDefaultDisplay() {
+    return new MacDisplay(0);
+}
+
+bool EglOS::releaseDisplay(EGLNativeInternalDisplayType dpy) {
+    return dpy->release();
+}
+
+void EglOS::queryConfigs(EGLNativeInternalDisplayType dpy,
+                         int renderableType,
+                         ConfigsList& listOut) {
+    return dpy->queryConfigs(renderableType, listOut);
 }
 
 bool EglOS::validNativeDisplay(EGLNativeInternalDisplayType dpy) {
-    return true;
+    return dpy != NULL;
 }
 
-bool EglOS::validNativeWin(EGLNativeDisplayType dpy, EGLNativeWindowType win) {
-    unsigned int width,height;
-    return nsGetWinDims(win,&width,&height);
+bool EglOS::validNativeWin(EGLNativeInternalDisplayType dpy,
+                           EGLNativeWindowType win) {
+    return dpy->isValidNativeWin(win);
 }
 
-bool EglOS::validNativeWin(EGLNativeDisplayType dpy,
+bool EglOS::validNativeWin(EGLNativeInternalDisplayType dpy,
                            EGLNativeSurfaceType win) {
-    if (win->type() != SrfcInfo::WINDOW) {
-        return false;
-    } else {
-        return validNativeWin(dpy, win->handle());
-    }
+    return dpy->isValidNativeWin(win);
 }
 
-//no support for pixmap in mac
-bool EglOS::validNativePixmap(EGLNativeDisplayType dpy,
+bool EglOS::validNativePixmap(EGLNativeInternalDisplayType dpy,
                               EGLNativeSurfaceType pix) {
-   return true;
+    return dpy->isValidNativePixmap(pix);
 }
 
-bool EglOS::checkWindowPixelFormatMatch(EGLNativeDisplayType dpy,
+bool EglOS::checkWindowPixelFormatMatch(EGLNativeInternalDisplayType dpy,
                                         EGLNativeWindowType win,
                                         EglConfig* cfg,
                                         unsigned int* width,
                                         unsigned int* height) {
-    int r,g,b;
-    bool ret = nsGetWinDims(win,width,height);
-
-    cfg->getConfAttrib(EGL_RED_SIZE,&r);
-    cfg->getConfAttrib(EGL_GREEN_SIZE,&g);
-    cfg->getConfAttrib(EGL_BLUE_SIZE,&b);
-    bool match = nsCheckColor(win,r + g + b);
-
-    return ret && match;
+    return dpy->checkWindowPixelFormatMatch(win, cfg, width, height);
 }
 
 //no support for pixmap in mac
-bool EglOS::checkPixmapPixelFormatMatch(EGLNativeDisplayType dpy,
+bool EglOS::checkPixmapPixelFormatMatch(EGLNativeInternalDisplayType dpy,
                                         EGLNativePixmapType pix,
                                         EglConfig* cfg,
                                         unsigned int* width,
                                         unsigned int* height) {
-    return false;
+    return dpy->checkPixmapPixelFormatMatch(pix, cfg, width, height);
 }
 
 EGLNativeSurfaceType EglOS::createPbufferSurface(
-        EGLNativeDisplayType dpy,
+        EGLNativeInternalDisplayType dpy,
         EglConfig* cfg,
         const PbufferInfo* info) {
-    GLenum glTexFormat = GL_RGBA, glTexTarget = GL_TEXTURE_2D;
-    switch (info->format) {
-    case EGL_TEXTURE_RGB:
-        glTexFormat = GL_RGB;
-        break;
-    case EGL_TEXTURE_RGBA:
-        glTexFormat = GL_RGBA;
-        break;
-    }
-    EGLint maxMipmap = info->hasMipmap ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
-
-    EGLNativeSurfaceType result = new SrfcInfo(
-            nsCreatePBuffer(
-                    glTexTarget,
-                    glTexFormat,
-                    maxMipmap,
-                    info->width,
-                    info->height),
-                    SrfcInfo::PBUFFER);
-
-    result->setHasMipmap(info->hasMipmap);
-    return result;
+    return dpy->createPbufferSurface(cfg, info);
 }
 
-bool EglOS::releasePbuffer(EGLNativeDisplayType dis,EGLNativeSurfaceType pb) {
-    if (pb) {
-        nsDestroyPBuffer(pb->handle());
-    }
-    return true;
+bool EglOS::releasePbuffer(EGLNativeInternalDisplayType dpy,
+                           EGLNativeSurfaceType pb) {
+    return dpy->releasePbuffer(pb);
 }
 
-EGLNativeContextType EglOS::createContext(EGLNativeDisplayType dpy,
+EGLNativeContextType EglOS::createContext(EGLNativeInternalDisplayType dpy,
                                           EglConfig* cfg,
                                           EGLNativeContextType sharedContext) {
- return nsCreateContext(cfg->nativeFormat(),sharedContext);
+    return dpy->createContext(cfg, sharedContext);
 }
 
-bool EglOS::destroyContext(EGLNativeDisplayType dpy,EGLNativeContextType ctx) {
-    nsDestroyContext(ctx);
-    return true;
+bool EglOS::destroyContext(EGLNativeInternalDisplayType dpy,
+                           EGLNativeContextType ctx) {
+    return dpy->destroyContext(ctx);
 }
 
-bool EglOS::makeCurrent(EGLNativeDisplayType dpy,
+bool EglOS::makeCurrent(EGLNativeInternalDisplayType dpy,
                         EGLNativeSurfaceType read,
                         EGLNativeSurfaceType draw,
                         EGLNativeContextType ctx) {
-    // check for unbind
-    if (ctx == NULL && read == NULL && draw == NULL) {
-        nsWindowMakeCurrent(NULL, NULL);
-        return true;
-    }
-    else if (ctx == NULL || read == NULL || draw == NULL) {
-        // error !
-        return false;
-    }
-
-    //dont supporting diffrent read & draw surfaces on Mac
-    if (read != draw) {
-        return false;
-    }
-    switch (draw->type()) {
-    case SrfcInfo::WINDOW:
-        nsWindowMakeCurrent(ctx, draw->handle());
-        break;
-    case SrfcInfo::PBUFFER:
-    {
-        int mipmapLevel = draw->hasMipmap() ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
-        nsPBufferMakeCurrent(ctx, draw->handle(), mipmapLevel);
-        break;
-    }
-    case SrfcInfo::PIXMAP:
-    default:
-        return false;
-    }
-    return true;
+    return dpy->makeCurrent(read, draw, ctx);
 }
 
-void EglOS::swapBuffers(EGLNativeDisplayType dpy, EGLNativeSurfaceType srfc) {
-    nsSwapBuffers();
+void EglOS::swapBuffers(EGLNativeInternalDisplayType dpy,
+                        EGLNativeSurfaceType srfc) {
+    dpy->swapBuffers(srfc);
 }
 
 void EglOS::waitNative() {}
 
-void EglOS::swapInterval(EGLNativeDisplayType dpy,
+void EglOS::swapInterval(EGLNativeInternalDisplayType dpy,
                          EGLNativeSurfaceType win,
                          int interval) {
-    nsSwapInterval(&interval);
+    dpy->swapInterval(win, interval);
 }
 
 EGLNativeSurfaceType EglOS::createWindowSurface(EGLNativeWindowType wnd) {
@@ -300,8 +380,9 @@ void EglOS::destroySurface(EGLNativeSurfaceType srfc) {
 
 EGLNativeInternalDisplayType EglOS::getInternalDisplay(
         EGLNativeDisplayType dpy) {
-    return (EGLNativeInternalDisplayType)dpy;
+    return new MacDisplay(dpy);
 }
 
 void EglOS::deleteDisplay(EGLNativeInternalDisplayType idpy) {
+    delete idpy;
 }

@@ -49,7 +49,7 @@ typedef void*                  EGLNativePixelFormatType;
 #define PIXEL_FORMAT_INITIALIZER NULL
 typedef void*                  EGLNativeContextType;
 typedef void*                  EGLNativePbufferType;
-typedef EGLNativeDisplayType   EGLNativeInternalDisplayType;  // really 'unsigned int'
+typedef EglOS::Display*        EGLNativeInternalDisplayType;
 
 
 #elif defined(__unix__)
@@ -63,8 +63,7 @@ typedef GLXFBConfig           EGLNativePixelFormatType;
 #define PIXEL_FORMAT_INITIALIZER 0;
 typedef GLXContext            EGLNativeContextType;
 typedef GLXPbuffer            EGLNativePbufferType;
-
-typedef EglOS::Display*  EGLNativeInternalDisplayType;
+typedef EglOS::Display*       EGLNativeInternalDisplayType;
 
 #else
 #error "Platform not recognized"
