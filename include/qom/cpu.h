@@ -151,7 +151,8 @@ typedef struct CPUClass {
     CPUUnassignedAccess do_unassigned_access;
     void (*do_unaligned_access)(CPUState *cpu, vaddr addr,
                                 MMUAccessType access_type,
-                                int mmu_idx, uintptr_t retaddr);
+                                int mmu_idx, uintptr_t retaddr,
+                                unsigned size);
     bool (*virtio_is_big_endian)(CPUState *cpu);
     int (*memory_rw_debug)(CPUState *cpu, vaddr addr,
                            uint8_t *buf, int len, bool is_write);
@@ -730,11 +731,12 @@ static inline void cpu_unassigned_access(CPUState *cpu, hwaddr addr,
 
 static inline void cpu_unaligned_access(CPUState *cpu, vaddr addr,
                                         MMUAccessType access_type,
-                                        int mmu_idx, uintptr_t retaddr)
+                                        int mmu_idx, uintptr_t retaddr,
+                                        unsigned size)
 {
     CPUClass *cc = CPU_GET_CLASS(cpu);
 
-    cc->do_unaligned_access(cpu, addr, access_type, mmu_idx, retaddr);
+    cc->do_unaligned_access(cpu, addr, access_type, mmu_idx, retaddr, size);
 }
 #endif
 

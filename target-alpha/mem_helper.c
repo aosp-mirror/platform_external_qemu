@@ -100,12 +100,15 @@ uint64_t helper_stq_c_phys(CPUAlphaState *env, uint64_t p, uint64_t v)
 
 void alpha_cpu_do_unaligned_access(CPUState *cs, vaddr addr,
                                    MMUAccessType access_type,
-                                   int mmu_idx, uintptr_t retaddr)
+                                   int mmu_idx, uintptr_t retaddr,
+                                   unsigned size)
 {
     AlphaCPU *cpu = ALPHA_CPU(cs);
     CPUAlphaState *env = &cpu->env;
     uint64_t pc;
     uint32_t insn;
+
+    (void)size;
 
     if (retaddr) {
         cpu_restore_state(cs, retaddr);

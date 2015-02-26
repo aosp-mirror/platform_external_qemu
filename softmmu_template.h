@@ -155,7 +155,7 @@ WORD_TYPE helper_le_ld_name(CPUArchState *env, target_ulong addr,
 
     if (a_bits > 0 && (addr & ((1 << a_bits) - 1)) != 0) {
         cpu_unaligned_access(ENV_GET_CPU(env), addr, READ_ACCESS_TYPE,
-                             mmu_idx, retaddr);
+                             mmu_idx, retaddr, DATA_SIZE);
     }
 
     /* If the TLB entry is for a different page, reload and try again.  */
@@ -229,7 +229,7 @@ WORD_TYPE helper_be_ld_name(CPUArchState *env, target_ulong addr,
 
     if (a_bits > 0 && (addr & ((1 << a_bits) - 1)) != 0) {
         cpu_unaligned_access(ENV_GET_CPU(env), addr, READ_ACCESS_TYPE,
-                             mmu_idx, retaddr);
+                             mmu_idx, retaddr, DATA_SIZE);
     }
 
     /* If the TLB entry is for a different page, reload and try again.  */
@@ -339,7 +339,7 @@ void helper_le_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
 
     if (a_bits > 0 && (addr & ((1 << a_bits) - 1)) != 0) {
         cpu_unaligned_access(ENV_GET_CPU(env), addr, MMU_DATA_STORE,
-                             mmu_idx, retaddr);
+                             mmu_idx, retaddr, DATA_SIZE);
     }
 
     /* If the TLB entry is for a different page, reload and try again.  */
@@ -422,7 +422,7 @@ void helper_be_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
 
     if (a_bits > 0 && (addr & ((1 << a_bits) - 1)) != 0) {
         cpu_unaligned_access(ENV_GET_CPU(env), addr, MMU_DATA_STORE,
-                             mmu_idx, retaddr);
+                             mmu_idx, retaddr, DATA_SIZE);
     }
 
     /* If the TLB entry is for a different page, reload and try again.  */

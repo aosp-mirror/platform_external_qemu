@@ -172,13 +172,16 @@ void tlb_fill(CPUState *cs, target_ulong addr, MMUAccessType access_type,
 /* Raise a data fault alignment exception for the specified virtual address */
 void arm_cpu_do_unaligned_access(CPUState *cs, vaddr vaddr,
                                  MMUAccessType access_type,
-                                 int mmu_idx, uintptr_t retaddr)
+                                 int mmu_idx, uintptr_t retaddr,
+                                 unsigned size)
 {
     ARMCPU *cpu = ARM_CPU(cs);
     CPUARMState *env = &cpu->env;
     int target_el;
     bool same_el;
     uint32_t syn;
+
+    (void)size;
 
     if (retaddr) {
         /* now we have a real cpu fault */

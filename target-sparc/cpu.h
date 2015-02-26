@@ -543,7 +543,8 @@ int sparc_cpu_gdb_write_register(CPUState *cpu, uint8_t *buf, int reg);
 void QEMU_NORETURN sparc_cpu_do_unaligned_access(CPUState *cpu, vaddr addr,
                                                  MMUAccessType access_type,
                                                  int mmu_idx,
-                                                 uintptr_t retaddr);
+                                                 uintptr_t retaddr,
+                                                 unsigned size);
 
 #ifndef NO_CPU_IO_DEFS
 /* cpu_init.c */

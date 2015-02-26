@@ -2385,12 +2385,15 @@ void helper_wait(CPUMIPSState *env)
 
 void mips_cpu_do_unaligned_access(CPUState *cs, vaddr addr,
                                   MMUAccessType access_type,
-                                  int mmu_idx, uintptr_t retaddr)
+                                  int mmu_idx, uintptr_t retaddr,
+                                  unsigned size)
 {
     MIPSCPU *cpu = MIPS_CPU(cs);
     CPUMIPSState *env = &cpu->env;
     int error_code = 0;
     int excp;
+
+    (void)size;
 
     env->CP0_BadVAddr = addr;
 
