@@ -1423,10 +1423,12 @@ void helper_mtc0_status(CPUMIPSState *env, target_ulong arg1)
     uint32_t mask = env->CP0_Status_rw_bitmask;
 
     if (env->insn_flags & ISA_MIPS32R6) {
-        if (extract32(env->CP0_Status, CP0St_KSU, 2) == 0x3) {
+        bool has_supervisor = extract32(mask, CP0St_KSU, 2) == 0x3;
+
+        if (has_supervisor && extract32(arg1, CP0St_KSU, 2) == 0x3) {
             mask &= ~(3 << CP0St_KSU);
         }
-        mask &= ~(0x00180000 & arg1);
+        mask &= ~(((1 << CP0St_SR) | (1 << CP0St_NMI)) & arg1);
     }
 
     val = arg1 & mask;
@@ -2280,12 +2282,25 @@ void helper_wait(CPUMIPSState *env)
 
 void mips_cpu_do_unaligned_access(CPUState *cs, vaddr addr,
                                   int access_type, int is_user,
-                                  uintptr_t retaddr)
+                                  uintptr_t retaddr, unsigned size)
 {
     MIPSCPU *cpu = MIPS_CPU(cs);
     CPUMIPSState *env = &cpu->env;
     int error_code = 0;
     int excp;
+
+    if (env->insn_flags & ISA_MIPS32R6) {
+        /* Release 6 provides support for misaligned memory access for
+         * all ordinary memory reference instructions
+         * */
+        if (!cpu_mips_validate_access(env, addr, addr, size, access_type)) {
+            CPUState *cs = CPU(mips_env_get_cpu(env));
+            do_raise_exception_err(env, cs->exception_index,
+                                   env->error_code, retaddr);
+            return;
+        }
+        return;
+    }
 
     env->CP0_BadVAddr = addr;
 
@@ -2387,6 +2402,16 @@ target_ulong helper_cfc1(CPUMIPSState *env, uint32_t reg)
             }
         }
         break;
+    case 5:
+        /* FRE support - read Config5.FRE bit */
+        if (env->active_fpu.fcr0 & (1 << FCR0_FREP)) {
+            if (env->CP0_Config5 & (1 << CP0C5_UFE)) {
+                arg1 = (env->CP0_Config5 >> CP0C5_FRE) & 1;
+            } else {
+                helper_raise_exception(env, EXCP_RI);
+            }
+        }
+        break;
     case 25:
         arg1 = ((env->active_fpu.fcr31 >> 24) & 0xfe) | ((env->active_fpu.fcr31 >> 23) & 0x1);
         break;
@@ -2426,6 +2451,30 @@ void helper_ctc1(CPUMIPSState *env, target_ulong arg1, uint32_t fs, uint32_t rt)
         }
         if (env->CP0_Config5 & (1 << CP0C5_UFR)) {
             env->CP0_Status |= (1 << CP0St_FR);
+            compute_hflags(env);
+        } else {
+            helper_raise_exception(env, EXCP_RI);
+        }
+        break;
+    case 5:
+        /* FRE Support - clear Config5.FRE bit */
+        if (!((env->active_fpu.fcr0 & (1 << FCR0_FREP)) && (rt == 0))) {
+            return;
+        }
+        if (env->CP0_Config5 & (1 << CP0C5_UFE)) {
+            env->CP0_Config5 &= ~(1 << CP0C5_FRE);
+            compute_hflags(env);
+        } else {
+            helper_raise_exception(env, EXCP_RI);
+        }
+        break;
+    case 6:
+        /* FRE support - set Config5.FRE bit */
+        if (!((env->active_fpu.fcr0 & (1 << FCR0_FREP)) && (rt == 0))) {
+            return;
+        }
+        if (env->CP0_Config5 & (1 << CP0C5_UFE)) {
+            env->CP0_Config5 |= (1 << CP0C5_FRE);
             compute_hflags(env);
         } else {
             helper_raise_exception(env, EXCP_RI);
@@ -3643,12 +3692,36 @@ FOP_CONDN_S(sne,  (float32_lt(fst1, fst0, &env->active_fpu.fp_status)
 /* Element-by-element access macros */
 #define DF_ELEMENTS(df) (MSA_WRLEN / DF_BITS(df))
 
+#if !defined(CONFIG_USER_ONLY)
+static bool cpu_mips_validate_msa_block_access(CPUMIPSState *env,
+        target_ulong address, int df, int rw)
+{
+    int i;
+    for (i = 0; i < DF_ELEMENTS(df); i++) {
+        if (!cpu_mips_validate_access(env, address + (i << df),
+                address, (1 << df), rw)) {
+            CPUState *cs = CPU(mips_env_get_cpu(env));
+            do_raise_exception_err(env, cs->exception_index,
+                                   env->error_code, GETRA());
+            return false;
+        }
+    }
+    return true;
+}
+#endif
+
 void helper_msa_ld_df(CPUMIPSState *env, uint32_t df, uint32_t wd, uint32_t rs,
                      int32_t s10)
 {
     wr_t *pwd = &(env->active_fpu.fpr[wd].wr);
     target_ulong addr = env->active_tc.gpr[rs] + (s10 << df);
     int i;
+
+#if !defined(CONFIG_USER_ONLY)
+    if (!cpu_mips_validate_msa_block_access(env, addr, df, MMU_DATA_LOAD)) {
+        return;
+    }
+#endif
 
     switch (df) {
     case DF_BYTE:
@@ -3684,6 +3757,12 @@ void helper_msa_st_df(CPUMIPSState *env, uint32_t df, uint32_t wd, uint32_t rs,
     wr_t *pwd = &(env->active_fpu.fpr[wd].wr);
     target_ulong addr = env->active_tc.gpr[rs] + (s10 << df);
     int i;
+
+#if !defined(CONFIG_USER_ONLY)
+    if (!cpu_mips_validate_msa_block_access(env, addr, df, MMU_DATA_STORE)) {
+        return;
+    }
+#endif
 
     switch (df) {
     case DF_BYTE:
