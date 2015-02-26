@@ -27,6 +27,10 @@ sdk {
             into 'lib'
             builtBy buildDefaultEmulator
         }
+        item("$buildDefaultEmulator.output/lib64") {
+            into 'lib64'
+            builtBy buildDefaultEmulator
+        }
         item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/bios.bin") {
             into 'lib/pc-bios'
         }
