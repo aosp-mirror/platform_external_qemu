@@ -37,11 +37,13 @@ EglGlobalInfo* EglGlobalInfo::getInstance() {
 
 EglGlobalInfo::EglGlobalInfo() :
         m_displays(),
-        m_default(EglOS::getDefaultDisplay()),
+        m_engine(NULL),
+        m_display(NULL),
         m_lock() {
-#ifdef _WIN32
-    EglOS::initPtrToWglFunctions();
-#endif
+    // TODO(digit): Choose alternate engine based on env. variable?
+    m_engine = EglOS::Engine::getHostInstance();
+    m_display = m_engine->getDefaultDisplay();
+
     memset(m_gles_ifaces, 0, sizeof(m_gles_ifaces));
     memset(m_gles_extFuncs_inited, 0, sizeof(m_gles_extFuncs_inited));
 }
@@ -105,7 +107,7 @@ EglDisplay* EglGlobalInfo::getDisplay(EGLDisplay dpy) const {
 // static
 EglOS::Display* EglGlobalInfo::generateInternalDisplay(
         EGLNativeDisplayType dpy) {
-    return EglOS::getInternalDisplay(dpy);
+    return getInstance()->m_engine->getInternalDisplay(dpy);
 }
 
 void EglGlobalInfo::initClientExtFuncTable(GLESVersion ver) {

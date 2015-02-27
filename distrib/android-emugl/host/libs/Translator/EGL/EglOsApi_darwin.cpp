@@ -16,8 +16,9 @@
 #include "EglOsApi.h"
 
 #include "EglConfig.h"
-
 #include "MacNative.h"
+
+#include "emugl/common/lazy_instance.h"
 
 #define MAX_PBUFFER_MIPMAP_LEVEL 1
 
@@ -360,24 +361,32 @@ private:
     EGLNativeDisplayType mDpy;
 };
 
+class MacEngine : public EglOS::Engine {
+public:
+    virtual EglOS::Display* getDefaultDisplay() {
+        return new MacDisplay(0);
+    }
+
+    virtual EglOS::Display* getInternalDisplay(EGLNativeDisplayType dpy) {
+        return new MacDisplay(dpy);
+    }
+
+    virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
+        return new MacSurface(wnd, MacSurface::WINDOW);
+    }
+
+    virtual EglOS::Surface* createPixmapSurface(EGLNativePixmapType pix) {
+        return new MacSurface(pix, MacSurface::PIXMAP);
+    }
+
+    virtual void wait() {}
+};
+
+emugl::LazyInstance<MacEngine> sHostEngine = LAZY_INSTANCE_INIT;
+
 }  // namespace
 
-EglOS::Display* EglOS::getDefaultDisplay() {
-    return new MacDisplay(0);
-}
-
-
-EglOS::Display* EglOS::getInternalDisplay(
-        EGLNativeDisplayType dpy) {
-    return new MacDisplay(dpy);
-}
-
-void EglOS::waitNative() {}
-
-EglOS::Surface* EglOS::createWindowSurface(EGLNativeWindowType wnd) {
-    return new MacSurface(wnd, MacSurface::WINDOW);
-}
-
-EglOS::Surface* EglOS::createPixmapSurface(EGLNativePixmapType pix) {
-    return new MacSurface(pix, MacSurface::PIXMAP);
+// static
+EglOS::Engine* EglOS::Engine::getHostInstance() {
+    return sHostEngine.ptr();
 }

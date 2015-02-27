@@ -932,7 +932,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglWaitNative(EGLint engine) {
             }
         }
     }
-    EglOS::waitNative();
+    EglGlobalInfo::getInstance()->getOsEngine()->wait();
     return EGL_TRUE;
 }
 

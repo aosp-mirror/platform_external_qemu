@@ -17,6 +17,8 @@
 
 #include "EglConfig.h"
 
+#include "emugl/common/lazy_instance.h"
+
 #include <windows.h>
 #include <wingdi.h>
 
@@ -31,6 +33,44 @@
         if (a != true) return NULL;
 
 namespace {
+
+LRESULT CALLBACK dummyWndProc(HWND hwnd,
+                              UINT uMsg,
+                              WPARAM wParam,
+                              LPARAM lParam) {
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+HWND createDummyWindow() {
+    WNDCLASSEX wcx;
+    wcx.cbSize = sizeof(wcx);                       // size of structure
+    wcx.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW; // redraw if size changes
+    wcx.lpfnWndProc = dummyWndProc;                 // points to window procedure
+    wcx.cbClsExtra = 0;                             // no extra class memory
+    wcx.cbWndExtra = sizeof(void*);                 // save extra window memory, to store VasWindow instance
+    wcx.hInstance = NULL;                           // handle to instance
+    wcx.hIcon = NULL;                               // predefined app. icon
+    wcx.hCursor = NULL;
+    wcx.hbrBackground = NULL;                       // no background brush
+    wcx.lpszMenuName =  NULL;                       // name of menu resource
+    wcx.lpszClassName = "DummyWin";                 // name of window class
+    wcx.hIconSm = (HICON) NULL;                     // small class icon
+
+    RegisterClassEx(&wcx);
+
+    HWND hwnd = CreateWindowEx(WS_EX_CLIENTEDGE,
+                               "DummyWin",
+                               "Dummy",
+                               WS_POPUP,
+                               0,
+                               0,
+                               1,
+                               1,
+                               NULL,
+                               NULL,
+                               0,0);
+    return hwnd;
+}
 
 struct WglExtProcs{
     PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB;
@@ -70,6 +110,123 @@ PROC wglGetExtentionsProcAddress(HDC hdc,
 
     // extension is supported
     return wglGetProcAddress(proc_name);
+}
+
+void initPtrToWglFunctions(){
+    HWND hwnd = createDummyWindow();
+    HDC dpy =  GetDC(hwnd);
+    if (!hwnd || !dpy){
+        fprintf(stderr,"error while getting DC\n");
+        return;
+    }
+    PIXELFORMATDESCRIPTOR pfd = {
+        sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd
+        1,                     // version number
+        PFD_DRAW_TO_WINDOW |   // support window
+        PFD_SUPPORT_OPENGL |   // support OpenGL
+        PFD_DOUBLEBUFFER,      // double buffered
+        PFD_TYPE_RGBA,         // RGBA type
+        24,                    // 24-bit color depth
+        0, 0, 0, 0, 0, 0,      // color bits ignored
+        0,                     // no alpha buffer
+        0,                     // shift bit ignored
+        0,                     // no accumulation buffer
+        0, 0, 0, 0,            // accum bits ignored
+        32,                    // 32-bit z-buffer
+        0,                     // no stencil buffer
+        0,                     // no auxiliary buffer
+        PFD_MAIN_PLANE,        // main layer
+        0,                     // reserved
+        0, 0, 0                // layer masks ignored
+    };
+
+    int iPixelFormat = ChoosePixelFormat(dpy, &pfd);
+    if (iPixelFormat < 0){
+        fprintf(stderr,"error while choosing pixel format\n");
+        return;
+    }
+    if (!SetPixelFormat(dpy, iPixelFormat, &pfd)){
+
+        int err = GetLastError();
+        fprintf(stderr,"error while setting pixel format 0x%x\n", err);
+        return;
+    }
+
+    int err;
+    HGLRC ctx = wglCreateContext(dpy);
+    if (!ctx){
+        err =  GetLastError();
+        fprintf(stderr,"error while creating dummy context %d\n", err);
+    }
+    if (!wglMakeCurrent(dpy, ctx)) {
+        err =  GetLastError();
+        fprintf(stderr,"error while making dummy context current %d\n", err);
+    }
+
+    if (!s_wglExtProcs) {
+        s_wglExtProcs = new WglExtProcs();
+
+        s_wglExtProcs->wglGetPixelFormatAttribivARB =
+                (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)
+                        wglGetExtentionsProcAddress(
+                                dpy,
+                                "WGL_ARB_pixel_format",
+                                "wglGetPixelFormatAttribivARB");
+
+        s_wglExtProcs->wglChoosePixelFormatARB =
+                (PFNWGLCHOOSEPIXELFORMATARBPROC)
+                        wglGetExtentionsProcAddress(
+                                dpy,
+                                "WGL_ARB_pixel_format",
+                                "wglChoosePixelFormatARB");
+
+        s_wglExtProcs->wglCreatePbufferARB =
+                (PFNWGLCREATEPBUFFERARBPROC)
+                        wglGetExtentionsProcAddress(
+                                dpy,
+                                "WGL_ARB_pbuffer",
+                                "wglCreatePbufferARB");
+
+        s_wglExtProcs->wglReleasePbufferDCARB =
+                (PFNWGLRELEASEPBUFFERDCARBPROC)
+                        wglGetExtentionsProcAddress(
+                                dpy,
+                                "WGL_ARB_pbuffer",
+                                "wglReleasePbufferDCARB");
+
+        s_wglExtProcs->wglDestroyPbufferARB =
+                (PFNWGLDESTROYPBUFFERARBPROC)
+                        wglGetExtentionsProcAddress(
+                                dpy,
+                                "WGL_ARB_pbuffer",
+                                "wglDestroyPbufferARB");
+
+        s_wglExtProcs->wglGetPbufferDCARB =
+                (PFNWGLGETPBUFFERDCARBPROC)
+                        wglGetExtentionsProcAddress(
+                                dpy,
+                                "WGL_ARB_pbuffer",
+                                "wglGetPbufferDCARB");
+
+        s_wglExtProcs->wglMakeContextCurrentARB =
+                (PFNWGLMAKECONTEXTCURRENTARBPROC)
+                        wglGetExtentionsProcAddress(
+                                dpy,
+                                "WGL_ARB_make_current_read",
+                                "wglMakeContextCurrentARB");
+
+        s_wglExtProcs->wglSwapIntervalEXT =
+                (PFNWGLSWAPINTERVALEXTPROC)
+                        wglGetExtentionsProcAddress(
+                                dpy,
+                                "WGL_EXT_swap_control",
+                                "wglSwapIntervalEXT");
+    }
+
+    wglMakeCurrent(dpy, NULL);
+    wglDeleteContext(ctx);
+    DestroyWindow(hwnd);
+    DeleteDC(dpy);
 }
 
 class WinPixelFormat : public EglOS::PixelFormat {
@@ -238,44 +395,6 @@ void WinDisplay::setInfo(int configurationIndex, const DisplayInfo& info) {
 }
 
 namespace {
-
-LRESULT CALLBACK dummyWndProc(HWND hwnd,
-                              UINT uMsg,
-                              WPARAM wParam,
-                              LPARAM lParam) {
-    return DefWindowProc(hwnd, uMsg, wParam, lParam);
-}
-
-HWND createDummyWindow() {
-    WNDCLASSEX wcx;
-    wcx.cbSize = sizeof(wcx);                       // size of structure
-    wcx.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW; // redraw if size changes
-    wcx.lpfnWndProc = dummyWndProc;                 // points to window procedure
-    wcx.cbClsExtra = 0;                             // no extra class memory
-    wcx.cbWndExtra = sizeof(void*);                 // save extra window memory, to store VasWindow instance
-    wcx.hInstance = NULL;                           // handle to instance
-    wcx.hIcon = NULL;                               // predefined app. icon
-    wcx.hCursor = NULL;
-    wcx.hbrBackground = NULL;                       // no background brush
-    wcx.lpszMenuName =  NULL;                       // name of menu resource
-    wcx.lpszClassName = "DummyWin";                 // name of window class
-    wcx.hIconSm = (HICON) NULL;                     // small class icon
-
-    RegisterClassEx(&wcx);
-
-    HWND hwnd = CreateWindowEx(WS_EX_CLIENTEDGE,
-                               "DummyWin",
-                               "Dummy",
-                               WS_POPUP,
-                               0,
-                               0,
-                               1,
-                               1,
-                               NULL,
-                               NULL,
-                               0,0);
-    return hwnd;
-}
 
 static HDC getDummyDC(WinDisplay* display, int cfgId) {
     HDC dpy = NULL;
@@ -634,155 +753,50 @@ private:
     WinDisplay* mDpy;
 };
 
+class WinEngine : public EglOS::Engine {
+public:
+    WinEngine();
+
+    virtual EglOS::Display* getDefaultDisplay() {
+        WinDisplay* dpy = new WinDisplay();
+
+        HWND hwnd = createDummyWindow();
+        HDC  hdc  =  GetDC(hwnd);
+        dpy->setInfo(WinDisplay::DEFAULT_DISPLAY, DisplayInfo(hdc, hwnd));
+
+        return new WglDisplay(dpy);
+    }
+
+    virtual EglOS::Display* getInternalDisplay(EGLNativeDisplayType display) {
+        WinDisplay* dpy = new WinDisplay();
+        dpy->setInfo(WinDisplay::DEFAULT_DISPLAY, DisplayInfo(display, NULL));
+
+        return new WglDisplay(dpy);
+    }
+
+    virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
+        return new WinSurface(wnd);
+    }
+
+    virtual EglOS::Surface* createPixmapSurface(EGLNativePixmapType pix) {
+        return new WinSurface(pix);
+    }
+
+    virtual void wait() {}
+};
+
+WinEngine::WinEngine() {
+    if (!s_tlsIndex) {
+        s_tlsIndex = TlsAlloc();
+    }
+    initPtrToWglFunctions();
+}
+
+emugl::LazyInstance<WinEngine> sHostEngine = LAZY_INSTANCE_INIT;
+
 }  // namespace
 
-EglOS::Display* EglOS::getDefaultDisplay() {
-    if (!s_tlsIndex) {
-        s_tlsIndex = TlsAlloc();
-    }
-    WinDisplay* dpy = new WinDisplay();
-
-    HWND hwnd = createDummyWindow();
-    HDC  hdc  =  GetDC(hwnd);
-    dpy->setInfo(WinDisplay::DEFAULT_DISPLAY, DisplayInfo(hdc, hwnd));
-
-    return new WglDisplay(dpy);
-}
-
-EglOS::Display* EglOS::getInternalDisplay(
-        EGLNativeDisplayType display){
-    if (!s_tlsIndex) {
-        s_tlsIndex = TlsAlloc();
-    }
-    WinDisplay* dpy = new WinDisplay();
-    dpy->setInfo(WinDisplay::DEFAULT_DISPLAY, DisplayInfo(display, NULL));
-
-    return new WglDisplay(dpy);
-}
-
-void EglOS::initPtrToWglFunctions(){
-    HWND hwnd = createDummyWindow();
-    HDC dpy =  GetDC(hwnd);
-    if (!hwnd || !dpy){
-        fprintf(stderr,"error while getting DC\n");
-        return;
-    }
-    PIXELFORMATDESCRIPTOR pfd = {
-        sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd
-        1,                     // version number
-        PFD_DRAW_TO_WINDOW |   // support window
-        PFD_SUPPORT_OPENGL |   // support OpenGL
-        PFD_DOUBLEBUFFER,      // double buffered
-        PFD_TYPE_RGBA,         // RGBA type
-        24,                    // 24-bit color depth
-        0, 0, 0, 0, 0, 0,      // color bits ignored
-        0,                     // no alpha buffer
-        0,                     // shift bit ignored
-        0,                     // no accumulation buffer
-        0, 0, 0, 0,            // accum bits ignored
-        32,                    // 32-bit z-buffer
-        0,                     // no stencil buffer
-        0,                     // no auxiliary buffer
-        PFD_MAIN_PLANE,        // main layer
-        0,                     // reserved
-        0, 0, 0                // layer masks ignored
-    };
-
-    int iPixelFormat = ChoosePixelFormat(dpy, &pfd);
-    if (iPixelFormat < 0){
-        fprintf(stderr,"error while choosing pixel format\n");
-        return;
-    }
-    if (!SetPixelFormat(dpy, iPixelFormat, &pfd)){
-
-        int err = GetLastError();
-        fprintf(stderr,"error while setting pixel format 0x%x\n", err);
-        return;
-    }
-
-    int err;
-    HGLRC ctx = wglCreateContext(dpy);
-    if (!ctx){
-        err =  GetLastError();
-        fprintf(stderr,"error while creating dummy context %d\n", err);
-    }
-    if (!wglMakeCurrent(dpy, ctx)) {
-        err =  GetLastError();
-        fprintf(stderr,"error while making dummy context current %d\n", err);
-    }
-
-    if (!s_wglExtProcs) {
-        s_wglExtProcs = new WglExtProcs();
-
-        s_wglExtProcs->wglGetPixelFormatAttribivARB =
-                (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_pixel_format",
-                                "wglGetPixelFormatAttribivARB");
-
-        s_wglExtProcs->wglChoosePixelFormatARB =
-                (PFNWGLCHOOSEPIXELFORMATARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_pixel_format",
-                                "wglChoosePixelFormatARB");
-
-        s_wglExtProcs->wglCreatePbufferARB =
-                (PFNWGLCREATEPBUFFERARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_pbuffer",
-                                "wglCreatePbufferARB");
-
-        s_wglExtProcs->wglReleasePbufferDCARB =
-                (PFNWGLRELEASEPBUFFERDCARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_pbuffer",
-                                "wglReleasePbufferDCARB");
-
-        s_wglExtProcs->wglDestroyPbufferARB =
-                (PFNWGLDESTROYPBUFFERARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_pbuffer",
-                                "wglDestroyPbufferARB");
-
-        s_wglExtProcs->wglGetPbufferDCARB =
-                (PFNWGLGETPBUFFERDCARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_pbuffer",
-                                "wglGetPbufferDCARB");
-
-        s_wglExtProcs->wglMakeContextCurrentARB =
-                (PFNWGLMAKECONTEXTCURRENTARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_make_current_read",
-                                "wglMakeContextCurrentARB");
-
-        s_wglExtProcs->wglSwapIntervalEXT =
-                (PFNWGLSWAPINTERVALEXTPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_EXT_swap_control",
-                                "wglSwapIntervalEXT");
-    }
-
-    wglMakeCurrent(dpy, NULL);
-    wglDeleteContext(ctx);
-    DestroyWindow(hwnd);
-    DeleteDC(dpy);
-}
-
-void EglOS::waitNative(){}
-
-EglOS::Surface* EglOS::createWindowSurface(EGLNativeWindowType wnd) {
-    return new WinSurface(wnd);
-}
-
-EglOS::Surface* EglOS::createPixmapSurface(EGLNativePixmapType pix) {
-    return new WinSurface(pix);
+// static
+EglOS::Engine* EglOS::Engine::getHostInstance() {
+    return sHostEngine.ptr();
 }
