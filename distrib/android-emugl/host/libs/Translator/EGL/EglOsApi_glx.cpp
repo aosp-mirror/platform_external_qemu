@@ -15,8 +15,6 @@
 */
 #include "EglOsApi.h"
 
-#include "EglConfig.h"
-
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/mutex.h"
 
@@ -67,7 +65,10 @@ int ErrorHandler::errorHandlerProc(EGLNativeDisplayType dpy,
 }
 
 #define IS_SUCCESS(a) \
-        if(a != Success) return 0;
+        do { if (a != Success) return 0; } while (0)
+
+#define EXIT_IF_FALSE(a) \
+        do { if (a != Success) return; } while (0)
 
 // Implementation of EglOS::PixelFormat based on GLX.
 class GlxPixelFormat : public EglOS::PixelFormat {
@@ -80,129 +81,125 @@ public:
 
     GLXFBConfig fbConfig() const { return mFbConfig; }
 
-    static GLXFBConfig from(EglOS::PixelFormat* f) {
-        return static_cast<GlxPixelFormat*>(f)->fbConfig();
+    static GLXFBConfig from(const EglOS::PixelFormat* f) {
+        return static_cast<const GlxPixelFormat*>(f)->fbConfig();
     }
 
 private:
     GLXFBConfig mFbConfig;
 };
 
-EglConfig* pixelFormatToConfig(EGLNativeDisplayType dpy,
-                               int renderableType,
-                               GLXFBConfig frmt) {
-    int  bSize, red, green, blue, alpha, depth, stencil;
-    int  supportedSurfaces, visualType, visualId;
-    int  caveat, transparentType, samples;
-    int  tRed = 0, tGreen = 0, tBlue = 0;
-    int  pMaxWidth, pMaxHeight, pMaxPixels;
+void pixelFormatToConfig(EGLNativeDisplayType dpy,
+                         int renderableType,
+                         GLXFBConfig frmt,
+                         EglOS::AddConfigCallback* addConfigFunc,
+                         void* addConfigOpaque) {
+    EglOS::ConfigInfo info;
     int  tmp;
-    int  configId, level, renderable;
-    int  doubleBuffer;
 
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy, frmt, GLX_TRANSPARENT_TYPE, &tmp));
+    memset(&info, 0, sizeof(info));
+
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(dpy, frmt, GLX_TRANSPARENT_TYPE, &tmp));
     if (tmp == GLX_TRANSPARENT_INDEX) {
-        return NULL; // not supporting transparent index
+        return; // not supporting transparent index
     } else if (tmp == GLX_NONE) {
-        transparentType = EGL_NONE;
+        info.transparent_type = EGL_NONE;
+        info.trans_red_val = 0;
+        info.trans_green_val = 0;
+        info.trans_blue_val = 0;
     } else {
-        transparentType = EGL_TRANSPARENT_RGB;
+        info.transparent_type = EGL_TRANSPARENT_RGB;
 
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                dpy, frmt, GLX_TRANSPARENT_RED_VALUE, &tRed));
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                dpy, frmt, GLX_TRANSPARENT_GREEN_VALUE, &tGreen));
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                dpy, frmt, GLX_TRANSPARENT_BLUE_VALUE, &tBlue));
+        EXIT_IF_FALSE(glXGetFBConfigAttrib(
+                dpy, frmt, GLX_TRANSPARENT_RED_VALUE, &info.trans_red_val));
+        EXIT_IF_FALSE(glXGetFBConfigAttrib(
+                dpy, frmt, GLX_TRANSPARENT_GREEN_VALUE, &info.trans_green_val));
+        EXIT_IF_FALSE(glXGetFBConfigAttrib(
+                dpy, frmt, GLX_TRANSPARENT_BLUE_VALUE, &info.trans_blue_val));
     }
 
     //
     // filter out single buffer configurations
     //
-    IS_SUCCESS(glXGetFBConfigAttrib(
+    int doubleBuffer = 0;
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
             dpy, frmt, GLX_DOUBLEBUFFER, &doubleBuffer));
     if (!doubleBuffer) {
-        return NULL;
+        return;
     }
 
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy ,frmt, GLX_BUFFER_SIZE, &bSize));
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy ,frmt, GLX_RED_SIZE, &red));
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy ,frmt, GLX_GREEN_SIZE, &green));
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy ,frmt, GLX_BLUE_SIZE, &blue));
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy ,frmt, GLX_ALPHA_SIZE, &alpha));
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy ,frmt, GLX_DEPTH_SIZE, &depth));
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy ,frmt, GLX_STENCIL_SIZE, &stencil));
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy ,frmt, GLX_RED_SIZE, &info.red_size));
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy ,frmt, GLX_GREEN_SIZE, &info.green_size));
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy ,frmt, GLX_BLUE_SIZE, &info.blue_size));
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy ,frmt, GLX_ALPHA_SIZE, &info.alpha_size));
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy ,frmt, GLX_DEPTH_SIZE, &info.depth_size));
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy ,frmt, GLX_STENCIL_SIZE, &info.stencil_size));
 
+    info.renderable_type = renderableType;
+    int nativeRenderable = 0;
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy, frmt, GLX_X_RENDERABLE, &nativeRenderable));
+    info.native_renderable = !!nativeRenderable;
 
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy, frmt, GLX_X_RENDERABLE, &renderable));
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy, frmt, GLX_X_VISUAL_TYPE, &info.native_visual_type));
 
-    IS_SUCCESS(glXGetFBConfigAttrib(
-            dpy, frmt, GLX_X_VISUAL_TYPE, &visualType));
-
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy, frmt, GLX_VISUAL_ID, &visualId));
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy, frmt, GLX_VISUAL_ID, &info.native_visual_id));
 
     //supported surfaces types
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy, frmt, GLX_DRAWABLE_TYPE, &tmp));
-    supportedSurfaces = 0;
-    if (tmp & GLX_WINDOW_BIT && visualId != 0) {
-        supportedSurfaces |= EGL_WINDOW_BIT;
+    info.surface_type = 0;
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(dpy, frmt, GLX_DRAWABLE_TYPE, &tmp));
+    if (tmp & GLX_WINDOW_BIT && info.native_visual_id != 0) {
+        info.surface_type |= EGL_WINDOW_BIT;
     } else {
-        visualId = 0;
-        visualType = EGL_NONE;
+        info.native_visual_id = 0;
+        info.native_visual_type = EGL_NONE;
     }
     if (tmp & GLX_PBUFFER_BIT) {
-        supportedSurfaces |= EGL_PBUFFER_BIT;
+        info.surface_type |= EGL_PBUFFER_BIT;
     }
 
-    caveat = 0;
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy, frmt, GLX_CONFIG_CAVEAT, &tmp));
+    info.caveat = 0;
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(dpy, frmt, GLX_CONFIG_CAVEAT, &tmp));
     if (tmp == GLX_NONE) {
-        caveat = EGL_NONE;
+        info.caveat = EGL_NONE;
     } else if (tmp == GLX_SLOW_CONFIG) {
-        caveat = EGL_SLOW_CONFIG;
+        info.caveat = EGL_SLOW_CONFIG;
     } else if (tmp == GLX_NON_CONFORMANT_CONFIG) {
-        caveat = EGL_NON_CONFORMANT_CONFIG;
+        info.caveat = EGL_NON_CONFORMANT_CONFIG;
     }
-    IS_SUCCESS(glXGetFBConfigAttrib(
-            dpy, frmt, GLX_MAX_PBUFFER_WIDTH, &pMaxWidth));
-    IS_SUCCESS(glXGetFBConfigAttrib(
-            dpy, frmt, GLX_MAX_PBUFFER_HEIGHT, &pMaxHeight));
-    IS_SUCCESS(glXGetFBConfigAttrib(
-            dpy, frmt, GLX_MAX_PBUFFER_HEIGHT, &pMaxPixels));
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy, frmt, GLX_MAX_PBUFFER_WIDTH, &info.max_pbuffer_width));
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy, frmt, GLX_MAX_PBUFFER_HEIGHT, &info.max_pbuffer_height));
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy, frmt, GLX_MAX_PBUFFER_HEIGHT, &info.max_pbuffer_size));
 
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy, frmt, GLX_LEVEL, &level));
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy, frmt, GLX_FBCONFIG_ID, &configId));
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy, frmt, GLX_SAMPLES, &samples));
-    //Filter out configs that does not support RGBA
-    IS_SUCCESS(glXGetFBConfigAttrib(dpy, frmt, GLX_RENDER_TYPE, &tmp));
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy, frmt, GLX_LEVEL, &info.frame_buffer_level));
+
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy, frmt, GLX_FBCONFIG_ID, &info.config_id));
+
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+            dpy, frmt, GLX_SAMPLES, &info.samples_per_pixel));
+
+    //Filter out configs that do not support RGBA
+    EXIT_IF_FALSE(glXGetFBConfigAttrib(dpy, frmt, GLX_RENDER_TYPE, &tmp));
     if (!(tmp & GLX_RGBA_BIT)) {
-        return NULL;
+        return;
     }
 
-    return new EglConfig(
-            red,
-            green,
-            blue,
-            alpha,
-            caveat,
-            configId,
-            depth,
-            level,
-            pMaxWidth,
-            pMaxHeight,
-            pMaxPixels,
-            renderable,
-            renderableType,
-            visualId,
-            visualType,
-            samples,
-            stencil,
-            supportedSurfaces,
-            transparentType,
-            tRed,
-            tGreen,
-            tBlue,
-            new GlxPixelFormat(frmt));
+    info.frmt = new GlxPixelFormat(frmt);
+
+    (*addConfigFunc)(addConfigOpaque, &info);
 }
 
 // Implementation of EglOS::Surface based on GLX.
@@ -246,15 +243,18 @@ public:
         return XCloseDisplay(mDisplay);
     }
 
-    virtual void queryConfigs(int renderableType, ConfigsList& listOut) {
+    virtual void queryConfigs(int renderableType,
+                              EglOS::AddConfigCallback* addConfigFunc,
+                              void* addConfigOpaque) {
         int n;
         GLXFBConfig* frmtList = glXGetFBConfigs(mDisplay, 0, &n);
         for(int i = 0; i < n; i++) {
-            EglConfig* conf = pixelFormatToConfig(
-                    mDisplay, renderableType, frmtList[i]);
-            if(conf) {
-                listOut.push_back(conf);
-            }
+            pixelFormatToConfig(
+                    mDisplay,
+                    renderableType,
+                    frmtList[i],
+                    addConfigFunc,
+                    addConfigOpaque);
         }
         XFree(frmtList);
     }
@@ -290,14 +290,15 @@ public:
         return handler.getLastError() == 0;
     }
 
-    virtual bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
-                                             const EglConfig* cfg,
-                                             unsigned int* width,
-                                             unsigned int* height) {
+    virtual bool checkWindowPixelFormatMatch(
+            EGLNativeWindowType win,
+            const EglOS::PixelFormat* pixelFormat,
+            unsigned int* width,
+            unsigned int* height) {
         //TODO: to check what does ATI & NVIDIA enforce on win pixelformat
         unsigned int depth, configDepth, border;
         int r, g, b, x, y;
-        GLXFBConfig fbconfig = GlxPixelFormat::from(cfg->nativeFormat());
+        GLXFBConfig fbconfig = GlxPixelFormat::from(pixelFormat);
 
         IS_SUCCESS(glXGetFBConfigAttrib(
                 mDisplay, fbconfig, GLX_RED_SIZE, &r));
@@ -314,13 +315,14 @@ public:
         return depth >= configDepth;
     }
 
-    virtual bool checkPixmapPixelFormatMatch(EGLNativePixmapType pix,
-                                             const EglConfig* cfg,
-                                             unsigned int* width,
-                                             unsigned int* height) {
+    virtual bool checkPixmapPixelFormatMatch(
+            EGLNativePixmapType pix,
+            const EglOS::PixelFormat* pixelFormat,
+            unsigned int* width,
+            unsigned int* height) {
         unsigned int depth, configDepth, border;
         int r, g, b, x, y;
-        GLXFBConfig fbconfig = GlxPixelFormat::from(cfg->nativeFormat());
+        GLXFBConfig fbconfig = GlxPixelFormat::from(pixelFormat);
 
         IS_SUCCESS(glXGetFBConfigAttrib(
                 mDisplay, fbconfig, GLX_RED_SIZE, &r));
@@ -338,11 +340,12 @@ public:
     }
 
     virtual EglOS::Context* createContext(
-            const EglConfig* config, EglOS::Context* sharedContext) {
+            const EglOS::PixelFormat* pixelFormat,
+            EglOS::Context* sharedContext) {
         ErrorHandler handler(mDisplay);
         GLXContext ctx = glXCreateNewContext(
                 mDisplay,
-                GlxPixelFormat::from(config->nativeFormat()),
+                GlxPixelFormat::from(pixelFormat),
                 GLX_RGBA_TYPE,
                 sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
                 true);
@@ -360,7 +363,8 @@ public:
     }
 
     virtual EglOS::Surface* createPbufferSurface(
-            const EglConfig* config, const EglOS::PbufferInfo* info) {
+            const EglOS::PixelFormat* pixelFormat,
+            const EglOS::PbufferInfo* info) {
         const int attribs[] = {
             GLX_PBUFFER_WIDTH, info->width,
             GLX_PBUFFER_HEIGHT, info->height,
@@ -369,7 +373,7 @@ public:
         };
         GLXPbuffer pb = glXCreatePbuffer(
                 mDisplay,
-                GlxPixelFormat::from(config->nativeFormat()),
+                GlxPixelFormat::from(pixelFormat),
                 attribs);
         return pb ? new GlxSurface(pb, GlxSurface::PBUFFER) : NULL;
     }

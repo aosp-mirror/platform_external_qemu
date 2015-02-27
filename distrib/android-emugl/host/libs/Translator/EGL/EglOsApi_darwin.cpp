@@ -15,36 +15,13 @@
 */
 #include "EglOsApi.h"
 
-#include "EglConfig.h"
 #include "MacNative.h"
 
 #include "emugl/common/lazy_instance.h"
 
-#define MAX_PBUFFER_MIPMAP_LEVEL 1
+#include <list>
 
-// class SrfcInfo {
-// public:
-//     typedef enum {
-//         WINDOW  = 0,
-//         PBUFFER = 1,
-//         PIXMAP
-//     } SurfaceType;
-//
-//     SrfcInfo(void* handle, SurfaceType type) :
-//             m_type(type), m_handle(handle), m_hasMipmap(false) {}
-//
-//     SurfaceType type() const { return m_type; }
-//
-//     void* handle() const { return m_handle; }
-//
-//     bool hasMipmap() const { return m_hasMipmap; }
-//     void setHasMipmap(bool value) { m_hasMipmap = value; }
-//
-// private:
-//     SurfaceType m_type;
-//     void* m_handle;
-//     bool m_hasMipmap;
-// };
+#define MAX_PBUFFER_MIPMAP_LEVEL 1
 
 namespace {
 
@@ -103,102 +80,106 @@ void initNativeConfigs(){
 
 class MacPixelFormat : public EglOS::PixelFormat {
 public:
-    explicit MacPixelFormat(void* format) : mFormat(format) {}
+    MacPixelFormat(void* handle, int redSize, int greenSize, int blueSize) :
+            mHandle(handle),
+            mRedSize(redSize),
+            mGreenSize(greenSize),
+            mBlueSize(blueSize) {}
 
     EglOS::PixelFormat* clone() {
-        return new MacPixelFormat(mFormat);
+        return new MacPixelFormat(mHandle, mRedSize, mGreenSize, mBlueSize);
     }
 
-    void* format() const { return mFormat; }
+    void* handle() const { return mHandle; }
+    int redSize() const { return mRedSize; }
+    int greenSize() const { return mGreenSize; }
+    int blueSize() const { return mBlueSize; }
 
-    static void* from(EglOS::PixelFormat* f) {
-        return static_cast<MacPixelFormat*>(f)->format();
+    static const MacPixelFormat* from(const EglOS::PixelFormat* f) {
+        return static_cast<const MacPixelFormat*>(f);
     }
 
 private:
-    void* mFormat;
+    MacPixelFormat();
+    MacPixelFormat(const MacPixelFormat& other);
+
+    void* mHandle;
+    int mRedSize;
+    int mGreenSize;
+    int mBlueSize;
 };
 
 
-EglConfig* pixelFormatToConfig(int index,
-                               int renderableType,
-                               void* frmt) {
-    EGLint  red,green,blue,alpha,depth,stencil;
-    EGLint  supportedSurfaces,visualType,visualId;
-    EGLint  transparentType,samples;
-    EGLint  tRed,tGreen,tBlue;
-    EGLint  pMaxWidth,pMaxHeight,pMaxPixels;
-    EGLint  level;
-    EGLint  window,pbuffer;
-    EGLint  doubleBuffer,colorSize;
+void pixelFormatToConfig(int index,
+                         int renderableType,
+                         void* frmt,
+                         EglOS::AddConfigCallback addConfigFunc,
+                         void* addConfigOpaque) {
+    EglOS::ConfigInfo info;
+    memset(&info, 0, sizeof(info));
 
-    getPixelFormatAttrib(frmt,MAC_HAS_DOUBLE_BUFFER,&doubleBuffer);
-    if(!doubleBuffer) return NULL; //pixel double buffer
+    EGLint doubleBuffer;
+    getPixelFormatAttrib(frmt, MAC_HAS_DOUBLE_BUFFER, &doubleBuffer);
+    if (!doubleBuffer) {
+        return; //pixel double buffer
+    }
 
-    supportedSurfaces = 0;
+    EGLint window = 0, pbuffer = 0;
+    getPixelFormatAttrib(frmt, MAC_DRAW_TO_WINDOW, &window);
+    getPixelFormatAttrib(frmt, MAC_DRAW_TO_PBUFFER, &pbuffer);
 
-    getPixelFormatAttrib(frmt,MAC_DRAW_TO_WINDOW,&window);
-    getPixelFormatAttrib(frmt,MAC_DRAW_TO_PBUFFER,&pbuffer);
-
-    if(window)  supportedSurfaces |= EGL_WINDOW_BIT;
-    if(pbuffer) supportedSurfaces |= EGL_PBUFFER_BIT;
-
-    if(!supportedSurfaces) return NULL;
+    info.surface_type = 0;
+    if (window) {
+        info.surface_type |= EGL_WINDOW_BIT;
+    }
+    if (pbuffer) {
+        info.surface_type |= EGL_PBUFFER_BIT;
+    }
+    if (!info.surface_type) {
+        return;
+    }
 
     //default values
-    visualId                  = 0;
-    visualType                = EGL_NONE;
-    EGLenum caveat            = EGL_NONE;
-    EGLBoolean renderable     = EGL_FALSE;
-    pMaxWidth                 = PBUFFER_MAX_WIDTH;
-    pMaxHeight                = PBUFFER_MAX_HEIGHT;
-    pMaxPixels                = PBUFFER_MAX_PIXELS;
-    samples                   = 0;
-    level                     = 0;
-    tRed = tGreen = tBlue     = 0;
+    info.native_visual_id = 0;
+    info.native_visual_type = EGL_NONE;
+    info.caveat = EGL_NONE;
+    info.native_renderable = EGL_FALSE;
+    info.renderable_type = renderableType;
+    info.max_pbuffer_width = PBUFFER_MAX_WIDTH;
+    info.max_pbuffer_height = PBUFFER_MAX_HEIGHT;
+    info.max_pbuffer_size = PBUFFER_MAX_PIXELS;
+    info.samples_per_pixel = 0;
+    info.frame_buffer_level = 0;
+    info.trans_red_val = 0;
+    info.trans_green_val = 0;
+    info.trans_blue_val = 0;
 
-    transparentType = EGL_NONE;
+    info.transparent_type = EGL_NONE;
 
-    getPixelFormatAttrib(frmt,MAC_SAMPLES_PER_PIXEL,&samples);
-    getPixelFormatAttrib(frmt,MAC_COLOR_SIZE,&colorSize);
     /* All configs can end up having an alpha channel even if none was requested.
      * The default config chooser in GLSurfaceView will therefore not find any
      * matching config. Thus, make sure alpha is zero (or at least signalled as
      * zero to the calling EGL layer) for the configs where it was intended to
      * be zero. */
-    if (getPixelFormatDefinitionAlpha(index) == 0)
-        alpha = 0;
-    else
-        getPixelFormatAttrib(frmt,MAC_ALPHA_SIZE,&alpha);
-    getPixelFormatAttrib(frmt,MAC_DEPTH_SIZE,&depth);
-    getPixelFormatAttrib(frmt,MAC_STENCIL_SIZE,&stencil);
+    if (getPixelFormatDefinitionAlpha(index) == 0) {
+        info.alpha_size = 0;
+    } else {
+        getPixelFormatAttrib(frmt, MAC_ALPHA_SIZE, &info.alpha_size);
+    }
+    getPixelFormatAttrib(frmt, MAC_DEPTH_SIZE, &info.depth_size);
+    getPixelFormatAttrib(frmt, MAC_STENCIL_SIZE, &info.stencil_size);
+    getPixelFormatAttrib(frmt, MAC_SAMPLES_PER_PIXEL, &info.samples_per_pixel);
 
-    red = green = blue = (colorSize / 4); //TODO: ask guy if it is OK
+    //TODO: ask guy if it is OK
+    GLint colorSize = 0;
+    getPixelFormatAttrib(frmt, MAC_COLOR_SIZE, &colorSize);
+    info.red_size = info.green_size = info.blue_size = (colorSize / 4);
 
-    return new EglConfig(
-            red,
-            green,
-            blue,
-            alpha,
-            caveat,
-            (EGLint)index,
-            depth,
-            level,
-            pMaxWidth,
-            pMaxHeight,
-            pMaxPixels,
-            renderable,
-            renderableType,
-            visualId,
-            visualType,
-            samples,
-            stencil,
-            supportedSurfaces,
-            transparentType,
-            tRed,
-            tGreen,
-            tBlue,
-            new MacPixelFormat(frmt));
+    info.config_id = (EGLint) index;
+    info.frmt = new MacPixelFormat(
+            frmt, info.red_size, info.green_size, info.blue_size);
+
+    (*addConfigFunc)(addConfigOpaque, &info);
 }
 
 
@@ -210,16 +191,19 @@ public:
         return true;
     }
 
-    virtual void queryConfigs(int renderableType, ConfigsList& listOut) {
+    virtual void queryConfigs(int renderableType,
+                              EglOS::AddConfigCallback* addConfigFunc,
+                              void* addConfigOpaque) {
         initNativeConfigs();
         int i = 0;
         for (NativeFormatList::iterator it = s_nativeFormats.begin();
                 it != s_nativeFormats.end();
                 it++) {
-            EglConfig* conf = pixelFormatToConfig(i++, renderableType, *it);
-            if(conf) {
-                listOut.push_front(conf);
-            }
+            pixelFormatToConfig(i++,
+                                renderableType,
+                                *it,
+                                addConfigFunc,
+                                addConfigOpaque);
         }
     }
 
@@ -232,7 +216,7 @@ public:
     }
 
     virtual bool isValidNativeWin(EGLNativeWindowType win) {
-        unsigned int width,height;
+        unsigned int width, height;
         return nsGetWinDims(win, &width, &height);
     }
 
@@ -241,34 +225,38 @@ public:
         return true;
     }
 
-    virtual bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
-                                             const EglConfig* cfg,
-                                             unsigned int* width,
-                                             unsigned int* height) {
-        int r,g,b;
+    virtual bool checkWindowPixelFormatMatch(
+            EGLNativeWindowType win,
+            const EglOS::PixelFormat* pixelFormat,
+            unsigned int* width,
+            unsigned int* height) {
         bool ret = nsGetWinDims(win, width, height);
 
-        cfg->getConfAttrib(EGL_RED_SIZE, &r);
-        cfg->getConfAttrib(EGL_GREEN_SIZE, &g);
-        cfg->getConfAttrib(EGL_BLUE_SIZE, &b);
+        const MacPixelFormat* format = MacPixelFormat::from(pixelFormat);
+        int r = format->redSize();
+        int g = format->greenSize();
+        int b = format->blueSize();
+
         bool match = nsCheckColor(win, r + g + b);
 
         return ret && match;
     }
 
-    virtual bool checkPixmapPixelFormatMatch(EGLNativePixmapType pix,
-                                             const EglConfig* config,
-                                             unsigned int* width,
-                                             unsigned int* height) {
+    virtual bool checkPixmapPixelFormatMatch(
+            EGLNativePixmapType pix,
+            const EglOS::PixelFormat* pixelFormat,
+            unsigned int* width,
+            unsigned int* height) {
         return false;
     }
 
     virtual EglOS::Context* createContext(
-            const EglConfig* config, EglOS::Context* sharedContext) {
+            const EglOS::PixelFormat* pixelFormat,
+            EglOS::Context* sharedContext) {
         void* macSharedContext =
                 sharedContext ? MacContext::from(sharedContext) : NULL;
         return new MacContext(
-                nsCreateContext(MacPixelFormat::from(config->nativeFormat()),
+                nsCreateContext(MacPixelFormat::from(pixelFormat)->handle(),
                                 macSharedContext));
     }
 
@@ -278,7 +266,8 @@ public:
     }
 
     virtual EglOS::Surface* createPbufferSurface(
-            const EglConfig* cfg, const EglOS::PbufferInfo* info) {
+            const EglOS::PixelFormat* pixelFormat,
+            const EglOS::PbufferInfo* info) {
         GLenum glTexFormat = GL_RGBA, glTexTarget = GL_TEXTURE_2D;
         switch (info->format) {
         case EGL_TEXTURE_RGB:

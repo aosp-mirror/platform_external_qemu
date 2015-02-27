@@ -18,13 +18,9 @@
 
 #include <EGL/egl.h>
 
-#include <list>
-
 #define PBUFFER_MAX_WIDTH  32767
 #define PBUFFER_MAX_HEIGHT 32767
-#define PBUFFER_MAX_PIXELS 32767*32767
-
-class EglConfig;
+#define PBUFFER_MAX_PIXELS (PBUFFER_MAX_WIDTH * PBUFFER_MAX_HEIGHT)
 
 namespace EglOS {
 
@@ -64,6 +60,41 @@ public:
     virtual PixelFormat* clone() = 0;
 };
 
+// Small structure used to describe the properties of an engine-specific
+// config.
+struct ConfigInfo {
+    EGLint red_size;
+    EGLint green_size;
+    EGLint blue_size;
+    EGLint alpha_size;
+    EGLenum caveat;
+    EGLint config_id;
+    EGLint depth_size;
+    EGLint frame_buffer_level;
+    EGLint max_pbuffer_width;
+    EGLint max_pbuffer_height;
+    EGLint max_pbuffer_size;
+    EGLBoolean native_renderable;
+    EGLint renderable_type;
+    EGLint native_visual_id;
+    EGLint native_visual_type;
+    EGLint samples_per_pixel;
+    EGLint stencil_size;
+    EGLint surface_type;
+    EGLenum transparent_type;
+    EGLint trans_red_val;
+    EGLint trans_green_val;
+    EGLint trans_blue_val;
+    PixelFormat* frmt;
+};
+
+// A callback function type used with Display::queryConfig() to report to the
+// caller a new host EGLConfig.
+// |opaque| is an opaque value passed to queryConfig().
+// All other parameters are config attributes.
+// Note that ownership of |frmt| is transfered to the callback.
+typedef void (AddConfigCallback)(void* opaque, const ConfigInfo* configInfo);
+
 // Pbuffer description.
 // |width| and |height| are its dimensions.
 // |largest| is set to ask the largest pixek buffer (see GLX_LARGEST_PBUFFER).
@@ -89,29 +120,30 @@ public:
     virtual bool release() = 0;
 
     virtual void queryConfigs(int renderableType,
-                              std::list<EglConfig*>& listOut) = 0;
+                              AddConfigCallback* addConfigFunc,
+                              void* addConfigOpaque) = 0;
 
     virtual bool isValidNativeWin(Surface* win) = 0;
     virtual bool isValidNativeWin(EGLNativeWindowType win) = 0;
     virtual bool isValidNativePixmap(Surface* pix) = 0;
 
     virtual bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
-                                             const EglConfig* config,
+                                             const PixelFormat* pixelFormat,
                                              unsigned int* width,
                                              unsigned int* height) = 0;
 
     virtual bool checkPixmapPixelFormatMatch(EGLNativePixmapType pix,
-                                             const EglConfig* config,
+                                             const PixelFormat* pixelFormat,
                                              unsigned int* width,
                                              unsigned int* height) = 0;
 
     virtual Context* createContext(
-            const EglConfig* config, Context* sharedContext) = 0;
+            const PixelFormat* pixelFormat, Context* sharedContext) = 0;
 
     virtual bool destroyContext(Context* context) = 0;
 
     virtual Surface* createPbufferSurface(
-            const EglConfig* config, const PbufferInfo* info) = 0;
+            const PixelFormat* pixelFormat, const PbufferInfo* info) = 0;
 
     virtual bool releasePbuffer(Surface* pb) = 0;
 
