@@ -497,7 +497,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreateWindowSurface(EGLDisplay display, EGLConf
 
     unsigned int width,height;
     if(!dpy->nativeType()->checkWindowPixelFormatMatch(
-            win,cfg,&width,&height)) {
+            win, cfg->nativeFormat(), &width, &height)) {
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ALLOC);
     }
     SurfacePtr wSurface(new EglWindowSurface(dpy, win,cfg,width,height));
@@ -558,7 +558,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
     tmpPbSurfacePtr->getAttrib(EGL_MIPMAP_TEXTURE, &pbinfo.hasMipmap);
 
     EglOS::Surface* pb = dpy->nativeType()->createPbufferSurface(
-            cfg, &pbinfo);
+            cfg->nativeFormat(), &pbinfo);
     if(!pb) {
         //TODO: RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_VALUE); dont have bad value
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ATTRIBUTE);
@@ -585,7 +585,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePixmapSurface(EGLDisplay display, EGLConf
 
     unsigned int width,height;
     if(!dpy->nativeType()->checkPixmapPixelFormatMatch(
-            pixmap, cfg, &width, &height)) {
+            pixmap, cfg->nativeFormat(), &width, &height)) {
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ALLOC);
     }
     SurfacePtr pixSurface(new EglPixmapSurface(dpy, pixmap,cfg));
@@ -670,7 +670,7 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
 
     EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
     EglOS::Context* nativeContext = dpy->nativeType()->createContext(
-            cfg, globalSharedContext);
+            cfg->nativeFormat(), globalSharedContext);
 
     if(nativeContext) {
         ContextPtr ctx(new EglContext(dpy, nativeContext,sharedCtxPtr,cfg,glesCtx,version,dpy->getManager(version)));

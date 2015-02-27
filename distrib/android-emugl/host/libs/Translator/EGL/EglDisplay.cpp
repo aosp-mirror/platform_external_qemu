@@ -14,6 +14,8 @@
 * limitations under the License.
 */
 #include "EglDisplay.h"
+
+#include "EglConfig.h"
 #include "EglOsApi.h"
 #include <GLcommon/GLutils.h>
 
@@ -135,7 +137,7 @@ void EglDisplay::initConfigurations(int renderableType) {
     if (m_configInitialized) {
         return;
     }
-    m_idpy->queryConfigs(renderableType, m_configs);
+    m_idpy->queryConfigs(renderableType, addConfig, this);
 
     addMissingConfigs();
     m_configs.sort(compareEglConfigsPtrs);
@@ -360,9 +362,41 @@ EglOS::Context* EglDisplay::getGlobalSharedContext() const {
             return NULL;
         }
         EglConfig *cfg = (*m_configs.begin());
-        m_globalSharedContext = m_idpy->createContext(cfg, NULL);
+        m_globalSharedContext = m_idpy->createContext(
+                cfg->nativeFormat(), NULL);
     }
 
     return m_globalSharedContext;
 #endif
+}
+
+// static
+void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
+    EglDisplay* display = static_cast<EglDisplay*>(opaque);
+    EglConfig* config = new EglConfig(
+            info->red_size,
+            info->green_size,
+            info->blue_size,
+            info->alpha_size,
+            info->caveat,
+            info->config_id,
+            info->depth_size,
+            info->frame_buffer_level,
+            info->max_pbuffer_width,
+            info->max_pbuffer_height,
+            info->max_pbuffer_size,
+            info->native_renderable,
+            info->renderable_type,
+            info->native_visual_id,
+            info->native_visual_type,
+            info->samples_per_pixel,
+            info->stencil_size,
+            info->surface_type,
+            info->transparent_type,
+            info->trans_red_val,
+            info->trans_green_val,
+            info->trans_blue_val,
+            info->frmt);
+
+    display->m_configs.push_back(config);
 }
