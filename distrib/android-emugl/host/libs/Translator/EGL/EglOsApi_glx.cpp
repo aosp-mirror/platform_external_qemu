@@ -17,6 +17,7 @@
 
 #include "EglConfig.h"
 
+#include "emugl/common/lazy_instance.h"
 #include "emugl/common/mutex.h"
 
 #include <string.h>
@@ -428,25 +429,34 @@ private:
     X11Display* mDisplay;
 };
 
+class GlxEngine : public EglOS::Engine {
+public:
+    virtual EglOS::Display* getDefaultDisplay() {
+        return new GlxDisplay(XOpenDisplay(0));
+    }
+
+    virtual EglOS::Display* getInternalDisplay(EGLNativeDisplayType dpy) {
+        return new GlxDisplay(dpy);
+    }
+
+    virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
+        return new GlxSurface(wnd, GlxSurface::WINDOW);
+    }
+
+    virtual EglOS::Surface* createPixmapSurface(EGLNativePixmapType pix) {
+        return new GlxSurface(pix, GlxSurface::PIXMAP);
+    }
+
+    virtual void wait() {
+        glXWaitX();
+    }
+};
+
+emugl::LazyInstance<GlxEngine> sHostEngine = LAZY_INSTANCE_INIT;
+
 }  // namespace
 
-EglOS::Display* EglOS::getDefaultDisplay() {
-    return new GlxDisplay(XOpenDisplay(0));
-}
-
-EglOS::Display* EglOS::getInternalDisplay(
-        EGLNativeDisplayType dpy) {
-    return new GlxDisplay(dpy);
-}
-
-void EglOS::waitNative() {
-    glXWaitX();
-}
-
-EglOS::Surface* EglOS::createWindowSurface(EGLNativeWindowType wnd) {
-    return new GlxSurface(wnd, GlxSurface::WINDOW);
-}
-
-EglOS::Surface* EglOS::createPixmapSurface(EGLNativePixmapType pix) {
-    return new GlxSurface(pix, GlxSurface::PIXMAP);
+// static
+EglOS::Engine* EglOS::Engine::getHostInstance() {
+    return sHostEngine.ptr();
 }

@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 #include "EglPixmapSurface.h"
+#include "EglGlobalInfo.h"
 #include "EglOsApi.h"
 
 std::set<EGLNativePixmapType> EglPixmapSurface::s_associatedPixmaps;
@@ -30,7 +31,8 @@ EglPixmapSurface::EglPixmapSurface(EglDisplay *dpy,
            m_pixmap(pix)
 {
     s_associatedPixmaps.insert(pix);
-    m_native = EglOS::createPixmapSurface(pix);
+    EglOS::Engine* engine = EglGlobalInfo::getInstance()->getOsEngine();
+    m_native = engine->createPixmapSurface(pix);
 }
 
 EglPixmapSurface::~EglPixmapSurface() {

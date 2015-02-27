@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 #include "EglWindowSurface.h"
+#include "EglGlobalInfo.h"
 #include "EglOsApi.h"
 
 std::set<EGLNativeWindowType> EglWindowSurface::s_associatedWins;
@@ -23,15 +24,17 @@ bool EglWindowSurface::alreadyAssociatedWithConfig(EGLNativeWindowType win) {
 
 }
 
-EglWindowSurface::EglWindowSurface(EglDisplay *dpy, 
+EglWindowSurface::EglWindowSurface(EglDisplay* dpy,
                                    EGLNativeWindowType win,
                                    EglConfig* config,
-                                   unsigned int width,unsigned int height) :
-                  EglSurface(dpy, WINDOW,config,width,height),
-                  m_win(win)
+                                   unsigned int width,
+                                   unsigned int height) :
+        EglSurface(dpy, WINDOW, config, width, height),
+        m_win(win)
 {
     s_associatedWins.insert(win);
-    m_native = EglOS::createWindowSurface(win);
+    EglOS::Engine* engine = EglGlobalInfo::getInstance()->getOsEngine();
+    m_native = engine->createWindowSurface(win);
 }
 
 EglWindowSurface:: ~EglWindowSurface() {

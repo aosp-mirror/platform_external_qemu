@@ -66,8 +66,13 @@ public:
 
     // Return the default native internal display handle.
     EglOS::Display* getDefaultNativeDisplay() const {
-        return m_default;
+        return m_display;
     };
+
+    // Return the default engine handle.
+    EglOS::Engine* getOsEngine() const {
+        return m_engine;
+    }
 
     // Given a native display handle |dpy|, generate the corresponding
     // internal native display handle and return it. This is mostly used
@@ -103,7 +108,8 @@ private:
     friend class emugl::LazyInstance<EglGlobalInfo>;
 
     emugl::PodVector<EglDisplay*>  m_displays;
-    EglOS::Display*   m_default;
+    EglOS::Engine*                 m_engine;
+    EglOS::Display*                m_display;
     const GLESiface*               m_gles_ifaces[MAX_GLES_VERSION];
     bool                           m_gles_extFuncs_inited[MAX_GLES_VERSION];
     mutable emugl::Mutex           m_lock;
