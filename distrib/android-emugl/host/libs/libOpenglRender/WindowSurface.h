@@ -18,7 +18,7 @@
 
 #include "ColorBuffer.h"
 #include "RenderContext.h"
-#include "FBConfig.h"
+#include "FbConfig.h"
 #include "emugl/common/smart_ptr.h"
 #include "FixedBuffer.h"
 #include <EGL/egl.h>
@@ -63,7 +63,7 @@ private:
     bool m_useBindToTexture;
     FixedBuffer m_xferBuffer;
     FixedBuffer m_xUpdateBuf;
-    const FBConfig *m_fbconf;
+    const FbConfig *m_fbconf;
 };
 
 typedef emugl::SmartPtr<WindowSurface> WindowSurfacePtr;

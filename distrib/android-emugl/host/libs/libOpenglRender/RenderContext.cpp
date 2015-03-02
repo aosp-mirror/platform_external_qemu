@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 #include "RenderContext.h"
-#include "FBConfig.h"
+#include "FbConfig.h"
 #include "FrameBuffer.h"
 #include "EGLDispatch.h"
 #include "GLESv1Dispatch.h"
@@ -23,8 +23,10 @@ RenderContext *RenderContext::create(int p_config,
                                      RenderContextPtr p_shareContext,
                                      bool p_isGL2)
 {
-    const FBConfig *fbconf = FBConfig::get(p_config);
-    if (!fbconf) {
+    FrameBuffer* fb = FrameBuffer::getFB();
+
+    const FbConfig* config = fb->getConfigs()->get(p_config);
+    if (!config) {
         return NULL;
     }
 
@@ -48,10 +50,10 @@ RenderContext *RenderContext::create(int p_config,
         c->m_isGL2 = true;
     }
 
-    c->m_ctx = s_egl.eglCreateContext(FrameBuffer::getFB()->getDisplay(),
-                                      fbconf->getEGLConfig(), share,
+    c->m_ctx = s_egl.eglCreateContext(fb->getDisplay(),
+                                      config->getEglConfig(),
+                                      share,
                                       glContextAttribs);
-
     if (c->m_ctx == EGL_NO_CONTEXT) {
         delete c;
         return NULL;
@@ -62,14 +64,11 @@ RenderContext *RenderContext::create(int p_config,
 }
 
 RenderContext::RenderContext() :
-    m_ctx(EGL_NO_CONTEXT),
-    m_config(0),
-    m_isGL2(false)
-{
-}
+        m_ctx(EGL_NO_CONTEXT),
+        m_config(0),
+        m_isGL2(false) {}
 
-RenderContext::~RenderContext()
-{
+RenderContext::~RenderContext() {
     if (m_ctx != EGL_NO_CONTEXT) {
         s_egl.eglDestroyContext(FrameBuffer::getFB()->getDisplay(), m_ctx);
     }

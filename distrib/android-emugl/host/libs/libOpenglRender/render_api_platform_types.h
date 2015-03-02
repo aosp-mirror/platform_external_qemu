@@ -20,7 +20,6 @@
 #if defined(_WIN32) || defined(__VC32__) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__) /* Win32 and WinCE */
 #include <windows.h>
 
-typedef HDC     FBNativeDisplayType;
 typedef HWND    FBNativeWindowType;
 
 #elif defined(__linux__)

@@ -17,7 +17,6 @@
 #include "FrameBuffer.h"
 
 #include "EGLDispatch.h"
-#include "FBConfig.h"
 #include "GLESv1Dispatch.h"
 #include "GLESv2Dispatch.h"
 #include "NativeSubWindow.h"
@@ -279,8 +278,8 @@ bool FrameBuffer::initialize(int width, int height)
     //
     // Initialize set of configs
     //
-    InitConfigStatus configStatus = FBConfig::initConfigList(fb);
-    if (configStatus == INIT_CONFIG_FAILED) {
+    fb->m_configs = new FbConfigList(fb->m_eglDisplay);
+    if (fb->m_configs->empty()) {
         ERR("Failed: Initialize set of configs\n");
         delete fb;
         return false;
@@ -289,11 +288,11 @@ bool FrameBuffer::initialize(int width, int height)
     //
     // Check that we have config for each GLES and GLES2
     //
-    int nConfigs = FBConfig::getNumConfigs();
+    size_t nConfigs = fb->m_configs->size();
     int nGLConfigs = 0;
     int nGL2Configs = 0;
-    for (int i=0; i<nConfigs; i++) {
-        GLint rtype = FBConfig::get(i)->getRenderableType();
+    for (size_t i = 0; i < nConfigs; ++i) {
+        GLint rtype = fb->m_configs->get(i)->getRenderableType();
         if (0 != (rtype & EGL_OPENGL_ES_BIT)) {
             nGLConfigs++;
         }
@@ -341,6 +340,7 @@ bool FrameBuffer::initialize(int width, int height)
 FrameBuffer::FrameBuffer(int p_width, int p_height) :
     m_width(p_width),
     m_height(p_height),
+    m_configs(NULL),
     m_eglDisplay(EGL_NO_DISPLAY),
     m_eglSurface(EGL_NO_SURFACE),
     m_eglContext(EGL_NO_CONTEXT),
@@ -368,6 +368,7 @@ FrameBuffer::FrameBuffer(int p_width, int p_height) :
 FrameBuffer::~FrameBuffer()
 {
     delete m_textureDraw;
+    delete m_configs;
     free(m_fbImage);
 }
 

@@ -14,7 +14,8 @@
 * limitations under the License.
 */
 #include "WindowSurface.h"
-#include "FBConfig.h"
+
+#include "FbConfig.h"
 #include "FrameBuffer.h"
 #include <GLES/glext.h>
 #include "EGLDispatch.h"
@@ -46,8 +47,8 @@ WindowSurface::~WindowSurface()
 
 WindowSurface *WindowSurface::create(int p_config, int p_width, int p_height)
 {
-    const FBConfig *fbconf = FBConfig::get(p_config);
-    if (!fbconf) {
+    const FbConfig* config = FrameBuffer::getFB()->getConfigs()->get(p_config);
+    if (!config) {
         return NULL;
     }
 
@@ -56,7 +57,7 @@ WindowSurface *WindowSurface::create(int p_config, int p_width, int p_height)
     if (!win) {
         return NULL;
     }
-    win->m_fbconf = fbconf;
+    win->m_fbconf = config;
 
     //
     // Create a pbuffer to be used as the egl surface
@@ -217,7 +218,7 @@ bool WindowSurface::resizePbuffer(unsigned int p_width, unsigned int p_height)
     pbufAttribs[4] = EGL_NONE;
 
     m_eglSurface = s_egl.eglCreatePbufferSurface(fb->getDisplay(),
-                                                 m_fbconf->getEGLConfig(),
+                                                 m_fbconf->getEglConfig(),
                                                  pbufAttribs);
     if (m_eglSurface == EGL_NO_SURFACE) {
         fprintf(stderr, "Renderer error: failed to create/resize pbuffer!!\n");

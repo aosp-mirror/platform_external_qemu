@@ -15,7 +15,7 @@
 */
 #include "RenderControl.h"
 
-#include "FBConfig.h"
+#include "FbConfig.h"
 #include "FrameBuffer.h"
 #include "EGLDispatch.h"
 #include "GLESv2Dispatch.h"
@@ -90,34 +90,35 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     return len;
 }
 
-static EGLint rcGetNumConfigs(uint32_t* numAttribs)
+static EGLint rcGetNumConfigs(uint32_t* p_numAttribs)
 {
-    if (numAttribs) {
-        *numAttribs = FBConfig::getNumAttribs();
+    int numConfigs = 0, numAttribs = 0;
+
+    FrameBuffer::getFB()->getConfigs()->getPackInfo(&numConfigs, &numAttribs);
+    if (p_numAttribs) {
+        *p_numAttribs = static_cast<uint32_t>(numAttribs);
     }
-    return FBConfig::getNumConfigs();
+    return numConfigs;
 }
 
 static EGLint rcGetConfigs(uint32_t bufSize, GLuint* buffer)
 {
-    int configSize = FBConfig::getNumAttribs();
-    int nConfigs = FBConfig::getNumConfigs();
-    uint32_t neededSize = (nConfigs + 1) * configSize * sizeof(GLuint);
-    if (!buffer || bufSize < neededSize) {
-        return -neededSize;
-    }
-    FBConfig::packConfigsInfo(buffer);
-    return nConfigs;
+    GLuint bufferSize = (GLuint)bufSize;
+    return FrameBuffer::getFB()->getConfigs()->packConfigs(bufferSize, buffer);
 }
 
-static EGLint rcChooseConfig(EGLint *attribs, uint32_t attribs_size, uint32_t *configs, uint32_t configs_size)
+static EGLint rcChooseConfig(EGLint *attribs,
+                             uint32_t attribs_size,
+                             uint32_t *configs,
+                             uint32_t configs_size)
 {
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
     }
 
-    return FBConfig::chooseConfig(fb, attribs, configs, configs_size);
+    return fb->getConfigs()->chooseConfig(
+            attribs, (EGLint*)configs, (EGLint)configs_size);
 }
 
 static EGLint rcGetFBParam(EGLint param)
