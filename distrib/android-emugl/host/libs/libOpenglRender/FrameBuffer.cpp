@@ -515,7 +515,14 @@ HandleType FrameBuffer::createWindowSurface(int p_config, int p_width, int p_hei
     emugl::Mutex::AutoLock mutex(m_lock);
 
     HandleType ret = 0;
-    WindowSurfacePtr win( WindowSurface::create(p_config, p_width, p_height) );
+
+    const FbConfig* config = getConfigs()->get(p_config);
+    if (!config) {
+        return ret;
+    }
+
+    WindowSurfacePtr win(WindowSurface::create(
+            getDisplay(), config->getEglConfig(), p_width, p_height));
     if (win.Ptr() != NULL) {
         ret = genHandle();
         m_windows[ret] = win;
@@ -761,11 +768,11 @@ bool FrameBuffer::bindContext(HandleType p_context,
 
     if (bindDraw.Ptr() != NULL && bindRead.Ptr() != NULL) {
         if (bindDraw.Ptr() != bindRead.Ptr()) {
-            bindDraw->bind(ctx, SURFACE_BIND_DRAW);
-            bindRead->bind(ctx, SURFACE_BIND_READ);
+            bindDraw->bind(ctx, WindowSurface::BIND_DRAW);
+            bindRead->bind(ctx, WindowSurface::BIND_READ);
         }
         else {
-            bindDraw->bind(ctx, SURFACE_BIND_READDRAW);
+            bindDraw->bind(ctx, WindowSurface::BIND_READDRAW);
         }
     }
 
