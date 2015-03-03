@@ -4,17 +4,17 @@ host_OS_SRCS :=
 host_common_LDLIBS :=
 
 ifeq ($(HOST_OS),linux)
-    host_OS_SRCS = NativeLinuxSubWindow.cpp
+    host_OS_SRCS = NativeSubWindow_x11.cpp
     host_common_LDLIBS += -lX11 -lrt
 endif
 
 ifeq ($(HOST_OS),darwin)
-    host_OS_SRCS = NativeMacSubWindow.m
+    host_OS_SRCS = NativeSubWindow_cocoa.m
     host_common_LDLIBS += -Wl,-framework,AppKit
 endif
 
 ifeq ($(HOST_OS),windows)
-    host_OS_SRCS = NativeWindowsSubWindow.cpp
+    host_OS_SRCS = NativeSubWindow_win32.cpp
 endif
 
 host_common_SRC_FILES := \
