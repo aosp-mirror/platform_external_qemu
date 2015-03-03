@@ -52,9 +52,15 @@
 #ifdef CONFIG_XEN
 #  include <xen/hvm/hvm_info_table.h>
 #endif
-#if 1  /* #ifdef CONFIG_ANDROID */
+// android related header
 #  include "hw/acpi/goldfish_defs.h"
-#endif  /* CONFIG_ANDROID */
+#include "qemu/error-report.h"
+#include "sysemu/char.h"
+#include "monitor/monitor.h"
+#include "hw/misc/android_pipe.h"
+#include "hw/display/goldfish_fb.h"
+#include "hw/input/goldfish_sensors.h"
+// end of android related header
 
 #define MAX_IDE_BUS 2
 
@@ -73,6 +79,122 @@ static bool smbios_uuid_encoded = true;
  */
 static bool gigabyte_align = true;
 static bool has_reserved_memory = true;
+
+/* android specific device init */
+static CharDriverState *android_try_create_console_chardev(int portno)
+{
+    /* Try to create the chardev for the Android console on the specified port.
+     * This is equivalent to the command line options
+     *  -chardev socket,id=monitor,host=127.0.0.1,port=NNN,server,nowait,telnet
+
+     *  -mon chardev=monitor,mode=android-console
+     * Return true on success, false on failure (presumably port-in-use).
+     */
+    Error *err = NULL;
+    CharDriverState *chr;
+    QemuOpts *opts;
+    const char *chardev_opts =
+        "socket,id=private-chardev-for-android-monitor,"
+        "host=127.0.0.1,server,nowait,telnet";
+
+    opts = qemu_opts_parse(qemu_find_opts("chardev"), chardev_opts, 1);
+    assert(opts);
+    qemu_opt_set_number(opts, "port", portno);
+    chr = qemu_chr_new_from_opts(opts, NULL, &err);
+    if (err) {
+        /* Assume this was port-in-use */
+        qemu_opts_del(opts);
+        error_free(err);
+        return NULL;
+    }
+
+    qemu_chr_fe_claim_no_fail(chr);
+    return chr;
+}
+
+/* Console hooks for rotation state */
+
+static int ranchu_rotation_state = 0;       /* 0-3 */
+
+static void android_console_rotate_screen(Monitor *mon, const QDict *qdict)
+{
+    ranchu_rotation_state = ((ranchu_rotation_state + 1) % 4);
+    goldfish_sensors_set_rotation(ranchu_rotation_state);
+    /* The mapping between QEMU and Android's idea of rotation are
+       reversed */
+    switch (ranchu_rotation_state) {
+    case 0:
+        goldfish_fb_set_rotation(0);
+        graphic_rotate = 0;
+        break;
+    case 1:
+        goldfish_fb_set_rotation(3);
+        graphic_rotate = 90;
+        break;
+    case 2:
+        goldfish_fb_set_rotation(2);
+        graphic_rotate = 180;
+        break;
+    case 3:
+        goldfish_fb_set_rotation(1);
+        graphic_rotate = 270;
+        break;
+    default:
+        g_assert_not_reached();
+    }
+}
+
+static mon_cmd_t rotate_cmd = {
+    .name = "rotate",
+    .args_type = "",
+    .params = "",
+    .help = "rotate the screen by 90 degrees",
+    .mhandler.cmd = android_console_rotate_screen,
+};
+
+static void android_init_console_and_adb(int console_baseport,
+                                         int max_nb_emulators)
+{
+    /* Initialize the console and ADB, which must listen on two
+     * consecutive TCP ports starting from 5555 and working up until
+     * we manage to open both connections.
+     */
+    int baseport = console_baseport;
+    int tries = max_nb_emulators;
+    CharDriverState *chr;
+    struct Monitor *android_monitor;
+    // TODO: reconsider a better place to store this monitor handler
+
+    for (; tries > 0; tries--, baseport += 2) {
+        chr = android_try_create_console_chardev(baseport);
+        if (!chr) {
+            continue;
+        }
+
+        if (!adb_server_init(baseport + 1)) {
+            qemu_chr_delete(chr);
+            chr = NULL;
+            continue;
+        }
+
+        /* Confirmed we have both ports, now we can create the console itself.
+         * This is equivalent to
+         * "-mon chardev=private-chardev,mode=android-console"
+         */
+        android_monitor = monitor_init(chr,
+                                       MONITOR_ANDROID_CONSOLE |
+                                       MONITOR_USE_READLINE |
+                                       MONITOR_DYNAMIC_CMDS);
+        monitor_add_command(android_monitor, &rotate_cmd);
+
+        printf("console on port %d, ADB on port %d\n", baseport, baseport + 1);
+        return;
+    }
+    error_report("it seems too many emulator instances are running "
+                 "on this machine. Aborting\n");
+    exit(1);
+}
+/* end of android device init */
 
 /* PC hardware initialisation */
 static void pc_init1(MachineState *machine,
@@ -235,7 +357,7 @@ static void pc_init1(MachineState *machine,
 
     pc_register_ferr_irq(gsi[13]);
 
-#if 1  /* #ifdef CONFIG_ANDROID */
+/* create android devices */
     sysbus_create_simple("goldfish_battery", GF_BATTERY_IOMEM_BASE,
                          gsi[GF_BATTERY_IRQ]);
     sysbus_create_simple("goldfish-events", GF_EVENTS_IOMEM_BASE,
@@ -243,7 +365,7 @@ static void pc_init1(MachineState *machine,
     sysbus_create_simple("android_pipe", GF_PIPE_IOMEM_BASE, gsi[GF_PIPE_IRQ]);
     sysbus_create_simple("goldfish_fb", GF_FB_IOMEM_BASE, gsi[GF_FB_IRQ]);
     sysbus_create_simple("goldfish_audio", GF_AUDIO_IOMEM_BASE, gsi[GF_AUDIO_IRQ]);
-#endif  /* CONFIG_ANDROID */
+/* end of create android devices */
 
     pc_vga_init(isa_bus, pci_enabled ? pci_bus : NULL);
 
@@ -314,6 +436,16 @@ static void pc_init1(MachineState *machine,
     if (pci_enabled) {
         pc_pci_device_init(pci_bus);
     }
+
+/* Android initialization */
+    #define ANDROID_CONSOLE_BASEPORT 5554
+    #define MAX_ANDROID_EMULATORS 64
+
+    android_init_console_and_adb(ANDROID_CONSOLE_BASEPORT,
+                                 MAX_ANDROID_EMULATORS);
+/* end of Android initialization */
+
+
 }
 
 static void pc_init_pci(MachineState *machine)
