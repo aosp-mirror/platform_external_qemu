@@ -559,16 +559,24 @@ HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
     emugl::Mutex::AutoLock mutex(m_lock);
     HandleType ret = 0;
 
+    const FbConfig* config = getConfigs()->get(p_config);
+    if (!config) {
+        return ret;
+    }
+
     RenderContextPtr share(NULL);
     if (p_share != 0) {
-        RenderContextMap::iterator s( m_contexts.find(p_share) );
+        RenderContextMap::iterator s(m_contexts.find(p_share));
         if (s == m_contexts.end()) {
-            return 0;
+            return ret;
         }
         share = (*s).second;
     }
+    EGLContext sharedContext =
+            share.Ptr() ? share->getEGLContext() : EGL_NO_CONTEXT;
 
-    RenderContextPtr rctx( RenderContext::create(p_config, share, p_isGL2) );
+    RenderContextPtr rctx(RenderContext::create(
+        m_eglDisplay, config->getEglConfig(), sharedContext, p_isGL2));
     if (rctx.Ptr() != NULL) {
         ret = genHandle();
         m_contexts[ret] = rctx;

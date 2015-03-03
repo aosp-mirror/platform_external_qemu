@@ -14,62 +14,36 @@
 * limitations under the License.
 */
 #include "RenderContext.h"
-#include "FbConfig.h"
-#include "FrameBuffer.h"
+
 #include "EGLDispatch.h"
-#include "GLESv1Dispatch.h"
 
-RenderContext *RenderContext::create(int p_config,
-                                     RenderContextPtr p_shareContext,
-                                     bool p_isGL2)
-{
-    FrameBuffer* fb = FrameBuffer::getFB();
-
-    const FbConfig* config = fb->getConfigs()->get(p_config);
-    if (!config) {
-        return NULL;
-    }
-
-    RenderContext *c = new RenderContext();
-    if (!c) {
-        return NULL;
-    }
-
-    EGLContext share = EGL_NO_CONTEXT;
-    if (p_shareContext.Ptr() != NULL) {
-        share = p_shareContext->getEGLContext();
-    }
-
-    GLint glContextAttribs[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 1,
+RenderContext* RenderContext::create(EGLDisplay display,
+                                     EGLConfig config,
+                                     EGLContext sharedContext,
+                                     bool isGl2) {
+    const EGLint contextAttribs[] = {
+        EGL_CONTEXT_CLIENT_VERSION, isGl2 ? 2 : 1,
         EGL_NONE
     };
-
-    if (p_isGL2) {
-        glContextAttribs[1] = 2;
-        c->m_isGL2 = true;
-    }
-
-    c->m_ctx = s_egl.eglCreateContext(fb->getDisplay(),
-                                      config->getEglConfig(),
-                                      share,
-                                      glContextAttribs);
-    if (c->m_ctx == EGL_NO_CONTEXT) {
-        delete c;
+    EGLContext context = s_egl.eglCreateContext(
+            display, config, sharedContext, contextAttribs);
+    if (context == EGL_NO_CONTEXT) {
         return NULL;
     }
 
-    c->m_config = p_config;
-    return c;
+    return new RenderContext(display, context, isGl2);
 }
 
-RenderContext::RenderContext() :
-        m_ctx(EGL_NO_CONTEXT),
-        m_config(0),
-        m_isGL2(false) {}
+RenderContext::RenderContext(EGLDisplay display,
+                             EGLContext context,
+                             bool isGl2) :
+        mDisplay(display),
+        mContext(context),
+        mIsGl2(isGl2),
+        mContextData() {}
 
 RenderContext::~RenderContext() {
-    if (m_ctx != EGL_NO_CONTEXT) {
-        s_egl.eglDestroyContext(FrameBuffer::getFB()->getDisplay(), m_ctx);
+    if (mContext != EGL_NO_CONTEXT) {
+        s_egl.eglDestroyContext(mDisplay, mContext);
     }
 }
