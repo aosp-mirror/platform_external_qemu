@@ -44,6 +44,11 @@ public:
     // Retrieve the host EGLSurface of the WindowSurface's Pbuffer.
     EGLSurface getEGLSurface() const { return mSurface; }
 
+    // Retrieve currently attached ColorBuffer, if any.
+    ColorBuffer* getColorBuffer() const {
+        return mAttachedColorBuffer.Ptr();
+    }
+
     // Attach a ColorBuffer to this WindowSurface.
     // Once attached, calling flushColorBuffer() will copy the Pbuffer's
     // pixels to the color buffer.
@@ -84,8 +89,6 @@ private:
     WindowSurface(const WindowSurface& other);
 
     explicit WindowSurface(EGLDisplay display, EGLConfig config);
-
-    bool blitToColorBuffer();  // copy pbuffer content with texload and blit
 
     bool resize(unsigned int p_width, unsigned int p_height);
 
