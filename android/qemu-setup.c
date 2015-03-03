@@ -361,7 +361,10 @@ void  android_emulation_setup( void )
    /* send a simple message to the ADB host server to tell it we just started.
     * it should be listening on port 5037. if we can't reach it, don't bother
     */
-    int s = socket_loopback_client(adb_host_port, SOCKET_STREAM);
+    int s = -1;
+    BEGIN_NOSIGALRM
+    s = socket_loopback_client(adb_host_port, SOCKET_STREAM);
+    END_NOSIGALRM
     if (s < 0) {
         D("can't connect to ADB server: %s", errno_str );
     } else {
