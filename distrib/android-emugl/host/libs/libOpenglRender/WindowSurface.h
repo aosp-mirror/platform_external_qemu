@@ -85,8 +85,6 @@ private:
 
     explicit WindowSurface(EGLDisplay display, EGLConfig config);
 
-    bool blitToColorBuffer();  // copy pbuffer content with texload and blit
-
     bool resize(unsigned int p_width, unsigned int p_height);
 
 private:

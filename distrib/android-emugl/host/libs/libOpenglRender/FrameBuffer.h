@@ -142,6 +142,7 @@ private:
     RenderContextMap m_contexts;
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
+    ColorBuffer::Helper* m_colorBufferHelper;
 
     EGLSurface m_eglSurface;
     EGLContext m_eglContext;

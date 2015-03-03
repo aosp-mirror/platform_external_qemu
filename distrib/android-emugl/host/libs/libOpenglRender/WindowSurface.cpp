@@ -61,20 +61,6 @@ WindowSurface *WindowSurface::create(EGLDisplay display,
 }
 
 
-// flushColorBuffer - The function makes sure that the
-//    previous attached color buffer is updated, if copy or blit should be done
-//    in order to update it - it is being done here.
-bool WindowSurface::flushColorBuffer() {
-    if (mAttachedColorBuffer.Ptr() != NULL) {
-        return blitToColorBuffer();
-    } else {
-        return true;
-    }
-}
-
-// setColorBuffer - this function is called when a new color buffer needs to
-//    be attached to the surface. The function doesn't make sure that the
-//    previous attached color buffer is updated, this is done by flushColorBuffer
 void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer) {
     mAttachedColorBuffer = p_colorBuffer;
 
@@ -88,12 +74,6 @@ void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer) {
     }
 }
 
-//
-// This function is called after the context and eglSurface is already
-// bound in the current thread (eglMakeCurrent has been called).
-// This function should take actions required on the other surface objects
-// when being bind/unbound
-//
 void WindowSurface::bind(RenderContextPtr p_ctx, BindType p_bindType) {
     if (p_bindType == BIND_READ) {
         mReadContext = p_ctx;
@@ -105,8 +85,11 @@ void WindowSurface::bind(RenderContextPtr p_ctx, BindType p_bindType) {
     }
 }
 
-bool WindowSurface::blitToColorBuffer() {
-    if (!mWidth && !mHeight) {
+bool WindowSurface::flushColorBuffer() {
+    if (!mAttachedColorBuffer.Ptr()) {
+        return true;
+    }
+    if (!mWidth || !mHeight) {
         return false;
     }
 
@@ -174,12 +157,9 @@ bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
     //
     // Create pbuffer surface.
     //
-    EGLint pbufAttribs[5];
-    pbufAttribs[0] = EGL_WIDTH;
-    pbufAttribs[1] = p_width;
-    pbufAttribs[2] = EGL_HEIGHT;
-    pbufAttribs[3] = p_height;
-    pbufAttribs[4] = EGL_NONE;
+    const EGLint pbufAttribs[5] = {
+        EGL_WIDTH, (EGLint) p_width, EGL_HEIGHT, (EGLint) p_height, EGL_NONE,
+    };
 
     mSurface = s_egl.eglCreatePbufferSurface(mDisplay,
                                              mConfig,
