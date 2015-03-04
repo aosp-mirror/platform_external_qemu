@@ -70,6 +70,30 @@
       "revId": "e63bf95afe5b5e619700d408cc59a0953f15591d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "52a68e28_8e0b5ba6",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1068239
+      },
+      "writtenOn": "2015-03-04T19:40:49Z",
+      "side": 1,
+      "message": "Sure, we use emulator for CI, and we want to install some apk on it / run ativity tests, so we need an adb server. I can discard this change if you prefer.",
+      "parentUuid": "321d9af7_d71cb367",
+      "range": {
+        "startLine": 367,
+        "startChar": 8,
+        "endLine": 367,
+        "endChar": 12
+      },
+      "revId": "e63bf95afe5b5e619700d408cc59a0953f15591d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
