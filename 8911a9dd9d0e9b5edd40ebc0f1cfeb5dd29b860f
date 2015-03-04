@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "12b17657_91c9bc58",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-03-04T10:58:01Z",
+      "side": 1,
+      "message": "arrays are a bash-ism, which we want to avoid in this script.\nMoreover, there is stricly no reason to use them here anyway, i.e. you can replace this with:\n\n  OSX_SDK_VERSION\u003d\n  for SUPPORTED_VERSION in $OSX_SDK_SUPPORTED; do\n    if [ \"$OSX_SDK_VERSION\" ]; then\n      break\n    fi\n    for INSTALLED_VERSION in $OSX_SDK_INSTALLED_LIST; do\n      if [ \"$SUPPORTED_VERSION\" \u003d \"$INSTALLED_VERSION\" ]; then\n        OSX_SDK_VERSION\u003d$INSTALLED_VERSION\n        break\n      fi\n    done\n  done",
+      "revId": "8911a9dd9d0e9b5edd40ebc0f1cfeb5dd29b860f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "126ed67a_a91c3d66",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-03-04T10:58:01Z",
+      "side": 1,
+      "message": "this break isn\u0027t enough to properly stop the outer loop, see solution above.",
+      "revId": "8911a9dd9d0e9b5edd40ebc0f1cfeb5dd29b860f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
