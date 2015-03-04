@@ -57,6 +57,30 @@
       "revId": "0fef963a1329e64793537df9afdb6b83c94449a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12da56a9_8cad27a0",
+        "filename": "android/sockets.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1274,
+      "author": {
+        "id": 1068239
+      },
+      "writtenOn": "2015-03-04T22:09:42Z",
+      "side": 1,
+      "message": "nice catch, I\u0027ll update again ;-)",
+      "parentUuid": "321d9af7_f5e44f28",
+      "range": {
+        "startLine": 1274,
+        "startChar": 8,
+        "endLine": 1274,
+        "endChar": 17
+      },
+      "revId": "0fef963a1329e64793537df9afdb6b83c94449a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
