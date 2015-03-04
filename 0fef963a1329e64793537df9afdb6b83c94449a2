@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "12da56a9_ec3b03f2",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1068239
+      },
+      "writtenOn": "2015-03-04T21:36:24Z",
+      "side": 1,
+      "message": "oups, forgot to remove errno in debug message... critical ?",
+      "revId": "0fef963a1329e64793537df9afdb6b83c94449a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
