@@ -84,7 +84,7 @@ void GLESConversionArrays::operator++(){
     m_current++;
 }
 
-GLDispatch     GLEScontext::s_glDispatch;
+GLIssue     GLEScontext::s_glIssue;
 emugl::Mutex   GLEScontext::s_lock;
 std::string*   GLEScontext::s_glExtensions= NULL;
 std::string    GLEScontext::s_glVendor;
@@ -134,7 +134,7 @@ bool Version::operator<(const Version& ver) const{
 void GLEScontext::init() {
 
     if (!s_glExtensions) {
-        initCapsLocked(s_glDispatch.glGetString(GL_EXTENSIONS));
+        initCapsLocked(s_glIssue.glGetString(GL_EXTENSIONS));
         s_glExtensions = new std::string("");
     }
 
@@ -508,15 +508,15 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
 {
     const char* cstring = (const char*)extensionString;
 
-    s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&s_glSupport.maxVertexAttribs);
-    s_glDispatch.glGetIntegerv(GL_MAX_CLIP_PLANES,&s_glSupport.maxClipPlane);
-    s_glDispatch.glGetIntegerv(GL_MAX_LIGHTS,&s_glSupport.maxLights);
-    s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_SIZE,&s_glSupport.maxTexSize);
-    s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_UNITS,&s_glSupport.maxTexUnits);
-    s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS,&s_glSupport.maxTexImageUnits);
-    const GLubyte* glslVersion = s_glDispatch.glGetString(GL_SHADING_LANGUAGE_VERSION);
+    s_glIssue.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&s_glSupport.maxVertexAttribs);
+    s_glIssue.glGetIntegerv(GL_MAX_CLIP_PLANES,&s_glSupport.maxClipPlane);
+    s_glIssue.glGetIntegerv(GL_MAX_LIGHTS,&s_glSupport.maxLights);
+    s_glIssue.glGetIntegerv(GL_MAX_TEXTURE_SIZE,&s_glSupport.maxTexSize);
+    s_glIssue.glGetIntegerv(GL_MAX_TEXTURE_UNITS,&s_glSupport.maxTexUnits);
+    s_glIssue.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS,&s_glSupport.maxTexImageUnits);
+    const GLubyte* glslVersion = s_glIssue.glGetString(GL_SHADING_LANGUAGE_VERSION);
     s_glSupport.glslVersion = Version((const  char*)(glslVersion));
-    const GLubyte* glVersion = s_glDispatch.glGetString(GL_VERSION);
+    const GLubyte* glVersion = s_glIssue.glGetString(GL_VERSION);
 
     if (strstr(cstring,"GL_EXT_bgra ")!=NULL)
         s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888 = true;

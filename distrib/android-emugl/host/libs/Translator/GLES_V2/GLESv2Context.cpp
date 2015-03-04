@@ -20,16 +20,16 @@
 void GLESv2Context::init() {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
-        s_glDispatch.dispatchFuncs(GLES_2_0);
+        s_glIssue.issueFuncs(GLES_2_0);
         GLEScontext::init();
         for(int i=0; i < s_glSupport.maxVertexAttribs;i++){
             m_map[i] = new GLESpointer();
         }
         setAttribute0value(0.0, 0.0, 0.0, 1.0);
 
-        buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
-                     (const char*)dispatcher().glGetString(GL_RENDERER),
-                     (const char*)dispatcher().glGetString(GL_VERSION),
+        buildStrings((const char*)issuer().glGetString(GL_VENDOR),
+                     (const char*)issuer().glGetString(GL_RENDERER),
+                     (const char*)issuer().glGetString(GL_VERSION),
                      "OpenGL ES 2.0");
     }
     m_initialized = true;
@@ -58,7 +58,7 @@ void GLESv2Context::validateAtt0PreDraw(unsigned int count)
         return;
 
     int enabled = 0;
-    s_glDispatch.glGetVertexAttribiv(0, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
+    s_glIssue.glGetVertexAttribiv(0, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
     if(enabled)
         return;
 
@@ -72,8 +72,8 @@ void GLESv2Context::validateAtt0PreDraw(unsigned int count)
     for(unsigned int i=0; i<count; i++)
         memcpy(m_att0Array+i*4, m_attribute0value, 4*sizeof(GLfloat));
 
-    s_glDispatch.glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, m_att0Array);
-    s_glDispatch.glEnableVertexAttribArray(0);
+    s_glIssue.glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, m_att0Array);
+    s_glIssue.glEnableVertexAttribArray(0);
 
     m_att0NeedsDisable = true;
 }
@@ -81,7 +81,7 @@ void GLESv2Context::validateAtt0PreDraw(unsigned int count)
 void GLESv2Context::validateAtt0PostDraw(void)
 {
     if(m_att0NeedsDisable)
-        s_glDispatch.glDisableVertexAttribArray(0);
+        s_glIssue.glDisableVertexAttribArray(0);
 
     m_att0NeedsDisable = false;
 }
@@ -112,7 +112,7 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
 //setting client side arr
 void GLESv2Context::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index){
      if(arr == NULL) return;
-     s_glDispatch.glVertexAttribPointer(arrayType,size,dataType,normalized,stride,arr);
+     s_glIssue.glVertexAttribPointer(arrayType,size,dataType,normalized,stride,arr);
 }
 
 bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {

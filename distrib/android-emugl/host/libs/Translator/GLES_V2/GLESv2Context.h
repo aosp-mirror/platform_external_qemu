@@ -17,7 +17,7 @@
 #ifndef GLES_V2_CONTEXT_H
 #define GLES_V2_CONTEXT_H
 
-#include <GLcommon/GLDispatch.h>
+#include <GLcommon/GLIssue.h>
 #include <GLcommon/GLEScontext.h>
 #include <GLcommon/objectNameManager.h>
 
@@ -25,7 +25,7 @@
 
 class GLESv2Context : public GLEScontext{
 public:
-    void init();
+    virtual void init();
     GLESv2Context();
     virtual ~GLESv2Context();
     void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);

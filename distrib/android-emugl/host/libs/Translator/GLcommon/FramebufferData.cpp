@@ -113,10 +113,10 @@ void FramebufferData::detachObject(int idx) {
         switch(m_attachPoints[idx].target)
         {
         case GL_RENDERBUFFER_OES:
-            GLEScontext::dispatcher().glDeleteRenderbuffersEXT(1, &(m_attachPoints[idx].name));
+            GLEScontext::issuer().glDeleteRenderbuffersEXT(1, &(m_attachPoints[idx].name));
             break;
         case GL_TEXTURE_2D:
-            GLEScontext::dispatcher().glDeleteTextures(1, &(m_attachPoints[idx].name));
+            GLEScontext::issuer().glDeleteTextures(1, &(m_attachPoints[idx].name));
             break;
         }
     }
@@ -140,17 +140,17 @@ void FramebufferData::validate(GLEScontext* ctx)
         GLint type = GL_NONE;
         GLint name = 0;
 
-        ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+        ctx->issuer().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
         if(type != GL_NONE)
         {
-            ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
+            ctx->issuer().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
         }
         else
         {
-            ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+            ctx->issuer().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
             if(type != GL_NONE)
             {
-                ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
+                ctx->issuer().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
             }
             else
             {
@@ -166,38 +166,38 @@ void FramebufferData::validate(GLEScontext* ctx)
         if(type == GL_RENDERBUFFER)
         {
             GLint prev;
-            ctx->dispatcher().glGetIntegerv(GL_RENDERBUFFER_BINDING, &prev);
-            ctx->dispatcher().glBindRenderbufferEXT(GL_RENDERBUFFER, name);
-            ctx->dispatcher().glGetRenderbufferParameterivEXT(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
-            ctx->dispatcher().glGetRenderbufferParameterivEXT(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
-            ctx->dispatcher().glBindRenderbufferEXT(GL_RENDERBUFFER, prev);
+            ctx->issuer().glGetIntegerv(GL_RENDERBUFFER_BINDING, &prev);
+            ctx->issuer().glBindRenderbufferEXT(GL_RENDERBUFFER, name);
+            ctx->issuer().glGetRenderbufferParameterivEXT(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
+            ctx->issuer().glGetRenderbufferParameterivEXT(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+            ctx->issuer().glBindRenderbufferEXT(GL_RENDERBUFFER, prev);
         }
         else if(type == GL_TEXTURE)
         {
             GLint prev;
-            ctx->dispatcher().glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev);
-            ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, name);
-            ctx->dispatcher().glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-            ctx->dispatcher().glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
-            ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, prev);
+            ctx->issuer().glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev);
+            ctx->issuer().glBindTexture(GL_TEXTURE_2D, name);
+            ctx->issuer().glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+            ctx->issuer().glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+            ctx->issuer().glBindTexture(GL_TEXTURE_2D, prev);
         }
 
         // Create the color attachment and attch it
         unsigned int tex = ctx->shareGroup()->genGlobalName(TEXTURE);
         GLint prev;
-        ctx->dispatcher().glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev);
-        ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, tex);
+        ctx->issuer().glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev);
+        ctx->issuer().glBindTexture(GL_TEXTURE_2D, tex);
 
-        ctx->dispatcher().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-        ctx->dispatcher().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-        ctx->dispatcher().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-        ctx->dispatcher().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-        ctx->dispatcher().glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        ctx->issuer().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+        ctx->issuer().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        ctx->issuer().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+        ctx->issuer().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+        ctx->issuer().glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-        ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, 0);
+        ctx->issuer().glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, 0);
         setAttachment(GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, ObjectDataPtr(NULL), true);
 
-        ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, prev);
+        ctx->issuer().glBindTexture(GL_TEXTURE_2D, prev);
     }
 
     if(m_dirty)
@@ -206,10 +206,9 @@ void FramebufferData::validate(GLEScontext* ctx)
         // drivers (e.g. ATI's) - after the framebuffer attachments
         // have changed, and before the next draw, unbind and rebind
         // the framebuffer to sort things out.
-        ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER,0);
-        ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER,ctx->shareGroup()->getGlobalName(FRAMEBUFFER,m_fbName));
+        ctx->issuer().glBindFramebufferEXT(GL_FRAMEBUFFER,0);
+        ctx->issuer().glBindFramebufferEXT(GL_FRAMEBUFFER,ctx->shareGroup()->getGlobalName(FRAMEBUFFER,m_fbName));
 
         m_dirty = false;
     }
 }
-

@@ -18,8 +18,8 @@
 
 #include "EGLDispatch.h"
 #include "FBConfig.h"
-#include "GLDispatch.h"
-#include "GL2Dispatch.h"
+#include "GLEScmDispatch.h"
+#include "GLESv2Dispatch.h"
 #include "NativeSubWindow.h"
 #include "RenderThreadInfo.h"
 #include "TimeUtils.h"
@@ -78,7 +78,7 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy)
     }
 
     // the string pointer may become invalid when the context is destroyed
-    const char* s = (const char*)s_gl2.glGetString(GL_EXTENSIONS);
+    const char* s = (const char*)s_gles_v2.glGetString(GL_EXTENSIONS);
     char* extString = strdup(s ? s : "");
 
     s_egl.eglMakeCurrent(p_dpy, NULL, NULL, NULL);
@@ -126,7 +126,7 @@ bool FrameBuffer::initialize(int width, int height)
         fb->m_caps.hasGL2 = false;
     }
     else {
-        fb->m_caps.hasGL2 = s_gl2_enabled;
+        fb->m_caps.hasGL2 = s_gles_v2_enabled;
     }
 #else
     fb->m_caps.hasGL2 = false;
@@ -148,7 +148,7 @@ bool FrameBuffer::initialize(int width, int height)
         return false;
     }
 
-    DBG("egl: %d %d\n", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
+    //    DBG("egl: %d %d\n", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
     s_egl.eglBindAPI(EGL_OPENGL_ES_API);
 
     //
@@ -259,7 +259,7 @@ bool FrameBuffer::initialize(int width, int height)
     //
     // Initilize framebuffer capabilities
     //
-    const char *glExtensions = (const char *)s_gl.glGetString(GL_EXTENSIONS);
+    const char *glExtensions = (const char *)s_gles_cm.glGetString(GL_EXTENSIONS);
     bool has_gl_oes_image = false;
     if (glExtensions) {
         has_gl_oes_image = strstr(glExtensions, "GL_OES_EGL_image") != NULL;
@@ -347,9 +347,9 @@ bool FrameBuffer::initialize(int width, int height)
     // Cache the GL strings so we don't have to think about threading or
     // current-context when asked for them.
     //
-    fb->m_glVendor = (const char*)s_gl.glGetString(GL_VENDOR);
-    fb->m_glRenderer = (const char*)s_gl.glGetString(GL_RENDERER);
-    fb->m_glVersion = (const char*)s_gl.glGetString(GL_VERSION);
+    fb->m_glVendor = (const char*)s_gles_cm.glGetString(GL_VENDOR);
+    fb->m_glRenderer = (const char*)s_gles_cm.glGetString(GL_RENDERER);
+    fb->m_glVersion = (const char*)s_gles_cm.glGetString(GL_VERSION);
 
     // release the FB context
     fb->unbind_locked();
@@ -442,7 +442,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                     // Subwin creation was successfull,
                     // update viewport and z rotation and draw
                     // the last posted color buffer.
-                    s_gl.glViewport(0, 0, p_width, p_height);
+                    s_gles_cm.glViewport(0, 0, p_width, p_height);
                     fb->m_zRot = zRot;
                     fb->post( fb->m_lastPostedColorBuffer, false );
                     fb->unbind_locked();
@@ -892,13 +892,13 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
         //
         // render the color buffer to the window
         //
-        s_gl.glPushMatrix();
-        s_gl.glRotatef(m_zRot, 0.0f, 0.0f, 1.0f);
+        s_gles_cm.glPushMatrix();
+        s_gles_cm.glRotatef(m_zRot, 0.0f, 0.0f, 1.0f);
         if (m_zRot != 0.0f) {
-            s_gl.glClear(GL_COLOR_BUFFER_BIT);
+            s_gles_cm.glClear(GL_COLOR_BUFFER_BIT);
         }
         ret = (*c).second.cb->post();
-        s_gl.glPopMatrix();
+        s_gles_cm.glPopMatrix();
 
         if (ret) {
             //
@@ -946,9 +946,9 @@ bool FrameBuffer::repost()
 
 void FrameBuffer::initGLState()
 {
-    s_gl.glMatrixMode(GL_PROJECTION);
-    s_gl.glLoadIdentity();
-    s_gl.glOrthof(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
-    s_gl.glMatrixMode(GL_MODELVIEW);
-    s_gl.glLoadIdentity();
+    s_gles_cm.glMatrixMode(GL_PROJECTION);
+    s_gles_cm.glLoadIdentity();
+    s_gles_cm.glOrthof(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+    s_gles_cm.glMatrixMode(GL_MODELVIEW);
+    s_gles_cm.glLoadIdentity();
 }

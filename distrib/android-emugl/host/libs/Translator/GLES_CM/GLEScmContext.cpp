@@ -25,15 +25,15 @@
 void GLEScmContext::init() {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
-        s_glDispatch.dispatchFuncs(GLES_1_1);
+        s_glIssue.issueFuncs(GLES_1_1);
         GLEScontext::init();
 
         m_texCoords = new GLESpointer[s_glSupport.maxTexUnits];
         m_map[GL_TEXTURE_COORD_ARRAY]  = &m_texCoords[m_clientActiveTexture];
 
-        buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
-                     (const char*)dispatcher().glGetString(GL_RENDERER),
-                     (const char*)dispatcher().glGetString(GL_VERSION),
+        buildStrings((const char*)issuer().glGetString(GL_VENDOR),
+                     (const char*)issuer().glGetString(GL_RENDERER),
+                     (const char*)issuer().glGetString(GL_VERSION),
                      "OpenGL ES-CM 1.1");
     }
     m_initialized = true;
@@ -71,16 +71,16 @@ void GLEScmContext::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,
     if( arr == NULL) return;
     switch(arrayType) {
         case GL_VERTEX_ARRAY:
-            s_glDispatch.glVertexPointer(size,dataType,stride,arr);
+            s_glIssue.glVertexPointer(size,dataType,stride,arr);
             break;
         case GL_NORMAL_ARRAY:
-            s_glDispatch.glNormalPointer(dataType,stride,arr);
+            s_glIssue.glNormalPointer(dataType,stride,arr);
             break;
         case GL_TEXTURE_COORD_ARRAY:
-            s_glDispatch.glTexCoordPointer(size,dataType,stride,arr);
+            s_glIssue.glTexCoordPointer(size,dataType,stride,arr);
             break;
         case GL_COLOR_ARRAY:
-            s_glDispatch.glColorPointer(size,dataType,stride,arr);
+            s_glIssue.glColorPointer(size,dataType,stride,arr);
             break;
         case GL_POINT_SIZE_ARRAY_OES:
             m_pointsIndex = index;
@@ -128,7 +128,7 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
 
         unsigned int tex = GL_TEXTURE0+i;
         setClientActiveTexture(tex);
-        s_glDispatch.glClientActiveTexture(tex);
+        s_glIssue.glClientActiveTexture(tex);
 
         GLenum array_id   = GL_TEXTURE_COORD_ARRAY;
         GLESpointer* p = m_map[array_id];
@@ -137,7 +137,7 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
     }
 
     setClientActiveTexture(activeTexture);
-    s_glDispatch.glClientActiveTexture(activeTexture);
+    s_glIssue.glClientActiveTexture(activeTexture);
 }
 
 void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices_in,bool isElemsDraw) {
@@ -182,8 +182,8 @@ void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsi
                 i++;
             }
 
-            s_glDispatch.glPointSize(pSize);
-            s_glDispatch.glDrawElements(GL_POINTS, sCount, type, (char*)indices_in+sStart*tSize);
+            s_glIssue.glPointSize(pSize);
+            s_glIssue.glDrawElements(GL_POINTS, sCount, type, (char*)indices_in+sStart*tSize);
         }
     } else {
         int i = 0;
@@ -200,8 +200,8 @@ void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsi
                 i++;
             }
 
-            s_glDispatch.glPointSize(pSize);
-            s_glDispatch.glDrawArrays(GL_POINTS, first+sStart, sCount);
+            s_glIssue.glPointSize(pSize);
+            s_glIssue.glDrawArrays(GL_POINTS, first+sStart, sCount);
         }
     }
 }
@@ -284,8 +284,8 @@ void GLEScmContext::initExtensionString() {
         *s_glExtensions+="GL_OES_matrix_palette ";
         GLint max_palette_matrices=0;
         GLint max_vertex_units=0;
-        dispatcher().glGetIntegerv(GL_MAX_PALETTE_MATRICES_OES,&max_palette_matrices);
-        dispatcher().glGetIntegerv(GL_MAX_VERTEX_UNITS_OES,&max_vertex_units);
+        issuer().glGetIntegerv(GL_MAX_PALETTE_MATRICES_OES,&max_palette_matrices);
+        issuer().glGetIntegerv(GL_MAX_VERTEX_UNITS_OES,&max_vertex_units);
         if (max_palette_matrices>=32 && max_vertex_units>=4)
             *s_glExtensions+="GL_OES_extended_matrix_palette ";
     }

@@ -68,6 +68,18 @@ static const EGLiface s_eglIface = {
     .eglDetachEGLImage = detachEGLImage,
 };
 
+static void initGLESx(GLESVersion version)
+{
+  const GLESiface* iface = g_eglInfo->getIface(version);
+  if(iface) {
+    iface->initGLESx();
+  } else { // there is no interface for this gles version
+    fprintf(stderr, "*************** Could not static init interface %d from inside EGL **************\n", version);
+  }
+
+  return;
+}
+
 /*****************************************  supported extentions  ***********************************************************************/
 
 //extentions
@@ -214,6 +226,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
            fprintf(stderr,"could not find ifaces for GLES CM 1.1\n");
            return EGL_FALSE;
         }
+        initGLESx(GLES_1_1);
     }
     if(!g_eglInfo->getIface(GLES_2_0)) {
         func  = loadIfaces(LIB_GLES_V2_NAME);
