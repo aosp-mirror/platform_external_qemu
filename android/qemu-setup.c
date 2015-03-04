@@ -363,7 +363,8 @@ void  android_emulation_setup( void )
     */
     int s = socket_loopback_client(adb_host_port, SOCKET_STREAM);
     if (s < 0) {
-        D("can't connect to ADB server: %s", errno_str );
+        fprintf(stderr, "can't connect to ADB server: %s (errno = %d)", errno_str, errno );
+        exit(1);
     } else {
         char tmp[32];
         char header[5];

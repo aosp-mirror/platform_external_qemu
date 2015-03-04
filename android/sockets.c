@@ -1266,6 +1266,7 @@ FAIL:
 static int
 socket_connect_client( int  s, const SockAddress*  to )
 {
+    BEGIN_NOSIGALRM
     if (socket_connect(s, to) < 0) {
         D( "could not connect client socket to %s: %s\n",
            sock_address_to_string(to), errno_str );
@@ -1274,6 +1275,7 @@ socket_connect_client( int  s, const SockAddress*  to )
     }
 
     socket_set_nonblock( s );
+    END_NOSIGALRM
     return s;
 }
 
