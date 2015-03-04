@@ -128,16 +128,16 @@ GlobalNameSpace::genName(NamedObjectType p_type)
     emugl::Mutex::AutoLock _lock(m_lock);
     switch (p_type) {
     case VERTEXBUFFER:
-        GLEScontext::dispatcher().glGenBuffers(1,&name);
+        GLEScontext::issuer().glGenBuffers(1,&name);
         break;
     case TEXTURE:
-        GLEScontext::dispatcher().glGenTextures(1,&name);
+        GLEScontext::issuer().glGenTextures(1,&name);
         break;
     case RENDERBUFFER:
-        GLEScontext::dispatcher().glGenRenderbuffersEXT(1,&name);
+        GLEScontext::issuer().glGenRenderbuffersEXT(1,&name);
         break;
     case FRAMEBUFFER:
-        GLEScontext::dispatcher().glGenFramebuffersEXT(1,&name);
+        GLEScontext::issuer().glGenFramebuffersEXT(1,&name);
         break;
     case SHADER: //objects in shader namepace are not handled
     default:
@@ -366,4 +366,3 @@ void *ObjectNameManager::getGlobalContext()
     emugl::Mutex::AutoLock _lock(m_lock);
     return (m_groups.size() > 0) ? (*m_groups.begin()).first : NULL;
 }
-

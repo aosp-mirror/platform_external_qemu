@@ -1,7 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 
 host_common_SRC_FILES :=     \
-     GLDispatch.cpp          \
+     GLIssue.cpp             \
      GLutils.cpp             \
      GLEScontext.cpp         \
      GLESvalidate.cpp        \

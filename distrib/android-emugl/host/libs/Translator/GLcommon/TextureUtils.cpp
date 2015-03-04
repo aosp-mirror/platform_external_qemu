@@ -15,7 +15,7 @@
 */
 #include <GLcommon/TextureUtils.h>
 #include <GLcommon/GLESmacros.h>
-#include <GLcommon/GLDispatch.h>
+#include <GLcommon/GLIssue.h>
 #include <GLcommon/GLESvalidate.h>
 #include <stdio.h>
 #include <cmath>
@@ -84,7 +84,7 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
             {
                 SET_ERROR_IF(level > log2(ctx->getMaxTexSize()) || 
                              border !=0 || level > 0 || 
-                             !GLESvalidate::texImgDim(width,height,ctx->getMaxTexSize()+2),GL_INVALID_VALUE)
+                             !GLESvalidate::texImgDim(width,height,ctx->getMaxTexSize()+2),GL_INVALID_VALUE);
 
                 int nMipmaps = -level + 1;
                 GLsizei tmpWidth  = width;

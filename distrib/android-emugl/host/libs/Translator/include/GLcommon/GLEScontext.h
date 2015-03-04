@@ -17,7 +17,7 @@
 #ifndef GLES_CONTEXT_H
 #define GLES_CONTEXT_H
 
-#include "GLDispatch.h"
+#include "GLIssue.h"
 #include "GLESpointer.h"
 #include "objectNameManager.h"
 #include "emugl/common/mutex.h"
@@ -165,7 +165,7 @@ public:
     void setFramebufferBinding(GLuint fb) { m_framebuffer = fb; }
     GLuint getFramebufferBinding() const { return m_framebuffer; }
 
-    static GLDispatch& dispatcher(){return s_glDispatch;};
+    static GLIssue& issuer(){return s_glIssue;};
 
     static int getMaxLights(){return s_glSupport.maxLights;}
     static int getMaxClipPlanes(){return s_glSupport.maxClipPlane;}
@@ -191,7 +191,7 @@ protected:
     virtual void initExtensionString() =0;
 
     static emugl::Mutex   s_lock;
-    static GLDispatch     s_glDispatch;
+    static GLIssue        s_glIssue;
     bool                  m_initialized;
     unsigned int          m_activeTexture;
     GLint                 m_unpackAlignment;
@@ -218,4 +218,3 @@ private:
 };
 
 #endif
-

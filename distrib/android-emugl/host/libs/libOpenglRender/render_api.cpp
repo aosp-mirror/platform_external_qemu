@@ -28,8 +28,8 @@
 #endif
 
 #include "EGLDispatch.h"
-#include "GLDispatch.h"
-#include "GL2Dispatch.h"
+#include "GLEScmDispatch.h"
+#include "GLESv2Dispatch.h"
 
 #include <string.h>
 
@@ -52,19 +52,17 @@ int initLibrary(void)
         return false;
     }
 
-    //
-    // Load GLES Plugin
-    //
-    if (!init_gl_dispatch()) {
-        // Failed to load GLES
-        ERR("Failed to init_gl_dispatch\n");
-        return false;
+    // Load the GLES2 Plugin
+    if (!init_gles_v2_dispatch()) {
+      // Failed to load GLES2
+      ERR("*** Failed to init_gl2_dispatch. Cannot use 1.x-->2.0 transformer.\n"
+          "*** Trying to load standalone 1.x plugin instead.\n");
+      return init_gles_cm_dispatch();
     }
 
-    /* failure to init the GLES2 dispatch table is not fatal */
-    init_gl2_dispatch();
-
-    return true;
+    // GLES2 has loaded successfully;
+    // Try to load the GLESv1 library that is based on 1.x-->2.0 transformer
+    return init_gles_cm_dispatch();
 }
 
 int initOpenGLRenderer(int width, int height, char* addr, size_t addrLen)

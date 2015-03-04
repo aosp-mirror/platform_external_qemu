@@ -16,7 +16,7 @@
 #ifndef GLES_CM_CONTEX_H
 #define GLES_CM_CONTEX_H
 
-#include <GLcommon/GLDispatch.h>
+#include <GLcommon/GLIssue.h>
 #include <GLcommon/GLESpointer.h>
 #include <GLcommon/GLESbuffer.h>
 #include <GLcommon/GLEScontext.h>
@@ -65,4 +65,3 @@ private:
 };
 
 #endif
-

@@ -13,8 +13,8 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef GLDISPATCHH
-#define GLDISPATCHH
+#ifndef GLISSUEH
+#define GLISSUEH
 
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
@@ -25,12 +25,12 @@
 #define GLAPIENTRY GL_APIENTRY
 typedef void(*FUNCPTR)();
 
-class GLDispatch
+class GLIssue
 {
 public:
 
-    GLDispatch();
-    void dispatchFuncs(GLESVersion version);
+    GLIssue();
+    void issueFuncs(GLESVersion version);
 
     /* OpenGL functions which are needed for implementing BOTH GLES 1.1 & GLES 2.0*/
     static void (GLAPIENTRY *glActiveTexture) ( GLenum texture );

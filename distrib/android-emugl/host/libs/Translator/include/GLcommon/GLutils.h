@@ -21,8 +21,9 @@
 #include <stdio.h>
 
 typedef enum {
-    GLES_1_1 = 1,
-    GLES_2_0 = 2,
+    GLES_1_1    = 1,
+    GLES_2_0    = 2,
+    GLES_1_to_2 = 3,
     MAX_GLES_VERSION //Must be last
 } GLESVersion;
 

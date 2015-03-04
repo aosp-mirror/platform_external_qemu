@@ -17,10 +17,10 @@
 
 #include "EGLDispatch.h"
 #include "FrameBuffer.h"
-#include "GLDispatch.h"
+#include "GLEScmDispatch.h"
 #include "GLcommon/GLutils.h"
 #ifdef WITH_GLES2
-#include "GL2Dispatch.h"
+#include "GLESv2Dispatch.h"
 #endif
 #include "RenderThreadInfo.h"
 #include <stdio.h>
@@ -56,38 +56,38 @@ ColorBuffer *ColorBuffer::create(int p_width, int p_height,
     ColorBuffer *cb = new ColorBuffer();
 
 
-    s_gl.glGenTextures(1, &cb->m_tex);
-    s_gl.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
+    s_gles_cm.glGenTextures(1, &cb->m_tex);
+    s_gles_cm.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
     int nComp = (texInternalFormat == GL_RGB ? 3 : 4);
     char *zBuff = new char[nComp*p_width*p_height];
     if (zBuff) {
         memset(zBuff, 0, nComp*p_width*p_height);
     }
-    s_gl.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat,
+    s_gles_cm.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat,
                       p_width, p_height, 0,
                       texInternalFormat,
                       GL_UNSIGNED_BYTE, zBuff);
     delete [] zBuff;
-    s_gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    s_gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    s_gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    s_gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    s_gl.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    s_gles_cm.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    s_gles_cm.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    s_gles_cm.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    s_gles_cm.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    s_gles_cm.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
     //
     // create another texture for that colorbuffer for blit
     //
-    s_gl.glGenTextures(1, &cb->m_blitTex);
-    s_gl.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
-    s_gl.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat,
+    s_gles_cm.glGenTextures(1, &cb->m_blitTex);
+    s_gles_cm.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
+    s_gles_cm.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat,
                       p_width, p_height, 0,
                       texInternalFormat,
                       GL_UNSIGNED_BYTE, NULL);
-    s_gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    s_gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    s_gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    s_gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    s_gl.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    s_gles_cm.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    s_gles_cm.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    s_gles_cm.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    s_gles_cm.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    s_gles_cm.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
     cb->m_width = p_width;
     cb->m_height = p_height;
@@ -136,11 +136,11 @@ ColorBuffer::~ColorBuffer()
     }
 
     if (m_fbo) {
-        s_gl.glDeleteFramebuffersOES(1, &m_fbo);
+        s_gles_cm.glDeleteFramebuffersOES(1, &m_fbo);
     }
 
     GLuint tex[2] = {m_tex, m_blitTex};
-    s_gl.glDeleteTextures(2, tex);
+    s_gles_cm.glDeleteTextures(2, tex);
 
     fb->unbind_locked();
 }
@@ -150,7 +150,7 @@ void ColorBuffer::readPixels(int x, int y, int width, int height, GLenum p_forma
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb->bind_locked()) return;
     if (bind_fbo()) {
-        s_gl.glReadPixels(x, y, width, height, p_format, p_type, pixels);
+        s_gles_cm.glReadPixels(x, y, width, height, p_format, p_type, pixels);
     }
     fb->unbind_locked();
 }
@@ -159,9 +159,9 @@ void ColorBuffer::subUpdate(int x, int y, int width, int height, GLenum p_format
 {
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb->bind_locked()) return;
-    s_gl.glBindTexture(GL_TEXTURE_2D, m_tex);
-    s_gl.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    s_gl.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y,
+    s_gles_cm.glBindTexture(GL_TEXTURE_2D, m_tex);
+    s_gles_cm.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    s_gles_cm.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y,
                          width, height, p_format, p_type, pixels);
     fb->unbind_locked();
 }
@@ -182,19 +182,19 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
     GLuint tmpTex;
     GLint currTexBind;
     if (tInfo->currContext->isGL2()) {
-        s_gl2.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
-        s_gl2.glGenTextures(1,&tmpTex);
-        s_gl2.glBindTexture(GL_TEXTURE_2D, tmpTex);
-        s_gl2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
-        s_gl2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
+        s_gles_v2.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
+        s_gles_v2.glGenTextures(1,&tmpTex);
+        s_gles_v2.glBindTexture(GL_TEXTURE_2D, tmpTex);
+        s_gles_v2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
+        s_gles_v2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
                                   m_width, m_height);
     }
     else {
-        s_gl.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
-        s_gl.glGenTextures(1,&tmpTex);
-        s_gl.glBindTexture(GL_TEXTURE_2D, tmpTex);
-        s_gl.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
-        s_gl.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
+        s_gles_cm.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
+        s_gles_cm.glGenTextures(1,&tmpTex);
+        s_gles_cm.glBindTexture(GL_TEXTURE_2D, tmpTex);
+        s_gles_cm.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
+        s_gles_cm.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
                                  m_width, m_height);
     }
 
@@ -216,20 +216,20 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
             // colorbuffer size
             //
             GLint vport[4] = {};
-            s_gl.glGetIntegerv(GL_VIEWPORT, vport);
-            s_gl.glViewport(0, 0, m_width, m_height);
+            s_gles_cm.glGetIntegerv(GL_VIEWPORT, vport);
+            s_gles_cm.glViewport(0, 0, m_width, m_height);
 
             // render m_blitTex
-            s_gl.glBindTexture(GL_TEXTURE_2D, m_blitTex);
-            s_gl.glEnable(GL_TEXTURE_2D);
-            s_gl.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            s_gles_cm.glBindTexture(GL_TEXTURE_2D, m_blitTex);
+            s_gles_cm.glEnable(GL_TEXTURE_2D);
+            s_gles_cm.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
             drawTexQuad();  // this will render the texture flipped
 
             // unbind the fbo
-            s_gl.glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+            s_gles_cm.glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
 
             // restrore previous viewport
-            s_gl.glViewport(vport[0], vport[1], vport[2], vport[3]);
+            s_gles_cm.glViewport(vport[0], vport[1], vport[2], vport[3]);
         }
 
         // unbind from the FrameBuffer context
@@ -241,12 +241,12 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
     // inside the current context
     //
     if (tInfo->currContext->isGL2()) {
-        s_gl2.glDeleteTextures(1, &tmpTex);
-        s_gl2.glBindTexture(GL_TEXTURE_2D, currTexBind);
+        s_gles_v2.glDeleteTextures(1, &tmpTex);
+        s_gles_v2.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
     else {
-        s_gl.glDeleteTextures(1, &tmpTex);
-        s_gl.glBindTexture(GL_TEXTURE_2D, currTexBind);
+        s_gles_cm.glDeleteTextures(1, &tmpTex);
+        s_gles_cm.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
 
     return true;
@@ -259,13 +259,13 @@ bool ColorBuffer::bindToTexture()
         if (tInfo->currContext.Ptr()) {
 #ifdef WITH_GLES2
             if (tInfo->currContext->isGL2()) {
-                s_gl2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
+                s_gles_v2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
             }
             else {
-                s_gl.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
+                s_gles_cm.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
             }
 #else
-            s_gl.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
+            s_gles_cm.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
 #endif
             return true;
         }
@@ -280,13 +280,13 @@ bool ColorBuffer::bindToRenderbuffer()
         if (tInfo->currContext.Ptr()) {
 #ifdef WITH_GLES2
             if (tInfo->currContext->isGL2()) {
-                s_gl2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
+                s_gles_v2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
             }
             else {
-                s_gl.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
+                s_gles_cm.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
             }
 #else
-            s_gl.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
+            s_gles_cm.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
 #endif
             return true;
         }
@@ -298,20 +298,20 @@ bool ColorBuffer::bind_fbo()
 {
     if (m_fbo) {
         // fbo already exist - just bind
-        s_gl.glBindFramebufferOES(GL_FRAMEBUFFER_OES, m_fbo);
+        s_gles_cm.glBindFramebufferOES(GL_FRAMEBUFFER_OES, m_fbo);
         return true;
     }
 
-    s_gl.glGenFramebuffersOES(1, &m_fbo);
-    s_gl.glBindFramebufferOES(GL_FRAMEBUFFER_OES, m_fbo);
-    s_gl.glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES,
+    s_gles_cm.glGenFramebuffersOES(1, &m_fbo);
+    s_gles_cm.glBindFramebufferOES(GL_FRAMEBUFFER_OES, m_fbo);
+    s_gles_cm.glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES,
                                    GL_COLOR_ATTACHMENT0_OES,
                                    GL_TEXTURE_2D, m_tex, 0);
-    GLenum status = s_gl.glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
+    GLenum status = s_gles_cm.glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
     if (status != GL_FRAMEBUFFER_COMPLETE_OES) {
         ERR("ColorBuffer::bind_fbo: FBO not complete: %#x\n", status);
-        s_gl.glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
-        s_gl.glDeleteFramebuffersOES(1, &m_fbo);
+        s_gles_cm.glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+        s_gles_cm.glDeleteFramebuffersOES(1, &m_fbo);
         m_fbo = 0;
         return false;
     }
@@ -321,9 +321,9 @@ bool ColorBuffer::bind_fbo()
 
 bool ColorBuffer::post()
 {
-    s_gl.glBindTexture(GL_TEXTURE_2D, m_tex);
-    s_gl.glEnable(GL_TEXTURE_2D);
-    s_gl.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    s_gles_cm.glBindTexture(GL_TEXTURE_2D, m_tex);
+    s_gles_cm.glEnable(GL_TEXTURE_2D);
+    s_gles_cm.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     drawTexQuad();
 
     return true;
@@ -341,13 +341,13 @@ void ColorBuffer::drawTexQuad()
                            1.0f, 1.0f,
                            1.0f, 0.0f };
 
-    s_gl.glClientActiveTexture(GL_TEXTURE0);
-    s_gl.glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    s_gl.glTexCoordPointer(2, GL_FLOAT, 0, tcoords);
+    s_gles_cm.glClientActiveTexture(GL_TEXTURE0);
+    s_gles_cm.glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    s_gles_cm.glTexCoordPointer(2, GL_FLOAT, 0, tcoords);
 
-    s_gl.glEnableClientState(GL_VERTEX_ARRAY);
-    s_gl.glVertexPointer(3, GL_FLOAT, 0, verts);
-    s_gl.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    s_gles_cm.glEnableClientState(GL_VERTEX_ARRAY);
+    s_gles_cm.glVertexPointer(3, GL_FLOAT, 0, verts);
+    s_gles_cm.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void ColorBuffer::readback(unsigned char* img)
@@ -355,7 +355,7 @@ void ColorBuffer::readback(unsigned char* img)
     FrameBuffer *fb = FrameBuffer::getFB();
     if (fb->bind_locked()) {
         if (bind_fbo()) {
-            s_gl.glReadPixels(0, 0, m_width, m_height,
+            s_gles_cm.glReadPixels(0, 0, m_width, m_height,
                     GL_RGBA, GL_UNSIGNED_BYTE, img);
         }
         fb->unbind_locked();

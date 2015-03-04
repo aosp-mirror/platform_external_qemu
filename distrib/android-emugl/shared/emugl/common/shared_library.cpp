@@ -91,6 +91,12 @@ SharedLibrary* SharedLibrary::open(const char* libraryName) {
         free(path);
     }
 
+    char *error = NULL;
+    if ((error = dlerror()) != NULL)  {
+      fprintf(stderr, "*** %s ERROR: %s \n", libraryName, error);
+      return NULL;
+    }
+
     return lib ? new SharedLibrary(lib) : NULL;
 }
 
@@ -102,12 +108,17 @@ SharedLibrary::~SharedLibrary() {
     }
 }
 
-SharedLibrary::FunctionPtr SharedLibrary::findSymbol(
-        const char* symbolName) {
-    if (!mLib || !symbolName) {
-        return NULL;
-    }
-    return reinterpret_cast<FunctionPtr>(dlsym(mLib, symbolName));
+SharedLibrary::FunctionPtr SharedLibrary::findSymbol(const char* symbolName) {
+  if (!mLib || !symbolName) {
+    return NULL;
+  }
+  dlerror(); // clear
+  return reinterpret_cast<FunctionPtr>(dlsym(mLib, symbolName));
+  char *error = NULL;
+  if ((error = dlerror()) != NULL)  {
+    fprintf(stderr, "*** ERROR finding %s (%s) \n", symbolName, error);
+    return NULL;
+  }
 }
 
 #endif  // !_WIN32

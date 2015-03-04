@@ -87,6 +87,7 @@ typedef struct {
     void                                            (*finish)();
     void                                            (*setShareGroup)(GLEScontext*,ShareGroupPtr);
     __translatorMustCastToProperFunctionPointerType (*getProcAddress)(const char*);
+    void                                            (*initGLESx)();
 }GLESiface;
 
 

@@ -14,8 +14,8 @@ EMUGL_PATH := $(call my-dir)
 # See the definition of emugl-begin-module in common.mk
 #
 EMUGL_COMMON_INCLUDES := \
-    $(EMUGL_PATH)/host/include/libOpenglRender \
-    $(EMUGL_PATH)/shared
+$(EMUGL_PATH)/host/include/libOpenglRender \
+$(EMUGL_PATH)/shared
 
 ifeq ($(BUILD_STANDALONE_EMULATOR),true)
 EMUGL_COMMON_INCLUDES := $(EMUGL_PATH)/host/libs/Translator/include
@@ -33,12 +33,17 @@ EMUGL_COMMON_CFLAGS += -D__STDC_LIMIT_MACROS=1
 # Define EMUGL_BUILD_DEBUG=1 in your environment to build a
 # debug version of the EmuGL host binaries.
 ifneq (,$(strip $(EMUGL_BUILD_DEBUG)))
-EMUGL_COMMON_CFLAGS += -O0 -g -DEMUGL_DEBUG=1
+EMUGL_COMMON_CFLAGS += -O0 -ggdb -DEMUGL_DEBUG=1
 endif
 
 # Uncomment the following line if you want to enable debug traces
 # in the GLES emulation libraries.
 # EMUGL_COMMON_CFLAGS += -DEMUGL_DEBUG=1
+
+# __kostas__TODO: DISABLE THIS; temporary for debugging purposes
+ifeq (,$(strip $(EMUGL_BUILD_DEBUG)))
+EMUGL_COMMON_CFLAGS += -O0 -ggdb -DEMUGL_DEBUG=1
+endif
 
 # Include common definitions used by all the modules included later
 # in this build file. This contains the definition of all useful
@@ -77,8 +82,14 @@ include $(EMUGL_PATH)/host/libs/GLESv1_dec/Android.mk
 include $(EMUGL_PATH)/host/libs/GLESv2_dec/Android.mk
 include $(EMUGL_PATH)/host/libs/renderControl_dec/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/GLcommon/Android.mk
+ifeq (true,$(BUILD_GLES1X))
+include $(EMUGL_PATH)/host/libs/Translator/GLES_Vx/debase/Android.mk
+include $(EMUGL_PATH)/host/libs/Translator/GLES_Vx/es1x/Android.mk
+include $(EMUGL_PATH)/host/libs/Translator/GLES_Vx/Android.mk
+else
 include $(EMUGL_PATH)/host/libs/Translator/GLES_CM/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/GLES_V2/Android.mk
+endif
 include $(EMUGL_PATH)/host/libs/Translator/EGL/Android.mk
 
 # Host shared libraries
