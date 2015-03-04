@@ -46,6 +46,30 @@
       "revId": "e63bf95afe5b5e619700d408cc59a0953f15591d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "321d9af7_d71cb367",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2015-03-04T19:36:55Z",
+      "side": 1,
+      "message": "that means without adb we cannot run emulator",
+      "parentUuid": "929c86d9_708eceaa",
+      "range": {
+        "startLine": 367,
+        "startChar": 8,
+        "endLine": 367,
+        "endChar": 12
+      },
+      "revId": "e63bf95afe5b5e619700d408cc59a0953f15591d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
