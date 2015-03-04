@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7299d2f8_fce3a955",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/GLIssue.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-03-04T19:24:53Z",
+      "side": 1,
+      "message": "I made this change early on, when I had a hard time telling apart when dispatch refers to libGL or the translator libraries. For a newbie, this was confusing. The rationale follows the parlance common in processor design: instructions (GLES calls) get dispatched when scheduled for execution; we only say they are \"issued\" (GL calls) when they are arrive at the execution units (in our case, libGL). \n\nIn retrospect, this was unnecessary to make it to this commit. As long as the distinction between GL_Dispatch (libGL API) and GLES_Dispatch (GLES_?? API) is clear, I am happy --- the prefix should be enough. I will abandon this change and stick to current naming, only making any changes necessary to ensure the prefix is consistent with the API it refers to.",
+      "parentUuid": "929c86d9_10630a8f",
+      "revId": "0225b47af3eddd97bc18c285b858afbe7be7e1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "52a68e28_8efa3b47",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/GLESv2Dispatch.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-04T18:38:32Z",
       "side": 1,
       "message": "I\u0027m completely ok with the renaming of the dispatching headers / variables, but these should go into their own individual patch.\n\nAlso, this will probably conflict with some of my own patches, I\u0027d be happy if you could actually submit this as soon as possible so I can rebase on top of it :)",
+      "revId": "0225b47af3eddd97bc18c285b858afbe7be7e1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "321d9af7_8465a74b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/GLESv2Dispatch.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-03-04T19:24:53Z",
+      "side": 1,
+      "message": "Will do that asap. I would like naming to be always clear and reveal whether we are referring to GLES or GL, hence this change.",
+      "parentUuid": "52a68e28_8efa3b47",
       "revId": "0225b47af3eddd97bc18c285b858afbe7be7e1c1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7299d2f8_5cc1fd96",
+        "filename": "distrib/android-emugl/host/tools/emugen/ApiGen.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-03-04T19:24:53Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "929c86d9_100e6ae2",
+      "revId": "0225b47af3eddd97bc18c285b858afbe7be7e1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12da56a9_6925452f",
         "filename": "distrib/android-emugl/shared/emugl/common/shared_library.cpp",
         "patchSetId": 1
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "321d9af7_f733f72a",
+        "filename": "distrib/android-emugl/shared/emugl/common/shared_library.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-03-04T19:24:53Z",
+      "side": 1,
+      "message": "Yes, I don\u0027t know why such a message was not always there.",
+      "parentUuid": "12da56a9_6925452f",
+      "revId": "0225b47af3eddd97bc18c285b858afbe7be7e1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12da56a9_091809f7",
         "filename": "distrib/android-emugl/shared/emugl/common/shared_library.cpp",
         "patchSetId": 1
@@ -81,6 +153,30 @@
       "writtenOn": "2015-03-04T18:38:32Z",
       "side": 1,
       "message": "I think you want to make this test after the dlsym(), not before it, right?",
+      "range": {
+        "startLine": 117,
+        "startChar": 7,
+        "endLine": 117,
+        "endChar": 12
+      },
+      "revId": "0225b47af3eddd97bc18c285b858afbe7be7e1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7299d2f8_3c9b51be",
+        "filename": "distrib/android-emugl/shared/emugl/common/shared_library.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-03-04T19:24:53Z",
+      "side": 1,
+      "message": "Indeed! Will fix that",
+      "parentUuid": "12da56a9_091809f7",
       "range": {
         "startLine": 117,
         "startChar": 7,
