@@ -16,6 +16,47 @@
       "revId": "0fef963a1329e64793537df9afdb6b83c94449a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "321d9af7_1a5d727b",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2015-03-04T21:50:37Z",
+      "side": 1,
+      "message": "not critical.",
+      "parentUuid": "12da56a9_ec3b03f2",
+      "revId": "0fef963a1329e64793537df9afdb6b83c94449a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "321d9af7_f5e44f28",
+        "filename": "android/sockets.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1274,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2015-03-04T21:50:37Z",
+      "side": 1,
+      "message": "should we call END_NOSIGALRM here before returning?",
+      "range": {
+        "startLine": 1274,
+        "startChar": 8,
+        "endLine": 1274,
+        "endChar": 17
+      },
+      "revId": "0fef963a1329e64793537df9afdb6b83c94449a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
