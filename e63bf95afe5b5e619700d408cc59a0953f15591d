@@ -94,6 +94,47 @@
       "revId": "e63bf95afe5b5e619700d408cc59a0953f15591d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "929c86d9_b0a2f6fc",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-03-04T21:17:56Z",
+      "side": 1,
+      "message": "You should definitely *not* exit here. The cufrent behaviour is intentional, and is to notify any existing ADB server that a new emulator instance has started (so that it will get listed through \"adb devices\").\n\nIf an ADB server is not running, the emulator should just start, and we definitely want to keep things running this way. If you have a problem for CI, you should modify your scripts to always ensure that the ADB server runs before launching the emulators instead.",
+      "parentUuid": "52a68e28_8e0b5ba6",
+      "range": {
+        "startLine": 367,
+        "startChar": 8,
+        "endLine": 367,
+        "endChar": 12
+      },
+      "revId": "e63bf95afe5b5e619700d408cc59a0953f15591d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12da56a9_cc69dff9",
+        "filename": "android/sockets.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1270,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-03-04T21:17:56Z",
+      "side": 1,
+      "message": "It looks like the problem is really that socket_connect() will retry on EINTR, while the socket is already connected. It might be better to fix socket_connect() in this case.",
+      "revId": "e63bf95afe5b5e619700d408cc59a0953f15591d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
