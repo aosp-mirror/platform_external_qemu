@@ -121,6 +121,30 @@
     },
     {
       "key": {
+        "uuid": "52a68e28_6e98afbf",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1068239
+      },
+      "writtenOn": "2015-03-04T21:27:04Z",
+      "side": 1,
+      "message": "Ok, I\u0027ll rollback this. But it was useful to me to have emulators exiting during CI (because, it makes me able to validate that this connect EINTR/EISCONN does not occurs anymore.\nLast word, I think it could happened somewhere else, on other syscalls, as it happens for fork. Maybe some other issues can be related to SIGARLM interruptions.",
+      "parentUuid": "929c86d9_b0a2f6fc",
+      "range": {
+        "startLine": 367,
+        "startChar": 8,
+        "endLine": 367,
+        "endChar": 12
+      },
+      "revId": "e63bf95afe5b5e619700d408cc59a0953f15591d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12da56a9_cc69dff9",
         "filename": "android/sockets.c",
         "patchSetId": 1
