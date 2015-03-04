@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "12da56a9_09d00946",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-03-04T14:24:20Z",
+      "side": 1,
+      "message": "Thanks. I\u0027ve learned a lot from this.",
+      "parentUuid": "12b17657_91c9bc58",
+      "revId": "8911a9dd9d0e9b5edd40ebc0f1cfeb5dd29b860f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "126ed67a_a91c3d66",
         "filename": "android-configure.sh",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-04T10:58:01Z",
       "side": 1,
       "message": "this break isn\u0027t enough to properly stop the outer loop, see solution above.",
+      "revId": "8911a9dd9d0e9b5edd40ebc0f1cfeb5dd29b860f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12da56a9_c9e43129",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-03-04T14:24:20Z",
+      "side": 1,
+      "message": "Good catch - I\u0027m embarrassed. Is \"break 2\" an acceptable alternative?",
+      "parentUuid": "126ed67a_a91c3d66",
       "revId": "8911a9dd9d0e9b5edd40ebc0f1cfeb5dd29b860f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
