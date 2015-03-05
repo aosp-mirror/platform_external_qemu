@@ -33,6 +33,7 @@ host_common_SRC_FILES := \
     RenderThreadInfo.cpp \
     render_api.cpp \
     RenderWindow.cpp \
+    TextureDraw.cpp \
     WindowSurface.cpp \
 
 host_common_CFLAGS :=
