@@ -17,8 +17,8 @@
 
 #include "EGLDispatch.h"
 #include "FrameBuffer.h"
-#include "GL2Dispatch.h"
-#include "GLDispatch.h"
+#include "GLESv2Dispatch.h"
+#include "GLESv1Dispatch.h"
 #include "ReadBuffer.h"
 #include "RenderControl.h"
 #include "RenderThreadInfo.h"
@@ -50,8 +50,8 @@ intptr_t RenderThread::main() {
     //
     // initialize decoders
     //
-    tInfo.m_glDec.initGL(gl_dispatch_get_proc_func, NULL);
-    tInfo.m_gl2Dec.initGL(gl2_dispatch_get_proc_func, NULL);
+    tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, NULL);
+    tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, NULL);
     initRenderControlContext(&tInfo.m_rcDec);
 
     ReadBuffer readBuf(m_stream, STREAM_BUFFER_SIZE);

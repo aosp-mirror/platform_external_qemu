@@ -296,4 +296,3 @@ GL_ENTRY(GLboolean, glExtIsProgramBinaryQCOM, GLuint program)
 GL_ENTRY(void, glExtGetProgramBinarySourceQCOM, GLuint program, GLenum shadertype, GLchar *source, GLint *length)
 GL_ENTRY(void, glStartTilingQCOM, GLuint x, GLuint y, GLuint width, GLuint height, GLbitfield preserveMask)
 GL_ENTRY(void, glEndTilingQCOM, GLbitfield preserveMask)
-
