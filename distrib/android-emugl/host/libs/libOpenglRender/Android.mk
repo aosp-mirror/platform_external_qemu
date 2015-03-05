@@ -23,8 +23,8 @@ host_common_SRC_FILES := \
     EGLDispatch.cpp \
     FBConfig.cpp \
     FrameBuffer.cpp \
-    GLDispatch.cpp \
-    GL2Dispatch.cpp \
+    GLESv1Dispatch.cpp \
+    GLESv2Dispatch.cpp \
     ReadBuffer.cpp \
     RenderContext.cpp \
     RenderControl.cpp \

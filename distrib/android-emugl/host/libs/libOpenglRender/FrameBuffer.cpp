@@ -18,8 +18,8 @@
 
 #include "EGLDispatch.h"
 #include "FBConfig.h"
-#include "GLDispatch.h"
-#include "GL2Dispatch.h"
+#include "GLESv1Dispatch.h"
+#include "GLESv2Dispatch.h"
 #include "NativeSubWindow.h"
 #include "RenderThreadInfo.h"
 #include "TimeUtils.h"

@@ -17,8 +17,8 @@
 
 #include "EGLDispatch.h"
 #include "FrameBuffer.h"
-#include "GL2Dispatch.h"
-#include "GLDispatch.h"
+#include "GLESv2Dispatch.h"
+#include "GLESv1Dispatch.h"
 #include "ReadBuffer.h"
 #include "RenderControl.h"
 #include "RenderThreadInfo.h"

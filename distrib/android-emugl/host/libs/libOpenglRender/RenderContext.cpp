@@ -17,7 +17,7 @@
 #include "FBConfig.h"
 #include "FrameBuffer.h"
 #include "EGLDispatch.h"
-#include "GLDispatch.h"
+#include "GLESv1Dispatch.h"
 
 RenderContext *RenderContext::create(int p_config,
                                      RenderContextPtr p_shareContext,

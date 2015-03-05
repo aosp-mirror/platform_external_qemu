@@ -17,10 +17,10 @@
 
 #include "EGLDispatch.h"
 #include "FrameBuffer.h"
-#include "GLDispatch.h"
+#include "GLESv1Dispatch.h"
 #include "GLcommon/GLutils.h"
 #ifdef WITH_GLES2
-#include "GL2Dispatch.h"
+#include "GLESv2Dispatch.h"
 #endif
 #include "RenderThreadInfo.h"
 #include <stdio.h>

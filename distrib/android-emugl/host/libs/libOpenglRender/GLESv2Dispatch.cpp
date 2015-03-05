@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 #ifdef WITH_GLES2
-#include "GL2Dispatch.h"
+#include "GLESv2Dispatch.h"
 #include <stdio.h>
 #include <stdlib.h>
 
