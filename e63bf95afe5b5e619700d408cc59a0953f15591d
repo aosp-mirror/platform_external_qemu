@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "d22fde6e_272fda8b",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1068239
+      },
+      "writtenOn": "2015-03-05T10:05:12Z",
+      "side": 1,
+      "message": "So I have to make :\n    SOCKET_CALL(connect(fd,addr.sa,addrlen));\nbecome :\n    SOCKET_CALL(socket_connect_no_sigalrm(fd,addr.sa,addrlen));\nin sockets.c",
+      "parentUuid": "52a68e28_3128c8b2",
+      "range": {
+        "startLine": 364,
+        "startChar": 4,
+        "endLine": 364,
+        "endChar": 65
+      },
+      "revId": "e63bf95afe5b5e619700d408cc59a0953f15591d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7299d2f8_3c7c3137",
         "filename": "android/qemu-setup.c",
         "patchSetId": 1
