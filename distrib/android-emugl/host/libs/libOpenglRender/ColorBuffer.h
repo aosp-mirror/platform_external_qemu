@@ -42,7 +42,6 @@ public:
 
 private:
     ColorBuffer();
-    void drawTexQuad();
     bool bind_fbo();  // binds a fbo which have this texture as render target
 
 private:
