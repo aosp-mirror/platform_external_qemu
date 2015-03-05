@@ -1,6 +1,6 @@
 GLOBAL
 	base_opcode 1024
-	encoder_headers "glUtils.h" "GLEncoderUtils.h"
+	encoder_headers "glUtils.h" "GLESv1EncoderUtils.h"
 	
 #void glClipPlanef(GLenum plane, GLfloat *equation)
 glClipPlanef
