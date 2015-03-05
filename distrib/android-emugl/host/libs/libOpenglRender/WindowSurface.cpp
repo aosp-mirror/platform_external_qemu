@@ -18,8 +18,8 @@
 #include "FrameBuffer.h"
 #include <GLES/glext.h>
 #include "EGLDispatch.h"
-#include "GLDispatch.h"
-#include "GL2Dispatch.h"
+#include "GLESv1Dispatch.h"
+#include "GLESv2Dispatch.h"
 #include <stdio.h>
 #include <string.h>
 #include "GLErrorLog.h"

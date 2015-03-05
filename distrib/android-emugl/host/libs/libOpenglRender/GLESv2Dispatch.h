@@ -13,8 +13,19 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef __GL_TYPES__H
-#define __GL_TYPES__H
+#ifndef _GLES_V2_DISPATCH_H
+#define _GLES_V2_DISPATCH_H
 
-#include "gl_base_types.h"
+#ifdef WITH_GLES2
+
+#include "gles2_dec.h"
+
+bool init_gles2_dispatch();
+void *gles2_dispatch_get_proc_func(const char *name, void *userData);
+
+extern gles2_decoder_context_t s_gles2;
+extern int                     s_gles2_enabled;
+
 #endif
+
+#endif  // _GLES_V2_DISPATCH_H
