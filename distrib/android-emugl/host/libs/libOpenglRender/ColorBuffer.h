@@ -34,7 +34,7 @@ public:
 
     void readPixels(int x, int y, int width, int height, GLenum p_format, GLenum p_type, void *pixels);
     void subUpdate(int x, int y, int width, int height, GLenum p_format, GLenum p_type, void *pixels);
-    bool post();
+    bool post(float rotation);
     bool bindToTexture();
     bool bindToRenderbuffer();
     bool blitFromCurrentReadBuffer();
@@ -42,7 +42,6 @@ public:
 
 private:
     ColorBuffer();
-    void drawTexQuad();
     bool bind_fbo();  // binds a fbo which have this texture as render target
 
 private:
