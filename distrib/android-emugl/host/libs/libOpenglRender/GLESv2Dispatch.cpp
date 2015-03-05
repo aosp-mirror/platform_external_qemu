@@ -13,8 +13,8 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifdef WITH_GLES2
 #include "GLESv2Dispatch.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -61,5 +61,3 @@ void *gles2_dispatch_get_proc_func(const char *name, void *userData)
     }
     return (void *)s_gles2_lib->findSymbol(name);
 }
-
-#endif

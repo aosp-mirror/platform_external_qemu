@@ -29,7 +29,6 @@
 FrameBuffer *FrameBuffer::s_theFrameBuffer = NULL;
 HandleType FrameBuffer::s_nextHandle = 0;
 
-#ifdef WITH_GLES2
 static char* getGLES2ExtensionString(EGLDisplay p_dpy)
 {
     EGLConfig config;
@@ -87,7 +86,6 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy)
 
     return extString;
 }
-#endif
 
 void FrameBuffer::finalize(){
     if(s_theFrameBuffer){
@@ -118,7 +116,6 @@ bool FrameBuffer::initialize(int width, int height)
         return false;
     }
 
-#ifdef WITH_GLES2
     //
     // Try to load GLES2 Plugin, not mandatory
     //
@@ -128,9 +125,6 @@ bool FrameBuffer::initialize(int width, int height)
     else {
         fb->m_caps.hasGL2 = s_gles2_enabled;
     }
-#else
-    fb->m_caps.hasGL2 = false;
-#endif
 
     //
     // Initialize backend EGL display
@@ -156,7 +150,6 @@ bool FrameBuffer::initialize(int width, int height)
     // get GLES2 extension string
     //
     char* gl2Extensions = NULL;
-#ifdef WITH_GLES2
     if (fb->m_caps.hasGL2) {
         gl2Extensions = getGLES2ExtensionString(fb->m_eglDisplay);
         if (!gl2Extensions) {
@@ -164,7 +157,6 @@ bool FrameBuffer::initialize(int width, int height)
             fb->m_caps.hasGL2 = false;
         }
     }
-#endif
 
     //
     // Create EGL context for framebuffer post rendering.
