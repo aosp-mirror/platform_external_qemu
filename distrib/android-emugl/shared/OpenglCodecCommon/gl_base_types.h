@@ -22,8 +22,8 @@
 #define gles1_APIENTRY KHRONOS_APIENTRY
 #endif
 
-#ifndef gl2_APIENTRY
-#define gl2_APIENTRY KHRONOS_APIENTRY
+#ifndef gles2_APIENTRY
+#define gles2_APIENTRY KHRONOS_APIENTRY
 #endif
 
 typedef void             GLvoid;
