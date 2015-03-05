@@ -20,11 +20,11 @@
 
 #include "gles2_dec.h"
 
-bool init_gl2_dispatch();
-void *gl2_dispatch_get_proc_func(const char *name, void *userData);
+bool init_gles2_dispatch();
+void *gles2_dispatch_get_proc_func(const char *name, void *userData);
 
-extern gles2_decoder_context_t s_gl2;
-extern int                     s_gl2_enabled;
+extern gles2_decoder_context_t s_gles2;
+extern int                     s_gles2_enabled;
 
 #endif
 

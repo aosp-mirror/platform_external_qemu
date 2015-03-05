@@ -20,8 +20,8 @@
 
 #include "emugl/common/shared_library.h"
 
-gles2_decoder_context_t s_gl2;
-int                     s_gl2_enabled;
+gles2_decoder_context_t s_gles2;
+int                     s_gles2_enabled;
 
 static emugl::SharedLibrary *s_gles2_lib = NULL;
 
@@ -31,7 +31,7 @@ static emugl::SharedLibrary *s_gles2_lib = NULL;
 // This function is called only once during initialiation before
 // any thread has been created - hence it should NOT be thread safe.
 //
-bool init_gl2_dispatch()
+bool init_gles2_dispatch()
 {
     const char *libName = getenv("ANDROID_GLESv2_LIB");
     if (!libName) libName = DEFAULT_GLES_V2_LIB;
@@ -45,8 +45,8 @@ bool init_gl2_dispatch()
     //
     // init the GLES dispatch table
     //
-    s_gl2.initDispatchByName( gl2_dispatch_get_proc_func, NULL );
-    s_gl2_enabled = true;
+    s_gles2.initDispatchByName(gles2_dispatch_get_proc_func, NULL);
+    s_gles2_enabled = true;
     return true;
 }
 
@@ -54,7 +54,7 @@ bool init_gl2_dispatch()
 // This function is called only during initialiation before
 // any thread has been created - hence it should NOT be thread safe.
 //
-void *gl2_dispatch_get_proc_func(const char *name, void *userData)
+void *gles2_dispatch_get_proc_func(const char *name, void *userData)
 {
     if (!s_gles2_lib) {
         return NULL;

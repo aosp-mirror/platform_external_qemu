@@ -78,7 +78,7 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy)
     }
 
     // the string pointer may become invalid when the context is destroyed
-    const char* s = (const char*)s_gl2.glGetString(GL_EXTENSIONS);
+    const char* s = (const char*)s_gles2.glGetString(GL_EXTENSIONS);
     char* extString = strdup(s ? s : "");
 
     s_egl.eglMakeCurrent(p_dpy, NULL, NULL, NULL);
@@ -126,7 +126,7 @@ bool FrameBuffer::initialize(int width, int height)
         fb->m_caps.hasGL2 = false;
     }
     else {
-        fb->m_caps.hasGL2 = s_gl2_enabled;
+        fb->m_caps.hasGL2 = s_gles2_enabled;
     }
 #else
     fb->m_caps.hasGL2 = false;

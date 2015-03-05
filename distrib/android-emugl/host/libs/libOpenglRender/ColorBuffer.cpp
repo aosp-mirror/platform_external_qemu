@@ -182,11 +182,11 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
     GLuint tmpTex;
     GLint currTexBind;
     if (tInfo->currContext->isGL2()) {
-        s_gl2.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
-        s_gl2.glGenTextures(1,&tmpTex);
-        s_gl2.glBindTexture(GL_TEXTURE_2D, tmpTex);
-        s_gl2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
-        s_gl2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
+        s_gles2.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
+        s_gles2.glGenTextures(1,&tmpTex);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
+        s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
+        s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
                                   m_width, m_height);
     }
     else {
@@ -241,8 +241,8 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
     // inside the current context
     //
     if (tInfo->currContext->isGL2()) {
-        s_gl2.glDeleteTextures(1, &tmpTex);
-        s_gl2.glBindTexture(GL_TEXTURE_2D, currTexBind);
+        s_gles2.glDeleteTextures(1, &tmpTex);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
     else {
         s_gles1.glDeleteTextures(1, &tmpTex);
@@ -259,7 +259,7 @@ bool ColorBuffer::bindToTexture()
         if (tInfo->currContext.Ptr()) {
 #ifdef WITH_GLES2
             if (tInfo->currContext->isGL2()) {
-                s_gl2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
+                s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
             }
             else {
                 s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
@@ -280,7 +280,7 @@ bool ColorBuffer::bindToRenderbuffer()
         if (tInfo->currContext.Ptr()) {
 #ifdef WITH_GLES2
             if (tInfo->currContext->isGL2()) {
-                s_gl2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
+                s_gles2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
             }
             else {
                 s_gles1.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);

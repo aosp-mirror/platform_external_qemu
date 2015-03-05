@@ -62,7 +62,7 @@ int initLibrary(void)
     }
 
     /* failure to init the GLES2 dispatch table is not fatal */
-    init_gl2_dispatch();
+    init_gles2_dispatch();
 
     return true;
 }
