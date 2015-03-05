@@ -188,7 +188,7 @@ list_files_under () {
     local FILTER FILE FILES TMP_LIST
     TMP_LIST=$(mktemp)
     for FILTER in "$FILTERS"; do
-        FILES=$((cd "$TOP_DIR" && ls -d $FILTER) 2>/dev/null || true)
+        FILES=$( (cd "$TOP_DIR" && ls -d $FILTER) 2>/dev/null || true)
         for FILE in $FILES; do
             (cd "$TOP_DIR" && find "$FILE" -type f -o -type l 2>/dev/null || true) >> $TMP_LIST
         done
