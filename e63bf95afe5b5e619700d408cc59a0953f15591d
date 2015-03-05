@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "52a68e28_3128c8b2",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-03-05T09:20:50Z",
+      "side": 1,
+      "message": "We should just put the BEGIN_/END_NOSIGALRM in socket_connect(), it\u0027s likely that the interrupt could happen before or after the actual connection and that there is no easy way to tell after receiving an EINTR :-/",
+      "parentUuid": "d742704b_ef2861b3",
+      "range": {
+        "startLine": 364,
+        "startChar": 4,
+        "endLine": 364,
+        "endChar": 65
+      },
+      "revId": "e63bf95afe5b5e619700d408cc59a0953f15591d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7299d2f8_3c7c3137",
         "filename": "android/qemu-setup.c",
         "patchSetId": 1
