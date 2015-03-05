@@ -31,8 +31,10 @@ EMUGL_COMMON_CFLAGS += -D__STDC_LIMIT_MACROS=1
 # Define EMUGL_BUILD_DEBUG=1 in your environment to build a
 # debug version of the EmuGL host binaries.
 ifneq (,$(strip $(EMUGL_BUILD_DEBUG)))
-EMUGL_COMMON_CFLAGS += -O0 -g -DEMUGL_DEBUG=1
+EMUGL_COMMON_CFLAGS += -O0 -ggdb -DEMUGL_DEBUG=1
 endif
+
+EMUGL_COMMON_CFLAGS += -O0 -ggdb -DEMUGL_DEBUG=1
 
 # Uncomment the following line if you want to enable debug traces
 # in the GLES emulation libraries.
