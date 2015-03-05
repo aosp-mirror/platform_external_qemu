@@ -14,7 +14,8 @@
 * limitations under the License.
 */
 
-#include "GL2Decoder.h"
+#include "GLESv2Decoder.h"
+
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -23,20 +24,20 @@ static inline void* SafePointerFromUInt(GLuint value) {
   return (void*)(uintptr_t)value;
 }
 
-GL2Decoder::GL2Decoder()
+GLESv2Decoder::GLESv2Decoder()
 {
     m_contextData = NULL;
     m_GL2library = NULL;
 }
 
-GL2Decoder::~GL2Decoder()
+GLESv2Decoder::~GLESv2Decoder()
 {
     delete m_GL2library;
 }
 
-void *GL2Decoder::s_getProc(const char *name, void *userData)
+void *GLESv2Decoder::s_getProc(const char *name, void *userData)
 {
-    GL2Decoder *ctx = (GL2Decoder *) userData;
+    GLESv2Decoder *ctx = (GLESv2Decoder *) userData;
 
     if (ctx == NULL || ctx->m_GL2library == NULL) {
         return NULL;
@@ -52,7 +53,7 @@ void *GL2Decoder::s_getProc(const char *name, void *userData)
     return func;
 }
 
-int GL2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
+int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 {
     if (getProcFunc == NULL) {
         const char *libname = GLES2_LIBNAME;
@@ -82,16 +83,16 @@ int GL2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 
 }
 
-int GL2Decoder::s_glFinishRoundTrip(void *self)
+int GLESv2Decoder::s_glFinishRoundTrip(void *self)
 {
-    GL2Decoder *ctx = (GL2Decoder *)self;
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glFinish();
     return 0;
 }
 
-void GL2Decoder::s_glGetCompressedTextureFormats(void *self, int count, GLint *formats)
+void GLESv2Decoder::s_glGetCompressedTextureFormats(void *self, int count, GLint *formats)
 {
-    GL2Decoder *ctx = (GL2Decoder *) self;
+    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
 
     int nFormats;
     ctx->glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &nFormats);
@@ -102,10 +103,10 @@ void GL2Decoder::s_glGetCompressedTextureFormats(void *self, int count, GLint *f
     }
 }
 
-void GL2Decoder::s_glVertexAttribPointerData(void *self, GLuint indx, GLint size, GLenum type,
+void GLESv2Decoder::s_glVertexAttribPointerData(void *self, GLuint indx, GLint size, GLenum type,
                                              GLboolean normalized, GLsizei stride,  void * data, GLuint datalen)
 {
-    GL2Decoder *ctx = (GL2Decoder *) self;
+    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
     if (ctx->m_contextData != NULL) {
         ctx->m_contextData->storePointerData(indx, data, datalen);
         // note - the stride of the data is always zero when it comes out of the codec.
@@ -114,29 +115,29 @@ void GL2Decoder::s_glVertexAttribPointerData(void *self, GLuint indx, GLint size
     }
 }
 
-void GL2Decoder::s_glVertexAttribPointerOffset(void *self, GLuint indx, GLint size, GLenum type,
+void GLESv2Decoder::s_glVertexAttribPointerOffset(void *self, GLuint indx, GLint size, GLenum type,
                                                GLboolean normalized, GLsizei stride,  GLuint data)
 {
-    GL2Decoder *ctx = (GL2Decoder *) self;
+    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
     ctx->glVertexAttribPointer(indx, size, type, normalized, stride, SafePointerFromUInt(data));
 }
 
 
-void GL2Decoder::s_glDrawElementsData(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen)
+void GLESv2Decoder::s_glDrawElementsData(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen)
 {
-    GL2Decoder *ctx = (GL2Decoder *)self;
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElements(mode, count, type, data);
 }
 
 
-void GL2Decoder::s_glDrawElementsOffset(void *self, GLenum mode, GLsizei count, GLenum type, GLuint offset)
+void GLESv2Decoder::s_glDrawElementsOffset(void *self, GLenum mode, GLsizei count, GLenum type, GLuint offset)
 {
-    GL2Decoder *ctx = (GL2Decoder *)self;
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElements(mode, count, type, SafePointerFromUInt(offset));
 }
 
-void GL2Decoder::s_glShaderString(void *self, GLuint shader, const GLchar* string, GLsizei len)
+void GLESv2Decoder::s_glShaderString(void *self, GLuint shader, const GLchar* string, GLsizei len)
 {
-    GL2Decoder *ctx = (GL2Decoder *)self;
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glShaderSource(shader, 1, &string, NULL);
 }

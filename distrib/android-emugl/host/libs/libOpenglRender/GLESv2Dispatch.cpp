@@ -20,8 +20,8 @@
 
 #include "emugl/common/shared_library.h"
 
-gl2_decoder_context_t s_gl2;
-int                   s_gl2_enabled;
+gles2_decoder_context_t s_gl2;
+int                     s_gl2_enabled;
 
 static emugl::SharedLibrary *s_gles2_lib = NULL;
 

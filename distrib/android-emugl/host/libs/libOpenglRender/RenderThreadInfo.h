@@ -19,7 +19,7 @@
 #include "RenderContext.h"
 #include "WindowSurface.h"
 #include "GLESv1Decoder.h"
-#include "GL2Decoder.h"
+#include "GLESv2Decoder.h"
 #include "renderControl_dec.h"
 
 #include <set>
@@ -48,7 +48,7 @@ struct RenderThreadInfo {
 
     // Decoder states.
     GLESv1Decoder                   m_glDec;
-    GL2Decoder                      m_gl2Dec;
+    GLESv2Decoder                   m_gl2Dec;
     renderControl_decoder_context_t m_rcDec;
 
     // all the contexts that are created by this render thread
