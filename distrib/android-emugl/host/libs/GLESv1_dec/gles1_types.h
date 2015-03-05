@@ -13,8 +13,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef __GL_TYPES__H
-#define __GL_TYPES__H
+#ifndef __GLES1_TYPES__H
+#define __GLES1_TYPES__H
 
 #include "gl_base_types.h"
-#endif
+
+#endif  // __GLES1_TYPES__H
