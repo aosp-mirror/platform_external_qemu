@@ -28,8 +28,8 @@
 #endif
 
 #include "EGLDispatch.h"
-#include "GLDispatch.h"
-#include "GL2Dispatch.h"
+#include "GLESv1Dispatch.h"
+#include "GLESv2Dispatch.h"
 
 #include <string.h>
 

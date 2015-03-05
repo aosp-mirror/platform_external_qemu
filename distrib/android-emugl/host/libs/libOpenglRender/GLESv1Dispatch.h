@@ -13,8 +13,8 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _GLES_DISPATCH_H
-#define _GLES_DISPATCH_H
+#ifndef _GLES_V1_DISPATCH_H
+#define _GLES_V1_DISPATCH_H
 
 #include "gl_proc.h"
 
@@ -297,4 +297,5 @@ bool init_gl_dispatch();
 void *gl_dispatch_get_proc_func(const char *name, void *userData);
 
 extern GLDispatch s_gl;
-#endif
+
+#endif  // _GLES_V1_DISPATCH_H

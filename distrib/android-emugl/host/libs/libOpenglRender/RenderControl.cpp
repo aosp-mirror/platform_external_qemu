@@ -18,8 +18,8 @@
 #include "FBConfig.h"
 #include "FrameBuffer.h"
 #include "EGLDispatch.h"
-#include "GL2Dispatch.h"
-#include "GLDispatch.h"
+#include "GLESv2Dispatch.h"
+#include "GLESv1Dispatch.h"
 #include "RenderThreadInfo.h"
 
 static const GLint rendererVersion = 1;
