@@ -55,9 +55,9 @@ int initLibrary(void)
     //
     // Load GLES Plugin
     //
-    if (!init_gl_dispatch()) {
+    if (!init_gles1_dispatch()) {
         // Failed to load GLES
-        ERR("Failed to init_gl_dispatch\n");
+        ERR("Failed to init_gles1_dispatch\n");
         return false;
     }
 

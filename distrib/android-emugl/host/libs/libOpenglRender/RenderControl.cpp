@@ -76,7 +76,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
     else {
 #endif
-        str = (const char *)s_gl.glGetString(name);
+        str = (const char *)s_gles1.glGetString(name);
 #ifdef WITH_GLES2
     }
 #endif

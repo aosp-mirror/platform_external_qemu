@@ -50,7 +50,7 @@ intptr_t RenderThread::main() {
     //
     // initialize decoders
     //
-    tInfo.m_glDec.initGL(gl_dispatch_get_proc_func, NULL);
+    tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, NULL);
     tInfo.m_gl2Dec.initGL(gl2_dispatch_get_proc_func, NULL);
     initRenderControlContext(&tInfo.m_rcDec);
 

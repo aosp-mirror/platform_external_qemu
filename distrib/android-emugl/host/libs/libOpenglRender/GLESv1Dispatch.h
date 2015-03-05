@@ -19,7 +19,7 @@
 #include "gl_proc.h"
 
 
-struct GLDispatch {
+struct GLESv1Dispatch {
     glAlphaFunc_t glAlphaFunc;
     glClearColor_t glClearColor;
     glClearDepthf_t glClearDepthf;
@@ -293,9 +293,9 @@ struct GLDispatch {
     glEndTilingQCOM_t glEndTilingQCOM;
 };
 
-bool init_gl_dispatch();
-void *gl_dispatch_get_proc_func(const char *name, void *userData);
+bool init_gles1_dispatch();
+void *gles1_dispatch_get_proc_func(const char *name, void *userData);
 
-extern GLDispatch s_gl;
+extern GLESv1Dispatch s_gles1;
 
 #endif  // _GLES_V1_DISPATCH_H
