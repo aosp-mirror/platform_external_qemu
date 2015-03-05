@@ -39,7 +39,6 @@ typedef std::map<HandleType, ColorBufferRef> ColorBufferMap;
 
 struct FrameBufferCaps
 {
-    bool hasGL2;
     bool has_eglimage_texture_2d;
     bool has_eglimage_renderbuffer;
     EGLint eglMajor;

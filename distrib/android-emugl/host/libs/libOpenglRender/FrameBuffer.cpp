@@ -117,16 +117,6 @@ bool FrameBuffer::initialize(int width, int height)
     }
 
     //
-    // Try to load GLES2 Plugin, not mandatory
-    //
-    if (getenv("ANDROID_NO_GLES2")) {
-        fb->m_caps.hasGL2 = false;
-    }
-    else {
-        fb->m_caps.hasGL2 = s_gles2_enabled;
-    }
-
-    //
     // Initialize backend EGL display
     //
     fb->m_eglDisplay = s_egl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -150,12 +140,12 @@ bool FrameBuffer::initialize(int width, int height)
     // get GLES2 extension string
     //
     char* gl2Extensions = NULL;
-    if (fb->m_caps.hasGL2) {
-        gl2Extensions = getGLES2ExtensionString(fb->m_eglDisplay);
-        if (!gl2Extensions) {
-            // Could not create GLES2 context - drop GL2 capability
-            fb->m_caps.hasGL2 = false;
-        }
+    gl2Extensions = getGLES2ExtensionString(fb->m_eglDisplay);
+    if (!gl2Extensions) {
+        // Could not create GLES2 context - drop GL2 capability
+        ERR("Failed to obtain GLES 2.x extensions string!\n");
+        delete fb;
+        return false;
     }
 
     //
@@ -251,13 +241,13 @@ bool FrameBuffer::initialize(int width, int height)
     //
     // Initilize framebuffer capabilities
     //
-    const char *glExtensions = (const char *)s_gles1.glGetString(GL_EXTENSIONS);
+    const char* glExtensions = (const char *)s_gles1.glGetString(GL_EXTENSIONS);
     bool has_gl_oes_image = false;
     if (glExtensions) {
         has_gl_oes_image = strstr(glExtensions, "GL_OES_EGL_image") != NULL;
     }
 
-    if (fb->m_caps.hasGL2 && has_gl_oes_image) {
+    if (has_gl_oes_image) {
         has_gl_oes_image &= strstr(gl2Extensions, "GL_OES_EGL_image") != NULL;
     }
     free(gl2Extensions);
@@ -319,6 +309,7 @@ bool FrameBuffer::initialize(int width, int height)
     // Fail initialization if no GLES configs exist
     //
     if (nGLConfigs == 0) {
+        ERR("Failed: No GLES 1.x configs found!\n");
         delete fb;
         return false;
     }
@@ -327,7 +318,9 @@ bool FrameBuffer::initialize(int width, int height)
     // If no GLES2 configs exist - not GLES2 capability
     //
     if (nGL2Configs == 0) {
-        fb->m_caps.hasGL2 = false;
+        ERR("Failed: No GLES 2.x configs found!\n");
+        delete fb;
+        return false;
     }
 
     //
