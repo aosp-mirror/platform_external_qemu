@@ -13,18 +13,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _GLES2_DISPATCH_H
-#define _GLES2_DISPATCH_H
+#ifndef _GLES_V1_DISPATCH_H
+#define _GLES_V1_DISPATCH_H
 
-#ifdef WITH_GLES2
+#include "gles1_dec.h"
 
-#include "gl2_dec.h"
+bool init_gles1_dispatch();
+void *gles1_dispatch_get_proc_func(const char *name, void *userData);
 
-bool init_gl2_dispatch();
-void *gl2_dispatch_get_proc_func(const char *name, void *userData);
+extern gles1_decoder_context_t s_gles1;
 
-extern gl2_decoder_context_t s_gl2;
-extern int                   s_gl2_enabled;
-
-#endif
-#endif
+#endif  // _GLES_V1_DISPATCH_H

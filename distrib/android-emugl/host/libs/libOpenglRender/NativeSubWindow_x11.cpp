@@ -17,10 +17,9 @@
 
 #include <stdio.h>
 
-static Bool WaitForMapNotify(Display *d, XEvent *e, char *arg)
-{
+static Bool WaitForMapNotify(Display *d, XEvent *e, char *arg) {
     if (e->type == MapNotify && e->xmap.window == (Window)arg) {
-	    return 1;
+        return 1;
     }
     return 0;
 }
@@ -28,23 +27,39 @@ static Bool WaitForMapNotify(Display *d, XEvent *e, char *arg)
 static Display *s_display = NULL;
 
 EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
-                                    EGLNativeDisplayType* display_out,
-                                    int x, int y,int width, int height){
-
+                                    int x,
+                                    int y,
+                                    int width,
+                                    int height) {
    // The call to this function is protected by a lock
    // in FrameBuffer so it is safe to check and initialize s_display here
-   if (!s_display) s_display = XOpenDisplay(NULL);
-   *display_out = s_display;
+   if (!s_display) {
+       s_display = XOpenDisplay(NULL);
+   }
 
     XSetWindowAttributes wa;
     wa.event_mask = StructureNotifyMask;
-    Window win = XCreateWindow(*display_out,p_window,x,y, width,height,0,CopyFromParent,CopyFromParent,CopyFromParent,CWEventMask,&wa);
-    XMapWindow(*display_out,win);
+    Window win = XCreateWindow(s_display,
+                               p_window,
+                               x,
+                               y,
+                               width,
+                               height,
+                               0,
+                               CopyFromParent,
+                               CopyFromParent,
+                               CopyFromParent,
+                               CWEventMask,
+                               &wa);
+    XMapWindow(s_display,win);
     XEvent e;
-    XIfEvent(*display_out, &e, WaitForMapNotify, (char *)win);
+    XIfEvent(s_display, &e, WaitForMapNotify, (char *)win);
     return win;
 }
 
-void destroySubWindow(EGLNativeDisplayType dis,EGLNativeWindowType win){
-    XDestroyWindow(dis, win);
+void destroySubWindow(EGLNativeWindowType win) {
+    if (!s_display) {
+        return;
+    }
+    XDestroyWindow(s_display, win);
 }

@@ -17,7 +17,6 @@
 #define _LIB_OPENGL_RENDER_RENDER_THREAD_H
 
 #include "IOStream.h"
-#include "GLDecoder.h"
 
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"

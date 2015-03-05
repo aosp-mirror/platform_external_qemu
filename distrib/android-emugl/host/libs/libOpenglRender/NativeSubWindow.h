@@ -24,12 +24,24 @@
 extern "C" {
 #endif
 
+// Create a new sub-window that will be used to display the content of the
+// emulated GPU on top of the regular UI window.
+// |p_window| is the platform-specific handle to the main UI window.
+// |x|, |y| is the position sub-window relative to the top-left corner of the
+// main window.
+// |width| and |height| are the dimensions of the sub-window, as well as of
+// the emulated framebuffer.
+// On success, return a new platform-specific window handle, cast as an
+// EGLNativeWindowType. Or 0/NULL in case of failure.
 EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
-                                    EGLNativeDisplayType* display_out,
-                                    int x, int y,int width, int height);
+                                    int x,
+                                    int y,
+                                    int width,
+                                    int height);
 
 
-void destroySubWindow(EGLNativeDisplayType dis,EGLNativeWindowType win);
+// Destroy a sub-window previously created through createSubWindow() above.
+void destroySubWindow(EGLNativeWindowType win);
 
 #ifdef __cplusplus
 }

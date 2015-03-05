@@ -28,8 +28,8 @@
 #endif
 
 #include "EGLDispatch.h"
-#include "GLDispatch.h"
-#include "GL2Dispatch.h"
+#include "GLESv1Dispatch.h"
+#include "GLESv2Dispatch.h"
 
 #include <string.h>
 
@@ -55,14 +55,14 @@ int initLibrary(void)
     //
     // Load GLES Plugin
     //
-    if (!init_gl_dispatch()) {
+    if (!init_gles1_dispatch()) {
         // Failed to load GLES
-        ERR("Failed to init_gl_dispatch\n");
+        ERR("Failed to init_gles1_dispatch\n");
         return false;
     }
 
     /* failure to init the GLES2 dispatch table is not fatal */
-    init_gl2_dispatch();
+    init_gles2_dispatch();
 
     return true;
 }

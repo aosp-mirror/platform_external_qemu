@@ -22,7 +22,6 @@ LRESULT CALLBACK myWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 }
 
 EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
-                                    EGLNativeDisplayType* display_out,
                                     int x, int y,int width, int height){
     WNDCLASS wc;
     wc.style =  CS_OWNDC |CS_HREDRAW |CS_VREDRAW;  // redraw if size changes
@@ -52,6 +51,6 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
     return ret;
 }
 
-void destroySubWindow(EGLNativeDisplayType dis,EGLNativeWindowType win){
+void destroySubWindow(EGLNativeWindowType win){
     PostMessage(win, WM_CLOSE, 0, 0);
 }
