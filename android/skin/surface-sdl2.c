@@ -360,6 +360,9 @@ skin_surface_create_window(int x,
                                   window_flags);
         if (!window) {
             panic("Could not create SDL2 window: %s\n", SDL_GetError());
+        } else {
+    fprintf(stderr, "%s: x=%d y=%d w=%d h=%d original_w=%d original_h=%d is_fullscreen=%d",
+      __FUNCTION__, x, y, w, h, original_w, original_h, is_fullscreen);
         }
         skin_winsys_set_window(window);
     } else {
