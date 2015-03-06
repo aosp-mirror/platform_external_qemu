@@ -70,6 +70,13 @@ user_config_get_window_pos( int *window_x, int *window_y )
 
     if (userConfig)
         auserConfig_getWindowPos(userConfig, window_x, window_y);
+    // when the returned value from userConfig is too small, for example: 0,0
+    // we cannot find the menu bar and cannot move the window out of the
+    // left upper corner.
+    // http://stackoverflow.com/questions/28874061/
+    // android-studio-the-emulator-is-stacked-outside-of-the-screen/28909264#28909264
+    if (*window_x < 10) *window_x = 10;
+    if (*window_y < 10) *window_y = 10;
 }
 
 /***********************************************************************/
