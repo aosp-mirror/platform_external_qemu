@@ -24,6 +24,7 @@
 #include "GLEScmValidate.h"
 #include "GLEScmUtils.h"
 #include <GLcommon/TextureUtils.h>
+#include <OpenglCodecCommon/ErrorLog.h>
 
 #include <stdio.h>
 #include <GLcommon/gldefs.h>
@@ -39,6 +40,7 @@
 extern "C" {
 
 //decleration
+static void initGLESx();
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
@@ -55,18 +57,24 @@ ProcTableMap *s_glesExtensions = NULL;
 
 static EGLiface*  s_eglIface = NULL;
 static GLESiface  s_glesIface = {
-    createGLESContext:createGLESContext,
-    initContext      :initContext,
-    deleteGLESContext:deleteGLESContext,
-    flush            :(FUNCPTR)glFlush,
-    finish           :(FUNCPTR)glFinish,
-    setShareGroup    :setShareGroup,
-    getProcAddress   :getProcAddress
+    .initGLESx         = initGLESx,
+    .createGLESContext = createGLESContext,
+    .initContext       = initContext,
+    .deleteGLESContext = deleteGLESContext,
+    .flush             = (FUNCPTR)glFlush,
+    .finish            = (FUNCPTR)glFinish,
+    .setShareGroup     = setShareGroup,
+    .getProcAddress    = getProcAddress
 };
 
 #include <GLcommon/GLESmacros.h>
 
 extern "C" {
+
+static void initGLESx() {
+    DBG("No special initialization necessary for GLES_CM\n");
+    return;
+}
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     if (!ctx->isInitialized()) {
