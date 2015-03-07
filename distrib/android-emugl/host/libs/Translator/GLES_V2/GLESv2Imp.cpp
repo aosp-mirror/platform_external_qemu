@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <OpenglCodecCommon/ErrorLog.h>
 #include <GLcommon/TranslatorIfaces.h>
 #include <GLcommon/gldefs.h>
 #include "GLESv2Context.h"
@@ -36,6 +37,7 @@
 extern "C" {
 
 //decleration
+static void initGLESx();
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
@@ -52,18 +54,24 @@ ProcTableMap *s_glesExtensions = NULL;
 
 static EGLiface*  s_eglIface = NULL;
 static GLESiface  s_glesIface = {
-    createGLESContext:createGLESContext,
-    initContext      :initContext,
-    deleteGLESContext:deleteGLESContext,
-    flush            :(FUNCPTR)glFlush,
-    finish           :(FUNCPTR)glFinish,
-    setShareGroup    :setShareGroup,
-    getProcAddress   :getProcAddress
+    .initGLESx         = initGLESx,
+    .createGLESContext = createGLESContext,
+    .initContext       = initContext,
+    .deleteGLESContext = deleteGLESContext,
+    .flush             = (FUNCPTR)glFlush,
+    .finish            = (FUNCPTR)glFinish,
+    .setShareGroup     = setShareGroup,
+    .getProcAddress    = getProcAddress
 };
 
 #include <GLcommon/GLESmacros.h>
 
 extern "C" {
+
+static void initGLESx() {
+    DBG("No special initialization necessary for GLES_V2\n");
+    return;
+}
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     if (!ctx->isInitialized()) {
