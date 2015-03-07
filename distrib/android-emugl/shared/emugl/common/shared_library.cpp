@@ -29,85 +29,99 @@ namespace emugl {
 
 // static
 SharedLibrary* SharedLibrary::open(const char* libraryName) {
-    HMODULE lib = LoadLibrary(libraryName);
-    return lib ? new SharedLibrary(lib) : NULL;
+  HMODULE lib = LoadLibrary(libraryName);
+  return lib ? new SharedLibrary(lib) : NULL;
 }
 
 SharedLibrary::SharedLibrary(HandleType lib) : mLib(lib) {}
 
 SharedLibrary::~SharedLibrary() {
-    if (mLib) {
-        FreeLibrary(mLib);
-    }
+  if (mLib) {
+    FreeLibrary(mLib);
+  }
 }
 
 SharedLibrary::FunctionPtr SharedLibrary::findSymbol(
-        const char* symbolName) {
-    if (!mLib || !symbolName) {
-        return NULL;
-    }
-    return reinterpret_cast<FunctionPtr>(
-                GetProcAddress(mLib, symbolName));
+    const char* symbolName) {
+  if (!mLib || !symbolName) {
+    return NULL;
+  }
+  return reinterpret_cast<FunctionPtr>(
+      GetProcAddress(mLib, symbolName));
 }
 
 #else // !_WIN32
 
 // static
 SharedLibrary* SharedLibrary::open(const char* libraryName) {
-    const char* libPath = libraryName;
-    char* path = NULL;
+  const char* libPath = libraryName;
+  char* path = NULL;
 
-    const char* libBaseName = strrchr(libraryName, '/');
-    if (!libBaseName) {
-        libBaseName = libraryName;
-    }
+  const char* libBaseName = strrchr(libraryName, '/');
+  if (!libBaseName) {
+    libBaseName = libraryName;
+  }
 
-    if (!strchr(libBaseName, '.')) {
-        // There is no extension in this library name, so append one.
+  if (!strchr(libBaseName, '.')) {
+    // There is no extension in this library name, so append one.
 #ifdef __APPLE__
-        static const char kDllExtension[] = ".dylib";
+    static const char kDllExtension[] = ".dylib";
 #else
-        static const char kDllExtension[] = ".so";
+    static const char kDllExtension[] = ".so";
 #endif
-        size_t pathLen = strlen(libraryName) + sizeof(kDllExtension);
-        path = static_cast<char*>(malloc(pathLen));
-        snprintf(path, pathLen, "%s%s", libraryName, kDllExtension);
-        libPath = path;
-    }
+    size_t pathLen = strlen(libraryName) + sizeof(kDllExtension);
+    path = static_cast<char*>(malloc(pathLen));
+    snprintf(path, pathLen, "%s%s", libraryName, kDllExtension);
+    libPath = path;
+  }
 
 #ifdef __APPLE__
-    // On OSX, some libraries don't include an extension (notably OpenGL)
-    // On OSX we try to open |libraryName| first.  If that doesn't exist,
-    // we try |libraryName|.dylib
-    void* lib = dlopen(libraryName, RTLD_NOW);
-    if (lib == NULL) {
-        lib = dlopen(libPath, RTLD_NOW);
-    }
+  // On OSX, some libraries don't include an extension (notably OpenGL)
+  // On OSX we try to open |libraryName| first.  If that doesn't exist,
+  // we try |libraryName|.dylib
+  void* lib = dlopen(libraryName, RTLD_NOW);
+  if (lib == NULL) {
+    lib = dlopen(libPath, RTLD_NOW);
+  }
 #else
-    void* lib = dlopen(libPath, RTLD_NOW);
+  void* lib = dlopen(libPath, RTLD_NOW);
 #endif
 
-    if (path) {
-        free(path);
-    }
+  if (path) {
+    free(path);
+  }
 
-    return lib ? new SharedLibrary(lib) : NULL;
+  dlerror(); // clear
+  char *error = NULL;
+  if ((error = dlerror()) != NULL)  {
+    fprintf(stderr, "Could not open shared "
+            "library %s: %s\n", libraryName, error);
+    return NULL;
+  }
+
+  return lib ? new SharedLibrary(lib) : NULL;
 }
 
 SharedLibrary::SharedLibrary(HandleType lib) : mLib(lib) {}
 
 SharedLibrary::~SharedLibrary() {
-    if (mLib) {
-        dlclose(mLib);
-    }
+  if (mLib) {
+    dlclose(mLib);
+  }
 }
 
-SharedLibrary::FunctionPtr SharedLibrary::findSymbol(
-        const char* symbolName) {
-    if (!mLib || !symbolName) {
-        return NULL;
-    }
-    return reinterpret_cast<FunctionPtr>(dlsym(mLib, symbolName));
+SharedLibrary::FunctionPtr SharedLibrary::findSymbol(const char* symbolName) {
+  if (!mLib || !symbolName) {
+    return NULL;
+  }
+  dlerror(); // clear
+  char *error = NULL;
+  if ((error = dlerror()) != NULL)  {
+    fprintf(stderr, "Could not find shared library "
+            "symbol %s: %s\n", symbolName, error);
+    return NULL;
+  }
+  return reinterpret_cast<FunctionPtr>(dlsym(mLib, symbolName));
 }
 
 #endif  // !_WIN32
