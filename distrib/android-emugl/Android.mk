@@ -22,10 +22,6 @@ EMUGL_COMMON_INCLUDES := $(EMUGL_PATH)/host/libs/Translator/include
 endif
 
 # common cflags used by several modules
-# This is always set to a module's LOCAL_CFLAGS
-# See the definition of emugl-begin-module in common.mk
-#
-EMUGL_COMMON_CFLAGS := -DWITH_GLES2
 
 # Needed to ensure SIZE_MAX is properly defined when including <stdint.h>
 EMUGL_COMMON_CFLAGS += -D__STDC_LIMIT_MACROS=1

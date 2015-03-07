@@ -19,9 +19,7 @@
 #include "FrameBuffer.h"
 #include "GLESv1Dispatch.h"
 #include "GLcommon/GLutils.h"
-#ifdef WITH_GLES2
 #include "GLESv2Dispatch.h"
-#endif
 #include "RenderThreadInfo.h"
 #include <stdio.h>
 
@@ -257,16 +255,12 @@ bool ColorBuffer::bindToTexture()
     if (m_eglImage) {
         RenderThreadInfo *tInfo = RenderThreadInfo::get();
         if (tInfo->currContext.Ptr()) {
-#ifdef WITH_GLES2
             if (tInfo->currContext->isGL2()) {
                 s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
             }
             else {
                 s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
             }
-#else
-            s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
-#endif
             return true;
         }
     }
@@ -278,16 +272,12 @@ bool ColorBuffer::bindToRenderbuffer()
     if (m_eglImage) {
         RenderThreadInfo *tInfo = RenderThreadInfo::get();
         if (tInfo->currContext.Ptr()) {
-#ifdef WITH_GLES2
             if (tInfo->currContext->isGL2()) {
                 s_gles2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
             }
             else {
                 s_gles1.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
             }
-#else
-            s_gles1.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
-#endif
             return true;
         }
     }
