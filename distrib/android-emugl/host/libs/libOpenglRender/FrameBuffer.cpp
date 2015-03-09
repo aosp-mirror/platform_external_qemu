@@ -645,7 +645,7 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
 
     ColorBufferMap::iterator c( m_colorbuffers.find(p_colorbuffer) );
     if (c == m_colorbuffers.end()) {
-        ERR("%s: bad color buffer handle %#x\n", __FUNCTION__, p_colorbuffer);
+        DBG("%s: bad color buffer handle %#x\n", __FUNCTION__, p_colorbuffer);
         // bad colorbuffer handle
         return false;
     }
