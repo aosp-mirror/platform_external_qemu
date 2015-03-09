@@ -1010,6 +1010,16 @@ socket_recvfrom(int  fd, void*  buf, int  len, SockAddress*  from)
 }
 
 int
+socket_connect_no_sigalrm(int socket, const struct sockaddr *address, socklen_t address_len)
+{
+    int ret;
+    BEGIN_NOSIGALRM
+    ret = connect(socket, address, address_len);
+    END_NOSIGALRM
+    return ret;
+}
+
+int
 socket_connect( int  fd, const SockAddress*  address )
 {
     sockaddr_storage  addr;
@@ -1018,7 +1028,7 @@ socket_connect( int  fd, const SockAddress*  address )
     if (sock_address_to_bsd(address, &addr, &addrlen) < 0)
         return -1;
 
-    SOCKET_CALL(connect(fd,addr.sa,addrlen));
+    SOCKET_CALL(socket_connect_no_sigalrm(fd,addr.sa,addrlen));
 }
 
 int
