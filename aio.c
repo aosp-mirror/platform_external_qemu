@@ -15,7 +15,7 @@
 #include "block/block.h"
 #include "qemu/queue.h"
 #include "qemu/sockets.h"
-
+// a comment
 typedef struct AioHandler AioHandler;
 
 /* The list of registered AIO handlers */
