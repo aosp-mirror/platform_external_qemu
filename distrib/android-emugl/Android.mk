@@ -75,8 +75,18 @@ include $(EMUGL_PATH)/host/libs/GLESv1_dec/Android.mk
 include $(EMUGL_PATH)/host/libs/GLESv2_dec/Android.mk
 include $(EMUGL_PATH)/host/libs/renderControl_dec/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/GLcommon/Android.mk
+ifneq (,$(strip $(BUILD_GLES_VX)))
+# EXPERIMENTAL:
+# You must define BUILD_GLES_VX in your environment to
+# build the GLES 1.1--to--2.0 translator
+include $(EMUGL_PATH)/host/libs/Translator/GLES_Vx/debase/Android.mk
+include $(EMUGL_PATH)/host/libs/Translator/GLES_Vx/es1x/Android.mk
+include $(EMUGL_PATH)/host/libs/Translator/GLES_Vx/Android.mk
+else
+# Default: Build stable, standalone GLES translator libraries
 include $(EMUGL_PATH)/host/libs/Translator/GLES_CM/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/GLES_V2/Android.mk
+endif
 include $(EMUGL_PATH)/host/libs/Translator/EGL/Android.mk
 
 # Host shared libraries
