@@ -85,6 +85,11 @@ GL_API void GL_APIENTRY es1xAlphaFuncx(void *_context_, GLenum func, GLclampx re
 GL_API void GL_APIENTRY es1xBindBuffer(void *_context_, GLenum target, GLuint buffer);
 GL_API void GL_APIENTRY es1xBindTexture(void *_context_, GLenum target, GLuint textureName);
 GL_API void GL_APIENTRY es1xBlendFunc(void *_context_, GLenum src, GLenum dst);
+
+GL_API void GL_APIENTRY es1xBlendEquation(void *_context_, GLenum mode);
+GL_API void GL_APIENTRY es1xBlendEquationSeparate(void *_context_, GLenum modeRGB, GLenum modeAlpha);
+GL_API void GL_APIENTRY es1xBlendFuncSeparate(void *_context_, GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha);
+
 GL_API void GL_APIENTRY es1xBufferData(void *_context_, GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
 GL_API void GL_APIENTRY es1xBufferSubData(void *_context_, GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data);
 GL_API void GL_APIENTRY es1xClear(void *_context_, GLbitfield mask);
