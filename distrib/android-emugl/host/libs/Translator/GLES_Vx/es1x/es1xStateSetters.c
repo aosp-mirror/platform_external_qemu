@@ -128,6 +128,19 @@ static GLboolean es1xIsAllowedDepthFunc(GLenum func)
   return GL_FALSE;
 }
 
+
+/*---------------------------------------------------------------------------*/
+
+static GLboolean es1xIsAllowedBlendEquation(GLenum mode)
+{
+  if(mode == GL_FUNC_ADD             ||
+     mode == GL_FUNC_SUBTRACT        ||
+     mode == GL_FUNC_REVERSE_SUBTRACT)
+    return GL_TRUE;
+
+  return GL_FALSE;
+}
+
 #endif /* ES1X_DUPLICATE_ES2_STATE */
 
 /*---------------------------------------------------------------------------*/
@@ -556,6 +569,85 @@ GL_API void GL_APIENTRY es1xBlendFunc(void *_context_,
                                                      GL_INVALID_ENUM));
   ES20_DEBUG_CODE(context->blendSrc = src);
   ES20_DEBUG_CODE(context->blendDst = dst);
+}
+
+/*---------------------------------------------------------------------------*/
+
+GL_API void GL_APIENTRY es1xBlendEquation(void *_context_,
+                                          GLenum mode)
+{
+  es1xContext *context = (es1xContext *) _context_;
+  ES1X_LOG_CALL(("glBlendEquation(%s)\n",
+                 ES1X_ENUM_TO_STRING(mode)));
+  ES1X_CHECK_CONTEXT(context);
+  ES1X_ASSUME_NO_ERROR;
+
+  gl2b->glBlendEquation(mode);
+  es1xCheckError(_context_);
+
+  ES20_DEBUG_CODE(ES1X_SET_ERROR_AND_RETURN_IF_FALSE(es1xIsAllowedBlendEquation(mode),
+                                                     GL_INVALID_ENUM));
+  ES20_DEBUG_CODE(context->blendEquationMode = mode);
+}
+
+
+/*---------------------------------------------------------------------------*/
+
+GL_API void GL_APIENTRY es1xBlendEquationSeparate(void *_context_,
+                                                  GLenum modeRGB,
+                                                  GLenum modeAlpha)
+{
+  es1xContext *context = (es1xContext *) _context_;
+  ES1X_LOG_CALL(("glBlendEquationSeparate(%s, %s)\n",
+                 ES1X_ENUM_TO_STRING(modeRGB),
+                 ES1X_ENUM_TO_STRING(modeAlpha)));
+  ES1X_CHECK_CONTEXT(context);
+  ES1X_ASSUME_NO_ERROR;
+
+  gl2b->glBlendEquationSeparate(modeRGB, modeAlpha);
+  es1xCheckError(_context_);
+
+  ES20_DEBUG_CODE(ES1X_SET_ERROR_AND_RETURN_IF_FALSE(es1xIsAllowedBlendEquation(modeRGB),
+                                                     GL_INVALID_ENUM));
+  ES20_DEBUG_CODE(ES1X_SET_ERROR_AND_RETURN_IF_FALSE(es1xIsAllowedBlendEquation(modeAlpha),
+                                                     GL_INVALID_ENUM));
+  ES20_DEBUG_CODE(context->blendEquationModeRGB = modeRGB);
+  ES20_DEBUG_CODE(context->blendEquationModeAlpha = modeAlpha);
+}
+
+/*---------------------------------------------------------------------------*/
+
+GL_API void GL_APIENTRY es1xBlendFuncSeparate(void *_context_,
+                                              GLenum srcRGB,
+                                              GLenum dstRGB,
+                                              GLenum srcAlpha,
+                                              GLenum dstAlpha)
+{
+  es1xContext *context = (es1xContext *) _context_;
+  ES1X_LOG_CALL(("glBlendEquationSeparate(%s, %s)\n",
+                 ES1X_ENUM_TO_STRING(srcRGB),
+                 ES1X_ENUM_TO_STRING(dstRGB),
+                 ES1X_ENUM_TO_STRING(srcAlpha),
+                 ES1X_ENUM_TO_STRING(dstAlpha)));
+  ES1X_CHECK_CONTEXT(context);
+  ES1X_ASSUME_NO_ERROR;
+
+  gl2b->glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+  es1xCheckError(_context_);
+
+  ES20_DEBUG_CODE(ES1X_SET_ERROR_AND_RETURN_IF_FALSE(es1xIsAllowedBlendSrcFunc(srcRGB),
+                                                     GL_INVALID_ENUM));
+  ES20_DEBUG_CODE(ES1X_SET_ERROR_AND_RETURN_IF_FALSE(es1xIsAllowedBlendDstFunc(dstRGB),
+                                                     GL_INVALID_ENUM));
+  ES20_DEBUG_CODE(ES1X_SET_ERROR_AND_RETURN_IF_FALSE(es1xIsAllowedBlendSrcFunc(srcRGB),
+                                                     GL_INVALID_ENUM));
+  ES20_DEBUG_CODE(ES1X_SET_ERROR_AND_RETURN_IF_FALSE(es1xIsAllowedBlendDstFunc(dstAlpha),
+                                                     GL_INVALID_ENUM));
+
+  ES20_DEBUG_CODE(context->blendEquationSrcRGB   = srcRGB);
+  ES20_DEBUG_CODE(context->blendEquationDstRGB   = dstRGB);
+  ES20_DEBUG_CODE(context->blendEquationSrcAlpha = srcAlpha);
+  ES20_DEBUG_CODE(context->blendEquationDstAlpha = dstAlpha);
 }
 
 /*---------------------------------------------------------------------------*/
