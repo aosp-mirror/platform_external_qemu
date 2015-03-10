@@ -20,6 +20,7 @@
 #include "emugl/common/mutex.h"
 #include "RenderContext.h"
 #include "render_api.h"
+#include "TextureDraw.h"
 #include "WindowSurface.h"
 
 #include <EGL/egl.h>
@@ -39,7 +40,6 @@ typedef std::map<HandleType, ColorBufferRef> ColorBufferMap;
 
 struct FrameBufferCaps
 {
-    bool hasGL2;
     bool has_eglimage_texture_2d;
     bool has_eglimage_renderbuffer;
     EGLint eglMajor;
@@ -110,12 +110,13 @@ public:
         repost();
     }
 
+    TextureDraw* getTextureDraw() const { return m_textureDraw; }
+
 private:
     FrameBuffer(int p_width, int p_height);
     ~FrameBuffer();
     HandleType genHandle();
     bool bindSubwin_locked();
-    void initGLState();
 
 private:
     static FrameBuffer *s_theFrameBuffer;
@@ -141,6 +142,7 @@ private:
     EGLSurface m_prevReadSurf;
     EGLSurface m_prevDrawSurf;
     EGLNativeWindowType m_subWin;
+    TextureDraw* m_textureDraw;
     EGLConfig  m_eglConfig;
     HandleType m_lastPostedColorBuffer;
     float      m_zRot;
