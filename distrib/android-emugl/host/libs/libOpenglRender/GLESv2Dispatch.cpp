@@ -13,15 +13,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifdef WITH_GLES2
 #include "GLESv2Dispatch.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "emugl/common/shared_library.h"
 
 gles2_decoder_context_t s_gles2;
-int                     s_gles2_enabled;
 
 static emugl::SharedLibrary *s_gles2_lib = NULL;
 
@@ -46,7 +45,6 @@ bool init_gles2_dispatch()
     // init the GLES dispatch table
     //
     s_gles2.initDispatchByName(gles2_dispatch_get_proc_func, NULL);
-    s_gles2_enabled = true;
     return true;
 }
 
@@ -61,5 +59,3 @@ void *gles2_dispatch_get_proc_func(const char *name, void *userData)
     }
     return (void *)s_gles2_lib->findSymbol(name);
 }
-
-#endif
