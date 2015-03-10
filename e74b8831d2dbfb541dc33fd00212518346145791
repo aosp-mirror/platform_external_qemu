@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9c7bbdac_9529e488",
+        "filename": "distrib/update-emugl-sources.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-03-10T09:57:51Z",
+      "side": 0,
+      "message": "I\u0027m pretty sure you don\u0027t want to remove this script. Did you intend to move it to android/scripts/ instead?",
+      "revId": "e74b8831d2dbfb541dc33fd00212518346145791",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
