@@ -1299,104 +1299,34 @@ GL_API void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOE
 {
   GET_CTX_CM();
   SET_ERROR_IF(!GLEScmValidate::textureTargetLimited(target),GL_INVALID_ENUM);
-  fprintf(stdout, "v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
+  fprintf(stdout, "v1: %s ctx=%p ---> short-circuited to GLES_V2: \n", __func__, ctx);
 
-  // unsigned int imagehndl = SafeUIntFromPointer(image);
-  // EglImage *img = s_eglIface->eglAttachEGLImage(imagehndl);
-  // if (img) {
-  //   // Create the texture object in the underlying EGL implementation,
-  //   // flag to the OpenGL layer to skip the image creation and map the
-  //   // current binded texture object to the existing global object.
-  //   if (ctx->shareGroup().Ptr()) {
-  //     ObjectLocalName tex = TextureLocalName(target,ctx->getBindedTexture(target));
-  //     unsigned int oldGlobal = ctx->shareGroup()->getGlobalName(TEXTURE, tex);
-  //     // Delete old texture object but only if it is not a target of a EGLImage
-  //     if (oldGlobal) {
-  //       TextureData* oldTexData = getTextureData(tex);
-  //       if (!oldTexData || oldTexData->sourceEGLImage == 0) {
-  //         ctx->dispatcher().glDeleteTextures(1, &oldGlobal);
-  //       }
-  //     }
-  //     // replace mapping and bind the new global object
-  //     ctx->shareGroup()->replaceGlobalName(TEXTURE, tex,img->globalTexName);
-  //     ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, img->globalTexName);
-  //     TextureData *texData = getTextureTargetData(target);
-  //     SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
-  //     texData->width = img->width;
-  //     texData->height = img->height;
-  //     texData->border = img->border;
-  //     texData->internalFormat = img->internalFormat;
-  //     texData->sourceEGLImage = imagehndl;
-  //     texData->eglImageDetach = s_eglIface->eglDetachEGLImage;
-  //     texData->oldGlobal = oldGlobal;
-  //   }
-  // }
+  v2_glEGLImageTargetTexture2DOES(target, image);
 }
 
 GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image)
 {
   GET_CTX_CM();
   SET_ERROR_IF(target != GL_RENDERBUFFER_OES,GL_INVALID_ENUM);
-  fprintf(stdout, "v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
+  fprintf(stdout, "v1: %s ctx=%p ---> short-circuited to GLES_V2: \n", __func__, ctx);
 
-  // unsigned int imagehndl = SafeUIntFromPointer(image);
-  // EglImage *img = s_eglIface->eglAttachEGLImage(imagehndl);
-  // SET_ERROR_IF(!img,GL_INVALID_VALUE);
-  // SET_ERROR_IF(!ctx->shareGroup().Ptr(),GL_INVALID_OPERATION);
-
-  // // Get current bounded renderbuffer
-  // // raise INVALID_OPERATIOn if no renderbuffer is bounded
-  // GLuint rb = ctx->getRenderbufferBinding();
-  // SET_ERROR_IF(rb == 0,GL_INVALID_OPERATION);
-  // ObjectDataPtr objData = ctx->shareGroup()->getObjectData(RENDERBUFFER,rb);
-  // RenderbufferData *rbData = (RenderbufferData *)objData.Ptr();
-  // SET_ERROR_IF(!rbData,GL_INVALID_OPERATION);
-
-  // //
-  // // flag in the renderbufferData that it is an eglImage target
-  // //
-  // rbData->sourceEGLImage = imagehndl;
-  // rbData->eglImageDetach = s_eglIface->eglDetachEGLImage;
-  // rbData->eglImageGlobalTexName = img->globalTexName;
-
-  // //
-  // // if the renderbuffer is attached to a framebuffer
-  // // change the framebuffer attachment in the undelying OpenGL
-  // // to point to the eglImage texture object.
-  // //
-  // if (rbData->attachedFB) {
-  //   // update the framebuffer attachment point to the
-  //   // underlying texture of the img
-  //   GLuint prevFB = ctx->getFramebufferBinding();
-  //   if (prevFB != rbData->attachedFB) {
-  //     ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
-  //                                        rbData->attachedFB);
-  //   }
-  //   ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-  //                                           rbData->attachedPoint,
-  //                                           GL_TEXTURE_2D,
-  //                                           img->globalTexName,0);
-  //   if (prevFB != rbData->attachedFB) {
-  //     ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
-  //                                        prevFB);
-  //   }
-  // }
+  v2_glEGLImageTargetRenderbufferStorageOES(target, image);
 }
 
 /* GL_OES_blend_subtract*/
 GL_API void GL_APIENTRY glBlendEquationOES(GLenum mode) {
   GET_CTX_CM();
   SET_ERROR_IF(!(GLEScmValidate::blendEquationMode(mode)), GL_INVALID_ENUM);
-  fprintf(stdout, "v1: %s ctx=%p ---> Forwarded directly to libGL\n", __func__, ctx);
-  ctx->dispatcher().glBlendEquation(mode);
+  fprintf(stdout, "v1: %s ctx=%p ---> EXTENSION with GLESv2 equivalent: ", __func__, ctx);
+  es1xBlendEquation(ctx->getES1xContext(), mode);
 }
 
 /* GL_OES_blend_equation_separate */
 GL_API void GL_APIENTRY glBlendEquationSeparateOES (GLenum modeRGB, GLenum modeAlpha) {
   GET_CTX_CM();
   SET_ERROR_IF(!(GLEScmValidate::blendEquationMode(modeRGB) && GLEScmValidate::blendEquationMode(modeAlpha)), GL_INVALID_ENUM);
-  fprintf(stdout, "v1: %s ctx=%p ---> Forwarded directly to libGL\n", __func__, ctx);
-  ctx->dispatcher().glBlendEquationSeparate(modeRGB,modeAlpha);
+  fprintf(stdout, "v1: %s ctx=%p ---> EXTENSION with GLESv2 equivalent: ", __func__, ctx);
+  es1xBlendEquationSeparate(ctx->getES1xContext(), modeRGB, modeAlpha);
 }
 
 /* GL_OES_blend_func_separate */
@@ -1404,8 +1334,8 @@ GL_API void GL_APIENTRY glBlendFuncSeparateOES(GLenum srcRGB, GLenum dstRGB, GLe
   GET_CTX_CM();
   SET_ERROR_IF(!GLEScmValidate::blendSrc(srcRGB) || !GLEScmValidate::blendDst(dstRGB) ||
                !GLEScmValidate::blendSrc(srcAlpha) || ! GLEScmValidate::blendDst(dstAlpha) ,GL_INVALID_ENUM);
-  fprintf(stdout, "v1: %s ctx=%p ---> Forwarded directly to libGL\n", __func__, ctx);
-  ctx->dispatcher().glBlendFuncSeparate(srcRGB,dstRGB,srcAlpha,dstAlpha);
+  fprintf(stdout, "v1: %s ctx=%p ---> EXTENSION with GLESv2 equivalent: ", __func__, ctx);
+  es1xBlendFuncSeparate(ctx->getES1xContext(), srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
 /* GL_OES_framebuffer_object */

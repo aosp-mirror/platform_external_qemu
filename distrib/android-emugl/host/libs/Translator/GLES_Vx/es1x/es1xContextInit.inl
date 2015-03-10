@@ -194,6 +194,15 @@
 	context->blendDst							=		GL_ZERO;
 	context->blendSrc							=		GL_ONE;
 	context->blendEnabled						=		GL_FALSE;
+        
+        context->blendEquationMode                                      =               GL_FUNC_ADD;
+        context->blendEquationModeRGB                                =               GL_FUNC_ADD;
+        context->blendEquationModeAlpha                                 =               GL_FUNC_ADD;        
+        context->blendEquationSrcRGB                                   =              GL_ONE;
+        context->blendEquationDstRGB                                   =               GL_ZERO;        
+        context->blendEquationSrcAlpha                                   =              GL_ONE;
+        context->blendEquationDstAlpha                                  =               GL_ZERO;
+        
 	context->colorLogicOpMode					=		GL_COPY;
 	context->colorLogicOpEnabled				=		GL_FALSE;
 	context->scissorTestEnabled					=		GL_FALSE;
