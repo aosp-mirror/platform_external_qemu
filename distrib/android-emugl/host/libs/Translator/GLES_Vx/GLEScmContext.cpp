@@ -34,12 +34,7 @@ GLEScmContext::~GLEScmContext(){
 void GLEScmContext::init() {
   fprintf(stdout, "___ Init GLESv1Context @ %p\n", this);
   if(!m_initialized) {
-    GLESv2Context::init(); // will init dispatchFuncs GLES_2_0, set m_initialized
-    // TODO: load dispatch-fucntions to libGL for extensios not implemented in GLES2
-    //
-    // s_glDispatch.dispatchFuncs(GLES_1_to_2); // load only extensions
-    //
-    // s_glDispatch.dispatchFuncs(GLES_1_1);    // load the whole GLES_1_1 interface
+    GLESv2Context::init(); // init GLES_2_0 dispatchFuncs, set m_initialized
     m_es1xContext = (void *) es1xContext_create();
   }
   fprintf(stdout, "--- Init GLESv1Context @ %p; es1xCtx @ %p\n", this, m_es1xContext);

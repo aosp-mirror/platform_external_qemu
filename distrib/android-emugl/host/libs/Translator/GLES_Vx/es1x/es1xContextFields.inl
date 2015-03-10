@@ -166,6 +166,15 @@ GLboolean		ditherEnabled;
 GLenum			blendDst;
 GLenum			blendSrc;
 GLboolean		blendEnabled;
+
+GLenum                  blendEquationMode;
+GLenum                  blendEquationModeRGB;
+GLenum                  blendEquationModeAlpha;
+GLenum                  blendEquationSrcRGB;
+GLenum                  blendEquationDstRGB;
+GLenum                  blendEquationSrcAlpha;
+GLenum                  blendEquationDstAlpha;
+
 GLenum			colorLogicOpMode;
 GLboolean		colorLogicOpEnabled;
 es1xRecti		scissorBox;
