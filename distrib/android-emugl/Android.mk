@@ -36,7 +36,11 @@ endif
 
 # Uncomment the following line if you want to enable debug traces
 # in the GLES emulation libraries.
-# EMUGL_COMMON_CFLAGS += -DEMUGL_DEBUG=1
+
+
+#TODO :DISABLE ME
+BUILD_GLES_VX = 1
+EMUGL_COMMON_CFLAGS += -DEMUGL_DEBUG=1 -O0 -ggdb
 
 # Include common definitions used by all the modules included later
 # in this build file. This contains the definition of all useful

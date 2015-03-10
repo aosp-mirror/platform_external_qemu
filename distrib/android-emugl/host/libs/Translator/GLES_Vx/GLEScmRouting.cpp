@@ -50,7 +50,10 @@ void init_gl_routing_for_glesv2() {
 /****************************************************************************/
 
 static emugl::SharedLibrary *s_gles_v2_lib = NULL;
-bool                  s_gles_v1tov2_routing_enabled;
+bool s_gles_v1tov2_routing_enabled = false;
+glEGLImageTargetTexture2DOES_server_proc_t           v2_glEGLImageTargetTexture2DOES;
+glEGLImageTargetRenderbufferStorageOES_server_proc_t v2_glEGLImageTargetRenderbufferStorageOES;
+
 
 static void *gles_routing_get_proc_func(const char *name, void *userData)
 {
@@ -88,6 +91,10 @@ void init_gles_v1tov2_routing() {
   struct gles2_server_base_t *gles_v2_base = static_cast<struct gles2_server_base_t *>(&gles_v2);
   fprintf(stdout, "*** Setting 1.x-->2.0 routing table to %p \n", gles_v2_base);
   setGLES2base(gles_v2_base);
+
+  // init extensions not implemented through es1x but available in GLES_V2
+  v2_glEGLImageTargetTexture2DOES = gles_v2_base->glEGLImageTargetTexture2DOES;
+  v2_glEGLImageTargetRenderbufferStorageOES = gles_v2_base->glEGLImageTargetRenderbufferStorageOES;
 
   init_gl_routing_for_glesv2();
 
