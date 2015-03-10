@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3c6d71ed_1a9bbd46",
+        "filename": "distrib/android-emugl/shared/emugl/common/shared_library.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-03-10T10:00:05Z",
+      "side": 1,
+      "message": "Let\u0027s avoid patches that mix changes and reformatting. This makes things harder to follow.\n\nI recommend doing any large reformatting changes into individual patches that don\u0027t touch the code base otherwise.\n\nAlso, we should use one or more .clang_format files to ensure consistent formatting through clang-format, instead of having to deal with that manually, or with editor-specific tools. I\u0027ll try to come up with something.",
+      "revId": "7119986b674e1f26bb0b053f28c825d651fddf90",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
