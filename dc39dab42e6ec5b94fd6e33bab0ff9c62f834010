@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "610022f0_db045316",
+        "filename": "distrib/update-emugl-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-03-11T10:59:36Z",
+      "side": 0,
+      "message": "Hummm, it looks like this is still deleted by mistake :-/\n\nTo restore it while editing this patch through \"git rebase -i\":\n\n  git checkout HEAD^ distrib/update-emugl-sources.sh\n  git add distrib/update-emugl-sources.sh\n  git rebase --continue",
+      "revId": "dc39dab42e6ec5b94fd6e33bab0ff9c62f834010",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
