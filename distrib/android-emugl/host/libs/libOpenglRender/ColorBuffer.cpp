@@ -16,7 +16,6 @@
 #include "ColorBuffer.h"
 
 #include "EGLDispatch.h"
-#include "FrameBuffer.h"
 #include "GLESv1Dispatch.h"
 #include "GLcommon/GLutils.h"
 #include "GLESv2Dispatch.h"
@@ -25,14 +24,87 @@
 
 #include <stdio.h>
 
-ColorBuffer *ColorBuffer::create(int p_width, int p_height,
-                                 GLenum p_internalFormat)
-{
-    FrameBuffer *fb = FrameBuffer::getFB();
+namespace {
 
+// Lazily create and bind a framebuffer object to the current host context.
+// |fbo| is the address of the framebuffer object name.
+// |tex| is the name of a texture that is attached to the framebuffer object
+// on creation only. I.e. all rendering operations will target it.
+// returns true in case of success, false on failure.
+bool bindFbo(GLuint* fbo, GLuint tex) {
+    if (*fbo) {
+        // fbo already exist - just bind
+        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
+        return true;
+    }
+
+    s_gles2.glGenFramebuffers(1, fbo);
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
+    s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                   GL_COLOR_ATTACHMENT0_OES,
+                                   GL_TEXTURE_2D, tex, 0);
+    GLenum status = s_gles2.glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE_OES) {
+        ERR("ColorBuffer::bindFbo: FBO not complete: %#x\n", status);
+        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        s_gles2.glDeleteFramebuffers(1, fbo);
+        *fbo = 0;
+        return false;
+    }
+    return true;
+}
+
+void unbindFbo() {
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+// Helper class to use a ColorBuffer::Helper context.
+// Usage is pretty simple:
+//
+//     {
+//        ScopedHelperContext context(m_helper);
+//        if (!context.isOk()) {
+//            return false;   // something bad happened.
+//        }
+//        .... do something ....
+//     }   // automatically calls m_helper->teardownContext();
+//
+class ScopedHelperContext {
+public:
+    ScopedHelperContext(ColorBuffer::Helper* helper) : mHelper(helper) {
+        if (!helper->setupContext()) {
+            mHelper = NULL;
+        }
+    }
+
+    bool isOk() const { return mHelper != NULL; }
+
+    ~ScopedHelperContext() {
+        release();
+    }
+
+    void release() {
+        if (mHelper) {
+            mHelper->teardownContext();
+            mHelper = NULL;
+        }
+    }
+private:
+    ColorBuffer::Helper* mHelper;
+};
+
+}  // namespace
+
+// static
+ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
+                                 int p_width,
+                                 int p_height,
+                                 GLenum p_internalFormat,
+                                 bool has_eglimage_texture_2d,
+                                 Helper* helper) {
     GLenum texInternalFormat = 0;
 
-    switch(p_internalFormat) {
+    switch (p_internalFormat) {
         case GL_RGB:
         case GL_RGB565_OES:
             texInternalFormat = GL_RGB;
@@ -49,25 +121,30 @@ ColorBuffer *ColorBuffer::create(int p_width, int p_height,
             break;
     }
 
-    if (!fb->bind_locked()) {
+    ScopedHelperContext context(helper);
+    if (!context.isOk()) {
         return NULL;
     }
 
-    ColorBuffer *cb = new ColorBuffer();
-
+    ColorBuffer *cb = new ColorBuffer(p_display, helper);
 
     s_gles2.glGenTextures(1, &cb->m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
+
     int nComp = (texInternalFormat == GL_RGB ? 3 : 4);
-    char *zBuff = new char[nComp*p_width*p_height];
-    if (zBuff) {
-        memset(zBuff, 0, nComp*p_width*p_height);
-    }
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat,
-                      p_width, p_height, 0,
-                      texInternalFormat,
-                      GL_UNSIGNED_BYTE, zBuff);
-    delete [] zBuff;
+
+    char* zBuff = static_cast<char*>(::calloc(nComp * p_width * p_height, 1));
+    s_gles2.glTexImage2D(GL_TEXTURE_2D,
+                         0,
+                         texInternalFormat,
+                         p_width,
+                         p_height,
+                         0,
+                         texInternalFormat,
+                         GL_UNSIGNED_BYTE,
+                         zBuff);
+    ::free(zBuff);
+
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -78,10 +155,16 @@ ColorBuffer *ColorBuffer::create(int p_width, int p_height,
     //
     s_gles2.glGenTextures(1, &cb->m_blitTex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat,
-                      p_width, p_height, 0,
-                      texInternalFormat,
-                      GL_UNSIGNED_BYTE, NULL);
+    s_gles2.glTexImage2D(GL_TEXTURE_2D,
+                         0,
+                         texInternalFormat,
+                         p_width,
+                         p_height,
+                         0,
+                         texInternalFormat,
+                         GL_UNSIGNED_BYTE,
+                         NULL);
+
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -91,46 +174,42 @@ ColorBuffer *ColorBuffer::create(int p_width, int p_height,
     cb->m_height = p_height;
     cb->m_internalFormat = texInternalFormat;
 
-    if (fb->getCaps().has_eglimage_texture_2d) {
+    if (has_eglimage_texture_2d) {
         cb->m_eglImage = s_egl.eglCreateImageKHR(
-                fb->getDisplay(),
+                p_display,
                 s_egl.eglGetCurrentContext(),
                 EGL_GL_TEXTURE_2D_KHR,
                 (EGLClientBuffer)SafePointerFromUInt(cb->m_tex),
                 NULL);
 
         cb->m_blitEGLImage = s_egl.eglCreateImageKHR(
-                fb->getDisplay(),
+                p_display,
                 s_egl.eglGetCurrentContext(),
                 EGL_GL_TEXTURE_2D_KHR,
                 (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex),
                 NULL);
     }
-
-    fb->unbind_locked();
     return cb;
 }
 
-ColorBuffer::ColorBuffer() :
-    m_tex(0),
-    m_blitTex(0),
-    m_eglImage(NULL),
-    m_blitEGLImage(NULL),
-    m_fbo(0),
-    m_internalFormat(0)
-{
-}
+ColorBuffer::ColorBuffer(EGLDisplay display, Helper* helper) :
+        m_tex(0),
+        m_blitTex(0),
+        m_eglImage(NULL),
+        m_blitEGLImage(NULL),
+        m_fbo(0),
+        m_internalFormat(0),
+        m_display(display),
+        m_helper(helper) {}
 
-ColorBuffer::~ColorBuffer()
-{
-    FrameBuffer *fb = FrameBuffer::getFB();
-    fb->bind_locked();
+ColorBuffer::~ColorBuffer() {
+    ScopedHelperContext context(m_helper);
 
     if (m_blitEGLImage) {
-        s_egl.eglDestroyImageKHR(fb->getDisplay(), m_blitEGLImage);
+        s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
     }
     if (m_eglImage) {
-        s_egl.eglDestroyImageKHR(fb->getDisplay(), m_eglImage);
+        s_egl.eglDestroyImageKHR(m_display, m_eglImage);
     }
 
     if (m_fbo) {
@@ -139,30 +218,42 @@ ColorBuffer::~ColorBuffer()
 
     GLuint tex[2] = {m_tex, m_blitTex};
     s_gles2.glDeleteTextures(2, tex);
-
-    fb->unbind_locked();
 }
 
-void ColorBuffer::readPixels(int x, int y, int width, int height, GLenum p_format, GLenum p_type, void *pixels)
-{
-    FrameBuffer *fb = FrameBuffer::getFB();
-    if (!fb->bind_locked()) return;
-    if (bind_fbo()) {
-        s_gles2.glReadPixels(x, y, width, height, p_format, p_type, pixels);
-        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER_OES, 0);
+void ColorBuffer::readPixels(int x,
+                             int y,
+                             int width,
+                             int height,
+                             GLenum p_format,
+                             GLenum p_type,
+                             void* pixels) {
+    ScopedHelperContext context(m_helper);
+    if (!context.isOk()) {
+        return;
     }
-    fb->unbind_locked();
+
+    if (bindFbo(&m_fbo, m_tex)) {
+        s_gles2.glReadPixels(x, y, width, height, p_format, p_type, pixels);
+        unbindFbo();
+    }
 }
 
-void ColorBuffer::subUpdate(int x, int y, int width, int height, GLenum p_format, GLenum p_type, void *pixels)
-{
-    FrameBuffer *fb = FrameBuffer::getFB();
-    if (!fb->bind_locked()) return;
+void ColorBuffer::subUpdate(int x,
+                            int y,
+                            int width,
+                            int height,
+                            GLenum p_format,
+                            GLenum p_type,
+                            void* pixels) {
+    ScopedHelperContext context(m_helper);
+    if (!context.isOk()) {
+        return;
+    }
+
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
     s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y,
-                         width, height, p_format, p_type, pixels);
-    fb->unbind_locked();
+    s_gles2.glTexSubImage2D(
+            GL_TEXTURE_2D, 0, x, y, width, height, p_format, p_type, pixels);
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer()
@@ -173,11 +264,9 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
         return false;
     }
 
-    //
-    // Create a temporary texture inside the current context
-    // from the blit_texture EGLImage and copy the pixels
-    // from the current read buffer to that texture
-    //
+    // Copy the content of the current read surface into m_blitEGLImage.
+    // This is done by creating a temporary texture, bind it to the EGLImage
+    // then call glCopyTexSubImage2D().
     GLuint tmpTex;
     GLint currTexBind;
     if (tInfo->currContext->isGL2()) {
@@ -187,6 +276,8 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
         s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
         s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
                                   m_width, m_height);
+        s_gles2.glDeleteTextures(1, &tmpTex);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
     else {
         s_gles1.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
@@ -195,132 +286,81 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
         s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
         s_gles1.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
                                  m_width, m_height);
-    }
-
-
-    //
-    // Now bind the frame buffer context and blit from
-    // m_blitTex into m_tex
-    //
-    FrameBuffer *fb = FrameBuffer::getFB();
-    if (fb->bind_locked()) {
-
-        //
-        // bind FBO object which has this colorbuffer as render target
-        //
-        if (bind_fbo()) {
-
-            //
-            // save current viewport and match it to the current
-            // colorbuffer size
-            //
-            GLint vport[4] = {};
-            s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
-            s_gles2.glViewport(0, 0, m_width, m_height);
-
-            // render m_blitTex
-            fb->getTextureDraw()->draw(m_blitTex, 0.);
-
-            // unbind the fbo
-            s_gles2.glBindFramebuffer(GL_FRAMEBUFFER_OES, 0);
-
-            // restore previous viewport
-            s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
-        }
-
-        // unbind from the FrameBuffer context
-        fb->unbind_locked();
-    }
-
-    //
-    // delete the temporary texture and restore the texture binding
-    // inside the current context
-    //
-    if (tInfo->currContext->isGL2()) {
-        s_gles2.glDeleteTextures(1, &tmpTex);
-        s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
-    }
-    else {
         s_gles1.glDeleteTextures(1, &tmpTex);
         s_gles1.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
 
-    return true;
-}
-
-bool ColorBuffer::bindToTexture()
-{
-    if (m_eglImage) {
-        RenderThreadInfo *tInfo = RenderThreadInfo::get();
-        if (tInfo->currContext.Ptr()) {
-            if (tInfo->currContext->isGL2()) {
-                s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
-            }
-            else {
-                s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
-            }
-            return true;
-        }
-    }
-    return false;
-}
-
-bool ColorBuffer::bindToRenderbuffer()
-{
-    if (m_eglImage) {
-        RenderThreadInfo *tInfo = RenderThreadInfo::get();
-        if (tInfo->currContext.Ptr()) {
-            if (tInfo->currContext->isGL2()) {
-                s_gles2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
-            }
-            else {
-                s_gles1.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
-            }
-            return true;
-        }
-    }
-    return false;
-}
-
-bool ColorBuffer::bind_fbo()
-{
-    if (m_fbo) {
-        // fbo already exist - just bind
-        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER_OES, m_fbo);
-        return true;
-    }
-
-    s_gles2.glGenFramebuffers(1, &m_fbo);
-    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER_OES, m_fbo);
-    s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER_OES,
-                                   GL_COLOR_ATTACHMENT0_OES,
-                                   GL_TEXTURE_2D, m_tex, 0);
-    GLenum status = s_gles2.glCheckFramebufferStatus(GL_FRAMEBUFFER_OES);
-    if (status != GL_FRAMEBUFFER_COMPLETE_OES) {
-        ERR("ColorBuffer::bind_fbo: FBO not complete: %#x\n", status);
-        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER_OES, 0);
-        s_gles2.glDeleteFramebuffers(1, &m_fbo);
-        m_fbo = 0;
+    ScopedHelperContext context(m_helper);
+    if (!context.isOk()) {
         return false;
     }
 
+    if (!bindFbo(&m_fbo, m_tex)) {
+        return false;
+    }
+
+    // Save current viewport and match it to the current colorbuffer size.
+    GLint vport[4] = { 0, };
+    s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
+    s_gles2.glViewport(0, 0, m_width, m_height);
+
+    // render m_blitTex
+    m_helper->getTextureDraw()->draw(m_blitTex, 0.);
+
+    // Restore previous viewport.
+    s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
+    unbindFbo();
+
+    return true;
+}
+
+bool ColorBuffer::bindToTexture() {
+    if (!m_eglImage) {
+        return false;
+    }
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    if (!tInfo->currContext.Ptr()) {
+        return false;
+    }
+    if (tInfo->currContext->isGL2()) {
+        s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
+    }
+    else {
+        s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
+    }
+    return true;
+}
+
+bool ColorBuffer::bindToRenderbuffer() {
+    if (!m_eglImage) {
+        return false;
+    }
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    if (!tInfo->currContext.Ptr()) {
+        return false;
+    }
+    if (tInfo->currContext->isGL2()) {
+        s_gles2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
+    }
+    else {
+        s_gles1.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES, m_eglImage);
+    }
     return true;
 }
 
 bool ColorBuffer::post(float rotation) {
-    FrameBuffer::getFB()->getTextureDraw()->draw(m_tex, rotation);
-    return true;
+    // NOTE: Do not call m_helper->setupContext() here!
+    return m_helper->getTextureDraw()->draw(m_tex, rotation);
 }
 
-void ColorBuffer::readback(unsigned char* img)
-{
-    FrameBuffer *fb = FrameBuffer::getFB();
-    if (fb->bind_locked()) {
-        if (bind_fbo()) {
-            s_gles2.glReadPixels(0, 0, m_width, m_height,
-                    GL_RGBA, GL_UNSIGNED_BYTE, img);
-            s_gles2.glBindFramebuffer(GL_FRAMEBUFFER_OES, 0);
-        }
-        fb->unbind_locked();
+void ColorBuffer::readback(unsigned char* img) {
+    ScopedHelperContext context(m_helper);
+    if (!context.isOk()) {
+        return;
+    }
+    if (bindFbo(&m_fbo, m_tex)) {
+        s_gles2.glReadPixels(
+                0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, img);
+        unbindFbo();
     }
 }

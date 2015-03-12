@@ -13,37 +13,57 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _LIBRENDER_RENDERCONTEXT_H
-#define _LIBRENDER_RENDERCONTEXT_H
+#ifndef _LIBRENDER_RENDER_CONTEXT_H
+#define _LIBRENDER_RENDER_CONTEXT_H
 
 #include "emugl/common/smart_ptr.h"
-#include <EGL/egl.h>
 #include "GLDecoderContextData.h"
 
-class RenderContext;
-typedef emugl::SmartPtr<RenderContext> RenderContextPtr;
+#include <EGL/egl.h>
 
-class RenderContext
-{
+// A class used to model a guest EGLContext. This simply wraps a host
+// EGLContext, associated with an GLDecoderContextData instance that is
+// used to store copies of guest-side arrays.
+class RenderContext {
 public:
-    static RenderContext *create(int p_config, RenderContextPtr p_shareContext,
-                                 bool p_isGL2 = false);
+    // Create a new RenderContext instance.
+    // |display| is the host EGLDisplay handle.
+    // |config| is the host EGLConfig to use.
+    // |sharedContext| is either EGL_NO_CONTEXT of a host EGLContext handle.
+    // |isGl2| is true iff the new context will be used with GLESv2, or
+    // GLESv1 otherwise.
+    static RenderContext *create(EGLDisplay display,
+                                 EGLConfig config,
+                                 EGLContext sharedContext,
+                                 bool isGL2 = false);
+
+    // Destructor.
     ~RenderContext();
-    int getConfig() const { return m_config; }
 
-    EGLContext getEGLContext() const { return m_ctx; }
-    bool isGL2() const { return m_isGL2; }
+    // Retrieve host EGLContext value.
+    EGLContext getEGLContext() const { return mContext; }
 
-    GLDecoderContextData & decoderContextData() { return m_contextData; }
+    // Return true iff this is a GLESv2 context.
+    bool isGL2() const { return mIsGl2; }
+
+    // Retrieve GLDecoderContextData instance reference for this
+    // RenderContext instance.
+    GLDecoderContextData& decoderContextData() { return mContextData; }
 
 private:
     RenderContext();
 
+    RenderContext(EGLDisplay display,
+                  EGLContext context,
+                  bool isGl2);
+
 private:
-    EGLContext m_ctx;
-    int        m_config;
-    bool       m_isGL2;
-    GLDecoderContextData    m_contextData;
+    EGLDisplay mDisplay;
+    EGLContext mContext;
+    bool mIsGl2;
+    GLDecoderContextData mContextData;
 };
 
-#endif
+typedef emugl::SmartPtr<RenderContext> RenderContextPtr;
+
+#endif  // _LIBRENDER_RENDER_CONTEXT_H
