@@ -17,7 +17,6 @@
 #include "FrameBuffer.h"
 
 #include "EGLDispatch.h"
-#include "FBConfig.h"
 #include "GLESv1Dispatch.h"
 #include "GLESv2Dispatch.h"
 #include "NativeSubWindow.h"
@@ -25,6 +24,63 @@
 #include "TimeUtils.h"
 
 #include <stdio.h>
+
+namespace {
+
+// Helper class to call the bind_locked() / unbind_locked() properly.
+class ScopedBind {
+public:
+    // Constructor will call bind_locked() on |fb|.
+    // Use isValid() to check for errors.
+    ScopedBind(FrameBuffer* fb) : mFb(fb) {
+        if (!mFb->bind_locked()) {
+            mFb = NULL;
+        }
+    }
+
+    // Returns true if contruction bound the framebuffer context properly.
+    bool isValid() const { return mFb != NULL; }
+
+    // Unbound the framebuffer explictly. This is also called by the
+    // destructor.
+    void release() {
+        if (mFb) {
+            mFb->unbind_locked();
+            mFb = NULL;
+        }
+    }
+
+    // Destructor will call release().
+    ~ScopedBind() {
+        release();
+    }
+
+private:
+    FrameBuffer* mFb;
+};
+
+// Implementation of a ColorBuffer::Helper instance that redirects calls
+// to a FrameBuffer instance.
+class ColorBufferHelper : public ColorBuffer::Helper {
+public:
+    ColorBufferHelper(FrameBuffer* fb) : mFb(fb) {}
+
+    virtual bool setupContext() {
+        return mFb->bind_locked();
+    }
+
+    virtual void teardownContext() {
+        mFb->unbind_locked();
+    }
+
+    virtual TextureDraw* getTextureDraw() const {
+        return mFb->getTextureDraw();
+    }
+private:
+    FrameBuffer* mFb;
+};
+
+}  // namespace
 
 FrameBuffer *FrameBuffer::s_theFrameBuffer = NULL;
 HandleType FrameBuffer::s_nextHandle = 0;
@@ -89,8 +145,8 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
 
 void FrameBuffer::finalize(){
     if(s_theFrameBuffer){
-        s_theFrameBuffer->removeSubWindow();
         s_theFrameBuffer->m_colorbuffers.clear();
+        s_theFrameBuffer->removeSubWindow();
         s_theFrameBuffer->m_windows.clear();
         s_theFrameBuffer->m_contexts.clear();
         s_egl.eglMakeCurrent(s_theFrameBuffer->m_eglDisplay, NULL, NULL, NULL);
@@ -226,7 +282,8 @@ bool FrameBuffer::initialize(int width, int height)
     }
 
     // Make the context current
-    if (!fb->bind_locked()) {
+    ScopedBind bind(fb);
+    if (!bind.isValid()) {
         ERR("Failed to make current\n");
         free(gles1Extensions);
         delete fb;
@@ -236,7 +293,7 @@ bool FrameBuffer::initialize(int width, int height)
     //
     // Initilize framebuffer capabilities
     //
-    const char* gles2Extensions = (const char *)s_gles2.glGetString(GL_EXTENSIONS);
+    //const char* gles2Extensions = (const char *)s_gles2.glGetString(GL_EXTENSIONS);
     bool has_gl_oes_image = false;
 
 //     printf("GLES1 [%s]\n", gles1Extensions);
@@ -272,6 +329,7 @@ bool FrameBuffer::initialize(int width, int height)
     //
     if (!fb->m_caps.has_eglimage_texture_2d) {
         ERR("Failed: Missing egl_image related extension(s)\n");
+        bind.release();
         delete fb;
         return false;
     }
@@ -279,9 +337,10 @@ bool FrameBuffer::initialize(int width, int height)
     //
     // Initialize set of configs
     //
-    InitConfigStatus configStatus = FBConfig::initConfigList(fb);
-    if (configStatus == INIT_CONFIG_FAILED) {
+    fb->m_configs = new FbConfigList(fb->m_eglDisplay);
+    if (fb->m_configs->empty()) {
         ERR("Failed: Initialize set of configs\n");
+        bind.release();
         delete fb;
         return false;
     }
@@ -289,11 +348,11 @@ bool FrameBuffer::initialize(int width, int height)
     //
     // Check that we have config for each GLES and GLES2
     //
-    int nConfigs = FBConfig::getNumConfigs();
+    size_t nConfigs = fb->m_configs->size();
     int nGLConfigs = 0;
     int nGL2Configs = 0;
-    for (int i=0; i<nConfigs; i++) {
-        GLint rtype = FBConfig::get(i)->getRenderableType();
+    for (size_t i = 0; i < nConfigs; ++i) {
+        GLint rtype = fb->m_configs->get(i)->getRenderableType();
         if (0 != (rtype & EGL_OPENGL_ES_BIT)) {
             nGLConfigs++;
         }
@@ -306,7 +365,7 @@ bool FrameBuffer::initialize(int width, int height)
     // Fail initialization if no GLES configs exist
     //
     if (nGLConfigs == 0) {
-        ERR("Failed: No GLES 1.x configs found!\n");
+        bind.release();
         delete fb;
         return false;
     }
@@ -316,6 +375,7 @@ bool FrameBuffer::initialize(int width, int height)
     //
     if (nGL2Configs == 0) {
         ERR("Failed: No GLES 2.x configs found!\n");
+        bind.release();
         delete fb;
         return false;
     }
@@ -329,7 +389,7 @@ bool FrameBuffer::initialize(int width, int height)
     fb->m_glVersion = (const char*)s_gles2.glGetString(GL_VERSION);
 
     // release the FB context
-    fb->unbind_locked();
+    bind.release();
 
     //
     // Keep the singleton framebuffer pointer
@@ -341,7 +401,9 @@ bool FrameBuffer::initialize(int width, int height)
 FrameBuffer::FrameBuffer(int p_width, int p_height) :
     m_width(p_width),
     m_height(p_height),
+    m_configs(NULL),
     m_eglDisplay(EGL_NO_DISPLAY),
+    m_colorBufferHelper(new ColorBufferHelper(this)),
     m_eglSurface(EGL_NO_SURFACE),
     m_eglContext(EGL_NO_CONTEXT),
     m_pbufContext(EGL_NO_CONTEXT),
@@ -365,9 +427,10 @@ FrameBuffer::FrameBuffer(int p_width, int p_height) :
     m_fpsStats = getenv("SHOW_FPS_STATS") != NULL;
 }
 
-FrameBuffer::~FrameBuffer()
-{
+FrameBuffer::~FrameBuffer() {
     delete m_textureDraw;
+    delete m_configs;
+    delete m_colorBufferHelper;
     free(m_fbImage);
 }
 
@@ -475,7 +538,13 @@ HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
     emugl::Mutex::AutoLock mutex(m_lock);
     HandleType ret = 0;
 
-    ColorBufferPtr cb( ColorBuffer::create(p_width, p_height, p_internalFormat) );
+    ColorBufferPtr cb(ColorBuffer::create(
+            getDisplay(),
+            p_width,
+            p_height,
+            p_internalFormat,
+            getCaps().has_eglimage_texture_2d,
+            m_colorBufferHelper));
     if (cb.Ptr() != NULL) {
         ret = genHandle();
         m_colorbuffers[ret].cb = cb;
@@ -490,16 +559,24 @@ HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
     emugl::Mutex::AutoLock mutex(m_lock);
     HandleType ret = 0;
 
+    const FbConfig* config = getConfigs()->get(p_config);
+    if (!config) {
+        return ret;
+    }
+
     RenderContextPtr share(NULL);
     if (p_share != 0) {
-        RenderContextMap::iterator s( m_contexts.find(p_share) );
+        RenderContextMap::iterator s(m_contexts.find(p_share));
         if (s == m_contexts.end()) {
-            return 0;
+            return ret;
         }
         share = (*s).second;
     }
+    EGLContext sharedContext =
+            share.Ptr() ? share->getEGLContext() : EGL_NO_CONTEXT;
 
-    RenderContextPtr rctx( RenderContext::create(p_config, share, p_isGL2) );
+    RenderContextPtr rctx(RenderContext::create(
+        m_eglDisplay, config->getEglConfig(), sharedContext, p_isGL2));
     if (rctx.Ptr() != NULL) {
         ret = genHandle();
         m_contexts[ret] = rctx;
@@ -514,7 +591,14 @@ HandleType FrameBuffer::createWindowSurface(int p_config, int p_width, int p_hei
     emugl::Mutex::AutoLock mutex(m_lock);
 
     HandleType ret = 0;
-    WindowSurfacePtr win( WindowSurface::create(p_config, p_width, p_height) );
+
+    const FbConfig* config = getConfigs()->get(p_config);
+    if (!config) {
+        return ret;
+    }
+
+    WindowSurfacePtr win(WindowSurface::create(
+            getDisplay(), config->getEglConfig(), p_width, p_height));
     if (win.Ptr() != NULL) {
         ret = genHandle();
         m_windows[ret] = win;
@@ -611,7 +695,10 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface)
         return false;
     }
 
-    return (*w).second->flushColorBuffer();
+    WindowSurface* surface = (*w).second.Ptr();
+    surface->flushColorBuffer();
+
+    return true;
 }
 
 bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
@@ -633,8 +720,7 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
         return false;
     }
 
-    (*w).second->setColorBuffer( (*c).second.cb );
-
+    (*w).second->setColorBuffer((*c).second.cb);
     return true;
 }
 
@@ -760,11 +846,11 @@ bool FrameBuffer::bindContext(HandleType p_context,
 
     if (bindDraw.Ptr() != NULL && bindRead.Ptr() != NULL) {
         if (bindDraw.Ptr() != bindRead.Ptr()) {
-            bindDraw->bind(ctx, SURFACE_BIND_DRAW);
-            bindRead->bind(ctx, SURFACE_BIND_READ);
+            bindDraw->bind(ctx, WindowSurface::BIND_DRAW);
+            bindRead->bind(ctx, WindowSurface::BIND_READ);
         }
         else {
-            bindDraw->bind(ctx, SURFACE_BIND_READDRAW);
+            bindDraw->bind(ctx, WindowSurface::BIND_READDRAW);
         }
     }
 
@@ -846,76 +932,82 @@ bool FrameBuffer::unbind_locked()
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
 {
-    if (needLock) m_lock.lock();
+    if (needLock) {
+        m_lock.lock();
+    }
     bool ret = false;
 
     ColorBufferMap::iterator c( m_colorbuffers.find(p_colorbuffer) );
-    if (c != m_colorbuffers.end()) {
-
-        m_lastPostedColorBuffer = p_colorbuffer;
-        if (!m_subWin) {
-            // no subwindow created for the FB output
-            // cannot post the colorbuffer
-            if (needLock) m_lock.unlock();
-            return ret;
-        }
-
-
-        // bind the subwindow eglSurface
-        if (!bindSubwin_locked()) {
-            ERR("FrameBuffer::post eglMakeCurrent failed\n");
-            if (needLock) m_lock.unlock();
-            return false;
-        }
-
-        //
-        // render the color buffer to the window
-        //
-        if (m_zRot != 0.0f) {
-            s_gles2.glClear(GL_COLOR_BUFFER_BIT);
-        }
-        ret = (*c).second.cb->post(m_zRot);
-
-        if (ret) {
-            //
-            // output FPS statistics
-            //
-            if (m_fpsStats) {
-                long long currTime = GetCurrentTimeMS();
-                m_statsNumFrames++;
-                if (currTime - m_statsStartTime >= 1000) {
-                    float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
-                    printf("FPS: %5.3f\n", (float)m_statsNumFrames / dt);
-                    m_statsStartTime = currTime;
-                    m_statsNumFrames = 0;
-                }
-            }
-
-            s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
-        }
-
-        // restore previous binding
-        unbind_locked();
-
-        //
-        // Send framebuffer (without FPS overlay) to callback
-        //
-        if (m_onPost) {
-            (*c).second.cb->readback(m_fbImage);
-            m_onPost(m_onPostContext, m_width, m_height, -1,
-                    GL_RGBA, GL_UNSIGNED_BYTE, m_fbImage);
-        }
-
+    if (c == m_colorbuffers.end()) {
+        goto EXIT;
     }
 
-    if (needLock) m_lock.unlock();
+    m_lastPostedColorBuffer = p_colorbuffer;
+    if (!m_subWin) {
+        // no subwindow created for the FB output
+        // cannot post the colorbuffer
+        goto EXIT;
+    }
+
+
+    // bind the subwindow eglSurface
+    if (!bindSubwin_locked()) {
+        ERR("FrameBuffer::post eglMakeCurrent failed\n");
+        goto EXIT;
+    }
+
+    //
+    // render the color buffer to the window
+    //
+    if (m_zRot != 0.0f) {
+        s_gles2.glClear(GL_COLOR_BUFFER_BIT);
+    }
+    ret = (*c).second.cb->post(m_zRot);
+    if (ret) {
+        s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
+    }
+
+    //
+    // output FPS statistics
+    //
+    if (m_fpsStats) {
+        long long currTime = GetCurrentTimeMS();
+        m_statsNumFrames++;
+        if (currTime - m_statsStartTime >= 1000) {
+            float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
+            printf("FPS: %5.3f\n", (float)m_statsNumFrames / dt);
+            m_statsStartTime = currTime;
+            m_statsNumFrames = 0;
+        }
+    }
+
+    // restore previous binding
+    unbind_locked();
+
+    //
+    // Send framebuffer (without FPS overlay) to callback
+    //
+    if (m_onPost) {
+        (*c).second.cb->readback(m_fbImage);
+        m_onPost(m_onPostContext,
+                 m_width,
+                 m_height,
+                 -1,
+                 GL_RGBA,
+                 GL_UNSIGNED_BYTE,
+                 m_fbImage);
+    }
+
+EXIT:
+    if (needLock) {
+        m_lock.unlock();
+    }
     return ret;
 }
 
-bool FrameBuffer::repost()
-{
+bool FrameBuffer::repost() {
     if (m_lastPostedColorBuffer) {
-        return post( m_lastPostedColorBuffer );
+        return post(m_lastPostedColorBuffer);
     }
     return false;
 }
