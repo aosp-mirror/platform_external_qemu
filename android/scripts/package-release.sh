@@ -150,7 +150,8 @@ copy_directory_files () {
   FILES="$@"
 
   mkdir -p "$DSTDIR" || panic "Cannot create destination directory: $DSTDIR"
-  (cd $SRCDIR && tar cf - $FILES) | (cd $DSTDIR && tar xf -)
+  (cd $SRCDIR && tar cf - $FILES) | (cd $DSTDIR && tar xf -) ||
+        panic "Could not copy files to $DSTDIR"
 }
 
 # Copy all git sources from one source directory to a destination directory.
@@ -520,6 +521,11 @@ create_binaries_package () {
             copy_file_into objs/lib64/lib64$LIB$DLLEXT \
                            "$TEMP_PKG_DIR"/tools/lib64/
         done
+    fi
+    if [ -d "objs/lib/pc-bios" ]; then
+        dump "[$PKG_NAME] Copying x86 PC BIOS ROM files."
+        copy_directory_files objs/lib/pc-bios \
+                "$TEMP_PKG_DIR"/tools/lib/pc-bios "*.bin"
     fi
     if [ -d "objs/qemu" ]; then
         QEMU_BINARIES=$(list_files_under objs/qemu "$SYSTEM-*/qemu-system-*")
