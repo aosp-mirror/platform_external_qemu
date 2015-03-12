@@ -18,6 +18,7 @@
 
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
+#include "FbConfig.h"
 #include "RenderContext.h"
 #include "render_api.h"
 #include "TextureDraw.h"
@@ -30,6 +31,7 @@
 #include <stdint.h>
 
 typedef uint32_t HandleType;
+
 struct ColorBufferRef {
     ColorBufferPtr cb;
     uint32_t refcount;  // number of client-side references
@@ -50,17 +52,24 @@ class FrameBuffer
 {
 public:
     static bool initialize(int width, int height);
+
     static bool setupSubWindow(FBNativeWindowType p_window,
                                 int x, int y,
                                 int width, int height, float zRot);
+
     static bool removeSubWindow();
+
     static void finalize();
+
     static FrameBuffer *getFB() { return s_theFrameBuffer; }
 
     const FrameBufferCaps &getCaps() const { return m_caps; }
 
     int getWidth() const { return m_width; }
+
     int getHeight() const { return m_height; }
+
+    const FbConfigList* getConfigs() const { return m_configs; }
 
     void setPostCallback(OnPostFn onPost, void* onPostContext);
 
@@ -126,12 +135,14 @@ private:
     int m_width;
     int m_height;
     emugl::Mutex m_lock;
+    FbConfigList* m_configs;
     FBNativeWindowType m_nativeWindow;
     FrameBufferCaps m_caps;
     EGLDisplay m_eglDisplay;
     RenderContextMap m_contexts;
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
+    ColorBuffer::Helper* m_colorBufferHelper;
 
     EGLSurface m_eglSurface;
     EGLContext m_eglContext;
