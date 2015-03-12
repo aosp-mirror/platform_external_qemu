@@ -328,6 +328,8 @@ if [ -z "$NO_TESTS" ]; then
             fi
             EXECUTABLES="emulator.exe emulator-arm.exe emulator-x86.exe emulator-mips.exe"
             EXECUTABLES="$EXECUTABLES emulator64-arm.exe emulator64-x86.exe emulator64-mips.exe"
+            EXECUTABLES="$EXECUTABLES emulator-ranchu-arm64.exe emulator-ranchu-mips64.exe"
+            EXECUTABLES="$EXECUTABLES emulator64-ranchu-arm64.exe emulator64-ranchu-mips64.exe"
             EXPECTED_ICONS=14
             for EXEC in $EXECUTABLES; do
                 if [ ! -f "$OUT_DIR"/$EXEC ]; then
