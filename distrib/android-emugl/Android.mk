@@ -37,8 +37,7 @@ endif
 # Uncomment the following line if you want to enable debug traces
 # in the GLES emulation libraries.
 
-
-#TODO :DISABLE ME
+#----------TODO :DISABLE ME----------------
 BUILD_GLES_VX = 1
 EMUGL_COMMON_CFLAGS += -DEMUGL_DEBUG=1 -O0 -ggdb
 
