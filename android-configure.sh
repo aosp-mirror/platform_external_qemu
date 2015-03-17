@@ -161,7 +161,7 @@ fi
 #       provided by the XCode SDK.
 if [ "$HOST_OS" = darwin ]; then
     OSX_VERSION=$(sw_vers -productVersion)
-    OSX_SDK_SUPPORTED="10.6 10.7 10.8"
+    OSX_SDK_SUPPORTED="10.8 10.7 10.6"  # in order of preference
     OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
             grep macosx | sed -e "s/.*macosx//g" | sort -n | tr '\n' ' ')
     if [ -z "$OSX_SDK_INSTALLED_LIST" ]; then
@@ -170,9 +170,23 @@ if [ "$HOST_OS" = darwin ]; then
     fi
     log "OSX: Installed SDKs: $OSX_SDK_INSTALLED_LIST"
 
-    OSX_SDK_VERSION=$(echo "$OSX_SDK_INSTALLED_LIST" | tr ' ' '\n' | head -1)
+    OSX_SDK_VERSION=
 
-    if [ "$OSX_SDK_VERSION" = "10.6" -o "$OSX_SDK_VERSION" = "10.7" -o "$OSX_SDK_VERSION" = "10.8" ]; then
+    # compare each SDK version supported with each SDK version installed
+    for SUPPORTED_VERSION in $OSX_SDK_SUPPORTED; do
+        for INSTALLED_VERSION in $OSX_SDK_INSTALLED_LIST; do
+            if [ "$SUPPORTED_VERSION" = "$INSTALLED_VERSION" ]; then
+                # use the first match found
+                OSX_SDK_VERSION=$INSTALLED_VERSION
+                break
+            fi
+        done
+        if [ "$OSX_SDK_VERSION" ]; then
+            break
+        fi
+    done
+
+    if [ "$OSX_SDK_VERSION" ]; then
         log "OSX: Using SDK version $OSX_SDK_VERSION"
     else
         echo "ERROR: Only OSX SDK $OSX_SDK_SUPPORTED are supported and this machine has $OSX_SDK_VERSION."
