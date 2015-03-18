@@ -90,12 +90,12 @@ if [ "$OPT_CCACHE" ]; then
     if [ "$OPT_NO_CCACHE" ]; then
         panic "You cannot use both --ccache=<program> and --no-ccache at the same time."
     fi
-    CCACHE=$(which "$OPT_CCACHE" 2>/dev/null)
+    CCACHE=$(find_program "$OPT_CCACHE")
     if [ -z "$CCACHE" ]; then
         panic "Missing ccache program: $OPT_CCACHE"
     fi
 elif [ -z "$OPT_NO_CCACHE" ]; then
-    CCACHE=$(which ccache 2>/dev/null)
+    CCACHE=$(find_program ccache)
     if [ "$CCACHE" ]; then
         log "Auto-config: --ccache=$CCACHE"
     fi
