@@ -167,7 +167,7 @@ require_program () {
     local VARNAME PROGNAME CMD
     VARNAME=$1
     PROGNAME=$2
-    CMD=$(which $PROGNAME 2>/dev/null)
+    CMD=$(which $PROGNAME 2>/dev/null) || true
     if [ -z "$CMD" ]; then
         panic "Cannot find required build executable: $PROGNAME"
     fi
