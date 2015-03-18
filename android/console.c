@@ -2597,6 +2597,30 @@ static const CommandDefRec sensor_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
+/*****                        F I N G E R P R I N T  C O M M A N D S                   ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static int
+do_fingerprint_touch(ControlClient client, char* args )
+{
+    return 0;
+}
+
+
+static const CommandDefRec fingerprint_commands[] =
+{
+    { "touch", "touch finger print sensor with <finger-index>",
+      "'touch <fingerindex>' touch finger print sensor with <fingerindex>.\r\n",
+      NULL, do_fingerprint_touch, NULL },
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
+
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
 /*****                           M A I N   C O M M A N D S                             ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -2956,6 +2980,10 @@ static const CommandDefRec   main_commands[] =
     { "sensor", "manage emulator sensors",
       "allows you to request the emulator sensors\r\n", NULL,
       NULL, sensor_commands },
+
+    { "finger", "manage emulator finger print",
+      "allows you to touch the emulator finger print sensor\r\n", NULL,
+      NULL, fingerprint_commands},
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
