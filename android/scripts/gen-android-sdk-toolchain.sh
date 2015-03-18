@@ -178,15 +178,6 @@ gen_wrapper_program ()
       windres) FLAGS=$FLAGS" $EXTRA_WINDRESFLAGS";;
     esac
 
-    local DST_PROG="$PROG"
-    if [ -z "$DST_PREFIX" ]; then
-        DST_PROG=$(which "$PROG" 2>/dev/null || true)
-        if [ -z "$DST_PROG" ]; then
-            log "Ignored: $PROG"
-            return 0
-        fi
-    fi
-
     if [ "$CCACHE" ]; then
         DST_PREFIX="$CCACHE $DST_PREFIX"
     fi
@@ -199,7 +190,7 @@ gen_wrapper_program ()
 $EXTRA_ENV_SETUP
 
 # Tool invokation.
-${DST_PREFIX}$DST_PROG $FLAGS "\$@" $LDFLAGS
+${DST_PREFIX}$PROG $FLAGS "\$@" $LDFLAGS
 EOF
     chmod +x "$DST_FILE"
     log "  Generating: ${SRC_PREFIX}$PROG"
@@ -267,7 +258,7 @@ prepare_build_for_host () {
     PREBUILT_TOOLCHAIN_DIR=
     TOOLCHAIN_PREFIX=
     EXTRA_ENV_SETUP=
-    PREBUILT_TOOLCHAIN_SUBDIR=$(aosp_prebuilt_toolchain_subdir_for $CURRENT_HOST)
+    PREBUILT_TOOLCHAIN_DIR=$AOSP_DIR/$(aosp_prebuilt_toolchain_subdir_for $CURRENT_HOST)
     TOOLCHAIN_PREFIX=$(aosp_prebuilt_toolchain_prefix_for $CURRENT_HOST)
     case $CURRENT_HOST in
         darwin-*)
@@ -296,7 +287,7 @@ prepare_build_for_host () {
                 fi
             fi
             log "OSX: Using SDK at $OSX_SDK_ROOT"
-            EXTRA_ENV_SETUP="export MACOSX_DEPLOYEMENT_TARGET=10.8"
+            EXTRA_ENV_SETUP="export SDKROOT=$OSX_SDK_ROOT"
             ;;
     esac
 
@@ -352,16 +343,10 @@ prepare_build_for_host () {
 
     PATH=$ORIGINAL_PATH
 
-    if [ "$OSX_SDK_ROOT" ]; then
-        var_append EXTRA_CFLAGS "-isysroot $OSX_SDK_ROOT -mmacosx-version-min=$OSX_SDK_VERSION"
-        var_append EXTRA_CXXFLAGS "-isysroot $OSX_SDK_ROOT -mmacosx-version-min=$OSX_SDK_VERSION"
-        var_append EXTRA_LDFLAGS "-isysroot $OSX_SDK_ROOT -Wl,-syslibroot,$OSX_SDK_ROOT -mmacosx-version-min=$OSX_SDK_VERSION"
-    fi
-
     if [ "$OPT_PREFIX" ]; then
-        var_append EXTRA_CFLAGS "-I$OPT_PREFIX/include"
-        var_append EXTRA_CXXFLAGS "-I$OPT_PREFIX/include"
-        var_append EXTRA_LDFLAGS "-L$OPT_PREFIX/lib"
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -I$OPT_PREFIX/include"
+        EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -I$OPT_PREFIX/include"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -L$OPT_PREFIX/lib"
     fi
 
     if [ "$OPT_PRINT" ]; then
@@ -383,13 +368,7 @@ prepare_build_for_host () {
         else
             log "$CURRENT_TEXT Generating host wrapper toolchain in $INSTALL_DIR"
         fi
-
-        DST_PREFIX=
-        if [ "$PREBUILT_TOOLCHAIN_SUBDIR" ]; then
-            DST_PREFIX=$AOSP_DIR/$PREBUILT_TOOLCHAIN_SUBDIR/bin/$TOOLCHAIN_PREFIX
-        fi
-
-        gen_wrapper_toolchain "$BINPREFIX" "$DST_PREFIX" "$INSTALL_DIR"
+        gen_wrapper_toolchain "$BINPREFIX" "$PREBUILT_TOOLCHAIN_DIR/bin/$TOOLCHAIN_PREFIX" "$INSTALL_DIR"
 
         # Create pkgconfig link for other scripts.
         case $CURRENT_HOST in
