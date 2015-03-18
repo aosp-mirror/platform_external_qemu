@@ -127,7 +127,7 @@ if [ "$BAD_TARGETS" ]; then
     panic "Invalid target name(s): [$BAD_TARGETS], use one of: $VALID_TARGETS"
 fi
 
-export PKG_CONFIG=$(which pkg-config 2>/dev/null)
+export PKG_CONFIG=$(find_program pkg-config)
 if [ "$PKG_CONFIG" ]; then
     log "Found pkg-config at: $PKG_CONFIG"
 else

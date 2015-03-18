@@ -53,7 +53,7 @@ if [ -z "$FILES" ]; then
     die "Please give a list of PNG files as arguments. See --help."
 fi
 
-XXD=$(which xxd 2>/dev/null)
+XXD=$(which xxd 2>/dev/null || true)
 if [ -z "$XXD" ]; then
     die "Could not find 'xxd' tool in your PATH. Please install it!"
 fi

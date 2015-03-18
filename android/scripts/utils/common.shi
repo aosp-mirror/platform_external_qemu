@@ -473,3 +473,10 @@ timestamp_set () {
 timestamp_clear () {
     run rm -f "$(_shu_timestamp_file "$1" "$2")"
 }
+
+# Find a given program in the current path. This function never fails.
+# $1: Program name
+# Out: program path, if found, or empty string otherwise.
+find_program () {
+    which "$1" 2>/dev/null || true
+}
