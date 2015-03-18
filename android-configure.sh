@@ -225,21 +225,28 @@ if [ -z "$CC" -a -z "$OPTION_CC" -a -z "$OPTION_NO_AOSP_PREBUILTS" ] ; then
             fi
         fi
     elif [ "$HOST_OS" = "darwin" ] ; then
-        PREBUILTS_HOST_GCC=$AOSP_PREBUILTS_DIR/clang/darwin-x86/host
-        PROBE_HOST_CC=$PREBUILTS_HOST_GCC/3.5/bin/clang
-        PROBE_HOST_CFLAGS="-target x86_64-apple-darwin11.0.0"
+        # Unfortunately, the prebuilts clang binary is reserved for the platform
+        # build, so always use the installed host compiler instead.
+        # PREBUILTS_HOST_GCC=$AOSP_PREBUILTS_DIR/clang/darwin-x86/host
+        # PROBE_HOST_CC=$PREBUILTS_HOST_GCC/3.5/bin/clang
+        # PROBE_HOST_CFLAGS="-target x86_64-apple-darwin11.0.0"
+        true
     else
         echo "ERROR: Can't build emulator binaries on this platform. Use Linux or Darwin only!"
         exit 1
     fi
 
-    if [ -f "$PROBE_HOST_CC" ] ; then
-        echo "Using prebuilt toolchain: $PROBE_HOST_CC"
-        CC="$PROBE_HOST_CC $PROBE_HOST_CFLAGS"
+    if [ "$PROBE_HOST_CC" ]; then
+        if [ -f "$PROBE_HOST_CC" ] ; then
+            echo "Using prebuilt toolchain: $PROBE_HOST_CC"
+            CC="$PROBE_HOST_CC $PROBE_HOST_CFLAGS"
+        else
+            echo "ERROR: Cannot find prebuilts toolchain: $PROBE_HOST_CC"
+            echo "Please use --no-aosp-prebuilts or --aosp-prebuilts-dir=<path>."
+            exit 1
+        fi
     else
-        echo "ERROR: Cannot find prebuilts toolchain: $PROBE_HOST_CC"
-        echo "Please use --no-aosp-prebuilts or --aosp-prebuilts-dir=<path>."
-        exit 1
+        echo "Using host toolchain"
     fi
 fi
 
