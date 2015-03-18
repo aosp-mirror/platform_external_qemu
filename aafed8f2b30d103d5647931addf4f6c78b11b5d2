@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "26b800d4_5c9ed1e4",
+        "filename": "android/scripts/utils/package_builder.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-03-18T09:24:37Z",
+      "side": 1,
+      "message": "Oh nice, I think the right way to fix that is to define a new function in common.shi, and also use:\n\n  # Find program in current path.\n  # $1: Program name (e.g. \u0027ccache\u0027)\n  # Output: full program path as returned by \u0027which\u0027, or empty string\n  find_program () {\n      $(which \"$1\" 2\u003e/dev/null || true)\n  }\n\nCan I ask you to do that? Thanks in advance.",
+      "revId": "aafed8f2b30d103d5647931addf4f6c78b11b5d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
