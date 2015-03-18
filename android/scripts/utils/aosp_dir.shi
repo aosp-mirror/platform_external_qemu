@@ -45,21 +45,9 @@ aosp_dir_parse_option () {
         AOSP_DIR=$ANDROID_EMULATOR_AOSP_DIR
         log "Auto-config: --aosp-dir=$AOSP_DIR  [environment]"
     else
-        # Find the AOSP root directory
-        AOSP_DIR=$(program_directory)/..
-        while true; do
-            log "Probing $AOSP_DIR"
-            AOSP_DIR=$(cd "$AOSP_DIR" 2>/dev/null && pwd -P || true)
-            if [ "$AOSP_DIR" = "/" -o -z "$AOSP_DIR" ]; then
-                AOSP_DIR=
-                break
-            fi
-            if [ -d "$AOSP_DIR/prebuilts/gcc" ]; then
-                break
-            fi
-            AOSP_DIR=$AOSP_DIR/..
-        done
-        if [ -z "$AOSP_DIR" ]; then
+        # Assume that the current script is under external/qemu/android/scripts
+        AOSP_DIR=$(program_directory)/../../../..
+        if [ ! -d "$AOSP_DIR" -o ! -d "$AOSP_DIR"/prebuilts/gcc ]; then
             dump "Please define ANDROID_EMULATOR_AOSP_DIR in your environment,"
             dump "or use --aosp-dir=<path> on the command-line to specify the"
             dump "root of a valid AOSP source tree."
@@ -71,8 +59,11 @@ aosp_dir_parse_option () {
     AOSP_DIR=$(cd "$AOSP_DIR" && pwd -P 2>/dev/null)
     AOSP_PREBUILTS_GCC_DIR=$AOSP_DIR/prebuilts/gcc
     AOSP_PREBUILTS_CLANG_DIR=$AOSP_DIR/prebuilts/clang
-    if [ $(get_build_os) != "darwin" -a ! -d "$AOSP_PREBUILTS_GCC_DIR" ]; then
+    if [ ! -d "$AOSP_PREBUILTS_GCC_DIR" ]; then
         panic "Not a valid AOSP tree: missing directory: $AOSP_PREBUILTS_GCC_DIR"
+    fi
+    if [ ! -d "$AOSP_PREBUILTS_CLANG_DIR" ]; then
+        panic "Not a valid AOSP tree: missing directory: $AOSP_PREBUILTS_CLANG_DIR"
     fi
 }
 
@@ -85,10 +76,7 @@ aosp_prebuilt_toolchain_subdir_for () {
             printf "prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.8"
             ;;
         darwin*)
-            # NOTE: prebuilts/clang/darwin-x86/host/ is reserved for the platform
-            #       build and cannot be used to compile C++11 code at this point.
-            #       See b/19787770.
-            printf ""
+            printf "prebuilts/clang/darwin-x86/host/3.5"
             ;;
         windows*)
             printf "prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8"
