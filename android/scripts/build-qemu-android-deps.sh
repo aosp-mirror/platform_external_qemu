@@ -96,7 +96,7 @@ fi
 
 package_list_parse_file "$PACKAGE_LIST"
 
-export PKG_CONFIG=$(which pkg-config 2>/dev/null)
+export PKG_CONFIG=$(find_program pkg-config)
 if [ "$PKG_CONFIG" ]; then
     log "Found pkg-config at: $PKG_CONFIG"
 else
@@ -167,7 +167,7 @@ require_program () {
     local VARNAME PROGNAME CMD
     VARNAME=$1
     PROGNAME=$2
-    CMD=$(which $PROGNAME 2>/dev/null)
+    CMD=$(find_program "$PROGNAME")
     if [ -z "$CMD" ]; then
         panic "Cannot find required build executable: $PROGNAME"
     fi
@@ -224,7 +224,7 @@ do_windows_glib_package () {
         export CPPFLAGS="-I$PREFIX/include -I$GLIB_DIR -I$GLIB_DIR/glib" &&
         export CC=${GNU_CONFIG_HOST_PREFIX}gcc &&
         export CXX=${GNU_CONFIG_HOST_PREFIX}c++ &&
-        export PKG_CONFIG=$(which pkg-config) &&
+        export PKG_CONFIG=$(find_program pkg-config) &&
         export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig &&
         run ./configure \
             --prefix=$PREFIX \
