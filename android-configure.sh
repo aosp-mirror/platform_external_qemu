@@ -344,7 +344,7 @@ if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
     fi
 else
     if [ "$USE_CCACHE" != 0 ]; then
-        CCACHE=$(which ccache 2>/dev/null)
+        CCACHE=$(which ccache 2>/dev/null || true)
     fi
 fi  # IN_ANDROID_BUILD = no
 

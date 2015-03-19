@@ -620,7 +620,7 @@ pattern_match ()
 find_program ()
 {
     local PROG
-    PROG=`which $2 2>/dev/null`
+    PROG=`which $2 2>/dev/null || true`
     if [ -n "$PROG" ] ; then
         if pattern_match '^no ' "$PROG"; then
             PROG=
