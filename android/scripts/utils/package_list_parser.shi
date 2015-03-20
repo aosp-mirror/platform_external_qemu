@@ -184,7 +184,8 @@ package_list_parse_file () {
     local COUNT=0
     local LINE_NUMBER=0
     local LINE
-    IFS=$'\n'
+    IFS="
+"
     for LINE in $(cat "$1"); do
         IFS=$OLD_IFS
         LINE_NUMBER=$(( $LINE_NUMBER + 1 ))
