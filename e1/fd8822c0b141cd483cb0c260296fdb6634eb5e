@@ -1,0 +1,8 @@
+Code-Review+1: Yu Ning <yu.ning@intel.com>
+Code-Review+2: David Turner <digit@google.com>
+Verified+1: David Turner <digit@google.com>
+Submitted-by: David Turner <digit@google.com>
+Submitted-at: Fri, 20 Mar 2015 08:40:35 +0000
+Reviewed-on: https://android-review.googlesource.com/143074
+Project: platform/external/qemu
+Branch: refs/heads/studio-1.3-dev
