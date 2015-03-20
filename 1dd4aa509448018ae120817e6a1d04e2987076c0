@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "068cdc85_d76edcac",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_Vx/GLEScmImp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2120,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2015-03-20T22:35:30Z",
+      "side": 1,
+      "message": "crashes nVidia driver, but not the mesa driver.",
+      "revId": "1dd4aa509448018ae120817e6a1d04e2987076c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
