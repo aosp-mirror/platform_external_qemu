@@ -15,12 +15,12 @@
 */
 
 #include "GLESv2Context.h"
+#include <OpenglCodecCommon/ErrorLog.h>
 #include <string.h>
 
 void GLESv2Context::init() {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
-      fprintf(stdout, "___ Init GLESv2Context @ %p\n", this);
         s_glDispatch.dispatchFuncs(GLES_2_0);
         GLEScontext::init();
         for(int i=0; i < s_glSupport.maxVertexAttribs;i++){
@@ -33,14 +33,13 @@ void GLESv2Context::init() {
                      (const char*)dispatcher().glGetString(GL_VERSION),
                      "OpenGL ES 2.0");
     }
-    fprintf(stdout, "--- Init GLESv2Context @ %p\n", this);
 
     m_initialized = true;
 }
 
 void GLESv2Context::initGLESx() {
-  fprintf(stdout, "static init GLES_V2 through a tmp context\n");
   emugl::Mutex::AutoLock mutex(s_lock);
+  DBG("INIT GLES_2_0 ---- load dispatcher");
   s_glDispatch.dispatchFuncs(GLES_2_0);
 }
 
@@ -73,7 +72,7 @@ void GLESv2Context::validateAtt0PreDraw(unsigned int count)
 
     if(count > m_att0ArrayLength)
     {
-        delete [] m_att0Array; 
+        delete [] m_att0Array;
         m_att0Array = new GLfloat[4*count];
         m_att0ArrayLength = count;
     }

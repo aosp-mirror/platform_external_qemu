@@ -466,7 +466,7 @@ GL_API void GL_APIENTRY es1xFrustumf(void *_context_, GLfloat left, GLfloat righ
 
   /* Check invalid input */
   if (near      <= 0.f          ||
-      far               <= 0.f          ||
+      far       <= 0.f          ||
       left      == right        ||
       bottom    == top          ||
       near      == far)
