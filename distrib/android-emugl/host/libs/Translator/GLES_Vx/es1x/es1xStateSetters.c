@@ -817,8 +817,11 @@ GL_API void GL_APIENTRY es1xClientActiveTexture(void *_context_,
 
   if (textureUnitIndex >= 0 && textureUnitIndex < ES1X_NUM_SUPPORTED_TEXTURE_UNITS)
     context->clientActiveTexture = textureUnitIndex;
-  else
+  else {
+    ES1X_LOG(("*** ES1X : texture unit %d > supported tex units %d \n", \
+              (int) textureUnitIndex, ES1X_NUM_SUPPORTED_TEXTURE_UNITS));
     es1xSetError(_context_, GL_INVALID_ENUM);
+  }
 }
 
 /*---------------------------------------------------------------------------*/

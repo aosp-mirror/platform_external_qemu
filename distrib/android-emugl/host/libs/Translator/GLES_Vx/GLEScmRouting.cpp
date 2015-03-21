@@ -37,7 +37,6 @@ static __translator_getGLESIfaceFunc loadIfaces(const char* libName)
 }
 
 void init_gl_routing_for_glesv2() {
-  printf("*** GLEScmRouting: initializating GL routing table for GLESv2\n");
 
   __translator_getGLESIfaceFunc func  = NULL;
   func  = loadIfaces(LIB_GLES_V2_NAME);
@@ -57,13 +56,10 @@ glEGLImageTargetRenderbufferStorageOES_server_proc_t v2_glEGLImageTargetRenderbu
 
 static void *gles_routing_get_proc_func(const char *name, void *userData)
 {
-  if (!s_gles_v2_lib) {
+  if (!s_gles_v2_lib)
     return NULL;
-  }
 
   void *func = (void *) s_gles_v2_lib->findSymbol(name);
-  if( func != NULL)
-    fprintf(stdout, "*** GLESv2 %s found @ %p\n", name, func);
 
   return func;
 }
@@ -79,17 +75,13 @@ void init_gles_v1tov2_routing() {
   const char *libName = LIB_GLES_V2_NAME;
 
   s_gles_v2_lib = emugl::SharedLibrary::open(libName);
-  if (!s_gles_v2_lib) {
-    fprintf(stderr, "*** Could not load %s to init GLES routing"
-            "through libes1x \n", libName);
+  if (!s_gles_v2_lib)
     return;
-  } else {
+  else
     gles_v2.initDispatchByName(gles_routing_get_proc_func, NULL);
-  }
 
   // init es1x
   struct gles2_server_base_t *gles_v2_base = static_cast<struct gles2_server_base_t *>(&gles_v2);
-  fprintf(stdout, "*** Setting 1.x-->2.0 routing table to %p \n", gles_v2_base);
   setGLES2base(gles_v2_base);
 
   // init extensions not implemented through es1x but available in GLES_V2
