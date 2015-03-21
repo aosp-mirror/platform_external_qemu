@@ -16,6 +16,24 @@
       "revId": "1dd4aa509448018ae120817e6a1d04e2987076c0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "86160cff_9469c4a8",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_Vx/GLEScmImp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2120,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-03-21T00:42:07Z",
+      "side": 1,
+      "message": "Perhaps there is something wrong with my MESA libGL because I get shader compiler errors so I did not manage to test this piece with MESA",
+      "parentUuid": "068cdc85_d76edcac",
+      "revId": "1dd4aa509448018ae120817e6a1d04e2987076c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
