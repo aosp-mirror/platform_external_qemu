@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-#include "qemu-common.h"
-#include "android/user-events.h"
+#include "android/multitouch-screen.h"
+
 #include "android/display-core.h"
-#include "android/hw-events.h"
-#include "android/charmap.h"
 #include "android/globals.h"  /* for android_hw */
+#include "android/hw-events.h"
+#include "android/skin/charmap.h"
+#include "android/user-events.h"
 #include "android/utils/misc.h"
 #include "android/utils/debug.h"
-#include "android/multitouch-screen.h"
+
+#include "qemu-common.h"
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)

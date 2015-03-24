@@ -9,10 +9,10 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_KEYCODE_H
-#define ANDROID_KEYCODE_H
+#ifndef ANDROID_SKIN_KEYCODE_H
+#define ANDROID_SKIN_KEYCODE_H
 
-#include "linux_keycodes.h"
+#include "android/skin/linux_keycodes.h"
 
 /* Keep it consistent with linux/input.h */
 typedef enum {
@@ -116,7 +116,7 @@ typedef enum {
     kKeyCodeChannelUp               = KEY_CHANNELUP,
     kKeyCodeChannelDown             = KEY_CHANNELDOWN,
 
-} AndroidKeyCode;
+} SkinKeyCode;
 
 /* This function is used to rotate D-Pad keycodes, while leaving other ones
  * untouched. 'code' is the input keycode, which will be returned as is if
@@ -124,11 +124,11 @@ typedef enum {
  * *clockwise* 90 degrees rotations to perform on D-Pad keys.
  *
  * Here are examples:
- *    android_keycode_rotate( kKeyCodeDpadUp, 1 )  => kKeyCodeDpadRight
- *    android_keycode_rotate( kKeyCodeDpadRight, 2 ) => kKeyCodeDpadLeft
- *    android_keycode_rotate( kKeyCodeDpadDown, 3 ) => kKeyCodeDpadRight
- *    android_keycode_rotate( kKeyCodeSpace, n ) => kKeyCodeSpace independent of n
+ *    skin_keycode_rotate( kKeyCodeDpadUp, 1 )  => kKeyCodeDpadRight
+ *    skin_keycode_rotate( kKeyCodeDpadRight, 2 ) => kKeyCodeDpadLeft
+ *    skin_keycode_rotate( kKeyCodeDpadDown, 3 ) => kKeyCodeDpadRight
+ *    skin_keycode_rotate( kKeyCodeSpace, n ) => kKeyCodeSpace independent of n
  */
-extern AndroidKeyCode   android_keycode_rotate( AndroidKeyCode  code, int  rotation );
+extern SkinKeyCode   skin_keycode_rotate( SkinKeyCode  code, int  rotation );
 
-#endif /* ANDROID_KEYCODE_H */
+#endif /* ANDROID_SKIN_KEYCODE_H */

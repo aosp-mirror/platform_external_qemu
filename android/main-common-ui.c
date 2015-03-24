@@ -10,19 +10,18 @@
 ** GNU General Public License for more details.
 */
 
-#include <SDL.h>
-#include <SDL_syswm.h>
-
 #include "android/avd/util.h"
+#include "android/display.h"
+#include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/qemulator.h"
-#include "android/display.h"
 #include "android/resource.h"
-#include "android/skin/image.h"
-#include "android/skin/trackball.h"
-#include "android/skin/keyboard.h"
 #include "android/skin/file.h"
+#include "android/skin/image.h"
+#include "android/skin/keyboard.h"
+#include "android/skin/resource.h"
+#include "android/skin/trackball.h"
 #include "android/skin/window.h"
 #include "android/user-config.h"
 #include "android/utils/bufprint.h"
@@ -31,6 +30,9 @@
 #include "android/utils/path.h"
 
 #include "ui/console.h"
+
+#include <SDL.h>
+#include <SDL_syswm.h>
 
 #include <stdlib.h>
 
@@ -82,17 +84,16 @@ user_config_get_window_pos( int *window_x, int *window_y )
 
 #define  KEYSET_FILE    "default.keyset"
 
-SkinKeyset*  android_keyset = NULL;
-
 static int
 load_keyset(const char*  path)
 {
     if (path_can_read(path)) {
         AConfig*  root = aconfig_node("","");
         if (!aconfig_load_file(root, path)) {
-            android_keyset = skin_keyset_new(root);
-            if (android_keyset != NULL) {
+            SkinKeyset* keyset = skin_keyset_new(root);
+            if (keyset != NULL) {
                 D( "keyset loaded from: %s", path);
+                skin_keyset_set_default(keyset);
                 return 0;
             }
         }
@@ -151,7 +152,7 @@ write_default_keyset( void )
     /* only write if there is no file here */
     if (!path_exists(path)) {
         int          fd = open( path, O_WRONLY | O_CREAT, 0666 );
-        const char*  ks = skin_keyset_get_default();
+        const char*  ks = skin_keyset_get_default_text();
 
 
         D( "writing default keyset file to %s", path );
@@ -665,7 +666,7 @@ DEFAULT_SKIN:
 
         skinName = "<builtin>";
 
-        layout_base = android_resource_find( "layout", &layout_size );
+        layout_base = skin_resource_find( "layout", &layout_size );
         if (layout_base == NULL) {
             fprintf(stderr, "Couldn't load builtin skin\n");
             exit(1);

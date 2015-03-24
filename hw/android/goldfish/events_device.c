@@ -10,16 +10,17 @@
 ** GNU General Public License for more details.
 */
 #include "hw/android/goldfish/device.h"
-#include "migration/qemu-file.h"
-#include "android/hw-events.h"
-#include "android/charmap.h"
+
 #include "android/globals.h"  /* for android_hw */
+#include "android/hw-events.h"
 #include "android/multitouch-screen.h"
+#include "android/skin/charmap.h"
+#include "android/user-events.h"
 #include "exec/cpu-common.h"
 #include "exec/hwaddr.h"
 #include "hw/hw.h"
 #include "hw/irq.h"
-#include "android/user-events.h"
+#include "migration/qemu-file.h"
 #include "ui/console.h"
 
 #define MAX_EVENTS 256*4

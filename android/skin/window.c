@@ -10,18 +10,21 @@
 ** GNU General Public License for more details.
 */
 #include "android/skin/window.h"
+
+#include "android/hw-sensors.h"
+#include "android/skin/charmap.h"
 #include "android/skin/image.h"
 #include "android/skin/scaler.h"
-#include "android/charmap.h"
-#include "android/hw-sensors.h"
+#include "android/user-events.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 #include "android/utils/duff.h"
+
 #include <SDL_syswm.h>
-#include "android/user-events.h"
+
 #include <math.h>
 
-#include "android/framebuffer.h"
+//#include "android/framebuffer.h"
 #include "android/opengles.h"
 
 /* when shrinking, we reduce the pixel ratio by this fixed amount */
@@ -89,7 +92,7 @@ typedef struct ADisplay {
     SkinRotation   rotation;
     SkinSize       datasize;  /* framebuffer size */
     void*          data;      /* framebuffer pixels */
-    QFrameBuffer*  qfbuff;
+    int            bits_per_pixel;  /* framebuffer depth */
     SkinImage*     onion;       /* onion image */
     SkinRect       onion_rect;  /* onion rect, if any */
     int            brightness;
@@ -99,7 +102,6 @@ static void
 display_done( ADisplay*  disp )
 {
     disp->data   = NULL;
-    disp->qfbuff = NULL;
     skin_image_unref( &disp->onion );
 }
 
@@ -139,8 +141,14 @@ display_init( ADisplay*  disp, SkinDisplay*  sdisp, SkinLocation*  loc, SkinRect
                     disp->rect.size.w, disp->rect.size.h,
                     disp->datasize.w, disp->datasize.h);
 #endif
-    disp->qfbuff = sdisp->qfbuff;
-    disp->data   = sdisp->qfbuff->pixels;
+    disp->data = NULL;
+    disp->bits_per_pixel = 0;
+    if (sdisp->framebuffer_funcs) {
+        disp->data =
+                sdisp->framebuffer_funcs->get_pixels(sdisp->framebuffer);
+        disp->bits_per_pixel =
+                sdisp->framebuffer_funcs->get_depth(sdisp->framebuffer);
+    }
     disp->onion  = NULL;
 
     disp->brightness = LCD_BRIGHTNESS_DEFAULT;
@@ -402,7 +410,7 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
 
     switch ( disp->rotation & 3 )
     {
-    case ANDROID_ROTATION_0:
+    case SKIN_ROTATION_0:
         src_line += x*2 + y*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -420,7 +428,7 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
         }
         break;
 
-    case ANDROID_ROTATION_90:
+    case SKIN_ROTATION_90:
         src_line += y*2 + (disp_w - x - 1)*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -438,7 +446,7 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
         }
         break;
 
-    case ANDROID_ROTATION_180:
+    case SKIN_ROTATION_180:
         src_line += (disp_w -1 - x)*2 + (disp_h-1-y)*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -456,7 +464,7 @@ display_redraw_rect16( ADisplay* disp, SkinRect* rect, SDL_Surface* surface)
     }
     break;
 
-    default:  /* ANDROID_ROTATION_270 */
+    default:  /* SKIN_ROTATION_270 */
         src_line += (disp_h-1-y)*2 + x*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -496,7 +504,7 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
 
     switch ( disp->rotation & 3 )
     {
-    case ANDROID_ROTATION_0:
+    case SKIN_ROTATION_0:
         src_line += x*4 + y*src_pitch;
 
         for (yy = h; yy > 0; yy--) {
@@ -513,7 +521,7 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
         }
         break;
 
-    case ANDROID_ROTATION_90:
+    case SKIN_ROTATION_90:
         src_line += y*4 + (disp_w - x - 1)*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -531,7 +539,7 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
         }
         break;
 
-    case ANDROID_ROTATION_180:
+    case SKIN_ROTATION_180:
         src_line += (disp_w -1 - x)*4 + (disp_h-1-y)*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -549,7 +557,7 @@ display_redraw_rect32( ADisplay* disp, SkinRect* rect,SDL_Surface* surface)
     }
     break;
 
-    default:  /* ANDROID_ROTATION_270 */
+    default:  /* SKIN_ROTATION_270 */
         src_line += (disp_h-1-y)*4 + x*src_pitch;
 
         for (yy = h; yy > 0; yy--)
@@ -591,7 +599,7 @@ display_redraw( ADisplay*  disp, SkinRect*  rect, SDL_Surface*  surface )
         }
         else
         {
-            if (disp->qfbuff->bits_per_pixel == 32)
+            if (disp->bits_per_pixel == 32)
                 display_redraw_rect32(disp, &r, surface);
             else
                 display_redraw_rect16(disp, &r, surface);
@@ -660,7 +668,7 @@ button_init( Button*  button, SkinButton*  sbutton, SkinLocation*  loc, Backgrou
          * this is used as a counter-measure to the fact that the framework always assumes
          * that the physical D-Pad has been rotated when in landscape mode.
          */
-        button->keycode = android_keycode_rotate( button->keycode, -slayout->dpad_rotation );
+        button->keycode = skin_keycode_rotate( button->keycode, -slayout->dpad_rotation );
     }
 
     skin_rect_rotate( &r, &sbutton->rect, loc->rotation );

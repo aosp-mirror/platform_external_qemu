@@ -14,7 +14,23 @@
 
 #include "android/skin/image.h"
 #include "android/utils/aconfig-file.h"
-#include "android/framebuffer.h"
+
+typedef struct {
+    void* (*create_framebuffer)(int width,
+                                int height,
+                                int bpp);
+
+    void (*free_framebuffer)(void* framebuffer);
+
+    void* (*get_pixels)(void* framebuffer);
+
+    int (*get_depth)(void* framebuffer);
+} SkinFramebufferFuncs;
+
+typedef struct {
+    unsigned (*translate_name)(const char* key_name);
+    unsigned dpad_up_keycode;
+} SkinCharmapFuncs;
 
 /**  Layout
  **/
@@ -30,7 +46,8 @@ typedef struct SkinDisplay {
     SkinRotation  rotation;  /* framebuffer rotation */
     int           bpp;       /* bits per pixel, 32 or 16 */
     char          valid;
-    QFrameBuffer  qfbuff[1];
+    void*         framebuffer;
+    const SkinFramebufferFuncs* framebuffer_funcs;
 } SkinDisplay;
 
 typedef struct SkinButton {
@@ -78,6 +95,7 @@ typedef struct SkinLayout {
     int                 event_value;
     char                has_dpad_rotation;
     SkinRotation        dpad_rotation;
+    unsigned            dpad_up_keycode;
     SkinSize            size;
     SkinLocation*       locations;
     SkinImage*          onion_image;
@@ -133,7 +151,12 @@ typedef struct SkinFile {
         }                          \
     } while (0);
 
-extern SkinFile*  skin_file_create_from_aconfig( AConfig*   aconfig, const char*  basepath );
+extern SkinFile* skin_file_create_from_aconfig(
+        AConfig* aconfig,
+        const char* basepath,
+        const SkinFramebufferFuncs* fb_funcs,
+        const SkinCharmapFuncs* charmap_funcs);
+
 extern void       skin_file_free( SkinFile*  file );
 
 #endif /* _ANDROID_SKIN_FILE_H */

@@ -13,11 +13,12 @@
 #ifndef QEMU_ANDROID_QEMULATOR_H
 #define QEMU_ANDROID_QEMULATOR_H
 
-#include "android/utils/aconfig-file.h"
+#include "android/cmdline-option.h"
+#include "android/framebuffer.h"
 #include "android/skin/file.h"
 #include "android/skin/keyboard.h"
 #include "android/skin/window.h"
-#include "android/cmdline-option.h"
+#include "android/utils/aconfig-file.h"
 
 typedef struct {
     AConfig*       aconfig;

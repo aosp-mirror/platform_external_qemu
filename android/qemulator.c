@@ -10,12 +10,15 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/utils/debug.h"
-#include "android/utils/bufprint.h"
+#include "android/qemulator.h"
+
+#include "android/android.h"
+#include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/hw-control.h"
-#include "android/qemulator.h"
 #include "android/user-events.h"
+#include "android/utils/debug.h"
+#include "android/utils/bufprint.h"
 #include "telephony/modem_driver.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
@@ -42,6 +45,10 @@ qemulator_light_brightness( void* opaque, const char*  light, int  value )
     }
 }
 
+static void qemulator_trackball_event(int dx, int dy) {
+    user_event_mouse(dx, dy, 1, 0);
+}
+
 static void
 qemulator_setup( QEmulator*  emulator )
 {
@@ -64,6 +71,7 @@ qemulator_setup( QEmulator*  emulator )
             params.ball_color = 0xffe0e0e0;
             params.dot_color  = 0xff202020;
             params.ring_color = 0xff000000;
+            params.event_func = &qemulator_trackball_event;
 
             ball = skin_trackball_create( &params );
             emulator->trackball = ball;
@@ -128,6 +136,134 @@ qemulator_get(void)
     return qemulator;
 }
 
+static void qemulator_framebuffer_free(void* opaque) {
+    QFrameBuffer* fb = opaque;
+
+    qframebuffer_done(fb);
+    free(fb);
+}
+
+static void* qemulator_framebuffer_create(int width, int height, int bpp) {
+    QFrameBuffer* fb = calloc(1, sizeof(*fb));
+
+    qframebuffer_init(fb, width, height, 0,
+                      bpp == 32 ? QFRAME_BUFFER_RGBX_8888
+                                : QFRAME_BUFFER_RGB565 );
+
+    qframebuffer_fifo_add(fb);
+    return fb;
+}
+
+static void* qemulator_framebuffer_get_pixels(void* opaque) {
+    QFrameBuffer* fb = opaque;
+    return fb->pixels;
+}
+
+static int qemulator_framebuffer_get_depth(void* opaque) {
+    QFrameBuffer* fb = opaque;
+    return fb->bits_per_pixel;
+}
+
+static unsigned qemulator_translate_button_name(const char* name) {
+    typedef struct {
+        const char*     name;
+        SkinKeyCode  code;
+    } KeyInfo;
+
+    static const KeyInfo keyinfo_table[] = {
+        { "dpad-up",      kKeyCodeDpadUp },
+        { "dpad-down",    kKeyCodeDpadDown },
+        { "dpad-left",    kKeyCodeDpadLeft },
+        { "dpad-right",   kKeyCodeDpadRight },
+        { "dpad-center",  kKeyCodeDpadCenter },
+        { "soft-left",    kKeyCodeSoftLeft },
+        { "soft-right",   kKeyCodeSoftRight },
+        { "search",       kKeyCodeSearch },
+        { "camera",       kKeyCodeCamera },
+        { "volume-up",    kKeyCodeVolumeUp },
+        { "volume-down",  kKeyCodeVolumeDown },
+        { "power",        kKeyCodePower },
+        { "home",         kKeyCodeHome },
+        { "back",         kKeyCodeBack },
+        { "del",          kKeyCodeDel },
+        { "0",            kKeyCode0 },
+        { "1",            kKeyCode1 },
+        { "2",            kKeyCode2 },
+        { "3",            kKeyCode3 },
+        { "4",            kKeyCode4 },
+        { "5",            kKeyCode5 },
+        { "6",            kKeyCode6 },
+        { "7",            kKeyCode7 },
+        { "8",            kKeyCode8 },
+        { "9",            kKeyCode9 },
+        { "star",         kKeyCodeStar },
+        { "pound",        kKeyCodePound },
+        { "phone-dial",   kKeyCodeCall },
+        { "phone-hangup", kKeyCodeEndCall },
+        { "q",            kKeyCodeQ },
+        { "w",            kKeyCodeW },
+        { "e",            kKeyCodeE },
+        { "r",            kKeyCodeR },
+        { "t",            kKeyCodeT },
+        { "y",            kKeyCodeY },
+        { "u",            kKeyCodeU },
+        { "i",            kKeyCodeI },
+        { "o",            kKeyCodeO },
+        { "p",            kKeyCodeP },
+        { "a",            kKeyCodeA },
+        { "s",            kKeyCodeS },
+        { "d",            kKeyCodeD },
+        { "f",            kKeyCodeF },
+        { "g",            kKeyCodeG },
+        { "h",            kKeyCodeH },
+        { "j",            kKeyCodeJ },
+        { "k",            kKeyCodeK },
+        { "l",            kKeyCodeL },
+        { "DEL",          kKeyCodeDel },
+        { "z",            kKeyCodeZ },
+        { "x",            kKeyCodeX },
+        { "c",            kKeyCodeC },
+        { "v",            kKeyCodeV },
+        { "b",            kKeyCodeB },
+        { "n",            kKeyCodeN },
+        { "m",            kKeyCodeM },
+        { "COMMA",        kKeyCodeComma },
+        { "PERIOD",       kKeyCodePeriod },
+        { "ENTER",        kKeyCodeNewline },
+        { "AT",           kKeyCodeAt },
+        { "SPACE",        kKeyCodeSpace },
+        { "SLASH",        kKeyCodeSlash },
+        { "CAP",          kKeyCodeCapLeft },
+        { "SYM",          kKeyCodeSym },
+        { "ALT",          kKeyCodeAltLeft },
+        { "ALT2",         kKeyCodeAltRight },
+        { "CAP2",         kKeyCodeCapRight },
+        { "tv",           kKeyCodeTV },
+        { "epg",          kKeyCodeEPG },
+        { "dvr",          kKeyCodeDVR },
+        { "prev",         kKeyCodePrevious },
+        { "next",         kKeyCodeNext },
+        { "play",         kKeyCodePlay },
+        { "pause",        kKeyCodePause },
+        { "stop",         kKeyCodeStop },
+        { "rev",          kKeyCodeRewind },
+        { "ffwd",         kKeyCodeFastForward },
+        { "bookmarks",    kKeyCodeBookmarks },
+        { "window",       kKeyCodeCycleWindows },
+        { "channel-up",   kKeyCodeChannelUp },
+        { "channel-down", kKeyCodeChannelDown },
+        { 0, 0 },
+    };
+
+    const KeyInfo *ki = keyinfo_table;
+    while(ki->name) {
+        if(!strcmp(name, ki->name))
+            return ki->code;
+        ki++;
+    }
+    return 0;
+}
+
 int
 qemulator_init( QEmulator*       emulator,
                 AConfig*         aconfig,
@@ -136,10 +272,29 @@ qemulator_init( QEmulator*       emulator,
                 int              y,
                 AndroidOptions*  opts )
 {
+    static const SkinFramebufferFuncs skin_fb_funcs = {
+        .create_framebuffer = &qemulator_framebuffer_create,
+        .free_framebuffer = &qemulator_framebuffer_free,
+        .get_pixels = &qemulator_framebuffer_get_pixels,
+        .get_depth = &qemulator_framebuffer_get_depth,
+    };
+
+    static const SkinCharmapFuncs skin_charmap_funcs = {
+        .translate_name = &qemulator_translate_button_name,
+        .dpad_up_keycode = kKeyCodeDpadUp,
+    };
+
     emulator->aconfig     = aconfig;
-    emulator->layout_file = skin_file_create_from_aconfig(aconfig, basepath);
+    emulator->layout_file =
+            skin_file_create_from_aconfig(aconfig,
+                                          basepath,
+                                          &skin_fb_funcs,
+                                          &skin_charmap_funcs);
+
     emulator->layout      = emulator->layout_file->layouts;
-    emulator->keyboard    = skin_keyboard_create(opts->charmap, opts->raw_keys);
+    emulator->keyboard    = skin_keyboard_create(opts->charmap,
+                                                 opts->raw_keys,
+                                                 &user_event_keycodes);
     emulator->window      = NULL;
     emulator->win_x       = x;
     emulator->win_y       = y;
@@ -149,7 +304,7 @@ qemulator_init( QEmulator*       emulator,
     SKIN_FILE_LOOP_PARTS( emulator->layout_file, part )
         SkinDisplay*  disp = part->display;
         if (disp->valid) {
-            qframebuffer_add_client( disp->qfbuff,
+            qframebuffer_add_client( disp->framebuffer,
                                      emulator,
                                      qemulator_fb_update,
                                      qemulator_fb_rotate,
@@ -199,7 +354,7 @@ qemulator_get_first_framebuffer(QEmulator* emulator)
     SKIN_FILE_LOOP_PARTS( emulator->layout_file, part )
         SkinDisplay*  disp = part->display;
         if (disp->valid) {
-            return disp->qfbuff;
+            return disp->framebuffer;
         }
     SKIN_FILE_LOOP_END_PARTS
     return NULL;
@@ -217,7 +372,7 @@ qemulator_set_title(QEmulator* emulator)
         SkinKeyBinding  bindings[ SKIN_KEY_COMMAND_MAX_BINDINGS ];
         int             count;
 
-        count = skin_keyset_get_bindings( android_keyset,
+        count = skin_keyset_get_bindings( skin_keyset_get_default(),
                                           SKIN_KEY_COMMAND_TOGGLE_TRACKBALL,
                                           bindings );
 
@@ -330,7 +485,7 @@ get_default_scale( AndroidOptions*  opts )
 static void
 handle_key_command( void*  opaque, SkinKeyCommand  command, int  down )
 {
-    static const struct { SkinKeyCommand  cmd; AndroidKeyCode  kcode; }  keycodes[] =
+    static const struct { SkinKeyCommand  cmd; SkinKeyCode  kcode; }  keycodes[] =
     {
         { SKIN_KEY_COMMAND_BUTTON_CALL,        kKeyCodeCall },
         { SKIN_KEY_COMMAND_BUTTON_HOME,        kKeyCodeHome },
@@ -540,20 +695,20 @@ static void qemulator_refresh(QEmulator* emulator)
                 if (ev.button.button == 4)
                 {
                     /* scroll-wheel simulates DPad up */
-                    AndroidKeyCode  kcode;
+                    SkinKeyCode  kcode;
 
                     kcode = // qemulator_rotate_keycode(kKeyCodeDpadUp);
-                        android_keycode_rotate(kKeyCodeDpadUp,
+                        skin_keycode_rotate(kKeyCodeDpadUp,
                             skin_layout_get_dpad_rotation(qemulator_get_layout(qemulator_get())));
                     user_event_key( kcode, down );
                 }
                 else if (ev.button.button == 5)
                 {
                     /* scroll-wheel simulates DPad down */
-                    AndroidKeyCode  kcode;
+                    SkinKeyCode  kcode;
 
                     kcode = // qemulator_rotate_keycode(kKeyCodeDpadDown);
-                        android_keycode_rotate(kKeyCodeDpadDown,
+                        skin_keycode_rotate(kKeyCodeDpadDown,
                             skin_layout_get_dpad_rotation(qemulator_get_layout(qemulator_get())));
                     user_event_key( kcode, down );
                 }

@@ -10,36 +10,43 @@
 ** GNU General Public License for more details.
 */
 
-#include <stdio.h>
-#include "android/utils/debug.h"
-#include "android/keycode-array.h"
-#include "android/user-events.h"
+#include "android/skin/keycode-buffer.h"
 
-void
-android_keycodes_add_key_event( AKeycodeBuffer* keycodes,
-                                unsigned       code,
-                                unsigned       down )
-{
+#include "android/utils/debug.h"
+
+#include <stdio.h>
+
+void skin_keycodes_buffer_init(SkinKeycodeBuffer* buffer,
+                               SkinKeyCodeFlushFunc flush_func) {
+    buffer->keycode_flush = flush_func;
+    buffer->keycode_count = 0;
+}
+
+void skin_keycodes_buffer_add(SkinKeycodeBuffer* keycodes,
+                              unsigned code,
+                              unsigned down) {
     if (code != 0 && keycodes->keycode_count < MAX_KEYCODES) {
         keycodes->keycodes[(int)keycodes->keycode_count++] =
                 ( (code & 0x1ff) | (down ? 0x200 : 0) );
     }
 }
 
-void
-android_keycodes_flush(AKeycodeBuffer* keycodes)
-{
+void skin_keycodes_buffer_flush(SkinKeycodeBuffer* keycodes) {
     if (keycodes->keycode_count > 0) {
         if (VERBOSE_CHECK(keys)) {
             int  nn;
-            printf(">> KEY" );
+            printf(">> KEY");
             for (nn = 0; nn < keycodes->keycode_count; nn++) {
                 int  code = keycodes->keycodes[nn];
-                printf(" [0x%03x,%s]", (code & 0x1ff), (code & 0x200) ? "down" : " up " );
+                printf(" [0x%03x,%s]",
+                       (code & 0x1ff), (code & 0x200) ? "down" : " up ");
             }
-            printf( "\n" );
+            printf("\n");
         }
-        user_event_keycodes(keycodes->keycodes, keycodes->keycode_count);
+        if (keycodes->keycode_flush) {
+            keycodes->keycode_flush(keycodes->keycodes,
+                                    keycodes->keycode_count);
+        }
         keycodes->keycode_count = 0;
     }
 }

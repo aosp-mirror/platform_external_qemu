@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "android/skin/image.h"
-#include "android/resource.h"
+#include "android/skin/resource.h"
 #include <assert.h>
 #include <limits.h>
 
@@ -286,7 +286,7 @@ skin_image_load( SkinImage*  image )
         if (path[1] == '/' || path[1] == '\\')
             path += 1;
 
-        base = android_resource_find( path+1, &size );
+        base = skin_resource_find( path+1, &size );
         if (base == NULL) {
             fprintf(stderr, "failed to locate built-in image file '%s'\n", path );
             return -1;

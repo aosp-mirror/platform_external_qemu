@@ -17,6 +17,8 @@
 
 typedef struct SkinTrackBall  SkinTrackBall;
 
+typedef void (*SkinTrackBallEventFunc)(int dx, int dy);
+
 typedef struct SkinTrackBallParameters
 {
     int       diameter;
@@ -24,11 +26,13 @@ typedef struct SkinTrackBallParameters
     unsigned  ball_color;
     unsigned  dot_color;
     unsigned  ring_color;
+
+    SkinTrackBallEventFunc event_func;
 }
 SkinTrackBallParameters;
 
 
-extern SkinTrackBall*  skin_trackball_create  ( SkinTrackBallParameters*  params );
+extern SkinTrackBall*  skin_trackball_create  ( const SkinTrackBallParameters*  params );
 extern void            skin_trackball_rect    ( SkinTrackBall*  ball, SDL_Rect*  rect );
 extern int             skin_trackball_contains( SkinTrackBall*  ball, int  x, int  y );
 extern int             skin_trackball_move    ( SkinTrackBall*  ball, int  dx, int  dy );
