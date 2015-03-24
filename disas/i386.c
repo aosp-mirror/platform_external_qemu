@@ -238,6 +238,11 @@ enum address_mode
 
 static enum address_mode address_mode;
 
+/* Helper macro used to avoid compiler warnings when using
+ * constant strings. This is equivalent to |x + intel_syntax|
+ * otherwise. */
+#define INTEL_SYNTAX(x)  &x[(int)(intel_syntax)]
+
 /* Flags for the prefixes for the current instruction.  See below.  */
 static int prefixes;
 
@@ -4384,7 +4389,7 @@ dofloat (int sizeflag)
 static void
 OP_ST (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
-  oappend ("%st" + intel_syntax);
+  oappend (&"%st"[(int)intel_syntax]);
 }
 
 static void
@@ -4735,32 +4740,32 @@ append_seg (void)
   if (prefixes & PREFIX_CS)
     {
       used_prefixes |= PREFIX_CS;
-      oappend ("%cs:" + intel_syntax);
+      oappend (INTEL_SYNTAX("%cs:"));
     }
   if (prefixes & PREFIX_DS)
     {
       used_prefixes |= PREFIX_DS;
-      oappend ("%ds:" + intel_syntax);
+      oappend (INTEL_SYNTAX("%ds:"));
     }
   if (prefixes & PREFIX_SS)
     {
       used_prefixes |= PREFIX_SS;
-      oappend ("%ss:" + intel_syntax);
+      oappend (INTEL_SYNTAX("%ss:"));
     }
   if (prefixes & PREFIX_ES)
     {
       used_prefixes |= PREFIX_ES;
-      oappend ("%es:" + intel_syntax);
+      oappend (INTEL_SYNTAX("%es:"));
     }
   if (prefixes & PREFIX_FS)
     {
       used_prefixes |= PREFIX_FS;
-      oappend ("%fs:" + intel_syntax);
+      oappend (INTEL_SYNTAX("%fs:"));
     }
   if (prefixes & PREFIX_GS)
     {
       used_prefixes |= PREFIX_GS;
-      oappend ("%gs:" + intel_syntax);
+      oappend (INTEL_SYNTAX("%gs:"));
     }
 }
 
@@ -5810,7 +5815,7 @@ OP_ESreg (int code, int sizeflag)
 	  intel_operand_size (b_mode, sizeflag);
 	}
     }
-  oappend ("%es:" + intel_syntax);
+  oappend (INTEL_SYNTAX("%es:"));
   ptr_reg (code, sizeflag);
 }
 

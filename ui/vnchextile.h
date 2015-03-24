@@ -166,7 +166,7 @@ static void CONCAT(send_hextile_tile_, NAME)(VncState *vs,
 
 	/* A SubrectsColoured subtile invalidates the foreground color */
 	*has_fg = 0;
-	if (n_data > (w * h * sizeof(pixel_t))) {
+	if (n_data > (w * h * (int)sizeof(pixel_t))) {
 	    n_colors = 4;
 	    flags = 0x01;
 	    *has_bg = 0;

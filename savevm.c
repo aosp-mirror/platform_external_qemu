@@ -403,7 +403,7 @@ static ssize_t unix_writev_buffer(void *opaque, struct iovec *iov, int iovcnt,
     offset = 0;
     while (size > 0) {
         /* Find the next start position; skip all full-sized vector elements  */
-        while (offset >= iov[0].iov_len) {
+        while (offset >= (ssize_t)iov[0].iov_len) {
             offset -= iov[0].iov_len;
             iov++, iovcnt--;
         }
@@ -1163,7 +1163,7 @@ int   qemu_get_struct(QEMUFile*  f, const QField*  fields, void*  s)
                     uint32_t  size = ((uint32_t)qf[1].offset << 16) | (uint32_t)qf[2].offset;
                     int       ret  = qemu_get_buffer(f, p, size);
 
-                    if (ret != size) {
+                    if (ret != (int)size) {
                         fprintf(stderr, "%s: not enough bytes to load structure\n", __FUNCTION__);
                         return -1;
                     }
@@ -1210,7 +1210,7 @@ void timer_get(QEMUFile *f, QEMUTimer *ts)
     uint64_t expire_time;
 
     expire_time = qemu_get_be64(f);
-    if (expire_time != -1) {
+    if (expire_time != (uint64_t)(-1)) {
         timer_mod_ns(ts, expire_time);
     } else {
         timer_del(ts);
@@ -1639,7 +1639,7 @@ static int get_bitmap(QEMUFile *f, void *pv, size_t size)
 {
     unsigned long *bmp = pv;
     int i, idx = 0;
-    for (i = 0; i < BITS_TO_U64S(size); i++) {
+    for (i = 0; i < (int)BITS_TO_U64S(size); i++) {
         uint64_t w = qemu_get_be64(f);
         bmp[idx++] = w;
         if (sizeof(unsigned long) == 4 && idx < BITS_TO_LONGS(size)) {
@@ -1653,7 +1653,7 @@ static void put_bitmap(QEMUFile *f, void *pv, size_t size)
 {
     unsigned long *bmp = pv;
     int i, idx = 0;
-    for (i = 0; i < BITS_TO_U64S(size); i++) {
+    for (i = 0; i < (int)BITS_TO_U64S(size); i++) {
         uint64_t w = bmp[idx++];
         if (sizeof(unsigned long) == 4 && idx < BITS_TO_LONGS(size)) {
             w |= ((uint64_t)bmp[idx++]) << 32;
@@ -2367,7 +2367,7 @@ int qemu_loadvm_state(QEMUFile *f)
             }
 
             /* Validate version */
-            if (version_id > se->version_id) {
+            if (version_id > (uint32_t)se->version_id) {
                 fprintf(stderr, "savevm: unsupported version %d for '%s' v%d\n",
                         version_id, idstr, se->version_id);
                 ret = -EINVAL;
@@ -2394,7 +2394,7 @@ int qemu_loadvm_state(QEMUFile *f)
             section_id = qemu_get_be32(f);
 
             QLIST_FOREACH(le, &loadvm_handlers, entry) {
-                if (le->section_id == section_id) {
+                if ((uint32_t)le->section_id == section_id) {
                     break;
                 }
             }

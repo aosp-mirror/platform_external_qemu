@@ -62,13 +62,13 @@ static const uint16_t kBlue5    = 0x001f;
  */
 
 #ifndef HOST_WORDS_BIGENDIAN
-static const uint32_t kRed8     = 0x000000ff;
-static const uint32_t kGreen8   = 0x0000ff00;
-static const uint32_t kBlue8    = 0x00ff0000;
+#define kRed8     ((uint32_t)0x000000ffU)
+#define kGreen8   ((uint32_t)0x0000ff00U)
+#define kBlue8    ((uint32_t)0x00ff0000U)
 #else   // !HOST_WORDS_BIGENDIAN
-static const uint32_t kRed8     = 0x00ff0000;
-static const uint32_t kGreen8   = 0x0000ff00;
-static const uint32_t kBlue8    = 0x000000ff;
+#define kRed8     ((uint32_t)0x00ff0000U)
+#define kGreen8   ((uint32_t)0x0000ff00U)
+#define kBlue8    ((uint32_t)0x000000ffU)
 #endif  // !HOST_WORDS_BIGENDIAN
 
 /*
@@ -165,6 +165,7 @@ R8G8B8ToYUV(uint8_t r, uint8_t g, uint8_t b, uint8_t* y, uint8_t* u, uint8_t* v)
     *v = RGB2V((int)r, (int)g, (int)b);
 }
 
+#if 0
 /* Converts RGB565 color to YUV. */
 static __inline__ void
 RGB565ToYUV(uint16_t rgb, uint8_t* y, uint8_t* u, uint8_t* v)
@@ -180,6 +181,7 @@ RGB32ToYUV(uint32_t rgb, uint8_t* y, uint8_t* u, uint8_t* v)
     rgb_c.color = rgb;
     R8G8B8ToYUV(rgb_c.r, rgb_c.g, rgb_c.b, y, u, v);
 }
+#endif
 
 /********************************************************************************
  * Basics of YUV -> RGB conversion.
@@ -206,6 +208,7 @@ RGB32ToYUV(uint32_t rgb, uint8_t* y, uint8_t* u, uint8_t* v)
 #define YUV2B(y, u, v) clamp((298 * ((y)-16) + 516 * ((u)-128) + 128) >> 8)
 
 
+#if 0
 /* Converts YUV color to RGB565. */
 static __inline__ uint16_t
 YUVToRGB565(int y, int u, int v)
@@ -230,6 +233,7 @@ YUVToRGB32(int y, int u, int v)
     rgb.b = YUV2BO(y,u,v);
     return rgb.color;
 }
+#endif
 
 /* Converts YUV color to separated RGB32 colors. */
 static __inline__ void
@@ -635,6 +639,7 @@ _save_RGB16(void* rgb, uint8_t r, uint8_t g, uint8_t b)
     return (uint8_t*)rgb + 2;
 }
 
+#if 0
 /* Loads R, G, and B colors from a BRG565 framebuffer. */
 static const void*
 _load_BRG16(const void* rgb, uint8_t* r, uint8_t* g, uint8_t* b)
@@ -651,6 +656,7 @@ _save_BRG16(void* rgb, uint8_t r, uint8_t g, uint8_t b)
     *(uint16_t*)rgb = RGB565(b & 0x1f, g & 0x3f, r & 0x1f);
     return (uint8_t*)rgb + 2;
 }
+#endif
 
 /********************************************************************************
  * YUV's U/V offset calculation routines.
@@ -1264,6 +1270,7 @@ static const RGBDesc _RGB16 =
     .rgb_inc    = 2
 };
 
+#if 0
 /* Describes BRG16 format. */
 static const RGBDesc _BRG16 =
 {
@@ -1271,6 +1278,7 @@ static const RGBDesc _BRG16 =
     .save_rgb   = _save_BRG16,
     .rgb_inc    = 2
 };
+#endif
 
 /********************************************************************************
  * YUV 4:2:2 format descriptors.

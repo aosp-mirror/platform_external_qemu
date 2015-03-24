@@ -717,7 +717,7 @@ slirp_delay_in_cb( void*   data,
                    void*   opaque )
 {
     slirp_input( (const uint8_t*)data, (int)size );
-    opaque = opaque;
+    (void)opaque;
 }
 
 static void
@@ -1639,8 +1639,8 @@ static void net_socket_send(void *opaque)
         switch(s->state) {
         case 0:
             l = 4 - s->index;
-            if (l > size)
-                l = size;
+            if (l > (unsigned)size)
+                l = (unsigned)size;
             memcpy(s->buf + s->index, buf, l);
             buf += l;
             size -= l;
@@ -1654,8 +1654,8 @@ static void net_socket_send(void *opaque)
             break;
         case 1:
             l = s->packet_len - s->index;
-            if (l > size)
-                l = size;
+            if (l > (unsigned)size)
+                l = (unsigned)size;
             if (s->index + l <= sizeof(s->buf)) {
                 memcpy(s->buf + s->index, buf, l);
             } else {
@@ -2037,7 +2037,7 @@ static ssize_t dump_receive(VLANClientState *vc, const uint8_t *buf, size_t size
     }
 
     ts = muldiv64(qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL), 1000000, get_ticks_per_sec());
-    caplen = size > s->pcap_caplen ? s->pcap_caplen : size;
+    caplen = size > (size_t)s->pcap_caplen ? s->pcap_caplen : (int)size;
 
     hdr.ts.tv_sec = ts / 1000000;
     hdr.ts.tv_usec = ts % 1000000;
@@ -2085,7 +2085,7 @@ static int net_dump_init(Monitor *mon, VLANState *vlan, const char *device,
     hdr.snaplen = s->pcap_caplen;
     hdr.linktype = 1;
 
-    if (write(s->fd, &hdr, sizeof(hdr)) < sizeof(hdr)) {
+    if (write(s->fd, &hdr, sizeof(hdr)) < (int)sizeof(hdr)) {
         config_error(mon, "-net dump write error: %s\n", strerror(errno));
         close(s->fd);
         g_free(s);
@@ -2472,7 +2472,7 @@ static int net_host_check_device(const char *device)
                                        ,"vde"
 #endif
     };
-    for (i = 0; i < sizeof(valid_param_list) / sizeof(char *); i++) {
+    for (i = 0; i < (int)(sizeof(valid_param_list) / sizeof(char *)); i++) {
         if (!strncmp(valid_param_list[i], device,
                      strlen(valid_param_list[i])))
             return 1;
@@ -2525,7 +2525,7 @@ int net_client_parse(const char *str)
     p = str;
     q = device;
     while (*p != '\0' && *p != ',') {
-        if ((q - device) < sizeof(device) - 1)
+        if ((q - device) < (int)sizeof(device) - 1)
             *q++ = *p;
         p++;
     }

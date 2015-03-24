@@ -550,7 +550,7 @@ static void send_framebuffer_update_hextile(VncState *vs, int x, int y, int w, i
 static void vnc_zlib_init(VncState *vs)
 {
     int i;
-    for (i=0; i<(sizeof(vs->zlib_stream) / sizeof(z_stream)); i++)
+    for (i=0; i < (int)(sizeof(vs->zlib_stream) / sizeof(z_stream)); i++)
         vs->zlib_stream[i].opaque = NULL;
 }
 
@@ -1880,7 +1880,7 @@ static void make_challenge(VncState *vs)
 
     srand(time(NULL)+getpid()+getpid()*987654+rand());
 
-    for (i = 0 ; i < sizeof(vs->challenge) ; i++)
+    for (i = 0 ; i < (int)sizeof(vs->challenge) ; i++)
         vs->challenge[i] = (int) (256.0*rand()/(RAND_MAX+1.0));
 }
 
@@ -1907,7 +1907,7 @@ static int protocol_client_auth_vnc(VncState *vs, uint8_t *data, size_t len)
 
     /* Calculate the expected challenge response */
     pwlen = strlen(vs->vd->password);
-    for (i=0; i<sizeof(key); i++)
+    for (i=0; i < (int)sizeof(key); i++)
         key[i] = i<pwlen ? vs->vd->password[i] : 0;
     deskey(key, EN0);
     for (j = 0; j < VNC_AUTH_CHALLENGE_SIZE; j += 8)

@@ -219,7 +219,7 @@ ssize_t iov_send_recv(int sockfd, struct iovec *iov, unsigned iov_cnt,
 void iov_hexdump(const struct iovec *iov, const unsigned int iov_cnt,
                  FILE *fp, const char *prefix, size_t limit)
 {
-    int v;
+    unsigned int v;
     size_t size = 0;
     char *buf;
 
@@ -306,7 +306,7 @@ void qemu_iovec_concat_iov(QEMUIOVector *dst,
                            struct iovec *src_iov, unsigned int src_cnt,
                            size_t soffset, size_t sbytes)
 {
-    int i;
+    unsigned int i;
     size_t done;
 
     if (!sbytes) {

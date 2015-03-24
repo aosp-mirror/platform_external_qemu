@@ -65,7 +65,7 @@
         unsigned long name[BITS_TO_LONGS(bits)]
 
 #define small_nbits(nbits)                      \
-        ((nbits) <= BITS_PER_LONG)
+        ((nbits) <= (int)BITS_PER_LONG)
 
 int slow_bitmap_empty(const unsigned long *bitmap, long bits);
 int slow_bitmap_full(const unsigned long *bitmap, long bits);

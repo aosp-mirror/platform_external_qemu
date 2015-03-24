@@ -55,7 +55,7 @@ skin_scaler_set( SkinScaler*  scaler, double  scale, double xdisp, double ydisp 
 void
 skin_scaler_free( SkinScaler*  scaler )
 {
-    scaler=scaler;
+    (void)scaler;
 }
 
 typedef struct {

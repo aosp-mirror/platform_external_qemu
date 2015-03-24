@@ -1918,7 +1918,7 @@ _qemudPipe_init(void* hwpipe, void* _looper, const char* args)
      * service name wit ':'. Separate service name from the client param. */
     client_args = strchr(args, ':');
     if (client_args != NULL) {
-        srv_name_len = min(client_args - args, sizeof(service_name) - 1);
+        srv_name_len = min(client_args - args, (intptr_t)sizeof(service_name) - 1);
         client_args++;  // Past the ':'
         if (*client_args == '\0') {
             /* No actual parameters. */

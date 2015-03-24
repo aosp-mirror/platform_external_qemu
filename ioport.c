@@ -139,7 +139,8 @@ static int ioport_bsize(int size, int *bsize)
 int register_ioport_read(pio_addr_t start, int length, int size,
                          IOPortReadFunc *func, void *opaque)
 {
-    int i, bsize;
+    pio_addr_t i;
+    int bsize;
 
     if (ioport_bsize(size, &bsize)) {
         hw_error("register_ioport_read: invalid size");
@@ -158,7 +159,8 @@ int register_ioport_read(pio_addr_t start, int length, int size,
 int register_ioport_write(pio_addr_t start, int length, int size,
                           IOPortWriteFunc *func, void *opaque)
 {
-    int i, bsize;
+    pio_addr_t i;
+    int bsize;
 
     if (ioport_bsize(size, &bsize)) {
         hw_error("register_ioport_write: invalid size");
@@ -175,7 +177,7 @@ int register_ioport_write(pio_addr_t start, int length, int size,
 
 void isa_unassign_ioport(pio_addr_t start, int length)
 {
-    int i;
+    pio_addr_t i;
 
     for(i = start; i < start + length; i++) {
         ioport_read_table[0][i] = default_ioport_readb;

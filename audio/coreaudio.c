@@ -111,7 +111,7 @@ static void coreaudio_logstatus (OSStatus status)
         break;
 
     default:
-        AUD_log (AUDIO_CAP, "Reason: status code %ld\n", status);
+        AUD_log (AUDIO_CAP, "Reason: status code %d\n", status);
         return;
     }
 
@@ -367,8 +367,8 @@ coreaudio_voice_init (coreaudioVoice*    core,
         &core->bufferFrameSize);
     if (status != kAudioHardwareNoError) {
         coreaudio_logerr2 (status, typ,
-                           "Could not set device buffer frame size %ld\n",
-                           core->bufferFrameSize);
+                           "Could not set device buffer frame size %d\n",
+                           (unsigned)core->bufferFrameSize);
         return -1;
     }
 
@@ -521,7 +521,7 @@ static OSStatus audioOutDeviceIOProc(
     live = core->live;
 
     /* if there are not enough samples, set signal and return */
-    if (live < frameCount) {
+    if (live < (int)frameCount) {
         inInputTime = 0;
         coreaudio_voice_unlock (core, "audioDeviceIOProc(empty)");
         return 0;
@@ -607,7 +607,7 @@ typedef struct coreaudioVoiceIn {
 #define  CORE_IN(hw)  ((coreaudioVoiceIn *) (hw))->core
 
 
-static int coreaudio_run_in (HWVoiceIn *hw, int live)
+static int coreaudio_run_in (HWVoiceIn *hw)
 {
     int decr;
 
@@ -662,7 +662,7 @@ static OSStatus audioInDeviceIOProc(
       __FUNCTION__, avail, core->decr, core->pos, hw->samples, hw->total_samples_captured, (int)frameCount);
 
     /* if there are not enough samples, set signal and return */
-    if (avail < frameCount) {
+    if (avail < (int)frameCount) {
         inInputTime = 0;
         coreaudio_voice_unlock (core, "audioDeviceIOProc(empty)");
         return 0;

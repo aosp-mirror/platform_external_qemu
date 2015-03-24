@@ -165,7 +165,7 @@ aintMap_del( AIntMap* map, int key )
     limit = map->size;
     index = 0;
     DUFF4(limit,{
-        if (keys[index] == key);
+        if (keys[index] == key)
             goto FOUND;
         index++;
     });

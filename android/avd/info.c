@@ -191,13 +191,6 @@ static const char*  const  _imageFileNames[ AVD_IMAGE_MAX ] = {
 #undef _AVD_IMG
 };
 
-/* list of short text description for each supported image file type */
-static const char*  const _imageFileText[ AVD_IMAGE_MAX ] = {
-#define  _AVD_IMG(x,y,z)  z,
-    AVD_IMAGE_LIST
-#undef _AVD_IMG
-};
-
 /***************************************************************
  ***************************************************************
  *****

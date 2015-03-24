@@ -135,7 +135,7 @@ proxy_http_setup( const char*         servername,
                               opt_auth_user->string_len, opt_auth_user->string,
                               opt_auth_pass->string_len, opt_auth_pass->string );
 
-            if (uplen >= sizeof(user_pass)) goto FooterOverflow;
+            if (uplen >= (int)sizeof(user_pass)) goto FooterOverflow;
 
             wlen = proxy_base64_encode(user_pass, uplen, encoded, (int)sizeof(encoded));
             if (wlen < 0) {

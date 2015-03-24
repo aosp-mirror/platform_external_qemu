@@ -100,7 +100,7 @@ udp_input(register struct mbuf *m, int iphlen)
 	 * but we don't yet have a way to check the checksum
 	 * with options still present.
 	 */
-	if(iphlen > sizeof(struct ip)) {
+	if(iphlen > (int)sizeof(struct ip)) {
 		ip_stripoptions(m, (struct mbuf *)0);
 		iphlen = sizeof(struct ip);
 	}
@@ -207,7 +207,7 @@ udp_input(register struct mbuf *m, int iphlen)
             }
             dns_num_conns++;
             if (slirp_get_max_dns_conns() != -1 &&
-                dns_num_conns > slirp_get_max_dns_conns())
+                dns_num_conns > (unsigned)slirp_get_max_dns_conns())
                 goto bad;
         }
 
@@ -469,7 +469,7 @@ struct cu_header {
 		 * do any other tests, just replace the address and port
 		 * fields.
 		 */
-		if (m->m_len >= sizeof (*cu_head)) {
+		if (m->m_len >= (int)sizeof (*cu_head)) {
 			if (socket_get_address(so->s, &sockaddr) < 0)
                             return;
 
