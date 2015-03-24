@@ -356,8 +356,16 @@ if [ $? != 0 ] ; then
 fi
 
 if [ "$OPTION_SAVEDEFCONFIG" = "yes" ]; then
+    case $ARCH in
+        x86_64)
+            DEFCONFIG_ARCH=x86
+            ;;
+        *)
+            DEFCONFIG_ARCH=$ARCH
+            ;;
+    esac
     make savedefconfig
-    mv -f defconfig arch/$ARCH/configs/${CONFIG}_defconfig
+    mv -f defconfig arch/$DEFCONFIG_ARCH/configs/${CONFIG}_defconfig
 fi
 
 # Note: The exact names of the output files are important for the Android build,
