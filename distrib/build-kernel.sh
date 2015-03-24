@@ -384,7 +384,7 @@ OUTPUT_KERNEL=kernel-qemu
 OUTPUT_VMLINUX=vmlinux-qemu
 if [ "$CONFIG" = "goldfish_armv7" ]; then
     OUTPUT_KERNEL=${OUTPUT_KERNEL}-armv7
-    OUTPUT_VMLINUX=${OUTPUT_KERNEL}-armv7
+    OUTPUT_VMLINUX=${OUTPUT_VMLINUX}-armv7
 fi
 
 cp -f vmlinux $OUTPUT/$OUTPUT_VMLINUX
