@@ -120,20 +120,24 @@ DECL(void, setPostCallback, (OnPostFn onPost, void* onPostContext));
 /* createOpenGLSubwindow -
  *     Create a native subwindow which is a child of 'window'
  *     to be used for framebuffer display.
- *     Framebuffer will not get displayed if a subwindow is not
- *     created.
  *     x,y,width,height are the dimensions of the rendering subwindow.
  *     zRot is the rotation to apply on the framebuffer display image.
+ *
+ *     Return true on success, false on failure, which can happen when using
+ *     a software-only renderer like OSMesa. In this case, the client should
+ *     call setPostCallback to get the content of each new frame when it is
+ *     posted, and will be responsible for displaying it.
  */
-DECL(int, createOpenGLSubwindow, (FBNativeWindowType window,
+DECL(bool, createOpenGLSubwindow, (FBNativeWindowType window,
 		int x, int y, int width, int height, float zRot));
 
 /* destroyOpenGLSubwindow -
  *   destroys the created native subwindow. Once destroyed,
  *   Framebuffer content will not be visible until a new
  *   subwindow will be created.
+ *   Return true on success, false otherwise.
  */
-DECL(int, destroyOpenGLSubwindow, (void));
+DECL(bool, destroyOpenGLSubwindow, (void));
 
 /* setOpenGLDisplayRotation -
  *    set the framebuffer display image rotation in units

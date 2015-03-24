@@ -54,8 +54,8 @@ typedef void* FBNativeWindowType;
   FUNCTION_(int, initOpenGLRenderer, (int width, int height, char* addr, size_t addrLen), (width, height, addr, addrLen)) \
   FUNCTION_VOID_(getHardwareStrings, (const char** vendors, const char** renderer, const char** version), (vendors, renderer, version)) \
   FUNCTION_VOID_(setPostCallback, (OnPostFunc onPost, void* onPostContext), (onPost, onPostContext)) \
-  FUNCTION_(int, createOpenGLSubwindow, (FBNativeWindowType window, int x, int y, int width, int height, float zRot), (window, x, y, width, height, zRot)) \
-  FUNCTION_(int, destroyOpenGLSubwindow, (void), ()) \
+  FUNCTION_(bool, createOpenGLSubwindow, (FBNativeWindowType window, int x, int y, int width, int height, float zRot), (window, x, y, width, height, zRot)) \
+  FUNCTION_(bool, destroyOpenGLSubwindow, (void), ()) \
   FUNCTION_VOID_(setOpenGLDisplayRotation, (float zRot), (zRot)) \
   FUNCTION_VOID_(repaintOpenGLDisplay, (void), ()) \
   FUNCTION_(int, stopOpenGLRenderer, (void), ()) \
@@ -274,23 +274,23 @@ android_stopOpenglesRenderer(void)
 int
 android_showOpenglesWindow(void* window, int x, int y, int width, int height, float rotation)
 {
-    if (rendererStarted) {
-        int success = createOpenGLSubwindow((FBNativeWindowType)(uintptr_t)window, x, y, width, height, rotation);
-        return success ? 0 : -1;
-    } else {
+    if (!rendererStarted) {
         return -1;
     }
+    FBNativeWindowType win = (FBNativeWindowType)(uintptr_t)window;
+    bool success = createOpenGLSubwindow(
+            win, x, y, width, height, rotation);
+    return success ? 0 : -1;
 }
 
 int
 android_hideOpenglesWindow(void)
 {
-    if (rendererStarted) {
-        int success = destroyOpenGLSubwindow();
-        return success ? 0 : -1;
-    } else {
+    if (!rendererStarted) {
         return -1;
     }
+    bool success = destroyOpenGLSubwindow();
+    return success ? 0 : -1;
 }
 
 void

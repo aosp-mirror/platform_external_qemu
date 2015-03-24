@@ -171,8 +171,12 @@ int stopOpenGLRenderer(void)
     return ret;
 }
 
-int createOpenGLSubwindow(FBNativeWindowType window_id,
-                           int x, int y, int width, int height, float zRot)
+bool createOpenGLSubwindow(FBNativeWindowType window_id,
+                           int x,
+                           int y,
+                           int width,
+                           int height,
+                           float zRot)
 {
     RenderWindow* window = s_renderWindow;
 
@@ -186,7 +190,7 @@ int createOpenGLSubwindow(FBNativeWindowType window_id,
     return false;
 }
 
-int destroyOpenGLSubwindow(void)
+bool destroyOpenGLSubwindow(void)
 {
     RenderWindow* window = s_renderWindow;
 

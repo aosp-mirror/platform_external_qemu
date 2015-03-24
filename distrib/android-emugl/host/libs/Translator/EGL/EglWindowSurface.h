@@ -25,13 +25,22 @@ class EglDisplay;
 
 class EglWindowSurface: public EglSurface {
 public:
-    EglWindowSurface(EglDisplay *dpy, EGLNativeWindowType win,EglConfig* config,unsigned width,unsigned int height);
+    EglWindowSurface(EglDisplay* dpy,
+                     EGLNativeWindowType win,
+                     EglConfig* config,
+                     unsigned width,
+                     unsigned int height);
+
     ~EglWindowSurface();
+
     bool  getAttrib(EGLint attrib,EGLint* val);
 
     static bool alreadyAssociatedWithConfig(EGLNativeWindowType win);
+
 private:
     EGLNativeWindowType m_win;
+
     static std::set<EGLNativeWindowType> s_associatedWins;
 };
-#endif
+
+#endif  // EGL_WINDOW_SURFACE_H
