@@ -92,6 +92,23 @@ TEST(StringVector, PrependLotsOfStrings) {
     }
 }
 
+TEST(StringVector, Remove) {
+    StringVector v;
+    const size_t kMaxCount = 1000;
+    for (size_t n = 0; n < kMaxCount; ++n) {
+        v.append(genHashString(n));
+    }
+    EXPECT_EQ(kMaxCount, v.size());
+    for (size_t n = 0; n < kMaxCount; ++n) {
+        String front = v[0];
+        String expected = genHashString(n);
+        EXPECT_STREQ(expected.c_str(), front.c_str())
+                << "At index " << n;
+        v.remove(0U);
+        EXPECT_EQ(kMaxCount - 1U - n, v.size());
+    }
+}
+
 TEST(StringVector, Swap) {
     static const char* const kList1[] = {
         "Hello", "World!",

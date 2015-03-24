@@ -71,6 +71,7 @@ void StringVector::remove(size_t index) {
         return;
     String::finalizeSlice(begin(), 1U);
     String::moveSlice(begin(), index + 1, index, oldSize - index);
+    mEnd -= sizeof(String);
 }
 
 String* StringVector::emplace(size_t index) {
