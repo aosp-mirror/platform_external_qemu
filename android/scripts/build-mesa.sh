@@ -51,19 +51,6 @@ install_dir_parse_option
 
 package_builder_process_options mesa
 
-# Check that we have the right prebuilts
-EXTRA_FLAGS=
-if [ "$DARWIN_SSH" ]; then
-    var_append EXTRA_FLAGS "--darwin-ssh=$DARWIN_SSH"
-fi
-$(program_directory)/build-mesa-deps.sh \
-    --verbosity=$(get_verbosity) \
-    --prebuilts-dir=$PREBUILTS_DIR \
-    --aosp-dir=$AOSP_DIR \
-    --host=$(spaces_to_commas "$HOST_SYSTEMS") \
-    $EXTRA_FLAGS \
-        || panic "could not check or rebuild mesa dependencies."
-
 if [ "$OPT_INSTALL_DIR" ]; then
     INSTALL_DIR=$OPT_INSTALL_DIR
     log "Using install dir: $INSTALL_DIR"
@@ -84,6 +71,11 @@ if [ ! -f "$PACKAGE_LIST" ]; then
     panic "Missing package list file, run download-sources.sh: $PACKAGE_LIST"
 fi
 
+SCONS=$(which scons 2>/dev/null || true)
+if [ -z "$SCONS" ]; then
+    panic "Please install the 'scons' build tool to use this script!"
+fi
+
 package_list_parse_file "$PACKAGE_LIST"
 
 BUILD_SRC_DIR=$TEMP_DIR/src
@@ -100,106 +92,14 @@ unpack_package_source () {
     fi
 }
 
-# $1: Package basename (e.g. 'libpthread-stubs-0.3')
-# $2+: Extra configuration options.
-build_package () {
-    local PKG_NAME PKG_SRC_DIR PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP
-    PKG_NAME=$(package_list_get_src_dir $1)
-    unpack_package_source "$1"
-    shift
-    PKG_SRC_DIR="$BUILD_SRC_DIR/$PKG_NAME"
-    PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/$PKG_NAME
-    if ! timestamp_check "$PKG_BUILD_DIR" "$PKG_NAME"; then
-        builder_build_autotools_package \
-            "$PKG_SRC_DIR" \
-            "$PKG_BUILD_DIR" \
-            "$@"
-
-        timestamp_set "$PKG_BUILD_DIR" "$PKG_NAME"
-    fi
-}
-
-build_windows_mesa () {
-    # TODO(digit): MAKE THIS WORK CORRECTLY!!
-
-    # panic "Building offscreen Mesa for Windows doesn't work yet!"
-
-    local PKG_NAME PKG_SRC_DIR PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP
-    PKG_NAME=$(package_list_get_src_dir MesaLib)
-    unpack_package_source "MesaLib"
-    shift
-    PKG_SRC_DIR="$BUILD_SRC_DIR/$PKG_NAME"
-    PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/$PKG_NAME
-    PKG_TIMESTAMP=$TEMP_DIR/build-$SYSTEM/$PKG_NAME-timestamp
-    if [ ! -f "$PKG_TIMESTAMP" -o -n "$OPT_FORCE" ]; then
-        (
-            export LDFLAGS="-static -s" &&
-            export CXXFLAGS="-std=gnu++11" &&
-            export LLVM=$INSTALL_DIR/$(builder_host) &&
-            mkdir -p "$PKG_BUILD_DIR" &&
-            cd "$PKG_BUILD_DIR" &&
-            run scons -j$NUM_JOBS -C "$PKG_SRC_DIR" \
-                build=release \
-                platform=windows \
-                toolchain=crossmingw \
-                llvm=yes \
-                machine=$LLVM_TARGETS \
-                libgl-gdi
-        ) || panic "Could not build Windows Mesa from sources"
-
-        touch "$PKG_TIMESTAMP"
-    fi
-}
-
-build_linux_mesa () {
-    local PKG_NAME PKG_SRC_DIR PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP
-    local BINPREFIX=$(builder_gnu_config_host_prefix)
-    local EXTRA_FLAGS
-    PKG_NAME=$(package_list_get_src_dir MesaLib)
-    unpack_package_source "MesaLib"
-    shift
-    PKG_SRC_DIR="$BUILD_SRC_DIR/$PKG_NAME"
-    PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/$PKG_NAME
-    PKG_TIMESTAMP=$TEMP_DIR/build-$SYSTEM/$PKG_NAME-timestamp
-    if [ "$(get_verbosity)" -gt 2 ]; then
-        var_append EXTRA_FLAGS "verbose=true"
-    fi
-    if ! timestamp_check "$PKG_BUILD_DIR" "$PKG_NAME"; then
-        (
-            export LLVM=$INSTALL_DIR/$(builder_host) &&
-            mkdir -p "$PKG_BUILD_DIR" &&
-            cd "$PKG_BUILD_DIR" &&
-            run scons -j$NUM_JOBS -C "$PKG_SRC_DIR" \
-                build=release \
-                llvm=yes \
-                machine=$LLVM_TARGETS \
-                libgl-xlib \
-                $EXTRA_FLAGS &&
-
-            # The SCons build scripts place everything under $SRC/build
-            # so copy the final binaries to our installation directory.
-            run mkdir -p "$(builder_install_prefix)/lib" &&
-            run cp -f \
-                "$PKG_SRC_DIR"/build/$(builder_host)/gallium/targets/libgl-xlib/lib* \
-                "$(builder_install_prefix)/lib/"
-
-        ) || panic "Could not build Linux Mesa from sources"
-
-        timestamp_set "$PKG_BUILD_DIR" "$PKG_NAME"
-    fi
-}
-
-# TODO(digit): Implement Mesa darwin builds?
-if [ "$DARWIN_SYSTEMS" ]; then
-    panic "Sorry, I don't know how to build Darwin Mesa binaries for now!"
-fi
-
-for SYSTEM in $LOCAL_HOST_SYSTEMS; do
-    # Rebuild dependencies if needed.
+# Rebuild dependencies if needed.
+# $1: System name (e..g darwin-x86_64)
+check_mesa_dependencies () {
+    local SYSTEM="$1"
     if ! timestamp_check "$INSTALL_DIR/$SYSTEM" mesa-deps; then
         dump "[$SYSTEM] Need to rebuild Mesa dependencies first."
-        EXTRA_FLAGS=
-        VERBOSITY=$(get_verbosity)
+        local EXTRA_FLAGS=
+        local VERBOSITY=$(get_verbosity)
         while [ "$VERBOSITY" -gt 1 ]; do
             var_append EXTRA_FLAGS "--verbose"
             VERBOSITY=$(( $VERBOSITY - 1 ))
@@ -215,9 +115,88 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             --install-dir=$INSTALL_DIR \
             $EXTRA_FLAGS
     fi
+}
 
+# Perform a Darwin build through ssh to a remote machine.
+# $1: Darwin host name.
+# $2: List of darwin target systems to build for.
+do_remote_darwin_build () {
+    local DARWIN_SYSTEMS="$2"
+    local SYSTEM
+    for SYSTEM in $DARWIN_SYSTEMS; do
+        check_mesa_dependencies "$SYSTEM"
+    done
+    builder_prepare_remote_darwin_build \
+            "/tmp/$USER-rebuild-darwin-ssh-$$/mesa-build"
+
+    local PKG_DIR="$DARWIN_PKG_DIR"
+    local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
+
+    run mkdir -p "$PKG_DIR/prebuilts"
+    for SYSTEM in $DARWIN_SYSTEMS; do
+        copy_directory "$INSTALL_DIR/$SYSTEM" \
+                "$PKG_DIR/prebuilts/mesa/$SYSTEM"
+    done
+    copy_directory "$ARCHIVE_DIR" "$PKG_DIR"/prebuilts/archive
+
+    if [ "$OPT_OSMESA" ]; then
+        var_append DARWIN_BUILD_FLAGS "--osmesa"
+    fi
+
+    # Generate a script to rebuild all binaries from sources.
+    # Note that the use of the '-l' flag is important to ensure
+    # that this is run under a login shell. This ensures that
+    # ~/.bash_profile is sourced before running the script, which
+    # puts MacPorts' /opt/local/bin in the PATH properly.
+    #
+    # If not, the build is likely to fail with a cryptic error message
+    # like "readlink: illegal option -- f"
+    cat > $PKG_DIR/build.sh <<EOF
+#!/bin/bash -l
+PROGDIR=\$(dirname \$0)
+\$PROGDIR/scripts/$(program_name) \\
+    --build-dir=$REMOTE_DIR/build \\
+    --host=$(spaces_to_commas "$DARWIN_SYSTEMS") \\
+    --install-dir=$REMOTE_DIR/install-prefix \\
+    --prebuilts-dir=$REMOTE_DIR/prebuilts \\
+    --aosp-dir=$REMOTE_DIR/aosp \\
+    $DARWIN_BUILD_FLAGS
+EOF
+    builder_run_remote_darwin_build
+
+    local BINARY_DIR=$INSTALL_DIR
+    run mkdir -p "$BINARY_DIR" ||
+            panic "Could not create final directory: $BINARY_DIR"
+
+    for SYSTEM in $DARWIN_SYSTEMS; do
+        dump "[$SYSTEM] Retrieving remote darwin binaries"
+        run scp -r "$DARWIN_SSH":$REMOTE_DIR/install-prefix/$SYSTEM \
+                $BINARY_DIR/
+
+        timestamp_set "$INSTALL_DIR/$SYSTEM" mesa
+    done
+}
+
+if [ -z "$OPT_FORCE" ]; then
+    builder_check_all_timestamps "$INSTALL_DIR" mesa
+fi
+
+if [ "$DARWIN_SYSTEMS" -a "$DARWIN_SSH" ]; then
+    # TODO(digit): Implement Mesa darwin builds?
+    panic "Sorry, I don't know how to build Darwin Mesa binaries for now!"
+
+    # Building OSMesa remotely.
+    dump "Remote Mesa build for: $DARWIN_SYSTEMS"
+    do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
+fi
+
+
+for SYSTEM in $LOCAL_HOST_SYSTEMS; do
+    check_mesa_dependencies "$SYSTEM"
     (
         export PKG_CONFIG_PATH=$INSTALL_DIR/$SYSTEM/lib/pkgconfig
+
+        BUILD_OSMESA=
 
         builder_prepare_for_host_no_binprefix \
                 "$SYSTEM" \
@@ -263,7 +242,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 # library called opengl32.dll to match the platform's
                 # official OpenGL shared library name.
                 MESA_TARGET="libgl-gdi"
-                MESA_LIBS="opengl32.dll"
+                OSMESA_TARGET="libgl-osmesa"
+                MESA_LIBS="opengl32.dll osmesa.dll"
+                BUILD_OSMESA=true
                 ;;
 
             linux-*)
@@ -271,7 +252,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 # as well as the GLX API on top of standard XLib.
                 # This generates a libGL.so.
                 MESA_TARGET="libgl-xlib"
-                MESA_LIBS="libGL.so"
+                OSMESA_TARGET="libgl-osmesa"
+                MESA_LIBS="libGL.so libosmesa.so"
+                BUILD_OSMESA=true
                 ;;
 
             *)
@@ -299,13 +282,30 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                     llvm=yes \
                     machine=$LLVM_TARGETS \
                     $EXTRA_FLAGS \
-                    $MESA_TARGET
+                    $MESA_TARGET || exit $?
+
+                if [ "$BUILD_OSMESA" ]; then
+                    run scons -j$NUM_JOBS -C "$PKG_SRC_DIR" \
+                        build=release \
+                        llvm=yes \
+                        machine=$LLVM_TARGETS \
+                        $EXTRA_FLAGS \
+                        $OSMESA_TARGET || exit $?
+                fi
 
                 # Now copy the result to temporary install directory.
                 run mkdir -p "$(builder_install_prefix)/lib" &&
                 for LIB in $MESA_LIBS; do
+                    case $LIB in
+                        *osmesa*)
+                            GALLIUM_TARGET="osmesa"
+                            ;;
+                        *)
+                            GALLIUM_TARGET=$MESA_TARGET
+                            ;;
+                    esac
                     run cp -f \
-                        "$PKG_SRC_DIR"/build/$(builder_host)/gallium/targets/$MESA_TARGET/$LIB \
+                        "$PKG_SRC_DIR"/build/$(builder_host)/gallium/targets/$GALLIUM_TARGET/$LIB \
                         "$(builder_install_prefix)/lib/$LIB"
                 done
 
