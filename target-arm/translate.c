@@ -25,6 +25,7 @@
 #include <inttypes.h>
 
 #include "cpu.h"
+#include "exec/code-profile.h"
 #include "exec/exec-all.h"
 #include "disas/disas.h"
 #include "tcg-op.h"
@@ -9685,6 +9686,24 @@ undef:
     gen_exception_insn(s, 2, EXCP_UDEF);
 }
 
+static void
+gen_profileBB(void * tb)
+{
+#if HOST_LONG_BITS == 32
+    TCGv_i32  tmpTb  = tcg_temp_new_i32();
+
+    tcg_gen_movi_i32(tmpTb,  (int32_t)tb);
+    gen_helper_profileBB(tmpTb);
+    tcg_temp_free_i32(tmpTb);
+#elif HOST_LONG_BITS == 64
+    TCGv_i64  tmpTb  = tcg_temp_new_i64();
+
+    tcg_gen_movi_i64(tmpTb,  (int64_t)tb);
+    gen_helper_profileBB(tmpTb);
+    tcg_temp_free_i64(tmpTb);
+#endif
+}
+
 /* generate intermediate code in gen_opc_buf and gen_opparam_buf for
    basic block 'tb'. If search_pc is TRUE, also generate PC
    information for each intermediate instruction. */
@@ -9737,6 +9756,9 @@ static inline void gen_intermediate_code_internal(CPUARMState *env,
         max_insns = CF_COUNT_MASK;
 
     gen_icount_start();
+
+    if (code_profile_record_func != NULL && code_profile_dirname != NULL)
+        gen_profileBB(tb);
 
     tcg_clear_temp_count();
 
