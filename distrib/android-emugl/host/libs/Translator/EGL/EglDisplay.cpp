@@ -14,17 +14,17 @@
 * limitations under the License.
 */
 #include "EglDisplay.h"
+
+#include "EglConfig.h"
 #include "EglOsApi.h"
 #include <GLcommon/GLutils.h>
 
 EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
-                       EGLNativeInternalDisplayType idpy,
-                       bool isDefault) :
+                       EglOS::Display* idpy) :
     m_dpy(dpy),
     m_idpy(idpy),
     m_initialized(false),
     m_configInitialized(false),
-    m_isDefault(isDefault),
     m_nextEglImageId(0),
     m_globalSharedContext(NULL)
 {
@@ -40,13 +40,10 @@ EglDisplay::~EglDisplay() {
     // (should be true for windows platform only)
     //
     if (m_globalSharedContext != NULL) {
-        EglOS::destroyContext(m_idpy, m_globalSharedContext);
+        m_idpy->destroyContext(m_globalSharedContext);
     }
 
-    if(m_isDefault) {
-        EglOS::releaseDisplay(m_idpy);
-    }
-
+    m_idpy->release();
 
     for(ConfigsList::iterator it = m_configs.begin();
         it != m_configs.end();
@@ -57,7 +54,7 @@ EglDisplay::~EglDisplay() {
     delete m_manager[GLES_1_1];
     delete m_manager[GLES_2_0];
 
-    EglOS::deleteDisplay(m_idpy);
+    delete m_idpy;
 }
 
 void EglDisplay::initialize(int renderableType) {
@@ -86,8 +83,6 @@ void EglDisplay::addMissingConfigs(void)
 
     EGLConfig match;
 
-    EGLNativePixelFormatType tmpfrmt = PIXEL_FORMAT_INITIALIZER;
-
     EglConfig dummy(5, 6, 5, 0,  // RGB_565
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
@@ -107,7 +102,7 @@ void EglDisplay::addMissingConfigs(void)
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
-                    tmpfrmt);
+                    NULL);
 
     if(!doChooseConfigs(dummy, &match, 1))
     {
@@ -142,7 +137,7 @@ void EglDisplay::initConfigurations(int renderableType) {
     if (m_configInitialized) {
         return;
     }
-    EglOS::queryConfigs(m_idpy, renderableType, m_configs);
+    m_idpy->queryConfigs(renderableType, addConfig, this);
 
     addMissingConfigs();
     m_configs.sort(compareEglConfigsPtrs);
@@ -344,14 +339,14 @@ bool EglDisplay:: destroyImageKHR(EGLImageKHR img) {
     return false;
 }
 
-EGLNativeContextType EglDisplay::getGlobalSharedContext() const {
+EglOS::Context* EglDisplay::getGlobalSharedContext() const {
     emugl::Mutex::AutoLock mutex(m_lock);
 #ifndef _WIN32
     // find an existing OpenGL context to share with, if exist
-    EGLNativeContextType ret = 
-        (EGLNativeContextType)m_manager[GLES_1_1]->getGlobalContext();
+    EglOS::Context* ret =
+        (EglOS::Context*)m_manager[GLES_1_1]->getGlobalContext();
     if (!ret)
-        ret = (EGLNativeContextType)m_manager[GLES_2_0]->getGlobalContext();
+        ret = (EglOS::Context*)m_manager[GLES_2_0]->getGlobalContext();
     return ret;
 #else
     if (!m_globalSharedContext) {
@@ -367,9 +362,41 @@ EGLNativeContextType EglDisplay::getGlobalSharedContext() const {
             return NULL;
         }
         EglConfig *cfg = (*m_configs.begin());
-        m_globalSharedContext = EglOS::createContext(m_idpy,cfg,NULL);
+        m_globalSharedContext = m_idpy->createContext(
+                cfg->nativeFormat(), NULL);
     }
 
     return m_globalSharedContext;
 #endif
+}
+
+// static
+void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
+    EglDisplay* display = static_cast<EglDisplay*>(opaque);
+    EglConfig* config = new EglConfig(
+            info->red_size,
+            info->green_size,
+            info->blue_size,
+            info->alpha_size,
+            info->caveat,
+            info->config_id,
+            info->depth_size,
+            info->frame_buffer_level,
+            info->max_pbuffer_width,
+            info->max_pbuffer_height,
+            info->max_pbuffer_size,
+            info->native_renderable,
+            info->renderable_type,
+            info->native_visual_id,
+            info->native_visual_type,
+            info->samples_per_pixel,
+            info->stencil_size,
+            info->surface_type,
+            info->transparent_type,
+            info->trans_red_val,
+            info->trans_green_val,
+            info->trans_blue_val,
+            info->frmt);
+
+    display->m_configs.push_back(config);
 }

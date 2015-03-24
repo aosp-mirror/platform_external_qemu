@@ -25,30 +25,27 @@
 
 #include "EglConfig.h"
 #include "EglContext.h"
+#include "EglOsApi.h"
 #include "EglSurface.h"
 #include "EglWindowSurface.h"
 
 
 
-
-typedef  std::list<EglConfig*>  ConfigsList;
-typedef  std::map< unsigned int, ContextPtr>     ContextsHndlMap;
-typedef  std::map< unsigned int, SurfacePtr>     SurfacesHndlMap;
+typedef std::map<unsigned int, ContextPtr>  ContextsHndlMap;
+typedef std::map<unsigned int, SurfacePtr>  SurfacesHndlMap;
 
 class EglDisplay {
 public:
     // Create new EglDisplay instance from a given native display |dpy|,
     // with matching internal display |idpy|. If |isDefault| is true,
     // this will be considered the default diplay.
-    EglDisplay(EGLNativeDisplayType dpy,
-               EGLNativeInternalDisplayType idpy,
-               bool isDefault = true);
+    EglDisplay(EGLNativeDisplayType dpy, EglOS::Display* idpy);
 
     // Return the native display handle for this EglDisplay.
     EGLNativeDisplayType getNativeDisplay() const { return m_dpy; }
 
     // Return the native internal display handle for this EglDisplay.
-    EGLNativeInternalDisplayType nativeType() const { return m_idpy; }
+    EglOS::Display* nativeType() const { return m_idpy; }
 
     // Return the number of known configurations for this EglDisplay.
     int nConfigs() const { return m_configs.size(); }
@@ -91,27 +88,28 @@ public:
     ImagePtr getImage(EGLImageKHR img) const;
     EGLImageKHR addImageKHR(ImagePtr);
     bool destroyImageKHR(EGLImageKHR img);
-    EGLNativeContextType getGlobalSharedContext() const;
+    EglOS::Context* getGlobalSharedContext() const;
 
 private:
+   static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
+
    int doChooseConfigs(const EglConfig& dummy,EGLConfig* configs,int config_size) const;
    void addMissingConfigs(void);
    void initConfigurations(int renderableType);
 
-   EGLNativeDisplayType           m_dpy;
-   EGLNativeInternalDisplayType   m_idpy;
-   bool                           m_initialized;
-   bool                           m_configInitialized;
-   bool                           m_isDefault;
-   ConfigsList                    m_configs;
-   ContextsHndlMap                m_contexts;
-   SurfacesHndlMap                m_surfaces;
-   GlobalNameSpace                m_globalNameSpace;
-   ObjectNameManager              *m_manager[MAX_GLES_VERSION];
-   mutable emugl::Mutex                   m_lock;
-   ImagesHndlMap                  m_eglImages;
-   unsigned int                   m_nextEglImageId;
-   mutable EGLNativeContextType           m_globalSharedContext;
+   EGLNativeDisplayType    m_dpy;
+   EglOS::Display*         m_idpy;
+   bool                    m_initialized;
+   bool                    m_configInitialized;
+   ConfigsList             m_configs;
+   ContextsHndlMap         m_contexts;
+   SurfacesHndlMap         m_surfaces;
+   GlobalNameSpace         m_globalNameSpace;
+   ObjectNameManager*      m_manager[MAX_GLES_VERSION];
+   mutable emugl::Mutex    m_lock;
+   ImagesHndlMap           m_eglImages;
+   unsigned int            m_nextEglImageId;
+   mutable EglOS::Context* m_globalSharedContext;
 };
 
 #endif

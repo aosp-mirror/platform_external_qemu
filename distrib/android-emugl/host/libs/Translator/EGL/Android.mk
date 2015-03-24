@@ -4,12 +4,12 @@ host_OS_SRCS :=
 host_common_LDLIBS :=
 
 ifeq ($(HOST_OS),linux)
-    host_OS_SRCS = EglX11Api.cpp
+    host_OS_SRCS = EglOsApi_glx.cpp
     host_common_LDLIBS += -lX11 -lGL -ldl -lpthread
 endif
 
 ifeq ($(HOST_OS),darwin)
-    host_OS_SRCS = EglMacApi.cpp \
+    host_OS_SRCS = EglOsApi_darwin.cpp \
                    MacNative.m   \
                    MacPixelFormatsAttribs.m
 
@@ -17,7 +17,7 @@ ifeq ($(HOST_OS),darwin)
 endif
 
 ifeq ($(HOST_OS),windows)
-    host_OS_SRCS = EglWindowsApi.cpp
+    host_OS_SRCS = EglOsApi_wgl.cpp
     host_common_LDLIBS += -lopengl32 -lgdi32
 endif
 

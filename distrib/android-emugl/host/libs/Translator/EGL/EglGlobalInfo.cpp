@@ -37,11 +37,13 @@ EglGlobalInfo* EglGlobalInfo::getInstance() {
 
 EglGlobalInfo::EglGlobalInfo() :
         m_displays(),
-        m_default(EglOS::getDefaultDisplay()),
+        m_engine(NULL),
+        m_display(NULL),
         m_lock() {
-#ifdef _WIN32
-    EglOS::initPtrToWglFunctions();
-#endif
+    // TODO(digit): Choose alternate engine based on env. variable?
+    m_engine = EglOS::Engine::getHostInstance();
+    m_display = m_engine->getDefaultDisplay();
+
     memset(m_gles_ifaces, 0, sizeof(m_gles_ifaces));
     memset(m_gles_extFuncs_inited, 0, sizeof(m_gles_extFuncs_inited));
 }
@@ -53,7 +55,7 @@ EglGlobalInfo::~EglGlobalInfo() {
 }
 
 EglDisplay* EglGlobalInfo::addDisplay(EGLNativeDisplayType dpy,
-                                      EGLNativeInternalDisplayType idpy) {
+                                      EglOS::Display* idpy) {
     //search if it already exists.
     emugl::Mutex::AutoLock mutex(m_lock);
     for (size_t n = 0; n < m_displays.size(); ++n) {
@@ -62,7 +64,7 @@ EglDisplay* EglGlobalInfo::addDisplay(EGLNativeDisplayType dpy,
         }
     }
 
-    if (!EglOS::validNativeDisplay(idpy)) {
+    if (!idpy) {
         return NULL;
     }
     EglDisplay* result = new EglDisplay(dpy, idpy);
@@ -103,9 +105,9 @@ EglDisplay* EglGlobalInfo::getDisplay(EGLDisplay dpy) const {
 }
 
 // static
-EGLNativeInternalDisplayType EglGlobalInfo::generateInternalDisplay(
+EglOS::Display* EglGlobalInfo::generateInternalDisplay(
         EGLNativeDisplayType dpy) {
-    return EglOS::getInternalDisplay(dpy);
+    return getInstance()->m_engine->getInternalDisplay(dpy);
 }
 
 void EglGlobalInfo::initClientExtFuncTable(GLESVersion ver) {
