@@ -22,7 +22,7 @@ namespace base {
 
 // Create a severity level which is guaranteed to never generate a log
 // message. See LogOnlyEvaluatesArgumentsIfNeeded for usage.
-const LogSeverity LOG_INVISIBLE = -10000;
+const LogSeverity LOG_INVISIBLE = static_cast<LogSeverity>(-10000);
 
 class LogTest : public ::testing::Test, android::base::testing::LogOutput {
 public:

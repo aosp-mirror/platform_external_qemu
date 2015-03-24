@@ -88,7 +88,7 @@ bool setDcheckLevel(bool enabled) {
 // LogSeverity
 
 LogSeverity getMinLogLevel() {
-    return 0;
+    return LOG_INFO;
 }
 
 // LogString

@@ -19,26 +19,28 @@
 namespace android {
 namespace base {
 
-// The list of severity levels used for logging.
-// Note that negative verbosity levels are used.
-typedef int LogSeverity;
-const LogSeverity LOG_VERBOSE = -1;
-const LogSeverity LOG_INFO = 0;
-const LogSeverity LOG_WARNING = 1;
-const LogSeverity LOG_ERROR = 2;
-const LogSeverity LOG_FATAL = 3;
-const LogSeverity LOG_NUM_SEVERITIES = 4;
+enum LogSeverity {
+    LOG_VERBOSE = -1,
+    LOG_INFO = 0,
+    LOG_WARNING = 1,
+    LOG_ERROR = 2,
+    LOG_FATAL = 3,
+    LOG_NUM_SEVERITIES,
 
-// LOG_DFATAL will be LOG_ERROR in release builds, and LOG_FATAL in debug
-// ones.
+// DFATAL will be ERROR in release builds, and FATAL in debug ones.
 #ifdef NDEBUG
-const LogSeverity LOG_DFATAL = LOG_ERROR;
+    LOG_DFATAL = LOG_ERROR,
 #else
-const LogSeverity LOG_DFATAL = LOG_FATAL;
+    LOG_DFATAL = LOG_FATAL,
 #endif
+};
 
 // Returns the minimal log level.
 LogSeverity getMinLogLevel();
+
+// Convert a log level name (e.g. 'INFO') into the equivalent
+// ::android::base LOG_<name> constant.
+#define LOG_SEVERITY_FROM(x)  ::android::base::LOG_ ## x
 
 // Helper macro used to test if logging for a given log level is
 // currently enabled. |severity| must be a log level without the LOG_
@@ -49,8 +51,7 @@ LogSeverity getMinLogLevel();
 //  }
 //
 #define LOG_IS_ON(severity) \
-  ((::android::base::LOG_ ## severity) >=  \
-        ::android::base::getMinLogLevel())
+        (LOG_SEVERITY_FROM(severity) >=  ::android::base::getMinLogLevel())
 
 // For performance reasons, it's important to avoid constructing a
 // LogMessage instance every time a LOG() or CHECK() statement is
@@ -198,12 +199,13 @@ bool setDcheckLevel(bool enabled);
 // DLOG() is like LOG() for debug builds, and doesn't do anything for
 // release one. This is useful to add log messages that you don't want
 // to see in the final binaries, but are useful during testing.
-#define DLOG(severity)  LOG_IF(severity, DLOG_IS_ON(severity))
+#define DLOG(severity)  DLOG_IF(severity, true)
 
 // DLOG_IF() is like DLOG() for debug builds, and doesn't do anything for
 // release one. See DLOG() comments.
 #define DLOG_IF(severity, condition)  \
-        LOG_IF(severity, DLOG_IS_ON() && (condition))
+        LOG_LAZY_EVAL(DLOG_IS_ON(severity) && (condition), \
+                      LOG_MESSAGE_STREAM_COMPACT(severity))
 
 // DCHECK(condition) is used to perform CHECK() in debug builds, or if
 // the program called setDcheckLevel(true) previously. Note that it is
@@ -217,12 +219,13 @@ bool setDcheckLevel(bool enabled);
 // to the current value of 'errno' just before the macro is called. This
 // also preserves the value of 'errno' so it can be tested after the
 // macro call (i.e. any error during log output does not interfere).
-#define DPLOG(severity)  PLOG_IF(severity, DLOG_IS_ON(severity))
+#define DPLOG(severity)  DPLOG_IF(severity, true)
 
 // DPLOG_IF() tests whether |condition| is true before calling
 // DPLOG(severity)
 #define DPLOG_IF(severity, condition)  \
-        PLOG_IF(severity, DLOG_IS_ON() && (condition))
+        LOG_LAZY_EVAL(DLOG_IS_ON(severity) && (condition), \
+                      PLOG_MESSAGE_STREAM_COMPACT(severity))
 
 // Convenience class used hold a formatted string for logging reasons.
 // Usage example:
@@ -241,7 +244,8 @@ private:
 // Helper structure used to group the parameters of a LOG() or CHECK()
 // statement.
 struct LogParams {
-    LogParams() : file(NULL), lineno(-1), severity(-1) {}
+    LogParams() :
+            file(NULL), lineno(-1), severity(LOG_VERBOSE) {}
 
     LogParams(const char* a_file, int a_lineno, LogSeverity a_severity)
             : file(a_file), lineno(a_lineno), severity(a_severity) {}
@@ -337,7 +341,7 @@ protected:
     ::android::base::LogMessage( \
             __FILE__, \
             __LINE__, \
-            ::android::base::LOG_ ## severity)
+            LOG_SEVERITY_FROM(severity))
 
 #define LOG_MESSAGE_STREAM_COMPACT(severity) \
     LOG_MESSAGE_COMPACT(severity).stream()
@@ -370,7 +374,7 @@ private:
     ::android::base::ErrnoLogMessage( \
             __FILE__, \
             __LINE__, \
-            ::android::base::LOG_ ## severity, \
+            LOG_SEVERITY_FROM(severity), \
             errno)
 
 #define PLOG_MESSAGE_STREAM_COMPACT(severity) \
