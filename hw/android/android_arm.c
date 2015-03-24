@@ -125,6 +125,8 @@ static void android_arm_init_(ram_addr_t ram_size,
     nand_dev_init(nand_device.base);
 #endif
 
+    trace_dev_init();
+
     bool newDeviceNaming =
             (androidHwConfig_getKernelDeviceNaming(android_hw) >= 1);
     pipe_dev_init(newDeviceNaming);
