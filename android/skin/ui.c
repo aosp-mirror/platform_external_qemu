@@ -27,6 +27,7 @@
 #include <stdio.h>
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
+#define  DE(...) do { if (VERBOSE_CHECK(keys)) dprint(__VA_ARGS__); } while (0)
 
 struct SkinUI {
     SkinUIParams           ui_params;
@@ -356,29 +357,42 @@ bool skin_ui_process_events(SkinUI* ui) {
     SkinEvent ev;
 
     while(skin_event_poll(&ev)) {
-        switch(ev.type){
+        switch(ev.type) {
         case kEventVideoExpose:
+            DE("EVENT: kEventVideoExpose\n");
             skin_window_redraw(ui->window, NULL);
             break;
 
         case kEventKeyDown:
+            DE("EVENT: kEventKeyDown scancode=%d mod=0x%x\n",
+               ev.u.key.keycode, ev.u.key.mod);
             skin_keyboard_process_event(ui->keyboard, &ev, 1);
             break;
 
         case kEventKeyUp:
+            DE("EVENT: kEventKeyUp scancode=%d mod=0x%x\n",
+               ev.u.key.keycode, ev.u.key.mod);
             skin_keyboard_process_event(ui->keyboard, &ev, 0);
             break;
 
         case kEventTextInput:
+            DE("EVENT: kEventTextInput text=[%s] down=%s\n",
+               ev.u.text.text, ev.u.text.down ? "true" : "false");
             skin_keyboard_process_event(ui->keyboard, &ev, ev.u.text.down);
             break;
 
         case kEventMouseMotion:
+            DE("EVENT: kEventMouseMotion x=%d y=%d xrel=%d yrel=%d button=%d\n",
+               ev.u.mouse.x, ev.u.mouse.y, ev.u.mouse.xrel, ev.u.mouse.yrel,
+               ev.u.mouse.button);
             skin_window_process_event(ui->window, &ev);
             break;
 
         case kEventMouseButtonDown:
         case kEventMouseButtonUp:
+            DE("EVENT: kEventMouseButton x=%d y=%d xrel=%d yrel=%d button=%d\n",
+               ev.u.mouse.x, ev.u.mouse.y, ev.u.mouse.xrel, ev.u.mouse.yrel,
+               ev.u.mouse.button);
             {
                 int  down = (ev.type == kEventMouseButtonDown);
                 if (ev.u.mouse.button == kMouseButtonScrollUp)
@@ -408,6 +422,7 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
 
         case kEventQuit:
+            DE("EVENT: kEventQuit\n");
             /* only save emulator config through clean exit */
             return true;
         }
