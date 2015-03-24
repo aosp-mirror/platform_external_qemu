@@ -536,7 +536,7 @@ int qemu_timer_alarm_pending(void)
     return ret;
 }
 
-#if 0
+#if defined(__linux__) || defined(_WIN32)
 // Compute the next alarm deadline, return a timeout in nanoseconds.
 // NOTE: This function cannot be called from a signal handler since
 // it calls qemu-timer.c functions that acquire/release global mutexes.
@@ -556,7 +556,7 @@ static int64_t qemu_next_alarm_deadline(void)
     }
     return delta;
 }
-#endif
+#endif  // __linux__ || _WIN32
 
 #ifdef _WIN32
 static void CALLBACK host_alarm_handler(PVOID lpParam, BOOLEAN unused)
