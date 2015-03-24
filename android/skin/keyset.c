@@ -10,9 +10,14 @@
 ** GNU General Public License for more details.
 */
 #include "android/skin/keyset.h"
+
+#include "android/skin/keycode.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
-#include <SDL.h>
+
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define  DEBUG  1
 
@@ -74,251 +79,6 @@ skin_key_command_description( SkinKeyCommand  cmd )
     return NULL;
 }
 
-#define  _KEYSYM1_(x)  _KEYSYM_(x,x)
-
-#define _KEYSYM_LIST  \
-    _KEYSYM1_(BACKSPACE)   \
-    _KEYSYM1_(TAB)         \
-    _KEYSYM1_(CLEAR)       \
-    _KEYSYM_(RETURN,ENTER) \
-    _KEYSYM1_(PAUSE)       \
-    _KEYSYM1_(ESCAPE)      \
-    _KEYSYM1_(SPACE)       \
-    _KEYSYM_(EXCLAIM,EXCLAM)    \
-    _KEYSYM_(QUOTEDBL,DOUBLEQUOTE)   \
-    _KEYSYM_(HASH,HASH)    \
-    _KEYSYM1_(DOLLAR)      \
-    _KEYSYM1_(AMPERSAND)   \
-    _KEYSYM1_(QUOTE)       \
-    _KEYSYM_(LEFTPAREN,LPAREN)  \
-    _KEYSYM_(RIGHTPAREN,RPAREN) \
-    _KEYSYM1_(ASTERISK) \
-    _KEYSYM1_(PLUS) \
-    _KEYSYM1_(COMMA) \
-    _KEYSYM1_(MINUS) \
-    _KEYSYM1_(PERIOD) \
-    _KEYSYM1_(SLASH) \
-    _KEYSYM1_(0) \
-    _KEYSYM1_(1) \
-    _KEYSYM1_(2) \
-    _KEYSYM1_(3) \
-    _KEYSYM1_(4) \
-    _KEYSYM1_(5) \
-    _KEYSYM1_(6) \
-    _KEYSYM1_(7) \
-    _KEYSYM1_(8) \
-    _KEYSYM1_(9) \
-    _KEYSYM1_(COLON) \
-    _KEYSYM1_(SEMICOLON) \
-    _KEYSYM1_(LESS) \
-    _KEYSYM_(EQUALS,EQUAL) \
-    _KEYSYM1_(GREATER) \
-    _KEYSYM1_(QUESTION) \
-    _KEYSYM1_(AT) \
-    _KEYSYM1_(LEFTBRACKET) \
-    _KEYSYM1_(BACKSLASH) \
-    _KEYSYM1_(RIGHTBRACKET) \
-    _KEYSYM1_(CARET) \
-    _KEYSYM1_(UNDERSCORE) \
-    _KEYSYM1_(BACKQUOTE) \
-    _KEYSYM_(a,A) \
-    _KEYSYM_(b,B) \
-    _KEYSYM_(c,C) \
-    _KEYSYM_(d,D) \
-    _KEYSYM_(e,E) \
-    _KEYSYM_(f,F) \
-    _KEYSYM_(g,G) \
-    _KEYSYM_(h,H) \
-    _KEYSYM_(i,I) \
-    _KEYSYM_(j,J) \
-    _KEYSYM_(k,K) \
-    _KEYSYM_(l,L) \
-    _KEYSYM_(m,M) \
-    _KEYSYM_(n,N) \
-    _KEYSYM_(o,O) \
-    _KEYSYM_(p,P) \
-    _KEYSYM_(q,Q) \
-    _KEYSYM_(r,R) \
-    _KEYSYM_(s,S) \
-    _KEYSYM_(t,T) \
-    _KEYSYM_(u,U) \
-    _KEYSYM_(v,V) \
-    _KEYSYM_(w,W) \
-    _KEYSYM_(x,X) \
-    _KEYSYM_(y,Y) \
-    _KEYSYM_(z,Z) \
-    _KEYSYM1_(DELETE) \
-    _KEYSYM_(KP_PLUS,KEYPAD_PLUS)     \
-    _KEYSYM_(KP_MINUS,KEYPAD_MINUS)    \
-    _KEYSYM_(KP_MULTIPLY,KEYPAD_MULTIPLY) \
-    _KEYSYM_(KP_DIVIDE,KEYPAD_DIVIDE)   \
-    _KEYSYM_(KP_ENTER,KEYPAD_ENTER)    \
-    _KEYSYM_(KP_PERIOD,KEYPAD_PERIOD)   \
-    _KEYSYM_(KP_EQUALS,KEYPAD_EQUALS)   \
-    _KEYSYM_(KP1,KEYPAD_1)         \
-    _KEYSYM_(KP2,KEYPAD_2)         \
-    _KEYSYM_(KP3,KEYPAD_3)         \
-    _KEYSYM_(KP4,KEYPAD_4)         \
-    _KEYSYM_(KP5,KEYPAD_5)         \
-    _KEYSYM_(KP6,KEYPAD_6)         \
-    _KEYSYM_(KP7,KEYPAD_7)         \
-    _KEYSYM_(KP8,KEYPAD_8)         \
-    _KEYSYM_(KP9,KEYPAD_9)         \
-    _KEYSYM_(KP0,KEYPAD_0)         \
-    _KEYSYM1_(UP)  \
-    _KEYSYM1_(DOWN) \
-    _KEYSYM1_(RIGHT) \
-    _KEYSYM1_(LEFT) \
-    _KEYSYM1_(INSERT) \
-    _KEYSYM1_(HOME) \
-    _KEYSYM1_(END) \
-    _KEYSYM1_(PAGEUP) \
-    _KEYSYM1_(PAGEDOWN) \
-    _KEYSYM1_(F1) \
-    _KEYSYM1_(F2) \
-    _KEYSYM1_(F3) \
-    _KEYSYM1_(F4) \
-    _KEYSYM1_(F5) \
-    _KEYSYM1_(F6) \
-    _KEYSYM1_(F7) \
-    _KEYSYM1_(F8) \
-    _KEYSYM1_(F9) \
-    _KEYSYM1_(F10) \
-    _KEYSYM1_(F11) \
-    _KEYSYM1_(F12) \
-    _KEYSYM1_(F13) \
-    _KEYSYM1_(F14) \
-    _KEYSYM1_(F15) \
-    _KEYSYM1_(SCROLLOCK) \
-    _KEYSYM1_(SYSREQ) \
-    _KEYSYM1_(PRINT) \
-    _KEYSYM1_(BREAK) \
-
-#define _KEYSYM_(x,y)   { SDLK_##x, #y },
-static const struct { int  _sym; const char*  _str; }  keysym_names[] =
-{
-    _KEYSYM_LIST
-    { 0, NULL }
-};
-#undef _KEYSYM_
-
-int
-skin_keysym_str_count( void )
-{
-    return sizeof(keysym_names)/sizeof(keysym_names[0])-1;
-}
-
-const char*
-skin_keysym_str( int  index )
-{
-    if (index >= 0 && index < skin_keysym_str_count())
-        return keysym_names[index]._str;
-
-    return NULL;
-}
-
-const char*
-skin_key_symmod_to_str( int  sym, int  mod )
-{
-    static char  temp[32];
-    char*        p = temp;
-    char*        end = p + sizeof(temp);
-    int          nn;
-
-    if ((mod & KMOD_LCTRL) != 0) {
-        p = bufprint(p, end, "Ctrl-");
-    }
-    if ((mod & KMOD_RCTRL) != 0) {
-        p = bufprint(p, end, "RCtrl-");
-    }
-    if ((mod & KMOD_LSHIFT) != 0) {
-        p = bufprint(p, end, "Shift-");
-    }
-    if ((mod & KMOD_RSHIFT) != 0) {
-        p = bufprint(p, end, "RShift-");
-    }
-    if ((mod & KMOD_LALT) != 0) {
-        p = bufprint(p, end, "Alt-");
-    }
-    if ((mod & KMOD_RALT) != 0) {
-        p = bufprint(p, end, "RAlt-");
-    }
-    for (nn = 0; keysym_names[nn]._sym != 0; nn++) {
-        if (keysym_names[nn]._sym == sym) {
-            p = bufprint(p, end, "%s", keysym_names[nn]._str);
-            return temp;;
-        }
-    }
-
-    if (sym >= 32 && sym <= 127) {
-        p = bufprint(p, end, "%c", sym);
-        return temp;
-    }
-
-    return NULL;
-}
-
-
-int
-skin_key_symmod_from_str( const char*  str, int  *psym, int  *pmod )
-{
-    int          mod = 0;
-    int          match = 1;
-    int          nn;
-    const char*  s0 = str;
-    static const struct { const char*  prefix; int  mod; }  mods[] =
-    {
-        { "^",      KMOD_LCTRL },
-        { "Ctrl",   KMOD_LCTRL },
-        { "ctrl",   KMOD_LCTRL },
-        { "RCtrl",  KMOD_RCTRL },
-        { "rctrl",  KMOD_RCTRL },
-        { "Alt",    KMOD_LALT },
-        { "alt",    KMOD_LALT },
-        { "RAlt",   KMOD_RALT },
-        { "ralt",   KMOD_RALT },
-        { "Shift",  KMOD_LSHIFT },
-        { "shift",  KMOD_LSHIFT },
-        { "RShift", KMOD_RSHIFT },
-        { "rshift", KMOD_RSHIFT },
-        { NULL, 0 }
-    };
-
-    while (match) {
-        match = 0;
-        for (nn = 0; mods[nn].prefix != NULL; nn++) {
-            const char*  prefix = mods[nn].prefix;
-            int          len    = strlen(prefix);
-
-            if ( !memcmp(str, prefix, len) ) {
-                str  += len;
-                match = 1;
-                mod  |= mods[nn].mod;
-                if (str[0] == '-' && str[1] != 0)
-                    str++;
-                break;
-            }
-        }
-    }
-
-    for (nn = 0; keysym_names[nn]._sym; nn++) {
-#ifdef _WIN32
-        if ( !stricmp(str, keysym_names[nn]._str) )
-#else
-        if ( !strcasecmp(str, keysym_names[nn]._str) )
-#endif
-        {
-            *psym = keysym_names[nn]._sym;
-            *pmod = mod;
-            return 0;
-        }
-    }
-
-    D("%s: can't find sym value for '%s' (mod=%d, str=%s)", __FUNCTION__, s0, mod, str);
-    return -1;
-}
-
-
 typedef struct {
     int             sym;
     int             mod;
@@ -341,7 +101,10 @@ skin_keyset_add( SkinKeyset*  kset, int  sym, int  mod, SkinKeyCommand  command 
     SkinKeyItem*  first = NULL;
     int           count = 0;
 
-    D( "adding binding %s to %s", skin_key_command_to_str(command), skin_key_symmod_to_str(sym,mod));
+    D("adding binding %s to %s",
+      skin_key_command_to_str(command),
+      skin_key_pair_to_string(sym,mod));
+
     for ( ; item < end; item++) {
         if (item->command == command) {
             if (!first)
@@ -390,7 +153,7 @@ skin_keyset_new ( AConfig*  root )
     for ( ; node != NULL; node = node->next )
     {
         SkinKeyCommand  command;
-        int             sym, mod;
+        uint32_t        sym, mod;
         char*           p;
 
         command = skin_key_command_from_str( node->name, -1 );
@@ -413,7 +176,7 @@ skin_keyset_new ( AConfig*  root )
                 else {
                     memcpy( keys, p, len );
                     keys[len] = 0;
-                    if ( skin_key_symmod_from_str( keys, &sym, &mod ) < 0 ) {
+                    if ( skin_key_pair_from_string( keys, &sym, &mod ) < 0 ) {
                         D( "ignoring unknown keys '%s' for command '%s'",
                                 keys, node->name );
                     } else {

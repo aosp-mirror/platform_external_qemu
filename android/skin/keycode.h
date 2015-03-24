@@ -14,6 +14,16 @@
 
 #include "android/skin/linux_keycodes.h"
 
+#include <stdbool.h>
+#include <stdint.h>
+
+/* Define layout-independent key codes. Think of it as "the user pressed
+ * the key that corresponds to Q on a US QWERTY keyboard".
+ *
+ * The values here must match the Linux keycodes since they are sent
+ * to the guest kernel directly.
+ */
+
 /* Keep it consistent with linux/input.h */
 typedef enum {
     kKeyCodeSoftLeft                = KEY_SOFT1,
@@ -129,6 +139,36 @@ typedef enum {
  *    skin_keycode_rotate( kKeyCodeDpadDown, 3 ) => kKeyCodeDpadRight
  *    skin_keycode_rotate( kKeyCodeSpace, n ) => kKeyCodeSpace independent of n
  */
-extern SkinKeyCode   skin_keycode_rotate( SkinKeyCode  code, int  rotation );
+extern SkinKeyCode skin_keycode_rotate( SkinKeyCode  code, int  rotation );
+
+extern int skin_key_code_count(void);
+extern const char* skin_key_code_str(int index);
+
+
+// Bit flag for key modifiers like Ctrl or Alt.
+typedef enum {
+    kKeyModLCtrl  = (1U << 0),  // left-control key
+    kKeyModRCtrl  = (1U << 1),  // right-control
+    kKeyModLAlt   = (1U << 2),  // left-alt
+    kKeyModRAlt   = (1U << 3),  // right-alt
+    kKeyModLShift = (1U << 4),  // left-shift
+    kKeyModRShift = (1U << 5),  // right-shift
+    kKeyModNumLock = (1U << 6),  // numlock
+
+} SkinKeyMod;
+
+// Convert a pair of (SkinKeyCode,SkinKeyMod) values into a human-readable
+// string. Returns the address of a static string that is overwritten on
+// each call.
+// |keycode| is the layout-independent SkinKeyCode.
+// |mod| is a set of SkinKeyMod bit flags.
+extern const char* skin_key_pair_to_string(uint32_t keycode, uint32_t mod);
+
+// Convert a textual key description |str| (e.g. "Ctrl-K") into a pair
+// if (SkinKeyCode,SkinKeyMod) values. On success, return true and sets
+// |*keycode| and |*mod|. On failure, return false.
+extern bool skin_key_pair_from_string(const char* str,
+                                      uint32_t* keycode,
+                                      uint32_t* mod);
 
 #endif /* ANDROID_SKIN_KEYCODE_H */

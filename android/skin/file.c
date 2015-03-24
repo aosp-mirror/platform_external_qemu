@@ -17,6 +17,8 @@
 #include "android/utils/system.h"
 #include "android/utils/debug.h"
 
+#include <stdlib.h>
+
 /** UTILITY ROUTINES
  **/
 static SkinImage*

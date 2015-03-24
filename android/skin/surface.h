@@ -33,6 +33,8 @@ typedef void (*SkinSurfaceDoneFunc)( void*  user );
 
 extern void  skin_surface_set_done( SkinSurface*  s, SkinSurfaceDoneFunc  done_func, void*  done_user );
 
+extern int skin_surface_width(SkinSurface* s);
+extern int skin_surface_height(SkinSurface* s);
 
 /* there are two kinds of surfaces:
 
@@ -62,6 +64,13 @@ extern SkinSurface*  skin_surface_create_argb32_from(
                             uint32_t*            pixels,
                             int                  do_copy );
 
+extern SkinSurface* skin_surface_create_window(
+                            int x,
+                            int y,
+                            int w,
+                            int h,
+                            int is_fullscreen);
+
 /* surface pixels information for slow surfaces */
 typedef struct {
     int         w;
@@ -70,6 +79,17 @@ typedef struct {
     uint32_t*   pixels;
 } SkinSurfacePixels;
 
+typedef struct {
+    uint32_t r_shift;
+    uint32_t r_mask;
+    uint32_t g_shift;
+    uint32_t g_mask;
+    uint32_t b_shift;
+    uint32_t b_mask;
+    uint32_t a_shift;
+    uint32_t a_mask;
+} SkinSurfacePixelFormat;
+
 /* lock a slow surface, and returns its pixel information.
    returns 0 in case of success, -1 otherwise */
 extern int     skin_surface_lock  ( SkinSurface*  s, SkinSurfacePixels  *pix );
@@ -77,11 +97,17 @@ extern int     skin_surface_lock  ( SkinSurface*  s, SkinSurfacePixels  *pix );
 /* unlock a slow surface that was previously locked */
 extern void    skin_surface_unlock( SkinSurface*  s );
 
+extern void    skin_surface_get_format(SkinSurface* s,
+                                       SkinSurfacePixelFormat* format);
+
+extern void    skin_surface_set_alpha_blending( SkinSurface*  s, int alpha );
+
+extern void    skin_surface_update(SkinSurface* surface, SkinRect* rect);
+
 /* list of composition operators for the blit routine */
 typedef enum {
     SKIN_BLIT_COPY = 0,
     SKIN_BLIT_SRCOVER,
-    SKIN_BLIT_DSTOVER,
 } SkinBlitOp;
 
 
@@ -93,9 +119,8 @@ extern void    skin_surface_blit( SkinSurface*  dst,
                                   SkinBlitOp    blitop );
 
 /* blit a colored rectangle into a destination surface */
-extern void    skin_surface_fill( SkinSurface*  dst,
-                                  SkinRect*     rect,
-                                  uint32_t      argb_premul,
-                                  SkinBlitOp    blitop );
+extern void    skin_surface_fill(SkinSurface*  dst,
+                                 SkinRect*     rect,
+                                 uint32_t      argb_premul);
 
 #endif /* _ANDROID_SKIN_SURFACE_H */
