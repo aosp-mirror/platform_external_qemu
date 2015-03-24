@@ -14,6 +14,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/files/ScopedFd_unittest.cpp \
   android/base/files/ScopedStdioFile_unittest.cpp \
   android/base/Log_unittest.cpp \
+  android/base/memory/LazyInstance_unittest.cpp \
   android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/ScopedPtr_unittest.cpp \
   android/base/misc/HttpUtils_unittest.cpp \
@@ -24,6 +25,9 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/String_unittest.cpp \
   android/base/StringFormat_unittest.cpp \
   android/base/StringView_unittest.cpp \
+  android/base/synchronization/Lock_unittest.cpp \
+  android/base/threads/Thread_unittest.cpp \
+  android/base/threads/ThreadStore_unittest.cpp \
   android/emulation/CpuAccelerator_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
   android/filesystems/fstab_parser_unittest.cpp \

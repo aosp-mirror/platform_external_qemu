@@ -127,6 +127,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/async/AsyncReader.cpp \
 	android/base/async/AsyncWriter.cpp \
 	android/base/async/Looper.cpp \
+	android/base/async/ThreadLooper.cpp \
 	android/base/containers/PodVector.cpp \
 	android/base/containers/PointerSet.cpp \
 	android/base/containers/HashUtils.cpp \
@@ -138,9 +139,11 @@ common_LOCAL_SRC_FILES += \
 	android/base/sockets/SocketUtils.cpp \
 	android/base/sockets/SocketWaiter.cpp \
 	android/base/Log.cpp \
+	android/base/memory/LazyInstance.cpp \
 	android/base/String.cpp \
 	android/base/StringFormat.cpp \
 	android/base/StringView.cpp \
+	android/base/threads/ThreadStore.cpp \
 	android/emulation/CpuAccelerator.cpp \
 	android/filesystems/ext4_utils.cpp \
 	android/filesystems/fstab_parser.cpp \
@@ -181,6 +184,12 @@ common_LOCAL_SRC_FILES += \
 	android/utils/utf8_utils.cpp \
 	android/utils/vector.c \
 	android/utils/win32_cmdline_quote.c \
+
+ifeq (windows,$(HOST_OS))
+common_LOCAL_SRC_FILES += android/base/threads/Thread_win32.cpp
+else
+common_LOCAL_SRC_FILES += android/base/threads/Thread_pthread.cpp
+endif
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
