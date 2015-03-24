@@ -16,6 +16,8 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/Log_unittest.cpp \
   android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/ScopedPtr_unittest.cpp \
+  android/base/misc/HttpUtils_unittest.cpp \
+  android/base/misc/Utf8Utils_unittest.cpp \
   android/base/sockets/ScopedSocket_unittest.cpp \
   android/base/sockets/SocketDrainer_unittest.cpp \
   android/base/sockets/SocketWaiter_unittest.cpp \

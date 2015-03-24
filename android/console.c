@@ -35,7 +35,9 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/http_utils.h"
 #include "android/utils/stralloc.h"
+#include "android/utils/utf8_utils.h"
 #include "android/config/config.h"
 #include "android/tcpdump.h"
 #include "net/net.h"
@@ -403,6 +405,8 @@ dump_help( ControlClient  client,
     }
 }
 
+static int do_quit(ControlClient client, char* args);  // forward
+
 static void
 control_client_do_command( ControlClient  client )
 {
@@ -413,7 +417,16 @@ control_client_do_command( ControlClient  client )
     CommandDef  cmd      = find_command( line, commands, &cmdend, &args );
 
     if (cmd == NULL) {
-        control_write( client, "KO: unknown command, try 'help'\r\n" );
+        size_t line_len = strlen(line);
+        if (android_http_is_request_line(line, line_len)) {
+            control_write( client, "KO: Forbidden HTTP request. Aborting\r\n");
+            do_quit(client, NULL);
+        } else  if (!android_utf8_is_valid(line, line_len)) {
+            control_write( client, "KO: Forbidden binary request. Aborting\r\n");
+            do_quit(client, NULL);
+        } else {
+            control_write( client, "KO: unknown command, try 'help'\r\n" );
+        }
         return;
     }
 
