@@ -322,7 +322,7 @@ if [ "$HOST_OS" = darwin ]; then
     OSX_SDK_ROOT=$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${OSX_SDK_VERSION}.sdk
     log "OSX: Looking for $OSX_SDK_ROOT"
     if [ ! -d "$OSX_SDK_ROOT" ]; then
-        OSX_SDK_ROOT=/Developer/SDKs/MaxOSX${OSX_SDK_VERSION}.sdk
+        OSX_SDK_ROOT=/Developer/SDKs/MacOSX${OSX_SDK_VERSION}.sdk
         log "OSX: Looking for $OSX_SDK_ROOT"
         if [ ! -d "$OSX_SDK_ROOT" ]; then
             echo "ERROR: Could not find SDK $OSX_SDK_VERSION at $OSX_SDK_ROOT"
