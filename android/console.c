@@ -51,6 +51,7 @@
 #include <fcntl.h>
 #include "android/hw-events.h"
 #include "android/user-events.h"
+#include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
 #include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"
@@ -2597,6 +2598,49 @@ static const CommandDefRec sensor_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
+/*****                        F I N G E R P R I N T  C O M M A N D S                   ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static int
+do_fingerprint_touch(ControlClient client, char* args )
+{
+    if (args) {
+        char *endptr;
+        int fingerid = strtol(args, &endptr, 0);
+        if (endptr != args) {
+            android_hw_fingerprint_touch(fingerid);
+            return 0;
+        }
+        control_write(client, "KO: invalid fingerid\r\n");
+        return -1;
+    }
+    control_write(client, "KO: missing fingerid\r\n");
+    return -1;
+}
+
+static int
+do_fingerprint_remove(ControlClient client, char* args )
+{
+    android_hw_fingerprint_remove();
+    return 0;
+}
+
+static const CommandDefRec fingerprint_commands[] =
+{
+    { "touch", "touch finger print sensor with <fingerid>",
+      "'touch <fingerid>' touch finger print sensor with <fingerid>.\r\n",
+      NULL, do_fingerprint_touch, NULL },
+    { "remove", "remove finger from the fingerprint sensor",
+      "'remove' remove finger from the fingerprint sensor.\r\n",
+      NULL, do_fingerprint_remove, NULL },
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
 /*****                           M A I N   C O M M A N D S                             ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -2956,6 +3000,10 @@ static const CommandDefRec   main_commands[] =
     { "sensor", "manage emulator sensors",
       "allows you to request the emulator sensors\r\n", NULL,
       NULL, sensor_commands },
+
+    { "finger", "manage emulator finger print",
+      "allows you to touch the emulator finger print sensor\r\n", NULL,
+      NULL, fingerprint_commands},
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
