@@ -369,6 +369,10 @@ bool skin_ui_process_events(SkinUI* ui) {
             skin_keyboard_process_event(ui->keyboard, &ev, 0);
             break;
 
+        case kEventTextInput:
+            skin_keyboard_process_event(ui->keyboard, &ev, ev.u.text.down);
+            break;
+
         case kEventMouseMotion:
             skin_window_process_event(ui->window, &ev);
             break;

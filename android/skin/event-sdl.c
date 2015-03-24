@@ -12,8 +12,11 @@
 #include "android/skin/event.h"
 
 #include "android/skin/keycode.h"
+#include "android/utils/utf8_utils.h"
 
 #include <SDL.h>
+
+#include <stdbool.h>
 
 /** LAST PRESSED KEYS
  ** a small buffer of last pressed keys, this is used to properly
@@ -245,8 +248,34 @@ static bool is_winsys_exit(SDL_Event* ev) {
 #endif
 }
 
+static bool prepare_text_input_event(SkinEvent* event,
+                                     uint32_t unicode, 
+                                     bool down) {
+    event->type = kEventTextInput;
+    // Encode the Unicode value as a 0-terminated UTF-8 value.
+    int len = android_utf8_encode(unicode,
+                                  event->u.text.text,
+                                  sizeof(event->u.text.text));
+    if (len < 0) {
+        return false;
+    }
+    event->u.text.down = down;
+    event->u.text.text[len] = '\0';
+    return true;
+}
+
 bool skin_event_poll(SkinEvent* event) {
     SDL_Event ev;
+
+    static SkinEvent pending_event;
+    static bool pending = false;
+
+    // We need to buffer at most one event to support text input with SDL 1.x
+    if (pending) {
+        pending = false;
+        event[0] = pending_event;
+        return true;
+    }
 
     for (;;) {
         if (!SDL_PollEvent(&ev)) {
@@ -265,10 +294,9 @@ bool skin_event_poll(SkinEvent* event) {
                 }
                 // fall-through.
 
-            case SDL_KEYUP:
-                event->type = (ev.type == SDL_KEYDOWN) ?
-                        kEventKeyDown :
-                        kEventKeyUp;
+            case SDL_KEYUP: {
+                bool down = (ev.type == SDL_KEYDOWN);
+                event->type = down ? kEventKeyDown : kEventKeyUp;
 
                 int sdl_sym = ev.key.keysym.sym;
                 int sdl_mod = ev.key.keysym.mod;
@@ -277,17 +305,18 @@ bool skin_event_poll(SkinEvent* event) {
                 event->u.key.keycode = sdl_sym_to_key_code(sdl_sym);
                 event->u.key.mod = sdl_mod_to_key_mod(sdl_mod);
 
+                // Prepare a pending text input event for the next call.
+
                 // ev.key.keysym.unicode is only valid on keydown events.
                 // and will be 0 on the corresponding keyup ones, so
                 // remember the set of last pressed key syms to "undo" the
                 // job.
                 LastKeys* last_keys = &sLastKeys;
-                event->u.key.unicode = unicode;
                 if (ev.type == SDL_KEYUP) {
                     LastKey* k = last_keys_find(last_keys, sdl_sym);
                     if (k != NULL) {
                         if (!unicode) {
-                            event->u.key.unicode = k->unicode;
+                            unicode = k->unicode;
                         }
                         if (!sdl_mod) {
                             event->u.key.mod = sdl_mod_to_key_mod(sdl_mod);
@@ -298,7 +327,19 @@ bool skin_event_poll(SkinEvent* event) {
                     last_keys_add(last_keys, sdl_sym, sdl_mod, unicode);
                 }
 
+                if (unicode) {
+                    // The unicode value is added to a pending event
+                    // unless it is invalid.
+                    if (prepare_text_input_event(
+                            &pending_event, 
+                            unicode, 
+                            down)) {
+                        pending = true;
+                    }
+                }
+
                 return true;
+                }
 
             case SDL_MOUSEMOTION:
                 event->type = kEventMouseMotion;

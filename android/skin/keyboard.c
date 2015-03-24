@@ -17,6 +17,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/system.h"
+#include "android/utils/utf8_utils.h"
 
 #include <stdio.h>
 
@@ -177,59 +178,70 @@ skin_keyboard_do_key_event( SkinKeyboard*   kb,
 void
 skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
 {
-    int unicode = ev->u.key.unicode;
-    int keycode = ev->u.key.keycode;
-    int mod = ev->u.key.mod;
-
     /* ignore key events if we're not enabled */
     if (!kb->enabled) {
-        printf( "ignoring key event keycode=%d mod=0x%x unicode=%d\n",
-                keycode, mod, unicode );
+        //printf( "ignoring key event\n");
         return;
     }
 
-    /* first, try the keyboard-mode-independent keys */
-    int code = skin_keyboard_key_to_code(kb, keycode, mod, down);
-    if (code == 0) {
-        return;
-    }
-    if ((int)code > 0) {
-        skin_keyboard_do_key_event(kb, code, down);
-        skin_keyboard_flush(kb);
-        return;
-    }
-
-    /* Ctrl-K is used to switch between 'unicode' and 'raw' modes */
-    if (keycode == kKeyCodeK) {
-        if (mod == kKeyModLCtrl || mod == kKeyModRCtrl) {
-            if (down) {
-                kb->raw_keys = !kb->raw_keys;
-                skin_event_enable_unicode(!kb->raw_keys);
-                D( "switching keyboard to %s mode", kb->raw_keys ? "raw" : "unicode" );
+    if (ev->type == kEventTextInput) {
+        if (!kb->raw_keys) {
+            // TODO(digit): For each Unicode value in the input text.
+            const uint8_t* text = ev->u.text.text;
+            const uint8_t* end = text + sizeof(ev->u.text.text);
+            while (text < end && *text) {
+                uint32_t codepoint = 0;
+                int len = android_utf8_decode(text, end - text, &codepoint);
+                if (len < 0) {
+                    break;
+                }
+                skin_keyboard_process_unicode_event(kb, codepoint, down);
+                text += len;
             }
+            skin_keyboard_flush(kb);
+        }
+    } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {
+        int keycode = ev->u.key.keycode;
+        int mod = ev->u.key.mod;
+
+        /* first, try the keyboard-mode-independent keys */
+        int code = skin_keyboard_key_to_code(kb, keycode, mod, down);
+        if (code == 0) {
             return;
         }
-    }
+        if ((int)code > 0) {
+            skin_keyboard_do_key_event(kb, code, down);
+            skin_keyboard_flush(kb);
+            return;
+        }
 
-    if (!kb->raw_keys &&
-        skin_keyboard_process_unicode_event(kb, unicode, down) > 0)
-    {
-        skin_keyboard_flush(kb);
-        return;
-    }
+        /* Ctrl-K is used to switch between 'unicode' and 'raw' modes */
+        if (keycode == kKeyCodeK) {
+            if (mod == kKeyModLCtrl || mod == kKeyModRCtrl) {
+                if (down) {
+                    kb->raw_keys = !kb->raw_keys;
+                    skin_event_enable_unicode(!kb->raw_keys);
+                    D( "switching keyboard to %s mode", kb->raw_keys ? "raw" : "unicode" );
+                }
+                return;
+            }
+        }
 
-    if ( !kb->raw_keys &&
-         (code == kKeyCodeAltLeft  || code == kKeyCodeAltRight ||
-          code == kKeyCodeCapLeft  || code == kKeyCodeCapRight ||
-          code == kKeyCodeSym) ) {
-        return;
-    }
+        code = keycode;
 
-    if (code == -1) {
-        D("ignoring keycode %d", keycode);
-    } else if (code > 0) {
-        skin_keyboard_do_key_event(kb, code, down);
-        skin_keyboard_flush(kb);
+        if ( !kb->raw_keys &&
+            (code == kKeyCodeAltLeft  || code == kKeyCodeAltRight ||
+             code == kKeyCodeCapLeft  || code == kKeyCodeCapRight ||
+             code == kKeyCodeSym) ) {
+            return;
+        }
+
+        if (code == -1) {
+            D("ignoring keycode %d", keycode);
+        } else if (code > 0) {
+            skin_keyboard_do_key_event(kb, code, down);
+            skin_keyboard_flush(kb);
+        }
     }
 }
 
