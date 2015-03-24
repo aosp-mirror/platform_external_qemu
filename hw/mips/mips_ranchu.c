@@ -36,6 +36,7 @@
 
 #define TYPE_MIPS_RANCHU "mips-ranchu"
 #define MIPS_RANCHU(obj) OBJECT_CHECK(RanchuState, (obj), TYPE_MIPS_RANCHU)
+#define MIPS_RANCHU_REV "1"
 
 typedef struct {
     SysBusDevice parent_obj;
@@ -442,6 +443,13 @@ static void ranchu_init(MachineState *machine)
     qemu_fdt_setprop_cell(fdt, "/", "#address-cells", 0x1);
     qemu_fdt_setprop_cell(fdt, "/", "#size-cells", 0x2);
     qemu_fdt_setprop_cell(fdt, "/", "interrupt-parent", devmap[RANCHU_GF_PIC].irq);
+
+    /* Firmware node */
+    qemu_fdt_add_subnode(fdt, "/firmware");
+    qemu_fdt_add_subnode(fdt, "/firmware/android");
+    qemu_fdt_setprop_string(fdt, "/firmware/android", "compatible", "android,firmware");
+    qemu_fdt_setprop_string(fdt, "/firmware/android", "hardware", "ranchu");
+    qemu_fdt_setprop_string(fdt, "/firmware/android", "revision", MIPS_RANCHU_REV);
 
     /* CPU node */
     qemu_fdt_add_subnode(fdt, "/cpus");
