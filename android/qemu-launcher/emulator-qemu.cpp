@@ -817,6 +817,11 @@ extern "C" int main(int argc, char **argv, char **envp) {
     args[n++] = "virtio-net-device,netdev=mynet";
     args[n++] = "-show-cursor";
 
+    // Graphics
+    if (opts->no_window) {
+        args[n++] = "-nographic";
+    }
+
     // Data directory (for keymaps and PC Bios).
     args[n++] = "-L";
     String dataDir = getNthParentDir(qemuExecutable.c_str(), 2U);
