@@ -9,21 +9,19 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#ifndef ANDROID_UTILS_SETENV_H
+#define ANDROID_UTILS_SETENV_H
+
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
+#ifndef _WIN32
 #include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-#ifdef _WIN32
-int setenv(const char *name, const char *value, int overwrite)
-{
-    int result = 0;
-    if (overwrite || !getenv(name)) {
-        size_t length = strlen(name) + strlen(value) + 2;
-        char *string = malloc(length);
-        snprintf(string, length, "%s=%s", name, value);
-        result = putenv(string);
-    }
-    return result;
-}
-
+#else
+extern void setenv(const char* name, const char* value, int overwrite);
 #endif
+
+ANDROID_END_HEADER
+
+#endif  // ANDROID_UTILS_SETENV_H
