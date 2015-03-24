@@ -80,6 +80,7 @@ typedef std::map< unsigned int, ImagePtr>       ImagesHndlMap;
 class GLEScontext;
 
 typedef struct {
+    void                                            (*initGLESx)();
     GLEScontext*                                    (*createGLESContext)();
     void                                            (*initContext)(GLEScontext*,ShareGroupPtr);
     void                                            (*deleteGLESContext)(GLEScontext*);

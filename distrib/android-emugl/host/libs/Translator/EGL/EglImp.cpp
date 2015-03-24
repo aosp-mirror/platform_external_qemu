@@ -21,6 +21,7 @@
 #include "ThreadInfo.h"
 #include <GLcommon/TranslatorIfaces.h>
 #include "emugl/common/shared_library.h"
+#include <OpenglCodecCommon/ErrorLog.h>
 
 #include "EglWindowSurface.h"
 #include "EglPbufferSurface.h"
@@ -67,6 +68,15 @@ static const EGLiface s_eglIface = {
     .eglAttachEGLImage = attachEGLImage,
     .eglDetachEGLImage = detachEGLImage,
 };
+
+static void initGLESx(GLESVersion version) {
+    const GLESiface* iface = g_eglInfo->getIface(version);
+    if (!iface) {
+        DBG("EGL failed to initialize GLESv%d; incompatible interface\n", version);
+        return;
+    }
+    iface->initGLESx();
+}
 
 /*****************************************  supported extentions  ***********************************************************************/
 
@@ -214,6 +224,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
            fprintf(stderr,"could not find ifaces for GLES CM 1.1\n");
            return EGL_FALSE;
         }
+        initGLESx(GLES_1_1);
     }
     if(!g_eglInfo->getIface(GLES_2_0)) {
         func  = loadIfaces(LIB_GLES_V2_NAME);
@@ -223,6 +234,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
         } else {
            fprintf(stderr,"could not find ifaces for GLES 2.0\n");
         }
+        initGLESx(GLES_2_0);
     }
     dpy->initialize(renderableType);
     return EGL_TRUE;
