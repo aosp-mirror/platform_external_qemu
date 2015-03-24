@@ -55,10 +55,6 @@ emulator_window_init(EmulatorWindow*  emulator,
 void
 emulator_window_done(EmulatorWindow* emulator);
 
-/* Sets title on the emulator's window. */
-void
-emulator_window_set_title(EmulatorWindow* emulator);
-
 /* Gets emulator's layout. */
 SkinLayout*
 emulator_window_get_layout(EmulatorWindow* emulator);

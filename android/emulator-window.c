@@ -35,6 +35,14 @@ static EmulatorWindow   qemulator[1];
 static void emulator_window_refresh(EmulatorWindow* emulator);
 extern void qemu_system_shutdown_request(void);
 
+static void write_window_name(char* buff,
+                              size_t buff_len,
+                              int base_port,
+                              const char* avd_name) {
+    snprintf(buff, buff_len, "%d:%s", base_port, avd_name);
+}
+
+
 static void
 emulator_window_light_brightness(void* opaque, const char*  light, int  value)
 {
@@ -118,7 +126,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .event_func = &emulator_window_trackball_event,
     };
 
-    if (emulator->ui) {
+    if (emulator->opts->no_window || emulator->ui) {
         return;
     }
 
@@ -136,11 +144,10 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .keyboard_raw_keys = emulator->opts->raw_keys != 0,
     };
 
-    snprintf(my_ui_params.window_name,
-            sizeof(my_ui_params.window_name),
-            "%d:%s",
-            android_base_port,
-            avdInfo_getName(android_avdInfo));
+    write_window_name(my_ui_params.window_name,
+                      sizeof(my_ui_params.window_name),
+                      android_base_port,
+                      avdInfo_getName(android_avdInfo));
 
     static const SkinUIFuncs my_ui_funcs = {
         .window_funcs = &my_window_funcs,
@@ -255,10 +262,6 @@ emulator_window_init( EmulatorWindow*       emulator,
     emulator->ui = NULL;
     emulator->opts[0] = opts[0];
 
-    if (!opts->no_window) {
-        emulator_window_setup(emulator);
-    }
-
     /* register as a framebuffer clients for all displays defined in the skin file */
     SKIN_FILE_LOOP_PARTS( emulator->layout_file, part )
         SkinDisplay*  disp = part->display;
@@ -304,14 +307,6 @@ emulator_window_get_first_framebuffer(EmulatorWindow* emulator)
         }
     SKIN_FILE_LOOP_END_PARTS
     return NULL;
-}
-
-void
-emulator_window_set_title(EmulatorWindow* emulator)
-{
-    if (emulator->ui) {
-        skin_ui_reset_title(emulator->ui);
-    }
 }
 
 /*
@@ -432,8 +427,16 @@ android_emulator_set_window_scale(double  scale, int  is_dpi)
 void
 android_emulator_set_base_port( int  port )
 {
-    /* Base port is already set in the emulator's core. */
-    emulator_window_set_title(qemulator);
+    if (qemulator->ui) {
+        /* Base port is already set in the emulator's core. */
+        char buff[32];
+        write_window_name(buff,
+                        sizeof(buff),
+                        android_base_port,
+                        avdInfo_getName(android_avdInfo));
+
+        skin_ui_set_name(qemulator->ui, buff);
+    }
 }
 
 SkinLayout*
