@@ -382,20 +382,20 @@ int main(int argc, char **argv)
         }
     }
 
-    if (opts->trace) {
-        char*   tracePath = avdInfo_getTracePath(avd, opts->trace);
+    if (opts->code_profile) {
+        char*   profilePath = avdInfo_getCodeProfilePath(avd, opts->code_profile);
         int     ret;
 
-        if (tracePath == NULL) {
-            derror( "bad -trace parameter" );
+        if (profilePath == NULL) {
+            derror( "bad -code-profile parameter" );
             exit(1);
         }
-        ret = path_mkdir_if_needed( tracePath, 0755 );
+        ret = path_mkdir_if_needed( profilePath, 0755 );
         if (ret < 0) {
             fprintf(stderr, "could not create directory '%s'\n", tmp);
             exit(2);
         }
-        opts->trace = tracePath;
+        opts->code_profile = profilePath;
     }
 
     /* Update CPU architecture for HW configs created from build dir. */
@@ -1019,11 +1019,9 @@ int main(int argc, char **argv)
         hw->vm_heapSize = heapSize;
     }
 
-    if (opts->trace) {
-        args[n++] = "-trace";
-        args[n++] = opts->trace;
-        args[n++] = "-tracing";
-        args[n++] = "off";
+    if (opts->code_profile) {
+        args[n++] = "-code-profile";
+        args[n++] = opts->code_profile;
     }
 
     /* Pass boot properties to the core. First, those from boot.prop,
@@ -1068,10 +1066,6 @@ int main(int argc, char **argv)
             p = bufprint(p, end, " androidboot.console=%s%d",
                          androidHwConfig_getKernelSerialPrefix(android_hw),
                          shell_serial );
-        }
-
-        if (opts->trace) {
-            p = bufprint(p, end, " android.tracing=1");
         }
 
         if (!opts->no_jni) {

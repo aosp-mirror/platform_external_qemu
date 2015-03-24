@@ -260,8 +260,8 @@ char*        avdInfo_getTargetAbi( AvdInfo*  i );
 /* Reads the AVD's hardware configuration into 'hw'. returns -1 on error, 0 otherwise */
 int          avdInfo_initHwConfig( AvdInfo*  i, AndroidHwConfig*  hw );
 
-/* Returns a *copy* of the path used to store trace 'foo'. result must be freed by caller */
-char*        avdInfo_getTracePath( AvdInfo*  i, const char*  traceName );
+/* Returns a *copy* of the path used to store profile 'foo'. result must be freed by caller */
+char*        avdInfo_getCodeProfilePath( AvdInfo*  i, const char*  profileName );
 
 /* Returns the path of the hardware.ini where we will write the AVD's
  * complete hardware configuration before launching the corresponding
