@@ -77,6 +77,8 @@ HW_SOURCES := \
     android/goldfish/pipe.c \
     android/goldfish/tty.c \
     android/goldfish/vmem.c \
+    android/goldfish/trace.c \
+    android/goldfish/profile.c \
     pci/pci.c \
     watchdog/watchdog.c
 
