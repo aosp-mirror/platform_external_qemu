@@ -37,7 +37,7 @@ EglConfig::EglConfig(EGLint     red_size,
                      EGLint     trans_red_val,
                      EGLint     trans_green_val,
                      EGLint     trans_blue_val,
-                     EGLNativePixelFormatType frmt):
+                     EglOS::PixelFormat* frmt):
         m_buffer_size(red_size + green_size + blue_size + alpha_size),
         m_red_size(red_size),
         m_green_size(green_size),
@@ -104,7 +104,7 @@ EglConfig::EglConfig(const EglConfig& conf) :
         m_trans_green_val(conf.m_trans_green_val),
         m_trans_blue_val(conf.m_trans_blue_val),
         m_conformant(conf.m_conformant),
-        m_nativeFormat(conf.m_nativeFormat) {}
+        m_nativeFormat(conf.m_nativeFormat->clone()) {}
 
 
 EglConfig::EglConfig(const EglConfig& conf,
@@ -143,7 +143,7 @@ EglConfig::EglConfig(const EglConfig& conf,
         m_trans_green_val(conf.m_trans_green_val),
         m_trans_blue_val(conf.m_trans_blue_val),
         m_conformant(conf.m_conformant),
-        m_nativeFormat(conf.m_nativeFormat) {};
+        m_nativeFormat(conf.m_nativeFormat->clone()) {};
 
 
 bool EglConfig::getConfAttrib(EGLint attrib,EGLint* val) const {

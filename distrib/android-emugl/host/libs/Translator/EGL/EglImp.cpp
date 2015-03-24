@@ -156,7 +156,7 @@ EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
 
 EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
     EglDisplay* dpy = NULL;
-    EGLNativeInternalDisplayType internalDisplay = NULL;
+    EglOS::Display* internalDisplay = NULL;
 
     initGlobalInfo();
 
@@ -455,11 +455,10 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
             }
         }
     }
-    EGLNativePixelFormatType tmpfrmt = PIXEL_FORMAT_INITIALIZER;
     EglConfig dummy(red_size,green_size,blue_size,alpha_size,caveat,config_id,depth_size,
                     frame_buffer_level,0,0,0,native_renderable,renderable_type,0,native_visual_type,
                     samples_per_pixel,stencil_size,surface_type,transparent_type,
-                    trans_red_val,trans_green_val,trans_blue_val,tmpfrmt);
+                    trans_red_val,trans_green_val,trans_blue_val,NULL);
 
     *num_config = dpy->chooseConfigs(dummy,configs,config_size);
 
@@ -486,7 +485,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreateWindowSurface(EGLDisplay display, EGLConf
     if(!(cfg->surfaceType() & EGL_WINDOW_BIT)) {
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_MATCH);
     }
-    if(!EglOS::validNativeWin(dpy->nativeType(),win)) {
+    if(!dpy->nativeType()->isValidNativeWin(win)) {
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_NATIVE_WINDOW);
     }
     if(!EglValidate::noAttribs(attrib_list)) {
@@ -497,7 +496,8 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreateWindowSurface(EGLDisplay display, EGLConf
     }
 
     unsigned int width,height;
-    if(!EglOS::checkWindowPixelFormatMatch(dpy->nativeType(),win,cfg,&width,&height)) {
+    if(!dpy->nativeType()->checkWindowPixelFormatMatch(
+            win, cfg->nativeFormat(), &width, &height)) {
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ALLOC);
     }
     SurfacePtr wSurface(new EglWindowSurface(dpy, win,cfg,width,height));
@@ -547,7 +547,18 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ATTRIBUTE);
     }
 
-    EGLNativeSurfaceType pb = EglOS::createPbufferSurface(dpy->nativeType(),cfg,tmpPbSurfacePtr);
+    EglOS::PbufferInfo pbinfo;
+
+    pbinfo.width = width;
+    pbinfo.height = height;
+    pbinfo.largest = largest;
+    pbinfo.target = texTarget;
+    pbinfo.format = texFormat;
+
+    tmpPbSurfacePtr->getAttrib(EGL_MIPMAP_TEXTURE, &pbinfo.hasMipmap);
+
+    EglOS::Surface* pb = dpy->nativeType()->createPbufferSurface(
+            cfg->nativeFormat(), &pbinfo);
     if(!pb) {
         //TODO: RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_VALUE); dont have bad value
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ATTRIBUTE);
@@ -573,7 +584,8 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePixmapSurface(EGLDisplay display, EGLConf
     }
 
     unsigned int width,height;
-    if(!EglOS::checkPixmapPixelFormatMatch(dpy->nativeType(),pixmap,cfg,&width,&height)) {
+    if(!dpy->nativeType()->checkPixmapPixelFormatMatch(
+            pixmap, cfg->nativeFormat(), &width, &height)) {
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ALLOC);
     }
     SurfacePtr pixSurface(new EglPixmapSurface(dpy, pixmap,cfg));
@@ -656,8 +668,9 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
         }
     }
 
-    EGLNativeContextType globalSharedContext = dpy->getGlobalSharedContext();
-    EGLNativeContextType nativeContext = EglOS::createContext(dpy->nativeType(),cfg,globalSharedContext);
+    EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
+    EglOS::Context* nativeContext = dpy->nativeType()->createContext(
+            cfg->nativeFormat(), globalSharedContext);
 
     if(nativeContext) {
         ContextPtr ctx(new EglContext(dpy, nativeContext,sharedCtxPtr,cfg,glesCtx,version,dpy->getManager(version)));
@@ -694,7 +707,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
     if(releaseContext) { //releasing current context
        if(prevCtx.Ptr()) {
            g_eglInfo->getIface(prevCtx->version())->flush();
-           if(!EglOS::makeCurrent(dpy->nativeType(),NULL,NULL,NULL)) {
+           if(!dpy->nativeType()->makeCurrent(NULL,NULL,NULL)) {
                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
            }
            thread->updateInfo(ContextPtr(NULL),dpy,NULL,ShareGroupPtr(NULL),dpy->getManager(prevCtx->version()));
@@ -728,28 +741,35 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
             RETURN_ERROR(EGL_FALSE,EGL_BAD_MATCH);
         }
 
-         EGLNativeInternalDisplayType nativeDisplay = dpy->nativeType();
-         EGLNativeSurfaceType nativeRead = newReadPtr->native();
-         EGLNativeSurfaceType nativeDraw = newDrawPtr->native();
+         EglOS::Display* nativeDisplay = dpy->nativeType();
+         EglOS::Surface* nativeRead = newReadPtr->native();
+         EglOS::Surface* nativeDraw = newDrawPtr->native();
         //checking native window validity
-        if(newReadPtr->type() == EglSurface::WINDOW && !EglOS::validNativeWin(nativeDisplay,nativeRead)) {
+        if(newReadPtr->type() == EglSurface::WINDOW &&
+                !nativeDisplay->isValidNativeWin(nativeRead)) {
             RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_WINDOW);
         }
-        if(newDrawPtr->type() == EglSurface::WINDOW && !EglOS::validNativeWin(nativeDisplay,nativeDraw)) {
+        if(newDrawPtr->type() == EglSurface::WINDOW &&
+                !nativeDisplay->isValidNativeWin(nativeDraw)) {
             RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_WINDOW);
         }
 
         //checking native pixmap validity
-        if(newReadPtr->type() == EglSurface::PIXMAP && !EglOS::validNativePixmap(nativeDisplay,nativeRead)) {
+        if(newReadPtr->type() == EglSurface::PIXMAP &&
+                !nativeDisplay->isValidNativePixmap(nativeRead)) {
             RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_PIXMAP);
         }
-        if(newDrawPtr->type() == EglSurface::PIXMAP && !EglOS::validNativePixmap(nativeDisplay,nativeDraw)) {
+        if(newDrawPtr->type() == EglSurface::PIXMAP &&
+                !nativeDisplay->isValidNativePixmap(nativeDraw)) {
             RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_PIXMAP);
         }
         if(prevCtx.Ptr()) {
             g_eglInfo->getIface(prevCtx->version())->flush();
         }
-        if(!EglOS::makeCurrent(dpy->nativeType(),newReadPtr,newDrawPtr,newCtx->nativeType())) {
+        if (!dpy->nativeType()->makeCurrent(
+                newReadPtr->native(),
+                newDrawPtr->native(),
+                newCtx->nativeType())) {
                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
         }
         //TODO: handle the following errors
@@ -797,11 +817,12 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSwapBuffers(EGLDisplay display, EGLSurface surf
         RETURN_ERROR(EGL_TRUE,EGL_SUCCESS);
     }
 
-    if(!currentCtx.Ptr() || !currentCtx->usingSurface(Srfc) || !EglOS::validNativeWin(dpy->nativeType(),Srfc.Ptr()->native())) {
+    if(!currentCtx.Ptr() || !currentCtx->usingSurface(Srfc) ||
+            !dpy->nativeType()->isValidNativeWin(Srfc.Ptr()->native())) {
         RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
     }
 
-    EglOS::swapBuffers(dpy->nativeType(),Srfc->native());
+    dpy->nativeType()->swapBuffers(Srfc->native());
     return EGL_TRUE;
 }
 
@@ -813,7 +834,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSwapInterval(EGLDisplay display, EGLint interva
         if(!currCtx->read().Ptr() || !currCtx->draw().Ptr() || currCtx->draw()->type()!=EglSurface::WINDOW) {
             RETURN_ERROR(EGL_FALSE,EGL_BAD_CURRENT_SURFACE);
         }
-        EglOS::swapInterval(dpy->nativeType(),currCtx->draw()->native(),interval);
+        dpy->nativeType()->swapInterval(currCtx->draw()->native(),interval);
     } else {
             RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
     }
@@ -889,29 +910,29 @@ EGLAPI EGLBoolean EGLAPIENTRY eglWaitNative(EGLint engine) {
         SurfacePtr read = currCtx->read();
         SurfacePtr draw = currCtx->draw();
 
-        EGLNativeInternalDisplayType nativeDisplay = dpy->nativeType();
+        EglOS::Display* nativeDisplay = dpy->nativeType();
         if(read.Ptr()) {
             if(read->type() == EglSurface::WINDOW &&
-               !EglOS::validNativeWin(nativeDisplay,read->native())) {
+               !nativeDisplay->isValidNativeWin(read->native())) {
                 RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
             }
             if(read->type() == EglSurface::PIXMAP &&
-               !EglOS::validNativePixmap(nativeDisplay,read->native())) {
+               !nativeDisplay->isValidNativePixmap(read->native())) {
                 RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
             }
         }
         if(draw.Ptr()) {
             if(draw->type() == EglSurface::WINDOW &&
-               !EglOS::validNativeWin(nativeDisplay,draw->native())) {
+               !nativeDisplay->isValidNativeWin(draw->native())) {
                 RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
             }
             if(draw->type() == EglSurface::PIXMAP &&
-               !EglOS::validNativePixmap(nativeDisplay,draw->native())) {
+               !nativeDisplay->isValidNativePixmap(draw->native())) {
                 RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
             }
         }
     }
-    EglOS::waitNative();
+    EglGlobalInfo::getInstance()->getOsEngine()->wait();
     return EGL_TRUE;
 }
 
@@ -984,7 +1005,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglCopyBuffers(EGLDisplay display, EGLSurface surf
               EGLNativePixmapType target) {
     VALIDATE_DISPLAY(display);
     VALIDATE_SURFACE(surface,srfc);
-    if(!EglOS::validNativePixmap(dpy->nativeType(),NULL)) {
+    if(!dpy->nativeType()->isValidNativePixmap(NULL)) {
         RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_PIXMAP);
     }
 

@@ -17,48 +17,181 @@
 #define EGL_OS_API_H
 
 #include <EGL/egl.h>
-#include <EGL/eglinternalplatform.h>
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
-#include "EglConfig.h"
-#include "EglDisplay.h"
-#include "EglPbufferSurface.h"
 
 #define PBUFFER_MAX_WIDTH  32767
 #define PBUFFER_MAX_HEIGHT 32767
-#define PBUFFER_MAX_PIXELS 32767*32767
+#define PBUFFER_MAX_PIXELS (PBUFFER_MAX_WIDTH * PBUFFER_MAX_HEIGHT)
 
-namespace EglOS{
+namespace EglOS {
 
-    void queryConfigs(EGLNativeInternalDisplayType dpy,int renderable_type,ConfigsList& listOut);
-    bool releasePbuffer(EGLNativeInternalDisplayType dis,EGLNativeSurfaceType pb);
-    bool destroyContext(EGLNativeInternalDisplayType dpy,EGLNativeContextType ctx);
-    bool releaseDisplay(EGLNativeInternalDisplayType dpy);
-    bool validNativeDisplay(EGLNativeInternalDisplayType dpy);
-    bool validNativeWin(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType win);
-    bool validNativeWin(EGLNativeInternalDisplayType dpy,EGLNativeWindowType win);
-    bool validNativePixmap(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType pix);
-    bool checkWindowPixelFormatMatch(EGLNativeInternalDisplayType dpy,EGLNativeWindowType win,EglConfig* cfg,unsigned int* width,unsigned int* height);
-    bool checkPixmapPixelFormatMatch(EGLNativeInternalDisplayType dpy,EGLNativePixmapType pix,EglConfig* cfg,unsigned int* width,unsigned int* height);
-    bool makeCurrent(EGLNativeInternalDisplayType dpy,EglSurface* read,EglSurface* draw,EGLNativeContextType);
-    void swapBuffers(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType srfc);
-    void swapInterval(EGLNativeInternalDisplayType dpy,EGLNativeSurfaceType win,int interval);
-    void waitNative();
+// Base class used to wrap various GL Surface types.
+class Surface {
+public:
+    typedef enum {
+        WINDOW = 0,
+        PBUFFER = 1,
+        PIXMAP,
+    } SurfaceType;
 
-    EGLNativeInternalDisplayType getDefaultDisplay();
-    EGLNativeInternalDisplayType getInternalDisplay(EGLNativeDisplayType dpy);
-    void deleteDisplay(EGLNativeInternalDisplayType idpy);
-    EGLNativeSurfaceType createPbufferSurface(EGLNativeInternalDisplayType dpy,EglConfig* cfg,EglPbufferSurface* pb);
-    EGLNativeContextType createContext(EGLNativeInternalDisplayType dpy,EglConfig* cfg,EGLNativeContextType sharedContext);
-    EGLNativeSurfaceType createWindowSurface(EGLNativeWindowType wnd);
-    EGLNativeSurfaceType createPixmapSurface(EGLNativePixmapType pix);
-    void destroySurface(EGLNativeSurfaceType srfc);
-#ifdef _WIN32
-    void initPtrToWglFunctions();
-#endif
+    explicit Surface(SurfaceType type) : mType(type) {}
+
+    virtual ~Surface() {}
+
+    SurfaceType type() const { return mType; }
+
+protected:
+    SurfaceType mType;
 };
+
+// An interface class for engine-specific implementation of a GL context.
+class Context {
+public:
+    Context() {}
+    virtual ~Context() {}
+};
+
+// Base class used to wrap engine-specific pixel format descriptors.
+class PixelFormat {
+public:
+    PixelFormat() {}
+
+    virtual ~PixelFormat() {}
+
+    virtual PixelFormat* clone() = 0;
+};
+
+// Small structure used to describe the properties of an engine-specific
+// config.
+struct ConfigInfo {
+    EGLint red_size;
+    EGLint green_size;
+    EGLint blue_size;
+    EGLint alpha_size;
+    EGLenum caveat;
+    EGLint config_id;
+    EGLint depth_size;
+    EGLint frame_buffer_level;
+    EGLint max_pbuffer_width;
+    EGLint max_pbuffer_height;
+    EGLint max_pbuffer_size;
+    EGLBoolean native_renderable;
+    EGLint renderable_type;
+    EGLint native_visual_id;
+    EGLint native_visual_type;
+    EGLint samples_per_pixel;
+    EGLint stencil_size;
+    EGLint surface_type;
+    EGLenum transparent_type;
+    EGLint trans_red_val;
+    EGLint trans_green_val;
+    EGLint trans_blue_val;
+    PixelFormat* frmt;
+};
+
+// A callback function type used with Display::queryConfig() to report to the
+// caller a new host EGLConfig.
+// |opaque| is an opaque value passed to queryConfig().
+// All other parameters are config attributes.
+// Note that ownership of |frmt| is transfered to the callback.
+typedef void (AddConfigCallback)(void* opaque, const ConfigInfo* configInfo);
+
+// Pbuffer description.
+// |width| and |height| are its dimensions.
+// |largest| is set to ask the largest pixek buffer (see GLX_LARGEST_PBUFFER).
+// |format| is one of EGL_TEXTURE_RGB or EGL_TEXTURE_RGBA
+// |target| is one of EGL_TEXTURE_2D or EGL_NO_TEXTURE.
+// |hasMipmap| is true if the Pbuffer has mipmaps.
+struct PbufferInfo {
+    EGLint width;
+    EGLint height;
+    EGLint largest;
+    EGLint format;
+    EGLint target;
+    EGLint hasMipmap;
+};
+
+// A class to model the engine-specific implementation of a GL display
+// connection.
+class Display {
+public:
+    Display() {}
+    virtual ~Display() {}
+
+    virtual bool release() = 0;
+
+    virtual void queryConfigs(int renderableType,
+                              AddConfigCallback* addConfigFunc,
+                              void* addConfigOpaque) = 0;
+
+    virtual bool isValidNativeWin(Surface* win) = 0;
+    virtual bool isValidNativeWin(EGLNativeWindowType win) = 0;
+    virtual bool isValidNativePixmap(Surface* pix) = 0;
+
+    virtual bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
+                                             const PixelFormat* pixelFormat,
+                                             unsigned int* width,
+                                             unsigned int* height) = 0;
+
+    virtual bool checkPixmapPixelFormatMatch(EGLNativePixmapType pix,
+                                             const PixelFormat* pixelFormat,
+                                             unsigned int* width,
+                                             unsigned int* height) = 0;
+
+    virtual Context* createContext(
+            const PixelFormat* pixelFormat, Context* sharedContext) = 0;
+
+    virtual bool destroyContext(Context* context) = 0;
+
+    virtual Surface* createPbufferSurface(
+            const PixelFormat* pixelFormat, const PbufferInfo* info) = 0;
+
+    virtual bool releasePbuffer(Surface* pb) = 0;
+
+    virtual bool makeCurrent(Surface* read,
+                             Surface* draw,
+                             Context* context) = 0;
+
+    virtual void swapBuffers(Surface* srfc) = 0;
+
+    virtual void swapInterval(Surface* win, int interval) = 0;
+};
+
+// An interface class to model a specific underlying GL graphics subsystem
+// or engine. Use getHost() to retrieve the implementation for the current
+// host.
+class Engine {
+public:
+    Engine() {}
+    virtual ~Engine() {}
+
+    // Return a Display instance to the default display / window.
+    virtual Display* getDefaultDisplay() = 0;
+
+    // Convert a platform-specific display type (e.g. a Windows HWND) into
+    // the corresponding Display instance. This will return NULL for engines
+    // that are not tied to the host platform (e.g. software renderers like
+    // OSMesa).
+    virtual Display* getInternalDisplay(EGLNativeDisplayType dpy) = 0;
+
+    // Create a new window surface. |wnd| is a host-specific window handle
+    // (e.g. a Windows HWND). A software renderer would always return NULL
+    // here.
+    virtual Surface* createWindowSurface(EGLNativeWindowType wnd) = 0;
+
+    // Create a new pixmap surface. |pix| is a host-specific pixmap handle
+    // (e.g. a Windows HBITMAP). A software renderer would always return NULL.
+    virtual Surface* createPixmapSurface(EGLNativePixmapType pix) = 0;
+
+    // Wait for host graphics command completion. This is only useful on X11
+    // to gall glXwaitX(), ignored on other platforms or by software
+    // engines.
+    virtual void wait() = 0;
+
+    // Retrieve the implementation for the current host. This can be called
+    // multiple times, and will initialize the engine on first call.
+    static Engine* getHostInstance();
+};
+
+}  // namespace EglOS
 
 #endif
