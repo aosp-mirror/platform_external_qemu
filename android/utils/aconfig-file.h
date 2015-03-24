@@ -9,8 +9,12 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_CONFIG_FILE_H
-#define ANDROID_CONFIG_FILE_H
+#ifndef ANDROID_UTILS_ACONFIG_FILE_H
+#define ANDROID_UTILS_ACONFIG_FILE_H
+
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /** ANDROID CONFIGURATION FILE SUPPORT
  **
@@ -54,4 +58,9 @@ extern unsigned     aconfig_unsigned(AConfig *root, const char *name, unsigned _
 extern int          aconfig_int     (AConfig *root, const char *name, int _default);
 extern const char*  aconfig_str     (AConfig *root, const char *name, const char *_default);
 
-#endif /* ANDROID_CONFIG_FILE_H */
+/* Recusively destroy a node and its children. */
+extern void aconfig_node_free(AConfig *root);
+
+ANDROID_END_HEADER
+
+#endif /* ANDROID_UTILS_ACONFIG_FILE_H */

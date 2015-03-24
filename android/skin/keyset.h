@@ -13,7 +13,7 @@
 #define _ANDROID_SKIN_KEYSET_H_
 
 #include "android/utils/compiler.h"
-#include "android/config-file.h"
+#include "android/utils/aconfig-file.h"
 
 ANDROID_BEGIN_HEADER
 

@@ -33,14 +33,15 @@
 #include "math.h"
 
 #include "android/charmap.h"
-#include "android/utils/debug.h"
-#include "android/config-file.h"
 #include "android/config/config.h"
 #include "android/cpu_accelerator.h"
 
 #include "android/kernel/kernel_utils.h"
 #include "android/user-config.h"
+
+#include "android/utils/aconfig-file.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/debug.h"
 #include "android/utils/filelock.h"
 #include "android/utils/lineinput.h"
 #include "android/utils/path.h"

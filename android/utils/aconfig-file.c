@@ -9,16 +9,17 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+
+#include "android/utils/aconfig-file.h"
+#include "android/utils/eintr_wrapper.h"
+#include "android/utils/path.h"
+
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-
-#include "android/config-file.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/path.h"
 
 AConfig*
 aconfig_node(const char *name, const char *value)
@@ -30,6 +31,16 @@ aconfig_node(const char *name, const char *value)
     n->value = value ? value : "";
 
     return n;
+}
+
+void
+aconfig_node_free(AConfig *root) {
+    AConfig *node, *next;
+    for (node = root->first_child; node; node = next) {
+        next = node->next;
+        aconfig_node_free(node);
+    }
+    free(node);
 }
 
 static AConfig*
@@ -74,6 +85,8 @@ aconfig_bool(AConfig *root, const char *name, int _default)
         case 'y':
         case 'Y':
         case '1':
+        case 't':
+        case 'T':
             return 1;
         default:
             return 0;
@@ -221,7 +234,7 @@ restart:
 
                 goto got_text;
             } else {
-               /* looking for a key name. we stop at whitspace,
+               /* looking for a key name. we stop at whitespace,
                 * EOF, of T_DOT/T_OBRACE/T_CBRACE characters.
                 * note that the name can include sharp signs
                 */
