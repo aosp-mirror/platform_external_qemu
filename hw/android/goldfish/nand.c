@@ -644,8 +644,19 @@ static uint32_t nand_dev_read(void *opaque, hwaddr offset)
     case NAND_DEV_EXTRA_SIZE:
         return dev->extra_size;
 
-    case NAND_DEV_ERASE_SIZE:
-        return dev->erase_size;
+    case NAND_DEV_ERASE_SIZE: {
+            // IMPORTANT: The kernel's MTD module, which handles reads/writes
+            // to NAND memory, implements caching. Unfortunately, this ends up
+            // randomly corrupting writable partitions when the emulator is
+            // stopped (either normally or forcefully). Reporting an erase_size
+            // of 0 here disables that caching, and allows the system to boot
+            // and run from ext4 partitions properly, but not from YAFFS ones.
+            //
+            // Since YAFFS seems resilient to these corruption issues anyway,
+            // just report the size as 0 for EXT4 partitions.
+            int is_ext4 = (dev->extra_size == 0);
+            return is_ext4 ? 0 : dev->erase_size;
+        }
 
     case NAND_DEV_SIZE_LOW:
         return (uint32_t)dev->max_size;
