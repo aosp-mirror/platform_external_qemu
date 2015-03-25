@@ -1087,8 +1087,8 @@ int main(int argc, char **argv)
         /* Don't worry about having a leading space here, this is handled
          * by the core later. */
 
-#ifdef TARGET_I386
         p = bufprint(p, end, " androidboot.hardware=goldfish");
+#ifdef TARGET_I386
         p = bufprint(p, end, " clocksource=pit");
 #endif
 
