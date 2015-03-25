@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "43116641_fd402314",
+        "filename": "android/hw-fingerprint.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-03-25T13:32:44Z",
+      "side": 1,
+      "message": "nit: I\u0027d be tempted to rename this to HwFingerprintService for clarity.",
+      "revId": "4b0904d7ff3068cbfaf046835cdad979c09eae13",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "23147232_3ced7d88",
+        "filename": "android/hw-fingerprint.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-03-25T13:32:44Z",
+      "side": 1,
+      "message": "Can you implement the load/save functions? It looks like all it needs is handling one 32-bit integer and one boolean, and thus should be easy.",
+      "revId": "4b0904d7ff3068cbfaf046835cdad979c09eae13",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
