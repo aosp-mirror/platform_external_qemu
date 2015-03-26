@@ -2021,7 +2021,15 @@ GL_API void GL_APIENTRY glDrawTexsOES (GLshort x, GLshort y, GLshort z, GLshort 
 GL_API void GL_APIENTRY glDrawTexiOES (GLint x, GLint y, GLint z, GLint width, GLint height) {
   GET_CTX_CM();
   DBG("v1: %s ctx=%p ---> simulated through ES1x: \n", __func__, ctx);
-  glDrawTexOES<GLint,GL_INT>(x,y,z,width,height);
+  //  glDrawTexOES<GLint,GL_INT>(x,y,z,width,height);
+  GLfloat fx = static_cast<GLfloat>(x);
+  GLfloat fy = static_cast<GLfloat>(y);
+  GLfloat fz = static_cast<GLfloat>(z);
+  GLfloat fwidth = static_cast<GLfloat>(width);
+  GLfloat fheight = static_cast<GLfloat>(height);
+
+  glDrawTexOES<GLfloat,GL_FLOAT>(fx,fy,fz,fwidth,fheight);
+
   return;
 }
 
@@ -2049,7 +2057,7 @@ GL_API void GL_APIENTRY glDrawTexsvOES (const GLshort * coords) {
 GL_API void GL_APIENTRY glDrawTexivOES (const GLint * coords) {
   GET_CTX_CM();
   DBG("v1: %s ctx=%p ---> simulated through ES1x: \n", __func__, ctx);
-  glDrawTexOES<GLint,GL_INT>(coords[0],coords[1],coords[2],coords[3],coords[4]);
+  glDrawTexiOES(coords[0],coords[1],coords[2],coords[3],coords[4]);
   return;
 }
 
