@@ -519,6 +519,7 @@ CORE_MISC_SOURCES = \
     android/hw-lcd.c \
     android/hw-events.c \
     android/hw-control.c \
+    android/hw-fingerprint.c \
     android/hw-sensors.c \
     android/hw-qemud.c \
     android/looper-qemu.cpp \
