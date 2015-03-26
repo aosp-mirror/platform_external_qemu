@@ -112,9 +112,7 @@ typedef struct _es1xContext_
 #include "es1xContextFields.inl"
 
   /* Statistics */
-#ifdef ES1X_SUPPORT_STATISTICS
   es1xStatistics                statistics;
-#endif
 
 } es1xContext;
 

@@ -67,7 +67,7 @@ static void *gles_routing_get_proc_func(const char *name, void *userData)
 /****************************************************************************/
 
 void init_gles_v1tov2_routing() {
-  printf("*** GLEScmRouting: initializating GLESv2 routing table \n");
+  DBG("*** GLEScmRouting: initializating GLESv2 routing table \n");
 
   // GLES 2.0 must have already been successfully loaded
   // for us to be able to load the GLES 1.x with 1.x-->2.0 transformer

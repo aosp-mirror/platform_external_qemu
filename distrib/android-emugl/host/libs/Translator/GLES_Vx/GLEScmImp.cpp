@@ -83,6 +83,7 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
   if (!ctx->isInitialized()) {
     ctx->setShareGroup(grp);
     ctx->init();
+    glGetError();
     glBindTexture(GL_TEXTURE_2D,0);
     glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
   }
@@ -1859,6 +1860,50 @@ GL_API void GL_APIENTRY glGetTexGenxvOES (GLenum coord, GLenum pname, GLfixed *p
 }
 
 template <class T, GLenum TypeName>
+void FAKEglDrawTexOES (T x, T y, T z, T width, T height) {
+  GET_CTX_CM();
+
+  SET_ERROR_IF((width<=0 || height<=0),GL_INVALID_VALUE);
+
+  ctx->drawValidate();
+
+  GLfloat vertices[] = {
+     1.5f,  1.5f, 0.0f,  0.0, 0.0, // Top Right
+     1.5f, -1.5f, 0.0f,  0.0, 1.0,  // Bottom Right
+    -1.5f, -1.5f, 0.0f,  1.0, 1.0,  // Bottom Left
+    -1.5f,  1.5f, 0.0f,  1.0, 0.0 // Top Left
+  };
+
+
+  GLfloat texels[ctx->getMaxTexUnits()][4*2];
+  memset((void*)texels, 0, ctx->getMaxTexUnits()*4*2*sizeof(GLfloat));
+
+  GLuint        m_ui32Vbo;
+  glGenBuffers(1, &m_ui32Vbo);
+  unsigned int uiSize = 4 * (sizeof(float) * 5); // 3 vertices * stride (5 floats per vertex)
+
+  // Bind the VBO
+  glBindBuffer(GL_ARRAY_BUFFER, m_ui32Vbo);
+
+  // Set the buffer's data
+  glBufferData(GL_ARRAY_BUFFER, uiSize, vertices, GL_DYNAMIC_DRAW);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glVertexPointer(3,GL_FLOAT,sizeof(float) * 5, 0);
+
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  glTexCoordPointer(2,GL_FLOAT,sizeof(float) * 5, (unsigned char*) (sizeof(float) * 3));
+
+  // Draws a non-indexed triangle array
+  glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+  // unbind the vertex buffer as we don't need it bound anymore
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  return;
+}
+
+template <class T, GLenum TypeName>
 void glDrawTexOES (T x, T y, T z, T width, T height) {
   GET_CTX_CM();
 
@@ -1868,66 +1913,47 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
 
   int numClipPlanes;
 
-  GLint viewport[4] = { 0 };
+  GLint viewport[4] = {};
   z = (z>1 ? 1 : (z<0 ?  0 : z));
 
-  T vertices[4*3] = {
-    x ,                      y,                        z,
-    x ,                      static_cast<T>(y+height), z,
+  T vertices[] = {
+    x , y, z,
+    x , static_cast<T>(y+height), z,
     static_cast<T>(x+width), static_cast<T>(y+height), z,
-    static_cast<T>(x+width), y,                        z
+    static_cast<T>(x+width), y, z
   };
   GLfloat texels[ctx->getMaxTexUnits()][4*2];
   memset((void*)texels, 0, ctx->getMaxTexUnits()*4*2*sizeof(GLfloat));
 
-  ctx->dispatcher().glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
-  ctx->dispatcher().glPushAttrib(GL_TRANSFORM_BIT);
+  //  ctx->dispatcher().glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+  //  ctx->dispatcher().glPushAttrib(GL_TRANSFORM_BIT);
 
   //setup projection matrix to draw in viewport aligned coordinates
-  //   ctx->dispatcher().glMatrixMode(GL_PROJECTION);
   es1xMatrixMode(ctx->getES1xContext(), GL_PROJECTION);
-  //   ctx->dispatcher().glPushMatrix();
   es1xPushMatrix(ctx->getES1xContext());
-  //   ctx->dispatcher().glLoadIdentity();
   es1xLoadIdentity(ctx->getES1xContext());
-  //   ctx->dispatcher().glGetIntegerv(GL_VIEWPORT,viewport);
   es1xGetIntegerv(ctx->getES1xContext(), GL_VIEWPORT,viewport);
-  printf("VIEWPORT = [ %d %d %d %d] \n", viewport[0], viewport[1], viewport[2], viewport[3] );
-  //   ctx->dispatcher().glOrtho(viewport[0],viewport[0] + viewport[2],viewport[1],viewport[1]+viewport[3],0,-1);
-  es1xOrthox(ctx->getES1xContext(), viewport[0],viewport[0] + viewport[2],viewport[1],viewport[1]+viewport[3],0,-1);
-
+  es1xOrthof(ctx->getES1xContext(), viewport[0], viewport[0] + viewport[2], viewport[1], viewport[1]+viewport[3], 0, -1);
   //setup texture matrix
   es1xMatrixMode(ctx->getES1xContext(), GL_TEXTURE);
-  //   ctx->dispatcher().glPushMatrix();
   es1xPushMatrix(ctx->getES1xContext());
-  //   ctx->dispatcher().glLoadIdentity();
   es1xLoadIdentity(ctx->getES1xContext());
-
   //setup modelview matrix
-  //   ctx->dispatcher().glMatrixMode(GL_MODELVIEW);
   es1xMatrixMode(ctx->getES1xContext(), GL_MODELVIEW);
-  //   ctx->dispatcher().glPushMatrix();
   es1xPushMatrix(ctx->getES1xContext());
-  //   ctx->dispatcher().glLoadIdentity();
   es1xLoadIdentity(ctx->getES1xContext());
-
   //backup vbo's
-  int array_buffer =0;
-  int element_array_buffer = 0;
-  //  glGetIntegerv(GL_ARRAY_BUFFER_BINDING,&array_buffer);
-  es1xGetIntegerv(ctx->getES1xContext(), GL_ARRAY_BUFFER_BINDING,&array_buffer);
-  //  glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,&element_array_buffer);
-  es1xGetIntegerv(ctx->getES1xContext(), GL_ELEMENT_ARRAY_BUFFER_BINDING,&element_array_buffer);
-  //  ctx->dispatcher().glBindBuffer(GL_ARRAY_BUFFER,0);
-  es1xBindBuffer(ctx->getES1xContext(), GL_ARRAY_BUFFER,0);
-  //  ctx->dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
-  es1xBindBuffer(ctx->getES1xContext(), GL_ELEMENT_ARRAY_BUFFER,0);
+  int array_buffer = 0xffff;
+  int element_array_buffer = 0xffff;
+  es1xGetIntegerv(ctx->getES1xContext(), GL_ARRAY_BUFFER_BINDING, &array_buffer);
+  es1xGetIntegerv(ctx->getES1xContext(), GL_ELEMENT_ARRAY_BUFFER_BINDING, &element_array_buffer);
+  es1xBindBuffer(ctx->getES1xContext(), GL_ARRAY_BUFFER, 0);
+  es1xBindBuffer(ctx->getES1xContext(), GL_ELEMENT_ARRAY_BUFFER, 0);
+  fprintf(stdout, "__ZHT__array_buffer 0x%x , element_array_buffer 0x%x \n", array_buffer, element_array_buffer);
 
   //disable clip planes
-  //    ctx->dispatcher().glGetIntegerv(GL_MAX_CLIP_PLANES,&numClipPlanes);
   es1xGetIntegerv(ctx->getES1xContext(), GL_MAX_CLIP_PLANES,&numClipPlanes);
   for (int i=0;i<numClipPlanes;++i)
-    //    ctx->dispatcher().glDisable(GL_CLIP_PLANE0+i);
     es1xDisable(ctx->getES1xContext(), GL_CLIP_PLANE0+i);
 
   int nTexPtrs = 0;
@@ -1936,12 +1962,7 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
       TextureData * texData = NULL;
       unsigned int texname = ctx->getBindedTexture(GL_TEXTURE0+i,GL_TEXTURE_2D);
       ObjectLocalName tex = TextureLocalName(GL_TEXTURE_2D,texname);
-
-      //        ctx->dispatcher().glClientActiveTexture(GL_TEXTURE0+i);
       es1xClientActiveTexture(ctx->getES1xContext(), GL_TEXTURE0+i);
-
-      DBG("----------------TEXUNIT %2d : texname 0x%x -> local 0x%x-----------------\n", i, texname, (int) tex);
-
       ObjectDataPtr objData = ctx->shareGroup()->getObjectData(TEXTURE,tex);
       if (objData.Ptr()) {
         texData = (TextureData*)objData.Ptr();
@@ -1958,18 +1979,6 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
         texels[i][6] = (float)(texData->crop_rect[2]+texData->crop_rect[0])/(float)(texData->width);
         texels[i][7] = (float)(texData->crop_rect[1])/(float)(texData->height);
 
-        DBG("____________________ texData [%f %f %f %f ]\n",
-            (float)(texData->crop_rect[0]), (float)(texData->crop_rect[1]),
-            (float)(texData->crop_rect[2]), (float)(texData->crop_rect[3]));
-        DBG("____________________ texels [%f %f %f %f %f %f %f %f ]\n",
-            (float) texels[i][0], (float) texels[i][1],
-            (float) texels[i][2], (float) texels[i][3],
-            (float) texels[i][4], (float) texels[i][5],
-            (float) texels[i][6], (float) texels[i][7]);
-
-        fflush(stdout);
-
-        //          ctx->dispatcher().glTexCoordPointer(2,GL_FLOAT,0,texels[i]);
         es1xTexCoordPointer(ctx->getES1xContext(), 2, GL_FLOAT, 0, texels[i]);
         nTexPtrs++;
       }
@@ -1977,48 +1986,27 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
   }
 
   if (nTexPtrs>0) {
-    //draw rectangle - only if we have some textures enabled & ready
-    //      ctx->dispatcher().glEnableClientState(GL_VERTEX_ARRAY);
+    //    draw rectangle - only if we have some textures enabled & ready
     es1xEnableClientState(ctx->getES1xContext(), GL_VERTEX_ARRAY);
-    //    ctx->dispatcher().glVertexPointer(3,TypeName,0,vertices);
     es1xVertexPointer(ctx->getES1xContext(), 3,TypeName,0,vertices);
-    printf("[ %5.3f %5.3f %5.3f\n"
-           "  %5.3f %5.3f %5.3f\n"
-           "  %5.3f %5.3f %5.3f\n"
-           "  %5.3f %5.3f %5.3f ]\n",
-           (float) vertices[0*3+0],  (float) vertices[0*3+1], (float) vertices[0*3+2],
-           (float) vertices[1*3+0],  (float) vertices[1*3+1], (float) vertices[1*3+2],
-           (float) vertices[2*3+0],  (float) vertices[2*3+1], (float) vertices[2*3+2],
-           (float) vertices[3*3+0],  (float) vertices[3*3+1], (float) vertices[3*3+2]);
-
-    // ctx->dispatcher().glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     es1xEnableClientState(ctx->getES1xContext(), GL_TEXTURE_COORD_ARRAY);
-    // ctx->dispatcher().glDrawArrays(GL_TRIANGLE_FAN,0,4);
     es1xDrawArrays(ctx->getES1xContext(), GL_TRIANGLE_FAN,0,4);
   }
 
   //restore vbo's
-  //    ctx->dispatcher().glBindBuffer(GL_ARRAY_BUFFER,array_buffer);
-  es1xBindBuffer(ctx->getES1xContext(), GL_ARRAY_BUFFER,array_buffer);
-  //    ctx->dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,element_array_buffer);
-  es1xBindBuffer(ctx->getES1xContext(), GL_ELEMENT_ARRAY_BUFFER,element_array_buffer);
+  es1xBindBuffer(ctx->getES1xContext(), GL_ARRAY_BUFFER, array_buffer);
+  es1xBindBuffer(ctx->getES1xContext(), GL_ELEMENT_ARRAY_BUFFER, element_array_buffer);
 
   //restore matrix state
-  //   ctx->dispatcher().glMatrixMode(GL_MODELVIEW);
   es1xMatrixMode(ctx->getES1xContext(), GL_MODELVIEW);
-  //   ctx->dispatcher().glPopMatrix();
   es1xPopMatrix(ctx->getES1xContext());
-  //   ctx->dispatcher().glMatrixMode(GL_TEXTURE);
   es1xMatrixMode(ctx->getES1xContext(), GL_TEXTURE);
-  //   ctx->dispatcher().glPopMatrix();
   es1xPopMatrix(ctx->getES1xContext());
-  //   ctx->dispatcher().glMatrixMode(GL_PROJECTION);
   es1xMatrixMode(ctx->getES1xContext(), GL_PROJECTION);
-  //   ctx->dispatcher().glPopMatrix();
   es1xPopMatrix(ctx->getES1xContext());
 
-  ctx->dispatcher().glPopAttrib();
-  ctx->dispatcher().glPopClientAttrib();
+  //    ctx->dispatcher().glPopAttrib();
+  //   ctx->dispatcher().glPopClientAttrib();
 
   return;
 }

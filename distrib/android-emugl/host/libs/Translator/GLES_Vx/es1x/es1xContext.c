@@ -102,7 +102,7 @@ void *es1xContext_create()
   es1xStatistics_clear(&context->statistics);
 #endif
 
-  fprintf(stdout, "*** es1xContext_create @ 0x%p \n", context);
+  //  fprintf(stdout, "*** es1xContext_create @ 0x%p \n", context);
 
   return (void *) context;
 }

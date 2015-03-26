@@ -23,29 +23,29 @@
 #endif
 
 #    include <stdio.h>
+
 #    define ES1X_LOG(P)              printf P
 #    define ES1X_WARNING(P)          printf P
 #    define ES1X_ERROR(P)            printf P
-
-/*
-#       define ES1X_LOG(P)
-#       define ES1X_WARNING(P)
-#       define ES1X_ERROR(P)
-*/
-
-const char* es1xEnumToString(GLenum e);
-
+// #       define ES1X_LOG(P)
+// #       define ES1X_WARNING(P)
+// #       define ES1X_ERROR(P)
 
 #include <stdio.h>
 
-#define ES1X_LOG_CALL(P)        {                   \
+const char* es1xEnumToString(GLenum e);
+
+#define ES1X_ENUM_TO_STRING     es1xEnumToString
+// #define ES1X_ENUM_TO_STRING(P)
+
+#define ES1X_LOG_CALL(P)        do{                 \
     printf("*** ES1X: ");                           \
     printf P ;                                      \
     printf("\n");                                   \
   } while(0)
-#define ES1X_ENUM_TO_STRING     es1xEnumToString
-
 // #define ES1X_LOG_CALL(P)
-// #define ES1X_ENUM_TO_STRING(P)
+
+#define ES1X_LOG_UNIFORM_UPDATE(P) printf P
+// #define ES1X_LOG_UNIFORM_UPDATE(P)
 
 #endif // _ES1XMATRIX_H

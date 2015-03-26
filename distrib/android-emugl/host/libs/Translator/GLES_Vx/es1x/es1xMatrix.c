@@ -522,6 +522,8 @@ GL_API void GL_APIENTRY es1xOrthof(void *_context_, GLfloat left, GLfloat right,
     es1xMatrix4x4*      current = es1xMatrixStack_peekMatrix(context->currentMatrixStack);
 
     es1xMatrix4x4_createOrtho(&ortho, left, right, bottom, top, near, far);
+    ES1X_DEBUG_CODE(ES1X_LOG_UNIFORM_UPDATE(("ORTHO = \n                       [ %.8f, %.8f, %.8f, %.8f ]\n                       [ %.8f, %.8f, %.8f, %.8f ]\n                       [ %.8f, %.8f, %.8f, %.8f ]\n                       [ %.8f, %.8f, %.8f, %.8f ]\n",
+                                             ortho.data[0][0], ortho.data[0][1], ortho.data[0][2], ortho.data[0][3], ortho.data[1][0], ortho.data[1][1], ortho.data[1][2], ortho.data[1][3], ortho.data[2][0], ortho.data[2][1], ortho.data[2][2], ortho.data[2][3], ortho.data[3][0], ortho.data[3][1], ortho.data[3][2], ortho.data[3][3])));
     es1xMatrix4x4_multiply(current, &ortho);
     es1xMarkCurrentMatrixUniformDirty(context);
   }

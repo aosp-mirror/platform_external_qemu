@@ -28,10 +28,6 @@
 #include "es1xShaderCodeUniforms.h"
 #include "es1xRouting.h"
 
-
-#define ES1X_LOG_UNIFORM_UPDATE(P) printf P
-// #define ES1X_LOG_UNIFORM_UPDATE(P)
-
 ES1X_DEBUG_CODE(extern const char* ES1X_SHADER_CODE_UNIFORM_NAME_LOOKUP[]);
 
 /*---------------------------------------------------------------------------*/

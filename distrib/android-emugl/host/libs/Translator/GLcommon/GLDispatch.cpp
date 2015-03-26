@@ -51,7 +51,7 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName) {
             if (funcAddress) { \
                 name = (__typeof__(name))(funcAddress); \
             } else { \
-                fprintf(stderr, "Could not load func %s\n", #name); \
+                fprintf(stderr, "ERR: Could not load func %s\n", #name); \
                 name = (__typeof__(name))(dummy_##name); \
             } \
         } \
