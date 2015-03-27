@@ -113,26 +113,48 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
       s_glesExtensions = new ProcTableMap();
     else
       s_glesExtensions->clear();
-    (*s_glesExtensions)["glEGLImageTargetTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType) glEGLImageTargetTexture2DOES;
+    (*s_glesExtensions)["glEGLImageTargetTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)glEGLImageTargetTexture2DOES;
     (*s_glesExtensions)["glEGLImageTargetRenderbufferStorageOES"]=(__translatorMustCastToProperFunctionPointerType)glEGLImageTargetRenderbufferStorageOES;
-    if (ctx->getCaps()->GL_ARB_MATRIX_PALETTE && ctx->getCaps()->GL_ARB_VERTEX_BLEND) {
-      (*s_glesExtensions)["glFrustumfOES"] = (__translatorMustCastToProperFunctionPointerType)glFrustumf;
-    }
+    (*s_glesExtensions)["glBlendEquationSeparateOES"] = (__translatorMustCastToProperFunctionPointerType)glBlendEquationSeparateOES;
+    (*s_glesExtensions)["glBlendFuncSeparateOES"] = (__translatorMustCastToProperFunctionPointerType)glBlendFuncSeparateOES;
+    (*s_glesExtensions)["glBlendEquationOES"] = (__translatorMustCastToProperFunctionPointerType)glBlendEquationOES;
+    // if (ctx->getCaps()->GL_ARB_MATRIX_PALETTE && ctx->getCaps()->GL_ARB_VERTEX_BLEND) {
+    //     (*s_glesExtensions)["glCurrentPaletteMatrixOES"] = (__translatorMustCastToProperFunctionPointerType)glCurrentPaletteMatrixOES;
+    //     (*s_glesExtensions)["glLoadPaletteFromModelViewMatrixOES"]=(__translatorMustCastToProperFunctionPointerType)glLoadPaletteFromModelViewMatrixOES;
+    //     (*s_glesExtensions)["glMatrixIndexPointerOES"] = (__translatorMustCastToProperFunctionPointerType)glMatrixIndexPointerOES;
+    //     (*s_glesExtensions)["glWeightPointerOES"] = (__translatorMustCastToProperFunctionPointerType)glWeightPointerOES;
+    // }
+    (*s_glesExtensions)["glDepthRangefOES"] = (__translatorMustCastToProperFunctionPointerType)glDepthRangef;
+    (*s_glesExtensions)["glFrustumfOES"] = (__translatorMustCastToProperFunctionPointerType)glFrustumf;
+    (*s_glesExtensions)["glOrthofOES"] = (__translatorMustCastToProperFunctionPointerType)glOrthof;
+    (*s_glesExtensions)["glClipPlanefOES"] = (__translatorMustCastToProperFunctionPointerType)glClipPlanef;
+    (*s_glesExtensions)["glGetClipPlanefOES"] = (__translatorMustCastToProperFunctionPointerType)glGetClipPlanef;
+    (*s_glesExtensions)["glClearDepthfOES"] = (__translatorMustCastToProperFunctionPointerType)glClearDepthf;
+    (*s_glesExtensions)["glPointSizePointerOES"] = (__translatorMustCastToProperFunctionPointerType)glPointSizePointerOES;
+    // (*s_glesExtensions)["glTexGenfOES"] = (__translatorMustCastToProperFunctionPointerType)glTexGenfOES;
+    // (*s_glesExtensions)["glTexGenfvOES"] = (__translatorMustCastToProperFunctionPointerType)glTexGenfvOES;
+    // (*s_glesExtensions)["glTexGeniOES"] = (__translatorMustCastToProperFunctionPointerType)glTexGeniOES;
+    // (*s_glesExtensions)["glTexGenivOES"] = (__translatorMustCastToProperFunctionPointerType)glTexGenivOES;
+    // (*s_glesExtensions)["glTexGenxOES"] = (__translatorMustCastToProperFunctionPointerType)glTexGenxOES;
+    // (*s_glesExtensions)["glTexGenxvOES"] = (__translatorMustCastToProperFunctionPointerType)glTexGenxvOES;
+    // (*s_glesExtensions)["glGetTexGenfvOES"] = (__translatorMustCastToProperFunctionPointerType)glGetTexGenfvOES;
+    // (*s_glesExtensions)["glGetTexGenivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetTexGenivOES;
+    // (*s_glesExtensions)["glGetTexGenxvOES"] = (__translatorMustCastToProperFunctionPointerType)glGetTexGenxvOES;
     if (ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT) {
-      (*s_glesExtensions)["glIsRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glIsRenderbufferOES;
-      (*s_glesExtensions)["glBindRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glBindRenderbufferOES;
-      (*s_glesExtensions)["glDeleteRenderbuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glDeleteRenderbuffersOES;
-      (*s_glesExtensions)["glGenRenderbuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glGenRenderbuffersOES;
-      (*s_glesExtensions)["glRenderbufferStorageOES"] = (__translatorMustCastToProperFunctionPointerType)glRenderbufferStorageOES;
-      (*s_glesExtensions)["glGetRenderbufferParameterivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetRenderbufferParameterivOES;
-      (*s_glesExtensions)["glIsFramebufferOES"] = (__translatorMustCastToProperFunctionPointerType)glIsFramebufferOES;
-      (*s_glesExtensions)["glBindFramebufferOES"] = (__translatorMustCastToProperFunctionPointerType)glBindFramebufferOES;
-      (*s_glesExtensions)["glDeleteFramebuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glDeleteFramebuffersOES;
-      (*s_glesExtensions)["glGenFramebuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glGenFramebuffersOES;
-      (*s_glesExtensions)["glCheckFramebufferStatusOES"] = (__translatorMustCastToProperFunctionPointerType)glCheckFramebufferStatusOES;
-      (*s_glesExtensions)["glFramebufferRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glFramebufferRenderbufferOES;
-      (*s_glesExtensions)["glFramebufferTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)glFramebufferTexture2DOES;
-      (*s_glesExtensions)["glGetFramebufferAttachmentParameterivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetFramebufferAttachmentParameterivOES;
+      // (*s_glesExtensions)["glIsRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glIsRenderbufferOES;
+      // (*s_glesExtensions)["glBindRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glBindRenderbufferOES;
+      // (*s_glesExtensions)["glDeleteRenderbuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glDeleteRenderbuffersOES;
+      // (*s_glesExtensions)["glGenRenderbuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glGenRenderbuffersOES;
+      // (*s_glesExtensions)["glRenderbufferStorageOES"] = (__translatorMustCastToProperFunctionPointerType)glRenderbufferStorageOES;
+      // (*s_glesExtensions)["glGetRenderbufferParameterivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetRenderbufferParameterivOES;
+      // (*s_glesExtensions)["glIsFramebufferOES"] = (__translatorMustCastToProperFunctionPointerType)glIsFramebufferOES;
+      // (*s_glesExtensions)["glBindFramebufferOES"] = (__translatorMustCastToProperFunctionPointerType)glBindFramebufferOES;
+      // (*s_glesExtensions)["glDeleteFramebuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glDeleteFramebuffersOES;
+      // (*s_glesExtensions)["glGenFramebuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glGenFramebuffersOES;
+      // (*s_glesExtensions)["glCheckFramebufferStatusOES"] = (__translatorMustCastToProperFunctionPointerType)glCheckFramebufferStatusOES;
+      // (*s_glesExtensions)["glFramebufferTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)glFramebufferTexture2DOES;
+      // (*s_glesExtensions)["glFramebufferRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glFramebufferRenderbufferOES;
+      // (*s_glesExtensions)["glGetFramebufferAttachmentParameterivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetFramebufferAttachmentParameterivOES;
       (*s_glesExtensions)["glGenerateMipmapOES"] = (__translatorMustCastToProperFunctionPointerType)glGenerateMipmapOES;
     }
     (*s_glesExtensions)["glDrawTexsOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexsOES;
@@ -1338,7 +1360,7 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
 GL_API void GL_APIENTRY glBlendEquationOES(GLenum mode) {
   GET_CTX_CM();
   SET_ERROR_IF(!(GLEScmValidate::blendEquationMode(mode)), GL_INVALID_ENUM);
-  DBG("v1: %s ctx=%p ---> EXTENSION with GLESv2 equivalent: ", __func__, ctx);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   es1xBlendEquation(ctx->getES1xContext(), mode);
 }
 
@@ -1346,7 +1368,7 @@ GL_API void GL_APIENTRY glBlendEquationOES(GLenum mode) {
 GL_API void GL_APIENTRY glBlendEquationSeparateOES (GLenum modeRGB, GLenum modeAlpha) {
   GET_CTX_CM();
   SET_ERROR_IF(!(GLEScmValidate::blendEquationMode(modeRGB) && GLEScmValidate::blendEquationMode(modeAlpha)), GL_INVALID_ENUM);
-  DBG("v1: %s ctx=%p ---> EXTENSION with GLESv2 equivalent: ", __func__, ctx);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   es1xBlendEquationSeparate(ctx->getES1xContext(), modeRGB, modeAlpha);
 }
 
@@ -1355,7 +1377,7 @@ GL_API void GL_APIENTRY glBlendFuncSeparateOES(GLenum srcRGB, GLenum dstRGB, GLe
   GET_CTX_CM();
   SET_ERROR_IF(!GLEScmValidate::blendSrc(srcRGB) || !GLEScmValidate::blendDst(dstRGB) ||
                !GLEScmValidate::blendSrc(srcAlpha) || ! GLEScmValidate::blendDst(dstAlpha) ,GL_INVALID_ENUM);
-  DBG("v1: %s ctx=%p ---> EXTENSION with GLESv2 equivalent: ", __func__, ctx);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   es1xBlendFuncSeparate(ctx->getES1xContext(), srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
@@ -1686,8 +1708,8 @@ GL_API void GL_APIENTRY glGenerateMipmapOES(GLenum target) {
   GET_CTX_CM();
   SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
   SET_ERROR_IF(!GLEScmValidate::textureTargetLimited(target),GL_INVALID_ENUM);
-  DBG("v1: %s ctx=%p ---> Forwarded directly to libGL\n", __func__, ctx);
-  ctx->dispatcher().glGenerateMipmapEXT(target);
+
+  es1xGenerateMipmapOES(ctx->getES1xContext(), target);
 }
 
 GL_API void GL_APIENTRY glCurrentPaletteMatrixOES(GLuint index) {
@@ -1868,8 +1890,8 @@ void FAKEglDrawTexOES (T x, T y, T z, T width, T height) {
   ctx->drawValidate();
 
   GLfloat vertices[] = {
-     1.5f,  1.5f, 0.0f,  0.0, 0.0, // Top Right
-     1.5f, -1.5f, 0.0f,  0.0, 1.0,  // Bottom Right
+    1.5f,  1.5f, 0.0f,  0.0, 0.0, // Top Right
+    1.5f, -1.5f, 0.0f,  0.0, 1.0,  // Bottom Right
     -1.5f, -1.5f, 0.0f,  1.0, 1.0,  // Bottom Left
     -1.5f,  1.5f, 0.0f,  1.0, 0.0 // Top Left
   };
@@ -1925,6 +1947,7 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
   GLfloat texels[ctx->getMaxTexUnits()][4*2];
   memset((void*)texels, 0, ctx->getMaxTexUnits()*4*2*sizeof(GLfloat));
 
+  // TODO: Consider implementing equivalents in ES1X or by saving locally all related state
   //  ctx->dispatcher().glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
   //  ctx->dispatcher().glPushAttrib(GL_TRANSFORM_BIT);
 
@@ -2005,6 +2028,7 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
   es1xMatrixMode(ctx->getES1xContext(), GL_PROJECTION);
   es1xPopMatrix(ctx->getES1xContext());
 
+  // TODO: Consider implementing equivalents in ES1X or by saving locally all related state
   //    ctx->dispatcher().glPopAttrib();
   //   ctx->dispatcher().glPopClientAttrib();
 
@@ -2035,42 +2059,42 @@ GL_API void GL_APIENTRY glDrawTexiOES (GLint x, GLint y, GLint z, GLint width, G
 
 GL_API void GL_APIENTRY glDrawTexfOES (GLfloat x, GLfloat y, GLfloat z, GLfloat width, GLfloat height) {
   GET_CTX_CM();
-  DBG("v1: %s ctx=%p ---> simulated through ES1x: \n", __func__, ctx);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   glDrawTexOES<GLfloat,GL_FLOAT>(x,y,z,width,height);
   return;
 }
 
 GL_API void GL_APIENTRY glDrawTexxOES (GLfixed x, GLfixed y, GLfixed z, GLfixed width, GLfixed height) {
   GET_CTX_CM();
-  DBG("v1: %s ctx=%p ---> simulated through ES1x: \n", __func__, ctx);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   glDrawTexOES<GLfloat,GL_FLOAT>(X2F(x),X2F(y),X2F(z),X2F(width),X2F(height));
   return;
 }
 
 GL_API void GL_APIENTRY glDrawTexsvOES (const GLshort * coords) {
   GET_CTX_CM();
-  DBG("v1: %s ctx=%p ---> simulated through ES1x: \n", __func__, ctx);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   glDrawTexOES<GLshort,GL_SHORT>(coords[0],coords[1],coords[2],coords[3],coords[4]);
   return;
 }
 
 GL_API void GL_APIENTRY glDrawTexivOES (const GLint * coords) {
   GET_CTX_CM();
-  DBG("v1: %s ctx=%p ---> simulated through ES1x: \n", __func__, ctx);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   glDrawTexiOES(coords[0],coords[1],coords[2],coords[3],coords[4]);
   return;
 }
 
 GL_API void GL_APIENTRY glDrawTexfvOES (const GLfloat * coords) {
   GET_CTX_CM();
-  DBG("v1: %s ctx=%p ---> simulated through ES1x: \n", __func__, ctx);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   glDrawTexOES<GLfloat,GL_FLOAT>(coords[0],coords[1],coords[2],coords[3],coords[4]);
   return;
 }
 
 GL_API void GL_APIENTRY glDrawTexxvOES (const GLfixed * coords) {
   GET_CTX_CM();
-  DBG("v1: %s ctx=%p ---> simulated through ES1x: \n", __func__, ctx);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   glDrawTexOES<GLfloat,GL_FLOAT>(X2F(coords[0]),X2F(coords[1]),X2F(coords[2]),X2F(coords[3]),X2F(coords[4]));
   return;
 }
