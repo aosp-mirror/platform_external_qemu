@@ -11,11 +11,11 @@ of components, which are:
     GLES 2.0 ABIs defined by Khronos, and translate the corresponding function
     calls into calls to the appropriate desktop APIs, i.e.:
 
-      - Xgl (Linux), AGL (OS X) or WGL (Windows) for EGL
+      - GLX (Linux), AGL (OS X) or WGL (Windows) for EGL
       - desktop GL 2.0 for GLES 1.1 and GLES 2.0
 
          _________            __________          __________
-        |         |          |          |        |          |     HOST
+        |         |          |          |        |          |
         |TRANSLATOR          |TRANSLATOR|        |TRANSLATOR|     HOST
         |   EGL   |          | GLES 1.1 |        | GLES 2.0 |     TRANSLATOR
         |_________|          |__________|        |__________|     LIBRARIES
@@ -24,7 +24,7 @@ of components, which are:
              |                    |                    |
          ____v____            ____v_____          _____v____      HOST
         |         |          |          |        |          |     SYSTEM
-        |   Xgl   |          |  GL 2.0  |        |  GL 2.0  |     LIBRARIES
+        |   GLX   |          |  GL 2.0  |        |  GL 2.0  |     LIBRARIES
         |_________|          |__________|        |__________|
 
 
@@ -150,10 +150,10 @@ of components, which are:
              |                    |                    |
          ____v____            ____v_____          _____v____      HOST 
         |         |          |          |        |          |     SYSTEM
-        |   Xgl   |          |  GL 2.0  |        |  GL 2.0  |     LIBRARIES
+        |   GLX   |          |  GL 2.0  |        |  GL 2.0  |     LIBRARIES
         |_________|          |__________|        |__________|
 
-    (NOTE: 'Xgl' is for Linux only, replace 'AGL' on OS X, and 'WGL' on Windows).
+    (NOTE: 'GLX' is for Linux only, replace 'AGL' on OS X, and 'WGL' on Windows).
 
 
 Note that, in the above graphics, only the host system libraries at the bottom
@@ -216,7 +216,8 @@ in the Android source trees:
   - The host renderer and translator libraries are under
     $QEMU/distrib/android-emugl, which we'll call $EMUGL_HOST
 
-  - The QEMU Pipe kernel driver is under $KERNEL/drivers/misc/qemupipe
+  - The QEMU Pipe kernel driver is under $KERNEL/drivers/misc/qemupipe (3.4)
+    or $KERNEL/drivers/platform/goldfish/goldfish_pipe.c (3.10)
 
 Where $ANDROID is the top of the open-source Android source tree, and
 $KERNEL is the top of the qemu-specific kernel source tree (using one
@@ -224,24 +225,24 @@ of the android-goldfish-xxxx branches here).
 
 The emulator sources related to this projects are:
 
-   $QEMU/hw/goldfish_pipe.c  -> implement QEMU pipe virtual hardware
-   $QEMU/hw/opengles.c       -> implement GLES initialization
-   $QEMU/hw/hw-pipe-net.c    -> implements the communication channel
-                                between the QEMU Pipe and the renderer library
+   $QEMU/hw/android/goldfish/pipe.c -> implements QEMU pipe virtual hardware.
+   $QEMU/android/opengles.c         -> implements GLES initialization.
+   $QEMU/android/hw-pipe-net.c      -> implements the communication channel
+            between the QEMU Pipe and the renderer library
 
 The other sources are:
 
    $EMUGL_GUEST/system   -> system libraries
    $EMUGL_GUEST/shared   -> guest copy of shared libraries
    $EMUGL_GUEST/tests    -> various test programs
+
    $EMUGL_HOST/host      -> host libraries (translator + renderer)
    $EMUGL_HOST/shared    -> host copy of shared libraries
-   $EMUGL_HOST/tests     -> various test programs
 
 The reason the shared libraries aren't actually shared is historical: at one
 point both guest and host code lived in the same place. That turned out to be
 impractical with the way the Android SDK is branched, and didn't support the
-requirement that a single emulator binary be able to run several generations
+requirement that a single emulator binary be able to run several releases
 of Android.
 
 
