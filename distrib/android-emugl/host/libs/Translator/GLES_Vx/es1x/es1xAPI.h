@@ -203,6 +203,7 @@ GL_API void GL_APIENTRY es1xCurrentPaletteMatrixOES(void *_context_, GLuint matr
 GL_API void GL_APIENTRY es1xLoadPaletteFromModelViewMatrixOES(void *_context_);
 GL_API void GL_APIENTRY es1xMatrixIndexPointerOES(void *_context_, GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 GL_API void GL_APIENTRY es1xWeightPointerOES(void *_context_, GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
+GL_API void GL_APIENTRY es1xGenerateMipmapOES(void *_context_, GLenum target);
 
 #ifdef __cplusplus
 } /* extern "C" */

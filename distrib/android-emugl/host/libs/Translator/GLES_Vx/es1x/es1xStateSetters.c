@@ -624,7 +624,7 @@ GL_API void GL_APIENTRY es1xBlendFuncSeparate(void *_context_,
                                               GLenum dstAlpha)
 {
   es1xContext *context = (es1xContext *) _context_;
-  ES1X_LOG_CALL(("glBlendEquationSeparate(%s, %s)\n",
+  ES1X_LOG_CALL(("glBlendEquationSeparate(%s, %s, %s, %s)\n",
                  ES1X_ENUM_TO_STRING(srcRGB),
                  ES1X_ENUM_TO_STRING(dstRGB),
                  ES1X_ENUM_TO_STRING(srcAlpha),
@@ -2064,9 +2064,7 @@ GL_API void GL_APIENTRY es1xHint(void *_context_,
 
     case GL_GENERATE_MIPMAP_HINT:
       {
-        gl2b->glHint(target,
-                      hint);
-
+        gl2b->glHint(target,hint);
         /* glHint should not cause errors */
         ES1X_ASSUME_NO_ERROR;
         ES20_DEBUG_CODE(context->generateMipMapHint = hint);
@@ -3984,4 +3982,19 @@ GL_API void GL_APIENTRY es1xWeightPointerOES(void *_context_,
   ES1X_UNREF(type);
   ES1X_UNREF(stride);
   ES1X_UNREF(pointer);
+}
+
+/*---------------------------------------------------------------------------*/
+GL_API void GL_APIENTRY es1xGenerateMipmapOES(void *_context_,
+                                            GLenum target)
+{
+  // es1xContext *context = (es1xContext *) _context_;
+  // ES1X_CHECK_CONTEXT(context);
+  GLenum error = gl2b->glGetError();
+  gl2b->glGenerateMipmap(target);
+  /* \todo Is this okay to discard error if calling with texture name zero? */
+  error = gl2b->glGetError();
+  ES1X_ASSERT(error == GL_INVALID_VALUE || error == GL_NO_ERROR);
+
+  return;
 }
