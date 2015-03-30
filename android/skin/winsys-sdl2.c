@@ -17,12 +17,33 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
+
+// Set to 1 to enable debugging.
+#define DEBUG 0
+
+#if DEBUG
+#  define DBG(...)  fprintf(stderr, "%s: ", __FUNCTION__), fprintf(stderr, __VA_ARGS__)
+#else
+#  define DBG(...)  ((void)0)
+#endif
+
+typedef struct {
+    int left;
+    int right;
+    int top;
+    int bottom;
+} Borders;
 
 static SDL_Window* s_window = NULL;
 static SDL_Renderer* s_renderer = NULL;
 static SDL_Surface* s_window_icon = NULL;
+static Borders s_window_borders = { 0, 0, 0, 0 };
 
 static void set_window_icon(void) {
     if (s_window && s_window_icon) {
@@ -40,6 +61,19 @@ SDL_Window* skin_winsys_get_window(void) {
 
 void skin_winsys_set_window(SDL_Window* window) {
     s_window = window;
+#ifdef _WIN32
+    s_window_borders.left = GetSystemMetrics(SM_CXFRAME);
+    s_window_borders.right = GetSystemMetrics(SM_CXFRAME);
+    s_window_borders.top =
+            GetSystemMetrics(SM_CYFRAME) + GetSystemMetrics(SM_CYCAPTION);
+    s_window_borders.bottom = GetSystemMetrics(SM_CYFRAME);
+
+    DBG("window borders left=%d right=%d top=%d bottom=%d\n",
+        s_window_borders.left,
+        s_window_borders.right,
+        s_window_borders.top,
+        s_window_borders.bottom);
+#endif
     set_window_icon();
 }
 
@@ -108,10 +142,11 @@ void skin_winsys_get_monitor_rect(SkinRect* rect) {
             }
         }
     }
-    rect->pos.x = monitor.x;
-    rect->pos.y = monitor.y;
-    rect->size.w = monitor.w;
-    rect->size.h = monitor.h;
+    Borders* borders = &s_window_borders;
+    rect->pos.x = monitor.x + borders->left;
+    rect->pos.y = monitor.y + borders->top;
+    rect->size.w = monitor.w - borders->right;
+    rect->size.h = monitor.h - borders->bottom;
 }
 
 int skin_winsys_get_monitor_dpi(int* x_dpi, int* y_dpi) {
@@ -142,26 +177,40 @@ void skin_winsys_set_window_title(const char* title) {
 
 bool skin_winsys_is_window_fully_visible(void) {
     if (!s_window) {
+        DBG("no window\n");
         return false;
     }
     SDL_Rect w;
     SDL_GetWindowPosition(s_window, &w.x, &w.y);
     SDL_GetWindowSize(s_window, &w.w, &w.h);
+
+    Borders* borders = &s_window_borders;
+    w.x -= borders->left;
+    w.w += borders->left + borders->right;
+    w.y -= borders->top;
+    w.h += borders->top + borders->bottom;
+
+    DBG("Window pos=(%d,%d) dim=(%d,%d)\n", w.x, w.y, w.w, w.h);
     int count = SDL_GetNumVideoDisplays();
     int nn;
+    DBG("There are %d screens\n", count);
     for (nn = 0; nn < count; ++nn) {
         SDL_Rect r;
         if (SDL_GetDisplayBounds(nn, &r) != 0) {
+            DBG("Can't get bounds of screen #%d\n", nn + 1);
             continue;
         }
+        DBG("Screen #%d (%d,%d) (%d,%d)\n", nn + 1, r.x, r.y, r.w, r.h);
         if (w.x >= r.x &&
             w.y >= r.y &&
             w.x + w.w <= r.x + r.w &&
             w.y + w.h <= r.y + r.h) {
             // The window is contained in this display.
+            DBG("Window fully inside screen %d\n", nn + 1);
             return true;
         }
     }
+    DBG("Window is not fully visible\n");
     return false;
 }
 

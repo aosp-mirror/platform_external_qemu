@@ -1282,6 +1282,17 @@ skin_window_create(SkinLayout* slayout,
         win_w = skin_surface_width(window->surface);
         win_h = skin_surface_height(window->surface);
 
+        VERBOSE_PRINT(init, "Window was not fully visible: "
+                "monitor=[%d,%d,%d,%d] window=[%d,%d,%d,%d]",
+                monitor.pos.x,
+                monitor.pos.y,
+                monitor.size.w,
+                monitor.size.h,
+                win_x,
+                win_y,
+                win_w,
+                win_h);
+
         /* First, we recenter the window */
         new_x = (monitor.size.w - win_w)/2;
         new_y = (monitor.size.h - win_h)/2;
@@ -1289,6 +1300,8 @@ skin_window_create(SkinLayout* slayout,
         /* If it is still too large, we ensure the top-border is visible */
         if (new_y < 0)
             new_y = 0;
+
+        VERBOSE_PRINT(init, "Window repositioned to [%d,%d]", new_x, new_y);
 
         /* Done */
         skin_winsys_set_window_pos(new_x, new_y);
