@@ -141,20 +141,20 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
     // (*s_glesExtensions)["glGetTexGenivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetTexGenivOES;
     // (*s_glesExtensions)["glGetTexGenxvOES"] = (__translatorMustCastToProperFunctionPointerType)glGetTexGenxvOES;
     if (ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT) {
-      // (*s_glesExtensions)["glIsRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glIsRenderbufferOES;
-      // (*s_glesExtensions)["glBindRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glBindRenderbufferOES;
-      // (*s_glesExtensions)["glDeleteRenderbuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glDeleteRenderbuffersOES;
-      // (*s_glesExtensions)["glGenRenderbuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glGenRenderbuffersOES;
-      // (*s_glesExtensions)["glRenderbufferStorageOES"] = (__translatorMustCastToProperFunctionPointerType)glRenderbufferStorageOES;
-      // (*s_glesExtensions)["glGetRenderbufferParameterivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetRenderbufferParameterivOES;
-      // (*s_glesExtensions)["glIsFramebufferOES"] = (__translatorMustCastToProperFunctionPointerType)glIsFramebufferOES;
-      // (*s_glesExtensions)["glBindFramebufferOES"] = (__translatorMustCastToProperFunctionPointerType)glBindFramebufferOES;
-      // (*s_glesExtensions)["glDeleteFramebuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glDeleteFramebuffersOES;
-      // (*s_glesExtensions)["glGenFramebuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glGenFramebuffersOES;
-      // (*s_glesExtensions)["glCheckFramebufferStatusOES"] = (__translatorMustCastToProperFunctionPointerType)glCheckFramebufferStatusOES;
-      // (*s_glesExtensions)["glFramebufferTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)glFramebufferTexture2DOES;
-      // (*s_glesExtensions)["glFramebufferRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glFramebufferRenderbufferOES;
-      // (*s_glesExtensions)["glGetFramebufferAttachmentParameterivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetFramebufferAttachmentParameterivOES;
+      (*s_glesExtensions)["glIsRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glIsRenderbufferOES;
+      (*s_glesExtensions)["glBindRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glBindRenderbufferOES;
+      (*s_glesExtensions)["glDeleteRenderbuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glDeleteRenderbuffersOES;
+      (*s_glesExtensions)["glGenRenderbuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glGenRenderbuffersOES;
+      (*s_glesExtensions)["glRenderbufferStorageOES"] = (__translatorMustCastToProperFunctionPointerType)glRenderbufferStorageOES;
+      (*s_glesExtensions)["glGetRenderbufferParameterivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetRenderbufferParameterivOES;
+      (*s_glesExtensions)["glIsFramebufferOES"] = (__translatorMustCastToProperFunctionPointerType)glIsFramebufferOES;
+      (*s_glesExtensions)["glBindFramebufferOES"] = (__translatorMustCastToProperFunctionPointerType)glBindFramebufferOES;
+      (*s_glesExtensions)["glDeleteFramebuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glDeleteFramebuffersOES;
+      (*s_glesExtensions)["glGenFramebuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glGenFramebuffersOES;
+      (*s_glesExtensions)["glCheckFramebufferStatusOES"] = (__translatorMustCastToProperFunctionPointerType)glCheckFramebufferStatusOES;
+      (*s_glesExtensions)["glFramebufferTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)glFramebufferTexture2DOES;
+      (*s_glesExtensions)["glFramebufferRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glFramebufferRenderbufferOES;
+      (*s_glesExtensions)["glGetFramebufferAttachmentParameterivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetFramebufferAttachmentParameterivOES;
       (*s_glesExtensions)["glGenerateMipmapOES"] = (__translatorMustCastToProperFunctionPointerType)glGenerateMipmapOES;
     }
     (*s_glesExtensions)["glDrawTexsOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexsOES;
@@ -1385,210 +1385,86 @@ GL_API void GL_APIENTRY glBlendFuncSeparateOES(GLenum srcRGB, GLenum dstRGB, GLe
 GL_API GLboolean GL_APIENTRY glIsRenderbufferOES(GLuint renderbuffer) {
   GET_CTX_CM_RET(GL_FALSE);
   RET_AND_SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION,GL_FALSE);
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx); return GL_FALSE;
-  // if(renderbuffer && ctx->shareGroup().Ptr()){
-  //   return ctx->shareGroup()->isObject(RENDERBUFFER,renderbuffer) ? GL_TRUE :GL_FALSE;
-  // }
-  // return ctx->dispatcher().glIsRenderbufferEXT(renderbuffer);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  return es1xIsRenderbufferOES(ctx->getES1xContext(), renderbuffer);
 }
 
 GL_API void GLAPIENTRY glBindRenderbufferOES(GLenum target, GLuint renderbuffer) {
   GET_CTX_CM();
   SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
   SET_ERROR_IF(!GLEScmValidate::renderbufferTarget(target),GL_INVALID_ENUM);
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
-  // //if buffer wasn't generated before,generate one
-  // if(renderbuffer && ctx->shareGroup().Ptr() && !ctx->shareGroup()->isObject(RENDERBUFFER,renderbuffer)){
-  //   ctx->shareGroup()->genName(RENDERBUFFER,renderbuffer);
-  //   ctx->shareGroup()->setObjectData(RENDERBUFFER,
-  //                                    renderbuffer,
-  //                                    ObjectDataPtr(new RenderbufferData()));
-  // }
-
-  // int globalBufferName = (renderbuffer != 0) ? ctx->shareGroup()->getGlobalName(RENDERBUFFER,renderbuffer) : 0;
-  // ctx->dispatcher().glBindRenderbufferEXT(target,globalBufferName);
-
-  // // update renderbuffer binding state
-  // ctx->setRenderbufferBinding(renderbuffer);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  es1xBindRenderbufferOES(ctx->getES1xContext(), target, renderbuffer);
 }
 
 
 GL_API void GLAPIENTRY glDeleteRenderbuffersOES(GLsizei n, const GLuint *renderbuffers) {
   GET_CTX_CM();
   SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
-  //   for (int i=0;i<n;++i) {
-  //     GLuint globalBufferName = ctx->shareGroup()->getGlobalName(RENDERBUFFER,renderbuffers[i]);
-  //     ctx->dispatcher().glDeleteRenderbuffersEXT(1,&globalBufferName);
-  //   }
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  es1xDeleteRenderbuffersOES(ctx->getES1xContext(), n, renderbuffers);
 }
 
 GL_API void GLAPIENTRY glGenRenderbuffersOES(GLsizei n, GLuint *renderbuffers) {
   GET_CTX_CM();
   SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
   SET_ERROR_IF(n<0,GL_INVALID_VALUE);
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
-  //   if(ctx->shareGroup().Ptr()) {
-  //     for(int i=0; i<n ;i++) {
-  //       renderbuffers[i] = ctx->shareGroup()->genName(RENDERBUFFER, 0, true);
-  //       ctx->shareGroup()->setObjectData(RENDERBUFFER,
-  //                                        renderbuffers[i],
-  //                                        ObjectDataPtr(new RenderbufferData()));
-  //     }
-  //   }
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  es1xGenRenderbuffersOES(ctx->getES1xContext(), n, renderbuffers);
 }
 
 GL_API void GLAPIENTRY glRenderbufferStorageOES(GLenum target, GLenum internalformat, GLsizei width, GLsizei height){
   GET_CTX_CM();
   SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
   SET_ERROR_IF(!GLEScmValidate::renderbufferTarget(target) || !GLEScmValidate::renderbufferInternalFrmt(ctx,internalformat) ,GL_INVALID_ENUM);
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
-  //   if (internalformat==GL_RGB565_OES) //RGB565 not supported by GL
-  //     internalformat = GL_RGB8_OES;
-
-  //   // Get current bounded renderbuffer
-  //   // raise INVALID_OPERATIOn if no renderbuffer is bounded
-  //   GLuint rb = ctx->getRenderbufferBinding();
-  //   SET_ERROR_IF(rb == 0,GL_INVALID_OPERATION);
-  //   ObjectDataPtr objData = ctx->shareGroup()->getObjectData(RENDERBUFFER,rb);
-  //   RenderbufferData *rbData = (RenderbufferData *)objData.Ptr();
-  //   SET_ERROR_IF(!rbData,GL_INVALID_OPERATION);
-
-  //   //
-  //   // if the renderbuffer was an eglImage target, detach from
-  //   // the eglImage.
-  //   //
-  //   if (rbData->sourceEGLImage != 0) {
-  //     if (rbData->eglImageDetach) {
-  //       (*rbData->eglImageDetach)(rbData->sourceEGLImage);
-  //     }
-  //     rbData->sourceEGLImage = 0;
-  //     rbData->eglImageGlobalTexName = 0;
-  //   }
-
-  //   ctx->dispatcher().glRenderbufferStorageEXT(target,internalformat,width,height);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  es1xRenderbufferStorageOES(ctx->getES1xContext(), target, internalformat, width, height);
 }
 
 GL_API void GLAPIENTRY glGetRenderbufferParameterivOES(GLenum target, GLenum pname, GLint* params) {
   GET_CTX_CM();
   SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
   SET_ERROR_IF(!GLEScmValidate::renderbufferTarget(target) || !GLEScmValidate::renderbufferParams(pname) ,GL_INVALID_ENUM);
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
-
-  //   //
-  //   // If this is a renderbuffer which is eglimage's target, we
-  //   // should query the underlying eglimage's texture object instead.
-  //   //
-  //   GLuint rb = ctx->getRenderbufferBinding();
-  //   if (rb) {
-  //     ObjectDataPtr objData = ctx->shareGroup()->getObjectData(RENDERBUFFER,rb);
-  //     RenderbufferData *rbData = (RenderbufferData *)objData.Ptr();
-  //     if (rbData && rbData->sourceEGLImage != 0) {
-  //       GLenum texPname;
-  //       switch(pname) {
-  //         case GL_RENDERBUFFER_WIDTH_OES:
-  //           texPname = GL_TEXTURE_WIDTH;
-  //           break;
-  //         case GL_RENDERBUFFER_HEIGHT_OES:
-  //           texPname = GL_TEXTURE_HEIGHT;
-  //           break;
-  //         case GL_RENDERBUFFER_INTERNAL_FORMAT_OES:
-  //           texPname = GL_TEXTURE_INTERNAL_FORMAT;
-  //           break;
-  //         case GL_RENDERBUFFER_RED_SIZE_OES:
-  //           texPname = GL_TEXTURE_RED_SIZE;
-  //           break;
-  //         case GL_RENDERBUFFER_GREEN_SIZE_OES:
-  //           texPname = GL_TEXTURE_GREEN_SIZE;
-  //           break;
-  //         case GL_RENDERBUFFER_BLUE_SIZE_OES:
-  //           texPname = GL_TEXTURE_BLUE_SIZE;
-  //           break;
-  //         case GL_RENDERBUFFER_ALPHA_SIZE_OES:
-  //           texPname = GL_TEXTURE_ALPHA_SIZE;
-  //           break;
-  //         case GL_RENDERBUFFER_DEPTH_SIZE_OES:
-  //           texPname = GL_TEXTURE_DEPTH_SIZE;
-  //           break;
-  //         case GL_RENDERBUFFER_STENCIL_SIZE_OES:
-  //         default:
-  //           *params = 0; //XXX
-  //           return;
-  //           break;
-  //       }
-
-  //       GLint prevTex;
-  //       ctx->dispatcher().glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
-  //       ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
-  //                                   rbData->eglImageGlobalTexName);
-  //       ctx->dispatcher().glGetTexLevelParameteriv(GL_TEXTURE_2D, 0,
-  //                                              texPname,
-  //                                              params);
-  //       ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, prevTex);
-  //       return;
-  //     }
-  //  }
-
-  //   ctx->dispatcher().glGetRenderbufferParameterivEXT(target,pname,params);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  es1xGetRenderbufferParameterivOES(ctx->getES1xContext(), target, pname, params);
 }
 
 GL_API GLboolean GLAPIENTRY glIsFramebufferOES(GLuint framebuffer) {
-  GET_CTX_RET(GL_FALSE);
+  GET_CTX_CM_RET(GL_FALSE);
   RET_AND_SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION,GL_FALSE);
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx); return GL_FALSE;
-  //   if (framebuffer && ctx->shareGroup().Ptr()) {
-  //     return ctx->shareGroup()->isObject(FRAMEBUFFER,framebuffer) ? GL_TRUE : GL_FALSE;
-  //   }
-  //   return ctx->dispatcher().glIsFramebufferEXT(framebuffer);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  return es1xIsFramebufferOES(ctx->getES1xContext(), framebuffer);
 }
 
 GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) {
   GET_CTX_CM();
   SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
   SET_ERROR_IF(!GLEScmValidate::framebufferTarget(target) ,GL_INVALID_ENUM);
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
-  //   if (framebuffer && ctx->shareGroup().Ptr() && !ctx->shareGroup()->isObject(FRAMEBUFFER,framebuffer)) {
-  //     ctx->shareGroup()->genName(FRAMEBUFFER,framebuffer);
-  //     ctx->shareGroup()->setObjectData(FRAMEBUFFER, framebuffer,
-  //                                      ObjectDataPtr(new FramebufferData(framebuffer)));
-  //   }
-  //   int globalBufferName = (framebuffer!=0) ? ctx->shareGroup()->getGlobalName(FRAMEBUFFER,framebuffer) : 0;
-  //   ctx->dispatcher().glBindFramebufferEXT(target,globalBufferName);
-
-  //   // update framebuffer binding state
-  //   ctx->setFramebufferBinding(framebuffer);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  es1xBindFramebufferOES(ctx->getES1xContext(), target, framebuffer);
 }
 
 GL_API void GLAPIENTRY glDeleteFramebuffersOES(GLsizei n, const GLuint *framebuffers) {
   GET_CTX_CM();
   SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
-  //   for (int i=0;i<n;++i) {
-  //     GLuint globalBufferName = ctx->shareGroup()->getGlobalName(FRAMEBUFFER,framebuffers[i]);
-  //     ctx->dispatcher().glDeleteFramebuffersEXT(1,&globalBufferName);
-  //   }
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  es1xDeleteFramebuffersOES(ctx->getES1xContext(), n, framebuffers);
 }
 
 GL_API void GLAPIENTRY glGenFramebuffersOES(GLsizei n, GLuint *framebuffers) {
   GET_CTX_CM();
   SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
   SET_ERROR_IF(n<0,GL_INVALID_VALUE);
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
-  //   if (ctx->shareGroup().Ptr()) {
-  //     for (int i=0;i<n;i++) {
-  //       framebuffers[i] = ctx->shareGroup()->genName(FRAMEBUFFER, 0, true);
-  //       ctx->shareGroup()->setObjectData(FRAMEBUFFER, framebuffers[i],
-  //                                        ObjectDataPtr(new FramebufferData(framebuffers[i])));
-  //     }
-  //   }
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  es1xGenFramebuffersOES(ctx->getES1xContext(), n, framebuffers);
 }
 
 GL_API GLenum GLAPIENTRY glCheckFramebufferStatusOES(GLenum target) {
-  GET_CTX_RET(0);
+  GET_CTX_CM_RET(0);
   RET_AND_SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION,0);
   RET_AND_SET_ERROR_IF(!GLEScmValidate::framebufferTarget(target) ,GL_INVALID_ENUM,0);
-  DBG("v1: %s ctx=%p ---> Forwarded directly to libGL\n", __func__, ctx);
-  return ctx->dispatcher().glCheckFramebufferStatusEXT(target);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  return es1xCheckFramebufferStatusOES(ctx->getES1xContext(), target);
 }
 
 GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) {
@@ -1597,26 +1473,8 @@ GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachmen
   SET_ERROR_IF(!GLEScmValidate::framebufferTarget(target) || !GLEScmValidate::framebufferAttachment(attachment) ||
                !GLEScmValidate::textureTargetEx(textarget),GL_INVALID_ENUM);
   SET_ERROR_IF(!ctx->shareGroup().Ptr(), GL_INVALID_OPERATION);
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
-  //   GLuint globalTexName = 0;
-  //   if(texture) {
-  //     if (!ctx->shareGroup()->isObject(TEXTURE,texture)) {
-  //       ctx->shareGroup()->genName(TEXTURE,texture);
-  //     }
-  //     ObjectLocalName texname = TextureLocalName(textarget,texture);
-  //     globalTexName = ctx->shareGroup()->getGlobalName(TEXTURE,texname);
-  //   }
-
-  //   ctx->dispatcher().glFramebufferTexture2DEXT(target,attachment,textarget,globalTexName,level);
-
-  //   // Update the the current framebuffer object attachment state
-  //   GLuint fbName = ctx->getFramebufferBinding();
-  //   ObjectDataPtr fbObj = ctx->shareGroup()->getObjectData(FRAMEBUFFER,fbName);
-  //   if (fbObj.Ptr() != NULL) {
-  //     FramebufferData *fbData = (FramebufferData *)fbObj.Ptr();
-  //     fbData->setAttachment(attachment, textarget,
-  //                           texture, ObjectDataPtr(NULL));
-  //   }
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  es1xFramebufferTexture2DOES(ctx->getES1xContext(), target, attachment, textarget, texture, level);
 }
 
 GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attachment,GLenum renderbuffertarget, GLuint renderbuffer) {
@@ -1627,51 +1485,8 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
                !GLEScmValidate::renderbufferTarget(renderbuffertarget), GL_INVALID_ENUM);
 
   SET_ERROR_IF(!ctx->shareGroup().Ptr(), GL_INVALID_OPERATION);
-
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
-
-  //   GLuint globalBufferName = 0;
-  //   ObjectDataPtr obj;
-
-  //   // generate the renderbuffer object if not yet exist
-  //   if (renderbuffer) {
-  //     if (!ctx->shareGroup()->isObject(RENDERBUFFER,renderbuffer)) {
-  //       ctx->shareGroup()->genName(RENDERBUFFER,renderbuffer);
-  //       obj = ObjectDataPtr(new RenderbufferData());
-  //       ctx->shareGroup()->setObjectData(RENDERBUFFER,
-  //                                        renderbuffer,
-  //                                        ObjectDataPtr(new RenderbufferData()));
-  //     }
-  //     else {
-  //       obj = ctx->shareGroup()->getObjectData(RENDERBUFFER,renderbuffer);
-  //     }
-  //     globalBufferName = ctx->shareGroup()->getGlobalName(RENDERBUFFER,renderbuffer);
-  //   }
-
-  //   // Update the the current framebuffer object attachment state
-  //   GLuint fbName = ctx->getFramebufferBinding();
-  //   ObjectDataPtr fbObj = ctx->shareGroup()->getObjectData(FRAMEBUFFER,fbName);
-  //   if (fbObj.Ptr() != NULL) {
-  //     FramebufferData *fbData = (FramebufferData *)fbObj.Ptr();
-  //     fbData->setAttachment(attachment, renderbuffertarget, renderbuffer, obj);
-  //   }
-
-  //   if (renderbuffer && obj.Ptr() != NULL) {
-  //     RenderbufferData *rbData = (RenderbufferData *)obj.Ptr();
-  //     if (rbData->sourceEGLImage != 0) {
-  //       //
-  //       // This renderbuffer object is an eglImage target
-  //       // attach the eglimage's texture instead the renderbuffer.
-  //       //
-  //       ctx->dispatcher().glFramebufferTexture2DEXT(target,
-  //                                               attachment,
-  //                                               GL_TEXTURE_2D,
-  //                                               rbData->eglImageGlobalTexName,0);
-  //       return;
-  //     }
-  //   }
-
-  //   ctx->dispatcher().glFramebufferRenderbufferEXT(target,attachment,renderbuffertarget,globalBufferName);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  es1xFramebufferRenderbufferOES(ctx->getES1xContext(), target, attachment, renderbuffertarget, renderbuffer);
 }
 
 GL_API void GLAPIENTRY glGetFramebufferAttachmentParameterivOES(GLenum target, GLenum attachment, GLenum pname, GLint *params) {
@@ -1679,29 +1494,8 @@ GL_API void GLAPIENTRY glGetFramebufferAttachmentParameterivOES(GLenum target, G
   SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
   SET_ERROR_IF(!GLEScmValidate::framebufferTarget(target) || !GLEScmValidate::framebufferAttachment(attachment) ||
                !GLEScmValidate::framebufferAttachmentParams(pname), GL_INVALID_ENUM);
-  DBG("v1: %s ctx=%p ---> UNIMPLEMENTED\n", __func__, ctx);
-  //   //
-  //   // Take the attachment attribute from our state - if available
-  //   //
-  //   GLuint fbName = ctx->getFramebufferBinding();
-  //   if (fbName) {
-  //     ObjectDataPtr fbObj = ctx->shareGroup()->getObjectData(FRAMEBUFFER,fbName);
-  //     if (fbObj.Ptr() != NULL) {
-  //       FramebufferData *fbData = (FramebufferData *)fbObj.Ptr();
-  //       GLenum target;
-  //       GLuint name = fbData->getAttachment(attachment, &target, NULL);
-  //       if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_OES) {
-  //         *params = target;
-  //         return;
-  //       }
-  //       else if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_OES) {
-  //         *params = name;
-  //         return;
-  //       }
-  //     }
-  //  }
-  //
-  //  ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(target,attachment,pname,params);
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  es1xGetFramebufferAttachmentParameterivOES(ctx->getES1xContext(), target, attachment, pname, params);
 }
 
 GL_API void GL_APIENTRY glGenerateMipmapOES(GLenum target) {

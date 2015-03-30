@@ -22,7 +22,7 @@
 #       include "es1xDefs.h"
 #endif
 
-#    include <stdio.h>
+#include <stdio.h>
 
 #    define ES1X_LOG(P)              printf P
 #    define ES1X_WARNING(P)          printf P
@@ -30,8 +30,6 @@
 // #       define ES1X_LOG(P)
 // #       define ES1X_WARNING(P)
 // #       define ES1X_ERROR(P)
-
-#include <stdio.h>
 
 const char* es1xEnumToString(GLenum e);
 
@@ -48,4 +46,4 @@ const char* es1xEnumToString(GLenum e);
 #define ES1X_LOG_UNIFORM_UPDATE(P) printf P
 // #define ES1X_LOG_UNIFORM_UPDATE(P)
 
-#endif // _ES1XMATRIX_H
+#endif // _ES1XDEBUG_H

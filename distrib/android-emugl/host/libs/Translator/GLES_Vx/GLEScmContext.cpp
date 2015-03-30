@@ -56,18 +56,18 @@ void GLEScmContext::initExtensionString() {
   //                   "GL_OES_texture_mirored_repeat "
   //                   "GL_OES_element_index_uint "
   //                   "GL_OES_texture_cube_map "; // --> glTexGen?OES
-  // if (s_glSupport.GL_OES_READ_FORMAT)
-  //     *s_glExtensions+="GL_OES_read_format ";
-  // if (s_glSupport.GL_EXT_FRAMEBUFFER_OBJECT) {
-  //     *s_glExtensions+="GL_OES_framebuffer_object " // --> gl*RenderbuffersOES
-  //                     "GL_OES_depth24 "
-  //                     "GL_OES_depth32 "
-  //                     "GL_OES_fbo_render_mipmap "
-  //                     "GL_OES_rgb8_rgba8 "
-  //                     "GL_OES_stencil1 "
-  //                     "GL_OES_stencil4 "
-  //                     "GL_OES_stencil8 ";
-  // }
+  if (s_glSupport.GL_OES_READ_FORMAT)
+      *s_glExtensions+="GL_OES_read_format ";
+  if (s_glSupport.GL_EXT_FRAMEBUFFER_OBJECT) {
+      *s_glExtensions+="GL_OES_framebuffer_object " // --> gl*RenderbuffersOES
+                      "GL_OES_depth24 "
+                      "GL_OES_depth32 "
+                      "GL_OES_fbo_render_mipmap "
+                      "GL_OES_rgb8_rgba8 "
+                      "GL_OES_stencil1 "
+                      "GL_OES_stencil4 "
+                      "GL_OES_stencil8 ";
+  }
   // if (s_glSupport.GL_EXT_PACKED_DEPTH_STENCIL)
   //     *s_glExtensions+="GL_OES_packed_depth_stencil ";
   // if (s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888)
@@ -82,8 +82,7 @@ void GLEScmContext::initExtensionString() {
   //     if (max_palette_matrices>=32 && max_vertex_units>=4)
   //         *s_glExtensions+="GL_OES_extended_matrix_palette ";
   // }
-  // *s_glExtensions+="GL_OES_compressed_ETC1_RGB8_texture ";
-  *s_glExtensions = "GL_OES_EGL_image "
-                    "GL_OES_draw_texture ";
+  *s_glExtensions+="GL_OES_compressed_ETC1_RGB8_texture ";
+
   return;
 }

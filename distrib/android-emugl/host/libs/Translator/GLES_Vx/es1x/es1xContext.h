@@ -172,6 +172,10 @@ void            es1xContext_releaseTexture(es1xContext* context, es1xTexture2D* 
   if(CONTEXT == 0)                              \
     return GL_FALSE;
 
+#define ES1X_CHECK_CONTEXT_RETVAL(CONTEXT, VAL)     \
+  if(CONTEXT == 0)                                  \
+    return VAL;
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
