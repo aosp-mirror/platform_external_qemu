@@ -372,9 +372,10 @@ endif
 common_LOCAL_SRC_FILES += $(SKIN_SOURCES:%=android/skin/%)
 
 common_LOCAL_SRC_FILES += \
-             android/user-config.c \
-             android/resource.c \
+             android/gpu_frame.cpp \
              android/emulator-window.c \
+             android/resource.c \
+             android/user-config.c \
 
 # enable MMX code for our skin scaler
 ifeq ($(HOST_ARCH),x86)

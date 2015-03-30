@@ -14,6 +14,10 @@
 
 #include <stddef.h>
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* Call this function to initialize the hardware opengles emulation.
  * This function will abort if we can't find the corresponding host
  * libraries through dlopen() or equivalent.
@@ -62,5 +66,7 @@ extern int  android_gles_fast_pipes;
  * For UNIX and Win32 pipes it is the full pathname of the pipe.
  */
 void android_gles_server_path(char* buff, size_t buffsize);
+
+ANDROID_END_HEADER
 
 #endif /* ANDROID_OPENGLES_H */
