@@ -204,6 +204,20 @@ GL_API void GL_APIENTRY es1xLoadPaletteFromModelViewMatrixOES(void *_context_);
 GL_API void GL_APIENTRY es1xMatrixIndexPointerOES(void *_context_, GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 GL_API void GL_APIENTRY es1xWeightPointerOES(void *_context_, GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 GL_API void GL_APIENTRY es1xGenerateMipmapOES(void *_context_, GLenum target);
+GL_API GLboolean GL_APIENTRY es1xIsRenderbufferOES(void *_context_, GLuint renderbuffer);
+GL_API void GLAPIENTRY es1xBindRenderbufferOES(void *_context_, GLenum target, GLuint renderbuffer);
+GL_API void GLAPIENTRY es1xDeleteRenderbuffersOES(void *_context_, GLsizei n, const GLuint *renderbuffers);
+GL_API void GLAPIENTRY es1xGenRenderbuffersOES(void *_context_, GLsizei n, GLuint *renderbuffers);
+GL_API void GLAPIENTRY es1xRenderbufferStorageOES(void *_context_, GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
+GL_API void GLAPIENTRY es1xGetRenderbufferParameterivOES(void *_context_, GLenum target, GLenum pname, GLint* params);
+GL_API GLboolean GLAPIENTRY es1xIsFramebufferOES(void *_context_, GLuint framebuffer);
+GL_API void GLAPIENTRY es1xBindFramebufferOES(void *_context_, GLenum target, GLuint framebuffer);
+GL_API void GLAPIENTRY es1xDeleteFramebuffersOES(void *_context_, GLsizei n, const GLuint *framebuffers);
+GL_API void GLAPIENTRY es1xGenFramebuffersOES(void *_context_, GLsizei n, GLuint *framebuffers);
+GL_API GLenum GLAPIENTRY es1xCheckFramebufferStatusOES(void *_context_, GLenum target);
+GL_API void GLAPIENTRY es1xFramebufferTexture2DOES(void *_context_, GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+GL_API void GLAPIENTRY es1xFramebufferRenderbufferOES(void *_context_, GLenum target, GLenum attachment,GLenum renderbuffertarget, GLuint renderbuffer);
+GL_API void GLAPIENTRY es1xGetFramebufferAttachmentParameterivOES(void *_context_, GLenum target, GLenum attachment, GLenum pname, GLint *params);
 
 #ifdef __cplusplus
 } /* extern "C" */

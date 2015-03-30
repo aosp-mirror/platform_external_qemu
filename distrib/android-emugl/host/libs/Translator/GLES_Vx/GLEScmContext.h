@@ -27,7 +27,7 @@ class GLEScmContext: public GLESv2Context
 
   void  init();
   void *getES1xContext() const;
-
+  void initExtensionString();
   // protected:
 
  private:
