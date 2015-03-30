@@ -20,7 +20,6 @@
 void GLESv2Context::init() {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
-      fprintf(stdout, "___ Init GLESv2Context @ %p\n", this);
         s_glDispatch.dispatchFuncs(GLES_2_0);
         GLEScontext::init();
         for(int i=0; i < s_glSupport.maxVertexAttribs;i++){
@@ -33,13 +32,11 @@ void GLESv2Context::init() {
                      (const char*)dispatcher().glGetString(GL_VERSION),
                      "OpenGL ES 2.0");
     }
-    fprintf(stdout, "--- Init GLESv2Context @ %p\n", this);
 
     m_initialized = true;
 }
 
 void GLESv2Context::initGLESx() {
-  fprintf(stdout, "static init GLES_V2 through a tmp context\n");
   emugl::Mutex::AutoLock mutex(s_lock);
   s_glDispatch.dispatchFuncs(GLES_2_0);
 }

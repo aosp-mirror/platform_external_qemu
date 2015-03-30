@@ -29,6 +29,7 @@
 #include "GLEScmValidate.h"
 #include "GLEScmContext.h"
 #include "es1xAPI.h"
+#include <OpenglCodecCommon/ErrorLog.h>
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -1766,7 +1767,6 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
   es1xGetIntegerv(ctx->getES1xContext(), GL_ELEMENT_ARRAY_BUFFER_BINDING, &element_array_buffer);
   es1xBindBuffer(ctx->getES1xContext(), GL_ARRAY_BUFFER, 0);
   es1xBindBuffer(ctx->getES1xContext(), GL_ELEMENT_ARRAY_BUFFER, 0);
-  fprintf(stdout, "__ZHT__array_buffer 0x%x , element_array_buffer 0x%x \n", array_buffer, element_array_buffer);
 
   //disable clip planes
   es1xGetIntegerv(ctx->getES1xContext(), GL_MAX_CLIP_PLANES,&numClipPlanes);
