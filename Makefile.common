@@ -140,6 +140,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/sockets/SocketDrainer.cpp \
 	android/base/sockets/SocketUtils.cpp \
 	android/base/sockets/SocketWaiter.cpp \
+	android/base/synchronization/MessageChannel.cpp \
 	android/base/Log.cpp \
 	android/base/memory/LazyInstance.cpp \
 	android/base/String.cpp \
