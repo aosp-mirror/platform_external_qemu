@@ -21,9 +21,6 @@
 
 void init_gles_v1tov2_routing();
 
-extern glEGLImageTargetTexture2DOES_server_proc_t           v2_glEGLImageTargetTexture2DOES;
-extern glEGLImageTargetRenderbufferStorageOES_server_proc_t v2_glEGLImageTargetRenderbufferStorageOES;
-
 extern bool s_gles_routing_enabled;
 
 #endif // _GLES_CM_ROUTING_H
