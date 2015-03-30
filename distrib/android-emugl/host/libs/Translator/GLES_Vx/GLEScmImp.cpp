@@ -29,6 +29,7 @@
 #include "GLEScmValidate.h"
 #include "GLEScmContext.h"
 #include "es1xAPI.h"
+#include <OpenglCodecCommon/ErrorLog.h>
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -1676,50 +1677,6 @@ GL_API void GL_APIENTRY glGetTexGenxvOES (GLenum coord, GLenum pname, GLfixed *p
 }
 
 template <class T, GLenum TypeName>
-void FAKEglDrawTexOES (T x, T y, T z, T width, T height) {
-  GET_CTX_CM();
-
-  SET_ERROR_IF((width<=0 || height<=0),GL_INVALID_VALUE);
-
-  ctx->drawValidate();
-
-  GLfloat vertices[] = {
-    1.5f,  1.5f, 0.0f,  0.0, 0.0, // Top Right
-    1.5f, -1.5f, 0.0f,  0.0, 1.0,  // Bottom Right
-    -1.5f, -1.5f, 0.0f,  1.0, 1.0,  // Bottom Left
-    -1.5f,  1.5f, 0.0f,  1.0, 0.0 // Top Left
-  };
-
-
-  GLfloat texels[ctx->getMaxTexUnits()][4*2];
-  memset((void*)texels, 0, ctx->getMaxTexUnits()*4*2*sizeof(GLfloat));
-
-  GLuint        m_ui32Vbo;
-  glGenBuffers(1, &m_ui32Vbo);
-  unsigned int uiSize = 4 * (sizeof(float) * 5); // 3 vertices * stride (5 floats per vertex)
-
-  // Bind the VBO
-  glBindBuffer(GL_ARRAY_BUFFER, m_ui32Vbo);
-
-  // Set the buffer's data
-  glBufferData(GL_ARRAY_BUFFER, uiSize, vertices, GL_DYNAMIC_DRAW);
-
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3,GL_FLOAT,sizeof(float) * 5, 0);
-
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glTexCoordPointer(2,GL_FLOAT,sizeof(float) * 5, (unsigned char*) (sizeof(float) * 3));
-
-  // Draws a non-indexed triangle array
-  glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-  // unbind the vertex buffer as we don't need it bound anymore
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  return;
-}
-
-template <class T, GLenum TypeName>
 void glDrawTexOES (T x, T y, T z, T width, T height) {
   GET_CTX_CM();
 
@@ -1766,7 +1723,6 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
   es1xGetIntegerv(ctx->getES1xContext(), GL_ELEMENT_ARRAY_BUFFER_BINDING, &element_array_buffer);
   es1xBindBuffer(ctx->getES1xContext(), GL_ARRAY_BUFFER, 0);
   es1xBindBuffer(ctx->getES1xContext(), GL_ELEMENT_ARRAY_BUFFER, 0);
-  fprintf(stdout, "__ZHT__array_buffer 0x%x , element_array_buffer 0x%x \n", array_buffer, element_array_buffer);
 
   //disable clip planes
   es1xGetIntegerv(ctx->getES1xContext(), GL_MAX_CLIP_PLANES,&numClipPlanes);

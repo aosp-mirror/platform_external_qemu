@@ -19,25 +19,21 @@
 #include "es1xContext.h"
 
 GLEScmContext::GLEScmContext():GLESv2Context(), m_es1xContext(NULL) {
-  fprintf(stdout, "Create new GLESv1Context\n");
   return;
 }
 
 GLEScmContext::~GLEScmContext(){
   if(m_es1xContext != NULL) {
-    fprintf(stdout, "Destroy new GLESv1Context; es1xCtx @ %p\n", m_es1xContext);
     es1xContext_destroy(m_es1xContext);
     m_es1xContext = NULL;
   }
 }
 
 void GLEScmContext::init() {
-  fprintf(stdout, "___ Init GLESv1Context @ %p\n", this);
   if(!m_initialized) {
     GLESv2Context::init(); // init GLES_2_0 dispatchFuncs, set m_initialized
     m_es1xContext = (void *) es1xContext_create();
   }
-  fprintf(stdout, "--- Init GLESv1Context @ %p; es1xCtx @ %p\n", this, m_es1xContext);
 }
 
 void * GLEScmContext::getES1xContext() const {
