@@ -218,6 +218,8 @@ GL_API GLenum GLAPIENTRY es1xCheckFramebufferStatusOES(void *_context_, GLenum t
 GL_API void GLAPIENTRY es1xFramebufferTexture2DOES(void *_context_, GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
 GL_API void GLAPIENTRY es1xFramebufferRenderbufferOES(void *_context_, GLenum target, GLenum attachment,GLenum renderbuffertarget, GLuint renderbuffer);
 GL_API void GLAPIENTRY es1xGetFramebufferAttachmentParameterivOES(void *_context_, GLenum target, GLenum attachment, GLenum pname, GLint *params);
+GL_API void GLAPIENTRY es1xEGLImageTargetTexture2DOES(void *_context_, GLenum target, GLeglImageOES image);
+GL_API void GLAPIENTRY es1xEGLImageTargetRenderbufferStorageOES(void *_context_, GLenum target, GLeglImageOES image);
 
 #ifdef __cplusplus
 } /* extern "C" */

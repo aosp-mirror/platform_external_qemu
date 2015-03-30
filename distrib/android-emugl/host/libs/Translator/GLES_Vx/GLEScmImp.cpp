@@ -1345,7 +1345,7 @@ GL_API void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOE
   SET_ERROR_IF(!GLEScmValidate::textureTargetLimited(target),GL_INVALID_ENUM);
   DBG("v1: %s ctx=%p ---> short-circuited to GLES_V2: \n", __func__, ctx);
 
-  v2_glEGLImageTargetTexture2DOES(target, image);
+  es1xEGLImageTargetTexture2DOES(ctx->getES1xContext(), target, image);
 }
 
 GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image)
@@ -1354,7 +1354,7 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
   SET_ERROR_IF(target != GL_RENDERBUFFER_OES,GL_INVALID_ENUM);
   DBG("v1: %s ctx=%p ---> short-circuited to GLES_V2: \n", __func__, ctx);
 
-  v2_glEGLImageTargetRenderbufferStorageOES(target, image);
+  es1xEGLImageTargetRenderbufferStorageOES(ctx->getES1xContext(), target, image);
 }
 
 /* GL_OES_blend_subtract*/

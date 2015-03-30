@@ -38,6 +38,7 @@ host_common_SRC_FILES :=           	\
     es1xShaderProgramInfoHashTable.c	\
     es1xTextureHashTable.c		\
     es1xRenderFrameBuffer.c		\
+    es1xEGLImage.c			\
     es1xRouting.c
 
 host_common_CFLAGS := -ggdb -DDE_DEBUG -DES1X_SUPPORT_STATISTICS 
