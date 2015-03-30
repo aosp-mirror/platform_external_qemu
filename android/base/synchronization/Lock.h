@@ -67,6 +67,8 @@ public:
     }
 
 private:
+    friend class ConditionVariable;
+
 #ifdef _WIN32
     CRITICAL_SECTION mLock;
 #else
