@@ -300,6 +300,8 @@ skin_keyset_get_default_text( void )
     "CHANGE_LAYOUT_NEXT  Keypad_9, Ctrl-F12\n"
     "ONION_ALPHA_UP      Keypad_Multiply\n"
     "ONION_ALPHA_DOWN    Keypad_Divide\n"
+
+    "BUTTON_SLEEP        Ctrl-F9\n"
     ;
 }
 
