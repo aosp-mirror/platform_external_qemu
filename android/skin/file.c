@@ -222,6 +222,7 @@ static unsigned translate_button_name(const char* name) {
         { "window",       kKeyCodeCycleWindows },
         { "channel-up",   kKeyCodeChannelUp },
         { "channel-down", kKeyCodeChannelDown },
+        { "sleep",        kKeyCodeSleep },
         { 0, 0 },
     };
 
