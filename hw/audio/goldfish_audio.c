@@ -344,9 +344,10 @@ static bool goldfish_audio_flush(struct goldfish_audio_state *s, int buf,
     *free -= written;
     trace_goldfish_audio_buff_send(written, buf + 1);
 
-    if (!goldfish_audio_buff_length(b) == 0)
-        *new_status |= buf ? AUDIO_INT_WRITE_BUFFER_1_EMPTY :
-                AUDIO_INT_WRITE_BUFFER_2_EMPTY;
+    /* If buffer is drained, set corresponding status bit. */
+    if (!goldfish_audio_buff_length(b))
+        *new_status |= buf ? AUDIO_INT_WRITE_BUFFER_2_EMPTY :
+                AUDIO_INT_WRITE_BUFFER_1_EMPTY;
 
     return true;
 }
