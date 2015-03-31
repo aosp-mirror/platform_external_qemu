@@ -252,6 +252,7 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
         { SKIN_KEY_COMMAND_BUTTON_WINDOW,      kKeyCodeCycleWindows },
         { SKIN_KEY_COMMAND_BUTTON_CHANNELUP,   kKeyCodeChannelUp },
         { SKIN_KEY_COMMAND_BUTTON_CHANNELDOWN, kKeyCodeChannelDown },
+        { SKIN_KEY_COMMAND_BUTTON_SLEEP,       kKeyCodeSleep },
         { SKIN_KEY_COMMAND_NONE, 0 }
     };
 
