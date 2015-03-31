@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83fb5e85_ef825d00",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_Vx/es1x/es1xStateSetters.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1042426
+      },
+      "writtenOn": "2015-03-31T12:38:32Z",
+      "side": 1,
+      "message": "How about put the parameters\u0027 checking before using gl2b",
+      "range": {
+        "startLine": 610,
+        "startChar": 2,
+        "endLine": 613,
+        "endChar": 71
+      },
+      "revId": "7f0f057a28ab4be5ef996ecc473a165df1292e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
