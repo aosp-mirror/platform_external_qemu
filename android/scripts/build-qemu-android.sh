@@ -227,6 +227,15 @@ build_qemu_android () {
                 ;;
         esac
 
+        AUDIO_BACKENDS_FLAG=
+        case $1 in
+            linux-*)
+                # Use PulseAudio on Linux because the default backend,
+                # OSS, does not work
+                AUDIO_BACKENDS_FLAG="--audio-drv-list=pa"
+                ;;
+        esac
+
         PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
         PKG_CONFIG_LIBDIR=$PREFIX/lib/pkgconfig
         case $1 in
@@ -272,6 +281,7 @@ EOF
             --prefix=$PREFIX \
             --extra-cflags="$EXTRA_CFLAGS" \
             --extra-ldflags="$EXTRA_LDFLAGS" \
+            $AUDIO_BACKENDS_FLAG \
             --disable-attr \
             --disable-blobs \
             --disable-cap-ng \
