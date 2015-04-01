@@ -680,106 +680,106 @@ GL_API void GL_APIENTRY  glGetClipPlanef(GLenum pname, GLfloat eqn[4]) {
 }
 
 GL_API void GL_APIENTRY  glGetClipPlanex(GLenum pname, GLfixed eqn[4]) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p --->", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p --->", __func__, ctx);
   es1xGetClipPlanex(ctx->getES1xContext(), pname, eqn);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetFixedv(GLenum pname, GLfixed *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p --->", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p --->", __func__, ctx);
   es1xGetFixedv(ctx->getES1xContext(), pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetFloatv(GLenum pname, GLfloat *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   es1xGetFloatv(ctx->getES1xContext(), pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetIntegerv(GLenum pname, GLint *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   es1xGetIntegerv(ctx->getES1xContext(), pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetLightfv(GLenum light, GLenum pname, GLfloat *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   es1xGetLightfv(ctx->getES1xContext(), light, pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetLightxv(GLenum light, GLenum pname, GLfixed *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   es1xGetLightxv(ctx->getES1xContext(), light, pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetMaterialfv(GLenum face, GLenum pname, GLfloat *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   es1xGetMaterialfv(ctx->getES1xContext(), face, pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetMaterialxv(GLenum face, GLenum pname, GLfixed *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   es1xGetMaterialxv(ctx->getES1xContext(), face, pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetPointerv(GLenum pname, void **params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p ---> ", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p ---> ", __func__, ctx);
   es1xGetPointerv(ctx->getES1xContext(), pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetTexEnvfv(GLenum env, GLenum pname, GLfloat *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p --->", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p --->", __func__, ctx);
   es1xGetTexEnvfv(ctx->getES1xContext(), env, pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetTexEnviv(GLenum env, GLenum pname, GLint *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p --->", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p --->", __func__, ctx);
   es1xGetTexEnviv(ctx->getES1xContext(), env, pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetTexEnvxv(GLenum env, GLenum pname, GLfixed *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p --->", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p --->", __func__, ctx);
   es1xGetTexEnvxv(ctx->getES1xContext(), env, pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetTexParameterfv(GLenum target, GLenum pname, GLfloat *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p --->", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p --->", __func__, ctx);
   es1xGetTexParameterfv(ctx->getES1xContext(), target, pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetTexParameteriv(GLenum target, GLenum pname, GLint *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p --->", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p --->", __func__, ctx);
   es1xGetTexParameteriv(ctx->getES1xContext(), target, pname, params);
   return;
 }
 
 GL_API void GL_APIENTRY  glGetTexParameterxv(GLenum target, GLenum pname, GLfixed *params) {
-  GET_CTX_CM()
-      DBG("v1: %s ctx=%p --->", __func__, ctx);
+  GET_CTX_CM();
+  DBG("v1: %s ctx=%p --->", __func__, ctx);
   es1xGetTexParameterxv(ctx->getES1xContext(), target, pname, params);
   return;
 }
