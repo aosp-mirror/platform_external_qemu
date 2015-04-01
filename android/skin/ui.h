@@ -114,6 +114,8 @@ void skin_ui_set_scale(SkinUI* ui, double scale);
 
 void skin_ui_update_display(SkinUI* ui, int x, int y, int w, int h);
 
+void skin_ui_update_gpu_frame(SkinUI* ui, int w, int h, const void* pixels);
+
 // Return the current SkinLayout used by the user interface.
 struct SkinLayout* skin_ui_get_current_layout(SkinUI* ui);
 
