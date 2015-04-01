@@ -322,7 +322,7 @@ void es1xMatrix4x4_createOrtho(es1xMatrix4x4* dst, GLfloat left, GLfloat right, 
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xMultMatrixf(void *_context_, const GLfloat* matrix)
+ES1X_API void ES1X_APIENTRY es1xMultMatrixf(void *_context_, const GLfloat* matrix)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glMultMatrixf(0x%p)\n", matrix));
@@ -334,7 +334,7 @@ GL_API void GL_APIENTRY es1xMultMatrixf(void *_context_, const GLfloat* matrix)
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xMultMatrixx(void *_context_, const GLfixed* matrix)
+ES1X_API void ES1X_APIENTRY es1xMultMatrixx(void *_context_, const GLfixed* matrix)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   es1xMatrix4x4 dst;
@@ -345,7 +345,7 @@ GL_API void GL_APIENTRY es1xMultMatrixx(void *_context_, const GLfixed* matrix)
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLoadMatrixf(void *_context_, const GLfloat* matrix)
+ES1X_API void ES1X_APIENTRY es1xLoadMatrixf(void *_context_, const GLfloat* matrix)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glLoadMatrixf(0x%p)\n", matrix));
@@ -358,7 +358,7 @@ GL_API void GL_APIENTRY es1xLoadMatrixf(void *_context_, const GLfloat* matrix)
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLoadMatrixx(void *_context_, const GLfixed* matrix)
+ES1X_API void ES1X_APIENTRY es1xLoadMatrixx(void *_context_, const GLfixed* matrix)
 {
   //   es1xContext *context = (es1xContext *) _context_;
   es1xMatrix4x4 dst;
@@ -369,7 +369,7 @@ GL_API void GL_APIENTRY es1xLoadMatrixx(void *_context_, const GLfixed* matrix)
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xMatrixMode(void *_context_, GLenum mode)
+ES1X_API void ES1X_APIENTRY es1xMatrixMode(void *_context_, GLenum mode)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glMatrixMode(%s)\n", ES1X_ENUM_TO_STRING(mode)));
@@ -391,7 +391,7 @@ GL_API void GL_APIENTRY es1xMatrixMode(void *_context_, GLenum mode)
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLoadIdentity (void *_context_)
+ES1X_API void ES1X_APIENTRY es1xLoadIdentity (void *_context_)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glLoadIdentity also calls --> "));
@@ -400,7 +400,7 @@ GL_API void GL_APIENTRY es1xLoadIdentity (void *_context_)
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xRotatef(void *_context_, GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+ES1X_API void ES1X_APIENTRY es1xRotatef(void *_context_, GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glRotatef(%.8f, %.8f, %.8f, %.8f)\n", angle, x, y, z));
@@ -420,7 +420,7 @@ GL_API void GL_APIENTRY es1xRotatef(void *_context_, GLfloat angle, GLfloat x, G
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xRotatex(void *_context_, GLfixed angle, GLfixed x, GLfixed y, GLfixed z)
+ES1X_API void ES1X_APIENTRY es1xRotatex(void *_context_, GLfixed angle, GLfixed x, GLfixed y, GLfixed z)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glRotatex(0x%x, 0x%x, 0x%x, 0x%x)\n", angle, x, y, z));
@@ -429,7 +429,7 @@ GL_API void GL_APIENTRY es1xRotatex(void *_context_, GLfixed angle, GLfixed x, G
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xScalef(void *_context_, GLfloat x, GLfloat y, GLfloat z)
+ES1X_API void ES1X_APIENTRY es1xScalef(void *_context_, GLfloat x, GLfloat y, GLfloat z)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glScalef(%.8f, %.8f, %.8f)\n", x, y, z));
@@ -449,7 +449,7 @@ GL_API void GL_APIENTRY es1xScalef(void *_context_, GLfloat x, GLfloat y, GLfloa
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xScalex(void *_context_, GLfixed x, GLfixed y, GLfixed z)
+ES1X_API void ES1X_APIENTRY es1xScalex(void *_context_, GLfixed x, GLfixed y, GLfixed z)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glScalex(%.8x, %.8x, %.8x)\n", x, y, z));
@@ -458,7 +458,7 @@ GL_API void GL_APIENTRY es1xScalex(void *_context_, GLfixed x, GLfixed y, GLfixe
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xFrustumf(void *_context_, GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near, GLfloat far)
+ES1X_API void ES1X_APIENTRY es1xFrustumf(void *_context_, GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near, GLfloat far)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glFrustumf(%.8f, %.8f, %.8f, %.8f, %.8f, %.8f)\n", left, right, bottom, top, near, far));
@@ -487,7 +487,7 @@ GL_API void GL_APIENTRY es1xFrustumf(void *_context_, GLfloat left, GLfloat righ
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xFrustumx(void *_context_, GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar)
+ES1X_API void ES1X_APIENTRY es1xFrustumx(void *_context_, GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glFrustumx(%.8x, %.8x, %.8x, %.8x, %.8x, %.8x)\n", left, right, bottom, top, zNear, zFar));
@@ -502,7 +502,7 @@ GL_API void GL_APIENTRY es1xFrustumx(void *_context_, GLfixed left, GLfixed righ
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xOrthof(void *_context_, GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near, GLfloat far)
+ES1X_API void ES1X_APIENTRY es1xOrthof(void *_context_, GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near, GLfloat far)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glOrthof(%.8f, %.8f, %.8f, %.8f, %.8f, %.8f)\n", left, right, bottom, top, near, far));
@@ -529,7 +529,7 @@ GL_API void GL_APIENTRY es1xOrthof(void *_context_, GLfloat left, GLfloat right,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xOrthox(void *_context_, GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed near, GLfixed far)
+ES1X_API void ES1X_APIENTRY es1xOrthox(void *_context_, GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed near, GLfixed far)
 {
   //   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glOrthox(%.8x, %.8x, %.8x, %.8x, %.8x, %.8x)\n", left, right, bottom, top, near, far));
@@ -545,7 +545,7 @@ GL_API void GL_APIENTRY es1xOrthox(void *_context_, GLfixed left, GLfixed right,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTranslatef(void *_context_, GLfloat x, GLfloat y, GLfloat z)
+ES1X_API void ES1X_APIENTRY es1xTranslatef(void *_context_, GLfloat x, GLfloat y, GLfloat z)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glTranslatef(%.8f, %.8f, %.8f)\n", x, y, z));
@@ -564,7 +564,7 @@ GL_API void GL_APIENTRY es1xTranslatef(void *_context_, GLfloat x, GLfloat y, GL
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTranslatex(void *_context_, GLfixed x, GLfixed y, GLfixed z)
+ES1X_API void ES1X_APIENTRY es1xTranslatex(void *_context_, GLfixed x, GLfixed y, GLfixed z)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glTranslatex(%.8x, %.8x, %.8x)\n", x, y, z));
@@ -573,7 +573,7 @@ GL_API void GL_APIENTRY es1xTranslatex(void *_context_, GLfixed x, GLfixed y, GL
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xPopMatrix(void *_context_)
+ES1X_API void ES1X_APIENTRY es1xPopMatrix(void *_context_)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glPopMatrix()\n"));
@@ -595,7 +595,7 @@ GL_API void GL_APIENTRY es1xPopMatrix(void *_context_)
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xPushMatrix(void *_context_)
+ES1X_API void ES1X_APIENTRY es1xPushMatrix(void *_context_)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glPushMatrix()\n"));

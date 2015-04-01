@@ -11,14 +11,14 @@
 LOCAL_PATH := $(call my-dir)
 
 # Set OS (required to defined debugging flags)
-ifeq ($(HOST_OS), linux)
-    DE_OS := __unix__
+ifeq ($(HOST_OS), windows)
+    DE_OS := 1
+else ifeq ($(HOST_OS), linux)
+    DE_OS := 2
 else ifeq ($(HOST_OS), darwin)
-    DE_OS := __APPLE__
-else ifeq ($(HOST_OS), windows)
-    DE_OS := _WIN32
+    DE_OS := 4
 endif
-host_common_CFLAGS    := -O0 -D$(DE_OS) -ggdb
+host_common_CFLAGS    := -O0 -DDE_OS=$(DE_OS) -ggdb
 
 host_common_SRC_FILES :=	\
     deDefs.c       		\

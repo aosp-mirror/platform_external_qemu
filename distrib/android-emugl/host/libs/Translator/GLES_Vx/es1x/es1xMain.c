@@ -19,13 +19,13 @@
 #include "es1xContext.h"
 #include "es1xDebug.h"
 
-GL_API void* GL_APIENTRY es1xCreate()
+ES1X_API void* ES1X_APIENTRY es1xCreate()
 {
   ES1X_LOG_CALL(("es1xCreate\n"));
   return es1xContext_create();
 }
 
-GL_API void GL_APIENTRY es1xDestroy(void* _context_)
+ES1X_API void ES1X_APIENTRY es1xDestroy(void* _context_)
 {
   ES1X_LOG_CALL(("es1xDestroy\n"));
   es1xContext_destroy(_context_);

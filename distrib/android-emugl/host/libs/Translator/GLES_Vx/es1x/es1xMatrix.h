@@ -60,7 +60,7 @@ void            es1xMatrix4x4_multiplyVec4              (const es1xMatrix4x4* ma
 void            es1xMatrix4x4_multiplyVec3              (const es1xMatrix4x4* matrix, const es1xVec3* vector, es1xVec3* result);
 
 // used in StateSetters
-GL_API void GL_APIENTRY es1xMatrixMode(void *_context_, GLenum mode);
+ES1X_API void ES1X_APIENTRY es1xMatrixMode(void *_context_, GLenum mode);
 
 /* Debugging routines */
 #ifdef ES1X_DEBUG

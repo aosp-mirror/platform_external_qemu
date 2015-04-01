@@ -22,7 +22,7 @@
 
 /*---------------------------------------------------------------------------*/
 
-GL_API GLenum GL_APIENTRY es1xGetError(void *_context_)
+ES1X_API GLenum ES1X_APIENTRY es1xGetError(void *_context_)
 {
   struct _es1xContext_* context = (struct _es1xContext_*) _context_;
   ES1X_LOG_CALL(("glGetError\n"));

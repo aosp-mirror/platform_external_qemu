@@ -389,7 +389,7 @@ static void es1xSet(void* _context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xActiveTexture(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xActiveTexture(void *_context_,
                                           GLenum pname)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -419,7 +419,7 @@ GL_API void GL_APIENTRY es1xActiveTexture(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xAlphaFunc(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xAlphaFunc(void *_context_,
                                       GLenum func,
                                       GLclampf ref)
 {
@@ -467,7 +467,7 @@ GL_API void GL_APIENTRY es1xAlphaFunc(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xAlphaFuncx(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xAlphaFuncx(void *_context_,
                                        GLenum func,
                                        GLclampx ref)
 {
@@ -478,7 +478,7 @@ GL_API void GL_APIENTRY es1xAlphaFuncx(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xBindBuffer(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xBindBuffer(void *_context_,
                                        GLenum target,
                                        GLuint buffer)
 {
@@ -497,7 +497,7 @@ GL_API void GL_APIENTRY es1xBindBuffer(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xBindTexture(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xBindTexture(void *_context_,
                                         GLenum target,
                                         GLuint textureName)
 {
@@ -548,7 +548,7 @@ GL_API void GL_APIENTRY es1xBindTexture(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xBlendFunc(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xBlendFunc(void *_context_,
                                       GLenum src,
                                       GLenum dst)
 {
@@ -573,7 +573,7 @@ GL_API void GL_APIENTRY es1xBlendFunc(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xBlendEquation(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xBlendEquation(void *_context_,
                                           GLenum mode)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -593,7 +593,7 @@ GL_API void GL_APIENTRY es1xBlendEquation(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xBlendEquationSeparate(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xBlendEquationSeparate(void *_context_,
                                                   GLenum modeRGB,
                                                   GLenum modeAlpha)
 {
@@ -617,7 +617,7 @@ GL_API void GL_APIENTRY es1xBlendEquationSeparate(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xBlendFuncSeparate(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xBlendFuncSeparate(void *_context_,
                                               GLenum srcRGB,
                                               GLenum dstRGB,
                                               GLenum srcAlpha,
@@ -652,7 +652,7 @@ GL_API void GL_APIENTRY es1xBlendFuncSeparate(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xBufferData(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xBufferData(void *_context_,
                                        GLenum target,
                                        GLsizeiptr size,
                                        const GLvoid* data,
@@ -676,7 +676,7 @@ GL_API void GL_APIENTRY es1xBufferData(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xBufferSubData(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xBufferSubData(void *_context_,
                                           GLenum target,
                                           GLintptr offset,
                                           GLsizeiptr size,
@@ -700,7 +700,7 @@ GL_API void GL_APIENTRY es1xBufferSubData(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xClear(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xClear(void *_context_,
                                   GLbitfield mask)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -716,7 +716,7 @@ GL_API void GL_APIENTRY es1xClear(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xClearColor(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xClearColor(void *_context_,
                                        GLclampf red,
                                        GLclampf green,
                                        GLclampf blue,
@@ -744,7 +744,7 @@ GL_API void GL_APIENTRY es1xClearColor(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xClearColorx(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xClearColorx(void *_context_,
                                         GLclampx red,
                                         GLclampx green,
                                         GLclampx blue,
@@ -760,7 +760,7 @@ GL_API void GL_APIENTRY es1xClearColorx(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xClearDepthf(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xClearDepthf(void *_context_,
                                         GLclampf depth)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -778,7 +778,7 @@ GL_API void GL_APIENTRY es1xClearDepthf(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xClearDepthx(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xClearDepthx(void *_context_,
                                         GLclampx depth)
 {
   //  es1xContext *context = (es1xContext *) _context_;
@@ -788,7 +788,7 @@ GL_API void GL_APIENTRY es1xClearDepthx(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xClearStencil(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xClearStencil(void *_context_,
                                          GLint s)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -806,7 +806,7 @@ GL_API void GL_APIENTRY es1xClearStencil(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xClientActiveTexture(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xClientActiveTexture(void *_context_,
                                                 GLenum texture)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -823,7 +823,7 @@ GL_API void GL_APIENTRY es1xClientActiveTexture(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xClipPlanef(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xClipPlanef(void *_context_,
                                        GLenum plane,
                                        const GLfloat* eqn)
 {
@@ -850,7 +850,7 @@ GL_API void GL_APIENTRY es1xClipPlanef(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xClipPlanex(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xClipPlanex(void *_context_,
                                        GLenum plane,
                                        const GLfixed* eqn)
 {
@@ -869,7 +869,7 @@ GL_API void GL_APIENTRY es1xClipPlanex(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xColor4f(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xColor4f(void *_context_,
                                     GLfloat red,
                                     GLfloat green,
                                     GLfloat blue,
@@ -888,7 +888,7 @@ GL_API void GL_APIENTRY es1xColor4f(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xColor4ub(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xColor4ub(void *_context_,
                                      GLubyte red,
                                      GLubyte green,
                                      GLubyte blue,
@@ -906,7 +906,7 @@ GL_API void GL_APIENTRY es1xColor4ub(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xColor4x(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xColor4x(void *_context_,
                                     GLfixed red,
                                     GLfixed green,
                                     GLfixed blue,
@@ -923,7 +923,7 @@ GL_API void GL_APIENTRY es1xColor4x(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xColorMask(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xColorMask(void *_context_,
                                       GLboolean red,
                                       GLboolean green,
                                       GLboolean blue,
@@ -955,7 +955,7 @@ GL_API void GL_APIENTRY es1xColorMask(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xColorPointer(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xColorPointer(void *_context_,
                                          GLint size,
                                          GLenum type,
                                          GLsizei stride,
@@ -1235,7 +1235,7 @@ static GLuint* es1xUnpackPalette(const GLvoid* data,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexImage2D(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexImage2D(void *_context_,
                                        GLenum target,
                                        GLint level,
                                        GLint internalFormat,
@@ -1309,7 +1309,7 @@ GL_API void GL_APIENTRY es1xTexImage2D(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xCompressedTexImage2D(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xCompressedTexImage2D(void *_context_,
                                                  GLenum target,
                                                  GLint level,
                                                  GLenum internalFormat,
@@ -1492,7 +1492,7 @@ GL_API void GL_APIENTRY es1xCompressedTexImage2D(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xCompressedTexSubImage2D(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xCompressedTexSubImage2D(void *_context_,
                                                     GLenum target,
                                                     GLint level,
                                                     GLint xoffset,
@@ -1522,7 +1522,7 @@ GL_API void GL_APIENTRY es1xCompressedTexSubImage2D(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xCopyTexImage2D(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xCopyTexImage2D(void *_context_,
                                            GLenum target,
                                            GLint level,
                                            GLenum internalFormat,
@@ -1590,7 +1590,7 @@ GL_API void GL_APIENTRY es1xCopyTexImage2D(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xCopyTexSubImage2D(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xCopyTexSubImage2D(void *_context_,
                                               GLenum target,
                                               GLint level,
                                               GLint xoffset,
@@ -1618,7 +1618,7 @@ GL_API void GL_APIENTRY es1xCopyTexSubImage2D(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xCullFace(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xCullFace(void *_context_,
                                      GLenum mode)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -1637,7 +1637,7 @@ GL_API void GL_APIENTRY es1xCullFace(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xDeleteBuffers(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xDeleteBuffers(void *_context_,
                                           GLsizei n,
                                           const GLuint* buffers)
 {
@@ -1653,7 +1653,7 @@ GL_API void GL_APIENTRY es1xDeleteBuffers(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xDeleteTextures(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xDeleteTextures(void *_context_,
                                            GLsizei n,
                                            const GLuint* textures)
 {
@@ -1690,7 +1690,7 @@ GL_API void GL_APIENTRY es1xDeleteTextures(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xDepthFunc(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xDepthFunc(void *_context_,
                                       GLenum func)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -1709,7 +1709,7 @@ GL_API void GL_APIENTRY es1xDepthFunc(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xDepthMask(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xDepthMask(void *_context_,
                                       GLboolean mask)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -1727,7 +1727,7 @@ GL_API void GL_APIENTRY es1xDepthMask(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xDepthRangef(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xDepthRangef(void *_context_,
                                         GLclampf zNear,
                                         GLclampf zFar)
 {
@@ -1748,7 +1748,7 @@ GL_API void GL_APIENTRY es1xDepthRangef(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xDepthRangex(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xDepthRangex(void *_context_,
                                         GLclampx zNear,
                                         GLclampx zFar)
 {
@@ -1761,7 +1761,7 @@ GL_API void GL_APIENTRY es1xDepthRangex(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xDisable(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xDisable(void *_context_,
                                     GLenum cap)
 {
   //  es1xContext *context = (es1xContext *) _context_;
@@ -1771,7 +1771,7 @@ GL_API void GL_APIENTRY es1xDisable(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xDisableClientState(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xDisableClientState(void *_context_,
                                                GLenum array)
 {
   //  es1xContext *context = (es1xContext *) _context_;
@@ -1783,7 +1783,7 @@ GL_API void GL_APIENTRY es1xDisableClientState(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xEnable(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xEnable(void *_context_,
                                    GLenum cap)
 {
   //  es1xContext *context = (es1xContext *) _context_;
@@ -1795,7 +1795,7 @@ GL_API void GL_APIENTRY es1xEnable(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xEnableClientState(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xEnableClientState(void *_context_,
                                               GLenum array)
 {
   //  es1xContext *context = (es1xContext *) _context_;
@@ -1807,7 +1807,7 @@ GL_API void GL_APIENTRY es1xEnableClientState(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xFinish(void *_context_)
+ES1X_API void ES1X_APIENTRY es1xFinish(void *_context_)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glFinish"));
@@ -1822,7 +1822,7 @@ GL_API void GL_APIENTRY es1xFinish(void *_context_)
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xFlush(void *_context_)
+ES1X_API void ES1X_APIENTRY es1xFlush(void *_context_)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glFlush"));
@@ -1837,7 +1837,7 @@ GL_API void GL_APIENTRY es1xFlush(void *_context_)
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xFogf(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xFogf(void *_context_,
                                  GLenum pname,
                                  GLfloat param)
 {
@@ -1900,7 +1900,7 @@ GL_API void GL_APIENTRY es1xFogf(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xFogfv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xFogfv(void *_context_,
                                   GLenum pname,
                                   const GLfloat* param)
 {
@@ -1933,7 +1933,7 @@ GL_API void GL_APIENTRY es1xFogfv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xFogx(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xFogx(void *_context_,
                                  GLenum pname,
                                  GLfixed param)
 {
@@ -1949,7 +1949,7 @@ GL_API void GL_APIENTRY es1xFogx(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xFogxv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xFogxv(void *_context_,
                                   GLenum pname,
                                   const GLfixed* param)
 {
@@ -1982,7 +1982,7 @@ GL_API void GL_APIENTRY es1xFogxv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xFrontFace(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xFrontFace(void *_context_,
                                       GLenum dir)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -2001,7 +2001,7 @@ GL_API void GL_APIENTRY es1xFrontFace(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGenBuffers(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xGenBuffers(void *_context_,
                                        GLsizei n,
                                        GLuint* buffers)
 {
@@ -2016,7 +2016,7 @@ GL_API void GL_APIENTRY es1xGenBuffers(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGenTextures(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xGenTextures(void *_context_,
                                         GLsizei n,
                                         GLuint* textures)
 {
@@ -2032,7 +2032,7 @@ GL_API void GL_APIENTRY es1xGenTextures(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xHint(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xHint(void *_context_,
                                  GLenum target,
                                  GLenum hint)
 {
@@ -2079,7 +2079,7 @@ GL_API void GL_APIENTRY es1xHint(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API GLboolean GL_APIENTRY es1xIsBuffer(void *_context_,
+ES1X_API GLboolean ES1X_APIENTRY es1xIsBuffer(void *_context_,
                                           GLuint buffer)
 {
   //  es1xContext *context = (es1xContext *) _context_;
@@ -2093,7 +2093,7 @@ GL_API GLboolean GL_APIENTRY es1xIsBuffer(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API GLboolean GL_APIENTRY es1xIsTexture(void *_context_,
+ES1X_API GLboolean ES1X_APIENTRY es1xIsTexture(void *_context_,
                                            GLuint texture)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -2111,7 +2111,7 @@ GL_API GLboolean GL_APIENTRY es1xIsTexture(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLightModelf(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xLightModelf(void *_context_,
                                         GLenum pname,
                                         GLfloat param)
 {
@@ -2128,7 +2128,7 @@ GL_API void GL_APIENTRY es1xLightModelf(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLightModelfv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xLightModelfv(void *_context_,
                                          GLenum pname,
                                          const GLfloat* param)
 {
@@ -2154,7 +2154,7 @@ GL_API void GL_APIENTRY es1xLightModelfv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLightModelx(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xLightModelx(void *_context_,
                                         GLenum pname,
                                         GLfixed param)
 {
@@ -2164,7 +2164,7 @@ GL_API void GL_APIENTRY es1xLightModelx(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLightModelxv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xLightModelxv(void *_context_,
                                          GLenum pname,
                                          const GLfixed* param)
 {
@@ -2194,7 +2194,7 @@ GL_API void GL_APIENTRY es1xLightModelxv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLightf(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xLightf(void *_context_,
                                    GLenum lightEnum,
                                    GLenum pname,
                                    GLfloat param)
@@ -2268,7 +2268,7 @@ GL_API void GL_APIENTRY es1xLightf(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLightfv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xLightfv(void *_context_,
                                     GLenum lightEnum,
                                     GLenum pname,
                                     const GLfloat* params)
@@ -2359,7 +2359,7 @@ GL_API void GL_APIENTRY es1xLightfv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLightx(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xLightx(void *_context_,
                                    GLenum light,
                                    GLenum pname,
                                    GLfixed param)
@@ -2371,7 +2371,7 @@ GL_API void GL_APIENTRY es1xLightx(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLightxv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xLightxv(void *_context_,
                                     GLenum light,
                                     GLenum pname,
                                     const GLfixed* params)
@@ -2419,7 +2419,7 @@ GL_API void GL_APIENTRY es1xLightxv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLineWidth(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xLineWidth(void *_context_,
                                       GLfloat width)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -2438,7 +2438,7 @@ GL_API void GL_APIENTRY es1xLineWidth(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLineWidthx(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xLineWidthx(void *_context_,
                                        GLfixed width)
 {
   //  es1xContext *context = (es1xContext *) _context_;
@@ -2448,7 +2448,7 @@ GL_API void GL_APIENTRY es1xLineWidthx(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLogicOp(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xLogicOp(void *_context_,
                                     GLenum mode)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -2480,7 +2480,7 @@ GL_API void GL_APIENTRY es1xLogicOp(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xMaterialf(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xMaterialf(void *_context_,
                                       GLenum face,
                                       GLenum pname,
                                       GLfloat param)
@@ -2504,7 +2504,7 @@ GL_API void GL_APIENTRY es1xMaterialf(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xMaterialfv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xMaterialfv(void *_context_,
                                        GLenum face,
                                        GLenum pname,
                                        const GLfloat* params)
@@ -2568,7 +2568,7 @@ GL_API void GL_APIENTRY es1xMaterialfv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xMaterialx(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xMaterialx(void *_context_,
                                       GLenum face,
                                       GLenum pname,
                                       GLfixed param)
@@ -2580,7 +2580,7 @@ GL_API void GL_APIENTRY es1xMaterialx(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xMaterialxv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xMaterialxv(void *_context_,
                                        GLenum face,
                                        GLenum pname,
                                        const GLfixed* params)
@@ -2618,7 +2618,7 @@ GL_API void GL_APIENTRY es1xMaterialxv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xMultiTexCoord4f(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xMultiTexCoord4f(void *_context_,
                                             GLenum target,
                                             GLfloat s,
                                             GLfloat t,
@@ -2643,7 +2643,7 @@ GL_API void GL_APIENTRY es1xMultiTexCoord4f(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xMultiTexCoord4x(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xMultiTexCoord4x(void *_context_,
                                             GLenum target,
                                             GLfixed s,
                                             GLfixed t,
@@ -2662,7 +2662,7 @@ GL_API void GL_APIENTRY es1xMultiTexCoord4x(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xNormal3f(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xNormal3f(void *_context_,
                                      GLfloat x,
                                      GLfloat y,
                                      GLfloat z)
@@ -2679,7 +2679,7 @@ GL_API void GL_APIENTRY es1xNormal3f(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xNormal3x(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xNormal3x(void *_context_,
                                      GLfixed x,
                                      GLfixed y,
                                      GLfixed z)
@@ -2693,7 +2693,7 @@ GL_API void GL_APIENTRY es1xNormal3x(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xPixelStorei(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xPixelStorei(void *_context_,
                                         GLenum pname,
                                         GLint param)
 {
@@ -2725,7 +2725,7 @@ GL_API void GL_APIENTRY es1xPixelStorei(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xPointParameterf(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xPointParameterf(void *_context_,
                                             GLenum pname,
                                             GLfloat param)
 {
@@ -2765,7 +2765,7 @@ GL_API void GL_APIENTRY es1xPointParameterf(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xPointParameterfv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xPointParameterfv(void *_context_,
                                              GLenum pname,
                                              const GLfloat *params)
 {
@@ -2791,7 +2791,7 @@ GL_API void GL_APIENTRY es1xPointParameterfv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xPointParameterx(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xPointParameterx(void *_context_,
                                             GLenum pname,
                                             GLfixed param)
 {
@@ -2804,7 +2804,7 @@ GL_API void GL_APIENTRY es1xPointParameterx(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xPointParameterxv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xPointParameterxv(void *_context_,
                                              GLenum pname,
                                              const GLfixed* params)
 {
@@ -2833,7 +2833,7 @@ GL_API void GL_APIENTRY es1xPointParameterxv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xPointSize(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xPointSize(void *_context_,
                                       GLfloat size)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -2849,7 +2849,7 @@ GL_API void GL_APIENTRY es1xPointSize(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xPointSizex(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xPointSizex(void *_context_,
                                        GLfixed size)
 {
   //  es1xContext *context = (es1xContext *) _context_;
@@ -2859,7 +2859,7 @@ GL_API void GL_APIENTRY es1xPointSizex(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xPointSizePointerOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xPointSizePointerOES(void *_context_,
                                                 GLenum type,
                                                 GLsizei stride,
                                                 const GLvoid* pointer)
@@ -2890,7 +2890,7 @@ GL_API void GL_APIENTRY es1xPointSizePointerOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xPolygonOffset(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xPolygonOffset(void *_context_,
                                           GLfloat factor,
                                           GLfloat units)
 {
@@ -2911,7 +2911,7 @@ GL_API void GL_APIENTRY es1xPolygonOffset(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xPolygonOffsetx(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xPolygonOffsetx(void *_context_,
                                            GLfixed factor,
                                            GLfixed units)
 {
@@ -2922,7 +2922,7 @@ GL_API void GL_APIENTRY es1xPolygonOffsetx(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xReadPixels(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xReadPixels(void *_context_,
                                        GLint x,
                                        GLint y,
                                        GLsizei width,
@@ -2949,7 +2949,7 @@ GL_API void GL_APIENTRY es1xReadPixels(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xSampleCoverage(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xSampleCoverage(void *_context_,
                                            GLclampf value,
                                            GLboolean invert)
 {
@@ -2971,7 +2971,7 @@ GL_API void GL_APIENTRY es1xSampleCoverage(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xSampleCoveragex(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xSampleCoveragex(void *_context_,
                                             GLclampx value,
                                             GLboolean invert)
 {
@@ -2982,7 +2982,7 @@ GL_API void GL_APIENTRY es1xSampleCoveragex(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xScissor(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xScissor(void *_context_,
                                     GLint x,
                                     GLint y,
                                     GLsizei width,
@@ -3014,7 +3014,7 @@ GL_API void GL_APIENTRY es1xScissor(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xShadeModel(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xShadeModel(void *_context_,
                                        GLenum model)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -3031,7 +3031,7 @@ GL_API void GL_APIENTRY es1xShadeModel(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xStencilFunc(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xStencilFunc(void *_context_,
                                         GLenum func,
                                         GLint ref,
                                         GLuint mask)
@@ -3049,7 +3049,7 @@ GL_API void GL_APIENTRY es1xStencilFunc(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xStencilMask(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xStencilMask(void *_context_,
                                         GLuint mask)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -3065,7 +3065,7 @@ GL_API void GL_APIENTRY es1xStencilMask(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xStencilOp(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xStencilOp(void *_context_,
                                       GLenum fail,
                                       GLenum zFail,
                                       GLenum zPass)
@@ -3083,7 +3083,7 @@ GL_API void GL_APIENTRY es1xStencilOp(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexCoordPointer(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexCoordPointer(void *_context_,
                                             GLint size,
                                             GLenum type,
                                             GLsizei stride,
@@ -3130,7 +3130,7 @@ GL_API void GL_APIENTRY es1xTexCoordPointer(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexEnvf(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexEnvf(void *_context_,
                                     GLenum target,
                                     GLenum pname,
                                     GLfloat param)
@@ -3208,7 +3208,7 @@ GL_API void GL_APIENTRY es1xTexEnvf(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexEnvfv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexEnvfv(void *_context_,
                                      GLenum target,
                                      GLenum pname,
                                      const GLfloat* params)
@@ -3256,7 +3256,7 @@ GL_API void GL_APIENTRY es1xTexEnvfv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexEnvi(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexEnvi(void *_context_,
                                     GLenum target,
                                     GLenum pname,
                                     GLint param)
@@ -3535,7 +3535,7 @@ GL_API void GL_APIENTRY es1xTexEnvi(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexEnvx(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexEnvx(void *_context_,
                                     GLenum target,
                                     GLenum pname,
                                     GLfixed param)
@@ -3547,7 +3547,7 @@ GL_API void GL_APIENTRY es1xTexEnvx(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexEnviv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexEnviv(void *_context_,
                                      GLenum target,
                                      GLenum pname,
                                      const GLint* params)
@@ -3605,7 +3605,7 @@ GL_API void GL_APIENTRY es1xTexEnviv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexEnvxv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexEnvxv(void *_context_,
                                      GLenum target,
                                      GLenum pname,
                                      const GLfixed* params)
@@ -3656,7 +3656,7 @@ GL_API void GL_APIENTRY es1xTexEnvxv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexParameterf(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexParameterf(void *_context_,
                                           GLenum target,
                                           GLenum pname,
                                           GLfloat param)
@@ -3684,7 +3684,7 @@ GL_API void GL_APIENTRY es1xTexParameterf(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexParameterfv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexParameterfv(void *_context_,
                                            GLenum target,
                                            GLenum pname,
                                            const GLfloat* params)
@@ -3715,7 +3715,7 @@ GL_API void GL_APIENTRY es1xTexParameterfv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexParameteri(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexParameteri(void *_context_,
                                           GLenum target,
                                           GLenum pname,
                                           GLint param)
@@ -3743,7 +3743,7 @@ GL_API void GL_APIENTRY es1xTexParameteri(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexParameterx(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexParameterx(void *_context_,
                                           GLenum target,
                                           GLenum pname,
                                           GLfixed param)
@@ -3758,7 +3758,7 @@ GL_API void GL_APIENTRY es1xTexParameterx(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexParameteriv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexParameteriv(void *_context_,
                                            GLenum target,
                                            GLenum pname,
                                            const GLint* params)
@@ -3789,7 +3789,7 @@ GL_API void GL_APIENTRY es1xTexParameteriv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexParameterxv(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexParameterxv(void *_context_,
                                            GLenum target,
                                            GLenum pname,
                                            const GLfixed* params)
@@ -3805,7 +3805,7 @@ GL_API void GL_APIENTRY es1xTexParameterxv(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xTexSubImage2D(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xTexSubImage2D(void *_context_,
                                           GLenum target,
                                           GLint level,
                                           GLint xoffset,
@@ -3835,7 +3835,7 @@ GL_API void GL_APIENTRY es1xTexSubImage2D(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xViewport(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xViewport(void *_context_,
                                      GLint x,
                                      GLint y,
                                      GLsizei width,
@@ -3864,7 +3864,7 @@ GL_API void GL_APIENTRY es1xViewport(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xNormalPointer(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xNormalPointer(void *_context_,
                                           GLenum type,
                                           GLsizei stride,
                                           const GLvoid* pointer)
@@ -3902,7 +3902,7 @@ GL_API void GL_APIENTRY es1xNormalPointer(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xVertexPointer(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xVertexPointer(void *_context_,
                                           GLint size,
                                           GLenum type,
                                           GLsizei stride,
@@ -3939,7 +3939,7 @@ GL_API void GL_APIENTRY es1xVertexPointer(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xCurrentPaletteMatrixOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xCurrentPaletteMatrixOES(void *_context_,
                                                     GLuint matrixpaletteindex)
 {
   //  es1xContext *context = (es1xContext *) _context_;
@@ -3948,7 +3948,7 @@ GL_API void GL_APIENTRY es1xCurrentPaletteMatrixOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xLoadPaletteFromModelViewMatrixOES(void *_context_)
+ES1X_API void ES1X_APIENTRY es1xLoadPaletteFromModelViewMatrixOES(void *_context_)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   return;
@@ -3956,7 +3956,7 @@ GL_API void GL_APIENTRY es1xLoadPaletteFromModelViewMatrixOES(void *_context_)
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xMatrixIndexPointerOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xMatrixIndexPointerOES(void *_context_,
                                                   GLint size,
                                                   GLenum type,
                                                   GLsizei stride,
@@ -3971,7 +3971,7 @@ GL_API void GL_APIENTRY es1xMatrixIndexPointerOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xWeightPointerOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xWeightPointerOES(void *_context_,
                                              GLint size,
                                              GLenum type,
                                              GLsizei stride,
@@ -3985,7 +3985,7 @@ GL_API void GL_APIENTRY es1xWeightPointerOES(void *_context_,
 }
 
 /*---------------------------------------------------------------------------*/
-GL_API void GL_APIENTRY es1xGenerateMipmapOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xGenerateMipmapOES(void *_context_,
                                             GLenum target)
 {
   // es1xContext *context = (es1xContext *) _context_;

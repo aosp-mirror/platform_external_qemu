@@ -41,7 +41,7 @@ extern "C"
 
 void es1xTexEnv_init    (es1xTexEnv* env);
 void es1xTexEnv_dump    (const es1xTexEnv* env);
-GL_API void GL_APIENTRY es1xTexEnvi(void *_context_, GLenum target, GLenum pname, GLint param);
+ES1X_API void ES1X_APIENTRY es1xTexEnvi(void *_context_, GLenum target, GLenum pname, GLint param);
 
 #ifdef __cplusplus
 } /* extern "C" */

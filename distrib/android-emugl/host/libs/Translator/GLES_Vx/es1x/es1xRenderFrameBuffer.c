@@ -22,7 +22,7 @@
 
 /*---------------------------------------------------------------------------*/
 
-GL_API GLboolean GL_APIENTRY es1xIsRenderbufferOES(void *_context_,
+ES1X_API GLboolean ES1X_APIENTRY es1xIsRenderbufferOES(void *_context_,
                                                    GLuint renderbuffer)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -36,7 +36,7 @@ GL_API GLboolean GL_APIENTRY es1xIsRenderbufferOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xBindRenderbufferOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xBindRenderbufferOES(void *_context_,
                                                GLenum target,
                                                GLuint renderbuffer)
 {
@@ -52,7 +52,7 @@ GL_API void GL_APIENTRY es1xBindRenderbufferOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xDeleteRenderbuffersOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xDeleteRenderbuffersOES(void *_context_,
                                                   GLsizei n,
                                                   const GLuint *renderbuffers)
 {
@@ -68,7 +68,7 @@ GL_API void GL_APIENTRY es1xDeleteRenderbuffersOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGenRenderbuffersOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xGenRenderbuffersOES(void *_context_,
                                                GLsizei n,
                                                GLuint *renderbuffers)
 {
@@ -84,7 +84,7 @@ GL_API void GL_APIENTRY es1xGenRenderbuffersOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xRenderbufferStorageOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xRenderbufferStorageOES(void *_context_,
                                                   GLenum target,
                                                   GLenum internalformat,
                                                   GLsizei width,
@@ -103,7 +103,7 @@ GL_API void GL_APIENTRY es1xRenderbufferStorageOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetRenderbufferParameterivOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xGetRenderbufferParameterivOES(void *_context_,
                                                          GLenum target,
                                                          GLenum pname,
                                                          GLint* params)
@@ -121,7 +121,7 @@ GL_API void GL_APIENTRY es1xGetRenderbufferParameterivOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API GLboolean GL_APIENTRY es1xIsFramebufferOES(void *_context_,
+ES1X_API GLboolean ES1X_APIENTRY es1xIsFramebufferOES(void *_context_,
                                                  GLuint framebuffer)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -135,7 +135,7 @@ GL_API GLboolean GL_APIENTRY es1xIsFramebufferOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xBindFramebufferOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xBindFramebufferOES(void *_context_,
                                               GLenum target,
                                               GLuint framebuffer)
 {
@@ -151,7 +151,7 @@ GL_API void GL_APIENTRY es1xBindFramebufferOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xDeleteFramebuffersOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xDeleteFramebuffersOES(void *_context_,
                                                  GLsizei n,
                                                  const GLuint *framebuffers)
 {
@@ -167,7 +167,7 @@ GL_API void GL_APIENTRY es1xDeleteFramebuffersOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGenFramebuffersOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xGenFramebuffersOES(void *_context_,
                                               GLsizei n,
                                               GLuint *framebuffers)
 {
@@ -183,7 +183,7 @@ GL_API void GL_APIENTRY es1xGenFramebuffersOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API GLenum GL_APIENTRY es1xCheckFramebufferStatusOES(void *_context_,
+ES1X_API GLenum ES1X_APIENTRY es1xCheckFramebufferStatusOES(void *_context_,
                                                        GLenum target)
 {
   es1xContext *context = (es1xContext *) _context_;
@@ -197,7 +197,7 @@ GL_API GLenum GL_APIENTRY es1xCheckFramebufferStatusOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xFramebufferTexture2DOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xFramebufferTexture2DOES(void *_context_,
                                                    GLenum target,
                                                    GLenum attachment,
                                                    GLenum textarget,
@@ -218,7 +218,7 @@ GL_API void GL_APIENTRY es1xFramebufferTexture2DOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xFramebufferRenderbufferOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xFramebufferRenderbufferOES(void *_context_,
                                                       GLenum target,
                                                       GLenum attachment,
                                                       GLenum renderbuffertarget,
@@ -238,7 +238,7 @@ GL_API void GL_APIENTRY es1xFramebufferRenderbufferOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetFramebufferAttachmentParameterivOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xGetFramebufferAttachmentParameterivOES(void *_context_,
                                                                   GLenum target,
                                                                   GLenum attachment,
                                                                   GLenum pname,
