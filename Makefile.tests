@@ -27,7 +27,9 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/String_unittest.cpp \
   android/base/StringFormat_unittest.cpp \
   android/base/StringView_unittest.cpp \
+  android/base/synchronization/ConditionVariable_unittest.cpp \
   android/base/synchronization/Lock_unittest.cpp \
+  android/base/synchronization/MessageChannel_unittest.cpp \
   android/base/system/System_unittest.cpp \
   android/base/threads/Thread_unittest.cpp \
   android/base/threads/ThreadStore_unittest.cpp \
@@ -41,6 +43,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/opengl/EmuglBackendList_unittest.cpp \
   android/opengl/EmuglBackendScanner_unittest.cpp \
   android/opengl/emugl_config_unittest.cpp \
+  android/opengl/GpuFrameBridge_unittest.cpp \
   android/utils/aconfig-file_unittest.cpp \
   android/utils/bufprint_unittest.cpp \
   android/utils/dirscanner_unittest.cpp \
