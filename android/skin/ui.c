@@ -451,6 +451,12 @@ void skin_ui_update_display(SkinUI* ui, int x, int y, int w, int h) {
     }
 }
 
+void skin_ui_update_gpu_frame(SkinUI* ui, int w, int h, const void* pixels) {
+    if (ui->window) {
+        skin_window_update_gpu_frame(ui->window, w, h, pixels);
+    }
+}
+
 SkinLayout* skin_ui_get_current_layout(SkinUI* ui) {
     return ui->layout;
 }

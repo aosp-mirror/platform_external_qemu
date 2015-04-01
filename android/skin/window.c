@@ -93,10 +93,16 @@ typedef struct ADisplay {
     SkinImage*     onion;       /* onion image */
     SkinRect       onion_rect;  /* onion rect, if any */
     int            brightness;
+    void*          gpu_frame;   /* GL_RGBA, datasize.w * datasize.h * 4 bytes */
     SkinSurface*   surface;     /* displayed surface after rotation + onion */
 } ADisplay;
 
 static void adisplay_done(ADisplay* disp) {
+    if (disp->gpu_frame) {
+        free(disp->gpu_frame);
+        disp->gpu_frame = NULL;
+    }
+
     skin_surface_unrefp(&disp->surface);
     disp->data = NULL;
     skin_image_unref(&disp->onion);
@@ -150,6 +156,8 @@ static int adisplay_init(ADisplay* disp,
     disp->onion  = NULL;
 
     disp->brightness = LCD_BRIGHTNESS_DEFAULT;
+
+    disp->gpu_frame = NULL;
 
     disp->surface = skin_surface_create_slow(disp->rect.size.w,
                                              disp->rect.size.h);
@@ -458,7 +466,8 @@ static void adisplay_update_surface_pixels_16(ADisplay* disp,
 static void adisplay_update_surface_pixels_32(ADisplay* disp,
                                               SkinRect* rect,
                                               uint8_t* dst_pixels,
-                                              int dst_pitch) {
+                                              int dst_pitch,
+                                              const void* src_pixels) {
     int           x  = rect->pos.x;
     int           y  = rect->pos.y;
     int           w  = rect->size.w;
@@ -467,7 +476,7 @@ static void adisplay_update_surface_pixels_32(ADisplay* disp,
     int           src_h     = disp->datasize.h;
     uint8_t*      dst_line  = dst_pixels;
     int           src_pitch = disp->datasize.w * 4;
-    uint8_t*      src_line  = (uint8_t*)disp->data;
+    const uint8_t* src_line  = (const uint8_t*)src_pixels;
     int           yy;
 
     switch ( disp->rotation & 3 )
@@ -494,7 +503,7 @@ static void adisplay_update_surface_pixels_32(ADisplay* disp,
 
         for (yy = h; yy > 0; yy--) {
             uint32_t* dst = (uint32_t*)dst_line;
-            uint8_t*  src = src_line;
+            const uint8_t*  src = src_line;
 
             DUFF4(w, {
                 dst[0] = *(uint32_t*)src;
@@ -510,7 +519,7 @@ static void adisplay_update_surface_pixels_32(ADisplay* disp,
         src_line += ((src_w - 1 - x) * 4) + ((src_h - 1 - y) * src_pitch);
 
         for (yy = h; yy > 0; yy--) {
-            uint32_t*  src = (uint32_t*)src_line;
+            const uint32_t*  src = (const uint32_t*)src_line;
             uint32_t*  dst = (uint32_t*)dst_line;
 
             DUFF4(w, {
@@ -529,7 +538,7 @@ static void adisplay_update_surface_pixels_32(ADisplay* disp,
         for (yy = h; yy > 0; yy--)
         {
             uint32_t*  dst = (uint32_t*)dst_line;
-            uint8_t*   src = src_line;
+            const uint8_t*   src = src_line;
 
             DUFF4(w, {
                 dst[0] = *(uint32_t*)src;
@@ -585,10 +594,19 @@ static void adisplay_update_surface(ADisplay* disp,
         .size.w = w,
         .size.h = h };
 
-    if (disp->bits_per_pixel == 32) {
-        adisplay_update_surface_pixels_32(disp, &dst_r, dst_pixels, dst_pitch);
+    if (disp->gpu_frame) {
+        // Content comes from the emulated GPU.
+        adisplay_update_surface_pixels_32(
+                disp, &dst_r, dst_pixels, dst_pitch, disp->gpu_frame);
     } else {
-        adisplay_update_surface_pixels_16(disp, &dst_r, dst_pixels, dst_pitch);
+        // Content comes from the emulated framebuffer.
+        if (disp->bits_per_pixel == 32) {
+            adisplay_update_surface_pixels_32(
+                    disp, &dst_r, dst_pixels, dst_pitch, disp->data);
+        } else {
+            adisplay_update_surface_pixels_16(
+                    disp, &dst_r, dst_pixels, dst_pitch);
+        }
     }
 
     // Apply brightness modulation.
@@ -1721,4 +1739,41 @@ skin_window_update_display( SkinWindow*  window, int  x, int  y, int  w, int  h 
 
         adisplay_redraw(disp, &r, window->surface);
     }
+}
+
+
+void skin_window_update_gpu_frame(SkinWindow* window,
+                                  int w,
+                                  int h,
+                                  const void* pixels) {
+    if (!window) {
+        return;
+    }
+
+    ADisplay* disp = skin_window_display(window);
+    if (!disp || disp->datasize.w != w || disp->datasize.h != h) {
+        fprintf(stderr, "%s: bad values!\n", __FUNCTION__);
+        return;
+    }
+
+    if (!disp->gpu_frame) {
+        disp->gpu_frame = calloc(w * 4, h);
+        if (!disp->gpu_frame) {
+            return;
+        }
+    }
+    // Convert from GL_RGBA to 32-bit ARGB.
+    {
+        const uint8_t* src = pixels;
+        uint32_t* dst = (uint32_t*)disp->gpu_frame;
+        uint32_t* dst_end = dst + w * h;
+        for (; dst < dst_end; src += 4, dst += 1) {
+            dst[0] = ((uint32_t)src[3] << 24) |
+                     ((uint32_t)src[0] << 16) |
+                     ((uint32_t)src[1] << 8) |
+                      (uint32_t)src[2];
+        }
+    }
+
+    skin_window_update_display(window, 0, 0, w, h);
 }
