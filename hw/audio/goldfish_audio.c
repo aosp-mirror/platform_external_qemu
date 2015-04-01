@@ -41,6 +41,11 @@ enum {
 	/* number of bytes available in read buffer */
 	AUDIO_READ_BUFFER_AVAILABLE  = 0x24,
 
+	/* for 64-bit guest CPUs only */
+	AUDIO_SET_WRITE_BUFFER_1_HIGH = 0x28,
+	AUDIO_SET_WRITE_BUFFER_2_HIGH = 0x30,
+	AUDIO_SET_READ_BUFFER_HIGH = 0x34,
+
 	/* AUDIO_INT_STATUS bits */
 
 	/* this bit set when it is safe to write more bytes to the buffer */
@@ -50,7 +55,7 @@ enum {
 };
 
 struct goldfish_audio_buff {
-    uint32_t  address;
+    uint64_t  address;
     uint32_t  length;
     uint8*    data;
     uint32_t  capacity;
@@ -123,7 +128,14 @@ goldfish_audio_buff_ensure( struct goldfish_audio_buff*  b, uint32_t  size )
 static void
 goldfish_audio_buff_set_address( struct goldfish_audio_buff*  b, uint32_t  addr )
 {
-    b->address = addr;
+    b->address = deposit64(b->address, 0, 32, addr);
+}
+
+static void
+goldfish_audio_buff_set_address_high( struct goldfish_audio_buff*  b,
+                                      uint32_t  addr )
+{
+    b->address = deposit64(b->address, 32, 32, addr);
 }
 
 static void
@@ -181,7 +193,7 @@ static const VMStateDescription goldfish_audio_buff_vmsd = {
     .minimum_version_id = AUDIO_STATE_SAVE_VERSION,
     .minimum_version_id_old = AUDIO_STATE_SAVE_VERSION,
     .fields = (VMStateField[]) {
-        VMSTATE_UINT32(address, struct goldfish_audio_buff),
+        VMSTATE_UINT64(address, struct goldfish_audio_buff),
         VMSTATE_UINT32(length, struct goldfish_audio_buff),
         VMSTATE_UINT32(offset, struct goldfish_audio_buff),
         VMSTATE_VARRAY_UINT32(data, struct goldfish_audio_buff, length,
@@ -289,10 +301,22 @@ static void goldfish_audio_write(void *opaque, hwaddr offset, uint64_t val,
             trace_goldfish_audio_memory_write("AUDIO_SET_WRITE_BUFFER_1", val);
             goldfish_audio_buff_set_address( &s->out_buffs[0], val );
             break;
+        case AUDIO_SET_WRITE_BUFFER_1_HIGH:
+            /* save pointer to buffer 1 */
+            trace_goldfish_audio_memory_write("AUDIO_SET_WRITE_BUFFER_1_HIGH",
+                                              val);
+            goldfish_audio_buff_set_address_high( &s->out_buffs[0], val );
+            break;
         case AUDIO_SET_WRITE_BUFFER_2:
             /* save pointer to buffer 2 */
             trace_goldfish_audio_memory_write("AUDIO_SET_WRITE_BUFFER_2", val);
             goldfish_audio_buff_set_address( &s->out_buffs[1], val );
+            break;
+        case AUDIO_SET_WRITE_BUFFER_2_HIGH:
+            /* save pointer to buffer 2 */
+            trace_goldfish_audio_memory_write("AUDIO_SET_WRITE_BUFFER_2_HIGH",
+                                              val);
+            goldfish_audio_buff_set_address_high( &s->out_buffs[1], val );
             break;
         case AUDIO_WRITE_BUFFER_1:
             /* record that data in buffer 1 is ready to write */
@@ -318,6 +342,13 @@ static void goldfish_audio_write(void *opaque, hwaddr offset, uint64_t val,
             start_read(s, val);
             s->int_status &= ~AUDIO_INT_READ_BUFFER_FULL;
             qemu_set_irq(s->irq, s->int_status & s->int_enable);
+            break;
+
+        case AUDIO_SET_READ_BUFFER_HIGH:
+            /* save pointer to the read buffer */
+            goldfish_audio_buff_set_address_high( &s->in_buff, val );
+            trace_goldfish_audio_memory_write("AUDIO_SET_READ_BUFFER_HIGH",
+                                              val);
             break;
 
         default:
