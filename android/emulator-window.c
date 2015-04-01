@@ -15,8 +15,10 @@
 #include "android/android.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
+#include "android/gpu_frame.h"
 #include "android/hw-control.h"
 #include "android/hw-sensors.h"
+#include "android/looper.h"
 #include "android/opengles.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
@@ -31,6 +33,11 @@ static double get_default_scale( AndroidOptions*  opts );
 
 /* EmulatorWindow structure instance. */
 static EmulatorWindow   qemulator[1];
+
+// Set to 1 to use an EmuGL sub-window to display GpU content, or 0 to use
+// the frame post callback to retrieve every frame from the GPU, which will
+// be slower, except for software-based renderers.
+static bool s_use_emugl_subwindow = 1;
 
 static void emulator_window_refresh(EmulatorWindow* emulator);
 extern void qemu_system_shutdown_request(void);
@@ -105,6 +112,41 @@ static void emulator_window_keyboard_event(void* opaque, SkinKeyCode keycode, in
     user_event_key(keycode, down);
 }
 
+static int emulator_window_opengles_show_window(
+    void* window, int x, int y, int w, int h, float rotation) {
+    if (s_use_emugl_subwindow) {
+        return android_showOpenglesWindow(window, x, y, w, h, rotation);
+    } else {
+        return 0;
+    }
+}
+
+static int emulator_window_opengles_hide_window(void) {
+    if (s_use_emugl_subwindow) {
+        return android_hideOpenglesWindow();
+    } else {
+        return 0;
+    }
+}
+
+static void emulator_window_opengles_redraw_window(void) {
+    if (s_use_emugl_subwindow) {
+        android_redrawOpenglesWindow();
+    }
+}
+
+// Used as an emugl callback to get each frame of GPU display.
+static void _emulator_window_on_gpu_frame(void* context,
+                                          int width,
+                                          int height,
+                                          const void* pixels) {
+    EmulatorWindow* emulator = (EmulatorWindow*)context;
+    // This function is called from an EmuGL thread, which cannot
+    // call the skin_ui_update_gpu_frame() function. Create a GpuFrame
+    // instance, and send its address into the pipe.
+    skin_ui_update_gpu_frame(emulator->ui, width, height, pixels);
+}
+
 static void
 emulator_window_setup( EmulatorWindow*  emulator )
 {
@@ -112,9 +154,9 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .key_event = &emulator_window_window_key_event,
         .mouse_event = &emulator_window_window_mouse_event,
         .generic_event = &emulator_window_window_generic_event,
-        .opengles_show = &android_showOpenglesWindow,
-        .opengles_hide = &android_hideOpenglesWindow,
-        .opengles_redraw = &android_redrawOpenglesWindow,
+        .opengles_show = &emulator_window_opengles_show_window,
+        .opengles_hide = &emulator_window_opengles_hide_window,
+        .opengles_redraw = &emulator_window_opengles_redraw_window,
         .opengles_free = &android_stopOpenglesRenderer,
     };
 
@@ -172,6 +214,19 @@ emulator_window_setup( EmulatorWindow*  emulator )
                           emulator->onion,
                           emulator->onion_rotation,
                           emulator->onion_alpha);
+    }
+
+    // Determine whether to use an EmuGL sub-window or not.
+    const char* env = getenv("ANDROID_EMULATOR_EXPERIMENT_READ_PIXELS");
+    s_use_emugl_subwindow = !env || !env[0] || env[0] == '0';
+
+    if (s_use_emugl_subwindow) {
+        VERBOSE_PRINT(gles, "Using EmuGL sub-window for GPU display");
+    } else {
+        VERBOSE_PRINT(gles, "Using glReadPixels() for GPU display");
+        gpu_frame_set_post_callback(looper_newCore(),
+                                    emulator,
+                                    _emulator_window_on_gpu_frame);
     }
 
     skin_ui_reset_title(emulator->ui);
@@ -403,9 +458,9 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
     if (emulator->ui) {
         if (skin_ui_process_events(emulator->ui)) {
             // Quit program.
-           skin_ui_free(emulator->ui);
-           emulator->ui = NULL;
-           qemu_system_shutdown_request();
+            skin_ui_free(emulator->ui);
+            emulator->ui = NULL;
+            qemu_system_shutdown_request();
         }
     }
 }
