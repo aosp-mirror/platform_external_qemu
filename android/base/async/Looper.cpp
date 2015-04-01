@@ -20,6 +20,8 @@
 
 #include <sys/time.h>
 
+#include <stdio.h>
+
 namespace android {
 namespace base {
 
@@ -30,12 +32,12 @@ class GenLooper : public Looper {
 public:
     GenLooper() :
             Looper(),
+            mWaiter(SocketWaiter::create()),
             mFdWatches(),
             mPendingFdWatches(),
             mTimers(),
             mActiveTimers(),
             mPendingTimers(),
-            mWaiter(SocketWaiter::create()),
             mForcedExit(false) {}
 
     virtual ~GenLooper() {}
@@ -389,7 +391,7 @@ public:
                 watch->fire();
             }
 
-            if (nextDeadline > deadlineMs) {
+            if (ret == 0) {
                 return ETIMEDOUT;
             }
         }
@@ -404,6 +406,7 @@ public:
     typedef ScopedPointerSet<FdWatch> FdWatchSet;
 
 private:
+    ScopedPtr<SocketWaiter> mWaiter;
     FdWatchSet mFdWatches;         // Set of all fd watches.
     FdWatchList mPendingFdWatches;  // Queue of pending fd watches.
 
@@ -411,7 +414,6 @@ private:
     TimerList mActiveTimers;  // Sorted list of active timers.
     TimerList mPendingTimers; // Sorted list of pending timers.
 
-    ScopedPtr<SocketWaiter> mWaiter;
     bool mForcedExit;
 };
 
