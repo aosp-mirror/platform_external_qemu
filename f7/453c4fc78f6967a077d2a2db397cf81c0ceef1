@@ -1,0 +1,7 @@
+Code-Review+2: Bo Hu <bohu@google.com>
+Verified+1: Bo Hu <bohu@google.com>
+Submitted-by: David Turner <digit@google.com>
+Submitted-at: Wed, 01 Apr 2015 07:12:56 +0000
+Reviewed-on: https://android-review.googlesource.com/144637
+Project: platform/external/qemu
+Branch: refs/heads/studio-1.3-dev
