@@ -22,7 +22,7 @@
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xEGLImageTargetTexture2DOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xEGLImageTargetTexture2DOES(void *_context_,
                                                        GLenum target,
                                                        GLeglImageOES image)
 {
@@ -38,7 +38,7 @@ GL_API void GL_APIENTRY es1xEGLImageTargetTexture2DOES(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xEGLImageTargetRenderbufferStorageOES(void *_context_,
+ES1X_API void ES1X_APIENTRY es1xEGLImageTargetRenderbufferStorageOES(void *_context_,
                                                                  GLenum target,
                                                                  GLeglImageOES image)
 {

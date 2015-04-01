@@ -464,7 +464,7 @@ static GLboolean es1xPrepareShaders(void *_context_, GLenum primitive)
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xDrawArrays(void *_context_, GLenum mode, GLint first, GLsizei count)
+ES1X_API void ES1X_APIENTRY es1xDrawArrays(void *_context_, GLenum mode, GLint first, GLsizei count)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glDrawArrays(%s, %d, %d)\n", ES1X_ENUM_TO_STRING(mode), first, count));
@@ -483,7 +483,7 @@ GL_API void GL_APIENTRY es1xDrawArrays(void *_context_, GLenum mode, GLint first
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xDrawElements(void *_context_, GLenum mode, GLsizei count, GLenum type, const GLvoid* indices)
+ES1X_API void ES1X_APIENTRY es1xDrawElements(void *_context_, GLenum mode, GLsizei count, GLenum type, const GLvoid* indices)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glDrawElements(mode %s, count %d, type %d, indixes %p)\n", \

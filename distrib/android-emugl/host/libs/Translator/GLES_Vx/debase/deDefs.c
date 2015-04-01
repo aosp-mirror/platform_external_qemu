@@ -95,7 +95,8 @@ void deAssertFail (const char* reason, const char* file, int line)
 	}
 #endif
 
-#if (((DE_OS == DE_OS_WIN32) || (DE_OS == DE_OS_WINCE)) && (DE_COMPILER == DE_COMPILER_MSC))
+#if ( ((DE_COMPILER == DE_COMPILER_MSC) || (DE_COMPILER == DE_COMPILER_GCC)) && \
+      ((DE_OS == DE_OS_WIN32) || (DE_OS == DE_OS_WINCE)))
 	{
 		wchar_t	wreason[1024];
 		wchar_t	wfile[128];

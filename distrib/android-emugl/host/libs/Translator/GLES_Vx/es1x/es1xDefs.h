@@ -43,6 +43,11 @@
 #       define ES1X_VOID_STATEMENT
 #endif
 
+/* ES1X API */
+#define ES1X_API
+#define ES1X_APIENTRY
+
+
 /* OpenGL ES headers */
 #define ES1X_OMIT_FUNCTION_NAME_WRAPPING
 #define __GL_EXPORTS

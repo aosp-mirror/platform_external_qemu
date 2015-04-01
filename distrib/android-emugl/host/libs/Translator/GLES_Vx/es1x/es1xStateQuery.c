@@ -432,7 +432,7 @@ static void es1xGetGeneric(void *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetIntegerv(void *_context_, GLenum pname, GLint* params)
+ES1X_API void ES1X_APIENTRY es1xGetIntegerv(void *_context_, GLenum pname, GLint* params)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetIntegerv(%s, %p)\n", ES1X_ENUM_TO_STRING(pname), params));
@@ -441,7 +441,7 @@ GL_API void GL_APIENTRY es1xGetIntegerv(void *_context_, GLenum pname, GLint* pa
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetBooleanv(void *_context_, GLenum pname, GLboolean* params)
+ES1X_API void ES1X_APIENTRY es1xGetBooleanv(void *_context_, GLenum pname, GLboolean* params)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetBooleanv(%s, %p)\n", ES1X_ENUM_TO_STRING(pname), params));
@@ -450,7 +450,7 @@ GL_API void GL_APIENTRY es1xGetBooleanv(void *_context_, GLenum pname, GLboolean
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetFloatv(void *_context_, GLenum pname, GLfloat* params)
+ES1X_API void ES1X_APIENTRY es1xGetFloatv(void *_context_, GLenum pname, GLfloat* params)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetFloatv(%s, %p)\n", ES1X_ENUM_TO_STRING(pname), params));
@@ -459,7 +459,7 @@ GL_API void GL_APIENTRY es1xGetFloatv(void *_context_, GLenum pname, GLfloat* pa
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetFixedv(void *_context_, GLenum pname, GLfixed* params)
+ES1X_API void ES1X_APIENTRY es1xGetFixedv(void *_context_, GLenum pname, GLfixed* params)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetFixedv(%s, %p)\n", ES1X_ENUM_TO_STRING(pname), params));
@@ -468,7 +468,7 @@ GL_API void GL_APIENTRY es1xGetFixedv(void *_context_, GLenum pname, GLfixed* pa
 
 /*---------------------------------------------------------------------------*/
 
-GL_API GLboolean GL_APIENTRY es1xIsEnabled(void *_context_, GLenum cap)
+ES1X_API GLboolean ES1X_APIENTRY es1xIsEnabled(void *_context_, GLenum cap)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glIsEnabled(%s)\n", ES1X_ENUM_TO_STRING(cap)));
@@ -506,7 +506,7 @@ GL_API GLboolean GL_APIENTRY es1xIsEnabled(void *_context_, GLenum cap)
 
 /*---------------------------------------------------------------------------*/
 
-static GLboolean GL_APIENTRY es1xGetClipPlane(void *_context_, GLenum pname, GLvoid* params, es1xStateQueryParamType paramType)
+static GLboolean ES1X_APIENTRY es1xGetClipPlane(void *_context_, GLenum pname, GLvoid* params, es1xStateQueryParamType paramType)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_CHECK_CONTEXT_RET_FALSE(context);
@@ -528,7 +528,7 @@ static GLboolean GL_APIENTRY es1xGetClipPlane(void *_context_, GLenum pname, GLv
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetClipPlanef(void *_context_, GLenum pname, GLfloat eqn[4])
+ES1X_API void ES1X_APIENTRY es1xGetClipPlanef(void *_context_, GLenum pname, GLfloat eqn[4])
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetClipPlanef(%s, 0x%p)\n", ES1X_ENUM_TO_STRING(pname), eqn));
@@ -537,7 +537,7 @@ GL_API void GL_APIENTRY es1xGetClipPlanef(void *_context_, GLenum pname, GLfloat
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetClipPlanex(void *_context_, GLenum pname, GLfixed eqn[4])
+ES1X_API void ES1X_APIENTRY es1xGetClipPlanex(void *_context_, GLenum pname, GLfixed eqn[4])
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetClipPlanex(%s, 0x%p)\n", ES1X_ENUM_TO_STRING(pname), eqn));
@@ -578,7 +578,7 @@ static void es1xGetMaterialv(es1xContext *_context_,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetMaterialfv(void *_context_, GLenum face, GLenum pname, GLfloat* params)
+ES1X_API void ES1X_APIENTRY es1xGetMaterialfv(void *_context_, GLenum face, GLenum pname, GLfloat* params)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetMaterialfv"));
@@ -587,7 +587,7 @@ GL_API void GL_APIENTRY es1xGetMaterialfv(void *_context_, GLenum face, GLenum p
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetMaterialxv(void *_context_, GLenum face, GLenum pname, GLfixed* params)
+ES1X_API void ES1X_APIENTRY es1xGetMaterialxv(void *_context_, GLenum face, GLenum pname, GLfixed* params)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetMaterialxv"));
@@ -596,7 +596,7 @@ GL_API void GL_APIENTRY es1xGetMaterialxv(void *_context_, GLenum face, GLenum p
 
 /*---------------------------------------------------------------------------*/
 
-static void GL_APIENTRY es1xGetLightv(void *_context_, GLenum light, GLenum pname, GLvoid* params, es1xStateQueryParamType paramType)
+static void ES1X_APIENTRY es1xGetLightv(void *_context_, GLenum light, GLenum pname, GLvoid* params, es1xStateQueryParamType paramType)
 {
   es1xContext *context = (es1xContext *) _context_;
   int ndx = light - GL_LIGHT0;
@@ -616,7 +616,7 @@ static void GL_APIENTRY es1xGetLightv(void *_context_, GLenum light, GLenum pnam
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetLightfv(void *_context_, GLenum light, GLenum pname, GLfloat* params)
+ES1X_API void ES1X_APIENTRY es1xGetLightfv(void *_context_, GLenum light, GLenum pname, GLfloat* params)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetLightfv"));
@@ -625,7 +625,7 @@ GL_API void GL_APIENTRY es1xGetLightfv(void *_context_, GLenum light, GLenum pna
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetLightxv(void *_context_, GLenum light, GLenum pname, GLfixed* params)
+ES1X_API void ES1X_APIENTRY es1xGetLightxv(void *_context_, GLenum light, GLenum pname, GLfixed* params)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetLightxv"));
@@ -651,7 +651,7 @@ static void es1xGetTexEnv(void *_context_, GLenum env, GLenum pname, GLvoid* par
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetTexEnviv(void *_context_, GLenum env, GLenum pname, GLint* params)
+ES1X_API void ES1X_APIENTRY es1xGetTexEnviv(void *_context_, GLenum env, GLenum pname, GLint* params)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetTexEnviv"));
@@ -660,7 +660,7 @@ GL_API void GL_APIENTRY es1xGetTexEnviv(void *_context_, GLenum env, GLenum pnam
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetTexEnvfv(void *_context_, GLenum env, GLenum pname, GLfloat* params)
+ES1X_API void ES1X_APIENTRY es1xGetTexEnvfv(void *_context_, GLenum env, GLenum pname, GLfloat* params)
 {
   //   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetTexEnvfv"));
@@ -669,7 +669,7 @@ GL_API void GL_APIENTRY es1xGetTexEnvfv(void *_context_, GLenum env, GLenum pnam
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetTexEnvxv(void *_context_, GLenum env, GLenum pname, GLfixed* params)
+ES1X_API void ES1X_APIENTRY es1xGetTexEnvxv(void *_context_, GLenum env, GLenum pname, GLfixed* params)
 {
   //  es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetTexEnvxv"));
@@ -678,7 +678,7 @@ GL_API void GL_APIENTRY es1xGetTexEnvxv(void *_context_, GLenum env, GLenum pnam
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetTexParameterfv(void *_context_, GLenum target, GLenum pname, GLfloat* params)
+ES1X_API void ES1X_APIENTRY es1xGetTexParameterfv(void *_context_, GLenum target, GLenum pname, GLfloat* params)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetTexParameterfv"));
@@ -699,7 +699,7 @@ GL_API void GL_APIENTRY es1xGetTexParameterfv(void *_context_, GLenum target, GL
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetTexParameteriv(void *_context_, GLenum target, GLenum pname, GLint* params)
+ES1X_API void ES1X_APIENTRY es1xGetTexParameteriv(void *_context_, GLenum target, GLenum pname, GLint* params)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetTexParameteriv"));
@@ -720,7 +720,7 @@ GL_API void GL_APIENTRY es1xGetTexParameteriv(void *_context_, GLenum target, GL
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetTexParameterxv(void *_context_, GLenum target, GLenum pname, GLfixed* params)
+ES1X_API void ES1X_APIENTRY es1xGetTexParameterxv(void *_context_, GLenum target, GLenum pname, GLfixed* params)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetTexParameterxv"));
@@ -736,7 +736,7 @@ GL_API void GL_APIENTRY es1xGetTexParameterxv(void *_context_, GLenum target, GL
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetBufferParameteriv(void *_context_, GLenum target, GLenum pname, GLint* params)
+ES1X_API void ES1X_APIENTRY es1xGetBufferParameteriv(void *_context_, GLenum target, GLenum pname, GLint* params)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetBufferParameteriv"));
@@ -748,7 +748,7 @@ GL_API void GL_APIENTRY es1xGetBufferParameteriv(void *_context_, GLenum target,
 
 /*---------------------------------------------------------------------------*/
 
-GL_API void GL_APIENTRY es1xGetPointerv(void *_context_, GLenum pname, void** params)
+ES1X_API void ES1X_APIENTRY es1xGetPointerv(void *_context_, GLenum pname, void** params)
 {
   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetPointerv"));
@@ -764,7 +764,7 @@ GL_API void GL_APIENTRY es1xGetPointerv(void *_context_, GLenum pname, void** pa
 
 /*---------------------------------------------------------------------------*/
 
-GL_API const GLubyte* GL_APIENTRY es1xGetString(void *_context_, GLenum pname)
+ES1X_API const GLubyte* ES1X_APIENTRY es1xGetString(void *_context_, GLenum pname)
 {
   //   es1xContext *context = (es1xContext *) _context_;
   ES1X_LOG_CALL(("glGetString"));
