@@ -154,6 +154,12 @@ static void create_fdt(VirtBoardInfo *vbi)
     qemu_fdt_setprop_cell(fdt, "/", "#address-cells", 0x2);
     qemu_fdt_setprop_cell(fdt, "/", "#size-cells", 0x2);
 
+    /* Firmware node */
+    qemu_fdt_add_subnode(fdt, "/firmware");
+    qemu_fdt_add_subnode(fdt, "/firmware/android");
+    qemu_fdt_setprop_string(fdt, "/firmware/android", "compatible", "android,firmware");
+    qemu_fdt_setprop_string(fdt, "/firmware/android", "hardware", "ranchu");
+
     /*
      * /chosen and /memory nodes must exist for load_dtb
      * to fill in necessary properties later
