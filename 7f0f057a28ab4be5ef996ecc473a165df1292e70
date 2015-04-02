@@ -22,6 +22,30 @@
       "revId": "7f0f057a28ab4be5ef996ecc473a165df1292e70",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3bdfae6_c9419318",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_Vx/es1x/es1xStateSetters.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-04-02T19:53:09Z",
+      "side": 1,
+      "message": "It should absolutely be that way! \n\nI moved some code around before committing and neglected to double check. Sorry :( but thanks for catching this :)\n\nI will post a fix soon to do parameter checking before forwarding call to GLESv2.",
+      "parentUuid": "83fb5e85_ef825d00",
+      "range": {
+        "startLine": 610,
+        "startChar": 2,
+        "endLine": 613,
+        "endChar": 71
+      },
+      "revId": "7f0f057a28ab4be5ef996ecc473a165df1292e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
