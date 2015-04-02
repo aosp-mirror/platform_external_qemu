@@ -42,4 +42,9 @@
 #define GF_FB_IOMEM_SIZE        0x00000100
 #define GF_FB_IRQ               19
 
+/* goldfish audio */
+#define GF_AUDIO_IOMEM_BASE     0xff013000
+#define GF_AUDIO_IOMEM_SIZE     0x00000100
+#define GF_AUDIO_IRQ            20
+
 #endif  /* !ACPI_GOLDFISH_DEFS_H */

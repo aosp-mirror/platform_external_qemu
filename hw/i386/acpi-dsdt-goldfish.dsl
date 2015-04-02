@@ -78,4 +78,19 @@ Scope(\_SB) {
             }
         })
     }
+
+    /* Audio */
+    Device(GFAU) {
+        Name(_HID, "GFSH0005")
+        Name(_STR, Unicode("goldfish audio"))
+        Name(_CRS, ResourceTemplate() {
+            Memory32Fixed(ReadWrite,
+                GF_AUDIO_IOMEM_BASE,
+                GF_AUDIO_IOMEM_SIZE
+                )
+            Interrupt(, Edge, ActiveHigh) {
+                GF_AUDIO_IRQ
+            }
+        })
+    }
 }
