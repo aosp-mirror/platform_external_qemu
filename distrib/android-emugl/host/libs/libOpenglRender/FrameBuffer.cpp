@@ -91,16 +91,19 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
     EGLSurface surface;
 
     static const GLint configAttribs[] = {
-        EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+        EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
         EGL_NONE
     };
 
     int n;
     if (!s_egl.eglChooseConfig(p_dpy, configAttribs,
-                               &config, 1, &n)) {
+                               &config, 1, &n) || n == 0) {
+        ERR("%s: Could not find GLES 1.x config!\n", __FUNCTION__);
         return NULL;
     }
+
+    DBG("%s: Found config %p\n", __FUNCTION__, (void*)config);
 
     static const EGLint pbufAttribs[] = {
         EGL_WIDTH, 1,
@@ -110,6 +113,7 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
 
     surface = s_egl.eglCreatePbufferSurface(p_dpy, config, pbufAttribs);
     if (surface == EGL_NO_SURFACE) {
+        ERR("%s: Could not create GLES 1.x Pbuffer!\n", __FUNCTION__);
         return NULL;
     }
 
@@ -122,11 +126,13 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
                                             EGL_NO_CONTEXT,
                                             gles1ContextAttribs);
     if (ctx == EGL_NO_CONTEXT) {
+        ERR("%s: Could not create GLES 1.x Context!\n", __FUNCTION__);
         s_egl.eglDestroySurface(p_dpy, surface);
         return NULL;
     }
 
     if (!s_egl.eglMakeCurrent(p_dpy, surface, surface, ctx)) {
+        ERR("%s: Could not make GLES 1.x context current!\n", __FUNCTION__);
         s_egl.eglDestroySurface(p_dpy, surface);
         s_egl.eglDestroyContext(p_dpy, ctx);
         return NULL;
@@ -388,6 +394,14 @@ bool FrameBuffer::initialize(int width, int height)
     fb->m_glRenderer = (const char*)s_gles2.glGetString(GL_RENDERER);
     fb->m_glVersion = (const char*)s_gles2.glGetString(GL_VERSION);
 
+    fb->m_textureDraw = new TextureDraw(fb->m_eglDisplay);
+    if (!fb->m_textureDraw) {
+        ERR("Failed: creation of TextureDraw instance\n");
+        bind.release();
+        delete fb;
+        return false;
+    }
+
     // release the FB context
     bind.release();
 
@@ -474,7 +488,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                                     NULL);
 
                 if (fb->m_eglSurface == EGL_NO_SURFACE) {
-                    ERR("Failed to create surface\n");
+                    // NOTE: This can typically happen with software-only renderers like OSMesa.
                     destroySubWindow(fb->m_subWin);
                     fb->m_subWin = (EGLNativeWindowType)0;
                 } else {
@@ -482,9 +496,6 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                         // Subwin creation was successfull,
                         // update viewport and z rotation and draw
                         // the last posted color buffer.
-
-                        // NOTE: We need a context to create a TextureDraw.
-                        fb->m_textureDraw = new TextureDraw(fb->getDisplay());
                         s_gles2.glViewport(0, 0, p_width, p_height);
                         fb->m_zRot = zRot;
                         fb->post(fb->m_lastPostedColorBuffer, false);
@@ -943,28 +954,31 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
     }
 
     m_lastPostedColorBuffer = p_colorbuffer;
-    if (!m_subWin) {
-        // no subwindow created for the FB output
-        // cannot post the colorbuffer
-        goto EXIT;
-    }
 
+    if (m_subWin) {
+        // bind the subwindow eglSurface
+        if (!bindSubwin_locked()) {
+            ERR("FrameBuffer::post(): eglMakeCurrent failed\n");
+            goto EXIT;
+        }
 
-    // bind the subwindow eglSurface
-    if (!bindSubwin_locked()) {
-        ERR("FrameBuffer::post eglMakeCurrent failed\n");
-        goto EXIT;
-    }
+        //
+        // render the color buffer to the window
+        //
+        if (m_zRot != 0.0f) {
+            s_gles2.glClear(GL_COLOR_BUFFER_BIT);
+        }
+        ret = (*c).second.cb->post(m_zRot);
+        if (ret) {
+            s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
+        }
 
-    //
-    // render the color buffer to the window
-    //
-    if (m_zRot != 0.0f) {
-        s_gles2.glClear(GL_COLOR_BUFFER_BIT);
-    }
-    ret = (*c).second.cb->post(m_zRot);
-    if (ret) {
-        s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
+        // restore previous binding
+        unbind_locked();
+    } else {
+        // If there is no sub-window, don't display anything, the client will
+        // rely on m_onPost to get the pixels instead.
+        ret = true;
     }
 
     //
@@ -980,9 +994,6 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
             m_statsNumFrames = 0;
         }
     }
-
-    // restore previous binding
-    unbind_locked();
 
     //
     // Send framebuffer (without FPS overlay) to callback
