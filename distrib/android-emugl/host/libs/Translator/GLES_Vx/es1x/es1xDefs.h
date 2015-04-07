@@ -24,13 +24,13 @@
 
 #ifdef DE_DEBUG
 #       define ES1X_DEBUG
+#       define ES1X_DEBUG_CODE         DE_DEBUG_CODE
 #endif
 
 #define ES1X_ASSERT             DE_ASSERT
 #define ES1X_UNREF              DE_UNREF
 #define ES1X_NULL               DE_NULL
 #define ES1X_INLINE             DE_INLINE
-#define ES1X_DEBUG_CODE         DE_DEBUG_CODE
 
 /*      In some cases it is handy to add void statements to the end of
         a code block because MSVC debugger falls immediately out from

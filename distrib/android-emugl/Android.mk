@@ -40,7 +40,11 @@ endif
 
 #TODO :DISABLE ME
 BUILD_GLES_VX = 1
+BUILD_GLES_VX_DEBUG = 0
+
+ifeq ($(BUILD_GLES_VX_DEBUG),1)
 EMUGL_COMMON_CFLAGS += -DEMUGL_DEBUG=1 -O0 -ggdb
+endif
 
 # Include common definitions used by all the modules included later
 # in this build file. This contains the definition of all useful

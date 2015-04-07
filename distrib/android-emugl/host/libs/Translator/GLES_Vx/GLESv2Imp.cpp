@@ -63,29 +63,35 @@ static GLESiface  s_glesIface = {
   .setShareGroup     = setShareGroup,
   .getProcAddress    = getProcAddress
 };
-static bool s_glesXisInit = false;
 
 #include <GLcommon/GLESmacros.h>
 
 extern "C" {
 
 static void initGLESx() {
-  if(s_glesXisInit == false)
-    s_glesXisInit = true;
+  static bool s_GLES_is_init = false;
+  if(s_GLES_is_init == true)
+    return;
+  DBG("%s : __initGLESx__v2__\n", __func__);
   // instantiate a GLESv2 context to initialize static library components
   GLESv2Context *tmp_ctx = new GLESv2Context();
-  tmp_ctx->initGLESx();
+  tmp_ctx->initGLESx_es2Dispatch();
   delete tmp_ctx;
+  s_GLES_is_init = true;
+  return;
 }
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
   if (!ctx->isInitialized()) {
+    //    GLESv2Context *v2ctx = static_cast<GLESv2Context *>(ctx);
+    //    v2ctx->initGLESx_es2Dispatch();
     ctx->setShareGroup(grp);
     ctx->init();
     glBindTexture(GL_TEXTURE_2D,0);
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
   }
 }
+
 static GLEScontext* createGLESContext() {
   return new GLESv2Context();
 }

@@ -36,8 +36,8 @@ static __translator_getGLESIfaceFunc loadIfaces(const char* libName)
   return func;
 }
 
-void init_gl_routing_for_glesv2() {
-  printf("*** GLEScmRouting: initializating GL routing table for GLESv2\n");
+void init_es2_gl_routing() {
+  DBG("%s: load GL interface for ES2 \n", __func__);
 
   __translator_getGLESIfaceFunc func  = NULL;
   func  = loadIfaces(LIB_GLES_V2_NAME);
@@ -50,7 +50,6 @@ void init_gl_routing_for_glesv2() {
 /****************************************************************************/
 
 static emugl::SharedLibrary *s_gles_v2_lib = NULL;
-bool s_gles_v1tov2_routing_enabled = false;
 
 static void *gles_routing_get_proc_func(const char *name, void *userData)
 {
@@ -66,29 +65,24 @@ static void *gles_routing_get_proc_func(const char *name, void *userData)
 /****************************************************************************/
 
 void init_gles_v1tov2_routing() {
-  printf("*** GLEScmRouting: initializating GLESv2 routing table \n");
+  DBG("%s: 1/2 Init GLESv2 Desktop GL dispatcher\n", __func__);
 
-  // GLES 2.0 must have already been successfully loaded
-  // for us to be able to load the GLES 1.x with 1.x-->2.0 transformer
-  gles2_decoder_context_t gles_v2;
+  init_es2_gl_routing();
+
+  DBG("%s: 2/2 Load ES2 for use in es1x\n", __func__);
   const char *libName = LIB_GLES_V2_NAME;
-
   s_gles_v2_lib = emugl::SharedLibrary::open(libName);
   if (!s_gles_v2_lib) {
     fprintf(stderr, "*** Could not load %s to init GLES routing"
             "through libes1x \n", libName);
     return;
-  } else {
-    gles_v2.initDispatchByName(gles_routing_get_proc_func, NULL);
   }
 
   // init es1x
+  gles2_decoder_context_t gles_v2;
+  gles_v2.initDispatchByName(gles_routing_get_proc_func, NULL);
   struct gles2_server_base_t *gles_v2_base = static_cast<struct gles2_server_base_t *>(&gles_v2);
   setGLES2base(gles_v2_base);
-
-  init_gl_routing_for_glesv2();
-
-  s_gles_v1tov2_routing_enabled = true;
 
   return;
 }

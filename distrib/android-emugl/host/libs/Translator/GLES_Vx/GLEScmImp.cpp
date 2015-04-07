@@ -76,12 +76,18 @@ static GLESiface  s_glesIface = {
 extern "C" {
 
 static void initGLESx() {
+  static bool s_GLES_is_init = false;
+  if(s_GLES_is_init == true)
+    return;
+  DBG("%s : __initGLESx__v1__\n", __func__);
   init_gles_v1tov2_routing();
+  s_GLES_is_init = true;
   return;
 }
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
   if (!ctx->isInitialized()) {
+    initGLESx();
     ctx->setShareGroup(grp);
     ctx->init();
     glGetError();

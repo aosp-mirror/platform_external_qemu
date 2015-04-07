@@ -15,6 +15,7 @@
 */
 
 #include "GLESv2Context.h"
+#include <OpenglCodecCommon/ErrorLog.h>
 #include <string.h>
 
 void GLESv2Context::init() {
@@ -36,9 +37,10 @@ void GLESv2Context::init() {
     m_initialized = true;
 }
 
-void GLESv2Context::initGLESx() {
-  emugl::Mutex::AutoLock mutex(s_lock);
+void GLESv2Context::initGLESx_es2Dispatch() {
+  DBG("%s : __initGLESx__es2Dispatch__\n", __func__);
   s_glDispatch.dispatchFuncs(GLES_2_0);
+  return;
 }
 
 GLESv2Context::GLESv2Context():GLEScontext(), m_att0Array(NULL), m_att0ArrayLength(0), m_att0NeedsDisable(false){};
@@ -70,7 +72,7 @@ void GLESv2Context::validateAtt0PreDraw(unsigned int count)
 
     if(count > m_att0ArrayLength)
     {
-        delete [] m_att0Array; 
+        delete [] m_att0Array;
         m_att0Array = new GLfloat[4*count];
         m_att0ArrayLength = count;
     }

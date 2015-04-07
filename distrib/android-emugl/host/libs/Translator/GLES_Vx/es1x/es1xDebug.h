@@ -22,25 +22,34 @@
 #       include "es1xDefs.h"
 #endif
 
+/*
+#ifdef ES1X_DEBUG
+
 #include <stdio.h>
 
 #    define ES1X_LOG(P)              printf P
+#    define ES1X_LOG_UNIFORM_UPDATE(P) printf P
 #    define ES1X_WARNING(P)          printf P
 #    define ES1X_ERROR(P)            printf P
 
 const char* es1xEnumToString(GLenum e);
-
-
-#include <stdio.h>
-
+#define ES1X_ENUM_TO_STRING     es1xEnumToString
 #define ES1X_LOG_CALL(P)        {                   \
     printf("*** ES1X: ");                           \
     printf P ;                                      \
     printf("\n");                                   \
   } while(0)
-#define ES1X_ENUM_TO_STRING     es1xEnumToString
 
-// #define ES1X_LOG_CALL(P)
-// #define ES1X_ENUM_TO_STRING(P)
+#else // !ES1X_DEBUG
+*/
+#define ES1X_LOG(P)
+#define ES1X_LOG_UNIFORM_UPDATE(P)
+#define ES1X_WARNING(P)
+#define ES1X_ERROR(P)
+#define ES1X_ENUM_TO_STRING(P)
+#define ES1X_LOG_CALL(P)
+/*
+#endif // ~ES1X_DEBUG
+*/
 
 #endif // _ES1XDEBUG_H

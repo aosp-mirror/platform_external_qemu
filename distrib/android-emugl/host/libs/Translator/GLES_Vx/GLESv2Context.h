@@ -40,7 +40,7 @@ public:
     void validateAtt0PostDraw(void);
     const float* getAtt0(void) {return m_attribute0value;}
 
-    void initGLESx();
+    void initGLESx_es2Dispatch();
 
 protected:
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);

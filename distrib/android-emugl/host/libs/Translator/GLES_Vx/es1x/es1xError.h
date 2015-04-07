@@ -26,6 +26,10 @@
 #       include "es1xRouting.h"
 #endif
 
+#ifndef _ES1XDEBUG_H
+#       include "es1xDebug.h"
+#endif
+
 struct _es1xContext_;
 
 #ifdef __cplusplus
@@ -55,7 +59,7 @@ void es1xSetError(void *_context_, GLenum errorCode);
   {                                                                     \
     ES1X_DEBUG_CODE(GLenum errorCode = gl2b->glGetError());            \
     if(errorCode != GL_NO_ERROR)                                        \
-      fprintf(stderr, "!!! es1x glERROR 0x%x", errorCode);              \
+      ES1X_LOG(("!!! es1x glERROR 0x%x", errorCode));                   \
   } while(deGetFalse())
 
 #define ES1X_SET_ERROR_AND_RETURN_IF_FALSE(CONTEXT, EXPRESSION, ERROR)  \

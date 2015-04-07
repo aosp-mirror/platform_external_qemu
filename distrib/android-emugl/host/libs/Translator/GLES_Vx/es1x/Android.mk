@@ -41,7 +41,9 @@ host_common_SRC_FILES :=           	\
     es1xEGLImage.c			\
     es1xRouting.c
 
-host_common_CFLAGS := -ggdb -DDE_DEBUG -DES1X_SUPPORT_STATISTICS 
+# ifeq ($(BUILD_GLES_VX_DEBUG),1)
+# host_common_CFLAGS := -ggdb -O0 -DDE_DEBUG -DES1X_SUPPORT_STATISTICS 
+# endif
 
 ### GLES 1.x to 2.0 transformer  ############
 $(call emugl-begin-host-static-library,libes1x)
