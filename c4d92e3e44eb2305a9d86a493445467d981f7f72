@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a32b0216_2830266b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-04-08T01:49:38Z",
+      "side": 1,
+      "message": "The NOTE that was here is now confusing, better remove it",
+      "range": {
+        "startLine": 499,
+        "startChar": 0,
+        "endLine": 500,
+        "endChar": 75
+      },
+      "revId": "c4d92e3e44eb2305a9d86a493445467d981f7f72",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
