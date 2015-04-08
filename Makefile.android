@@ -424,6 +424,9 @@ ifeq (true,$(BUILD_STANDALONE_EMULATOR))
   # TODO(digit): Remove the line below.
   BUILD_EMULATOR_OPENGL := true
   BUILD_EMULATOR_HOST_OPENGL := true
+  ifeq (true,$(BUILD_DEBUG_EMULATOR))
+    EMUGL_BUILD_DEBUG := 1
+  endif
   include $(EMULATOR_EMUGL_SOURCES_DIR)/Android.mk
 endif
 
