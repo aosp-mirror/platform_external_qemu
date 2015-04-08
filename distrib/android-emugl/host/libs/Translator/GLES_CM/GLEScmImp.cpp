@@ -171,9 +171,11 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
     return ret;
 }
 
-GL_API GLESiface* __translator_getIfaces(EGLiface* eglIface){
+GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
+
+GLESiface* __translator_getIfaces(EGLiface* eglIface) {
     s_eglIface = eglIface;
-    return & s_glesIface;
+    return &s_glesIface;
 }
 
 }

@@ -72,8 +72,10 @@ $(call emugl-end-module)
 
 $(call emugl-begin-host-shared-library,libemugl_test_shared_library)
 LOCAL_SRC_FILES := testing/test_shared_library.cpp
+LOCAL_CFLAGS := -fvisibility=default
 $(call emugl-end-module)
 
 $(call emugl-begin-host64-shared-library,lib64emugl_test_shared_library)
 LOCAL_SRC_FILES := testing/test_shared_library.cpp
+LOCAL_CFLAGS := -fvisibility=default
 $(call emugl-end-module)
