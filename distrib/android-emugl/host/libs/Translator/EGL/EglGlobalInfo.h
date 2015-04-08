@@ -105,7 +105,7 @@ private:
     EglGlobalInfo();
     ~EglGlobalInfo();
 
-    friend class emugl::LazyInstance<EglGlobalInfo>;
+    friend struct emugl::LazyInstance<EglGlobalInfo>;
 
     emugl::PodVector<EglDisplay*>  m_displays;
     EglOS::Engine*                 m_engine;
