@@ -1,0 +1,18 @@
+!render_api
+
+%#include "render_api_platform_types.h"
+%#include <stdbool.h>
+%#include <stddef.h>
+
+%typedef void (*OnPostFn)(void* context, int width, int height, int ydir,
+%                         int format, int type, unsigned char* pixels);
+
+int setStreamMode(int mode);
+int initOpenGLRenderer(int width, int height, char* addr, size_t addrLen);
+void getHardwareStrings(const char** vendor, const char** renderer, const char** version);
+void setPostCallback(OnPostFn onPost, void* onPostContext);
+bool createOpenGLSubwindow(FBNativeWindowType window, int x, int y, int width, int height, float zRot);
+bool destroyOpenGLSubwindow(void);
+void setOpenGLDisplayRotation(float zRot);
+void repaintOpenGLDisplay(void);
+int stopOpenGLRenderer(void);
