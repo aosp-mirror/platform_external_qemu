@@ -27,6 +27,8 @@
 #include "android/utils/bufprint.h"
 #include "telephony/modem_driver.h"
 
+#include <SDL.h>
+
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
 static double get_default_scale( AndroidOptions*  opts );
@@ -447,6 +449,22 @@ get_default_scale( AndroidOptions*  opts )
     return scale;
 }
 
+static int confirm_close_emulator_window() {
+    const SDL_MessageBoxButtonData buttons[] = {
+        {        0, 0, "Cancel" },
+        { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Exit" },
+    };
+    const SDL_MessageBoxData messageboxdata = {
+        SDL_MESSAGEBOX_INFORMATION, NULL, "Confirm exit",
+        "Are you sure you want to exit emulator ?",
+        SDL_arraysize(buttons), buttons, NULL /* use system color */
+    };
+    int buttonid = -1;
+    if (SDL_ShowMessageBox(&messageboxdata, &buttonid) < 0) {
+        return 1;
+    }
+    return buttonid;
+}
 
 /* called periodically to poll for user input events */
 static void emulator_window_refresh(EmulatorWindow* emulator)
@@ -457,10 +475,12 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
 
     if (emulator->ui) {
         if (skin_ui_process_events(emulator->ui)) {
-            // Quit program.
-            skin_ui_free(emulator->ui);
-            emulator->ui = NULL;
-            qemu_system_shutdown_request();
+            if (confirm_close_emulator_window()) {
+                // Quit program.
+                skin_ui_free(emulator->ui);
+                emulator->ui = NULL;
+                qemu_system_shutdown_request();
+            }
         }
     }
 }
