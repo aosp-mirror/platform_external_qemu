@@ -25,7 +25,6 @@
 
 #include "emugl/common/mutex.h"
 
-#define GLAPIENTRY GL_APIENTRY
 typedef void(*FUNCPTR)();
 
 #define GLES_DECLARE_METHOD(return_type, function_name, signature) \
