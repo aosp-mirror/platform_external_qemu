@@ -33,6 +33,7 @@
 #import <QTKit/QTCaptureVideoPreviewOutput.h>
 #import <QTKit/QTMedia.h>
 #import <QTKit/QTSampleBuffer.h>
+#import <AVFoundation/AVFoundation.h>
 #endif
 #import <CoreAudio/CoreAudio.h>
 #include "android/camera/camera-capture.h"
@@ -543,6 +544,14 @@ static const CameraFrameDim _emulate_dims[] =
 
     /* Obtain FOURCC pixel format for the device. */
     cis[0].pixel_format = _QTtoFOURCC(qt_pix_format);
+    if (cis[0].pixel_format == 0) {
+        AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+        for(AVCaptureDeviceFormat *vFormat in [videoDevice formats]) {
+            CMFormatDescriptionRef description= vFormat.formatDescription;
+            cis[0].pixel_format = _QTtoFOURCC(CMFormatDescriptionGetMediaSubType(description));
+            if (cis[0].pixel_format) break;
+        }
+    }
     if (cis[0].pixel_format == 0) {
         /* Unsupported pixel format. */
         E("Pixel format '%.4s' reported by the camera device is unsupported",
