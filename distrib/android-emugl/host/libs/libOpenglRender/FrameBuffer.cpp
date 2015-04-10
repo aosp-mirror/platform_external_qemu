@@ -612,7 +612,7 @@ HandleType FrameBuffer::createWindowSurface(int p_config, int p_width, int p_hei
             getDisplay(), config->getEglConfig(), p_width, p_height));
     if (win.Ptr() != NULL) {
         ret = genHandle();
-        m_windows[ret] = win;
+        m_windows[ret] = std::pair<WindowSurfacePtr, HandleType>(win,0);
         RenderThreadInfo *tinfo = RenderThreadInfo::get();
         tinfo->m_windowSet.insert(ret);
     }
@@ -642,6 +642,13 @@ void FrameBuffer::drainWindowSurface()
             it != tinfo->m_windowSet.end(); ++it) {
         HandleType windowHandle = *it;
         if (m_windows.find(windowHandle) != m_windows.end()) {
+            HandleType oldColorBufferHandle = m_windows[windowHandle].second;
+            if (oldColorBufferHandle) {
+                ColorBufferMap::iterator cit(m_colorbuffers.find(oldColorBufferHandle));
+                if (cit != m_colorbuffers.end()) {
+                    if (--(*cit).second.refcount == 0) { m_colorbuffers.erase(cit); }
+                }
+            }
             m_windows.erase(windowHandle);
         }
     }
@@ -686,8 +693,10 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer)
     emugl::Mutex::AutoLock mutex(m_lock);
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
-        ERR("FB: closeColorBuffer cb handle %#x not found\n", p_colorbuffer);
-        // bad colorbuffer handle
+        // This is harmless: it is normal for guest system to issue
+        // closeColorBuffer command when the color buffer is already
+        // garbage collected on the host. (we dont have a mechanism
+        // to give guest a notice yet)
         return;
     }
     if (--(*c).second.refcount == 0) {
@@ -706,7 +715,7 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface)
         return false;
     }
 
-    WindowSurface* surface = (*w).second.Ptr();
+    WindowSurface* surface = (*w).second.first.Ptr();
     surface->flushColorBuffer();
 
     return true;
@@ -731,7 +740,8 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
         return false;
     }
 
-    (*w).second->setColorBuffer((*c).second.cb);
+    (*w).second.first->setColorBuffer((*c).second.cb);
+    (*w).second.second = p_colorbuffer;
     return true;
 }
 
@@ -818,7 +828,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
             // bad surface handle
             return false;
         }
-        draw = (*w).second;
+        draw = (*w).second.first;
 
         if (p_readSurface != p_drawSurface) {
             WindowSurfaceMap::iterator w( m_windows.find(p_readSurface) );
@@ -826,7 +836,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
                 // bad surface handle
                 return false;
             }
-            read = (*w).second;
+            read = (*w).second.first;
         }
         else {
             read = draw;
