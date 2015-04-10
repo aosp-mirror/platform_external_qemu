@@ -642,6 +642,13 @@ void FrameBuffer::drainWindowSurface()
             it != tinfo->m_windowSet.end(); ++it) {
         HandleType windowHandle = *it;
         if (m_windows.find(windowHandle) != m_windows.end()) {
+            HandleType oldColorBufferHandle = m_windows[windowHandle]->getColorBufferHandle();
+            if (oldColorBufferHandle) {
+                ColorBufferMap::iterator cit(m_colorbuffers.find(oldColorBufferHandle));
+                if (cit != m_colorbuffers.end()) {
+                    if (--(*cit).second.refcount == 0) { m_colorbuffers.erase(cit); }
+                }
+            }
             m_windows.erase(windowHandle);
         }
     }
@@ -686,8 +693,10 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer)
     emugl::Mutex::AutoLock mutex(m_lock);
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
-        ERR("FB: closeColorBuffer cb handle %#x not found\n", p_colorbuffer);
-        // bad colorbuffer handle
+        // This is harmless: it is normal for guest system to issue
+        // closeColorBuffer command when the color buffer is already
+        // garbage collected on the host. (we dont have a mechanism
+        // to give guest a notice yet)
         return;
     }
     if (--(*c).second.refcount == 0) {
@@ -731,7 +740,7 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
         return false;
     }
 
-    (*w).second->setColorBuffer((*c).second.cb);
+    (*w).second->setColorBuffer((*c).second.cb, p_colorbuffer);
     return true;
 }
 

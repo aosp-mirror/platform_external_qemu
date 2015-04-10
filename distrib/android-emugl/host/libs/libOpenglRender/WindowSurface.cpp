@@ -29,6 +29,7 @@ WindowSurface::WindowSurface(EGLDisplay display,
                              EGLConfig config) :
         mSurface(NULL),
         mAttachedColorBuffer(NULL),
+        m_attachedColorBufferHandle(0),
         mReadContext(NULL),
         mDrawContext(NULL),
         mWidth(0),
@@ -61,8 +62,9 @@ WindowSurface *WindowSurface::create(EGLDisplay display,
 }
 
 
-void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer) {
+void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer, HandleType p_colorBufferHandle) {
     mAttachedColorBuffer = p_colorBuffer;
+    m_attachedColorBufferHandle = p_colorBufferHandle;
 
     // resize the window if the attached color buffer is of different
     // size.

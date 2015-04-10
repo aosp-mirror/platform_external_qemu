@@ -24,6 +24,8 @@
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 
+typedef uint32_t HandleType;
+
 // A class used to model a guest-side window surface. The implementation
 // uses a host Pbuffer to act as the EGL rendering surface instead.
 class WindowSurface {
@@ -50,7 +52,8 @@ public:
     //
     // IMPORTANT: This automatically resizes the Pbuffer's to the ColorBuffer's
     // dimensions. Potentially losing pixel values in the process.
-    void setColorBuffer(ColorBufferPtr p_colorBuffer);
+    void setColorBuffer(ColorBufferPtr p_colorBuffer, HandleType p_colorBufferHandle);
+    HandleType getColorBufferHandle() const { return m_attachedColorBufferHandle; }
 
     // Copy the Pbuffer's pixels to the attached color buffer.
     // Returns true on success, or false on error (e.g. if there is no
@@ -90,6 +93,7 @@ private:
 private:
     EGLSurface mSurface;
     ColorBufferPtr mAttachedColorBuffer;
+    HandleType  m_attachedColorBufferHandle;
     RenderContextPtr mReadContext;
     RenderContextPtr mDrawContext;
     GLuint mWidth;
