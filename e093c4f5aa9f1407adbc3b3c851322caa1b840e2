@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e32fba6e_3b044fcd",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/WindowSurface.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-04-11T00:02:44Z",
+      "side": 1,
+      "message": "This defined in other header files too and could cause confusion. Are we OK with that?\n\nFrameBuffer.h:35:typedef uint32_t HandleType;\nRenderThreadInfo.h:27:typedef uint32_t HandleType;",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 28
+      },
+      "revId": "e093c4f5aa9f1407adbc3b3c851322caa1b840e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c326369c_80b14ac4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/WindowSurface.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-04-11T00:02:44Z",
+      "side": 1,
+      "message": "Following the class pattern a few comment lines with a short purpose description would be nice here.",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 83
+      },
+      "revId": "e093c4f5aa9f1407adbc3b3c851322caa1b840e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
