@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f0f4e242_3fcd6767",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/WindowSurface.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-04-12T18:45:54Z",
+      "side": 1,
+      "message": "I agree this is problematic. Moreover, this part of the code doesn\u0027t deal with GL object names (handles) at all, and it\u0027s better to keep it that way. I.e. instead of using a HandleType, can we instead use a simple ColorBuffer* or ColorBufferPtr?",
+      "parentUuid": "e32fba6e_3b044fcd",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 28
+      },
+      "revId": "e093c4f5aa9f1407adbc3b3c851322caa1b840e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c326369c_80b14ac4",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/WindowSurface.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-04-11T00:02:44Z",
       "side": 1,
       "message": "Following the class pattern a few comment lines with a short purpose description would be nice here.",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 83
+      },
+      "revId": "e093c4f5aa9f1407adbc3b3c851322caa1b840e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30ebda64_81953a18",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/WindowSurface.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-04-12T18:45:54Z",
+      "side": 1,
+      "message": "Agreed.",
+      "parentUuid": "c326369c_80b14ac4",
       "range": {
         "startLine": 56,
         "startChar": 0,
