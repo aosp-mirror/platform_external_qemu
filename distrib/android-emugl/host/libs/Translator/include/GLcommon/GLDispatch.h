@@ -28,7 +28,7 @@
 typedef void(*FUNCPTR)();
 
 #define GLES_DECLARE_METHOD(return_type, function_name, signature) \
-    static GL_APICALL return_type (GL_APIENTRY *function_name) signature;
+    return_type (GL_APIENTRY *function_name) signature;
 
 class GLDispatch {
 public:
@@ -40,8 +40,7 @@ public:
     LIST_GLES_FUNCTIONS(GLES_DECLARE_METHOD, GLES_DECLARE_METHOD)
 
 private:
-    bool                  m_isLoaded;
-    static emugl::Mutex   s_lock;
+    bool m_isLoaded;
 };
 
 #endif  // GL_DISPATCH_H
