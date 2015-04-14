@@ -25,22 +25,79 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+// Generic function type.
 typedef void (*GL_FUNC_PTR)();
+
+// GL symbol resolver function type.
+typedef GL_FUNC_PTR (Resolver)(const char* funcName);
 
 static GL_FUNC_PTR getGLFuncAddress(const char *funcName) {
     GL_FUNC_PTR ret = NULL;
-#ifdef __linux__
-    static emugl::SharedLibrary* libGL = emugl::SharedLibrary::open("libGL");
-    ret = (GL_FUNC_PTR)glXGetProcAddress((const GLubyte*)funcName);
-#elif defined(WIN32)
-    static emugl::SharedLibrary* libGL = emugl::SharedLibrary::open("opengl32");
-    ret = (GL_FUNC_PTR)wglGetProcAddress(funcName);
-#elif defined(__APPLE__)
-    static emugl::SharedLibrary* libGL = emugl::SharedLibrary::open("/System/Library/Frameworks/OpenGL.framework/OpenGL");
+    static emugl::SharedLibrary* s_libGL = NULL;
+    static Resolver* s_resolver = NULL;
+
+    if (!s_libGL) {
+#if defined(__APPLE__)
+        static const char kLibName[] =
+                "/System/Library/Frameworks/OpenGL.framework/OpenGL";
+        static const char* const kResolverName = NULL;
+#elif defined(_WIN32)
+        static const char kLibName[] = "opengl32";
+        static const char kResolverName[] = "wglGetProcAddress";
+#elif defined(__linux__)
+        static const char kLibName[] = "libGL";
+        static const char kResolverName[] = "glXGetProcAddress";
+#else
+#error "Unsupported platform"
 #endif
-    if(!ret && libGL){
-        ret = libGL->findSymbol(funcName);
+        const char* libName = kLibName;
+        const char* resolverName = kResolverName;
+        const char* env = ::getenv("ANDROID_EGL_ENGINE");
+        if (env) {
+            if (!strcmp(env, "osmesa")) {
+                libName = "libosmesa";
+                resolverName = "OSMesaGetProcAddress";
+            } else {
+                fprintf(stderr,
+                        "Ignoring invalid ANDROID_EGL_ENGINE value '%s'\n",
+                        env);
+            }
+        }
+        s_libGL = emugl::SharedLibrary::open(libName);
+        if (!s_libGL) {
+            fprintf(stderr, "Could not load desktop GL library: %s\n",
+                    libName);
+            return NULL;
+        }
+        if (resolverName) {
+            s_resolver = reinterpret_cast<Resolver*>(
+                    s_libGL->findSymbol(resolverName));
+            if (!s_resolver) {
+                fprintf(
+                    stderr,
+                    "Could not find desktop GL symbol resolver '%s' in '%s'\n",
+                    resolverName, libName);
+            }
+        }
+    }
+
+#if defined(__linux__)
+    // HACK ATTACK: Using the resolver loaded through dlsym() doesn't work
+    // on Linux with some native system libraries, for reasons to obscure to
+    // understand here. We must thus call glXGetProcAddress() directly instead
+    // or the functions returned by the resolver will _not_ work correctly and
+    // simply return NULL.
+    ret = glXGetProcAddress((const GLubyte*)funcName);
+#else
+    if (s_resolver) {
+        ret = (*s_resolver)(funcName);
+    }
+#endif
+    if (!ret && s_libGL) {
+        ret = s_libGL->findSymbol(funcName);
     }
     return ret;
 }
