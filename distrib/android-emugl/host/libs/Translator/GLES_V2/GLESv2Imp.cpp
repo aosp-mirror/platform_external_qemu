@@ -819,7 +819,7 @@ GL_APICALL void  GL_APIENTRY glGenBuffers(GLsizei n, GLuint* buffers){
 
 GL_APICALL void  GL_APIENTRY glGenerateMipmap(GLenum target){
     GET_CTX();
-    SET_ERROR_IF(!GLESv2Validate::textureTargetEx(target),GL_INVALID_ENUM);
+    SET_ERROR_IF(target != GL_TEXTURE_2D && target != GL_TEXTURE_CUBE_MAP, GL_INVALID_ENUM);
     ctx->dispatcher().glGenerateMipmapEXT(target);
 }
 
