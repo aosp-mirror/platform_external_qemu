@@ -41,7 +41,7 @@ static RenderWindow* s_renderWindow = NULL;
 static IOStream *createRenderThread(int p_stream_buffer_size,
                                     unsigned int clientFlags);
 
-int initLibrary(void)
+RENDER_APICALL int RENDER_APIENTRY initLibrary(void)
 {
     //
     // Load EGL Plugin
@@ -70,8 +70,8 @@ int initLibrary(void)
     return true;
 }
 
-int initOpenGLRenderer(int width, int height, char* addr, size_t addrLen)
-{
+RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
+        int width, int height, char* addr, size_t addrLen) {
     //
     // Fail if renderer is already initialized
     //
@@ -126,8 +126,8 @@ int initOpenGLRenderer(int width, int height, char* addr, size_t addrLen)
     return true;
 }
 
-void setPostCallback(OnPostFn onPost, void* onPostContext)
-{
+RENDER_APICALL void RENDER_APIENTRY setPostCallback(
+        OnPostFn onPost, void* onPostContext) {
     if (s_renderWindow) {
         s_renderWindow->setPostCallback(onPost, onPostContext);
     } else {
@@ -135,9 +135,10 @@ void setPostCallback(OnPostFn onPost, void* onPostContext)
     }
 }
 
-void getHardwareStrings(const char** vendor,
-                        const char** renderer,
-                        const char** version) {
+RENDER_APICALL void RENDER_APIENTRY getHardwareStrings(
+        const char** vendor,
+        const char** renderer,
+        const char** version) {
     if (s_renderWindow &&
         s_renderWindow->getHardwareStrings(vendor, renderer, version)) {
         return;
@@ -145,7 +146,7 @@ void getHardwareStrings(const char** vendor,
     *vendor = *renderer = *version = NULL;
 }
 
-int stopOpenGLRenderer(void)
+RENDER_APICALL int RENDER_APIENTRY stopOpenGLRenderer(void)
 {
     bool ret = false;
 
@@ -171,12 +172,13 @@ int stopOpenGLRenderer(void)
     return ret;
 }
 
-bool createOpenGLSubwindow(FBNativeWindowType window_id,
-                           int x,
-                           int y,
-                           int width,
-                           int height,
-                           float zRot)
+RENDER_APICALL bool RENDER_APIENTRY createOpenGLSubwindow(
+        FBNativeWindowType window_id,
+        int x,
+        int y,
+        int width,
+        int height,
+        float zRot)
 {
     RenderWindow* window = s_renderWindow;
 
@@ -190,7 +192,7 @@ bool createOpenGLSubwindow(FBNativeWindowType window_id,
     return false;
 }
 
-bool destroyOpenGLSubwindow(void)
+RENDER_APICALL bool RENDER_APIENTRY destroyOpenGLSubwindow(void)
 {
     RenderWindow* window = s_renderWindow;
 
@@ -205,7 +207,7 @@ bool destroyOpenGLSubwindow(void)
     return false;
 }
 
-void setOpenGLDisplayRotation(float zRot)
+RENDER_APICALL void RENDER_APIENTRY setOpenGLDisplayRotation(float zRot)
 {
     RenderWindow* window = s_renderWindow;
 
@@ -219,7 +221,7 @@ void setOpenGLDisplayRotation(float zRot)
             __FUNCTION__);
 }
 
-void repaintOpenGLDisplay(void)
+RENDER_APICALL void RENDER_APIENTRY repaintOpenGLDisplay(void)
 {
     RenderWindow* window = s_renderWindow;
 
@@ -276,8 +278,7 @@ IOStream *createRenderThread(int p_stream_buffer_size, unsigned int clientFlags)
     return stream;
 }
 
-int
-setStreamMode(int mode)
+RENDER_APICALL int RENDER_APIENTRY setStreamMode(int mode)
 {
     switch (mode) {
         case STREAM_MODE_DEFAULT:

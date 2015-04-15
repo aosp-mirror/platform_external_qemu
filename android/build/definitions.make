@@ -217,3 +217,30 @@ define transform-generated-source
 @mkdir -p $(dir $@)
 $(hide) $(PRIVATE_CUSTOM_TOOL)
 endef
+
+# Generate DLL symbol file
+#
+# NOTE: The file is always named foo.def
+#
+define generate-symbol-file
+SRC:=$(1)
+OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%.entries=%.def))
+LOCAL_GENERATED_SYMBOL_FILE:=$$(OBJ)
+$$(OBJ): PRIVATE_SRC := $$(SRC)
+$$(OBJ): PRIVATE_DST := $$(OBJ)
+$$(OBJ): PRIVATE_MODE := $$(GEN_ENTRIES_MODE_$(HOST_OS))
+$$(OBJ): $$(SRC)
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	@echo "Generate symbol file: $$(notdir $$(PRIVATE_DST))"
+	$(hide) android/scripts/gen-entries.py --mode=$$(PRIVATE_MODE) --output=$$(PRIVATE_DST) $$(PRIVATE_SRC)
+endef
+
+GEN_ENTRIES_MODE_darwin := _symbols
+GEN_ENTRIES_MODE_windows := def
+GEN_ENTRIES_MODE_linux := sym
+
+EXPORTED_SYMBOL_LIST_windows :=
+EXPORTED_SYMBOL_LIST_darwin := -Wl,-exported_symbols_list,
+EXPORTED_SYMBOL_LIST_linux := -Wl,--version-script=
+
+symbol-file-linker-flags = $(EXPORTED_SYMBOL_LIST_$(HOST_OS))$1

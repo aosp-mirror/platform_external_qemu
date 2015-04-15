@@ -117,12 +117,14 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
     return ret;
 }
 
-GL_APICALL GLESiface* __translator_getIfaces(EGLiface* eglIface){
+GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
+
+GLESiface* __translator_getIfaces(EGLiface* eglIface) {
     s_eglIface = eglIface;
     return & s_glesIface;
 }
 
-}
+}  // extern "C"
 
 static void s_attachShader(GLEScontext* ctx, GLuint program, GLuint shader) {
     if (ctx && program && shader && ctx->shareGroup().Ptr()) {

@@ -84,8 +84,10 @@ static void initGLESx(GLESVersion version) {
 #define EGL_EXTENTIONS 2
 
 //decleration
+extern "C" {
 EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
+}  // extern "C"
 
 // extentions descriptors
 static const ExtentionDescriptor s_eglExtentions[] = {
