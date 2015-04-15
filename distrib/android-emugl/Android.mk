@@ -34,6 +34,14 @@ ifneq (,$(strip $(EMUGL_BUILD_DEBUG)))
 EMUGL_COMMON_CFLAGS += -O0 -g -DEMUGL_DEBUG=1
 endif
 
+EMUGL_COMMON_CFLAGS += -DEMUGL_BUILD=1
+ifeq (linux,$(HOST_OS))
+EMUGL_COMMON_CFLAGS += -fvisibility=internal
+endif
+ifeq (darwin,$(HOST_OS))
+EMUGL_COMMON_CFLAGS += -fvisibility=hidden
+endif
+
 # Uncomment the following line if you want to enable debug traces
 # in the GLES emulation libraries.
 # EMUGL_COMMON_CFLAGS += -DEMUGL_DEBUG=1
