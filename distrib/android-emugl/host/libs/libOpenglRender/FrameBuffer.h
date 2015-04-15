@@ -39,7 +39,7 @@ struct ColorBufferRef {
     uint32_t refcount;  // number of client-side references
 };
 typedef std::map<HandleType, RenderContextPtr> RenderContextMap;
-typedef std::map<HandleType, WindowSurfacePtr> WindowSurfaceMap;
+typedef std::map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
 typedef std::map<HandleType, ColorBufferRef> ColorBufferMap;
 
 // A structure used to list the capabilities of the underlying EGL
