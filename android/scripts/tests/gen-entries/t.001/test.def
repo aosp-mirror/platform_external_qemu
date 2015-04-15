@@ -1,0 +1,11 @@
+EXPORTS
+    initLibrary
+    setStreamMode
+    initOpenGLRenderer
+    getHardwareStrings
+    setPostCallback
+    createOpenGLSubwindow
+    destroyOpenGLSubwindow
+    setOpenGLDisplayRotation
+    repaintOpenGLDisplay
+    stopOpenGLRenderer
