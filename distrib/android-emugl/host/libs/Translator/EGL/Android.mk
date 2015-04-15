@@ -28,6 +28,7 @@ host_common_SRC_FILES :=      \
      EglConfig.cpp            \
      EglContext.cpp           \
      EglGlobalInfo.cpp        \
+     EglOsApi_osmesa.cpp      \
      EglValidate.cpp          \
      EglSurface.cpp           \
      EglWindowSurface.cpp     \

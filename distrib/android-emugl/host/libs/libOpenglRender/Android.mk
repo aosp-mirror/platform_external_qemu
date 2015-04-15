@@ -58,6 +58,8 @@ LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/include
 
 LOCAL_STATIC_LIBRARIES += libemugl_common
 
+LOCAL_SYMBOL_FILE := render_api.entries
+
 $(call emugl-export,CFLAGS,$(host_common_CFLAGS))
 
 $(call emugl-end-module)
