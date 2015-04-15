@@ -38,7 +38,7 @@ _TEMP_DIR=
 temp_dir () {
     if [ -z "$_TEMP_DIR" ]; then
         _TEMP_DIR=/tmp/$USER-download-sources-temp-$$
-        run mkdir -p "$_TEMP_DIR" || panic "Could not create temporary directory: $_TEMP_DIR"
+        silent_run mkdir -p "$_TEMP_DIR" || panic "Could not create temporary directory: $_TEMP_DIR"
         # Ensure temporary directory is deleted on script exit
         trap "_cleanup_temp_dir 0" EXIT
         trap "_cleanup_temp_dir \$?" QUIT INT HUP
