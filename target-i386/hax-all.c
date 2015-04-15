@@ -16,6 +16,7 @@
  * Some portion of code from KVM is used in this file.
  */
 
+#include <inttypes.h>
 #include "hw/hw.h"
 #include "target-i386/hax-i386.h"
 
@@ -139,9 +140,13 @@ static int hax_get_capability(struct hax_state *hax)
           HAX_CAP_STATUS_NOTWORKING ))
     {
         if (cap->winfo & HAX_CAP_FAILREASON_VT)
-            dprint("VT feature is not enabled, HAXM not working.\n");
+            dprint("VT feature is not enabled, HAXM not working.\n"
+                   "You might want to check your BIOS/UEFI settings "
+                   "and/or system manual on how to enable.\n");
         else if (cap->winfo & HAX_CAP_FAILREASON_NX)
-            dprint("NX feature is not enabled, HAXM not working.\n");
+            dprint("NX feature is not enabled, HAXM not working.\n"
+                   "You might want to check your BIOS/UEFI settings "
+                   "and/or system manual on how to enable.\n");
         return -ENXIO;
     }
 
@@ -149,8 +154,13 @@ static int hax_get_capability(struct hax_state *hax)
     {
         if (cap->mem_quota < hax->mem_quota)
         {
-            dprint("The memory needed by this VM exceeds the driver limit.\n");
-            return -ENOSPC;
+          dprint("The memory needed by this AVD exceeds the max specified "
+                 "in your HAXM configuration.");
+          dprint("AVD      RAM size = %"PRId64" MB", hax->mem_quota >> 20);
+          dprint("HAXM max RAM size = %"PRId64" MB", cap->mem_quota >> 20);
+          dprint("You might want to adjust your AVD RAM size and/or HAXM "
+                 "configuration to run in fast virt mode.\n");
+          return -ENOSPC;
         }
     }
 
