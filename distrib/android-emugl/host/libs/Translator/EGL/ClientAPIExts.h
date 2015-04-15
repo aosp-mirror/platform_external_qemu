@@ -13,17 +13,40 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _CLIENT_APIS_EXTS_H
-#define _CLIENT_APIS_EXTS_H
+#ifndef EGL_CLIENT_APIS_EXTS_H
+#define EGL_CLIENT_APIS_EXTS_H
 
+#include "ClientAPIExts_functions.h"
 #include "GLcommon/TranslatorIfaces.h"
 
-namespace ClientAPIExts
-{
+class ClientAPIExts {
+public:
+    // Constructor.
+    ClientAPIExts();
 
-void initClientFuncs(const GLESiface *iface, int idx);
-__translatorMustCastToProperFunctionPointerType getProcAddress(const char *fname);
+    // This function initialized each entry in the s_client_extensions
+    // struct at the givven index using the givven client interface
+    static void initClientFuncs(const GLESiface *iface, int idx);
 
-} // of namespace ClientAPIExts
+    static __translatorMustCastToProperFunctionPointerType getProcAddress(
+            const char *fname);
 
-#endif
+#define CLIENTAPI_DECLARE_TYPEDEF(ret,name,signature,args) \
+    typedef ret (GL_APIENTRY *name ## _t) signature;
+
+    LIST_CLIENTAPI_EXTENSIONS_FUNCTIONS(CLIENTAPI_DECLARE_TYPEDEF)
+
+#define CLIENTAPI_DECLARE_MEMBER(ret,name,signature,args) \
+    name ## _t name;
+
+    LIST_CLIENTAPI_EXTENSIONS_FUNCTIONS(CLIENTAPI_DECLARE_MEMBER)
+private:
+    void init(const GLESiface* iface);
+
+    __translatorMustCastToProperFunctionPointerType resolve(
+            const char* functionName);
+
+    int dummy;
+};
+
+#endif  // EGL_CLIENT_APIS_EXTS_H
