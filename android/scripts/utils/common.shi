@@ -83,6 +83,12 @@ log2 () {
     dump_n 2 "$@"
 }
 
+# Run a command, but suppress stdout
+# keep stderr open in case error
+silent_run () {
+    "$@" >/dev/null
+}
+
 # Run a command, output depends on verbosity level
 run () {
     local VERBOSE=$_SHU_VERBOSE
@@ -214,10 +220,10 @@ unpack_archive () {
     local DEST_DIR="$2"
     case $PKG_PATH in
         *.tar.gz|*.tar.bz2|*.tar.xz)
-            run tar xf "$PKG_PATH" -C "$DEST_DIR"
+            silent_run tar xf "$PKG_PATH" -C "$DEST_DIR"
             ;;
         *.zip)
-            run unzip -q -o -d "$DEST_DIR" "$PKG_PATH"
+            silent_run unzip -q -o -d "$DEST_DIR" "$PKG_PATH"
             ;;
         *)
             panic "Unsupported package format: $PKG_PATH"
