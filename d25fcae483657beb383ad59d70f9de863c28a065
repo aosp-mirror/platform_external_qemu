@@ -16,6 +16,24 @@
       "revId": "d25fcae483657beb383ad59d70f9de863c28a065",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "907ac6a8_c69b2471",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2015-04-16T02:03:42Z",
+      "side": 1,
+      "message": "Thanks Tina; updated .",
+      "parentUuid": "904c868c_6d1b4d2c",
+      "revId": "d25fcae483657beb383ad59d70f9de863c28a065",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
