@@ -37,9 +37,12 @@ typedef std::map<unsigned int, SurfacePtr>  SurfacesHndlMap;
 class EglDisplay {
 public:
     // Create new EglDisplay instance from a given native display |dpy|,
-    // with matching internal display |idpy|. If |isDefault| is true,
-    // this will be considered the default diplay.
-    EglDisplay(EGLNativeDisplayType dpy, EglOS::Display* idpy);
+    // with matching internal display |idpy|. |dispatch| is a GL dispatch
+    // table that will be used to allocate/deallocate object ids for the
+    // global name space.
+    EglDisplay(EGLNativeDisplayType dpy,
+               EglOS::Display* idpy,
+               const GLDispatch* dispatch);
 
     // Return the native display handle for this EglDisplay.
     EGLNativeDisplayType getNativeDisplay() const { return m_dpy; }

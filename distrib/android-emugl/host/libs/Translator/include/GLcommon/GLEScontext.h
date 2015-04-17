@@ -118,7 +118,7 @@ private:
 
 class GLEScontext{
 public:
-    virtual void init();
+    virtual void init(const GLDispatch* dispatch);
     GLEScontext();
     GLenum getGLerror();
     void setGLerror(GLenum err);
@@ -165,7 +165,7 @@ public:
     void setFramebufferBinding(GLuint fb) { m_framebuffer = fb; }
     GLuint getFramebufferBinding() const { return m_framebuffer; }
 
-    static GLDispatch& dispatcher(){return s_glDispatch;};
+    const  GLDispatch& dispatcher() const {return *m_glDispatch; }
 
     static int getMaxLights(){return s_glSupport.maxLights;}
     static int getMaxClipPlanes(){return s_glSupport.maxClipPlane;}
@@ -187,12 +187,12 @@ protected:
     void convertDirectVBO(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum array_id,GLESpointer* p);
     void convertIndirect(GLESConversionArrays& fArrs,GLsizei count,GLenum type,const GLvoid* indices,GLenum array_id,GLESpointer* p);
     void convertIndirectVBO(GLESConversionArrays& fArrs,GLsizei count,GLenum indices_type,const GLvoid* indices,GLenum array_id,GLESpointer* p);
-    void initCapsLocked(const GLubyte * extensionString);
+    void initCapsLocked(const GLDispatch* dispatch, const GLubyte * extensionString);
     virtual void initExtensionString() =0;
 
     static emugl::Mutex   s_lock;
-    static GLDispatch     s_glDispatch;
     bool                  m_initialized;
+    const GLDispatch*     m_glDispatch;
     unsigned int          m_activeTexture;
     GLint                 m_unpackAlignment;
     ArraysMap             m_map;
