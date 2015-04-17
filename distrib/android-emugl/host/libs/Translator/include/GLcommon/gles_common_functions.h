@@ -19,6 +19,7 @@ typedef const GLubyte* GLconstubyteptr;
   X(void, glBufferSubData, (GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid * data)) \
   X(void, glClear, (GLbitfield mask)) \
   X(void, glClearColor, (GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha)) \
+  X(void, glClearDepth, (GLclampd depth)) \
   X(void, glClearStencil, (GLint s)) \
   X(void, glColorMask, (GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha)) \
   X(void, glCompressedTexImage2D, (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid * data)) \
@@ -46,6 +47,8 @@ typedef const GLubyte* GLconstubyteptr;
   X(void, glGetFloatv, (GLenum pname, GLfloat * params)) \
   X(void, glGetIntegerv, (GLenum pname, GLint * params)) \
   X(GLconstubyteptr, glGetString, (GLenum name)) \
+  X(void, glTexParameterf, (GLenum target, GLenum pname, GLfloat param)) \
+  X(void, glTexParameterfv, (GLenum target, GLenum pname, const GLfloat * params)) \
   X(void, glGetTexParameterfv, (GLenum target, GLenum pname, GLfloat * params)) \
   X(void, glGetTexParameteriv, (GLenum target, GLenum pname, GLint * params)) \
   X(void, glGetTexLevelParameteriv, (GLenum target, GLint level, GLenum pname, GLint * params)) \
@@ -68,8 +71,8 @@ typedef const GLubyte* GLconstubyteptr;
   X(void, glTexSubImage2D, (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid * pixels)) \
   X(void, glViewport, (GLint x, GLint y, GLsizei width, GLsizei height)) \
   X(void, glPushAttrib, (GLbitfield mask)) \
-  X(void, glPopAttrib, ()) \
   X(void, glPushClientAttrib, (GLbitfield mask)) \
+  X(void, glPopAttrib, ()) \
   X(void, glPopClientAttrib, ()) \
 
 

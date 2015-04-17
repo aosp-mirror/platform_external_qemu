@@ -20,6 +20,8 @@
 #include "emugl/common/mutex.h"
 #include "emugl/common/smart_ptr.h"
 
+class GLDispatch;
+
 enum NamedObjectType {
     VERTEXBUFFER = 0,
     TEXTURE = 1,
@@ -120,16 +122,17 @@ private:
     GlobalNameSpace *m_globalNameSpace;
 };
 
-class GlobalNameSpace
-{
+class GlobalNameSpace {
 public:
-    GlobalNameSpace();
+    explicit GlobalNameSpace(const GLDispatch* dispatch);
     ~GlobalNameSpace();
+    void setDispatch(const GLDispatch* dispatch);
     unsigned int genName(NamedObjectType p_type);
     void deleteName(NamedObjectType p_type, unsigned int p_name);
 
 private:
     emugl::Mutex m_lock;
+    const GLDispatch* m_dispatch;
 };
 
 //

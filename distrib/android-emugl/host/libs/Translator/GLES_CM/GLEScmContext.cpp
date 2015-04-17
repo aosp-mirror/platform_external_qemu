@@ -22,18 +22,17 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
-void GLEScmContext::init() {
+void GLEScmContext::init(const GLDispatch* dispatch) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
-        s_glDispatch.dispatchFuncs(GLES_1_1);
-        GLEScontext::init();
+        GLEScontext::init(dispatch);
 
         m_texCoords = new GLESpointer[s_glSupport.maxTexUnits];
         m_map[GL_TEXTURE_COORD_ARRAY]  = &m_texCoords[m_clientActiveTexture];
 
-        buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
-                     (const char*)dispatcher().glGetString(GL_RENDERER),
-                     (const char*)dispatcher().glGetString(GL_VERSION),
+        buildStrings((const char*)dispatch->glGetString(GL_VENDOR),
+                     (const char*)dispatch->glGetString(GL_RENDERER),
+                     (const char*)dispatch->glGetString(GL_VERSION),
                      "OpenGL ES-CM 1.1");
     }
     m_initialized = true;
@@ -69,18 +68,19 @@ GLEScmContext::~GLEScmContext(){
 //setting client side arr
 void GLEScmContext::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index){
     if( arr == NULL) return;
+    const GLDispatch* dispatch = &dispatcher();
     switch(arrayType) {
         case GL_VERTEX_ARRAY:
-            s_glDispatch.glVertexPointer(size,dataType,stride,arr);
+            dispatch->glVertexPointer(size,dataType,stride,arr);
             break;
         case GL_NORMAL_ARRAY:
-            s_glDispatch.glNormalPointer(dataType,stride,arr);
+            dispatch->glNormalPointer(dataType,stride,arr);
             break;
         case GL_TEXTURE_COORD_ARRAY:
-            s_glDispatch.glTexCoordPointer(size,dataType,stride,arr);
+            dispatch->glTexCoordPointer(size,dataType,stride,arr);
             break;
         case GL_COLOR_ARRAY:
-            s_glDispatch.glColorPointer(size,dataType,stride,arr);
+            dispatch->glColorPointer(size,dataType,stride,arr);
             break;
         case GL_POINT_SIZE_ARRAY_OES:
             m_pointsIndex = index;
@@ -123,12 +123,14 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
     int maxTexUnits = s_glSupport.maxTexUnits;
     s_lock.unlock();
 
+    const GLDispatch* dispatch = &dispatcher();
+
     //converting all texture coords arrays
     for(int i=0; i< maxTexUnits;i++) {
 
         unsigned int tex = GL_TEXTURE0+i;
         setClientActiveTexture(tex);
-        s_glDispatch.glClientActiveTexture(tex);
+        dispatch->glClientActiveTexture(tex);
 
         GLenum array_id   = GL_TEXTURE_COORD_ARRAY;
         GLESpointer* p = m_map[array_id];
@@ -137,7 +139,7 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
     }
 
     setClientActiveTexture(activeTexture);
-    s_glDispatch.glClientActiveTexture(activeTexture);
+    dispatch->glClientActiveTexture(activeTexture);
 }
 
 void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices_in,bool isElemsDraw) {
@@ -158,6 +160,7 @@ void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsi
         stride = sizeof(GLfloat);
     }
 
+    const GLDispatch* dispatch = &dispatcher();
 
     if(isElemsDraw) {
         int tSize = type == GL_UNSIGNED_SHORT ? 2 : 1;
@@ -182,8 +185,8 @@ void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsi
                 i++;
             }
 
-            s_glDispatch.glPointSize(pSize);
-            s_glDispatch.glDrawElements(GL_POINTS, sCount, type, (char*)indices_in+sStart*tSize);
+            dispatch->glPointSize(pSize);
+            dispatch->glDrawElements(GL_POINTS, sCount, type, (char*)indices_in+sStart*tSize);
         }
     } else {
         int i = 0;
@@ -200,8 +203,8 @@ void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsi
                 i++;
             }
 
-            s_glDispatch.glPointSize(pSize);
-            s_glDispatch.glDrawArrays(GL_POINTS, first+sStart, sCount);
+            dispatch->glPointSize(pSize);
+            dispatch->glDrawArrays(GL_POINTS, first+sStart, sCount);
         }
     }
 }

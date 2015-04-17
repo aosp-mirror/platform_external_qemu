@@ -25,7 +25,7 @@
 
 class GLESv2Context : public GLEScontext{
 public:
-    void init();
+    void init(const GLDispatch* dispatch);
     GLESv2Context();
     virtual ~GLESv2Context();
     void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
