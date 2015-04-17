@@ -81,6 +81,7 @@ class GLEScontext;
 
 typedef struct {
     void                                            (*initGLESx)();
+    const GLDispatch*                               (*getDispatch)();
     GLEScontext*                                    (*createGLESContext)();
     void                                            (*initContext)(GLEScontext*,ShareGroupPtr);
     void                                            (*deleteGLESContext)(GLEScontext*);
@@ -88,7 +89,7 @@ typedef struct {
     void                                            (*finish)();
     void                                            (*setShareGroup)(GLEScontext*,ShareGroupPtr);
     __translatorMustCastToProperFunctionPointerType (*getProcAddress)(const char*);
-}GLESiface;
+} GLESiface;
 
 
 typedef struct {
