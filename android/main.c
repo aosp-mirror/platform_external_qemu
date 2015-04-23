@@ -109,6 +109,46 @@ void emulator_help( void )
     exit(1);
 }
 
+/*
+ * _findQemuInformationalOption: search for informational QEMU options
+ *
+ * Scans the given command-line options for any informational QEMU option (see
+ * |qemu_info_opts| for the list of informational QEMU options). Returns the
+ * first matching option, or NULL if no match is found.
+ *
+ * |qemu_argc| is the number of command-line options in |qemu_argv|.
+ * |qemu_argv| is the array of command-line options to be searched. It is the
+ * caller's responsibility to ensure that all these options are intended for
+ * QEMU.
+ */
+static char*
+_findQemuInformationalOption( int qemu_argc, char** qemu_argv )
+{
+    /* Informational QEMU options, which make QEMU print some information to the
+     * console and exit. */
+    static const char* const qemu_info_opts[] = {
+        "-h",
+        "-help",
+        "-version",
+        "-audio-help",
+        "?",           /* e.g. '-cpu ?' for listing available CPU models */
+        NULL           /* denotes the end of the list */
+    };
+    int i = 0;
+
+    for (; i < qemu_argc; i++) {
+        char* arg = qemu_argv[i];
+        const char* const* oo = qemu_info_opts;
+
+        for (; *oo; oo++) {
+            if (!strcmp(*oo, arg)) {
+                return arg;
+            }
+        }
+    }
+    return NULL;
+}
+
 /* TODO: Put in shared source file */
 static char*
 _getFullFilePath( const char* rootPath, const char* fileName )
@@ -162,6 +202,8 @@ int main(int argc, char **argv)
     char*  args[128];
     int    n;
     char*  opt;
+    char*  qemu_info_opt;
+
     /* The emulator always uses the first serial port for kernel messages
      * and the second one for qemud. So start at the third if we need one
      * for logcat or 'shell'
@@ -291,6 +333,30 @@ int main(int argc, char **argv)
             }
         }
         snapshot_print_and_exit(opts->snapstorage);
+    }
+
+    /* Both |argc| and |argv| have been modified by the big while loop above:
+     * |argc| should now be the number of options after '-qemu', and if that is
+     * positive, |argv| should point to the first option following '-qemu'.
+     * Now we check if any of these QEMU options is an 'informational' option,
+     * e.g. '-h', '-version', etc.
+     * The extra pair of parentheses is to keep gcc happy.
+     */
+    if ((qemu_info_opt = _findQemuInformationalOption(argc, argv))) {
+        D("Found informational option '%s' after '-qemu'.\n"
+          "All options before '-qemu' will be ignored!", qemu_info_opt);
+
+        /* Copy all QEMU options to |args|, and set |n| to the number of options
+         * in |args| (|argc| must be positive here). */
+        n = 1;
+        do {
+            args[n] = argv[n - 1];
+        } while (n++ < argc);
+        args[n] = NULL;
+
+        /* Skip the translation of command-line options and jump straight to
+         * qemu_main(). */
+        goto invoke_qemu;
     }
 
     sanitizeOptions(opts);
@@ -1540,5 +1606,6 @@ int main(int argc, char **argv)
     /* Setup SDL UI just before calling the code */
     init_sdl_ui(skinConfig, skinPath, opts);
 
+invoke_qemu:
     return qemu_main(n, args);
 }
