@@ -234,6 +234,11 @@ build_qemu_android () {
                 # OSS, does not work
                 AUDIO_BACKENDS_FLAG="--audio-drv-list=pa"
                 ;;
+            windows-*)
+                # Prefer winaudio on Windows because winwave causes
+                # major problems when audio input is enabled
+                AUDIO_BACKENDS_FLAG="--audio-drv-list=winaudio,winwave"
+                ;;
         esac
 
         PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
