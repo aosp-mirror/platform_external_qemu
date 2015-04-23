@@ -2,6 +2,7 @@
  * QEMU "simple" Windows audio driver
  *
  * Copyright (c) 2007 The Android Open Source Project
+ * Copyright (c) 2015 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <mmsystem.h>
+
+#include "qemu-common.h"
+#include "sysemu/sysemu.h"
+#include "audio.h"
 
 #define AUDIO_CAP "winaudio"
 #include "audio_int.h"
+
+#include <windows.h>
+#include <mmsystem.h>
 
 /* define DEBUG to 1 to dump audio debugging info at runtime to stderr */
 #define  DEBUG  0
@@ -544,7 +549,7 @@ winaudio_in_run (HWVoiceIn *hw)
                __FUNCTION__, s->read_index, s->read_pos, s->read_size, wav_samples, wav_bytes, live,
                hw->wpos, hw->samples);
 
-            hw->conv(dst, src, wav_samples, &nominal_volume);
+            hw->conv(dst, src, wav_samples);
 
             hw->wpos += wav_samples;
             if (hw->wpos >= hw->samples)
@@ -650,16 +655,16 @@ static struct audio_pcm_ops winaudio_pcm_ops = {
     winaudio_in_ctl
 };
 
-struct audio_driver win_audio_driver = {
-    INIT_FIELD (name           = ) "winaudio",
-    INIT_FIELD (descr          = ) "Windows wave audio",
-    INIT_FIELD (options        = ) winaudio_options,
-    INIT_FIELD (init           = ) winaudio_init,
-    INIT_FIELD (fini           = ) winaudio_fini,
-    INIT_FIELD (pcm_ops        = ) &winaudio_pcm_ops,
-    INIT_FIELD (can_be_default = ) 1,
-    INIT_FIELD (max_voices_out = ) 1,
-    INIT_FIELD (max_voices_in  = ) 1,
-    INIT_FIELD (voice_size_out = ) sizeof (WinAudioOut),
-    INIT_FIELD (voice_size_in  = ) sizeof (WinAudioIn)
+struct audio_driver winaudio_audio_driver = {
+    .name           = "winaudio",
+    .descr          = "Windows wave audio",
+    .options        = winaudio_options,
+    .init           = winaudio_init,
+    .fini           = winaudio_fini,
+    .pcm_ops        = &winaudio_pcm_ops,
+    .can_be_default = 1,
+    .max_voices_out = 1,
+    .max_voices_in  = 1,
+    .voice_size_out = sizeof (WinAudioOut),
+    .voice_size_in  = sizeof (WinAudioIn)
 };

@@ -560,7 +560,7 @@ CYGWIN*)
 ;;
 MINGW32*)
   mingw32="yes"
-  audio_possible_drivers="winwave dsound sdl fmod"
+  audio_possible_drivers="winwave dsound sdl fmod winaudio"
   audio_drv_list="winwave"
 ;;
 GNU/kFreeBSD)
@@ -2577,6 +2577,10 @@ for drv in $audio_drv_list; do
     winwave)
       libs_softmmu="-lwinmm $libs_softmmu"
       audio_win_int="yes"
+    ;;
+
+    winaudio)
+      libs_softmmu="-lwinmm $libs_softmmu"
     ;;
 
     *)
