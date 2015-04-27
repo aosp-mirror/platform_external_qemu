@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d0027e8c_4f292583",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-04-27T07:56:50Z",
+      "side": 1,
+      "message": "Good idea. The extra const qualifier actually leads to an interesting question of how to properly declare the type of \"oo\" on line 143 :) You\u0027ll see that shortly.",
+      "parentUuid": "90e3a61e_acb8a3d9",
+      "revId": "7cda61249de6ad13dd4a32b1a7bd6b1d8782e0de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "90e3a61e_6ca3dbad",
         "filename": "android/main.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-27T06:58:37Z",
       "side": 1,
       "message": "nit: rename this to _findQemuInformationalOption().",
+      "revId": "7cda61249de6ad13dd4a32b1a7bd6b1d8782e0de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0fd0ac2_e8ae8b98",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-04-27T07:56:50Z",
+      "side": 1,
+      "message": "Sure. Will fix.",
+      "parentUuid": "90e3a61e_6ca3dbad",
       "revId": "7cda61249de6ad13dd4a32b1a7bd6b1d8782e0de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
