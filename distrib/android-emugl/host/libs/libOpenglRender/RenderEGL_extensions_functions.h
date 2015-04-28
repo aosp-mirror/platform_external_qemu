@@ -8,16 +8,8 @@
 #define EGL_EGLEXT_PROTOTYPES
 #include <EGL/eglext.h>
 #define LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(X) \
-  X(EGLBoolean, eglLockSurfaceKHR, (EGLDisplay display, EGLSurface surface, const EGLint* attrib_list)) \
-  X(EGLBoolean, eglUnlockSurfaceKHR, (EGLDisplay display, EGLSurface surface)) \
   X(EGLImageKHR, eglCreateImageKHR, (EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint* attrib_list)) \
   X(EGLBoolean, eglDestroyImageKHR, (EGLDisplay display, EGLImageKHR image)) \
-  X(EGLSyncKHR, eglCreateSyncKHR, (EGLDisplay display, EGLenum type, const EGLint* attrib_list)) \
-  X(EGLBoolean, eglDestroySyncKHR, (EGLDisplay display, EGLSyncKHR sync)) \
-  X(EGLint, eglClientWaitSyncKHR, (EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)) \
-  X(EGLBoolean, eglSignalSyncKHR, (EGLDisplay display, EGLSyncKHR sync, EGLenum mode)) \
-  X(EGLBoolean, eglGetSyncAttribKHR, (EGLDisplay display, EGLSyncKHR sync, EGLint attribute, EGLint* value)) \
-  X(EGLBoolean, eglSetSwapRectangleANDROID, (EGLDisplay display, EGLSurface surface, EGLint left, EGLint top, EGLint width, EGLint height)) \
 
 
 #endif  // RENDER_EGL_EXTENSIONS_FUNCTIONS_H

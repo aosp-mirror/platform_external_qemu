@@ -7,13 +7,5 @@
 %#define EGL_EGLEXT_PROTOTYPES
 %#include <EGL/eglext.h>
 
-EGLBoolean eglLockSurfaceKHR(EGLDisplay display, EGLSurface surface, const EGLint* attrib_list);
-EGLBoolean eglUnlockSurfaceKHR(EGLDisplay display, EGLSurface surface);
 EGLImageKHR eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint* attrib_list);
 EGLBoolean eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
-EGLSyncKHR eglCreateSyncKHR(EGLDisplay display, EGLenum type, const EGLint* attrib_list);
-EGLBoolean eglDestroySyncKHR(EGLDisplay display, EGLSyncKHR sync);
-EGLint eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout);
-EGLBoolean eglSignalSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLenum mode);
-EGLBoolean eglGetSyncAttribKHR(EGLDisplay display, EGLSyncKHR sync, EGLint attribute, EGLint* value);
-EGLBoolean eglSetSwapRectangleANDROID(EGLDisplay display, EGLSurface surface, EGLint left, EGLint top, EGLint width, EGLint height);
