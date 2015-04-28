@@ -386,10 +386,6 @@ public:
         return new GlxDisplay(XOpenDisplay(0));
     }
 
-    virtual EglOS::Display* getInternalDisplay(EGLNativeDisplayType dpy) {
-        return new GlxDisplay(dpy);
-    }
-
     virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
         return new GlxSurface(wnd, GlxSurface::WINDOW);
     }

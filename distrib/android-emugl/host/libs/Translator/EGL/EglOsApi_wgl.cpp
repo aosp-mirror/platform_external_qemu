@@ -709,13 +709,6 @@ public:
         return new WglDisplay(dpy);
     }
 
-    virtual EglOS::Display* getInternalDisplay(EGLNativeDisplayType display) {
-        WinDisplay* dpy = new WinDisplay();
-        dpy->setInfo(WinDisplay::DEFAULT_DISPLAY, DisplayInfo(display, NULL));
-
-        return new WglDisplay(dpy);
-    }
-
     virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
         return new WinSurface(wnd);
     }

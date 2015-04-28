@@ -173,18 +173,16 @@ EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
 
     if ((dpy = g_eglInfo->getDisplay(display_id))) {
         return dpy;
-    } else {
-
-        if( display_id == EGL_DEFAULT_DISPLAY) {
-            internalDisplay = g_eglInfo->getDefaultNativeDisplay();
-        } else {
-            internalDisplay = g_eglInfo->generateInternalDisplay(display_id);
-        }
-
-        dpy = g_eglInfo->addDisplay(display_id,internalDisplay);
-        if(dpy) return dpy;
+    }
+    if (display_id != EGL_DEFAULT_DISPLAY) {
         return EGL_NO_DISPLAY;
     }
+    internalDisplay = g_eglInfo->getDefaultNativeDisplay();
+    dpy = g_eglInfo->addDisplay(display_id,internalDisplay);
+    if(!dpy) {
+        return EGL_NO_DISPLAY;
+    }
+    return dpy;
 }
 
 

@@ -338,10 +338,6 @@ public:
         return new MacDisplay(0);
     }
 
-    virtual EglOS::Display* getInternalDisplay(EGLNativeDisplayType dpy) {
-        return new MacDisplay(dpy);
-    }
-
     virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
         return new MacSurface(wnd, MacSurface::WINDOW);
     }

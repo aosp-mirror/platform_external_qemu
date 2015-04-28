@@ -158,12 +158,6 @@ public:
     // Return a Display instance to the default display / window.
     virtual Display* getDefaultDisplay() = 0;
 
-    // Convert a platform-specific display type (e.g. a Windows HWND) into
-    // the corresponding Display instance. This will return NULL for engines
-    // that are not tied to the host platform (e.g. software renderers like
-    // OSMesa).
-    virtual Display* getInternalDisplay(EGLNativeDisplayType dpy) = 0;
-
     // Create a new window surface. |wnd| is a host-specific window handle
     // (e.g. a Windows HWND). A software renderer would always return NULL
     // here.
