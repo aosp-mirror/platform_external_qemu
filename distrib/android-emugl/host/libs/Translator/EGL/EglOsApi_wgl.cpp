@@ -81,7 +81,6 @@ struct WglExtProcs{
     PFNWGLDESTROYPBUFFERARBPROC wglDestroyPbufferARB;
     PFNWGLGETPBUFFERDCARBPROC wglGetPbufferDCARB;
     PFNWGLMAKECONTEXTCURRENTARBPROC wglMakeContextCurrentARB;
-    PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
 };
 
 WglExtProcs* s_wglExtProcs = NULL;
@@ -215,13 +214,6 @@ void initPtrToWglFunctions(){
                                 dpy,
                                 "WGL_ARB_make_current_read",
                                 "wglMakeContextCurrentARB");
-
-        s_wglExtProcs->wglSwapIntervalEXT =
-                (PFNWGLSWAPINTERVALEXTPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_EXT_swap_control",
-                                "wglSwapIntervalEXT");
     }
 
     wglMakeCurrent(dpy, NULL);
@@ -262,26 +254,17 @@ public:
             Surface(WINDOW),
             m_hwnd(wnd),
             m_pb(NULL),
-            m_bmap(NULL),
             m_hdc(GetDC(wnd)) {}
 
     explicit WinSurface(HPBUFFERARB pb) :
             Surface(PBUFFER),
             m_hwnd(NULL),
             m_pb(pb),
-            m_bmap(NULL),
             m_hdc(NULL) {
         if (s_wglExtProcs->wglGetPbufferDCARB) {
             m_hdc = s_wglExtProcs->wglGetPbufferDCARB(pb);
         }
     }
-
-    explicit WinSurface(HBITMAP bmap) :
-            Surface(PIXMAP),
-            m_hwnd(NULL),
-            m_pb(NULL),
-            m_bmap(bmap),
-            m_hdc(NULL) {}
 
     ~WinSurface() {
         if (type() == WINDOW) {
@@ -291,7 +274,6 @@ public:
 
     HWND getHwnd() const { return m_hwnd; }
     HDC  getDC() const { return m_hdc; }
-    HBITMAP getBmap() const { return m_bmap; }
     HPBUFFERARB getPbuffer() const { return m_pb; }
 
     static WinSurface* from(EglOS::Surface* s) {
@@ -301,7 +283,6 @@ public:
 private:
     HWND        m_hwnd;
     HPBUFFERARB m_pb;
-    HBITMAP     m_bmap;
     HDC         m_hdc;
 };
 
@@ -455,7 +436,6 @@ void pixelFormatToConfig(WinDisplay* display,
 
     int attribs [] = {
         WGL_DRAW_TO_WINDOW_ARB,
-        WGL_DRAW_TO_BITMAP_ARB,
         WGL_DRAW_TO_PBUFFER_ARB,
         WGL_TRANSPARENT_ARB,
         WGL_TRANSPARENT_RED_VALUE_ARB,
@@ -467,20 +447,15 @@ void pixelFormatToConfig(WinDisplay* display,
         return;
     }
 
-    GLint window, bitmap, pbuffer;
+    GLint window, pbuffer;
     EXIT_IF_FALSE(s_wglExtProcs->wglGetPixelFormatAttribivARB(
             dpy, index, 0, 1, &attribs[0], &window));
     EXIT_IF_FALSE(s_wglExtProcs->wglGetPixelFormatAttribivARB(
-            dpy, index, 0, 1, &attribs[1], &bitmap));
-    EXIT_IF_FALSE(s_wglExtProcs->wglGetPixelFormatAttribivARB(
-            dpy, index, 0, 1, &attribs[2], &pbuffer));
+            dpy, index, 0, 1, &attribs[1], &pbuffer));
 
     info.surface_type = 0;
     if (window) {
         info.surface_type |= EGL_WINDOW_BIT;
-    }
-    if (bitmap) {
-        info.surface_type |= EGL_PIXMAP_BIT;
     }
     if (pbuffer) {
         info.surface_type |= EGL_PBUFFER_BIT;
@@ -584,17 +559,6 @@ public:
         return IsWindow(win);
     }
 
-    virtual bool isValidNativePixmap(EglOS::Surface* pix) {
-        if (!pix) {
-            return false;
-        } else {
-            BITMAP bm;
-            return GetObject(WinSurface::from(pix)->getBmap(),
-                             sizeof(BITMAP),
-                             (LPSTR)&bm);
-        }
-    }
-
     virtual bool checkWindowPixelFormatMatch(
             EGLNativeWindowType win,
             const EglOS::PixelFormat* pixelFormat,
@@ -611,20 +575,6 @@ public:
         bool ret = SetPixelFormat(dc, format->configId(), format->desc());
         DeleteDC(dc);
         return ret;
-    }
-
-    virtual bool checkPixmapPixelFormatMatch(
-            EGLNativePixmapType pix,
-            const EglOS::PixelFormat* pixelFormat,
-            unsigned int* width,
-            unsigned int* height) {
-        BITMAP bm;
-        if (!GetObject(pix, sizeof(BITMAP), (LPSTR)&bm)) {
-            return false;
-        }
-        *width  = bm.bmWidth;
-        *height = bm.bmHeight;
-        return true;
     }
 
     virtual EglOS::Context* createContext(
@@ -741,12 +691,6 @@ public:
         }
     }
 
-    virtual void swapInterval(EglOS::Surface* win, int interval) {
-        if (s_wglExtProcs->wglSwapIntervalEXT){
-            s_wglExtProcs->wglSwapIntervalEXT(interval);
-        }
-    }
-
 private:
     WinDisplay* mDpy;
 };
@@ -775,12 +719,6 @@ public:
     virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
         return new WinSurface(wnd);
     }
-
-    virtual EglOS::Surface* createPixmapSurface(EGLNativePixmapType pix) {
-        return new WinSurface(pix);
-    }
-
-    virtual void wait() {}
 };
 
 WinEngine::WinEngine() {

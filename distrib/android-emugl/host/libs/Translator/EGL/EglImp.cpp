@@ -25,7 +25,6 @@
 
 #include "EglWindowSurface.h"
 #include "EglPbufferSurface.h"
-#include "EglPixmapSurface.h"
 #include "EglGlobalInfo.h"
 #include "EglThreadInfo.h"
 #include "EglValidate.h"
@@ -582,34 +581,6 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
     return dpy->addSurface(pbSurface);
 }
 
-EGLAPI EGLSurface EGLAPIENTRY eglCreatePixmapSurface(EGLDisplay display, EGLConfig config,
-                  EGLNativePixmapType pixmap,
-                  const EGLint *attrib_list) {
-    VALIDATE_DISPLAY_RETURN(display,EGL_NO_SURFACE);
-    VALIDATE_CONFIG_RETURN(config,EGL_NO_SURFACE);
-    if(!(cfg->surfaceType() & EGL_PIXMAP_BIT)) {
-        RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_MATCH);
-    }
-    if(!EglValidate::noAttribs(attrib_list)) {
-        RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ATTRIBUTE);
-    }
-    if(EglPixmapSurface::alreadyAssociatedWithConfig(pixmap)) {
-        RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ALLOC);
-    }
-
-    unsigned int width,height;
-    if(!dpy->nativeType()->checkPixmapPixelFormatMatch(
-            pixmap, cfg->nativeFormat(), &width, &height)) {
-        RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ALLOC);
-    }
-    SurfacePtr pixSurface(new EglPixmapSurface(dpy, pixmap,cfg));
-    if(!pixSurface.Ptr()) {
-        RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ALLOC);
-    }
-
-    return dpy->addSurface(pixSurface);
-}
-
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySurface(EGLDisplay display, EGLSurface surface) {
     VALIDATE_DISPLAY(display);
     SurfacePtr srfc = dpy->getSurface(surface);
@@ -768,15 +739,6 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
             RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_WINDOW);
         }
 
-        //checking native pixmap validity
-        if(newReadPtr->type() == EglSurface::PIXMAP &&
-                !nativeDisplay->isValidNativePixmap(nativeRead)) {
-            RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_PIXMAP);
-        }
-        if(newDrawPtr->type() == EglSurface::PIXMAP &&
-                !nativeDisplay->isValidNativePixmap(nativeDraw)) {
-            RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_PIXMAP);
-        }
         if(prevCtx.Ptr()) {
             g_eglInfo->getIface(prevCtx->version())->flush();
         }
@@ -840,22 +802,6 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSwapBuffers(EGLDisplay display, EGLSurface surf
     return EGL_TRUE;
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY eglSwapInterval(EGLDisplay display, EGLint interval) {
-    VALIDATE_DISPLAY(display);
-    ThreadInfo* thread  = getThreadInfo();
-    ContextPtr currCtx = thread->eglContext;
-    if(currCtx.Ptr()) {
-        if(!currCtx->read().Ptr() || !currCtx->draw().Ptr() || currCtx->draw()->type()!=EglSurface::WINDOW) {
-            RETURN_ERROR(EGL_FALSE,EGL_BAD_CURRENT_SURFACE);
-        }
-        dpy->nativeType()->swapInterval(currCtx->draw()->native(),interval);
-    } else {
-            RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
-    }
-    return EGL_TRUE;
-}
-
-
 EGLAPI EGLContext EGLAPIENTRY eglGetCurrentContext(void) {
     ThreadInfo* thread = getThreadInfo();
     EglDisplay* dpy    = static_cast<EglDisplay*>(thread->eglDisplay);
@@ -905,51 +851,6 @@ EGLAPI EGLDisplay EGLAPIENTRY eglGetCurrentDisplay(void) {
     return (thread->eglContext.Ptr()) ? thread->eglDisplay : EGL_NO_DISPLAY;
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY eglWaitGL(void) {
-    EGLenum api = eglQueryAPI();
-    eglBindAPI(EGL_OPENGL_ES_API);
-    EGLBoolean ret = eglWaitClient();
-    eglBindAPI(api);
-    return ret;
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY eglWaitNative(EGLint engine) {
-    if(!EglValidate::engine(engine)) {
-        RETURN_ERROR(EGL_FALSE,EGL_BAD_PARAMETER);
-    }
-    ThreadInfo* thread  = getThreadInfo();
-    ContextPtr  currCtx = thread->eglContext;
-    EglDisplay* dpy     = static_cast<EglDisplay*>(thread->eglDisplay);
-    if(currCtx.Ptr()) {
-        SurfacePtr read = currCtx->read();
-        SurfacePtr draw = currCtx->draw();
-
-        EglOS::Display* nativeDisplay = dpy->nativeType();
-        if(read.Ptr()) {
-            if(read->type() == EglSurface::WINDOW &&
-               !nativeDisplay->isValidNativeWin(read->native())) {
-                RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
-            }
-            if(read->type() == EglSurface::PIXMAP &&
-               !nativeDisplay->isValidNativePixmap(read->native())) {
-                RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
-            }
-        }
-        if(draw.Ptr()) {
-            if(draw->type() == EglSurface::WINDOW &&
-               !nativeDisplay->isValidNativeWin(draw->native())) {
-                RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
-            }
-            if(draw->type() == EglSurface::PIXMAP &&
-               !nativeDisplay->isValidNativePixmap(draw->native())) {
-                RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
-            }
-        }
-    }
-    EglGlobalInfo::getInstance()->getOsEngine()->wait();
-    return EGL_TRUE;
-}
-
 EGLAPI EGLBoolean EGLAPIENTRY eglBindAPI(EGLenum api) {
     if(!EglValidate::supportedApi(api)) {
         RETURN_ERROR(EGL_FALSE,EGL_BAD_PARAMETER);
@@ -962,18 +863,6 @@ EGLAPI EGLBoolean EGLAPIENTRY eglBindAPI(EGLenum api) {
 EGLAPI EGLenum EGLAPIENTRY eglQueryAPI(void) {
     CURRENT_THREAD();
     return tls_thread->getApi();
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY eglWaitClient(void) {
-    ThreadInfo* thread  = getThreadInfo();
-    ContextPtr currCtx = thread->eglContext;
-    if(currCtx.Ptr()) {
-        if(!currCtx->read().Ptr() || !currCtx->draw().Ptr()) {
-            RETURN_ERROR(EGL_FALSE,EGL_BAD_CURRENT_SURFACE);
-        }
-        g_eglInfo->getIface(currCtx->version())->finish();
-    }
-    return EGL_TRUE;
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglReleaseThread(void) {
@@ -1003,47 +892,6 @@ EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
     }
     return retVal;
 }
-
-//not supported for now
-/************************* NOT SUPPORTED FOR NOW ***********************/
-EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferFromClientBuffer(
-          EGLDisplay display, EGLenum buftype, EGLClientBuffer buffer,
-          EGLConfig config, const EGLint *attrib_list) {
-    VALIDATE_DISPLAY(display);
-    VALIDATE_CONFIG(config);
-    //we do not support for now openVG, and the only client API resources which may be bound in this fashion are OpenVG
-    RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_PARAMETER);
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY eglCopyBuffers(EGLDisplay display, EGLSurface surface,
-              EGLNativePixmapType target) {
-    VALIDATE_DISPLAY(display);
-    VALIDATE_SURFACE(surface,srfc);
-    if(!dpy->nativeType()->isValidNativePixmap(NULL)) {
-        RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_PIXMAP);
-    }
-
-    //we do not need to support this for android , since we are not gonna use pixmaps
-    RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_PIXMAP);
-}
-
-/***********************************************************************/
-
-
-
-//do last ( only if needed)
-/*********************************************************************************************************/
-EGLAPI EGLBoolean EGLAPIENTRY eglBindTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer) {
-//TODO:
-return 0;
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY eglReleaseTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer) {
-//TODO:
-return 0;
-}
-/*********************************************************************************************************/
-
 
 /************************** KHR IMAGE *************************************************************/
 EglImage *attachEGLImage(unsigned int imageId)

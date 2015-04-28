@@ -30,7 +30,6 @@ public:
     typedef enum {
         WINDOW = 0,
         PBUFFER = 1,
-        PIXMAP,
     } SurfaceType;
 
     explicit Surface(SurfaceType type) : mType(type) {}
@@ -125,14 +124,8 @@ public:
 
     virtual bool isValidNativeWin(Surface* win) = 0;
     virtual bool isValidNativeWin(EGLNativeWindowType win) = 0;
-    virtual bool isValidNativePixmap(Surface* pix) = 0;
 
     virtual bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
-                                             const PixelFormat* pixelFormat,
-                                             unsigned int* width,
-                                             unsigned int* height) = 0;
-
-    virtual bool checkPixmapPixelFormatMatch(EGLNativePixmapType pix,
                                              const PixelFormat* pixelFormat,
                                              unsigned int* width,
                                              unsigned int* height) = 0;
@@ -152,8 +145,6 @@ public:
                              Context* context) = 0;
 
     virtual void swapBuffers(Surface* srfc) = 0;
-
-    virtual void swapInterval(Surface* win, int interval) = 0;
 };
 
 // An interface class to model a specific underlying GL graphics subsystem
@@ -177,15 +168,6 @@ public:
     // (e.g. a Windows HWND). A software renderer would always return NULL
     // here.
     virtual Surface* createWindowSurface(EGLNativeWindowType wnd) = 0;
-
-    // Create a new pixmap surface. |pix| is a host-specific pixmap handle
-    // (e.g. a Windows HBITMAP). A software renderer would always return NULL.
-    virtual Surface* createPixmapSurface(EGLNativePixmapType pix) = 0;
-
-    // Wait for host graphics command completion. This is only useful on X11
-    // to gall glXwaitX(), ignored on other platforms or by software
-    // engines.
-    virtual void wait() = 0;
 
     // Retrieve the implementation for the current host. This can be called
     // multiple times, and will initialize the engine on first call.
