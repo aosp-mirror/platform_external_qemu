@@ -257,83 +257,17 @@ common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
 # SDL-related definitions
 #
 
-# Set EMULATOR_USE_SDL2 to 'true' to use SDL 2.x instead of SDL 1.x as
-# the UI library backend.
-EMULATOR_USE_SDL2 ?= true
-
-# Build SDL from sources except in certain cases where we use
-# prebuilt libraries instead.
-#
-BUILD_SDL_FROM_SOURCES := true
-
-# On linux-x86, using the prebuilts avoid installing all the X11
-# development packages on our build servers. Note: When building 64-bit
-# host binaries, don't use 32-bit SDL prebuilts.
-ifeq ($(strip $(QEMU_HOST_TAG)$(HOST_IS_64_BIT)),linux-x86)
-    BUILD_SDL_FROM_SOURCES := false
-endif
-
-# If we're building with android-configure.sh && make, always build from
-# sources to catch regressions as soon as they happen.
-#
-ifeq ($(BUILD_STANDALONE_EMULATOR),true)
-    BUILD_SDL_FROM_SOURCES := true
-endif
-
-# Except if we used android-configure.sh --sdl-config=<script>
-#
-ifneq ($(QEMU_SDL_CONFIG),)
-   BUILD_SDL_FROM_SOURCES := false
-   SDL_CONFIG := $(QEMU_SDL_CONFIG)
-endif
-
-ifneq ($(BUILD_SDL_FROM_SOURCES),true)
-
-    SDL_CONFIG ?= prebuilts/tools/$(QEMU_HOST_TAG)/sdl/bin/sdl-config
-    SDL_CFLAGS := $(shell $(SDL_CONFIG) --cflags)
-
-    # We need to filter out the _GNU_SOURCE variable because it breaks recent
-    # releases of Cygwin when using the -mno-cygwin option. Moreover, we don't
-    # need this macro at all to build the Android emulator.
-    SDL_CFLAGS := $(filter-out -D_GNU_SOURCE=1,$(SDL_CFLAGS))
-    SDL_LDLIBS := $(filter-out %.a %.lib,$(shell $(SDL_CONFIG) --static-libs))
-
-    # Circular dependencies between libSDL and libSDLmain
-    # We repeat the libraries in the final link to work around it
-    SDL_STATIC_LIBRARIES := libSDL libSDLmain libSDL libSDLmain
-    SDL_STATIC_LIBRARIES_64 := lib64SDL lib64SDLmain lib64SDL lib64SDLmain
-
-else # BUILD_SDL_FROM_SOURCES
-
-    SDL_DIR := distrib/sdl-1.2.15
-    include $(LOCAL_PATH)/$(SDL_DIR)/sources.make
-
-    SDL_STATIC_LIBRARIES := emulator_libSDL emulator_libSDLmain emulator_libSDL emulator_libSDLmain
-    SDL_STATIC_LIBRARIES_64 := emulator_lib64SDL emulator_lib64SDLmain emulator_lib64SDL emulator_lib64SDLmain
-
-    SDL_INCLUDES := $(LOCAL_PATH)/$(SDL_DIR)/include
-
-endif # BUILD_SDL_FROM_SOURCES
-
 SDL2_DIR := distrib/sdl2-2.0.3
 include $(LOCAL_PATH)/$(SDL2_DIR)/sources.make
 
 SDL2_STATIC_LIBRARIES := emulator_libSDL2
 SDL2_STATIC_LIBRARIES_64 := emulator_lib64SDL2
 
-ifeq (true,$(EMULATOR_USE_SDL2))
 EMULATOR_LIBUI_CFLAGS += $(SDL2_CFLAGS) $(foreach inc,$(SDL2_INCLUDES),-I$(inc))
 EMULATOR_LIBUI_LDLIBS += $(SDL2_LDLIBS)
 EMULATOR_SDL_STATIC_LIBRARIES := $(SDL2_STATIC_LIBRARIES)
 EMULATOR_SDL_STATIC_LIBRARIES_64 := $(SDL2_STATIC_LIBRARIES_64)
 EMULATOR_SDL_LDLIBS := $(SDL2_LDLIBS)
-else  # EMULATOR_USE_SDL2 != true
-EMULATOR_LIBUI_CFLAGS += $(SDL_CFLAGS) $(foreach inc,$(SDL_INCLUDES),-I$(inc))
-EMULATOR_LIBUI_LDLIBS += $(SDL_LDLIBS)
-EMULATOR_SDL_STATIC_LIBRARIES := $(SDL_STATIC_LIBRARIES)
-EMULATOR_SDL_STATIC_LIBRARIES_64 := $(SDL_STATIC_LIBRARIES_64)
-EMULATOR_SDL_LDLIBS := $(SDL_LDLIBS)
-endif
 
 # The following is needed by SDL_LoadObject
 ifneq ($(HOST_OS),windows)
@@ -357,17 +291,9 @@ SKIN_SOURCES := charmap.c \
                 scaler.c \
                 ui.c \
 
-ifeq (true,$(EMULATOR_USE_SDL2))
 SKIN_SOURCES += event-sdl2.c \
                 surface-sdl2.c \
                 winsys-sdl2.c \
-
-else
-SKIN_SOURCES += event-sdl.c \
-                surface-sdl.c \
-                winsys-sdl.c \
-
-endif
 
 common_LOCAL_SRC_FILES += $(SKIN_SOURCES:%=android/skin/%)
 
