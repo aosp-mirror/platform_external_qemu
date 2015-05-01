@@ -30,7 +30,7 @@ typedef std::map<GLfloat,std::vector<int> > PointSizeIndices;
 class GLEScmContext: public GLEScontext
 {
 public:
-    void init(const GLDispatch* dispatch);
+    void init();
     GLEScmContext();
 
     void setActiveTexture(GLenum tex);
