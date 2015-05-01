@@ -37,20 +37,17 @@
 #include <cmath>
 #include <map>
 
-#include "emugl/common/lazy_instance.h"
-
 extern "C" {
 
-// forward declarations
+//decleration
 static void initGLESx();
-static const GLDispatch* getDispatch();
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext();
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 
-}  // extern "C"
+}
 
 /************************************** GLES EXTENSIONS *********************************************************/
 //extentions descriptor
@@ -61,7 +58,6 @@ ProcTableMap *s_glesExtensions = NULL;
 static EGLiface*  s_eglIface = NULL;
 static GLESiface  s_glesIface = {
     .initGLESx         = initGLESx,
-    .getDispatch       = getDispatch,
     .createGLESContext = createGLESContext,
     .initContext       = initContext,
     .deleteGLESContext = deleteGLESContext,
@@ -70,20 +66,6 @@ static GLESiface  s_glesIface = {
     .setShareGroup     = setShareGroup,
     .getProcAddress    = getProcAddress
 };
-
-// Dispatch table for GLES 1.x functions.
-class GLEScmDispatch : public GLDispatch {
-public:
-    GLEScmDispatch() : GLDispatch() {
-        dispatchFuncs(GLES_1_1);
-    }
-};
-
-static emugl::LazyInstance<GLEScmDispatch> s_dispatch1 = LAZY_INSTANCE_INIT;
-
-static const GLDispatch* getDispatch() {
-    return s_dispatch1.ptr();
-}
 
 #include <GLcommon/GLESmacros.h>
 
@@ -97,7 +79,7 @@ static void initGLESx() {
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     if (!ctx->isInitialized()) {
         ctx->setShareGroup(grp);
-        ctx->init(getDispatch());
+        ctx->init();
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
      }
@@ -1939,7 +1921,7 @@ GL_API void GL_APIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) 
     if (framebuffer && ctx->shareGroup().Ptr() && !ctx->shareGroup()->isObject(FRAMEBUFFER,framebuffer)) {
         ctx->shareGroup()->genName(FRAMEBUFFER,framebuffer);
         ctx->shareGroup()->setObjectData(FRAMEBUFFER, framebuffer,
-                                         ObjectDataPtr(new FramebufferData(framebuffer, getDispatch())));
+                                         ObjectDataPtr(new FramebufferData(framebuffer)));
     }
     int globalBufferName = (framebuffer!=0) ? ctx->shareGroup()->getGlobalName(FRAMEBUFFER,framebuffer) : 0;
     ctx->dispatcher().glBindFramebufferEXT(target,globalBufferName);
@@ -1965,7 +1947,7 @@ GL_API void GL_APIENTRY glGenFramebuffersOES(GLsizei n, GLuint *framebuffers) {
         for (int i=0;i<n;i++) {
             framebuffers[i] = ctx->shareGroup()->genName(FRAMEBUFFER, 0, true);
             ctx->shareGroup()->setObjectData(FRAMEBUFFER, framebuffers[i],
-                                             ObjectDataPtr(new FramebufferData(framebuffers[i], getDispatch())));
+                                             ObjectDataPtr(new FramebufferData(framebuffers[i])));
         }
     }
 }

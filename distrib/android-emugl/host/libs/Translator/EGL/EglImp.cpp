@@ -55,49 +55,27 @@ GLEScontext* getGLESContext();
 EglGlobalInfo* g_eglInfo = NULL;
 emugl::Mutex  s_eglLock;
 
+void initGlobalInfo()
+{
+    emugl::Mutex::AutoLock mutex(s_eglLock);
+    if (!g_eglInfo) {
+        g_eglInfo = EglGlobalInfo::getInstance();
+    } 
+}
+
 static const EGLiface s_eglIface = {
     .getGLESContext = getGLESContext,
     .eglAttachEGLImage = attachEGLImage,
     .eglDetachEGLImage = detachEGLImage,
 };
 
-#define TRANSLATOR_GETIFACE_NAME "__translator_getIfaces"
-
-static __translator_getGLESIfaceFunc loadIfaces(const char* libName){
-    emugl::SharedLibrary* libGLES = emugl::SharedLibrary::open(libName);
-
-    if(!libGLES) return NULL;
-    __translator_getGLESIfaceFunc func =  (__translator_getGLESIfaceFunc)libGLES->findSymbol(TRANSLATOR_GETIFACE_NAME);
-    if(!func) return NULL;
-    return func;
-}
-
-#define LIB_GLES_CM_NAME EMUGL_LIBNAME("GLES_CM_translator")
-#define LIB_GLES_V2_NAME EMUGL_LIBNAME("GLES_V2_translator")
-
-void initGlobalInfo() {
-    emugl::Mutex::AutoLock mutex(s_eglLock);
-    if (!g_eglInfo) {
-        g_eglInfo = EglGlobalInfo::getInstance();
-
-        __translator_getGLESIfaceFunc func = loadIfaces(LIB_GLES_CM_NAME);
-        if (!func) {
-           fprintf(stderr, "Could not find interal interface for GLES 1.1\n");
-           return;
-        }
-        const GLESiface* iface = func(&s_eglIface);
-        g_eglInfo->setIface(iface, GLES_1_1);
-        iface->initGLESx();
-
-        func = loadIfaces(LIB_GLES_V2_NAME);
-        if (!func) {
-           fprintf(stderr, "Could not find interal interface for GLES 2.0\n");
-           return;
-        }
-        iface = func(&s_eglIface);
-        g_eglInfo->setIface(iface, GLES_2_0);
-        iface->initGLESx();
+static void initGLESx(GLESVersion version) {
+    const GLESiface* iface = g_eglInfo->getIface(version);
+    if (!iface) {
+        DBG("EGL failed to initialize GLESv%d; incompatible interface\n", version);
+        return;
     }
+    iface->initGLESx();
 }
 
 /*****************************************  supported extentions  ***********************************************************************/
@@ -211,6 +189,20 @@ EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
 }
 
 
+#define TRANSLATOR_GETIFACE_NAME "__translator_getIfaces"
+
+static __translator_getGLESIfaceFunc loadIfaces(const char* libName){
+    emugl::SharedLibrary* libGLES = emugl::SharedLibrary::open(libName);
+
+    if(!libGLES) return NULL;
+    __translator_getGLESIfaceFunc func =  (__translator_getGLESIfaceFunc)libGLES->findSymbol(TRANSLATOR_GETIFACE_NAME);
+    if(!func) return NULL;
+    return func;
+}
+
+#define LIB_GLES_CM_NAME EMUGL_LIBNAME("GLES_CM_translator")
+#define LIB_GLES_V2_NAME EMUGL_LIBNAME("GLES_V2_translator")
+
 EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, EGLint *minor) {
 
     initGlobalInfo();
@@ -223,7 +215,30 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
     if(major) *major = MAJOR;
     if(minor) *minor = MINOR;
 
-    dpy->initialize(EGL_OPENGL_ES_BIT | EGL_OPENGL_ES2_BIT);
+    __translator_getGLESIfaceFunc func  = NULL;
+    int renderableType = EGL_OPENGL_ES_BIT;
+
+    if(!g_eglInfo->getIface(GLES_1_1)) {
+        func  = loadIfaces(LIB_GLES_CM_NAME);
+        if(func){
+            g_eglInfo->setIface(func(&s_eglIface),GLES_1_1);
+        } else {
+           fprintf(stderr,"could not find ifaces for GLES CM 1.1\n");
+           return EGL_FALSE;
+        }
+        initGLESx(GLES_1_1);
+    }
+    if(!g_eglInfo->getIface(GLES_2_0)) {
+        func  = loadIfaces(LIB_GLES_V2_NAME);
+        if(func){
+            renderableType |= EGL_OPENGL_ES2_BIT;
+            g_eglInfo->setIface(func(&s_eglIface),GLES_2_0);
+        } else {
+           fprintf(stderr,"could not find ifaces for GLES 2.0\n");
+        }
+        initGLESx(GLES_2_0);
+    }
+    dpy->initialize(renderableType);
     return EGL_TRUE;
 }
 
