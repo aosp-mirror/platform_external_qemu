@@ -30,9 +30,9 @@ RenderbufferData::~RenderbufferData() {
 }
 
 
-FramebufferData::FramebufferData(GLuint name, const GLDispatch* dispatch) :
-        m_fbName(name), m_dirty(false), m_dispatch(dispatch) {
-    for (int i = 0; i < MAX_ATTACH_POINTS; i++) {
+FramebufferData::FramebufferData(GLuint name):m_dirty(false) {
+    m_fbName = name;
+    for (int i=0; i<MAX_ATTACH_POINTS; i++) {
         m_attachPoints[i].target = 0;
         m_attachPoints[i].name = 0;
         m_attachPoints[i].obj = ObjectDataPtr(NULL);
@@ -41,17 +41,17 @@ FramebufferData::FramebufferData(GLuint name, const GLDispatch* dispatch) :
 }
 
 FramebufferData::~FramebufferData() {
-    for (int i = 0; i < MAX_ATTACH_POINTS; i++) {
-        detachObject(i);
-    }
+for (int i=0; i<MAX_ATTACH_POINTS; i++) {
+    detachObject(i);
+}
 }
 
 void FramebufferData::setAttachment(GLenum attachment,
-                                    GLenum target,
-                                    GLuint name,
-                                    ObjectDataPtr obj,
-                                    bool takeOwnership) {
-    int idx = attachmentPointIndex(attachment);
+               GLenum target,
+               GLuint name,
+               ObjectDataPtr obj,
+               bool takeOwnership) {
+int idx = attachmentPointIndex(attachment);
     if (!name) {
         detachObject(idx);
         return;
@@ -113,10 +113,10 @@ void FramebufferData::detachObject(int idx) {
         switch(m_attachPoints[idx].target)
         {
         case GL_RENDERBUFFER_OES:
-            m_dispatch->glDeleteRenderbuffersEXT(1, &(m_attachPoints[idx].name));
+            GLEScontext::dispatcher().glDeleteRenderbuffersEXT(1, &(m_attachPoints[idx].name));
             break;
         case GL_TEXTURE_2D:
-            m_dispatch->glDeleteTextures(1, &(m_attachPoints[idx].name));
+            GLEScontext::dispatcher().glDeleteTextures(1, &(m_attachPoints[idx].name));
             break;
         }
     }
@@ -129,8 +129,6 @@ void FramebufferData::detachObject(int idx) {
 
 void FramebufferData::validate(GLEScontext* ctx)
 {
-    const GLDispatch* dispatch = &ctx->dispatcher();
-
     if(!getAttachment(GL_COLOR_ATTACHMENT0_OES, NULL, NULL))
     {
         // GLES does not require the framebuffer to have a color attachment.
@@ -142,17 +140,17 @@ void FramebufferData::validate(GLEScontext* ctx)
         GLint type = GL_NONE;
         GLint name = 0;
 
-        dispatch->glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+        ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
         if(type != GL_NONE)
         {
-            dispatch->glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
+            ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
         }
         else
         {
-            dispatch->glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+            ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
             if(type != GL_NONE)
             {
-                dispatch->glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
+                ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
             }
             else
             {
@@ -168,38 +166,38 @@ void FramebufferData::validate(GLEScontext* ctx)
         if(type == GL_RENDERBUFFER)
         {
             GLint prev;
-            dispatch->glGetIntegerv(GL_RENDERBUFFER_BINDING, &prev);
-            dispatch->glBindRenderbufferEXT(GL_RENDERBUFFER, name);
-            dispatch->glGetRenderbufferParameterivEXT(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
-            dispatch->glGetRenderbufferParameterivEXT(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
-            dispatch->glBindRenderbufferEXT(GL_RENDERBUFFER, prev);
+            ctx->dispatcher().glGetIntegerv(GL_RENDERBUFFER_BINDING, &prev);
+            ctx->dispatcher().glBindRenderbufferEXT(GL_RENDERBUFFER, name);
+            ctx->dispatcher().glGetRenderbufferParameterivEXT(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
+            ctx->dispatcher().glGetRenderbufferParameterivEXT(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+            ctx->dispatcher().glBindRenderbufferEXT(GL_RENDERBUFFER, prev);
         }
         else if(type == GL_TEXTURE)
         {
             GLint prev;
-            dispatch->glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev);
-            dispatch->glBindTexture(GL_TEXTURE_2D, name);
-            dispatch->glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-            dispatch->glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
-            dispatch->glBindTexture(GL_TEXTURE_2D, prev);
+            ctx->dispatcher().glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev);
+            ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, name);
+            ctx->dispatcher().glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+            ctx->dispatcher().glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+            ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, prev);
         }
 
         // Create the color attachment and attch it
         unsigned int tex = ctx->shareGroup()->genGlobalName(TEXTURE);
         GLint prev;
-        dispatch->glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev);
-        dispatch->glBindTexture(GL_TEXTURE_2D, tex);
+        ctx->dispatcher().glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev);
+        ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, tex);
 
-        dispatch->glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-        dispatch->glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-        dispatch->glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-        dispatch->glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-        dispatch->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        ctx->dispatcher().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+        ctx->dispatcher().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        ctx->dispatcher().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+        ctx->dispatcher().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+        ctx->dispatcher().glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-        dispatch->glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, 0);
+        ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, 0);
         setAttachment(GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, ObjectDataPtr(NULL), true);
 
-        dispatch->glBindTexture(GL_TEXTURE_2D, prev);
+        ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, prev);
     }
 
     if(m_dirty)
@@ -208,8 +206,8 @@ void FramebufferData::validate(GLEScontext* ctx)
         // drivers (e.g. ATI's) - after the framebuffer attachments
         // have changed, and before the next draw, unbind and rebind
         // the framebuffer to sort things out.
-        dispatch->glBindFramebufferEXT(GL_FRAMEBUFFER,0);
-        dispatch->glBindFramebufferEXT(GL_FRAMEBUFFER,ctx->shareGroup()->getGlobalName(FRAMEBUFFER,m_fbName));
+        ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER,0);
+        ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER,ctx->shareGroup()->getGlobalName(FRAMEBUFFER,m_fbName));
 
         m_dirty = false;
     }

@@ -15,8 +15,8 @@
 */
 #include <map>
 #include <GLcommon/objectNameManager.h>
-#include <GLcommon/GLDispatch.h>
 #include <GLcommon/GLEScontext.h>
+
 
 NameSpace::NameSpace(NamedObjectType p_type,
                      GlobalNameSpace *globalNameSpace) :
@@ -114,34 +114,30 @@ NameSpace::replaceGlobalName(ObjectLocalName p_localName, unsigned int p_globalN
     }
 }
 
-GlobalNameSpace::GlobalNameSpace(const GLDispatch* dispatch) :
-        m_lock(), m_dispatch(dispatch) {}
+
+GlobalNameSpace::GlobalNameSpace() : m_lock() {}
 
 GlobalNameSpace::~GlobalNameSpace() {}
 
-void GlobalNameSpace::setDispatch(const GLDispatch* dispatch) {
-    m_dispatch = dispatch;
-}
-
-unsigned int GlobalNameSpace::genName(NamedObjectType p_type) {
-    if (p_type >= NUM_OBJECT_TYPES) {
-        return 0;
-    }
+unsigned int 
+GlobalNameSpace::genName(NamedObjectType p_type)
+{
+    if ( p_type >= NUM_OBJECT_TYPES ) return 0;
     unsigned int name = 0;
 
     emugl::Mutex::AutoLock _lock(m_lock);
     switch (p_type) {
     case VERTEXBUFFER:
-        m_dispatch->glGenBuffers(1, &name);
+        GLEScontext::dispatcher().glGenBuffers(1,&name);
         break;
     case TEXTURE:
-        m_dispatch->glGenTextures(1, &name);
+        GLEScontext::dispatcher().glGenTextures(1,&name);
         break;
     case RENDERBUFFER:
-        m_dispatch->glGenRenderbuffersEXT(1, &name);
+        GLEScontext::dispatcher().glGenRenderbuffersEXT(1,&name);
         break;
     case FRAMEBUFFER:
-        m_dispatch->glGenFramebuffersEXT(1, &name);
+        GLEScontext::dispatcher().glGenFramebuffersEXT(1,&name);
         break;
     case SHADER: //objects in shader namepace are not handled
     default:
@@ -150,7 +146,9 @@ unsigned int GlobalNameSpace::genName(NamedObjectType p_type) {
     return name;
 }
 
-void GlobalNameSpace::deleteName(NamedObjectType p_type, unsigned int p_name) {
+void 
+GlobalNameSpace::deleteName(NamedObjectType p_type, unsigned int p_name)
+{
 }
 
 typedef std::pair<NamedObjectType, ObjectLocalName> ObjectIDPair;

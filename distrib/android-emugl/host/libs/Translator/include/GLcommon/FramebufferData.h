@@ -39,7 +39,7 @@ const int MAX_ATTACH_POINTS = 3;
 class FramebufferData : public ObjectData
 {
 public:
-    FramebufferData(GLuint name, const GLDispatch* dispatch);
+    explicit FramebufferData(GLuint name);
     ~FramebufferData();
 
     void setAttachment(GLenum attachment,
@@ -67,7 +67,6 @@ private:
         bool owned;
     } m_attachPoints[MAX_ATTACH_POINTS+1];
     bool m_dirty;
-    const GLDispatch* m_dispatch;
 };
 
 #endif
