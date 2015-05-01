@@ -84,6 +84,7 @@ void GLESConversionArrays::operator++(){
     m_current++;
 }
 
+GLDispatch     GLEScontext::s_glDispatch;
 emugl::Mutex   GLEScontext::s_lock;
 std::string*   GLEScontext::s_glExtensions= NULL;
 std::string    GLEScontext::s_glVendor;
@@ -130,12 +131,10 @@ bool Version::operator<(const Version& ver) const{
     return false;
 }
 
-void GLEScontext::init(const GLDispatch* dispatch) {
-    m_glDispatch = dispatch;
+void GLEScontext::init() {
 
-    // TODO(digit): Make this thread-safe!!
     if (!s_glExtensions) {
-        initCapsLocked(dispatch, dispatch->glGetString(GL_EXTENSIONS));
+        initCapsLocked(s_glDispatch.glGetString(GL_EXTENSIONS));
         s_glExtensions = new std::string("");
     }
 
@@ -156,7 +155,6 @@ void GLEScontext::init(const GLDispatch* dispatch) {
 
 GLEScontext::GLEScontext():
                            m_initialized(false)    ,
-                           m_glDispatch(NULL)      ,
                            m_activeTexture(0)      ,
                            m_unpackAlignment(4)    ,
                            m_glError(GL_NO_ERROR)  ,
@@ -506,20 +504,19 @@ void GLEScontext::releaseGlobalLock() {
 }
 
 
-void GLEScontext::initCapsLocked(const GLDispatch* dispatch,
-                                 const GLubyte* extensionString)
+void GLEScontext::initCapsLocked(const GLubyte * extensionString)
 {
     const char* cstring = (const char*)extensionString;
 
-    dispatch->glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&s_glSupport.maxVertexAttribs);
-    dispatch->glGetIntegerv(GL_MAX_CLIP_PLANES,&s_glSupport.maxClipPlane);
-    dispatch->glGetIntegerv(GL_MAX_LIGHTS,&s_glSupport.maxLights);
-    dispatch->glGetIntegerv(GL_MAX_TEXTURE_SIZE,&s_glSupport.maxTexSize);
-    dispatch->glGetIntegerv(GL_MAX_TEXTURE_UNITS,&s_glSupport.maxTexUnits);
-    dispatch->glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS,&s_glSupport.maxTexImageUnits);
-    const GLubyte* glslVersion = dispatch->glGetString(GL_SHADING_LANGUAGE_VERSION);
+    s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&s_glSupport.maxVertexAttribs);
+    s_glDispatch.glGetIntegerv(GL_MAX_CLIP_PLANES,&s_glSupport.maxClipPlane);
+    s_glDispatch.glGetIntegerv(GL_MAX_LIGHTS,&s_glSupport.maxLights);
+    s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_SIZE,&s_glSupport.maxTexSize);
+    s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_UNITS,&s_glSupport.maxTexUnits);
+    s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS,&s_glSupport.maxTexImageUnits);
+    const GLubyte* glslVersion = s_glDispatch.glGetString(GL_SHADING_LANGUAGE_VERSION);
     s_glSupport.glslVersion = Version((const  char*)(glslVersion));
-    const GLubyte* glVersion = dispatch->glGetString(GL_VERSION);
+    const GLubyte* glVersion = s_glDispatch.glGetString(GL_VERSION);
 
     if (strstr(cstring,"GL_EXT_bgra ")!=NULL)
         s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888 = true;

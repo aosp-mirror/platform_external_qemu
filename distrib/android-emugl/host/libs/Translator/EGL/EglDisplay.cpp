@@ -20,16 +20,11 @@
 #include <GLcommon/GLutils.h>
 
 EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
-                       EglOS::Display* idpy,
-                       const GLDispatch* dispatch) :
+                       EglOS::Display* idpy) :
     m_dpy(dpy),
     m_idpy(idpy),
     m_initialized(false),
     m_configInitialized(false),
-    m_configs(),
-    m_contexts(),
-    m_surfaces(),
-    m_globalNameSpace(dispatch),
     m_nextEglImageId(0),
     m_globalSharedContext(NULL)
 {
