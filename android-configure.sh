@@ -152,6 +152,14 @@ elif [ "$OPTION_NO_AOSP_PREBUILTS" ]; then
     AOSP_PREBUILTS_DIR=""
 fi
 
+if [ "$OPTION_OUT_DIR" ]; then
+    OUT_DIR="$OPTION_OUT_DIR"
+    mkdir -p "$OUT_DIR" || panic "Could not create output directory: $OUT_DIR"
+else
+    OUT_DIR=objs
+    log "Auto-config: --out-dir=objs"
+fi
+
 # For OS X, detect the location of the SDK to use.
 # NOTE: This must happen before probing the host toolchain, because our
 #       prebuilt Clang one depends on runtime object files like crt1.10.6.o
@@ -207,37 +215,38 @@ if [ "$HOST_OS" = darwin ]; then
     echo "OSX SDK   : Found at $OSX_SDK_ROOT"
 fi
 
+CCACHE=
+if [ "$USE_CCACHE" != 0 ]; then
+    CCACHE=$(which ccache 2>/dev/null || true)
+fi
+
+if [ -n "$CCACHE" -a -f "$CCACHE" ]; then
+    if [ "$HOST_OS" == "darwin" -a "$OPTION_DEBUG" == "yes" ]; then
+        # http://llvm.org/bugs/show_bug.cgi?id=20297
+        # ccache works for mingw/gdb, therefore probably works for gcc/gdb
+        log "Prebuilt   : CCACHE disabled for OSX debug builds"
+        CCACHE=
+    else
+        log "Prebuilt   : CCACHE=$CCACHE"
+    fi
+else
+    log "Prebuilt   : CCACHE can't be found"
+    CCACHE=
+fi
+
 # On Linux, try to use our prebuilt toolchain to generate binaries
 # that are compatible with Ubuntu 10.4
 if [ -z "$CC" -a -z "$OPTION_CC" -a -z "$OPTION_NO_AOSP_PREBUILTS" ] ; then
-    PROBE_HOST_CC=
-    PROBE_HOST_CFLAGS=
-    if [ "$HOST_OS" = "linux" ] ; then
-        PREBUILTS_HOST_GCC=$AOSP_PREBUILTS_DIR/gcc/linux-x86/host
-        PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
-        if [ ! -f "$PROBE_HOST_CC" ]; then
-            PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-gcc
-            if [ ! -f "$PROBE_HOST_CC" ] ; then
-                PROBE_HOST_CC=$AOSP_PREBUILTS_DIR/tools/gcc-sdk/gcc
-            fi
-        fi
-    elif [ "$HOST_OS" = "darwin" ] ; then
-        PREBUILTS_HOST_GCC=$AOSP_PREBUILTS_DIR/clang/darwin-x86/host
-        PROBE_HOST_CC=$PREBUILTS_HOST_GCC/3.5/bin/clang
-        PROBE_HOST_CFLAGS="-target x86_64-apple-darwin11.0.0"
+    GEN_SDK=$PROGDIR/android/scripts/gen-android-sdk-toolchain.sh
+    GEN_SDK_FLAGS=
+    if [ "$CCACHE" ]; then
+        GEN_SDK_FLAGS="$GEN_SDK_FLAGS --ccache=$CCACHE"
     else
-        echo "ERROR: Can't build emulator binaries on this platform. Use Linux or Darwin only!"
-        exit 1
+        GEN_SDK_FLAGS="$GEN_SDK_FLAGS --no-ccache"
     fi
-
-    if [ -f "$PROBE_HOST_CC" ] ; then
-        echo "Using prebuilt toolchain: $PROBE_HOST_CC"
-        CC="$PROBE_HOST_CC $PROBE_HOST_CFLAGS"
-    else
-        echo "ERROR: Cannot find prebuilts toolchain: $PROBE_HOST_CC"
-        echo "Please use --no-aosp-prebuilts or --aosp-prebuilts-dir=<path>."
-        exit 1
-    fi
+    GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
+    $GEN_SDK $GEN_SDK_FLAGS $OUT_DIR/toolchain || panic "Cannot generate SDK toolchain!"
+    CC="$OUT_DIR/toolchain/"$($GEN_SDK $GEN_SDK_FLAGS --print=gcc $OUT_DIR/toolchain)
 fi
 
 if [ -n "$OPTION_CC" ]; then
@@ -285,14 +294,6 @@ else
     enable_cygwin
 fi
 
-if [ "$OPTION_OUT_DIR" ]; then
-    OUT_DIR="$OPTION_OUT_DIR"
-    mkdir -p "$OUT_DIR" || panic "Could not create output directory: $OUT_DIR"
-else
-    OUT_DIR=objs
-    log "Auto-config: --out-dir=objs"
-fi
-
 # Are we running in the Android build system ?
 check_android_build
 
@@ -303,70 +304,6 @@ check_android_build
 #    - locate and use prebuilt libraries
 #    - copy the new binary to the correct location
 #
-if [ "$OPTION_NO_AOSP_PREBUILTS" ] ; then
-    IN_ANDROID_BUILD=no
-fi
-
-if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
-    locate_android_prebuilt
-
-    # use ccache if USE_CCACHE is defined and the corresponding
-    # binary is available.
-    #
-    if [ -n "$USE_CCACHE" ] ; then
-        CCACHE="$ANDROID_PREBUILT/ccache/ccache$EXE"
-        if [ ! -f $CCACHE ] ; then
-            CCACHE="$ANDROID_PREBUILTS/ccache/ccache$EXE"
-        fi
-    fi
-
-    # finally ensure that our new binary is copied to the 'out'
-    # subdirectory as 'emulator'
-    HOST_BIN=$(get_android_abs_build_var HOST_OUT_EXECUTABLES)
-    if [ "$TARGET_OS" = "windows" ]; then
-        HOST_BIN=$(echo $HOST_BIN | sed "s%$OS/bin%windows/bin%")
-    fi
-    if [ -n "$HOST_BIN" ] ; then
-        OPTION_TARGETS="$OPTION_TARGETS $HOST_BIN/emulator$EXE"
-        log "Targets    : TARGETS=$OPTION_TARGETS"
-    fi
-
-    # find the Android SDK Tools revision number
-    TOOLS_PROPS=$ANDROID_TOP/sdk/files/tools_source.properties
-    if [ -f $TOOLS_PROPS ] ; then
-        ANDROID_SDK_TOOLS_REVISION=`awk -F= '/Pkg.Revision/ { print $2; }' $TOOLS_PROPS 2> /dev/null`
-        log "Tools      : Found tools revision number $ANDROID_SDK_TOOLS_REVISION"
-    else
-        log "Tools      : Could not locate $TOOLS_PROPS !?"
-    fi
-else
-    if [ "$USE_CCACHE" != 0 ]; then
-        CCACHE=$(which ccache 2>/dev/null || true)
-    fi
-fi  # IN_ANDROID_BUILD = no
-
-if [ -n "$CCACHE" -a -f "$CCACHE" ]; then
-    if [ "$HOST_OS" == "darwin" -a "$OPTION_DEBUG" == "yes" ]; then
-        # http://llvm.org/bugs/show_bug.cgi?id=20297
-        # ccache works for mingw/gdb, therefore probably works for gcc/gdb
-        log "Prebuilt   : CCACHE disabled for OSX debug builds"
-        CCACHE=
-    else
-        CC="$CCACHE $CC"
-        $CC --version 2>/dev/null
-        if ($CC --version 2>/dev/null | grep -q clang); then
-            # If this is clang, disable ccache-induced warnings and
-            # restore colored diagnostics.
-            # http://petereisentraut.blogspot.fr/2011/05/ccache-and-clang.html
-            CC="$CC -Qunused-arguments -fcolor-diagnostics"
-        fi
-        log "Prebuilt   : CCACHE=$CCACHE"
-    fi
-else
-    log "Prebuilt   : CCACHE can't be found"
-    CCACHE=
-fi
-
 # Try to find the GLES emulation headers and libraries automatically
 if [ "$GLES_PROBE" = "yes" ]; then
     GLES_SUPPORT=yes

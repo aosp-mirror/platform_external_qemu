@@ -46,13 +46,21 @@ aosp_dir_parse_option () {
         log "Auto-config: --aosp-dir=$AOSP_DIR  [environment]"
     else
         # Assume that the current script is under external/qemu/android/scripts
-        AOSP_DIR=$(program_directory)/../../../..
-        if [ ! -d "$AOSP_DIR" -o ! -d "$AOSP_DIR"/prebuilts/gcc ]; then
-            dump "Please define ANDROID_EMULATOR_AOSP_DIR in your environment,"
-            dump "or use --aosp-dir=<path> on the command-line to specify the"
-            dump "root of a valid AOSP source tree."
-            panic "Can't find AOSP root."
-        fi
+        local PROBE_DIR="$(program_directory)/.."
+        while [ "$PROBE_DIR" != "/" ]; do
+            PROBE_DIR=$(cd "$PROBE_DIR" 2>/dev/null && pwd -P || true)
+            if [ -z "$PROBE_DIR" -o "$PROBE_DIR" = "/" ]; then
+                dump "Please define ANDROID_EMULATOR_AOSP_DIR in your environment,"
+                dump "or use --aosp-dir=<path> on the command-line to specify the"
+                dump "root of a valid AOSP source tree."
+                panic "Can't find AOSP root."
+            fi
+            if [ -d "$PROBE_DIR/prebuilts" ]; then
+                AOSP_DIR=$PROBE_DIR
+                break
+            fi
+            PROBE_DIR=$PROBE_DIR/..
+        done
         log "Auto-config: --aosp-dir=$AOSP_DIR  [auto-detect]"
     fi
 
@@ -76,7 +84,7 @@ aosp_prebuilt_toolchain_subdir_for () {
             printf "prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.8"
             ;;
         darwin*)
-            printf "prebuilts/clang/darwin-x86/host/3.5"
+            printf "prebuilts/clang/darwin-x86/sdk/3.5"
             ;;
         windows*)
             printf "prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8"

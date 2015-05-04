@@ -155,6 +155,7 @@ fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     (
+        builder_enable_cxx11
         builder_prepare_for_host "$SYSTEM" "$AOSP_DIR" "$INSTALL_DIR/$SYSTEM"
 
         case $SYSTEM in
