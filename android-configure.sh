@@ -225,9 +225,12 @@ if [ -z "$CC" -a -z "$OPTION_CC" -a -z "$OPTION_NO_AOSP_PREBUILTS" ] ; then
             fi
         fi
     elif [ "$HOST_OS" = "darwin" ] ; then
-        PREBUILTS_HOST_GCC=$AOSP_PREBUILTS_DIR/clang/darwin-x86/host
+        PREBUILTS_HOST_GCC=$AOSP_PREBUILTS_DIR/clang/darwin-x86/sdk
+        if [ ! -d "$PREBUILTS_HOST" ]; then
+             PREBUILTS_HOST_GCC=$AOSP_PREBUILTS_DIR/clang/darwin-x86/host
+        fi
         PROBE_HOST_CC=$PREBUILTS_HOST_GCC/3.5/bin/clang
-        PROBE_HOST_CFLAGS="-target x86_64-apple-darwin11.0.0"
+        PROBE_HOST_CFLAGS="-target x86_64-apple-darwin12.0.0"
     else
         echo "ERROR: Can't build emulator binaries on this platform. Use Linux or Darwin only!"
         exit 1

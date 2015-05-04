@@ -67,6 +67,9 @@ option_register_var "--ccache=<program>" OPT_CCACHE "Use specific ccache program
 OPT_NO_CCACHE=
 option_register_var "--no-ccache" OPT_NO_CCACHE "Don't try to probe and use ccache."
 
+OPT_CXX11=
+option_register_var "--cxx11" OPT_CXX11 "Enable C++11 features."
+
 option_parse "$@"
 
 if [ "$PARAMETER_COUNT" != 1 ]; then
@@ -141,6 +144,7 @@ fi
 # $2: source prefix (e.g. 'i586-mingw32msvc-')
 # $3: destination prefix (e.g. 'i586-px-mingw32msvc-')
 # $4: destination directory for the generated program
+# $5: option, CLANG installation path.
 #
 # You may also define the following variables to pass extra tool flags:
 #
@@ -162,14 +166,15 @@ gen_wrapper_program ()
     local SRC_PREFIX="$2"
     local DST_PREFIX="$3"
     local DST_FILE="$4/${SRC_PREFIX}$PROG"
+    local CLANG_BINDIR="$5"
     local FLAGS=""
     local LDFLAGS=""
 
     case $PROG in
-      cc|gcc|cpp)
+      cc|gcc|cpp|clang)
           FLAGS=$FLAGS" $EXTRA_CFLAGS"
           ;;
-      c++|g++)
+      c++|g++|clang++)
           FLAGS=$FLAGS" $EXTRA_CXXFLAGS"
           ;;
       ar) FLAGS=$FLAGS" $EXTRA_ARFLAGS";;
@@ -177,6 +182,33 @@ gen_wrapper_program ()
       ld|ld.bfd|ld.gold) FLAGS=$FLAGS" $EXTRA_LDFLAGS";;
       windres) FLAGS=$FLAGS" $EXTRA_WINDRESFLAGS";;
     esac
+
+    local DST_PROG="$PROG"
+    if [ "$CLANG_BINDIR" ]; then
+        CLANG_BINDIR=${CLANG_BINDIR%/}
+        case $PROG in
+            cc|gcc|clang)
+                DST_PROG=clang
+                DST_PREFIX=$CLANG_BINDIR/
+                ;;
+            c++|g++|clang++)
+                DST_PROG=clang++
+                DST_PREFIX=$CLANG_BINDIR/
+                ;;
+        esac
+    fi
+
+    if [ -z "$DST_PREFIX" ]; then
+        # Avoid infinite loop by getting real path of destination
+        # program
+        DST_PROG=$(which "$PROG" 2>/dev/null || true)
+        if [ -z "$DST_PROG" ]; then
+            log "Ignoring: ${SRC_PREFIX}$PROG"
+            return
+        fi
+        DST_PREFIX=$(dirname "$DST_PROG")/
+        DST_PROG=$(basename "$DST_PROG")
+    fi
 
     if [ "$CCACHE" ]; then
         DST_PREFIX="$CCACHE $DST_PREFIX"
@@ -190,7 +222,7 @@ gen_wrapper_program ()
 $EXTRA_ENV_SETUP
 
 # Tool invokation.
-${DST_PREFIX}$PROG $FLAGS "\$@" $LDFLAGS
+${DST_PREFIX}$DST_PROG $FLAGS "\$@" $LDFLAGS
 EOF
     chmod +x "$DST_FILE"
     log "  Generating: ${SRC_PREFIX}$PROG"
@@ -199,12 +231,14 @@ EOF
 # $1: source prefix
 # $2: destination prefix
 # $3: destination directory.
+# $4: optional. Clang installation path.
 gen_wrapper_toolchain () {
     local SRC_PREFIX="$1"
     local DST_PREFIX="$2"
     local DST_DIR="$3"
+    local CLANG_BINDIR="$4"
     local PROG
-    local PROGRAMS="cc gcc c++ g++ cpp as ld ar ranlib strip strings nm objdump objcopy dlltool"
+    local PROGRAMS="cc gcc clang c++ g++ clang++ cpp as ld ar ranlib strip strings nm objdump objcopy dlltool"
 
     log "Generating toolchain wrappers in: $DST_DIR"
     run mkdir -p "$DST_DIR"
@@ -236,7 +270,7 @@ gen_wrapper_toolchain () {
     fi
 
     for PROG in $PROGRAMS; do
-        gen_wrapper_program $PROG "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
+        gen_wrapper_program $PROG "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR" "$CLANG_BINDIR"
     done
 
     EXTRA_CFLAGS=
@@ -258,8 +292,10 @@ prepare_build_for_host () {
     PREBUILT_TOOLCHAIN_DIR=
     TOOLCHAIN_PREFIX=
     EXTRA_ENV_SETUP=
-    PREBUILT_TOOLCHAIN_DIR=$AOSP_DIR/$(aosp_prebuilt_toolchain_subdir_for $CURRENT_HOST)
+    PREBUILT_TOOLCHAIN_SUBDIR=$(aosp_prebuilt_toolchain_subdir_for $CURRENT_HOST)
+	PREBUILT_TOOLCHAIN_DIR=$AOSP_DIR/$PREBUILT_TOOLCHAIN_SUBDIR
     TOOLCHAIN_PREFIX=$(aosp_prebuilt_toolchain_prefix_for $CURRENT_HOST)
+	CLANG_BINDIR=
     case $CURRENT_HOST in
         darwin-*)
             # Ensure we use the 10.8 SDK or else.
@@ -288,6 +324,8 @@ prepare_build_for_host () {
             fi
             log "OSX: Using SDK at $OSX_SDK_ROOT"
             EXTRA_ENV_SETUP="export SDKROOT=$OSX_SDK_ROOT"
+            CLANG_BINDIR=$PREBUILT_TOOLCHAIN_DIR/bin
+            PREBUILT_TOOLCHAIN_DIR=
             ;;
     esac
 
@@ -324,6 +362,19 @@ prepare_build_for_host () {
     fi
 
     case $CURRENT_HOST in
+        darwin-x86_64)
+
+            common_FLAGS="-target x86_64-apple-darwin12.0.0 -isysroot $OSX_SDK_ROOT -mmacosx-version-min=$OSX_SDK_VERSION -DMACOSX_DEPLOYEMENT_TARGET=$OSX_SDK_VERSION"
+            EXTRA_CFLAGS="$common_FLAGS"
+            EXTRA_CXXFLAGS="$common_FLAGS"
+            if [ "$OPT_CXX11" ]; then
+                var_append EXTRA_CXXFLAGS "-stdlib=libc++"
+            fi
+            EXTRA_LDFLAGS="-syslibroot $OSX_SDK_ROOT"
+            ;;
+        darwin-x86)
+            panic "Host system '$CURRENT_HOST' is not supported by this script!"
+            ;;
         *-x86)
             EXTRA_CFLAGS="-m32"
             EXTRA_CXXFLAGS="-m32"
@@ -339,14 +390,18 @@ prepare_build_for_host () {
             ;;
     esac
 
+    if [ "$OPT_CXX11" ]; then
+        var_append EXTRA_CXXFLAGS "-std=c++11"
+    fi
+
     CROSS_PREFIX=${GNU_CONFIG_HOST}-
 
     PATH=$ORIGINAL_PATH
 
     if [ "$OPT_PREFIX" ]; then
-        EXTRA_CFLAGS="$EXTRA_CFLAGS -I$OPT_PREFIX/include"
-        EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -I$OPT_PREFIX/include"
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -L$OPT_PREFIX/lib"
+        var_append EXTRA_CFLAGS "-I$OPT_PREFIX/include"
+        var_append EXTRA_CXXFLAGS "-I$OPT_PREFIX/include"
+        var_append EXTRA_LDFLAGS "-L$OPT_PREFIX/lib"
     fi
 
     if [ "$OPT_PRINT" ]; then
@@ -368,7 +423,12 @@ prepare_build_for_host () {
         else
             log "$CURRENT_TEXT Generating host wrapper toolchain in $INSTALL_DIR"
         fi
-        gen_wrapper_toolchain "$BINPREFIX" "$PREBUILT_TOOLCHAIN_DIR/bin/$TOOLCHAIN_PREFIX" "$INSTALL_DIR"
+        if [ "$CLANG_BINDIR" ]; then
+            DST_PREFIX=""
+        else
+            DST_PREFIX=$PREBUILT_TOOLCHAIN_DIR/bin/$TOOLCHAIN_PREFIX
+        fi
+        gen_wrapper_toolchain "$BINPREFIX" "$DST_PREFIX" "$INSTALL_DIR" "$CLANG_BINDIR"
 
         # Create pkgconfig link for other scripts.
         case $CURRENT_HOST in
