@@ -23,10 +23,6 @@ sdk {
             executable true
             builtBy buildDefaultEmulator
         }
-        item("$buildDefaultEmulator.output/qemu") {
-            into 'qemu'
-            builtBy buildDefaultEmulator
-        }
         item("$buildDefaultEmulator.output/lib") {
             into 'lib'
             builtBy buildDefaultEmulator
@@ -40,16 +36,6 @@ sdk {
         }
         item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/vgabios-cirrus.bin") {
             into 'lib/pc-bios'
-        }
-
-        item("$buildDefaultEmulator.output/emulator64-ranchu-arm64") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-
-        item("$buildDefaultEmulator.output/emulator64-ranchu-mips64") {
-            executable true
-            builtBy buildDefaultEmulator
         }
 
         item("$buildDefaultEmulator.output/emulator64-arm") {
@@ -82,22 +68,10 @@ sdk {
             executable true
             builtBy buildDefaultEmulator
         }
-        item("$buildDefaultEmulator.output/emulator-ranchu-arm64") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-        item("$buildDefaultEmulator.output/emulator-ranchu-mips64") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
     }
 
     windows {
         item("$buildWindowsEmulator.output/emulator.exe") {
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/qemu") {
-            into 'qemu'
             builtBy buildWindowsEmulator
         }
         item("$buildWindowsEmulator.output/lib") {
@@ -111,18 +85,6 @@ sdk {
             into 'lib/pc-bios'
         }
 
-        item("$buildWindowsEmulator.output/emulator64-ranchu-arm64.exe") {
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/emulator64-ranchu-mips64.exe") {
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/emulator-ranchu-arm64.exe") {
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/emulator-ranchu-mips64.exe") {
-            builtBy buildWindowsEmulator
-        }
         item("$buildWindowsEmulator.output/emulator-arm.exe") {
             builtBy buildWindowsEmulator
         }
