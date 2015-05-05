@@ -11,7 +11,6 @@ SHA1=e0d425de1bd1a16993b262ff37eaf08abee8f953    URL=https://ftp.gnu.org/gnu/get
 SHA1=685c5a4215b776b83dd5330ab9084c5dcb0a51b8    URL=http://ftp.gnome.org/pub/gnome/sources/glib/2.38/glib-2.38.2.tar.xz   PATCHES=glib-2.38.2-patches.tar.xz
 SHA1=54be89b3453109be0930400e5b13c35c9e9d5e3a    URL=http://cairographics.org/releases/pixman-0.32.4.tar.gz
 SHA1=71853779b12f958777bffcb8ca6d849b4d3bed46    URL=http://pkgconfig.freedesktop.org/releases/pkg-config-0.28.tar.gz
-SHA1=0c5f193ced810b0d7ce3ab06d808cbb5eef03a2c    URL=http://www.libsdl.org/release/SDL-1.2.15.tar.gz
 SHA1=21c45586a4e94d7622e371340edec5da40d06ecc    URL=http://www.libsdl.org/release/SDL2-2.0.3.tar.gz
 SHA1=8830e4b3db1ef0cc56f26b27c95ca67ca18900b0    GIT=git://git.qemu-project.org/dtc.git BRANCH=v1.4.0
 
