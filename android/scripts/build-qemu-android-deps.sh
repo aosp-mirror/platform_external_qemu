@@ -428,35 +428,9 @@ build_qemu_android_deps () {
         --disable-gtk \
         --disable-libpng
 
-    # Handle SDL1
-    EXTRA_SDL_FLAGS=
-    case $(get_build_os) in
-        darwin)
-            EXTRA_SDL_FLAGS="--disable-video-x11"
-            ;;
-    esac
-    do_autotools_package SDL \
-        --disable-audio \
-        --disable-joystick \
-        --disable-cdrom \
-        --disable-file \
-        --disable-threads \
-        $EXTRA_SDL_FLAGS
-
-    # The SDL build script install a buggy sdl.pc when cross-compiling for
-    # Windows as a static library. I.e. it lacks many of the required
-    # libraries, that are part of --static-libs. Patch it directly
-    # instead.
-    case $1 in
-        windows-*)
-            sed -i -e 's|^Libs: -L\${libdir}  -lmingw32 -lSDLmain -lSDL  -mwindows|Libs: -lmingw32 -lSDLmain -lSDL  -mwindows -lm -luser32 -lgdi32 -lwinmm -ldxguid|g' $PREFIX/lib/pkgconfig/sdl.pc
-            ;;
-    esac
-
-    SDL_CONFIG=$PREFIX/bin/sdl-config
-
+    # Handle SDL2
     do_autotools_package SDL2
-    SDL2_CONFIG=$PREFIX/bin/sdl2-config
+    SDL_CONFIG=$PREFIX/bin/sdl2-config
 
     PKG_CONFIG_LIBDIR=$PREFIX/lib/pkgconfig
     case $1 in

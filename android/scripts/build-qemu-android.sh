@@ -68,9 +68,6 @@ OPT_TARGET=
 option_register_var "--target=<list>" OPT_TARGET \
         "Build binaries for targets [$DEFAULT_TARGETS]"
 
-OPT_USE_SDL1=
-option_register_var "--use-sdl1" "Use SDL 1.x instead of SDL 2.x"
-
 OPT_SRC_DIR=
 option_register_var "--src-dir=<dir>" OPT_SRC_DIR \
         "Set qemu-android source directory [autodetect]"
@@ -273,11 +270,7 @@ EOF
                 ;;
         esac
 
-        if [ "$OPT_USE_SDL1" ]; then
-            SDL_CONFIG=$PREFIX/bin/sdl-config
-        else
-            SDL_CONFIG=$PREFIX/bin/sdl2-config
-        fi
+        SDL_CONFIG=$PREFIX/bin/sdl2-config
         export SDL_CONFIG
 
         run $QEMU_ANDROID/configure \
@@ -374,10 +367,6 @@ do_remote_darwin_build () {
                 "$PKG_DIR/prebuilts/qemu-android/$SYSTEM"
     done
     copy_directory "$PREBUILTS_DIR"/archive "$PKG_DIR/prebuilts/archive"
-
-    if [ "$OPT_USE_SDL1" ]; then
-        var_append DARWIN_BUILD_FLAGS "--use-sdl1"
-    fi
 
     local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
 
