@@ -1,0 +1,10 @@
+_initLibrary
+_setStreamMode
+_initOpenGLRenderer
+_getHardwareStrings
+_setPostCallback
+_createOpenGLSubwindow
+_destroyOpenGLSubwindow
+_setOpenGLDisplayRotation
+_repaintOpenGLDisplay
+_stopOpenGLRenderer
