@@ -268,6 +268,9 @@ do_autotools_package () {
     PKG_VERSION=$(package_list_get_version $PKG)
     PKG_NAME=$(package_list_get_filename $PKG)
     dump "$(builder_text) Building $PKG-$PKG_VERSION"
+    if [ $PKG == "SDL2" ]; then
+        unset SDKROOT
+    fi
     (
         run cd "$(builder_build_dir)/$PKG-$PKG_VERSION" &&
         export LDFLAGS="-L$PREFIX/lib" &&
@@ -402,7 +405,8 @@ build_qemu_android_deps () {
                 --disable-libelf \
                 --disable-man \
                 --disable-selinux \
-                --disable-xattr
+                --disable-xattr \
+                --disable-compile-warnings
             ;;
     esac
 
