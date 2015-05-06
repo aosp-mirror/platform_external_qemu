@@ -7,6 +7,7 @@
 #define LIST_GLES1_ONLY_FUNCTIONS(X) \
   X(void, glAlphaFunc, (GLenum func, GLclampf ref)) \
   X(void, glBegin, (GLenum mode)) \
+  X(void, glClearDepth, (GLclampd depth)) \
   X(void, glClientActiveTexture, (GLenum texture)) \
   X(void, glClipPlane, (GLenum plane, const GLdouble * equation)) \
   X(void, glColor4d, (GLdouble red, GLdouble green, GLdouble blue, GLdouble alpha)) \
@@ -56,6 +57,8 @@
   X(void, glScalef, (GLfloat x, GLfloat y, GLfloat z)) \
   X(void, glTexEnvf, (GLenum target, GLenum pname, GLfloat param)) \
   X(void, glTexEnvfv, (GLenum target, GLenum pname, const GLfloat * params)) \
+  X(void, glTexParameterf, (GLenum target, GLenum pname, GLfloat param)) \
+  X(void, glTexParameterfv, (GLenum target, GLenum pname, const GLfloat * params)) \
   X(void, glMatrixMode, (GLenum mode)) \
   X(void, glNormalPointer, (GLenum type, GLsizei stride, const GLvoid * pointer)) \
   X(void, glPopMatrix, ()) \
