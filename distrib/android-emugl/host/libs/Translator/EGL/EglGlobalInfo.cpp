@@ -18,13 +18,9 @@
 #include "ClientAPIExts.h"
 #include "EglDisplay.h"
 #include "EglOsApi.h"
-#include "EglOsApi_osmesa.h"
-
-#include "OpenglCodecCommon/ErrorLog.h"
 
 #include "emugl/common/lazy_instance.h"
 
-#include <stdlib.h>
 #include <string.h>
 
 namespace {
@@ -44,21 +40,8 @@ EglGlobalInfo::EglGlobalInfo() :
         m_engine(NULL),
         m_display(NULL),
         m_lock() {
-    const char* env = ::getenv("ANDROID_EGL_ENGINE");
-    if (env) {
-        if (!strcmp(env, "osmesa")) {
-            m_engine = EglOS::getOSMesaEngineInstance();
-            if (!m_engine) {
-                ERR("%s: Could not load OSMesa library!\n", __FUNCTION__);
-            }
-        } else {
-            ERR("%s: Unknown ANDROID_EGL_ENGINE value '%s' ignored\n",
-                __FUNCTION__, env);
-        }
-    }
-    if (!m_engine) {
-        m_engine = EglOS::Engine::getHostInstance();
-    }
+    // TODO(digit): Choose alternate engine based on env. variable?
+    m_engine = EglOS::Engine::getHostInstance();
     m_display = m_engine->getDefaultDisplay();
 
     memset(m_gles_ifaces, 0, sizeof(m_gles_ifaces));
