@@ -103,11 +103,14 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName) {
 }
 
 #define LOAD_GL_FUNC(return_type, func_name, signature)  do { \
-        void* address = (void *)getGLFuncAddress(#func_name); \
-        if (address) { \
-            func_name = (__typeof__(func_name))(address); \
-        } else { \
-            fprintf(stderr, "Could not load func %s\n", #func_name); \
+        if (!func_name) { \
+            void* address = (void *)getGLFuncAddress(#func_name); \
+            if (address) { \
+                func_name = (__typeof__(func_name))(address); \
+            } else { \
+                fprintf(stderr, "Could not load func %s\n", #func_name); \
+                func_name = (__typeof__(func_name))(dummy_##func_name); \
+            } \
         } \
     } while (0);
 
@@ -134,7 +137,7 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName) {
 #define RETURN_(x)  RETURN_ ## x
 
 #define DEFINE_DUMMY_FUNCTION(return_type, func_name, signature) \
-static return_type GL_APIENTRY dummy_##func_name signature { \
+static return_type dummy_##func_name signature { \
     RETURN_(return_type); \
 }
 
@@ -143,22 +146,22 @@ static return_type GL_APIENTRY dummy_##func_name signature { \
 
 LIST_GLES_FUNCTIONS(DEFINE_DUMMY_FUNCTION, DEFINE_DUMMY_EXTENSION_FUNCTION)
 
-// Constructor
-#define INIT_POINTER(return_type, function_name, signature) \
-    function_name(& dummy_ ## function_name),
+// Initializing static GLDispatch members*/
 
-#define INIT_EXTENSION_POINTER(return_type, function_name, signature) \
-    function_name(NULL),
+emugl::Mutex GLDispatch::s_lock;
 
-GLDispatch::GLDispatch() :
-    LIST_GLES_FUNCTIONS(INIT_POINTER, INIT_EXTENSION_POINTER)
-    m_isLoaded(false) {}
+#define GL_DISPATCH_DEFINE_POINTER(return_type, function_name, signature) \
+    GL_APICALL return_type (GL_APIENTRY *GLDispatch::function_name) signature = NULL;
 
-// Initialization fo dispatch table.
+LIST_GLES_FUNCTIONS(GL_DISPATCH_DEFINE_POINTER, GL_DISPATCH_DEFINE_POINTER)
+
+// Constructor.
+GLDispatch::GLDispatch() : m_isLoaded(false) {}
+
 void GLDispatch::dispatchFuncs(GLESVersion version) {
-    if (m_isLoaded) {
+    emugl::Mutex::AutoLock mutex(s_lock);
+    if(m_isLoaded)
         return;
-    }
 
     /* Loading OpenGL functions which are needed for implementing BOTH GLES 1.1 & GLES 2.0*/
     LIST_GLES_COMMON_FUNCTIONS(LOAD_GL_FUNC)
