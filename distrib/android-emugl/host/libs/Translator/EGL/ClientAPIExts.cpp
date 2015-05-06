@@ -14,94 +14,139 @@
 * limitations under the License.
 */
 #include "ClientAPIExts.h"
-
 #include "EglGlobalInfo.h"
 #include "GLcommon/GLutils.h"
 #include "GLcommon/TranslatorIfaces.h"
 #include "ThreadInfo.h"
-
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+namespace ClientAPIExts
+{
+
+//
+// define function pointer type for each extention function
+// typename has the form __egl_{funcname}_t
+//
+#define FUNC_TYPE(fname) __egl_ ## fname ## _t
+#define API_ENTRY(fname,params,args) \
+    typedef void (GL_APIENTRY *FUNC_TYPE(fname)) params;
+
+#define API_ENTRY_RET(rtype,fname,params,args) \
+    typedef rtype (GL_APIENTRY *FUNC_TYPE(fname)) params;
+
+#include "ClientAPIExts.in"
+#undef API_ENTRY
+#undef API_ENTRY_RET
+
+/////
 // Define static table to store the function value for each
 // client API. functions pointers will get initialized through
 // ClientAPIExts::initClientFuncs function after each client API has been
 // loaded.
-static ClientAPIExts s_client_extensions[MAX_GLES_VERSION - 1];
+/////
+#define API_ENTRY(fname,params,args) \
+    FUNC_TYPE(fname) fname;
 
-#define INIT_MEMBER(ret,name,signature,args)  name(NULL),
+#define API_ENTRY_RET(rtype,fname,params,args) \
+    API_ENTRY(fname,params,args)
 
-// Constructor.
-ClientAPIExts::ClientAPIExts() :
-    LIST_CLIENTAPI_EXTENSIONS_FUNCTIONS(INIT_MEMBER)
-    dummy(0)
-    {}
+static struct _ext_table
+{
+#include "ClientAPIExts.in"
+} s_client_extensions[MAX_GLES_VERSION-1];
 
-void ClientAPIExts::init(const GLESiface* iface) {
-#define ASSIGN_METHOD(ret,name,signature,args) \
-    this->name = \
-          (name ## _t)iface->getProcAddress(#name);
+#undef API_ENTRY
+#undef API_ENTRY_RET
 
-    LIST_CLIENTAPI_EXTENSIONS_FUNCTIONS(ASSIGN_METHOD)
+//
+// This function initialized each entry in the s_client_extensions
+// struct at the givven index using the givven client interface
+//
+void initClientFuncs(const GLESiface *iface, int idx)
+{
+#define API_ENTRY(fname,params,args) \
+    s_client_extensions[idx].fname = \
+          (FUNC_TYPE(fname))iface->getProcAddress(#fname);
+
+#define API_ENTRY_RET(rtype,fname,params,args) \
+    API_ENTRY(fname,params,args)
+
+    //
+    // reset all func pointers to NULL
+    //
+    memset(&s_client_extensions[idx], 0, sizeof(struct _ext_table));
+
+    //
+    // And now query the GLES library for each proc address
+    //
+#include "ClientAPIExts.in"
+#undef API_ENTRY
+#undef API_ENTRY_RET
 }
 
+//
 // Define implementation for each extension function which checks
 // the current context version and calls to the correct client API
 // function.
-#define RETURN_void /* nothing */
-#define RETURN_GLboolean return
-#define RETURN_GLenum return
-
-#define RETURN_0_void  return
-#define RETURN_0_GLboolean return GL_FALSE
-#define RETURN_0_GLenum return 0
-
-#define RETURN_(x)  RETURN_ ## x
-#define RETURN_0_(x) RETURN_0_ ## x
-
-#define DEFINE_STATIC_WRAPPER(ret,name,signature,args) \
-    static ret _egl_ ## name signature { \
+//
+#define API_ENTRY(fname,params,args) \
+    static void _egl_ ## fname params \
+    { \
         ThreadInfo* thread  = getThreadInfo(); \
         if (!thread->eglContext.Ptr()) { \
-            RETURN_0_(ret); \
+            return; \
         } \
         int idx = (int)thread->eglContext->version() - 1; \
-        if (!s_client_extensions[idx].name) { \
-            RETURN_0_(ret); \
+        if (!s_client_extensions[idx].fname) { \
+            return; \
         } \
-        RETURN_(ret) (*s_client_extensions[idx].name) args; \
+        (*s_client_extensions[idx].fname) args; \
     }
 
-LIST_CLIENTAPI_EXTENSIONS_FUNCTIONS(DEFINE_STATIC_WRAPPER)
+#define API_ENTRY_RET(rtype,fname,params,args) \
+    static rtype _egl_ ## fname params \
+    { \
+        ThreadInfo* thread  = getThreadInfo(); \
+        if (!thread->eglContext.Ptr()) { \
+            return (rtype)0; \
+        } \
+        int idx = (int)thread->eglContext->version() - 1; \
+        if (!s_client_extensions[idx].fname) { \
+            return (rtype)0; \
+        } \
+        return (*s_client_extensions[idx].fname) args; \
+    }
 
-// static
-void ClientAPIExts::initClientFuncs(const GLESiface *iface, int idx) {
-    s_client_extensions[idx].init(iface);
-}
+#include "ClientAPIExts.in"
+#undef API_ENTRY
+#undef API_ENTRY_RET
 
 //
 // Define a table to map function names to the local _egl_ version of
 // the extension function, to be used in eglGetProcAddress.
 //
-#define DEFINE_TABLE_ENTRY(ret,name,signature,args) \
-    { #name, (__translatorMustCastToProperFunctionPointerType)_egl_ ## name },
+#define API_ENTRY(fname,params,args) \
+    { #fname, (__translatorMustCastToProperFunctionPointerType)_egl_ ## fname},
+#define API_ENTRY_RET(rtype,fname,params,args) \
+    API_ENTRY(fname,params,args)
 
 static struct _client_ext_funcs {
     const char *fname;
     __translatorMustCastToProperFunctionPointerType proc;
 } s_client_ext_funcs[] = {
-    LIST_CLIENTAPI_EXTENSIONS_FUNCTIONS(DEFINE_TABLE_ENTRY)
+#include "ClientAPIExts.in"
 };
-
 static const int numExtFuncs = sizeof(s_client_ext_funcs) / 
                                sizeof(s_client_ext_funcs[0]);
 
-//
-// returns the __egl_ version of the given extension function name.
+#undef API_ENTRY
+#undef API_ENTRY_RET
 
-// static
-__translatorMustCastToProperFunctionPointerType
-ClientAPIExts::getProcAddress(const char *fname)
+//
+// returns the __egl_ version of the givven extension function name.
+//
+__translatorMustCastToProperFunctionPointerType getProcAddress(const char *fname)
 {
     for (int i=0; i<numExtFuncs; i++) {
         if (!strcmp(fname, s_client_ext_funcs[i].fname)) {
@@ -111,3 +156,4 @@ ClientAPIExts::getProcAddress(const char *fname)
     return NULL;
 }
 
+} // of namespace ClientAPIExts
