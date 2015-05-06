@@ -48,7 +48,7 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName) {
         static const char kLibName[] = "opengl32";
         static const char kResolverName[] = "wglGetProcAddress";
 #elif defined(__linux__)
-        static const char kLibName[] = "libGL";
+        static const char kLibName[] = "libGL.so.1";
         static const char kResolverName[] = "glXGetProcAddress";
 #else
 #error "Unsupported platform"
