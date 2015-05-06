@@ -19,12 +19,7 @@ set -e
 export LANG=C
 export LC_ALL=C
 
-if [ -z "$_SHU_PROGDIR" ]; then
-    _SHU_PROGDIR=$(dirname "$0")
-elif [ ! -f "$_SHU_PROGDIR"/common.shi ]; then
-    echo "ERROR: Invalid _SHU_PROGDIR value (missing common.shi): $_SHU_PROGDIR"
-fi
-
+_SHU_PROGDIR=$(dirname "$0")
 _SHU_PROGNAME=$(basename "$0")
 
 # Print an error message to stderr then exit the current process.

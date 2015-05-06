@@ -224,7 +224,6 @@ fi
 RUN_32BIT_TESTS=
 RUN_64BIT_TESTS=true
 RUN_EMUGEN_TESTS=true
-RUN_GEN_ENTRIES_TESTS=true
 
 TEST_SHELL=
 EXE_SUFFIX=
@@ -315,13 +314,6 @@ if [ -z "$NO_TESTS" ]; then
                     FAILURES="$FAILURES emugen-test-suite"
             fi
         fi
-    fi
-
-    # Check the gen-entries.py script.
-    if [ "$RUN_GEN_ENTRIES_TESTS" ]; then
-        echo "Running gen-entries.py test suite."
-        run android/scripts/tests/gen-entries/run-tests.sh ||
-            FAILURES="$FAILURES gen-entries_tests"
     fi
 
     # Check that the windows executables all have icons.
