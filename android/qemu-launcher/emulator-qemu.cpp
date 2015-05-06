@@ -854,6 +854,7 @@ extern "C" int main(int argc, char **argv, char **envp) {
     String dataDir = getNthParentDir(qemuExecutable.c_str(), 2U);
     dataDir += "/pc-bios";
     args[n++] = dataDir.c_str();
+    args[n] = NULL;
 
     if(VERBOSE_CHECK(init)) {
         int i;
