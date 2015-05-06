@@ -84,8 +84,7 @@ EglDisplay* EglGlobalInfo::addDisplay(EGLNativeDisplayType dpy,
     if (!idpy) {
         return NULL;
     }
-    const GLDispatch* dispatch = getIface(GLES_2_0)->getDispatch();
-    EglDisplay* result = new EglDisplay(dpy, idpy, dispatch);
+    EglDisplay* result = new EglDisplay(dpy, idpy);
     m_displays.push_back(result);
     return result;
 }
