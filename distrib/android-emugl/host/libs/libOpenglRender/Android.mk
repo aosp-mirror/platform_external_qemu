@@ -21,6 +21,7 @@ host_common_SRC_FILES := \
     $(host_OS_SRCS) \
     ColorBuffer.cpp \
     EGLDispatch.cpp \
+    EGLWrapper.cpp \
     FbConfig.cpp \
     FrameBuffer.cpp \
     GLESv1Dispatch.cpp \
