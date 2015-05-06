@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd290587_ee429f1c",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 857,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-06T09:44:56Z",
+      "side": 1,
+      "message": "shouldn\u0027t we just add \u0027args[n] \u003d NULL;\u0027 here instead?",
+      "revId": "0c773b79710ff0ea281ef8f1e51d0648398a0324",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
