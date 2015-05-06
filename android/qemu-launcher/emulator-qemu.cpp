@@ -774,7 +774,7 @@ extern "C" int main(int argc, char **argv, char **envp) {
     }
 
     // Now build the QEMU parameters.
-    const char* args[128];
+    const char* args[128] = { NULL };
     int n = 0;
 
     args[n++] = qemuExecutable.c_str();
