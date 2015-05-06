@@ -4,6 +4,7 @@
 
 void glAlphaFunc(GLenum func, GLclampf ref);
 void glBegin( GLenum mode );
+void glClearDepth(GLclampd depth);
 void glClientActiveTexture( GLenum texture );
 void glClipPlane(GLenum plane, const GLdouble *equation);
 void glColor4d(GLdouble red, GLdouble green, GLdouble blue, GLdouble alpha);
@@ -53,6 +54,8 @@ void glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
 void glScalef(GLfloat x, GLfloat y, GLfloat z);
 void glTexEnvf(GLenum target, GLenum pname, GLfloat param);
 void glTexEnvfv(GLenum target, GLenum pname, const GLfloat *params);
+void glTexParameterf(GLenum target, GLenum pname, GLfloat param);
+void glTexParameterfv(GLenum target, GLenum pname, const GLfloat *params);
 void glMatrixMode(GLenum mode);
 void glNormalPointer(GLenum type, GLsizei stride, const GLvoid *pointer);
 void glPopMatrix(void);
