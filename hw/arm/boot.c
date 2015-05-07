@@ -13,6 +13,7 @@
 
 #define KERNEL_ARGS_ADDR 0x100
 #define KERNEL_LOAD_ADDR 0x00010000
+#define INITRD_LOAD_ADDR 0x00800000
 
 /* The worlds second smallest bootloader.  Set r0-r2, then jump to kernel.  */
 static uint32_t bootloader[] = {
@@ -79,7 +80,7 @@ static void set_kernel_args(const struct arm_boot_info *info,
         /* ATAG_INITRD2 */
         WRITE_WORD(p, 4);
         WRITE_WORD(p, 0x54420005);
-        WRITE_WORD(p, info->initrd_start);
+        WRITE_WORD(p, info->loader_start + INITRD_LOAD_ADDR);
         WRITE_WORD(p, initrd_size);
     }
     if (info->kernel_cmdline && *info->kernel_cmdline) {
@@ -155,11 +156,10 @@ static void set_kernel_args_old(const struct arm_boot_info *info,
     /* pages_in_vram */
     WRITE_WORD(p, 0);
     /* initrd_start */
-    if (initrd_size) {
-        WRITE_WORD(p, info->initrd_start);
-    } else {
+    if (initrd_size)
+        WRITE_WORD(p, info->loader_start + INITRD_LOAD_ADDR);
+    else
         WRITE_WORD(p, 0);
-    }
     /* initrd_size */
     WRITE_WORD(p, initrd_size);
     /* rd_start */
@@ -203,19 +203,6 @@ void arm_load_kernel(CPUARMState *env, struct arm_boot_info *info)
     nb_cpus = info->nb_cpus ? info->nb_cpus : 1;
     env->boot_info = info;
 
-     /* We want to put the initrd far enough into RAM that when the
-      * kernel is uncompressed it will not clobber the initrd. However
-      * on boards without much RAM we must ensure that we still leave
-      * enough room for a decent sized initrd, and on boards with large
-      * amounts of RAM we must avoid the initrd being so far up in RAM
-      * that it is outside lowmem and inaccessible to the kernel.
-      * So for boards with less than 256MB of RAM we put the initrd
-      * halfway into RAM, and for boards with 256MB of RAM or more we put
-      * the initrd at 128MB.
-      */
-    info->initrd_start = info->loader_start +
-        MIN(info->ram_size / 2, 128 * 1024 * 1024);
-
     /* Assume that raw images are linux kernels, and ELF images are not.  */
     kernel_size = load_elf(info->kernel_filename, 0, &elf_entry, NULL, NULL);
     entry = elf_entry;
@@ -241,8 +228,9 @@ void arm_load_kernel(CPUARMState *env, struct arm_boot_info *info)
     } else {
         if (info->initrd_filename) {
             initrd_size = load_image_targphys(info->initrd_filename,
-                                              info->initrd_start,
-                                              ram_size - info->initrd_start);
+                                              info->loader_start
+                                              + INITRD_LOAD_ADDR,
+                                              ram_size - INITRD_LOAD_ADDR);
             if (initrd_size < 0) {
                 fprintf(stderr, "qemu: could not load initrd '%s'\n",
                         info->initrd_filename);
