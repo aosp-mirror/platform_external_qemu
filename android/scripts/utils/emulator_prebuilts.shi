@@ -7,6 +7,7 @@
 #      http://www.apache.org/licenses/LICENSE-2.0
 #
 
+shell_import utils/aosp_dir.shi
 shell_import utils/option_parser.shi
 
 # Default location of prebuilts directory.
@@ -26,7 +27,15 @@ prebuilts_dir_parse_option () {
         PREBUILTS_DIR=$ANDROID_EMULATOR_PREBUILTS_DIR
         log "Auto-config: --prebuilts-dir=$PREBUILTS_DIR  [environment]"
     else
-        PREBUILTS_DIR=$DEFAULT_PREBUILTS_DIR
+        local AOSP_TOP
+        AOSP_TOP=$(aosp_find_top_dir_from "$(program_directory)")
+        if [ -z "$AOSP_TOP" ]; then
+            panic "Could not find AOSP top-level directory. Please use --prebuilts-dir=<dir>."
+        fi
+        PREBUILTS_DIR=$AOSP_TOP/prebuilts/android-emulator-build
+        if [ ! -d "$PREBUILTS_DIR" ]; then
+            panic "Missing directory, please use --prebuilts-dir=<dir>: [$PREBUILTS_DIR]"
+        fi
         log "Auto-config: --prebuilts-dir=$PREBUILTS_DIR  [default]"
     fi
 }

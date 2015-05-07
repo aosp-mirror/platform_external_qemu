@@ -97,3 +97,25 @@ aosp_prebuilt_toolchain_prefix_for () {
             ;;
     esac
 }
+
+# Find the AOSP top-level directory, starting from a given sub-directory.
+# $1: Starting directory, must be a sub-directory of the AOSP checkout.
+# Out: AOSP directory path on success, empty string on failure.
+aosp_find_top_dir_from () {
+    local PROBE_DIR
+    PROBE_DIR=$1
+    while true; do
+        if [ -z "$PROBE_DIR" -o "$PROBE_DIR" = "/" -o ! -d "$PROBE_DIR" ]; then
+            # Could not find anything, weird.
+            return
+        fi
+        # Use prebuilts/qemu-kernel, as the test sub-directory, given that
+        # it should be part of all interesting AOSP checkouts (platform and
+        # SDK ones).
+        if [ -d "$PROBE_DIR"/prebuilts/qemu-kernel ]; then
+            printf "%s" "$PROBE_DIR"
+            return
+        fi
+        PROBE_DIR=$(cd "$PROBE_DIR"/.. && pwd -P || true)
+    done
+}
