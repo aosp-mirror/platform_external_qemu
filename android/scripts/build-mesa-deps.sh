@@ -32,7 +32,7 @@ package_builder_register_options
 
 aosp_dir_register_option
 prebuilts_dir_register_option
-install_dir_register_option mesa
+install_dir_register_option mesa-deps
 
 option_parse "$@"
 
@@ -195,13 +195,18 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --enable-targets=$LLVM_TARGETS \
                 --disable-bindings \
 
-        for SUBDIR in bin include lib share/aclocal share/pkgconfig; do
+        for SUBDIR in include lib share/aclocal share/pkgconfig; do
             if [ -d "$(builder_install_prefix)/$SUBDIR" ]; then
                 copy_directory \
                         "$(builder_install_prefix)/$SUBDIR" \
                         "$INSTALL_DIR/$SYSTEM/$SUBDIR"
             fi
         done
+
+        # llvm-config is the only binary needed to build Mesa.
+        run mkdir -p "$INSTALL_DIR/$SYSTEM/bin"
+        run cp -f "$(builder_install_prefix)/bin/llvm-config" \
+                "$INSTALL_DIR/$SYSTEM/bin/"
 
         timestamp_set "$INSTALL_DIR/$SYSTEM" mesa-deps
 
