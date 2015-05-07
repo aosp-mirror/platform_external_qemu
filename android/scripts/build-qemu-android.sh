@@ -104,6 +104,8 @@ install_dir_parse_option
 
 package_builder_process_options qemu-android
 
+QEMU_ANDROID_DEPS_INSTALL_DIR=$PREBUILTS_DIR/qemu-android-deps
+
 ##
 ## Handle target system list
 ##
@@ -181,7 +183,7 @@ build_qemu_android () {
 
     BUILD_DIR=$TEMP_DIR/build-$1/qemu-android
     (
-        PREFIX=$INSTALL_DIR/$1
+        PREFIX=$QEMU_ANDROID_DEPS_INSTALL_DIR/$1
 
         BUILD_FLAGS=
         if [ "$(get_verbosity)" -gt 3 ]; then
@@ -363,8 +365,8 @@ do_remote_darwin_build () {
 
     run mkdir -p "$PKG_DIR/prebuilts"
     for SYSTEM in $DARWIN_SYSTEMS; do
-        copy_directory "$INSTALL_DIR/$SYSTEM" \
-                "$PKG_DIR/prebuilts/qemu-android/$SYSTEM"
+        copy_directory "$QEMU_ANDROID_DEPS_INSTALL_DIR/$SYSTEM" \
+                "$PKG_DIR/prebuilts/qemu-android-deps/$SYSTEM"
     done
     copy_directory "$PREBUILTS_DIR"/archive "$PKG_DIR/prebuilts/archive"
 
@@ -403,10 +405,6 @@ EOF
         timestamp_set "$INSTALL_DIR/$SYSTEM" qemu-android
     done
 }
-
-if [ -z "$OPT_FORCE" ]; then
-    builder_check_all_timestamps "$INSTALL_DIR" qemu-android
-fi
 
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     dump "Remote build for: $DARWIN_SYSTEMS"
