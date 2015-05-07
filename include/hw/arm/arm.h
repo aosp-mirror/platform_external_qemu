@@ -37,7 +37,6 @@ struct arm_boot_info {
     int (*atag_board)(const struct arm_boot_info *info, void *p);
     /* Used internally by arm_boot.c */
     int is_linux;
-    hwaddr initrd_start;
     hwaddr initrd_size;
     hwaddr entry;
 };
