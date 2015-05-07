@@ -59,6 +59,8 @@ else
     log "Auto-config: --install-dir=$INSTALL_DIR  [default]"
 fi
 
+MESA_DEPS_INSTALL_DIR=$PREBUILTS_DIR/mesa-deps
+
 ARCHIVE_DIR=$PREBUILTS_DIR/archive
 if [ ! -d "$ARCHIVE_DIR" ]; then
     panic "Missing archive directory: $ARCHIVE_DIR"
@@ -96,7 +98,7 @@ unpack_package_source () {
 # $1: System name (e..g darwin-x86_64)
 check_mesa_dependencies () {
     local SYSTEM="$1"
-    if ! timestamp_check "$INSTALL_DIR/$SYSTEM" mesa-deps; then
+    if ! timestamp_check "$MESA_DEPS_INSTALL_DIR/$SYSTEM" mesa-deps; then
         dump "[$SYSTEM] Need to rebuild Mesa dependencies first."
         local EXTRA_FLAGS=
         local VERBOSITY=$(get_verbosity)
@@ -112,7 +114,7 @@ check_mesa_dependencies () {
             --prebuilts-dir=$PREBUILTS_DIR \
             --build-dir=$BUILD_DIR \
             --host=$SYSTEM \
-            --install-dir=$INSTALL_DIR \
+            --install-dir=$MESA_DEPS_INSTALL_DIR \
             $EXTRA_FLAGS
     fi
 }
@@ -276,7 +278,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                         export CXXFLAGS="-std=gnu++11"
                         ;;
                 esac
-                export LLVM=$INSTALL_DIR/$(builder_host) &&
+                export LLVM=$MESA_DEPS_INSTALL_DIR/$(builder_host) &&
                 run scons -j$NUM_JOBS -C "$PKG_SRC_DIR" \
                     build=release \
                     llvm=yes \
@@ -315,6 +317,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         fi
 
         # Copy to install location.
+        run mkdir -p "$INSTALL_DIR"/$SYSTEM/lib
         for LIB in $MESA_LIBS; do
             run cp -f "$(builder_install_prefix)/lib/$LIB" \
                     "$INSTALL_DIR/$SYSTEM/lib/$LIB"
