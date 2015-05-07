@@ -23,13 +23,14 @@ shell_import utils/option_parser.shi
 shell_import utils/package_builder.shi
 shell_import utils/package_list_parser.shi
 
-package_builder_register_options qemu-android
+package_builder_register_options qemu-android-deps
 
 aosp_dir_register_option
 prebuilts_dir_register_option
 install_dir_register_option
 
-DEFAULT_INSTALL_SUBDIR=qemu-android
+DEFAULT_PREBUILTS_SUBDIR=prebuilts/android-emulator-build
+DEFAULT_INSTALL_SUBDIR=qemu-android-deps
 
 PROGRAM_PARAMETERS=""
 
@@ -38,7 +39,7 @@ PROGRAM_DESCRIPTION=\
 <prebuilts>/$DEFAULT_INSTALL_SUBDIR/ and will rebuild the libraries from sources
 if they are not available.
 
-The default value of <prebuilts> is: $DEFAULT_PREBUILTS_DIR
+The default value of <prebuilts> is: \$AOSP/$DEFAULT_PREBUILTS_SUBDIR
 Use --prebuilts-dir=<path> or define ANDROID_EMULATOR_PREBUILTS_DIR in your
 environment to change it.
 
