@@ -149,7 +149,7 @@ fi
 # Copy qemu-android binaries, if any.
 PREBUILTS_DIR=$ANDROID_EMULATOR_PREBUILTS_DIR
 if [ -z "$PREBUILTS_DIR" ]; then
-PREBUILTS_DIR=/tmp/$USER-emulator-prebuilts
+    PREBUILTS_DIR=$PROGDIR/../../prebuilts/android-emulator-build
 fi
 QEMU_ANDROID_HOSTS=
 QEMU_ANDROID_BINARIES=
