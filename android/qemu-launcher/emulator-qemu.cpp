@@ -21,6 +21,7 @@
 #include "android/base/StringFormat.h"
 
 #include "android/cmdline-option.h"
+#include "android/cpu_accelerator.h"
 #include "android/globals.h"
 #include "android/help.h"
 #include "android/filesystems/ext4_utils.h"
@@ -31,6 +32,7 @@
 #include "android/utils/path.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/win32_cmdline_quote.h"
+#include "android/utils/x86_cpuid.h"
 
 #include <limits.h>
 #include <stdio.h>
@@ -115,13 +117,27 @@ const TargetInfo kTarget = {
     "ttyGF",
     NULL,
 #endif
+#ifdef TARGET_X86
+    "x86",
+    "i386",
+    "qemu32",
+    "ttyS",
+    " androidboot.hardware=ranchu",
+#endif
+#ifdef TARGET_X86_64
+    "x86_64",
+    "x86_64",
+    "qemu64",
+    "ttyS",
+    " androidboot.hardware=ranchu",
+#endif
 };
 
 String getNthParentDir(const char* path, size_t n) {
     StringVector dir = PathUtils::decompose(path);
     PathUtils::simplifyComponents(&dir);
     if (dir.size() < n + 1U) {
-        return String("");
+        return String(".");
     }
     dir.resize(dir.size() - n);
     return PathUtils::recompose(dir);
@@ -779,11 +795,143 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     args[n++] = qemuExecutable.c_str();
 
+#if defined(TARGET_X86_64) || defined(TARGET_X86)
+    /* Handle CPU acceleration options. */
+    if (opts->no_accel) {
+        if (opts->accel) {
+            if (strcmp(opts->accel, "off") != 0) {
+                derror("You cannot use -no-accel and '-accel %s' at the same time",
+                       opts->accel);
+                exit(1);
+            }
+        } else {
+            reassign_string(&opts->accel, "off");
+        }
+    }
+
+    enum {
+        ACCEL_OFF = 0,
+        ACCEL_ON = 1,
+        ACCEL_AUTO = 2,
+    } accel_mode = ACCEL_AUTO;
+
+    if (opts->accel) {
+        if (!strcmp(opts->accel, "off")) {
+            accel_mode = ACCEL_OFF;
+        } else if (!strcmp(opts->accel, "on")) {
+            accel_mode = ACCEL_ON;
+        } else if (!strcmp(opts->accel, "auto")) {
+            accel_mode = ACCEL_AUTO;
+        } else {
+            derror("Invalid '-accel %s' parameter, valid values are: on off auto\n",
+                   opts->accel);
+            exit(1);
+        }
+    }
+
+    char* accel_status = NULL;
+#ifdef __linux__
+    bool accel_ok = android_hasCpuAcceleration(&accel_status);
+    static const char kAccelerator[] = "KVM";
+    static const char kEnableAccelerator[] = "-enable-kvm";
+#else
+    /* TODO: will check HAXM after it is integrated */
+    bool accel_ok = false;
+    accel_status = "This system does not support CPU acceleration.";
+    static const char kAccelerator[] = "Intel HAXM";
+    static const char kEnableAccelerator[] = "-enable-hax";
+#endif
+
+    // Dump CPU acceleration status.
+    if (VERBOSE_CHECK(init)) {
+        const char* accel_str = "DISABLED";
+        if (accel_ok) {
+            if (accel_mode == ACCEL_OFF) {
+                accel_str = "working, but disabled by user";
+            } else {
+                accel_str = "working";
+            }
+        }
+        dprint("CPU Acceleration %s: %s", kAccelerator, accel_str);
+        dprint("CPU Acceleration status: %s", accel_status);
+    }
+
+    /* abi check CPU acceleration */
+    {
+        char* abi = avdInfo_getTargetAbi(avd);
+        if (!strncmp(abi, "x86", 3)) {
+            if (accel_ok && accel_mode != ACCEL_OFF) {
+                /* CPU acceleration is enabled and working, but if the host CPU
+                 * does not support all instruction sets specified in the x86/
+                 * x86_64 ABI, emulation may fail on unsupported instructions.
+                 * Therefore, check the capabilities of the host CPU and warn
+                 * the user if any required features are missing. */
+                uint32_t ecx = 0;
+                char buf[64], *p = buf, * const end = p + sizeof(buf);
+
+                /* Execute CPUID instruction with EAX=1 and ECX=0 to get CPU
+                 * feature bits (stored in EDX, ECX and EBX). */
+                android_get_x86_cpuid(1, 0, NULL, NULL, &ecx, NULL);
+
+                /* Theoretically, MMX and SSE/2/3 should be checked as well, but
+                 * CPU models that do not support them are probably too old to
+                 * run Android emulator. */
+                if (!(ecx & CPUID_ECX_SSSE3)) {
+                    p = bufprint(p, end, " SSSE3");
+                }
+                if (!strcmp(abi, "x86_64")) {
+                    if (!(ecx & CPUID_ECX_SSE41)) {
+                        p = bufprint(p, end, " SSE4.1");
+                    }
+                    if (!(ecx & CPUID_ECX_SSE42)) {
+                        p = bufprint(p, end, " SSE4.2");
+                    }
+                    if (!(ecx & CPUID_ECX_POPCNT)) {
+                        p = bufprint(p, end, " POPCNT");
+                    }
+                }
+
+                if (p > buf) {
+                    /* Using dwarning(..) would cause this message to be written
+                     * to stdout and filtered out by AVD Manager. But we want
+                     * the AVD Manager user to see this warning, so we resort to
+                     * fprintf(..). */
+                    fprintf(stderr, "emulator: WARNING: Host CPU is missing the"
+                            " following feature(s) required for %s emulation:%s"
+                            "\nHardware-accelerated emulation may not work"
+                            " properly!\n", abi, buf);
+                }
+            }
+        }
+        AFREE(abi);
+    }
+    /* CPU acceleration only works for x86 and x86_64 system images. */
+    if (accel_mode == ACCEL_OFF) {
+        args[n++] = "-cpu";
+        args[n++] = kTarget.qemuCpu;
+    } else if (accel_mode == ACCEL_ON) {
+        if (!accel_ok) {
+            derror("CPU acceleration not supported on this machine!");
+            derror("Reason: %s", accel_status);
+            exit(1);
+        }
+        args[n++] = ASTRDUP(kEnableAccelerator);
+    } else {
+        /* ACCEL_AUTO */
+        if (accel_ok) {
+            args[n++] = ASTRDUP(kEnableAccelerator);
+        } else {
+            args[n++] = "-cpu";
+            args[n++] = kTarget.qemuCpu;
+        }
+    }
+    AFREE(accel_status);
+#else
     args[n++] = "-cpu";
     args[n++] = kTarget.qemuCpu;
     args[n++] = "-machine";
     args[n++] = "type=ranchu";
-
+#endif
     // Memory size
     args[n++] = "-m";
     String memorySize = StringFormat("%ld", hw->hw_ramSize);
@@ -810,6 +958,45 @@ extern "C" int main(int argc, char **argv, char **envp) {
     args[n++] = "-initrd";
     args[n++] = hw->disk_ramdisk_path;
 
+/* the order of drive in cmd determines where the image is mounted.
+   x86 is different than arm/mips implementation.
+   this part could be refactored after LABEL based fstab is merged.
+   e.g. https://android-review.googlesource.com/#/c/120067
+*/
+#if defined(TARGET_X86_64) || defined(TARGET_X86)
+    // System partition.
+    args[n++] = "-drive";
+    String systemParam =
+            StringFormat("if=none,index=0,id=system,format=raw,file=%s",
+                         hw->disk_systemPartition_initPath);
+		args[n++] = systemParam.c_str();
+    args[n++] = "-device";
+    args[n++] = "virtio-blk-pci,drive=system";
+
+    // Cache partition.
+    args[n++] = "-drive";
+    String cacheParam =
+            StringFormat("if=none,index=1,id=cache,format=raw,file=%s",
+                         hw->disk_cachePartition_path);
+    args[n++] = cacheParam.c_str();
+    args[n++] = "-device";
+    args[n++] = "virtio-blk-pci,drive=cache";
+
+    // Data partition.
+    args[n++] = "-drive";
+    String userDataParam =
+            StringFormat("if=none,index=2,id=userdata,format=raw,file=%s",
+                         hw->disk_dataPartition_path);
+    args[n++] = userDataParam.c_str();
+    args[n++] = "-device";
+    args[n++] = "virtio-blk-pci,drive=userdata";
+
+    // Network
+    args[n++] = "-netdev";
+    args[n++] = "user,id=mynet";
+    args[n++] = "-device";
+    args[n++] = "virtio-net-pci,netdev=mynet";
+#else
     // Data partition.
     args[n++] = "-drive";
     String userDataParam =
@@ -842,6 +1029,7 @@ extern "C" int main(int argc, char **argv, char **envp) {
     args[n++] = "user,id=mynet";
     args[n++] = "-device";
     args[n++] = "virtio-net-device,netdev=mynet";
+#endif
     args[n++] = "-show-cursor";
 
     // Graphics
@@ -851,8 +1039,8 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     // Data directory (for keymaps and PC Bios).
     args[n++] = "-L";
-    String dataDir = getNthParentDir(qemuExecutable.c_str(), 2U);
-    dataDir += "/pc-bios";
+    String dataDir = getNthParentDir(qemuExecutable.c_str(), 3U);
+    dataDir += "/lib/pc-bios";
     args[n++] = dataDir.c_str();
     args[n] = NULL;
 
@@ -896,7 +1084,6 @@ extern "C" int main(int argc, char **argv, char **envp) {
         D("Quoted param: [%s]\n", args[i]);
     }
 #endif
-
     safe_execv(qemuExecutable.c_str(), (char* const*)args);
 
     fprintf(stderr,

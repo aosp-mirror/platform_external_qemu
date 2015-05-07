@@ -35,7 +35,7 @@
 
 /* Required by android/utils/debug.h */
 int android_verbose;
-
+bool ranchu=false;
 
 #define DEBUG 1
 
@@ -118,6 +118,11 @@ int main(int argc, char** argv)
         if (!strcmp(opt,"-gpu") && nn + 1 < argc) {
             gpu = argv[nn + 1];
             nn++;
+        }
+
+        if (!strcmp(opt,"-ranchu")) {
+            ranchu = true;
+            continue;
         }
 
         if (!strcmp(opt,"-force-32bit")) {
@@ -235,6 +240,27 @@ int main(int argc, char** argv)
         D("Quoted param: [%s]\n", argv[n]);
     }
 #endif
+
+    {
+        int i;
+        D("Running :%s\n", emulatorPath);
+        for(i = 0; i < argc; i++) {
+            D("Emulator: argv[%02d] = \"%s\"\n", i, argv[i]);
+        }
+        /* Dump final command-line option to make debugging the core easier */
+        D("Concatenated QEMU options:\n");
+        for (i = 0; i < argc; i++) {
+            /* To make it easier to copy-paste the output to a command-line,
+             * quote anything that contains spaces.
+             */
+            if (strchr(argv[i], ' ') != NULL) {
+                D(" '%s'", argv[i]);
+            } else {
+                D(" %s", argv[i]);
+            }
+        }
+        D("\n");
+    }
 
     // Launch it with the same set of options !
     // Note that on Windows, the first argument must _not_ be quoted or
@@ -379,14 +405,8 @@ getTargetEmulatorPath(const char* progName,
 {
     char*  progDir;
     char*  result;
-#ifdef _WIN32
-    /* TODO: currently amd64-mingw32msvc-gcc doesn't work which prevents
-             generating 64-bit binaries for Windows */
-    bool search_for_64bit_emulator = false;
-#else
     bool search_for_64bit_emulator =
             !force_32bit && android_getHostBitness() == 64;
-#endif
 
     /* Only search in current path if there is no directory separator
      * in |progName|. */
@@ -402,28 +422,17 @@ getTargetEmulatorPath(const char* progName,
 
     const char* emulatorSuffix;
 
-    // Special case: try to find emulator-ranchu-<arch> before emulator-<arch>
-    D("Looking for ranchu emulator backed for %s CPU\n", avdArch);
-    result = probeTargetEmulatorPath(progDir,
-                                     "ranchu",
-                                     avdArch,
-                                     search_for_64bit_emulator,
-                                     try_current_path,
-                                     is_64bit);
-    if (result) {
-        return result;
-    }
-
-    // Special case: for x86_64, first try to find emulator-x86_64 before
-    // looking for emulator-x86.
-    if (!strcmp(avdArch, "x86_64")) {
-        emulatorSuffix = "x86_64";
-
-        D("Looking for emulator backend for %s CPU\n", avdArch);
-
+    /* NOTE: To be compatible with classic emulator,
+       x86/x86_64 will find classic emulator first
+       unless '-ranchu' option is specified.
+       arm64/mips64 always pick ranchu.
+    */
+    if ((strcmp(avdArch, "x86_64") && strcmp(avdArch, "x86")) || ranchu) {
+        // Special case: try to find emulator-ranchu-<arch> before emulator-<arch>
+        D("Looking for ranchu emulator backed for %s CPU\n", avdArch);
         result = probeTargetEmulatorPath(progDir,
-                                         NULL,
-                                         emulatorSuffix,
+                                         "ranchu",
+                                         avdArch,
                                          search_for_64bit_emulator,
                                          try_current_path,
                                          is_64bit);

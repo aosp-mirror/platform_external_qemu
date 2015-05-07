@@ -788,6 +788,14 @@ help_no_accel(stralloc_t* out)
 }
 
 static void
+help_ranchu(stralloc_t* out)
+{
+    PRINTF(
+        "  Use the new emulator as the preferred backend for IA(x86/x86_64)\n"
+    );
+}
+
+static void
 help_skindir(stralloc_t*  out)
 {
     PRINTF(
