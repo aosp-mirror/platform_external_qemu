@@ -92,7 +92,7 @@ static DevMapEntry devmap[] = {
     [RANCHU_ANDROID_PIPE] = { GOLDFISH_IO_SPACE + 0x0A000, 0x2000, 10,
         "android_pipe", "android_pipe", "generic,android-pipe" },
     [RANCHU_GF_AUDIO] =     { GOLDFISH_IO_SPACE + 0x0C000, 0x0100, 11,
-        NULL, NULL, NULL },
+        "goldfish_audio", "goldfish_audio", "generic,goldfish-audio" },
     [RANCHU_MMIO] =         { GOLDFISH_IO_SPACE + 0x10000, 0x0200, 16,
         "virtio-mmio", "virtio_mmio", "virtio,mmio" },
     /* ...repeating for a total of VIRTIO_TRANSPORTS, each of that size */
@@ -475,7 +475,7 @@ static void ranchu_init(MachineState *machine)
     create_device(fdt, &devmap[RANCHU_GF_TTY], goldfish_pic, MAX_GF_TTYS, 0);
 
     /* Other Goldfish Platform devices */
-    for (i = RANCHU_ANDROID_PIPE; i >= RANCHU_GF_TIMER ; i--) {
+    for (i = RANCHU_GF_AUDIO; i >= RANCHU_GF_TIMER ; i--) {
         create_device(fdt, &devmap[i], goldfish_pic, 1, 0);
     }
 
