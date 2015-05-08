@@ -39,7 +39,8 @@ for OPT; do
             OUT_DIR=${OPT##--out-dir=}
             ;;
         --help|-?)
-            VERBOSE=2
+            export IN_ANDROID_REBUILD_SH=1
+            ./android-configure.sh --help
             ;;
     esac
 done
