@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd24a5a6_1806ecd9",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-05-08T22:12:26Z",
+      "side": 1,
+      "message": "android-configure.sh instead?",
+      "range": {
+        "startLine": 113,
+        "startChar": 7,
+        "endLine": 113,
+        "endChar": 26
+      },
+      "revId": "82c23656db16f4d359d38153ec146c7b4fa310b5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd24a5a6_f8d7b0c0",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-05-08T22:12:26Z",
+      "side": 1,
+      "message": "I think this is not ok because \"./android-configure.sh --help\" lists more options that do not apply to ./android-rebuild.sh",
+      "range": {
+        "startLine": 42,
+        "startChar": 21,
+        "endLine": 42,
+        "endChar": 22
+      },
+      "revId": "82c23656db16f4d359d38153ec146c7b4fa310b5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
