@@ -39,7 +39,7 @@ for OPT; do
             OUT_DIR=${OPT##--out-dir=}
             ;;
         --help|-?)
-            VERBOSE=2
+            ./android-configure.sh --help
             ;;
     esac
 done

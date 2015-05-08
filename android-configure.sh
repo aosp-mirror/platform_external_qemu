@@ -110,7 +110,7 @@ done
 if [ "$OPTION_HELP" = "yes" ] ; then
     cat << EOF
 
-Usage: rebuild.sh [options]
+Usage: android-rebuild.sh [options]
 Options: [defaults in brackets after descriptions]
 EOF
     echo "Standard options:"
@@ -120,7 +120,6 @@ EOF
     echo "  --sdl-config=FILE           Use specific sdl-config script [$SDL_CONFIG]"
     echo "  --strip                     Strip emulator executables."
     echo "  --no-strip                  Do not strip emulator executables (default)."
-    echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --ignore-audio              Ignore audio messages (may build sound-less emulator)"
     echo "  --no-aosp-prebuilts         Do not use prebuilt toolchain"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
