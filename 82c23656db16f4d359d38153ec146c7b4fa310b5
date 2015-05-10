@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8d338df4_260faab7",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-05-10T07:01:42Z",
+      "side": 1,
+      "message": "thanx, i made the change in another patch, how do you think ?",
+      "parentUuid": "cd24a5a6_1806ecd9",
+      "range": {
+        "startLine": 113,
+        "startChar": 7,
+        "endLine": 113,
+        "endChar": 26
+      },
+      "revId": "82c23656db16f4d359d38153ec146c7b4fa310b5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cd24a5a6_f8d7b0c0",
         "filename": "android-rebuild.sh",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-05-08T22:12:26Z",
       "side": 1,
       "message": "I think this is not ok because \"./android-configure.sh --help\" lists more options that do not apply to ./android-rebuild.sh",
+      "range": {
+        "startLine": 42,
+        "startChar": 21,
+        "endLine": 42,
+        "endChar": 22
+      },
+      "revId": "82c23656db16f4d359d38153ec146c7b4fa310b5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d2e5992_9ab8f153",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-05-10T07:01:42Z",
+      "side": 1,
+      "message": "i thought android-configure.sh is like the back end for android-rebuild.sh, so i just invoked it here.  i did miss one option, --build-qemu-android, which i corrected it in the 2nd patch.\nwould you mind telling me any other options that i missed ?",
+      "parentUuid": "cd24a5a6_f8d7b0c0",
       "range": {
         "startLine": 42,
         "startChar": 21,
