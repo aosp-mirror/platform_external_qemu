@@ -68,8 +68,6 @@ for opt do
   ;;
   --install=*) OPTION_TARGETS="$OPTION_TARGETS $optarg";
   ;;
-  --sdl-config=*) SDL_CONFIG=$optarg
-  ;;
   --mingw) OPTION_MINGW=yes
   ;;
   --cc=*) OPTION_CC="$optarg"
@@ -117,7 +115,6 @@ EOF
     echo "  --help                      Print this message"
     echo "  --install=FILEPATH          Copy emulator executable to FILEPATH [$TARGETS]"
     echo "  --cc=PATH                   Specify C compiler [$HOST_CC]"
-    echo "  --sdl-config=FILE           Use specific sdl-config script [$SDL_CONFIG]"
     echo "  --strip                     Strip emulator executables."
     echo "  --no-strip                  Do not strip emulator executables (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
@@ -417,87 +414,6 @@ enable_cygwin
 setup_toolchain
 
 ###
-###  SDL Probe
-###
-
-if [ -n "$SDL_CONFIG" ] ; then
-
-	# check that we can link statically with the library.
-	#
-	SDL_CFLAGS=`$SDL_CONFIG --cflags`
-	SDL_LIBS=`$SDL_CONFIG --static-libs`
-
-	# quick hack, remove the -D_GNU_SOURCE=1 of some SDL Cflags
-	# since they break recent Mingw releases
-	SDL_CFLAGS=`echo $SDL_CFLAGS | sed -e s/-D_GNU_SOURCE=1//g`
-
-	log "SDL-probe  : SDL_CFLAGS = $SDL_CFLAGS"
-	log "SDL-probe  : SDL_LIBS   = $SDL_LIBS"
-
-
-	EXTRA_CFLAGS="$SDL_CFLAGS"
-	EXTRA_LDFLAGS="$SDL_LIBS"
-
-	case "$OS" in
-		freebsd-*)
-		EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm -lpthread"
-		;;
-	esac
-
-	cat > $TMPC << EOF
-#include <SDL.h>
-#undef main
-int main( int argc, char** argv ) {
-   return SDL_Init (SDL_INIT_VIDEO);
-}
-EOF
-	feature_check_link  SDL_LINKING
-
-	if [ $SDL_LINKING != "yes" ] ; then
-		echo "You provided an explicit sdl-config script, but the corresponding library"
-		echo "cannot be statically linked with the Android emulator directly."
-		echo "Error message:"
-		cat $TMPL
-		clean_exit
-	fi
-	log "SDL-probe  : static linking ok"
-
-	# now, let's check that the SDL library has the special functions
-	# we added to our own sources
-	#
-	cat > $TMPC << EOF
-#include <SDL.h>
-#undef main
-int main( int argc, char** argv ) {
-	int  x, y;
-	SDL_Rect  r;
-	SDL_WM_GetPos(&x, &y);
-	SDL_WM_SetPos(x, y);
-	SDL_WM_GetMonitorDPI(&x, &y);
-	SDL_WM_GetMonitorRect(&r);
-	return SDL_Init (SDL_INIT_VIDEO);
-}
-EOF
-	feature_check_link  SDL_LINKING
-
-	if [ $SDL_LINKING != "yes" ] ; then
-		echo "You provided an explicit sdl-config script in SDL_CONFIG, but the"
-		echo "corresponding library doesn't have the patches required to link"
-		echo "with the Android emulator. Unsetting SDL_CONFIG will use the"
-		echo "sources bundled with the emulator instead"
-		echo "Error:"
-		cat $TMPL
-		clean_exit
-	fi
-
-	log "SDL-probe  : extra features ok"
-	clean_temp
-
-	EXTRA_CFLAGS=
-	EXTRA_LDFLAGS=
-fi
-
-###
 ###  Audio subsystems probes
 ###
 PROBE_COREAUDIO=no
@@ -679,9 +595,6 @@ echo "BUILD_LDFLAGS     := $BUILD_LDFLAGS" >> $config_mk
 
 PWD=`pwd`
 echo "SRC_PATH          := $PWD" >> $config_mk
-if [ -n "$SDL_CONFIG" ] ; then
-echo "QEMU_SDL_CONFIG   := $SDL_CONFIG" >> $config_mk
-fi
 echo "CONFIG_COREAUDIO  := $PROBE_COREAUDIO" >> $config_mk
 echo "CONFIG_WINAUDIO   := $PROBE_WINAUDIO" >> $config_mk
 echo "CONFIG_ESD        := $PROBE_ESD" >> $config_mk
