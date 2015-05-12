@@ -23,6 +23,12 @@ PROGDIR=`dirname $0`
 VERBOSE=yes
 VERBOSE2=no
 
+panic ()
+{
+    echo "ERROR: $@"
+    exit 1
+}
+
 log ()
 {
     if [ "$VERBOSE" = "yes" ] ; then
