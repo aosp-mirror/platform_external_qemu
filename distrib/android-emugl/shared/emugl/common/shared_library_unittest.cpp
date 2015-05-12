@@ -117,6 +117,18 @@ TEST_F(SharedLibraryTest, Open) {
     EXPECT_TRUE(lib.get());
 }
 
+TEST_F(SharedLibraryTest, OpenFailureWithError) {
+    char error[256];
+    error[0] = '\0';
+    SharedLibrary* lib = SharedLibrary::open("/tmp/does/not/exists",
+                                             error,
+                                             sizeof(error));
+    EXPECT_FALSE(lib);
+    EXPECT_TRUE(error[0])
+            << "Could not get error string when failing to load library";
+    printf("Expected library load failure: [%s]\n", error);
+}
+
 TEST_F(SharedLibraryTest, OpenLibraryWithExtension) {
     std::string path = library_path();
 
