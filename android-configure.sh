@@ -16,7 +16,6 @@ cd `dirname $0`
 . android/build/common.sh
 
 # Parse options
-OPTION_TARGETS=""
 OPTION_DEBUG=no
 OPTION_IGNORE_AUDIO=no
 OPTION_AOSP_PREBUILTS_DIR=
@@ -66,8 +65,6 @@ for opt do
 
   --debug) OPTION_DEBUG=yes
   ;;
-  --install=*) OPTION_TARGETS="$OPTION_TARGETS $optarg";
-  ;;
   --mingw) OPTION_MINGW=yes
   ;;
   --cc=*) OPTION_CC="$optarg"
@@ -113,7 +110,6 @@ Options: [defaults in brackets after descriptions]
 EOF
     echo "Standard options:"
     echo "  --help                      Print this message"
-    echo "  --install=FILEPATH          Copy emulator executable to FILEPATH [$TARGETS]"
     echo "  --cc=PATH                   Specify C compiler [$HOST_CC]"
     echo "  --strip                     Strip emulator executables."
     echo "  --no-strip                  Do not strip emulator executables (default)."
