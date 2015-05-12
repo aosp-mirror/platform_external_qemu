@@ -177,6 +177,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .enable_touch = !androidHwConfig_isScreenNoTouch(android_hw),
         .enable_dpad = android_hw->hw_dPad != 0,
         .enable_keyboard = android_hw->hw_keyboard != 0,
+        .enable_mediakeys = android_hw->hw_mediaKeys != 0,
         .enable_trackball = android_hw->hw_trackBall != 0,
 
         .window_x = emulator->win_x,

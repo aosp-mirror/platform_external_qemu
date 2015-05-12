@@ -404,6 +404,13 @@ void events_dev_init(uint32_t base, qemu_irq irq)
         events_set_bit(s, EV_KEY, KEY_CENTER);
     }
 
+    if (config->hw_mediaKeys) {
+        events_set_bit(s, EV_KEY, KEY_PLAYPAUSE);
+        events_set_bit(s, EV_KEY, KEY_STOP);
+        events_set_bit(s, EV_KEY, KEY_REWIND);
+        events_set_bit(s, EV_KEY, KEY_FASTFORWARD);
+    }
+
     if (config->hw_trackBall) {
         events_set_bit(s, EV_KEY, BTN_MOUSE);
     }

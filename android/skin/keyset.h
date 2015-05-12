@@ -56,6 +56,7 @@ typedef struct SkinKeyset  SkinKeyset;
     _SKIN_KEY_COMMAND(BUTTON_PREV,"Previous button")         \
     _SKIN_KEY_COMMAND(BUTTON_NEXT,"Next button")         \
     _SKIN_KEY_COMMAND(BUTTON_PLAY,"Play button")         \
+    _SKIN_KEY_COMMAND(BUTTON_PLAYPAUSE,"Play/Pause button")     \
     _SKIN_KEY_COMMAND(BUTTON_PAUSE,"Pause button")         \
     _SKIN_KEY_COMMAND(BUTTON_STOP,"Stop button")         \
     _SKIN_KEY_COMMAND(BUTTON_REWIND,"Rewind button")         \

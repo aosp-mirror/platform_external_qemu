@@ -54,6 +54,7 @@ typedef struct SkinUIFuncs {
 // |window_scale| is the window scaling factor. Use 1.0 for unscaled display.
 // |enable_touch| is true iff touch emulation is needed.
 // |enable_dpad| is true iff DPad emulation is needed.
+// |enable_mediakeys| is true iff Media Playback keys emulation is needed.
 // |enable_keyboard| is true iff a hardware keyboard must be emulated.
 // |enable_trackball| is true iff a trackball must be emulated.
 // |keyboard_charmap| is the name of the keyboard charmap, if any. If NULL,
@@ -69,6 +70,7 @@ typedef struct SkinUIParams {
 
     bool enable_touch;
     bool enable_dpad;
+    bool enable_mediakeys;
     bool enable_keyboard;
     bool enable_trackball;
 
