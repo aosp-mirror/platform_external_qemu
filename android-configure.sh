@@ -75,8 +75,6 @@ for opt do
   ;;
   --out-dir=*) OPTION_OUT_DIR=$optarg
   ;;
-  --ignore-audio) OPTION_IGNORE_AUDIO=yes
-  ;;
   --no-aosp-prebuilts) OPTION_NO_AOSP_PREBUILTS=yes
   ;;
   --aosp-prebuilts-dir=*) OPTION_AOSP_PREBUILTS_DIR=$optarg
@@ -114,7 +112,6 @@ EOF
     echo "  --strip                     Strip emulator executables."
     echo "  --no-strip                  Do not strip emulator executables (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
-    echo "  --ignore-audio              Ignore audio messages (may build sound-less emulator)"
     echo "  --no-aosp-prebuilts         Do not use prebuilt toolchain"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
@@ -366,54 +363,6 @@ case "$TARGET_OS" in
     windows) PROBE_WINAUDIO=yes
     ;;
 esac
-
-ORG_CFLAGS=$CFLAGS
-ORG_LDFLAGS=$LDFLAGS
-
-if [ "$OPTION_IGNORE_AUDIO" = "yes" ] ; then
-PROBE_ESD_ESD=no
-PROBE_ALSA=no
-PROBE_PULSEAUDIO=no
-fi
-
-# Probe a system library
-#
-# $1: Variable name (e.g. PROBE_ESD)
-# $2: Library name (e.g. "Alsa")
-# $3: Path to source file for probe program (e.g. android/config/check-alsa.c)
-# $4: Package name (e.g. libasound-dev)
-#
-probe_system_library ()
-{
-    if [ `var_value $1` = yes ] ; then
-        CFLAGS="$ORG_CFLAGS"
-        LDFLAGS="$ORG_LDFLAGS -ldl"
-        cp -f android/config/check-esd.c $TMPC
-        compile
-        if [ $? = 0 ] ; then
-            log "AudioProbe : $2 seems to be usable on this system"
-        else
-            if [ "$OPTION_IGNORE_AUDIO" = no ] ; then
-                echo "The $2 development files do not seem to be installed on this system"
-                echo "Are you missing the $4 package ?"
-                echo "You can ignore this error with --ignore-audio, otherwise correct"
-                echo "the issue(s) below and try again:"
-                cat $TMPL
-                clean_exit
-            fi
-            eval $1=no
-            log "AudioProbe : $2 seems to be UNUSABLE on this system !!"
-        fi
-        clean_temp
-    fi
-}
-
-probe_system_library PROBE_ESD        ESounD     android/config/check-esd.c libesd-dev
-probe_system_library PROBE_ALSA       Alsa       android/config/check-alsa.c libasound-dev
-probe_system_library PROBE_PULSEAUDIO PulseAudio android/config/check-pulseaudio.c libpulse-dev
-
-CFLAGS=$ORG_CFLAGS
-LDFLAGS=$ORG_LDFLAGS
 
 # create the objs directory that is going to contain all generated files
 # including the configuration ones
