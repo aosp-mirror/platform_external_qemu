@@ -19,7 +19,6 @@ cd `dirname $0`
 OPTION_DEBUG=no
 OPTION_IGNORE_AUDIO=no
 OPTION_AOSP_PREBUILTS_DIR=
-OPTION_NO_AOSP_PREBUILTS=
 OPTION_OUT_DIR=
 OPTION_HELP=no
 OPTION_STRIP=no
@@ -72,8 +71,6 @@ for opt do
   ;;
   --out-dir=*) OPTION_OUT_DIR=$optarg
   ;;
-  --no-aosp-prebuilts) OPTION_NO_AOSP_PREBUILTS=yes
-  ;;
   --aosp-prebuilts-dir=*) OPTION_AOSP_PREBUILTS_DIR=$optarg
   ;;
   --build-qemu-android) true # Ignored, used by android-rebuild.sh only.
@@ -103,7 +100,6 @@ EOF
     echo "  --strip                     Strip emulator executables."
     echo "  --no-strip                  Do not strip emulator executables (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
-    echo "  --no-aosp-prebuilts         Do not use prebuilt toolchain"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
     echo "  --mingw                     Build Windows executable on Linux"
@@ -119,18 +115,12 @@ EOF
 fi
 
 if [ "$OPTION_AOSP_PREBUILTS_DIR" ]; then
-    if [ "$OPTION_NO_AOSP_PREBUILTS" ]; then
-        echo "ERROR: You can't use both --no-aosp-prebuilts and --aosp-prebuilts-dir=<path>."
-        exit 1
-    fi
     if [ ! -d "$OPTION_AOSP_PREBUILTS_DIR"/gcc -a \
          ! -d "$OPTION_AOSP_PREBUILTS_DIR"/clang ]; then
         echo "ERROR: Prebuilts directory does not exist: $OPTION_AOSP_PREBUILTS_DIR/gcc"
         exit 1
     fi
     AOSP_PREBUILTS_DIR=$OPTION_AOSP_PREBUILTS_DIR
-elif [ "$OPTION_NO_AOSP_PREBUILTS" ]; then
-    AOSP_PREBUILTS_DIR=""
 fi
 
 if [ "$OPTION_OUT_DIR" ]; then
@@ -217,7 +207,7 @@ fi
 
 # On Linux, try to use our prebuilt toolchain to generate binaries
 # that are compatible with Ubuntu 10.4
-if [ -z "$CC" -a -z "$OPTION_CC" -a -z "$OPTION_NO_AOSP_PREBUILTS" ] ; then
+if [ -z "$CC" -a -z "$OPTION_CC" ] ; then
     GEN_SDK=$PROGDIR/android/scripts/gen-android-sdk-toolchain.sh
     GEN_SDK_FLAGS=
     if [ "$CCACHE" ]; then
