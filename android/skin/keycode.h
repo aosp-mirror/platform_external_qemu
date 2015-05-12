@@ -120,6 +120,7 @@ typedef enum {
     kKeyCodePrevious                = KEY_PREVIOUS,
     kKeyCodeNext                    = KEY_NEXT,
     kKeyCodePlay                    = KEY_PLAY,
+    kKeyCodePlayPause               = KEY_PLAYPAUSE,
     kKeyCodePause                   = KEY_PAUSE,
     kKeyCodeStop                    = KEY_STOP,
     kKeyCodeRewind                  = KEY_REWIND,

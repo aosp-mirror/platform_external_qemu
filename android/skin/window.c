@@ -995,6 +995,7 @@ struct SkinWindow {
     char          enable_touch;
     char          enable_trackball;
     char          enable_dpad;
+    char          enable_mediakeys;
     char          enable_qwerty;
 
     SkinImage*    onion;
@@ -1101,7 +1102,7 @@ skin_window_move_mouse( SkinWindow*  window,
             }
         LAYOUT_LOOP_END_BUTTONS
 
-        /* filter DPAD and QWERTY buttons right here */
+        /* filter DPAD, MEDIA and QWERTY buttons right here */
         if (hover != NULL) {
             switch (hover->keycode) {
                 /* these correspond to the DPad */
@@ -1113,6 +1114,14 @@ skin_window_move_mouse( SkinWindow*  window,
                     if (!window->enable_dpad)
                         hover = NULL;
                     break;
+
+                /* these correspond to the Media Playback keys */
+                case kKeyCodePlay:
+                case kKeyCodePlayPause:
+                case kKeyCodePause:
+                case kKeyCodeStop:
+                case kKeyCodeRewind:
+                case kKeyCodeFastForward:
 
                 /* these correspond to non-qwerty buttons */
                 case kKeyCodeSoftLeft:
@@ -1129,11 +1138,6 @@ skin_window_move_mouse( SkinWindow*  window,
                 case kKeyCodeDVR:
                 case kKeyCodePrevious:
                 case kKeyCodeNext:
-                case kKeyCodePlay:
-                case kKeyCodePause:
-                case kKeyCodeStop:
-                case kKeyCodeRewind:
-                case kKeyCodeFastForward:
                 case kKeyCodeBookmarks:
                 case kKeyCodeCycleWindows:
                 case kKeyCodeChannelUp:
@@ -1277,6 +1281,7 @@ skin_window_create(SkinLayout* slayout,
     window->enable_touch     = 1;
     window->enable_trackball = 1;
     window->enable_dpad      = 1;
+    window->enable_mediakeys = 1;
     window->enable_qwerty    = 1;
 
     window->x_pos = x;
@@ -1347,6 +1352,12 @@ void
 skin_window_enable_dpad( SkinWindow*  window, int  enabled )
 {
     window->enable_dpad = !!enabled;
+}
+
+void
+skin_window_enable_mediakeys( SkinWindow*  window, int  enabled )
+{
+    window->enable_mediakeys = !!enabled;
 }
 
 void
