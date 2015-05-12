@@ -322,7 +322,7 @@ do_dtc_package () {
 # $1: host os name.
 # $2: environment shell script.
 build_qemu_android_deps () {
-    builder_prepare_for_host "$1"
+    builder_prepare_for_host "$1" "$AOSP_DIR"
 
     if [ -z "$OPT_FORCE" ]; then
         if timestamp_check \

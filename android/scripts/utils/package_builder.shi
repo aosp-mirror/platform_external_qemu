@@ -233,6 +233,18 @@ builder_check_all_timestamps () {
     _shu_builder_setup_local_systems "$HOST_SYSTEMS"
 }
 
+# Call this function to enable C++11 features. Must happen before
+# any build_prepare_xxxxx function call.
+builder_enable_cxx11 () {
+    _SHU_BUILDER_CXX11=true
+}
+
+# Call this function to disable C++11 features. Must happen before
+# any build_prepare_xxxx function call.
+build_disable_cxx11 () {
+    _SHU_BUILDER_CXX11=
+}
+
 # Prepare for a remote darwin build. This takes as a parameter the
 # name of a temporary directory, e..g '/tmp/foo/bar/'.
 # This function populates the directory with some scripts and
@@ -445,41 +457,33 @@ export PATH \
     _SHU_BUILDER_PKG_CONFIG_PATH \
     _SHU_BUILDER_CONFIGURE_FLAGS
 EOF
-    if [ "$_SHU_BUILDER_GNU_CONFIG_HOST" ]; then
-        TOOLCHAIN_WRAPPER_DIR=$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper
-        log "$_SHU_BUILDER_CURRENT_TEXT Generating $_SHU_BUILDER_GNU_CONFIG_HOST wrapper toolchain in $TOOLCHAIN_WRAPPER_DIR"
-        local EXTRA_FLAGS
-        if [ "$CCACHE" ]; then
-            var_append EXTRA_FLAGS "--ccache=$CCACHE"
-        else
-            var_append EXTRA_FLAGS "--no-ccache"
-        fi
-        for _PREFIX in $_SHU_BUILDER_TOOLCHAIN_PREFIX; do
-            var_append EXTRA_FLAGS "--prefix=$_PREFIX"
-        done
-        run $(program_directory)/gen-android-sdk-toolchain.sh \
-                --aosp-dir="$2" \
-                --host=$_SHU_BUILDER_CURRENT_HOST \
-                --binprefix=${_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX:--} \
-                $EXTRA_FLAGS \
-                $TOOLCHAIN_WRAPPER_DIR ||
-                panic "Cannot generate toolchain wrapper!"
-        cat >> "$_SHU_BUILDER_ENV_SH" <<EOF
+    TOOLCHAIN_WRAPPER_DIR=$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper
+    log "$_SHU_BUILDER_CURRENT_TEXT Generating $_SHU_BUILDER_GNU_CONFIG_HOST wrapper toolchain in $TOOLCHAIN_WRAPPER_DIR"
+    local EXTRA_FLAGS
+    if [ "$CCACHE" ]; then
+        var_append EXTRA_FLAGS "--ccache=$CCACHE"
+    else
+        var_append EXTRA_FLAGS "--no-ccache"
+    fi
+    for _PREFIX in $_SHU_BUILDER_TOOLCHAIN_PREFIX; do
+        var_append EXTRA_FLAGS "--prefix=$_PREFIX"
+    done
+    if [ "$_SHU_BUILDER_CXX11" ]; then
+        var_append EXTRA_FLAGS "--cxx11"
+    fi
+    run $(program_directory)/gen-android-sdk-toolchain.sh \
+            --aosp-dir="$2" \
+            --host=$_SHU_BUILDER_CURRENT_HOST \
+            --binprefix=${_SHU_BUILDER_GNU_CONFIG_HOST_PREFIX:--} \
+            $EXTRA_FLAGS \
+            $TOOLCHAIN_WRAPPER_DIR ||
+            panic "Cannot generate toolchain wrapper!"
+    cat >> "$_SHU_BUILDER_ENV_SH" <<EOF
 PATH=$TOOLCHAIN_WRAPPER_DIR:\$PATH
 export PATH
 EOF
-        PATH=$TOOLCHAIN_WRAPPER_DIR:$PATH
-        log "$_SHU_BUILDER_CURRENT_TEXT Path: $(echo \"$PATH\" | tr ' ' '\n')"
-    elif [ "$(get_build_os)" = "darwin" ]; then
-        # Force the use of the 10.8 SDK on OS X, this
-        # ensures that the generated binaries run properly
-        # on that platform, and also avoids build failures
-        # in SDL!!
-        cat >> "$_SHU_BUILDER_ENV_SH" <<EOF
-# Force the use of the 10.8 SDK
-export SDKROOT=macosx10.8
-EOF
-    fi
+    PATH=$TOOLCHAIN_WRAPPER_DIR:$PATH
+    log "$_SHU_BUILDER_CURRENT_TEXT Path: $(echo \"$PATH\" | tr ' ' '\n')"
 
     # Read the source script.
     . "$_SHU_BUILDER_ENV_SH"

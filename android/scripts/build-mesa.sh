@@ -200,6 +200,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         BUILD_OSMESA=
 
+        builder_enable_cxx11
+
         builder_prepare_for_host_no_binprefix \
                 "$SYSTEM" \
                 "$AOSP_DIR" \
