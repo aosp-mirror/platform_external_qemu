@@ -26,9 +26,7 @@ OPTION_STATIC=no
 OPTION_STRIP=no
 OPTION_MINGW=no
 
-GLES_DIR=
 GLES_SUPPORT=no
-GLES_PROBE=yes
 
 PCBIOS_PROBE=yes
 
@@ -83,10 +81,6 @@ for opt do
   ;;
   --static) OPTION_STATIC=yes
   ;;
-  --gles-dir=*) GLES_DIR=$optarg
-  ;;
-  --no-gles) GLES_PROBE=no
-  ;;
   --no-pcbios) PCBIOS_PROBE=no
   ;;
   --no-tests)
@@ -119,8 +113,6 @@ EOF
     echo "  --static                    Build a completely static executable"
     echo "  --verbose                   Verbose configuration"
     echo "  --debug                     Build debug version of the emulator"
-    echo "  --gles-dir=PATH             Specify path to GLES host emulation sources [auto-detected]"
-    echo "  --no-gles                   Disable GLES emulation support"
     echo "  --no-pcbios                 Disable copying of PC Bios files"
     echo "  --no-tests                  Don't run unit test suite"
     if [ "$IN_ANDROID_REBUILD_SH" ]; then
@@ -298,26 +290,11 @@ check_android_build
 #    - copy the new binary to the correct location
 #
 # Try to find the GLES emulation headers and libraries automatically
-if [ "$GLES_PROBE" = "yes" ]; then
-    GLES_SUPPORT=yes
-    if [ -z "$GLES_DIR" ]; then
-        GLES_DIR=distrib/android-emugl
-        log2 "GLES       : Probing source dir: $GLES_DIR"
-        if [ ! -d "$GLES_DIR" ]; then
-            GLES_DIR=../opengl
-            log2 "GLES       : Probing source dir: $GLES_DIR"
-            if [ ! -d "$GLES_DIR" ]; then
-                GLES_DIR=
-            fi
-        fi
-        if [ -z "$GLES_DIR" ]; then
-            echo "GLES       : Could not find GPU emulation sources!"
-            GLES_SUPPORT=no
-        else
-            echo "GLES       : Found GPU emulation sources: $GLES_DIR"
-            GLES_SUPPORT=yes
-        fi
-    fi
+GLES_DIR=distrib/android-emugl
+if [ ! -d "$GLES_DIR" ]; then
+    panic "GLES       : Could not find GPU emulation sources!: $GLES_DIR"
+else
+    echo "GLES       : Found GPU emulation sources: $GLES_DIR"
 fi
 
 if [ "$PCBIOS_PROBE" = "yes" ]; then
@@ -490,10 +467,8 @@ fi
 if [ $OPTION_STATIC = yes ] ; then
     echo "CONFIG_STATIC_EXECUTABLE := true" >> $config_mk
 fi
-if [ "$GLES_SUPPORT" = "yes" ]; then
-    echo "EMULATOR_BUILD_EMUGL       := true" >> $config_mk
-    echo "EMULATOR_EMUGL_SOURCES_DIR := $GLES_DIR" >> $config_mk
-fi
+echo "EMULATOR_BUILD_EMUGL       := true" >> $config_mk
+echo "EMULATOR_EMUGL_SOURCES_DIR := $GLES_DIR" >> $config_mk
 
 if [ -n "$ANDROID_SDK_TOOLS_REVISION" ] ; then
     echo "ANDROID_SDK_TOOLS_REVISION := $ANDROID_SDK_TOOLS_REVISION" >> $config_mk
