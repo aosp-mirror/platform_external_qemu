@@ -100,13 +100,7 @@ case "$OS" in
         OS=freebsd-$CPU
         ;;
     CYGWIN*|*_NT-*)
-        OS=windows
-        EXE=.exe
-        if [ "x$OSTYPE" = xcygwin ] ; then
-            OS=cygwin
-            HOST_CFLAGS="$CFLAGS -mno-cygwin"
-            HOST_LDFLAGS="$LDFLAGS -mno-cygwin"
-        fi
+        panic "Please build Windows binaries on Linux with --mingw option."
         ;;
 esac
 
@@ -119,11 +113,6 @@ log2 "EXE=$EXE"
 #   darwin-x86
 #   darwin-x86_64
 #   darwin-ppc
-#   windows  (MSys)
-#   cygwin
-#
-# Note that cygwin is treated as a special case because it behaves very differently
-# for a few things
 #
 # other values may be possible but have not been tested
 
@@ -147,7 +136,7 @@ HOST_ARCH=$CPU
 compute_host_tag ()
 {
     case $HOST_OS-$HOST_ARCH in
-        cygwin-x86|windows-x86)
+        windows-x86)
             HOST_TAG=windows
             ;;
         *)
@@ -237,35 +226,14 @@ enable_linux_mingw ()
     AR=$MINGW_PREFIX-ar
 }
 
-# Cygwin is normally not supported, unless you call this function
-#
-enable_cygwin ()
-{
-    if [ $OS = cygwin ] ; then
-        CFLAGS="$CFLAGS -mno-cygwin"
-        LDFLAGS="$LDFLAGS -mno-cygwin"
-        OS=windows
-        HOST_OS=windows
-    fi
-}
-
 # this function will setup the compiler and linker and check that they work as advertized
 # note that you should call 'force_32bit_binaries' before this one if you want it to work
 # as advertized.
 #
 setup_toolchain ()
 {
-    if [ "$OS" = cygwin ] ; then
-        echo "Do not compile this program or library with Cygwin, use MSYS instead !!"
-        echo "As an experimental feature, you can try to --try-cygwin option to override this"
-        exit 2
-    fi
-
     if [ -z "$CC" ] ; then
         CC=gcc
-        if [ $CPU = "powerpc" ] ; then
-            CC=gcc-3.3
-        fi
     fi
 
     # check that we can compile a trivial C program with this compiler

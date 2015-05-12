@@ -261,8 +261,6 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     enable_linux_mingw
     TARGET_OS=windows
     TARGET_DLL_SUFFIX=.dll
-else
-    enable_cygwin
 fi
 
 # Are we running in the Android build system ?
@@ -300,9 +298,6 @@ if [ "$PCBIOS_PROBE" = "yes" ]; then
         done
     fi
 fi
-
-# we can build the emulator with Cygwin, so enable it
-enable_cygwin
 
 setup_toolchain
 
