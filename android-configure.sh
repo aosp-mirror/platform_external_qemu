@@ -22,7 +22,6 @@ OPTION_AOSP_PREBUILTS_DIR=
 OPTION_NO_AOSP_PREBUILTS=
 OPTION_OUT_DIR=
 OPTION_HELP=no
-OPTION_STATIC=no
 OPTION_STRIP=no
 OPTION_MINGW=no
 
@@ -79,8 +78,6 @@ for opt do
   ;;
   --build-qemu-android) true # Ignored, used by android-rebuild.sh only.
   ;;
-  --static) OPTION_STATIC=yes
-  ;;
   --no-pcbios) PCBIOS_PROBE=no
   ;;
   --no-tests)
@@ -110,7 +107,6 @@ EOF
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
     echo "  --mingw                     Build Windows executable on Linux"
-    echo "  --static                    Build a completely static executable"
     echo "  --verbose                   Verbose configuration"
     echo "  --debug                     Build debug version of the emulator"
     echo "  --no-pcbios                 Disable copying of PC Bios files"
@@ -464,9 +460,6 @@ echo "BUILD_STANDALONE_EMULATOR := true" >> $config_mk
 if [ $OPTION_DEBUG = yes ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
 fi
-if [ $OPTION_STATIC = yes ] ; then
-    echo "CONFIG_STATIC_EXECUTABLE := true" >> $config_mk
-fi
 echo "EMULATOR_BUILD_EMUGL       := true" >> $config_mk
 echo "EMULATOR_EMUGL_SOURCES_DIR := $GLES_DIR" >> $config_mk
 
@@ -571,11 +564,6 @@ case "$TARGET_OS" in
     ;;
     *) CONFIG_OS=$OS
 esac
-
-if [ "$OPTION_STATIC" = "yes" ] ; then
-    echo "CONFIG_STATIC_EXECUTABLE := true" >> $config_mk
-    echo "#define CONFIG_STATIC_EXECUTABLE  1" >> $config_h
-fi
 
 case $TARGET_OS in
     linux-*|darwin-*)
