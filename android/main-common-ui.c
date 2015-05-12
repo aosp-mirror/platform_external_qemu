@@ -280,6 +280,10 @@ add_parts_to_layout(AConfig* layout,
     char    tmp[512];
     for (i = 0; i < n_parts; i++) {
         part_properties *p = get_part_properties(props, parts[i]);
+        if(p == NULL) {
+          dwarning("Skin part \"%s\" could not be loaded\n", parts[i]);
+          continue;
+        }
         snprintf(tmp, sizeof tmp,
             "part%d {\n \
                 name %s\n \
@@ -343,12 +347,13 @@ load_dynamic_skin(AndroidHwConfig* hwConfig,
 
     part_properties* props = read_all_part_properties(aconfig_find(root, "parts"));
 
-    const int N_PARTS = 4;
+    const int N_PARTS = 5;
     char* parts[N_PARTS];
     parts[0] = "basic_controls";
     parts[1] = hwConfig->hw_mainKeys ? "hwkeys_on" : "hwkeys_off";
     parts[2] = hwConfig->hw_dPad ? "dpad_on" : "dpad_off";
-    parts[3] = hwConfig->hw_keyboard ? "keyboard_on" : "keyboard_off";
+    parts[3] = hwConfig->hw_mediaKeys ? "mediakeys_on" : "mediakeys_off";
+    parts[4] = hwConfig->hw_keyboard ? "keyboard_on" : "keyboard_off";
 
     for (i = 0, max_part_width = 0; i < N_PARTS; i++) {
         part_properties *p = get_part_properties(props, parts[i]);

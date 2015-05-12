@@ -48,6 +48,7 @@ extern SkinWindow*      skin_window_create( SkinLayout*  layout,
 extern void             skin_window_enable_touch( SkinWindow*  window, int  enabled );
 extern void             skin_window_enable_trackball( SkinWindow*  window, int  enabled );
 extern void             skin_window_enable_dpad( SkinWindow*  window, int  enabled );
+extern void             skin_window_enable_mediakeys( SkinWindow*  window, int  enabled );
 extern void             skin_window_enable_qwerty( SkinWindow*  window, int  enabled );
 
 extern int              skin_window_reset ( SkinWindow*  window, SkinLayout*  layout );

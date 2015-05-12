@@ -119,6 +119,7 @@ SkinUI* skin_ui_create(SkinFile* layout_file, const char* initial_orientation,
 
     skin_window_enable_touch(ui->window, ui->ui_params.enable_touch);
     skin_window_enable_dpad(ui->window, ui->ui_params.enable_dpad);
+    skin_window_enable_mediakeys(ui->window, ui->ui_params.enable_dpad);
     skin_window_enable_qwerty(ui->window, ui->ui_params.enable_keyboard);
     skin_window_enable_trackball(ui->window, ui->ui_params.enable_trackball);
 
@@ -244,6 +245,7 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
         { SKIN_KEY_COMMAND_BUTTON_PREV,        kKeyCodePrevious },
         { SKIN_KEY_COMMAND_BUTTON_NEXT,        kKeyCodeNext },
         { SKIN_KEY_COMMAND_BUTTON_PLAY,        kKeyCodePlay },
+        { SKIN_KEY_COMMAND_BUTTON_PLAYPAUSE,   kKeyCodePlayPause },
         { SKIN_KEY_COMMAND_BUTTON_PAUSE,       kKeyCodePause },
         { SKIN_KEY_COMMAND_BUTTON_STOP,        kKeyCodeStop },
         { SKIN_KEY_COMMAND_BUTTON_REWIND,      kKeyCodeRewind },
