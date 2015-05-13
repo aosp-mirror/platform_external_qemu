@@ -43,26 +43,6 @@ log2 ()
     fi
 }
 
-## Utilities
-##
-
-# return the value of a given named variable
-# $1: variable name
-#
-var_value ()
-{
-    # find a better way to do that ?
-    local result
-    eval result="$`echo $1`"
-    echo $result
-}
-
-# convert to uppercase
-to_uppercase ()
-{
-    echo $1 | tr "[:lower:]" "[:upper:]"
-}
-
 ## Normalize OS and CPU
 ##
 
@@ -72,7 +52,7 @@ case "$CPU" in
     ;;
     amd64) CPU=x86_64
     ;;
-    powerpc) CPU=ppc
+    powerpc) panic "PowerPC builds are not supported!"
     ;;
 esac
 
@@ -81,7 +61,6 @@ log2 "CPU=$CPU"
 # at this point, the supported values for CPU are:
 #   x86
 #   x86_64
-#   ppc
 #
 # other values may be possible but haven't been tested
 #
@@ -112,7 +91,6 @@ log2 "EXE=$EXE"
 #   linux-x86_64
 #   darwin-x86
 #   darwin-x86_64
-#   darwin-ppc
 #
 # other values may be possible but have not been tested
 
@@ -180,7 +158,7 @@ force_32bit_binaries ()
         case $OS in
             linux-x86_64) OS=linux-x86 ;;
             darwin-x86_64) OS=darwin-x86 ;;
-	    freebsd-x86_64) OS=freebsd-x86 ;;
+            freebsd-x86_64) OS=freebsd-x86 ;;
         esac
         HOST_ARCH=x86
         CPU=x86
@@ -299,14 +277,6 @@ link()
     $LD -o $TMPE $TMPO $LDFLAGS 2> $TMPL
 }
 
-# run a command
-#
-execute()
-{
-    log2 "Running: $*"
-    $*
-}
-
 # perform a simple compile / link / run of the source file in $TMPC
 compile_exec_run()
 {
@@ -332,60 +302,6 @@ compile_exec_run()
 ## Feature test support
 ##
 
-# Each feature test allows us to check against a single target-specific feature
-# We run the feature checks in a Makefile in order to be able to do them in
-# parallel, and we also have some cached values in our output directory, just
-# in case.
-#
-# check that a given C program in $TMPC can be compiled on the host system
-# $1: variable name which will be set to "yes" or "no" depending on result
-# you can define EXTRA_CFLAGS for extra C compiler flags
-# for convenience, this variable will be unset by the function
-#
-feature_check_compile ()
-{
-    local result_cc=yes
-    local OLD_CFLAGS
-    OLD_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS $EXTRA_CFLAGS"
-    compile
-    if [ $? != 0 ] ; then
-        result_cc=no
-    fi
-    eval $1=$result_cc
-    EXTRA_CFLAGS=
-    CFLAGS=$OLD_CFLAGS
-}
-
-# check that a given C program $TMPC can be linked on the host system
-# $1: variable name which will be set to "yes" or "no" depending on result
-# you can define EXTRA_CFLAGS for extra C compiler flags
-# you can define EXTRA_LDFLAGS for extra linker flags
-# for convenience, these variables will be unset by the function
-#
-feature_check_link ()
-{
-    local result_cl=yes
-    local OLD_CFLAGS OLD_LDFLAGS
-    OLD_CFLAGS=$CFLAGS
-    OLD_LDFLAGS=$LDFLAGS
-    CFLAGS="$CFLAGS $EXTRA_CFLAGS"
-    LDFLAGS="$LDFLAGS $EXTRA_LDFLAGS"
-    compile
-    if [ $? != 0 ] ; then
-        result_cl=no
-    else
-        link
-        if [ $? != 0 ] ; then
-            result_cl=no
-        fi
-    fi
-    CFLAGS=$OLD_CFLAGS
-    LDFLAGS=$OLD_LDFLAGS
-    eval $1=$result_cl
-    clean_temp
-}
-
 # check that a given C header file exists on the host system
 # $1: variable name which will be set to "yes" or "no" depending on result
 # $2: header name
@@ -395,16 +311,24 @@ feature_check_link ()
 #
 feature_check_header ()
 {
-    local result_ch
-    log "HeaderCheck: $2"
+    local result_ch OLD_CFLAGS
+    log2 "HeaderCheck: $2"
     echo "#include $2" > $TMPC
     cat >> $TMPC <<EOF
         int main(void) { return 0; }
 EOF
-    feature_check_compile result_ch
+    OLD_CFLAGS=$CFLAGS
+    CFLAGS="$CFLAGS $EXTRA_CFLAGS"
+    compile
+    if [ $? != 0 ]; then
+        result_ch=no
+    else
+        result_ch=yes
+    fi
+    log "HeaderCheck: $2 [$result_ch]"
+    EXTRA_CFLAGS=
+    CFLAGS=$OLD_CFLAGS
     eval $1=$result_ch
-    #eval result=$`echo $1`
-    #log  "Host       : $1=$result_ch"
     clean_temp
 }
 
@@ -463,20 +387,6 @@ create_config_mk ()
     echo "HOST_AR     := $AR" >> $config_mk
     echo "HOST_WINDRES:= $WINDRES" >> $config_mk
     echo "OBJS_DIR    := $out_dir" >> $config_mk
-}
-
-add_android_config_mk ()
-{
-    echo "" >> $config_mk
-    if [ $TARGET_ARCH = arm ] ; then
-    echo "TARGET_ARCH       := arm" >> $config_mk
-    fi
-    if [ $TARGET_ARCH = x86 ] ; then
-    echo "TARGET_ARCH       := x86" >> $config_mk
-    fi
-    echo "HOST_PREBUILT_TAG := $HOST_TAG" >> $config_mk
-    echo "PREBUILT          := $ANDROID_PREBUILT" >> $config_mk
-    echo "PREBUILTS         := $ANDROID_PREBUILTS" >> $config_mk
 }
 
 # Find pattern $1 in string $2
