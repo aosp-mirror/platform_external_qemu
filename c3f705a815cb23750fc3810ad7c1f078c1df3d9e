@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0d531d56_7859018f",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1072780
+      },
+      "writtenOn": "2015-05-13T14:56:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6d4819a1_3b7db76a",
+      "revId": "c3f705a815cb23750fc3810ad7c1f078c1df3d9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d599572_9ab4cd33",
         "filename": "android/qemu-launcher/emulator-qemu.cpp",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-05-12T02:19:07Z",
       "side": 1,
       "message": "Not sure if hw_sdCard_path could ever be null. vl-android.c, line 3156 has a check for that.",
+      "revId": "c3f705a815cb23750fc3810ad7c1f078c1df3d9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d531d56_984fb5c3",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1072780
+      },
+      "writtenOn": "2015-05-13T14:56:00Z",
+      "side": 1,
+      "message": "That check in vl-android.c is for the old goldfish qemu emulator. I think that hw_sdCard_path can be null, check the emulator-qemu.cpp at line 672.",
+      "parentUuid": "4d599572_9ab4cd33",
       "revId": "c3f705a815cb23750fc3810ad7c1f078c1df3d9e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
