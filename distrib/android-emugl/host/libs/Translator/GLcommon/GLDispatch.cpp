@@ -15,8 +15,11 @@
 */
 
 #include <GLcommon/GLDispatch.h>
-#include <stdio.h>
+
+#include "emugl/common/lazy_instance.h"
 #include "emugl/common/shared_library.h"
+
+#include "OpenglCodecCommon/ErrorLog.h"
 
 #ifdef __linux__
 #include <GL/glx.h>
@@ -24,25 +27,80 @@
 #include <windows.h>
 #endif
 
+#include <stdio.h>
+
 #include "DummyGLfuncs.h"
 
 typedef void (*GL_FUNC_PTR)();
 
-static GL_FUNC_PTR getGLFuncAddress(const char *funcName) {
-    GL_FUNC_PTR ret = NULL;
 #ifdef __linux__
-    static emugl::SharedLibrary* libGL = emugl::SharedLibrary::open("libGL");
-    ret = (GL_FUNC_PTR)glXGetProcAddress((const GLubyte*)funcName);
-#elif defined(WIN32)
+class GlLibrary {
+public:
+    typedef GL_FUNC_PTR (ResolverFunc)(const char* name);
+
+    // Important: Use libGL.so.1 explicitly, because it will always link to
+    // the vendor-specific version of the library. libGL.so might in some
+    // cases, depending on bad ldconfig configurations, link to the wrapper
+    // lib that doesn't behave the same.
+    GlLibrary() : mLib(NULL), mResolver(NULL) {
+        static const char kLibName[] = "libGL.so.1";
+        mLib = emugl::SharedLibrary::open(kLibName);
+        if (!mLib) {
+            ERR("%s: Could not open GL library %s\n",
+                __FUNCTION__, kLibName);
+        }
+        // NOTE: Don't use glXGetProcAddress here.
+        static const char kResolverName[] = "glXGetProcAddressARB";
+        mResolver = reinterpret_cast<ResolverFunc*>(
+                mLib->findSymbol(kResolverName));
+        if (!mResolver) {
+            ERR("%s: Could not find resolver %s in %s\n",
+                __FUNCTION__, kResolverName, kLibName);
+            delete mLib;
+            mLib = NULL;
+        }
+    }
+
+    ~GlLibrary() {
+        delete mLib;
+    }
+
+    GL_FUNC_PTR find(const char* name) {
+        if (!mLib) {
+            return NULL;
+        }
+        GL_FUNC_PTR ret = (*mResolver)(name);
+        if (!ret) {
+            ret = reinterpret_cast<GL_FUNC_PTR>(mLib->findSymbol(name));
+        }
+        return ret;
+    }
+
+private:
+    emugl::SharedLibrary* mLib;
+    ResolverFunc* mResolver;
+};
+
+emugl::LazyInstance<GlLibrary> sGlLibrary = LAZY_INSTANCE_INIT;
+
+#endif  // __linux__
+
+static GL_FUNC_PTR getGLFuncAddress(const char *funcName) {
+#ifdef __linux__
+    return sGlLibrary->find(funcName);
+#else
+    GL_FUNC_PTR ret = NULL;
+#  if defined(WIN32)
     static emugl::SharedLibrary* libGL = emugl::SharedLibrary::open("opengl32");
     ret = (GL_FUNC_PTR)wglGetProcAddress(funcName);
-#elif defined(__APPLE__)
+#  elif defined(__APPLE__)
     static emugl::SharedLibrary* libGL = emugl::SharedLibrary::open("/System/Library/Frameworks/OpenGL.framework/OpenGL");
-#endif
+#  endif
     if(!ret && libGL){
         ret = libGL->findSymbol(funcName);
     }
     return ret;
+#endif
 }
 
 #define LOAD_GL_FUNC(name)  do { \

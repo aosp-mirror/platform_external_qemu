@@ -21,7 +21,7 @@ host_common_LDFLAGS :=
 
 ifeq ($(HOST_OS),linux)
 #    host_common_LDFLAGS += -Wl,--whole-archive
-    host_common_LDLIBS += -lGL -ldl
+    host_common_LDLIBS += -ldl
     host_common_LDFLAGS += -Wl,-Bsymbolic
 endif
 
