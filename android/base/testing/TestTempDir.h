@@ -52,11 +52,7 @@ public:
     // Create new instance. This also tries to create a new temporary
     // directory. |debugPrefix| is an optional name prefix and can be NULL.
     TestTempDir(const char* debugName) {
-#ifdef _WIN32
         String temp_dir = getTempPath();
-#else  // !_WIN32
-        String temp_dir = "/tmp/";
-#endif  // !_WIN32
         if (debugName) {
             temp_dir += debugName;
             temp_dir += ".";
@@ -205,7 +201,37 @@ private:
         }
         return NULL;
     }
-#endif
+#else  // !_WIN32
+    String getTempPath() {
+        String result;
+        // Only check TMPDIR if we're not root.
+        if (getuid() != 0 && getgid() != 0) {
+            const char* tmpdir = ::getenv("TMPDIR");
+            if (tmpdir && tmpdir[0]) {
+                result = tmpdir;
+            }
+        }
+        // Otherwise use P_tmpdir, which defaults to /tmp
+        if (result.empty()) {
+#  ifndef P_tmpdir
+#  define P_tmpdir "/tmp"
+#  endif
+            result = P_tmpdir;
+        }
+        // Check that it exists and is a directory.
+        struct stat st;
+        int ret = ::stat(result.c_str(), &st);
+        if (ret < 0 || !S_ISDIR(st.st_mode)) {
+            LOG(FATAL) << "Can't find temporary path: ["
+                    << result.c_str() << "]";
+        }
+        // Ensure there is a trailing directory separator.
+        if (result.size() && result[result.size() - 1] != '/') {
+            result += '/';
+        }
+        return result;
+    }
+#endif  // !_WIN32
 
     String mPath;
 };
