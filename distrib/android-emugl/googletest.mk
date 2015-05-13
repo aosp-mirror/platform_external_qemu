@@ -6,11 +6,7 @@
 # building a 32-bit only SDK (sdk-eng, sdk_x86-eng, sdk_mips-eng).
 
 
-ifeq (true,$(BUILD_STANDALONE_EMULATOR))
 LOCAL_PATH := $(EMULATOR_GTEST_SOURCES_DIR)
-else
-LOCAL_PATH := $(EMUGL_PATH)/../../../external/gtest
-endif
 
 common_SRC_FILES := \
     src/gtest-all.cc \

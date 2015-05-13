@@ -17,9 +17,7 @@ EMUGL_COMMON_INCLUDES := \
     $(EMUGL_PATH)/host/include/libOpenglRender \
     $(EMUGL_PATH)/shared
 
-ifeq ($(BUILD_STANDALONE_EMULATOR),true)
 EMUGL_COMMON_INCLUDES := $(EMUGL_PATH)/host/libs/Translator/include
-endif
 
 # common cflags used by several modules
 # This is always set to a module's LOCAL_CFLAGS

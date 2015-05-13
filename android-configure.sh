@@ -263,16 +263,6 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     TARGET_DLL_SUFFIX=.dll
 fi
 
-# Are we running in the Android build system ?
-check_android_build
-
-
-# Adjust a few things when we're building within the Android build
-# system:
-#    - locate prebuilt directory
-#    - locate and use prebuilt libraries
-#    - copy the new binary to the correct location
-#
 # Try to find the GLES emulation headers and libraries automatically
 GLES_DIR=distrib/android-emugl
 if [ ! -d "$GLES_DIR" ]; then
@@ -441,7 +431,6 @@ echo "CONFIG_ESD        := $PROBE_ESD" >> $config_mk
 echo "CONFIG_ALSA       := $PROBE_ALSA" >> $config_mk
 echo "CONFIG_OSS        := $PROBE_OSS" >> $config_mk
 echo "CONFIG_PULSEAUDIO := $PROBE_PULSEAUDIO" >> $config_mk
-echo "BUILD_STANDALONE_EMULATOR := true" >> $config_mk
 if [ $OPTION_DEBUG = yes ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
 fi

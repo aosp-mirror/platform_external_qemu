@@ -1,5 +1,3 @@
-ifneq ($(filter true% %true,$(BUILD_EMULATOR)$(BUILD_STANDALONE_EMULATOR)),)
-
 LOCAL_PATH:= $(call my-dir)
 
 # determine the host tag to use
@@ -46,9 +44,7 @@ include-if-bitness-64 = \
 QEMU_CONFIG_DIRS     := \
     $(LOCAL_PATH)/android/config/$(QEMU_HOST_TAG)
 
-ifeq ($(BUILD_STANDALONE_EMULATOR),true)
-    QEMU_CONFIG_DIRS := $(LOCAL_PATH)/objs $(QEMU_CONFIG_DIRS)
-endif
+QEMU_CONFIG_DIRS := $(LOCAL_PATH)/objs $(QEMU_CONFIG_DIRS)
 
 QEMU_CONFIG_INCLUDES := $(QEMU_CONFIG_DIRS:%=-I%)
 
@@ -100,16 +96,12 @@ endif
 
 ifeq ($(HOST_OS),darwin)
     MY_CFLAGS += -D_DARWIN_C_SOURCE=1
-    ifneq ($(host_toolchain_header),)
-        MY_CFLAGS += -isystem $(host_toolchain_header)
-    else
-        ifneq (,$(mac_sdk_root))
-            MY_CFLAGS += -isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version) -DMACOSX_DEPLOYMENT_TARGET=$(mac_sdk_version)
-            MY_LDLIBS += -isysroot $(mac_sdk_root) -Wl,-syslibroot,$(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)
+    ifneq (,$(mac_sdk_root))
+        MY_CFLAGS += -isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version) -DMACOSX_DEPLOYMENT_TARGET=$(mac_sdk_version)
+        MY_LDLIBS += -isysroot $(mac_sdk_root) -Wl,-syslibroot,$(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)
 
-            # Clang complains about this flag being not useful anymore.
-            MY_CFLAGS := $(filter-out -falign-functions=0,$(MY_CFLAGS))
-        endif
+        # Clang complains about this flag being not useful anymore.
+        MY_CFLAGS := $(filter-out -falign-functions=0,$(MY_CFLAGS))
     endif
 endif
 
@@ -136,39 +128,6 @@ ifeq ($(HOST_OS),windows)
     endif
 endif
 
-# BUILD_STANDALONE_EMULATOR is only defined when building with
-# the android-rebuild.sh script. The script will also provide
-# adequate values for HOST_CC
-#
-ifneq ($(BUILD_STANDALONE_EMULATOR),true)
-  # On Linux, use our custom 32-bit host toolchain (unless HOST_IS_64_BIT=true)
-  # which contains the relevant headers and 32-bit libraries for audio (The host 64-bit
-  # Lucid doesn't provide these anymore, only their 64-bit versions).
-  ifeq ($(HOST_OS),linux)
-    HOST_SDK_TOOLCHAIN_PREFIX := prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-
-    ifeq (,$(strip $(wildcard $(HOST_SDK_TOOLCHAIN_PREFIX)gcc)))
-      # fallback to the previous host toolchain if new one isn't available
-      HOST_SDK_TOOLCHAIN_PREFIX := prebuilts/tools/gcc-sdk/
-    endif
-    # Don't do anything if the toolchain is not there
-    ifneq (,$(strip $(wildcard $(HOST_SDK_TOOLCHAIN_PREFIX)gcc)))
-      MY_CC  := $(HOST_SDK_TOOLCHAIN_PREFIX)gcc
-      MY_CXX := $(HOST_SDK_TOOLCHAIN_PREFIX)g++
-      MY_AR  := $(HOST_SDK_TOOLCHAIN_PREFIX)ar
-    endif # $(HOST_SDK_TOOLCHAIN_PREFIX)gcc exists
-  endif # HOST_OS == linux
-
-  ifneq ($(USE_CCACHE),)
-    ccache := prebuilts/misc/$(HOST_PREBUILT_TAG)/ccache/ccache
-    ccache := $(strip $(wildcard $(ccache)))
-    ifneq ($(ccache),$(firstword $(MY_CC)))
-      MY_CC := $(ccache) $(MY_CC)
-      MY_CXX := $(ccache) $(MY_CXX)
-    endif
-    ccache :=
-  endif
-endif
-
 ifneq ($(HOST_IS_64_BIT),)
   MY_CFLAGS += -m64
   MY_LDFLAGS += -m64
@@ -183,7 +142,7 @@ ifneq ($(BUILD_HOST_static),)
   MY_LDLIBS += -static
 endif
 
-ifeq ($(HOST_OS)-$(BUILD_STANDALONE_EMULATOR),windows-true)
+ifeq ($(HOST_OS),windows)
   # Ensure that printf() et al use GNU printf format specifiers as required
   # by QEMU. This is important when using the newer Mingw64 cross-toolchain.
   # See http://sourceforge.net/apps/trac/mingw-w64/wiki/gnu%20printf
@@ -208,11 +167,7 @@ endif
 # Needed to build block.c on Linux/x86_64.
 MY_CFLAGS += -D_GNU_SOURCE=1
 
-ifneq (true,$(BUILD_STANDALONE_EMULATOR))
-my-host-tool = $(MY_$1)
-else
 my-host-tool = $(if $(strip $(LOCAL_HOST_BUILD)),$(BUILD_$1),$(MY_$1))
-endif
 
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.
@@ -416,20 +371,16 @@ include $(LOCAL_PATH)/Makefile.tests
 ###
 ###  Build directly from sources when using the standalone build.
 ###
-ifeq (true,$(BUILD_STANDALONE_EMULATOR))
-  ifeq (,$(strip $(wildcard $(EMULATOR_EMUGL_SOURCES_DIR))))
-    $(error Cannot find GPU emulation sources directory: $(EMULATOR_EMUGL_SOURCES_DIR))
-  endif
-
-  # TODO(digit): Remove the line below.
-  BUILD_EMULATOR_OPENGL := true
-  BUILD_EMULATOR_HOST_OPENGL := true
-  ifeq (true,$(BUILD_DEBUG_EMULATOR))
-    EMUGL_BUILD_DEBUG := 1
-  endif
-  include $(EMULATOR_EMUGL_SOURCES_DIR)/Android.mk
+ifeq (,$(strip $(wildcard $(EMULATOR_EMUGL_SOURCES_DIR))))
+$(error Cannot find GPU emulation sources directory: $(EMULATOR_EMUGL_SOURCES_DIR))
 endif
 
-## VOILA!!
+# TODO(digit): Remove the line below.
+BUILD_EMULATOR_OPENGL := true
+BUILD_EMULATOR_HOST_OPENGL := true
+ifeq (true,$(BUILD_DEBUG_EMULATOR))
+EMUGL_BUILD_DEBUG := 1
+endif
+include $(EMULATOR_EMUGL_SOURCES_DIR)/Android.mk
 
-endif  # BUILD_EMULATOR == true || BUILD_STANDALONE_EMULATOR == true
+## VOILA!!

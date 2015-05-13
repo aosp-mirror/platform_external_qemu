@@ -69,17 +69,6 @@ EMULATOR_COMMON_CFLAGS += \
 EMULATOR_COMMON_CFLAGS += -I$(LOCAL_PATH)/qapi-auto-generated
 
 
-# add the build ID to the default macro definitions
-ifeq ($(BUILD_STANDALONE_EMULATOR),)
-EMULATOR_COMMON_CFLAGS += -DANDROID_BUILD_ID="$(strip $(BUILD_ID))-$(strip $(BUILD_NUMBER))"
-endif
-
-# For non-standalone builds, extract the major version number from the Android SDK
-# tools revision number.
-ifneq ($(BUILD_STANDALONE_EMULATOR),true)
-    ANDROID_SDK_TOOLS_REVISION := $(shell awk -F= '/Pkg.Revision/ { print $$2; }' sdk/files/tools_source.properties)
-endif
-
 ANDROID_SDK_TOOLS_REVISION := $(strip $(ANDROID_SDK_TOOLS_REVISION))
 ifdef ANDROID_SDK_TOOLS_REVISION
     EMULATOR_COMMON_CFLAGS += -DANDROID_SDK_TOOLS_REVISION=$(ANDROID_SDK_TOOLS_REVISION)
