@@ -69,6 +69,24 @@
       "revId": "c3f705a815cb23750fc3810ad7c1f078c1df3d9e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6dbd79c9_f9eb2fef",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-05-14T09:36:56Z",
+      "side": 1,
+      "message": "Line 672 sets hw_sdCard_path to a non-null value, so I don\u0027t quite get your point. Anyway, IMO, if hw_sdCard_path could be null, then we should make sure it\u0027s not null before calling strcmp(), because strcmp() may not be able to handle null input.",
+      "parentUuid": "0d531d56_984fb5c3",
+      "revId": "c3f705a815cb23750fc3810ad7c1f078c1df3d9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
