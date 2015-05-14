@@ -87,6 +87,24 @@
       "revId": "c3f705a815cb23750fc3810ad7c1f078c1df3d9e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad885137_b06c5604",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1072780
+      },
+      "writtenOn": "2015-05-14T15:05:47Z",
+      "side": 1,
+      "message": "hw_sdCard_path field is generated via andorid/tools/gen-hw-config.py with properties from android/avd/hardware-properties.ini where default value is empty string.\n\nNull could happen on that line 672 where is ASTRDUP, if malloc fails and yes I forgot to check for null before calling the strcmp, so I uploaded the patch set 3 which fixes that.",
+      "parentUuid": "6dbd79c9_f9eb2fef",
+      "revId": "c3f705a815cb23750fc3810ad7c1f078c1df3d9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
