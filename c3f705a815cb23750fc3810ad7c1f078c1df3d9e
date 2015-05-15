@@ -105,6 +105,24 @@
       "revId": "c3f705a815cb23750fc3810ad7c1f078c1df3d9e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6dbd79c9_67dbfa68",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-05-15T03:30:05Z",
+      "side": 1,
+      "message": "Thanks! That clears it up. I looked into ASTRDUP() (android/utils/system.c, line 135) and I think it would just cause a segfault if malloc() returns NULL, so the check is not necessary after all... Anyway, it doesn\u0027t do any harm either and we always want to be on the safe side :)",
+      "parentUuid": "ad885137_b06c5604",
+      "revId": "c3f705a815cb23750fc3810ad7c1f078c1df3d9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
