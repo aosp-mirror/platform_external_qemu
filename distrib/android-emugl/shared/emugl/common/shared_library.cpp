@@ -25,12 +25,57 @@
 
 namespace emugl {
 
+// static
+SharedLibrary* SharedLibrary::open(const char* libraryName) {
+    char error[1];
+    return open(libraryName, error, sizeof(error));
+}
+
 #ifdef _WIN32
 
 // static
-SharedLibrary* SharedLibrary::open(const char* libraryName) {
+SharedLibrary* SharedLibrary::open(const char* libraryName,
+                                   char* error,
+                                   size_t errorSize) {
     HMODULE lib = LoadLibrary(libraryName);
-    return lib ? new SharedLibrary(lib) : NULL;
+    if (lib) {
+        return new SharedLibrary(lib);
+    }
+
+    if (errorSize == 0) {
+        return NULL;
+    }
+
+    // Convert error into human-readable message.
+    DWORD errorCode = ::GetLastError();
+    LPSTR message = NULL;
+    size_t messageLen = FormatMessageA(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER |
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            errorCode,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPSTR) &message,
+            0,
+            NULL);
+
+    int ret = snprintf(error, errorSize, "%.*s", (int)messageLen, message);
+    if (ret < 0 || ret == static_cast<int>(errorSize)) {
+        // snprintf() on Windows doesn't behave as expected by C99,
+        // this path is to ensure that the result is always properly
+        // zero-terminated.
+        ret = static_cast<int>(errorSize - 1);
+        error[ret] = '\0';
+    }
+    // Remove any trailing \r\n added by FormatMessage
+    if (ret > 0 && error[ret - 1] == '\n') {
+        error[--ret] = '\0';
+    }
+    if (ret > 0 && error[ret - 1] == '\r') {
+        error[--ret] = '\0';
+    }
+    return NULL;
 }
 
 SharedLibrary::SharedLibrary(HandleType lib) : mLib(lib) {}
@@ -53,7 +98,9 @@ SharedLibrary::FunctionPtr SharedLibrary::findSymbol(
 #else // !_WIN32
 
 // static
-SharedLibrary* SharedLibrary::open(const char* libraryName) {
+SharedLibrary* SharedLibrary::open(const char* libraryName,
+                                   char* error,
+                                   size_t errorSize) {
     const char* libPath = libraryName;
     char* path = NULL;
 
@@ -75,6 +122,8 @@ SharedLibrary* SharedLibrary::open(const char* libraryName) {
         libPath = path;
     }
 
+    dlerror();  // clear error.
+
 #ifdef __APPLE__
     // On OSX, some libraries don't include an extension (notably OpenGL)
     // On OSX we try to open |libraryName| first.  If that doesn't exist,
@@ -91,7 +140,12 @@ SharedLibrary* SharedLibrary::open(const char* libraryName) {
         free(path);
     }
 
-    return lib ? new SharedLibrary(lib) : NULL;
+    if (lib) {
+        return new SharedLibrary(lib);
+    }
+
+    snprintf(error, errorSize, "%s", dlerror());
+    return NULL;
 }
 
 SharedLibrary::SharedLibrary(HandleType lib) : mLib(lib) {}

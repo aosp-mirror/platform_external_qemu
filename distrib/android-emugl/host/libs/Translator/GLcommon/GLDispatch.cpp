@@ -14,9 +14,13 @@
 * limitations under the License.
 */
 
-#include <GLcommon/GLDispatch.h>
-#include <stdio.h>
+#include "GLcommon/GLDispatch.h"
+#include "GLcommon/GLLibrary.h"
+
+#include "emugl/common/lazy_instance.h"
 #include "emugl/common/shared_library.h"
+
+#include "OpenglCodecCommon/ErrorLog.h"
 
 #ifdef __linux__
 #include <GL/glx.h>
@@ -24,25 +28,14 @@
 #include <windows.h>
 #endif
 
+#include <stdio.h>
+
 #include "DummyGLfuncs.h"
 
-typedef void (*GL_FUNC_PTR)();
+typedef GlLibrary::GlFunctionPointer GL_FUNC_PTR;
 
 static GL_FUNC_PTR getGLFuncAddress(const char *funcName) {
-    GL_FUNC_PTR ret = NULL;
-#ifdef __linux__
-    static emugl::SharedLibrary* libGL = emugl::SharedLibrary::open("libGL");
-    ret = (GL_FUNC_PTR)glXGetProcAddress((const GLubyte*)funcName);
-#elif defined(WIN32)
-    static emugl::SharedLibrary* libGL = emugl::SharedLibrary::open("opengl32");
-    ret = (GL_FUNC_PTR)wglGetProcAddress(funcName);
-#elif defined(__APPLE__)
-    static emugl::SharedLibrary* libGL = emugl::SharedLibrary::open("/System/Library/Frameworks/OpenGL.framework/OpenGL");
-#endif
-    if(!ret && libGL){
-        ret = libGL->findSymbol(funcName);
-    }
-    return ret;
+    return GlLibrary::getHostInstance()->findSymbol(funcName);
 }
 
 #define LOAD_GL_FUNC(name)  do { \
