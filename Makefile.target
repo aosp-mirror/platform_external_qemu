@@ -330,14 +330,6 @@ common_LOCAL_CFLAGS    += $(BLOCK_CFLAGS)
 
 common_LOCAL_LDLIBS += -lstdc++
 
-# Generate a completely static executable if needed.
-# Note that this means no sound and graphics on Linux.
-#
-ifneq ($(strip $(CONFIG_STATIC_EXECUTABLE)$(BUILD_HOST_static)),)
-    common_LOCAL_SRC_FILES += android/dynlink-static.c
-    common_LOCAL_LDLIBS    += -static
-endif
-
 ## one for 32-bit
 $(call start-emulator-program, emulator-$(EMULATOR_TARGET_ARCH))
 LOCAL_STATIC_LIBRARIES += \
