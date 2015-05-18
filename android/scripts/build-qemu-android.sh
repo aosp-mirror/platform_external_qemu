@@ -285,6 +285,7 @@ EOF
             --disable-attr \
             --disable-blobs \
             --disable-cap-ng \
+            --disable-curl \
             --disable-curses \
             --disable-docs \
             --disable-glusterfs \
