@@ -220,11 +220,6 @@ public:
         return nsGetWinDims(win, &width, &height);
     }
 
-    virtual bool isValidNativePixmap(EglOS::Surface* pix) {
-        // no support for pixmap in mac
-        return true;
-    }
-
     virtual bool checkWindowPixelFormatMatch(
             EGLNativeWindowType win,
             const EglOS::PixelFormat* pixelFormat,
@@ -240,14 +235,6 @@ public:
         bool match = nsCheckColor(win, r + g + b);
 
         return ret && match;
-    }
-
-    virtual bool checkPixmapPixelFormatMatch(
-            EGLNativePixmapType pix,
-            const EglOS::PixelFormat* pixelFormat,
-            unsigned int* width,
-            unsigned int* height) {
-        return false;
     }
 
     virtual EglOS::Context* createContext(
@@ -329,7 +316,6 @@ public:
                                  macdraw->handle(), mipmapLevel);
             break;
         }
-        case MacSurface::PIXMAP:
         default:
             return false;
         }
@@ -338,10 +324,6 @@ public:
 
     virtual void swapBuffers(EglOS::Surface* srfc) {
         nsSwapBuffers();
-    }
-
-    virtual void swapInterval(EglOS::Surface* win, int interval) {
-        nsSwapInterval(&interval);
     }
 
     EGLNativeDisplayType dpy() const { return mDpy; }
@@ -356,19 +338,9 @@ public:
         return new MacDisplay(0);
     }
 
-    virtual EglOS::Display* getInternalDisplay(EGLNativeDisplayType dpy) {
-        return new MacDisplay(dpy);
-    }
-
     virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
         return new MacSurface(wnd, MacSurface::WINDOW);
     }
-
-    virtual EglOS::Surface* createPixmapSurface(EGLNativePixmapType pix) {
-        return new MacSurface(pix, MacSurface::PIXMAP);
-    }
-
-    virtual void wait() {}
 };
 
 emugl::LazyInstance<MacEngine> sHostEngine = LAZY_INSTANCE_INIT;

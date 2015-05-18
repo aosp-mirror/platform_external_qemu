@@ -32,7 +32,6 @@ host_common_SRC_FILES :=      \
      EglSurface.cpp           \
      EglWindowSurface.cpp     \
      EglPbufferSurface.cpp    \
-     EglPixmapSurface.cpp     \
      EglThreadInfo.cpp        \
      EglDisplay.cpp           \
      ClientAPIExts.cpp
