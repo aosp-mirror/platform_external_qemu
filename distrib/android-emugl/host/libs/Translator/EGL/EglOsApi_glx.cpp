@@ -278,18 +278,6 @@ public:
         return handler.getLastError() == 0;
     }
 
-    virtual bool isValidNativePixmap(EglOS::Surface* pix) {
-        Window root;
-        int t;
-        unsigned int u;
-        ErrorHandler handler(mDisplay);
-        GLXDrawable surface = pix ? GlxSurface::drawableFor(pix) : 0;
-        if (!XGetGeometry(mDisplay, surface, &root, &t, &t, &u, &u, &u, &u)) {
-            return false;
-        }
-        return handler.getLastError() == 0;
-    }
-
     virtual bool checkWindowPixelFormatMatch(
             EGLNativeWindowType win,
             const EglOS::PixelFormat* pixelFormat,
@@ -310,30 +298,6 @@ public:
         Window root;
         if (!XGetGeometry(
                 mDisplay, win, &root, &x, &y, width, height, &border, &depth)) {
-            return false;
-        }
-        return depth >= configDepth;
-    }
-
-    virtual bool checkPixmapPixelFormatMatch(
-            EGLNativePixmapType pix,
-            const EglOS::PixelFormat* pixelFormat,
-            unsigned int* width,
-            unsigned int* height) {
-        unsigned int depth, configDepth, border;
-        int r, g, b, x, y;
-        GLXFBConfig fbconfig = GlxPixelFormat::from(pixelFormat);
-
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, fbconfig, GLX_RED_SIZE, &r));
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, fbconfig, GLX_GREEN_SIZE, &g));
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, fbconfig, GLX_BLUE_SIZE, &b));
-        configDepth = r + g + b;
-        Window root;
-        if (!XGetGeometry(
-                mDisplay, pix, &root, &x, &y, width, height, &border, &depth)) {
             return false;
         }
         return depth >= configDepth;
@@ -412,23 +376,6 @@ public:
         }
     }
 
-    virtual void swapInterval(EglOS::Surface* win, int interval) {
-        const char* extensions = glXQueryExtensionsString(
-                mDisplay, DefaultScreen(mDisplay));
-        typedef void (*GLXSWAPINTERVALEXT)(X11Display*,GLXDrawable,int);
-        GLXSWAPINTERVALEXT glXSwapIntervalEXT = NULL;
-
-        if(strstr(extensions,"EXT_swap_control")) {
-            glXSwapIntervalEXT = (GLXSWAPINTERVALEXT)glXGetProcAddress(
-                    (const GLubyte*)"glXSwapIntervalEXT");
-        }
-        if (glXSwapIntervalEXT && win) {
-            glXSwapIntervalEXT(mDisplay,
-                               GlxSurface::drawableFor(win),
-                               interval);
-        }
-    }
-
 private:
     X11Display* mDisplay;
 };
@@ -439,20 +386,8 @@ public:
         return new GlxDisplay(XOpenDisplay(0));
     }
 
-    virtual EglOS::Display* getInternalDisplay(EGLNativeDisplayType dpy) {
-        return new GlxDisplay(dpy);
-    }
-
     virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
         return new GlxSurface(wnd, GlxSurface::WINDOW);
-    }
-
-    virtual EglOS::Surface* createPixmapSurface(EGLNativePixmapType pix) {
-        return new GlxSurface(pix, GlxSurface::PIXMAP);
-    }
-
-    virtual void wait() {
-        glXWaitX();
     }
 };
 
