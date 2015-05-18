@@ -28,7 +28,7 @@
 #define GLAPIENTRY GL_APIENTRY
 typedef void(*FUNCPTR)();
 
-#define GLES_DECLARE_METHOD(return_type, function_name, signature) \
+#define GLES_DECLARE_METHOD(return_type, function_name, signature, args) \
     static GL_APICALL return_type (GL_APIENTRY *function_name) signature;
 
 class GLDispatch {
