@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d8cfd85_4d24aea9",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_glx.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-05-19T23:08:11Z",
+      "side": 1,
+      "message": "I am not sure the part about libGL.so.1 always linking to vendor\u0027s implementation of libGL is true.",
+      "range": {
+        "startLine": 391,
+        "startChar": 0,
+        "endLine": 394,
+        "endChar": 40
+      },
+      "revId": "bb8724be4b9e17339d5d6442e588b02f2aa42f4b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d37016d_b527aae0",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 700,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-05-19T23:08:11Z",
+      "side": 1,
+      "message": "I will mark this patch as \"don\u0027t submit\" yet for that reason, but lgtm otherwise",
+      "range": {
+        "startLine": 700,
+        "startChar": 0,
+        "endLine": 700,
+        "endChar": 75
+      },
+      "revId": "bb8724be4b9e17339d5d6442e588b02f2aa42f4b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
