@@ -48,6 +48,7 @@
 EglImage *attachEGLImage(unsigned int imageId);
 void detachEGLImage(unsigned int imageId);
 GLEScontext* getGLESContext();
+GlLibrary* getGlLibrary();
 
 #define tls_thread  EglThreadInfo::get()
 
@@ -66,6 +67,7 @@ static const EGLiface s_eglIface = {
     .getGLESContext = getGLESContext,
     .eglAttachEGLImage = attachEGLImage,
     .eglDetachEGLImage = detachEGLImage,
+    .eglGetGlLibrary = getGlLibrary,
 };
 
 static void initGLESx(GLESVersion version) {
@@ -156,6 +158,10 @@ GLEScontext* getGLESContext()
 {
     ThreadInfo* thread  = getThreadInfo();
     return thread->glesContext;
+}
+
+GlLibrary* getGlLibrary() {
+    return EglGlobalInfo::getInstance()->getOsEngine()->getGlLibrary();
 }
 
 EGLAPI EGLint EGLAPIENTRY eglGetError(void) {

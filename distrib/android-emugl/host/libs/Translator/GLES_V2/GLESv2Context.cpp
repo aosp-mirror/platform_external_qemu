@@ -15,13 +15,14 @@
 */
 
 #include "GLESv2Context.h"
+
 #include <string.h>
 
-void GLESv2Context::init() {
+void GLESv2Context::init(GlLibrary* glLib) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
-        s_glDispatch.dispatchFuncs(GLES_2_0);
-        GLEScontext::init();
+        s_glDispatch.dispatchFuncs(GLES_2_0, glLib);
+        GLEScontext::init(glLib);
         for(int i=0; i < s_glSupport.maxVertexAttribs;i++){
             m_map[i] = new GLESpointer();
         }

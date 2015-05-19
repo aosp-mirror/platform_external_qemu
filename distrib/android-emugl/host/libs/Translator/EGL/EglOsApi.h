@@ -22,7 +22,19 @@
 #define PBUFFER_MAX_HEIGHT 32767
 #define PBUFFER_MAX_PIXELS (PBUFFER_MAX_WIDTH * PBUFFER_MAX_HEIGHT)
 
+class GlLibrary;
+
 namespace EglOS {
+
+// This header contains declaration used to abstract the underlying
+// desktop GL library (or equivalent) that is being used by our EGL
+// and GLES translation libraries.
+
+// Use EglOS::Engine::getHostInstance() to retrieve an instance of the
+// EglOS::Engine interface that matches the host display system.
+//
+// Alternate renderers (e.g. software-based Mesa) can also implement
+// their own engine.
 
 // Base class used to wrap various GL Surface types.
 class Surface {
@@ -158,6 +170,9 @@ public:
     // Return a Display instance to the default display / window.
     virtual Display* getDefaultDisplay() = 0;
 
+    // Return to engine-specific implementation of GlLibrary.
+    virtual GlLibrary* getGlLibrary() = 0;
+
     // Create a new window surface. |wnd| is a host-specific window handle
     // (e.g. a Windows HWND). A software renderer would always return NULL
     // here.
@@ -170,4 +185,4 @@ public:
 
 }  // namespace EglOS
 
-#endif
+#endif  // EGL_OS_API_H

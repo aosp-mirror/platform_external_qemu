@@ -17,6 +17,10 @@
 
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/mutex.h"
+#include "emugl/common/shared_library.h"
+#include "GLcommon/GLLibrary.h"
+
+#include "OpenglCodecCommon/ErrorLog.h"
 
 #include <string.h>
 #include <X11/Xlib.h>
@@ -380,15 +384,74 @@ private:
     X11Display* mDisplay;
 };
 
+class GlxLibrary : public GlLibrary {
+public:
+    typedef GlFunctionPointer (ResolverFunc)(const char* name);
+
+    // Important: Use libGL.so.1 explicitly, because it will always link to
+    // the vendor-specific version of the library. libGL.so might in some
+    // cases, depending on bad ldconfig configurations, link to the wrapper
+    // lib that doesn't behave the same.
+    GlxLibrary() : mLib(NULL), mResolver(NULL) {
+        static const char kLibName[] = "libGL.so.1";
+        char error[256];
+        mLib = emugl::SharedLibrary::open(kLibName, error, sizeof(error));
+        if (!mLib) {
+            ERR("%s: Could not open GL library %s [%s]\n",
+                __FUNCTION__, kLibName, error);
+            return;
+        }
+        // NOTE: Don't use glXGetProcAddress here, only glXGetProcAddressARB
+        // is guaranteed to be supported by vendor-specific libraries.
+        static const char kResolverName[] = "glXGetProcAddressARB";
+        mResolver = reinterpret_cast<ResolverFunc*>(
+                mLib->findSymbol(kResolverName));
+        if (!mResolver) {
+            ERR("%s: Could not find resolver %s in %s\n",
+                __FUNCTION__, kResolverName, kLibName);
+            delete mLib;
+            mLib = NULL;
+        }
+    }
+
+    ~GlxLibrary() {
+        delete mLib;
+    }
+
+    // override
+    virtual GlFunctionPointer findSymbol(const char* name) {
+        if (!mLib) {
+            return NULL;
+        }
+        GlFunctionPointer ret = (*mResolver)(name);
+        if (!ret) {
+            ret = reinterpret_cast<GlFunctionPointer>(mLib->findSymbol(name));
+        }
+        return ret;
+    }
+
+private:
+    emugl::SharedLibrary* mLib;
+    ResolverFunc* mResolver;
+};
+
 class GlxEngine : public EglOS::Engine {
 public:
+    GlxEngine() : mGlLib() {}
+
     virtual EglOS::Display* getDefaultDisplay() {
         return new GlxDisplay(XOpenDisplay(0));
+    }
+
+    virtual GlLibrary* getGlLibrary() {
+        return &mGlLib;
     }
 
     virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
         return new GlxSurface(wnd, GlxSurface::WINDOW);
     }
+private:
+    GlxLibrary mGlLib;
 };
 
 emugl::LazyInstance<GlxEngine> sHostEngine = LAZY_INSTANCE_INIT;

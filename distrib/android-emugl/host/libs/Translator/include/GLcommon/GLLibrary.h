@@ -23,10 +23,6 @@ public:
     // Generic pointer-to-function type.
     typedef void (*GlFunctionPointer)(void);
 
-    // Return the instance corresponding to the host system's default
-    // system GL library.
-    static GlLibrary* getHostInstance();
-
     // Empty constructor.
     GlLibrary() {}
 

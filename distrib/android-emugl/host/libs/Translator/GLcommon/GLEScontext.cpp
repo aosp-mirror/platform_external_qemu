@@ -131,7 +131,7 @@ bool Version::operator<(const Version& ver) const{
     return false;
 }
 
-void GLEScontext::init() {
+void GLEScontext::init(GlLibrary* glLib) {
 
     if (!s_glExtensions) {
         initCapsLocked(s_glDispatch.glGetString(GL_EXTENSIONS));

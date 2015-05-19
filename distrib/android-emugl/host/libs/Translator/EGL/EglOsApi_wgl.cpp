@@ -16,6 +16,8 @@
 #include "EglOsApi.h"
 
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/shared_library.h"
+#include "GLcommon/GLLibrary.h"
 
 #include <windows.h>
 #include <wingdi.h>
@@ -695,6 +697,21 @@ private:
     WinDisplay* mDpy;
 };
 
+// TODO(digit): Remove this static C++ constructor. Doing so breaks stuff!!
+static emugl::SharedLibrary* sLibGl = emugl::SharedLibrary::open("opengl32");
+
+class WglLibrary : public GlLibrary {
+public:
+    virtual GlFunctionPointer findSymbol(const char* name) {
+        // TODO(digit): Don't call wglGetProcAddress directly.
+        GlFunctionPointer ret = (GlFunctionPointer)wglGetProcAddress(name);
+        if (!ret && sLibGl) {
+            ret = sLibGl->findSymbol(name);
+        }
+        return ret;
+    }
+};
+
 class WinEngine : public EglOS::Engine {
 public:
     WinEngine();
@@ -709,12 +726,19 @@ public:
         return new WglDisplay(dpy);
     }
 
+    virtual GlLibrary* getGlLibrary() {
+        return &mGlLib;
+    }
+
     virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
         return new WinSurface(wnd);
     }
+
+private:
+    WglLibrary mGlLib;
 };
 
-WinEngine::WinEngine() {
+WinEngine::WinEngine() : mGlLib() {
     if (!s_tlsIndex) {
         s_tlsIndex = TlsAlloc();
     }
