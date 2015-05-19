@@ -32,13 +32,13 @@
 
 typedef GlLibrary::GlFunctionPointer GL_FUNC_PTR;
 
-static GL_FUNC_PTR getGLFuncAddress(const char *funcName) {
-    return GlLibrary::getHostInstance()->findSymbol(funcName);
+static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
+    return glLib->findSymbol(funcName);
 }
 
 #define LOAD_GL_FUNC(return_type, func_name, signature, args)  do { \
         if (!func_name) { \
-            void* address = (void *)getGLFuncAddress(#func_name); \
+            void* address = (void *)getGLFuncAddress(#func_name, glLib); \
             if (address) { \
                 func_name = (__typeof__(func_name))(address); \
             } else { \
@@ -50,7 +50,7 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName) {
 
 #define LOAD_GLEXT_FUNC(return_type, func_name, signature, args) do { \
         if (!func_name) { \
-            void* address = (void *)getGLFuncAddress(#func_name); \
+            void* address = (void *)getGLFuncAddress(#func_name, glLib); \
             if (address) { \
                 func_name = (__typeof__(func_name))(address); \
             } \
@@ -92,7 +92,7 @@ LIST_GLES_FUNCTIONS(GL_DISPATCH_DEFINE_POINTER, GL_DISPATCH_DEFINE_POINTER)
 // Constructor.
 GLDispatch::GLDispatch() : m_isLoaded(false) {}
 
-void GLDispatch::dispatchFuncs(GLESVersion version) {
+void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(m_isLoaded)
         return;
