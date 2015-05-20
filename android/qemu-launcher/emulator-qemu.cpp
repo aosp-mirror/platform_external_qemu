@@ -668,6 +668,14 @@ extern "C" int main(int argc, char **argv, char **envp) {
         }
     }
 
+    if (opts->selinux) {
+        if ((strcmp(opts->selinux, "permissive") != 0)
+                && (strcmp(opts->selinux, "disabled") != 0)) {
+            derror("-selinux must be \"disabled\" or \"permissive\"");
+            exit(1);
+        }
+    }
+
     if (opts->memory) {
         char*  end;
         long   ramSize = strtol(opts->memory, &end, 0);
@@ -796,6 +804,10 @@ extern "C" int main(int argc, char **argv, char **envp) {
                                             kTarget.ttyPrefix);
     if (kTarget.kernelExtraArgs) {
         kernelCommandLine += kTarget.kernelExtraArgs;
+    }
+    if (opts->selinux) {
+        kernelCommandLine += StringFormat(
+                " androidboot.selinux=%s", opts->selinux);
     }
     args[n++] = kernelCommandLine.c_str();
 
