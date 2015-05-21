@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed67a99d_c7f07e65",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 673,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-05-21T02:04:33Z",
+      "side": 1,
+      "message": "FYI, androidboot.selinux\u003ddisabled is no longer supported by the latest version of init: https://android-review.googlesource.com/148538",
+      "revId": "c728383c28e08aab96c4ac6172f8e11866a2a7e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
