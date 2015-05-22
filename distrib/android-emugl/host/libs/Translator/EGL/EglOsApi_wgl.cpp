@@ -19,9 +19,12 @@
 #include "emugl/common/shared_library.h"
 #include "GLcommon/GLLibrary.h"
 
+#include "OpenglCodecCommon/ErrorLog.h"
+
 #include <windows.h>
 #include <wingdi.h>
 
+#include <GLES/glplatform.h>
 #include <GL/gl.h>
 #include <GL/wglext.h>
 
@@ -37,6 +40,150 @@
 
 namespace {
 
+using emugl::SharedLibrary;
+typedef GlLibrary::GlFunctionPointer GlFunctionPointer;
+
+/////
+/////  W G L   D I S P A T C H   T A B L E S
+/////
+
+// A technical note to explain what is going here, trust me, it's important.
+//
+// I. Library-dependent symbol resolution:
+// ---------------------------------------
+//
+// The code here can deal with two kinds of OpenGL Windows libraries: the
+// system-provided opengl32.dll, or alternate software renderers like Mesa
+// (e.g. mesa_opengl32.dll).
+//
+// When using the system library, pixel-format related functions, like
+// SetPixelFormat(), are provided by gdi32.dll, and _not_ opengl32.dll
+// (even though they are documented as part of the Windows GL API).
+//
+// These functions must _not_ be used when using alternative renderers.
+// Instead, these provide _undocumented_ alternatives with the 'wgl' prefix,
+// as in wglSetPixelFormat(), wglDescribePixelFormat(), etc... which
+// implement the same calling conventions.
+//
+// For more details about this, see 5.190 of the Windows OpenGL FAQ at:
+// https://www.opengl.org/archives/resources/faq/technical/mswindows.htm
+//
+// Another good source of information on this topic:
+// http://stackoverflow.com/questions/20645706/why-are-functions-duplicated-between-opengl32-dll-and-gdi32-dll
+//
+// In practice, it means that the code here should resolve 'naked' symbols
+// (e.g. 'GetPixelFormat()) when using the system library, and 'prefixed' ones
+// (e.g. 'wglGetPixelFormat()) otherwise.
+//
+
+// List of WGL functions of interest to probe with GetProcAddress()
+#define LIST_WGL_FUNCTIONS(X) \
+    X(HGLRC, wglCreateContext, (HDC hdc)) \
+    X(BOOL, wglDeleteContext, (HGLRC hglrc)) \
+    X(BOOL, wglMakeCurrent, (HDC hdc, HGLRC hglrc)) \
+    X(BOOL, wglShareLists, (HGLRC hglrc1, HGLRC hglrc2)) \
+    X(HGLRC, wglGetCurrentContext, (void)) \
+    X(HDC, wglGetCurrentDC, (void)) \
+    X(GlFunctionPointer, wglGetProcAddress, (const char* functionName)) \
+
+// List of WGL functions exported by GDI32 that must be used when using
+// the system's opengl32.dll only, i.e. not with a software renderer like
+// Mesa. For more information, see 5.190 at:
+// And also:
+#define LIST_GDI32_FUNCTIONS(X) \
+    X(int, ChoosePixelFormat, (HDC hdc, const PIXELFORMATDESCRIPTOR* ppfd)) \
+    X(BOOL, SetPixelFormat, (HDC hdc, int iPixelFormat, const PIXELFORMATDESCRIPTOR* pfd)) \
+    X(int, GetPixelFormat, (HDC hdc)) \
+    X(int, DescribePixelFormat, (HDC hdc, int iPixelFormat, UINT nbytes, LPPIXELFORMATDESCRIPTOR ppfd)) \
+    X(BOOL, SwapBuffers, (HDC hdc)) \
+
+// Declare a structure containing pointers to all functions listed above,
+// and a way to initialize them.
+struct WglBaseDispatch {
+    // declare all function pointers, followed by a dummy member used
+    // to terminate the constructor's initialization list properly.
+#define DECLARE_WGL_POINTER(return_type, function_name, signature) \
+    return_type (GL_APIENTRY* function_name) signature;
+    LIST_WGL_FUNCTIONS(DECLARE_WGL_POINTER)
+    LIST_GDI32_FUNCTIONS(DECLARE_WGL_POINTER)
+    SharedLibrary* mLib;
+
+    // Default Constructor
+    WglBaseDispatch() :
+#define INIT_WGL_POINTER(return_type, function_name, signature) \
+    function_name(NULL),
+            LIST_WGL_FUNCTIONS(INIT_WGL_POINTER)
+            LIST_GDI32_FUNCTIONS(INIT_WGL_POINTER)
+            mLib(NULL) {}
+
+    // Initialize the dispatch table from shared library |glLib|, which
+    // must point to either the system or non-system opengl32.dll
+    // implementation. If |systemLib| is true, this considers the library
+    // to be the system one, and will try to find the GDI32 functions
+    // like GetPixelFormat() directly. If |systemLib| is false, this will
+    // try to load the wglXXX variants (e.g. for Mesa). See technical note
+    // above for details.
+    // Returns true on success, false otherwise (i.e. if one of the
+    // required symbols could not be loaded).
+    bool init(SharedLibrary* glLib, bool systemLib) {
+        bool result = true;
+
+        mLib = glLib;
+
+#define LOAD_WGL_POINTER(return_type, function_name, signature) \
+    this->function_name = reinterpret_cast< \
+            return_type (GL_APIENTRY*) signature>( \
+                    glLib->findSymbol(#function_name)); \
+    if (!this->function_name) { \
+        ERR("%s: Could not find %s in GL library\n", __FUNCTION__, \
+                #function_name); \
+        result = false; \
+    }
+
+#define LOAD_WGL_GDI32_POINTER(return_type, function_name, signature) \
+    this->function_name = reinterpret_cast< \
+            return_type (GL_APIENTRY*) signature>( \
+                    GetProcAddress(gdi32, #function_name)); \
+    if (!this->function_name) { \
+        ERR("%s: Could not find %s in GDI32 library\n", __FUNCTION__, \
+                #function_name); \
+        result = false; \
+    }
+
+#define LOAD_WGL_INNER_POINTER(return_type, function_name, signature) \
+    this->function_name = reinterpret_cast< \
+            return_type (GL_APIENTRY*) signature>( \
+                    glLib->findSymbol("wgl" #function_name)); \
+    if (!this->function_name) { \
+        ERR("%s: Could not find %s in GL library\n", __FUNCTION__, \
+                "wgl" #function_name); \
+        result = false; \
+    }
+
+        LIST_WGL_FUNCTIONS(LOAD_WGL_POINTER)
+        if (systemLib) {
+            HMODULE gdi32 = GetModuleHandle("gdi32.dll");
+            LIST_GDI32_FUNCTIONS(LOAD_WGL_GDI32_POINTER)
+        } else {
+            LIST_GDI32_FUNCTIONS(LOAD_WGL_INNER_POINTER)
+        }
+        return result;
+    }
+
+    // Find a function, using wglGetProcAddress() first, and if that doesn't
+    // work, SharedLibrary::findSymbol().
+    // |functionName| is the function name.
+    // |glLib| is the GL library to probe with findSymbol() is needed.
+    GlFunctionPointer findFunction(const char* functionName) const {
+        GlFunctionPointer result = this->wglGetProcAddress(functionName);
+        if (!result && mLib) {
+            result = mLib->findSymbol(functionName);
+        }
+        return result;
+    }
+};
+
+// Used internally by createDummyWindow().
 LRESULT CALLBACK dummyWndProc(HWND hwnd,
                               UINT uMsg,
                               WPARAM wParam,
@@ -44,6 +191,10 @@ LRESULT CALLBACK dummyWndProc(HWND hwnd,
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
+// Create a new dummy window, and return its handle.
+// Note that the window is 1x1 pixels and not visible, but
+// it can be used to create a device context and associated
+// OpenGL rendering context.
 HWND createDummyWindow() {
     WNDCLASSEX wcx;
     wcx.cbSize = sizeof(wcx);                       // size of structure
@@ -89,14 +240,15 @@ WglExtProcs* s_wglExtProcs = NULL;
 
 PROC wglGetExtentionsProcAddress(HDC hdc,
                                  const char* extension_name,
-                                 const char* proc_name) {
+                                 const char* proc_name,
+                                 const WglBaseDispatch* dispatch) {
     // this is pointer to function which returns a pointer to a string with
     // the list of all wgl extensions
     PFNWGLGETEXTENSIONSSTRINGARBPROC _wglGetExtensionsStringARB = NULL;
 
     // determine pointer to wglGetExtensionsStringEXT function
     _wglGetExtensionsStringARB =
-            (PFNWGLGETEXTENSIONSSTRINGARBPROC) wglGetProcAddress(
+            (PFNWGLGETEXTENSIONSSTRINGARBPROC) dispatch->wglGetProcAddress(
                     "wglGetExtensionsStringARB");
     if (!_wglGetExtensionsStringARB){
         fprintf(stderr,"could not get wglGetExtensionsStringARB\n");
@@ -111,10 +263,10 @@ PROC wglGetExtentionsProcAddress(HDC hdc,
     }
 
     // extension is supported
-    return wglGetProcAddress(proc_name);
+    return reinterpret_cast<PROC>(dispatch->wglGetProcAddress(proc_name));
 }
 
-void initPtrToWglFunctions(){
+void initPtrToWglFunctions(const WglBaseDispatch* dispatch){
     HWND hwnd = createDummyWindow();
     HDC dpy =  GetDC(hwnd);
     if (!hwnd || !dpy){
@@ -142,12 +294,12 @@ void initPtrToWglFunctions(){
         0, 0, 0                // layer masks ignored
     };
 
-    int iPixelFormat = ChoosePixelFormat(dpy, &pfd);
+    int iPixelFormat = dispatch->ChoosePixelFormat(dpy, &pfd);
     if (iPixelFormat < 0){
         fprintf(stderr,"error while choosing pixel format\n");
         return;
     }
-    if (!SetPixelFormat(dpy, iPixelFormat, &pfd)){
+    if (!dispatch->SetPixelFormat(dpy, iPixelFormat, &pfd)){
 
         int err = GetLastError();
         fprintf(stderr,"error while setting pixel format 0x%x\n", err);
@@ -155,12 +307,12 @@ void initPtrToWglFunctions(){
     }
 
     int err;
-    HGLRC ctx = wglCreateContext(dpy);
+    HGLRC ctx = dispatch->wglCreateContext(dpy);
     if (!ctx){
         err =  GetLastError();
         fprintf(stderr,"error while creating dummy context %d\n", err);
     }
-    if (!wglMakeCurrent(dpy, ctx)) {
+    if (!dispatch->wglMakeCurrent(dpy, ctx)) {
         err =  GetLastError();
         fprintf(stderr,"error while making dummy context current %d\n", err);
     }
@@ -173,53 +325,60 @@ void initPtrToWglFunctions(){
                         wglGetExtentionsProcAddress(
                                 dpy,
                                 "WGL_ARB_pixel_format",
-                                "wglGetPixelFormatAttribivARB");
+                                "wglGetPixelFormatAttribivARB",
+                                dispatch);
 
         s_wglExtProcs->wglChoosePixelFormatARB =
                 (PFNWGLCHOOSEPIXELFORMATARBPROC)
                         wglGetExtentionsProcAddress(
                                 dpy,
                                 "WGL_ARB_pixel_format",
-                                "wglChoosePixelFormatARB");
+                                "wglChoosePixelFormatARB",
+                                dispatch);
 
         s_wglExtProcs->wglCreatePbufferARB =
                 (PFNWGLCREATEPBUFFERARBPROC)
                         wglGetExtentionsProcAddress(
                                 dpy,
                                 "WGL_ARB_pbuffer",
-                                "wglCreatePbufferARB");
+                                "wglCreatePbufferARB",
+                                dispatch);
 
         s_wglExtProcs->wglReleasePbufferDCARB =
                 (PFNWGLRELEASEPBUFFERDCARBPROC)
                         wglGetExtentionsProcAddress(
                                 dpy,
                                 "WGL_ARB_pbuffer",
-                                "wglReleasePbufferDCARB");
+                                "wglReleasePbufferDCARB",
+                                dispatch);
 
         s_wglExtProcs->wglDestroyPbufferARB =
                 (PFNWGLDESTROYPBUFFERARBPROC)
                         wglGetExtentionsProcAddress(
                                 dpy,
                                 "WGL_ARB_pbuffer",
-                                "wglDestroyPbufferARB");
+                                "wglDestroyPbufferARB",
+                                dispatch);
 
         s_wglExtProcs->wglGetPbufferDCARB =
                 (PFNWGLGETPBUFFERDCARBPROC)
                         wglGetExtentionsProcAddress(
                                 dpy,
                                 "WGL_ARB_pbuffer",
-                                "wglGetPbufferDCARB");
+                                "wglGetPbufferDCARB",
+                                dispatch);
 
         s_wglExtProcs->wglMakeContextCurrentARB =
                 (PFNWGLMAKECONTEXTCURRENTARBPROC)
                         wglGetExtentionsProcAddress(
                                 dpy,
                                 "WGL_ARB_make_current_read",
-                                "wglMakeContextCurrentARB");
+                                "wglMakeContextCurrentARB",
+                                dispatch);
     }
 
-    wglMakeCurrent(dpy, NULL);
-    wglDeleteContext(ctx);
+    dispatch->wglMakeCurrent(dpy, NULL);
+    dispatch->wglDeleteContext(ctx);
     DestroyWindow(hwnd);
     DeleteDC(dpy);
 }
@@ -399,7 +558,7 @@ static HDC getDummyDC(WinDisplay* display, int cfgId) {
 }
 
 
-bool initPixelFormat(HDC dc) {
+bool initPixelFormat(HDC dc, const WglBaseDispatch* dispatch) {
     if (s_wglExtProcs->wglChoosePixelFormatARB) {
         unsigned int numpf;
         int iPixelFormat;
@@ -409,7 +568,7 @@ bool initPixelFormat(HDC dc) {
                 dc, &i0, &f0, 1, &iPixelFormat, &numpf);
     } else {
         PIXELFORMATDESCRIPTOR  pfd;
-        return ChoosePixelFormat(dc, &pfd);
+        return dispatch->ChoosePixelFormat(dc, &pfd);
     }
 }
 
@@ -509,7 +668,8 @@ void pixelFormatToConfig(WinDisplay* display,
 class WglDisplay : public EglOS::Display {
 public:
     // TODO(digit): Remove WinDisplay entirely.
-    explicit WglDisplay(WinDisplay* dpy) : mDpy(dpy) {}
+    explicit WglDisplay(WinDisplay* dpy, const WglBaseDispatch* dispatch) :
+            mDpy(dpy), mDispatch(dispatch) {}
 
     virtual ~WglDisplay() {
         delete mDpy;
@@ -528,16 +688,16 @@ public:
         // wglChoosePixelFormat() needs to be called at least once,
         // i.e. it seems that the driver needs to initialize itself.
         // Do it here during initialization.
-        initPixelFormat(dpy);
+        initPixelFormat(dpy, mDispatch);
 
         // Quering number of formats
         PIXELFORMATDESCRIPTOR  pfd;
-        int maxFormat = DescribePixelFormat(
+        int maxFormat = mDispatch->DescribePixelFormat(
                 dpy, 1, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 
         // Inserting rest of formats. Try to map each one to an EGL Config.
         for (int configId = 1; configId <= maxFormat; configId++) {
-            DescribePixelFormat(
+            mDispatch->DescribePixelFormat(
                     dpy, configId, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
             pixelFormatToConfig(
                     mDpy,
@@ -574,7 +734,9 @@ public:
         *height = r.bottom - r.top;
         HDC dc = GetDC(win);
         const WinPixelFormat* format = WinPixelFormat::from(pixelFormat);
-        bool ret = SetPixelFormat(dc, format->configId(), format->desc());
+        bool ret = mDispatch->SetPixelFormat(dc,
+                                             format->configId(),
+                                             format->desc());
         DeleteDC(dc);
         return ret;
     }
@@ -586,17 +748,19 @@ public:
         HDC dpy = getDummyDC(mDpy, format->configId());
 
         if (!mDpy->isPixelFormatSet(format->configId())) {
-            if (!SetPixelFormat(dpy, format->configId(), format->desc())) {
+            if (!mDispatch->SetPixelFormat(dpy,
+                                           format->configId(),
+                                           format->desc())) {
                 return NULL;
             }
             mDpy->pixelFormatWasSet(format->configId());
         }
 
-        HGLRC ctx = wglCreateContext(dpy);
+        HGLRC ctx = mDispatch->wglCreateContext(dpy);
 
         if (ctx && sharedContext) {
-            if (!wglShareLists(WinContext::from(sharedContext), ctx)) {
-                wglDeleteContext(ctx);
+            if (!mDispatch->wglShareLists(WinContext::from(sharedContext), ctx)) {
+                mDispatch->wglDeleteContext(ctx);
                 return NULL;
             }
         }
@@ -607,7 +771,7 @@ public:
         if (!context) {
             return false;
         }
-        if (!wglDeleteContext(WinContext::from(context))) {
+        if (!mDispatch->wglDeleteContext(WinContext::from(context))) {
             GetLastError();
             return false;
         }
@@ -678,7 +842,7 @@ public:
         HGLRC hdcContext = context ? WinContext::from(context) : 0;
 
         if (hdcRead == hdcDraw){
-            return wglMakeCurrent(hdcDraw, hdcContext);
+            return mDispatch->wglMakeCurrent(hdcDraw, hdcContext);
         } else if (!s_wglExtProcs->wglMakeContextCurrentARB) {
             return false;
         }
@@ -688,13 +852,14 @@ public:
     }
 
     virtual void swapBuffers(EglOS::Surface* srfc) {
-        if (srfc && !SwapBuffers(WinSurface::from(srfc)->getDC())) {
+        if (srfc && !mDispatch->SwapBuffers(WinSurface::from(srfc)->getDC())) {
             GetLastError();
         }
     }
 
 private:
     WinDisplay* mDpy;
+    const WglBaseDispatch* mDispatch;
 };
 
 // TODO(digit): Remove this static C++ constructor. Doing so breaks stuff!!
@@ -702,14 +867,14 @@ static emugl::SharedLibrary* sLibGl = emugl::SharedLibrary::open("opengl32");
 
 class WglLibrary : public GlLibrary {
 public:
+    WglLibrary(const WglBaseDispatch* dispatch) : mDispatch(dispatch) {}
+
     virtual GlFunctionPointer findSymbol(const char* name) {
-        // TODO(digit): Don't call wglGetProcAddress directly.
-        GlFunctionPointer ret = (GlFunctionPointer)wglGetProcAddress(name);
-        if (!ret && sLibGl) {
-            ret = sLibGl->findSymbol(name);
-        }
-        return ret;
+        return mDispatch->findFunction(name);
     }
+
+private:
+    const WglBaseDispatch* mDispatch;
 };
 
 class WinEngine : public EglOS::Engine {
@@ -723,7 +888,7 @@ public:
         HDC  hdc  =  GetDC(hwnd);
         dpy->setInfo(WinDisplay::DEFAULT_DISPLAY, DisplayInfo(hdc, hwnd));
 
-        return new WglDisplay(dpy);
+        return new WglDisplay(dpy, &mDispatch);
     }
 
     virtual GlLibrary* getGlLibrary() {
@@ -735,14 +900,17 @@ public:
     }
 
 private:
+    WglBaseDispatch mDispatch;
     WglLibrary mGlLib;
 };
 
-WinEngine::WinEngine() : mGlLib() {
+WinEngine::WinEngine() : mDispatch(), mGlLib(&mDispatch) {
     if (!s_tlsIndex) {
         s_tlsIndex = TlsAlloc();
     }
-    initPtrToWglFunctions();
+    // TODO(digit): Support software renderers like Mesa.
+    mDispatch.init(sLibGl, true);
+    initPtrToWglFunctions(&mDispatch);
 }
 
 emugl::LazyInstance<WinEngine> sHostEngine = LAZY_INSTANCE_INIT;
