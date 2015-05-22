@@ -31,6 +31,7 @@
 #include <map>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define IS_TRUE(a) \
         do { if (!(a)) return NULL; } while (0)
@@ -903,9 +904,6 @@ private:
     const WglExtensionsDispatch* mDispatch;
 };
 
-// TODO(digit): Remove this static C++ constructor. Doing so breaks stuff!!
-static emugl::SharedLibrary* sLibGl = emugl::SharedLibrary::open("opengl32");
-
 class WglLibrary : public GlLibrary {
 public:
     WglLibrary(const WglBaseDispatch* dispatch) : mDispatch(dispatch) {}
@@ -924,6 +922,7 @@ public:
 
     ~WinEngine() {
         delete mDispatch;
+        delete mLib;
     }
 
     virtual EglOS::Display* getDefaultDisplay() {
@@ -945,12 +944,14 @@ public:
     }
 
 private:
+    SharedLibrary* mLib;
     const WglExtensionsDispatch* mDispatch;
     WglBaseDispatch mBaseDispatch;
     WglLibrary mGlLib;
 };
 
 WinEngine::WinEngine() :
+        mLib(NULL),
         mDispatch(NULL),
         mBaseDispatch(),
         mGlLib(&mBaseDispatch) {
@@ -958,7 +959,16 @@ WinEngine::WinEngine() :
         s_tlsIndex = TlsAlloc();
     }
     // TODO(digit): Support software renderers like Mesa.
-    mBaseDispatch.init(sLibGl, true);
+    char error[256];
+    static const char kLibName[] = "opengl32.dll";
+    mLib = SharedLibrary::open(kLibName, error, sizeof(error));
+    if (!mLib) {
+        ERR("ERROR: %s: Could not open %s: %s\n", __FUNCTION__,
+            kLibName, error);
+        exit(1);
+    }
+
+    mBaseDispatch.init(mLib, true);
     mDispatch = initExtensionsDispatch(&mBaseDispatch);
 }
 
