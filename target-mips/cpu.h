@@ -484,6 +484,22 @@ struct CPUMIPSState {
 
 #include "cpu-qom.h"
 
+typedef struct {
+    target_long gpr_reg[32];
+    uint32_t pc;
+    uint32_t branch_addr;
+    target_ulong CP0_EntryLo0;
+    target_ulong CP0_EntryLo1;
+    target_ulong CP0_BadVAddr;
+    target_ulong CP0_EntryHi;
+    target_ulong CP0_Context;
+    target_ulong CP0_XContext;
+    int do_tlbwr;
+} CPUInterpreterContext;
+
+extern CPUInterpreterContext CPU;
+
+int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *handler, uint32_t size);
 int no_mmu_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
                         target_ulong address, int rw, int access_type);
 int fixed_mmu_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
