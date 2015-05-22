@@ -93,13 +93,13 @@ private:
 
 class ScopedSharedLibrary {
 public:
-    explicit ScopedSharedLibrary(SharedLibrary* lib) : mLib(lib) {}
+    explicit ScopedSharedLibrary(const SharedLibrary* lib) : mLib(lib) {}
     ~ScopedSharedLibrary() {
         delete mLib;
     }
-    SharedLibrary* get() const { return mLib; }
+    const SharedLibrary* get() const { return mLib; }
 
-    SharedLibrary* operator->() { return mLib; }
+    const SharedLibrary* operator->() { return mLib; }
 
     void release() {
         delete mLib;
@@ -107,7 +107,7 @@ public:
     }
 
 private:
-    SharedLibrary* mLib;
+    const SharedLibrary* mLib;
 };
 
 }  // namespace

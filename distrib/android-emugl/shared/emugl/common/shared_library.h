@@ -73,7 +73,7 @@ public:
     // Probe a given SharedLibrary instance to find a symbol named
     // |symbolName| in it. Return its address as a FunctionPtr, or
     // NULL if the symbol is not found.
-    FunctionPtr findSymbol(const char* symbolName);
+    FunctionPtr findSymbol(const char* symbolName) const;
 
 private:
 #ifdef _WIN32

@@ -87,7 +87,7 @@ SharedLibrary::~SharedLibrary() {
 }
 
 SharedLibrary::FunctionPtr SharedLibrary::findSymbol(
-        const char* symbolName) {
+        const char* symbolName) const {
     if (!mLib || !symbolName) {
         return NULL;
     }
@@ -157,7 +157,7 @@ SharedLibrary::~SharedLibrary() {
 }
 
 SharedLibrary::FunctionPtr SharedLibrary::findSymbol(
-        const char* symbolName) {
+        const char* symbolName) const {
     if (!mLib || !symbolName) {
         return NULL;
     }
