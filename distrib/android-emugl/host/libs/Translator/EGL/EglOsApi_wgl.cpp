@@ -43,6 +43,30 @@ namespace {
 using emugl::SharedLibrary;
 typedef GlLibrary::GlFunctionPointer GlFunctionPointer;
 
+// Returns true if an extension is include in a given extension list.
+// |extension| is an GL extension name.
+// |extensionList| is a space-separated list of supported extension.
+// Returns true if the extension is supported, false otherwise.
+bool supportsExtension(const char* extension, const char* extensionList) {
+    size_t extensionLen = ::strlen(extension);
+    const char* list = extensionList;
+    for (;;) {
+        const char* p = const_cast<const char*>(::strstr(list, extension));
+        if (!p) {
+            return false;
+        }
+        // Check that the extension appears as a single word in the list
+        // i.e. that it is wrapped by either spaces or the start/end of
+        // the list.
+        if ((p == extensionList || p[-1] == ' ') &&
+            (p[extensionLen] == '\0' || p[extensionLen] == ' ')) {
+            return true;
+        }
+        // otherwise, skip over the current position to find something else.
+        p += extensionLen;
+    }
+}
+
 /////
 /////  W G L   D I S P A T C H   T A B L E S
 /////
@@ -107,6 +131,7 @@ struct WglBaseDispatch {
     LIST_WGL_FUNCTIONS(DECLARE_WGL_POINTER)
     LIST_GDI32_FUNCTIONS(DECLARE_WGL_POINTER)
     SharedLibrary* mLib;
+    bool mIsSystemLib;
 
     // Default Constructor
     WglBaseDispatch() :
@@ -114,7 +139,17 @@ struct WglBaseDispatch {
     function_name(NULL),
             LIST_WGL_FUNCTIONS(INIT_WGL_POINTER)
             LIST_GDI32_FUNCTIONS(INIT_WGL_POINTER)
-            mLib(NULL) {}
+            mLib(NULL),
+            mIsSystemLib(false) {}
+
+    // Copy constructor
+    WglBaseDispatch(const WglBaseDispatch& other) :
+#define COPY_WGL_POINTER(return_type, function_name, signature) \
+    function_name(other.function_name),
+            LIST_WGL_FUNCTIONS(COPY_WGL_POINTER)
+            LIST_GDI32_FUNCTIONS(COPY_WGL_POINTER)
+            mLib(other.mLib),
+            mIsSystemLib(other.mIsSystemLib) {}
 
     // Initialize the dispatch table from shared library |glLib|, which
     // must point to either the system or non-system opengl32.dll
@@ -129,6 +164,7 @@ struct WglBaseDispatch {
         bool result = true;
 
         mLib = glLib;
+        mIsSystemLib = systemLib;
 
 #define LOAD_WGL_POINTER(return_type, function_name, signature) \
     this->function_name = reinterpret_cast< \
@@ -226,52 +262,106 @@ HWND createDummyWindow() {
     return hwnd;
 }
 
-struct WglExtProcs{
-    PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB;
-    PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
-    PFNWGLCREATEPBUFFERARBPROC wglCreatePbufferARB;
-    PFNWGLRELEASEPBUFFERDCARBPROC wglReleasePbufferDCARB;
-    PFNWGLDESTROYPBUFFERARBPROC wglDestroyPbufferARB;
-    PFNWGLGETPBUFFERDCARBPROC wglGetPbufferDCARB;
-    PFNWGLMAKECONTEXTCURRENTARBPROC wglMakeContextCurrentARB;
+// List of functions defined by the WGL_ARB_extensions_string extension.
+#define LIST_WGL_ARB_extensions_string_FUNCTIONS(X) \
+    X(const char*, wglGetExtensionsStringARB, (HDC hdc))
+
+// List of functions defined by the WGL_ARB_pixel_format extension.
+#define LIST_WGL_ARB_pixel_format_FUNCTIONS(X) \
+    X(BOOL, wglGetPixelFormatAttribivARB, (HDC hdc, int iPixelFormat, int iLayerPlane, UINT nAttributes, const int* piAttributes, int* piValues)) \
+    X(BOOL, wglGetPixelFormatAttribfvARB, (HDC hdc, int iPixelFormat, int iLayerPlane, UINT nAttributes, const int* piAttributes, FLOAT* pfValues)) \
+    X(BOOL, wglChoosePixelFormatARB, (HDC, const int* piAttribList, const FLOAT* pfAttribList, UINT nMaxFormats, int* piFormats, UINT* nNumFormats)) \
+
+// List of functions defined by the WGL_ARB_make_current_read extension.
+#define LIST_WGL_ARB_make_current_read_FUNCTIONS(X) \
+    X(BOOL, wglMakeContextCurrentARB, (HDC hDrawDC, HDC hReadDC, HGLRC hglrc)) \
+    X(HDC, wglGetCurrentReadDCARB, (void)) \
+
+// List of functions defined by the WGL_ARB_pbuffer extension.
+#define LIST_WGL_ARB_pbuffer_FUNCTIONS(X) \
+    X(HPBUFFERARB, wglCreatePbufferARB, (HDC hdc, int iPixelFormat, int iWidth, int iHeight, const int* piAttribList)) \
+    X(HDC, wglGetPbufferDCARB, (HPBUFFERARB hPbuffer)) \
+    X(int, wglReleasePbufferDCARB, (HPBUFFERARB hPbuffer, HDC hdc)) \
+    X(BOOL, wglDestroyPbufferARB, (HPBUFFERARB hPbuffer)) \
+
+#define LIST_WGL_EXTENSIONS_FUNCTIONS(X) \
+    LIST_WGL_ARB_pixel_format_FUNCTIONS(X) \
+    LIST_WGL_ARB_make_current_read_FUNCTIONS(X) \
+    LIST_WGL_ARB_pbuffer_FUNCTIONS(X) \
+
+// A structure used to hold pointers to WGL extension functions.
+struct WglExtensionsDispatch : public WglBaseDispatch {
+public:
+    LIST_WGL_EXTENSIONS_FUNCTIONS(DECLARE_WGL_POINTER)
+    int dummy;
+
+    // Default constructor
+    explicit WglExtensionsDispatch(const WglBaseDispatch& baseDispatch) :
+            WglBaseDispatch(baseDispatch),
+            LIST_WGL_EXTENSIONS_FUNCTIONS(INIT_WGL_POINTER)
+            dummy(0) {}
+
+    // Initialization
+    bool init(HDC hdc) {
+        // Base initialization happens first.
+        bool result = WglBaseDispatch::init(mLib, mIsSystemLib);
+        if (!result) {
+            return false;
+        }
+
+        // Find the list of extensions.
+        typedef const char* (GL_APIENTRY* GetExtensionsStringFunc)(HDC hdc);
+
+        GetExtensionsStringFunc wglGetExtensionsStringARB =
+                reinterpret_cast<GetExtensionsStringFunc>(
+                        this->findFunction("wglGetExtensionsStringARB"));
+        if (!wglGetExtensionsStringARB) {
+            ERR("%s: Could not find wglGetExtensionsStringARB!\n",
+                __FUNCTION__);
+            return false;
+        }
+        const char* extensionList = wglGetExtensionsStringARB(hdc);
+        if (!extensionList) {
+            extensionList = "";
+        }
+
+        // Load each extension individually.
+#define LOAD_WGL_EXTENSION_FUNCTION(return_type, function_name, signature) \
+    this->function_name = reinterpret_cast< \
+            return_type (GL_APIENTRY*) signature>( \
+                    this->findFunction(#function_name)); \
+    if (!this->function_name) { \
+        ERR("ERROR: %s: Missing extension function %s\n", __FUNCTION__, \
+            #function_name); \
+        result = false; \
+    }
+
+#define LOAD_WGL_EXTENSION(extension) \
+    if (!supportsExtension(#extension, extensionList)) { \
+        ERR("WARNING: %s: Missing WGL extension %s\n", __FUNCTION__, #extension); \
+    } else { \
+        LIST_##extension##_FUNCTIONS(LOAD_WGL_EXTENSION_FUNCTION) \
+    }
+
+        LOAD_WGL_EXTENSION(WGL_ARB_pixel_format)
+        LOAD_WGL_EXTENSION(WGL_ARB_make_current_read)
+        LOAD_WGL_EXTENSION(WGL_ARB_pbuffer)
+
+        // Done.
+        return result;
+    }
+
+private:
+    WglExtensionsDispatch();  // no default constructor.
 };
 
-WglExtProcs* s_wglExtProcs = NULL;
-
-PROC wglGetExtentionsProcAddress(HDC hdc,
-                                 const char* extension_name,
-                                 const char* proc_name,
-                                 const WglBaseDispatch* dispatch) {
-    // this is pointer to function which returns a pointer to a string with
-    // the list of all wgl extensions
-    PFNWGLGETEXTENSIONSSTRINGARBPROC _wglGetExtensionsStringARB = NULL;
-
-    // determine pointer to wglGetExtensionsStringEXT function
-    _wglGetExtensionsStringARB =
-            (PFNWGLGETEXTENSIONSSTRINGARBPROC) dispatch->wglGetProcAddress(
-                    "wglGetExtensionsStringARB");
-    if (!_wglGetExtensionsStringARB){
-        fprintf(stderr,"could not get wglGetExtensionsStringARB\n");
-        return NULL;
-    }
-
-    if (!_wglGetExtensionsStringARB ||
-        strstr(_wglGetExtensionsStringARB(hdc), extension_name) == NULL) {
-        fprintf(stderr,"extension %s was not found\n",extension_name);
-        // string was not found
-        return NULL;
-    }
-
-    // extension is supported
-    return reinterpret_cast<PROC>(dispatch->wglGetProcAddress(proc_name));
-}
-
-void initPtrToWglFunctions(const WglBaseDispatch* dispatch){
+const WglExtensionsDispatch* initExtensionsDispatch(
+        const WglBaseDispatch* dispatch) {
     HWND hwnd = createDummyWindow();
-    HDC dpy =  GetDC(hwnd);
-    if (!hwnd || !dpy){
+    HDC hdc =  GetDC(hwnd);
+    if (!hwnd || !hdc){
         fprintf(stderr,"error while getting DC\n");
-        return;
+        return NULL;
     }
     PIXELFORMATDESCRIPTOR pfd = {
         sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd
@@ -294,93 +384,38 @@ void initPtrToWglFunctions(const WglBaseDispatch* dispatch){
         0, 0, 0                // layer masks ignored
     };
 
-    int iPixelFormat = dispatch->ChoosePixelFormat(dpy, &pfd);
+    int iPixelFormat = dispatch->ChoosePixelFormat(hdc, &pfd);
     if (iPixelFormat < 0){
         fprintf(stderr,"error while choosing pixel format\n");
-        return;
+        return NULL;
     }
-    if (!dispatch->SetPixelFormat(dpy, iPixelFormat, &pfd)){
+    if (!dispatch->SetPixelFormat(hdc, iPixelFormat, &pfd)){
 
         int err = GetLastError();
         fprintf(stderr,"error while setting pixel format 0x%x\n", err);
-        return;
+        return NULL;
     }
 
     int err;
-    HGLRC ctx = dispatch->wglCreateContext(dpy);
+    HGLRC ctx = dispatch->wglCreateContext(hdc);
     if (!ctx){
         err =  GetLastError();
         fprintf(stderr,"error while creating dummy context %d\n", err);
     }
-    if (!dispatch->wglMakeCurrent(dpy, ctx)) {
+    if (!dispatch->wglMakeCurrent(hdc, ctx)) {
         err =  GetLastError();
         fprintf(stderr,"error while making dummy context current %d\n", err);
     }
 
-    if (!s_wglExtProcs) {
-        s_wglExtProcs = new WglExtProcs();
+    WglExtensionsDispatch* result = new WglExtensionsDispatch(*dispatch);
+    result->init(hdc);
 
-        s_wglExtProcs->wglGetPixelFormatAttribivARB =
-                (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_pixel_format",
-                                "wglGetPixelFormatAttribivARB",
-                                dispatch);
-
-        s_wglExtProcs->wglChoosePixelFormatARB =
-                (PFNWGLCHOOSEPIXELFORMATARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_pixel_format",
-                                "wglChoosePixelFormatARB",
-                                dispatch);
-
-        s_wglExtProcs->wglCreatePbufferARB =
-                (PFNWGLCREATEPBUFFERARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_pbuffer",
-                                "wglCreatePbufferARB",
-                                dispatch);
-
-        s_wglExtProcs->wglReleasePbufferDCARB =
-                (PFNWGLRELEASEPBUFFERDCARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_pbuffer",
-                                "wglReleasePbufferDCARB",
-                                dispatch);
-
-        s_wglExtProcs->wglDestroyPbufferARB =
-                (PFNWGLDESTROYPBUFFERARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_pbuffer",
-                                "wglDestroyPbufferARB",
-                                dispatch);
-
-        s_wglExtProcs->wglGetPbufferDCARB =
-                (PFNWGLGETPBUFFERDCARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_pbuffer",
-                                "wglGetPbufferDCARB",
-                                dispatch);
-
-        s_wglExtProcs->wglMakeContextCurrentARB =
-                (PFNWGLMAKECONTEXTCURRENTARBPROC)
-                        wglGetExtentionsProcAddress(
-                                dpy,
-                                "WGL_ARB_make_current_read",
-                                "wglMakeContextCurrentARB",
-                                dispatch);
-    }
-
-    dispatch->wglMakeCurrent(dpy, NULL);
+    dispatch->wglMakeCurrent(hdc, NULL);
     dispatch->wglDeleteContext(ctx);
+    DeleteDC(hdc);
     DestroyWindow(hwnd);
-    DeleteDC(dpy);
+
+    return result;
 }
 
 class WinPixelFormat : public EglOS::PixelFormat {
@@ -417,13 +452,13 @@ public:
             m_pb(NULL),
             m_hdc(GetDC(wnd)) {}
 
-    explicit WinSurface(HPBUFFERARB pb) :
+    explicit WinSurface(HPBUFFERARB pb, const WglExtensionsDispatch* dispatch) :
             Surface(PBUFFER),
             m_hwnd(NULL),
             m_pb(pb),
             m_hdc(NULL) {
-        if (s_wglExtProcs->wglGetPbufferDCARB) {
-            m_hdc = s_wglExtProcs->wglGetPbufferDCARB(pb);
+        if (dispatch->wglGetPbufferDCARB) {
+            m_hdc = dispatch->wglGetPbufferDCARB(pb);
         }
     }
 
@@ -558,13 +593,13 @@ static HDC getDummyDC(WinDisplay* display, int cfgId) {
 }
 
 
-bool initPixelFormat(HDC dc, const WglBaseDispatch* dispatch) {
-    if (s_wglExtProcs->wglChoosePixelFormatARB) {
+bool initPixelFormat(HDC dc, const WglExtensionsDispatch* dispatch) {
+    if (dispatch->wglChoosePixelFormatARB) {
         unsigned int numpf;
         int iPixelFormat;
         int i0 = 0;
         float f0 = 0.0f;
-        return s_wglExtProcs->wglChoosePixelFormatARB(
+        return dispatch->wglChoosePixelFormatARB(
                 dc, &i0, &f0, 1, &iPixelFormat, &numpf);
     } else {
         PIXELFORMATDESCRIPTOR  pfd;
@@ -573,6 +608,7 @@ bool initPixelFormat(HDC dc, const WglBaseDispatch* dispatch) {
 }
 
 void pixelFormatToConfig(WinDisplay* display,
+                         const WglExtensionsDispatch* dispatch,
                          int renderableType,
                          const PIXELFORMATDESCRIPTOR* frmt,
                          int index,
@@ -604,14 +640,14 @@ void pixelFormatToConfig(WinDisplay* display,
         WGL_TRANSPARENT_BLUE_VALUE_ARB
     };
 
-    if (!s_wglExtProcs->wglGetPixelFormatAttribivARB) {
+    if (!dispatch->wglGetPixelFormatAttribivARB) {
         return;
     }
 
     GLint window, pbuffer;
-    EXIT_IF_FALSE(s_wglExtProcs->wglGetPixelFormatAttribivARB(
+    EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
             dpy, index, 0, 1, &attribs[0], &window));
-    EXIT_IF_FALSE(s_wglExtProcs->wglGetPixelFormatAttribivARB(
+    EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
             dpy, index, 0, 1, &attribs[1], &pbuffer));
 
     info.surface_type = 0;
@@ -638,15 +674,15 @@ void pixelFormatToConfig(WinDisplay* display,
     info.frame_buffer_level = 0;
 
     GLint transparent;
-    EXIT_IF_FALSE(s_wglExtProcs->wglGetPixelFormatAttribivARB(
+    EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
             dpy, index, 0, 1, &attribs[3], &transparent));
     if (transparent) {
         info.transparent_type = EGL_TRANSPARENT_RGB;
-        EXIT_IF_FALSE(s_wglExtProcs->wglGetPixelFormatAttribivARB(
+        EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
                 dpy, index, 0, 1, &attribs[4], &info.trans_red_val));
-        EXIT_IF_FALSE(s_wglExtProcs->wglGetPixelFormatAttribivARB(
+        EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
                 dpy, index, 0, 1, &attribs[5], &info.trans_green_val));
-        EXIT_IF_FALSE(s_wglExtProcs->wglGetPixelFormatAttribivARB(
+        EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
                 dpy,index, 0, 1, &attribs[6], &info.trans_blue_val));
     } else {
         info.transparent_type = EGL_NONE;
@@ -668,7 +704,7 @@ void pixelFormatToConfig(WinDisplay* display,
 class WglDisplay : public EglOS::Display {
 public:
     // TODO(digit): Remove WinDisplay entirely.
-    explicit WglDisplay(WinDisplay* dpy, const WglBaseDispatch* dispatch) :
+    explicit WglDisplay(WinDisplay* dpy, const WglExtensionsDispatch* dispatch) :
             mDpy(dpy), mDispatch(dispatch) {}
 
     virtual ~WglDisplay() {
@@ -701,6 +737,7 @@ public:
                     dpy, configId, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
             pixelFormatToConfig(
                     mDpy,
+                    mDispatch,
                     renderableType,
                     &pfd,
                     configId,
@@ -804,30 +841,32 @@ public:
             0
         };
 
-        if (!s_wglExtProcs->wglCreatePbufferARB) {
+        const WglExtensionsDispatch* dispatch = mDispatch;
+        if (!dispatch->wglCreatePbufferARB) {
             return NULL;
         }
-        HPBUFFERARB pb = s_wglExtProcs->wglCreatePbufferARB(
+        HPBUFFERARB pb = dispatch->wglCreatePbufferARB(
                 dpy, configId, info->width, info->height, pbAttribs);
         if (!pb) {
             GetLastError();
             return NULL;
         }
-        return new WinSurface(pb);
+        return new WinSurface(pb, dispatch);
     }
 
     virtual bool releasePbuffer(EglOS::Surface* pb) {
         if (!pb) {
             return false;
         }
-        if (!s_wglExtProcs->wglReleasePbufferDCARB ||
-            !s_wglExtProcs->wglDestroyPbufferARB) {
+        const WglExtensionsDispatch* dispatch = mDispatch;
+        if (!dispatch->wglReleasePbufferDCARB ||
+            !dispatch->wglDestroyPbufferARB) {
             return false;
         }
         WinSurface* winpb = WinSurface::from(pb);
-        if (!s_wglExtProcs->wglReleasePbufferDCARB(
+        if (!dispatch->wglReleasePbufferDCARB(
                 winpb->getPbuffer(), winpb->getDC()) ||
-            !s_wglExtProcs->wglDestroyPbufferARB(winpb->getPbuffer())) {
+            !dispatch->wglDestroyPbufferARB(winpb->getPbuffer())) {
             GetLastError();
             return false;
         }
@@ -841,12 +880,14 @@ public:
         HDC hdcDraw = draw ? WinSurface::from(draw)->getDC() : NULL;
         HGLRC hdcContext = context ? WinContext::from(context) : 0;
 
+        const WglExtensionsDispatch* dispatch = mDispatch;
+
         if (hdcRead == hdcDraw){
-            return mDispatch->wglMakeCurrent(hdcDraw, hdcContext);
-        } else if (!s_wglExtProcs->wglMakeContextCurrentARB) {
+            return dispatch->wglMakeCurrent(hdcDraw, hdcContext);
+        } else if (!dispatch->wglMakeContextCurrentARB) {
             return false;
         }
-        bool retVal = s_wglExtProcs->wglMakeContextCurrentARB(
+        bool retVal = dispatch->wglMakeContextCurrentARB(
                 hdcDraw, hdcRead, hdcContext);
         return retVal;
     }
@@ -859,7 +900,7 @@ public:
 
 private:
     WinDisplay* mDpy;
-    const WglBaseDispatch* mDispatch;
+    const WglExtensionsDispatch* mDispatch;
 };
 
 // TODO(digit): Remove this static C++ constructor. Doing so breaks stuff!!
@@ -881,6 +922,10 @@ class WinEngine : public EglOS::Engine {
 public:
     WinEngine();
 
+    ~WinEngine() {
+        delete mDispatch;
+    }
+
     virtual EglOS::Display* getDefaultDisplay() {
         WinDisplay* dpy = new WinDisplay();
 
@@ -888,7 +933,7 @@ public:
         HDC  hdc  =  GetDC(hwnd);
         dpy->setInfo(WinDisplay::DEFAULT_DISPLAY, DisplayInfo(hdc, hwnd));
 
-        return new WglDisplay(dpy, &mDispatch);
+        return new WglDisplay(dpy, mDispatch);
     }
 
     virtual GlLibrary* getGlLibrary() {
@@ -900,17 +945,21 @@ public:
     }
 
 private:
-    WglBaseDispatch mDispatch;
+    const WglExtensionsDispatch* mDispatch;
+    WglBaseDispatch mBaseDispatch;
     WglLibrary mGlLib;
 };
 
-WinEngine::WinEngine() : mDispatch(), mGlLib(&mDispatch) {
+WinEngine::WinEngine() :
+        mDispatch(NULL),
+        mBaseDispatch(),
+        mGlLib(&mBaseDispatch) {
     if (!s_tlsIndex) {
         s_tlsIndex = TlsAlloc();
     }
     // TODO(digit): Support software renderers like Mesa.
-    mDispatch.init(sLibGl, true);
-    initPtrToWglFunctions(&mDispatch);
+    mBaseDispatch.init(sLibGl, true);
+    mDispatch = initExtensionsDispatch(&mBaseDispatch);
 }
 
 emugl::LazyInstance<WinEngine> sHostEngine = LAZY_INSTANCE_INIT;
