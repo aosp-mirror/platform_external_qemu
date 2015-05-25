@@ -204,9 +204,13 @@ if [ -d "$PREBUILTS_DIR/mesa" ]; then
             MESA_LIBRARY=$(ls "$PREBUILTS_DIR/mesa/$MESA_HOST-$MESA_ARCH/lib/$LIBNAME" 2>/dev/null || true)
             if [ "$MESA_LIBRARY" ]; then
                 MESA_DSTDIR="$OUT_DIR/$MESA_LIBDIR/gles_mesa"
+                MESA_DSTLIB="$LIBNAME"
+                if [ "$LIBNAME" = "opengl32.dll" ]; then
+                    MESA_DSTLIB="mesa_opengl32.dll"
+                fi
                 echo "Copying $MESA_HOST-$MESA_ARCH $LIBNAME library to $MESA_DSTDIR"
                 run mkdir -p "$MESA_DSTDIR" &&
-                run cp -f "$MESA_LIBRARY" "$MESA_DSTDIR/$LIBNAME"
+                run cp -f "$MESA_LIBRARY" "$MESA_DSTDIR/$MESA_DSTLIB"
                 if [ "$MESA_HOST" = "linux" -a "$LIBNAME" = "libGL.so" ]; then
                     # Special handling for Linux, this is needed because SDL
                     # will actually try to load libGL.so.1 before GPU emulation
