@@ -25,7 +25,7 @@ ifeq ($(HOST_OS),linux)
 endif
 
 ifeq ($(HOST_OS),windows)
-    host_common_LDLIBS += -lopengl32 -lgdi32
+    host_common_LDLIBS += -lgdi32
     host_common_LDFLAGS += -Wl,--add-stdcall-alias
 endif
 
