@@ -129,7 +129,8 @@ android_initOpenglesEmulation(void)
 
     rendererLib = adynamicLibrary_open(RENDERER_LIB_NAME, &error);
     if (rendererLib == NULL) {
-        derror("Could not load OpenGLES emulation library: %s", error);
+        derror("Could not load OpenGLES emulation library [%s]: %s",
+               RENDERER_LIB_NAME, error);
         return -1;
     }
 
