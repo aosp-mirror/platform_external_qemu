@@ -958,9 +958,15 @@ WinEngine::WinEngine() :
     if (!s_tlsIndex) {
         s_tlsIndex = TlsAlloc();
     }
-    // TODO(digit): Support software renderers like Mesa.
+    const char* kLibName = "opengl32.dll";
+    bool isSystemLib = true;
+    const char* env = ::getenv("ANDROID_GL_LIB");
+    if (env && !strcmp(env, "mesa")) {
+        kLibName = "mesa_opengl32.dll";
+        isSystemLib = false;
+    }
     char error[256];
-    static const char kLibName[] = "opengl32.dll";
+    ERR("XXXXX TRYING TO LOAD %s\n", kLibName);
     mLib = SharedLibrary::open(kLibName, error, sizeof(error));
     if (!mLib) {
         ERR("ERROR: %s: Could not open %s: %s\n", __FUNCTION__,
@@ -968,7 +974,8 @@ WinEngine::WinEngine() :
         exit(1);
     }
 
-    mBaseDispatch.init(mLib, true);
+    ERR("XXXXX LIBRARY LOADED AT %p\n", mLib);
+    mBaseDispatch.init(mLib, isSystemLib);
     mDispatch = initExtensionsDispatch(&mBaseDispatch);
 }
 

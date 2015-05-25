@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #define D(...)  printf(__VA_ARGS__)
@@ -229,5 +229,9 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv2, &lib)) {
         system->envSet("ANDROID_GLESv2_LIB", lib.c_str());
+    }
+
+    if (!strcmp(config->backend, "mesa")) {
+        system->envSet("ANDROID_GL_LIB", "mesa");
     }
 }
