@@ -39,6 +39,13 @@
 #define EXIT_IF_FALSE(a) \
         do { if (!(a)) return; } while (0)
 
+#define DEBUG 0
+#if DEBUG
+#define D(...)  fprintf(stderr, __VA_ARGS__)
+#else
+#define D(...)  ((void)0)
+#endif
+
 namespace {
 
 using emugl::SharedLibrary;
@@ -621,35 +628,38 @@ void pixelFormatToConfig(WinDisplay* display,
     HDC dpy = getDummyDC(display, WinDisplay::DEFAULT_DISPLAY);
 
     if (frmt->iPixelType != PFD_TYPE_RGBA) {
+        D("%s: Not an RGBA type!\n", __FUNCTION__);
         return; // other formats are not supported yet
     }
-    if (!((frmt->dwFlags & PFD_SUPPORT_OPENGL) &&
-            (frmt->dwFlags & PFD_DOUBLEBUFFER))) {
-        return; //pixel format does not supports opengl or double buffer
+    if (!(frmt->dwFlags & PFD_SUPPORT_OPENGL)) {
+        D("%s: No OpenGL support\n", __FUNCTION__);
+        return;
+    }
+    // NOTE: Software renderers don't always support double-buffering.
+    if (dispatch->mIsSystemLib && !(frmt->dwFlags & PFD_DOUBLEBUFFER)) {
+        D("%s: No double-buffer support\n", __FUNCTION__);
+        return;
     }
     if ((frmt->dwFlags & (PFD_GENERIC_FORMAT | PFD_NEED_PALETTE)) != 0) {
         //discard generic pixel formats as well as pallete pixel formats
+        D("%s: Generic format or needs palette\n", __FUNCTION__);
         return;
     }
-
-    int attribs [] = {
-        WGL_DRAW_TO_WINDOW_ARB,
-        WGL_DRAW_TO_PBUFFER_ARB,
-        WGL_TRANSPARENT_ARB,
-        WGL_TRANSPARENT_RED_VALUE_ARB,
-        WGL_TRANSPARENT_GREEN_VALUE_ARB,
-        WGL_TRANSPARENT_BLUE_VALUE_ARB
-    };
 
     if (!dispatch->wglGetPixelFormatAttribivARB) {
+        D("%s: Missing wglGetPixelFormatAttribivARB\n", __FUNCTION__);
         return;
     }
 
-    GLint window, pbuffer;
+    GLint window = 0, pbuffer = 0;
+    if (dispatch->mIsSystemLib) {
+        int windowAttrib = WGL_DRAW_TO_WINDOW_ARB;
+        EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
+                dpy, index, 0, 1, &windowAttrib, &window));
+    }
+    int pbufferAttrib = WGL_DRAW_TO_PBUFFER_ARB;
     EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
-            dpy, index, 0, 1, &attribs[0], &window));
-    EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
-            dpy, index, 0, 1, &attribs[1], &pbuffer));
+            dpy, index, 0, 1, &pbufferAttrib, &pbuffer));
 
     info.surface_type = 0;
     if (window) {
@@ -659,6 +669,7 @@ void pixelFormatToConfig(WinDisplay* display,
         info.surface_type |= EGL_PBUFFER_BIT;
     }
     if (!info.surface_type) {
+        D("%s: Missing surface type\n", __FUNCTION__);
         return;
     }
 
@@ -675,16 +686,21 @@ void pixelFormatToConfig(WinDisplay* display,
     info.frame_buffer_level = 0;
 
     GLint transparent;
+    int transparentAttrib = WGL_TRANSPARENT_ARB;
     EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
-            dpy, index, 0, 1, &attribs[3], &transparent));
+            dpy, index, 0, 1, &transparentAttrib, &transparent));
     if (transparent) {
         info.transparent_type = EGL_TRANSPARENT_RGB;
+        int transparentRedAttrib = WGL_TRANSPARENT_RED_VALUE_ARB;
         EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
-                dpy, index, 0, 1, &attribs[4], &info.trans_red_val));
+                dpy, index, 0, 1, &transparentRedAttrib, &info.trans_red_val));
+        int transparentGreenAttrib = WGL_TRANSPARENT_GREEN_VALUE_ARB;
         EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
-                dpy, index, 0, 1, &attribs[5], &info.trans_green_val));
+                dpy, index, 0, 1, &transparentGreenAttrib,
+                &info.trans_green_val));
+        int transparentBlueAttrib = WGL_TRANSPARENT_RED_VALUE_ARB;
         EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
-                dpy,index, 0, 1, &attribs[6], &info.trans_blue_val));
+                dpy,index, 0, 1, &transparentBlueAttrib, &info.trans_blue_val));
     } else {
         info.transparent_type = EGL_NONE;
     }
@@ -966,7 +982,7 @@ WinEngine::WinEngine() :
         isSystemLib = false;
     }
     char error[256];
-    ERR("XXXXX TRYING TO LOAD %s\n", kLibName);
+    D("%s: Trying to load %s\n", __FUNCTION__, kLibName);
     mLib = SharedLibrary::open(kLibName, error, sizeof(error));
     if (!mLib) {
         ERR("ERROR: %s: Could not open %s: %s\n", __FUNCTION__,
@@ -974,9 +990,10 @@ WinEngine::WinEngine() :
         exit(1);
     }
 
-    ERR("XXXXX LIBRARY LOADED AT %p\n", mLib);
+    D("%s: Library loaded at %p\n", __FUNCTION__, mLib);
     mBaseDispatch.init(mLib, isSystemLib);
     mDispatch = initExtensionsDispatch(&mBaseDispatch);
+    D("%s: Dispatch initialized\n", __FUNCTION__);
 }
 
 emugl::LazyInstance<WinEngine> sHostEngine = LAZY_INSTANCE_INIT;
