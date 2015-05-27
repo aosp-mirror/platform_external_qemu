@@ -101,20 +101,7 @@ case $OS in
 esac
 
 HOST_ARCH=$BUILD_ARCH
-
-# define HOST_TAG
-# special case: windows-x86 => windows
-compute_host_tag () {
-    case $HOST_OS-$HOST_ARCH in
-        windows-x86)
-            HOST_TAG=windows
-            ;;
-        *)
-            HOST_TAG=$HOST_OS-$HOST_ARCH
-            ;;
-    esac
-}
-compute_host_tag
+HOST_TAG=$HOST_OS-$HOST_ARCH
 
 #### Toolchain support
 ####
@@ -151,7 +138,7 @@ force_32bit_binaries () {
         esac
         HOST_ARCH=x86
         BUILD_ARCH=x86
-        compute_host_tag
+        HOST_TAG=$HOST_OS-$HOST_ARCH
         log "Check32Bits: Forcing generation of 32-bit binaries."
     fi
 }
@@ -190,6 +177,8 @@ enable_linux_mingw () {
     LD=$MINGW_CC
     WINDRES=$MINGW_PREFIX-windres
     AR=$MINGW_PREFIX-ar
+    HOST_OS=windows
+    HOST_TAG=$HOST_OS-$HOST_ARCH
 }
 
 # this function will setup the compiler and linker and check that they work as advertized
@@ -549,19 +538,6 @@ fi
 # generate 64-bit ones by using -m64 on the command-line.
 force_32bit_binaries
 
-case $OS in
-    linux-*)
-        TARGET_DLL_SUFFIX=.so
-        ;;
-    darwin-*)
-        TARGET_DLL_SUFFIX=.dylib
-        ;;
-    windows*)
-        TARGET_DLL_SUFFIX=.dll
-esac
-
-TARGET_OS=$OS
-
 setup_toolchain
 
 BUILD_AR=$AR
@@ -574,8 +550,6 @@ BUILD_LDFLAGS=$LDFLAGS
 
 if [ "$OPTION_MINGW" = "yes" ] ; then
     enable_linux_mingw
-    TARGET_OS=windows
-    TARGET_DLL_SUFFIX=.dll
 fi
 
 # Try to find the GLES emulation headers and libraries automatically
@@ -616,12 +590,12 @@ PROBE_ESD=no
 PROBE_PULSEAUDIO=no
 PROBE_WINAUDIO=no
 
-case "$TARGET_OS" in
-    darwin*) PROBE_COREAUDIO=yes;
+case "$HOST_OS" in
+    darwin) PROBE_COREAUDIO=yes;
     ;;
-    linux-*) PROBE_ALSA=yes; PROBE_OSS=yes; PROBE_ESD=yes; PROBE_PULSEAUDIO=yes;
+    linux) PROBE_ALSA=yes; PROBE_OSS=yes; PROBE_ESD=yes; PROBE_PULSEAUDIO=yes;
     ;;
-    freebsd-*) PROBE_OSS=yes;
+    freebsd) PROBE_OSS=yes;
     ;;
     windows) PROBE_WINAUDIO=yes
     ;;
@@ -651,7 +625,7 @@ feature_check_header HAVE_FNMATCH_H       "<fnmatch.h>"
 
 # check for Mingw version.
 MINGW_VERSION=
-if [ "$TARGET_OS" = "windows" ]; then
+if [ "$HOST_OS" = "windows" ]; then
 log "Mingw      : Probing for GCC version."
 GCC_VERSION=$($CC -v 2>&1 | awk '$1 == "gcc" && $2 == "version" { print $3; }')
 GCC_MAJOR=$(echo "$GCC_VERSION" | cut -f1 -d.)
@@ -677,7 +651,7 @@ case $OS in
         ;;
 esac
 
-case $TARGET_OS in
+case $HOST_OS in
     windows)
         HOST_EXEEXT=.exe
         HOST_DLLEXT=.dll
@@ -726,7 +700,7 @@ echo "HOST_AR     := $AR" >> $config_mk
 echo "HOST_WINDRES:= $WINDRES" >> $config_mk
 echo "OBJS_DIR    := $OUT_DIR" >> $config_mk
 echo "" >> $config_mk
-echo "HOST_PREBUILT_TAG := $TARGET_OS" >> $config_mk
+echo "HOST_PREBUILT_TAG := $HOST_TAG" >> $config_mk
 echo "HOST_EXEEXT       := $HOST_EXEEXT" >> $config_mk
 echo "HOST_DLLEXT       := $HOST_DLLEXT" >> $config_mk
 echo "PREBUILT          := $ANDROID_PREBUILT" >> $config_mk
@@ -796,7 +770,7 @@ echo "#define CONFIG_SLIRP    1" >> $config_h
 echo "#define CONFIG_SKINS    1" >> $config_h
 echo "#define CONFIG_TRACE    1" >> $config_h
 
-case "$TARGET_OS" in
+case "$HOST_OS" in
     windows)
         echo "#define CONFIG_WIN32  1" >> $config_h
         ;;
@@ -805,48 +779,48 @@ case "$TARGET_OS" in
         ;;
 esac
 
-case "$TARGET_OS" in
-    linux-*)
+case "$HOST_OS" in
+    linux)
         echo "#define CONFIG_KVM_GS_RESTORE 1" >> $config_h
         ;;
 esac
 
 # only Linux has fdatasync()
-case "$TARGET_OS" in
-    linux-*)
+case "$HOST_OS" in
+    linux)
         echo "#define CONFIG_FDATASYNC    1" >> $config_h
         ;;
 esac
 
-case "$TARGET_OS" in
-    linux-*|darwin-*)
+case "$HOST_OS" in
+    linux|darwin)
         echo "#define CONFIG_MADVISE  1" >> $config_h
         ;;
 esac
 
 # the -nand-limits options can only work on non-windows systems
-if [ "$TARGET_OS" != "windows" ] ; then
+if [ "$HOST_OS" != "windows" ] ; then
     echo "#define CONFIG_NAND_LIMITS  1" >> $config_h
 fi
 echo "#define QEMU_VERSION    \"0.10.50\"" >> $config_h
 echo "#define QEMU_PKGVERSION \"Android\"" >> $config_h
 BSD=0
-case "$TARGET_OS" in
-    linux-*) CONFIG_OS=LINUX
+case "$HOST_OS" in
+    linux) CONFIG_OS=LINUX
     ;;
-    darwin-*) CONFIG_OS=DARWIN
+    darwin) CONFIG_OS=DARWIN
               BSD=1
     ;;
-    freebsd-*) CONFIG_OS=FREEBSD
+    freebsd) CONFIG_OS=FREEBSD
               BSD=1
     ;;
-    windows*) CONFIG_OS=WIN32
+    windows) CONFIG_OS=WIN32
     ;;
-    *) CONFIG_OS=$OS
+    *) CONFIG_OS=$HOST_OS
 esac
 
-case $TARGET_OS in
-    linux-*|darwin-*)
+case $HOST_OS in
+    linux|darwin)
         echo "#define CONFIG_IOVEC 1" >> $config_h
         ;;
 esac
@@ -858,8 +832,8 @@ if [ $BSD = 1 ] ; then
     echo "#define MAP_ANONYMOUS    MAP_ANON" >> $config_h
 fi
 
-case "$TARGET_OS" in
-    linux-*)
+case "$HOST_OS" in
+    linux)
         echo "#define CONFIG_SIGNALFD       1" >> $config_h
         ;;
 esac
