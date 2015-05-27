@@ -20,21 +20,18 @@ PROGDIR=`dirname $0`
 VERBOSE=yes
 VERBOSE2=no
 
-panic ()
-{
+panic () {
     echo "ERROR: $@"
     exit 1
 }
 
-log ()
-{
+log () {
     if [ "$VERBOSE" = "yes" ] ; then
         echo "$1"
     fi
 }
 
-log2 ()
-{
+log2 () {
     if [ "$VERBOSE2" = "yes" ] ; then
         echo "$1"
     fi
@@ -108,8 +105,7 @@ HOST_ARCH=$CPU
 
 # define HOST_TAG
 # special case: windows-x86 => windows
-compute_host_tag ()
-{
+compute_host_tag () {
     case $HOST_OS-$HOST_ARCH in
         windows-x86)
             HOST_TAG=windows
@@ -133,14 +129,12 @@ TMPE=/tmp/android-$$-test$EXE
 TMPL=/tmp/android-$$-test.log
 
 # cleanup temporary files
-clean_temp ()
-{
+clean_temp () {
     rm -f $TMPC $TMPO $TMPL $TMPE
 }
 
 # cleanup temp files then exit with an error
-clean_exit ()
-{
+clean_exit () {
     clean_temp
     exit 1
 }
@@ -148,8 +142,7 @@ clean_exit ()
 # this function should be called to enforce the build of 32-bit binaries on 64-bit systems
 # that support it.
 FORCE_32BIT=no
-force_32bit_binaries ()
-{
+force_32bit_binaries () {
     if [ $CPU = x86_64 ] ; then
         FORCE_32BIT=yes
         case $OS in
@@ -168,8 +161,7 @@ force_32bit_binaries ()
 # windows executables on a Linux machine, which is considerably
 # faster than using Cygwin / MSys to do the same job.
 #
-enable_linux_mingw ()
-{
+enable_linux_mingw () {
     # Are we on Linux ?
     log "Mingw      : Checking for Linux host"
     if [ "$HOST_OS" != "linux" ] ; then
@@ -205,8 +197,7 @@ enable_linux_mingw ()
 # note that you should call 'force_32bit_binaries' before this one if you want it to work
 # as advertized.
 #
-setup_toolchain ()
-{
+setup_toolchain () {
     if [ -z "$CC" ] ; then
         CC=gcc
     fi
@@ -260,23 +251,20 @@ EOF
 # try to compile the current source file in $TMPC into an object
 # stores the error log into $TMPL
 #
-compile ()
-{
+compile () {
     log2 "Object     : $CC -o $TMPO -c $CFLAGS $TMPC"
     $CC -o $TMPO -c $CFLAGS $TMPC 2> $TMPL
 }
 
 # try to link the recently built file into an executable. error log in $TMPL
 #
-link()
-{
+link() {
     log2 "Link      : $LD -o $TMPE $TMPO $LDFLAGS"
     $LD -o $TMPE $TMPO $LDFLAGS 2> $TMPL
 }
 
 # perform a simple compile / link / run of the source file in $TMPC
-compile_exec_run()
-{
+compile_exec_run() {
     log2 "RunExec    : $CC -o $TMPE $CFLAGS $TMPC"
     compile
     if [ $? != 0 ] ; then
@@ -306,8 +294,7 @@ compile_exec_run()
 # you can define EXTRA_CFLAGS for extra C compiler flags
 # for convenience, this variable will be unset by the function.
 #
-feature_check_header ()
-{
+feature_check_header () {
     local result_ch OLD_CFLAGS
     log2 "HeaderCheck: $2"
     echo "#include $2" > $TMPC
@@ -333,8 +320,7 @@ EOF
 # in the $1 variable.
 # you can define EXTRA_CFLAGS and EXTRA_LDFLAGS
 #
-feature_run_exec ()
-{
+feature_run_exec () {
     local run_exec_result
     local OLD_CFLAGS="$CFLAGS"
     local OLD_LDFLAGS="$LDFLAGS"
@@ -356,8 +342,7 @@ feature_run_exec ()
 #       ...
 #    fi
 #
-pattern_match ()
-{
+pattern_match () {
     echo "$2" | grep -q -E -e "$1"
 }
 
@@ -373,8 +358,7 @@ pattern_match ()
 # Result: set $1 to the full path of the corresponding command
 #         or to the empty/undefined string if not available
 #
-find_program ()
-{
+find_program () {
     local PROG
     PROG=`which $2 2>/dev/null || true`
     if [ -n "$PROG" ] ; then
