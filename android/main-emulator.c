@@ -407,7 +407,11 @@ getTargetEmulatorPath(const char* progName,
     result = probeTargetEmulatorPath(progDir,
                                      "ranchu",
                                      avdArch,
+#ifdef _WIN32
+                                     true, // 32 bit ranchu does not work on windows
+#else
                                      search_for_64bit_emulator,
+#endif
                                      try_current_path,
                                      is_64bit);
     if (result) {
