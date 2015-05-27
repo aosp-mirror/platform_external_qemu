@@ -143,44 +143,6 @@ force_32bit_binaries () {
     fi
 }
 
-# Enable linux-mingw32 compilation. This allows you to build
-# windows executables on a Linux machine, which is considerably
-# faster than using Cygwin / MSys to do the same job.
-#
-enable_linux_mingw () {
-    # Are we on Linux ?
-    log "Mingw      : Checking for Linux host"
-    if [ "$HOST_OS" != "linux" ] ; then
-        echo "Sorry, but mingw compilation is only supported on Linux !"
-        exit 1
-    fi
-    # Do we have our prebuilt mingw64 toolchain?
-    log "Mingw      : Looking for prebuilt mingw64 toolchain."
-    MINGW_DIR=$PROGDIR/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8
-    MINGW_CC=
-    if [ -d "$MINGW_DIR" ]; then
-        MINGW_PREFIX=$MINGW_DIR/bin/x86_64-w64-mingw32
-        find_program MINGW_CC "$MINGW_PREFIX-gcc"
-    fi
-    if [ -z "$MINGW_CC" ]; then
-        log "Mingw      : Looking for mingw64 toolchain."
-        MINGW_PREFIX=x86_64-w64-mingw32
-        find_program MINGW_CC $MINGW_PREFIX-gcc
-    fi
-    if [ -z "$MINGW_CC" ]; then
-        echo "ERROR: It looks like no Mingw64 toolchain is available!"
-        echo "Please install x86_64-w64-mingw32 package !"
-        exit 1
-    fi
-    log2 "Mingw      : Found $MINGW_CC"
-    CC=$MINGW_CC
-    LD=$MINGW_CC
-    WINDRES=$MINGW_PREFIX-windres
-    AR=$MINGW_PREFIX-ar
-    HOST_OS=windows
-    HOST_TAG=$HOST_OS-$HOST_ARCH
-}
-
 # this function will setup the compiler and linker and check that they work as advertized
 # note that you should call 'force_32bit_binaries' before this one if you want it to work
 # as advertized.
@@ -549,7 +511,40 @@ BUILD_CXXFLAGS=$CXXFLAGS
 BUILD_LDFLAGS=$LDFLAGS
 
 if [ "$OPTION_MINGW" = "yes" ] ; then
-    enable_linux_mingw
+    # Are we on Linux ?
+    log "Mingw      : Checking for Linux host"
+    if [ "$HOST_OS" != "linux" ] ; then
+        echo "Sorry, but mingw compilation is only supported on Linux !"
+        exit 1
+    fi
+    # Do we have our prebuilt mingw64 toolchain?
+    log "Mingw      : Looking for prebuilt mingw64 toolchain."
+    MINGW_DIR=$PROGDIR/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8
+    MINGW_CC=
+    if [ -d "$MINGW_DIR" ]; then
+        MINGW_PREFIX=$MINGW_DIR/bin/x86_64-w64-mingw32
+        find_program MINGW_CC "$MINGW_PREFIX-gcc"
+    fi
+    if [ -z "$MINGW_CC" ]; then
+        log "Mingw      : Looking for mingw64 toolchain."
+        MINGW_PREFIX=x86_64-w64-mingw32
+        find_program MINGW_CC $MINGW_PREFIX-gcc
+    fi
+    if [ -z "$MINGW_CC" ]; then
+        echo "ERROR: It looks like no Mingw64 toolchain is available!"
+        echo "Please install x86_64-w64-mingw32 package !"
+        exit 1
+    fi
+    log2 "Mingw      : Found $MINGW_CC"
+    CC=$MINGW_CC
+    if [ "$CCACHE" ]; then
+        CC="$CCACHE $CC"
+    fi
+    LD=$MINGW_CC
+    WINDRES=$MINGW_PREFIX-windres
+    AR=$MINGW_PREFIX-ar
+    HOST_OS=windows
+    HOST_TAG=$HOST_OS-$HOST_ARCH
 fi
 
 # Try to find the GLES emulation headers and libraries automatically
