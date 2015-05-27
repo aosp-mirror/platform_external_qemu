@@ -108,7 +108,7 @@ struct RenderWindowMessage {
 
             case CMD_FINALIZE:
                 D("CMD_FINALIZE\n");
-                FrameBuffer::finalize();
+                FrameBuffer::getFB()->finalize();
                 result = true;
                 break;
 
@@ -128,17 +128,18 @@ struct RenderWindowMessage {
                     msg.subwindow.w,
                     msg.subwindow.h,
                     msg.subwindow.rotation);
-                result = FrameBuffer::setupSubWindow(msg.subwindow.parent,
-                                                        msg.subwindow.x,
-                                                        msg.subwindow.y,
-                                                        msg.subwindow.w,
-                                                        msg.subwindow.h,
-                                                        msg.subwindow.rotation);
+                result = FrameBuffer::getFB()->setupSubWindow(
+                        msg.subwindow.parent,
+                        msg.subwindow.x,
+                        msg.subwindow.y,
+                        msg.subwindow.w,
+                        msg.subwindow.h,
+                        msg.subwindow.rotation);
                 break;
 
             case CMD_REMOVE_SUBWINDOW:
                 D("CMD_REMOVE_SUBWINDOW\n");
-                result = FrameBuffer::removeSubWindow();
+                result = FrameBuffer::getFB()->removeSubWindow();
                 break;
 
             case CMD_SET_ROTATION:

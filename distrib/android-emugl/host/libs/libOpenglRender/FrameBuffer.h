@@ -82,16 +82,16 @@ public:
     // Return true on success, false otherwise.
     //
     // NOTE: This can return NULL for software-only EGL engines like OSMesa.
-    static bool setupSubWindow(FBNativeWindowType p_window,
-                                int x, int y,
-                                int width, int height, float zRot);
+    bool setupSubWindow(FBNativeWindowType p_window,
+                        int x, int y,
+                        int width, int height, float zRot);
 
     // Remove the sub-window created by setupSubWindow(), if any.
     // Return true on success, false otherwise.
-    static bool removeSubWindow();
+    bool removeSubWindow();
 
-    // Finalize the global instance.
-    static void finalize();
+    // Finalize the instance.
+    void finalize();
 
     // Return a pointer to the global instance. initialize() must be called
     // previously, or this will return NULL.
