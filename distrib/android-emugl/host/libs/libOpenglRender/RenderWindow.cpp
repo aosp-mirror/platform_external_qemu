@@ -68,6 +68,7 @@ struct RenderWindowMessage {
         struct {
             int width;
             int height;
+            bool useSubWindow;
         } init;
 
         // CMD_SET_POST_CALLBACK
@@ -103,7 +104,8 @@ struct RenderWindowMessage {
             case CMD_INITIALIZE:
                 D("CMD_INITIALIZE w=%d h=%d\n", msg.init.width, msg.init.height);
                 result = FrameBuffer::initialize(msg.init.width,
-                                                 msg.init.height);
+                                                 msg.init.height,
+                                                 msg.init.useSubWindow);
                 break;
 
             case CMD_FINALIZE:
@@ -268,7 +270,10 @@ private:
 
 }  // namespace
 
-RenderWindow::RenderWindow(int width, int height, bool use_thread) :
+RenderWindow::RenderWindow(int width,
+                           int height,
+                           bool use_thread,
+                           bool use_sub_window) :
         mValid(false),
         mHasSubWindow(false),
         mThread(NULL),
@@ -283,6 +288,7 @@ RenderWindow::RenderWindow(int width, int height, bool use_thread) :
     msg.cmd = CMD_INITIALIZE;
     msg.init.width = width;
     msg.init.height = height;
+    msg.init.useSubWindow = use_sub_window;
     mValid = processMessage(msg);
 }
 

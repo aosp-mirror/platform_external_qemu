@@ -68,8 +68,12 @@ class FrameBuffer {
 public:
     // Initialize the global instance.
     // |width| and |height| are the dimensions of the emulator GPU display
-    // in pixels. Returns true on success, false otherwise.
-    static bool initialize(int width, int height);
+    // in pixels. |useSubWindow| is true to indicate that the caller
+    // will use setupSubWindow() to let EmuGL display the GPU content in its
+    // own sub-windows. If false, this means the caller will use
+    // setPostCallback() instead to retrieve the content.
+    // Returns true on success, false otherwise.
+    static bool initialize(int width, int height, bool useSubWindow);
 
     // Setup a new sub-window to display the content of the emulated GPU
     // on-top of an existing UI window. |p_window| is the platform-specific
@@ -271,7 +275,7 @@ public:
     bool unbind_locked();
 
 private:
-    FrameBuffer(int p_width, int p_height);
+    FrameBuffer(int p_width, int p_height, bool useSubWindow);
     ~FrameBuffer();
     HandleType genHandle();
 
@@ -284,6 +288,7 @@ private:
     int m_y;
     int m_width;
     int m_height;
+    bool m_useSubWindow;
     emugl::Mutex m_lock;
     FbConfigList* m_configs;
     FBNativeWindowType m_nativeWindow;

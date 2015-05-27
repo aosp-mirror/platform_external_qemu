@@ -160,7 +160,7 @@ void FrameBuffer::finalize(){
     s_egl.eglDestroySurface(m_eglDisplay, m_pbufSurface);
 }
 
-bool FrameBuffer::initialize(int width, int height)
+bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
 {
     if (s_theFrameBuffer != NULL) {
         return true;
@@ -169,7 +169,7 @@ bool FrameBuffer::initialize(int width, int height)
     //
     // allocate space for the FrameBuffer object
     //
-    FrameBuffer *fb = new FrameBuffer(width, height);
+    FrameBuffer *fb = new FrameBuffer(width, height, useSubWindow);
     if (!fb) {
         ERR("Failed to create fb\n");
         return false;
@@ -185,7 +185,9 @@ bool FrameBuffer::initialize(int width, int height)
         return false;
     }
 
-    if (!s_egl.eglInitialize(fb->m_eglDisplay, &fb->m_caps.eglMajor, &fb->m_caps.eglMinor)) {
+    if (!s_egl.eglInitialize(fb->m_eglDisplay,
+                             &fb->m_caps.eglMajor,
+                             &fb->m_caps.eglMinor)) {
         ERR("Failed to eglInitialize\n");
         delete fb;
         return false;
@@ -210,11 +212,12 @@ bool FrameBuffer::initialize(int width, int height)
     //
     // Create EGL context for framebuffer post rendering.
     //
-    static const GLint configAttribs[] = {
+    GLint surfaceType = (useSubWindow ? EGL_WINDOW_BIT : 0) | EGL_PBUFFER_BIT;
+    const GLint configAttribs[] = {
         EGL_RED_SIZE, 1,
         EGL_GREEN_SIZE, 1,
         EGL_BLUE_SIZE, 1,
-        EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+        EGL_SURFACE_TYPE, surfaceType,
         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
         EGL_NONE
     };
@@ -238,7 +241,7 @@ bool FrameBuffer::initialize(int width, int height)
                                               EGL_NO_CONTEXT,
                                               glContextAttribs);
     if (fb->m_eglContext == EGL_NO_CONTEXT) {
-        printf("Failed to create Context 0x%x\n", s_egl.eglGetError());
+        ERR("Failed to create context 0x%x\n", s_egl.eglGetError());
         free(gles1Extensions);
         delete fb;
         return false;
@@ -257,7 +260,7 @@ bool FrameBuffer::initialize(int width, int height)
                                                fb->m_eglContext,
                                                glContextAttribs);
     if (fb->m_pbufContext == EGL_NO_CONTEXT) {
-        printf("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
+        ERR("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
         free(gles1Extensions);
         delete fb;
         return false;
@@ -275,10 +278,10 @@ bool FrameBuffer::initialize(int width, int height)
     };
 
     fb->m_pbufSurface = s_egl.eglCreatePbufferSurface(fb->m_eglDisplay,
-                                                  fb->m_eglConfig,
-                                                  pbufAttribs);
+                                                      fb->m_eglConfig,
+                                                      pbufAttribs);
     if (fb->m_pbufSurface == EGL_NO_SURFACE) {
-        printf("Failed to create pbuf surface for FB 0x%x\n", s_egl.eglGetError());
+        ERR("Failed to create pbuf surface for FB 0x%x\n", s_egl.eglGetError());
         free(gles1Extensions);
         delete fb;
         return false;
@@ -409,9 +412,10 @@ bool FrameBuffer::initialize(int width, int height)
     return true;
 }
 
-FrameBuffer::FrameBuffer(int p_width, int p_height) :
+FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow) :
     m_width(p_width),
     m_height(p_height),
+    m_useSubWindow(useSubWindow),
     m_configs(NULL),
     m_eglDisplay(EGL_NO_DISPLAY),
     m_colorBufferHelper(new ColorBufferHelper(this)),
@@ -469,6 +473,12 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  float zRot) {
     bool success = false;
 
+    if (!m_useSubWindow) {
+        ERR("%s: Cannot create native sub-window in this configuration\n",
+            __FUNCTION__);
+        return false;
+    }
+
     m_lock.lock();
     if (!m_subWin) {
         // create native subwindow for FB display output
@@ -505,6 +515,11 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
 }
 
 bool FrameBuffer::removeSubWindow() {
+    if (!m_useSubWindow) {
+        ERR("%s: Cannot remove native sub-window in this configuration\n",
+            __FUNCTION__);
+        return false;
+    }
     bool removed = false;
     m_lock.lock();
     if (m_subWin) {
