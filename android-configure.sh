@@ -263,27 +263,6 @@ link() {
     $LD -o $TMPE $TMPO $LDFLAGS 2> $TMPL
 }
 
-# perform a simple compile / link / run of the source file in $TMPC
-compile_exec_run() {
-    log2 "RunExec    : $CC -o $TMPE $CFLAGS $TMPC"
-    compile
-    if [ $? != 0 ] ; then
-        echo "Failure to compile test program"
-        cat $TMPC
-        cat $TMPL
-        clean_exit
-    fi
-    link
-    if [ $? != 0 ] ; then
-        echo "Failure to link test program"
-        cat $TMPC
-        echo "------"
-        cat $TMPL
-        clean_exit
-    fi
-    $TMPE
-}
-
 ## Feature test support
 ##
 
@@ -313,25 +292,6 @@ EOF
     EXTRA_CFLAGS=
     CFLAGS=$OLD_CFLAGS
     eval $1=$result_ch
-    clean_temp
-}
-
-# run the test program that is in $TMPC and set its exit status
-# in the $1 variable.
-# you can define EXTRA_CFLAGS and EXTRA_LDFLAGS
-#
-feature_run_exec () {
-    local run_exec_result
-    local OLD_CFLAGS="$CFLAGS"
-    local OLD_LDFLAGS="$LDFLAGS"
-    CFLAGS="$CFLAGS $EXTRA_CFLAGS"
-    LDFLAGS="$LDFLAGS $EXTRA_LDFLAGS"
-    compile_exec_run
-    run_exec_result=$?
-    CFLAGS="$OLD_CFLAGS"
-    LDFLAGS="$OLD_LDFLAGS"
-    eval $1=$run_exec_result
-    log "Host       : $1=$run_exec_result"
     clean_temp
 }
 
@@ -684,20 +644,6 @@ mkdir -p $OUT_DIR
 # because the previous version could be read-only
 clean_temp
 
-# check host endianess
-#
-HOST_BIGENDIAN=no
-if [ "$TARGET_OS" = "$OS" ] ; then
-cat > $TMPC << EOF
-#include <inttypes.h>
-int main(int argc, char ** argv){
-        volatile uint32_t i=0x01234567;
-        return (*((uint8_t*)(&i))) == 0x01;
-}
-EOF
-feature_run_exec HOST_BIGENDIAN
-fi
-
 # check whether we have <byteswap.h>
 #
 feature_check_header HAVE_BYTESWAP_H      "<byteswap.h>"
@@ -895,9 +841,6 @@ case "$CPU" in
     *) CONFIG_CPU=$CPU
     ;;
 esac
-if [ "$HOST_BIGENDIAN" = "1" ] ; then
-  echo "#define HOST_WORDS_BIGENDIAN 1" >> $config_h
-fi
 BSD=0
 case "$TARGET_OS" in
     linux-*) CONFIG_OS=LINUX
