@@ -40,17 +40,17 @@ log2 () {
 ## Normalize OS and CPU
 ##
 
-CPU=`uname -m`
-case "$CPU" in
-    i?86) CPU=x86
+BUILD_ARCH=$(uname -m)
+case "$BUILD_ARCH" in
+    i?86) BUILD_ARCH=x86
     ;;
-    amd64) CPU=x86_64
+    x86_64|amd64) BUILD_ARCH=x86_64
     ;;
-    powerpc) panic "PowerPC builds are not supported!"
+    *) panic "$BUILD_ARCH builds are not supported!"
     ;;
 esac
 
-log2 "CPU=$CPU"
+log2 "BUILD_ARCH=$BUILD_ARCH"
 
 # at this point, the supported values for CPU are:
 #   x86
@@ -63,14 +63,14 @@ EXE=""
 OS=`uname -s`
 case "$OS" in
     Darwin)
-        OS=darwin-$CPU
+        OS=darwin-$BUILD_ARCH
         ;;
     Linux)
         # note that building  32-bit binaries on x86_64 is handled later
-        OS=linux-$CPU
+        OS=linux-$BUILD_ARCH
         ;;
     FreeBSD)
-        OS=freebsd-$CPU
+        OS=freebsd-$BUILD_ARCH
         ;;
     CYGWIN*|*_NT-*)
         panic "Please build Windows binaries on Linux with --mingw option."
@@ -100,8 +100,7 @@ case $OS in
     *) HOST_OS=$OS
 esac
 
-# define HOST_ARCH as the $CPU
-HOST_ARCH=$CPU
+HOST_ARCH=$BUILD_ARCH
 
 # define HOST_TAG
 # special case: windows-x86 => windows
@@ -143,7 +142,7 @@ clean_exit () {
 # that support it.
 FORCE_32BIT=no
 force_32bit_binaries () {
-    if [ $CPU = x86_64 ] ; then
+    if [ $BUILD_ARCH = x86_64 ] ; then
         FORCE_32BIT=yes
         case $OS in
             linux-x86_64) OS=linux-x86 ;;
@@ -151,7 +150,7 @@ force_32bit_binaries () {
             freebsd-x86_64) OS=freebsd-x86 ;;
         esac
         HOST_ARCH=x86
-        CPU=x86
+        BUILD_ARCH=x86
         compute_host_tag
         log "Check32Bits: Forcing generation of 32-bit binaries."
     fi
@@ -831,16 +830,6 @@ if [ "$TARGET_OS" != "windows" ] ; then
 fi
 echo "#define QEMU_VERSION    \"0.10.50\"" >> $config_h
 echo "#define QEMU_PKGVERSION \"Android\"" >> $config_h
-case "$CPU" in
-    x86) CONFIG_CPU=I386
-    ;;
-    ppc) CONFIG_CPU=PPC
-    ;;
-    x86_64) CONFIG_CPU=X86_64
-    ;;
-    *) CONFIG_CPU=$CPU
-    ;;
-esac
 BSD=0
 case "$TARGET_OS" in
     linux-*) CONFIG_OS=LINUX
