@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ed8889a6_b444d67d",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_glx.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-27T08:52:45Z",
+      "side": 1,
+      "message": "It really depends on your ldconfig configuration, in my specific case (Goobuntu 10.4) libGL.so goes to the generic wrapper, and libGL.so.1 goes to the vendor-specific library. Also our SDL2 library dynamically loads libGL.so.1 before the EmuGL are in the process\u0027 address space, so it\u0027s better to ensure this is the same library being used.",
+      "parentUuid": "0d8cfd85_4d24aea9",
+      "range": {
+        "startLine": 391,
+        "startChar": 0,
+        "endLine": 394,
+        "endChar": 40
+      },
+      "revId": "bb8724be4b9e17339d5d6442e588b02f2aa42f4b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d37016d_b527aae0",
         "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-05-19T23:08:11Z",
       "side": 1,
       "message": "I will mark this patch as \"don\u0027t submit\" yet for that reason, but lgtm otherwise",
+      "range": {
+        "startLine": 700,
+        "startChar": 0,
+        "endLine": 700,
+        "endChar": 75
+      },
+      "revId": "bb8724be4b9e17339d5d6442e588b02f2aa42f4b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd782572_560e3437",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 700,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-27T08:52:45Z",
+      "side": 1,
+      "message": "Actually, this comment and code was already in the previous version of the code, all this patch does is move it to a better location. I have a future patch to remove the static constructor that I will upload soon.",
+      "parentUuid": "2d37016d_b527aae0",
       "range": {
         "startLine": 700,
         "startChar": 0,
