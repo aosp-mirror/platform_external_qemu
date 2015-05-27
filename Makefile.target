@@ -22,7 +22,6 @@ endif
 
 # Common compiler flags for all target-dependent libraries
 EMULATOR_TARGET_CFLAGS := \
-    -I$(LOCAL_PATH)/android/config/$(HOST_PREBUILT_TAG) \
     -I$(LOCAL_PATH)/android/config/target-$(EMULATOR_TARGET_ARCH) \
     -I$(LOCAL_PATH)/target-$(EMULATOR_TARGET_CPU) \
     -I$(LOCAL_PATH)/fpu \

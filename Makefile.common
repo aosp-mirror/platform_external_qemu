@@ -60,8 +60,10 @@ common_LOCAL_SRC_FILES =
 EMULATOR_COMMON_CFLAGS := -Werror=implicit-function-declaration
 
 # Needed by everything about the host
+# OBJS_DIR contains config-host.h
+# $(LOCAL_PATH)/include contains common headers.
 EMULATOR_COMMON_CFLAGS += \
-    -I$(LOCAL_PATH)/android/config/$(QEMU_HOST_TAG) \
+    -I$(OBJS_DIR) \
     -I$(LOCAL_PATH)/include
 
 # Need to include "qapi-types.h" and other auto-generated files from
