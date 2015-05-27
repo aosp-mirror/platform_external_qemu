@@ -20,21 +20,18 @@ PROGDIR=`dirname $0`
 VERBOSE=yes
 VERBOSE2=no
 
-panic ()
-{
+panic () {
     echo "ERROR: $@"
     exit 1
 }
 
-log ()
-{
+log () {
     if [ "$VERBOSE" = "yes" ] ; then
         echo "$1"
     fi
 }
 
-log2 ()
-{
+log2 () {
     if [ "$VERBOSE2" = "yes" ] ; then
         echo "$1"
     fi
@@ -43,17 +40,17 @@ log2 ()
 ## Normalize OS and CPU
 ##
 
-CPU=`uname -m`
-case "$CPU" in
-    i?86) CPU=x86
+BUILD_ARCH=$(uname -m)
+case "$BUILD_ARCH" in
+    i?86) BUILD_ARCH=x86
     ;;
-    amd64) CPU=x86_64
+    x86_64|amd64) BUILD_ARCH=x86_64
     ;;
-    powerpc) panic "PowerPC builds are not supported!"
+    *) panic "$BUILD_ARCH builds are not supported!"
     ;;
 esac
 
-log2 "CPU=$CPU"
+log2 "BUILD_ARCH=$BUILD_ARCH"
 
 # at this point, the supported values for CPU are:
 #   x86
@@ -66,14 +63,14 @@ EXE=""
 OS=`uname -s`
 case "$OS" in
     Darwin)
-        OS=darwin-$CPU
+        OS=darwin-$BUILD_ARCH
         ;;
     Linux)
         # note that building  32-bit binaries on x86_64 is handled later
-        OS=linux-$CPU
+        OS=linux-$BUILD_ARCH
         ;;
     FreeBSD)
-        OS=freebsd-$CPU
+        OS=freebsd-$BUILD_ARCH
         ;;
     CYGWIN*|*_NT-*)
         panic "Please build Windows binaries on Linux with --mingw option."
@@ -103,23 +100,8 @@ case $OS in
     *) HOST_OS=$OS
 esac
 
-# define HOST_ARCH as the $CPU
-HOST_ARCH=$CPU
-
-# define HOST_TAG
-# special case: windows-x86 => windows
-compute_host_tag ()
-{
-    case $HOST_OS-$HOST_ARCH in
-        windows-x86)
-            HOST_TAG=windows
-            ;;
-        *)
-            HOST_TAG=$HOST_OS-$HOST_ARCH
-            ;;
-    esac
-}
-compute_host_tag
+HOST_ARCH=$BUILD_ARCH
+HOST_TAG=$HOST_OS-$HOST_ARCH
 
 #### Toolchain support
 ####
@@ -133,14 +115,12 @@ TMPE=/tmp/android-$$-test$EXE
 TMPL=/tmp/android-$$-test.log
 
 # cleanup temporary files
-clean_temp ()
-{
+clean_temp () {
     rm -f $TMPC $TMPO $TMPL $TMPE
 }
 
 # cleanup temp files then exit with an error
-clean_exit ()
-{
+clean_exit () {
     clean_temp
     exit 1
 }
@@ -148,9 +128,8 @@ clean_exit ()
 # this function should be called to enforce the build of 32-bit binaries on 64-bit systems
 # that support it.
 FORCE_32BIT=no
-force_32bit_binaries ()
-{
-    if [ $CPU = x86_64 ] ; then
+force_32bit_binaries () {
+    if [ $BUILD_ARCH = x86_64 ] ; then
         FORCE_32BIT=yes
         case $OS in
             linux-x86_64) OS=linux-x86 ;;
@@ -158,55 +137,17 @@ force_32bit_binaries ()
             freebsd-x86_64) OS=freebsd-x86 ;;
         esac
         HOST_ARCH=x86
-        CPU=x86
-        compute_host_tag
-        log "Check32Bits: Forcing generation of 32-bit binaries (--try-64 to disable)"
+        BUILD_ARCH=x86
+        HOST_TAG=$HOST_OS-$HOST_ARCH
+        log "Check32Bits: Forcing generation of 32-bit binaries."
     fi
-}
-
-# Enable linux-mingw32 compilation. This allows you to build
-# windows executables on a Linux machine, which is considerably
-# faster than using Cygwin / MSys to do the same job.
-#
-enable_linux_mingw ()
-{
-    # Are we on Linux ?
-    log "Mingw      : Checking for Linux host"
-    if [ "$HOST_OS" != "linux" ] ; then
-        echo "Sorry, but mingw compilation is only supported on Linux !"
-        exit 1
-    fi
-    # Do we have our prebuilt mingw64 toolchain?
-    log "Mingw      : Looking for prebuilt mingw64 toolchain."
-    MINGW_DIR=$PROGDIR/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8
-    MINGW_CC=
-    if [ -d "$MINGW_DIR" ]; then
-        MINGW_PREFIX=$MINGW_DIR/bin/x86_64-w64-mingw32
-        find_program MINGW_CC "$MINGW_PREFIX-gcc"
-    fi
-    if [ -z "$MINGW_CC" ]; then
-        log "Mingw      : Looking for mingw64 toolchain."
-        MINGW_PREFIX=x86_64-w64-mingw32
-        find_program MINGW_CC $MINGW_PREFIX-gcc
-    fi
-    if [ -z "$MINGW_CC" ]; then
-        echo "ERROR: It looks like no Mingw64 toolchain is available!"
-        echo "Please install x86_64-w64-mingw32 package !"
-        exit 1
-    fi
-    log2 "Mingw      : Found $MINGW_CC"
-    CC=$MINGW_CC
-    LD=$MINGW_CC
-    WINDRES=$MINGW_PREFIX-windres
-    AR=$MINGW_PREFIX-ar
 }
 
 # this function will setup the compiler and linker and check that they work as advertized
 # note that you should call 'force_32bit_binaries' before this one if you want it to work
 # as advertized.
 #
-setup_toolchain ()
-{
+setup_toolchain () {
     if [ -z "$CC" ] ; then
         CC=gcc
     fi
@@ -260,40 +201,16 @@ EOF
 # try to compile the current source file in $TMPC into an object
 # stores the error log into $TMPL
 #
-compile ()
-{
+compile () {
     log2 "Object     : $CC -o $TMPO -c $CFLAGS $TMPC"
     $CC -o $TMPO -c $CFLAGS $TMPC 2> $TMPL
 }
 
 # try to link the recently built file into an executable. error log in $TMPL
 #
-link()
-{
+link() {
     log2 "Link      : $LD -o $TMPE $TMPO $LDFLAGS"
     $LD -o $TMPE $TMPO $LDFLAGS 2> $TMPL
-}
-
-# perform a simple compile / link / run of the source file in $TMPC
-compile_exec_run()
-{
-    log2 "RunExec    : $CC -o $TMPE $CFLAGS $TMPC"
-    compile
-    if [ $? != 0 ] ; then
-        echo "Failure to compile test program"
-        cat $TMPC
-        cat $TMPL
-        clean_exit
-    fi
-    link
-    if [ $? != 0 ] ; then
-        echo "Failure to link test program"
-        cat $TMPC
-        echo "------"
-        cat $TMPL
-        clean_exit
-    fi
-    $TMPE
 }
 
 ## Feature test support
@@ -306,8 +223,7 @@ compile_exec_run()
 # you can define EXTRA_CFLAGS for extra C compiler flags
 # for convenience, this variable will be unset by the function.
 #
-feature_check_header ()
-{
+feature_check_header () {
     local result_ch OLD_CFLAGS
     log2 "HeaderCheck: $2"
     echo "#include $2" > $TMPC
@@ -329,63 +245,6 @@ EOF
     clean_temp
 }
 
-# run the test program that is in $TMPC and set its exit status
-# in the $1 variable.
-# you can define EXTRA_CFLAGS and EXTRA_LDFLAGS
-#
-feature_run_exec ()
-{
-    local run_exec_result
-    local OLD_CFLAGS="$CFLAGS"
-    local OLD_LDFLAGS="$LDFLAGS"
-    CFLAGS="$CFLAGS $EXTRA_CFLAGS"
-    LDFLAGS="$LDFLAGS $EXTRA_LDFLAGS"
-    compile_exec_run
-    run_exec_result=$?
-    CFLAGS="$OLD_CFLAGS"
-    LDFLAGS="$OLD_LDFLAGS"
-    eval $1=$run_exec_result
-    log "Host       : $1=$run_exec_result"
-    clean_temp
-}
-
-## Build configuration file support
-## you must define $config_mk before calling this function
-##
-## $1: Optional output directory.
-create_config_mk ()
-{
-    # create the directory if needed
-    local  config_dir
-    local out_dir=${1:-objs}
-    config_mk=${config_mk:-$out_dir/config.make}
-    config_dir=`dirname $config_mk`
-    mkdir -p $config_dir 2> $TMPL
-    if [ $? != 0 ] ; then
-        echo "Can't create directory for build config file: $config_dir"
-        cat $TMPL
-        clean_exit
-    fi
-
-    # re-create the start of the configuration file
-    log "Generate   : $config_mk"
-
-    echo "# This file was autogenerated by $PROGNAME. Do not edit !" > $config_mk
-    echo "OS          := $OS" >> $config_mk
-    echo "HOST_OS     := $HOST_OS" >> $config_mk
-    echo "HOST_ARCH   := $HOST_ARCH" >> $config_mk
-    echo "CC          := $CC" >> $config_mk
-    echo "LD          := $LD" >> $config_mk
-    echo "AR          := $AR" >> $config_mk
-    echo "CFLAGS      := $CFLAGS" >> $config_mk
-    echo "LDFLAGS     := $LDFLAGS" >> $config_mk
-    echo "HOST_CC     := $CC" >> $config_mk
-    echo "HOST_LD     := $LD" >> $config_mk
-    echo "HOST_AR     := $AR" >> $config_mk
-    echo "HOST_WINDRES:= $WINDRES" >> $config_mk
-    echo "OBJS_DIR    := $out_dir" >> $config_mk
-}
-
 # Find pattern $1 in string $2
 # This is to be used in if statements as in:
 #
@@ -393,8 +252,7 @@ create_config_mk ()
 #       ...
 #    fi
 #
-pattern_match ()
-{
+pattern_match () {
     echo "$2" | grep -q -E -e "$1"
 }
 
@@ -410,8 +268,7 @@ pattern_match ()
 # Result: set $1 to the full path of the corresponding command
 #         or to the empty/undefined string if not available
 #
-find_program ()
-{
+find_program () {
     local PROG
     PROG=`which $2 2>/dev/null || true`
     if [ -n "$PROG" ] ; then
@@ -624,7 +481,10 @@ if [ -z "$CC" -a -z "$OPTION_CC" ] ; then
     fi
     GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
     $GEN_SDK $GEN_SDK_FLAGS $OUT_DIR/toolchain || panic "Cannot generate SDK toolchain!"
-    CC="$OUT_DIR/toolchain/"$($GEN_SDK $GEN_SDK_FLAGS --print=gcc $OUT_DIR/toolchain)
+    BINPREFIX=$($GEN_SDK $GEN_SDK_FLAGS --print=binprefix $OUT_DIR/toolchain)
+    CC="$OUT_DIR/toolchain/${BINPREFIX}gcc"
+    AR="$OUT_DIR/toolchain/${BINPREFIX}ar"
+    LD=$CC
 fi
 
 if [ -n "$OPTION_CC" ]; then
@@ -640,34 +500,51 @@ fi
 # generate 64-bit ones by using -m64 on the command-line.
 force_32bit_binaries
 
-case $OS in
-    linux-*)
-        TARGET_DLL_SUFFIX=.so
-        ;;
-    darwin-*)
-        TARGET_DLL_SUFFIX=.dylib
-        ;;
-    windows*)
-        TARGET_DLL_SUFFIX=.dll
-esac
-
-TARGET_OS=$OS
-
 setup_toolchain
 
 BUILD_AR=$AR
 BUILD_CC=$CC
 BUILD_CXX=$CC
 BUILD_LD=$LD
-BUILD_AR=$AR
 BUILD_CFLAGS=$CFLAGS
 BUILD_CXXFLAGS=$CXXFLAGS
 BUILD_LDFLAGS=$LDFLAGS
 
 if [ "$OPTION_MINGW" = "yes" ] ; then
-    enable_linux_mingw
-    TARGET_OS=windows
-    TARGET_DLL_SUFFIX=.dll
+    # Are we on Linux ?
+    log "Mingw      : Checking for Linux host"
+    if [ "$HOST_OS" != "linux" ] ; then
+        echo "Sorry, but mingw compilation is only supported on Linux !"
+        exit 1
+    fi
+    # Do we have our prebuilt mingw64 toolchain?
+    log "Mingw      : Looking for prebuilt mingw64 toolchain."
+    MINGW_DIR=$PROGDIR/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8
+    MINGW_CC=
+    if [ -d "$MINGW_DIR" ]; then
+        MINGW_PREFIX=$MINGW_DIR/bin/x86_64-w64-mingw32
+        find_program MINGW_CC "$MINGW_PREFIX-gcc"
+    fi
+    if [ -z "$MINGW_CC" ]; then
+        log "Mingw      : Looking for mingw64 toolchain."
+        MINGW_PREFIX=x86_64-w64-mingw32
+        find_program MINGW_CC $MINGW_PREFIX-gcc
+    fi
+    if [ -z "$MINGW_CC" ]; then
+        echo "ERROR: It looks like no Mingw64 toolchain is available!"
+        echo "Please install x86_64-w64-mingw32 package !"
+        exit 1
+    fi
+    log2 "Mingw      : Found $MINGW_CC"
+    CC=$MINGW_CC
+    if [ "$CCACHE" ]; then
+        CC="$CCACHE $CC"
+    fi
+    LD=$MINGW_CC
+    WINDRES=$MINGW_PREFIX-windres
+    AR=$MINGW_PREFIX-ar
+    HOST_OS=windows
+    HOST_TAG=$HOST_OS-$HOST_ARCH
 fi
 
 # Try to find the GLES emulation headers and libraries automatically
@@ -708,12 +585,12 @@ PROBE_ESD=no
 PROBE_PULSEAUDIO=no
 PROBE_WINAUDIO=no
 
-case "$TARGET_OS" in
-    darwin*) PROBE_COREAUDIO=yes;
+case "$HOST_OS" in
+    darwin) PROBE_COREAUDIO=yes;
     ;;
-    linux-*) PROBE_ALSA=yes; PROBE_OSS=yes; PROBE_ESD=yes; PROBE_PULSEAUDIO=yes;
+    linux) PROBE_ALSA=yes; PROBE_OSS=yes; PROBE_ESD=yes; PROBE_PULSEAUDIO=yes;
     ;;
-    freebsd-*) PROBE_OSS=yes;
+    freebsd) PROBE_OSS=yes;
     ;;
     windows) PROBE_WINAUDIO=yes
     ;;
@@ -735,20 +612,6 @@ mkdir -p $OUT_DIR
 # because the previous version could be read-only
 clean_temp
 
-# check host endianess
-#
-HOST_BIGENDIAN=no
-if [ "$TARGET_OS" = "$OS" ] ; then
-cat > $TMPC << EOF
-#include <inttypes.h>
-int main(int argc, char ** argv){
-        volatile uint32_t i=0x01234567;
-        return (*((uint8_t*)(&i))) == 0x01;
-}
-EOF
-feature_run_exec HOST_BIGENDIAN
-fi
-
 # check whether we have <byteswap.h>
 #
 feature_check_header HAVE_BYTESWAP_H      "<byteswap.h>"
@@ -757,7 +620,7 @@ feature_check_header HAVE_FNMATCH_H       "<fnmatch.h>"
 
 # check for Mingw version.
 MINGW_VERSION=
-if [ "$TARGET_OS" = "windows" ]; then
+if [ "$HOST_OS" = "windows" ]; then
 log "Mingw      : Probing for GCC version."
 GCC_VERSION=$($CC -v 2>&1 | awk '$1 == "gcc" && $2 == "version" { print $3; }')
 GCC_MAJOR=$(echo "$GCC_VERSION" | cut -f1 -d.)
@@ -770,31 +633,31 @@ fi
 
 case $OS in
     windows)
+        BUILD_EXEEXT=.exe
+        BUILD_DLLEXT=.dll
+        ;;
+    darwin)
+        BUILD_EXEEXT=
+        BUILD_DLLEXT=.dylib
+        ;;
+    *)
+        BUILD_EXEEXT=
+        BUILD_DLLEXT=
+        ;;
+esac
+
+case $HOST_OS in
+    windows)
         HOST_EXEEXT=.exe
         HOST_DLLEXT=.dll
         ;;
     darwin)
-        HOST_EXEEXT=
+        HOST_EXEXT=
         HOST_DLLEXT=.dylib
         ;;
     *)
         HOST_EXEEXT=
-        HOST_DLLEXT=
-        ;;
-esac
-
-case $TARGET_OS in
-    windows)
-        TARGET_EXEEXT=.exe
-        TARGET_DLLEXT=.dll
-        ;;
-    darwin)
-        TARGET_EXEXT=
-        TARGET_DLLEXT=.dylib
-        ;;
-    *)
-        TARGET_EXEEXT=
-        TARGET_DLLEXT=.so
+        HOST_DLLEXT=.so
         ;;
 esac
 
@@ -810,19 +673,37 @@ if [ "$OPTION_DEBUG" != "yes" -a "$OPTION_STRIP" = "yes" ]; then
     esac
 fi
 
-create_config_mk "$OUT_DIR"
+# Re-create the configuration file
+config_mk=$OUT_DIR/config.make
+config_dir=$(dirname $config_mk)
+mkdir -p "$config_dir" 2> $TMPL
+if [ $? != 0 ] ; then
+    echo "Can't create directory for build config file: $config_dir"
+    cat $TMPL
+    clean_exit
+fi
+
+log "Generate   : $config_mk"
+
+echo "# This file was autogenerated by $PROGNAME. Do not edit !" > $config_mk
+echo "HOST_OS     := $HOST_OS" >> $config_mk
+echo "HOST_ARCH   := $HOST_ARCH" >> $config_mk
+echo "HOST_CC     := $CC" >> $config_mk
+echo "HOST_CXX    := $CXX" >> $config_mk
+echo "HOST_LD     := $LD" >> $config_mk
+echo "HOST_AR     := $AR" >> $config_mk
+echo "HOST_WINDRES:= $WINDRES" >> $config_mk
+echo "OBJS_DIR    := $OUT_DIR" >> $config_mk
 echo "" >> $config_mk
-echo "HOST_PREBUILT_TAG := $TARGET_OS" >> $config_mk
-echo "HOST_EXEEXT       := $TARGET_EXEEXT" >> $config_mk
-echo "HOST_DLLEXT       := $TARGET_DLLEXT" >> $config_mk
+echo "HOST_PREBUILT_TAG := $HOST_TAG" >> $config_mk
+echo "HOST_EXEEXT       := $HOST_EXEEXT" >> $config_mk
+echo "HOST_DLLEXT       := $HOST_DLLEXT" >> $config_mk
 echo "PREBUILT          := $ANDROID_PREBUILT" >> $config_mk
 echo "PREBUILTS         := $ANDROID_PREBUILTS" >> $config_mk
 
 echo "" >> $config_mk
-echo "BUILD_OS          := $HOST_OS" >> $config_mk
-echo "BUILD_ARCH        := $HOST_ARCH" >> $config_mk
-echo "BUILD_EXEEXT      := $HOST_EXEEXT" >> $config_mk
-echo "BUILD_DLLEXT      := $HOST_DLLEXT" >> $config_mk
+echo "BUILD_EXEEXT      := $BUILD_EXEEXT" >> $config_mk
+echo "BUILD_DLLEXT      := $BUILD_DLLEXT" >> $config_mk
 echo "BUILD_AR          := $BUILD_AR" >> $config_mk
 echo "BUILD_CC          := $BUILD_CC" >> $config_mk
 echo "BUILD_CXX         := $BUILD_CXX" >> $config_mk
@@ -884,7 +765,7 @@ echo "#define CONFIG_SLIRP    1" >> $config_h
 echo "#define CONFIG_SKINS    1" >> $config_h
 echo "#define CONFIG_TRACE    1" >> $config_h
 
-case "$TARGET_OS" in
+case "$HOST_OS" in
     windows)
         echo "#define CONFIG_WIN32  1" >> $config_h
         ;;
@@ -893,61 +774,48 @@ case "$TARGET_OS" in
         ;;
 esac
 
-case "$TARGET_OS" in
-    linux-*)
+case "$HOST_OS" in
+    linux)
         echo "#define CONFIG_KVM_GS_RESTORE 1" >> $config_h
         ;;
 esac
 
 # only Linux has fdatasync()
-case "$TARGET_OS" in
-    linux-*)
+case "$HOST_OS" in
+    linux)
         echo "#define CONFIG_FDATASYNC    1" >> $config_h
         ;;
 esac
 
-case "$TARGET_OS" in
-    linux-*|darwin-*)
+case "$HOST_OS" in
+    linux|darwin)
         echo "#define CONFIG_MADVISE  1" >> $config_h
         ;;
 esac
 
 # the -nand-limits options can only work on non-windows systems
-if [ "$TARGET_OS" != "windows" ] ; then
+if [ "$HOST_OS" != "windows" ] ; then
     echo "#define CONFIG_NAND_LIMITS  1" >> $config_h
 fi
 echo "#define QEMU_VERSION    \"0.10.50\"" >> $config_h
 echo "#define QEMU_PKGVERSION \"Android\"" >> $config_h
-case "$CPU" in
-    x86) CONFIG_CPU=I386
-    ;;
-    ppc) CONFIG_CPU=PPC
-    ;;
-    x86_64) CONFIG_CPU=X86_64
-    ;;
-    *) CONFIG_CPU=$CPU
-    ;;
-esac
-if [ "$HOST_BIGENDIAN" = "1" ] ; then
-  echo "#define HOST_WORDS_BIGENDIAN 1" >> $config_h
-fi
 BSD=0
-case "$TARGET_OS" in
-    linux-*) CONFIG_OS=LINUX
+case "$HOST_OS" in
+    linux) CONFIG_OS=LINUX
     ;;
-    darwin-*) CONFIG_OS=DARWIN
+    darwin) CONFIG_OS=DARWIN
               BSD=1
     ;;
-    freebsd-*) CONFIG_OS=FREEBSD
+    freebsd) CONFIG_OS=FREEBSD
               BSD=1
     ;;
-    windows*) CONFIG_OS=WIN32
+    windows) CONFIG_OS=WIN32
     ;;
-    *) CONFIG_OS=$OS
+    *) CONFIG_OS=$HOST_OS
 esac
 
-case $TARGET_OS in
-    linux-*|darwin-*)
+case $HOST_OS in
+    linux|darwin)
         echo "#define CONFIG_IOVEC 1" >> $config_h
         ;;
 esac
@@ -959,8 +827,8 @@ if [ $BSD = 1 ] ; then
     echo "#define MAP_ANONYMOUS    MAP_ANON" >> $config_h
 fi
 
-case "$TARGET_OS" in
-    linux-*)
+case "$HOST_OS" in
+    linux)
         echo "#define CONFIG_SIGNALFD       1" >> $config_h
         ;;
 esac
