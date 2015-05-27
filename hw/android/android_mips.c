@@ -25,18 +25,26 @@
 
 #include "android/utils/debug.h"
 
-#define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
+#define D(...)  fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#define E(...)  fprintf(stderr, "ERROR:" __VA_ARGS__), fprintf(stderr, "\n")
 
 #define MIPS_CPU_SAVE_VERSION  1
-#define GOLDFISH_IO_SPACE       0x1f000000
-#define GOLDFISH_INTERRUPT	0x1f000000
-#define GOLDFISH_DEVICEBUS	0x1f001000
-#define GOLDFISH_TTY		0x1f002000
-#define GOLDFISH_RTC		0x1f003000
-#define GOLDFISH_AUDIO		0x1f004000
-#define GOLDFISH_MMC		0x1f005000
-#define GOLDFISH_MEMLOG		0x1f006000
-#define GOLDFISH_DEVICES	0x1f010000
+
+#define HIGHMEM_OFFSET      0x20000000
+#define GOLDFISH_IO_SPACE   0x1f000000
+
+#define GOLDFISH_INTERRUPT  (GOLDFISH_IO_SPACE + 0x00000)
+#define GOLDFISH_DEVICEBUS  (GOLDFISH_IO_SPACE + 0x01000)
+#define GOLDFISH_TTY        (GOLDFISH_IO_SPACE + 0x02000)
+#define GOLDFISH_RTC        (GOLDFISH_IO_SPACE + 0x03000)
+#define GOLDFISH_AUDIO      (GOLDFISH_IO_SPACE + 0x04000)
+#define GOLDFISH_MMC        (GOLDFISH_IO_SPACE + 0x05000)
+#define GOLDFISH_MEMLOG     (GOLDFISH_IO_SPACE + 0x06000)
+#define GOLDFISH_DEVICES    (GOLDFISH_IO_SPACE + 0x10000)
+
+#define MAX_RAM_SIZE_MB 4079UL
+
+static unsigned int highmem_size = 0;
 
 char* audio_input_source = NULL;
 
@@ -59,8 +67,10 @@ static struct goldfish_device nand_device = {
 
 #define PHYS_TO_VIRT(x) ((x) | ~(target_ulong)0x7fffffff)
 
-static void android_load_kernel(CPUOldState *env, int ram_size, const char *kernel_filename,
-              const char *kernel_cmdline, const char *initrd_filename)
+static void android_load_kernel(CPUOldState *env, int ram_size,
+                                const char *kernel_filename,
+                                const char *kernel_cmdline,
+                                const char *initrd_filename)
 {
     int initrd_size;
     ram_addr_t initrd_offset;
@@ -69,14 +79,16 @@ static void android_load_kernel(CPUOldState *env, int ram_size, const char *kern
 
     /* Load the kernel.  */
     if (!kernel_filename) {
-        fprintf(stderr, "Kernel image must be specified\n");
+        E("Kernel image must be specified\n");
         exit(1);
     }
+
     if (load_elf(kernel_filename, VIRT_TO_PHYS_ADDEND,
-         (uint64_t *)&kernel_entry, (uint64_t *)&kernel_low,
-         (uint64_t *)&kernel_high) < 0) {
-    fprintf(stderr, "qemu: could not load kernel '%s'\n", kernel_filename);
-    exit(1);
+                 (uint64_t *)&kernel_entry,
+                 (uint64_t *)&kernel_low,
+                 (uint64_t *)&kernel_high) < 0) {
+        E("qemu: could not load kernel '%s'\n", kernel_filename);
+        exit(1);
     }
     env->active_tc.PC = (int32_t)kernel_entry;
 
@@ -84,23 +96,19 @@ static void android_load_kernel(CPUOldState *env, int ram_size, const char *kern
     initrd_size = 0;
     initrd_offset = 0;
     if (initrd_filename) {
-    initrd_size = get_image_size (initrd_filename);
-    if (initrd_size > 0) {
-        initrd_offset = (kernel_high + ~TARGET_PAGE_MASK) & TARGET_PAGE_MASK;
+        initrd_size = get_image_size (initrd_filename);
+        if (initrd_size > 0) {
+            initrd_offset = (kernel_high + ~TARGET_PAGE_MASK) & TARGET_PAGE_MASK;
             if (initrd_offset + initrd_size > ram_size) {
-        fprintf(stderr,
-                        "qemu: memory too small for initial ram disk '%s'\n",
-                        initrd_filename);
+                E("qemu: memory too small for initial ram disk '%s'\n", initrd_filename);
                 exit(1);
             }
             initrd_size = load_image_targphys(initrd_filename,
-                                               initrd_offset,
-                                               ram_size - initrd_offset);
-
-    }
+                                              initrd_offset,
+                                              ram_size - initrd_offset);
+        }
         if (initrd_size == (target_ulong) -1) {
-        fprintf(stderr, "qemu: could not load initial ram disk '%s'\n",
-            initrd_filename);
+            E("qemu: could not load initial ram disk '%s'\n", initrd_filename);
             exit(1);
         }
     }
@@ -110,15 +118,27 @@ static void android_load_kernel(CPUOldState *env, int ram_size, const char *kern
      */
     cmdline = ram_size - TARGET_PAGE_SIZE;
     char kernel_cmd[1024];
-    if (initrd_size > 0)
+    if (initrd_size > 0) {
         sprintf (kernel_cmd, "%s rd_start=0x%" HWADDR_PRIx " rd_size=%li",
-                       kernel_cmdline,
-                       (hwaddr)PHYS_TO_VIRT(initrd_offset),
-                       (long int)initrd_size);
-    else
+                 kernel_cmdline,
+                 (hwaddr)PHYS_TO_VIRT(initrd_offset),
+                 (long int)initrd_size);
+    } else {
         strcpy (kernel_cmd, kernel_cmdline);
+    }
 
-    cpu_physical_memory_write(ram_size - TARGET_PAGE_SIZE, (void *)kernel_cmd, strlen(kernel_cmd) + 1);
+    char kernel_cmd2[1024];
+    if (highmem_size) {
+        sprintf (kernel_cmd2, "%s mem=%um@0x0 mem=%um@0x%x",
+                 kernel_cmd,
+                 GOLDFISH_IO_SPACE / (1024 * 1024),
+                 highmem_size / (1024 * 1024),
+                 HIGHMEM_OFFSET);
+    } else {
+        strcpy (kernel_cmd2, kernel_cmd);
+    }
+
+    cpu_physical_memory_write(ram_size - TARGET_PAGE_SIZE, (void *)kernel_cmd2, strlen(kernel_cmd2) + 1);
 
 #if 0
     if (initrd_size > 0)
@@ -129,20 +149,19 @@ static void android_load_kernel(CPUOldState *env, int ram_size, const char *kern
         strcpy (phys_ram_base+cmdline, kernel_cmdline);
 #endif
 
-    env->active_tc.gpr[4] = PHYS_TO_VIRT(cmdline);/* a0 */
-    env->active_tc.gpr[5] = ram_size;       /* a1 */
-    env->active_tc.gpr[6] = 0;          /* a2 */
-    env->active_tc.gpr[7] = 0;          /* a3 */
-
+    env->active_tc.gpr[4] = PHYS_TO_VIRT(cmdline);  /* a0 */
+    env->active_tc.gpr[5] = ram_size;               /* a1 */
+    env->active_tc.gpr[6] = highmem_size;           /* a2 */
+    env->active_tc.gpr[7] = 0;                      /* a3 */
 }
 
 
 static void android_mips_init_(ram_addr_t ram_size,
-    const char *boot_device,
-    const char *kernel_filename,
-    const char *kernel_cmdline,
-    const char *initrd_filename,
-    const char *cpu_model)
+                               const char *boot_device,
+                               const char *kernel_filename,
+                               const char *kernel_cmdline,
+                               const char *initrd_filename,
+                               const char *cpu_model)
 {
     CPUOldState *env;
     qemu_irq *goldfish_pic;
@@ -162,17 +181,26 @@ static void android_mips_init_(ram_addr_t ram_size,
                     cpu_load,
                     env);
 
-    if (ram_size > GOLDFISH_IO_SPACE)
-        ram_size = GOLDFISH_IO_SPACE;   /* avoid overlap of ram and IO regs */
+    if (ram_size > (MAX_RAM_SIZE_MB << 20)) {
+        D("qemu: Too much memory for this machine. "
+          "RAM size reduced to %lu MB\n", MAX_RAM_SIZE_MB);
+        ram_size = MAX_RAM_SIZE_MB << 20;
+    }
+
     ram_offset = qemu_ram_alloc(NULL, "android_mips", ram_size);
-    cpu_register_physical_memory(0, ram_size, ram_offset | IO_MEM_RAM);
+    cpu_register_physical_memory(0, MIN(ram_size, GOLDFISH_IO_SPACE), ram_offset | IO_MEM_RAM);
+
+    if (ram_size > GOLDFISH_IO_SPACE) {
+        highmem_size = ram_size - GOLDFISH_IO_SPACE;
+        cpu_register_physical_memory(HIGHMEM_OFFSET, highmem_size, ram_offset + GOLDFISH_IO_SPACE);
+    }
 
     /* Init internal devices */
     cpu_mips_irq_init_cpu(env);
     cpu_mips_clock_init(env);
 
     goldfish_pic = goldfish_interrupt_init(GOLDFISH_INTERRUPT,
-					   env->irq[2], env->irq[3]);
+                                           env->irq[2], env->irq[3]);
     goldfish_device_init(goldfish_pic, GOLDFISH_DEVICES, 0x7f0000, 10, 22);
 
     goldfish_device_bus_init(GOLDFISH_DEVICEBUS, 1);
@@ -199,7 +227,7 @@ static void android_mips_init_(ram_addr_t ram_size,
                 goldfish_add_device_no_io(smc_device);
                 smc91c111_init(&nd_table[i], smc_device->base, goldfish_pic[smc_device->irq]);
             } else {
-                fprintf(stderr, "qemu: Unsupported NIC: %s\n", nd_table[0].model);
+                E("qemu: Unsupported NIC: %s\n", nd_table[0].model);
                 exit (1);
             }
         }
@@ -213,7 +241,7 @@ static void android_mips_init_(ram_addr_t ram_size,
         DriveInfo* info = drive_get( IF_IDE, 0, 0 );
         if (info != NULL) {
             goldfish_mmc_init(GOLDFISH_MMC, 0, info->bdrv);
-	}
+        }
     }
     goldfish_battery_init(android_hw->hw_battery);
 
@@ -227,7 +255,7 @@ static void android_mips_init_(ram_addr_t ram_size,
             (androidHwConfig_getKernelDeviceNaming(android_hw) >= 1);
     pipe_dev_init(newDeviceNaming);
 
-    android_load_kernel(env, ram_size, kernel_filename, kernel_cmdline, initrd_filename);
+    android_load_kernel(env, MIN(ram_size, GOLDFISH_IO_SPACE), kernel_filename, kernel_cmdline, initrd_filename);
 }
 
 
