@@ -344,7 +344,7 @@ static void lcd_brightness_argb32(uint32_t* pixels,
                 line[nn] = (unsigned)(ag | rb);
                 nn++;
             });
-            pixels += pitch;
+            pixels += (pitch / sizeof(uint32_t));
         }
     }
     else if (alpha > LCD_BRIGHTNESS_HIGH) /* 'superluminous' mode */
@@ -372,7 +372,7 @@ static void lcd_brightness_argb32(uint32_t* pixels,
                 line[nn] = (unsigned)(ag | rb);
                 nn++;
             });
-            pixels += pitch;
+            pixels += (pitch / sizeof(uint32_t));
         }
     }
 }
@@ -391,7 +391,7 @@ static void adisplay_update_surface_pixels_16(ADisplay* disp,
     uint8_t*      src_line  = (uint8_t*)disp->data;
     uint8_t*      dst_line  = dst_pixels;
     int           yy, xx;
-
+    
     switch ( disp->rotation & 3 )
     {
     case SKIN_ROTATION_0:
@@ -585,15 +585,16 @@ static void adisplay_update_surface(ADisplay* disp,
 
     // Allocate a temporary buffer to get the potentially rotated / converted
     // content.
-    int dst_pitch = 4 * w;
-    uint8_t* dst_pixels = calloc(h, dst_pitch);
+    int sz = disp->datasize.h > disp->datasize.w ? disp->datasize.h : disp->datasize.w;
+    int dst_pitch = 4 * sz;
+    uint8_t* dst_pixels = calloc(sz, dst_pitch);
 
     SkinRect dst_r = {
         .pos.x = x,
         .pos.y = y,
         .size.w = w,
         .size.h = h };
-
+    
     if (disp->gpu_frame) {
         // Content comes from the emulated GPU.
         adisplay_update_surface_pixels_32(
@@ -646,7 +647,7 @@ static void adisplay_redraw(ADisplay* disp,
     src_r.pos.x -= disp->rect.pos.x;
     src_r.pos.y -= disp->rect.pos.y;
     adisplay_update_surface(disp, &src_r);
-
+    
     if (disp->brightness == LCD_BRIGHTNESS_OFF) {
         // Fill window surface with solid black.
         skin_surface_fill(surface, &r, 0xff000000);
@@ -667,7 +668,7 @@ static void adisplay_redraw(ADisplay* disp,
             src_rect.pos.x = r2.pos.x - disp->onion_rect.pos.x;
             src_rect.pos.y = r2.pos.y - disp->onion_rect.pos.y;
             src_rect.size = r2.size;
-
+            
             skin_surface_blit(surface,
                                 &r2.pos,
                                 skin_image_surface(disp->onion),
@@ -675,7 +676,7 @@ static void adisplay_redraw(ADisplay* disp,
                                 SKIN_BLIT_SRCOVER);
         }
     }
-
+    
     skin_surface_update(surface, &r);
 }
 
