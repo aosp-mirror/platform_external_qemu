@@ -63,7 +63,6 @@ extern unsigned long  android_verbose;
 
 #define  VERBOSE_ENABLE(tag)    \
     android_verbose |= (1 << VERBOSE_##tag)
-
 #define  VERBOSE_DISABLE(tag)   \
     android_verbose &= (1 << VERBOSE_##tag)
 
