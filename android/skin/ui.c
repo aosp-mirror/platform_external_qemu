@@ -22,9 +22,14 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
+#include "android/config/config.h"
 
 #include <stdbool.h>
 #include <stdio.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 #define  DE(...) do { if (VERBOSE_CHECK(keys)) dprint(__VA_ARGS__); } while (0)
@@ -369,6 +374,18 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
 bool skin_ui_process_events(SkinUI* ui) {
     SkinEvent ev;
 
+#if defined(_WIN32) && defined(CONFIG_QT)
+    // In QT, Windows messages are received by the QT thread, which is the thread that creates all of
+    // its windows, so that should be okay. However, in GPU accelerated images, there's a native window
+    // that's created that represents the actual OpenGL output pane, and that window is created from
+    // this thread and not the QT thread. We need to keep its message queue from getting jammed up with
+    // messages, so we need to grab any messages we see and drop unnecessary ones on the floor.
+
+    // Alternately, perhaps we should delegate that native window creation to the Qt UI skin code, and let
+    // it allocate that window in its own thread.
+    MSG message;
+    PeekMessage(&message, NULL, 0, 0, PM_REMOVE);
+#endif
     while(skin_event_poll(&ev)) {
         switch(ev.type) {
         case kEventVideoExpose:
