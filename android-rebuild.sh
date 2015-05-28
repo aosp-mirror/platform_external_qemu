@@ -112,16 +112,19 @@ if [ "$MINGW" ]; then
     EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
     EXPECTED_EMULATOR_BITNESS=32
     EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
+    TARGET_OS=windows
 elif [ "$HOST_OS" = "Darwin" ]; then
     EXPECTED_32BIT_FILE_TYPE="Mach-O executable i386"
     EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable x86_64"
     EXPECTED_EMULATOR_BITNESS=64
     EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
+    TARGET_OS=darwin
 else
     EXPECTED_32BIT_FILE_TYPE="ELF 32-bit LSB +executable, Intel 80386"
     EXPECTED_64BIT_FILE_TYPE="ELF 32-bit LSB +executable, x86-64"
     EXPECTED_EMULATOR_BITNESS=32
     EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
+    TARGET_OS=linux
 fi
 
 # Build the binaries from sources.
@@ -154,12 +157,7 @@ fi
 QEMU_ANDROID_HOSTS=
 QEMU_ANDROID_BINARIES=
 if [ -d "$PREBUILTS_DIR/qemu-android" ]; then
-    HOST_PREFIX=
-    if [ "$MINGW" ]; then
-        HOST_PREFIX=windows
-    else
-        HOST_PREFIX=$HOST_SYSTEM
-    fi
+    HOST_PREFIX=$TARGET_OS
     if [ "$HOST_PREFIX" ]; then
         QEMU_ANDROID_BINARIES=$(cd "$PREBUILTS_DIR"/qemu-android && ls $HOST_PREFIX-*/qemu-system-* 2>/dev/null || true)
     fi
@@ -221,6 +219,44 @@ if [ -d "$PREBUILTS_DIR/mesa" ]; then
                     run ln -sf libGL.so "$MESA_DSTDIR/libGL.so.1"
                 fi
             fi
+        done
+    done
+fi
+
+# Copy Qt shared libraries, if needed.
+EMULATOR_USE_QT=$(awk '$1 == "EMULATOR_USE_QT" { print $3; }' \
+        $OUT_DIR/config.make 2>/dev/null)
+if [ "$EMULATOR_USE_QT" = "true" ]; then
+    QT_PREBUILTS_DIR=$(awk '$1 == "QT_PREBUILTS_DIR" { print $3; }' \
+            $OUT_DIR/config.make 2>/dev/null)
+    if [ ! -d "$QT_PREBUILTS_DIR" ]; then
+        panic "Missing Qt prebuilts directory: $QT_PREBUILTS_DIR"
+    fi
+    echo "Copying Qt prebuilt libraries from $QT_PREBUILTS_DIR"
+    for QT_ARCH in x86 x86_64; do
+        QT_SRCDIR=$QT_PREBUILTS_DIR/$TARGET_OS-$QT_ARCH
+        case $QT_ARCH in
+            x86) QT_DSTDIR=$OUT_DIR/lib/qt;;
+            x86_64) QT_DSTDIR=$OUT_DIR/lib64/qt;;
+            *) panic "Invalid Qt host architecture: $QT_ARCH";;
+        esac
+        run mkdir -p "$QT_DSTDIR" || panic "Could not create Qt library sub-directory!"
+        if [ ! -d "$QT_SRCDIR" ]; then
+            continue
+        fi
+        case $TARGET_OS in
+            windows) QT_DLL_FILTER="*.dll";;
+            darwin) QT_DLL_FILTER="*.dylib";;
+            *) QT_DLL_FILTER="*.so*";;
+        esac
+        QT_LIBS=$(cd "$QT_SRCDIR" && find . -name "$QT_DLL_FILTER" 2>/dev/null)
+        #echo "QT_SRCDIR [$QT_SRCDIR] QT_LIBS [$QT_LIBS]"
+        if [ -z "$QT_LIBS" ]; then
+            panic "Cannot find Qt prebuilt libraries!?"
+        fi
+        for QT_LIB in $QT_LIBS; do
+            run cp -a "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR"/$(basename "$QT_LIB") ||
+                    panic "Could not copy $QT_LIB"
         done
     done
 fi

@@ -87,11 +87,12 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
 
     case PNG_COLOR_TYPE_GRAY:
         if(bitdepth < 8) {
-            png_set_gray_1_2_4_to_8(p);
+            LOG("%s: unsupported grayscale type\n", __FUNCTION__);
+	    goto oops;
         }
 
     default:
-        LOG("%s: unsupported (grayscale?) color type\n");
+        LOG("%s: unsupported (grayscale?) color type\n", __FUNCTION__);
         goto oops;
     }
 
@@ -219,7 +220,8 @@ void *readpng(const unsigned char *base, size_t   size, unsigned *_width, unsign
 
     case PNG_COLOR_TYPE_GRAY:
         if(bitdepth < 8) {
-            png_set_gray_1_2_4_to_8(p);
+            LOG("%s: unsupported grayscale color type\n", __FUNCTION__);
+            goto oops;
         }
 
     default:

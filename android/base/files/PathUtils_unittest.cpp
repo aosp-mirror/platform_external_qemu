@@ -279,6 +279,8 @@ TEST(PathUtils, recompose) {
         { { "foo", "bar", NULL }, { "foo/bar", "foo\\bar" } },
         { { ".", "foo", "..", NULL }, { "./foo/..", ".\\foo\\.." } },
         { { "C:", "foo", NULL }, { "C:/foo", "C:foo" } },
+        { { "/foo/bar", "lib", NULL }, { "/foo/bar/lib", "/foo/bar\\lib" } },
+        { { "\\foo\\bar", "lib", NULL }, { "\\foo\\bar/lib", "\\foo\\bar\\lib" } },
     };
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
         StringVector components = componentListToVector(kData[n].input);

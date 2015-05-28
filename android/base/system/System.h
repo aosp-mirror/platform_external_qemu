@@ -51,12 +51,31 @@ public:
     static const int kProgramBitness = 32;
 #endif
 
+    // The character used to separator directories in path-related
+    // environment variables.
+#ifdef _WIN32
+    static const char kPathSeparator = ';';
+#else
+    static const char kPathSeparator = ':';
+#endif
+
+    // Environment variable name corresponding to the library search
+    // list for shared libraries.
+    static const char* kLibrarySearchListEnvVarName;
+
     // Return the name of the sub-directory containing libraries
     // for the current platform, i.e. "lib" or "lib64" depending
     // on the value of kProgramBitness.
     static const char* kLibSubDir;
 
+    // Return program's bitness, either 32 or 64.
     static int getProgramBitness() { return kProgramBitness; }
+
+    // Prepend a new directory to the system's library search path. This
+    // only alters an environment variable like PATH or LD_LIBRARY_PATH,
+    // and thus typically takes effect only after spawning/executing a new
+    // process.
+    static void addLibrarySearchDir(const char* dirPath);
 
     // Retrieve the value of a given environment variable.
     // Equivalent to getenv().

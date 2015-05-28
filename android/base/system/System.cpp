@@ -18,6 +18,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/misc/StringUtils.h"
+#include "android/base/StringFormat.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -232,6 +233,16 @@ const char* System::kLibSubDir = "lib64";
 const char* System::kLibSubDir = "lib";
 #endif
 
+#ifdef _WIN32
+// static
+const char* System::kLibrarySearchListEnvVarName = "PATH";
+#elif defined(__APPLE__)
+const char* System::kLibrarySearchListEnvVarName = "DYLD_LIBRARY_PATH";
+#else
+// static
+const char* System::kLibrarySearchListEnvVarName = "LD_LIBRARY_PATH";
+#endif
+
 // static
 System* System::setForTesting(System* system) {
     System* result = sSystemForTesting;
@@ -314,6 +325,24 @@ bool System::pathIsDirInternal(const char* path) {
         return false;
     }
     return S_ISDIR(st.st_mode);
+}
+
+// static
+void System::addLibrarySearchDir(const char* path) {
+    System* system = System::get();
+    const char* varName = kLibrarySearchListEnvVarName;
+
+    const char* env = system->envGet(varName);
+    String libSearchPath = env ? env : "";
+    if (libSearchPath.size()) {
+        libSearchPath = StringFormat("%s%c%s",
+                                     path,
+                                     kPathSeparator,
+                                     libSearchPath.c_str());
+    } else {
+        libSearchPath = path;
+    }
+    system->envSet(varName, libSearchPath.c_str());
 }
 
 }  // namespace base
