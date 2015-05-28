@@ -46,6 +46,9 @@ gen-hw-config-defs = \
   $(eval LOCAL_GENERATED_SOURCES += $(QEMU_HW_CONFIG_DEFS_H))\
   $(eval LOCAL_C_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES))
 
+EMULATOR_USE_SDL2 := $(strip $(filter true,$(EMULATOR_USE_SDL2)))
+EMULATOR_USE_QT := $(strip $(filter true,$(EMULATOR_USE_QT)))
+
 ##############################################################################
 ##############################################################################
 ###
@@ -242,28 +245,66 @@ EMULATOR_LIBUI_CFLAGS += \
     $(LIBPNG_CFLAGS) \
     -I$(LOCAL_PATH)/$(LIBPNG_DIR)
 
-common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
+ifndef EMULATOR_USE_QT
+common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES)
+endif
+common_LOCAL_SRC_FILES += android/loadpng.c
 
 ##############################################################################
 # SDL-related definitions
 #
 
-SDL2_DIR := distrib/sdl2-2.0.3
-include $(LOCAL_PATH)/$(SDL2_DIR)/sources.make
+ifdef EMULATOR_USE_SDL2
+    SDL2_DIR := distrib/sdl2-2.0.3
+    include $(LOCAL_PATH)/$(SDL2_DIR)/sources.make
 
-SDL2_STATIC_LIBRARIES := emulator_libSDL2
-SDL2_STATIC_LIBRARIES_64 := emulator_lib64SDL2
+    SDL2_STATIC_LIBRARIES := emulator_libSDL2
+    SDL2_STATIC_LIBRARIES_64 := emulator_lib64SDL2
 
-EMULATOR_LIBUI_CFLAGS += $(SDL2_CFLAGS) $(foreach inc,$(SDL2_INCLUDES),-I$(inc))
-EMULATOR_LIBUI_LDLIBS += $(SDL2_LDLIBS)
-EMULATOR_SDL_STATIC_LIBRARIES := $(SDL2_STATIC_LIBRARIES)
-EMULATOR_SDL_STATIC_LIBRARIES_64 := $(SDL2_STATIC_LIBRARIES_64)
-EMULATOR_SDL_LDLIBS := $(SDL2_LDLIBS)
+    EMULATOR_LIBUI_CFLAGS += $(SDL2_CFLAGS) $(foreach inc,$(SDL2_INCLUDES),-I$(inc))
+    EMULATOR_LIBUI_LDLIBS += $(SDL2_LDLIBS)
+    EMULATOR_SDL_STATIC_LIBRARIES := $(SDL2_STATIC_LIBRARIES)
+    EMULATOR_SDL_STATIC_LIBRARIES_64 := $(SDL2_STATIC_LIBRARIES_64)
+    EMULATOR_SDL_LDLIBS := $(SDL2_LDLIBS)
+    # The following is needed by SDL_LoadObject
+    ifneq ($(HOST_OS),windows)
+        EMULATOR_LIBUI_LDLIBS += -ldl
+    endif
+endif  #EMULATOR_USE_SDL2
 
-# The following is needed by SDL_LoadObject
-ifneq ($(HOST_OS),windows)
-    EMULATOR_LIBUI_LDLIBS += -ldl
-endif
+###########################################################################
+# Qt-related definitions
+#
+ifdef EMULATOR_USE_QT
+    QT_TOP32_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-x86
+    QT_TOP64_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-x86_64
+    EMULATOR_QT_PREBUILT_LIBS := Qt5Widgets Qt5Gui Qt5Core qtharfbuzzng
+    $(foreach lib,$(EMULATOR_QT_PREBUILT_LIBS),\
+        $(call define-emulator-prebuilt-library,emulator-$(lib),$(QT_TOP32_DIR)/lib/lib$(lib).a)\
+        $(call define-emulator64-prebuilt-library,emulator64-$(lib),$(QT_TOP64_DIR)/lib/lib$(lib).a)\
+    )
+    ifeq ($(HOST_OS),linux)
+        EMULATOR_QT_LDLIBS += -lGL
+    endif
+    ifeq ($(HOST_OS),windows)
+        # On Windows, linking to mingw32 is required. The library is provided
+        # by the toolchain, and depends on a main() function provided by qtmain
+        # which itself depends on qMain(). These must appear in LDFLAGS and
+        # not LDLIBS since qMain() is provided by object/libraries that
+        # appear after these in the link command-line.
+        EMULATOR_QT_LDFLAGS += -lmingw32 $(QT_TOP32_DIR)/lib/libqtmain.a
+        EMULATOR_QT_LDFLAGS_64 += -lmingw32 $(QT_TOP64_DIR)/lib/libqtmain.a
+        EMULATOR_QT_LDLIBS += -lopengl32 -lole32 -luuid
+    endif
+    QT_INCLUDE := $(QT_TOP64_DIR)/include
+    EMULATOR_LIBUI_CFLAGS += -I$(QT_INCLUDE) -I$(QT_INCLUDE)/QtCore -I$(QT_INCLUDE)/QtGui -I$(QT_INCLUDE)/QtWidgets
+    EMULATOR_LIBUI_LDLIBS += $(EMULATOR_QT_LDLIBS)
+    EMULATOR_QT_STATIC_LIBRARIES := \
+                $(foreach lib,$(EMULATOR_QT_PREBUILT_LIBS),emulator-$(lib))
+    EMULATOR_QT_STATIC_LIBRARIES_64 := \
+                $(foreach lib,$(EMULATOR_QT_PREBUILT_LIBS),emulator64-$(lib))
+endif  # EMULATOR_USE_QT
+
 
 # the skin support sources
 #
@@ -282,9 +323,31 @@ SKIN_SOURCES := charmap.c \
                 scaler.c \
                 ui.c \
 
+ifdef EMULATOR_USE_SDL2
 SKIN_SOURCES += event-sdl2.c \
                 surface-sdl2.c \
                 winsys-sdl2.c \
+
+endif
+
+ifdef EMULATOR_USE_QT
+SKIN_SOURCES += \
+    qt/event-qt.cpp \
+    qt/surface-qt.cpp \
+    qt/winsys-qt.cpp \
+
+ifeq (darwin, $(HOST_OS))
+SKIN_SOURCES += qt/mac-native-window.mm
+endif
+
+SKIN_SOURCES += \
+    qt/emulator-window.cpp \
+    qt/moc_emulator-window.cpp \
+    qt/moc_tool-window.cpp \
+    qt/rcc_resources.cpp \
+    qt/tool-window.cpp \
+
+endif
 
 common_LOCAL_SRC_FILES += $(SKIN_SOURCES:%=android/skin/%)
 
@@ -510,6 +573,7 @@ ifeq ($(HOST_OS),windows)
                          android/camera/camera-capture-windows.c \
                          util/qemu-thread-win32.c
 
+  EMULATOR_LIBQEMU_LDLIBS += -lvfw32
 else
   CORE_MISC_SOURCES   += posix-aio-compat.c
 endif
