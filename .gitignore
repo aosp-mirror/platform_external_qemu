@@ -1,5 +1,9 @@
 images/emulator_icon32.o
 images/emulator_icon64.o
+android/skin/qt/**/Makefile*
+android/skin/qt/**/qrc_resources.cpp
+android/skin/qt/**/*.user
+android/skin/qt/.qmake.stash
 objs/*
 *.*~
 

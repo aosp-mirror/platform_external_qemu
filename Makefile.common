@@ -253,6 +253,11 @@ EMULATOR_LIBUI_CFLAGS += \
 
 common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
 
+###########################################################################
+# Qt-related definitions
+#
+EMULATOR_USE_QT ?= false
+
 ##############################################################################
 # SDL-related definitions
 #
@@ -335,6 +340,38 @@ EMULATOR_SDL_STATIC_LIBRARIES_64 := $(SDL_STATIC_LIBRARIES_64)
 EMULATOR_SDL_LDLIBS := $(SDL_LDLIBS)
 endif
 
+# Build the Qt-based UI
+
+QT_HOME=$(HOME)/Qt
+QT_VERSION=5.4
+
+ifeq (true, $(EMULATOR_USE_QT))
+  ifeq ($(HOST_OS),darwin)
+    QT_ARCHITECTURE=clang_64
+    QT_ARCHITECTURE_64=clang_64
+    EMULATOR_QT_LDLIBS += -lqcocoa_debug
+    EMULATOR_QT_LDFLAGS += -L $(QT_HOME)/$(QT_VERSION)/$(QT_ARCHITECTURE)/plugins/platforms/
+    EMULATOR_QT_LDFLAGS_64 += -L $(QT_HOME)/$(QT_VERSION)/$(QT_ARCHITECTURE_64)/plugins/platforms/
+  
+  else ifeq ($(HOST_OS), windows)
+      QT_ARCHITECTURE=i686-w64-mingw32
+      QT_ARCHITECTURE_64=x86_64-w64-mingw32
+      EMULATOR_QT_LDLIBS += -lQt5Core -lQt5Gui -lQt5Widgets
+      EMULATOR_QT_LDFLAGS += -L $(QT_HOME)/$(QT_VERSION)/$(QT_ARCHITECTURE)/lib/
+      EMULATOR_QT_LDFLAGS_64 += -L $(QT_HOME)/$(QT_VERSION)/$(QT_ARCHITECTURE_64)/lib/
+  
+  else
+    QT_ARCHITECTURE=gcc_32
+    QT_ARCHITECTURE_64=gcc_64
+    EMULATOR_QT_LDLIBS += -lQt5Core -lQt5Gui -lQt5Widgets
+    EMULATOR_QT_LDFLAGS += -L $(QT_HOME)/$(QT_VERSION)/$(QT_ARCHITECTURE)/lib/
+    EMULATOR_QT_LDFLAGS_64 += -L $(QT_HOME)/$(QT_VERSION)/$(QT_ARCHITECTURE_64)/lib/
+  endif
+  EMULATOR_QT_STATIC_LIBRARIES := libuiqt_debug
+  EMULATOR_QT_STATIC_LIBRARIES_64 := libuiqt64_debug
+endif
+
+
 # The following is needed by SDL_LoadObject
 ifneq ($(HOST_OS),windows)
     EMULATOR_LIBUI_LDLIBS += -ldl
@@ -362,7 +399,7 @@ SKIN_SOURCES += event-sdl2.c \
                 surface-sdl2.c \
                 winsys-sdl2.c \
 
-else
+else ifneq (true,$(EMULATOR_USE_QT))
 SKIN_SOURCES += event-sdl.c \
                 surface-sdl.c \
                 winsys-sdl.c \
