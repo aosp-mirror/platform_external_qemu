@@ -69,7 +69,7 @@ option_register_var "--target=<list>" OPT_TARGET \
         "Build binaries for targets [$DEFAULT_TARGETS]"
 
 OPT_USE_SDL1=
-option_register_var "--use-sdl1" "Use SDL 1.x instead of SDL 2.x"
+option_register_var "--use-sdl1" OPT_USE_SDL1 "Use SDL 1.x instead of SDL 2.x"
 
 OPT_SRC_DIR=
 option_register_var "--src-dir=<dir>" OPT_SRC_DIR \
@@ -277,8 +277,10 @@ EOF
 
         if [ "$OPT_USE_SDL1" ]; then
             SDL_CONFIG=$PREFIX/bin/sdl-config
+            SDL_ABI=1.2
         else
             SDL_CONFIG=$PREFIX/bin/sdl2-config
+            SDL_ABI=2.0
         fi
         export SDL_CONFIG
 
@@ -312,6 +314,7 @@ EOF
             --disable-vhdx \
             --disable-vhost-net \
             --disable-werror \
+            --with-sdlabi=$SDL_ABI \
             &&
 
             case $1 in

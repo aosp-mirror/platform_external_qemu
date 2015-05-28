@@ -463,6 +463,18 @@ build_qemu_android_deps () {
     do_autotools_package SDL2
     SDL2_CONFIG=$PREFIX/bin/sdl2-config
 
+    # similar to SDL 1.2, sdl2.pc doesn't work with our cross-compiler,
+    # replaced Libs in windows and added -lrt for Linux
+    case $1 in
+        windows-*)
+            sed -i -e 's|^Libs: -L\${libdir}  -lmingw32 -lSDL2main -lSDL2  -mwindows|Libs: -lmingw32 -lSDL2main -lSDL2  -mwindows  -Wl,--no-undefined -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid|g' $PREFIX/lib/pkgconfig/sdl2.pc
+            ;;
+        linux-*)
+            sed -i -e '/^Libs: -L\${libdir} /s/$/ -lrt/' $PREFIX/lib/pkgconfig/sdl2.pc
+            ;;
+
+    esac
+
     PKG_CONFIG_LIBDIR=$PREFIX/lib/pkgconfig
     case $1 in
         windows-*)
