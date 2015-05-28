@@ -1,0 +1,25 @@
+BUILDING AND RUNNING A QT EMULATOR
+
+BUILDING:
+
+All platforms:
+
+In the android/skin/qt directory,
+
+    find . | grep Makefile | xargs rm
+    /path/to/Qt/5.4/<qt-architecture>/bin/qmake
+    make
+
+In Makefile.common,
+
+    EMULATOR_USE_QT ?= true
+    EMULATOR_USE_SDL2 ?= false
+
+    adjust QT_HOME
+
+In android/config.h:
+
+    //#define CONFIG_SDL 0
+    #define CONFIG_QT 1
+
+On your platform, you may need to set LD_LIBRARY_PATH or DYLD_LIBRARY_PATH to point to the Qt libs and/or platform directories.
