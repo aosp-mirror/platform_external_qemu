@@ -18,6 +18,9 @@
 #include "MacNative.h"
 
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/shared_library.h"
+#include "GLcommon/GlLibrary.h"
+#include "OpenglCodecCommon/ErrorLog.h"
 
 #include <list>
 
@@ -332,20 +335,59 @@ private:
     EGLNativeDisplayType mDpy;
 };
 
+class MacGlLibrary : public GlLibrary {
+public:
+    MacGlLibrary() : mLib(NULL) {
+        static const char kLibName[] =
+                "/System/Library/Frameworks/OpenGL.framework/OpenGL";
+        char error[256];
+        mLib = emugl::SharedLibrary::open(kLibName, error, sizeof(error));
+        if (!mLib) {
+            ERR("%s: Could not open GL library %s [%s]\n",
+                __FUNCTION__, kLibName, error);
+        }
+    }
+
+    ~MacGlLibrary() {
+        delete mLib;
+    }
+
+    // override
+    virtual GlFunctionPointer findSymbol(const char* name) {
+        if (!mLib) {
+            return NULL;
+        }
+        return reinterpret_cast<GlFunctionPointer>(mLib->findSymbol(name));
+    }
+
+private:
+    emugl::SharedLibrary* mLib;
+};
+
 class MacEngine : public EglOS::Engine {
 public:
+    MacEngine() : mGlLib() {}
+
     virtual EglOS::Display* getDefaultDisplay() {
         return new MacDisplay(0);
+    }
+
+    virtual GlLibrary* getGlLibrary() {
+        return &mGlLib;
     }
 
     virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
         return new MacSurface(wnd, MacSurface::WINDOW);
     }
+
+private:
+    MacGlLibrary mGlLib;
 };
 
 emugl::LazyInstance<MacEngine> sHostEngine = LAZY_INSTANCE_INIT;
 
 }  // namespace
+
 
 // static
 EglOS::Engine* EglOS::Engine::getHostInstance() {

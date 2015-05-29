@@ -18,7 +18,7 @@ endif
 
 ifeq ($(HOST_OS),windows)
     host_OS_SRCS = EglOsApi_wgl.cpp
-    host_common_LDLIBS += -lopengl32 -lgdi32
+    host_common_LDLIBS += -lgdi32
 endif
 
 host_common_SRC_FILES :=      \

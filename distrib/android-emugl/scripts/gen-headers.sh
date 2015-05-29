@@ -57,6 +57,22 @@ gen_functions_header () {
     fi
 }
 
+# $1: Source file
+# $2: Target file
+# $3: gen-entries script.
+gen_funcargs_header () {
+    local SRC_FILE="$1"
+    local DST_FILE="$2"
+    local GEN_ENTRIES="$3"
+    if [ ! -f "$SRC_FILE" ]; then
+        echo "ERROR: Missing source file: $SRC_FILE"
+        FAILURES=true
+    else
+        echo "Generating $DST_FILE"
+        $GEN_ENTRIES --mode=funcargs $SRC_FILE --output=$DST_FILE
+    fi
+}
+
 ##
 ##  Translator/GLcommon headers.
 ##
@@ -67,7 +83,7 @@ gles2_extensions"
 for ENTRY in $GLCOMMON_ENTRIES; do
     SRC_FILE=$GLCOMMON_SRC_DIR/GLcommon/${ENTRY}.entries
     DST_FILE=$GLCOMMON_SRC_DIR/include/GLcommon/${ENTRY}_functions.h
-    gen_functions_header "$SRC_FILE" "$DST_FILE" "$GEN_ENTRIES"
+    gen_funcargs_header "$SRC_FILE" "$DST_FILE" "$GEN_ENTRIES"
 done
 
 ##
