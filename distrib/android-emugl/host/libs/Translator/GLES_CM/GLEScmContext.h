@@ -20,6 +20,7 @@
 #include <GLcommon/GLESpointer.h>
 #include <GLcommon/GLESbuffer.h>
 #include <GLcommon/GLEScontext.h>
+
 #include <map>
 #include <vector>
 #include <string>
@@ -27,10 +28,12 @@
 
 typedef std::map<GLfloat,std::vector<int> > PointSizeIndices;
 
+class GlLibrary;
+
 class GLEScmContext: public GLEScontext
 {
 public:
-    void init();
+    virtual void init(GlLibrary* glLib);
     GLEScmContext();
 
     void setActiveTexture(GLenum tex);
@@ -47,7 +50,7 @@ public:
     virtual bool glGetBooleanv(GLenum pname, GLboolean *params);
     virtual bool glGetFloatv(GLenum pname, GLfloat *params);
     virtual bool glGetFixedv(GLenum pname, GLfixed *params);
-  
+
     ~GLEScmContext();
 protected:
 

@@ -118,7 +118,7 @@ private:
 
 class GLEScontext{
 public:
-    virtual void init();
+    virtual void init(GlLibrary* glLib);
     GLEScontext();
     GLenum getGLerror();
     void setGLerror(GLenum err);

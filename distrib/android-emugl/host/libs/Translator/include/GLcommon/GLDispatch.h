@@ -28,7 +28,9 @@
 #define GLAPIENTRY GL_APIENTRY
 typedef void(*FUNCPTR)();
 
-#define GLES_DECLARE_METHOD(return_type, function_name, signature) \
+class GlLibrary;
+
+#define GLES_DECLARE_METHOD(return_type, function_name, signature, args) \
     static GL_APICALL return_type (GL_APIENTRY *function_name) signature;
 
 class GLDispatch {
@@ -36,7 +38,7 @@ public:
     // Constructor.
     GLDispatch();
 
-    void dispatchFuncs(GLESVersion version);
+    void dispatchFuncs(GLESVersion version, GlLibrary* glLib);
 
     LIST_GLES_FUNCTIONS(GLES_DECLARE_METHOD, GLES_DECLARE_METHOD)
 

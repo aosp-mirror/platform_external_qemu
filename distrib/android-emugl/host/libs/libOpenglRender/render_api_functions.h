@@ -13,7 +13,7 @@ typedef void (*OnPostFn)(void* context, int width, int height, int ydir,
 #define LIST_RENDER_API_FUNCTIONS(X) \
   X(int, initLibrary, ()) \
   X(int, setStreamMode, (int mode)) \
-  X(int, initOpenGLRenderer, (int width, int height, char* addr, size_t addrLen)) \
+  X(int, initOpenGLRenderer, (int width, int height, bool useSubWindow, char* addr, size_t addrLen)) \
   X(void, getHardwareStrings, (const char** vendor, const char** renderer, const char** version)) \
   X(void, setPostCallback, (OnPostFn onPost, void* onPostContext)) \
   X(bool, createOpenGLSubwindow, (FBNativeWindowType window, int x, int y, int width, int height, float zRot)) \
