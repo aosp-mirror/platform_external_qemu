@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d42d931_658aaab4",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 0,
+      "message": "It looks like you removed this important special case here. Did you test that x86_64 emulation still starts properly after this?",
+      "revId": "f03197bbe25744a3c70578280d449a0c4bca7dcd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

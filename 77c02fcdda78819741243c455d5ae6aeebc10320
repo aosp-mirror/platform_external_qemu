@@ -1,0 +1,214 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d42d931_65bc6a48",
+        "filename": "Makefile.qemu-launcher",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 1,
+      "message": "nit: Can you align the :\u003d with other ones above, thanks :)",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d42d931_45af6e0f",
+        "filename": "android/cmdline-options.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 1,
+      "message": "nit: I find this slightly confusing, what about something like:\n\n  Use new emulator backend instead of the classic one.\n\nOr use \u0027engine\u0027 instead of backend.",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d470d3e_c1c6f04b",
+        "filename": "android/help.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 794,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 1,
+      "message": "I recommend changing this to not mention IA explicitly (it will become handy in the future to experiment with ARM emulation on qemu2 for example ). E.g.:\n\n    Use the new emulator engine as the preferred backend\n    (e.g. for x86 or x86_64).\n\nWe also prefer not to use IA or IA-32 in help messages to avoid confusion, since we already have \u0027x86\u0027 and \u0027x86_64\u0027 to describe the corresponding CPU architectures.",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d470d3e_6127fcaf",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 1,
+      "message": "nit: Add a space around the \u003d as in:\n\n    bool ranchu \u003d false;",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9fb8c32_c1e464a6",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 1,
+      "message": "It looks like these are _not_ QEMU options, but only the command-line parameters for the emulation engine being called.",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9fb8c32_e1d760b6",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 1,
+      "message": "It looks like it would be better to try to pick the non-ranchu emulator first, if it exists and -ranchu is not used, then later probe for the ranchu version. That would remove the special cases here.",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d470d3e_a1c1e436",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 1,
+      "message": "Hmm, I\u0027m not sure I agree with this change of semantics. I\u0027d prefer if the caller would handle this case explicitly instead.",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d470d3e_8124e8aa",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 928,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 1,
+      "message": "That\u0027s a lot of code duplicated from main.c, I feel we should place that in a common source file that is linked into both executables instead.",
+      "range": {
+        "startLine": 928,
+        "startChar": 4,
+        "endLine": 928,
+        "endChar": 9
+      },
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d42d931_a5bd724b",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 970,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 1,
+      "message": "just curious, is there a specific reason to add if\u003dnone and format\u003draw ? If not, maybe not use them and assign drive indices through platform-specific local variables, e.g.:\n\n   StringFormat(\"index\u003d%d,id\u003dsystem,file\u003d%s\",\n                systemDriveIndex,\n                hw-\u003edisk_systemPartition_initPath);\n\nWhere |systemDriveIndex| is computed before hand.",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d42d931_65638a8c",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 972,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 1,
+      "message": "minor nit: please remove tabs",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9fb8c32_01024cc6",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 998,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 1,
+      "message": "it looks like the Network portion is the same between the two cases, maybe factor it out of the #ifdef .. #else .. #endif?",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d42d931_e5c77ae5",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1042,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-05-29T09:58:27Z",
+      "side": 1,
+      "message": "This should probably go into its own tiny patch instead.",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
