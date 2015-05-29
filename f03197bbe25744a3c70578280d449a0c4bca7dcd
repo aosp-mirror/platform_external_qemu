@@ -16,6 +16,24 @@
       "revId": "f03197bbe25744a3c70578280d449a0c4bca7dcd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad213187_4e95c7b7",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-05-29T12:10:34Z",
+      "side": 0,
+      "message": "glad you mentioned this.  \nI cannot find emulator-x86_64 anywhere.\nemulator-x86 handles both x86 and x86_64, so i was hoping you would point me to the cases for emulator-x86_64, thanx !!",
+      "parentUuid": "6d42d931_658aaab4",
+      "revId": "f03197bbe25744a3c70578280d449a0c4bca7dcd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

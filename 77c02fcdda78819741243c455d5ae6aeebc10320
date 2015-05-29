@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "cd26659c_6fbd21a2",
+        "filename": "Makefile.qemu-launcher",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-05-29T12:10:34Z",
+      "side": 1,
+      "message": "absolutely.",
+      "parentUuid": "6d42d931_65bc6a48",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d42d931_45af6e0f",
         "filename": "android/cmdline-options.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-05-29T09:58:27Z",
       "side": 1,
       "message": "nit: I find this slightly confusing, what about something like:\n\n  Use new emulator backend instead of the classic one.\n\nOr use \u0027engine\u0027 instead of backend.",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d3355d7_136a1619",
+        "filename": "android/cmdline-options.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-05-29T12:10:34Z",
+      "side": 1,
+      "message": "will do.",
+      "parentUuid": "6d42d931_45af6e0f",
       "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -144,6 +180,30 @@
     },
     {
       "key": {
+        "uuid": "4d3355d7_534d6ec8",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 928,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-05-29T12:10:34Z",
+      "side": 1,
+      "message": "i was planning to do so in another patch, but now you mentioned it, of course :)",
+      "parentUuid": "8d470d3e_8124e8aa",
+      "range": {
+        "startLine": 928,
+        "startChar": 4,
+        "endLine": 928,
+        "endChar": 9
+      },
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d42d931_a5bd724b",
         "filename": "android/qemu-launcher/emulator-qemu.cpp",
         "patchSetId": 1
@@ -155,6 +215,24 @@
       "writtenOn": "2015-05-29T09:58:27Z",
       "side": 1,
       "message": "just curious, is there a specific reason to add if\u003dnone and format\u003draw ? If not, maybe not use them and assign drive indices through platform-specific local variables, e.g.:\n\n   StringFormat(\"index\u003d%d,id\u003dsystem,file\u003d%s\",\n                systemDriveIndex,\n                hw-\u003edisk_systemPartition_initPath);\n\nWhere |systemDriveIndex| is computed before hand.",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad213187_6ebfe30b",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 970,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-05-29T12:10:34Z",
+      "side": 1,
+      "message": "at first, we used old drive format like:\n-drive if\u003dvirtio,index\u003d2,id\u003duserdata,file\u003d/path/to/userdata\n\nsince we adopted the new \"-drive ... -device ...\" format, if\u003dnone became necessary as in\nhttp://blog.vmsplice.net/2013/03/new-in-qemu-14-high-performance-virtio.html\n\n\nformat\u003draw is not necessary but it eliminates a qemu warning msg.\n\nwill move DriveIndex and few other arguments into TargetInfo.",
+      "parentUuid": "6d42d931_a5bd724b",
       "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -195,6 +273,24 @@
     },
     {
       "key": {
+        "uuid": "ad213187_8e8c1f8d",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 998,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-05-29T12:10:34Z",
+      "side": 1,
+      "message": "yes, of course",
+      "parentUuid": "d9fb8c32_01024cc6",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d42d931_e5c77ae5",
         "filename": "android/qemu-launcher/emulator-qemu.cpp",
         "patchSetId": 1
@@ -206,6 +302,24 @@
       "writtenOn": "2015-05-29T09:58:27Z",
       "side": 1,
       "message": "This should probably go into its own tiny patch instead.",
+      "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd26659c_ef7bd171",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1042,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-05-29T12:10:34Z",
+      "side": 1,
+      "message": "will move this out and submit another patch.",
+      "parentUuid": "6d42d931_e5c77ae5",
       "revId": "77c02fcdda78819741243c455d5ae6aeebc10320",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
