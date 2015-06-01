@@ -210,6 +210,11 @@ gen_wrapper_program ()
         DST_PROG=$(basename "$DST_PROG")
     fi
 
+    if [ ! -f "${DST_PREFIX}$DST_PROG" ]; then
+        log "  Skipping: ${SRC_PREFIX}$PROG  [missing destination program]"
+        return
+    fi
+
     if [ "$CCACHE" ]; then
         DST_PREFIX="$CCACHE $DST_PREFIX"
     fi
