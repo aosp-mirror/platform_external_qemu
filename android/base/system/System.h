@@ -82,6 +82,12 @@ public:
     virtual StringVector scanDirEntries(const char* dirPath,
                                         bool fullPath = false) = 0;
 
+    // Checks the system to see if it is running under a remoting session
+    // like Nomachine's NX, Chrome Remote Desktop or Windows Terminal Services.
+    // On success, return true and sets |*sessionType| to the detected
+    // session type. Otherwise, just return false.
+    virtual bool isRemoteSession(String* sessionType) const = 0;
+
 protected:
     static System* setForTesting(System* system);
 

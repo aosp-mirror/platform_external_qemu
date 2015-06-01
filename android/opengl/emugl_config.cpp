@@ -91,23 +91,14 @@ bool emuglConfig_init(EmuglConfig* config,
     if (!strcmp(gpu_mode, "auto") && !gpu_option) {
         // The default will be 'host' unless NX or Chrome Remote Desktop
         // is detected.
-        if (System::get()->envGet("NX_TEMP") != NULL) {
-            D("%s: NX session detected\n", __FUNCTION__);
+        String sessionType;
+        if (System::get()->isRemoteSession(&sessionType)) {
+            D("%s: %s session detected\n", __FUNCTION__, sessionType.c_str());
             if (!sBackendList->contains("mesa")) {
                 config->enabled = false;
                 snprintf(config->status, sizeof(config->status),
-                        "GPU emulation is disabled under NX without Mesa");
-                return true;
-            }
-            D("%s: 'mesa' mode auto-selected\n", __FUNCTION__);
-            gpu_mode = "mesa";
-        } else if (System::get()->envGet(
-                "CHROME_REMOTE_DESKTOP_SESSION") != NULL) {
-            D("%s: Chrome Remote Desktop session detected\n", __FUNCTION__);
-            if (!sBackendList->contains("mesa")) {
-                config->enabled = false;
-                snprintf(config->status, sizeof(config->status),
-                        "GPU emulation is disabled under Chrome Remote Desktop without Mesa");
+                        "GPU emulation is disabled under %s without Mesa",
+                        sessionType.c_str());
                 return true;
             }
             D("%s: 'mesa' mode auto-selected\n", __FUNCTION__);
@@ -153,7 +144,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     System* system = System::get();
 
     if (!config->enabled) {
-        // There is no GPU emulation. As a special case, define
+        // There is no real GPU emulation. As a special case, define
         // SDL_RENDER_DRIVER to 'software' to ensure that the
         // software SDL renderer is being used. This allows one
         // to run with '-gpu off' under NX and Chrome Remote Desktop

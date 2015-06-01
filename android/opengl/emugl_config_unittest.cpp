@@ -150,7 +150,7 @@ TEST(EmuglConfig, initNxWithMesa) {
     makeLibSubDir(myDir, "gles_mesa");
     makeLibSubFile(myDir, "gles_mesa/libGLES.so");
 
-    testSys.envSet("NX_TEMP", "/tmp/nx");
+    testSys.setRemoteSessionType("NX");
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0));
@@ -165,7 +165,7 @@ TEST(EmuglConfig, initNxWithoutMesa) {
     myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
     makeLibSubDir(myDir, "");
 
-    testSys.envSet("NX_TEMP", "/tmp/nx");
+    testSys.setRemoteSessionType("NX");
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0));
@@ -182,7 +182,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithMesa) {
     makeLibSubDir(myDir, "gles_mesa");
     makeLibSubFile(myDir, "gles_mesa/libGLES.so");
 
-    testSys.envSet("CHROME_REMOTE_DESKTOP_SESSION", "1");
+    testSys.setRemoteSessionType("Chrome Remote Desktop");
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0));
@@ -197,7 +197,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithoutMesa) {
     myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
     makeLibSubDir(myDir, "");
 
-    testSys.envSet("CHROME_REMOTE_DESKTOP_SESSION", "1");
+    testSys.setRemoteSessionType("Chrome Remote Desktop");
 
     EmuglConfig config;
     EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0));
