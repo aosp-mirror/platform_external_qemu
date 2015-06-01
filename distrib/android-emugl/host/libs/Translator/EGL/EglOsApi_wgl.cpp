@@ -393,12 +393,12 @@ const WglExtensionsDispatch* initExtensionsDispatch(
     };
 
     int iPixelFormat = dispatch->ChoosePixelFormat(hdc, &pfd);
-    if (iPixelFormat < 0){
-        fprintf(stderr,"error while choosing pixel format\n");
+    if (iPixelFormat <= 0) {
+        int err = GetLastError();
+        fprintf(stderr,"error while choosing pixel format 0x%x\n", err);
         return NULL;
     }
-    if (!dispatch->SetPixelFormat(hdc, iPixelFormat, &pfd)){
-
+    if (!dispatch->SetPixelFormat(hdc, iPixelFormat, &pfd)) {
         int err = GetLastError();
         fprintf(stderr,"error while setting pixel format 0x%x\n", err);
         return NULL;
@@ -406,7 +406,7 @@ const WglExtensionsDispatch* initExtensionsDispatch(
 
     int err;
     HGLRC ctx = dispatch->wglCreateContext(hdc);
-    if (!ctx){
+    if (!ctx) {
         err =  GetLastError();
         fprintf(stderr,"error while creating dummy context %d\n", err);
     }
