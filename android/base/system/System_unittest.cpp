@@ -139,5 +139,15 @@ TEST(System, scanDirEntriesWithFullPaths) {
     }
 }
 
+TEST(System, isRemoteSession) {
+    String sessionType;
+    bool isRemote = System::get()->isRemoteSession(&sessionType);
+    if (isRemote) {
+        LOG(INFO) << "Remote session type [" << sessionType.c_str() << "]";
+    } else {
+        LOG(INFO) << "Local session type";
+    }
+}
+
 }  // namespace base
 }  // namespace android
