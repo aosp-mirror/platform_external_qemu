@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "99a8345d_4a82d7db",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 1072780
+      },
+      "writtenOn": "2015-06-02T16:03:14Z",
+      "side": 1,
+      "message": "Regarding comments made on https://android-review.googlesource.com/#/c/149661/1/android/qemu-launcher/emulator-qemu.cpp@970 we propose a solution using driveIndex local variable which is incremented for each drive.\n\nDoes this look ok?",
+      "range": {
+        "startLine": 829,
+        "startChar": 29,
+        "endLine": 829,
+        "endChar": 39
+      },
+      "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
