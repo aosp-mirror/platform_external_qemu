@@ -172,7 +172,11 @@ static void goldfish_tty_write(void *opaque, hwaddr offset, uint64_t value, unsi
             break;
 
         case TTY_DATA_PTR:
+#if defined(TARGET_MIPS64)
+            s->ptr = (int32_t)deposit64(s->ptr, 0, 32, value);
+#else
             s->ptr = deposit64(s->ptr, 0, 32, value);
+#endif
             break;
 
         case TTY_DATA_PTR_HIGH:
