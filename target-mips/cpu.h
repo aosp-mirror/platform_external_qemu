@@ -598,6 +598,29 @@ struct CPUMIPSState {
 #include "cpu-qom.h"
 
 #if !defined(CONFIG_USER_ONLY)
+
+typedef struct {
+    target_long gpr_reg[32];
+    uint32_t pc;
+    uint32_t branch_addr;
+    target_ulong CP0_EntryLo0;
+    target_ulong CP0_EntryLo1;
+    target_ulong CP0_BadVAddr;
+    target_ulong CP0_EntryHi;
+    target_ulong CP0_Context;
+    target_ulong CP0_XContext;
+    target_ulong CP0_PageMask;
+    target_ulong CP0_PageGrain;
+    target_ulong CP0_PageGrain_rw_bitmask;
+    target_ulong CP0_Cause;
+    int32_t CP0_Index;
+    target_ulong CP0_KScratch[MIPS_KSCRATCH_NUM];
+    int do_tlbwr;
+} CPUInterpreterContext;
+
+extern CPUInterpreterContext CPU;
+
+int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *handler, uint32_t size);
 int no_mmu_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
                         target_ulong address, int rw, int access_type);
 int fixed_mmu_map_address (CPUMIPSState *env, hwaddr *physical, int *prot,
@@ -921,5 +944,4 @@ static inline void compute_hflags(CPUMIPSState *env)
         }
     }
 }
-
 #endif /* !defined (__MIPS_CPU_H__) */
