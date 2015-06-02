@@ -19,7 +19,7 @@
 
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/shared_library.h"
-#include "GLcommon/GlLibrary.h"
+#include "GLcommon/GLLibrary.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 
 #include <list>
