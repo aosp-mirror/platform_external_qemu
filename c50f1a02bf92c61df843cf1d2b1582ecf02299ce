@@ -46,6 +46,30 @@
       "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9de90f5_d801c1c2",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-06-03T13:58:39Z",
+      "side": 1,
+      "message": "FYI, for x86, the sequence of images appearing in the command line matters, i.e. system first, then cache and data.\nthe index is irrelevant here.",
+      "parentUuid": "b9a97860_3aba452f",
+      "range": {
+        "startLine": 829,
+        "startChar": 29,
+        "endLine": 829,
+        "endChar": 39
+      },
+      "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
