@@ -70,6 +70,30 @@
       "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9a97860_4e88a26f",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2015-06-03T14:48:15Z",
+      "side": 1,
+      "message": "Yes, I believe that Jason is right, index property is used to specify the order on the bus where the device should be attached. On the other hand bootindex property is used to control the order in which the firmware should boot the devices :\n\nTaken from docs/bootindex.txt\n\n\u003d Bootindex property \u003d\n\nBlock and net devices have bootindex property. This property is used to\ndetermine the order in which firmware will consider devices for booting\nthe guest OS. If the bootindex property is not set for a device, it gets\nlowest boot priority. There is no particular order in which devices with\nunset bootindex property will be considered for booting, but they will\nstill be bootable.\n\n\u003d\u003d Example \u003d\u003d\n\nLet\u0027s assume we have a QEMU machine with two NICs (virtio, e1000) and two\ndisks (IDE, virtio):\n\nqemu -drive file\u003ddisk1.img,if\u003dnone,id\u003ddisk1\n     -device ide-drive,drive\u003ddisk1,bootindex\u003d4\n     -drive file\u003ddisk2.img,if\u003dnone,id\u003ddisk2\n     -device virtio-blk-pci,drive\u003ddisk2,bootindex\u003d3\n     -netdev type\u003duser,id\u003dnet0 -device virtio-net-pci,netdev\u003dnet0,bootindex\u003d2\n     -netdev type\u003duser,id\u003dnet1 -device e1000,netdev\u003dnet1,bootindex\u003d1\n\nGiven the command above, firmware should try to boot from the e1000 NIC\nfirst.  If this fails, it should try the virtio NIC next; if this fails\ntoo, it should try the virtio disk, and then the IDE disk.\n\nManipulation with \"index\" property is taken care of in :\n\nqemu-android/blockdev.c +880\n\n    /* Device address specified by bus/unit or index.\n     * If none was specified, try to find the first free one. */\n    bus_id  \u003d qemu_opt_get_number(legacy_opts, \"bus\", 0);\n    unit_id \u003d qemu_opt_get_number(legacy_opts, \"unit\", -1);\n    index   \u003d qemu_opt_get_number(legacy_opts, \"index\", -1);\n\n    max_devs \u003d if_max_devs[type];\n\n    if (index !\u003d -1) {\n        if (bus_id !\u003d 0 || unit_id !\u003d -1) {\n            error_report(\"index cannot be used with bus and unit\");\n            goto fail;\n        }\n        bus_id \u003d drive_index_to_bus_id(type, index);\n        unit_id \u003d drive_index_to_unit_id(type, index);\n    }",
+      "parentUuid": "f9de90f5_d801c1c2",
+      "range": {
+        "startLine": 829,
+        "startChar": 29,
+        "endLine": 829,
+        "endChar": 39
+      },
+      "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
