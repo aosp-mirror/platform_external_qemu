@@ -22,6 +22,30 @@
       "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9a97860_3aba452f",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-03T10:14:53Z",
+      "side": 1,
+      "message": "I think the actual index values are important here because they must match the content of /etc/fstab. Let me check that",
+      "parentUuid": "99a8345d_4a82d7db",
+      "range": {
+        "startLine": 829,
+        "startChar": 29,
+        "endLine": 829,
+        "endChar": 39
+      },
+      "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
