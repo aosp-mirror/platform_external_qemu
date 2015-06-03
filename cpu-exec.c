@@ -40,8 +40,6 @@
 #endif
 #endif
 
-int tb_invalidated_flag;
-
 //#define CONFIG_DEBUG_EXEC
 //#define DEBUG_SIGNAL
 
@@ -126,7 +124,7 @@ static TranslationBlock *tb_find_slow(CPUArchState *env,
     unsigned int h;
     target_ulong phys_pc, phys_page1, phys_page2, virt_page2;
 
-    tb_invalidated_flag = 0;
+    tcg_ctx.tb_ctx.tb_invalidated_flag = 0;
 
     /* find translated block using physical mappings */
     phys_pc = get_page_addr_code(env, pc);
@@ -564,12 +562,12 @@ int cpu_exec(CPUOldState *env)
                 tb = tb_find_fast(env);
                 /* Note: we do it here to avoid a gcc bug on Mac OS X when
                    doing it in tb_find_slow */
-                if (tb_invalidated_flag) {
+                if (tcg_ctx.tb_ctx.tb_invalidated_flag) {
                     /* as some TB could have been invalidated because
                        of memory exceptions while generating the code, we
                        must recompute the hash index here */
                     next_tb = 0;
-                    tb_invalidated_flag = 0;
+                    tcg_ctx.tb_ctx.tb_invalidated_flag = 0;
                 }
 #ifdef CONFIG_DEBUG_EXEC
                 qemu_log_mask(CPU_LOG_EXEC, "Trace 0x%08lx [" TARGET_FMT_lx "] %s\n",
