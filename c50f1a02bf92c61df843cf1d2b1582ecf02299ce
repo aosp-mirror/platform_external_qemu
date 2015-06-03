@@ -94,6 +94,30 @@
       "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19b524ac_0bab8192",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-06-03T15:00:08Z",
+      "side": 1,
+      "message": "That\u0027s good information! However, could bootindex possibly affect how the virtio-blk devices are named by the kernel? I think that\u0027s the key problem here: if we use the wrong order of the \"-drive\" options, the system partition may end up being named something other than /dev/block/vda, but fstab.ranchu expects system to be vda...",
+      "parentUuid": "b9a97860_4e88a26f",
+      "range": {
+        "startLine": 829,
+        "startChar": 29,
+        "endLine": 829,
+        "endChar": 39
+      },
+      "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
