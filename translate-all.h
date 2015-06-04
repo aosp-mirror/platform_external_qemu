@@ -31,7 +31,6 @@
 /* translate-all.c */
 bool tcg_enabled(void);
 void tb_invalidate_phys_page_fast(tb_page_addr_t start, int len);
-void cpu_unlink_tb(CPUOldState *cpu);
 void tb_check_watchpoint(CPUArchState *env);
 
 #endif /* TRANSLATE_ALL_H */
