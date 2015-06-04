@@ -537,7 +537,8 @@ void cpu_reset(CPUState *cpu)
 
 void cpu_x86_close(CPUX86State *env)
 {
-    g_free(env);
+    CPUState *cpu = ENV_GET_CPU(env);
+    g_free(cpu);
 }
 
 /***********************************************************/
