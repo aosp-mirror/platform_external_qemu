@@ -142,6 +142,30 @@
       "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59279cf4_6aee57b3",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-06-04T02:00:41Z",
+      "side": 1,
+      "message": "Thanks. I just tried to boot arm64 with\n\n -drive if\u003dnone,index\u003d0,id\u003dsystem,format\u003draw,file\u003dsystem.img \\\n -device virtio-blk-device,drive\u003dsystem,bootindex\u003d0 \\\n -drive if\u003dnone,index\u003d1,id\u003dcache,format\u003draw,file\u003dcache.img \\\n -device virtio-blk-device,drive\u003dcache,bootindex\u003d1 \\\n -drive if\u003dnone,index\u003d2,id\u003duserdata,format\u003draw,file\u003duserdata.img \\\n -device virtio-blk-device,drive\u003duserdata,bootindex\u003d2 \\\n\nbut failed :(\n\nChanging bootindex values to 2 1 0 (while keeping the order of options) didn\u0027t help.\n\nI think your assumption was that the virtio-blk device with bootindex\u003d0 will be the one which gets probe()\u0027d first, but that may not be the case. I\u0027d suppose the order of probing would be determined by how these virito-blk devices got connected to the virtio bus, which must have something to do with the command-line options...",
+      "parentUuid": "d9ae2c65_fba273f8",
+      "range": {
+        "startLine": 829,
+        "startChar": 29,
+        "endLine": 829,
+        "endChar": 39
+      },
+      "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
