@@ -166,6 +166,30 @@
       "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9f1cca3_6272fe5e",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 1072780
+      },
+      "writtenOn": "2015-06-04T15:23:45Z",
+      "side": 1,
+      "message": "I guess you are right. I\u0027ve tried this and it looks like it doesn\u0027t affect the order of drive probing in the kernel. But, I suppose we are safe as long as QEMU ranchu is lunched using the wrapper.",
+      "parentUuid": "59279cf4_6aee57b3",
+      "range": {
+        "startLine": 829,
+        "startChar": 29,
+        "endLine": 829,
+        "endChar": 39
+      },
+      "revId": "c50f1a02bf92c61df843cf1d2b1582ecf02299ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
