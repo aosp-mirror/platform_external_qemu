@@ -879,6 +879,17 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
             derror("-selinux must be \"disabled\" or \"permissive\"");
             exit(1);
         }
+
+        // SELinux 'disabled' mode is no longer supported starting with M.
+        // See https://android-review.googlesource.com/#/c/148538/
+        const int kSELinuxWithoutDisabledApiLevel = 23;
+        if (!strcmp(opts->selinux, "disabled") &&
+                avdInfo_getApiLevel(avd) >= kSELinuxWithoutDisabledApiLevel) {
+            dwarning("SELinux 'disabled' is no longer supported starting "
+                     "with API level %d, switching to 'permissive'",
+                     kSELinuxWithoutDisabledApiLevel);
+            opts->selinux = "permissive";
+        }
     }
 
     if (opts->memory) {
