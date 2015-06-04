@@ -305,6 +305,7 @@ EOF
             --disable-vhdx \
             --disable-vhost-net \
             --disable-werror \
+            --with-sdlabi=2.0 \
             &&
 
             case $1 in
