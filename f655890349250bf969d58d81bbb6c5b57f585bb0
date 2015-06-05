@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39b828d4_1c9b7952",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-05T08:26:16Z",
+      "side": 1,
+      "message": "nit: if (dataDir.empty()) might be more efficient than doing a string comparison.",
+      "revId": "f655890349250bf969d58d81bbb6c5b57f585bb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39b828d4_3ca03d7c",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-05T08:26:16Z",
+      "side": 1,
+      "message": "nit: dataDir \u003d \"lib/pc-bios\"; might be clearer",
+      "revId": "f655890349250bf969d58d81bbb6c5b57f585bb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
