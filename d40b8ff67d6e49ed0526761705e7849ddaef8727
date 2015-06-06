@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79c9c09b_73f280e6",
+        "filename": "main-loop.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-06T22:20:56Z",
+      "side": 1,
+      "message": "Oh my, first of all, thanks a million times for finding the reason for this bug, it was driving me crazy.\n\nIt turns out that this function is always called with a NULL option value by default, and thus exits immediately here. What was really missing was a call to qemu_timer_register_savevm()\n\nicount handling is actually missing a few other things in this codebase, but that doesn\u0027t matter, because the timers were never registered anyway.\n\nLet\u0027s accept this patch as is. If you prefer, an alternative is just to call qemu_timer_register_savevm() from vl-android.c, but I don\u0027t think it\u0027s worth it.\n\nAgain, thanks a ton.",
+      "revId": "d40b8ff67d6e49ed0526761705e7849ddaef8727",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
