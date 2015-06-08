@@ -432,8 +432,12 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     // Data directory (for keymaps and PC Bios).
     args[n++] = "-L";
-    String dataDir = getNthParentDir(qemuExecutable.c_str(), 2U);
-    dataDir += "/pc-bios";
+    String dataDir = getNthParentDir(qemuExecutable.c_str(), 3U);
+    if (dataDir.empty()) {
+        dataDir = "lib/pc-bios";
+    } else {
+        dataDir += "/lib/pc-bios";
+    }
     args[n++] = dataDir.c_str();
     args[n] = NULL;
 
