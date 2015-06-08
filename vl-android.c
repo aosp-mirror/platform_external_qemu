@@ -390,7 +390,8 @@ char* android_op_ui_settings = NULL;
 /* -android-avdname option value. */
 char* android_op_avd_name = "unknown";
 
-bool android_op_wipe_data = false;
+// TODO(digit): Remove this
+extern bool android_op_wipe_data;
 
 extern int android_display_width;
 extern int android_display_height;
