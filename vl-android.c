@@ -1911,6 +1911,7 @@ void android_nand_add_image(const char* part_name,
 {
     char tmp[PATH_MAX * 2 + 32];
 
+    const bool is_system = !strcmp("system", part_name);
     // Sanitize parameters, an empty string must be the same as NULL.
     if (part_file && !*part_file) {
         part_file = NULL;
@@ -2043,7 +2044,7 @@ void android_nand_add_image(const char* part_name,
     }
 
     pstrcat(tmp, sizeof tmp, ",file=");
-    pstrcat(tmp, sizeof tmp, part_file);
+    pstrcat(tmp, sizeof tmp, is_system ? part_init_file : part_file);
 
     // Do we need to make the partition image empty?
     // Do not do it if there is an initial file though since it will
@@ -2064,7 +2065,7 @@ void android_nand_add_image(const char* part_name,
         }
     }
 
-    if (part_init_file) {
+    if (!is_system && part_init_file) {
         pstrcat(tmp, sizeof tmp, ",initfile=");
         pstrcat(tmp, sizeof tmp, part_init_file);
     }
