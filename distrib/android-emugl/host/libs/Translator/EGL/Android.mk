@@ -5,7 +5,7 @@ host_common_LDLIBS :=
 
 ifeq ($(HOST_OS),linux)
     host_OS_SRCS = EglOsApi_glx.cpp
-    host_common_LDLIBS += -lX11 -ldl -lpthread
+    host_common_LDLIBS += -lGL -lX11 -ldl -lpthread
 endif
 
 ifeq ($(HOST_OS),darwin)

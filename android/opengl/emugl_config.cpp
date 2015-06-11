@@ -44,11 +44,22 @@ static void resetBackendList(int bitness) {
             bitness);
 }
 
+static bool stringVectorContains(const StringVector& list,
+                                 const char* value) {
+    for (size_t n = 0; n < list.size(); ++n) {
+        if (!strcmp(list[n].c_str(), value)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,
                       const char* gpu_option,
-                      int bitness) {
+                      int bitness,
+                      bool no_window) {
     // zero all fields first.
     memset(config, 0, sizeof(*config));
 
@@ -90,7 +101,7 @@ bool emuglConfig_init(EmuglConfig* config,
     // is detected.
     if (!strcmp(gpu_mode, "auto") && !gpu_option) {
         // The default will be 'host' unless NX or Chrome Remote Desktop
-        // is detected.
+        // is detected, or |no_window| is true.
         String sessionType;
         if (System::get()->isRemoteSession(&sessionType)) {
             D("%s: %s session detected\n", __FUNCTION__, sessionType.c_str());
@@ -103,6 +114,19 @@ bool emuglConfig_init(EmuglConfig* config,
             }
             D("%s: 'mesa' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "mesa";
+        } else if (no_window) {
+            if (stringVectorContains(sBackendList->names(), "mesa")) {
+                D("%s: Headless (-no-window) mode, using Mesa backend\n",
+                  __FUNCTION__);
+                gpu_mode = "mesa";
+            } else {
+                D("%s: Headless (-no-window) mode without Mesa, forcing '-gpu off'\n",
+                  __FUNCTION__);
+                config->enabled = false;
+                snprintf(config->status, sizeof(config->status),
+                        "GPU emulation is disabled (-no-window without Mesa)");
+                return true;
+            }
         } else {
             D("%s: 'host' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "host";
@@ -113,14 +137,7 @@ bool emuglConfig_init(EmuglConfig* config,
     // to desktop GL, anything else must be checked against existing backends.
     if (strcmp(gpu_mode, "host") != 0) {
         const StringVector& backends = sBackendList->names();
-        const char* backend = NULL;
-        for (size_t n = 0; n < backends.size(); ++n) {
-            if (!strcmp(backends[n].c_str(), gpu_mode)) {
-                backend = gpu_mode;
-                break;
-            }
-        }
-        if (!backend) {
+        if (!stringVectorContains(backends, gpu_mode)) {
             String error = StringFormat(
                 "Invalid GPU mode '%s', use one of: on off host", gpu_mode);
             for (size_t n = 0; n < backends.size(); ++n) {
