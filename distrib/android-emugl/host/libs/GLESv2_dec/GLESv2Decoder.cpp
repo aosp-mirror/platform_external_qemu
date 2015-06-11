@@ -61,9 +61,12 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
             libname = getenv(GLES2_LIBNAME_VAR);
         }
 
-        m_GL2library = emugl::SharedLibrary::open(libname);
+        char error[256];
+        m_GL2library = emugl::SharedLibrary::open(
+                libname, error, sizeof(error));
         if (m_GL2library == NULL) {
-            fprintf(stderr, "%s: Couldn't find %s \n", __FUNCTION__, libname);
+            fprintf(stderr, "%s: Couldn't load %s [%s]\n", __FUNCTION__,
+                    libname, error);
             return -1;
         }
         this->initDispatchByName(s_getProc, this);

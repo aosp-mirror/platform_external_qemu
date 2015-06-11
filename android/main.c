@@ -785,7 +785,8 @@ int main(int argc, char **argv)
                               hw->hw_gpu_enabled,
                               hw->hw_gpu_mode,
                               opts->gpu,
-                              0)) {
+                              0,
+                              opts->no_window)) {
             derror("%s", config.status);
             exit(1);
         }

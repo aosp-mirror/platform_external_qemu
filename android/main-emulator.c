@@ -85,6 +85,7 @@ int main(int argc, char** argv)
     const char* gpu = NULL;
     char*       emulatorPath;
     int         force_32bit = 0;
+    bool        no_window = false;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -122,6 +123,11 @@ int main(int argc, char** argv)
 
         if (!strcmp(opt,"-force-32bit")) {
             force_32bit = 1;
+            continue;
+        }
+
+        if (!strcmp(opt,"-no-window")) {
+            no_window = true;
             continue;
         }
 
@@ -215,7 +221,8 @@ int main(int argc, char** argv)
 
     EmuglConfig config;
     int bitness = is_64bit ? 64 : 32;
-    if (!emuglConfig_init(&config, gpuEnabled, gpuMode, gpu, bitness)) {
+    if (!emuglConfig_init(
+                &config, gpuEnabled, gpuMode, gpu, bitness, no_window)) {
         fprintf(stderr, "ERROR: %s\n", config.status);
         exit(1);
     }

@@ -41,6 +41,7 @@ typedef struct {
 // |gpu_mode| is the value of the hw.gpu.mode hardware property.
 // |gpu_option| is the value of the '-gpu <mode>' option, or NULL.
 // |bitness| is the host bitness (0, 32 or 64).
+// |no_window| is true if the '-no-window' emulator flag was used.
 //
 // Returns true on success, or false if there was an error (e.g. bad
 // mode or option value), in which case the |status| field will contain
@@ -49,7 +50,8 @@ bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,
                       const char* gpu_option,
-                      int bitness);
+                      int bitness,
+                      bool no_window);
 
 // Setup GPU emulation according to a given |backend|.
 // |bitness| is the host bitness, and can be 0 (autodetect), 32 or 64.

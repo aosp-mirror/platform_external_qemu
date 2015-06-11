@@ -38,8 +38,13 @@ bool init_gles2_dispatch()
     //
     // Load the GLES library
     //
-    s_gles2_lib = emugl::SharedLibrary::open(libName);
-    if (!s_gles2_lib) return false;
+    char error[256];
+    s_gles2_lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
+    if (!s_gles2_lib) {
+        fprintf(stderr, "%s: Could not load %s [%s]\n", __FUNCTION__,
+                libName, error);
+        return false;
+    }
 
     //
     // init the GLES dispatch table
