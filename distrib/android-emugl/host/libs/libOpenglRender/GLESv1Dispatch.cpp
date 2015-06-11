@@ -36,8 +36,13 @@ bool init_gles1_dispatch()
     const char *libName = getenv("ANDROID_GLESv1_LIB");
     if (!libName) libName = DEFAULT_GLES_CM_LIB;
 
-    s_gles1_lib = emugl::SharedLibrary::open(libName);
-    if (!s_gles1_lib) return false;
+    char error[256];
+    s_gles1_lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
+    if (!s_gles1_lib) {
+        fprintf(stderr, "%s: Could not load %s [%s]\n", __FUNCTION__,
+                libName, error);
+        return false;
+    }
 
     //
     // init the GLES dispatch table

@@ -39,9 +39,10 @@ bool init_egl_dispatch()
     const char *libName = getenv("ANDROID_EGL_LIB");
     if (!libName) libName = DEFAULT_EGL_LIB;
 
-    emugl::SharedLibrary *lib = emugl::SharedLibrary::open(libName);
+    char error[256];
+    emugl::SharedLibrary *lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
     if (!lib) {
-        printf("Failed to open %s\n", libName);
+        printf("Failed to open %s: [%s]\n", libName, error);
         return NULL;
     }
     LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_LOAD_FIELD)

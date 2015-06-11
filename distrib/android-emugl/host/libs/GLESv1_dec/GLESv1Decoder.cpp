@@ -49,9 +49,10 @@ int GLESv1Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
             libname = getenv(GLES_LIBNAME_VAR);
         }
 
-        m_glesDso = emugl::SharedLibrary::open(libname);
+        char error[256];
+        m_glesDso = emugl::SharedLibrary::open(libname, error, sizeof(error));
         if (m_glesDso == NULL) {
-            fprintf(stderr, "Couldn't find %s \n", GLES_LIBNAME);
+            fprintf(stderr, "Couldn't load %s [%s]\n", GLES_LIBNAME, error);
             return -1;
         }
 

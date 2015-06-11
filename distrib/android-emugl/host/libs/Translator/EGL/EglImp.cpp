@@ -194,12 +194,21 @@ EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
 
 #define TRANSLATOR_GETIFACE_NAME "__translator_getIfaces"
 
-static __translator_getGLESIfaceFunc loadIfaces(const char* libName){
-    emugl::SharedLibrary* libGLES = emugl::SharedLibrary::open(libName);
-
-    if(!libGLES) return NULL;
-    __translator_getGLESIfaceFunc func =  (__translator_getGLESIfaceFunc)libGLES->findSymbol(TRANSLATOR_GETIFACE_NAME);
-    if(!func) return NULL;
+static __translator_getGLESIfaceFunc loadIfaces(const char* libName,
+                                                char* error,
+                                                size_t errorSize) {
+    emugl::SharedLibrary* libGLES = emugl::SharedLibrary::open(
+            libName, error, errorSize);
+    if (!libGLES) {
+        return NULL;
+    }
+    __translator_getGLESIfaceFunc func =  (__translator_getGLESIfaceFunc)
+            libGLES->findSymbol(TRANSLATOR_GETIFACE_NAME);
+    if (!func) {
+        snprintf(error, errorSize, "Missing symbol %s",
+                 TRANSLATOR_GETIFACE_NAME);
+        return NULL;
+    }
     return func;
 }
 
@@ -221,23 +230,26 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
     __translator_getGLESIfaceFunc func  = NULL;
     int renderableType = EGL_OPENGL_ES_BIT;
 
+    char error[256];
     if(!g_eglInfo->getIface(GLES_1_1)) {
-        func  = loadIfaces(LIB_GLES_CM_NAME);
-        if(func){
+        func  = loadIfaces(LIB_GLES_CM_NAME, error, sizeof(error));
+        if (func) {
             g_eglInfo->setIface(func(&s_eglIface),GLES_1_1);
         } else {
-           fprintf(stderr,"could not find ifaces for GLES CM 1.1\n");
+           fprintf(stderr, "%s: Could not find ifaces for GLES CM 1.1 [%s]\n",
+                   __FUNCTION__, error);
            return EGL_FALSE;
         }
         initGLESx(GLES_1_1);
     }
     if(!g_eglInfo->getIface(GLES_2_0)) {
-        func  = loadIfaces(LIB_GLES_V2_NAME);
-        if(func){
+        func  = loadIfaces(LIB_GLES_V2_NAME, error, sizeof(error));
+        if (func) {
             renderableType |= EGL_OPENGL_ES2_BIT;
             g_eglInfo->setIface(func(&s_eglIface),GLES_2_0);
         } else {
-           fprintf(stderr,"could not find ifaces for GLES 2.0\n");
+           fprintf(stderr, "%s: Could not find ifaces for GLES 2.0 [%s]\n",
+                   __FUNCTION__, error);
         }
         initGLESx(GLES_2_0);
     }
