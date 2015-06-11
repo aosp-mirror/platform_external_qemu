@@ -632,6 +632,9 @@ bool cpu_mips_validate_access(CPUMIPSState *env, target_ulong address,
     ret = get_physical_address(env, &physical, &prot,
             addr, rw, access_type);
     if (ret != TLBRET_MATCH) {
+        if (ret != TLBRET_BADADDR && addr > badvaddr) {
+            badvaddr = addr;
+        }
         raise_mmu_exception(env, badvaddr, rw, ret);
         return false;
     }
