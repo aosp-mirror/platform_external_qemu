@@ -91,12 +91,16 @@ static const char kHostOs[] = "windows";
 // |ttyPrefix| is the prefix to use for TTY devices.
 // |kernelExtraArgs|, if not NULL, is an optional string appended to the kernel
 // parameters.
+// |storageDeviceType| is the QEMU storage device type.
+// |networkDeviceType| is the QEMU network device type.
 struct TargetInfo {
     const char* androidArch;
     const char* qemuArch;
     const char* qemuCpu;
     const char* ttyPrefix;
     const char* kernelExtraArgs;
+    const char* storageDeviceType;
+    const char* networkDeviceType;
 };
 
 // The current target architecture information!
@@ -107,6 +111,8 @@ const TargetInfo kTarget = {
     "cortex-a57",
     "ttyAMA",
     " keep_bootcon earlyprintk=ttyAMA0",
+    "virtio-blk-device",
+    "virtio-net-device",
 #endif
 #ifdef TARGET_MIPS64
     "mips64",
@@ -114,6 +120,8 @@ const TargetInfo kTarget = {
     "MIPS64R6-generic",
     "ttyGF",
     NULL,
+    "virtio-blk-device",
+    "virtio-net-device",
 #endif
 };
 
@@ -353,6 +361,7 @@ extern "C" int main(int argc, char **argv, char **envp) {
     // Now build the QEMU parameters.
     const char* args[128];
     int n = 0;
+    int driveIndex = 0;
 
     args[n++] = qemuExecutable.c_str();
 
@@ -391,38 +400,61 @@ extern "C" int main(int argc, char **argv, char **envp) {
     args[n++] = "-initrd";
     args[n++] = hw->disk_ramdisk_path;
 
+    // Sdcard
+    String sdCardParam;
+    String sdCardDevice;
+    if (hw->hw_sdCard_path != NULL && strcmp(hw->hw_sdCard_path, "")) {
+        args[n++] = "-drive";
+            sdCardParam =
+                StringFormat("index=%d,id=sdcard,format=raw,file=%s",
+                             driveIndex++, hw->hw_sdCard_path);
+        args[n++] = sdCardParam.c_str();
+        args[n++] = "-device";
+        sdCardDevice =
+                StringFormat("%s,drive=sdcard", kTarget.storageDeviceType);
+        args[n++] = sdCardDevice.c_str();
+    }
+
     // Data partition.
     args[n++] = "-drive";
     String userDataParam =
-            StringFormat("index=2,id=userdata,file=%s",
-                         hw->disk_dataPartition_path);
+            StringFormat("index=%d,id=userdata,file=%s",
+                         driveIndex++, hw->disk_dataPartition_path);
     args[n++] = userDataParam.c_str();
     args[n++] = "-device";
-    args[n++] = "virtio-blk-device,drive=userdata";
+    String userDataDevice =
+            StringFormat("%s,drive=userdata", kTarget.storageDeviceType);
+    args[n++] = userDataDevice.c_str();
 
     // Cache partition.
     args[n++] = "-drive";
     String cacheParam =
-            StringFormat("index=1,id=cache,file=%s",
-                         hw->disk_cachePartition_path);
+            StringFormat("index=%d,id=cache,file=%s",
+                         driveIndex++, hw->disk_cachePartition_path);
     args[n++] = cacheParam.c_str();
     args[n++] = "-device";
-    args[n++] = "virtio-blk-device,drive=cache";
+    String cacheDevice =
+            StringFormat("%s,drive=cache", kTarget.storageDeviceType);
+    args[n++] = cacheDevice.c_str();
 
     // System partition.
     args[n++] = "-drive";
     String systemParam =
-            StringFormat("index=0,id=system,file=%s",
-                         hw->disk_systemPartition_initPath);
+            StringFormat("index=%d,id=system,file=%s",
+                         driveIndex++, hw->disk_systemPartition_initPath);
     args[n++] = systemParam.c_str();
     args[n++] = "-device";
-    args[n++] = "virtio-blk-device,drive=system";
+    String systemDevice =
+            StringFormat("%s,drive=system", kTarget.storageDeviceType);
+    args[n++] = systemDevice.c_str();
 
     // Network
     args[n++] = "-netdev";
     args[n++] = "user,id=mynet";
     args[n++] = "-device";
-    args[n++] = "virtio-net-device,netdev=mynet";
+    String netDevice =
+            StringFormat("%s,netdev=mynet", kTarget.networkDeviceType);
+    args[n++] = netDevice.c_str();
     args[n++] = "-show-cursor";
 
     // Graphics
