@@ -18,3 +18,6 @@ SHA1=8830e4b3db1ef0cc56f26b27c95ca67ca18900b0    GIT=git://git.qemu-project.org/
 SHA1=20e061c463bed415051f0f89e968e331a2078551    URL=http://xorg.freedesktop.org/releases/individual/proto/glproto-1.4.17.tar.bz2
 SHA1=79638cf00584b08fd6eeb1e73ea69b331561e7f6    URL=http://llvm.org/releases/3.5.1/llvm-3.5.1.src.tar.xz
 SHA1=53ec316946bce7b63327f73c40ac9be1f50e31b2    URL=ftp://ftp.freedesktop.org/pub/mesa/10.4.2/MesaLib-10.4.2.tar.bz2  SRCDIR=Mesa-10.4.2 PATCHES=MesaLib-10.4.2-patches.tar.xz
+
+# Google Breakpad
+SHA1=858a3e171d744d2aee5ef4b70382ed57db8eb70c    SVN=http://google-breakpad.googlecode.com/svn/trunk/google-breakpad-read-only BRANCH=1418 BASENAME=google-breakpad
