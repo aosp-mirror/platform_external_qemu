@@ -223,6 +223,12 @@ int main(int argc, char** argv)
 
     emuglConfig_setupEnv(&config);
 
+#ifdef __APPLE__
+    // For OSX 10.8, following is needed to launcher emulator
+    // issue: https://code.google.com/p/android/issues/detail?id=176338
+    setenv("DYLD_INSERT_LIBRARIES", "/System/Library/Frameworks/AVFoundation.framework/AVFoundation",1);
+#endif
+
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().
     // See the "Eveyone quotes command line arguments the wrong way" on
