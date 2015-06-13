@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d98f0cac_be2af984",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2015-06-13T01:22:10Z",
+      "side": 1,
+      "message": "clicking the number will go to internal bug tracker;\nbetter use \nhttps://code.google.com/p/android/issues/detail?id\u003d27272",
+      "revId": "8e2854cefdd893e0e08e6c45d1cd62a0c7efb02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
