@@ -267,7 +267,7 @@ else
 endif
 
 ifeq ($(HOST_OS),darwin)
-  QEMU_SYSTEM_LDLIBS += -Wl,-framework,Cocoa,-framework,QTKit,-framework,CoreVideo
+  QEMU_SYSTEM_LDLIBS += -Wl,-framework,Cocoa,-framework,QTKit,-framework,CoreVideo,-framework,AVFoundation
 
   # Required to avoid compilation errors when targetting i386 with newer
   # XCode toolchain.
