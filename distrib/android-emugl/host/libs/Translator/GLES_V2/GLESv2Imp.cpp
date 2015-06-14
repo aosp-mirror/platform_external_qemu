@@ -1852,6 +1852,14 @@ GL_APICALL void  GL_APIENTRY glStencilMask(GLuint mask){
 
 GL_APICALL void  GL_APIENTRY glStencilMaskSeparate(GLenum face, GLuint mask){
     GET_CTX();
+    switch (face) {
+        case GL_FRONT:
+        case GL_BACK:
+        case GL_FRONT_AND_BACK:
+            break;
+        default:
+            SET_ERROR_IF(1, GL_INVALID_ENUM);
+    }
     ctx->dispatcher().glStencilMaskSeparate(face,mask);
 }
 
