@@ -155,6 +155,7 @@ fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     (
+        builder_enable_cxx11
         builder_prepare_for_host "$SYSTEM" "$AOSP_DIR" "$INSTALL_DIR/$SYSTEM"
 
         case $SYSTEM in
@@ -203,10 +204,20 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             fi
         done
 
-        # llvm-config is the only binary needed to build Mesa.
         run mkdir -p "$INSTALL_DIR/$SYSTEM/bin"
-        run cp -f "$(builder_install_prefix)/bin/llvm-config" \
-                "$INSTALL_DIR/$SYSTEM/bin/"
+        case $SYSTEM in
+            windows-*)
+                # Create a dummy file to ensure that .../bin exists, since
+                # the Mesa configure step will abort if it doesn't exist.
+                echo "This file is required to build Mesa" > \
+                        "$INSTALL_DIR/$SYSTEM/bin/DO_NOT_REMOVE"
+                ;;
+            *)
+                # Copy llvm-config to .../bin.
+                run cp -f "$(builder_install_prefix)/bin/llvm-config" \
+                        "$INSTALL_DIR/$SYSTEM/bin/"
+                ;;
+        esac
 
         timestamp_set "$INSTALL_DIR/$SYSTEM" mesa-deps
 

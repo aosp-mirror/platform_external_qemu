@@ -24,6 +24,9 @@ int setStreamMode(int mode);
 # width and height are the framebuffer dimensions that will be reported to the
 # guest display driver.
 #
+# useSubWindow is true to indicate that createOpenGLSubWindow() will be called
+# later. If false, only setPostCallback() is supported.
+#
 # addr is a buffer of addrLen bytes that will receive the address that clients
 # should connect to. The interpretation depends on the transport:
 #   - TCP: The buffer contains the port number as a string. The server is
@@ -33,7 +36,7 @@ int setStreamMode(int mode);
 #
 # This function is *NOT* thread safe and should be called first
 # to initialize the renderer after initLibrary().
-int initOpenGLRenderer(int width, int height, char* addr, size_t addrLen);
+int initOpenGLRenderer(int width, int height, bool useSubWindow, char* addr, size_t addrLen);
 
 # getHardwareStrings - describe the GPU hardware and driver.
 # The underlying GL's vendor/renderer/version strings are returned to the

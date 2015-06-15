@@ -2309,7 +2309,7 @@ do_geo_fix( ControlClient  client, char*  args )
         double   val;
         int      deg, min;
         char     hemi;
-        int      hh=0, mm=0, ss=0;
+        int      hh = 0, mm = 0, ss = 0;
 
         /* format overview:
          *    time of fix      123519     12:35:19 UTC
@@ -2332,12 +2332,10 @@ do_geo_fix( ControlClient  client, char*  args )
         struct timeval tm;
 
         if (0 == gettimeofday(&tm, NULL)) {
-            // Elapsed seconds since epoch (UTC, which is what we want)
-            ss = tm.tv_sec % (24 * 60 * 60); // Seconds since midnight
-            hh =  ss / (60 * 60);
-            ss -= hh * (60 * 60);
-            mm =  ss / 60;
-            ss -= mm * 60;
+            // tm.tv_sec is elapsed seconds since epoch (UTC, which is what we want)
+            hh = (int) (tm.tv_sec / (60 * 60)) % 24;
+            mm = (int) (tm.tv_sec /  60      ) % 60;
+            ss = (int) (tm.tv_sec            ) % 60;
         }
 
         stralloc_add_format( s, "$GPGGA,%02d%02d%02d", hh, mm, ss);

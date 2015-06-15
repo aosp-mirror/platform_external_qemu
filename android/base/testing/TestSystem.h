@@ -30,6 +30,8 @@ public:
     TestSystem(const char* programDir, int hostBitness) :
             mProgramDir(programDir),
             mHostBitness(hostBitness),
+            mIsRemoteSession(false),
+            mRemoteSessionType(),
             mTempDir(NULL),
             mTempRootPrefix(),
             mEnvPairs(),
@@ -130,6 +132,24 @@ public:
         return mTempDir;
     }
 
+    virtual bool isRemoteSession(String* sessionType) const {
+        if (!mIsRemoteSession) {
+            return false;
+        }
+        *sessionType = mRemoteSessionType;
+        return true;
+    }
+
+    // Force the remote session type. If |sessionType| is NULL or empty,
+    // this sets the session as local. Otherwise, |*sessionType| must be
+    // a session type.
+    void setRemoteSessionType(const char* sessionType) {
+        mIsRemoteSession = (sessionType != NULL) && *sessionType;
+        if (mIsRemoteSession) {
+            mRemoteSessionType = sessionType;
+        }
+    }
+
 private:
     String toTempRoot(const char* path) {
         String result = mTempRootPrefix;
@@ -147,6 +167,8 @@ private:
 
     String mProgramDir;
     int mHostBitness;
+    bool mIsRemoteSession;
+    String mRemoteSessionType;
     mutable TestTempDir* mTempDir;
     mutable String mTempRootPrefix;
     StringVector mEnvPairs;

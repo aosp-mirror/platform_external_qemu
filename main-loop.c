@@ -48,7 +48,6 @@
 
 int qemu_calculate_timeout(void);
 
-#ifndef CONFIG_ANDROID
 /* Conversion factor from emulated instructions to virtual clock ticks.  */
 int icount_time_shift;
 /* Arbitrarily pick 1MIPS as the minimum allowable speed.  */
@@ -57,7 +56,6 @@ int icount_time_shift;
 int64_t qemu_icount_bias;
 static QEMUTimer *icount_rt_timer;
 static QEMUTimer *icount_vm_timer;
-#endif  // !CONFIG_ANDROID
 
 #ifndef _WIN32
 static int io_thread_fd = -1;
@@ -367,8 +365,87 @@ void main_loop(void)
     pause_all_vcpus();
 }
 
-// TODO(digit): Re-enable icount handling int he future.
-void configure_icount(const char* opts) {
+/* Correlation between real and virtual time is always going to be
+   fairly approximate, so ignore small variation.
+   When the guest is idle real and virtual time will be aligned in
+   the IO wait loop.  */
+#define ICOUNT_WOBBLE (get_ticks_per_sec() / 10)
+
+static void icount_adjust(void)
+{
+    int64_t cur_time;
+    int64_t cur_icount;
+    int64_t delta;
+    static int64_t last_delta;
+    /* If the VM is not running, then do nothing.  */
+    if (!vm_running)
+        return;
+
+    cur_time = cpu_get_clock();
+    cur_icount = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
+    delta = cur_icount - cur_time;
+    /* FIXME: This is a very crude algorithm, somewhat prone to oscillation.  */
+    if (delta > 0
+        && last_delta + ICOUNT_WOBBLE < delta * 2
+        && icount_time_shift > 0) {
+        /* The guest is getting too far ahead.  Slow time down.  */
+        icount_time_shift--;
+    }
+    if (delta < 0
+        && last_delta - ICOUNT_WOBBLE > delta * 2
+        && icount_time_shift < MAX_ICOUNT_SHIFT) {
+        /* The guest is getting too far behind.  Speed time up.  */
+        icount_time_shift++;
+    }
+    last_delta = delta;
+    qemu_icount_bias = cur_icount - (qemu_icount << icount_time_shift);
+}
+
+static void icount_adjust_rt(void * opaque)
+{
+    timer_mod(icount_rt_timer,
+                   qemu_clock_get_ms(QEMU_CLOCK_REALTIME) + 1000);
+    icount_adjust();
+}
+
+static void icount_adjust_vm(void * opaque)
+{
+    timer_mod(icount_vm_timer,
+                   qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + get_ticks_per_sec() / 10);
+    icount_adjust();
+}
+extern void qemu_timer_register_savevm(void);
+
+void configure_icount(const char *option)
+{
+    qemu_timer_register_savevm();
+
+    if (!option)
+        return;
+
+    if (strcmp(option, "auto") != 0) {
+        icount_time_shift = strtol(option, NULL, 0);
+        use_icount = 1;
+        return;
+    }
+
+    use_icount = 2;
+
+    /* 125MIPS seems a reasonable initial guess at the guest speed.
+       It will be corrected fairly quickly anyway.  */
+    icount_time_shift = 3;
+
+    /* Have both realtime and virtual time triggers for speed adjustment.
+       The realtime trigger catches emulated time passing too slowly,
+       the virtual time trigger catches emulated time passing too fast.
+       Realtime triggers occur even when idle, so use them less frequently
+       than VM triggers.  */
+    icount_rt_timer = timer_new(QEMU_CLOCK_REALTIME, SCALE_MS, icount_adjust_rt, NULL);
+    timer_mod(icount_rt_timer,
+                   qemu_clock_get_ms(QEMU_CLOCK_REALTIME) + 1000);
+    icount_vm_timer = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, icount_adjust_vm, NULL);
+    timer_mod(icount_vm_timer,
+                   qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + get_ticks_per_sec() / 10);
 }
 
 struct qemu_alarm_timer {

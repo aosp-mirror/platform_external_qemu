@@ -322,7 +322,7 @@ do_dtc_package () {
 # $1: host os name.
 # $2: environment shell script.
 build_qemu_android_deps () {
-    builder_prepare_for_host "$1"
+    builder_prepare_for_host "$1" "$AOSP_DIR"
 
     if [ -z "$OPT_FORCE" ]; then
         if timestamp_check \
@@ -433,35 +433,21 @@ build_qemu_android_deps () {
         --disable-gtk \
         --disable-libpng
 
-    # Handle SDL1
-    EXTRA_SDL_FLAGS=
-    case $(get_build_os) in
-        darwin)
-            EXTRA_SDL_FLAGS="--disable-video-x11"
-            ;;
-    esac
-    do_autotools_package SDL \
-        --disable-audio \
-        --disable-joystick \
-        --disable-cdrom \
-        --disable-file \
-        --disable-threads \
-        $EXTRA_SDL_FLAGS
+    # Handle SDL2
+    do_autotools_package SDL2
+    SDL_CONFIG=$PREFIX/bin/sdl2-config
 
-    # The SDL build script install a buggy sdl.pc when cross-compiling for
-    # Windows as a static library. I.e. it lacks many of the required
-    # libraries, that are part of --static-libs. Patch it directly
-    # instead.
+    # default sdl2.pc libs doesn't work with our cross-compiler,
+    # append missing libs
     case $1 in
         windows-*)
-            sed -i -e 's|^Libs: -L\${libdir}  -lmingw32 -lSDLmain -lSDL  -mwindows|Libs: -lmingw32 -lSDLmain -lSDL  -mwindows -lm -luser32 -lgdi32 -lwinmm -ldxguid|g' $PREFIX/lib/pkgconfig/sdl.pc
+            sed -i -e '/^Libs: -L\${libdir} /s/$/ -Wl,--no-undefined -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -static-libgcc/' $PREFIX/lib/pkgconfig/sdl2.pc
+            ;;
+        linux-*)
+            sed -i -e '/^Libs: -L\${libdir} /s/$/ -Wl,--no-undefined -lm -ldl -lrt/' $PREFIX/lib/pkgconfig/sdl2.pc
             ;;
     esac
 
-    SDL_CONFIG=$PREFIX/bin/sdl-config
-
-    do_autotools_package SDL2
-    SDL2_CONFIG=$PREFIX/bin/sdl2-config
 
     PKG_CONFIG_LIBDIR=$PREFIX/lib/pkgconfig
     case $1 in

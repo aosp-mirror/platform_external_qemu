@@ -51,7 +51,7 @@ typedef void* FBNativeWindowType;
 #define RENDERER_FUNCTIONS_LIST \
   FUNCTION_(int, initLibrary, (void), ()) \
   FUNCTION_(int, setStreamMode, (int mode), (mode)) \
-  FUNCTION_(int, initOpenGLRenderer, (int width, int height, char* addr, size_t addrLen), (width, height, addr, addrLen)) \
+  FUNCTION_(int, initOpenGLRenderer, (int width, int height, bool useSubWindow, char* addr, size_t addrLen), (width, height, addr, addrLen)) \
   FUNCTION_VOID_(getHardwareStrings, (const char** vendors, const char** renderer, const char** version), (vendors, renderer, version)) \
   FUNCTION_VOID_(setPostCallback, (OnPostFunc onPost, void* onPostContext), (onPost, onPostContext)) \
   FUNCTION_(bool, createOpenGLSubwindow, (FBNativeWindowType window, int x, int y, int width, int height, float zRot), (window, x, y, width, height, zRot)) \
@@ -114,6 +114,7 @@ RENDERER_FUNCTIONS_LIST
 extern int android_init_opengles_pipes(void);
 
 static ADynamicLibrary*  rendererLib;
+static bool              rendererUsesSubWindow;
 static int               rendererStarted;
 static char              rendererAddress[256];
 
@@ -129,7 +130,8 @@ android_initOpenglesEmulation(void)
 
     rendererLib = adynamicLibrary_open(RENDERER_LIB_NAME, &error);
     if (rendererLib == NULL) {
-        derror("Could not load OpenGLES emulation library: %s", error);
+        derror("Could not load OpenGLES emulation library [%s]: %s",
+               RENDERER_LIB_NAME, error);
         return -1;
     }
 
@@ -146,15 +148,21 @@ android_initOpenglesEmulation(void)
         goto BAD_EXIT;
     }
 
+    rendererUsesSubWindow = true;
+    const char* env = getenv("ANDROID_GL_SOFTWARE_RENDERER");
+    if (env && env[0] != '\0' && env[0] != '0') {
+        rendererUsesSubWindow = false;
+    }
+
     if (android_gles_fast_pipes) {
 #ifdef _WIN32
         /* XXX: NEED Win32 pipe implementation */
         setStreamMode(STREAM_MODE_TCP);
 #else
-	    setStreamMode(STREAM_MODE_UNIX);
+        setStreamMode(STREAM_MODE_UNIX);
 #endif
     } else {
-	    setStreamMode(STREAM_MODE_TCP);
+        setStreamMode(STREAM_MODE_TCP);
     }
     return 0;
 
@@ -177,7 +185,11 @@ android_startOpenglesRenderer(int width, int height)
         return 0;
     }
 
-    if (!initOpenGLRenderer(width, height, rendererAddress, sizeof(rendererAddress))) {
+    if (!initOpenGLRenderer(width,
+                            height,
+                            rendererUsesSubWindow,
+                            rendererAddress,
+                            sizeof(rendererAddress))) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }

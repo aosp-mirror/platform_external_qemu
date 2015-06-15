@@ -40,8 +40,6 @@
 #endif
 #endif
 
-int tb_invalidated_flag;
-
 //#define CONFIG_DEBUG_EXEC
 //#define DEBUG_SIGNAL
 
@@ -126,7 +124,7 @@ static TranslationBlock *tb_find_slow(CPUArchState *env,
     unsigned int h;
     target_ulong phys_pc, phys_page1, phys_page2, virt_page2;
 
-    tb_invalidated_flag = 0;
+    tcg_ctx.tb_ctx.tb_invalidated_flag = 0;
 
     /* find translated block using physical mappings */
     phys_pc = get_page_addr_code(env, pc);
@@ -564,12 +562,12 @@ int cpu_exec(CPUOldState *env)
                 tb = tb_find_fast(env);
                 /* Note: we do it here to avoid a gcc bug on Mac OS X when
                    doing it in tb_find_slow */
-                if (tb_invalidated_flag) {
+                if (tcg_ctx.tb_ctx.tb_invalidated_flag) {
                     /* as some TB could have been invalidated because
                        of memory exceptions while generating the code, we
                        must recompute the hash index here */
                     next_tb = 0;
-                    tb_invalidated_flag = 0;
+                    tcg_ctx.tb_ctx.tb_invalidated_flag = 0;
                 }
 #ifdef CONFIG_DEBUG_EXEC
                 qemu_log_mask(CPU_LOG_EXEC, "Trace 0x%08lx [" TARGET_FMT_lx "] %s\n",
@@ -594,10 +592,25 @@ int cpu_exec(CPUOldState *env)
                     tc_ptr = tb->tc_ptr;
                 /* execute the generated code */
                     next_tb = tcg_qemu_tb_exec(env, tc_ptr);
-                    if ((next_tb & 3) == 2) {
+                    switch (next_tb & TB_EXIT_MASK) {
+                    case TB_EXIT_REQUESTED:
+                        /* Something asked us to stop executing
+                         * chained TBs; just continue round the main
+                         * loop. Whatever requested the exit will also
+                         * have set something else (eg exit_request or
+                         * interrupt_request) which we will handle
+                         * next time around the loop.
+                         */
+                        cpu->tcg_exit_req = 0;
+                        tb = (TranslationBlock *)(intptr_t)(next_tb & ~TB_EXIT_MASK);
+                        cpu_pc_from_tb(env, tb);
+                        next_tb = 0;
+                        break;
+                    case TB_EXIT_ICOUNT_EXPIRED:
+                    {
                         /* Instruction counter expired.  */
                         int insns_left;
-                        tb = (TranslationBlock *)(intptr_t)(next_tb & ~3);
+                        tb = (TranslationBlock *)(intptr_t)(next_tb & ~TB_EXIT_MASK);
                         /* Restore PC.  */
                         cpu_pc_from_tb(env, tb);
                         insns_left = env->icount_decr.u32;
@@ -620,6 +633,10 @@ int cpu_exec(CPUOldState *env)
                             next_tb = 0;
                             cpu_loop_exit(env);
                         }
+                        break;
+                    }
+                    default:
+                        break;
                     }
                 }
                 env->current_tb = NULL;

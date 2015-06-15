@@ -15,9 +15,11 @@
 */
 #ifndef TRANSLATOR_IFACES_H
 #define TRANSLATOR_IFACES_H
+
+#include "GLcommon/objectNameManager.h"
+
 #include <GLES/gl.h>
 #include <string.h>
-#include "objectNameManager.h"
 
 extern "C" {
 
@@ -90,12 +92,27 @@ typedef struct {
     __translatorMustCastToProperFunctionPointerType (*getProcAddress)(const char*);
 }GLESiface;
 
+class GlLibrary;
 
-typedef struct {
+// A structure containing function pointers implemented by the EGL
+// translator library, and called from the GLES 1.x and 2.0 translator
+// libraries.
+struct EGLiface {
+    // Get the current GLESContext instance for the current thread.
     GLEScontext* (*getGLESContext)();
+
+    // Create a new global EglImage object named |imageId| and return a
+    // pointer to its new instance.
     EglImage*    (*eglAttachEGLImage)(unsigned int imageId);
+
+    // Release a global EglImage instance named |imageId|.
     void         (*eglDetachEGLImage)(unsigned int imageId);
-}EGLiface;
+
+    // Return instance of GlLibrary class to use for dispatch.
+    // at runtime. This is implemented in the EGL library because on Windows
+    // all functions returned by wglGetProcAddress() are context-dependent!
+    GlLibrary* (*eglGetGlLibrary)();
+};
 
 typedef GLESiface* (*__translator_getGLESIfaceFunc)(const EGLiface*);
 

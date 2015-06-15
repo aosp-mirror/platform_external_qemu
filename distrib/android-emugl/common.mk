@@ -32,11 +32,7 @@ emugl-begin-host64-executable = $(call emugl-begin-module64,$1,HOST_EXECUTABLE,H
 _emugl_modules :=
 _emugl_HOST_modules :=
 
-ifeq ($(BUILD_STANDALONE_EMULATOR),true)
 EMUGL_LOCAL_EXTRAS = $(end-emulator-module-ev)
-else  # BUILD_STANDALONE_EMULATOR != true
-EMUGL_LOCAL_EXTRAS =
-endif  # BUILD_STANDALONE_EMULATOR != true
 
 # do not use directly, see functions above instead
 emugl-begin-module = \

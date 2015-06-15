@@ -13,60 +13,44 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _EGL_DISPATCH_H
-#define _EGL_DISPATCH_H
+#ifndef RENDER_EGL_DISPATCH_H
+#define RENDER_EGL_DISPATCH_H
 
-#include "egl_proc.h"
+#include "RenderEGL_functions.h"
+#include "RenderEGL_extensions_functions.h"
 
+// This header is used to define the EGLDispatch structure that contains
+// pointers to the EGL shared library used by libOpenglRender. Normally,
+// this will be our own libEGL_translator, but one could imagine a
+// vendor-specific being used instead.
+
+// There is a single global instance of this structure, named |s_egl|,
+// which must be initialized by calling init_egl_dispatch() before use.
+
+// Note that our code requires the implementation of misc EGL extensions
+// including eglSetSwapRectangleANDROID(), see RenderEGL_extensions_functions.h
+// for a full list.
+
+#define RENDER_EGL_DEFINE_TYPE(return_type, function_name, signature) \
+    typedef return_type (EGLAPIENTRY *function_name ## _t) signature;
+
+#define RENDER_EGL_DECLARE_MEMBER(return_type, function_name, signature) \
+    function_name ## _t function_name;
+
+// Define function typedefs.
+LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_DEFINE_TYPE)
+LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_DEFINE_TYPE)
+
+// Define EGLDispatch structure.
 struct EGLDispatch {
-    eglGetError_t eglGetError;
-    eglGetDisplay_t eglGetDisplay;
-    eglInitialize_t eglInitialize;
-    eglTerminate_t eglTerminate;
-    eglQueryString_t eglQueryString;
-    eglGetConfigs_t eglGetConfigs;
-    eglChooseConfig_t eglChooseConfig;
-    eglGetConfigAttrib_t eglGetConfigAttrib;
-    eglCreateWindowSurface_t eglCreateWindowSurface;
-    eglCreatePbufferSurface_t eglCreatePbufferSurface;
-    eglCreatePixmapSurface_t eglCreatePixmapSurface;
-    eglDestroySurface_t eglDestroySurface;
-    eglQuerySurface_t eglQuerySurface;
-    eglBindAPI_t eglBindAPI;
-    eglQueryAPI_t eglQueryAPI;
-    eglWaitClient_t eglWaitClient;
-    eglReleaseThread_t eglReleaseThread;
-    eglCreatePbufferFromClientBuffer_t eglCreatePbufferFromClientBuffer;
-    eglSurfaceAttrib_t eglSurfaceAttrib;
-    eglBindTexImage_t eglBindTexImage;
-    eglReleaseTexImage_t eglReleaseTexImage;
-    eglSwapInterval_t eglSwapInterval;
-    eglCreateContext_t eglCreateContext;
-    eglDestroyContext_t eglDestroyContext;
-    eglMakeCurrent_t eglMakeCurrent;
-    eglGetCurrentContext_t eglGetCurrentContext;
-    eglGetCurrentSurface_t eglGetCurrentSurface;
-    eglGetCurrentDisplay_t eglGetCurrentDisplay;
-    eglQueryContext_t eglQueryContext;
-    eglWaitGL_t eglWaitGL;
-    eglWaitNative_t eglWaitNative;
-    eglSwapBuffers_t eglSwapBuffers;
-    eglCopyBuffers_t eglCopyBuffers;
-    eglGetProcAddress_t eglGetProcAddress;
-    eglLockSurfaceKHR_t eglLockSurfaceKHR;
-    eglUnlockSurfaceKHR_t eglUnlockSurfaceKHR;
-    eglCreateImageKHR_t eglCreateImageKHR;
-    eglDestroyImageKHR_t eglDestroyImageKHR;
-    eglCreateSyncKHR_t eglCreateSyncKHR;
-    eglDestroySyncKHR_t eglDestroySyncKHR;
-    eglClientWaitSyncKHR_t eglClientWaitSyncKHR;
-    eglSignalSyncKHR_t eglSignalSyncKHR;
-    eglGetSyncAttribKHR_t eglGetSyncAttribKHR;
-    eglSetSwapRectangleANDROID_t eglSetSwapRectangleANDROID;
+    LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
+    LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
 };
 
+// Initialize EGLDispatch function. Return true on success, false on failure.
 bool init_egl_dispatch();
 
+// Global EGLDispatch instance. Call init_egl_dispatch() before using it.
 extern EGLDispatch s_egl;
 
-#endif
+#endif  // RENDER_EGL_DISPATCH_H

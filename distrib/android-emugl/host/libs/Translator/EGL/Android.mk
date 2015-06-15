@@ -5,7 +5,7 @@ host_common_LDLIBS :=
 
 ifeq ($(HOST_OS),linux)
     host_OS_SRCS = EglOsApi_glx.cpp
-    host_common_LDLIBS += -lX11 -lGL -ldl -lpthread
+    host_common_LDLIBS += -lGL -lX11 -ldl -lpthread
 endif
 
 ifeq ($(HOST_OS),darwin)
@@ -18,7 +18,7 @@ endif
 
 ifeq ($(HOST_OS),windows)
     host_OS_SRCS = EglOsApi_wgl.cpp
-    host_common_LDLIBS += -lopengl32 -lgdi32
+    host_common_LDLIBS += -lgdi32
 endif
 
 host_common_SRC_FILES :=      \
@@ -32,7 +32,6 @@ host_common_SRC_FILES :=      \
      EglSurface.cpp           \
      EglWindowSurface.cpp     \
      EglPbufferSurface.cpp    \
-     EglPixmapSurface.cpp     \
      EglThreadInfo.cpp        \
      EglDisplay.cpp           \
      ClientAPIExts.cpp

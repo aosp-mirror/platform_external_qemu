@@ -18,6 +18,9 @@
 #include "MacNative.h"
 
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/shared_library.h"
+#include "GLcommon/GLLibrary.h"
+#include "OpenglCodecCommon/ErrorLog.h"
 
 #include <list>
 
@@ -220,11 +223,6 @@ public:
         return nsGetWinDims(win, &width, &height);
     }
 
-    virtual bool isValidNativePixmap(EglOS::Surface* pix) {
-        // no support for pixmap in mac
-        return true;
-    }
-
     virtual bool checkWindowPixelFormatMatch(
             EGLNativeWindowType win,
             const EglOS::PixelFormat* pixelFormat,
@@ -240,14 +238,6 @@ public:
         bool match = nsCheckColor(win, r + g + b);
 
         return ret && match;
-    }
-
-    virtual bool checkPixmapPixelFormatMatch(
-            EGLNativePixmapType pix,
-            const EglOS::PixelFormat* pixelFormat,
-            unsigned int* width,
-            unsigned int* height) {
-        return false;
     }
 
     virtual EglOS::Context* createContext(
@@ -329,7 +319,6 @@ public:
                                  macdraw->handle(), mipmapLevel);
             break;
         }
-        case MacSurface::PIXMAP:
         default:
             return false;
         }
@@ -340,40 +329,65 @@ public:
         nsSwapBuffers();
     }
 
-    virtual void swapInterval(EglOS::Surface* win, int interval) {
-        nsSwapInterval(&interval);
-    }
-
     EGLNativeDisplayType dpy() const { return mDpy; }
 
 private:
     EGLNativeDisplayType mDpy;
 };
 
+class MacGlLibrary : public GlLibrary {
+public:
+    MacGlLibrary() : mLib(NULL) {
+        static const char kLibName[] =
+                "/System/Library/Frameworks/OpenGL.framework/OpenGL";
+        char error[256];
+        mLib = emugl::SharedLibrary::open(kLibName, error, sizeof(error));
+        if (!mLib) {
+            ERR("%s: Could not open GL library %s [%s]\n",
+                __FUNCTION__, kLibName, error);
+        }
+    }
+
+    ~MacGlLibrary() {
+        delete mLib;
+    }
+
+    // override
+    virtual GlFunctionPointer findSymbol(const char* name) {
+        if (!mLib) {
+            return NULL;
+        }
+        return reinterpret_cast<GlFunctionPointer>(mLib->findSymbol(name));
+    }
+
+private:
+    emugl::SharedLibrary* mLib;
+};
+
 class MacEngine : public EglOS::Engine {
 public:
+    MacEngine() : mGlLib() {}
+
     virtual EglOS::Display* getDefaultDisplay() {
         return new MacDisplay(0);
     }
 
-    virtual EglOS::Display* getInternalDisplay(EGLNativeDisplayType dpy) {
-        return new MacDisplay(dpy);
+    virtual GlLibrary* getGlLibrary() {
+        return &mGlLib;
     }
 
     virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
         return new MacSurface(wnd, MacSurface::WINDOW);
     }
 
-    virtual EglOS::Surface* createPixmapSurface(EGLNativePixmapType pix) {
-        return new MacSurface(pix, MacSurface::PIXMAP);
-    }
-
-    virtual void wait() {}
+private:
+    MacGlLibrary mGlLib;
 };
 
 emugl::LazyInstance<MacEngine> sHostEngine = LAZY_INSTANCE_INIT;
 
 }  // namespace
+
 
 // static
 EglOS::Engine* EglOS::Engine::getHostInstance() {

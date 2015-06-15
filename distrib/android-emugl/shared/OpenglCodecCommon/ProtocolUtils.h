@@ -167,6 +167,12 @@ public:
         }
     }
 
+    ~OutputBuffer() {
+        if (mBuff != mOrgBuff) {
+            free(mBuff);
+        }
+    }
+
     void* get() const {
         return mBuff;
     }

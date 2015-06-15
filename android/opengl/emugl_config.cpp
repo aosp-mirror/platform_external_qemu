@@ -44,11 +44,22 @@ static void resetBackendList(int bitness) {
             bitness);
 }
 
+static bool stringVectorContains(const StringVector& list,
+                                 const char* value) {
+    for (size_t n = 0; n < list.size(); ++n) {
+        if (!strcmp(list[n].c_str(), value)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,
                       const char* gpu_option,
-                      int bitness) {
+                      int bitness,
+                      bool no_window) {
     // zero all fields first.
     memset(config, 0, sizeof(*config));
 
@@ -90,28 +101,32 @@ bool emuglConfig_init(EmuglConfig* config,
     // is detected.
     if (!strcmp(gpu_mode, "auto") && !gpu_option) {
         // The default will be 'host' unless NX or Chrome Remote Desktop
-        // is detected.
-        if (System::get()->envGet("NX_TEMP") != NULL) {
-            D("%s: NX session detected\n", __FUNCTION__);
+        // is detected, or |no_window| is true.
+        String sessionType;
+        if (System::get()->isRemoteSession(&sessionType)) {
+            D("%s: %s session detected\n", __FUNCTION__, sessionType.c_str());
             if (!sBackendList->contains("mesa")) {
                 config->enabled = false;
                 snprintf(config->status, sizeof(config->status),
-                        "GPU emulation is disabled under NX without Mesa");
+                        "GPU emulation is disabled under %s without Mesa",
+                        sessionType.c_str());
                 return true;
             }
             D("%s: 'mesa' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "mesa";
-        } else if (System::get()->envGet(
-                "CHROME_REMOTE_DESKTOP_SESSION") != NULL) {
-            D("%s: Chrome Remote Desktop session detected\n", __FUNCTION__);
-            if (!sBackendList->contains("mesa")) {
+        } else if (no_window) {
+            if (stringVectorContains(sBackendList->names(), "mesa")) {
+                D("%s: Headless (-no-window) mode, using Mesa backend\n",
+                  __FUNCTION__);
+                gpu_mode = "mesa";
+            } else {
+                D("%s: Headless (-no-window) mode without Mesa, forcing '-gpu off'\n",
+                  __FUNCTION__);
                 config->enabled = false;
                 snprintf(config->status, sizeof(config->status),
-                        "GPU emulation is disabled under Chrome Remote Desktop without Mesa");
+                        "GPU emulation is disabled (-no-window without Mesa)");
                 return true;
             }
-            D("%s: 'mesa' mode auto-selected\n", __FUNCTION__);
-            gpu_mode = "mesa";
         } else {
             D("%s: 'host' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "host";
@@ -122,14 +137,7 @@ bool emuglConfig_init(EmuglConfig* config,
     // to desktop GL, anything else must be checked against existing backends.
     if (strcmp(gpu_mode, "host") != 0) {
         const StringVector& backends = sBackendList->names();
-        const char* backend = NULL;
-        for (size_t n = 0; n < backends.size(); ++n) {
-            if (!strcmp(backends[n].c_str(), gpu_mode)) {
-                backend = gpu_mode;
-                break;
-            }
-        }
-        if (!backend) {
+        if (!stringVectorContains(backends, gpu_mode)) {
             String error = StringFormat(
                 "Invalid GPU mode '%s', use one of: on off host", gpu_mode);
             for (size_t n = 0; n < backends.size(); ++n) {
@@ -153,7 +161,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     System* system = System::get();
 
     if (!config->enabled) {
-        // There is no GPU emulation. As a special case, define
+        // There is no real GPU emulation. As a special case, define
         // SDL_RENDER_DRIVER to 'software' to ensure that the
         // software SDL renderer is being used. This allows one
         // to run with '-gpu off' under NX and Chrome Remote Desktop
@@ -229,5 +237,10 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv2, &lib)) {
         system->envSet("ANDROID_GLESv2_LIB", lib.c_str());
+    }
+
+    if (!strcmp(config->backend, "mesa")) {
+        system->envSet("ANDROID_GL_LIB", "mesa");
+        system->envSet("ANDROID_GL_SOFTWARE_RENDERER", "1");
     }
 }

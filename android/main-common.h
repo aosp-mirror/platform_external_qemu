@@ -83,6 +83,15 @@ void sanitizeOptions( AndroidOptions* opts );
  */
 struct AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild);
 
+/* Handle the command-line options that are common to both the classic and
+ * and new emulator code bases. |opts| is the set of options, that may be
+ * modified by the function, |hw| is the hardware configuration that will
+ * be modified by the function, and |avd| is the AVD information data.
+ */
+void handleCommonEmulatorOptions(AndroidOptions* opts,
+                                 AndroidHwConfig* hw,
+                                 AvdInfo* avd);
+
 /* Populate the hwConfig fields corresponding to the kernel/disk images
  * used by the emulator. This will zero *hwConfig first.
  */

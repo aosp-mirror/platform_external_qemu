@@ -104,12 +104,6 @@ EglDisplay* EglGlobalInfo::getDisplay(EGLDisplay dpy) const {
     return NULL;
 }
 
-// static
-EglOS::Display* EglGlobalInfo::generateInternalDisplay(
-        EGLNativeDisplayType dpy) {
-    return getInstance()->m_engine->getInternalDisplay(dpy);
-}
-
 void EglGlobalInfo::initClientExtFuncTable(GLESVersion ver) {
     emugl::Mutex::AutoLock mutex(m_lock);
     if (!m_gles_extFuncs_inited[ver]) {

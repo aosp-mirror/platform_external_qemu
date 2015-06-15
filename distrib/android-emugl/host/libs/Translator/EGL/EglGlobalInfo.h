@@ -74,14 +74,6 @@ public:
         return m_engine;
     }
 
-    // Given a native display handle |dpy|, generate the corresponding
-    // internal native display handle and return it. This is mostly used
-    // on Windows, where |dpy| corresponds to a HDC, while the internal
-    // handle corresponds to a WGL DISPLAY value, which is different.
-    // For other platforms, this is likely to return the input |dpy|.
-    static EglOS::Display* generateInternalDisplay(
-            EGLNativeDisplayType dpy);
-
     // Set the GLES interface pointer corresponding to a given GLES version.
     // |iface| is a pointer to a structure containing function pointers
     // related to a specific GLES version.

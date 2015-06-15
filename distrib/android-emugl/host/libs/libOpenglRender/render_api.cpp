@@ -71,7 +71,7 @@ RENDER_APICALL int RENDER_APIENTRY initLibrary(void)
 }
 
 RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
-        int width, int height, char* addr, size_t addrLen) {
+        int width, int height, bool useSubWindow, char* addr, size_t addrLen) {
     //
     // Fail if renderer is already initialized
     //
@@ -104,7 +104,7 @@ RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
     // initialize the renderer and listen to connections
     // on a thread in the current process.
     //
-    s_renderWindow = new RenderWindow(width, height, kUseThread);
+    s_renderWindow = new RenderWindow(width, height, kUseThread, useSubWindow);
     if (!s_renderWindow) {
         ERR("Could not create rendering window class");
         return false;

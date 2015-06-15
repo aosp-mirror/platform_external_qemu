@@ -91,12 +91,16 @@ static const char kHostOs[] = "windows";
 // |ttyPrefix| is the prefix to use for TTY devices.
 // |kernelExtraArgs|, if not NULL, is an optional string appended to the kernel
 // parameters.
+// |storageDeviceType| is the QEMU storage device type.
+// |networkDeviceType| is the QEMU network device type.
 struct TargetInfo {
     const char* androidArch;
     const char* qemuArch;
     const char* qemuCpu;
     const char* ttyPrefix;
     const char* kernelExtraArgs;
+    const char* storageDeviceType;
+    const char* networkDeviceType;
 };
 
 // The current target architecture information!
@@ -107,6 +111,8 @@ const TargetInfo kTarget = {
     "cortex-a57",
     "ttyAMA",
     " keep_bootcon earlyprintk=ttyAMA0",
+    "virtio-blk-device",
+    "virtio-net-device",
 #endif
 #ifdef TARGET_MIPS64
     "mips64",
@@ -114,6 +120,8 @@ const TargetInfo kTarget = {
     "MIPS64R6-generic",
     "ttyGF",
     NULL,
+    "virtio-blk-device",
+    "virtio-net-device",
 #endif
 };
 
@@ -162,21 +170,6 @@ void emulator_help( void ) {
     exit(1);
 }
 
-/* TODO: Put in shared source file */
-char* _getFullFilePath(const char* rootPath, const char* fileName) {
-    if (path_is_absolute(fileName)) {
-        return ASTRDUP(fileName);
-    } else {
-        char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-
-        p = bufprint(temp, end, "%s/%s", rootPath, fileName);
-        if (p >= end) {
-            return NULL;
-        }
-        return ASTRDUP(temp);
-    }
-}
-
 uint64_t _adjustPartitionSize(const char*  description,
                               uint64_t     imageBytes,
                               uint64_t     defaultBytes,
@@ -203,8 +196,6 @@ uint64_t _adjustPartitionSize(const char*  description,
 
     return convertMBToBytes(imageMB);
 }
-
-bool android_op_wipe_data;
 
 }  // namespace
 
@@ -313,413 +304,7 @@ extern "C" int main(int argc, char **argv, char **envp) {
         reassign_string(&android_hw->hw_cpu_arch, kTarget.androidArch);
     }
 
-    /* generate arguments for the underlying qemu main() */
-    {
-        char*  kernelFile    = opts->kernel;
-
-        if (kernelFile == NULL) {
-            kernelFile = avdInfo_getKernelPath(avd);
-            if (kernelFile == NULL) {
-                derror( "This AVD's configuration is missing a kernel file!!" );
-                exit(2);
-            }
-            D("autoconfig: -kernel %s", kernelFile);
-        }
-        if (!path_exists(kernelFile)) {
-            derror( "Invalid or missing kernel image file: %s", kernelFile );
-            exit(2);
-        }
-
-        hw->kernel_path = kernelFile;
-    }
-
-    char versionString[256];
-    if (!android_pathProbeKernelVersionString(hw->kernel_path,
-                                              versionString,
-                                              sizeof(versionString))) {
-        derror("Can't find 'Linux version ' string in kernel image file: %s",
-               hw->kernel_path);
-        exit(2);
-    }
-
-    KernelVersion kernelVersion;
-    if (!android_parseLinuxVersionString(versionString, &kernelVersion)) {
-        derror("Can't parse 'Linux version ' string in kernel image file: '%s'",
-               versionString);
-        exit(2);
-    }
-
-    // Auto-detect kernel device naming scheme if needed.
-    if (androidHwConfig_getKernelDeviceNaming(hw) < 0) {
-        const char* newDeviceNaming = "no";
-        if (kernelVersion >= KERNEL_VERSION_3_10_0) {
-            D("Auto-detect: Kernel image requires new device naming scheme.");
-            newDeviceNaming = "yes";
-        } else {
-            D("Auto-detect: Kernel image requires legacy device naming scheme.");
-        }
-        AFREE(hw->kernel_newDeviceNaming);
-        hw->kernel_newDeviceNaming = ASTRDUP(newDeviceNaming);
-    }
-
-    // Auto-detect YAFFS2 partition support if needed.
-    if (androidHwConfig_getKernelYaffs2Support(hw) < 0) {
-        // Essentially, anything before API level 20 supports Yaffs2
-        const char* newYaffs2Support = "no";
-        if (avdInfo_getApiLevel(avd) < 20) {
-            newYaffs2Support = "yes";
-            D("Auto-detect: Kernel does support YAFFS2 partitions.");
-        } else {
-            D("Auto-detect: Kernel does not support YAFFS2 partitions.");
-        }
-        AFREE(hw->kernel_supportsYaffs2);
-        hw->kernel_supportsYaffs2 = ASTRDUP(newYaffs2Support);
-    }
-
-
-    /* opts->ramdisk is never NULL (see createAVD) here */
-    if (opts->ramdisk) {
-        reassign_string(&hw->disk_ramdisk_path, opts->ramdisk);
-    }
-    else if (!hw->disk_ramdisk_path[0]) {
-        hw->disk_ramdisk_path = avdInfo_getRamdiskPath(avd);
-        D("autoconfig: -ramdisk %s", hw->disk_ramdisk_path);
-    }
-
-    /* -partition-size is used to specify the max size of both the system
-     * and data partition sizes.
-     */
-    uint64_t defaultPartitionSize = convertMBToBytes(200);
-
-    if (opts->partition_size) {
-        char*  end;
-        long   sizeMB = strtol(opts->partition_size, &end, 0);
-        long   minSizeMB = 10;
-        long   maxSizeMB = LONG_MAX / ONE_MB;
-
-        if (sizeMB < 0 || *end != 0) {
-            derror( "-partition-size must be followed by a positive integer" );
-            exit(1);
-        }
-        if (sizeMB < minSizeMB || sizeMB > maxSizeMB) {
-            derror( "partition-size (%d) must be between %dMB and %dMB",
-                    sizeMB, minSizeMB, maxSizeMB );
-            exit(1);
-        }
-        defaultPartitionSize = (uint64_t) sizeMB * ONE_MB;
-    }
-
-    /** SYSTEM PARTITION **/
-
-    if (opts->sysdir == NULL) {
-        if (avdInfo_inAndroidBuild(avd)) {
-            opts->sysdir = ASTRDUP(avdInfo_getContentPath(avd));
-            D("autoconfig: -sysdir %s", opts->sysdir);
-        }
-    }
-
-    if (opts->sysdir != NULL) {
-        if (!path_exists(opts->sysdir)) {
-            derror("Directory does not exist: %s", opts->sysdir);
-            exit(1);
-        }
-    }
-
-    {
-        char*  rwImage   = NULL;
-        char*  initImage = NULL;
-
-        do {
-            if (opts->system == NULL) {
-                /* If -system is not used, try to find a runtime system image
-                * (i.e. system-qemu.img) in the content directory.
-                */
-                rwImage = avdInfo_getSystemImagePath(avd);
-                if (rwImage != NULL) {
-                    break;
-                }
-                /* Otherwise, try to find the initial system image */
-                initImage = avdInfo_getSystemInitImagePath(avd);
-                if (initImage == NULL) {
-                    derror("No initial system image for this configuration!");
-                    exit(1);
-                }
-                break;
-            }
-
-            /* If -system <name> is used, use it to find the initial image */
-            if (opts->sysdir != NULL && !path_exists(opts->system)) {
-                initImage = _getFullFilePath(opts->sysdir, opts->system);
-            } else {
-                initImage = ASTRDUP(opts->system);
-            }
-            if (!path_exists(initImage)) {
-                derror("System image file doesn't exist: %s", initImage);
-                exit(1);
-            }
-
-        } while (0);
-
-        if (rwImage != NULL) {
-            /* Use the read/write image file directly */
-            hw->disk_systemPartition_path     = rwImage;
-            hw->disk_systemPartition_initPath = NULL;
-            D("Using direct system image: %s", rwImage);
-        } else if (initImage != NULL) {
-            hw->disk_systemPartition_path = NULL;
-            hw->disk_systemPartition_initPath = initImage;
-            D("Using initial system image: %s", initImage);
-        }
-
-        /* Check the size of the system partition image.
-        * If we have an AVD, it must be smaller than
-        * the disk.systemPartition.size hardware property.
-        *
-        * Otherwise, we need to adjust the systemPartitionSize
-        * automatically, and print a warning.
-        *
-        */
-        const char* systemImage = hw->disk_systemPartition_path;
-        uint64_t    systemBytes;
-
-        if (systemImage == NULL)
-            systemImage = hw->disk_systemPartition_initPath;
-
-        if (path_get_size(systemImage, &systemBytes) < 0) {
-            derror("Missing system image: %s", systemImage);
-            exit(1);
-        }
-
-        hw->disk_systemPartition_size =
-            _adjustPartitionSize("system", systemBytes, defaultPartitionSize,
-                                 avdInfo_inAndroidBuild(avd));
-    }
-
-    /** DATA PARTITION **/
-
-    if (opts->datadir) {
-        if (!path_exists(opts->datadir)) {
-            derror("Invalid -datadir directory: %s", opts->datadir);
-        }
-    }
-
-    {
-        char*  dataImage = NULL;
-        char*  initImage = NULL;
-
-        do {
-            if (!opts->data) {
-                dataImage = avdInfo_getDataImagePath(avd);
-                if (dataImage != NULL) {
-                    D("autoconfig: -data %s", dataImage);
-                    break;
-                }
-                dataImage = avdInfo_getDefaultDataImagePath(avd);
-                if (dataImage == NULL) {
-                    derror("No data image path for this configuration!");
-                    exit (1);
-                }
-                opts->wipe_data = 1;
-                break;
-            }
-
-            if (opts->datadir) {
-                dataImage = _getFullFilePath(opts->datadir, opts->data);
-            } else {
-                dataImage = ASTRDUP(opts->data);
-            }
-        } while (0);
-
-        if (opts->initdata != NULL) {
-            initImage = ASTRDUP(opts->initdata);
-            if (!path_exists(initImage)) {
-                derror("Invalid initial data image path: %s", initImage);
-                exit(1);
-            }
-        } else {
-            initImage = avdInfo_getDataInitImagePath(avd);
-            D("autoconfig: -initdata %s", initImage);
-        }
-
-        hw->disk_dataPartition_path = dataImage;
-        if (opts->wipe_data) {
-            hw->disk_dataPartition_initPath = initImage;
-        } else {
-            hw->disk_dataPartition_initPath = NULL;
-        }
-        android_op_wipe_data = opts->wipe_data;
-
-        uint64_t     defaultBytes =
-                hw->disk_dataPartition_size == 0 ?
-                defaultPartitionSize :
-                hw->disk_dataPartition_size;
-        uint64_t     dataBytes;
-        const char*  dataPath = hw->disk_dataPartition_initPath;
-
-        if (dataPath == NULL)
-            dataPath = hw->disk_dataPartition_path;
-
-        path_get_size(dataPath, &dataBytes);
-
-        hw->disk_dataPartition_size =
-            _adjustPartitionSize("data", dataBytes, defaultBytes,
-                                 avdInfo_inAndroidBuild(avd));
-    }
-
-    /** CACHE PARTITION **/
-
-    if (opts->no_cache) {
-        /* No cache partition at all */
-        hw->disk_cachePartition = 0;
-    }
-    else if (!hw->disk_cachePartition) {
-        if (opts->cache) {
-            dwarning( "Emulated hardware doesn't support a cache partition. -cache option ignored!" );
-            opts->cache = NULL;
-        }
-    }
-    else
-    {
-        if (!opts->cache) {
-            /* Find the current cache partition file */
-            opts->cache = avdInfo_getCachePath(avd);
-            if (opts->cache == NULL) {
-                /* The file does not exists, we will force its creation
-                 * if we are not in the Android build system. Otherwise,
-                 * a temporary file will be used.
-                 */
-                if (!avdInfo_inAndroidBuild(avd)) {
-                    opts->cache = avdInfo_getDefaultCachePath(avd);
-                }
-            }
-            if (opts->cache) {
-                D("autoconfig: -cache %s", opts->cache);
-            }
-        }
-
-        if (opts->cache) {
-            hw->disk_cachePartition_path = ASTRDUP(opts->cache);
-        }
-    }
-
-    if (hw->disk_cachePartition_path && opts->cache_size) {
-        /* Set cache partition size per user options. */
-        char*  end;
-        long   sizeMB = strtol(opts->cache_size, &end, 0);
-
-        if (sizeMB < 0 || *end != 0) {
-            derror( "-cache-size must be followed by a positive integer" );
-            exit(1);
-        }
-        hw->disk_cachePartition_size = (uint64_t) sizeMB * ONE_MB;
-    }
-
-    /** SD CARD PARTITION */
-
-    if (!hw->hw_sdCard) {
-        /* No SD Card emulation, so -sdcard will be ignored */
-        if (opts->sdcard) {
-            dwarning( "Emulated hardware doesn't support SD Cards. -sdcard option ignored." );
-            opts->sdcard = NULL;
-        }
-    } else {
-        /* Auto-configure -sdcard if it is not available */
-        if (!opts->sdcard) {
-            do {
-                /* If -datadir <path> is used, look for a sdcard.img file here */
-                if (opts->datadir) {
-                    char tmp[PATH_MAX], *tmpend = tmp + sizeof(tmp);
-                    bufprint(tmp, tmpend, "%s/%s", opts->datadir, "system.img");
-                    if (path_exists(tmp)) {
-                        opts->sdcard = strdup(tmp);
-                        break;
-                    }
-                }
-
-                /* Otherwise, look at the AVD's content */
-                opts->sdcard = avdInfo_getSdCardPath(avd);
-                if (opts->sdcard != NULL) {
-                    break;
-                }
-
-                /* Nothing */
-            } while (0);
-
-            if (opts->sdcard) {
-                D("autoconfig: -sdcard %s", opts->sdcard);
-            }
-        }
-    }
-
-    if(opts->sdcard) {
-        uint64_t  size;
-        if (path_get_size(opts->sdcard, &size) == 0) {
-            /* see if we have an sdcard image.  get its size if it exists */
-            /* due to what looks like limitations of the MMC protocol, one has
-             * to use an SD Card image that is equal or larger than 9 MB
-             */
-            if (size < 9*1024*1024ULL) {
-                fprintf(stderr, "### WARNING: SD Card files must be at least 9MB, ignoring '%s'\n", opts->sdcard);
-            } else {
-                hw->hw_sdCard_path = ASTRDUP(opts->sdcard);
-            }
-        } else {
-            dwarning("no SD Card image at '%s'", opts->sdcard);
-        }
-    }
-
-    if (opts->memory) {
-        char*  end;
-        long   ramSize = strtol(opts->memory, &end, 0);
-        if (ramSize < 0 || *end != 0) {
-            derror( "-memory must be followed by a positive integer" );
-            exit(1);
-        }
-        if (ramSize < 32 || ramSize > 4096) {
-            derror( "physical memory size must be between 32 and 4096 MB" );
-            exit(1);
-        }
-        hw->hw_ramSize = ramSize;
-    } else {
-        int ramSize = hw->hw_ramSize;
-        if (ramSize <= 0) {
-            /* Compute the default RAM size based on the size of screen.
-             * This is only used when the skin doesn't provide the ram
-             * size through its hardware.ini (i.e. legacy ones) or when
-             * in the full Android build system.
-             */
-            int64_t pixels  = hw->hw_lcd_width * hw->hw_lcd_height;
-            /* The following thresholds are a bit liberal, but we
-             * essentially want to ensure the following mappings:
-             *
-             *   320x480 -> 96
-             *   800x600 -> 128
-             *  1024x768 -> 256
-             *
-             * These are just simple heuristics, they could change in
-             * the future.
-             */
-            if (pixels <= 250000)
-                ramSize = 96;
-            else if (pixels <= 500000)
-                ramSize = 128;
-            else
-                ramSize = 256;
-
-            hw->hw_ramSize = ramSize;
-        }
-    }
-
-#if 1
-    // For ARM64, ensure a minimum of 1GB or memory, anything lower is
-    // very painful during the boot process and after that.
-    if (hw->hw_ramSize < 1024) {
-        dwarning("Increasing RAM size to 1GB");
-        hw->hw_ramSize = 1024;
-    }
-#endif
-
-    D("Physical RAM size: %dMB\n", hw->hw_ramSize);
+    handleCommonEmulatorOptions(opts, hw, avd);
 
     if (opts->gpu) {
         const char* gpu = opts->gpu;
@@ -776,6 +361,7 @@ extern "C" int main(int argc, char **argv, char **envp) {
     // Now build the QEMU parameters.
     const char* args[128];
     int n = 0;
+    int driveIndex = 0;
 
     args[n++] = qemuExecutable.c_str();
 
@@ -797,6 +383,10 @@ extern "C" int main(int argc, char **argv, char **envp) {
     if (kTarget.kernelExtraArgs) {
         kernelCommandLine += kTarget.kernelExtraArgs;
     }
+    if (opts->selinux) {
+        kernelCommandLine += StringFormat(
+                " androidboot.selinux=%s", opts->selinux);
+    }
     args[n++] = kernelCommandLine.c_str();
 
     args[n++] = "-serial";
@@ -810,38 +400,61 @@ extern "C" int main(int argc, char **argv, char **envp) {
     args[n++] = "-initrd";
     args[n++] = hw->disk_ramdisk_path;
 
+    // Sdcard
+    String sdCardParam;
+    String sdCardDevice;
+    if (hw->hw_sdCard_path != NULL && strcmp(hw->hw_sdCard_path, "")) {
+        args[n++] = "-drive";
+            sdCardParam =
+                StringFormat("index=%d,id=sdcard,format=raw,file=%s",
+                             driveIndex++, hw->hw_sdCard_path);
+        args[n++] = sdCardParam.c_str();
+        args[n++] = "-device";
+        sdCardDevice =
+                StringFormat("%s,drive=sdcard", kTarget.storageDeviceType);
+        args[n++] = sdCardDevice.c_str();
+    }
+
     // Data partition.
     args[n++] = "-drive";
     String userDataParam =
-            StringFormat("index=2,id=userdata,file=%s",
-                         hw->disk_dataPartition_path);
+            StringFormat("index=%d,id=userdata,file=%s",
+                         driveIndex++, hw->disk_dataPartition_path);
     args[n++] = userDataParam.c_str();
     args[n++] = "-device";
-    args[n++] = "virtio-blk-device,drive=userdata";
+    String userDataDevice =
+            StringFormat("%s,drive=userdata", kTarget.storageDeviceType);
+    args[n++] = userDataDevice.c_str();
 
     // Cache partition.
     args[n++] = "-drive";
     String cacheParam =
-            StringFormat("index=1,id=cache,file=%s",
-                         hw->disk_cachePartition_path);
+            StringFormat("index=%d,id=cache,file=%s",
+                         driveIndex++, hw->disk_cachePartition_path);
     args[n++] = cacheParam.c_str();
     args[n++] = "-device";
-    args[n++] = "virtio-blk-device,drive=cache";
+    String cacheDevice =
+            StringFormat("%s,drive=cache", kTarget.storageDeviceType);
+    args[n++] = cacheDevice.c_str();
 
     // System partition.
     args[n++] = "-drive";
     String systemParam =
-            StringFormat("index=0,id=system,file=%s",
-                         hw->disk_systemPartition_initPath);
+            StringFormat("index=%d,id=system,file=%s",
+                         driveIndex++, hw->disk_systemPartition_initPath);
     args[n++] = systemParam.c_str();
     args[n++] = "-device";
-    args[n++] = "virtio-blk-device,drive=system";
+    String systemDevice =
+            StringFormat("%s,drive=system", kTarget.storageDeviceType);
+    args[n++] = systemDevice.c_str();
 
     // Network
     args[n++] = "-netdev";
     args[n++] = "user,id=mynet";
     args[n++] = "-device";
-    args[n++] = "virtio-net-device,netdev=mynet";
+    String netDevice =
+            StringFormat("%s,netdev=mynet", kTarget.networkDeviceType);
+    args[n++] = netDevice.c_str();
     args[n++] = "-show-cursor";
 
     // Graphics
@@ -851,8 +464,12 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     // Data directory (for keymaps and PC Bios).
     args[n++] = "-L";
-    String dataDir = getNthParentDir(qemuExecutable.c_str(), 2U);
-    dataDir += "/pc-bios";
+    String dataDir = getNthParentDir(qemuExecutable.c_str(), 3U);
+    if (dataDir.empty()) {
+        dataDir = "lib/pc-bios";
+    } else {
+        dataDir += "/lib/pc-bios";
+    }
     args[n++] = dataDir.c_str();
     args[n] = NULL;
 
