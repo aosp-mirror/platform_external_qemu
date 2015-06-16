@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f9ba1036_98a559bf",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3114,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-06-16T03:33:25Z",
+      "side": 1,
+      "message": "Instead of making the above changes, how about just modifying this call? We could do something like:\n\n const char* system_image_path \u003d android_hw-\u003edisk_systemPartition_path ?\n                                 : android_hw-\u003edisk_systemPartition_initPath;\n android_nand_add_image(\"system\",\n                        system_partition_type,\n                        ANDROID_PARTITION_OPEN_MODE_MUST_EXIST,\n                        android_hw-\u003edisk_systemPartition_size,\n                        system_image_path,\n                        NULL);\n\nThis should ensure that we get\n\n need_temp_partition \u003d false\n\nin android_nand_add_image(), and that the creation of the temp file is skipped.\n\nThere may be a corner case not covered by this code: usually disk.systemPartition.path is missing from hardware-qemu.ini, but if the user adds it and sets its value to a non-existent file, they may want the system image copied to that location. But that can be easily handled if deemed necessary.",
+      "revId": "3f44a694366a126996ac4c6f4bae50308e4a4e5e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
