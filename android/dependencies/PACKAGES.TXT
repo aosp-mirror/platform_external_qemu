@@ -21,3 +21,6 @@ SHA1=53ec316946bce7b63327f73c40ac9be1f50e31b2    URL=ftp://ftp.freedesktop.org/p
 
 # Google Breakpad
 SHA1=858a3e171d744d2aee5ef4b70382ed57db8eb70c    SVN=http://google-breakpad.googlecode.com/svn/trunk/google-breakpad-read-only BRANCH=1418 BASENAME=google-breakpad
+
+# Qt 5.4
+SHA1=3703c6a584193e759f5b9cbf0ea6022d685ab827    URL=http://download.qt.io/official_releases/qt/5.4/5.4.2/submodules/qtbase-opensource-src-5.4.2.tar.xz BASENAME=qt-base SRCDIR=qtbase-opensource-src-5.4.2
