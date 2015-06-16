@@ -16,6 +16,40 @@
       "revId": "8e2854cefdd893e0e08e6c45d1cd62a0c7efb02d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f95690ec_83f94e48",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2312,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-16T23:30:56Z",
+      "side": 1,
+      "message": "nit: please use spaces around \u003d, as in:\n\n  int hh \u003d 0, mm \u003d 0, ss \u003d 0;",
+      "revId": "8e2854cefdd893e0e08e6c45d1cd62a0c7efb02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f95690ec_63fc6a37",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2340,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-16T23:30:56Z",
+      "side": 1,
+      "message": "nit: I believe the following will give the same results and be a little easier to understand / maintain:\n\n  hh \u003d (int) ((tm.tv_sec / (60 * 60)) % 24);\n  mm \u003d (int) ((tm.tv_sec / 60) % 60);\n  ss \u003d (int) (tm.tv_sec % 60);",
+      "revId": "8e2854cefdd893e0e08e6c45d1cd62a0c7efb02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
