@@ -2264,8 +2264,6 @@ do_geo_fix( ControlClient  client, char*  args )
     double  params[ NUM_GEO_PARAMS ];
     int     n_satellites = 1;
 
-    static  int last_time = 0;
-
     if (!p)
         p = "";
 
@@ -2311,6 +2309,7 @@ do_geo_fix( ControlClient  client, char*  args )
         double   val;
         int      deg, min;
         char     hemi;
+        int      hh = 0, mm = 0, ss = 0;
 
         /* format overview:
          *    time of fix      123519     12:35:19 UTC
@@ -2329,9 +2328,17 @@ do_geo_fix( ControlClient  client, char*  args )
          *    dgps sid         <dontcare> DGPS station id
          */
 
-        /* first, the time */
-        stralloc_add_format( s, "$GPGGA,%06d", last_time );
-        last_time ++;
+        // Get the current time as hh:mm:ss
+        struct timeval tm;
+
+        if (0 == gettimeofday(&tm, NULL)) {
+            // tm.tv_sec is elapsed seconds since epoch (UTC, which is what we want)
+            hh = (int) (tm.tv_sec / (60 * 60)) % 24;
+            mm = (int) (tm.tv_sec /  60      ) % 60;
+            ss = (int) (tm.tv_sec            ) % 60;
+        }
+
+        stralloc_add_format( s, "$GPGGA,%02d%02d%02d", hh, mm, ss);
 
         /* then the latitude */
         hemi = 'N';
@@ -2380,9 +2387,9 @@ do_geo_fix( ControlClient  client, char*  args )
 
 static const CommandDefRec  geo_commands[] =
 {
-    { "nmea", "send an GPS NMEA sentence",
-    "'geo nema <sentence>' sends a NMEA 0183 sentence to the emulated device, as\r\n"
-    "if it came from an emulated GPS modem. <sentence> must begin with '$GP'. only\r\n"
+    { "nmea", "send a GPS NMEA sentence",
+    "'geo nema <sentence>' sends an NMEA 0183 sentence to the emulated device, as\r\n"
+    "if it came from an emulated GPS modem. <sentence> must begin with '$GP'. Only\r\n"
     "'$GPGGA' and '$GPRCM' sentences are supported at the moment.\r\n",
     NULL, do_geo_nmea, NULL },
 
