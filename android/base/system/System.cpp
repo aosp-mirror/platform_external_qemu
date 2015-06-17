@@ -170,6 +170,30 @@ public:
 #endif
     }
 
+    virtual bool isRemoteSession(String* sessionType) const {
+        if (getenv("NX_TEMP") != NULL) {
+            if (sessionType) {
+                *sessionType = "NX";
+            }
+            return true;
+        }
+        if (getenv("CHROME_REMOTE_DESKTOP_SESSION") != NULL) {
+            if (sessionType) {
+                *sessionType = "Chrome Remote Desktop";
+            }
+            return true;
+        }
+#ifdef _WIN32
+        if (GetSystemMetrics(SM_REMOTESESSION)) {
+            if (sessionType) {
+                *sessionType = "Windows Remote Desktop";
+            }
+            return true;
+        }
+#endif  // _WIN32
+        return false;
+    }
+
     virtual bool pathExists(const char* path) {
         return pathExistsInternal(path);
     }

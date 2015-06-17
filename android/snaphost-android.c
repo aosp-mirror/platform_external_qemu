@@ -38,11 +38,11 @@ _cmp_hw_config(IniFile* current, IniFile* saved)
     int n, ret = 0;
     const int num_pairs = iniFile_getPairCount(current);
 
-    /* Check 1: must contain same number of entries. */
+    /* Check 1: better contain same number of entries; but this is a non-fatal requirement*/
     if (num_pairs != iniFile_getPairCount(saved)) {
         D("Different numbers of entries in the HW config files. Current contains %d, while saved contains %d entries.",
           num_pairs, iniFile_getPairCount(saved));
-        return -1;
+        // return -1;
     }
 
     /* Iterate through the entries in the current file, comparing them to entries

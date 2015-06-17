@@ -15,6 +15,8 @@
 #ifndef EMUGL_COMMON_SHARED_LIBRARY_H
 #define EMUGL_COMMON_SHARED_LIBRARY_H
 
+#include <stddef.h>
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -50,6 +52,17 @@ public:
     // deleted by the caller.
     static SharedLibrary* open(const char* libraryName);
 
+    // A variant of open() that can report a human-readable error if loading
+    // the library fails. |error| is a caller-provided buffer of |errorSize|
+    // bytes that will be filled with snprintf() and always zero terminated.
+    //
+    // On success, return a new SharedLibrary instance, and do not touch
+    // the content of |error|. On failure, return NULL, and sets the content
+    // of |error|.
+    static SharedLibrary* open(const char* libraryName,
+                               char* error,
+                               size_t errorSize);
+
     // Closes an existing SharedLibrary instance.
     ~SharedLibrary();
 
@@ -60,7 +73,7 @@ public:
     // Probe a given SharedLibrary instance to find a symbol named
     // |symbolName| in it. Return its address as a FunctionPtr, or
     // NULL if the symbol is not found.
-    FunctionPtr findSymbol(const char* symbolName);
+    FunctionPtr findSymbol(const char* symbolName) const;
 
 private:
 #ifdef _WIN32

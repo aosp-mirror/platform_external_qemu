@@ -93,13 +93,13 @@ private:
 
 class ScopedSharedLibrary {
 public:
-    explicit ScopedSharedLibrary(SharedLibrary* lib) : mLib(lib) {}
+    explicit ScopedSharedLibrary(const SharedLibrary* lib) : mLib(lib) {}
     ~ScopedSharedLibrary() {
         delete mLib;
     }
-    SharedLibrary* get() const { return mLib; }
+    const SharedLibrary* get() const { return mLib; }
 
-    SharedLibrary* operator->() { return mLib; }
+    const SharedLibrary* operator->() { return mLib; }
 
     void release() {
         delete mLib;
@@ -107,7 +107,7 @@ public:
     }
 
 private:
-    SharedLibrary* mLib;
+    const SharedLibrary* mLib;
 };
 
 }  // namespace
@@ -115,6 +115,18 @@ private:
 TEST_F(SharedLibraryTest, Open) {
     ScopedSharedLibrary lib(SharedLibrary::open(library_path()));
     EXPECT_TRUE(lib.get());
+}
+
+TEST_F(SharedLibraryTest, OpenFailureWithError) {
+    char error[256];
+    error[0] = '\0';
+    SharedLibrary* lib = SharedLibrary::open("/tmp/does/not/exists",
+                                             error,
+                                             sizeof(error));
+    EXPECT_FALSE(lib);
+    EXPECT_TRUE(error[0])
+            << "Could not get error string when failing to load library";
+    printf("Expected library load failure: [%s]\n", error);
 }
 
 TEST_F(SharedLibraryTest, OpenLibraryWithExtension) {

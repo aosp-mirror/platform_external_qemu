@@ -17,6 +17,10 @@
 
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/mutex.h"
+#include "emugl/common/shared_library.h"
+#include "GLcommon/GLLibrary.h"
+
+#include "OpenglCodecCommon/ErrorLog.h"
 
 #include <string.h>
 #include <X11/Xlib.h>
@@ -278,18 +282,6 @@ public:
         return handler.getLastError() == 0;
     }
 
-    virtual bool isValidNativePixmap(EglOS::Surface* pix) {
-        Window root;
-        int t;
-        unsigned int u;
-        ErrorHandler handler(mDisplay);
-        GLXDrawable surface = pix ? GlxSurface::drawableFor(pix) : 0;
-        if (!XGetGeometry(mDisplay, surface, &root, &t, &t, &u, &u, &u, &u)) {
-            return false;
-        }
-        return handler.getLastError() == 0;
-    }
-
     virtual bool checkWindowPixelFormatMatch(
             EGLNativeWindowType win,
             const EglOS::PixelFormat* pixelFormat,
@@ -310,30 +302,6 @@ public:
         Window root;
         if (!XGetGeometry(
                 mDisplay, win, &root, &x, &y, width, height, &border, &depth)) {
-            return false;
-        }
-        return depth >= configDepth;
-    }
-
-    virtual bool checkPixmapPixelFormatMatch(
-            EGLNativePixmapType pix,
-            const EglOS::PixelFormat* pixelFormat,
-            unsigned int* width,
-            unsigned int* height) {
-        unsigned int depth, configDepth, border;
-        int r, g, b, x, y;
-        GLXFBConfig fbconfig = GlxPixelFormat::from(pixelFormat);
-
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, fbconfig, GLX_RED_SIZE, &r));
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, fbconfig, GLX_GREEN_SIZE, &g));
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, fbconfig, GLX_BLUE_SIZE, &b));
-        configDepth = r + g + b;
-        Window root;
-        if (!XGetGeometry(
-                mDisplay, pix, &root, &x, &y, width, height, &border, &depth)) {
             return false;
         }
         return depth >= configDepth;
@@ -412,48 +380,78 @@ public:
         }
     }
 
-    virtual void swapInterval(EglOS::Surface* win, int interval) {
-        const char* extensions = glXQueryExtensionsString(
-                mDisplay, DefaultScreen(mDisplay));
-        typedef void (*GLXSWAPINTERVALEXT)(X11Display*,GLXDrawable,int);
-        GLXSWAPINTERVALEXT glXSwapIntervalEXT = NULL;
-
-        if(strstr(extensions,"EXT_swap_control")) {
-            glXSwapIntervalEXT = (GLXSWAPINTERVALEXT)glXGetProcAddress(
-                    (const GLubyte*)"glXSwapIntervalEXT");
-        }
-        if (glXSwapIntervalEXT && win) {
-            glXSwapIntervalEXT(mDisplay,
-                               GlxSurface::drawableFor(win),
-                               interval);
-        }
-    }
-
 private:
     X11Display* mDisplay;
 };
 
+class GlxLibrary : public GlLibrary {
+public:
+    typedef GlFunctionPointer (ResolverFunc)(const char* name);
+
+    // Important: Use libGL.so.1 explicitly, because it will always link to
+    // the vendor-specific version of the library. libGL.so might in some
+    // cases, depending on bad ldconfig configurations, link to the wrapper
+    // lib that doesn't behave the same.
+    GlxLibrary() : mLib(NULL), mResolver(NULL) {
+        static const char kLibName[] = "libGL.so.1";
+        char error[256];
+        mLib = emugl::SharedLibrary::open(kLibName, error, sizeof(error));
+        if (!mLib) {
+            ERR("%s: Could not open GL library %s [%s]\n",
+                __FUNCTION__, kLibName, error);
+            return;
+        }
+        // NOTE: Don't use glXGetProcAddress here, only glXGetProcAddressARB
+        // is guaranteed to be supported by vendor-specific libraries.
+        static const char kResolverName[] = "glXGetProcAddressARB";
+        mResolver = reinterpret_cast<ResolverFunc*>(
+                mLib->findSymbol(kResolverName));
+        if (!mResolver) {
+            ERR("%s: Could not find resolver %s in %s\n",
+                __FUNCTION__, kResolverName, kLibName);
+            delete mLib;
+            mLib = NULL;
+        }
+    }
+
+    ~GlxLibrary() {
+        delete mLib;
+    }
+
+    // override
+    virtual GlFunctionPointer findSymbol(const char* name) {
+        if (!mLib) {
+            return NULL;
+        }
+        GlFunctionPointer ret = (*mResolver)(name);
+        if (!ret) {
+            ret = reinterpret_cast<GlFunctionPointer>(mLib->findSymbol(name));
+        }
+        return ret;
+    }
+
+private:
+    emugl::SharedLibrary* mLib;
+    ResolverFunc* mResolver;
+};
+
 class GlxEngine : public EglOS::Engine {
 public:
+    GlxEngine() : mGlLib() {}
+
     virtual EglOS::Display* getDefaultDisplay() {
         return new GlxDisplay(XOpenDisplay(0));
     }
 
-    virtual EglOS::Display* getInternalDisplay(EGLNativeDisplayType dpy) {
-        return new GlxDisplay(dpy);
+    virtual GlLibrary* getGlLibrary() {
+        return &mGlLib;
     }
 
     virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
         return new GlxSurface(wnd, GlxSurface::WINDOW);
     }
-
-    virtual EglOS::Surface* createPixmapSurface(EGLNativePixmapType pix) {
-        return new GlxSurface(pix, GlxSurface::PIXMAP);
-    }
-
-    virtual void wait() {
-        glXWaitX();
-    }
+private:
+    GlxLibrary mGlLib;
 };
 
 emugl::LazyInstance<GlxEngine> sHostEngine = LAZY_INSTANCE_INIT;

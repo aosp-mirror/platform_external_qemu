@@ -201,6 +201,16 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .framebuffer_invalidate = &emulator_window_framebuffer_invalidate,
     };
 
+    // Determine whether to use an EmuGL sub-window or not.
+    const char* env = getenv("ANDROID_GL_SOFTWARE_RENDERER");
+    s_use_emugl_subwindow = !env || !env[0] || env[0] == '0';
+
+    if (s_use_emugl_subwindow) {
+        VERBOSE_PRINT(gles, "Using EmuGL sub-window for GPU display");
+    } else {
+        VERBOSE_PRINT(gles, "Using glReadPixels() for GPU display");
+    }
+
     emulator->ui = skin_ui_create(emulator->layout_file,
                                   android_hw->hw_initialOrientation,
                                   &my_ui_funcs,
@@ -217,13 +227,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     }
 
     // Determine whether to use an EmuGL sub-window or not.
-    const char* env = getenv("ANDROID_EMULATOR_EXPERIMENT_READ_PIXELS");
-    s_use_emugl_subwindow = !env || !env[0] || env[0] == '0';
-
-    if (s_use_emugl_subwindow) {
-        VERBOSE_PRINT(gles, "Using EmuGL sub-window for GPU display");
-    } else {
-        VERBOSE_PRINT(gles, "Using glReadPixels() for GPU display");
+    if (!s_use_emugl_subwindow) {
         gpu_frame_set_post_callback(looper_newCore(),
                                     emulator,
                                     _emulator_window_on_gpu_frame);

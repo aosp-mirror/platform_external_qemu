@@ -204,9 +204,13 @@ if [ -d "$PREBUILTS_DIR/mesa" ]; then
             MESA_LIBRARY=$(ls "$PREBUILTS_DIR/mesa/$MESA_HOST-$MESA_ARCH/lib/$LIBNAME" 2>/dev/null || true)
             if [ "$MESA_LIBRARY" ]; then
                 MESA_DSTDIR="$OUT_DIR/$MESA_LIBDIR/gles_mesa"
+                MESA_DSTLIB="$LIBNAME"
+                if [ "$LIBNAME" = "opengl32.dll" ]; then
+                    MESA_DSTLIB="mesa_opengl32.dll"
+                fi
                 echo "Copying $MESA_HOST-$MESA_ARCH $LIBNAME library to $MESA_DSTDIR"
                 run mkdir -p "$MESA_DSTDIR" &&
-                run cp -f "$MESA_LIBRARY" "$MESA_DSTDIR/$LIBNAME"
+                run cp -f "$MESA_LIBRARY" "$MESA_DSTDIR/$MESA_DSTLIB"
                 if [ "$MESA_HOST" = "linux" -a "$LIBNAME" = "libGL.so" ]; then
                     # Special handling for Linux, this is needed because SDL
                     # will actually try to load libGL.so.1 before GPU emulation
@@ -224,6 +228,7 @@ fi
 RUN_32BIT_TESTS=
 RUN_64BIT_TESTS=true
 RUN_EMUGEN_TESTS=true
+RUN_GEN_ENTRIES_TESTS=true
 
 TEST_SHELL=
 EXE_SUFFIX=
@@ -314,6 +319,13 @@ if [ -z "$NO_TESTS" ]; then
                     FAILURES="$FAILURES emugen-test-suite"
             fi
         fi
+    fi
+
+    # Check the gen-entries.py script.
+    if [ "$RUN_GEN_ENTRIES_TESTS" ]; then
+        echo "Running gen-entries.py test suite."
+        run android/scripts/tests/gen-entries/run-tests.sh ||
+            FAILURES="$FAILURES gen-entries_tests"
     fi
 
     # Check that the windows executables all have icons.

@@ -54,9 +54,12 @@ public:
     // to avoid GL-realted corruption issues in the main window. Call
     // isValid() after construction to verify that it worked properly.
     //
+    // |use_sub_window| is true if the client will call setupSubWindow(),
+    // and false if it will call setPostCallback().
+    //
     // Note that this call doesn't display anything, it just initializes
     // the library, use setupSubWindow() to display something.
-    RenderWindow(int width, int height, bool use_thread);
+    RenderWindow(int width, int height, bool use_thread, bool use_sub_window);
 
     // Destructor. This will automatically call removeSubWindow() is needed.
     ~RenderWindow();

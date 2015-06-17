@@ -69,6 +69,7 @@ struct CPUState {
     uint32_t stopped; /* Artificially stopped */
 
     volatile sig_atomic_t exit_request;
+    volatile sig_atomic_t tcg_exit_req;
     uint32_t interrupt_request;
 
     void *env_ptr; /* CPUArchState */

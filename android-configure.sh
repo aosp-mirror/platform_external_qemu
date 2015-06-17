@@ -12,24 +12,283 @@
 # first, let's see which system we're running this on
 cd `dirname $0`
 
-# source common functions definitions
-. android/build/common.sh
+PROGNAME=`basename $0`
+PROGDIR=`dirname $0`
+
+## Logging support
+##
+VERBOSE=yes
+VERBOSE2=no
+
+panic () {
+    echo "ERROR: $@"
+    exit 1
+}
+
+log () {
+    if [ "$VERBOSE" = "yes" ] ; then
+        echo "$1"
+    fi
+}
+
+log2 () {
+    if [ "$VERBOSE2" = "yes" ] ; then
+        echo "$1"
+    fi
+}
+
+## Normalize OS and CPU
+##
+
+BUILD_ARCH=$(uname -m)
+case "$BUILD_ARCH" in
+    i?86) BUILD_ARCH=x86
+    ;;
+    x86_64|amd64) BUILD_ARCH=x86_64
+    ;;
+    *) panic "$BUILD_ARCH builds are not supported!"
+    ;;
+esac
+
+log2 "BUILD_ARCH=$BUILD_ARCH"
+
+# at this point, the supported values for CPU are:
+#   x86
+#   x86_64
+#
+# other values may be possible but haven't been tested
+#
+
+EXE=""
+OS=`uname -s`
+case "$OS" in
+    Darwin)
+        OS=darwin-$BUILD_ARCH
+        ;;
+    Linux)
+        # note that building  32-bit binaries on x86_64 is handled later
+        OS=linux-$BUILD_ARCH
+        ;;
+    FreeBSD)
+        OS=freebsd-$BUILD_ARCH
+        ;;
+    CYGWIN*|*_NT-*)
+        panic "Please build Windows binaries on Linux with --mingw option."
+        ;;
+esac
+
+log2 "OS=$OS"
+log2 "EXE=$EXE"
+
+# at this point, the value of OS should be one of the following:
+#   linux-x86
+#   linux-x86_64
+#   darwin-x86
+#   darwin-x86_64
+#
+# other values may be possible but have not been tested
+
+# define HOST_OS as $OS without any cpu-specific suffix
+#
+case $OS in
+    linux-*) HOST_OS=linux
+    ;;
+    darwin-*) HOST_OS=darwin
+    ;;
+    freebsd-*) HOST_OS=freebsd
+    ;;
+    *) HOST_OS=$OS
+esac
+
+HOST_ARCH=$BUILD_ARCH
+HOST_TAG=$HOST_OS-$HOST_ARCH
+
+#### Toolchain support
+####
+
+WINDRES=
+
+# Various probes are going to need to run a small C program
+TMPC=/tmp/android-$$-test.c
+TMPO=/tmp/android-$$-test.o
+TMPE=/tmp/android-$$-test$EXE
+TMPL=/tmp/android-$$-test.log
+
+# cleanup temporary files
+clean_temp () {
+    rm -f $TMPC $TMPO $TMPL $TMPE
+}
+
+# cleanup temp files then exit with an error
+clean_exit () {
+    clean_temp
+    exit 1
+}
+
+# this function should be called to enforce the build of 32-bit binaries on 64-bit systems
+# that support it.
+FORCE_32BIT=no
+force_32bit_binaries () {
+    if [ $BUILD_ARCH = x86_64 ] ; then
+        FORCE_32BIT=yes
+        case $OS in
+            linux-x86_64) OS=linux-x86 ;;
+            darwin-x86_64) OS=darwin-x86 ;;
+            freebsd-x86_64) OS=freebsd-x86 ;;
+        esac
+        HOST_ARCH=x86
+        BUILD_ARCH=x86
+        HOST_TAG=$HOST_OS-$HOST_ARCH
+        log "Check32Bits: Forcing generation of 32-bit binaries."
+    fi
+}
+
+# this function will setup the compiler and linker and check that they work as advertized
+# note that you should call 'force_32bit_binaries' before this one if you want it to work
+# as advertized.
+#
+setup_toolchain () {
+    if [ -z "$CC" ] ; then
+        CC=gcc
+    fi
+
+    # check that we can compile a trivial C program with this compiler
+    cat > $TMPC <<EOF
+int main(void) {}
+EOF
+
+    if [ $FORCE_32BIT = yes ] ; then
+        CFLAGS="$CFLAGS -m32"
+        LDFLAGS="$LDFLAGS -m32"
+        compile
+        if [ $? != 0 ] ; then
+            # sometimes, we need to also tell the assembler to generate 32-bit binaries
+            # this is highly dependent on your GCC installation (and no, we can't set
+            # this flag all the time)
+            CFLAGS="$CFLAGS -Wa,--32"
+        fi
+    fi
+
+    compile
+    if [ $? != 0 ] ; then
+        echo "your C compiler doesn't seem to work: $CC"
+        cat $TMPL
+        clean_exit
+    fi
+    log "CC         : compiler check ok ($CC)"
+    CC_VER=`$CC --version`
+    log "CC_VER     : $CC_VER"
+
+    # check that we can link the trivial program into an executable
+    if [ -z "$LD" ] ; then
+        LD=$CC
+    fi
+    link
+    if [ $? != 0 ] ; then
+        echo "your linker doesn't seem to work:"
+        cat $TMPL
+        clean_exit
+    fi
+    log "LD         : linker check ok ($LD)"
+
+    if [ -z "$AR" ]; then
+        AR=ar
+    fi
+    log "AR         : archiver ($AR)"
+    clean_temp
+}
+
+# try to compile the current source file in $TMPC into an object
+# stores the error log into $TMPL
+#
+compile () {
+    log2 "Object     : $CC -o $TMPO -c $CFLAGS $TMPC"
+    $CC -o $TMPO -c $CFLAGS $TMPC 2> $TMPL
+}
+
+# try to link the recently built file into an executable. error log in $TMPL
+#
+link() {
+    log2 "Link      : $LD -o $TMPE $TMPO $LDFLAGS"
+    $LD -o $TMPE $TMPO $LDFLAGS 2> $TMPL
+}
+
+## Feature test support
+##
+
+# check that a given C header file exists on the host system
+# $1: variable name which will be set to "yes" or "no" depending on result
+# $2: header name
+#
+# you can define EXTRA_CFLAGS for extra C compiler flags
+# for convenience, this variable will be unset by the function.
+#
+feature_check_header () {
+    local result_ch OLD_CFLAGS
+    log2 "HeaderCheck: $2"
+    echo "#include $2" > $TMPC
+    cat >> $TMPC <<EOF
+        int main(void) { return 0; }
+EOF
+    OLD_CFLAGS=$CFLAGS
+    CFLAGS="$CFLAGS $EXTRA_CFLAGS"
+    compile
+    if [ $? != 0 ]; then
+        result_ch=no
+    else
+        result_ch=yes
+    fi
+    log "HeaderCheck: $2 [$result_ch]"
+    EXTRA_CFLAGS=
+    CFLAGS=$OLD_CFLAGS
+    eval $1=$result_ch
+    clean_temp
+}
+
+# Find pattern $1 in string $2
+# This is to be used in if statements as in:
+#
+#    if pattern_match <pattern> <string>; then
+#       ...
+#    fi
+#
+pattern_match () {
+    echo "$2" | grep -q -E -e "$1"
+}
+
+# Find if a given shell program is available.
+# We need to take care of the fact that the 'which <foo>' command
+# may return either an empty string (Linux) or something like
+# "no <foo> in ..." (Darwin). Also, we need to redirect stderr
+# to /dev/null for Cygwin
+#
+# $1: variable name
+# $2: program name
+#
+# Result: set $1 to the full path of the corresponding command
+#         or to the empty/undefined string if not available
+#
+find_program () {
+    local PROG
+    PROG=`which $2 2>/dev/null || true`
+    if [ -n "$PROG" ] ; then
+        if pattern_match '^no ' "$PROG"; then
+            PROG=
+        fi
+    fi
+    eval $1="$PROG"
+}
 
 # Parse options
-OPTION_TARGETS=""
 OPTION_DEBUG=no
 OPTION_IGNORE_AUDIO=no
 OPTION_AOSP_PREBUILTS_DIR=
-OPTION_NO_AOSP_PREBUILTS=
 OPTION_OUT_DIR=
 OPTION_HELP=no
-OPTION_STATIC=no
 OPTION_STRIP=no
 OPTION_MINGW=no
 
-GLES_DIR=
 GLES_SUPPORT=no
-GLES_PROBE=yes
 
 PCBIOS_PROBE=yes
 
@@ -66,10 +325,6 @@ for opt do
 
   --debug) OPTION_DEBUG=yes
   ;;
-  --install=*) OPTION_TARGETS="$OPTION_TARGETS $optarg";
-  ;;
-  --sdl-config=*) SDL_CONFIG=$optarg
-  ;;
   --mingw) OPTION_MINGW=yes
   ;;
   --cc=*) OPTION_CC="$optarg"
@@ -80,19 +335,9 @@ for opt do
   ;;
   --out-dir=*) OPTION_OUT_DIR=$optarg
   ;;
-  --ignore-audio) OPTION_IGNORE_AUDIO=yes
-  ;;
-  --no-aosp-prebuilts) OPTION_NO_AOSP_PREBUILTS=yes
-  ;;
   --aosp-prebuilts-dir=*) OPTION_AOSP_PREBUILTS_DIR=$optarg
   ;;
   --build-qemu-android) true # Ignored, used by android-rebuild.sh only.
-  ;;
-  --static) OPTION_STATIC=yes
-  ;;
-  --gles-dir=*) GLES_DIR=$optarg
-  ;;
-  --no-gles) GLES_PROBE=no
   ;;
   --no-pcbios) PCBIOS_PROBE=no
   ;;
@@ -115,22 +360,15 @@ Options: [defaults in brackets after descriptions]
 EOF
     echo "Standard options:"
     echo "  --help                      Print this message"
-    echo "  --install=FILEPATH          Copy emulator executable to FILEPATH [$TARGETS]"
     echo "  --cc=PATH                   Specify C compiler [$HOST_CC]"
-    echo "  --sdl-config=FILE           Use specific sdl-config script [$SDL_CONFIG]"
     echo "  --strip                     Strip emulator executables."
     echo "  --no-strip                  Do not strip emulator executables (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
-    echo "  --ignore-audio              Ignore audio messages (may build sound-less emulator)"
-    echo "  --no-aosp-prebuilts         Do not use prebuilt toolchain"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
     echo "  --mingw                     Build Windows executable on Linux"
-    echo "  --static                    Build a completely static executable"
     echo "  --verbose                   Verbose configuration"
     echo "  --debug                     Build debug version of the emulator"
-    echo "  --gles-dir=PATH             Specify path to GLES host emulation sources [auto-detected]"
-    echo "  --no-gles                   Disable GLES emulation support"
     echo "  --no-pcbios                 Disable copying of PC Bios files"
     echo "  --no-tests                  Don't run unit test suite"
     if [ "$IN_ANDROID_REBUILD_SH" ]; then
@@ -141,18 +379,20 @@ EOF
 fi
 
 if [ "$OPTION_AOSP_PREBUILTS_DIR" ]; then
-    if [ "$OPTION_NO_AOSP_PREBUILTS" ]; then
-        echo "ERROR: You can't use both --no-aosp-prebuilts and --aosp-prebuilts-dir=<path>."
-        exit 1
-    fi
     if [ ! -d "$OPTION_AOSP_PREBUILTS_DIR"/gcc -a \
          ! -d "$OPTION_AOSP_PREBUILTS_DIR"/clang ]; then
         echo "ERROR: Prebuilts directory does not exist: $OPTION_AOSP_PREBUILTS_DIR/gcc"
         exit 1
     fi
     AOSP_PREBUILTS_DIR=$OPTION_AOSP_PREBUILTS_DIR
-elif [ "$OPTION_NO_AOSP_PREBUILTS" ]; then
-    AOSP_PREBUILTS_DIR=""
+fi
+
+if [ "$OPTION_OUT_DIR" ]; then
+    OUT_DIR="$OPTION_OUT_DIR"
+    mkdir -p "$OUT_DIR" || panic "Could not create output directory: $OUT_DIR"
+else
+    OUT_DIR=objs
+    log "Auto-config: --out-dir=objs"
 fi
 
 # For OS X, detect the location of the SDK to use.
@@ -210,37 +450,41 @@ if [ "$HOST_OS" = darwin ]; then
     echo "OSX SDK   : Found at $OSX_SDK_ROOT"
 fi
 
+CCACHE=
+if [ "$USE_CCACHE" != 0 ]; then
+    CCACHE=$(which ccache 2>/dev/null || true)
+fi
+
+if [ -n "$CCACHE" -a -f "$CCACHE" ]; then
+    if [ "$HOST_OS" == "darwin" -a "$OPTION_DEBUG" == "yes" ]; then
+        # http://llvm.org/bugs/show_bug.cgi?id=20297
+        # ccache works for mingw/gdb, therefore probably works for gcc/gdb
+        log "Prebuilt   : CCACHE disabled for OSX debug builds"
+        CCACHE=
+    else
+        log "Prebuilt   : CCACHE=$CCACHE"
+    fi
+else
+    log "Prebuilt   : CCACHE can't be found"
+    CCACHE=
+fi
+
 # On Linux, try to use our prebuilt toolchain to generate binaries
 # that are compatible with Ubuntu 10.4
-if [ -z "$CC" -a -z "$OPTION_CC" -a -z "$OPTION_NO_AOSP_PREBUILTS" ] ; then
-    PROBE_HOST_CC=
-    PROBE_HOST_CFLAGS=
-    if [ "$HOST_OS" = "linux" ] ; then
-        PREBUILTS_HOST_GCC=$AOSP_PREBUILTS_DIR/gcc/linux-x86/host
-        PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
-        if [ ! -f "$PROBE_HOST_CC" ]; then
-            PROBE_HOST_CC=$PREBUILTS_HOST_GCC/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-gcc
-            if [ ! -f "$PROBE_HOST_CC" ] ; then
-                PROBE_HOST_CC=$AOSP_PREBUILTS_DIR/tools/gcc-sdk/gcc
-            fi
-        fi
-    elif [ "$HOST_OS" = "darwin" ] ; then
-        PREBUILTS_HOST_GCC=$AOSP_PREBUILTS_DIR/clang/darwin-x86/host
-        PROBE_HOST_CC=$PREBUILTS_HOST_GCC/3.5/bin/clang
-        PROBE_HOST_CFLAGS="-target x86_64-apple-darwin11.0.0"
+if [ -z "$CC" -a -z "$OPTION_CC" ] ; then
+    GEN_SDK=$PROGDIR/android/scripts/gen-android-sdk-toolchain.sh
+    GEN_SDK_FLAGS=
+    if [ "$CCACHE" ]; then
+        GEN_SDK_FLAGS="$GEN_SDK_FLAGS --ccache=$CCACHE"
     else
-        echo "ERROR: Can't build emulator binaries on this platform. Use Linux or Darwin only!"
-        exit 1
+        GEN_SDK_FLAGS="$GEN_SDK_FLAGS --no-ccache"
     fi
-
-    if [ -f "$PROBE_HOST_CC" ] ; then
-        echo "Using prebuilt toolchain: $PROBE_HOST_CC"
-        CC="$PROBE_HOST_CC $PROBE_HOST_CFLAGS"
-    else
-        echo "ERROR: Cannot find prebuilts toolchain: $PROBE_HOST_CC"
-        echo "Please use --no-aosp-prebuilts or --aosp-prebuilts-dir=<path>."
-        exit 1
-    fi
+    GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
+    $GEN_SDK $GEN_SDK_FLAGS $OUT_DIR/toolchain || panic "Cannot generate SDK toolchain!"
+    BINPREFIX=$($GEN_SDK $GEN_SDK_FLAGS --print=binprefix $OUT_DIR/toolchain)
+    CC="$OUT_DIR/toolchain/${BINPREFIX}gcc"
+    AR="$OUT_DIR/toolchain/${BINPREFIX}ar"
+    LD=$CC
 fi
 
 if [ -n "$OPTION_CC" ]; then
@@ -256,141 +500,59 @@ fi
 # generate 64-bit ones by using -m64 on the command-line.
 force_32bit_binaries
 
-case $OS in
-    linux-*)
-        TARGET_DLL_SUFFIX=.so
-        ;;
-    darwin-*)
-        TARGET_DLL_SUFFIX=.dylib
-        ;;
-    windows*)
-        TARGET_DLL_SUFFIX=.dll
-esac
-
-TARGET_OS=$OS
-
 setup_toolchain
 
 BUILD_AR=$AR
 BUILD_CC=$CC
 BUILD_CXX=$CC
 BUILD_LD=$LD
-BUILD_AR=$AR
 BUILD_CFLAGS=$CFLAGS
 BUILD_CXXFLAGS=$CXXFLAGS
 BUILD_LDFLAGS=$LDFLAGS
 
 if [ "$OPTION_MINGW" = "yes" ] ; then
-    enable_linux_mingw
-    TARGET_OS=windows
-    TARGET_DLL_SUFFIX=.dll
-else
-    enable_cygwin
-fi
-
-if [ "$OPTION_OUT_DIR" ]; then
-    OUT_DIR="$OPTION_OUT_DIR"
-    mkdir -p "$OUT_DIR" || panic "Could not create output directory: $OUT_DIR"
-else
-    OUT_DIR=objs
-    log "Auto-config: --out-dir=objs"
-fi
-
-# Are we running in the Android build system ?
-check_android_build
-
-
-# Adjust a few things when we're building within the Android build
-# system:
-#    - locate prebuilt directory
-#    - locate and use prebuilt libraries
-#    - copy the new binary to the correct location
-#
-if [ "$OPTION_NO_AOSP_PREBUILTS" ] ; then
-    IN_ANDROID_BUILD=no
-fi
-
-if [ "$IN_ANDROID_BUILD" = "yes" ] ; then
-    locate_android_prebuilt
-
-    # use ccache if USE_CCACHE is defined and the corresponding
-    # binary is available.
-    #
-    if [ -n "$USE_CCACHE" ] ; then
-        CCACHE="$ANDROID_PREBUILT/ccache/ccache$EXE"
-        if [ ! -f $CCACHE ] ; then
-            CCACHE="$ANDROID_PREBUILTS/ccache/ccache$EXE"
-        fi
+    # Are we on Linux ?
+    log "Mingw      : Checking for Linux host"
+    if [ "$HOST_OS" != "linux" ] ; then
+        echo "Sorry, but mingw compilation is only supported on Linux !"
+        exit 1
     fi
-
-    # finally ensure that our new binary is copied to the 'out'
-    # subdirectory as 'emulator'
-    HOST_BIN=$(get_android_abs_build_var HOST_OUT_EXECUTABLES)
-    if [ "$TARGET_OS" = "windows" ]; then
-        HOST_BIN=$(echo $HOST_BIN | sed "s%$OS/bin%windows/bin%")
+    # Do we have our prebuilt mingw64 toolchain?
+    log "Mingw      : Looking for prebuilt mingw64 toolchain."
+    MINGW_DIR=$PROGDIR/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8
+    MINGW_CC=
+    if [ -d "$MINGW_DIR" ]; then
+        MINGW_PREFIX=$MINGW_DIR/bin/x86_64-w64-mingw32
+        find_program MINGW_CC "$MINGW_PREFIX-gcc"
     fi
-    if [ -n "$HOST_BIN" ] ; then
-        OPTION_TARGETS="$OPTION_TARGETS $HOST_BIN/emulator$EXE"
-        log "Targets    : TARGETS=$OPTION_TARGETS"
+    if [ -z "$MINGW_CC" ]; then
+        log "Mingw      : Looking for mingw64 toolchain."
+        MINGW_PREFIX=x86_64-w64-mingw32
+        find_program MINGW_CC $MINGW_PREFIX-gcc
     fi
-
-    # find the Android SDK Tools revision number
-    TOOLS_PROPS=$ANDROID_TOP/sdk/files/tools_source.properties
-    if [ -f $TOOLS_PROPS ] ; then
-        ANDROID_SDK_TOOLS_REVISION=`awk -F= '/Pkg.Revision/ { print $2; }' $TOOLS_PROPS 2> /dev/null`
-        log "Tools      : Found tools revision number $ANDROID_SDK_TOOLS_REVISION"
-    else
-        log "Tools      : Could not locate $TOOLS_PROPS !?"
+    if [ -z "$MINGW_CC" ]; then
+        echo "ERROR: It looks like no Mingw64 toolchain is available!"
+        echo "Please install x86_64-w64-mingw32 package !"
+        exit 1
     fi
-else
-    if [ "$USE_CCACHE" != 0 ]; then
-        CCACHE=$(which ccache 2>/dev/null || true)
-    fi
-fi  # IN_ANDROID_BUILD = no
-
-if [ -n "$CCACHE" -a -f "$CCACHE" ]; then
-    if [ "$HOST_OS" == "darwin" -a "$OPTION_DEBUG" == "yes" ]; then
-        # http://llvm.org/bugs/show_bug.cgi?id=20297
-        # ccache works for mingw/gdb, therefore probably works for gcc/gdb
-        log "Prebuilt   : CCACHE disabled for OSX debug builds"
-        CCACHE=
-    else
+    log2 "Mingw      : Found $MINGW_CC"
+    CC=$MINGW_CC
+    if [ "$CCACHE" ]; then
         CC="$CCACHE $CC"
-        $CC --version 2>/dev/null
-        if ($CC --version 2>/dev/null | grep -q clang); then
-            # If this is clang, disable ccache-induced warnings and
-            # restore colored diagnostics.
-            # http://petereisentraut.blogspot.fr/2011/05/ccache-and-clang.html
-            CC="$CC -Qunused-arguments -fcolor-diagnostics"
-        fi
-        log "Prebuilt   : CCACHE=$CCACHE"
     fi
-else
-    log "Prebuilt   : CCACHE can't be found"
-    CCACHE=
+    LD=$MINGW_CC
+    WINDRES=$MINGW_PREFIX-windres
+    AR=$MINGW_PREFIX-ar
+    HOST_OS=windows
+    HOST_TAG=$HOST_OS-$HOST_ARCH
 fi
 
 # Try to find the GLES emulation headers and libraries automatically
-if [ "$GLES_PROBE" = "yes" ]; then
-    GLES_SUPPORT=yes
-    if [ -z "$GLES_DIR" ]; then
-        GLES_DIR=distrib/android-emugl
-        log2 "GLES       : Probing source dir: $GLES_DIR"
-        if [ ! -d "$GLES_DIR" ]; then
-            GLES_DIR=../opengl
-            log2 "GLES       : Probing source dir: $GLES_DIR"
-            if [ ! -d "$GLES_DIR" ]; then
-                GLES_DIR=
-            fi
-        fi
-        if [ -z "$GLES_DIR" ]; then
-            echo "GLES       : Could not find GPU emulation sources!"
-            GLES_SUPPORT=no
-        else
-            echo "GLES       : Found GPU emulation sources: $GLES_DIR"
-            GLES_SUPPORT=yes
-        fi
-    fi
+GLES_DIR=distrib/android-emugl
+if [ ! -d "$GLES_DIR" ]; then
+    panic "GLES       : Could not find GPU emulation sources!: $GLES_DIR"
+else
+    echo "GLES       : Found GPU emulation sources: $GLES_DIR"
 fi
 
 if [ "$PCBIOS_PROBE" = "yes" ]; then
@@ -404,98 +566,14 @@ if [ "$PCBIOS_PROBE" = "yes" ]; then
         log "PC Bios    : Could not find prebuilts directory."
     else
         mkdir -p $OUT_DIR/lib/pc-bios
-        for BIOS_FILE in bios.bin vgabios-cirrus.bin; do
+        for BIOS_FILE in bios.bin vgabios-cirrus.bin bios-256k.bin efi-virtio.rom kvmvapic.bin linuxboot.bin; do
             log "PC Bios    : Copying $BIOS_FILE"
             cp -f $PCBIOS_DIR/$BIOS_FILE $OUT_DIR/lib/pc-bios/$BIOS_FILE
         done
     fi
 fi
 
-# we can build the emulator with Cygwin, so enable it
-enable_cygwin
-
 setup_toolchain
-
-###
-###  SDL Probe
-###
-
-if [ -n "$SDL_CONFIG" ] ; then
-
-	# check that we can link statically with the library.
-	#
-	SDL_CFLAGS=`$SDL_CONFIG --cflags`
-	SDL_LIBS=`$SDL_CONFIG --static-libs`
-
-	# quick hack, remove the -D_GNU_SOURCE=1 of some SDL Cflags
-	# since they break recent Mingw releases
-	SDL_CFLAGS=`echo $SDL_CFLAGS | sed -e s/-D_GNU_SOURCE=1//g`
-
-	log "SDL-probe  : SDL_CFLAGS = $SDL_CFLAGS"
-	log "SDL-probe  : SDL_LIBS   = $SDL_LIBS"
-
-
-	EXTRA_CFLAGS="$SDL_CFLAGS"
-	EXTRA_LDFLAGS="$SDL_LIBS"
-
-	case "$OS" in
-		freebsd-*)
-		EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm -lpthread"
-		;;
-	esac
-
-	cat > $TMPC << EOF
-#include <SDL.h>
-#undef main
-int main( int argc, char** argv ) {
-   return SDL_Init (SDL_INIT_VIDEO);
-}
-EOF
-	feature_check_link  SDL_LINKING
-
-	if [ $SDL_LINKING != "yes" ] ; then
-		echo "You provided an explicit sdl-config script, but the corresponding library"
-		echo "cannot be statically linked with the Android emulator directly."
-		echo "Error message:"
-		cat $TMPL
-		clean_exit
-	fi
-	log "SDL-probe  : static linking ok"
-
-	# now, let's check that the SDL library has the special functions
-	# we added to our own sources
-	#
-	cat > $TMPC << EOF
-#include <SDL.h>
-#undef main
-int main( int argc, char** argv ) {
-	int  x, y;
-	SDL_Rect  r;
-	SDL_WM_GetPos(&x, &y);
-	SDL_WM_SetPos(x, y);
-	SDL_WM_GetMonitorDPI(&x, &y);
-	SDL_WM_GetMonitorRect(&r);
-	return SDL_Init (SDL_INIT_VIDEO);
-}
-EOF
-	feature_check_link  SDL_LINKING
-
-	if [ $SDL_LINKING != "yes" ] ; then
-		echo "You provided an explicit sdl-config script in SDL_CONFIG, but the"
-		echo "corresponding library doesn't have the patches required to link"
-		echo "with the Android emulator. Unsetting SDL_CONFIG will use the"
-		echo "sources bundled with the emulator instead"
-		echo "Error:"
-		cat $TMPL
-		clean_exit
-	fi
-
-	log "SDL-probe  : extra features ok"
-	clean_temp
-
-	EXTRA_CFLAGS=
-	EXTRA_LDFLAGS=
-fi
 
 ###
 ###  Audio subsystems probes
@@ -507,64 +585,16 @@ PROBE_ESD=no
 PROBE_PULSEAUDIO=no
 PROBE_WINAUDIO=no
 
-case "$TARGET_OS" in
-    darwin*) PROBE_COREAUDIO=yes;
+case "$HOST_OS" in
+    darwin) PROBE_COREAUDIO=yes;
     ;;
-    linux-*) PROBE_ALSA=yes; PROBE_OSS=yes; PROBE_ESD=yes; PROBE_PULSEAUDIO=yes;
+    linux) PROBE_ALSA=yes; PROBE_OSS=yes; PROBE_ESD=yes; PROBE_PULSEAUDIO=yes;
     ;;
-    freebsd-*) PROBE_OSS=yes;
+    freebsd) PROBE_OSS=yes;
     ;;
     windows) PROBE_WINAUDIO=yes
     ;;
 esac
-
-ORG_CFLAGS=$CFLAGS
-ORG_LDFLAGS=$LDFLAGS
-
-if [ "$OPTION_IGNORE_AUDIO" = "yes" ] ; then
-PROBE_ESD_ESD=no
-PROBE_ALSA=no
-PROBE_PULSEAUDIO=no
-fi
-
-# Probe a system library
-#
-# $1: Variable name (e.g. PROBE_ESD)
-# $2: Library name (e.g. "Alsa")
-# $3: Path to source file for probe program (e.g. android/config/check-alsa.c)
-# $4: Package name (e.g. libasound-dev)
-#
-probe_system_library ()
-{
-    if [ `var_value $1` = yes ] ; then
-        CFLAGS="$ORG_CFLAGS"
-        LDFLAGS="$ORG_LDFLAGS -ldl"
-        cp -f android/config/check-esd.c $TMPC
-        compile
-        if [ $? = 0 ] ; then
-            log "AudioProbe : $2 seems to be usable on this system"
-        else
-            if [ "$OPTION_IGNORE_AUDIO" = no ] ; then
-                echo "The $2 development files do not seem to be installed on this system"
-                echo "Are you missing the $4 package ?"
-                echo "You can ignore this error with --ignore-audio, otherwise correct"
-                echo "the issue(s) below and try again:"
-                cat $TMPL
-                clean_exit
-            fi
-            eval $1=no
-            log "AudioProbe : $2 seems to be UNUSABLE on this system !!"
-        fi
-        clean_temp
-    fi
-}
-
-probe_system_library PROBE_ESD        ESounD     android/config/check-esd.c libesd-dev
-probe_system_library PROBE_ALSA       Alsa       android/config/check-alsa.c libasound-dev
-probe_system_library PROBE_PULSEAUDIO PulseAudio android/config/check-pulseaudio.c libpulse-dev
-
-CFLAGS=$ORG_CFLAGS
-LDFLAGS=$ORG_LDFLAGS
 
 # create the objs directory that is going to contain all generated files
 # including the configuration ones
@@ -582,20 +612,6 @@ mkdir -p $OUT_DIR
 # because the previous version could be read-only
 clean_temp
 
-# check host endianess
-#
-HOST_BIGENDIAN=no
-if [ "$TARGET_OS" = "$OS" ] ; then
-cat > $TMPC << EOF
-#include <inttypes.h>
-int main(int argc, char ** argv){
-        volatile uint32_t i=0x01234567;
-        return (*((uint8_t*)(&i))) == 0x01;
-}
-EOF
-feature_run_exec HOST_BIGENDIAN
-fi
-
 # check whether we have <byteswap.h>
 #
 feature_check_header HAVE_BYTESWAP_H      "<byteswap.h>"
@@ -604,7 +620,7 @@ feature_check_header HAVE_FNMATCH_H       "<fnmatch.h>"
 
 # check for Mingw version.
 MINGW_VERSION=
-if [ "$TARGET_OS" = "windows" ]; then
+if [ "$HOST_OS" = "windows" ]; then
 log "Mingw      : Probing for GCC version."
 GCC_VERSION=$($CC -v 2>&1 | awk '$1 == "gcc" && $2 == "version" { print $3; }')
 GCC_MAJOR=$(echo "$GCC_VERSION" | cut -f1 -d.)
@@ -617,31 +633,31 @@ fi
 
 case $OS in
     windows)
+        BUILD_EXEEXT=.exe
+        BUILD_DLLEXT=.dll
+        ;;
+    darwin)
+        BUILD_EXEEXT=
+        BUILD_DLLEXT=.dylib
+        ;;
+    *)
+        BUILD_EXEEXT=
+        BUILD_DLLEXT=
+        ;;
+esac
+
+case $HOST_OS in
+    windows)
         HOST_EXEEXT=.exe
         HOST_DLLEXT=.dll
         ;;
     darwin)
-        HOST_EXEEXT=
+        HOST_EXEXT=
         HOST_DLLEXT=.dylib
         ;;
     *)
         HOST_EXEEXT=
-        HOST_DLLEXT=
-        ;;
-esac
-
-case $TARGET_OS in
-    windows)
-        TARGET_EXEEXT=.exe
-        TARGET_DLLEXT=.dll
-        ;;
-    darwin)
-        TARGET_EXEXT=
-        TARGET_DLLEXT=.dylib
-        ;;
-    *)
-        TARGET_EXEEXT=
-        TARGET_DLLEXT=.so
+        HOST_DLLEXT=.so
         ;;
 esac
 
@@ -657,19 +673,37 @@ if [ "$OPTION_DEBUG" != "yes" -a "$OPTION_STRIP" = "yes" ]; then
     esac
 fi
 
-create_config_mk "$OUT_DIR"
+# Re-create the configuration file
+config_mk=$OUT_DIR/config.make
+config_dir=$(dirname $config_mk)
+mkdir -p "$config_dir" 2> $TMPL
+if [ $? != 0 ] ; then
+    echo "Can't create directory for build config file: $config_dir"
+    cat $TMPL
+    clean_exit
+fi
+
+log "Generate   : $config_mk"
+
+echo "# This file was autogenerated by $PROGNAME. Do not edit !" > $config_mk
+echo "HOST_OS     := $HOST_OS" >> $config_mk
+echo "HOST_ARCH   := $HOST_ARCH" >> $config_mk
+echo "HOST_CC     := $CC" >> $config_mk
+echo "HOST_CXX    := $CXX" >> $config_mk
+echo "HOST_LD     := $LD" >> $config_mk
+echo "HOST_AR     := $AR" >> $config_mk
+echo "HOST_WINDRES:= $WINDRES" >> $config_mk
+echo "OBJS_DIR    := $OUT_DIR" >> $config_mk
 echo "" >> $config_mk
-echo "HOST_PREBUILT_TAG := $TARGET_OS" >> $config_mk
-echo "HOST_EXEEXT       := $TARGET_EXEEXT" >> $config_mk
-echo "HOST_DLLEXT       := $TARGET_DLLEXT" >> $config_mk
+echo "HOST_PREBUILT_TAG := $HOST_TAG" >> $config_mk
+echo "HOST_EXEEXT       := $HOST_EXEEXT" >> $config_mk
+echo "HOST_DLLEXT       := $HOST_DLLEXT" >> $config_mk
 echo "PREBUILT          := $ANDROID_PREBUILT" >> $config_mk
 echo "PREBUILTS         := $ANDROID_PREBUILTS" >> $config_mk
 
 echo "" >> $config_mk
-echo "BUILD_OS          := $HOST_OS" >> $config_mk
-echo "BUILD_ARCH        := $HOST_ARCH" >> $config_mk
-echo "BUILD_EXEEXT      := $HOST_EXEEXT" >> $config_mk
-echo "BUILD_DLLEXT      := $HOST_DLLEXT" >> $config_mk
+echo "BUILD_EXEEXT      := $BUILD_EXEEXT" >> $config_mk
+echo "BUILD_DLLEXT      := $BUILD_DLLEXT" >> $config_mk
 echo "BUILD_AR          := $BUILD_AR" >> $config_mk
 echo "BUILD_CC          := $BUILD_CC" >> $config_mk
 echo "BUILD_CXX         := $BUILD_CXX" >> $config_mk
@@ -679,26 +713,17 @@ echo "BUILD_LDFLAGS     := $BUILD_LDFLAGS" >> $config_mk
 
 PWD=`pwd`
 echo "SRC_PATH          := $PWD" >> $config_mk
-if [ -n "$SDL_CONFIG" ] ; then
-echo "QEMU_SDL_CONFIG   := $SDL_CONFIG" >> $config_mk
-fi
 echo "CONFIG_COREAUDIO  := $PROBE_COREAUDIO" >> $config_mk
 echo "CONFIG_WINAUDIO   := $PROBE_WINAUDIO" >> $config_mk
 echo "CONFIG_ESD        := $PROBE_ESD" >> $config_mk
 echo "CONFIG_ALSA       := $PROBE_ALSA" >> $config_mk
 echo "CONFIG_OSS        := $PROBE_OSS" >> $config_mk
 echo "CONFIG_PULSEAUDIO := $PROBE_PULSEAUDIO" >> $config_mk
-echo "BUILD_STANDALONE_EMULATOR := true" >> $config_mk
 if [ $OPTION_DEBUG = yes ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
 fi
-if [ $OPTION_STATIC = yes ] ; then
-    echo "CONFIG_STATIC_EXECUTABLE := true" >> $config_mk
-fi
-if [ "$GLES_SUPPORT" = "yes" ]; then
-    echo "EMULATOR_BUILD_EMUGL       := true" >> $config_mk
-    echo "EMULATOR_EMUGL_SOURCES_DIR := $GLES_DIR" >> $config_mk
-fi
+echo "EMULATOR_BUILD_EMUGL       := true" >> $config_mk
+echo "EMULATOR_EMUGL_SOURCES_DIR := $GLES_DIR" >> $config_mk
 
 if [ -n "$ANDROID_SDK_TOOLS_REVISION" ] ; then
     echo "ANDROID_SDK_TOOLS_REVISION := $ANDROID_SDK_TOOLS_REVISION" >> $config_mk
@@ -740,7 +765,7 @@ echo "#define CONFIG_SLIRP    1" >> $config_h
 echo "#define CONFIG_SKINS    1" >> $config_h
 echo "#define CONFIG_TRACE    1" >> $config_h
 
-case "$TARGET_OS" in
+case "$HOST_OS" in
     windows)
         echo "#define CONFIG_WIN32  1" >> $config_h
         ;;
@@ -749,66 +774,48 @@ case "$TARGET_OS" in
         ;;
 esac
 
-case "$TARGET_OS" in
-    linux-*)
+case "$HOST_OS" in
+    linux)
         echo "#define CONFIG_KVM_GS_RESTORE 1" >> $config_h
         ;;
 esac
 
 # only Linux has fdatasync()
-case "$TARGET_OS" in
-    linux-*)
+case "$HOST_OS" in
+    linux)
         echo "#define CONFIG_FDATASYNC    1" >> $config_h
         ;;
 esac
 
-case "$TARGET_OS" in
-    linux-*|darwin-*)
+case "$HOST_OS" in
+    linux|darwin)
         echo "#define CONFIG_MADVISE  1" >> $config_h
         ;;
 esac
 
 # the -nand-limits options can only work on non-windows systems
-if [ "$TARGET_OS" != "windows" ] ; then
+if [ "$HOST_OS" != "windows" ] ; then
     echo "#define CONFIG_NAND_LIMITS  1" >> $config_h
 fi
 echo "#define QEMU_VERSION    \"0.10.50\"" >> $config_h
 echo "#define QEMU_PKGVERSION \"Android\"" >> $config_h
-case "$CPU" in
-    x86) CONFIG_CPU=I386
-    ;;
-    ppc) CONFIG_CPU=PPC
-    ;;
-    x86_64) CONFIG_CPU=X86_64
-    ;;
-    *) CONFIG_CPU=$CPU
-    ;;
-esac
-if [ "$HOST_BIGENDIAN" = "1" ] ; then
-  echo "#define HOST_WORDS_BIGENDIAN 1" >> $config_h
-fi
 BSD=0
-case "$TARGET_OS" in
-    linux-*) CONFIG_OS=LINUX
+case "$HOST_OS" in
+    linux) CONFIG_OS=LINUX
     ;;
-    darwin-*) CONFIG_OS=DARWIN
+    darwin) CONFIG_OS=DARWIN
               BSD=1
     ;;
-    freebsd-*) CONFIG_OS=FREEBSD
+    freebsd) CONFIG_OS=FREEBSD
               BSD=1
     ;;
-    windows*) CONFIG_OS=WIN32
+    windows) CONFIG_OS=WIN32
     ;;
-    *) CONFIG_OS=$OS
+    *) CONFIG_OS=$HOST_OS
 esac
 
-if [ "$OPTION_STATIC" = "yes" ] ; then
-    echo "CONFIG_STATIC_EXECUTABLE := true" >> $config_mk
-    echo "#define CONFIG_STATIC_EXECUTABLE  1" >> $config_h
-fi
-
-case $TARGET_OS in
-    linux-*|darwin-*)
+case $HOST_OS in
+    linux|darwin)
         echo "#define CONFIG_IOVEC 1" >> $config_h
         ;;
 esac
@@ -820,8 +827,8 @@ if [ $BSD = 1 ] ; then
     echo "#define MAP_ANONYMOUS    MAP_ANON" >> $config_h
 fi
 
-case "$TARGET_OS" in
-    linux-*)
+case "$HOST_OS" in
+    linux)
         echo "#define CONFIG_SIGNALFD       1" >> $config_h
         ;;
 esac

@@ -68,6 +68,7 @@ struct RenderWindowMessage {
         struct {
             int width;
             int height;
+            bool useSubWindow;
         } init;
 
         // CMD_SET_POST_CALLBACK
@@ -103,12 +104,13 @@ struct RenderWindowMessage {
             case CMD_INITIALIZE:
                 D("CMD_INITIALIZE w=%d h=%d\n", msg.init.width, msg.init.height);
                 result = FrameBuffer::initialize(msg.init.width,
-                                                 msg.init.height);
+                                                 msg.init.height,
+                                                 msg.init.useSubWindow);
                 break;
 
             case CMD_FINALIZE:
                 D("CMD_FINALIZE\n");
-                FrameBuffer::finalize();
+                FrameBuffer::getFB()->finalize();
                 result = true;
                 break;
 
@@ -128,17 +130,18 @@ struct RenderWindowMessage {
                     msg.subwindow.w,
                     msg.subwindow.h,
                     msg.subwindow.rotation);
-                result = FrameBuffer::setupSubWindow(msg.subwindow.parent,
-                                                        msg.subwindow.x,
-                                                        msg.subwindow.y,
-                                                        msg.subwindow.w,
-                                                        msg.subwindow.h,
-                                                        msg.subwindow.rotation);
+                result = FrameBuffer::getFB()->setupSubWindow(
+                        msg.subwindow.parent,
+                        msg.subwindow.x,
+                        msg.subwindow.y,
+                        msg.subwindow.w,
+                        msg.subwindow.h,
+                        msg.subwindow.rotation);
                 break;
 
             case CMD_REMOVE_SUBWINDOW:
                 D("CMD_REMOVE_SUBWINDOW\n");
-                result = FrameBuffer::removeSubWindow();
+                result = FrameBuffer::getFB()->removeSubWindow();
                 break;
 
             case CMD_SET_ROTATION:
@@ -267,7 +270,10 @@ private:
 
 }  // namespace
 
-RenderWindow::RenderWindow(int width, int height, bool use_thread) :
+RenderWindow::RenderWindow(int width,
+                           int height,
+                           bool use_thread,
+                           bool use_sub_window) :
         mValid(false),
         mHasSubWindow(false),
         mThread(NULL),
@@ -282,6 +288,7 @@ RenderWindow::RenderWindow(int width, int height, bool use_thread) :
     msg.cmd = CMD_INITIALIZE;
     msg.init.width = width;
     msg.init.height = height;
+    msg.init.useSubWindow = use_sub_window;
     mValid = processMessage(msg);
 }
 

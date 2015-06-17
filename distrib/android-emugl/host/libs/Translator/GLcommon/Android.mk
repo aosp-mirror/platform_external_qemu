@@ -7,7 +7,6 @@ host_common_SRC_FILES :=     \
      GLESvalidate.cpp        \
      GLESpointer.cpp         \
      GLESbuffer.cpp          \
-     DummyGLfuncs.cpp        \
      RangeManip.cpp          \
      TextureUtils.cpp        \
      PaletteTexture.cpp      \
@@ -21,15 +20,14 @@ host_common_LDFLAGS :=
 
 ifeq ($(HOST_OS),linux)
 #    host_common_LDFLAGS += -Wl,--whole-archive
-    host_common_LDLIBS += -lGL -ldl
+    host_common_LDLIBS += -ldl
     host_common_LDFLAGS += -Wl,-Bsymbolic
 endif
 
 ifeq ($(HOST_OS),windows)
-    host_common_LDLIBS += -lopengl32 -lgdi32
+    host_common_LDLIBS += -lgdi32
     host_common_LDFLAGS += -Wl,--add-stdcall-alias
 endif
-
 
 ### EGL host implementation ########################
 
