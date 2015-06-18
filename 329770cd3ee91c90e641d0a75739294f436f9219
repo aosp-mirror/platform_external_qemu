@@ -1,0 +1,129 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e700ec3_196c2b7f",
+        "filename": "android/main-common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-18T15:53:02Z",
+      "side": 1,
+      "message": "nit: Since this is now in a public header, prefer AccelMode, or even CpuAccelMode here",
+      "range": {
+        "startLine": 116,
+        "startChar": 3,
+        "endLine": 116,
+        "endChar": 4
+      },
+      "revId": "329770cd3ee91c90e641d0a75739294f436f9219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1e67ca0f_58937db1",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-18T15:53:02Z",
+      "side": 1,
+      "message": "nit: since this is C++, prefer integer constant definitions like:\n\n  const int kMaxPartitions \u003d 4;\n\nplaced in the anonymous namespace below.",
+      "revId": "329770cd3ee91c90e641d0a75739294f436f9219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5e6dc2eb_7a9e79e9",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-18T15:53:02Z",
+      "side": 1,
+      "message": "Same here, and put their definitions closer to their usage to make the code slightly easier to understand.",
+      "revId": "329770cd3ee91c90e641d0a75739294f436f9219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7e9c462a_fb1e0feb",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-18T15:53:02Z",
+      "side": 1,
+      "message": "nit: avoid plural in type definitions (i.e. use ImageType instead).\nAlso it\u0027s better to use constant names that follow a naming convention related to the underlying type, i.e. either one of:\n\n  enum ImageType {\n    kImageTypeSystem \u003d 0,\n    kImageTypeCache,\n    kImageTypeUserData,\n    kImageTypeSdCard,\n  };\n\nor:\n\n  enum ImageType {\n    IMAGE_TYPE_SYSTEM \u003d 0,\n    IMAGE_TYPE_CACHE,\n    IMAGE_TYPE_USER_DATA,\n    IMAGE_TYPE_SD_CARD,\n  };",
+      "revId": "329770cd3ee91c90e641d0a75739294f436f9219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5e6dc2eb_da21c52f",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-18T15:53:02Z",
+      "side": 1,
+      "message": "nit: \u0027cmdSeq\u0027 is pretty vague as a field name. What about \u0027imagePartitionTypes\u0027 instead? Also the field description is ambiguous, I would recommend using something a little bit more explicit, as in:\n\n\"\"\"",
+      "revId": "329770cd3ee91c90e641d0a75739294f436f9219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5e6dc2eb_7a13d9e8",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-18T15:53:02Z",
+      "side": 1,
+      "message": "nit: call it |qemuExtraArgs| to make the field usage clearer, and match the previous |kernelExtraArgs|",
+      "revId": "329770cd3ee91c90e641d0a75739294f436f9219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5e6dc2eb_ba83b187",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-18T15:53:02Z",
+      "side": 1,
+      "message": "nit: shouldn\u0027t this be { NULL } instead?",
+      "revId": "329770cd3ee91c90e641d0a75739294f436f9219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
