@@ -35,7 +35,7 @@
 
 /* Required by android/utils/debug.h */
 int android_verbose;
-
+bool ranchu = false;
 
 #define DEBUG 1
 
@@ -119,6 +119,11 @@ int main(int argc, char** argv)
         if (!strcmp(opt,"-gpu") && nn + 1 < argc) {
             gpu = argv[nn + 1];
             nn++;
+        }
+
+        if (!strcmp(opt,"-ranchu")) {
+            ranchu = true;
+            continue;
         }
 
         if (!strcmp(opt,"-force-32bit")) {
@@ -242,6 +247,27 @@ int main(int argc, char** argv)
         D("Quoted param: [%s]\n", argv[n]);
     }
 #endif
+
+    if (android_verbose) {
+        int i;
+        printf("emulator: Running :%s\n", emulatorPath);
+        for(i = 0; i < argc; i++) {
+            printf("emulator: qemu backend: argv[%02d] = \"%s\"\n", i, argv[i]);
+        }
+        /* Dump final command-line parameters to make debugging easier */
+        printf("emulator: Concatenated backend parameters:\n");
+        for (i = 0; i < argc; i++) {
+            /* To make it easier to copy-paste the output to a command-line,
+             * quote anything that contains spaces.
+             */
+            if (strchr(argv[i], ' ') != NULL) {
+                printf(" '%s'", argv[i]);
+            } else {
+                printf(" %s", argv[i]);
+            }
+        }
+        printf("\n");
+    }
 
     // Launch it with the same set of options !
     // Note that on Windows, the first argument must _not_ be quoted or
@@ -378,6 +404,27 @@ probeTargetEmulatorPath(const char* progDir,
     return NULL;
 }
 
+/*
+ * emulator engine selection process is
+ * emulator ->
+ *   arm:
+ *     32-bit: emulator(64)-arm
+ *     64-bit: emulator(64)-arm64(NA) ->
+               emulator(64)-ranchu-arm64 -> qemu/<host>/qemu-system-aarch64
+ *   mips:
+ *     32-bit: emulator(64)-mips
+ *     64-bit: emulator(64)-mips64(NA) ->
+               emulator(64)-ranchu-mips64 -> qemu/<host>/qemu-system-mips64
+ *   x86:
+ *     32-bit: (if '-ranchu')
+ *               emulator(64)-ranchu-x86 -> qemu/<host>/qemu-system-x86
+ *             else
+ *               emulator(64)-x86
+ *     64-bit: (if '-ranchu')
+ *               emulator(64)-ranchu-x86_64 -> qemu/<host>/qemu-system-x86_64
+ *             else
+ *               emulator(64)-x86
+ */
 static char*
 getTargetEmulatorPath(const char* progName,
                       const char* avdArch,
@@ -386,14 +433,9 @@ getTargetEmulatorPath(const char* progName,
 {
     char*  progDir;
     char*  result;
-#ifdef _WIN32
-    /* TODO: currently amd64-mingw32msvc-gcc doesn't work which prevents
-             generating 64-bit binaries for Windows */
-    bool search_for_64bit_emulator = false;
-#else
+    char* ranchu_result;
     bool search_for_64bit_emulator =
             !force_32bit && android_getHostBitness() == 64;
-#endif
 
     /* Only search in current path if there is no directory separator
      * in |progName|. */
@@ -409,59 +451,7 @@ getTargetEmulatorPath(const char* progName,
 
     const char* emulatorSuffix;
 
-    // Special case: try to find emulator-ranchu-<arch> before emulator-<arch>
-    D("Looking for ranchu emulator backed for %s CPU\n", avdArch);
-    result = probeTargetEmulatorPath(progDir,
-                                     "ranchu",
-                                     avdArch,
-#ifdef _WIN32
-                                     true, // 32 bit ranchu does not work on windows
-#else
-                                     search_for_64bit_emulator,
-#endif
-                                     try_current_path,
-                                     is_64bit);
-    if (result) {
-        return result;
-    }
-
-    // Special case: for x86_64, first try to find emulator-x86_64 before
-    // looking for emulator-x86.
-    if (!strcmp(avdArch, "x86_64")) {
-        emulatorSuffix = "x86_64";
-
-        D("Looking for emulator backend for %s CPU\n", avdArch);
-
-        result = probeTargetEmulatorPath(progDir,
-                                         NULL,
-                                         emulatorSuffix,
-                                         search_for_64bit_emulator,
-                                         try_current_path,
-                                         is_64bit);
-        if (result) {
-            return result;
-        }
-    }
-
-    // Special case: for arm64, first try to find emulator-arm64 before
-    // looking for emulator-arm.
-    if (!strcmp(avdArch, "arm64")) {
-        emulatorSuffix = "arm64";
-
-        D("Looking for emulator backend for %s CPU\n", avdArch);
-
-        result = probeTargetEmulatorPath(progDir,
-                                         NULL,
-                                         emulatorSuffix,
-                                         search_for_64bit_emulator,
-                                         try_current_path,
-                                         is_64bit);
-        if (result) {
-            return result;
-        }
-    }
-
-    // Now for the regular case.
+    /* Try look for classic emulator first */
     emulatorSuffix = emulator_getBackendSuffix(avdArch);
     if (!emulatorSuffix) {
         APANIC("This emulator cannot emulate %s CPUs!\n", avdArch);
@@ -475,8 +465,37 @@ getTargetEmulatorPath(const char* progName,
                                      search_for_64bit_emulator,
                                      try_current_path,
                                      is_64bit);
-    if (result) {
+    if (result && !ranchu) {
+        /* found and not ranchu */
+        D("return result: %s\n", result);
         return result;
+    } else {
+        /* no classic emulator or prefer ranchu */
+        D("Looking for ranchu emulator backend for %s CPU\n", avdArch);
+        ranchu_result = probeTargetEmulatorPath(progDir,
+                                                "ranchu",
+                                                avdArch,
+#ifdef _WIN32
+                                                true, // 32 bit ranchu does not work on windows
+#else
+                                                search_for_64bit_emulator,
+#endif
+                                                try_current_path,
+                                                is_64bit);
+        if (ranchu_result) {
+            D("return ranchu: %s\n", ranchu_result);
+            return ranchu_result;
+        } else {
+            if (result) {
+                /* ranchu not found, fallback to classic
+                   should NOT happen in current scenario
+                   just go ahead still and leave a message
+                */
+                fprintf(stderr, "ERROR: requested 'ranchu' not available\n"
+                        "classic backend is used\n");
+                return result;
+            }
+        }
     }
 
     /* Otherwise, the program is missing */
