@@ -788,6 +788,14 @@ help_no_accel(stralloc_t* out)
 }
 
 static void
+help_ranchu(stralloc_t* out)
+{
+    PRINTF(
+        "  Use the new emulator engine as the preferred backend\n"
+    );
+}
+
+static void
 help_skindir(stralloc_t*  out)
 {
     PRINTF(
