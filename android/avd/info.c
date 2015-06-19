@@ -1095,14 +1095,16 @@ avdInfo_initHwConfig( AvdInfo*  i, AndroidHwConfig*  hw )
 
     androidHwConfig_init(hw, i->apiLevel);
 
-    /* First read the config.ini, if any */
-    if (i->configIni != NULL) {
-        ret = androidHwConfig_read(hw, i->configIni);
+    /* First read the skin's hardware.ini, if any */
+    if (i->skinHardwareIni != NULL) {
+        ret = androidHwConfig_read(hw, i->skinHardwareIni);
     }
 
-    /* The skin's hardware.ini can override values */
-    if (ret == 0 && i->skinHardwareIni != NULL) {
-        ret = androidHwConfig_read(hw, i->skinHardwareIni);
+    /* The device's config.ini can override the skin's values
+     * (which is preferable to the opposite order)
+     */
+    if (ret == 0 && i->configIni != NULL) {
+        ret = androidHwConfig_read(hw, i->configIni);
     }
 
     /* Auto-disable keyboard emulation on sapphire platform builds */
