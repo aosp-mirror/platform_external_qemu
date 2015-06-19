@@ -91,6 +91,7 @@ enum ImageType {
 };
 
 const int kMaxPartitions = 4;
+const int kMaxTargetParams = 16;
 /*
  * A structure used to model information about a given target CPU architecture.
  * |androidArch| is the architecture name, following Android conventions.
@@ -110,6 +111,7 @@ const int kMaxPartitions = 4;
  * the last one is mounted to /dev/block/vda. the 2nd last to /dev/block/vdb.
  * So far, we have 4(kMaxPartitions) types defined for system, cache, userdata
  * and sdcard images.
+ * |qemuExtraArgs| are the qemu parameters specifc for the target platform
  */
 struct TargetInfo {
     const char* androidArch;
@@ -120,6 +122,7 @@ struct TargetInfo {
     const char* storageDeviceType;
     const char* networkDeviceType;
     const ImageType imagePartitionTypes[kMaxPartitions];
+    const char* qemuExtraArgs[kMaxTargetParams];
 };
 
 // The current target architecture information!
@@ -133,6 +136,7 @@ const TargetInfo kTarget = {
     "virtio-blk-device",
     "virtio-net-device",
     {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {NULL},
 #endif
 #ifdef TARGET_MIPS64
     "mips64",
@@ -143,6 +147,7 @@ const TargetInfo kTarget = {
     "virtio-blk-device",
     "virtio-net-device",
     {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {NULL},
 #endif
 };
 
@@ -521,6 +526,12 @@ extern "C" int main(int argc, char **argv, char **envp) {
         dataDir += "/lib/pc-bios";
     }
     args[n++] = dataDir.c_str();
+
+    /* append extra qemu parameter if any */
+    int idx = 0;
+    while (kTarget.qemuExtraArgs[idx] != NULL) {
+        args[n++] = kTarget.qemuExtraArgs[idx++];
+    }
     args[n] = NULL;
 
     if(VERBOSE_CHECK(init)) {
