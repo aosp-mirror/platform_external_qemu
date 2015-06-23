@@ -693,3 +693,43 @@ path_search_exec( const char* filename )
     /* Nothing, really */
     return NULL;
 }
+
+void
+escape_file_path(char* dst, const char* src)
+{
+    while (*src != '\0') {
+        switch (*src) {
+            case '=':  *dst++ = '%'; *dst++ = 'E'; break;
+            case ',':  *dst++ = '%'; *dst++ = 'C'; break;
+            case '%':  *dst++ = '%'; *dst++ = 'P'; break;
+            default:   *dst++ = *src;
+        }
+        src++;
+    }
+    *dst = '\0';
+}
+
+
+void
+unescape_file_path(char* str)
+{
+    char *src = str;
+    char *dst = str;
+
+    while (*src != '\0') {
+        if (*src != '%') {
+            *dst++ = *src++;
+        } else {
+            // Escaped character
+            src++;
+            switch (*src) {
+                case 'C': *dst++ = ','; src++; break;
+                case 'E': *dst++ = '='; src++; break;
+                case 'P': *dst++ = '%'; src++; break;
+
+                default:   ;   // Just drop the '%'
+            }
+        }
+    }
+    *dst = '\0';
+}
