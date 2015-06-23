@@ -18,9 +18,9 @@
 #include <QRect>
 #include <QWidget>
 
+#include "android/skin/surface.h"
 #include "android/skin/argb.h"
 #include "android/skin/rect.h"
-#include "android/skin/surface.h"
 #include "android/skin/winsys.h"
 #include "android/skin/qt/emulator-window.h"
 #include "android/utils/setenv.h"
