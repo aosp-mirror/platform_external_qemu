@@ -51,6 +51,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/utils/file_data_unittest.cpp \
   android/utils/format_unittest.cpp \
   android/utils/host_bitness_unittest.cpp \
+  android/utils/path_unittest.cpp \
   android/utils/property_file_unittest.cpp \
   android/utils/win32_cmdline_quote_unittest.cpp \
   android/utils/x86_cpuid_unittest.cpp \

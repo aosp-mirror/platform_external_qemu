@@ -15,6 +15,7 @@
 #include "hw/android/goldfish/nand.h"
 #include "hw/android/goldfish/vmem.h"
 #include "hw/hw.h"
+#include "android/utils/path.h"
 #include "android/utils/tempfile.h"
 #include "android/qemu-debug.h"
 #include "android/android.h"
@@ -806,6 +807,8 @@ void nand_add_dev(const char *arg)
                     goto out_of_memory;
                 memcpy(initfilename, value, value_len);
                 initfilename[value_len] = '\0';
+                // Restore unusual characters that confuse parsing
+                path_unescape_path(initfilename);
             }
             else if(arg_match("file", arg, arg_len)) {
                 rwfilename = malloc(value_len + 1);
@@ -813,6 +816,8 @@ void nand_add_dev(const char *arg)
                     goto out_of_memory;
                 memcpy(rwfilename, value, value_len);
                 rwfilename[value_len] = '\0';
+                // Restore unusual characters that confuse parsing
+                path_unescape_path(rwfilename);
             }
             else {
                 goto bad_arg_and_value;
