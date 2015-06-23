@@ -18,7 +18,6 @@ sdk {
             into 'lib'
             notice null
         }
-
         item("$buildDefaultEmulator.output/emulator") {
             executable true
             builtBy buildDefaultEmulator
@@ -93,6 +92,10 @@ sdk {
     }
 
     windows {
+        item('android/avd/hardware-properties.ini') {
+            into 'lib'
+            notice null
+        }
         item("$buildWindowsEmulator.output/emulator.exe") {
             builtBy buildWindowsEmulator
         }
