@@ -28,7 +28,7 @@ ANDROID_BEGIN_HEADER
 #  define  O_BINARY  0
 #endif
 
-/* define  PATH_SEP as a string containing the directory separateor */
+/* define  PATH_SEP as a string containing the directory separator */
 #ifdef _WIN32
 #  define  PATH_SEP   "\\"
 #  define  PATH_SEP_C '\\'
@@ -166,6 +166,27 @@ extern APosixStatus   path_delete_file( const char*  path );
  * In case of failure, NULL is returned and the error code is in errno
  */
 extern void*          path_load_file( const char*  path, size_t  *pSize );
+
+/* Modify the path to eliminate ',' and '=', which confuse parsers
+ * that look at strings with multiple parameters.
+ * This function makes these conversions: ',' --> '%' 'C'
+ *                                        '=' --> '%' 'E'
+ *                                        '%' --> '%' 'P'
+ *
+ * The returned string is on the heap. The caller is reponsible
+ * for freeing this memory.
+ */
+extern char*          path_escape_path( const char* src );
+
+/* Modify the path to restore ',' and '='.
+ * This function makes these conversions: '%' 'C' --> ','
+ *                                        '%' 'E' --> '='
+ *                                        '%' 'P' --> '%'
+ *
+ * Because this can only reduce the length of the string,
+ * this conversion is done in place.
+ */
+extern void           path_unescape_path( char* str );
 
 /* */
 ANDROID_END_HEADER
