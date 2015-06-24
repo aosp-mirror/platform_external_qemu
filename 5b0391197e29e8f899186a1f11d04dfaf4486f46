@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e856e59_d1de0450",
+        "filename": "android/utils/path.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 700,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-24T21:36:16Z",
+      "side": 1,
+      "message": "see further command about comparing pointers to 0. Also prefer return NULL for clarity.",
+      "revId": "5b0391197e29e8f899186a1f11d04dfaf4486f46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1e8c2a86_70f070dc",
+        "filename": "android/utils/path.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 703,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-24T21:36:16Z",
+      "side": 1,
+      "message": "nit: try to use spaces around operators, as in:\n\n   char *retStr \u003d malloc(2 * strlen(src) + 1);",
+      "revId": "5b0391197e29e8f899186a1f11d04dfaf4486f46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3e6e4e7b_09ed49ff",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2048,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-24T21:36:16Z",
+      "side": 1,
+      "message": "nit: prefer not using \u003d\u003d 0 when comparing pointers. The main reason is that it\u0027s a little ambiguous to the reader, also that works in C but not C++ IIRC.\n\nThe usual way is either to use NULL, or ! as in:\n\n  if (!escaped_part_file) { ... }",
+      "revId": "5b0391197e29e8f899186a1f11d04dfaf4486f46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fe8e767f_2fea89e8",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2049,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-24T21:36:16Z",
+      "side": 1,
+      "message": "this is better left to the path_escape_path() function. Also all platforms we support implement over-commit, which means malloc() will never return NULL on them, so maybe you don\u0027t need to check this.",
+      "revId": "5b0391197e29e8f899186a1f11d04dfaf4486f46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
