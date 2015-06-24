@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "de761212_c948557e",
+        "filename": "android/utils/path.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-24T17:28:14Z",
+      "side": 1,
+      "message": "nit: can you respect the convention of using the path_ prefix for functions here, e.g. path_escape_path() and path_unescape_path()?\n\nnit: make it clearer that |dst| should point to a user-provided buffer that must be at least twice the length of |src| plus one byte for a terminating zero.\n\nSpecify whether |src| and |dst| can be the same?\n\nI would prefer if you would make the function return a heap-allocated string to be freed by the caller though. This avoid trivial caller-side bugs like the one described elsewhere.",
+      "range": {
+        "startLine": 178,
+        "startChar": 22,
+        "endLine": 178,
+        "endChar": 38
+      },
+      "revId": "37053fcd4c2f134473ca8155966433a57b7f5ad1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9eb57afa_df3f1fe6",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2047,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-24T17:28:14Z",
+      "side": 1,
+      "message": "actually, this is missing a +1 for the terminating \u0027\\0\u0027 !",
+      "revId": "37053fcd4c2f134473ca8155966433a57b7f5ad1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de761212_09a0adad",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2076,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-24T17:28:14Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "37053fcd4c2f134473ca8155966433a57b7f5ad1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
