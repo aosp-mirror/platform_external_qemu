@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fe8e767f_cffdfd80",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-25T04:11:08Z",
+      "side": 1,
+      "message": "aargh, a global variable with a name like |n| is probably not a good idea (short names typically refer to local variables, this will mislead readers).\n\nBetter keep |n| a local variable and pass its address to makePartitionCmd() so that the function modifies its value.",
+      "revId": "36f196bab25d0200c06be32ec5f03aac91556aed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3e6e4e7b_e98d5539",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-25T04:11:08Z",
+      "side": 1,
+      "message": "as suggested above, make the function take the address of the |args| index position, as in:\n\n  void makePartitionCmd(const char** args,\n                                       int* argsPos,\n                                       AndroidHwConfig* hw,\n                                       ImageType type) {\n    int n \u003d *argsPos;\n\n    ....\n\n    *argsPos \u003d n;\n  }",
+      "revId": "36f196bab25d0200c06be32ec5f03aac91556aed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
