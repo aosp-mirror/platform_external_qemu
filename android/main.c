@@ -37,7 +37,6 @@
 
 #include "android/avd/scanner.h"
 #include "android/config/config.h"
-#include "android/cpu_accelerator.h"
 
 #include "android/kernel/kernel_utils.h"
 #include "android/skin/charmap.h"
@@ -51,7 +50,6 @@
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
 #include "android/utils/tempfile.h"
-#include "android/utils/x86_cpuid.h"
 
 #include "android/main-common.h"
 #include "android/help.h"
@@ -857,130 +855,10 @@ int main(int argc, char **argv)
         args[n++] = "socket,vlan=1,mcast=230.0.0.10:1234";
     }
 
-    /* Handle CPU acceleration options. */
-    if (opts->no_accel) {
-        if (opts->accel) {
-            if (strcmp(opts->accel, "off") != 0) {
-                derror("You cannot use -no-accel and '-accel %s' at the same time",
-                       opts->accel);
-                exit(1);
-            }
-        } else {
-            reassign_string(&opts->accel, "off");
-        }
-    }
-
-    enum {
-        ACCEL_OFF = 0,
-        ACCEL_ON = 1,
-        ACCEL_AUTO = 2,
-    } accel_mode = ACCEL_AUTO;
-
-    if (opts->accel) {
-        if (!strcmp(opts->accel, "off")) {
-            accel_mode = ACCEL_OFF;
-        } else if (!strcmp(opts->accel, "on")) {
-            accel_mode = ACCEL_ON;
-        } else if (!strcmp(opts->accel, "auto")) {
-            accel_mode = ACCEL_AUTO;
-        } else {
-            derror("Invalid '-accel %s' parameter, valid values are: on off auto\n",
-                   opts->accel);
-            exit(1);
-        }
-    }
-
 #if defined(TARGET_I386) || defined(TARGET_X86_64)
     char* accel_status = NULL;
-    bool accel_ok = android_hasCpuAcceleration(&accel_status);
-
-#ifdef __linux__
-    static const char kAccelerator[] = "KVM";
-    static const char kEnableAccelerator[] = "-enable-kvm";
-    static const char kDisableAccelerator[] = "-disable-kvm";
-#else
-    static const char kAccelerator[] = "Intel HAXM";
-    static const char kEnableAccelerator[] = "-enable-hax";
-    static const char kDisableAccelerator[] = "-disable-hax";
-#endif
-
-    // Dump CPU acceleration status.
-    if (VERBOSE_CHECK(init)) {
-        const char* accel_str = "DISABLED";
-        if (accel_ok) {
-            if (accel_mode == ACCEL_OFF) {
-                accel_str = "working, but disabled by user";
-            } else {
-                accel_str = "working";
-            }
-        }
-        dprint("CPU Acceleration: %s", accel_str);
-        dprint("CPU Acceleration status: %s", accel_status);
-    }
-
-    // Special case: x86/x86_64 emulation currently requires hardware
-    // acceleration, so refuse to start in 'auto' mode if it is not
-    // available.
-    {
-        char* abi = avdInfo_getTargetAbi(avd);
-        if (!strncmp(abi, "x86", 3)) {
-            if (!accel_ok && accel_mode != ACCEL_OFF) {
-                derror("%s emulation currently requires hardware acceleration!\n"
-                    "Please ensure %s is properly installed and usable.\n"
-                    "CPU acceleration status: %s",
-                    abi, kAccelerator, accel_status);
-                exit(1);
-            }
-            else if (accel_mode == ACCEL_OFF) {
-                // '-no-accel' of '-accel off' was used explicitly. Warn about
-                // the issue but do not exit.
-                dwarning("%s emulation may not work without hardware acceleration!", abi);
-            }
-            else {
-                /* CPU acceleration is enabled and working, but if the host CPU
-                 * does not support all instruction sets specified in the x86/
-                 * x86_64 ABI, emulation may fail on unsupported instructions.
-                 * Therefore, check the capabilities of the host CPU and warn
-                 * the user if any required features are missing. */
-                uint32_t ecx = 0;
-                char buf[64], *p = buf, * const end = p + sizeof(buf);
-
-                /* Execute CPUID instruction with EAX=1 and ECX=0 to get CPU
-                 * feature bits (stored in EDX, ECX and EBX). */
-                android_get_x86_cpuid(1, 0, NULL, NULL, &ecx, NULL);
-
-                /* Theoretically, MMX and SSE/2/3 should be checked as well, but
-                 * CPU models that do not support them are probably too old to
-                 * run Android emulator. */
-                if (!(ecx & CPUID_ECX_SSSE3)) {
-                    p = bufprint(p, end, " SSSE3");
-                }
-                if (!strcmp(abi, "x86_64")) {
-                    if (!(ecx & CPUID_ECX_SSE41)) {
-                        p = bufprint(p, end, " SSE4.1");
-                    }
-                    if (!(ecx & CPUID_ECX_SSE42)) {
-                        p = bufprint(p, end, " SSE4.2");
-                    }
-                    if (!(ecx & CPUID_ECX_POPCNT)) {
-                        p = bufprint(p, end, " POPCNT");
-                    }
-                }
-
-                if (p > buf) {
-                    /* Using dwarning(..) would cause this message to be written
-                     * to stdout and filtered out by AVD Manager. But we want
-                     * the AVD Manager user to see this warning, so we resort to
-                     * fprintf(..). */
-                    fprintf(stderr, "emulator: WARNING: Host CPU is missing the"
-                            " following feature(s) required for %s emulation:%s"
-                            "\nHardware-accelerated emulation may not work"
-                            " properly!\n", abi, buf);
-                }
-            }
-        }
-        AFREE(abi);
-    }
+    CpuAccelMode accel_mode = ACCEL_AUTO;
+    bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, accel_status);
 
     // CPU acceleration only works for x86 and x86_64 system images.
     if (accel_mode == ACCEL_OFF && accel_ok) {
@@ -999,8 +877,6 @@ int main(int argc, char **argv)
 
     AFREE(accel_status);
 #else
-    (void)accel_mode;
-
     if (VERBOSE_CHECK(init)) {
         dwarning("CPU acceleration only works with x86/x86_64 "
             "system images.");
