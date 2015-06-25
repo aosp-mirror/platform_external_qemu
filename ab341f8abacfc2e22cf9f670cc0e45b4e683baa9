@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e856e59_f13f88e5",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-25T04:15:48Z",
+      "side": 1,
+      "message": "nit: use a \u0027bool\u0027 type here instead.",
+      "revId": "ab341f8abacfc2e22cf9f670cc0e45b4e683baa9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fe8e767f_ef024112",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-25T04:15:48Z",
+      "side": 1,
+      "message": "nit: Unlike D(\"\u003cmsg\u003e\"), this doesn\u0027t print an \"emulator: \" prefix to each line. Please add this manually here and below.",
+      "revId": "ab341f8abacfc2e22cf9f670cc0e45b4e683baa9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
