@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7e5366ca_831d9e23",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-06-25T08:14:04Z",
+      "side": 1,
+      "message": "thanx Digit, you are right, simpler but it could be very misleading. will update the patch.",
+      "parentUuid": "fe8e767f_cffdfd80",
+      "revId": "36f196bab25d0200c06be32ec5f03aac91556aed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3e6e4e7b_e98d5539",
         "filename": "android/qemu-launcher/emulator-qemu.cpp",
         "patchSetId": 1
