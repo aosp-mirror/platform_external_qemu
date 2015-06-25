@@ -109,6 +109,33 @@ void findImagePaths( AndroidHwConfig*  hwConfig,
 void updateHwConfigFromAVD(AndroidHwConfig* hwConfig, struct AvdInfo* avd,
                            AndroidOptions* opts, int inAndroidBuild);
 
+typedef enum {
+    ACCEL_OFF = 0,
+    ACCEL_ON = 1,
+    ACCEL_AUTO = 2,
+} CpuAccelMode;
+
+#ifdef __linux__
+    static const char kAccelerator[] = "KVM";
+    static const char kEnableAccelerator[] = "-enable-kvm";
+    static const char kDisableAccelerator[] = "-disable-kvm";
+#else
+    static const char kAccelerator[] = "Intel HAXM";
+    static const char kEnableAccelerator[] = "-enable-hax";
+    static const char kDisableAccelerator[] = "-disable-hax";
+#endif
+
+/*
+ * Param:
+ *  opts - Options passed to the main()
+ *  avd - AVD info containig paths for the hardware configuration.
+ *  accel_mode - indicates acceleration mode based on command line
+ *  status - a string about cpu acceleration status
+ * Return: if cpu acceleration is available
+ */
+bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,
+                           CpuAccelMode* accel_mode, char* accel_status);
+
 ANDROID_END_HEADER
 
 #endif /* ANDROID_MAIN_COMMON_H */

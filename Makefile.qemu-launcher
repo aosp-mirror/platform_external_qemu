@@ -22,6 +22,7 @@ endif
 qemu_launcher_SOURCES := \
     android/qemu-launcher/emulator-qemu.cpp \
     android/cmdline-option.c \
+    android/cpu_accelerator.cpp \
     android/help.c \
     android/main-common.c \
 
