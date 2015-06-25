@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1e8c2a86_7091505b",
+        "filename": "android/utils/path_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-25T01:45:45Z",
+      "side": 1,
+      "message": "nit: tab here :)",
+      "revId": "d4617d66b823fc6632ad67fa528fb38cd21fdc52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
