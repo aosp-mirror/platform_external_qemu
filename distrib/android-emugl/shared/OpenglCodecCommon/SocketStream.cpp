@@ -50,8 +50,11 @@ SocketStream::~SocketStream()
 #ifdef _WIN32
         closesocket(m_sock);
 #else
-        ::close(m_sock);
+        forceStop();
+        if(close(m_sock) < 0)
+          perror("Closing SocketStream failed");
 #endif
+        // DBG("SocketStream::~close  @ %d \n", m_sock);
         m_sock = -1;
     }
     if (m_buf != NULL) {
@@ -171,6 +174,7 @@ void SocketStream::forceStop() {
 #ifdef _WIN32
     ::shutdown(m_sock, SD_BOTH);
 #else
-    ::shutdown(m_sock, SHUT_RDWR);
+    if(::shutdown(m_sock, SHUT_RDWR) < 0)
+      perror("Error shutting down SocketStream");
 #endif
 }

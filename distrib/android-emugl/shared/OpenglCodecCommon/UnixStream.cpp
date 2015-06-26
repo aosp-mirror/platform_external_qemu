@@ -37,13 +37,30 @@
 #endif
 
 UnixStream::UnixStream(size_t bufSize) :
-    SocketStream(bufSize)
+    SocketStream(bufSize),
+    bound_socket_path(NULL)
 {
 }
 
 UnixStream::UnixStream(int sock, size_t bufSize) :
-    SocketStream(sock, bufSize)
+    SocketStream(sock, bufSize),
+    bound_socket_path(NULL)
 {
+}
+
+UnixStream::~UnixStream()
+{
+    if (bound_socket_path != NULL) {
+      int ret = 0;
+      do {
+          ret = unlink(bound_socket_path);
+      } while (ret < 0 && errno == EINTR);
+      if(ret != 0) {
+          ERR("Failed to unlink UNIX socket at \"%s\"\n", bound_socket_path);
+          perror("UNIX socket could not be unlinked");
+      }
+      free(bound_socket_path);
+    }
 }
 
 /* Initialize a sockaddr_un with the appropriate values corresponding
@@ -84,6 +101,7 @@ make_unix_path(char *path, size_t  pathlen, int port_number)
 
     // Now, initialize it properly
     snprintf(path, pathlen, "%s/qemu-gles-%d", tmp, port_number);
+
     return 0;
 }
 
@@ -95,7 +113,16 @@ int UnixStream::listen(char addrstr[MAX_ADDRSTR_LEN])
     }
 
     m_sock = emugl::socketLocalServer(addrstr, SOCK_STREAM);
-    if (!valid()) return int(ERR_INVALID_SOCKET);
+
+    if (!valid())
+        return int(ERR_INVALID_SOCKET);
+
+    bound_socket_path = strdup(addrstr);
+    if(bound_socket_path == NULL) {
+        ERR("WARNING: UNIX socket at \"%s\" should be manually removed \n",
+            addrstr);
+        return -1;
+    }
 
     return 0;
 }
@@ -108,6 +135,7 @@ SocketStream * UnixStream::accept()
         struct sockaddr_un addr;
         socklen_t len = sizeof(addr);
         clientSock = ::accept(m_sock, (sockaddr *)&addr, &len);
+        // DBG("UnixStream::accept  @ %d \n", clientSock);
 
         if (clientSock < 0 && errno == EINTR) {
             continue;
@@ -126,6 +154,7 @@ SocketStream * UnixStream::accept()
 int UnixStream::connect(const char* addr)
 {
     m_sock = emugl::socketLocalClient(addr, SOCK_STREAM);
+    // DBG("UnixStream::connect @ %d \n", m_sock);
     if (!valid()) return -1;
 
     return 0;

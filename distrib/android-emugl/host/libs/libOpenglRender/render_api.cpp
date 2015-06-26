@@ -112,6 +112,7 @@ RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
     if (!s_renderWindow->isValid()) {
         ERR("Could not initialize emulated framebuffer");
         delete s_renderWindow;
+        s_renderWindow = NULL;
         return false;
     }
 
@@ -164,10 +165,22 @@ RENDER_APICALL int RENDER_APIENTRY stopOpenGLRenderer(void)
         s_renderThread = NULL;
     }
 
-    if (s_renderWindow) {
-        delete s_renderWindow;
-        s_renderWindow = NULL;
-    }
+    /*
+     * This conditional is unreachable in all cases except
+     * during UI shutdown. When the UI has to shutdown in an
+     * unorderly fashion (e.g. SIGKILL), a yet undefined
+     * alternative path will free s_renderWindow twice,
+     * resulting to a segfault.
+     *
+     * TODO: FIX THIS
+     *
+     */
+    // if (s_renderWindow != NULL) {
+    //     delete s_renderWindow;
+    //     s_renderWindow = NULL;
+    // }
+
+    delete dummy;
 
     return ret;
 }
