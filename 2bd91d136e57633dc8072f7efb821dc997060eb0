@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b31fd953_3528f0bd",
+        "filename": "telephony/gsm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 541,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-26T21:55:17Z",
+      "side": 1,
+      "message": "nit: s/gms7/gms7/ :)",
+      "revId": "2bd91d136e57633dc8072f7efb821dc997060eb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b31fd953_152df4cd",
+        "filename": "telephony/gsm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 555,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-26T21:55:17Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "2bd91d136e57633dc8072f7efb821dc997060eb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b31fd953_d51e5c92",
+        "filename": "telephony/gsm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 570,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-26T21:55:17Z",
+      "side": 1,
+      "message": "nit: technically, it\u0027s a Unicode codepoint, UTF-8 is just one specific encoding of Unicode code points.",
+      "revId": "2bd91d136e57633dc8072f7efb821dc997060eb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b31fd953_9518e4a4",
+        "filename": "telephony/gsm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-26T21:55:17Z",
+      "side": 1,
+      "message": "nit: I prefer \u0027encoded\u0027 to \u0027expressed\u0027 here.",
+      "revId": "2bd91d136e57633dc8072f7efb821dc997060eb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "931e5558_7451c834",
+        "filename": "telephony/gsm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 575,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-26T21:55:17Z",
+      "side": 1,
+      "message": "nit: s/retuned/returned/",
+      "range": {
+        "startLine": 575,
+        "startChar": 44,
+        "endLine": 575,
+        "endChar": 51
+      },
+      "revId": "2bd91d136e57633dc8072f7efb821dc997060eb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b31fd953_b51be0a0",
+        "filename": "telephony/gsm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 590,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-26T21:55:17Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "2bd91d136e57633dc8072f7efb821dc997060eb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
