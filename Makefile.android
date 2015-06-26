@@ -357,7 +357,10 @@ $(call start-emulator-program, emulator)
 else
 $(call start-emulator64-program, emulator)
 endif
-LOCAL_SRC_FILES := android/main-emulator.c
+LOCAL_SRC_FILES := \
+    android/main-emulator.c \
+    android/qt/qt_setup.cpp \
+
 
 ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
     LOCAL_STATIC_LIBRARIES := emulator-common
