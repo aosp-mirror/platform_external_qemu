@@ -18,6 +18,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Enable/Disable relative mouse mode. Used for trackball emulation.
 // This hides the cursor and grabs the input.
 void skin_winsys_set_relative_mouse_mode(bool enabled);
@@ -60,5 +64,17 @@ void skin_winsys_set_window_icon(const unsigned char* icon_data,
 
 // Stop main window and quit program. Must be called from inside event loop.
 void skin_winsys_quit(void);
+
+typedef void (*StartFunction)(int argc, char** argv);
+
+// Spawn a thread and run the given function in it.
+void skin_winsys_spawn_thread(StartFunction f, int argc, char** argv);
+
+// Enter the main event handling loop for the UI subsystem.
+void skin_winsys_enter_main_loop(int argc, char** argv);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // ANDROID_SKIN_WINSYS_H

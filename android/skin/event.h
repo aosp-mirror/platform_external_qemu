@@ -15,6 +15,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     kEventKeyDown,
     kEventKeyUp,
@@ -68,5 +72,9 @@ extern bool skin_event_poll(SkinEvent* event);
 
 // Set/unset unicode translation for key events.
 extern void skin_event_enable_unicode(bool enabled);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // ANDROID_SKIN_EVENT_H
