@@ -149,5 +149,12 @@ TEST(System, isRemoteSession) {
     }
 }
 
+TEST(System, addLibrarySearchDir) {
+    TestSystem testSys("/foo/bar", 32);
+    TestTempDir* testDir = testSys.getTempRoot();
+    ASSERT_TRUE(testDir->makeSubDir("lib"));
+    testSys.addLibrarySearchDir("lib");
+}
+
 }  // namespace base
 }  // namespace android

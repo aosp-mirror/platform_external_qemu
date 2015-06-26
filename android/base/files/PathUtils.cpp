@@ -144,7 +144,7 @@ String PathUtils::recompose(const StringVector& components,
         addSeparator = true;
         if (n == 0) {
             size_t prefixLen = rootPrefixSize(component.c_str(), hostType);
-            if (prefixLen > 0) {
+            if (prefixLen == component.size()) {
                 addSeparator = false;
             }
         }
