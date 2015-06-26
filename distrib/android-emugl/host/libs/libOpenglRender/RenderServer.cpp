@@ -113,6 +113,7 @@ intptr_t RenderServer::main()
         // check if we have been requested to exit while waiting on accept
         if ((clientFlags & IOSTREAM_CLIENT_EXIT_SERVER) != 0) {
             m_exiting = true;
+            delete stream;
             break;
         }
 
@@ -120,11 +121,10 @@ intptr_t RenderServer::main()
         if (!rt) {
             fprintf(stderr,"Failed to create RenderThread\n");
             delete stream;
-            stream = NULL;
         } else if (!rt->start()) {
             fprintf(stderr,"Failed to start RenderThread\n");
             delete rt;
-            rt = NULL;
+            delete stream;
         }
 
         //
