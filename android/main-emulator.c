@@ -31,6 +31,7 @@
 #include <android/utils/bufprint.h>
 #include <android/utils/win32_cmdline_quote.h>
 #include <android/opengl/emugl_config.h>
+#include <android/qt/qt_setup.h>
 #include <android/avd/scanner.h>
 #include <android/avd/util.h>
 
@@ -60,7 +61,8 @@ bool ranchu = false;
 #define GLES_EMULATION_LIB64  "lib64OpenglRender" DLL_EXTENSION
 
 /* Forward declarations */
-static char* getTargetEmulatorPath(const char* progName,
+static char* getTargetEmulatorPath(const char* progDir,
+                                   bool tryCurrentPath,
                                    const char* avdArch,
                                    const int force_32bit,
                                    bool* is_64bit);
@@ -216,9 +218,22 @@ int main(int argc, char** argv)
         D("Can't determine target AVD architecture: defaulting to %s\n", avdArch);
     }
 
+    /* Find program directory. */
+    char* progDir = NULL;
+    path_split(argv[0], &progDir, NULL);
+
+    /* Only search in current path if there is no directory separator
+     * in |progName|. */
+#ifdef _WIN32
+    bool tryCurrentPath = (!strchr(argv[0], '/') && !strchr(argv[0], '\\'));
+#else
+    bool tryCurrentPath = !strchr(argv[0], '/');
+#endif
+
     /* Find the architecture-specific program in the same directory */
     bool is_64bit = false;
-    emulatorPath = getTargetEmulatorPath(argv[0],
+    emulatorPath = getTargetEmulatorPath(progDir,
+                                         tryCurrentPath,
                                          avdArch,
                                          force_32bit,
                                          &is_64bit);
@@ -248,6 +263,9 @@ int main(int argc, char** argv)
     D("%s\n", config.status);
 
     emuglConfig_setupEnv(&config);
+
+    /* For Qt-based UI backends, add <lib>/qt/ to the library search path. */
+    androidQtSetupEnv(is_64bit);
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().
@@ -440,28 +458,16 @@ probeTargetEmulatorPath(const char* progDir,
  *               emulator(64)-x86
  */
 static char*
-getTargetEmulatorPath(const char* progName,
+getTargetEmulatorPath(const char* progDir,
+                      bool tryCurrentPath,
                       const char* avdArch,
                       const int force_32bit,
                       bool* is_64bit)
 {
-    char*  progDir;
     char*  result;
     char* ranchu_result;
     bool search_for_64bit_emulator =
             !force_32bit && android_getHostBitness() == 64;
-
-    /* Only search in current path if there is no directory separator
-     * in |progName|. */
-#ifdef _WIN32
-    bool try_current_path =
-            (!strchr(progName, '/') && !strchr(progName, '\\'));
-#else
-    bool try_current_path = !strchr(progName, '/');
-#endif
-
-    /* Get program's directory name in progDir */
-    path_split(progName, &progDir, NULL);
 
     const char* emulatorSuffix;
 
@@ -477,7 +483,7 @@ getTargetEmulatorPath(const char* progName,
                                      NULL,
                                      emulatorSuffix,
                                      search_for_64bit_emulator,
-                                     try_current_path,
+                                     tryCurrentPath,
                                      is_64bit);
     if (result && !ranchu) {
         /* found and not ranchu */
@@ -494,7 +500,7 @@ getTargetEmulatorPath(const char* progName,
 #else
                                                 search_for_64bit_emulator,
 #endif
-                                                try_current_path,
+                                                tryCurrentPath,
                                                 is_64bit);
         if (ranchu_result) {
             D("return ranchu: %s\n", ranchu_result);
