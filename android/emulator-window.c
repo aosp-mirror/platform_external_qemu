@@ -185,6 +185,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
 
         .keyboard_charmap = emulator->opts->charmap,
         .keyboard_raw_keys = emulator->opts->raw_keys != 0,
+        .win32_ignore_events = false,
     };
 
     write_window_name(my_ui_params.window_name,

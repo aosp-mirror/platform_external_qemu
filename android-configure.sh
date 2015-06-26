@@ -764,6 +764,7 @@ echo "#define CONFIG_GDBSTUB  1" >> $config_h
 echo "#define CONFIG_SLIRP    1" >> $config_h
 echo "#define CONFIG_SKINS    1" >> $config_h
 echo "#define CONFIG_TRACE    1" >> $config_h
+echo "#define CONFIG_SDL      1" >> $config_h
 
 case "$HOST_OS" in
     windows)
