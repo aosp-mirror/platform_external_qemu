@@ -1593,7 +1593,7 @@ do_sms_send( ControlClient  client, char*  args )
     }
 
 
-    /* un-secape message text into proper utf-8 (conversion happens in-site) */
+    /* un-escape message text into proper utf-8 (conversion happens in-site) */
     p      += 1;
     textlen = strlen(p);
     textlen = sms_utf8_from_message_str( p, textlen, (unsigned char*)p, textlen );

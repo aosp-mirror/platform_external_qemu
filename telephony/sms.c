@@ -63,7 +63,7 @@ sms_utf8_from_message_str( const char*  str, int  strlen, unsigned char*  utf8, 
                 c &= 0x0f;
             else
                 c &= 0x07;
-            p++;
+
             while (p < end && (p[0] & 0xc0) == 0x80) {
                 c = (c << 6) | (p[0] & 0x3f);
                 p++;
@@ -1178,7 +1178,6 @@ gsm_rope_add_sms_deliver_pdu( GsmRope                 rope,
         else
             gsm_rope_add_c( rope, count*2 );
 
-        gsm_rope_add_c( rope, count*2 );
         dst = gsm_rope_reserve( rope, count*2 );
         if (dst != NULL) {
             utf8_to_ucs2( utf8, utf8len, dst );
@@ -1270,17 +1269,19 @@ smspdu_create_deliver_utf8( const unsigned char*   utf8,
     use_gsm7 = utf8_check_gsm7( utf8, utf8len );
 
     /* count the number of SMS PDUs we'll need */
-    block = MAX_USER_DATA_SEPTETS - USER_DATA_HEADER_SIZE;
 
     if (use_gsm7) {
         count = utf8_to_gsm7( utf8, utf8len, NULL, 0 );
+        block = MAX_USER_DATA_SEPTETS - USER_DATA_HEADER_SIZE;
+        num_pdus = count / block;
+        leftover = count - num_pdus*block;
     } else {
         count = utf8_to_ucs2( utf8, utf8len, NULL );
         block = MAX_USER_DATA_BYTES - USER_DATA_HEADER_SIZE;
+        num_pdus = (2 * count) / block;
+        leftover = (2 * count) - num_pdus*block;
     }
 
-    num_pdus = count / block;
-    leftover = count - num_pdus*block;
     if (leftover > 0)
         num_pdus += 1;
 
@@ -1302,7 +1303,12 @@ smspdu_create_deliver_utf8( const unsigned char*   utf8,
             if (leftover > 0 && nn == num_pdus-1)
                 skip = leftover;
 
-            src_next = utf8_skip_gsm7( src, src_end, skip );
+            /* How many utf8 symbols will fit in this PDU? */
+            if (use_gsm7) {
+                src_next = utf8_skip_gsm7( src, src_end, skip );
+            } else {
+                src_next = utf8_skip_ucs2( src, src_end, skip );
+            }
 
             list[nn] = smspdu_create_deliver( src, src_next - src, use_gsm7, sender_address, timestamp,
                                               ref_num, num_pdus, nn );
