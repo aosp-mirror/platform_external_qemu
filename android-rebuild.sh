@@ -223,6 +223,43 @@ if [ -d "$PREBUILTS_DIR/mesa" ]; then
     done
 fi
 
+# Copy Qt shared libraries, if needed.
+if true; then
+    QT_PREBUILTS_DIR=$(awk '$1 == "QT_PREBUILTS_DIR" { print $3; }' \
+            $OUT_DIR/config.make 2>/dev/null)
+    if [ ! -d "$QT_PREBUILTS_DIR" ]; then
+        echo "Warning: Missing Qt prebuilts directory: $QT_PREBUILTS_DIR"
+    else
+    echo "Copying Qt prebuilt libraries from $QT_PREBUILTS_DIR"
+    for QT_ARCH in x86 x86_64; do
+        QT_SRCDIR=$QT_PREBUILTS_DIR/$TARGET_OS-$QT_ARCH
+        case $QT_ARCH in
+            x86) QT_DSTDIR=$OUT_DIR/lib/qt;;
+            x86_64) QT_DSTDIR=$OUT_DIR/lib64/qt;;
+            *) panic "Invalid Qt host architecture: $QT_ARCH";;
+        esac
+        run mkdir -p "$QT_DSTDIR" || panic "Could not create Qt library sub-directory!"
+        if [ ! -d "$QT_SRCDIR" ]; then
+            continue
+        fi
+        case $TARGET_OS in
+            windows) QT_DLL_FILTER="*.dll";;
+            darwin) QT_DLL_FILTER="*.dylib";;
+            *) QT_DLL_FILTER="*.so*";;
+        esac
+        QT_LIBS=$(cd "$QT_SRCDIR" && find . -name "$QT_DLL_FILTER" 2>/dev/null)
+        #echo "QT_SRCDIR [$QT_SRCDIR] QT_LIBS [$QT_LIBS]"
+        if [ -z "$QT_LIBS" ]; then
+            panic "Cannot find Qt prebuilt libraries!?"
+        fi
+        for QT_LIB in $QT_LIBS; do
+            run cp -a "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR"/$(basename "$QT_LIB") ||
+                    panic "Could not copy $QT_LIB"
+        done
+    done
+    fi
+fi
+
 RUN_32BIT_TESTS=
 RUN_64BIT_TESTS=true
 RUN_EMUGEN_TESTS=true

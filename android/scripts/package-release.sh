@@ -592,7 +592,7 @@ EOF
 # $3: Darwin prebuilts directory.
 build_darwin_binaries_on () {
     local HOST PKG_FILE PKG_FILE_BASENAME DST_DIR TARFLAGS
-    local AOSP_DIR AOSP_PREBUILTS_DIR DARWIN_FLAGS SYSTEM
+    local AOSP_DIR AOSP_PREBUILTS_DIR DARWIN_FLAGS SYSTEM QT_SUBDIR
     HOST=$1
     PKG_FILE=$2
     AOSP_PREBUILTS_DIR=$3
@@ -612,6 +612,11 @@ build_darwin_binaries_on () {
     builder_prepare_remote_darwin_build \
             /tmp/$USER-android-emulator/$PKG_FILE_PREFIX
 
+    QT_SUBDIR=android-emulator-build/qt/
+    copy_directory "$AOSP_PREBUILTS_DIR"/$QT_SUBDIR/common \
+            "$DARWIN_PKG_DIR"/aosp/prebuilts/$QT_SUBDIR/common
+    copy_directory "$AOSP_PREBUILTS_DIR"/$QT_SUBDIR/darwin-x86_64 \
+            "$DARWIN_PKG_DIR"/aosp/prebuilts/$QT_SUBDIR/darwin-x86_64
     run tar xf "$PKG_FILE" -C "$DARWIN_PKG_DIR"/..
 
     if [ "$AOSP_PREBUILTS_DIR" ]; then
