@@ -538,6 +538,9 @@ utf8_to_ucs2( cbytes_t  utf8,
 #define  GSM_7BITS_ESCAPE   0x1b
 #define  GSM_7BITS_UNKNOWN  0
 
+/* For each gsm7 code value, this table gives the equivalent
+ * UTF-8 code point.
+ */
 static const unsigned short   gsm7bits_to_unicode[128] = {
   '@', 0xa3,  '$', 0xa5, 0xe8, 0xe9, 0xf9, 0xec, 0xf2, 0xc7, '\n', 0xd8, 0xf8, '\r', 0xc5, 0xe5,
 0x394,  '_',0x3a6,0x393,0x39b,0x3a9,0x3a0,0x3a8,0x3a3,0x398,0x39e,    0, 0xc6, 0xe6, 0xdf, 0xc9,
@@ -549,6 +552,9 @@ static const unsigned short   gsm7bits_to_unicode[128] = {
   'p',  'q',  'r',  's',  't',  'u',  'v',  'w',  'x',  'y',  'z', 0xe4, 0xf6, 0xf1, 0xfc, 0xe0,
 };
 
+/* For each gsm7 extended code value, this table gives the equivalent
+ * UTF-8 code point.
+ */
 static const unsigned short  gsm7bits_extend_to_unicode[128] = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,'\f',   0,   0,   0,   0,   0,
     0,   0,   0,   0, '^',   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -560,7 +566,14 @@ static const unsigned short  gsm7bits_extend_to_unicode[128] = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 };
 
-
+/*
+ * Input:  A Unicode code point
+ * Output: If the character represented by the input can
+ *         be encoded as gsm7, the gsm7 code value is
+ *         returned (0 .. 127).
+ *         If the input cannot be expressed by a (non-
+ *         extended) gsm7 code value, -1 is returned.
+ */
 static int
 unichar_to_gsm7( int  unicode )
 {
@@ -573,6 +586,14 @@ unichar_to_gsm7( int  unicode )
     return -1;
 }
 
+/*
+ * Input:  A Unicode code point
+ * Output: If the character represented by the input can
+ *         be encoded as extended gsm7, the extension
+ *         code value is returned (0 .. 127).
+ *         If the input cannot be expressed by an
+ *         extension gsm7 code value, -1 is returned.
+ */
 static int
 unichar_to_gsm7_extend( int  unichar )
 {
@@ -586,7 +607,9 @@ unichar_to_gsm7_extend( int  unichar )
 }
 
 
-/* return the number of septets needed to encode a unicode charcode */
+/* Return the number of septets needed to encode a unicode charcode.
+ * Return 0 if the charcode cannot be represented in gsm7.
+ */
 static int
 unichar_to_gsm7_count( int  unicode )
 {
@@ -602,7 +625,6 @@ unichar_to_gsm7_count( int  unicode )
 
     return 0;
 }
-
 
 cbytes_t
 utf8_skip_gsm7( cbytes_t  utf8, cbytes_t  utf8end, int  gsm7len )
@@ -622,11 +644,31 @@ utf8_skip_gsm7( cbytes_t  utf8, cbytes_t  utf8end, int  gsm7len )
         if (len == 0)  /* unknown chars are replaced by spaces */
             len = 1;
 
-        if (len > gsm7len)
+        if (len > gsm7len) /* We went too far */
             break;
 
         gsm7len -= len;
         p        = q;
+    }
+    return  p;
+}
+
+
+cbytes_t
+utf8_skip_ucs2( cbytes_t  utf8, cbytes_t  utf8end, int  ucs2len )
+{
+    cbytes_t  p   = utf8;
+    cbytes_t  end = utf8end;
+
+    while (ucs2len >= 2) {
+        cbytes_t  q = p;
+        int       c = utf8_next( &q, end );
+
+        if (c < 0)
+            break;
+
+        ucs2len -= 2; // All symbols take 2 bytes
+        p       =  q;
     }
     return  p;
 }
