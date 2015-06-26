@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "138ee5ef_8343e0f6",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/render_api.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-06-26T22:05:01Z",
+      "side": 1,
+      "message": "This bug is orthogonal; will get back to it on time but pls be my guest if you want it :)",
+      "range": {
+        "startLine": 175,
+        "startChar": 0,
+        "endLine": 175,
+        "endChar": 21
+      },
+      "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
