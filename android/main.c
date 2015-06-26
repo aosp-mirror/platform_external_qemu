@@ -35,7 +35,6 @@
 
 #include "math.h"
 
-#include "android/avd/scanner.h"
 #include "android/config/config.h"
 
 #include "android/kernel/kernel_utils.h"
@@ -246,19 +245,6 @@ int main(int argc, char **argv)
                "  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
                "  GNU General Public License for more details.\n\n");
 
-        exit(0);
-    }
-
-    if (opts->list_avds) {
-        AvdScanner* scanner = avdScanner_new(NULL);
-        for (;;) {
-            const char* name = avdScanner_next(scanner);
-            if (!name) {
-                break;
-            }
-            printf("%s\n", name);
-        }
-        avdScanner_free(scanner);
         exit(0);
     }
 

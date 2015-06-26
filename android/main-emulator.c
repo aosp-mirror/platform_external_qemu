@@ -31,6 +31,7 @@
 #include <android/utils/bufprint.h>
 #include <android/utils/win32_cmdline_quote.h>
 #include <android/opengl/emugl_config.h>
+#include <android/avd/scanner.h>
 #include <android/avd/util.h>
 
 /* Required by android/utils/debug.h */
@@ -134,6 +135,19 @@ int main(int argc, char** argv)
         if (!strcmp(opt,"-no-window")) {
             no_window = true;
             continue;
+        }
+
+        if (!strcmp(opt,"-list-avds")) {
+            AvdScanner* scanner = avdScanner_new(NULL);
+            for (;;) {
+                const char* name = avdScanner_next(scanner);
+                if (!name) {
+                    break;
+                }
+                printf("%s\n", name);
+            }
+            avdScanner_free(scanner);
+            exit(0);
         }
 
         if (!avdName) {
