@@ -719,6 +719,8 @@ echo "CONFIG_ESD        := $PROBE_ESD" >> $config_mk
 echo "CONFIG_ALSA       := $PROBE_ALSA" >> $config_mk
 echo "CONFIG_OSS        := $PROBE_OSS" >> $config_mk
 echo "CONFIG_PULSEAUDIO := $PROBE_PULSEAUDIO" >> $config_mk
+echo "EMULATOR_USE_SDL2 := true" >> $config_mk
+
 if [ $OPTION_DEBUG = yes ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
 fi

@@ -46,6 +46,8 @@ gen-hw-config-defs = \
   $(eval LOCAL_GENERATED_SOURCES += $(QEMU_HW_CONFIG_DEFS_H))\
   $(eval LOCAL_C_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES))
 
+EMULATOR_USE_SDL2 := $(strip $(filter true,$(EMULATOR_USE_SDL2)))
+
 ##############################################################################
 ##############################################################################
 ###
@@ -232,6 +234,13 @@ common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
+EMULATOR_LIBUI_CFLAGS :=
+EMULATOR_LIBUI_LDLIBS :=
+EMULATOR_LIBUI_LDFLAGS :=
+EMULATOR_LIBUI_LDFLAGS_64 :=
+EMULATOR_LIBUI_STATIC_LIBRARIES :=
+EMULATOR_LIBUI_STATIC_LIBRARIES_64 :=
+
 ###########################################################
 # Libpng configuration
 #
@@ -248,22 +257,30 @@ common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
 # SDL-related definitions
 #
 
-SDL2_DIR := distrib/sdl2-2.0.3
-include $(LOCAL_PATH)/$(SDL2_DIR)/sources.make
+ifdef EMULATOR_USE_SDL2
+    SDL2_DIR := distrib/sdl2-2.0.3
+    include $(LOCAL_PATH)/$(SDL2_DIR)/sources.make
 
-SDL2_STATIC_LIBRARIES := emulator_libSDL2
-SDL2_STATIC_LIBRARIES_64 := emulator_lib64SDL2
+    SDL2_STATIC_LIBRARIES := emulator_libSDL2
+    SDL2_STATIC_LIBRARIES_64 := emulator_lib64SDL2
 
-EMULATOR_LIBUI_CFLAGS += $(SDL2_CFLAGS) $(foreach inc,$(SDL2_INCLUDES),-I$(inc))
-EMULATOR_LIBUI_LDLIBS += $(SDL2_LDLIBS)
-EMULATOR_SDL_STATIC_LIBRARIES := $(SDL2_STATIC_LIBRARIES)
-EMULATOR_SDL_STATIC_LIBRARIES_64 := $(SDL2_STATIC_LIBRARIES_64)
-EMULATOR_SDL_LDLIBS := $(SDL2_LDLIBS)
+    EMULATOR_LIBUI_CFLAGS += $(SDL2_CFLAGS) $(foreach inc,$(SDL2_INCLUDES),-I$(inc))
+    EMULATOR_LIBUI_LDLIBS += $(SDL2_LDLIBS)
+    EMULATOR_LIBUI_STATIC_LIBRARIES := $(SDL2_STATIC_LIBRARIES)
+    EMULATOR_LIBUI_STATIC_LIBRARIES_64 := $(SDL2_STATIC_LIBRARIES_64)
+    EMULATOR_SDL_LDLIBS := $(SDL2_LDLIBS)
 
-# The following is needed by SDL_LoadObject
-ifneq ($(HOST_OS),windows)
-    EMULATOR_LIBUI_LDLIBS += -ldl
-endif
+    ifeq ($(HOST_OS),windows)
+        # Special exception for Windows: -lmingw32 must appear before libSDLmain
+        # on the link command-line, because it depends on _WinMain@16 which is
+        # exported by the latter.
+        EMULATOR_LIBUI_LDFLAGS += -lmingw32
+        EMULATOR_LIBUI_LDFLAGS_64 += -lmingw32
+    else
+        # The following is needed by SDL_LoadObject
+        EMULATOR_LIBUI_LDLIBS += -ldl
+    endif
+endif  # EMULATOR_USE_SDL2
 
 # the skin support sources
 #
@@ -282,9 +299,12 @@ SKIN_SOURCES := charmap.c \
                 scaler.c \
                 ui.c \
 
+ifdef EMULATOR_USE_SDL2
 SKIN_SOURCES += event-sdl2.c \
                 surface-sdl2.c \
                 winsys-sdl2.c \
+
+endif  # EMULATOR_USE_SDL2
 
 common_LOCAL_SRC_FILES += $(SKIN_SOURCES:%=android/skin/%)
 
