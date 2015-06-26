@@ -21,10 +21,12 @@
 class UnixStream : public SocketStream {
 public:
     explicit UnixStream(size_t bufsize = 10000);
+    ~UnixStream();
     virtual int listen(char addrstr[MAX_ADDRSTR_LEN]);
     virtual SocketStream *accept();
     virtual int connect(const char* addr);
 private:
+    char *bound_socket_path;
     UnixStream(int sock, size_t bufSize);
 };
 
