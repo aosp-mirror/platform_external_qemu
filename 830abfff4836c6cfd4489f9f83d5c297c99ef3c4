@@ -22,6 +22,29 @@
       "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "138ee5ef_66610a8b",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/UnixStream.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-06-26T23:26:48Z",
+      "side": 1,
+      "message": "I\u0027m thought strcpy() *always* returns the destination. What is this test looking for?",
+      "range": {
+        "startLine": 121,
+        "startChar": 24,
+        "endLine": 121,
+        "endChar": 28
+      },
+      "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
