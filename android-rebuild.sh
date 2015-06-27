@@ -224,12 +224,14 @@ if [ -d "$PREBUILTS_DIR/mesa" ]; then
 fi
 
 # Copy Qt shared libraries, if needed.
-if true; then
+EMULATOR_USE_QT=$(awk '$1 == "EMULATOR_USE_QT" { print $3; }' \
+        $OUT_DIR/config.make 2>/dev/null)
+if [ "$EMULATOR_USE_QT" = "true" ]; then
     QT_PREBUILTS_DIR=$(awk '$1 == "QT_PREBUILTS_DIR" { print $3; }' \
             $OUT_DIR/config.make 2>/dev/null)
     if [ ! -d "$QT_PREBUILTS_DIR" ]; then
-        echo "Warning: Missing Qt prebuilts directory: $QT_PREBUILTS_DIR"
-    else
+        panic "Missing Qt prebuilts directory: $QT_PREBUILTS_DIR"
+    fi
     echo "Copying Qt prebuilt libraries from $QT_PREBUILTS_DIR"
     for QT_ARCH in x86 x86_64; do
         QT_SRCDIR=$QT_PREBUILTS_DIR/$TARGET_OS-$QT_ARCH
@@ -257,7 +259,6 @@ if true; then
                     panic "Could not copy $QT_LIB"
         done
     done
-    fi
 fi
 
 # Copy e2fsprogs binaries.

@@ -273,7 +273,7 @@ int std_vga_enabled = 0;
 int vmsvga_enabled = 0;
 int xenfb_enabled = 0;
 static int full_screen = 0;
-#ifdef CONFIG_SDL
+#if defined(CONFIG_SDL) || defined(CONFIG_QT)
 static int no_frame = 0;
 #endif
 int no_quit = 0;
@@ -3875,6 +3875,8 @@ int main(int argc, char **argv, char **envp)
     if (display_type == DT_DEFAULT) {
 #if defined(CONFIG_SDL) || defined(CONFIG_COCOA)
         display_type = DT_SDL;
+#elif defined(CONFIG_QT)
+        display_type = DT_QT;
 #else
         display_type = DT_VNC;
         vnc_display = "localhost:0,to=99";
@@ -3895,12 +3897,18 @@ int main(int argc, char **argv, char **envp)
     case DT_SDL:
         sdl_display_init(ds, full_screen, no_frame);
         break;
+#elif defined(CONFIG_QT) && !defined(CONFIG_STANDALONE_CORE)
+    case DT_QT:
+        sdl_display_init(ds, full_screen, no_frame);
+        break;
 #elif defined(CONFIG_COCOA)
     case DT_SDL:
+    case DT_QT:
         cocoa_display_init(ds, full_screen);
         break;
 #elif defined(CONFIG_STANDALONE_CORE)
     case DT_SDL:
+    case DT_QT:
         coredisplay_init(ds);
         break;
 #endif

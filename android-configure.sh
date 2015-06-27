@@ -279,6 +279,9 @@ find_program () {
     eval $1="$PROG"
 }
 
+# Default value of --ui option.
+UI_DEFAULT=sdl2
+
 # Parse options
 OPTION_DEBUG=no
 OPTION_IGNORE_AUDIO=no
@@ -287,6 +290,7 @@ OPTION_OUT_DIR=
 OPTION_HELP=no
 OPTION_STRIP=no
 OPTION_MINGW=no
+OPTION_UI=
 
 GLES_SUPPORT=no
 
@@ -344,6 +348,12 @@ for opt do
   --no-tests)
   # Ignore this option, only used by android-rebuild.sh
   ;;
+  --ui=sdl2) OPTION_UI=sdl2
+  ;;
+  --ui=qt) OPTION_UI=qt
+  ;;
+  --ui=*) echo "Unknown --ui value, try one of: sdl2 qt"
+  ;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -364,6 +374,8 @@ EOF
     echo "  --strip                     Strip emulator executables."
     echo "  --no-strip                  Do not strip emulator executables (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
+    echo "  --ui=sdl2                   Use SDL2-based UI backend (default)."
+    echo "  --ui=qt                     Use Qt-based UI backend."
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
     echo "  --mingw                     Build Windows executable on Linux"
@@ -385,6 +397,11 @@ if [ "$OPTION_AOSP_PREBUILTS_DIR" ]; then
         exit 1
     fi
     AOSP_PREBUILTS_DIR=$OPTION_AOSP_PREBUILTS_DIR
+fi
+
+if [ -z "$OPTION_UI" ]; then
+    OPTION_UI=$UI_DEFAULT
+    log "Auto-config: --ui=$OPTION_UI"
 fi
 
 if [ "$OPTION_OUT_DIR" ]; then
@@ -600,12 +617,12 @@ esac
 ###  Qt probe
 ###
 QT_PREBUILTS_DIR=
-if true; then
+if [ "$OPTION_UI" = "qt" ]; then
     QT_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/qt
     if [ -d "$QT_PREBUILTS_DIR" ]; then
         log "Qt prebuilts dir: $QT_PREBUILTS_DIR"
     else
-        echo "WARNING: Missing Qt prebuilts directory: $QT_PREBUILTS_DIR"
+        panic "Missing Qt prebuilts directory: $QT_PREBUILTS_DIR"
     fi
 fi
 
@@ -732,8 +749,14 @@ echo "CONFIG_ESD        := $PROBE_ESD" >> $config_mk
 echo "CONFIG_ALSA       := $PROBE_ALSA" >> $config_mk
 echo "CONFIG_OSS        := $PROBE_OSS" >> $config_mk
 echo "CONFIG_PULSEAUDIO := $PROBE_PULSEAUDIO" >> $config_mk
-echo "EMULATOR_USE_SDL2 := true" >> $config_mk
-echo "QT_PREBUILTS_DIR  := $QT_PREBUILTS_DIR" >> $config_mk
+if [ "$QT_PREBUILTS_DIR" ]; then
+    echo "QT_PREBUILTS_DIR  := $QT_PREBUILTS_DIR" >> $config_mk
+    echo "EMULATOR_USE_SDL2 := false" >> $config_mk
+    echo "EMULATOR_USE_QT   := true" >> $config_mk
+else
+    echo "EMULATOR_USE_SDL2 := true" >> $config_mk
+    echo "EMULATOR_USE_QT   := false" >> $config_mk
+fi
 
 if [ $OPTION_DEBUG = yes ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
@@ -780,7 +803,14 @@ echo "#define CONFIG_GDBSTUB  1" >> $config_h
 echo "#define CONFIG_SLIRP    1" >> $config_h
 echo "#define CONFIG_SKINS    1" >> $config_h
 echo "#define CONFIG_TRACE    1" >> $config_h
-echo "#define CONFIG_SDL      1" >> $config_h
+
+if [ "$QT_PREBUILTS_DIR" ]; then
+    echo "#define CONFIG_QT     1" >> $config_h
+    echo "#undef CONFIG_SDL" >> $config_h
+else
+    echo "#undef CONFIG_QT" >> $config_mk
+    echo "#define CONFIG_SDL    1" >> $config_h
+fi
 
 case "$HOST_OS" in
     windows)
