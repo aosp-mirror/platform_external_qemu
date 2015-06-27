@@ -1,0 +1,63 @@
+BUILDING AND RUNNING A QT EMULATOR
+
+===========
+BUILDING QT
+===========
+
+For Linux and Windows, you will need to build Qt from source using the same toolchains you use to build emulator. You will need to have a different
+build of Qt for each host platform (32+64-bit Windows and Linux).
+
+On Mac, you may be able to use the binary distribution of the libraries; give it a shot.
+
+To build it, download the source, and from the <Qt home>/src directory, configure and build. Here's an example to build the 32-bit Linux libraries.
+
+export CC=<path to source tree>/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
+export CXX=<path to source tree>/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.8/bin/x86_64-linux-gcc
+./configure -prefix <Qt home>/5.4/gcc_32 -platform linux-g++-32 -opensource -confirm-license -no-openssl -no-compile-examples
+make -j80 clean
+make -j80 install
+
+To confiure Qt for cross compilation to Windows from a Linux GCC host (64-bit):
+
+./configure -prefix <Qt home>/5.4/x86_64-w64-mingw32 -developer-build -opensource -confirm-license -dbus -xplatform win32-g++ -device-option CROSS_COMPILE=x86_64-w64-mingw32- -nomake examples -nomake tests -no-warnings-are-errors -silent
+
+=================
+BUILDING EMULATOR
+=================
+
+In the android/skin/qt directory,
+
+    find . | grep Makefile | xargs rm
+    /path/to/Qt/5.4/<qt-architecture>/bin/qmake
+    make
+    
+    Note that you'll generally need to build twice; once for 32-bit and once for 64-bit. The libraries go into
+    external/qemu/objs, and the two different versions won't clobber each other.
+
+In Makefile.common,
+
+    EMULATOR_USE_QT ?= true
+    EMULATOR_USE_SDL2 ?= false
+
+    adjust QT_HOME
+
+In android/config/config.h:
+
+    //#define CONFIG_SDL 1
+    #define CONFIG_QT 1
+
+=======
+RUNNING
+=======
+
+Windows:
+
+    QT_PLUGIN_PATH=<Qt home>/5.4/x86_64-w64-mingw32/plugins
+
+MacOS:
+
+    DYLD_LIBRARY_PATH=<Qt home>/5.4/clang_64/plugins/platforms:<path to source tree>/external/qemu/objs/lib64
+
+Linux:
+
+    LD_LIBRARY_PATH=<path to source tree>/external/qemu/objs/lib64
