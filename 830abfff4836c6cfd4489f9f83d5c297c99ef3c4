@@ -45,6 +45,30 @@
       "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "53305d12_02b7aac1",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/UnixStream.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-06-28T22:02:17Z",
+      "side": 1,
+      "message": "Assuming libc works always as expected :)\n\nActually, it is simply a habit, like --always-- checking left and right before you cross the street. You do it always to avoid forgetting to do it when you really should have. If this is confusing, I will edit it out. But I would argue in favor of such redundancy as a means of quality improvement.",
+      "parentUuid": "138ee5ef_66610a8b",
+      "range": {
+        "startLine": 121,
+        "startChar": 24,
+        "endLine": 121,
+        "endChar": 28
+      },
+      "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
