@@ -19,6 +19,10 @@ typedef unsigned char  byte_t;
 typedef byte_t*        bytes_t;
 typedef const byte_t*  cbytes_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** BCD
  **/
 
@@ -197,5 +201,9 @@ extern void      gsm_rope_add( GsmRope  rope, const void*  str, int  len );
 extern void*     gsm_rope_reserve( GsmRope  rope, int  len );
 
 #define  PHONE_PREFIX "1555521"
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* _android_gsm_h */
