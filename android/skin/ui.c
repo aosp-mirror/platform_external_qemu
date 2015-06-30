@@ -26,6 +26,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 #define  DE(...) do { if (VERBOSE_CHECK(keys)) dprint(__VA_ARGS__); } while (0)
 
@@ -368,6 +372,21 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
 
 bool skin_ui_process_events(SkinUI* ui) {
     SkinEvent ev;
+
+#ifdef _WIN32
+    if (ui->ui_params.win32_ignore_events) {
+        // In QT, Windows messages are received by the QT thread, which is
+        // the thread that creates all of its windows, so that should be
+        // okay. However, in GPU accelerated images, there's a native window
+        // that's created that represents the actual OpenGL output pane, and
+        // that window is created from this thread and not the QT thread. We
+        // need to keep its message queue from getting jammed up with
+        // messages, so we need to grab any messages we see and drop
+        // unnecessary ones on the floor.
+        MSG message;
+        PeekMessage(&message, NULL, 0, 0, PM_REMOVE);
+    }
+#endif  // _WIN32
 
     while(skin_event_poll(&ev)) {
         switch(ev.type) {

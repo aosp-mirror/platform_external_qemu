@@ -21,6 +21,10 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#ifndef _WIN32
+#include <signal.h>
+#include <pthread.h>
+#endif
 
 #define DEBUG 0
 
@@ -245,6 +249,11 @@ public:
 
     virtual intptr_t main() {
         D("Entering render window thread thread\n");
+#ifndef _WIN32
+        sigset_t set;
+        sigfillset(&set);
+        pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif
         bool running = true;
         while (running) {
             RenderWindowMessage msg;
