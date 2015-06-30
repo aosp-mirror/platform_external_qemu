@@ -16,6 +16,24 @@
       "revId": "73869ad56ed0f8461002af64491767985d43b9f0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b388b937_cdb6a9c4",
+        "filename": "hw/android/goldfish/tty.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1049723
+      },
+      "writtenOn": "2015-06-30T16:41:27Z",
+      "side": 1,
+      "message": "I guess you are right :), a copy-paste mistake.\nI\u0027ll upload a corrected patch-set. Thanks.",
+      "parentUuid": "3e856e59_9134fc0b",
+      "revId": "73869ad56ed0f8461002af64491767985d43b9f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
