@@ -58,6 +58,8 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
   android/wear-agent/WearAgent_unittest.cpp \
+  telephony/gsm_unittest.cpp \
+  telephony/gsm.c \
 
 ifeq (windows,$(HOST_OS))
 EMULATOR_UNITTESTS_SOURCES += \
