@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d3ab6d9c_7efb71b8",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/UnixStream.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-30T22:42:24Z",
+      "side": 1,
+      "message": "well, you should probably still call free() if the unlink() failed.\nAlso, shouldn\u0027t you be looping around EINTR in unlink() ?",
+      "revId": "8c10fa431b6840b4424a47a5a0bcd648c9ee386e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
