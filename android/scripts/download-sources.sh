@@ -129,6 +129,49 @@ git_clone_depth1 () {
             panic "Could not clone git repository: $GIT_URL"
 }
 
+# Check out a SVN repository
+# $1: Source SVN URL
+# $2: Destination directory
+# $3: Revision number
+svn_checkout () {
+    local SVN_URL DST_DIR DST_SUBDIR VERSION
+    SVN_URL=$1
+    DST_DIR=$(dirname "$2")
+    DST_SUBDIR=$(basename "$2")
+    VERSION=$3
+
+    (
+        run mkdir -p "$DST_DIR" &&
+        run cd "$DST_DIR" &&
+        run svn checkout -r "$VERSION" $(dirname "$SVN_URL") $DST_SUBDIR
+    ) || panic "Could not checkout SVN repository: $SVN_URL"
+}
+
+# $1: Destination archive file.
+# $2: Source directory.
+create_sorted_tar_archive () {
+    local FILES TARFLAGS SRC_DIR SUBDIR DST_FILE
+    DST_FILE=$1
+    SRC_DIR=$(dirname "$2")
+    SUBDIR=$(basename "$2")
+    # To ensure that the tarball has reproducible results, we need to:
+    # - Force the mtime of all files.
+    # - Force the user/group names
+    # - Ensure consistent order for files in the archive.
+    # - Remove files with spaces in their names, they are problematic and not
+    #   needed for our use case.
+    FILES=$(cd "$SRC_DIR" && find "$SUBDIR" -type f | grep -v -e " " | sort | \
+            tr '\n' ' ')
+    TARFLAGS=
+    case $(get_build_os) in
+        linux)
+            var_append TARFLAGS "--owner=android --group=android"
+            var_append TARFLAGS "--mtime=2015-01-01"
+    esac
+    run tar cJf "$DST_FILE" $TARFLAGS -C "$SRC_DIR" $FILES ||
+            panic "Could not create archive"
+}
+
 ###
 ###  Command-line parsing
 ###
@@ -199,6 +242,7 @@ package_list_parse_file "$PACKAGE_LIST"
 for PACKAGE in $(package_list_get_packages); do
     PKG_URL=$(package_list_get_url $PACKAGE)
     PKG_GIT=$(package_list_get_git_url $PACKAGE)
+    PKG_SVN=$(package_list_get_svn_url $PACKAGE)
 
     # Check existing file archive, if any.
     PKG_FILE=$ARCHIVE_DIR/$(package_list_get_filename $PACKAGE)
@@ -208,7 +252,7 @@ for PACKAGE in $(package_list_get_packages); do
     fi
     if [ -f "$PKG_FILE" -a -n "$PKG_SHA1" ]; then
         dump "Checking existing file: $PKG_FILE"
-        if [ "$PKG_GIT" ]; then
+        if [ "$PKG_GIT" -o "$PKG_SVN" ]; then
             # IMPORTANT: Git tarballs are not built in a reproducible way on
             # Darwin, so check the SHA-1 of files within the archive,
             # instead of the archive file instead.
@@ -237,23 +281,24 @@ for PACKAGE in $(package_list_get_packages); do
             fi
             git_clone_depth1 "$PKG_GIT" "$TEMP_DIR/$PKG_FILE" "$PKG_BRANCH"
             run rm -rf "$TEMP_DIR/$PKG_FILE"/.git*
-            # To ensure that the tarball has reproducible results, we need to:
-            # - Force the mtime of all files.
-            # - Force the user/group names
-            # - Ensure consistent order for files in the archive.
-            FILES=$(cd "$TEMP_DIR" && find "$PKG_FILE" -type f | sort | tr '\n' ' ')
-            TARFLAGS=
-            case $(get_build_os) in
-                linux)
-                    var_append TARFLAGS "--owner=android --group=android"
-                    var_append TARFLAGS "--mtime=2015-01-01"
-            esac
-            run tar cJf "$ARCHIVE_DIR/$PKG_FILE.tar.xz" \
-                    $TARFLAGS \
-                    -C "$TEMP_DIR" \
-                    $FILES \
-                    || panic "Could not create archive"
+            create_sorted_tar_archive "$ARCHIVE_DIR"/$PKG_FILE.tar.xz \
+                    "$TEMP_DIR/$PKG_FILE"
             PKG_FILE=$ARCHIVE_DIR/$PKG_FILE.tar.xz
+        elif [ "$PKG_SVN" ]; then
+            PKG_FILE=$(package_list_get_filename $PACKAGE)
+            PKG_VERSION=$(package_list_get_version $PACKAGE)
+            PKG_SRC_DIR=$(package_list_get_src_dir $PACKAGE)
+            PKG_SUBDIR=${PKG_SRC_DIR}
+            dump "Checking out $PKG_SVN@$PKG_VERSION"
+            TEMP_DIR=$(temp_dir)
+            if [ -d "$TEMP_DIR/$PKG_SUBDIR" ]; then
+                run rm -rf "$TEMP_DIR/$PKG_SUBDIR"
+            fi
+            svn_checkout "$PKG_SVN" "$TEMP_DIR/$PKG_SUBDIR" "$PKG_VERSION"
+            find "$TEMP_DIR/$PKG_SUBDIR" -name ".svn*" -print0 | xargs -0 rm -rf
+            create_sorted_tar_archive "$ARCHIVE_DIR"/$PKG_FILE \
+                    "$TEMP_DIR"/$PKG_SUBDIR
+            PKG_FILE=$ARCHIVE_DIR/$PKG_FILE
         else
             panic "Missing GIT=<url> or URL=<url> for package $PACKAGE"
         fi
@@ -261,7 +306,7 @@ for PACKAGE in $(package_list_get_packages); do
 
     # Time to check the new archive SHA-1
     if [ "$PKG_SHA1" ]; then
-        if [ "$PKG_GIT" ]; then
+        if [ -n "$PKG_GIT" -o -n "$PKG_SVN" ]; then
             ARCHIVE_SHA1=$(compute_archive_sha1 "$PKG_FILE")
         else
             ARCHIVE_SHA1=$(compute_file_sha1 "$PKG_FILE")
