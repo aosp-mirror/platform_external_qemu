@@ -20,6 +20,8 @@
 #include "TcpStream.h"
 #ifndef _WIN32
 #include "UnixStream.h"
+#include <signal.h>
+#include <pthread.h>
 #endif
 #ifdef _WIN32
 #include "Win32PipeStream.h"
@@ -85,6 +87,12 @@ RenderServer *RenderServer::create(char* addr, size_t addrLen)
 intptr_t RenderServer::main()
 {
     RenderThreadsSet threads;
+
+#ifndef _WIN32
+    sigset_t set;
+    sigfillset(&set);
+    pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif
 
     while(1) {
         SocketStream *stream = m_listenSock->accept();

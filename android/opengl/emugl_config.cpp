@@ -179,38 +179,18 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     String newDirs = StringFormat("%s/%s",
                                   System::get()->getProgramDirectory().c_str(),
                                   libSubDir);
-#ifdef _WIN32
-    const char kPathSeparator = ';';
-#else
-    const char kPathSeparator = ':';
-#endif
-
     if (strcmp(config->backend, "host") != 0) {
         // If the backend is not 'host', we also need to add the
         // backend directory.
         String dir = sBackendList->getLibDirPath(config->backend);
         if (dir.size()) {
-            newDirs += kPathSeparator;
+            newDirs += System::kPathSeparator;
             newDirs += dir;
         }
     }
 
-#ifdef _WIN32
-    static const char kEnvPathVar[] = "PATH";
-#else  // !_WIN32
-    static const char kEnvPathVar[] = "LD_LIBRARY_PATH";
-#endif  // !_WIN32
-    String path = system->envGet(kEnvPathVar) ?: "";
-    if (path.size()) {
-        path = StringFormat("%s%c%s",
-                            newDirs.c_str(),
-                            kPathSeparator,
-                            path.c_str());
-    } else {
-        path = newDirs;
-    }
-    D("Setting %s=%s\n", kEnvPathVar, path.c_str());
-    system->envSet(kEnvPathVar, path.c_str());
+    D("Adding to the library search path: %s\n", newDirs.c_str());
+    system->addLibrarySearchDir(newDirs.c_str());
 
     if (!strcmp(config->backend, "host")) {
         // Nothing more to do for the 'host' backend.

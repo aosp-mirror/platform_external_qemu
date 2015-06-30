@@ -184,7 +184,8 @@ start-emulator-library = \
     $(eval LOCAL_NO_DEFAULT_COMPILER_FLAGS := true) \
     $(eval LOCAL_MODULE := $1) \
     $(eval LOCAL_MODULE_CLASS := STATIC_LIBRARIES) \
-    $(eval LOCAL_MODULE_BITS := 32)
+    $(eval LOCAL_MODULE_BITS := 32) \
+    $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_STATIC_LIBRARY))
 
 start-emulator64-library = \
     $(call start-emulator-library, $1) \
@@ -193,13 +194,25 @@ start-emulator64-library = \
 # Used with start-emulator-library
 end-emulator-library = \
     $(eval $(end-emulator-module-ev)) \
-    $(call include-if-bitness-$(LOCAL_MODULE_BITS), $(BUILD_HOST_STATIC_LIBRARY))
+
+define-emulator-prebuilt-library = \
+    $(call start-emulator-library,$1) \
+    $(eval LOCAL_BUILD_FILE := $(PREBUILT_STATIC_LIBRARY)) \
+    $(eval LOCAL_SRC_FILES := $2) \
+    $(eval $(end-emulator-module-ev)) \
+
+define-emulator64-prebuilt-library = \
+    $(call start-emulator64-library,$1) \
+    $(eval LOCAL_BUILD_FILE := $(PREBUILT_STATIC_LIBRARY)) \
+    $(eval LOCAL_SRC_FILES := $2) \
+    $(eval $(end-emulator-module-ev)) \
 
 # A variant of start-emulator-library to start the definition of a host
 # program instead. Use with end-emulator-program
 start-emulator-program = \
     $(call start-emulator-library,$1) \
-    $(eval LOCAL_MODULE_CLASS := EXECUTABLES)
+    $(eval LOCAL_MODULE_CLASS := EXECUTABLES) \
+    $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_EXECUTABLE))
 
 start-emulator64-program = \
     $(call start-emulator-program, $1) \
@@ -209,7 +222,6 @@ start-emulator64-program = \
 end-emulator-program = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
     $(eval $(end-emulator-module-ev)) \
-    $(call include-if-bitness-$(LOCAL_MODULE_BITS), $(BUILD_HOST_EXECUTABLE))
 
 define end-emulator-module-ev
 LOCAL_CC := $$(call my-host-tool,CC)
@@ -241,6 +253,7 @@ LOCAL_LDFLAGS := \
     -m$$(LOCAL_MODULE_BITS) \
     $$(filter-out -m32 -m64, $$(LOCAL_LDFLAGS))
 
+$$(call include-if-bitness-$$(LOCAL_MODULE_BITS), $$(LOCAL_BUILD_FILE))
 endef
 
 # The common libraries
