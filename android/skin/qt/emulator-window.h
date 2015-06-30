@@ -57,7 +57,6 @@ public:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-    void setBackingSurface(SkinSurface *surface) { backing_surface = surface;}
     void show();
     void startThread(StartFunction f, int argc, char **argv);
     void wheelEvent(QWheelEvent *event);
@@ -94,7 +93,7 @@ signals:
     void setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore = NULL);
     void setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void setTitle(const QString *title, QSemaphore *semaphore = NULL);
-    void showWindow(int x, int y, int w, int h, int is_fullscreen, QSemaphore *semaphore = NULL);
+    void showWindow(SkinSurface *s, const QRect* rect, int is_fullscreen, QSemaphore *semaphore = NULL);
 private slots:
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
     void slot_clearInstance();
@@ -114,7 +113,7 @@ private slots:
     void slot_setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore = NULL);
     void slot_setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void slot_setWindowTitle(const QString *title, QSemaphore *semaphore = NULL);
-    void slot_showWindow(int x, int y, int w, int h, int is_fullscreen, QSemaphore *semaphore = NULL);
+    void slot_showWindow(SkinSurface *s, const QRect* rect, int is_fullscreen, QSemaphore *semaphore = NULL);
     
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
