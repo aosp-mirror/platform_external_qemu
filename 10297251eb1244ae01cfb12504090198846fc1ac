@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3a99960_e852ab5c",
+        "filename": "Makefile.android",
+        "patchSetId": 2
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-30T10:31:45Z",
+      "side": 1,
+      "message": "damn, will get rid of this.",
+      "revId": "10297251eb1244ae01cfb12504090198846fc1ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
