@@ -30,6 +30,16 @@
 #          where <basename> is the GIT url basename, and <revision> is the
 #          branch or commit SHA1.
 #
+#      SVN=<url>
+#          SVN URL to be checked out and packed as a tarball in the archive
+#          directory. Package name will be <basename>-<revision>.tar.xz
+#          where <basename> is the SVN url basename, and <revision> is the
+#          revision number after @.
+#
+#      BASENAME=<name>
+#          Optional package base name. If not provided, the base name will
+#          be extracted from the URL/GIT/SVN value.
+#
 #      BRANCH=<name>
 #          GIT branch name, only needed when GIT=<url> is also used, ignored
 #          otherwise.
@@ -53,6 +63,17 @@
 #          the 'Mesa-10.4.2' directory is created. SRCDIR=<subdir>
 #          is a way to override the default value derived from
 #          the package's full name.
+#
+#      DSTDIR=<subdir>
+#          Optional destination sub-directory. In certain cases, it is
+#          necessary to rename the destination directory from something
+#          different from SRCDIR (e.g. Qt packages should all uncompress
+#          into the same source directory, but they come in tarballs that
+#          extract to separate directories like qtbase-XXX/ and qtsvg-XXX/.
+#
+#          By setting a non-empty value here, the content of SRCDIR will be
+#          recursively copied into the DSTDIR sub-directory. This happens
+#          after all patches have been applied in SRCDIR.
 #
 # Usage:
 #
@@ -90,26 +111,12 @@ _shu_package_name_extract_version () {
     package_file_strip_ext "$1" | sed -e 's|.*-\([^-]*\)$|\1|g'
 }
 
-# Extract the version of a given package file.
-# $1: Package file path (e.g. '/path/to/pkg-config-2.1.8.tar.xz')
-# Out: version (e.g. '2.1.8')
-package_file_get_version () {
-    _shu_package_name_extract_version "$(basename "$1")"
-}
-
 # Extract the base name of a given package file. Assumes the same format as
 # _shu_package_name_extract_basename.
 # $1: Package name (e.g. 'zlib-1.2.8.tar.gz')
 # Out: Package base name (e.g. 'zlib')
 _shu_package_name_extract_basename () {
     package_file_strip_ext "$1" | sed -e 's|^\(.*\)-[^-]*$|\1|g'
-}
-
-# Extract the basename of a given package file.
-# $1: Package file path (e.g. '/path/to/pkg-config-2.1.8.tar.xz')
-# Out: basename (e.g. 'pkg-config')
-package_file_get_basename () {
-    _shu_package_name_extract_basename "$(basename "$1")"
 }
 
 # Return the name of a package without its archive suffix (.zip/.tar.gz/etc).
@@ -192,6 +199,7 @@ package_list_parse_file () {
         _shu_parser_log "$LINE_NUMBER: LINE=[$LINE]"
         PKG_URL=
         PKG_GIT=
+        PKG_SVN=
         PKG_BRANCH=
         PKG_BASENAME=
         PKG_SHA1=
@@ -199,6 +207,7 @@ package_list_parse_file () {
         PKG_PATCHES=
         PKG_VERSION=
         PKG_SRC_DIR=
+        PKG_DST_DIR=
 
         # Skip empty lines, and comment lines that start with #
         if [ -z "$LINE" -o "${LINE##\#}" != "${LINE}" ]; then
@@ -215,17 +224,26 @@ package_list_parse_file () {
                 URL=*)
                     PKG_URL=${FIELD#URL=}
                     ;;
+                BASENAME=*)
+                    PKG_BASENAME=${FIELD##BASENAME=}
+                    ;;
                 BRANCH=*)
                     PKG_BRANCH=${FIELD#BRANCH=}
                     ;;
                 GIT=*)
                     PKG_GIT=${FIELD#GIT=}
                     ;;
+                SVN=*)
+                    PKG_SVN=${FIELD#SVN=}
+                    ;;
                 PATCHES=*)
                     PKG_PATCHES=${FIELD#PATCHES=}
                     ;;
                 SRCDIR=*)
                     PKG_SRC_DIR=${FIELD#SRCDIR=}
+                    ;;
+                DSTDIR=*)
+                    PKG_DST_DIR=${FIELD#DSTDIR=}
                     ;;
                 *)
                     dump "WARNING: Unknown package field [$FIELD] on line $LINE_NUMBER: $1"
@@ -235,29 +253,54 @@ package_list_parse_file () {
 
         if [ "$PKG_URL" ]; then
             if [ "$PKG_GIT" ]; then
-                panic "Cannot used bot URL=<url> and GIT=<url> on line $LINE_NUMBER: $1"
+                panic "Cannot use both URL=<url> and GIT=<url> on line $LINE_NUMBER: $1"
+            fi
+            if [ "$PKG_SVN" ]; then
+                panic "Cannot use both URL=<url> and SVN=<url> on line $LINE_NUMBER: $1"
             fi
             PKG_FILE=$(basename "$PKG_URL")
-            PKG_BASENAME=$(package_file_get_basename "$PKG_URL")
-            PKG_VERSION=$(package_file_get_version "$PKG_URL")
+            if [ -z "$PKG_BASENAME" ]; then
+                PKG_BASENAME=$(_shu_package_name_extract_basename "$PKG_FILE")
+            fi
+            PKG_VERSION=$(_shu_package_name_extract_version "$PKG_FILE")
         elif [ "$PKG_GIT" ]; then
+            if [ "$PKG_SVN" ]; then
+                panic "Cannot use both GIT=<url> and SVN=<url> on line $LINE_NUMBER: $1"
+            fi
             if [ -z "$PKG_BRANCH" ]; then
                 panic "Missing BRANCH=<name> on line $LINE_NUMBER: $1"
             fi
             PKG_FILE=$(basename "$PKG_GIT")
             PKG_FILE=${PKG_FILE%.git}  # Remove any .git suffix.
-            PKG_BASENAME=$PKG_FILE
-            PKG_FILE=$PKG_FILE-$PKG_BRANCH.tar.xz
+            if [ -z "$PKG_BASENAME" ]; then
+                PKG_BASENAME=$PKG_FILE
+            fi
+            PKG_FILE=$PKG_BASENAME-$PKG_BRANCH.tar.xz
+            PKG_VERSION=$PKG_BRANCH
+        elif [ "$PKG_SVN" ]; then
+            if [ -z "$PKG_BRANCH" ]; then
+                panic "Missing BRANCH=<name> on line $LINE_NUMBER: $1"
+            fi
+            PKG_FILE=$(basename "$PKG_SVN")
+            if [ -z "$PKG_BASENAME" ]; then
+                PKG_BASENAME=$PKG_FILE
+            fi
+            PKG_FILE=$PKG_BASENAME-$PKG_BRANCH.tar.xz
             PKG_VERSION=$PKG_BRANCH
         else
-            panic "Missing URL=<url> or GIT=<url> field in package list line $LINE_NUMBER: $1"
+            panic "Missing URL=<url>, GIT=<url> or SVN=<url> field in package list line $LINE_NUMBER: $1"
         fi
 
-        _shu_parser_log "    FILE=$PKG_FILE"
+        _shu_parser_log "    BASENAME=$PKG_BASENAME FILE=$PKG_FILE"
         if [ -z "$PKG_SRC_DIR" ]; then
             PKG_SRC_DIR=$PKG_BASENAME-$PKG_VERSION
             _shu_parser_log "    SRC_DIR=$PKG_SRC_DIR"
         fi
+
+        if [ -z "$PKG_DST_DIR" ]; then
+            PKG_DST_DIR=$PKG_SRC_DIR
+        fi
+        _shu_parser_log "        DST_DIR=$PKG_DST_DIR"
 
         # Save the package information now.
         COUNT=$(( $COUNT + 1 ))
@@ -265,8 +308,10 @@ package_list_parse_file () {
         _shu_pkg_set_var $COUNT VERSION "$PKG_VERSION"
         _shu_pkg_set_var $COUNT FILE "$PKG_FILE"
         _shu_pkg_set_var $COUNT SRC_DIR "$PKG_SRC_DIR"
+        _shu_pkg_set_var $COUNT DST_DIR "$PKG_DST_DIR"
         _shu_pkg_set_var $COUNT URL "$PKG_URL"
         _shu_pkg_set_var $COUNT GIT "$PKG_GIT"
+        _shu_pkg_set_var $COUNT SVN "$PKG_SVN"
         _shu_pkg_set_var $COUNT SHA1 "$PKG_SHA1"
         _shu_pkg_set_var $COUNT PATCHES "$PKG_PATCHES"
 
@@ -297,7 +342,7 @@ package_list_get_version () {
     local N
     N=$(_shu_pkg_find_basename_index "$1")
     if [ "$N" ]; then
-        package_file_get_version $(_shu_pkg_get_var $N FILE)
+        printf %s $(_shu_pkg_get_var $N VERSION)
     fi
 }
 
@@ -333,6 +378,13 @@ package_list_get_git_url () {
     _shu_package_list_get_field "$1" GIT
 }
 
+# Return the git SVM of a given package, if any.
+# $1: unversioned and un-suffixed package prefix (e.g. 'zlib')
+# Out: package URL (e.g. 'svn://svn.project.org/trunk/something@version')
+package_list_get_svn_url () {
+    _shu_package_list_get_field "$1" SVN
+}
+
 package_list_get_git_branch () {
     _shu_package_list_get_field "$1" BRANCH
 }
@@ -355,6 +407,10 @@ package_list_get_patches () {
 # $1: unversioned and un-suffixed package prefix (e.g. 'MesaLib')
 # Out: source sub-directory (e.g. 'Mesa-10.4.2')
 package_list_get_src_dir () {
+    _shu_package_list_get_field "$1" DST_DIR
+}
+
+package_list_get_unpack_src_dir () {
     _shu_package_list_get_field "$1" SRC_DIR
 }
 
@@ -373,7 +429,7 @@ package_list_unpack_and_patch () {
     local SRC_DIR="$2"
     local DST_DIR="$3"
     local PKG_VERSION PKG_PACKAGE PKG_PATCHES_DIR PKG_PATCHES_PACKAGE
-    local PKG_DIR PATCH PKG_FULLNAME
+    local PKG_DIR PKG_DST_DIR PATCH PKG_FULLNAME
     PKG_VERSION=$(package_list_get_version $PKG_NAME)
     if [ -z "$PKG_VERSION" ]; then
         panic "Cannot find version for package $PKG_NAME!"
@@ -384,7 +440,7 @@ package_list_unpack_and_patch () {
     mkdir -p "$DST_DIR" &&
     unpack_archive "$SRC_DIR/$PKG_FILE" "$DST_DIR" ||
             panic "Could not unpack $PKG_FULLNAME"
-    PKG_DIR=$DST_DIR/$(package_list_get_src_dir $PKG_NAME)
+    PKG_DIR=$DST_DIR/$(package_list_get_unpack_src_dir $PKG_NAME)
     if [ ! -d "$PKG_DIR" ]; then
         panic "Missing extracted directory: $PKG_DIR"
     fi
@@ -398,5 +454,10 @@ package_list_unpack_and_patch () {
             (cd "$PKG_DIR" && run patch -p1 < "../$PATCH") ||
                     panic "Could not apply $PATCH"
         done
+    fi
+    PKG_DST_DIR=$DST_DIR/$(package_list_get_src_dir $PKG_NAME)
+    if [ "$PKG_DST_DIR" != "$PKG_DIR" ]; then
+        log "Copying sources from $PKG_DIR into $PKG_DST_DIR"
+        copy_directory "$PKG_DIR" "$PKG_DST_DIR"
     fi
 }

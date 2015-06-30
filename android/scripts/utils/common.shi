@@ -421,6 +421,25 @@ copy_directory ()
             panic "Cannot copy to directory: $DSTDIR"
 }
 
+# $1: source directory
+# $2: target directory location
+# $3+: list of file names and filters.
+copy_directory_files ()
+{
+    local SRCDIR="$1"
+    local DSTDIR="$2"
+    shift
+    shift
+    if [ ! -d "$SRCDIR" ] ; then
+        panic "Can't copy from non-directory: $SRCDIR"
+    fi
+    log "Copying directory: from [$SRCDIR] to [$DSTDIR]"
+    mkdir -p "$DSTDIR" || panic "Cannot create target directory: $DSTDIR"
+    (cd "$SRCDIR" && 2>/dev/null tar cf - "$@" | \
+            tar xf - -C "$DSTDIR") ||
+        panic "Cannot copy to directory: $DSTDIR"
+}
+
 # Compute the SHA-1 sum of a given file. Implementation depends on the
 # current host machine.
 # $1: File path
