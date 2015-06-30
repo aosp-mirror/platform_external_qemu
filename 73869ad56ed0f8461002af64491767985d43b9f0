@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e856e59_9134fc0b",
+        "filename": "hw/android/goldfish/tty.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-30T07:24:05Z",
+      "side": 1,
+      "message": "nit: pretty sure the fprintf() will never be called here :)",
+      "revId": "73869ad56ed0f8461002af64491767985d43b9f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
