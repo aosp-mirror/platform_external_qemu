@@ -112,16 +112,19 @@ if [ "$MINGW" ]; then
     EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
     EXPECTED_EMULATOR_BITNESS=32
     EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
+    TARGET_OS=windows
 elif [ "$HOST_OS" = "Darwin" ]; then
     EXPECTED_32BIT_FILE_TYPE="Mach-O executable i386"
     EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable x86_64"
     EXPECTED_EMULATOR_BITNESS=64
     EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
+    TARGET_OS=darwin
 else
     EXPECTED_32BIT_FILE_TYPE="ELF 32-bit LSB +executable, Intel 80386"
     EXPECTED_64BIT_FILE_TYPE="ELF 32-bit LSB +executable, x86-64"
     EXPECTED_EMULATOR_BITNESS=32
     EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
+    TARGET_OS=linux
 fi
 
 # Build the binaries from sources.
@@ -154,12 +157,7 @@ fi
 QEMU_ANDROID_HOSTS=
 QEMU_ANDROID_BINARIES=
 if [ -d "$PREBUILTS_DIR/qemu-android" ]; then
-    HOST_PREFIX=
-    if [ "$MINGW" ]; then
-        HOST_PREFIX=windows
-    else
-        HOST_PREFIX=$HOST_SYSTEM
-    fi
+    HOST_PREFIX=$TARGET_OS
     if [ "$HOST_PREFIX" ]; then
         QEMU_ANDROID_BINARIES=$(cd "$PREBUILTS_DIR"/qemu-android && ls $HOST_PREFIX-*/qemu-system-* 2>/dev/null || true)
     fi

@@ -344,7 +344,7 @@ static void lcd_brightness_argb32(uint32_t* pixels,
                 line[nn] = (unsigned)(ag | rb);
                 nn++;
             });
-            pixels += pitch;
+            pixels += (pitch / sizeof(uint32_t));
         }
     }
     else if (alpha > LCD_BRIGHTNESS_HIGH) /* 'superluminous' mode */
@@ -372,7 +372,7 @@ static void lcd_brightness_argb32(uint32_t* pixels,
                 line[nn] = (unsigned)(ag | rb);
                 nn++;
             });
-            pixels += pitch;
+            pixels += (pitch / sizeof(uint32_t));
         }
     }
 }
@@ -585,8 +585,9 @@ static void adisplay_update_surface(ADisplay* disp,
 
     // Allocate a temporary buffer to get the potentially rotated / converted
     // content.
-    int dst_pitch = 4 * w;
-    uint8_t* dst_pixels = calloc(h, dst_pitch);
+    int sz = disp->datasize.h > disp->datasize.w ? disp->datasize.h : disp->datasize.w;
+    int dst_pitch = 4 * sz;
+    uint8_t* dst_pixels = calloc(sz, dst_pitch);
 
     SkinRect dst_r = {
         .pos.x = x,

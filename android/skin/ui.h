@@ -61,6 +61,8 @@ typedef struct SkinUIFuncs {
 // |keyboard_raw_keys| is true to start in raw key input mode. Default is
 // to start in Unicode mode. It's possible to toggle between modes at runtime
 // by using Ctrl-K.
+// |win32_ignore_events| is true to indicate that window events should be
+// ignored on Windows.
 typedef struct SkinUIParams {
     char window_name[64];
     int window_x;
@@ -74,6 +76,7 @@ typedef struct SkinUIParams {
 
     const char* keyboard_charmap;
     bool keyboard_raw_keys;
+    bool win32_ignore_events;
 
 } SkinUIParams;
 
