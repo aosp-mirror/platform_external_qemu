@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "b3a99960_c8748f48",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-30T07:23:08Z",
+      "side": 1,
+      "message": "nit: uniquely :)",
+      "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f3b791b3_8a8d2b09",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-30T07:23:08Z",
+      "side": 1,
+      "message": "nit: tab here",
+      "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "13b505ac_abd91599",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-30T07:23:08Z",
+      "side": 1,
+      "message": "nit: tab here",
+      "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "138ee5ef_8343e0f6",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/render_api.cpp",
         "patchSetId": 2
@@ -19,6 +70,23 @@
         "endLine": 175,
         "endChar": 21
       },
+      "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "13b505ac_ebcf0dcf",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/UnixStream.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-30T07:23:08Z",
+      "side": 1,
+      "message": "I would suggest just using strdup() here instead of trying to reimplement it (badly) :)",
       "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -90,6 +158,64 @@
         "endLine": 121,
         "endChar": 28
       },
+      "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b367d930_5816c184",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/UnixStream.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-30T07:23:08Z",
+      "side": 1,
+      "message": "I would argue against using strcpy() unless you have properly checked that the input is zero-terminated here!",
+      "parentUuid": "5384ddcb_517fde5c",
+      "range": {
+        "startLine": 121,
+        "startChar": 24,
+        "endLine": 121,
+        "endChar": 28
+      },
+      "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b367d930_b8fa75b1",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/UnixStream.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-30T07:23:08Z",
+      "side": 1,
+      "message": "This should be delete [] instead!",
+      "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "13b505ac_8bdc518a",
+        "filename": "distrib/android-emugl/shared/emugl/common/sockets.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-06-30T07:23:08Z",
+      "side": 1,
+      "message": "nit: trailing whitespace here",
       "revId": "830abfff4836c6cfd4489f9f83d5c297c99ef3c4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
