@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "339be98e_1b623339",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T16:41:08Z",
+      "side": 1,
+      "message": "Is \"if true; then\" temporary code? (Or maybe it\u0027s an idiom that I don\u0027t understand.)",
+      "revId": "438ed65754ac7e592fdde30901567bca36e7ef43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "33c4c97c_45e7ad21",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T16:41:08Z",
+      "side": 1,
+      "message": "Now I\u0027m guessing it\u0027s either a way to control scope or it\u0027s to bound the code to make it more readable.",
+      "revId": "438ed65754ac7e592fdde30901567bca36e7ef43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "33c4c97c_c515fd77",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T16:41:08Z",
+      "side": 1,
+      "message": "Missing a level of indentation here",
+      "revId": "438ed65754ac7e592fdde30901567bca36e7ef43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
