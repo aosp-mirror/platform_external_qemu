@@ -161,7 +161,7 @@ endef
 
 define compile-generated-cxx-source
 SRC:=$(1)
-OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%$(LOCAL_CPP_EXTENSION)=%.o))
+OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%$$(LOCAL_CPP_EXTENSION)=%.o))
 LOCAL_OBJECTS += $$(OBJ)
 DEPENDENCY_DIRS += $$(dir $$(OBJ))
 $$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
@@ -244,3 +244,41 @@ EXPORTED_SYMBOL_LIST_darwin := -Wl,-exported_symbols_list,
 EXPORTED_SYMBOL_LIST_linux := -Wl,--version-script=
 
 symbol-file-linker-flags = $(EXPORTED_SYMBOL_LIST_$(HOST_OS))$1
+
+# Generate and compile source file through the Qt 'moc' tool
+# NOTE: This expects QT_MOC_TOOL to be defined.
+define compile-qt-moc-source
+SRC:=$(1)
+MOC_SRC:=$$(LOCAL_OBJS_DIR)/moc_$$(notdir $$(SRC:%.h=%$$(LOCAL_CPP_EXTENSION)))
+ifeq (,$$(strip $$(QT_MOC_TOOL)))
+$$(error QT_MOC_TOOL is not defined when trying to generate $$(MOC_SRC) !!)
+endif
+
+$$(MOC_SRC): PRIVATE_SRC := $$(SRC)
+$$(MOC_SRC): PRIVATE_DST := $$(MOC_SRC)
+$$(MOC_SRC): $$(SRC) $$(MOC_TOOL)
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	@echo "Qt moc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
+	$(hide) $$(QT_MOC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
+
+$$(eval $$(call compile-generated-cxx-source,$$(MOC_SRC)))
+endef
+
+# Generate and compile a Qt resource source file through the 'rcc' tool.
+# NOTE: This expects QT_RCC_TOOL to be defined.
+define compile-qt-resources
+SRC := $(1)
+RCC_SRC := $$(LOCAL_OBJS_DIR)/rcc_$$(notdir $$(SRC:%.qrc=%$$(LOCAL_CPP_EXTENSION)))
+ifeq (,$$(strip $$(QT_RCC_TOOL)))
+$$(error QT_RCC_TOOL is not defined when trying to generate $$(RCC_SRC) !!)
+endif
+$$(RCC_SRC): PRIVATE_SRC := $$(SRC)
+$$(RCC_SRC): PRIVATE_DST := $$(RCC_SRC)
+$$(RCC_SRC): PRIVATE_NAME := $$(notdir $$(SRC:%.qrc=%))
+$$(RCC_SRC): $$(SRC) $$(QT_RCC_TOOL)
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	@echo "Qt rcc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
+	$(hide) $$(QT_RCC_TOOL) -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
+
+$$(eval $$(call compile-generated-cxx-source,$$(RCC_SRC)))
+endef
