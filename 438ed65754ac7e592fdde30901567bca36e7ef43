@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "13bb45f3_9b22cfac",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-01T17:32:00Z",
+      "side": 1,
+      "message": "Yes, it\u0027s temporary code, it will be replaced by a condition that extract EMULATOR_USE_QT from $OUT_DIR/config.make, but this is handled in a later patch. Using this here allows us to not alter the indentation when that happens.",
+      "parentUuid": "339be98e_1b623339",
+      "revId": "438ed65754ac7e592fdde30901567bca36e7ef43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "33c4c97c_45e7ad21",
         "filename": "android-rebuild.sh",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "b3cfd99d_f8a2edb7",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-01T17:32:00Z",
+      "side": 1,
+      "message": "That\u0027s temporary: it will become conditional in a future patch, testing for --ui\u003dqt",
+      "parentUuid": "33c4c97c_45e7ad21",
+      "revId": "438ed65754ac7e592fdde30901567bca36e7ef43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "33c4c97c_c515fd77",
         "filename": "android-rebuild.sh",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-07-01T16:41:08Z",
       "side": 1,
       "message": "Missing a level of indentation here",
+      "revId": "438ed65754ac7e592fdde30901567bca36e7ef43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d3ab6d9c_41469473",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-01T17:32:00Z",
+      "side": 1,
+      "message": "right, I\u0027ll fix it thanks",
+      "parentUuid": "33c4c97c_c515fd77",
       "revId": "438ed65754ac7e592fdde30901567bca36e7ef43",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
