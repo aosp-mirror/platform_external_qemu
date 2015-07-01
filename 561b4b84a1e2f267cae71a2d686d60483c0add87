@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9370151a_478a9074",
+        "filename": "android/skin/qt/emulator-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1017944
+      },
+      "writtenOn": "2015-07-01T16:15:56Z",
+      "side": 1,
+      "message": "Oh, that\u0027s probably a mistake.",
+      "parentUuid": "33c4c97c_0d07a155",
+      "revId": "561b4b84a1e2f267cae71a2d686d60483c0add87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b3a6f9d3_a67e8c5e",
         "filename": "android/skin/qt/images/ic_call_48px.svg",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-06-30T23:14:34Z",
       "side": 1,
       "message": "This image has a glitch in it",
+      "revId": "561b4b84a1e2f267cae71a2d686d60483c0add87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f37f91e4_0a8a5b25",
+        "filename": "android/skin/qt/images/ic_call_48px.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1017944
+      },
+      "writtenOn": "2015-07-01T16:15:56Z",
+      "side": 1,
+      "message": "The images all render fine for me on all three platforms.",
+      "parentUuid": "b3a6f9d3_a67e8c5e",
       "revId": "561b4b84a1e2f267cae71a2d686d60483c0add87",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -81,6 +117,24 @@
       "writtenOn": "2015-06-30T23:14:34Z",
       "side": 1,
       "message": "This appears as a single triangle rather than as bars.",
+      "revId": "561b4b84a1e2f267cae71a2d686d60483c0add87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9370151a_27959491",
+        "filename": "android/skin/qt/images/ic_signal_cellular_4_bar_48px.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1017944
+      },
+      "writtenOn": "2015-07-01T16:15:56Z",
+      "side": 1,
+      "message": "https://icons.googleplex.com/#ic_signal_cellular_4_bar\n\nThis matches the UI mocks.",
+      "parentUuid": "33c4c97c_2d66e5cd",
       "revId": "561b4b84a1e2f267cae71a2d686d60483c0add87",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
