@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "b3fd19c2_089e8768",
+        "filename": "android/skin/qt/images/ic_call_48px.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T18:18:51Z",
+      "side": 1,
+      "message": "Interesting. They look fine on my Mac, but my Ubuntu system shows some problems...",
+      "parentUuid": "f37f91e4_0a8a5b25",
+      "revId": "561b4b84a1e2f267cae71a2d686d60483c0add87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5383fd1c_44a8c297",
         "filename": "android/skin/qt/images/ic_camera_enhance_48px.svg",
         "patchSetId": 3
