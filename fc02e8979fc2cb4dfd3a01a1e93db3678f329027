@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d3d44d30_ff99b3ff",
+        "filename": "android/skin/qt/README",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T00:20:57Z",
+      "side": 1,
+      "message": "This file seems largely obsolete.\nAre you going to omit it from the final commit?",
+      "revId": "fc02e8979fc2cb4dfd3a01a1e93db3678f329027",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "339be98e_0adf7f84",
+        "filename": "android/skin/qt/emulator-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T00:20:57Z",
+      "side": 1,
+      "message": "Change this before the final commit?",
+      "revId": "fc02e8979fc2cb4dfd3a01a1e93db3678f329027",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b3a6f9d3_c6b2b854",
+        "filename": "android/skin/qt/emulator-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T00:20:57Z",
+      "side": 1,
+      "message": "Add a TODO here?",
+      "revId": "fc02e8979fc2cb4dfd3a01a1e93db3678f329027",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "33c4c97c_4846a773",
+        "filename": "android/skin/qt/emulator-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T00:20:57Z",
+      "side": 1,
+      "message": "Does this need *ALL* keyboard characters (!@#$%...)?",
+      "revId": "fc02e8979fc2cb4dfd3a01a1e93db3678f329027",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "339be98e_aa60932d",
+        "filename": "android/skin/qt/event-qt.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T00:20:57Z",
+      "side": 1,
+      "message": "Change to 0 prior to commit?",
+      "revId": "fc02e8979fc2cb4dfd3a01a1e93db3678f329027",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d3d44d30_8ac95b9f",
+        "filename": "android/skin/qt/surface-qt.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T00:20:57Z",
+      "side": 1,
+      "message": "Set to 0?",
+      "revId": "fc02e8979fc2cb4dfd3a01a1e93db3678f329027",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d3d44d30_ea0b2f5f",
+        "filename": "android/skin/qt/surface-qt.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T00:20:57Z",
+      "side": 1,
+      "message": "Not that it matters, but is there a reason you didn\u0027t put this inside create_surface()?",
+      "revId": "fc02e8979fc2cb4dfd3a01a1e93db3678f329027",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "339be98e_9565f415",
+        "filename": "android/skin/qt/surface-qt.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T00:20:57Z",
+      "side": 1,
+      "message": "\u0027num\u0027 appears unused",
+      "revId": "fc02e8979fc2cb4dfd3a01a1e93db3678f329027",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "53985d8f_e21126de",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T00:20:57Z",
+      "side": 1,
+      "message": "0?",
+      "revId": "fc02e8979fc2cb4dfd3a01a1e93db3678f329027",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
