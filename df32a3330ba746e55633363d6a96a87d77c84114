@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5383fd1c_65669da5",
+        "filename": "android/scripts/utils/package_list_parser.shi",
+        "patchSetId": 4
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-01T16:09:56Z",
+      "side": 1,
+      "message": "should be SVN",
+      "revId": "df32a3330ba746e55633363d6a96a87d77c84114",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
