@@ -39,6 +39,14 @@ $(foreach src,$(LOCAL_C_SOURCES), \
     $(eval $(call compile-c-source,$(src))) \
 )
 
+$(foreach src,$(LOCAL_QT_MOC_SRC_FILES), \
+    $(eval $(call compile-qt-moc-source,$(src))) \
+)
+
+$(foreach src,$(LOCAL_QT_RESOURCES), \
+    $(eval $(call compile-qt-resources,$(src))) \
+)
+
 $(foreach src,$(LOCAL_GENERATED_C_SOURCES), \
     $(eval $(call compile-generated-c-source,$(src))) \
 )
