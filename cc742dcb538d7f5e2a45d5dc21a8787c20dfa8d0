@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "b317d9fa_b5db205f",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-02T06:11:41Z",
+      "side": 1,
+      "message": "Ah forgot about that one :)",
+      "parentUuid": "130985af_88c3977d",
+      "revId": "cc742dcb538d7f5e2a45d5dc21a8787c20dfa8d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f30b11a7_07d0b639",
         "filename": "android/scripts/package-release.sh",
         "patchSetId": 3
@@ -47,6 +65,24 @@
       "writtenOn": "2015-07-01T17:51:22Z",
       "side": 1,
       "message": "Won\u0027t this get executed if the invocation has \"--ui\u003dsdl2\"?",
+      "revId": "cc742dcb538d7f5e2a45d5dc21a8787c20dfa8d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "13b8a53c_10c6648b",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-02T06:11:41Z",
+      "side": 1,
+      "message": "you are right, that\u0027s a bug! will fix. Thanks!",
+      "parentUuid": "f30b11a7_07d0b639",
       "revId": "cc742dcb538d7f5e2a45d5dc21a8787c20dfa8d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
