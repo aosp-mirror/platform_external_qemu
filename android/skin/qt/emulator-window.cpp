@@ -22,6 +22,7 @@
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-window.h"
+#include "android/skin/qt/winsys-qt.h"
 
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
@@ -46,7 +47,7 @@ EmulatorWindow::EmulatorWindow(QWidget *parent) :
     instance = this;
     backing_surface = NULL;
     tool_window = new ToolWindow(this);
-    
+
     QObject::connect(this, &EmulatorWindow::blit, this, &EmulatorWindow::slot_blit);
     QObject::connect(this, &EmulatorWindow::createBitmap, this, &EmulatorWindow::slot_createBitmap);
     QObject::connect(this, &EmulatorWindow::fill, this, &EmulatorWindow::slot_fill);
@@ -149,13 +150,14 @@ void EmulatorWindow::slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint 
     QPainter painter(dst);
     painter.setCompositionMode(*op);
     painter.drawImage(*dstPos, *src, *srcRect);
-    
+
     painter.setCompositionMode(QPainter::CompositionMode_Source);
     if (semaphore != NULL) semaphore->release();
 }
 
 void EmulatorWindow::slot_clearInstance()
 {
+    skin_winsys_save_window_pos();
     instance = NULL;
 }
 
