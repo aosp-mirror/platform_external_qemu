@@ -596,6 +596,19 @@ case "$HOST_OS" in
     ;;
 esac
 
+###
+###  Qt probe
+###
+QT_PREBUILTS_DIR=
+if true; then
+    QT_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/qt
+    if [ -d "$QT_PREBUILTS_DIR" ]; then
+        log "Qt prebuilts dir: $QT_PREBUILTS_DIR"
+    else
+        echo "WARNING: Missing Qt prebuilts directory: $QT_PREBUILTS_DIR"
+    fi
+fi
+
 # create the objs directory that is going to contain all generated files
 # including the configuration ones
 #
@@ -720,6 +733,7 @@ echo "CONFIG_ALSA       := $PROBE_ALSA" >> $config_mk
 echo "CONFIG_OSS        := $PROBE_OSS" >> $config_mk
 echo "CONFIG_PULSEAUDIO := $PROBE_PULSEAUDIO" >> $config_mk
 echo "EMULATOR_USE_SDL2 := true" >> $config_mk
+echo "QT_PREBUILTS_DIR  := $QT_PREBUILTS_DIR" >> $config_mk
 
 if [ $OPTION_DEBUG = yes ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
