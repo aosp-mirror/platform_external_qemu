@@ -173,7 +173,7 @@ static TextureData* getTextureTargetData(GLenum target){
 
 GL_APICALL void  GL_APIENTRY glActiveTexture(GLenum texture){
     GET_CTX_V2();
-    SET_ERROR_IF (!GLESv2Validate::textureEnum(texture,ctx->getMaxTexUnits()),GL_INVALID_ENUM);
+    SET_ERROR_IF (!GLESv2Validate::textureEnum(texture,ctx->getMaxCombinedTexUnits()),GL_INVALID_ENUM);
     ctx->setActiveTexture(texture);
     ctx->dispatcher().glActiveTexture(texture);
 }
