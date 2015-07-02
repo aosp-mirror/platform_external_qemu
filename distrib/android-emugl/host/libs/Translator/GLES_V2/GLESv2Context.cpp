@@ -164,3 +164,9 @@ void GLESv2Context::initExtensionString() {
 int GLESv2Context::getMaxTexUnits() {
     return getCaps()->maxTexImageUnits;
 }
+
+int GLESv2Context::getMaxCombinedTexUnits() {
+    if (getCaps()->maxCombinedTexImageUnits > 16)
+        return 16;
+    return getCaps()->maxCombinedTexImageUnits;
+}
