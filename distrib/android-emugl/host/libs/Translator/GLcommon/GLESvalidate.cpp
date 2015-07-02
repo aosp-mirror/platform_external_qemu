@@ -23,7 +23,7 @@
 
 
 bool  GLESvalidate::textureEnum(GLenum e,unsigned int maxTex) {
-    return e >= GL_TEXTURE0 && e <= (GL_TEXTURE0 + maxTex);
+    return e >= GL_TEXTURE0 && e < (GL_TEXTURE0 + maxTex);
 }
 
 bool GLESvalidate::pixelType(GLEScontext * ctx, GLenum type) {

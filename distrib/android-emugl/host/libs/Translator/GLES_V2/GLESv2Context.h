@@ -27,6 +27,7 @@ public:
     GLESv2Context();
     virtual ~GLESv2Context();
     void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
+    int  getMaxCombinedTexUnits();
     int  getMaxTexUnits();
 
     // This whole att0 thing is about a incompatibility between GLES and OpenGL.
