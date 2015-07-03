@@ -39,8 +39,6 @@ public:
 
 private:
     EGLNativeWindowType m_win;
-
-    static std::set<EGLNativeWindowType> s_associatedWins;
 };
 
 #endif  // EGL_WINDOW_SURFACE_H

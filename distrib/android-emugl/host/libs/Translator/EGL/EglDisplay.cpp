@@ -209,23 +209,6 @@ bool EglDisplay::removeSurface(EGLSurface s) {
     return false;
 }
 
-bool EglDisplay::removeSurface(SurfacePtr s) {
-    emugl::Mutex::AutoLock mutex(m_lock);
-
-    SurfacesHndlMap::iterator it;
-    for(it = m_surfaces.begin(); it!= m_surfaces.end();it++)
-    {
-        if((*it).second.Ptr() == s.Ptr()) {
-            break;
-        }
-    }
-    if(it != m_surfaces.end()) {
-        m_surfaces.erase(it);
-        return true;
-    }
-    return false;
-}
-
 bool EglDisplay::removeContext(EGLContext ctx) {
     emugl::Mutex::AutoLock mutex(m_lock);
     /* ctx is "key" in map<unsigned int, ContextPtr>. */
