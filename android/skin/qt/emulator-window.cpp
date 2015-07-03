@@ -289,10 +289,15 @@ void EmulatorWindow::slot_setWindowTitle(const QString *title, QSemaphore *semap
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_showWindow(int x, int y, int w, int h, int, QSemaphore *semaphore)
+void EmulatorWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore)
 {
-    move(x, y);
-    resize(w, h);
+    backing_surface = surface;
+    if (is_fullscreen) {
+        showFullScreen();
+    } else {
+        showNormal();
+        setGeometry(*rect);
+    }
     show();
     if (semaphore != NULL) semaphore->release();
 }
@@ -321,7 +326,7 @@ void EmulatorWindow::slot_down()
 
 void EmulatorWindow::slot_fullscreen()
 {
-    simulateKeyPress(KEY_ENTER, kKeyModLAlt);
+    simulateKeyPress(KEY_F9, 0);
 }
 
 void EmulatorWindow::slot_gps()

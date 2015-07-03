@@ -49,7 +49,7 @@ class EmulatorWindow : public QFrame
 public:
     explicit EmulatorWindow(QWidget *parent = 0);
     virtual ~EmulatorWindow();
-    
+
     static EmulatorWindow *getInstance();
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
@@ -57,7 +57,6 @@ public:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-    void setBackingSurface(SkinSurface *surface) { backing_surface = surface;}
     void show();
     void startThread(StartFunction f, int argc, char **argv);
     void wheelEvent(QWheelEvent *event);
@@ -72,7 +71,7 @@ public:
      that will be released by the slot when it is done processing. If you want to block on the completion of the signal, simply
      pass in the semaphore to the signal and acquire it after the call returns. If you're passing in pointers to data structures
      that could change or go away, you will need to make sure you block to maintain the integrity of the data while the signal runs.
-     
+
      TODO: allow nonblocking calls to these signals by having the signal take ownership of object pointers. This would allow QEMU
      to do things like update the screen without blocking, which would make it run faster.
      */
@@ -94,7 +93,7 @@ signals:
     void setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore = NULL);
     void setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void setTitle(const QString *title, QSemaphore *semaphore = NULL);
-    void showWindow(int x, int y, int w, int h, int is_fullscreen, QSemaphore *semaphore = NULL);
+    void showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore = NULL);
 private slots:
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
     void slot_clearInstance();
@@ -114,8 +113,8 @@ private slots:
     void slot_setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore = NULL);
     void slot_setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void slot_setWindowTitle(const QString *title, QSemaphore *semaphore = NULL);
-    void slot_showWindow(int x, int y, int w, int h, int is_fullscreen, QSemaphore *semaphore = NULL);
-    
+    void slot_showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore = NULL);
+
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
      from UI elements or called independently.
