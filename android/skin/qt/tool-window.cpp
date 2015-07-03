@@ -22,7 +22,7 @@ ToolWindow::ToolWindow(EmulatorWindow *window) :
     emulator_window(window)
 {
     Q_INIT_RESOURCE(resources);
-    
+
     setWindowFlags(Qt::Tool);
     QGridLayout *layout = new QGridLayout(this);
     setLayout(layout);
@@ -33,8 +33,6 @@ ToolWindow::ToolWindow(EmulatorWindow *window) :
     addButton(layout, ":/images/ic_stay_current_portrait_48px.svg", &EmulatorWindow::slot_rotate);
     addButton(layout, ":/images/ic_zoom_in_24px.svg", &EmulatorWindow::slot_zoom);
     addButton(layout, ":/images/ic_fullscreen_48px.svg", &EmulatorWindow::slot_fullscreen);
-    
-    move(window->geometry().right() + 10, window->geometry().top() + 10);
 }
 
 void ToolWindow::addButton(QLayout *layout, const char *iconPath, EmulatorWindowSlot slot)
