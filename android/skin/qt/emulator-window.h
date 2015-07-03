@@ -121,12 +121,30 @@ private slots:
      from UI elements or called independently.
      */
 public slots:
+    void slot_back();
+    void slot_battery();
+    void slot_camera();
+    void slot_cellular();
+    void slot_down();
+    void slot_fullscreen();
+    void slot_gps();
+    void slot_home();
+    void slot_left();
+    void slot_menu();
+    void slot_phone();
     void slot_power();
+    void slot_recents();
+    void slot_right();
     void slot_rotate();
+    void slot_screenrecord();
+    void slot_screenshot();
+    void slot_sdcard();
+    void slot_sensors();
+    void slot_up();
+    void slot_voice();
     void slot_volumeUp();
     void slot_volumeDown();
     void slot_zoom();
-    void slot_fullscreen();
 
 private:
     void handleEvent(SkinEventType type, QMouseEvent *event);
