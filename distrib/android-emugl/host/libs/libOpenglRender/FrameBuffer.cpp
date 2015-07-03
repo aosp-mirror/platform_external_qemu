@@ -151,7 +151,9 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
 
 void FrameBuffer::finalize(){
     m_colorbuffers.clear();
-    removeSubWindow();
+    if (m_useSubWindow) {
+        removeSubWindow();
+    }
     m_windows.clear();
     m_contexts.clear();
     s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
