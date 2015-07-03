@@ -148,10 +148,10 @@ extern SkinSurface* skin_surface_create_window(int x, int y, int w, int h, int o
     QSemaphore semaphore;
     EmulatorWindow *window = EmulatorWindow::getInstance();
     if (window == NULL) return NULL;
-    window->showWindow(x, y, w, h, is_fullscreen, &semaphore);
-    semaphore.acquire();
     SkinSurface *surface = create_surface(w, h, original_w, original_h);
-    surface->window->setBackingSurface(surface);
+    QRect rect(x, y, w, h);
+    window->showWindow(surface, &rect, is_fullscreen, &semaphore);
+    semaphore.acquire();
     D("ID of backing bitmap surface is %d", surface->id);
     return surface;
 }
