@@ -17,7 +17,7 @@
 #include "EglGlobalInfo.h"
 #include "EglOsApi.h"
 
-std::set<EGLNativeWindowType> EglWindowSurface::s_associatedWins;
+static std::set<EGLNativeWindowType> s_associatedWins;
 
 bool EglWindowSurface::alreadyAssociatedWithConfig(EGLNativeWindowType win) {
     return s_associatedWins.find(win) != s_associatedWins.end();
