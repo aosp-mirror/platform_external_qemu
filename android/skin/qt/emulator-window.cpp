@@ -271,6 +271,7 @@ void EmulatorWindow::slot_requestUpdate(const QRect *rect, QSemaphore *semaphore
 void EmulatorWindow::slot_setWindowPos(int x, int y, QSemaphore *semaphore)
 {
     move(x, y);
+    tool_window->move(this->x() + width() + 10, this->y() + 10);
     if (semaphore != NULL) semaphore->release();
 }
 
