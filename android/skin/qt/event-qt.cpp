@@ -11,7 +11,7 @@
 */
 #include <stdbool.h>
 
-#include <QtCore/QSemaphore>
+#include <QSemaphore>
 
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"

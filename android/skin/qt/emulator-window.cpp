@@ -271,7 +271,6 @@ void EmulatorWindow::slot_requestUpdate(const QRect *rect, QSemaphore *semaphore
 void EmulatorWindow::slot_setWindowPos(int x, int y, QSemaphore *semaphore)
 {
     move(x, y);
-    tool_window->move(this->x() + width() + 10, this->y() + 10);
     if (semaphore != NULL) semaphore->release();
 }
 
@@ -298,9 +297,54 @@ void EmulatorWindow::slot_showWindow(int x, int y, int w, int h, int, QSemaphore
     if (semaphore != NULL) semaphore->release();
 }
 
+void EmulatorWindow::slot_back()
+{
+    simulateKeyPress(KEY_ESC, 0);
+}
+
+void EmulatorWindow::slot_battery()
+{
+}
+
+void EmulatorWindow::slot_camera()
+{
+}
+
+void EmulatorWindow::slot_cellular()
+{
+}
+
+void EmulatorWindow::slot_down()
+{
+    simulateKeyPress(KEY_KP8, 0);
+}
+
 void EmulatorWindow::slot_fullscreen()
 {
     simulateKeyPress(KEY_ENTER, kKeyModLAlt);
+}
+
+void EmulatorWindow::slot_gps()
+{
+}
+
+void EmulatorWindow::slot_home()
+{
+    simulateKeyPress(KEY_HOME, 0);
+}
+
+void EmulatorWindow::slot_left()
+{
+    simulateKeyPress(KEY_KP4, 0);
+}
+
+void EmulatorWindow::slot_menu()
+{
+    simulateKeyPress(KEY_F2, 0);
+}
+
+void EmulatorWindow::slot_phone()
+{
 }
 
 void EmulatorWindow::slot_power()
@@ -308,14 +352,49 @@ void EmulatorWindow::slot_power()
     simulateKeyPress(KEY_F7, 0);
 }
 
+void EmulatorWindow::slot_recents()
+{
+    simulateKeyPress(KEY_F2, kKeyModLShift);
+}
+
+void EmulatorWindow::slot_right()
+{
+    simulateKeyPress(KEY_KP6, 0);
+}
+
 void EmulatorWindow::slot_rotate()
 {
     simulateKeyPress(KEY_F12, kKeyModLCtrl);
 }
 
+void EmulatorWindow::slot_screenrecord()
+{
+}
+
+void EmulatorWindow::slot_screenshot()
+{
+}
+
+void EmulatorWindow::slot_sdcard()
+{
+}
+
+void EmulatorWindow::slot_sensors()
+{
+}
+
+void EmulatorWindow::slot_up()
+{
+    simulateKeyPress(KEY_KP2, 0);
+}
+
 void EmulatorWindow::slot_volumeDown()
 {
     simulateKeyPress(KEY_F6, kKeyModLCtrl);
+}
+
+void EmulatorWindow::slot_voice()
+{
 }
 
 void EmulatorWindow::slot_volumeUp()

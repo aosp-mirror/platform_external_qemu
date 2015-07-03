@@ -14,12 +14,17 @@
 #define TOOLWINDOW_H
 
 #include <QFrame>
+#include <QGridLayout>
+#include <QHash>
+#include <QToolButton>
 
 namespace Ui {
     class ToolWindow;
 }
 
 class EmulatorWindow;
+class TitleBarWidget;
+
 typedef void(EmulatorWindow::*EmulatorWindowSlot)();
 
 class ToolWindow : public QFrame
@@ -28,11 +33,42 @@ class ToolWindow : public QFrame
 
 public:
     explicit ToolWindow(EmulatorWindow *emulatorWindow);
+    void show();
+    
+public slots:
+    void slot_toggleExpand();
 
 private:
-    void addButton(QLayout *layout, const char *iconPath, EmulatorWindowSlot slot);
+    QToolButton *addButton(QGridLayout *layout, int row, int col, const char *iconPath, EmulatorWindowSlot slot);
+    void setExpandedState(bool expanded);
     
+    QWidget *button_area;
     EmulatorWindow *emulator_window;
+    bool expanded;
+    QList<QToolButton*> expanded_buttons;
+    TitleBarWidget *title_bar;
+    QBoxLayout *top_layout;
 };
 
+typedef void(ToolWindow::*ToolWindowSlot)();
+
+class TitleBarWidget : public QWidget
+{
+    Q_OBJECT
+    
+public:
+    explicit TitleBarWidget(ToolWindow *window);
+    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void mouseMoveEvent(QMouseEvent *event);
+    void setExpandedState(bool state);
+
+private:
+    QToolButton *addButton(QBoxLayout *layout, const char *iconPath, ToolWindowSlot slot);
+
+    QIcon collapsed_icon;
+    QPoint drag_offset;
+    QIcon expanded_icon;
+    QToolButton *expand_button;
+    ToolWindow *tool_window;
+};
 #endif // TOOLWINDOW_H
