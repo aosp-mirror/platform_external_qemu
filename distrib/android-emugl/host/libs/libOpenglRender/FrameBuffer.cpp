@@ -151,7 +151,9 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
 
 void FrameBuffer::finalize(){
     m_colorbuffers.clear();
-    removeSubWindow();
+    if (m_useSubWindow) {
+        removeSubWindow();
+    }
     m_windows.clear();
     m_contexts.clear();
     s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
@@ -503,7 +505,14 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                     // the last posted color buffer.
                     s_gles2.glViewport(0, 0, p_width, p_height);
                     m_zRot = zRot;
-                    post(m_lastPostedColorBuffer, false);
+                    if (m_lastPostedColorBuffer) {
+                        post(m_lastPostedColorBuffer, false);
+                    } else {
+                        s_gles2.glClear(GL_COLOR_BUFFER_BIT |
+                                        GL_DEPTH_BUFFER_BIT |
+                                        GL_STENCIL_BUFFER_BIT);
+                        s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
+                    }
                     unbind_locked();
                     success = true;
                 }

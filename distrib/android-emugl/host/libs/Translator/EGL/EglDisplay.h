@@ -72,8 +72,6 @@ public:
     EGLSurface addSurface(SurfacePtr s );
     SurfacePtr getSurface(EGLSurface surface) const;
     bool removeSurface(EGLSurface s);
-    bool removeSurface(SurfacePtr s);
-
     EGLContext addContext(ContextPtr ctx );
     ContextPtr getContext(EGLContext ctx) const;
     bool removeContext(EGLContext ctx);
