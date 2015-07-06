@@ -154,7 +154,7 @@ EOF
 
     if [ -d "$INSTALL_DIR"/common/include ]; then
         run rm -rf "$INSTALL_DIR"/common/include.old
-        run mv "$INSTALL_DIR"/common/include.old
+        run mv "$INSTALL_DIR"/common/include "$INSTALL_DIR"/common/include.old
     fi
 
     for SYSTEM in $DARWIN_SYSTEMS; do
