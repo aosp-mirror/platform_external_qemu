@@ -1,0 +1,203 @@
+Introduction:
+=============
+
+The Android emulator builds now uses several prebuilt host binaries
+(shared libraries or executables), in order to simplify and speed up the
+build.
+
+These binaries typically come from third-party open-source projects,
+for example:
+
+  - libffi, gettext, glib and other dependencies required by the code base
+    under external/qemu-android
+
+  - The LLVM and Mesa3D graphics libraries used to implement software-based
+    GPU emulation.
+
+This documents explains how these prebuilts were generated, how they are
+typically stored and managed by the android-rebuild.sh script.
+
+
+I. List of Android emulator prebuilt packages:
+==============================================
+
+The following file lists the location of all source packages for the prebuilts
+required by the emulator build:
+
+  android/dependencies/PACKAGES.TXT
+
+This is a simple text file that contains one-line per package. For a detailed
+description of the file format, read the comments in:
+
+  android/scripts/utils/package_list_parser.py
+
+It is possible to apply a set of patches on top of an official source package
+by using a PATCHES=<file> field in a PACKAGES.TXT package description. For
+example, this is used to apply a few patches on top of the official Mesa3D
+release (see current content of android/dependencies/ and PACKAGES.TXT).
+
+You should call the following script to download all source packages from
+known reliable sources, and verify their content through sha1sum:
+
+  android/scripts/download-sources.sh
+
+IMPORTANT: You must also call this script every time you modify PACKAGES.TXT.
+
+Note that by default, this will copy PACKAGES.TXT and patch files located
+under android/dependencies/ into the following target directory:
+
+  $AOSP/prebuilts/android-emulator-build/archive/
+
+You can change this destination by using the --install-dir=<dir> option, or
+defining the ANDROID_EMULATOR_PREBUILTS_DIR environment variable to point
+to a different location.
+
+
+II. Android SDK specific toolchains:
+====================================
+
+To avoid surprises and unexpected differences when people use different
+systems to build the same sources, special toolchains are used to build
+all prebuilts, more specifically:
+
+  - A Linux toolchain, based on GCC 4.8, which compiles against GLibc 2.11,
+    which is ancient enough to let binaries run on Debian Stable and
+    RedHat systems.
+
+  - A cross-toolchain (x86_64-w64-mingw32) which generates Win32 and Win64
+    binaries under Linux. This is a lot more faster than trying to rebuild
+    these with a solution like Cygwin on Windows.
+
+  - For OS X, we use a prebuilt Clang binary (currently 3.5) and well as need
+    to ensure that the corresponding binaries run at least on OS 10.8, the
+    minimal supported version of the system for the SDK.
+
+To make things easier, a script is provided that can generate a 'wrapper'
+toolchain:
+
+  android/scripts/gen-android-sdk-toolchain.sh --host=<system> <dst-dir>
+
+Where <system> is a host system name as in [1], and <dst-dir> is a
+directory where wrapper scripts for gcc, cc, ld, ar, and other toolchain
+programs will be created to target
+
+Note that these scripts have a system-specific prefix:
+
+  - The Linux compiler will be called x86_64-linux-gcc.
+  - The Windows compiler will be called x86_64-w64-mingw32-gcc.
+  - The Darwin compiler doesn't use a prefix.
+
+This is done to make typical GNU 'configure' script work easier. One would
+typically use the configure --host option to ensure the wrapper toolchain
+is being used, i.e.:
+
+  - On Linux, use --host=x86_64-linux
+  - On Linux, when generating Windows binaries, use --host=x86_64-w64-mingw32
+  - On Darwin, don't use --host, since the wrapper toolchain doesn't use
+    a 'binprefix' at all.
+
+Use the --help option to see more options available when calling this script.
+
+Typically, one would prepend <dst-dir> to your PATH before launching
+the configure script, as an example, here's how to recompile a given
+opensource package on Linux:
+
+    /path/to/external/qemu/android/scripts/gen-android-sdk-toolchain.sh \
+        /tmp/my-toolchain
+
+    PATH=/tmp/my-toolchain:$PATH
+
+    cd /path/to/opensource-package-1.0/
+    ./configure --host=x86_64-linux --prefix <install-dir> <other-options>
+    make -j8
+    make install
+
+However, several shell scripts are provided to automate this.
+
+
+III. Rebuild scripts for third-party packages:
+==============================================
+
+the android/scripts/ directory contains many shell scripts used to rebuild
+specific third-party libraries or executables. In particular:
+
+  - They all use shared functions from android/scripts/utils/ that make
+    it easy to parse the PACKAGES.TXT file, extract source tarball to
+    temporary build directories, generate SDK toolchain wrappers, and
+    configure simple projects.
+
+  - On Linux, they will build binaries for linux-x86,linux-x86_64,
+    windows-x86 and windows-x86_64 automatically.
+
+    Also, they support the --darwin-ssh=<hostname> which allows one
+    to perform a remote build of Darwin binaries through SSH.
+
+  - They place all generated binaries under:
+
+       $AOSP/prebuilts/android-emulator-build/<name>
+
+    Where <name> is a unique name corresponding to this group of binaries.
+
+Most features are explained when using the --help option on one of these
+scripts.
+
+If you consider adding new prebuilt binaries, consider writing such a
+specialized script to get the same benefits. A good starting point is
+looking at one of the existing scripts and try to modify it.
+
+Another thing to do is open a buganizer entry to request a new git
+repository under:
+
+    $AOSP/prebuilts/android-emulator-build/<new-project-name>
+
+Consider providing an archive of the original content for this directory
+(i.e. generated by your own build script) to populate it first.
+
+
+IV. How prebuilt binaries are used by the build:
+================================================
+
+The android-rebuild.sh script is in charge of placing prebuilt binaries
+to the correct location under $OUT_DIR/, which defaults to objs/
+
+In particular:
+
+  - qemu-android binaries must be placed under:
+
+       $OUT_DIR/qemu/<system>/qemu-system-<qemu-arch>
+
+    Note that these binaries are generated by running:
+
+        android/scripts/
+
+  - Mesa libraries must be placed under:
+
+       $OUT_DIR/lib/gles_mesa/    (32-bit ones)
+       $OUT_DIR/lib64/gles_mesa/  (64-bit ones)
+
+  - Qt shared libraries should go into:
+
+       $OUT_DIR/lib/qt/           (32-bit ones)
+       $OUT_DIR/lib64/qt/         (64-bit ones)
+
+  - Any third-party host executable (if any) should go under:
+
+       $OUT_DIR/bin/     (32-bit ones)
+       $OUT_DIR/bin64/   (64-bit ones)
+
+Note that the top-level 'emulator' launcher program will modify the runtime
+library search path (e.g. LD_LIBRARY_PATH on Linux) to ensure that libraries
+under <lib>/, <lib>/qt/ or <lib>/gles_mesa/, whenever that makes sense.
+
+The PATH is not modified though, so use explicit bin/ or bin64/ prefixes
+when invoking host binaries.
+
+
+
+[1] Valid host system names are:
+
+      darwin-x86_64
+      linux-x86_64
+      windows-x86_64
+      linux-x86
+      windows-x86
