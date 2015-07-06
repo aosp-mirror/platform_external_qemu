@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "534a1d43_b265c098",
+        "filename": "build.gradle",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001414
+      },
+      "writtenOn": "2015-07-06T19:27:21Z",
+      "side": 0,
+      "message": "did you mean to remove it from here? I thought the only issue was that it was missing on windows?",
+      "range": {
+        "startLine": 17,
+        "startChar": 12,
+        "endLine": 17,
+        "endChar": 53
+      },
+      "revId": "23d102936b26391cb9d1e8dbd4829b5f398b5a50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
