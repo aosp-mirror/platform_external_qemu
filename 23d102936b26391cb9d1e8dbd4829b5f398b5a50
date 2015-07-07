@@ -22,6 +22,30 @@
       "revId": "23d102936b26391cb9d1e8dbd4829b5f398b5a50",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f356b1ec_3ef8b5b9",
+        "filename": "build.gradle",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1055888
+      },
+      "writtenOn": "2015-07-07T20:34:03Z",
+      "side": 0,
+      "message": "No, that\u0027s because I went back and forth between making a new common section and putting it in the windows-only section...",
+      "parentUuid": "534a1d43_b265c098",
+      "range": {
+        "startLine": 17,
+        "startChar": 12,
+        "endLine": 17,
+        "endChar": 53
+      },
+      "revId": "23d102936b26391cb9d1e8dbd4829b5f398b5a50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
