@@ -537,6 +537,22 @@ builder_add_configure_flags () {
     var_append _SHU_BUILDER_CONFIGURE_FLAGS "$*"
 }
 
+# Call this function to disable verbose output during the 'make install' pass
+# of builder_build_autotools_package(). This is necessary for certain packages
+# with broken Makefiles (e.g. e2fsprogs when built on Darwin).
+_SHU_BUILDER_DISABLE_VERBOSE_INSTALL=
+builder_disable_verbose_install () {
+    _SHU_BUILDER_DISABLE_VERBOSE_INSTALL=true
+}
+
+# Call this function to disable parallel jobs during the 'make install' pass
+# of builder_build_autotools_package(). This is necessary for certain packages
+# with broken Makefiles.
+_SHU_BUILDER_DISABLE_PARALLEL_INSTALL=
+builder_disable_parallel_install () {
+    _SHU_BUILDER_DISABLE_PARALLEL_INSTALL=true
+}
+
 # Build a given autotools based package
 #
 # $1: Source directory.
@@ -548,6 +564,13 @@ builder_build_autotools_package () {
 
     local PKG_SRC_DIR="$1"
     local PKG_BUILD_DIR="$2"
+    local INSTALL_FLAGS
+    if [ -z "$_SHU_BUILDER_DISABLE_PARALLEL_INSTALL" ]; then
+        var_append INSTALL_FLAGS "-j$NUM_JOBS"
+    fi
+    if [ -z "$_SHU_BUILDER_DISABLE_VERBOSE_INSTALL" ]; then
+        var_append INSTALL_FLAGS "V=1";
+    fi
     shift; shift;
     (
         run mkdir -p "$PKG_BUILD_DIR" &&
@@ -562,7 +585,7 @@ builder_build_autotools_package () {
             $_SHU_BUILDER_CONFIGURE_FLAGS \
             "$@" &&
         run make -j$NUM_JOBS V=1 &&
-        run make install -j$NUM_JOBS V=1
+        run make install $INSTALL_FLAGS
     ) ||
     panic "Could not build and install $PKG_FULLNAME"
 }
