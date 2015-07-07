@@ -260,6 +260,33 @@ if true; then
     fi
 fi
 
+# Copy e2fsprogs binaries.
+if true; then
+    E2FSPROGS_DIR=$PREBUILTS_DIR/e2fsprogs
+    if [ ! -d "$E2FSPROGS_DIR" ]; then
+        echo "Warning: Missing e2fsprogs prebuilts directory: $E2FSPROGS_DIR"
+    else
+    # NOTE: Bad indentation here is intentional, the echo/else above will
+    # be replaced by a panic/fi in a future patch.
+    echo "Copying e2fsprogs binaries."
+    for E2FS_ARCH in x86 x86_64; do
+        E2FS_SRCDIR=$E2FSPROGS_DIR/$TARGET_OS-$E2FS_ARCH
+        case $E2FS_ARCH in
+            x86) E2FS_DSTDIR=$OUT_DIR/bin;;
+            x86_64) E2FS_DSTDIR=$OUT_DIR/bin64;;
+            *) panic "Invalid e2fsprogs host architecture: $E2FS_ARCH"
+        esac
+        run mkdir -p "$E2FS_DSTDIR" || panic "Could not create sub-directory: $E2FS_DSTDIR"
+        if [ ! -d "$E2FS_SRCDIR" ]; then
+            continue
+        fi
+        run cp -a "$E2FS_SRCDIR"/sbin/* "$E2FS_DSTDIR" || "Could not copy e2fsprogs binaries!"
+        # TODO: For Windows, probably copy the Cygwin DLL from somewhere
+        # and place it into $E2FS_DSTDIR
+    done
+    fi  # Again, intentional, will disappear in a future patch.
+fi
+
 RUN_32BIT_TESTS=
 RUN_64BIT_TESTS=true
 RUN_EMUGEN_TESTS=true
