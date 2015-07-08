@@ -55,7 +55,6 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/utils/host_bitness_unittest.cpp \
   android/utils/path_unittest.cpp \
   android/utils/property_file_unittest.cpp \
-  android/utils/win32_cmdline_quote_unittest.cpp \
   android/utils/x86_cpuid_unittest.cpp \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
@@ -66,6 +65,8 @@ EMULATOR_UNITTESTS_SOURCES := \
 ifeq (windows,$(HOST_OS))
 EMULATOR_UNITTESTS_SOURCES += \
   android/base/files/ScopedHandle_unittest.cpp \
+  android/base/system/Win32Utils_unittest.cpp \
+  android/utils/win32_cmdline_quote_unittest.cpp \
 
 endif
 
