@@ -68,6 +68,11 @@ public:
     // on the value of kProgramBitness.
     static const char* kLibSubDir;
 
+    // Return the name of the sub-directory containing executables
+    // for the current platform, i.e. "bin" or "bin64" depending
+    // on the value of kProgramBitness.
+    static const char* kBinSubDir;
+
     // Return program's bitness, either 32 or 64.
     static int getProgramBitness() { return kProgramBitness; }
 
@@ -76,6 +81,12 @@ public:
     // and thus typically takes effect only after spawning/executing a new
     // process.
     static void addLibrarySearchDir(const char* dirPath);
+
+    // Find a bundled executable named |programName|, it must appear in the
+    // kBinSubDir of getProgramDirectory(). The name should not include the
+    // executable extension (.exe) on Windows.
+    // Return an empty string if the file doesn't exist.
+    static String findBundledExecutable(const char* programName);
 
     // Retrieve the value of a given environment variable.
     // Equivalent to getenv().
