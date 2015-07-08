@@ -609,6 +609,19 @@ if true; then
     fi
 fi
 
+###
+###  e2fsprogs probe
+###
+E2FSPROGS_PREBUILTS_DIR=
+if true; then
+    E2FSPROGS_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/e2fsprogs
+    if [ -d "$E2FSPROGS_PREBUILTS_DIR" ]; then
+        log "e2fsprogs prebuilts dir: $E2FSPROGS_PREBUILTS_DIR"
+    else
+        echo "WARNING: Missing e2fsprogs prebuilts directory: $E2FSPROGS_PREBUILTS_DIR"
+    fi
+fi
+
 # create the objs directory that is going to contain all generated files
 # including the configuration ones
 #
