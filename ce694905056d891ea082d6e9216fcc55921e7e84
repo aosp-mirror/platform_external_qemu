@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8f4ce42_05c25629",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-08T18:23:20Z",
+      "side": 1,
+      "message": "nit: s/Qt/e2fsprogs/ here :)",
+      "revId": "ce694905056d891ea082d6e9216fcc55921e7e84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
