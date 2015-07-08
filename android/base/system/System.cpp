@@ -228,9 +228,13 @@ System* System::get() {
 #ifdef __x86_64__
 // static
 const char* System::kLibSubDir = "lib64";
+// static
+const char* System::kBinSubDir = "bin64";
 #else
 // static
 const char* System::kLibSubDir = "lib";
+// static
+const char* System::kBinSubDir = "bin";
 #endif
 
 #ifdef _WIN32
@@ -343,6 +347,26 @@ void System::addLibrarySearchDir(const char* path) {
         libSearchPath = path;
     }
     system->envSet(varName, libSearchPath.c_str());
+}
+
+// static
+String System::findBundledExecutable(const char* programName) {
+    System* system = System::get();
+
+    String executableName(programName);
+#ifdef _WIN32
+    executableName += ".exe";
+#endif
+    StringVector pathList;
+    pathList.push_back(system->getProgramDirectory());
+    pathList.push_back(kBinSubDir);
+    pathList.push_back(executableName);
+
+    String executablePath = PathUtils::recompose(pathList);
+    if (!system->pathIsFile(executablePath.c_str())) {
+        executablePath.clear();
+    }
+    return executablePath;
 }
 
 }  // namespace base

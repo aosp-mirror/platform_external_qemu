@@ -35,7 +35,7 @@ static void make_subfile(const String& dir, const char* file) {
     path.append("/");
     path.append(file);
     int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0755);
-    EXPECT_GE(fd, 0);
+    EXPECT_GE(fd, 0) << "Path: " << path.c_str();
     ::close(fd);
 }
 
@@ -154,6 +154,35 @@ TEST(System, addLibrarySearchDir) {
     TestTempDir* testDir = testSys.getTempRoot();
     ASSERT_TRUE(testDir->makeSubDir("lib"));
     testSys.addLibrarySearchDir("lib");
+}
+
+TEST(System, findBundledExecutable) {
+#ifdef _WIN32
+    static const char kProgramFile[] = "myprogram.exe";
+#else
+    static const char kProgramFile[] = "myprogram";
+#endif
+
+    TestSystem testSys("/foo", System::kProgramBitness);
+    TestTempDir* testDir = testSys.getTempRoot();
+    ASSERT_TRUE(testDir->makeSubDir("foo"));
+
+    StringVector pathList;
+    pathList.push_back(String("foo"));
+    pathList.push_back(String(System::kBinSubDir));
+    ASSERT_TRUE(testDir->makeSubDir(PathUtils::recompose(pathList).c_str()));
+
+    pathList.push_back(String(kProgramFile));
+    String programPath = PathUtils::recompose(pathList);
+    make_subfile(testDir->path(), programPath.c_str());
+
+    String path = testSys.findBundledExecutable("myprogram");
+    String expectedPath("/");
+    expectedPath += programPath;
+    EXPECT_STREQ(expectedPath.c_str(), path.c_str());
+
+    path = testSys.findBundledExecutable("otherprogram");
+    EXPECT_FALSE(path.size());
 }
 
 }  // namespace base
