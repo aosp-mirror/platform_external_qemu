@@ -52,6 +52,7 @@ public:
         if (mProgramDir.empty()) {
 #if defined(__linux__)
             char path[1024];
+            memset(path, 0, sizeof(path));  // happy valgrind!
             int len = readlink("/proc/self/exe", path, sizeof(path));
             if (len > 0 && len < (int)sizeof(path)) {
                 char* x = ::strrchr(path, '/');
