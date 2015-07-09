@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98a11261_fcb84932",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-09T15:41:05Z",
+      "side": 1,
+      "message": "should delete these now",
+      "revId": "5b7ae7df674bbad5a482bb96183c8a7a56e04ca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
