@@ -1,0 +1,42 @@
+<!--Copyright (C) 2015 The Android Open Source Project
+
+    This software is licensed under the terms of the GNU General Public
+    License version 2, as published by the Free Software Foundation, and
+    may be copied, distributed, and modified under those terms.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+-->
+<!DOCTYPE RCC><RCC version="1.0">
+ <qresource>
+     <file>images/ic_arrow_back_48px.svg</file>
+     <file>images/ic_battery_std_48px.svg</file>
+     <file>images/ic_call_48px.svg</file>
+     <file>images/ic_camera_enhance_48px.svg</file>
+     <file>images/ic_close_48px.svg</file>
+     <file>images/ic_crop_square_48px.svg</file>
+     <file>images/ic_filter_tilt_shift_48px.svg</file>
+     <file>images/ic_fullscreen_48px.svg</file>
+     <file>images/ic_hangout_video_48px.svg</file>
+     <file>images/ic_keyboard_arrow_down_48px.svg</file>
+     <file>images/ic_keyboard_arrow_left_48px.svg</file>
+     <file>images/ic_keyboard_arrow_right_48px.svg</file>
+     <file>images/ic_keyboard_arrow_up_48px.svg</file>
+     <file>images/ic_location_on_48px.svg</file>
+     <file>images/ic_menu_48px.svg</file>
+     <file>images/ic_mic_48px.svg</file>
+     <file>images/ic_panorama_fish_eye_48px.svg</file>
+     <file>images/ic_photo_camera_48px.svg</file>
+     <file>images/ic_power_settings_new_48px.svg</file>
+     <file>images/ic_sd_card_48px.svg</file>
+     <file>images/ic_signal_cellular_4_bar_48px.svg</file>
+     <file>images/ic_stay_current_portrait_48px.svg</file>
+     <file>images/ic_unfold_less_48px.svg</file>
+     <file>images/ic_unfold_more_48px.svg</file>
+     <file>images/ic_volume_down_48px.svg</file>
+     <file>images/ic_volume_up_48px.svg</file>
+     <file>images/ic_zoom_in_24px.svg</file>
+ </qresource>
+ </RCC>

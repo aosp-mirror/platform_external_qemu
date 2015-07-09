@@ -47,6 +47,7 @@ gen-hw-config-defs = \
   $(eval LOCAL_C_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES))
 
 EMULATOR_USE_SDL2 := $(strip $(filter true,$(EMULATOR_USE_SDL2)))
+EMULATOR_USE_QT := $(strip $(filter true,$(EMULATOR_USE_QT)))
 
 ##############################################################################
 ##############################################################################
@@ -233,6 +234,8 @@ $(call end-emulator-library)
 
 common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
+common_LOCAL_QT_MOC_SRC_FILES =
+common_LOCAL_QT_RESOURCES =
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
 EMULATOR_LIBUI_CFLAGS :=
@@ -269,7 +272,6 @@ ifdef EMULATOR_USE_SDL2
     EMULATOR_LIBUI_LDLIBS += $(SDL2_LDLIBS)
     EMULATOR_LIBUI_STATIC_LIBRARIES := $(SDL2_STATIC_LIBRARIES)
     EMULATOR_LIBUI_STATIC_LIBRARIES_64 := $(SDL2_STATIC_LIBRARIES_64)
-    EMULATOR_SDL_LDLIBS := $(SDL2_LDLIBS)
 
     ifeq ($(HOST_OS),windows)
         # Special exception for Windows: -lmingw32 must appear before libSDLmain
@@ -283,31 +285,50 @@ ifdef EMULATOR_USE_SDL2
     endif
 endif  # EMULATOR_USE_SDL2
 
+###########################################################################
+# Qt-related definitions
+#
+ifdef EMULATOR_USE_QT
+    QT_TOP32_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-x86
+    QT_TOP64_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-x86_64
+    QT_MOC_TOOL := $(QT_TOP64_DIR)/bin/moc
+    QT_RCC_TOOL := $(QT_TOP64_DIR)/bin/rcc
+
+    EMULATOR_QT_LIBS := Qt5Widgets Qt5Gui Qt5Core
+    EMULATOR_QT_LDLIBS := $(foreach lib,$(EMULATOR_QT_LIBS),-l$(lib))
+    ifeq ($(HOST_OS),windows)
+        # On Windows, linking to mingw32 is required. The library is provided
+        # by the toolchain, and depends on a main() function provided by qtmain
+        # which itself depends on qMain(). These must appear in LDFLAGS and
+        # not LDLIBS since qMain() is provided by object/libraries that
+        # appear after these in the link command-line.
+        EMULATOR_QT_LDFLAGS += \
+                -L$(QT_TOP32_DIR)/bin \
+                -lmingw32 \
+                $(QT_TOP32_DIR)/lib/libqtmain.a
+        EMULATOR_QT_LDFLAGS_64 += \
+                 -L$(QT_TOP64_DIR)/bin \
+                 -lmingw32 \
+                 $(QT_TOP64_DIR)/lib/libqtmain.a
+    else
+        EMULATOR_QT_LDFLAGS := -L$(QT_TOP32_DIR)/lib
+        EMULATOR_QT_LDFLAGS_64 := -L$(QT_TOP64_DIR)/lib
+    endif
+    QT_INCLUDE := $(QT_PREBUILTS_DIR)/common/include
+    EMULATOR_LIBUI_CFLAGS += \
+            -I$(QT_INCLUDE) \
+            -I$(QT_INCLUDE)/QtCore \
+            -I$(QT_INCLUDE)/QtGui \
+            -I$(QT_INCLUDE)/QtWidgets
+    EMULATOR_LIBUI_LDFLAGS += $(EMULATOR_QT_LDFLAGS)
+    EMULATOR_LIBUI_LDFLAGS_64 += $(EMULATOR_QT_LDFLAGS_64)
+    EMULATOR_LIBUI_LDLIBS += $(EMULATOR_QT_LDLIBS)
+endif  # EMULATOR_USE_QT
+
 # the skin support sources
 #
-SKIN_SOURCES := charmap.c \
-                rect.c \
-                region.c \
-                image.c \
-                trackball.c \
-                keyboard.c \
-                keycode.c \
-                keycode-buffer.c \
-                keyset.c \
-                file.c \
-                window.c \
-                resource.c \
-                scaler.c \
-                ui.c \
-
-ifdef EMULATOR_USE_SDL2
-SKIN_SOURCES += event-sdl2.c \
-                surface-sdl2.c \
-                winsys-sdl2.c \
-
-endif  # EMULATOR_USE_SDL2
-
-common_LOCAL_SRC_FILES += $(SKIN_SOURCES:%=android/skin/%)
+include $(LOCAL_PATH)/android/skin/sources.mk
+common_LOCAL_SRC_FILES += $(ANDROID_SKIN_SOURCES)
 
 common_LOCAL_SRC_FILES += \
              android/gpu_frame.cpp \
@@ -322,11 +343,17 @@ endif
 
 common_LOCAL_CFLAGS += $(EMULATOR_LIBUI_CFLAGS)
 
+ifeq ($(HOST_OS),windows)
+# For capCreateCaptureWindow used in camera-capture-windows.c
+EMULATOR_LIBUI_LDLIBS += -lvfw32
+endif
 
 ## one for 32-bit
 $(call start-emulator-library, emulator-libui)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
+LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
@@ -334,6 +361,8 @@ $(call end-emulator-library)
 $(call start-emulator64-library, emulator64-libui)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
+LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 

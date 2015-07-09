@@ -14,11 +14,14 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/time.h>
+#ifdef CONFIG_POSIX
+#include <pthread.h>
+#endif
 #ifdef _WIN32
 #include <process.h>
 #endif
 
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(CONFIG_SDL)
 // This include is currently required to ensure that 'main' is renamed
 // to 'SDL_main' as a macro. This is required by SDL 1.x on OS X.
 #include "SDL.h"
@@ -63,6 +66,8 @@
 #include "android/framebuffer.h"
 #include "android/opengl/emugl_config.h"
 #include "android/iolooper.h"
+
+#include "android/skin/winsys.h"
 
 SkinRotation  android_framebuffer_rotation;
 
@@ -144,8 +149,26 @@ _findQemuInformationalOption( int qemu_argc, char** qemu_argv )
     return NULL;
 }
 
-int main(int argc, char **argv)
-{
+void enter_qemu_main_loop(int argc, char **argv) {
+#ifndef _WIN32
+    sigset_t set;
+    sigemptyset(&set);
+    pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif
+
+    D("Starting QEMU main loop");
+    qemu_main(argc, argv);
+    D("Done with QEMU main loop");
+    exit(0);
+}
+
+#if CONFIG_QT && defined(_WIN32)
+// On Windows, link against qtmain.lib which provides a WinMain()
+// implementation, that latter calls qMain().
+#define main qt_main
+#endif
+
+int main(int argc, char **argv) {
     char   tmp[MAX_PATH];
     char*  args[128];
     int    n;
@@ -288,7 +311,8 @@ int main(int argc, char **argv)
 
         /* Skip the translation of command-line options and jump straight to
          * qemu_main(). */
-        goto invoke_qemu;
+        enter_qemu_main_loop(n, args);
+        return 0;
     }
 
     sanitizeOptions(opts);
@@ -961,8 +985,18 @@ int main(int argc, char **argv)
     }
 
     /* Setup SDL UI just before calling the code */
+#if defined(CONFIG_SDL)
     init_sdl_ui(skinConfig, skinPath, opts);
-
-invoke_qemu:
-    return qemu_main(n, args);
+    enter_qemu_main_loop(n, args);
+#elif defined(CONFIG_QT)
+#ifndef _WIN32
+    sigset_t set;
+    sigfillset(&set);
+    pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif
+    init_sdl_ui(skinConfig, skinPath, opts);
+    skin_winsys_spawn_thread(enter_qemu_main_loop, n, args);
+    skin_winsys_enter_main_loop(argc, argv);
+#endif
+    return 0;
 }

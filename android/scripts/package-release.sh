@@ -324,6 +324,10 @@ OPT_COPY_PREBUILTS=
 option_register_var "--copy-prebuilts=<dir>" OPT_COPY_PREBUILTS \
         "Copy final emulator binaries to <path>/prebuilts/android-emulator"
 
+OPT_UI=
+option_register_var "--ui=<name>" OPT_UI \
+        "Specify UI backend ('sdl2' or 'qt')"
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -472,7 +476,7 @@ EOF
 # from sources.
 
 cd \$(dirname "\$0") &&
-(cd qemu && ./android-rebuild.sh --ignore-audio) &&
+(cd qemu && ./android-rebuild.sh --ignore-audio "\$@") &&
 mkdir -p bin/ &&
 cp -rfp qemu/objs/emulator* bin/ &&
 echo "Emulator binaries are under \$(pwd -P)/bin/"
@@ -624,7 +628,9 @@ build_darwin_binaries_on () {
     else
         var_append DARWIN_BUILD_FLAGS "--no-aosp-prebuilts"
     fi
-
+    if [ "$OPT_UI" ]; then
+        var_append DARWIN_BUILD_FLAGS "--ui=$OPT_UI"
+    fi
     cat > $DARWIN_PKG_DIR/build.sh <<EOF
 #!/bin/bash -l
 cd $DARWIN_REMOTE_DIR/qemu &&
@@ -672,6 +678,10 @@ if [ "$AOSP_PREBUILTS_DIR" ]; then
     var_append REBUILD_FLAGS "--aosp-prebuilts-dir=$AOSP_PREBUILTS_DIR"
 else
     var_append REBUILD_FLAGS "--no-aosp-prebuilts-dir"
+fi
+
+if [ "$OPT_UI" ]; then
+    var_append REBUILD_FLAGS "--ui=$OPT_UI"
 fi
 
 for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do
