@@ -20,9 +20,12 @@
 #include <QPainter>
 #include <QWidget>
 
+#include "android/ui-emulator-if.h"
 #include "android/skin/event.h"
 #include "android/skin/surface.h"
 #include "android/skin/winsys.h"
+#include "android/skin/qt/battery-window.h"
+#include "android/skin/qt/sms-window.h"
 #include "android/skin/qt/tool-window.h"
 
 namespace Ui {
@@ -60,6 +63,9 @@ public:
     void show();
     void startThread(StartFunction f, int argc, char **argv);
     void wheelEvent(QWheelEvent *event);
+    void BatteryWindowIsClosing();
+    void SmsWindowIsClosing();
+    void setEmulatorIf(const UiEmulatorIf *emPtr);
 
     /*
      In Qt, signals are normally events of interest that a class can emit, which can be hooked up to arbitrary slots. Here
@@ -141,15 +147,21 @@ public slots:
     void slot_sensors();
     void slot_up();
     void slot_voice();
+
     void slot_volumeUp();
     void slot_volumeDown();
     void slot_zoom();
+    void slot_SMS_subwindow();
 
 private:
     void handleEvent(SkinEventType type, QMouseEvent *event);
     SkinEvent *createSkinEvent(SkinEventType type);
     void handleKeyEvent(SkinEventType type, QKeyEvent *pEvent);
     void simulateKeyPress(int keyCode, int modifiers);
+    SmsWindow     *smsWindow;
+    BatteryWindow *batteryWindow;
+    void          *batteryState;
+    const UiEmulatorIf *emulatorIf;
 
     SkinSurface *backing_surface;
     QQueue<SkinEvent*> event_queue;

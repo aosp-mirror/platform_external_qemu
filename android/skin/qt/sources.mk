@@ -11,11 +11,15 @@ ANDROID_SKIN_SOURCES += \
 endif
 
 ANDROID_SKIN_SOURCES += \
+    android/skin/qt/battery-window.cpp \
     android/skin/qt/emulator-window.cpp \
+    android/skin/qt/sms-window.cpp \
     android/skin/qt/tool-window.cpp \
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
+    android/skin/qt/battery-window.h \
     android/skin/qt/emulator-window.h \
+    android/skin/qt/sms-window.h \
     android/skin/qt/tool-window.h \
 
 ANDROID_SKIN_QT_RESOURCES := \

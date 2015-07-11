@@ -13,6 +13,9 @@
 #include "android/emulator-window.h"
 
 #include "android/android.h"
+#include "android/ui-emulator-if.h"
+#include "android/battery-if.h"
+#include "android/battery-if-impl.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
@@ -26,6 +29,9 @@
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
 #include "telephony/modem_driver.h"
+
+extern void setEmulatorUI(const UiEmulatorIf *ifPtr);
+
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -230,6 +236,21 @@ emulator_window_setup( EmulatorWindow*  emulator )
                           emulator->onion_rotation,
                           emulator->onion_alpha);
     }
+
+    static const BatteryIf myBatteryFuncs = {
+        .setIsCharging  = battery_setIsCharging,
+        .setChargeLevel = battery_setChargeLevel,
+        .setHealth      = battery_setHealth,
+        .setStatus      = battery_setStatus
+    };
+
+    static const UiEmulatorIf myUiEmulatorIf = {
+        .battery   = &myBatteryFuncs,
+        .cellular  = 0,
+        .telephony = 0
+    };
+
+    setEmulatorUI(&myUiEmulatorIf);
 
     // Determine whether to use an EmuGL sub-window or not.
     if (!s_use_emugl_subwindow) {
