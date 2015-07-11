@@ -19,10 +19,13 @@
 #include <QScreen>
 #include <QSemaphore>
 
+#include "android/ui-emulator-if.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-window.h"
 #include "android/skin/qt/winsys-qt.h"
+#include "android/skin/qt/battery-window.h"
+#include "android/skin/qt/sms-window.h"
 
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
@@ -41,11 +44,24 @@
 
 static EmulatorWindow *instance;
 
+extern "C" void setEmulatorUI(const UiEmulatorIf *ifPtr) {
+    if (!instance) {
+        D("setEmulatorUI(): EmulatorWindow instance is null!");
+        return;
+    }
+    instance->setEmulatorIf(ifPtr);
+}
+
 EmulatorWindow::EmulatorWindow(QWidget *parent) :
         QFrame(parent)
 {
     instance = this;
     backing_surface = NULL;
+    emulatorIf      = NULL;
+    batteryWindow   = NULL;
+    batteryState    = NULL;
+    smsWindow       = NULL;
+
     tool_window = new ToolWindow(this);
 
     QObject::connect(this, &EmulatorWindow::blit, this, &EmulatorWindow::slot_blit);
@@ -77,6 +93,10 @@ EmulatorWindow::~EmulatorWindow()
 EmulatorWindow *EmulatorWindow::getInstance()
 {
     return instance;
+}
+
+void EmulatorWindow::setEmulatorIf(const UiEmulatorIf *emPtr) {
+    emulatorIf = emPtr;
 }
 
 void EmulatorWindow::keyPressEvent(QKeyEvent *event)
@@ -125,6 +145,12 @@ void EmulatorWindow::show()
 {
     QFrame::show();
     tool_window->show();
+    if (batteryWindow) {
+        batteryWindow->show();
+    }
+    if (smsWindow) {
+        smsWindow->show();
+    }
 }
 
 void EmulatorWindow::startThread(StartFunction f, int argc, char **argv)
@@ -309,6 +335,15 @@ void EmulatorWindow::slot_back()
 
 void EmulatorWindow::slot_battery()
 {
+    if (batteryWindow) {
+        // It already exists. Don't create another,
+        // but raise it in case it's hidden.
+        batteryWindow->raise();
+        return;
+    }
+
+    batteryWindow = new BatteryWindow(this, batteryState, emulatorIf->battery);
+    batteryWindow->show();
 }
 
 void EmulatorWindow::slot_camera()
@@ -409,6 +444,29 @@ void EmulatorWindow::slot_volumeUp()
 
 void EmulatorWindow::slot_zoom()
 {
+}
+
+void EmulatorWindow::slot_SMS_subwindow()
+{
+    if (smsWindow) {
+        // It already exists. Don't create another,
+        // but raise it in case it's hidden.
+        smsWindow->raise();
+        return;
+    }
+
+    smsWindow = new SmsWindow(this);
+    smsWindow->show();
+}
+
+void EmulatorWindow::BatteryWindowIsClosing()
+{
+    batteryWindow = NULL;
+}
+
+void EmulatorWindow::SmsWindowIsClosing()
+{
+    smsWindow = NULL;
 }
 
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.

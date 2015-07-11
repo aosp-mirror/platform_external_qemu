@@ -12,6 +12,10 @@
 #ifndef _android_modem_h_
 #define _android_modem_h_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "sim_card.h"
 #include "sms.h"
 
@@ -165,5 +169,9 @@ extern int    amodem_update_call( AModem  modem, const char*  number, ACallState
 extern int    amodem_disconnect_call( AModem  modem, const char*  number );
 
 /**/
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _android_modem_h_ */
