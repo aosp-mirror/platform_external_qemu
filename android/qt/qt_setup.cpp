@@ -34,7 +34,8 @@ bool androidQtSetupEnv(bool is64bit) {
         return false;
     }
     //LOG(INFO) << "Adding library search path [" << qtLibSubDir.c_str() << "]";
-    system->addLibrarySearchDir(qtLibSubDir.c_str());
+// ?? The following line makes the icons disappear!
+//    system->addLibrarySearchDir(qtLibSubDir.c_str());
     //const char* env = ::getenv(System::kLibrarySearchListEnvVarName);
     //LOG(INFO) << "Library search list [" << (env ? env : "<empty>") << "]";
 

@@ -1,0 +1,172 @@
+/* Copyright (C) 2015 The Android Open Source Project
+ **
+ ** This software is licensed under the terms of the GNU General Public
+ ** License version 2, as published by the Free Software Foundation, and
+ ** may be copied, distributed, and modified under those terms.
+ **
+ ** This program is distributed in the hope that it will be useful,
+ ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+ ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ ** GNU General Public License for more details.
+ */
+
+#ifndef SKIN_QT_EXTENDED_WINDOW_H
+#define SKIN_QT_EXTENDED_WINDOW_H
+
+#include <QFile>
+#include <QFrame>
+#include <QPushButton>
+#include <QString>
+#include <QTableWidget>
+#include <QTimer>
+#include <QValidator>
+
+#include "android/battery-agent.h"
+#include "android/cellular-agent.h"
+#include "android/finger-agent.h"
+#include "android/location-agent.h"
+#include "android/telephony-agent.h"
+#include "android/ui-emu-agent.h"
+
+class EmulatorQtWindow;
+class Tools;
+
+namespace Ui {
+    class ExtendedControls;
+}
+
+class ExtendedWindow : public QFrame
+{
+    Q_OBJECT
+
+public:
+    explicit ExtendedWindow(EmulatorQtWindow *eW, Tools *tW, const UiEmuAgent *agentPtr);
+
+    void     completeInitialization();
+
+private:
+
+    ~ExtendedWindow();
+    void closeEvent(QCloseEvent *ce);
+
+    EmulatorQtWindow   *parentWindow;
+    Tools              *toolWindow;
+
+    class BatteryState {
+    public:
+        bool          isCharging;
+        int           chargeLevel; // Percent
+        BatteryHealth health;
+        BatteryStatus status;
+
+        BatteryState() {
+            isCharging  = true;
+            chargeLevel = 50;
+            health      = Battery_H_Good;
+            status      = Battery_S_Charging;
+        }
+    };
+
+    typedef enum { Call_Inactive, Call_Active, Call_Held } CallActivity;
+
+    class TelephonyState {
+    public:
+
+        CallActivity  activity;
+        QString       phoneNumber;
+
+        TelephonyState() :
+            activity(Call_Inactive),
+            phoneNumber("6505551212") // TODO: Change to "(650) 555-1212"
+        { }
+    };
+
+    void initBattery();
+    void initCellular();
+    void initFinger();
+    void initLocation();
+    void initSd();
+    void initSms();
+    void initTelephony();
+
+    BatteryState    batteryState;
+    TelephonyState  telephonyState;
+
+    const BatteryAgent    *batteryAgent;
+    const CellularAgent   *cellularAgent;
+    const FingerAgent     *fingerAgent;
+    const LocationAgent   *locationAgent;
+    const TelephonyAgent  *telephonyAgent;
+
+    int      loc_mSecRemaining;
+    bool     loc_nowPaused;
+    int      loc_rowToSend;
+    QTimer   loc_timer;
+
+    bool     themeIsDark;
+
+    Ui::ExtendedControls *extendedUi;
+
+    void adjustTabs(QPushButton *thisButton, int thisIndex);
+    void loc_readKmlFile(QFile *kmlFile);
+    void loc_appendToTable(QString lat,  QString lon, QString elev,
+                           QString name, QString description       );
+    QString loc_getToken(QFile *kmlFile);
+
+    void    setButtonEnabled(QPushButton *theButton, bool isEnabled);
+
+private slots:
+    void on_theme_pushButton_clicked(); // ?? Temporary
+
+    // Master tabs
+    void on_batteryButton_clicked();
+    void on_cellularButton_clicked();
+    void on_fingerButton_clicked();
+    void on_locationButton_clicked();
+    void on_messageButton_clicked();
+    void on_sdButton_clicked();
+    void on_telephoneButton_clicked();
+
+    // Battery
+    void on_bat_chargeCkBox_toggled(bool checked);
+    void on_bat_levelSlider_valueChanged(int value);
+    void on_bat_healthBox_currentIndexChanged(int index);
+    void on_bat_statusBox_currentIndexChanged(int index);
+
+    // Cellular
+    void on_cell_signalStrengthSlider_valueChanged(int value);
+    void on_cell_standardBox_currentIndexChanged(int index);
+    void on_cell_voiceStatusBox_currentIndexChanged(int index);
+    void on_cell_dataStatusBox_currentIndexChanged(int index);
+
+    // Fingerprint
+    void on_finger_touchCkBox_toggled(bool checked);
+
+    // SMS messaging
+    void on_sms_sendButton_clicked();
+
+    // Telephony
+    void on_tel_startCallButton_clicked();
+    void on_tel_endCallButton_clicked();
+    void on_tel_holdCallButton_clicked();
+
+    // Location
+    void on_loc_KmlButton_clicked();
+    void on_loc_addRowButton_clicked();
+    void on_loc_pathTable_cellChanged(int row, int col);
+    void on_loc_pauseButton_clicked();
+    void on_loc_playButton_clicked();
+    void on_loc_removeRowButton_clicked();
+    void on_loc_stopButton_clicked();
+
+    bool loc_cellIsValid(QTableWidget *table, int row, int col);
+    void loc_slot_timeout();
+};
+
+class phoneNumberValidator : public QValidator
+{
+public:
+    State validate(QString &input, int &pos) const;
+};
+
+#endif // SKIN_QT_EXTENDED_WINDOW_H

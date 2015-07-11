@@ -10,65 +10,64 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef TOOLWINDOW_H
-#define TOOLWINDOW_H
+#ifndef SKIN_QT_TOOLWINDOW_H
+#define SKIN_QT_TOOLWINDOW_H
 
 #include <QFrame>
 #include <QGridLayout>
 #include <QHash>
 #include <QToolButton>
 
+#include "android/ui-emu-agent.h"
+
 namespace Ui {
-    class ToolWindow;
+    class ToolControls;
 }
 
-class EmulatorWindow;
-class TitleBarWidget;
+class EmulatorQtWindow;
+class ExtendedWindow;
 
-typedef void(EmulatorWindow::*EmulatorWindowSlot)();
+typedef void(EmulatorQtWindow::*EmulatorQtWindowSlot)();
 
-class ToolWindow : public QFrame
+class Tools : public QFrame
 {
     Q_OBJECT
 
 public:
-    explicit ToolWindow(EmulatorWindow *emulatorWindow);
+    explicit Tools(EmulatorQtWindow *emulatorWindow);
     void show();
+    void extendedIsClosing() { extendedWindow = NULL; };
     
-public slots:
-    void slot_toggleExpand();
+    void setEmuAgent(const UiEmuAgent *agPtr)
+        { uiEmuAgent = agPtr; };
 
 private:
-    QToolButton *addButton(QGridLayout *layout, int row, int col, const char *iconPath, EmulatorWindowSlot slot);
+    QToolButton *addButton(QGridLayout *layout, int row, int col, const char *iconPath, QString tip, EmulatorQtWindowSlot slot);
     void setExpandedState(bool expanded);
     
     QWidget *button_area;
-    EmulatorWindow *emulator_window;
+    EmulatorQtWindow *emulator_window;
+    ExtendedWindow   *extendedWindow;
     bool expanded;
     QList<QToolButton*> expanded_buttons;
-    TitleBarWidget *title_bar;
     QBoxLayout *top_layout;
+    const struct UiEmuAgent *uiEmuAgent;
+
+    Ui::ToolControls  *toolsUi;
+
+private slots:
+    void on_close_button_clicked();
+    void on_power_button_clicked();
+    void on_volume_up_button_clicked();
+    void on_volume_down_button_clicked();
+    void on_rotate_CW_button_clicked();
+    void on_rotate_CCW_button_clicked();
+    void on_zoom_button_clicked();
+    void on_fullscreen_button_clicked();
+    void on_more_button_clicked();
+
 };
 
-typedef void(ToolWindow::*ToolWindowSlot)();
+typedef void(Tools::*ToolsSlot)();
 
-class TitleBarWidget : public QWidget
-{
-    Q_OBJECT
-    
-public:
-    explicit TitleBarWidget(ToolWindow *window);
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual void mouseMoveEvent(QMouseEvent *event);
-    void setExpandedState(bool state);
-
-private:
-    QToolButton *addButton(QBoxLayout *layout, const char *iconPath, ToolWindowSlot slot);
-
-    QIcon collapsed_icon;
-    QPoint drag_offset;
-    QIcon expanded_icon;
-    QToolButton *expand_button;
-    ToolWindow *tool_window;
-};
-#endif // TOOLWINDOW_H
+#endif // SKIN_QT_TOOLWINDOW_H

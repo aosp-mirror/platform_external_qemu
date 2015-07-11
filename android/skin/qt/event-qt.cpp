@@ -15,7 +15,7 @@
 
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
-#include "android/skin/qt/emulator-window.h"
+#include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/utf8_utils.h"
 
 #define  DEBUG  1
@@ -30,7 +30,7 @@
 extern bool skin_event_poll(SkinEvent* event) {
     bool retval;
     QSemaphore semaphore;
-    EmulatorWindow *window = EmulatorWindow::getInstance();
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == false) return false;
     window->pollEvent(event, &retval, &semaphore);
     semaphore.acquire();
