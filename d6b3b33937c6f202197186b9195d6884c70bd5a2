@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9870321a_2744b4ff",
+        "filename": "android/battery-if-impl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-13T23:51:04Z",
+      "side": 1,
+      "message": "They\u0027re not missing; they\u0027re just on the same line as the other statements.\nMultiple statements on one line is usually bad style, but in this case I think it\u0027s actually easier to read.\nWhat do you think?",
+      "parentUuid": "d88d4a46_2e0ba760",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d88d4a46_4e10f388",
         "filename": "android/battery-if.h",
         "patchSetId": 2
@@ -47,6 +65,23 @@
       "writtenOn": "2015-07-13T20:53:23Z",
       "side": 1,
       "message": "nit: I\u0027m not a big fan of the \"interface\" word, because it\u0027s too abstract / confusing. I feel the \"If\" suffix is even more puzzling. What about using something else here? For example, I used the \"Funcs\" suffix for structures that contain contain function pointers (and \"Params\" for those that contain initialization parameters) but frankly that\u0027s not very good either.\n\nFor the record, the Chrome codebase uses the \"Delegate\" suffix to designate C++ classes that only contain virtual abstract methods and serve as interface declarations.\n\nI\u0027m open to suggestions, do you have ideas here?\n\nApart from that, the definition is of course ok.",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98975254_3ba763ca",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-13T23:51:04Z",
+      "side": 1,
+      "message": "I dislike that we have files named \"emulator-window.c\" and \"emulator-window.cpp\".\nWorse is that we have two files both called \"emulator-window.h\"\nAny objection to my renaming one set?",
       "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -138,6 +173,24 @@
     },
     {
       "key": {
+        "uuid": "187d22ed_0bfc2181",
+        "filename": "android/skin/qt/sms-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-13T23:51:04Z",
+      "side": 1,
+      "message": "I don\u0027t know its purpose.\nI did this because tool-window.h does it. I\u0027m happy to remove it.",
+      "parentUuid": "389bc68e_61c5167f",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d88d4a46_eee7df20",
         "filename": "telephony/sms.c",
         "patchSetId": 2
@@ -149,6 +202,24 @@
       "writtenOn": "2015-07-13T20:53:23Z",
       "side": 1,
       "message": "nit: you changed the logic here to simply ignore any characters that are not in 0..9 ? I.e. \"1ab2\" will parse as decimal 12. It looks like this is intentional (e.g. to handle \"(12)345\" for example), but I would recommend adding a comment though to make this more explicit.",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98975254_3b55a322",
+        "filename": "telephony/sms.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-13T23:51:04Z",
+      "side": 1,
+      "message": "Yes, this was intentional. I\u0027ll describe that intent.\n\nBTW, the Qt text box accepts a validator that I will use to prevent the use from entering a phone number as \"1ab2\", but will allow \"(1)2\".",
+      "parentUuid": "d88d4a46_eee7df20",
       "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
