@@ -51,6 +51,63 @@
       "revId": "36f196bab25d0200c06be32ec5f03aac91556aed",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3e6e4e7b_497d8192",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T21:31:57Z",
+      "side": 1,
+      "message": "also avoid introducing static local variables, they\u0027re confusing and make it easy to introduce bug in later maintenance. Better pass the address of driveIndex as a parameter as well.",
+      "revId": "36f196bab25d0200c06be32ec5f03aac91556aed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3e856e59_714cf890",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T21:31:57Z",
+      "side": 1,
+      "message": "nit: use constructor as:\n\n  String driveParam(\"if\u003dnone,\");",
+      "revId": "36f196bab25d0200c06be32ec5f03aac91556aed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3e6e4e7b_697ac59d",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T21:31:57Z",
+      "side": 1,
+      "message": "nit: use default constructor to avoid needless copy:\n\n  String driveParam;",
+      "range": {
+        "startLine": 204,
+        "startChar": 12,
+        "endLine": 205,
+        "endChar": 6
+      },
+      "revId": "36f196bab25d0200c06be32ec5f03aac91556aed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
