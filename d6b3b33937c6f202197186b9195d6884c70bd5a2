@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d88d4a46_2e0ba760",
+        "filename": "android/battery-if-impl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T20:53:23Z",
+      "side": 1,
+      "message": "these lines are missing \"break\" statements here! The code is not going to do what you want :)",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d88d4a46_4e10f388",
+        "filename": "android/battery-if.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T20:53:23Z",
+      "side": 1,
+      "message": "nit: If possible, use a guard macro that reflects the source file location, in this case: ANDROID_BATTERY_IF_H is preferred over BATTERY_IF_H, same for other headers.",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "389bc68e_c1bd0205",
+        "filename": "android/battery-if.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T20:53:23Z",
+      "side": 1,
+      "message": "nit: I\u0027m not a big fan of the \"interface\" word, because it\u0027s too abstract / confusing. I feel the \"If\" suffix is even more puzzling. What about using something else here? For example, I used the \"Funcs\" suffix for structures that contain contain function pointers (and \"Params\" for those that contain initialization parameters) but frankly that\u0027s not very good either.\n\nFor the record, the Chrome codebase uses the \"Delegate\" suffix to designate C++ classes that only contain virtual abstract methods and serve as interface declarations.\n\nI\u0027m open to suggestions, do you have ideas here?\n\nApart from that, the definition is of course ok.",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18a282bf_c0bdfe04",
+        "filename": "android/skin/qt/emulator-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T20:53:23Z",
+      "side": 1,
+      "message": "nit: inclusion order",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "389bc68e_a1c2fe78",
+        "filename": "android/skin/qt/emulator-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T20:53:23Z",
+      "side": 1,
+      "message": "nit: try to keep headers in alphabetical order whenever possible. Looks like this wasn\u0027t done in a previous patch, but that would get you:\n\n  android/skin/event.h\n  android/skin/qt/battery-window.h\n  android/skin/qt/sms-window.h\n  android/skin/qt/tool-window.h\n  android/skin/surface.h\n  android/skin/winsys.h\n\nThis is done to reduce merge conflicts when two people are modifying the same source file. It also avoids having to think about the best location.\n\nAlso, normally, the best header inclusion order is:\n\n  1) [for source files only] corresponding header\n  2) headers from the same directory or logical component\n  3) third-party library headers (e.g. Qt ones here).\n  3) system headers.\n\nThe idea is to avoid having one of your headers breaking if a specific third-party or system header isn\u0027t included first.",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8a6d6d3_fdb3073a",
+        "filename": "android/skin/qt/emulator-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T20:53:23Z",
+      "side": 1,
+      "message": "Again, try to keep alphabetical order here, and avoid CapitalCamelCase for C++ methods, use smallCamelCase instead.",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "389bc68e_81c81a99",
+        "filename": "android/skin/qt/sms-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T20:53:23Z",
+      "side": 1,
+      "message": "nit: space around binary operators (i.e. \u003d and \u003c here)",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "389bc68e_61c5167f",
+        "filename": "android/skin/qt/sms-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T20:53:23Z",
+      "side": 1,
+      "message": "I\u0027m a bit puzzled by this declaration, what is the purpose of Ui::SmsWindow compared to ::SmsWindow ?",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d88d4a46_eee7df20",
+        "filename": "telephony/sms.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T20:53:23Z",
+      "side": 1,
+      "message": "nit: you changed the logic here to simply ignore any characters that are not in 0..9 ? I.e. \"1ab2\" will parse as decimal 12. It looks like this is intentional (e.g. to handle \"(12)345\" for example), but I would recommend adding a comment though to make this more explicit.",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f8a4cecc_ffb3ff39",
+        "filename": "telephony/sms_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-13T20:53:23Z",
+      "side": 1,
+      "message": "nit: I think this kind of change should probably go into its own patch.",
+      "revId": "d6b3b33937c6f202197186b9195d6884c70bd5a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
