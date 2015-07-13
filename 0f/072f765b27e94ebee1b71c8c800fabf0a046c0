@@ -1,0 +1,8 @@
+Code-Review+1: Jim Kaye <jameskaye@google.com>
+Code-Review+2: David Turner <digit@google.com>
+Verified+1: Konstantinos Menychtas <kmenychtas@google.com>
+Submitted-by: Konstantinos Menychtas <kmenychtas@google.com>
+Submitted-at: Mon, 13 Jul 2015 21:29:55 +0000
+Reviewed-on: https://android-review.googlesource.com/156962
+Project: platform/external/qemu
+Branch: refs/heads/studio-master-dev
