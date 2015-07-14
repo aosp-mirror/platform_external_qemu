@@ -27,7 +27,7 @@ shell_import utils/package_builder.shi
 # host systems list to linux ones.
 case $(get_build_os) in
     linux)
-        DEFAULT_HOST_SYSTEMS="linux-x86,linux-x86_64"
+        DEFAULT_HOST_SYSTEMS="linux-x86,linux-x86_64,windows-x86"
         ;;
 esac
 
@@ -84,6 +84,42 @@ unpack_package_source () {
         package_list_unpack_and_patch "$1" "$ARCHIVE_DIR" "$BUILD_SRC_DIR"
         touch $PKG_SRC_TIMESTAMP
     fi
+}
+
+# For windows we have already downloaded the executables
+# so just uncompress them to the correct directory in 
+# preparation for android-rebuild.sh.
+# $1: Destination directory of dependencies
+WINDOWS_DEPENDENCIES="e2fsprogs-windows cygwin libcom_err2 
+    libe2p2 libblkid1 libuuid1 libext2fs2 libgcc1 libiconv2 libintl8"
+unpack_windows_dependencies () {
+    DSTDIR=$1
+    for DEP in $WINDOWS_DEPENDENCIES; do
+        run mkdir -p $BUILD_SRC_DIR/$(package_list_get_unpack_src_dir $DEP)
+        unpack_package_source "$DEP"
+    done
+
+    copy_directory_files \
+                        "$BUILD_SRC_DIR/usr/bin" \
+                        "$DSTDIR/sbin" \
+                        cygblkid-1.dll \
+                        cygcom_err-2.dll \
+                        cyge2p-2.dll \
+                        cygext2fs02.dll \
+                        cyggcc_s-1.dll \
+                        cygiconv-2.dll \
+                        cygintl-8.dll \
+                        cyguuid-1.dll \
+                        cygwin1.dll 
+
+    copy_directory_files \
+                        "$BUILD_SRC_DIR/usr" \
+                        "$DSTDIR" \
+                        sbin/e2fsck.exe \
+                        sbin/fsck.ext4 \
+                        sbin/mkfs.ext4 \
+                        sbin/resize2fs.exe \
+                        sbin/tune2fs.exe
 }
 
 # $1: Package basename (e.g. 'libpthread-stubs-0.3')
@@ -166,16 +202,7 @@ fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     (
-        case $SYSTEM in
-            windows*)
-                echo "ERROR: Sorry, cannot build Windows binaries with this script!" >&2
-                echo "Please use Cygwin on Windows to build e2fsprogs instead!"
-                exit 1
-                ;;
-            *)
-                builder_prepare_for_host_no_binprefix "$SYSTEM" "$AOSP_DIR"
-                ;;
-        esac
+        builder_prepare_for_host_no_binprefix "$SYSTEM" "$AOSP_DIR"
 
         dump "$(builder_text) Building e2fsprogs"
 
@@ -188,18 +215,26 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --disable-testio-debug \
                 --disable-rpath \
 
-        build_package e2fsprogs $CONFIGURE_FLAGS
+        case $SYSTEM in
+            windows*)
+                unpack_windows_dependencies "$INSTALL_DIR/$SYSTEM"
+                ;;
+            *)
+                build_package e2fsprogs $CONFIGURE_FLAGS
 
-        # Copy binaries necessary for the build itself as well as static
-        # libraries.
-        copy_directory_files \
-                "$(builder_install_prefix)" \
-                "$INSTALL_DIR/$SYSTEM" \
-                sbin/e2fsck \
-                sbin/fsck.ext4 \
-                sbin/mkfs.ext4 \
-                sbin/resize2fs \
-                sbin/tune2fs \
+                # Copy binaries necessary for the build itself as well as static
+                # libraries.
+                copy_directory_files \
+                        "$(builder_install_prefix)" \
+                        "$INSTALL_DIR/$SYSTEM" \
+                        sbin/e2fsck \
+                        sbin/fsck.ext4 \
+                        sbin/mkfs.ext4 \
+                        sbin/resize2fs \
+                        sbin/tune2fs \
+                ;;
+        esac
+
 
     ) || panic "[$SYSTEM] Could not build e2fsprogs!"
 
