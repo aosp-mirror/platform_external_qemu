@@ -16,6 +16,24 @@
       "revId": "3e9c869c5333b8e8ff2eaa0b8d351d7322604e55",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "78929e67_ce9f8363",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-07-14T10:41:48Z",
+      "side": 1,
+      "message": "thanx Digit. My intention was to hide driveIndex from the caller, because the caller doesn\u0027t need to know/use this variable.\nhowever, i get your worry about \u0027surprise\u0027:) will fix this.",
+      "parentUuid": "f8a4cecc_ffdc1f57",
+      "revId": "3e9c869c5333b8e8ff2eaa0b8d351d7322604e55",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
