@@ -282,8 +282,6 @@ if true; then
             continue
         fi
         run cp -a "$E2FS_SRCDIR"/sbin/* "$E2FS_DSTDIR" || "Could not copy e2fsprogs binaries!"
-        # TODO: For Windows, probably copy the Cygwin DLL from somewhere
-        # and place it into $E2FS_DSTDIR
     done
     fi  # Again, intentional, will disappear in a future patch.
 fi
