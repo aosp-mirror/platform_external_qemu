@@ -56,6 +56,7 @@
 #include "android/filesystems/partition_types.h"
 #include "android/filesystems/ramdisk_extractor.h"
 #include "android/gps.h"
+#include "android/ext4_resize.h"
 #include "android/hw-kmsg.h"
 #include "android/hw-pipe-net.h"
 #include "android/hw-qemud.h"
@@ -80,7 +81,6 @@
 #include "android/multitouch-screen.h"
 #include "exec/hwaddr.h"
 #include "android/tcpdump.h"
-
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -3127,6 +3127,18 @@ int main(int argc, char **argv, char **envp)
                            android_hw->disk_systemPartition_path,
                            android_hw->disk_systemPartition_initPath);
 
+    /* For ext4, to extend an internal partition to more than the default size
+     * you need to initialize userdata-qemu.img to the desired size and restore
+     * it after moving the data in - yaffs is resilient enough for this not to
+     * matter
+    */
+    if(android_op_wipe_data &&
+            userdata_partition_type == ANDROID_PARTITION_TYPE_EXT4) {
+        androidPartitionType_makeEmptyFile(userdata_partition_type,
+                                           android_hw->disk_dataPartition_size,
+                                           android_hw->disk_dataPartition_path);
+    }
+
     /* Initialize data partition image */
     android_nand_add_image("userdata",
                            userdata_partition_type,
@@ -3134,6 +3146,15 @@ int main(int argc, char **argv, char **envp)
                            android_hw->disk_dataPartition_size,
                            android_hw->disk_dataPartition_path,
                            android_hw->disk_dataPartition_initPath);
+
+    /* Extend the userdata-qemu.img to the desired size - resize2fs can only
+     * extend partitions to fill available space
+    */
+    if(android_op_wipe_data &&
+            userdata_partition_type == ANDROID_PARTITION_TYPE_EXT4) {
+        resizeExt4Partition(android_hw->disk_dataPartition_path,
+                            android_hw->disk_dataPartition_size);
+    }
 
     /* Initialize cache partition image, if any. Its type depends on the
      * kernel version. For anything >= 3.10, it must be EXT4, or

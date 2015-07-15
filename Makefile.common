@@ -492,6 +492,7 @@ CORE_MISC_SOURCES = \
     android/cbuffer.c \
     android/charpipe.c \
     android/core-init-utils.c   \
+    android/ext4_resize.cpp   \
     android/gps.c \
     android/hw-kmsg.c \
     android/hw-lcd.c \
