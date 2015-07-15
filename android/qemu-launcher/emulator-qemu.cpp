@@ -83,16 +83,34 @@ static const char kHostOs[] = "darwin";
 static const char kHostOs[] = "windows";
 #endif
 
-// A structure used to model information about a given target CPU architecture.
-// |androidArch| is the architecture name, following Android conventions.
-// |qemuArch| is the same name, following QEMU conventions, used to locate
-// the final qemu-system-<qemuArch> binary.
-// |qemuCpu| is the QEMU -cpu parameter value.
-// |ttyPrefix| is the prefix to use for TTY devices.
-// |kernelExtraArgs|, if not NULL, is an optional string appended to the kernel
-// parameters.
-// |storageDeviceType| is the QEMU storage device type.
-// |networkDeviceType| is the QEMU network device type.
+enum ImageType {
+    IMAGE_TYPE_SYSTEM = 0,
+    IMAGE_TYPE_CACHE,
+    IMAGE_TYPE_USER_DATA,
+    IMAGE_TYPE_SD_CARD,
+};
+
+const int kMaxPartitions = 4;
+/*
+ * A structure used to model information about a given target CPU architecture.
+ * |androidArch| is the architecture name, following Android conventions.
+ * |qemuArch| is the same name, following QEMU conventions, used to locate
+ * the final qemu-system-<qemuArch> binary.
+ * |qemuCpu| is the QEMU -cpu parameter value.
+ * |ttyPrefix| is the prefix to use for TTY devices.
+ * |kernelExtraArgs|, if not NULL, is an optional string appended to the kernel
+ * parameters.
+ * |storageDeviceType| is the QEMU storage device type.
+ * |networkDeviceType| is the QEMU network device type.
+ * |imagePartitionTypes| defines the order of how the image partitions are
+ * listed in the command line, because the command line order determines which
+ * mount point the partition is attached to.  For x86, the first partition
+ * listed in command line is mounted first, i.e. to /dev/block/vda,
+ * the next one to /dev/block/vdb, etc. However, for arm/mips, it's reversed;
+ * the last one is mounted to /dev/block/vda. the 2nd last to /dev/block/vdb.
+ * So far, we have 4(kMaxPartitions) types defined for system, cache, userdata
+ * and sdcard images.
+ */
 struct TargetInfo {
     const char* androidArch;
     const char* qemuArch;
@@ -101,6 +119,7 @@ struct TargetInfo {
     const char* kernelExtraArgs;
     const char* storageDeviceType;
     const char* networkDeviceType;
+    const ImageType imagePartitionTypes[kMaxPartitions];
 };
 
 // The current target architecture information!
@@ -113,6 +132,7 @@ const TargetInfo kTarget = {
     " keep_bootcon earlyprintk=ttyAMA0",
     "virtio-blk-device",
     "virtio-net-device",
+    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
 #endif
 #ifdef TARGET_MIPS64
     "mips64",
@@ -122,6 +142,7 @@ const TargetInfo kTarget = {
     NULL,
     "virtio-blk-device",
     "virtio-net-device",
+    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
 #endif
 };
 
@@ -160,6 +181,74 @@ String getQemuExecutablePath(const char* programPath) {
     path.append(qemuProgram);
 
     return PathUtils::recompose(path);
+}
+
+/* generate parameters for each partition by type.
+ * Param:
+ *  args - array to hold parameters for qemu
+ *  argsPosition - current index in the parameter array
+ *  driveIndex - a sequence number for the drive parameter
+ *  hw - the hardware configuration that conatains image info.
+ *  type - what type of partition parameter to generate
+*/
+
+void makePartitionCmd(const char** args, int* argsPosition, int* driveIndex,
+                      AndroidHwConfig* hw, ImageType type) {
+    int n   = *argsPosition;
+    int idx = *driveIndex;
+
+#if defined(TARGET_X86_64) || defined(TARGET_X86)
+    /* for x86, 'if=none' is necessary for virtio blk*/
+    String driveParam("if=none,");
+#else
+    String driveParam;
+#endif
+    String deviceParam;
+
+    switch (type) {
+        case IMAGE_TYPE_SYSTEM:
+            driveParam += StringFormat("index=%d,id=system,file=%s",
+                                      idx++,
+                                      hw->disk_systemPartition_initPath);
+            deviceParam = StringFormat("%s,drive=system",
+                                       kTarget.storageDeviceType);
+            break;
+        case IMAGE_TYPE_CACHE:
+            driveParam += StringFormat("index=%d,id=cache,file=%s",
+                                      idx++,
+                                      hw->disk_cachePartition_path);
+            deviceParam = StringFormat("%s,drive=cache",
+                                       kTarget.storageDeviceType);
+            break;
+        case IMAGE_TYPE_USER_DATA:
+            driveParam += StringFormat("index=%d,id=userdata,file=%s",
+                                      idx++,
+                                      hw->disk_dataPartition_path);
+            deviceParam = StringFormat("%s,drive=userdata",
+                                       kTarget.storageDeviceType);
+            break;
+        case IMAGE_TYPE_SD_CARD:
+            if (hw->hw_sdCard_path != NULL && strcmp(hw->hw_sdCard_path, "")) {
+               driveParam += StringFormat("index=%d,id=sdcard,file=%s",
+                                         idx++, hw->hw_sdCard_path);
+               deviceParam = StringFormat("%s,drive=sdcard",
+                                          kTarget.storageDeviceType);
+            } else {
+                /* no sdcard is defined */
+                return;
+            }
+            break;
+        default:
+            dwarning("Unknown Image type %d\n", type);
+            return;
+    }
+    args[n++] = "-drive";
+    args[n++] = ASTRDUP(driveParam.c_str());
+    args[n++] = "-device";
+    args[n++] = ASTRDUP(deviceParam.c_str());
+    /* update the index */
+    *argsPosition = n;
+    *driveIndex = idx;
 }
 
 void emulator_help( void ) {
@@ -361,7 +450,6 @@ extern "C" int main(int argc, char **argv, char **envp) {
     // Now build the QEMU parameters.
     const char* args[128];
     int n = 0;
-    int driveIndex = 0;
 
     args[n++] = qemuExecutable.c_str();
 
@@ -400,53 +488,15 @@ extern "C" int main(int argc, char **argv, char **envp) {
     args[n++] = "-initrd";
     args[n++] = hw->disk_ramdisk_path;
 
-    // Sdcard
-    String sdCardParam;
-    String sdCardDevice;
-    if (hw->hw_sdCard_path != NULL && strcmp(hw->hw_sdCard_path, "")) {
-        args[n++] = "-drive";
-            sdCardParam =
-                StringFormat("index=%d,id=sdcard,format=raw,file=%s",
-                             driveIndex++, hw->hw_sdCard_path);
-        args[n++] = sdCardParam.c_str();
-        args[n++] = "-device";
-        sdCardDevice =
-                StringFormat("%s,drive=sdcard", kTarget.storageDeviceType);
-        args[n++] = sdCardDevice.c_str();
+    /*
+     * add partition parameters with the seqeuence
+     * pre-defined in targetInfo.imagePartitionTypes
+     */
+    int s;
+    int drvIndex = 0;
+    for (s = 0; s < kMaxPartitions; s++) {
+        makePartitionCmd(args, &n, &drvIndex, hw, kTarget.imagePartitionTypes[s]);
     }
-
-    // Data partition.
-    args[n++] = "-drive";
-    String userDataParam =
-            StringFormat("index=%d,id=userdata,file=%s",
-                         driveIndex++, hw->disk_dataPartition_path);
-    args[n++] = userDataParam.c_str();
-    args[n++] = "-device";
-    String userDataDevice =
-            StringFormat("%s,drive=userdata", kTarget.storageDeviceType);
-    args[n++] = userDataDevice.c_str();
-
-    // Cache partition.
-    args[n++] = "-drive";
-    String cacheParam =
-            StringFormat("index=%d,id=cache,file=%s",
-                         driveIndex++, hw->disk_cachePartition_path);
-    args[n++] = cacheParam.c_str();
-    args[n++] = "-device";
-    String cacheDevice =
-            StringFormat("%s,drive=cache", kTarget.storageDeviceType);
-    args[n++] = cacheDevice.c_str();
-
-    // System partition.
-    args[n++] = "-drive";
-    String systemParam =
-            StringFormat("index=%d,id=system,file=%s",
-                         driveIndex++, hw->disk_systemPartition_initPath);
-    args[n++] = systemParam.c_str();
-    args[n++] = "-device";
-    String systemDevice =
-            StringFormat("%s,drive=system", kTarget.storageDeviceType);
-    args[n++] = systemDevice.c_str();
 
     // Network
     args[n++] = "-netdev";
