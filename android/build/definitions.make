@@ -282,3 +282,21 @@ $$(RCC_SRC): $$(SRC) $$(QT_RCC_TOOL)
 
 $$(eval $$(call compile-generated-cxx-source,$$(RCC_SRC)))
 endef
+
+# Generate and compit a Qt .i source file through the 'uic' tool.
+# NOTE: This expects QT_UIC_TOOL to be defined.
+define compile-qt-uic-source
+SRC := $(1)
+UIC_SRC := $$(LOCAL_OBJS_DIR)/ui_$$(notdir $$(SRC:%.ui=%.h))
+ifeq (,$$(strip $$(QT_UIC_TOOL)))
+$$(error QT_UIC_TOOL is not defined when trying to generate $$(UIC_SRC) !!)
+endif
+$$(UIC_SRC): PRIVATE_SRC := $$(SRC)
+$$(UIC_SRC): PRIVATE_DST := $$(UIC_SRC)
+$$(UIC_SRC): $$(SRC) $$(QT_UIC_TOOL)
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	@echo "Qt uic: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
+	$(hide) $$(QT_UIC_TOOL) -o $$(PRIVATE_DST) -g cpp $$(PRIVATE_SRC)
+
+LOCAL_GENERATED_SOURCES += $$(UIC_SRC)
+endef

@@ -293,6 +293,10 @@ ifdef EMULATOR_USE_QT
     QT_TOP64_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-x86_64
     QT_MOC_TOOL := $(QT_TOP64_DIR)/bin/moc
     QT_RCC_TOOL := $(QT_TOP64_DIR)/bin/rcc
+    # Special-case: the 'uic' tool depends on Qt5Core: always ensure that the
+    # version that is being used is from the prebuilts directory. Otherwise
+    # the executable may fail to start due to dynamic linking problems.
+    QT_UIC_TOOL := LD_LIBRARY_PATH=$(QT_TOP64_DIR)/lib $(QT_TOP64_DIR)/bin/uic
 
     EMULATOR_QT_LIBS := Qt5Widgets Qt5Gui Qt5Core
     EMULATOR_QT_LDLIBS := $(foreach lib,$(EMULATOR_QT_LIBS),-l$(lib))
