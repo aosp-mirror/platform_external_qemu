@@ -293,6 +293,11 @@ ifdef EMULATOR_USE_QT
     QT_TOP64_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-x86_64
     QT_MOC_TOOL := $(QT_TOP64_DIR)/bin/moc
     QT_RCC_TOOL := $(QT_TOP64_DIR)/bin/rcc
+    # Special-case: the 'uic' tool depends on Qt5Core: always ensure that the
+    # version that is being used is from the prebuilts directory. Otherwise
+    # the executable may fail to start due to dynamic linking problems.
+    QT_UIC_TOOL_LDPATH := $(QT_TOP64_DIR)/lib
+    QT_UIC_TOOL := $(QT_TOP64_DIR)/bin/uic
 
     EMULATOR_QT_LIBS := Qt5Widgets Qt5Gui Qt5Core
     EMULATOR_QT_LDLIBS := $(foreach lib,$(EMULATOR_QT_LIBS),-l$(lib))
@@ -354,6 +359,7 @@ LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
+LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
@@ -363,6 +369,7 @@ LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
+LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 

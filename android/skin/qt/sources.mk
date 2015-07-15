@@ -20,3 +20,6 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
 
 ANDROID_SKIN_QT_RESOURCES := \
     android/skin/qt/resources.qrc \
+
+ANDROID_SKIN_QT_UI_SRC_FILES := \
+    android/skin/qt/battery.ui \
