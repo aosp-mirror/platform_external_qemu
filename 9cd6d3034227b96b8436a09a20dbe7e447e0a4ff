@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "b8fdf6c1_a84c1346",
+        "filename": "android/scripts/build-e2fsprogs.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-15T19:32:53Z",
+      "side": 1,
+      "message": "nit: get rid of trailing spaces.",
+      "revId": "9cd6d3034227b96b8436a09a20dbe7e447e0a4ff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "18f0c2db_f390caa4",
         "filename": "android/scripts/build-e2fsprogs.sh",
         "patchSetId": 4
