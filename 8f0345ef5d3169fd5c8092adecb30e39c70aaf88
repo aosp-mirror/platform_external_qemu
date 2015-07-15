@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78f7fee1_c6298494",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-15T16:07:58Z",
+      "side": 1,
+      "message": "s/gets/get/",
+      "revId": "8f0345ef5d3169fd5c8092adecb30e39c70aaf88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3837466d_4111d206",
+        "filename": "android/build/definitions.make",
+        "patchSetId": 1
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-15T16:07:58Z",
+      "side": 1,
+      "message": "s/compit/compile/\ns/.i/.ui/",
+      "revId": "8f0345ef5d3169fd5c8092adecb30e39c70aaf88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "183e024a_20ccca58",
+        "filename": "android/build/definitions.make",
+        "patchSetId": 1
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-15T16:07:58Z",
+      "side": 1,
+      "message": "remove \u0027-g cpp\u0027",
+      "revId": "8f0345ef5d3169fd5c8092adecb30e39c70aaf88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
