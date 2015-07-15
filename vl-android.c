@@ -71,6 +71,7 @@
 #include "android/utils/socket_drainer.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/tempfile.h"
+#include "android/utils/win32_cmdline_quote.h"
 #include "android/wear-agent/android_wear_agent.h"
 #include "android/display-core.h"
 #include "android/utils/timezone.h"
@@ -78,6 +79,7 @@
 #include "android/opengles.h"
 #include "android/opengl/emugl_config.h"
 #include "android/multitouch-screen.h"
+#include "android/main-common.h"
 #include "exec/hwaddr.h"
 #include "android/tcpdump.h"
 
@@ -3127,6 +3129,18 @@ int main(int argc, char **argv, char **envp)
                            android_hw->disk_systemPartition_path,
                            android_hw->disk_systemPartition_initPath);
 
+    /* For ext4, to extend an internal partition to more than the default size
+     * you need to initialize userdata-qemu.img to the desired size and restore
+     * it after moving the data in - yaffs is resilient enough for this not to
+     * matter
+    */
+    if(android_op_wipe_data &&
+            userdata_partition_type == ANDROID_PARTITION_TYPE_EXT4) {
+        androidPartitionType_makeEmptyFile(userdata_partition_type,
+                                           android_hw->disk_dataPartition_size,
+                                           android_hw->disk_dataPartition_path);
+    }
+
     /* Initialize data partition image */
     android_nand_add_image("userdata",
                            userdata_partition_type,
@@ -3134,6 +3148,101 @@ int main(int argc, char **argv, char **envp)
                            android_hw->disk_dataPartition_size,
                            android_hw->disk_dataPartition_path,
                            android_hw->disk_dataPartition_initPath);
+
+    /* Extend the userdata-qemu.img to the desired size - resize2fs can only
+     * extend partitions to fill available space
+    */
+    if(android_op_wipe_data &&
+            userdata_partition_type == ANDROID_PARTITION_TYPE_EXT4) {
+         #ifdef _WIN32
+            char executable[PATH_MAX];
+            if(snprintf(executable, PATH_MAX, "%s\\bin\\resize2fs.exe",
+                        find_datadir(argv[0])) < 0) {
+                fprintf(stderr, "ERROR: Resize2fs command line too long: %s", executable);
+                return 1;
+            }
+
+            const size_t ARGSLEN = PATH_MAX * 2 + 1;
+            char args[ARGSLEN];
+            if (snprintf(args, ARGSLEN, "resize2fs.exe -f -p %s %uM",
+                         win32_cmdline_quote(android_hw->disk_dataPartition_path),
+                         convertBytesToMB(android_hw->disk_dataPartition_size)) < 0) {
+                fprintf(stderr, "ERROR: Resize2fs command line too long: %s", args);
+                return 1;
+            }
+
+            STARTUPINFO           startup;
+            PROCESS_INFORMATION   pinfo;
+            ZeroMemory(&startup, sizeof(startup));
+            ZeroMemory(&pinfo, sizeof(pinfo));
+            startup.cb = sizeof(startup);
+            BOOL success = CreateProcess(
+                win32_cmdline_quote(executable),              /* program path */
+                args,                                    /* command line args */
+                NULL,                    /* process handle is not inheritable */
+                NULL,                     /* thread handle is not inheritable */
+                FALSE,                       /* no, don't inherit any handles */
+                CREATE_NO_WINDOW,   /* the new process doesn't have a console */
+                NULL,                       /* use parent's environment block */
+                NULL,                      /* use parent's starting directory */
+                &startup,                   /* startup info, i.e. std handles */
+                &pinfo);
+
+            if (!success) {
+                fprintf(stderr, "ERROR: CreateProcess in vl-android failed\n");
+            } else {
+                WaitForSingleObject(pinfo.hProcess, INFINITE);
+                DWORD exitCode;
+                if (GetExitCodeProcess(pinfo.hProcess, &exitCode) && exitCode != 0) {
+                    fprintf(stderr, "ERROR: Resize2fs.exe failed\n");
+                }
+
+                CloseHandle(pinfo.hProcess);
+                CloseHandle(pinfo.hThread);
+            }
+        #else
+            int status;
+            pid_t pid;
+            pid_t child = fork();
+
+            if (child < 0) {
+                fprintf(stderr,"ERROR: Vl-android fork failed!\n");
+                return 0;
+            }
+            if (child == 0) {
+                char size_in_MB[50];
+                snprintf(&size_in_MB, 50, "%uM",
+                         convertBytesToMB(android_hw->disk_dataPartition_size));
+
+                char executable[PATH_MAX];
+            #if defined(__x86_64__)
+                char * binDir = "bin64";
+            #else
+                char * binDir = "bin";
+            #endif
+                if(snprintf(executable, PATH_MAX, "%s/%s/resize2fs",
+                            find_datadir(argv[0]), binDir) < 0) {
+                    fprintf(stderr, "ERROR: Resize2fs command line too long\n");
+                    return 1;
+                }
+
+                execlp(executable,
+                       executable,
+                       "-f",
+                       android_hw->disk_dataPartition_path,
+                       &size_in_MB,
+                       NULL);
+                exit(-1);
+            }
+
+            while ((pid=waitpid(-1, &status, 0)) != child) {
+                if (pid == -1) {
+                    fprintf(stderr, "ERROR: vl-android waitpid failed!\n");
+                    return 1;
+                }
+            }
+        #endif
+    }
 
     /* Initialize cache partition image, if any. Its type depends on the
      * kernel version. For anything >= 3.10, it must be EXT4, or
