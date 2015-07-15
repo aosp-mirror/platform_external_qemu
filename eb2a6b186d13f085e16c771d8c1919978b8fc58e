@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "18f0c2db_1001043a",
+        "filename": "android/dependencies/PACKAGES.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-15T08:27:00Z",
+      "side": 1,
+      "message": "nit: Can you remove the tabs here?",
+      "revId": "eb2a6b186d13f085e16c771d8c1919978b8fc58e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38e906fb_b1d6c033",
+        "filename": "android/scripts/build-e2fsprogs.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-15T08:27:00Z",
+      "side": 1,
+      "message": "nit: Can you update the comment here and explain why windows-x86_64 is not supported?",
+      "revId": "eb2a6b186d13f085e16c771d8c1919978b8fc58e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8470aeb_9ed65d34",
+        "filename": "android/scripts/build-e2fsprogs.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-15T08:27:00Z",
+      "side": 1,
+      "message": "nit: please remove the trailing whitespace :)",
+      "revId": "eb2a6b186d13f085e16c771d8c1919978b8fc58e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8470aeb_bedb195b",
+        "filename": "android/scripts/build-e2fsprogs.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-15T08:27:00Z",
+      "side": 1,
+      "message": "nit: You might want to use a terminating \\ here",
+      "revId": "eb2a6b186d13f085e16c771d8c1919978b8fc58e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18f0c2db_70fa90b4",
+        "filename": "android/scripts/build-e2fsprogs.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-15T08:27:00Z",
+      "side": 1,
+      "message": "nit: To avoid surprises, it\u0027s better to define DEP and DSTDIR as local variables for this function. As in:\n\n    local DEP DSTDIR\n    DSTDIR\u003d$1\n    ...",
+      "revId": "eb2a6b186d13f085e16c771d8c1919978b8fc58e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18f0c2db_50f78cca",
+        "filename": "android/scripts/build-e2fsprogs.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-15T08:27:00Z",
+      "side": 1,
+      "message": "Generally speaking, try to quote directory paths in case they contain spaces (something a lot more likely on Windows than Linux or OSX).\n\nAlso, so just you know, posix _direct_ assignments don\u0027t need quoting, i.e. a line like:\n\n   X\u003d$Y\n\nwill always work as expected, even if $Y contains spaces. The issue comes only when expanding $Y as non-assigment expression parameters (writing portable shell scripts is hard). And since we\u0027re talking about that:\n\n  local X\u003d$Y\n\nwill not always work as expected if $Y contains spaces, depending on your shell implementation (some of them treat \u0027local\u0027 as a builtin keyword, and then the expression above is seen as a direct assignment; some others treat \u0027local\u0027 as a special function call, huuu), so this line is\nbetter rewritten as:\n\n  local X\u003d\"$Y\"\n\nor:\n\n   local X\n    X\u003d$Y",
+      "revId": "eb2a6b186d13f085e16c771d8c1919978b8fc58e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8fdf6c1_0501d239",
+        "filename": "android/scripts/build-e2fsprogs.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-15T08:27:00Z",
+      "side": 1,
+      "message": "Do you want to print a warning/panic message for windows-x86_64 at this point?",
+      "revId": "eb2a6b186d13f085e16c771d8c1919978b8fc58e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
