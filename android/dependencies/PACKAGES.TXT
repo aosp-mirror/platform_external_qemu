@@ -19,9 +19,5 @@ SHA1=20e061c463bed415051f0f89e968e331a2078551    URL=http://xorg.freedesktop.org
 SHA1=79638cf00584b08fd6eeb1e73ea69b331561e7f6    URL=http://llvm.org/releases/3.5.1/llvm-3.5.1.src.tar.xz
 SHA1=53ec316946bce7b63327f73c40ac9be1f50e31b2    URL=ftp://ftp.freedesktop.org/pub/mesa/10.4.2/MesaLib-10.4.2.tar.bz2  SRCDIR=Mesa-10.4.2 PATCHES=MesaLib-10.4.2-patches.tar.xz
 
-# Qt 5.5
-SHA1=3d6734bc6d00e1017c1db40d68309997bdf7bf6f    URL=http://download.qt.io/archive/qt/5.5/5.5.0/submodules/qtbase-opensource-src-5.5.0.tar.xz BASENAME=qt-base SRCDIR=qtbase-opensource-src-5.5.0
-SHA1=9238a1aedd126f84a73014c12b6391267238da0a    URL=http://download.qt.io/archive/qt/5.5/5.5.0/submodules/qtsvg-opensource-src-5.5.0.tar.xz  BASENAME=qt-svg  SRCDIR=qtsvg-opensource-src-5.5.0 DSTDIR=qtbase-opensource-src-5.5.0/qtsvg
-
 # e2fsprogs
 SHA1=2d008b9902a169bd6767058ba98fce334328c763    URL=https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.42.13/e2fsprogs-1.42.13.tar.xz PATCHES=e2fsprogs-1.42.13-patches.tar.xz
