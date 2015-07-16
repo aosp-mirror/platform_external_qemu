@@ -16,6 +16,160 @@
       "revId": "c33eb3b79e8e6f9ec28c2de735ffbd4becbf25c1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38e906fb_94ecca41",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3157,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-16T11:28:07Z",
+      "side": 1,
+      "message": "I would prefer if you could move all this code under its own source file (e.g. android/ext4_resize.c or android/ext4_resize.cpp, and provide android/ext4_resize.h to declare the function(s) in here), the reason for this is that eventually, all this processing should happen in the top-level \u0027emulator\u0027 launcher process, to ensure that the same feature is supported by both the classic and the qemu2 codebases.\n\nI already plan to separate the partition management code from vl-android.c and hw/android/goldfish/nand.c to its own sources in the same way.\n\nAlso this means dropping qemu-specific dependencies, e.g. try to use android::base::System::get()-\u003efindBundledExecutable(\"resize2fs\"); to get the path to the executable. I know that for now, there are only Windows executable under bin/, and nothing under bin64/, but this can be solved by copying the 32-bit binaries into the bin64/ folder in android-rebuild.sh\n\nPing me if this isn\u0027t clear.",
+      "parentUuid": "78f7fee1_a4478e20",
+      "revId": "c33eb3b79e8e6f9ec28c2de735ffbd4becbf25c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8470aeb_21b04878",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3161,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-16T11:28:07Z",
+      "side": 1,
+      "message": "nit: please add a \\n at the end of line.\n\nnit2: On Windows, snprintf() does *not* zero-terminate the buffer in case of overflow [1]. Yes, this is insane, but it means that, if the result is negative, you should either add the zero manually, as in:\n\n    executable[PATH_MAX - 1] \u003d \u0027\\0\u0027;\n    fprintf(stderr, \"....%s\\n\", executable);\n\nOr use length-based format specifier:\n\n    fprintf(stderr, \"...%.*s\\n\", PATH_MAX, executable);\n\n[1] https://msdn.microsoft.com/en-us/library/aa298594(v\u003dvs.60).aspx",
+      "revId": "c33eb3b79e8e6f9ec28c2de735ffbd4becbf25c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38e906fb_74d28679",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3170,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-16T11:28:07Z",
+      "side": 1,
+      "message": "nit: missing trailing \\n too.",
+      "revId": "c33eb3b79e8e6f9ec28c2de735ffbd4becbf25c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38e906fb_34dcfe86",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3192,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-16T11:28:07Z",
+      "side": 1,
+      "message": "It might be useful to print a human-friendly error message here, the right way to do it is:\n\n  char *pstr \u003d NULL;\n  FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM |\n                FORMAT_MESSAGE_ALLOCATE_BUFFER,\n                NULL,\n                GetLastError(),\n                0,\n                (LPTSTR)\u0026pstr,\n                2,\n                NULL);\n  // print error message with |pstr| here.\n  LocalFree(pstr);\n\nSadly, qemu doesn\u0027t provide a helper function to do that, and reimplements it throughout its source code base.",
+      "revId": "c33eb3b79e8e6f9ec28c2de735ffbd4becbf25c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8470aeb_41ad541f",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3197,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-16T11:28:07Z",
+      "side": 1,
+      "message": "It might be a good idea to print the exit code here :)",
+      "revId": "c33eb3b79e8e6f9ec28c2de735ffbd4becbf25c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18f0c2db_b6735091",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3209,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-16T11:28:07Z",
+      "side": 1,
+      "message": "It might be useful to use strerror(errno) to get a better understanding of the failure.",
+      "revId": "c33eb3b79e8e6f9ec28c2de735ffbd4becbf25c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18f0c2db_765e08f4",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3214,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-16T11:28:07Z",
+      "side": 1,
+      "message": "nit: should be size_in_MB, not \u0026size_in_MB.\n\nIn general, it\u0027s also typically better to avoid repeating hard-coded constants, i.e. use:\n\n  char array[ARRAY_SIZE];\n  snprintf(array, sizeof(array), ....);\n\ninstead of:\n\n  char array[ARRAY_SIZE];\n  snprintf(array, ARRAY_SIZE, ....);\n\nit avoids trivial but deadly errors when someone changes the size of the array but forgets other places where it is used.",
+      "revId": "c33eb3b79e8e6f9ec28c2de735ffbd4becbf25c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8fdf6c1_6b105557",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3238,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-16T11:28:07Z",
+      "side": 1,
+      "message": "nit: spaces around \u003d, i.e.:\n\n    while ((pid \u003d waitpid(-1, \u0026status, 0)) !\u003d child) {\n       ...\n    }",
+      "revId": "c33eb3b79e8e6f9ec28c2de735ffbd4becbf25c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8470aeb_01a0ac26",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3242,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-16T11:28:07Z",
+      "side": 1,
+      "message": "Do you want to check the exit code here?",
+      "revId": "c33eb3b79e8e6f9ec28c2de735ffbd4becbf25c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
