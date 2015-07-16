@@ -21,3 +21,14 @@ SHA1=53ec316946bce7b63327f73c40ac9be1f50e31b2    URL=ftp://ftp.freedesktop.org/p
 
 # e2fsprogs
 SHA1=2d008b9902a169bd6767058ba98fce334328c763    URL=https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.42.13/e2fsprogs-1.42.13.tar.xz PATCHES=e2fsprogs-1.42.13-patches.tar.xz
+# Windows distributions of e2fsprogs
+SHA1=5f8d9badb74cd2979ea163cf14e5ceb31f0a4923    URL=https://mirrors.kernel.org/sourceware/cygwin/x86/release/e2fsprogs/e2fsprogs-1.42.12-1.tar.xz BASENAME=e2fsprogs-windows
+SHA1=c90c00a5818aafdd4c3d55c7eb37d268d86154c9    URL=https://mirrors.kernel.org/sourceware/cygwin/x86/release/cygwin/cygwin-2.0.4-1.tar.xz BASENAME=cygwin
+SHA1=951446cb21cf695bbdb7d014ae63388ec33977a2    URL=https://mirrors.kernel.org/sourceware/cygwin/x86/release/e2fsprogs/libcom_err2/libcom_err2-1.42.12-2.tar.xz BASENAME=libcom_err2
+SHA1=907dfb79bcc50c00da9f2863563893dab640d870    URL=https://mirrors.kernel.org/sourceware/cygwin/x86/release/e2fsprogs/libe2p2/libe2p2-1.42.12-2.tar.xz BASENAME=libe2p2
+SHA1=8b855cbd3b499d7d33bcc1c68a1a86c9546c80bf    URL=http://mirrors.sonic.net/cygwin/x86/release/util-linux/libblkid1/libblkid1-2.25.2-1.tar.xz BASENAME=libblkid1
+SHA1=8004e216a3745bc564e07542ee71d959f707815b    URL=http://mirrors.sonic.net/cygwin/x86/release/util-linux/libuuid1/libuuid1-2.25.2-2.tar.xz BASENAME=libuuid1
+SHA1=73ab0a008adf2b6a87fed598db1a9df5d3179674    URL=https://mirrors.kernel.org/sourceware/cygwin/x86/release/e2fsprogs/libext2fs2/libext2fs2-1.42.12-2.tar.xz BASENAME=libext2fs2
+SHA1=b695a0a5c8ebac0763569670a875da2531994d66    URL=https://mirrors.kernel.org/sourceware/cygwin/x86/release/gcc/libgcc1/libgcc1-4.9.3-1.tar.xz BASENAME=libgcc1
+SHA1=89bcd3a153152362e1931bce0af8d1cb98696287    URL=https://mirrors.kernel.org/sourceware/cygwin/x86/release/libiconv/libiconv2/libiconv2-1.14-3.tar.xz  BASENAME=libiconv2
+SHA1=876f10834f6569ae94772ba7ecf430d803db26eb    URL=https://mirrors.kernel.org/sourceware/cygwin/x86/release/gettext/libintl8/libintl8-0.19.4-1.tar.xz BASENAME=libintl8

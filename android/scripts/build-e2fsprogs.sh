@@ -23,11 +23,15 @@ shell_import utils/option_parser.shi
 shell_import utils/package_list_parser.shi
 shell_import utils/package_builder.shi
 
-# This script cannot build Windows binaries on Linux, so limit the default
-# host systems list to linux ones.
+# This script cannot build windows-x86_64 binaries - only 32-bit support
+# is achievable as the 64-bit distribution of e2fsprogs requires a newer
+# version of a dll dependency than is available.  The available dependencies
+# (version 1.42.7) do not export the ext2fs_close_free function that was
+# added to a later version of e2fsprogs (at version 1.42.11), and no early
+# enough executable version of e2fsprogs is readily available from Cygwin.
 case $(get_build_os) in
     linux)
-        DEFAULT_HOST_SYSTEMS="linux-x86,linux-x86_64"
+        DEFAULT_HOST_SYSTEMS="linux-x86,linux-x86_64,windows-x86"
         ;;
 esac
 
@@ -86,6 +90,41 @@ unpack_package_source () {
     fi
 }
 
+# For windows we have already downloaded the executables
+# so just uncompress them to the correct directory in
+# preparation for android-rebuild.sh.
+# $1: Destination directory of dependencies
+WINDOWS_DEPENDENCIES="e2fsprogs-windows cygwin libcom_err2\
+    libe2p2 libblkid1 libuuid1 libext2fs2 libgcc1 libiconv2 libintl8"
+unpack_windows_dependencies () {
+    local DEP DSTDIR
+    DSTDIR=$1
+    for DEP in $WINDOWS_DEPENDENCIES; do
+        run mkdir -p "$BUILD_SRC_DIR/$(package_list_get_unpack_src_dir $DEP)"
+        unpack_package_source "$DEP"
+    done
+
+    copy_directory_files \
+                        "$BUILD_SRC_DIR/usr/bin" \
+                        "$DSTDIR/sbin" \
+                        cygblkid-1.dll \
+                        cygcom_err-2.dll \
+                        cyge2p-2.dll \
+                        cygext2fs-2.dll \
+                        cyggcc_s-1.dll \
+                        cygiconv-2.dll \
+                        cygintl-8.dll \
+                        cyguuid-1.dll \
+                        cygwin1.dll
+
+    copy_directory_files \
+                        "$BUILD_SRC_DIR/usr" \
+                        "$DSTDIR" \
+                        sbin/e2fsck.exe \
+                        sbin/resize2fs.exe \
+                        sbin/tune2fs.exe
+}
+
 # $1: Package basename (e.g. 'libpthread-stubs-0.3')
 # $2+: Extra configuration options.
 build_package () {
@@ -100,7 +139,7 @@ build_package () {
         case $SYSTEM in
             darwin*)
                 # Required for proper build on Darwin!
-                build_disable_verbose_install
+                builder_disable_verbose_install
                 ;;
         esac
         builder_build_autotools_package \
@@ -166,16 +205,7 @@ fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     (
-        case $SYSTEM in
-            windows*)
-                echo "ERROR: Sorry, cannot build Windows binaries with this script!" >&2
-                echo "Please use Cygwin on Windows to build e2fsprogs instead!"
-                exit 1
-                ;;
-            *)
-                builder_prepare_for_host_no_binprefix "$SYSTEM" "$AOSP_DIR"
-                ;;
-        esac
+        builder_prepare_for_host_no_binprefix "$SYSTEM" "$AOSP_DIR"
 
         dump "$(builder_text) Building e2fsprogs"
 
@@ -188,18 +218,29 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --disable-testio-debug \
                 --disable-rpath \
 
-        build_package e2fsprogs $CONFIGURE_FLAGS
+        case $SYSTEM in
+            windows-x86)
+                unpack_windows_dependencies "$INSTALL_DIR/$SYSTEM"
+                ;;
+            windows-x86_64)
+                dump "WARNING: windows-x86_64 isn't supported with this script!"
+                ;;
+            *)
+                build_package e2fsprogs $CONFIGURE_FLAGS
 
-        # Copy binaries necessary for the build itself as well as static
-        # libraries.
-        copy_directory_files \
-                "$(builder_install_prefix)" \
-                "$INSTALL_DIR/$SYSTEM" \
-                sbin/e2fsck \
-                sbin/fsck.ext4 \
-                sbin/mkfs.ext4 \
-                sbin/resize2fs \
-                sbin/tune2fs \
+                # Copy binaries necessary for the build itself as well as static
+                # libraries.
+                copy_directory_files \
+                        "$(builder_install_prefix)" \
+                        "$INSTALL_DIR/$SYSTEM" \
+                        sbin/e2fsck \
+                        sbin/fsck.ext4 \
+                        sbin/mkfs.ext4 \
+                        sbin/resize2fs \
+                        sbin/tune2fs \
+                ;;
+        esac
+
 
     ) || panic "[$SYSTEM] Could not build e2fsprogs!"
 
