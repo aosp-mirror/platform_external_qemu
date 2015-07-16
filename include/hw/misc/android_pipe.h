@@ -230,6 +230,7 @@ extern void android_throttle_init(void);
 extern void android_adb_dbg_backend_init(void);
 extern void android_adb_backend_init(void);
 extern void android_sensors_init(void);
+extern void android_net_pipes_init(void);
 
 extern bool adb_server_init(int port);
 

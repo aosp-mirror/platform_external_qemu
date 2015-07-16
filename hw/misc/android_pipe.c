@@ -788,6 +788,7 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     android_throttle_init();
     android_sensors_init();
     android_boot_properties_init();
+    android_net_pipes_init();
 
     /* TODO: This may be a complete hack and there may be beautiful QOM ways
      * to accomplish this.

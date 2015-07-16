@@ -15,6 +15,7 @@ common-obj-$(CONFIG_A9SCU) += a9scu.o
 common-obj-$(CONFIG_ARM11SCU) += arm11scu.o
 
 obj-$(CONFIG_ANDROID_PIPE) += android_pipe.o
+obj-$(CONFIG_ANDROID_PIPE) += android_pipe_opengles.o
 obj-$(CONFIG_ANDROID_PIPE) += android_pipe_test.o
 obj-$(CONFIG_ANDROID_PIPE) += android_adb_dbg.o
 obj-$(CONFIG_ANDROID_PIPE) += android_adb.o
