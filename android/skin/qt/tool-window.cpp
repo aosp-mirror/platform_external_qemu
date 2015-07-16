@@ -12,10 +12,11 @@
 
 #include <QPushButton>
 
-#include "android/skin/qt/emulator-window.h"
-#include "android/skin/qt/tool-window.h"
+#include "ui_battery.h"
 #include "ui_tool-window.h"
 
+#include "android/skin/qt/emulator-window.h"
+#include "android/skin/qt/tool-window.h"
 
 ToolWindow::ToolWindow(EmulatorWindow *window) :
     QFrame(window),
