@@ -75,6 +75,15 @@ local-library-path = $(OBJS_DIR)/$(call local-bits-choice,libs,libs64)/$(1).a
 local-executable-path = $(OBJS_DIR)/$(1)$(call local-host-tool,EXEEXT)
 local-shared-library-path = $(OBJS_DIR)/$(call local-bits-choice,lib,lib64)/$(1)$(call local-host-tool,DLLEXT)
 
+# Expand to a shell statement that changes the runtime library search path.
+# Note that this is only used for Qt-related stuff, and on Windows, the
+# Windows libraries are placed under bin/ instead of lib/ so there is no
+# point in changing the PATH variable.
+set-host-library-search-path = $(call set-host-library-search-path-$(HOST_OS),$1)
+set-host-library-search-path-linux = LD_LIBRARY_PATH=$1
+set-host-library-search-path-darwin = DYLD_LIBRARY_PATH=$1
+set-host-library-search-path-windows =
+
 # Toolchain control support.
 # It's possible to switch between the regular toolchain and the host one
 # in certain cases.
@@ -281,4 +290,25 @@ $$(RCC_SRC): $$(SRC) $$(QT_RCC_TOOL)
 	$(hide) $$(QT_RCC_TOOL) -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
 
 $$(eval $$(call compile-generated-cxx-source,$$(RCC_SRC)))
+endef
+
+# Process a Qt .ui source file through the 'uic' tool to generate a header.
+# NOTE: This expects QT_UIC_TOOL and QT_UIC_TOOL_LDPATH to be defined.
+define compile-qt-uic-source
+SRC := $(1)
+UIC_SRC := $$(LOCAL_OBJS_DIR)/ui_$$(notdir $$(SRC:%.ui=%.h))
+ifeq (,$$(strip $$(QT_UIC_TOOL)))
+$$(error QT_UIC_TOOL is not defined when trying to generate $$(UIC_SRC) !!)
+endif
+ifeq (,$$(strip $$(QT_UIC_TOOL_LDPATH)))
+$$(error QT_UIC_TOOL_LDPATH is not defined when trying to generate $$(UIC_SRC) !!)
+endif
+$$(UIC_SRC): PRIVATE_SRC := $$(SRC)
+$$(UIC_SRC): PRIVATE_DST := $$(UIC_SRC)
+$$(UIC_SRC): $$(SRC) $$(QT_UIC_TOOL)
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	@echo "Qt uic: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
+	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_UIC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
+
+LOCAL_GENERATED_SOURCES += $$(UIC_SRC)
 endef

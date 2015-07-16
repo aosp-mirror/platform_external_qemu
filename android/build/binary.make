@@ -47,6 +47,10 @@ $(foreach src,$(LOCAL_QT_RESOURCES), \
     $(eval $(call compile-qt-resources,$(src))) \
 )
 
+$(foreach src,$(LOCAL_QT_UI_SRC_FILES), \
+    $(eval $(call compile-qt-uic-source,$(src))) \
+)
+
 $(foreach src,$(LOCAL_GENERATED_C_SOURCES), \
     $(eval $(call compile-generated-c-source,$(src))) \
 )
