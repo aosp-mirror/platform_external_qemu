@@ -16,6 +16,8 @@ common-obj-$(CONFIG_CURSES) += curses.o
 common-obj-$(CONFIG_VNC) += $(vnc-obj-y)
 common-obj-$(CONFIG_GTK) += gtk.o x_keymap.o
 
+common-obj-$(CONFIG_ANDROID_PIPE) += android-opengles.o
+
 sdl.mo-objs := sdl.o sdl_zoom.o sdl2.o
 sdl.mo-cflags := $(SDL_CFLAGS)
 
