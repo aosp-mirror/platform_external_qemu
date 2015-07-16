@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d8470aeb_218928aa",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-16T11:33:13Z",
+      "side": 1,
+      "message": "nit: please call it kMaxTargetQemuParams.",
+      "revId": "6bab3b8f84321a0ee4a33e1b3b6233b30d22da18",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "985112ab_bfec7341",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-16T11:33:13Z",
+      "side": 1,
+      "message": "nit: s/specifc for/specific to/\n\nAlso please specify it\u0027s a NULL-terminated list of string pointers of at most kMaxTargetQemuParams",
+      "revId": "6bab3b8f84321a0ee4a33e1b3b6233b30d22da18",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8470aeb_4186b49b",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 534,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-16T11:33:13Z",
+      "side": 1,
+      "message": "Please change to:\n\n  for (int idx \u003d 0; kTarget.qemuExtraArgs[idx] !\u003d NULL; ++idx) {\n      args[n++] \u003d kTarget.qemuExtraArgs[idx];\n  }",
+      "revId": "6bab3b8f84321a0ee4a33e1b3b6233b30d22da18",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
