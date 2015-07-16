@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78f7fee1_a4478e20",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3157,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-07-16T00:49:54Z",
+      "side": 1,
+      "message": "Why not use system() to hide OS differences?",
+      "revId": "c33eb3b79e8e6f9ec28c2de735ffbd4becbf25c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
