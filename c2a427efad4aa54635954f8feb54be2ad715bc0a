@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "188c4286_79713b55",
+        "filename": "android/ext4_resize.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-17T14:38:36Z",
+      "side": 1,
+      "message": "Is (newSize \u003d\u003d 0) OK?",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f88e8e7f_a3bd3205",
+        "filename": "android/ext4_resize.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-17T14:38:36Z",
+      "side": 1,
+      "message": "snprintf doesn\u0027t count the terminator, so I think you need\ncopied \u003e\u003d sizeof() - 1",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f8ba0e36_efbdc104",
         "filename": "android/ext4_resize.cpp",
         "patchSetId": 2
@@ -13,6 +47,40 @@
       "writtenOn": "2015-07-17T07:37:58Z",
       "side": 1,
       "message": "technically, you are supposed to call free() on the result of win32_cmdline_quote(), so your code leads to two minor memory leaks.\n\nIt\u0027s possible to fix this by using android::base::Win32Utils::quoteCommandLine() instead, since it returns an android::base::String. It\u0027s under android/base/system/Win32Utils.h, and I recommend you use it.",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "787a9e34_f4544e27",
+        "filename": "android/ext4_resize.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-17T14:38:36Z",
+      "side": 1,
+      "message": "Need a -1 here, too",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "386e667b_4f5ee1f3",
+        "filename": "android/ext4_resize.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-17T14:38:36Z",
+      "side": 1,
+      "message": "Do you want to use printErrors( ) here?",
       "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
