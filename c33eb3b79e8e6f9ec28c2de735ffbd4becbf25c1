@@ -106,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "787a9e34_0ec6abab",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3192,
+      "author": {
+        "id": 1074988
+      },
+      "writtenOn": "2015-07-17T00:38:58Z",
+      "side": 1,
+      "message": "I ended up creating a helper function to print error messages when the error is is errno/GetLastError() - would it be helpful to eventually make this into a utility function elsewhere and refactor the code a bit (or is it not worth it)?",
+      "parentUuid": "38e906fb_34dcfe86",
+      "revId": "c33eb3b79e8e6f9ec28c2de735ffbd4becbf25c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d8470aeb_41ad541f",
         "filename": "vl-android.c",
         "patchSetId": 1
