@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "f8d3ee93_c77ffe59",
+        "filename": "android/ext4_resize.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-17T15:29:23Z",
+      "side": 1,
+      "message": "The code is correct, if |copied| is equal to |sizeof(size_in_MB)| it means there was a truncation because snprintf() only wrote sizeof(size_in_MB) - 1 characters, followed by a \u0027\\0\u0027 (on Posix). On Windows, the function writes sizeof(size_in_MB) without a terminating \u0027\\0\u0027, but returns -1.",
+      "parentUuid": "f88e8e7f_a3bd3205",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f8ba0e36_efbdc104",
         "filename": "android/ext4_resize.cpp",
         "patchSetId": 2
@@ -70,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "18d1a28c_28334bb1",
+        "filename": "android/ext4_resize.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-17T15:29:23Z",
+      "side": 1,
+      "message": "Same here, this is correct.",
+      "parentUuid": "787a9e34_f4544e27",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "386e667b_4f5ee1f3",
         "filename": "android/ext4_resize.cpp",
         "patchSetId": 2
@@ -81,6 +117,24 @@
       "writtenOn": "2015-07-17T14:38:36Z",
       "side": 1,
       "message": "Do you want to use printErrors( ) here?",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38dae6a9_095be902",
+        "filename": "android/ext4_resize.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-17T15:29:23Z",
+      "side": 1,
+      "message": "printErrors() uses the value of errno or GetLastError(), which is probably 0 here, it\u0027s better not to use it in this case.",
+      "parentUuid": "386e667b_4f5ee1f3",
       "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
