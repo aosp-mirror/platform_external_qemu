@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8ba0e36_efbdc104",
+        "filename": "android/ext4_resize.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-17T07:37:58Z",
+      "side": 1,
+      "message": "technically, you are supposed to call free() on the result of win32_cmdline_quote(), so your code leads to two minor memory leaks.\n\nIt\u0027s possible to fix this by using android::base::Win32Utils::quoteCommandLine() instead, since it returns an android::base::String. It\u0027s under android/base/system/Win32Utils.h, and I recommend you use it.",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "58d79a7e_0ac59b7f",
+        "filename": "android/ext4_resize.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-17T07:37:58Z",
+      "side": 1,
+      "message": "nit: We don\u0027t use leading underscores for guard macros (technically these are always reserved for the language or runtime library), so ANDROID_EXT4_RESIZE_H should be good enough :)",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f8d3ee93_67d29247",
+        "filename": "android/ext4_resize.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-17T07:37:58Z",
+      "side": 1,
+      "message": "I think it might be worthwhile to return an error status/flag here, so that the caller can safely abort the emulator if the resize didn\u0027t happen properly (e.g. out of disk space).\n\nCan you specify if there are specific constraints on the value of |newSize| as well as the size of the new partition file? E.g. I remember that ext4 partition sizes must be a multiple of 128MB or some other large granular size. I would assume it is then important to retrieve the size of the new partition to properly setup NAND emulation after that.",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b817b6fa_75eb48ef",
+        "filename": "android/ext4_resize.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-07-17T07:37:58Z",
+      "side": 1,
+      "message": "nit: use a \u0027const char* partitionPath\u0027 here, there is no reason to expect a pointer to a mutable string.\n\nAlso rename \u0027newSize\u0027 to \u0027newByteSize\u0027 to make the units more explicit.",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
