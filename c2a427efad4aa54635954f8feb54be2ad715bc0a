@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "58823a52_06652a97",
+        "filename": "android/ext4_resize.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1074988
+      },
+      "writtenOn": "2015-07-17T21:44:30Z",
+      "side": 1,
+      "message": "replaced with a stricter check - but yes agreed!",
+      "parentUuid": "188c4286_79713b55",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f88e8e7f_a3bd3205",
         "filename": "android/ext4_resize.cpp",
         "patchSetId": 2
