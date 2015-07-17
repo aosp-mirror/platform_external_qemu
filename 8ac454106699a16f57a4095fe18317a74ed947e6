@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "987f5221_7bc5ab7e",
+        "filename": "vl-android.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3155,
+      "author": {
+        "id": 1074988
+      },
+      "writtenOn": "2015-07-17T21:44:30Z",
+      "side": 1,
+      "message": "I\u0027m not aborting upon failure here because while it wouldn\u0027t be great if the resize2fs failed, it\u0027s not catastrophic to the boot process either if the data partition size is off",
+      "revId": "8ac454106699a16f57a4095fe18317a74ed947e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
