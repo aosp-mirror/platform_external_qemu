@@ -271,7 +271,13 @@ if true; then
     # be replaced by a panic/fi in a future patch.
     echo "Copying e2fsprogs binaries."
     for E2FS_ARCH in x86 x86_64; do
-        E2FS_SRCDIR=$E2FSPROGS_DIR/$TARGET_OS-$E2FS_ARCH
+        # NOTE: in windows only 32-bit binaries are available, so we'll copy the
+        # 32-bit executables to the bin64/ directory to cover all our bases
+        case $TARGET_OS in
+            windows) E2FS_SRCDIR=$E2FSPROGS_DIR/$TARGET_OS-x86;;
+            *) E2FS_SRCDIR=$E2FSPROGS_DIR/$TARGET_OS-$E2FS_ARCH;;
+        esac
+
         case $E2FS_ARCH in
             x86) E2FS_DSTDIR=$OUT_DIR/bin;;
             x86_64) E2FS_DSTDIR=$OUT_DIR/bin64;;
