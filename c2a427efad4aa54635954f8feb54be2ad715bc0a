@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "987f5221_466576c0",
+        "filename": "android/ext4_resize.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-18T00:35:18Z",
+      "side": 1,
+      "message": "Agreed",
+      "parentUuid": "f8d3ee93_c77ffe59",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f8ba0e36_efbdc104",
         "filename": "android/ext4_resize.cpp",
         "patchSetId": 2
@@ -117,6 +135,24 @@
       "writtenOn": "2015-07-17T15:29:23Z",
       "side": 1,
       "message": "Same here, this is correct.",
+      "parentUuid": "787a9e34_f4544e27",
+      "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f88e8e7f_f8f6808a",
+        "filename": "android/ext4_resize.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-07-18T00:35:18Z",
+      "side": 1,
+      "message": "Agreed",
       "parentUuid": "787a9e34_f4544e27",
       "revId": "c2a427efad4aa54635954f8feb54be2ad715bc0a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
