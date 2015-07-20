@@ -306,6 +306,7 @@ EOF
             --disable-vhost-net \
             --disable-werror \
             --with-sdlabi=2.0 \
+            --enable-android \
             &&
 
             case $1 in
