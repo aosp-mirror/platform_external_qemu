@@ -466,8 +466,13 @@ extern "C" int main(int argc, char **argv, char **envp) {
     // Command-line
     args[n++] = "-append";
 
+#ifdef TARGET_ARM64
+    String kernelCommandLine = StringFormat("console=%s2,38400",
+                                            kTarget.ttyPrefix);
+#else
     String kernelCommandLine = StringFormat("console=%s0,38400",
                                             kTarget.ttyPrefix);
+#endif
 
     // We always force qemu=1 when running inside QEMU
     kernelCommandLine += StringFormat(" qemu=1");
