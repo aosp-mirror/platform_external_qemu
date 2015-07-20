@@ -468,6 +468,14 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     String kernelCommandLine = StringFormat("console=%s0,38400",
                                             kTarget.ttyPrefix);
+
+    // We always force qemu=1 when running inside QEMU
+    kernelCommandLine += StringFormat(" qemu=1");
+
+    // Initialize qemud on ttyXX1
+    kernelCommandLine += StringFormat(" android.qemud=%s1",
+                                            kTarget.ttyPrefix);
+
     if (kTarget.kernelExtraArgs) {
         kernelCommandLine += kTarget.kernelExtraArgs;
     }
