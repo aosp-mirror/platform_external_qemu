@@ -16,6 +16,24 @@
       "revId": "bfb93aa2753ac978c01b30e603d0356ae9b4492f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d2e328f_8b12ed87",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-07-21T04:40:41Z",
+      "side": 1,
+      "message": "thanx digit, will fix the typo in the very next commit.",
+      "parentUuid": "38dae6a9_691d4593",
+      "revId": "bfb93aa2753ac978c01b30e603d0356ae9b4492f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
