@@ -16,6 +16,24 @@
       "revId": "bdda7efd282e1417680331e5f8da956cc5d77692",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad977653_3b5cc353",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3703,
+      "author": {
+        "id": 1047453
+      },
+      "writtenOn": "2015-07-24T23:50:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6d9ade79_c7c3dc7b",
+      "revId": "bdda7efd282e1417680331e5f8da956cc5d77692",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
