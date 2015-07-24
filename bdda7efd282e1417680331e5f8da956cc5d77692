@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d9ade79_c7c3dc7b",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3703,
+      "author": {
+        "id": 1047533
+      },
+      "writtenOn": "2015-07-24T22:14:11Z",
+      "side": 1,
+      "message": "What do you think about changing HAX to HAXM since that\u0027s the terminology we use with our users all the time?",
+      "revId": "bdda7efd282e1417680331e5f8da956cc5d77692",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
