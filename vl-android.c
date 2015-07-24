@@ -3720,8 +3720,11 @@ int main(int argc, char **argv, char **envp)
 
         hax_set_ramsize(ram_size);
         ret = hax_init(smp_cpus);
-        fprintf(stderr, "HAX is %s and emulator runs in %s mode\n",
-            !ret ? "working" :"not working", !ret ? "fast virt" : "emulation");
+        if (ret) {
+            fprintf(stderr, "HAXM is not working and emulator runs in emulation mode\n");
+        } else {
+            fprintf(stdout, "HAXM is working and emulator runs in fast virt mode\n");
+        }
     }
 #endif
 
