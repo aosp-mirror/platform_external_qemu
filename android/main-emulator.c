@@ -468,6 +468,13 @@ getTargetEmulatorPath(const char* progDir,
     char* ranchu_result;
     bool search_for_64bit_emulator =
             !force_32bit && android_getHostBitness() == 64;
+#ifdef _WIN32
+    // Using emulator64-arm.exe results in a kernel panic while
+    // x86/x86_64 emulator executables don't have this issue
+    if (!strcmp(avdArch, "arm")) {
+        search_for_64bit_emulator = false;
+    }
+#endif
 
     const char* emulatorSuffix;
 
