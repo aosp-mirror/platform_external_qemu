@@ -46,24 +46,29 @@
 #include "sysemu/blockdev.h"
 #include "audio/audio.h"
 
-#include "migration/qemu-file.h"
 #include "android/android.h"
+#include "android/camera/camera-service.h"
 #include "android/charpipe.h"
-#include "android/log-rotate.h"
-#include "modem_driver.h"
+#include "android/display-core.h"
+#include "android/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
 #include "android/filesystems/fstab_parser.h"
 #include "android/filesystems/partition_types.h"
 #include "android/filesystems/ramdisk_extractor.h"
+#include "android/globals.h"
 #include "android/gps.h"
 #include "android/hw-kmsg.h"
 #include "android/hw-pipe-net.h"
 #include "android/hw-qemud.h"
 #include "android/hw-sensors.h"
-#include "android/camera/camera-service.h"
+#include "android/log-rotate.h"
 #include "android/multitouch-port.h"
+#include "android/multitouch-screen.h"
+#include "android/opengles.h"
+#include "android/opengl/emugl_config.h"
 #include "android/skin/charmap.h"
-#include "android/globals.h"
+#include "android/snapshot.h"
+#include "android/tcpdump.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
@@ -71,22 +76,17 @@
 #include "android/utils/socket_drainer.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/tempfile.h"
-#include "android/wear-agent/android_wear_agent.h"
-#include "android/display-core.h"
 #include "android/utils/timezone.h"
-#include "android/snapshot.h"
-#include "android/opengles.h"
-#include "android/opengl/emugl_config.h"
-#include "android/multitouch-screen.h"
+#include "android/wear-agent/android_wear_agent.h"
 #include "exec/hwaddr.h"
-#include "android/tcpdump.h"
-
-#include <unistd.h>
+#include "migration/qemu-file.h"
+#include "modem_driver.h"
+#include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <time.h>
-#include <errno.h>
 #include <sys/time.h>
+#include <time.h>
+#include <unistd.h>
 #include <zlib.h>
 
 /* Needed early for CONFIG_BSD etc. */
@@ -3127,6 +3127,18 @@ int main(int argc, char **argv, char **envp)
                            android_hw->disk_systemPartition_path,
                            android_hw->disk_systemPartition_initPath);
 
+    /* For ext4, to extend an internal partition to more than the default size
+     * you need to initialize userdata-qemu.img to the desired size and restore
+     * it after moving the data in - yaffs is resilient enough for this not to
+     * matter
+    */
+    if(android_op_wipe_data &&
+            userdata_partition_type == ANDROID_PARTITION_TYPE_EXT4) {
+        androidPartitionType_makeEmptyFile(userdata_partition_type,
+                                           android_hw->disk_dataPartition_size,
+                                           android_hw->disk_dataPartition_path);
+    }
+
     /* Initialize data partition image */
     android_nand_add_image("userdata",
                            userdata_partition_type,
@@ -3134,6 +3146,15 @@ int main(int argc, char **argv, char **envp)
                            android_hw->disk_dataPartition_size,
                            android_hw->disk_dataPartition_path,
                            android_hw->disk_dataPartition_initPath);
+
+    /* Extend the userdata-qemu.img to the desired size - resize2fs can only
+     * extend partitions to fill available space
+    */
+    if(android_op_wipe_data &&
+            userdata_partition_type == ANDROID_PARTITION_TYPE_EXT4) {
+        resizeExt4Partition(android_hw->disk_dataPartition_path,
+                            android_hw->disk_dataPartition_size);
+    }
 
     /* Initialize cache partition image, if any. Its type depends on the
      * kernel version. For anything >= 3.10, it must be EXT4, or
