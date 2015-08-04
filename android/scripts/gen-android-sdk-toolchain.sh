@@ -305,8 +305,11 @@ prepare_build_for_host () {
         darwin-*)
             # Ensure we use the 10.8 SDK or else.
             OSX_VERSION=$(sw_vers -productVersion)
-            OSX_SDK_SUPPORTED="10.6 10.7 10.8"
-            OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | grep macosx | sed -e "s/.*macosx//g" | sort -n | tr '\n' ' ')
+            OSX_DEPLOYEMENT_TARGET=10.8
+            OSX_SDK_SUPPORTED="10.6 10.7 10.8 10.9"
+            OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
+                    grep macosx | sed -e "s/.*macosx10\.//g" | sort -n | \
+                    tr '\n' ' ' | sed -e 's/^/10./g')
             if [ -z "$OSX_SDK_INSTALLED_LIST" ]; then
                 panic "Please install XCode on this machine!"
             fi
@@ -369,7 +372,10 @@ prepare_build_for_host () {
     case $CURRENT_HOST in
         darwin-x86_64)
 
-            common_FLAGS="-target x86_64-apple-darwin12.0.0 -isysroot $OSX_SDK_ROOT -mmacosx-version-min=$OSX_SDK_VERSION -DMACOSX_DEPLOYEMENT_TARGET=$OSX_SDK_VERSION"
+            common_FLAGS="-target x86_64-apple-darwin12.0.0"
+            var_append common_FLAGS " -isysroot $OSX_SDK_ROOT"
+            var_append common_FLAGS " -mmacosx-version-min=$OSX_DEPLOYEMENT_TARGET"
+            var_append common_FALGS " -DMACOSX_DEPLOYEMENT_TARGET=$OSX_DEPLOYEMENT_TARGET"
             EXTRA_CFLAGS="$common_FLAGS"
             EXTRA_CXXFLAGS="$common_FLAGS"
             if [ "$OPT_CXX11" ]; then
