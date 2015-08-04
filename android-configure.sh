@@ -412,61 +412,6 @@ else
     log "Auto-config: --out-dir=objs"
 fi
 
-# For OS X, detect the location of the SDK to use.
-# NOTE: This must happen before probing the host toolchain, because our
-#       prebuilt Clang one depends on runtime object files like crt1.10.6.o
-#       provided by the XCode SDK.
-if [ "$HOST_OS" = darwin ]; then
-    OSX_VERSION=$(sw_vers -productVersion)
-    OSX_SDK_SUPPORTED="10.8 10.7 10.6"  # in order of preference
-    OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
-            grep macosx | sed -e "s/.*macosx//g" | sort -n | tr '\n' ' ')
-    if [ -z "$OSX_SDK_INSTALLED_LIST" ]; then
-        echo "ERROR: Please install XCode on this machine!"
-        exit 1
-    fi
-    log "OSX: Installed SDKs: $OSX_SDK_INSTALLED_LIST"
-
-    OSX_SDK_VERSION=
-
-    # compare each SDK version supported with each SDK version installed
-    for SUPPORTED_VERSION in $OSX_SDK_SUPPORTED; do
-        for INSTALLED_VERSION in $OSX_SDK_INSTALLED_LIST; do
-            if [ "$SUPPORTED_VERSION" = "$INSTALLED_VERSION" ]; then
-                # use the first match found
-                OSX_SDK_VERSION=$INSTALLED_VERSION
-                break
-            fi
-        done
-        if [ "$OSX_SDK_VERSION" ]; then
-            break
-        fi
-    done
-
-    if [ "$OSX_SDK_VERSION" ]; then
-        log "OSX: Using SDK version $OSX_SDK_VERSION"
-    else
-        echo "ERROR: Only OSX SDK $OSX_SDK_SUPPORTED are supported and this machine has $OSX_SDK_VERSION."
-        echo "Please install Xcode 5 on this machine (If you have Xcode 6 installed, downgrade to Xcode 5)"
-        exit 1
-    fi
-
-    XCODE_PATH=$(xcode-select -print-path 2>/dev/null)
-    log "OSX: XCode path: $XCODE_PATH"
-
-    OSX_SDK_ROOT=$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${OSX_SDK_VERSION}.sdk
-    log "OSX: Looking for $OSX_SDK_ROOT"
-    if [ ! -d "$OSX_SDK_ROOT" ]; then
-        OSX_SDK_ROOT=/Developer/SDKs/MacOSX${OSX_SDK_VERSION}.sdk
-        log "OSX: Looking for $OSX_SDK_ROOT"
-        if [ ! -d "$OSX_SDK_ROOT" ]; then
-            echo "ERROR: Could not find SDK $OSX_SDK_VERSION at $OSX_SDK_ROOT"
-            exit 1
-        fi
-    fi
-    echo "OSX SDK   : Found at $OSX_SDK_ROOT"
-fi
-
 CCACHE=
 if [ "$USE_CCACHE" != 0 ]; then
     CCACHE=$(which ccache 2>/dev/null || true)
@@ -486,9 +431,9 @@ else
     CCACHE=
 fi
 
-# On Linux, try to use our prebuilt toolchain to generate binaries
-# that are compatible with Ubuntu 10.4
-if [ -z "$CC" -a -z "$OPTION_CC" ] ; then
+# Use gen-android-sdk-toolchain.sh to generate a toolchain that will
+# build binaries compatible with the SDK deployement systems.
+if [ -z "$OPTION_CC" ] ; then
     GEN_SDK=$PROGDIR/android/scripts/gen-android-sdk-toolchain.sh
     GEN_SDK_FLAGS=
     if [ "$CCACHE" ]; then
@@ -786,11 +731,6 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     echo "USE_MINGW := 1" >> $config_mk
     echo "HOST_OS   := windows" >> $config_mk
     echo "HOST_MINGW_VERSION := $MINGW_GCC_VERSION" >> $config_mk
-fi
-
-if [ "$HOST_OS" = "darwin" ]; then
-    echo "mac_sdk_root := $OSX_SDK_ROOT" >> $config_mk
-    echo "mac_sdk_version := $OSX_SDK_VERSION" >> $config_mk
 fi
 
 # Build the config-host.h file
