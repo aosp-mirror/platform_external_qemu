@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aae91cd1_318db23e",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-04T23:15:46Z",
+      "side": 1,
+      "message": "nit: use underscores consistently, i.e. IS_VALID_VERSION(v)",
+      "revId": "6276c49c159f1788cffbd869980a97ffd83cb4ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
