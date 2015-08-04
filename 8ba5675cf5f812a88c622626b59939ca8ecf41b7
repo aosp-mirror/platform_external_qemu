@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eadf9421_1edc4204",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-04T23:47:43Z",
+      "side": 1,
+      "message": "Should this be \u003e rather than !\u003d ?",
+      "revId": "8ba5675cf5f812a88c622626b59939ca8ecf41b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
