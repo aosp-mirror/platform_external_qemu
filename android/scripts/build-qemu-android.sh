@@ -72,6 +72,10 @@ OPT_SRC_DIR=
 option_register_var "--src-dir=<dir>" OPT_SRC_DIR \
         "Set qemu-android source directory [autodetect]"
 
+OPT_DEBUG=
+option_register_var "--debug" OPT_DEBUG \
+        "Generate debuggable binaries."
+
 prebuilts_dir_register_option
 aosp_dir_register_option
 install_dir_register_option qemu-android
@@ -275,12 +279,18 @@ EOF
         SDL_CONFIG=$PREFIX/bin/sdl2-config
         export SDL_CONFIG
 
+        DEBUG_FLAGS=
+        if [ "$OPT_DEBUG" ]; then
+            DEBUG_FLAGS="--enable-debug"
+        fi
+
         run $QEMU_ANDROID/configure \
             $CROSS_PREFIX_FLAG \
             --target-list="$QEMU_TARGET_LIST" \
             --prefix=$PREFIX \
             --extra-cflags="$EXTRA_CFLAGS" \
             --extra-ldflags="$EXTRA_LDFLAGS" \
+            $DEBUG_FLAGS \
             $AUDIO_BACKENDS_FLAG \
             --disable-attr \
             --disable-blobs \
