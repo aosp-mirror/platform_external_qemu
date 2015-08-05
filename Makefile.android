@@ -96,13 +96,8 @@ endif
 
 ifeq ($(HOST_OS),darwin)
     MY_CFLAGS += -D_DARWIN_C_SOURCE=1
-    ifneq (,$(mac_sdk_root))
-        MY_CFLAGS += -isysroot $(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version) -DMACOSX_DEPLOYMENT_TARGET=$(mac_sdk_version)
-        MY_LDLIBS += -isysroot $(mac_sdk_root) -Wl,-syslibroot,$(mac_sdk_root) -mmacosx-version-min=$(mac_sdk_version)
-
-        # Clang complains about this flag being not useful anymore.
-        MY_CFLAGS := $(filter-out -falign-functions=0,$(MY_CFLAGS))
-    endif
+    # Clang complains about this flag being not useful anymore.
+    MY_CFLAGS := $(filter-out -falign-functions=0,$(MY_CFLAGS))
 endif
 
 # NOTE: The following definitions are only used by the standalone build.
@@ -286,13 +281,9 @@ ifeq ($(HOST_OS),darwin)
   # XCode toolchain.
   MY_LDFLAGS32 += -Wl,-read_only_relocs,suppress
 
-  # SDK 10.6+ doesn't have __dyld_func_lookup anymore. Dynamic library lookup symbols
-  # are instead resolved at runtime
-  OSX_VERSION_MAJOR := $(shell echo $(mac_sdk_version) | cut -d . -f 2)
-  OSX_VERSION_MAJOR_GREATER_THAN_OR_EQUAL_TO_6 := $(shell [ $(OSX_VERSION_MAJOR) -ge 6 ] && echo true)
-  ifeq ($(OSX_VERSION_MAJOR_GREATER_THAN_OR_EQUAL_TO_6),true)
-    QEMU_SYSTEM_LDLIBS += -undefined dynamic_lookup
-  endif
+  # SDK 10.6+ doesn't have __dyld_func_lookup anymore. Dynamic library lookup
+  # symbols are instead resolved at runtime
+  QEMU_SYSTEM_LDLIBS += -undefined dynamic_lookup
 endif
 
 # Build libext4_utils and related modules/

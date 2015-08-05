@@ -318,6 +318,23 @@ if [ "$HOST_OS" = "Linux" ]; then
     RUN_32BIT_TESTS=true
 fi
 
+# Return the minimum OS X version that a Darwin binary targets.
+# $1: executable path
+# Out: minimum version (e.g. '10.8') or empty string on error.
+darwin_min_version () {
+    otool -l "$1" 2>/dev/null | awk \
+          'BEGIN { CMD="" } $1 == "cmd" { CMD=$2 } $1 == "version" && CMD == "LC_VERSION_MIN_MACOSX" { print $2 }'
+}
+
+OSX_DEPLOYMENT_TARGET=10.8
+
+# List all executables to check later.
+EXECUTABLES="emulator emulator64-arm emulator64-x86 emulator64-mips"
+EXECUTABLES="$EXECUTABLES emulator64-ranchu-arm64 emulator64-ranchu-mips64"
+if [ "$HOST_OS" != "Darwin" ]; then
+    EXECUTABLES="$EXECUTABLES emulator-arm emulator-x86 emulator-mips"
+    EXECUTABLES="$EXECUTABLES emulator-ranchu-arm64 emulator-ranchu-mips64"
+fi
 
 if [ -z "$NO_TESTS" ]; then
     FAILURES=""
@@ -336,6 +353,17 @@ if [ -z "$NO_TESTS" ]; then
         echo "        File type: $EMULATOR_FILE_TYPE"
         echo "        Expected : $EXPECTED_EMULATOR_FILE_TYPE"
         FAILURES="$FAILURES emulator-bitness-check"
+    fi
+
+    if [ "$HOST_OS" = "Darwin" ]; then
+        echo "Checking that Darwin binaries target OSX $OSX_DEPLOYMENT_TARGET"
+        for EXEC in $EXECUTABLES; do
+            MIN_VERSION=$(darwin_min_version "$OUT_DIR/$EXEC")
+            if [ "$MIN_VERSION" != "$OSX_DEPLOYMENT_TARGET" ]; then
+                echo "   - FAIL: $EXEC targets [$MIN_VERSION], expected [$OSX_DEPLOYMENT_TARGET]"
+                FAILURES="$FAILURES $EXEC-darwin-target"
+            fi
+        done
     fi
 
     if [ "$RUN_32BIT_TESTS" ]; then
@@ -408,12 +436,9 @@ if [ -z "$NO_TESTS" ]; then
                 echo "FAIL: Could not find host 'windres' program"
                 FAILURES="$FAILURES host-windres"
             fi
-            EXECUTABLES="emulator.exe emulator-arm.exe emulator-x86.exe emulator-mips.exe"
-            EXECUTABLES="$EXECUTABLES emulator64-arm.exe emulator64-x86.exe emulator64-mips.exe"
-            EXECUTABLES="$EXECUTABLES emulator-ranchu-arm64.exe emulator-ranchu-mips64.exe"
-            EXECUTABLES="$EXECUTABLES emulator64-ranchu-arm64.exe emulator64-ranchu-mips64.exe"
             EXPECTED_ICONS=14
             for EXEC in $EXECUTABLES; do
+                EXEC=${EXEC}.exe
                 if [ ! -f "$OUT_DIR"/$EXEC ]; then
                     echo "FAIL: Missing windows executable: $EXEC"
                     FAILURES="$FAILURES windows-$EXEC"

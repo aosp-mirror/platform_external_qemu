@@ -38,15 +38,6 @@ ifeq ($(HOST_OS),darwin)
     SDL2_CFLAGS += -DTHREAD_SAFE
     FRAMEWORKS := OpenGL Cocoa ApplicationServices Carbon IOKit
     SDL2_LDLIBS += $(FRAMEWORKS:%=-Wl,-framework,%)
-
-    # SDK 10.6+ deprecates __dyld_func_lookup required by dlcompat_init_func
-    # in SDL_dlcompat.o this module depends.  Instruct linker to resolve it
-    # at runtime.
-#     OSX_VERSION_MAJOR := $(shell echo $(mac_sdk_version) | cut -d . -f 2)
-#     OSX_VERSION_MAJOR_GREATER_THAN_OR_EQUAL_TO_6 := $(shell [ $(OSX_VERSION_MAJOR) -ge 6 ] && echo true)
-#     ifeq ($(OSX_VERSION_MAJOR_GREATER_THAN_OR_EQUAL_TO_6),true)
-#         LOCAL_LDLIBS += -Wl,-undefined,dynamic_lookup
-#     endif
 endif
 
 ifeq ($(HOST_OS),windows)
