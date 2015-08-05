@@ -10,11 +10,13 @@
 ** GNU General Public License for more details.
 */
 #include "sms.h"
+
 #include "gsm.h"
+
+#include <assert.h>
 #include <memory.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #define  DEBUG  1
 
