@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0ad9483e_1e9fdc6a",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-05T10:40:13Z",
+      "side": 1,
+      "message": "Actually, it\u0027s really a minimum according to the documentation. I.e this field indicates that the binary can run on any version that is equal or greater than the specific returned value.",
+      "parentUuid": "4acfc072_6d05a04d",
+      "revId": "8ba5675cf5f812a88c622626b59939ca8ecf41b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eadf9421_1edc4204",
         "filename": "android-rebuild.sh",
         "patchSetId": 1
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "I can buy all that.\nBut should we call it REQUIRED_VERSION rather than MIN_...?",
       "parentUuid": "6acc847d_e97d2690",
+      "revId": "8ba5675cf5f812a88c622626b59939ca8ecf41b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eadf9421_74dd658e",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-05T10:40:13Z",
+      "side": 1,
+      "message": "well, MIN_VERSION is specific to the binary that has been built and is the right name here. The requirement we use is OSX_DEPLOYMENT_TARGET and I think that\u0027s clear enough.",
+      "parentUuid": "cadad034_120b5adc",
       "revId": "8ba5675cf5f812a88c622626b59939ca8ecf41b7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
