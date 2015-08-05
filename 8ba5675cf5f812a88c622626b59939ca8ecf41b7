@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "4acfc072_6d05a04d",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-05T00:00:24Z",
+      "side": 1,
+      "message": "s/minimum/required/ ?",
+      "revId": "8ba5675cf5f812a88c622626b59939ca8ecf41b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eadf9421_1edc4204",
         "filename": "android-rebuild.sh",
         "patchSetId": 1
@@ -31,6 +48,24 @@
       "side": 1,
       "message": "We really want to check that the generated binaries target our deployment target. If the number is smaller, it\u0027s probably a symptom that there is something wrong with the toolchain being used.\n\nBesides, this will not work in Unix shells, where \u003e is used for redirections, you\u0027re looking for -gt, a.k.a \"greater than\". Besides, -gt will make a lexicographical compare, so \"10.10\" will be smaller than \"10.8\" with it.",
       "parentUuid": "eadf9421_1edc4204",
+      "revId": "8ba5675cf5f812a88c622626b59939ca8ecf41b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cadad034_120b5adc",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-05T00:00:24Z",
+      "side": 1,
+      "message": "I can buy all that.\nBut should we call it REQUIRED_VERSION rather than MIN_...?",
+      "parentUuid": "6acc847d_e97d2690",
       "revId": "8ba5675cf5f812a88c622626b59939ca8ecf41b7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
