@@ -10,13 +10,18 @@
 ** GNU General Public License for more details.
 */
 #include "remote_call.h"
+
+#include "gsm.h"
+#include "sysdeps.h"
+
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
-#include "sysdeps.h"
-#include "gsm.h"
-#include "android/android.h"
-#include "android/sockets.h"
+
+#include <errno.h>
 #include <stdlib.h>
+#include <string.h>
+
+#define errno_str strerror(errno)
 
 #define  DEBUG  1
 
