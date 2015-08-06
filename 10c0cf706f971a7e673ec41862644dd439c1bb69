@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "4a0c20ee_df187307",
+        "filename": "android/qt/qt_setup.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-06T22:41:31Z",
+      "side": 1,
+      "message": "It\u0027s probably better to use:\n\n   LOG(ERROR) \u003c\u003c \"Qt library not found at \" \u003c\u003c qtLibSubDir.c_str();\n\nThe reason is that you can actually redirect the LOG() output, e.g. to check that it works with a unit-test. This will require including \"android/base/Log.h\"",
+      "revId": "10c0cf706f971a7e673ec41862644dd439c1bb69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ab8cc3c_390ef33e",
         "filename": "android/skin/qt/winsys-qt.cpp",
         "patchSetId": 1
@@ -19,6 +36,23 @@
         "endLine": 73,
         "endChar": 65
       },
+      "revId": "10c0cf706f971a7e673ec41862644dd439c1bb69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea1cf420_3cd6d9c1",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-06T22:41:31Z",
+      "side": 1,
+      "message": "You now have two different sources that compute the same location, and I think it would be better if you could avoid that (to avoid them being out of sync).\n\nCan I ask you to declare a new function in android/qt/qt-setup.h that looks like:\n\n   // Return a heap-allocated string with the path to Qt libraries.\n   // caller must free() the result.\n   char* androidQtGetLibPath();\n\nAnd essentially implements either the code above, or the one already inside of androidQtSetupEnv() (preferably).",
       "revId": "10c0cf706f971a7e673ec41862644dd439c1bb69",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
