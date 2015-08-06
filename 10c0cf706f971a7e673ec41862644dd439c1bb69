@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ab8cc3c_390ef33e",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1074988
+      },
+      "writtenOn": "2015-08-06T19:32:30Z",
+      "side": 1,
+      "message": "if you change to \"using android::base::System;\" that might make the code more readable :)",
+      "range": {
+        "startLine": 73,
+        "startChar": 4,
+        "endLine": 73,
+        "endChar": 65
+      },
+      "revId": "10c0cf706f971a7e673ec41862644dd439c1bb69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
