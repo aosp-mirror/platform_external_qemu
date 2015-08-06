@@ -14,6 +14,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* system-dependent platform abstraction used by the emulated GSM modem
  */
 
@@ -90,5 +94,9 @@ extern void sys_file_get_buffer(SysFile* file, void* buffer, int len);
 /** main loop (may return immediately on some platform)
  **/
 extern int   sys_main_loop( void );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __sysdeps_h__ */

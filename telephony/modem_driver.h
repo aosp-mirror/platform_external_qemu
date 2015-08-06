@@ -15,6 +15,10 @@
 #include "android_modem.h"
 #include "qemu-common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** in telephony/modem_driver.c */
 /* this is the internal character driver used to communicate with the
  * emulated GSM modem. see qemu_chr_open() in vl.c */
@@ -25,5 +29,9 @@ extern AModem  android_modem;
 
 /* must be called before the VM runs if there is a modem to emulate */
 extern void   android_modem_init( int  base_port );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _modem_driver_h */

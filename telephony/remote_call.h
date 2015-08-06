@@ -14,6 +14,10 @@
 
 #include "sms.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* convert a base console port into a remote phone number, -1 on error */
 extern int         remote_number_from_port( int  port );
 
@@ -51,5 +55,9 @@ extern int      remote_call_sms( const char*   number, int  from_port, SmsPDU  p
 extern void     remote_call_other( const char*  to_number, int  from_port, RemoteCallType  type );
 
 extern void     remote_call_cancel( const char*  to_number, int from_port );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _REMOTE_CALL_H */
