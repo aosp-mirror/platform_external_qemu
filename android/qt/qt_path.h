@@ -9,23 +9,19 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_QT_QT_SETUP_H
-#define ANDROID_QT_QT_SETUP_H
+#ifndef ANDROID_QT_QT_PATH_H
+#define ANDROID_QT_QT_PATH_H
 
-#include "android/utils/compiler.h"
+#include "android/base/system/System.h"
 
-#include <stdbool.h>
+using namespace android::base;
 
-ANDROID_BEGIN_HEADER
+// Return the path to the emulator's Qt library directory.
+// This is the path to the emulator executable, with either
+// "/lib/qt" or "/lib64/qt" appended, depending on the bitness
+// of the current execution. (And with the proper '/' or '\'
+// path separator.)
+String androidQt_QtDir();
 
-// Setup environment variables to run the Qt-based UI programs.
-// This function should be called from the top-level launcher and will
-// modify the library search path when needed.
-// Return true in case of success, false if there is no corresponding
-// Qt library directory.
-bool androidQtSetupEnv();
-
-ANDROID_END_HEADER
-
-#endif  // ANDROID_QT_QT_SETUP_H
+#endif  // ANDROID_QT_QT_PATH_H
 
