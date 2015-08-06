@@ -11,6 +11,7 @@
 */
 #include "android/telephony/sms.h"
 
+#include "android/telephony/debug.h"
 #include "android/telephony/gsm.h"
 
 #include <assert.h>
@@ -18,20 +19,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define  DEBUG  1
-
-#if 1
-#  include "android/utils/debug.h"
-#  define  D_ACTIVE  VERBOSE_CHECK(modem)
-#else
-#  define  D_ACTIVE  DEBUG
-#endif
-
-#if DEBUG
-#  define  D(...)  VERBOSE_PRINT(modem,__VA_ARGS__)
-#else
-#  define  D(...)  ((void)0)
-#endif
+// Debug logs.
+#define  D(...)  ANDROID_TELEPHONY_LOG_ON(modem,__VA_ARGS__)
 
 /* maximum number of data bytes in a SMS data message */
 #define  MAX_USER_DATA_BYTES   140
@@ -1522,7 +1511,7 @@ sms_receiver_add_submit_pdu( SmsReceiver  rec, SmsPDU       submit_pdu )
             D("%s: not enough memory to allocate new fragment\n", __FUNCTION__ );
             return -1;
         }
-        if (D_ACTIVE) {
+        if (android_telephony_debug_modem) {
             char  tmp[32];
             int   len;
 

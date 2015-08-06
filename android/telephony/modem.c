@@ -11,6 +11,7 @@
 */
 #include "android/telephony/modem.h"
 
+#include "android/telephony/debug.h"
 #include "android/telephony/remote_call.h"
 #include "android/telephony/sim_card.h"
 #include "android/telephony/sms.h"
@@ -18,7 +19,6 @@
 
 #include "android/utils/aconfig-file.h"
 #include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
 #include "android/utils/timezone.h"
 #include "android/utils/system.h"
 #include "android/utils/path.h"
@@ -30,27 +30,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define  DEBUG  1
-
-#if  1
-#  define  D_ACTIVE  VERBOSE_CHECK(modem)
-#else
-#  define  D_ACTIVE  DEBUG
-#endif
-
-#if 1
-#  define  R_ACTIVE  VERBOSE_CHECK(radio)
-#else
-#  define  R_ACTIVE  DEBUG
-#endif
-
-#if DEBUG
-#  define  D(...)   do { if (D_ACTIVE) fprintf( stderr, __VA_ARGS__ ); } while (0)
-#  define  R(...)   do { if (R_ACTIVE) fprintf( stderr, __VA_ARGS__ ); } while (0)
-#else
-#  define  D(...)   ((void)0)
-#  define  R(...)   ((void)0)
-#endif
+// Debug logs.
+#define  D(...)   ANDROID_TELEPHONY_LOG_ON(modem,__VA_ARGS__)
+#define  R(...)   ANDROID_TELEPHONY_LOG_ON(radio,__VA_ARGS__)
 
 #define  CALL_DELAY_DIAL   1000
 #define  CALL_DELAY_ALERT  1000
@@ -84,7 +66,6 @@ static const char* _amodem_switch_technology(AModem modem, AModemTech newtech, i
 static int _amodem_set_cdma_subscription_source( AModem modem, ACdmaSubscriptionSource ss);
 static int _amodem_set_cdma_prl_version( AModem modem, int prlVersion);
 
-#if DEBUG
 static const char*  quote( const char*  line )
 {
     static char  temp[1024];
@@ -116,7 +97,6 @@ static const char*  quote( const char*  line )
     *p = 0;
     return temp;
 }
-#endif
 
 extern AModemTech
 android_parse_modem_tech( const char * tech )

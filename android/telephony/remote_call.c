@@ -11,40 +11,22 @@
 */
 #include "android/telephony/remote_call.h"
 
+#include "android/telephony/debug.h"
 #include "android/telephony/gsm.h"
 #include "android/telephony/sysdeps.h"
 
 #include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
 
 #include <errno.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #define errno_str strerror(errno)
 
-#define  DEBUG  1
-
-#if 1
-#  define  D_ACTIVE  VERBOSE_CHECK(modem)
-#else
-#  define  D_ACTIVE  DEBUG
-#endif
-
-#if 1
-#  define  S_ACTIVE  VERBOSE_CHECK(socket)
-#else
-#  define  S_ACTIVE  DEBUG
-#endif
-
-#if DEBUG
-#  include <stdio.h>
-#  define  D(...)   do { if (D_ACTIVE) fprintf( stderr, __VA_ARGS__ ); } while (0)
-#  define  S(...)   do { if (S_ACTIVE) fprintf( stderr, __VA_ARGS__ ); } while (0)
-#else
-#  define  D(...)   ((void)0)
-#  define  S(...)   ((void)0)
-#endif
+// Debug logs.
+#define  D(...)   ANDROID_TELEPHONY_LOG_ON(modem,__VA_ARGS__)
+#define  S(...)   ANDROID_TELEPHONY_LOG_ON(socket,__VA_ARGS__)
 
 /** By convention, remote numbers are the console ports, i.e. 5554, 5556, etc...
  **/
@@ -293,7 +275,7 @@ remote_call_event( void*  opaque, int  events )
     if (events & SYS_EVENT_WRITE) {
         int  n;
 
-        if (S_ACTIVE) {
+        if (android_telephony_debug_socket) {
             int  nn;
             S("%s: call (%d,%d) sending %d bytes '", __FUNCTION__,
             call->from_port, call->to_port, call->buff_len - call->buff_pos );

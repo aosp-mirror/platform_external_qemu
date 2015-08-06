@@ -15,6 +15,9 @@
  */
 #include "modem_driver.h"
 
+#include "android/telephony/debug.h"
+#include "android/utils/debug.h"
+
 #include "hw/hw.h"
 #include "sysemu/char.h"
 
@@ -166,6 +169,10 @@ modem_driver_init( int  base_port, ModemDriver*  dm, CharDriverState*  cs )
 void android_modem_init( int  base_port )
 {
     static ModemDriver  modem_driver[1];
+
+    android_telephony_debug_modem = VERBOSE_CHECK(modem);
+    android_telephony_debug_radio = VERBOSE_CHECK(radio);
+    android_telephony_debug_socket = VERBOSE_CHECK(socket);
 
     if (android_modem_cs != NULL) {
         modem_driver_init( base_port, modem_driver, android_modem_cs );

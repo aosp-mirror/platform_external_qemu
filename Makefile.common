@@ -630,6 +630,7 @@ EMULATOR_LIBQEMU_CFLAGS += -I$(LOCAL_PATH)/proxy
 # include telephony stuff
 #
 common_LOCAL_SRC_FILES += \
+    android/telephony/debug.c \
     android/telephony/gsm.c \
     android/telephony/modem.c \
     android/telephony/remote_call.c \
