@@ -14,6 +14,7 @@
 
 #include "sim_card.h"
 #include "sms.h"
+#include "sysdeps.h"
 
 /** MODEM OBJECT
  **/
@@ -163,6 +164,9 @@ extern ACall  amodem_find_call_by_number( AModem  modem, const char*  number );
 extern int    amodem_add_inbound_call( AModem  modem, const char*  number );
 extern int    amodem_update_call( AModem  modem, const char*  number, ACallState  state );
 extern int    amodem_disconnect_call( AModem  modem, const char*  number );
+
+extern void   amodem_state_save( AModem modem, SysFile* file );
+extern int    amodem_state_load( AModem modem, SysFile* file );
 
 /**/
 

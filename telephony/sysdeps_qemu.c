@@ -9,11 +9,15 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android/sockets.h"
 #include "sysdeps.h"
+
+#include "android/sockets.h"
+
+#include "hw/hw.h"
 #include "qemu-common.h"
 #include "qemu/timer.h"
 #include "sysemu/char.h"
+
 #ifdef _WIN32
 #include <winsock2.h>
 #else
@@ -376,3 +380,32 @@ sys_channel_create_tcp_client( const char*  hostname, int  port )
     return channel;
 }
 
+void
+sys_file_put_byte(SysFile* file, int c) {
+    qemu_put_byte((QEMUFile*)file, c);
+}
+
+void
+sys_file_put_be32(SysFile* file, uint32_t v) {
+    qemu_put_be32((QEMUFile*)file, v);
+}
+
+void
+sys_file_put_buffer(SysFile* file, const void* buff, int len) {
+    qemu_put_buffer((QEMUFile*)file, buff, len);
+}
+
+uint8_t
+sys_file_get_byte(SysFile* file) {
+    return qemu_get_byte((QEMUFile*)file);
+}
+
+uint32_t
+sys_file_get_be32(SysFile* file) {
+    return qemu_get_be32((QEMUFile*)file);
+}
+
+void
+sys_file_get_buffer(SysFile* file, void* buff, int len) {
+    qemu_get_buffer((QEMUFile*)file, buff, len);
+}
