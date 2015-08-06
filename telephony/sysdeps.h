@@ -12,6 +12,8 @@
 #ifndef __sysdeps_h__
 #define __sysdeps_h__
 
+#include <stdint.h>
+
 /* system-dependent platform abstraction used by the emulated GSM modem
  */
 
@@ -72,6 +74,18 @@ extern void       sys_timer_unset( SysTimer  timer );
 extern void       sys_timer_destroy( SysTimer  timer );
 
 extern long long  sys_time_ms( void );
+
+/** files (for saving/loading state)
+ **/
+typedef struct SysFile SysFile;
+
+extern void sys_file_put_byte(SysFile* file, int b);
+extern void sys_file_put_be32(SysFile* file, uint32_t value);
+extern void sys_file_put_buffer(SysFile* file, const void* buffer, int len);
+
+extern uint8_t sys_file_get_byte(SysFile* file);
+extern uint32_t sys_file_get_be32(SysFile* file);
+extern void sys_file_get_buffer(SysFile* file, void* buffer, int len);
 
 /** main loop (may return immediately on some platform)
  **/
