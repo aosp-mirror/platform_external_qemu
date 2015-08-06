@@ -31,9 +31,12 @@
 #include <android/utils/bufprint.h>
 #include <android/utils/win32_cmdline_quote.h>
 #include <android/opengl/emugl_config.h>
-#include <android/qt/qt_setup.h>
 #include <android/avd/scanner.h>
 #include <android/avd/util.h>
+
+#if CONFIG_QT
+#include <android/qt/qt_setup.h>
+#endif
 
 /* Required by android/utils/debug.h */
 int android_verbose;
@@ -264,8 +267,10 @@ int main(int argc, char** argv)
 
     emuglConfig_setupEnv(&config);
 
+#if CONFIG_QT
     /* For Qt-based UI backends, add <lib>/qt/ to the library search path. */
-    androidQtSetupEnv(is_64bit);
+    androidQtSetupEnv();
+#endif
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().
