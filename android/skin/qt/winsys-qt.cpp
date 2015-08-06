@@ -14,6 +14,7 @@
 #include <pthread.h>
 #endif
 
+#include "android/base/system/System.h"
 #include "android/skin/rect.h"
 #include "android/skin/resource.h"
 #include "android/skin/winsys.h"
@@ -27,6 +28,9 @@
 #include <QSemaphore>
 #include <QThread>
 #include <QWidget>
+
+using android::base::System;
+using android::base::String;
 
 #define  DEBUG  1
 
@@ -66,6 +70,14 @@ static GlobalState* globalState() {
 extern void skin_winsys_enter_main_loop(int argc, char **argv)
 {
     D("Starting QT main loop\n");
+
+    // Make Qt look at the libraries within this installation
+    // (e.g., ".../objs/lib64/qt")
+    String qtPath = System::emulatorQtDir();
+    QStringList pathList(qtPath.c_str());
+    QCoreApplication::setLibraryPaths(pathList);
+    D("Qt lib path: %s\n", qtPath.c_str());
+
     GlobalState* g = globalState();
     g->argc = argc;
     g->argv = argv;
