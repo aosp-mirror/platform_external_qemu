@@ -16,6 +16,7 @@
 #include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 using namespace android::base;
@@ -31,6 +32,7 @@ bool androidQtSetupEnv(bool is64bit) {
     String qtLibSubDir = PathUtils::recompose(subDirVector);
 
     if (!system->pathIsDir(qtLibSubDir.c_str())) {
+        fprintf(stderr, "ERROR: Qt library not found at %s\n", qtLibSubDir.c_str());
         return false;
     }
     //LOG(INFO) << "Adding library search path [" << qtLibSubDir.c_str() << "]";
