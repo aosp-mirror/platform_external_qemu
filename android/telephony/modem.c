@@ -16,7 +16,6 @@
 #include "android/telephony/sms.h"
 #include "android/telephony/sysdeps.h"
 
-#include "android/android.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -24,11 +23,12 @@
 #include "android/utils/system.h"
 #include "android/utils/path.h"
 
+#include <assert.h>
 #include <memory.h>
 #include <stdarg.h>
-#include <time.h>
-#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define  DEBUG  1
 
