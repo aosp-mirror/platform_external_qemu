@@ -14,6 +14,10 @@
 
 #include "gsm.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct ASimCardRec_*    ASimCard;
 
 extern ASimCard  asimcard_create( int from_port );
@@ -50,5 +54,9 @@ typedef enum {
 } ASimCommand;
 
 extern const char*  asimcard_io( ASimCard  sim, const char*  cmd );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _android_sim_card_h */

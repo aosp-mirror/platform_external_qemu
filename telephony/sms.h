@@ -14,6 +14,10 @@
 
 #include <time.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** MESSAGE TEXT
  **/
 /* convert a quoted message text into a utf8 string. Note: you can use 'str' as the destination buffer
@@ -113,5 +117,9 @@ extern void          sms_receiver_destroy( SmsReceiver  rec );
 extern int           sms_receiver_add_submit_pdu( SmsReceiver  rec, SmsPDU       submit_pdu );
 extern int           sms_receiver_get_text_message( SmsReceiver  rec, int  index, unsigned char*  utf8, int  utf8len );
 extern SmsPDU*       sms_receiver_create_deliver( SmsReceiver  rec, int  index, const SmsAddressRec*  from );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _android_sms_h */

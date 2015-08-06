@@ -16,6 +16,10 @@
 #include "sms.h"
 #include "sysdeps.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** MODEM OBJECT
  **/
 typedef struct AModemRec_*    AModem;
@@ -169,5 +173,9 @@ extern void   amodem_state_save( AModem modem, SysFile* file );
 extern int    amodem_state_load( AModem modem, SysFile* file );
 
 /**/
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _android_modem_h_ */
