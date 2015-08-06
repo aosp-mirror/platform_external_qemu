@@ -12,7 +12,7 @@
 #ifndef _modem_driver_h
 #define _modem_driver_h
 
-#include "android_modem.h"
+#include "android/telephony/android_modem.h"
 #include "qemu-common.h"
 
 #ifdef __cplusplus

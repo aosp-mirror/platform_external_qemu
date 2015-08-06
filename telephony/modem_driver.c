@@ -15,8 +15,6 @@
  */
 #include "modem_driver.h"
 
-#include "android_modem.h"
-
 #include "hw/hw.h"
 #include "sysemu/char.h"
 

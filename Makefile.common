@@ -629,17 +629,14 @@ EMULATOR_LIBQEMU_CFLAGS += -I$(LOCAL_PATH)/proxy
 
 # include telephony stuff
 #
-TELEPHONY_SOURCES := \
-    android_modem.c \
-    modem_driver.c \
-    gsm.c \
-    sim_card.c \
-    sysdeps_qemu.c \
-    sms.c \
-    remote_call.c
-
-common_LOCAL_SRC_FILES += $(TELEPHONY_SOURCES:%=telephony/%)
-EMULATOR_LIBQEMU_CFLAGS += -I$(LOCAL_PATH)/telephony
+common_LOCAL_SRC_FILES += \
+    android/telephony/android_modem.c \
+    android/telephony/gsm.c \
+    android/telephony/remote_call.c \
+    android/telephony/sim_card.c \
+    android/telephony/sms.c \
+    telephony/modem_driver.c \
+    telephony/sysdeps_qemu.c
 
 # sources inherited from upstream, but not fully
 # integrated into android emulator

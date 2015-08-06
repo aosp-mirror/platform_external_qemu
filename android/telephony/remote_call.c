@@ -9,10 +9,10 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "remote_call.h"
+#include "android/telephony/remote_call.h"
 
-#include "gsm.h"
-#include "sysdeps.h"
+#include "android/telephony/gsm.h"
+#include "android/telephony/sysdeps.h"
 
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
