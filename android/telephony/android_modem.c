@@ -9,12 +9,12 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android_modem.h"
+#include "android/telephony/android_modem.h"
 
-#include "remote_call.h"
-#include "sim_card.h"
-#include "sms.h"
-#include "sysdeps.h"
+#include "android/telephony/remote_call.h"
+#include "android/telephony/sim_card.h"
+#include "android/telephony/sms.h"
+#include "android/telephony/sysdeps.h"
 
 #include "android/android.h"
 #include "android/utils/aconfig-file.h"

@@ -9,7 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "sysdeps.h"
+#include "android/telephony/sysdeps.h"
 #include <assert.h>
 #include <unistd.h>
 #include <sys/select.h>

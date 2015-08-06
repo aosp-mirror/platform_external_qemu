@@ -9,12 +9,12 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _android_modem_h_
-#define _android_modem_h_
+#ifndef ANDROID_TELEPHONY_ANDROID_MODEM_H
+#define ANDROID_TELEPHONY_ANDROID_MODEM_H
 
-#include "sim_card.h"
-#include "sms.h"
-#include "sysdeps.h"
+#include "android/telephony/sim_card.h"
+#include "android/telephony/sms.h"
+#include "android/telephony/sysdeps.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -178,4 +178,4 @@ extern int    amodem_state_load( AModem modem, SysFile* file );
 }
 #endif
 
-#endif /* _android_modem_h_ */
+#endif  // ANDROID_TELEPHONY_ANDROID_MODEM_H

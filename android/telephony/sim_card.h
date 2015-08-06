@@ -9,10 +9,10 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _android_sim_card_h
-#define _android_sim_card_h
+#ifndef ANDROID_TELEPHONY_SIM_CARD_H
+#define ANDROID_TELEPHONY_SIM_CARD_H
 
-#include "gsm.h"
+#include "android/telephony/gsm.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,4 +59,4 @@ extern const char*  asimcard_io( ASimCard  sim, const char*  cmd );
 }
 #endif
 
-#endif /* _android_sim_card_h */
+#endif /* ANDROID_TELEPHONY_SIM_CARD_H */
