@@ -312,6 +312,7 @@ common_LOCAL_SRC_FILES := \
     android/main.c \
     android/opengles.c \
     android/user-events-qemu.c \
+    android/qt/qt_path.cpp \
     hw/core/loader.c \
     util/bitmap.c \
     util/bitops.c \
