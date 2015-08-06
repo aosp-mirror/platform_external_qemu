@@ -370,5 +370,19 @@ String System::findBundledExecutable(const char* programName) {
     return executablePath;
 }
 
+// Static
+String System::emulatorQtDir()
+{
+    System* system = System::get();
+    const char* libBitness = (system->getHostBitness() == 64) ? "lib64" : "lib";
+    StringVector subDirVector;
+    subDirVector.push_back(system->getProgramDirectory());
+    subDirVector.push_back(String(libBitness));
+    subDirVector.push_back(String("qt"));
+    String qtDir = PathUtils::recompose(subDirVector);
+
+    return qtDir;
+}
+
 }  // namespace base
 }  // namespace android

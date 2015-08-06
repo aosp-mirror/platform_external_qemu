@@ -88,6 +88,13 @@ public:
     // Return an empty string if the file doesn't exist.
     static String findBundledExecutable(const char* programName);
 
+    // Return the path to the emulator's Qt library directory.
+    // This is the path to the emulator executable, with either
+    // "/lib/qt" or "/lib64/qt" appended, depending on the bitness
+    // of the current execution. And with the proper '/' or '\'
+    // path separator.
+    static String emulatorQtDir();
+
     // Retrieve the value of a given environment variable.
     // Equivalent to getenv().
     virtual const char* envGet(const char* varname) const = 0;
