@@ -2041,8 +2041,14 @@ void android_nand_add_image(const char* part_name,
         need_make_empty = true;
     }
 
-    pstrcat(tmp, sizeof tmp, ",file=");
-    pstrcat(tmp, sizeof tmp, part_file);
+
+    // Escape special characters in the file name
+    char *escaped_part_file = path_escape_path(part_file);
+    if (escaped_part_file) {
+        pstrcat(tmp, sizeof tmp, ",file=");
+        pstrcat(tmp, sizeof tmp, escaped_part_file);
+        free(escaped_part_file);
+    }
 
     // Do we need to make the partition image empty?
     // Do not do it if there is an initial file though since it will
@@ -2064,8 +2070,12 @@ void android_nand_add_image(const char* part_name,
     }
 
     if (part_init_file) {
-        pstrcat(tmp, sizeof tmp, ",initfile=");
-        pstrcat(tmp, sizeof tmp, part_init_file);
+        char *escaped_part_init = path_escape_path(part_init_file);
+        if (escaped_part_init) {
+            pstrcat(tmp, sizeof tmp, ",initfile=");
+            pstrcat(tmp, sizeof tmp, escaped_part_init);
+            free(escaped_part_init);
+        }
     }
 
     if (part_type == ANDROID_PARTITION_TYPE_EXT4) {
