@@ -16,6 +16,24 @@
       "revId": "ca666b9159b08f2d6da90771e9ee398054cf9a6b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27672710_987b5599",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-07T20:32:45Z",
+      "side": 1,
+      "message": "Yes, will fix, thanks.",
+      "parentUuid": "879c532b_bb6f27ee",
+      "revId": "ca666b9159b08f2d6da90771e9ee398054cf9a6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
