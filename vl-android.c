@@ -80,7 +80,7 @@
 #include "android/wear-agent/android_wear_agent.h"
 #include "exec/hwaddr.h"
 #include "migration/qemu-file.h"
-#include "modem_driver.h"
+#include "telephony/modem_driver.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>

@@ -9,50 +9,30 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android_modem.h"
+#include "android/telephony/modem.h"
 
-#include "remote_call.h"
-#include "sim_card.h"
-#include "sms.h"
-#include "sysdeps.h"
+#include "android/telephony/debug.h"
+#include "android/telephony/remote_call.h"
+#include "android/telephony/sim_card.h"
+#include "android/telephony/sms.h"
+#include "android/telephony/sysdeps.h"
 
-#include "android/android.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
 #include "android/utils/timezone.h"
 #include "android/utils/system.h"
 #include "android/utils/path.h"
-
-#include "hw/hw.h"
 
 #include <assert.h>
 #include <memory.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
-#define  DEBUG  1
-
-#if  1
-#  define  D_ACTIVE  VERBOSE_CHECK(modem)
-#else
-#  define  D_ACTIVE  DEBUG
-#endif
-
-#if 1
-#  define  R_ACTIVE  VERBOSE_CHECK(radio)
-#else
-#  define  R_ACTIVE  DEBUG
-#endif
-
-#if DEBUG
-#  define  D(...)   do { if (D_ACTIVE) fprintf( stderr, __VA_ARGS__ ); } while (0)
-#  define  R(...)   do { if (R_ACTIVE) fprintf( stderr, __VA_ARGS__ ); } while (0)
-#else
-#  define  D(...)   ((void)0)
-#  define  R(...)   ((void)0)
-#endif
+// Debug logs.
+#define  D(...)   ANDROID_TELEPHONY_LOG_ON(modem,__VA_ARGS__)
+#define  R(...)   ANDROID_TELEPHONY_LOG_ON(radio,__VA_ARGS__)
 
 #define  CALL_DELAY_DIAL   1000
 #define  CALL_DELAY_ALERT  1000
@@ -86,7 +66,6 @@ static const char* _amodem_switch_technology(AModem modem, AModemTech newtech, i
 static int _amodem_set_cdma_subscription_source( AModem modem, ACdmaSubscriptionSource ss);
 static int _amodem_set_cdma_prl_version( AModem modem, int prlVersion);
 
-#if DEBUG
 static const char*  quote( const char*  line )
 {
     static char  temp[1024];
@@ -118,7 +97,6 @@ static const char*  quote( const char*  line )
     *p = 0;
     return temp;
 }
-#endif
 
 extern AModemTech
 android_parse_modem_tech( const char * tech )
@@ -524,51 +502,43 @@ amodem_reset( AModem  modem )
 static AVoiceCall amodem_alloc_call( AModem   modem );
 static void amodem_free_call( AModem  modem, AVoiceCall  call );
 
-#define MODEM_DEV_STATE_SAVE_VERSION 1
-
-static void  android_modem_state_save(QEMUFile *f, void  *opaque)
+void amodem_state_save(AModem modem, SysFile* file)
 {
-    AModem modem = opaque;
-
     // TODO: save more than just calls and call_count - rssi, power, etc.
 
-    qemu_put_byte(f, modem->call_count);
+    sys_file_put_byte(file, modem->call_count);
 
     int nn;
     for (nn = modem->call_count - 1; nn >= 0; nn--) {
       AVoiceCall  vcall = modem->calls + nn;
       // Note: not saving timers or remote calls.
       ACall       call  = &vcall->call;
-      qemu_put_byte( f, call->dir );
-      qemu_put_byte( f, call->state );
-      qemu_put_byte( f, call->mode );
-      qemu_put_be32( f, call->multi );
-      qemu_put_buffer( f, (uint8_t *)call->number, A_CALL_NUMBER_MAX_SIZE+1 );
+      sys_file_put_byte(file, call->dir);
+      sys_file_put_byte(file, call->state);
+      sys_file_put_byte(file, call->mode);
+      sys_file_put_be32(file, call->multi);
+      sys_file_put_buffer(file, (uint8_t *)call->number,
+                          A_CALL_NUMBER_MAX_SIZE+1);
     }
 }
 
-static int  android_modem_state_load(QEMUFile *f, void  *opaque, int version_id)
+int amodem_state_load(AModem modem, SysFile* file)
 {
-    if (version_id != MODEM_DEV_STATE_SAVE_VERSION)
-      return -1;
-
-    AModem modem = opaque;
-
     // In case there are timers or remote calls.
     int nn;
     for (nn = modem->call_count - 1; nn >= 0; nn--) {
       amodem_free_call( modem, modem->calls + nn);
     }
 
-    int call_count = qemu_get_byte(f);
+    int call_count = sys_file_get_byte(file);
     for (nn = call_count; nn > 0; nn--) {
       AVoiceCall vcall = amodem_alloc_call( modem );
       ACall      call  = &vcall->call;
-      call->dir   = qemu_get_byte( f );
-      call->state = qemu_get_byte( f );
-      call->mode  = qemu_get_byte( f );
-      call->multi = qemu_get_be32( f );
-      qemu_get_buffer( f, (uint8_t *)call->number, A_CALL_NUMBER_MAX_SIZE+1 );
+      call->dir   = sys_file_get_byte(file);
+      call->state = sys_file_get_byte(file);
+      call->mode  = sys_file_get_byte(file);
+      call->multi = sys_file_get_be32(file);
+      sys_file_get_buffer(file, (uint8_t *)call->number, A_CALL_NUMBER_MAX_SIZE+1 );
     }
 
     return 0; // >=0 Happy
@@ -597,13 +567,6 @@ amodem_create( int  base_port, AModemUnsolFunc  unsol_func, void*  unsol_opaque 
     modem->sim = asimcard_create(base_port);
 
     sys_main_init();
-    register_savevm(NULL,
-                    "android_modem",
-                    0,
-                    MODEM_DEV_STATE_SAVE_VERSION,
-                    android_modem_state_save,
-                    android_modem_state_load,
-                    modem);
 
     aconfig_save_file( modem->nvram_config, modem->nvram_config_filename );
     return  modem;

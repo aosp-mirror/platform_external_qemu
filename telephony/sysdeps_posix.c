@@ -9,7 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "sysdeps.h"
+#include "android/telephony/sysdeps.h"
 #include <assert.h>
 #include <unistd.h>
 #include <sys/select.h>
@@ -643,3 +643,52 @@ sys_channel_create_tcp_client( const char*  hostname, int  port )
     return channel;
 }
 
+void
+sys_file_put_byte(SysFile* file, int b) {
+    uint8_t c = (uint8_t)b;
+    fwrite(&c, 1, 1, (FILE*)file);
+}
+
+void
+sys_file_put_be32(SysFile* file, uint32_t v) {
+    uint8_c b[4] = {
+        (uint8_t)(v >> 24),
+        (uint8_t)(v >> 16),
+        (uint8_t)(v >> 8),
+        (uint8_t)v,
+    };
+    fwrite(b, 4, 1, (FILE*)file);
+}
+
+void
+sys_file_put_buffer(SysFile* file, const void* buff, int len) {
+    fwrite(buff, len, 1, (FILE*)file);
+}
+
+int
+sys_file_get_byte(SysFile* file) {
+    FILE* f = (FILE*)file;
+    uint8_t c[1];
+    if (fread(c, 1, 1, f) != 1) {
+        return 0;
+    }
+    return c[0];
+}
+
+void
+sys_file_get_be32(SysFile* file) {
+    FILE* f = (FILE*)file;
+    uint8_t b[4];
+    if (fread(c, 4, 1, f) != 1) {
+        return 0;
+    }
+    return ((uint32_t)b[0] << 24) |
+           ((uint32_t)b[1] << 16) |
+           ((uint32_t)b[2] << 8) | b[0];
+}
+
+void
+sys_file_get_buffer(SysFile* file, void* buffer, int len) {
+    FILE* f = (FILE*)f;
+    fread(buffer, len, 1, f);
+}

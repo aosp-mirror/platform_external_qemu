@@ -63,7 +63,7 @@
 #define  SUPPORT_LEGACY_QEMUD  0 /* no legacy support */
 #endif
 #if SUPPORT_LEGACY_QEMUD
-#include "telephony/android_modem.h"
+#include "android/telephony/modem.h"
 #include "telephony/modem_driver.h"
 #endif
 

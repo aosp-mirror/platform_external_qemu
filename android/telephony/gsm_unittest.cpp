@@ -9,8 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/telephony/gsm.h"
+
 #include <gtest/gtest.h>
-#include "telephony/gsm.h"
 
 namespace gsm {
 

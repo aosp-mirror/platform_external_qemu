@@ -46,6 +46,8 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/opengl/GpuFrameBridge_unittest.cpp \
   android/qt/qt_setup.cpp \
   android/qt/qt_setup_unittest.cpp \
+  android/telephony/gsm_unittest.cpp \
+  android/telephony/gsm.c \
   android/utils/aconfig-file_unittest.cpp \
   android/utils/bufprint_unittest.cpp \
   android/utils/dirscanner_unittest.cpp \
@@ -59,8 +61,6 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
   android/wear-agent/WearAgent_unittest.cpp \
-  telephony/gsm_unittest.cpp \
-  telephony/gsm.c \
 
 ifeq (windows,$(HOST_OS))
 EMULATOR_UNITTESTS_SOURCES += \

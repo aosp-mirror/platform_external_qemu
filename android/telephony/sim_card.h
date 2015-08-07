@@ -9,10 +9,14 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _android_sim_card_h
-#define _android_sim_card_h
+#ifndef ANDROID_TELEPHONY_SIM_CARD_H
+#define ANDROID_TELEPHONY_SIM_CARD_H
 
-#include "gsm.h"
+#include "android/telephony/gsm.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct ASimCardRec_*    ASimCard;
 
@@ -51,4 +55,8 @@ typedef enum {
 
 extern const char*  asimcard_io( ASimCard  sim, const char*  cmd );
 
-#endif /* _android_sim_card_h */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* ANDROID_TELEPHONY_SIM_CARD_H */
