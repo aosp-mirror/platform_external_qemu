@@ -9,27 +9,28 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android/android.h"
 #include "android_modem.h"
+
+#include "remote_call.h"
+#include "sim_card.h"
+#include "sms.h"
+#include "sysdeps.h"
+
+#include "android/android.h"
 #include "android/utils/aconfig-file.h"
-#include "android/config/config.h"
-#include "android/snapshot.h"
+#include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/timezone.h"
 #include "android/utils/system.h"
-#include "android/utils/bufprint.h"
 #include "android/utils/path.h"
+
 #include "hw/hw.h"
-#include "qemu-common.h"
-#include "sim_card.h"
-#include "sysdeps.h"
+
+#include <assert.h>
 #include <memory.h>
 #include <stdarg.h>
-#include <time.h>
-#include <assert.h>
 #include <stdio.h>
-#include "sms.h"
-#include "remote_call.h"
+#include <time.h>
 
 #define  DEBUG  1
 
