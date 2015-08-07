@@ -78,6 +78,9 @@ extern int      utf8_check_gsm7( cbytes_t  utf8, int  utf8len );
 /* try to skip enough utf8 characters to generate gsm7len GSM septets */
 extern cbytes_t utf8_skip_gsm7( cbytes_t  utf8, cbytes_t  utf8end, int  gsm7len );
 
+/* Determine how many utf8 bytes are needed to produce 'ucs2len' ucs2 bytes */
+extern cbytes_t utf8_skip_ucs2( cbytes_t  utf8, cbytes_t  utf8end, int  ucs2len );
+
 /* convert a utf-8 string into a GSM septet string, assumes 'dst' is NULL or is properly sized,
    and that all characters are representable. 'offset' is the starting bit offset in 'dst'.
    non-representable characters are replaced by spaces.
