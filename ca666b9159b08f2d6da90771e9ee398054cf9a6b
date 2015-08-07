@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "879c532b_bb6f27ee",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-07T19:57:48Z",
+      "side": 1,
+      "message": "Should this be +\u003d ?",
+      "revId": "ca666b9159b08f2d6da90771e9ee398054cf9a6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
