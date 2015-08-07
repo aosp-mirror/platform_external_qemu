@@ -21,11 +21,9 @@ ANDROID_BEGIN_HEADER
 // Setup environment variables to run the Qt-based UI programs.
 // This function should be called from the top-level launcher and will
 // modify the library search path when needed.
-// |is64bit| is true to indicate that a 64-bit engine/launcher program
-// will be launched, false for 32-bit ones.
 // Return true in case of success, false if there is no corresponding
 // Qt library directory.
-bool androidQtSetupEnv(bool is64bit);
+bool androidQtSetupEnv();
 
 ANDROID_END_HEADER
 

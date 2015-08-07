@@ -21,15 +21,10 @@
 
 using namespace android::base;
 
-bool androidQtSetupEnv(bool is64bit) {
+bool androidQtSetupEnv() {
     // Add <progdir>/<lib>/qt if it exists to the library search path.
+    String  qtLibSubDir = System::emulatorQtDir();
     System* system = System::get();
-    const char* libDir = is64bit ? "lib64" : "lib";
-    StringVector subDirVector;
-    subDirVector.push_back(system->getProgramDirectory());
-    subDirVector.push_back(String(libDir));
-    subDirVector.push_back(String("qt"));
-    String qtLibSubDir = PathUtils::recompose(subDirVector);
 
     if (!system->pathIsDir(qtLibSubDir.c_str())) {
         fprintf(stderr, "ERROR: Qt library not found at %s\n", qtLibSubDir.c_str());

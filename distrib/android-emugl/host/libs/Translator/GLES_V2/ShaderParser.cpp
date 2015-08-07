@@ -108,6 +108,8 @@ void ShaderParser::parseGLSLversion() {
     } parseState = PARSE_NONE;
     const char *c = src;
 
+    #define IS_VALID_VERSION(v) ( (v) == 100 || (v) == 300 || (v) == 310 )
+
     while( c && *c != '\0') {
         if (parseState == PARSE_IN_C_COMMENT) {
             if (*c == '*' && *(c+1) == '/') {
@@ -154,7 +156,7 @@ void ShaderParser::parseGLSLversion() {
 
                     // Use the version from the source but only if
                     // it is larger than our minGLSLVersion
-                    if (ver > minGLSLVersion) glslVersion = ver;
+                    if (!IS_VALID_VERSION(ver) || ver > minGLSLVersion) glslVersion = ver;
                 }
             }
 

@@ -9,10 +9,14 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _android_sms_h
-#define _android_sms_h
+#ifndef ANDROID_TELEPHONY_SMS_H
+#define ANDROID_TELEPHONY_SMS_H
 
 #include <time.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /** MESSAGE TEXT
  **/
@@ -114,4 +118,8 @@ extern int           sms_receiver_add_submit_pdu( SmsReceiver  rec, SmsPDU      
 extern int           sms_receiver_get_text_message( SmsReceiver  rec, int  index, unsigned char*  utf8, int  utf8len );
 extern SmsPDU*       sms_receiver_create_deliver( SmsReceiver  rec, int  index, const SmsAddressRec*  from );
 
-#endif /* _android_sms_h */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* ANDROID_TELEPHONY_SMS_H */

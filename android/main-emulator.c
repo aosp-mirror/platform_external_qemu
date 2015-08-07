@@ -265,7 +265,7 @@ int main(int argc, char** argv)
     emuglConfig_setupEnv(&config);
 
     /* For Qt-based UI backends, add <lib>/qt/ to the library search path. */
-    androidQtSetupEnv(is_64bit);
+    androidQtSetupEnv();
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().

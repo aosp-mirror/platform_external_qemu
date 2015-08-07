@@ -14,6 +14,11 @@
  * on the emulated device.
  */
 #include "modem_driver.h"
+
+#include "android/telephony/debug.h"
+#include "android/utils/debug.h"
+
+#include "hw/hw.h"
 #include "sysemu/char.h"
 
 #define  xxDEBUG
@@ -124,6 +129,22 @@ modem_driver_read( void*  _md, const uint8_t*  src, int  len )
     D( "%s: done\n", __FUNCTION__ );
 }
 
+#define MODEM_DEV_STATE_SAVE_VERSION 1
+
+static void
+modem_state_save(QEMUFile* file, void* opaque)
+{
+    amodem_state_save((AModem)opaque, (SysFile*)file);
+}
+
+static int
+modem_state_load(QEMUFile* file, void* opaque, int version_id)
+{
+    if (version_id != MODEM_DEV_STATE_SAVE_VERSION)
+      return -1;
+
+    return amodem_state_load((AModem)opaque, (SysFile*)file);
+}
 
 static void
 modem_driver_init( int  base_port, ModemDriver*  dm, CharDriverState*  cs )
@@ -133,6 +154,14 @@ modem_driver_init( int  base_port, ModemDriver*  dm, CharDriverState*  cs )
     dm->in_sms = 0;
     dm->modem  = amodem_create( base_port, modem_driver_unsol, dm );
 
+    register_savevm(NULL,
+                    "android_modem",
+                    0,
+                    MODEM_DEV_STATE_SAVE_VERSION,
+                    modem_state_save,
+                    modem_state_load,
+                    dm->modem);
+
     qemu_chr_add_handlers( cs, modem_driver_can_read, modem_driver_read, NULL, dm );
 }
 
@@ -140,6 +169,10 @@ modem_driver_init( int  base_port, ModemDriver*  dm, CharDriverState*  cs )
 void android_modem_init( int  base_port )
 {
     static ModemDriver  modem_driver[1];
+
+    android_telephony_debug_modem = VERBOSE_CHECK(modem);
+    android_telephony_debug_radio = VERBOSE_CHECK(radio);
+    android_telephony_debug_socket = VERBOSE_CHECK(socket);
 
     if (android_modem_cs != NULL) {
         modem_driver_init( base_port, modem_driver, android_modem_cs );

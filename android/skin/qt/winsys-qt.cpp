@@ -29,6 +29,9 @@
 #include <QThread>
 #include <QWidget>
 
+using android::base::System;
+using android::base::String;
+
 #define  DEBUG  1
 
 #if DEBUG
@@ -70,10 +73,7 @@ extern void skin_winsys_enter_main_loop(int argc, char **argv)
 
     // Make Qt look at the libraries within this installation
     // (e.g., ".../objs/lib64/qt")
-    android::base::System* system = android::base::System::get();
-    android::base::String qtPath = system->getProgramDirectory();
-    qtPath += (system->getHostBitness() == 64) ? "/lib64/qt" : "/lib/qt";
-
+    String qtPath = System::emulatorQtDir();
     QStringList pathList(qtPath.c_str());
     QCoreApplication::setLibraryPaths(pathList);
     D("Qt lib path: %s\n", qtPath.c_str());
