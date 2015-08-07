@@ -10,6 +10,10 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/mac-native-window.mm
 endif
 
+ANDROID_SKIN_CFLAGS += -I$(LIBXML2_INCLUDES)
+ANDROID_SKIN_LDLIBS += $(LIBXML2_LDLIBS)
+ANDROID_SKIN_LDLIBS_64 += $(LIBXML2_LDLIBS_64)
+
 ANDROID_SKIN_SOURCES += \
     android/skin/qt/emulator-window.cpp \
     android/skin/qt/tool-window.cpp \
