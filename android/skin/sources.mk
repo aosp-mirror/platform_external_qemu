@@ -2,6 +2,10 @@
 # Note that there are two possible backends, based on the definitions
 # of EMULATOR_USE_SDL2 or EMULATOR_USE_QT.
 
+ANDROID_SKIN_LDLIBS :=
+ANDROID_SKIN_LDLIBS_64 :=
+ANDROID_SKIN_CFLAGS :=
+
 ANDROID_SKIN_QT_MOC_SRC_FILES :=
 ANDROID_SKIN_QT_RESOURCES :=
 

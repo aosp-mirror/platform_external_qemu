@@ -258,6 +258,16 @@ EMULATOR_LIBUI_CFLAGS += \
 common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
 
 ##############################################################################
+# Libxml2 definitions
+#
+LIBXML2_TOP32_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86
+LIBXML2_TOP64_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86_64
+
+LIBXML2_INCLUDES := $(LIBXML2_TOP32_DIR)/include
+LIBXML2_LDLIBS := $(LIBXML2_TOP32_DIR)/lib/libxml2.a
+LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
+
+##############################################################################
 # SDL-related definitions
 #
 
@@ -355,7 +365,7 @@ endif
 
 ## one for 32-bit
 $(call start-emulator-library, emulator-libui)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) $(ANDROID_SKIN_CFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
@@ -365,7 +375,7 @@ $(call end-emulator-library)
 
 
 $(call start-emulator64-library, emulator64-libui)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) $(ANDROID_SKIN_CFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
