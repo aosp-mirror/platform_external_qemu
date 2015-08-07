@@ -56,6 +56,24 @@
       "revId": "10c0cf706f971a7e673ec41862644dd439c1bb69",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "070ea328_7af2d593",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-07T22:15:59Z",
+      "side": 1,
+      "message": "I agree. I earlier tried that but got a linker error. It also failed when I tried the dependency in the other direction.\n\nCan you suggest another location for this function that both winsys-qt.cpp and qt_setup.c can link with?",
+      "parentUuid": "ea1cf420_3cd6d9c1",
+      "revId": "10c0cf706f971a7e673ec41862644dd439c1bb69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
