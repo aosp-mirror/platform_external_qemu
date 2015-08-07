@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a3068cc_0d491536",
+        "filename": "android/telephony/debug.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-07T17:40:47Z",
+      "side": 1,
+      "message": "s/is/if",
+      "revId": "bda5be7f9d919f353dff050e61d950465a867538",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
