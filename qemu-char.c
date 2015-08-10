@@ -102,7 +102,7 @@
 
 #ifdef CONFIG_ANDROID
 #include "android/charpipe.h"
-#include "modem_driver.h"
+#include "telephony/modem_driver.h"
 #include "android/gps.h"
 #include "android/hw-kmsg.h"
 #include "android/hw-qemud.h"

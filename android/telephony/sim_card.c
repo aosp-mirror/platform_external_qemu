@@ -9,10 +9,11 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "sim_card.h"
-#include <string.h>
+#include "android/telephony/sim_card.h"
+
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 /* set ENABLE_DYNAMIC_RECORDS to 1 to enable dynamic records
  * for now, this is an experimental feature that needs more testing

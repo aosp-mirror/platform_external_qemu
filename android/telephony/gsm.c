@@ -9,7 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "gsm.h"
+#include "android/telephony/gsm.h"
+
 #include <stdlib.h>
 #include <string.h>
 

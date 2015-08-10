@@ -32,3 +32,6 @@ SHA1=73ab0a008adf2b6a87fed598db1a9df5d3179674    URL=https://mirrors.kernel.org/
 SHA1=b695a0a5c8ebac0763569670a875da2531994d66    URL=https://mirrors.kernel.org/sourceware/cygwin/x86/release/gcc/libgcc1/libgcc1-4.9.3-1.tar.xz BASENAME=libgcc1
 SHA1=89bcd3a153152362e1931bce0af8d1cb98696287    URL=https://mirrors.kernel.org/sourceware/cygwin/x86/release/libiconv/libiconv2/libiconv2-1.14-3.tar.xz  BASENAME=libiconv2
 SHA1=876f10834f6569ae94772ba7ecf430d803db26eb    URL=https://mirrors.kernel.org/sourceware/cygwin/x86/release/gettext/libintl8/libintl8-0.19.4-1.tar.xz BASENAME=libintl8
+
+# libxml2
+SHA1=f46a37ea6d869f702e03f393c376760f3cbee673    URL=ftp://xmlsoft.org/libxml2/libxml2-2.9.2.tar.gz

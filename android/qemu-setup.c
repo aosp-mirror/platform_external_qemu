@@ -13,7 +13,7 @@
 #include "libslirp.h"
 #include "qemu-common.h"
 #include "sysemu/sysemu.h"
-#include "modem_driver.h"
+#include "telephony/modem_driver.h"
 #include "proxy_http.h"
 
 #include "android/android.h"

@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _android_gsm_h
-#define _android_gsm_h
+#ifndef ANDROID_TELEPHONY_GSM_H
+#define ANDROID_TELEPHONY_GSM_H
 
 /** USEFUL TYPES
  **/
@@ -206,4 +206,4 @@ extern void*     gsm_rope_reserve( GsmRope  rope, int  len );
 } // extern "C"
 #endif
 
-#endif /* _android_gsm_h */
+#endif /* ANDROID_TELEPHONY_GSM_H */
