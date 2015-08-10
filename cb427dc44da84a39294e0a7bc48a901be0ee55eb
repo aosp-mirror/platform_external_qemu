@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "47c41b7d_bc8d8d90",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-10T18:53:56Z",
+      "side": 1,
+      "message": "ah ah. android/base/ should be as agnostic from QEMU and Qt as possible. I think a better location would be to put such a declaration under android/qt/qt_setup.h instead.\n\nAlso, while this is not necesarry here, if you modify android/base/system/System.h, you should provide an implementation for the same method under android/base/testing/TestSystem.h, the following can then be used in unit-tests that don\u0027t want to depend on the system they\u0027re running on.\n\nHope this helps",
+      "revId": "cb427dc44da84a39294e0a7bc48a901be0ee55eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07bea3e2_5dbc2bb1",
+        "filename": "android/qt/qt_setup_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-10T18:53:56Z",
+      "side": 1,
+      "message": "We probably need to change makeSubDir() to support creating intermediate directories in the future, but hey, whatever works for now :)",
+      "revId": "cb427dc44da84a39294e0a7bc48a901be0ee55eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
