@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0706a3cf_da2881bc",
+        "filename": "Makefile.target",
+        "patchSetId": 5
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-11T19:21:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "47b17b56_d18d0487",
+      "revId": "76220ab2eb4a1e83103eb10bb03ec75325ca5412",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0706a3cf_b7acc8f9",
         "filename": "android/qt/qt_path.cpp",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-11T18:49:23Z",
       "side": 1,
       "message": "nit: Please respect alphabetical ordering, i.e.:\n\n  #include \"android/base/files/PathUtils.h\"\n  #include \"android/base/system/System.h\"",
+      "revId": "76220ab2eb4a1e83103eb10bb03ec75325ca5412",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2703a7c0_18f32513",
+        "filename": "android/qt/qt_path.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-11T19:21:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0706a3cf_b7acc8f9",
       "revId": "76220ab2eb4a1e83103eb10bb03ec75325ca5412",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "0706a3cf_3a1edd97",
+        "filename": "android/qt/qt_path.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-11T19:21:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2703a7c0_98bbb55e",
+      "revId": "76220ab2eb4a1e83103eb10bb03ec75325ca5412",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07bb033c_2ffce931",
         "filename": "android/qt/qt_path.h",
         "patchSetId": 5
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "2703a7c0_38f6e902",
+        "filename": "android/qt/qt_path.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-11T19:21:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "07bb033c_2ffce931",
+      "revId": "76220ab2eb4a1e83103eb10bb03ec75325ca5412",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a716b7fe_54f3ac5f",
         "filename": "android/qt/qt_setup.cpp",
         "patchSetId": 5
@@ -81,6 +153,24 @@
       "writtenOn": "2015-08-11T18:49:23Z",
       "side": 1,
       "message": "nit: include android/base/Log.h here. The idea is to not depend on \u0027hidden\u0027 dependencies between the headers in the source files that include them.",
+      "revId": "76220ab2eb4a1e83103eb10bb03ec75325ca5412",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67ae7ffb_b20840ba",
+        "filename": "android/qt/qt_setup.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-11T19:21:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a716b7fe_54f3ac5f",
       "revId": "76220ab2eb4a1e83103eb10bb03ec75325ca5412",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
