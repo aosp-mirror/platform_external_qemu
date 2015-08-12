@@ -13,19 +13,35 @@
 #include "android/emulator-window.h"
 
 #include "android/android.h"
+#include "android/ui-emu-agent.h"
+#include "android/battery-agent.h"
+#include "android/battery-agent-impl.h"
+#include "android/cellular-agent.h"
+#include "android/cellular-agent-impl.h"
+#include "android/finger-agent.h"
+#include "android/finger-agent-impl.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
 #include "android/hw-control.h"
 #include "android/hw-sensors.h"
+#include "android/location-agent.h"
+#include "android/location-agent-impl.h"
 #include "android/looper.h"
 #include "android/opengles.h"
+#include "android/telephony-agent.h"
+#include "android/telephony-agent-impl.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
 #include "android/user-events.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
 #include "telephony/modem_driver.h"
+
+#if CONFIG_QT
+extern void setEmuAgent(const UiEmuAgent *agPtr);
+#endif
+
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -230,6 +246,44 @@ emulator_window_setup( EmulatorWindow*  emulator )
                           emulator->onion_rotation,
                           emulator->onion_alpha);
     }
+
+#if CONFIG_QT
+    static const BatteryAgent myBatteryAgent = {
+        .setIsCharging  = battery_setIsCharging,
+        .setChargeLevel = battery_setChargeLevel,
+        .setHealth      = battery_setHealth,
+        .setStatus      = battery_setStatus
+    };
+
+    static const CellularAgent myCellularAgent = {
+        .setSignalStrength = cellular_setSignalStrength,
+        .setVoiceStatus    = cellular_setVoiceStatus,
+        .setDataStatus     = cellular_setDataStatus,
+        .setStandard       = cellular_setStandard
+    };
+
+    static const FingerAgent myFingerAgent = {
+        .setTouch       = finger_setTouch
+    };
+
+    static const LocationAgent myLocationAgent = {
+        .gpsCmd         = location_gpsCmd
+    };
+
+    static const TelephonyAgent myTelephonyAgent = {
+        .telephonyCmd   = telephony_telephonyCmd
+    };
+
+    static const UiEmuAgent myUiEmuAgent = {
+        .battery   = &myBatteryAgent,
+        .cellular  = &myCellularAgent,
+        .finger    = &myFingerAgent,
+        .location  = &myLocationAgent,
+        .telephony = &myTelephonyAgent
+    };
+
+    setEmuAgent(&myUiEmuAgent);
+#endif
 
     // Determine whether to use an EmuGL sub-window or not.
     if (!s_use_emugl_subwindow) {

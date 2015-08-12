@@ -20,4 +20,16 @@ extern CharDriverState*  android_gps_cs;
 
 extern void  android_gps_send_nmea( const char*  sentence );
 
+// Send a GPS location to the AVD using an NMEA sentence
+//
+// Inputs: latitude:        Degrees
+//         longitude:       Degrees
+//         metersElevation: Meters above sea level
+//         nSatellites:     Number of satellites used
+//         time:            UTC, in the format provided
+//                          by gettimeofday()
+extern void  send_GPS_location(double latitude, double longitude, 
+                               double metersElevation, int nSatellites,
+                               struct timeval *time);
+
 #endif /* _android_gps_h */
