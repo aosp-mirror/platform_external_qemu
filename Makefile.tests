@@ -45,6 +45,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/opengl/emugl_config_unittest.cpp \
   android/opengl/GpuFrameBridge_unittest.cpp \
   android/qt/qt_path.cpp \
+  android/qt/qt_path_unittest.cpp \
   android/qt/qt_setup.cpp \
   android/qt/qt_setup_unittest.cpp \
   android/telephony/gsm_unittest.cpp \
