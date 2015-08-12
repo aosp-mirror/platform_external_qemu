@@ -2023,8 +2023,8 @@ do_event_text( ControlClient  client, char*  args )
 static const CommandDefRec  event_commands[] =
 {
     { "send", "send a series of events to the kernel",
-    "'event send <type>:<code>:<value> ...' allows your to send one or more hardware events\r\n"
-    "to the Android kernel. you can use text names or integers for <type> and <code>\r\n", NULL,
+    "'event send <type>:<code>:<value> ...' allows you to send one or more hardware events\r\n"
+    "to the Android kernel. You can use text names or integers for <type> and <code>\r\n", NULL,
     do_event_send, NULL },
 
     { "types", "list all <type> aliases",
@@ -2038,7 +2038,7 @@ static const CommandDefRec  event_commands[] =
     { "text", "simulate keystrokes from a given text",
     "'event text <message>' allows you to simulate keypresses to generate a given text\r\n"
     "message. <message> must be an utf-8 string. Unicode points will be reverse-mapped\r\n"
-    "according to the current device keyboard. unsupported characters will be discarded\r\n"
+    "according to the current device keyboard. Unsupported characters will be discarded\r\n"
     "silently\r\n", NULL, do_event_text, NULL },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }

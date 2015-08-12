@@ -3193,7 +3193,7 @@ int main(int argc, char **argv, char **envp)
             } else {
                 /* Successful locking */
                 hda_opts = drive_add(sdPath, HD_ALIAS, 0);
-                /* Set this property of any operation involving the SD Card
+                /* Set this property or any operation involving the SD Card
                  * will be x100 slower, due to the corresponding file being
                  * mounted as O_DIRECT. Note that this is only 'unsafe' in
                  * the context of an emulator crash. The data is already
