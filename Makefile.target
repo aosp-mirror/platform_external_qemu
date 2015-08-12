@@ -311,13 +311,14 @@ common_LOCAL_SRC_FILES := \
     android/main-common-ui.c \
     android/main.c \
     android/opengles.c \
+    android/qt/qt_path.cpp \
     android/user-events-qemu.c \
     hw/core/loader.c \
+    ui/keymaps.c \
     util/bitmap.c \
     util/bitops.c \
-    ui/keymaps.c \
-    util/qemu-timer-common.c \
     util/iov.c \
+    util/qemu-timer-common.c \
 
 # The following files cannot be in static libraries because they contain
 # constructor functions that are otherwise stripped by the final linker

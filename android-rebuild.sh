@@ -255,7 +255,11 @@ if [ "$EMULATOR_USE_QT" = "true" ]; then
             panic "Cannot find Qt prebuilt libraries!?"
         fi
         for QT_LIB in $QT_LIBS; do
-            run cp -a "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR"/$(basename "$QT_LIB") ||
+            QT_DST_SUBDIR=$(dirname "$QT_LIB")
+            if [ ! -d "$QT_DSTDIR/$QT_DST_SUBDIR" ]; then
+                run mkdir -p "$QT_DSTDIR/$QT_DST_SUBDIR"
+            fi
+            run cp -a "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR/$QT_DST_SUBDIR" ||
                     panic "Could not copy $QT_LIB"
         done
     done
