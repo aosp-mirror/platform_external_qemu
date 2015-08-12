@@ -1,0 +1,361 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a41eb557_f7671a18",
+        "filename": "Makefile.target",
+        "patchSetId": 2
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "nit: please respect alphabetical ordering.",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a41eb557_b771a2d2",
+        "filename": "android/battery-agent-impl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "nit: always use consistent header paths, i.e. android/battery-agent.h",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64111d42_7d9c134a",
+        "filename": "android/battery-agent-impl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "what about calling this header file qemu-battery-agent.h instead, only define a pointer, and include C++ inclusion guards, as in:\n\n\n  #include \"android/battery-agent.h\"\n  #include \"android/utils/compiler.h\"\n\n  ANDROID_BEGIN_HEADER\n\n  const BatteryAgent* qemu_battery_agent;\n\n  ANDROID_END_HEADER",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44141933_5cf83170",
+        "filename": "android/battery-agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "nit: I\u0027d recommend adding C++ inclusion guards directly in such a header. Either directly, or using:\n\n  #include \"android/utils/compiler.h\"\n\n  ANDROID_BEGIN_HEADER\n\n  ...\n\n  ANDROID_END_HEADER",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4f6494b_e0acfc74",
+        "filename": "android/battery-agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "Nit: can you add a little bit of documentation explaning what each method is supposed to do here?",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4298d86_11118e8f",
+        "filename": "android/cellular-agent-impl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "same remarks as battery-agent-impl.h here.",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a41eb557_9747c672",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2026,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "nit: I\u0027d prefer for simple changes that fix typos like this to appear in their own trivial patch, if possible.",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64111d42_bdb98bb1",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2318,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "sounds good, but can we have an individual patch that moves this code to send_GPS_location() before the rest of the UI changes patch?",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04f5c13c_42e4d456",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "nit: alphabetical order.",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4f6494b_40a61099",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "nit: I would prefer setUiEmuAgent() for consistency.\n\nWhy is this not declared in a header instead?",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64111d42_dd955f13",
+        "filename": "android/gps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "nit: trailing spaces.",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64367de0_92ed7c2f",
+        "filename": "android/gps.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "nit: trailing space.",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4298d86_b1ff5a9c",
+        "filename": "android/gps.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "can this be const? this helps explain that this is passed as input.",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "645f5d28_ca8fc3b2",
+        "filename": "android/location-agent-impl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "see battery-agent-impl.h comments",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44141933_bce06db7",
+        "filename": "android/location-agent-impl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "nit: trailing space.",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4298d86_91fc5ea8",
+        "filename": "android/location-agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "please provide documentation for this method. What is it supposed to do exactly?",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c42489af_50071259",
+        "filename": "android/qt/qt_setup.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "woot? Really?",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4298d86_f1672218",
+        "filename": "android/skin/qt/surface-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "nit: alphabetical order means this line should appear higher.",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "842e118f_abb36980",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "I suggest to put the file rename in its own individual patch",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04f5c13c_82ac1cf9",
+        "filename": "telephony/sms_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "it looks like you need to rebase to a more recent version of the tree. This source file is supposed to be under android/telephony/ now.\n\nMaybe a left-over from previous editing?",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c42489af_d0f2e2d5",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3196,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T01:05:57Z",
+      "side": 1,
+      "message": "thanks, but can that go into a different patch?",
+      "revId": "c7af8d5d0e00a20830cfd1956d2a8331ff73da99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
