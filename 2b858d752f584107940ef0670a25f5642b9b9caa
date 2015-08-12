@@ -69,6 +69,24 @@
       "revId": "2b858d752f584107940ef0670a25f5642b9b9caa",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a41eb557_f4715803",
+        "filename": "android/qt/qt_path.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-12T00:25:48Z",
+      "side": 1,
+      "message": "ok, I trust you to submit a working one in a future patch soon then, ok ?",
+      "parentUuid": "c42489af_0d73b15d",
+      "revId": "2b858d752f584107940ef0670a25f5642b9b9caa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
