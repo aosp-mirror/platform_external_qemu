@@ -22,28 +22,28 @@ namespace Ui {
     class ToolWindow;
 }
 
-class EmulatorWindow;
+class EmulatorQtWindow;
 class TitleBarWidget;
 
-typedef void(EmulatorWindow::*EmulatorWindowSlot)();
+typedef void(EmulatorQtWindow::*EmulatorQtWindowSlot)();
 
 class ToolWindow : public QFrame
 {
     Q_OBJECT
 
 public:
-    explicit ToolWindow(EmulatorWindow *emulatorWindow);
+    explicit ToolWindow(EmulatorQtWindow *emulatorWindow);
     void show();
-    
+
 public slots:
     void slot_toggleExpand();
 
 private:
-    QToolButton *addButton(QGridLayout *layout, int row, int col, const char *iconPath, EmulatorWindowSlot slot);
+    QToolButton *addButton(QGridLayout *layout, int row, int col, const char *iconPath, EmulatorQtWindowSlot slot);
     void setExpandedState(bool expanded);
-    
+
     QWidget *button_area;
-    EmulatorWindow *emulator_window;
+    EmulatorQtWindow *emulator_qt_window;
     bool expanded;
     QList<QToolButton*> expanded_buttons;
     TitleBarWidget *title_bar;
@@ -55,7 +55,7 @@ typedef void(ToolWindow::*ToolWindowSlot)();
 class TitleBarWidget : public QWidget
 {
     Q_OBJECT
-    
+
 public:
     explicit TitleBarWidget(ToolWindow *window);
     virtual void mousePressEvent(QMouseEvent *event);

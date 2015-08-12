@@ -15,11 +15,11 @@ ANDROID_SKIN_LDLIBS += $(LIBXML2_LDLIBS)
 ANDROID_SKIN_LDLIBS_64 += $(LIBXML2_LDLIBS_64)
 
 ANDROID_SKIN_SOURCES += \
-    android/skin/qt/emulator-window.cpp \
+    android/skin/qt/emulator-qt-window.cpp \
     android/skin/qt/tool-window.cpp \
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
-    android/skin/qt/emulator-window.h \
+    android/skin/qt/emulator-qt-window.h \
     android/skin/qt/tool-window.h \
 
 ANDROID_SKIN_QT_RESOURCES := \

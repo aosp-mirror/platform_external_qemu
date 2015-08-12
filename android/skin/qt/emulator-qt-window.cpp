@@ -21,7 +21,7 @@
 
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
-#include "android/skin/qt/emulator-window.h"
+#include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/winsys-qt.h"
 
 #if defined(__APPLE__)
@@ -39,52 +39,52 @@
 
 #define MIN(a,b) (a < b ? a : b)
 
-static EmulatorWindow *instance;
+static EmulatorQtWindow *instance;
 
-EmulatorWindow::EmulatorWindow(QWidget *parent) :
+EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         QFrame(parent)
 {
     instance = this;
     backing_surface = NULL;
     tool_window = new ToolWindow(this);
 
-    QObject::connect(this, &EmulatorWindow::blit, this, &EmulatorWindow::slot_blit);
-    QObject::connect(this, &EmulatorWindow::createBitmap, this, &EmulatorWindow::slot_createBitmap);
-    QObject::connect(this, &EmulatorWindow::fill, this, &EmulatorWindow::slot_fill);
-    QObject::connect(this, &EmulatorWindow::getBitmapInfo, this, &EmulatorWindow::slot_getBitmapInfo);
-    QObject::connect(this, &EmulatorWindow::getMonitorDpi, this, &EmulatorWindow::slot_getMonitorDpi);
-    QObject::connect(this, &EmulatorWindow::getScreenDimensions, this, &EmulatorWindow::slot_getScreenDimensions);
-    QObject::connect(this, &EmulatorWindow::getWindowId, this, &EmulatorWindow::slot_getWindowId);
-    QObject::connect(this, &EmulatorWindow::getWindowPos, this, &EmulatorWindow::slot_getWindowPos);
-    QObject::connect(this, &EmulatorWindow::isWindowFullyVisible, this, &EmulatorWindow::slot_isWindowFullyVisible);
-    QObject::connect(this, &EmulatorWindow::pollEvent, this, &EmulatorWindow::slot_pollEvent);
-    QObject::connect(this, &EmulatorWindow::queueEvent, this, &EmulatorWindow::slot_queueEvent);
-    QObject::connect(this, &EmulatorWindow::releaseBitmap, this, &EmulatorWindow::slot_releaseBitmap);
-    QObject::connect(this, &EmulatorWindow::requestClose, this, &EmulatorWindow::slot_requestClose);
-    QObject::connect(this, &EmulatorWindow::requestUpdate, this, &EmulatorWindow::slot_requestUpdate);
-    QObject::connect(this, &EmulatorWindow::setWindowIcon, this, &EmulatorWindow::slot_setWindowIcon);
-    QObject::connect(this, &EmulatorWindow::setWindowPos, this, &EmulatorWindow::slot_setWindowPos);
-    QObject::connect(this, &EmulatorWindow::setTitle, this, &EmulatorWindow::slot_setWindowTitle);
-    QObject::connect(this, &EmulatorWindow::showWindow, this, &EmulatorWindow::slot_showWindow);
-    QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit, this, &EmulatorWindow::slot_clearInstance);
+    QObject::connect(this, &EmulatorQtWindow::blit, this, &EmulatorQtWindow::slot_blit);
+    QObject::connect(this, &EmulatorQtWindow::createBitmap, this, &EmulatorQtWindow::slot_createBitmap);
+    QObject::connect(this, &EmulatorQtWindow::fill, this, &EmulatorQtWindow::slot_fill);
+    QObject::connect(this, &EmulatorQtWindow::getBitmapInfo, this, &EmulatorQtWindow::slot_getBitmapInfo);
+    QObject::connect(this, &EmulatorQtWindow::getMonitorDpi, this, &EmulatorQtWindow::slot_getMonitorDpi);
+    QObject::connect(this, &EmulatorQtWindow::getScreenDimensions, this, &EmulatorQtWindow::slot_getScreenDimensions);
+    QObject::connect(this, &EmulatorQtWindow::getWindowId, this, &EmulatorQtWindow::slot_getWindowId);
+    QObject::connect(this, &EmulatorQtWindow::getWindowPos, this, &EmulatorQtWindow::slot_getWindowPos);
+    QObject::connect(this, &EmulatorQtWindow::isWindowFullyVisible, this, &EmulatorQtWindow::slot_isWindowFullyVisible);
+    QObject::connect(this, &EmulatorQtWindow::pollEvent, this, &EmulatorQtWindow::slot_pollEvent);
+    QObject::connect(this, &EmulatorQtWindow::queueEvent, this, &EmulatorQtWindow::slot_queueEvent);
+    QObject::connect(this, &EmulatorQtWindow::releaseBitmap, this, &EmulatorQtWindow::slot_releaseBitmap);
+    QObject::connect(this, &EmulatorQtWindow::requestClose, this, &EmulatorQtWindow::slot_requestClose);
+    QObject::connect(this, &EmulatorQtWindow::requestUpdate, this, &EmulatorQtWindow::slot_requestUpdate);
+    QObject::connect(this, &EmulatorQtWindow::setWindowIcon, this, &EmulatorQtWindow::slot_setWindowIcon);
+    QObject::connect(this, &EmulatorQtWindow::setWindowPos, this, &EmulatorQtWindow::slot_setWindowPos);
+    QObject::connect(this, &EmulatorQtWindow::setTitle, this, &EmulatorQtWindow::slot_setWindowTitle);
+    QObject::connect(this, &EmulatorQtWindow::showWindow, this, &EmulatorQtWindow::slot_showWindow);
+    QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit, this, &EmulatorQtWindow::slot_clearInstance);
 }
 
-EmulatorWindow::~EmulatorWindow()
+EmulatorQtWindow::~EmulatorQtWindow()
 {
     delete tool_window;
 }
 
-EmulatorWindow *EmulatorWindow::getInstance()
+EmulatorQtWindow *EmulatorQtWindow::getInstance()
 {
     return instance;
 }
 
-void EmulatorWindow::keyPressEvent(QKeyEvent *event)
+void EmulatorQtWindow::keyPressEvent(QKeyEvent *event)
 {
     handleKeyEvent(kEventKeyDown, event);
 }
 
-void EmulatorWindow::keyReleaseEvent(QKeyEvent *event)
+void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
 {
     handleKeyEvent(kEventKeyUp, event);
     if (event->text().length() > 0) {
@@ -95,22 +95,22 @@ void EmulatorWindow::keyReleaseEvent(QKeyEvent *event)
     }
 }
 
-void EmulatorWindow::mouseMoveEvent(QMouseEvent *event)
+void EmulatorQtWindow::mouseMoveEvent(QMouseEvent *event)
 {
     handleEvent(kEventMouseMotion, event);
 }
 
-void EmulatorWindow::mousePressEvent(QMouseEvent *event)
+void EmulatorQtWindow::mousePressEvent(QMouseEvent *event)
 {
     handleEvent(kEventMouseButtonDown, event);
 }
 
-void EmulatorWindow::mouseReleaseEvent(QMouseEvent *event)
+void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent *event)
 {
     handleEvent(kEventMouseButtonUp, event);
 }
 
-void EmulatorWindow::paintEvent(QPaintEvent *)
+void EmulatorQtWindow::paintEvent(QPaintEvent *)
 {
     if (backing_surface) {
         QPainter painter(this);
@@ -121,19 +121,19 @@ void EmulatorWindow::paintEvent(QPaintEvent *)
     }
 }
 
-void EmulatorWindow::show()
+void EmulatorQtWindow::show()
 {
     QFrame::show();
     tool_window->show();
 }
 
-void EmulatorWindow::startThread(StartFunction f, int argc, char **argv)
+void EmulatorQtWindow::startThread(StartFunction f, int argc, char **argv)
 {
     MainLoopThread *t = new MainLoopThread(f, argc, argv);
     t->start();
 }
 
-void EmulatorWindow::wheelEvent(QWheelEvent *event)
+void EmulatorQtWindow::wheelEvent(QWheelEvent *event)
 {
     int delta = event->delta();
     SkinEvent *skin_event = createSkinEvent(kEventMouseButtonDown);
@@ -145,7 +145,7 @@ void EmulatorWindow::wheelEvent(QWheelEvent *event)
     queueEvent(skin_event);
 }
 
-void EmulatorWindow::slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore)
 {
     QPainter painter(dst);
     painter.setCompositionMode(*op);
@@ -155,26 +155,26 @@ void EmulatorWindow::slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint 
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_clearInstance()
+void EmulatorQtWindow::slot_clearInstance()
 {
     skin_winsys_save_window_pos();
     instance = NULL;
 }
 
-void EmulatorWindow::slot_createBitmap(SkinSurface *s, int w, int h, QSemaphore *semaphore) {
+void EmulatorQtWindow::slot_createBitmap(SkinSurface *s, int w, int h, QSemaphore *semaphore) {
     s->bitmap = new QImage(w, h, QImage::Format_ARGB32);
     s->bitmap->fill(0);
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_fill(SkinSurface *s, const QRect *rect, const QColor *color, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_fill(SkinSurface *s, const QRect *rect, const QColor *color, QSemaphore *semaphore)
 {
     QPainter painter(s->bitmap);
     painter.fillRect(*rect, *color);
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_getBitmapInfo(SkinSurface *s, SkinSurfacePixels *pix, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_getBitmapInfo(SkinSurface *s, SkinSurfacePixels *pix, QSemaphore *semaphore)
 {
     pix->pixels = (uint32_t*)s->bitmap->bits();
     pix->w = s->original_w;
@@ -183,13 +183,13 @@ void EmulatorWindow::slot_getBitmapInfo(SkinSurface *s, SkinSurfacePixels *pix, 
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_getMonitorDpi(int *out_dpi, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_getMonitorDpi(int *out_dpi, QSemaphore *semaphore)
 {
     *out_dpi = QApplication::screens().at(0)->logicalDotsPerInch();
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_getScreenDimensions(QRect *out_rect, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_getScreenDimensions(QRect *out_rect, QSemaphore *semaphore)
 {
     QRect rect = ((QApplication*)QApplication::instance())->desktop()->screenGeometry();
     out_rect->setX(rect.x());
@@ -199,7 +199,7 @@ void EmulatorWindow::slot_getScreenDimensions(QRect *out_rect, QSemaphore *semap
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_getWindowId(WId *out_id, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_getWindowId(WId *out_id, QSemaphore *semaphore)
 {
     WId wid = effectiveWinId();
     D("Effective win ID is %lx", wid);
@@ -211,20 +211,20 @@ void EmulatorWindow::slot_getWindowId(WId *out_id, QSemaphore *semaphore)
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_getWindowPos(int *xx, int *yy, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_getWindowPos(int *xx, int *yy, QSemaphore *semaphore)
 {
     *xx = x();
     *yy = y();
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_isWindowFullyVisible(bool *out_value, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_isWindowFullyVisible(bool *out_value, QSemaphore *semaphore)
 {
     *out_value = ((QApplication*)QApplication::instance())->desktop()->screenGeometry().contains(geometry());
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemaphore *semaphore)
 {
     if (event_queue.isEmpty()) {
         *hasEvent = false;
@@ -237,13 +237,13 @@ void EmulatorWindow::slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemaphore
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_queueEvent(SkinEvent *event, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_queueEvent(SkinEvent *event, QSemaphore *semaphore)
 {
     event_queue.enqueue(event);
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_releaseBitmap(SkinSurface *s, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_releaseBitmap(SkinSurface *s, QSemaphore *semaphore)
 {
     if (backing_surface == s) {
         backing_surface = NULL;
@@ -252,13 +252,13 @@ void EmulatorWindow::slot_releaseBitmap(SkinSurface *s, QSemaphore *semaphore)
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_requestClose(QSemaphore *semaphore)
+void EmulatorQtWindow::slot_requestClose(QSemaphore *semaphore)
 {
     close();
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_requestUpdate(const QRect *rect, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_requestUpdate(const QRect *rect, QSemaphore *semaphore)
 {
     QRect r(rect->x()  *backing_surface->w / backing_surface->original_w,
             rect->y()  *backing_surface->h / backing_surface->original_h,
@@ -268,13 +268,13 @@ void EmulatorWindow::slot_requestUpdate(const QRect *rect, QSemaphore *semaphore
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_setWindowPos(int x, int y, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_setWindowPos(int x, int y, QSemaphore *semaphore)
 {
     move(x, y);
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_setWindowIcon(const unsigned char *, int, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_setWindowIcon(const unsigned char *, int, QSemaphore *semaphore)
 {
     //    QPixmap image;
     //    image.loadFromData(data, size);
@@ -283,13 +283,13 @@ void EmulatorWindow::slot_setWindowIcon(const unsigned char *, int, QSemaphore *
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_setWindowTitle(const QString *title, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_setWindowTitle(const QString *title, QSemaphore *semaphore)
 {
     setWindowTitle(*title);
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore)
 {
     backing_surface = surface;
     if (is_fullscreen) {
@@ -302,112 +302,112 @@ void EmulatorWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, in
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorWindow::slot_back()
+void EmulatorQtWindow::slot_back()
 {
     simulateKeyPress(KEY_ESC, 0);
 }
 
-void EmulatorWindow::slot_battery()
+void EmulatorQtWindow::slot_battery()
 {
 }
 
-void EmulatorWindow::slot_camera()
+void EmulatorQtWindow::slot_camera()
 {
 }
 
-void EmulatorWindow::slot_cellular()
+void EmulatorQtWindow::slot_cellular()
 {
 }
 
-void EmulatorWindow::slot_down()
+void EmulatorQtWindow::slot_down()
 {
     simulateKeyPress(KEY_KP8, 0);
 }
 
-void EmulatorWindow::slot_fullscreen()
+void EmulatorQtWindow::slot_fullscreen()
 {
     simulateKeyPress(KEY_F9, 0);
 }
 
-void EmulatorWindow::slot_gps()
+void EmulatorQtWindow::slot_gps()
 {
 }
 
-void EmulatorWindow::slot_home()
+void EmulatorQtWindow::slot_home()
 {
     simulateKeyPress(KEY_HOME, 0);
 }
 
-void EmulatorWindow::slot_left()
+void EmulatorQtWindow::slot_left()
 {
     simulateKeyPress(KEY_KP4, 0);
 }
 
-void EmulatorWindow::slot_menu()
+void EmulatorQtWindow::slot_menu()
 {
     simulateKeyPress(KEY_F2, 0);
 }
 
-void EmulatorWindow::slot_phone()
+void EmulatorQtWindow::slot_phone()
 {
 }
 
-void EmulatorWindow::slot_power()
+void EmulatorQtWindow::slot_power()
 {
     simulateKeyPress(KEY_F7, 0);
 }
 
-void EmulatorWindow::slot_recents()
+void EmulatorQtWindow::slot_recents()
 {
     simulateKeyPress(KEY_F2, kKeyModLShift);
 }
 
-void EmulatorWindow::slot_right()
+void EmulatorQtWindow::slot_right()
 {
     simulateKeyPress(KEY_KP6, 0);
 }
 
-void EmulatorWindow::slot_rotate()
+void EmulatorQtWindow::slot_rotate()
 {
     simulateKeyPress(KEY_F12, kKeyModLCtrl);
 }
 
-void EmulatorWindow::slot_screenrecord()
+void EmulatorQtWindow::slot_screenrecord()
 {
 }
 
-void EmulatorWindow::slot_screenshot()
+void EmulatorQtWindow::slot_screenshot()
 {
 }
 
-void EmulatorWindow::slot_sdcard()
+void EmulatorQtWindow::slot_sdcard()
 {
 }
 
-void EmulatorWindow::slot_sensors()
+void EmulatorQtWindow::slot_sensors()
 {
 }
 
-void EmulatorWindow::slot_up()
+void EmulatorQtWindow::slot_up()
 {
     simulateKeyPress(KEY_KP2, 0);
 }
 
-void EmulatorWindow::slot_volumeDown()
+void EmulatorQtWindow::slot_volumeDown()
 {
     simulateKeyPress(KEY_F6, kKeyModLCtrl);
 }
 
-void EmulatorWindow::slot_voice()
+void EmulatorQtWindow::slot_voice()
 {
 }
 
-void EmulatorWindow::slot_volumeUp()
+void EmulatorQtWindow::slot_volumeUp()
 {
     simulateKeyPress(KEY_F5, kKeyModLCtrl);
 }
 
-void EmulatorWindow::slot_zoom()
+void EmulatorQtWindow::slot_zoom()
 {
 }
 
@@ -500,14 +500,14 @@ static int convertKeyCode(int sym)
     return -1;
 }
 
-SkinEvent *EmulatorWindow::createSkinEvent(SkinEventType type)
+SkinEvent *EmulatorQtWindow::createSkinEvent(SkinEventType type)
 {
     SkinEvent *skin_event = new SkinEvent();
     skin_event->type = type;
     return skin_event;
 }
 
-void EmulatorWindow::handleEvent(SkinEventType type, QMouseEvent *event)
+void EmulatorQtWindow::handleEvent(SkinEventType type, QMouseEvent *event)
 {
     SkinEvent *skin_event = createSkinEvent(type);
     skin_event->u.mouse.button = event->button() == Qt::RightButton ? kMouseButtonRight : kMouseButtonLeft;
@@ -518,7 +518,7 @@ void EmulatorWindow::handleEvent(SkinEventType type, QMouseEvent *event)
     queueEvent(skin_event);
 }
 
-void EmulatorWindow::handleKeyEvent(SkinEventType type, QKeyEvent *pEvent)
+void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *pEvent)
 {
     SkinEvent *skin_event = createSkinEvent(type);
     SkinEventKeyData *keyData = &skin_event->u.key;
@@ -530,7 +530,7 @@ void EmulatorWindow::handleKeyEvent(SkinEventType type, QKeyEvent *pEvent)
     queueEvent(skin_event);
 }
 
-void EmulatorWindow::simulateKeyPress(int keyCode, int modifiers)
+void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers)
 {
     SkinEvent *event = new SkinEvent();
     event->type = kEventKeyDown;

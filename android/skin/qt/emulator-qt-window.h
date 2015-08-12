@@ -9,8 +9,8 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU General Public License for more details.
  */
-#ifndef EMULATOR_WINDOW_H
-#define EMULATOR_WINDOW_H
+#ifndef SKIN_QT_EMULATOR_QT_WINDOW_H
+#define SKIN_QT_EMULATOR_QT_WINDOW_H
 
 #include <QtCore>
 #include <QApplication>
@@ -43,14 +43,14 @@ private:
     char **argv;
 };
 
-class EmulatorWindow : public QFrame
+class EmulatorQtWindow : public QFrame
 {
     Q_OBJECT
 public:
-    explicit EmulatorWindow(QWidget *parent = 0);
-    virtual ~EmulatorWindow();
+    explicit EmulatorQtWindow(QWidget *parent = 0);
+    virtual ~EmulatorQtWindow();
 
-    static EmulatorWindow *getInstance();
+    static EmulatorQtWindow *getInstance();
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     void paintEvent(QPaintEvent *event);
@@ -161,7 +161,7 @@ struct SkinSurface {
     int id;
     QImage *bitmap;
     int w, h, original_w, original_h;
-    EmulatorWindow *window;
+    EmulatorQtWindow *window;
 };
 
-#endif //EMULATOR_WINDOW_H
+#endif // SKIN_QT_EMULATOR_QT_WINDOW_H

@@ -15,15 +15,15 @@
 #include "ui_battery.h"
 #include "ui_tool-window.h"
 
-#include "android/skin/qt/emulator-window.h"
+#include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/tool-window.h"
 
-ToolWindow::ToolWindow(EmulatorWindow *window) :
+ToolWindow::ToolWindow(EmulatorQtWindow *window) :
     QFrame(window),
-    emulator_window(window)
+    emulator_qt_window(window)
 {
     Q_INIT_RESOURCE(resources);
-    
+
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
     top_layout = new QBoxLayout(QBoxLayout::TopToBottom);
     top_layout->setContentsMargins(0, 0, 0, 0);
@@ -31,38 +31,38 @@ ToolWindow::ToolWindow(EmulatorWindow *window) :
     setStyleSheet(QString("* { background: #2c3239 }"));
     title_bar = new TitleBarWidget(this);
     top_layout->addWidget(title_bar);
-    
+
     QGridLayout *layout = new QGridLayout();
     layout->setContentsMargins(10, 0, 10, 10);
     layout->setAlignment(Qt::AlignHCenter);
     int col = 0;
     int row = 0;
-    addButton(layout, row++, col, ":/images/ic_power_settings_new_48px.svg", &EmulatorWindow::slot_power);
-    addButton(layout, row++, col, ":/images/ic_volume_up_48px.svg", &EmulatorWindow::slot_volumeUp);
-    addButton(layout, row++, col, ":/images/ic_volume_down_48px.svg", &EmulatorWindow::slot_volumeDown);
-    addButton(layout, row++, col, ":/images/ic_stay_current_portrait_48px.svg", &EmulatorWindow::slot_rotate);
-    addButton(layout, row++, col, ":/images/ic_zoom_in_24px.svg", &EmulatorWindow::slot_zoom);
-    addButton(layout, row++, col, ":/images/ic_fullscreen_48px.svg", &EmulatorWindow::slot_fullscreen);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_camera_enhance_48px.svg", &EmulatorWindow::slot_screenshot);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_hangout_video_48px.svg", &EmulatorWindow::slot_screenrecord);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_arrow_back_48px.svg", &EmulatorWindow::slot_back);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_panorama_fish_eye_48px.svg", &EmulatorWindow::slot_home);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_crop_square_48px.svg", &EmulatorWindow::slot_recents);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_menu_48px.svg", &EmulatorWindow::slot_menu);
+    addButton(layout, row++, col, ":/images/ic_power_settings_new_48px.svg", &EmulatorQtWindow::slot_power);
+    addButton(layout, row++, col, ":/images/ic_volume_up_48px.svg", &EmulatorQtWindow::slot_volumeUp);
+    addButton(layout, row++, col, ":/images/ic_volume_down_48px.svg", &EmulatorQtWindow::slot_volumeDown);
+    addButton(layout, row++, col, ":/images/ic_stay_current_portrait_48px.svg", &EmulatorQtWindow::slot_rotate);
+    addButton(layout, row++, col, ":/images/ic_zoom_in_24px.svg", &EmulatorQtWindow::slot_zoom);
+    addButton(layout, row++, col, ":/images/ic_fullscreen_48px.svg", &EmulatorQtWindow::slot_fullscreen);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_camera_enhance_48px.svg", &EmulatorQtWindow::slot_screenshot);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_hangout_video_48px.svg", &EmulatorQtWindow::slot_screenrecord);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_arrow_back_48px.svg", &EmulatorQtWindow::slot_back);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_panorama_fish_eye_48px.svg", &EmulatorQtWindow::slot_home);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_crop_square_48px.svg", &EmulatorQtWindow::slot_recents);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_menu_48px.svg", &EmulatorQtWindow::slot_menu);
     col++;
     row = 0;
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_mic_48px.svg", &EmulatorWindow::slot_voice);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_sd_card_48px.svg", &EmulatorWindow::slot_sdcard);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_location_on_48px.svg", &EmulatorWindow::slot_gps);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_signal_cellular_4_bar_48px.svg", &EmulatorWindow::slot_cellular);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_battery_std_48px.svg", &EmulatorWindow::slot_battery);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_photo_camera_48px.svg", &EmulatorWindow::slot_camera);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_call_48px.svg", &EmulatorWindow::slot_phone);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_filter_tilt_shift_48px.svg", &EmulatorWindow::slot_sensors);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_keyboard_arrow_left_48px.svg", &EmulatorWindow::slot_left);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_keyboard_arrow_down_48px.svg", &EmulatorWindow::slot_down);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_keyboard_arrow_up_48px.svg", &EmulatorWindow::slot_up);
-    expanded_buttons << addButton(layout, row++, col, ":/images/ic_keyboard_arrow_right_48px.svg", &EmulatorWindow::slot_right);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_mic_48px.svg", &EmulatorQtWindow::slot_voice);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_sd_card_48px.svg", &EmulatorQtWindow::slot_sdcard);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_location_on_48px.svg", &EmulatorQtWindow::slot_gps);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_signal_cellular_4_bar_48px.svg", &EmulatorQtWindow::slot_cellular);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_battery_std_48px.svg", &EmulatorQtWindow::slot_battery);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_photo_camera_48px.svg", &EmulatorQtWindow::slot_camera);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_call_48px.svg", &EmulatorQtWindow::slot_phone);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_filter_tilt_shift_48px.svg", &EmulatorQtWindow::slot_sensors);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_keyboard_arrow_left_48px.svg", &EmulatorQtWindow::slot_left);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_keyboard_arrow_down_48px.svg", &EmulatorQtWindow::slot_down);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_keyboard_arrow_up_48px.svg", &EmulatorQtWindow::slot_up);
+    expanded_buttons << addButton(layout, row++, col, ":/images/ic_keyboard_arrow_right_48px.svg", &EmulatorQtWindow::slot_right);
     button_area = new QWidget();
     button_area->setLayout(layout);
 
@@ -70,12 +70,12 @@ ToolWindow::ToolWindow(EmulatorWindow *window) :
     setExpandedState(false);
 }
 
-QToolButton *ToolWindow::addButton(QGridLayout *layout, int row, int col, const char *iconPath, EmulatorWindowSlot slot)
+QToolButton *ToolWindow::addButton(QGridLayout *layout, int row, int col, const char *iconPath, EmulatorQtWindowSlot slot)
 {
     QToolButton *button = new QToolButton();
     button->setAutoRaise(true);
     button->setIcon(QIcon(iconPath));
-    QObject::connect(button, &QPushButton::clicked, emulator_window, slot);
+    QObject::connect(button, &QPushButton::clicked, emulator_qt_window, slot);
     layout->addWidget(button, row, col);
     layout->setAlignment(button, Qt::AlignHCenter);
     return button;
@@ -96,7 +96,7 @@ void ToolWindow::setExpandedState(bool exp)
 
 void ToolWindow::show()
 {
-    move(emulator_window->geometry().right() + 10, emulator_window->geometry().top() + 10);
+    move(emulator_qt_window->geometry().right() + 10, emulator_qt_window->geometry().top() + 10);
     QFrame::show();
     setFixedSize(size());
     title_bar->setFixedSize(title_bar->size());
