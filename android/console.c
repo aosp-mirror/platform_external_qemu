@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -2261,8 +2261,11 @@ do_geo_fix( ControlClient  client, char*  args )
     enum { GEO_LONG = 0, GEO_LAT, GEO_ALT, GEO_SAT, GEO_SAT2, NUM_GEO_PARAMS };
     char*   p = args;
     int     top_param = -1;
+    double  altitude;
     double  params[ NUM_GEO_PARAMS ];
     int     n_satellites = 1;
+
+    struct  timeval tVal;
 
     if (!p)
         p = "";
@@ -2303,85 +2306,16 @@ do_geo_fix( ControlClient  client, char*  args )
         }
     }
 
-    /* generate an NMEA sentence for this fix */
-    {
-        STRALLOC_DEFINE(s);
-        double   val;
-        int      deg, min;
-        char     hemi;
-        int      hh = 0, mm = 0, ss = 0;
-
-        /* format overview:
-         *    time of fix      123519     12:35:19 UTC
-         *    latitude         4807.038   48 degrees, 07.038 minutes
-         *    north/south      N or S
-         *    longitude        01131.000  11 degrees, 31. minutes
-         *    east/west        E or W
-         *    fix quality      1          standard GPS fix
-         *    satellites       1 to 12    number of satellites being tracked
-         *    HDOP             <dontcare> horizontal dilution
-         *    altitude         546.       altitude above sea-level
-         *    altitude units   M          to indicate meters
-         *    diff             <dontcare> height of sea-level above ellipsoid
-         *    diff units       M          to indicate meters (should be <dontcare>)
-         *    dgps age         <dontcare> time in seconds since last DGPS fix
-         *    dgps sid         <dontcare> DGPS station id
-         */
-
-        // Get the current time as hh:mm:ss
-        struct timeval tm;
-
-        if (0 == gettimeofday(&tm, NULL)) {
-            // tm.tv_sec is elapsed seconds since epoch (UTC, which is what we want)
-            hh = (int) (tm.tv_sec / (60 * 60)) % 24;
-            mm = (int) (tm.tv_sec /  60      ) % 60;
-            ss = (int) (tm.tv_sec            ) % 60;
-        }
-
-        stralloc_add_format( s, "$GPGGA,%02d%02d%02d", hh, mm, ss);
-
-        /* then the latitude */
-        hemi = 'N';
-        val  = params[GEO_LAT];
-        if (val < 0) {
-            hemi = 'S';
-            val  = -val;
-        }
-        deg = (int) val;
-        val = 60*(val - deg);
-        min = (int) val;
-        val = 10000*(val - min);
-        stralloc_add_format( s, ",%02d%02d.%04d,%c", deg, min, (int)val, hemi );
-
-        /* the longitude */
-        hemi = 'E';
-        val  = params[GEO_LONG];
-        if (val < 0) {
-            hemi = 'W';
-            val  = -val;
-        }
-        deg = (int) val;
-        val = 60*(val - deg);
-        min = (int) val;
-        val = 10000*(val - min);
-        stralloc_add_format( s, ",%02d%02d.%04d,%c", deg, min, (int)val, hemi );
-
-        /* bogus fix quality, satellite count and dilution */
-        stralloc_add_format( s, ",1,%02d,", n_satellites );
-
-        /* optional altitude + bogus diff */
-        if (top_param >= GEO_ALT) {
-            stralloc_add_format( s, ",%.1g,M,0.,M", params[GEO_ALT] );
-        } else {
-            stralloc_add_str( s, ",,,," );
-        }
-        /* bogus rest and checksum */
-        stralloc_add_str( s, ",,,*47" );
-
-        /* send it, then free */
-        android_gps_send_nmea( stralloc_cstr(s) );
-        stralloc_reset( s );
+    altitude = 0.0;
+    if (top_param < GEO_ALT) {
+        altitude = params[GEO_ALT];
     }
+
+    memset(&tVal, 0, sizeof(tVal));
+    gettimeofday(&tVal, NULL);
+
+    android_gps_send_location(params[GEO_LAT], params[GEO_LONG],
+                              altitude, n_satellites, &tVal);
     return 0;
 }
 
