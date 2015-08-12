@@ -22,7 +22,7 @@
 #include "android/skin/rect.h"
 #include "android/skin/surface.h"
 #include "android/skin/winsys.h"
-#include "android/skin/qt/emulator-window.h"
+#include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/setenv.h"
 
 #define  DEBUG  1
@@ -40,7 +40,7 @@ static int next_id = 0;
 static SkinSurface *create_surface(int w, int h, int original_w, int original_h)
 {
     SkinSurface*  s = (SkinSurface*)malloc(sizeof(*s));
-    EmulatorWindow *window = EmulatorWindow::getInstance();
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) return NULL;
     if (s != NULL) {
         QSemaphore semaphore;
@@ -146,7 +146,7 @@ extern SkinSurface* skin_surface_create_window(int x, int y, int w, int h, int o
 {
     D("skin_surface_create_window  %d, %d, %d, %d, %d, %d, fullscreen: %d", x, y, w, h, original_w, original_h, is_fullscreen);
     QSemaphore semaphore;
-    EmulatorWindow *window = EmulatorWindow::getInstance();
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) return NULL;
     SkinSurface *surface = create_surface(w, h, original_w, original_h);
     QRect rect(x, y, w, h);
