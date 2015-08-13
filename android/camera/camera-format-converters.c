@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+#include "android/camera/camera-format-converters.h"
+
+#ifdef __linux__
+#include <linux/videodev2.h>
+#endif
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef _WIN32
-#elif _DARWIN_C_SOURCE
-#else
-#include <linux/videodev2.h>
-#endif
-#include "android/camera/camera-format-converters.h"
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
