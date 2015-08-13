@@ -19,12 +19,14 @@
 #include "android/hw-control.h"
 #include "android/hw-sensors.h"
 #include "android/looper.h"
+#include "android/looper-qemu.h"
 #include "android/opengles.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
 #include "android/user-events.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
+
 #include "telephony/modem_driver.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)

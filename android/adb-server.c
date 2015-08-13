@@ -17,6 +17,7 @@
 #include "android/adb-server.h"
 
 #include "android/async-utils.h"
+#include "android/looper-qemu.h"
 #include "android/utils/debug.h"
 #include "android/utils/format.h"
 #include "android/utils/iolooper.h"

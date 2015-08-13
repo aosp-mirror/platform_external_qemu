@@ -13,6 +13,7 @@
 
 #include "android/charpipe.h"
 #include "android/looper.h"
+#include "android/looper-qemu.h"
 
 #include "android/utils/bufprint.h"
 #include "android/utils/cbuffer.h"
