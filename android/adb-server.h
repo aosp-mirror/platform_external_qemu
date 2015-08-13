@@ -17,6 +17,8 @@
 #ifndef ANDROID_ADB_SERVER_H_
 #define ANDROID_ADB_SERVER_H_
 
+#include <stdint.h>
+
 /*
  * Encapsulates a socket server that is bound to ADB port, and bridges ADB host
  * connections and data to ADB daemon running inside the guest.
