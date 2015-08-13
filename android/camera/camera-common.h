@@ -22,7 +22,7 @@
  * camera emulation.
  */
 
-#include "qemu-common.h"
+//#include "qemu-common.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
@@ -35,6 +35,13 @@
 #else
 #include <linux/videodev2.h>
 #endif  /* _WIN32 */
+
+#include <errno.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
 
 /*
  * These are missing in the current linux/videodev2.h
