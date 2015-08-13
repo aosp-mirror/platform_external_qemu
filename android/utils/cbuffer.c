@@ -9,12 +9,13 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android/cbuffer.h"
+#include "android/utils/cbuffer.h"
 #include "android/utils/stralloc.h"
-#include <string.h>
-#include <stdlib.h>
+
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define  DEBUG  0
 
