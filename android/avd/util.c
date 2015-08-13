@@ -9,19 +9,21 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "android/avd/keys.h"
+#include "android/avd/util.h"
+
+#include "android/utils/bufprint.h"
+#include "android/utils/debug.h"
+#include "android/utils/ini.h"
+#include "android/utils/panic.h"
+#include "android/utils/path.h"
+#include "android/utils/property_file.h"
+#include "android/utils/system.h"
+
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include "android/utils/debug.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/ini.h"
-#include "android/utils/property_file.h"
-#include "android/utils/panic.h"
-#include "android/utils/path.h"
-#include "android/utils/system.h"
-#include "android/avd/util.h"
-#include "android/avd/keys.h"
 
 #define D(...) VERBOSE_PRINT(init,__VA_ARGS__)
 
