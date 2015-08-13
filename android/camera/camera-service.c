@@ -18,15 +18,15 @@
  * Contains emulated camera service implementation.
  */
 
-#include "qemu-common.h"
+#include "android/camera/camera-service.h"
+
+#include "android/camera/camera-format-converters.h"
+#include "android/camera/camera-capture.h"
 #include "android/globals.h"  /* for android_hw */
 #include "android/hw-qemud.h"
+#include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
-#include "android/utils/debug.h"
-#include "android/camera/camera-capture.h"
-#include "android/camera/camera-format-converters.h"
-#include "android/camera/camera-service.h"
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)

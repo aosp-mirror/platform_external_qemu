@@ -20,7 +20,15 @@
  * Mac OS at least 10.5
  */
 
+#include "android/camera/camera-capture.h"
+#include "android/camera/camera-format-converters.h"
+#include "android/utils/debug.h"
+#include "android/utils/system.h"
+
+#import <AVFoundation/AVFoundation.h>
 #import <Cocoa/Cocoa.h>
+#import <CoreAudio/CoreAudio.h>
+
 #if 0
 #import <QTKit/QTKit>
 #else
@@ -33,11 +41,7 @@
 #import <QTKit/QTCaptureVideoPreviewOutput.h>
 #import <QTKit/QTMedia.h>
 #import <QTKit/QTSampleBuffer.h>
-#import <AVFoundation/AVFoundation.h>
 #endif
-#import <CoreAudio/CoreAudio.h>
-#include "android/camera/camera-capture.h"
-#include "android/camera/camera-format-converters.h"
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
