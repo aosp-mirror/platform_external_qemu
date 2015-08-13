@@ -21,9 +21,9 @@
  *   - flashlight
  */
 #include "android/hw-control.h"
-#include "android/cbuffer.h"
 #include "android/hw-qemud.h"
 #include "android/globals.h"
+#include "android/utils/cbuffer.h"
 #include "android/utils/misc.h"
 #include "android/utils/debug.h"
 #include "sysemu/char.h"
