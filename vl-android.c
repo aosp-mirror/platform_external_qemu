@@ -62,6 +62,7 @@
 #include "android/hw-qemud.h"
 #include "android/hw-sensors.h"
 #include "android/log-rotate.h"
+#include "android/looper-qemu.h"
 #include "android/multitouch-port.h"
 #include "android/multitouch-screen.h"
 #include "android/opengles.h"
