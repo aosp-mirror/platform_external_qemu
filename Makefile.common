@@ -138,7 +138,6 @@ common_LOCAL_SRC_FILES += \
 	android/async-console.c \
 	android/async-utils.c \
 	android/framebuffer.c \
-	android/iolooper.cpp \
 	android/avd/hw-config.c \
 	android/avd/info.c \
 	android/avd/scanner.c \
@@ -196,6 +195,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/format.cpp \
 	android/utils/host_bitness.cpp \
 	android/utils/http_utils.cpp \
+	android/utils/iolooper.cpp \
 	android/utils/ini.c \
 	android/utils/intmap.c \
 	android/utils/lineinput.c \
