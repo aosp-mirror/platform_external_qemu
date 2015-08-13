@@ -17,12 +17,14 @@
 #ifndef CONFIG_QEMU
 #include "version.h"
 #endif
+
+#include "android/utils/sockets.h"
+
 #include "config-host.h"
 #include <stdint.h>
 #include "slirp_config.h"
 
 #include <stddef.h>
-#include "android/sockets.h"
 
 #ifdef _WIN32
 # include <inttypes.h>
