@@ -10,17 +10,20 @@
 ** GNU General Public License for more details.
 */
 #include "android/hw-qemud.h"
+
+#include "android/charpipe.h"
+#include "android/looper.h"
+
+#include "android/utils/bufprint.h"
+#include "android/utils/cbuffer.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
+#include "android/utils/panic.h"
 #include "android/utils/system.h"
-#include "android/utils/bufprint.h"
-#include "android/looper.h"
+
 #include "hw/hw.h"
 #include "hw/android/goldfish/pipe.h"
 #include "sysemu/char.h"
-#include "android/charpipe.h"
-#include "android/cbuffer.h"
-#include "utils/panic.h"
 
 #define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(qemud)

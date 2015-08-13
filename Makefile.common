@@ -186,6 +186,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/aconfig-file.c \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
+	android/utils/cbuffer.c \
 	android/utils/debug.c \
 	android/utils/dll.c \
 	android/utils/dirscanner.cpp \
@@ -528,7 +529,6 @@ CORE_MISC_SOURCES = \
     qemu-log.c \
     savevm.c \
     android/boot-properties.c \
-    android/cbuffer.c \
     android/charpipe.c \
     android/core-init-utils.c   \
     android/ext4_resize.cpp   \
