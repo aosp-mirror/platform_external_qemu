@@ -9,8 +9,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/looper-base.h"
+#include "android/base/Limits.h"
 
+#include "android/looper-qemu.h"
+
+#include "android/looper-base.h"
 #include "android/qemu/base/async/Looper.h"
 
 using ::android::internal::GLooper;
