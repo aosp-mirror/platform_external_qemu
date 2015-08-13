@@ -21,45 +21,45 @@
  *
  */
 
-#include "android/sockets.h"
-#include "sysemu/char.h"
-#include "sysemu/sysemu.h"
 #include "android/android.h"
-#include "cpu.h"
-#include "hw/android/goldfish/device.h"
-#include "hw/power_supply.h"
-#include "android/shaper.h"
-#include "telephony/modem_driver.h"
+#include "android/display-core.h"
 #include "android/gps.h"
 #include "android/globals.h"
+#include "android/hw-events.h"
+#include "android/hw-fingerprint.h"
+#include "android/hw-sensors.h"
+#include "android/shaper.h"
+#include "android/skin/charmap.h"
+#include "android/skin/keycode-buffer.h"
+#include "android/sockets.h"
+#include "android/tcpdump.h"
+#include "android/user-events.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/http_utils.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/utf8_utils.h"
-#include "android/config/config.h"
-#include "android/tcpdump.h"
-#include "net/net.h"
-#include "monitor/monitor.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include "android/hw-events.h"
-#include "android/user-events.h"
-#include "android/hw-fingerprint.h"
-#include "android/hw-sensors.h"
-#include "android/skin/charmap.h"
-#include "android/skin/keycode-buffer.h"
-#include "android/display-core.h"
-
+#include "config-host.h"
+#include "cpu.h"
+#include "hw/android/goldfish/device.h"
+#include "hw/power_supply.h"
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"
 #endif
+#include "monitor/monitor.h"
+#include "net/net.h"
+#include "telephony/modem_driver.h"
+#include "sysemu/char.h"
+#include "sysemu/sysemu.h"
+
+#include <fcntl.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 extern void android_emulator_set_window_scale(double, int);
 
@@ -117,23 +117,6 @@ typedef struct ControlGlobalRec_
     int       max_redirs;
 
 } ControlGlobalRec;
-
-#ifdef CONFIG_STANDALONE_CORE
-/* UI client currently attached to the core. */
-ControlClient attached_ui_client = NULL;
-
-/* User events service client. */
-ControlClient user_events_client = NULL;
-
-/* UI control service client (UI -> Core). */
-ControlClient ui_core_ctl_client = NULL;
-
-/* UI control service (UI -> Core. */
-// CoreUICtl* ui_core_ctl = NULL;
-
-/* UI control service client (Core-> UI). */
-ControlClient core_ui_ctl_client = NULL;
-#endif  // CONFIG_STANDALONE_CORE
 
 static int
 control_global_add_redir( ControlGlobal  global,
@@ -221,28 +204,6 @@ control_client_destroy( ControlClient  client )
     int            sock;
 
     D(( "destroying control client %p\n", client ));
-
-#ifdef CONFIG_STANDALONE_CORE
-    if (client == attached_ui_client) {
-        attachUiProxy_destroy();
-        attached_ui_client = NULL;
-    }
-
-    if (client == user_events_client) {
-        userEventsImpl_destroy();
-        user_events_client = NULL;
-    }
-
-    if (client == ui_core_ctl_client) {
-        coreCmdImpl_destroy();
-        ui_core_ctl_client = NULL;
-    }
-
-    if (client == core_ui_ctl_client) {
-        uiCmdProxy_destroy();
-        core_ui_ctl_client = NULL;
-    }
-#endif  // CONFIG_STANDALONE_CORE
 
     sock = control_client_detach( client );
     if (sock >= 0)
@@ -2641,226 +2602,11 @@ do_qemu_monitor( ControlClient client, char* args )
     return -1;
 }
 
-#ifdef CONFIG_STANDALONE_CORE
-/* UI settings, passed to the core via -ui-settings command line parameter. */
-extern char* android_op_ui_settings;
-
-static int
-do_attach_ui( ControlClient client, char* args )
-{
-    // Make sure that there are no UI already attached to this console.
-    if (attached_ui_client != NULL) {
-        control_write( client, "KO: Another UI is attached to this core!\r\n" );
-        control_client_destroy(client);
-        return -1;
-    }
-
-    if (!attachUiProxy_create(client->sock)) {
-        char reply_buf[4096];
-        attached_ui_client = client;
-        // Reply "OK" with the saved -ui-settings property.
-        snprintf(reply_buf, sizeof(reply_buf), "OK: %s\r\n", android_op_ui_settings);
-        control_write( client, reply_buf);
-    } else {
-        control_write( client, "KO\r\n" );
-        control_client_destroy(client);
-        return -1;
-    }
-
-    return 0;
-}
-
-void
-destroy_attach_ui_client(void)
-{
-    if (attached_ui_client != NULL) {
-        control_client_destroy(attached_ui_client);
-    }
-}
-
-static int
-do_create_framebuffer_service( ControlClient client, char* args )
-{
-    ProxyFramebuffer* core_fb;
-    const char* protocol = "-raw";   // Default framebuffer exchange protocol.
-    char reply_buf[64];
-
-    // Protocol type is defined by the arguments passed with the stream switch
-    // command.
-    if (args != NULL && *args != '\0') {
-        size_t token_len;
-        const char* param_end = strchr(args, ' ');
-        if (param_end == NULL) {
-            param_end = args + strlen(args);
-        }
-        token_len = param_end - args;
-        protocol = args;
-
-        // Make sure that this is one of the supported protocols.
-        if (strncmp(protocol, "-raw", token_len) &&
-            strncmp(protocol, "-shared", token_len)) {
-            derror("Invalid framebuffer parameter %s\n", protocol);
-            control_write( client, "KO: Invalid parameter\r\n" );
-            control_client_destroy(client);
-            return -1;
-        }
-    }
-
-    core_fb = proxyFb_create(client->sock, protocol);
-    if (core_fb == NULL) {
-        control_write( client, "KO\r\n" );
-        control_client_destroy(client);
-        return -1;
-    }
-
-    // Reply "OK" with the framebuffer's bits per pixel
-    snprintf(reply_buf, sizeof(reply_buf), "OK: -bitsperpixel=%d\r\n",
-             proxyFb_get_bits_per_pixel(core_fb));
-    control_write( client, reply_buf);
-    return 0;
-}
-
-static int
-do_create_user_events_service( ControlClient client, char* args )
-{
-    // Make sure that there are no user events client already existing.
-    if (user_events_client != NULL) {
-        control_write( client, "KO: Another user events service is already existing!\r\n" );
-        control_client_destroy(client);
-        return -1;
-    }
-
-    if (!userEventsImpl_create(client->sock)) {
-        char reply_buf[4096];
-        user_events_client = client;
-        snprintf(reply_buf, sizeof(reply_buf), "OK\r\n");
-        control_write( client, reply_buf);
-    } else {
-        control_write( client, "KO\r\n" );
-        control_client_destroy(client);
-        return -1;
-    }
-
-    return 0;
-}
-
-void
-destroy_user_events_client(void)
-{
-    if (user_events_client != NULL) {
-        control_client_destroy(user_events_client);
-    }
-}
-
-static int
-do_create_ui_core_ctl_service( ControlClient client, char* args )
-{
-    // Make sure that there are no ui control client already existing.
-    if (ui_core_ctl_client != NULL) {
-        control_write( client, "KO: Another UI control service is already existing!\r\n" );
-        control_client_destroy(client);
-        return -1;
-    }
-
-    if (!coreCmdImpl_create(client->sock)) {
-        char reply_buf[4096];
-        ui_core_ctl_client = client;
-        snprintf(reply_buf, sizeof(reply_buf), "OK\r\n");
-        control_write( client, reply_buf);
-    } else {
-        control_write( client, "KO\r\n" );
-        control_client_destroy(client);
-        return -1;
-    }
-
-    return 0;
-}
-
-void
-destroy_ui_core_ctl_client(void)
-{
-    if (ui_core_ctl_client != NULL) {
-        control_client_destroy(ui_core_ctl_client);
-    }
-}
-
-void
-destroy_corecmd_client(void)
-{
-    if (ui_core_ctl_client != NULL) {
-        control_client_destroy(ui_core_ctl_client);
-    }
-}
-
-static int
-do_create_core_ui_ctl_service( ControlClient client, char* args )
-{
-    // Make sure that there are no ui control client already existing.
-    if (core_ui_ctl_client != NULL) {
-        control_write( client, "KO: Another UI control service is already existing!\r\n" );
-        control_client_destroy(client);
-        return -1;
-    }
-
-    if (!uiCmdProxy_create(client->sock)) {
-        char reply_buf[4096];
-        core_ui_ctl_client = client;
-        snprintf(reply_buf, sizeof(reply_buf), "OK\r\n");
-        control_write( client, reply_buf);
-    } else {
-        control_write( client, "KO\r\n" );
-        control_client_destroy(client);
-        return -1;
-    }
-
-    return 0;
-}
-
-void
-destroy_core_ui_ctl_client(void)
-{
-    if (core_ui_ctl_client != NULL) {
-        control_client_destroy(core_ui_ctl_client);
-    }
-}
-
-void
-destroy_uicmd_client(void)
-{
-    if (core_ui_ctl_client != NULL) {
-        control_client_destroy(core_ui_ctl_client);
-    }
-}
-
-#endif  // CONFIG_STANDALONE_CORE
-
 static const CommandDefRec  qemu_commands[] =
 {
     { "monitor", "enter QEMU monitor",
     "Enter the QEMU virtual machine monitor\r\n",
     NULL, do_qemu_monitor, NULL },
-
-#ifdef CONFIG_STANDALONE_CORE
-    { "attach-UI", "attach UI to the core",
-    "Attach UI to the core\r\n",
-    NULL, do_attach_ui, NULL },
-
-    { "framebuffer", "create framebuffer service",
-    "Create framebuffer service\r\n",
-    NULL, do_create_framebuffer_service, NULL },
-
-    { "user-events", "create user events service",
-    "Create user events service\r\n",
-    NULL, do_create_user_events_service, NULL },
-
-    { "ui-core-control", "create UI control service",
-    "Create UI control service\r\n",
-    NULL, do_create_ui_core_ctl_service, NULL },
-
-    { "core-ui-control", "create UI control service",
-    "Create UI control service\r\n",
-    NULL, do_create_core_ui_ctl_service, NULL },
-#endif  // CONFIG_STANDALONE_CORE
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };

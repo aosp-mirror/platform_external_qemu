@@ -13,7 +13,6 @@
 #define ANDROID_AVD_INFO_H
 
 #include "android/avd/hw-config.h"
-#include "android/config/config.h"
 #include "android/utils/compiler.h"
 #include "android/utils/file_data.h"
 #include "android/utils/ini.h"

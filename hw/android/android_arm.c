@@ -120,10 +120,8 @@ static void android_arm_init_(ram_addr_t ram_size,
     goldfish_add_device_no_io(&event0_device);
     events_dev_init(event0_device.base, goldfish_pic[event0_device.irq]);
 
-#ifdef CONFIG_NAND
     goldfish_add_device_no_io(&nand_device);
     nand_dev_init(nand_device.base);
-#endif
 
     trace_dev_init();
 
