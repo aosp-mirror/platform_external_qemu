@@ -20,10 +20,13 @@
  * a TCP port forwarding, enabled by ADB.
  */
 
-#include "android/utils/debug.h"
 #include "android/async-socket-connector.h"
-#include "utils/panic.h"
+
+#include "android/looper-qemu.h"
+#include "android/utils/debug.h"
 #include "android/utils/iolooper.h"
+#include "android/utils/panic.h"
+
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)

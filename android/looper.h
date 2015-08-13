@@ -85,13 +85,6 @@ typedef struct Looper    Looper;
 /* Create a new generic looper that can be used in any context / thread. */
 Looper*  looper_newGeneric(void);
 
-/* Create a new looper which is implemented on top of the QEMU main event
- * loop. You should only use this when implementing the emulator UI and Core
- * features in a single program executable.
- */
-Looper*  looper_newCore(void);
-
-
 typedef struct LoopTimer LoopTimer;
 typedef void (*LoopTimerFunc)(void* opaque);
 
