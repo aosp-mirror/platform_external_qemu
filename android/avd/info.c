@@ -13,7 +13,6 @@
 #include "android/avd/util.h"
 #include "android/avd/keys.h"
 
-#include "android/config/config.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
