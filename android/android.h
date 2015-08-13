@@ -12,8 +12,6 @@
 #ifndef  _qemu_android_h
 #define  _qemu_android_h
 
-#define  CONFIG_SHAPER  1
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
