@@ -1,5 +1,5 @@
-#ifndef IOLOOPER_H
-#define IOLOOPER_H
+#ifndef ANDROID_UTILS_IOLOOPER_H
+#define ANDROID_UTILS_IOLOOPER_H
 
 #include "android/utils/compiler.h"
 
@@ -71,4 +71,4 @@ int iolooper_wait_absolute(IoLooper* iol, int64_t deadline);
 
 ANDROID_END_HEADER
 
-#endif /* IOLOOPER_H */
+#endif /* ANDROID_UTILS_IOLOOPER_H */
