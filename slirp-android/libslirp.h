@@ -1,10 +1,12 @@
 #ifndef _LIBSLIRP_H
 #define _LIBSLIRP_H
 
+#include "slirp.h"
+
+#include "android/utils/sockets.h"
+
 #include <stdint.h>
 #include <stdio.h>
-#include "android/sockets.h"
-#include "slirp.h"
 #ifdef _WIN32
 #  define WIN32_LEAN_AND_MEAN
 #  define socket_close  winsock2_socket_close3

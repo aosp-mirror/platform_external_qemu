@@ -22,7 +22,6 @@
  * THE SOFTWARE.
  */
 #include "qemu-common.h"
-#include "android/sockets.h"
 #include "net/net.h"
 #include "monitor/monitor.h"
 #include "ui/console.h"
@@ -102,10 +101,11 @@
 
 #ifdef CONFIG_ANDROID
 #include "android/charpipe.h"
-#include "telephony/modem_driver.h"
 #include "android/gps.h"
 #include "android/hw-kmsg.h"
 #include "android/hw-qemud.h"
+#include "android/utils/sockets.h"
+#include "telephony/modem_driver.h"
 #endif /* CONFIG_ANDROID */
 
 /***********************************************************/

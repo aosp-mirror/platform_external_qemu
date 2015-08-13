@@ -21,18 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "qemu-common.h"
-#include "sysemu/char.h"
 #include "slirp.h"
-#include "proxy_common.h"
-#include "hw/hw.h"
 
-#include "android/utils/debug.h"  /* for dprint */
-#include "android/utils/bufprint.h"
 #include "android/android.h"
-#include "android/sockets.h"
+#include "android/utils/bufprint.h"
+#include "android/utils/debug.h"  /* for dprint */
+#include "android/utils/sockets.h"
 
+#include "proxy/proxy_common.h"
+
+#include "hw/hw.h"
+#include "qemu-common.h"
 #include "qemu/queue.h"
+#include "sysemu/char.h"
 
 /* proto types */
 static void slirp_net_forward_init(void);

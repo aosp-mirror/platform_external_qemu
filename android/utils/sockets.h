@@ -10,10 +10,11 @@
 ** GNU General Public License for more details.
 */
 /* headers to use the BSD sockets */
-#ifndef QEMU_SOCKET_H
-#define QEMU_SOCKET_H
+#ifndef ANDROID_UTILS_SOCKETS_H
+#define ANDROID_UTILS_SOCKETS_H
 
 #include <android/utils/compiler.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <errno.h>
@@ -425,4 +426,4 @@ int  socket_mcast_inet_set_ttl( int  s, int  ttl );
 
 ANDROID_END_HEADER
 
-#endif /* QEMU_SOCKET_H */
+#endif /* ANDROID_UTILS_SOCKETS_H */

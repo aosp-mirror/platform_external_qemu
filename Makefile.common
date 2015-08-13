@@ -142,7 +142,6 @@ common_LOCAL_SRC_FILES += \
 	android/avd/info.c \
 	android/avd/scanner.c \
 	android/avd/util.c \
-	android/sockets.c \
 	android/base/async/AsyncReader.cpp \
 	android/base/async/AsyncWriter.cpp \
 	android/base/async/Looper.cpp \
@@ -206,6 +205,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/reflist.c \
 	android/utils/refset.c \
 	android/utils/socket_drainer.cpp \
+	android/utils/sockets.c \
 	android/utils/stralloc.c \
 	android/utils/string.cpp \
 	android/utils/system.c \

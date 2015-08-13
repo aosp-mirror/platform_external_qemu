@@ -12,7 +12,7 @@
 #ifndef _PROXY_COMMON_H_
 #define _PROXY_COMMON_H_
 
-#include "android/sockets.h"
+#include "android/utils/sockets.h"
 
 #ifdef _WIN32
 #include <winsock2.h>

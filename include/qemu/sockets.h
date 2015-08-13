@@ -4,7 +4,7 @@
 
 #include "qemu/option.h"
 
-#include "android/sockets.h"
+#include "android/utils/sockets.h"
 #define  socket_error()  errno
 #define  closesocket     socket_close
 

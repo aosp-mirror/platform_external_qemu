@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-#include "qemu-common.h"
-#include "android/sockets.h"
-#include "android/utils/iolooper.h"
+#include "android/adb-server.h"
+
 #include "android/async-utils.h"
 #include "android/utils/debug.h"
 #include "android/utils/format.h"
+#include "android/utils/iolooper.h"
 #include "android/utils/list.h"
 #include "android/utils/misc.h"
-#include "android/adb-server.h"
+#include "android/utils/sockets.h"
+
+#include "qemu-common.h"
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
