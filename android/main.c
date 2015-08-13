@@ -65,7 +65,7 @@
 
 #include "android/framebuffer.h"
 #include "android/opengl/emugl_config.h"
-#include "android/iolooper.h"
+#include "android/utils/iolooper.h"
 
 #include "android/skin/winsys.h"
 
