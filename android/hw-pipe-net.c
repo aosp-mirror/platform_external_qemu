@@ -18,13 +18,14 @@
  * guest clients to directly connect to a TCP port through /dev/qemu_pipe.
  */
 
-#include "android/sockets.h"
-#include "android/utils/assert.h"
-#include "android/utils/panic.h"
-#include "android/utils/system.h"
 #include "android/async-utils.h"
 #include "android/opengles.h"
 #include "android/looper.h"
+#include "android/utils/assert.h"
+#include "android/utils/panic.h"
+#include "android/utils/sockets.h"
+#include "android/utils/system.h"
+
 #include "hw/android/goldfish/pipe.h"
 
 /* Implement the OpenGL fast-pipe */

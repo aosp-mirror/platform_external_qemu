@@ -11,7 +11,7 @@
 */
 #include "android/telephony/sysdeps.h"
 
-#include "android/sockets.h"
+#include "android/utils/sockets.h"
 
 #include "hw/hw.h"
 #include "qemu-common.h"

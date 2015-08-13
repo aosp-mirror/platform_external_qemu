@@ -14,19 +14,22 @@
 #  define _GNU_SOURCE 1
 #endif
 
-#include "android/sockets.h"
-#include <fcntl.h>
-#include <stddef.h>
-#include "android/qemu-debug.h"
-#include "sysemu/char.h"
-#include <stdlib.h>
-#include <string.h>
+#include "android/utils/sockets.h"
+
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/misc.h"
 #include "android/utils/path.h"
 #include "android/utils/socket_drainer.h"
 #include "android/utils/system.h"
+
+//#include "sysemu/char.h"
+
+#include <fcntl.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #define  D(...) VERBOSE_PRINT(socket,__VA_ARGS__)
 
@@ -807,6 +810,8 @@ sock_address_list_create( const char*  hostname,
     freeaddrinfo(res);
     return list;
 }
+
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
 
 SockAddress**
 sock_address_list_create2(const char* host_and_port, unsigned flags )

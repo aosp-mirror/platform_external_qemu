@@ -13,7 +13,8 @@
 #define _PROXY_INT_H
 
 #include "proxy_common.h"
-#include "android/sockets.h"
+
+#include "android/utils/sockets.h"
 #include "android/utils/stralloc.h"
 
 extern int  proxy_log;
