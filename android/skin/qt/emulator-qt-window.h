@@ -94,6 +94,10 @@ signals:
     void setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void setTitle(const QString *title, QSemaphore *semaphore = NULL);
     void showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore = NULL);
+
+public:
+    void simulateKeyPress(int keyCode, int modifiers);
+
 private slots:
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
     void slot_clearInstance();
@@ -121,35 +125,23 @@ private slots:
      */
 public slots:
     void slot_back();
-    void slot_battery();
-    void slot_camera();
-    void slot_cellular();
     void slot_down();
-    void slot_fullscreen();
-    void slot_gps();
     void slot_home();
     void slot_left();
     void slot_menu();
-    void slot_phone();
-    void slot_power();
     void slot_recents();
     void slot_right();
-    void slot_rotate();
     void slot_screenrecord();
     void slot_screenshot();
-    void slot_sdcard();
-    void slot_sensors();
     void slot_up();
     void slot_voice();
-    void slot_volumeUp();
-    void slot_volumeDown();
+
     void slot_zoom();
 
 private:
     void handleEvent(SkinEventType type, QMouseEvent *event);
     SkinEvent *createSkinEvent(SkinEventType type);
     void handleKeyEvent(SkinEventType type, QKeyEvent *pEvent);
-    void simulateKeyPress(int keyCode, int modifiers);
 
     SkinSurface *backing_surface;
     QQueue<SkinEvent*> event_queue;

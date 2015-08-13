@@ -307,30 +307,9 @@ void EmulatorQtWindow::slot_back()
     simulateKeyPress(KEY_ESC, 0);
 }
 
-void EmulatorQtWindow::slot_battery()
-{
-}
-
-void EmulatorQtWindow::slot_camera()
-{
-}
-
-void EmulatorQtWindow::slot_cellular()
-{
-}
-
 void EmulatorQtWindow::slot_down()
 {
     simulateKeyPress(KEY_KP8, 0);
-}
-
-void EmulatorQtWindow::slot_fullscreen()
-{
-    simulateKeyPress(KEY_F9, 0);
-}
-
-void EmulatorQtWindow::slot_gps()
-{
 }
 
 void EmulatorQtWindow::slot_home()
@@ -348,15 +327,6 @@ void EmulatorQtWindow::slot_menu()
     simulateKeyPress(KEY_F2, 0);
 }
 
-void EmulatorQtWindow::slot_phone()
-{
-}
-
-void EmulatorQtWindow::slot_power()
-{
-    simulateKeyPress(KEY_F7, 0);
-}
-
 void EmulatorQtWindow::slot_recents()
 {
     simulateKeyPress(KEY_F2, kKeyModLShift);
@@ -367,25 +337,13 @@ void EmulatorQtWindow::slot_right()
     simulateKeyPress(KEY_KP6, 0);
 }
 
-void EmulatorQtWindow::slot_rotate()
-{
-    simulateKeyPress(KEY_F12, kKeyModLCtrl);
-}
-
 void EmulatorQtWindow::slot_screenrecord()
 {
 }
 
 void EmulatorQtWindow::slot_screenshot()
 {
-}
-
-void EmulatorQtWindow::slot_sdcard()
-{
-}
-
-void EmulatorQtWindow::slot_sensors()
-{
+    // TODO
 }
 
 void EmulatorQtWindow::slot_up()
@@ -393,18 +351,8 @@ void EmulatorQtWindow::slot_up()
     simulateKeyPress(KEY_KP2, 0);
 }
 
-void EmulatorQtWindow::slot_volumeDown()
-{
-    simulateKeyPress(KEY_F6, kKeyModLCtrl);
-}
-
 void EmulatorQtWindow::slot_voice()
 {
-}
-
-void EmulatorQtWindow::slot_volumeUp()
-{
-    simulateKeyPress(KEY_F5, kKeyModLCtrl);
 }
 
 void EmulatorQtWindow::slot_zoom()
