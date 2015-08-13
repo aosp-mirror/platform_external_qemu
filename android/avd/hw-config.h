@@ -12,9 +12,10 @@
 #ifndef _ANDROID_AVD_HW_CONFIG_H
 #define _ANDROID_AVD_HW_CONFIG_H
 
-#include <stdint.h>
 #include "android/utils/compiler.h"
 #include "android/utils/ini.h"
+
+#include <stdint.h>
 
 ANDROID_BEGIN_HEADER
 
