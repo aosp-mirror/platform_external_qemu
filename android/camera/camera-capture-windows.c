@@ -19,11 +19,13 @@
  * This code uses capXxx API, available via capCreateCaptureWindow.
  */
 
-#include <winsock2.h>
-#include <windows.h>
-#include <vfw.h>
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
+
+#include <stdio.h>
+#include <vfw.h>
+#include <winsock2.h>
+#include <windows.h>
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
