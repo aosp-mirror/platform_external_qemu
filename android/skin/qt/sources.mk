@@ -26,4 +26,6 @@ ANDROID_SKIN_QT_RESOURCES := \
     android/skin/qt/resources.qrc \
 
 ANDROID_SKIN_QT_UI_SRC_FILES := \
-    android/skin/qt/battery.ui \
+    android/skin/qt/extended.ui \
+    android/skin/qt/tools.ui \
+

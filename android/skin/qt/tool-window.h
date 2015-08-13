@@ -10,8 +10,8 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef TOOLWINDOW_H
-#define TOOLWINDOW_H
+#ifndef SKIN_QT_TOOLWINDOW_H
+#define SKIN_QT_TOOLWINDOW_H
 
 #include <QFrame>
 #include <QGridLayout>
@@ -19,11 +19,10 @@
 #include <QToolButton>
 
 namespace Ui {
-    class ToolWindow;
+    class ToolControls;
 }
 
 class EmulatorQtWindow;
-class TitleBarWidget;
 
 typedef void(EmulatorQtWindow::*EmulatorQtWindowSlot)();
 
@@ -35,40 +34,31 @@ public:
     explicit ToolWindow(EmulatorQtWindow *emulatorWindow);
     void show();
 
-public slots:
-    void slot_toggleExpand();
-
 private:
-    QToolButton *addButton(QGridLayout *layout, int row, int col, const char *iconPath, EmulatorQtWindowSlot slot);
+    QToolButton *addButton(QGridLayout *layout, int row, int col, const char *iconPath, QString tip, EmulatorQtWindowSlot slot);
     void setExpandedState(bool expanded);
 
     QWidget *button_area;
-    EmulatorQtWindow *emulator_qt_window;
+    EmulatorQtWindow *emulator_window;
     bool expanded;
     QList<QToolButton*> expanded_buttons;
-    TitleBarWidget *title_bar;
     QBoxLayout *top_layout;
+
+    Ui::ToolControls  *toolsUi;
+
+private slots:
+    void on_close_button_clicked();
+    void on_power_button_clicked();
+    void on_volume_up_button_clicked();
+    void on_volume_down_button_clicked();
+    void on_rotate_CW_button_clicked();
+    void on_rotate_CCW_button_clicked();
+    void on_zoom_button_clicked();
+    void on_fullscreen_button_clicked();
+    void on_more_button_clicked();
+
 };
 
 typedef void(ToolWindow::*ToolWindowSlot)();
 
-class TitleBarWidget : public QWidget
-{
-    Q_OBJECT
-
-public:
-    explicit TitleBarWidget(ToolWindow *window);
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual void mouseMoveEvent(QMouseEvent *event);
-    void setExpandedState(bool state);
-
-private:
-    QToolButton *addButton(QBoxLayout *layout, const char *iconPath, ToolWindowSlot slot);
-
-    QIcon collapsed_icon;
-    QPoint drag_offset;
-    QIcon expanded_icon;
-    QToolButton *expand_button;
-    ToolWindow *tool_window;
-};
-#endif // TOOLWINDOW_H
+#endif // SKIN_QT_TOOLWINDOW_H

@@ -10,33 +10,99 @@
     GNU General Public License for more details.
 -->
 <!DOCTYPE RCC><RCC version="1.0">
- <qresource>
-     <file>images/ic_arrow_back_48px.svg</file>
-     <file>images/ic_battery_std_48px.svg</file>
-     <file>images/ic_call_48px.svg</file>
-     <file>images/ic_camera_enhance_48px.svg</file>
-     <file>images/ic_close_48px.svg</file>
-     <file>images/ic_crop_square_48px.svg</file>
-     <file>images/ic_filter_tilt_shift_48px.svg</file>
-     <file>images/ic_fullscreen_48px.svg</file>
-     <file>images/ic_hangout_video_48px.svg</file>
-     <file>images/ic_keyboard_arrow_down_48px.svg</file>
-     <file>images/ic_keyboard_arrow_left_48px.svg</file>
-     <file>images/ic_keyboard_arrow_right_48px.svg</file>
-     <file>images/ic_keyboard_arrow_up_48px.svg</file>
-     <file>images/ic_location_on_48px.svg</file>
-     <file>images/ic_menu_48px.svg</file>
-     <file>images/ic_mic_48px.svg</file>
-     <file>images/ic_panorama_fish_eye_48px.svg</file>
-     <file>images/ic_photo_camera_48px.svg</file>
-     <file>images/ic_power_settings_new_48px.svg</file>
-     <file>images/ic_sd_card_48px.svg</file>
-     <file>images/ic_signal_cellular_4_bar_48px.svg</file>
-     <file>images/ic_stay_current_portrait_48px.svg</file>
-     <file>images/ic_unfold_less_48px.svg</file>
-     <file>images/ic_unfold_more_48px.svg</file>
-     <file>images/ic_volume_down_48px.svg</file>
-     <file>images/ic_volume_up_48px.svg</file>
-     <file>images/ic_zoom_in_24px.svg</file>
+ <qresource prefix="/dark">
+     <!-- Main list of tool buttons -->
+     <file alias="close">images/dark/ic_close_black_48dp.svg</file>
+     <file alias="down">images/dark/ic_keyboard_arrow_down_black_48dp.svg</file>
+     <file alias="fullscreen">images/dark/ic_fullscreen_black_48dp.svg</file>
+     <file alias="left">images/dark/ic_keyboard_arrow_left_black_48dp.svg</file>
+     <file alias="more">images/dark/ic_more_horiz_black_48dp.svg</file>
+     <file alias="power_settings">images/dark/ic_power_settings_new_black_48dp.svg</file>
+     <file alias="right">images/dark/ic_keyboard_arrow_right_black_48dp.svg</file>
+     <file alias="screen_rotation">images/dark/ic_screen_rotation_black_48dp.svg</file>
+     <file alias="screen_shot">images/dark/ic_photo_camera_black_48dp.svg</file>
+     <file alias="up">images/dark/ic_keyboard_arrow_up_black_48dp.svg</file>
+     <file alias="volume_down">images/dark/ic_volume_down_black_48dp.svg</file>
+     <file alias="volume_up">images/dark/ic_volume_up_black_48dp.svg</file>
+     <file alias="zoom">images/dark/ic_zoom_in_black_48dp.svg</file>
+
+     <!-- Used in the "extended" window -->
+     <file alias="add">images/dark/ic_add_black_48dp.svg</file>
+     <file alias="add_disabled">images/dark/ic_add_black_48dp.svg</file>
+     <file alias="battery">images/dark/ic_battery_80_black_48dp.svg</file>
+     <file alias="call_end">images/dark/ic_call_end_black_48dp.svg</file>
+     <file alias="call_end_disabled">images/dark/ic_call_end_black_48dp.svg</file>
+     <file alias="check_yes">images/dark/ic_check_box_black_24dp.svg</file>
+     <file alias="check_no">images/dark/ic_check_box_outline_blank_black_24dp.svg</file>
+     <file alias="file_download">images/dark/ic_file_download_black_48dp.svg</file>
+     <file alias="file_upload">images/dark/ic_file_upload_black_48dp.svg</file>
+     <file alias="fingerprint">images/dark/ic_fingerprint_black_48dp.svg</file>
+     <file alias="location">images/dark/ic_location_on_black_48dp.svg</file>
+     <file alias="message">images/dark/ic_message_black_48dp.svg</file>
+     <file alias="pause">images/dark/ic_pause_black_48dp.svg</file>
+     <file alias="pause_disabled">images/dark/ic_pause_black_48dp.svg</file>
+     <file alias="phone">images/dark/ic_phone_black_48dp.svg</file>
+     <file alias="phone_disabled">images/dark/ic_phone_black_48dp.svg</file>
+     <file alias="phone_in_talk">images/dark/ic_phone_in_talk_black_48dp.svg</file>
+     <file alias="phone_in_talk_disabled">images/dark/ic_phone_in_talk_black_48dp.svg</file>
+     <file alias="phone_paused">images/dark/ic_phone_paused_black_48dp.svg</file>
+     <file alias="phone_paused_disabled">images/dark/ic_phone_paused_black_48dp.svg</file>
+     <file alias="play_arrow">images/dark/ic_play_arrow_black_48dp.svg</file>
+     <file alias="play_arrow_disabled">images/dark/ic_play_arrow_black_48dp.svg</file>
+     <file alias="remove">images/dark/ic_remove_black_48dp.svg</file>
+     <file alias="remove_disabled">images/dark/ic_remove_black_48dp.svg</file>
+     <file alias="sd_storage">images/dark/ic_sd_storage_black_48dp.svg</file>
+     <file alias="send">images/dark/ic_send_black_48dp.svg</file>
+     <file alias="signal_cellular_3_bar">images/dark/ic_signal_cellular_3_bar_black_48dp.svg</file>
+     <file alias="stop">images/dark/ic_stop_black_48dp.svg</file>
+     <file alias="stop_disabled">images/dark/ic_stop_black_48dp.svg</file>
  </qresource>
- </RCC>
+
+ <qresource prefix="/light">
+     <!-- Main list of tool buttons -->
+     <file alias="close">images/light/ic_close_48px.svg</file>
+     <file alias="down">images/light/ic_keyboard_arrow_down_48px.svg</file>
+     <file alias="fullscreen">images/light/ic_fullscreen_48px.svg</file>
+     <file alias="left">images/light/ic_keyboard_arrow_left_48px.svg</file>
+     <file alias="more">images/light/ic_more_horiz_white_48dp.svg</file>
+     <file alias="power_settings">images/light/ic_power_settings_new_48px.svg</file>
+     <file alias="right">images/light/ic_keyboard_arrow_right_48px.svg</file>
+     <file alias="screen_rotation">images/light/ic_screen_rotation_white_48dp.svg</file>
+     <file alias="screen_shot">images/light/ic_photo_camera_48px.svg</file>
+     <file alias="up">images/light/ic_keyboard_arrow_up_48px.svg</file>
+     <file alias="volume_down">images/light/ic_volume_down_48px.svg</file>
+     <file alias="volume_up">images/light/ic_volume_up_48px.svg</file>
+     <file alias="zoom">images/light/ic_zoom_in_white_48dp.svg</file>
+
+     <!-- Used in the "extended" window -->
+     <file alias="add">images/light/ic_add_white_48dp.svg</file>
+     <file alias="add_disabled">images/light/ic_add_grey600_48dp.svg</file>
+     <file alias="battery">images/light/ic_battery_80_white_48dp.svg</file>
+     <file alias="call_end">images/light/ic_call_end_white_48dp.svg</file>
+     <file alias="call_end_disabled">images/light/ic_call_end_grey600_48dp.svg</file>
+     <file alias="check_yes">images/light/ic_check_box_white_24dp.svg</file>
+     <file alias="check_no">images/light/ic_check_box_outline_blank_white_24dp.svg</file>
+     <file alias="file_download">images/light/ic_file_download_white_48dp.svg</file>
+     <file alias="file_upload">images/light/ic_file_upload_white_48dp.svg</file>
+     <file alias="fingerprint">images/light/ic_fingerprint_white_48dp.svg</file>
+     <file alias="location">images/light/ic_location_on_white_48dp.svg</file>
+     <file alias="message">images/light/ic_message_white_48dp.svg</file>
+     <file alias="pause">images/light/ic_pause_white_48dp.svg</file>
+     <file alias="pause_disabled">images/light/ic_pause_grey600_48dp.svg</file>
+     <file alias="phone">images/light/ic_phone_white_48dp.svg</file>
+     <file alias="phone_disabled">images/light/ic_phone_grey600_48dp.svg</file>
+     <file alias="phone_in_talk">images/light/ic_phone_in_talk_white_48dp.svg</file>
+     <file alias="phone_in_talk_disabled">images/light/ic_phone_in_talk_grey600_48dp.svg</file>
+     <file alias="phone_paused">images/light/ic_phone_paused_white_48dp.svg</file>
+     <file alias="phone_paused_disabled">images/light/ic_phone_paused_grey600_48dp.svg</file>
+     <file alias="play_arrow">images/light/ic_play_arrow_white_48dp.svg</file>
+     <file alias="play_arrow_disabled">images/light/ic_play_arrow_grey600_48dp.svg</file>
+     <file alias="remove">images/light/ic_remove_white_48dp.svg</file>
+     <file alias="remove_disabled">images/light/ic_remove_grey600_48dp.svg</file>
+     <file alias="sd_storage">images/light/ic_sd_storage_white_48dp.svg</file>
+     <file alias="send">images/light/ic_send_white_48dp.svg</file>
+     <file alias="signal_cellular_3_bar">images/light/ic_signal_cellular_3_bar_white_48dp.svg</file>
+     <file alias="stop">images/light/ic_stop_white_48dp.svg</file>
+     <file alias="stop_disabled">images/light/ic_stop_grey600_48dp.svg</file>
+ </qresource>
+</RCC>
