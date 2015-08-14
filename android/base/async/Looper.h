@@ -58,6 +58,10 @@ public:
     // a fixed deadline has passed. |deadlineMs| is a deadline in
     // milliseconds relative to the current clock used by nowMs().
     // If can be kDurationInfinite to indicate no deadline.
+    // Return the reason why the looper stopped:
+    //    0           -> normal exit through forceQuit()
+    //    EWOULDBLOCK -> no more watchers and timers registered.
+    //    ETIMEOUT    -> timeout reached.
     virtual int runWithDeadlineMs(Duration deadlineMs) = 0;
 
     // A variant of run() that allows to run the event loop only until
