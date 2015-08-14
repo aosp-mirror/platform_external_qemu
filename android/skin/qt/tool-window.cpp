@@ -94,3 +94,9 @@ void ToolWindow::on_more_button_clicked()
     // completeInitialization() must be called AFTER show()
     extendedWindow->completeInitialization();
 }
+
+extern "C" void setUiEmuAgent(const UiEmuAgent *agentPtr) {
+    if (twInstance) {
+        twInstance->setToolEmuAgent(agentPtr);
+    }
+}
