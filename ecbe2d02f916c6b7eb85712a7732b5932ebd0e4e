@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e46c2d17_16b53c1a",
+        "filename": "android/gps.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-14T00:27:22Z",
+      "side": 1,
+      "message": "could you call if android_gps_send_location() instead for consistency?",
+      "revId": "ecbe2d02f916c6b7eb85712a7732b5932ebd0e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
