@@ -2181,6 +2181,10 @@ int main(int argc, char **argv, char **envp)
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;
 
+    /* Ensure Looper implementation for this thread is based on the QEMU
+     * main loop. */
+    qemu_looper_setForThread();
+
     /* Initialize sockets before anything else, so we can properly report
      * initialization failures back to the UI. */
 #ifdef _WIN32
@@ -2245,8 +2249,8 @@ int main(int argc, char **argv, char **envp)
     android_hw_control_init();
     android_net_pipes_init();
 
-    socket_drainer_start(looper_newCore());
-    android_wear_agent_start(looper_newCore());
+    socket_drainer_start(looper_getForThread());
+    android_wear_agent_start(looper_getForThread());
 
 #ifdef CONFIG_KVM
     /* By default, force auto-detection for kvm */

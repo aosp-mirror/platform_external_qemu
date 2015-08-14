@@ -24,7 +24,6 @@
 
 #include "android/async-socket.h"
 #include "android/async-socket-connector.h"
-#include "android/looper-qemu.h"
 #include "android/utils/debug.h"
 #include "android/utils/iolooper.h"
 #include "android/utils/panic.h"
@@ -1804,9 +1803,7 @@ _sdkctl_socket_free(SDKCtlSocket* sdkctl)
         }
 
         /* Free allocated resources. */
-        if (sdkctl->looper != NULL) {
-            looper_free(sdkctl->looper);
-        }
+        sdkctl->looper = NULL;
         if (sdkctl->service_name != NULL) {
             free(sdkctl->service_name);
         }
@@ -1947,7 +1944,7 @@ sdkctl_socket_new(int reconnect_to,
 
     T("SDKCtl %s: descriptor is created.", sdkctl->service_name);
 
-    sdkctl->looper = looper_newCore();
+    sdkctl->looper = looper_getForThread();
     if (sdkctl->looper == NULL) {
         E("Unable to create I/O looper for SDKCtl socket '%s'",
           service_name);

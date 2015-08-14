@@ -20,7 +20,6 @@
 
 #include "android/async-utils.h"
 #include "android/opengles.h"
-#include "android/looper-qemu.h"
 #include "android/utils/assert.h"
 #include "android/utils/looper.h"
 #include "android/utils/panic.h"
@@ -543,7 +542,7 @@ static const GoldfishPipeFuncs  openglesPipe_funcs = {
 void
 android_net_pipes_init(void)
 {
-    Looper*  looper = looper_newCore();
+    Looper*  looper = looper_getForThread();
 
     goldfish_pipe_add_type( "tcp", looper, &netPipeTcp_funcs );
 #ifndef _WIN32

@@ -28,8 +28,6 @@
 #include "android/utils/iolooper.h"
 #include "android/utils/panic.h"
 
-#include "android/looper-qemu.h"
-
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)    VERBOSE_PRINT(asyncsocket,__VA_ARGS__)
@@ -1121,7 +1119,7 @@ async_socket_new(int port,
     as->ref_count = 1;
     sock_address_init_inet(&as->address, SOCK_ADDRESS_INET_LOOPBACK, port);
     if (looper == NULL) {
-        as->looper = looper_newCore();
+        as->looper = looper_newGeneric();
         if (as->looper == NULL) {
             E("Unable to create I/O looper for async socket '%s'",
               _async_socket_string(as));

@@ -77,10 +77,20 @@ typedef int64_t   Duration;
  * a default implementation that can be used in all threads.
  *
  * For the QEMU core, you can grab a Looper pointer by calling
- * looper_newCore() instead. Its implementation relies on top of
+ * looper_getForThread() instead. Its implementation relies on top of
  * the QEMU event loop instead.
  */
 typedef struct Looper    Looper;
+
+/* Return the Looper instance for the current thread. If none exists,
+ * create a new one with looper_newGeneric().
+ * IMPORTANT: never call looper_free() on the result of this function.
+ */
+Looper* looper_getForThread(void);
+
+/* Set the current thread's Looper instance. This is only useful if you
+ * have a Looper implementation based on a foreign main loop. */
+void looper_setForThread(Looper* looper);
 
 /* Create a new generic looper that can be used in any context / thread. */
 Looper*  looper_newGeneric(void);

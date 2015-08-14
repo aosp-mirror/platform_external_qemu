@@ -17,11 +17,11 @@
 #include "android/adb-server.h"
 
 #include "android/async-utils.h"
-#include "android/looper-qemu.h"
 #include "android/utils/debug.h"
 #include "android/utils/format.h"
 #include "android/utils/iolooper.h"
 #include "android/utils/list.h"
+#include "android/utils/looper.h"
 #include "android/utils/misc.h"
 #include "android/utils/sockets.h"
 
@@ -427,7 +427,7 @@ adb_server_init(int port)
         _adb_server.port = port;
 
         /* Create looper for an async I/O on the server. */
-        _adb_server.looper = looper_newCore();
+        _adb_server.looper = looper_getForThread();
         if (_adb_server.looper == NULL) {
             E("Unable to create I/O looper for ADB server");
             return -1;
