@@ -22,7 +22,6 @@
 
 #include "android/async-socket-connector.h"
 
-#include "android/looper-qemu.h"
 #include "android/utils/debug.h"
 #include "android/utils/iolooper.h"
 #include "android/utils/panic.h"
@@ -329,7 +328,7 @@ async_socket_connector_new(const SockAddress* address,
 
     /* Create a looper for asynchronous I/O. */
     if (looper == NULL) {
-        connector->looper = looper_newCore();
+        connector->looper = looper_newGeneric();
         if (connector->looper == NULL) {
             E("Unable to create I/O looper for AsyncSocketConnector for socket '%s'",
               _asc_socket_string(connector));

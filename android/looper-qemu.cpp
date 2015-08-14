@@ -17,7 +17,7 @@
 
 typedef ::Looper CLooper;
 
-CLooper* looper_newCore(void) {
-    return reinterpret_cast<CLooper*>(
-            ::android::qemu::createLooper());
+void qemu_looper_setForThread(void) {
+    looper_setForThread(
+            reinterpret_cast<CLooper*>(::android::qemu::createLooper()));
 }

@@ -21,7 +21,7 @@ ANDROID_BEGIN_HEADER
  * loop. You should only use this when implementing the emulator UI and Core
  * features in a single program executable.
  */
-Looper*  looper_newCore(void);
+void  qemu_looper_setForThread(void);
 
 ANDROID_END_HEADER
 
