@@ -18,8 +18,6 @@
 #include "android/base/sockets/SocketDrainer.h"
 #include "android/base/sockets/SocketUtils.h"
 
-#include "android/utils/looper-base.h"
-
 #include <stddef.h>
 
 using namespace android::base;
@@ -39,7 +37,7 @@ void socket_drainer_start(CLooper* looper) {
     }
     if (!s_socket_drainer) {
         s_socket_drainer = new SocketDrainer(
-                ::android::internal::toBaseLooper(looper));
+                reinterpret_cast<BaseLooper*>(looper));
     }
 }
 

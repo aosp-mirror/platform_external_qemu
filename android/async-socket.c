@@ -71,7 +71,7 @@ struct AsyncSocketIO {
     /* Asynchronous socket for this I/O. */
     AsyncSocket*        as;
     /* Timer used for time outs on this I/O. */
-    LoopTimer           timer[1];
+    LoopTimer*          timer;
     /* An opaque pointer associated with this I/O. */
     void*               io_opaque;
     /* Buffer where to read / write data. */
@@ -156,8 +156,10 @@ _async_socket_rw_new(AsyncSocket* as,
     asio->state         = ASIO_STATE_QUEUED;
     asio->ref_count     = 1;
     asio->deadline      = deadline;
-    loopTimer_init(asio->timer, _async_socket_get_looper(as),
-                   _on_async_socket_io_timed_out, asio);
+    asio->timer = loopTimer_new(
+            _async_socket_get_looper(as),
+            _on_async_socket_io_timed_out,
+            asio);
     loopTimer_startAbsolute(asio->timer, deadline);
 
     /* Reference socket that is holding this I/O. */
@@ -178,7 +180,7 @@ _async_socket_io_free(AsyncSocketIO* asio)
     T("ASocket %s: %s I/O descriptor %p is destroyed.",
       _async_socket_string(as), asio->is_io_read ? "READ" : "WRITE", asio);
 
-    loopTimer_done(asio->timer);
+    loopTimer_free(asio->timer);
 
     /* Try to recycle it first, and free the memory if recycler is full. */
     if (_recycled_asio_count < _max_recycled_asio_num) {
@@ -368,9 +370,9 @@ struct AsyncSocket {
     /* I/O looper for asynchronous I/O on the socket. */
     Looper*             looper;
     /* I/O descriptor for asynchronous I/O on the socket. */
-    LoopIo              io[1];
+    LoopIo*             io;
     /* Timer to use for reconnection attempts. */
-    LoopTimer           reconnect_timer[1];
+    LoopTimer*          reconnect_timer;
     /* Head of the list of the active readers. */
     AsyncSocketIO*      readers_head;
     /* Tail of the list of the active readers. */
@@ -687,7 +689,7 @@ _async_socket_close_socket(AsyncSocket* as)
     if (as->fd >= 0) {
         T("ASocket %s: Socket handle %d is closed.",
           _async_socket_string(as), as->fd);
-        loopIo_done(as->io);
+        loopIo_free(as->io);
         socket_close(as->fd);
         as->fd = -1;
     }
@@ -708,7 +710,7 @@ _async_socket_free(AsyncSocket* as)
 
         /* Free allocated resources. */
         if (as->looper != NULL) {
-            loopTimer_done(as->reconnect_timer);
+            loopTimer_free(as->reconnect_timer);
             if (as->owns_looper) {
                 looper_free(as->looper);
             }
@@ -1053,7 +1055,7 @@ _on_connector_events(void* opaque,
     if (event == ASIO_STATE_SUCCEEDED) {
         /* Accept the connection. */
         as->fd = async_socket_connector_pull_fd(connector);
-        loopIo_init(as->io, as->looper, as->fd, _on_async_socket_io, as);
+        as->io = loopIo_new(as->looper, as->fd, _on_async_socket_io, as);
     }
 
     /* Invoke client's callback. */
@@ -1133,7 +1135,8 @@ async_socket_new(int port,
         as->owns_looper = 0;
     }
 
-    loopTimer_init(as->reconnect_timer, as->looper, _on_async_socket_reconnect, as);
+    as->reconnect_timer = loopTimer_new(
+            as->looper, _on_async_socket_reconnect, as);
 
     T("ASocket %s: Descriptor is created.", _async_socket_string(as));
 
