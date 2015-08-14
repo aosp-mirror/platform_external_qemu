@@ -51,9 +51,9 @@ struct AsyncSocketConnector {
     /* I/O looper for asynchronous I/O. */
     Looper*         looper;
     /* I/O port for asynchronous connection. */
-    LoopIo          connector_io[1];
+    LoopIo*         connector_io;
     /* Timer that is used to retry asynchronous connections. */
-    LoopTimer       connector_timer[1];
+    LoopTimer*      connector_timer;
     /* Asynchronous connector to the socket. */
     AsyncConnector  connector[1];
     /* Callback to invoke on connection events. */
@@ -100,12 +100,12 @@ _async_socket_connector_free(AsyncSocketConnector* connector)
              * that connection. */
             D("ASC %s: Stopped async connection in progress.",
               _asc_socket_string(connector));
-            loopIo_done(connector->connector_io);
+            loopIo_free(connector->connector_io);
         }
 
         /* Free allocated resources. */
         if (connector->looper != NULL) {
-            loopTimer_done(connector->connector_timer);
+            loopTimer_free(connector->connector_timer);
             if (connector->owns_looper) {
                 looper_free(connector->looper);
             }
@@ -183,7 +183,7 @@ _on_async_socket_connector_connecting(AsyncSocketConnector* connector,
 
     switch (status) {
         case ASYNC_COMPLETE:
-            loopIo_done(connector->connector_io);
+            loopIo_free(connector->connector_io);
             D("Socket '%s' is connected", _asc_socket_string(connector));
             /* Invoke "on connected" callback */
             action = connector->on_connected_cb(connector->on_connected_cb_opaque,
@@ -191,7 +191,7 @@ _on_async_socket_connector_connecting(AsyncSocketConnector* connector,
             break;
 
         case ASYNC_ERROR:
-            loopIo_done(connector->connector_io);
+            loopIo_free(connector->connector_io);
             D("Error while connecting to socket '%s': %d -> %s",
               _asc_socket_string(connector), errno, strerror(errno));
             /* Invoke "on connected" callback */
@@ -267,8 +267,10 @@ _on_async_socket_connector_retry(void* opaque)
 
         /* Retry connection attempt. */
         if (_async_socket_connector_open_socket(connector) == 0) {
-            loopIo_init(connector->connector_io, connector->looper,
-                        connector->fd, _on_async_socket_connector_io, connector);
+            connector->connector_io = loopIo_new(connector->looper,
+                                                 connector->fd,
+                                                 _on_async_socket_connector_io,
+                                                 connector);
             status = asyncConnector_init(connector->connector,
                                          &connector->address,
                                          connector->connector_io);
@@ -342,8 +344,10 @@ async_socket_connector_new(const SockAddress* address,
     }
 
     /* Create a timer that will be used for connection retries. */
-    loopTimer_init(connector->connector_timer, connector->looper,
-                   _on_async_socket_connector_retry, connector);
+    connector->connector_timer = loopTimer_new(
+            connector->looper,
+            _on_async_socket_connector_retry,
+            connector);
 
     T("ASC %s: New connector object", _asc_socket_string(connector));
 
@@ -388,8 +392,10 @@ async_socket_connector_connect(AsyncSocketConnector* connector)
               _asc_socket_string(connector), connector->fd);
             return;
         } else {
-            loopIo_init(connector->connector_io, connector->looper,
-                        connector->fd, _on_async_socket_connector_io, connector);
+            connector->connector_io = loopIo_new(connector->looper,
+                                                 connector->fd,
+                                                 _on_async_socket_connector_io,
+                                                 connector);
             status = asyncConnector_init(connector->connector,
                                          &connector->address,
                                          connector->connector_io);

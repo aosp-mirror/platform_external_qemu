@@ -69,7 +69,7 @@ typedef struct {
     void*           hwpipe;
     int             state;
     int             wakeWanted;
-    LoopIo          io[1];
+    LoopIo*         io;
     AsyncConnector  connector[1];
 } NetPipe;
 
@@ -79,8 +79,8 @@ netPipe_free( NetPipe*  pipe )
     int  fd;
 
     /* Close the socket */
-    fd = pipe->io->fd;
-    loopIo_done(pipe->io);
+    fd = loopIo_fd(pipe->io);
+    loopIo_free(pipe->io);
     socket_close(fd);
 
     /* Release the pipe object */
@@ -205,7 +205,7 @@ netPipe_initFromAddress( void* hwpipe, const SockAddress*  address, Looper* loop
             return NULL;
         }
 
-        loopIo_init(pipe->io, looper, fd, netPipe_io_func, pipe);
+        pipe->io = loopIo_new(looper, fd, netPipe_io_func, pipe);
         status = asyncConnector_init(pipe->connector, address, pipe->io);
         pipe->state = STATE_CONNECTING;
 
@@ -267,7 +267,8 @@ netPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuf
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
-        int  len = socket_send(pipe->io->fd, buff->data + buffStart, avail);
+        int  len = socket_send(
+                loopIo_fd(pipe->io), buff->data + buffStart, avail);
 
         /* the write succeeded */
         if (len > 0) {
@@ -321,7 +322,7 @@ netPipe_recvBuffers( void* opaque, GoldfishPipeBuffer*  buffers, int  numBuffers
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
-        int  len = socket_recv(pipe->io->fd, buff->data + buffStart, avail);
+        int  len = socket_recv(loopIo_fd(pipe->io), buff->data + buffStart, avail);
 
         /* the read succeeded */
         if (len > 0) {
@@ -509,14 +510,14 @@ openglesPipe_init( void* hwpipe, void* _looper, const char* args )
     }
     if (pipe != NULL) {
         // Disable TCP nagle algorithm to improve throughput of small packets
-        socket_set_nodelay(pipe->io->fd);
+        socket_set_nodelay(loopIo_fd(pipe->io));
 
     // On Win32, adjust buffer sizes
 #ifdef _WIN32
         {
             int sndbuf = 128 * 1024;
             int len = sizeof(sndbuf);
-            if (setsockopt(pipe->io->fd, SOL_SOCKET, SO_SNDBUF,
+            if (setsockopt(loopIo_fd(pipe->io), SOL_SOCKET, SO_SNDBUF,
                         (char*)&sndbuf, len) == SOCKET_ERROR) {
                 D("Failed to set SO_SNDBUF to %d error=0x%x\n",
                 sndbuf, WSAGetLastError());

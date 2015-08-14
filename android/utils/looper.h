@@ -91,17 +91,6 @@ typedef void (*LoopTimerFunc)(void* opaque);
 typedef struct LoopIo    LoopIo;
 typedef void (*LoopIoFunc)(void* opaque, int fd, unsigned events);
 
-struct Looper {
-    Duration (*now)   (Looper* looper);
-    void (*timer_init)(Looper* looper, LoopTimer* timer, LoopTimerFunc callback, void* opaque);
-    void (*io_init)   (Looper* looper, LoopIo* io, int fd, LoopIoFunc callback, void* opaque);
-    int  (*run)       (Looper* looper, Duration deadline_ms);
-    void (*forceQuit) (Looper* looper);
-    void (*destroy)   (Looper* looper);
-};
-
-
-
 /**********************************************************************
  **********************************************************************
  *****
@@ -110,52 +99,21 @@ struct Looper {
  **********************************************************************
  **********************************************************************/
 
-
-typedef struct LoopTimerClass  LoopTimerClass;
-
-struct LoopTimer {
-    LoopTimerClass*  clazz;
-    void*            impl;
-};
-
-struct LoopTimerClass {
-    void (*startRelative)(void* impl, Duration timeout_ms);
-    void (*startAbsolute)(void* impl, Duration deadline_ms);
-    void (*stop)         (void* impl);
-    int  (*isActive)     (void* impl);
-    void (*done)         (void* impl);
-};
-
 /* Initialize a LoopTimer with a callback and an 'opaque' value.
  * Each timer belongs to only one looper object.
  */
-AINLINED void
-loopTimer_init(LoopTimer*     timer,
-               Looper*        looper,
-               LoopTimerFunc  callback,
-               void*          opaque)
-{
-    looper->timer_init(looper, timer, callback, opaque);
-}
+LoopTimer* loopTimer_new(Looper*        looper,
+                         LoopTimerFunc  callback,
+                         void*          opaque);
 
 /* Finalize a LoopTimer */
-AINLINED void
-loopTimer_done(LoopTimer* timer)
-{
-    timer->clazz->done(timer->impl);
-    timer->clazz = NULL;
-    timer->impl  = NULL;
-}
+void loopTimer_free(LoopTimer* timer);
 
 /* Start a timer, i.e. arm it to expire in 'timeout_ms' milliseconds,
  * unless loopTimer_stop() is called before that, or the timer is
  * reprogrammed with another loopTimer_startXXX() call.
  */
-AINLINED void
-loopTimer_startRelative(LoopTimer* timer, Duration timeout_ms)
-{
-    timer->clazz->startRelative(timer->impl, timeout_ms);
-}
+void loopTimer_startRelative(LoopTimer* timer, Duration timeout_ms);
 
 /* A variant of loopTimer_startRelative that fires on a given deadline
  * in milliseconds instead. If the deadline already passed, the timer is
@@ -163,25 +121,13 @@ loopTimer_startRelative(LoopTimer* timer, Duration timeout_ms)
  * fire as soon as possible. Note that this can cause infinite loops
  * in your code if you're not careful.
  */
-AINLINED void
-loopTimer_startAbsolute(LoopTimer* timer, Duration deadline_ms)
-{
-    timer->clazz->startAbsolute(timer->impl, deadline_ms);
-}
+void loopTimer_startAbsolute(LoopTimer* timer, Duration deadline_ms);
 
 /* Stop a given timer */
-AINLINED void
-loopTimer_stop(LoopTimer* timer)
-{
-    timer->clazz->stop(timer->impl);
-}
+void loopTimer_stop(LoopTimer* timer);
 
 /* Returns true iff the timer is active / started */
-AINLINED int
-loopTimer_isActive(LoopTimer* timer)
-{
-    return timer->clazz->isActive(timer->impl);
-}
+int loopTimer_isActive(LoopTimer* timer);
 
 /**********************************************************************
  **********************************************************************
@@ -190,14 +136,6 @@ loopTimer_isActive(LoopTimer* timer)
  *****
  **********************************************************************
  **********************************************************************/
-
-typedef struct LoopIoClass  LoopIoClass;
-
-struct LoopIo {
-    LoopIoClass*  clazz;
-    void*         impl;
-    int           fd;
-};
 
 /* Bitmasks about i/o events. Note that errors (e.g. network disconnections)
  * are mapped to both read and write events. The idea is that a read() or
@@ -214,57 +152,25 @@ enum {
     LOOP_IO_WRITE = (1 << 1),
 };
 
-struct LoopIoClass {
-    void (*wantRead)(void* impl);
-    void (*wantWrite)(void* impl);
-    void (*dontWantRead)(void* impl);
-    void (*dontWantWrite)(void* impl);
-    unsigned (*poll)(void* impl);
-    void (*done)(void* impl);
-};
-
-AINLINED void
-loopIo_init(LoopIo* io, Looper* looper, int fd, LoopIoFunc callback, void* opaque)
-{
-    looper->io_init(looper, io, fd, callback, opaque);
-    io->fd = fd;
-}
+LoopIo* loopIo_new(Looper* looper,
+                   int fd,
+                   LoopIoFunc callback,
+                   void* opaque);
 
 /* Note: This does not close the file descriptor! */
-AINLINED void
-loopIo_done(LoopIo* io)
-{
-    io->clazz->done(io->impl);
-}
+void loopIo_free(LoopIo* io);
+
+int loopIo_fd(LoopIo* io);
 
 /* The following functions are used to indicate whether you want the callback
  * to be fired when there is data to be read or when the file is ready to
  * be written to. */
-AINLINED void
-loopIo_wantRead(LoopIo* io)
-{
-    io->clazz->wantRead(io->impl);
-}
-AINLINED void
-loopIo_wantWrite(LoopIo* io)
-{
-    io->clazz->wantWrite(io->impl);
-}
-AINLINED void
-loopIo_dontWantRead(LoopIo* io)
-{
-    io->clazz->dontWantRead(io->impl);
-}
-AINLINED void
-loopIo_dontWantWrite(LoopIo* io)
-{
-    io->clazz->dontWantWrite(io->impl);
-}
-AINLINED unsigned
-loopIo_poll(LoopIo* io)
-{
-    return io->clazz->poll(io->impl);
-}
+void loopIo_wantRead(LoopIo* io);
+void loopIo_wantWrite(LoopIo* io);
+void loopIo_dontWantRead(LoopIo* io);
+void loopIo_dontWantWrite(LoopIo* io);
+
+unsigned loopIo_poll(LoopIo* io);
 
 /**********************************************************************
  **********************************************************************
@@ -274,23 +180,29 @@ loopIo_poll(LoopIo* io)
  **********************************************************************
  **********************************************************************/
 
-AINLINED Duration
-looper_now(Looper* looper)
-{
-    return looper->now(looper);
-}
+/* Return the current looper time in milliseconds. This can be used to
+ * compute deadlines for looper_runWithDeadline(). */
+Duration looper_now(Looper* looper);
+
 /* Run the event loop, until looper_forceQuit() is called, or there is no
- * more registered watchers for events/timers in the looper.
+ * more registered watchers for events/timers in the looper, or a certain
+ * deadline expires.
+ *
+ * |deadline_ms| is a deadline in milliseconds.
  *
  * The value returned indicates the reason:
  *    0           -> normal exit through looper_forceQuit()
  *    EWOULDBLOCK -> there are not more watchers registered (the looper
  *                   would loop infinitely)
+ *    ETIMEDOUT   -> deadline expired.
  */
-AINLINED void
-looper_run(Looper* looper)
-{
-    (void) looper->run(looper, DURATION_INFINITE);
+int looper_runWithDeadline(Looper* looper, Duration deadline_ms);
+
+/* Run the event loop, until looper_forceQuit() is called, or there is no
+ * more registered watchers for events/timers in the looper.
+ */
+AINLINED void looper_run(Looper* looper) {
+    (void) looper_runWithDeadline(looper, DURATION_INFINITE);
 }
 
 /* A variant of looper_run() that allows to run the event loop only
@@ -303,33 +215,18 @@ looper_run(Looper* looper)
  *    ETIMEDOUT   -> timeout reached
  *
  */
-AINLINED int
-looper_runWithTimeout(Looper* looper, Duration timeout_ms)
-{
+AINLINED int looper_runWithTimeout(Looper* looper, Duration timeout_ms) {
     if (timeout_ms != DURATION_INFINITE)
         timeout_ms += looper_now(looper);
 
-    return looper->run(looper, timeout_ms);
-}
-
-/* Another variant of looper_run() that takes a deadline instead of a
- * timeout. Same return values than looper_runWithTimeout()
- */
-AINLINED int
-looper_runWithDeadline(Looper* looper, Duration deadline_ms)
-{
-    return looper->run(looper, deadline_ms);
+    return looper_runWithDeadline(looper, timeout_ms);
 }
 
 /* Call this function from within the event loop to force it to quit
  * as soon as possible. looper_run() / _runWithTimeout() / _runWithDeadline()
  * will then return 0.
  */
-AINLINED void
-looper_forceQuit(Looper* looper)
-{
-    looper->forceQuit(looper);
-}
+void looper_forceQuit(Looper* looper);
 
 /* Destroy a given looper object. Only works for those created
  * with looper_new(). Cannot be called within looper_run()!!
@@ -337,12 +234,7 @@ looper_forceQuit(Looper* looper)
  * NOTE: This assumes that the user has destroyed all its
  *        timers and ios properly
  */
-AINLINED void
-looper_free(Looper* looper)
-{
-    if (looper)
-        looper->destroy(looper);
-}
+void looper_free(Looper* looper);
 
 /* */
 

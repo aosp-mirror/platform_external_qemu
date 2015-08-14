@@ -196,7 +196,6 @@ common_LOCAL_SRC_FILES += \
 	android/utils/intmap.c \
 	android/utils/lineinput.c \
 	android/utils/looper.cpp \
-	android/utils/looper-base.cpp \
 	android/utils/mapfile.c \
 	android/utils/misc.c \
 	android/utils/panic.c \

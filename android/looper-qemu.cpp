@@ -12,15 +12,12 @@
 #include "android/base/Limits.h"
 
 #include "android/looper-qemu.h"
-
 #include "android/qemu/base/async/Looper.h"
-#include "android/utils/looper-base.h"
+#include "android/utils/looper.h"
 
-using ::android::internal::GLooper;
+typedef ::Looper CLooper;
 
-::Looper* looper_newCore(void) {
-    GLooper* glooper = new GLooper(
+CLooper* looper_newCore(void) {
+    return reinterpret_cast<CLooper*>(
             ::android::qemu::createLooper());
-
-    return &glooper->looper;
 }

@@ -66,7 +66,7 @@ struct AdbHost {
     /* ADB socket connected with the host. */
     int         host_so;
     /* I/O port for asynchronous I/O on the host socket. */
-    LoopIo      io[1];
+    LoopIo*     io;
     /* ADB guest connected with this ADB host. */
     AdbGuest*   adb_guest;
     /* Pending data to send to the guest when it is fully connected. */
@@ -88,7 +88,7 @@ struct AdbServer {
     /* Looper for async I/O on ADB server socket. */
     Looper*     looper;
     /* I/O port for asynchronous I/O on ADB server socket. */
-    LoopIo      io[1];
+    LoopIo*     io;
     /* ADB port. */
     int         port;
     /* Server socket. */
@@ -136,7 +136,7 @@ _adb_host_free(AdbHost* adb_host)
 
         /* Close the host socket. */
         if (adb_host->host_so >= 0) {
-            loopIo_done(adb_host->io);
+            loopIo_free(adb_host->io);
             socket_close(adb_host->host_so);
         }
 
@@ -389,8 +389,10 @@ _on_server_socket_io(void* opaque, int fd, unsigned events)
     }
 
     /* Prepare for I/O on the host connection socket. */
-    loopIo_init(adb_host->io, adb_srv->looper, adb_host->host_so,
-                _on_adb_host_io, adb_host);
+    adb_host->io = loopIo_new(adb_srv->looper,
+                              adb_host->host_so,
+                              _on_adb_host_io,
+                              adb_host);
 
     /* Lets see if there is an ADB guest waiting for a host connection. */
     adb_guest = (AdbGuest*)alist_remove_head(&adb_srv->pending_guests);
@@ -442,8 +444,10 @@ adb_server_init(int port)
 
         /* Prepare server socket for I/O */
         socket_set_nonblock(_adb_server.so);
-        loopIo_init(_adb_server.io, _adb_server.looper, _adb_server.so,
-                    _on_server_socket_io, &_adb_server);
+        _adb_server.io = loopIo_new(_adb_server.looper,
+                                    _adb_server.so,
+                                    _on_server_socket_io,
+                                    &_adb_server);
         loopIo_wantRead(_adb_server.io);
 
         D("ADB server has been initialized for port %d. Socket: %d",

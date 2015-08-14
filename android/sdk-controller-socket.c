@@ -208,7 +208,7 @@ struct SDKCtlQuery {
     /* Next query in the list of active queries. */
     SDKCtlQuery*            next;
     /* A timer to run time out on this query after it has been sent. */
-    LoopTimer               timer[1];
+    LoopTimer*              timer;
     /* Absolute time for this query's deadline. This is the value that query's
      * timer is set to after query has been transmitted to the service. */
     Duration                deadline;
@@ -963,7 +963,7 @@ _sdkctl_query_free(SDKCtlQuery* query)
             free(query->internal_resp_buffer);
         }
 
-        loopTimer_done(query->timer);
+        loopTimer_free(query->timer);
 
         /* Recyle the descriptor. */
         _sdkctl_socket_free_recycler(sdkctl, query);
@@ -1168,7 +1168,8 @@ sdkctl_query_new(SDKCtlSocket* sdkctl, int query_type, uint32_t in_data_size)
     query->header.query_type        = query_type;
 
     /* Initialize timer to fire up on query deadline expiration. */
-    loopTimer_init(query->timer, sdkctl->looper, _on_skdctl_query_timeout, query);
+    query->timer = loopTimer_new(
+            sdkctl->looper, _on_skdctl_query_timeout, query);
 
     /* Reference socket that owns this query. */
     sdkctl_socket_reference(sdkctl);
