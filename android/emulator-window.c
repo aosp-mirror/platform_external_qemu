@@ -18,7 +18,6 @@
 #include "android/gpu_frame.h"
 #include "android/hw-control.h"
 #include "android/hw-sensors.h"
-#include "android/looper.h"
 #include "android/looper-qemu.h"
 #include "android/opengles.h"
 #include "android/skin/keycode.h"
@@ -26,6 +25,7 @@
 #include "android/user-events.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/looper.h"
 
 #include "telephony/modem_driver.h"
 

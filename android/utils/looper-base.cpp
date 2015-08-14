@@ -12,12 +12,10 @@
 // Include this first to avoid compiler warning.
 #include "android/base/Limits.h"
 
-#include "android/looper-base.h"
+#include "android/utils/looper-base.h"
 
 #include "android/base/async/Looper.h"
 #include "android/base/sockets/SocketUtils.h"
-
-#include "android/qemu/base/async/Looper.h"
 
 // An implementation of the C Looper type based on the C++
 // android::base::Looper class.

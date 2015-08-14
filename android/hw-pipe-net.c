@@ -20,9 +20,9 @@
 
 #include "android/async-utils.h"
 #include "android/opengles.h"
-#include "android/looper.h"
 #include "android/looper-qemu.h"
 #include "android/utils/assert.h"
+#include "android/utils/looper.h"
 #include "android/utils/panic.h"
 #include "android/utils/sockets.h"
 #include "android/utils/system.h"
