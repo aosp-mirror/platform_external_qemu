@@ -10,8 +10,10 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef SKIN_QT_TOOLWINDOW_H
-#define SKIN_QT_TOOLWINDOW_H
+#ifndef ANDROID_SKIN_QT_TOOLWINDOW_H
+#define ANDROID_SKIN_QT_TOOLWINDOW_H
+
+#include "android/ui-emu-agent.h"
 
 #include <QFrame>
 #include <QGridLayout>
@@ -23,6 +25,7 @@ namespace Ui {
 }
 
 class EmulatorQtWindow;
+class ExtendedWindow;
 
 typedef void(EmulatorQtWindow::*EmulatorQtWindowSlot)();
 
@@ -34,19 +37,24 @@ public:
     explicit ToolWindow(EmulatorQtWindow *emulatorWindow);
     void show();
     void dockMainWindow();
+    void extendedIsClosing() { extendedWindow = NULL; }
+
+    void setEmuAgent(const UiEmuAgent *agPtr)
+        { uiEmuAgent = agPtr; }
 
 private:
-    QToolButton *addButton(QGridLayout *layout, int row, int col, const char *iconPath, QString tip, EmulatorQtWindowSlot slot);
-    void setExpandedState(bool expanded);
+    QToolButton *addButton(QGridLayout *layout, int row, int col,
+                           const char *iconPath, QString tip,
+                           EmulatorQtWindowSlot slot);
 
-    QWidget *button_area;
+    QWidget          *button_area;
     EmulatorQtWindow *emulator_window;
-    bool expanded;
-    QList<QToolButton*> expanded_buttons;
-    QBoxLayout *top_layout;
-    double scale; // TODO: add specific UI for scaling
+    ExtendedWindow   *extendedWindow;
+    QBoxLayout       *top_layout;
+    const struct UiEmuAgent *uiEmuAgent;
 
     Ui::ToolControls  *toolsUi;
+    double scale; // TODO: add specific UI for scaling
 
 private slots:
     void on_close_button_clicked();
@@ -63,4 +71,4 @@ private slots:
 
 typedef void(ToolWindow::*ToolWindowSlot)();
 
-#endif // SKIN_QT_TOOLWINDOW_H
+#endif // ANDROID_SKIN_QT_TOOLWINDOW_H

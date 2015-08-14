@@ -14,6 +14,7 @@
 
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/tool-window.h"
 #include "ui_tools.h"
 
@@ -22,6 +23,8 @@ static ToolWindow *twInstance = NULL;
 ToolWindow::ToolWindow(EmulatorQtWindow *window) :
     QFrame(window),
     emulator_window(window),
+    extendedWindow(NULL),
+    uiEmuAgent(NULL),
     toolsUi(new Ui::ToolControls),
     scale(.4) // TODO: add specific UI for scaling
 {
@@ -94,4 +97,15 @@ void ToolWindow::on_fullscreen_button_clicked()
 
 void ToolWindow::on_more_button_clicked()
 {
+    // Show the tabbed pane
+    if (extendedWindow) {
+        // It already exists. Don't create another.
+        // (But raise it in case it's hidden.)
+        extendedWindow->raise();
+        return;
+    }
+    extendedWindow = new ExtendedWindow(emulator_window, this, uiEmuAgent);
+    extendedWindow->show();
+    // completeInitialization() must be called AFTER show()
+    extendedWindow->completeInitialization();
 }
