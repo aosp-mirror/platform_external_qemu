@@ -13,7 +13,8 @@
 #ifndef ANDROID_SKIN_QT_TOOLWINDOW_H
 #define ANDROID_SKIN_QT_TOOLWINDOW_H
 
-#include "android/ui-emu-agent.h"
+#include "android/skin/qt/set-ui-emu-agent.h"
+#include "android/utils/compiler.h"
 
 #include <QFrame>
 #include <QGridLayout>
@@ -39,7 +40,7 @@ public:
     void dockMainWindow();
     void extendedIsClosing() { extendedWindow = NULL; };
 
-    void setEmuAgent(const UiEmuAgent *agPtr)
+    void setToolEmuAgent(const UiEmuAgent *agPtr)
         { uiEmuAgent = agPtr; };
 
 private:
