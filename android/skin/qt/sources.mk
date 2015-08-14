@@ -18,6 +18,7 @@ ANDROID_SKIN_SOURCES += \
     android/gps/GpxParser.cpp \
     android/gps/KmlParser.cpp \
     android/skin/qt/emulator-qt-window.cpp \
+    android/skin/qt/ext-battery.cpp \
     android/skin/qt/extended-window.cpp \
     android/skin/qt/tool-window.cpp \
 

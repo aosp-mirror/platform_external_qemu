@@ -13,7 +13,8 @@
 #ifndef ANDROID_SKIN_QT_TOOLWINDOW_H
 #define ANDROID_SKIN_QT_TOOLWINDOW_H
 
-#include "android/ui-emu-agent.h"
+#include "android/skin/qt/set-ui-emu-agent.h"
+#include "android/utils/compiler.h"
 
 #include <QFrame>
 #include <QGridLayout>
@@ -37,10 +38,10 @@ public:
     explicit ToolWindow(EmulatorQtWindow *emulatorWindow);
     void show();
     void dockMainWindow();
-    void extendedIsClosing() { extendedWindow = NULL; }
+    void extendedIsClosing() { mExtendedWindow = NULL; }
 
     void setEmuAgent(const UiEmuAgent *agPtr)
-        { uiEmuAgent = agPtr; }
+        { mUiEmuAgent = agPtr; }
 
 private:
     QToolButton *addButton(QGridLayout *layout, int row, int col,

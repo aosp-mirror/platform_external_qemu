@@ -146,6 +146,8 @@ private:
     SkinEvent *createSkinEvent(SkinEventType type);
     void handleKeyEvent(SkinEventType type, QKeyEvent *pEvent);
 
+    void             *batteryState;
+
     SkinSurface *backing_surface;
     QQueue<SkinEvent*> event_queue;
     ToolWindow *tool_window;

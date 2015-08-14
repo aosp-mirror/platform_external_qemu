@@ -46,6 +46,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
 {
     instance = this;
     backing_surface = NULL;
+    batteryState    = NULL;
+
     tool_window = new ToolWindow(this);
 
     QObject::connect(this, &EmulatorQtWindow::blit, this, &EmulatorQtWindow::slot_blit);
