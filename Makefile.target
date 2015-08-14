@@ -311,6 +311,7 @@ common_LOCAL_SRC_FILES := \
     android/main-common-ui.c \
     android/main.c \
     android/opengles.c \
+    android/qemu-battery-agent-impl.c \
     android/qt/qt_path.cpp \
     android/user-events-qemu.c \
     hw/core/loader.c \

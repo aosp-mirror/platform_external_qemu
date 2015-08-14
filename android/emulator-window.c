@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2010 The Android Open Source Project
+/* Copyright (C) 2006-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -13,6 +13,8 @@
 #include "android/emulator-window.h"
 
 #include "android/android.h"
+#include "android/battery-agent.h"
+#include "android/battery-agent-impl.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
@@ -21,12 +23,17 @@
 #include "android/opengles.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
+#include "android/ui-emu-agent.h"
 #include "android/user-events.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/looper.h"
 
 #include "telephony/modem_driver.h"
+
+#if CONFIG_QT
+#include "android/skin/qt/set-ui-emu-agent.h"
+#endif
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -231,6 +238,25 @@ emulator_window_setup( EmulatorWindow*  emulator )
                           emulator->onion_rotation,
                           emulator->onion_alpha);
     }
+
+#if CONFIG_QT
+    static const BatteryAgent myBatteryAgent = {
+        .setIsCharging  = battery_setIsCharging,
+        .setChargeLevel = battery_setChargeLevel,
+        .setHealth      = battery_setHealth,
+        .setStatus      = battery_setStatus
+    };
+
+    static const UiEmuAgent myUiEmuAgent = {
+        .battery   = &myBatteryAgent,
+        .cellular  = NULL,
+        .finger    = NULL,
+        .location  = NULL,
+        .telephony = NULL
+    };
+
+    setUiEmuAgent(&myUiEmuAgent);
+#endif
 
     // Determine whether to use an EmuGL sub-window or not.
     if (!s_use_emugl_subwindow) {
