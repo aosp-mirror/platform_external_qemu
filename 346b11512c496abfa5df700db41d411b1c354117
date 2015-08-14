@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0456a145_d7ca9c90",
+        "filename": "android/telephony/sms_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-14T00:26:31Z",
+      "side": 1,
+      "message": "nit: generally speaking, this include should appear before the gtest one, but let\u0027s allow it here.",
+      "revId": "346b11512c496abfa5df700db41d411b1c354117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
