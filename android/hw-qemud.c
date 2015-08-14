@@ -12,12 +12,12 @@
 #include "android/hw-qemud.h"
 
 #include "android/charpipe.h"
-#include "android/looper.h"
 #include "android/looper-qemu.h"
 
 #include "android/utils/bufprint.h"
 #include "android/utils/cbuffer.h"
 #include "android/utils/debug.h"
+#include "android/utils/looper.h"
 #include "android/utils/misc.h"
 #include "android/utils/panic.h"
 #include "android/utils/system.h"
