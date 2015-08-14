@@ -21,7 +21,6 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/opengl/GpuFrameBridge.h"
 #include "android/opengles.h"
-#include "android/utils/looper-base.h"
 
 // Standard values from Khronos.
 #define GL_RGBA 0x1908
@@ -55,7 +54,9 @@ void gpu_frame_set_post_callback(
     DCHECK(!sBridge);
 
     sBridge = android::opengl::GpuFrameBridge::create(
-            android::internal::toBaseLooper(looper), callback, context);
+            reinterpret_cast<android::base::Looper*>(looper),
+            callback,
+            context);
     CHECK(sBridge);
 
     android_setPostCallback(onNewGpuFrame, sBridge);
