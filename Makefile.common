@@ -146,8 +146,6 @@ common_LOCAL_SRC_FILES += \
 	android/filesystems/ramdisk_extractor.cpp \
 	android/kernel/kernel_utils.cpp \
 	android/qemu/base/async/Looper.cpp \
-	android/looper-base.cpp \
-	android/looper-generic.cpp \
 	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
 	android/opengl/emugl_config.cpp \
@@ -169,6 +167,8 @@ common_LOCAL_SRC_FILES += \
 	android/utils/ini.c \
 	android/utils/intmap.c \
 	android/utils/lineinput.c \
+	android/utils/looper.cpp \
+	android/utils/looper-base.cpp \
 	android/utils/mapfile.c \
 	android/utils/misc.c \
 	android/utils/panic.c \

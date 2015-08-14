@@ -13,7 +13,7 @@
 #define ANDROID_LOOPER_BASE_H
 
 #include "android/base/async/Looper.h"
-#include "android/looper.h"
+#include "android/utils/looper.h"
 
 namespace android {
 namespace internal {

@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/looper-base.h"
+#include "android/utils/looper-base.h"
 
 #include "android/base/async/Looper.h"
 

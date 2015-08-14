@@ -13,8 +13,8 @@
 
 #include "android/looper-qemu.h"
 
-#include "android/looper-base.h"
 #include "android/qemu/base/async/Looper.h"
+#include "android/utils/looper-base.h"
 
 using ::android::internal::GLooper;
 

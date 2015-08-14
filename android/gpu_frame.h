@@ -16,7 +16,7 @@
 #define ANDROID_GPU_FRAME_H
 
 #include "android/utils/compiler.h"
-#include "android/looper.h"
+#include "android/utils/looper.h"
 
 ANDROID_BEGIN_HEADER
 
