@@ -19,9 +19,9 @@
 
 #include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
-#include "android/looper-base.h"
 #include "android/opengl/GpuFrameBridge.h"
 #include "android/opengles.h"
+#include "android/utils/looper-base.h"
 
 // Standard values from Khronos.
 #define GL_RGBA 0x1908

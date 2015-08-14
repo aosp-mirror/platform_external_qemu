@@ -16,8 +16,8 @@
 #ifndef ANDROID_ASYNC_UTILS_H
 #define ANDROID_ASYNC_UTILS_H
 
-#include "android/looper.h"
 #include "android/utils/compiler.h"
+#include "android/utils/looper.h"
 #include "android/utils/sockets.h"
 
 ANDROID_BEGIN_HEADER

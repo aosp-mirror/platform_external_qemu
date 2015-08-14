@@ -18,7 +18,7 @@
 #include "android/base/sockets/SocketDrainer.h"
 #include "android/base/sockets/SocketUtils.h"
 
-#include "android/looper-base.h"
+#include "android/utils/looper-base.h"
 
 #include <stddef.h>
 

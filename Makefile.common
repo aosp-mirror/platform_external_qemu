@@ -171,10 +171,8 @@ common_LOCAL_SRC_FILES += \
 	android/filesystems/partition_types.cpp \
 	android/filesystems/ramdisk_extractor.cpp \
 	android/kernel/kernel_utils.cpp \
-	android/metrics/metrics_reporter.c \
-	android/looper-base.cpp \
-	android/looper-generic.cpp \
 	android/metrics/ddms-ping.cpp \
+	android/metrics/metrics_reporter.c \
 	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
 	android/opengl/emugl_config.cpp \
@@ -197,6 +195,8 @@ common_LOCAL_SRC_FILES += \
 	android/utils/ini.c \
 	android/utils/intmap.c \
 	android/utils/lineinput.c \
+	android/utils/looper.cpp \
+	android/utils/looper-base.cpp \
 	android/utils/mapfile.c \
 	android/utils/misc.c \
 	android/utils/panic.c \
