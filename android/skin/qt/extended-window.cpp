@@ -51,6 +51,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     QFrame(eW),
     parentWindow(eW),
     toolWindow(tW),
+    batteryAgent  (agentPtr ? agentPtr->battery   : NULL),
     extendedUi(new Ui::ExtendedControls)
 {
     Q_INIT_RESOURCE(resources);
@@ -59,6 +60,9 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     setAttribute(Qt::WA_DeleteOnClose);
 
     extendedUi->setupUi(this);
+
+    // Do any sub-window-specific initialization
+    initBattery();
 
     move(parentWindow->geometry().right() + 40,
          parentWindow->geometry().top()   + 40 );

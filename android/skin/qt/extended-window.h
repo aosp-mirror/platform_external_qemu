@@ -23,6 +23,8 @@
 #include <QTimer>
 #include <QValidator>
 
+#include "android/battery-agent.h"
+
 class EmulatorQtWindow;
 class ToolWindow;
 
@@ -47,6 +49,27 @@ private:
     EmulatorQtWindow   *parentWindow;
     ToolWindow         *toolWindow;
 
+    class BatteryState {
+    public:
+        bool          isCharging;
+        int           chargeLevel; // Percent
+        BatteryHealth health;
+        BatteryStatus status;
+
+        BatteryState() {
+            isCharging  = true;
+            chargeLevel = 50;
+            health      = Battery_H_Good;
+            status      = Battery_S_Charging;
+        }
+    };
+
+    void initBattery();
+
+    BatteryState    batteryState;
+
+    const BatteryAgent    *batteryAgent;
+
     bool     themeIsDark;
 
     Ui::ExtendedControls *extendedUi;
@@ -67,6 +90,11 @@ private slots:
     void on_sdButton_clicked();
     void on_telephoneButton_clicked();
 
+    // Battery
+    void on_bat_chargeCkBox_toggled(bool checked);
+    void on_bat_levelSlider_valueChanged(int value);
+    void on_bat_healthBox_currentIndexChanged(int index);
+    void on_bat_statusBox_currentIndexChanged(int index);
 };
 
 #endif // ANDROID_SKIN_QT_EXTENDED_WINDOW_H

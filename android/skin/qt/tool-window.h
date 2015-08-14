@@ -13,7 +13,21 @@
 #ifndef ANDROID_SKIN_QT_TOOLWINDOW_H
 #define ANDROID_SKIN_QT_TOOLWINDOW_H
 
-#include "android/ui-emu-agent.h"
+#include "android/utils/compiler.h"
+
+// This is the only part that is accessable from C
+
+struct UiEmuAgent;
+
+ANDROID_BEGIN_HEADER
+
+void setEmuAgent(const UiEmuAgent *agentPtr);
+
+ANDROID_END_HEADER
+
+// The rest of this file is C++
+
+#ifdef __cplusplus
 
 #include <QFrame>
 #include <QGridLayout>
@@ -38,7 +52,7 @@ public:
     void show();
     void extendedIsClosing() { extendedWindow = NULL; };
 
-    void setEmuAgent(const UiEmuAgent *agPtr)
+    void setToolEmuAgent(const UiEmuAgent *agPtr)
         { uiEmuAgent = agPtr; };
 
 private:
@@ -67,5 +81,7 @@ private slots:
 };
 
 typedef void(ToolWindow::*ToolWindowSlot)();
+
+#endif // __cplusplus
 
 #endif // ANDROID_SKIN_QT_TOOLWINDOW_H
