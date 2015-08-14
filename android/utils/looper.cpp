@@ -15,6 +15,7 @@
 #include "android/utils/looper.h"
 
 #include "android/base/async/Looper.h"
+#include "android/base/async/ThreadLooper.h"
 
 //using ::android::internal::GLooper;
 
@@ -133,6 +134,16 @@ LoopIo* loopIo_new(CLooper* looper,
 
     return reinterpret_cast<LoopIo*>(
             asBaseLooper(looper)->createFdWatch(fd, callback, opaque));
+}
+
+CLooper* looper_getForThread(void) {
+    return reinterpret_cast<CLooper*>(
+            android::base::ThreadLooper::get());
+}
+
+void looper_setForThread(Looper* looper) {
+    android::base::ThreadLooper::setLooper(
+            reinterpret_cast<BaseLooper*>(looper));
 }
 
 CLooper* looper_newGeneric(void) {

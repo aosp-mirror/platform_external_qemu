@@ -12,7 +12,6 @@
 #include "android/hw-qemud.h"
 
 #include "android/charpipe.h"
-#include "android/looper-qemu.h"
 
 #include "android/utils/bufprint.h"
 #include "android/utils/cbuffer.h"
@@ -2231,7 +2230,7 @@ _android_qemud_pipe_init(void)
     static ABool _qemud_pipe_initialized = false;
 
     if (!_qemud_pipe_initialized) {
-        goldfish_pipe_add_type( "qemud", looper_newCore(), &_qemudPipe_funcs );
+        goldfish_pipe_add_type( "qemud", looper_getForThread(), &_qemudPipe_funcs );
         _qemud_pipe_initialized = true;
     }
 }
