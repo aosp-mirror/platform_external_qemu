@@ -1,0 +1,7 @@
+Code-Review+2: David Turner <digit@google.com>
+Verified+1: Jim Kaye <jameskaye@google.com>
+Submitted-by: Jim Kaye <jameskaye@google.com>
+Submitted-at: Sat, 15 Aug 2015 17:13:00 +0000
+Reviewed-on: https://android-review.googlesource.com/166799
+Project: platform/external/qemu
+Branch: refs/heads/studio-1.4-dev
