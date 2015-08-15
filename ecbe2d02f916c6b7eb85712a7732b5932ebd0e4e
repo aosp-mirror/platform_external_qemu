@@ -16,6 +16,24 @@
       "revId": "ecbe2d02f916c6b7eb85712a7732b5932ebd0e4e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04b861a5_d0a8b2d9",
+        "filename": "android/gps.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-15T17:06:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e46c2d17_16b53c1a",
+      "revId": "ecbe2d02f916c6b7eb85712a7732b5932ebd0e4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
