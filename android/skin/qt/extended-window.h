@@ -24,6 +24,7 @@
 #include <QValidator>
 
 #include "android/battery-agent.h"
+#include "android/cellular-agent.h"
 #include "android/telephony-agent.h"
 
 class EmulatorQtWindow;
@@ -79,12 +80,14 @@ private:
     };
 
     void initBattery();
+    void initCellular();
     void initTelephony();
 
     BatteryState    batteryState;
     TelephonyState  telephonyState;
 
     const BatteryAgent    *batteryAgent;
+    const CellularAgent   *cellularAgent;
     const TelephonyAgent  *telephonyAgent;
 
     bool     themeIsDark;
@@ -112,6 +115,12 @@ private slots:
     void on_bat_levelSlider_valueChanged(int value);
     void on_bat_healthBox_currentIndexChanged(int index);
     void on_bat_statusBox_currentIndexChanged(int index);
+
+    // Cellular
+    void on_cell_signalStrengthSlider_valueChanged(int value);
+    void on_cell_standardBox_currentIndexChanged(int index);
+    void on_cell_voiceStatusBox_currentIndexChanged(int index);
+    void on_cell_dataStatusBox_currentIndexChanged(int index);
 
     // Telephony
     void on_tel_startCallButton_clicked();
