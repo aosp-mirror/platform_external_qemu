@@ -15,6 +15,8 @@
 #include "android/android.h"
 #include "android/battery-agent.h"
 #include "android/battery-agent-impl.h"
+#include "android/cellular-agent.h"
+#include "android/cellular-agent-impl.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
@@ -249,13 +251,20 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .setStatus      = battery_setStatus
     };
 
+    static const CellularAgent myCellularAgent = {
+        .setSignalStrength = cellular_setSignalStrength,
+        .setVoiceStatus    = cellular_setVoiceStatus,
+        .setDataStatus     = cellular_setDataStatus,
+        .setStandard       = cellular_setStandard
+    };
+
     static const TelephonyAgent myTelephonyAgent = {
         .telephonyCmd   = telephony_telephonyCmd
     };
 
     static const UiEmuAgent myUiEmuAgent = {
         .battery   = &myBatteryAgent,
-        .cellular  = NULL,
+        .cellular  = &myCellularAgent,
         .finger    = NULL,
         .location  = NULL,
         .telephony = &myTelephonyAgent
