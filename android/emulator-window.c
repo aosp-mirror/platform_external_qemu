@@ -24,6 +24,8 @@
 #include "android/opengles.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
+#include "android/telephony-agent.h"
+#include "android/telephony-agent-impl.h"
 #include "android/ui-emu-agent.h"
 #include "android/user-events.h"
 #include "android/utils/debug.h"
@@ -246,12 +248,16 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .setStatus      = battery_setStatus
     };
 
+    static const TelephonyAgent myTelephonyAgent = {
+        .telephonyCmd   = telephony_telephonyCmd
+    };
+
     static const UiEmuAgent myUiEmuAgent = {
         .battery   = &myBatteryAgent,
         .cellular  = NULL,
         .finger    = NULL,
         .location  = NULL,
-        .telephony = NULL
+        .telephony = &myTelephonyAgent
     };
 
     setUiEmuAgent(&myUiEmuAgent);
