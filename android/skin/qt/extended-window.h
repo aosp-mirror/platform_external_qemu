@@ -24,6 +24,8 @@
 #include <QValidator>
 
 #include "android/battery-agent.h"
+#include "android/cellular-agent.h"
+#include "android/telephony-agent.h"
 
 class EmulatorQtWindow;
 class ToolWindow;
@@ -64,11 +66,30 @@ private:
             mStatus(BATTERY_STATUS_CHARGING) { }
     };
 
+    typedef enum { Call_Inactive, Call_Active, Call_Held } CallActivity;
+
+    class TelephonyState {
+    public:
+
+        CallActivity  mActivity;
+        QString       mPhoneNumber;
+
+        TelephonyState() :
+            mActivity(Call_Inactive),
+            mPhoneNumber("6505551212") // TODO: Change to "(650) 555-1212"
+        { }
+    };
+
     void initBattery();
+    void initCellular();
+    void initTelephony();
 
     BatteryState    mBatteryState;
+    TelephonyState  mTelephonyState;
 
     const BatteryAgent    *mBatteryAgent;
+    const CellularAgent   *mCellularAgent;
+    const TelephonyAgent  *mTelephonyAgent;
 
     Ui::ExtendedControls *mExtendedUi;
 
@@ -93,6 +114,23 @@ private slots:
     void on_bat_levelSlider_valueChanged(int value);
     void on_bat_healthBox_currentIndexChanged(int index);
     void on_bat_statusBox_currentIndexChanged(int index);
+
+    // Cellular
+    void on_cell_signalStrengthSlider_valueChanged(int value);
+    void on_cell_standardBox_currentIndexChanged(int index);
+    void on_cell_voiceStatusBox_currentIndexChanged(int index);
+    void on_cell_dataStatusBox_currentIndexChanged(int index);
+
+    // Telephony
+    void on_tel_startCallButton_clicked();
+    void on_tel_endCallButton_clicked();
+    void on_tel_holdCallButton_clicked();
+};
+
+class phoneNumberValidator : public QValidator
+{
+public:
+    State validate(QString &input, int &pos) const;
 };
 
 #endif // ANDROID_SKIN_QT_EXTENDED_WINDOW_H

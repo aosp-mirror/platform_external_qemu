@@ -38,10 +38,10 @@ public:
     explicit ToolWindow(EmulatorQtWindow *emulatorWindow);
     void show();
     void dockMainWindow();
-    void extendedIsClosing() { mExtendedWindow = NULL; }
+    void extendedIsClosing() { extendedWindow = NULL; }
 
-    void setEmuAgent(const UiEmuAgent *agPtr)
-        { mUiEmuAgent = agPtr; }
+    void setToolEmuAgent(const UiEmuAgent *agPtr)
+        { uiEmuAgent = agPtr; }
 
 private:
     QToolButton *addButton(QGridLayout *layout, int row, int col,

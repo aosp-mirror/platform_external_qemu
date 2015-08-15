@@ -22,17 +22,17 @@ void ExtendedWindow::initBattery()
 
 void ExtendedWindow::on_bat_chargeCkBox_toggled(bool checked)
 {
-    batteryState.isCharging = checked;
-    if (batteryAgent && batteryAgent->setIsCharging) {
-        batteryAgent->setIsCharging(checked);
+    mBatteryState.mIsCharging = checked;
+    if (mBatteryAgent && mBatteryAgent->setIsCharging) {
+        mBatteryAgent->setIsCharging(checked);
     }
 }
 
 void ExtendedWindow::on_bat_levelSlider_valueChanged(int value)
 {
-    batteryState.chargeLevel = value;
-    if (batteryAgent && batteryAgent->setChargeLevel) {
-        batteryAgent->setChargeLevel(value);
+    mBatteryState.mChargeLevel = value;
+    if (mBatteryAgent && mBatteryAgent->setChargeLevel) {
+        mBatteryAgent->setChargeLevel(value);
     }
 }
 
@@ -40,10 +40,10 @@ void ExtendedWindow::on_bat_healthBox_currentIndexChanged(int index)
 {
     BatteryHealth bHealth = (BatteryHealth)index;
     if (bHealth >= 0 && bHealth < BATTERY_HEALTH_NUM_ENTRIES) {
-        batteryState.health = bHealth;
+        mBatteryState.mHealth = bHealth;
 
-        if (batteryAgent && batteryAgent->setHealth) {
-            batteryAgent->setHealth(bHealth);
+        if (mBatteryAgent && mBatteryAgent->setHealth) {
+            mBatteryAgent->setHealth(bHealth);
         }
     }
 }
@@ -52,10 +52,10 @@ void ExtendedWindow::on_bat_statusBox_currentIndexChanged(int index)
 {
     BatteryStatus bStatus = (BatteryStatus)index;
     if (bStatus >= 0 && bStatus < BATTERY_STATUS_NUM_ENTRIES) {
-        batteryState.status = bStatus;
+        mBatteryState.mStatus = bStatus;
 
-        if (batteryAgent && batteryAgent->setStatus) {
-                batteryAgent->setStatus(bStatus);
+        if (mBatteryAgent && mBatteryAgent->setStatus) {
+                mBatteryAgent->setStatus(bStatus);
         }
     }
 }

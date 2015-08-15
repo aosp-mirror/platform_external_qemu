@@ -25,6 +25,8 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     mParentWindow(eW),
     mToolWindow(tW),
     mBatteryAgent  (agentPtr ? agentPtr->battery   : NULL),
+    mCellularAgent (agentPtr ? agentPtr->cellular  : NULL),
+    mTelephonyAgent(agentPtr ? agentPtr->telephony : NULL),
     mExtendedUi(new Ui::ExtendedControls)
 {
     Q_INIT_RESOURCE(resources);
@@ -36,6 +38,8 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
 
     // Do any sub-window-specific initialization
     initBattery();
+    initCellular();
+    initTelephony();
 
     move(mParentWindow->geometry().right() + 40,
          mParentWindow->geometry().top()   + 40 );
@@ -137,6 +141,44 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
     thisButton->clearFocus(); // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(thisIndex);
 }
+
+////////////////////////////////////////////////////////////
+//
+// phoneNumberValidator
+//
+// Validate the input of a telephone number.
+// We allow '+' only in the first position.
+// One or more digits (0-9) are required.
+// Some additional characters are allowed, but ignored.
+
+QValidator::State phoneNumberValidator::validate(QString &input, int &pos) const
+{
+    int numDigits = 0;
+    const int MAX_DIGITS = 16;
+
+    if (input.length() >= 32) return QValidator::Invalid;
+
+    for (int ii=0; ii<input.length(); ii++) {
+        if (input[ii] >= '0' &&  input[ii] <= '9') {
+            numDigits++;
+            if (numDigits > MAX_DIGITS) return QValidator::Invalid;
+        } else if (input[ii] == '+' && ii != 0) {
+            // '+' is only allowed as the first character
+            return QValidator::Invalid;
+        } else if (input[ii] != '-' &&
+                   input[ii] != '.' &&
+                   input[ii] != '(' &&
+                   input[ii] != ')' &&
+                   input[ii] != '/' &&
+                   input[ii] != ' ' &&
+                   input[ii] != '+'   )
+        {
+            return QValidator::Invalid;
+        }
+    }
+
+    return ((numDigits > 0) ? QValidator::Acceptable : QValidator::Intermediate);
+} // end validate()
 
 void ExtendedWindow::setButtonEnabled(QPushButton *theButton, bool isEnabled)
 {
