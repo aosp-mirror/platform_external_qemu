@@ -281,13 +281,13 @@ sms_address_from_str( SmsAddress  address, const char*  src, int  srclen )
     bytes_t      data = address->data;
 
     address->len = 0;
-    address->toa = 0x81;
+    address->toa = 0x81; // Type of address: domestic
 
     if (src >= end)
         return -1;
 
     if ( src[0] == '+' ) {
-        address->toa = 0x91;
+        address->toa = 0x91; // Type of address: international
         if (++src == end)
             goto Fail;
     }
@@ -297,25 +297,26 @@ sms_address_from_str( SmsAddress  address, const char*  src, int  srclen )
     shift = 0;
 
     while (src < end) {
-        int  c = *src++ - '0';
+        int  c = *src++;
+        if (c >= '0' && c <= '9') {
+            if (data >= address->data + sizeof(address->data) )
+                goto Fail;
 
-        if ( (unsigned)c >= 10 ||
-              data >= address->data + sizeof(address->data) )
-            goto Fail;
-
-        data[0] |= c << shift;
-        len   += 1;
-        shift += 4;
-        if (shift == 8) {
-            shift = 0;
-            data += 1;
-        }
+            c -= '0';
+            data[0] |= c << shift;
+            len   += 1;
+            shift += 4;
+            if (shift == 8) {
+                shift = 0;
+                data += 1;
+            }
+        } // endif (0..9)
     }
     if (shift != 0)
         data[0] |= 0xf0;
 
     address->len = len;
-    return 0;
+    return (len > 0) ? 0 : -1;
 
 Fail:
     return -1;
@@ -1651,4 +1652,3 @@ Exit:
     sms_receiver_remove( rec, index );
     return result;
 }
-

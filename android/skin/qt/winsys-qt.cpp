@@ -19,7 +19,7 @@
 #include "android/skin/rect.h"
 #include "android/skin/resource.h"
 #include "android/skin/winsys.h"
-#include "android/skin/qt/emulator-window.h"
+#include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/setenv.h"
 
 #include <QtCore>
@@ -86,7 +86,7 @@ extern void skin_winsys_get_monitor_rect(SkinRect *rect)
 {
     QRect qrect;
     QSemaphore semaphore;
-    EmulatorWindow *window = EmulatorWindow::getInstance();
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -105,7 +105,7 @@ extern int skin_winsys_get_monitor_dpi(int *x, int *y)
 {
     D("skin_winsys_get_monitor_dpi");
     QSemaphore semaphore;
-    EmulatorWindow *window = EmulatorWindow::getInstance();
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return -1;
@@ -123,7 +123,7 @@ extern void *skin_winsys_get_window_handle(void)
     D("skin_winsys_get_window_handle");
     WId handle;
     QSemaphore semaphore;
-    EmulatorWindow *window = EmulatorWindow::getInstance();
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return NULL;
@@ -143,7 +143,7 @@ extern void skin_winsys_get_window_pos(int *x, int *y)
         *y = g->window_pos_y;
     } else {
         QSemaphore semaphore;
-        EmulatorWindow *window = EmulatorWindow::getInstance();
+        EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
         if (window == NULL) {
             D("%s: Could not get window handle", __FUNCTION__);
             return;
@@ -167,7 +167,7 @@ extern bool skin_winsys_is_window_fully_visible()
 {
     D("skin_winsys_is_window_fully_visible");
     QSemaphore semaphore;
-    EmulatorWindow *window = EmulatorWindow::getInstance();
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return true;
@@ -182,7 +182,7 @@ extern bool skin_winsys_is_window_fully_visible()
 extern void skin_winsys_quit()
 {
     D("skin_winsys_quit");
-    EmulatorWindow *window = EmulatorWindow::getInstance();
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -198,7 +198,7 @@ extern void skin_winsys_set_relative_mouse_mode(bool)
 extern void skin_winsys_set_window_icon(const unsigned char *data, size_t size)
 {
     D("skin_winsys_set_window_icon");
-    EmulatorWindow *window = EmulatorWindow::getInstance();
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -209,7 +209,7 @@ extern void skin_winsys_set_window_icon(const unsigned char *data, size_t size)
 extern void skin_winsys_set_window_pos(int x, int y)
 {
     D("skin_winsys_set_window_pos %d, %d", x, y);
-    EmulatorWindow *window = EmulatorWindow::getInstance();
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -221,7 +221,7 @@ extern void skin_winsys_set_window_title(const char *title)
 {
     D("skin_winsys_set_window_title [%s]", title);
     QSemaphore semaphore;
-    EmulatorWindow *window = EmulatorWindow::getInstance();
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -234,7 +234,7 @@ extern void skin_winsys_set_window_title(const char *title)
 extern void skin_winsys_spawn_thread(StartFunction f, int argc, char **argv)
 {
     D("skin_spawn_thread");
-    EmulatorWindow *window = EmulatorWindow::getInstance();
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -246,7 +246,7 @@ extern void skin_winsys_start(bool, bool)
 {
     GlobalState* g = globalState();
     g->app = new QApplication(g->argc, g->argv);
-    new EmulatorWindow(NULL);
+    new EmulatorQtWindow(NULL);
 }
 
 #ifdef _WIN32
@@ -256,4 +256,3 @@ int qMain(int argc, char** argv) {
     return qt_main(argc, argv);
 }
 #endif  // _WIN32
-

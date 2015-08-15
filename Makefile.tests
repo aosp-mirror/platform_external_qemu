@@ -48,8 +48,11 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/qt/qt_path_unittest.cpp \
   android/qt/qt_setup.cpp \
   android/qt/qt_setup_unittest.cpp \
+  android/telephony/debug.c \
   android/telephony/gsm_unittest.cpp \
   android/telephony/gsm.c \
+  android/telephony/sms.c \
+  android/telephony/sms_unittest.cpp \
   android/utils/aconfig-file_unittest.cpp \
   android/utils/bufprint_unittest.cpp \
   android/utils/dirscanner_unittest.cpp \

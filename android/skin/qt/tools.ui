@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ToolControls</class>
+ <widget class="QFrame" name="ToolControls">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>94</width>
+    <height>370</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string notr="true"/>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #3c4249;
+color: #f0f0f0</string>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::NoFrame</enum>
+  </property>
+  <property name="frameShadow">
+   <enum>QFrame::Raised</enum>
+  </property>
+  <widget class="QPushButton" name="close_button">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>32</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Close</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/close</normaloff>:/light/close</iconset>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">close</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="power_button">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>50</y>
+     <width>32</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Power</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/power_settings</normaloff>:/light/power_settings</iconset>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">power_settings</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="volume_up_button">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>90</y>
+     <width>32</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Volume Up</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/volume_up</normaloff>:/light/volume_up</iconset>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">volume_up</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="volume_down_button">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>130</y>
+     <width>32</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Volume Down</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/volume_down</normaloff>:/light/volume_down</iconset>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">volume_down</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="rotate_CW_button">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>170</y>
+     <width>32</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Rotate left</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/screen_rotation</normaloff>:/light/screen_rotation</iconset>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">screen_rotation</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="rotate_CCW_button">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>210</y>
+     <width>32</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Rotate Right</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/screen_rotation</normaloff>:/light/screen_rotation</iconset>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">screen_rotation</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="zoom_button">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>250</y>
+     <width>32</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Zoom</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/zoom</normaloff>:/light/zoom</iconset>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">zoom</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="fullscreen_button">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>290</y>
+     <width>32</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Full Screen</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/fullscreen</normaloff>:/light/fullscreen</iconset>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">fullscreen</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="more_button">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>330</y>
+     <width>32</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>More</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/more</normaloff>:/light/more</iconset>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">more</string>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
