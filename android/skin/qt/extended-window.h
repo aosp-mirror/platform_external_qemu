@@ -24,6 +24,7 @@
 #include <QValidator>
 
 #include "android/battery-agent.h"
+#include "android/telephony-agent.h"
 
 class EmulatorQtWindow;
 class ToolWindow;
@@ -64,11 +65,28 @@ private:
         }
     };
 
+    typedef enum { Call_Inactive, Call_Active, Call_Held } CallActivity;
+
+    class TelephonyState {
+    public:
+
+        CallActivity  activity;
+        QString       phoneNumber;
+
+        TelephonyState() :
+            activity(Call_Inactive),
+            phoneNumber("6505551212") // TODO: Change to "(650) 555-1212"
+        { }
+    };
+
     void initBattery();
+    void initTelephony();
 
     BatteryState    batteryState;
+    TelephonyState  telephonyState;
 
     const BatteryAgent    *batteryAgent;
+    const TelephonyAgent  *telephonyAgent;
 
     bool     themeIsDark;
 
@@ -95,6 +113,17 @@ private slots:
     void on_bat_levelSlider_valueChanged(int value);
     void on_bat_healthBox_currentIndexChanged(int index);
     void on_bat_statusBox_currentIndexChanged(int index);
+
+    // Telephony
+    void on_tel_startCallButton_clicked();
+    void on_tel_endCallButton_clicked();
+    void on_tel_holdCallButton_clicked();
+};
+
+class phoneNumberValidator : public QValidator
+{
+public:
+    State validate(QString &input, int &pos) const;
 };
 
 #endif // ANDROID_SKIN_QT_EXTENDED_WINDOW_H

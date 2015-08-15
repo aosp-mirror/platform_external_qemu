@@ -17,6 +17,7 @@ ANDROID_SKIN_LDLIBS_64 += $(LIBXML2_LDLIBS_64)
 ANDROID_SKIN_SOURCES += \
     android/skin/qt/emulator-qt-window.cpp \
     android/skin/qt/ext-battery.cpp \
+    android/skin/qt/ext-telephony.cpp \
     android/skin/qt/extended-window.cpp \
     android/skin/qt/tool-window.cpp \
 
