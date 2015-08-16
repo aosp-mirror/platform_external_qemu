@@ -26,6 +26,7 @@
 #include "android/utils/iolooper.h"
 #include "android/utils/panic.h"
 
+#include <assert.h>
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)

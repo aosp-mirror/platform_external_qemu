@@ -27,7 +27,7 @@
 #include "android/utils/misc.h"
 #include "android/utils/panic.h"
 
-#include "qemu-common.h"
+#include <assert.h>
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
