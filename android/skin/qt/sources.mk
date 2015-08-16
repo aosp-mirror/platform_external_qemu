@@ -21,6 +21,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/ext-battery.cpp \
     android/skin/qt/ext-cellular.cpp \
     android/skin/qt/ext-finger.cpp \
+    android/skin/qt/ext-location.cpp \
     android/skin/qt/ext-telephony.cpp \
     android/skin/qt/extended-window.cpp \
     android/skin/qt/tool-window.cpp \
