@@ -26,6 +26,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     mToolWindow(tW),
     mBatteryAgent  (agentPtr ? agentPtr->battery   : NULL),
     mCellularAgent (agentPtr ? agentPtr->cellular  : NULL),
+    mFingerAgent   (agentPtr ? agentPtr->finger    : NULL),
     mTelephonyAgent(agentPtr ? agentPtr->telephony : NULL),
     mExtendedUi(new Ui::ExtendedControls)
 {
@@ -39,6 +40,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     // Do any sub-window-specific initialization
     initBattery();
     initCellular();
+    initFinger();
     initTelephony();
 
     move(mParentWindow->geometry().right() + 40,

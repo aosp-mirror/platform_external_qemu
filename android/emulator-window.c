@@ -17,6 +17,8 @@
 #include "android/battery-agent-impl.h"
 #include "android/cellular-agent.h"
 #include "android/cellular-agent-impl.h"
+#include "android/finger-agent.h"
+#include "android/finger-agent-impl.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
@@ -258,6 +260,10 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .setStandard       = cellular_setStandard
     };
 
+    static const FingerAgent myFingerAgent = {
+        .setTouch       = finger_setTouch
+    };
+
     static const TelephonyAgent myTelephonyAgent = {
         .telephonyCmd   = telephony_telephonyCmd
     };
@@ -265,7 +271,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     static const UiEmuAgent myUiEmuAgent = {
         .battery   = &myBatteryAgent,
         .cellular  = &myCellularAgent,
-        .finger    = NULL,
+        .finger    = &myFingerAgent,
         .location  = NULL,
         .telephony = &myTelephonyAgent
     };
