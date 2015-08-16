@@ -17,6 +17,10 @@
 #ifndef ANDROID_ASYNC_IO_COMMON_H_
 #define ANDROID_ASYNC_IO_COMMON_H_
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /*
  * Contains declarations common for asynchronous socket I/O
  */
@@ -63,5 +67,7 @@ typedef enum AsyncIOAction {
     /* Retry the I/O. */
     ASIO_ACTION_RETRY,
 } AsyncIOAction;
+
+ANDROID_END_HEADER
 
 #endif  /* ANDROID_ASYNC_IO_COMMON_H_ */

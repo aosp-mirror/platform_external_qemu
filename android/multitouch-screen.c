@@ -21,10 +21,8 @@
 #include "android/hw-events.h"
 #include "android/skin/charmap.h"
 #include "android/user-events.h"
-#include "android/utils/misc.h"
 #include "android/utils/debug.h"
-
-#include "qemu-common.h"
+#include "android/utils/misc.h"
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
