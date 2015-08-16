@@ -215,13 +215,7 @@ ABool androidMetrics_keepAlive(Looper* metrics_looper) {
     success &= androidMetrics_tick();
 
     // Initialize a timer for recurring metrics update
-    metrics_timer = android_alloc(sizeof(*metrics_timer));
-    if (!metrics_timer) {
-        dwarning("Failed to allocate metrics timer (OOM?).");
-        return 0;
-    }
-    loopTimer_init(metrics_timer, metrics_looper, &on_metrics_timer,
-                   metrics_timer);
+    metrics_timer = loopTimer_new(metrics_looper, &on_metrics_timer, NULL);
     loopTimer_startRelative(metrics_timer, metrics_timer_timeout_ms);
 
     return success;
@@ -238,8 +232,7 @@ ABool androidMetrics_seal() {
 
     if (metrics_timer != NULL) {
         loopTimer_stop(metrics_timer);
-        loopTimer_done(metrics_timer);
-        AFREE(metrics_timer);
+        loopTimer_free(metrics_timer);
         metrics_timer = NULL;
     }
 

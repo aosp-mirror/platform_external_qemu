@@ -2124,7 +2124,7 @@ static void android_init_metrics()
 
     androidMetrics_tryReportAll();
 
-    metrics_looper = looper_newCore();
+    metrics_looper = looper_getForThread();
     if (!metrics_looper) {
         dwarning("Failed to initialize metrics looper (OOM?).");
         return;

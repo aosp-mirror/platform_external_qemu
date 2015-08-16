@@ -151,6 +151,8 @@ common_LOCAL_SRC_FILES += \
 	android/base/containers/HashUtils.cpp \
 	android/base/containers/StringVector.cpp \
 	android/base/files/PathUtils.cpp \
+	android/base/files/StdioStream.cpp \
+	android/base/files/Stream.cpp \
 	android/base/misc/HttpUtils.cpp \
 	android/base/misc/StringUtils.cpp \
 	android/base/misc/Utf8Utils.cpp \
@@ -173,6 +175,7 @@ common_LOCAL_SRC_FILES += \
 	android/kernel/kernel_utils.cpp \
 	android/metrics/ddms-ping.cpp \
 	android/metrics/metrics_reporter.c \
+	android/qemu/base/files/QemuFileStream.cpp \
 	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
 	android/opengl/emugl_config.cpp \
@@ -206,6 +209,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/socket_drainer.cpp \
 	android/utils/sockets.c \
 	android/utils/stralloc.c \
+	android/utils/stream.cpp \
 	android/utils/string.cpp \
 	android/utils/system.c \
 	android/utils/system_wrapper.cpp \
