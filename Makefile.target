@@ -314,6 +314,7 @@ common_LOCAL_SRC_FILES := \
     android/qemu-battery-agent-impl.c \
     android/qemu-cellular-agent-impl.c \
     android/qemu-finger-agent-impl.c \
+    android/qemu-location-agent-impl.c \
     android/qemu-telephony-agent-impl.c \
     android/qt/qt_path.cpp \
     android/user-events-qemu.c \
