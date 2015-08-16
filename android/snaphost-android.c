@@ -10,10 +10,15 @@
 ** GNU General Public License for more details.
 */
 
-#include "qemu-common.h"
-#include "android/globals.h"
 #include "android/snaphost-android.h"
+
+#include "android/globals.h"
 #include "android/utils/debug.h"
+
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)

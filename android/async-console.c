@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "android/async-console.h"
+
 #include <string.h>
 
 /*
