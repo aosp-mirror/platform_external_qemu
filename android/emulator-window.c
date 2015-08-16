@@ -24,6 +24,8 @@
 #include "android/gpu_frame.h"
 #include "android/hw-control.h"
 #include "android/hw-sensors.h"
+#include "android/location-agent.h"
+#include "android/location-agent-impl.h"
 #include "android/looper.h"
 #include "android/opengles.h"
 #include "android/skin/keycode.h"
@@ -263,6 +265,10 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .setTouch       = finger_setTouch
     };
 
+    static const LocationAgent myLocationAgent = {
+        .gpsCmd         = location_gpsCmd
+    };
+
     static const TelephonyAgent myTelephonyAgent = {
         .telephonyCmd   = telephony_telephonyCmd
     };
@@ -271,7 +277,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .battery   = &myBatteryAgent,
         .cellular  = &myCellularAgent,
         .finger    = &myFingerAgent,
-        .location  = NULL,
+        .location  = &myLocationAgent,
         .telephony = &myTelephonyAgent
     };
 
