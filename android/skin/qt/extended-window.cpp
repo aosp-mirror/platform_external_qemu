@@ -54,7 +54,11 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     batteryAgent  (agentPtr ? agentPtr->battery   : NULL),
     cellularAgent (agentPtr ? agentPtr->cellular  : NULL),
     fingerAgent   (agentPtr ? agentPtr->finger    : NULL),
+    locationAgent (agentPtr ? agentPtr->location  : NULL),
     telephonyAgent(agentPtr ? agentPtr->telephony : NULL),
+    loc_mSecRemaining(-1),
+    loc_nowPaused(false),
+    loc_rowToSend(-1),
     extendedUi(new Ui::ExtendedControls)
 {
     Q_INIT_RESOURCE(resources);
@@ -68,6 +72,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     initBattery();
     initCellular();
     initFinger();
+    initLocation();
     initTelephony();
 
     move(parentWindow->geometry().right() + 40,
