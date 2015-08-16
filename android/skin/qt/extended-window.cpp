@@ -46,6 +46,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     initCellular();
     initFinger();
     initLocation();
+    initSd();
     initSms();
     initTelephony();
 

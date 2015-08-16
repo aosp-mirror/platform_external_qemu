@@ -36,8 +36,10 @@ void ExtendedWindow::on_sms_sendButton_clicked()
     // Get the "from" number
     SmsAddressRec sender;
     int retVal = sms_address_from_str(&sender,
-                                      mExtendedUi->sms_phoneNumberBox->currentText().toStdString().c_str(),
-                                      mExtendedUi->sms_phoneNumberBox->currentText().length());
+                     mExtendedUi->sms_phoneNumberBox->
+                              currentText().toStdString().c_str(),
+                     mExtendedUi->sms_phoneNumberBox->
+                              currentText().length());
     if (retVal < 0  ||  sender.len <= 0) {
         QErrorMessage *eM = new QErrorMessage;
         eM->showMessage(QString("The \"From\" number is invalid"));
@@ -67,7 +69,8 @@ void ExtendedWindow::on_sms_sendButton_clicked()
     }
 
     // Create a list of SMS PDUs, then send them
-    SmsPDU *pdus = smspdu_create_deliver_utf8(utf8Message, nUtf8Chars, &sender, NULL);
+    SmsPDU *pdus = smspdu_create_deliver_utf8(utf8Message, nUtf8Chars,
+                                              &sender, NULL);
     if (pdus == NULL) {
         QErrorMessage *eM = new QErrorMessage;
         eM->showMessage(QString(tr("The message contains invalid characters")));

@@ -86,6 +86,7 @@ private:
     void initCellular();
     void initFinger();
     void initLocation();
+    void initSd();
     void initSms();
     void initTelephony();
 
