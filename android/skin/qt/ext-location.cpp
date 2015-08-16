@@ -10,13 +10,17 @@
  ** GNU General Public License for more details.
  */
 
+#include "ui_extended.h"
+
 #define __STDC_LIMIT_MACROS
 
 #include "extended-window.h"
 #include "android/location-agent.h"
 #include "android/gps.h"
+#include "android/gps/GpsFix.h"
+#include "android/gps/KmlParser.h"
 #include "android/skin/qt/emulator-qt-window.h"
-#include "ui_extended.h"
+
 
 #include <QtWidgets>
 #include <unistd.h>
@@ -265,26 +269,29 @@ void ExtendedWindow::on_loc_KmlButton_clicked()
 
     if (fileName.isNull()) return;
 
-    // Open the file
-    QFile theFile(fileName);
-    if ( !theFile.exists() ) {
-        QErrorMessage *eM = new QErrorMessage;
-        eM->showMessage(tr("The file does not exist"));
-        return;
-    }
-    isOK = theFile.open(QIODevice::ReadOnly | QIODevice::Text);
-    if ( !isOK ) {
-        QErrorMessage *eM = new QErrorMessage;
-        eM->showMessage(tr("Cannot open the file"));
-        return;
-    }
-
     // Delete all rows in table
     mExtendedUi->loc_pathTable->setRowCount(0);
 
-    loc_readKmlFile(&theFile);
+    GpsFixArray kmlFixes;
+    std::string errStr;
+    isOK = KmlParser::parseFile(fileName.toStdString().c_str(),
+                                &kmlFixes, &errStr);
+    if (!isOK) {
+        QErrorMessage *eM = new QErrorMessage;
+        eM->showMessage(errStr.c_str());
+    } else {
+        // Put the data into 'loc_pathTable'
+        for (unsigned int idx = 0; idx < kmlFixes.size(); idx++) {
+            loc_appendToTable(kmlFixes[idx].latitude,
+                              kmlFixes[idx].longitude,
+                              kmlFixes[idx].elevation,
+                              kmlFixes[idx].name,
+                              kmlFixes[idx].description,
+                              kmlFixes[idx].time);
+        }
+    }
 
-    // Ensure that we have at least on row
+    // Ensure that we have at least one row
     if (mExtendedUi->loc_pathTable->rowCount() == 0) {
         mExtendedUi->loc_pathTable->insertRow(0);
 
@@ -300,194 +307,26 @@ void ExtendedWindow::on_loc_KmlButton_clicked()
                      mExtendedUi->loc_pathTable->rowCount() > 1 );
 }
 
-void ExtendedWindow::loc_readKmlFile(QFile *kmlFile)
-{
-    QString str;
-    QString theDescription;
-    QString theElevation;
-    QString theLatitude;
-    QString theLongitude;
-    QString theName;
-
-    // Process all the <Placemark> constructs
-    while ( !kmlFile->atEnd() ) {
-        // Process one <Placemark> ... </Placemark> construct
-
-        // Find a <Placemark> start
-        while ( !kmlFile->atEnd() ) {
-            str = loc_getToken(kmlFile);
-            if (0 == str.compare("<Placemark>", Qt::CaseInsensitive)) break;
-        }
-        theName = "";
-        theDescription = "";
-
-        // Got <Placemark>
-        // Look for <Name>, <Description>, or <Point>
-        while ( !kmlFile->atEnd() ) {
-            str = loc_getToken(kmlFile);
-            if (0 == str.compare("<Name>", Qt::CaseInsensitive)) {
-                theName = loc_getToken(kmlFile);
-                str = loc_getToken(kmlFile);
-                if (0 != str.compare("</Name>", Qt::CaseInsensitive)) {
-                   QErrorMessage *eM = new QErrorMessage;
-                   eM->showMessage(tr("&lt;Name&gt; not followed by &lt;/Name&gt;"));
-                   return;
-                }
-
-            }
-            else if (0 == str.compare("<Description>", Qt::CaseInsensitive)) {
-                theDescription = loc_getToken(kmlFile);
-                str = loc_getToken(kmlFile);
-                if (0 != str.compare("</Description>", Qt::CaseInsensitive)) {
-                   QErrorMessage *eM = new QErrorMessage;
-                   eM->showMessage(tr("&lt;Description&gt; not followed by &lt;/Description&gt;"));
-                   return;
-                }
-
-            }
-            else if (0 == str.compare("<Point>", Qt::CaseInsensitive)) {
-                // Got <Point>, now look for <Coordinates>
-                while ( !kmlFile->atEnd() ) {
-                    str = loc_getToken(kmlFile);
-                    if (0 == str.compare("<Coordinates>", Qt::CaseInsensitive)) {
-                        str = loc_getToken(kmlFile);
-                        // Parse into Lat, Lon, Elevation
-                        theLongitude = str.section(',', 0, 0);
-                        theLatitude  = str.section(',', 1, 1);
-                        theElevation = str.section(',', 2, 2);
-
-                        loc_appendToTable(theLatitude, theLongitude, theElevation,
-                                          theName, theDescription);
-                        theName = "";
-                        theDescription = "";
-
-                        str = loc_getToken(kmlFile);
-                        if (0 != str.compare("</Coordinates>", Qt::CaseInsensitive)) {
-                           QErrorMessage *eM = new QErrorMessage;
-                           eM->showMessage(tr("&lt;Coordinates&gt; not followed by &lt;/Coordinates&gt;"));
-                           return;
-                        }
-                    } else if (0 == str.compare("</Point>", Qt::CaseInsensitive)) {
-                        break;
-                    }
-                }
-            }
-            else if (0 == str.compare("<LineString>", Qt::CaseInsensitive)) {
-                // Got <LineString>, now look for <Coordinates>
-                while ( !kmlFile->atEnd() ) {
-                    str = loc_getToken(kmlFile);
-                    if (0 == str.compare("<Coordinates>", Qt::CaseInsensitive)) {
-                        str = loc_getToken(kmlFile);
-                        // This string should be sets of triplets. The triplets
-                        // are delimited by white space. Each triplet is three values
-                        // delimited by a comma (without white space).
-                        // Separate out the triplets.
-                        QStringList tripList = str.split(QRegExp("\\s+"), QString::SkipEmptyParts);
-                        for (int idx = 0; idx < tripList.size(); idx++) {
-                            // Parse into Lat, Lon, Elevation
-                            theLongitude = tripList[idx].section(',', 0, 0);
-                            theLatitude  = tripList[idx].section(',', 1, 1);
-                            theElevation = tripList[idx].section(',', 2, 2);
-
-                            loc_appendToTable(theLatitude, theLongitude, theElevation,
-                                              theName, theDescription);
-                            theName = "";
-                            theDescription = "";
-                        }
-                        str = loc_getToken(kmlFile);
-                        if (0 != str.compare("</Coordinates>", Qt::CaseInsensitive)) {
-                           QErrorMessage *eM = new QErrorMessage;
-                           eM->showMessage(tr("&lt;Coordinates&gt; not followed by &lt;/Coordinates&gt;"));
-                           return;
-                        }
-                    } else if (0 == str.compare("</LineString>", Qt::CaseInsensitive)) {
-                        break;
-                    }
-                } // end while <LineString>
-            }
-            else if (0 == str.compare("</Placemark>", Qt::CaseInsensitive)) {
-                // This completes a <Placemark> construct.
-                break; // Go get the next <Placemark>
-            }
-            // We are still inside <Placemark> ... </Placemark>
-            // Continue looking for <Name>, <Description>, <Point>, and <LineString>
-        }
-        // We just completed a <Placemark> construct.
-        // look for another.
-    }
-}
-
-
 ////////////////////////////////////////////////////////////
 //
 //  loc_appendToTable
 //
 //  Adds a row at the end of the table
 
-void ExtendedWindow::loc_appendToTable(QString lat, QString lon, QString elev,
-                                       QString name, QString description       )
+void ExtendedWindow::loc_appendToTable(std::string lat,
+                                       std::string lon,
+                                       std::string elev,
+                                       std::string name,
+                                       std::string description,
+                                       std::string time)
 {
     int newRow = mExtendedUi->loc_pathTable->rowCount();
 
     mExtendedUi->loc_pathTable->insertRow(newRow);
-    mExtendedUi->loc_pathTable->setItem(newRow, 0, new QTableWidgetItem("10")); // Delay
-    mExtendedUi->loc_pathTable->setItem(newRow, 1, new QTableWidgetItem(lat));
-    mExtendedUi->loc_pathTable->setItem(newRow, 2, new QTableWidgetItem(lon));
-    mExtendedUi->loc_pathTable->setItem(newRow, 3, new QTableWidgetItem(elev));
-    mExtendedUi->loc_pathTable->setItem(newRow, 4, new QTableWidgetItem(name));
-    mExtendedUi->loc_pathTable->setItem(newRow, 5, new QTableWidgetItem(description));
+    mExtendedUi->loc_pathTable->setItem(newRow, 0, new QTableWidgetItem(time.c_str()));
+    mExtendedUi->loc_pathTable->setItem(newRow, 1, new QTableWidgetItem(lat.c_str()));
+    mExtendedUi->loc_pathTable->setItem(newRow, 2, new QTableWidgetItem(lon.c_str()));
+    mExtendedUi->loc_pathTable->setItem(newRow, 3, new QTableWidgetItem(elev.c_str()));
+    mExtendedUi->loc_pathTable->setItem(newRow, 4, new QTableWidgetItem(name.c_str()));
+    mExtendedUi->loc_pathTable->setItem(newRow, 5, new QTableWidgetItem(description.c_str()));
 }
-
-////////////////////////////////////////////////////////////
-//
-//  loc_getToken
-//
-//  Return a string from an XML-stle file.
-//
-//  The '<' and '>' characters form the delimiters.
-//  The first character of the returned string will either be
-//  '<' or will be the character following '>'.
-//  Similarly, the last character of the returned string will
-//  either be '>' or will be followed by '<'.
-//
-//  Whitespace at the start and end of strings is eliminated.
-
-QString ExtendedWindow::loc_getToken(QFile *kmlFile)
-{
-    char    aChar;
-    QString retStr;
-
-    // Skip initial white space
-    do {
-        kmlFile->getChar(&aChar);
-        if (kmlFile->atEnd()) return retStr;
-    } while (aChar == ' '  ||
-             aChar == '\t' ||
-             aChar == '\n' ||
-             aChar == '\r'   );
-
-    // Save this (which may be '<' but should not be '>')
-    retStr += aChar;
-
-    // Save all subsequent characters until '>' or '<'
-    while (1) {
-        kmlFile->getChar(&aChar);
-        if (kmlFile->atEnd()) return retStr;
-
-        if (aChar == '<') {
-            // Stop here. Push the '<'
-            // back for the next time.
-            kmlFile->ungetChar(aChar);
-            return retStr;
-        }
-        if (aChar == '>') {
-            // Stop here.
-            // Include the '>'.
-            retStr += aChar;
-            return retStr;
-        }
-        // Take this character and continue
-        retStr += aChar;
-    }
-    // Never get here
-} // end loc_getToken()

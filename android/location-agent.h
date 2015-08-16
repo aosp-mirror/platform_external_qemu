@@ -15,19 +15,16 @@
 
 #include "android/utils/compiler.h"
 
-ANDROID_BEGIN_HEADER
-
 #include <sys/time.h>
+
+ANDROID_BEGIN_HEADER
 
 typedef struct LocationAgent {
     // Send a GPS location to the AVD using an NMEA sentence
-    //
-    // Inputs: latitude:        Degrees
-    //         longitude:       Degrees
-    //         metersElevation: Meters above sea level
-    //         nSatellites:     Number of satellites used
-    //         time:            UTC, in the format provided
-    //                          by gettimeofday()
+    //   |latitude| and |longitude| are in degrees
+    //   |metersElevation| is meters above sea level
+    //   |nSatellites| is the number of satellites used
+    //   |time| is UTC, in the format provided by gettimeofday()
     void (*gpsCmd)(double latitude, double longitude,
                    double metersElevation, int nSatellites,
                    const struct timeval *time);

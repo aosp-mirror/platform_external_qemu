@@ -46,6 +46,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     initCellular();
     initFinger();
     initLocation();
+    initSms();
     initTelephony();
 
     move(mParentWindow->geometry().right() + 40,

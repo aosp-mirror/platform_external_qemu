@@ -86,6 +86,7 @@ private:
     void initCellular();
     void initFinger();
     void initLocation();
+    void initSms();
     void initTelephony();
 
     BatteryState    mBatteryState;
@@ -105,10 +106,12 @@ private:
     Ui::ExtendedControls *mExtendedUi;
 
     void    adjustTabs(QPushButton *thisButton, int thisIndex);
-    void    loc_appendToTable(QString lat,  QString lon, QString elev,
-                              QString name, QString description       );
-    QString loc_getToken(QFile *kmlFile);
-    void    loc_readKmlFile(QFile *kmlFile);
+    void    loc_appendToTable(std::string lat,
+                              std::string lon,
+                              std::string elev,
+                              std::string name,
+                              std::string description,
+                              std::string time);
 
     void    setButtonEnabled(QPushButton *theButton, bool isEnabled);
 
@@ -150,6 +153,9 @@ private slots:
 
     bool loc_cellIsValid(QTableWidget *table, int row, int col);
     void loc_slot_timeout();
+
+    // SMS messaging
+    void on_sms_sendButton_clicked();
 
     // Telephony
     void on_tel_startCallButton_clicked();
