@@ -25,6 +25,7 @@
 
 #include "android/battery-agent.h"
 #include "android/cellular-agent.h"
+#include "android/finger-agent.h"
 #include "android/telephony-agent.h"
 
 class EmulatorQtWindow;
@@ -82,6 +83,7 @@ private:
 
     void initBattery();
     void initCellular();
+    void initFinger();
     void initTelephony();
 
     BatteryState    batteryState;
@@ -89,6 +91,7 @@ private:
 
     const BatteryAgent    *batteryAgent;
     const CellularAgent   *cellularAgent;
+    const FingerAgent     *fingerAgent;
     const TelephonyAgent  *telephonyAgent;
 
     bool     themeIsDark;
@@ -122,6 +125,9 @@ private slots:
     void on_cell_standardBox_currentIndexChanged(int index);
     void on_cell_voiceStatusBox_currentIndexChanged(int index);
     void on_cell_dataStatusBox_currentIndexChanged(int index);
+
+    // Fingerprint
+    void on_finger_touchCkBox_toggled(bool checked);
 
     // Telephony
     void on_tel_startCallButton_clicked();
