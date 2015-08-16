@@ -26,6 +26,7 @@
 #include "android/battery-agent.h"
 #include "android/cellular-agent.h"
 #include "android/finger-agent.h"
+#include "android/location-agent.h"
 #include "android/telephony-agent.h"
 
 class EmulatorQtWindow;
@@ -84,6 +85,7 @@ private:
     void initBattery();
     void initCellular();
     void initFinger();
+    void initLocation();
     void initTelephony();
 
     BatteryState    batteryState;
@@ -92,13 +94,23 @@ private:
     const BatteryAgent    *batteryAgent;
     const CellularAgent   *cellularAgent;
     const FingerAgent     *fingerAgent;
+    const LocationAgent   *locationAgent;
     const TelephonyAgent  *telephonyAgent;
+
+    int      loc_mSecRemaining;
+    bool     loc_nowPaused;
+    int      loc_rowToSend;
+    QTimer   loc_timer;
 
     bool     themeIsDark;
 
     Ui::ExtendedControls *extendedUi;
 
     void    adjustTabs(QPushButton *thisButton, int thisIndex);
+    void    loc_appendToTable(QString lat,  QString lon, QString elev,
+                              QString name, QString description       );
+    QString loc_getToken(QFile *kmlFile);
+    void    loc_readKmlFile(QFile *kmlFile);
 
     void    setButtonEnabled(QPushButton *theButton, bool isEnabled);
 
@@ -128,6 +140,18 @@ private slots:
 
     // Fingerprint
     void on_finger_touchCkBox_toggled(bool checked);
+
+    // Location
+    void on_loc_addRowButton_clicked();
+    void on_loc_KmlButton_clicked();
+    void on_loc_pathTable_cellChanged(int row, int col);
+    void on_loc_pauseButton_clicked();
+    void on_loc_playButton_clicked();
+    void on_loc_removeRowButton_clicked();
+    void on_loc_stopButton_clicked();
+
+    bool loc_cellIsValid(QTableWidget *table, int row, int col);
+    void loc_slot_timeout();
 
     // Telephony
     void on_tel_startCallButton_clicked();
