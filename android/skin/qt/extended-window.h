@@ -85,6 +85,7 @@ private:
     void initCellular();
     void initFinger();
     void initLocation();
+    void initSms();
     void initTelephony();
 
     BatteryState    batteryState;
@@ -151,6 +152,9 @@ private slots:
 
     bool loc_cellIsValid(QTableWidget *table, int row, int col);
     void loc_slot_timeout();
+
+    // SMS messaging
+    void on_sms_sendButton_clicked();
 
     // Telephony
     void on_tel_startCallButton_clicked();
