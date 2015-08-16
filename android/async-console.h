@@ -17,6 +17,10 @@
 #define ANDROID_ASYNC_CONSOLE_H
 
 #include "android/async-utils.h"
+#include "android/utils/compiler.h"
+#include "android/utils/sockets.h"
+
+ANDROID_BEGIN_HEADER
 
 /* An AsyncConsoleConnector allows you to asynchronously connect to an
  * Android console port.
@@ -58,5 +62,6 @@ asyncConsoleConnector_connect(AsyncConsoleConnector* acc,
 AsyncStatus
 asyncConsoleConnector_run(AsyncConsoleConnector* acc);
 
+ANDROID_END_HEADER
 
 #endif /* ANDROID_ASYNC_CONSOLE_H */

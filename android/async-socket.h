@@ -17,9 +17,11 @@
 #ifndef ANDROID_ASYNC_SOCKET_H_
 #define ANDROID_ASYNC_SOCKET_H_
 
-#include "qemu-common.h"
 #include "android/async-io-common.h"
 #include "android/async-utils.h"
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /*
  * Contains declaration of an API that encapsulates communication via an
@@ -271,5 +273,7 @@ extern int async_socket_get_port(const AsyncSocket* as);
  *  Boolean: 1 - socket is connected, 0 - socket is not connected.
  */
 extern int async_socket_is_connected(const AsyncSocket* as);
+
+ANDROID_END_HEADER
 
 #endif  /* ANDROID_ASYNC_SOCKET_H_ */

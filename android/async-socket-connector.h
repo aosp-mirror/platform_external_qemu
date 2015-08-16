@@ -17,9 +17,11 @@
 #ifndef ANDROID_ASYNC_SOCKET_CONNECTOR_H_
 #define ANDROID_ASYNC_SOCKET_CONNECTOR_H_
 
-#include "qemu-common.h"
 #include "android/async-io-common.h"
 #include "android/async-utils.h"
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /*
  * Contains declaration of an API that allows asynchronous connection to a
@@ -145,5 +147,7 @@ extern void async_socket_connector_connect(AsyncSocketConnector* connector);
  *  File descriptor for the connected socket.
  */
 extern int async_socket_connector_pull_fd(AsyncSocketConnector* connector);
+
+ANDROID_END_HEADER
 
 #endif  /* ANDROID_ASYNC_SOCKET_CONNECTOR_H_ */

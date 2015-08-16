@@ -10,10 +10,13 @@
 ** GNU General Public License for more details.
 */
 
-#include "qemu-common.h"
 #include "android/utils/misc.h"
-#include "android/utils/stralloc.h"
+
 #include "android/utils/debug.h"
+#include "android/utils/stralloc.h"
+
+#include <errno.h>
+#include <limits.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

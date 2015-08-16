@@ -25,7 +25,8 @@
 #include "android/utils/misc.h"
 #include "android/utils/sockets.h"
 
-#include "qemu-common.h"
+#include <assert.h>
+#include <stdlib.h>
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
@@ -155,7 +156,7 @@ _adb_host_free(AdbHost* adb_host)
 static void
 _adb_host_append_message(AdbHost* adb_host, const void* msg, int msglen)
 {
-    printf("Append %d bytes to ADB host buffer.\n", msglen);
+    D("Append %d bytes to ADB host buffer.\n", msglen);
 
     /* Make sure that buffer can contain the appending data. */
     if (adb_host->pending_send_buffer == NULL) {

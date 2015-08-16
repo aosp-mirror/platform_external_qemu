@@ -9,15 +9,16 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "android/utils/timezone.h"
+
+#include "android/android.h"
+#include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
-#include "android/utils/timezone.h"
-#include "android/utils/bufprint.h"
-#include "android/android.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "qemu-common.h"
 
 #define  DEBUG  1
 

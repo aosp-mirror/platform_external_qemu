@@ -22,7 +22,6 @@
  * camera emulation.
  */
 
-//#include "qemu-common.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"

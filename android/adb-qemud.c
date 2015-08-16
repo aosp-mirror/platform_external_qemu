@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include "qemu-common.h"
+#include "android/adb-qemud.h"
+
+#include "android/adb-server.h"
 #include "android/globals.h"  /* for android_hw */
 #include "android/hw-qemud.h"
+#include "android/utils/debug.h"
 #include "android/utils/format.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
-#include "android/utils/debug.h"
-#include "android/adb-server.h"
-#include "android/adb-qemud.h"
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)

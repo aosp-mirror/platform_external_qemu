@@ -21,8 +21,6 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/sockets.h"
 
-#include "qemu-common.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
