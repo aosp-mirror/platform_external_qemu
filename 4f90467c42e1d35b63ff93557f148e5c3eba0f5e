@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4a8755c_ceed742e",
+        "filename": "android/qemu-cellular-agent-impl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-16T22:29:43Z",
+      "side": 1,
+      "message": "Bad indentation on these two lines.",
+      "revId": "4f90467c42e1d35b63ff93557f148e5c3eba0f5e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
