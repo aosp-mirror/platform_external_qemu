@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4a9e95f_6e6ebeaa",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-16T22:27:08Z",
+      "side": 1,
+      "message": "This function will be replaced by something that Evan and Kirsten are working on.",
+      "revId": "d8f27cfa3ba400ea21881d9d6b08490923785922",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04806112_c7159e4a",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-16T22:27:08Z",
+      "side": 1,
+      "message": "This function will also be replaced by something that Evan and Kirsten are working on.",
+      "revId": "d8f27cfa3ba400ea21881d9d6b08490923785922",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
