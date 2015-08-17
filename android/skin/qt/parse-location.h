@@ -13,16 +13,19 @@
 #ifndef PARSE_LOCATION_H
 #define PARSE_LOCATION_H
 
-#include <QString>
+#include <libxml/parser.h>
 #include <vector>
+#include <string>
+
+using std::string;
 
 struct LocationSet {
-    QString name;
-    QString description;
-    QString latitude;
-    QString longitude;
-    QString elevation;
-    QString time;
+    string name;
+    string description;
+    string latitude;
+    string longitude;
+    string elevation;
+    string time;
     LocationSet(void);
 };
 
@@ -52,7 +55,7 @@ struct KmlParser {
 	* proceeds to parse the tree according to the KML format, returning
 	* a list of formatted coordinates into |locations|.
 	*/
-	void parse(const QString& fileName);
+	void parse(const string& fileName);
 
 	/* Recursively traverses all the siblings and children of |current|
 	* calling other functions along the way to parse the KML placemarks into

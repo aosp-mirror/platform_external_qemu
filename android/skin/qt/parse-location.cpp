@@ -13,9 +13,7 @@
 #define __STDC_LIMIT_MACROS
 
 #include <unistd.h>
-#include <QRegExp>
-#include <QStringList>
-#include <libxml/parser.h>
+#include <string.h>
 #include <libxml/tree.h>
 #include "parse-location.h"
 
@@ -53,25 +51,44 @@ xmlNode * KmlParser::find_coordinates(xmlNode * current) {
 */
 bool KmlParser::parse_coordinates(xmlNode * current) {
     xmlNode * coordinates_node = find_coordinates(current);
-    if (coordinates_node == NULL)
+    if (coordinates_node == NULL 
+        || coordinates_node->xmlChildrenNode == NULL 
+        || coordinates_node->xmlChildrenNode->content == NULL)
 		return false;
 
-    QString coordinates = (const char *) coordinates_node->xmlChildrenNode->content;
-    QStringList triple = coordinates.split(QRegExp("\\s+"), QString::SkipEmptyParts);
-    for (int i = 0; i < triple.size(); i++) {
-		int ind = locations.size();
-		this->locations.push_back(LocationSet());
-        this->locations[ind].longitude = triple[i].section(',', 0, 0);
-        this->locations[ind].latitude  = triple[i].section(',', 1, 1);
-        this->locations[ind].elevation = triple[i].section(',', 2, 2);
+    // strtok modifies the string it's given, so we make a copy to operate on
+    char * coordinates = new char[strlen((const char *) 
+        coordinates_node->xmlChildrenNode->content) + 1];
+    coordinates = strcpy(coordinates, (const char *) 
+        coordinates_node->xmlChildrenNode->content);
+
+    char * split = strtok(coordinates, " \t\n\v\r\f");
+    while (split != NULL) {
+        int ind = locations.size();
+        locations.push_back(LocationSet());
+
+        string triple = string(split);
+        int first = triple.find(",");
+        int second = triple.find(",", first + 1);
+        if (first == string::npos || second == string::npos) {
+            // the coordinates were malformatted
+            locations.pop_back();
+        } else {
+            locations[ind].longitude = triple.substr(0, first);
+            locations[ind].latitude  = triple.substr(first + 1, second - first - 1);
+            locations[ind].elevation = triple.substr(second + 1);
+        }
+
+        split = strtok(NULL, " \t\n\v\r\f");
     }
 
+    delete coordinates;
     return true;
 }
 
 bool KmlParser::parse_location(xmlNode * current) {
-	QString description = "";
-	QString name = "";
+	string description = "";
+	string name = "";
 	int ind = -1;
 
     for (; current != NULL; current = current->next) {
@@ -87,7 +104,6 @@ bool KmlParser::parse_location(xmlNode * current) {
 				return false;
         }
     }
-
     // only assign name and description to the first of the
     // points to avoid needless repitition
     if (ind > -1 && ind < locations.size()) {
@@ -114,7 +130,7 @@ void KmlParser::traverse_subtree(xmlNode * current) {
     }
 }
 
-void KmlParser::parse(const QString& fileName) {
+void KmlParser::parse(const string& fileName) {
     /*
      * this initialize the library and check potential ABI mismatches
      * between the version it was compiled for and the actual shared
@@ -122,7 +138,8 @@ void KmlParser::parse(const QString& fileName) {
      */
     LIBXML_TEST_VERSION
 
-    xmlDocPtr doc = xmlReadFile(fileName.toStdString().c_str(), NULL, 0);
+    //xmlDocPtr doc = xmlReadFile(fileName.toStdString().c_str(), NULL, 0);
+    xmlDocPtr doc = xmlReadFile(fileName.c_str(), NULL, 0);
     if (doc == NULL) {
         fprintf(stderr,"KML document not parsed successfully.\n");
         xmlFreeDoc(doc);
