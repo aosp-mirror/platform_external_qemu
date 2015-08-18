@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "64591d73_660833b8",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1074988
+      },
+      "writtenOn": "2015-08-18T19:16:55Z",
+      "side": 1,
+      "message": "could it be useful to pull all these defines into a separate header file for standardization of any extensions to the UI later on?",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 34
+      },
+      "revId": "c896911a265aab2425a492987e23806c6b9b1ad5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c471e91c_74abb65d",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1074988
+      },
+      "writtenOn": "2015-08-18T19:16:55Z",
+      "side": 1,
+      "message": "small style comment: some of the files in this folder follow the format \n\nfunction declaration {\n}\n\nwhile others follow \n\nfunction declaration\n{\n}\n\nand some do a mixture of both. We should probably standardize (this is more of a general comment)",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 1
+      },
+      "revId": "c896911a265aab2425a492987e23806c6b9b1ad5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4a8755c_99da5d95",
+        "filename": "android/ui-emu-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1074988
+      },
+      "writtenOn": "2015-08-18T19:16:55Z",
+      "side": 1,
+      "message": "do you want to set these guys to NULL here?",
+      "range": {
+        "startLine": 19,
+        "startChar": 3,
+        "endLine": 19,
+        "endChar": 42
+      },
+      "revId": "c896911a265aab2425a492987e23806c6b9b1ad5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
