@@ -6325,7 +6325,6 @@ static void gen_farith (DisasContext *ctx, uint32_t op1,
         opn = "movn.s";
         break;
     case FOP(21, 16):
-        check_cop1x(ctx);
         {
             TCGv_i32 fp0 = tcg_temp_new_i32();
 
@@ -6337,7 +6336,6 @@ static void gen_farith (DisasContext *ctx, uint32_t op1,
         opn = "recip.s";
         break;
     case FOP(22, 16):
-        check_cop1x(ctx);
         {
             TCGv_i32 fp0 = tcg_temp_new_i32();
 
@@ -6744,7 +6742,6 @@ static void gen_farith (DisasContext *ctx, uint32_t op1,
         opn = "movn.d";
         break;
     case FOP(21, 17):
-        check_cp1_64bitmode(ctx);
         {
             TCGv_i64 fp0 = tcg_temp_new_i64();
 
@@ -6756,7 +6753,6 @@ static void gen_farith (DisasContext *ctx, uint32_t op1,
         opn = "recip.d";
         break;
     case FOP(22, 17):
-        check_cp1_64bitmode(ctx);
         {
             TCGv_i64 fp0 = tcg_temp_new_i64();
 
