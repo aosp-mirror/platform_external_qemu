@@ -72,6 +72,23 @@
     },
     {
       "key": {
+        "uuid": "a4fb1585_277da18c",
+        "filename": "android/skin/qt/parse-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-08-18T17:29:10Z",
+      "side": 1,
+      "message": "I\u0027m fairly certain this macro is unnecessary. I\u0027m not sure what setup it\u0027s doing, but I would assume that if it is necessary, it should only be done once (somewhere at global scope?)",
+      "revId": "91fc8d67765c6f6820462534cd70f58d2d596644",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "04806112_01a15ea9",
         "filename": "android/skin/qt/parse-location_unittest.cpp",
         "patchSetId": 2
@@ -153,6 +170,24 @@
       "side": 1,
       "message": "Alright, will do",
       "parentUuid": "04b861a5_ba44f01f",
+      "revId": "91fc8d67765c6f6820462534cd70f58d2d596644",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64591d73_4b9a5ac6",
+        "filename": "android/skin/qt/parse-location_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-08-18T17:29:10Z",
+      "side": 1,
+      "message": "Additionally, it might be fine to use simpler coordinates for readability\u0027s sake, since these parsers don\u0027t actually verify that the strings are \"valid\" coordinates - this is done in the UI.",
+      "parentUuid": "a4a8755c_96678a45",
       "revId": "91fc8d67765c6f6820462534cd70f58d2d596644",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
