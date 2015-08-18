@@ -96,7 +96,7 @@ struct ProxyConnection {
 extern void
 proxy_connection_init( ProxyConnection*           conn,
                        int                        socket,
-                       SockAddress*               address,
+                       const SockAddress*         address,
                        ProxyService*              service,
                        ProxyConnectionFreeFunc    conn_free,
                        ProxyConnectionSelectFunc  conn_select,

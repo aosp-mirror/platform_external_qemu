@@ -12,6 +12,7 @@
 #include "proxy_http_int.h"
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "qemu-common.h"
 
@@ -39,7 +40,7 @@ static void
 connection_free( ProxyConnection*  root )
 {
     proxy_connection_done(root);
-    g_free(root);
+    free(root);
 }
 
 
@@ -187,7 +188,7 @@ http_connector_connect( HttpService*  service,
     if (s < 0)
         return NULL;
 
-    conn = g_malloc0(sizeof(*conn));
+    conn = calloc(1, sizeof(*conn));
     if (conn == NULL) {
         socket_close(s);
         return NULL;

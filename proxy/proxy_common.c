@@ -61,7 +61,7 @@ hex_dump( void*   base, int  size, const char*  prefix )
 void
 proxy_connection_init( ProxyConnection*           conn,
                        int                        socket,
-                       SockAddress*               address,
+                       const SockAddress*         address,
                        ProxyService*              service,
                        ProxyConnectionFreeFunc    conn_free,
                        ProxyConnectionSelectFunc  conn_select,
@@ -328,10 +328,10 @@ proxy_connection_free( ProxyConnection*  conn,
 
 
 int
-proxy_manager_add( SockAddress*    address,
-                   SocketType      sock_type,
-                   ProxyEventFunc  ev_func,
-                   void*           ev_opaque )
+proxy_manager_add( const SockAddress*  address,
+                   SocketType          sock_type,
+                   ProxyEventFunc      ev_func,
+                   void*               ev_opaque )
 {
     int  n;
 
@@ -509,7 +509,7 @@ proxy_resolve_server( SockAddress*   addr,
     if (servernamelen < 0)
         servernamelen = strlen(servername);
 
-    if (servernamelen >= sizeof(name0)) {
+    if (servernamelen >= (int)sizeof(name0)) {
         AARRAY_NEW(name, servernamelen+1);
     }
 
