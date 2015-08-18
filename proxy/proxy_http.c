@@ -23,8 +23,8 @@ http_service_free( HttpService*  service )
 {
     PROXY_LOG("%s", __FUNCTION__);
     if (service->footer != service->footer0)
-        g_free(service->footer);
-    g_free(service);
+        free(service->footer);
+    free(service);
 }
 
 
@@ -84,7 +84,7 @@ proxy_http_setup( const char*         servername,
     }
 
     /* create service object */
-    service = g_malloc0(sizeof(*service));
+    service = calloc(1, sizeof(*service));
     if (service == NULL) {
         PROXY_LOG("%s: not enough memory to allocate new proxy service", __FUNCTION__);
         return -1;

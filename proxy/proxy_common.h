@@ -62,7 +62,7 @@ typedef struct {
  *
  * returns 0 on success, or -1 if there is no proxy service for this type of connection
  */
-extern int   proxy_manager_add( SockAddress*         address,
+extern int   proxy_manager_add( const SockAddress*   address,
                                 SocketType           sock_type,
                                 ProxyEventFunc       ev_func,
                                 void*                ev_opaque );
