@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4a9e95f_78b0c02a",
+        "filename": "Makefile.tests",
+        "patchSetId": 2
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-18T16:51:00Z",
+      "side": 1,
+      "message": "Does this need a -I before $(LOCAL_PATH)?",
+      "revId": "91fc8d67765c6f6820462534cd70f58d2d596644",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64591d73_6be91e77",
+        "filename": "android/skin/qt/parse-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-18T16:51:00Z",
+      "side": 1,
+      "message": "I think we prefer spaces to tabs. Can you change that throughout this file?",
+      "revId": "91fc8d67765c6f6820462534cd70f58d2d596644",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04806112_01a15ea9",
+        "filename": "android/skin/qt/parse-location_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-18T16:51:00Z",
+      "side": 1,
+      "message": "You probably meant to delete this line",
+      "revId": "91fc8d67765c6f6820462534cd70f58d2d596644",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04806112_e17c4a92",
+        "filename": "android/skin/qt/parse-location_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-18T16:51:00Z",
+      "side": 1,
+      "message": "I think whitespace is prohibited within a triplet, but allowed between triplets. If so, this is \"some whitespace\", not \"some bad whitespace\"",
+      "revId": "91fc8d67765c6f6820462534cd70f58d2d596644",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04b861a5_ba44f01f",
+        "filename": "android/skin/qt/parse-location_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-18T16:51:00Z",
+      "side": 1,
+      "message": "It would be more convincing to have three different triplets. You\u0027ll have to unroll your EXPECT loop, but I think that\u0027s worth it.",
+      "revId": "91fc8d67765c6f6820462534cd70f58d2d596644",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4aeed64_dc152a71",
+        "filename": "android/skin/qt/parse-location_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-18T16:51:00Z",
+      "side": 1,
+      "message": "Even more valuable to have three different triplets here",
+      "revId": "91fc8d67765c6f6820462534cd70f58d2d596644",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
