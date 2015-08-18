@@ -10,10 +10,13 @@
 ** GNU General Public License for more details.
 */
 #include "proxy_http_int.h"
+
+#include "android/utils/system.h"  /* strsep */
+
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "qemu-common.h"
-#include "android/utils/system.h"  /* strsep */
 
 /* this implements a transparent HTTP rewriting proxy
  *
@@ -75,8 +78,8 @@ static void
 http_header_free( HttpHeader*  h )
 {
     if (h) {
-        g_free((char*)h->value);
-        g_free(h);
+        free((char*)h->value);
+        free(h);
     }
 }
 
@@ -102,7 +105,7 @@ http_header_alloc( const char*  key, const char*  value )
         h->next  = NULL;
         h->key   = (const char*)(h+1);
         memcpy( (char*)h->key, key, len );
-        h->value = g_strdup(value);
+        h->value = strdup(value);
     }
     return h;
 }
@@ -197,9 +200,9 @@ http_request_alloc( const char*      method,
 {
     HttpRequest*  r = malloc(sizeof(*r));
 
-    r->req_method   = g_strdup(method);
-    r->req_uri      = g_strdup(uri);
-    r->req_version  = g_strdup(version);
+    r->req_method   = strdup(method);
+    r->req_uri      = strdup(uri);
+    r->req_version  = strdup(version);
     r->rep_version  = NULL;
     r->rep_code     = -1;
     r->rep_readable = NULL;
@@ -226,8 +229,8 @@ http_request_replace_uri( HttpRequest*  r,
                           const char*   uri )
 {
     const char*  old = r->req_uri;
-    r->req_uri = g_strdup(uri);
-    g_free((char*)old);
+    r->req_uri = strdup(uri);
+    free((char*)old);
 }
 
 static void
@@ -236,12 +239,12 @@ http_request_free( HttpRequest*  r )
     if (r) {
         http_header_list_done(r->headers);
 
-        g_free(r->req_method);
-        g_free(r->req_uri);
-        g_free(r->req_version);
-        g_free(r->rep_version);
-        g_free(r->rep_readable);
-        g_free(r);
+        free(r->req_method);
+        free(r->req_uri);
+        free(r->req_version);
+        free(r->rep_version);
+        free(r->rep_readable);
+        free(r);
     }
 }
 
@@ -293,8 +296,8 @@ http_request_set_reply( HttpRequest*  r,
         return -1;
     }
 
-    r->rep_version  = g_strdup(version);
-    r->rep_readable = g_strdup(readable);
+    r->rep_version  = strdup(version);
+    r->rep_readable = strdup(readable);
 
     /* reset the list of headers */
     http_header_list_done(r->headers);
@@ -375,7 +378,7 @@ rewrite_connection_free( ProxyConnection*  root )
     }
     http_request_free(conn->request);
     proxy_connection_done(root);
-    g_free(conn);
+    free(conn);
 }
 
 
@@ -1158,7 +1161,7 @@ http_rewriter_connect( HttpService*  service,
     if (s < 0)
         return NULL;
 
-    conn = g_malloc0(sizeof(*conn));
+    conn = calloc(1, sizeof(*conn));
     if (conn == NULL) {
         socket_close(s);
         return NULL;
