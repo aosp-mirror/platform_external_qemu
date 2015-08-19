@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4c23555_17da7696",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T19:04:15Z",
+      "side": 1,
+      "message": "hummm, I\u0027m pretty sure we don\u0027t want to use the serial port for qemud, we should only use the Android pipe, which is much more efficient, what\u0027s happening here? Did we revert to the serial port at some point? If so, why?",
+      "revId": "4ddfd3c5a43854d0712e5b2ee0a3c185dec5e28c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
