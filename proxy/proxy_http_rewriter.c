@@ -869,7 +869,7 @@ rewrite_connection_read_body( RewriteConnection*  conn, int  fd )
                 conn->body_total  += conn->chunk_total;
                 conn->chunk_total  = 0;
                 conn->chunk_length = -1;
-                conn->chunk_state  = CHUNK_DATA;
+                conn->chunk_state  = CHUNK_DATA_END;
             }
             break;
 
