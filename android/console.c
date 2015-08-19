@@ -43,6 +43,7 @@
 #include "net/net.h"
 #include "monitor/monitor.h"
 
+#include <iconv.h> 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -1576,6 +1577,12 @@ do_sms_send( ControlClient  client, char*  args )
     SmsPDU*        pdus;
     int            nn;
 
+    iconv_t cd;
+    char *outbuf;
+    char *pout;
+    char *pin;
+    size_t inlen;
+    size_t outlen; 
     /* check that we have a phone number made of digits */
     if (!args) {
     MissingArgument:
@@ -1596,27 +1603,60 @@ do_sms_send( ControlClient  client, char*  args )
     /* un-escape message text into proper utf-8 (conversion happens in-site) */
     p      += 1;
     textlen = strlen(p);
-    textlen = sms_utf8_from_message_str( p, textlen, (unsigned char*)p, textlen );
-    if (textlen < 0) {
-        control_write( client, "message must be utf8 and can use the following escapes:\r\n"
+
+    if(0 == textlen){
+       goto MissingArgument;
+    }        
+
+    // convert from GBK to utf-8 
+    cd = iconv_open("utf-8", "GBK");
+    if(0 == cd) {
+       control_write( client, "iconv_open failed!\r\n");
+       return -1;
+    }
+
+    outbuf = (char*)malloc(textlen * 4);
+    if(NULL == outbuf){
+       control_write( client, "malloc failed!");
+       return -1;
+    }
+
+    memset(outbuf, 0, textlen * 4 * sizeof(char)); 
+    pin = p;
+    pout = outbuf;
+    inlen = textlen;
+    if(iconv(cd, &pin, &inlen, &pout, &outlen) == -1){
+       control_write( client, "iconv failed!\r\n");
+       iconv_close(cd);
+       free(outbuf);
+       return -1; 
+    }
+
+    outlen = strlen(outbuf);
+    iconv_close(cd);
+    if (outlen < 0) {
+	control_write( client, "message must be utf8 and can use the following escapes:\r\n"
                        "    \\n      for a newline\r\n"
                        "    \\xNN    where NN are two hexadecimal numbers\r\n"
                        "    \\uNNNN  where NNNN are four hexadecimal numbers\r\n"
                        "    \\\\     to send a '\\' character\r\n\r\n"
                        "    anything else is an error\r\n"
                        "KO: badly formatted text\r\n" );
+        free(outbuf);
         return -1;
     }
 
     if (!android_modem) {
         control_write( client, "KO: modem emulation not running\r\n" );
+        free(outbuf);
         return -1;
     }
 
     /* create a list of SMS PDUs, then send them */
-    pdus = smspdu_create_deliver_utf8( (cbytes_t)p, textlen, &sender, NULL );
+    pdus = smspdu_create_deliver_utf8( (cbytes_t)outbuf, outlen, &sender, NULL );
     if (pdus == NULL) {
         control_write( client, "KO: internal error when creating SMS-DELIVER PDUs\n" );
+        free(outbuf);
         return -1;
     }
 
@@ -1624,6 +1664,7 @@ do_sms_send( ControlClient  client, char*  args )
         amodem_receive_sms( android_modem, pdus[nn] );
 
     smspdu_free_list( pdus );
+    free(outbuf);
     return 0;
 }
 
