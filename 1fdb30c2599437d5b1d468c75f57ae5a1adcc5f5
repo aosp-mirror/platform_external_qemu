@@ -291,6 +291,24 @@
     },
     {
       "key": {
+        "uuid": "04806112_8412b7e3",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1074988
+      },
+      "writtenOn": "2015-08-19T19:29:42Z",
+      "side": 1,
+      "message": "Hi David, I mostly just exposed them to make testing possible - I can certainly make them private if there\u0027s a workaround you know of for testing? Thanks!",
+      "parentUuid": "24a485b9_d31806aa",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a4c23555_572b0e06",
         "filename": "android/skin/qt/parse-location_unittest.cpp",
         "patchSetId": 4
