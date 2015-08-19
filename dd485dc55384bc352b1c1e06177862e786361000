@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "247d65ed_6b84bdea",
+        "filename": "Makefile.tests",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:51:18Z",
+      "side": 1,
+      "message": "are you sure about this change? iirc LOCAL_C_INCLUDES should only contain paths, not compiler flags.",
+      "revId": "dd485dc55384bc352b1c1e06177862e786361000",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84bd31cc_368a16f8",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:51:18Z",
+      "side": 1,
+      "message": "same remark as for the KmlParser, i.e.:\n\n1) Place this under android/gps/ instead, since this is not specific to the UI or to Qt\n2) Name the header GpxParser.h\n3) Use ANDROID_GPS_GPX_PARSER_H guard macro",
+      "revId": "dd485dc55384bc352b1c1e06177862e786361000",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04a781c0_122b6ab9",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:51:18Z",
+      "side": 1,
+      "message": "question: is it necessary to expose libxml2 here in the header? I.e. can this be completely hidden from clients if all they want is to parse a single file and extracts locations from it?",
+      "revId": "dd485dc55384bc352b1c1e06177862e786361000",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4c8ad77_f9b09375",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:51:18Z",
+      "side": 1,
+      "message": "move into GpxParser declaration, otherwise this will conflict with the declaration in KmlParser.h",
+      "revId": "dd485dc55384bc352b1c1e06177862e786361000",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4c8ad77_39a4cb37",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:51:18Z",
+      "side": 1,
+      "message": "nit: document class usage here.",
+      "revId": "dd485dc55384bc352b1c1e06177862e786361000",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4c8ad77_199f0fe8",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:51:18Z",
+      "side": 1,
+      "message": "nit: ordering of members",
+      "revId": "dd485dc55384bc352b1c1e06177862e786361000",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4c23555_b741c2c1",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:51:18Z",
+      "side": 1,
+      "message": "usual nits about C++ style commands, smallCamelCase() method naming.",
+      "revId": "dd485dc55384bc352b1c1e06177862e786361000",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04b221f6_1a2b79b9",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:51:18Z",
+      "side": 1,
+      "message": "a std::ostringstream here is completely overkill, just provide a |std::string* error| and indicate it will be set on error.",
+      "revId": "dd485dc55384bc352b1c1e06177862e786361000",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
