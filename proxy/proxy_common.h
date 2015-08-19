@@ -14,12 +14,6 @@
 
 #include "android/utils/sockets.h"
 
-#ifdef _WIN32
-#include <winsock2.h>
-#else
-#include <sys/select.h>
-#endif
-
 /* types and definitions used by all proxy connections */
 
 typedef enum {
@@ -72,18 +66,6 @@ extern int   proxy_manager_add( const SockAddress*   address,
  * the connection accept/refusal occured
  */
 extern void  proxy_manager_del( void*  ev_opaque );
-
-/* this function is called to update the select file descriptor sets
- * with those of the proxified connection sockets that are currently managed */
-extern void  proxy_manager_select_fill( int     *pcount,
-                                        fd_set*  read_fds,
-                                        fd_set*  write_fds,
-                                        fd_set*  err_fds);
-
-/* this function is called to act on proxified connection sockets when network events arrive */
-extern void  proxy_manager_poll( fd_set*  read_fds,
-                                 fd_set*  write_fds,
-                                 fd_set*  err_fds );
 
 /* this function checks that one can connect to a given proxy. It will simply try to connect()
  * to it, for a specified timeout, in milliseconds, then close the connection.
