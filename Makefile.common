@@ -175,12 +175,16 @@ common_LOCAL_SRC_FILES += \
 	android/kernel/kernel_utils.cpp \
 	android/metrics/ddms-ping.cpp \
 	android/metrics/metrics_reporter.c \
+	android/qemu/base/async/Looper.cpp \
 	android/qemu/base/files/QemuFileStream.cpp \
 	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
 	android/opengl/emugl_config.cpp \
 	android/opengl/GpuFrameBridge.cpp \
-	android/qemu/base/async/Looper.cpp \
+	android/proxy/proxy_common.c \
+	android/proxy/proxy_http.c \
+	android/proxy/proxy_http_connector.c \
+	android/proxy/proxy_http_rewriter.c \
 	android/utils/aconfig-file.c \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
@@ -646,17 +650,6 @@ SLIRP_SOURCES := \
 
 common_LOCAL_SRC_FILES += $(SLIRP_SOURCES:%=slirp-android/%)
 EMULATOR_LIBQEMU_CFLAGS += -I$(LOCAL_PATH)/slirp-android
-
-# socket proxy support
-#
-PROXY_SOURCES := \
-    proxy_common.c \
-    proxy_http.c \
-    proxy_http_connector.c \
-    proxy_http_rewriter.c \
-
-common_LOCAL_SRC_FILES += $(PROXY_SOURCES:%=proxy/%)
-EMULATOR_LIBQEMU_CFLAGS += -I$(LOCAL_PATH)/proxy
 
 # include telephony stuff
 #

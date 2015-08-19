@@ -28,7 +28,7 @@
 #include "android/utils/debug.h"  /* for dprint */
 #include "android/utils/sockets.h"
 
-#include "proxy/proxy_common.h"
+#include "android/proxy/proxy_common.h"
 
 #include "hw/hw.h"
 #include "qemu-common.h"

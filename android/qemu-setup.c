@@ -14,19 +14,19 @@
 #include "qemu-common.h"
 #include "sysemu/sysemu.h"
 #include "telephony/modem_driver.h"
-#include "proxy_http.h"
 
+#include "android/adb-qemud.h"
+#include "android/adb-server.h"
 #include "android/android.h"
 #include "android/globals.h"
-#include "android/hw-sensors.h"
 #include "android/hw-fingerprint.h"
+#include "android/hw-sensors.h"
 #include "android/metrics/ddms-ping.h"
+#include "android/proxy/proxy_http.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 #include "android/utils/system.h"
 #include "android/utils/bufprint.h"
-#include "android/adb-server.h"
-#include "android/adb-qemud.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 

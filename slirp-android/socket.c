@@ -14,8 +14,8 @@
 #include <sys/filio.h>
 #endif
 #define  SLIRP_COMPILATION 1
+#include "android/proxy/proxy_common.h"
 #include "android/utils/sockets.h"
-#include "proxy_common.h"
 
 static void sofcantrcvmore(struct socket *so);
 static void sofcantsendmore(struct socket *so);

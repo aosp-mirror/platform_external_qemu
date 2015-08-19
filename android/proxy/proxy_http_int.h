@@ -9,11 +9,11 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _PROXY_HTTP_INT_H
-#define _PROXY_HTTP_INT_H
+#ifndef ANDROID_PROXY_PROXY_HTTP_INT_H
+#define ANDROID_PROXY_PROXY_HTTP_INT_H
 
-#include "proxy_http.h"
-#include "proxy_int.h"
+#include "android/proxy/proxy_http.h"
+#include "android/proxy/proxy_int.h"
 
 /* the HttpService object */
 typedef struct HttpService {
@@ -35,4 +35,4 @@ extern ProxyConnection*  http_rewriter_connect(
                                 SockAddress*   address );
 
 
-#endif /* _PROXY_HTTP_INT_H */
+#endif /* ANDROID_PROXY_PROXY_HTTP_INT_H */
