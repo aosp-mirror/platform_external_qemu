@@ -10,11 +10,11 @@
 ** GNU General Public License for more details.
 */
 #include "proxy_http_int.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "qemu-common.h"
 
 /* A HttpConnector implements a non-HTTP proxied connection
  * through the CONNECT method. Many firewalls are configured
@@ -60,7 +60,9 @@ connection_init( Connection*  conn )
 
     stralloc_add_bytes(str, service->footer, service->footer_len);
 
-    if (!socket_connect( root->socket, &service->server_addr )) {
+    loopIo_wantWrite(conn->root->io);
+
+    if (!socket_connect(loopIo_fd(root->io), &service->server_addr )) {
         /* immediate connection ?? */
         conn->state = STATE_SEND_HEADER;
         PROXY_LOG("%s: immediate connection", root->name);
@@ -80,44 +82,16 @@ connection_init( Connection*  conn )
 
 
 static void
-connection_select( ProxyConnection*   root,
-                   ProxySelect*       sel )
-{
-    unsigned     flags;
-    Connection*  conn = (Connection*)root;
-
-    switch (conn->state) {
-        case STATE_RECEIVE_ANSWER_LINE1:
-        case STATE_RECEIVE_ANSWER_LINE2:
-            flags = PROXY_SELECT_READ;
-            break;
-
-        case STATE_CONNECTING:
-        case STATE_SEND_HEADER:
-            flags = PROXY_SELECT_WRITE;
-            break;
-
-        default:
-            flags = 0;
-    };
-    proxy_select_set(sel, root->socket, flags);
-}
-
-static void
-connection_poll( ProxyConnection*   root,
-                 ProxySelect*       sel )
-{
+connection_io_event(void* opaque, int fd, unsigned events) {
+    Connection*  conn = opaque;
+    ProxyConnection* root = conn->root;
     DataStatus   ret  = DATA_NEED_MORE;
-    Connection*  conn = (Connection*)root;
-    int          fd   = root->socket;
 
-    if (!proxy_select_poll(sel, fd))
-        return;
-
-    switch (conn->state)
-    {
+    if (events & LOOP_IO_WRITE) {
+        switch (conn->state) {
         case STATE_CONNECTING:
-            PROXY_LOG("%s: connected to http proxy, sending header", root->name);
+            PROXY_LOG("%s: connected to http proxy, sending header",
+                      root->name);
             conn->state = STATE_SEND_HEADER;
             break;
 
@@ -125,19 +99,29 @@ connection_poll( ProxyConnection*   root,
             ret = proxy_connection_send(root, fd);
             if (ret == DATA_COMPLETED) {
                 conn->state = STATE_RECEIVE_ANSWER_LINE1;
-                PROXY_LOG("%s: header sent, receiving first answer line", root->name);
+                loopIo_dontWantWrite(root->io);
+                loopIo_wantRead(root->io);
+                PROXY_LOG("%s: header sent, receiving first answer line",
+                          root->name);
             }
             break;
 
+        default:
+            PROXY_LOG("%s: invalid state for write event: %d",
+                      root->name, conn->state);
+        }
+    } else if (events & LOOP_IO_READ) {
+        switch (conn->state) {
         case STATE_RECEIVE_ANSWER_LINE1:
         case STATE_RECEIVE_ANSWER_LINE2:
-            ret = proxy_connection_receive_line(root, root->socket);
+            ret = proxy_connection_receive_line(root, fd);
             if (ret == DATA_COMPLETED) {
                 const char*  line = root->str->s;
                 if (conn->state == STATE_RECEIVE_ANSWER_LINE1) {
                     int  http1, http2, codenum;
 
-                    if ( sscanf(line, "HTTP/%d.%d %d", &http1, &http2, &codenum) != 3 ) {
+                    if (sscanf(line, "HTTP/%d.%d %d", &http1, &http2,
+                               &codenum) != 3) {
                         PROXY_LOG( "%s: invalid answer from proxy: '%s'",
                                     root->name, line );
                         ret = DATA_ERROR;
@@ -148,7 +132,9 @@ connection_poll( ProxyConnection*   root,
                     if (codenum/2 != 100) {
                         PROXY_LOG( "%s: connection refused, error=%d",
                                     root->name, codenum );
-                        proxy_connection_free( root, 0, PROXY_EVENT_CONNECTION_REFUSED );
+                        proxy_connection_free(root,
+                                              0,
+                                              PROXY_EVENT_CONNECTION_REFUSED);
                         return;
                     }
                     PROXY_LOG("%s: receiving second answer line", root->name);
@@ -158,7 +144,7 @@ connection_poll( ProxyConnection*   root,
                     if (line[0] == '\0') { /* end of headers */
                         /* ok, we're connected */
                         PROXY_LOG("%s: connection succeeded", root->name);
-                        proxy_connection_free( root, 1, PROXY_EVENT_CONNECTED );
+                        proxy_connection_free(root, 1, PROXY_EVENT_CONNECTED);
                     } else {
                         /* just skip headers */
                     }
@@ -167,14 +153,15 @@ connection_poll( ProxyConnection*   root,
             break;
 
         default:
-            PROXY_LOG("%s: invalid state for read event: %d", root->name, conn->state);
+            PROXY_LOG("%s: invalid state for read event: %d",
+                      root->name, conn->state);
+        }
     }
 
     if (ret == DATA_ERROR) {
-        proxy_connection_free( root, 0, PROXY_EVENT_SERVER_ERROR );
+        proxy_connection_free(root, 0, PROXY_EVENT_SERVER_ERROR);
     }
 }
-
 
 
 ProxyConnection*
@@ -194,10 +181,12 @@ http_connector_connect( HttpService*  service,
         return NULL;
     }
 
-    proxy_connection_init( conn->root, s, address, service->root,
-                           connection_free,
-                           connection_select,
-                           connection_poll );
+    proxy_connection_init(conn->root,
+                          s,
+                          address,
+                          service->root,
+                          connection_io_event,
+                          connection_free);
 
     if ( connection_init( conn ) < 0 ) {
         connection_free( conn->root );
