@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "04a781c0_921e7a95",
+        "filename": "android/scripts/build-qemu-android.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T19:05:34Z",
+      "side": 1,
+      "message": "I don\u0027t see any support for this option in qemu-android/configure ? Is there a related patch that adds that ?",
+      "revId": "cfda4254b31f0b418fa5b79946b574599ea8f01f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
