@@ -9,10 +9,10 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _PROXY_HTTP_H
-#define _PROXY_HTTP_H
+#ifndef ANDROID_PROXY_PROXY_HTTP_H
+#define ANDROID_PROXY_PROXY_HTTP_H
 
-#include "proxy_common.h"
+#include "android/proxy/proxy_common.h"
 
 extern int
 proxy_http_setup( const char*         servername,
@@ -21,4 +21,4 @@ proxy_http_setup( const char*         servername,
                   int                 num_options,
                   const ProxyOption*  options );
 
-#endif /* END */
+#endif  // ANDROID_PROXY_PROXY_HTTP_H
