@@ -65,7 +65,7 @@ bool GLEScmValidate::vertexPointerParams(GLint size,GLsizei stride) {
 }
 
 bool GLEScmValidate::colorPointerParams(GLint size,GLsizei stride) {
-    return ((size >=3) && (size <= 4)) && (stride >=0) ;
+    return (size == 4) && (stride >=0) ;
 }
 
 bool GLEScmValidate::texCoordPointerParams(GLint size,GLsizei stride) {
