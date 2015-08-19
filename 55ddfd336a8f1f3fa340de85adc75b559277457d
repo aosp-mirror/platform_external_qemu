@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "247d65ed_8b98114b",
+        "filename": "android/battery-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T19:01:20Z",
+      "side": 1,
+      "message": "nit: for constants, I would recommend using either BATTERY_HEALTH_NAME or kBatteryHealthName, whichever you prefer (though the first form is typical for C sources, and the second one typical for C++ ones). Anything else is slightly confusing / distracting imho.",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4c3a958_f8c40d38",
+        "filename": "android/battery-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T19:01:20Z",
+      "side": 1,
+      "message": "nit: same here.",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24a485b9_13544e2a",
+        "filename": "android/battery-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T19:01:20Z",
+      "side": 1,
+      "message": "nit: can this be a bool instead?",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4486d92e_ac7fab84",
+        "filename": "android/battery-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T19:01:20Z",
+      "side": 1,
+      "message": "nit: better write something that uses the parameter name, e.g.:\n\n |percentFull| is an integer percentage, between 0 and 100 incuded.",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84bd31cc_76848eea",
+        "filename": "android/battery-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T19:01:20Z",
+      "side": 1,
+      "message": "nit: same here:\n\n  |health| is one of BatteryHealth values.",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04b221f6_3a303d21",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T19:01:20Z",
+      "side": 1,
+      "message": "nit: use direct member initialization here:\n\n  BatteryState() :\n          isCharging(true),\n          chargeLevel(50),\n          health(BATTERY_HEALTH_GOOD),\n          status(BATTERY_STATUS_CHARGING) {}",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84bd31cc_b6954614",
+        "filename": "android/skin/qt/tool-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T19:01:20Z",
+      "side": 1,
+      "message": "this declaration should be in its own header instead.",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84bd31cc_96984a4b",
+        "filename": "android/skin/qt/tool-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T19:01:20Z",
+      "side": 1,
+      "message": "nit: call this setUiEmuAgent() for consistency.",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
