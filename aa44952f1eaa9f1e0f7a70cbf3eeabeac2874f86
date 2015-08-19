@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "04b861a5_8df8d38a",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1612,
+      "author": {
+        "id": 1003224
+      },
+      "writtenOn": "2015-08-19T17:09:12Z",
+      "side": 1,
+      "message": "we don\u0027t own this code, so we\u0027re not the right reviewers, but this is clearly wrong too --- not all input is GBK. i think you should just fix whatever\u0027s causing this code to see non-UTF-8.",
+      "revId": "aa44952f1eaa9f1e0f7a70cbf3eeabeac2874f86",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
