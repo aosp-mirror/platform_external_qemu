@@ -40,7 +40,7 @@
 
 #define WANT_SYS_IOCTL_H
 #include <slirp.h>
-#include "proxy_common.h"
+#include "android/proxy/proxy_common.h"
 
 /* patchable/settable parameters for tcp */
 /* Don't do rfc1323 performance enhancements */

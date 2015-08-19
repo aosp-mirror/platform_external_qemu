@@ -9,10 +9,10 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _PROXY_INT_H
-#define _PROXY_INT_H
+#ifndef ANDROID_PROXY_PROXY_INT_H
+#define ANDROID_PROXY_PROXY_INT_H
 
-#include "proxy_common.h"
+#include "android/proxy/proxy_common.h"
 
 #include "android/utils/looper.h"
 #include "android/utils/sockets.h"
@@ -165,4 +165,4 @@ extern int
 proxy_manager_add_service( ProxyService*  service );
 
 
-#endif /* _PROXY_INT_H */
+#endif /* ANDROID_PROXY_PROXY_INT_H */
