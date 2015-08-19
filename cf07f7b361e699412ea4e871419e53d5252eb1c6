@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4486d92e_0cf8b788",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T19:02:58Z",
+      "side": 1,
+      "message": "it\u0027s better to put all target-specific configuration into kTarget, in this case this would mean adding a ttyConsole member then.",
+      "revId": "cf07f7b361e699412ea4e871419e53d5252eb1c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
