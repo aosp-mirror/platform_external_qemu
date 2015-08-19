@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "qemu-common.h"
 
 /* this implements a transparent HTTP rewriting proxy
  *
@@ -50,7 +49,7 @@
  * info when -debug-proxy is used. These are only needed
  * when debugging the proxy code.
  */
-#define  D_ACTIVE  1
+#define  D_ACTIVE  0
 
 #if D_ACTIVE
 #  define  D(...)   PROXY_LOG(__VA_ARGS__)
@@ -349,7 +348,7 @@ enum {
 
 typedef struct {
     ProxyConnection   root[1];
-    int               slirp_fd;
+    LoopIo*           slirp_io;
     ConnectionState   state;
     HttpRequest*      request;
     BodyMode          body_mode;
@@ -366,15 +365,22 @@ typedef struct {
     char              parse_chunk_trailer;
 } RewriteConnection;
 
+// Forward declarations.
+static void rewrite_connection_set_state(RewriteConnection* conn,
+                                         ConnectionState state);
+
+static void rewrite_connection_io_event(void* opaque, int fd, unsigned events);
 
 static void
 rewrite_connection_free( ProxyConnection*  root )
 {
     RewriteConnection*  conn = (RewriteConnection*)root;
 
-    if (conn->slirp_fd >= 0) {
-        socket_close(conn->slirp_fd);
-        conn->slirp_fd = -1;
+    if (conn->slirp_io) {
+        int fd = loopIo_fd(conn->slirp_io);
+        loopIo_free(conn->slirp_io);
+        conn->slirp_io = NULL;
+        socket_close(fd);
     }
     http_request_free(conn->request);
     proxy_connection_done(root);
@@ -387,23 +393,22 @@ rewrite_connection_init( RewriteConnection*   conn )
 {
     HttpService*      service = (HttpService*) conn->root->service;
     ProxyConnection*  root    = conn->root;
+    int proxy_fd = loopIo_fd(root->io);
 
-    conn->slirp_fd = -1;
+    conn->slirp_io = NULL;
     conn->state    = STATE_CONNECTING;
 
-    if (socket_connect( root->socket, &service->server_addr ) < 0) {
-        if (errno == EINPROGRESS || errno == EWOULDBLOCK || errno == EAGAIN) {
-            PROXY_LOG("%s: connecting", conn->root->name);
-        }
-        else {
-            PROXY_LOG("%s: cannot connect to proxy: %s", root->name, errno_str);
-            return -1;
-        }
-    }
-    else {
+    if (socket_connect(proxy_fd, &service->server_addr ) == 0) {
         PROXY_LOG("%s: immediate connection", root->name);
-        conn->state = STATE_CREATE_SOCKET_PAIR;
+        rewrite_connection_set_state(conn, STATE_CREATE_SOCKET_PAIR);
+        return 0;
     }
+    if (errno != EINPROGRESS && errno != EWOULDBLOCK && errno != EAGAIN) {
+        PROXY_LOG("%s: cannot connect to proxy: %s", root->name, errno_str);
+        return -1;
+    }
+    PROXY_LOG("%s: connecting", conn->root->name);
+    loopIo_wantWrite(root->io);
     return 0;
 }
 
@@ -412,17 +417,20 @@ rewrite_connection_create_sockets( RewriteConnection*  conn )
 {
     /* immediate connection to the proxy. now create a socket
         * pair and send a 'success' event to slirp */
-    int               slirp_1;
+    int               slirp_1, slirp_2;
     ProxyConnection*  root = conn->root;
 
-    if (socket_pair( &slirp_1, &conn->slirp_fd ) < 0) {
+    if (socket_pair( &slirp_1, &slirp_2 ) < 0) {
         PROXY_LOG("%s: coult not create socket pair: %s",
                     root->name, errno_str);
         return -1;
     }
 
+    conn->slirp_io = loopIo_new(looper_getForThread(),
+                                slirp_2,
+                                rewrite_connection_io_event,
+                                conn);
     root->ev_func( root->ev_opaque, slirp_1, PROXY_EVENT_CONNECTED );
-    conn->state = STATE_REQUEST_FIRST_LINE;
     return 0;
 }
 
@@ -434,7 +442,7 @@ rewrite_connection_read_request( RewriteConnection*  conn )
     ProxyConnection*  root = conn->root;
     DataStatus        ret;
 
-    ret = proxy_connection_receive_line(root, conn->slirp_fd);
+    ret = proxy_connection_receive_line(root, loopIo_fd(conn->slirp_io));
     if (ret == DATA_COMPLETED) {
         /* now parse the first line to see if we can handle it */
         char*  line   = root->str->s;
@@ -475,12 +483,12 @@ rewrite_connection_read_request( RewriteConnection*  conn )
 
 
 static DataStatus
-rewrite_connection_read_reply( RewriteConnection*  conn )
+rewrite_connection_read_reply( RewriteConnection*  conn, int fd )
 {
     ProxyConnection*  root = conn->root;
     DataStatus        ret;
 
-    ret = proxy_connection_receive_line( root, root->socket );
+    ret = proxy_connection_receive_line( root, fd );
     if (ret == DATA_COMPLETED) {
         HttpRequest*  request = conn->request;
 
@@ -711,6 +719,7 @@ rewrite_connection_read_body( RewriteConnection*  conn, int  fd )
     DataStatus        ret;
 
     if (conn->body_is_closed) {
+        D("%s: read_body with closed!!?", root->name);
         return DATA_NEED_MORE;
     }
 
@@ -740,8 +749,10 @@ rewrite_connection_read_body( RewriteConnection*  conn, int  fd )
         if (conn->chunk_state == CHUNK_DATA_END) {
             /* We're waiting for the CR LF after the chunk data */
             ret = proxy_connection_receive_line(root, fd);
-            if (ret != DATA_COMPLETED)
+            if (ret != DATA_COMPLETED) {
+                PROXY_LOG("%s: receive line too early ret=%d", root->name, ret);
                 return ret;
+            }
 
             if (str->s[0] != 0) { /* this should be an empty line */
                 PROXY_LOG("%s: invalid chunk data end: '%s'",
@@ -764,13 +775,16 @@ rewrite_connection_read_body( RewriteConnection*  conn, int  fd )
             /* Ensure that the previous chunk was flushed before
              * accepting a new header */
             if (!conn->parse_chunk_header) {
-                if (conn->body_has_data)
+                if (conn->body_has_data) {
+                    D("%s: chunk state waiting for flush", root->name);
                     return DATA_NEED_MORE;
+                }
                 D("%s: waiting chunk header", root->name);
                 conn->parse_chunk_header = 1;
             }
             ret = proxy_connection_receive_line(root, fd);
             if (ret != DATA_COMPLETED) {
+                D("%s:%d", root->name, __LINE__);
                 return ret;
             }
             conn->parse_chunk_header = 0;
@@ -806,8 +820,10 @@ rewrite_connection_read_body( RewriteConnection*  conn, int  fd )
         if (conn->chunk_state == CHUNK_TRAILER) {
             /* ensure that 'str' is flushed before reading the trailer */
             if (!conn->parse_chunk_trailer) {
-                if (conn->body_has_data)
+                if (conn->body_has_data) {
+                    D("%s:%d", root->name, __LINE__);
                     return DATA_NEED_MORE;
+                }
                 conn->parse_chunk_trailer = 1;
             }
             ret = rewrite_connection_read_headers(conn, fd);
@@ -934,81 +950,117 @@ rewrite_connection_send_body( RewriteConnection*  conn, int  fd )
                 conn->body_has_data, str->n,
                 ret);
         }
+    } else {
+        PROXY_LOG("%s: send_body with no data!!?", root->name);
     }
     return ret;
 }
 
+// TODO(digit): Add this function to looper.h instead.
+static void loopIo_setMask(LoopIo* io, unsigned events) {
+    if (events & LOOP_IO_READ) {
+        loopIo_wantRead(io);
+    } else {
+        loopIo_dontWantRead(io);
+    }
+    if (events & LOOP_IO_WRITE) {
+        loopIo_wantWrite(io);
+    } else {
+        loopIo_dontWantWrite(io);
+    }
+}
 
 static void
-rewrite_connection_select( ProxyConnection*  root,
-                           ProxySelect*      sel )
-{
-    RewriteConnection*  conn = (RewriteConnection*)root;
-    int  slirp = conn->slirp_fd;
-    int  proxy = root->socket;
+rewrite_connection_set_state(RewriteConnection* conn, ConnectionState state) {
+    LoopIo* proxy_io = conn->root->io;
+    LoopIo* slirp_io = conn->slirp_io;
 
-    switch (conn->state) {
+    unsigned proxy_mask = 0U;
+    unsigned slirp_mask = 0U;
+
+    switch (state) {
         case STATE_CONNECTING:
         case STATE_CREATE_SOCKET_PAIR:
-            /* try to connect to the proxy server */
-            proxy_select_set( sel, proxy, PROXY_SELECT_WRITE );
+            proxy_mask |= LOOP_IO_WRITE;
             break;
 
         case STATE_REQUEST_FIRST_LINE:
         case STATE_REQUEST_HEADERS:
-            proxy_select_set( sel, slirp, PROXY_SELECT_READ );
+            slirp_mask |= LOOP_IO_READ;
             break;
 
         case STATE_REQUEST_SEND:
-            proxy_select_set( sel, proxy, PROXY_SELECT_WRITE );
+            proxy_mask |= LOOP_IO_WRITE;
             break;
 
         case STATE_REQUEST_BODY:
-            if (!conn->body_is_closed && !conn->body_is_full)
-                proxy_select_set( sel, slirp, PROXY_SELECT_READ );
-
-            if (conn->body_has_data)
-                proxy_select_set( sel, proxy, PROXY_SELECT_WRITE );
+            if (!conn->body_is_closed && !conn->body_is_full) {
+                slirp_mask |= LOOP_IO_READ;
+            }
+            if (conn->body_has_data) {
+                proxy_mask |= LOOP_IO_WRITE;
+            }
             break;
 
         case STATE_REPLY_FIRST_LINE:
         case STATE_REPLY_HEADERS:
-            proxy_select_set( sel, proxy, PROXY_SELECT_READ );
+            proxy_mask |= LOOP_IO_READ;
             break;
 
         case STATE_REPLY_SEND:
-            proxy_select_set( sel, slirp, PROXY_SELECT_WRITE );
+            slirp_mask |= LOOP_IO_WRITE;
             break;
 
         case STATE_REPLY_BODY:
-            if (conn->body_has_data)
-                proxy_select_set( sel, slirp, PROXY_SELECT_WRITE );
-
-            if (!conn->body_is_closed && !conn->body_is_full)
-                proxy_select_set( sel, proxy, PROXY_SELECT_READ );
+            if (conn->body_has_data) {
+                slirp_mask |= LOOP_IO_WRITE;
+            }
+            if (!conn->body_is_closed && !conn->body_is_full) {
+                proxy_mask |= LOOP_IO_READ;
+            }
             break;
         default:
             ;
-    };
+    }
+    D("%s: change state %d -> %d wanted events proxy=%s%s slirp=%s%s",
+      conn->root->name,
+      conn->state,
+      state,
+      (proxy_mask & LOOP_IO_READ) ? "R" : "",
+      (proxy_mask & LOOP_IO_WRITE) ? "W" : "",
+      (slirp_mask & LOOP_IO_READ) ? "R" : "",
+      (slirp_mask & LOOP_IO_WRITE) ? "W" : "");
+
+    loopIo_setMask(proxy_io, proxy_mask);
+    if (slirp_io) {
+        loopIo_setMask(slirp_io, slirp_mask);
+    }
+    conn->state = state;
 }
 
 static void
-rewrite_connection_poll( ProxyConnection*  root,
-                         ProxySelect*      sel )
-{
-    RewriteConnection*  conn = (RewriteConnection*)root;
+rewrite_connection_io_event(void* opaque, int fd, unsigned events) {
+    ProxyConnection* root = opaque;
+    RewriteConnection* conn = (RewriteConnection*)root;
 
-    int         slirp     = conn->slirp_fd;
-    int         proxy     = root->socket;
-    int         has_slirp = proxy_select_poll(sel, slirp);
-    int         has_proxy = proxy_select_poll(sel, proxy);
+    int         slirp     = conn->slirp_io ? loopIo_fd(conn->slirp_io) : -1;
+    int         proxy     = loopIo_fd(root->io);
+    int         has_slirp = (fd == slirp);
+    int         has_proxy = (fd == proxy);
     DataStatus  ret       = DATA_NEED_MORE;
+
+    D("%s: state=%d fd=%s events=%s%s",
+      root->name,
+      conn->state,
+      has_slirp ? "slirp" : (has_proxy ? "proxy" : "none"),
+      (events & LOOP_IO_READ) ? "R" : "",
+      (events & LOOP_IO_WRITE) ? "W" : "");
 
     switch (conn->state) {
         case STATE_CONNECTING:
             if (has_proxy) {
-                PROXY_LOG("%s: connected to proxy", root->name);
-                conn->state = STATE_CREATE_SOCKET_PAIR;
+                D("%s: connected", root->name);
+                rewrite_connection_set_state(conn, STATE_CREATE_SOCKET_PAIR);
             }
             break;
 
@@ -1018,7 +1070,8 @@ rewrite_connection_poll( ProxyConnection*  root,
                     ret = DATA_ERROR;
                 } else {
                     D("%s: socket pair created", root->name);
-                    conn->state = STATE_REQUEST_FIRST_LINE;
+                    rewrite_connection_set_state(conn,
+                                                 STATE_REQUEST_FIRST_LINE);
                 }
             }
             break;
@@ -1028,7 +1081,7 @@ rewrite_connection_poll( ProxyConnection*  root,
                 ret = rewrite_connection_read_request(conn);
                 if (ret == DATA_COMPLETED) {
                     PROXY_LOG("%s: request first line ok", root->name);
-                    conn->state = STATE_REQUEST_HEADERS;
+                    rewrite_connection_set_state(conn, STATE_REQUEST_HEADERS);
                 }
             }
             break;
@@ -1038,10 +1091,11 @@ rewrite_connection_poll( ProxyConnection*  root,
                 ret = rewrite_connection_read_headers(conn, slirp);
                 if (ret == DATA_COMPLETED) {
                     PROXY_LOG("%s: request headers ok", root->name);
-                    if (rewrite_connection_rewrite_request(conn) < 0)
+                    if (rewrite_connection_rewrite_request(conn) < 0) {
                         ret = DATA_ERROR;
-                    else
-                        conn->state = STATE_REQUEST_SEND;
+                    } else {
+                        rewrite_connection_set_state(conn, STATE_REQUEST_SEND);
+                    }
                 }
             }
             break;
@@ -1055,11 +1109,12 @@ rewrite_connection_poll( ProxyConnection*  root,
                     } else if (conn->body_mode != BODY_NONE) {
                         PROXY_LOG("%s: request sent, waiting for body",
                                    root->name);
-                        conn->state = STATE_REQUEST_BODY;
+                       rewrite_connection_set_state(conn, STATE_REQUEST_BODY);
                     } else {
                         PROXY_LOG("%s: request sent, waiting for reply",
                                   root->name);
-                        conn->state = STATE_REPLY_FIRST_LINE;
+                        rewrite_connection_set_state(conn,
+                                                     STATE_REPLY_FIRST_LINE);
                     }
                 }
             }
@@ -1068,23 +1123,28 @@ rewrite_connection_poll( ProxyConnection*  root,
         case STATE_REQUEST_BODY:
             if (has_slirp) {
                 ret = rewrite_connection_read_body(conn, slirp);
+                if (ret != DATA_ERROR) {
+                    rewrite_connection_set_state(conn, STATE_REQUEST_BODY);
+                }
             }
             if (ret != DATA_ERROR && has_proxy) {
                 ret = rewrite_connection_send_body(conn, proxy);
                 if (ret == DATA_COMPLETED) {
                     PROXY_LOG("%s: request body ok, waiting for reply",
                               root->name);
-                    conn->state = STATE_REPLY_FIRST_LINE;
+                    rewrite_connection_set_state(conn, STATE_REPLY_FIRST_LINE);
+                } else if (ret != DATA_ERROR) {
+                    rewrite_connection_set_state(conn, STATE_REQUEST_BODY);
                 }
             }
             break;
 
         case STATE_REPLY_FIRST_LINE:
             if (has_proxy) {
-                ret = rewrite_connection_read_reply(conn);
+                ret = rewrite_connection_read_reply(conn, proxy);
                 if (ret == DATA_COMPLETED) {
                     PROXY_LOG("%s: reply first line ok", root->name);
-                    conn->state = STATE_REPLY_HEADERS;
+                    rewrite_connection_set_state(conn, STATE_REPLY_HEADERS);
                 }
             }
             break;
@@ -1094,10 +1154,11 @@ rewrite_connection_poll( ProxyConnection*  root,
                 ret = rewrite_connection_read_headers(conn, proxy);
                 if (ret == DATA_COMPLETED) {
                     PROXY_LOG("%s: reply headers ok", root->name);
-                    if (rewrite_connection_rewrite_reply(conn) < 0)
+                    if (rewrite_connection_rewrite_reply(conn) < 0) {
                         ret = DATA_ERROR;
-                    else
-                        conn->state = STATE_REPLY_SEND;
+                    } else {
+                        rewrite_connection_set_state(conn, STATE_REPLY_SEND);
+                    }
                 }
             }
             break;
@@ -1111,11 +1172,12 @@ rewrite_connection_poll( ProxyConnection*  root,
                     } else if (conn->body_mode != BODY_NONE) {
                         PROXY_LOG("%s: reply sent, waiting for body",
                                   root->name);
-                        conn->state = STATE_REPLY_BODY;
+                        rewrite_connection_set_state(conn, STATE_REPLY_BODY);
                     } else {
                         PROXY_LOG("%s: reply sent, looping to waiting request",
                                   root->name);
-                        conn->state = STATE_REQUEST_FIRST_LINE;
+                        rewrite_connection_set_state(conn,
+                                                     STATE_REQUEST_FIRST_LINE);
                     }
                 }
             }
@@ -1124,6 +1186,9 @@ rewrite_connection_poll( ProxyConnection*  root,
         case STATE_REPLY_BODY:
             if (has_proxy) {
                 ret = rewrite_connection_read_body(conn, proxy);
+                if (ret != DATA_ERROR) {
+                    rewrite_connection_set_state(conn, STATE_REPLY_BODY);
+                }
             }
             if (ret != DATA_ERROR && has_slirp) {
                 ret = rewrite_connection_send_body(conn, slirp);
@@ -1132,10 +1197,14 @@ rewrite_connection_poll( ProxyConnection*  root,
                         PROXY_LOG("%s: closing connection", root->name);
                         ret = DATA_ERROR;
                     } else {
-                        PROXY_LOG("%s: reply body ok, looping to waiting request",
+                        PROXY_LOG(
+                                "%s: reply body ok, looping to waiting request",
                                 root->name);
-                        conn->state = STATE_REQUEST_FIRST_LINE;
+                        rewrite_connection_set_state(conn,
+                                                     STATE_REQUEST_FIRST_LINE);
                     }
+                } else if (ret != DATA_ERROR) {
+                    rewrite_connection_set_state(conn, STATE_REPLY_BODY);
                 }
             }
             break;
@@ -1167,10 +1236,12 @@ http_rewriter_connect( HttpService*  service,
         return NULL;
     }
 
-    proxy_connection_init( conn->root, s, address, service->root,
-                           rewrite_connection_free,
-                           rewrite_connection_select,
-                           rewrite_connection_poll );
+    proxy_connection_init( conn->root,
+                           s,
+                           address,
+                           service->root,
+                           rewrite_connection_io_event,
+                           rewrite_connection_free );
 
     if ( rewrite_connection_init( conn ) < 0 ) {
         rewrite_connection_free( conn->root );
