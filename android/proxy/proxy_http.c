@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "proxy_int.h"
-#include "proxy_http_int.h"
+#include "android/proxy/proxy_int.h"
+#include "android/proxy/proxy_http_int.h"
 
 #include <errno.h>
 #include <stdio.h>

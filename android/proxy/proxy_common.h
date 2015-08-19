@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _PROXY_COMMON_H_
-#define _PROXY_COMMON_H_
+#ifndef ANDROID_PROXY_PROXY_COMMON_H
+#define ANDROID_PROXY_PROXY_COMMON_H
 
 #include "android/utils/sockets.h"
 
