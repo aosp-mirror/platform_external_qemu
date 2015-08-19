@@ -1,0 +1,361 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "84bd31cc_76abae5d",
+        "filename": "android/skin/qt/parse-location.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: should be the first header included here before library ones, this ensure there are no hidden dependencies in parse-location.h/KmlParser.h",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04a781c0_d2ff229b",
+        "filename": "android/skin/qt/parse-location.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: It\u0027s slightly better to use member initialization, otherwise the resulting code will initialize all strings to empty by default, before running your assignments below.",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64b59dd9_bd47eb23",
+        "filename": "android/skin/qt/parse-location.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: trailing whitespace. Please configure your editor to remove this automatically on save, this will save you a lot of time :)",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64b59dd9_dd449f21",
+        "filename": "android/skin/qt/parse-location.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: use a double-indent width for line continuations. This applies to the rest of the code.",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64b59dd9_fd41630e",
+        "filename": "android/skin/qt/parse-location.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: please use strdup() instead, there really is no good reason to use strcpy() these days :)",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "247d65ed_4b7ff958",
+        "filename": "android/skin/qt/parse-location.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: it\u0027s probably better to only push a new fix when your know the coordinates are well-formed, this makes the code less confusing.",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04b221f6_7a11d58e",
+        "filename": "android/skin/qt/parse-location.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "bug: this should be delete [] here, but again, use free() if you use strdup().",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84bd31cc_96af6a68",
+        "filename": "android/skin/qt/parse-location.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "IMPORTANT: never use strcasecmp(), the result is locale-dependent and will surprise you greatly when running on a non-US locale, resulting in unexpected and hard-to-reproduce bugs.\n\nUse a custom ASCII-only implementation of strcasecmp() (if you need it, I suggest adding it to a new header like android/base/misc/CaseCompare.h with appropriate unit tests).\n\nAlso use a small function that will do the comparison and casting in one go, to make all use cases more legible.",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4486d92e_0c8fd739",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: our convention for our sources files is to use a header guard macro that reflects the location of the source file, i.e. in this case, it should be ANDROID_SKIN_QT_PARSE_LOCATION_H\n\nHowever, since there is nothing specific to Qt here, and the same code could be easily reused elsewhere, I strongly propose to move it to a non-Qt specific location (e.g. android/gps/).\n\nFinally, for C++ files, it\u0027s better to use the name of the main class for the header/sources, using CapitalCamelCasing, i.e. in this example, this would be android/gps/KmlParser.h",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04b221f6_5a0c117a",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "I recommend putting this structure definition inside of KmlParser, and just call it GpsFix, since this is more descriptive fo what it is; e.g. full name would be KmlParser::GpsFix",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24a485b9_b31b82a4",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "Please document the class/struct purpose and give basic usage example here.",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4c23555_d7255e38",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: If it is a public member, please document how to use it (when is it initialized for example).\n\nI suggest following the Google3 / Chromium / Android coding convention when declaring structs or classes, i.e.:\n\n1) public methods\n2) public members\n3) private methods\n4) private members\n\nAlso define them in the same order in the corresponding source file.",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4486d92e_2c949b49",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: Prefer C++ style comments (// .....) here.\n\nAlso document when the parameter is expected to be using |current| notation. Describe who owns the returned pointer, i.e. whether the caller should free it.\n\nAdd const() qualifier if this function doesn\u0027t modify the state.",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64b59dd9_7d5633da",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: prefer smallCamelCasing() for method/function names in C++ source files, and all_small_letters() for C functions.",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "247d65ed_0b8501e9",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: why not call this function parsePlacemarks() instead?",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64b59dd9_9d4a272b",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: what\u0027s the point of the other functions if this function does everything? should other methods be private?\n\nAlso use a |const char*| here, since there is little reason to force the use of a string here.",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24a485b9_d31806aa",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "Again, not sure how this is useful for a caller given what parse() already does.",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4c23555_572b0e06",
+        "filename": "android/skin/qt/parse-location_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: Try to use the class name for the test name, i.e. KmlParser instead of kml_parser.",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4c3a958_78d9dd1d",
+        "filename": "android/skin/qt/parse-location_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: make this a \u0027const char*\u0027",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04b221f6_9af5c9c1",
+        "filename": "android/skin/qt/parse-location_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "make this a \u0027const char*\u0027",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84bd31cc_b6ac6674",
+        "filename": "android/skin/qt/parse-location_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T18:39:40Z",
+      "side": 1,
+      "message": "nit: don\u0027t overuse \u003c\u003c here, it\u0027s simpler to use direct string concatenation by omitting them.",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
