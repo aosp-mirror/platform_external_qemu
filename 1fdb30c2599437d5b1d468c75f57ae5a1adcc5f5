@@ -309,6 +309,24 @@
     },
     {
       "key": {
+        "uuid": "84bd31cc_d692c228",
+        "filename": "android/skin/qt/parse-location.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-19T19:51:52Z",
+      "side": 1,
+      "message": "It\u0027s better to keep these as implementation detail then.\n\nYou can still write a unit test that checks for a specific behavior with an appropriately-crafted input file. Generally speaking, the less you expose in the interface the better since it makes the interface simpler to use / understand. And the implementation is more hermetic, reducing coupling. E.g. if the caller doesn\u0027t really need to do anything specific with libxml2, just provide a parse() function that takes a file path and be done with it.\n\nIf there are some complex functions that you would want to unit-test, it\u0027s probably better to use a private header to expose them and document that this should not be used by clients. A simple way to do that is to use an \u0027internal\u0027 sub-directory, as in:\n\n  android/gps/KmlParser.h  -\u003e public interface.\n  android/gps/KmlParser.cpp -\u003e implementation of public interface\n  android/gps/KmlParser_unittest.cpp -\u003e unit test for public interface.\n  android/gps/internal/KmlParserInternal.h  -\u003e private class declaration.\n  android/gps/internal/KmlParserInternal_unittest.cpp -\u003e unit test for it.\n\nIn this specific example, if all you need is to provide a function that returns a list of GPS fixes, you can use a class with a single static function instead, as in:\n\n  #include \u003cvector\u003e\n\n  class KmlParser {\n      struct GpsFix { .. };\n\n      typedef std::vector\u003cGpsFix\u003e GpsFixArray;\n\n      // Parses a given .kml file at |filePath| and extract all GPS fixes from it, putting them into |*fixes| on success.\n      // Return true on success, false otherwise.\n      static bool parseFile(const char* filePath, GpsFixArray* fixes);\n  };",
+      "parentUuid": "04806112_8412b7e3",
+      "revId": "1fdb30c2599437d5b1d468c75f57ae5a1adcc5f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a4c23555_572b0e06",
         "filename": "android/skin/qt/parse-location_unittest.cpp",
         "patchSetId": 4
