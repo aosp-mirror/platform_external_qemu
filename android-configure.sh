@@ -291,6 +291,7 @@ OPTION_HELP=no
 OPTION_STRIP=no
 OPTION_MINGW=no
 OPTION_UI=
+OPTION_SDK_REV=
 
 GLES_SUPPORT=no
 
@@ -354,6 +355,8 @@ for opt do
   ;;
   --ui=*) echo "Unknown --ui value, try one of: sdl2 qt"
   ;;
+  --sdk-revision=*) ANDROID_SDK_TOOLS_REVISION=$optarg
+  ;;    
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -737,8 +740,9 @@ fi
 echo "EMULATOR_BUILD_EMUGL       := true" >> $config_mk
 echo "EMULATOR_EMUGL_SOURCES_DIR := $GLES_DIR" >> $config_mk
 
-if [ -n "$ANDROID_SDK_TOOLS_REVISION" ] ; then
-    echo "ANDROID_SDK_TOOLS_REVISION := $ANDROID_SDK_TOOLS_REVISION" >> $config_mk
+ANDROID_SDK_TOOLS_REVSION=
+if [ "$ANDROID_SDK_TOOLS_REVISION" ] ; then
+  echo "ANDROID_SDK_TOOLS_REVISION := $ANDROID_SDK_TOOLS_REVISION" >> $config_mk
 fi
 
 if [ "$OPTION_MINGW" = "yes" ] ; then
