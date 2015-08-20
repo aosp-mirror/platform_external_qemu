@@ -87,6 +87,23 @@
     },
     {
       "key": {
+        "uuid": "248c8586_168d5cb9",
+        "filename": "android/gps/KmlParser.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-08-20T18:45:03Z",
+      "side": 1,
+      "message": "Since the goal is to have both the KML and GPX parsing code return the same types, it makes sense to either:\n\n1. Put GpsFix and GpsFixArray in their own header file, that way the GPX parser is not required to include the KML parser\nor\n2. Rename all of the KmlParser related files to something like \"GpsXmlParser\" so that the appropriate GPX parsing functions make sense in the same files",
+      "revId": "1e91afde746adbbf4c61ce40f250f93262fd50ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a45875e6_a4aa2258",
         "filename": "android/gps/KmlParser.h",
         "patchSetId": 5
