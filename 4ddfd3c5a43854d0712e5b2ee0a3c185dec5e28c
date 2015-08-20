@@ -16,6 +16,24 @@
       "revId": "4ddfd3c5a43854d0712e5b2ee0a3c185dec5e28c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e45eedce_a629c6be",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2015-08-20T10:16:31Z",
+      "side": 1,
+      "message": "We\u0027ll no, it\u0027s still using Android pipe, this was ported as a legacy support from the classic emulator.",
+      "parentUuid": "a4c23555_17da7696",
+      "revId": "4ddfd3c5a43854d0712e5b2ee0a3c185dec5e28c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
