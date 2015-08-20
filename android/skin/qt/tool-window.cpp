@@ -22,7 +22,8 @@ static ToolWindow *twInstance = NULL;
 ToolWindow::ToolWindow(EmulatorQtWindow *window) :
     QFrame(window),
     emulator_window(window),
-    toolsUi(new Ui::ToolControls)
+    toolsUi(new Ui::ToolControls),
+    scale(.4) // TODO: add specific UI for scaling
 {
     Q_INIT_RESOURCE(resources);
 
@@ -41,7 +42,10 @@ void ToolWindow::show()
     setFixedSize(size());
 }
 
-void ToolWindow::on_close_button_clicked()       { /* TODO: What goes here? */ }
+void ToolWindow::on_close_button_clicked()
+{
+    emulator_window->simulateQuit();
+}
 void ToolWindow::on_power_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_F7, 0);
@@ -58,7 +62,10 @@ void ToolWindow::on_rotate_CW_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_F12, kKeyModLCtrl);
 }
-void ToolWindow::on_rotate_CCW_button_clicked()  { /* TBD */ }
+void ToolWindow::on_rotate_CCW_button_clicked()
+{
+    emulator_window->simulateKeyPress(KEY_F11, kKeyModLCtrl);
+}
 void ToolWindow::on_zoom_button_clicked()
 {
     // TODO
@@ -71,6 +78,9 @@ void ToolWindow::on_zoom_button_clicked()
     //   o A pane on the extended window
     //   o Implicit from resizing the device window itself
     // Obviously the last is the best
+
+    scale = 1.0 - scale;
+    emulator_window->simulateSetScale(scale);
 }
 void ToolWindow::on_fullscreen_button_clicked()
 {
