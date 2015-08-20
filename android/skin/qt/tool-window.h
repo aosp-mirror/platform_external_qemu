@@ -43,6 +43,7 @@ private:
     bool expanded;
     QList<QToolButton*> expanded_buttons;
     QBoxLayout *top_layout;
+    double scale;
 
     Ui::ToolControls  *toolsUi;
 
