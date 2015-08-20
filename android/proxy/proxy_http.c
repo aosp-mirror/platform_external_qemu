@@ -45,12 +45,21 @@ http_service_connect( HttpService*  service,
     PROXY_LOG("%s: trying to connect to %s",
               __FUNCTION__, sock_address_to_string(address));
 
-    if (sock_address_get_port(address) == 80) {
+    HttpServiceType service_type = service->service_type;
+    if (service_type == HTTP_SERVICE_TYPE_AUTO) {
+        if (sock_address_get_port(address) == 80) {
+            service_type = HTTP_SERVICE_TYPE_REWRITER;
+        } else {
+            service_type = HTTP_SERVICE_TYPE_CONNECTOR;
+        }
+    }
+
+    if (service_type == HTTP_SERVICE_TYPE_REWRITER) {
         /* use the rewriter for HTTP */
         PROXY_LOG("%s: using HTTP rewriter", __FUNCTION__);
         return http_rewriter_connect(service, address);
     } else {
-        PROXY_LOG("%s: using HTTP rewriter", __FUNCTION__);
+        PROXY_LOG("%s: using HTTP connector", __FUNCTION__);
         return http_connector_connect(service, address);
     }
 }
@@ -70,6 +79,7 @@ proxy_http_setup( const char*         servername,
     const ProxyOption*  opt_auth_user = NULL;
     const ProxyOption*  opt_auth_pass = NULL;
     const ProxyOption*  opt_user_agent = NULL;
+    const ProxyOption*  opt_type = NULL;
 
     if (servernamelen < 0)
         servernamelen = strlen(servername);
@@ -105,8 +115,23 @@ proxy_http_setup( const char*         servername,
                 case PROXY_OPTION_AUTH_USERNAME:    opt_auth_user  = opt; break;
                 case PROXY_OPTION_AUTH_PASSWORD:    opt_auth_pass  = opt; break;
                 case PROXY_OPTION_HTTP_USER_AGENT:  opt_user_agent = opt; break;
+                case PROXY_OPTION_TYPE:             opt_type       = opt; break;
                 default: ;
             }
+        }
+    }
+
+    service->service_type = HTTP_SERVICE_TYPE_AUTO;
+    if (opt_type) {
+        if (opt_type->string_len == 4 &&
+                !memcmp(opt_type->string, "http", opt_type->string_len)) {
+            service->service_type = HTTP_SERVICE_TYPE_REWRITER;
+        } else if (opt_type->string_len == 5 &&
+                !memcmp(opt_type->string, "https", opt_type->string_len)) {
+            service->service_type = HTTP_SERVICE_TYPE_CONNECTOR;
+        } else {
+            PROXY_LOG("%s: Unknown HTTP service type [%.*s], ignoring",
+                      __FUNCTION__, opt_type->string_len, opt_type->string);
         }
     }
 

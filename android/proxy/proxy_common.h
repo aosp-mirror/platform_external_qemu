@@ -37,6 +37,8 @@ typedef enum {
     PROXY_OPTION_HTTP_KEEPALIVE,
     PROXY_OPTION_HTTP_USER_AGENT,
 
+    PROXY_OPTION_TYPE,  // type of proxy, valid values are "http" and "https".
+
     PROXY_OPTION_MAX
 
 } ProxyOptionType;
