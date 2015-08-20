@@ -16,6 +16,24 @@
       "revId": "cfda4254b31f0b418fa5b79946b574599ea8f01f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e45eedce_8624cae7",
+        "filename": "android/scripts/build-qemu-android.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2015-08-20T10:12:24Z",
+      "side": 1,
+      "message": "This support has been sqashed into the https://android-review.googlesource.com/160781 (QEMU Multiplexing Daemon initial support). But I will abandon all changes under topic:qemud-services-support since this is not the right path for development according to your comment on the above mentioned patch.",
+      "parentUuid": "04a781c0_921e7a95",
+      "revId": "cfda4254b31f0b418fa5b79946b574599ea8f01f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
