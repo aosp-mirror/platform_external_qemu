@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44e3394a_8145fa1c",
+        "filename": "android/gps/KmlParser.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-20T20:46:47Z",
+      "side": 1,
+      "message": "nit: should be \"android/gps/GpsFix.h\" here.",
+      "revId": "2d27208b6ed78e79748d86621a0135060c9e38ff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a45875e6_e489fa03",
+        "filename": "android/gps/KmlParser.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-20T20:46:47Z",
+      "side": 1,
+      "message": "nit: technically, \"|*error| is set to an error message.\" is more accurate, since |error| won\u0027t be modified by the function :-)",
+      "revId": "2d27208b6ed78e79748d86621a0135060c9e38ff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "847a9131_eb89d103",
+        "filename": "android/gps/internal/KmlParserInternal.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-20T20:46:47Z",
+      "side": 1,
+      "message": "nit: should use a _H suffix here :-)",
+      "revId": "2d27208b6ed78e79748d86621a0135060c9e38ff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
