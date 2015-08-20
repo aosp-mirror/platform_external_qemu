@@ -26,8 +26,9 @@ typedef enum {
     kEventMouseButtonDown,
     kEventMouseButtonUp,
     kEventMouseMotion,
-    kEventVideoExpose,
     kEventQuit,
+    kEventSetScale,
+    kEventVideoExpose,
 } SkinEventType;
 
 typedef enum {
@@ -58,11 +59,16 @@ typedef struct {
 } SkinEventMouseData;
 
 typedef struct {
+    double scale;
+} SkinEventResizeData;
+
+typedef struct {
     SkinEventType type;
     union {
         SkinEventKeyData key;
         SkinEventMouseData mouse;
         SkinEventTextInputData text;
+        SkinEventResizeData resize;
     } u;
 } SkinEvent;
 

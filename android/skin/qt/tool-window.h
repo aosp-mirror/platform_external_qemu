@@ -44,6 +44,7 @@ private:
     bool expanded;
     QList<QToolButton*> expanded_buttons;
     QBoxLayout *top_layout;
+    double scale; // TODO: add specific UI for scaling
 
     Ui::ToolControls  *toolsUi;
 
