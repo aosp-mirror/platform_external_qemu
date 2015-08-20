@@ -104,6 +104,24 @@
     },
     {
       "key": {
+        "uuid": "44e3394a_6169d698",
+        "filename": "android/gps/KmlParser.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-20T18:49:22Z",
+      "side": 1,
+      "message": "Yes, I agree that 1. is the best way to go here :)",
+      "parentUuid": "248c8586_168d5cb9",
+      "revId": "1e91afde746adbbf4c61ce40f250f93262fd50ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a45875e6_a4aa2258",
         "filename": "android/gps/KmlParser.h",
         "patchSetId": 5
