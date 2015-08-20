@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "847a9131_6bade16d",
+        "filename": "android/gps/KmlParser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-20T18:36:25Z",
+      "side": 1,
+      "message": "nit: use (\u003cvalue\u003e) instead of {\u003cvalue\u003e} here.",
+      "revId": "1e91afde746adbbf4c61ce40f250f93262fd50ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e45eedce_464b3231",
+        "filename": "android/gps/KmlParser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-20T18:36:25Z",
+      "side": 1,
+      "message": "nit: these are internal functions, and it would be better if their names were enclosed in a namespace or a class.\n\nThis avoids any conflicts at link time with any other findCoordinates(xmlNode*) that might appear in the future in another piece of code from the emulator (e.g. a GPX parser!).\n\nThere are two ways to do that:\n\n1) Enclose them in a custom namespace (e.g. kml_parser::internal::)\n2) Make them static methods of a KmlParserInternal class.\n\nChoose whatever works best for you. I\u0027d favor the 2nd one, but frankly don\u0027t care that much.\n\nSame for other internal functions below.",
+      "revId": "1e91afde746adbbf4c61ce40f250f93262fd50ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0468616f_a77c6a5b",
+        "filename": "android/gps/KmlParser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-20T18:36:25Z",
+      "side": 1,
+      "message": "nit: initializes, checks",
+      "revId": "1e91afde746adbbf4c61ce40f250f93262fd50ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24656596_28db6be5",
+        "filename": "android/gps/KmlParser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-20T18:36:25Z",
+      "side": 1,
+      "message": "nit: You don\u0027t need to create a temporary string() in the lvalue, I believe, a simple assignment from a cont char* should just work.",
+      "revId": "1e91afde746adbbf4c61ce40f250f93262fd50ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a45875e6_84a5a68c",
+        "filename": "android/gps/KmlParser.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-20T18:36:25Z",
+      "side": 1,
+      "message": "nit: don\u0027t use \u0027using\u0027 in header files because this affects any source file that includes it. You\u0027ll have to use std::string in the declarations below.",
+      "revId": "1e91afde746adbbf4c61ce40f250f93262fd50ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a45875e6_a4aa2258",
+        "filename": "android/gps/KmlParser.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-08-20T18:36:25Z",
+      "side": 1,
+      "message": "nit: this name is too generic, either enclosing it a namespace (e.g. android::kml) or define it as a static method in a class, as in:\n\n  class KmlParser {\n  public:\n    static bool parseFile(...);\n  };\n\nThis way, the function name will be KmlParser::parseFile().\n\nI recommend this approach and put the definitions of GpsFix and GpsFixArray into the same class (so their names will be KmlParser::GpsFix and KmlParser::GpsFixArray).",
+      "revId": "1e91afde746adbbf4c61ce40f250f93262fd50ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
