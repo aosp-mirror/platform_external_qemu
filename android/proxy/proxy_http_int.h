@@ -15,10 +15,21 @@
 #include "android/proxy/proxy_http.h"
 #include "android/proxy/proxy_int.h"
 
+// Used to indicate the type of HTTP proxy to implement.
+// AUTO -> determine type based on address port (80 -> REWRITER, other -> CONNECTOR)
+// CONNECTOR -> use connector method (HTTPS).
+// REWRITER -> use rewriter method (HTTP).
+typedef enum {
+    HTTP_SERVICE_TYPE_AUTO,
+    HTTP_SERVICE_TYPE_CONNECTOR,
+    HTTP_SERVICE_TYPE_REWRITER,
+} HttpServiceType;
+
 /* the HttpService object */
 typedef struct HttpService {
     ProxyService        root[1];
     SockAddress         server_addr;  /* server address and port */
+    HttpServiceType     service_type;
     char*               footer;      /* the footer contains the static parts of the */
     int                 footer_len;  /* connection header, we generate it only once */
     char                footer0[512];
