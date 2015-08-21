@@ -215,7 +215,7 @@ goldfish_audio_buff_recv( struct goldfish_audio_buff*  b, int  avail, struct gol
     if (avail2 > 0)
         D("%s: AUD_read(%d) returned %d", __FUNCTION__, avail2, read);
 
-    cpu_physical_memory_write( b->address + b->offset, b->data, read );
+    cpu_physical_memory_write( b->address + b->offset, b->data + b->offset, read );
     b->offset += read;
 
     return read;
@@ -677,4 +677,3 @@ void goldfish_audio_init(uint32_t base, int id, const char* input_source)
                     audio_state_load,
                     s);
 }
-
