@@ -474,12 +474,11 @@ static void goldfish_audio_realize(DeviceState *dev, Error **errp)
 
     AUD_register_card( "goldfish_audio", &s->card);
 
-    as.freq = 44100;
-    as.nchannels = 2;
-    as.fmt = AUD_FMT_S16;
-    as.endianness = AUDIO_HOST_ENDIANNESS;
-
     if (s->output) {
+        as.freq = 44100;
+        as.nchannels = 2;
+        as.fmt = AUD_FMT_S16;
+        as.endianness = AUDIO_HOST_ENDIANNESS;
         s->voice = AUD_open_out (
             &s->card,
             NULL,
@@ -490,15 +489,17 @@ static void goldfish_audio_realize(DeviceState *dev, Error **errp)
             );
         if (!s->voice) {
             error_report("warning: opening audio output failed");
+        } else {
+            goldfish_audio_buff_init( &s->out_buffs[0] );
+            goldfish_audio_buff_init( &s->out_buffs[1] );
         }
     }
 
-    as.freq       = 8000;
-    as.nchannels  = 1;
-    as.fmt        = AUD_FMT_S16;
-    as.endianness = AUDIO_HOST_ENDIANNESS;
-
     if (s->input) {
+        as.freq       = 8000;
+        as.nchannels  = 1;
+        as.fmt        = AUD_FMT_S16;
+        as.endianness = AUDIO_HOST_ENDIANNESS;
         s->voicein = AUD_open_in (
             &s->card,
             NULL,
@@ -509,12 +510,10 @@ static void goldfish_audio_realize(DeviceState *dev, Error **errp)
             );
         if (!s->voicein) {
             error_report("warning: opening audio input failed");
+        } else {
+            goldfish_audio_buff_init( &s->in_buff );
         }
     }
-
-    goldfish_audio_buff_init( &s->out_buffs[0] );
-    goldfish_audio_buff_init( &s->out_buffs[1] );
-    goldfish_audio_buff_init( &s->in_buff );
 }
 
 static Property goldfish_audio_properties[] = {
