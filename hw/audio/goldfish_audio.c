@@ -178,7 +178,8 @@ goldfish_audio_buff_recv( struct goldfish_audio_buff*  b, int  avail, struct gol
     if (avail2 > 0)
         trace_goldfish_audio_buff_recv(avail2, read);
 
-    cpu_physical_memory_write( b->address + b->offset, b->data, read );
+    cpu_physical_memory_write(b->address + b->offset, b->data + b->offset,
+            read);
     b->offset += read;
 
     return read;
