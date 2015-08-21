@@ -2,11 +2,18 @@ apply plugin: 'sdk-files'
 
 import com.android.tools.internal.emulator.BuildEmulator
 
+// Get SDK revision to define emulator revision
+File fprops = new File(rootDir.getParentFile(), 'sdk/files/tools_source.properties')
+Properties props = new Properties()
+props.load(fprops.newDataInputStream())
+
 task buildDefaultEmulator(type: BuildEmulator) {
+    revision = props."Pkg.Revision"
     output = new File(project.buildDir, "default")
 }
 
 task buildWindowsEmulator(type: BuildEmulator) {
+    revision = props."Pkg.Revision"
     output = new File(project.buildDir, "windows")
     windows = true
 }
