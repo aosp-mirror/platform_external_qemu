@@ -71,6 +71,7 @@ glTexParameterfv
 #void glBufferData(GLenum target, GLsizeiptr size, GLvoid *data, GLenum usage)
 glBufferData
 	len data size
+	var_flag data nullAllowed
 
 #void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid *data)
 glBufferSubData
