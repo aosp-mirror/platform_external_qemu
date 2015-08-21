@@ -519,9 +519,6 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glSupport.glslVersion = Version((const  char*)(glslVersion));
     const GLubyte* glVersion = s_glDispatch.glGetString(GL_VERSION);
 
-    if (strstr(cstring,"GL_EXT_texture_storage ")!=NULL)
-        s_glSupport.GL_EXT_TEXTURE_STORAGE = true;
-
     if (strstr(cstring,"GL_EXT_bgra ")!=NULL)
         s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888 = true;
 

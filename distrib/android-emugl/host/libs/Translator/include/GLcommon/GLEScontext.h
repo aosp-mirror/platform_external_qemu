@@ -84,7 +84,6 @@ struct GLSupport {
     bool GL_OES_STANDARD_DERIVATIVES;
     bool GL_OES_TEXTURE_NPOT;
     bool GL_OES_RGB8_RGBA8;
-    bool GL_EXT_TEXTURE_STORAGE;
 
 };
 
