@@ -24,9 +24,6 @@ enum {
     TTY_DATA_LEN       = 0x14,
     TTY_DATA_PTR_HIGH  = 0x18,
 
-    /* Only used by kernel 3.10+ */
-    TTY_VERSION        = 0x20,
-
     TTY_CMD_INT_DISABLE    = 0,
     TTY_CMD_INT_ENABLE     = 1,
     TTY_CMD_WRITE_BUFFER   = 2,
@@ -43,21 +40,7 @@ struct tty_state {
     uint32_t data_count;
 };
 
-#define  TTY_DEVICE_VERSION 0
 #define  GOLDFISH_TTY_SAVE_VERSION  2
-
-#define  DEBUG 0
-
-/* Set to 1 to debug i/o register reads/writes */
-#define DEBUG_REGS  0
-
-#if DEBUG >= 1
-#  define D(...)  fprintf(stderr, __VA_ARGS__)
-#else
-#  define D(...)  (void)0
-#endif
-
-#define E(...)  cpu_abort(cpu_single_env, __VA_ARGS__)
 
 static void  goldfish_tty_save(QEMUFile*  f, void*  opaque)
 {
@@ -95,15 +78,15 @@ static uint32_t goldfish_tty_read(void *opaque, hwaddr offset)
 {
     struct tty_state *s = (struct tty_state *)opaque;
 
-    D("goldfish_tty_read %" HWADDR_PRIx "\n", offset);
+    //printf("goldfish_tty_read %x %x\n", offset, size);
 
     switch (offset) {
         case TTY_BYTES_READY:
             return s->data_count;
-        case TTY_VERSION:
-            return TTY_DEVICE_VERSION;
     default:
-        E("goldfish_tty_read: Bad offset %" HWADDR_PRIx "\n", offset);
+        cpu_abort(cpu_single_env,
+                  "goldfish_tty_read: Bad offset %" HWADDR_PRIx "\n",
+                  offset);
         return 0;
     }
 }
@@ -112,7 +95,7 @@ static void goldfish_tty_write(void *opaque, hwaddr offset, uint32_t value)
 {
     struct tty_state *s = (struct tty_state *)opaque;
 
-    D("goldfish_tty_write %" HWADDR_PRIx " %x\n", offset, value);
+    //printf("goldfish_tty_write %x %x %x\n", offset, value, size);
 
     switch(offset) {
         case TTY_PUT_CHAR: {
@@ -158,15 +141,15 @@ static void goldfish_tty_write(void *opaque, hwaddr offset, uint32_t value)
                             buf += to_write;
                             len -= to_write;
                         }
-                        D("goldfish_tty_write: got %d bytes from %llx\n", s->ptr_len, (unsigned long long)s->ptr);
+                        //printf("goldfish_tty_write: got %d bytes from %llx\n", s->ptr_len, (unsigned long long)s->ptr);
                     }
                     break;
 
                 case TTY_CMD_READ_BUFFER:
                     if(s->ptr_len > s->data_count)
-                        E("goldfish_tty_write: reading more data than available %d %d\n", s->ptr_len, s->data_count);
+                        cpu_abort (cpu_single_env, "goldfish_tty_write: reading more data than available %d %d\n", s->ptr_len, s->data_count);
                     safe_memory_rw_debug(current_cpu, s->ptr, s->data, s->ptr_len,1);
-                    D("goldfish_tty_write: read %d bytes to %llx\n", s->ptr_len, (unsigned long long)s->ptr);
+                    //printf("goldfish_tty_write: read %d bytes to %llx\n", s->ptr_len, (unsigned long long)s->ptr);
                     if(s->data_count > s->ptr_len)
                         memmove(s->data, s->data + s->ptr_len, s->data_count - s->ptr_len);
                     s->data_count -= s->ptr_len;
@@ -175,7 +158,7 @@ static void goldfish_tty_write(void *opaque, hwaddr offset, uint32_t value)
                     break;
 
                 default:
-                    E("goldfish_tty_write: Bad command %x\n", value);
+                    cpu_abort (cpu_single_env, "goldfish_tty_write: Bad command %x\n", value);
             };
             break;
 
@@ -192,7 +175,9 @@ static void goldfish_tty_write(void *opaque, hwaddr offset, uint32_t value)
             break;
 
         default:
-            E("goldfish_tty_write: Bad offset %" HWADDR_PRIx "\n", offset);
+            cpu_abort(cpu_single_env,
+                      "goldfish_tty_write: Bad offset %" HWADDR_PRIx "\n",
+                      offset);
     }
 }
 
