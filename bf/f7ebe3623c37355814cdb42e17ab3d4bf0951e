@@ -1,0 +1,7 @@
+Code-Review+2: David Turner <digit@google.com>
+Verified+1: David Turner <digit@google.com>
+Submitted-by: Konstantinos Menychtas <kmenychtas@google.com>
+Submitted-at: Fri, 21 Aug 2015 00:11:34 +0000
+Reviewed-on: https://android-review.googlesource.com/160370
+Project: platform/external/qemu
+Branch: refs/heads/studio-1.4-dev
