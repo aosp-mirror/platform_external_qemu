@@ -17,8 +17,6 @@
 #include "hw/sysbus.h"
 #include "sysemu/sysemu.h"
 
-#define TTY_DEVICE_VERSION 1
-
 enum {
     TTY_PUT_CHAR       = 0x00,
     TTY_BYTES_READY    = 0x04,
@@ -27,8 +25,6 @@ enum {
     TTY_DATA_PTR       = 0x10,
     TTY_DATA_LEN       = 0x14,
     TTY_DATA_PTR_HIGH  = 0x18,
-
-    TTY_VERSION        = 0x20,
 
     TTY_CMD_INT_DISABLE    = 0,
     TTY_CMD_INT_ENABLE     = 1,
@@ -100,8 +96,6 @@ static uint64_t goldfish_tty_read(void *opaque, hwaddr offset, unsigned size)
     switch (offset) {
         case TTY_BYTES_READY:
             return s->data_count;
-        case TTY_VERSION:
-            return TTY_DEVICE_VERSION;
     default:
         cpu_abort(current_cpu,
                   "goldfish_tty_read: Bad offset %" HWADDR_PRIx "\n",
@@ -110,8 +104,7 @@ static uint64_t goldfish_tty_read(void *opaque, hwaddr offset, unsigned size)
     }
 }
 
-static void goldfish_tty_write(void *opaque, hwaddr offset,
-                               uint64_t value, unsigned size)
+static void goldfish_tty_write(void *opaque, hwaddr offset, uint64_t value, unsigned size)
 {
     struct tty_state *s = (struct tty_state *)opaque;
 
@@ -142,42 +135,39 @@ static void goldfish_tty_write(void *opaque, hwaddr offset,
 
                 case TTY_CMD_WRITE_BUFFER:
                     if(s->cs) {
-                        hwaddr l = s->ptr_len;
-                        void *ptr;
+                        int len;
+                        target_ulong  buf;
 
-                        ptr = cpu_physical_memory_map(s->ptr, &l, 0);
-                        qemu_chr_fe_write(s->cs, (const uint8_t*)ptr, l);
-                        cpu_physical_memory_unmap(ptr, l, 0, 0);
+                        buf = s->ptr;
+                        len = s->ptr_len;
+
+                        while (len) {
+                            char   temp[64];
+                            int    to_write = sizeof(temp);
+                            if (to_write > len)
+                                to_write = len;
+
+                            cpu_memory_rw_debug(current_cpu, buf, (uint8_t*)temp, to_write, 0);
+                            qemu_chr_fe_write(s->cs, (const uint8_t*)temp, to_write);
+                            buf += to_write;
+                            len -= to_write;
+                        }
                     }
                     break;
 
                 case TTY_CMD_READ_BUFFER:
-                    {
-                        hwaddr l = s->ptr_len;
-                        void *ptr;
-
-                        if(s->ptr_len > s->data_count)
-                            cpu_abort(current_cpu,
-                                      "goldfish_tty_write: reading"
-                                      " more data than available %d %d\n",
-                                      s->ptr_len, s->data_count);
-
-                        ptr = cpu_physical_memory_map(s->ptr, &l, 1);
-                        memcpy(ptr, s->data, l);
-                        cpu_physical_memory_unmap(ptr, l, 1, l);
-
-                        if(s->data_count > l)
-                            memmove(s->data, s->data + l, s->data_count - l);
-                        s->data_count -= l;
-                        if(s->data_count == 0 && s->ready)
-                            qemu_set_irq(s->irq, 0);
-                    }
+                    if(s->ptr_len > s->data_count)
+                        cpu_abort(current_cpu, "goldfish_tty_write: reading more data than available %d %d\n", s->ptr_len, s->data_count);
+                    cpu_memory_rw_debug(current_cpu, s->ptr, s->data, s->ptr_len,1);
+                    if(s->data_count > s->ptr_len)
+                        memmove(s->data, s->data + s->ptr_len, s->data_count - s->ptr_len);
+                    s->data_count -= s->ptr_len;
+                    if(s->data_count == 0 && s->ready)
+                        qemu_set_irq(s->irq, 0);
                     break;
 
                 default:
-                    cpu_abort(current_cpu,
-                              "goldfish_tty_write: Bad command %" PRIx64 "\n",
-                              value);
+                    cpu_abort(current_cpu, "goldfish_tty_write: Bad command %" PRIx64 "\n", value);
             };
             break;
 
@@ -234,9 +224,7 @@ static void goldfish_tty_realize(DeviceState *dev, Error **errp)
     int i;
 
     if ((instance_id + 1) == MAX_SERIAL_PORTS) {
-        cpu_abort(current_cpu,
-                  "goldfish_tty: MAX_SERIAL_PORTS(%d) reached\n",
-                  MAX_SERIAL_PORTS);
+        cpu_abort(current_cpu, "goldfish_tty: MAX_SERIAL_PORTS(%d) reached\n", MAX_SERIAL_PORTS);
     }
 
     memory_region_init_io(&s->iomem, OBJECT(s), &mips_qemu_ops, s,
@@ -247,8 +235,7 @@ static void goldfish_tty_realize(DeviceState *dev, Error **errp)
     for(i = 0; i < MAX_SERIAL_PORTS; i++) {
         if(serial_hds[i]) {
             s->cs = serial_hds[i];
-            qemu_chr_add_handlers(serial_hds[i], tty_can_receive,
-                                  tty_receive, NULL, s);
+            qemu_chr_add_handlers(serial_hds[i], tty_can_receive, tty_receive, NULL, s);
             break;
         }
     }
