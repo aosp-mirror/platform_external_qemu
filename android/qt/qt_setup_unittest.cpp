@@ -40,6 +40,7 @@ TEST(androidQtSetupEnv, QtLibDir32Only) {
     EXPECT_TRUE(testDir32->makeSubDir("foo"));
     EXPECT_TRUE(testDir32->makeSubDir("foo/lib"));
     EXPECT_TRUE(testDir32->makeSubDir("foo/lib/qt"));
+    EXPECT_TRUE(testDir32->makeSubDir("foo/lib/qt/lib"));
     EXPECT_TRUE(testDir32->makeSubDir("foo/lib64"));
     EXPECT_TRUE(androidQtSetupEnv());
 
@@ -48,6 +49,7 @@ TEST(androidQtSetupEnv, QtLibDir32Only) {
     EXPECT_TRUE(testDir64->makeSubDir("foo"));
     EXPECT_TRUE(testDir64->makeSubDir("foo/lib"));
     EXPECT_TRUE(testDir64->makeSubDir("foo/lib/qt"));
+    EXPECT_TRUE(testDir64->makeSubDir("foo/lib/qt/lib"));
     EXPECT_TRUE(testDir64->makeSubDir("foo/lib64"));
     EXPECT_FALSE(androidQtSetupEnv());
 }
@@ -59,6 +61,7 @@ TEST(androidQtSetupEnv, QtLibDir64Only) {
     EXPECT_TRUE(testDir32->makeSubDir("foo/lib"));
     EXPECT_TRUE(testDir32->makeSubDir("foo/lib64"));
     EXPECT_TRUE(testDir32->makeSubDir("foo/lib64/qt"));
+    EXPECT_TRUE(testDir32->makeSubDir("foo/lib64/qt/lib"));
     EXPECT_FALSE(androidQtSetupEnv());
 
     TestSystem testSys64("/foo", 64);
@@ -67,6 +70,7 @@ TEST(androidQtSetupEnv, QtLibDir64Only) {
     EXPECT_TRUE(testDir64->makeSubDir("foo/lib"));
     EXPECT_TRUE(testDir64->makeSubDir("foo/lib64"));
     EXPECT_TRUE(testDir64->makeSubDir("foo/lib64/qt"));
+    EXPECT_TRUE(testDir64->makeSubDir("foo/lib64/qt/lib"));
     EXPECT_TRUE(androidQtSetupEnv());
 }
 
@@ -76,8 +80,10 @@ TEST(androidQtSetupEnv, QtLibDir32And64) {
     EXPECT_TRUE(testDir32->makeSubDir("foo"));
     EXPECT_TRUE(testDir32->makeSubDir("foo/lib"));
     EXPECT_TRUE(testDir32->makeSubDir("foo/lib/qt"));
+    EXPECT_TRUE(testDir32->makeSubDir("foo/lib/qt/lib"));
     EXPECT_TRUE(testDir32->makeSubDir("foo/lib64"));
     EXPECT_TRUE(testDir32->makeSubDir("foo/lib64/qt"));
+    EXPECT_TRUE(testDir32->makeSubDir("foo/lib64/qt/lib"));
     EXPECT_TRUE(androidQtSetupEnv());
 
     TestSystem testSys64("/foo", 64);
@@ -85,7 +91,9 @@ TEST(androidQtSetupEnv, QtLibDir32And64) {
     EXPECT_TRUE(testDir64->makeSubDir("foo"));
     EXPECT_TRUE(testDir64->makeSubDir("foo/lib"));
     EXPECT_TRUE(testDir64->makeSubDir("foo/lib/qt"));
+    EXPECT_TRUE(testDir64->makeSubDir("foo/lib/qt/lib"));
     EXPECT_TRUE(testDir64->makeSubDir("foo/lib64"));
     EXPECT_TRUE(testDir64->makeSubDir("foo/lib64/qt"));
+    EXPECT_TRUE(testDir64->makeSubDir("foo/lib64/qt/lib"));
     EXPECT_TRUE(androidQtSetupEnv());
 }

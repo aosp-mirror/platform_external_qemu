@@ -16,7 +16,8 @@
 
 using namespace android::base;
 
-String androidQtGetLibraryDir()
+// Get the base directory for libraries and plugins.
+static String androidQtGetBaseDir()
 {
     System* system = System::get();
     const char* libBitness = (system->getHostBitness() == 64) ? "lib64" : "lib";
@@ -27,4 +28,24 @@ String androidQtGetLibraryDir()
     String qtDir = PathUtils::recompose(subDirVector);
 
     return qtDir;
+}
+
+String androidQtGetLibraryDir()
+{
+    StringVector subDirVector;
+    subDirVector.push_back(androidQtGetBaseDir());
+    subDirVector.push_back(String("lib"));
+    String qtLibDir = PathUtils::recompose(subDirVector);
+
+    return qtLibDir;
+}
+
+String androidQtGetPluginsDir()
+{
+    StringVector subDirVector;
+    subDirVector.push_back(androidQtGetBaseDir());
+    subDirVector.push_back(String("plugins"));
+    String qtPluginsDir = PathUtils::recompose(subDirVector);
+
+    return qtPluginsDir;
 }
