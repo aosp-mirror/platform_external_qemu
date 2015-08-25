@@ -799,7 +799,6 @@ int main(int argc, char **argv) {
             exit(1);
         }
         hw->hw_gpu_enabled = config.enabled;
-        reassign_string(&hw->hw_gpu_mode, config.backend);
         D("%s", config.status);
     }
 
