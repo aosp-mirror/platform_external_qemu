@@ -24,7 +24,7 @@ ANDROID_BEGIN_HEADER
  **
  ** create a FileLock object with filelock_create(), the function will return
  ** NULL only if the corresponding path is already locked by another emulator
- ** of if the path is read-only.
+ ** or if the path is read-only.
  **
  ** note that 'path' can designate a non-existing path and that the lock creation
  ** function can detect stale file locks that can longer when the emulator
