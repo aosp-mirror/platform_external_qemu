@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a42a3512_803cac47",
+        "filename": "android/gps/KmlParser.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-26T22:56:43Z",
+      "side": 1,
+      "message": "The function above does not check for current-\u003ename !\u003d NULL\nIs the situation different in the two functions?",
+      "revId": "05ac963f2a5c3095f2a41cb81d3912882ca187de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
