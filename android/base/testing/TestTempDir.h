@@ -104,7 +104,7 @@ public:
     // Create an empty file under the temporary directory.
     bool makeSubFile(const char* file) {
         String path = makeSubPath(file);
-        int fd = ::open(path.c_str(), O_WRONLY|O_CREAT);
+        int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0744);
         if (fd < 0) {
             PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
             return false;

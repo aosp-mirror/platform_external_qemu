@@ -60,8 +60,10 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/utils/file_data_unittest.cpp \
   android/utils/format_unittest.cpp \
   android/utils/host_bitness_unittest.cpp \
+  android/utils/metrics/metrics_reporter_unittest.cpp \
   android/utils/path_unittest.cpp \
   android/utils/property_file_unittest.cpp \
+  android/utils/string_unittest.cpp \
   android/utils/x86_cpuid_unittest.cpp \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \

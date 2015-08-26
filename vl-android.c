@@ -72,6 +72,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
+#include "android/utils/metrics/metrics_reporter.h"
 #include "android/utils/path.h"
 #include "android/utils/socket_drainer.h"
 #include "android/utils/stralloc.h"
@@ -216,6 +217,15 @@ int qemu_main(int argc, char **argv, char **envp);
 #if !defined(CONFIG_STANDALONE_CORE)
 /* in android/qemulator.c */
 extern void  android_emulator_set_base_port(int  port);
+#endif
+
+#define  STRINGIFY(x)   _STRINGIFY(x)
+#define  _STRINGIFY(x)  #x
+
+#ifdef ANDROID_SDK_TOOLS_REVISION
+#  define  VERSION_STRING  STRINGIFY(ANDROID_SDK_TOOLS_REVISION)".0"
+#else
+#  define  VERSION_STRING  "standalone"
 #endif
 
 #if defined(CONFIG_SKINS) && !defined(CONFIG_STANDALONE_CORE)
@@ -2086,6 +2096,21 @@ void android_nand_add_image(const char* part_name,
     }
 
     nand_add_dev(tmp);
+}
+
+static void
+android_init_metrics()
+{
+    AndroidMetrics metrics;
+    VERBOSE_PRINT(init, "Initializing metrics reporting.");
+    androidMetrics_init(&metrics);
+    ANDROID_METRICS_STRASSIGN(metrics.emulator_version, VERSION_STRING);
+    ANDROID_METRICS_STRASSIGN( metrics.guest_arch, android_hw->hw_cpu_arch);
+    metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
+    androidMetrics_write(&metrics);
+    androidMetrics_free(&metrics);
+
+    androidMetrics_tryReportAll();
 }
 
 
@@ -4023,6 +4048,14 @@ int main(int argc, char **argv, char **envp)
     android_core_init_completed();
 #endif  // CONFIG_ANDROID
 
+    /* Initialize metrics right before entering main loop.
+     * We want to track performance of a running emulator, ignoring any early
+     * exits as a result of incorrect setup.
+     * TODO(kmenchytas) With ddms going away, see if this needs its own
+     * approval.
+     */
+    android_init_metrics();
+
     main_loop();
     quit_timers();
     net_cleanup();
@@ -4037,4 +4070,5 @@ void
 android_emulation_teardown(void)
 {
     skin_charmap_done();
+    androidMetrics_seal();
 }
