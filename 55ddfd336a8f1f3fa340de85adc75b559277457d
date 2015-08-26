@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c4700952_de1a8374",
+        "filename": "android/battery-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-26T21:21:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "247d65ed_8b98114b",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4c3a958_f8c40d38",
         "filename": "android/battery-agent.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-19T19:01:20Z",
       "side": 1,
       "message": "nit: same here.",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c42ba915_b74ed28d",
+        "filename": "android/battery-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-26T21:21:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c4c3a958_f8c40d38",
       "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "e4750d3f_c661517e",
+        "filename": "android/battery-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-26T21:21:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "24a485b9_13544e2a",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4486d92e_ac7fab84",
         "filename": "android/battery-agent.h",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2015-08-19T19:01:20Z",
       "side": 1,
       "message": "nit: better write something that uses the parameter name, e.g.:\n\n |percentFull| is an integer percentage, between 0 and 100 incuded.",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a47f9520_b3fa4834",
+        "filename": "android/battery-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-26T21:21:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4486d92e_ac7fab84",
       "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "c42ba915_574bbe7e",
+        "filename": "android/battery-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-26T21:21:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "84bd31cc_76848eea",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "04b221f6_3a303d21",
         "filename": "android/skin/qt/extended-window.h",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2015-08-19T19:01:20Z",
       "side": 1,
       "message": "nit: use direct member initialization here:\n\n  BatteryState() :\n          isCharging(true),\n          chargeLevel(50),\n          health(BATTERY_HEALTH_GOOD),\n          status(BATTERY_STATUS_CHARGING) {}",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "849451c2_fece3d28",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-26T21:21:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04b221f6_3a303d21",
       "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "c42ba915_57f73e4d",
+        "filename": "android/skin/qt/tool-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-26T21:21:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "84bd31cc_b6954614",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "84bd31cc_96984a4b",
         "filename": "android/skin/qt/tool-window.h",
         "patchSetId": 1
@@ -132,6 +258,24 @@
       "writtenOn": "2015-08-19T19:01:20Z",
       "side": 1,
       "message": "nit: call this setUiEmuAgent() for consistency.",
+      "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e430ad80_39bb955f",
+        "filename": "android/skin/qt/tool-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-26T21:21:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "84bd31cc_96984a4b",
       "revId": "55ddfd336a8f1f3fa340de85adc75b559277457d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
