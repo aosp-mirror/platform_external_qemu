@@ -42,6 +42,7 @@ TEST(DirScanner, scanEmptyDir) {
     TestTempDir myDir("DirScannerTest");
     DirScanner* scanner = dirScanner_new(myDir.path());
     EXPECT_TRUE(scanner);
+    EXPECT_EQ(0, dirScanner_numEntries(scanner));
     EXPECT_FALSE(dirScanner_next(scanner));
     dirScanner_free(scanner);
 }
@@ -62,6 +63,7 @@ TEST(DirScanner, scanNormal) {
 
     DirScanner* scanner = dirScanner_new(myDir.path());
     EXPECT_TRUE(scanner);
+    EXPECT_EQ(kCount, dirScanner_numEntries(scanner));
 
     StringVector entries;
     for (;;) {
@@ -100,6 +102,7 @@ TEST(DirScanner, scanFull) {
 
     DirScanner* scanner = dirScanner_new(myDir.path());
     EXPECT_TRUE(scanner);
+    EXPECT_EQ(kCount, dirScanner_numEntries(scanner));
 
     StringVector entries;
     for (;;) {

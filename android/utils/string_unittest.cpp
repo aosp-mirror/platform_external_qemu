@@ -9,21 +9,20 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/utils/bufprint.h"
+#include "android/utils/string.h"
 
 #include <gtest/gtest.h>
 
-TEST(bufprint, SimpleString) {
-    char buffer[128], *p = buffer, *end = p + sizeof(buffer);
-
-    p = bufprint(p, end, "%s/%s", "foo", "bar");
-    EXPECT_EQ(buffer + 7, p);
-    EXPECT_STREQ("foo/bar", buffer);
+TEST(String, endsWithFailure) {
+    EXPECT_FALSE(endswith("", "suffix"));
+    EXPECT_FALSE(endswith("fix", "suffix"));
+    EXPECT_FALSE(endswith("abc", "xxyyzz"));
 }
 
-TEST(bufprint, TruncationOnOverflow) {
-    char buffer[4], *p, *end = buffer + sizeof(buffer);
-    p = bufprint(buffer, end, "foobar");
-    EXPECT_EQ(buffer + 4, p);
-    EXPECT_STREQ("foo", buffer);
+TEST(String, endsWithSuccess) {
+    EXPECT_TRUE(endswith("string", ""));
+    EXPECT_TRUE(endswith("", ""));
+    EXPECT_TRUE(endswith("abc", "abc"));
+    EXPECT_TRUE(endswith("abc", "c"));
+    EXPECT_TRUE(endswith("0123", "23"));
 }

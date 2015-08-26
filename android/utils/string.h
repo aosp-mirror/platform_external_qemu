@@ -13,6 +13,7 @@
 #define ANDROID_UTILS_STRING_H
 
 #include "android/utils/compiler.h"
+#include "android/utils/system.h"
 
 #include <stddef.h>
 #if defined(__APPLE__) || defined(__FreeBSD__)
@@ -24,6 +25,9 @@ ANDROID_BEGIN_HEADER
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
 size_t strlcpy(char* dst, const char * src, size_t size);
 #endif
+
+/* Determine if string str ends with the string suffix. */
+ABool endswith(const char* str, const char* suffix);
 
 ANDROID_END_HEADER
 
