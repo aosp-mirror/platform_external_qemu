@@ -72,6 +72,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
+#include "android/utils/metrics_reporter.h"
 #include "android/utils/path.h"
 #include "android/utils/socket_drainer.h"
 #include "android/utils/stralloc.h"
@@ -2130,6 +2131,7 @@ int main(int argc, char **argv, char **envp)
     STRALLOC_DEFINE(kernel_params);
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;
+    AndroidMetrics* defaultMetrics;
 
     /* Initialize sockets before anything else, so we can properly report
      * initialization failures back to the UI. */
@@ -4022,6 +4024,20 @@ int main(int argc, char **argv, char **envp)
     // This will notify the UI that the core is successfuly initialized
     android_core_init_completed();
 #endif  // CONFIG_ANDROID
+
+    /* Initialize metrics right before entering main loop.
+     * We want to track performance of a running emulator, ignoring any early
+     * exits as a result of incorrect setup.
+     */
+    VERBOSE_PRINT(init, "Initializing metrics reporting.");
+    defaultMetrics = android_alloc0(sizeof(AndroidMetrics));
+    androidMetrics_init(defaultMetrics);
+    defaultMetrics->guest_arch = android_hw->hw_cpu_arch;
+    defaultMetrics->guest_gpu_enabled = android_hw->hw_gpu_enabled;
+    androidMetrics_write(defaultMetrics);
+    AFREE(defaultMetrics);
+
+    androidMetrics_seal();
 
     main_loop();
     quit_timers();

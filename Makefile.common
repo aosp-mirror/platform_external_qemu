@@ -171,6 +171,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/intmap.c \
 	android/utils/lineinput.c \
 	android/utils/mapfile.c \
+	android/utils/metrics_reporter.c \
 	android/utils/misc.c \
 	android/utils/panic.c \
 	android/utils/path.c \
