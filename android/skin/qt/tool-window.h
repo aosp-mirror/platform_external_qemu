@@ -33,6 +33,7 @@ class ToolWindow : public QFrame
 public:
     explicit ToolWindow(EmulatorQtWindow *emulatorWindow);
     void show();
+    void dockMainWindow();
 
 private:
     QToolButton *addButton(QGridLayout *layout, int row, int col, const char *iconPath, QString tip, EmulatorQtWindowSlot slot);
