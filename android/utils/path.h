@@ -134,7 +134,7 @@ extern char*  path_get_absolute( const char* path );
  **
  **  path_copy_file() copies one file into another.
  **
- **  unlink_file() is equivalent to unlink() on Unix, on Windows,
+ **  path_delete_file() is equivalent to unlink() on Unix, on Windows,
  **  it will handle the case where _unlink() fails because the file is
  **  read-only by trying to change its access rights then calling _unlink()
  **  again.
