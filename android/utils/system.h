@@ -155,6 +155,10 @@ extern  void   restore_sigalrm( signal_state_t  *state );
 
 extern  void   sleep_ms( int  timeout );
 
+/** Get system / user time for the current process, in milliseconds **/
+extern  int64_t get_user_time_ms();
+extern  int64_t get_system_time_ms();
+
 /** FORMATTING int64_t in printf() statements
  **
  ** Normally defined in <inttypes.h> except on Windows and maybe others.

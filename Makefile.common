@@ -171,16 +171,19 @@ common_LOCAL_SRC_FILES += \
 	android/utils/intmap.c \
 	android/utils/lineinput.c \
 	android/utils/mapfile.c \
+	android/utils/metrics/metrics_reporter.c \
 	android/utils/misc.c \
 	android/utils/panic.c \
 	android/utils/path.c \
 	android/utils/property_file.c \
 	android/utils/reflist.c \
 	android/utils/refset.c \
+	android/utils/setenv.c \
 	android/utils/socket_drainer.cpp \
 	android/utils/stralloc.c \
 	android/utils/string.cpp \
 	android/utils/system.c \
+	android/utils/system_wrapper.cpp \
 	android/utils/tempfile.c \
 	android/utils/uncompress.cpp \
 	android/utils/utf8_utils.cpp \

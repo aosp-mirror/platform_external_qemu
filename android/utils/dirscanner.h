@@ -50,6 +50,9 @@ const char*    dirScanner_next( DirScanner*  s );
  */
 const char*    dirScanner_nextFull( DirScanner*  s );
 
+/* Return the number of entries in the given initialized DirScanner. */
+int            dirScanner_numEntries( DirScanner*  s );
+
 ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_DIR_H */
