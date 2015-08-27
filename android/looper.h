@@ -14,26 +14,13 @@
 
 #include "android/utils/compiler.h"
 #include "android/utils/system.h"
+#include "android/base/types.h"
 
 #include <stddef.h>
 #include <stdint.h>
 #include <limits.h>
 
 ANDROID_BEGIN_HEADER
-
-/**********************************************************************
- **********************************************************************
- *****
- *****  T I M E   R E P R E S E N T A T I O N
- *****
- **********************************************************************
- **********************************************************************/
-
-/* An Duration represents a duration in milliseconds */
-typedef int64_t   Duration;
-
-/* A special Duration value used to mean "infinite" */
-#define  DURATION_INFINITE       ((Duration)INT64_MAX)
 
 /**********************************************************************
  **********************************************************************
