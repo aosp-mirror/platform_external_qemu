@@ -19,12 +19,21 @@
 
 #include "android/base/String.h"
 #include "android/base/containers/StringVector.h"
+#include <android/looper.h>
 
 namespace android {
 namespace base {
 
 // Interface class to the underlying operating system.
 class System {
+public:
+    // Information about user and system times for some process,
+    // in milliseconds
+    struct Times {
+        Duration userMs;
+        Duration systemMs;
+    };
+
 public:
     // Call this function to get the instance
     static System* get();
@@ -117,6 +126,9 @@ public:
     // On success, return true and sets |*sessionType| to the detected
     // session type. Otherwise, just return false.
     virtual bool isRemoteSession(String* sessionType) const = 0;
+
+    // Returns Times structure for the current process
+    virtual Times getProcessTimes() const = 0;
 
 protected:
     static System* setForTesting(System* system);
