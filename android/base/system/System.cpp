@@ -30,6 +30,7 @@
 
 #ifndef _WIN32
 #include <dirent.h>
+#include <sys/times.h>
 #endif
 #include <stdlib.h>
 #include <stdio.h>
@@ -206,6 +207,39 @@ public:
 
     virtual bool pathIsDir(const char* path) {
         return pathIsDirInternal(path);
+    }
+
+    Times getProcessTimes() const {
+        Times res = {};
+
+#ifdef _WIN32
+        FILETIME creationTime = {};
+        FILETIME exitTime = {};
+        FILETIME kernelTime = {};
+        FILETIME userTime = {};
+        ::GetProcessTimes(::GetCurrentProcess(),
+            &creationTime, &exitTime, &kernelTime, &userTime);
+
+        // convert 100-ns intervals from a struct to int64_t milliseconds
+        ULARGE_INTEGER kernelInt64;
+        kernelInt64.LowPart = kernelTime.dwLowDateTime;
+        kernelInt64.HighPart = kernelTime.dwHighDateTime;
+        res.systemMs = static_cast<Duration>(kernelInt64.QuadPart / 10000);
+
+        ULARGE_INTEGER userInt64;
+        userInt64.LowPart = userTime.dwLowDateTime;
+        userInt64.HighPart = userTime.dwHighDateTime;
+        res.userMs = static_cast<Duration>(userInt64.QuadPart / 10000);
+#else
+        tms times = {};
+        ::times(&times);
+        // convert to milliseconds
+        const long int ticksPerSec = ::sysconf(_SC_CLK_TCK);
+        res.systemMs = (times.tms_stime * 1000ll) / ticksPerSec;
+        res.userMs = (times.tms_utime * 1000ll) / ticksPerSec;
+#endif
+
+        return res;
     }
 
 private:

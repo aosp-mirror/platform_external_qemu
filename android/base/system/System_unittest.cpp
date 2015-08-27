@@ -185,5 +185,12 @@ TEST(System, findBundledExecutable) {
     EXPECT_FALSE(path.size());
 }
 
+TEST(System, getProcessTimes) {
+    const System::Times times1 = System::get()->getProcessTimes();
+    const System::Times times2 = System::get()->getProcessTimes();
+    ASSERT_GE(times2.userMs, times1.userMs);
+    ASSERT_GE(times2.systemMs, times1.systemMs);
+}
+
 }  // namespace base
 }  // namespace android
