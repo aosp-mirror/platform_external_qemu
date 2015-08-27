@@ -140,6 +140,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/String.cpp \
 	android/base/StringFormat.cpp \
 	android/base/StringView.cpp \
+	android/base/TimeValue.cpp \
 	android/base/system/System.cpp \
 	android/base/threads/ThreadStore.cpp \
 	android/emulation/CpuAccelerator.cpp \
@@ -183,6 +184,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/string.cpp \
 	android/utils/system.c \
 	android/utils/tempfile.c \
+        android/utils/time_utils.cpp \
 	android/utils/uncompress.cpp \
 	android/utils/utf8_utils.cpp \
 	android/utils/vector.c \

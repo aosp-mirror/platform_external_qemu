@@ -28,6 +28,10 @@
 #import <Carbon/Carbon.h>
 #endif  // __APPLE__
 
+#ifdef __linux__
+#include <sys/resource.h>
+#endif
+
 #ifndef _WIN32
 #include <dirent.h>
 #endif
@@ -36,6 +40,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <utility>
 
 namespace android {
 namespace base {
@@ -368,6 +373,42 @@ String System::findBundledExecutable(const char* programName) {
         executablePath.clear();
     }
     return executablePath;
+}
+
+namespace {
+
+static std::pair<TimeValue, TimeValue> getRUsageTimes() {
+    struct rusage ru;
+    ::getrusage(RUSAGE_SELF, &ru);
+    return std::make_pair(
+            TimeValue(
+                    static_cast<TimeValue::SecondsType>(ru.ru_utime.tv_sec),
+                    static_cast<TimeValue::NanoSecondsType>(
+                            ru.ru_utime.tv_usec *
+                            TimeValue::NANOSECONDS_PER_MICROSECOND)),
+            TimeValue(
+                    static_cast<TimeValue::SecondsType>(ru.ru_stime.tv_sec),
+                    static_cast<TimeValue::NanoSecondsType>(
+                            ru.ru_stime.tv_usec *
+                            TimeValue::NANOSECONDS_PER_MICROSECOND)));
+}
+
+}  // namespace
+
+TimeValue System::getUserTime() {
+#ifdef _WIN32
+    TODO(pprabhu) Untested code, that will blow up very obviously.
+#else
+    return getRUsageTimes().first;
+#endif
+}
+
+TimeValue System::getKernelTime() {
+#ifdef _WIN32
+    TODO(pprabhu) Untested code, that will blow up very obviously.
+#else
+    return getRUsageTimes().second;
+#endif
 }
 
 }  // namespace base

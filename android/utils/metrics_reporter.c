@@ -17,6 +17,7 @@
 #include "android/utils/metrics_reporter.h"
 #include "android/utils/path.h"
 #include "android/utils/system.h"
+#include "android/utils/timezone.h"
 #ifdef _WIN32
 # include <process.h>
 #else
@@ -139,11 +140,17 @@ androidMetrics_write( const AndroidMetrics* androidMetrics )
         return 0;
     }
     iniFile_free(ini);
+
+    /* HACK:XXX I just want to see some output */
+    char buf[100], *beg = buf, *end = beg +sizeof(buf);
+    bufprint_user_time(buf, end);
+    VERBOSE_PRINT(init, "[xkcd] user_time: %s", buf);
+
     return 1;
 }
 
 ABool
-androidMetrics_timestamp()
+androidMetrics_tick()
 {
     return 0;
 }

@@ -32,6 +32,12 @@ extern int  timezone_set( const char*  tzname );
  */
 extern char*  bufprint_zoneinfo_timezone( char*  buffer, char*  end );
 
+/*
+ * This is here only to test stuff. This belongs somewhere else.
+ */
+extern char* bufprint_user_time( char* buffer, char* end );
+extern char* bufprint_kernel_time( char* buffer, char* end );
+
 ANDROID_END_HEADER
 
 #endif /* _ANDROID_UTILS_TIMEZONE_H */

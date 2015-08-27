@@ -18,6 +18,7 @@
 #include "android/base/Compiler.h"
 
 #include "android/base/String.h"
+#include "android/base/TimeValue.h"
 #include "android/base/containers/StringVector.h"
 
 namespace android {
@@ -117,6 +118,12 @@ public:
     // On success, return true and sets |*sessionType| to the detected
     // session type. Otherwise, just return false.
     virtual bool isRemoteSession(String* sessionType) const = 0;
+
+    // Process resource measurement related functions.
+    // Return the user and kernel (system) time used so far by this process
+    // respectively, in seconds.
+    static TimeValue getUserTime();
+    static TimeValue getKernelTime();
 
 protected:
     static System* setForTesting(System* system);

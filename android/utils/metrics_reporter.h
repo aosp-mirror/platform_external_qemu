@@ -45,7 +45,7 @@ extern ABool androidMetrics_write( const AndroidMetrics* androidMetrics );
  *
  * Returns: 1 if successful, 0 otherwise.
  */
-extern ABool androidMetrics_timestamp();
+extern ABool androidMetrics_tick();
 
 
 /* This is the last function any emulator process should call on a metrics file
