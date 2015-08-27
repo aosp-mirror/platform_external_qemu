@@ -20,9 +20,6 @@
 
 using std::string;
 
-GpsFix::GpsFix(void) : name(""), description(""), latitude(""),
-        longitude(""), elevation(""), time("10") {}
-
 // Coordinates can be nested arbitrarily deep within a Placemark, depending
 // on the type of object (Point, LineString, Polygon) the Placemark contains
 xmlNode * KmlParserInternal::findCoordinates(xmlNode * current) {
