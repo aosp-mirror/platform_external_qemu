@@ -115,9 +115,20 @@ ANDROID_SKIN_UNITTESTS := \
     android/skin/region_unittest.cpp \
 
 $(call start-emulator-program, android_skin_unittests)
+
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include
 LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS)
 LOCAL_SRC_FILES := $(ANDROID_SKIN_UNITTESTS)
+
+ifdef EMULATOR_USE_QT
+LOCAL_SRC_FILES += \
+    android/gps/internal/KmlParserInternal_unittest.cpp \
+    android/gps/KmlParser_unittest.cpp \
+
+LOCAL_C_INCLUDES += $(LIBXML2_INCLUDES)
+LOCAL_LDLIBS += $(LIBXML2_LDLIBS)
+endif  # EMULATOR_USE_QT
+
 LOCAL_CFLAGS += -O0
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
@@ -129,6 +140,16 @@ $(call start-emulator64-program, android64_skin_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include
 LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS)
 LOCAL_SRC_FILES := $(ANDROID_SKIN_UNITTESTS)
+
+ifdef EMULATOR_USE_QT
+LOCAL_SRC_FILES += \
+    android/gps/internal/KmlParserInternal_unittest.cpp \
+    android/gps/KmlParser_unittest.cpp \
+
+LOCAL_C_INCLUDES += $(LIBXML2_INCLUDES)
+LOCAL_LDLIBS += $(LIBXML2_LDLIBS_64)
+endif  # EMULATOR_USE_QT
+
 LOCAL_CFLAGS += -O0
 LOCAL_STATIC_LIBRARIES += \
     emulator64-libui \
