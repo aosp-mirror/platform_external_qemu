@@ -475,6 +475,10 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     String kernelCommandLine = StringFormat("console=%s0,38400",
                                             kTarget.ttyPrefix);
+
+    // We always force qemu=1 when running inside QEMU
+    kernelCommandLine += StringFormat(" qemu=1");
+
     if (kTarget.kernelExtraArgs) {
         kernelCommandLine += kTarget.kernelExtraArgs;
     }
@@ -482,6 +486,10 @@ extern "C" int main(int argc, char **argv, char **envp) {
         kernelCommandLine += StringFormat(
                 " androidboot.selinux=%s", opts->selinux);
     }
+    if (opts->no_boot_anim) {
+        kernelCommandLine += StringFormat(" android.bootanim=0");
+    }
+
     args[n++] = kernelCommandLine.c_str();
 
     args[n++] = "-serial";
