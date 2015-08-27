@@ -35,3 +35,8 @@ SHA1=876f10834f6569ae94772ba7ecf430d803db26eb    URL=https://mirrors.kernel.org/
 
 # libxml2
 SHA1=f46a37ea6d869f702e03f393c376760f3cbee673    URL=ftp://xmlsoft.org/libxml2/libxml2-2.9.2.tar.gz
+
+# curl
+SHA1=879a186944e7b06e619a2eb07cef729b5702345c    URL=http://curl.haxx.se/download/curl-7.44.0.tar.bz2 BASENAME=curl
+SHA1=9d1977cc89242cd11471269ece2ed4650947c046    URL=https://www.openssl.org/source/openssl-1.0.1p.tar.gz BASENAME=openssl
+# libz is covered by qemu-android dependencies
