@@ -17,7 +17,6 @@ ANDROID_SKIN_LDLIBS_64 += $(LIBXML2_LDLIBS_64)
 ANDROID_SKIN_SOURCES += \
     android/skin/qt/emulator-qt-window.cpp \
     android/skin/qt/tool-window.cpp \
-    android/gps/KmlParser.cpp \
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/emulator-qt-window.h \
