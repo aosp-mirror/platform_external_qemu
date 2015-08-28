@@ -442,6 +442,14 @@ const char* savevm_on_exit = NULL;
 hwaddr isa_mem_base = 0;
 PicState2 *isa_pic;
 
+
+/////////////////////////////////////////////////////////////
+// Metrics reporting: timer
+static const Duration metrics_timer_timeout_ms = 60 * 1000; // a minute
+static Looper* metrics_looper = NULL;
+static LoopTimer* metrics_timer = NULL;
+/////////////////////////////////////////////////////////////
+
 static IOPortReadFunc default_ioport_readb, default_ioport_readw, default_ioport_readl;
 static IOPortWriteFunc default_ioport_writeb, default_ioport_writew, default_ioport_writel;
 
@@ -2098,8 +2106,15 @@ void android_nand_add_image(const char* part_name,
     nand_add_dev(tmp);
 }
 
-static void
-android_init_metrics()
+static void on_metrics_timer(void* state)
+{
+    LoopTimer* const timer = (LoopTimer*)state;
+
+    androidMetrics_tick();
+    loopTimer_startRelative(timer, metrics_timer_timeout_ms);
+}
+
+static void android_init_metrics()
 {
     char path[PATH_MAX], *pathend=path, *bufend=pathend+sizeof(path);
     AndroidMetrics metrics;
@@ -2121,8 +2136,31 @@ android_init_metrics()
     androidMetrics_tick();
 
     androidMetrics_tryReportAll();
+
+    // Initialize a timer for recurring metrics update
+    metrics_looper = looper_newCore();
+    if (!metrics_looper) {
+        dwarning("Failed to initialize metrics looper (OOM?).");
+        return;
+    }
+    metrics_timer = android_alloc(sizeof(*metrics_timer));
+    if (!metrics_timer) {
+        dwarning("Failed to allocate metrics timer (OOM?).");
+        return;
+    }
+    loopTimer_init(metrics_timer, metrics_looper, &on_metrics_timer, metrics_timer);
+    loopTimer_startRelative(metrics_timer, metrics_timer_timeout_ms);
 }
 
+static void android_teardown_metrics()
+{
+    loopTimer_stop(metrics_timer);
+    loopTimer_done(metrics_timer);
+    looper_free(metrics_looper);
+
+    androidMetrics_seal();
+    androidMetrics_moduleFini();
+}
 
 int main(int argc, char **argv, char **envp)
 {
@@ -4080,6 +4118,5 @@ void
 android_emulation_teardown(void)
 {
     skin_charmap_done();
-    androidMetrics_seal();
-    androidMetrics_moduleFini();
+    android_teardown_metrics();
 }
