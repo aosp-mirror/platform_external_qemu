@@ -486,14 +486,26 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *pEvent)
 
 void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers)
 {
-    SkinEvent *event = new SkinEvent();
-    event->type = kEventKeyDown;
+    SkinEvent *event = createSkinEvent(kEventKeyDown);
     event->u.key.keycode = keyCode;
     event->u.key.mod = modifiers;
     slot_queueEvent(event);
-    event = new SkinEvent();
-    event->type = kEventKeyUp;
+
+    event = createSkinEvent(kEventKeyUp);
     event->u.key.keycode = keyCode;
     event->u.key.mod = modifiers;
+    slot_queueEvent(event);
+}
+
+void EmulatorQtWindow::simulateQuit()
+{
+    SkinEvent *event = createSkinEvent(kEventQuit);
+    slot_queueEvent(event);
+}
+
+void EmulatorQtWindow::simulateSetScale(double scale)
+{
+    SkinEvent *event = createSkinEvent(kEventSetScale);
+    event->u.resize.scale = scale;
     slot_queueEvent(event);
 }
