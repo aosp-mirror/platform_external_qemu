@@ -24,6 +24,7 @@
 #include "qemu/atomic.h"
 #include "sysemu/qtest.h"
 #include "qemu/timer.h"
+#include "sysemu/hax.h"
 
 /* -icount align implementation. */
 
@@ -314,6 +315,23 @@ static void cpu_handle_debug_exception(CPUArchState *env)
 
 volatile sig_atomic_t exit_request;
 
+/*
+ * QEMU emulate can happens because of MMIO or emulation mode, i.e. non-PG mode,
+ * when it's because of MMIO, the MMIO, the interrupt should not be emulated,
+ * because MMIO is emulated for only one instruction now and then back to
+ * HAX kernel
+ */
+static int need_handle_intr_request(CPUState *cpu)
+{
+#ifdef CONFIG_HAX
+    if (!hax_enabled() || hax_vcpu_emulation_mode(cpu))
+        return cpu->interrupt_request;
+    return 0;
+#else
+    return cpu->interrupt_request;
+#endif
+}
+
 int cpu_exec(CPUArchState *env)
 {
     CPUState *cpu = ENV_GET_CPU(env);
@@ -391,9 +409,14 @@ int cpu_exec(CPUArchState *env)
                 }
             }
 
+#ifdef CONFIG_HAX
+            if (hax_enabled() && !hax_vcpu_exec(cpu))
+                longjmp(cpu->jmp_env, 1);
+#endif
+
             next_tb = 0; /* force lookup of first TB */
             for(;;) {
-                interrupt_request = cpu->interrupt_request;
+                interrupt_request = need_handle_intr_request(cpu);
                 if (unlikely(interrupt_request)) {
                     if (unlikely(cpu->singlestep_enabled & SSTEP_NOIRQ)) {
                         /* Mask out external interrupts for this step. */
@@ -525,6 +548,11 @@ int cpu_exec(CPUArchState *env)
                     }
                 }
                 cpu->current_tb = NULL;
+#ifdef CONFIG_HAX
+                if (hax_enabled() && hax_stop_emulation(cpu))
+                    cpu_loop_exit(cpu);
+#endif
+
                 /* Try to align the host and virtual clocks
                    if the guest is in advance */
                 align_clocks(&sc, cpu);

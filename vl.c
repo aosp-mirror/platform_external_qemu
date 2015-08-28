@@ -90,6 +90,7 @@ int main(int argc, char **argv)
 #include "audio/audio.h"
 #include "migration/migration.h"
 #include "sysemu/kvm.h"
+#include "sysemu/hax.h"
 #include "qapi/qmp/qjson.h"
 #include "qemu/option.h"
 #include "qemu/config-file.h"
@@ -1874,8 +1875,11 @@ static void main_loop(void)
 #ifdef CONFIG_PROFILER
     int64_t ti;
 #endif
+
+    hax_sync_vcpus();
+
     do {
-        nonblocking = !kvm_enabled() && !xen_enabled() && last_io > 0;
+        nonblocking = !kvm_enabled() && !xen_enabled() && !hax_enabled() && last_io > 0;
 #ifdef CONFIG_PROFILER
         ti = profile_getclock();
 #endif
@@ -3508,6 +3512,11 @@ int main(int argc, char **argv, char **envp)
                 olist = qemu_find_opts("machine");
                 qemu_opts_parse(olist, "accel=kvm", 0);
                 break;
+            case QEMU_OPTION_enable_hax:
+                olist = qemu_find_opts("machine");
+                qemu_opts_parse(olist, "accel=hax", 0);
+                hax_disable(0);
+                break;
             case QEMU_OPTION_machine:
                 olist = qemu_find_opts("machine");
                 opts = qemu_opts_parse(olist, optarg, 1);
@@ -4057,6 +4066,7 @@ int main(int argc, char **argv, char **envp)
 
     /* store value for the future use */
     qemu_opt_set_number(qemu_find_opts_singleton("memory"), "size", ram_size);
+    hax_pre_init(ram_size);
 
     if (qemu_opts_foreach(qemu_find_opts("device"), device_help_func, NULL, 0)
         != 0) {
@@ -4151,8 +4161,8 @@ int main(int argc, char **argv, char **envp)
 
     cpu_ticks_init();
     if (icount_opts) {
-        if (kvm_enabled() || xen_enabled()) {
-            fprintf(stderr, "-icount is not allowed with kvm or xen\n");
+        if (kvm_enabled() || xen_enabled() || hax_enabled()) {
+            fprintf(stderr, "-icount is not allowed with kvm or xen or hax\n");
             exit(1);
         }
         configure_icount(icount_opts, &error_abort);
@@ -4272,6 +4282,10 @@ int main(int argc, char **argv, char **envp)
     cpu_synchronize_all_post_init();
 
     set_numa_modes();
+
+    if (hax_enabled()) {
+        hax_sync_vcpus();
+    }
 
     /* init USB devices */
     if (usb_enabled(false)) {

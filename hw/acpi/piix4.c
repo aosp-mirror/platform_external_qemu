@@ -25,6 +25,7 @@
 #include "hw/pci/pci.h"
 #include "hw/acpi/acpi.h"
 #include "sysemu/sysemu.h"
+#include "sysemu/hax.h"
 #include "qemu/range.h"
 #include "exec/ioport.h"
 #include "hw/nvram/fw_cfg.h"
@@ -321,7 +322,7 @@ static void piix4_reset(void *opaque)
     pci_conf[0x40] = 0x01; /* PM io base read only bit */
     pci_conf[0x80] = 0;
 
-    if (s->kvm_enabled) {
+    if (s->kvm_enabled || hax_enabled()) {
         /* Mark SMM as already inited (until KVM supports SMM). */
         pci_conf[0x5B] = 0x02;
     }
@@ -434,7 +435,7 @@ static int piix4_pm_initfn(PCIDevice *dev)
     /* APM */
     apm_init(dev, &s->apm, apm_ctrl_changed, s);
 
-    if (s->kvm_enabled) {
+    if (s->kvm_enabled || hax_enabled()) {
         /* Mark SMM as already inited to prevent SMM from running.  KVM does not
          * support SMM mode. */
         pci_conf[0x5B] = 0x02;

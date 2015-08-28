@@ -258,6 +258,7 @@ xfs=""
 vhost_net="no"
 vhost_scsi="no"
 kvm="no"
+hax="no"
 rdma=""
 gprof="no"
 debug_tcg="no"
@@ -560,6 +561,7 @@ CYGWIN*)
 ;;
 MINGW32*)
   mingw32="yes"
+  hax="yes"
   audio_possible_drivers="winwave dsound sdl fmod winaudio"
   audio_drv_list="winwave"
 ;;
@@ -603,6 +605,7 @@ OpenBSD)
 Darwin)
   bsd="yes"
   darwin="yes"
+  hax="yes"
   LDFLAGS_SHARED="-bundle -undefined dynamic_lookup"
   if [ "$cpu" = "x86_64" ] ; then
     QEMU_CFLAGS="-arch x86_64 $QEMU_CFLAGS"
@@ -921,6 +924,10 @@ for opt do
   --disable-kvm) kvm="no"
   ;;
   --enable-kvm) kvm="yes"
+  ;;
+  --disable-hax) hax="no"
+  ;;
+  --enable-hax) hax="yes"
   ;;
   --disable-tcg-interpreter) tcg_interpreter="no"
   ;;
@@ -1318,6 +1325,8 @@ Advanced options (experts only):
   --disable-slirp          disable SLIRP userspace network connectivity
   --disable-kvm            disable KVM acceleration support
   --enable-kvm             enable KVM acceleration support
+  --disable-hax            disable HAX acceleration support
+  --enable-hax             enable HAX acceleration support
   --disable-rdma           disable RDMA-based migration support
   --enable-rdma            enable RDMA-based migration support
   --enable-tcg-interpreter enable TCG with bytecode interpreter (TCI)
@@ -4301,6 +4310,7 @@ echo "Linux AIO support $linux_aio"
 echo "ATTR/XATTR support $attr"
 echo "Install blobs     $blobs"
 echo "KVM support       $kvm"
+echo "HAX support       $hax"
 echo "RDMA support      $rdma"
 echo "TCG interpreter   $tcg_interpreter"
 echo "fdt support       $fdt"
@@ -5178,6 +5188,15 @@ case "$target_name" in
       fi
     fi
 esac
+if test "$hax" = "yes" ; then
+  if test "$target_softmmu" = "yes" ; then
+    case "$target_name" in
+    i386|x86_64)
+      echo "CONFIG_HAX=y" >> $config_target_mak
+    ;;
+    esac
+  fi
+fi
 if test "$target_bigendian" = "yes" ; then
   echo "TARGET_WORDS_BIGENDIAN=y" >> $config_target_mak
 fi
