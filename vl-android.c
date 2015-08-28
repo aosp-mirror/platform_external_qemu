@@ -432,6 +432,14 @@ const char* savevm_on_exit = NULL;
 hwaddr isa_mem_base = 0;
 PicState2 *isa_pic;
 
+
+/////////////////////////////////////////////////////////////
+// Metrics reporting: timer
+static const Duration metrics_timer_timeout_ms = 60 * 1000; // a minute
+static Looper* metrics_looper = NULL;
+static LoopTimer* metrics_timer = NULL;
+/////////////////////////////////////////////////////////////
+
 static IOPortReadFunc default_ioport_readb, default_ioport_readw, default_ioport_readl;
 static IOPortWriteFunc default_ioport_writeb, default_ioport_writew, default_ioport_writel;
 
@@ -2088,6 +2096,46 @@ void android_nand_add_image(const char* part_name,
     nand_add_dev(tmp);
 }
 
+// TODO: remove this when the actual function is here
+static void androidMetrics_tick() {
+    // stub
+    printf("test\n");
+}
+
+static void on_metrics_timer(void* state) {
+    LoopTimer* const timer = (LoopTimer*)state;
+
+    androidMetrics_tick();
+
+    loopTimer_startRelative(timer, metrics_timer_timeout_ms);
+}
+
+static void android_init_metrics()
+{
+    // TODO: merge in the actual initialization code
+
+    // Initialize a timer for recurring metrics update
+    metrics_looper = looper_newCore();
+    if (!metrics_looper) {
+        dwarning("Failed to initialize metrics looper (OOM?).");
+        return;
+    }
+    metrics_timer = android_alloc(sizeof(*metrics_timer));
+    if (!metrics_timer) {
+        dwarning("Failed to allocate metrics timer (OOM?).");
+        return;
+    }
+    loopTimer_init(metrics_timer, metrics_looper, &on_metrics_timer, metrics_timer);
+    loopTimer_startRelative(metrics_timer, metrics_timer_timeout_ms);
+}
+
+static void android_teardown_metrics() {
+    loopTimer_stop(metrics_timer);
+    loopTimer_done(metrics_timer);
+    looper_free(metrics_looper);
+
+    // TODO: merge in the actual teardown code
+}
 
 int main(int argc, char **argv, char **envp)
 {
@@ -4023,6 +4071,8 @@ int main(int argc, char **argv, char **envp)
     android_core_init_completed();
 #endif  // CONFIG_ANDROID
 
+    android_init_metrics();
+
     main_loop();
     quit_timers();
     net_cleanup();
@@ -4037,4 +4087,6 @@ void
 android_emulation_teardown(void)
 {
     skin_charmap_done();
+
+    android_teardown_metrics();
 }
