@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4485f957_795849cf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-28T16:15:29Z",
+      "side": 1,
+      "message": "I\u0027d say \"XML\" rather than \".xml\". They are XMl files, but they don\u0027t have .xml extension.",
+      "revId": "cad836b0fb1dee43e0f142a78f57a15c6b567bf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "248c8586_22ed93b1",
+        "filename": "Makefile.tests",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-28T16:15:29Z",
+      "side": 1,
+      "message": "I believe Digit prefers to alphabetize independent of the \u0027/\u0027, so gps/Gpx.cpp would go before gps/int/GpxI.cpp",
+      "revId": "cad836b0fb1dee43e0f142a78f57a15c6b567bf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "248c8586_e2e78bcf",
+        "filename": "Makefile.tests",
+        "patchSetId": 2
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-28T16:15:29Z",
+      "side": 1,
+      "message": "Same alphabetical comment.\n(Do we need to be especially careful now that we are Alphabet?)",
+      "revId": "cad836b0fb1dee43e0f142a78f57a15c6b567bf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "048f817d_2fd90a6a",
+        "filename": "android/gps/GpxParser.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-28T16:15:29Z",
+      "side": 1,
+      "message": "longitude",
+      "revId": "cad836b0fb1dee43e0f142a78f57a15c6b567bf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4485f957_99aacd07",
+        "filename": "android/gps/GpxParser.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-28T16:15:29Z",
+      "side": 1,
+      "message": "Because of this test, should you remove the \"continue\"s and make the tests \"if/else\" instead?",
+      "revId": "cad836b0fb1dee43e0f142a78f57a15c6b567bf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "046221c0_eb5d994c",
+        "filename": "android/gps/GpxParser.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-28T16:15:29Z",
+      "side": 1,
+      "message": "No need to change this, but I prefer boolean names that express a yes/no, like resGood or isOK.",
+      "revId": "cad836b0fb1dee43e0f142a78f57a15c6b567bf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4700952_10b0f429",
+        "filename": "android/gps/GpxParser.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-08-28T16:15:29Z",
+      "side": 1,
+      "message": "|*error|",
+      "revId": "cad836b0fb1dee43e0f142a78f57a15c6b567bf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
