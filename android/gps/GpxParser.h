@@ -9,26 +9,21 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_GPS_GPS_FIX_H
-#define ANDROID_GPS_GPS_FIX_H
+#ifndef ANDROID_GPS_GPX_PARSER_H
+#define ANDROID_GPS_GPX_PARSER_H
 
-#include <string>
-#include <vector>
+#include "android/gps/GpsFix.h"
 
-// A struct representing a location on a map
-struct GpsFix {
-    std::string name;
-    std::string description;
-    std::string latitude;
-    std::string longitude;
-    std::string elevation;
-    std::string time;
+class GpxParser {
+public:
 
-    GpsFix(void)
-        : name(""), description(""), latitude(""),
-          longitude(""), elevation(""), time("10") {}
+    /* Parses a given .gpx file at |filePath| and extracts all contained GPS
+     * fixes into |*fixes|.
+     *
+     * Returns true on success, false otherwise. If false is returned, |*error|
+     * is set to a string describing the error.
+     */
+    static bool parseFile(const char *filePath, GpsFixArray *fixes, std::string *error);
 };
 
-typedef std::vector<GpsFix> GpsFixArray;
-
-#endif // ANDROID_GPS_GPS_FIX_H
+#endif // ANDROID_GPS_GPX_PARSER_H
