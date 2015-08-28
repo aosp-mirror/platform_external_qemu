@@ -1,0 +1,280 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a47f9520_b0ba34a3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T01:43:46Z",
+      "side": 1,
+      "message": "any tests?",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 44
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a47f9520_d016e07b",
+        "filename": "android/utils/metrics/metrics_fields.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T01:43:46Z",
+      "side": 1,
+      "message": "What about host architecture? do we want to capture it as well?",
+      "range": {
+        "startLine": 34,
+        "startChar": 8,
+        "endLine": 34,
+        "endChar": 19
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a47f9520_703dace8",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T01:43:46Z",
+      "side": 1,
+      "message": "typo - collision",
+      "range": {
+        "startLine": 107,
+        "startChar": 50,
+        "endLine": 107,
+        "endChar": 60
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "849451c2_64d1bbc5",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T01:43:46Z",
+      "side": 1,
+      "message": "Can you have the STRINGIZE() macro here so the name isn\u0027t mentioned twice in the field declaration?",
+      "range": {
+        "startLine": 151,
+        "startChar": 60,
+        "endLine": 151,
+        "endChar": 61
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "048f817d_d95fecef",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T01:43:46Z",
+      "side": 1,
+      "message": "some TODO?",
+      "range": {
+        "startLine": 167,
+        "startChar": 0,
+        "endLine": 171,
+        "endChar": 1
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a47f9520_307f245a",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T01:43:46Z",
+      "side": 1,
+      "message": "why do we need to alloc/free an object in the same function? simple stack var should be enough",
+      "range": {
+        "startLine": 176,
+        "startChar": 0,
+        "endLine": 183,
+        "endChar": 19
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "248c8586_e79a3d7a",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T01:43:46Z",
+      "side": 1,
+      "message": "IMO we should report it more often than just every 100 runs. Otherwise we may miss some cases when people don\u0027t run it very often, or don\u0027t turn it off frequently, or uninstall it before 100 runs because it\u0027s too crashy :)",
+      "range": {
+        "startLine": 176,
+        "startChar": 0,
+        "endLine": 187,
+        "endChar": 18
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84253145_f8242ee8",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T01:43:46Z",
+      "side": 1,
+      "message": "AFAIK our C compiler supports variable declaration in the middle of a function. Just FYI",
+      "range": {
+        "startLine": 235,
+        "startChar": 0,
+        "endLine": 239,
+        "endChar": 28
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "849451c2_442f5f40",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T01:43:46Z",
+      "side": 1,
+      "message": "just about readability and IMHO: a !\u003d 0 is easier to understand than !!a",
+      "range": {
+        "startLine": 259,
+        "startChar": 27,
+        "endLine": 259,
+        "endChar": 29
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84253145_987ada92",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T01:43:46Z",
+      "side": 1,
+      "message": "-1 ?",
+      "range": {
+        "startLine": 385,
+        "startChar": 25,
+        "endLine": 385,
+        "endChar": 41
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "048f817d_f91af073",
+        "filename": "android/utils/string.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T01:43:46Z",
+      "side": 1,
+      "message": "\u003e\u003d\n?",
+      "range": {
+        "startLine": 44,
+        "startChar": 20,
+        "endLine": 44,
+        "endChar": 21
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "248c8586_ec2c644c",
+        "filename": "vl-android.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4057,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T01:43:46Z",
+      "side": 1,
+      "message": "let\u0027s at least add a TODO for an optin check - we should have that before collecting data",
+      "range": {
+        "startLine": 4053,
+        "startChar": 0,
+        "endLine": 4057,
+        "endChar": 27
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
