@@ -66,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "c42ba915_60b5c918",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T21:54:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "248c8586_27d4c5e7",
+      "revId": "9c15ffad1e8528c4b9f4662684ad2fa2187aa6c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a47f9520_509e70e8",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 1
@@ -77,6 +95,30 @@
       "writtenOn": "2015-08-28T04:36:54Z",
       "side": 1,
       "message": "readability: Consider parens around the multiplication. Although this does the right thing, that computation order is significant for rounding.",
+      "range": {
+        "startLine": 239,
+        "startChar": 23,
+        "endLine": 239,
+        "endChar": 47
+      },
+      "revId": "9c15ffad1e8528c4b9f4662684ad2fa2187aa6c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c42ba915_00bad508",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-08-28T21:54:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a47f9520_509e70e8",
       "range": {
         "startLine": 239,
         "startChar": 23,
