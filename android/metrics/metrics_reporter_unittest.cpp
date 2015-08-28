@@ -9,6 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#define __STDC_LIMIT_MACROS
 #include "android/metrics/metrics_reporter.h"
 #include "android/metrics/internal/metrics_reporter_internal.h"
 

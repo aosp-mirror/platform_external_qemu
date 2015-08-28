@@ -9,7 +9,6 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-
 #include "android/metrics/metrics_reporter.h"
 #include "android/metrics/internal/metrics_reporter_internal.h"
 
@@ -45,6 +44,12 @@ static char* metricsFilePath;
 static const char metricsRelativeDir[] = "metrics";
 static const char metricsFilePrefix[] = "metrics";
 static const char metricsFileSuffix[] = "yogibear";
+
+/////////////////////////////////////////////////////////////
+// Regular update timer.
+static const int64_t metrics_timer_timeout_ms = 60 * 1000;  // A minute
+static LoopTimer* metrics_timer = NULL;
+/////////////////////////////////////////////////////////////
 
 /* Global injections for testing purposes. */
 static androidMetricsUploaderFunction testUploader = NULL;
@@ -178,6 +183,7 @@ ABool androidMetrics_write(const AndroidMetrics* androidMetrics) {
     return 1;
 }
 
+// Not static, exposed to tests ONLY.
 ABool androidMetrics_tick() {
     int success;
     AndroidMetrics metrics;
@@ -196,6 +202,31 @@ ABool androidMetrics_tick() {
     return success;
 }
 
+static void on_metrics_timer(void* state) {
+    LoopTimer* const timer = (LoopTimer*)state;
+
+    androidMetrics_tick();
+    loopTimer_startRelative(timer, metrics_timer_timeout_ms);
+}
+
+ABool androidMetrics_keepAlive(Looper* metrics_looper) {
+    ABool success = 1;
+
+    success &= androidMetrics_tick();
+
+    // Initialize a timer for recurring metrics update
+    metrics_timer = android_alloc(sizeof(*metrics_timer));
+    if (!metrics_timer) {
+        dwarning("Failed to allocate metrics timer (OOM?).");
+        return 0;
+    }
+    loopTimer_init(metrics_timer, metrics_looper, &on_metrics_timer,
+                   metrics_timer);
+    loopTimer_startRelative(metrics_timer, metrics_timer_timeout_ms);
+
+    return success;
+}
+
 ABool androidMetrics_seal() {
     int success;
     AndroidMetrics metrics;
@@ -203,6 +234,13 @@ ABool androidMetrics_seal() {
     if (metricsFilePath == NULL) {
         mwarning("seal called twice / before init.");
         return 1;
+    }
+
+    if (metrics_timer != NULL) {
+        loopTimer_stop(metrics_timer);
+        loopTimer_done(metrics_timer);
+        AFREE(metrics_timer);
+        metrics_timer = NULL;
     }
 
     androidMetrics_init(&metrics);
