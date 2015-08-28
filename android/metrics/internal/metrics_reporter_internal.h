@@ -23,9 +23,13 @@ ANDROID_BEGIN_HEADER
 /* This is a primarily internal function definition, exposed here for testing
  * purposes
  */
-typedef ABool (*androidMetricsUploaderFunction)(const AndroidMetrics*);
 const char* androidMetrics_getMetricsFilePath(void);
+
 ABool androidMetrics_readPath(AndroidMetrics* androidMetrics, const char* path);
+
+ABool androidMetrics_tick();
+
+typedef ABool (*androidMetricsUploaderFunction)(const AndroidMetrics*);
 void androidMetrics_injectUploader(
         androidMetricsUploaderFunction uploaderFunction);
 

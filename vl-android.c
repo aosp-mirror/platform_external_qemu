@@ -442,6 +442,11 @@ const char* savevm_on_exit = NULL;
 hwaddr isa_mem_base = 0;
 PicState2 *isa_pic;
 
+/////////////////////////////////////////////////////////////
+// Metrics reporting globals.
+static Looper* metrics_looper = NULL;
+/////////////////////////////////////////////////////////////
+
 static IOPortReadFunc default_ioport_readb, default_ioport_readw, default_ioport_readl;
 static IOPortWriteFunc default_ioport_writeb, default_ioport_writew, default_ioport_writel;
 
@@ -2098,8 +2103,7 @@ void android_nand_add_image(const char* part_name,
     nand_add_dev(tmp);
 }
 
-static void
-android_init_metrics()
+static void android_init_metrics()
 {
     char path[PATH_MAX], *pathend=path, *bufend=pathend+sizeof(path);
     AndroidMetrics metrics;
@@ -2118,11 +2122,23 @@ android_init_metrics()
     metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
     androidMetrics_write(&metrics);
     androidMetrics_fini(&metrics);
-    androidMetrics_tick();
 
     androidMetrics_tryReportAll();
+
+    metrics_looper = looper_newCore();
+    if (!metrics_looper) {
+        dwarning("Failed to initialize metrics looper (OOM?).");
+        return;
+    }
+    androidMetrics_keepAlive(metrics_looper);
 }
 
+static void android_teardown_metrics()
+{
+    androidMetrics_seal();
+    looper_free(metrics_looper);
+    androidMetrics_moduleFini();
+}
 
 int main(int argc, char **argv, char **envp)
 {
@@ -4080,6 +4096,5 @@ void
 android_emulation_teardown(void)
 {
     skin_charmap_done();
-    androidMetrics_seal();
-    androidMetrics_moduleFini();
+    android_teardown_metrics();
 }

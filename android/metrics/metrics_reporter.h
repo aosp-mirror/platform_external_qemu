@@ -13,6 +13,7 @@
 #ifndef ANDROID_METRICS_ANDROID_METRICS_REPORTER_H
 #define ANDROID_METRICS_ANDROID_METRICS_REPORTER_H
 
+#include "android/looper.h"
 #include "android/utils/compiler.h"
 #include "android/utils/system.h"
 
@@ -41,12 +42,13 @@ ANDROID_BEGIN_HEADER
  *   my_metrics.guest_arch = get_my_arch_somehow(); // etc.
  *   androidMetrics_write(&my_metrics);
  *
- *   // [B] Liveness ping: Arrange for my androidMetrics_tick to be called
- *   regularly.
+ *   // [B] Liveness ping: Call AndroidMetrics_keepAlive(...).
+ *   This sets up a regular update of system/user time metrics.
  *
  *   // [C] Finally, notify metrics of a clean exit by calling
  *   androidMetrics_seal();
- *   // You should no longer reference androidMetrics at all.
+ *   This stops the liveness ping and marks the run to have exited cleanly.
+ *   You should no longer reference androidMetrics at all.
  *
  * [2] Reporting metrics from previous runs.
  *   androidMetrics_tryReportAll();
@@ -91,9 +93,11 @@ extern ABool androidMetrics_write(const AndroidMetrics* androidMetrics);
  * This is used to semi-regularly dump and updated view of the time this
  * emulator process has been running.
  *
- * Returns: 1 if successful, 0 otherwise.
+ * You should call |androidMetrics_seal| when done to cleanup.
+ *
+ * Returns: 1 if a regular update was successfullly setup, 0 otherwise.
  */
-extern ABool androidMetrics_tick(void);
+extern ABool androidMetrics_keepAlive(Looper* metrics_looper);
 
 /* Helper to easily replace string fields */
 #define ANDROID_METRICS_STRASSIGN(name, val) \
