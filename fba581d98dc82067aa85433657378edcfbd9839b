@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "048f817d_11aea86b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-29T00:40:02Z",
+      "side": 1,
+      "message": "Added. PTAL.",
+      "parentUuid": "a47f9520_b0ba34a3",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 44
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a47f9520_d016e07b",
         "filename": "android/utils/metrics/metrics_fields.h",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2015-08-28T01:43:46Z",
       "side": 1,
       "message": "What about host architecture? do we want to capture it as well?",
+      "range": {
+        "startLine": 34,
+        "startChar": 8,
+        "endLine": 34,
+        "endChar": 19
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4750d3f_01b178ca",
+        "filename": "android/utils/metrics/metrics_fields.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-29T00:40:02Z",
+      "side": 1,
+      "message": "I\u0027m going to add system image version here.\nI\u0027m not sure about host arch yet. That\u0027s a different class of data than information about the guest system (since the latter is part of the SDK itself).",
+      "parentUuid": "a47f9520_d016e07b",
       "range": {
         "startLine": 34,
         "startChar": 8,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "4485f957_0878c466",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-29T00:40:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a47f9520_703dace8",
+      "range": {
+        "startLine": 107,
+        "startChar": 50,
+        "endLine": 107,
+        "endChar": 60
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "849451c2_64d1bbc5",
         "filename": "android/utils/metrics/metrics_reporter.c",
         "patchSetId": 4
@@ -82,6 +154,30 @@
       "writtenOn": "2015-08-28T01:43:46Z",
       "side": 1,
       "message": "Can you have the STRINGIZE() macro here so the name isn\u0027t mentioned twice in the field declaration?",
+      "range": {
+        "startLine": 151,
+        "startChar": 60,
+        "endLine": 151,
+        "endChar": 61
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "048f817d_71b61479",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-29T00:40:02Z",
+      "side": 1,
+      "message": "That\u0027s a cool idea.\nI\u0027m going to not bother atm though. Current implementation matches hw-config.h, and there are other fruits to pick.",
+      "parentUuid": "849451c2_64d1bbc5",
       "range": {
         "startLine": 151,
         "startChar": 60,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "c4700952_a4420111",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-29T00:40:02Z",
+      "side": 1,
+      "message": "Implemented.",
+      "parentUuid": "048f817d_d95fecef",
+      "range": {
+        "startLine": 167,
+        "startChar": 0,
+        "endLine": 171,
+        "endChar": 1
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a47f9520_307f245a",
         "filename": "android/utils/metrics/metrics_reporter.c",
         "patchSetId": 4
@@ -128,6 +248,30 @@
       "writtenOn": "2015-08-28T01:43:46Z",
       "side": 1,
       "message": "why do we need to alloc/free an object in the same function? simple stack var should be enough",
+      "range": {
+        "startLine": 176,
+        "startChar": 0,
+        "endLine": 183,
+        "endChar": 19
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a47f9520_f94bc72e",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-29T00:40:02Z",
+      "side": 1,
+      "message": "We don\u0027t.\nBrainfreeze. Good catch. We do have to call the now added androidMetrics_free, since there\u0027s strings in that struct.",
+      "parentUuid": "a47f9520_307f245a",
       "range": {
         "startLine": 176,
         "startChar": 0,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "c4700952_64c5f906",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-29T00:40:02Z",
+      "side": 1,
+      "message": "Obsolete. We now report everything individually.",
+      "parentUuid": "248c8586_e79a3d7a",
+      "range": {
+        "startLine": 176,
+        "startChar": 0,
+        "endLine": 187,
+        "endChar": 18
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "84253145_f8242ee8",
         "filename": "android/utils/metrics/metrics_reporter.c",
         "patchSetId": 4
@@ -186,6 +354,30 @@
     },
     {
       "key": {
+        "uuid": "a47f9520_39caaf17",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-29T00:40:02Z",
+      "side": 1,
+      "message": "Yeah. ANSI C before C99 didn\u0027t.\n\nThe only reason I\u0027m doing this is for uniformity with code in the project.",
+      "parentUuid": "84253145_f8242ee8",
+      "range": {
+        "startLine": 235,
+        "startChar": 0,
+        "endLine": 239,
+        "endChar": 28
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "849451c2_442f5f40",
         "filename": "android/utils/metrics/metrics_reporter.c",
         "patchSetId": 4
@@ -197,6 +389,30 @@
       "writtenOn": "2015-08-28T01:43:46Z",
       "side": 1,
       "message": "just about readability and IMHO: a !\u003d 0 is easier to understand than !!a",
+      "range": {
+        "startLine": 259,
+        "startChar": 27,
+        "endLine": 259,
+        "endChar": 29
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "048f817d_1197881b",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-29T00:40:02Z",
+      "side": 1,
+      "message": "But. It\u0027s. So. Cool!\n\n:D\n\nWould have dropped it. This code has now been gutted.",
+      "parentUuid": "849451c2_442f5f40",
       "range": {
         "startLine": 259,
         "startChar": 27,
@@ -256,6 +472,30 @@
     },
     {
       "key": {
+        "uuid": "c42ba915_60594960",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-29T00:40:02Z",
+      "side": 1,
+      "message": "Obsolete. This has been greatly simplified.",
+      "parentUuid": "e4750d3f_95a12a82",
+      "range": {
+        "startLine": 385,
+        "startChar": 25,
+        "endLine": 385,
+        "endChar": 41
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "048f817d_f91af073",
         "filename": "android/utils/string.cpp",
         "patchSetId": 4
@@ -279,6 +519,30 @@
     },
     {
       "key": {
+        "uuid": "046221c0_7116d856",
+        "filename": "android/utils/string.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-29T00:40:02Z",
+      "side": 1,
+      "message": "Done. \nCaught that via a unittest yesterday. Yay unittests!",
+      "parentUuid": "048f817d_f91af073",
+      "range": {
+        "startLine": 44,
+        "startChar": 20,
+        "endLine": 44,
+        "endChar": 21
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "248c8586_ec2c644c",
         "filename": "vl-android.c",
         "patchSetId": 4
@@ -290,6 +554,30 @@
       "writtenOn": "2015-08-28T01:43:46Z",
       "side": 1,
       "message": "let\u0027s at least add a TODO for an optin check - we should have that before collecting data",
+      "range": {
+        "startLine": 4053,
+        "startChar": 0,
+        "endLine": 4057,
+        "endChar": 27
+      },
+      "revId": "fba581d98dc82067aa85433657378edcfbd9839b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4485f957_0851a4e0",
+        "filename": "vl-android.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4057,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-29T00:40:02Z",
+      "side": 1,
+      "message": "Done.\n\nkmenchytas@ is working on that front.",
+      "parentUuid": "248c8586_ec2c644c",
       "range": {
         "startLine": 4053,
         "startChar": 0,
