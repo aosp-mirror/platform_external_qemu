@@ -13,12 +13,25 @@
 #define ANDROID_PROXY_PROXY_HTTP_H
 
 #include "android/proxy/proxy_common.h"
+#include "android/utils/compiler.h"
 
+ANDROID_BEGIN_HEADER
+
+// Configure the transparent proxy engine to use a specific HTTP/HTTPS
+// proxy. |servername| and |servernamelen| specify the server's URL.
+// |serverport| is the port to connect to.
+// |num_options| is the number of options, listed in the |options|
+// array, which can be used to specify various ProxyOption key/value
+// pairs to configure the proxy.
+//
+// Returns 0 on success, or -1 on failure.
 extern int
 proxy_http_setup( const char*         servername,
                   int                 servernamelen,
                   int                 serverport,
                   int                 num_options,
                   const ProxyOption*  options );
+
+ANDROID_END_HEADER
 
 #endif  // ANDROID_PROXY_PROXY_HTTP_H
