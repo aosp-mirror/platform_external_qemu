@@ -85,7 +85,7 @@ public:
     }
 
     virtual void update(int fd, unsigned events) {
-        DCHECK(isValidFd(fd)) << "fd " << fd << " max" << FD_SETSIZE;
+        DCHECK(isValidFd(fd)) << "fd " << fd << " max " << FD_SETSIZE;
 
         // Compute current flags for fd.
         unsigned oldEvents = wantedEventsFor(fd);
