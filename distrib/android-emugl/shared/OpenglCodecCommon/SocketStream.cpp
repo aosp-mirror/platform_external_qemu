@@ -174,7 +174,6 @@ void SocketStream::forceStop() {
 #ifdef _WIN32
     ::shutdown(m_sock, SD_BOTH);
 #else
-    if(::shutdown(m_sock, SHUT_RDWR) < 0)
-      perror("Error shutting down SocketStream");
+  ::shutdown(m_sock, SHUT_RDWR);
 #endif
 }
