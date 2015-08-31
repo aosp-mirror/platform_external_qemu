@@ -21,7 +21,14 @@
 #endif
 
 // Default FD_SETSIZE is 64 which is not enough for us.
-#  define FD_SETSIZE 1024
+// Note: previously set to 1024, which was not enough, see:
+//     https://code.google.com/p/android/issues/detail?id=102361
+//
+// The value 32768 is what a typical Winsock initialization returns
+// as the maximum number of sockets, see #12 on the link above. Just assume
+// that this translates to the max file descriptor number for our uses.
+// Of course that also means each fd_set will be 4 KiB.
+#define FD_SETSIZE 32768
 
 // Order of inclusion of winsock2.h and windows.h depends on the version
 // of Mingw32 being used.
