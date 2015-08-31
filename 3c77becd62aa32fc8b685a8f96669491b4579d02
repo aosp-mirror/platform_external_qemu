@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e486eed4_24077c5a",
+        "filename": "android/base/testing/TestTempDir.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-08-31T20:57:10Z",
+      "side": 1,
+      "message": "This is not really needed for this CL anymore (I don\u0027t use this function anymore in the unittests), but I hit a problem because makeSubFile would create files that are not readable even by the creator...\n\nAccording to manpage for open/creat, you the mode argument is required with O_CREAT.",
+      "range": {
+        "startLine": 107,
+        "startChar": 56,
+        "endLine": 107,
+        "endChar": 60
+      },
+      "revId": "3c77becd62aa32fc8b685a8f96669491b4579d02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
