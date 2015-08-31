@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "048f817d_3a8f0188",
+        "filename": "android/base/types.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-08-31T15:58:07Z",
+      "side": 1,
+      "message": "compiling for Mac fails, redefined in Xcode MacTypes\n\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/usr/include/MacTypes.h:277:16: error: typedef redefinition with different types (\u0027SInt32\u0027 (aka \u0027int\u0027) vs \u0027int64_t\u0027 (aka \u0027long long\u0027))\ntypedef SInt32 Duration;",
+      "range": {
+        "startLine": 27,
+        "startChar": 17,
+        "endLine": 27,
+        "endChar": 27
+      },
+      "revId": "7dcb45827a5c3924d52da7fedc0850cca270fa87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
