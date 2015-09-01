@@ -360,7 +360,6 @@ Fail:
         IGNORE_EINTR(close(lock_fd));
     }
 
-    HANDLE_EINTR(unlink(lock->lock));
     HANDLE_EINTR(unlink(lock->temp));
     return -1;
 #endif
