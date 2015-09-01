@@ -12,7 +12,7 @@ struct hax_vcpu_state;
 #ifdef CONFIG_HAX
 int hax_enabled(void);
 int hax_set_ramsize(uint64_t ramsize);
-int hax_init(int smp_cpus);
+int hax_init(int smp_cpus, const char* haxm_path);
 int hax_init_vcpu(CPUState *cpu);
 /* Execute vcpu in non-root mode */
 int hax_vcpu_exec(CPUState *cpu);
