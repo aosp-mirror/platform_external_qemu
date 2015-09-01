@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "8497f201_87e44ca2",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-01T16:03:57Z",
+      "side": 1,
+      "message": "oops, missed that it\u0027s supposed to be alphabetical",
+      "parentUuid": "a46956e6_5724acf1",
+      "revId": "561d0cfe25753e0781b82d195c2be11d7d7f5951",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8480d2c5_d6f0c4cd",
         "filename": "android/base/system/System.h",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "644d9e85_ebc605a2",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-01T16:03:57Z",
+      "side": 1,
+      "message": "I wanted to leave it a POD",
+      "parentUuid": "8480d2c5_d6f0c4cd",
+      "revId": "561d0cfe25753e0781b82d195c2be11d7d7f5951",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8480d2c5_f6edc0f2",
         "filename": "android/base/testing/TestSystem.h",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-09-01T10:58:34Z",
       "side": 1,
       "message": "note: my understanding is that if System::Times\u0027 default constructor doesn\u0027t do anything, which is why I was asking for an explicit constructor.",
+      "revId": "561d0cfe25753e0781b82d195c2be11d7d7f5951",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_7568b22e",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-01T16:03:57Z",
+      "side": 1,
+      "message": "This is value-initialization which sets everything to zero if there\u0027s no default ctor",
+      "parentUuid": "8480d2c5_f6edc0f2",
       "revId": "561d0cfe25753e0781b82d195c2be11d7d7f5951",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
