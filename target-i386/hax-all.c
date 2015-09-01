@@ -17,6 +17,7 @@
  */
 
 #include <inttypes.h>
+#include "android/avd/util.h"
 #include "hw/hw.h"
 #include "target-i386/hax-i386.h"
 
@@ -127,6 +128,35 @@ uint32_t hax_cur_version = 0x2;
 /* Least HAX kernel version */
 uint32_t hax_lest_version = 0x1;
 
+// Return the path to Intel HAXM installer. We want to make it is easier for
+// users to re-run the installer to reconfigure the HAXMs.
+static char* hax_get_intel_HAXM_installer_path() {
+#ifdef CONFIG_DARWIN
+    const char *const relative_path =
+        "/extras/intel/Hardware_Accelerated_Execution_Manager/"
+        "IntelHAXM_1.1.4.dmg";
+#elif CONFIG_WIN32
+    const char *const relative_path =
+        "\\extras\\intel\\Hardware_Accelerated_Execution_Manager\\"
+        "intelhaxm-android.exe";
+#else
+    return NULL;
+#endif
+
+    char buf[PATH_MAX];
+    char from_env = false;
+    char* sdk_home = path_getSdkRoot(&from_env);
+    strncpy(buf, sdk_home, PATH_MAX);
+    free(sdk_home);
+
+    strncpy(buf + strlen(buf), relative_path, PATH_MAX);
+    if (access(buf, R_OK) == 0) {
+        return g_strdup(buf);
+    } else {
+        return NULL;
+    }
+}
+
 static int hax_get_capability(struct hax_state *hax)
 {
     int ret;
@@ -154,13 +184,23 @@ static int hax_get_capability(struct hax_state *hax)
     {
         if (cap->mem_quota < hax->mem_quota)
         {
-          dprint("The memory needed by this AVD exceeds the max specified "
-                 "in your HAXM configuration.");
-          dprint("AVD      RAM size = %"PRId64" MB", hax->mem_quota >> 20);
-          dprint("HAXM max RAM size = %"PRId64" MB", cap->mem_quota >> 20);
-          dprint("You might want to adjust your AVD RAM size and/or HAXM "
-                 "configuration to run in fast virt mode.\n");
-          return -ENOSPC;
+            char buf[PATH_MAX + 128];  // To hold some words plus a path.
+            char* haxm_path = hax_get_intel_HAXM_installer_path();
+            if (haxm_path != NULL) {
+                sprintf(buf, " The HAXM installer may be found at %s.",
+                        haxm_path);
+            } else {
+                buf[0] = 0;    // Make an empty string.
+            }
+
+            dprint(
+                "HAXM does not have enough memory remaining to load this AVD.");
+            dprint("AVD      RAM size = %"PRId64" MB", hax->mem_quota >> 20);
+            dprint("HAXM max RAM size = %"PRId64" MB", cap->mem_quota >> 20);
+            dprint(
+                "Try creating an AVD that requires less RAM or re-running "
+                "the HAXM installer to set a higher memory limit.%s\n", buf);
+            return -ENOSPC;
         }
     }
 
