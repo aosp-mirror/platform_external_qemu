@@ -616,6 +616,9 @@ build_darwin_binaries_on () {
     builder_prepare_remote_darwin_build \
             /tmp/$USER-android-emulator/$PKG_FILE_PREFIX
 
+    copy_directory "$AOSP_PREBUILTS_DIR/android-emulator-build/curl" \
+            "$DARWIN_PKG_DIR"/aosp/prebuilts/android-emulator-build/curl
+
     QT_SUBDIR=android-emulator-build/qt/
     copy_directory "$AOSP_PREBUILTS_DIR"/$QT_SUBDIR/common \
             "$DARWIN_PKG_DIR"/aosp/prebuilts/$QT_SUBDIR/common

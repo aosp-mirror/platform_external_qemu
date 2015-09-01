@@ -576,6 +576,16 @@ if [ "$OPTION_UI" = "qt" ]; then
 fi
 
 ###
+###  Libcurl probe
+###
+LIBCURL_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/curl
+if [ -d "$LIBCURL_PREBUILTS_DIR" ]; then
+    log "LibCURL prebuilts dir: $LIBCURL_PREBUILTS_DIR"
+else
+    panic "Missing prebuilts directory (please run build-curl.sh): $LIBCURL_PREBUILTS_DIR"
+fi
+
+###
 ###  Qt probe
 ###
 QT_PREBUILTS_DIR=
@@ -733,6 +743,8 @@ else
     echo "EMULATOR_USE_SDL2 := true" >> $config_mk
     echo "EMULATOR_USE_QT   := false" >> $config_mk
 fi
+
+echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
 
 if [ $OPTION_DEBUG = yes ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
