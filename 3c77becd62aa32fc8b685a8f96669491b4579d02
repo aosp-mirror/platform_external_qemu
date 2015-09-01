@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "8429b287_d7441613",
+        "filename": "android/utils/metrics/metrics_reporter_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done. Check for NULL, because that\u0027s what\u0027s returned. This code base doesn\u0027t use nullptr anywhere yet.",
+      "parentUuid": "84529221_a9137921",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 41,
+        "endChar": 39
+      },
+      "revId": "3c77becd62aa32fc8b685a8f96669491b4579d02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4618eea_cc5b5f6b",
         "filename": "android/utils/metrics/metrics_reporter_unittest.cpp",
         "patchSetId": 7
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "6492fe15_433dda54",
+        "filename": "android/utils/metrics/metrics_reporter_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4618eea_cc5b5f6b",
+      "range": {
+        "startLine": 55,
+        "startChar": 25,
+        "endLine": 55,
+        "endChar": 31
+      },
+      "revId": "3c77becd62aa32fc8b685a8f96669491b4579d02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8429b287_31bfea99",
         "filename": "android/utils/metrics/metrics_reporter_unittest.cpp",
         "patchSetId": 7
@@ -82,6 +130,30 @@
       "writtenOn": "2015-09-01T01:02:15Z",
       "side": 1,
       "message": "could you please remove commented code?",
+      "range": {
+        "startLine": 56,
+        "startChar": 8,
+        "endLine": 56,
+        "endChar": 63
+      },
+      "revId": "3c77becd62aa32fc8b685a8f96669491b4579d02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6492fe15_e35186a4",
+        "filename": "android/utils/metrics/metrics_reporter_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8429b287_31bfea99",
       "range": {
         "startLine": 56,
         "startChar": 8,
