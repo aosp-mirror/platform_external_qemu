@@ -89,6 +89,8 @@
 #include <unistd.h>
 #include <zlib.h>
 
+#include <curl/curl.h>
+
 /* Needed early for CONFIG_BSD etc. */
 #include "config-host.h"
 
@@ -4023,6 +4025,8 @@ int main(int argc, char **argv, char **envp)
     android_core_init_completed();
 #endif  // CONFIG_ANDROID
 
+    curl_global_init(CURL_GLOBAL_ALL);
+
     main_loop();
     quit_timers();
     net_cleanup();
@@ -4037,4 +4041,6 @@ void
 android_emulation_teardown(void)
 {
     skin_charmap_done();
+
+    curl_global_cleanup();
 }
