@@ -35,6 +35,8 @@
 #define SUFFIX _xmm
 #endif
 
+#include "util/aes.h"
+
 void glue(helper_psrlw, SUFFIX)(CPUX86State *env, Reg *d, Reg *s)
 {
     int shift;
