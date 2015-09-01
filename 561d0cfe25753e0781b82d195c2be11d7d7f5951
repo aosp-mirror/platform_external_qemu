@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "04d222e7_92c9dc3a",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T16:11:39Z",
+      "side": 1,
+      "message": "Yes, I definitely need to write that coding style guide now :)",
+      "parentUuid": "8497f201_87e44ca2",
+      "revId": "561d0cfe25753e0781b82d195c2be11d7d7f5951",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8480d2c5_d6f0c4cd",
         "filename": "android/base/system/System.h",
         "patchSetId": 3
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "This is value-initialization which sets everything to zero if there\u0027s no default ctor",
       "parentUuid": "8480d2c5_f6edc0f2",
+      "revId": "561d0cfe25753e0781b82d195c2be11d7d7f5951",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4dbaa04_30d828b1",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T16:11:39Z",
+      "side": 1,
+      "message": "Oh I see, better leave this as is then. Thanks for the clarification.",
+      "parentUuid": "84529221_7568b22e",
       "revId": "561d0cfe25753e0781b82d195c2be11d7d7f5951",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
