@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4618eea_d8aaf9b9",
+        "filename": "android/metrics/metrics_reporter.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-01T20:48:14Z",
+      "side": 1,
+      "message": "hmm, never heard of this one before :)\nsetup/teardown? I\u0027m ok with your name, just thought about something more common",
+      "range": {
+        "startLine": 28,
+        "startChar": 5,
+        "endLine": 28,
+        "endChar": 24
+      },
+      "revId": "7cdd23fc48421f49ea74f9266fffc19affc536e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6492fe15_66810435",
+        "filename": "android/utils/system.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-01T20:48:14Z",
+      "side": 1,
+      "message": "When I moved it into a separate file - it broke Mac build :(",
+      "range": {
+        "startLine": 159,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 25
+      },
+      "revId": "7cdd23fc48421f49ea74f9266fffc19affc536e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
