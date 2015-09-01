@@ -85,10 +85,7 @@ static FileLock*   _all_filelocks;
 
 #define  LOCK_NAME   ".lock"
 #define  TEMP_NAME   ".tmp-XXXXXX"
-
-#ifdef _WIN32
-#define  PIDFILE_NAME  "pid"
-#endif
+#define  WIN_PIDFILE_NAME  "pid"
 
 /* returns 0 on success, -1 on failure */
 static int
@@ -281,12 +278,30 @@ filelock_lock( FileLock*  lock )
         }
 
         if (S_ISDIR(st_lock.st_mode)) {
+            char *win_pid;
+            int win_pid_len;
             // The .lock file is a directory. This can only happen
             // when the AVD was previously used by a Win32 emulator
             // instance running under Wine on the same machine.
             fprintf(stderr,
                     "Stale Win32 lock file detected: %s\n",
                     lock->lock);
+
+            /* Try deleting the pid file dropped in windows.
+             * Ignore error -- try blowing away the directory anyway.
+             */
+            win_pid_len = strlen(lock->lock) + 1 + sizeof(WIN_PIDFILE_NAME);
+            win_pid = (char *) malloc(win_pid_len);
+            snprintf(win_pid, win_pid_len, "%s/" WIN_PIDFILE_NAME, lock->lock);
+            HANDLE_EINTR(unlink(win_pid));
+            free(win_pid);
+
+            rc = HANDLE_EINTR(rmdir(lock->lock));
+            if (rc != 0) {
+                D("Removing stale Win32 lockfile '%s' failed (%s)",
+                  lock->lock, strerror(errno));
+            }
+
             goto Fail;
         }
 
@@ -360,7 +375,6 @@ Fail:
         IGNORE_EINTR(close(lock_fd));
     }
 
-    HANDLE_EINTR(unlink(lock->lock));
     HANDLE_EINTR(unlink(lock->temp));
     return -1;
 #endif
@@ -396,7 +410,7 @@ filelock_create( const char*  file )
     int    file_len = strlen(file);
     int    lock_len = file_len + sizeof(LOCK_NAME);
 #ifdef _WIN32
-    int    temp_len = lock_len + 1 + sizeof(PIDFILE_NAME);
+    int    temp_len = lock_len + 1 + sizeof(WIN_PIDFILE_NAME);
 #else
     int    temp_len = file_len + sizeof(TEMP_NAME);
 #endif
@@ -413,7 +427,8 @@ filelock_create( const char*  file )
 
     lock->temp    = (char*)lock->lock + lock_len + 1;
 #ifdef _WIN32
-    snprintf( (char*)lock->temp, temp_len, "%s\\" PIDFILE_NAME, lock->lock );
+    snprintf( (char*)lock->temp, temp_len, "%s\\" WIN_PIDFILE_NAME,
+              lock->lock );
 #else
     snprintf((char*)lock->temp, temp_len, "%s%s", lock->file, TEMP_NAME);
 #endif
