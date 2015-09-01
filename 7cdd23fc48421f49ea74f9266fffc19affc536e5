@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8497f201_0d17fd10",
+        "filename": "android/metrics/metrics_reporter.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T21:47:52Z",
+      "side": 1,
+      "message": "*_fini is not unheard of :)\n\nDon\u0027t have a big incentive to rename this, so I\u0027ll be lazy.",
+      "parentUuid": "e4618eea_d8aaf9b9",
+      "range": {
+        "startLine": 28,
+        "startChar": 5,
+        "endLine": 28,
+        "endChar": 24
+      },
+      "revId": "7cdd23fc48421f49ea74f9266fffc19affc536e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6492fe15_66810435",
         "filename": "android/utils/system.h",
         "patchSetId": 10
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-01T20:48:14Z",
       "side": 1,
       "message": "When I moved it into a separate file - it broke Mac build :(",
+      "range": {
+        "startLine": 159,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 25
+      },
+      "revId": "7cdd23fc48421f49ea74f9266fffc19affc536e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8497f201_ad2a893f",
+        "filename": "android/utils/system.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T21:47:52Z",
+      "side": 1,
+      "message": "Me too!\n\nOK, leaving it as int64_t.",
+      "parentUuid": "6492fe15_66810435",
       "range": {
         "startLine": 159,
         "startChar": 0,
