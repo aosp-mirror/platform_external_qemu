@@ -1,0 +1,378 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4deb6f4_8f3f75eb",
+        "filename": "android/base/testing/TestTempDir.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "Interesting, can this go into its own CL with a small explanation. Thanks.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04d222e7_b2650029",
+        "filename": "android/utils/bufprint_unittest.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "nit: Probably not needed here",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84c53226_6e500f4b",
+        "filename": "android/utils/dirscanner.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "nit: Please add a static_cast\u003cint\u003e() here since size() returns a size_t.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a46956e6_973fa4eb",
+        "filename": "android/utils/dirscanner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "A good change, but can I ask you to move it to its own CL?",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a46956e6_b73c28f7",
+        "filename": "android/utils/metrics/metrics_fields.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "nit: 2015, not 20015 here :)",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4dbaa04_90047421",
+        "filename": "android/utils/metrics/metrics_fields.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "android/utils/ is meant to provide low-level C functions to the underlying system (which can also be implemented on top of android/base/ which serves the same purpose for C++).\n\nSince metrics reporting is a higher-level concept, can I ask you to put the corresponding code under android/metrics/ instead ?",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64c03e16_cd5ee95d",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "nit: should be first included header.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8480d2c5_365a586b",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "interesting file suffix :-) I wonder what\u0027s the story behind this.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4deb6f4_cf8c9d2d",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "nit: don\u0027t bother too much about this case, since all host platforms we use implement memory overcommit, which means strdup() / malloc() can only return NULL for very very large allocations.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4d42ed5_f189481a",
+        "filename": "android/utils/metrics/metrics_reporter.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "Please provide some documentation about what these functions are supposed to do and how to use them. It\u0027s pretty important.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04d222e7_32311021",
+        "filename": "android/utils/metrics/metrics_reporter.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "nit: put the #undef at the end of this header so they don\u0027t leak to the source file that included them.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "447a5aab_d48c3c2d",
+        "filename": "android/utils/metrics/metrics_reporter.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "nit: If the function doesn\u0027t perform a free() call, it\u0027s better to call it _done() or _fini() instead to make that clearer. This simplifies documentation as well (i.e. just say \"finalize an AndroidMetrics instance\").",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "447a5aab_f489381a",
+        "filename": "android/utils/metrics/metrics_reporter.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "what is metricsFile? Where does it live? How can this be unit-tested?",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4d42ed5_b193c048",
+        "filename": "android/utils/metrics/metrics_reporter.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "Please put all of this under android/metrics/internal/metrics_reporter_internal.h instead.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a46956e6_17a394a1",
+        "filename": "android/utils/metrics/metrics_reporter_unittest.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "don\u0027t use std::getenv() and std::setenv() in unit tests. You should use a TestSystem instance, and access the environment with System::envGet() / System::envSet() instead.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8480d2c5_96680c02",
+        "filename": "android/utils/metrics/metrics_reporter_unittest.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "nit: use \"const char*\" instead, your code creates temporary String instances need-lessly.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04d222e7_9268fc01",
+        "filename": "android/utils/string.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "nit: strEndsWith() or str_ends_with() might be a more descriptive name I think.\n\nABool is pretty ancient, now that we\u0027re using more modern toolchains, I\u0027d favor using \u003cstdbool.h\u003e and the \u0027bool\u0027 type directly.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4deb6f4_ef42c174",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "nit: probably put 2015 here.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64c03e16_0d55d139",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "This fails to compile. Where is this header defined?\nIt\u0027s better if dependent patches are uploaded in the correct order in gerrit to avoid this.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "447a5aab_14a394a1",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "nit: This should be the first header included by this source file.\n\nAlso, the definition below should probably go into utils/system.cpp instead (which means converting the system.c to a C++ one first).",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "447a5aab_34a8107b",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "Should be int64_t here to match the declaration in system.h",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8480d2c5_f614e07c",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-01T12:39:19Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
