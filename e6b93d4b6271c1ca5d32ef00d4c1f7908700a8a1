@@ -603,6 +603,24 @@
     },
     {
       "key": {
+        "uuid": "045f8228_99c367bf",
+        "filename": "android/utils/metrics/metrics_reporter_unittest.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-01T20:48:14Z",
+      "side": 1,
+      "message": "What about using System::env* in metrics as well?",
+      "parentUuid": "e486eed4_f045ce7e",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8480d2c5_96680c02",
         "filename": "android/utils/metrics/metrics_reporter_unittest.cpp",
         "patchSetId": 8
@@ -755,6 +773,24 @@
       "side": 1,
       "message": "Changed to use System::Duration typedef\u0027d to system.h::Duration to keep them in-sync.",
       "parentUuid": "8429b287_3737dab0",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8429b287_ddf79792",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-01T20:48:14Z",
+      "side": 1,
+      "message": "AFAIK Duration name is already defined in Mac libraries, and it\u0027s defined to int32 :(",
+      "parentUuid": "0484e2ca_d1f9ae46",
       "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
