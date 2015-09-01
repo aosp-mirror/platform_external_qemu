@@ -287,6 +287,12 @@ filelock_lock( FileLock*  lock )
             fprintf(stderr,
                     "Stale Win32 lock file detected: %s\n",
                     lock->lock);
+            rc = HANDLE_EINTR(rmdir(lock->lock));
+            if (rc != 0) {
+                D("Removing stale Win32 lockfile '%s' failed (%s)",
+                  lock->lock, strerror(errno));
+            }
+
             goto Fail;
         }
 
@@ -360,7 +366,6 @@ Fail:
         IGNORE_EINTR(close(lock_fd));
     }
 
-    HANDLE_EINTR(unlink(lock->lock));
     HANDLE_EINTR(unlink(lock->temp));
     return -1;
 #endif
