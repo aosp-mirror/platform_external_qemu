@@ -127,7 +127,7 @@ uint32_t hax_cur_version = 0x2;
 /* Least HAX kernel version */
 uint32_t hax_lest_version = 0x1;
 
-static int hax_get_capability(struct hax_state *hax)
+static int hax_get_capability(struct hax_state *hax, const char* haxm_path)
 {
     int ret;
     struct hax_capabilityinfo capinfo, *cap = &capinfo;
@@ -154,13 +154,22 @@ static int hax_get_capability(struct hax_state *hax)
     {
         if (cap->mem_quota < hax->mem_quota)
         {
-          dprint("The memory needed by this AVD exceeds the max specified "
-                 "in your HAXM configuration.");
-          dprint("AVD      RAM size = %"PRId64" MB", hax->mem_quota >> 20);
-          dprint("HAXM max RAM size = %"PRId64" MB", cap->mem_quota >> 20);
-          dprint("You might want to adjust your AVD RAM size and/or HAXM "
-                 "configuration to run in fast virt mode.\n");
-          return -ENOSPC;
+            char buf[PATH_MAX + 128];  // To hold some words plus a path.
+            if (haxm_path != NULL) {
+                sprintf(buf, " The HAXM installer may be found at %s.",
+                        haxm_path);
+            } else {
+                buf[0] = 0;    // Make an empty string.
+            }
+
+            dprint(
+                "HAXM does not have enough memory remaining to load this AVD.");
+            dprint("AVD      RAM size = %"PRId64" MB", hax->mem_quota >> 20);
+            dprint("HAXM max RAM size = %"PRId64" MB", cap->mem_quota >> 20);
+            dprint(
+                "Try creating an AVD that requires less RAM or re-running "
+                "the HAXM installer to set a higher memory limit.%s\n", buf);
+            return -ENOSPC;
         }
     }
 
@@ -349,7 +358,7 @@ int hax_set_ramsize(uint64_t ramsize)
     return 0;
 }
 
-int hax_init(int smp_cpus)
+int hax_init(int smp_cpus, const char* haxm_path)
 {
     struct hax_state *hax = NULL;
     struct hax_qemu_version qversion;
@@ -367,7 +376,7 @@ int hax_init(int smp_cpus)
         goto error;
     }
 
-    ret = hax_get_capability(hax);
+    ret = hax_get_capability(hax, haxm_path);
     /* In case HAXM have no such capability support */
     if (ret && (ret != -ENOSYS))
     {

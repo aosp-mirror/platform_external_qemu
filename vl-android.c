@@ -1542,6 +1542,80 @@ static char *find_datadir(const char *argv0)
 }
 #endif
 
+// Return the path to Intel HAXM installer based on the given path to the
+// emulator.
+//
+// On Darwin and Windows, we want to make it is easier for users to re-run the
+// installer to reconfigure the HAXMs.
+// The implementation below borrows things from find_datadir(..) above.
+#ifdef CONFIG_DARWIN
+static char *find_intel_HAXM_installer_path(const char *emulator_path) {
+    char *p = NULL;
+    char buf[PATH_MAX];
+
+    if (!p) {
+        p = realpath(emulator_path, buf);
+        if (!p) {
+            return NULL;
+        }
+    }
+
+    // emulator is expected in a directory called "tools".
+    char* pos = strrchr(buf, '/');
+    if (pos) {
+        *pos = 0;
+        pos = strrchr(buf, '/');
+        if (pos) {
+            *pos = 0;
+        } else {
+            return NULL;
+        }
+    } else {
+        return NULL;
+    }
+    // pos should point to the end of SDK home now.
+    strcpy(pos,
+        "/extras/intel/Hardware_Accelerated_Execution_Manager/IntelHAXM_1.1.4.dmg");
+    if (access(buf, R_OK) == 0) {
+        return g_strdup(buf);
+    } else {
+        return NULL;
+    }
+}
+#elif CONFIG_WIN32
+static char *find_intel_HAXM_installer_path(const char *emulator_path) {
+    char *p;
+    char buf[MAX_PATH];
+    DWORD len;
+
+    len = GetModuleFileName(NULL, buf, sizeof(buf) - 1);
+
+    if (len == 0) {
+        return NULL;
+    }
+
+    buf[len] = 0;
+    p = buf + len - 1;
+    while (p != buf && *p != '\\') p--;
+    *p = 0;
+
+    // emulator is expected in a directory called "tools".
+    while (p != buf && *p != '\\') p--;
+    if (*p == '\\' && strncmp(p, "\\tools", 6 /* length of "\tools" */) == 0) {
+        strcpy(p,
+           "\\extras\\intel\\Hardware_Accelerated_Execution_Manager\\"
+           "intelhaxm-android.exe");
+        if (access(buf, R_OK) == 0) {
+            return g_strdup(buf);
+        } else {
+            return NULL;
+        }
+    } else {
+        return NULL;
+    }
+}
+#endif
+
 static char*
 qemu_find_file_with_subdir(const char* data_dir, const char* subdir, const char* name)
 {
@@ -3719,7 +3793,7 @@ int main(int argc, char **argv, char **envp)
         int ret;
 
         hax_set_ramsize(ram_size);
-        ret = hax_init(smp_cpus);
+        ret = hax_init(smp_cpus, find_intel_HAXM_installer_path(argv[0]));
         if (ret) {
             fprintf(stderr, "HAXM is not working and emulator runs in emulation mode\n");
         } else {
