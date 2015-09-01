@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6492fe15_e3d8a692",
+        "filename": "android/base/testing/TestTempDir.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4deb6f4_8f3f75eb",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "04d222e7_b2650029",
         "filename": "android/utils/bufprint_unittest.cpp",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-01T12:39:19Z",
       "side": 1,
       "message": "nit: Probably not needed here",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8497f201_c76c948e",
+        "filename": "android/utils/bufprint_unittest.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Leaked, sorry.",
+      "parentUuid": "04d222e7_b2650029",
       "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "8497f201_c7c334be",
+        "filename": "android/utils/dirscanner.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done.\nI think the right thing is to return size_t. Thanks for catching this.",
+      "parentUuid": "84c53226_6e500f4b",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a46956e6_973fa4eb",
         "filename": "android/utils/dirscanner.h",
         "patchSetId": 8
@@ -64,6 +118,24 @@
       "writtenOn": "2015-09-01T12:39:19Z",
       "side": 1,
       "message": "A good change, but can I ask you to move it to its own CL?",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4618eea_1d23e3e8",
+        "filename": "android/utils/dirscanner.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done.\nI needed this for an earlier version of this CL, but this is no longer needed.\nI\u0027m generally against adding dead code. Feel free to tell me to not merge CL:XXX.",
+      "parentUuid": "a46956e6_973fa4eb",
       "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "8429b287_d7277648",
+        "filename": "android/utils/metrics/metrics_fields.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done.\nI didn\u0027t want to pollute the top level directory.",
+      "parentUuid": "c4dbaa04_90047421",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0484e2ca_2b38a965",
         "filename": "android/utils/metrics/metrics_fields.h",
         "patchSetId": 8
@@ -115,6 +205,30 @@
       "writtenOn": "2015-09-01T16:14:05Z",
       "side": 1,
       "message": "could you please show where do you fill this? I need it too :)",
+      "range": {
+        "startLine": 28,
+        "startChar": 8,
+        "endLine": 28,
+        "endChar": 24
+      },
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8429b287_9731ee86",
+        "filename": "android/utils/metrics/metrics_fields.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "https://android-review.googlesource.com/#/c/168386/8/vl-android.c@225\n\nCan you tell me why you need this?\nI don\u0027t think you should need this in the related CLs you\u0027re working on.",
+      "parentUuid": "0484e2ca_2b38a965",
       "range": {
         "startLine": 28,
         "startChar": 8,
@@ -150,6 +264,30 @@
     },
     {
       "key": {
+        "uuid": "84529221_606fcec7",
+        "filename": "android/utils/metrics/metrics_fields.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done. \nThis was double because I was initially thinking seconds.\n\nChanged to METRICS_DURATION.",
+      "parentUuid": "e486eed4_752d305e",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 14
+      },
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "64c03e16_cd5ee95d",
         "filename": "android/utils/metrics/metrics_reporter.c",
         "patchSetId": 8
@@ -161,6 +299,24 @@
       "writtenOn": "2015-09-01T12:39:19Z",
       "side": 1,
       "message": "nit: should be first included header.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_00525aa8",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "64c03e16_cd5ee95d",
       "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -184,6 +340,24 @@
     },
     {
       "key": {
+        "uuid": "0484e2ca_918566fb",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Just keepin\u0027 it fun :)",
+      "parentUuid": "8480d2c5_365a586b",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a4deb6f4_cf8c9d2d",
         "filename": "android/utils/metrics/metrics_reporter.c",
         "patchSetId": 8
@@ -195,6 +369,24 @@
       "writtenOn": "2015-09-01T12:39:19Z",
       "side": 1,
       "message": "nit: don\u0027t bother too much about this case, since all host platforms we use implement memory overcommit, which means strdup() / malloc() can only return NULL for very very large allocations.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8497f201_1215dc76",
+        "filename": "android/utils/metrics/metrics_reporter.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done. Leaving non-obvious allocs (like dirScanner_new) as is, since this file doesn\u0027t know how big a chunk that is.\n\nAside: What\u0027s the best practice given overcommit? e.g., metrics reporting failing in excruciatingly painful manner should still not crash emulator. That\u0027s why I was being extra careful. But then, if we\u0027re in OOM, everything\u0027s up in the air anyway, so being careful here is unlikely to help matters...",
+      "parentUuid": "a4deb6f4_cf8c9d2d",
       "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -218,6 +410,24 @@
     },
     {
       "key": {
+        "uuid": "644d9e85_0ea84f7a",
+        "filename": "android/utils/metrics/metrics_reporter.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4d42ed5_f189481a",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "04d222e7_32311021",
         "filename": "android/utils/metrics/metrics_reporter.h",
         "patchSetId": 8
@@ -229,6 +439,24 @@
       "writtenOn": "2015-09-01T12:39:19Z",
       "side": 1,
       "message": "nit: put the #undef at the end of this header so they don\u0027t leak to the source file that included them.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6424bead_e1274e48",
+        "filename": "android/utils/metrics/metrics_reporter.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04d222e7_32311021",
       "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -252,6 +480,24 @@
     },
     {
       "key": {
+        "uuid": "8497f201_67810035",
+        "filename": "android/utils/metrics/metrics_reporter.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done.\nLeaving the docstring as is though -- there are other functions in the codebase called foo_free which are similarly confusing. That\u0027s why I was being extra clear here.",
+      "parentUuid": "447a5aab_d48c3c2d",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "447a5aab_f489381a",
         "filename": "android/utils/metrics/metrics_reporter.h",
         "patchSetId": 8
@@ -263,6 +509,24 @@
       "writtenOn": "2015-09-01T12:39:19Z",
       "side": 1,
       "message": "what is metricsFile? Where does it live? How can this be unit-tested?",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8497f201_876d2c40",
+        "filename": "android/utils/metrics/metrics_reporter.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Droped the special sounding name.\n\nThis is a file on disk, by default written to .avd/metrics/foofile.$(uid -p).someweirdext\n\nThis is unit-tested by writing and then reading in a temporary directory: https://android-review.googlesource.com/#/c/168386/8/android/utils/metrics/metrics_reporter_unittest.cpp@101\n\nAnything else you\u0027d like to see w.r.t. unittests?",
+      "parentUuid": "447a5aab_f489381a",
       "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -286,6 +550,24 @@
     },
     {
       "key": {
+        "uuid": "e4618eea_bd2a973f",
+        "filename": "android/utils/metrics/metrics_reporter.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4d42ed5_b193c048",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a46956e6_17a394a1",
         "filename": "android/utils/metrics/metrics_reporter_unittest.cpp",
         "patchSetId": 8
@@ -297,6 +579,24 @@
       "writtenOn": "2015-09-01T12:39:19Z",
       "side": 1,
       "message": "don\u0027t use std::getenv() and std::setenv() in unit tests. You should use a TestSystem instance, and access the environment with System::envGet() / System::envSet() instead.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e486eed4_f045ce7e",
+        "filename": "android/utils/metrics/metrics_reporter_unittest.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Tried to. No can do :(\n\nmetrics_reporter.c uses bufprint_avd_home_path, and TestSystem::envSet doesn\u0027t really update the environment. As a result, envSet doesn\u0027t affect the metrics_reporter\u0027s view of where AVD_HOME is.\n\nI *could* inject a fake bufprint_avd_home_path function like I do for uploaderFunction.\nIt\u0027s a little heavy-weight though.\n\nwdyt? Add complexity or poison unittest env?",
+      "parentUuid": "a46956e6_17a394a1",
       "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -320,6 +620,24 @@
     },
     {
       "key": {
+        "uuid": "84529221_7be783e7",
+        "filename": "android/utils/metrics/metrics_reporter_unittest.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8480d2c5_96680c02",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "04d222e7_9268fc01",
         "filename": "android/utils/string.h",
         "patchSetId": 8
@@ -337,6 +655,24 @@
     },
     {
       "key": {
+        "uuid": "0484e2ca_51eefe81",
+        "filename": "android/utils/string.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04d222e7_9268fc01",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a4deb6f4_ef42c174",
         "filename": "android/utils/system_wrapper.cpp",
         "patchSetId": 8
@@ -348,6 +684,24 @@
       "writtenOn": "2015-09-01T12:39:19Z",
       "side": 1,
       "message": "nit: probably put 2015 here.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8497f201_12cddc45",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4deb6f4_ef42c174",
       "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -389,6 +743,24 @@
     },
     {
       "key": {
+        "uuid": "0484e2ca_d1f9ae46",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Changed to use System::Duration typedef\u0027d to system.h::Duration to keep them in-sync.",
+      "parentUuid": "8429b287_3737dab0",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "447a5aab_14a394a1",
         "filename": "android/utils/system_wrapper.cpp",
         "patchSetId": 8
@@ -400,6 +772,24 @@
       "writtenOn": "2015-09-01T12:39:19Z",
       "side": 1,
       "message": "nit: This should be the first header included by this source file.\n\nAlso, the definition below should probably go into utils/system.cpp instead (which means converting the system.c to a C++ one first).",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0484e2ca_913246be",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "system.c is a pretty big file implementing quite a few system functions for C. I agree that we should move to just wrapping android/base/System.h and exposing it to C code, but that\u0027s not something I want to do in this CL.\n\nThat\u0027s why I introduced a system_wrapper.cpp, which starts this trend -- keep moving implementation from system.c to system_wrapper.cpp; delete system.c; rename system_wrapper.cpp -\u003e system.c\n\nAdded comment in both system.c and system_wrapper.cpp to that effect. Wdyt?",
+      "parentUuid": "447a5aab_14a394a1",
       "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -423,6 +813,24 @@
     },
     {
       "key": {
+        "uuid": "8497f201_326498e7",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Changed to typedef. PTAL.",
+      "parentUuid": "447a5aab_34a8107b",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8480d2c5_f614e07c",
         "filename": "android/utils/system_wrapper.cpp",
         "patchSetId": 8
@@ -434,6 +842,24 @@
       "writtenOn": "2015-09-01T12:39:19Z",
       "side": 1,
       "message": "same here.",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_1b376fc7",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-01T19:14:34Z",
+      "side": 1,
+      "message": "Changed to typedef. PTAL.",
+      "parentUuid": "8480d2c5_f614e07c",
       "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
