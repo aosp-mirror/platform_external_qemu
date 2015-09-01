@@ -176,7 +176,7 @@ build_package_openssl () {
           CONFIG_FLAGS="mingw64"
           ;;
         darwin-*)
-          CONFIG_FLAGS="darwin64-x86_64-cc"
+          CONFIG_FLAGS="darwin64-x86_64-cc -no-asm"
           ;;
         *)
           panic "Host system '$CURRENT_HOST' is not supported by this script!"
