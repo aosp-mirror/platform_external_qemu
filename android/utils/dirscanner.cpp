@@ -53,6 +53,10 @@ const char* dirScanner_nextFull(DirScanner* s) {
     return NULL;
 }
 
+size_t dirScanner_numEntries(DirScanner* s) {
+    return s->entries.size();
+}
+
 DirScanner* dirScanner_new(const char* rootPath) {
     DirScanner* s = new DirScanner(rootPath);
     return s;

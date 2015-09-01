@@ -14,6 +14,8 @@
 
 #include "android/utils/compiler.h"
 
+#include <stddef.h>
+
 ANDROID_BEGIN_HEADER
 
 /* simple utility to parse directories for files            */
@@ -49,6 +51,9 @@ const char*    dirScanner_next( DirScanner*  s );
  * to the next directory element.
  */
 const char*    dirScanner_nextFull( DirScanner*  s );
+
+/* Return the number of entries in the given initialized DirScanner. */
+size_t         dirScanner_numEntries( DirScanner*  s );
 
 ANDROID_END_HEADER
 
