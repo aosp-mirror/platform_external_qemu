@@ -850,6 +850,24 @@
     },
     {
       "key": {
+        "uuid": "a46956e6_b7cd08be",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:16:23Z",
+      "side": 1,
+      "message": "Fair enough, let\u0027s keep system_wrapper.cpp for now then.",
+      "parentUuid": "0484e2ca_913246be",
+      "revId": "e6b93d4b6271c1ca5d32ef00d4c1f7908700a8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "447a5aab_34a8107b",
         "filename": "android/utils/system_wrapper.cpp",
         "patchSetId": 8
