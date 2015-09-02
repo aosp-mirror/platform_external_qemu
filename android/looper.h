@@ -29,7 +29,7 @@ ANDROID_BEGIN_HEADER
  **********************************************************************
  **********************************************************************/
 
-/* An Duration represents a duration in milliseconds */
+/* A Duration represents a duration in milliseconds */
 typedef int64_t   Duration;
 
 /* A special Duration value used to mean "infinite" */
