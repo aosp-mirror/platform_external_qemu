@@ -598,6 +598,30 @@
     },
     {
       "key": {
+        "uuid": "04d222e7_92e23c3f",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T17:08:49Z",
+      "side": 1,
+      "message": "In practice I prefer to invert the condition on the #else, it helps better understand on which end the code is when dealing with large blocks.",
+      "parentUuid": "84529221_7c6f76c7",
+      "range": {
+        "startLine": 387,
+        "startChar": 15,
+        "endLine": 387,
+        "endChar": 39
+      },
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0484e2ca_5f3cc491",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -609,6 +633,30 @@
       "writtenOn": "2015-09-02T16:43:42Z",
       "side": 1,
       "message": "rational? if you end up not including a required header in your_fancy_module.h, then you catch that mistake while trying to compile your_fancy_module.c, instead of someone else hitting it later when including your_fancy_module.h in their client code.",
+      "range": {
+        "startLine": 394,
+        "startChar": 28,
+        "endLine": 394,
+        "endChar": 57
+      },
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "247566b9_333d8856",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T17:08:49Z",
+      "side": 1,
+      "message": "Absolutely, I\u0027ll add a note there.",
+      "parentUuid": "0484e2ca_5f3cc491",
       "range": {
         "startLine": 394,
         "startChar": 28,
