@@ -48,6 +48,23 @@
     },
     {
       "key": {
+        "uuid": "644d9e85_bf13a721",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-02T16:13:27Z",
+      "side": 1,
+      "message": "Did you mean for this example to trail off? If so, perhaps append ellipses.",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8497f201_d3cd36bd",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -65,6 +82,91 @@
         "endLine": 109,
         "endChar": 31
       },
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6492fe15_9788fcea",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-02T16:13:27Z",
+      "side": 1,
+      "message": "s/parentheses/curly brace/",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e486eed4_ed741097",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-02T16:13:27Z",
+      "side": 1,
+      "message": "s/parentheses/curly brace/",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6492fe15_1794ec01",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-02T16:13:27Z",
+      "side": 1,
+      "message": "Perhaps \"at the start of its own line, or at the end of the line containing the opening brace.\"\n[I\u0027m thinking of if (error) { return ENOPE; }]",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_bcf72ec1",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-02T16:13:27Z",
+      "side": 1,
+      "message": "I\u0027m not seeing 8-char indentation in the example",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_dcfaeaaa",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-02T16:13:27Z",
+      "side": 1,
+      "message": "s/column/colon/",
       "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -111,6 +213,57 @@
         "endLine": 339,
         "endChar": 17
       },
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_1c1882af",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-02T16:13:27Z",
+      "side": 1,
+      "message": "May want to explicitly prohibit a leading underscore, since we\u0027ve seen that attempted recently.",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6424bead_b99dfa27",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-02T16:13:27Z",
+      "side": 1,
+      "message": "Super nit: \"e.g.\" is redundant with \"etc...\"",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8429b287_c3e21440",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-02T16:13:27Z",
+      "side": 1,
+      "message": "Suggest appending\n#include \"android/otherFeature.h\" \n\n[This helps to show that the ordering should not be hierarchical. I don\u0027t know if an explicit statement to this effect is warranted.]",
       "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
