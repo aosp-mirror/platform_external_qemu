@@ -27,6 +27,8 @@
 # include <unistd.h>
 #endif
 
+#include "curl/curl.h"
+
 # define mwarning(fmt, ...) \
         dwarning("%s:%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
@@ -69,6 +71,9 @@ androidMetrics_moduleInit(const char* avdHome)
     }
 
     metricsDirPath = ASTRDUP(path);
+
+    curl_global_init(CURL_GLOBAL_ALL);
+
     return 1;
 }
 
@@ -76,6 +81,8 @@ androidMetrics_moduleInit(const char* avdHome)
 void
 androidMetrics_moduleFini(void)
 {
+    curl_global_cleanup();
+
     AFREE(metricsDirPath);
     AFREE(metricsFilePath);
     metricsDirPath = metricsFilePath = NULL;
@@ -386,16 +393,71 @@ androidMetrics_tryReportAll()
     return success;
 }
 
-void
-androidMetrics_injectUploader(androidMetricsUploaderFunction uploaderFunction)
-{
-    testUploader = uploaderFunction;
+// these two are taken from the Android Studio -
+//  analytics/src/com/android/stats/AnalyticsUploader.java
+static const char analytics_url[] = "https://ssl.google-analytics.com/collect";
+#ifdef NDEBUG
+static const char analytics_id[] = "UA-19996407-3";
+#else
+static const char analytics_id[] = "UA-44790371-1";
+#endif
+
+// these are specific to the emulator
+static const char analytics_app[] = "Android Emulator";
+
+static size_t formatPostFields(char* ptr, size_t n, const AndroidMetrics* metrics) {
+    // format the metrics into post data string, having the following dimensions
+    // and values:
+    // - custom dimension 1 - guest arch
+    // - custom dimension 2 - is gpu enabled
+    // - event value - number of crashes
+    // - custom metric 1 - user time
+    // - custom metric 2 - system time
+
+    return (size_t)snprintf(ptr, n,
+        "v=%d&tid=%s&an=%s&av=%s&t=%s&ec=%s&ea=%s&cd1=%s&cd2=%s&ev=%d&cm1=%" PRId64 "&cm2=%" PRId64,
+        1, analytics_id, analytics_app, metrics->emulator_version, "event", "crashTracking", "Hit",
+        metrics->guest_arch, (metrics->guest_gpu_enabled ? "enabled" : "disabled"),
+        metrics->num_failed_reports, metrics->user_time, metrics->system_time);
 }
 
 /* typedef'ed to: androidMetricsUploaderFunction */
 ABool
 androidMetrics_uploadMetrics( const AndroidMetrics* metrics_list )
 {
-    /* TODO(zyy) Actually send the given metrics. */
-    return 0;
+    CURL* const curl = curl_easy_init();
+    if (!curl) {
+        mwarning("Failed to initialize libcurl");
+        return 0;
+    }
+
+    ABool res = 0;
+    const size_t fieldsSize = formatPostFields(NULL, 0, metrics);
+    char* const fields = (char*)android_alloc(fieldsSize * sizeof(*fields));
+    if (!fields) {
+        mwarning("Failed to allocate memory for a request");
+    } else {
+        formatPostFields(fields, fieldsSize, metrics);
+
+        curl_easy_setopt(curl, CURLOPT_URL, analytics_url);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fields);
+
+        const CURLcode curlRes = curl_easy_perform(curl);
+        if (curlRes != CURLE_OK) {
+            mwarning("curl_easy_perform() failed with code %d (%s)",
+                curlRes, curl_easy_strerror(curlRes));
+        } else {
+            res = 1;
+        }
+        android_free(fields);
+    }
+
+    curl_easy_cleanup(curl);
+    return res;
+}
+
+void
+androidMetrics_injectUploader(androidMetricsUploaderFunction uploaderFunction)
+{
+    testUploader = uploaderFunction;
 }
