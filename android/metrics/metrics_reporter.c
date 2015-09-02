@@ -21,6 +21,9 @@
 #include "android/utils/path.h"
 #include "android/utils/string.h"
 #include "android/utils/system.h"
+
+#include "curl/curl.h"
+
 #ifdef _WIN32
 # include <process.h>
 #else
@@ -69,6 +72,9 @@ androidMetrics_moduleInit(const char* avdHome)
     }
 
     metricsDirPath = ASTRDUP(path);
+
+    curl_global_init(CURL_GLOBAL_ALL);
+
     return 1;
 }
 
@@ -76,6 +82,7 @@ androidMetrics_moduleInit(const char* avdHome)
 void
 androidMetrics_moduleFini(void)
 {
+    curl_global_cleanup();
     AFREE(metricsDirPath);
     AFREE(metricsFilePath);
     metricsDirPath = metricsFilePath = NULL;
@@ -286,8 +293,7 @@ androidMetrics_read( AndroidMetrics* androidMetrics )
 }
 
 /* Forward declaration. */
-ABool
-androidMetrics_uploadMetrics( const AndroidMetrics* metrics_list );
+ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics);
 
 ABool
 androidMetrics_tryReportAll()
@@ -392,10 +398,141 @@ androidMetrics_injectUploader(androidMetricsUploaderFunction uploaderFunction)
     testUploader = uploaderFunction;
 }
 
+// /////////////////////////////////////////////////////////////////////////////
+// Google Analytics reporting.
+
+#ifdef GA_VALIDATE_HITS
+static const char analytics_url[] =
+        "https://ssl.google-analytics.com/debug/collect";
+#else   // !defined(GA_VALIDATE_HITS)
+static const char analytics_url[] = "https://ssl.google-analytics.com/collect";
+#endif  // !defined(GA_VALIDATE_HITS)
+
+// Base GA keys.
+static const char ga_protocol_version_key[] = "v";
+static const char ga_tracking_id_key[] = "tid";
+static const char ga_application_name_key[] = "an";
+static const char ga_application_version_key[] = "av";
+static const char ga_client_id_key[] = "cid";
+static const char ga_hit_type_key[] = "t";
+static const char ga_event_category_key[] = "ec";
+static const char ga_event_action_key[] = "ea";
+static const char ga_event_label_key[] = "el";
+static const char ga_event_value_key[] = "ev";
+
+// Custom dimensions should match the index given in Analytics.
+static const char ga_cd_guest_arch_key[] = "cd6";
+static const char ga_cd_emulator_version_key[] = "cd7";
+
+// Base Google Analytics values.
+static const char ga_protocol_version[] = "1";
+static const char ga_hit_type_event[] = "event";
+// We're sharing this app with our peers.
+static const char ga_application_name[] = "Android Studio";
+#ifdef NDEBUG
+// TODO(pprabhu) Verfiy this is used in prod environment. I had trouble here.
+static const char ga_tracking_id[] = "UA-19996407-3";
+// TODO(pprabhu) Get anonymus UUID here, preferably the same one as studio.
+static const char ga_client_id[] = "ndebug-client";
+#else
+static const char ga_tracking_id[] = "UA-44790371-1";
+static const char ga_client_id[] = "debug-client";
+#endif
+
+// Crash reporting GA keys / values.
+static const char ga_event_category_emulator[] = "emulator";
+static const char ga_event_action_single_run_info[] = "singleRunInfo";
+static const char ga_event_label_crash_detected[] = "crashDetected";
+// Custom metrics should match the index given in Analytics.
+static const char ga_cm_user_time_key[] = "cm2";
+static const char ga_cm_system_time_key[] = "cm3";
+
+static size_t formatGAPostData(char* ptr,
+                               size_t n,
+                               const AndroidMetrics* metrics) {
+    // TODO(pprabhu) Decide whether we want to report gpu_enabled.
+    return (size_t)snprintf(ptr, n,
+        "%s=%s&%s=%s&%s=%s&%s=%s&%s=%s"
+        "&%s=%s"
+        "&%s=%s&%s=%s&%s=%s&%s=%s&%s=%d"
+        "&%s=%" PRId64 "&%s=%" PRId64,
+        ga_protocol_version_key, ga_protocol_version,
+        ga_tracking_id_key, ga_tracking_id,
+        ga_application_name_key, ga_application_name,
+        ga_application_version_key, metrics->emulator_version,
+        ga_client_id_key, ga_client_id,
+
+        ga_cd_guest_arch_key, metrics->guest_arch,
+
+        ga_hit_type_key, ga_hit_type_event,
+        ga_event_category_key, ga_event_category_emulator,
+        ga_event_action_key, ga_event_action_single_run_info,
+        ga_event_label_key, ga_event_label_crash_detected,
+        ga_event_value_key, metrics->is_dirty,
+
+        ga_cm_user_time_key, metrics->user_time,
+        ga_cm_system_time_key, metrics->system_time);
+}
+
+#ifndef GA_VALIDATE_HITS
+// We pass a dummy write function to curl to avoid dumping the returned output
+// to stdout.
+static size_t curlWriteFunction(CURL* handle,
+                                size_t size,
+                                size_t nmemb,
+                                void* userdata) {
+    // Report that we "took care of" all the data provided.
+    return size * nmemb;
+}
+#endif  // defined(GA_VALIDATE_HITS)
+
 /* typedef'ed to: androidMetricsUploaderFunction */
-ABool
-androidMetrics_uploadMetrics( const AndroidMetrics* metrics_list )
-{
-    /* TODO(zyy) Actually send the given metrics. */
-    return 0;
+ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics) {
+    ABool success = 1;
+    CURL* const curl = curl_easy_init();
+    CURLcode curlRes;
+    if (!curl) {
+        mwarning("Failed to initialize libcurl");
+        return 0;
+    }
+
+    const size_t fieldsSize = formatGAPostData(NULL, 0, metrics) + 1;
+    char* const fields = (char*)android_alloc(fieldsSize * sizeof(*fields));
+    if (!fields) {
+        mwarning("Failed to allocate memory for a request");
+        curl_easy_cleanup(curl);
+        return 0;
+    }
+
+    formatGAPostData(fields, fieldsSize, metrics);
+
+    curl_easy_setopt(curl, CURLOPT_URL, analytics_url);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fields);
+#ifndef GA_VALIDATE_HITS
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteFunction);
+#endif
+    curlRes = curl_easy_perform(curl);
+    if (curlRes != CURLE_OK) {
+        success = 0;
+        mwarning("curl_easy_perform() failed with code %d (%s)", curlRes,
+                 curl_easy_strerror(curlRes));
+    }
+
+    long http_response = 0;
+    curlRes = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response);
+    if (curlRes == CURLE_OK) {
+        if (http_response != 200) {
+            mwarning("Got HTTP response code %ld", http_response);
+            success = 0;
+        }
+    } else if (curlRes == CURLE_UNKNOWN_OPTION) {
+        mwarning("Can not get a valid response code: not supported");
+    } else {
+        mwarning("Unexpected error while checking http response: %s",
+                 curl_easy_strerror(curlRes));
+    }
+
+    android_free(fields);
+    curl_easy_cleanup(curl);
+    return success;
 }
