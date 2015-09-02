@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e486eed4_5eb92401",
+        "filename": "vl-android.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2109,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-02T21:45:07Z",
+      "side": 1,
+      "message": "zyy@\nNow that things are clearer, how about \n- move this implementation inside metrics_reporter.\n- Optionally pass a (Looper *) to androidMetrics_moduleInit.\n- When a non NULL looper is received, the metrics_reporter will setup the timer etc.\n\nI think logically we should consider the regular updates to process times an internal feature of metrics, and so the hidden implementation makes sense.\n\nThis should be easy now because this CL is on stacked top of the main metrics_reporter CL.",
+      "range": {
+        "startLine": 2109,
+        "startChar": 12,
+        "endLine": 2109,
+        "endChar": 28
+      },
+      "revId": "6119de4b42e5a8a84518453d5233465153318271",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
