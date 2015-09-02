@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a40a365b_0f508549",
+        "filename": "android/utils/filelock.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-02T17:42:59Z",
+      "side": 1,
+      "message": "Ah, you\u0027re right. We drop a pid file.\nMy \"test\" involved just creating a directory, so I need to update this and test with a pid file in there.\n\nOTOH, before this CL, we\u0027d have tried to \"unlink\" the directory. On some implementations (including the one on my linux workstation), unlink will fail for directories unless you\u0027re superuser because of security concerns.\n\nI\u0027ll unlink both the possible pid file, and then blow away the directory.",
+      "parentUuid": "8480d2c5_f6d5c057",
+      "revId": "dc52b07f8f497ada64a8a76f26eae74bc98690dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "644d9e85_7432f629",
         "filename": "android/utils/filelock.c",
         "patchSetId": 2
@@ -54,6 +72,30 @@
       "side": 1,
       "message": "This is intentional, the next loop iteration will try to rename the .temp file to .lock",
       "parentUuid": "644d9e85_7432f629",
+      "range": {
+        "startLine": 349,
+        "startChar": 17,
+        "endLine": 349,
+        "endChar": 29
+      },
+      "revId": "dc52b07f8f497ada64a8a76f26eae74bc98690dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_57bff397",
+        "filename": "android/utils/filelock.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-02T17:42:59Z",
+      "side": 1,
+      "message": "Correct. Just pointing out that we\u0027ve covered all cases where the lock file should actually be removed.",
+      "parentUuid": "2461e61f_33516800",
       "range": {
         "startLine": 349,
         "startChar": 17,
