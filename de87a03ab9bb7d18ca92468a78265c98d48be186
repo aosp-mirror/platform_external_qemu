@@ -88,6 +88,30 @@
     },
     {
       "key": {
+        "uuid": "04d222e7_b248a0f4",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:24:51Z",
+      "side": 1,
+      "message": "That\u0027s right, this is not clear. Essentially you call android::base::ThreadLooper::get() to retrieve the android::base::Looper instance for the current thread, by default, this creates a new \u0027generic\u0027 looper based on select().\n\nBut alternatively, you can create and android::qemu::Looper instance and inject it into the (main) thread with android::base::ThreadLooper::set()\n\nThis way, any code that uses ThreadLooper::get() will use the QEMU-based main loop when it runs in the main thread, even if it doesn\u0027t know anything about QEMU.\n\nThat\u0027s the kind of decoupling I\u0027m looking for in our code, but I need a better way to explain that.",
+      "parentUuid": "045f8228_9117bbdc",
+      "range": {
+        "startLine": 91,
+        "startChar": 33,
+        "endLine": 92,
+        "endChar": 15
+      },
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8497f201_d3cd36bd",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -99,6 +123,30 @@
       "writtenOn": "2015-09-02T16:00:25Z",
       "side": 1,
       "message": "we could add a note that it\u0027s possible to create a class similar to System to be able to mock the qemu functions",
+      "range": {
+        "startLine": 107,
+        "startChar": 6,
+        "endLine": 109,
+        "endChar": 31
+      },
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a46956e6_f7c3808f",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:24:51Z",
+      "side": 1,
+      "message": "The problem is that we have both the \u0027classic\u0027 and \u0027qemu2\u0027 versions of QEMU that are slightly different, so it\u0027s better to provide a generic abstract interface, with QEMU1 and QEMU2 specific implementations / backends instead. That\u0027s what external/android/qemu/ is for (for QEMU1), we don\u0027t have code for QEMU2 yet.",
+      "parentUuid": "8497f201_d3cd36bd",
       "range": {
         "startLine": 107,
         "startChar": 6,
@@ -128,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "04d222e7_52e5b44c",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:24:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6492fe15_9788fcea",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e486eed4_ed741097",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -139,6 +205,24 @@
       "writtenOn": "2015-09-02T16:13:27Z",
       "side": 1,
       "message": "s/parentheses/curly brace/",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4dbaa04_d396860c",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:24:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e486eed4_ed741097",
       "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -162,6 +246,24 @@
     },
     {
       "key": {
+        "uuid": "2461e61f_5337c4c5",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:24:51Z",
+      "side": 1,
+      "message": "Excellent suggestion :) Done.",
+      "parentUuid": "6492fe15_1794ec01",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "84529221_bcf72ec1",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -173,6 +275,24 @@
       "writtenOn": "2015-09-02T16:13:27Z",
       "side": 1,
       "message": "I\u0027m not seeing 8-char indentation in the example",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a46956e6_579a6cae",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:24:51Z",
+      "side": 1,
+      "message": "Yes, actually i\u0027ll drop this, it looks like clang-format doesn\u0027t really support this anyway.",
+      "parentUuid": "84529221_bcf72ec1",
       "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -196,6 +316,24 @@
     },
     {
       "key": {
+        "uuid": "c4dbaa04_f3938a19",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:24:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "84529221_dcfaeaaa",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8429b287_a34828f4",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -207,6 +345,30 @@
       "writtenOn": "2015-09-02T16:00:25Z",
       "side": 1,
       "message": "IMO: I\u0027d prefer this to be on a separate line. It makes a diff with new member much better looking",
+      "range": {
+        "startLine": 280,
+        "startChar": 34,
+        "endLine": 280,
+        "endChar": 37
+      },
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a455d63a_971e646b",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:24:51Z",
+      "side": 1,
+      "message": "If you can find the clang-format option that does that, why not, otherwise that\u0027s the Chromium default, and it\u0027s good enough for me really.",
+      "parentUuid": "8429b287_a34828f4",
       "range": {
         "startLine": 280,
         "startChar": 34,
@@ -259,6 +421,30 @@
     },
     {
       "key": {
+        "uuid": "2461e61f_7332c0d7",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:24:51Z",
+      "side": 1,
+      "message": "I\u0027m not opposed to it, what do other team member think about this?",
+      "parentUuid": "8429b287_83e52c50",
+      "range": {
+        "startLine": 337,
+        "startChar": 0,
+        "endLine": 339,
+        "endChar": 17
+      },
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6424bead_b99dfa27",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -270,6 +456,24 @@
       "writtenOn": "2015-09-02T16:13:27Z",
       "side": 1,
       "message": "Super nit: \"e.g.\" is redundant with \"etc...\"",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4dbaa04_b39d0228",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:24:51Z",
+      "side": 1,
+      "message": "You\u0027re right :) Fixed.",
+      "parentUuid": "6424bead_b99dfa27",
       "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -293,6 +497,24 @@
     },
     {
       "key": {
+        "uuid": "a46956e6_779f709d",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:24:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8429b287_c3e21440",
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8429b287_03d93c94",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -304,6 +526,30 @@
       "writtenOn": "2015-09-02T16:00:25Z",
       "side": 1,
       "message": "and this was \u0027undeprecated\u0027 back in C++14, so there\u0027s no real reason to use unnamed namespace over a static function anymore (except of a struct/class you want to make private)",
+      "range": {
+        "startLine": 433,
+        "startChar": 2,
+        "endLine": 433,
+        "endChar": 68
+      },
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4deb6f4_92e31a0c",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:24:51Z",
+      "side": 1,
+      "message": "I\u0027m not sure I understand, do you have a pointer about this?\nAre you suggesting not to use unnamed namespaces except for private class/struct declarations now?",
+      "parentUuid": "8429b287_03d93c94",
       "range": {
         "startLine": 433,
         "startChar": 2,
