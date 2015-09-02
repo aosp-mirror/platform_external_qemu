@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e486eed4_1ec39c73",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-02T21:46:11Z",
+      "side": 1,
+      "message": "I think we want to use both googleanalytics and the more rudimentary ping method.\n\nCould you add the other one here as well?",
+      "range": {
+        "startLine": 408,
+        "startChar": 14,
+        "endLine": 408,
+        "endChar": 30
+      },
+      "revId": "74b2bab2179c5cf0e521c0a0a8bbc41e5d533b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
