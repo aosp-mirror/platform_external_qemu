@@ -4087,7 +4087,6 @@ int main(int argc, char **argv, char **envp)
     net_cleanup();
     android_wear_agent_stop();
     socket_drainer_stop();
-
     android_emulation_teardown();
     return 0;
 }
