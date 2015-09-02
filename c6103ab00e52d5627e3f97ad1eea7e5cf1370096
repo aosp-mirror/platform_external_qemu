@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "247566b9_13216c37",
+        "filename": "Makefile.common",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T15:38:25Z",
+      "side": 1,
+      "message": "As said previously, don\u0027t put this under android/utils/, use android/metrics/ instead. Thanks.",
+      "revId": "c6103ab00e52d5627e3f97ad1eea7e5cf1370096",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4deb6f4_8f553560",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4028,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T15:38:25Z",
+      "side": 1,
+      "message": "You\u0027re exposing the fact that the metrics reporter is currently using curl in a different QEMU-specific source file.\n\nIt\u0027s probably better to provide android_metrics_reporter_init() and android_metrics_reporter_done() functions and call them here.\n\nThis way, if the metrics reporting scheme changes in the future, we won\u0027t have to change this file at all.",
+      "revId": "c6103ab00e52d5627e3f97ad1eea7e5cf1370096",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
