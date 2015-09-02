@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e4618eea_f5426374",
+        "filename": "android/metrics/internal/metrics_reporter_internal.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-02T17:33:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4deb6f4_32beeeeb",
+      "revId": "5f0bb333568d7ca938c5fd18cafc6f9e771ba38f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2461e61f_b344583b",
         "filename": "android/metrics/internal/metrics_reporter_internal.h",
         "patchSetId": 11
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "e4618eea_759e735a",
+        "filename": "android/metrics/internal/metrics_reporter_internal.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-02T17:33:26Z",
+      "side": 1,
+      "message": "OMG. I know I\u0027ve read that before, but clean forgot.\n\nThanks.",
+      "parentUuid": "a455d63a_7708f030",
+      "revId": "5f0bb333568d7ca938c5fd18cafc6f9e771ba38f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a4deb6f4_12b96a02",
         "filename": "android/metrics/internal/metrics_reporter_internal.h",
         "patchSetId": 11
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "0484e2ca_7f62e89f",
+        "filename": "android/metrics/internal/metrics_reporter_internal.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-02T17:33:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4deb6f4_12b96a02",
+      "revId": "5f0bb333568d7ca938c5fd18cafc6f9e771ba38f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8480d2c5_360b389e",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 11
@@ -81,6 +135,24 @@
       "writtenOn": "2015-09-02T16:16:23Z",
       "side": 1,
       "message": "It\u0027s unfortunate that this code depends on the AVD home directory location. It would be more convenient (and testable) if such path was passed when initializing the metrics reporter instead (something which seems to be needed to initialize curl anyway).\n\nThis would reduce coupling between this code and the rest of emulation, and make it considerably easier to unit-test.",
+      "revId": "5f0bb333568d7ca938c5fd18cafc6f9e771ba38f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0484e2ca_3f5c60de",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-02T17:33:26Z",
+      "side": 1,
+      "message": "Done.\nI dependency injection FTW.",
+      "parentUuid": "8480d2c5_360b389e",
       "revId": "5f0bb333568d7ca938c5fd18cafc6f9e771ba38f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
