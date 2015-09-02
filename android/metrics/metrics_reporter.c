@@ -10,8 +10,9 @@
 ** GNU General Public License for more details.
 */
 #include "android/metrics/metrics_reporter.h"
-#include "android/metrics/internal/metrics_reporter_internal.h"
 
+#include "android/metrics/internal/metrics_reporter_internal.h"
+#include "android/metrics/metrics_reporter_ga.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
@@ -20,6 +21,7 @@
 #include "android/utils/path.h"
 #include "android/utils/string.h"
 #include "android/utils/system.h"
+
 #ifdef _WIN32
 #include <process.h>
 #else
@@ -288,7 +290,7 @@ ABool androidMetrics_read(AndroidMetrics* androidMetrics) {
 }
 
 /* Forward declaration. */
-ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics_list);
+ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics);
 
 ABool androidMetrics_tryReportAll() {
     DirScanner* avd_dir = NULL;
@@ -382,7 +384,6 @@ void androidMetrics_injectUploader(
 }
 
 /* typedef'ed to: androidMetricsUploaderFunction */
-ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics_list) {
-    /* TODO(zyy) Actually send the given metrics. */
-    return 0;
+ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics) {
+    return (ABool)androidMetrics_uploadMetricsGA(metrics);
 }

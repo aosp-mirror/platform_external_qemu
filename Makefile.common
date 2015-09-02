@@ -176,6 +176,7 @@ common_LOCAL_SRC_FILES += \
 	android/kernel/kernel_utils.cpp \
 	android/metrics/ddms-ping.cpp \
 	android/metrics/metrics_reporter.c \
+	android/metrics/metrics_reporter_ga.c \
 	android/qemu/base/async/Looper.cpp \
 	android/qemu/base/files/QemuFileStream.cpp \
 	android/opengl/EmuglBackendList.cpp \
