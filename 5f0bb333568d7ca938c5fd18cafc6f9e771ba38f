@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4deb6f4_32beeeeb",
+        "filename": "android/metrics/internal/metrics_reporter_internal.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:16:23Z",
+      "side": 1,
+      "message": "nit: not leading underscore, and use a guard macro that reflects the file location, in this case:\n\nANDROID_METRICS_INTERNAL_METRICS_REPORTER_INTERNAL_H",
+      "revId": "5f0bb333568d7ca938c5fd18cafc6f9e771ba38f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2461e61f_b344583b",
+        "filename": "android/metrics/internal/metrics_reporter_internal.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:16:23Z",
+      "side": 1,
+      "message": "Just for the record, ABool is historical, and we should avoid using it in new code (i.e. just use \u003cstdbool.h\u003e and \u0027bool\u0027 even in C). However that still works.\n\nI\u0027ll probably submit a patch in the future that gets rid of ABool entirely in one fell swoop :)\n\nSame goes with android_alloc() / android_free() / AFREE() etc.. btw. But again, let\u0027s not break what\u0027s working for now :)",
+      "revId": "5f0bb333568d7ca938c5fd18cafc6f9e771ba38f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a455d63a_7708f030",
+        "filename": "android/metrics/internal/metrics_reporter_internal.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:16:23Z",
+      "side": 1,
+      "message": "nit: in C declarations, always use (void) for functions with no parameters, otherwise the compiler assumes the function may take an optional int parameter!\n\nIn other words, it will accept and compile a call like androidMetricsw_getMetricsFilePath(32) !!\n\nSee http://stackoverflow.com/questions/13950642/why-does-a-function-with-no-parameters-compared-to-the-actual-function-definiti",
+      "revId": "5f0bb333568d7ca938c5fd18cafc6f9e771ba38f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4deb6f4_12b96a02",
+        "filename": "android/metrics/internal/metrics_reporter_internal.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:16:23Z",
+      "side": 1,
+      "message": "nit: can you add an empty line after this macro?",
+      "revId": "5f0bb333568d7ca938c5fd18cafc6f9e771ba38f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8480d2c5_360b389e",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:16:23Z",
+      "side": 1,
+      "message": "It\u0027s unfortunate that this code depends on the AVD home directory location. It would be more convenient (and testable) if such path was passed when initializing the metrics reporter instead (something which seems to be needed to initialize curl anyway).\n\nThis would reduce coupling between this code and the rest of emulation, and make it considerably easier to unit-test.",
+      "revId": "5f0bb333568d7ca938c5fd18cafc6f9e771ba38f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
