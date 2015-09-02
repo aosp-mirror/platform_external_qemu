@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "8480d2c5_f6d5c057",
+        "filename": "android/utils/filelock.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T15:33:26Z",
+      "side": 1,
+      "message": "did you test this change? I believe rmdir() will fail if the directory is not empty (and it shouldn\u0027t be, i.e. it will contain a pid file or something iirc).",
+      "revId": "dc52b07f8f497ada64a8a76f26eae74bc98690dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "644d9e85_7432f629",
         "filename": "android/utils/filelock.c",
         "patchSetId": 2
@@ -13,6 +30,30 @@
       "writtenOn": "2015-09-01T22:52:03Z",
       "side": 1,
       "message": "Note that we already explicitly delete the lock file here when we find a stale lock file.",
+      "range": {
+        "startLine": 349,
+        "startChar": 17,
+        "endLine": 349,
+        "endChar": 29
+      },
+      "revId": "dc52b07f8f497ada64a8a76f26eae74bc98690dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2461e61f_33516800",
+        "filename": "android/utils/filelock.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T15:33:26Z",
+      "side": 1,
+      "message": "This is intentional, the next loop iteration will try to rename the .temp file to .lock",
+      "parentUuid": "644d9e85_7432f629",
       "range": {
         "startLine": 349,
         "startChar": 17,
