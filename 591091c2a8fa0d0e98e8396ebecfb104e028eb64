@@ -22,6 +22,30 @@
       "revId": "591091c2a8fa0d0e98e8396ebecfb104e028eb64",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4d42ed5_74378618",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T16:47:27Z",
+      "side": 1,
+      "message": "That\u0027s true, C++ is preferred because I think it leads to code that is easier to unit-test / decouple from other sources. IMHO. Will add a blurb about it.",
+      "parentUuid": "84529221_dc4e6a59",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 69
+      },
+      "revId": "591091c2a8fa0d0e98e8396ebecfb104e028eb64",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
