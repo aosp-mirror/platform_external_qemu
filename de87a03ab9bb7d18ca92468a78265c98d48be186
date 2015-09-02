@@ -112,6 +112,30 @@
     },
     {
       "key": {
+        "uuid": "8429b287_c3a7b4ef",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-02T16:38:47Z",
+      "side": 1,
+      "message": "I just pointed to the sentence \"This one can be injected into the current thread by\" - it looks a little bit incomplet to me",
+      "parentUuid": "04d222e7_b248a0f4",
+      "range": {
+        "startLine": 91,
+        "startChar": 33,
+        "endLine": 92,
+        "endChar": 15
+      },
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8497f201_d3cd36bd",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -381,6 +405,30 @@
     },
     {
       "key": {
+        "uuid": "6492fe15_570594d5",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-02T16:38:47Z",
+      "side": 1,
+      "message": "Sadly, it\u0027s not there :(",
+      "parentUuid": "a455d63a_971e646b",
+      "range": {
+        "startLine": 280,
+        "startChar": 34,
+        "endLine": 280,
+        "endChar": 37
+      },
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8429b287_83e52c50",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -550,6 +598,30 @@
       "side": 1,
       "message": "I\u0027m not sure I understand, do you have a pointer about this?\nAre you suggesting not to use unnamed namespaces except for private class/struct declarations now?",
       "parentUuid": "8429b287_03d93c94",
+      "range": {
+        "startLine": 433,
+        "startChar": 2,
+        "endLine": 433,
+        "endChar": 68
+      },
+      "revId": "de87a03ab9bb7d18ca92468a78265c98d48be186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "644d9e85_bf6f2781",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-02T16:38:47Z",
+      "side": 1,
+      "message": "Yes, exactly.\nOriginally C++ deprecated static functions and suggested unnamed namespaces as a replacement. Now this is reverted, and C++ Standard recommends using static wherever possible;  so the only reason to use unnamed namespace is to hide something that can\u0027t be static.",
+      "parentUuid": "a4deb6f4_92e31a0c",
       "range": {
         "startLine": 433,
         "startChar": 2,
