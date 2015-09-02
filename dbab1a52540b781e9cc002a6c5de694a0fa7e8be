@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "247566b9_f3a0700a",
+        "filename": "target-i386/ops_sse.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T15:02:48Z",
+      "side": 1,
+      "message": "There is no explanation for this change, nor any reason why you added the new sources. Since this doesn\u0027t seem related to linking against libcurl, can you move this to a separate patch instead ?",
+      "revId": "dbab1a52540b781e9cc002a6c5de694a0fa7e8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4deb6f4_4f818d34",
+        "filename": "util/aes.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-02T15:02:48Z",
+      "side": 1,
+      "message": "nit: this should be \"util/aes.h\"",
+      "revId": "dbab1a52540b781e9cc002a6c5de694a0fa7e8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
