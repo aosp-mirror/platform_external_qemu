@@ -66,7 +66,10 @@ typedef struct {
 #include "android/metrics/metrics_fields.h"
 } AndroidMetrics;
 
-/* Module initialization and finalization functions. */
+/* Module initialization and finalization functions.
+ * Warning: These functions are not thread-safe. They should be called when no
+ * other threads are running (even if they do not use metrics).
+ */
 extern ABool androidMetrics_moduleInit(const char* avdHome);
 extern void androidMetrics_moduleFini(void);
 

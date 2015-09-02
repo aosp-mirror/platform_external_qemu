@@ -2140,6 +2140,12 @@ static void android_teardown_metrics()
     androidMetrics_moduleFini();
 }
 
+/* This entry-point does some thread unsafe initialization.
+ * As such, you should only spawn threads after the point marked below with:
+ *   END THREAD UNSAFE INIT
+ * Similarly, all threads should be reaped before cleanup code marked with:
+ *   START THREAD UNSAFE TEARDOWN
+ */
 int main(int argc, char **argv, char **envp)
 {
     const char *gdbstub_dev = NULL;
@@ -4082,12 +4088,14 @@ int main(int argc, char **argv, char **envp)
      */
     android_init_metrics();
 
+    /*  END THREAD UNSAFE INIT */
     main_loop();
     quit_timers();
     net_cleanup();
     android_wear_agent_stop();
     socket_drainer_stop();
 
+    /* START THREAD UNSAFE TEARDOWN */
     android_emulation_teardown();
     return 0;
 }
