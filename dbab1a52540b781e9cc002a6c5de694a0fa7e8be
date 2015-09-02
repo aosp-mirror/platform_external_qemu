@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "644d9e85_ce6d92fa",
+        "filename": "target-i386/ops_sse.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-02T20:40:44Z",
+      "side": 1,
+      "message": "Explained it better in the checkin description.\nbasically, the constants are not used in this file anymore, so compiler throws them away. But they\u0027re used in some other header - so it didn\u0027t link that way. Now, when each use explicitly includes the constant definitions, everything works",
+      "parentUuid": "247566b9_f3a0700a",
+      "revId": "dbab1a52540b781e9cc002a6c5de694a0fa7e8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a4deb6f4_4f818d34",
         "filename": "util/aes.c",
         "patchSetId": 1
