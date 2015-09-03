@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4dbaa04_93555e60",
+        "filename": "android/metrics/metrics_reporter_unittest.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-03T17:19:50Z",
+      "side": 1,
+      "message": "nit: use mUploadCallsCount instead if upload_calls_count_, but let\u0027s allow it there.",
+      "revId": "a2de3eeb1269aa93b8a525359b56d8f3cd574c04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
