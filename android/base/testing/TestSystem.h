@@ -36,8 +36,9 @@ public:
             mTempRootPrefix(),
             mEnvPairs(),
             mPrevSystem(System::setForTesting(this)),
-            mTimes()
-    {}
+            mTimes(),
+            mSilentShellFunc(NULL),
+            mSilentShellOpaque(NULL) {}
 
     virtual ~TestSystem() {
         System::setForTesting(mPrevSystem);
@@ -160,6 +161,32 @@ public:
         mTimes = times;
     }
 
+    // Type of a helper function that can be used during unit-testing to
+    // receive the parameters of a runSilentCommand() call. Register it
+    // with setSilentCommandShell().
+    typedef bool (SilentCommandShell)(void* opaque,
+                                      const StringVector& commandLine);
+
+    // Register a silent shell function. |shell| is the function callback,
+    // and |shellOpaque| a user-provided pointer passed as its first parameter.
+    void setSilentCommandShell(SilentCommandShell* shell, void* shellOpaque) {
+        mSilentShellFunc = shell;
+        mSilentShellOpaque = shellOpaque;
+    }
+
+    virtual bool runSilentCommand(const StringVector& commandLine) {
+        if (!commandLine.size()) {
+            return false;
+        }
+        // If a silent shell function was registered, invoke it, otherwise
+        // ignore the command completely.
+        if (mSilentShellFunc) {
+            return (*mSilentShellFunc)(mSilentShellOpaque, commandLine);
+        } else {
+            return true;
+        }
+    }
+
 private:
     String toTempRoot(const char* path) {
         String result = mTempRootPrefix;
@@ -184,6 +211,8 @@ private:
     StringVector mEnvPairs;
     System* mPrevSystem;
     Times mTimes;
+    SilentCommandShell* mSilentShellFunc;
+    void* mSilentShellOpaque;
 };
 
 }  // namespace base
