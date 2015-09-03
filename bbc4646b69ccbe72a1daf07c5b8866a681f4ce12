@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "04cce27b_45db5c58",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1564,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-03T01:16:29Z",
+      "side": 1,
+      "message": "Sorry, I found a better way to get the SDK root.\n\nandroid/avd/util.c\n\nchar*\npath_getSdkRoot( char *pFromEnv )",
+      "revId": "bbc4646b69ccbe72a1daf07c5b8866a681f4ce12",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8497f201_aaea641c",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1577,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-03T01:16:29Z",
+      "side": 1,
+      "message": "strncpy?",
+      "revId": "bbc4646b69ccbe72a1daf07c5b8866a681f4ce12",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64159e82_65e96678",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1605,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-03T01:16:29Z",
+      "side": 1,
+      "message": "strncpy?",
+      "revId": "bbc4646b69ccbe72a1daf07c5b8866a681f4ce12",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
