@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2461e61f_f6119e8a",
+        "filename": "Makefile.common",
+        "patchSetId": 13
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-03T16:09:02Z",
+      "side": 1,
+      "message": "I believe this is not needed anymore (we should probably remove this source file in another patch anyway).",
+      "revId": "177828241b99f6fbcf43e137ea1ec8e3b4608a69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4deb6f4_929d5ad1",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-03T16:09:02Z",
+      "side": 1,
+      "message": "again \u0027git clang-format\u0027 will put the accolades at the right place for you ;)",
+      "revId": "177828241b99f6fbcf43e137ea1ec8e3b4608a69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8480d2c5_99b27fc9",
+        "filename": "android/metrics/metrics_reporter.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-03T16:09:02Z",
+      "side": 1,
+      "message": "nit: It might be a good idea to exercise \u0027git clang-format\u0027 now, this will get rid of the spaces after/before the parens :)",
+      "revId": "177828241b99f6fbcf43e137ea1ec8e3b4608a69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
