@@ -15,9 +15,14 @@
 #include "android/base/String.h"
 
 // Return the path to the emulator's Qt library directory,
-// which holds Qt's shared libraries and plug-ins.
-// This path is typically added to the system library search
-// path and passed to QCoreApplication::setLibraryPaths().
+// which holds Qt's shared libraries. This path is typically
+// added to the system library search path and passed to
+// QCoreApplication::setLibraryPaths().
 android::base::String androidQtGetLibraryDir();
+
+// Return the path to the emulator's Qt plugins directory,
+// which holds Qt's plugins. It should be added to the
+// QT_QPA_PLATFORM_PLUGIN_PATH environment variable.
+android::base::String androidQtGetPluginsDir();
 
 #endif  // ANDROID_QT_QT_PATH_H
