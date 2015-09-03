@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "84529221_63aa2aef",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-03T17:08:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4deb6f4_929d5ad1",
+      "revId": "177828241b99f6fbcf43e137ea1ec8e3b4608a69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8480d2c5_99b27fc9",
         "filename": "android/metrics/metrics_reporter.h",
         "patchSetId": 13
@@ -47,6 +65,24 @@
       "writtenOn": "2015-09-03T16:09:02Z",
       "side": 1,
       "message": "nit: It might be a good idea to exercise \u0027git clang-format\u0027 now, this will get rid of the spaces after/before the parens :)",
+      "revId": "177828241b99f6fbcf43e137ea1ec8e3b4608a69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0484e2ca_f09862f8",
+        "filename": "android/metrics/metrics_reporter.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-03T17:08:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8480d2c5_99b27fc9",
       "revId": "177828241b99f6fbcf43e137ea1ec8e3b4608a69",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
