@@ -50,6 +50,24 @@
       "revId": "b66cc0cea73f330f8c3bf6dd0ccbba23406e5e5c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e486eed4_946a2db6",
+        "filename": "android/scripts/build-curl-deps.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-03T18:02:22Z",
+      "side": 1,
+      "message": "It was fixed in original commit but the wrong file was cherry picked. Thanks for catching this.",
+      "parentUuid": "c4dbaa04_9341de01",
+      "revId": "b66cc0cea73f330f8c3bf6dd0ccbba23406e5e5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
