@@ -22,6 +22,92 @@
       "revId": "74b2bab2179c5cf0e521c0a0a8bbc41e5d533b11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_9a80ef81",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-03T00:01:02Z",
+      "side": 1,
+      "message": "wrap to 80 chars.",
+      "revId": "74b2bab2179c5cf0e521c0a0a8bbc41e5d533b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "644d9e85_112bcf18",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-03T00:01:02Z",
+      "side": 1,
+      "message": "I think this leaked in one of the rebases. Should be |metrics|, here and in the forward declaration above please.",
+      "range": {
+        "startLine": 426,
+        "startChar": 52,
+        "endLine": 426,
+        "endChar": 64
+      },
+      "revId": "74b2bab2179c5cf0e521c0a0a8bbc41e5d533b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e486eed4_990ee63e",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-03T00:01:02Z",
+      "side": 1,
+      "message": "Repeating digit@\u0027s comment on one of my earlier CLs: All hosts we care about use memory overcommit. So if you\u0027re sure that the memory chunk required is small-ish, you can be alx about strict checking.",
+      "range": {
+        "startLine": 437,
+        "startChar": 4,
+        "endLine": 438,
+        "endChar": 60
+      },
+      "revId": "74b2bab2179c5cf0e521c0a0a8bbc41e5d533b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6492fe15_a950384b",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-03T00:01:02Z",
+      "side": 1,
+      "message": "This call spews out junk on stdout for me. :/",
+      "range": {
+        "startLine": 445,
+        "startChar": 33,
+        "endLine": 445,
+        "endChar": 50
+      },
+      "revId": "74b2bab2179c5cf0e521c0a0a8bbc41e5d533b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
