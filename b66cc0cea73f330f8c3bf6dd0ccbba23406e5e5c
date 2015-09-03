@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a455d63a_37515800",
+        "filename": "android/scripts/build-curl-deps.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-03T08:04:56Z",
+      "side": 1,
+      "message": "Don\u0027t use Bash-isms like \u0027[[ ]]\u0027 or \u0027\u003d~\u0027 here.\n\nIt\u0027s easier to panic after option_parse when you see that \u0027--cache\u003d\u003cprogram\u003e\u0027 was used. As in:\n\n    option_parse \"$@\"\n\n  ....\n\n  # Forcefully disable ccache to build OpenSSL properly.\n  if [ \"$OPT_CCACHE\" ]; then\n     panic \"You cannot use --ccache with this script (OpenSSL would fail to build).\"\n  fi\n  OPT_NO_CCACHE\u003dtrue\n  package_builder_parse_option curl-deps",
+      "revId": "b66cc0cea73f330f8c3bf6dd0ccbba23406e5e5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84c53226_8e7e9bee",
+        "filename": "android/scripts/build-curl-deps.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-03T08:04:56Z",
+      "side": 1,
+      "message": "nit: Since you modified the original build_package() function, please rename it since it\u0027s no longer generic and can only be used properly with \"$1 \u003d\u003d openssl\". Maybe merge build_openssl_package() above and this build_package() into a single function?",
+      "revId": "b66cc0cea73f330f8c3bf6dd0ccbba23406e5e5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4dbaa04_9341de01",
+        "filename": "android/scripts/build-curl-deps.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-03T08:04:56Z",
+      "side": 1,
+      "message": "nit: Shouldn\u0027t this be $SYSTEM instead?",
+      "revId": "b66cc0cea73f330f8c3bf6dd0ccbba23406e5e5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
