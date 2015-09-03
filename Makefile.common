@@ -168,6 +168,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/StringView.cpp \
 	android/base/system/System.cpp \
 	android/base/threads/ThreadStore.cpp \
+	android/base/Version.cpp \
 	android/emulation/CpuAccelerator.cpp \
 	android/filesystems/ext4_utils.cpp \
 	android/filesystems/fstab_parser.cpp \
@@ -187,10 +188,14 @@ common_LOCAL_SRC_FILES += \
 	android/proxy/proxy_http.c \
 	android/proxy/proxy_http_connector.c \
 	android/proxy/proxy_http_rewriter.c \
+	android/update-check/UpdateChecker.cpp \
 	android/utils/aconfig-file.c \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
 	android/utils/cbuffer.c \
+	android/utils/aconfig-file.c \
+	android/utils/assert.c \
+	android/utils/bufprint.c \
 	android/utils/debug.c \
 	android/utils/dll.c \
 	android/utils/dirscanner.cpp \
