@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44141a88_8442a673",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-03T00:02:44Z",
+      "side": 1,
+      "message": "Please keep commit message lines \u003c65 chars.\nThis makes gerrit formatting as well as some git-log formatting happy.",
+      "range": {
+        "startLine": 10,
+        "startChar": 66,
+        "endLine": 10,
+        "endChar": 73
+      },
+      "revId": "3c441054ebedb2ea844a0bad39efb007f30806f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
