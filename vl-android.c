@@ -69,6 +69,7 @@
 #include "android/skin/charmap.h"
 #include "android/snapshot.h"
 #include "android/tcpdump.h"
+#include "android/update-check/update_check.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
@@ -135,6 +136,7 @@
 
 #include <linux/ppdev.h>
 #include <linux/parport.h>
+
 #endif
 #ifdef __sun__
 #include <sys/stat.h>
@@ -398,6 +400,8 @@ extern int android_display_height;
 extern int android_display_bpp;
 
 extern void  dprint( const char* format, ... );
+
+static void android_check_for_updates();
 
 const char* dns_log_filename = NULL;
 const char* drop_log_filename = NULL;
@@ -4023,6 +4027,8 @@ int main(int argc, char **argv, char **envp)
     android_core_init_completed();
 #endif  // CONFIG_ANDROID
 
+    android_check_for_updates();
+
     main_loop();
     quit_timers();
     net_cleanup();
@@ -4031,6 +4037,12 @@ int main(int argc, char **argv, char **envp)
 
     android_emulation_teardown();
     return 0;
+}
+
+void android_check_for_updates() {
+    char homePath[PATH_MAX];
+    bufprint_avd_home_path(homePath, homePath + sizeof(homePath));
+    checkForUpdates(homePath);
 }
 
 void
