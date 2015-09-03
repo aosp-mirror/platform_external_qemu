@@ -21,6 +21,10 @@
 #include "android/base/StringFormat.h"
 
 #ifdef _WIN32
+#include "android/base/system/Win32Utils.h"
+#endif
+
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -29,6 +33,7 @@
 #endif  // __APPLE__
 
 #ifndef _WIN32
+#include <fcntl.h>
 #include <dirent.h>
 #include <sys/times.h>
 #endif
@@ -240,6 +245,78 @@ public:
 #endif
 
         return res;
+    }
+
+    bool runSilentCommand(const StringVector& commandLine) {
+        // Sanity check.
+        if (commandLine.empty()) {
+            return false;
+        }
+
+#ifdef _WIN32
+        STARTUPINFO startup;
+        ZeroMemory(&startup, sizeof(startup));
+        startup.cb = sizeof(startup);
+        startup.dwFlags = STARTF_USESHOWWINDOW;
+        startup.wShowWindow = SW_SHOWMINIMIZED;
+
+        PROCESS_INFORMATION pinfo;
+        ZeroMemory(&pinfo, sizeof(pinfo));
+
+        const char* comspec = ::getenv("COMSPEC");
+        if (!comspec) {
+            comspec = "cmd.exe";
+        }
+
+        // Run the command.
+        String command = "/C";
+        for (size_t n = 0; n < commandLine.size(); ++n) {
+            command += " ";
+            command += android::base::Win32Utils::quoteCommandLine(commandLine[n].c_str());
+        }
+
+        fprintf(stderr, "COMMAND [%s]\n", command.c_str());
+        if (!CreateProcess(comspec,                /* program path */
+                            (char*)command.c_str(), /* command line args */
+                            NULL,             /* process handle is not inheritable */
+                            NULL,             /* thread handle is not inheritable */
+                            FALSE,            /* no, don't inherit any handles */
+                            DETACHED_PROCESS, /* the new process doesn't have a console */
+                            NULL,             /* use parent's environment block */
+                            NULL,             /* use parent's starting directory */
+                            &startup,         /* startup info, i.e. std handles */
+                            &pinfo)) {
+            return false;
+        }
+
+        CloseHandle(pinfo.hProcess);
+        CloseHandle(pinfo.hThread);
+
+        return true;
+#else  // !_WIN32
+        char** params = new char*[commandLine.size()];
+        for (size_t n = 0; n < commandLine.size(); ++n) {
+            params[n] = (char*)commandLine[n].c_str();
+        }
+
+        int pid = fork();
+        if (pid < 0) {
+            return false;
+        }
+        if (pid != 0) {
+            // Parent process returns immediately.
+            delete [] params;
+            return true;
+        }
+
+        // In the child process.
+        int fd = open("/dev/null", O_WRONLY);
+        dup2(fd, 1);
+        dup2(fd, 2);
+        execvp(commandLine[0].c_str(), params);
+        // Should not happen.
+        exit(1);
+#endif  // !_WIN32
     }
 
 private:

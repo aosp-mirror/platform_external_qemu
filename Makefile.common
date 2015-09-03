@@ -149,13 +149,14 @@ common_LOCAL_SRC_FILES += \
 	android/filesystems/ramdisk_extractor.cpp \
 	android/kernel/kernel_utils.cpp \
 	android/metrics/metrics_reporter.c \
-	android/qemu/base/async/Looper.cpp \
 	android/looper-base.cpp \
 	android/looper-generic.cpp \
+	android/metrics/ddms-ping.cpp \
 	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
 	android/opengl/emugl_config.cpp \
 	android/opengl/GpuFrameBridge.cpp \
+	android/qemu/base/async/Looper.cpp \
 	android/utils/aconfig-file.c \
 	android/utils/assert.c \
 	android/utils/bufprint.c \

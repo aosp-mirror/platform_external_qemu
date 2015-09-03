@@ -20,6 +20,7 @@
 #include "android/globals.h"
 #include "android/hw-sensors.h"
 #include "android/hw-fingerprint.h"
+#include "android/metrics/ddms-ping.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 #include "android/utils/system.h"
@@ -476,97 +477,8 @@ void  android_emulation_setup( void )
     * if the user agreed for it. the emulator itself never sends anything to any outside
     * machine
     */
-    {
-#ifdef _WIN32
-#  define  _ANDROID_PING_PROGRAM   "ddms.bat"
-#else
-#  define  _ANDROID_PING_PROGRAM   "ddms"
-#endif
-
-        char         tmp[PATH_MAX];
-        const char*  appdir = get_app_dir();
-
-        const size_t ARGSLEN =
-                PATH_MAX +                    // max ping program path
-                10 +                          // max VERSION_STRING length
-                3*ANDROID_GLSTRING_BUF_SIZE + // max GL string lengths
-                29 +                          // static args characters
-                1;                            // NUL terminator
-        char args[ARGSLEN];
-
-        if (snprintf( tmp, PATH_MAX, "%s%s%s", appdir, PATH_SEP,
-                      _ANDROID_PING_PROGRAM ) >= PATH_MAX) {
-            dprint( "Application directory too long: %s", appdir);
-            return;
-        }
-
-        /* if the program isn't there, don't bother */
-        D( "ping program: %s", tmp);
-        if (path_exists(tmp)) {
-#ifdef _WIN32
-            STARTUPINFO           startup;
-            PROCESS_INFORMATION   pinfo;
-
-            ZeroMemory( &startup, sizeof(startup) );
-            startup.cb = sizeof(startup);
-            startup.dwFlags = STARTF_USESHOWWINDOW;
-            startup.wShowWindow = SW_SHOWMINIMIZED;
-
-            ZeroMemory( &pinfo, sizeof(pinfo) );
-
-            char* comspec = getenv("COMSPEC");
-            if (!comspec) comspec = "cmd.exe";
-
-            // Run
-            if (snprintf(args, ARGSLEN,
-                    "/C \"%s\" ping emulator " VERSION_STRING " \"%s\" \"%s\" \"%s\"",
-                    tmp, android_gl_vendor, android_gl_renderer, android_gl_version)
-                >= ARGSLEN)
-            {
-                D( "DDMS command line too long: %s", args);
-                return;
-            }
-
-            CreateProcess(
-                comspec,                                      /* program path */
-                args,                                    /* command line args */
-                NULL,                    /* process handle is not inheritable */
-                NULL,                     /* thread handle is not inheritable */
-                FALSE,                       /* no, don't inherit any handles */
-                DETACHED_PROCESS,   /* the new process doesn't have a console */
-                NULL,                       /* use parent's environment block */
-                NULL,                      /* use parent's starting directory */
-                &startup,                   /* startup info, i.e. std handles */
-                &pinfo );
-
-            D( "ping command: %s %s", comspec, args );
-#else
-            int  pid;
-
-            /* disable SIGALRM for the fork(), the periodic signal seems to
-             * interefere badly with the fork() implementation on Linux running
-             * under VMWare.
-             */
-            BEGIN_NOSIGALRM
-                pid = fork();
-                if (pid == 0) {
-                    int  fd = open("/dev/null", O_WRONLY);
-                    dup2(fd, 1);
-                    dup2(fd, 2);
-                    execl( tmp, _ANDROID_PING_PROGRAM, "ping", "emulator", VERSION_STRING,
-                            android_gl_vendor, android_gl_renderer, android_gl_version,
-                            NULL );
-                }
-            END_NOSIGALRM
-
-            /* don't do anything in the parent or in case of error */
-            snprintf(args, ARGSLEN,
-                    "%s ping emulator " VERSION_STRING " \"%s\" \"%s\" \"%s\"",
-                    tmp, android_gl_vendor, android_gl_renderer, android_gl_version);
-            D( "ping command: %s", args );
-#endif
-        }
-    }
+    android_ddms_ping(VERSION_STRING, android_gl_vendor, android_gl_renderer,
+                      android_gl_version);
 }
 
 
