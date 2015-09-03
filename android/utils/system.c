@@ -9,6 +9,19 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+
+/* *** DEPRECATION WARNING ***
+ * This file is deprecated. If you want a new system function in C code, do the
+ * following:
+ * - Extend android/base/system/System.{h,cpp} if needed to implement new
+ *   function in C++
+ * - Expose a C function through a thin wrapper declared in
+ *   android/utils/system.h and implemented in android/utils/system_wrapper.c
+ *
+ * This file will be actively ported over using the above mentioned scheme and
+ * then deleted.
+ */
+
 #include "android/utils/system.h"
 #include "android/utils/assert.h"
 #include <stdlib.h>

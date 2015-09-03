@@ -148,6 +148,7 @@ common_LOCAL_SRC_FILES += \
 	android/filesystems/partition_types.cpp \
 	android/filesystems/ramdisk_extractor.cpp \
 	android/kernel/kernel_utils.cpp \
+	android/metrics/metrics_reporter.c \
 	android/qemu/base/async/Looper.cpp \
 	android/looper-base.cpp \
 	android/looper-generic.cpp \
@@ -181,6 +182,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/stralloc.c \
 	android/utils/string.cpp \
 	android/utils/system.c \
+	android/utils/system_wrapper.cpp \
 	android/utils/tempfile.c \
 	android/utils/uncompress.cpp \
 	android/utils/utf8_utils.cpp \
