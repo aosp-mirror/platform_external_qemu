@@ -726,6 +726,23 @@
       "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6492fe15_500035c7",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4030,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T19:04:46Z",
+      "side": 1,
+      "message": "Let\u0027s make sure this is called after the thread unsafe section I added in my CL.\n\nSee https://android-review.googlesource.com/#/c/169413/5/vl-android.c@4091",
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
