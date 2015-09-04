@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6492fe15_8b99ac72",
+        "filename": "android/utils/curl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T21:30:19Z",
+      "side": 1,
+      "message": "This will never go above one.",
+      "range": {
+        "startLine": 30,
+        "startChar": 10,
+        "endLine": 30,
+        "endChar": 19
+      },
+      "revId": "5b24b4841504a864f554383135392d74ebbd59a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0484e2ca_7f997db4",
+        "filename": "android/utils/curl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T21:30:19Z",
+      "side": 1,
+      "message": "while this will only go down once...\n\nI don\u0027t get it.\n\nDid you intend to increment *every time* curl_init is called?",
+      "range": {
+        "startLine": 37,
+        "startChar": 15,
+        "endLine": 37,
+        "endChar": 33
+      },
+      "revId": "5b24b4841504a864f554383135392d74ebbd59a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e486eed4_e9e3970a",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4079,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T21:30:19Z",
+      "side": 1,
+      "message": "Call this much earlier. Before anyone has had a chance to spawn threads.\nSee vharron@\u0027s comment earlier.",
+      "range": {
+        "startLine": 4079,
+        "startChar": 4,
+        "endLine": 4079,
+        "endChar": 13
+      },
+      "revId": "5b24b4841504a864f554383135392d74ebbd59a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
