@@ -71,6 +71,7 @@
 #include "android/snapshot.h"
 #include "android/tcpdump.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/curl.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
 #include "android/utils/path.h"
@@ -137,6 +138,7 @@
 #include <linux/ppdev.h>
 #include <linux/parport.h>
 #endif
+
 #ifdef __sun__
 #include <sys/stat.h>
 #include <sys/ethernet.h>
@@ -4074,6 +4076,8 @@ int main(int argc, char **argv, char **envp)
     android_core_init_completed();
 #endif  // CONFIG_ANDROID
 
+    curl_init();
+
     /* Initialize metrics right before entering main loop.
      * We want to track performance of a running emulator, ignoring any early
      * exits as a result of incorrect setup.
@@ -4097,4 +4101,6 @@ android_emulation_teardown(void)
 {
     skin_charmap_done();
     android_teardown_metrics();
+
+    curl_cleanup();
 }
