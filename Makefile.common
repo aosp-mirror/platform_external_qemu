@@ -136,8 +136,9 @@ EMULATOR_COMMON_CFLAGS += -DCURL_STATICLIB
 common_LOCAL_SRC_FILES += \
 	android/android-constants.c \
 	android/async-console.c \
-	android/framebuffer.c \
 	android/async-utils.c \
+	android/curl-support.c \
+	android/framebuffer.c \
 	android/avd/hw-config.c \
 	android/avd/info.c \
 	android/avd/scanner.c \
