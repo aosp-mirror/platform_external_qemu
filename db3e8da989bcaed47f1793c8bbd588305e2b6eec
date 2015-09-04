@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "64159e82_3adca500",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T18:53:04Z",
+      "side": 1,
+      "message": "Done and Done.",
+      "parentUuid": "6492fe15_7560c3ca",
+      "revId": "db3e8da989bcaed47f1793c8bbd588305e2b6eec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "644d9e85_58bde40d",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-04T16:08:33Z",
       "side": 1,
       "message": "Where is androidMetrics_moduleFini called from?  Since it depends on curl_global_cleanup, which is marked as *This function is not thread safe.* the declaration of this function should also be marked as *This function is not thread safe.*\n\nIt should be called from main() level cleanup (after threads are destroyed)",
+      "revId": "db3e8da989bcaed47f1793c8bbd588305e2b6eec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8497f201_9606ab93",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T18:53:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "644d9e85_58bde40d",
       "revId": "db3e8da989bcaed47f1793c8bbd588305e2b6eec",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -59,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "44141a88_795c6bdf",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T18:53:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "644d9e85_181acc39",
+      "range": {
+        "startLine": 404,
+        "startChar": 7,
+        "endLine": 404,
+        "endChar": 23
+      },
+      "revId": "db3e8da989bcaed47f1793c8bbd588305e2b6eec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e486eed4_b8063fe5",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 3
@@ -70,6 +130,24 @@
       "writtenOn": "2015-09-04T16:08:33Z",
       "side": 1,
       "message": "Should you\n    android_free(fields);\n    curl_easy_cleanup(curl);\n    return 0;",
+      "revId": "db3e8da989bcaed47f1793c8bbd588305e2b6eec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64159e82_3a32e528",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T18:53:04Z",
+      "side": 1,
+      "message": "No. There is some overlap in the errors returned by curl_easy_perform and HTTP error responses. So we want to continue down to get the exact HTTP error code.",
+      "parentUuid": "e486eed4_b8063fe5",
       "revId": "db3e8da989bcaed47f1793c8bbd588305e2b6eec",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
