@@ -21,6 +21,13 @@
 
 ANDROID_BEGIN_HEADER
 
+/* stdint.h will not define necessary macros in some c++ compiler
+ * implementations without this macro definition.
+ */
+#if defined(__cplusplus) && !defined(__STDC_LIMIT_MACROS)
+#error "This header requires you to define __STDC_LIMIT_MACROS."
+#endif
+
 /**********************************************************************
  **********************************************************************
  *****
