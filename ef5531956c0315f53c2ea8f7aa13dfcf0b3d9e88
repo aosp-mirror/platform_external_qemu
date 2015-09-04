@@ -16,6 +16,24 @@
       "revId": "ef5531956c0315f53c2ea8f7aa13dfcf0b3d9e88",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44141a88_390cb3b6",
+        "filename": "vl-android.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4091,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T19:41:21Z",
+      "side": 1,
+      "message": "Good that I didn\u0027t really mean that +2 :/\n\nThere\u0027s a small update to how I\u0027m reporting the two values. I was playing with GA, making a dashboard and realized that it\u0027s better to report things a little differently.\n\nWill fix both and upload a patchset here.",
+      "parentUuid": "84529221_05149308",
+      "revId": "ef5531956c0315f53c2ea8f7aa13dfcf0b3d9e88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
