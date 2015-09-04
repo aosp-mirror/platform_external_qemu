@@ -276,16 +276,7 @@ void qemud_client_disconnect(void* opaque, int guest_close) {
     }
 
     if (qemud_is_pipe_client(c) && !guest_close) {
-        /* This is emulator component (rather than the guest) closing a pipe
-         * client. Since pipe clients are controlled strictly by the guest, we
-         * don't actually close the client here, but notify the guest about the
-         * client being disconnected. Then we will do the real client close when
-         * the guest explicitly closes the pipe, in which case this routine will
-         * be called from the _qemudPipe_closeFromGuest callback with guest_close
-         * set to 1. */
-        char tmp[128], * p = tmp, * end = p + sizeof(tmp);
-        p = bufprint(tmp, end, "disconnect:00");
-        _qemud_pipe_send(c, (uint8_t*) tmp, p - tmp);
+        android_pipe_close(c->ProtocolSelector.Pipe.qemud_pipe->hwpipe);
         return;
     }
 
