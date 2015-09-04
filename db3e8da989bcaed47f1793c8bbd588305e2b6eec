@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "644d9e85_181acc39",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T02:42:22Z",
+      "side": 1,
+      "message": "TODO(pprabhu) Add a comment about this macro, to save the next person some time debugging.",
+      "range": {
+        "startLine": 404,
+        "startChar": 7,
+        "endLine": 404,
+        "endChar": 23
+      },
+      "revId": "db3e8da989bcaed47f1793c8bbd588305e2b6eec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
