@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "6492fe15_7560c3ca",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-04T16:08:33Z",
+      "side": 1,
+      "message": "Check return value?\n\nWhere is androidMetrics_moduleInit called from?  Since it depends on curl_global_init, which is marked as *This function is not thread safe.* the declaration of this function should also be marked as *This function is not thread safe.*\n\nIt should be called from main() level initialization (before threads are created)",
+      "revId": "db3e8da989bcaed47f1793c8bbd588305e2b6eec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "644d9e85_58bde40d",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-04T16:08:33Z",
+      "side": 1,
+      "message": "Where is androidMetrics_moduleFini called from?  Since it depends on curl_global_cleanup, which is marked as *This function is not thread safe.* the declaration of this function should also be marked as *This function is not thread safe.*\n\nIt should be called from main() level cleanup (after threads are destroyed)",
+      "revId": "db3e8da989bcaed47f1793c8bbd588305e2b6eec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "644d9e85_181acc39",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 3
@@ -19,6 +53,23 @@
         "endLine": 404,
         "endChar": 23
       },
+      "revId": "db3e8da989bcaed47f1793c8bbd588305e2b6eec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e486eed4_b8063fe5",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-04T16:08:33Z",
+      "side": 1,
+      "message": "Should you\n    android_free(fields);\n    curl_easy_cleanup(curl);\n    return 0;",
       "revId": "db3e8da989bcaed47f1793c8bbd588305e2b6eec",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
