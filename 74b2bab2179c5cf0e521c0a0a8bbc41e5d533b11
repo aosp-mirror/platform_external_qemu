@@ -65,6 +65,30 @@
     },
     {
       "key": {
+        "uuid": "644d9e85_c2a443ed",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T02:02:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "644d9e85_112bcf18",
+      "range": {
+        "startLine": 426,
+        "startChar": 52,
+        "endLine": 426,
+        "endChar": 64
+      },
+      "revId": "74b2bab2179c5cf0e521c0a0a8bbc41e5d533b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e486eed4_990ee63e",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 1
@@ -99,6 +123,30 @@
       "writtenOn": "2015-09-03T21:38:11Z",
       "side": 1,
       "message": "AFAIK windows doesn\u0027t\nAnd I just don\u0027t like to have a code which may go insane at some point (I usually completely disable page file on my boxes, so it\u0027s quite easy to get allocation failure for me)",
+      "parentUuid": "e486eed4_990ee63e",
+      "range": {
+        "startLine": 437,
+        "startChar": 4,
+        "endLine": 438,
+        "endChar": 60
+      },
+      "revId": "74b2bab2179c5cf0e521c0a0a8bbc41e5d533b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6492fe15_1fd63e64",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T02:02:00Z",
+      "side": 1,
+      "message": "Done",
       "parentUuid": "e486eed4_990ee63e",
       "range": {
         "startLine": 437,
