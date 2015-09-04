@@ -186,6 +186,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/aconfig-file.c \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
+	android/utils/curl.c \
 	android/utils/debug.c \
 	android/utils/dll.c \
 	android/utils/dirscanner.cpp \

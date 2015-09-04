@@ -1,6 +1,8 @@
 #ifndef __QEMU_THREAD_H
 #define __QEMU_THREAD_H 1
 
+#include "android/utils/compiler.h"
+
 #include <inttypes.h>
 #include <stdbool.h>
 
@@ -15,6 +17,8 @@ typedef struct QemuThread QemuThread;
 #else
 #include "qemu/thread-posix.h"
 #endif
+
+ANDROID_BEGIN_HEADER
 
 #define QEMU_THREAD_JOINABLE 0
 #define QEMU_THREAD_DETACHED 1
@@ -61,5 +65,7 @@ void *qemu_thread_join(QemuThread *thread);
 void qemu_thread_get_self(QemuThread *thread);
 bool qemu_thread_is_self(QemuThread *thread);
 void qemu_thread_exit(void *retval);
+
+ANDROID_END_HEADER
 
 #endif
