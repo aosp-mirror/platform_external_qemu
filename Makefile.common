@@ -137,6 +137,7 @@ common_LOCAL_SRC_FILES += \
 	android/android-constants.c \
 	android/async-console.c \
 	android/async-utils.c \
+	android/curl-support.c \
 	android/framebuffer.c \
 	android/iolooper.cpp \
 	android/avd/hw-config.c \
