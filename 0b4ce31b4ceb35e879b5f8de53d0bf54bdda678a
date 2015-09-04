@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44141a88_8e38fc67",
+        "filename": "vl-android.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2189,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T23:22:51Z",
+      "side": 1,
+      "message": "zyy@: Can you double check if this should be below the socket_init call below.\nAnd, OTOH, if it *can* be below (that one doesn\u0027t spawn threads).",
+      "range": {
+        "startLine": 2189,
+        "startChar": 4,
+        "endLine": 2189,
+        "endChar": 13
+      },
+      "revId": "0b4ce31b4ceb35e879b5f8de53d0bf54bdda678a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
