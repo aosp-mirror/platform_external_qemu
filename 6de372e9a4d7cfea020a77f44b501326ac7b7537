@@ -688,6 +688,30 @@
     },
     {
       "key": {
+        "uuid": "64159e82_9af79993",
+        "filename": "android/update-check/UpdateChecker.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-04T19:02:37Z",
+      "side": 1,
+      "message": "that\u0027s true, but that\u0027s the simplest smart pointer I have now.\nLet\u0027s just replace it with unique_ptr when C++11 is enabled",
+      "parentUuid": "84529221_0f56f46a",
+      "range": {
+        "startLine": 73,
+        "startChar": 9,
+        "endLine": 73,
+        "endChar": 17
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e486eed4_43438479",
         "filename": "vl-android.c",
         "patchSetId": 2
