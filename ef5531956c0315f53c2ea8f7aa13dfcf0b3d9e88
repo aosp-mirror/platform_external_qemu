@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "84529221_05149308",
+        "filename": "vl-android.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4091,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-04T19:36:56Z",
+      "side": 1,
+      "message": "Whoa there.\n\nThere is some stuff above that spawns threads, like the opengl stuff (I think).  Probably best to move this up to somewhere you are more confident is thread safe.",
+      "revId": "ef5531956c0315f53c2ea8f7aa13dfcf0b3d9e88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
