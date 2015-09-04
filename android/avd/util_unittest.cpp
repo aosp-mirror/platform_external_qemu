@@ -119,10 +119,8 @@ TEST(AvdUtil, propertyFile_getAdbdCommunicationMode) {
   EXPECT_EQ(0, propertyFile_getAdbdCommunicationMode(&fd));
 
   // 1 -> 0.
-  // ADB hangs when using the qemud pipe, so the communication method should
-  // always be "0" (see note in propertyFile_getAdbdCommunicationMode()).
   EXPECT_EQ(0, fileData_initFromMemory(&fd, valueIsOne, strlen(valueIsOne)));
-  EXPECT_EQ(0, propertyFile_getAdbdCommunicationMode(&fd));
+  EXPECT_EQ(1, propertyFile_getAdbdCommunicationMode(&fd));
 
   // BOGUS -> 0
   EXPECT_EQ(0, fileData_initFromMemory(&fd, valueIsBogus, strlen(valueIsBogus)));

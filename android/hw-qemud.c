@@ -848,9 +848,7 @@ qemud_client_disconnect( void*  opaque, int guest_close )
          * the guest explicitly closes the pipe, in which case this routine will
          * be called from the _qemudPipe_closeFromGuest callback with guest_close
          * set to 1. */
-        char  tmp[128], *p=tmp, *end=p+sizeof(tmp);
-        p = bufprint(tmp, end, "disconnect:00");
-        _qemud_pipe_send(c, (uint8_t*)tmp, p-tmp);
+        goldfish_pipe_close(c->ProtocolSelector.Pipe.qemud_pipe->hwpipe);
         return;
     }
 
@@ -2087,7 +2085,15 @@ _qemudPipe_poll(void* opaque)
 static void
 _qemudPipe_wakeOn(void* opaque, int flags)
 {
+    QemudPipe* pipe = opaque;
+    QemudClient* client = pipe->client;
     D("%s: -> %X", __FUNCTION__, flags);
+    if (flags & PIPE_WAKE_READ) {
+        if (client->ProtocolSelector.Pipe.messages != NULL) {
+            goldfish_pipe_wake(client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
+                               PIPE_WAKE_READ);
+        }
+    }
 }
 
 static void
