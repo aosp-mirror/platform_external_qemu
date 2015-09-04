@@ -151,6 +151,28 @@ const TargetInfo kTarget = {
     {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
     {NULL},
 #endif
+#ifdef TARGET_X86
+    "x86",
+    "i386",
+    "qemu32",
+    "ttyS",
+    " androidboot.hardware=ranchu",
+    "virtio-blk-pci",
+    "virtio-net-pci",
+    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_SD_CARD},
+    {"-vga", "none", NULL},
+#endif
+#ifdef TARGET_X86_64
+    "x86_64",
+    "x86_64",
+    "qemu64",
+    "ttyS",
+    " androidboot.hardware=ranchu",
+    "virtio-blk-pci",
+    "virtio-net-pci",
+    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_SD_CARD},
+    {"-vga", "none", NULL},
+#endif
 };
 
 String getNthParentDir(const char* path, size_t n) {
@@ -462,9 +484,12 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     args[n++] = "-cpu";
     args[n++] = kTarget.qemuCpu;
+#if defined(TARGET_X86_64) || defined(TARGET_X86)
+    // placeholder: will put hardware acceleration code here in next patch
+#else
     args[n++] = "-machine";
     args[n++] = "type=ranchu";
-
+#endif
     // Memory size
     args[n++] = "-m";
     String memorySize = StringFormat("%ld", hw->hw_ramSize);
@@ -530,8 +555,8 @@ extern "C" int main(int argc, char **argv, char **envp) {
     args[n++] = dataDir.c_str();
 
     /* append extra qemu parameters if any */
-    for (int idx = 0; kTarget.qemuExtraArgs[idx] != NULL; ++idx) {
-        args[n++] = kTarget.qemuExtraArgs[idx++];
+    for (int idx = 0; kTarget.qemuExtraArgs[idx] != NULL; idx++) {
+        args[n++] = kTarget.qemuExtraArgs[idx];
     }
     args[n] = NULL;
 
