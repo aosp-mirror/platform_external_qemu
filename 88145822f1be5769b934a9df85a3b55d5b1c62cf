@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0484e2ca_5fd35996",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T21:06:18Z",
+      "side": 1,
+      "message": "I meant, should you set *this \u003d Invalid here as well.\n\n4.5.6.0.3.4 should be treated as an invalid version.",
+      "range": {
+        "startLine": 74,
+        "startChar": 25,
+        "endLine": 74,
+        "endChar": 34
+      },
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_a0ec8dca",
+        "filename": "android/update-check/update_check.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T21:06:18Z",
+      "side": 1,
+      "message": "Update header guards.",
+      "range": {
+        "startLine": 12,
+        "startChar": 8,
+        "endLine": 12,
+        "endChar": 34
+      },
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "240f267a_5dbebbeb",
+        "filename": "android/utils/curl.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T21:06:18Z",
+      "side": 1,
+      "message": "Please add a function: \n\n  bool is_curl_initialized()\n\nthat can be used by users of curl to decide whether they can use curl.",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
