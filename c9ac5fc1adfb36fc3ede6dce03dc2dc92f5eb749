@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4d56a01_e0a0e261",
+        "filename": "android/scripts/build-curl-deps.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-04T16:36:38Z",
+      "side": 1,
+      "message": "nit: trailing whitespace here :)",
+      "revId": "c9ac5fc1adfb36fc3ede6dce03dc2dc92f5eb749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
