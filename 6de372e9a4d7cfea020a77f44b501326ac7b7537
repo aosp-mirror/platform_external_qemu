@@ -2,6 +2,161 @@
   "comments": [
     {
       "key": {
+        "uuid": "8497f201_b367395b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "nit: Tell us what this CL does: \n\n  \"Add update checker in emulator.\"",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 26
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04cce27b_d741de29",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "nit: sort",
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04cce27b_f777c298",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "We frown upon non-const reference arguments. It\u0027s very non-obvious at the callsite that |value| will get modified through the call.",
+      "range": {
+        "startLine": 37,
+        "startChar": 43,
+        "endLine": 37,
+        "endChar": 62
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0484e2ca_79067d96",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "nit: I\u0027ve never seen this formatting before. Why not , with the previous element? That seems the more intuitive choice.",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 52,
+        "endChar": 6
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "240f267a_f7fa28aa",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "Should still be |Invalid|?",
+      "range": {
+        "startLine": 76,
+        "startChar": 8,
+        "endLine": 76,
+        "endChar": 65
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e486eed4_58ee13f0",
+        "filename": "android/base/Version.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "Convention is to not start with QEMU_, just ANDROID_BASE_VERSION_H",
+      "range": {
+        "startLine": 12,
+        "startChar": 8,
+        "endLine": 12,
+        "endChar": 13
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e486eed4_58fdb3da",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "Why the special handling?",
+      "range": {
+        "startLine": 16,
+        "startChar": 9,
+        "endLine": 16,
+        "endChar": 31
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6492fe15_35a6bb8e",
         "filename": "android/update-check/UpdateChecker.cpp",
         "patchSetId": 2
@@ -19,6 +174,339 @@
         "endLine": 35,
         "endChar": 52
       },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8497f201_96b9cb04",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "Please document the setup for this xml in a team-shared place. Refer vharron@ for where that should be.",
+      "range": {
+        "startLine": 40,
+        "startChar": 9,
+        "endLine": 40,
+        "endChar": 67
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_eaaf065f",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "super nit: Is it safe to |release| a pointer that is no longer pointing to a valid object? In the odd scenario where the async run happens to run after the condition check but before this statement, you\u0027d have that situation.\n\n- I *think* it\u0027s safe.\n- This situation is extremely unlikely.",
+      "range": {
+        "startLine": 52,
+        "startChar": 8,
+        "endLine": 52,
+        "endChar": 68
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64159e82_3f2db75f",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "This is being called from a thread. That\u0027s unsafe.\n\nIn fact, it has to be called from the main thread *before any threads have been spawned*.\n\nFWIW: It\u0027s OK to call it twice -- here and in |androidMetrics_moduleInit|.",
+      "range": {
+        "startLine": 113,
+        "startChar": 8,
+        "endLine": 113,
+        "endChar": 42
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64159e82_1f327bbf",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "Ditto about thread safety.",
+      "range": {
+        "startLine": 127,
+        "startChar": 8,
+        "endLine": 127,
+        "endChar": 30
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64159e82_9f414b2b",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "This will break on windows. Use android/base/PathUtils.h",
+      "range": {
+        "startLine": 137,
+        "startChar": 48,
+        "endLine": 137,
+        "endChar": 51
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44141a88_5e0b559c",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "Use std::endl instead.",
+      "range": {
+        "startLine": 172,
+        "startChar": 54,
+        "endLine": 172,
+        "endChar": 58
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "644d9e85_53bf0798",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "I think it\u0027d be equally easy, and a little better experience if we check that the diff \u003e 24 hours. wdyt?",
+      "range": {
+        "startLine": 205,
+        "startChar": 4,
+        "endLine": 205,
+        "endChar": 68
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04cce27b_692916c9",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "I\u0027m not sure about the android/* --\u003e qemu dependency.",
+      "range": {
+        "startLine": 211,
+        "startChar": 4,
+        "endLine": 211,
+        "endChar": 22
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0484e2ca_e4250089",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "nit: avoid hanging comments. Why not above?\nDidn\u0027t clang-format complain about this?",
+      "range": {
+        "startLine": 214,
+        "startChar": 19,
+        "endLine": 215,
+        "endChar": 40
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8497f201_f6eccfcb",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "I like this comment :)\nnit: Above the return statement please.",
+      "range": {
+        "startLine": 238,
+        "startChar": 21,
+        "endLine": 238,
+        "endChar": 80
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e486eed4_235f605b",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "- You don\u0027t need the \"%s\" at all.\n\n- why not std::cout?",
+      "range": {
+        "startLine": 242,
+        "startChar": 11,
+        "endLine": 243,
+        "endChar": 57
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "240f267a_d7f72cc0",
+        "filename": "android/update-check/UpdateChecker.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 12,
+        "startChar": 8,
+        "endLine": 12,
+        "endChar": 48
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6492fe15_75d8c3b1",
+        "filename": "android/update-check/UpdateChecker.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "You\u0027ll see a lot of comments from me in a general direction: Let\u0027s document the interfaces nicely in the headers. In general, a user of your stuff shouldn\u0027t have to look at the c file to figure out what your stuff does :)",
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_0f56f46a",
+        "filename": "android/update-check/UpdateChecker.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "nit: deprectaed in c++11. There\u0027s no use of auto_ptr in the codebase so far.\nMay not want to introduce it now.",
+      "range": {
+        "startLine": 73,
+        "startChar": 9,
+        "endLine": 73,
+        "endChar": 17
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e486eed4_43438479",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-04T17:38:39Z",
+      "side": 1,
+      "message": "nit: This makes the endif more confusing by sticking it with the next ifdef",
       "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
