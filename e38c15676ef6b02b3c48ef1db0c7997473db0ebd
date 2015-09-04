@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "644d9e85_b3cd1bbe",
+        "filename": "Makefile.common",
+        "patchSetId": 3
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-04T19:04:15Z",
+      "side": 1,
+      "message": "I removed a changeset from my git history, that\u0027s how it looks like now :)",
+      "range": {
+        "startLine": 107,
+        "startChar": 0,
+        "endLine": 127,
+        "endChar": 59
+      },
+      "revId": "e38c15676ef6b02b3c48ef1db0c7997473db0ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
