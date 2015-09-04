@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6492fe15_35a6bb8e",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-04T05:38:27Z",
+      "side": 1,
+      "message": "for testing, will update",
+      "range": {
+        "startLine": 35,
+        "startChar": 31,
+        "endLine": 35,
+        "endChar": 52
+      },
+      "revId": "6de372e9a4d7cfea020a77f44b501326ac7b7537",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
