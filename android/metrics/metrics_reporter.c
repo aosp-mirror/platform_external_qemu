@@ -506,6 +506,7 @@ ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics) {
 
     curl_easy_setopt(curl, CURLOPT_URL, analytics_url);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fields);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
 #ifndef GA_VALIDATE_HITS
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteFunction);
 #endif
