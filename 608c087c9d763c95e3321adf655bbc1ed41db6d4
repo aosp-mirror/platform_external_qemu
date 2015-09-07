@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4ae4a93_581edda0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-07T09:39:12Z",
+      "side": 1,
+      "message": "nit: s/TSL/TLS/ here :)",
+      "revId": "608c087c9d763c95e3321adf655bbc1ed41db6d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
