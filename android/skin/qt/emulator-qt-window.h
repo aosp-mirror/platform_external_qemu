@@ -99,6 +99,8 @@ signals:
 
 public:
     void simulateKeyPress(int keyCode, int modifiers);
+    void simulateQuit();
+    void simulateSetScale(double scale);
 
 private slots:
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
@@ -137,7 +139,6 @@ public slots:
     void slot_screenshot();
     void slot_up();
     void slot_voice();
-
     void slot_zoom();
 
 private:
