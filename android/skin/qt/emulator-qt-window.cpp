@@ -121,6 +121,12 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
     }
 }
 
+void EmulatorQtWindow::moveEvent(QMoveEvent *event)
+{
+    QFrame::moveEvent(event);
+    tool_window->dockMainWindow();
+}
+
 void EmulatorQtWindow::show()
 {
     QFrame::show();

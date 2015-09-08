@@ -36,9 +36,14 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window) :
 
 void ToolWindow::show()
 {
-    move(emulator_window->geometry().right() + 10, emulator_window->geometry().top() + 10);
+    dockMainWindow();
     QFrame::show();
     setFixedSize(size());
+}
+
+void ToolWindow::dockMainWindow()
+{
+    move(emulator_window->geometry().right() + 10, emulator_window->geometry().top() + 10);
 }
 
 void ToolWindow::on_close_button_clicked()       { /* TODO: What goes here? */ }
