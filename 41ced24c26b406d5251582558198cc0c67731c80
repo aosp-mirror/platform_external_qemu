@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4d8763b_0296acc9",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-08T19:54:48Z",
+      "side": 1,
+      "message": "is there a practical reason to put that behind a runtime flag like -debug-metrics instead?",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64c3de5a_159a74ad",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-08T19:54:48Z",
+      "side": 1,
+      "message": "nit: I recommend putting all these static constant string definitions inside formatGAPostData() if they are not used outside of the function.",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4d56a01_a37d047f",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-08T19:54:48Z",
+      "side": 1,
+      "message": "Since this is a pretty complex function, would it be a good idea to put it in its own source file (e.g. metrics_reporter_google_analytics.c), with an appropriate unit test?",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4d42ed5_c501da0f",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-08T19:54:48Z",
+      "side": 1,
+      "message": "this seems to contradict the comment above describing GA_VALIDATE_HITS. Is this expected or do you intend to dump stuff to stdout in the future? Some clarification would be welcomed :)",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
