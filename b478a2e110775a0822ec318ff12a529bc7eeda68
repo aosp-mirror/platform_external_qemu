@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0434e264_42ca3286",
+        "filename": "android/scripts/build-curl-deps.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-09T06:33:33Z",
+      "side": 1,
+      "message": "Oh I see, was using a slightly different version of this script. A better fix is to use \"-fPIC -fno-common\", so that we can still use the fast assembly functions. These flags are disabled by default when using -no-shared, but we want to use the static library in a .dylib in the end, I\u0027ll make a new patch to modify build-curl-deps.sh, and then a new version of this one/",
+      "revId": "b478a2e110775a0822ec318ff12a529bc7eeda68",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
