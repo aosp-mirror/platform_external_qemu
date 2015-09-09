@@ -582,6 +582,13 @@ else
     panic "Missing prebuilts directory (please run build-curl.sh): $LIBCURL_PREBUILTS_DIR"
 fi
 
+CACERTS_FILE="ca-bundle.pem"
+if [ ! -f "$CACERTS_FILE" ]; then
+  panic "Missing cacerts file: $CACERTS_FILE"
+fi
+mkdir -p $OUT_DIR/lib
+cp -f "$CACERTS_FILE" "$OUT_DIR/lib/"
+
 ###
 ###  Qt probe
 ###
