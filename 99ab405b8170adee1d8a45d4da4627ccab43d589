@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4ef2afe_15be7239",
+        "filename": "android/utils/curl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-09T23:42:41Z",
+      "side": 1,
+      "message": "the name doesn\u0027t really tell that it\u0027s much different from curl_init()\nCan we call it curl_easy_default_init() ?",
+      "range": {
+        "startLine": 52,
+        "startChar": 6,
+        "endLine": 52,
+        "endChar": 23
+      },
+      "revId": "99ab405b8170adee1d8a45d4da4627ccab43d589",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04c1426c_2f6b79e6",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2190,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-09T23:42:41Z",
+      "side": 1,
+      "message": "does this work on Windows?",
+      "range": {
+        "startLine": 2190,
+        "startChar": 45,
+        "endLine": 2190,
+        "endChar": 46
+      },
+      "revId": "99ab405b8170adee1d8a45d4da4627ccab43d589",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
