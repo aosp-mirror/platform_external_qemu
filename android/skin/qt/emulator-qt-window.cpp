@@ -67,6 +67,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(this, &EmulatorQtWindow::setTitle, this, &EmulatorQtWindow::slot_setWindowTitle);
     QObject::connect(this, &EmulatorQtWindow::showWindow, this, &EmulatorQtWindow::slot_showWindow);
     QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit, this, &EmulatorQtWindow::slot_clearInstance);
+
+    resize_timer.setSingleShot(true);
+    connect(&resize_timer, SIGNAL(timeout()), SLOT(slot_resizeDone()));
 }
 
 EmulatorQtWindow::~EmulatorQtWindow()
@@ -114,6 +117,10 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
 {
     if (backing_surface) {
         QPainter painter(this);
+
+        QRect bg(QPoint(0, 0), this->size());
+        painter.fillRect(bg, Qt::black);
+
         QRect r(0, 0, backing_surface->w, backing_surface->h);
         painter.drawImage(r, *backing_surface->bitmap);
     } else {
@@ -125,6 +132,12 @@ void EmulatorQtWindow::moveEvent(QMoveEvent *event)
 {
     QFrame::moveEvent(event);
     tool_window->dockMainWindow();
+}
+
+void EmulatorQtWindow::resizeEvent(QResizeEvent *event)
+{
+    resize_timer.start(500);
+    QFrame::resizeEvent(event);
 }
 
 void EmulatorQtWindow::show()
@@ -262,6 +275,15 @@ void EmulatorQtWindow::slot_requestClose(QSemaphore *semaphore)
 {
     close();
     if (semaphore != NULL) semaphore->release();
+}
+
+void EmulatorQtWindow::slot_resizeDone()
+{
+    QSize newSize(backing_surface->original_w, backing_surface->original_h);
+    newSize.scale(this->size(), Qt::KeepAspectRatio);
+
+    double newScale = (double) newSize.width() / (double) backing_surface->original_w;
+    simulateSetScale(newScale);
 }
 
 void EmulatorQtWindow::slot_requestUpdate(const QRect *rect, QSemaphore *semaphore)
