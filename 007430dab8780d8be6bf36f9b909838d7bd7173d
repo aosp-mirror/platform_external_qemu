@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "84d4522f_7fa4831d",
+        "filename": "android/scripts/build-curl.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-09T16:13:21Z",
+      "side": 1,
+      "message": "I don\u0027t understand how this works. -fPIC makes sense, but I know that that isn\u0027t enough to fix this problem. -fno-common just tells GCC to put global variables in the text section -- it should cause more trouble in some code (due to multiple definitions), but not less :)\nAlso, my reading of the problem here was related to global function definitions:\n\n\nI dug into this earlier and saw problems in two assembly files:\n\n- Some functions from openssl were declared .hidden and .extern in libcrypto code. This means that the the compiler is free to not use trampoline function to refer to these functions, causing PIC generation to fail *only on darwin*. See http://prod.lists.apple.com/archives/xcode-users/2012/Jun/msg00126.html\n\n- One file in libcrypto seemed to be directly computing the address of an openssl function. In this case, the problem was more obvious.\n\nMy \"fix\" was to build with -shared Configure option, and then pick up the static libraries, since one of the NEWS lines claims that only PIC-friendly assembly code is linked when -shared is used. I verified that the offending object files weren\u0027t linked into libcrypto when I used -shared.",
+      "range": {
+        "startLine": 217,
+        "startChar": 19,
+        "endLine": 217,
+        "endChar": 36
+      },
+      "revId": "007430dab8780d8be6bf36f9b909838d7bd7173d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
