@@ -13,6 +13,43 @@
 ##############################################################################
 ##############################################################################
 ###
+###  gen-telemetry-config-defs: Generate telemetry configuration definitions header
+###
+###  The 'gen-telemetry-config.py' script is used to generate the 
+###  telemetry-config-defs.h header from an .ini file like
+###  android/telemetry/telemetry-properties.ini
+###
+###  Due to the way the Android build system works, we need to regenerate
+###  it for each module (the output will go into a module-specific directory).
+###
+###  This defines a function that can be used inside a module definition
+###
+###  $(call gen-telemetry-config-defs)
+###
+
+# First, define a rule to generate a dummy "telemetry_config_defs" module
+# which purpose is simply to host the generated header in its output directory.
+intermediates := $(call intermediates-dir-for,SHARED_LIBRARIES,telemetry_config_defs,true)
+
+QEMU_TELEMETRY_PROPERTIES_INI := $(LOCAL_PATH)/android/telemetry/telemetry-properties.ini
+QEMU_TELEMETRY_CONFIG_DEFS_H := $(intermediates)/android/telemetry/telemetry-config-defs.h
+$(QEMU_TELEMETRY_CONFIG_DEFS_H): PRIVATE_PATH := $(LOCAL_PATH)
+$(QEMU_TELEMETRY_CONFIG_DEFS_H): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/android/tools/gen-telemetry-config.py $< $@
+$(QEMU_TELEMETRY_CONFIG_DEFS_H): $(QEMU_TELEMETRY_PROPERTIES_INI) $(LOCAL_PATH)/android/tools/gen-telemetry-config.py
+	$(hide) rm -f $@
+	$(transform-generated-source)
+
+QEMU_TELEMETRY_CONFIG_DEFS_INCLUDES := $(intermediates)
+
+# Second, define a function that needs to be called inside each module that contains
+# a source file that includes the generated header file.
+gen-telemetry-config-defs = \
+  $(eval LOCAL_GENERATED_SOURCES += $(QEMU_TELEMETRY_CONFIG_DEFS_H))\
+  $(eval LOCAL_C_INCLUDES += $(QEMU_TELEMETRY_CONFIG_DEFS_INCLUDES))
+
+##############################################################################
+##############################################################################
+###
 ###  gen-hw-config-defs: Generate hardware configuration definitions header
 ###
 ###  The 'gen-hw-config.py' script is used to generate the hw-config-defs.h
@@ -104,6 +141,22 @@ EMULATOR_COMMON_CFLAGS += -I$(GLIB_INCLUDE_DIR)
 
 common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 
+##############################################################################
+# Libxml2 definitions
+#
+LIBXML2_TOP32_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86
+LIBXML2_TOP64_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86_64
+
+ifeq ($(HOST_OS),darwin)
+     LIBXML2_INCLUDES := $(LIBXML2_TOP64_DIR)/include
+else
+     LIBXML2_INCLUDES := $(LIBXML2_TOP32_DIR)/include
+endif
+LIBXML2_LDLIBS := $(LIBXML2_TOP32_DIR)/lib/libxml2.a
+LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
+LIBXML2_LDLIBS := $(LIBXML2_TOP32_DIR)/lib/libxml2.a
+LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
+
 ###########################################################
 # Android utility functions
 #
@@ -113,6 +166,9 @@ common_LOCAL_SRC_FILES += \
 	android/async-utils.c \
 	android/framebuffer.c \
 	android/iolooper.cpp \
+	android/telemetry/telemetry-config.c \
+	android/telemetry/studio_helper.c \
+	android/telemetry/telemetry.c \
 	android/avd/hw-config.c \
 	android/avd/info.c \
 	android/avd/scanner.c \
@@ -205,7 +261,7 @@ endif
 
 
 
-common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
+common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS) 
 
 common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
 
@@ -214,16 +270,20 @@ include $(LOCAL_PATH)/android/wear-agent/sources.mk
 ## one for 32-bit
 $(call start-emulator-library, emulator-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES) -DLIBXML_STATIC
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
     LOCAL_IGNORE_BITNESS := true
 endif
+$(call gen-telemetry-config-defs)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
 $(call start-emulator64-library, emulator64-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES) -DLIBXML_STATIC
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+$(call gen-telemetry-config-defs)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
@@ -260,15 +320,15 @@ EMULATOR_LIBUI_CFLAGS += \
 
 common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
 
-##############################################################################
-# Libxml2 definitions
-#
-LIBXML2_TOP32_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86
-LIBXML2_TOP64_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86_64
+# ##############################################################################
+# # Libxml2 definitions
+# #
+# LIBXML2_TOP32_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86
+# LIBXML2_TOP64_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86_64
 
-LIBXML2_INCLUDES := $(LIBXML2_TOP32_DIR)/include
-LIBXML2_LDLIBS := $(LIBXML2_TOP32_DIR)/lib/libxml2.a
-LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
+# LIBXML2_INCLUDES := $(LIBXML2_TOP32_DIR)/include
+# LIBXML2_LDLIBS := $(LIBXML2_TOP32_DIR)/lib/libxml2.a
+# LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
 
 ##############################################################################
 # SDL-related definitions
@@ -681,6 +741,7 @@ $(QEMU_GDBSTUB_XML_C): $(QEMU_TARGET_XML_SOURCES) $(LOCAL_PATH)/feature_to_c.sh
 LOCAL_GENERATED_SOURCES += $(QEMU_GDBSTUB_XML_C)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(intermediates)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+$(call gen-telemetry-config-defs)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
@@ -701,6 +762,7 @@ $(QEMU_GDBSTUB_XML_C): $(QEMU_TARGET_XML_SOURCES) $(LOCAL_PATH)/feature_to_c.sh
 LOCAL_GENERATED_SOURCES += $(QEMU_GDBSTUB_XML_C)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(intermediates)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+$(call gen-telemetry-config-defs)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
