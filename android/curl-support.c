@@ -12,12 +12,17 @@
 #include "android/curl-support.h"
 
 #include "android/utils/debug.h"
+#include "android/utils/system.h"
 
 #include <curl/curl.h>
 
-static int initCount = 0;
+#include <stdlib.h>
+#include <string.h>
 
-bool curl_init() {
+static int initCount = 0;
+static char* cached_ca_info = NULL;
+
+bool curl_init(const char* ca_info) {
     if (initCount == 0) {
         // first time - try to initialize the library
         const CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
@@ -28,6 +33,8 @@ bool curl_init() {
         }
     }
 
+    free(cached_ca_info);
+    cached_ca_info = strdup(ca_info);
     ++initCount;
     return true;
 }
@@ -36,6 +43,26 @@ void curl_cleanup() {
     if (initCount == 0) {
         return;
     } else if (--initCount == 0) {
+        free(cached_ca_info);
+        cached_ca_info = NULL;
         curl_global_cleanup();
     }
+}
+
+CURL* curl_easy_default_init() {
+    CURL* const curl = curl_easy_init();
+    CURLcode curlRes;
+
+    if (!curl) {
+        dwarning("Failed to initialize libcurl");
+        return NULL;
+    }
+    if (cached_ca_info != NULL) {
+        curlRes = curl_easy_setopt(curl, CURLOPT_CAINFO, cached_ca_info);
+        if (curlRes != CURLE_OK) {
+            dwarning("Could not set CURLOPT_CAINFO: %s",
+                     curl_easy_strerror(curlRes));
+        }
+    }
+    return curl;
 }
