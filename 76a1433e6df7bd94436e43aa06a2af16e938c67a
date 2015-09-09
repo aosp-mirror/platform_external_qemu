@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4bdd6e7_40e44413",
+        "filename": "Makefile.common",
+        "patchSetId": 8
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-09T03:45:22Z",
+      "side": 1,
+      "message": "as I understand, this is a result of a rebase, right?",
+      "range": {
+        "startLine": 182,
+        "startChar": 0,
+        "endLine": 182,
+        "endChar": 32
+      },
+      "revId": "76a1433e6df7bd94436e43aa06a2af16e938c67a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
