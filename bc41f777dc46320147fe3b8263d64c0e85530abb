@@ -16,6 +16,24 @@
       "revId": "bc41f777dc46320147fe3b8263d64c0e85530abb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4bd0e95_0fbf0999",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-09-09T03:02:09Z",
+      "side": 1,
+      "message": "sure, thanx !!",
+      "parentUuid": "64cf5e9f_b506c05a",
+      "revId": "bc41f777dc46320147fe3b8263d64c0e85530abb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
