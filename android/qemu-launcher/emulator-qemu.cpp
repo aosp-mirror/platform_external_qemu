@@ -482,14 +482,37 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     args[n++] = qemuExecutable.c_str();
 
+#if defined(TARGET_X86_64) || defined(TARGET_X86)
+    char* accel_status = NULL;
+    CpuAccelMode accel_mode = ACCEL_AUTO;
+    const bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, accel_status);
+
+    if (accel_mode == ACCEL_OFF) {  // 'accel off' is specified'
+        args[n++] = "-cpu";
+        args[n++] = kTarget.qemuCpu;
+    } else if (accel_mode == ACCEL_ON) {  // 'accel on' is specified'
+        if (!accel_ok) {
+            derror("CPU acceleration is not supported on this machine!");
+            derror("Reason: %s", accel_status);
+            exit(1);
+        }
+        args[n++] = ASTRDUP(kEnableAccelerator);
+    } else {  // ACCEL_AUTO
+        if (accel_ok) {
+            args[n++] = ASTRDUP(kEnableAccelerator);
+        } else {
+            args[n++] = "-cpu";
+            args[n++] = kTarget.qemuCpu;
+        }
+    }
+
+    AFREE(accel_status);
+#else   // !TARGET_X86_64 && !TARGET_X86
     args[n++] = "-cpu";
     args[n++] = kTarget.qemuCpu;
-#if defined(TARGET_X86_64) || defined(TARGET_X86)
-    // placeholder: will put hardware acceleration code here in next patch
-#else
     args[n++] = "-machine";
     args[n++] = "type=ranchu";
-#endif
+#endif  // !TARGET_X86_64 && !TARGET_X86
     // Memory size
     args[n++] = "-m";
     String memorySize = StringFormat("%ld", hw->hw_ramSize);
