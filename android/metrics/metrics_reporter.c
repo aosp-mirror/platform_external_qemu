@@ -13,6 +13,7 @@
 #include "android/metrics/internal/metrics_reporter_internal.h"
 
 #include "android/utils/bufprint.h"
+#include "android/utils/curl.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
 #include "android/utils/filelock.h"
@@ -487,10 +488,9 @@ static size_t curlWriteFunction(CURL* handle,
 /* typedef'ed to: androidMetricsUploaderFunction */
 ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics) {
     ABool success = 1;
-    CURL* const curl = curl_easy_init();
+    CURL* const curl = curl_default_init();
     CURLcode curlRes;
     if (!curl) {
-        mwarning("Failed to initialize libcurl");
         return 0;
     }
 
