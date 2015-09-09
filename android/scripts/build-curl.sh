@@ -61,9 +61,6 @@ if [ ! -f "$PACKAGE_LIST" ]; then
 fi
 
 package_builder_process_options curl
-
-CURL_DEPS_INSTALL_DIR=$PREBUILTS_DIR/curl-deps
-
 package_list_parse_file "$PACKAGE_LIST"
 
 BUILD_SRC_DIR=$TEMP_DIR/src
@@ -103,6 +100,154 @@ build_package () {
             "$@"
 
         touch "$PKG_TIMESTAMP"
+    fi
+}
+
+# Handle zlib, only on Win32 because the zlib configure script
+# doesn't know how to generate a static library with -fPIC!
+build_windows_zlib_package () {
+    local ZLIB_VERSION ZLIB_PACKAGE
+    local LOC LDFLAGS
+    local PREFIX=$(builder_install_prefix)
+    local BUILD_DIR=$(builder_build_dir)
+    case $(builder_host) in
+        windows-x86)
+            LOC=-m32
+            LDFLAGS=-m32
+            ;;
+        windows-x86_64)
+            LOC=-m64
+            LDFLAGS=-m64
+            ;;
+    esac
+    ZLIB_VERSION=$(package_list_get_version zlib)
+    dump "$(builder_text) Building zlib-$ZLIB_VERSION"
+    ZLIB_PACKAGE=$(package_list_get_filename zlib)
+    unpack_archive "$ARCHIVE_DIR/$ZLIB_PACKAGE" "$BUILD_DIR"
+    (
+        run cd "$BUILD_DIR/zlib-$ZLIB_VERSION" &&
+        export PKG_CONFIG_PATH=$(builder_install_prefix)/lib/pkgconfig &&
+        export BINARY_PATH=$PREFIX/bin &&
+        export INCLUDE_PATH=$PREFIX/include &&
+        export LIBRARY_PATH=$PREFIX/lib &&
+        run make -fwin32/Makefile.gcc install \
+                PREFIX=$(builder_gnu_config_host_prefix) \
+                LOC=$LOC \
+                LDFLAGS=$LDFLAGS &&
+        unset PKG_CONFIG_PATH &&
+        unset CROSS_PREFIX
+    )
+}
+
+# Build a package zlib for Linux and Mac OS X
+#
+build_zlib_package () {
+    local ZLIB_VERSION ZLIB_PACKAGE
+    local LOC LDFLAGS
+    local BUILD_DIR=$(builder_build_dir)
+    case $(builder_host) in
+        *-x86)
+            LOC=-m32
+            LDFLAGS=-m32
+            ;;
+        *-x86_64)
+            LOC=-m64
+            LDFLAGS=-m64
+            ;;
+    esac
+    ZLIB_VERSION=$(package_list_get_version zlib)
+    dump "$(builder_text) Building zlib-$ZLIB_VERSION"
+    ZLIB_PACKAGE=$(package_list_get_filename zlib)
+    unpack_archive "$ARCHIVE_DIR/$ZLIB_PACKAGE" "$BUILD_DIR"
+    (
+        run cd "$BUILD_DIR/zlib-$ZLIB_VERSION" &&
+        export PKG_CONFIG_PATH=$(builder_install_prefix)/lib/pkgconfig &&
+        export CROSS_PREFIX=$(builder_gnu_config_host_prefix) &&
+        run ./configure --prefix=$(builder_install_prefix) &&
+        run make -j$NUM_JOBS &&
+        run make install &&
+        unset PKG_CONFIG_PATH &&
+        unset CROSS_PREFIX
+    )
+}
+
+# $1+: Configuration options.
+build_package_openssl () {
+    # Unpack package source into $BUILD_SRC_DIR if needed.
+    local BUILD_SRC_DIR=${TEMP_DIR}/src
+    local PKG_SRCD_NAME=$(package_list_get_unpack_src_dir "openssl")
+    local PKG_SRC_TIMESTAMP=$BUILD_SRC_DIR/timestamp-${PKG_SRCD_NAME}
+    if [ ! -f "$PKG_SRC_TIMESTAMP" ]; then
+      package_list_unpack_and_patch "openssl" "$ARCHIVE_DIR" "$BUILD_SRC_DIR"
+      touch $PKG_SRC_TIMESTAMP
+    fi
+
+    shift
+    local PKG_SRC_DIR="$BUILD_SRC_DIR/$PKG_SRCD_NAME"
+    local PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/$PKG_SRCD_NAME
+    local PKG_BLD_TIMESTAMP=$TEMP_DIR/build-$SYSTEM/$PKG_SRCD_NAME-timestamp
+    if [ ! -f "$PKG_BLD_TIMESTAMP" -o -n "$OPT_FORCE" ]; then
+      case $SYSTEM in
+        darwin*)
+          # Required for proper build on Darwin!
+          builder_disable_verbose_install
+          ;;
+      esac
+      # build openssl package
+      local PKG_FULLNAME="$(basename "${PKG_SRC_DIR}")"
+      dump "$(builder_text) Building $PKG_FULLNAME"
+
+      local CONFIG_FLAGS
+      local INSTALL_FLAGS
+
+      case $(builder_host) in
+        linux-x86_64)
+          CONFIG_FLAGS="linux-x86_64"
+          ;;
+        linux-x86)
+          CONFIG_FLAGS="linux-generic32 386 -m32"
+          ;;
+        windows-x86)
+          CONFIG_FLAGS="mingw 386 -m32"
+          ;;
+        windows-x86_64)
+          CONFIG_FLAGS="mingw64"
+          ;;
+        darwin-*)
+          # NOTE: '-fPIC -fno-common' is required to build PIE-compatible
+          # static libraries, i.e. one that can be linked into a .dylib.
+          CONFIG_FLAGS="darwin64-x86_64-cc -fPIC -fno-common"
+          ;;
+        *)
+          panic "Host system '$(builder_host)' is not supported by this script!"
+          ;;
+      esac
+
+      # NOTE: Parallel builds sometimes fail on Darwin and Linux.
+      NUM_JOBS=1
+
+      (
+        run mkdir -p "$PKG_BUILD_DIR" &&
+        run cd "$PKG_SRC_DIR" &&
+        export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
+        export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
+        export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
+        export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
+        run "$PKG_SRC_DIR"/Configure \
+          $CONFIG_FLAGS \
+          -no-shared \
+          --prefix=$_SHU_BUILDER_PREFIX \
+          --openssldir=$_SHU_BUILDER_PREFIX \
+          --cross-compile-prefix=$(builder_gnu_config_host_prefix) \
+          "$@" &&
+        run make MAKEFLAGS=-j${NUM_JOBS} &&
+        run make install_sw $INSTALL_FLAGS &&
+        run make clean
+        # install_sw skips man, etc, shortenning build time
+      ) ||
+      panic "Could not build and install $PKG_FULLNAME"
+      # success
+      touch "$PKG_BLD_TIMESTAMP"
     fi
 }
 
@@ -158,21 +303,22 @@ if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     do_remote_darwin_build "$DARWIN_SSH" "$DARWIN_SYSTEMS"
 fi
 
-# Build dependencies if necessary
-$(program_directory)/build-curl-deps.sh \
-    --verbosity=$(get_verbosity) \
-    --prebuilts-dir=$PREBUILTS_DIR \
-    --aosp-dir=$AOSP_DIR \
-    --host=$(spaces_to_commas "$HOST_SYSTEMS") \
-    $EXTRA_FLAGS \
-        || panic "could not check or rebuild curl dependencies."
-
-# Build curl
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     (
         builder_prepare_for_host "$SYSTEM" "$AOSP_DIR"
 
-        dump "$(builder_text) Building curl"
+        case $SYSTEM in
+            windows-*)
+                build_windows_zlib_package
+                ;;
+            *)
+                build_zlib_package
+                ;;
+        esac
+
+        build_package_openssl
+
+       dump "$(builder_text) Building libcurl"
 
         build_package curl \
             --disable-debug \
@@ -212,10 +358,10 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             --disable-tls-srp \
             --enable-cookies \
             --disable-soname-bump \
-            --with-zlib="${CURL_DEPS_INSTALL_DIR}/${SYSTEM}" \
+            --with-zlib="$builder_install_prefix" \
             --without-winssl \
             --without-darwinssl \
-            --with-ssl="${CURL_DEPS_INSTALL_DIR}/${SYSTEM}" \
+            --with-ssl="$builder_install_prefix" \
             --without-gnutls \
             --without-polarssl \
             --without-cyassl \
@@ -228,12 +374,18 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             --without-winidn
 
         # Copy libraries and header files
-        copy_directory \
-            "$(builder_install_prefix)/lib" \
-            "$INSTALL_DIR/$SYSTEM/lib"
-        copy_directory \
-            "$(builder_install_prefix)/include/curl" \
-            "$INSTALL_DIR/$SYSTEM/include/curl"
+        copy_directory_files \
+                "$(builder_install_prefix)" \
+                "$INSTALL_DIR/$SYSTEM" \
+                lib/libcrypto.a \
+                lib/libssl.a \
+                lib/libz.a \
+                lib/libcurl.a \
+                bin/openssl$(builder_host_ext)
+
+       copy_directory \
+               "$(builder_install_prefix)/include/curl" \
+               "$INSTALL_DIR/$SYSTEM/include/curl"
 
         # Copy the curl executable; this is not necessary
         # but serves as a validation point
