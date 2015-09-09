@@ -22,6 +22,30 @@
       "revId": "007430dab8780d8be6bf36f9b909838d7bd7173d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e436ee6e_e1b4a6bd",
+        "filename": "android/scripts/build-curl.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-09T16:58:52Z",
+      "side": 1,
+      "message": "the \"-fPIC -fno-common\" flags are added by the Configure script when building the shared libraries. You need to look inside the script to see why. This allows us to use -no-shared while being able to link everything. -fPIC actually defines compiler macros (e.g. __PIC__) that are picked by the assembly language sources\n\nBoth solutions should be equivalent, except we don\u0027t rebuild shared libraries at all.",
+      "parentUuid": "84d4522f_7fa4831d",
+      "range": {
+        "startLine": 217,
+        "startChar": 19,
+        "endLine": 217,
+        "endChar": 36
+      },
+      "revId": "007430dab8780d8be6bf36f9b909838d7bd7173d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
