@@ -33,6 +33,7 @@
 #include "hw/sysbus.h"
 
 #include "hw/misc/android_pipe.h"
+#include "hw/misc/android_boot_properties.h"
 #include "qemu-common.h"
 #include "qemu/timer.h"
 #include "qemu/error-report.h"
@@ -786,6 +787,7 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     android_pingpong_init();
     android_throttle_init();
     android_sensors_init();
+    android_boot_properties_init();
 
     /* TODO: This may be a complete hack and there may be beautiful QOM ways
      * to accomplish this.
