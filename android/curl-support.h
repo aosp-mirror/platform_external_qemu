@@ -14,6 +14,8 @@
 
 #include "android/utils/compiler.h"
 
+#include <curl/curl.h>
+
 #include <stdbool.h>
 
 ANDROID_BEGIN_HEADER
@@ -22,8 +24,15 @@ ANDROID_BEGIN_HEADER
 // they make sure it is initialized properly, and only once
 // NOTE: not thread-safe, run only on a main thread!
 
-extern bool curl_init();
+// Args: |ca_info| is path to the SSL Certificate Authority bundle.
+extern bool curl_init(const char* ca_info);
 extern void curl_cleanup();
+
+// Use this function instead of curl_easy_init to initialize a new |CURL|
+// object. This calls libcurl's curl_easy_init, and then sets some default
+// library-wide options on it.
+// Returns NULL on failure.
+extern CURL* curl_easy_default_init();
 
 ANDROID_END_HEADER
 

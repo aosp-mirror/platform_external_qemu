@@ -15,6 +15,7 @@
 #include "android/metrics/metrics_reporter_ga.h"
 #include "android/metrics/internal/metrics_reporter_ga_internal.h"
 
+#include "android/curl-support.h"
 #include "android/utils/compiler.h"
 #include "android/utils/debug.h"
 
@@ -105,10 +106,9 @@ bool androidMetrics_uploadMetricsGA(const AndroidMetrics* metrics) {
             "https://ssl.google-analytics.com/debug/collect";
 
     bool success = true;
-    CURL* const curl = curl_easy_init();
+    CURL* const curl = curl_easy_default_init();
     CURLcode curlRes;
     if (!curl) {
-        mwarning("Failed to initialize libcurl");
         return false;
     }
 

@@ -2186,7 +2186,9 @@ int main(int argc, char **argv, char **envp)
 
     // libcurl initialization is thread-unsafe, so let's call it first
     // to make sure no other thread could be doing the same
-    curl_init();
+    curl_init(qemu_find_file_with_subdir(find_datadir(argv[0]),
+                                         "lib/",
+                                         "ca-bundle.pem"));
 
     /* Initialize sockets before anything else, so we can properly report
      * initialization failures back to the UI. */
