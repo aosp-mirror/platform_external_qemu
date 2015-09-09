@@ -284,6 +284,13 @@ EOF
             DEBUG_FLAGS="--enable-debug"
         fi
 
+        # A future version of qemu-android/configure will require
+        # --enable-android to enable Android support, so add the
+        # flag when required.
+        ENABLE_ANDROID=
+        fgrep -q -e "--enable-android" $QEMU_ANDROID/configure &&
+                ENABLE_ANDROID="--enable-android"
+
         run $QEMU_ANDROID/configure \
             $CROSS_PREFIX_FLAG \
             --target-list="$QEMU_TARGET_LIST" \
@@ -315,6 +322,7 @@ EOF
             --disable-vhdx \
             --disable-vhost-net \
             --disable-werror \
+            $ENABLE_ANDROID \
             --with-sdlabi=2.0 \
             &&
 
