@@ -22,6 +22,30 @@
       "revId": "76a1433e6df7bd94436e43aa06a2af16e938c67a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "244c8613_bb6807bd",
+        "filename": "Makefile.common",
+        "patchSetId": 8
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-09T03:48:45Z",
+      "side": 1,
+      "message": "I merged to resolve the conflict, but this made sense to be removed --- we are getting rid of ddms-ping as its functionality is being replaced by libcurl . I am guessing the respective source should be removed too, but I will let the author of this change do that to avoid further conflicts",
+      "parentUuid": "a4bdd6e7_40e44413",
+      "range": {
+        "startLine": 182,
+        "startChar": 0,
+        "endLine": 182,
+        "endChar": 32
+      },
+      "revId": "76a1433e6df7bd94436e43aa06a2af16e938c67a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
