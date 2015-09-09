@@ -12,13 +12,18 @@
 
 #include <QtCore>
 #include <QDesktopWidget>
+#include <QFileDialog>
+#include <QGraphicsView>
+#include <QGraphicsScene>
 #include <QIcon>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QPixmap>
 #include <QPushButton>
 #include <QScreen>
 #include <QSemaphore>
 
+#include "android/android.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -72,6 +77,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
 
     resize_timer.setSingleShot(true);
     connect(&resize_timer, SIGNAL(timeout()), SLOT(slot_resizeDone()));
+
+    QObject::connect(&mScreencapProcess, SIGNAL(finished(int)), this, SLOT(slot_screenProcessFinished(int)));
 }
 
 EmulatorQtWindow::~EmulatorQtWindow()
@@ -373,7 +380,20 @@ void EmulatorQtWindow::slot_screenrecord()
 
 void EmulatorQtWindow::slot_screenshot()
 {
-    // TODO
+    if (mScreencapProcess.state() != QProcess::NotRunning) {
+        // Modal dialogs should prevent this
+        return;
+    }
+
+    // Take the screenshot
+    // TODO: is this safe cross-platform? Appears to be
+    // TODO: is it necessary to delete the remote file?
+    QString command = "adb -s emulator-" + QString::number(android_base_port); // Base command
+    command += " shell screencap -p"; // Take the screenshot
+
+    // Keep track of this process
+    mScreencapProcess.start(command);
+    mScreencapProcess.waitForStarted();
 }
 
 void EmulatorQtWindow::slot_up()
@@ -387,6 +407,46 @@ void EmulatorQtWindow::slot_voice()
 
 void EmulatorQtWindow::slot_zoom()
 {
+}
+
+void EmulatorQtWindow::slot_screenProcessFinished(int exitStatus)
+{
+    if (exitStatus) {
+        // TODO: error message popup
+    } else {
+        // Get the image data directly from the output process
+        // adb does EOL conversion from \n to \r\n - this must be undone
+        QByteArray imageData = mScreencapProcess.readAllStandardOutput();
+        imageData.replace(QByteArray("\r\n"), QByteArray("\n"));
+
+        // Load the data into an image
+        QPixmap screencap;
+        bool isOk = screencap.loadFromData(imageData, "PNG");
+        if (!isOk) {
+            // TODO: error message popup
+            return;
+        }
+
+        // Show a preview image - falls out of scope and disappears when the function exits
+        QPixmap preview = screencap.scaled(size(), Qt::KeepAspectRatio);
+        QGraphicsScene scene;
+        scene.addPixmap(preview);
+
+        QGraphicsView view(&scene);
+        view.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        view.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        view.setWindowTitle(tr("Screenshot Preview"));
+        view.setFixedSize(preview.size());
+        view.show();
+
+        // Pop up the save file dialog, and save the file if a name is given
+        QString fileName = QFileDialog::getSaveFileName(this,
+                                                        tr("Screenshot Save File"),
+                                                        ".",
+                                                        tr("PNG files (*.png);;All files (*)"));
+        if (fileName.isNull()) return;
+        screencap.save(fileName);
+    }
 }
 
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.
