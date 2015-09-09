@@ -19,6 +19,7 @@
 #include <QMoveEvent>
 #include <QObject>
 #include <QPainter>
+#include <QProcess>
 #include <QResizeEvent>
 #include <QTimer>
 #include <QWidget>
@@ -145,6 +146,8 @@ public slots:
     void slot_voice();
     void slot_zoom();
 
+    void slot_screenProcessFinished(int exitStatus);
+
 private:
     void handleEvent(SkinEventType type, QMouseEvent *event);
     SkinEvent *createSkinEvent(SkinEventType type);
@@ -156,6 +159,8 @@ private:
     QQueue<SkinEvent*> event_queue;
     ToolWindow *tool_window;
     QTimer resize_timer;
+
+    QProcess mScreencapProcess;
 };
 
 struct SkinSurface {
