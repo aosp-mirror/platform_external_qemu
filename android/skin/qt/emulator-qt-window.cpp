@@ -12,6 +12,7 @@
 
 #include <QtCore>
 #include <QDesktopWidget>
+#include <QFileDialog>
 #include <QIcon>
 #include <QMouseEvent>
 #include <QPainter>
@@ -349,7 +350,18 @@ void EmulatorQtWindow::slot_screenrecord()
 
 void EmulatorQtWindow::slot_screenshot()
 {
-    // TODO
+    if (backing_surface && backing_surface->bitmap) {
+
+        // Make a copy of the current screen, since contents may change while a name is chosen
+        QImage currentScreen(*backing_surface->bitmap);
+        QString fileName = QFileDialog::getSaveFileName(this,
+                                                        tr("Open File"),
+                                                        ".",
+                                                        tr("PNG files (*.png);;All files (*)"));
+        if (fileName.isNull()) return;
+
+        currentScreen.save(fileName);
+    }
 }
 
 void EmulatorQtWindow::slot_up()
