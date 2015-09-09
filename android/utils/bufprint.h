@@ -77,6 +77,7 @@ extern char*  bufprint_config_path(char*  buffer, char*  buffend);
 extern char*  bufprint_config_file(char*  buffer, char*  buffend, const char*  suffix);
 extern char*  bufprint_temp_dir   (char*  buffer, char*  buffend);
 extern char*  bufprint_temp_file  (char*  buffer, char*  buffend, const char*  suffix);
+extern char*  bufprint_home_dir   (char*  buffer, char*  buffend);
 
 ANDROID_END_HEADER
 

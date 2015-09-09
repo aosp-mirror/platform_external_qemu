@@ -27,6 +27,7 @@
 #include "android/utils/bufprint.h"
 #include "android/adb-server.h"
 #include "android/adb-qemud.h"
+#include "android/telemetry/telemetry.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -473,12 +474,13 @@ void  android_emulation_setup( void )
     /* initilize fingperprint here */
     android_hw_fingerprint_init();
 
-   /* cool, now try to run the "ddms ping" command, which will take care of pinging usage
+    /* initialize android emulator telemetry */
+    android_telemetry_init();
+
+    /* cool, now try to run the "ddms ping" command, which will take care of pinging usage
     * if the user agreed for it. the emulator itself never sends anything to any outside
     * machine
     */
     android_ddms_ping(VERSION_STRING, android_gl_vendor, android_gl_renderer,
                       android_gl_version);
 }
-
-
