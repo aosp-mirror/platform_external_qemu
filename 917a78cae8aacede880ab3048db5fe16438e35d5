@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "64cf5e9f_5756476b",
+        "filename": "android-configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 585,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T17:23:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a44076d4_ff551feb",
+      "revId": "917a78cae8aacede880ab3048db5fe16438e35d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8447f2eb_de6945c4",
         "filename": "android/utils/curl.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-10T06:44:47Z",
       "side": 1,
       "message": "nit: avoid using AFREE(), they\u0027re legacy macros we\u0027re likely to remove in a future patch. Same for ASTRDUP()",
+      "revId": "917a78cae8aacede880ab3048db5fe16438e35d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4ef2afe_8a56a6f5",
+        "filename": "android/utils/curl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T17:23:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8447f2eb_de6945c4",
       "revId": "917a78cae8aacede880ab3048db5fe16438e35d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "e4c34e74_a2743fc8",
+        "filename": "android/utils/curl.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T17:23:36Z",
+      "side": 1,
+      "message": "rebase picked this up.",
+      "parentUuid": "0434e264_a2845e94",
+      "revId": "917a78cae8aacede880ab3048db5fe16438e35d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e436ee6e_c16882be",
         "filename": "android/utils/curl.h",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2015-09-10T06:44:47Z",
       "side": 1,
       "message": "nit: prefer \u003ccurl/curl.h\u003e for third-party libraries",
+      "revId": "917a78cae8aacede880ab3048db5fe16438e35d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44cedaa4_4e6eb7f6",
+        "filename": "android/utils/curl.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T17:23:36Z",
+      "side": 1,
+      "message": "rebase picked this up.",
+      "parentUuid": "e436ee6e_c16882be",
       "revId": "917a78cae8aacede880ab3048db5fe16438e35d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
