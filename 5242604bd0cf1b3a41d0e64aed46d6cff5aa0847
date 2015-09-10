@@ -16,6 +16,24 @@
       "revId": "5242604bd0cf1b3a41d0e64aed46d6cff5aa0847",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4bdd6e7_202dcb5e",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 453,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T16:52:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c43d6a4e_80a1160f",
+      "revId": "5242604bd0cf1b3a41d0e64aed46d6cff5aa0847",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
