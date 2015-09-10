@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e4c34e74_6278678b",
+        "filename": "android-configure.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T17:47:32Z",
+      "side": 1,
+      "message": "Need to change my vim defaults.",
+      "parentUuid": "44517aa7_df537fdf",
+      "revId": "4cbe3b26920a71e37c6aa390192317dc09e79cf8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a44076d4_7ffd8fda",
         "filename": "android/curl-support.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-10T17:38:47Z",
       "side": 1,
       "message": "nit: better use free() here too.",
+      "revId": "4cbe3b26920a71e37c6aa390192317dc09e79cf8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44fdfae7_ff073b1e",
+        "filename": "android/curl-support.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T17:47:32Z",
+      "side": 1,
+      "message": "OK, I\u0027m done with AFREE now.",
+      "parentUuid": "a44076d4_7ffd8fda",
       "revId": "4cbe3b26920a71e37c6aa390192317dc09e79cf8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "64cf5e9f_92a62d8c",
+        "filename": "android/curl-support.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T17:47:32Z",
+      "side": 1,
+      "message": "Rebase will pick it up: https://android-review.googlesource.com/#/c/169595/7/android/curl-support.h",
+      "parentUuid": "24f726e3_c6b3c422",
+      "revId": "4cbe3b26920a71e37c6aa390192317dc09e79cf8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4164adc_fbb3eb21",
         "filename": "android/curl-support.h",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2015-09-10T17:38:47Z",
       "side": 1,
       "message": "nit: favor \u003ccurl/curl.h\u003e notation for third-party libraries.",
+      "revId": "4cbe3b26920a71e37c6aa390192317dc09e79cf8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44fdfae7_9fb9d7b6",
+        "filename": "android/curl-support.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T17:47:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c4164adc_fbb3eb21",
       "revId": "4cbe3b26920a71e37c6aa390192317dc09e79cf8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
