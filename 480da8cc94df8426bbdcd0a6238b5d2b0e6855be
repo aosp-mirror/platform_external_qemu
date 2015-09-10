@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "244c8613_95ee34ed",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T18:02:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a44076d4_3fe06736",
+      "revId": "480da8cc94df8426bbdcd0a6238b5d2b0e6855be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c43d6a4e_23b374d0",
         "filename": "android/metrics/metrics_reporter_ga_unittest.cpp",
         "patchSetId": 12
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-10T17:33:07Z",
       "side": 1,
       "message": "nit: you probable want to check the returned value as well, as in:\n\n  static const char kExpected[] \u003d \"......\";\n  const int expected \u003d (int)(sizeof(kExpected) - 1);\n  ASSERT_EQ(expected, formatGAPostData(\u0026post_data, \u0026metrics));\n  ASSERT_STREQ(kExpected, post_data);",
+      "revId": "480da8cc94df8426bbdcd0a6238b5d2b0e6855be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24c9e69c_7ca1280c",
+        "filename": "android/metrics/metrics_reporter_ga_unittest.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T18:02:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c43d6a4e_23b374d0",
       "revId": "480da8cc94df8426bbdcd0a6238b5d2b0e6855be",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "44cedaa4_ae042bdb",
+        "filename": "android/metrics/metrics_reporter_ga_unittest.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T18:02:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8447f2eb_3ee06936",
+      "revId": "480da8cc94df8426bbdcd0a6238b5d2b0e6855be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e436ee6e_c1ae4200",
         "filename": "android/metrics/metrics_reporter_ga_unittest.cpp",
         "patchSetId": 12
@@ -64,6 +118,24 @@
       "writtenOn": "2015-09-10T17:33:07Z",
       "side": 1,
       "message": "nit: please free() post_data after that.",
+      "revId": "480da8cc94df8426bbdcd0a6238b5d2b0e6855be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84d4522f_003d27a7",
+        "filename": "android/metrics/metrics_reporter_ga_unittest.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T18:02:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e436ee6e_c1ae4200",
       "revId": "480da8cc94df8426bbdcd0a6238b5d2b0e6855be",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
