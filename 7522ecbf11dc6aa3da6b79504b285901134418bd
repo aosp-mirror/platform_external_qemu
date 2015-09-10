@@ -34,6 +34,24 @@
       "revId": "7522ecbf11dc6aa3da6b79504b285901134418bd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44fdfae7_fc20e935",
+        "filename": "Makefile.common",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-10T15:37:45Z",
+      "side": 1,
+      "message": "I see. \nWhen building for 32 bits, we\u0027ll use \u0027include\u0027 from the\n64-bit directory. This directory is always there and is\nthe same as \u0027include\u0027 in the 32-bit directory.",
+      "parentUuid": "44517aa7_3f9e2323",
+      "revId": "7522ecbf11dc6aa3da6b79504b285901134418bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
