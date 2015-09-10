@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44fdfae7_dc5fed08",
+        "filename": "android/telemetry/telemetry.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-10T02:38:53Z",
+      "side": 1,
+      "message": "if this fails, and the user calls it one more time with the same argument - we would get a double free for uid",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 5
+      },
+      "revId": "4c9a0e7689e158f24b1fa05639676d8469ca2829",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4ef2afe_e0d1ee5a",
+        "filename": "android/telemetry/telemetry.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-10T02:38:53Z",
+      "side": 1,
+      "message": "some global constant?",
+      "range": {
+        "startLine": 88,
+        "startChar": 1,
+        "endLine": 89,
+        "endChar": 31
+      },
+      "revId": "4c9a0e7689e158f24b1fa05639676d8469ca2829",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4c34e74_ae68abbc",
+        "filename": "android/telemetry/telemetry.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-10T02:38:53Z",
+      "side": 1,
+      "message": "I have a code review for exactly the same thing\nhttps://android-review.googlesource.com/#/c/169469/",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 5
+      },
+      "revId": "4c9a0e7689e158f24b1fa05639676d8469ca2829",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44cedaa4_63174c10",
+        "filename": "android/utils/bufprint.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-10T02:38:53Z",
+      "side": 1,
+      "message": "accident?",
+      "revId": "4c9a0e7689e158f24b1fa05639676d8469ca2829",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4bdd6e7_0c9a03ae",
+        "filename": "android/utils/bufprint.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-10T02:38:53Z",
+      "side": 1,
+      "message": "on windows HOMEDRIVE and HOMEPATH don\u0027t need path separator in between:\n\nC:\\Users\\zyy\u003eset home\nHOMEDRIVE\u003dC:\nHOMEPATH\u003d\\Users\\zyy",
+      "range": {
+        "startLine": 278,
+        "startChar": 29,
+        "endLine": 278,
+        "endChar": 37
+      },
+      "revId": "4c9a0e7689e158f24b1fa05639676d8469ca2829",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44cedaa4_23115419",
+        "filename": "android/utils/bufprint.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-10T02:38:53Z",
+      "side": 1,
+      "message": "nit: add a block please { }",
+      "range": {
+        "startLine": 296,
+        "startChar": 5,
+        "endLine": 296,
+        "endChar": 50
+      },
+      "revId": "4c9a0e7689e158f24b1fa05639676d8469ca2829",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
