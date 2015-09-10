@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a44076d4_ff551feb",
+        "filename": "android-configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 585,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T06:44:47Z",
+      "side": 1,
+      "message": "Please use a path relative to the script\u0027s own directory to avoid surprises when it is run outside of external/qemu/",
+      "revId": "917a78cae8aacede880ab3048db5fe16438e35d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8447f2eb_de6945c4",
+        "filename": "android/utils/curl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T06:44:47Z",
+      "side": 1,
+      "message": "nit: avoid using AFREE(), they\u0027re legacy macros we\u0027re likely to remove in a future patch. Same for ASTRDUP()",
+      "revId": "917a78cae8aacede880ab3048db5fe16438e35d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0434e264_a2845e94",
+        "filename": "android/utils/curl.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T06:44:47Z",
+      "side": 1,
+      "message": "same remark as in previous patch: don\u0027t put this into android/utils/, try android/ instead.",
+      "revId": "917a78cae8aacede880ab3048db5fe16438e35d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e436ee6e_c16882be",
+        "filename": "android/utils/curl.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T06:44:47Z",
+      "side": 1,
+      "message": "nit: prefer \u003ccurl/curl.h\u003e for third-party libraries",
+      "revId": "917a78cae8aacede880ab3048db5fe16438e35d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
