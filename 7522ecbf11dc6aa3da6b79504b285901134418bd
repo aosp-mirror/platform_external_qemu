@@ -16,6 +16,24 @@
       "revId": "7522ecbf11dc6aa3da6b79504b285901134418bd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44517aa7_3f9e2323",
+        "filename": "Makefile.common",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T15:18:06Z",
+      "side": 1,
+      "message": "If you look at the ..../libxml2/ directory, you will see:\n\n  darwin-x86_64/\n  linux-x86_64/\n  linux-x86/\n  windows-x86_64/\n  windows-x86/\n\nEach one of them has a copy of the same \u0027include\u0027 directory.\nWhat\u0027s missing is darwin-x86/ which we don\u0027t need since we don\u0027t support 32-bit Darwin binaries anymore.\n\nNote: For Qt, we created a qt/common/include directory that contains the real header files, and put a link to it under qt/\u003csystem\u003e/include\n\nWe could do the same in theory for libxml2, but it\u0027s not worth the effort at the moment.",
+      "parentUuid": "e4c34e74_ce207f36",
+      "revId": "7522ecbf11dc6aa3da6b79504b285901134418bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
