@@ -24,6 +24,7 @@
 #include <netinet/tcp.h>
 #include <sys/un.h>
 #include <sys/stat.h>
+#include <stdio.h>
 #endif
 
 #include <stddef.h>
@@ -35,6 +36,19 @@ namespace emugl {
 
 namespace {
 
+static void socketSetDontLinger(int s) {
+#ifdef _WIN32
+  // TODO: Verify default behavior on WINDOWS
+#else
+    // Ungraceful shutdown, no reason to linger at all
+    struct linger so_linger;
+    so_linger.l_onoff  = 1;
+    so_linger.l_linger = 0;
+    if(setsockopt(s, SOL_SOCKET, SO_LINGER, &so_linger, sizeof so_linger) < 0)
+      perror("Setting socket option SO_LINGER={on, 0} failed");
+#endif
+}
+
 static void socketSetReuseAddress(int s) {
 #ifdef _WIN32
     // The default behaviour on Windows is equivalent to SO_REUSEADDR
@@ -44,7 +58,8 @@ static void socketSetReuseAddress(int s) {
     // http://msdn.microsoft.com/en-us/library/windows/desktop/ms740621(v=vs.85).aspx
 #else
     int val = 1;
-    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
+    if(setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) < 0)
+      perror("Setting socket option SO_REUSEADDR failed");
 #endif
 }
 
@@ -104,25 +119,35 @@ struct SockAddr {
 
 int socketBindInternal(const SockAddr* addr, int socketType) {
     int s = ::socket(addr->getFamily(), socketType, 0);
-    if (s < 0)
+    if (s < 0) {
+        perror("Could not create socket to bind");
         return -errno;
+    }
+
+    socketSetDontLinger(s);
+    socketSetReuseAddress(s);
 
     // Bind to the socket.
     if (::bind(s, &addr->generic, addr->len) < 0 ||
         ::listen(s, 5) < 0) {
         int ret = -errno;
+        perror("Could not bind or listen to socket");
         ::close(s);
         return ret;
     }
 
-    socketSetReuseAddress(s);
     return s;
 }
 
 int socketConnectInternal(const SockAddr* addr, int socketType) {
     int s = ::socket(addr->getFamily(), socketType, 0);
-    if (s < 0)
+    if (s < 0) {
+        perror("Could not create socket to connect");
         return -errno;
+    }
+
+    socketSetDontLinger(s);
+    socketSetReuseAddress(s);
 
     int ret;
     do {

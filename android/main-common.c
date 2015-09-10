@@ -537,6 +537,21 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         }
     }
 
+    /* If the target architecture is 'x86', ensure that the 'qemu32'
+     * CPU model is used. Otherwise, the default (which is now 'qemu64')
+     * will result in a failure to boot with some kernels under
+     * un-accelerated emulation.
+     */
+    if (hw->hw_cpu_model[0] == '\0') {
+        char* arch = avdInfo_getTargetCpuArch(avd);
+        D("Target arch = '%s'", arch ? arch : "NULL");
+        if (arch != NULL && !strcmp(arch, "x86")) {
+            reassign_string(&hw->hw_cpu_model, "qemu32");
+            D("Auto-config: -qemu -cpu %s", hw->hw_cpu_model);
+        }
+        AFREE(arch);
+    }
+
     if (forceArmv7 != 0) {
         reassign_string(&hw->hw_cpu_model, "cortex-a8");
         D("Auto-config: -qemu -cpu %s", hw->hw_cpu_model);

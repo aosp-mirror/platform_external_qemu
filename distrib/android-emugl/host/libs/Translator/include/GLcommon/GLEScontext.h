@@ -54,7 +54,7 @@ private:
 
 struct GLSupport {
     GLSupport():maxLights(0),maxVertexAttribs(0),maxClipPlane(0),maxTexUnits(0), \
-                maxTexImageUnits(0),maxTexSize(0) , \
+                maxTexImageUnits(0),maxTexSize(0) , maxCombinedTexImageUnits(0), \
                 GL_EXT_TEXTURE_FORMAT_BGRA8888(false), GL_EXT_FRAMEBUFFER_OBJECT(false), \
                 GL_ARB_VERTEX_BLEND(false), GL_ARB_MATRIX_PALETTE(false), \
                 GL_EXT_PACKED_DEPTH_STENCIL(false) , GL_OES_READ_FORMAT(false), \
@@ -67,6 +67,7 @@ struct GLSupport {
     int  maxClipPlane;
     int  maxTexUnits;
     int  maxTexImageUnits;
+    int  maxCombinedTexImageUnits;
     int  maxTexSize;
     Version glslVersion;
     bool GL_EXT_TEXTURE_FORMAT_BGRA8888;
@@ -83,7 +84,6 @@ struct GLSupport {
     bool GL_OES_STANDARD_DERIVATIVES;
     bool GL_OES_TEXTURE_NPOT;
     bool GL_OES_RGB8_RGBA8;
-    bool GL_EXT_TEXTURE_STORAGE;
 
 };
 

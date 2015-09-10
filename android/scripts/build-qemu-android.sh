@@ -62,7 +62,7 @@ allowing one to inspect build failures easily."
 package_builder_register_options
 
 VALID_TARGETS="arm,arm64,x86,x86_64,mips,mips64"
-DEFAULT_TARGETS="arm64,mips64"
+DEFAULT_TARGETS="arm64,mips64,x86,x86_64"
 
 OPT_TARGET=
 option_register_var "--target=<list>" OPT_TARGET \

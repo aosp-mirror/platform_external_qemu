@@ -155,21 +155,21 @@ void GLESv2Context::initExtensionString() {
     if (s_glSupport.GL_OES_STANDARD_DERIVATIVES)
         *s_glExtensions+="GL_OES_standard_derivatives ";
     if (s_glSupport.GL_OES_TEXTURE_NPOT)
-        *s_glExtensions+="GL_OES_texture_npot ";
-    if (s_glSupport.GL_OES_RGB8_RGBA8)
-        *s_glExtensions+="GL_OES_rgb8_rgba8 ";
-    if (s_glSupport.GL_OES_READ_FORMAT)
-        *s_glExtensions+="GL_OES_read_format ";
-    if (s_glSupport.GL_EXT_TEXTURE_STORAGE)
-        *s_glExtensions+="GL_EXT_texture_storage ";
-    if (s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888)
-        *s_glExtensions+="GL_EXT_texture_format_BGRA8888 ";
-    if (s_glSupport.GL_EXT_FRAMEBUFFER_OBJECT) {
-        *s_glExtensions+="GL_OES_framebuffer_object GL_OES_depth24 GL_OES_depth32 GL_OES_fbo_render_mipmap "
-                         "GL_OES_rgb8_rgba8 GL_OES_stencil1 GL_OES_stencil4 GL_OES_stencil8 ";
+        *s_glExtensions+="GL_OES_texture_npot";
+    if (s_glSupport.GL_OES_RGB8_RGBA8) {
+        *s_glExtensions+=" GL_OES_rgb8_rgba8";
     }
 }
 
 int GLESv2Context::getMaxTexUnits() {
     return getCaps()->maxTexImageUnits;
+}
+
+int GLESv2Context::getMaxCombinedTexUnits() {
+    // GLES spec requires only 2, and the ATI driver erronously
+    // returns 32 (although it supports only 16). This WAR is simple,
+    // compliant and good enough for developers.
+    if (getCaps()->maxCombinedTexImageUnits > 16)
+        return 16;
+    return getCaps()->maxCombinedTexImageUnits;
 }

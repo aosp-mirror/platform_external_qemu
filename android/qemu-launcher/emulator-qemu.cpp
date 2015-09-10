@@ -91,6 +91,7 @@ enum ImageType {
 };
 
 const int kMaxPartitions = 4;
+const int kMaxTargetQemuParams = 16;
 /*
  * A structure used to model information about a given target CPU architecture.
  * |androidArch| is the architecture name, following Android conventions.
@@ -110,6 +111,9 @@ const int kMaxPartitions = 4;
  * the last one is mounted to /dev/block/vda. the 2nd last to /dev/block/vdb.
  * So far, we have 4(kMaxPartitions) types defined for system, cache, userdata
  * and sdcard images.
+ * |qemuExtraArgs| are the qemu parameters specific to the target platform.
+ * this is a NULL-terminated list of string pointers of at most
+ * kMaxTargetQemuParams(16).
  */
 struct TargetInfo {
     const char* androidArch;
@@ -120,6 +124,7 @@ struct TargetInfo {
     const char* storageDeviceType;
     const char* networkDeviceType;
     const ImageType imagePartitionTypes[kMaxPartitions];
+    const char* qemuExtraArgs[kMaxTargetQemuParams];
 };
 
 // The current target architecture information!
@@ -133,6 +138,7 @@ const TargetInfo kTarget = {
     "virtio-blk-device",
     "virtio-net-device",
     {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {NULL},
 #endif
 #ifdef TARGET_MIPS64
     "mips64",
@@ -143,6 +149,29 @@ const TargetInfo kTarget = {
     "virtio-blk-device",
     "virtio-net-device",
     {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {NULL},
+#endif
+#ifdef TARGET_X86
+    "x86",
+    "i386",
+    "qemu32",
+    "ttyS",
+    " androidboot.hardware=ranchu",
+    "virtio-blk-pci",
+    "virtio-net-pci",
+    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_SD_CARD},
+    {"-vga", "none", NULL},
+#endif
+#ifdef TARGET_X86_64
+    "x86_64",
+    "x86_64",
+    "qemu64",
+    "ttyS",
+    " androidboot.hardware=ranchu",
+    "virtio-blk-pci",
+    "virtio-net-pci",
+    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_SD_CARD},
+    {"-vga", "none", NULL},
 #endif
 };
 
@@ -300,6 +329,7 @@ extern "C" int main(int argc, char **argv, char **envp) {
         return 1;
     }
 
+    String qemuExecutable = getQemuExecutablePath(argv[0]);
     // TODO(digit): This code is very similar to the one in main.c,
     // refactor everything so that it fits into a single shared source
     // file, if possible, with the least amount of dependencies.
@@ -412,7 +442,6 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     hw->avd_name = ASTRDUP(avdInfo_getName(avd));
 
-    String qemuExecutable = getQemuExecutablePath(argv[0]);
     D("QEMU EXECUTABLE=%s\n", qemuExecutable.c_str());
 
     // Create userdata file from init version if needed.
@@ -453,11 +482,37 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     args[n++] = qemuExecutable.c_str();
 
+#if defined(TARGET_X86_64) || defined(TARGET_X86)
+    char* accel_status = NULL;
+    CpuAccelMode accel_mode = ACCEL_AUTO;
+    const bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, accel_status);
+
+    if (accel_mode == ACCEL_OFF) {  // 'accel off' is specified'
+        args[n++] = "-cpu";
+        args[n++] = kTarget.qemuCpu;
+    } else if (accel_mode == ACCEL_ON) {  // 'accel on' is specified'
+        if (!accel_ok) {
+            derror("CPU acceleration is not supported on this machine!");
+            derror("Reason: %s", accel_status);
+            exit(1);
+        }
+        args[n++] = ASTRDUP(kEnableAccelerator);
+    } else {  // ACCEL_AUTO
+        if (accel_ok) {
+            args[n++] = ASTRDUP(kEnableAccelerator);
+        } else {
+            args[n++] = "-cpu";
+            args[n++] = kTarget.qemuCpu;
+        }
+    }
+
+    AFREE(accel_status);
+#else   // !TARGET_X86_64 && !TARGET_X86
     args[n++] = "-cpu";
     args[n++] = kTarget.qemuCpu;
     args[n++] = "-machine";
     args[n++] = "type=ranchu";
-
+#endif  // !TARGET_X86_64 && !TARGET_X86
     // Memory size
     args[n++] = "-m";
     String memorySize = StringFormat("%ld", hw->hw_ramSize);
@@ -521,6 +576,17 @@ extern "C" int main(int argc, char **argv, char **envp) {
         dataDir += "/lib/pc-bios";
     }
     args[n++] = dataDir.c_str();
+
+    /* append extra qemu parameters if any */
+    for (int idx = 0; kTarget.qemuExtraArgs[idx] != NULL; idx++) {
+        args[n++] = kTarget.qemuExtraArgs[idx];
+    }
+
+    /* append the options after -qemu */
+    for (int i = 0; i < argc; ++i) {
+        args[n++] = argv[i];
+    }
+
     args[n] = NULL;
 
     if(VERBOSE_CHECK(init)) {
