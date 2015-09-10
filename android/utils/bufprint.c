@@ -24,6 +24,8 @@
 #else
 #  include <unistd.h>
 #  include <sys/stat.h>
+#  include <sys/types.h>
+#  include <pwd.h>
 #endif
 
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
@@ -89,7 +91,7 @@ bufprint_app_dir(char*  buff, char*  end)
     *x = 0;
 
     return bufprint(buff, end, "%s", path);
-Fail:
+ Fail:
     fprintf(stderr,"cannot locate application directory\n");
     exit(1);
     return end;
@@ -118,14 +120,14 @@ bufprint_app_dir(char*  buff, char*  end)
     GetCurrentProcess(&psn);
     dict  = ProcessInformationCopyDictionary(&psn, 0xffffffff);
     value = (CFStringRef)CFDictionaryGetValue(dict,
-                                             CFSTR("CFBundleExecutable"));
+                                              CFSTR("CFBundleExecutable"));
     CFStringGetCString(value, s, PATH_MAX - 1, kCFStringEncodingUTF8);
     x = strrchr(s, '/');
     if (x == 0) goto fail;
     *x = 0;
 
     return bufprint(buff, end, "%s", s);
-fail:
+ fail:
     fprintf(stderr,"cannot locate application directory\n");
     exit(1);
     return end;
@@ -135,22 +137,22 @@ char*
 bufprint_app_dir(char*  buff, char*  end)
 {
     char   appDir[MAX_PATH];
-	int    len;
-	char*  sep;
+    int    len;
+    char*  sep;
 
     len = GetModuleFileName( 0, appDir, sizeof(appDir)-1 );
-	if (len == 0) {
-		fprintf(stderr, "PANIC CITY!!\n");
-		exit(1);
-	}
-	if (len >= (int)sizeof(appDir)) {
-		len = sizeof(appDir)-1;
-	    appDir[len] = 0;
+    if (len == 0) {
+        fprintf(stderr, "PANIC CITY!!\n");
+        exit(1);
+    }
+    if (len >= (int)sizeof(appDir)) {
+        len = sizeof(appDir)-1;
+        appDir[len] = 0;
     }
 
-	sep = strrchr(appDir, '\\');
-	if (sep)
-	  *sep = 0;
+    sep = strrchr(appDir, '\\');
+    if (sep)
+        *sep = 0;
 
     return bufprint(buff, end, "%s", appDir);
 }
@@ -250,3 +252,48 @@ bufprint_temp_file(char*  buff, char*  end, const char*  suffix)
     return p;
 }
 
+/* Relatively failsafe call to get user home directory */
+char *
+bufprint_home_dir(char *buff, char *end)
+{
+    char *p = buff;
+
+#ifdef _WIN32   // Windows
+    char path[PATH_MAX] = { 0 };
+    if(SUCCEEDED(SHGetFolderPath( NULL, CSIDL_PROFILE, NULL, 0, path))) {
+        p = bufprint(p, end, "%s", path);
+    } else {
+        D("Failed to get path to user HOME directory; trying alternative path");
+        const char *hd = getenv("HOMEDRIVE");
+        if(hd == NULL) {
+            D("Failed to get path to valid user home directory via HOMEDRIVE env var");
+            return NULL;
+        }
+        const char *hp = getenv("HOMEPATH");
+        if(hd == NULL) {
+            D("Failed to get path to valid user home directory via HOMEPATH env var");
+            return NULL;
+        }
+        p = bufprint(p, end, "%s", hd);
+        p = bufprint(p, end, PATH_SEP "%s", hp);
+    }
+#else // Linux, MacOSX
+    const char *h = getenv("HOME");
+    if(h != NULL) {
+        p = bufprint(p, end, "%s", h);
+    }
+    else {
+        D("Failed to get path to user HOME directory; trying alternative path");
+        struct passwd *pw = getpwuid(getuid());
+        if(pw == NULL || pw->pw_dir == NULL) {
+            D("Failed to get path to valid user home directory via pwuid");
+            return p;
+        }
+        p = bufprint(p, end, "%s", pw->pw_dir);
+    }
+#endif
+    if (p >= end)
+        D("HOME path (\"%s\") too long.\n", buff);
+
+    return p;
+}

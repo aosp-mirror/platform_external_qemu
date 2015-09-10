@@ -563,7 +563,8 @@ esac
 ###
 LIBXML2_PREBUILTS_DIR=
 # Note: libxml2 is only used when building the Qt-based UI.
-if [ "$OPTION_UI" = "qt" ]; then
+# if [ "$OPTION_UI" = "qt" ]; then
+if [ "$OPTION_UI" = "qt" -o "$OPTION_UI" = "sdl2" ]; then
     LIBXML2_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/libxml2
     if [ -d "$LIBXML2_PREBUILTS_DIR" ]; then
         log "Libxml2 prebuilts dir: $LIBXML2_PREBUILTS_DIR"
@@ -739,6 +740,7 @@ if [ "$QT_PREBUILTS_DIR" ]; then
 else
     echo "EMULATOR_USE_SDL2 := true" >> $config_mk
     echo "EMULATOR_USE_QT   := false" >> $config_mk
+    echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 fi
 
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
