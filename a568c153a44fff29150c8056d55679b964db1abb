@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6442fedf_1dfa53e4",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T17:42:41Z",
+      "side": 1,
+      "message": "actually, you could just do:\n\n   args[n++] \u003d argv[i]\n\n:-)",
+      "revId": "a568c153a44fff29150c8056d55679b964db1abb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
