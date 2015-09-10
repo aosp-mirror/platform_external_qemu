@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "e4c34e74_2e493bf8",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T16:52:51Z",
+      "side": 1,
+      "message": "Done.\nFair point.",
+      "parentUuid": "c4164adc_38116919",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "64c3de5a_159a74ad",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 6
@@ -126,6 +144,24 @@
     },
     {
       "key": {
+        "uuid": "c4ef2afe_1b2343b8",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T16:52:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0434e264_628f36b0",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4d56a01_a37d047f",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 6
@@ -173,6 +209,24 @@
       "side": 1,
       "message": "There are several reasons to use a unit-test in this case:\n\n1) It allows you to run this non-trivial function and verify that it works correctly without a special setup / debug server.\n\n2) It catches any regression in the future. If someone modifies the function\u0027s output in some way, the unit-test will catch it immediately. The fact that the test must be updated if the output _must_ change is actually a feature!.\n\nThis also forces you to think hard about versioning and the way you want to handle defaults.\n\n3) It makes it easier to check for edge cases. For example, ga_application_name contains a space that doesn\u0027t seem to be escaped at all by your function. This looks like a bug.\n\nI really think you should move this to its own file and add a unit-test.",
       "parentUuid": "64cf5e9f_d41db5a3",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44cedaa4_23a5d4e6",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T16:52:51Z",
+      "side": 1,
+      "message": "Done. Disagreements are what reviews are for ;)\n\nEscaping: I was using curl_urlescape, but the server didn\u0027t like that. OTOH, it\u0027s totally fine with that space.",
+      "parentUuid": "44517aa7_7c727925",
       "revId": "41ced24c26b406d5251582558198cc0c67731c80",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
