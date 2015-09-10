@@ -10,6 +10,19 @@
     GNU General Public License for more details.
 -->
 <!DOCTYPE RCC><RCC version="1.0">
+ <qresource>
+     <!-- Qt wants an extra 'qt/' in this path name -->
+     <file alias="qt/etc/qt.conf">etc/qt.conf</file>
+ </qresource>
+
+ <qresource prefix="/lib/fonts">
+     <!-- The names 'uiDefault*' are used to load the fonts in
+          android/skin/qt/winsys-qt.cpp -->
+     <file alias="uiDefault">fonts/Roboto-Regular.ttf</file>
+     <file alias="uiDefault-Bold">fonts/Roboto-Bold.ttf</file>
+     <file alias="uiDefault-Medium">fonts/Roboto-Medium.ttf</file>
+ </qresource>
+
  <qresource prefix="/dark">
      <!-- Main list of tool buttons -->
      <file alias="close">images/dark/ic_close_black_48dp.svg</file>

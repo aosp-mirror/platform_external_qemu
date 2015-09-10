@@ -25,6 +25,7 @@
 #include <QtCore>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QFontDatabase>
 #include <QRect>
 #include <QSemaphore>
 #include <QThread>
@@ -73,6 +74,23 @@ extern void skin_winsys_enter_main_loop(int argc, char **argv)
     QStringList pathList(qtPath.c_str());
     QCoreApplication::setLibraryPaths(pathList);
     D("Qt lib path: %s\n", qtPath.c_str());
+
+    // Give Qt the fonts from our resource file
+    QFontDatabase  fontDb;
+    int fontId = fontDb.addApplicationFont(":/lib/fonts/uiDefault");
+    if (fontId < 0) {
+        D("Count not load font resource: \":/lib/fonts/uiDefault");
+    }
+
+    fontId = fontDb.addApplicationFont(":/lib/fonts/uiDefault-Bold");
+    if (fontId < 0) {
+        D("Count not load font resource: \":/lib/fonts/uiDefault-Bold");
+    }
+
+    fontId = fontDb.addApplicationFont(":/lib/fonts/uiDefault-Medium");
+    if (fontId < 0) {
+        D("Count not load font resource: \":/lib/fonts/uiDefault-Medium");
+    }
 
     GlobalState* g = globalState();
     g->argc = argc;
