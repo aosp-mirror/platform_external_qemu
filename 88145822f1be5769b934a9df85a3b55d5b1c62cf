@@ -2,6 +2,74 @@
   "comments": [
     {
       "key": {
+        "uuid": "8447f2eb_fe852141",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "there is a slight layering conflict here: code in android/base/ should not depend on code in android/utils/\n\n(but code in android/utils/ is allowed to depend on android/base/)",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6442fedf_5dc77b9e",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "nit: use kContinue, kComplete, kError per the style guide.",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e41fceee_bc224de2",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "nit: we should only use const references in C++ code, as per the Google/Chromium style guide.",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0434e264_855cc464",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "question: strtoi() is not standard, does that compile with our Windows cross-toolchain?",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0484e2ca_5fd35996",
         "filename": "android/base/Version.cpp",
         "patchSetId": 4
@@ -19,6 +87,251 @@
         "endLine": 74,
         "endChar": 34
       },
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a44076d4_3fce27b9",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "You don\u0027t want any a dwarning() / dprint() in android/base/\nJust let the client call version.isValid() to check it.",
+      "parentUuid": "0484e2ca_5fd35996",
+      "range": {
+        "startLine": 74,
+        "startChar": 25,
+        "endLine": 74,
+        "endChar": 34
+      },
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0434e264_25693805",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "Please move this into its own patch, and add a unit-test :)",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6442fedf_bdc1df8c",
+        "filename": "android/base/Version.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "nit: doesn\u0027t seem to be needed by code that uses this class.",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a44076d4_7fc4af98",
+        "filename": "android/base/Version.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "Please add minimal comment explaining the class\u0027 purpose and usage.",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e436ee6e_21fa8ee4",
+        "filename": "android/base/Version.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "nit: you probably want operator\u003d\u003d as well.",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e41fceee_9c1d09a5",
+        "filename": "android/base/Version.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "nit: naming, probably use kInvalid instead\n\nAlso what\u0027s the point of this member if you don\u0027t have operator\u003d\u003d ?\n\nI\u0027d rather suggest an isValid() const method that returns a bool instead. Use something like mMajor \u003d\u003d 0xffffffffU to indicate an invalid version.",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4164adc_1bcd7f9c",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "nit: please put C headers after C++ ones.",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e41fceee_5c18d1b0",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "nit: prefer kDataFileName for the name, same below.",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c43d6a4e_63d09ce0",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "probably not needed anymore?",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44517aa7_ffcd1bf2",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "don\u0027t use QEMU-specific stuff here, use android::base::Thread instead. If not possible, please specify why",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e436ee6e_e1b26640",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "why not directly returning Version(SDK_VERSION_STRING)?",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a44076d4_df993bba",
+        "filename": "android/update-check/UpdateChecker.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "nit: remove this include, it\u0027s not needed by client code that includes this header. Same for \"android/base/String.h\"",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0434e264_4566bc34",
+        "filename": "android/update-check/UpdateChecker.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "nit: what happens if init() or needsCheck() returns false? Should the caller free the instance explicitly? That sounds like an error-prone API.",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6442fedf_1dd1f359",
+        "filename": "android/update-check/UpdateChecker.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "nit: document what |homePath| is (certainly not $HOME)",
       "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -48,6 +361,23 @@
     },
     {
       "key": {
+        "uuid": "e436ee6e_41f792f9",
+        "filename": "android/update-check/update_check.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "nit: call this android_checkForUpdates() or android_check_for_updates().",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "240f267a_5dbebbeb",
         "filename": "android/utils/curl.h",
         "patchSetId": 4
@@ -59,6 +389,23 @@
       "writtenOn": "2015-09-04T21:06:18Z",
       "side": 1,
       "message": "Please add a function: \n\n  bool is_curl_initialized()\n\nthat can be used by users of curl to decide whether they can use curl.",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8447f2eb_9e8add50",
+        "filename": "vl-android.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4103,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:21:59Z",
+      "side": 1,
+      "message": "oh, I see that this name was already taken :)",
       "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
