@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "244c8613_4ffa5d3c",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-10T02:24:52Z",
+      "side": 1,
+      "message": "statics don\u0027t use stack space at all, they are the same globals but with a limited visibility",
+      "parentUuid": "44cedaa4_4369f003",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4d56a01_a37d047f",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 6
