@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4c34e74_ce207f36",
+        "filename": "Makefile.common",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-10T15:02:11Z",
+      "side": 1,
+      "message": "Should this be conditional on Darwin?\nIt\u0027s not clear to me why this doesn\u0027t cause a problem\nwith non-Darwin 32-bit builds.",
+      "revId": "7522ecbf11dc6aa3da6b79504b285901134418bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
