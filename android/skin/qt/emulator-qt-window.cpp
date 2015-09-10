@@ -50,6 +50,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
 
     tool_window = new ToolWindow(this);
 
+    this->setAcceptDrops(true);
+
     QObject::connect(this, &EmulatorQtWindow::blit, this, &EmulatorQtWindow::slot_blit);
     QObject::connect(this, &EmulatorQtWindow::createBitmap, this, &EmulatorQtWindow::slot_createBitmap);
     QObject::connect(this, &EmulatorQtWindow::fill, this, &EmulatorQtWindow::slot_fill);
@@ -82,6 +84,40 @@ EmulatorQtWindow::~EmulatorQtWindow()
 EmulatorQtWindow *EmulatorQtWindow::getInstance()
 {
     return instance;
+}
+
+void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    // Accept all drag enter events with any URL, then filter more in drop events
+    // TODO: check this with hasFormats() using MIME type for .apk?
+    if (event->mimeData() && event->mimeData()->hasUrls()) {
+        event->acceptProposedAction();
+    }
+}
+
+void EmulatorQtWindow::dropEvent(QDropEvent *event)
+{
+    // Get the first url - if it's an APK and the only file, attempt to install it
+    QList<QUrl> urls = event->mimeData()->urls();
+    QString url = urls[0].path();
+
+    if (url.endsWith(".apk") && urls.length() == 1) {
+        tool_window->runAdbInstall(url);
+        return;
+    } else {
+
+        // If any of the files is an APK, intent was ambiguous
+        for (int i = 0; i < urls.length(); i++) {
+            if (urls[i].path().endsWith(".apk")) {
+                tool_window->showErrorDialog(tr("Drag-and-drop can either install a single APK"
+                                                " file or copy one or more non-APK files to the"
+                                                " SD card."),
+                                             tr("Drag and Drop"));
+                return;
+            }
+        }
+        tool_window->runAdbPush(urls);
+    }
 }
 
 void EmulatorQtWindow::keyPressEvent(QKeyEvent *event)
