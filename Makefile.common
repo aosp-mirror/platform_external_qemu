@@ -104,6 +104,32 @@ EMULATOR_COMMON_CFLAGS += -I$(GLIB_INCLUDE_DIR)
 
 common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 
+
+##############################################################################
+# Libcurl definitions
+#
+LIBCURL_TOP32_DIR := $(LIBCURL_PREBUILTS_DIR)/$(HOST_OS)-x86
+LIBCURL_TOP64_DIR := $(LIBCURL_PREBUILTS_DIR)/$(HOST_OS)-x86_64
+
+LIBCURL_INCLUDES := $(LIBCURL_TOP32_DIR)/include
+LIBCURL_INCLUDES_64 := $(LIBCURL_TOP64_DIR)/include
+LIBCURL_LDLIBS := $(LIBCURL_TOP32_DIR)/lib/libcurl.a \
+    $(LIBCURL_TOP32_DIR)/lib/libssl.a \
+    $(LIBCURL_TOP32_DIR)/lib/libz.a \
+    $(LIBCURL_TOP32_DIR)/lib/libcrypto.a
+
+LIBCURL_LDLIBS_64 := $(LIBCURL_TOP64_DIR)/lib/libcurl.a \
+    $(LIBCURL_TOP64_DIR)/lib/libssl.a \
+    $(LIBCURL_TOP64_DIR)/lib/libz.a \
+    $(LIBCURL_TOP64_DIR)/lib/libcrypto.a
+
+ifneq ($(HOST_OS),windows)
+  LIBCURL_LDLIBS += -ldl
+  LIBCURL_LDLIBS_64 += -ldl
+endif
+
+EMULATOR_COMMON_CFLAGS += -DCURL_STATICLIB
+
 ###########################################################
 # Android utility functions
 #
@@ -213,7 +239,7 @@ include $(LOCAL_PATH)/android/wear-agent/sources.mk
 
 ## one for 32-bit
 $(call start-emulator-library, emulator-common)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
     LOCAL_IGNORE_BITNESS := true
@@ -222,7 +248,7 @@ $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
 $(call start-emulator64-library, emulator64-common)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES_64)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
