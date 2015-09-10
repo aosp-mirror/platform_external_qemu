@@ -18,13 +18,14 @@
 #include "android/gpu_frame.h"
 #include "android/hw-control.h"
 #include "android/hw-sensors.h"
-#include "android/looper.h"
 #include "android/opengles.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
 #include "android/user-events.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/looper.h"
+
 #include "telephony/modem_driver.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
@@ -233,7 +234,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
 
     // Determine whether to use an EmuGL sub-window or not.
     if (!s_use_emugl_subwindow) {
-        gpu_frame_set_post_callback(looper_newCore(),
+        gpu_frame_set_post_callback(looper_getForThread(),
                                     emulator,
                                     _emulator_window_on_gpu_frame);
     }

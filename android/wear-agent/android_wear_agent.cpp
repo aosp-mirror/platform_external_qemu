@@ -14,7 +14,6 @@
 #include "android/wear-agent/android_wear_agent.h"
 
 #include "android/base/Log.h"
-#include "android/looper-base.h"
 #include "android/wear-agent/WearAgent.h"
 
 namespace {
@@ -29,7 +28,8 @@ void android_wear_agent_start(CLooper* looper) {
     DCHECK(looper);
     // TODO(digit): Make this thread-safe?
     if (!sAgent) {
-        sAgent = new android::wear::WearAgent(android::internal::toBaseLooper(looper));
+        sAgent = new android::wear::WearAgent(
+                reinterpret_cast<android::base::Looper*>(looper));
     }
 }
 

@@ -28,7 +28,6 @@
 #endif  // __APPLE__
 
 #include "config.h"
-#include "android/sockets.h"
 
 #include "android/android.h"
 #include "qemu-common.h"
@@ -52,6 +51,7 @@
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
 #include "android/utils/tempfile.h"
+#include "android/utils/sockets.h"
 
 #include "android/main-common.h"
 #include "android/help.h"
@@ -65,7 +65,7 @@
 
 #include "android/framebuffer.h"
 #include "android/opengl/emugl_config.h"
-#include "android/iolooper.h"
+#include "android/utils/iolooper.h"
 
 #include "android/skin/winsys.h"
 

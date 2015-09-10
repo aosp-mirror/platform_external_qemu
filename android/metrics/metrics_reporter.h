@@ -13,7 +13,7 @@
 #ifndef ANDROID_METRICS_ANDROID_METRICS_REPORTER_H
 #define ANDROID_METRICS_ANDROID_METRICS_REPORTER_H
 
-#include "android/looper.h"
+#include "android/utils/looper.h"
 #include "android/utils/compiler.h"
 #include "android/utils/system.h"
 

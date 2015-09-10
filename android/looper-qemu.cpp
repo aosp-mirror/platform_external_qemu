@@ -9,15 +9,15 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/looper-base.h"
+#include "android/base/Limits.h"
 
+#include "android/looper-qemu.h"
 #include "android/qemu/base/async/Looper.h"
+#include "android/utils/looper.h"
 
-using ::android::internal::GLooper;
+typedef ::Looper CLooper;
 
-::Looper* looper_newCore(void) {
-    GLooper* glooper = new GLooper(
-            ::android::qemu::createLooper());
-
-    return &glooper->looper;
+void qemu_looper_setForThread(void) {
+    looper_setForThread(
+            reinterpret_cast<CLooper*>(::android::qemu::createLooper()));
 }

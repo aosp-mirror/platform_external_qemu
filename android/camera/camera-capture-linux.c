@@ -20,12 +20,16 @@
  * Linux kernel version at least 2.5
  */
 
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
 #include "android/utils/eintr_wrapper.h"
+
+#include <fcntl.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)

@@ -19,6 +19,9 @@
 
 #include "android/async-socket.h"
 #include "android/async-utils.h"
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /*
  * Contains declaration of an API that encapsulates communication protocol with
@@ -595,5 +598,7 @@ extern SdkCtlPortStatus sdkctl_socket_get_port_status(SDKCtlSocket* sdkctl);
  *  Boolean: 1 if handshake was successful, 0 if handshake was not successful.
  */
 extern int sdkctl_socket_is_handshake_ok(SDKCtlSocket* sdkctl);
+
+ANDROID_END_HEADER
 
 #endif  /* ANDROID_SDKCONTROL_SOCKET_H_ */

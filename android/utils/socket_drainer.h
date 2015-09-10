@@ -12,8 +12,8 @@
 #ifndef ANDROID_UTILS_SOCKET_DRAINER_H
 #define ANDROID_UTILS_SOCKET_DRAINER_H
 
-#include "android/looper.h"
 #include "android/utils/compiler.h"
+#include "android/utils/looper.h"
 
 ANDROID_BEGIN_HEADER
 

@@ -15,14 +15,15 @@
  * of the emulator's core initialization.
  */
 
+#include "android/core-init-utils.h"
+
+#include "android/android.h"
+#include "android/utils/bufprint.h"
+#include "android/utils/sockets.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "qemu-common.h"
-#include "android/sockets.h"
-#include "android/android.h"
-#include "android/core-init-utils.h"
-#include "android/utils/bufprint.h"
 
 extern char* android_op_ui_port;
 

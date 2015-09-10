@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-#include "qemu-common.h"
-#include "android/sockets.h"
-#include "android/iolooper.h"
+#include "android/adb-server.h"
+
 #include "android/async-utils.h"
 #include "android/utils/debug.h"
 #include "android/utils/format.h"
+#include "android/utils/iolooper.h"
 #include "android/utils/list.h"
+#include "android/utils/looper.h"
 #include "android/utils/misc.h"
-#include "android/adb-server.h"
+#include "android/utils/sockets.h"
+
+#include <assert.h>
+#include <stdlib.h>
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
@@ -63,7 +67,7 @@ struct AdbHost {
     /* ADB socket connected with the host. */
     int         host_so;
     /* I/O port for asynchronous I/O on the host socket. */
-    LoopIo      io[1];
+    LoopIo*     io;
     /* ADB guest connected with this ADB host. */
     AdbGuest*   adb_guest;
     /* Pending data to send to the guest when it is fully connected. */
@@ -85,7 +89,7 @@ struct AdbServer {
     /* Looper for async I/O on ADB server socket. */
     Looper*     looper;
     /* I/O port for asynchronous I/O on ADB server socket. */
-    LoopIo      io[1];
+    LoopIo*     io;
     /* ADB port. */
     int         port;
     /* Server socket. */
@@ -133,7 +137,7 @@ _adb_host_free(AdbHost* adb_host)
 
         /* Close the host socket. */
         if (adb_host->host_so >= 0) {
-            loopIo_done(adb_host->io);
+            loopIo_free(adb_host->io);
             socket_close(adb_host->host_so);
         }
 
@@ -152,7 +156,7 @@ _adb_host_free(AdbHost* adb_host)
 static void
 _adb_host_append_message(AdbHost* adb_host, const void* msg, int msglen)
 {
-    printf("Append %d bytes to ADB host buffer.\n", msglen);
+    D("Append %d bytes to ADB host buffer.\n", msglen);
 
     /* Make sure that buffer can contain the appending data. */
     if (adb_host->pending_send_buffer == NULL) {
@@ -386,8 +390,10 @@ _on_server_socket_io(void* opaque, int fd, unsigned events)
     }
 
     /* Prepare for I/O on the host connection socket. */
-    loopIo_init(adb_host->io, adb_srv->looper, adb_host->host_so,
-                _on_adb_host_io, adb_host);
+    adb_host->io = loopIo_new(adb_srv->looper,
+                              adb_host->host_so,
+                              _on_adb_host_io,
+                              adb_host);
 
     /* Lets see if there is an ADB guest waiting for a host connection. */
     adb_guest = (AdbGuest*)alist_remove_head(&adb_srv->pending_guests);
@@ -422,7 +428,7 @@ adb_server_init(int port)
         _adb_server.port = port;
 
         /* Create looper for an async I/O on the server. */
-        _adb_server.looper = looper_newCore();
+        _adb_server.looper = looper_getForThread();
         if (_adb_server.looper == NULL) {
             E("Unable to create I/O looper for ADB server");
             return -1;
@@ -439,8 +445,10 @@ adb_server_init(int port)
 
         /* Prepare server socket for I/O */
         socket_set_nonblock(_adb_server.so);
-        loopIo_init(_adb_server.io, _adb_server.looper, _adb_server.so,
-                    _on_server_socket_io, &_adb_server);
+        _adb_server.io = loopIo_new(_adb_server.looper,
+                                    _adb_server.so,
+                                    _on_server_socket_io,
+                                    &_adb_server);
         loopIo_wantRead(_adb_server.io);
 
         D("ADB server has been initialized for port %d. Socket: %d",

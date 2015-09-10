@@ -19,7 +19,6 @@
 
 #include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
-#include "android/looper-base.h"
 #include "android/opengl/GpuFrameBridge.h"
 #include "android/opengles.h"
 
@@ -55,7 +54,9 @@ void gpu_frame_set_post_callback(
     DCHECK(!sBridge);
 
     sBridge = android::opengl::GpuFrameBridge::create(
-            android::internal::toBaseLooper(looper), callback, context);
+            reinterpret_cast<android::base::Looper*>(looper),
+            callback,
+            context);
     CHECK(sBridge);
 
     android_setPostCallback(onNewGpuFrame, sBridge);

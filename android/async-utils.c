@@ -15,7 +15,8 @@
  */
 #include "android/async-utils.h"
 #include "android/utils/eintr_wrapper.h"
-#include "unistd.h"
+
+#include <unistd.h>
 
 void
 asyncReader_init(AsyncReader* ar,
@@ -42,7 +43,7 @@ asyncReader_read(AsyncReader*  ar)
 
     do {
         ret = HANDLE_EINTR(
-                socket_recv(ar->io->fd,
+                socket_recv(loopIo_fd(ar->io),
                             ar->buffer + ar->pos,
                             ar->buffsize - ar->pos));
         if (ret == 0) {
@@ -90,7 +91,7 @@ asyncWriter_write(AsyncWriter* aw)
 
     do {
         ret = HANDLE_EINTR(
-                socket_send(aw->io->fd,
+                socket_send(loopIo_fd(aw->io),
                             aw->buffer + aw->pos,
                             aw->buffsize - aw->pos));
         if (ret == 0) {
@@ -140,7 +141,7 @@ asyncLineReader_read(AsyncLineReader* alr)
 
     do {
         char ch;
-        ret = HANDLE_EINTR(socket_recv(alr->io->fd, &ch, 1));
+        ret = HANDLE_EINTR(socket_recv(loopIo_fd(alr->io), &ch, 1));
         if (ret == 0) {
             /* disconnection ! */
             errno = ECONNRESET;
@@ -221,7 +222,7 @@ asyncConnector_init(AsyncConnector*    ac,
     int ret;
     ac->error = 0;
     ac->io    = io;
-    ret = socket_connect(io->fd, address);
+    ret = socket_connect(loopIo_fd(io), address);
     if (ret == 0) {
         ac->state = CONNECT_COMPLETED;
         return ASYNC_COMPLETE;
@@ -256,7 +257,7 @@ asyncConnector_run(AsyncConnector* ac)
             * allows us to get a better error value as soon as
             * possible.
             */
-        ac->error = socket_get_error(ac->io->fd);
+        ac->error = socket_get_error(loopIo_fd(ac->io));
         if (ac->error == 0) {
             ac->state = CONNECT_COMPLETED;
             return ASYNC_COMPLETE;

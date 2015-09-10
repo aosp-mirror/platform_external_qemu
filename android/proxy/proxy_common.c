@@ -9,16 +9,18 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "proxy_int.h"
-#include "android/sockets.h"
-#include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
+#include "android/proxy/proxy_int.h"
+
+#include "android/utils/iolooper.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
-#include "android/iolooper.h"
+#include "android/utils/sockets.h"
+
+#include <errno.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int  proxy_log = 0;
 
@@ -59,20 +61,19 @@ hex_dump( void*   base, int  size, const char*  prefix )
 void
 proxy_connection_init( ProxyConnection*           conn,
                        int                        socket,
-                       SockAddress*               address,
+                       const SockAddress*         address,
                        ProxyService*              service,
-                       ProxyConnectionFreeFunc    conn_free,
-                       ProxyConnectionSelectFunc  conn_select,
-                       ProxyConnectionPollFunc    conn_poll )
+                       LoopIoFunc                 conn_io,
+                       ProxyConnectionFreeFunc    conn_free )
 {
-    conn->socket    = socket;
+    conn->io        = loopIo_new(looper_getForThread(),
+                                 socket,
+                                 conn_io,
+                                 conn);
     conn->address   = address[0];
     conn->service   = service;
     conn->next      = NULL;
-
-    conn->conn_free   = conn_free;
-    conn->conn_select = conn_select;
-    conn->conn_poll   = conn_poll;
+    conn->conn_free = conn_free;
 
     socket_set_nonblock(socket);
 
@@ -96,9 +97,11 @@ void
 proxy_connection_done( ProxyConnection*  conn )
 {
     stralloc_reset( conn->str );
-    if (conn->socket >= 0) {
-        socket_close(conn->socket);
-        conn->socket = -1;
+    if (conn->io) {
+        int socket = loopIo_fd(conn->io);
+        loopIo_free(conn->io);
+        socket_close(socket);
+        conn->io = NULL;
     }
 }
 
@@ -309,27 +312,34 @@ proxy_connection_free( ProxyConnection*  conn,
                        int               keep_alive,
                        ProxyEvent        event )
 {
-    if (conn) {
-        int  fd = conn->socket;
-
-        proxy_connection_remove(conn);
-
-        if (event != PROXY_EVENT_NONE)
-            conn->ev_func( conn->ev_opaque, fd, event );
-
-        if (keep_alive)
-            conn->socket = -1;
-
-        conn->conn_free(conn);
+    if (!conn) {
+        return;
     }
+
+    proxy_connection_remove(conn);
+
+    if (event != PROXY_EVENT_NONE && conn->io) {
+        conn->ev_func( conn->ev_opaque, loopIo_fd(conn->io), event );
+    }
+
+    if (conn->io) {
+        int fd = loopIo_fd(conn->io);
+        loopIo_free(conn->io);
+        conn->io = NULL;
+        if (!keep_alive) {
+            socket_close(fd);
+        }
+    }
+
+    conn->conn_free(conn);
 }
 
 
 int
-proxy_manager_add( SockAddress*    address,
-                   SocketType      sock_type,
-                   ProxyEventFunc  ev_func,
-                   void*           ev_opaque )
+proxy_manager_add( const SockAddress*  address,
+                   SocketType          sock_type,
+                   ProxyEventFunc      ev_func,
+                   void*               ev_opaque )
 {
     int  n;
 
@@ -369,94 +379,6 @@ proxy_manager_del( void*  ev_opaque )
         }
     }
 }
-
-void
-proxy_select_set( ProxySelect*  sel,
-                  int           fd,
-                  unsigned      flags )
-{
-    if (fd < 0 || !flags)
-        return;
-
-    if (*sel->pcount < fd+1)
-        *sel->pcount = fd+1;
-
-    if (flags & PROXY_SELECT_READ) {
-        FD_SET( fd, sel->reads );
-    } else {
-        FD_CLR( fd, sel->reads );
-    }
-    if (flags & PROXY_SELECT_WRITE) {
-        FD_SET( fd, sel->writes );
-    } else {
-        FD_CLR( fd, sel->writes );
-    }
-    if (flags & PROXY_SELECT_ERROR) {
-        FD_SET( fd, sel->errors );
-    } else {
-        FD_CLR( fd, sel->errors );
-    }
-}
-
-unsigned
-proxy_select_poll( ProxySelect*  sel, int  fd )
-{
-    unsigned  flags = 0;
-
-    if (fd >= 0) {
-        if ( FD_ISSET(fd, sel->reads) )
-            flags |= PROXY_SELECT_READ;
-        if ( FD_ISSET(fd, sel->writes) )
-            flags |= PROXY_SELECT_WRITE;
-        if ( FD_ISSET(fd, sel->errors) )
-            flags |= PROXY_SELECT_ERROR;
-    }
-    return flags;
-}
-
-/* this function is called to update the select file descriptor sets
- * with those of the proxified connection sockets that are currently managed */
-void
-proxy_manager_select_fill( int  *pcount, fd_set*  read_fds, fd_set*  write_fds, fd_set*  err_fds)
-{
-    ProxyConnection*  conn;
-    ProxySelect       sel[1];
-
-    if (!s_init)
-        proxy_manager_init();
-
-    sel->pcount = pcount;
-    sel->reads  = read_fds;
-    sel->writes = write_fds;
-    sel->errors = err_fds;
-
-    conn = s_connections->next;
-    while (conn != s_connections) {
-        ProxyConnection*  next = conn->next;
-        conn->conn_select(conn, sel);
-        conn = next;
-    }
-}
-
-/* this function is called to act on proxified connection sockets when network events arrive */
-void
-proxy_manager_poll( fd_set*  read_fds, fd_set*  write_fds, fd_set*  err_fds )
-{
-    ProxyConnection*  conn = s_connections->next;
-    ProxySelect       sel[1];
-
-    sel->pcount = NULL;
-    sel->reads  = read_fds;
-    sel->writes = write_fds;
-    sel->errors = err_fds;
-
-    while (conn != s_connections) {
-        ProxyConnection*  next  = conn->next;
-        conn->conn_poll( conn, sel );
-        conn = next;
-    }
-}
-
 
 int
 proxy_base64_encode( const char*  src, int  srclen,
@@ -507,7 +429,7 @@ proxy_resolve_server( SockAddress*   addr,
     if (servernamelen < 0)
         servernamelen = strlen(servername);
 
-    if (servernamelen >= sizeof(name0)) {
+    if (servernamelen >= (int)sizeof(name0)) {
         AARRAY_NEW(name, servernamelen+1);
     }
 

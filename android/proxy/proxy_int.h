@@ -9,42 +9,21 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _PROXY_INT_H
-#define _PROXY_INT_H
+#ifndef ANDROID_PROXY_PROXY_INT_H
+#define ANDROID_PROXY_PROXY_INT_H
 
-#include "proxy_common.h"
-#include "android/sockets.h"
+#include "android/proxy/proxy_common.h"
+
+#include "android/utils/looper.h"
+#include "android/utils/sockets.h"
 #include "android/utils/stralloc.h"
 
 extern int  proxy_log;
 
-extern void
-proxy_LOG(const char*  fmt, ...);
+extern void proxy_LOG(const char*  fmt, ...);
 
 #define  PROXY_LOG(...)   \
     do { if (proxy_log) proxy_LOG(__VA_ARGS__); } while (0)
-
-
-/* ProxySelect is used to handle events */
-
-enum {
-    PROXY_SELECT_READ  = (1 << 0),
-    PROXY_SELECT_WRITE = (1 << 1),
-    PROXY_SELECT_ERROR = (1 << 2)
-};
-
-typedef struct {
-    int*     pcount;
-    fd_set*  reads;
-    fd_set*  writes;
-    fd_set*  errors;
-} ProxySelect;
-
-extern void     proxy_select_set( ProxySelect*  sel,
-                                  int           fd,
-                                  unsigned      flags );
-
-extern unsigned  proxy_select_poll( ProxySelect*  sel, int  fd );
 
 
 /* sockets proxy manager internals */
@@ -53,20 +32,11 @@ typedef struct ProxyConnection   ProxyConnection;
 typedef struct ProxyService      ProxyService;
 
 /* free a given proxified connection */
-typedef void              (*ProxyConnectionFreeFunc)   ( ProxyConnection*  conn );
-
-/* modify the ProxySelect to tell which events to listen to */
-typedef void              (*ProxyConnectionSelectFunc) ( ProxyConnection*  conn,
-                                                         ProxySelect*      sel );
-
-/* action a proxy connection when select() returns certain events for its socket */
-typedef void              (*ProxyConnectionPollFunc)   ( ProxyConnection*  conn,
-                                                         ProxySelect*      sel );
-
+typedef void (*ProxyConnectionFreeFunc)(ProxyConnection* conn);
 
 /* root ProxyConnection object */
 struct ProxyConnection {
-    int                 socket;
+    LoopIo*             io;
     SockAddress         address;  /* for debugging */
     ProxyConnection*    next;
     ProxyConnection*    prev;
@@ -84,8 +54,6 @@ struct ProxyConnection {
 
     /* connection methods */
     ProxyConnectionFreeFunc    conn_free;
-    ProxyConnectionSelectFunc  conn_select;
-    ProxyConnectionPollFunc    conn_poll;
 
     /* rest of data depend on exact implementation */
 };
@@ -95,11 +63,10 @@ struct ProxyConnection {
 extern void
 proxy_connection_init( ProxyConnection*           conn,
                        int                        socket,
-                       SockAddress*               address,
+                       const SockAddress*         address,
                        ProxyService*              service,
-                       ProxyConnectionFreeFunc    conn_free,
-                       ProxyConnectionSelectFunc  conn_select,
-                       ProxyConnectionPollFunc    conn_poll );
+                       LoopIoFunc                 conn_io,
+                       ProxyConnectionFreeFunc    conn_free );
 
 extern void
 proxy_connection_done( ProxyConnection*  conn );
@@ -198,4 +165,4 @@ extern int
 proxy_manager_add_service( ProxyService*  service );
 
 
-#endif /* _PROXY_INT_H */
+#endif /* ANDROID_PROXY_PROXY_INT_H */

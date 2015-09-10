@@ -9,16 +9,27 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _PROXY_HTTP_INT_H
-#define _PROXY_HTTP_INT_H
+#ifndef ANDROID_PROXY_PROXY_HTTP_INT_H
+#define ANDROID_PROXY_PROXY_HTTP_INT_H
 
-#include "proxy_http.h"
-#include "proxy_int.h"
+#include "android/proxy/proxy_http.h"
+#include "android/proxy/proxy_int.h"
+
+// Used to indicate the type of HTTP proxy to implement.
+// AUTO -> determine type based on address port (80 -> REWRITER, other -> CONNECTOR)
+// CONNECTOR -> use connector method (HTTPS).
+// REWRITER -> use rewriter method (HTTP).
+typedef enum {
+    HTTP_SERVICE_TYPE_AUTO,
+    HTTP_SERVICE_TYPE_CONNECTOR,
+    HTTP_SERVICE_TYPE_REWRITER,
+} HttpServiceType;
 
 /* the HttpService object */
 typedef struct HttpService {
     ProxyService        root[1];
     SockAddress         server_addr;  /* server address and port */
+    HttpServiceType     service_type;
     char*               footer;      /* the footer contains the static parts of the */
     int                 footer_len;  /* connection header, we generate it only once */
     char                footer0[512];
@@ -35,4 +46,4 @@ extern ProxyConnection*  http_rewriter_connect(
                                 SockAddress*   address );
 
 
-#endif /* _PROXY_HTTP_INT_H */
+#endif /* ANDROID_PROXY_PROXY_HTTP_INT_H */

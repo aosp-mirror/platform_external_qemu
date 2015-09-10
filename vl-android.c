@@ -62,6 +62,7 @@
 #include "android/hw-qemud.h"
 #include "android/hw-sensors.h"
 #include "android/log-rotate.h"
+#include "android/looper-qemu.h"
 #include "android/metrics/metrics_reporter.h"
 #include "android/multitouch-port.h"
 #include "android/multitouch-screen.h"
@@ -214,10 +215,8 @@ int qemu_main(int argc, char **argv, char **envp);
 
 #include "android/snaphost-android.h"
 
-#if !defined(CONFIG_STANDALONE_CORE)
 /* in android/qemulator.c */
 extern void  android_emulator_set_base_port(int  port);
-#endif
 
 #define STRINGIFY(x) _STRINGIFY(x)
 #define _STRINGIFY(x) #x
@@ -228,7 +227,7 @@ extern void  android_emulator_set_base_port(int  port);
 #define VERSION_STRING "standalone"
 #endif
 
-#if defined(CONFIG_SKINS) && !defined(CONFIG_STANDALONE_CORE)
+#if defined(CONFIG_SKINS)
 #undef main
 #define main qemu_main
 #endif
@@ -2125,7 +2124,7 @@ static void android_init_metrics()
 
     androidMetrics_tryReportAll();
 
-    metrics_looper = looper_newCore();
+    metrics_looper = looper_getForThread();
     if (!metrics_looper) {
         dwarning("Failed to initialize metrics looper (OOM?).");
         return;
@@ -2181,6 +2180,10 @@ int main(int argc, char **argv, char **envp)
     STRALLOC_DEFINE(kernel_params);
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;
+
+    /* Ensure Looper implementation for this thread is based on the QEMU
+     * main loop. */
+    qemu_looper_setForThread();
 
     /* Initialize sockets before anything else, so we can properly report
      * initialization failures back to the UI. */
@@ -2246,8 +2249,8 @@ int main(int argc, char **argv, char **envp)
     android_hw_control_init();
     android_net_pipes_init();
 
-    socket_drainer_start(looper_newCore());
-    android_wear_agent_start(looper_newCore());
+    socket_drainer_start(looper_getForThread());
+    android_wear_agent_start(looper_getForThread());
 
 #ifdef CONFIG_KVM
     /* By default, force auto-detection for kvm */
@@ -2916,12 +2919,9 @@ int main(int argc, char **argv, char **envp)
             case QEMU_OPTION_mic:
                 audio_input_source = (char*)optarg;
                 break;
-#ifdef CONFIG_NAND
             case QEMU_OPTION_nand:
                 nand_add_dev(optarg);
                 break;
-
-#endif
 #ifdef CONFIG_HAX
             case QEMU_OPTION_enable_hax:
                 hax_disabled = 0;
@@ -3968,11 +3968,11 @@ int main(int argc, char **argv, char **envp)
         curses_display_init(ds, full_screen);
         break;
 #endif
-#if defined(CONFIG_SDL) && !defined(CONFIG_STANDALONE_CORE)
+#if defined(CONFIG_SDL)
     case DT_SDL:
         sdl_display_init(ds, full_screen, no_frame);
         break;
-#elif defined(CONFIG_QT) && !defined(CONFIG_STANDALONE_CORE)
+#elif defined(CONFIG_QT)
     case DT_QT:
         sdl_display_init(ds, full_screen, no_frame);
         break;
@@ -3980,11 +3980,6 @@ int main(int argc, char **argv, char **envp)
     case DT_SDL:
     case DT_QT:
         cocoa_display_init(ds, full_screen);
-        break;
-#elif defined(CONFIG_STANDALONE_CORE)
-    case DT_SDL:
-    case DT_QT:
-        coredisplay_init(ds);
         break;
 #endif
     case DT_VNC:

@@ -12,15 +12,16 @@
 #include "android/avd/info.h"
 #include "android/avd/util.h"
 #include "android/avd/keys.h"
-#include "android/config/config.h"
-#include "android/utils/file_data.h"
-#include "android/utils/path.h"
-#include "android/utils/property_file.h"
+
 #include "android/utils/bufprint.h"
-#include "android/utils/filelock.h"
-#include "android/utils/tempfile.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
+#include "android/utils/file_data.h"
+#include "android/utils/filelock.h"
+#include "android/utils/path.h"
+#include "android/utils/property_file.h"
+#include "android/utils/tempfile.h"
+
 #include <ctype.h>
 #include <stddef.h>
 #include <string.h>

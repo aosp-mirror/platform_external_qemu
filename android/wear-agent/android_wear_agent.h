@@ -15,7 +15,7 @@
 // C interface to android/wear-agent/WearAgent.h
 
 #include "android/utils/compiler.h"
-#include "android/looper.h"
+#include "android/utils/looper.h"
 
 ANDROID_BEGIN_HEADER
 
