@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a44076d4_3f75c790",
+        "filename": "Makefile.common",
+        "patchSetId": 4
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T06:39:59Z",
+      "side": 1,
+      "message": "Please don\u0027t put that into android/utils/\n\nAs specified in the documentation (ANDROID-CODING-STYLE.TXT), the content of android/utils/ should only depend on low-level system interfaces and android/base/\n\n(android/base/ should also only depend on low-level system interfaces).\n\nJust put that into android/curl-support.c for example, and that should be enough.",
+      "revId": "c6818b392180163c9a6c218f44bc88a7b6576f67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4164adc_78292165",
+        "filename": "include/qemu/thread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T06:39:59Z",
+      "side": 1,
+      "message": "let\u0027s avoid adding Android-specific stuff to QEMU-specific headers, to keep things simple.\n\nIf this header needs to be included from a C++ file (which seems unlikely to me), it should do that inside an extern \"C\" block as in:\n\n    extern \"C\" {\n    #include \"qemu/thread.h\"\n    }  // extern \"C\"\n\nBesides, that doesn\u0027t seem to be related to curl at all, so it\u0027s probably something that should be left out of this patch anyway.",
+      "revId": "c6818b392180163c9a6c218f44bc88a7b6576f67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
