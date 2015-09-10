@@ -14,6 +14,8 @@
 
 #include <QtCore>
 #include <QApplication>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QFrame>
 #include <QMouseEvent>
 #include <QMoveEvent>
@@ -54,6 +56,8 @@ public:
     virtual ~EmulatorQtWindow();
 
     static EmulatorQtWindow *getInstance();
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     void paintEvent(QPaintEvent *event);

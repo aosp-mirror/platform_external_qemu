@@ -94,8 +94,8 @@ void ExtendedWindow::on_loc_playButton_clicked()
     for (int row = 0; row < mExtendedUi->loc_pathTable->rowCount(); row++) {
         for (int col = 0; col < mExtendedUi->loc_pathTable->columnCount(); col++) {
             if (!loc_cellIsValid(mExtendedUi->loc_pathTable, row, col)) {
-                QErrorMessage *eM = new QErrorMessage;
-                eM->showMessage(tr("The table contains errors.<br>No locations were sent."));
+                mToolWindow->showErrorDialog(tr("The table contains errors.<br>No locations were sent."),
+                                             tr("GPS Playback"));
                 return;
             }
         }
@@ -277,8 +277,8 @@ void ExtendedWindow::on_loc_KmlButton_clicked()
     isOK = KmlParser::parseFile(fileName.toStdString().c_str(),
                                 &kmlFixes, &errStr);
     if (!isOK) {
-        QErrorMessage *eM = new QErrorMessage;
-        eM->showMessage(errStr.c_str());
+        mToolWindow->showErrorDialog(tr(errStr.c_str()),
+                                     tr("KML Parser"));
     } else {
         // Put the data into 'loc_pathTable'
         for (unsigned int idx = 0; idx < kmlFixes.size(); idx++) {

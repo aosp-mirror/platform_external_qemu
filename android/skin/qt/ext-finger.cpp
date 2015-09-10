@@ -26,8 +26,8 @@ void ExtendedWindow::on_finger_touchCkBox_toggled(bool checked)
     int  id = mExtendedUi->finger_IdBox->toPlainText().toInt(&OK);
 
     if (checked && !OK) {
-        QErrorMessage *eM = new QErrorMessage;
-        eM->showMessage(QString("The \"Fingerprint ID\" number is invalid"));
+        mToolWindow->showErrorDialog(tr("The \"Fingerprint ID\" number is invalid."),
+                                     tr("Finger ID"));
         mExtendedUi->finger_IdBox->setEnabled(true);
         mExtendedUi->finger_touchCkBox->setChecked(false);
         return;
