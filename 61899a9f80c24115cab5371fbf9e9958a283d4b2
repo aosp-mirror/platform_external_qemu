@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c43d6a4e_e3b4acbd",
+        "filename": "android/curl-support.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T17:24:29Z",
+      "side": 1,
+      "message": "nit: That should be ANDROID_CURL_SUPPORT_H :)",
+      "revId": "61899a9f80c24115cab5371fbf9e9958a283d4b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
