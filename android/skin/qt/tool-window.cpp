@@ -12,6 +12,7 @@
 
 #include <QPushButton>
 
+#include "android/android.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-window.h"
@@ -36,6 +37,17 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window) :
     toolsUi->setupUi(this);
     // Make this more narrow than QtDesigner likes
     this->resize(54, this->height());
+
+    mErrorMessage.setWindowModality(Qt::ApplicationModal);
+
+    QObject::connect(&mInstallProcess, SIGNAL(finished(int)), this, SLOT(slot_installFinished(int)));
+
+    // TODO: make this affected by themes and changes
+    mInstallDialog.setWindowTitle(tr("APK Installer"));
+    mInstallDialog.setLabelText(tr("Installing APK..."));
+    mInstallDialog.setRange(0, 0); // Makes it a "busy" dialog
+    mInstallDialog.close();
+    QObject::connect(&mInstallDialog, SIGNAL(canceled()), this, SLOT(slot_installCanceled()));
 }
 
 void ToolWindow::show()
@@ -45,6 +57,41 @@ void ToolWindow::show()
     setFixedSize(size());
 }
 
+void ToolWindow::showErrorDialog(const QString &message, const QString &title)
+{
+    mErrorMessage.setWindowTitle(title);
+    mErrorMessage.showMessage(message);
+}
+
+void ToolWindow::runAdbInstall(const QString &path)
+{
+    if (mInstallProcess.state() != QProcess::NotRunning) {
+        showErrorDialog(tr("Another install is currently pending.<br>Try again when it completes."),
+                        tr("APK Installer"));
+        return;
+    }
+
+    // Show a dialog so the user knows something is happening
+    mInstallDialog.show();
+
+    // Default the -r flag to replace the current version
+    // TODO: is replace the desired default behavior?
+    // TODO: enable other flags? -lrstdg available
+    QString command = "adb "; // Base command
+    command += "-s emulator-" + QString::number(android_base_port); // Guarantees this emulator
+    command += " install -r "; // The desired command is install -r
+    command += path; // The absolute path to the desired .apk file
+
+    // Keep track of this process
+    mInstallProcess.start(command);
+    mInstallProcess.waitForStarted();
+}
+
+void ToolWindow::runAdbPush(const QList<QUrl> &paths)
+{
+    // TODO: implement me!
+}
+
 void ToolWindow::dockMainWindow()
 {
     move(emulator_window->geometry().right() + 10, emulator_window->geometry().top() + 10);
@@ -52,7 +99,7 @@ void ToolWindow::dockMainWindow()
 
 void ToolWindow::on_close_button_clicked()
 {
-    emulator_window->simulateQuit();
+    emulator_window->close();
 }
 void ToolWindow::on_power_button_clicked()
 {
@@ -108,6 +155,22 @@ void ToolWindow::on_more_button_clicked()
     extendedWindow->show();
     // completeInitialization() must be called AFTER show()
     extendedWindow->completeInitialization();
+}
+
+void ToolWindow::slot_installCanceled()
+{
+    if (mInstallProcess.state() != QProcess::NotRunning) {
+        mInstallProcess.kill();
+    }
+}
+
+void ToolWindow::slot_installFinished(int exitStatus)
+{
+    mInstallDialog.close();
+    if (exitStatus) {
+        showErrorDialog(tr("The installation failed."),
+                        tr("APK Installer"));
+    }
 }
 
 extern "C" void setUiEmuAgent(const UiEmuAgent *agentPtr) {

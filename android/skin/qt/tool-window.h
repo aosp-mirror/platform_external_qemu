@@ -16,10 +16,14 @@
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/utils/compiler.h"
 
+#include <QErrorMessage>
 #include <QFrame>
 #include <QGridLayout>
 #include <QHash>
+#include <QProcess>
+#include <QProgressDialog>
 #include <QToolButton>
+#include <QUrl>
 
 namespace Ui {
     class ToolControls;
@@ -43,6 +47,11 @@ public:
     void setToolEmuAgent(const UiEmuAgent *agPtr)
         { uiEmuAgent = agPtr; }
 
+    void showErrorDialog(const QString &message, const QString &title);
+
+    void runAdbInstall(const QString &path);
+    void runAdbPush(const QList<QUrl> &paths);
+
 private:
     QToolButton *addButton(QGridLayout *layout, int row, int col,
                            const char *iconPath, QString tip,
@@ -57,6 +66,11 @@ private:
     Ui::ToolControls  *toolsUi;
     double scale; // TODO: add specific UI for scaling
 
+    QErrorMessage mErrorMessage;
+
+    QProcess mInstallProcess;
+    QProgressDialog mInstallDialog;
+
 private slots:
     void on_close_button_clicked();
     void on_power_button_clicked();
@@ -68,6 +82,8 @@ private slots:
     void on_fullscreen_button_clicked();
     void on_more_button_clicked();
 
+    void slot_installCanceled();
+    void slot_installFinished(int exitStatus);
 };
 
 typedef void(ToolWindow::*ToolWindowSlot)();
