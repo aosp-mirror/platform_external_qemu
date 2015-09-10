@@ -329,6 +329,7 @@ extern "C" int main(int argc, char **argv, char **envp) {
         return 1;
     }
 
+    String qemuExecutable = getQemuExecutablePath(argv[0]);
     // TODO(digit): This code is very similar to the one in main.c,
     // refactor everything so that it fits into a single shared source
     // file, if possible, with the least amount of dependencies.
@@ -441,7 +442,6 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     hw->avd_name = ASTRDUP(avdInfo_getName(avd));
 
-    String qemuExecutable = getQemuExecutablePath(argv[0]);
     D("QEMU EXECUTABLE=%s\n", qemuExecutable.c_str());
 
     // Create userdata file from init version if needed.
@@ -481,6 +481,10 @@ extern "C" int main(int argc, char **argv, char **envp) {
     int n = 0;
 
     args[n++] = qemuExecutable.c_str();
+
+    for (int i = 0; i < argc; ++i) {
+        args[n++] = ASTRDUP(argv[i]);
+    }
 
 #if defined(TARGET_X86_64) || defined(TARGET_X86)
     char* accel_status = NULL;
