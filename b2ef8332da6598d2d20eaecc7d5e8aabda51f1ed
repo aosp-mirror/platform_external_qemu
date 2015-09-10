@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4164adc_f86c5143",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T17:20:35Z",
+      "side": 1,
+      "message": "don\u0027t you want to add these after the other arguments that are added by the launcher, this way there is a way to override the values?",
+      "revId": "b2ef8332da6598d2d20eaecc7d5e8aabda51f1ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
