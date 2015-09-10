@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c4ef2afe_5564fae6",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T00:41:02Z",
+      "side": 1,
+      "message": "No.\nI\u0027d rather not pollute commandline flags for this.",
+      "parentUuid": "a4d8763b_0296acc9",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "64c3de5a_159a74ad",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-08T19:54:48Z",
       "side": 1,
       "message": "nit: I recommend putting all these static constant string definitions inside formatGAPostData() if they are not used outside of the function.",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44cedaa4_4369f003",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T00:41:02Z",
+      "side": 1,
+      "message": "I tend to keep static const char*\u0027s as globals to avoid having to allocate stack space each time the function is called.\n\nI\u0027ve kept this as is, but you can convince me to change my habit if there\u0027s a good reason to.",
+      "parentUuid": "64c3de5a_159a74ad",
       "revId": "41ced24c26b406d5251582558198cc0c67731c80",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "64cf5e9f_d41db5a3",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T00:41:02Z",
+      "side": 1,
+      "message": "I tried both your suggestions but then redacted them.\n\n- I didn\u0027t move the function to its own file because there\u0027s a little leakage of GA specific stuff in androidMetrics_uploadMetrics already (the URL to post to in debug/prod mode). I\u0027d have to move that as well, and it seemed like an overkill.\n  - That said, we want to eventually also ping code.google.com in parallel. I\u0027ll hide away the backend specific formatting of post data at that point.\n- I didn\u0027t add a unittest just for the post function because it seems too low level to me. All this does is create a formatted string. A unittest for this function would be extremely brittle -- every change in code needs a corresponding change in unittest.\nhttps://sites.google.com/a/google.com/tater-tott/posts/2013/09/episode_299__test_behavior__not_implementation",
+      "parentUuid": "c4d56a01_a37d047f",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4d42ed5_c501da0f",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2015-09-08T19:54:48Z",
       "side": 1,
       "message": "this seems to contradict the comment above describing GA_VALIDATE_HITS. Is this expected or do you intend to dump stuff to stdout in the future? Some clarification would be welcomed :)",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4bdd6e7_2c026714",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-10T00:41:02Z",
+      "side": 1,
+      "message": "clarified. The key is the if\"n\"def :D\n\nI\u0027m muting stdout when that debug macro is not defined.\nWhen the macro is defined, we\u0027ll dump the output to stdout.",
+      "parentUuid": "e4d42ed5_c501da0f",
       "revId": "41ced24c26b406d5251582558198cc0c67731c80",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
