@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include "qemu-common.h"
 
 #define D(...) VERBOSE_PRINT(init,__VA_ARGS__)
 
@@ -40,6 +41,7 @@ path_getSdkRoot( char *pFromEnv )
     const char*  env;
     char*        sdkPath;
     char         temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
+    const char*  home;
 
     /* If ANDROID_SDK_ROOT is defined is must point to a directory
      * containing a valid SDK installation.
@@ -61,16 +63,42 @@ path_getSdkRoot( char *pFromEnv )
     /* We assume the emulator binary is under tools/ so use its
      * parent as the Android SDK root.
      */
+    D("Checking for SDK root relative to emulator binary...\n");
     (void) bufprint_app_dir(temp, end);
-    sdkPath = path_parent(temp, 1);
-    if (sdkPath == NULL) {
-        derror("can't find root of SDK directory");
-        return NULL;
+    D("Checking binary location %s for tools\n", temp);
+    char * basename = path_basename(temp);
+    if (basename && strcmp(basename, "tools") == 0) {
+        sdkPath = path_parent(temp, 1);
+        if (sdkPath == NULL) {
+            derror("can't find root of SDK directory");
+            return NULL;
+        }
+        D("found SDK root at %s\n", sdkPath);
+        return sdkPath;
     }
-    D("found SDK root at %s", sdkPath);
+
+    /* Can't find sdk still, use default
+     * Windows: C:\Users\<user>\AppData\Local\Android\sdk\
+     *              SHGetFolderPath(CSIDL_LOCAL_APPDATA
+     * OSX ~/Library/Android/sdk
+     * Linux: ~/Android/Sdk
+     */
+    D("Checking for SDK root at default install locations...\n");
+    home = getenv("HOME");
+
+#if defined( _WIN32)
+    sdkPath = qemu_get_user_local_state_pathname("Local" PATH_SEP "Android" PATH_SEP "sdk");
+#elif defined(__APPLE__)
+    sprintf(temp, "%s" PATH_SEP "Library" PATH_SEP "Android" PATH_SEP "sdk", home);
+    sdkPath = android_strdup(temp);
+#else
+    sprintf("%s" PATH_SEP "Android" PATH_SEP "sdk", home);
+    sdkPath = android_strdup(temp);
+#endif
+    if (sdkPath == NULL)
+        derror("can't find root of SDK directory");
     return sdkPath;
 }
-
 
 /* Return the path to the AVD's root configuration .ini file. it is located in
  * ~/.android/avd/<name>.ini or Windows equivalent
