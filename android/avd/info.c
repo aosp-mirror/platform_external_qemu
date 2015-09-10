@@ -415,7 +415,9 @@ _avdInfo_getSdkRoot( AvdInfo*  i )
     i->sdkRootPath = path_getSdkRoot(&i->sdkRootPathFromEnv);
     if (i->sdkRootPath == NULL)
         return -1;
-
+    if (!i->sdkRootPathFromEnv){
+        dwarning("Using inferred sdk root %s\n", i->sdkRootPath);
+    }
     return 0;
 }
 
@@ -661,7 +663,6 @@ static char*
 _avdInfo_getContentOrSdkFilePath(AvdInfo*  i, const char*  fileName)
 {
     char*  path;
-
     path = _avdInfo_getContentFilePath(i, fileName);
     if (path)
         return path;

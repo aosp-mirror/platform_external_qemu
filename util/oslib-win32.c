@@ -207,6 +207,24 @@ qemu_get_local_state_pathname(const char *relative_pathname)
                            relative_pathname);
 }
 
+char *
+qemu_get_user_local_state_pathname(const char *relative_pathname)
+{
+    HRESULT result;
+    char base_path[MAX_PATH+1] = "";
+
+    result = SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL,
+                             /* SHGFP_TYPE_CURRENT */ 0, base_path);
+    if (result != S_OK) {
+        /* misconfigured environment */
+        g_critical("CSIDL_LOCAL_APPDATA unavailable: %ld", (long)result);
+        abort();
+    }
+    return g_strdup_printf("%s" G_DIR_SEPARATOR_S "%s", base_path,
+                           relative_pathname);
+}
+
+
 #ifdef CONFIG_ANDROID
 int ffs(int x) {
     int result = 0;

@@ -217,6 +217,19 @@ bool fips_get_state(void);
  */
 char *qemu_get_local_state_pathname(const char *relative_pathname);
 
+
+/* Return a dynamically allocated pathname denoting a file or directory that is
+ * appropriate for storing user local state.
+ *
+ * @relative_pathname need not start with a directory separator; one will be
+ * added automatically.
+ *
+ * The caller is responsible for releasing the value returned with g_free()
+ * after use.
+ */
+char *qemu_get_user_local_state_pathname(const char *relative_pathname);
+
+
 /**
  * qemu_getauxval:
  * @type: the auxiliary vector key to lookup
