@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "c4164adc_38116919",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T07:40:02Z",
+      "side": 1,
+      "message": "I\u0027m concerned about the fact that code under such an #ifdef that is never compiled for production may get stale in the future.\n\nCan you use a static const variable instead? That will ensure that both code paths are compiled, even if only one is used at runtime, e.g.:\n\n  // Set to \u0027true\u0027 to send request to a Google Analytics\n  // debug server, and print the returned parsing\n  // information / error from the server to stdout.\n  static const bool use_debug_ga_server \u003d false;\n\n  static const char analytics_url[] \u003d \"...\";\n  static const char analytics_url_debug[] \u003d \"...\";\n\n  ...\n\n  if (!use_debug_ga_server) {\n      // don\u0027t print anything to stdout.\n      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteFunction);\n  }\n\n  ...",
+      "parentUuid": "c4ef2afe_5564fae6",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "64c3de5a_159a74ad",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 6
@@ -90,6 +108,24 @@
     },
     {
       "key": {
+        "uuid": "0434e264_628f36b0",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T07:40:02Z",
+      "side": 1,
+      "message": "Exactly :)",
+      "parentUuid": "244c8613_4ffa5d3c",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4d56a01_a37d047f",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 6
@@ -125,6 +161,24 @@
     },
     {
       "key": {
+        "uuid": "44517aa7_7c727925",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T07:40:02Z",
+      "side": 1,
+      "message": "There are several reasons to use a unit-test in this case:\n\n1) It allows you to run this non-trivial function and verify that it works correctly without a special setup / debug server.\n\n2) It catches any regression in the future. If someone modifies the function\u0027s output in some way, the unit-test will catch it immediately. The fact that the test must be updated if the output _must_ change is actually a feature!.\n\nThis also forces you to think hard about versioning and the way you want to handle defaults.\n\n3) It makes it easier to check for edge cases. For example, ga_application_name contains a space that doesn\u0027t seem to be escaped at all by your function. This looks like a bug.\n\nI really think you should move this to its own file and add a unit-test.",
+      "parentUuid": "64cf5e9f_d41db5a3",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4d42ed5_c501da0f",
         "filename": "android/metrics/metrics_reporter.c",
         "patchSetId": 6
@@ -154,6 +208,24 @@
       "side": 1,
       "message": "clarified. The key is the if\"n\"def :D\n\nI\u0027m muting stdout when that debug macro is not defined.\nWhen the macro is defined, we\u0027ll dump the output to stdout.",
       "parentUuid": "e4d42ed5_c501da0f",
+      "revId": "41ced24c26b406d5251582558198cc0c67731c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6442fedf_3d238f85",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T07:40:02Z",
+      "side": 1,
+      "message": "Oh I see, didn\u0027t noticed that.",
+      "parentUuid": "a4bdd6e7_2c026714",
       "revId": "41ced24c26b406d5251582558198cc0c67731c80",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
