@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a44076d4_9f05f389",
+        "filename": "android/curl-support.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T17:35:12Z",
+      "side": 1,
+      "message": "no, there is no QEMU_ prefix here :)",
+      "revId": "3a78331e09dfb58ad6582cc48ea9426ee55f5742",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
