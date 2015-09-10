@@ -16,6 +16,24 @@
       "revId": "61899a9f80c24115cab5371fbf9e9958a283d4b2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4c34e74_a2d0bfe0",
+        "filename": "android/curl-support.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-10T17:34:48Z",
+      "side": 1,
+      "message": "oops, renamed _almost_ everything :)",
+      "parentUuid": "c43d6a4e_e3b4acbd",
+      "revId": "61899a9f80c24115cab5371fbf9e9958a283d4b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
