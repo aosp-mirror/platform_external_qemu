@@ -48,6 +48,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     backing_surface = NULL;
     tool_window = new ToolWindow(this);
 
+    this->setAcceptDrops(true);
+
     QObject::connect(this, &EmulatorQtWindow::blit, this, &EmulatorQtWindow::slot_blit);
     QObject::connect(this, &EmulatorQtWindow::createBitmap, this, &EmulatorQtWindow::slot_createBitmap);
     QObject::connect(this, &EmulatorQtWindow::fill, this, &EmulatorQtWindow::slot_fill);
@@ -77,6 +79,28 @@ EmulatorQtWindow::~EmulatorQtWindow()
 EmulatorQtWindow *EmulatorQtWindow::getInstance()
 {
     return instance;
+}
+
+void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    // For now, only accept .apk URL's
+    // TODO: check this with hasFormats() using MIME type for .apk?
+    if (event->mimeData() && event->mimeData()->hasUrls()) {
+        QString url = event->mimeData()->urls()[0].path();
+        if (url.endsWith(".apk")) {
+            event->acceptProposedAction();
+        }
+    }
+}
+
+void EmulatorQtWindow::dropEvent(QDropEvent *event)
+{
+    // We only accept drag enter events if they contain .apk's, so this is safe
+    QString url = event->mimeData()->urls()[0].path();
+
+    // Default the -r flag to replace the current version
+    // TODO: enable other flags? -lrstdg available
+    tool_window->runAdbCommand("install -r " + url);
 }
 
 void EmulatorQtWindow::keyPressEvent(QKeyEvent *event)

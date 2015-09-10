@@ -12,6 +12,7 @@
 
 #include <QPushButton>
 
+#include "android/android.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/tool-window.h"
@@ -42,6 +43,21 @@ void ToolWindow::show()
     setFixedSize(size());
 }
 
+void ToolWindow::runAdbCommand(const QString &cmd)
+{
+    QString command = "adb"; // Base command
+    command += " -s emulator-" + QString::number(android_base_port); // Guarantees this emulator
+    command += " " + cmd; // The desired command
+
+    // The process must be detached else it can hang the main emulator
+    bool isOk = QProcess::startDetached(command);
+    if (!isOk) {
+        // TODO: display ar error message that the command couldn't be run?
+    }
+
+    // TODO: get output/error data from the process, place in a dialog box?
+}
+
 void ToolWindow::dockMainWindow()
 {
     move(emulator_window->geometry().right() + 10, emulator_window->geometry().top() + 10);
@@ -49,7 +65,7 @@ void ToolWindow::dockMainWindow()
 
 void ToolWindow::on_close_button_clicked()
 {
-    emulator_window->simulateQuit();
+    emulator_window->close();
 }
 void ToolWindow::on_power_button_clicked()
 {

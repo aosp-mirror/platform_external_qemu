@@ -16,6 +16,7 @@
 #include <QFrame>
 #include <QGridLayout>
 #include <QHash>
+#include <QProcess>
 #include <QToolButton>
 
 namespace Ui {
@@ -34,6 +35,8 @@ public:
     explicit ToolWindow(EmulatorQtWindow *emulatorWindow);
     void show();
     void dockMainWindow();
+
+    void runAdbCommand(const QString &cmd);
 
 private:
     QToolButton *addButton(QGridLayout *layout, int row, int col, const char *iconPath, QString tip, EmulatorQtWindowSlot slot);
