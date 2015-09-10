@@ -26,6 +26,7 @@
 #include "android/filesystems/ext4_utils.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/main-common.h"
+#include "android/opengl/emugl_config.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
@@ -425,19 +426,23 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     handleCommonEmulatorOptions(opts, hw, avd);
 
-    if (opts->gpu) {
-        const char* gpu = opts->gpu;
-        if (!strcmp(gpu,"on") || !strcmp(gpu,"enable")) {
-            hw->hw_gpu_enabled = 1;
-        } else if (!strcmp(gpu,"off") || !strcmp(gpu,"disable")) {
-            hw->hw_gpu_enabled = 0;
-        } else if (!strcmp(gpu,"auto")) {
-            /* Nothing to do */
-        } else {
-            derror("Invalid value for -gpu <mode> parameter: %s\n", gpu);
-            derror("Valid values are: on, off or auto\n");
+    {
+        EmuglConfig emuglConfig;
+
+        if (!emuglConfig_init(&emuglConfig,
+                              hw->hw_gpu_enabled,
+                              hw->hw_gpu_mode,
+                              opts->gpu,
+                              0,
+                              opts->no_window)) {
+            derror("%s", emuglConfig.status);
             exit(1);
         }
+        hw->hw_gpu_enabled = emuglConfig.enabled;
+        if (hw->hw_gpu_enabled) {
+            reassign_string(&hw->hw_gpu_mode, emuglConfig.backend);
+        }
+        D("%s", emuglConfig.status);
     }
 
     hw->avd_name = ASTRDUP(avdInfo_getName(avd));
@@ -529,6 +534,12 @@ extern "C" int main(int argc, char **argv, char **envp) {
     if (opts->selinux) {
         kernelCommandLine += StringFormat(
                 " androidboot.selinux=%s", opts->selinux);
+    }
+
+    if (hw->hw_gpu_enabled) {
+        kernelCommandLine += " qemu.gles=1";
+    } else {
+        kernelCommandLine += " qemu.gles=0";
     }
     args[n++] = kernelCommandLine.c_str();
 
