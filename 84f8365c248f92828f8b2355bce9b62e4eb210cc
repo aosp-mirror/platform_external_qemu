@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0434e264_05375418",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 567,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:35:10Z",
+      "side": 1,
+      "message": "Note: libxml2 is not in our repo manifest yet, so this will break the build, we need to create a new repository for it under $AOSP/prebuilts/android-emulator-build/libxml2/, update the manifest, then we will be able to submit this.\n\nActually, we\u0027re probably better creating $AOSP/prebuilts/android-emulator-build/common/ and put most stuff here to avoid asking the build team for new git repositories all the time.",
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a44076d4_9f93b396",
+        "filename": "android/telemetry/studio_helper.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:35:10Z",
+      "side": 1,
+      "message": "coding style: * should be on the side of the type. Ok, sorry for all the nits. \u0027git clang-format\u0027 will fix that for you (and many other things)",
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8447f2eb_5e75350a",
+        "filename": "android/telemetry/studio_helper.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:35:10Z",
+      "side": 1,
+      "message": "nit: Naming, try StudioXml instead.",
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44517aa7_9fd2d791",
+        "filename": "android/telemetry/studio_helper.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:35:10Z",
+      "side": 1,
+      "message": "nit: try StudioScanner",
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e41fceee_3c0f1d66",
+        "filename": "android/telemetry/studio_helper.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:35:10Z",
+      "side": 1,
+      "message": "nit: use prefixed names like android_studio_get_installation_id() and android_studio_get_optins()\n\n+ Add documentation for the parameters and return values.",
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c43d6a4e_83cda047",
+        "filename": "android/telemetry/telemetry-config.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:35:10Z",
+      "side": 1,
+      "message": "nit: should be lower in this list",
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8447f2eb_be8f995f",
+        "filename": "android/telemetry/telemetry-config.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:35:10Z",
+      "side": 1,
+      "message": "nit: should be higher in this list :)",
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e41fceee_7c159575",
+        "filename": "android/telemetry/telemetry-config.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:35:10Z",
+      "side": 1,
+      "message": "formatting: please use \u0027git clang-format\u0027 here.",
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0434e264_e5311025",
+        "filename": "android/telemetry/telemetry-config.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:35:10Z",
+      "side": 1,
+      "message": "nit: just free() :)",
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6442fedf_3dce2fb9",
+        "filename": "android/telemetry/telemetry-config.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:35:10Z",
+      "side": 1,
+      "message": "nit: header order. I understand this is a copy-and-paste from another file, but still :)",
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c43d6a4e_23ca942e",
+        "filename": "android/tools/gen-telemetry-config.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:35:10Z",
+      "side": 1,
+      "message": "this is a large copy of gen-hw-config.py, I\u0027ve not looked at any potential differences but I suspect that they are in the definitions of a few constants. If so, can you instead modify the original script to use a flag to change its behaviour (e.g. Make it accept \u0027--type\u003dhw\u0027 or \u0027--type\u003dtelemetry\u0027)\n\nPut the change in its own CL too.",
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a44076d4_ff9e7f9f",
+        "filename": "android/utils/bufprint.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-10T19:35:10Z",
+      "side": 1,
+      "message": "it\u0027s probably not a good idea to add stuff to android/utils/bufprint.c at this point. What about adding a corresponding function to android::base::System instead (e.g. getHomeDir()).",
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
