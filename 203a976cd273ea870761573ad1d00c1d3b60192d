@@ -93,6 +93,30 @@
       "revId": "203a976cd273ea870761573ad1d00c1d3b60192d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c45e4afd_983715c8",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-11T20:39:36Z",
+      "side": 1,
+      "message": "Well, in the UpdateChecker there\u0027s a class which saves some data into the file. I think about a test for it to check if it\u0027s getFileName() function appends correct suffix to the home directory and that it\u0027s rooted in home. So I\u0027d just set home in TestSystem to \u0027blah\u0027 and check if prefix of returned getFileName() is the same \u0027blah\u0027",
+      "parentUuid": "848ff2ac_fe5f2108",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 24
+      },
+      "revId": "203a976cd273ea870761573ad1d00c1d3b60192d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
