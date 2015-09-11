@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "841c5220_d6c34422",
+        "filename": "android/skin/qt/ext-sms.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:17:03Z",
+      "side": 1,
+      "message": "Nit: long line (try .data() instead of .toStdString().c_str()?)",
+      "revId": "02c74b464d8fa947b930fca7d193750c7c6fa49c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
