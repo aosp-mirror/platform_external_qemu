@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "84a1b20e_3118cab0",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-11T19:44:52Z",
+      "side": 1,
+      "message": "please leave either \u003d {0} or memset. They both do the same thing. (I prefer \u003d {0} as it\u0027s much safer)",
+      "range": {
+        "startLine": 111,
+        "startChar": 0,
+        "endLine": 112,
+        "endChar": 42
+      },
+      "revId": "203a976cd273ea870761573ad1d00c1d3b60192d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84a1b20e_b14afa99",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-11T19:44:52Z",
+      "side": 1,
+      "message": "could you please add a setter as well?",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 24
+      },
+      "revId": "203a976cd273ea870761573ad1d00c1d3b60192d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
