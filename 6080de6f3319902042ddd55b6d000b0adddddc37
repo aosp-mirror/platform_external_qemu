@@ -103,6 +103,24 @@
       "revId": "6080de6f3319902042ddd55b6d000b0adddddc37",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24f726e3_66d090e0",
+        "filename": "android/base/Version.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T16:25:35Z",
+      "side": 1,
+      "message": "Ok, turns out that not\u0027s the case, so forget this nit, thanks :)",
+      "parentUuid": "8447f2eb_c17e44aa",
+      "revId": "6080de6f3319902042ddd55b6d000b0adddddc37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
