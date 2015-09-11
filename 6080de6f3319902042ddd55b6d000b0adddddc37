@@ -85,6 +85,24 @@
       "revId": "6080de6f3319902042ddd55b6d000b0adddddc37",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8447f2eb_c17e44aa",
+        "filename": "android/base/Version.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T16:02:51Z",
+      "side": 1,
+      "message": "My understanding is that the compiler will implicitly define a default constructor for you if you don\u0027t declare it yourself. The fact that you actually declare it as \u0027private\u0027 and never define it ensures that it cannot be used ever.\n\nThere is also a default copy-constructor defined by the compiler, which is why you can actually write stuff like \u0027*this \u003d kInvalid\u0027 in your patch. But this one is ok.",
+      "parentUuid": "84a1b20e_4eca1386",
+      "revId": "6080de6f3319902042ddd55b6d000b0adddddc37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
