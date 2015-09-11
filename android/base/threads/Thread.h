@@ -21,7 +21,7 @@
 #include <pthread.h>
 #endif
 
-#include <stdint.h>
+#include "android/base/Limits.h"
 
 namespace android {
 namespace base {
@@ -65,6 +65,12 @@ public:
     // Override this method in your own thread sub-classes. This will
     // be called when start() is invoked on the Thread instance.
     virtual intptr_t main() = 0;
+
+    // Override this if you need to execute some code after thread has
+    // exited main() and is guaranteed not to access any of its members.
+    // E.g. if you need to delete a thread object from the same thread
+    // it has created
+    virtual void onExit() {}
 
     // Start a thread instance. Return true on success, false otherwise
     // (e.g. if the thread was already started or terminated).
