@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6473de94_f50bb862",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-11T21:07:51Z",
+      "side": 1,
+      "message": "Does this compile on Windows?\nThis needs linking with Shell32.dll, which we don\u0027t do atm.",
+      "range": {
+        "startLine": 28,
+        "startChar": 10,
+        "endLine": 28,
+        "endChar": 18
+      },
+      "revId": "c7820a65e582a40ba466707b568f2cc6caf4f2b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "648afea0_5d99fbf9",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-11T21:07:51Z",
+      "side": 1,
+      "message": "Didn\u0027t clang-format complain about this space?",
+      "range": {
+        "startLine": 112,
+        "startChar": 41,
+        "endLine": 112,
+        "endChar": 42
+      },
+      "revId": "c7820a65e582a40ba466707b568f2cc6caf4f2b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6473de94_952364ea",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-11T21:07:51Z",
+      "side": 1,
+      "message": "This is deprecated. Can you use SHGetKnownFolderPath instead?\nhttps://msdn.microsoft.com/en-us/library/windows/desktop/bb762188(v\u003dvs.85).aspx",
+      "range": {
+        "startLine": 112,
+        "startChar": 25,
+        "endLine": 112,
+        "endChar": 40
+      },
+      "revId": "c7820a65e582a40ba466707b568f2cc6caf4f2b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "848ff2ac_de36e5b1",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-11T21:07:51Z",
+      "side": 1,
+      "message": "nit: typo.",
+      "range": {
+        "startLine": 123,
+        "startChar": 19,
+        "endLine": 123,
+        "endChar": 27
+      },
+      "revId": "c7820a65e582a40ba466707b568f2cc6caf4f2b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "249486c0_5b14a309",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-11T21:07:51Z",
+      "side": 1,
+      "message": "We\u0027re using \u003cstdlib.h\u003e (not \u003ccstdlib\u003e), so it\u0027s safer to assume that the function definition is global, i.e., use\n\n  const char* home \u003d getenv(\"HOME\")",
+      "range": {
+        "startLine": 124,
+        "startChar": 31,
+        "endLine": 124,
+        "endChar": 39
+      },
+      "revId": "c7820a65e582a40ba466707b568f2cc6caf4f2b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44725a92_14fbd482",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-11T21:07:51Z",
+      "side": 1,
+      "message": "getpwuid does not transfer ownership of the returned struct to the caller. Perhaps use \u0027const struct passwd*\u0027 to signify that? (and avoid a \"cleanup\" that free()s the object).",
+      "range": {
+        "startLine": 130,
+        "startChar": 16,
+        "endLine": 130,
+        "endChar": 30
+      },
+      "revId": "c7820a65e582a40ba466707b568f2cc6caf4f2b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0465c2c3_ba3131bd",
+        "filename": "android/base/system/System_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-11T21:07:51Z",
+      "side": 1,
+      "message": "This is not really a test :(, but I don\u0027t have a better suggestion either...",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 4
+      },
+      "revId": "c7820a65e582a40ba466707b568f2cc6caf4f2b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6473de94_b5122062",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-11T21:07:51Z",
+      "side": 1,
+      "message": "Don\u0027t you want to take homeDir as an argument, so that tests can set it to a temporary directory?",
+      "range": {
+        "startLine": 32,
+        "startChar": 12,
+        "endLine": 32,
+        "endChar": 20
+      },
+      "revId": "c7820a65e582a40ba466707b568f2cc6caf4f2b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
