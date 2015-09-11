@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6473de94_95e604e9",
+        "filename": "android/skin/qt/ext-telephony.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-11T22:51:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c4b72a4b_3048c826",
+      "revId": "e6ba38e9f79d0c61a85dff7ac5c3ce6fa54b111d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4b0ae55_317e107a",
         "filename": "android/skin/qt/ext-telephony.cpp",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-11T17:25:19Z",
       "side": 1,
       "message": "Nit: long line",
+      "revId": "e6ba38e9f79d0c61a85dff7ac5c3ce6fa54b111d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6473de94_95b2843f",
+        "filename": "android/skin/qt/ext-telephony.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-11T22:51:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4b0ae55_317e107a",
       "revId": "e6ba38e9f79d0c61a85dff7ac5c3ce6fa54b111d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "e467cecb_dc7981c4",
+        "filename": "android/skin/qt/ext-telephony.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-11T22:51:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04aea2f9_f2e80877",
+      "revId": "e6ba38e9f79d0c61a85dff7ac5c3ce6fa54b111d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "64175efc_d504dcdc",
         "filename": "android/skin/qt/ext-telephony.cpp",
         "patchSetId": 2
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "8478d270_d95a771b",
+        "filename": "android/skin/qt/ext-telephony.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-11T22:51:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "64175efc_d504dcdc",
+      "revId": "e6ba38e9f79d0c61a85dff7ac5c3ce6fa54b111d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "24a64628_8b850d43",
         "filename": "android/skin/qt/extended-window.h",
         "patchSetId": 2
@@ -81,6 +153,24 @@
       "writtenOn": "2015-09-11T17:25:19Z",
       "side": 1,
       "message": "You get the drill at this point: mTelephonyState, mTelephonyAgent",
+      "revId": "e6ba38e9f79d0c61a85dff7ac5c3ce6fa54b111d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0465c2c3_dd5b3fe6",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-11T22:51:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "24a64628_8b850d43",
       "revId": "e6ba38e9f79d0c61a85dff7ac5c3ce6fa54b111d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
