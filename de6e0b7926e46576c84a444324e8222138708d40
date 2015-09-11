@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6442fedf_c0bde0ee",
+        "filename": "Makefile.common",
+        "patchSetId": 7
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T09:49:16Z",
+      "side": 1,
+      "message": "you\u0027re repeating aconfig-file.c, assert.c and bufprint.c here?",
+      "revId": "de6e0b7926e46576c84a444324e8222138708d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4164adc_5b46978b",
+        "filename": "android/base/threads/Thread.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T09:49:16Z",
+      "side": 1,
+      "message": "can you clarify why this change is needed?",
+      "revId": "de6e0b7926e46576c84a444324e8222138708d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6442fedf_a0b8d4ff",
+        "filename": "android/base/threads/Thread.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T09:49:16Z",
+      "side": 1,
+      "message": "Interesting, please move this change to its own patch and add a unit-test for the onExit() behaviour.",
+      "revId": "de6e0b7926e46576c84a444324e8222138708d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8447f2eb_21cda89c",
+        "filename": "android/base/threads/Thread_pthread.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T09:49:16Z",
+      "side": 1,
+      "message": "hum, you\u0027re redefining |ret| here, which means the function will return a random stack value :-/\n\nGenerally speaking, there is no point in adding braces here to denote he start/end of the block, just set |self| to NULL and add the comment, after self-\u003eonExit().",
+      "revId": "de6e0b7926e46576c84a444324e8222138708d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a44076d4_ff6c3f43",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T09:49:16Z",
+      "side": 1,
+      "message": "nit: please remove this.",
+      "revId": "de6e0b7926e46576c84a444324e8222138708d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
