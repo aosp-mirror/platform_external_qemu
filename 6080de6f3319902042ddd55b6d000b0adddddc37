@@ -67,6 +67,24 @@
       "revId": "6080de6f3319902042ddd55b6d000b0adddddc37",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84a1b20e_4eca1386",
+        "filename": "android/base/Version.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-11T15:46:22Z",
+      "side": 1,
+      "message": "there\u0027s no way one can do it - class doesn\u0027t have default ctor",
+      "parentUuid": "0434e264_058514f8",
+      "revId": "6080de6f3319902042ddd55b6d000b0adddddc37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
