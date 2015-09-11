@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4b72a4b_901b7408",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:31:39Z",
+      "side": 1,
+      "message": "Nit: mFingerAgent?",
+      "revId": "6b6774766acd6dd519716d43ab3b95591dc74df5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
