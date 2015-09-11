@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c402caba_9836151a",
+        "filename": "Makefile.common",
+        "patchSetId": 7
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-11T18:53:45Z",
+      "side": 1,
+      "message": "oops, some merge issue",
+      "parentUuid": "6442fedf_c0bde0ee",
+      "revId": "de6e0b7926e46576c84a444324e8222138708d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4164adc_5b46978b",
         "filename": "android/base/threads/Thread.h",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-11T09:49:16Z",
       "side": 1,
       "message": "can you clarify why this change is needed?",
+      "revId": "de6e0b7926e46576c84a444324e8222138708d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44ab3af0_ec1dcba3",
+        "filename": "android/base/threads/Thread.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-11T18:53:45Z",
+      "side": 1,
+      "message": "Limits.h defines the macro needed in C++ code for proper stdint.h inclusion. Do you want me to write a comment? I see that most of the places use Limits.h without one, so I wasn\u0027t going to add it here",
+      "parentUuid": "c4164adc_5b46978b",
       "revId": "de6e0b7926e46576c84a444324e8222138708d40",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "44ab3af0_0c15b776",
+        "filename": "android/base/threads/Thread_pthread.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-11T18:53:45Z",
+      "side": 1,
+      "message": "bug, I was going to reuse ret. It\u0027s better to ask compiler to help with |self| - it won\u0027t be accessible after the block.",
+      "parentUuid": "8447f2eb_21cda89c",
+      "revId": "de6e0b7926e46576c84a444324e8222138708d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a44076d4_ff6c3f43",
         "filename": "android/update-check/UpdateChecker.cpp",
         "patchSetId": 7
@@ -81,6 +135,24 @@
       "writtenOn": "2015-09-11T09:49:16Z",
       "side": 1,
       "message": "nit: please remove this.",
+      "revId": "de6e0b7926e46576c84a444324e8222138708d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4b0ae55_9101bc47",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-11T18:53:45Z",
+      "side": 1,
+      "message": "thanks, forgot it",
+      "parentUuid": "a44076d4_ff6c3f43",
       "revId": "de6e0b7926e46576c84a444324e8222138708d40",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
