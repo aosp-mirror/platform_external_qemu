@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "84a1b20e_ae3737c7",
+        "filename": "Makefile.common",
+        "patchSetId": 3
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-11T18:02:31Z",
+      "side": 1,
+      "message": "Leaked from some other CL?\nAlso, you shouldn\u0027t need special handling here. Just define and use LIBXML2_INCLUDES_64, and it\u0027ll work for darwin64.",
+      "range": {
+        "startLine": 305,
+        "startChar": 0,
+        "endLine": 306,
+        "endChar": 42
+      },
+      "revId": "3cd84a04b5e9916efdee3175de689dc5a7ef24ec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
