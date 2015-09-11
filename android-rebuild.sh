@@ -335,9 +335,11 @@ OSX_DEPLOYMENT_TARGET=10.8
 # List all executables to check later.
 EXECUTABLES="emulator emulator64-arm emulator64-x86 emulator64-mips"
 EXECUTABLES="$EXECUTABLES emulator64-ranchu-arm64 emulator64-ranchu-mips64"
+EXECUTABLES="$EXECUTABLES emulator64-ranchu-x86 emulator64-ranchu-x86_64"
 if [ "$HOST_OS" != "Darwin" ]; then
     EXECUTABLES="$EXECUTABLES emulator-arm emulator-x86 emulator-mips"
     EXECUTABLES="$EXECUTABLES emulator-ranchu-arm64 emulator-ranchu-mips64"
+    EXECUTABLES="$EXECUTABLES emulator-ranchu-x86 emulator-ranchu-x86_64"
 fi
 
 if [ -z "$NO_TESTS" ]; then
