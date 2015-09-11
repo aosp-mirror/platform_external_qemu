@@ -107,15 +107,21 @@ bool Thread::tryWait(intptr_t* exitStatus) {
 }
 
 // static
-DWORD WINAPI Thread::thread_main(void *arg)
-{
-    Thread* self = reinterpret_cast<Thread*>(arg);
-    intptr_t ret = self->main();
+DWORD WINAPI Thread::thread_main(void *arg) {
+    intptr_t ret;
 
-    EnterCriticalSection(&self->mLock);
-    self->mIsRunning = false;
-    self->mExitStatus = ret;
-    LeaveCriticalSection(&self->mLock);
+    {
+        Thread* self = reinterpret_cast<Thread*>(arg);
+        ret = self->main();
+
+        EnterCriticalSection(&self->mLock);
+        self->mIsRunning = false;
+        self->mExitStatus = ret;
+        LeaveCriticalSection(&self->mLock);
+
+        self->onExit();
+        // |self| is not valid beyond this point
+    }
 
     // Ensure all thread-local values are released for this thread.
     ::android::base::ThreadStoreBase::OnThreadExit();
