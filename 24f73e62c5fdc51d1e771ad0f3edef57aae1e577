@@ -1,0 +1,163 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6442fedf_00374818",
+        "filename": "android/metrics/studio_helper.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T13:41:48Z",
+      "side": 1,
+      "message": "nit: tabs here. As well as bad indents below. Please fix your formatting by running \u0027git clang-format\u0027",
+      "revId": "24f73e62c5fdc51d1e771ad0f3edef57aae1e577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e41fceee_9c63c9e0",
+        "filename": "android/metrics/studio_helper.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T13:41:48Z",
+      "side": 1,
+      "message": "excellent opportunity for a unit test here :)",
+      "revId": "24f73e62c5fdc51d1e771ad0f3edef57aae1e577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44517aa7_df67ff5c",
+        "filename": "android/metrics/studio_helper.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T13:41:48Z",
+      "side": 1,
+      "message": "it\u0027s 2015, nobody should use strncpy() anymore. Moreover, the function always returns its first argument, independent on whether truncation happened or not, so this branch is never going to be taken.",
+      "revId": "24f73e62c5fdc51d1e771ad0f3edef57aae1e577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c43d6a4e_0332f0bf",
+        "filename": "android/metrics/studio_helper.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T13:41:48Z",
+      "side": 1,
+      "message": "curious, what does this macro do exactly? What happens in case of failure? A comment might be welcomed here.",
+      "range": {
+        "startLine": 325,
+        "startChar": 1,
+        "endLine": 325,
+        "endChar": 20
+      },
+      "revId": "24f73e62c5fdc51d1e771ad0f3edef57aae1e577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e41fceee_fc6e85c9",
+        "filename": "android/metrics/studio_helper.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T13:41:48Z",
+      "side": 1,
+      "message": "again, avoid strncpy(), and |rv| will always be equal to |retval| anyway.",
+      "revId": "24f73e62c5fdc51d1e771ad0f3edef57aae1e577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c43d6a4e_a336a4b0",
+        "filename": "android/metrics/studio_helper.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T13:41:48Z",
+      "side": 1,
+      "message": "nit: typo s/Stuio/Studio/g here and there :)",
+      "revId": "24f73e62c5fdc51d1e771ad0f3edef57aae1e577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a44076d4_82159c78",
+        "filename": "android/metrics/studio_helper.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T13:41:48Z",
+      "side": 1,
+      "message": "Please use a simpler API, nobody likes to do a string comparison to check a boolean, and a failure to read the flag should be interpreted as an opt-out. Just use something like:\n\n  // Try to find whether the user has agreed to send anonymized\n  // usage data to Android Studio servers. This works by\n  // parsing Android Studio configuration files created\n  // at install time. Returns true if the user agreed,\n  // false otherwise or if the files cannot be found.\n  bool android_studio_get_optins_flag(void);",
+      "revId": "24f73e62c5fdc51d1e771ad0f3edef57aae1e577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44517aa7_bf66b35d",
+        "filename": "android/metrics/studio_helper.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T13:41:48Z",
+      "side": 1,
+      "message": "Asking the user to provide an appropriately-sized buffer is generally a bad API, just return a heap-allocated C string instead, and use a \u0027bool\u0027 type for the return value if you don\u0027t need several error values, it\u0027s simpler, as in:\n\n  // Find the Android Studio installation ID and return\n  // it as a string. On success, return true and sets\n  // |*id| to point to a new heap-allocated string, which\n  // must be freed by the caller with free().\n  // On failure, return false.\n  bool android_studio_get_installation_id(char** id);\n\nOr you could use C++ and return and android::base::String or an std::string, which would be empty on error.",
+      "revId": "24f73e62c5fdc51d1e771ad0f3edef57aae1e577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24f726e3_2605f81b",
+        "filename": "android/utils/bufprint.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T13:41:48Z",
+      "side": 1,
+      "message": "This code should definitely go into android::base::System instead so that we can actually mock it in TestSystem, used in unit-tests.\n\nConsider the bufprint() stuff legacy from now, we should not try to add to it, but instead remove its usage if possible.\n\nThis change should also go into its own patch.",
+      "revId": "24f73e62c5fdc51d1e771ad0f3edef57aae1e577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
