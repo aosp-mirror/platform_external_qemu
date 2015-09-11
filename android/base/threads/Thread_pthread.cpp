@@ -102,13 +102,20 @@ bool Thread::tryWait(intptr_t *exitStatus) {
 
 // static
 void* Thread::thread_main(void *arg) {
-    Thread* self = reinterpret_cast<Thread*>(arg);
-    intptr_t ret = self->main();
+    intptr_t ret;
 
-    pthread_mutex_lock(&self->mLock);
-    self->mIsRunning = false;
-    self->mExitStatus = ret;
-    pthread_mutex_unlock(&self->mLock);
+    {
+        Thread* self = reinterpret_cast<Thread*>(arg);
+        ret = self->main();
+
+        pthread_mutex_lock(&self->mLock);
+        self->mIsRunning = false;
+        self->mExitStatus = ret;
+        pthread_mutex_unlock(&self->mLock);
+
+        self->onExit();
+        // |self| is not valid beyond this point
+    }
 
     ::android::base::ThreadStoreBase::OnThreadExit();
 
