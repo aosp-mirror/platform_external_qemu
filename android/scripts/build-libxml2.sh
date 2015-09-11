@@ -32,7 +32,7 @@ package_builder_register_options
 
 aosp_dir_register_option
 prebuilts_dir_register_option
-install_dir_register_option libxml2
+install_dir_register_option "common/libxml2"
 
 option_parse "$@"
 
