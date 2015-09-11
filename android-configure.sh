@@ -567,7 +567,7 @@ esac
 LIBXML2_PREBUILTS_DIR=
 # Note: libxml2 is only used when building the Qt-based UI.
 if [ "$OPTION_UI" = "qt" ]; then
-    LIBXML2_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/libxml2
+    LIBXML2_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/libxml2
     if [ -d "$LIBXML2_PREBUILTS_DIR" ]; then
         log "Libxml2 prebuilts dir: $LIBXML2_PREBUILTS_DIR"
     else
