@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "64175efc_f8f0ed9f",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-11T18:44:21Z",
+      "side": 1,
+      "message": "Yup, it was a valid point (performance) 3 years ago. Since that time all STL implementations made sure streams are good. In the latest gcc library std::cout is even faster than default printf()\nAnd regarding the utility. I started as a C developer, and I still find the \u003c\u003c overload to be much more readable than %!@#foobar style of the printf. It\u0027s just a matter of preference, nothing more.\n\nAnyway, I changed my code to use StringFormat - mainly because of our own String class, to have one less memory allocation.\n\nP.S. Why every single project keeps writing its own string class? The standard one after C++11 is very decent and is good for most uses (but gaming apps probably)",
+      "parentUuid": "e4b0ae55_71709862",
+      "revId": "6080de6f3319902042ddd55b6d000b0adddddc37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e41fceee_dce621ea",
         "filename": "android/base/Version.h",
         "patchSetId": 2
