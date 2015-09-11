@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6442fedf_3d538f7b",
+        "filename": "android/base/Version.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T09:41:08Z",
+      "side": 1,
+      "message": "I hate standard C++ streams with a passion, they generate bloated code that does surprising things with locales.\n\nPlease use android::base::StringFormat() instead. I would also prefer you would return an android::base::String since this is part of android/base/",
+      "revId": "6080de6f3319902042ddd55b6d000b0adddddc37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e41fceee_dce621ea",
+        "filename": "android/base/Version.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T09:41:08Z",
+      "side": 1,
+      "message": "Please add documentation for the class and its methods. In particular, what is the expected format of |ver| in the first constructor.",
+      "revId": "6080de6f3319902042ddd55b6d000b0adddddc37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24f726e3_86594c78",
+        "filename": "android/base/Version.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T09:41:08Z",
+      "side": 1,
+      "message": "I prefer to avoid using static C++ objects in the code, they generate initializer functions that cannot be debugged properly and slow down library load time. Either make Version a POD-struct class (i.e. no private members, no constructor / destructor, no virtual methods), or just get rid of this member.",
+      "revId": "6080de6f3319902042ddd55b6d000b0adddddc37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0434e264_058514f8",
+        "filename": "android/base/Version.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-11T09:41:08Z",
+      "side": 1,
+      "message": "nit: Add a private default constructor here to avoid client code to mistakenly create version 0.0.0 objects.",
+      "revId": "6080de6f3319902042ddd55b6d000b0adddddc37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
