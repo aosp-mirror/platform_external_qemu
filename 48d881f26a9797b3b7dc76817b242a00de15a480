@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44725a92_974a869a",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-11T22:35:49Z",
+      "side": 1,
+      "message": "nit: star is on the wrong side :)",
+      "range": {
+        "startLine": 30,
+        "startChar": 66,
+        "endLine": 30,
+        "endChar": 68
+      },
+      "revId": "48d881f26a9797b3b7dc76817b242a00de15a480",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
