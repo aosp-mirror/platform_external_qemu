@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e467cecb_5c149109",
+        "filename": "android/base/threads/Thread.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-11T23:54:18Z",
+      "side": 1,
+      "message": "Why do you need this change?\nEspecially, why do your clients need this change?",
+      "range": {
+        "startLine": 24,
+        "startChar": 9,
+        "endLine": 24,
+        "endChar": 32
+      },
+      "revId": "8539d7ab7d6632b345d5b6dd077eab7833fafbed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a46156bd_9ac8e9e4",
+        "filename": "android/base/threads/Thread_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-11T23:54:18Z",
+      "side": 1,
+      "message": "This is really per object (even if you have only one object in a test)",
+      "range": {
+        "startLine": 35,
+        "startChar": 4,
+        "endLine": 35,
+        "endChar": 10
+      },
+      "revId": "8539d7ab7d6632b345d5b6dd077eab7833fafbed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
