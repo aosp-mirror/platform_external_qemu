@@ -55,20 +55,30 @@ extern char*   bufprint (char*  buffer, char*  buffend, const char*  fmt, ... );
 
 /** USEFUL DIRECTORY SUPPORT
  **
- **  bufprint_add_dir() appends the application's directory to a given bounded buffer
+ **  bufprint_add_dir() appends the application's directory to a given bounded
+ *buffer
  **
- **  bufprint_config_path() appends the applications' user-specific configuration directory
- **  to a bounded buffer. on Unix this is usually ~/.android, and something a bit more
+ **  bufprint_config_path() appends the applications' user-specific
+ *configuration directory
+ **  to a bounded buffer. on Unix this is usually ~/.android, and something a
+ *bit more
  **  complex on Windows
  **
- **  bufprint_config_file() appends the name of a file or directory relative to the
- **  user-specific configuration directory to a bounded buffer. this really is equivalent
+ **  bufprint_config_file() appends the name of a file or directory relative to
+ *the
+ **  user-specific configuration directory to a bounded buffer. this really is
+ *equivalent
  **  to concat-ing the config path + path separator + 'suffix'
  **
- **  bufprint_temp_dir() appends the temporary directory's path to a given bounded buffer
+ **  bufprint_temp_dir() appends the temporary directory's path to a given
+ *bounded buffer
  **
  **  bufprint_temp_file() appens the name of a file or directory relative to the
- **  temporary directory. equivalent to concat-ing the temp path + path separator + 'suffix'
+ **  temporary directory. equivalent to concat-ing the temp path + path
+ *separator + 'suffix'
+ **
+ **  bufprint_home_dir appends the user's HOME directory (as defined in *NIX and
+ **  Microsoft Windows platforms) to a given bounded buffer
  **/
 
 extern char*  bufprint_app_dir    (char*  buffer, char*  buffend);
@@ -77,6 +87,7 @@ extern char*  bufprint_config_path(char*  buffer, char*  buffend);
 extern char*  bufprint_config_file(char*  buffer, char*  buffend, const char*  suffix);
 extern char*  bufprint_temp_dir   (char*  buffer, char*  buffend);
 extern char*  bufprint_temp_file  (char*  buffer, char*  buffend, const char*  suffix);
+extern char* bufprint_home_dir(char* buffer, char* buffend);
 
 ANDROID_END_HEADER
 
