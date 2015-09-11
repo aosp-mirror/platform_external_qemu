@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e467cecb_b9ebffb1",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-11T20:37:02Z",
+      "side": 1,
+      "message": "This was the result of hesitation regarding valgrind and what would make it happier (see coment in line 63). I am removing memset() unless otherwise requested",
+      "parentUuid": "84a1b20e_3118cab0",
+      "range": {
+        "startLine": 111,
+        "startChar": 0,
+        "endLine": 112,
+        "endChar": 42
+      },
+      "revId": "203a976cd273ea870761573ad1d00c1d3b60192d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "84a1b20e_b14afa99",
         "filename": "android/base/testing/TestSystem.h",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-11T19:44:52Z",
       "side": 1,
       "message": "could you please add a setter as well?",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 24
+      },
+      "revId": "203a976cd273ea870761573ad1d00c1d3b60192d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "848ff2ac_fe5f2108",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-11T20:37:02Z",
+      "side": 1,
+      "message": "Since HOME is a system path that can vary per user/system/platform, I did not think this was necessary. Do you have a test in mind to exercise this? Can you please describe it?",
+      "parentUuid": "84a1b20e_b14afa99",
       "range": {
         "startLine": 57,
         "startChar": 0,
