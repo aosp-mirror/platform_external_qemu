@@ -27,8 +27,9 @@ namespace base {
 
 class TestSystem : public System {
 public:
-    TestSystem(const char* programDir, int hostBitness) :
+    TestSystem(const char* programDir, int hostBitness, const char* homeDir = "") :
             mProgramDir(programDir),
+            mHomeDir(homeDir),
             mHostBitness(hostBitness),
             mIsRemoteSession(false),
             mRemoteSessionType(),
@@ -50,6 +51,10 @@ public:
         } else {
             return mTempDir->pathString();
         }
+    }
+
+    virtual const String& getHomeDirectory() const {
+        return mHomeDir;
     }
 
     virtual int getHostBitness() const {
@@ -184,6 +189,7 @@ private:
     }
 
     String mProgramDir;
+    String mHomeDir;
     int mHostBitness;
     bool mIsRemoteSession;
     String mRemoteSessionType;

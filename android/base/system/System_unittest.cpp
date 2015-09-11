@@ -53,11 +53,20 @@ TEST(System, getProgramDirectory) {
     LOG(INFO) << "Program directory: [" << dir.c_str() << "]";
 }
 
-TEST(System, TestSystem) {
+TEST(System, getHomeDirectory) {
+    String dir = System::get()->getHomeDirectory();
+    EXPECT_FALSE(dir.empty());
+    LOG(INFO) << "Home directory: [" << dir.c_str() << "]";
+}
+
+TEST(TestSystem, getDirectory) {
     const char kProgramDir[] = "/foo/bar";
-    TestSystem testSys(kProgramDir, 32);
-    String dir = System::get()->getProgramDirectory();
-    EXPECT_STREQ(kProgramDir, dir.c_str());
+    const char kHomeDir[] = "/lala/kaka";
+    TestSystem testSys(kProgramDir, 32, kHomeDir);
+    String pdir = System::get()->getProgramDirectory();
+    EXPECT_STREQ(kProgramDir, pdir.c_str());
+    String hdir = System::get()->getHomeDirectory();
+    EXPECT_STREQ(kHomeDir, hdir.c_str());
 }
 
 TEST(System, getHostBitness) {
