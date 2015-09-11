@@ -616,14 +616,30 @@ build_darwin_binaries_on () {
     builder_prepare_remote_darwin_build \
             /tmp/$USER-android-emulator/$PKG_FILE_PREFIX
 
-    copy_directory "$AOSP_PREBUILTS_DIR/android-emulator-build/curl" \
-            "$DARWIN_PKG_DIR"/aosp/prebuilts/android-emulator-build/curl
+    AOSP_BUILD_PREBUILTS=$AOSP_PREBUILTS_DIR/android-emulator-build
+    DARWIN_BUILD_PREBUILTS=$DARWIN_PKG_DIR/aosp/prebuilts/android-emulator-build
 
-    QT_SUBDIR=android-emulator-build/qt/
-    copy_directory "$AOSP_PREBUILTS_DIR"/$QT_SUBDIR/common \
-            "$DARWIN_PKG_DIR"/aosp/prebuilts/$QT_SUBDIR/common
-    copy_directory "$AOSP_PREBUILTS_DIR"/$QT_SUBDIR/darwin-x86_64 \
-            "$DARWIN_PKG_DIR"/aosp/prebuilts/$QT_SUBDIR/darwin-x86_64
+    copy_directory "$AOSP_BUILD_PREBUILTS"/curl/darwin-x86_64 \
+            "$DARWIN_BUILD_PREBUILTS"/curl/darwin-x86_64
+
+    if [ "$OPT_UI" = "qt" ]; then
+        if [ ! -d "$AOSP_BUILD_PREBUILTS/libxml2/darwin-x86_64" ]; then
+            panic "Missing Darwin libxml2 prebuilts required by --ui=qt !!"
+        fi
+        copy_directory "$AOSP_BUILD_PREBUILTS"/libxml2/darwin-x86_64 \
+                "$DARWIN_BUILD_PREBUILTS"/libxml2/darwin-x86_64
+
+        if [ ! -d "$AOSP_BUILD_PREBUILTS"/qt/darwin-x86_64 ]; then
+            panic "Missing Darwin Qt prebuilts required by --ui=qt !!"
+        fi
+
+        copy_directory "$AOSP_BUILD_PREBUILTS"/qt/common \
+                "$DARWIN_BUILD_PREBUILTS"/qt/common
+
+        copy_directory "$AOSP_BUILD_PREBUILTS"/qt/darwin-x86_64 \
+                "$DARWIN_BUILD_PREBUILTS"/qt/darwin-x86_64
+    fi
+
     run tar xf "$PKG_FILE" -C "$DARWIN_PKG_DIR"/..
 
     if [ "$AOSP_PREBUILTS_DIR" ]; then

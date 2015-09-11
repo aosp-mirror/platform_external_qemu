@@ -301,8 +301,15 @@ common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
 LIBXML2_TOP32_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86
 LIBXML2_TOP64_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86_64
 
-LIBXML2_INCLUDES := $(LIBXML2_TOP32_DIR)/include
+# NOTE: Use $(LIBXML2_TOP64_DIR) for Darwin build since that's the only
+# thing that's available on this platform.
+LIBXML2_INCLUDES := $(LIBXML2_TOP64_DIR)/include
 LIBXML2_LDLIBS := $(LIBXML2_TOP32_DIR)/lib/libxml2.a
+
+# Required to properly link the library on Windows.
+# See https://mail.gnome.org/archives/xml/2012-November/msg00030.html
+common_LOCAL_CFLAGS += -DLIBXML_STATIC
+
 LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
 
 ##############################################################################
