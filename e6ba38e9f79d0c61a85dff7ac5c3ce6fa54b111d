@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4b72a4b_3048c826",
+        "filename": "android/skin/qt/ext-telephony.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:25:19Z",
+      "side": 1,
+      "message": "Nit: long line",
+      "revId": "e6ba38e9f79d0c61a85dff7ac5c3ce6fa54b111d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4b0ae55_317e107a",
+        "filename": "android/skin/qt/ext-telephony.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:25:19Z",
+      "side": 1,
+      "message": "Nit: long line",
+      "revId": "e6ba38e9f79d0c61a85dff7ac5c3ce6fa54b111d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04aea2f9_f2e80877",
+        "filename": "android/skin/qt/ext-telephony.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:25:19Z",
+      "side": 1,
+      "message": "Nit: long line",
+      "revId": "e6ba38e9f79d0c61a85dff7ac5c3ce6fa54b111d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64175efc_d504dcdc",
+        "filename": "android/skin/qt/ext-telephony.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:25:19Z",
+      "side": 1,
+      "message": "Nit: long line",
+      "revId": "e6ba38e9f79d0c61a85dff7ac5c3ce6fa54b111d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24a64628_8b850d43",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:25:19Z",
+      "side": 1,
+      "message": "You get the drill at this point: mTelephonyState, mTelephonyAgent",
+      "revId": "e6ba38e9f79d0c61a85dff7ac5c3ce6fa54b111d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
