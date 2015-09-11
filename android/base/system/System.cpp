@@ -27,6 +27,7 @@
 #ifdef _WIN32
 #include <shlobj.h>
 #include <windows.h>
+#include <shlobj.h>
 #endif
 
 #ifdef __APPLE__
@@ -87,7 +88,7 @@ public:
                 mProgramDir.assign("<unknown-application-dir>");
             }
 #elif defined(_WIN32)
-            char appDir[MAX_PATH];
+            char appDir[PATH_MAX];
             int len = GetModuleFileName(0, appDir, sizeof(appDir)-1);
             mProgramDir.assign("<unknown-application-dir>");
             if (len > 0 && len < (int)sizeof(appDir)) {
@@ -394,6 +395,38 @@ public:
         execvp(commandLine[0].c_str(), params);
         // Should not happen.
         exit(1);
+#endif  // !_WIN32
+    }
+
+    virtual String getTempDir() const {
+#ifdef _WIN32
+        char path[PATH_MAX];
+        DWORD retval = GetTempPath(sizeof(path), path);
+        if (retval > sizeof(path) || retval == 0) {
+            // Best effort!
+            return String("C:\\Temp");
+        }
+        // The result of GetTempPath() is already user-dependent
+        // so don't append the username or userid to the result.
+        String result(path);
+        result += "\\AndroidEmulator";
+        ::mkdir(result.c_str());
+        return result;
+#else   // !_WIN32
+        String result;
+        const char* tmppath = getenv("ANDROID_TMP");
+        if (!tmppath) {
+            const char* user = getenv("USER");
+            if (user == NULL || user[0] == '\0') {
+                user = "unknown";
+            }
+            result = "/tmp/android-";
+            result += user;
+        } else {
+            result = tmppath;
+        }
+        ::mkdir(result.c_str(), 0744);
+        return result;
 #endif  // !_WIN32
     }
 

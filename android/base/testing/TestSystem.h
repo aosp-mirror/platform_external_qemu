@@ -27,21 +27,24 @@ namespace base {
 
 class TestSystem : public System {
 public:
- TestSystem(const char* programDir, int hostBitness, const char* homeDir = "", const char* appDataDir = "") :
-            mProgramDir(programDir),
-            mHomeDir(homeDir),
-            mAppDataDir(appDataDir),
-            mHostBitness(hostBitness),
-            mIsRemoteSession(false),
-            mRemoteSessionType(),
-            mTempDir(NULL),
-            mTempRootPrefix(),
-            mEnvPairs(),
-            mPrevSystem(System::setForTesting(this)),
-            mTimes(),
-            mSilentShellFunc(NULL),
-            mSilentShellOpaque(NULL),
-            mUnixTime() {}
+    TestSystem(const char* programDir,
+               int hostBitness,
+               const char* homeDir = "/home",
+               const char* appDataDir = "")
+        : mProgramDir(programDir),
+          mHomeDir(homeDir),
+          mAppDataDir(appDataDir),
+          mHostBitness(hostBitness),
+          mIsRemoteSession(false),
+          mRemoteSessionType(),
+          mTempDir(NULL),
+          mTempRootPrefix(),
+          mEnvPairs(),
+          mPrevSystem(System::setForTesting(this)),
+          mTimes(),
+          mSilentShellFunc(NULL),
+          mSilentShellOpaque(NULL),
+          mUnixTime() {}
 
     virtual ~TestSystem() {
         System::setForTesting(mPrevSystem);
@@ -197,6 +200,8 @@ public:
             return true;
         }
     }
+
+    virtual String getTempDir() const { return String("/tmp"); }
 
     virtual time_t getUnixTime() const {
         return mUnixTime;

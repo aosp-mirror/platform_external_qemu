@@ -11,7 +11,13 @@
 
 #include "android/utils/bufprint.h"
 
+#include "android/base/system/System.h"
+#include "android/base/testing/TestSystem.h"
+#include "android/base/testing/TestTempDir.h"
+
 #include <gtest/gtest.h>
+
+using namespace android::base;
 
 TEST(bufprint, SimpleString) {
     char buffer[128], *p = buffer, *end = p + sizeof(buffer);
@@ -26,4 +32,91 @@ TEST(bufprint, TruncationOnOverflow) {
     p = bufprint(buffer, end, "foobar");
     EXPECT_EQ(buffer + 4, p);
     EXPECT_STREQ("foo", buffer);
+}
+
+TEST(bufprint, ApplicationDirectory) {
+    TestSystem sys("/bin", 32);
+    char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
+    p = bufprint_app_dir(buffer, end);
+    EXPECT_EQ(buffer + 4, p);
+    EXPECT_STREQ("/bin", buffer);
+}
+
+TEST(bufprint, AvdHomePathDefault) {
+    TestSystem sys("/bin", 32);
+    char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
+    p = bufprint_avd_home_path(p, end);
+    EXPECT_EQ(buffer + 18, p);
+#ifdef _WIN32
+    EXPECT_STREQ("/home\\.android\\avd", buffer);
+#else
+    EXPECT_STREQ("/home/.android/avd", buffer);
+#endif
+}
+
+TEST(bufprint, AvdHomePathWithAndroidAvdHome) {
+    TestSystem sys("/bin", 32);
+    sys.envSet("ANDROID_AVD_HOME", "/myhome");
+    char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
+    p = bufprint_avd_home_path(p, end);
+    EXPECT_EQ(buffer + 7, p);
+    EXPECT_STREQ("/myhome", buffer);
+}
+
+TEST(bufprint, ConfigPathDefault) {
+    TestSystem sys("/bin", 32);
+    char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
+    p = bufprint_config_path(p, end);
+    EXPECT_EQ(buffer + 14, p);
+#ifdef _WIN32
+    EXPECT_STREQ("/home\\.android", buffer);
+#else
+    EXPECT_STREQ("/home/.android", buffer);
+#endif
+}
+
+TEST(bufprint, ConfigPathWithAndroidEmulatorHome) {
+    TestSystem sys("/bin", 32);
+    sys.envSet("ANDROID_EMULATOR_HOME", "/myhome");
+    char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
+    p = bufprint_config_path(p, end);
+    EXPECT_EQ(buffer + 7, p);
+    EXPECT_STREQ("/myhome", buffer);
+}
+
+TEST(bufprint, ConfigPathWithAndroidSdkHome) {
+    TestSystem sys("/bin", 32);
+    sys.envSet("ANDROID_SDK_HOME", "/sdk-home");
+    char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
+    p = bufprint_config_path(p, end);
+    EXPECT_EQ(buffer + 18, p);
+#ifdef _WIN32
+    EXPECT_STREQ("/sdk-home\\.android", buffer);
+#else
+    EXPECT_STREQ("/sdk-home/.android", buffer);
+#endif
+}
+
+TEST(bufprint, ConfigFile) {
+    TestSystem sys("/bin", 32);
+    char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
+    p = bufprint_config_file(p, end, "file");
+    EXPECT_EQ(buffer + 19, p);
+#ifdef _WIN32
+    EXPECT_STREQ("/home\\.android\\file", buffer);
+#else
+    EXPECT_STREQ("/home/.android/file", buffer);
+#endif
+}
+
+TEST(bufprint, TempFile) {
+    TestSystem sys("/bin", 32);
+    char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
+    p = bufprint_temp_file(p, end, "tempfile");
+    EXPECT_EQ(buffer + 13, p);
+#ifdef _WIN32
+    EXPECT_STREQ("/tmp\\tempfile", buffer);
+#else
+    EXPECT_STREQ("/tmp/tempfile", buffer);
+#endif
 }
