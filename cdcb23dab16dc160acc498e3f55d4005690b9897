@@ -50,6 +50,69 @@
       "revId": "cdcb23dab16dc160acc498e3f55d4005690b9897",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64175efc_95b42454",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:41:39Z",
+      "side": 1,
+      "message": "The KML parsing code should be in by now, so this should be replaced with that code.\n\nThe GPX code is in as well, so that should be hooked up in this CL too.",
+      "revId": "cdcb23dab16dc160acc498e3f55d4005690b9897",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "841c5220_76fd1032",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:41:39Z",
+      "side": 1,
+      "message": "Nit: m\u003cInsert name of variable here\u003e",
+      "range": {
+        "startLine": 96,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 23
+      },
+      "revId": "cdcb23dab16dc160acc498e3f55d4005690b9897",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a405d6c4_574c4c5f",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:41:39Z",
+      "side": 1,
+      "message": "You wrapped the battery agent members in their own struct - it probably makes sense to do so with the location agent members as well.",
+      "range": {
+        "startLine": 99,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 23
+      },
+      "revId": "cdcb23dab16dc160acc498e3f55d4005690b9897",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
