@@ -27,18 +27,23 @@ namespace base {
 
 class TestSystem : public System {
 public:
-    TestSystem(const char* programDir, int hostBitness) :
-            mProgramDir(programDir),
-            mHostBitness(hostBitness),
-            mIsRemoteSession(false),
-            mRemoteSessionType(),
-            mTempDir(NULL),
-            mTempRootPrefix(),
-            mEnvPairs(),
-            mPrevSystem(System::setForTesting(this)),
-            mTimes(),
-            mSilentShellFunc(NULL),
-            mSilentShellOpaque(NULL) {}
+    TestSystem(const char* programDir, int hostBitness)
+        : mProgramDir(programDir),
+          mHostBitness(hostBitness),
+          mIsRemoteSession(false),
+          mRemoteSessionType(),
+          mTempDir(NULL),
+          mTempRootPrefix(),
+          mEnvPairs(),
+          mPrevSystem(System::setForTesting(this)),
+          mTimes(),
+          mSilentShellFunc(NULL),
+          mSilentShellOpaque(NULL),
+          mUserDir("/home") {
+#ifndef _WIN32
+        this->envSet("HOME", mUserDir.c_str());
+#endif  // !_WIN32
+    }
 
     virtual ~TestSystem() {
         System::setForTesting(mPrevSystem);
@@ -187,6 +192,15 @@ public:
         }
     }
 
+    virtual String getUserDir() const { return mUserDir; }
+
+    void setUserDir(const char* dir) {
+        mUserDir = dir;
+        this->envSet("HOME", dir);
+    }
+
+    virtual String getTempDir() const { return String("/tmp"); }
+
 private:
     String toTempRoot(const char* path) {
         String result = mTempRootPrefix;
@@ -213,6 +227,7 @@ private:
     Times mTimes;
     SilentCommandShell* mSilentShellFunc;
     void* mSilentShellOpaque;
+    String mUserDir;
 };
 
 }  // namespace base

@@ -65,6 +65,12 @@ public:
     static const int kProgramBitness = 32;
 #endif
 
+#ifdef _WIN32
+    static const char kDirSeparator = '\\';
+#else
+    static const char kDirSeparator = '/';
+#endif
+
     // The character used to separator directories in path-related
     // environment variables.
 #ifdef _WIN32
@@ -142,6 +148,13 @@ public:
     // executable could not be found, not whether the command itself
     // succeeded).
     virtual bool runSilentCommand(const StringVector& commandLine) = 0;
+
+    // Return the path to the user's 'home' directory, or an empty
+    // string if this cannot be determined.
+    virtual String getUserDir() const = 0;
+
+    // Return the path of a temporary directory appropriate for the system.
+    virtual String getTempDir() const = 0;
 
 protected:
     static System* setForTesting(System* system);
