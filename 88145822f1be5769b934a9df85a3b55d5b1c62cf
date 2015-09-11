@@ -287,6 +287,24 @@
     },
     {
       "key": {
+        "uuid": "24c9e69c_75ab7bbf",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-11T03:29:00Z",
+      "side": 1,
+      "message": "it would need to parse the version every single time the function is called (which is just just once for now, but that changes easily)",
+      "parentUuid": "e436ee6e_e1b26640",
+      "revId": "88145822f1be5769b934a9df85a3b55d5b1c62cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a44076d4_df993bba",
         "filename": "android/update-check/UpdateChecker.h",
         "patchSetId": 4
