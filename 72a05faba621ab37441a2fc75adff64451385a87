@@ -1,0 +1,101 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44ab3af0_cc044fdd",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:00:44Z",
+      "side": 1,
+      "message": "May want to externalize some of this eventually? I see a lot of the stylesheets are programmatically created, but this section could get ugly if a lot more styling is needed.",
+      "revId": "72a05faba621ab37441a2fc75adff64451385a87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c402caba_78422106",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:00:44Z",
+      "side": 1,
+      "message": "Even though the current implementation is temporary, the window should stay on the same tab when the theme is changed.",
+      "revId": "72a05faba621ab37441a2fc75adff64451385a87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c402caba_782b4146",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:00:44Z",
+      "side": 1,
+      "message": "Since these are completely new files, is it worth starting to use the new naming convention?\n\nmParentWindow, mToolWindow, etc...\n\nThe same might go for having the * with the type (EmulatorQtWindow* parentWindow), but I actually prefer this way.",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 37
+      },
+      "revId": "72a05faba621ab37441a2fc75adff64451385a87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04aea2f9_52c75423",
+        "filename": "android/skin/qt/tool-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:00:44Z",
+      "side": 1,
+      "message": "Nit: extra semicolon?",
+      "range": {
+        "startLine": 43,
+        "startChar": 30,
+        "endLine": 43,
+        "endChar": 32
+      },
+      "revId": "72a05faba621ab37441a2fc75adff64451385a87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c402caba_d889adad",
+        "filename": "android/skin/qt/tool-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:00:44Z",
+      "side": 1,
+      "message": "Nit: long line (might as well fix it now)",
+      "revId": "72a05faba621ab37441a2fc75adff64451385a87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
