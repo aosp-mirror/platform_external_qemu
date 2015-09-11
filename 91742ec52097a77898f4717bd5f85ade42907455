@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44725a92_172cb675",
+        "filename": "target-i386/hax-all.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-11T23:16:00Z",
+      "side": 1,
+      "message": "HAXM max RAM size \u003d %\"PRId64\" MB (for all running AVDs)",
+      "revId": "91742ec52097a77898f4717bd5f85ade42907455",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
