@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a405d6c4_776eb0f6",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-11T17:07:21Z",
+      "side": 1,
+      "message": "Same comment as the extended window - mBatteryState, mBatteryAgent?",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 40
+      },
+      "revId": "071d2556280fdf98d651dfd8cad065ee44ae8728",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
