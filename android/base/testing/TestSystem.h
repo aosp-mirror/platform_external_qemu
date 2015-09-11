@@ -29,6 +29,7 @@ class TestSystem : public System {
 public:
     TestSystem(const char* programDir, int hostBitness) :
             mProgramDir(programDir),
+            mHomeDir(),
             mHostBitness(hostBitness),
             mIsRemoteSession(false),
             mRemoteSessionType(),
@@ -51,6 +52,14 @@ public:
         } else {
             return mTempDir->pathString();
         }
+    }
+
+    virtual const String& getHomeDirectory() const {
+        return mHomeDir;
+    }
+
+    virtual void setHomeDirectoryForTesting(const char *dir) {
+        mHomeDir.assign(dir);
     }
 
     virtual int getHostBitness() const {
@@ -203,6 +212,7 @@ private:
     }
 
     String mProgramDir;
+    String mHomeDir;
     int mHostBitness;
     bool mIsRemoteSession;
     String mRemoteSessionType;
