@@ -22,7 +22,9 @@
 #  include "windows.h"
 #  include "shlobj.h"
 #else
+#  include <pwd.h>
 #  include <unistd.h>
+#  include <sys/types.h>
 #  include <sys/stat.h>
 #endif
 
@@ -34,29 +36,29 @@
 
 char*
 vbufprint( char*        buffer,
-           char*        buffer_end,
-           const char*  fmt,
-           va_list      args )
+		   char*        buffer_end,
+		   const char*  fmt,
+		   va_list      args )
 {
-    int  len = vsnprintf( buffer, buffer_end - buffer, fmt, args );
-    if (len < 0 || buffer+len >= buffer_end) {
-        if (buffer < buffer_end)
-            buffer_end[-1] = 0;
-        return buffer_end;
-    }
-    return buffer + len;
+	int  len = vsnprintf( buffer, buffer_end - buffer, fmt, args );
+	if (len < 0 || buffer+len >= buffer_end) {
+		if (buffer < buffer_end)
+			buffer_end[-1] = 0;
+		return buffer_end;
+	}
+	return buffer + len;
 }
 
 char*
 bufprint(char*  buffer, char*  end, const char*  fmt, ... )
 {
-    va_list  args;
-    char*    result;
+	va_list  args;
+	char*    result;
 
-    va_start(args, fmt);
-    result = vbufprint(buffer, end, fmt, args);
-    va_end(args);
-    return  result;
+	va_start(args, fmt);
+	result = vbufprint(buffer, end, fmt, args);
+	va_end(args);
+	return  result;
 }
 
 /** USEFUL DIRECTORY SUPPORT
@@ -76,23 +78,23 @@ bufprint(char*  buffer, char*  end, const char*  fmt, ... )
 char*
 bufprint_app_dir(char*  buff, char*  end)
 {
-    char   path[1024];
-    int    len;
-    char*  x;
+	char   path[1024];
+	int    len;
+	char*  x;
 
-    len = readlink("/proc/self/exe", path, sizeof(path));
-    if (len <= 0 || len >= (int)sizeof(path)) goto Fail;
-    path[len] = 0;
+	len = readlink("/proc/self/exe", path, sizeof(path));
+	if (len <= 0 || len >= (int)sizeof(path)) goto Fail;
+	path[len] = 0;
 
-    x = strrchr(path, '/');
-    if (x == 0) goto Fail;
-    *x = 0;
+	x = strrchr(path, '/');
+	if (x == 0) goto Fail;
+	*x = 0;
 
-    return bufprint(buff, end, "%s", path);
+	return bufprint(buff, end, "%s", path);
 Fail:
-    fprintf(stderr,"cannot locate application directory\n");
-    exit(1);
-    return end;
+	fprintf(stderr,"cannot locate application directory\n");
+	exit(1);
+	return end;
 }
 
 #elif defined(__APPLE__)
@@ -109,56 +111,56 @@ Fail:
 char*
 bufprint_app_dir(char*  buff, char*  end)
 {
-    ProcessSerialNumber psn;
-    CFDictionaryRef     dict;
-    CFStringRef         value;
-    char                s[PATH_MAX];
-    char*               x;
+	ProcessSerialNumber psn;
+	CFDictionaryRef     dict;
+	CFStringRef         value;
+	char                s[PATH_MAX];
+	char*               x;
 
-    GetCurrentProcess(&psn);
-    dict  = ProcessInformationCopyDictionary(&psn, 0xffffffff);
-    value = (CFStringRef)CFDictionaryGetValue(dict,
-                                             CFSTR("CFBundleExecutable"));
-    CFStringGetCString(value, s, PATH_MAX - 1, kCFStringEncodingUTF8);
-    x = strrchr(s, '/');
-    if (x == 0) goto fail;
-    *x = 0;
+	GetCurrentProcess(&psn);
+	dict  = ProcessInformationCopyDictionary(&psn, 0xffffffff);
+	value = (CFStringRef)CFDictionaryGetValue(dict,
+											 CFSTR("CFBundleExecutable"));
+	CFStringGetCString(value, s, PATH_MAX - 1, kCFStringEncodingUTF8);
+	x = strrchr(s, '/');
+	if (x == 0) goto fail;
+	*x = 0;
 
-    return bufprint(buff, end, "%s", s);
+	return bufprint(buff, end, "%s", s);
 fail:
-    fprintf(stderr,"cannot locate application directory\n");
-    exit(1);
-    return end;
+	fprintf(stderr,"cannot locate application directory\n");
+	exit(1);
+	return end;
 }
 #elif defined _WIN32
 char*
 bufprint_app_dir(char*  buff, char*  end)
 {
-    char   appDir[MAX_PATH];
+	char   appDir[MAX_PATH];
 	int    len;
 	char*  sep;
 
-    len = GetModuleFileName( 0, appDir, sizeof(appDir)-1 );
+	len = GetModuleFileName( 0, appDir, sizeof(appDir)-1 );
 	if (len == 0) {
 		fprintf(stderr, "PANIC CITY!!\n");
 		exit(1);
 	}
 	if (len >= (int)sizeof(appDir)) {
 		len = sizeof(appDir)-1;
-	    appDir[len] = 0;
-    }
+		appDir[len] = 0;
+	}
 
 	sep = strrchr(appDir, '\\');
 	if (sep)
 	  *sep = 0;
 
-    return bufprint(buff, end, "%s", appDir);
+	return bufprint(buff, end, "%s", appDir);
 }
 #else
 char*
 bufprint_app_dir(char*  buff, char*  end)
 {
-    return bufprint(buff, end, ".");
+	return bufprint(buff, end, ".");
 }
 #endif
 
@@ -168,85 +170,128 @@ bufprint_app_dir(char*  buff, char*  end)
 char*
 bufprint_avd_home_path(char*  buff, char*  end)
 {
-    const char*  home = getenv("ANDROID_AVD_HOME");
-    if (home) {
-        return bufprint(buff, end, "%s", home);
-    }
-    buff = bufprint_config_path(buff, end);
-    return bufprint(buff, end, PATH_SEP "%s", _ANDROID_AVD_DIR);
+	const char*  home = getenv("ANDROID_AVD_HOME");
+	if (home) {
+		return bufprint(buff, end, "%s", home);
+	}
+	buff = bufprint_config_path(buff, end);
+	return bufprint(buff, end, PATH_SEP "%s", _ANDROID_AVD_DIR);
 }
 
 char*
 bufprint_config_path(char*  buff, char*  end)
 {
-    const char*  home = getenv("ANDROID_EMULATOR_HOME");
-    if (home) {
-        return bufprint(buff, end, "%s", home);
-    }
-    home = getenv("ANDROID_SDK_HOME");
-    if (home) {
-        return bufprint(buff, end, "%s" PATH_SEP "%s", home, _ANDROID_PATH);
-    }
+	const char*  home = getenv("ANDROID_EMULATOR_HOME");
+	if (home) {
+		return bufprint(buff, end, "%s", home);
+	}
+	home = getenv("ANDROID_SDK_HOME");
+	if (home) {
+		return bufprint(buff, end, "%s" PATH_SEP "%s", home, _ANDROID_PATH);
+	}
 #ifdef _WIN32
-    char  path[MAX_PATH];
-    SHGetFolderPath( NULL, CSIDL_PROFILE,
-                     NULL, 0, path);
-    return bufprint(buff, end, "%s\\%s", path, _ANDROID_PATH);
+	char  path[MAX_PATH];
+	SHGetFolderPath( NULL, CSIDL_PROFILE,
+					 NULL, 0, path);
+	return bufprint(buff, end, "%s\\%s", path, _ANDROID_PATH);
 #else
-    home = getenv("HOME");
-    if (home == NULL)
-        home = "/tmp";
-    return bufprint(buff, end, "%s/%s", home, _ANDROID_PATH);
+	home = getenv("HOME");
+	if (home == NULL)
+		home = "/tmp";
+	return bufprint(buff, end, "%s/%s", home, _ANDROID_PATH);
 #endif
 }
 
 char*
 bufprint_config_file(char*  buff, char*  end, const char*  suffix)
 {
-    char*   p;
-    p = bufprint_config_path(buff, end);
-    p = bufprint(p, end, PATH_SEP "%s", suffix);
-    return p;
+	char*   p;
+	p = bufprint_config_path(buff, end);
+	p = bufprint(p, end, PATH_SEP "%s", suffix);
+	return p;
 }
 
 char*
 bufprint_temp_dir(char*  buff, char*  end)
 {
 #ifdef _WIN32
-    char   path[MAX_PATH];
-    DWORD  retval;
+	char   path[MAX_PATH];
+	DWORD  retval;
 
-    retval = GetTempPath( sizeof(path), path );
-    if (retval > sizeof(path) || retval == 0) {
-        D( "can't locate TEMP directory" );
-        strncpy(path, "C:\\Temp", sizeof(path) );
-    }
-    strncat( path, "\\AndroidEmulator", sizeof(path)-1 );
-    path_mkdir(path, 0744);
+	retval = GetTempPath( sizeof(path), path );
+	if (retval > sizeof(path) || retval == 0) {
+		D( "can't locate TEMP directory" );
+		strncpy(path, "C:\\Temp", sizeof(path) );
+	}
+	strncat( path, "\\AndroidEmulator", sizeof(path)-1 );
+	path_mkdir(path, 0744);
 
-    return  bufprint(buff, end, "%s", path);
+	return  bufprint(buff, end, "%s", path);
 #else
-    char path[MAX_PATH];
-    const char*  tmppath = getenv("ANDROID_TMP");
-    if (!tmppath) {
-        const char* user = getenv("USER");
-        if (user == NULL || user[0] == '\0')
-            user = "unknown";
+	char path[MAX_PATH];
+	const char*  tmppath = getenv("ANDROID_TMP");
+	if (!tmppath) {
+		const char* user = getenv("USER");
+		if (user == NULL || user[0] == '\0')
+			user = "unknown";
 
-        snprintf(path, sizeof path, "/tmp/android-%s", user);
-        tmppath = path;
-    }
-    mkdir(tmppath, 0744);
-    return  bufprint(buff, end, "%s", tmppath );
+		snprintf(path, sizeof path, "/tmp/android-%s", user);
+		tmppath = path;
+	}
+	mkdir(tmppath, 0744);
+	return  bufprint(buff, end, "%s", tmppath );
 #endif
 }
 
 char*
 bufprint_temp_file(char*  buff, char*  end, const char*  suffix)
 {
-    char*  p;
-    p = bufprint_temp_dir(buff, end);
-    p = bufprint(p, end, PATH_SEP "%s", suffix);
-    return p;
+	char*  p;
+	p = bufprint_temp_dir(buff, end);
+	p = bufprint(p, end, PATH_SEP "%s", suffix);
+	return p;
 }
 
+/* Relatively failsafe call to get user home directory */
+char* bufprint_home_dir(char* buff, char* end) {
+	char* p = buff;
+#ifdef _WIN32  // Windows
+	char path[PATH_MAX] = {0};
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path))) {
+		p = bufprint(p, end, "%s", path);
+	} else {
+		D("Failed to get path to user HOME directory; trying alternative path");
+		const char* hd = getenv("HOMEDRIVE");
+		if (hd == NULL) {
+			D("Failed to get path to valid user home directory via HOMEDRIVE "
+			  "env var");
+			return NULL;
+		}
+		const char* hp = getenv("HOMEPATH");
+		if (hd == NULL) {
+			D("Failed to get path to valid user home directory via HOMEPATH "
+			  "env var");
+			return NULL;
+		}
+		p = bufprint(p, end, "%s", hd);
+		p = bufprint(p, end, PATH_SEP "%s", hp);
+	}
+#else  // Linux, MacOSX
+	const char* h = getenv("HOME");
+	if (h != NULL) {
+		p = bufprint(p, end, "%s", h);
+	} else {
+		D("Failed to get path to user HOME directory; trying alternative path");
+		struct passwd* pw = getpwuid(getuid());
+		if (pw == NULL || pw->pw_dir == NULL) {
+			D("Failed to get path to valid user home directory via pwuid");
+			return p;
+		}
+		p = bufprint(p, end, "%s", pw->pw_dir);
+	}
+#endif
+	if (p >= end)
+		D("HOME path (\"%s\") too long.\n", buff);
+
+	return p;
+}

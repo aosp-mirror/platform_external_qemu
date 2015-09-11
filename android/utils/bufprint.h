@@ -69,6 +69,9 @@ extern char*   bufprint (char*  buffer, char*  buffend, const char*  fmt, ... );
  **
  **  bufprint_temp_file() appens the name of a file or directory relative to the
  **  temporary directory. equivalent to concat-ing the temp path + path separator + 'suffix'
+ **
+ **  bufprint_home_dir appends the user's HOME directory (as defined in *NIX and
+ **  Microsoft Windows platforms) to a given bounded buffer
  **/
 
 extern char*  bufprint_app_dir    (char*  buffer, char*  buffend);
@@ -77,6 +80,7 @@ extern char*  bufprint_config_path(char*  buffer, char*  buffend);
 extern char*  bufprint_config_file(char*  buffer, char*  buffend, const char*  suffix);
 extern char*  bufprint_temp_dir   (char*  buffer, char*  buffend);
 extern char*  bufprint_temp_file  (char*  buffer, char*  buffend, const char*  suffix);
+extern char*  bufprint_home_dir   (char*  buffer, char*  buffend);
 
 ANDROID_END_HEADER
 
