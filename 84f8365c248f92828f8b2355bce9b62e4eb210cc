@@ -87,6 +87,29 @@
     },
     {
       "key": {
+        "uuid": "e4c34e74_383f407c",
+        "filename": "android/telemetry/studio_helper.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-11T00:30:04Z",
+      "side": 1,
+      "message": "Let\u0027s break this CL into two:\n- One CL that just provides these two functions. These are enough to do the basic opt-in checks, and also to get client ids in the wild. I\u0027ll directly use these in metrics reporting.\n- A follow up CL can hold the bulk of the work here, that adds knobs to the reporting (how often we measure user/system time etc), which is the intention here. When that has landed, I will update metrics reporting to use the more powerful configuration objects.\n\nI think it\u0027ll be easier to review and land just the first part as it\u0027s much smaller than this CL. And I think it\u0027s enough for us to roll out metrics and update checks.",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 48
+      },
+      "revId": "84f8365c248f92828f8b2355bce9b62e4eb210cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c43d6a4e_83cda047",
         "filename": "android/telemetry/telemetry-config.c",
         "patchSetId": 3
