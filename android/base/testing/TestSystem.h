@@ -27,7 +27,7 @@ namespace base {
 
 class TestSystem : public System {
 public:
-    TestSystem(const char* programDir, int hostBitness, const char* homeDir = "") :
+    TestSystem(const char* programDir, int hostBitness, const char* homeDir = "/home") :
             mProgramDir(programDir),
             mHomeDir(homeDir),
             mHostBitness(hostBitness),
@@ -190,6 +190,10 @@ public:
         } else {
             return true;
         }
+    }
+
+    virtual String getTempDir() const {
+        return String("/tmp");
     }
 
 private:
