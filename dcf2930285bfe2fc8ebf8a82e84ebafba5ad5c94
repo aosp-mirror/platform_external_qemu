@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6473de94_55fd4c31",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-11T21:47:27Z",
+      "side": 1,
+      "message": "I\u0027d prefer to move this function into TestSystem class only. So it\u0027s non-virtual, but not present in the System interface. And the name could be just setHomeDirectory(), as TestSystem already implies it\u0027s for testing only",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 65
+      },
+      "revId": "dcf2930285bfe2fc8ebf8a82e84ebafba5ad5c94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
