@@ -25,6 +25,7 @@
 #endif
 
 #ifdef _WIN32
+#include <shlobj.h>
 #include <windows.h>
 #endif
 
@@ -35,7 +36,9 @@
 #ifndef _WIN32
 #include <fcntl.h>
 #include <dirent.h>
+#include <pwd.h>
 #include <sys/times.h>
+#include <sys/types.h>
 #endif
 #include <stdlib.h>
 #include <stdio.h>
@@ -50,277 +53,313 @@ namespace {
 
 class HostSystem : public System {
 public:
-    HostSystem() : mProgramDir() {}
+	HostSystem() : mProgramDir(), mHomeDir() {}
 
-    virtual ~HostSystem() {}
+	virtual ~HostSystem() {}
 
-    virtual const String& getProgramDirectory() const {
-        if (mProgramDir.empty()) {
+	virtual const String& getProgramDirectory() const {
+		if (mProgramDir.empty()) {
 #if defined(__linux__)
-            char path[1024];
-            memset(path, 0, sizeof(path));  // happy valgrind!
-            int len = readlink("/proc/self/exe", path, sizeof(path));
-            if (len > 0 && len < (int)sizeof(path)) {
-                char* x = ::strrchr(path, '/');
-                if (x) {
-                    *x = '\0';
-                    mProgramDir.assign(path);
-                }
-            }
+			char path[1024];
+			memset(path, 0, sizeof(path));  // happy valgrind!
+			int len = readlink("/proc/self/exe", path, sizeof(path));
+			if (len > 0 && len < (int)sizeof(path)) {
+				char* x = ::strrchr(path, '/');
+				if (x) {
+					*x = '\0';
+					mProgramDir.assign(path);
+				}
+			}
 #elif defined(__APPLE__)
-            ProcessSerialNumber psn;
-            GetCurrentProcess(&psn);
-            CFDictionaryRef dict =
-                    ProcessInformationCopyDictionary(&psn, 0xffffffff);
-            CFStringRef value = (CFStringRef)CFDictionaryGetValue(
-                    dict, CFSTR("CFBundleExecutable"));
-            char s[PATH_MAX];
-            CFStringGetCString(value, s, PATH_MAX - 1, kCFStringEncodingUTF8);
-            char* x = ::strrchr(s, '/');
-            if (x) {
-                *x = '\0';
-                mProgramDir.assign(s);
-            } else {
-                mProgramDir.assign("<unknown-application-dir>");
-            }
+			ProcessSerialNumber psn;
+			GetCurrentProcess(&psn);
+			CFDictionaryRef dict =
+					ProcessInformationCopyDictionary(&psn, 0xffffffff);
+			CFStringRef value = (CFStringRef)CFDictionaryGetValue(
+					dict, CFSTR("CFBundleExecutable"));
+			char s[PATH_MAX];
+			CFStringGetCString(value, s, PATH_MAX - 1, kCFStringEncodingUTF8);
+			char* x = ::strrchr(s, '/');
+			if (x) {
+				*x = '\0';
+				mProgramDir.assign(s);
+			} else {
+				mProgramDir.assign("<unknown-application-dir>");
+			}
 #elif defined(_WIN32)
-            char appDir[MAX_PATH];
-            int len = GetModuleFileName(0, appDir, sizeof(appDir)-1);
-            mProgramDir.assign("<unknown-application-dir>");
-            if (len > 0 && len < (int)sizeof(appDir)) {
-                appDir[len] = 0;
-                char* sep = ::strrchr(appDir, '\\');
-                if (sep) {
-                    *sep = '\0';
-                    mProgramDir.assign(appDir);
-                }
-            }
+			char appDir[MAX_PATH];
+			int len = GetModuleFileName(0, appDir, sizeof(appDir)-1);
+			mProgramDir.assign("<unknown-application-dir>");
+			if (len > 0 && len < (int)sizeof(appDir)) {
+				appDir[len] = 0;
+				char* sep = ::strrchr(appDir, '\\');
+				if (sep) {
+					*sep = '\0';
+					mProgramDir.assign(appDir);
+				}
+			}
 #else
 #error "Unsupported platform!"
 #endif
-        }
-        return mProgramDir;
-    }
+		}
+		return mProgramDir;
+	}
 
-    virtual int getHostBitness() const {
+	virtual const String& getHomeDirectory() const {
+		if (mHomeDir.empty()) {
+#if defined(_WIN32)
+			char path[MAX_PATH] = { 0 };
+			memset(path, 0, sizeof(path));
+			if(SUCCEEDED(SHGetFolderPath( NULL, CSIDL_PROFILE, NULL, 0, path))) {
+				mHomeDir.assign(path);
+			} else {
+				const char *homedrive = getenv("HOMEDRIVE");
+				const char *homepath  = getenv("HOMEPATH");
+				if(homedrive != NULL && homepath != NULL) {
+					mHomeDir.assign(homedrive);
+					mHomeDir.append(homepath);
+				}
+			}
+#elif defined(__linux__) || (__APPLE__)
+			// Try geteting HOME from env first
+			const char* home = ::getenv("HOME");
+			if (home != NULL) {
+				mHomeDir.assign(home);
+			} else {
+				// If env HOME appears empty for some reason,
+				// try getting HOME by querying system password database
+				struct passwd *pw = getpwuid(getuid());
+				if (pw != NULL && pw->pw_dir != NULL) {
+					mHomeDir.assign(pw->pw_dir);
+				}
+			}
+#else
+#error "Unsupported platform!"
+#endif
+		}
+		return mHomeDir;
+	}
+
+	virtual int getHostBitness() const {
 #ifdef _WIN32
-        char directory[900];
+		char directory[900];
 
-        // Retrieves the path of the WOW64 system directory, which doesn't
-        // exist on 32-bit systems.
-        unsigned len = GetSystemWow64Directory(directory, sizeof(directory));
-        if (len == 0) {
-            return 32;
-        } else {
-            return 64;
-        }
+		// Retrieves the path of the WOW64 system directory, which doesn't
+		// exist on 32-bit systems.
+		unsigned len = GetSystemWow64Directory(directory, sizeof(directory));
+		if (len == 0) {
+			return 32;
+		} else {
+			return 64;
+		}
 #else // !_WIN32
-    /*
-        This function returns 64 if host is running 64-bit OS, or 32 otherwise.
+	/*
+		This function returns 64 if host is running 64-bit OS, or 32 otherwise.
 
-        It uses the same technique in ndk/build/core/ndk-common.sh.
-        Here are comments from there:
+		It uses the same technique in ndk/build/core/ndk-common.sh.
+		Here are comments from there:
 
-        ## On Linux or Darwin, a 64-bit kernel (*) doesn't mean that the
-        ## user-landis always 32-bit, so use "file" to determine the bitness
-        ## of the shell that invoked us. The -L option is used to de-reference
-        ## symlinks.
-        ##
-        ## Note that on Darwin, a single executable can contain both x86 and
-        ## x86_64 machine code, so just look for x86_64 (darwin) or x86-64
-        ## (Linux) in the output.
+		## On Linux or Darwin, a 64-bit kernel (*) doesn't mean that the
+		## user-landis always 32-bit, so use "file" to determine the bitness
+		## of the shell that invoked us. The -L option is used to de-reference
+		## symlinks.
+		##
+		## Note that on Darwin, a single executable can contain both x86 and
+		## x86_64 machine code, so just look for x86_64 (darwin) or x86-64
+		## (Linux) in the output.
 
-        (*) ie. The following code doesn't always work:
-            struct utsname u;
-            int host_runs_64bit_OS = (uname(&u) == 0 &&
-                                     strcmp(u.machine, "x86_64") == 0);
-    */
-        return system("file -L \"$SHELL\" | grep -q \"x86[_-]64\"") == 0 ?
-                64 : 32;
+		(*) ie. The following code doesn't always work:
+			struct utsname u;
+			int host_runs_64bit_OS = (uname(&u) == 0 &&
+									 strcmp(u.machine, "x86_64") == 0);
+	*/
+		return system("file -L \"$SHELL\" | grep -q \"x86[_-]64\"") == 0 ?
+				64 : 32;
 #endif // !_WIN32
-    }
+	}
 
-    virtual StringVector scanDirEntries(const char* dirPath,
-                                        bool fullPath = false) {
-        StringVector result = scanDirInternal(dirPath);
-        if (fullPath) {
-            // Pre-pend |dirPath| to each entry.
-            String prefix =
-                    PathUtils::addTrailingDirSeparator(String(dirPath));
-            for (size_t n = 0; n < result.size(); ++n) {
-                String path = prefix;
-                path.append(result[n]);
-                result[n] = path;
-            }
-        }
-        return result;
-    }
+	virtual StringVector scanDirEntries(const char* dirPath,
+										bool fullPath = false) {
+		StringVector result = scanDirInternal(dirPath);
+		if (fullPath) {
+			// Pre-pend |dirPath| to each entry.
+			String prefix =
+					PathUtils::addTrailingDirSeparator(String(dirPath));
+			for (size_t n = 0; n < result.size(); ++n) {
+				String path = prefix;
+				path.append(result[n]);
+				result[n] = path;
+			}
+		}
+		return result;
+	}
 
-    virtual const char* envGet(const char* varname) const {
-        return getenv(varname);
-    }
+	virtual const char* envGet(const char* varname) const {
+		return getenv(varname);
+	}
 
-    virtual void envSet(const char* varname, const char* varvalue) {
+	virtual void envSet(const char* varname, const char* varvalue) {
 #ifdef _WIN32
-        if (!varvalue || !varvalue[0]) {
-            varvalue = "";
-        }
-        size_t length = ::strlen(varname) + ::strlen(varvalue) + 2;
-        char* string = static_cast<char*>(malloc(length));
-        snprintf(string, length, "%s=%s", varname, varvalue);
-        putenv(string);
+		if (!varvalue || !varvalue[0]) {
+			varvalue = "";
+		}
+		size_t length = ::strlen(varname) + ::strlen(varvalue) + 2;
+		char* string = static_cast<char*>(malloc(length));
+		snprintf(string, length, "%s=%s", varname, varvalue);
+		putenv(string);
 #else
-        if (!varvalue || !varvalue[0]) {
-            unsetenv(varname);
-        } else {
-            setenv(varname, varvalue, 1);
-        }
+		if (!varvalue || !varvalue[0]) {
+			unsetenv(varname);
+		} else {
+			setenv(varname, varvalue, 1);
+		}
 #endif
-    }
+	}
 
-    virtual bool isRemoteSession(String* sessionType) const {
-        if (getenv("NX_TEMP") != NULL) {
-            if (sessionType) {
-                *sessionType = "NX";
-            }
-            return true;
-        }
-        if (getenv("CHROME_REMOTE_DESKTOP_SESSION") != NULL) {
-            if (sessionType) {
-                *sessionType = "Chrome Remote Desktop";
-            }
-            return true;
-        }
+	virtual bool isRemoteSession(String* sessionType) const {
+		if (getenv("NX_TEMP") != NULL) {
+			if (sessionType) {
+				*sessionType = "NX";
+			}
+			return true;
+		}
+		if (getenv("CHROME_REMOTE_DESKTOP_SESSION") != NULL) {
+			if (sessionType) {
+				*sessionType = "Chrome Remote Desktop";
+			}
+			return true;
+		}
 #ifdef _WIN32
-        if (GetSystemMetrics(SM_REMOTESESSION)) {
-            if (sessionType) {
-                *sessionType = "Windows Remote Desktop";
-            }
-            return true;
-        }
+		if (GetSystemMetrics(SM_REMOTESESSION)) {
+			if (sessionType) {
+				*sessionType = "Windows Remote Desktop";
+			}
+			return true;
+		}
 #endif  // _WIN32
-        return false;
-    }
+		return false;
+	}
 
-    virtual bool pathExists(const char* path) {
-        return pathExistsInternal(path);
-    }
+	virtual bool pathExists(const char* path) {
+		return pathExistsInternal(path);
+	}
 
-    virtual bool pathIsFile(const char* path) {
-        return pathIsFileInternal(path);
-    }
+	virtual bool pathIsFile(const char* path) {
+		return pathIsFileInternal(path);
+	}
 
-    virtual bool pathIsDir(const char* path) {
-        return pathIsDirInternal(path);
-    }
+	virtual bool pathIsDir(const char* path) {
+		return pathIsDirInternal(path);
+	}
 
-    Times getProcessTimes() const {
-        Times res = {};
+	Times getProcessTimes() const {
+		Times res = {};
 
 #ifdef _WIN32
-        FILETIME creationTime = {};
-        FILETIME exitTime = {};
-        FILETIME kernelTime = {};
-        FILETIME userTime = {};
-        ::GetProcessTimes(::GetCurrentProcess(),
-            &creationTime, &exitTime, &kernelTime, &userTime);
+		FILETIME creationTime = {};
+		FILETIME exitTime = {};
+		FILETIME kernelTime = {};
+		FILETIME userTime = {};
+		::GetProcessTimes(::GetCurrentProcess(),
+			&creationTime, &exitTime, &kernelTime, &userTime);
 
-        // convert 100-ns intervals from a struct to int64_t milliseconds
-        ULARGE_INTEGER kernelInt64;
-        kernelInt64.LowPart = kernelTime.dwLowDateTime;
-        kernelInt64.HighPart = kernelTime.dwHighDateTime;
-        res.systemMs = static_cast<Duration>(kernelInt64.QuadPart / 10000);
+		// convert 100-ns intervals from a struct to int64_t milliseconds
+		ULARGE_INTEGER kernelInt64;
+		kernelInt64.LowPart = kernelTime.dwLowDateTime;
+		kernelInt64.HighPart = kernelTime.dwHighDateTime;
+		res.systemMs = static_cast<Duration>(kernelInt64.QuadPart / 10000);
 
-        ULARGE_INTEGER userInt64;
-        userInt64.LowPart = userTime.dwLowDateTime;
-        userInt64.HighPart = userTime.dwHighDateTime;
-        res.userMs = static_cast<Duration>(userInt64.QuadPart / 10000);
+		ULARGE_INTEGER userInt64;
+		userInt64.LowPart = userTime.dwLowDateTime;
+		userInt64.HighPart = userTime.dwHighDateTime;
+		res.userMs = static_cast<Duration>(userInt64.QuadPart / 10000);
 #else
-        tms times = {};
-        ::times(&times);
-        // convert to milliseconds
-        const long int ticksPerSec = ::sysconf(_SC_CLK_TCK);
-        res.systemMs = (times.tms_stime * 1000ll) / ticksPerSec;
-        res.userMs = (times.tms_utime * 1000ll) / ticksPerSec;
+		tms times = {};
+		::times(&times);
+		// convert to milliseconds
+		const long int ticksPerSec = ::sysconf(_SC_CLK_TCK);
+		res.systemMs = (times.tms_stime * 1000ll) / ticksPerSec;
+		res.userMs = (times.tms_utime * 1000ll) / ticksPerSec;
 #endif
 
-        return res;
-    }
+		return res;
+	}
 
-    bool runSilentCommand(const StringVector& commandLine) {
-        // Sanity check.
-        if (commandLine.empty()) {
-            return false;
-        }
+	bool runSilentCommand(const StringVector& commandLine) {
+		// Sanity check.
+		if (commandLine.empty()) {
+			return false;
+		}
 
 #ifdef _WIN32
-        STARTUPINFO startup;
-        ZeroMemory(&startup, sizeof(startup));
-        startup.cb = sizeof(startup);
-        startup.dwFlags = STARTF_USESHOWWINDOW;
-        startup.wShowWindow = SW_SHOWMINIMIZED;
+		STARTUPINFO startup;
+		ZeroMemory(&startup, sizeof(startup));
+		startup.cb = sizeof(startup);
+		startup.dwFlags = STARTF_USESHOWWINDOW;
+		startup.wShowWindow = SW_SHOWMINIMIZED;
 
-        PROCESS_INFORMATION pinfo;
-        ZeroMemory(&pinfo, sizeof(pinfo));
+		PROCESS_INFORMATION pinfo;
+		ZeroMemory(&pinfo, sizeof(pinfo));
 
-        const char* comspec = ::getenv("COMSPEC");
-        if (!comspec) {
-            comspec = "cmd.exe";
-        }
+		const char* comspec = ::getenv("COMSPEC");
+		if (!comspec) {
+			comspec = "cmd.exe";
+		}
 
-        // Run the command.
-        String command = "/C";
-        for (size_t n = 0; n < commandLine.size(); ++n) {
-            command += " ";
-            command += android::base::Win32Utils::quoteCommandLine(commandLine[n].c_str());
-        }
+		// Run the command.
+		String command = "/C";
+		for (size_t n = 0; n < commandLine.size(); ++n) {
+			command += " ";
+			command += android::base::Win32Utils::quoteCommandLine(commandLine[n].c_str());
+		}
 
-        fprintf(stderr, "COMMAND [%s]\n", command.c_str());
-        if (!CreateProcess(comspec,                /* program path */
-                            (char*)command.c_str(), /* command line args */
-                            NULL,             /* process handle is not inheritable */
-                            NULL,             /* thread handle is not inheritable */
-                            FALSE,            /* no, don't inherit any handles */
-                            DETACHED_PROCESS, /* the new process doesn't have a console */
-                            NULL,             /* use parent's environment block */
-                            NULL,             /* use parent's starting directory */
-                            &startup,         /* startup info, i.e. std handles */
-                            &pinfo)) {
-            return false;
-        }
+		fprintf(stderr, "COMMAND [%s]\n", command.c_str());
+		if (!CreateProcess(comspec,                /* program path */
+							(char*)command.c_str(), /* command line args */
+							NULL,             /* process handle is not inheritable */
+							NULL,             /* thread handle is not inheritable */
+							FALSE,            /* no, don't inherit any handles */
+							DETACHED_PROCESS, /* the new process doesn't have a console */
+							NULL,             /* use parent's environment block */
+							NULL,             /* use parent's starting directory */
+							&startup,         /* startup info, i.e. std handles */
+							&pinfo)) {
+			return false;
+		}
 
-        CloseHandle(pinfo.hProcess);
-        CloseHandle(pinfo.hThread);
+		CloseHandle(pinfo.hProcess);
+		CloseHandle(pinfo.hThread);
 
-        return true;
+		return true;
 #else  // !_WIN32
-        char** params = new char*[commandLine.size()];
-        for (size_t n = 0; n < commandLine.size(); ++n) {
-            params[n] = (char*)commandLine[n].c_str();
-        }
+		char** params = new char*[commandLine.size()];
+		for (size_t n = 0; n < commandLine.size(); ++n) {
+			params[n] = (char*)commandLine[n].c_str();
+		}
 
-        int pid = fork();
-        if (pid < 0) {
-            return false;
-        }
-        if (pid != 0) {
-            // Parent process returns immediately.
-            delete [] params;
-            return true;
-        }
+		int pid = fork();
+		if (pid < 0) {
+			return false;
+		}
+		if (pid != 0) {
+			// Parent process returns immediately.
+			delete [] params;
+			return true;
+		}
 
-        // In the child process.
-        int fd = open("/dev/null", O_WRONLY);
-        dup2(fd, 1);
-        dup2(fd, 2);
-        execvp(commandLine[0].c_str(), params);
-        // Should not happen.
-        exit(1);
+		// In the child process.
+		int fd = open("/dev/null", O_WRONLY);
+		dup2(fd, 1);
+		dup2(fd, 2);
+		execvp(commandLine[0].c_str(), params);
+		// Should not happen.
+		exit(1);
 #endif  // !_WIN32
-    }
+	}
 
 private:
-    mutable String mProgramDir;
+	mutable String mProgramDir;
+	mutable String mHomeDir;
 };
 
 LazyInstance<HostSystem> sHostSystem = LAZY_INSTANCE_INIT;
@@ -330,11 +369,11 @@ System* sSystemForTesting = NULL;
 
 // static
 System* System::get() {
-    System* result = sSystemForTesting;
-    if (!result) {
-        result = sHostSystem.ptr();
-    }
-    return result;
+	System* result = sSystemForTesting;
+	if (!result) {
+		result = sHostSystem.ptr();
+	}
+	return result;
 }
 
 #ifdef __x86_64__
@@ -361,124 +400,124 @@ const char* System::kLibrarySearchListEnvVarName = "LD_LIBRARY_PATH";
 
 // static
 System* System::setForTesting(System* system) {
-    System* result = sSystemForTesting;
-    sSystemForTesting = system;
-    return result;
+	System* result = sSystemForTesting;
+	sSystemForTesting = system;
+	return result;
 }
 
 // static
 StringVector System::scanDirInternal(const char* dirPath) {
-    StringVector result;
+	StringVector result;
 
-    if (!dirPath) {
-        return result;
-    }
+	if (!dirPath) {
+		return result;
+	}
 #ifdef _WIN32
-    String root(dirPath);
-    root = PathUtils::addTrailingDirSeparator(root);
-    root += '*';
-    struct _finddata_t findData;
-    intptr_t findIndex = _findfirst(root.c_str(), &findData);
-    if (findIndex >= 0) {
-        do {
-            const char* name = findData.name;
-            if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0) {
-                result.append(String(name));
-            }
-        } while (_findnext(findIndex, &findData) >= 0);
-        _findclose(findIndex);
-    }
+	String root(dirPath);
+	root = PathUtils::addTrailingDirSeparator(root);
+	root += '*';
+	struct _finddata_t findData;
+	intptr_t findIndex = _findfirst(root.c_str(), &findData);
+	if (findIndex >= 0) {
+		do {
+			const char* name = findData.name;
+			if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0) {
+				result.append(String(name));
+			}
+		} while (_findnext(findIndex, &findData) >= 0);
+		_findclose(findIndex);
+	}
 #else  // !_WIN32
-    DIR* dir = ::opendir(dirPath);
-    if (dir) {
-        for (;;) {
-            struct dirent* entry = ::readdir(dir);
-            if (!entry) {
-                break;
-            }
-            const char* name = entry->d_name;
-            if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0) {
-                result.append(String(name));
-            }
-        }
-        ::closedir(dir);
-    }
+	DIR* dir = ::opendir(dirPath);
+	if (dir) {
+		for (;;) {
+			struct dirent* entry = ::readdir(dir);
+			if (!entry) {
+				break;
+			}
+			const char* name = entry->d_name;
+			if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0) {
+				result.append(String(name));
+			}
+		}
+		::closedir(dir);
+	}
 #endif  // !_WIN32
-    sortStringVector(&result);
-    return result;
+	sortStringVector(&result);
+	return result;
 }
 
 // static
 bool System::pathExistsInternal(const char* path) {
-    if (!path) {
-        return false;
-    }
-    int ret = HANDLE_EINTR(access(path, F_OK));
-    return (ret == 0) || (errno != ENOENT);
+	if (!path) {
+		return false;
+	}
+	int ret = HANDLE_EINTR(access(path, F_OK));
+	return (ret == 0) || (errno != ENOENT);
 }
 
 // static
 bool System::pathIsFileInternal(const char* path) {
-    if (!path) {
-        return false;
-    }
-    struct stat st;
-    int ret = HANDLE_EINTR(stat(path, &st));
-    if (ret < 0) {
-        return false;
-    }
-    return S_ISREG(st.st_mode);
+	if (!path) {
+		return false;
+	}
+	struct stat st;
+	int ret = HANDLE_EINTR(stat(path, &st));
+	if (ret < 0) {
+		return false;
+	}
+	return S_ISREG(st.st_mode);
 }
 
 // static
 bool System::pathIsDirInternal(const char* path) {
-    if (!path) {
-        return false;
-    }
-    struct stat st;
-    int ret = HANDLE_EINTR(stat(path, &st));
-    if (ret < 0) {
-        return false;
-    }
-    return S_ISDIR(st.st_mode);
+	if (!path) {
+		return false;
+	}
+	struct stat st;
+	int ret = HANDLE_EINTR(stat(path, &st));
+	if (ret < 0) {
+		return false;
+	}
+	return S_ISDIR(st.st_mode);
 }
 
 // static
 void System::addLibrarySearchDir(const char* path) {
-    System* system = System::get();
-    const char* varName = kLibrarySearchListEnvVarName;
+	System* system = System::get();
+	const char* varName = kLibrarySearchListEnvVarName;
 
-    const char* env = system->envGet(varName);
-    String libSearchPath = env ? env : "";
-    if (libSearchPath.size()) {
-        libSearchPath = StringFormat("%s%c%s",
-                                     path,
-                                     kPathSeparator,
-                                     libSearchPath.c_str());
-    } else {
-        libSearchPath = path;
-    }
-    system->envSet(varName, libSearchPath.c_str());
+	const char* env = system->envGet(varName);
+	String libSearchPath = env ? env : "";
+	if (libSearchPath.size()) {
+		libSearchPath = StringFormat("%s%c%s",
+									 path,
+									 kPathSeparator,
+									 libSearchPath.c_str());
+	} else {
+		libSearchPath = path;
+	}
+	system->envSet(varName, libSearchPath.c_str());
 }
 
 // static
 String System::findBundledExecutable(const char* programName) {
-    System* system = System::get();
+	System* system = System::get();
 
-    String executableName(programName);
+	String executableName(programName);
 #ifdef _WIN32
-    executableName += ".exe";
+	executableName += ".exe";
 #endif
-    StringVector pathList;
-    pathList.push_back(system->getProgramDirectory());
-    pathList.push_back(kBinSubDir);
-    pathList.push_back(executableName);
+	StringVector pathList;
+	pathList.push_back(system->getProgramDirectory());
+	pathList.push_back(kBinSubDir);
+	pathList.push_back(executableName);
 
-    String executablePath = PathUtils::recompose(pathList);
-    if (!system->pathIsFile(executablePath.c_str())) {
-        executablePath.clear();
-    }
-    return executablePath;
+	String executablePath = PathUtils::recompose(pathList);
+	if (!system->pathIsFile(executablePath.c_str())) {
+		executablePath.clear();
+	}
+	return executablePath;
 }
 
 }  // namespace base
