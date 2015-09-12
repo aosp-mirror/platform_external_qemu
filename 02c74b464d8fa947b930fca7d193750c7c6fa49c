@@ -16,6 +16,24 @@
       "revId": "02c74b464d8fa947b930fca7d193750c7c6fa49c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c45e4afd_1e484d26",
+        "filename": "android/skin/qt/ext-sms.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-12T00:20:52Z",
+      "side": 1,
+      "message": "I split the line conventionally.\n.data() doesn\u0027t work for me.\nIt gives QChar*, which the compiler says it can\u0027t\nconvert to char*.",
+      "parentUuid": "841c5220_d6c34422",
+      "revId": "02c74b464d8fa947b930fca7d193750c7c6fa49c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
