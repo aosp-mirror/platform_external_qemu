@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0465c2c3_c0eb52b1",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-12T00:30:22Z",
+      "side": 1,
+      "message": "Re \"[0]\": Do we want to allow dragging multiple files?\nPerhaps dragEnter should accept only exactly one .apk.",
+      "revId": "61932cad8b65d76fa070d86c2ac9e12c376e61ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0465c2c3_40f82284",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-12T00:30:22Z",
+      "side": 1,
+      "message": "Yes, I think we need a pop-up if the adb command couldn\u0027t be run.\n\nWorse, I also think we\u0027ll need a pop-up if the installation\nfailed--requiring some coordination with the detached\nprocess.",
+      "revId": "61932cad8b65d76fa070d86c2ac9e12c376e61ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
