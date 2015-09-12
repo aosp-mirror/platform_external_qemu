@@ -25,6 +25,7 @@
 #endif
 
 #ifdef _WIN32
+#include <shlobj.h>
 #include <windows.h>
 #endif
 
@@ -35,7 +36,9 @@
 #ifndef _WIN32
 #include <fcntl.h>
 #include <dirent.h>
+#include <pwd.h>
 #include <sys/times.h>
+#include <sys/types.h>
 #endif
 #include <stdlib.h>
 #include <stdio.h>
@@ -50,7 +53,7 @@ namespace {
 
 class HostSystem : public System {
 public:
-    HostSystem() : mProgramDir() {}
+    HostSystem() : mProgramDir(), mHomeDir() {}
 
     virtual ~HostSystem() {}
 
@@ -100,6 +103,44 @@ public:
 #endif
         }
         return mProgramDir;
+    }
+
+    virtual const String& getHomeDirectory() const {
+        if (mHomeDir.empty()) {
+#if defined(_WIN32)
+            char path[MAX_PATH] = { 0 };
+            // Query Windows shell for known folder paths.
+            // SHGetFolderPath acts as a wrapper to KnownFolders;
+            // this is preferred for simplicity and XP compatibility
+            if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path))) {
+                mHomeDir.assign(path);
+            } else {
+                // Fallback to windows-equivalent of HOME env var
+                const char *homedrive = getenv("HOMEDRIVE");
+                const char *homepath  = getenv("HOMEPATH");
+                if(homedrive != NULL && homepath != NULL) {
+                    mHomeDir.assign(homedrive);
+                    mHomeDir.append(homepath);
+                }
+            }
+#elif defined(__linux__) || (__APPLE__)
+            // Try getting HOME from env first
+            const char* home = getenv("HOME");
+            if (home != NULL) {
+                mHomeDir.assign(home);
+            } else {
+                // If env HOME appears empty for some reason,
+                // try getting HOME by querying system password database
+                const struct passwd *pw = getpwuid(getuid());
+                if (pw != NULL && pw->pw_dir != NULL) {
+                    mHomeDir.assign(pw->pw_dir);
+                }
+            }
+#else
+#error "Unsupported platform!"
+#endif
+        }
+        return mHomeDir;
     }
 
     virtual int getHostBitness() const {
@@ -321,6 +362,7 @@ public:
 
 private:
     mutable String mProgramDir;
+    mutable String mHomeDir;
 };
 
 LazyInstance<HostSystem> sHostSystem = LAZY_INSTANCE_INIT;
