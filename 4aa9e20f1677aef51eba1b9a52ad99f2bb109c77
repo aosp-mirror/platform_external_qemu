@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "648afea0_c3428ad9",
+        "filename": "android/base/threads/Thread_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-12T02:06:07Z",
+      "side": 1,
+      "message": "Please mark explicitly as virtual.",
+      "range": {
+        "startLine": 40,
+        "startChar": 5,
+        "endLine": 40,
+        "endChar": 17
+      },
+      "revId": "4aa9e20f1677aef51eba1b9a52ad99f2bb109c77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
