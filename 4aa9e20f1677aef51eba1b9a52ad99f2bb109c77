@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "490513fd_3cb8d1fc",
+        "filename": "android/base/threads/Thread.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-13T11:57:22Z",
+      "side": 1,
+      "message": "I fear this is too generic, i.e. it would be simpler to use a flag that tells the thread to self-delete on exit instead, i.e. add something like:\n\n  // Call this method to indicate that the thread instance should\n  // self-delete after it\u0027s main() method has returned. This is useful\n  // to create fire-and-forget threads. Cannot be undone.\n  void setSelfDeleteOnExit();\n\nThere is less potential for abuse and ambiguity, and the code will be simpler.",
+      "revId": "4aa9e20f1677aef51eba1b9a52ad99f2bb109c77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "648afea0_c3428ad9",
         "filename": "android/base/threads/Thread_unittest.cpp",
         "patchSetId": 2
