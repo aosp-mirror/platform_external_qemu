@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "2900dfee_dbbe93e7",
+        "filename": "android/base/threads/Thread.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-13T11:58:52Z",
+      "side": 1,
+      "message": "Just to clarify, if you don\u0027t have time to do it, just submit the patch as is, I\u0027ll provide another one to change it later.",
+      "parentUuid": "490513fd_3cb8d1fc",
+      "revId": "4aa9e20f1677aef51eba1b9a52ad99f2bb109c77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "648afea0_c3428ad9",
         "filename": "android/base/threads/Thread_unittest.cpp",
         "patchSetId": 2
