@@ -13,6 +13,7 @@
 
 #include "android/metrics/internal/metrics_reporter_internal.h"
 #include "android/metrics/metrics_reporter_ga.h"
+#include "android/metrics/studio-helper.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
@@ -58,6 +59,9 @@ static androidMetricsUploaderFunction testUploader = NULL;
 
 ABool androidMetrics_moduleInit(const char* avdHome) {
     char path[PATH_MAX], *pathend = path, *bufend = pathend + sizeof(path);
+
+    derror("--------- OPT-IN : %s ---------", android_studio_get_optins() == 0 ? "false" : "true");
+    derror("---------  UUID  : %s ---------", android_studio_get_installation_id());
 
     pathend = bufprint(pathend, bufend, "%s", avdHome);
     if (pathend >= bufend || !path_is_dir(path)) {
