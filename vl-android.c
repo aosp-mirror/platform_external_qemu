@@ -51,6 +51,7 @@
 #include "android/charpipe.h"
 #include "android/curl-support.h"
 #include "android/display-core.h"
+#include "android/emulation/bufprint_config_dirs.h"
 #include "android/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
 #include "android/filesystems/fstab_parser.h"
