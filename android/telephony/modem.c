@@ -17,6 +17,7 @@
 #include "android/telephony/sms.h"
 #include "android/telephony/sysdeps.h"
 
+#include "android/emulation/bufprint_config_dirs.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/timezone.h"
