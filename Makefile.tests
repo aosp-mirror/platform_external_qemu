@@ -43,6 +43,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/kernel/kernel_utils_unittest.cpp \
   android/metrics/metrics_reporter_unittest.cpp \
   android/metrics/metrics_reporter_ga_unittest.cpp \
+  android/metrics/StudioHelper_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
   android/opengl/EmuglBackendScanner_unittest.cpp \
   android/opengl/emugl_config_unittest.cpp \
@@ -81,8 +82,8 @@ EMULATOR_UNITTESTS_SOURCES += \
 endif
 
 $(call start-emulator-program, emulator_unittests)
-LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include
-LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS) $(LIBCURL_LDLIBS)
+LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include  $(LIBXML2_INCLUDES)
+LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS) $(LIBCURL_LDLIBS) $(LIBXML2_LDLIBS)
 LOCAL_SRC_FILES := $(EMULATOR_UNITTESTS_SOURCES)
 LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES)
 LOCAL_STATIC_LIBRARIES += \
@@ -97,8 +98,8 @@ $(call end-emulator-program)
 
 
 $(call start-emulator64-program, emulator64_unittests)
-LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include
-LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS) $(LIBCURL_LDLIBS_64)
+LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include  $(LIBXML2_INCLUDES)
+LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS) $(LIBCURL_LDLIBS_64) $(LIBXML2_LDLIBS_64)
 LOCAL_SRC_FILES := $(EMULATOR_UNITTESTS_SOURCES)
 LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES_64)
 LOCAL_STATIC_LIBRARIES += \
