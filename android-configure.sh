@@ -564,15 +564,11 @@ esac
 ###
 ###  Libxml2 probe
 ###
-LIBXML2_PREBUILTS_DIR=
-# Note: libxml2 is only used when building the Qt-based UI.
-if [ "$OPTION_UI" = "qt" ]; then
-    LIBXML2_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/libxml2
-    if [ -d "$LIBXML2_PREBUILTS_DIR" ]; then
-        log "Libxml2 prebuilts dir: $LIBXML2_PREBUILTS_DIR"
-    else
-        panic "Missing prebuilts directory (please run build-libxml2.sh): $LIBXML2_PREBUILTS_DIR"
-    fi
+LIBXML2_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/libxml2
+if [ -d "$LIBXML2_PREBUILTS_DIR" ]; then
+    log "Libxml2 prebuilts dir: $LIBXML2_PREBUILTS_DIR"
+else
+    panic "Missing prebuilts directory (please run build-libxml2.sh): $LIBXML2_PREBUILTS_DIR"
 fi
 
 ###
@@ -743,7 +739,6 @@ echo "CONFIG_OSS        := $PROBE_OSS" >> $config_mk
 echo "CONFIG_PULSEAUDIO := $PROBE_PULSEAUDIO" >> $config_mk
 if [ "$QT_PREBUILTS_DIR" ]; then
     echo "QT_PREBUILTS_DIR  := $QT_PREBUILTS_DIR" >> $config_mk
-    echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
     echo "EMULATOR_USE_SDL2 := false" >> $config_mk
     echo "EMULATOR_USE_QT   := true" >> $config_mk
 else
@@ -751,6 +746,7 @@ else
     echo "EMULATOR_USE_QT   := false" >> $config_mk
 fi
 
+echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
 
 if [ $OPTION_DEBUG = yes ] ; then
