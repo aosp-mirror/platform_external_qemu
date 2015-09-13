@@ -18,6 +18,7 @@
 #include "android/adb-qemud.h"
 #include "android/adb-server.h"
 #include "android/android.h"
+#include "android/emulation/bufprint_config_dirs.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"

@@ -56,27 +56,6 @@ ANDROID_BEGIN_HEADER
 extern char*   vbufprint(char*  buffer, char*  buffend, const char*  fmt, va_list  args );
 extern char*   bufprint (char*  buffer, char*  buffend, const char*  fmt, ... );
 
-// Append the application's directory to a bounded |buffer| that stops at
-// |buffend|, and return the new position.
-extern char*  bufprint_app_dir    (char*  buffer, char*  buffend);
-
-// Append the root path containing all AVD sub-directories to a bounded
-// |buffer| that stops at |buffend| and return new position. The default
-// location can be overriden by defining ANDROID_AVD_HOME in the environment.
-extern char*  bufprint_avd_home_path(char*  buffer, char*  buffend);
-
-// Append the user-specific emulator configuration directory to a bounded
-// |buffer| that stops at |buffend| and return the new position. The default
-// location can be overriden by defining ANDROID_EMULATOR_HOME in the
-// environment. Otherwise, a sub-directory of $HOME is used, unless
-// ANDROID_SDK_HOME is also defined.
-extern char*  bufprint_config_path(char*  buffer, char*  buffend);
-
-// Append the name or a file |suffix| relative to the configuration
-// directory (see bufprint_config_path) to the bounded |buffer| that stops
-// at |buffend|, and return the new position.
-extern char*  bufprint_config_file(char*  buffer, char*  buffend, const char*  suffix);
-
 // Append the path to all emulator temporary files to a bounded |buffer| that
 // stops at |buffend|, and return the new position.
 extern char*  bufprint_temp_dir   (char*  buffer, char*  buffend);
