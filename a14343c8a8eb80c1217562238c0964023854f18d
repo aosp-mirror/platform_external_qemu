@@ -25,6 +25,47 @@
     },
     {
       "key": {
+        "uuid": "490513fd_5c703da7",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T21:39:04Z",
+      "side": 1,
+      "message": "I\u0027m not sure I understand this, the previous version of bufprint_config_path() doesn\u0027t seem to do what you\u0027re describing. Can you clarify ?",
+      "parentUuid": "44725a92_a8b2c33e",
+      "range": {
+        "startLine": 109,
+        "startChar": 26,
+        "endLine": 109,
+        "endChar": 42
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "490513fd_9c9c852a",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T21:39:04Z",
+      "side": 1,
+      "message": "I didn\u0027t noticed this missing defined() here for the __APPLE__ macro. This probably compiles by accident though.",
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a9420f4a_4fb9adb1",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 2
@@ -36,6 +77,30 @@
       "writtenOn": "2015-09-14T16:47:28Z",
       "side": 1,
       "message": "what about getenv(\"TMP\"), then getenv(\"TEMP\")?\nThose are usually defined",
+      "range": {
+        "startLine": 370,
+        "startChar": 0,
+        "endLine": 370,
+        "endChar": 38
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9ea475e_81de5acf",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T21:39:04Z",
+      "side": 1,
+      "message": "GetTempPath() already looks into these. See http://blogs.msdn.com/b/oldnewthing/archive/2015/04/17/10608077.aspx",
+      "parentUuid": "a9420f4a_4fb9adb1",
       "range": {
         "startLine": 370,
         "startChar": 0,
@@ -71,6 +136,30 @@
     },
     {
       "key": {
+        "uuid": "691f3755_7539c8ba",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T21:39:04Z",
+      "side": 1,
+      "message": "Then you\u0027re looking for serious trouble, and should be rewarded accordingly at runtime :-)",
+      "parentUuid": "a46156bd_8094fc31",
+      "range": {
+        "startLine": 372,
+        "startChar": 1,
+        "endLine": 373,
+        "endChar": 64
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "44725a92_285f935a",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 2
@@ -94,6 +183,30 @@
     },
     {
       "key": {
+        "uuid": "691f3755_553ecca4",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T21:39:04Z",
+      "side": 1,
+      "message": "TMP is not always defined, as far as I know, you\u0027re probably thinking about TMPDIR instead, which is mandated by Posix. We could indeed use it instead of the hard-coded /tmp/ below.\n\nANDROID_TMP is intentional, to specifically direct emulator\u0027s temporary files to a specific location, independent from other stuff (e.g. the emulator launches the \u0027ddms ping\u0027 command, or can launch external binaries like \u0027e2fsprogs\u0027, and probably more in the future). This is useful for debugging and troubleshooting only though. I propose we change this in a future patch too.",
+      "parentUuid": "44725a92_285f935a",
+      "range": {
+        "startLine": 380,
+        "startChar": 38,
+        "endLine": 380,
+        "endChar": 49
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "648afea0_cc6e37ca",
         "filename": "android/base/testing/TestSystem.h",
         "patchSetId": 2
@@ -105,6 +218,30 @@
       "writtenOn": "2015-09-14T18:37:37Z",
       "side": 1,
       "message": "Isn\u0027t it better to create a directory under mTempDir and set mHomeDir and mProgramDir to be valid paths under that directory?\n\nThat way, unittests can actually use these directories safely and hermetically.",
+      "range": {
+        "startLine": 30,
+        "startChar": 68,
+        "endLine": 30,
+        "endChar": 75
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2900dfee_1b62bb9c",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T21:39:04Z",
+      "side": 1,
+      "message": "That\u0027s exactly what already happens :-)",
+      "parentUuid": "648afea0_cc6e37ca",
       "range": {
         "startLine": 30,
         "startChar": 68,
@@ -152,6 +289,30 @@
       "side": 1,
       "message": "++ We really don\u0027t want arbitrary exit points for the application.\nI plan on running through and consolidating exits in fact.",
       "parentUuid": "8478d270_6a6edff6",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 16
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2900dfee_bb706763",
+        "filename": "android/utils/bufprint_system.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T21:39:04Z",
+      "side": 1,
+      "message": "Ok, but let\u0027s do this in a future patch, after checking all callers of the function. For now, we\u0027re essentially moving stuff around for better layering, so let\u0027s keep the changes minimum.",
+      "parentUuid": "44725a92_88e0a738",
       "range": {
         "startLine": 34,
         "startChar": 0,
