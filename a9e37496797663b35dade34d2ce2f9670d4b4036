@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e9ea475e_41e85273",
+        "filename": "android/emulation/ConfigDirs.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T21:36:06Z",
+      "side": 1,
+      "message": "That\u0027s really cosmetic, android::ConfigDirs::functionName() looks better than android::config_dirs::functionName() to me.",
+      "parentUuid": "6473de94_fb8f275e",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 6
+      },
+      "revId": "a9e37496797663b35dade34d2ce2f9670d4b4036",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "44725a92_a87f23a8",
         "filename": "android/emulation/bufprint_config_dirs.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-14T16:56:02Z",
       "side": 1,
       "message": "same issue as in the other review: it\u0027s very C-like to exit from some helper function, and it doesn\u0027t work well with C++",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 16
+      },
+      "revId": "a9e37496797663b35dade34d2ce2f9670d4b4036",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2900dfee_db73336f",
+        "filename": "android/emulation/bufprint_config_dirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T21:36:06Z",
+      "side": 1,
+      "message": "I agree, but for now we\u0027re just moving code around. We can fix this later in a future patch that will also check all calls to the function for \u0027proper\u0027 error handling.",
+      "parentUuid": "44725a92_a87f23a8",
       "range": {
         "startLine": 39,
         "startChar": 0,
