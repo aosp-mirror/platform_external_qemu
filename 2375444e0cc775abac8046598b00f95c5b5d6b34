@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8478d270_4a94c302",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-14T17:09:37Z",
+      "side": 1,
+      "message": "You append $QT_DSTDIR twice, making the resulting path incorrect (and very confusing). Removing this line should fix it.",
+      "range": {
+        "startLine": 308,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 45
+      },
+      "revId": "2375444e0cc775abac8046598b00f95c5b5d6b34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
