@@ -1,0 +1,259 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e9ea475e_015eca5c",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "nit: should appear before system headers.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09e87b64_a2e15e05",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "nit: it looks like this should be \u0027static const\u0027, and could be moved inside the only function that actually uses it.\n\nAlso, for C++ constant values, prefer the kVariableName naming convention.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9ea475e_2159ce74",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "nit: same here as above.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9ea475e_4154d23e",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "nit: Please move the comment to the header.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9f4cf41_ffea5fe1",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "nit: star on the side of the type, use \u0027git clang-format\u0027 to fix everything automatically.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09e87b64_62011645",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "nit: s/direcotires/directories/g :)",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c93f43b4_30b808fd",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "nit: move comment to header file.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09e87b64_82fc1aad",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "nit: move comment to header files, document the parameters |studioPath| and |filename| properly, and explain who owns the result, and what happens in case of failure.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09e87b64_4206125f",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "should this be static?",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "691f3755_35d11037",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "this header doesn\u0027t seem to be needed here.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44209a82_6419ca81",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "nit: move the macro definitions to the implementation file instead. Duplicate them in the unit-test file, this ensures that if someone changes them by accident, this will get caught during testing (and if this is intentional, update the test source as well).",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2900dfee_3b1fb79c",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "please move documentation for this function in the header. Also specify who\u0027s owns the returned string. Consider returning an android::base::String instead to simplify ownership management of the result.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9ea475e_614fd6aa",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64211e85_25e7ce1a",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "nit: this is a C++ header, and thus should be named StudioHelper.h instead.\n\nAlso, put everything inside the \u0027android\u0027 namespace, and ideally create a struct named StudioHelper that provides static methods, to avoid conflicts in the future, i.e.:\n\n  namespace android {\n\n  struct StudioHelper {\n\n  static const android::base::Version extractAndroidStudioVersion(....);\n\n  static char* latestAndroidStudioDir(...);\n\n  static char* pathToStudioXML(...);\n\n  };\n\n  }  // namespace android",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64211e85_a501fe46",
+        "filename": "android/metrics/studio-preferences.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T09:19:12Z",
+      "side": 1,
+      "message": "nit: please specify that the caller is responsible for freeing the return string, it\u0027s pretty important. Also it\u0027s better to actually return a char* in this case (const char* is typically returned by the function or object implementing the method to indicate it is still owned by it).",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
