@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9420f4a_4fb9adb1",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-14T16:47:28Z",
+      "side": 1,
+      "message": "what about getenv(\"TMP\"), then getenv(\"TEMP\")?\nThose are usually defined",
+      "range": {
+        "startLine": 370,
+        "startChar": 0,
+        "endLine": 370,
+        "endChar": 38
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a46156bd_8094fc31",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-14T16:47:28Z",
+      "side": 1,
+      "message": "it might be, it might not be. I always define temp to be single C:\\Temp for all uses on my box :)",
+      "range": {
+        "startLine": 372,
+        "startChar": 1,
+        "endLine": 373,
+        "endChar": 64
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44725a92_285f935a",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-14T16:47:28Z",
+      "side": 1,
+      "message": "what about the real TMP var?",
+      "range": {
+        "startLine": 380,
+        "startChar": 38,
+        "endLine": 380,
+        "endChar": 49
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8478d270_6a6edff6",
+        "filename": "android/utils/bufprint_system.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-14T16:47:28Z",
+      "side": 1,
+      "message": "can\u0027t we do it a little bit safer? exit() won\u0027t run any C++ dtors of the locals, which may be quite messy. and we won\u0027t get any core dump to look at. Even \u0027return NULL\u0027 is more useful for later investigation IMO",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 16
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
