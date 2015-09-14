@@ -23,6 +23,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/ext-finger.cpp \
     android/skin/qt/ext-location.cpp \
     android/skin/qt/ext-sd.cpp \
+    android/skin/qt/ext-settings.cpp \
     android/skin/qt/ext-sms.cpp \
     android/skin/qt/ext-telephony.cpp \
     android/skin/qt/extended-window.cpp \
@@ -31,7 +32,6 @@ ANDROID_SKIN_SOURCES += \
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/emulator-qt-window.h \
     android/skin/qt/extended-window.h \
-    android/skin/qt/extended-window-styles.h \
     android/skin/qt/tool-window.h \
 
 ANDROID_SKIN_QT_RESOURCES := \

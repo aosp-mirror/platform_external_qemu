@@ -44,4 +44,16 @@
     "QCheckBox::indicator:unchecked { image: url(:/light/check_no); " \
                                      "icon-size: 24px; height: 24 px; width: 24 px }"
 
+// This gives the order of the tabbed panes on the extended window.
+// This must correspond to the ordering that is set from within
+// QtDesigner and written to extended.ui.
+enum { PANE_IDX_BATTERY = 0,
+       PANE_IDX_TELEPHONE,
+       PANE_IDX_MESSAGE,
+       PANE_IDX_LOCATION,
+       PANE_IDX_CELLULAR,
+       PANE_IDX_FINGER,
+       PANE_IDX_SD,
+       PANE_IDX_SETTINGS };
+
 #endif // ANDROID_SKIN_QT_EXTENDED_WINDOW_STYLES_H
