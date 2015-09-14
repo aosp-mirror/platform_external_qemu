@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "89fb8b33_3e01e9cc",
+        "filename": "android/base/threads/Thread.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T21:48:07Z",
+      "side": 1,
+      "message": "No, that\u0027s ok, we should fix the problem by defining the macros in the build system so that including \u003cstdint.h\u003e is always safe, but let\u0027s do that in a future patch. Thanks for the clarification, that\u0027s all I needed.",
+      "parentUuid": "44ab3af0_ec1dcba3",
+      "revId": "de6e0b7926e46576c84a444324e8222138708d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6442fedf_a0b8d4ff",
         "filename": "android/base/threads/Thread.h",
         "patchSetId": 7
