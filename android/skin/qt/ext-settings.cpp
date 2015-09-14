@@ -35,29 +35,6 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
     // Save a valid selection
     mSettingsState.mTheme = theme;
 
-    // Implement this theme
-    QString style;
-    style += SLIDER_STYLE;
-    switch (theme) {
-        case SETTINGS_THEME_DARK:
-            // Use light icons
-            style += LIGHT_CHECKBOX_STYLE
-                     " QTextEdit, QPlainTextEdit, QTreeView"
-                     "{ border: 1px solid " DARK_FOREGROUND " } "
-                     "*{color:" DARK_FOREGROUND
-                     ";background-color: " DARK_BACKGROUND  "}";
-            break;
-        case SETTINGS_THEME_LIGHT:
-        default:
-            // Use dark icons
-            style += DARK_CHECKBOX_STYLE
-                     " QTextEdit, QPlainTextEdit, QTreeView"
-                     "{ border: 1px solid " LIGHT_FOREGROUND " } "
-                     "*{color:" LIGHT_FOREGROUND
-                     ";background-color:" LIGHT_BACKGROUND "}";
-            break;
-    }
-
     // Switch to the icon images that are appropriate for this theme.
     // Examine every widget.
     QWidgetList wList = QApplication::allWidgets();
@@ -68,8 +45,18 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
         }
     }
 
-    // Apply the updated style sheet and force a re-draw
-    this->setStyleSheet(style);
+    // Set the style for this theme
+    switch (theme) {
+        case SETTINGS_THEME_DARK:
+            this->setStyleSheet(QT_STYLE_DARK_THEME);
+            break;
+        case SETTINGS_THEME_LIGHT:
+        default:
+            this->setStyleSheet(QT_STYLE_LIGHT_THEME);
+            break;
+    }
+
+    // Force a re-draw to make the new style take effect
     this->style()->unpolish(mExtendedUi->stackedWidget);
     this->style()->polish(mExtendedUi->stackedWidget);
     this->update();

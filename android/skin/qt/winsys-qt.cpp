@@ -77,19 +77,19 @@ extern void skin_winsys_enter_main_loop(int argc, char **argv)
 
     // Give Qt the fonts from our resource file
     QFontDatabase  fontDb;
-    int fontId = fontDb.addApplicationFont(":/lib/fonts/uiDefault");
+    int fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto");
     if (fontId < 0) {
-        D("Count not load font resource: \":/lib/fonts/uiDefault");
+        D("Count not load font resource: \":/lib/fonts/Roboto");
     }
 
-    fontId = fontDb.addApplicationFont(":/lib/fonts/uiDefault-Bold");
+    fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto-Bold");
     if (fontId < 0) {
-        D("Count not load font resource: \":/lib/fonts/uiDefault-Bold");
+        D("Count not load font resource: \":/lib/fonts/Roboto-Bold");
     }
 
-    fontId = fontDb.addApplicationFont(":/lib/fonts/uiDefault-Medium");
+    fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto-Medium");
     if (fontId < 0) {
-        D("Count not load font resource: \":/lib/fonts/uiDefault-Medium");
+        D("Count not load font resource: \":/lib/fonts/Roboto-Medium");
     }
 
     GlobalState* g = globalState();
