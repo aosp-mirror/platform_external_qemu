@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "44725a92_a8b2c33e",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-14T18:37:37Z",
+      "side": 1,
+      "message": "To maintain the same behaviour for bufprint_config_path, this should fallback to a folder in getTempDir if all else fails.",
+      "range": {
+        "startLine": 109,
+        "startChar": 26,
+        "endLine": 109,
+        "endChar": 42
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a9420f4a_4fb9adb1",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 2
@@ -71,6 +94,29 @@
     },
     {
       "key": {
+        "uuid": "648afea0_cc6e37ca",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-14T18:37:37Z",
+      "side": 1,
+      "message": "Isn\u0027t it better to create a directory under mTempDir and set mHomeDir and mProgramDir to be valid paths under that directory?\n\nThat way, unittests can actually use these directories safely and hermetically.",
+      "range": {
+        "startLine": 30,
+        "startChar": 68,
+        "endLine": 30,
+        "endChar": 75
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8478d270_6a6edff6",
         "filename": "android/utils/bufprint_system.cpp",
         "patchSetId": 2
@@ -82,6 +128,30 @@
       "writtenOn": "2015-09-14T16:47:28Z",
       "side": 1,
       "message": "can\u0027t we do it a little bit safer? exit() won\u0027t run any C++ dtors of the locals, which may be quite messy. and we won\u0027t get any core dump to look at. Even \u0027return NULL\u0027 is more useful for later investigation IMO",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 16
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44725a92_88e0a738",
+        "filename": "android/utils/bufprint_system.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-14T18:37:37Z",
+      "side": 1,
+      "message": "++ We really don\u0027t want arbitrary exit points for the application.\nI plan on running through and consolidating exits in fact.",
+      "parentUuid": "8478d270_6a6edff6",
       "range": {
         "startLine": 34,
         "startChar": 0,
