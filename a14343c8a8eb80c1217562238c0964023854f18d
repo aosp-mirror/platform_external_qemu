@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "648afea0_d287b2d7",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-14T22:32:21Z",
+      "side": 1,
+      "message": "See https://android-review.googlesource.com/#/c/169995/2/android/utils/bufprint.c@198\n\non !_WIN32, if all else fails, we assign /tmp to home, and compute the config_path exntending that.\n\nAfter this CL, that logic is lost because getHomeDirectory() will return \"\", and bufprint_system will just add kAndroidSubdir to \"\" instead of \"/tmp\"",
+      "parentUuid": "490513fd_5c703da7",
+      "range": {
+        "startLine": 109,
+        "startChar": 26,
+        "endLine": 109,
+        "endChar": 42
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "490513fd_9c9c852a",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 2
