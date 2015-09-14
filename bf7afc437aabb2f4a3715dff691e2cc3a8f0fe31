@@ -362,6 +362,30 @@
     },
     {
       "key": {
+        "uuid": "8478d270_a5fca8ad",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-14T18:21:30Z",
+      "side": 1,
+      "message": "This can\u0027t be String because this is exposed through a C header.\n\nPerhaps keep the implementation of studio-preferences.h in studio-preferences.c, since the implementation should be a very thin wrapper around logic in c++.\n\nIn fact, if you see any non-trivial logic in this function, it needs to be pushed to the C++ implementation, so that all implementation details are in one place.",
+      "parentUuid": "c45e4afd_b27f90a8",
+      "range": {
+        "startLine": 309,
+        "startChar": 0,
+        "endLine": 309,
+        "endChar": 12
+      },
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a9420f4a_8f7af5f7",
         "filename": "android/metrics/studio-helper.cpp",
         "patchSetId": 6
@@ -401,6 +425,53 @@
         "startChar": 11,
         "endLine": 315,
         "endChar": 67
+      },
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "848ff2ac_d2017446",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-14T18:21:30Z",
+      "side": 1,
+      "message": "Yeah, I think it\u0027s important to support Windows users here.",
+      "parentUuid": "8478d270_4a45a30b",
+      "range": {
+        "startLine": 315,
+        "startChar": 11,
+        "endLine": 315,
+        "endChar": 67
+      },
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "648afea0_ec07731e",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-14T18:21:30Z",
+      "side": 1,
+      "message": "It\u0027s actually bad to generate a random installation ID on every run for the same user -- it\u0027ll pollute the UUID data for other users that is read from the Studio config.\n\nInstead, you should return an obvious default ID that let\u0027s us at least keep all the \"unknown\" users clients together.",
+      "range": {
+        "startLine": 321,
+        "startChar": 15,
+        "endLine": 321,
+        "endChar": 35
       },
       "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
