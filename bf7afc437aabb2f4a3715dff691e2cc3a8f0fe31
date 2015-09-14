@@ -271,6 +271,30 @@
     },
     {
       "key": {
+        "uuid": "44725a92_d4e071b7",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-14T23:50:17Z",
+      "side": 1,
+      "message": "Yeah, it is important for me: it actually makes the code harder to understand, not just less efficient\ne.g.\ncompare it with this:\nVersion mainVer(cVersion);\nreturn Version(mainVer.major(), mainVer.minor(), micro);",
+      "parentUuid": "8478d270_302c5876",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 44
+      },
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "09e87b64_62011645",
         "filename": "android/metrics/studio-helper.cpp",
         "patchSetId": 6
