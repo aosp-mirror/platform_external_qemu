@@ -18,7 +18,7 @@
 
 /* TECHNICAL NOTE:
  *
- * A goldfish pipe is a very fast communication channel between the guest
+ * An Android pipe is a very fast communication channel between the guest
  * system and the emulator program.
  *
  * To open a new pipe to the emulator, a guest client will do the following:
@@ -39,7 +39,7 @@
  * to receive new client connection and deal with them.
  *
  *
- * 1/ Call goldfish_pipe_add_type() to register a new pipe service by name.
+ * 1/ Call android_pipe_add_type() to register a new pipe service by name.
  *    This must provide a pointer to a series of functions that will be called
  *    during normal pipe operations.
  *
@@ -47,30 +47,30 @@
  *    to create a new service-specific client identifier (which must returned
  *    by the function).
  *
- * 3/ Call goldfish_pipe_close() to force the closure of a given pipe.
+ * 3/ Call android_pipe_close() to force the closure of a given pipe.
  *
- * 4/ Call goldfish_pipe_signal() to signal a change of state to the pipe.
+ * 4/ Call goldfish_pipe_wake() to signal a change of state to the pipe.
  *
  */
 
 /* Buffer descriptor for sendBuffers() and recvBuffers() callbacks */
-typedef struct GoldfishPipeBuffer {
+typedef struct AndroidPipeBuffer {
     uint8_t*  data;
     size_t    size;
-} GoldfishPipeBuffer;
+} AndroidPipeBuffer;
 
 /* Pipe handler funcs */
 typedef struct {
     /* Create new client connection, 'hwpipe' must be passed to other
      * goldfish_pipe_xxx functions, while the returned value will be passed
      * to other callbacks (e.g. close). 'pipeOpaque' is the value passed
-     * to goldfish_pipe_add_type() when registering a given pipe service.
+     * to android_pipe_add_type() when registering a given pipe service.
      */
     void*        (*init)( void* hwpipe, void* pipeOpaque, const char* args );
 
     /* Called when the guest kernel has finally closed a pipe connection.
      * This is the only place where you can release/free the client connection.
-     * You should never invoke this callback directly. Call goldfish_pipe_close()
+     * You should never invoke this callback directly. Call android_pipe_close()
      * instead.
      */
     void         (*close)( void* pipe );
@@ -80,10 +80,10 @@ typedef struct {
      * value otherwise, including PIPE_ERROR_AGAIN to indicate that the
      * emulator is not ready to receive data yet.
      */
-    int          (*sendBuffers)( void* pipe, const GoldfishPipeBuffer*  buffers, int numBuffers );
+    int          (*sendBuffers)( void* pipe, const AndroidPipeBuffer*  buffers, int numBuffers );
 
     /* Same as sendBuffers when the guest is read()-ing from the pipe. */
-    int          (*recvBuffers)( void* pipe, GoldfishPipeBuffer* buffers, int numBuffers );
+    int          (*recvBuffers)( void* pipe, AndroidPipeBuffer* buffers, int numBuffers );
 
     /* Called when guest wants to poll the read/write status for the pipe.
      * Should return a combination of PIPE_POLL_XXX flags.
@@ -92,7 +92,7 @@ typedef struct {
 
     /* Called to signal that the guest wants to be woken when the set of
      * PIPE_WAKE_XXX bit-flags in 'flags' occur. When the condition occurs,
-     * then the pipe implementation shall call goldfish_pipe_wake().
+     * then the pipe implementation shall call android_pipe_wake().
      */
     void         (*wakeOn)( void* opaque, int flags );
 
@@ -116,14 +116,14 @@ typedef struct {
      * to 'init'.
      */
     void*        (*load)( void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* file);
-} GoldfishPipeFuncs;
+} AndroidPipeFuncs;
 
 /* Register a new pipe handler type. 'pipeOpaque' is passed directly
  * to 'init() when a new pipe is connected to.
  */
-extern void  goldfish_pipe_add_type(const char*               pipeName,
+extern void  android_pipe_add_type(const char*               pipeName,
                                      void*                     pipeOpaque,
-                                     const GoldfishPipeFuncs*  pipeFuncs );
+                                     const AndroidPipeFuncs*  pipeFuncs );
 
 /* This tells the guest system that we want to close the pipe and that
  * further attempts to read or write to it will fail. This will not
@@ -131,12 +131,12 @@ extern void  goldfish_pipe_add_type(const char*               pipeName,
  *
  * This will also wake-up any blocked guest threads waiting for i/o.
  */
-extern void goldfish_pipe_close( void* hwpipe );
+extern void android_pipe_close( void* hwpipe );
 
 /* Signal that the pipe can be woken up. 'flags' must be a combination of
  * PIPE_WAKE_READ and PIPE_WAKE_WRITE.
  */
-extern void goldfish_pipe_wake( void* hwpipe, unsigned flags );
+extern void android_pipe_wake( void* hwpipe, unsigned flags );
 
 /* The following definitions must match those under:
  *

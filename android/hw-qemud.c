@@ -587,7 +587,7 @@ qemud_serial_send( QemudSerial*    s,
 /* Descriptor for a data buffer pending to be sent to a qemud pipe client.
  *
  * When a service decides to send data to the client, there could be cases when
- * client is not ready to read them. In this case there is no GoldfishPipeBuffer
+ * client is not ready to read them. In this case there is no AndroidPipeBuffer
  * available to write service's data to, So, we need to cache that data into the
  * client descriptor, and "send" them over to the client in _qemudPipe_recvBuffers
  * callback. Pending service data is stored in the client descriptor as a list
@@ -1630,7 +1630,7 @@ _qemud_pipe_cache_buffer(QemudClient* client, const uint8_t*  msg, int  msglen)
         }
         *ins_at = buf;
         /* Notify the pipe that there is data to read. */
-        goldfish_pipe_wake(client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
+        android_pipe_wake(client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
                            PIPE_WAKE_READ);
     }
 }
@@ -1976,7 +1976,7 @@ _qemudPipe_closeFromGuest( void* opaque )
  */
 static int
 _qemudPipe_sendBuffers(void* opaque,
-                       const GoldfishPipeBuffer* buffers,
+                       const AndroidPipeBuffer* buffers,
                        int numBuffers)
 {
     QemudPipe* pipe = opaque;
@@ -2018,13 +2018,13 @@ _qemudPipe_sendBuffers(void* opaque,
 /* Called when the guest is reading data from the client.
  */
 static int
-_qemudPipe_recvBuffers(void* opaque, GoldfishPipeBuffer* buffers, int numBuffers)
+_qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers)
 {
     QemudPipe* pipe = opaque;
     QemudClient*  client = pipe->client;
     QemudPipeMessage** msg_list;
-    GoldfishPipeBuffer* buff = buffers;
-    GoldfishPipeBuffer* endbuff = buffers + numBuffers;
+    AndroidPipeBuffer* buff = buffers;
+    AndroidPipeBuffer* endbuff = buffers + numBuffers;
     size_t sent_bytes = 0;
     size_t off_in_buff = 0;
 
@@ -2211,7 +2211,7 @@ _qemudPipe_load(void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* f)
 
 /* QEMUD pipe functions.
  */
-static const GoldfishPipeFuncs _qemudPipe_funcs = {
+static const AndroidPipeFuncs _qemudPipe_funcs = {
     _qemudPipe_init,
     _qemudPipe_closeFromGuest,
     _qemudPipe_sendBuffers,
@@ -2230,7 +2230,7 @@ _android_qemud_pipe_init(void)
     static ABool _qemud_pipe_initialized = false;
 
     if (!_qemud_pipe_initialized) {
-        goldfish_pipe_add_type( "qemud", looper_getForThread(), &_qemudPipe_funcs );
+        android_pipe_add_type( "qemud", looper_getForThread(), &_qemudPipe_funcs );
         _qemud_pipe_initialized = true;
     }
 }

@@ -123,7 +123,7 @@ netPipe_closeFromSocket( void* opaque )
     /* Force the closure of the QEMUD channel - if a guest is blocked
      * waiting for a wake signal, it will receive an error. */
     if (pipe->hwpipe != NULL) {
-        goldfish_pipe_close(pipe->hwpipe);
+        android_pipe_close(pipe->hwpipe);
         pipe->hwpipe = NULL;
     }
 
@@ -175,7 +175,7 @@ netPipe_io_func( void* opaque, int fd, unsigned events )
 
     /* Send wake signal to the guest if needed */
     if (wakeFlags != 0) {
-        goldfish_pipe_wake(pipe->hwpipe, wakeFlags);
+        android_pipe_wake(pipe->hwpipe, wakeFlags);
         pipe->wakeWanted &= ~wakeFlags;
     }
 
@@ -247,14 +247,14 @@ static int netPipeReadySend(NetPipe *pipe)
 }
 
 static int
-netPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
+netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuffers )
 {
     NetPipe*  pipe = opaque;
     int       count = 0;
     int       ret   = 0;
     size_t    buffStart = 0;
-    const GoldfishPipeBuffer* buff = buffers;
-    const GoldfishPipeBuffer* buffEnd = buff + numBuffers;
+    const AndroidPipeBuffer* buff = buffers;
+    const AndroidPipeBuffer* buffEnd = buff + numBuffers;
 
     ret = netPipeReadySend(pipe);
     if (ret != 0)
@@ -306,14 +306,14 @@ netPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuf
 }
 
 static int
-netPipe_recvBuffers( void* opaque, GoldfishPipeBuffer*  buffers, int  numBuffers )
+netPipe_recvBuffers( void* opaque, AndroidPipeBuffer*  buffers, int  numBuffers )
 {
     NetPipe*  pipe = opaque;
     int       count = 0;
     int       ret   = 0;
     size_t    buffStart = 0;
-    GoldfishPipeBuffer* buff = buffers;
-    GoldfishPipeBuffer* buffEnd = buff + numBuffers;
+    AndroidPipeBuffer* buff = buffers;
+    AndroidPipeBuffer* buffEnd = buff + numBuffers;
 
     for (; buff < buffEnd; buff++)
         count += buff->size;
@@ -451,7 +451,7 @@ netPipe_initUnix( void* hwpipe, void* _looper, const char* args )
  *****
  *****/
 
-static const GoldfishPipeFuncs  netPipeTcp_funcs = {
+static const AndroidPipeFuncs  netPipeTcp_funcs = {
     netPipe_initTcp,
     netPipe_closeFromGuest,
     netPipe_sendBuffers,
@@ -463,7 +463,7 @@ static const GoldfishPipeFuncs  netPipeTcp_funcs = {
 };
 
 #ifndef _WIN32
-static const GoldfishPipeFuncs  netPipeUnix_funcs = {
+static const AndroidPipeFuncs  netPipeUnix_funcs = {
     netPipe_initUnix,
     netPipe_closeFromGuest,
     netPipe_sendBuffers,
@@ -528,7 +528,7 @@ openglesPipe_init( void* hwpipe, void* _looper, const char* args )
     return pipe;
 }
 
-static const GoldfishPipeFuncs  openglesPipe_funcs = {
+static const AndroidPipeFuncs  openglesPipe_funcs = {
     openglesPipe_init,
     netPipe_closeFromGuest,
     netPipe_sendBuffers,
@@ -544,11 +544,11 @@ android_net_pipes_init(void)
 {
     Looper*  looper = looper_getForThread();
 
-    goldfish_pipe_add_type( "tcp", looper, &netPipeTcp_funcs );
+    android_pipe_add_type( "tcp", looper, &netPipeTcp_funcs );
 #ifndef _WIN32
-    goldfish_pipe_add_type( "unix", looper, &netPipeUnix_funcs );
+    android_pipe_add_type( "unix", looper, &netPipeUnix_funcs );
 #endif
-    goldfish_pipe_add_type( "opengles", looper, &openglesPipe_funcs );
+    android_pipe_add_type( "opengles", looper, &openglesPipe_funcs );
 }
 
 int

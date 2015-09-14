@@ -70,7 +70,7 @@
 typedef struct {
     const char*        name;
     void*              opaque;
-    GoldfishPipeFuncs  funcs;
+    AndroidPipeFuncs  funcs;
 } PipeService;
 
 typedef struct {
@@ -81,9 +81,9 @@ typedef struct {
 static PipeServices  _pipeServices[1];
 
 void
-goldfish_pipe_add_type(const char*               pipeName,
+android_pipe_add_type(const char*               pipeName,
                        void*                     pipeOpaque,
-                       const GoldfishPipeFuncs*  pipeFuncs )
+                       const AndroidPipeFuncs*  pipeFuncs )
 {
     PipeServices* list = _pipeServices;
     int           count = list->count;
@@ -134,7 +134,7 @@ typedef struct Pipe {
     PipeDevice*                device;
     uint64_t                   channel;
     void*                      opaque;
-    const GoldfishPipeFuncs*   funcs;
+    const AndroidPipeFuncs*   funcs;
     const PipeService*         service;
     char*                      args;
     unsigned char              wanted;
@@ -331,7 +331,7 @@ typedef struct {
     int    buffpos;
 } PipeConnector;
 
-static const GoldfishPipeFuncs  pipeConnector_funcs;  // forward
+static const AndroidPipeFuncs  pipeConnector_funcs;  // forward
 
 void*
 pipeConnector_new(Pipe*  pipe)
@@ -352,10 +352,10 @@ pipeConnector_close( void* opaque )
 }
 
 static int
-pipeConnector_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
+pipeConnector_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuffers )
 {
     PipeConnector* pcon = opaque;
-    const GoldfishPipeBuffer*  buffers_limit = buffers + numBuffers;
+    const AndroidPipeBuffer*  buffers_limit = buffers + numBuffers;
     int ret = 0;
 
     DD("%s: channel=0x%llx numBuffers=%d", __FUNCTION__,
@@ -437,7 +437,7 @@ pipeConnector_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int 
 }
 
 static int
-pipeConnector_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers )
+pipeConnector_recvBuffers( void* opaque, AndroidPipeBuffer* buffers, int numBuffers )
 {
     return PIPE_ERROR_IO;
 }
@@ -480,7 +480,7 @@ pipeConnector_load( void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* 
     return pcon;
 }
 
-static const GoldfishPipeFuncs  pipeConnector_funcs = {
+static const AndroidPipeFuncs  pipeConnector_funcs = {
     NULL,  /* init */
     pipeConnector_close,        /* should rarely happen */
     pipeConnector_sendBuffers,  /* the interesting stuff */
@@ -529,7 +529,7 @@ zeroPipe_close( void* opaque )
 }
 
 static int
-zeroPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
+zeroPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuffers )
 {
     int  ret = 0;
     while (numBuffers > 0) {
@@ -541,7 +541,7 @@ zeroPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBu
 }
 
 static int
-zeroPipe_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers )
+zeroPipe_recvBuffers( void* opaque, AndroidPipeBuffer* buffers, int numBuffers )
 {
     int  ret = 0;
     while (numBuffers > 0) {
@@ -565,7 +565,7 @@ zeroPipe_wakeOn( void* opaque, int flags )
     /* nothing to do here */
 }
 
-static const GoldfishPipeFuncs  zeroPipe_funcs = {
+static const AndroidPipeFuncs  zeroPipe_funcs = {
     zeroPipe_init,
     zeroPipe_close,
     zeroPipe_sendBuffers,
@@ -633,13 +633,13 @@ pingPongPipe_close( void* opaque )
 }
 
 static int
-pingPongPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
+pingPongPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuffers )
 {
     PingPongPipe*  pipe = opaque;
     int  ret = 0;
     int  count;
-    const GoldfishPipeBuffer* buff = buffers;
-    const GoldfishPipeBuffer* buffEnd = buff + numBuffers;
+    const AndroidPipeBuffer* buff = buffers;
+    const AndroidPipeBuffer* buffEnd = buff + numBuffers;
 
     count = 0;
     for ( ; buff < buffEnd; buff++ )
@@ -690,14 +690,14 @@ pingPongPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int n
 
     /* Wake up any waiting readers if we wrote something */
     if (pipe->count > 0 && (pipe->flags & PIPE_WAKE_READ)) {
-        goldfish_pipe_wake(pipe->hwpipe, PIPE_WAKE_READ);
+        android_pipe_wake(pipe->hwpipe, PIPE_WAKE_READ);
     }
 
     return ret;
 }
 
 static int
-pingPongPipe_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers )
+pingPongPipe_recvBuffers( void* opaque, AndroidPipeBuffer* buffers, int numBuffers )
 {
     PingPongPipe*  pipe = opaque;
     int  ret = 0;
@@ -734,7 +734,7 @@ pingPongPipe_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuff
 
     /* Wake up any waiting readers if we wrote something */
     if (pipe->count < PINGPONG_SIZE && (pipe->flags & PIPE_WAKE_WRITE)) {
-        goldfish_pipe_wake(pipe->hwpipe, PIPE_WAKE_WRITE);
+        android_pipe_wake(pipe->hwpipe, PIPE_WAKE_WRITE);
     }
 
     return ret;
@@ -762,7 +762,7 @@ pingPongPipe_wakeOn( void* opaque, int flags )
     pipe->flags |= (unsigned)flags;
 }
 
-static const GoldfishPipeFuncs  pingPongPipe_funcs = {
+static const AndroidPipeFuncs  pingPongPipe_funcs = {
     pingPongPipe_init,
     pingPongPipe_close,
     pingPongPipe_sendBuffers,
@@ -868,14 +868,14 @@ throttlePipe_timerFunc( void* opaque )
     flags &= pipe->pingpong.flags;
     if (flags != 0) {
         DD("%s: WAKE %d\n", __FUNCTION__, flags);
-        goldfish_pipe_wake(pipe->pingpong.hwpipe, flags);
+        android_pipe_wake(pipe->pingpong.hwpipe, flags);
     }
 
     throttlePipe_rearm(pipe);
 }
 
 static int
-throttlePipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
+throttlePipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuffers )
 {
     ThrottlePipe*  pipe = opaque;
     int            ret;
@@ -894,7 +894,7 @@ throttlePipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int n
 }
 
 static int
-throttlePipe_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers )
+throttlePipe_recvBuffers( void* opaque, AndroidPipeBuffer* buffers, int numBuffers )
 {
     ThrottlePipe* pipe = opaque;
     int           ret;
@@ -933,7 +933,7 @@ throttlePipe_wakeOn( void* opaque, int flags )
     pingPongPipe_wakeOn(&pipe->pingpong, flags);
 }
 
-static const GoldfishPipeFuncs  throttlePipe_funcs = {
+static const AndroidPipeFuncs  throttlePipe_funcs = {
     throttlePipe_init,
     throttlePipe_close,
     throttlePipe_sendBuffers,
@@ -1081,7 +1081,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
          * (guest PA or VA depending on the driver version)
          * into host memory.
          */
-        GoldfishPipeBuffer  buffer;
+        AndroidPipeBuffer  buffer;
         buffer.data = map_guest_buffer(dev->address, dev->size, 1);
         if (!buffer.data) {
             dev->status = PIPE_ERROR_INVAL;
@@ -1101,7 +1101,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
          * (guest PA or VA depending on the driver version)
          * into host memory.
          */
-        GoldfishPipeBuffer  buffer;
+        AndroidPipeBuffer  buffer;
         buffer.data = map_guest_buffer(dev->address, dev->size, 0);
         if (!buffer.data) {
             dev->status = PIPE_ERROR_INVAL;
@@ -1372,9 +1372,9 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
     /* Now we need to wake/close all relevant pipes */
     for ( pipe = dev->pipes; pipe; pipe = pipe->next ) {
         if (pipe->wanted != 0)
-            goldfish_pipe_wake(pipe, pipe->wanted);
+            android_pipe_wake(pipe, pipe->wanted);
         if (pipe->closed != 0)
-            goldfish_pipe_close(pipe);
+            android_pipe_close(pipe);
     }
     return 0;
 }
@@ -1404,18 +1404,18 @@ void pipe_dev_init(bool newDeviceNaming)
                     s);
 
 #if DEBUG_ZERO_PIPE
-    goldfish_pipe_add_type("zero", NULL, &zeroPipe_funcs);
+    android_pipe_add_type("zero", NULL, &zeroPipe_funcs);
 #endif
 #if DEBUG_PINGPONG_PIPE
-    goldfish_pipe_add_type("pingpong", NULL, &pingPongPipe_funcs);
+    android_pipe_add_type("pingpong", NULL, &pingPongPipe_funcs);
 #endif
 #if DEBUG_THROTTLE_PIPE
-    goldfish_pipe_add_type("throttle", NULL, &throttlePipe_funcs);
+    android_pipe_add_type("throttle", NULL, &throttlePipe_funcs);
 #endif
 }
 
 void
-goldfish_pipe_wake( void* hwpipe, unsigned flags )
+android_pipe_wake( void* hwpipe, unsigned flags )
 {
     Pipe*  pipe = hwpipe;
     Pipe** lookup;
@@ -1437,7 +1437,7 @@ goldfish_pipe_wake( void* hwpipe, unsigned flags )
 }
 
 void
-goldfish_pipe_close( void* hwpipe )
+android_pipe_close( void* hwpipe )
 {
     Pipe* pipe = hwpipe;
 
@@ -1445,6 +1445,6 @@ goldfish_pipe_close( void* hwpipe )
 
     if (!pipe->closed) {
         pipe->closed = 1;
-        goldfish_pipe_wake( hwpipe, PIPE_WAKE_CLOSED );
+        android_pipe_wake( hwpipe, PIPE_WAKE_CLOSED );
     }
 }
