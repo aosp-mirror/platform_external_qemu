@@ -221,6 +221,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/system.c \
 	android/utils/system_wrapper.cpp \
 	android/utils/tempfile.c \
+	android/utils/thread.cpp \
 	android/utils/uncompress.cpp \
 	android/utils/utf8_utils.cpp \
 	android/utils/vector.c \

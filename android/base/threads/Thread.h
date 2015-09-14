@@ -27,12 +27,12 @@ namespace android {
 namespace base {
 
 // Wrapper class for platform-specific threads.
-// To create your own thread, define a sub-class of emugl::Thread
+// To create your own thread, define a sub-class of android::base::Thread
 // and override its main() method.
 //
 // For example:
 //
-//    class MyThread : public emugl::Thread {
+//    class MyThread : public android::base::Thread {
 //    public:
 //        MyThread() : Thread() {}
 //
