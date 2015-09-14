@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "89fb8b33_de17a50f",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T22:11:04Z",
+      "side": 1,
+      "message": "shouldn\u0027t this be checker.release()-\u003erunAsyncCheck() instead, since otherwise the thread could terminate, in theory, before runAsyncCheck() returns?",
+      "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "89fb8b33_1e062de5",
+        "filename": "android/update-check/UpdateChecker.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T22:11:04Z",
+      "side": 1,
+      "message": "nit: UPDATE_CHECK not UPDATECHECK :)",
+      "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "490513fd_1c6ab5b3",
+        "filename": "android/update-check/UpdateChecker.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T22:11:04Z",
+      "side": 1,
+      "message": "nit: for simplicity. I would drop the update_check namespace and just put the declarations for the interface classes in the public part of the UpdateChecker class.",
+      "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09e87b64_e292c617",
+        "filename": "android/update-check/UpdateChecker.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T22:11:04Z",
+      "side": 1,
+      "message": "nit: avoid mutable references in C++ code, per the Chromium style guide, use simple pointers.",
+      "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "89fb8b33_fe1a6137",
+        "filename": "android/update-check/UpdateChecker.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T22:11:04Z",
+      "side": 1,
+      "message": "nit: wrong order of namespace names :) Ok, I\u0027m really picky ;)",
+      "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09e87b64_c29fc21d",
+        "filename": "android/update-check/update_check.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-14T22:11:04Z",
+      "side": 1,
+      "message": "nit: documentation?",
+      "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
