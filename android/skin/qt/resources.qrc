@@ -16,11 +16,11 @@
  </qresource>
 
  <qresource prefix="/lib/fonts">
-     <!-- The names 'uiDefault*' are used to load the fonts in
+     <!-- The names 'Roboto*' are used to load the fonts in
           android/skin/qt/winsys-qt.cpp -->
-     <file alias="uiDefault">fonts/Roboto-Regular.ttf</file>
-     <file alias="uiDefault-Bold">fonts/Roboto-Bold.ttf</file>
-     <file alias="uiDefault-Medium">fonts/Roboto-Medium.ttf</file>
+     <file alias="Roboto">fonts/Roboto-Regular.ttf</file>
+     <file alias="Roboto-Bold">fonts/Roboto-Bold.ttf</file>
+     <file alias="Roboto-Medium">fonts/Roboto-Medium.ttf</file>
  </qresource>
 
  <qresource prefix="/dark">
@@ -30,8 +30,8 @@
      <file alias="battery">images/dark/ic_battery_80_678_48dp.svg</file>
      <file alias="call_end">images/dark/ic_call_end_678_48dp.svg</file>
      <file alias="call_end_disabled">images/dark/ic_call_end_678_48dp.svg</file>
-     <file alias="check_yes">images/dark/ic_check_box_678_24dp.svg</file>
-     <file alias="check_no">images/dark/ic_check_box_outline_blank_678_24dp.svg</file>
+     <file alias="check_yes">images/dark/ic_check_box_0BA_24dp.svg</file>
+     <file alias="check_no">images/dark/ic_check_box_outline_blank_0BA_24dp.svg</file>
      <file alias="file_download">images/dark/ic_file_download_678_48dp.svg</file>
      <file alias="file_upload">images/dark/ic_file_upload_678_48dp.svg</file>
      <file alias="fingerprint">images/dark/ic_fingerprint_678_48dp.svg</file>

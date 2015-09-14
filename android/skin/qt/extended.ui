@@ -6,9 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>948</width>
-    <height>800</height>
+    <width>951</width>
+    <height>790</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Roboto</family>
+   </font>
   </property>
   <property name="windowTitle">
    <string>Extended controls</string>
@@ -16,7 +21,8 @@
   <property name="styleSheet">
    <string notr="true">/* Qt::WindowMinimizeButtonHint; This is bad*/
 background-color: #3c4249;
-color: #f0f0f0;</string>
+color: #f0f0f0;
+font-family: &quot;Roboto&quot;</string>
   </property>
   <property name="frameShape">
    <enum>QFrame::StyledPanel</enum>
@@ -33,16 +39,655 @@ color: #f0f0f0;</string>
      <height>721</height>
     </rect>
    </property>
-   <property name="font">
-    <font>
-     <family>Sans Serif</family>
-     <weight>50</weight>
-     <bold>false</bold>
-    </font>
-   </property>
    <property name="currentIndex">
     <number>0</number>
    </property>
+   <widget class="QWidget" name="location_page">
+    <widget class="QGroupBox" name="locationGroup">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>101</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Location</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="loc_stopButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>640</x>
+       <y>390</y>
+       <width>36</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/light/stop</normaloff>
+       <disabledoff>:/light/stop_disabled</disabledoff>:/light/stop</iconset>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>stop</string>
+     </property>
+     <property name="themeIconName_disabled" stdset="0">
+      <string>stop_disabled</string>
+     </property>
+    </widget>
+    <widget class="QTextBrowser" name="loc_currentLocBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>390</y>
+       <width>471</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="acceptDrops">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">Text.AlignVCenter;</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="loc_GpxButton">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>340</y>
+       <width>72</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load GPX</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="loc_removeRowButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>70</x>
+       <y>340</y>
+       <width>36</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/light/remove</normaloff>
+       <disabledoff>:/light/remove_disabled</disabledoff>:/light/remove</iconset>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>remove</string>
+     </property>
+     <property name="themeIconName_disabled" stdset="0">
+      <string>remove_disabled</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="loc_playButton">
+     <property name="geometry">
+      <rect>
+       <x>540</x>
+       <y>390</y>
+       <width>36</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/light/play_arrow</normaloff>:/light/play_arrow</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>play_arrow</string>
+     </property>
+     <property name="themeIconName_disabled" stdset="0">
+      <string>play_arrow_disabled</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="loc_KmlButton">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>340</y>
+       <width>72</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load KML</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="loc_pauseButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>590</x>
+       <y>390</y>
+       <width>36</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/light/pause</normaloff>
+       <disabledoff>:/light/pause_disabled</disabledoff>:/light/pause</iconset>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>pause</string>
+     </property>
+     <property name="themeIconName_disabled" stdset="0">
+      <string>pause_disabled</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="loc_addRowButton">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>340</y>
+       <width>36</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/light/add</normaloff>:/light/add</iconset>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>add</string>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="loc_pathTable">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>651</width>
+       <height>240</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>9</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="rowCount">
+      <number>1</number>
+     </property>
+     <property name="columnCount">
+      <number>6</number>
+     </property>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <row/>
+     <column>
+      <property name="text">
+       <string>Delay (sec)</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Latitude</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Longitude</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Elevation</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Name</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Description</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+     </column>
+     <item row="0" column="0">
+      <property name="text">
+       <string>0</string>
+      </property>
+     </item>
+     <item row="0" column="1">
+      <property name="text">
+       <string>37.42228990140251</string>
+      </property>
+     </item>
+     <item row="0" column="2">
+      <property name="text">
+       <string>-122.0822035425683</string>
+      </property>
+     </item>
+     <item row="0" column="3">
+      <property name="text">
+       <string>0</string>
+      </property>
+     </item>
+     <item row="0" column="4">
+      <property name="text">
+       <string/>
+      </property>
+     </item>
+     <item row="0" column="5">
+      <property name="text">
+       <string/>
+      </property>
+     </item>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="cellular_page">
+    <widget class="QGroupBox" name="cell_groupBox">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>181</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Cellular Network</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cell_dataStatusBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>250</y>
+       <width>241</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>Home</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Roaming</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Searching</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Denied</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Unregistered (off)</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QGroupBox" name="cell_dStatusGroupBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>220</y>
+       <width>91</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Data status</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cell_voiceStatusBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>170</y>
+       <width>241</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>Home</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Roaming</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Searching</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Denied (emergency calls only)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Unregistered (off)</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QGroupBox" name="cell_vStatusGroupBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>140</y>
+       <width>111</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Voice status</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
+     </property>
+    </widget>
+    <widget class="QSlider" name="cell_signalStrengthSlider">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>80</y>
+       <width>160</width>
+       <height>29</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>31</number>
+     </property>
+     <property name="pageStep">
+      <number>5</number>
+     </property>
+     <property name="value">
+      <number>24</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="tickPosition">
+      <enum>QSlider::NoTicks</enum>
+     </property>
+     <property name="tickInterval">
+      <number>0</number>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="cell_strengthGroupBox">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>40</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Signal strength</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cell_standardBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>70</y>
+       <width>121</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="currentIndex">
+      <number>6</number>
+     </property>
+     <item>
+      <property name="text">
+       <string>GSM</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>HSCSD</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>GPRS</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>EDGE</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>UMTS</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>HSDPA</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>full</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QGroupBox" name="cell_stdGroupBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>131</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Cellular standard</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="cell_sigStrengthText">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>360</x>
+       <y>80</y>
+       <width>41</width>
+       <height>29</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="mouseTracking">
+      <bool>false</bool>
+     </property>
+     <property name="acceptDrops">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string notr="true">24</string>
+     </property>
+     <property name="frame">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </widget>
    <widget class="QWidget" name="batteryPage">
     <widget class="QGroupBox" name="batteryBox">
      <property name="geometry">
@@ -55,7 +700,7 @@ color: #f0f0f0;</string>
      </property>
      <property name="font">
       <font>
-       <family>Sans Serif</family>
+       <family>Roboto</family>
        <pointsize>12</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -70,6 +715,46 @@ color: #f0f0f0;</string>
      <property name="flat">
       <bool>false</bool>
      </property>
+     <widget class="QLineEdit" name="bat_chargeLevelText">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>70</y>
+        <width>51</width>
+        <height>29</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="mouseTracking">
+       <bool>false</bool>
+      </property>
+      <property name="acceptDrops">
+       <bool>false</bool>
+      </property>
+      <property name="toolTip">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string notr="true">50%</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
     </widget>
     <widget class="QGroupBox" name="bat_chargeGroup">
      <property name="geometry">
@@ -82,10 +767,7 @@ color: #f0f0f0;</string>
      </property>
      <property name="font">
       <font>
-       <family>Sans Serif</family>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
+       <family>Roboto</family>
       </font>
      </property>
      <property name="styleSheet">
@@ -93,6 +775,9 @@ color: #f0f0f0;</string>
      </property>
      <property name="title">
       <string>Charge Level</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
      </property>
      <widget class="QSlider" name="bat_levelSlider">
       <property name="geometry">
@@ -120,7 +805,7 @@ color: #f0f0f0;</string>
     <widget class="QGroupBox" name="bat_acGroup">
      <property name="geometry">
       <rect>
-       <x>210</x>
+       <x>300</x>
        <y>40</y>
        <width>61</width>
        <height>61</height>
@@ -128,9 +813,7 @@ color: #f0f0f0;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
+       <family>Roboto</family>
       </font>
      </property>
      <property name="styleSheet">
@@ -138,6 +821,9 @@ color: #f0f0f0;</string>
      </property>
      <property name="title">
       <string>AC On</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
      </property>
      <widget class="QCheckBox" name="bat_chargeCkBox">
       <property name="geometry">
@@ -167,9 +853,7 @@ color: #f0f0f0;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
+       <family>Roboto</family>
       </font>
      </property>
      <property name="styleSheet">
@@ -177,6 +861,9 @@ color: #f0f0f0;</string>
      </property>
      <property name="title">
       <string>Power Status</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
      </property>
     </widget>
     <widget class="QGroupBox" name="bat_healthGroup">
@@ -190,9 +877,7 @@ color: #f0f0f0;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
+       <family>Roboto</family>
       </font>
      </property>
      <property name="styleSheet">
@@ -200,6 +885,9 @@ color: #f0f0f0;</string>
      </property>
      <property name="title">
       <string>Power Health</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
      </property>
     </widget>
     <widget class="QComboBox" name="bat_healthBox">
@@ -287,6 +975,32 @@ color: #f0f0f0;</string>
      </item>
     </widget>
    </widget>
+   <widget class="QWidget" name="page">
+    <widget class="QGroupBox" name="cameraBox">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>101</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Camera</string>
+     </property>
+    </widget>
+   </widget>
    <widget class="QWidget" name="telephonyPage">
     <widget class="QGroupBox" name="telephonyBox">
      <property name="geometry">
@@ -299,6 +1013,7 @@ color: #f0f0f0;</string>
      </property>
      <property name="font">
       <font>
+       <family>Roboto</family>
        <pointsize>12</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -376,18 +1091,14 @@ color: #f0f0f0;</string>
        <height>21</height>
       </rect>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
      <property name="styleSheet">
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
       <string>From</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
      </property>
     </widget>
     <widget class="QPushButton" name="tel_holdCallButton">
@@ -429,13 +1140,6 @@ color: #f0f0f0;</string>
        <height>25</height>
       </rect>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
      <property name="editable">
       <bool>true</bool>
      </property>
@@ -454,6 +1158,84 @@ color: #f0f0f0;</string>
      </item>
     </widget>
    </widget>
+   <widget class="QWidget" name="page_2">
+    <widget class="QGroupBox" name="virtualSensorsBox">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>161</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Virtual sensors</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="page_3">
+    <widget class="QGroupBox" name="hardwareSensorsBox">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>181</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Hardware sensors</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="page_4">
+    <widget class="QGroupBox" name="hardwareSensorsBox_2">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>181</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Directional pad</string>
+     </property>
+    </widget>
+   </widget>
    <widget class="QWidget" name="smsPage">
     <widget class="QGroupBox" name="smsGroup">
      <property name="geometry">
@@ -466,6 +1248,7 @@ color: #f0f0f0;</string>
      </property>
      <property name="font">
       <font>
+       <family>Roboto</family>
        <pointsize>12</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -487,18 +1270,14 @@ color: #f0f0f0;</string>
        <height>21</height>
       </rect>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
      <property name="styleSheet">
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
       <string>From</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
      </property>
     </widget>
     <widget class="QPushButton" name="sms_sendButton">
@@ -533,13 +1312,6 @@ color: #f0f0f0;</string>
        <height>140</height>
       </rect>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
     </widget>
     <widget class="QComboBox" name="sms_phoneNumberBox">
      <property name="geometry">
@@ -549,13 +1321,6 @@ color: #f0f0f0;</string>
        <width>221</width>
        <height>25</height>
       </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
      </property>
      <property name="editable">
       <bool>true</bool>
@@ -575,645 +1340,6 @@ color: #f0f0f0;</string>
      </item>
     </widget>
    </widget>
-   <widget class="QWidget" name="location_page">
-    <widget class="QGroupBox" name="locationGroup">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>101</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Location</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="loc_stopButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>640</x>
-       <y>390</y>
-       <width>36</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/stop</normaloff>
-       <disabledoff>:/light/stop_disabled</disabledoff>:/light/stop</iconset>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>stop</string>
-     </property>
-     <property name="themeIconName_disabled" stdset="0">
-      <string>stop_disabled</string>
-     </property>
-    </widget>
-    <widget class="QTextBrowser" name="loc_currentLocBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>390</y>
-       <width>471</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="acceptDrops">
-      <bool>false</bool>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">Text.AlignVCenter;</string>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="loc_GpxButton">
-     <property name="geometry">
-      <rect>
-       <x>150</x>
-       <y>340</y>
-       <width>72</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Load GPX</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="loc_removeRowButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>340</y>
-       <width>36</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/remove</normaloff>
-       <disabledoff>:/light/remove_disabled</disabledoff>:/light/remove</iconset>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>remove</string>
-     </property>
-     <property name="themeIconName_disabled" stdset="0">
-      <string>remove_disabled</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="loc_playButton">
-     <property name="geometry">
-      <rect>
-       <x>540</x>
-       <y>390</y>
-       <width>36</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/play_arrow</normaloff>:/light/play_arrow</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>play_arrow</string>
-     </property>
-     <property name="themeIconName_disabled" stdset="0">
-      <string>play_arrow_disabled</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="loc_KmlButton">
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>340</y>
-       <width>72</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Load KML</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="loc_pauseButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>590</x>
-       <y>390</y>
-       <width>36</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/pause</normaloff>
-       <disabledoff>:/light/pause_disabled</disabledoff>:/light/pause</iconset>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>pause</string>
-     </property>
-     <property name="themeIconName_disabled" stdset="0">
-      <string>pause_disabled</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="loc_addRowButton">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>340</y>
-       <width>36</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/add</normaloff>:/light/add</iconset>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>add</string>
-     </property>
-    </widget>
-    <widget class="QTableWidget" name="loc_pathTable">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>40</y>
-       <width>651</width>
-       <height>240</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Sans Serif</family>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="rowCount">
-      <number>1</number>
-     </property>
-     <property name="columnCount">
-      <number>6</number>
-     </property>
-     <attribute name="verticalHeaderVisible">
-      <bool>false</bool>
-     </attribute>
-     <row/>
-     <column>
-      <property name="text">
-       <string>Delay (sec)</string>
-      </property>
-      <property name="font">
-       <font>
-        <family>Sans Serif</family>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Latitude</string>
-      </property>
-      <property name="font">
-       <font>
-        <family>Sans Serif</family>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Longitude</string>
-      </property>
-      <property name="font">
-       <font>
-        <family>Sans Serif</family>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Elevation</string>
-      </property>
-      <property name="font">
-       <font>
-        <family>Sans Serif</family>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Name</string>
-      </property>
-      <property name="font">
-       <font>
-        <family>Sans Serif</family>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Description</string>
-      </property>
-      <property name="font">
-       <font>
-        <family>Sans Serif</family>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-     </column>
-     <item row="0" column="0">
-      <property name="text">
-       <string>0</string>
-      </property>
-     </item>
-     <item row="0" column="1">
-      <property name="text">
-       <string>37.42228990140251</string>
-      </property>
-     </item>
-     <item row="0" column="2">
-      <property name="text">
-       <string>-122.0822035425683</string>
-      </property>
-     </item>
-     <item row="0" column="3">
-      <property name="text">
-       <string>0</string>
-      </property>
-     </item>
-     <item row="0" column="4">
-      <property name="text">
-       <string/>
-      </property>
-     </item>
-     <item row="0" column="5">
-      <property name="text">
-       <string/>
-      </property>
-     </item>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="cellular_page">
-    <widget class="QGroupBox" name="cell_groupBox">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>181</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Sans Serif</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Cellular Network</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="cell_dataStatusBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>250</y>
-       <width>241</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">padding: 3px 3px 3px 3px;</string>
-     </property>
-     <item>
-      <property name="text">
-       <string>Home</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Roaming</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Searching</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Denied</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Unregistered (off)</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QGroupBox" name="cell_dStatusGroupBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>220</y>
-       <width>91</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Data status</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="cell_voiceStatusBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>170</y>
-       <width>241</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">padding: 3px 3px 3px 3px;</string>
-     </property>
-     <item>
-      <property name="text">
-       <string>Home</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Roaming</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Searching</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Denied (emergency calls only)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Unregistered (off)</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QGroupBox" name="cell_vStatusGroupBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>140</y>
-       <width>111</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Voice status</string>
-     </property>
-    </widget>
-    <widget class="QSlider" name="cell_signalStrengthSlider">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>80</y>
-       <width>160</width>
-       <height>29</height>
-      </rect>
-     </property>
-     <property name="maximum">
-      <number>31</number>
-     </property>
-     <property name="pageStep">
-      <number>5</number>
-     </property>
-     <property name="value">
-      <number>24</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="tickPosition">
-      <enum>QSlider::NoTicks</enum>
-     </property>
-     <property name="tickInterval">
-      <number>0</number>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="cell_strengthGroupBox">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>40</y>
-       <width>111</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Signal strength</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="cell_standardBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>70</y>
-       <width>121</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">padding: 3px 3px 3px 3px;</string>
-     </property>
-     <property name="currentIndex">
-      <number>6</number>
-     </property>
-     <item>
-      <property name="text">
-       <string>GSM</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>HSCSD</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>GPRS</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>EDGE</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>UMTS</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>HSDPA</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>full</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QGroupBox" name="cell_stdGroupBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>40</y>
-       <width>131</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Cellular standard</string>
-     </property>
-    </widget>
-   </widget>
    <widget class="QWidget" name="finger_page">
     <widget class="QGroupBox" name="finger_group">
      <property name="geometry">
@@ -1226,7 +1352,7 @@ color: #f0f0f0;</string>
      </property>
      <property name="font">
       <font>
-       <family>Sans Serif</family>
+       <family>Roboto</family>
        <pointsize>12</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -1248,18 +1374,14 @@ color: #f0f0f0;</string>
        <height>21</height>
       </rect>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
      <property name="styleSheet">
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
       <string>Fingerprint ID</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
      </property>
     </widget>
     <widget class="QGroupBox" name="finger_touchGroup">
@@ -1270,13 +1392,6 @@ color: #f0f0f0;</string>
        <width>71</width>
        <height>21</height>
       </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
      </property>
      <property name="styleSheet">
       <string notr="true">border: 0px;</string>
@@ -1345,7 +1460,7 @@ color: #f0f0f0;</string>
      </property>
      <property name="font">
       <font>
-       <family>Sans Serif</family>
+       <family>Roboto</family>
        <pointsize>12</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -1415,7 +1530,7 @@ color: #f0f0f0;</string>
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="page">
+   <widget class="QWidget" name="page_5">
     <widget class="QGroupBox" name="sd_group_2">
      <property name="geometry">
       <rect>
@@ -1427,7 +1542,7 @@ color: #f0f0f0;</string>
      </property>
      <property name="font">
       <font>
-       <family>Sans Serif</family>
+       <family>Roboto</family>
        <pointsize>12</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -1439,72 +1554,6 @@ color: #f0f0f0;</string>
      <property name="title">
       <string>Settings</string>
      </property>
-    </widget>
-    <widget class="QGroupBox" name="themeTitle">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>40</y>
-       <width>181</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Emulator Window Theme</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="adbPortTitle">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>140</y>
-       <width>181</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Emulator ADB Port</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="set_themeBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>70</y>
-       <width>181</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <item>
-      <property name="text">
-       <string>Light</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Dark</string>
-      </property>
-     </item>
     </widget>
     <widget class="QPlainTextEdit" name="set_adbPortBox">
      <property name="geometry">
@@ -1531,6 +1580,54 @@ color: #f0f0f0;</string>
       <string>5037</string>
      </property>
     </widget>
+    <widget class="QGroupBox" name="themeTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>181</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Emulator Window Theme</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="gpuAccelTitle">
+     <property name="geometry">
+      <rect>
+       <x>360</x>
+       <y>40</y>
+       <width>181</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Emulator GPU Acceleration</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
     <widget class="QGroupBox" name="versionTitle">
      <property name="geometry">
       <rect>
@@ -1542,9 +1639,7 @@ color: #f0f0f0;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
+       <family>Roboto</family>
       </font>
      </property>
      <property name="styleSheet">
@@ -1552,6 +1647,9 @@ color: #f0f0f0;</string>
      </property>
      <property name="title">
       <string>Emulator Version</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
      </property>
     </widget>
     <widget class="QPlainTextEdit" name="set_versionBox">
@@ -1588,33 +1686,10 @@ color: #f0f0f0;</string>
       <string>1.4</string>
      </property>
     </widget>
-    <widget class="QGroupBox" name="gpuAccelTitle">
+    <widget class="QComboBox" name="set_themeBox">
      <property name="geometry">
       <rect>
-       <x>360</x>
-       <y>40</y>
-       <width>181</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Emulator GPU Acceleration</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="set_gpuAccelBox">
-     <property name="geometry">
-      <rect>
-       <x>360</x>
+       <x>20</x>
        <y>70</y>
        <width>181</width>
        <height>31</height>
@@ -1622,60 +1697,14 @@ color: #f0f0f0;</string>
      </property>
      <item>
       <property name="text">
-       <string>Hardware (OpenGL ES)</string>
+       <string>Light</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Software emulation</string>
+       <string>Dark</string>
       </property>
      </item>
-    </widget>
-    <widget class="QGroupBox" name="saveLocationTitle">
-     <property name="geometry">
-      <rect>
-       <x>360</x>
-       <y>140</y>
-       <width>301</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Screenshots / Record Screen save location</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="imageVertionTitle">
-     <property name="geometry">
-      <rect>
-       <x>360</x>
-       <y>240</y>
-       <width>181</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>System Image Version</string>
-     </property>
     </widget>
     <widget class="QPlainTextEdit" name="set_imageVersionBox">
      <property name="enabled">
@@ -1711,16 +1740,114 @@ color: #f0f0f0;</string>
       <string>Android 5.1 - API 22 (Rev 2)</string>
      </property>
     </widget>
+    <widget class="QGroupBox" name="imageVertionTitle">
+     <property name="geometry">
+      <rect>
+       <x>360</x>
+       <y>240</y>
+       <width>181</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>System Image Version</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="saveLocationTitle">
+     <property name="geometry">
+      <rect>
+       <x>360</x>
+       <y>140</y>
+       <width>301</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Screenshots / Record Screen save location</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="set_gpuAccelBox">
+     <property name="geometry">
+      <rect>
+       <x>360</x>
+       <y>70</y>
+       <width>181</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>Hardware (OpenGL ES)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Software emulation</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QGroupBox" name="adbPortTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>140</y>
+       <width>181</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Emulator ADB Port</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QPushButton" name="telephoneButton">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>60</y>
-     <width>191</width>
-     <height>40</height>
+     <x>16</x>
+     <y>196</y>
+     <width>194</width>
+     <height>44</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
    </property>
    <property name="autoFillBackground">
     <bool>false</bool>
@@ -1729,7 +1856,7 @@ color: #f0f0f0;</string>
     <string notr="true">text-align: left;</string>
    </property>
    <property name="text">
-    <string>Telephone</string>
+    <string>  Phone</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -1737,8 +1864,8 @@ color: #f0f0f0;</string>
    </property>
    <property name="iconSize">
     <size>
-     <width>32</width>
-     <height>32</height>
+     <width>20</width>
+     <height>20</height>
     </size>
    </property>
    <property name="flat">
@@ -1747,15 +1874,24 @@ color: #f0f0f0;</string>
    <property name="themeIconName" stdset="0">
     <string>phone</string>
    </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="batteryButton">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>191</width>
-     <height>40</height>
+     <x>16</x>
+     <y>108</y>
+     <width>194</width>
+     <height>44</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
    </property>
    <property name="autoFillBackground">
     <bool>false</bool>
@@ -1764,7 +1900,7 @@ color: #f0f0f0;</string>
     <string notr="true">text-align: left;</string>
    </property>
    <property name="text">
-    <string>Battery</string>
+    <string>  Battery</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -1772,8 +1908,8 @@ color: #f0f0f0;</string>
    </property>
    <property name="iconSize">
     <size>
-     <width>32</width>
-     <height>32</height>
+     <width>20</width>
+     <height>20</height>
     </size>
    </property>
    <property name="flat">
@@ -1782,15 +1918,24 @@ color: #f0f0f0;</string>
    <property name="themeIconName" stdset="0">
     <string>battery</string>
    </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="messageButton">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>100</y>
-     <width>191</width>
-     <height>40</height>
+     <x>16</x>
+     <y>372</y>
+     <width>194</width>
+     <height>44</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
    </property>
    <property name="autoFillBackground">
     <bool>false</bool>
@@ -1799,7 +1944,7 @@ color: #f0f0f0;</string>
     <string notr="true">text-align: left;</string>
    </property>
    <property name="text">
-    <string>Message</string>
+    <string>  Message</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -1807,8 +1952,8 @@ color: #f0f0f0;</string>
    </property>
    <property name="iconSize">
     <size>
-     <width>32</width>
-     <height>32</height>
+     <width>20</width>
+     <height>20</height>
     </size>
    </property>
    <property name="flat">
@@ -1817,15 +1962,24 @@ color: #f0f0f0;</string>
    <property name="themeIconName" stdset="0">
     <string>message</string>
    </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="locationButton">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>140</y>
-     <width>191</width>
-     <height>40</height>
+     <x>16</x>
+     <y>20</y>
+     <width>194</width>
+     <height>44</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
    </property>
    <property name="autoFillBackground">
     <bool>false</bool>
@@ -1834,7 +1988,7 @@ color: #f0f0f0;</string>
     <string notr="true">text-align: left;</string>
    </property>
    <property name="text">
-    <string>Location</string>
+    <string>  Location</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -1842,8 +1996,8 @@ color: #f0f0f0;</string>
    </property>
    <property name="iconSize">
     <size>
-     <width>32</width>
-     <height>32</height>
+     <width>20</width>
+     <height>20</height>
     </size>
    </property>
    <property name="flat">
@@ -1852,15 +2006,24 @@ color: #f0f0f0;</string>
    <property name="themeIconName" stdset="0">
     <string>location</string>
    </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="cellularButton">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>180</y>
-     <width>191</width>
-     <height>40</height>
+     <x>16</x>
+     <y>64</y>
+     <width>194</width>
+     <height>44</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
    </property>
    <property name="autoFillBackground">
     <bool>false</bool>
@@ -1869,7 +2032,7 @@ color: #f0f0f0;</string>
     <string notr="true">text-align: left;</string>
    </property>
    <property name="text">
-    <string>Cellular</string>
+    <string>  Cellular</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -1877,8 +2040,8 @@ color: #f0f0f0;</string>
    </property>
    <property name="iconSize">
     <size>
-     <width>32</width>
-     <height>32</height>
+     <width>20</width>
+     <height>20</height>
     </size>
    </property>
    <property name="flat">
@@ -1887,15 +2050,24 @@ color: #f0f0f0;</string>
    <property name="themeIconName" stdset="0">
     <string>signal_cellular_3_bar</string>
    </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="fingerButton">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>220</y>
-     <width>191</width>
-     <height>40</height>
+     <x>16</x>
+     <y>416</y>
+     <width>194</width>
+     <height>44</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
    </property>
    <property name="autoFillBackground">
     <bool>false</bool>
@@ -1904,7 +2076,7 @@ color: #f0f0f0;</string>
     <string notr="true">text-align: left;</string>
    </property>
    <property name="text">
-    <string>Fingerprint</string>
+    <string>  Fingerprint</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -1912,8 +2084,8 @@ color: #f0f0f0;</string>
    </property>
    <property name="iconSize">
     <size>
-     <width>32</width>
-     <height>32</height>
+     <width>20</width>
+     <height>20</height>
     </size>
    </property>
    <property name="flat">
@@ -1922,15 +2094,24 @@ color: #f0f0f0;</string>
    <property name="themeIconName" stdset="0">
     <string>fingerprint</string>
    </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="sdButton">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>260</y>
-     <width>191</width>
-     <height>40</height>
+     <x>16</x>
+     <y>460</y>
+     <width>194</width>
+     <height>44</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
    </property>
    <property name="autoFillBackground">
     <bool>false</bool>
@@ -1939,7 +2120,7 @@ color: #f0f0f0;</string>
     <string notr="true">text-align: left;</string>
    </property>
    <property name="text">
-    <string>SD Card</string>
+    <string>  SD Card</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -1947,8 +2128,8 @@ color: #f0f0f0;</string>
    </property>
    <property name="iconSize">
     <size>
-     <width>32</width>
-     <height>32</height>
+     <width>20</width>
+     <height>20</height>
     </size>
    </property>
    <property name="flat">
@@ -1957,14 +2138,262 @@ color: #f0f0f0;</string>
    <property name="themeIconName" stdset="0">
     <string>sd_storage</string>
    </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cameraButton">
+   <property name="geometry">
+    <rect>
+     <x>16</x>
+     <y>152</y>
+     <width>194</width>
+     <height>44</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: left;</string>
+   </property>
+   <property name="text">
+    <string>  Camera</string>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/close</normaloff>:/light/close</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>close</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="virtSensorsButton">
+   <property name="geometry">
+    <rect>
+     <x>16</x>
+     <y>240</y>
+     <width>194</width>
+     <height>44</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: left;</string>
+   </property>
+   <property name="text">
+    <string>  Virtual sensors</string>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/close</normaloff>:/light/close</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>close</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="hwSensorsButton">
+   <property name="geometry">
+    <rect>
+     <x>16</x>
+     <y>284</y>
+     <width>194</width>
+     <height>44</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: left;</string>
+   </property>
+   <property name="text">
+    <string>  Hardware sensors</string>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/close</normaloff>:/light/close</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>close</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="dpadButton">
+   <property name="geometry">
+    <rect>
+     <x>16</x>
+     <y>328</y>
+     <width>194</width>
+     <height>44</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: left;</string>
+   </property>
+   <property name="text">
+    <string>  Directional pad</string>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/close</normaloff>:/light/close</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>close</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
+  </widget>
+  <widget class="Line" name="VertDivider">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>20</y>
+     <width>2</width>
+     <height>721</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color : #808080</string>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="lineWidth">
+    <number>2</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
   </widget>
   <widget class="QPushButton" name="settingsButton">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>300</y>
-     <width>191</width>
-     <height>40</height>
+     <x>16</x>
+     <y>548</y>
+     <width>194</width>
+     <height>44</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: left;</string>
+   </property>
+   <property name="text">
+    <string>  Settings</string>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/settings</normaloff>:/light/settings</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>settings</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="spacerButton">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>16</x>
+     <y>592</y>
+     <width>194</width>
+     <height>149</height>
     </rect>
    </property>
    <property name="autoFillBackground">
@@ -1974,11 +2403,7 @@ color: #f0f0f0;</string>
     <string notr="true">text-align: left;</string>
    </property>
    <property name="text">
-    <string>Settings</string>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/settings</normaloff>:/light/settings</iconset>
+    <string/>
    </property>
    <property name="iconSize">
     <size>
@@ -1990,18 +2415,63 @@ color: #f0f0f0;</string>
     <bool>true</bool>
    </property>
    <property name="themeIconName" stdset="0">
-    <string>settings</string>
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="additionalButton">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>16</x>
+     <y>504</y>
+     <width>194</width>
+     <height>44</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: left;</string>
+   </property>
+   <property name="text">
+    <string>Additional options</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTabTitle</string>
    </property>
   </widget>
  </widget>
  <tabstops>
-  <tabstop>batteryButton</tabstop>
-  <tabstop>telephoneButton</tabstop>
-  <tabstop>messageButton</tabstop>
   <tabstop>locationButton</tabstop>
   <tabstop>cellularButton</tabstop>
+  <tabstop>batteryButton</tabstop>
+  <tabstop>cameraButton</tabstop>
+  <tabstop>telephoneButton</tabstop>
+  <tabstop>virtSensorsButton</tabstop>
+  <tabstop>hwSensorsButton</tabstop>
+  <tabstop>dpadButton</tabstop>
+  <tabstop>messageButton</tabstop>
   <tabstop>fingerButton</tabstop>
   <tabstop>sdButton</tabstop>
+  <tabstop>settingsButton</tabstop>
   <tabstop>bat_levelSlider</tabstop>
   <tabstop>bat_chargeCkBox</tabstop>
   <tabstop>bat_healthBox</tabstop>
@@ -2031,6 +2501,13 @@ color: #f0f0f0;</string>
   <tabstop>sd_treeView</tabstop>
   <tabstop>sd_pushPushButton</tabstop>
   <tabstop>sd_pullPushButton</tabstop>
+  <tabstop>spacerButton</tabstop>
+  <tabstop>additionalButton</tabstop>
+  <tabstop>set_adbPortBox</tabstop>
+  <tabstop>set_versionBox</tabstop>
+  <tabstop>set_themeBox</tabstop>
+  <tabstop>set_imageVersionBox</tabstop>
+  <tabstop>set_gpuAccelBox</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

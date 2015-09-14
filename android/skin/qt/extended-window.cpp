@@ -59,11 +59,12 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
 void ExtendedWindow::completeInitialization()
 {
     // TODO: Remember the theme setting from before
-    // Set the theme to light (by pretending the theme setting got changed)
-    on_set_themeBox_currentIndexChanged(SETTINGS_THEME_LIGHT);
+    // Set the theme to the initial selection
+    // (by pretending the theme setting got changed)
+    on_set_themeBox_currentIndexChanged(mSettingsState.mTheme);
 
     // Set the first tab active
-    on_batteryButton_clicked();
+    on_locationButton_clicked();
 }
 
 ExtendedWindow::~ExtendedWindow()
@@ -78,46 +79,67 @@ void ExtendedWindow::closeEvent(QCloseEvent *ce)
 }
 
 // Tab buttons. Each raises its stacked pane to the top.
-
-void ExtendedWindow::on_batteryButton_clicked()   { adjustTabs(mExtendedUi->batteryButton,   PANE_IDX_BATTERY); }
-void ExtendedWindow::on_cellularButton_clicked()  { adjustTabs(mExtendedUi->cellularButton,  PANE_IDX_CELLULAR); }
-void ExtendedWindow::on_fingerButton_clicked()    { adjustTabs(mExtendedUi->fingerButton,    PANE_IDX_FINGER); }
-void ExtendedWindow::on_locationButton_clicked()  { adjustTabs(mExtendedUi->locationButton,  PANE_IDX_LOCATION); }
-void ExtendedWindow::on_messageButton_clicked()   { adjustTabs(mExtendedUi->messageButton,   PANE_IDX_MESSAGE); }
-void ExtendedWindow::on_sdButton_clicked()        { adjustTabs(mExtendedUi->sdButton,        PANE_IDX_SD); }
-void ExtendedWindow::on_settingsButton_clicked()  { adjustTabs(mExtendedUi->settingsButton,  PANE_IDX_SETTINGS); }
-void ExtendedWindow::on_telephoneButton_clicked() { adjustTabs(mExtendedUi->telephoneButton, PANE_IDX_TELEPHONE); }
+void ExtendedWindow::on_batteryButton_clicked()     { adjustTabs(mExtendedUi->batteryButton,     PANE_IDX_BATTERY); }
+void ExtendedWindow::on_cameraButton_clicked()      { adjustTabs(mExtendedUi->cameraButton,      PANE_IDX_CAMERA); }
+void ExtendedWindow::on_cellularButton_clicked()    { adjustTabs(mExtendedUi->cellularButton,    PANE_IDX_CELLULAR); }
+void ExtendedWindow::on_dpadButton_clicked()        { adjustTabs(mExtendedUi->dpadButton,        PANE_IDX_DPAD); }
+void ExtendedWindow::on_fingerButton_clicked()      { adjustTabs(mExtendedUi->fingerButton,      PANE_IDX_FINGER); }
+void ExtendedWindow::on_hwSensorsButton_clicked()   { adjustTabs(mExtendedUi->hwSensorsButton,   PANE_IDX_HW_SENSORS); }
+void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(mExtendedUi->locationButton,    PANE_IDX_LOCATION); }
+void ExtendedWindow::on_messageButton_clicked()     { adjustTabs(mExtendedUi->messageButton,     PANE_IDX_MESSAGE); }
+void ExtendedWindow::on_sdButton_clicked()          { adjustTabs(mExtendedUi->sdButton,          PANE_IDX_SD); }
+void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(mExtendedUi->settingsButton,    PANE_IDX_SETTINGS); }
+void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(mExtendedUi->telephoneButton,   PANE_IDX_TELEPHONE); }
+void ExtendedWindow::on_virtSensorsButton_clicked() { adjustTabs(mExtendedUi->virtSensorsButton, PANE_IDX_VIRT_SENSORS); }
 
 void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
 {
     // Make all the tab buttons the same except for the one whose
     // pane is on top.
-    QString colorStyle("text-align: left; background-color:");
+    QString colorStyle("text-align: left; color:");
     colorStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
-                      DARK_BACKGROUND : LIGHT_BACKGROUND;
+                      DARK_MAJOR_TAB_COLOR : LIGHT_MAJOR_TAB_COLOR;
+    colorStyle += "; background-color:";
+    colorStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
+                      DARK_TAB_BKG_COLOR : LIGHT_TAB_BKG_COLOR;
 
-    mExtendedUi->batteryButton  ->setStyleSheet(colorStyle);
-    mExtendedUi->cellularButton ->setStyleSheet(colorStyle);
-    mExtendedUi->fingerButton   ->setStyleSheet(colorStyle);
-    mExtendedUi->locationButton ->setStyleSheet(colorStyle);
-    mExtendedUi->messageButton  ->setStyleSheet(colorStyle);
-    mExtendedUi->sdButton       ->setStyleSheet(colorStyle);
-    mExtendedUi->settingsButton ->setStyleSheet(colorStyle);
-    mExtendedUi->telephoneButton->setStyleSheet(colorStyle);
+    // Omit "additionalButton" -- The main style sheet handles it
+    mExtendedUi->batteryButton    ->setStyleSheet(colorStyle);
+    mExtendedUi->cameraButton     ->setStyleSheet(colorStyle);
+    mExtendedUi->cellularButton   ->setStyleSheet(colorStyle);
+    mExtendedUi->dpadButton       ->setStyleSheet(colorStyle);
+    mExtendedUi->fingerButton     ->setStyleSheet(colorStyle);
+    mExtendedUi->hwSensorsButton  ->setStyleSheet(colorStyle);
+    mExtendedUi->locationButton   ->setStyleSheet(colorStyle);
+    mExtendedUi->messageButton    ->setStyleSheet(colorStyle);
+    mExtendedUi->sdButton         ->setStyleSheet(colorStyle);
+    mExtendedUi->settingsButton   ->setStyleSheet(colorStyle);
+    // Omit "spacerButton" -- The main style sheet handles it
+    mExtendedUi->telephoneButton  ->setStyleSheet(colorStyle);
+    mExtendedUi->virtSensorsButton->setStyleSheet(colorStyle);
 
-    QString activeStyle("text-align: left; background-color:");
+    QString activeStyle("text-align: left; color:");
     activeStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
-                      DARK_ACTIVE : LIGHT_ACTIVE;
+                      DARK_MAJOR_TAB_COLOR : LIGHT_MAJOR_TAB_COLOR;
+    activeStyle += "; background-color:";
+    activeStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
+                      DARK_BKG_COLOR : LIGHT_BKG_COLOR;
     thisButton->setStyleSheet(activeStyle);
 
-    mExtendedUi->batteryButton  ->setAutoFillBackground(true);
-    mExtendedUi->cellularButton ->setAutoFillBackground(true);
-    mExtendedUi->fingerButton   ->setAutoFillBackground(true);
-    mExtendedUi->locationButton ->setAutoFillBackground(true);
-    mExtendedUi->messageButton  ->setAutoFillBackground(true);
-    mExtendedUi->sdButton       ->setAutoFillBackground(true);
-    mExtendedUi->settingsButton ->setAutoFillBackground(true);
-    mExtendedUi->telephoneButton->setAutoFillBackground(true);
+    mExtendedUi->additionalButton ->setAutoFillBackground(true);
+    mExtendedUi->batteryButton    ->setAutoFillBackground(true);
+    mExtendedUi->cameraButton     ->setAutoFillBackground(true);
+    mExtendedUi->cellularButton   ->setAutoFillBackground(true);
+    mExtendedUi->dpadButton       ->setAutoFillBackground(true);
+    mExtendedUi->fingerButton     ->setAutoFillBackground(true);
+    mExtendedUi->hwSensorsButton  ->setAutoFillBackground(true);
+    mExtendedUi->locationButton   ->setAutoFillBackground(true);
+    mExtendedUi->messageButton    ->setAutoFillBackground(true);
+    mExtendedUi->sdButton         ->setAutoFillBackground(true);
+    mExtendedUi->settingsButton   ->setAutoFillBackground(true);
+    mExtendedUi->spacerButton     ->setAutoFillBackground(true);
+    mExtendedUi->telephoneButton  ->setAutoFillBackground(true);
+    mExtendedUi->virtSensorsButton->setAutoFillBackground(true);
 
     thisButton->clearFocus(); // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(thisIndex);
