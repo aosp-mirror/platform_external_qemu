@@ -66,6 +66,7 @@
      <file alias="remove_disabled">images/dark/ic_remove_black_48dp.svg</file>
      <file alias="sd_storage">images/dark/ic_sd_storage_black_48dp.svg</file>
      <file alias="send">images/dark/ic_send_black_48dp.svg</file>
+     <file alias="settings">images/dark/ic_settings_black_48dp.svg</file>
      <file alias="signal_cellular_3_bar">images/dark/ic_signal_cellular_3_bar_black_48dp.svg</file>
      <file alias="stop">images/dark/ic_stop_black_48dp.svg</file>
      <file alias="stop_disabled">images/dark/ic_stop_black_48dp.svg</file>
@@ -114,6 +115,7 @@
      <file alias="remove_disabled">images/light/ic_remove_grey600_48dp.svg</file>
      <file alias="sd_storage">images/light/ic_sd_storage_white_48dp.svg</file>
      <file alias="send">images/light/ic_send_white_48dp.svg</file>
+     <file alias="settings">images/light/ic_settings_white_48dp.svg</file>
      <file alias="signal_cellular_3_bar">images/light/ic_signal_cellular_3_bar_white_48dp.svg</file>
      <file alias="stop">images/light/ic_stop_white_48dp.svg</file>
      <file alias="stop_disabled">images/light/ic_stop_grey600_48dp.svg</file>

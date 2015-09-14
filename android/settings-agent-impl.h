@@ -10,18 +10,11 @@
  ** GNU General Public License for more details.
  */
 
-// Agent iterfaces for sending commands from the UI to the emulator
+#ifndef ANDROID_SETTINGS_AGENT_IMPL_H
+#define ANDROID_SETTINGS_AGENT_IMPL_H
 
-#ifndef ANDROID_UI_EMU_AGENT_H
-#define ANDROID_UI_EMU_AGENT_H
+#include "android/settings-agent.h"
 
-typedef struct UiEmuAgent {
-    const struct BatteryAgent    *battery;
-    const struct CellularAgent   *cellular;
-    const struct FingerAgent     *finger;
-    const struct LocationAgent   *location;
-    const struct SettingsAgent   *settings;
-    const struct TelephonyAgent  *telephony;
-} UiEmuAgent;
+void settings_setAdbPort(int portNumber);
 
-#endif // ANDROID_UI_EMU_AGENT_H
+#endif // ANDROID_SETTINGS_AGENT_IMPL_H
