@@ -48,6 +48,16 @@ sdk {
             into 'lib/pc-bios'
         }
 
+        item("$buildDefaultEmulator.output/emulator64-ranchu-x86") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+
+        item("$buildDefaultEmulator.output/emulator64-ranchu-x86_64") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+
         item("$buildDefaultEmulator.output/emulator64-ranchu-arm64") {
             executable true
             builtBy buildDefaultEmulator
@@ -88,6 +98,14 @@ sdk {
             executable true
             builtBy buildDefaultEmulator
         }
+        item("$buildDefaultEmulator.output/emulator-ranchu-x86") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+        item("$buildDefaultEmulator.output/emulator-ranchu-x86_64") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
         item("$buildDefaultEmulator.output/emulator-ranchu-arm64") {
             executable true
             builtBy buildDefaultEmulator
@@ -121,10 +139,22 @@ sdk {
             into 'lib/pc-bios'
         }
 
+        item("$buildWindowsEmulator.output/emulator64-ranchu-x86.exe") {
+            builtBy buildWindowsEmulator
+        }
+        item("$buildWindowsEmulator.output/emulator64-ranchu-x86_64.exe") {
+            builtBy buildWindowsEmulator
+        }
         item("$buildWindowsEmulator.output/emulator64-ranchu-arm64.exe") {
             builtBy buildWindowsEmulator
         }
         item("$buildWindowsEmulator.output/emulator64-ranchu-mips64.exe") {
+            builtBy buildWindowsEmulator
+        }
+        item("$buildWindowsEmulator.output/emulator-ranchu-x86.exe") {
+            builtBy buildWindowsEmulator
+        }
+        item("$buildWindowsEmulator.output/emulator-ranchu-x86_64.exe") {
             builtBy buildWindowsEmulator
         }
         item("$buildWindowsEmulator.output/emulator-ranchu-arm64.exe") {
