@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e467cecb_6dca7d2f",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "e9ea475e_015eca5c",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "09e87b64_a2e15e05",
         "filename": "android/metrics/studio-helper.cpp",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-14T09:19:12Z",
       "side": 1,
       "message": "nit: it looks like this should be \u0027static const\u0027, and could be moved inside the only function that actually uses it.\n\nAlso, for C++ constant values, prefer the kVariableName naming convention.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44725a92_639e0ccd",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "09e87b64_a2e15e05",
       "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "44725a92_a31664de",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "e9ea475e_2159ce74",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9ea475e_4154d23e",
         "filename": "android/metrics/studio-helper.cpp",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2015-09-14T09:19:12Z",
       "side": 1,
       "message": "nit: Please move the comment to the header.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9420f4a_f52cb077",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "e9ea475e_4154d23e",
       "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "0465c2c3_548c64b9",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "a9f4cf41_ffea5fe1",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "44725a92_c8e0dfb7",
         "filename": "android/metrics/studio-helper.cpp",
         "patchSetId": 6
@@ -98,6 +188,30 @@
       "writtenOn": "2015-09-14T17:57:56Z",
       "side": 1,
       "message": "if (cVersion[0] \u003d\u003d 0) ...\nstrlen is less efficient - it would traverse the whole string",
+      "range": {
+        "startLine": 98,
+        "startChar": 4,
+        "endLine": 98,
+        "endChar": 28
+      },
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e467cecb_8dc7d122",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "44725a92_c8e0dfb7",
       "range": {
         "startLine": 98,
         "startChar": 4,
@@ -133,6 +247,30 @@
     },
     {
       "key": {
+        "uuid": "8478d270_302c5876",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "Version was not merged when I wrote this and I didn\u0027t want to create conflicts. If you think this is important, I will change it, otherwise this is no critical path.",
+      "parentUuid": "a9420f4a_2f4f8932",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 44
+      },
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "09e87b64_62011645",
         "filename": "android/metrics/studio-helper.cpp",
         "patchSetId": 6
@@ -144,6 +282,24 @@
       "writtenOn": "2015-09-14T09:19:12Z",
       "side": 1,
       "message": "nit: s/direcotires/directories/g :)",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6473de94_894989fa",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "09e87b64_62011645",
       "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -190,6 +346,24 @@
     },
     {
       "key": {
+        "uuid": "6473de94_a9e48552",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "c93f43b4_30b808fd",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "648afea0_d15894fe",
         "filename": "android/metrics/studio-helper.cpp",
         "patchSetId": 6
@@ -201,6 +375,30 @@
       "writtenOn": "2015-09-14T17:57:56Z",
       "side": 1,
       "message": "please use another ctor, this one parses the input string",
+      "range": {
+        "startLine": 126,
+        "startChar": 26,
+        "endLine": 126,
+        "endChar": 31
+      },
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "848ff2ac_ad98096e",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "648afea0_d15894fe",
       "range": {
         "startLine": 126,
         "startChar": 26,
@@ -276,6 +474,24 @@
     },
     {
       "key": {
+        "uuid": "c45e4afd_42d023e0",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "09e87b64_82fc1aad",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "09e87b64_4206125f",
         "filename": "android/metrics/studio-helper.cpp",
         "patchSetId": 6
@@ -316,6 +532,24 @@
     },
     {
       "key": {
+        "uuid": "0465c2c3_74708862",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "09e87b64_4206125f",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c45e4afd_521f1468",
         "filename": "android/metrics/studio-helper.cpp",
         "patchSetId": 6
@@ -332,6 +566,29 @@
         "startChar": 0,
         "endLine": 291,
         "endChar": 44
+      },
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "648afea0_774c1009",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "Will remove and return a default string per Prathmesh\u0027s suggestion",
+      "range": {
+        "startLine": 275,
+        "startChar": 0,
+        "endLine": 301,
+        "endChar": 2
       },
       "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -397,6 +654,30 @@
       "writtenOn": "2015-09-14T17:57:56Z",
       "side": 1,
       "message": "|val| leaks here",
+      "range": {
+        "startLine": 311,
+        "startChar": 13,
+        "endLine": 311,
+        "endChar": 16
+      },
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a46156bd_8b497dfa",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "a9420f4a_8f7af5f7",
       "range": {
         "startLine": 311,
         "startChar": 13,
@@ -479,6 +760,30 @@
     },
     {
       "key": {
+        "uuid": "a9420f4a_354fd832",
+        "filename": "android/metrics/studio-helper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "Agreed, I will create a zero installation ID in these cases",
+      "parentUuid": "648afea0_ec07731e",
+      "range": {
+        "startLine": 321,
+        "startChar": 15,
+        "endLine": 321,
+        "endChar": 35
+      },
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "691f3755_35d11037",
         "filename": "android/metrics/studio-helper.h",
         "patchSetId": 6
@@ -490,6 +795,24 @@
       "writtenOn": "2015-09-14T09:19:12Z",
       "side": 1,
       "message": "this header doesn\u0027t seem to be needed here.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8478d270_d05884fe",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "691f3755_35d11037",
       "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -531,6 +854,24 @@
     },
     {
       "key": {
+        "uuid": "44725a92_e305bc88",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "Will follow David\u0027s suggestion.\nKeeping macros in test code to take advantage of compiler string concat",
+      "parentUuid": "e467cecb_62cd2c9c",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8478d270_ca87f3d7",
         "filename": "android/metrics/studio-helper.h",
         "patchSetId": 6
@@ -542,6 +883,30 @@
       "writtenOn": "2015-09-14T17:57:56Z",
       "side": 1,
       "message": "please add some documentation about the expected format of the dirName",
+      "range": {
+        "startLine": 34,
+        "startChar": 29,
+        "endLine": 34,
+        "endChar": 56
+      },
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6473de94_a9b2c53e",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "8478d270_ca87f3d7",
       "range": {
         "startLine": 34,
         "startChar": 29,
@@ -571,6 +936,24 @@
     },
     {
       "key": {
+        "uuid": "648afea0_57c47498",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "2900dfee_3b1fb79c",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9ea475e_614fd6aa",
         "filename": "android/metrics/studio-helper.h",
         "patchSetId": 6
@@ -582,6 +965,24 @@
       "writtenOn": "2015-09-14T09:19:12Z",
       "side": 1,
       "message": "Same here.",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9420f4a_158974aa",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "e9ea475e_614fd6aa",
       "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -605,6 +1006,24 @@
     },
     {
       "key": {
+        "uuid": "648afea0_77d17059",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "64211e85_25e7ce1a",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "64211e85_a501fe46",
         "filename": "android/metrics/studio-preferences.h",
         "patchSetId": 6
@@ -616,6 +1035,24 @@
       "writtenOn": "2015-09-14T09:19:12Z",
       "side": 1,
       "message": "nit: please specify that the caller is responsible for freeing the return string, it\u0027s pretty important. Also it\u0027s better to actually return a char* in this case (const char* is typically returned by the function or object implementing the method to indicate it is still owned by it).",
+      "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9420f4a_f58dd0b6",
+        "filename": "android/metrics/studio-preferences.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-14T23:22:24Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "64211e85_a501fe46",
       "revId": "bf7afc437aabb2f4a3715dff691e2cc3a8f0fe31",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
