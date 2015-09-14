@@ -204,9 +204,7 @@ ABool androidMetrics_tick() {
     return success;
 }
 
-static void on_metrics_timer(void* state) {
-    LoopTimer* const timer = *(LoopTimer**)state;
-
+static void on_metrics_timer(void* ignored, LoopTimer* timer) {
     androidMetrics_tick();
     loopTimer_startRelative(timer, metrics_timer_timeout_ms);
 }
@@ -217,8 +215,7 @@ ABool androidMetrics_keepAlive(Looper* metrics_looper) {
     success &= androidMetrics_tick();
 
     // Initialize a timer for recurring metrics update
-    metrics_timer = loopTimer_new(metrics_looper, &on_metrics_timer,
-                                  &metrics_timer);
+    metrics_timer = loopTimer_new(metrics_looper, &on_metrics_timer, NULL);
     loopTimer_startRelative(metrics_timer, metrics_timer_timeout_ms);
 
     return success;

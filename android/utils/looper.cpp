@@ -80,7 +80,9 @@ LoopTimer* loopTimer_new(CLooper*       looper,
                          LoopTimerFunc  callback,
                          void*          opaque) {
     return reinterpret_cast<LoopTimer*>(
-            asBaseLooper(looper)->createTimer(callback, opaque));
+            asBaseLooper(looper)->createTimer(
+                    reinterpret_cast<BaseLooper::Timer::Callback>(callback),
+                    opaque));
 }
 
 

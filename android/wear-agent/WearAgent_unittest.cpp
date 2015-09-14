@@ -36,7 +36,7 @@ namespace wear {
 using namespace ::android::base;
 using namespace ::android::wear::testing;
 
-static void on_time_up (void* opaque) {
+static void on_time_up (void* opaque, Looper::Timer* timer) {
     Looper* looper = static_cast<Looper*>(opaque);
     looper->forceQuit();
 }

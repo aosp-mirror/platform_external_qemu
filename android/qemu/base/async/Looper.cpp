@@ -177,8 +177,8 @@ public:
                     mTimer(NULL) {
             mTimer = ::timer_new(QEMU_CLOCK_HOST,
                                  SCALE_MS,
-                                 callback,
-                                 opaque);
+                                 qemuTimerCallbackAdapter,
+                                 this);
         }
 
         ~Timer() {
@@ -211,6 +211,11 @@ public:
         }
 
     private:
+        static void qemuTimerCallbackAdapter(void* opaque) {
+            Timer* timer = static_cast<Timer*>(opaque);
+            timer->mCallback(timer->mOpaque, timer);
+        }
+
         QEMUTimer* mTimer;
     };
 

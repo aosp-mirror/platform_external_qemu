@@ -1032,7 +1032,7 @@ _on_sdkctl_query_cancelled(SDKCtlQuery* query)
  *  opaque - SDKCtlQuery instance.
  */
 static void
-_on_skdctl_query_timeout(void* opaque)
+_on_skdctl_query_timeout(void* opaque, LoopTimer* timer)
 {
     SDKCtlQuery* const query = (SDKCtlQuery*)opaque;
 
