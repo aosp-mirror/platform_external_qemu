@@ -241,7 +241,7 @@ public:
         }
 
         void fire() {
-            mCallback(mOpaque);
+            mCallback(mOpaque, this);
         }
 
         TAIL_QUEUE_LIST_TRAITS(Traits, Timer, mPendingLink);

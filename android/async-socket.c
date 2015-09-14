@@ -112,7 +112,7 @@ static const int _max_recycled_asio_num = 32;
  * Param:
  *  opaque - AsyncSocketIO instance representing the timed out I/O.
  */
-static void _on_async_socket_io_timed_out(void* opaque);
+static void _on_async_socket_io_timed_out(void* opaque, LoopTimer* timer);
 
 /* Creates new I/O descriptor.
  * Param:
@@ -274,7 +274,7 @@ _async_socket_writer_new(AsyncSocket* as,
 
 /* I/O timed out. */
 static void
-_on_async_socket_io_timed_out(void* opaque)
+_on_async_socket_io_timed_out(void* opaque, LoopTimer* timer)
 {
     AsyncSocketIO* const asio = (AsyncSocketIO*)opaque;
     AsyncSocket* const as = asio->as;
@@ -1082,7 +1082,7 @@ _on_connector_events(void* opaque,
  *  as - Initialized AsyncSocket instance.
  */
 void
-_on_async_socket_reconnect(void* opaque)
+_on_async_socket_reconnect(void* opaque, LoopTimer* timer)
 {
     AsyncSocket* as = (AsyncSocket*)opaque;
 

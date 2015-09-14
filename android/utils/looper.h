@@ -96,7 +96,7 @@ void looper_setForThread(Looper* looper);
 Looper*  looper_newGeneric(void);
 
 typedef struct LoopTimer LoopTimer;
-typedef void (*LoopTimerFunc)(void* opaque);
+typedef void (*LoopTimerFunc)(void* opaque, LoopTimer* timer);
 
 typedef struct LoopIo    LoopIo;
 typedef void (*LoopIoFunc)(void* opaque, int fd, unsigned events);

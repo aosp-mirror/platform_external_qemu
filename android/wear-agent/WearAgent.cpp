@@ -211,7 +211,7 @@ void WearAgentImpl::connectToAdbHost() {
     }
 }
 
-void _on_reconnect_timeout(void* opaque) {
+void _on_reconnect_timeout(void* opaque, Looper::Timer* timer) {
     WearAgentImpl* agent = reinterpret_cast<WearAgentImpl*>(opaque);
     if (agent) {
         agent->connectToAdbHost();

@@ -87,7 +87,7 @@ public:
     class Timer {
     public:
         // Type of callback function called when the timer expires.
-        typedef void (*Callback)(void* opaque);
+        typedef void (*Callback)(void* opaque, Timer* timer);
 
         virtual ~Timer() {}
 

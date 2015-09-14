@@ -245,7 +245,7 @@ _on_async_socket_connector_io(void* opaque, int fd, unsigned events)
  *  opaque - AsyncSocketConnector instance.
  */
 static void
-_on_async_socket_connector_retry(void* opaque)
+_on_async_socket_connector_retry(void* opaque, LoopTimer* timer)
 {
     AsyncStatus status;
     AsyncSocketConnector* const connector = (AsyncSocketConnector*)opaque;

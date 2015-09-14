@@ -24,7 +24,7 @@ using namespace android::base;
 
 void print_help(const char* progname);
 
-static void _on_time_up (void* opaque) {
+static void _on_time_up (void* opaque, Looper::Timer* timer) {
     Looper* looper = static_cast<Looper*>(opaque);
     printf("stop the wear agent now !\n");
     looper->forceQuit();
