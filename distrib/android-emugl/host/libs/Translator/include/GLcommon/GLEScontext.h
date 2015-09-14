@@ -67,8 +67,8 @@ struct GLSupport {
     int  maxClipPlane;
     int  maxTexUnits;
     int  maxTexImageUnits;
-    int  maxCombinedTexImageUnits;
     int  maxTexSize;
+    int  maxCombinedTexImageUnits;
     Version glslVersion;
     bool GL_EXT_TEXTURE_FORMAT_BGRA8888;
     bool GL_EXT_FRAMEBUFFER_OBJECT;
