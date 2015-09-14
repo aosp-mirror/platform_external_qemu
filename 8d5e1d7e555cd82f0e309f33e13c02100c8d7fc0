@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e467cecb_28ea33e4",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-14T23:50:17Z",
+      "side": 1,
+      "message": "(0, 0, 0) ?",
+      "range": {
+        "startLine": 116,
+        "startChar": 27,
+        "endLine": 116,
+        "endChar": 30
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e467cecb_e8067b5b",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-14T23:50:17Z",
+      "side": 1,
+      "message": "I\u0027d prefer to return String here and pass it through",
+      "range": {
+        "startLine": 162,
+        "startChar": 16,
+        "endLine": 162,
+        "endChar": 38
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a46156bd_a67af84f",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-14T23:50:17Z",
+      "side": 1,
+      "message": "I can\u0027t find its definition. What is this?",
+      "range": {
+        "startLine": 170,
+        "startChar": 43,
+        "endLine": 170,
+        "endChar": 51
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6473de94_e45b04e6",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-14T23:50:17Z",
+      "side": 1,
+      "message": "nit: code style forbids hanging statements without block",
+      "range": {
+        "startLine": 200,
+        "startChar": 0,
+        "endLine": 200,
+        "endChar": 20
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a46156bd_6699c0fa",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-14T23:50:17Z",
+      "side": 1,
+      "message": "with String you can always compare with \u003d\u003d",
+      "range": {
+        "startLine": 249,
+        "startChar": 9,
+        "endLine": 249,
+        "endChar": 19
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
