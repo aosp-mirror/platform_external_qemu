@@ -34,7 +34,6 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/system/System_unittest.cpp \
   android/base/threads/Thread_unittest.cpp \
   android/base/threads/ThreadStore_unittest.cpp \
-  android/base/Version_unittest.cpp \
   android/emulation/CpuAccelerator_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
   android/filesystems/fstab_parser_unittest.cpp \
