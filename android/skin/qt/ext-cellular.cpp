@@ -22,6 +22,9 @@ void ExtendedWindow::initCellular()
 
 void ExtendedWindow::on_cell_signalStrengthSlider_valueChanged(int value)
 {
+    // Update the text output
+    mExtendedUi->cell_sigStrengthText->setText(QString::number(value));
+
     if (mCellularAgent && mCellularAgent->setSignalStrength) {
         mCellularAgent->setSignalStrength(value);
     }
