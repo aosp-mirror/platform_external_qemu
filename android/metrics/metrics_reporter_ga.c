@@ -16,12 +16,14 @@
 #include "android/metrics/internal/metrics_reporter_ga_internal.h"
 
 #include "android/curl-support.h"
+#include "android/metrics/studio-helper.h"
 #include "android/utils/compiler.h"
 #include "android/utils/debug.h"
 
 #include <curl/curl.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define mwarning(fmt, ...) \
     dwarning("%s:%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
@@ -53,8 +55,6 @@ int formatGAPostData(char** ptr, const AndroidMetrics* metrics) {
     static const char ga_application_name[] = "Android Studio";
     // TODO(pprabhu) Send to debug Analytics project in debug builds.
     static const char ga_tracking_id[] = "UA-19996407-3";
-    // TODO(pprabhu) Get anonymus UUID here, preferably the same one as studio.
-    static const char ga_client_id[] = "default-client";
 
     // Crash reporting GA keys / values.
     static const char ga_event_category_emulator[] = "emulator";
@@ -67,6 +67,8 @@ int formatGAPostData(char** ptr, const AndroidMetrics* metrics) {
 
     const char* label = metrics->is_dirty ? ga_event_label_crash_detected
                                           : ga_event_label_clean_exit;
+    char* ga_client_id = android_studio_get_installation_id();
+
     // TODO(pprabhu) Decide whether we want to report gpu_enabled.
     return asprintf(ptr,
                     "%s=%s&%s=%s&%s=%s&%s=%s&%s=%s"
@@ -86,6 +88,7 @@ int formatGAPostData(char** ptr, const AndroidMetrics* metrics) {
 
                     ga_cm_user_time_key, metrics->user_time,
                     ga_cm_system_time_key, metrics->system_time);
+    free(ga_client_id);
 }
 
 // Dummy write function to pass to curl to avoid dumping the returned output to
