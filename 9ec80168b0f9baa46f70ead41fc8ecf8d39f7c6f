@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8478d270_56ab89be",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-15T21:56:04Z",
+      "side": 1,
+      "message": "nit: Can you say \"Unix-style\". This being the System interface to abstract away platform details, that name is confusing.",
+      "range": {
+        "startLine": 143,
+        "startChar": 27,
+        "endLine": 143,
+        "endChar": 31
+      },
+      "revId": "9ec80168b0f9baa46f70ead41fc8ecf8d39f7c6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0465c2c3_1a26924f",
+        "filename": "android/base/system/System_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-15T21:56:04Z",
+      "side": 1,
+      "message": "Please use std::difftime to compare time_t values.\nThis could break on some windows platforms: http://computer-programming-forum.com/47-c-language/8d7dec65bd1ddafe.htm",
+      "range": {
+        "startLine": 208,
+        "startChar": 4,
+        "endLine": 208,
+        "endChar": 30
+      },
+      "revId": "9ec80168b0f9baa46f70ead41fc8ecf8d39f7c6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
