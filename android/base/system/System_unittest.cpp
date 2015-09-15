@@ -59,14 +59,36 @@ TEST(System, getHomeDirectory) {
     LOG(INFO) << "Home directory: [" << dir.c_str() << "]";
 }
 
+TEST(System, getAppDataDirectory) {
+    String dir = System::get()->getAppDataDirectory();
+#ifdef _WIN32
+    EXPECT_FALSE(dir.empty());
+#else
+    EXPECT_TRUE(dir.empty());
+#endif // !_WIN32
+    LOG(INFO) << "AppData directory: [" << dir.c_str() << "]";
+}
+
 TEST(TestSystem, getDirectory) {
-    const char kProgramDir[] = "/foo/bar";
-    const char kHomeDir[] = "/lala/kaka";
-    TestSystem testSys(kProgramDir, 32, kHomeDir);
+    const char  kProgramDir[] = "/foo/bar";
+    const char  kHomeDir[]    = "/mama/papa";
+#ifdef _WIN32
+    const char  kAppDataDir[] = "/lala/kaka";
+#else
+    const char *kAppDataDir   = "";
+#endif
+    TestSystem testSys(kProgramDir, 32, kHomeDir, kAppDataDir);
     String pdir = System::get()->getProgramDirectory();
     EXPECT_STREQ(kProgramDir, pdir.c_str());
     String hdir = System::get()->getHomeDirectory();
     EXPECT_STREQ(kHomeDir, hdir.c_str());
+    String adir = System::get()->getAppDataDirectory();
+#if defined(__linux__)
+    EXPECT_TRUE(adir.empty());
+#else
+    // Mac OS X, Microsoft Windows
+    EXPECT_STREQ(kAppDataDir, adir.c_str());
+#endif
 }
 
 TEST(System, getHostBitness) {
