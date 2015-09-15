@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0465c2c3_013709af",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-15T02:19:32Z",
+      "side": 1,
+      "message": "Nit: long line",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 104
+      },
+      "revId": "0ee25b52778a439e0cbd1647581f4f42d8fbd215",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6473de94_afdba508",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-15T02:19:32Z",
+      "side": 1,
+      "message": "Nit: long line",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 105
+      },
+      "revId": "0ee25b52778a439e0cbd1647581f4f42d8fbd215",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9420f4a_3e8c55fb",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-15T02:19:32Z",
+      "side": 1,
+      "message": "mAdbPort? Not sure what Adp is...",
+      "range": {
+        "startLine": 75,
+        "startChar": 22,
+        "endLine": 75,
+        "endChar": 30
+      },
+      "revId": "0ee25b52778a439e0cbd1647581f4f42d8fbd215",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8478d270_7d26a895",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-15T02:19:32Z",
+      "side": 1,
+      "message": "Is there a reason for this value? The emulator has a port assigned in the startup prcoess (see android_adb_port in android.h)",
+      "range": {
+        "startLine": 79,
+        "startChar": 21,
+        "endLine": 79,
+        "endChar": 25
+      },
+      "revId": "0ee25b52778a439e0cbd1647581f4f42d8fbd215",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
