@@ -238,6 +238,30 @@
     },
     {
       "key": {
+        "uuid": "c93f43b4_300128cd",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T07:22:24Z",
+      "side": 1,
+      "message": "Also there is a space between the \u0027if\u0027 and the opening parens :). Did you run \u0027git clang-format\u0027 ?",
+      "parentUuid": "848ff2ac_18c4dd29",
+      "range": {
+        "startLine": 200,
+        "startChar": 0,
+        "endLine": 200,
+        "endChar": 20
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a46156bd_6699c0fa",
         "filename": "android/metrics/StudioHelper.cpp",
         "patchSetId": 8
@@ -303,6 +327,57 @@
         "endLine": 249,
         "endChar": 19
       },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09e87b64_4265f2e3",
+        "filename": "android/metrics/StudioHelper.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T07:22:24Z",
+      "side": 1,
+      "message": "nit: no indentation for namespaces :) Just add one line after the \u0027namespace android {\u0027 line, and one before the \u0027}  // namespace android\u0027 one.",
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "490513fd_5c55ddea",
+        "filename": "android/metrics/StudioHelper.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T07:22:24Z",
+      "side": 1,
+      "message": "nit: not need for \u0027;\u0027 :)",
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "490513fd_3c5a111b",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T07:22:24Z",
+      "side": 1,
+      "message": "nit: for C functions (not C++), use a (void) parameter, otherwise the compiler will assume the function takes any number of parameters, and will gladly accept both calls as valid:\n\n  android_studio_get_optins();\n  android_studio_get_optins(42);\n\nThis is legacy C crap :-/ See http://stackoverflow.com/questions/693788/c-void-arguments",
       "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
