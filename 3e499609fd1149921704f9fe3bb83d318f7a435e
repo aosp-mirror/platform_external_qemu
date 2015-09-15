@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8478d270_d3588bfe",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T18:50:53Z",
+      "side": 1,
+      "message": "you need to free the xmlval here",
+      "range": {
+        "startLine": 216,
+        "startChar": 24,
+        "endLine": 216,
+        "endChar": 29
+      },
+      "revId": "3e499609fd1149921704f9fe3bb83d318f7a435e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e467cecb_b367985d",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T18:50:53Z",
+      "side": 1,
+      "message": "APPLE, not Windows?",
+      "range": {
+        "startLine": 239,
+        "startChar": 7,
+        "endLine": 239,
+        "endChar": 16
+      },
+      "revId": "3e499609fd1149921704f9fe3bb83d318f7a435e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8478d270_b37a2f50",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T18:50:53Z",
+      "side": 1,
+      "message": "do we need to check if it opened and read fine?\ne.g. if (uuid_file \u0026\u0026 getline(...)) { ... }\n?",
+      "range": {
+        "startLine": 278,
+        "startChar": 18,
+        "endLine": 278,
+        "endChar": 27
+      },
+      "revId": "3e499609fd1149921704f9fe3bb83d318f7a435e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e467cecb_1367645c",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T18:50:53Z",
+      "side": 1,
+      "message": "this is unsafe\nplease use the following:\n\nstd::string line;\nstd::getline(uuid_file, line);\n\nThen you can copy the value into String to return it",
+      "range": {
+        "startLine": 279,
+        "startChar": 4,
+        "endLine": 279,
+        "endChar": 42
+      },
+      "revId": "3e499609fd1149921704f9fe3bb83d318f7a435e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "843d32a1_424f62fe",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T18:50:53Z",
+      "side": 1,
+      "message": "clang-format, please :)",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 7
+      },
+      "revId": "3e499609fd1149921704f9fe3bb83d318f7a435e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
