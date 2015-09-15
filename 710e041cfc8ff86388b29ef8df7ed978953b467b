@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6473de94_61a6018f",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-15T22:37:38Z",
+      "side": 1,
+      "message": "Please use System::envGet so that this can be mocked out.",
+      "range": {
+        "startLine": 242,
+        "startChar": 29,
+        "endLine": 242,
+        "endChar": 35
+      },
+      "revId": "710e041cfc8ff86388b29ef8df7ed978953b467b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
