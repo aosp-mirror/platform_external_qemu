@@ -93,6 +93,30 @@
       "revId": "9ec80168b0f9baa46f70ead41fc8ecf8d39f7c6f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0465c2c3_75c07f65",
+        "filename": "android/base/system/System_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-15T22:30:04Z",
+      "side": 1,
+      "message": "I\u0027ve seen direct subtraction of times cause trouble in other contexts (SQL) so I\u0027m wary.\n\nThe last comment in the link I posted actually says that their time_t implementation is not even monotonic. And this was a windows library that was pretty common (at least at some point in the past).\n\nThat said, I\u0027m not an expert on portable coding ethics (yet), so I won\u0027t insist.",
+      "parentUuid": "a9420f4a_587bacba",
+      "range": {
+        "startLine": 208,
+        "startChar": 4,
+        "endLine": 208,
+        "endChar": 30
+      },
+      "revId": "9ec80168b0f9baa46f70ead41fc8ecf8d39f7c6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
