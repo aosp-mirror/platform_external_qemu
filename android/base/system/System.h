@@ -22,6 +22,7 @@
 
 #include <limits.h>
 #include <stdint.h>
+#include <time.h>
 
 
 namespace android {
@@ -134,6 +135,9 @@ public:
 
     // Returns Times structure for the current process
     virtual Times getProcessTimes() const = 0;
+
+    // Returns the current Unix timestamp
+    virtual time_t getUnixTime() const = 0;
 
 protected:
     static System* setForTesting(System* system);
