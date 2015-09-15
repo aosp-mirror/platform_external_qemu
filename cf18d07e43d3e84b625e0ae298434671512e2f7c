@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a9420f4a_9e3fc179",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-15T05:28:42Z",
+      "side": 1,
+      "message": "The paths/strings returned are generic System directories, not specific to AndroidStudio. IMHO, the only sensical equivalent path for Linux is HOME, and I could make sure that is the path returned for Linux. I am not sure that is of great value really, since getHomeDirectory serves that purpose and we need both for different reasons.",
+      "parentUuid": "0465c2c3_a16d7d89",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 23
+      },
+      "revId": "cf18d07e43d3e84b625e0ae298434671512e2f7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e467cecb_282b1319",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-15T03:35:42Z",
       "side": 1,
       "message": "PATH_MAX ?",
+      "range": {
+        "startLine": 149,
+        "startChar": 22,
+        "endLine": 149,
+        "endChar": 30
+      },
+      "revId": "cf18d07e43d3e84b625e0ae298434671512e2f7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c45e4afd_531ab33a",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-15T05:28:42Z",
+      "side": 1,
+      "message": "Well, it looks like both are defined and I took cues by which to use based on existing code on this very file which I didn\u0027t write (see getProgramDirectory)",
+      "parentUuid": "e467cecb_282b1319",
       "range": {
         "startLine": 149,
         "startChar": 22,
