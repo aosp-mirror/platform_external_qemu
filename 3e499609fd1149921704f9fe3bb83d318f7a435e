@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "0465c2c3_574f03fe",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-15T19:34:33Z",
+      "side": 1,
+      "message": "I assume FR means Future Release. I agree, let\u0027s coordinate with Studio team after this release",
+      "parentUuid": "e467cecb_0e5ad76a",
+      "range": {
+        "startLine": 234,
+        "startChar": 14,
+        "endLine": 234,
+        "endChar": 28
+      },
+      "revId": "3e499609fd1149921704f9fe3bb83d318f7a435e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e467cecb_b367985d",
         "filename": "android/metrics/StudioHelper.cpp",
         "patchSetId": 14
