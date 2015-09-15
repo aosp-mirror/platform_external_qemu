@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6473de94_3e46e88a",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-15T19:31:01Z",
+      "side": 1,
+      "message": "oops",
+      "parentUuid": "8478d270_d3588bfe",
+      "range": {
+        "startLine": 216,
+        "startChar": 24,
+        "endLine": 216,
+        "endChar": 29
+      },
+      "revId": "3e499609fd1149921704f9fe3bb83d318f7a435e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e467cecb_0e5ad76a",
         "filename": "android/metrics/StudioHelper.cpp",
         "patchSetId": 14
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "648afea0_bcaf58fe",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-15T19:31:01Z",
+      "side": 1,
+      "message": "This points to $HOME/Library/Preferences in MacOSX which is where Android Studio saves its preferences file. Because it is a close equivalent to APPDATA in Windows, this call will return the aforemention path in MacOSX. Interestingly, the XML file we are looking for here is NOT saved in %APPDATA% in Windows, but in HOME/.AndroidStudio. Also in Linux. \n\nI will comment this on the code.",
+      "parentUuid": "e467cecb_b367985d",
+      "range": {
+        "startLine": 239,
+        "startChar": 7,
+        "endLine": 239,
+        "endChar": 16
+      },
+      "revId": "3e499609fd1149921704f9fe3bb83d318f7a435e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8478d270_b37a2f50",
         "filename": "android/metrics/StudioHelper.cpp",
         "patchSetId": 14
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "8478d270_33753f0c",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-15T19:31:01Z",
+      "side": 1,
+      "message": "Yes good idea.",
+      "parentUuid": "8478d270_b37a2f50",
+      "range": {
+        "startLine": 278,
+        "startChar": 18,
+        "endLine": 278,
+        "endChar": 27
+      },
+      "revId": "3e499609fd1149921704f9fe3bb83d318f7a435e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e467cecb_1367645c",
         "filename": "android/metrics/StudioHelper.cpp",
         "patchSetId": 14
@@ -105,6 +177,30 @@
       "writtenOn": "2015-09-15T18:50:53Z",
       "side": 1,
       "message": "this is unsafe\nplease use the following:\n\nstd::string line;\nstd::getline(uuid_file, line);\n\nThen you can copy the value into String to return it",
+      "range": {
+        "startLine": 279,
+        "startChar": 4,
+        "endLine": 279,
+        "endChar": 42
+      },
+      "revId": "3e499609fd1149921704f9fe3bb83d318f7a435e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0465c2c3_d74233d9",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-15T19:31:01Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "e467cecb_1367645c",
       "range": {
         "startLine": 279,
         "startChar": 4,
