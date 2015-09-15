@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "a9420f4a_c9cb5587",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T16:25:49Z",
+      "side": 1,
+      "message": "There\u0027s definitely another way to do it, I agree\nWith the current way, here\u0027s what I see:\n1. auto_ptr is not allowed to access the pointer inside, by definition. It\u0027s just a pointer.\n2. it is runAsyncCheck()\u0027s responsibility to take care of possible exceptions, and not to throw after the thread is started. Otherwise there\u0027s just no way of writing correct code.\n3. release()-\u003erunAsyncCheck() needs to check for a return value and manually delete the object if it is \u0027false\u0027\n\nCurrent code is perfectly valid by the Standard, and it looks exactly as I think the best code of this function should look like. release()-\u003e... is a step backwards - it only adds more code where one could make a mistake",
+      "parentUuid": "490513fd_7c5099fc",
+      "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "89fb8b33_1e062de5",
         "filename": "android/update-check/UpdateChecker.h",
         "patchSetId": 9
