@@ -969,12 +969,43 @@ struct PipeDevice {
     uint64_t  params_addr;
 };
 
+/* Update this version number if the device's interface changes. */
+#define PIPE_DEVICE_VERSION  1
+
+/* Map the guest buffer specified by the guest paddr 'phys'.
+ * Returns a host pointer which should be unmapped later via
+ * cpu_physical_memory_unmap(), or NULL if mapping failed (likely
+ * because the paddr doesn't actually point at RAM).
+ * Note that for RAM the "mapping" process doesn't actually involve a
+ * data copy.
+ */
+static void *map_guest_buffer(hwaddr phys, size_t size, int is_write)
+{
+    hwaddr l = size;
+    void *ptr;
+
+    ptr = cpu_physical_memory_map(phys, &l, is_write);
+    if (!ptr) {
+        /* Can't happen for RAM */
+        return NULL;
+    }
+    if (l != size) {
+        /* This will only happen if the address pointed at non-RAM,
+         * or if the size means the buffer end is beyond the end of
+         * the RAM block.
+         */
+        cpu_physical_memory_unmap(ptr, l, 0, 0);
+        return NULL;
+    }
+
+    return ptr;
+}
+
 static void
 pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
 {
     Pipe** lookup = pipe_list_findp_channel(&dev->pipes, dev->channel);
     Pipe*  pipe   = *lookup;
-    CPUOldState* env = cpu_single_env;
 
     /* Check that we're referring a known pipe channel */
     if (command != PIPE_CMD_OPEN && pipe == NULL) {
@@ -1016,40 +1047,36 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         break;
 
     case PIPE_CMD_READ_BUFFER: {
-        /* Translate virtual address into physical one, into emulator memory. */
+        /* Translate guest physical address into emulator memory. */
         GoldfishPipeBuffer  buffer;
-        target_ulong        address = dev->address;
-        target_ulong        page    = address & TARGET_PAGE_MASK;
-        hwaddr  phys;
-        phys = safe_get_phys_page_debug(ENV_GET_CPU(env), page);
-#ifdef TARGET_X86_64
-        phys = phys & TARGET_PTE_MASK;
-#endif
-        buffer.data = qemu_get_ram_ptr(phys) + (address - page);
+        buffer.data = map_guest_buffer(dev->address, dev->size, 1);
+        if (!buffer.data) {
+            dev->status = PIPE_ERROR_INVAL;
+            break;
+        }
         buffer.size = dev->size;
         dev->status = pipe->funcs->recvBuffers(pipe->opaque, &buffer, 1);
         DD("%s: CMD_READ_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
            dev->size, dev->status);
+        cpu_physical_memory_unmap(buffer.data, dev->size, 1, dev->size);
         break;
     }
 
     case PIPE_CMD_WRITE_BUFFER: {
-        /* Translate virtual address into physical one, into emulator memory. */
+        /* Translate guest physical address into emulator memory. */
         GoldfishPipeBuffer  buffer;
-        target_ulong        address = dev->address;
-        target_ulong        page    = address & TARGET_PAGE_MASK;
-        hwaddr  phys;
-        phys = safe_get_phys_page_debug(ENV_GET_CPU(env), page);
-#ifdef TARGET_X86_64
-        phys = phys & TARGET_PTE_MASK;
-#endif
-        buffer.data = qemu_get_ram_ptr(phys) + (address - page);
+        buffer.data = map_guest_buffer(dev->address, dev->size, 0);
+        if (!buffer.data) {
+            dev->status = PIPE_ERROR_INVAL;
+            break;
+        }
         buffer.size = dev->size;
         dev->status = pipe->funcs->sendBuffers(pipe->opaque, &buffer, 1);
         DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
            dev->size, dev->status);
+        cpu_physical_memory_unmap(buffer.data, dev->size, 0, dev->size);
         break;
     }
 
@@ -1219,6 +1246,9 @@ static uint32_t pipe_dev_read(void *opaque, hwaddr offset)
 
     case PIPE_REG_PARAMS_ADDR_LOW:
         return (uint32_t)(dev->params_addr & 0xFFFFFFFFUL);
+
+    case PIPE_REG_VERSION:
+        return PIPE_DEVICE_VERSION;
 
     default:
         D("%s: offset=%d (0x%x)\n", __FUNCTION__, offset, offset);
