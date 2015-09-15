@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c93f43b4_3365b2e5",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T21:07:51Z",
+      "side": 1,
+      "message": "nit: still a string here.",
+      "revId": "0d5be7443aa47af9de359c6dc16f2d9f39972d90",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9f4cf41_ffaedfcd",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T21:07:51Z",
+      "side": 1,
+      "message": "nit: you know what :)",
+      "revId": "0d5be7443aa47af9de359c6dc16f2d9f39972d90",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2900dfee_1ea749ae",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T21:07:51Z",
+      "side": 1,
+      "message": "nit: indent",
+      "revId": "0d5be7443aa47af9de359c6dc16f2d9f39972d90",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "490513fd_1c9ab5a9",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T21:07:51Z",
+      "side": 1,
+      "message": "nit",
+      "revId": "0d5be7443aa47af9de359c6dc16f2d9f39972d90",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "490513fd_fcaee9cd",
+        "filename": "android/metrics/StudioHelper.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T21:07:51Z",
+      "side": 1,
+      "message": "nit: why a space before parens?",
+      "revId": "0d5be7443aa47af9de359c6dc16f2d9f39972d90",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09e87b64_e2c2c68d",
+        "filename": "android/metrics/StudioHelper_unittest.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T21:07:51Z",
+      "side": 1,
+      "message": "nit: clang-format? Does the tool work for you at all?",
+      "revId": "0d5be7443aa47af9de359c6dc16f2d9f39972d90",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
