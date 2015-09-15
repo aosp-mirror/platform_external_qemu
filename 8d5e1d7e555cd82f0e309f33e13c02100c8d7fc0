@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6473de94_24bdfc3c",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-15T00:15:35Z",
+      "side": 1,
+      "message": "lost in between updates, yes that\u0027s what it should be",
+      "parentUuid": "e467cecb_28ea33e4",
+      "range": {
+        "startLine": 116,
+        "startChar": 27,
+        "endLine": 116,
+        "endChar": 30
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e467cecb_e8067b5b",
         "filename": "android/metrics/StudioHelper.cpp",
         "patchSetId": 8
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-14T23:50:17Z",
       "side": 1,
       "message": "I\u0027d prefer to return String here and pass it through",
+      "range": {
+        "startLine": 162,
+        "startChar": 16,
+        "endLine": 162,
+        "endChar": 38
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c45e4afd_f854863f",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-15T00:15:35Z",
+      "side": 1,
+      "message": "I am not sure I get this. This is a recursive xml scanner and the API it is making calls to is expecting xmlChar* input. I prefer to use libxml2 API for XML node string comparisons and not switch types.",
+      "parentUuid": "e467cecb_e8067b5b",
       "range": {
         "startLine": 162,
         "startChar": 16,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "44725a92_34452536",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-15T00:15:35Z",
+      "side": 1,
+      "message": "http://www.xmlsoft.org/html/libxml-xmlstring.html#BAD_CAST\n\nBAD_CAST http://www.xmlsoft.org/html/libxml-xmlstring.html#BAD_CAST  is used throughout libxml2 examples in a similar fashion. I believe it will force an error if you try to cast the result of a BAD_CAST back to char *.",
+      "parentUuid": "a46156bd_a67af84f",
+      "range": {
+        "startLine": 170,
+        "startChar": 43,
+        "endLine": 170,
+        "endChar": 51
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6473de94_e45b04e6",
         "filename": "android/metrics/StudioHelper.cpp",
         "patchSetId": 8
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "848ff2ac_18c4dd29",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-15T00:15:35Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "6473de94_e45b04e6",
+      "range": {
+        "startLine": 200,
+        "startChar": 0,
+        "endLine": 200,
+        "endChar": 20
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a46156bd_6699c0fa",
         "filename": "android/metrics/StudioHelper.cpp",
         "patchSetId": 8
@@ -105,6 +201,30 @@
       "writtenOn": "2015-09-14T23:50:17Z",
       "side": 1,
       "message": "with String you can always compare with \u003d\u003d",
+      "range": {
+        "startLine": 249,
+        "startChar": 9,
+        "endLine": 249,
+        "endChar": 19
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9420f4a_63e36a9b",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-15T00:15:35Z",
+      "side": 1,
+      "message": "I prefer using libxml routines for that purpose.",
+      "parentUuid": "a46156bd_6699c0fa",
       "range": {
         "startLine": 249,
         "startChar": 9,
