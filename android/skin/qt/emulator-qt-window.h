@@ -19,6 +19,8 @@
 #include <QMoveEvent>
 #include <QObject>
 #include <QPainter>
+#include <QResizeEvent>
+#include <QTimer>
 #include <QWidget>
 
 #include "android/skin/event.h"
@@ -59,6 +61,7 @@ public:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+    void resizeEvent(QResizeEvent *event);
     void show();
     void startThread(StartFunction f, int argc, char **argv);
     void wheelEvent(QWheelEvent *event);
@@ -118,6 +121,7 @@ private slots:
     void slot_releaseBitmap(SkinSurface *s, QSemaphore *sempahore = NULL);
     void slot_requestClose(QSemaphore *semaphore = NULL);
     void slot_requestUpdate(const QRect *rect, QSemaphore *semaphore = NULL);
+    void slot_resizeDone();
     void slot_setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore = NULL);
     void slot_setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void slot_setWindowTitle(const QString *title, QSemaphore *semaphore = NULL);
@@ -151,6 +155,7 @@ private:
     SkinSurface *backing_surface;
     QQueue<SkinEvent*> event_queue;
     ToolWindow *tool_window;
+    QTimer resize_timer;
 };
 
 struct SkinSurface {
