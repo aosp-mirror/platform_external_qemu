@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "0465c2c3_41bd813b",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T03:46:38Z",
+      "side": 1,
+      "message": "Yes, but its result could be String, not xmlChar*\nany time you transfer resource ownership (e.g. allocated memory) you introduce a possible leak (when it is never freed) or a crash (when it is freed in a wrong way, e.g. with simple free() here).",
+      "parentUuid": "c45e4afd_f854863f",
+      "range": {
+        "startLine": 162,
+        "startChar": 16,
+        "endLine": 162,
+        "endChar": 38
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a46156bd_a67af84f",
         "filename": "android/metrics/StudioHelper.cpp",
         "patchSetId": 8
@@ -131,6 +155,30 @@
       "side": 1,
       "message": "http://www.xmlsoft.org/html/libxml-xmlstring.html#BAD_CAST\n\nBAD_CAST http://www.xmlsoft.org/html/libxml-xmlstring.html#BAD_CAST  is used throughout libxml2 examples in a similar fashion. I believe it will force an error if you try to cast the result of a BAD_CAST back to char *.",
       "parentUuid": "a46156bd_a67af84f",
+      "range": {
+        "startLine": 170,
+        "startChar": 43,
+        "endLine": 170,
+        "endChar": 51
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "648afea0_86a88bc2",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T03:46:38Z",
+      "side": 1,
+      "message": "thanks, I didn\u0027t even think it is a part of libxml :)",
+      "parentUuid": "44725a92_34452536",
       "range": {
         "startLine": 170,
         "startChar": 43,
@@ -225,6 +273,30 @@
       "side": 1,
       "message": "I prefer using libxml routines for that purpose.",
       "parentUuid": "a46156bd_6699c0fa",
+      "range": {
+        "startLine": 249,
+        "startChar": 9,
+        "endLine": 249,
+        "endChar": 19
+      },
+      "revId": "8d5e1d7e555cd82f0e309f33e13c02100c8d7fc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6473de94_ef311dd3",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T03:46:38Z",
+      "side": 1,
+      "message": "well, in that case there are already some leaks. \"true\" and \"false\" look exactly the same in xmlchars and in chars. For the rest of values you\u0027re already strdup\u0027ing it to be a char*. Why can\u0027t we do it earlier so it\u0027s much less error-prone?",
+      "parentUuid": "a9420f4a_63e36a9b",
       "range": {
         "startLine": 249,
         "startChar": 9,
