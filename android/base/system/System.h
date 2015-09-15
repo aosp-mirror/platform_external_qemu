@@ -57,6 +57,10 @@ public:
     // underlying platform) or an empty string if it can't be found
     virtual const String& getHomeDirectory() const = 0;
 
+    // Return the path to user's App Data directory (only applies
+    // in Microsoft Windows) or an empty string if it can't be found
+    virtual const String& getAppDataDirectory() const = 0;
+
     // Return the host bitness as an integer, either 32 or 64.
     // Note that this is different from the program's bitness. I.e. if
     // a 32-bit program runs under a 64-bit host, getProgramBitness()
