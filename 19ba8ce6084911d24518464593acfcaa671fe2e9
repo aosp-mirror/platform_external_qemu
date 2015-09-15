@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "490513fd_7c5099fc",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T07:09:12Z",
+      "side": 1,
+      "message": "Ok, but that\u0027s not really true in the most general case, e.g.:\n\n- One could assume a debugging implementation of std::auto_ptr that actually does something important from the pointer value in the destructor (even if it doesn\u0027t derefence it, having a stale pointer value on the stack is bad).\n\n- Since you used std::nothow here, you\u0027re assuming this code could be used with exceptions enabled. However if an exception is raised in runAsyncCheck() after the thread is started, you might have the destructor run on the same instance twice, in two different threads (very unlikely, probably impossible with the current implementation of runAsyncCheck(), but possible if it changes in the future).\n\nI think semantics are important, the code you\u0027re writing will be read by other people in the future, which may take this for good programming practice, when it isn\u0027t.\n\nI\u0027ll ask you to either add a comment explaining the _subtle_ expectation you\u0027re making here, or to just use checker.release()-\u003erunAsyncCheck().\n\nAnother way to look at it is that this init()/needsCheck()/runAsyncCheck() API sequence is error-prone, maybe there is a better way to implement this than asking to caller to delete the object in certains cases, and not others?",
+      "parentUuid": "a9420f4a_780795e4",
+      "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "89fb8b33_1e062de5",
         "filename": "android/update-check/UpdateChecker.h",
         "patchSetId": 9
