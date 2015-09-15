@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "648afea0_bf690ac5",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T21:29:43Z",
+      "side": 1,
+      "message": "stdlib.h\nc* versions do not work the same way on different platforms",
+      "range": {
+        "startLine": 28,
+        "startChar": 10,
+        "endLine": 28,
+        "endChar": 17
+      },
+      "revId": "93d6f9bef4a9ceb5e57ce678e3bf7aadc8fcfb02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6473de94_be9918bb",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T21:29:43Z",
+      "side": 1,
+      "message": "not here, before the \u0027break\u0027. Otherwise it will leak anyway as break skips this \u0027free\u0027",
+      "range": {
+        "startLine": 219,
+        "startChar": 20,
+        "endLine": 219,
+        "endChar": 36
+      },
+      "revId": "93d6f9bef4a9ceb5e57ce678e3bf7aadc8fcfb02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
