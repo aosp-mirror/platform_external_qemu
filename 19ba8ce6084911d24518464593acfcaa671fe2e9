@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a9420f4a_780795e4",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T01:10:18Z",
+      "side": 1,
+      "message": "release() doesn\u0027t access the pointer, so it\u0027s safe to do it both ways",
+      "parentUuid": "89fb8b33_de17a50f",
+      "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "89fb8b33_1e062de5",
         "filename": "android/update-check/UpdateChecker.h",
         "patchSetId": 9
@@ -47,6 +65,24 @@
       "writtenOn": "2015-09-14T22:11:04Z",
       "side": 1,
       "message": "nit: for simplicity. I would drop the update_check namespace and just put the declarations for the interface classes in the public part of the UpdateChecker class.",
+      "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8478d270_9d3d44f4",
+        "filename": "android/update-check/UpdateChecker.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T01:10:18Z",
+      "side": 1,
+      "message": "I prefer not to - things like to expand with time, and now it would all be contained in a namespace.",
+      "parentUuid": "490513fd_1c6ab5b3",
       "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
