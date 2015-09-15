@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "8478d270_001e279f",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-15T14:42:37Z",
+      "side": 1,
+      "message": "D-Oh!",
+      "parentUuid": "a9420f4a_3e8c55fb",
+      "range": {
+        "startLine": 75,
+        "startChar": 22,
+        "endLine": 75,
+        "endChar": 30
+      },
+      "revId": "0ee25b52778a439e0cbd1647581f4f42d8fbd215",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8478d270_7d26a895",
         "filename": "android/skin/qt/extended-window.h",
         "patchSetId": 1
