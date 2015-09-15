@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "e9ea475e_a1ccbebf",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T16:37:24Z",
+      "side": 1,
+      "message": "Ok, I don\u0027t totally agree with you, and I think the root of the problem is the \"self-deleting object in case of success-only\", this is cumbersome and I feel there is a better way to implement this. However, let\u0027s not fight over it, it\u0027s not worth it at the moment :)",
+      "parentUuid": "a9420f4a_c9cb5587",
+      "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "89fb8b33_1e062de5",
         "filename": "android/update-check/UpdateChecker.h",
         "patchSetId": 9
