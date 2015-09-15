@@ -108,6 +108,7 @@ extern ABool androidMetrics_keepAlive(Looper* metrics_looper);
 
 /* This is the last function any emulator process should call on a metrics file
  * to indicate that the process exited cleanly.
+ * Calling this before initializing the module trivially succeeds.
  *
  * Returns: 1 if successful, 0 otherwise.
  */
