@@ -225,5 +225,13 @@ TEST(System, getProcessTimes) {
     ASSERT_GE(times2.systemMs, times1.systemMs);
 }
 
+TEST(System, getUnixTime) {
+    const time_t curTime = time(NULL);
+    const time_t time1 = System::get()->getUnixTime();
+    const time_t time2 = System::get()->getUnixTime();
+    ASSERT_GE(time1, curTime);
+    ASSERT_GE(time2, time1);
+}
+
 }  // namespace base
 }  // namespace android
