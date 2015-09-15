@@ -91,6 +91,24 @@
     },
     {
       "key": {
+        "uuid": "8478d270_7340976c",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-15T17:58:09Z",
+      "side": 1,
+      "message": "Now I\u0027m agree with you completely. Sadly, the Thread class model doesn\u0027t allow any other usage but only \u0027delete externally in case of failure, delete inside if succeeded\u0027\nI could\u0027ve moved it inside of UpdateChecker class, but it\u0027s already inside of the implementation of update checking - which is private enough for me",
+      "parentUuid": "e9ea475e_a1ccbebf",
+      "revId": "19ba8ce6084911d24518464593acfcaa671fe2e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "89fb8b33_1e062de5",
         "filename": "android/update-check/UpdateChecker.h",
         "patchSetId": 9
