@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "09e87b64_e2408627",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T08:38:12Z",
+      "side": 1,
+      "message": "Oh you\u0027re right, I\u0027ve fixed it per your suggestion in ConfigDirs in the next patch during my last rebase, but will move it to bufprint_config_path() in this patch instead. Thanks.",
+      "parentUuid": "648afea0_d287b2d7",
+      "range": {
+        "startLine": 109,
+        "startChar": 26,
+        "endLine": 109,
+        "endChar": 42
+      },
+      "revId": "a14343c8a8eb80c1217562238c0964023854f18d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "490513fd_9c9c852a",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 2
