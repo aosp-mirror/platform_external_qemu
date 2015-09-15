@@ -234,7 +234,6 @@ ABool androidMetrics_seal() {
     AndroidMetrics metrics;
 
     if (metricsFilePath == NULL) {
-        mwarning("seal called twice / before init.");
         return 1;
     }
 
