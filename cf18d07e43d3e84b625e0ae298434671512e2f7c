@@ -93,6 +93,47 @@
       "revId": "cf18d07e43d3e84b625e0ae298434671512e2f7c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09e87b64_027fea75",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T08:07:46Z",
+      "side": 1,
+      "message": "for the record, the SHGetFolderPath() doc specifically mentions MAX_PATH, it\u0027s one of these annoying Windows-specific things, but since this is within a defined(_WIN32) block, should be ok.\n\nhttps://msdn.microsoft.com/en-us/library/windows/desktop/bb762181(v\u003dvs.85).aspx",
+      "parentUuid": "c45e4afd_531ab33a",
+      "range": {
+        "startLine": 149,
+        "startChar": 22,
+        "endLine": 149,
+        "endChar": 30
+      },
+      "revId": "cf18d07e43d3e84b625e0ae298434671512e2f7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44209a82_c4619e49",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T08:07:46Z",
+      "side": 1,
+      "message": "typo: s/applicatoins/applications/g",
+      "revId": "cf18d07e43d3e84b625e0ae298434671512e2f7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
