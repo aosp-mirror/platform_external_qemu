@@ -62,6 +62,30 @@
       "revId": "8a7d9bbf2539dcc5583baf569b5a6253c519f20d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c93f43b4_500cac04",
+        "filename": "android/utils/thread_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T07:12:38Z",
+      "side": 1,
+      "message": "why? Each test instance needs to reset the static functions anyway, hence the need for the SetUp() function.",
+      "parentUuid": "a46156bd_26f3486a",
+      "range": {
+        "startLine": 21,
+        "startChar": 6,
+        "endLine": 21,
+        "endChar": 17
+      },
+      "revId": "8a7d9bbf2539dcc5583baf569b5a6253c519f20d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
