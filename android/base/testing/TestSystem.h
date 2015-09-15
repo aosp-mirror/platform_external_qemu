@@ -39,7 +39,8 @@ public:
             mPrevSystem(System::setForTesting(this)),
             mTimes(),
             mSilentShellFunc(NULL),
-            mSilentShellOpaque(NULL) {}
+            mSilentShellOpaque(NULL),
+            mUnixTime() {}
 
     virtual ~TestSystem() {
         System::setForTesting(mPrevSystem);
@@ -192,6 +193,14 @@ public:
         }
     }
 
+    virtual time_t getUnixTime() const {
+        return mUnixTime;
+    }
+
+    void setUnixTime(time_t time) {
+        mUnixTime = time;
+    }
+
 private:
     String toTempRoot(const char* path) {
         String result = mTempRootPrefix;
@@ -219,6 +228,7 @@ private:
     Times mTimes;
     SilentCommandShell* mSilentShellFunc;
     void* mSilentShellOpaque;
+    time_t mUnixTime;
 };
 
 }  // namespace base
