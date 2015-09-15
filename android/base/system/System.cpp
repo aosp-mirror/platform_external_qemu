@@ -288,6 +288,10 @@ public:
         return res;
     }
 
+    time_t getUnixTime() const {
+        return time(NULL);
+    }
+
     bool runSilentCommand(const StringVector& commandLine) {
         // Sanity check.
         if (commandLine.empty()) {
