@@ -36,8 +36,8 @@ public:
             mTempRootPrefix(),
             mEnvPairs(),
             mPrevSystem(System::setForTesting(this)),
-            mTimes()
-    {}
+            mTimes(),
+            mUnixTime() {}
 
     virtual ~TestSystem() {
         System::setForTesting(mPrevSystem);
@@ -160,6 +160,14 @@ public:
         mTimes = times;
     }
 
+    virtual time_t getUnixTime() const {
+        return mUnixTime;
+    }
+
+    void setUnixTime(time_t time) {
+        mUnixTime = time;
+    }
+
 private:
     String toTempRoot(const char* path) {
         String result = mTempRootPrefix;
@@ -184,6 +192,7 @@ private:
     StringVector mEnvPairs;
     System* mPrevSystem;
     Times mTimes;
+    time_t mUnixTime;
 };
 
 }  // namespace base
