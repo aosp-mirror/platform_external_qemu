@@ -284,6 +284,30 @@
     },
     {
       "key": {
+        "uuid": "e467cecb_6e97d336",
+        "filename": "android/metrics/StudioHelper_unittest.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-15T19:39:38Z",
+      "side": 1,
+      "message": "Ah, the problem is not the line continuation.\nYou\u0027ve defined ANDROID_STUDIO_DIR_INFIX above only for ! __APPLE__, but this unittest is compiled for it.",
+      "parentUuid": "a9420f4a_8481b4f0",
+      "range": {
+        "startLine": 167,
+        "startChar": 32,
+        "endLine": 167,
+        "endChar": 77
+      },
+      "revId": "3e499609fd1149921704f9fe3bb83d318f7a435e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "843d32a1_424f62fe",
         "filename": "android/metrics/studio-helper.h",
         "patchSetId": 14
