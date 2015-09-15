@@ -53,7 +53,7 @@ namespace {
 
 class HostSystem : public System {
 public:
-    HostSystem() : mProgramDir(), mHomeDir() {}
+    HostSystem() : mProgramDir(), mHomeDir(), mAppDataDir() {}
 
     virtual ~HostSystem() {}
 
@@ -142,6 +142,39 @@ public:
         }
         return mHomeDir;
     }
+
+    virtual const String& getAppDataDirectory() const {
+#if defined(_WIN32)
+        if (mAppDataDir.empty()) {
+            char path[MAX_PATH] = { 0 };
+            if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path))) {
+                mAppDataDir.assign(path);
+            } else {
+                const char *appdata = getenv("APPDATA");
+                if(appdata != NULL) {
+                    mAppDataDir.assign(appdata);
+                }
+            }
+        }
+#elif defined (__APPLE__)
+        if (mAppDataDir.empty()) {
+            // The equivalent of AppData directory in MacOS X is
+            // under ~/Library/Preferences. Apple does not offer
+            // a C/C++ API to query this location (in ObjC cocoa
+            // applications NSSearchPathForDirectoriesInDomains
+            // can be used), so we apply the common practice of
+            // hard coding it
+            mAppDataDir.assign(getHomeDirectory());
+            mAppDataDir.append("/Library/Preferences");
+        }
+#elif defined(__linux__)
+        ; // not applicable
+#else
+#error "Unsupported platform!"
+#endif
+        return mAppDataDir;
+    }
+
 
     virtual int getHostBitness() const {
 #ifdef _WIN32
@@ -363,6 +396,7 @@ public:
 private:
     mutable String mProgramDir;
     mutable String mHomeDir;
+    mutable String mAppDataDir;
 };
 
 LazyInstance<HostSystem> sHostSystem = LAZY_INSTANCE_INIT;
