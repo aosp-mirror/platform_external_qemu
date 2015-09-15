@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44209a82_8798886e",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T10:23:48Z",
+      "side": 1,
+      "message": "nit: a static const char array is slightly better because it avoids creating a liberal constant pointer, i.e.:\n\n  static const char ANDROID_STUDIO_UUID_DIR[] \u003d \"JetBrains\"; \n\nAlso, for C++ code, prefer kAndroidStudioUuidDir name.",
+      "revId": "e54035c5bcfcbac80ae3f23d370bc3a3525f9140",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c93f43b4_d08adc9c",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T10:23:48Z",
+      "side": 1,
+      "message": "nit: reformat indentation.",
+      "revId": "e54035c5bcfcbac80ae3f23d370bc3a3525f9140",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64211e85_258c2eb9",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T10:23:48Z",
+      "side": 1,
+      "message": "nit: style guide prefers braces for this use-case, as in:\n\n  if (appDataPath.empty()) {\n      return NULL;\n  }",
+      "revId": "e54035c5bcfcbac80ae3f23d370bc3a3525f9140",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9f4cf41_dfee7b7d",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T10:23:48Z",
+      "side": 1,
+      "message": "nit: opening brace at the end of the line above.",
+      "revId": "e54035c5bcfcbac80ae3f23d370bc3a3525f9140",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44209a82_a79d845d",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T10:23:48Z",
+      "side": 1,
+      "message": "nit: * on the side of the type. \u0027git clang-format\u0027 is your friend :)",
+      "revId": "e54035c5bcfcbac80ae3f23d370bc3a3525f9140",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2900dfee_1bf3db1b",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T10:23:48Z",
+      "side": 1,
+      "message": "nit: missing #include \"android/utils/compiler.h\" here.",
+      "revId": "e54035c5bcfcbac80ae3f23d370bc3a3525f9140",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44209a82_c7a2809c",
+        "filename": "android/metrics/studio-helper.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-15T10:23:48Z",
+      "side": 1,
+      "message": "nit: please use (void) here.",
+      "revId": "e54035c5bcfcbac80ae3f23d370bc3a3525f9140",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
