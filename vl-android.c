@@ -72,7 +72,6 @@
 #include "android/skin/charmap.h"
 #include "android/snapshot.h"
 #include "android/tcpdump.h"
-#include "android/update-check/update_check.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
@@ -410,8 +409,6 @@ extern int android_display_height;
 extern int android_display_bpp;
 
 extern void  dprint( const char* format, ... );
-
-static void android_check_for_updates();
 
 const char* dns_log_filename = NULL;
 const char* drop_log_filename = NULL;
@@ -4087,7 +4084,6 @@ int main(int argc, char **argv, char **envp)
      * approval.
      */
     android_init_metrics();
-    android_check_for_updates();
 
     main_loop();
     quit_timers();
@@ -4096,12 +4092,6 @@ int main(int argc, char **argv, char **envp)
     socket_drainer_stop();
     android_emulation_teardown();
     return 0;
-}
-
-void android_check_for_updates() {
-    char configPath[PATH_MAX];
-    bufprint_config_path(configPath, configPath + sizeof(configPath));
-    android_checkForUpdates(configPath);
 }
 
 void
