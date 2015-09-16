@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c45e4afd_0de4979f",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2113,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-16T00:25:34Z",
+      "side": 1,
+      "message": "do we have a single yes/no here or some flags with different optins?",
+      "range": {
+        "startLine": 2113,
+        "startChar": 9,
+        "endLine": 2113,
+        "endChar": 34
+      },
+      "revId": "f0ff1b32c8ff0aee1d03455694421b96c1376e4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0465c2c3_d5994bba",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2145,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-16T00:25:34Z",
+      "side": 1,
+      "message": "this actually searches and parses the configuration again. do we really want to slow down the process?",
+      "range": {
+        "startLine": 2145,
+        "startChar": 9,
+        "endLine": 2145,
+        "endChar": 34
+      },
+      "revId": "f0ff1b32c8ff0aee1d03455694421b96c1376e4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
