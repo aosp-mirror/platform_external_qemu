@@ -49,6 +49,7 @@
 #include "android/android.h"
 #include "android/camera/camera-service.h"
 #include "android/charpipe.h"
+#include "android/curl-support.h"
 #include "android/display-core.h"
 #include "android/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
@@ -137,6 +138,7 @@
 #include <linux/ppdev.h>
 #include <linux/parport.h>
 #endif
+
 #ifdef __sun__
 #include <sys/stat.h>
 #include <sys/ethernet.h>
@@ -2182,6 +2184,10 @@ int main(int argc, char **argv, char **envp)
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;
 
+    // libcurl initialization is thread-unsafe, so let's call it first
+    // to make sure no other thread could be doing the same
+    curl_init();
+
     /* Initialize sockets before anything else, so we can properly report
      * initialization failures back to the UI. */
 #ifdef _WIN32
@@ -4097,4 +4103,6 @@ android_emulation_teardown(void)
 {
     skin_charmap_done();
     android_teardown_metrics();
+
+    curl_cleanup();
 }
