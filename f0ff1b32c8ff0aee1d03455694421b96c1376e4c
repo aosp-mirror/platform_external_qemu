@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "a46156bd_f98c8afe",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2113,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-16T01:48:31Z",
+      "side": 1,
+      "message": "Kostas: Yes, this is a synchronous implementation of the reporting. No, there is no reason for it to be this way.\n\nStarted simple, and I haven\u0027t seen any situation where this actually blocked the process for any visible duration.\n\nI have a CL in the pipes to make this async, but that won\u0027t land very soon.",
+      "parentUuid": "c45e4afd_8d73476f",
+      "range": {
+        "startLine": 2113,
+        "startChar": 9,
+        "endLine": 2113,
+        "endChar": 34
+      },
+      "revId": "f0ff1b32c8ff0aee1d03455694421b96c1376e4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0465c2c3_d5994bba",
         "filename": "vl-android.c",
         "patchSetId": 2
