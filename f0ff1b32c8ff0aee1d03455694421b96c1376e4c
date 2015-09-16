@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "c45e4afd_8d73476f",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2113,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-16T00:47:34Z",
+      "side": 1,
+      "message": "It\u0027s a boolean, as it is in Android Studio.\n\nIf I understand correctly, there does not seem to be any reason for crash-reporting to run in a blocking fashion before the main loop. Crash reporting could be contained in a separate thread or simply in the parent path of the emulator wrapper that forks qemu.",
+      "parentUuid": "648afea0_95126f8d",
+      "range": {
+        "startLine": 2113,
+        "startChar": 9,
+        "endLine": 2113,
+        "endChar": 34
+      },
+      "revId": "f0ff1b32c8ff0aee1d03455694421b96c1376e4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0465c2c3_d5994bba",
         "filename": "vl-android.c",
         "patchSetId": 2
