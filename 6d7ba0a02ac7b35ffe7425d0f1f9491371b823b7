@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "848ff2ac_3bf3506a",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-16T00:16:28Z",
+      "side": 1,
+      "message": "Indeed, that would be safer",
+      "range": {
+        "startLine": 89,
+        "startChar": 11,
+        "endLine": 89,
+        "endChar": 15
+      },
+      "revId": "6d7ba0a02ac7b35ffe7425d0f1f9491371b823b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0465c2c3_b56db789",
+        "filename": "vl-android.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 4090,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-16T00:16:28Z",
+      "side": 1,
+      "message": "We could disable here (or abandon early in the checker thread) the version-update-check procedure for developement versions of the emulator (VERSION_STRING \"standalone\"). Or we could have a development build-flag.",
+      "range": {
+        "startLine": 4089,
+        "startChar": 0,
+        "endLine": 4090,
+        "endChar": 32
+      },
+      "revId": "6d7ba0a02ac7b35ffe7425d0f1f9491371b823b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
