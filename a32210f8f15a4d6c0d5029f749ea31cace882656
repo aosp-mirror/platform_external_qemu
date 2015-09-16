@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0465c2c3_0bef222e",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-16T17:08:03Z",
+      "side": 1,
+      "message": "SGTM\n\nWhat if the user wants to copy one or more files that include an APK to the device? This may be a non-issue, but it seems like a possibility.",
+      "parentUuid": "a9420f4a_ceca362c",
+      "revId": "a32210f8f15a4d6c0d5029f749ea31cace882656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0465c2c3_8b40926d",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-16T15:02:17Z",
       "side": 1,
       "message": "Does this prevent the background from showing on the\nemulator when it boots? (If so: Woo!)",
+      "revId": "a32210f8f15a4d6c0d5029f749ea31cace882656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6473de94_57f0e75a",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-16T17:08:03Z",
+      "side": 1,
+      "message": "I don\u0027t think so? When I put this in, it was so when you resize the window, you see black instead of white in the new space.",
+      "parentUuid": "0465c2c3_8b40926d",
       "revId": "a32210f8f15a4d6c0d5029f749ea31cace882656",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
