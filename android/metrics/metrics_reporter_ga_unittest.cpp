@@ -9,19 +9,41 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#define __STDC_LIMIT_MACROS
+// Must be included before anything that might include stdint.
+#include "android/base/Limits.h"
+
 #include "android/metrics/metrics_reporter_ga.h"
 #include "android/metrics/internal/metrics_reporter_ga_internal.h"
 
+#include "android/base/testing/TestSystem.h"
+#include "android/base/testing/TestTempDir.h"
+
 #include <gtest/gtest.h>
 
-TEST(MetricsReporterGa, defaultMetrics) {
+namespace {
+
+class MetricsReporterGaTest : public testing::Test {
+public:
+    MetricsReporterGaTest() : mTestSystem("", 32) {}
+
+    virtual void SetUp() {
+        // Set the envvar for studio preferences file to a known empty location.
+        // This ensures that our tests are hermetic w.r.t. studio prefrences.
+        mTestSystem.envSet("ANDROID_STUDIO_PREFERENCES",
+                           mTestSystem.getTempRoot()->path());
+    }
+
+private:
+    android::base::TestSystem mTestSystem;
+};
+
+TEST_F(MetricsReporterGaTest, defaultMetrics) {
     char* post_data;
     AndroidMetrics metrics;
     static const char kExpected[] =
             "v=1&tid=UA-19996407-3&an=Android Studio&av=unknown&"
-            "cid=default-client&cd6=unknown&t=event&ec=emulator&"
-            "ea=singleRunCrashInfo&el=crashDetected&cm2=0&cm3=0";
+            "cid=00000000-0000-0000-0000-000000000000&cd6=unknown&t=event&"
+            "ec=emulator&ea=singleRunCrashInfo&el=crashDetected&cm2=0&cm3=0";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -31,13 +53,13 @@ TEST(MetricsReporterGa, defaultMetrics) {
     free(post_data);
 }
 
-TEST(MetricsReporterGa, cleanRun) {
+TEST_F(MetricsReporterGaTest, cleanRun) {
     char* post_data;
     AndroidMetrics metrics;
     static const char kExpected[] =
             "v=1&tid=UA-19996407-3&an=Android Studio&av=standalone&"
-            "cid=default-client&cd6=x86_64&t=event&ec=emulator&"
-            "ea=singleRunCrashInfo&el=cleanExit&cm2=220&cm3=1170";
+            "cid=00000000-0000-0000-0000-000000000000&cd6=x86_64&t=event&"
+            "ec=emulator&ea=singleRunCrashInfo&el=cleanExit&cm2=220&cm3=1170";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -56,13 +78,14 @@ TEST(MetricsReporterGa, cleanRun) {
     free(post_data);
 }
 
-TEST(MetricsReporterGa, dirtyRun) {
+TEST_F(MetricsReporterGaTest, dirtyRun) {
     char* post_data;
     AndroidMetrics metrics;
     static const char kExpected[] =
             "v=1&tid=UA-19996407-3&an=Android Studio&av=standalone&"
-            "cid=default-client&cd6=x86_64&t=event&ec=emulator&"
-            "ea=singleRunCrashInfo&el=crashDetected&cm2=180&cm3=1080";
+            "cid=00000000-0000-0000-0000-000000000000&cd6=x86_64&t=event&"
+            "ec=emulator&ea=singleRunCrashInfo&el=crashDetected&cm2=180&"
+            "cm3=1080";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -80,3 +103,5 @@ TEST(MetricsReporterGa, dirtyRun) {
     androidMetrics_fini(&metrics);
     free(post_data);
 }
+
+}  // namespace
