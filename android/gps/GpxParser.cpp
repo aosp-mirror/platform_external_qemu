@@ -177,7 +177,7 @@ bool GpxParser::parseFile(const char *filePath, GpsFixArray *fixes, string *erro
     xmlDocPtr doc = xmlReadFile(filePath, NULL, 0);
     if (doc == NULL) {
         GpxParserInternal::cleanupXmlDoc(doc);
-        *error = "File could not be found.";
+        *error = "GPX document not parsed successfully.";
         return false;
     }
     return GpxParserInternal::parse(doc, fixes, error);

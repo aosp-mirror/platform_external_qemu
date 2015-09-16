@@ -18,6 +18,7 @@
 #include "android/location-agent.h"
 #include "android/gps.h"
 #include "android/gps/GpsFix.h"
+#include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
 #include "android/skin/qt/emulator-qt-window.h"
 
@@ -259,12 +260,60 @@ bool ExtendedWindow::loc_cellIsValid(QTableWidget *table, int row, int col)
     return cellOK;
 }
 
+void ExtendedWindow::on_loc_GpxButton_clicked()
+{
+    bool isOK;
+
+    // Use dialog to get file name
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open GPX File"), ".",
+                                                    tr("GPX files (*.gpx);;All files (*)"));
+
+    if (fileName.isNull()) return;
+
+    // Delete all rows in table
+    mExtendedUi->loc_pathTable->setRowCount(0);
+
+    GpsFixArray gpxFixes;
+    std::string errStr;
+    isOK = GpxParser::parseFile(fileName.toStdString().c_str(),
+                                &gpxFixes, &errStr);
+    if (!isOK) {
+        mToolWindow->showErrorDialog(tr(errStr.c_str()),
+                                     tr("GPX Parser"));
+    } else {
+        // Put the data into 'loc_pathTable'
+        for (unsigned int idx = 0; idx < gpxFixes.size(); idx++) {
+            loc_appendToTable(gpxFixes[idx].latitude,
+                              gpxFixes[idx].longitude,
+                              gpxFixes[idx].elevation,
+                              gpxFixes[idx].name,
+                              gpxFixes[idx].description,
+                              gpxFixes[idx].time);
+        }
+    }
+
+    // Ensure that we have at least one row
+    if (mExtendedUi->loc_pathTable->rowCount() == 0) {
+        mExtendedUi->loc_pathTable->insertRow(0);
+
+        mExtendedUi->loc_pathTable->setItem(0, 0, new QTableWidgetItem("0")); // Delay
+        mExtendedUi->loc_pathTable->setItem(0, 1, new QTableWidgetItem("0")); // Latitute
+        mExtendedUi->loc_pathTable->setItem(0, 2, new QTableWidgetItem("0")); // Longitude
+        mExtendedUi->loc_pathTable->setItem(0, 3, new QTableWidgetItem("0")); // Elevation
+        mExtendedUi->loc_pathTable->setItem(0, 4, new QTableWidgetItem("" )); // Name
+        mExtendedUi->loc_pathTable->setItem(0, 5, new QTableWidgetItem("" )); // Description
+    }
+
+    setButtonEnabled(mExtendedUi->loc_removeRowButton,
+                     mExtendedUi->loc_pathTable->rowCount() > 1 );
+}
+
 void ExtendedWindow::on_loc_KmlButton_clicked()
 {
     bool isOK;
 
     // Use dialog to get file name
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), ".",
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open KML File"), ".",
                                                     tr("KML files (*.kml);;All files (*)"));
 
     if (fileName.isNull()) return;
