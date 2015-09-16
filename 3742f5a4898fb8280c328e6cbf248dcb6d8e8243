@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "043302d8_79197381",
+        "filename": "android/utils/bufprint_system.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-16T23:08:03Z",
+      "side": 1,
+      "message": "Nit: Why else? A simple fallthrough is easier to follow imo, since you return from the if clause.",
+      "range": {
+        "startLine": 62,
+        "startChar": 6,
+        "endLine": 62,
+        "endChar": 12
+      },
+      "revId": "3742f5a4898fb8280c328e6cbf248dcb6d8e8243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
