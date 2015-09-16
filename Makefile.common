@@ -130,6 +130,22 @@ endif
 
 EMULATOR_COMMON_CFLAGS += -DCURL_STATICLIB
 
+##############################################################################
+# Libxml2 definitions
+#
+LIBXML2_TOP32_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86
+LIBXML2_TOP64_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86_64
+
+ifeq ($(HOST_OS),darwin)
+     LIBXML2_INCLUDES := $(LIBXML2_TOP64_DIR)/include
+else
+     LIBXML2_INCLUDES := $(LIBXML2_TOP32_DIR)/include
+endif
+LIBXML2_LDLIBS := $(LIBXML2_TOP32_DIR)/lib/libxml2.a
+LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
+LIBXML2_LDLIBS := $(LIBXML2_TOP32_DIR)/lib/libxml2.a
+LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
+
 ###########################################################
 # Android utility functions
 #
@@ -178,6 +194,7 @@ common_LOCAL_SRC_FILES += \
 	android/metrics/ddms-ping.cpp \
 	android/metrics/metrics_reporter.c \
 	android/metrics/metrics_reporter_ga.c \
+	android/metrics/StudioHelper.cpp \
 	android/qemu/base/async/Looper.cpp \
 	android/qemu/base/files/QemuFileStream.cpp \
 	android/opengl/EmuglBackendList.cpp \
@@ -251,6 +268,7 @@ include $(LOCAL_PATH)/android/wear-agent/sources.mk
 ## one for 32-bit
 $(call start-emulator-library, emulator-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES)
+LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES) -DLIBXML_STATIC
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
     LOCAL_IGNORE_BITNESS := true
@@ -260,6 +278,7 @@ $(call end-emulator-library)
 
 $(call start-emulator64-library, emulator64-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES_64)
+LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES) -DLIBXML_STATIC
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
@@ -296,23 +315,6 @@ EMULATOR_LIBUI_CFLAGS += \
     -I$(LOCAL_PATH)/$(LIBPNG_DIR)
 
 common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
-
-##############################################################################
-# Libxml2 definitions
-#
-LIBXML2_TOP32_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86
-LIBXML2_TOP64_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86_64
-
-# NOTE: Use $(LIBXML2_TOP64_DIR) for Darwin build since that's the only
-# thing that's available on this platform.
-LIBXML2_INCLUDES := $(LIBXML2_TOP64_DIR)/include
-LIBXML2_LDLIBS := $(LIBXML2_TOP32_DIR)/lib/libxml2.a
-
-# Required to properly link the library on Windows.
-# See https://mail.gnome.org/archives/xml/2012-November/msg00030.html
-common_LOCAL_CFLAGS += -DLIBXML_STATIC
-
-LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
 
 ##############################################################################
 # SDL-related definitions
