@@ -45,6 +45,30 @@
       "revId": "6d7ba0a02ac7b35ffe7425d0f1f9491371b823b7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "848ff2ac_db318cbc",
+        "filename": "vl-android.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 4090,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-16T00:20:44Z",
+      "side": 1,
+      "message": "We don\u0027t really care (enough) to distinguish emulator runs on ADT developer machines vs. on users\u0027 machines.\n\n- (One hopes) that there are enough emulator users out there that data generated from ADT developer machines is insignificant.\n- It\u0027s not possible to actually distinguish non release builds from release builds when the emulator is run standalone either way.\n- The \"standalone\" version string is a good enough hook to use to filter out data. Of course, this does not distinguish standalone runs of the emulator in the ADT team vs users.",
+      "parentUuid": "0465c2c3_b56db789",
+      "range": {
+        "startLine": 4089,
+        "startChar": 0,
+        "endLine": 4090,
+        "endChar": 32
+      },
+      "revId": "6d7ba0a02ac7b35ffe7425d0f1f9491371b823b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
