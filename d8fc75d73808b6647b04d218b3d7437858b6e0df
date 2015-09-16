@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e44c2e60_fa3c7d5b",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-16T21:53:40Z",
+      "side": 1,
+      "message": "Looks like this leaked in here.",
+      "range": {
+        "startLine": 102,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 3
+      },
+      "revId": "d8fc75d73808b6647b04d218b3d7437858b6e0df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
