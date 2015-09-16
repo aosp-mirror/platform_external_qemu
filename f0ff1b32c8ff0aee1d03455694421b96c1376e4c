@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "648afea0_95126f8d",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2113,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-16T00:31:24Z",
+      "side": 1,
+      "message": "Specifics are handled by android_studio_get_optins (Currently, it\u0027s a string \"true\"/\"false\" value) which returns an int to indicate opt-in state. See https://android-review.googlesource.com/#/c/170258/21/android/metrics/studio-helper.h@31",
+      "parentUuid": "c45e4afd_0de4979f",
+      "range": {
+        "startLine": 2113,
+        "startChar": 9,
+        "endLine": 2113,
+        "endChar": 34
+      },
+      "revId": "f0ff1b32c8ff0aee1d03455694421b96c1376e4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0465c2c3_d5994bba",
         "filename": "vl-android.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-16T00:25:34Z",
       "side": 1,
       "message": "this actually searches and parses the configuration again. do we really want to slow down the process?",
+      "range": {
+        "startLine": 2145,
+        "startChar": 9,
+        "endLine": 2145,
+        "endChar": 34
+      },
+      "revId": "f0ff1b32c8ff0aee1d03455694421b96c1376e4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "648afea0_15557f39",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2145,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-16T00:31:24Z",
+      "side": 1,
+      "message": "- This is during teardown, as long as this is not slow enough to cause trouble with shutdown, no one will notice.\n- This is a tiny file afaik, really shouldn\u0027t cause too much trouble (this does not happen 1000s of times a second).\n\n- I don\u0027t much care. I didn\u0027t have it at first, and this isn\u0027t failsafe (some weird user interaction could lead to opt-in value changing between the two calls).\n\nI\u0027ll simply remove it anyway.",
+      "parentUuid": "0465c2c3_d5994bba",
       "range": {
         "startLine": 2145,
         "startChar": 9,
