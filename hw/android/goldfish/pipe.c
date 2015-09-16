@@ -62,7 +62,7 @@
 /***********************************************************************
  ***********************************************************************
  *****
- *****   P I P E   S E R V I C E   R E G I S T R A T I O N
+ *****    P I P E   A P I
  *****
  *****/
 
@@ -118,6 +118,19 @@ goldfish_pipe_find_type(const char*  pipeName)
     return NULL;
 }
 
+static const AndroidPipeHwFuncs* sPipeHwFuncs = NULL;
+
+void android_pipe_set_hw_funcs(const AndroidPipeHwFuncs* hw_funcs) {
+    sPipeHwFuncs = hw_funcs;
+}
+
+void android_pipe_close(void* hwpipe) {
+    sPipeHwFuncs->closeFromHost(hwpipe);
+}
+
+void android_pipe_wake(void* hwpipe, unsigned flags) {
+    sPipeHwFuncs->signalWake(hwpipe, flags);
+}
 
 /***********************************************************************
  ***********************************************************************
@@ -1379,6 +1392,42 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
     return 0;
 }
 
+static void goldfish_pipe_wake(void* hwpipe, unsigned flags) {
+    Pipe*  pipe = hwpipe;
+    Pipe** lookup;
+    PipeDevice*  dev = pipe->device;
+
+    DD("%s: channel=0x%llx flags=%d", __FUNCTION__, (unsigned long long)pipe->channel, flags);
+
+    /* If not already there, add to the list of signaled pipes */
+    lookup = pipe_list_findp_waked(&dev->signaled_pipes, pipe);
+    if (!*lookup) {
+        pipe->next_waked = dev->signaled_pipes;
+        dev->signaled_pipes = pipe;
+    }
+    pipe->wanted |= (unsigned)flags;
+
+    /* Raise IRQ to indicate there are items on our list ! */
+    goldfish_device_set_irq(&dev->dev, 0, 1);
+    DD("%s: raising IRQ", __FUNCTION__);
+}
+
+static void goldfish_pipe_close(void* hwpipe) {
+    Pipe* pipe = hwpipe;
+
+    D("%s: channel=0x%llx (closed=%d)", __FUNCTION__, (unsigned long long)pipe->channel, pipe->closed);
+
+    if (!pipe->closed) {
+        pipe->closed = 1;
+        goldfish_pipe_wake(hwpipe, PIPE_WAKE_CLOSED);
+    }
+}
+
+static const AndroidPipeHwFuncs goldfish_pipe_hw_funcs = {
+    .closeFromHost = goldfish_pipe_close,
+    .signalWake = goldfish_pipe_wake,
+};
+
 /* initialize the trace device */
 void pipe_dev_init(bool newDeviceNaming)
 {
@@ -1403,6 +1452,8 @@ void pipe_dev_init(bool newDeviceNaming)
                     goldfish_pipe_load,
                     s);
 
+    android_pipe_set_hw_funcs(&goldfish_pipe_hw_funcs);
+
 #if DEBUG_ZERO_PIPE
     android_pipe_add_type("zero", NULL, &zeroPipe_funcs);
 #endif
@@ -1412,39 +1463,4 @@ void pipe_dev_init(bool newDeviceNaming)
 #if DEBUG_THROTTLE_PIPE
     android_pipe_add_type("throttle", NULL, &throttlePipe_funcs);
 #endif
-}
-
-void
-android_pipe_wake( void* hwpipe, unsigned flags )
-{
-    Pipe*  pipe = hwpipe;
-    Pipe** lookup;
-    PipeDevice*  dev = pipe->device;
-
-    DD("%s: channel=0x%llx flags=%d", __FUNCTION__, (unsigned long long)pipe->channel, flags);
-
-    /* If not already there, add to the list of signaled pipes */
-    lookup = pipe_list_findp_waked(&dev->signaled_pipes, pipe);
-    if (!*lookup) {
-        pipe->next_waked = dev->signaled_pipes;
-        dev->signaled_pipes = pipe;
-    }
-    pipe->wanted |= (unsigned)flags;
-
-    /* Raise IRQ to indicate there are items on our list ! */
-    goldfish_device_set_irq(&dev->dev, 0, 1);
-    DD("%s: raising IRQ", __FUNCTION__);
-}
-
-void
-android_pipe_close( void* hwpipe )
-{
-    Pipe* pipe = hwpipe;
-
-    D("%s: channel=0x%llx (closed=%d)", __FUNCTION__, (unsigned long long)pipe->channel, pipe->closed);
-
-    if (!pipe->closed) {
-        pipe->closed = 1;
-        android_pipe_wake( hwpipe, PIPE_WAKE_CLOSED );
-    }
 }
