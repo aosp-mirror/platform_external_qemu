@@ -24,14 +24,15 @@ ANDROID_BEGIN_HEADER
  **
  ** create a FileLock object with filelock_create(), the function will return
  ** NULL only if the corresponding path is already locked by another emulator
- ** of if the path is read-only.
+ ** or if the path is read-only.
  **
  ** note that 'path' can designate a non-existing path and that the lock creation
  ** function can detect stale file locks that can longer when the emulator
  ** crashes unexpectedly, and will happily clean them for you.
  **
- ** you can call filelock_release() to release a file lock explicitely. otherwise
+ ** You can call filelock_release() to release a file lock explicitely. otherwise
  ** all file locks are automatically released when the program exits.
+ ** It is safe to delete the originally locked file while the lock is held.
  **/
 
 typedef struct FileLock  FileLock;
