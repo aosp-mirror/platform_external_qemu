@@ -242,6 +242,10 @@ public:
         return res;
     }
 
+    time_t getUnixTime() const {
+        return time(NULL);
+    }
+
 private:
     mutable String mProgramDir;
 };
