@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4447ba3e_753fba7a",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-16T23:45:34Z",
+      "side": 1,
+      "message": "Want to make sure the merge picks up your\nnew-and-improved error pop-up.",
+      "revId": "f123a0293e1038406b176f56d7f6f007a114f95a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
