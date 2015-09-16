@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "848ff2ac_1ec20290",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-16T17:58:15Z",
+      "side": 0,
+      "message": "I think we should mark as success situations when metrics.tick \u003d\u003d 0, assuming the following scenario is possible: the user started the emulator and killed it instantly for whatever reason that fit their workflow\" (e.g. oops I didn\u0027t mean to do start the emulator now --\u003e let\u0027s hit manically the close button --\u003e emulator doesn\u0027t get the chance to write a single metrics.tick).",
+      "range": {
+        "startLine": 342,
+        "startChar": 16,
+        "endLine": 342,
+        "endChar": 39
+      },
+      "revId": "ab7fbc98ba0594d3fe85e6eca1c85a5c1a2fff8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
