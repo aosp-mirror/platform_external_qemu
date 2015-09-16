@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e4c34e74_02852bf8",
+        "filename": "Makefile.common",
+        "patchSetId": 4
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-16T21:15:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a44076d4_3f75c790",
+      "revId": "c6818b392180163c9a6c218f44bc88a7b6576f67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4164adc_78292165",
         "filename": "include/qemu/thread.h",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-10T06:39:59Z",
       "side": 1,
       "message": "let\u0027s avoid adding Android-specific stuff to QEMU-specific headers, to keep things simple.\n\nIf this header needs to be included from a C++ file (which seems unlikely to me), it should do that inside an extern \"C\" block as in:\n\n    extern \"C\" {\n    #include \"qemu/thread.h\"\n    }  // extern \"C\"\n\nBesides, that doesn\u0027t seem to be related to curl at all, so it\u0027s probably something that should be left out of this patch anyway.",
+      "revId": "c6818b392180163c9a6c218f44bc88a7b6576f67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44cedaa4_8e74cfc8",
+        "filename": "include/qemu/thread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-16T21:15:02Z",
+      "side": 1,
+      "message": "Dropped the change completely.",
+      "parentUuid": "c4164adc_78292165",
       "revId": "c6818b392180163c9a6c218f44bc88a7b6576f67",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
