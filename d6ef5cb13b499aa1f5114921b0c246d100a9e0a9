@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a456b6eb_52a812c1",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-09-16T22:38:07Z",
+      "side": 1,
+      "message": "This doc currently uses \u0027engine\u0027 3 times and \u0027glue\u0027 twice. They seem to be used interchangeably, so I suggest replacing \u0027engine\u0027 by \u0027glue\u0027 so that their purpose is more obvious.",
+      "range": {
+        "startLine": 50,
+        "startChar": 22,
+        "endLine": 50,
+        "endChar": 28
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e44c2e60_faae3dff",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-09-16T22:38:07Z",
+      "side": 1,
+      "message": "I think\n\n[AndroidEmu] + [QEMU1 glue] + [QEMU1] \u003d\u003d [Classic emulator]\n\nis more accurate. Every line of code should have a home in the diagram.\n\nIt should also be clear that [QEMU1 glue] is the only one that depends on AndroidEmu and QEMU1, and there should be no dependency between AndroidEmu and QEMU1/QEMU2, in principle.",
+      "range": {
+        "startLine": 70,
+        "startChar": 27,
+        "endLine": 70,
+        "endChar": 32
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "246d66b4_793ddff0",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-09-16T22:38:07Z",
+      "side": 1,
+      "message": "Is this sentence describing current status, or the goal? I\u0027m not sure because if it is QEMU1-specific, why should it be in AndroidEmu?",
+      "range": {
+        "startLine": 97,
+        "startChar": 27,
+        "endLine": 97,
+        "endChar": 41
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "843d32a1_f8d2be91",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-09-16T22:38:07Z",
+      "side": 1,
+      "message": "This is a great example showing the value to let the library having the same interface as QEMU1. Thanks!\n\nJust curious, are there many cases where QEMU1 and QEMU2 have different interfaces? If so, how should we design the lib\u0027s interface? Being closer to QEMU1 can help us move generic code out of android-qemu1/ sooner, while being closer to QEMU2 is likely leading to a cleaner code base in the long run. What do you think?",
+      "range": {
+        "startLine": 112,
+        "startChar": 10,
+        "endLine": 112,
+        "endChar": 19
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64383eb1_56a1ea62",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-09-16T22:38:07Z",
+      "side": 1,
+      "message": "How do we know the code moving out is actually generic? Is it possible to have a policy/guide that newly moved out code should be linked against QEMU2 in a reasonable timeframe? So they are at least syntactic generic.",
+      "range": {
+        "startLine": 150,
+        "startChar": 69,
+        "endLine": 150,
+        "endChar": 76
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
