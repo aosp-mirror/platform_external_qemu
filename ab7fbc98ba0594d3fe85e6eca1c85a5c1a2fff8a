@@ -22,6 +22,30 @@
       "revId": "ab7fbc98ba0594d3fe85e6eca1c85a5c1a2fff8a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4447ba3e_72a510e6",
+        "filename": "android/metrics/metrics_reporter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-16T22:29:48Z",
+      "side": 0,
+      "message": "That\u0027s an early edge case that we can\u0027t get consistent data for right now anyway. (since you\u0027re assuming _seal(...) isn\u0027t called / doesn\u0027t do anything).\n\nOtherwise, there\u0027s not way to call _seal(...) before at least one tick().\n\nThe point is that a non-0 tick is our cue that metrics initialization got far enough for us to trust the data.\n\nDo note that the initialization itself calls _tick() once, so you don\u0027t have to wait for a minute for the first tick.",
+      "parentUuid": "848ff2ac_1ec20290",
+      "range": {
+        "startLine": 342,
+        "startChar": 16,
+        "endLine": 342,
+        "endChar": 39
+      },
+      "revId": "ab7fbc98ba0594d3fe85e6eca1c85a5c1a2fff8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
