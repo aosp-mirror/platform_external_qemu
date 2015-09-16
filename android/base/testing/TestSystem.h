@@ -27,9 +27,10 @@ namespace base {
 
 class TestSystem : public System {
 public:
-    TestSystem(const char* programDir, int hostBitness, const char* homeDir = "") :
+ TestSystem(const char* programDir, int hostBitness, const char* homeDir = "", const char* appDataDir = "") :
             mProgramDir(programDir),
             mHomeDir(homeDir),
+            mAppDataDir(appDataDir),
             mHostBitness(hostBitness),
             mIsRemoteSession(false),
             mRemoteSessionType(),
@@ -55,6 +56,10 @@ public:
 
     virtual const String& getHomeDirectory() const {
         return mHomeDir;
+    }
+
+    virtual const String& getAppDataDirectory() const {
+        return mAppDataDir;
     }
 
     virtual int getHostBitness() const {
@@ -190,6 +195,7 @@ private:
 
     String mProgramDir;
     String mHomeDir;
+    String mAppDataDir;
     int mHostBitness;
     bool mIsRemoteSession;
     String mRemoteSessionType;
