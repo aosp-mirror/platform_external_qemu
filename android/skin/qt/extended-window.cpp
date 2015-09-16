@@ -28,6 +28,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     mCellularAgent (agentPtr ? agentPtr->cellular  : NULL),
     mFingerAgent   (agentPtr ? agentPtr->finger    : NULL),
     mLocationAgent (agentPtr ? agentPtr->location  : NULL),
+    mSettingsAgent (agentPtr ? agentPtr->settings  : NULL),
     mTelephonyAgent(agentPtr ? agentPtr->telephony : NULL),
     mLoc_mSecRemaining(-1),
     mLoc_nowPaused(false),
@@ -47,6 +48,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     initFinger();
     initLocation();
     initSd();
+    initSettings();
     initSms();
     initTelephony();
 
@@ -56,9 +58,12 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
 
 void ExtendedWindow::completeInitialization()
 {
-    // Set the theme to dark (by setting it light and doing a switch-over)
-    mThemeIsDark = false;
-    on_theme_pushButton_clicked();
+    // TODO: Remember the theme setting from before
+    // Set the theme to light (by pretending the theme setting got changed)
+    on_set_themeBox_currentIndexChanged(SETTINGS_THEME_LIGHT);
+
+    // Set the first tab active
+    on_batteryButton_clicked();
 }
 
 ExtendedWindow::~ExtendedWindow()
@@ -72,60 +77,24 @@ void ExtendedWindow::closeEvent(QCloseEvent *ce)
     mToolWindow->extendedIsClosing();
 }
 
-// TODO: This will probably not be implemented by a direct button press
-void ExtendedWindow::on_theme_pushButton_clicked()
-{
-    mThemeIsDark = !mThemeIsDark;
-
-    QString style;
-    style += SLIDER_STYLE;
-    if (mThemeIsDark) {
-        style += LIGHT_CHECKBOX_STYLE;
-        // TODO: Verify that this is the right set of widgets to modify
-        style += " QTextEdit, QPlainTextEdit, QTreeView { border: 1px solid " DARK_FOREGROUND " } ";
-        style += "*{color:" DARK_FOREGROUND  ";background-color: " DARK_BACKGROUND  "}";
-    } else {
-        style += DARK_CHECKBOX_STYLE;
-        style += " QTextEdit, QPlainTextEdit, QTreeView { border: 1px solid " LIGHT_FOREGROUND " } ";
-        style += "*{color:" LIGHT_FOREGROUND ";background-color:" LIGHT_BACKGROUND "}";
-    }
-
-    // Switch to the icon images that are appropriate for this theme.
-    // Examine every widget.
-    QWidgetList wList = QApplication::allWidgets();
-    for (int idx = 0; idx < wList.size(); idx++) {
-        QPushButton *pB = dynamic_cast<QPushButton*>(wList[idx]);
-        if (pB && !pB->icon().isNull()) {
-            setButtonEnabled(pB, pB->isEnabled());
-        }
-    }
-
-    // Apply the updated style sheet and force a re-draw
-    this->setStyleSheet(style);
-    this->style()->unpolish(mExtendedUi->stackedWidget);
-    this->style()->polish(mExtendedUi->stackedWidget);
-    this->update();
-
-    // Start with the Battery pane active
-    adjustTabs(mExtendedUi->batteryButton, 0);
-}
-
 // Tab buttons. Each raises its stacked pane to the top.
 
-void ExtendedWindow::on_batteryButton_clicked()   { adjustTabs(mExtendedUi->batteryButton,   0); }
-void ExtendedWindow::on_telephoneButton_clicked() { adjustTabs(mExtendedUi->telephoneButton, 1); }
-void ExtendedWindow::on_messageButton_clicked()   { adjustTabs(mExtendedUi->messageButton,   2); }
-void ExtendedWindow::on_locationButton_clicked()  { adjustTabs(mExtendedUi->locationButton,  3); }
-void ExtendedWindow::on_cellularButton_clicked()  { adjustTabs(mExtendedUi->cellularButton,  4); }
-void ExtendedWindow::on_fingerButton_clicked()    { adjustTabs(mExtendedUi->fingerButton,    5); }
-void ExtendedWindow::on_sdButton_clicked()        { adjustTabs(mExtendedUi->sdButton,        6); }
+void ExtendedWindow::on_batteryButton_clicked()   { adjustTabs(mExtendedUi->batteryButton,   PANE_IDX_BATTERY); }
+void ExtendedWindow::on_cellularButton_clicked()  { adjustTabs(mExtendedUi->cellularButton,  PANE_IDX_CELLULAR); }
+void ExtendedWindow::on_fingerButton_clicked()    { adjustTabs(mExtendedUi->fingerButton,    PANE_IDX_FINGER); }
+void ExtendedWindow::on_locationButton_clicked()  { adjustTabs(mExtendedUi->locationButton,  PANE_IDX_LOCATION); }
+void ExtendedWindow::on_messageButton_clicked()   { adjustTabs(mExtendedUi->messageButton,   PANE_IDX_MESSAGE); }
+void ExtendedWindow::on_sdButton_clicked()        { adjustTabs(mExtendedUi->sdButton,        PANE_IDX_SD); }
+void ExtendedWindow::on_settingsButton_clicked()  { adjustTabs(mExtendedUi->settingsButton,  PANE_IDX_SETTINGS); }
+void ExtendedWindow::on_telephoneButton_clicked() { adjustTabs(mExtendedUi->telephoneButton, PANE_IDX_TELEPHONE); }
 
 void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
 {
     // Make all the tab buttons the same except for the one whose
     // pane is on top.
     QString colorStyle("text-align: left; background-color:");
-    colorStyle += mThemeIsDark ? DARK_BACKGROUND : LIGHT_BACKGROUND;
+    colorStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
+                      DARK_BACKGROUND : LIGHT_BACKGROUND;
 
     mExtendedUi->batteryButton  ->setStyleSheet(colorStyle);
     mExtendedUi->cellularButton ->setStyleSheet(colorStyle);
@@ -133,10 +102,12 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
     mExtendedUi->locationButton ->setStyleSheet(colorStyle);
     mExtendedUi->messageButton  ->setStyleSheet(colorStyle);
     mExtendedUi->sdButton       ->setStyleSheet(colorStyle);
+    mExtendedUi->settingsButton ->setStyleSheet(colorStyle);
     mExtendedUi->telephoneButton->setStyleSheet(colorStyle);
 
     QString activeStyle("text-align: left; background-color:");
-    activeStyle += mThemeIsDark ? DARK_ACTIVE : LIGHT_ACTIVE;
+    activeStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
+                      DARK_ACTIVE : LIGHT_ACTIVE;
     thisButton->setStyleSheet(activeStyle);
 
     mExtendedUi->batteryButton  ->setAutoFillBackground(true);
@@ -145,6 +116,7 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
     mExtendedUi->locationButton ->setAutoFillBackground(true);
     mExtendedUi->messageButton  ->setAutoFillBackground(true);
     mExtendedUi->sdButton       ->setAutoFillBackground(true);
+    mExtendedUi->settingsButton ->setAutoFillBackground(true);
     mExtendedUi->telephoneButton->setAutoFillBackground(true);
 
     thisButton->clearFocus(); // It looks better when not highlighted
@@ -188,20 +160,3 @@ QValidator::State phoneNumberValidator::validate(QString &input, int &pos) const
 
     return ((numDigits > 0) ? QValidator::Acceptable : QValidator::Intermediate);
 } // end validate()
-
-void ExtendedWindow::setButtonEnabled(QPushButton *theButton, bool isEnabled)
-{
-    theButton->setEnabled(isEnabled);
-    // If this button has icon image properties, reset its
-    // image.
-    QString enabledPropStr  = theButton->property("themeIconName"         ).toString();
-    QString disabledPropStr = theButton->property("themeIconName_disabled").toString();
-    if ( !enabledPropStr.isNull() ) {
-        // It has at least an 'enabled' icon name.
-        // Select light/dark and enabled/disabled
-        QString resName = ":/";
-        resName += mThemeIsDark ? "light/" : "dark/"; // Theme is dark ==> icon is light
-        resName += (isEnabled || disabledPropStr.isNull()) ? enabledPropStr : disabledPropStr;
-        theButton->setIcon(QIcon(resName));
-    }
-}

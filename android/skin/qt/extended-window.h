@@ -27,6 +27,7 @@
 #include "android/cellular-agent.h"
 #include "android/finger-agent.h"
 #include "android/location-agent.h"
+#include "android/settings-agent.h"
 #include "android/telephony-agent.h"
 
 class EmulatorQtWindow;
@@ -52,7 +53,6 @@ private:
 
     EmulatorQtWindow   *mParentWindow;
     ToolWindow         *mToolWindow;
-    bool                mThemeIsDark;
 
     class BatteryState {
     public:
@@ -69,6 +69,15 @@ private:
     };
 
     typedef enum { Call_Inactive, Call_Active, Call_Held } CallActivity;
+
+    class SettingsState {
+    public:
+        SettingsTheme mTheme;
+
+        SettingsState() :
+            mTheme(SETTINGS_THEME_LIGHT)
+            { }
+    };
 
     class TelephonyState {
     public:
@@ -87,16 +96,19 @@ private:
     void initFinger();
     void initLocation();
     void initSd();
+    void initSettings();
     void initSms();
     void initTelephony();
 
     BatteryState    mBatteryState;
+    SettingsState   mSettingsState;
     TelephonyState  mTelephonyState;
 
     const BatteryAgent    *mBatteryAgent;
     const CellularAgent   *mCellularAgent;
     const FingerAgent     *mFingerAgent;
     const LocationAgent   *mLocationAgent;
+    const SettingsAgent   *mSettingsAgent;
     const TelephonyAgent  *mTelephonyAgent;
 
     int      mLoc_mSecRemaining;
@@ -117,8 +129,6 @@ private:
     void    setButtonEnabled(QPushButton *theButton, bool isEnabled);
 
 private slots:
-    void on_theme_pushButton_clicked(); // ?? Temporary
-
     // Master tabs
     void on_batteryButton_clicked();
     void on_cellularButton_clicked();
@@ -126,6 +136,7 @@ private slots:
     void on_locationButton_clicked();
     void on_messageButton_clicked();
     void on_sdButton_clicked();
+    void on_settingsButton_clicked();
     void on_telephoneButton_clicked();
 
     // Battery
@@ -154,6 +165,9 @@ private slots:
 
     bool loc_cellIsValid(QTableWidget *table, int row, int col);
     void loc_slot_timeout();
+
+    // Settings
+    void on_set_themeBox_currentIndexChanged(int index);
 
     // SMS messaging
     void on_sms_sendButton_clicked();
