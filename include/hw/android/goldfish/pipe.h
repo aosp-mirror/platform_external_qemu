@@ -145,8 +145,25 @@ typedef struct AndroidPipeFuncs {
  * to 'init() when a new pipe is connected to.
  */
 extern void  android_pipe_add_type(const char* pipeName,
-                                     void* pipeOpaque,
-                                     const AndroidPipeFuncs*  pipeFuncs);
+                                   void* pipeOpaque,
+                                   const AndroidPipeFuncs*  pipeFuncs);
+
+// A set of functions that must be implemented by the virtual device
+// implementation. Used with call android_pipe_set_hw_funcs().
+typedef struct AndroidPipeHwFuncs {
+    // Called from the host to signal that it wants to close a pipe.
+    // |hwpipe| is the device-side view of the pipe.
+    void (*closeFromHost)(void* hwpipe);
+
+    // Called to signal that the host has data for the guest (PIPE_WAKE_READ),
+    // or that the host is ready to accept data from the guest
+    // (PIPE_WAKE_WRITE). |hwpipe| is the device-side view of the pipe,
+    // and |flags| is a combination of PIPE_WAKE_READ and PIPE_WAKE_WRITE.
+    void (*signalWake)(void* hwpipe, unsigned flags);
+
+} AndroidPipeHwFuncs;
+
+extern void android_pipe_set_hw_funcs(const AndroidPipeHwFuncs* hw_funcs);
 
 /* This tells the guest system that we want to close the pipe and that
  * further attempts to read or write to it will fail. This will not
