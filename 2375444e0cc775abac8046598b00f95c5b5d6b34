@@ -22,6 +22,30 @@
       "revId": "2375444e0cc775abac8046598b00f95c5b5d6b34",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e986c7d4_01efca7a",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T09:30:59Z",
+      "side": 1,
+      "message": "Doh! You\u0027re right, fixed. Thanks!",
+      "parentUuid": "8478d270_4a94c302",
+      "range": {
+        "startLine": 308,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 45
+      },
+      "revId": "2375444e0cc775abac8046598b00f95c5b5d6b34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
