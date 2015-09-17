@@ -247,6 +247,14 @@ void UpdateChecker::asyncWorker() {
     Version current = mVersionExtractor->getCurrentVersion();
     Version last = loadLatestVersion();
 
+    if (!last.isValid()) {
+        // don't record the last check time if we were not able to retrieve
+        // the last version - next time we may be more lucky
+        dwarning("UpdateCheck: failed to get the latest version, skipping "
+            "check (current version '%s'", current.toString().c_str());
+        return;
+    }
+
     dprint("UpdateCheck: current version '%s', last version '%s'",
            current.toString().c_str(), last.toString().c_str());
 
