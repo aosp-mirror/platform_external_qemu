@@ -70,7 +70,7 @@ int formatGAPostData(char** ptr, const AndroidMetrics* metrics) {
     char* ga_client_id = android_studio_get_installation_id();
 
     // TODO(pprabhu) Decide whether we want to report gpu_enabled.
-    return asprintf(ptr,
+    int result = asprintf(ptr,
                     "%s=%s&%s=%s&%s=%s&%s=%s&%s=%s"
                     "&%s=%s"
                     "&%s=%s&%s=%s&%s=%s&%s=%s"
@@ -89,6 +89,7 @@ int formatGAPostData(char** ptr, const AndroidMetrics* metrics) {
                     ga_cm_user_time_key, metrics->user_time,
                     ga_cm_system_time_key, metrics->system_time);
     free(ga_client_id);
+    return result;
 }
 
 // Dummy write function to pass to curl to avoid dumping the returned output to
