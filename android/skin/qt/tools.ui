@@ -14,7 +14,7 @@
    <string notr="true"/>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: #3c4249;
+   <string notr="true">background-color: #394249;
 color: #f0f0f0</string>
   </property>
   <property name="frameShape">
@@ -42,9 +42,6 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/light/close</normaloff>:/light/close</iconset>
    </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">close</string>
-   </property>
   </widget>
   <widget class="QPushButton" name="power_button">
    <property name="geometry">
@@ -64,9 +61,6 @@ color: #f0f0f0</string>
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/light/power_settings</normaloff>:/light/power_settings</iconset>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">power_settings</string>
    </property>
   </widget>
   <widget class="QPushButton" name="volume_up_button">
@@ -88,9 +82,6 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/light/volume_up</normaloff>:/light/volume_up</iconset>
    </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">volume_up</string>
-   </property>
   </widget>
   <widget class="QPushButton" name="volume_down_button">
    <property name="geometry">
@@ -111,9 +102,6 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/light/volume_down</normaloff>:/light/volume_down</iconset>
    </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">volume_down</string>
-   </property>
   </widget>
   <widget class="QPushButton" name="rotate_CW_button">
    <property name="geometry">
@@ -132,10 +120,7 @@ color: #f0f0f0</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/light/screen_rotation</normaloff>:/light/screen_rotation</iconset>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">screen_rotation</string>
+     <normaloff>:/light/screen_rotation_right</normaloff>:/light/screen_rotation_right</iconset>
    </property>
   </widget>
   <widget class="QPushButton" name="rotate_CCW_button">
@@ -155,10 +140,7 @@ color: #f0f0f0</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/light/screen_rotation</normaloff>:/light/screen_rotation</iconset>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">screen_rotation</string>
+     <normaloff>:/light/screen_rotation_left</normaloff>:/light/screen_rotation_left</iconset>
    </property>
   </widget>
   <widget class="QPushButton" name="zoom_button">
@@ -180,9 +162,6 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/light/zoom</normaloff>:/light/zoom</iconset>
    </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">zoom</string>
-   </property>
   </widget>
   <widget class="QPushButton" name="fullscreen_button">
    <property name="geometry">
@@ -203,9 +182,6 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/light/fullscreen</normaloff>:/light/fullscreen</iconset>
    </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">fullscreen</string>
-   </property>
   </widget>
   <widget class="QPushButton" name="more_button">
    <property name="geometry">
@@ -225,9 +201,6 @@ color: #f0f0f0</string>
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/light/more</normaloff>:/light/more</iconset>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">more</string>
    </property>
   </widget>
  </widget>
