@@ -45,8 +45,8 @@ void ExtendedWindow::on_tel_startCallButton_clicked()
         tResp = mTelephonyAgent->telephonyCmd(Tel_Op_Init_Call,
                                               cleanNumber.toStdString().c_str());
         if (tResp != Tel_Resp_OK) {
-            QErrorMessage *eM = new QErrorMessage;
-            eM->showMessage(tr("The call failed"));
+            mToolWindow->showErrorDialog(tr("The call failed."),
+                                         tr("Telephony"));
             return;
         }
     }
@@ -83,8 +83,8 @@ void ExtendedWindow::on_tel_endCallButton_clicked()
         tResp = mTelephonyAgent->telephonyCmd(Tel_Op_Disconnect_Call,
                                               cleanNumber.toStdString().c_str());
         if (tResp != Tel_Resp_OK) {
-            QErrorMessage *eM = new QErrorMessage;
-            eM->showMessage(tr("The end-call failed"));
+            mToolWindow->showErrorDialog(tr("The end-call failed."),
+                                         tr("Telephony"));
             return;
         }
     }
@@ -132,8 +132,8 @@ void ExtendedWindow::on_tel_holdCallButton_clicked()
         tResp = mTelephonyAgent->telephonyCmd(tOp,
                                               cleanNumber.toStdString().c_str());
         if (tResp != Tel_Resp_OK) {
-            QErrorMessage *eM = new QErrorMessage;
-            eM->showMessage(tr("The call hold failed"));
+            mToolWindow->showErrorDialog(tr("The call hold failed."),
+                                         tr("Telephony"));
             return;
         }
     }

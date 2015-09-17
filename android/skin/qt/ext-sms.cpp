@@ -41,8 +41,8 @@ void ExtendedWindow::on_sms_sendButton_clicked()
                      mExtendedUi->sms_phoneNumberBox->
                               currentText().length());
     if (retVal < 0  ||  sender.len <= 0) {
-        QErrorMessage *eM = new QErrorMessage;
-        eM->showMessage(QString("The \"From\" number is invalid"));
+        mToolWindow->showErrorDialog(tr("The \"From\" number is invalid."),
+                                     tr("SMS"));
         return;
     }
 
@@ -57,14 +57,14 @@ void ExtendedWindow::on_sms_sendButton_clicked()
                                            utf8Message,
                                            MAX_SMS_MSG_SIZE);
     if (nUtf8Chars == 0) {
-        QErrorMessage *eM = new QErrorMessage;
-        eM->showMessage(tr("The message is empty.<br>Please enter a message."));
+        mToolWindow->showErrorDialog(tr("The message is empty.<br>Please enter a message."),
+                                     tr("SMS"));
         return;
     }
 
     if (nUtf8Chars < 0) {
-        QErrorMessage *eM = new QErrorMessage;
-        eM->showMessage(QString(tr("The message contains invalid characters")));
+        mToolWindow->showErrorDialog(tr("The message contains invalid characters."),
+                                     tr("SMS"));
         return;
     }
 
@@ -72,8 +72,8 @@ void ExtendedWindow::on_sms_sendButton_clicked()
     SmsPDU *pdus = smspdu_create_deliver_utf8(utf8Message, nUtf8Chars,
                                               &sender, NULL);
     if (pdus == NULL) {
-        QErrorMessage *eM = new QErrorMessage;
-        eM->showMessage(QString(tr("The message contains invalid characters")));
+        mToolWindow->showErrorDialog(tr("The message contains invalid characters."),
+                                     tr("SMS"));
         return;
     }
 
