@@ -71,6 +71,40 @@
     },
     {
       "key": {
+        "uuid": "099a3b78_75f5828d",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-17T23:20:55Z",
+      "side": 1,
+      "message": "The concept of a looper class isn\u0027t really understandable to someone new the QEMU codebase (me).  Are there any other examples?",
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "89df0b23_2133a82e",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-17T23:20:55Z",
+      "side": 1,
+      "message": "This helps explain a bit better.  Maybe move this up to give context for what you\u0027re abstracting?",
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "49a1935d_85868805",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 3
@@ -118,6 +152,70 @@
     },
     {
       "key": {
+        "uuid": "89df0b23_013eaced",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-17T23:20:55Z",
+      "side": 1,
+      "message": "+1 (my ideal layout)\nexternal/qemu1 (including glue code?)\nexternal/qemu2 (including glue code?)\nexternal/android-emu",
+      "parentUuid": "a90a0f5b_ef954130",
+      "range": {
+        "startLine": 162,
+        "startChar": 28,
+        "endLine": 162,
+        "endChar": 50
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9a3c3b1_d0fabce1",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-17T23:20:55Z",
+      "side": 1,
+      "message": "I think scripts to build qemu2 should live in qemu2 repo?",
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69dad736_c08a009d",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-17T23:20:55Z",
+      "side": 1,
+      "message": "I\u0027m confused.  can\u0027t prebuilts be used in place?\nlldb prebuilts are.\n\nhttps://android.googlesource.com/platform/manifest/+/lldb-master-dev/default.xml\n\nJust checkout \u0026 build\n\ncan\u0027t both of these scripts just depend on a script to copy prebuilts?",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 185,
+        "endChar": 68
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e96fa7e4_df00d378",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 3
@@ -135,6 +233,70 @@
         "endLine": 198,
         "endChar": 54
       },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9ae6393_bb40d326",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-17T23:20:55Z",
+      "side": 1,
+      "message": "Check in the configure output?",
+      "parentUuid": "e96fa7e4_df00d378",
+      "range": {
+        "startLine": 195,
+        "startChar": 0,
+        "endLine": 198,
+        "endChar": 54
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9a3c3b1_7068302b",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-17T23:20:55Z",
+      "side": 1,
+      "message": "I think that scripts that reference both qemu1 \u0026 qemu2 should be moved to external/android-emu-utils or similar",
+      "range": {
+        "startLine": 206,
+        "startChar": 0,
+        "endLine": 207,
+        "endChar": 17
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69c3b75a_9b431333",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-17T23:20:55Z",
+      "side": 1,
+      "message": "We should only go to this extent if we know it will be used by the UI developers",
       "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
