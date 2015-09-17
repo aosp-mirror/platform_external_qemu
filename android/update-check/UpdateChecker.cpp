@@ -13,12 +13,11 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
+#include "android/curl-support.h"
 #include "android/update-check/update_check.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
 #include "android/utils/misc.h"
-
-#include <curl/curl.h>
 
 #include <errno.h>
 #include <string.h>
@@ -127,7 +126,7 @@ class DataLoader : public IDataLoader {
 public:
     virtual std::string load() {
         std::string xml;
-        if (CURL* const curl = curl_easy_init()) {
+        if (CURL* const curl = curl_easy_default_init()) {
             curl_easy_setopt(curl, CURLOPT_URL, kVersionUrl);
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &curlWriteCallback);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, &xml);
