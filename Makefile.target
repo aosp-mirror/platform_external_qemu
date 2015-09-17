@@ -74,6 +74,9 @@ HW_SOURCES := \
     android/goldfish/mmc.c   \
     android/goldfish/nand.c \
     android/goldfish/pipe.c \
+    android/goldfish/pipe_pingpong.c \
+    android/goldfish/pipe_throttle.c \
+    android/goldfish/pipe_zero.c \
     android/goldfish/tty.c \
     android/goldfish/vmem.c \
     android/goldfish/trace.c \
