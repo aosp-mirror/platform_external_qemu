@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "89f1cba4_0e140b4f",
+        "filename": "android/metrics/metrics_reporter_toolbar.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-17T19:08:05Z",
+      "side": 1,
+      "message": "vsiva@: In particular, take a look at the URL format being used here.",
+      "revId": "f3a6d050d54ed10a2f02d99b4b728b28828ef915",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
