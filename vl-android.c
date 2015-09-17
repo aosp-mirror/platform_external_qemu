@@ -50,6 +50,7 @@
 #include "android/camera/camera-service.h"
 #include "android/charpipe.h"
 #include "android/curl-support.h"
+#include "android/breakpad-support.h"
 #include "android/display-core.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/ext4_resize.h"
@@ -133,6 +134,7 @@
 #include <pty.h>
 #include <malloc.h>
 #include <linux/rtc.h>
+
 
 /* For the benefit of older linux systems which don't supply it,
    we use a local copy of hpet.h. */
@@ -2194,6 +2196,8 @@ int main(int argc, char **argv, char **envp)
     STRALLOC_DEFINE(kernel_params);
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;
+
+    enable_breakpad();
 
     // libcurl initialization is thread-unsafe, so let's call it first
     // to make sure no other thread could be doing the same

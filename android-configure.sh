@@ -589,6 +589,16 @@ mkdir -p $OUT_DIR/lib
 cp -f "$CACERTS_FILE" "$OUT_DIR/lib/"
 
 ###
+###  Breakpad probe
+###
+BREAKPAD_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/breakpad
+if [ -d "$BREAKPAD_PREBUILTS_DIR" ]; then
+    log "BREAKPAD prebuilts dir: $BREAKPAD_PREBUILTS_DIR"
+else
+    panic "Missing prebuilts directory (please run build-breakpad.sh): $BREAKPD_PREBUILTS_DIR"
+fi
+
+###
 ###  Qt probe
 ###
 QT_PREBUILTS_DIR=
@@ -748,6 +758,7 @@ fi
 
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
+echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 
 if [ $OPTION_DEBUG = yes ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
