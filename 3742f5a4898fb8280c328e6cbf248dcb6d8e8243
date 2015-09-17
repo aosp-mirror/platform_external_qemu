@@ -22,6 +22,30 @@
       "revId": "3742f5a4898fb8280c328e6cbf248dcb6d8e8243",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "494c338b_84230684",
+        "filename": "android/utils/bufprint_system.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T10:37:00Z",
+      "side": 1,
+      "message": "Because it redefines \u0027home\u0027 as a String, instead of a \u0027const char *\u0027. But you\u0027re right, I\u0027ll fix it.",
+      "parentUuid": "043302d8_79197381",
+      "range": {
+        "startLine": 62,
+        "startChar": 6,
+        "endLine": 62,
+        "endChar": 12
+      },
+      "revId": "3742f5a4898fb8280c328e6cbf248dcb6d8e8243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
