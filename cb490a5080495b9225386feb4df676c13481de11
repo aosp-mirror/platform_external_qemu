@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "694d7785_657a4652",
+        "filename": "android/dependencies/PACKAGES.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T10:27:53Z",
+      "side": 1,
+      "message": "nit: \u0027master\u0027 work is not gonna work, you need a fixed release/revision/commit instead, or things will break unexpectedly in the future.",
+      "revId": "cb490a5080495b9225386feb4df676c13481de11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a95bef3d_c717be0f",
+        "filename": "android/dependencies/PACKAGES.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T10:27:53Z",
+      "side": 1,
+      "message": "we build all Windows binaries on Linux, I\u0027m not sure these tools are needed.",
+      "revId": "cb490a5080495b9225386feb4df676c13481de11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0984fbca_a2337e8e",
+        "filename": "android/scripts/build-breakpad.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T10:27:53Z",
+      "side": 1,
+      "message": "nit: This comment is obsolete and can be removed",
+      "revId": "cb490a5080495b9225386feb4df676c13481de11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a95bef3d_27369ab4",
+        "filename": "android/scripts/utils/package_builder.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 556,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T10:27:53Z",
+      "side": 1,
+      "message": "This is very unreliable: the output will depend on the version of autoconf being installed on the development system. This can easily lead to surprises / build breaks.\n\nI think it would be a lot saner to actually have the output of the reconf as an additional patch instead.",
+      "revId": "cb490a5080495b9225386feb4df676c13481de11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
