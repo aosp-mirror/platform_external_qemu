@@ -64,6 +64,7 @@
 #include "android/hw-sensors.h"
 #include "android/log-rotate.h"
 #include "android/metrics/metrics_reporter.h"
+#include "android/metrics/studio-helper.h"
 #include "android/multitouch-port.h"
 #include "android/multitouch-screen.h"
 #include "android/opengles.h"
@@ -2113,6 +2114,11 @@ static void android_init_metrics()
     char path[PATH_MAX], *pathend=path, *bufend=pathend+sizeof(path);
     AndroidMetrics metrics;
 
+    if (!android_studio_get_optins()) {
+        VERBOSE_PRINT(init, "Skipping metrics reporting: No user opt-in.");
+        return;
+    }
+
     VERBOSE_PRINT(init, "Initializing metrics reporting.");
     pathend = bufprint_avd_home_path(path, bufend);
     if (pathend >= bufend || !androidMetrics_moduleInit(path))
@@ -2140,6 +2146,8 @@ static void android_init_metrics()
 
 static void android_teardown_metrics()
 {
+    // NB: It is safe to cleanup metrics reporting even if we never initialized
+    // it.
     androidMetrics_seal();
     looper_free(metrics_looper);
     androidMetrics_moduleFini();
