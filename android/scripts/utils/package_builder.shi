@@ -553,6 +553,12 @@ builder_disable_parallel_install () {
     _SHU_BUILDER_DISABLE_PARALLEL_INSTALL=true
 }
 
+# Call this function to enable autoreconf of package (possibly after a patch)
+_SHU_BUILDER_ENABLE_AUTORECONF=
+builder_enable_autoreconf_package () {
+    _SHU_BUILDER_ENABLE_AUTORECONF=true
+}
+
 # Build a given autotools based package
 #
 # $1: Source directory.
@@ -570,6 +576,10 @@ builder_build_autotools_package () {
     fi
     if [ -z "$_SHU_BUILDER_DISABLE_VERBOSE_INSTALL" ]; then
         var_append INSTALL_FLAGS "V=1";
+    fi
+    if [ ! -z "$_SHU_BUILDER_ENABLE_AUTORECONF" ]; then
+        run cd "$PKG_SRC_DIR" &&
+        run autoreconf
     fi
     shift; shift;
     (
