@@ -50,11 +50,20 @@ panic () {
 }
 
 run () {
-  if [ "$VERBOSE" -gt 1 ]; then
-    "$@"
-  else
-    "$@" >/dev/null 2>&1
-  fi
+    if [ "$VERBOSE" -gt 2 ]; then
+        echo "COMMAND: $@"
+        "$@"
+    elif [ "$VERBOSE" -gt 1 ]; then
+        "$@"
+    else
+        "$@" >/dev/null 2>&1
+    fi
+}
+
+log () {
+    if [ "$VERBOSE" -gt 1 ]; then
+        printf "%s\n" "$*"
+    fi
 }
 
 HOST_OS=$(uname -s)
@@ -102,6 +111,42 @@ get_file_type () {
 # $2: expected file type substring
 check_file_type_substring () {
     printf "%s\n" "$1" | grep -q -E -e "$2"
+}
+
+# Copy a single file
+# $1: Source file path.
+# $2: Destination file path (not a directory!)
+copy_file () {
+    local SRC_FILE="$1"
+    local DST_FILE="$2"
+
+    if [ "$VERBOSE" = "1" ]; then
+        log "Copying $SRC_FILE -> $DST_FILE"
+    fi
+
+    case $DST_FILE in
+        */)
+            if [ ! -d "$DST_FILE" ]; then
+                run mkdir -p "${DST_FILE%%/}" ||
+                        panic "Cannot create destination directory: $DST_FILE"
+            fi
+            DST_FILE=${DST_FILE%%/}
+            ;;
+        *)
+            if [ -d "$DST_FILE" ]; then
+                DST_FILE=${DST_FILE}/
+            else
+                local DST_DIR="$(dirname "$DST_FILE")"
+                if [ ! -d "$DST_DIR" ]; then
+                    run mkdir -p "$(dirname "$DST_FILE")" ||
+                            panic "Could not create destination directory: $DST_DIR"
+                fi
+            fi
+            ;;
+    esac
+
+    run cp -a "$SRC_FILE" "$DST_FILE" ||
+            panic "Could not copy $SRC_FILE into $DST_FILE !?"
 }
 
 # Define EXPECTED_32BIT_FILE_TYPE and EXPECTED_64BIT_FILE_TYPE depending
@@ -167,10 +212,8 @@ if [ -z "$QEMU_ANDROID_BINARIES" ]; then
 else
     echo "Copying prebuilt $HOST_PREFIX qemu-android binaries to $OUT_DIR/qemu/"
     for QEMU_ANDROID_BINARY in $QEMU_ANDROID_BINARIES; do
-        run mkdir -p "$OUT_DIR/qemu/$(dirname "$QEMU_ANDROID_BINARY")" &&
-        run cp "$PREBUILTS_DIR"/qemu-android/$QEMU_ANDROID_BINARY \
-                $OUT_DIR/qemu/$QEMU_ANDROID_BINARY ||
-            panic "Could not copy $HOST_PREFIX/$QEMU_ANDROID_BINARY !?"
+        copy_file "$PREBUILTS_DIR"/qemu-android/$QEMU_ANDROID_BINARY \
+                $OUT_DIR/qemu/$QEMU_ANDROID_BINARY
     done
 fi
 
@@ -207,8 +250,7 @@ if [ -d "$PREBUILTS_DIR/mesa" ]; then
                     MESA_DSTLIB="mesa_opengl32.dll"
                 fi
                 echo "Copying $MESA_HOST-$MESA_ARCH $LIBNAME library to $MESA_DSTDIR"
-                run mkdir -p "$MESA_DSTDIR" &&
-                run cp -f "$MESA_LIBRARY" "$MESA_DSTDIR/$MESA_DSTLIB"
+                copy_file "$MESA_LIBRARY" "$MESA_DSTDIR/$MESA_DSTLIB"
                 if [ "$MESA_HOST" = "linux" -a "$LIBNAME" = "libGL.so" ]; then
                     # Special handling for Linux, this is needed because SDL
                     # will actually try to load libGL.so.1 before GPU emulation
@@ -255,12 +297,15 @@ if [ "$EMULATOR_USE_QT" = "true" ]; then
             panic "Cannot find Qt prebuilt libraries!?"
         fi
         for QT_LIB in $QT_LIBS; do
-            QT_DST_SUBDIR=$(dirname "$QT_LIB")
-            if [ ! -d "$QT_DSTDIR/$QT_DST_SUBDIR" ]; then
-                run mkdir -p "$QT_DSTDIR/$QT_DST_SUBDIR"
+            QT_LIB=${QT_LIB#./}
+            QT_DST_LIB=$QT_LIB
+            if [ "$TARGET_OS" = "windows" ]; then
+                # NOTE: On Windows, the prebuilt libraries are placed under
+                # $PREBUILTS/qt/bin, not $PREBUILTS/qt/lib, ensure that they
+                # are always copied to $OUT_DIR/lib[64]/qt/lib/.
+                QT_DST_LIB=$(printf %s "$QT_DST_LIB" | sed -e 's|^bin/|lib/|g')
             fi
-            run cp -a "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR/$QT_DST_SUBDIR" ||
-                    panic "Could not copy $QT_LIB"
+            copy_file "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR/$QT_DST_LIB"
         done
     done
 fi
