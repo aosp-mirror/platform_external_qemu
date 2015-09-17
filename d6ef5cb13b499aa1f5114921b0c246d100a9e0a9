@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "a9b76fb4_c75d5e61",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T10:12:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e986c7d4_215a0e1b",
+      "range": {
+        "startLine": 50,
+        "startChar": 22,
+        "endLine": 50,
+        "endChar": 28
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e44c2e60_faae3dff",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 1
@@ -96,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "694d7785_c5457a0f",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T10:12:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c98d83f4_807f563f",
+      "range": {
+        "startLine": 70,
+        "startChar": 27,
+        "endLine": 70,
+        "endChar": 32
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "246d66b4_793ddff0",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 1
@@ -131,6 +179,30 @@
       "side": 1,
       "message": "Ah, this needs clarification as well. In a nutshell:\n\n  external/qemu/android/telephony: will be part of AndroidEmu\n  external/qemu/telephony/: will be part of QEMU1 glue.\n\nFact is that external/qemu/telephony will very likely move\nto external/qemu/android-qemu1/ which will be the location of all the glue code.",
       "parentUuid": "246d66b4_793ddff0",
+      "range": {
+        "startLine": 97,
+        "startChar": 27,
+        "endLine": 97,
+        "endChar": 41
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8952ab21_a678468a",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T10:12:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c9582344_88ae7762",
       "range": {
         "startLine": 97,
         "startChar": 27,
