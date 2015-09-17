@@ -10,14 +10,17 @@
 ** GNU General Public License for more details.
 */
 
-#ifndef _ANDROID_UTILS_BUFPRINT_H
-#define _ANDROID_UTILS_BUFPRINT_H
-
-#include <stdarg.h>
+#ifndef ANDROID_UTILS_BUFPRINT_H
+#define ANDROID_UTILS_BUFPRINT_H
 
 #include "android/utils/compiler.h"
 
+#include <stdarg.h>
+
 ANDROID_BEGIN_HEADER
+
+// WARNING: Usage of bufprint functions is considered deprecated. Try to
+//          avoid them whenever possible.
 
 /** FORMATTED BUFFER PRINTING
  **
@@ -53,31 +56,15 @@ ANDROID_BEGIN_HEADER
 extern char*   vbufprint(char*  buffer, char*  buffend, const char*  fmt, va_list  args );
 extern char*   bufprint (char*  buffer, char*  buffend, const char*  fmt, ... );
 
-/** USEFUL DIRECTORY SUPPORT
- **
- **  bufprint_add_dir() appends the application's directory to a given bounded buffer
- **
- **  bufprint_config_path() appends the applications' user-specific configuration directory
- **  to a bounded buffer. on Unix this is usually ~/.android, and something a bit more
- **  complex on Windows
- **
- **  bufprint_config_file() appends the name of a file or directory relative to the
- **  user-specific configuration directory to a bounded buffer. this really is equivalent
- **  to concat-ing the config path + path separator + 'suffix'
- **
- **  bufprint_temp_dir() appends the temporary directory's path to a given bounded buffer
- **
- **  bufprint_temp_file() appens the name of a file or directory relative to the
- **  temporary directory. equivalent to concat-ing the temp path + path separator + 'suffix'
- **/
-
-extern char*  bufprint_app_dir    (char*  buffer, char*  buffend);
-extern char*  bufprint_avd_home_path(char*  buffer, char*  buffend);
-extern char*  bufprint_config_path(char*  buffer, char*  buffend);
-extern char*  bufprint_config_file(char*  buffer, char*  buffend, const char*  suffix);
+// Append the path to all emulator temporary files to a bounded |buffer| that
+// stops at |buffend|, and return the new position.
 extern char*  bufprint_temp_dir   (char*  buffer, char*  buffend);
+
+// Append the path of a file or directory named |suffix| relative to the
+// output of bufprint_temp_dir() to a bounded |buffer| that stops at
+// |buffend|, and return the new position.
 extern char*  bufprint_temp_file  (char*  buffer, char*  buffend, const char*  suffix);
 
 ANDROID_END_HEADER
 
-#endif /* _ANDROID_UTILS_BUFPRINT_H */
+#endif  // ANDROID_UTILS_BUFPRINT_H

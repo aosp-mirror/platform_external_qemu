@@ -12,7 +12,7 @@
 #include "android/avd/scanner.h"
 
 #include "android/avd/util.h"
-
+#include "android/emulation/bufprint_config_dirs.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"

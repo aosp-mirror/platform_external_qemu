@@ -190,6 +190,8 @@ common_LOCAL_SRC_FILES += \
 	android/base/system/System.cpp \
 	android/base/threads/ThreadStore.cpp \
 	android/base/Version.cpp \
+	android/emulation/bufprint_config_dirs.cpp \
+	android/emulation/ConfigDirs.cpp \
 	android/emulation/CpuAccelerator.cpp \
 	android/filesystems/ext4_utils.cpp \
 	android/filesystems/fstab_parser.cpp \
@@ -214,6 +216,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/aconfig-file.c \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
+	android/utils/bufprint_system.cpp \
 	android/utils/cbuffer.c \
 	android/utils/debug.c \
 	android/utils/dll.c \

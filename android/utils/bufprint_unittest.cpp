@@ -11,7 +11,13 @@
 
 #include "android/utils/bufprint.h"
 
+#include "android/base/system/System.h"
+#include "android/base/testing/TestSystem.h"
+#include "android/base/testing/TestTempDir.h"
+
 #include <gtest/gtest.h>
+
+using namespace android::base;
 
 TEST(bufprint, SimpleString) {
     char buffer[128], *p = buffer, *end = p + sizeof(buffer);
@@ -26,4 +32,16 @@ TEST(bufprint, TruncationOnOverflow) {
     p = bufprint(buffer, end, "foobar");
     EXPECT_EQ(buffer + 4, p);
     EXPECT_STREQ("foo", buffer);
+}
+
+TEST(bufprint, TempFile) {
+    TestSystem sys("/bin", 32);
+    char buffer[32], *p = buffer, *end = buffer + sizeof(buffer);
+    p = bufprint_temp_file(p, end, "tempfile");
+    EXPECT_EQ(buffer + 13, p);
+#ifdef _WIN32
+    EXPECT_STREQ("/tmp\\tempfile", buffer);
+#else
+    EXPECT_STREQ("/tmp/tempfile", buffer);
+#endif
 }
