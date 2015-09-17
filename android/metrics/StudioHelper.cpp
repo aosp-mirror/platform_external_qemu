@@ -189,6 +189,18 @@ String StudioHelper::pathToStudioUUIDWindows() {
 }
 #endif
 
+// static
+String StudioHelper::dropSeparatorsFromCid(const String& instr) {
+    String outstr;
+    const char* rawstr = instr.c_str();
+    for (size_t i = 0; i < instr.size(); ++i) {
+        if (rawstr[i] != '-') {
+            outstr += rawstr[i];
+        }
+    }
+    return outstr;
+}
+
 /*****************************************************************************/
 
 // Recurse through studio xml doc and return the value described in match
@@ -372,5 +384,6 @@ char* android_studio_get_installation_id() {
         retval = String(kAndroidStudioUuidHexPattern);
     }
 
+    retval = StudioHelper::dropSeparatorsFromCid(retval);
     return strdup(retval.c_str());
 }

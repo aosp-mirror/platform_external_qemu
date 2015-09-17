@@ -49,8 +49,11 @@ struct StudioHelper {
     // Construct and return the complete path to Android Studio
     // UUID storage file. Returned value is a String
     //
-    static android::base::String pathToStudioUUIDWindows();
+    static base::String pathToStudioUUIDWindows();
 #endif
+
+    // Helper function to compactify the client id by dropping all '-'s.
+    static base::String dropSeparatorsFromCid(const base::String& instr);
 };
 
 }  // namespace android

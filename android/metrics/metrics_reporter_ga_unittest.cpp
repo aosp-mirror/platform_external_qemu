@@ -42,7 +42,7 @@ TEST_F(MetricsReporterGaTest, defaultMetrics) {
     AndroidMetrics metrics;
     static const char kExpected[] =
             "v=1&tid=UA-19996407-3&an=Android Studio&av=unknown&"
-            "cid=00000000-0000-0000-0000-000000000000&cd6=unknown&t=event&"
+            "cid=00000000000000000000000000000000&cd6=unknown&t=event&"
             "ec=emulator&ea=singleRunCrashInfo&el=crashDetected&cm2=0&cm3=0";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
@@ -58,7 +58,7 @@ TEST_F(MetricsReporterGaTest, cleanRun) {
     AndroidMetrics metrics;
     static const char kExpected[] =
             "v=1&tid=UA-19996407-3&an=Android Studio&av=standalone&"
-            "cid=00000000-0000-0000-0000-000000000000&cd6=x86_64&t=event&"
+            "cid=00000000000000000000000000000000&cd6=x86_64&t=event&"
             "ec=emulator&ea=singleRunCrashInfo&el=cleanExit&cm2=220&cm3=1170";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
@@ -83,7 +83,7 @@ TEST_F(MetricsReporterGaTest, dirtyRun) {
     AndroidMetrics metrics;
     static const char kExpected[] =
             "v=1&tid=UA-19996407-3&an=Android Studio&av=standalone&"
-            "cid=00000000-0000-0000-0000-000000000000&cd6=x86_64&t=event&"
+            "cid=00000000000000000000000000000000&cd6=x86_64&t=event&"
             "ec=emulator&ea=singleRunCrashInfo&el=crashDetected&cm2=180&"
             "cm3=1080";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
