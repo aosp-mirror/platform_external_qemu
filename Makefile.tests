@@ -47,6 +47,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/metrics/ddms-ping_unittest.cpp \
   android/metrics/metrics_reporter_unittest.cpp \
   android/metrics/metrics_reporter_ga_unittest.cpp \
+  android/metrics/metrics_reporter_toolbar_unittest.cpp \
   android/metrics/StudioHelper_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
   android/opengl/EmuglBackendScanner_unittest.cpp \
