@@ -31,6 +31,9 @@ void ExtendedWindow::on_bat_chargeCkBox_toggled(bool checked)
 void ExtendedWindow::on_bat_levelSlider_valueChanged(int value)
 {
     mBatteryState.mChargeLevel = value;
+    // Update the text output
+    mExtendedUi->bat_chargeLevelText->setText(QString::number(value)+"%");
+
     if (mBatteryAgent && mBatteryAgent->setChargeLevel) {
         mBatteryAgent->setChargeLevel(value);
     }
