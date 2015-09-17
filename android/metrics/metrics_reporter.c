@@ -13,6 +13,7 @@
 
 #include "android/metrics/internal/metrics_reporter_internal.h"
 #include "android/metrics/metrics_reporter_ga.h"
+#include "android/metrics/metrics_reporter_toolbar.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
@@ -391,5 +392,7 @@ void androidMetrics_injectUploader(
 
 /* typedef'ed to: androidMetricsUploaderFunction */
 ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics) {
-    return (ABool)androidMetrics_uploadMetricsGA(metrics);
+    ABool success = (ABool)androidMetrics_uploadMetricsGA(metrics);
+    success &= (ABool)androidMetrics_uploadMetricsToolbar(metrics);
+    return success;
 }

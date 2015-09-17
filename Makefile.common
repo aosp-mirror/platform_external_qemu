@@ -194,6 +194,7 @@ common_LOCAL_SRC_FILES += \
 	android/kernel/kernel_utils.cpp \
 	android/metrics/metrics_reporter.c \
 	android/metrics/metrics_reporter_ga.c \
+	android/metrics/metrics_reporter_toolbar.c \
 	android/metrics/StudioHelper.cpp \
 	android/qemu/base/async/Looper.cpp \
 	android/looper-base.cpp \
