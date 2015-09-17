@@ -665,9 +665,6 @@ color: #f0f0f0;</string>
      </property>
     </widget>
     <widget class="QPushButton" name="loc_GpxButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
      <property name="geometry">
       <rect>
        <x>150</x>

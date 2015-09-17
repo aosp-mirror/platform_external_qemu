@@ -156,6 +156,7 @@ private slots:
 
     // Location
     void on_loc_addRowButton_clicked();
+    void on_loc_GpxButton_clicked();
     void on_loc_KmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
     void on_loc_pauseButton_clicked();
