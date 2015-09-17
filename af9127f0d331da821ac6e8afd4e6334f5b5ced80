@@ -45,6 +45,30 @@
       "revId": "af9127f0d331da821ac6e8afd4e6334f5b5ced80",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49fb5386_ccae8f63",
+        "filename": "android/metrics/metrics_reporter_toolbar.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-17T19:54:45Z",
+      "side": 1,
+      "message": "Thanks.",
+      "parentUuid": "69ec97ce_ad433d32",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 21
+      },
+      "revId": "af9127f0d331da821ac6e8afd4e6334f5b5ced80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
