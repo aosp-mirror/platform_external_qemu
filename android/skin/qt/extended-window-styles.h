@@ -45,32 +45,35 @@ enum { PANE_IDX_LOCATION = 0,
 // that can be assigned to a widget. (Properties are listed in the .ui
 // file.)
 //
-// So far, we have four sets of colors for each theme:
+// So far, we have five sets of colors for each theme:
 //   "MajorTab":       The area of the tab buttons on the left of the window
 //   "MajorTabTitle":  Section titles separating the tab buttons
 //   "Title":          Section titles in the main part of the window
+//   "Tool":           Buttons whose text is the same color as a checkbox
 //   <Normal>:         Text in the main part of the window
 //
-// The first three sets are identified by the value of their "ColorGroup"
+// The first four sets are identified by the value of their "ColorGroup"
 // property. The last set is identified by not having a "ColorGroup" property.
 
 // These are the colors used in the two themes
 
-#define LIGHT_BKG_COLOR         "#f9f9f9"  // Main page background
-#define LIGHT_MAJOR_TAB_COLOR   "#91a4ad"  // Text of major tabs
-#define LIGHT_MAJOR_TITLE_COLOR "#617d8a"  // Text of major tab separators
-#define LIGHT_TAB_BKG_COLOR     "#ffffff"  // Background of major tabs
-#define LIGHT_TEXT_COLOR        "#212121"  // Main page text
-#define LIGHT_TITLE_COLOR       "#757575"  // Main page titles
-#define LIGHT_TOOL_COLOR        "#00bea4"  // Checkboxes, sliders, etc.
+#define LIGHT_BKG_COLOR            "#f9f9f9"  // Main page background
+#define LIGHT_DISABLED_TOOL_COLOR  "#a0a0a0"  // Grayed-out button text
+#define LIGHT_MAJOR_TAB_COLOR      "#91a4ad"  // Text of major tabs
+#define LIGHT_MAJOR_TITLE_COLOR    "#617d8a"  // Text of major tab separators
+#define LIGHT_TAB_BKG_COLOR        "#ffffff"  // Background of major tabs
+#define LIGHT_TEXT_COLOR           "#212121"  // Main page text
+#define LIGHT_TITLE_COLOR          "#757575"  // Main page titles
+#define LIGHT_TOOL_COLOR           "#00bea4"  // Checkboxes, sliders, etc.
 
-#define DARK_BKG_COLOR          "#273238"
-#define DARK_MAJOR_TAB_COLOR    "#bdc0c3"
-#define DARK_MAJOR_TITLE_COLOR  "#e5e6e7"
-#define DARK_TAB_BKG_COLOR      "#394249"
-#define DARK_TEXT_COLOR         "#eeeeee"
-#define DARK_TITLE_COLOR        "#ffffff"
-#define DARK_TOOL_COLOR         "#00bea4"
+#define DARK_BKG_COLOR             "#273238"
+#define DARK_DISABLED_TOOL_COLOR   "#a0a0a0"
+#define DARK_MAJOR_TAB_COLOR       "#bdc0c3"
+#define DARK_MAJOR_TITLE_COLOR     "#e5e6e7"
+#define DARK_TAB_BKG_COLOR         "#394249"
+#define DARK_TEXT_COLOR            "#eeeeee"
+#define DARK_TITLE_COLOR           "#ffffff"
+#define DARK_TOOL_COLOR            "#00bea4"
 
 // These are the styles. One for each theme.
 
@@ -79,6 +82,8 @@ enum { PANE_IDX_LOCATION = 0,
     "*[ColorGroup=\"MajorTabTitle\"] { color:" LIGHT_MAJOR_TITLE_COLOR ";" \
                                       "background-color:" LIGHT_TAB_BKG_COLOR "}" \
     "*[ColorGroup=\"Title\"]         { color:" LIGHT_TITLE_COLOR "}" \
+    "*::disabled[ColorGroup=\"Tool\"]{ color:" LIGHT_DISABLED_TOOL_COLOR "}" \
+    "*[ColorGroup=\"Tool\"]          { color:" LIGHT_TOOL_COLOR "}" \
     "*                               { color:" LIGHT_TEXT_COLOR ";" \
                                       "background-color: "LIGHT_BKG_COLOR "}" \
     "QTextEdit, QPlainTextEdit, QTreeView {" \
@@ -99,6 +104,8 @@ enum { PANE_IDX_LOCATION = 0,
     "*[ColorGroup=\"MajorTabTitle\"] { color:" DARK_MAJOR_TITLE_COLOR ";" \
                                       "background-color:" DARK_TAB_BKG_COLOR "}" \
     "*[ColorGroup=\"Title\"]         { color:" DARK_TITLE_COLOR "}" \
+    "*::disabled[ColorGroup=\"Tool\"]{ color:" DARK_DISABLED_TOOL_COLOR "}" \
+    "*[ColorGroup=\"Tool\"]          { color:" DARK_TOOL_COLOR "}" \
     "*                               { color:" DARK_TEXT_COLOR ";" \
                                       "background-color: "DARK_BKG_COLOR "}" \
     "QTextEdit, QPlainTextEdit, QTreeView {" \

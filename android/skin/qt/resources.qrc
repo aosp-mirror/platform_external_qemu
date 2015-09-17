@@ -28,7 +28,7 @@
      <file alias="add">images/dark/ic_add_678_48dp.svg</file>
      <file alias="add_disabled">images/dark/ic_add_678_48dp.svg</file>
      <file alias="battery">images/dark/ic_battery_80_678_48dp.svg</file>
-     <file alias="call_end">images/dark/ic_call_end_678_48dp.svg</file>
+     <file alias="call_end">images/dark/ic_call_end_0BA_48dp.svg</file>
      <file alias="call_end_disabled">images/dark/ic_call_end_678_48dp.svg</file>
      <file alias="check_yes">images/dark/ic_check_box_0BA_24dp.svg</file>
      <file alias="check_no">images/dark/ic_check_box_outline_blank_0BA_24dp.svg</file>
@@ -40,10 +40,11 @@
      <file alias="pause">images/dark/ic_pause_678_48dp.svg</file>
      <file alias="pause_disabled">images/dark/ic_pause_678_48dp.svg</file>
      <file alias="phone">images/dark/ic_phone_678_48dp.svg</file>
+     <file alias="phone_button">images/dark/ic_phone_0BA_48dp.svg</file>
      <file alias="phone_disabled">images/dark/ic_phone_678_48dp.svg</file>
-     <file alias="phone_in_talk">images/dark/ic_phone_in_talk_678_48dp.svg</file>
+     <file alias="phone_in_talk">images/dark/ic_phone_in_talk_0BA_48dp.svg</file>
      <file alias="phone_in_talk_disabled">images/dark/ic_phone_in_talk_678_48dp.svg</file>
-     <file alias="phone_paused">images/dark/ic_phone_paused_678_48dp.svg</file>
+     <file alias="phone_paused">images/dark/ic_phone_paused_0BA_48dp.svg</file>
      <file alias="phone_paused_disabled">images/dark/ic_phone_paused_678_48dp.svg</file>
      <file alias="play_arrow">images/dark/ic_play_arrow_678_48dp.svg</file>
      <file alias="play_arrow_disabled">images/dark/ic_play_arrow_678_48dp.svg</file>
@@ -78,7 +79,7 @@
      <file alias="add">images/light/ic_add_677_48dp.svg</file>
      <file alias="add_disabled">images/light/ic_add_grey600_48dp.svg</file>
      <file alias="battery">images/light/ic_battery_80_677_48dp.svg</file>
-     <file alias="call_end">images/light/ic_call_end_677_48dp.svg</file>
+     <file alias="call_end">images/light/ic_call_end_0BA_48dp.svg</file>
      <file alias="call_end_disabled">images/light/ic_call_end_grey600_48dp.svg</file>
      <file alias="check_yes">images/light/ic_check_box_677_24dp.svg</file>
      <file alias="check_no">images/light/ic_check_box_outline_blank_677_24dp.svg</file>
@@ -90,10 +91,11 @@
      <file alias="pause">images/light/ic_pause_677_48dp.svg</file>
      <file alias="pause_disabled">images/light/ic_pause_grey600_48dp.svg</file>
      <file alias="phone">images/light/ic_phone_677_48dp.svg</file>
+     <file alias="phone_button">images/light/ic_phone_0BA_48dp.svg</file>
      <file alias="phone_disabled">images/light/ic_phone_grey600_48dp.svg</file>
-     <file alias="phone_in_talk">images/light/ic_phone_in_talk_677_48dp.svg</file>
+     <file alias="phone_in_talk">images/light/ic_phone_in_talk_0BA_48dp.svg</file>
      <file alias="phone_in_talk_disabled">images/light/ic_phone_in_talk_grey600_48dp.svg</file>
-     <file alias="phone_paused">images/light/ic_phone_paused_677_48dp.svg</file>
+     <file alias="phone_paused">images/light/ic_phone_paused_0BA_48dp.svg</file>
      <file alias="phone_paused_disabled">images/light/ic_phone_paused_grey600_48dp.svg</file>
      <file alias="play_arrow">images/light/ic_play_arrow_677_48dp.svg</file>
      <file alias="play_arrow_disabled">images/light/ic_play_arrow_grey600_48dp.svg</file>

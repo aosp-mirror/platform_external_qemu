@@ -1032,22 +1032,33 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="geometry">
       <rect>
-       <x>70</x>
+       <x>150</x>
        <y>100</y>
-       <width>36</width>
+       <width>111</width>
        <height>36</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="toolTip">
       <string>End call</string>
      </property>
      <property name="text">
-      <string/>
+      <string>HANG UP</string>
      </property>
      <property name="icon">
       <iconset resource="resources.qrc">
        <normaloff>:/light/call_end</normaloff>
        <disabledoff>:/light/call_end_disabled</disabledoff>:/light/call_end</iconset>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <property name="themeIconName" stdset="0">
       <string>call_end</string>
@@ -1055,31 +1066,48 @@ font-family: &quot;Roboto&quot;</string>
      <property name="themeIconName_disabled" stdset="0">
       <string>call_end_disabled</string>
      </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Tool</string>
+     </property>
     </widget>
     <widget class="QPushButton" name="tel_startCallButton">
      <property name="geometry">
       <rect>
        <x>20</x>
        <y>100</y>
-       <width>36</width>
+       <width>111</width>
        <height>36</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="toolTip">
       <string>Start call</string>
      </property>
      <property name="text">
-      <string/>
+      <string>CALL DEVICE</string>
      </property>
      <property name="icon">
       <iconset resource="resources.qrc">
-       <normaloff>:/light/phone</normaloff>:/light/phone</iconset>
+       <normaloff>:/light/phone_button</normaloff>:/light/phone_button</iconset>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <property name="themeIconName" stdset="0">
-      <string>phone</string>
+      <string>phone_button</string>
      </property>
      <property name="themeIconName_disabled" stdset="0">
       <string>phone_disabled</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Tool</string>
      </property>
     </widget>
     <widget class="QGroupBox" name="tel_fromGroup">
@@ -1107,28 +1135,42 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="geometry">
       <rect>
-       <x>120</x>
+       <x>280</x>
        <y>100</y>
-       <width>36</width>
+       <width>111</width>
        <height>36</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="toolTip">
       <string>Hold call</string>
      </property>
      <property name="text">
-      <string/>
+      <string>HOLD CALL</string>
      </property>
      <property name="icon">
       <iconset resource="resources.qrc">
        <normaloff>:/light/phone_paused</normaloff>
        <disabledoff>:/light/phone_paused_disabled</disabledoff>:/light/phone_paused</iconset>
      </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
      <property name="themeIconName" stdset="0">
       <string>phone_paused</string>
      </property>
      <property name="themeIconName_disabled" stdset="0">
       <string>phone_paused_disabled</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Tool</string>
      </property>
     </widget>
     <widget class="QComboBox" name="tel_numberBox">
@@ -2477,7 +2519,6 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>bat_healthBox</tabstop>
   <tabstop>bat_statusBox</tabstop>
   <tabstop>tel_numberBox</tabstop>
-  <tabstop>tel_startCallButton</tabstop>
   <tabstop>tel_endCallButton</tabstop>
   <tabstop>tel_holdCallButton</tabstop>
   <tabstop>sms_phoneNumberBox</tabstop>
