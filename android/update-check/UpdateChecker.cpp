@@ -132,7 +132,7 @@ public:
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, &xml);
             const CURLcode res = curl_easy_perform(curl);
             if (res != CURLE_OK) {
-                dwarning("UpdateCheck: failed to get an URL: %d (%s)\n", res,
+                dwarning("UpdateCheck: failed to get a URL: %d (%s)\n", res,
                          curl_easy_strerror(res));
             }
             curl_easy_cleanup(curl);
