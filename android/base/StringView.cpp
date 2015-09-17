@@ -18,7 +18,9 @@ namespace base {
 
 int StringView::compare(const StringView& other) const {
     size_t minSize = std::min(mSize, other.size());
-    if (!minSize) return true;
+    if (minSize == 0) {
+        return mSize < other.size() ? -1 : (mSize > other.size() ? +1 : 0);
+    }
     int ret = memcmp(mString, other.str(), minSize);
     if (ret) return ret;
     if (mSize < other.size()) return -1;
@@ -28,7 +30,7 @@ int StringView::compare(const StringView& other) const {
 
 bool operator==(const StringView& x, const StringView& y) {
     if (x.size() != y.size()) return false;
-    return !memcmp(x.str(), y.str(), x.size());
+    return memcmp(x.str(), y.str(), x.size()) == 0;
 }
 
 }  // namespace base
