@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a90a0f5b_cf64bd2e",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-09-17T18:52:44Z",
+      "side": 1,
+      "message": "s/A QEMU1-specific \u0027engine\u0027/An \u0027engine\u0027 (QEMU-1)/.",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 29
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "096ddbec_436aacb4",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-09-17T18:52:44Z",
+      "side": 1,
+      "message": "Can you clarify that external/qemu/telephony/ will be part of QEMU1 glue? One might think that telephony/ will be part of AndroidEmu as well, due to text \"For example:\" above.",
+      "range": {
+        "startLine": 101,
+        "startChar": 6,
+        "endLine": 101,
+        "endChar": 15
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49a1935d_85868805",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-09-17T18:52:44Z",
+      "side": 1,
+      "message": "external/qemu/ is for QEMU1 and I think AndroidEmu should not be a sub-directory of it. So my propose is\n\nexternal/android-emu :               AndroidEmu code\n\nexternal/qemu/android-qemu1 :        QEMU1 glue code\nexternal/qemu/\u003cOTHERS\u003e :             QEMU1 engine code\n\nexternal/qemu-android/android-qemu2: QEMU2 glue code\nexternal/qemu-android/\u003cOTHERS\u003e :     QEMU2 engine code\n\nThis structure will make it clear that AndroidEmu and underlying engines are independent. It will also make it easy for people to remember the boundary and verify the independence. It makes it super trivial to retire QEMU1 when it is ready.\n\nTwo notes. (1) I\u0027ll be thrilled if we could rename \"qemu-android\" to \"qemu2\". This could happen today. (2) we could create a directory external/emulator to hold 3 sub-directories \"android-emu\", \"qemu\", and \"qemu2\" if it is desired.",
+      "range": {
+        "startLine": 162,
+        "startChar": 28,
+        "endLine": 162,
+        "endChar": 50
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
