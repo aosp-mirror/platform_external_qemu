@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e986c7d4_215a0e1b",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T08:06:18Z",
+      "side": 1,
+      "message": "Actually this needs a little clarification, i.e. \u0027engine\u0027 is what\u0027s really performs the emulation at runtime, while \u0027glue\u0027 is the plumbing between a specific engine (QEMU1 or QEMU2) and AndroidEmu. I\u0027ll modify the doc to make this clear.",
+      "parentUuid": "a456b6eb_52a812c1",
+      "range": {
+        "startLine": 50,
+        "startChar": 22,
+        "endLine": 50,
+        "endChar": 28
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e44c2e60_faae3dff",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-16T22:38:07Z",
       "side": 1,
       "message": "I think\n\n[AndroidEmu] + [QEMU1 glue] + [QEMU1] \u003d\u003d [Classic emulator]\n\nis more accurate. Every line of code should have a home in the diagram.\n\nIt should also be clear that [QEMU1 glue] is the only one that depends on AndroidEmu and QEMU1, and there should be no dependency between AndroidEmu and QEMU1/QEMU2, in principle.",
+      "range": {
+        "startLine": 70,
+        "startChar": 27,
+        "endLine": 70,
+        "endChar": 32
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c98d83f4_807f563f",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T08:06:18Z",
+      "side": 1,
+      "message": "Excellent idea! Will do. Thanks.",
+      "parentUuid": "e44c2e60_faae3dff",
       "range": {
         "startLine": 70,
         "startChar": 27,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "c9582344_88ae7762",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T08:06:18Z",
+      "side": 1,
+      "message": "Ah, this needs clarification as well. In a nutshell:\n\n  external/qemu/android/telephony: will be part of AndroidEmu\n  external/qemu/telephony/: will be part of QEMU1 glue.\n\nFact is that external/qemu/telephony will very likely move\nto external/qemu/android-qemu1/ which will be the location of all the glue code.",
+      "parentUuid": "246d66b4_793ddff0",
+      "range": {
+        "startLine": 97,
+        "startChar": 27,
+        "endLine": 97,
+        "endChar": 41
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "843d32a1_f8d2be91",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 1
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "0984fbca_428952a9",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T08:06:18Z",
+      "side": 1,
+      "message": "Yes, there are significant differences between QEMU1 and QEMU2 internals, the larger ones being how virtual devices are actually declared / initialized / run. However, the interfaces we\u0027re going to deal with to connect with AndroidEmu should not be too problematic.",
+      "parentUuid": "843d32a1_f8d2be91",
+      "range": {
+        "startLine": 112,
+        "startChar": 10,
+        "endLine": 112,
+        "endChar": 19
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "64383eb1_56a1ea62",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 1
@@ -105,6 +201,30 @@
       "writtenOn": "2015-09-16T22:38:07Z",
       "side": 1,
       "message": "How do we know the code moving out is actually generic? Is it possible to have a policy/guide that newly moved out code should be linked against QEMU2 in a reasonable timeframe? So they are at least syntactic generic.",
+      "range": {
+        "startLine": 150,
+        "startChar": 69,
+        "endLine": 150,
+        "endChar": 76
+      },
+      "revId": "d6ef5cb13b499aa1f5114921b0c246d100a9e0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e986c7d4_e143c631",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-17T08:06:18Z",
+      "side": 1,
+      "message": "In a nutshell, it doesn\u0027t include \"qemu-common.h\", or any other QEMU-specific header (e.g. any stuff from \"hw/...\"). Also shall include stuff from \"android/...\" (after moving all the rest into \"android-qemu1/\").\n \nIt\u0027s not possible to give \"reasonable timeframes\" at the moment so I won\u0027t try.",
+      "parentUuid": "64383eb1_56a1ea62",
       "range": {
         "startLine": 150,
         "startChar": 69,
