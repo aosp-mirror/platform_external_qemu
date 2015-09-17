@@ -622,13 +622,13 @@ build_darwin_binaries_on () {
     copy_directory "$AOSP_BUILD_PREBUILTS"/curl/darwin-x86_64 \
             "$DARWIN_BUILD_PREBUILTS"/curl/darwin-x86_64
 
-    if [ "$OPT_UI" = "qt" ]; then
-        if [ ! -d "$AOSP_BUILD_PREBUILTS/libxml2/darwin-x86_64" ]; then
-            panic "Missing Darwin libxml2 prebuilts required by --ui=qt !!"
-        fi
-        copy_directory "$AOSP_BUILD_PREBUILTS"/libxml2/darwin-x86_64 \
-                "$DARWIN_BUILD_PREBUILTS"/libxml2/darwin-x86_64
+    if [ ! -d "$AOSP_BUILD_PREBUILTS/common/libxml2/darwin-x86_64" ]; then
+        panic "Missing Darwin libxml2 prebuilts!"
+    fi
+    copy_directory "$AOSP_BUILD_PREBUILTS"/common/libxml2/darwin-x86_64 \
+            "$DARWIN_BUILD_PREBUILTS"/common/libxml2/darwin-x86_64
 
+    if [ "$OPT_UI" = "qt" ]; then
         if [ ! -d "$AOSP_BUILD_PREBUILTS"/qt/darwin-x86_64 ]; then
             panic "Missing Darwin Qt prebuilts required by --ui=qt !!"
         fi
