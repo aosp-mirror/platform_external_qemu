@@ -48,6 +48,29 @@
     },
     {
       "key": {
+        "uuid": "a9692fe6_3d80f7e6",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-17T18:55:53Z",
+      "side": 1,
+      "message": "what about putting the \u0027glue\u0027 code into the glue/ directory? so it\u0027s much easier to see if a file is a part of a glue, not qemu1",
+      "range": {
+        "startLine": 101,
+        "startChar": 6,
+        "endLine": 101,
+        "endChar": 15
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "49a1935d_85868805",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 3
@@ -64,6 +87,53 @@
         "startChar": 28,
         "endLine": 162,
         "endChar": 50
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a90a0f5b_ef954130",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-17T18:55:53Z",
+      "side": 1,
+      "message": "Can we actually rename the directories? qemu1 and qemu2 would look much better than qemu and qemu-android there. And then we could just have a \u0027glue\u0027 or \u0027android-glue\u0027 subdirectory for both\n\nP.S. naming is the hardest problem after cache invalidation :)",
+      "parentUuid": "49a1935d_85868805",
+      "range": {
+        "startLine": 162,
+        "startChar": 28,
+        "endLine": 162,
+        "endChar": 50
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e96fa7e4_df00d378",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-17T18:55:53Z",
+      "side": 1,
+      "message": "what about refactoring it to be faster as a part of this effort?",
+      "range": {
+        "startLine": 195,
+        "startChar": 0,
+        "endLine": 198,
+        "endChar": 54
       },
       "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
