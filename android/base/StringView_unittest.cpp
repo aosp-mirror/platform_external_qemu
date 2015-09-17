@@ -126,6 +126,33 @@ TEST(StringView, ComparisonOperators) {
     EXPECT_FALSE(view1 <= view4);
     EXPECT_TRUE(view1 > view4);
     EXPECT_TRUE(view1 >= view4);
+
+    EXPECT_EQ(StringView(""), StringView(""));
+    EXPECT_GE(StringView(""), StringView(""));
+    EXPECT_GT(StringView("1"), StringView(""));
+    EXPECT_GE(StringView("1"), StringView(""));
+    EXPECT_LT(StringView(""), StringView("2"));
+    EXPECT_LE(StringView(""), StringView("2"));
+}
+
+TEST(StringView, Compare) {
+    // empty string
+    EXPECT_EQ(StringView("").compare(StringView("")), 0);
+    EXPECT_GT(StringView("1").compare(StringView("")), 0);
+    EXPECT_LT(StringView("").compare(StringView("2")), 0);
+
+    // non-empty strings, same length
+    EXPECT_EQ(StringView("1").compare(StringView("1")), 0);
+    EXPECT_GT(StringView("2").compare(StringView("1")), 0);
+    EXPECT_LT(StringView("1").compare(StringView("2")), 0);
+
+    // non-empty strings, first shorter
+    EXPECT_GT(StringView("2").compare(StringView("12")), 0);
+    EXPECT_LT(StringView("1").compare(StringView("11")), 0);
+
+    // non-empty strings, first longer
+    EXPECT_GT(StringView("11").compare(StringView("1")), 0);
+    EXPECT_LT(StringView("12").compare(StringView("2")), 0);
 }
 
 // TODO(digit): String
