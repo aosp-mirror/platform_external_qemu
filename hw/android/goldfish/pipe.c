@@ -55,9 +55,6 @@
 
 #define GOLDFISH_PIPE_SAVE_VERSION  3
 
-// Up to Tools r22.6, the emulator saved with this version number.
-#define GOLDFISH_PIPE_SAVE_VERSION_LEGACY  2
-
 /***********************************************************************
  ***********************************************************************
  *****
@@ -263,7 +260,7 @@ pipe_save( Pipe* pipe, QEMUFile* file )
 }
 
 static Pipe*
-pipe_load( PipeDevice* dev, QEMUFile* file, int version_id )
+pipe_load(PipeDevice* dev, QEMUFile* file)
 {
     Pipe*              pipe;
     const PipeService* service = NULL;
@@ -284,11 +281,8 @@ pipe_load( PipeDevice* dev, QEMUFile* file, int version_id )
         }
     }
 
-    if (version_id == GOLDFISH_PIPE_SAVE_VERSION_LEGACY) {
-        channel = qemu_get_be32(file);
-    } else {
-        channel = qemu_get_be64(file);
-    }
+    channel = qemu_get_be64(file);
+
     pipe = pipe_new(channel, dev);
     pipe->wanted  = qemu_get_byte(file);
     pipe->closed  = qemu_get_byte(file);
@@ -896,22 +890,14 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
     PipeDevice* dev = opaque;
     Pipe*       pipe;
 
-    if ((version_id != GOLDFISH_PIPE_SAVE_VERSION) &&
-        (version_id != GOLDFISH_PIPE_SAVE_VERSION_LEGACY)) {
+    if (version_id != GOLDFISH_PIPE_SAVE_VERSION) {
         return -EINVAL;
     }
-    if (version_id == GOLDFISH_PIPE_SAVE_VERSION_LEGACY) {
-        dev->address = (uint64_t)qemu_get_be32(file);
-    } else {
-        dev->address = qemu_get_be64(file);
-    }
+    dev->address = qemu_get_be64(file);
     dev->size    = qemu_get_be32(file);
     dev->status  = qemu_get_be32(file);
-    if (version_id == GOLDFISH_PIPE_SAVE_VERSION_LEGACY) {
-        dev->channel = (uint64_t)qemu_get_be32(file);
-    } else {
-        dev->channel = qemu_get_be64(file);
-    }
+    dev->channel = qemu_get_be64(file);
+
     dev->wakes   = qemu_get_be32(file);
     dev->params_addr   = qemu_get_be64(file);
 
@@ -920,7 +906,7 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
 
     /* Load all pipe connections */
     for ( ; count > 0; count-- ) {
-        pipe = pipe_load(dev, file, version_id);
+        pipe = pipe_load(dev, file);
         if (pipe == NULL) {
             return -EIO;
         }
