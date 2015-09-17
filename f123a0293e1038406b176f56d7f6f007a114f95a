@@ -16,6 +16,24 @@
       "revId": "f123a0293e1038406b176f56d7f6f007a114f95a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9666312_bb4973f8",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-17T16:48:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4447ba3e_753fba7a",
+      "revId": "f123a0293e1038406b176f56d7f6f007a114f95a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
