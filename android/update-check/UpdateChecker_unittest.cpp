@@ -180,11 +180,14 @@ TEST(UpdateChecker, asyncWorker) {
             test.mVersionExtractor->mExtractVersionDataParam = "test";
     test.mVersionExtractor->mExtractVersionResult = Version(1, 0, 0);
     test.mVersionExtractor->mGetCurrentVersionResult = Version(1, 0, 0);
+    test.mSystem.setUnixTime(time_t(1));
+    test.mTimeStorage->mSetTimeParam = time_t(1);
 
     test.mUC->asyncWorker();
     EXPECT_EQ(1, test.mDataLoader->mLoadCallCount);
     EXPECT_EQ(1, test.mVersionExtractor->mExtractVersionCallCount);
     EXPECT_EQ(1, test.mVersionExtractor->mGetCurrentVersionCallCount);
+    EXPECT_EQ(1, test.mTimeStorage->mSetTimeCallCount);
 
     // didn't report the newer version
     EXPECT_EQ(0, test.mReporter->mReportNewerVersionCallCount);
@@ -199,8 +202,23 @@ TEST(UpdateChecker, asyncWorker) {
     EXPECT_EQ(2, test.mDataLoader->mLoadCallCount);
     EXPECT_EQ(2, test.mVersionExtractor->mExtractVersionCallCount);
     EXPECT_EQ(2, test.mVersionExtractor->mGetCurrentVersionCallCount);
+    EXPECT_EQ(2, test.mTimeStorage->mSetTimeCallCount);
 
     // reported the newer version
+    EXPECT_EQ(1, test.mReporter->mReportNewerVersionCallCount);
+
+    /////////////////////////////////////////////////////////////////////
+    // failed to get the last version
+    test.mVersionExtractor->mExtractVersionResult = Version::Invalid();
+
+    test.mUC->asyncWorker();
+    EXPECT_EQ(3, test.mDataLoader->mLoadCallCount);
+    EXPECT_EQ(3, test.mVersionExtractor->mExtractVersionCallCount);
+    EXPECT_EQ(3, test.mVersionExtractor->mGetCurrentVersionCallCount);
+
+    // didn't store the last check time
+    EXPECT_EQ(2, test.mTimeStorage->mSetTimeCallCount);
+    // didn't report the newer version
     EXPECT_EQ(1, test.mReporter->mReportNewerVersionCallCount);
 }
 
