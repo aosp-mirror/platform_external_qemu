@@ -53,7 +53,8 @@
 /* Maximum length of pipe service name, in characters (excluding final 0) */
 #define MAX_PIPE_SERVICE_NAME_SIZE  255
 
-#define GOLDFISH_PIPE_SAVE_VERSION  3
+#define GOLDFISH_PIPE_SAVE_VERSION  4
+#define GOLDFISH_PIPE_SAVE_LEGACY_VERSION  3
 
 /***********************************************************************
  ***********************************************************************
@@ -231,6 +232,12 @@ pipe_list_remove_waked( Pipe** list, Pipe*  pipe )
 static void
 pipe_save( Pipe* pipe, QEMUFile* file )
 {
+    // First save the hardware-side fields.
+    qemu_put_be64(file, pipe->channel);
+    qemu_put_byte(file, (int)pipe->wanted);
+    qemu_put_byte(file, (int)pipe->closed);
+
+    // Then everything else about the pipe.
     if (pipe->service == NULL) {
         /* pipe->service == NULL means we're still using a PipeConnector */
         /* Write a zero to indicate this condition */
@@ -240,11 +247,6 @@ pipe_save( Pipe* pipe, QEMUFile* file )
         qemu_put_byte(file, 1);
         qemu_put_string(file, pipe->service->name);
     }
-
-    /* Now save other common data */
-    qemu_put_be64(file, pipe->channel);
-    qemu_put_byte(file, (int)pipe->wanted);
-    qemu_put_byte(file, (int)pipe->closed);
 
     /* Write 1 + args, if any, or simply 0 otherwise */
     if (pipe->args != NULL) {
@@ -262,30 +264,35 @@ pipe_save( Pipe* pipe, QEMUFile* file )
 static Pipe*
 pipe_load(PipeDevice* dev, QEMUFile* file)
 {
-    Pipe*              pipe;
+    Pipe* pipe;
     const PipeService* service = NULL;
-    int   state = qemu_get_byte(file);
-    uint64_t channel;
 
+    // First, the hardware-side fields.
+    uint64_t channel = qemu_get_be64(file);
+    unsigned char wanted = qemu_get_byte(file);
+    unsigned char closed = qemu_get_byte(file);
+
+    // Then everything else: service name + parameters
+    int state = qemu_get_byte(file);
     if (state != 0) {
         /* Pipe is associated with a service. */
         char* name = qemu_get_string(file);
-        if (name == NULL)
+        if (name == NULL) {
             return NULL;
-
+        }
         service = goldfish_pipe_find_type(name);
         if (service == NULL) {
             D("No QEMU pipe service named '%s'", name);
             AFREE(name);
             return NULL;
         }
+        AFREE(name);
     }
 
-    channel = qemu_get_be64(file);
 
     pipe = pipe_new(channel, dev);
-    pipe->wanted  = qemu_get_byte(file);
-    pipe->closed  = qemu_get_byte(file);
+    pipe->wanted  = wanted;
+    pipe->closed  = closed;
     if (qemu_get_byte(file) != 0) {
         pipe->args = qemu_get_string(file);
     }
@@ -296,7 +303,62 @@ pipe_load(PipeDevice* dev, QEMUFile* file)
     }
 
     if (pipe->funcs->load) {
-        pipe->opaque = pipe->funcs->load(pipe, service ? service->opaque : NULL, pipe->args, file);
+        pipe->opaque = pipe->funcs->load(pipe,
+                                         service ? service->opaque : NULL,
+                                         pipe->args,
+                                         file);
+        if (pipe->opaque == NULL) {
+            AFREE(pipe);
+            return NULL;
+        }
+    } else {
+        /* Force-close the pipe on load */
+        pipe->closed = 1;
+    }
+    return pipe;
+}
+
+static Pipe*
+pipe_load_legacy(PipeDevice* dev, QEMUFile* file)
+{
+    const PipeService* service = NULL;
+
+    int state = qemu_get_byte(file);
+    if (state != 0) {
+        /* Pipe is associated with a service. */
+        char* name = qemu_get_string(file);
+        if (name == NULL) {
+            return NULL;
+        }
+        service = goldfish_pipe_find_type(name);
+        if (service == NULL) {
+            D("No QEMU pipe service named '%s'", name);
+            AFREE(name);
+            return NULL;
+        }
+        AFREE(name);
+    }
+
+    // Hardware-side fields are in the middle!
+    uint64_t channel = qemu_get_be64(file);
+    Pipe* pipe = pipe_new(channel, dev);
+    pipe->wanted  = qemu_get_byte(file);
+    pipe->closed  = qemu_get_byte(file);
+
+    if (qemu_get_byte(file) != 0) {
+        pipe->args = qemu_get_string(file);
+    }
+
+    pipe->service = service;
+    if (service != NULL) {
+        pipe->funcs = &service->funcs;
+    }
+
+    if (pipe->funcs->load) {
+        pipe->opaque = pipe->funcs->load(pipe,
+                                         service ? service->opaque : NULL,
+                                         pipe->args,
+                                         file);
         if (pipe->opaque == NULL) {
             AFREE(pipe);
             return NULL;
@@ -890,7 +952,8 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
     PipeDevice* dev = opaque;
     Pipe*       pipe;
 
-    if (version_id != GOLDFISH_PIPE_SAVE_VERSION) {
+    if (version_id != GOLDFISH_PIPE_SAVE_VERSION &&
+        version_id != GOLDFISH_PIPE_SAVE_LEGACY_VERSION) {
         return -EINVAL;
     }
     dev->address = qemu_get_be64(file);
@@ -906,7 +969,11 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
 
     /* Load all pipe connections */
     for ( ; count > 0; count-- ) {
-        pipe = pipe_load(dev, file);
+        if (version_id == GOLDFISH_PIPE_SAVE_LEGACY_VERSION) {
+            pipe = pipe_load_legacy(dev, file);
+        } else {
+            pipe = pipe_load(dev, file);
+        }
         if (pipe == NULL) {
             return -EIO;
         }
@@ -916,10 +983,12 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
 
     /* Now we need to wake/close all relevant pipes */
     for ( pipe = dev->pipes; pipe; pipe = pipe->next ) {
-        if (pipe->wanted != 0)
+        if (pipe->wanted != 0) {
             android_pipe_wake(pipe, pipe->wanted);
-        if (pipe->closed != 0)
+        }
+        if (pipe->closed != 0) {
             android_pipe_close(pipe);
+        }
     }
     return 0;
 }
