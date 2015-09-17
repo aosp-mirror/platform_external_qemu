@@ -24,21 +24,6 @@
  </qresource>
 
  <qresource prefix="/dark">
-     <!-- Main list of tool buttons -->
-     <file alias="close">images/dark/ic_close_678_48dp.svg</file>
-     <file alias="down">images/dark/ic_keyboard_arrow_down_678_48dp.svg</file>
-     <file alias="fullscreen">images/dark/ic_fullscreen_678_48dp.svg</file>
-     <file alias="left">images/dark/ic_keyboard_arrow_left_678_48dp.svg</file>
-     <file alias="more">images/dark/ic_more_horiz_678_48dp.svg</file>
-     <file alias="power_settings">images/dark/ic_power_settings_new_678_48dp.svg</file>
-     <file alias="right">images/dark/ic_keyboard_arrow_right_678_48dp.svg</file>
-     <file alias="screen_rotation">images/dark/ic_screen_rotation_678_48dp.svg</file>
-     <file alias="screen_shot">images/dark/ic_photo_camera_678_48dp.svg</file>
-     <file alias="up">images/dark/ic_keyboard_arrow_up_678_48dp.svg</file>
-     <file alias="volume_down">images/dark/ic_volume_down_678_48dp.svg</file>
-     <file alias="volume_up">images/dark/ic_volume_up_678_48dp.svg</file>
-     <file alias="zoom">images/dark/ic_zoom_in_678_48dp.svg</file>
-
      <!-- Used in the "extended" window -->
      <file alias="add">images/dark/ic_add_678_48dp.svg</file>
      <file alias="add_disabled">images/dark/ic_add_678_48dp.svg</file>
@@ -73,20 +58,21 @@
  </qresource>
 
  <qresource prefix="/light">
-     <!-- Main list of tool buttons -->
-     <file alias="close">images/light/ic_close_677_48px.svg</file>
+     <!-- Main list of tool buttons (these have only one theme) -->
+     <file alias="close">images/light/ic_close_48px.svg</file>
      <file alias="down">images/light/ic_keyboard_arrow_down_677_48px.svg</file>
-     <file alias="fullscreen">images/light/ic_fullscreen_677_48px.svg</file>
+     <file alias="fullscreen">images/light/ic_fullscreen_48px.svg</file>
      <file alias="left">images/light/ic_keyboard_arrow_left_677_48px.svg</file>
-     <file alias="more">images/light/ic_more_horiz_677_48dp.svg</file>
-     <file alias="power_settings">images/light/ic_power_settings_new_677_48px.svg</file>
+     <file alias="more">images/light/ic_more_horiz_white_48dp.svg</file>
+     <file alias="power_settings">images/light/ic_power_settings_new_48px.svg</file>
      <file alias="right">images/light/ic_keyboard_arrow_right_677_48px.svg</file>
-     <file alias="screen_rotation">images/light/ic_screen_rotation_677_48dp.svg</file>
+     <file alias="screen_rotation_left">images/light/Rotate_Left_white.svg</file>
+     <file alias="screen_rotation_right">images/light/Rotate_Right_white.svg</file>
      <file alias="screen_shot">images/light/ic_photo_camera_677_48px.svg</file>
      <file alias="up">images/light/ic_keyboard_arrow_up_677_48px.svg</file>
-     <file alias="volume_down">images/light/ic_volume_down_677_48px.svg</file>
-     <file alias="volume_up">images/light/ic_volume_up_677_48px.svg</file>
-     <file alias="zoom">images/light/ic_zoom_in_677_48dp.svg</file>
+     <file alias="volume_down">images/light/ic_volume_down_48px.svg</file>
+     <file alias="volume_up">images/light/ic_volume_up_48px.svg</file>
+     <file alias="zoom">images/light/ic_zoom_in_white_48dp.svg</file>
 
      <!-- Used in the "extended" window -->
      <file alias="add">images/light/ic_add_677_48dp.svg</file>
