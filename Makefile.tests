@@ -132,7 +132,10 @@ LOCAL_SRC_FILES += \
     android/gps/GpxParser_unittest.cpp \
     android/gps/internal/GpxParserInternal_unittest.cpp \
     android/gps/internal/KmlParserInternal_unittest.cpp \
-    android/gps/KmlParser_unittest.cpp 
+    android/gps/KmlParser_unittest.cpp \
+
+LOCAL_C_INCLUDES += $(LIBXML2_INCLUDES)
+LOCAL_LDLIBS += $(LIBXML2_LDLIBS)
 endif  # EMULATOR_USE_QT
 
 LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES)
@@ -152,7 +155,10 @@ LOCAL_SRC_FILES += \
     android/gps/GpxParser_unittest.cpp \
     android/gps/internal/GpxParserInternal_unittest.cpp \
     android/gps/internal/KmlParserInternal_unittest.cpp \
-    android/gps/KmlParser_unittest.cpp 
+    android/gps/KmlParser_unittest.cpp \
+
+LOCAL_C_INCLUDES += $(LIBXML2_INCLUDES)
+LOCAL_LDLIBS += $(LIBXML2_LDLIBS_64)
 endif  # EMULATOR_USE_QT
 
 LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES_64)

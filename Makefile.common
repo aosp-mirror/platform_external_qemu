@@ -146,6 +146,11 @@ LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
 LIBXML2_LDLIBS := $(LIBXML2_TOP32_DIR)/lib/libxml2.a
 LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
 
+# Required on Windows to indicate that the code will link against a static
+# version of libxml2. Otherwise, the linker complains about undefined
+# references to '_imp__xmlFree'.
+LIBXML2_CFLAGS := -DLIBXML_STATIC
+
 ###########################################################
 # Android utility functions
 #
@@ -261,6 +266,7 @@ endif
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
+common_LOCAL_CFLAGS += $(LIBXML2_CFLAGS)
 common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
 
 include $(LOCAL_PATH)/android/wear-agent/sources.mk
@@ -268,7 +274,7 @@ include $(LOCAL_PATH)/android/wear-agent/sources.mk
 ## one for 32-bit
 $(call start-emulator-library, emulator-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES)
-LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES) -DLIBXML_STATIC
+LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
     LOCAL_IGNORE_BITNESS := true
@@ -278,7 +284,7 @@ $(call end-emulator-library)
 
 $(call start-emulator64-library, emulator64-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES_64)
-LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES) -DLIBXML_STATIC
+LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
@@ -387,6 +393,8 @@ ifdef EMULATOR_USE_QT
     EMULATOR_LIBUI_LDFLAGS += $(EMULATOR_QT_LDFLAGS)
     EMULATOR_LIBUI_LDFLAGS_64 += $(EMULATOR_QT_LDFLAGS_64)
     EMULATOR_LIBUI_LDLIBS += $(EMULATOR_QT_LDLIBS)
+
+    EMULATOR_LIBUI_CFLAGS += $(LIBXML2_CFLAGS)
 endif  # EMULATOR_USE_QT
 
 # the skin support sources
