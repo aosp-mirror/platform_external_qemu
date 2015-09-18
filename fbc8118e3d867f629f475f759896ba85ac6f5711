@@ -22,6 +22,30 @@
       "revId": "fbc8118e3d867f629f475f759896ba85ac6f5711",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9b7a7e1_a2efc4e9",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 476,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-18T16:20:13Z",
+      "side": 1,
+      "message": "Please assign it to me. I\u0027ll take care of it today.",
+      "parentUuid": "e9b7a7e1_42b34824",
+      "range": {
+        "startLine": 476,
+        "startChar": 6,
+        "endLine": 476,
+        "endChar": 11
+      },
+      "revId": "fbc8118e3d867f629f475f759896ba85ac6f5711",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
