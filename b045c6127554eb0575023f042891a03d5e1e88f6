@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "099a3b78_fb6de387",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-18T18:10:44Z",
+      "side": 1,
+      "message": "Aside: Isn\u0027t this an important target for us? I\u0027d hate to have to support QEMU-classic becuase of this.",
+      "range": {
+        "startLine": 25,
+        "startChar": 17,
+        "endLine": 25,
+        "endChar": 35
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a90a0f5b_cf64bd2e",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 3
@@ -216,6 +239,30 @@
     },
     {
       "key": {
+        "uuid": "e99c0776_2069f431",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-18T18:10:44Z",
+      "side": 1,
+      "message": "I think we should change our mental picture of the build\n\nCurrent situation:\n- top level target is external/qemu/ (this is a mash-up of qemu1 and AndroieEmu)\n- This uses scripts (manually launched) to create and use external/qemu-android/ prebuilts if desired.\n\nIn the new world, this is no longer the case.\n- There are two top level targets: external/qemu1 and external/qemu2. \n  - Pick which one you want. \n  - If you want both, build both. Neither depends on the other, and should not pull the other.\n  - If there is common code (like the launcher that decides which qemu to launch, it belongs in AndroidEmu).\n- Both of them require AndroidEmu.\n- You *could* use a script in both external/qemu1/ and external/qemu2 to (re)build and pull AndroidEmu library, but it\u0027d be better if we can go the Android.mk way (top level Makefiles with includes) as that gives the best incremental builds and we\u0027re likely to hack on the AndroidEmu library hand-in-hand with one or both of qemu{1,2}.",
+      "parentUuid": "69dad736_c08a009d",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 185,
+        "endChar": 68
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e96fa7e4_df00d378",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 3
@@ -263,6 +310,29 @@
     },
     {
       "key": {
+        "uuid": "69dad736_31e4d852",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-18T18:10:44Z",
+      "side": 1,
+      "message": "See my comment above about dropping the artificial the qemu1 \u003c-- qemu2 build-time dependency.",
+      "range": {
+        "startLine": 200,
+        "startChar": 5,
+        "endLine": 204,
+        "endChar": 73
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c9a3c3b1_7068302b",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 3
@@ -297,6 +367,47 @@
       "writtenOn": "2015-09-17T23:20:55Z",
       "side": 1,
       "message": "We should only go to this extent if we know it will be used by the UI developers",
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9ae6393_4cb37f24",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-18T18:10:44Z",
+      "side": 1,
+      "message": "I think it\u0027s valuable to keep the UI code common across the two. If nothing else, it ensures uniform experience to a user when both are being shipped / used based on guest_arch etc.",
+      "parentUuid": "69c3b75a_9b431333",
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e99c0776_8bd6412d",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-18T18:10:44Z",
+      "side": 1,
+      "message": "Great idea!\nI think it\u0027s very hard to back-patch integration testing capability to any system.",
+      "range": {
+        "startLine": 264,
+        "startChar": 63,
+        "endLine": 264,
+        "endChar": 69
+      },
       "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
