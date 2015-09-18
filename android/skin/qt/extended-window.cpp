@@ -85,8 +85,10 @@ void ExtendedWindow::on_cellularButton_clicked()    { adjustTabs(mExtendedUi->ce
 void ExtendedWindow::on_dpadButton_clicked()        { adjustTabs(mExtendedUi->dpadButton,        PANE_IDX_DPAD); }
 void ExtendedWindow::on_fingerButton_clicked()      { adjustTabs(mExtendedUi->fingerButton,      PANE_IDX_FINGER); }
 void ExtendedWindow::on_hwSensorsButton_clicked()   { adjustTabs(mExtendedUi->hwSensorsButton,   PANE_IDX_HW_SENSORS); }
+void ExtendedWindow::on_kbdShortsButton_clicked()   { adjustTabs(mExtendedUi->kbdShortsButton,   PANE_IDX_KBD_SHORTS); }
 void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(mExtendedUi->locationButton,    PANE_IDX_LOCATION); }
 void ExtendedWindow::on_messageButton_clicked()     { adjustTabs(mExtendedUi->messageButton,     PANE_IDX_MESSAGE); }
+void ExtendedWindow::on_recordScrButton_clicked()   { adjustTabs(mExtendedUi->recordScrButton,   PANE_IDX_RECORD_SCR); }
 void ExtendedWindow::on_sdButton_clicked()          { adjustTabs(mExtendedUi->sdButton,          PANE_IDX_SD); }
 void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(mExtendedUi->settingsButton,    PANE_IDX_SETTINGS); }
 void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(mExtendedUi->telephoneButton,   PANE_IDX_TELEPHONE); }
@@ -110,8 +112,10 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
     mExtendedUi->dpadButton       ->setStyleSheet(colorStyle);
     mExtendedUi->fingerButton     ->setStyleSheet(colorStyle);
     mExtendedUi->hwSensorsButton  ->setStyleSheet(colorStyle);
+    mExtendedUi->kbdShortsButton  ->setStyleSheet(colorStyle);
     mExtendedUi->locationButton   ->setStyleSheet(colorStyle);
     mExtendedUi->messageButton    ->setStyleSheet(colorStyle);
+    mExtendedUi->recordScrButton  ->setStyleSheet(colorStyle);
     mExtendedUi->sdButton         ->setStyleSheet(colorStyle);
     mExtendedUi->settingsButton   ->setStyleSheet(colorStyle);
     // Omit "spacerButton" -- The main style sheet handles it
@@ -133,8 +137,10 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
     mExtendedUi->dpadButton       ->setAutoFillBackground(true);
     mExtendedUi->fingerButton     ->setAutoFillBackground(true);
     mExtendedUi->hwSensorsButton  ->setAutoFillBackground(true);
+    mExtendedUi->kbdShortsButton  ->setAutoFillBackground(true);
     mExtendedUi->locationButton   ->setAutoFillBackground(true);
     mExtendedUi->messageButton    ->setAutoFillBackground(true);
+    mExtendedUi->recordScrButton  ->setAutoFillBackground(true);
     mExtendedUi->sdButton         ->setAutoFillBackground(true);
     mExtendedUi->settingsButton   ->setAutoFillBackground(true);
     mExtendedUi->spacerButton     ->setAutoFillBackground(true);
