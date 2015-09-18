@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>951</width>
+    <width>960</width>
     <height>790</height>
    </rect>
   </property>
@@ -33,7 +33,7 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QStackedWidget" name="stackedWidget">
    <property name="geometry">
     <rect>
-     <x>220</x>
+     <x>230</x>
      <y>20</y>
      <width>691</width>
      <height>721</height>
@@ -410,7 +410,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Cellular Network</string>
+      <string>Cellular network</string>
      </property>
     </widget>
     <widget class="QComboBox" name="cell_dataStatusBox">
@@ -774,7 +774,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Charge Level</string>
+      <string>Charge level</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Title</string>
@@ -820,7 +820,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>AC On</string>
+      <string>AC on</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Title</string>
@@ -860,7 +860,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Power Status</string>
+      <string>Power status</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Title</string>
@@ -884,7 +884,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Power Health</string>
+      <string>Power health</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Title</string>
@@ -1362,7 +1362,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Fingerprint Detection</string>
+      <string>Fingerprint detection</string>
      </property>
     </widget>
     <widget class="QGroupBox" name="finger_IdGroup">
@@ -1470,7 +1470,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>SD Card</string>
+      <string>SD card</string>
      </property>
     </widget>
     <widget class="QPushButton" name="sd_pullPushButton">
@@ -1527,6 +1527,58 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="horizontalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOn</enum>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="page_6">
+    <widget class="QGroupBox" name="recordScrGroup">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>121</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Record screen</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="page_7">
+    <widget class="QGroupBox" name="kbdShortsGroup">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>151</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Keyboard shortcuts</string>
      </property>
     </widget>
    </widget>
@@ -1598,7 +1650,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Emulator Window Theme</string>
+      <string>Emulator window theme</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
@@ -1622,7 +1674,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Emulator GPU Acceleration</string>
+      <string>Emulator GPU acceleration</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
@@ -1646,7 +1698,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Emulator Version</string>
+      <string>Emulator version</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
@@ -1758,7 +1810,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>System Image Version</string>
+      <string>System image version</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
@@ -1782,7 +1834,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Screenshots / Record Screen save location</string>
+      <string>Screenshot / Record screen save location</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
@@ -1826,7 +1878,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Emulator ADB Port</string>
+      <string>Emulator ADB port</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
@@ -1839,7 +1891,7 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>16</x>
      <y>196</y>
-     <width>194</width>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -1883,7 +1935,7 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>16</x>
      <y>108</y>
-     <width>194</width>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -1927,7 +1979,7 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>16</x>
      <y>372</y>
-     <width>194</width>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -1971,7 +2023,7 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>16</x>
      <y>20</y>
-     <width>194</width>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -2015,7 +2067,7 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>16</x>
      <y>64</y>
-     <width>194</width>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -2059,7 +2111,7 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>16</x>
      <y>416</y>
-     <width>194</width>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -2103,7 +2155,7 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>16</x>
      <y>460</y>
-     <width>194</width>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -2147,7 +2199,7 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>16</x>
      <y>152</y>
-     <width>194</width>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -2168,7 +2220,7 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/light/close</normaloff>:/light/close</iconset>
+     <normaloff>:/light/camera_iris</normaloff>:/light/camera_iris</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -2180,7 +2232,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>true</bool>
    </property>
    <property name="themeIconName" stdset="0">
-    <string>close</string>
+    <string>camera_iris</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>MajorTab</string>
@@ -2191,7 +2243,7 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>16</x>
      <y>240</y>
-     <width>194</width>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -2212,7 +2264,7 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/light/close</normaloff>:/light/close</iconset>
+     <normaloff>:/light/virtSensors</normaloff>:/light/virtSensors</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -2224,7 +2276,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>true</bool>
    </property>
    <property name="themeIconName" stdset="0">
-    <string>close</string>
+    <string>virtSensors</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>MajorTab</string>
@@ -2235,7 +2287,7 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>16</x>
      <y>284</y>
-     <width>194</width>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -2256,7 +2308,7 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/light/close</normaloff>:/light/close</iconset>
+     <normaloff>:/light/hwSensors</normaloff>:/light/hwSensors</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -2268,7 +2320,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>true</bool>
    </property>
    <property name="themeIconName" stdset="0">
-    <string>close</string>
+    <string>hwSensors</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>MajorTab</string>
@@ -2279,7 +2331,7 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>16</x>
      <y>328</y>
-     <width>194</width>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -2300,7 +2352,7 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/light/close</normaloff>:/light/close</iconset>
+     <normaloff>:/light/dpad</normaloff>:/light/dpad</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -2312,7 +2364,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>true</bool>
    </property>
    <property name="themeIconName" stdset="0">
-    <string>close</string>
+    <string>dpad</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>MajorTab</string>
@@ -2321,7 +2373,7 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="Line" name="VertDivider">
    <property name="geometry">
     <rect>
-     <x>210</x>
+     <x>220</x>
      <y>20</y>
      <width>2</width>
      <height>721</height>
@@ -2344,8 +2396,8 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>16</x>
-     <y>548</y>
-     <width>194</width>
+     <y>636</y>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -2391,9 +2443,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>16</x>
-     <y>592</y>
-     <width>194</width>
-     <height>149</height>
+     <y>680</y>
+     <width>204</width>
+     <height>61</height>
     </rect>
    </property>
    <property name="autoFillBackground">
@@ -2414,8 +2466,8 @@ font-family: &quot;Roboto&quot;</string>
    <property name="flat">
     <bool>true</bool>
    </property>
-   <property name="themeIconName" stdset="0">
-    <string/>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTabTitle</string>
    </property>
   </widget>
   <widget class="QPushButton" name="additionalButton">
@@ -2426,7 +2478,7 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>16</x>
      <y>504</y>
-     <width>194</width>
+     <width>204</width>
      <height>44</height>
     </rect>
    </property>
@@ -2458,6 +2510,94 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTabTitle</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="kbdShortsButton">
+   <property name="geometry">
+    <rect>
+     <x>16</x>
+     <y>592</y>
+     <width>204</width>
+     <height>44</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: left;</string>
+   </property>
+   <property name="text">
+    <string>  Keyboard shortcuts</string>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/keyboard</normaloff>:/light/keyboard</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>keyboard</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="recordScrButton">
+   <property name="geometry">
+    <rect>
+     <x>16</x>
+     <y>548</y>
+     <width>204</width>
+     <height>44</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: left;</string>
+   </property>
+   <property name="text">
+    <string>  Record screen</string>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/vidCam</normaloff>:/light/vidCam</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>vidCam</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
+  </widget>
  </widget>
  <tabstops>
   <tabstop>locationButton</tabstop>
@@ -2471,10 +2611,10 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>messageButton</tabstop>
   <tabstop>fingerButton</tabstop>
   <tabstop>sdButton</tabstop>
+  <tabstop>recordScrButton</tabstop>
+  <tabstop>kbdShortsButton</tabstop>
   <tabstop>settingsButton</tabstop>
-  <tabstop>bat_levelSlider</tabstop>
-  <tabstop>bat_chargeCkBox</tabstop>
-  <tabstop>bat_healthBox</tabstop>
+  <tabstop>spacerButton</tabstop>
   <tabstop>bat_statusBox</tabstop>
   <tabstop>tel_numberBox</tabstop>
   <tabstop>tel_startCallButton</tabstop>
@@ -2501,13 +2641,17 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>sd_treeView</tabstop>
   <tabstop>sd_pushPushButton</tabstop>
   <tabstop>sd_pullPushButton</tabstop>
-  <tabstop>spacerButton</tabstop>
+  <tabstop>bat_healthBox</tabstop>
   <tabstop>additionalButton</tabstop>
   <tabstop>set_adbPortBox</tabstop>
   <tabstop>set_versionBox</tabstop>
   <tabstop>set_themeBox</tabstop>
   <tabstop>set_imageVersionBox</tabstop>
   <tabstop>set_gpuAccelBox</tabstop>
+  <tabstop>bat_levelSlider</tabstop>
+  <tabstop>bat_chargeCkBox</tabstop>
+  <tabstop>cell_sigStrengthText</tabstop>
+  <tabstop>bat_chargeLevelText</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

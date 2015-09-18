@@ -30,6 +30,8 @@ enum { PANE_IDX_LOCATION = 0,
        PANE_IDX_MESSAGE,
        PANE_IDX_FINGER,
        PANE_IDX_SD,
+       PANE_IDX_RECORD_SCR,
+       PANE_IDX_KBD_SHORTS,
        PANE_IDX_SETTINGS };
 
 // Style sheets
