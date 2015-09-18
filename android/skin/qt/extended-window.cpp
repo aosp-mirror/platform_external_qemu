@@ -46,6 +46,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     initBattery();
     initCellular();
     initFinger();
+    initKbdShorts();
     initLocation();
     initSd();
     initSettings();
@@ -149,6 +150,21 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
 
     thisButton->clearFocus(); // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(thisIndex);
+}
+
+void ExtendedWindow::initKbdShorts()
+{
+    // This table displays the keyboard shortcuts
+    // Make the columns fill the bounding box
+    mExtendedUi->shortcutsTableWidget->horizontalHeader()->
+            setSectionResizeMode(QHeaderView::Stretch);
+    // Make the rows big enough for the text to wrap onto two lines
+    mExtendedUi->shortcutsTableWidget->verticalHeader()->
+            setDefaultSectionSize(48);
+    // QtDesigner sponaneously clears this attribute(!).
+    // Set it explicitly.
+    mExtendedUi->shortcutsTableWidget->horizontalHeader()->
+            setVisible(true);
 }
 
 ////////////////////////////////////////////////////////////
