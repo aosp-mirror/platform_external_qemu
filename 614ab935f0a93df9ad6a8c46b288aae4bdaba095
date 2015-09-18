@@ -22,6 +22,53 @@
       "revId": "614ab935f0a93df9ad6a8c46b288aae4bdaba095",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9ae6393_e1fb7c3c",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-18T17:30:35Z",
+      "side": 1,
+      "message": "I did not upload the final merge version, sorry --- this header doesn\u0027t even exist",
+      "parentUuid": "69c3b75a_840650e3",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 51
+      },
+      "revId": "614ab935f0a93df9ad6a8c46b288aae4bdaba095",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9b7a7e1_4270a8a7",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-18T17:30:35Z",
+      "side": 1,
+      "message": "And this has also moved, fixed in the proper upload",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 37
+      },
+      "revId": "614ab935f0a93df9ad6a8c46b288aae4bdaba095",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
