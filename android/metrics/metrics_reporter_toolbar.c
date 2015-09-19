@@ -32,6 +32,9 @@ int formatToolbarGetUrl(char** ptr,
     // This is of the form: androidsdk_<product_name>_<event_name>
     static const char product_name[] = "androidsdk_emu_crash";
     static const char guest_arch_key[] = "guest_arch";
+    static const char guest_gl_vendor_key[] = "ggl_vendor";
+    static const char guest_gl_renderer_key[] = "ggl_renderer";
+    static const char guest_gl_version_key[] = "ggl_version";
     static const char system_time_key[] = "system_time";
     static const char user_time_key[] = "user_time";
     // These keys are the same as AndroidStudio already uses.
@@ -53,6 +56,20 @@ int formatToolbarGetUrl(char** ptr,
             system_time_key, metrics->system_time,
             user_time_key, metrics->user_time);
     free(client_id);
+
+    if (result > 0 && metrics->guest_gpu_enabled > 0) {
+        char* buf = *ptr;
+        result = asprintf(
+                ptr,
+                "%s&%s=%s&%s=%s&%s=%s",
+                buf,
+                guest_gl_vendor_key, metrics->guest_gl_vendor,
+                guest_gl_renderer_key, metrics->guest_gl_renderer,
+                guest_gl_version_key, metrics->guest_gl_version);
+        // Only free |buf| if asprintf succeeded in allocating it.
+        free(buf);
+    }
+
     return result;
 }
 
