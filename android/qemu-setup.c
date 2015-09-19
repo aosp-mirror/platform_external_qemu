@@ -472,9 +472,4 @@ void  android_emulation_setup( void )
 
     /* initilize fingperprint here */
     android_hw_fingerprint_init();
-
-    // TODO: create a new CURL post with the following information:
-    // android_gl_vendor , android_gl_renderer, android_gl_version
-    // and send it only if user has opted-in to telemetry
-    // in Android Studio
 }
