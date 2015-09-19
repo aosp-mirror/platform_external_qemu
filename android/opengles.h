@@ -38,14 +38,13 @@ void android_setPostCallback(OnPostFunc onPost, void* onPostContext);
 /* Retrieve the Vendor/Renderer/Version strings describing the underlying GL
  * implementation. The call only works while the renderer is started.
  *
- * Each string is copied into the corresponding buffer. If the original string
- * (including NUL terminator) is more than xxBufSize bytes, it will be
- * truncated. In all cases, including failure, the buffer will be NUL-
- * terminated when this function returns.
+ * All arguments are out-pointers. The result is strdup'ed into the double
+ * pointers. Caller is expected to free the returned strings.
+ * In case of errors, pointers are set to NULL.
  */
-void android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
-                                        char* renderer, size_t rendererBufSize,
-                                        char* version, size_t versionBufSize);
+void android_getOpenglesHardwareStrings(char** vendor,
+                                        char** renderer,
+                                        char** version);
 
 int android_showOpenglesWindow(void* window, int x, int y, int width, int height, float rotation);
 
