@@ -32,16 +32,20 @@ int formatToolbarGetUrl(char** ptr,
     // This is of the form: androidsdk_<product_name>_<event_name>
     static const char product_name[] = "androidsdk_emu_crash";
     static const char guest_arch_key[] = "guest_arch";
+    static const char guest_gl_vendor_key[] = "ggl_vendor";
+    static const char guest_gl_renderer_key[] = "ggl_renderer";
+    static const char guest_gl_version_key[] = "ggl_version";
     static const char system_time_key[] = "system_time";
     static const char user_time_key[] = "user_time";
     // These keys are the same as AndroidStudio already uses.
     static const char client_id_key[] = "id";
     static const char version_key[] = "version";
     static const char num_crashes_key[] = "exf";
+    char* out_buf;
 
     char* client_id = android_studio_get_installation_id();
     int result = asprintf(
-            ptr,
+            &out_buf,
             "%s?as=%s&%s=%s&%s=%s&%s=%s"
             "&%s=%d&%s=%" PRId64 "&%s=%" PRId64,
             url, product_name,
@@ -53,6 +57,21 @@ int formatToolbarGetUrl(char** ptr,
             system_time_key, metrics->system_time,
             user_time_key, metrics->user_time);
     free(client_id);
+
+    if (result >= 0 && metrics->guest_gpu_enabled > 0) {
+        char* new_out_buf;
+        result = asprintf(
+                &new_out_buf,
+                "%s&%s=%s&%s=%s&%s=%s",
+                out_buf,
+                guest_gl_vendor_key, metrics->guest_gl_vendor,
+                guest_gl_renderer_key, metrics->guest_gl_renderer,
+                guest_gl_version_key, metrics->guest_gl_version);
+        free(out_buf);
+        out_buf = new_out_buf;
+    }
+
+    *ptr = out_buf;
     return result;
 }
 
