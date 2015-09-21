@@ -10,11 +10,12 @@
 ** GNU General Public License for more details.
 */
 
+#include "android/emulation/android_pipe.h"
+#include "android/utils/looper.h"
 #include "android/utils/system.h"
-#include "hw/android/goldfish/pipe.h"
-#include "qemu/timer.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define DEBUG 0
 
@@ -29,6 +30,12 @@
 #else
 #  define DD(...)  (void)0
 #endif
+
+#define TICKS_PER_SECOND  1000.
+
+static int64_t clock_now(void) {
+    return looper_now(looper_getForThread());
+}
 
 /***********************************************************************
  ***********************************************************************
@@ -55,11 +62,11 @@ typedef struct {
     int64_t       sendExpiration;
     double        recvRate;
     int64_t       recvExpiration;
-    QEMUTimer*    timer;
+    LoopTimer*    timer;
 } ThrottlePipe;
 
 /* forward declaration */
-static void throttlePipe_timerFunc( void* opaque );
+static void throttlePipe_timerFunc(void* opaque, LoopTimer* timer);
 
 static void*
 throttlePipe_init( void* hwpipe, void* svcOpaque, const char* args )
@@ -72,9 +79,9 @@ throttlePipe_init( void* hwpipe, void* svcOpaque, const char* args )
     pipe->buffer = malloc(pipe->size);
     pipe->pos = 0;
     pipe->count = 0;
-    pipe->timer = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, throttlePipe_timerFunc, pipe);
+    pipe->timer = loopTimer_new(looper_getForThread(), throttlePipe_timerFunc, pipe);
     /* For now, limit to 500 KB/s in both directions */
-    pipe->sendRate = 1e9 / (500*1024*8);
+    pipe->sendRate = TICKS_PER_SECOND / (500. * 1024 * 8);
     pipe->recvRate = pipe->sendRate;
     return pipe;
 }
@@ -87,8 +94,7 @@ throttlePipe_close( void* opaque )
     D("%s: hwpipe=%p (pos=%d count=%d size=%d)", __FUNCTION__,
       pipe->hwpipe, pipe->pos, pipe->count, pipe->size);
 
-    timer_del(pipe->timer);
-    timer_free(pipe->timer);
+    loopTimer_free(pipe->timer);
     free(pipe->buffer);
     AFREE(pipe);
 }
@@ -112,15 +118,15 @@ throttlePipe_rearm( ThrottlePipe* pipe )
 
     if (minExpiration != 0) {
         DD("%s: Arming for %lld\n", __FUNCTION__, minExpiration);
-        timer_mod(pipe->timer, minExpiration);
+        loopTimer_startRelative(pipe->timer, minExpiration);
     }
 }
 
 static void
-throttlePipe_timerFunc( void* opaque )
+throttlePipe_timerFunc(void* opaque, LoopTimer* unused)
 {
     ThrottlePipe* pipe = opaque;
-    int64_t  now = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
+    int64_t  now = clock_now();
 
     DD("%s: TICK! now=%lld sendExpiration=%lld recvExpiration=%lld\n",
        __FUNCTION__, now, pipe->sendExpiration, pipe->recvExpiration);
@@ -213,8 +219,7 @@ throttlePipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int nu
 
     if (ret > 0) {
         /* Compute next send expiration time */
-        pipe->sendExpiration = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) +
-                               ret * pipe->sendRate;
+        pipe->sendExpiration = clock_now() + ret * pipe->sendRate;
         throttlePipe_rearm(pipe);
     }
     return ret;
@@ -266,8 +271,7 @@ throttlePipe_recvBuffers( void* opaque, AndroidPipeBuffer* buffers, int numBuffe
     }
 
     if (ret > 0) {
-        pipe->recvExpiration = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) +
-                               ret * pipe->recvRate;
+        pipe->recvExpiration = clock_now() + ret * pipe->recvRate;
         throttlePipe_rearm(pipe);
     }
     return ret;
