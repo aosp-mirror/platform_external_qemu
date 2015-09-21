@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e9b7a7e1_4eb60f5e",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 4
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-21T15:50:21Z",
+      "side": 1,
+      "message": "Can we just contribute back? If that\u0027s the main reason why we have to suffer for 15 sec every time :)",
+      "range": {
+        "startLine": 305,
+        "startChar": 65,
+        "endLine": 306,
+        "endChar": 20
+      },
+      "revId": "77e619537d61e9859e943ef19db7639ba32a77bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
