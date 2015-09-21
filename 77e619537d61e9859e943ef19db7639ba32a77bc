@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "69dad736_fc708064",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-21T17:30:47Z",
+      "side": 1,
+      "message": "We might be able to retain a fair bit of git history when we do this. We did something similar in the CrOS world last year. I\u0027m all for preserving git history in a an easy to use way.",
+      "range": {
+        "startLine": 239,
+        "startChar": 2,
+        "endLine": 239,
+        "endChar": 23
+      },
+      "revId": "77e619537d61e9859e943ef19db7639ba32a77bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9b7a7e1_4eb60f5e",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 4
