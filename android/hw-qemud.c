@@ -12,17 +12,18 @@
 #include "android/hw-qemud.h"
 
 #include "android/charpipe.h"
-
+#include "android/qemu/utils/stream.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/cbuffer.h"
 #include "android/utils/debug.h"
 #include "android/utils/looper.h"
 #include "android/utils/misc.h"
 #include "android/utils/panic.h"
+#include "android/utils/stream.h"
 #include "android/utils/system.h"
 
-#include "hw/hw.h"
 #include "hw/android/goldfish/pipe.h"
+#include "migration/vmstate.h"
 #include "sysemu/char.h"
 
 #define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
@@ -120,20 +121,16 @@ typedef struct QemudSink {
  * is up to the caller to make sure the buffer is correctly saved and
  * restored.
  */
-static void
-qemud_sink_save(QEMUFile* f, QemudSink* s)
-{
-    qemu_put_be32(f, s->used);
-    qemu_put_be32(f, s->size);
+static void qemud_sink_save(Stream* f, QemudSink* s) {
+    stream_put_be32(f, s->used);
+    stream_put_be32(f, s->size);
 }
 
 /* load the state of a QemudSink from a snapshot.
  */
-static int
-qemud_sink_load(QEMUFile* f, QemudSink* s)
-{
-    s->used = qemu_get_be32(f);
-    s->size = qemu_get_be32(f);
+static int qemud_sink_load(Stream* f, QemudSink* s) {
+    s->used = stream_get_be32(f);
+    s->size = stream_get_be32(f);
     return 0;
 }
 
@@ -249,40 +246,36 @@ typedef struct QemudSerial {
 
 /* Save the state of a QemudSerial to a snapshot file.
  */
-static void
-qemud_serial_save(QEMUFile* f, QemudSerial* s)
-{
+static void qemud_serial_save(Stream* f, QemudSerial* s) {
     /* cs, recv_func and recv_opaque are not saved, as these are assigned only
      * during emulator init. A load within a session can re-use the values
      * already assigned, a newly launched emulator has freshly assigned values.
      */
 
     /* state of incoming packets from the serial port */
-    qemu_put_be32(f, s->need_header);
-    qemu_put_be32(f, s->overflow);
-    qemu_put_be32(f, s->in_size);
-    qemu_put_be32(f, s->in_channel);
+    stream_put_be32(f, s->need_header);
+    stream_put_be32(f, s->overflow);
+    stream_put_be32(f, s->in_size);
+    stream_put_be32(f, s->in_channel);
 #if SUPPORT_LEGACY_QEMUD
-    qemu_put_be32(f, s->version);
+    stream_put_be32(f, s->version);
 #endif
     qemud_sink_save(f, s->header);
     qemud_sink_save(f, s->payload);
-    qemu_put_be32(f, MAX_SERIAL_PAYLOAD+1);
-    qemu_put_buffer(f, s->data0, MAX_SERIAL_PAYLOAD+1);
+    stream_put_be32(f, MAX_SERIAL_PAYLOAD + 1);
+    stream_write(f, s->data0, MAX_SERIAL_PAYLOAD + 1);
 }
 
 /* Load the state of a QemudSerial from a snapshot file.
  */
-static int
-qemud_serial_load(QEMUFile* f, QemudSerial* s)
-{
+static int qemud_serial_load(Stream* f, QemudSerial* s) {
     /* state of incoming packets from the serial port */
-    s->need_header = qemu_get_be32(f);
-    s->overflow    = qemu_get_be32(f);
-    s->in_size     = qemu_get_be32(f);
-    s->in_channel  = qemu_get_be32(f);
+    s->need_header = stream_get_be32(f);
+    s->overflow = stream_get_be32(f);
+    s->in_size = stream_get_be32(f);
+    s->in_channel = stream_get_be32(f);
 #if SUPPORT_LEGACY_QEMUD
-    s->version = qemu_get_be32(f);
+    s->version = stream_get_be32(f);
 #endif
     qemud_sink_load(f, s->header);
     qemud_sink_load(f, s->payload);
@@ -290,7 +283,7 @@ qemud_serial_load(QEMUFile* f, QemudSerial* s)
     /* s->header and s->payload are only ever connected to s->data0 */
     s->header->buff = s->payload->buff = s->data0;
 
-    int len = qemu_get_be32(f);
+    int len = stream_get_be32(f);
     if (len - 1 > MAX_SERIAL_PAYLOAD) {
         D("%s: load failed: size of saved payload buffer (%d) exceeds "
           "current maximum (%d)\n",
@@ -298,7 +291,7 @@ qemud_serial_load(QEMUFile* f, QemudSerial* s)
         return -EIO;
     }
     int ret;
-    if ((ret = qemu_get_buffer(f, s->data0, len)) != len) {
+    if ((ret = stream_read(f, s->data0, len)) != len) {
         D("%s: failed to load serial buffer contents (tried reading %d bytes, got %d)\n",
           __FUNCTION__, len, ret);
         return -EIO;
@@ -940,8 +933,8 @@ qemud_client_alloc( int               channel_id,
 }
 
 /* forward */
-static void  qemud_service_save_name( QEMUFile* f, QemudService* s );
-static char* qemud_service_load_name( QEMUFile* f );
+static void qemud_service_save_name(Stream* f, QemudService* s);
+static char* qemud_service_load_name(Stream* f);
 static QemudService* qemud_service_find(  QemudService*  service_list,
                                           const char*    service_name );
 static QemudClient*  qemud_service_connect_client(  QemudService  *sv,
@@ -952,28 +945,26 @@ static QemudClient*  qemud_service_connect_client(  QemudService  *sv,
  * Note that we save only serial clients here. The pipe clients will be
  * saved along with the pipe to which they are attached.
  */
-static void
-qemud_serial_client_save(QEMUFile* f, QemudClient* c)
-{
+static void qemud_serial_client_save(Stream* f, QemudClient* c) {
     /* save generic information */
     qemud_service_save_name(f, c->service);
-    qemu_put_string(f, c->param);
-    qemu_put_be32(f, c->ProtocolSelector.Serial.channel);
+    stream_put_string(f, c->param);
+    stream_put_be32(f, c->ProtocolSelector.Serial.channel);
 
     /* save client-specific state */
     if (c->clie_save)
         c->clie_save(f, c, c->clie_opaque);
 
     /* save framing configuration */
-    qemu_put_be32(f, c->framing);
+    stream_put_be32(f, c->framing);
     if (c->framing) {
-        qemu_put_be32(f, c->need_header);
+        stream_put_be32(f, c->need_header);
         /* header sink always connected to c->header0, no need to save */
-        qemu_put_be32(f, FRAME_HEADER_SIZE);
-        qemu_put_buffer(f, c->header0, FRAME_HEADER_SIZE);
+        stream_put_be32(f, FRAME_HEADER_SIZE);
+        stream_write(f, c->header0, FRAME_HEADER_SIZE);
         /* payload sink */
         qemud_sink_save(f, c->payload);
-        qemu_put_buffer(f, c->payload->buff, c->payload->size);
+        stream_write(f, c->payload->buff, c->payload->size);
     }
 }
 
@@ -982,13 +973,13 @@ qemud_serial_client_save(QEMUFile* f, QemudClient* c)
  * Note that we load only serial clients here. The pipe clients will be
  * loaded along with the pipe to which they were attached.
  */
-static int
-qemud_serial_client_load(QEMUFile* f, QemudService* current_services, int version )
-{
+static int qemud_serial_client_load(Stream* f,
+                                    QemudService* current_services,
+                                    int version) {
     char *service_name = qemud_service_load_name(f);
     if (service_name == NULL)
         return -EIO;
-    char* param = qemu_get_string(f);
+    char* param = stream_get_string(f);
     /* get current service instance */
     QemudService *sv = qemud_service_find(current_services, service_name);
     if (sv == NULL) {
@@ -997,7 +988,7 @@ qemud_serial_client_load(QEMUFile* f, QemudService* current_services, int versio
         return -EIO;
     }
 
-    int channel = qemu_get_be32(f);
+    int channel = stream_get_be32(f);
 
     if (channel == 0) {
         D("%s: illegal snapshot: client for control channel must no be saved\n",
@@ -1017,19 +1008,19 @@ qemud_serial_client_load(QEMUFile* f, QemudService* current_services, int versio
             return ret;  /* load failure */
 
     /* load framing configuration */
-    c->framing = qemu_get_be32(f);
+    c->framing = stream_get_be32(f);
     if (c->framing) {
 
         /* header buffer */
-        c->need_header = qemu_get_be32(f);
-        int header_size = qemu_get_be32(f);
+        c->need_header = stream_get_be32(f);
+        int header_size = stream_get_be32(f);
         if (header_size > FRAME_HEADER_SIZE) {
             D("%s: load failed: payload buffer requires %d bytes, %d available\n",
               __FUNCTION__, header_size, FRAME_HEADER_SIZE);
             return -EIO;
         }
         int ret;
-        if ((ret = qemu_get_buffer(f, c->header0, header_size)) != header_size) {
+        if ((ret = stream_read(f, c->header0, header_size)) != header_size) {
             D("%s: frame header buffer load failed: expected %d bytes, got %d\n",
               __FUNCTION__, header_size, ret);
             return -EIO;
@@ -1044,7 +1035,8 @@ qemud_serial_client_load(QEMUFile* f, QemudService* current_services, int versio
             AFREE(c->payload->buff);
         }
         AARRAY_NEW(c->payload->buff, c->payload->size+1);  /* +1 for terminating zero */
-        if ((ret = qemu_get_buffer(f, c->payload->buff, c->payload->size)) != c->payload->size) {
+        if ((ret = stream_read(f, c->payload->buff, c->payload->size)) !=
+            c->payload->size) {
             D("%s: frame payload buffer load failed: expected %d bytes, got %d\n",
               __FUNCTION__, c->payload->size, ret);
             AFREE(c->payload->buff);
@@ -1185,24 +1177,20 @@ qemud_service_find( QemudService*  service_list, const char*  service_name)
 
 /* Save the name of the given service.
  */
-static void
-qemud_service_save_name(QEMUFile* f, QemudService* s)
-{
+static void qemud_service_save_name(Stream* f, QemudService* s) {
     int len = strlen(s->name) + 1;  // include '\0' terminator
-    qemu_put_be32(f, len);
-    qemu_put_buffer(f, (const uint8_t *) s->name, len);
+    stream_put_be32(f, len);
+    stream_write(f, (const uint8_t*)s->name, len);
 }
 
 /* Load the name of a service. Returns a pointer to the loaded name, or NULL
  * on failure.
  */
-static char*
-qemud_service_load_name( QEMUFile*  f )
-{
+static char* qemud_service_load_name(Stream* f) {
     int ret;
-    int name_len = qemu_get_be32(f);
+    int name_len = stream_get_be32(f);
     char *service_name = android_alloc(name_len);
-    if ((ret = qemu_get_buffer(f, (uint8_t*)service_name, name_len) != name_len)) {
+    if ((ret = stream_read(f, (uint8_t*)service_name, name_len) != name_len)) {
         D("%s: service name load failed: expected %d bytes, got %d\n",
           __FUNCTION__, name_len, ret);
         AFREE(service_name);
@@ -1223,12 +1211,10 @@ qemud_service_load_name( QEMUFile*  f )
 
 /* Saves state of a service.
  */
-static void
-qemud_service_save(QEMUFile* f, QemudService* s)
-{
+static void qemud_service_save(Stream* f, QemudService* s) {
     qemud_service_save_name(f, s);
-    qemu_put_be32(f, s->max_clients);
-    qemu_put_be32(f, s->num_clients);
+    stream_put_be32(f, s->max_clients);
+    stream_put_be32(f, s->num_clients);
 
     if (s->serv_save)
         s->serv_save(f, s, s->serv_opaque);
@@ -1240,9 +1226,7 @@ qemud_service_save(QEMUFile* f, QemudService* s)
  *
  * Parameter 'current_services' should be the list of active services.
  */
-static int
-qemud_service_load(  QEMUFile*  f, QemudService*  current_services  )
-{
+static int qemud_service_load(Stream* f, QemudService* current_services) {
     char* service_name = qemud_service_load_name(f);
     if (service_name == NULL)
         return -EIO;
@@ -1256,11 +1240,11 @@ qemud_service_load(  QEMUFile*  f, QemudService*  current_services  )
     }
 
     /* reconfigure service as required */
-    sv->max_clients = qemu_get_be32(f);
+    sv->max_clients = stream_get_be32(f);
     sv->num_clients = 0;
 
     // NOTE: The number of clients saved cannot be verified now.
-    (void) qemu_get_be32(f);
+    (void)stream_get_be32(f);
 
     /* load service specific data */
     int ret;
@@ -1726,9 +1710,7 @@ qemud_client_close( QemudClient*  client )
 
 /* Saves the number of clients.
  */
-static void
-qemud_client_save_count(QEMUFile* f, QemudClient* c)
-{
+static void qemud_client_save_count(Stream* f, QemudClient* c) {
     unsigned int client_count = 0;
     for( ; c; c = c->next)   // walk over linked list
         /* skip control channel, which is not saved, and pipe channels that
@@ -1736,19 +1718,17 @@ qemud_client_save_count(QEMUFile* f, QemudClient* c)
         if (!_is_pipe_client(c) && c->ProtocolSelector.Serial.channel > 0)
             client_count++;
 
-    qemu_put_be32(f, client_count);
+    stream_put_be32(f, client_count);
 }
 
 /* Saves the number of services currently available.
  */
-static void
-qemud_service_save_count(QEMUFile* f, QemudService* s)
-{
+static void qemud_service_save_count(Stream* f, QemudService* s) {
     unsigned int service_count = 0;
     for( ; s; s = s->next )  // walk over linked list
         service_count++;
 
-    qemu_put_be32(f, service_count);
+    stream_put_be32(f, service_count);
 }
 
 /* Save QemuD state to snapshot.
@@ -1758,46 +1738,39 @@ qemud_service_save_count(QEMUFile* f, QemudService* s)
  * which spares us dealing with the exception of a client not connected to a
  * service.
  */
-static void
-qemud_save(QEMUFile* f, void* opaque)
-{
-    QemudMultiplexer *m = opaque;
-
-    qemud_serial_save(f, m->serial);
+static void qemud_multiplexer_save(Stream* stream, QemudMultiplexer* m) {
+    /* save serial state if any */
+    qemud_serial_save(stream, m->serial);
 
     /* save service states */
-    qemud_service_save_count(f, m->services);
+    qemud_service_save_count(stream, m->services);
     QemudService *s;
     for (s = m->services; s; s = s->next)
-        qemud_service_save(f, s);
+        qemud_service_save(stream, s);
 
     /* save client channels */
-    qemud_client_save_count(f, m->clients);
+    qemud_client_save_count(stream, m->clients);
     QemudClient *c;
     for (c = m->clients; c; c = c->next) {
         /* skip control channel, and pipe clients */
         if (!_is_pipe_client(c) && c->ProtocolSelector.Serial.channel > 0) {
-            qemud_serial_client_save(f, c);
+            qemud_serial_client_save(stream, c);
         }
     }
-
 }
-
 
 /* Checks whether the same services are available at this point as when the
  * snapshot was made.
  */
-static int
-qemud_load_services( QEMUFile*  f, QemudService*  current_services )
-{
-    int i, ret;
-    int service_count = qemu_get_be32(f);
+static int qemud_load_services(Stream* f, QemudService* current_services) {
+    int i, ret = 0;
+    int service_count = stream_get_be32(f);
     for (i = 0; i < service_count; i++) {
-        if ((ret = qemud_service_load(f, current_services)))
-            return ret;
+        if ((ret = qemud_service_load(f, current_services))) {
+            break;
+        }
     }
-
-    return 0;
+    return ret;
 }
 
 /* Removes all active non-control clients, then creates new ones with state
@@ -1811,14 +1784,12 @@ qemud_load_services( QEMUFile*  f, QemudService*  current_services )
  * everything is multiplexed over one link, only the multiplexer notices the
  * changes, there is no communication with the guest.
  */
-static int
-qemud_load_clients(QEMUFile* f, QemudMultiplexer* m, int version )
-{
+static int qemud_load_clients(Stream* f, QemudMultiplexer* m, int version) {
     /* Remove all clients, except on the control channel.*/
     qemud_multiplexer_disconnect_noncontrol(m);
 
     /* Load clients from snapshot */
-    int client_count = qemu_get_be32(f);
+    int client_count = stream_get_be32(f);
     int i, ret;
     for (i = 0; i < client_count; i++) {
         if ((ret = qemud_serial_client_load(f, m->services, version))) {
@@ -1831,20 +1802,19 @@ qemud_load_clients(QEMUFile* f, QemudMultiplexer* m, int version )
 
 /* Load QemuD state from file.
  */
-static int
-qemud_load(QEMUFile *f, void* opaque, int version)
-{
-    QemudMultiplexer *m = opaque;
+static int qemud_load_multiplexer(Stream* stream,
+                                  QemudMultiplexer* m,
+                                  int version) {
+    int ret = 0;
 
-    int ret;
-
-    if ((ret = qemud_serial_load(f, m->serial)))
-        return ret;
-    if ((ret = qemud_load_services(f, m->services)))
-        return ret;
-    if ((ret = qemud_load_clients(f, m, version)))
-        return ret;
-    return 0;
+    ret = qemud_serial_load(stream, m->serial);
+    if (!ret) {
+        ret = qemud_load_services(stream, m->services);
+        if (!ret) {
+            ret = qemud_load_clients(stream, m, version);
+        }
+    }
+    return ret;
 }
 
 /*------------------------------------------------------------------------------
@@ -1854,12 +1824,10 @@ qemud_load(QEMUFile *f, void* opaque, int version)
  * ----------------------------------------------------------------------------*/
 
 /* Saves pending pipe message to the snapshot file. */
-static void
-_save_pipe_message(QEMUFile* f, QemudPipeMessage* msg)
-{
-    qemu_put_be32(f, msg->size);
-    qemu_put_be32(f, msg->offset);
-    qemu_put_buffer(f, msg->message, msg->size);
+static void _save_pipe_message(Stream* f, QemudPipeMessage* msg) {
+    stream_put_be32(f, msg->size);
+    stream_put_be32(f, msg->offset);
+    stream_write(f, msg->message, msg->size);
 }
 
 /* Loads pending pipe messages from the snapshot file.
@@ -1867,27 +1835,25 @@ _save_pipe_message(QEMUFile* f, QemudPipeMessage* msg)
  *  List of pending pipe messages loaded from snapshot, or NULL if snapshot didn't
  *  contain saved messages.
  */
-static QemudPipeMessage*
-_load_pipe_message(QEMUFile* f)
-{
+static QemudPipeMessage* _load_pipe_message(Stream* f) {
     QemudPipeMessage* ret = NULL;
     QemudPipeMessage** next = &ret;
 
-    uint32_t size = qemu_get_be32(f);
+    uint32_t size = stream_get_be32(f);
     while (size != 0) {
         QemudPipeMessage* wrk;
         ANEW0(wrk);
         *next = wrk;
         wrk->size = size;
-        wrk->offset = qemu_get_be32(f);
+        wrk->offset = stream_get_be32(f);
         wrk->message = malloc(wrk->size);
         if (wrk->message == NULL) {
             APANIC("Unable to allocate buffer for pipe's pending message.");
         }
-        qemu_get_buffer(f, wrk->message, wrk->size);
+        stream_read(f, wrk->message, wrk->size);
         next = &wrk->next;
         *next = NULL;
-        size = qemu_get_be32(f);
+        size = stream_get_be32(f);
     }
 
     return ret;
@@ -1901,7 +1867,7 @@ _load_pipe_message(QEMUFile* f)
 static void*
 _qemudPipe_init(void* hwpipe, void* _looper, const char* args)
 {
-    QemudMultiplexer *m = _multiplexer;
+    QemudMultiplexer* m = _multiplexer;
     QemudService* sv = m->services;
     QemudClient* client;
     QemudPipe* pipe = NULL;
@@ -2093,16 +2059,14 @@ _qemudPipe_wakeOn(void* opaque, int flags)
     D("%s: -> %X", __FUNCTION__, flags);
 }
 
-static void
-_qemudPipe_save(void* opaque, QEMUFile* f )
-{
+static void _qemudPipe_save(void* opaque, Stream* f) {
     QemudPipe* qemud_pipe = (QemudPipe*)opaque;
     QemudClient* c = qemud_pipe->client;
     QemudPipeMessage* msg = c->ProtocolSelector.Pipe.messages;
 
     /* save generic information */
     qemud_service_save_name(f, c->service);
-    qemu_put_string(f, c->param);
+    stream_put_string(f, c->param);
 
     /* Save pending messages. */
     while (msg != NULL) {
@@ -2110,28 +2074,29 @@ _qemudPipe_save(void* opaque, QEMUFile* f )
         msg = msg->next;
     }
     /* End of pending messages. */
-    qemu_put_be32(f, 0);
+    stream_put_be32(f, 0);
 
     /* save client-specific state */
     if (c->clie_save)
         c->clie_save(f, c, c->clie_opaque);
 
     /* save framing configuration */
-    qemu_put_be32(f, c->framing);
+    stream_put_be32(f, c->framing);
     if (c->framing) {
-        qemu_put_be32(f, c->need_header);
+        stream_put_be32(f, c->need_header);
         /* header sink always connected to c->header0, no need to save */
-        qemu_put_be32(f, FRAME_HEADER_SIZE);
-        qemu_put_buffer(f, c->header0, FRAME_HEADER_SIZE);
+        stream_put_be32(f, FRAME_HEADER_SIZE);
+        stream_write(f, c->header0, FRAME_HEADER_SIZE);
         /* payload sink */
         qemud_sink_save(f, c->payload);
-        qemu_put_buffer(f, c->payload->buff, c->payload->size);
+        stream_write(f, c->payload->buff, c->payload->size);
     }
 }
 
-static void*
-_qemudPipe_load(void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* f)
-{
+static void* _qemudPipe_load(void* hwpipe,
+                             void* pipeOpaque,
+                             const char* args,
+                             Stream* f) {
     QemudPipe* qemud_pipe = NULL;
     char* param;
     char *service_name = qemud_service_load_name(f);
@@ -2146,7 +2111,7 @@ _qemudPipe_load(void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* f)
     }
 
     /* Load saved parameters. */
-    param = qemu_get_string(f);
+    param = stream_get_string(f);
 
     /* re-connect client */
     QemudClient* c = qemud_service_connect_client(sv, -1, param);
@@ -2163,19 +2128,19 @@ _qemudPipe_load(void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* f)
     }
 
     /* load framing configuration */
-    c->framing = qemu_get_be32(f);
+    c->framing = stream_get_be32(f);
     if (c->framing) {
 
         /* header buffer */
-        c->need_header = qemu_get_be32(f);
-        int header_size = qemu_get_be32(f);
+        c->need_header = stream_get_be32(f);
+        int header_size = stream_get_be32(f);
         if (header_size > FRAME_HEADER_SIZE) {
             D("%s: load failed: payload buffer requires %d bytes, %d available\n",
               __FUNCTION__, header_size, FRAME_HEADER_SIZE);
             return NULL;
         }
         int ret;
-        if ((ret = qemu_get_buffer(f, c->header0, header_size)) != header_size) {
+        if ((ret = stream_read(f, c->header0, header_size)) != header_size) {
             D("%s: frame header buffer load failed: expected %d bytes, got %d\n",
               __FUNCTION__, header_size, ret);
             return NULL;
@@ -2190,7 +2155,8 @@ _qemudPipe_load(void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* f)
             AFREE(c->payload->buff);
         }
         AARRAY_NEW(c->payload->buff, c->payload->size+1);  /* +1 for terminating zero */
-        if ((ret = qemu_get_buffer(f, c->payload->buff, c->payload->size)) != c->payload->size) {
+        if ((ret = stream_read(f, c->payload->buff, c->payload->size)) !=
+            c->payload->size) {
             D("%s: frame payload buffer load failed: expected %d bytes, got %d\n",
               __FUNCTION__, c->payload->size, ret);
             AFREE(c->payload->buff);
@@ -2240,6 +2206,21 @@ _android_qemud_pipe_init(void)
  * charpipe must be passed to qemud_multiplexer_init().
  */
 static CharDriverState*  android_qemud_cs;
+
+static void qemud_save(QEMUFile* f, void* opaque) {
+    Stream* stream = stream_from_qemufile(f);
+    QemudMultiplexer* m = opaque;
+    qemud_multiplexer_save(stream, m);
+    stream_free(stream);
+}
+
+static int qemud_load(QEMUFile* f, void* opaque, int version) {
+    Stream* stream = stream_from_qemufile(f);
+    QemudMultiplexer* m = opaque;
+    int ret = qemud_load_multiplexer(stream, m, version);
+    stream_free(stream);
+    return ret;
+}
 
 /* Initializes QEMUD serial interface.
  */

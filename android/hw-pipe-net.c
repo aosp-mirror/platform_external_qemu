@@ -28,6 +28,12 @@
 
 #include "hw/android/goldfish/pipe.h"
 
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
+
+#include <stdlib.h>
+
 /* Implement the OpenGL fast-pipe */
 
 /* Set to 1 or 2 for debug traces */

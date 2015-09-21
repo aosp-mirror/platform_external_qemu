@@ -14,6 +14,7 @@
 #include "hw/android/goldfish/pipe.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define DEBUG 0
 

@@ -9,12 +9,17 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+
+#include "android/qemu/utils/stream.h"
 #include "android/utils/panic.h"
+#include "android/utils/stream.h"
 #include "android/utils/system.h"
+
 #include "hw/android/goldfish/pipe.h"
 #include "hw/android/goldfish/device.h"
 #include "hw/android/goldfish/vmem.h"
 #include "exec/ram_addr.h"
+#include "migration/vmstate.h"
 
 #define  DEBUG 0
 
@@ -174,23 +179,23 @@ pipe_free( Pipe* pipe )
     free(pipe);
 }
 
-static void pipe_save(Pipe* pipe, QEMUFile* file) {
+static void pipe_save(Pipe* pipe, Stream* file) {
     if (pipe->service == NULL) {
         /* pipe->service == NULL means we're still using a PipeConnector */
         /* Write a zero to indicate this condition */
-        qemu_put_byte(file, 0);
+        stream_put_byte(file, 0);
     } else {
         /* Otherwise, write a '1' then the service name */
-        qemu_put_byte(file, 1);
-        qemu_put_string(file, pipe->service->name);
+        stream_put_byte(file, 1);
+        stream_put_string(file, pipe->service->name);
     }
 
     /* Write 1 + args, if any, or simply 0 otherwise */
     if (pipe->args != NULL) {
-        qemu_put_byte(file, 1);
-        qemu_put_string(file, pipe->args);
+        stream_put_byte(file, 1);
+        stream_put_string(file, pipe->args);
     } else {
-        qemu_put_byte(file, 0);
+        stream_put_byte(file, 0);
     }
 
     if (pipe->funcs->save) {
@@ -201,14 +206,14 @@ static void pipe_save(Pipe* pipe, QEMUFile* file) {
 // Load an optional service name. On success, return 0 and
 // sets |*service| to either NULL (the name was not present)
 // or a PipeService pointer. Return -1 on failure.
-static int load_service_by_name(QEMUFile* file,
+static int load_service_by_name(Stream* file,
                                 const PipeService** service) {
     *service = NULL;
     int ret = 0;
-    int state = qemu_get_byte(file);
+    int state = stream_get_byte(file);
     if (state != 0) {
         /* Pipe is associated with a service. */
-        char* name = qemu_get_string(file);
+        char* name = stream_get_string(file);
         if (!name) {
             return -1;
         }
@@ -234,7 +239,7 @@ static int load_service_by_name(QEMUFile* file,
 // force-closed after creation.
 //
 // Return new Pipe instance, or NULL on error.
-static Pipe* pipe_load_state(QEMUFile* file,
+static Pipe* pipe_load_state(Stream* file,
                              void* hwpipe,
                              const PipeService* service,
                              char* force_close) {
@@ -246,8 +251,8 @@ static Pipe* pipe_load_state(QEMUFile* file,
         pipe->opaque = pipeConnector_new(pipe);
     } else {
         // Optional service arguments.
-        if (qemu_get_byte(file) != 0) {
-            pipe->args = qemu_get_string(file);
+        if (stream_get_byte(file) != 0) {
+            pipe->args = stream_get_string(file);
         }
         pipe->funcs = &service->funcs;
     }
@@ -269,7 +274,7 @@ static Pipe* pipe_load_state(QEMUFile* file,
     return pipe;
 }
 
-static Pipe* pipe_load(QEMUFile* file, void* hwpipe, char* force_close) {
+static Pipe* pipe_load(Stream* file, void* hwpipe, char* force_close) {
     const PipeService* service;
     if (load_service_by_name(file, &service) < 0) {
         return NULL;
@@ -277,7 +282,7 @@ static Pipe* pipe_load(QEMUFile* file, void* hwpipe, char* force_close) {
     return pipe_load_state(file, hwpipe, service, force_close);
 }
 
-static Pipe* pipe_load_legacy(QEMUFile* file,
+static Pipe* pipe_load_legacy(Stream* file,
                               void* hwpipe,
                               uint64_t* channel,
                               unsigned char* wakes,
@@ -288,9 +293,9 @@ static Pipe* pipe_load_legacy(QEMUFile* file,
         return NULL;
     }
 
-    *channel = qemu_get_be64(file);
-    *wakes = qemu_get_byte(file);
-    *closed = qemu_get_byte(file);
+    *channel = stream_get_be64(file);
+    *wakes = stream_get_byte(file);
+    *closed = stream_get_byte(file);
 
     return pipe_load_state(file, hwpipe, service, force_close);
 }
@@ -434,25 +439,26 @@ pipeConnector_wakeOn( void* opaque, int flags )
 }
 
 static void
-pipeConnector_save( void* pipe, QEMUFile* file )
+pipeConnector_save( void* pipe, Stream* file )
 {
     PipeConnector*  pcon = pipe;
-    qemu_put_sbe32(file, pcon->buffpos);
-    qemu_put_sbuffer(file, (const int8_t*)pcon->buffer, pcon->buffpos);
+    stream_put_be32(file, pcon->buffpos);
+    stream_write(file, (const uint8_t*)pcon->buffer, pcon->buffpos);
 }
 
 static void*
-pipeConnector_load( void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* file )
+pipeConnector_load(void* hwpipe, void* pipeOpaque, const char* args,
+                   Stream* file)
 {
     PipeConnector*  pcon;
 
-    int len = qemu_get_sbe32(file);
+    int len = stream_get_be32(file);
     if (len < 0 || len > sizeof(pcon->buffer)) {
         return NULL;
     }
     pcon = pipeConnector_new(hwpipe);
     pcon->buffpos = len;
-    if (qemu_get_buffer(file, (uint8_t*)pcon->buffer, pcon->buffpos) != pcon->buffpos) {
+    if (stream_read(file, (uint8_t*)pcon->buffer, pcon->buffpos) != pcon->buffpos) {
         free(pcon);
         return NULL;
     }
@@ -544,16 +550,16 @@ static void hwpipe_remove_signaled(HwPipe** list, HwPipe* pipe) {
     }
 }
 
-static void hwpipe_save(HwPipe* pipe, QEMUFile* file) {
+static void hwpipe_save(HwPipe* pipe, Stream* file) {
     /* Now save other common data */
-    qemu_put_be64(file, pipe->channel);
-    qemu_put_byte(file, (int)pipe->wakes);
-    qemu_put_byte(file, (int)pipe->closed);
+    stream_put_be64(file, pipe->channel);
+    stream_put_byte(file, (int)pipe->wakes);
+    stream_put_byte(file, (int)pipe->closed);
 
     pipe_save(pipe->pipe, file);
 }
 
-static HwPipe* hwpipe_load(PipeDevice* dev, QEMUFile* file, int version_id) {
+static HwPipe* hwpipe_load(PipeDevice* dev, Stream* file, int version_id) {
     HwPipe* pipe = hwpipe_new0(dev);
 
     char force_close = 0;
@@ -562,9 +568,9 @@ static HwPipe* hwpipe_load(PipeDevice* dev, QEMUFile* file, int version_id) {
                                       &pipe->wakes, &pipe->closed,
                                       &force_close);
     } else {
-        pipe->channel = qemu_get_be64(file);
-        pipe->wakes = qemu_get_byte(file);
-        pipe->closed = qemu_get_byte(file);
+        pipe->channel = stream_get_be64(file);
+        pipe->wakes = stream_get_byte(file);
+        pipe->closed = stream_get_byte(file);
         pipe->pipe = pipe_load(file, pipe, &force_close);
     }
 
@@ -946,12 +952,14 @@ goldfish_pipe_save( QEMUFile* file, void* opaque )
 {
     PipeDevice* dev = opaque;
 
-    qemu_put_be64(file, dev->address);
-    qemu_put_be32(file, dev->size);
-    qemu_put_be32(file, dev->status);
-    qemu_put_be64(file, dev->channel);
-    qemu_put_be32(file, dev->wakes);
-    qemu_put_be64(file, dev->params_addr);
+    Stream* stream = stream_from_qemufile(file);
+
+    stream_put_be64(stream, dev->address);
+    stream_put_be32(stream, dev->size);
+    stream_put_be32(stream, dev->status);
+    stream_put_be64(stream, dev->channel);
+    stream_put_be32(stream, dev->wakes);
+    stream_put_be64(stream, dev->params_addr);
 
     /* Count the number of pipe connections */
     HwPipe* pipe;
@@ -959,12 +967,13 @@ goldfish_pipe_save( QEMUFile* file, void* opaque )
     for (pipe = dev->pipes; pipe; pipe = pipe->next) {
         count++;
     }
-    qemu_put_sbe32(file, count);
+    stream_put_be32(stream, count);
 
     /* Now save each pipe one after the other */
     for (pipe = dev->pipes; pipe; pipe = pipe->next) {
-        hwpipe_save(pipe, file);
+        hwpipe_save(pipe, stream);
     }
+    stream_free(stream);
 }
 
 static int
@@ -976,22 +985,26 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
         (version_id != GOLDFISH_PIPE_SAVE_LEGACY_VERSION)) {
         return -EINVAL;
     }
-    dev->address = qemu_get_be64(file);
-    dev->size    = qemu_get_be32(file);
-    dev->status  = qemu_get_be32(file);
-    dev->channel = qemu_get_be64(file);
 
-    dev->wakes = qemu_get_be32(file);
-    dev->params_addr = qemu_get_be64(file);
+    Stream* stream = stream_from_qemufile(file);
+
+    dev->address = stream_get_be64(stream);
+    dev->size    = stream_get_be32(stream);
+    dev->status  = stream_get_be32(stream);
+    dev->channel = stream_get_be64(stream);
+
+    dev->wakes = stream_get_be32(stream);
+    dev->params_addr = stream_get_be64(stream);
 
     /* Count the number of pipe connections */
     HwPipe* pipe;
-    int count = qemu_get_sbe32(file);
+    int count = stream_get_be32(stream);
 
     /* Load all pipe connections */
     for (; count > 0; count--) {
-        pipe = hwpipe_load(dev, file, version_id);
+        pipe = hwpipe_load(dev, stream, version_id);
         if (pipe == NULL) {
+            stream_free(stream);
             return -EIO;
         }
         pipe->next = dev->pipes;
@@ -1007,6 +1020,8 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
             android_pipe_close(pipe);
         }
     }
+
+    stream_free(stream);
     return 0;
 }
 
