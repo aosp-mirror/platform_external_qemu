@@ -14,10 +14,27 @@
 #include "android/base/files/Stream.h"
 #include "android/qemu/base/files/QemuFileStream.h"
 
-::Stream* stream_from_qemufile(struct QEMUFile* file) {
+extern "C" void timer_put(struct QEMUFile*, struct QEMUTimer*);
+extern "C" void timer_get(struct QEMUFile*, struct QEMUTimer*);
+
+using android::qemu::QemuFileStream;
+using ::Stream;
+
+Stream* stream_from_qemufile(struct QEMUFile* file) {
     if (!file) {
         return NULL;
     }
-    return reinterpret_cast< ::Stream*>(
-            new android::qemu::QemuFileStream(file));
+    return reinterpret_cast< ::Stream*>(new QemuFileStream(file));
+}
+
+QemuFileStream* asQemuFileStream(Stream* stream) {
+    return reinterpret_cast<QemuFileStream*>(stream);
+}
+
+void stream_put_qemu_timer(Stream* stream, struct QEMUTimer* timer) {
+    timer_put(asQemuFileStream(stream)->file(), timer);
+}
+
+void stream_get_qemu_timer(Stream* stream, struct QEMUTimer* timer) {
+    timer_get(asQemuFileStream(stream)->file(), timer);
 }

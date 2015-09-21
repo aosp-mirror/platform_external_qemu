@@ -30,6 +30,8 @@ public:
     virtual ssize_t read(void* buffer, size_t len);
     virtual ssize_t write(const void* buffer, size_t len);
 
+    QEMUFile* file() const { return mFile; }
+
 private:
     QemuFileStream();
     DISALLOW_COPY_AND_ASSIGN(QemuFileStream);
