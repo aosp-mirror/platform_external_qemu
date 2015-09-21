@@ -191,6 +191,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/threads/ThreadStore.cpp \
 	android/base/Uri.cpp \
 	android/base/Version.cpp \
+	android/emulation/android_pipe.c \
 	android/emulation/bufprint_config_dirs.cpp \
 	android/emulation/ConfigDirs.cpp \
 	android/emulation/CpuAccelerator.cpp \
