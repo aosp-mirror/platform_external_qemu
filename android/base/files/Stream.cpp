@@ -81,6 +81,24 @@ uint64_t Stream::getBe64() {
            (uint64_t)b[7];
 }
 
+void Stream::putFloat(float v) {
+    union {
+        float f;
+        uint8_t bytes[sizeof(float)];
+    } u;
+    u.f = v;
+    this->write(u.bytes, sizeof(u.bytes));
+}
+
+float Stream::getFloat() {
+    union {
+        float f;
+        uint8_t bytes[sizeof(float)];
+    } u;
+    this->read(u.bytes, sizeof(u.bytes));
+    return u.f;
+}
+
 void Stream::putString(const String& str) {
     putString(str.c_str(), str.size());
 }

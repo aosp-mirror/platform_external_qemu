@@ -16,10 +16,19 @@
 
 ANDROID_BEGIN_HEADER
 
+struct QEMUFile;
+struct QEMUTimer;
+
 // Create a new Stream instance that wraps a QEMUFile instance.
 // This allows one to use it with other stream_xxx() functions
 // defined in "android/utils/stream.h"
 // |file| is a QEMUFile instance. Returns a new Stream instance.
 Stream* stream_from_qemufile(struct QEMUFile* file);
+
+// Save a QEMU timer's state to a stream.
+void stream_put_qemu_timer(Stream* stream, struct QEMUTimer* timer);
+
+// Reload a QEMU timer's state from a stream.
+void stream_get_qemu_timer(Stream* stream, struct QEMUTimer* timer);
 
 ANDROID_END_HEADER
