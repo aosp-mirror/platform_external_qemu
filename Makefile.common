@@ -205,6 +205,7 @@ common_LOCAL_SRC_FILES += \
 	android/metrics/StudioHelper.cpp \
 	android/qemu/base/async/Looper.cpp \
 	android/qemu/base/files/QemuFileStream.cpp \
+	android/qemu/utils/stream.cpp \
 	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
 	android/opengl/emugl_config.cpp \
