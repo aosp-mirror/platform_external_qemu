@@ -13,11 +13,12 @@
 #include "android/hw-fingerprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
+#include "android/utils/stream.h"
 #include "android/utils/system.h"
 #include "android/hw-qemud.h"
 #include "android/globals.h"
-#include "hw/hw.h"
 
+#include <stdlib.h>
 #include <math.h>
 
 #define  E(...)    derror(__VA_ARGS__)
@@ -70,11 +71,9 @@ static void
 _hwFingerprintClient_removeFromList(HwFingerprintClient** phead,
         HwFingerprintClient* target);
 
-static void
-_hwFingerprint_save(QEMUFile*  f, QemudService*  sv, void*  opaque);
+static void _hwFingerprint_save(Stream* f, QemudService* sv, void* opaque);
 
-static int
-_hwFingerprint_load(QEMUFile*  f, QemudService*  sv, void*  opaque);
+static int _hwFingerprint_load(Stream* f, QemudService* sv, void* opaque);
 /***********************************************************************************
 
             All the public methods
@@ -118,20 +117,16 @@ android_hw_fingerprint_remove()
 
 ***********************************************************************************/
 
-static void
-_hwFingerprint_save(QEMUFile*  f, QemudService*  sv, void*  opaque)
-{
+static void _hwFingerprint_save(Stream* f, QemudService* sv, void* opaque) {
     HwFingerprintService* fp = opaque;
-    qemu_put_be32(f, fp->fingerid);
-    qemu_put_be32(f, fp->finger_is_on_sensor);
+    stream_put_be32(f, fp->fingerid);
+    stream_put_be32(f, fp->finger_is_on_sensor);
 }
 
-static int
-_hwFingerprint_load(QEMUFile*  f, QemudService*  sv, void*  opaque)
-{
+static int _hwFingerprint_load(Stream* f, QemudService* sv, void* opaque) {
     HwFingerprintService* fp = opaque;
-    fp->fingerid = qemu_get_be32(f);
-    fp->finger_is_on_sensor = qemu_get_be32(f);
+    fp->fingerid = stream_get_be32(f);
+    fp->finger_is_on_sensor = stream_get_be32(f);
     return 0;
 }
 

@@ -12,7 +12,12 @@
 
 #pragma once
 
+#include "android/utils/compiler.h"
+#include "android/utils/stream.h"
+
 #include "qemu-common.h"
+
+ANDROID_BEGIN_HEADER
 
 /* Support for the qemud-based 'services' in the emulator.
  * Please read docs/ANDROID-QEMUD.TXT to understand what this is about.
@@ -75,12 +80,12 @@ typedef void (*QemudClientRecv) ( void*  opaque, uint8_t*  msg, int  msglen, Qem
 /* A function that will be called when the state of the client should be
  * saved to a snapshot.
  */
-typedef void (*QemudClientSave) ( QEMUFile*  f, QemudClient*  client, void*  opaque );
+typedef void (*QemudClientSave)(Stream* f, QemudClient* client, void* opaque);
 
 /* A function that will be called when the state of the client should be
  * restored from a snapshot.
  */
-typedef int (*QemudClientLoad) ( QEMUFile*  f, QemudClient*  client, void*  opaque );
+typedef int (*QemudClientLoad)(Stream* f, QemudClient* client, void* opaque);
 
 /* Register a new client for a given service.
  * 'clie_opaque' will be sent as the first argument to 'clie_recv' and 'clie_close'
@@ -123,12 +128,14 @@ typedef QemudClient*  (*QemudServiceConnect)( void*   opaque,
 /* A function that will be called when the state of the service should be
  * saved to a snapshot.
  */
-typedef void (*QemudServiceSave) ( QEMUFile*  f, QemudService*  service, void*  opaque );
+typedef void (*QemudServiceSave)(Stream* f,
+                                 QemudService* service,
+                                 void* opaque);
 
 /* A function that will be called when the state of the service should be
  * restored from a snapshot.
  */
-typedef int (*QemudServiceLoad) ( QEMUFile*  f, QemudService*  service, void*  opaque );
+typedef int (*QemudServiceLoad)(Stream* f, QemudService* service, void* opaque);
 
 /* Register a new qemud service.
  * 'serv_opaque' is the first parameter to 'serv_connect'
@@ -145,3 +152,5 @@ extern QemudService*  qemud_service_register( const char*          serviceName,
 extern void           qemud_service_broadcast( QemudService*   sv,
                                                const uint8_t*  msg,
                                                int             msglen );
+
+ANDROID_END_HEADER
