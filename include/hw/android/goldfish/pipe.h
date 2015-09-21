@@ -12,9 +12,13 @@
 #ifndef _HW_GOLDFISH_PIPE_H
 #define _HW_GOLDFISH_PIPE_H
 
+#include "android/utils/compiler.h"
+#include "android/utils/stream.h"
+
 #include <stdbool.h>
 #include <stdint.h>
-#include "hw/hw.h"
+
+ANDROID_BEGIN_HEADER
 
 // TECHNICAL NOTE:
 //
@@ -128,9 +132,9 @@ typedef struct AndroidPipeFuncs {
     // then the |pipe| implementation shall call android_pipe_wake().
     void (*wakeOn)(void* pipe, int flags);
 
-    // Called to save the |pipe|'s state to a QEMUFile, i.e. when saving
+    // Called to save the |pipe|'s state to a Stream, i.e. when saving
     // snapshots.
-    void (*save)(void* pipe, QEMUFile* file);
+    void (*save)(void* pipe, Stream* file);
 
     // Called to load the sate of a pipe from a QEMUFile. This will always
     // correspond to the state of the pipe as saved by a previous call to
@@ -138,7 +142,9 @@ typedef struct AndroidPipeFuncs {
     // be loaded. In this case, the emulator will automatically force-close
     // it. Parameters are similar to init(), with the addition of |file|
     // which is the input stream.
-    void* (*load)(void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* file);
+    void* (*load)(void* hwpipe, void* pipeOpaque, const char* args,
+                  Stream* file);
+
 } AndroidPipeFuncs;
 
 /* Register a new pipe handler type. 'pipeOpaque' is passed directly
@@ -262,5 +268,7 @@ struct access_params_64 {
 extern void android_pipe_add_type_zero(void);
 extern void android_pipe_add_type_pingpong(void);
 extern void android_pipe_add_type_throttle(void);
+
+ANDROID_END_HEADER
 
 #endif /* _HW_GOLDFISH_PIPE_H */
