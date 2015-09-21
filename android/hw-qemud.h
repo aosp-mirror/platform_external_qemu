@@ -12,21 +12,12 @@
 #ifndef _android_qemud_h
 #define _android_qemud_h
 
+#include "android/emulation/android_qemud.h"
 #include "android/utils/compiler.h"
-#include "android/utils/stream.h"
 
 #include "qemu-common.h"
 
 ANDROID_BEGIN_HEADER
-
-/* Support for the qemud-based 'services' in the emulator.
- * Please read docs/ANDROID-QEMUD.TXT to understand what this is about.
- */
-
-/* initialize the qemud support code in the emulator
- */
-
-extern void  android_qemud_init( void );
 
 /* return the character driver state object that needs to be connected to the
  * emulated serial port where all multiplexed channels go through.
