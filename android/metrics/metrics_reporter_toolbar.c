@@ -80,6 +80,7 @@ bool androidMetrics_uploadMetricsToolbar(const AndroidMetrics* metrics) {
     char* formatted_url;
     if (formatToolbarGetUrl(&formatted_url, toolbar_url, metrics) < 0) {
         mwarning("Failed to allocate memory for a request");
+        curl_easy_cleanup(curl);
         return false;
     }
 
