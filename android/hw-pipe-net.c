@@ -24,9 +24,16 @@
 #include "android/utils/looper.h"
 #include "android/utils/panic.h"
 #include "android/utils/sockets.h"
+#include "android/utils/stream.h"
 #include "android/utils/system.h"
 
 #include "hw/android/goldfish/pipe.h"
+
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
+
+#include <stdlib.h>
 
 /* Implement the OpenGL fast-pipe */
 
