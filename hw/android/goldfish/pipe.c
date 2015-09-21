@@ -55,84 +55,8 @@
 /* Set to 1 to enable the 'throttle' pipe type, useful for debugging */
 #define DEBUG_THROTTLE_PIPE 1
 
-/* Maximum length of pipe service name, in characters (excluding final 0) */
-#define MAX_PIPE_SERVICE_NAME_SIZE  255
-
 #define GOLDFISH_PIPE_SAVE_VERSION  4
 #define GOLDFISH_PIPE_SAVE_LEGACY_VERSION  3
-
-/***********************************************************************
- ***********************************************************************
- *****
- *****    P I P E   A P I
- *****
- *****/
-
-#define MAX_PIPE_SERVICES  8
-typedef struct {
-    const char* name;
-    void* opaque;
-    AndroidPipeFuncs funcs;
-} PipeService;
-
-typedef struct {
-    int          count;
-    PipeService  services[MAX_PIPE_SERVICES];
-} PipeServices;
-
-static PipeServices  _pipeServices[1];
-
-void
-android_pipe_add_type(const char*               pipeName,
-                       void*                     pipeOpaque,
-                       const AndroidPipeFuncs*  pipeFuncs )
-{
-    PipeServices* list = _pipeServices;
-    int           count = list->count;
-
-    if (count >= MAX_PIPE_SERVICES) {
-        APANIC("Too many goldfish pipe services (%d)", count);
-    }
-
-    if (strlen(pipeName) > MAX_PIPE_SERVICE_NAME_SIZE) {
-        APANIC("Pipe service name too long: '%s'", pipeName);
-    }
-
-    list->services[count].name   = pipeName;
-    list->services[count].opaque = pipeOpaque;
-    list->services[count].funcs  = pipeFuncs[0];
-
-    list->count++;
-}
-
-static const PipeService*
-android_pipe_service_find(const char* serviceName)
-{
-    const PipeServices* list = _pipeServices;
-    int count = list->count;
-    int nn;
-
-    for (nn = 0; nn < count; nn++) {
-        if (!strcmp(list->services[nn].name, serviceName)) {
-            return &list->services[nn];
-        }
-    }
-    return NULL;
-}
-
-static const AndroidPipeHwFuncs* sPipeHwFuncs = NULL;
-
-void android_pipe_set_hw_funcs(const AndroidPipeHwFuncs* hw_funcs) {
-    sPipeHwFuncs = hw_funcs;
-}
-
-void android_pipe_close(void* hwpipe) {
-    sPipeHwFuncs->closeFromHost(hwpipe);
-}
-
-void android_pipe_wake(void* hwpipe, unsigned flags) {
-    sPipeHwFuncs->signalWake(hwpipe, flags);
-}
 
 /***********************************************************************
  ***********************************************************************
@@ -142,339 +66,6 @@ void android_pipe_wake(void* hwpipe, unsigned flags) {
  *****/
 
 typedef struct PipeDevice  PipeDevice;
-
-typedef struct Pipe {
-    void*                      opaque;
-    const AndroidPipeFuncs*   funcs;
-    const PipeService*         service;
-    char*                      args;
-    void*                     hwpipe;
-} Pipe;
-
-/* Forward */
-static void*  pipeConnector_new(Pipe*  pipe);
-
-static Pipe* pipe_new0(void* hwpipe) {
-    Pipe* pipe;
-    ANEW0(pipe);
-    pipe->hwpipe = hwpipe;
-    return pipe;
-}
-
-static Pipe* pipe_new(void* hwpipe) {
-    Pipe* pipe = pipe_new0(hwpipe);
-    pipe->opaque = pipeConnector_new(pipe);
-    return pipe;
-}
-
-static void
-pipe_free( Pipe* pipe )
-{
-    /* Call close callback */
-    if (pipe->funcs->close) {
-        pipe->funcs->close(pipe->opaque);
-    }
-    /* Free stuff */
-    free(pipe->args);
-    free(pipe);
-}
-
-static void pipe_save(Pipe* pipe, Stream* file) {
-    if (pipe->service == NULL) {
-        /* pipe->service == NULL means we're still using a PipeConnector */
-        /* Write a zero to indicate this condition */
-        stream_put_byte(file, 0);
-    } else {
-        /* Otherwise, write a '1' then the service name */
-        stream_put_byte(file, 1);
-        stream_put_string(file, pipe->service->name);
-    }
-
-    /* Write 1 + args, if any, or simply 0 otherwise */
-    if (pipe->args != NULL) {
-        stream_put_byte(file, 1);
-        stream_put_string(file, pipe->args);
-    } else {
-        stream_put_byte(file, 0);
-    }
-
-    if (pipe->funcs->save) {
-        pipe->funcs->save(pipe->opaque, file);
-    }
-}
-
-// Load an optional service name. On success, return 0 and
-// sets |*service| to either NULL (the name was not present)
-// or a PipeService pointer. Return -1 on failure.
-static int load_service_by_name(Stream* file,
-                                const PipeService** service) {
-    *service = NULL;
-    int ret = 0;
-    int state = stream_get_byte(file);
-    if (state != 0) {
-        /* Pipe is associated with a service. */
-        char* name = stream_get_string(file);
-        if (!name) {
-            return -1;
-        }
-        *service = android_pipe_service_find(name);
-        if (!*service) {
-            D("No QEMU pipe service named '%s'", name);
-            ret = -1;
-        }
-        free(name);
-    }
-    return ret;
-}
-
-// Load the missing state of a Pipe instance.
-// This is used by both pipe_load() and pipe_load_legacy().
-//
-// |file| is the input stream.
-// |hwpipe| is the hardware-side view of the pipe.
-// |service| is either NULL or a PipeService instance pointer.
-// The NULL value indicates that the pipe is still receiving data
-// through a PipeConnector.
-// |*force_close| will be set to 1 to indicate that the pipe must be
-// force-closed after creation.
-//
-// Return new Pipe instance, or NULL on error.
-static Pipe* pipe_load_state(Stream* file,
-                             void* hwpipe,
-                             const PipeService* service,
-                             char* force_close) {
-    *force_close = 0;
-
-    Pipe* pipe = pipe_new0(hwpipe);
-    if (!service) {
-        // Pipe being opened.
-        pipe->opaque = pipeConnector_new(pipe);
-    } else {
-        // Optional service arguments.
-        if (stream_get_byte(file) != 0) {
-            pipe->args = stream_get_string(file);
-        }
-        pipe->funcs = &service->funcs;
-    }
-
-    // NOTE: |pipe->funcs| cannot be NULL because pipeConnector_new() sets it
-    // to &pipeConnector_funcs.
-    if (pipe->funcs->load) {
-        pipe->opaque = service->funcs.load(hwpipe,
-                                        service->opaque,
-                                        pipe->args,
-                                        file);
-        if (!pipe->opaque) {
-            pipe_free(pipe);
-            return NULL;
-        }
-    } else {
-        *force_close = 1;
-    }
-    return pipe;
-}
-
-static Pipe* pipe_load(Stream* file, void* hwpipe, char* force_close) {
-    const PipeService* service;
-    if (load_service_by_name(file, &service) < 0) {
-        return NULL;
-    }
-    return pipe_load_state(file, hwpipe, service, force_close);
-}
-
-static Pipe* pipe_load_legacy(Stream* file,
-                              void* hwpipe,
-                              uint64_t* channel,
-                              unsigned char* wakes,
-                              unsigned char* closed,
-                              char* force_close) {
-    const PipeService* service;
-    if (load_service_by_name(file, &service) < 0) {
-        return NULL;
-    }
-
-    *channel = stream_get_be64(file);
-    *wakes = stream_get_byte(file);
-    *closed = stream_get_byte(file);
-
-    return pipe_load_state(file, hwpipe, service, force_close);
-}
-
-/***********************************************************************
- ***********************************************************************
- *****
- *****    P I P E   C O N N E C T O R S
- *****
- *****/
-
-/* These are used to handle the initial connection attempt, where the
- * client is going to write the name of the pipe service it wants to
- * connect to, followed by a terminating zero.
- */
-typedef struct {
-    Pipe*  pipe;
-    char   buffer[128];
-    int    buffpos;
-} PipeConnector;
-
-static const AndroidPipeFuncs  pipeConnector_funcs;  // forward
-
-void*
-pipeConnector_new(Pipe*  pipe)
-{
-    PipeConnector*  pcon;
-
-    ANEW0(pcon);
-    pcon->pipe  = pipe;
-    pipe->funcs = &pipeConnector_funcs;
-    return pcon;
-}
-
-static void
-pipeConnector_close( void* opaque )
-{
-    PipeConnector*  pcon = opaque;
-    free(pcon);
-}
-
-static int
-pipeConnector_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuffers )
-{
-    PipeConnector* pcon = opaque;
-    const AndroidPipeBuffer*  buffers_limit = buffers + numBuffers;
-    int ret = 0;
-
-    DD("%s: pipe=%p numBuffers=%d", __FUNCTION__, pcon->pipe, numBuffers);
-
-    while (buffers < buffers_limit) {
-        int  avail;
-
-        DD("%s: buffer data (%3d bytes): '%.*s'", __FUNCTION__,
-           (int)buffers[0].size, (int)buffers[0].size, buffers[0].data);
-
-        if (buffers[0].size == 0) {
-            buffers++;
-            continue;
-        }
-
-        avail = sizeof(pcon->buffer) - pcon->buffpos;
-        if (avail > buffers[0].size)
-            avail = buffers[0].size;
-
-        if (avail > 0) {
-            memcpy(pcon->buffer + pcon->buffpos, buffers[0].data, avail);
-            pcon->buffpos += avail;
-            ret += avail;
-        }
-        buffers++;
-    }
-
-    /* Now check that our buffer contains a zero-terminated string */
-    if (memchr(pcon->buffer, '\0', pcon->buffpos) != NULL) {
-        /* Acceptable formats for the connection string are:
-         *
-         *   pipe:<name>
-         *   pipe:<name>:<arguments>
-         */
-        char* pipeName;
-        char* pipeArgs;
-
-        D("%s: connector: '%s'", __FUNCTION__, pcon->buffer);
-
-        if (memcmp(pcon->buffer, "pipe:", 5) != 0) {
-            /* Nope, we don't handle these for now. */
-            D("%s: Unknown pipe connection: '%s'", __FUNCTION__, pcon->buffer);
-            return PIPE_ERROR_INVAL;
-        }
-
-        pipeName = pcon->buffer + 5;
-        pipeArgs = strchr(pipeName, ':');
-
-        if (pipeArgs != NULL) {
-            *pipeArgs++ = '\0';
-            if (!*pipeArgs)
-                pipeArgs = NULL;
-        }
-
-        Pipe* pipe = pcon->pipe;
-        const PipeService* svc = android_pipe_service_find(pipeName);
-        if (svc == NULL) {
-            D("%s: Unknown server!", __FUNCTION__);
-            return PIPE_ERROR_INVAL;
-        }
-
-        void*  peer = svc->funcs.init(pipe->hwpipe, svc->opaque, pipeArgs);
-        if (peer == NULL) {
-            D("%s: Initialization failed!", __FUNCTION__);
-            return PIPE_ERROR_INVAL;
-        }
-
-        /* Do the evil switch now */
-        pipe->opaque = peer;
-        pipe->service = svc;
-        pipe->funcs  = &svc->funcs;
-        pipe->args   = ASTRDUP(pipeArgs);
-        free(pcon);
-    }
-
-    return ret;
-}
-
-static int
-pipeConnector_recvBuffers( void* opaque, AndroidPipeBuffer* buffers, int numBuffers )
-{
-    return PIPE_ERROR_IO;
-}
-
-static unsigned
-pipeConnector_poll( void* opaque )
-{
-    return PIPE_POLL_OUT;
-}
-
-static void
-pipeConnector_wakeOn( void* opaque, int flags )
-{
-    /* nothing, really should never happen */
-}
-
-static void
-pipeConnector_save( void* pipe, Stream* file )
-{
-    PipeConnector*  pcon = pipe;
-    stream_put_be32(file, pcon->buffpos);
-    stream_write(file, (const uint8_t*)pcon->buffer, pcon->buffpos);
-}
-
-static void*
-pipeConnector_load(void* hwpipe, void* pipeOpaque, const char* args,
-                   Stream* file)
-{
-    PipeConnector*  pcon;
-
-    int len = stream_get_be32(file);
-    if (len < 0 || len > sizeof(pcon->buffer)) {
-        return NULL;
-    }
-    pcon = pipeConnector_new(hwpipe);
-    pcon->buffpos = len;
-    if (stream_read(file, (uint8_t*)pcon->buffer, pcon->buffpos) != pcon->buffpos) {
-        free(pcon);
-        return NULL;
-    }
-    return pcon;
-}
-
-static const AndroidPipeFuncs  pipeConnector_funcs = {
-    NULL,  /* init */
-    pipeConnector_close,        /* should rarely happen */
-    pipeConnector_sendBuffers,  /* the interesting stuff */
-    pipeConnector_recvBuffers,  /* should not happen */
-    pipeConnector_poll,         /* should not happen */
-    pipeConnector_wakeOn,       /* should not happen */
-    pipeConnector_save,
-    pipeConnector_load,
-};
 
 /***********************************************************************
  ***********************************************************************
@@ -491,7 +82,7 @@ typedef struct HwPipe {
     uint64_t channel;
     unsigned char wakes;
     unsigned char closed;
-    Pipe* pipe;
+    void* pipe;
     struct PipeDevice* device;
 } HwPipe;
 
@@ -505,12 +96,12 @@ static HwPipe* hwpipe_new0(struct PipeDevice* device) {
 static HwPipe* hwpipe_new(uint64_t channel, struct PipeDevice* device) {
     HwPipe* hwp = hwpipe_new0(device);
     hwp->channel = channel;
-    hwp->pipe = pipe_new(hwp);
+    hwp->pipe = android_pipe_new(hwp);
     return hwp;
 }
 
 static void hwpipe_free(HwPipe* hwp) {
-    pipe_free(hwp->pipe);
+    android_pipe_free(hwp->pipe);
     free(hwp);
 }
 
@@ -556,7 +147,7 @@ static void hwpipe_save(HwPipe* pipe, Stream* file) {
     stream_put_byte(file, (int)pipe->wakes);
     stream_put_byte(file, (int)pipe->closed);
 
-    pipe_save(pipe->pipe, file);
+    android_pipe_save(pipe->pipe, file);
 }
 
 static HwPipe* hwpipe_load(PipeDevice* dev, Stream* file, int version_id) {
@@ -564,14 +155,14 @@ static HwPipe* hwpipe_load(PipeDevice* dev, Stream* file, int version_id) {
 
     char force_close = 0;
     if (version_id == GOLDFISH_PIPE_SAVE_LEGACY_VERSION) {
-        pipe->pipe = pipe_load_legacy(file, pipe, &pipe->channel,
-                                      &pipe->wakes, &pipe->closed,
-                                      &force_close);
+        pipe->pipe = android_pipe_load_legacy(file, pipe, &pipe->channel,
+                                              &pipe->wakes, &pipe->closed,
+                                              &force_close);
     } else {
         pipe->channel = stream_get_be64(file);
         pipe->wakes = stream_get_byte(file);
         pipe->closed = stream_get_byte(file);
-        pipe->pipe = pipe_load(file, pipe, &force_close);
+        pipe->pipe = android_pipe_load(file, pipe, &force_close);
     }
 
     if (!pipe->pipe) {
@@ -707,7 +298,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         break;
 
     case PIPE_CMD_POLL:
-        dev->status = pipe->pipe->funcs->poll(pipe->pipe->opaque);
+        dev->status = android_pipe_poll(pipe->pipe);
         DD("%s: CMD_POLL > status=%d", __FUNCTION__, dev->status);
         break;
 
@@ -723,8 +314,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
             break;
         }
         buffer.size = dev->size;
-        dev->status = pipe->pipe->funcs->recvBuffers(pipe->pipe->opaque,
-                                                     &buffer, 1);
+        dev->status = android_pipe_recv(pipe->pipe, &buffer, 1);
         DD("%s: CMD_READ_BUFFER channel=0x%llx address=0x%llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
            dev->size, dev->status);
@@ -744,8 +334,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
             break;
         }
         buffer.size = dev->size;
-        dev->status = pipe->pipe->funcs->sendBuffers(pipe->pipe->opaque,
-                                                     &buffer, 1);
+        dev->status = android_pipe_send(pipe->pipe, &buffer, 1);
         DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel,
            (unsigned long long)dev->address,
@@ -759,7 +348,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
            (unsigned long long)dev->channel);
         if ((pipe->wakes & PIPE_WAKE_READ) == 0) {
             pipe->wakes |= PIPE_WAKE_READ;
-            pipe->pipe->funcs->wakeOn(pipe->pipe->opaque, pipe->wakes);
+            android_pipe_wake_on(pipe->pipe, pipe->wakes);
         }
         dev->status = 0;
         break;
@@ -769,7 +358,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
            (unsigned long long)dev->channel);
         if ((pipe->wakes & PIPE_WAKE_WRITE) == 0) {
             pipe->wakes |= PIPE_WAKE_WRITE;
-            pipe->pipe->funcs->wakeOn(pipe->pipe->opaque, pipe->wakes);
+            android_pipe_wake_on(pipe->pipe, pipe->wakes);
         }
         dev->status = 0;
         break;
