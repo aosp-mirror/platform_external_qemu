@@ -4092,8 +4092,6 @@ int main(int argc, char **argv, char **envp)
     /* Initialize metrics right before entering main loop.
      * We want to track performance of a running emulator, ignoring any early
      * exits as a result of incorrect setup.
-     * TODO(kmenchytas) With ddms going away, see if this needs its own
-     * approval.
      */
     android_init_metrics();
     android_check_for_updates();

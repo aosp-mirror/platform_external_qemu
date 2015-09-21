@@ -289,7 +289,7 @@ help_environment(stralloc_t*  out)
     "  If ANDROID_LOG_TAGS is defined, it will be used as in '-logcat <tags>'.\n\n"
 
     "  If ANDROID_EMULATOR_HOME is defined, it replaces the path of the '$HOME/.android'\n"
-    "  directory which contains the emulator config data (DDMS preferences, key stores, etc.).\n\n"
+    "  directory which contains the emulator config data (key stores, etc.).\n\n"
 
     "  If ANDROID_SDK_ROOT is defined, it indicates the path of the SDK\n"
     "  installation directory.\n\n"
@@ -1070,7 +1070,7 @@ help_logcat(stralloc_t*  out)
     "  format and will be used to redirect log messages to the terminal.\n\n"
 
     "  note that this doesn't prevent you from redirecting the same, or other,\n"
-    "  log messages through the ADB or DDMS tools too.\n\n");
+    "  log messages through the ADB too.\n\n");
 }
 
 static void
@@ -1169,7 +1169,7 @@ help_ports(stralloc_t*  out)
 
     "  This is a very special option that should probably *not* be used by typical\n"
     "  developers using the Android SDK (use '-port <port>' instead), because the\n"
-    "  corresponding instance is probably not going to be seen from adb/DDMS. Its\n"
+    "  corresponding instance is probably not going to be seen from adb. Its\n"
     "  purpose is to use the emulator in very specific network configurations.\n\n"
 
     "    <consoleport> is the TCP port used to bind the control console\n"
