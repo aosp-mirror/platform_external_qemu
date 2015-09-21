@@ -22,6 +22,11 @@
 #include <stdio.h>
 #define ERR(...)  fprintf(stderr, __VA_ARGS__)
 
+// M_PI isn't defined in C++ (when strict ISO compliance is enabled)
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327
+#endif
+
 namespace {
 
 // Helper function to create a new shader.
