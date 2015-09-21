@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "090f9bb2_ca598300",
+        "filename": "android/opengles.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T11:22:19Z",
+      "side": 1,
+      "message": "good point, might as well fix this with:\n\n  const char* begin \u003d strchr(src, \u0027(\u0027);\n  if (!begin) {\n    return strdup(src);\n  }\n  const char* end \u003d strrchr(begin + 1, \u0027)\u0027);\n  if (!end) {\n    return strdup(src);\n  }",
+      "parentUuid": "c9ae6393_929a0ca8",
+      "range": {
+        "startLine": 217,
+        "startChar": 1,
+        "endLine": 218,
+        "endChar": 40
+      },
+      "revId": "0357488ca15fab8e11179a77947c644817e8243c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c9a3c3b1_1fb1af64",
         "filename": "android/opengles.c",
         "patchSetId": 2
@@ -42,6 +66,40 @@
         "endLine": 233,
         "endChar": 40
       },
+      "revId": "0357488ca15fab8e11179a77947c644817e8243c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4970b318_e44a9a42",
+        "filename": "android/opengles.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T11:22:19Z",
+      "side": 1,
+      "message": "nit: Use memcpy() here since you don\u0027t want to use strncpy_safe().",
+      "revId": "0357488ca15fab8e11179a77947c644817e8243c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a97f6fe5_6754f2c6",
+        "filename": "android/opengles.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T11:22:19Z",
+      "side": 1,
+      "message": "nit: that\u0027s a bit confusing (\"double pointers\" really?). I propose something simpler like:\n\n  On exit, sets |*vendor|, |*renderer| and |*version| to point\n  to new heap-allocated strings (that must be freed by the\n  caller) which represent the OpenGL hardware vendor\n  name, driver name, and version, respectively.",
       "revId": "0357488ca15fab8e11179a77947c644817e8243c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
