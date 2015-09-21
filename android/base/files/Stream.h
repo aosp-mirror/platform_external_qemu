@@ -65,6 +65,12 @@ public:
     // Return 0 on error.
     uint64_t getBe64();
 
+    // Write a 32-bit float |value| to the stream.
+    void putFloat(float value);
+
+    // Read a single 32-bit float value from the stream.
+    float getFloat();
+
     // Write a string |str| into the stream. Ignore errors.
     void putString(const String& str);
 

@@ -178,6 +178,29 @@ TEST(Stream,getBe64) {
     }
 }
 
+TEST(Stream, putFloat) {
+    static const float kValue = 3.141592;
+    static const uint8_t kExpected[] = {
+        0xd8, 0x0f, 0x49, 0x40,
+    };
+    uint8_t buffer[sizeof(kExpected)] = { 0, };
+    MemoryStream stream(buffer, sizeof(buffer));
+
+    stream.putFloat(kValue);
+    for (size_t n = 0; n < sizeof(kExpected); ++n) {
+        EXPECT_EQ(kExpected[n], buffer[n]) << "#" << n;
+    }
+}
+
+TEST(Stream, getFloat) {
+    static const uint8_t kData[] = {
+        0xd8, 0x0f, 0x49, 0x40,
+    };
+    static const float kExpected = 3.141592;
+    MemoryStream stream(kData, sizeof(kData));
+    EXPECT_EQ(kExpected, stream.getFloat());
+}
+
 TEST(Stream, putStringWithBaseString) {
     static const char kInput[] = "Hello world";
     static const uint8_t kExpected[] = {
