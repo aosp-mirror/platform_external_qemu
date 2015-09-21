@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "89762b11_464ff230",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T09:57:45Z",
+      "side": 1,
+      "message": "Yes, it is an important target for us, and the mere reason why we\u0027re creating this common library. Otherwise, we would just take the code and directly port it to QEMU2 without trying to make it reusable.\n\nWe need to keep the QEMU1 emulator to continue supporting existing SDK system images, because older ones require some horrible hacks we don\u0027t want to get into QEMU2.",
+      "parentUuid": "099a3b78_fb6de387",
+      "range": {
+        "startLine": 25,
+        "startChar": 17,
+        "endLine": 25,
+        "endChar": 35
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a90a0f5b_cf64bd2e",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-17T18:52:44Z",
       "side": 1,
       "message": "s/A QEMU1-specific \u0027engine\u0027/An \u0027engine\u0027 (QEMU-1)/.",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 29
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e99a4788_817ffa73",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T09:57:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a90a0f5b_cf64bd2e",
       "range": {
         "startLine": 50,
         "startChar": 4,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "4970b318_048256cb",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T09:57:45Z",
+      "side": 1,
+      "message": "For now, it is planned to go into external/qemu/android-qemu/, as explained below. We can choose something a little bit more explicit like external/qemu/android-qemu1-glue/ instead though :)",
+      "parentUuid": "a9692fe6_3d80f7e6",
+      "range": {
+        "startLine": 101,
+        "startChar": 6,
+        "endLine": 101,
+        "endChar": 15
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "099a3b78_75f5828d",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 3
@@ -105,6 +177,24 @@
       "writtenOn": "2015-09-17T23:20:55Z",
       "side": 1,
       "message": "The concept of a looper class isn\u0027t really understandable to someone new the QEMU codebase (me).  Are there any other examples?",
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "89762b11_a6450610",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T09:57:45Z",
+      "side": 1,
+      "message": "I\u0027ve reworded this sub-section to make it more understandable. Please take a look and let me know if this still needs refinements.",
+      "parentUuid": "099a3b78_75f5828d",
       "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -199,6 +289,30 @@
     },
     {
       "key": {
+        "uuid": "09987b8e_4279f28c",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T09:57:45Z",
+      "side": 1,
+      "message": "Yes, that would be an ideal layout. We would probably only change the names of the checkout repositories in the manifest (i.e. the git repositories would still be $AOSP/platform/external/qemu.git and $AOSP/platform/external/qemu-android.git) in order to keep all git history.\n\nOn the other hand, we can\u0027t create external/android-emu/ yet until we\u0027ve completed the code and build-system refactoring, but that\u0027s where we should shoot at.",
+      "parentUuid": "89df0b23_013eaced",
+      "range": {
+        "startLine": 162,
+        "startChar": 28,
+        "endLine": 162,
+        "endChar": 50
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c9a3c3b1_d0fabce1",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 3
@@ -210,6 +324,24 @@
       "writtenOn": "2015-09-17T23:20:55Z",
       "side": 1,
       "message": "I think scripts to build qemu2 should live in qemu2 repo?",
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8902ab8b_a68b26e4",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T09:57:45Z",
+      "side": 1,
+      "message": "build-qemu-android.sh depends on a lot of stuff that lives under android/scripts/utils/, it\u0027s just easier to keep it under android/scripts/ at the moment. We can move everything somewhere else in the future, but I don\u0027t think it\u0027s a priority. We\u0027re going to refactor the build system anyway.",
+      "parentUuid": "c9a3c3b1_d0fabce1",
       "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -251,6 +383,30 @@
       "side": 1,
       "message": "I think we should change our mental picture of the build\n\nCurrent situation:\n- top level target is external/qemu/ (this is a mash-up of qemu1 and AndroieEmu)\n- This uses scripts (manually launched) to create and use external/qemu-android/ prebuilts if desired.\n\nIn the new world, this is no longer the case.\n- There are two top level targets: external/qemu1 and external/qemu2. \n  - Pick which one you want. \n  - If you want both, build both. Neither depends on the other, and should not pull the other.\n  - If there is common code (like the launcher that decides which qemu to launch, it belongs in AndroidEmu).\n- Both of them require AndroidEmu.\n- You *could* use a script in both external/qemu1/ and external/qemu2 to (re)build and pull AndroidEmu library, but it\u0027d be better if we can go the Android.mk way (top level Makefiles with includes) as that gives the best incremental builds and we\u0027re likely to hack on the AndroidEmu library hand-in-hand with one or both of qemu{1,2}.",
       "parentUuid": "69dad736_c08a009d",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 185,
+        "endChar": 68
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "090f9bb2_8a05cbd9",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T09:57:45Z",
+      "side": 1,
+      "message": "Yes, that\u0027s the idea. I think we should always rebuild both engines at the same time, caching as much as possible to keep things fast. It\u0027s the best way to avoid hidden build breaks.\n\nI\u0027ve completely rewritten that part of the document. Please take a look at the last section now.",
+      "parentUuid": "e99c0776_2069f431",
       "range": {
         "startLine": 185,
         "startChar": 0,
@@ -310,6 +466,30 @@
     },
     {
       "key": {
+        "uuid": "e99a4788_01508afb",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T09:57:45Z",
+      "side": 1,
+      "message": "We want to keep the \u0027configure\u0027 script as close from upstream as possible, so refactoring is going to be tough. Also the configure output contains hard-coded full paths in generated Makefiles, as well as symbolic links to the source directory\u0027s full path. We probably need a better way to do that, based on some sort of templating.",
+      "parentUuid": "c9ae6393_bb40d326",
+      "range": {
+        "startLine": 195,
+        "startChar": 0,
+        "endLine": 198,
+        "endChar": 54
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "69dad736_31e4d852",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 3
@@ -356,6 +536,30 @@
     },
     {
       "key": {
+        "uuid": "e99a4788_e15486f1",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T09:57:45Z",
+      "side": 1,
+      "message": "Sometimes it\u0027s nice to have everything in a single git repository. \u0027repo\u0027 and gerrit still don\u0027t support atomic updates, which is error-prone. For now, I favor keeping the scripts under qemu1/android/scripts/",
+      "parentUuid": "c9a3c3b1_7068302b",
+      "range": {
+        "startLine": 206,
+        "startChar": 0,
+        "endLine": 207,
+        "endChar": 17
+      },
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "69c3b75a_9b431333",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 3
@@ -385,6 +589,24 @@
       "side": 1,
       "message": "I think it\u0027s valuable to keep the UI code common across the two. If nothing else, it ensures uniform experience to a user when both are being shipped / used based on guest_arch etc.",
       "parentUuid": "69c3b75a_9b431333",
+      "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a97f6fe5_871ac636",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-21T09:57:45Z",
+      "side": 1,
+      "message": "We clearly don\u0027t want to maintain two UI baselines. Sharing is the only way to go given our resources, imho.",
+      "parentUuid": "c9ae6393_4cb37f24",
       "revId": "b045c6127554eb0575023f042891a03d5e1e88f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
