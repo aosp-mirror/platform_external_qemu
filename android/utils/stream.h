@@ -42,6 +42,8 @@ void stream_put_string(Stream* stream, const char* str);
 // Caller must free() the resturned value.
 char* stream_get_string(Stream* stream);
 
+void stream_free(Stream* stream);
+
 ANDROID_END_HEADER
 
 #endif  // ANDROID_UTILS_STREAM_H

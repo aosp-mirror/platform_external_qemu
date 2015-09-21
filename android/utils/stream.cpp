@@ -75,3 +75,7 @@ char* stream_get_string(Stream* stream) {
     ::memcpy(result, ret.c_str(), ret.size() + 1U);
     return result;
 }
+
+void stream_free(Stream* stream) {
+    delete asBaseStream(stream);
+}
