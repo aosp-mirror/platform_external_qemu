@@ -606,6 +606,10 @@ static void handle_mousemotion(SDL_Event *ev)
     int max_x, max_y;
     struct sdl2_state *scon = get_scon_from_window(ev->key.windowID);
 
+    if (!scon) {
+        return;
+    }
+
     if (qemu_input_is_absolute() || absolute_enabled) {
         int scr_w, scr_h;
         SDL_GetWindowSize(scon->real_window, &scr_w, &scr_h);
@@ -633,6 +637,10 @@ static void handle_mousebutton(SDL_Event *ev)
     SDL_MouseButtonEvent *bev;
     struct sdl2_state *scon = get_scon_from_window(ev->key.windowID);
 
+    if (!scon) {
+        return;
+    }
+
     bev = &ev->button;
     if (!gui_grab && !qemu_input_is_absolute()) {
         if (ev->type == SDL_MOUSEBUTTONUP && bev->button == SDL_BUTTON_LEFT) {
@@ -655,6 +663,10 @@ static void handle_mousewheel(SDL_Event *ev)
     SDL_MouseWheelEvent *wev = &ev->wheel;
     InputButton btn;
 
+    if (!scon) {
+        return;
+    }
+
     if (wev->y > 0) {
         btn = INPUT_BUTTON_WHEEL_UP;
     } else if (wev->y < 0) {
@@ -673,6 +685,10 @@ static void handle_windowevent(DisplayChangeListener *dcl, SDL_Event *ev)
 {
     int w, h;
     struct sdl2_state *scon = get_scon_from_window(ev->key.windowID);
+
+    if (!scon) {
+        return;
+    }
 
     switch (ev->window.event) {
     case SDL_WINDOWEVENT_RESIZED:
