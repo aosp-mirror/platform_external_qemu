@@ -10,8 +10,8 @@
 ** GNU General Public License for more details.
 */
 
+#include "android/emulation/android_pipe.h"
 #include "android/utils/system.h"
-#include "hw/android/goldfish/pipe.h"
 
 #include <stdio.h>
 #include <stdlib.h>
