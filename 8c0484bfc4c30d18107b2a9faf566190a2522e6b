@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c9ae6393_2212cf1e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-21T18:39:58Z",
+      "side": 1,
+      "message": "this was already broken, as M_PI shouldn\u0027t be defined even with C++03",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 68
+      },
+      "revId": "8c0484bfc4c30d18107b2a9faf566190a2522e6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69dad736_9fdccefe",
+        "filename": "include/qemu/timer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 862,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-21T18:39:58Z",
+      "side": 1,
+      "message": "C++11 requires space here to differentiate from its user-defined literals (e.g. \"1\"s \u003d\u003d std::string(\"1\"))",
+      "range": {
+        "startLine": 862,
+        "startChar": 43,
+        "endLine": 862,
+        "endChar": 47
+      },
+      "revId": "8c0484bfc4c30d18107b2a9faf566190a2522e6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
