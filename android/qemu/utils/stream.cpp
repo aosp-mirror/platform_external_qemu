@@ -14,10 +14,36 @@
 #include "android/base/files/Stream.h"
 #include "android/qemu/base/files/QemuFileStream.h"
 
-::Stream* stream_from_qemufile(struct QEMUFile* file) {
+struct QEMUFile;
+struct QEMUTimer;
+
+using android::qemu::QemuFileStream;
+typedef ::Stream CStream;
+
+CStream* stream_from_qemufile(QEMUFile* file) {
     if (!file) {
         return NULL;
     }
-    return reinterpret_cast< ::Stream*>(
-            new android::qemu::QemuFileStream(file));
+    return reinterpret_cast<CStream*>(new QemuFileStream(file));
+}
+
+QemuFileStream* asQemuFileStream(CStream* stream) {
+    return reinterpret_cast<QemuFileStream*>(stream);
+}
+
+// NOTE: stream_put_qemu_timer() and stream_get_qemu_timer() are temporary
+// fixes that will disappear once we remove the use of QEMUTimer instances
+// from android/. Including "qemu-common.h" here is problematic, the compiler
+// will error complaining about missing endianess macro definitions for some
+// obscure reason. Given that this is a temporary fix, just declare these
+// two functions here.
+extern "C" void timer_put(QEMUFile*, QEMUTimer*);
+extern "C" void timer_get(QEMUFile*, QEMUTimer*);
+
+void stream_put_qemu_timer(CStream* stream, QEMUTimer* timer) {
+    timer_put(asQemuFileStream(stream)->file(), timer);
+}
+
+void stream_get_qemu_timer(CStream* stream, QEMUTimer* timer) {
+    timer_get(asQemuFileStream(stream)->file(), timer);
 }
