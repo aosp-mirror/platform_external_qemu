@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "c9a3c3b1_25c824e1",
+        "filename": "android/opengles.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-21T22:56:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "090f9bb2_ca598300",
+      "range": {
+        "startLine": 217,
+        "startChar": 1,
+        "endLine": 218,
+        "endChar": 40
+      },
+      "revId": "0357488ca15fab8e11179a77947c644817e8243c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c9a3c3b1_1fb1af64",
         "filename": "android/opengles.c",
         "patchSetId": 2
@@ -60,6 +84,30 @@
       "writtenOn": "2015-09-19T01:34:11Z",
       "side": 1,
       "message": "this is just 1 by definition",
+      "range": {
+        "startLine": 233,
+        "startChar": 28,
+        "endLine": 233,
+        "endChar": 40
+      },
+      "revId": "0357488ca15fab8e11179a77947c644817e8243c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69dad736_df26564e",
+        "filename": "android/opengles.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-21T22:56:42Z",
+      "side": 1,
+      "message": "I was on the fence about that...",
+      "parentUuid": "c9a3c3b1_1fb1af64",
       "range": {
         "startLine": 233,
         "startChar": 28,
@@ -89,6 +137,24 @@
     },
     {
       "key": {
+        "uuid": "c98bc36e_1379ee8d",
+        "filename": "android/opengles.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-21T22:56:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4970b318_e44a9a42",
+      "revId": "0357488ca15fab8e11179a77947c644817e8243c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a97f6fe5_6754f2c6",
         "filename": "android/opengles.h",
         "patchSetId": 2
@@ -106,6 +172,24 @@
     },
     {
       "key": {
+        "uuid": "c9ae6393_02578b68",
+        "filename": "android/opengles.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-21T22:56:42Z",
+      "side": 1,
+      "message": "Done.\nAdded an extra expectation to avoid a potential leak.",
+      "parentUuid": "a97f6fe5_6754f2c6",
+      "revId": "0357488ca15fab8e11179a77947c644817e8243c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e99c0776_3a9be0b1",
         "filename": "vl-android.c",
         "patchSetId": 2
@@ -117,6 +201,30 @@
       "writtenOn": "2015-09-19T01:34:11Z",
       "side": 1,
       "message": "nit",
+      "range": {
+        "startLine": 2132,
+        "startChar": 30,
+        "endLine": 2132,
+        "endChar": 31
+      },
+      "revId": "0357488ca15fab8e11179a77947c644817e8243c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69dad736_ff4cf209",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2132,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-21T22:56:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e99c0776_3a9be0b1",
       "range": {
         "startLine": 2132,
         "startChar": 30,
