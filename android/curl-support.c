@@ -34,7 +34,9 @@ bool curl_init(const char* ca_info) {
     }
 
     free(cached_ca_info);
-    cached_ca_info = strdup(ca_info);
+    if (ca_info != NULL) {
+        cached_ca_info = strdup(ca_info);
+    }
     ++initCount;
     return true;
 }
