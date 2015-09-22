@@ -2132,8 +2132,22 @@ static void android_init_metrics()
 
     androidMetrics_init(&metrics);
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version, VERSION_STRING);
-    ANDROID_METRICS_STRASSIGN( metrics.guest_arch, android_hw->hw_cpu_arch);
+    ANDROID_METRICS_STRASSIGN(metrics.guest_arch, android_hw->hw_cpu_arch);
     metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
+    if (android_hw->hw_gpu_enabled) {
+        free(metrics.guest_gl_vendor);
+        metrics.guest_gl_vendor = NULL;
+        free(metrics.guest_gl_renderer);
+        metrics.guest_gl_renderer = NULL;
+        free(metrics.guest_gl_version);
+        metrics.guest_gl_version = NULL;
+        // This call is only sensible after |android_startOpenglesRenderer| has
+        // been called.
+        android_getOpenglesHardwareStrings(&metrics.guest_gl_vendor,
+                                           &metrics.guest_gl_renderer,
+                                           &metrics.guest_gl_version);
+    }
+
     androidMetrics_write(&metrics);
     androidMetrics_fini(&metrics);
 
@@ -3480,19 +3494,14 @@ int main(int argc, char **argv, char **envp)
      * the emulation engine. */
     int qemu_gles = 0;
     if (android_hw->hw_gpu_enabled) {
-        if (android_initOpenglesEmulation() == 0 &&
+        if (android_initOpenglesEmulation() != 0 ||
             android_startOpenglesRenderer(android_hw->hw_lcd_width,
-                                          android_hw->hw_lcd_height) == 0)
+                                          android_hw->hw_lcd_height) != 0)
         {
-            android_getOpenglesHardwareStrings(
-                    android_gl_vendor, sizeof(android_gl_vendor),
-                    android_gl_renderer, sizeof(android_gl_renderer),
-                    android_gl_version, sizeof(android_gl_version));
-            qemu_gles = 1;
-        } else {
             derror("Could not initialize OpenglES emulation, use '-gpu off' to disable it.");
             exit(1);
         }
+        qemu_gles = 1;
     }
     if (qemu_gles) {
         stralloc_add_str(kernel_params, " qemu.gles=1");
