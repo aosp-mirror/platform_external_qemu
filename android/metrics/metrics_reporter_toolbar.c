@@ -28,7 +28,8 @@
 
 int formatToolbarGetUrl(char** ptr,
                         const char* url,
-                        const AndroidMetrics* metrics) {
+                        const AndroidMetrics* metrics,
+                        CURL* curl) {
     // This is of the form: androidsdk_<product_name>_<event_name>
     static const char product_name[] = "androidsdk_emu_crash";
     static const char guest_arch_key[] = "guest_arch";
@@ -46,9 +47,9 @@ int formatToolbarGetUrl(char** ptr,
     char* client_id = android_studio_get_installation_id();
     int result = asprintf(
             &out_buf,
-            "%s?as=%s&%s=%s&%s=%s&%s=%s"
+            "as=%s&%s=%s&%s=%s&%s=%s"
             "&%s=%d&%s=%" PRId64 "&%s=%" PRId64,
-            url, product_name,
+            product_name,
             version_key, metrics->emulator_version,
             client_id_key, client_id,
             guest_arch_key, metrics->guest_arch,
@@ -68,6 +69,17 @@ int formatToolbarGetUrl(char** ptr,
                 guest_gl_renderer_key, metrics->guest_gl_renderer,
                 guest_gl_version_key, metrics->guest_gl_version);
         free(out_buf);
+        out_buf = new_out_buf;
+    }
+
+    if (result >= 0) {
+        char* curl_escaped_buf = curl_easy_escape(curl, out_buf, 0);
+        free(out_buf);
+
+        char* new_out_buf;
+        result = asprintf(&new_out_buf, "%s?%s", url, curl_escaped_buf);
+        curl_free(curl_escaped_buf);
+
         out_buf = new_out_buf;
     }
 
@@ -97,7 +109,7 @@ bool androidMetrics_uploadMetricsToolbar(const AndroidMetrics* metrics) {
     }
 
     char* formatted_url;
-    if (formatToolbarGetUrl(&formatted_url, toolbar_url, metrics) < 0) {
+    if (formatToolbarGetUrl(&formatted_url, toolbar_url, metrics, curl) < 0) {
         mwarning("Failed to allocate memory for a request");
         curl_easy_cleanup(curl);
         return false;

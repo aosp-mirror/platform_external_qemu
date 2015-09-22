@@ -18,13 +18,18 @@
 #include "android/metrics/metrics_reporter.h"
 #include "android/utils/compiler.h"
 
+#include <curl/curl.h>
+
 ANDROID_BEGIN_HEADER
 
 // The function that actually formats the given data into post query data.
-// Formatted url is retrurned in |ptr|, caller must free the returned URL.
+// On success, formatted url is retrurned in |ptr|, and number of bytes
+// allocated is returned. Caller must free the returned URL.
+// On failure, return value is < 0 and contents of *ptr are undefined.
 extern int formatToolbarGetUrl(char** ptr,
                                const char* url,
-                               const AndroidMetrics* metrics);
+                               const AndroidMetrics* metrics,
+                               CURL* curl);
 
 ANDROID_END_HEADER
 
