@@ -77,6 +77,9 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
   android/wear-agent/WearAgent_unittest.cpp \
 
+EMULATOR_UNITTESTS_SOURCES += \
+  android/gtest_main.cpp
+
 ifeq (windows,$(HOST_OS))
 EMULATOR_UNITTESTS_SOURCES += \
   android/base/files/ScopedHandle_unittest.cpp \
@@ -123,6 +126,9 @@ ANDROID_SKIN_UNITTESTS := \
     android/skin/keycode-buffer_unittest.cpp \
     android/skin/rect_unittest.cpp \
     android/skin/region_unittest.cpp \
+
+ANDROID_SKIN_UNITTESTS += \
+    android/gtest_main.cpp
 
 $(call start-emulator-program, android_skin_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include
