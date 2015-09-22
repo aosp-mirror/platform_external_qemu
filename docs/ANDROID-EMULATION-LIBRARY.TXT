@@ -1,0 +1,311 @@
+AndroidEmu: Android Emulation Library Overview
+==============================================
+
+Introduction:
+-------------
+
+I. Overview:
+------------
+
+The Android emulator is now a set of binaries which are built from essentially
+two code bases:
+
+- The 'classic' code-base, under $AOSP/external/qemu/, which is based on
+  a really old version of QEMU 1.x, heavily patched, implementing a very large
+  set of features.
+
+- The 'QEMU2' code-base, under $AOSP/external/qemu-android/, which is based
+  on a much more recent version of QEMU 2.x, very lightly patched at the moment,
+  but which doesn't implement many Android-specific features to replace the
+  classic emulator.
+
+There are other differences, for example:
+
+- The QEMU2 code base supports Android ARM64, MIPS64, x86 and x86_64
+  system images (but not 32-bit ARM or MIPS). While the classic one only
+  supports 32-bit ARM, MIPS, x86 and x86_64.
+
+- The QEMU2 emulator has much better i/o performance through the use of
+  virtio virtual devices.
+
+- The classic emulator has a skinnable UI based on SDL2, with a prototype
+  new one based on Qt. The QEMU2 one only displays a mere rectangle.
+
+A small number of Android-specific features have been manually ported to the
+QEMU2 code base to enable it to boot Android system images, which meant
+rewriting from scratch existing support code (QEMU2 and classic internals are
+quite different, so code sharing is actually pretty low).
+
+However, this scheme doesn't really scale, and new features are being added to
+the classic emulator at increased speed now, making this manual porting process
+even more cumbersome.
+
+To solve this, the classic codebase is going to be refactored into the
+following:
+
+  - A static library, named 'AndroidEmu', providing as many Android-specific
+    emulation features as possible, in a way that doesn't depend on _any_ QEMU
+    internals.
+
+  - An 'engine' (QEMU1) that actually implements the emulation runtime
+    and virtual hardware board.
+
+  - A QEMU1-specific 'glue' between these two, that provides the necessary
+    plumbing between the above two components.
+
+Meanwhile, the QEMU2 code base will be modified to link against exactly the
+same AndroidEmu library, with the help of its own custom 'glue', to form the
+final QEMU2 binary.
+
+The goals of AndroidEmu are the following:
+
+  - Being a standalone component that comes with its own set of unit-tests
+    that can be run on each build to catch regressions and issues as soon
+    as possible (unlike the rest of QEMU1 / QEMU2 which is essentially
+    not unit-testable).
+
+  - Providing a UI layer decoupled from the underlying emulation engine
+    (be it based on SDL2, as currently, or on Qt, as in the future).
+
+This can be illustrated as follows:
+
+    ____________     ____________     _________        ____________________
+   |            |   |            |   |         |      |                    |
+   | AndroidEmu | + | QEMU1 Glue | + |  QEMU1  |  ==  |  Classic emulator  |
+   |____________|   |____________|   |_________|      |____________________|
+
+    ____________     ____________     _________        ____________________
+   |            |   |            |   |         |      |                    |
+   | AndroidEmu | + | QEMU2 Glue | + |  QEMU2  |  ==  |   QEMU2 emulator   |
+   |____________|   |____________|   |_________|      |____________________|
+
+    ____________     ____________        ______________________________
+   |            |   |            |      |                              |
+   | AndroidEmu | + | unit tests |  ==  |  AndroidEmu unit-test suite  |
+   |____________|   |____________|      |______________________________|
+
+
+
+II. AndroidEmu interfaces:
+--------------------------
+
+To achieve this, a series of programming techniques will be used, for example
+(all paths relative to $AOSP/external/qemu/):
+
+- AndroidEmu provides generic functions that can be called directly from
+  glue code. For example:
+
+      android/telephony/: contains generic AndroidEmu code used to support
+      GSM and SMS emulation.
+
+      telephony/: contains QEMU1-specific code that uses the generic code
+      and plugs it into the rest of the emulation engine (e.g. providing
+      a CharDriverState* instance for the emulated modem serial line).
+
+      NOTE: This is the current location, it will be moved to another
+            directory that collects all glue code. See sections below.
+
+- AndroidEmu can provide abstract interfaces that are implemented by the
+  library in a generic way, but can also be overriden by a QEMU1/QEMU2
+  specific implementation. For example (all paths relative to external/qemu/):
+
+    Most of the AndroidEmu code that needs to deal with asynchronous events
+    doesn't know if it runs within the QEMU event loop, or a more generic
+    one.
+
+    This is done by providing a generic abstract C++ interface to event loops
+    (android::base::Looper), which has both a generic implementation, based
+    on select(), as well as another one based on the QEMU main event loop
+    (android::qemu::Looper).
+
+    The code in AndroidEmu calls android::base::ThreadLooper::get() to
+    retrieve the Looper instance for the current thread. By default this
+    method lazily creates a generic android::base::Looper on-demand.
+
+    However, when the main QEMU main thread starts, it will create a new
+    android::qemu::Looper instance, and inject it through ThreadLooper::set()
+    into the current thread.
+
+    As such, any AndroidEmu code that runs in this thread will use QEMU1's
+    main event loop without knowing it.
+
+    For more details look at the following sources:
+
+      android/base/async/Looper.h
+      android/base/async/Looper.cpp
+      android/base/async/ThreadLooper.h
+      android/qemu/base/async/Looper.cpp
+
+    Technically, only the last source file is part of the QEMU1-specific glue.
+
+- The android::base::System class provides an abstract interface to the
+  underlying host system. Unit-tests can use an android::base::TestSystem
+  instance that will automatically inject itself into the process for the
+  duration of the test to ensure that operations are as hermetic as possible.
+
+
+III. Emulator UI Considerations:
+--------------------------------
+
+The code that handles the classic emulator's UI is currently divided into
+the following groups :
+
+  ui/console.c:
+        QEMU1-specific code to manage console and displays.
+        Essentially, QEMU differentiates between 'consoles' and 'displays'.
+
+        A 'console' is an output surface that can hold either text or graphics.
+        A given VM may have several consoles enabled at runtime.
+
+        A display, named DisplayState in QEMU1, is something that can "display"
+        one console at a time. It is possible to switch which console is
+        being associated with a given DisplayState at runtime.
+
+        Finally, a DisplayChangeListener is actually some code that actually
+        shows a DisplayState to the screen, or does some specific handling
+        (e.g. the VNC DisplayChangeListener can be used to send the
+        DisplayState to a remote client using the VNC protocol.
+
+  android/display.c:
+        The DisplayChangeListener implementation used to send
+        the DisplayState to the emulator's UI code.
+
+  android/framebuffer.c:
+        helper class acting as a bridge between the virtual framebuffer
+        device, and the emulator's DisplayChangeListener.
+
+  android/skin/:
+        Main UI emulator code (responsible for displaying the
+        emulator's window and its controls, handling use input). This only
+        depends on stuff under android/utils/ and android/base/ and thus is
+        already completely independent from QEMU1-specific code. However, it
+        relies on client code to provide adequate callbacks to operate.
+
+        The skin directory provides an abstract interface as well as an
+        implementation backed by the SDL2 library.
+
+  android/skin/qt/:
+        An alternative implementation of the abstract skin interface based
+        on the Qt widget toolkit (still experimental). Also independent from
+        the rest of QEMU1.
+
+        To build it, one must use the --ui=qt flag when calling
+        android-configure.sh, android-rebuild.sh or package-release.sh
+
+  android/emulator-window.c:
+        The main glue code between the generic skin UI code and the QEMU1
+        specific portions of the emulator. Provides appropriate callbacks.
+
+This means that most of the UI code can already be placed in AndroidEmu, and
+that it should also be possible to write a fake emulator backend for it in
+order to generate a smaller program to test the emulator's UI, as in:
+
+    ______________     __________________        ___________________________
+   |              |   |                  |      |                           |
+   |  AndroidEmu  | + |  Mock QEMU+Glue  |  ==  |  Android UI test program  |
+   |______________|   |__________________|      |___________________________|
+
+The goal of such a program would be to test the UI's features without having
+to start a full emulation session (which typically also involves lots of manual
+clicks to ensure that everything works correctly at the moment).
+
+This effort is independent from the one described above but should simplify
+and speed up work on the UI too.
+
+
+IV. Refactoring plans:
+----------------------
+
+To get where we want, several things are going to change, and this section
+tries to details them. Note that all details will probably appear in relevant
+entries in http://b.android.com, this is a preview:
+
+
+IV.1. Repository changes:
+- - - - - - - - - - - - -
+
+The manifest files used to manage emulator development branches will be
+updated to rename the checkout names of the emulator source directories.
+
+I.e. while the git repositories on android.googlesource.com will be the
+same, the following changes in the checkout tree will happen:
+
+  external/qemu          -> external/qemu1
+  external/qemu-android  -> external/qemu2
+
+When the source refactoring is completed, we may create a new git repository
+named:
+
+  external/android-emu/
+
+To hold the shared AndroidEmu sources, and related build scripts.
+
+
+IV.2. Source file changes:
+- - - - - - - - - - - - - -
+
+A new directory named external/qemu1/android-qemu1-glue/ will be created and
+all sources under external/qemu1/android/ that still depend on QEMU-specific
+declarations and functions will be moved here first.
+
+The goal here is to keep all 'generic' AndroidEmu code under
+external/qemu1/android/ at first (potentially moving it to its own location
+like external/android-emu/ in the future).
+
+After this, the code under android-qemu1-glue/ will be refactored into
+generic and non-generic parts. The generic ones will be moved to
+external/qemu1/android/, the non-generic ones will stay at the same location.
+
+Similarly, external/qemu2/android-qemu2-glue/ will be created, and code
+migrated there (however there is currently very little code in QEMU2 that
+would be impacted by this).
+
+As a reminder, there is a small amount of QEMU-specific code that deals with
+Android that cannot be moved to the glue, due to the way the emulation engine
+works. Examples are virtual hardware device implementations, initialization
+and teardown code paths, or special features like transparent HTTP proxy
+support which requires modifying the 'slirp' network stack (by adding only two
+calls to AndroidEmu functions).
+
+
+IV.3. Build system adjustments:
+- - - - - - - - - - - - - - - -
+
+The current build system assumes the following:
+
+  - QEMU2 binaries can be rebuilt as stand-alone binaries before the QEMU1
+    ones, through a specialized script (android/scripts/build-qemu-android.sh)
+
+  - 'android-rebuild.sh' will rebuild QEMU1 binaries and copy QEMU2 prebuilts
+    to the output directory location.
+
+This only works because QEMU2 sources don't depend on other code from the
+project, but this assumption will no longer hold true. As such, the build
+system (more precisely android-configure.sh and android-rebuild.sh) will
+have to be adjusted to ensure that:
+
+  - AndroidEmu code is built as a standalone static library before anything
+    else (with appropriate unit tests, which will be run as part of the
+    build routine).
+
+  - QEMU1 and QEMU2 are rebuilt after that, and include AndroidEmu headers,
+    and link against the library when generating final executables. For
+    example, this requires adding flags like --android-includes=<dir> and
+    --android-libdir=<dir> to the QEMU2 'configure' script.
+
+  - Ideally, all of AndroidEmu, QEMU1 and QEMU2 should be rebuilt by
+    android-rebuild.sh at the same time (but in the correct order), to
+    catch build breaks as soon as possible.
+
+Note that this requires running the QEMU2 'configure' script which is
+incredibly slow (e.g. about 15 seconds on a high-end workstation, for each
+target host platform). It's probably a good idea to find a way to speed this
+process.
+
+Generally speaking, we want to keep the QEMU2 'configure' script as close from
+upstream as possible. It's also not possible to put its output into version
+control (it creates symlinks and Makefiles that contain hard-coded paths to
+the original source directory in the build directory), so a more creative
+solution will have to be found. Probably some way to template the 'configure'
+output, given that the build uses hermetic (or pseudo-hermetic) toolchains
+to build binaries.
