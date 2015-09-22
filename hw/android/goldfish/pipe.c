@@ -969,12 +969,73 @@ struct PipeDevice {
     uint64_t  params_addr;
 };
 
+/* Update this version number if the device's interface changes. */
+#define PIPE_DEVICE_VERSION  1
+
+typedef enum { USE_VA, USE_PA } PipeDeviceMode;
+
+/* ============ Backward Compatibility support ============
+ *
+ * By default, assume old device behavior which
+ * uses guest virtual addresses for read/write operations.
+ * New driver will change the device mode to operate with
+ * guest physical addresses by reading the version register.
+ */
+static PipeDeviceMode deviceMode = USE_VA;
+
+/* Map the guest buffer into host memory.
+ *
+ * @xaddr    - Guest VA or PA depending on the driver version.
+ * @size     - Size of the mapping
+ * @is_write - Is it a read or write?
+ *
+ * @Return - Return a host pointer which should be unmapped later via
+ * cpu_physical_memory_unmap(), or NULL if mapping failed
+ * (likely because the paddr doesn't actually point at RAM).
+ * Note that for RAM the "mapping" process doesn't actually involve a
+ * data copy.
+ */
+static void *map_guest_buffer(target_ulong xaddr, size_t size, int is_write)
+{
+    CPUOldState* env = cpu_single_env;
+    target_ulong page = xaddr & TARGET_PAGE_MASK;
+    hwaddr l = size;
+    hwaddr phys = xaddr;
+    void *ptr;
+
+    if (unlikely(deviceMode == USE_VA)) {
+        phys = safe_get_phys_page_debug(ENV_GET_CPU(env), page);
+#ifdef TARGET_X86_64
+        phys = phys & TARGET_PTE_MASK;
+#endif
+    }
+
+    ptr = cpu_physical_memory_map(phys, &l, is_write);
+    if (!ptr) {
+        /* Can't happen for RAM */
+        return NULL;
+    }
+    if (l != size) {
+        /* This will only happen if the address pointed at non-RAM,
+         * or if the size means the buffer end is beyond the end of
+         * the RAM block.
+         */
+        cpu_physical_memory_unmap(ptr, l, 0, 0);
+        return NULL;
+    }
+
+    if (unlikely(deviceMode == USE_VA)) {
+        ptr += xaddr - page;
+    }
+
+    return ptr;
+}
+
 static void
 pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
 {
     Pipe** lookup = pipe_list_findp_channel(&dev->pipes, dev->channel);
     Pipe*  pipe   = *lookup;
-    CPUOldState* env = cpu_single_env;
 
     /* Check that we're referring a known pipe channel */
     if (command != PIPE_CMD_OPEN && pipe == NULL) {
@@ -1016,40 +1077,42 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         break;
 
     case PIPE_CMD_READ_BUFFER: {
-        /* Translate virtual address into physical one, into emulator memory. */
+        /* Map guest buffer identified by dev->address
+         * (guest PA or VA depending on the driver version)
+         * into host memory.
+         */
         GoldfishPipeBuffer  buffer;
-        target_ulong        address = dev->address;
-        target_ulong        page    = address & TARGET_PAGE_MASK;
-        hwaddr  phys;
-        phys = safe_get_phys_page_debug(ENV_GET_CPU(env), page);
-#ifdef TARGET_X86_64
-        phys = phys & TARGET_PTE_MASK;
-#endif
-        buffer.data = qemu_get_ram_ptr(phys) + (address - page);
+        buffer.data = map_guest_buffer(dev->address, dev->size, 1);
+        if (!buffer.data) {
+            dev->status = PIPE_ERROR_INVAL;
+            break;
+        }
         buffer.size = dev->size;
         dev->status = pipe->funcs->recvBuffers(pipe->opaque, &buffer, 1);
         DD("%s: CMD_READ_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
            dev->size, dev->status);
+        cpu_physical_memory_unmap(buffer.data, dev->size, 1, dev->size);
         break;
     }
 
     case PIPE_CMD_WRITE_BUFFER: {
-        /* Translate virtual address into physical one, into emulator memory. */
+        /* Map guest buffer identified by dev->address
+         * (guest PA or VA depending on the driver version)
+         * into host memory.
+         */
         GoldfishPipeBuffer  buffer;
-        target_ulong        address = dev->address;
-        target_ulong        page    = address & TARGET_PAGE_MASK;
-        hwaddr  phys;
-        phys = safe_get_phys_page_debug(ENV_GET_CPU(env), page);
-#ifdef TARGET_X86_64
-        phys = phys & TARGET_PTE_MASK;
-#endif
-        buffer.data = qemu_get_ram_ptr(phys) + (address - page);
+        buffer.data = map_guest_buffer(dev->address, dev->size, 0);
+        if (!buffer.data) {
+            dev->status = PIPE_ERROR_INVAL;
+            break;
+        }
         buffer.size = dev->size;
         dev->status = pipe->funcs->sendBuffers(pipe->opaque, &buffer, 1);
         DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
            dev->size, dev->status);
+        cpu_physical_memory_unmap(buffer.data, dev->size, 0, dev->size);
         break;
     }
 
@@ -1219,6 +1282,10 @@ static uint32_t pipe_dev_read(void *opaque, hwaddr offset)
 
     case PIPE_REG_PARAMS_ADDR_LOW:
         return (uint32_t)(dev->params_addr & 0xFFFFFFFFUL);
+
+    case PIPE_REG_VERSION:
+        deviceMode = USE_PA;
+        return PIPE_DEVICE_VERSION;
 
     default:
         D("%s: offset=%d (0x%x)\n", __FUNCTION__, offset, offset);

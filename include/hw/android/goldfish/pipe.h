@@ -159,6 +159,7 @@ extern void goldfish_pipe_wake( void* hwpipe, unsigned flags );
 #define PIPE_REG_PARAMS_ADDR_HIGH    0x1c
 /* write: access with paremeter buffer */
 #define PIPE_REG_ACCESS_PARAMS       0x20
+#define PIPE_REG_VERSION             0x24 /* read: device version */
 #define PIPE_REG_CHANNEL_HIGH        0x30 /* read/write: high 32 bit channel id */
 #define PIPE_REG_ADDRESS_HIGH        0x34 /* write: high 32 bit physical address */
 
