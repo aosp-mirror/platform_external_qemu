@@ -92,10 +92,5 @@ extern int   android_parse_network_latency(const char*  delay);
 
 /**  in qemu_setup.c */
 
-#define ANDROID_GLSTRING_BUF_SIZE 128
-extern char android_gl_vendor[ANDROID_GLSTRING_BUF_SIZE];
-extern char android_gl_renderer[ANDROID_GLSTRING_BUF_SIZE];
-extern char android_gl_version[ANDROID_GLSTRING_BUF_SIZE];
-
 extern void  android_emulation_setup( void );
 extern void  android_emulation_teardown( void );
