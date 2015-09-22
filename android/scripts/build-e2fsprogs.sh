@@ -44,7 +44,7 @@ package_builder_register_options
 
 aosp_dir_register_option
 prebuilts_dir_register_option
-install_dir_register_option e2fsprogs
+install_dir_register_option common/e2fsprogs
 
 option_parse "$@"
 
