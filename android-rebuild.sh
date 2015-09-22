@@ -201,6 +201,10 @@ fi
 PREBUILTS_DIR=$ANDROID_EMULATOR_PREBUILTS_DIR
 if [ -z "$PREBUILTS_DIR" ]; then
     PREBUILTS_DIR=$PROGDIR/../../prebuilts/android-emulator-build
+else
+    if [ -d "$PREBUILTS_DIR"/android-emulator-build ]; then
+        PREBUILTS_DIR=$PREBUILTS_DIR/android-emulator-build
+    fi
 fi
 QEMU_ANDROID_HOSTS=
 QEMU_ANDROID_BINARIES=
@@ -311,7 +315,7 @@ if [ "$EMULATOR_USE_QT" = "true" ]; then
 fi
 
 # Copy e2fsprogs binaries.
-E2FSPROGS_DIR=$PREBUILTS_DIR/android-emulator-build/common/e2fsprogs
+E2FSPROGS_DIR=$PREBUILTS_DIR/common/e2fsprogs
 if [ ! -d "$E2FSPROGS_DIR" ]; then
     panic "Missing e2fsprogs prebuilts directory: $E2FSPROGS_DIR"
 else
