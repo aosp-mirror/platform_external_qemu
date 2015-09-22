@@ -504,32 +504,28 @@ create_binaries_package () {
     dump "[$PKG_NAME] Copying emulator binaries."
     TEMP_PKG_DIR=$TEMP_DIR/$SYSTEM/$PKG_PREFIX-$PKG_REVISION
 
+
+    dump "[$PKG_NAME] Copying emulator binaries."
     FILE=emulator$EXEEXT
     copy_file_into objs/$FILE "$TEMP_PKG_DIR"/tools/
+    EMULATOR_BINARIES=$(list_files_under objs "emulator-*$EXEEXT" "emulator64-*$EXEEXT")
+    copy_directory_files objs "$TEMP_PKG_DIR"/tools/ $EMULATOR_BINARIES
+
+    if [ -d "objs/bin" ]; then
+        dump "[$PKG_NAME] Copying 32-bit executables."
+        copy_directory objs/bin "$TEMP_PKG_DIR"/tools/bin
+    fi
+    if [ -d "objs/bin64" ]; then
+        dump "[$PKG_NAME] Copying 64-bit executables."
+        copy_directory objs/bin64 "$TEMP_PKG_DIR"/tools/bin64
+    fi
     if [ -d "objs/lib" ]; then
-        for FILE in objs/emulator-*; do
-            copy_file_into $FILE "$TEMP_PKG_DIR"/tools/
-        done
-        dump "[$PKG_NAME] Copying 32-bit GLES emulation libraries."
-        for LIB in $EMUGL_LIBRARIES; do
-            copy_file_into objs/lib/lib$LIB$DLLEXT \
-                           "$TEMP_PKG_DIR"/tools/lib/
-        done
+        dump "[$PKG_NAME] Copying 32-bit libraries and config files."
+        copy_directory objs/lib "$TEMP_PKG_DIR"/tools/lib
     fi
     if [ -d "objs/lib64" ]; then
-        for FILE in objs/emulator64-*; do
-            copy_file_into $FILE "$TEMP_PKG_DIR"/tools/
-        done
-        dump "[$PKG_NAME] Copying 64-bit GLES emulation libraries."
-        for LIB in $EMUGL_LIBRARIES; do
-            copy_file_into objs/lib64/lib64$LIB$DLLEXT \
-                           "$TEMP_PKG_DIR"/tools/lib64/
-        done
-    fi
-    if [ -d "objs/lib/pc-bios" ]; then
-        dump "[$PKG_NAME] Copying x86 PC BIOS ROM files."
-        copy_directory_files objs/lib/pc-bios \
-                "$TEMP_PKG_DIR"/tools/lib/pc-bios "*.bin"
+        dump "[$PKG_NAME] Copying 64-bit libraries."
+        copy_directory objs/lib64 "$TEMP_PKG_DIR"/tools/lib64
     fi
     if [ -d "objs/qemu" ]; then
         QEMU_BINARIES=$(list_files_under objs/qemu "$SYSTEM-*/qemu-system-*")
@@ -543,31 +539,8 @@ create_binaries_package () {
         fi
     fi
 
-    # Copy Emugl backend directories, if any.
-    for EMUGL_BACKEND in $EMUGL_BACKEND_DIRS; do
-        MESA_LIBDIR=objs/lib/$EMUGL_BACKEND
-        if [ -d "$MESA_LIBDIR" ]; then
-            MESA_BINARIES=$(list_files_under "$MESA_LIBDIR" "")
-            if [ "$MESA_BINARIES" ] ;then
-                dump "[$PKG_NAME] Copying $EMUGL_BACKEND 32-bit binaries"
-                copy_directory_files \
-                        "$MESA_LIBDIR" \
-                        "$TEMP_PKG_DIR/tools/${MESA_LIBDIR#objs/}" \
-                        $MESA_BINARIES
-            fi
-        fi
-        MESA_LIBDIR=objs/lib64/$EMUGL_BACKEND
-        if [ -d "$MESA_LIBDIR" ]; then
-            MESA_BINARIES=$(list_files_under "$MESA_LIBDIR")
-            if [ "$MESA_BINARIES" ] ;then
-                dump "[$PKG_NAME] Copying $EMUGL_BACKEND 64-bit binaries"
-                copy_directory_files \
-                        "$MESA_LIBDIR" \
-                        "$TEMP_PKG_DIR/tools/${MESA_LIBDIR#objs/}" \
-                        $MESA_BINARIES
-            fi
-        fi
-    done
+    # Get rid of some extra files we don't really want
+    run rm -f "$TEMP_PKG_DIR"/tools/lib*/lib*emugl_test_shared_library*
 
     dump "[$PKG_NAME] Creating README file."
     cat > $TEMP_PKG_DIR/README <<EOF
@@ -621,6 +594,12 @@ build_darwin_binaries_on () {
 
     copy_directory "$AOSP_BUILD_PREBUILTS"/curl/darwin-x86_64 \
             "$DARWIN_BUILD_PREBUILTS"/curl/darwin-x86_64
+
+    if [ ! -d "$AOSP_BUILD_PREBUILTS/common/e2fsprogs/darwin-x86_64" ]; then
+        panic "Missing e2fsprogs prebuilts!"
+    fi
+    copy_directory "$AOSP_BUILD_PREBUILTS"/common/e2fsprogs/darwin-x86_64 \
+            "$DARWIN_BUILD_PREBUILTS"/common/e2fsprogs/darwin-x86_64
 
     if [ ! -d "$AOSP_BUILD_PREBUILTS/common/libxml2/darwin-x86_64" ]; then
         panic "Missing Darwin libxml2 prebuilts!"
@@ -741,46 +720,19 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
         run mkdir -p "$DST_DIR" || panic "Could not create directory: $DST_DIR"
         DLLEXT=$(dll_ext_for $SYSTEM)
         EXEEXT=$(exe_ext_for $SYSTEM)
-        FILES="emulator$EXEEXT"
-        for ARCH in arm x86 mips; do
-            var_append FILES "emulator$BITNESS-$ARCH$EXEEXT"
-        done
-        var_append FILES $(list_files_under "$SRC_DIR/tools" \
-                "emulator-ranchu-*$EXEEXT" \
-                "emulator64-ranchu-*$EXEEXT")
-
-        if [ -d "$SRC_DIR/tools/lib$BITNESS" ]; then
-            for LIB in $EMUGL_LIBRARIES; do
-                var_append FILES "lib$BITNESS/lib$BITNESS$LIB$DLLEXT"
-            done
-        fi
-
-        if [ -d "$SRC_DIR/tools/qemu" ]; then
-            var_append FILES $(list_files_under "$SRC_DIR/tools" "qemu/*")
-        fi
+        FILES=$(list_files_under "$SRC_DIR"/tools \
+            emulator$EXEEXT \
+            "emulator$BITNESS-*$EXEEXT" \
+            lib/ca-bundle.pem \
+            lib/pc-bios \
+            "bin$BITNESS/*" \
+            "lib$BITNESS/*" )
 
         # temporarily include linux 32 bit binaries
         if [ $SYSTEM = "linux" ]; then
-            BITNESS=
-            for ARCH in arm x86 mips; do
-                FILES="$FILES emulator-$ARCH$EXEEXT"
-            done
-            for LIB in $EMUGL_LIBRARIES; do
-                var_append FILES "lib/lib$LIB$DLLEXT"
-            done
+            var_append FILES $(list_files_under "$SRC_DIR"/tools \
+                    "emulator-*$EXEEXT" "bin/*" "lib/*")
         fi
-
-        # Copy Emugl backend files too.
-        for EMUGL_BACKEND in $EMUGL_BACKEND_DIRS; do
-            EMUGL_LIBDIR=lib/$EMUGL_BACKEND
-            for LIB in $(list_files_under "$SRC_DIR/tools/$EMUGL_LIBDIR"); do
-                var_append FILES "$EMUGL_LIBDIR/$LIB"
-            done
-            EMUGL_LIBDIR=lib64/$EMUGL_BACKEND
-            for LIB in $(list_files_under "$SRC_DIR/tools/$EMUGL_LIBDIR"); do
-                var_append FILES "$EMUGL_LIBDIR/$LIB"
-            done
-        done
 
         copy_directory_files "$SRC_DIR/tools" "$DST_DIR" "$FILES" ||
                 panic "Could not copy binaries to $DST_DIR"
