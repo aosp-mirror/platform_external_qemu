@@ -24,7 +24,7 @@ ANDROID_BEGIN_HEADER
 // they make sure it is initialized properly, and only once
 // NOTE: not thread-safe, run only on a main thread!
 
-// Args: |ca_info| is path to the SSL Certificate Authority bundle.
+// Args: |ca_info| is path to the SSL Certificate Authority bundle. May be NULL.
 extern bool curl_init(const char* ca_info);
 extern void curl_cleanup();
 
