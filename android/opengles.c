@@ -212,42 +212,42 @@ static void strncpy_safe(char* dst, const char* src, size_t n)
     dst[n-1] = '\0';
 }
 
-static void extractBaseString(char* dst, const char* src, size_t dstSize)
-{
+static char* strdupBaseString(const char* src) {
     const char* begin = strchr(src, '(');
-    const char* end = strrchr(src, ')');
-
-    if (!begin || !end) {
-        strncpy_safe(dst, src, dstSize);
-        return;
+    if (!begin) {
+        return strdup(src);
     }
+
+    const char* end = strrchr(begin + 1, ')');
+    if (!end) {
+        return strdup(src);
+    }
+
+    // src is of the form:
+    // "foo (barzzzzzzzzzz)"
+    //       ^            ^
+    //       (b+1)        e
+    //     = 5            18
+    int len;
     begin += 1;
+    len = end - begin;
 
-    // "foo (bar)"
-    //       ^  ^
-    //       b  e
-    //     = 5  8
-    // substring with NUL-terminator is end-begin+1 bytes
-    if (end - begin + 1 > dstSize) {
-        end = begin + dstSize - 1;
-    }
-
-    strncpy_safe(dst, begin, end - begin + 1);
+    char* result;
+    result = (char*)malloc(len + 1);
+    memcpy(result, begin, len);
+    result[len] = '\0';
+    return result;
 }
 
-void
-android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
-                                   char* renderer, size_t rendererBufSize,
-                                   char* version, size_t versionBufSize)
-{
+void android_getOpenglesHardwareStrings(char** vendor,
+                                        char** renderer,
+                                        char** version) {
     const char *vendorSrc, *rendererSrc, *versionSrc;
 
-    assert(vendorBufSize > 0 && rendererBufSize > 0 && versionBufSize > 0);
     assert(vendor != NULL && renderer != NULL && version != NULL);
-
+    assert(*vendor == NULL && *renderer == NULL && *version == NULL);
     if (!rendererStarted) {
         D("Can't get OpenGL ES hardware strings when renderer not started");
-        vendor[0] = renderer[0] = version[0] = '\0';
         return;
     }
 
@@ -264,13 +264,13 @@ android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
      * of the underlying OpenGL implementation. */
     if (strncmp(vendorSrc, "Google", 6) == 0 &&
             strncmp(rendererSrc, "Android Emulator OpenGL ES Translator", 37) == 0) {
-        extractBaseString(vendor, vendorSrc, vendorBufSize);
-        extractBaseString(renderer, rendererSrc, rendererBufSize);
-        extractBaseString(version, versionSrc, versionBufSize);
+        *vendor = strdupBaseString(vendorSrc);
+        *renderer = strdupBaseString(rendererSrc);
+        *version = strdupBaseString(versionSrc);
     } else {
-        strncpy_safe(vendor, vendorSrc, vendorBufSize);
-        strncpy_safe(renderer, rendererSrc, rendererBufSize);
-        strncpy_safe(version, versionSrc, versionBufSize);
+        *vendor = strdup(vendorSrc);
+        *renderer = strdup(rendererSrc);
+        *version = strdup(versionSrc);
     }
 }
 
