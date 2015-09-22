@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "09aebbf9_52af545f",
+        "filename": "android/metrics/metrics_reporter_toolbar.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-22T23:55:37Z",
+      "side": 1,
+      "message": "so in case of error here you\u0027re returning a freed address in *ptr. Is it OK?",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 78,
+        "endChar": 58
+      },
+      "revId": "7e0aea2cab784c3c01f96ba6de0b3c8a13cd2046",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
