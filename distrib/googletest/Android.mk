@@ -16,7 +16,7 @@ ifeq (,$(strip $(wildcard $(EMULATOR_GTEST_SOURCES_DIR))))
 endif
 
 EMULATOR_GTEST_INCLUDES := $(EMULATOR_GTEST_SOURCES_DIR)/include
-EMULATOR_GTEST_SOURCES := src/gtest-all.cc src/gtest_main.cc
+EMULATOR_GTEST_SOURCES := src/gtest-all.cc
 EMULATOR_GTEST_LDLIBS := -lstdc++
 
 old_LOCAL_PATH := $(LOCAL_PATH)
