@@ -22,6 +22,29 @@
       "revId": "b95a068748c61e66a0442334f33384bc995eca28",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0934fb64_6ba8715a",
+        "filename": "android/metrics/metrics_reporter_toolbar.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-22T00:18:45Z",
+      "side": 1,
+      "message": "this code actually made me stop for quite a while to understand what allocates what and if everything is ok with it\ncan you do it explicitly instead?\nchar* buf \u003d NULL;\nasprintf(\u0026buf, \"...\", *ptr, ...);\nfree(*ptr);\n*ptr \u003d buf;\n?\nOr, at least, rename \u0027buf\u0027 to \u0027oldPtr\u0027 or something more descriptive?",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 18
+      },
+      "revId": "b95a068748c61e66a0442334f33384bc995eca28",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
