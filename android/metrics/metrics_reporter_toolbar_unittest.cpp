@@ -17,7 +17,9 @@
 
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
+#include "android/curl-support.h"
 
+#include <curl/curl.h>
 #include <gtest/gtest.h>
 
 namespace {
@@ -31,10 +33,17 @@ public:
         // This ensures that our tests are hermetic w.r.t. studio prefrences.
         mTestSystem.envSet("ANDROID_STUDIO_PREFERENCES",
                            mTestSystem.getTempRoot()->path());
+        mCurl = curl_easy_default_init();
+    }
+
+    virtual void TearDown() {
+        curl_easy_cleanup(mCurl);
     }
 
 protected:
     static const char* mToolbarUrl;
+
+    CURL* mCurl;
 
 private:
     android::base::TestSystem mTestSystem;
@@ -49,14 +58,15 @@ TEST_F(MetricsReporterToolbarTest, defaultMetrics) {
     AndroidMetrics metrics;
     static const char kExpected[] =
             "https://tools.google.com/service/update?"
-            "as=androidsdk_emu_crash&version=unknown"
-            "&id=00000000-0000-0000-0000-000000000000&guest_arch=unknown"
-            "&exf=1&system_time=0&user_time=0";
+            "as%3Dandroidsdk_emu_crash%26version%3Dunknown"
+            "%26id%3D00000000-0000-0000-0000-000000000000"
+            "%26guest_arch%3Dunknown%26exf%3D1%26system_time%3D0"
+            "%26user_time%3D0";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
-    ASSERT_EQ(kExpectedLen,
-              formatToolbarGetUrl(&formatted_url, mToolbarUrl, &metrics));
+    ASSERT_EQ(kExpectedLen, formatToolbarGetUrl(&formatted_url, mToolbarUrl,
+                                                &metrics, mCurl));
     ASSERT_STREQ(kExpected, formatted_url);
     androidMetrics_fini(&metrics);
     free(formatted_url);
@@ -67,9 +77,9 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
     AndroidMetrics metrics;
     static const char kExpected[] =
             "https://tools.google.com/service/update?"
-            "as=androidsdk_emu_crash&version=standalone"
-            "&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
-            "&exf=0&system_time=1170&user_time=220";
+            "as%3Dandroidsdk_emu_crash%26version%3Dstandalone"
+            "%26id%3D00000000-0000-0000-0000-000000000000%26guest_arch%3Dx86_64"
+            "%26exf%3D0%26system_time%3D1170%26user_time%3D220";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -82,8 +92,8 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
     metrics.is_dirty = 0;
     metrics.num_failed_reports = 7;
 
-    ASSERT_EQ(kExpectedLen,
-              formatToolbarGetUrl(&formatted_url, mToolbarUrl, &metrics));
+    ASSERT_EQ(kExpectedLen, formatToolbarGetUrl(&formatted_url, mToolbarUrl,
+                                                &metrics, mCurl));
     ASSERT_STREQ(kExpected, formatted_url);
     androidMetrics_fini(&metrics);
     free(formatted_url);
@@ -94,9 +104,9 @@ TEST_F(MetricsReporterToolbarTest, dirtyRun) {
     AndroidMetrics metrics;
     static const char kExpected[] =
             "https://tools.google.com/service/update?"
-            "as=androidsdk_emu_crash&version=standalone"
-            "&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
-            "&exf=1&system_time=1080&user_time=180";
+            "as%3Dandroidsdk_emu_crash%26version%3Dstandalone"
+            "%26id%3D00000000-0000-0000-0000-000000000000%26guest_arch%3Dx86_64"
+            "%26exf%3D1%26system_time%3D1080%26user_time%3D180";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -109,8 +119,8 @@ TEST_F(MetricsReporterToolbarTest, dirtyRun) {
     metrics.is_dirty = 1;
     metrics.num_failed_reports = 9;
 
-    ASSERT_EQ(kExpectedLen,
-              formatToolbarGetUrl(&formatted_url, mToolbarUrl, &metrics));
+    ASSERT_EQ(kExpectedLen, formatToolbarGetUrl(&formatted_url, mToolbarUrl,
+                                                &metrics, mCurl));
     ASSERT_STREQ(kExpected, formatted_url);
     androidMetrics_fini(&metrics);
     free(formatted_url);
@@ -121,10 +131,11 @@ TEST_F(MetricsReporterToolbarTest, gpuStrings) {
     AndroidMetrics metrics;
     static const char kExpected[] =
             "https://tools.google.com/service/update?"
-            "as=androidsdk_emu_crash&version=standalone"
-            "&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
-            "&exf=0&system_time=1170&user_time=220"
-            "&ggl_vendor=Some_Vendor&ggl_renderer=&ggl_version=1 . 0";
+            "as%3Dandroidsdk_emu_crash%26version%3Dstandalone"
+            "%26id%3D00000000-0000-0000-0000-000000000000%26guest_arch%3Dx86_64"
+            "%26exf%3D0%26system_time%3D1170%26user_time%3D220"
+            "%26ggl_vendor%3DSome_Vendor%26ggl_renderer%3D"
+            "%26ggl_version%3D1%20.%200";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -141,8 +152,8 @@ TEST_F(MetricsReporterToolbarTest, gpuStrings) {
     // TODO(pprabhu): This needs to be URL encoded.
     ANDROID_METRICS_STRASSIGN(metrics.guest_gl_version, "1 . 0");
 
-    ASSERT_EQ(kExpectedLen,
-              formatToolbarGetUrl(&formatted_url, mToolbarUrl, &metrics));
+    ASSERT_EQ(kExpectedLen, formatToolbarGetUrl(&formatted_url, mToolbarUrl,
+                                                &metrics, mCurl));
     ASSERT_STREQ(kExpected, formatted_url);
     androidMetrics_fini(&metrics);
     free(formatted_url);
