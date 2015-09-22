@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a97f6fe5_4a09b332",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-22T16:52:13Z",
+      "side": 1,
+      "message": "Can you describe in a separate email how this would be done. For now, let\u0027s stick to the simple scheme, we can always refine things later here.",
+      "parentUuid": "69dad736_fc708064",
+      "range": {
+        "startLine": 239,
+        "startChar": 2,
+        "endLine": 239,
+        "endChar": 23
+      },
+      "revId": "77e619537d61e9859e943ef19db7639ba32a77bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9b7a7e1_4eb60f5e",
         "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-21T15:50:21Z",
       "side": 1,
       "message": "Can we just contribute back? If that\u0027s the main reason why we have to suffer for 15 sec every time :)",
+      "range": {
+        "startLine": 305,
+        "startChar": 65,
+        "endLine": 306,
+        "endChar": 20
+      },
+      "revId": "77e619537d61e9859e943ef19db7639ba32a77bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9ef43fe_73205a63",
+        "filename": "docs/ANDROID-EMULATION-LIBRARY.TXT",
+        "patchSetId": 4
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-22T16:52:13Z",
+      "side": 1,
+      "message": "It\u0027s the main reason, the QEMU2 configure script, will run various compile / link checks to verify the state of various system libraries, hence why it is slow. But because we have a fixed sysroot + fixed toolchains, the results of such probing are always the same.\n\nIf you think you can speed it up in a way that would be accepted upstream, please have a try at it :)",
+      "parentUuid": "e9b7a7e1_4eb60f5e",
       "range": {
         "startLine": 305,
         "startChar": 65,
