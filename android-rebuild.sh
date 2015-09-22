@@ -20,6 +20,9 @@ OUT_DIR=objs
 
 for OPT; do
     case $OPT in
+        --aosp-prebuilts-dir=*)
+            ANDROID_EMULATOR_PREBUILTS_DIR=${OPT##--aosp-prebuilts-dir=}
+            ;;
         --build-qemu-android)
             BUILD_QEMU_ANDROID=true
             ;;
@@ -225,17 +228,14 @@ if [ -d "$PREBUILTS_DIR/mesa" ]; then
     case $MESA_HOST in
         windows)
             MESA_LIBNAME=opengl32.dll
-            OSMESA_LIBNAME=osmesa.dll
             ;;
         linux)
             MESA_LIBNAME=libGL.so
-            OSMESA_LIBNAME=libosmesa.so
             ;;
         *)
             MESA_LIBNAME=
-            OSMESA_LIBNAME=
     esac
-    for LIBNAME in $MESA_LIBNAME $OSMESA_LIBNAME; do
+    for LIBNAME in $MESA_LIBNAME; do
         for MESA_ARCH in x86 x86_64; do
             if [ "$MESA_ARCH" = "x86" ]; then
                 MESA_LIBDIR=lib
@@ -311,13 +311,10 @@ if [ "$EMULATOR_USE_QT" = "true" ]; then
 fi
 
 # Copy e2fsprogs binaries.
-if true; then
-    E2FSPROGS_DIR=$PREBUILTS_DIR/e2fsprogs
-    if [ ! -d "$E2FSPROGS_DIR" ]; then
-        echo "Warning: Missing e2fsprogs prebuilts directory: $E2FSPROGS_DIR"
-    else
-    # NOTE: Bad indentation here is intentional, the echo/else above will
-    # be replaced by a panic/fi in a future patch.
+E2FSPROGS_DIR=$PREBUILTS_DIR/android-emulator-build/common/e2fsprogs
+if [ ! -d "$E2FSPROGS_DIR" ]; then
+    panic "Missing e2fsprogs prebuilts directory: $E2FSPROGS_DIR"
+else
     echo "Copying e2fsprogs binaries."
     for E2FS_ARCH in x86 x86_64; do
         # NOTE: in windows only 32-bit binaries are available, so we'll copy the
@@ -338,7 +335,6 @@ if true; then
         fi
         run cp -a "$E2FS_SRCDIR"/sbin/* "$E2FS_DSTDIR" || "Could not copy e2fsprogs binaries!"
     done
-    fi  # Again, intentional, will disappear in a future patch.
 fi
 
 RUN_32BIT_TESTS=
