@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e249dad_4d041957",
+        "filename": "hw/android/goldfish/pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-23T22:38:25Z",
+      "side": 1,
+      "message": "delete?",
+      "revId": "6b1aa08c05940c24ef8fd3c997cd776a04536b57",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e5fa128_caefc3eb",
+        "filename": "hw/android/goldfish/pipe_pingpong.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-23T22:38:25Z",
+      "side": 1,
+      "message": "Similar to what?",
+      "range": {
+        "startLine": 34,
+        "startChar": 3,
+        "endLine": 34,
+        "endChar": 10
+      },
+      "revId": "6b1aa08c05940c24ef8fd3c997cd776a04536b57",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
