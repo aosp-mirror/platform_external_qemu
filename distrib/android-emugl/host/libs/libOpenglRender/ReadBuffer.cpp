@@ -19,10 +19,9 @@
 #include <limits.h>
 #include "ErrorLog.h"
 
-ReadBuffer::ReadBuffer(IOStream *stream, size_t bufsize)
+ReadBuffer::ReadBuffer(size_t bufsize)
 {
     m_size = bufsize;
-    m_stream = stream;
     m_buf = (unsigned char*)malloc(m_size*sizeof(unsigned char));
     m_validData = 0;
     m_readPtr = m_buf;
@@ -33,8 +32,10 @@ ReadBuffer::~ReadBuffer()
     free(m_buf);
 }
 
-int ReadBuffer::getData()
+int ReadBuffer::getData(IOStream *stream)
 {
+    if(stream == NULL)
+        return -1;
     if ((m_validData > 0) && (m_readPtr > m_buf)) {
         memmove(m_buf, m_readPtr, m_validData);
     }
@@ -58,7 +59,7 @@ int ReadBuffer::getData()
         len    = m_size - m_validData;
     }
     m_readPtr = m_buf;
-    if (NULL != m_stream->read(m_buf + m_validData, &len)) {
+    if (NULL != stream->read(m_buf + m_validData, &len)) {
         m_validData += len;
         return len;
     }

@@ -54,7 +54,7 @@ intptr_t RenderThread::main() {
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, NULL);
     initRenderControlContext(&tInfo.m_rcDec);
 
-    ReadBuffer readBuf(m_stream, STREAM_BUFFER_SIZE);
+    ReadBuffer readBuf(STREAM_BUFFER_SIZE);
 
     int stats_totalBytes = 0;
     long long stats_t0 = GetCurrentTimeMS();
@@ -77,7 +77,7 @@ intptr_t RenderThread::main() {
 
     while (1) {
 
-        int stat = readBuf.getData();
+        int stat = readBuf.getData(m_stream);
         if (stat <= 0) {
             break;
         }

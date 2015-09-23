@@ -159,12 +159,8 @@ intptr_t RenderServer::main()
     for (RenderThreadsSet::iterator t = threads.begin();
          t != threads.end();
          t++) {
-#ifndef _WIN32
-        // Note: temporarily disable following steps so emulator does not
-        // freeze on windows when it is shut down, will fix in 1.2
         (*t)->forceStop();
         (*t)->wait(NULL);
-#endif
         delete (*t);
     }
     threads.clear();
