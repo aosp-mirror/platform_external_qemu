@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c9b7434b_7079b08d",
+        "filename": "android/emulation/android_qemud.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T00:29:09Z",
+      "side": 1,
+      "message": "I haven\u0027t seen all reviews yet, but as a not: we will need to update this doc as well",
+      "range": {
+        "startLine": 20,
+        "startChar": 15,
+        "endLine": 20,
+        "endChar": 37
+      },
+      "revId": "7aca99bae033f7d0268d90169696c4fc883b48f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9b7434b_50c8ec32",
+        "filename": "android/emulation/android_qemud.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T00:29:09Z",
+      "side": 1,
+      "message": "\"A callback for ...\" ?",
+      "range": {
+        "startLine": 99,
+        "startChar": 3,
+        "endLine": 99,
+        "endChar": 33
+      },
+      "revId": "7aca99bae033f7d0268d90169696c4fc883b48f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
