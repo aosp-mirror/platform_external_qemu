@@ -189,6 +189,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/StringView.cpp \
 	android/base/system/System.cpp \
 	android/base/threads/ThreadStore.cpp \
+	android/base/Uri.cpp \
 	android/base/Version.cpp \
 	android/emulation/bufprint_config_dirs.cpp \
 	android/emulation/ConfigDirs.cpp \
