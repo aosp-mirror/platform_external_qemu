@@ -19,6 +19,7 @@
 #include "android/base/Log.h"
 #include "android/base/String.h"
 #include "android/base/StringFormat.h"
+#include "android/base/system/System.h"
 
 #include "android/cmdline-option.h"
 #include "android/globals.h"
@@ -536,12 +537,23 @@ extern "C" int main(int argc, char **argv, char **envp) {
                 " androidboot.selinux=%s", opts->selinux);
     }
 
+    kernelCommandLine += " qemu=1";
+
     if (hw->hw_gpu_enabled) {
         kernelCommandLine += " qemu.gles=1";
     } else {
         kernelCommandLine += " qemu.gles=0";
     }
+
     args[n++] = kernelCommandLine.c_str();
+
+    // Support for changing default lcd-density
+    String lcd_density;
+    if (hw->hw_lcd_density) {
+        args[n++] = "-lcd-density";
+        lcd_density = StringFormat("%d", hw->hw_lcd_density);
+        args[n++] = lcd_density.c_str();
+    }
 
     args[n++] = "-serial";
     args[n++] = "mon:stdio";
