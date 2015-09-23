@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2e2e2591_cb40f570",
+        "filename": "android/base/Uri.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T23:03:46Z",
+      "side": 1,
+      "message": "unordered_set is much faster pretty much any data set",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 7
+      },
+      "revId": "5e8552b01ef05a2d47df179e20f88629db7efb02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e2e2591_cb8b5513",
+        "filename": "android/base/Uri.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T23:03:46Z",
+      "side": 1,
+      "message": "I don\u0027t see it used anywhere but in a single for loop\nfor performance you could write a switch by a character, having all chars from the set as cases + a separate default handler.\n\nswitch (c) {\n case \u0027!\u0027:\n case \u0027#\u0027:\n ...\n   encodedUri.append(...)\n   break;\n default:\n   ...\n}",
+      "range": {
+        "startLine": 57,
+        "startChar": 36,
+        "endLine": 57,
+        "endChar": 49
+      },
+      "revId": "5e8552b01ef05a2d47df179e20f88629db7efb02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e4c398b_2409f26e",
+        "filename": "android/base/Uri.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T23:03:46Z",
+      "side": 1,
+      "message": "this is unnecessary - .end() is a getter for a very small field and is always inlined",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 59,
+        "endChar": 32
+      },
+      "revId": "5e8552b01ef05a2d47df179e20f88629db7efb02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e5fa128_6a81f7c6",
+        "filename": "android/base/Uri.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T23:03:46Z",
+      "side": 1,
+      "message": "// Appends a formatted string at the end of an existing string.\nvoid StringAppendFormat(String* string, const char* format, ...);\n\nAlso, one operation is generally better than two",
+      "range": {
+        "startLine": 64,
+        "startChar": 11,
+        "endLine": 65,
+        "endChar": 58
+      },
+      "revId": "5e8552b01ef05a2d47df179e20f88629db7efb02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e2e2591_ab980965",
+        "filename": "android/base/Uri.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T23:03:46Z",
+      "side": 1,
+      "message": "!\u003d, it\u0027s more general (not all iterators have \u003c) and better known as a pattern",
+      "range": {
+        "startLine": 76,
+        "startChar": 59,
+        "endLine": 76,
+        "endChar": 60
+      },
+      "revId": "5e8552b01ef05a2d47df179e20f88629db7efb02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
