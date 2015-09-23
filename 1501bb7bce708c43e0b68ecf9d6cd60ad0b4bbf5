@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9eccf3c_9f5433f1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-23T15:04:28Z",
+      "side": 1,
+      "message": "this is not very clear. I wonder if you\u0027re talking about this patch or the one it reverted. Can you find a more explicit message that describes what the current patch does. It\u0027s ok to mention that this was reverted before but can now be applied due to changing consequences (to be explained :))",
+      "revId": "1501bb7bce708c43e0b68ecf9d6cd60ad0b4bbf5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
