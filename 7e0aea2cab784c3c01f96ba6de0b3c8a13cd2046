@@ -22,6 +22,30 @@
       "revId": "7e0aea2cab784c3c01f96ba6de0b3c8a13cd2046",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2911bf09_b697a63c",
+        "filename": "android/metrics/metrics_reporter_toolbar.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-23T00:55:25Z",
+      "side": 1,
+      "message": "Yes. The behaviour is identical to asprtinf. If the resullt \u003c 0, *ptr is not defined.\n\nTrying to give a better guarantee would need me to do error handling each time I call asprintf. I chose to keep the same API (and documented in in the header).",
+      "parentUuid": "09aebbf9_52af545f",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 78,
+        "endChar": 58
+      },
+      "revId": "7e0aea2cab784c3c01f96ba6de0b3c8a13cd2046",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
