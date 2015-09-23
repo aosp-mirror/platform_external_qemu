@@ -150,7 +150,8 @@ public slots:
     void slot_voice();
     void slot_zoom();
 
-    void slot_screenProcessFinished(int exitStatus);
+    void slot_screencapFinished(int exitStatus);
+    void slot_screencapPullFinished(int exitStatus);
 
 private:
     void handleEvent(SkinEventType type, QMouseEvent *event);
@@ -160,6 +161,8 @@ private:
     // Allow for the Qt window to eat keyboard shortcuts before sending them to the skin
     bool handleQtKeyEvent(SkinEventType type, QKeyEvent *event);
 
+    QString getTmpImagePath();
+
     void             *batteryState;
 
     SkinSurface *backing_surface;
@@ -168,6 +171,7 @@ private:
     QTimer resize_timer;
 
     QProcess mScreencapProcess;
+    QProcess mScreencapPullProcess;
 };
 
 struct SkinSurface {
