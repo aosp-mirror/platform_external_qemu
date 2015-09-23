@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c9e9032d_20ceaa41",
+        "filename": "android/metrics/metrics_reporter_toolbar.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-23T14:04:16Z",
+      "side": 1,
+      "message": "mini-nit: if result is \u003c 0 here, you probably want out_buf \u003d NULL instead. See below.",
+      "revId": "a8acec2792cfa897b9cdc367056cbcef142b890e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8978eb70_f6bca0f2",
+        "filename": "android/metrics/metrics_reporter_toolbar.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-23T14:04:16Z",
+      "side": 1,
+      "message": "mini-nit: if result is negative after asprintf(), the content of out_buf is undefined. It might be slightly safer to set out_buf to NULL in this case (otherwise the current code just copies the random initial value from the stack, which will make tools like Valgrind scream).",
+      "revId": "a8acec2792cfa897b9cdc367056cbcef142b890e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
