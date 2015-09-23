@@ -22,6 +22,30 @@
       "revId": "2b2038032e65cfc8c858ac984c1cff050a44a0e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9eccf3c_1fe823e8",
+        "filename": "android/emulation/android_pipe_throttle.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-23T08:13:48Z",
+      "side": 1,
+      "message": "No, it was just a \"git mv\" so no need to update the file for me.",
+      "parentUuid": "a905afc4_b762089e",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 53
+      },
+      "revId": "2b2038032e65cfc8c858ac984c1cff050a44a0e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
