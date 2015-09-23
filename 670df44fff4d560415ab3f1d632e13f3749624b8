@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4e1ef95a_346230df",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-23T22:36:26Z",
+      "side": 1,
+      "message": "s/on/a/",
+      "range": {
+        "startLine": 10,
+        "startChar": 12,
+        "endLine": 10,
+        "endChar": 14
+      },
+      "revId": "670df44fff4d560415ab3f1d632e13f3749624b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e249dad_4dd9b95c",
+        "filename": "include/hw/android/goldfish/pipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-23T22:36:26Z",
+      "side": 1,
+      "message": "iiuc, AndroidPipeFuncs are implemented by the particular QEMU device that wants to use the pipe. OTOH AndroidPipeHwFuncs is implemented once for QEMU1/QEMU2.\n\nThis situation will occur repeatedly as we tear apart AndroidEmu. It might be worthwhile to have a naming convention for structs and setting functions (android_pipe_set_hw_funcs) that are meant for this specific purpose.",
+      "range": {
+        "startLine": 153,
+        "startChar": 15,
+        "endLine": 153,
+        "endChar": 33
+      },
+      "revId": "670df44fff4d560415ab3f1d632e13f3749624b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
