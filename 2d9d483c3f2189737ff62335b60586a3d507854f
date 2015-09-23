@@ -22,6 +22,30 @@
       "revId": "2d9d483c3f2189737ff62335b60586a3d507854f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69ee5738_fd058751",
+        "filename": "hw/android/goldfish/pipe_throttle.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-23T08:15:23Z",
+      "side": 1,
+      "message": "We modified the LoopTimerFunc declaration recently to have a second |timer| parameter. I think it was because you thought it would be a good idea :)\n\nWe could avoid this here by adding a cast when calling loopTimer_new(), but this is equivalent.",
+      "parentUuid": "699c97d8_8d37e117",
+      "range": {
+        "startLine": 126,
+        "startChar": 36,
+        "endLine": 126,
+        "endChar": 53
+      },
+      "revId": "2d9d483c3f2189737ff62335b60586a3d507854f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
