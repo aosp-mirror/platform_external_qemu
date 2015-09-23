@@ -45,6 +45,30 @@
       "revId": "7aca99bae033f7d0268d90169696c4fc883b48f1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9e9032d_0006065d",
+        "filename": "android/emulation/android_qemud.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-23T08:16:15Z",
+      "side": 1,
+      "message": "Maybe later when we update the docs. This is just to move stuff around, so I prefer to avoid doing this here.",
+      "parentUuid": "c9b7434b_50c8ec32",
+      "range": {
+        "startLine": 99,
+        "startChar": 3,
+        "endLine": 99,
+        "endChar": 33
+      },
+      "revId": "7aca99bae033f7d0268d90169696c4fc883b48f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
