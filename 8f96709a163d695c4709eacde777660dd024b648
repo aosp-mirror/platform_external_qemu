@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4916f301_3af25966",
+        "filename": "android/base/files/Stream.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T16:53:18Z",
+      "side": 1,
+      "message": "what about endianness here? It looks like all other methods explicitly extract individual bytes from a value",
+      "range": {
+        "startLine": 87,
+        "startChar": 6,
+        "endLine": 87,
+        "endChar": 37
+      },
+      "revId": "8f96709a163d695c4709eacde777660dd024b648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9b7434b_93cc1ef6",
+        "filename": "android/qemu/utils/stream.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T16:53:18Z",
+      "side": 1,
+      "message": "struct? It\u0027s C++ :)",
+      "range": {
+        "startLine": 23,
+        "startChar": 29,
+        "endLine": 23,
+        "endChar": 35
+      },
+      "revId": "8f96709a163d695c4709eacde777660dd024b648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "891c6b20_1c415d2a",
+        "filename": "android/qemu/utils/stream.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T16:53:18Z",
+      "side": 1,
+      "message": "why not static_cast? reinterpret_cast may potentially even do wrong thing here",
+      "range": {
+        "startLine": 27,
+        "startChar": 11,
+        "endLine": 27,
+        "endChar": 27
+      },
+      "revId": "8f96709a163d695c4709eacde777660dd024b648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9b7434b_d3d6a685",
+        "filename": "android/qemu/utils/stream.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T16:53:18Z",
+      "side": 1,
+      "message": "are we sure it\u0027s the only stream type? Maybe we could at least assert here in debug if something is wrong",
+      "range": {
+        "startLine": 35,
+        "startChar": 14,
+        "endLine": 35,
+        "endChar": 30
+      },
+      "revId": "8f96709a163d695c4709eacde777660dd024b648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
