@@ -95,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "ee132d4a_99c81b37",
+        "filename": "android/qemu/utils/stream.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-23T21:56:36Z",
+      "side": 1,
+      "message": "I think we should rename the C Stream struct to CStream, same as CLooper.",
+      "parentUuid": "691737fc_5b1abb76",
+      "range": {
+        "startLine": 27,
+        "startChar": 11,
+        "endLine": 27,
+        "endChar": 27
+      },
+      "revId": "8f96709a163d695c4709eacde777660dd024b648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c9b7434b_d3d6a685",
         "filename": "android/qemu/utils/stream.cpp",
         "patchSetId": 1
