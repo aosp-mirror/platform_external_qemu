@@ -22,6 +22,30 @@
       "revId": "a6462a4ff6ff2c6cce77e7c0d3383ea2c5515678",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69ee5738_dd0a4b5f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-23T08:29:53Z",
+      "side": 1,
+      "message": "Yes, the hardware-specific fields are tied to the kernel driver implementation. The service name is a generic part of the pipe mechanism, and the virtual hardware device doesn\u0027t need to know anything about it. I need to clarify this in the commit message.",
+      "parentUuid": "4916f301_57af2e5f",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 6
+      },
+      "revId": "a6462a4ff6ff2c6cce77e7c0d3383ea2c5515678",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
