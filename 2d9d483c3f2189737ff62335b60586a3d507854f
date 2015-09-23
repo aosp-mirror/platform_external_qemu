@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "699c97d8_8d37e117",
+        "filename": "hw/android/goldfish/pipe_throttle.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T00:13:35Z",
+      "side": 1,
+      "message": "why is it here? I don\u0027t see any usages\nEven if it was needed, you can use one from the pipe",
+      "range": {
+        "startLine": 126,
+        "startChar": 36,
+        "endLine": 126,
+        "endChar": 53
+      },
+      "revId": "2d9d483c3f2189737ff62335b60586a3d507854f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
