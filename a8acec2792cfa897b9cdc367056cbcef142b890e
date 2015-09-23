@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "4916f301_1afe7dd7",
+        "filename": "android/metrics/metrics_reporter_toolbar.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-23T17:51:16Z",
+      "side": 1,
+      "message": "I was mimicking asprintf\u0027s API, and stating as such here: https://android-review.googlesource.com/#/c/172380/4/android/metrics/internal/metrics_reporter_toolbar_internal.h@28\n\n\nSince both my reviewers have suggested otherwise, I\u0027ll relent :)",
+      "parentUuid": "c9e9032d_20ceaa41",
+      "revId": "a8acec2792cfa897b9cdc367056cbcef142b890e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8978eb70_f6bca0f2",
         "filename": "android/metrics/metrics_reporter_toolbar.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-23T14:04:16Z",
       "side": 1,
       "message": "mini-nit: if result is negative after asprintf(), the content of out_buf is undefined. It might be slightly safer to set out_buf to NULL in this case (otherwise the current code just copies the random initial value from the stack, which will make tools like Valgrind scream).",
+      "revId": "a8acec2792cfa897b9cdc367056cbcef142b890e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9ba0f35_351b983e",
+        "filename": "android/metrics/metrics_reporter_toolbar.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-23T17:51:16Z",
+      "side": 1,
+      "message": "Ah. Good boy valgrind.",
+      "parentUuid": "8978eb70_f6bca0f2",
       "revId": "a8acec2792cfa897b9cdc367056cbcef142b890e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
