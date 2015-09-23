@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e1f3d55_95f904b6",
+        "filename": "android/qemu/utils/stream.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-23T21:53:33Z",
+      "side": 1,
+      "message": "Much as I like moving forward, I dislike aribtrary non-uniformity more.\n\nIf we decided \"#prama once\" is acceptable. I\u0027d request that we *first* have a dumb CL to migrate the relevant headers to use this. Trying to decide which one to use / or pointing out the one to use in reviews in face of non-uniformity is unnecessary cognitive load.",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 12
+      },
+      "revId": "ee02d754b3c2b68fe06282c0bfdda0ef09a75654",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
