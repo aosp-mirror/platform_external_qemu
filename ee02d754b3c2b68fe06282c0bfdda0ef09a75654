@@ -22,6 +22,30 @@
       "revId": "ee02d754b3c2b68fe06282c0bfdda0ef09a75654",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e470569_836c1eff",
+        "filename": "android/qemu/utils/stream.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-23T23:19:13Z",
+      "side": 1,
+      "message": "well, why don\u0027t you just make one? ;)\nWhen we decided to use something, I would prefer that new code uses new stuff, while old code is either upgraded at once or slowly updated on first change",
+      "parentUuid": "6e1f3d55_95f904b6",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 12
+      },
+      "revId": "ee02d754b3c2b68fe06282c0bfdda0ef09a75654",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
