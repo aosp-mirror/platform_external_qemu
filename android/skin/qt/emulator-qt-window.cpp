@@ -23,7 +23,7 @@
 #include <QScreen>
 #include <QSemaphore>
 
-#include "android/android.h"
+#include "android/base/files/PathUtils.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -43,6 +43,8 @@
 #endif
 
 #define MIN(a,b) (a < b ? a : b)
+
+using namespace android::base;
 
 static EmulatorQtWindow *instance;
 
@@ -80,7 +82,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     resize_timer.setSingleShot(true);
     connect(&resize_timer, SIGNAL(timeout()), SLOT(slot_resizeDone()));
 
-    QObject::connect(&mScreencapProcess, SIGNAL(finished(int)), this, SLOT(slot_screenProcessFinished(int)));
+    QObject::connect(&mScreencapProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapFinished(int)));
+    QObject::connect(&mScreencapPullProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapPullFinished(int)));
 }
 
 EmulatorQtWindow::~EmulatorQtWindow()
@@ -106,7 +109,7 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
 {
     // Get the first url - if it's an APK and the only file, attempt to install it
     QList<QUrl> urls = event->mimeData()->urls();
-    QString url = urls[0].path();
+    QString url = urls[0].toLocalFile();
 
     if (url.endsWith(".apk") && urls.length() == 1) {
         tool_window->runAdbInstall(url);
@@ -421,11 +424,14 @@ void EmulatorQtWindow::slot_screenshot()
         return;
     }
 
-    // Take the screenshot
-    // TODO: is this safe cross-platform? Appears to be
-    // TODO: is it necessary to delete the remote file?
-    QString command = "adb -s emulator-" + QString::number(android_base_port); // Base command
-    command += " shell screencap -p"; // Take the screenshot
+    QString command = tool_window->getAdbFullPath();
+    if (command.isNull()) {
+        return;
+    }
+
+    command += " shell screencap -p ";
+    command += REMOTE_TMP_DIR;
+    command += TMP_SCREENSHOT_FILE;
 
     // Keep track of this process
     mScreencapProcess.start(command);
@@ -445,22 +451,44 @@ void EmulatorQtWindow::slot_zoom()
 {
 }
 
-void EmulatorQtWindow::slot_screenProcessFinished(int exitStatus)
+void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
 {
     if (exitStatus) {
         tool_window->showErrorDialog(tr("The screenshot could not be captured."),
                                      tr("Screenshot"));
     } else {
-        // Get the image data directly from the output process
-        // adb does EOL conversion from \n to \r\n - this must be undone
-        QByteArray imageData = mScreencapProcess.readAllStandardOutput();
-        imageData.replace(QByteArray("\r\n"), QByteArray("\n"));
+        QString imagePath = getTmpImagePath();
+
+        // Pull the image from its remote location to the designated tmp directory
+        QString fullCommand = tool_window->getAdbFullPath();
+        if (fullCommand.isNull()) {
+            return;
+        }
+
+        fullCommand += " pull ";
+        fullCommand += REMOTE_TMP_DIR;
+        fullCommand += TMP_SCREENSHOT_FILE;
+        fullCommand += " " + imagePath;
+
+        // Use a different process to avoid infinite looping when pulling the file
+        mScreencapPullProcess.start(fullCommand);
+        mScreencapPullProcess.waitForStarted();
+    }
+}
+
+void EmulatorQtWindow::slot_screencapPullFinished(int exitStatus)
+{
+    if (exitStatus) {
+        tool_window->showErrorDialog(tr("The image could not be loaded properly"),
+                                     tr("Screenshot"));
+    } else {
 
         // Load the data into an image
         QPixmap screencap;
-        bool isOk = screencap.loadFromData(imageData, "PNG");
+        bool isOk = screencap.load(getTmpImagePath(), "PNG");
         if (!isOk) {
-            // TODO: error message popup
+            tool_window->showErrorDialog(tr("The image could not be loaded properly."),
+                                         tr("Screenshot"));
             return;
         }
 
@@ -482,8 +510,21 @@ void EmulatorQtWindow::slot_screenProcessFinished(int exitStatus)
                                                         ".",
                                                         tr("PNG files (*.png);;All files (*)"));
         if (fileName.isNull()) return;
+
+        // Qt doesn't force-append .png, so ensure it's there or the save may fail
+        if (!fileName.endsWith(".png")) {
+            fileName.append(".png");
+        }
         screencap.save(fileName);
     }
+}
+
+QString EmulatorQtWindow::getTmpImagePath()
+{
+    StringVector imageVector;
+    imageVector.push_back(String(QDir::tempPath().toStdString().data()));
+    imageVector.push_back(String(TMP_SCREENSHOT_FILE));
+    return QString(PathUtils::recompose(imageVector).c_str());
 }
 
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.

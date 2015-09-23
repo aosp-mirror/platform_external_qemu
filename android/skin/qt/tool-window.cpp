@@ -13,11 +13,16 @@
 #include <QPushButton>
 
 #include "android/android.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/tool-window.h"
+
 #include "ui_tools.h"
+
+using namespace android::base;
 
 static ToolWindow *twInstance = NULL;
 
@@ -63,6 +68,38 @@ void ToolWindow::showErrorDialog(const QString &message, const QString &title)
     mErrorMessage.showMessage(message);
 }
 
+QString ToolWindow::getAndroidSdkRoot()
+{
+    QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
+    if (!environment.contains("ANDROID_SDK_ROOT")) {
+        showErrorDialog(tr("The ANDROID_SDK_ROOT environment variable must be set to use this."),
+                        tr("Android Sdk Root"));
+        return QString::null;
+    }
+
+    return environment.value("ANDROID_SDK_ROOT");
+}
+
+QString ToolWindow::getAdbFullPath()
+{
+    // Find adb first
+    QString sdkRoot = getAndroidSdkRoot();
+    if (sdkRoot.isNull()) {
+        return QString::null;
+    }
+
+    StringVector adbVector;
+    adbVector.push_back(String(sdkRoot.toStdString().data()));
+    adbVector.push_back(String("platform-tools"));
+    adbVector.push_back(String("adb"));
+    String adbPath = PathUtils::recompose(adbVector);
+
+    // TODO: is this safe cross-platform?
+    QString command = QString(adbPath.c_str());
+    command += " -s emulator-" + QString::number(android_base_port);
+    return command;
+}
+
 void ToolWindow::runAdbInstall(const QString &path)
 {
     if (mInstallProcess.state() != QProcess::NotRunning) {
@@ -71,14 +108,17 @@ void ToolWindow::runAdbInstall(const QString &path)
         return;
     }
 
-    // Show a dialog so the user knows something is happening
-    mInstallDialog.show();
-
     // Default the -r flag to replace the current version
     // TODO: is replace the desired default behavior?
     // TODO: enable other flags? -lrstdg available
-    QString command = "adb "; // Base command
-    command += "-s emulator-" + QString::number(android_base_port); // Guarantees this emulator
+    QString command = getAdbFullPath();
+    if (command.isNull()) {
+        return;
+    }
+
+    // Show a dialog so the user knows something is happening
+    mInstallDialog.show();
+
     command += " install -r "; // The desired command is install -r
     command += path; // The absolute path to the desired .apk file
 
