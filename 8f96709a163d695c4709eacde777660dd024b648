@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ce074951_d0f9fcb4",
+        "filename": "android/base/files/Stream.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T07:47:01Z",
+      "side": 1,
+      "message": "Yes, but I\u0027m actually trying to port the existing code here more or less verbatim. We could change endianess later (which may or may not require changing the snapshot format btw).",
+      "parentUuid": "4916f301_3af25966",
+      "range": {
+        "startLine": 87,
+        "startChar": 6,
+        "endLine": 87,
+        "endChar": 37
+      },
+      "revId": "8f96709a163d695c4709eacde777660dd024b648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c9b7434b_93cc1ef6",
         "filename": "android/qemu/utils/stream.cpp",
         "patchSetId": 1
@@ -143,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "0eb5e1d9_5aced598",
+        "filename": "android/qemu/utils/stream.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T07:47:01Z",
+      "side": 1,
+      "message": "Actually an excellent idea, will do",
+      "parentUuid": "ee132d4a_99c81b37",
+      "range": {
+        "startLine": 27,
+        "startChar": 11,
+        "endLine": 27,
+        "endChar": 27
+      },
+      "revId": "8f96709a163d695c4709eacde777660dd024b648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c9b7434b_d3d6a685",
         "filename": "android/qemu/utils/stream.cpp",
         "patchSetId": 1
@@ -154,6 +202,30 @@
       "writtenOn": "2015-09-23T16:53:18Z",
       "side": 1,
       "message": "are we sure it\u0027s the only stream type? Maybe we could at least assert here in debug if something is wrong",
+      "range": {
+        "startLine": 35,
+        "startChar": 14,
+        "endLine": 35,
+        "endChar": 30
+      },
+      "revId": "8f96709a163d695c4709eacde777660dd024b648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ceae6993_d8e10d07",
+        "filename": "android/qemu/utils/stream.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T07:47:01Z",
+      "side": 1,
+      "message": "For now yes, and this is actually a temporary \u0027fix\u0027.\n\nThe right way to do this is to introduce stream_put_timer() that actually writes a LoopTimer state to the stream, then modify the QEMUD client code to use a LoopTimer instead of a QEMUTimer. However, I prefer to do that a bit later. We will then be able to get rid of these functions entirely then.\n\nIn other words, that\u0027s good enough for me for now. But I\u0027ll add a comment to clarify all of this.",
+      "parentUuid": "c9b7434b_d3d6a685",
       "range": {
         "startLine": 35,
         "startChar": 14,
