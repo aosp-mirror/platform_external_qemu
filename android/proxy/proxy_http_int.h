@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_PROXY_PROXY_HTTP_INT_H
-#define ANDROID_PROXY_PROXY_HTTP_INT_H
+
+#pragma once
 
 #include "android/proxy/proxy_http.h"
 #include "android/proxy/proxy_int.h"
@@ -44,6 +44,3 @@ extern ProxyConnection*  http_connector_connect(
 extern ProxyConnection*  http_rewriter_connect(
                                 HttpService*   service,
                                 SockAddress*   address );
-
-
-#endif /* ANDROID_PROXY_PROXY_HTTP_INT_H */

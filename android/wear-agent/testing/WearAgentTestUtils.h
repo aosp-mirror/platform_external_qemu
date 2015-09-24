@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_WEAR_AGENT_TESTING_WEAR_AGENT_TEST_UTILS_H
-#define ANDROID_WEAR_AGENT_TESTING_WEAR_AGENT_TEST_UTILS_H
+#pragma once
 
 namespace android {
 namespace wear {
@@ -65,5 +64,3 @@ bool testExpectMessageFromSocket(int socketFd,
 } // namespace testing
 } // namespace wear
 } // namespace android
-
-#endif  // ANDROID_WEAR_AGENT_TESTING_WEAR_AGENT_TEST_UTILS_H

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_ASYNC_IO_COMMON_H_
-#define ANDROID_ASYNC_IO_COMMON_H_
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -69,5 +68,3 @@ typedef enum AsyncIOAction {
 } AsyncIOAction;
 
 ANDROID_END_HEADER
-
-#endif  /* ANDROID_ASYNC_IO_COMMON_H_ */

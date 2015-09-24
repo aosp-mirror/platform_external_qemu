@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_KERNEL_KERNEL_UTILS_TESTING_H
-#define ANDROID_KERNEL_KERNEL_UTILS_TESTING_H
+#pragma once
 
 // Probe the kernel image at |kernelPath| and copy the corresponding
 // 'Linux version ' string into the |dst| buffer.  On success, returns true
@@ -24,5 +23,3 @@ bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
                                            char* dst,
                                            size_t dstLen);
 
-
-#endif  // ANDROID_KERNEL_KERNEL_UTILS_TESTING_H

@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_AVD_KEYS_H
-#define _ANDROID_AVD_KEYS_H
+
+#pragma once
 
 /* Keys of the properties found in avd/name.ini and config.ini files.
  *
@@ -64,7 +64,3 @@
  * the content directory.
  */
 #define  SDCARD_PATH     "sdcard.path"
-
-
-
-#endif /* _ANDROID_AVD_KEYS_H */

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_METRICS_STUDIO_HELPER_H
-#define ANDROID_METRICS_STUDIO_HELPER_H
+#pragma once
 
 #include "android/base/Version.h"
 #include "android/base/String.h"
@@ -54,5 +53,3 @@ struct StudioHelper {
 };
 
 }  // namespace android
-
-#endif  // ANDROID_METRICS_STUDIO_HELPER_H

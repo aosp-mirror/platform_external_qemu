@@ -1,5 +1,4 @@
-#ifndef _INPUT_H
-#define _INPUT_H
+#pragma once
 
 /*
  * Copyright (c) 1999-2002 Vojtech Pavlik
@@ -503,6 +502,4 @@
 #endif
 #ifndef SYN_DROPPED
 #define SYN_DROPPED             3
-#endif
-
 #endif

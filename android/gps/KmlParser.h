@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_GPS_KML_PARSER_H
-#define ANDROID_GPS_KML_PARSER_H
+#pragma once
 
 #include "android/gps/GpsFix.h"
 
@@ -24,5 +23,3 @@ public:
     // is set to a message describing the error.
     static bool parseFile(const char * filePath, GpsFixArray * fixes, std::string * error);
 };
-
-#endif // ANDROID_GPS_KML_PARSER_H

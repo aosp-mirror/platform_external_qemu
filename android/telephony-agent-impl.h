@@ -10,11 +10,8 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_TELEPHONY_AGENT_IMPL_H
-#define ANDROID_TELEPHONY_AGENT_IMPL_H
+#pragma once
 
 #include "android/telephony-agent.h"
 
 TelephonyResponse telephony_telephonyCmd(TelephonyOperation op, const char *phoneNumber);
-
-#endif // ANDROID_TELEPHONY_AGENT_IMPL_H

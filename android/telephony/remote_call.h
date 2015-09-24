@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_TELEPHONY_REMOTE_CALL_H
-#define ANDROID_TELEPHONY_REMOTE_CALL_H
+
+#pragma once
 
 #include "android/telephony/sms.h"
 
@@ -59,5 +59,3 @@ extern void     remote_call_cancel( const char*  to_number, int from_port );
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* ANDROID_TELEPHONY_REMOTE_CALL_H */

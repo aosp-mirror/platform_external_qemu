@@ -11,8 +11,7 @@
 ** GNU General Public License for more details.
 */
 
-#ifndef _ANDROID_UTILS_X86_CPUID_H
-#define _ANDROID_UTILS_X86_CPUID_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -51,5 +50,3 @@ void android_get_x86_cpuid(uint32_t function, uint32_t count,
                            uint32_t *ecx, uint32_t *edx);
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_X86_CPUID_H */

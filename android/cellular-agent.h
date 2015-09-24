@@ -10,8 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_CELLULAR_AGENT_H
-#define ANDROID_CELLULAR_AGENT_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -42,5 +41,3 @@ typedef struct CellularAgent {
 } CellularAgent;
 
 ANDROID_END_HEADER
-
-#endif // ANDROID_CELLULAR_AGENT_H

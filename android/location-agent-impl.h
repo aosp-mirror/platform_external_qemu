@@ -10,8 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_LOCATION_AGENT_IMPL_H
-#define ANDROID_LOCATION_AGENT_IMPL_H
+#pragma once
 
 #include "android/location-agent.h"
 
@@ -26,5 +25,3 @@
 void location_gpsCmd(double latitude, double longitude,
                      double metersElevation, int nSatellites,
                      const struct timeval *time);
-
-#endif // ANDROID_LOCATION_AGENT_IMPL_H

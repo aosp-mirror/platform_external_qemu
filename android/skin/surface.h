@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_SKIN_SURFACE_H
-#define _ANDROID_SKIN_SURFACE_H
+
+#pragma once
 
 #include "android/skin/region.h"
 #include <stdint.h>
@@ -137,5 +137,3 @@ extern void    skin_surface_fill(SkinSurface*  dst,
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* _ANDROID_SKIN_SURFACE_H */

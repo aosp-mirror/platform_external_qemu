@@ -10,8 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#ifndef ANDROID_METRICS_ANDROID_METRICS_REPORTER_H
-#define ANDROID_METRICS_ANDROID_METRICS_REPORTER_H
+#pragma once
 
 #include "android/utils/looper.h"
 #include "android/utils/compiler.h"
@@ -134,5 +133,3 @@ extern ABool androidMetrics_tryReportAll(void);
 #undef METRICS_DURATION
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_METRICS_ANDROID_METRICS_REPORTER_H */

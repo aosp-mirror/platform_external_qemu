@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_RESOURCE_H
-#define _ANDROID_RESOURCE_H
+
+#pragma once
 
 #include <stddef.h>
 
@@ -21,6 +21,3 @@ android_resource_find( const char*    name,
 extern const unsigned char*
 android_icon_find( const char*   name,
                    size_t       *psize );
-
-#endif /* END */
-

@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_FILESYSTEMS_FSTAB_PARSER_H
-#define ANDROID_FILESYSTEMS_FSTAB_PARSER_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -28,5 +27,3 @@ bool android_parseFstabPartitionFormat(const char* fstabData,
                                        char** outFormat);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_FILESYSTEMS_FSTAB_PARSER_H

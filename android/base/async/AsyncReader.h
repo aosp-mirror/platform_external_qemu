@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_ASYNC_ASYNC_READER_H
-#define ANDROID_BASE_ASYNC_ASYNC_READER_H
+#pragma once
 
 #include "android/base/async/AsyncStatus.h"
 #include "android/base/async/Looper.h"
@@ -65,5 +64,3 @@ private:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_ASYNC_ASYNC_READER_H

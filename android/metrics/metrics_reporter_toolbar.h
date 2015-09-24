@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_METRICS_ANDROID_METRICS_REPORTER_TOOLBAR_H
-#define ANDROID_METRICS_ANDROID_METRICS_REPORTER_TOOLBAR_H
+#pragma once
 
 #include "android/metrics/metrics_reporter.h"
 #include "android/utils/compiler.h"
@@ -26,5 +25,3 @@ ANDROID_BEGIN_HEADER
 bool androidMetrics_uploadMetricsToolbar(const AndroidMetrics* metrics);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_METRICS_ANDROID_METRICS_REPORTER_TOOLBAR_H

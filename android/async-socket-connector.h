@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_ASYNC_SOCKET_CONNECTOR_H_
-#define ANDROID_ASYNC_SOCKET_CONNECTOR_H_
+#pragma once
 
 #include "android/async-io-common.h"
 #include "android/async-utils.h"
@@ -149,5 +148,3 @@ extern void async_socket_connector_connect(AsyncSocketConnector* connector);
 extern int async_socket_connector_pull_fd(AsyncSocketConnector* connector);
 
 ANDROID_END_HEADER
-
-#endif  /* ANDROID_ASYNC_SOCKET_CONNECTOR_H_ */

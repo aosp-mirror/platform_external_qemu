@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_FILESYSTEMS_TESTING_TEST_SUPPORT_H
-#define ANDROID_FILESYSTEMS_TESTING_TEST_SUPPORT_H
+#pragma once
 
 #include <string>
 
@@ -21,5 +20,3 @@ std::string CreateTempFilePath();
 
 }  // namespace testing
 }  // namespace android
-
-#endif  // ANDROID_FILESYSTEMS_TESTING_TEST_SUPPORT_H

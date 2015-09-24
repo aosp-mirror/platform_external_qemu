@@ -10,8 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_BATTERY_AGENT_IMPL_H
-#define ANDROID_BATTERY_AGENT_IMPL_H
+#pragma once
 
 #include "android/battery-agent.h"
 
@@ -19,5 +18,3 @@ void battery_setIsCharging(bool isCharging);
 void battery_setChargeLevel(int percentFull);
 void battery_setHealth(enum BatteryHealth health);
 void battery_setStatus(enum BatteryStatus status);
-
-#endif // ANDROID_BATTERY_AGENT_IMPL_H

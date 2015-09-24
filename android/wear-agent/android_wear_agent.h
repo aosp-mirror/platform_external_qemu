@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_WEAR_AGENT_ANDROID_WEAR_AGENT_H
-#define ANDROID_WEAR_AGENT_ANDROID_WEAR_AGENT_H
+#pragma once
 
 // C interface to android/wear-agent/WearAgent.h
 
@@ -26,5 +25,3 @@ void android_wear_agent_start(Looper* looper);
 void android_wear_agent_stop(void);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_WEAR_AGENT_ANDROID_WEAR_AGENT_H

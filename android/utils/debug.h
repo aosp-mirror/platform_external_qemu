@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_DEBUG_H
-#define _ANDROID_UTILS_DEBUG_H
+
+#pragma once
 
 #include <stdarg.h>
 
@@ -104,5 +104,3 @@ extern void  stdio_disable( void );
 extern void  stdio_enable( void );
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_DEBUG_H */

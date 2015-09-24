@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _android_kmsg_h
-#define _android_kmsg_h
+
+#pragma once
 
 #include "qemu-common.h"
 
@@ -27,5 +27,3 @@ typedef enum {
 extern void  android_kmsg_init( AndroidKmsgFlags  flags );
 
 extern CharDriverState*  android_kmsg_get_cs( void );
-
-#endif /* _android_kmsg_h */

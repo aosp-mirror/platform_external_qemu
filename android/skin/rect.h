@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_SKIN_RECT_H
-#define _ANDROID_SKIN_RECT_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -153,5 +153,3 @@ extern void  skin_box_from_rect(SkinBox* box, const SkinRect* rect);
 extern void  skin_box_to_rect(const SkinBox* box, SkinRect* rect);
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_SKIN_RECT_H */

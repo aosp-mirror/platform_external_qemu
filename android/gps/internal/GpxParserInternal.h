@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_GPS_INTERNAL_GPX_PARSER_INTERNAL_H
-#define ANDROID_GPS_INTERNAL_GPX_PARSER_INTERNAL_H
+#pragma once
 
 #include "android/gps/GpsFix.h"
 
@@ -37,5 +36,3 @@ public:
      */
     static bool parse(xmlDoc *doc, GpsFixArray *fixes, std::string *error);
 };
-
-#endif // ANDROID_GPS_INTERNAL_GPX_PARSER_INTERNAL_H

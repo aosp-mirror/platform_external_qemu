@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_CAMERA_CAMERA_FORMAT_CONVERTERS_H
-#define ANDROID_CAMERA_CAMERA_FORMAT_CONVERTERS_H
+#pragma once
 
 /*
  * Contains declaration of the API that allows converting frames from one
@@ -69,5 +68,3 @@ extern int convert_frame(const void* frame,
                          float g_scale,
                          float b_scale,
                          float exp_comp);
-
-#endif  /* ANDROID_CAMERA_CAMERA_FORMAT_CONVERTERS_H */

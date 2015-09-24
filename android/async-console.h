@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ANDROID_ASYNC_CONSOLE_H
-#define ANDROID_ASYNC_CONSOLE_H
+
+#pragma once
 
 #include "android/async-utils.h"
 #include "android/utils/compiler.h"
@@ -63,5 +63,3 @@ AsyncStatus
 asyncConsoleConnector_run(AsyncConsoleConnector* acc);
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_ASYNC_CONSOLE_H */

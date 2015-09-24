@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_UTILS_WIN32_CMDLINE_QUOTE_H
-#define ANDROID_UTILS_WIN32_CMDLINE_QUOTE_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -37,5 +36,3 @@ ANDROID_BEGIN_HEADER
 char* win32_cmdline_quote(const char* param);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_UTILS_WIN32_CMDLINE_QUOTE_H

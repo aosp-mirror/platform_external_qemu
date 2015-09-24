@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_OPENG_EMUGL_BACKEND_SCANNER_H
-#define ANDROID_OPENG_EMUGL_BACKEND_SCANNER_H
+#pragma once
 
 #include "android/base/containers/StringVector.h"
 
@@ -32,5 +31,3 @@ static ::android::base::StringVector scanDir(const char* execDir,
 
 }  // namespace opengl
 }  // namespace android
-
-#endif  // ANDROID_OPENG_EMUGL_BACKEND_SCANNER_H

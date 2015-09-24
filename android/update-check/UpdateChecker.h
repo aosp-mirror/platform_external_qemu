@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_UPDATE_CHECK_UPDATECHECKER_H
-#define ANDROID_UPDATE_CHECK_UPDATECHECKER_H
+#pragma once
 
 #include "android/base/threads/Thread.h"
 #include "android/base/Version.h"
@@ -120,5 +119,3 @@ private:
 
 }  // namespace update_check
 }  // namespace android
-
-#endif  // ANDROID_UPDATE_CHECK_UPDATECHECKER_H

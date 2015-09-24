@@ -10,11 +10,8 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_SETTINGS_AGENT_IMPL_H
-#define ANDROID_SETTINGS_AGENT_IMPL_H
+#pragma once
 
 #include "android/settings-agent.h"
 
 void settings_setAdbPort(int portNumber);
-
-#endif // ANDROID_SETTINGS_AGENT_IMPL_H

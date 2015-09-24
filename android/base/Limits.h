@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_LIMITS_H
-#define ANDROID_BASE_LIMITS_H
+#pragma once
 
 // In C++, <stdint.h> will only define macros like SIZE_MAX if you have
 // defined __STDC_LIMIT_MACROS before including <stdint.h>. This header
@@ -29,5 +28,3 @@
 #warning "This prevents the definition of useful macros."
 #error "Please include <android/base/Limits.h> first!"
 #endif
-
-#endif  // ANDROID_BASE_LIMITS_H

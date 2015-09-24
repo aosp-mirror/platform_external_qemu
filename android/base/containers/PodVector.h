@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_CONTAINERS_POD_VECTOR_H
-#define ANDROID_BASE_CONTAINERS_POD_VECTOR_H
+#pragma once
 
 #include <android/base/Limits.h>
 #include <android/base/Log.h>
@@ -255,6 +254,3 @@ public:
 
 }  // namespace base
 }  // namespace android
-
-
-#endif  // ANDROID_BASE_VECTOR_H

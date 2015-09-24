@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_MULTITOUCH_SCREEN_H_
-#define ANDROID_MULTITOUCH_SCREEN_H_
+#pragma once
 
 #include "android/sdk-controller-socket.h"
 #include "android/multitouch-port.h"
@@ -102,5 +101,3 @@ extern void multitouch_refresh_screen(void);
 
 /* Framebuffer update has been handled by the device. */
 extern void multitouch_fb_updated(void);
-
-#endif  /* ANDROID_MULTITOUCH_SCREEN_H_ */

@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_UTILS_STRING_H
-#define ANDROID_UTILS_STRING_H
+#pragma once
 
 #include "android/utils/compiler.h"
 #include "android/utils/system.h"
@@ -31,5 +30,3 @@ size_t strlcpy(char* dst, const char * src, size_t size);
 bool str_ends_with(const char* str, const char* suffix);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_UTILS_STRING_H

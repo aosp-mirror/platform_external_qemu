@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_UTILS_FILE_UTILS_H
-#define ANDROID_UTILS_FILE_UTILS_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -74,5 +73,3 @@ void fileData_swap(FileData* fileData, FileData* other);
 void fileData_done(FileData* fileData);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_UTILS_FILE_UTILS_H

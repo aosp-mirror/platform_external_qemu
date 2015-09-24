@@ -8,8 +8,8 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#ifndef ANDROID_UTILS_EINTR_WRAPPER_H
-#define ANDROID_UTILS_EINTR_WRAPPER_H
+
+#pragma once
 
 #include <errno.h>
 
@@ -116,5 +116,3 @@ void __attribute__((noreturn)) android_eintr_wrapper_fatal(
 #endif  // !_WIN32
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_UTILS_EINTR_WRAPPER_H

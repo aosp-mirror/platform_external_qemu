@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_SKIN_KEYSET_H_
-#define _ANDROID_SKIN_KEYSET_H_
+
+#pragma once
 
 #include "android/utils/compiler.h"
 #include "android/utils/aconfig-file.h"
@@ -140,5 +140,3 @@ extern void skin_keyset_set_default(SkinKeyset* set);
 extern SkinKeyset* skin_keyset_get_default(void);
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_SKIN_KEYSET_H_ */

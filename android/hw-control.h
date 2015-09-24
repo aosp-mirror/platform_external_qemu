@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _android_hw_control_h
-#define _android_hw_control_h
+
+#pragma once
 
 #include "qemu-common.h"
 
@@ -36,6 +36,4 @@ extern void  android_hw_control_init( void );
 
 /* used to register a new hw-control back-end */
 extern void  android_hw_control_set( void*                         opaque,
-                                      const AndroidHwControlFuncs*  funcs );
-
-#endif /* _android_hw_control_h */
+                                     const AndroidHwControlFuncs*  funcs );

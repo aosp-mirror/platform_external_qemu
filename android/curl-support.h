@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_CURL_SUPPORT_H
-#define ANDROID_CURL_SUPPORT_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -35,5 +34,3 @@ extern void curl_cleanup();
 extern CURL* curl_easy_default_init();
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_CURL_SUPPORT_H

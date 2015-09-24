@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_ASYNC_SOCKET_H_
-#define ANDROID_ASYNC_SOCKET_H_
+#pragma once
 
 #include "android/async-io-common.h"
 #include "android/async-utils.h"
@@ -275,5 +274,3 @@ extern int async_socket_get_port(const AsyncSocket* as);
 extern int async_socket_is_connected(const AsyncSocket* as);
 
 ANDROID_END_HEADER
-
-#endif  /* ANDROID_ASYNC_SOCKET_H_ */

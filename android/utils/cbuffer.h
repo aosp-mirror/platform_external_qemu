@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _qemu_cbuffer_h
-#define _qemu_cbuffer_h
+
+#pragma once
 
 #include <stdint.h>
 
@@ -55,7 +55,3 @@ extern void cbuffer_read_step( CBuffer*  cb, int  len );
 extern const char*  cbuffer_quote( CBuffer*  cb );
 extern const char*  cbuffer_quote_data( CBuffer*  cb );
 extern void         cbuffer_print( CBuffer*  cb );
-
-#endif /* qemu_cbuffer_h */
-
-

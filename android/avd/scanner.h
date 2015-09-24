@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_AVD_SCANNER_H
-#define ANDROID_AVD_SCANNER_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -47,5 +47,3 @@ const char* avdScanner_next(AvdScanner* scanner);
 void avdScanner_free(AvdScanner* scanner);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_AVD_SCANNER_H

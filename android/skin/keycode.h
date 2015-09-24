@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_SKIN_KEYCODE_H
-#define ANDROID_SKIN_KEYCODE_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 #include "android/skin/linux_keycodes.h"
@@ -175,5 +175,3 @@ extern bool skin_key_pair_from_string(const char* str,
                                       uint32_t* mod);
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_SKIN_KEYCODE_H */

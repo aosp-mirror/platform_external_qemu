@@ -10,13 +10,12 @@
 ** GNU General Public License for more details.
 */
 
+#pragma once
+
 /*
  * Contains extension to android display (see android/display.h|c) that is used
  * by the core to communicate display changes to the attached UI
  */
-
-#ifndef _ANDROID_DISPLAY_CORE_H
-#define _ANDROID_DISPLAY_CORE_H
 
 #include "ui/console.h"
 
@@ -27,5 +26,3 @@
  *  ds - Display state to use for the core display.
  */
 extern void coredisplay_init(DisplayState* ds);
-
-#endif /* _ANDROID_DISPLAY_CORE_H */

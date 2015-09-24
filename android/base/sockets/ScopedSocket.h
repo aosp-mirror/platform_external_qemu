@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_SOCKETS_SCOPED_SOCKET_H
-#define ANDROID_BASE_SOCKETS_SCOPED_SOCKET_H
+#pragma once
 
 #include "android/base/Compiler.h"
 #include "android/base/sockets/SocketUtils.h"
@@ -65,5 +64,3 @@ private:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_SOCKETS_SCOPED_SOCKET_H

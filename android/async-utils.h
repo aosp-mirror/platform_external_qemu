@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ANDROID_ASYNC_UTILS_H
-#define ANDROID_ASYNC_UTILS_H
+#pragma once
 
 #include "android/utils/compiler.h"
 #include "android/utils/looper.h"
@@ -237,5 +236,3 @@ int
 asyncConnector_stop(AsyncConnector* ac);
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_ASYNC_UTILS_H */

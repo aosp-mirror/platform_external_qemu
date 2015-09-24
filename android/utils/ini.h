@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_INI_H
-#define _ANDROID_UTILS_INI_H
+
+#pragma once
 
 #include <stdint.h>
 
@@ -112,5 +112,3 @@ void iniFile_setBoolean( IniFile* f, const char* key, int value );
 void iniFile_setDiskSize( IniFile* f, const char* key, int64_t size );
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_INI_H */

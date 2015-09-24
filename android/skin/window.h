@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _SKIN_WINDOW_H
-#define _SKIN_WINDOW_H
+
+#pragma once
 
 #include "android/skin/event.h"
 #include "android/skin/file.h"
@@ -84,5 +84,3 @@ extern void             skin_window_get_display( SkinWindow*  window, ADisplayIn
 extern void             skin_window_update_display( SkinWindow*  window, int  x, int  y, int  w, int  h );
 
 extern void skin_window_update_gpu_frame(SkinWindow* window, int w, int h, const void* pixels);
-
-#endif /* _SKIN_WINDOW_H */

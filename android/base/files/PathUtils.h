@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_FILES_PATH_UTIL_H
-#define ANDROID_BASE_FILES_PATH_UTIL_H
+#pragma once
 
 #include "android/base/containers/StringVector.h"
 #include "android/base/String.h"
@@ -145,5 +144,3 @@ static const PathUtils::HostType kHostType = PathUtils::HOST_TYPE;
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_FILES_PATH_UTIL_H

@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _android_sensors_h
-#define _android_sensors_h
+
+#pragma once
 
 #include "qemu-common.h"
 
@@ -81,5 +81,3 @@ extern const char* android_sensors_get_name_from_id( int sensor_id );
 
 /* Get sensor from sensor id */
 extern uint8_t android_sensors_get_sensor_status( int sensor_id );
-
-#endif /* _android_gps_h */

@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _android_fingerprint_h
-#define _android_fingerprint_h
+
+#pragma once
 
 #include "qemu-common.h"
 
@@ -22,5 +22,3 @@ void android_hw_fingerprint_touch(int fingerid);
 
 /* take finger off the fingerprint sensor */
 void android_hw_fingerprint_remove();
-
-#endif /* _android_fingerprint_h */

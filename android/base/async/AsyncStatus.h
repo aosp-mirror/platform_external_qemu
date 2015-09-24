@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_ASYNC_ASYNC_STATUS_H
-#define ANDROID_BASE_ASYNC_ASYNC_STATUS_H
+#pragma once
 
 namespace android {
 namespace base {
@@ -31,5 +30,3 @@ enum AsyncStatus {
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_ASYNC_ASYNC_STATUS_H

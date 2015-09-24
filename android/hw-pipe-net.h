@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_PIPE_NET_H
-#define ANDROID_PIPE_NET_H
+#pragma once
 
 void android_net_pipes_init(void);
-
-#endif /* ANDROID_PIPE_NET_H */

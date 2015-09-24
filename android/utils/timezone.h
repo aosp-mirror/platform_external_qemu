@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_TIMEZONE_H
-#define _ANDROID_UTILS_TIMEZONE_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -33,5 +33,3 @@ extern int  timezone_set( const char*  tzname );
 extern char*  bufprint_zoneinfo_timezone( char*  buffer, char*  end );
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_TIMEZONE_H */

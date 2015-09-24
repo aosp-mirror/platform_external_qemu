@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_SKIN_EVENT_H
-#define ANDROID_SKIN_EVENT_H
+
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -82,5 +82,3 @@ extern void skin_event_enable_unicode(bool enabled);
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // ANDROID_SKIN_EVENT_H

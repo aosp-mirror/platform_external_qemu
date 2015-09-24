@@ -10,8 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_SKIN_QT_SET_UI_EMU_AGENT_H
-#define ANDROID_SKIN_QT_SET_UI_EMU_AGENT_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -22,5 +21,3 @@ ANDROID_BEGIN_HEADER
 void setUiEmuAgent(const UiEmuAgent *agentPtr);
 
 ANDROID_END_HEADER
-
-#endif // ANDROID_SKIN_QT_SET_UI_EMU_AGENT_H

@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_UTILS_HOST_BITNESS_H
-#define ANDROID_UTILS_HOST_BITNESS_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -22,5 +21,3 @@ ANDROID_BEGIN_HEADER
 int android_getHostBitness(void);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_UTILS_HOST_BITNESS_H

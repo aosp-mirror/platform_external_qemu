@@ -10,8 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#ifndef _ANDROID_SNAPHOST_ANDROID_H_
-#define _ANDROID_SNAPHOST_ANDROID_H_
+#pragma once
 
 #include "android/utils/ini.h"
 
@@ -29,6 +28,3 @@ extern int snaphost_match_configs(IniFile* hw_ini, const char* name);
  *  name - Name of the snapshot for the current VM.
  */
 extern void snaphost_save_config(const char* name);
-
-#endif  /* _ANDROID_SNAPHOST_ANDROID_H_ */
-

@@ -10,8 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_SETTINGS_AGENT_H
-#define ANDROID_SETTINGS_AGENT_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -29,5 +28,3 @@ typedef struct SettingsAgent {
 } SettingsAgent;
 
 ANDROID_END_HEADER
-
-#endif // ANDROID_SETTINGS_AGENT_H

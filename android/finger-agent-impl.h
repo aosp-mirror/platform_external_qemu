@@ -10,11 +10,8 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_FINGER_AGENT_IMPL_H
-#define ANDROID_FINGER_AGENT_IMPL_H
+#pragma once
 
 #include "finger-agent.h"
 
 void finger_setTouch(bool isTouching, int touchId);
-
-#endif // ANDROID_FINGER_AGENT_IMPL_H

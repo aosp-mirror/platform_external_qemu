@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_SKIN_RESOURCE_H
-#define ANDROID_SKIN_RESOURCE_H
+
+#pragma once
 
 #include <stddef.h>
 
@@ -19,5 +19,3 @@
 // On failure, return NULL.
 const unsigned char* skin_resource_find(const char* name,
                                         size_t* psize );
-
-#endif  // ANDROID_SKIN_RESOURCE_H

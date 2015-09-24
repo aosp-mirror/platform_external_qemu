@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_SOCKETS_WINSOCKS_H
-#define ANDROID_BASE_SOCKETS_WINSOCKS_H
+#pragma once
 
 #ifndef _WIN32
 #error "Only include this header when building for Windows."
@@ -37,5 +36,3 @@
 #include <ws2tcpip.h>
 
 #undef ERROR  // necessary to compile LOG(ERROR) statements.
-
-#endif  // ANDROID_BASE_SOCKETS_WINSOCKS_H

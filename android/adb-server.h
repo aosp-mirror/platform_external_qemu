@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_ADB_SERVER_H_
-#define ANDROID_ADB_SERVER_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -126,5 +125,3 @@ extern void adb_server_on_guest_message(void* opaque,
  *  opaque - An opaque pointer returned from adb_server_register_guest.
  */
 extern void adb_server_on_guest_closed(void* opaque);
-
-#endif  /* ANDROID_ADB_SERVER_H_ */

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_BASE_SYNCHRONIZATION_MESSAGE_CHANNEL_H
-#define ANDROID_BASE_SYNCHRONIZATION_MESSAGE_CHANNEL_H
+#pragma once
 
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
@@ -96,5 +95,3 @@ private:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_SYNCHRONIZATION_MESSAGE_CHANNEL_H

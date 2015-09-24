@@ -10,8 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_SKIN_QT_EXTENDED_WINDOW_H
-#define ANDROID_SKIN_QT_EXTENDED_WINDOW_H
+#pragma once
 
 #include "android/ui-emu-agent.h"
 
@@ -190,5 +189,3 @@ class phoneNumberValidator : public QValidator
 public:
     State validate(QString &input, int &pos) const;
 };
-
-#endif // ANDROID_SKIN_QT_EXTENDED_WINDOW_H

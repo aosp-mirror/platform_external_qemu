@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_USER_CONFIG_H
-#define _ANDROID_USER_CONFIG_H
+
+#pragma once
 
 #include "android/avd/info.h"
 #include <stdint.h>
@@ -45,7 +45,3 @@ void           auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y )
  * has changed.
  */
 void           auserConfig_save( AUserConfig*  uconfig );
-
-/* */
-
-#endif /* _ANDROID_USER_CONFIG_H */

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_SENSORS_PORT_H_
-#define ANDROID_SENSORS_PORT_H_
+#pragma once
 
 /*
  * Encapsulates exchange protocol between the sensor emulator, and an application
@@ -60,5 +59,3 @@ extern int sensors_port_enable_sensor(AndroidSensorsPort* asp, const char* name)
  *  Zero on success, failure otherwise.
  */
 extern int sensors_port_disable_sensor(AndroidSensorsPort* asp, const char* name);
-
-#endif  /* ANDROID_SENSORS_PORT_H_ */

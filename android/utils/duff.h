@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_UTILS_DUFF_H
-#define ANDROID_UTILS_DUFF_H
+
+#pragma once
 
 /*********************************************************************
  *********************************************************************
@@ -67,5 +67,3 @@
                 } while (--__n > 0); \
         } \
     })
-
-#endif /* ANDROID_UTILS_DUFF_H */

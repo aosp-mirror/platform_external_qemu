@@ -9,12 +9,10 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_DISPLAY_H
-#define _ANDROID_DISPLAY_H
+
+#pragma once
 
 #include "ui/console.h"
 #include "android/framebuffer.h"
 
 extern void android_display_init(DisplayState* ds, QFrameBuffer* qfbuff);
-
-#endif /* _ANDROID_DISPLAY_H */

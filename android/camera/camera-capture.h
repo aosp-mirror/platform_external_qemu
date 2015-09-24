@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_CAMERA_CAMERA_CAPTURE_H
-#define ANDROID_CAMERA_CAMERA_CAPTURE_H
+#pragma once
 
 /*
  * Contains declarations for video capturing API that is used by the camera
@@ -116,5 +115,3 @@ extern void camera_device_close(CameraDevice* cd);
  *  Number of entries added to the 'cis' array on success, or < 0 on failure.
  */
 extern int enumerate_camera_devices(CameraInfo* cis, int max);
-
-#endif  /* ANDROID_CAMERA_CAMERA_CAPTURE_H */

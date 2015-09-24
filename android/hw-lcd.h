@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_HW_LCD_H
-#define _ANDROID_HW_LCD_H
+
+#pragma once
 
 #define  LCD_DENSITY_LDPI      120
 #define  LCD_DENSITY_MDPI      160
@@ -25,5 +25,3 @@
 
 /* Sets the boot property corresponding to the emulated abstract LCD density */
 extern void  hwLcd_setBootProperty(int density);
-
-#endif /* _ANDROID_HW_LCD_H */

@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_SKIN_TRACKBALL_H
-#define _ANDROID_SKIN_TRACKBALL_H
+
+#pragma once
 
 #include "android/skin/rect.h"
 #include "android/skin/surface.h"
@@ -52,6 +52,3 @@ extern void skin_trackball_destroy (SkinTrackBall*  ball);
 
 /* this sets the rotation that will be applied to mouse events sent to the system */
 extern void skin_trackball_set_rotation(SkinTrackBall*  ball, SkinRotation  rotation);
-
-#endif /* END */
-

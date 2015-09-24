@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_SCOPED_FD_H
-#define ANDROID_BASE_SCOPED_FD_H
+#pragma once
 
 #include "android/base/Compiler.h"
 
@@ -72,5 +71,3 @@ private:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_SCOPED_FD_H

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_METRICS_STUDIO_PREFERENCES_H
-#define ANDROID_METRICS_STUDIO_PREFERENCES_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -44,5 +43,3 @@ int android_studio_get_optins(void);
 char* android_studio_get_installation_id(void);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_METRICS_STUDIO_PREFERENCES_H

@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_CONTAINERS_HASH_UTILS_H
-#define ANDROID_BASE_CONTAINERS_HASH_UTILS_H
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
@@ -48,5 +47,3 @@ inline size_t pointerHash(const void* ptr) {
 }  // namespace internal
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_CONTAINERS_HASH_UTILS_H

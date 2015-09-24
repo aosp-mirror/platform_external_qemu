@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_FILESYSTEMS_PARTITION_TYPES_H
-#define ANDROID_FILESYSTEMS_PARTITION_TYPES_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -45,5 +44,3 @@ int androidPartitionType_makeEmptyFile(AndroidPartitionType part_type,
                                        const char* image_file);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_FILESYSTEMS_PARTITION_TYPES_H

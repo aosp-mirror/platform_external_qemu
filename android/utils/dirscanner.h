@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_DIR_H
-#define _ANDROID_UTILS_DIR_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -56,5 +56,3 @@ const char*    dirScanner_nextFull( DirScanner*  s );
 size_t         dirScanner_numEntries( DirScanner*  s );
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_DIR_H */

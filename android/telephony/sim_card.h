@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_TELEPHONY_SIM_CARD_H
-#define ANDROID_TELEPHONY_SIM_CARD_H
+
+#pragma once
 
 #include "android/telephony/gsm.h"
 
@@ -58,5 +58,3 @@ extern const char*  asimcard_io( ASimCard  sim, const char*  cmd );
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* ANDROID_TELEPHONY_SIM_CARD_H */

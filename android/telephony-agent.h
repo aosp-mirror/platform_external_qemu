@@ -10,8 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_TELEPHONY_AGENT_H
-#define ANDROID_TELEPHONY_AGENT_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -40,5 +39,3 @@ typedef struct TelephonyAgent {
 } TelephonyAgent;
 
 ANDROID_END_HEADER
-
-#endif // ANDROID_TELEPHONY_AGENT_H

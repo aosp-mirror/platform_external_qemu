@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_UTILS_SETENV_H
-#define ANDROID_UTILS_SETENV_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -23,5 +23,3 @@ extern void setenv(const char* name, const char* value, int overwrite);
 #endif
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_UTILS_SETENV_H

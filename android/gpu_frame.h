@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_GPU_FRAME_H
-#define ANDROID_GPU_FRAME_H
+#pragma once
 
 #include "android/utils/compiler.h"
 #include "android/utils/looper.h"
@@ -33,5 +32,3 @@ void gpu_frame_set_post_callback(
                          const void* pixels));
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_GPU_FRAME_H

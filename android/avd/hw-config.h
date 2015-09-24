@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_AVD_HW_CONFIG_H
-#define _ANDROID_AVD_HW_CONFIG_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 #include "android/utils/ini.h"
@@ -91,5 +91,3 @@ int androidHwConfig_getKernelYaffs2Support( AndroidHwConfig* config );
 const char* androidHwConfig_getKernelSerialPrefix( AndroidHwConfig* config );
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_AVD_HW_CONFIG_H */

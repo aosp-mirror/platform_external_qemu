@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_ADB_PIPE_H_
-#define ANDROID_ADB_PIPE_H_
+#pragma once
 
 /*
  * Implements 'adb' QEMUD service that is responsible for the data exchange
@@ -24,6 +23,3 @@
 
 /* Initializes adb QEMUD service. */
 extern void android_adb_service_init(void);
-
-#endif  /* ANDROID_ADB_PIPE_H_ */
-

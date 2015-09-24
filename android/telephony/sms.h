@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_TELEPHONY_SMS_H
-#define ANDROID_TELEPHONY_SMS_H
+
+#pragma once
 
 #include <time.h>
 
@@ -121,5 +121,3 @@ extern SmsPDU*       sms_receiver_create_deliver( SmsReceiver  rec, int  index, 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* ANDROID_TELEPHONY_SMS_H */

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_SDKCONTROL_SOCKET_H_
-#define ANDROID_SDKCONTROL_SOCKET_H_
+#pragma once
 
 #include "android/async-socket.h"
 #include "android/async-utils.h"
@@ -600,5 +599,3 @@ extern SdkCtlPortStatus sdkctl_socket_get_port_status(SDKCtlSocket* sdkctl);
 extern int sdkctl_socket_is_handshake_ok(SDKCtlSocket* sdkctl);
 
 ANDROID_END_HEADER
-
-#endif  /* ANDROID_SDKCONTROL_SOCKET_H_ */

@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_INTMAP_H
-#define _ANDROID_UTILS_INTMAP_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -108,5 +108,3 @@ void aintMapIterator_done( AIntMapIterator* iter );
     } while (0)
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_INTMAP_H */

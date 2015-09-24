@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_SKIN_WINSYS_H
-#define ANDROID_SKIN_WINSYS_H
+
+#pragma once
 
 // Window system related definitions.
 #include "android/skin/rect.h"
@@ -76,5 +76,3 @@ void skin_winsys_enter_main_loop(int argc, char** argv);
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // ANDROID_SKIN_WINSYS_H

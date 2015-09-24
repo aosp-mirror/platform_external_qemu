@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_EMULATION_CONFIG_DIRS_H
-#define ANDROID_EMULATION_CONFIG_DIRS_H
+#pragma once
 
 #include "android/base/String.h"
 
@@ -46,5 +45,3 @@ struct ConfigDirs {
 };
 
 }  // namespace android
-
-#endif  // ANDROID_EMULATION_CONFIG_DIRS_H

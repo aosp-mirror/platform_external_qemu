@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_BASE_MISC_STRING_UTILS_H
-#define ANDROID_BASE_MISC_STRING_UTILS_H
+#pragma once
 
 #include "android/base/containers/StringVector.h"
 #include "android/base/String.h"
@@ -32,5 +31,3 @@ inline void sortStringVector(StringVector* strings) {
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_MISC_STRING_UTILS_H

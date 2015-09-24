@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_CONTAINERS_STRING_VECTOR_H
-#define ANDROID_BASE_CONTAINERS_STRING_VECTOR_H
+#pragma once
 
 #include "android/base/containers/PodVector.h"
 #include "android/base/String.h"
@@ -64,5 +63,3 @@ public:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_CONTAINERS_STRING_VECTOR_H

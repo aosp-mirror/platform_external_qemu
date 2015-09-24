@@ -10,8 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#ifndef _ANDROID_UTILS_FILELOCK_H
-#define _ANDROID_UTILS_FILELOCK_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -41,5 +40,3 @@ extern FileLock*  filelock_create ( const char*  path );
 extern void       filelock_release( FileLock*  lock );
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_FILELOCK_H */

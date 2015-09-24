@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _android_qemud_h
-#define _android_qemud_h
+
+#pragma once
 
 #include "qemu-common.h"
 
@@ -145,5 +145,3 @@ extern QemudService*  qemud_service_register( const char*          serviceName,
 extern void           qemud_service_broadcast( QemudService*   sv,
                                                const uint8_t*  msg,
                                                int             msglen );
-
-#endif /* _android_qemud_h */

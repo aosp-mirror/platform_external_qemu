@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_JPEG_COMPRESS_H
-#define _ANDROID_UTILS_JPEG_COMPRESS_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -101,5 +101,3 @@ extern void jpeg_compressor_compress_fb(AJPEGDesc* dsc,
                                         int ydir);
 
 ANDROID_END_HEADER
-
-#endif  /* _ANDROID_UTILS_JPEG_COMPRESS_H */

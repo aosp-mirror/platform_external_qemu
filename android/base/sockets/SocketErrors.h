@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_SOCKETS_SOCKET_ERRORS_H
-#define ANDROID_BASE_SOCKETS_SOCKET_ERRORS_H
+#pragma once
 
 // Older Mingw32 headers didn't define all error macros appropriately.
 // Include this header to work-around this.
@@ -101,5 +100,3 @@
 #    define EHOSTUNREACH  10065
 #  endif
 #endif /* _WIN32 */
-
-#endif  // ANDROID_BASE_SOCKETS_SOCKET_ERRORS_H

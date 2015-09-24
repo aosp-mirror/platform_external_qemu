@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef QEMU_ANDROID_UPDATECHECK_H
-#define QEMU_ANDROID_UPDATECHECK_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -25,5 +24,3 @@ ANDROID_BEGIN_HEADER
 extern void android_checkForUpdates(const char* homePath);
 
 ANDROID_END_HEADER
-
-#endif  // QEMU_ANDROID_UPDATECHECK_H

@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_FILES_SCOPED_HANDLE_H
-#define ANDROID_BASE_FILES_SCOPED_HANDLE_H
+#pragma once
 
 #if !defined(_WIN32) && !defined(_WIN64)
 #error "Only compile this file when targetting Windows!"
@@ -74,5 +73,3 @@ private:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_FILES_SCOPED_HANDLE_H

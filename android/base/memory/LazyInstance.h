@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_BASE_MEMORY_LAZY_INSTANCE_H
-#define ANDROID_BASE_MEMORY_LAZY_INSTANCE_H
+#pragma once
 
 #include <new>
 
@@ -154,5 +153,3 @@ T* LazyInstance<T>::ptr() const {
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_MEMORY_LAZY_INSTANCE_H

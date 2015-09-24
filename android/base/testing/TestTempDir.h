@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_BASE_TESTING_TEST_TEMP_DIR_H
-#define ANDROID_BASE_TESTING_TEST_TEMP_DIR_H
+#pragma once
 
 #include "android/base/Compiler.h"
 #include "android/base/Log.h"
@@ -238,5 +237,3 @@ private:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_TESTING_TEST_TEMP_DIR_H

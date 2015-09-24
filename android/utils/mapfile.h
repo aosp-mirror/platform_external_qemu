@@ -10,13 +10,12 @@
 ** GNU General Public License for more details.
 */
 
+#pragma once
+
 /*
  * Contains declarations of routines that implement platform-independent
  * file I/O.
  */
-
-#ifndef _ANDROID_UTILS_FILEIO_H
-#define _ANDROID_UTILS_FILEIO_H
 
 #include "android/utils/compiler.h"
 
@@ -130,5 +129,3 @@ extern void* mapfile_map(MapFile* handle,
 extern int mapfile_unmap(void* mapped_at, size_t len);
 
 ANDROID_END_HEADER
-
-#endif  // _ANDROID_UTILS_FILEIO_H

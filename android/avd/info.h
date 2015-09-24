@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_AVD_INFO_H
-#define ANDROID_AVD_INFO_H
+
+#pragma once
 
 #include "android/avd/hw-config.h"
 #include "android/utils/compiler.h"
@@ -287,5 +287,3 @@ int          avdInfo_getAdbdCommunicationMode( AvdInfo* i );
 int          avdInfo_getSnapshotPresent(AvdInfo* i);
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_AVD_INFO_H */

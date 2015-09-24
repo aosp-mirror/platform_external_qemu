@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_CAMERA_CAMERA_WIN_H_
-#define ANDROID_CAMERA_CAMERA_WIN_H_
+#pragma once
 
 /*
  * Contains declarations that are missing in non-Linux headers.
@@ -74,5 +73,3 @@
 #define V4L2_PIX_FMT_SGBRG12 v4l2_fourcc('G', 'B', '1', '2') /* 12  GBGB.. RGRG.. */
 #define V4L2_PIX_FMT_SGRBG12 v4l2_fourcc('B', 'A', '1', '2') /* 12  GRGR.. BGBG.. */
 #define V4L2_PIX_FMT_SRGGB12 v4l2_fourcc('R', 'G', '1', '2') /* 12  RGRG.. GBGB.. */
-
-#endif  /* ANDROID_CAMERA_CAMERA_WIN_H_ */

@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_SKIN_SCALER_H
-#define _ANDROID_SKIN_SCALER_H
+
+#pragma once
 
 #include "android/skin/image.h"
 #include "android/skin/surface.h"
@@ -59,5 +59,3 @@ extern void         skin_scaler_scale( SkinScaler* scaler,
                                        const SkinSurfacePixelFormat* dst_format,
                                        const SkinSurfacePixels* src_pix,
                                        const SkinRect* src_rect);
-
-#endif /* _ANDROID_SKIN_SCALER_H */

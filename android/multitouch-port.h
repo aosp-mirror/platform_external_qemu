@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_ANDROID_MULTITOUCH_PORT_H_
-#define ANDROID_ANDROID_MULTITOUCH_PORT_H_
+#pragma once
 
 #include "android/sdk-controller-socket.h"
 
@@ -107,5 +106,3 @@ extern int mts_port_send_frame(AndroidMTSPort* mtsp,
                                on_sdkctl_direct_cb cb,
                                void* cb_opaque,
                                int ydir);
-
-#endif  /* ANDROID_ANDROID_MULTITOUCH_PORT_H_ */
