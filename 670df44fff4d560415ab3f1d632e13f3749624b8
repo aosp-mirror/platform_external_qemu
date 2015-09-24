@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "eececd75_81bc7af1",
+        "filename": "hw/android/goldfish/pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1428,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T07:35:50Z",
+      "side": 1,
+      "message": "Actually, it\u0027s now part of ANSI C99, so we can use it :)\n\nSee for example http://www.dribin.org/dave/blog/archives/2010/05/15/c99_syntax/",
+      "parentUuid": "2e2e2591_ebf85184",
+      "range": {
+        "startLine": 1427,
+        "startChar": 1,
+        "endLine": 1428,
+        "endChar": 37
+      },
+      "revId": "670df44fff4d560415ab3f1d632e13f3749624b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6e249dad_4dd9b95c",
         "filename": "include/hw/android/goldfish/pipe.h",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2015-09-23T22:36:26Z",
       "side": 1,
       "message": "iiuc, AndroidPipeFuncs are implemented by the particular QEMU device that wants to use the pipe. OTOH AndroidPipeHwFuncs is implemented once for QEMU1/QEMU2.\n\nThis situation will occur repeatedly as we tear apart AndroidEmu. It might be worthwhile to have a naming convention for structs and setting functions (android_pipe_set_hw_funcs) that are meant for this specific purpose.",
+      "range": {
+        "startLine": 153,
+        "startChar": 15,
+        "endLine": 153,
+        "endChar": 33
+      },
+      "revId": "670df44fff4d560415ab3f1d632e13f3749624b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce074951_f0fc00a7",
+        "filename": "include/hw/android/goldfish/pipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T07:35:50Z",
+      "side": 1,
+      "message": "Yes, it\u0027s something that could be discussed with the team by email. Do you have any suggestion?",
+      "parentUuid": "6e249dad_4dd9b95c",
       "range": {
         "startLine": 153,
         "startChar": 15,
