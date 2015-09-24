@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "ee86cdd4_01202a61",
+        "filename": "hw/android/goldfish/pipe_throttle.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-24T00:26:08Z",
+      "side": 1,
+      "message": "isn\u0027t this exactly 0?",
+      "range": {
+        "startLine": 84,
+        "startChar": 21,
+        "endLine": 84,
+        "endChar": 52
+      },
+      "revId": "2d9d483c3f2189737ff62335b60586a3d507854f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "699c97d8_8d37e117",
         "filename": "hw/android/goldfish/pipe_throttle.c",
         "patchSetId": 1
@@ -37,6 +60,30 @@
       "side": 1,
       "message": "We modified the LoopTimerFunc declaration recently to have a second |timer| parameter. I think it was because you thought it would be a good idea :)\n\nWe could avoid this here by adding a cast when calling loopTimer_new(), but this is equivalent.",
       "parentUuid": "699c97d8_8d37e117",
+      "range": {
+        "startLine": 126,
+        "startChar": 36,
+        "endLine": 126,
+        "endChar": 53
+      },
+      "revId": "2d9d483c3f2189737ff62335b60586a3d507854f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce582944_887d57f2",
+        "filename": "hw/android/goldfish/pipe_throttle.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-24T00:26:08Z",
+      "side": 1,
+      "message": ":)\nDidn\u0027t think about it\nCan you comment out or remove the parameter name to show that it\u0027s not used intentionally?",
+      "parentUuid": "69ee5738_fd058751",
       "range": {
         "startLine": 126,
         "startChar": 36,
