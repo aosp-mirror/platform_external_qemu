@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6ec3bd5a_f5ded83f",
+        "filename": "android/boot-properties.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:04:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ce582944_0bb1615e",
+      "range": {
+        "startLine": 176,
+        "startChar": 8,
+        "endLine": 176,
+        "endChar": 10
+      },
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6e4d7d85_487e3f44",
         "filename": "android/hw-pipe-net.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-24T04:13:49Z",
       "side": 1,
       "message": "Wait, what? No code change but new headers?",
+      "range": {
+        "startLine": 27,
+        "startChar": 24,
+        "endLine": 27,
+        "endChar": 30
+      },
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ebd45ca_730e6078",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:04:58Z",
+      "side": 1,
+      "message": "The stream.h stuff is obsolete (comes from previous version of the patch). The new headers below are necessary due to changes in goldfish/pipe.h",
+      "parentUuid": "6e4d7d85_487e3f44",
       "range": {
         "startLine": 27,
         "startChar": 24,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "4ec27958_d4e1dc06",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:04:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0e5fa128_8d9325d7",
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e2e2591_4e589321",
         "filename": "android/hw-qemud.c",
         "patchSetId": 2
@@ -76,6 +142,30 @@
       "writtenOn": "2015-09-24T04:13:49Z",
       "side": 1,
       "message": "typo?",
+      "range": {
+        "startLine": 1472,
+        "startChar": 4,
+        "endLine": 1472,
+        "endChar": 25
+      },
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ceae6993_38b2091e",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1472,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:04:58Z",
+      "side": 1,
+      "message": "Oh my god, good catch! I\u0027ll fix this.",
+      "parentUuid": "2e2e2591_4e589321",
       "range": {
         "startLine": 1472,
         "startChar": 4,
@@ -105,6 +195,24 @@
     },
     {
       "key": {
+        "uuid": "ce074951_b0f278d0",
+        "filename": "android/hw-qemud.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:04:58Z",
+      "side": 1,
+      "message": "Yes, that\u0027s intentional:\n\n1) To be able to write unit tests for this in C++ later.\n2) To be able too implement pipe services in C++ if we want to",
+      "parentUuid": "4e4c398b_a7c844df",
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ee86cdd4_440e4078",
         "filename": "android/hw-sensors.c",
         "patchSetId": 2
@@ -122,6 +230,24 @@
     },
     {
       "key": {
+        "uuid": "6ec3bd5a_35b2101e",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:04:58Z",
+      "side": 1,
+      "message": "that\u0027s right, I\u0027ll fix it, thanks :)",
+      "parentUuid": "ee86cdd4_440e4078",
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0e5fa128_2d5af9e1",
         "filename": "hw/android/goldfish/pipe_pingpong.c",
         "patchSetId": 2
@@ -133,6 +259,24 @@
       "writtenOn": "2015-09-24T04:13:49Z",
       "side": 1,
       "message": "Again, why just a new include?",
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ec3bd5a_15ad14c1",
+        "filename": "hw/android/goldfish/pipe_pingpong.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:04:58Z",
+      "side": 1,
+      "message": "Because hw/android/goldfish/pipe.h no longer includes hw/hw.h which used to include this header indirectly. The new include is here to allow this file to compile properly.",
+      "parentUuid": "0e5fa128_2d5af9e1",
       "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
