@@ -725,6 +725,7 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
             "emulator$BITNESS-*$EXEEXT" \
             lib/ca-bundle.pem \
             lib/pc-bios \
+            "qemu/$SYSTEM-*/*" \
             "bin$BITNESS/*" \
             "lib$BITNESS/*" )
 
