@@ -215,7 +215,7 @@ if [ -d "$PREBUILTS_DIR/qemu-android" ]; then
     fi
 fi
 if [ -z "$QEMU_ANDROID_BINARIES" ]; then
-    echo "WARNING: Missing qemu-android prebuilts. Please run rebuild-qemu-android.sh!"
+    echo "WARNING: Missing qemu-android prebuilts. Please run build-qemu-android.sh!"
 else
     echo "Copying prebuilt $HOST_PREFIX qemu-android binaries to $OUT_DIR/qemu/"
     for QEMU_ANDROID_BINARY in $QEMU_ANDROID_BINARIES; do
