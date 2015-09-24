@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e4d7d85_bfca8785",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T23:41:58Z",
+      "side": 1,
+      "message": "Slight preference to more specific naming. There\u0027s hw_config, there\u0027s user_config.... :/",
+      "range": {
+        "startLine": 430,
+        "startChar": 20,
+        "endLine": 430,
+        "endChar": 26
+      },
+      "revId": "28b050d5643b0c85bb3b982b6ea48697842fe953",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e4d7d85_bfe16707",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T23:41:58Z",
+      "side": 1,
+      "message": "Only do this if config.enabled is true.\nSee https://android-review.googlesource.com/#/c/168083/2/android/main.c\nAnd while you\u0027re there, +2 that CL ;)",
+      "range": {
+        "startLine": 442,
+        "startChar": 8,
+        "endLine": 442,
+        "endChar": 58
+      },
+      "revId": "28b050d5643b0c85bb3b982b6ea48697842fe953",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
