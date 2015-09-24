@@ -16,6 +16,24 @@
       "revId": "c286163b786f624707c79354972d2263b2fe7ea2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce582944_f794aa03",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T23:46:01Z",
+      "side": 1,
+      "message": "Hmm, I had an assert here because semantically |assert| means a programming error (as opposed to erroring out / exceptions which mean a runtime error).\n\nBut the for loop in line 596 above appends user provided commandline options, so the fixed size args is actually a very unsafe assumption.\n\nI\u0027ll just FixIt in a follow up CL.",
+      "parentUuid": "2e2e2591_1f3993b7",
+      "revId": "c286163b786f624707c79354972d2263b2fe7ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
