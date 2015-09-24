@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ee86cdd4_24e77ca8",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2211,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-24T16:20:49Z",
+      "side": 1,
+      "message": "wrong side :)",
+      "range": {
+        "startLine": 2211,
+        "startChar": 20,
+        "endLine": 2211,
+        "endChar": 22
+      },
+      "revId": "848cfe44a36db6522f5d0c2930244ce36097fc87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
