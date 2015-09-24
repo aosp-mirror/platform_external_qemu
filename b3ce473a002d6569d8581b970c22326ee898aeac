@@ -1,0 +1,141 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce582944_0bb1615e",
+        "filename": "android/boot-properties.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T04:13:49Z",
+      "side": 1,
+      "message": "dead code, that probably needs a living counterpart :)",
+      "range": {
+        "startLine": 176,
+        "startChar": 8,
+        "endLine": 176,
+        "endChar": 10
+      },
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e4d7d85_487e3f44",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T04:13:49Z",
+      "side": 1,
+      "message": "Wait, what? No code change but new headers?",
+      "range": {
+        "startLine": 27,
+        "startChar": 24,
+        "endLine": 27,
+        "endChar": 30
+      },
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e5fa128_8d9325d7",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T04:13:49Z",
+      "side": 1,
+      "message": "nit: no extra newline.",
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e2e2591_4e589321",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1472,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T04:13:49Z",
+      "side": 1,
+      "message": "typo?",
+      "range": {
+        "startLine": 1472,
+        "startChar": 4,
+        "endLine": 1472,
+        "endChar": 25
+      },
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e4c398b_a7c844df",
+        "filename": "android/hw-qemud.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T04:13:49Z",
+      "side": 1,
+      "message": "Ah, you re-introduce the guards in this one ;)",
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ee86cdd4_440e4078",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T04:13:49Z",
+      "side": 1,
+      "message": "nit: no extra newline.\nIf this is separating the generic includes from qemu includes, android/globals.h should move to a qemu specific dir.",
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e5fa128_2d5af9e1",
+        "filename": "hw/android/goldfish/pipe_pingpong.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T04:13:49Z",
+      "side": 1,
+      "message": "Again, why just a new include?",
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
