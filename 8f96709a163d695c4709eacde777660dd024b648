@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "0e5fa128_aa2c8f5f",
+        "filename": "android/qemu/utils/stream.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-24T00:41:19Z",
+      "side": 1,
+      "message": "second that. Having these same names is quite inconvenient, especially after usings",
+      "parentUuid": "ee132d4a_99c81b37",
+      "range": {
+        "startLine": 27,
+        "startChar": 11,
+        "endLine": 27,
+        "endChar": 27
+      },
+      "revId": "8f96709a163d695c4709eacde777660dd024b648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c9b7434b_d3d6a685",
         "filename": "android/qemu/utils/stream.cpp",
         "patchSetId": 1
