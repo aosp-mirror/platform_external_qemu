@@ -22,6 +22,30 @@
       "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eececd75_a1197eb4",
+        "filename": "include/hw/android/goldfish/pipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:04:52Z",
+      "side": 0,
+      "message": "Yes, it\u0027s bare C code that should only be included from QEMU1 C code anyway, never from AndroidEmu one.",
+      "parentUuid": "6e4d7d85_8840b7fd",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 20
+      },
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

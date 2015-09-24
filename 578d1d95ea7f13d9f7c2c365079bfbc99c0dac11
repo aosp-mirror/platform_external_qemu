@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8ec8f176_562074dd",
+        "filename": "android/emulation/android_pipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:04:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ee616dea_ccbb5f45",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "578d1d95ea7f13d9f7c2c365079bfbc99c0dac11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e470569_a99ed91f",
         "filename": "include/hw/android/goldfish/pipe.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-24T03:59:44Z",
       "side": 1,
       "message": "From a quick read here, I don\u0027t understand why the specific constants that you moved are generic, while those left behind are not.\n\nAlso, perhaps we should name the generic and non-generic constants differently? (OK to leave as a TODO in this CL. A clean move is better by itself).",
+      "range": {
+        "startLine": 17,
+        "startChar": 1,
+        "endLine": 24,
+        "endChar": 3
+      },
+      "revId": "578d1d95ea7f13d9f7c2c365079bfbc99c0dac11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ec27958_1426f4fc",
+        "filename": "include/hw/android/goldfish/pipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:04:52Z",
+      "side": 1,
+      "message": "The PIPE_REG_XX and PIPE_CMD_XXX values are private to the virtual device and the corresponding guest kernel driver. Hence they are kept in this file.\n\nThe PIPE_WAKE_XXX, PIPE_POLL_XXX, PIPE_ERROR_XXX values are used between the Pipe client implementations and the generic pipe management code (actually also used by the kernel driver currently, but we could change that in the future).\n\nTechnically, all the declarations here could be moved to hw/android/goldfish/pipe.c, but we don\u0027t really need this.",
+      "parentUuid": "2e470569_a99ed91f",
       "range": {
         "startLine": 17,
         "startChar": 1,
