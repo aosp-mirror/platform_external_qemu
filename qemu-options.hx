@@ -3379,13 +3379,22 @@ DEF("dump-vmstate", HAS_ARG, QEMU_OPTION_dump_vmstate,
     "                Output vmstate information in JSON format to file.\n"
     "                Use the scripts/vmstate-static-checker.py file to\n"
     "                check for possible regressions in migration code\n"
-    "                by comparing two such vmstate dumps.",
+    "                by comparing two such vmstate dumps.\n",
     QEMU_ARCH_ALL)
 STEXI
 @item -dump-vmstate @var{file}
 @findex -dump-vmstate
 Dump json-encoded vmstate information for current machine type to file
 in @var{file}
+ETEXI
+
+DEF("lcd-density", HAS_ARG, QEMU_OPTION_lcd_density,
+    "-lcd-density density\n"
+    "                select lcd display density value (default is 160)\n", QEMU_ARCH_ALL)
+STEXI
+@item -lcd-density density (integer value)
+@findex -lcd-density
+Select lcd display density value (default is 160)
 ETEXI
 
 HXCOMM This is the last statement. Insert new options before this line!

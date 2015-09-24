@@ -120,10 +120,26 @@ int main(int argc, char **argv)
 #include "qom/object_interfaces.h"
 #include "qapi-event.h"
 
+#ifdef CONFIG_ANDROID
+#include "hw/misc/android_boot_properties.h"
+
+#define  LCD_DENSITY_LDPI      120
+#define  LCD_DENSITY_MDPI      160
+#define  LCD_DENSITY_TVDPI     213
+#define  LCD_DENSITY_HDPI      240
+#define  LCD_DENSITY_280DPI    280
+#define  LCD_DENSITY_XHDPI     320
+#define  LCD_DENSITY_360DPI    360
+#define  LCD_DENSITY_400DPI    400
+#define  LCD_DENSITY_XXHDPI    480
+#define  LCD_DENSITY_XXXHDPI   640
+#endif // CONFIG_ANDROID
+
 #define DEFAULT_RAM_SIZE 128
 
 #define MAX_VIRTIO_CONSOLES 1
 #define MAX_SCLP_CONSOLES 1
+
 
 static const char *data_dir[16];
 static int data_dir_idx;
@@ -169,6 +185,9 @@ static int no_reboot;
 int no_shutdown = 0;
 int cursor_hide = 1;
 int graphic_rotate = 0;
+#ifdef CONFIG_ANDROID
+int lcd_density = LCD_DENSITY_MDPI;
+#endif
 const char *watchdog;
 QEMUOptionRom option_rom[MAX_OPTION_ROMS];
 int nb_option_roms;
@@ -3813,11 +3832,42 @@ int main(int argc, char **argv, char **envp)
                     exit(1);
                 }
                 break;
+#ifdef CONFIG_ANDROID
+            case QEMU_OPTION_lcd_density:
+                lcd_density = strtol(optarg, (char **) &optarg, 10);
+                switch (lcd_density) {
+                    case LCD_DENSITY_LDPI:
+                    case LCD_DENSITY_MDPI:
+                    case LCD_DENSITY_TVDPI:
+                    case LCD_DENSITY_HDPI:
+                    case LCD_DENSITY_280DPI:
+                    case LCD_DENSITY_XHDPI:
+                    case LCD_DENSITY_360DPI:
+                    case LCD_DENSITY_400DPI:
+                    case LCD_DENSITY_XXHDPI:
+                    case LCD_DENSITY_XXXHDPI:
+                        break;
+                    default:
+                        fprintf(stderr, "qemu: available lcd densities are: "
+                                "120, 160, 213, 240, 280, 320, 360, 400, 480, 640\n");
+                        exit(1);
+                }
+                break;
+#endif // CONFIG_ANDROID
             default:
                 os_parse_cmd_args(popt->index, optarg);
             }
         }
     }
+
+#ifdef CONFIG_ANDROID
+    if (lcd_density) {
+        char temp[8];
+        snprintf(temp, sizeof(temp), "%d", lcd_density);
+        android_boot_property_add("qemu.sf.lcd_density", temp);
+    }
+#endif // CONFIG_ANDROID
+
     loc_set_none();
 
     os_daemonize();
