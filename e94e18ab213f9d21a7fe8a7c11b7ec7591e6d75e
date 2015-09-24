@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2e2e2591_f4da6e86",
+        "filename": "android/metrics/metrics_reporter_toolbar.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-24T21:57:17Z",
+      "side": 1,
+      "message": "new_out_buf[0] \u003d\u003d 0 ?",
+      "range": {
+        "startLine": 82,
+        "startChar": 41,
+        "endLine": 82,
+        "endChar": 70
+      },
+      "revId": "e94e18ab213f9d21a7fe8a7c11b7ec7591e6d75e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
