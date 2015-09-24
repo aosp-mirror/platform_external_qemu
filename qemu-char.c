@@ -736,6 +736,31 @@ int send_all(int fd, const void *buf, int len1)
     return len1 - len;
 }
 
+int recv_all(int fd, void *_buf, int len1, bool single_read)
+{
+    int ret, len;
+    char *buf = _buf;
+
+    len = len1;
+    while (len > 0) {
+        ret = recv(fd, buf, len, 0);
+        if (ret < 0) {
+            errno = WSAGetLastError();
+            if (errno != WSAEWOULDBLOCK) {
+                return -1;
+            }
+            continue;
+        } else {
+            if (single_read) {
+                return ret;
+            }
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+}
+
 #else
 
 int send_all(int fd, const void *_buf, int len1)
