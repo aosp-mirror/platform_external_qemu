@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4916f301_d7585e73",
+        "filename": "android/boot-properties.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-24T00:17:00Z",
+      "side": 1,
+      "message": "Is there a way to set stream to invalid state?\nif not, please just remove the commented code",
+      "range": {
+        "startLine": 176,
+        "startChar": 8,
+        "endLine": 176,
+        "endChar": 43
+      },
+      "revId": "9a6e68ac13a33d47914e01dc612301e1cfc49770",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "691737fc_956d443f",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1472,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-24T00:17:00Z",
+      "side": 1,
+      "message": "this looks strange",
+      "range": {
+        "startLine": 1472,
+        "startChar": 4,
+        "endLine": 1472,
+        "endChar": 25
+      },
+      "revId": "9a6e68ac13a33d47914e01dc612301e1cfc49770",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09aebbf9_72c6d8d2",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1743,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-24T00:17:00Z",
+      "side": 1,
+      "message": "what about here? why can\u0027t we change the parameter itself?",
+      "range": {
+        "startLine": 1743,
+        "startChar": 23,
+        "endLine": 1743,
+        "endChar": 31
+      },
+      "revId": "9a6e68ac13a33d47914e01dc612301e1cfc49770",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
