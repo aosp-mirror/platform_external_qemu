@@ -94,6 +94,30 @@
       "revId": "a6462a4ff6ff2c6cce77e7c0d3383ea2c5515678",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce582944_6ee58bdf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-24T16:30:34Z",
+      "side": 1,
+      "message": "It makes sense now. I actually thought that hardware-specific part is a \u0027derived\u0027 class, while Pipe is a base.",
+      "parentUuid": "4ec27958_54b78c0c",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 6
+      },
+      "revId": "a6462a4ff6ff2c6cce77e7c0d3383ea2c5515678",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
