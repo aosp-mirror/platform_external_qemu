@@ -19,6 +19,7 @@
 #include "android/metrics/studio-helper.h"
 #include "android/utils/compiler.h"
 #include "android/utils/debug.h"
+#include "android/utils/uri.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -50,9 +51,9 @@ int formatToolbarGetUrl(char** ptr,
     char* client_id = android_studio_get_installation_id();
     int result = asprintf(
             &out_buf,
-            "%s?as=%s&%s=%s&%s=%s&%s=%s"
+            "as=%s&%s=%s&%s=%s&%s=%s"
             "&%s=%d&%s=%" PRId64 "&%s=%" PRId64,
-            url, product_name,
+            product_name,
             version_key, metrics->emulator_version,
             client_id_key, client_id,
             guest_arch_key, metrics->guest_arch,
@@ -71,6 +72,21 @@ int formatToolbarGetUrl(char** ptr,
                 guest_gl_vendor_key, metrics->guest_gl_vendor,
                 guest_gl_renderer_key, metrics->guest_gl_renderer,
                 guest_gl_version_key, metrics->guest_gl_version);
+        free(out_buf);
+        out_buf = new_out_buf;
+    }
+
+    if (result >= 0) {
+        char* new_out_buf = uri_encode(out_buf);
+        // There is no real reason to ping the empty string "" either.
+        result = (new_out_buf == NULL || new_out_buf[0] == 0) ? -1 : result;
+        free(out_buf);
+        out_buf = new_out_buf;
+    }
+
+    if (result >= 0) {
+        char* new_out_buf;
+        result = asprintf(&new_out_buf, "%s?%s", url, out_buf);
         free(out_buf);
         out_buf = new_out_buf;
     }
