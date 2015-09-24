@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 
+#include <assert.h>
 #include <signal.h>
 #include <unistd.h>
 #include <string.h>
@@ -893,6 +894,12 @@ int main(int argc, char **argv) {
     }
 #endif
 
+    if (hw->hw_cpu_ncore > 1) {
+        derror("Classic qemu does not support SMP. "
+               "Please remove the hw.cpu.ncore option from your config file.");
+        exit(1);
+    }
+
     /* Setup screen emulation */
     if (opts->screen) {
         if (strcmp(opts->screen, "touch") &&
@@ -911,6 +918,8 @@ int main(int argc, char **argv) {
         args[n++] = *argv++;
     }
     args[n] = 0;
+    // We started with 128 slots in |args|.
+    assert(n < 128);
 
     /* Generate a hardware-qemu.ini for this AVD. The real hardware
      * configuration is ususally stored in several files, e.g. the AVD's

@@ -20,6 +20,7 @@
 #include "android/base/String.h"
 #include "android/base/StringFormat.h"
 
+#include "android/avd/hw-config.h"
 #include "android/cmdline-option.h"
 #include "android/globals.h"
 #include "android/help.h"
@@ -32,6 +33,7 @@
 #include "android/utils/stralloc.h"
 #include "android/utils/win32_cmdline_quote.h"
 
+#include <assert.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -513,6 +515,14 @@ extern "C" int main(int argc, char **argv, char **envp) {
     args[n++] = "-machine";
     args[n++] = "type=ranchu";
 #endif  // !TARGET_X86_64 && !TARGET_X86
+
+    // SMP Support.
+    if (hw->hw_cpu_ncore > 1) {
+        args[n++] = "-smp";
+        String ncores = StringFormat("cores=%ld", hw->hw_cpu_ncore);
+        args[n++] = strdup(ncores.c_str());
+    }
+
     // Memory size
     args[n++] = "-m";
     String memorySize = StringFormat("%ld", hw->hw_ramSize);
@@ -588,6 +598,8 @@ extern "C" int main(int argc, char **argv, char **envp) {
     }
 
     args[n] = NULL;
+    // We allocated only 128 slots in |args|.
+    assert(n < 128);
 
     if(VERBOSE_CHECK(init)) {
         int i;
