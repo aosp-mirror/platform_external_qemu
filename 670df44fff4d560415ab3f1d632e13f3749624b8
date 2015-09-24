@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6ec3bd5a_55ceac98",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:05:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4e1ef95a_346230df",
+      "range": {
+        "startLine": 10,
+        "startChar": 12,
+        "endLine": 10,
+        "endChar": 14
+      },
+      "revId": "670df44fff4d560415ab3f1d632e13f3749624b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e2e2591_ebf85184",
         "filename": "hw/android/goldfish/pipe.c",
         "patchSetId": 1
