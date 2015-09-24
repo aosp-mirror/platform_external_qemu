@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e4d7d85_8840b7fd",
+        "filename": "include/hw/android/goldfish/pipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T03:59:44Z",
+      "side": 0,
+      "message": "Was it intentional to no longer guard this with the usual externs?\niiuc, this is the case because the qemu specific header will never be included in more generic android code (which contains C++)?",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 20
+      },
+      "revId": "b3ce473a002d6569d8581b970c22326ee898aeac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

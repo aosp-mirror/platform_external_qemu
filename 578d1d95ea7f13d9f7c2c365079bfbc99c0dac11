@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ee616dea_ccbb5f45",
+        "filename": "android/emulation/android_pipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T03:59:44Z",
+      "side": 1,
+      "message": "nit: This is a new file. 2015?",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "578d1d95ea7f13d9f7c2c365079bfbc99c0dac11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e470569_a99ed91f",
+        "filename": "include/hw/android/goldfish/pipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T03:59:44Z",
+      "side": 1,
+      "message": "From a quick read here, I don\u0027t understand why the specific constants that you moved are generic, while those left behind are not.\n\nAlso, perhaps we should name the generic and non-generic constants differently? (OK to leave as a TODO in this CL. A clean move is better by itself).",
+      "range": {
+        "startLine": 17,
+        "startChar": 1,
+        "endLine": 24,
+        "endChar": 3
+      },
+      "revId": "578d1d95ea7f13d9f7c2c365079bfbc99c0dac11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
