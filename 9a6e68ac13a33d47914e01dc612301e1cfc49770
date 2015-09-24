@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8ec8f176_36b2181e",
+        "filename": "android/boot-properties.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:04:58Z",
+      "side": 1,
+      "message": "Yes, this requires modifying the Stream code to store the error code, and I\u0027m not sre it\u0027s totally worth it, I\u0027ll remove the comment.",
+      "parentUuid": "4916f301_d7585e73",
+      "range": {
+        "startLine": 176,
+        "startChar": 8,
+        "endLine": 176,
+        "endChar": 43
+      },
+      "revId": "9a6e68ac13a33d47914e01dc612301e1cfc49770",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "691737fc_956d443f",
         "filename": "android/hw-qemud.c",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2015-09-24T00:17:00Z",
       "side": 1,
       "message": "what about here? why can\u0027t we change the parameter itself?",
+      "range": {
+        "startLine": 1743,
+        "startChar": 23,
+        "endLine": 1743,
+        "endChar": 31
+      },
+      "revId": "9a6e68ac13a33d47914e01dc612301e1cfc49770",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e9a4178_52b7b40c",
+        "filename": "android/hw-qemud.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1743,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T12:04:58Z",
+      "side": 1,
+      "message": "This is a callback that is invoked from QEMU\u0027s savevm.c, so it will always receive a QEMUFile* parameter. I\u0027ll make this a little more clear with an adapter function that handles the QEMUFile wrapping only.",
+      "parentUuid": "09aebbf9_72c6d8d2",
       "range": {
         "startLine": 1743,
         "startChar": 23,
