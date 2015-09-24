@@ -1,0 +1,9 @@
+Verified+1: Prathmesh Prabhu <pprabhu@google.com>
+Code-Review+1: Yurii Zubrytskyi <zyy@google.com>
+Code-Review+2: David Turner <digit@google.com>
+Verified+1: David Turner <digit@google.com>
+Submitted-by: David Turner <digit@google.com>
+Submitted-at: Thu, 24 Sep 2015 09:02:51 +0000
+Reviewed-on: https://android-review.googlesource.com/172731
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
