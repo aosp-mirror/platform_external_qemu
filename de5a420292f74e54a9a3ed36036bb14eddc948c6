@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ee616dea_cf435132",
+        "filename": "android/qemu/utils/stream.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-24T16:26:51Z",
+      "side": 1,
+      "message": "I bet it will stay here for at least a year ;)",
+      "range": {
+        "startLine": 38,
+        "startChar": 19,
+        "endLine": 38,
+        "endChar": 53
+      },
+      "revId": "de5a420292f74e54a9a3ed36036bb14eddc948c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
