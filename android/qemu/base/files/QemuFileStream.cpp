@@ -13,7 +13,9 @@
 
 #include "android/base/Log.h"
 
+extern "C" {
 #include "migration/qemu-file.h"
+}
 
 namespace android {
 namespace qemu {

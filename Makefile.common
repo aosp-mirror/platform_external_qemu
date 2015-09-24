@@ -191,6 +191,10 @@ common_LOCAL_SRC_FILES += \
 	android/base/threads/ThreadStore.cpp \
 	android/base/Uri.cpp \
 	android/base/Version.cpp \
+	android/emulation/android_pipe.c \
+	android/emulation/android_pipe_pingpong.c \
+	android/emulation/android_pipe_throttle.c \
+	android/emulation/android_pipe_zero.c \
 	android/emulation/bufprint_config_dirs.cpp \
 	android/emulation/ConfigDirs.cpp \
 	android/emulation/CpuAccelerator.cpp \
@@ -205,6 +209,7 @@ common_LOCAL_SRC_FILES += \
 	android/metrics/StudioHelper.cpp \
 	android/qemu/base/async/Looper.cpp \
 	android/qemu/base/files/QemuFileStream.cpp \
+	android/qemu/utils/stream.cpp \
 	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
 	android/opengl/emugl_config.cpp \

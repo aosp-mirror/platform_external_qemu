@@ -35,10 +35,15 @@ uint16_t stream_get_be16(Stream* stream);
 uint32_t stream_get_be32(Stream* stream);
 uint64_t stream_get_be64(Stream* stream);
 
+void stream_put_float(Stream* stream, float v);
+float stream_get_float(Stream* stream);
+
 void stream_put_string(Stream* stream, const char* str);
 
 // Return a heap-allocated string, or NULL if empty string or error.
 // Caller must free() the resturned value.
 char* stream_get_string(Stream* stream);
+
+void stream_free(Stream* stream);
 
 ANDROID_END_HEADER

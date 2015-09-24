@@ -164,9 +164,7 @@ boot_property_add( const char*  name, const char*  value )
 
 /* Saves a single BootProperty to file.
  */
-static int
-boot_property_save_property( QEMUFile  *f, BootProperty  *p )
-{
+static int boot_property_save_property(Stream* f, BootProperty* p) {
     /* split in key and value, so we can re-use boot_property_add (and its
      * sanity checks) when loading
      */
@@ -175,19 +173,19 @@ boot_property_save_property( QEMUFile  *f, BootProperty  *p )
     if (split == NULL) {
         D("%s: save failed: illegal key/value pair \"%s\" (missing '=')\n",
           __FUNCTION__, p->property);
-        qemu_file_set_error(f, -EINVAL);
+        // qemu_file_set_error(f, -EINVAL);
         return -1;
     }
 
     *split = '\0';  /* p->property is now "<key>\0<value>\0" */
 
     uint32_t key_buf_len = (split - p->property) + 1; // +1: '\0' terminator
-    qemu_put_be32(f, key_buf_len);
-    qemu_put_buffer(f, (uint8_t*) p->property, key_buf_len);
+    stream_put_be32(f, key_buf_len);
+    stream_write(f, (uint8_t*)p->property, key_buf_len);
 
     uint32_t value_buf_len = p->length - key_buf_len + 1; // +1: '\0' terminator
-    qemu_put_be32(f, value_buf_len);
-    qemu_put_buffer(f, (uint8_t*) split + 1, value_buf_len);
+    stream_put_be32(f, value_buf_len);
+    stream_write(f, (uint8_t*)split + 1, value_buf_len);
 
     *split = '=';  /* restore property to "<key>=<value>\0" */
 
@@ -196,24 +194,24 @@ boot_property_save_property( QEMUFile  *f, BootProperty  *p )
 
 /* Loads a single boot property from a snapshot file
  */
-static int
-boot_property_load_property( QEMUFile  *f )
-{
+static int boot_property_load_property(Stream* f) {
     int ret;
 
     /* load key */
-    uint32_t key_buf_len = qemu_get_be32(f);
+    uint32_t key_buf_len = stream_get_be32(f);
     char* key = android_alloc(key_buf_len);
-    if ((ret = qemu_get_buffer(f, (uint8_t*)key, key_buf_len) != (int)key_buf_len)) {
+    if ((ret = stream_read(f, (uint8_t*)key, key_buf_len) !=
+               (int)key_buf_len)) {
         D("%s: key load failed: expected %d bytes, got %d\n",
           __FUNCTION__, key_buf_len, ret);
         goto fail_key;
     }
 
     /* load value */
-    uint32_t value_buf_len = qemu_get_be32(f);
+    uint32_t value_buf_len = stream_get_be32(f);
     char* value = android_alloc(value_buf_len);
-    if ((ret = qemu_get_buffer(f, (uint8_t*)value, value_buf_len) != (int)value_buf_len)) {
+    if ((ret = stream_read(f, (uint8_t*)value, value_buf_len) !=
+               (int)value_buf_len)) {
         D("%s: value load failed: expected %d bytes, got %d\n",
           __FUNCTION__, value_buf_len, ret);
         goto fail_value;
@@ -240,22 +238,18 @@ boot_property_load_property( QEMUFile  *f )
 
 /* Saves the number of available boot properties to file
  */
-static void
-boot_property_save_count( QEMUFile*  f, BootProperty*  p )
-{
+static void boot_property_save_count(Stream* f, BootProperty* p) {
     uint32_t property_count = 0;
     for (; p; p = p->next) {
         property_count++;
     }
 
-    qemu_put_be32(f, property_count);
+    stream_put_be32(f, property_count);
 }
 
 /* Saves all available boot properties to snapshot.
  */
-static void
-boot_property_save( QEMUFile*  f, QemudService*  service, void*  opaque )
-{
+static void boot_property_save(Stream* f, QemudService* service, void* opaque) {
     boot_property_save_count(f, _boot_properties);
 
     BootProperty *p = _boot_properties;
@@ -269,16 +263,14 @@ boot_property_save( QEMUFile*  f, QemudService*  service, void*  opaque )
 /* Replaces the currently available boot properties by those stored
  * in a snapshot.
  */
-static int
-boot_property_load( QEMUFile*  f, QemudService*  service, void*  opaque )
-{
+static int boot_property_load(Stream* f, QemudService* service, void* opaque) {
     int ret;
 
     /* remove properties from old run */
     boot_property_clear_all();
 
     /* load properties from snapshot */
-    uint32_t i, property_count = qemu_get_be32(f);
+    uint32_t i, property_count = stream_get_be32(f);
     for (i = 0; i < property_count; i++) {
         if ((ret = boot_property_load_property(f))) {
             return ret;

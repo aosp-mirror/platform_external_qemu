@@ -62,6 +62,14 @@ uint64_t stream_get_be64(Stream* stream) {
     return asBaseStream(stream)->getBe64();
 }
 
+void stream_put_float(Stream* stream, float v) {
+    asBaseStream(stream)->putFloat(v);
+}
+
+float stream_get_float(Stream* stream) {
+    return asBaseStream(stream)->getFloat();
+}
+
 void stream_put_string(Stream* stream, const char* str) {
     asBaseStream(stream)->putString(str);
 }
@@ -74,4 +82,8 @@ char* stream_get_string(Stream* stream) {
     char* result = static_cast<char*>(::malloc(ret.size() + 1U));
     ::memcpy(result, ret.c_str(), ret.size() + 1U);
     return result;
+}
+
+void stream_free(Stream* stream) {
+    delete asBaseStream(stream);
 }

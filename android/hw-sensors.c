@@ -10,17 +10,20 @@
 ** GNU General Public License for more details.
 */
 
-#include <math.h>
 #include "android/hw-sensors.h"
+
+#include "android/globals.h"
+#include "android/hw-qemud.h"
+#include "android/qemu/utils/stream.h"
+#include "android/sensors-port.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
+#include "android/utils/stream.h"
 #include "android/utils/system.h"
-#include "android/hw-qemud.h"
-#include "android/globals.h"
-#include "hw/hw.h"
-#include "sysemu/char.h"
+
 #include "qemu/timer.h"
-#include "android/sensors-port.h"
+
+#include <math.h>
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
@@ -454,25 +457,21 @@ _hwSensorClient_receive( HwSensorClient*  cl, uint8_t*  msg, int  msglen )
 }
 
 /* Saves sensor-specific client data to snapshot */
-static void
-_hwSensorClient_save( QEMUFile*  f, QemudClient*  client, void*  opaque  )
-{
+static void _hwSensorClient_save(Stream* f, QemudClient* client, void* opaque) {
     HwSensorClient* sc = opaque;
 
-    qemu_put_be32(f, sc->delay_ms);
-    qemu_put_be32(f, sc->enabledMask);
-    timer_put(f, sc->timer);
+    stream_put_be32(f, sc->delay_ms);
+    stream_put_be32(f, sc->enabledMask);
+    stream_put_qemu_timer(f, sc->timer);
 }
 
 /* Loads sensor-specific client data from snapshot */
-static int
-_hwSensorClient_load( QEMUFile*  f, QemudClient*  client, void*  opaque  )
-{
+static int _hwSensorClient_load(Stream* f, QemudClient* client, void* opaque) {
     HwSensorClient* sc = opaque;
 
-    sc->delay_ms = qemu_get_be32(f);
-    sc->enabledMask = qemu_get_be32(f);
-    timer_get(f, sc->timer);
+    sc->delay_ms = stream_get_be32(f);
+    sc->enabledMask = stream_get_be32(f);
+    stream_get_qemu_timer(f, sc->timer);
 
     return 0;
 }
@@ -509,42 +508,40 @@ _hwSensors_setSensorValue( HwSensors*  h, int sensor_id, float a, float b, float
 
 /* Saves available sensors to allow checking availability when loaded.
  */
-static void
-_hwSensors_save( QEMUFile*  f, QemudService*  sv, void*  opaque)
-{
+static void _hwSensors_save(Stream* f, QemudService* sv, void* opaque) {
     HwSensors* h = opaque;
 
     // number of sensors
-    qemu_put_be32(f, MAX_SENSORS);
+    stream_put_be32(f, MAX_SENSORS);
     AndroidSensor i;
     for (i = 0 ; i < MAX_SENSORS; i++) {
         Sensor* s = &h->sensors[i];
-        qemu_put_be32(f, s->enabled);
+        stream_put_be32(f, s->enabled);
 
         /* this switch ensures that a warning is raised when a new sensor is
          * added and is not added here as well.
          */
         switch (i) {
         case ANDROID_SENSOR_ACCELERATION:
-            qemu_put_float(f, s->u.acceleration.x);
-            qemu_put_float(f, s->u.acceleration.y);
-            qemu_put_float(f, s->u.acceleration.z);
+            stream_put_float(f, s->u.acceleration.x);
+            stream_put_float(f, s->u.acceleration.y);
+            stream_put_float(f, s->u.acceleration.z);
             break;
         case ANDROID_SENSOR_MAGNETIC_FIELD:
-            qemu_put_float(f, s->u.magnetic.x);
-            qemu_put_float(f, s->u.magnetic.y);
-            qemu_put_float(f, s->u.magnetic.z);
+            stream_put_float(f, s->u.magnetic.x);
+            stream_put_float(f, s->u.magnetic.y);
+            stream_put_float(f, s->u.magnetic.z);
             break;
         case ANDROID_SENSOR_ORIENTATION:
-            qemu_put_float(f, s->u.orientation.azimuth);
-            qemu_put_float(f, s->u.orientation.pitch);
-            qemu_put_float(f, s->u.orientation.roll);
+            stream_put_float(f, s->u.orientation.azimuth);
+            stream_put_float(f, s->u.orientation.pitch);
+            stream_put_float(f, s->u.orientation.roll);
             break;
         case ANDROID_SENSOR_TEMPERATURE:
-            qemu_put_float(f, s->u.temperature.celsius);
+            stream_put_float(f, s->u.temperature.celsius);
             break;
         case ANDROID_SENSOR_PROXIMITY:
-            qemu_put_float(f, s->u.proximity.value);
+            stream_put_float(f, s->u.proximity.value);
             break;
         case MAX_SENSORS:
             break;
@@ -552,14 +549,11 @@ _hwSensors_save( QEMUFile*  f, QemudService*  sv, void*  opaque)
     }
 }
 
-
-static int
-_hwSensors_load( QEMUFile*  f, QemudService*  s, void*  opaque)
-{
+static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
     HwSensors* h = opaque;
 
     /* check number of sensors */
-    int32_t num_sensors = qemu_get_be32(f);
+    int32_t num_sensors = stream_get_be32(f);
     if (num_sensors > MAX_SENSORS) {
         D("%s: cannot load: snapshot requires %d sensors, %d available\n",
           __FUNCTION__, num_sensors, MAX_SENSORS);
@@ -570,32 +564,32 @@ _hwSensors_load( QEMUFile*  f, QemudService*  s, void*  opaque)
     AndroidSensor i;
     for (i = 0 ; i < (AndroidSensor)num_sensors; i++) {
         Sensor* s = &h->sensors[i];
-        s->enabled = qemu_get_be32(f);
+        s->enabled = stream_get_be32(f);
 
         /* this switch ensures that a warning is raised when a new sensor is
          * added and is not added here as well.
          */
         switch (i) {
         case ANDROID_SENSOR_ACCELERATION:
-            s->u.acceleration.x = qemu_get_float(f);
-            s->u.acceleration.y = qemu_get_float(f);
-            s->u.acceleration.z = qemu_get_float(f);
+            s->u.acceleration.x = stream_get_float(f);
+            s->u.acceleration.y = stream_get_float(f);
+            s->u.acceleration.z = stream_get_float(f);
             break;
         case ANDROID_SENSOR_MAGNETIC_FIELD:
-            s->u.magnetic.x = qemu_get_float(f);
-            s->u.magnetic.y = qemu_get_float(f);
-            s->u.magnetic.z = qemu_get_float(f);
+            s->u.magnetic.x = stream_get_float(f);
+            s->u.magnetic.y = stream_get_float(f);
+            s->u.magnetic.z = stream_get_float(f);
             break;
         case ANDROID_SENSOR_ORIENTATION:
-            s->u.orientation.azimuth = qemu_get_float(f);
-            s->u.orientation.pitch   = qemu_get_float(f);
-            s->u.orientation.roll    = qemu_get_float(f);
+            s->u.orientation.azimuth = stream_get_float(f);
+            s->u.orientation.pitch = stream_get_float(f);
+            s->u.orientation.roll = stream_get_float(f);
             break;
         case ANDROID_SENSOR_TEMPERATURE:
-            s->u.temperature.celsius = qemu_get_float(f);
+            s->u.temperature.celsius = stream_get_float(f);
             break;
         case ANDROID_SENSOR_PROXIMITY:
-            s->u.proximity.value = qemu_get_float(f);
+            s->u.proximity.value = stream_get_float(f);
             break;
         case MAX_SENSORS:
             break;

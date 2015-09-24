@@ -9,13 +9,17 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+
+#include "android/qemu/utils/stream.h"
 #include "android/utils/panic.h"
+#include "android/utils/stream.h"
 #include "android/utils/system.h"
+
 #include "hw/android/goldfish/pipe.h"
 #include "hw/android/goldfish/device.h"
 #include "hw/android/goldfish/vmem.h"
 #include "exec/ram_addr.h"
-#include "qemu/timer.h"
+#include "migration/vmstate.h"
 
 #define  DEBUG 0
 
@@ -51,73 +55,8 @@
 /* Set to 1 to enable the 'throttle' pipe type, useful for debugging */
 #define DEBUG_THROTTLE_PIPE 1
 
-/* Maximum length of pipe service name, in characters (excluding final 0) */
-#define MAX_PIPE_SERVICE_NAME_SIZE  255
-
-#define GOLDFISH_PIPE_SAVE_VERSION  3
-
-// Up to Tools r22.6, the emulator saved with this version number.
-#define GOLDFISH_PIPE_SAVE_VERSION_LEGACY  2
-
-/***********************************************************************
- ***********************************************************************
- *****
- *****   P I P E   S E R V I C E   R E G I S T R A T I O N
- *****
- *****/
-
-#define MAX_PIPE_SERVICES  8
-typedef struct {
-    const char*        name;
-    void*              opaque;
-    GoldfishPipeFuncs  funcs;
-} PipeService;
-
-typedef struct {
-    int          count;
-    PipeService  services[MAX_PIPE_SERVICES];
-} PipeServices;
-
-static PipeServices  _pipeServices[1];
-
-void
-goldfish_pipe_add_type(const char*               pipeName,
-                       void*                     pipeOpaque,
-                       const GoldfishPipeFuncs*  pipeFuncs )
-{
-    PipeServices* list = _pipeServices;
-    int           count = list->count;
-
-    if (count >= MAX_PIPE_SERVICES) {
-        APANIC("Too many goldfish pipe services (%d)", count);
-    }
-
-    if (strlen(pipeName) > MAX_PIPE_SERVICE_NAME_SIZE) {
-        APANIC("Pipe service name too long: '%s'", pipeName);
-    }
-
-    list->services[count].name   = pipeName;
-    list->services[count].opaque = pipeOpaque;
-    list->services[count].funcs  = pipeFuncs[0];
-
-    list->count++;
-}
-
-static const PipeService*
-goldfish_pipe_find_type(const char*  pipeName)
-{
-    PipeServices* list = _pipeServices;
-    int           count = list->count;
-    int           nn;
-
-    for (nn = 0; nn < count; nn++) {
-        if (!strcmp(list->services[nn].name, pipeName)) {
-            return &list->services[nn];
-        }
-    }
-    return NULL;
-}
-
+#define GOLDFISH_PIPE_SAVE_VERSION  4
+#define GOLDFISH_PIPE_SAVE_LEGACY_VERSION  3
 
 /***********************************************************************
  ***********************************************************************
@@ -128,47 +67,52 @@ goldfish_pipe_find_type(const char*  pipeName)
 
 typedef struct PipeDevice  PipeDevice;
 
-typedef struct Pipe {
-    struct Pipe*              next;
-    struct Pipe*              next_waked;
-    PipeDevice*                device;
-    uint64_t                   channel;
-    void*                      opaque;
-    const GoldfishPipeFuncs*   funcs;
-    const PipeService*         service;
-    char*                      args;
-    unsigned char              wanted;
-    char                       closed;
-} Pipe;
+/***********************************************************************
+ ***********************************************************************
+ *****
+ *****    G O L D F I S H   P I P E   D E V I C E
+ *****
+ *****/
 
-/* Forward */
-static void*  pipeConnector_new(Pipe*  pipe);
+// An HwPipe instance models the virtual hardware view of a given
+// Android pipe.
+typedef struct HwPipe {
+    struct HwPipe* next;
+    struct HwPipe* next_waked;
+    uint64_t channel;
+    unsigned char wakes;
+    unsigned char closed;
+    void* pipe;
+    struct PipeDevice* device;
+} HwPipe;
 
-static Pipe*
-pipe_new0(PipeDevice* dev)
-{
-    Pipe*  pipe;
-    ANEW0(pipe);
-    pipe->device = dev;
-    return pipe;
+static HwPipe* hwpipe_new0(struct PipeDevice* device) {
+    HwPipe* hwp;
+    ANEW0(hwp);
+    hwp->device = device;
+    return hwp;
 }
 
-static Pipe*
-pipe_new(uint64_t channel, PipeDevice* dev)
-{
-    Pipe*  pipe = pipe_new0(dev);
-    pipe->channel = channel;
-    pipe->opaque  = pipeConnector_new(pipe);
-    return pipe;
+static HwPipe* hwpipe_new(uint64_t channel, struct PipeDevice* device) {
+    HwPipe* hwp = hwpipe_new0(device);
+    hwp->channel = channel;
+    hwp->pipe = android_pipe_new(hwp);
+    return hwp;
 }
 
-static Pipe**
-pipe_list_findp_channel( Pipe** list, uint64_t channel )
-{
-    Pipe** pnode = list;
+static void hwpipe_free(HwPipe* hwp) {
+    android_pipe_free(hwp->pipe);
+    free(hwp);
+}
+
+static HwPipe** hwpipe_findp_by_channel(HwPipe** list, uint64_t channel) {
+    HwPipe** pnode = list;
     for (;;) {
-        Pipe* node = *pnode;
-        if (node == NULL || node->channel == channel) {
+        HwPipe* node = *pnode;
+        if (!node) {
+            break;
+        }
+        if (node->channel == channel) {
             break;
         }
         pnode = &node->next;
@@ -176,29 +120,11 @@ pipe_list_findp_channel( Pipe** list, uint64_t channel )
     return pnode;
 }
 
-#if 0
-static Pipe**
-pipe_list_findp_opaque( Pipe** list, void* opaque )
-{
-    Pipe** pnode = list;
+static HwPipe** hwpipe_findp_signaled(HwPipe** list, HwPipe* pipe) {
+    HwPipe** pnode = list;
     for (;;) {
-        Pipe* node = *pnode;
-        if (node == NULL || node->opaque == opaque) {
-            break;
-        }
-        pnode = &node->next;
-    }
-    return pnode;
-}
-#endif
-
-static Pipe**
-pipe_list_findp_waked( Pipe** list, Pipe* pipe )
-{
-    Pipe** pnode = list;
-    for (;;) {
-        Pipe* node = *pnode;
-        if (node == NULL || node == pipe) {
+        HwPipe* node = *pnode;
+        if (!node || node == pipe) {
             break;
         }
         pnode = &node->next_waked;
@@ -207,758 +133,58 @@ pipe_list_findp_waked( Pipe** list, Pipe* pipe )
 }
 
 
-static void
-pipe_list_remove_waked( Pipe** list, Pipe*  pipe )
-{
-    Pipe** lookup = pipe_list_findp_waked(list, pipe);
-    Pipe*  node   = *lookup;
-
-    if (node != NULL) {
-        (*lookup) = node->next_waked;
-        node->next_waked = NULL;
+static void hwpipe_remove_signaled(HwPipe** list, HwPipe* pipe) {
+    HwPipe** pnode = hwpipe_findp_signaled(list, pipe);
+    if (*pnode) {
+        *pnode = pipe->next_waked;
+        pipe->next_waked = NULL;
     }
 }
 
-static void
-pipe_save( Pipe* pipe, QEMUFile* file )
-{
-    if (pipe->service == NULL) {
-        /* pipe->service == NULL means we're still using a PipeConnector */
-        /* Write a zero to indicate this condition */
-        qemu_put_byte(file, 0);
-    } else {
-        /* Otherwise, write a '1' then the service name */
-        qemu_put_byte(file, 1);
-        qemu_put_string(file, pipe->service->name);
-    }
-
+static void hwpipe_save(HwPipe* pipe, Stream* file) {
     /* Now save other common data */
-    qemu_put_be64(file, pipe->channel);
-    qemu_put_byte(file, (int)pipe->wanted);
-    qemu_put_byte(file, (int)pipe->closed);
+    stream_put_be64(file, pipe->channel);
+    stream_put_byte(file, (int)pipe->wakes);
+    stream_put_byte(file, (int)pipe->closed);
 
-    /* Write 1 + args, if any, or simply 0 otherwise */
-    if (pipe->args != NULL) {
-        qemu_put_byte(file, 1);
-        qemu_put_string(file, pipe->args);
-    } else {
-        qemu_put_byte(file, 0);
-    }
-
-    if (pipe->funcs->save) {
-        pipe->funcs->save(pipe->opaque, file);
-    }
+    android_pipe_save(pipe->pipe, file);
 }
 
-static Pipe*
-pipe_load( PipeDevice* dev, QEMUFile* file, int version_id )
-{
-    Pipe*              pipe;
-    const PipeService* service = NULL;
-    int   state = qemu_get_byte(file);
-    uint64_t channel;
+static HwPipe* hwpipe_load(PipeDevice* dev, Stream* file, int version_id) {
+    HwPipe* pipe = hwpipe_new0(dev);
 
-    if (state != 0) {
-        /* Pipe is associated with a service. */
-        char* name = qemu_get_string(file);
-        if (name == NULL)
-            return NULL;
-
-        service = goldfish_pipe_find_type(name);
-        if (service == NULL) {
-            D("No QEMU pipe service named '%s'", name);
-            AFREE(name);
-            return NULL;
-        }
-    }
-
-    if (version_id == GOLDFISH_PIPE_SAVE_VERSION_LEGACY) {
-        channel = qemu_get_be32(file);
+    char force_close = 0;
+    if (version_id == GOLDFISH_PIPE_SAVE_LEGACY_VERSION) {
+        pipe->pipe = android_pipe_load_legacy(file, pipe, &pipe->channel,
+                                              &pipe->wakes, &pipe->closed,
+                                              &force_close);
     } else {
-        channel = qemu_get_be64(file);
-    }
-    pipe = pipe_new(channel, dev);
-    pipe->wanted  = qemu_get_byte(file);
-    pipe->closed  = qemu_get_byte(file);
-    if (qemu_get_byte(file) != 0) {
-        pipe->args = qemu_get_string(file);
+        pipe->channel = stream_get_be64(file);
+        pipe->wakes = stream_get_byte(file);
+        pipe->closed = stream_get_byte(file);
+        pipe->pipe = android_pipe_load(file, pipe, &force_close);
     }
 
-    pipe->service = service;
-    if (service != NULL) {
-        pipe->funcs = &service->funcs;
+    if (!pipe->pipe) {
+        hwpipe_free(pipe);
+        return NULL;
     }
 
-    if (pipe->funcs->load) {
-        pipe->opaque = pipe->funcs->load(pipe, service ? service->opaque : NULL, pipe->args, file);
-        if (pipe->opaque == NULL) {
-            AFREE(pipe);
-            return NULL;
-        }
-    } else {
-        /* Force-close the pipe on load */
+    if (force_close) {
         pipe->closed = 1;
     }
+
     return pipe;
 }
-
-static void
-pipe_free( Pipe* pipe )
-{
-    /* Call close callback */
-    if (pipe->funcs->close) {
-        pipe->funcs->close(pipe->opaque);
-    }
-    /* Free stuff */
-    AFREE(pipe->args);
-    AFREE(pipe);
-}
-
-/***********************************************************************
- ***********************************************************************
- *****
- *****    P I P E   C O N N E C T O R S
- *****
- *****/
-
-/* These are used to handle the initial connection attempt, where the
- * client is going to write the name of the pipe service it wants to
- * connect to, followed by a terminating zero.
- */
-typedef struct {
-    Pipe*  pipe;
-    char   buffer[128];
-    int    buffpos;
-} PipeConnector;
-
-static const GoldfishPipeFuncs  pipeConnector_funcs;  // forward
-
-void*
-pipeConnector_new(Pipe*  pipe)
-{
-    PipeConnector*  pcon;
-
-    ANEW0(pcon);
-    pcon->pipe  = pipe;
-    pipe->funcs = &pipeConnector_funcs;
-    return pcon;
-}
-
-static void
-pipeConnector_close( void* opaque )
-{
-    PipeConnector*  pcon = opaque;
-    AFREE(pcon);
-}
-
-static int
-pipeConnector_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
-{
-    PipeConnector* pcon = opaque;
-    const GoldfishPipeBuffer*  buffers_limit = buffers + numBuffers;
-    int ret = 0;
-
-    DD("%s: channel=0x%llx numBuffers=%d", __FUNCTION__,
-       (unsigned long long)pcon->pipe->channel,
-       numBuffers);
-
-    while (buffers < buffers_limit) {
-        int  avail;
-
-        DD("%s: buffer data (%3d bytes): '%.*s'", __FUNCTION__,
-           buffers[0].size, buffers[0].size, buffers[0].data);
-
-        if (buffers[0].size == 0) {
-            buffers++;
-            continue;
-        }
-
-        avail = sizeof(pcon->buffer) - pcon->buffpos;
-        if (avail > buffers[0].size)
-            avail = buffers[0].size;
-
-        if (avail > 0) {
-            memcpy(pcon->buffer + pcon->buffpos, buffers[0].data, avail);
-            pcon->buffpos += avail;
-            ret += avail;
-        }
-        buffers++;
-    }
-
-    /* Now check that our buffer contains a zero-terminated string */
-    if (memchr(pcon->buffer, '\0', pcon->buffpos) != NULL) {
-        /* Acceptable formats for the connection string are:
-         *
-         *   pipe:<name>
-         *   pipe:<name>:<arguments>
-         */
-        char* pipeName;
-        char* pipeArgs;
-
-        D("%s: connector: '%s'", __FUNCTION__, pcon->buffer);
-
-        if (memcmp(pcon->buffer, "pipe:", 5) != 0) {
-            /* Nope, we don't handle these for now. */
-            D("%s: Unknown pipe connection: '%s'", __FUNCTION__, pcon->buffer);
-            return PIPE_ERROR_INVAL;
-        }
-
-        pipeName = pcon->buffer + 5;
-        pipeArgs = strchr(pipeName, ':');
-
-        if (pipeArgs != NULL) {
-            *pipeArgs++ = '\0';
-            if (!*pipeArgs)
-                pipeArgs = NULL;
-        }
-
-        Pipe* pipe = pcon->pipe;
-        const PipeService* svc = goldfish_pipe_find_type(pipeName);
-        if (svc == NULL) {
-            D("%s: Unknown server!", __FUNCTION__);
-            return PIPE_ERROR_INVAL;
-        }
-
-        void*  peer = svc->funcs.init(pipe, svc->opaque, pipeArgs);
-        if (peer == NULL) {
-            D("%s: Initialization failed!", __FUNCTION__);
-            return PIPE_ERROR_INVAL;
-        }
-
-        /* Do the evil switch now */
-        pipe->opaque = peer;
-        pipe->service = svc;
-        pipe->funcs  = &svc->funcs;
-        pipe->args   = ASTRDUP(pipeArgs);
-        AFREE(pcon);
-    }
-
-    return ret;
-}
-
-static int
-pipeConnector_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers )
-{
-    return PIPE_ERROR_IO;
-}
-
-static unsigned
-pipeConnector_poll( void* opaque )
-{
-    return PIPE_POLL_OUT;
-}
-
-static void
-pipeConnector_wakeOn( void* opaque, int flags )
-{
-    /* nothing, really should never happen */
-}
-
-static void
-pipeConnector_save( void* pipe, QEMUFile* file )
-{
-    PipeConnector*  pcon = pipe;
-    qemu_put_sbe32(file, pcon->buffpos);
-    qemu_put_sbuffer(file, (const int8_t*)pcon->buffer, pcon->buffpos);
-}
-
-static void*
-pipeConnector_load( void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* file )
-{
-    PipeConnector*  pcon;
-
-    int len = qemu_get_sbe32(file);
-    if (len < 0 || len > sizeof(pcon->buffer)) {
-        return NULL;
-    }
-    pcon = pipeConnector_new(hwpipe);
-    pcon->buffpos = len;
-    if (qemu_get_buffer(file, (uint8_t*)pcon->buffer, pcon->buffpos) != pcon->buffpos) {
-        AFREE(pcon);
-        return NULL;
-    }
-    return pcon;
-}
-
-static const GoldfishPipeFuncs  pipeConnector_funcs = {
-    NULL,  /* init */
-    pipeConnector_close,        /* should rarely happen */
-    pipeConnector_sendBuffers,  /* the interesting stuff */
-    pipeConnector_recvBuffers,  /* should not happen */
-    pipeConnector_poll,         /* should not happen */
-    pipeConnector_wakeOn,       /* should not happen */
-    pipeConnector_save,
-    pipeConnector_load,
-};
-
-/***********************************************************************
- ***********************************************************************
- *****
- *****    Z E R O   P I P E S
- *****
- *****/
-
-/* A simple pipe service that mimics /dev/zero, you can write anything to
- * it, and you can always read any number of zeros from it. Useful for debugging
- * the kernel driver.
- */
-#if DEBUG_ZERO_PIPE
-
-typedef struct {
-    void* hwpipe;
-} ZeroPipe;
-
-static void*
-zeroPipe_init( void* hwpipe, void* svcOpaque, const char* args )
-{
-    ZeroPipe*  zpipe;
-
-    D("%s: hwpipe=%p", __FUNCTION__, hwpipe);
-    ANEW0(zpipe);
-    zpipe->hwpipe = hwpipe;
-    return zpipe;
-}
-
-static void
-zeroPipe_close( void* opaque )
-{
-    ZeroPipe*  zpipe = opaque;
-
-    D("%s: hwpipe=%p", __FUNCTION__, zpipe->hwpipe);
-    AFREE(zpipe);
-}
-
-static int
-zeroPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
-{
-    int  ret = 0;
-    while (numBuffers > 0) {
-        ret += buffers[0].size;
-        buffers++;
-        numBuffers--;
-    }
-    return ret;
-}
-
-static int
-zeroPipe_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers )
-{
-    int  ret = 0;
-    while (numBuffers > 0) {
-        ret += buffers[0].size;
-        memset(buffers[0].data, 0, buffers[0].size);
-        buffers++;
-        numBuffers--;
-    }
-    return ret;
-}
-
-static unsigned
-zeroPipe_poll( void* opaque )
-{
-    return PIPE_POLL_IN | PIPE_POLL_OUT;
-}
-
-static void
-zeroPipe_wakeOn( void* opaque, int flags )
-{
-    /* nothing to do here */
-}
-
-static const GoldfishPipeFuncs  zeroPipe_funcs = {
-    zeroPipe_init,
-    zeroPipe_close,
-    zeroPipe_sendBuffers,
-    zeroPipe_recvBuffers,
-    zeroPipe_poll,
-    zeroPipe_wakeOn,
-};
-
-#endif /* DEBUG_ZERO */
-
-/***********************************************************************
- ***********************************************************************
- *****
- *****    P I N G   P O N G   P I P E S
- *****
- *****/
-
-/* Similar debug service that sends back anything it receives */
-/* All data is kept in a circular dynamic buffer */
-
-#if DEBUG_PINGPONG_PIPE
-
-/* Initial buffer size */
-#define PINGPONG_SIZE  1024
-
-typedef struct {
-    void*     hwpipe;
-    uint8_t*  buffer;
-    size_t    size;
-    size_t    pos;
-    size_t    count;
-    unsigned  flags;
-} PingPongPipe;
-
-static void
-pingPongPipe_init0( PingPongPipe* pipe, void* hwpipe, void* svcOpaque )
-{
-    pipe->hwpipe = hwpipe;
-    pipe->size = PINGPONG_SIZE;
-    pipe->buffer = malloc(pipe->size);
-    pipe->pos = 0;
-    pipe->count = 0;
-}
-
-static void*
-pingPongPipe_init( void* hwpipe, void* svcOpaque, const char* args )
-{
-    PingPongPipe*  ppipe;
-
-    D("%s: hwpipe=%p", __FUNCTION__, hwpipe);
-    ANEW0(ppipe);
-    pingPongPipe_init0(ppipe, hwpipe, svcOpaque);
-    return ppipe;
-}
-
-static void
-pingPongPipe_close( void* opaque )
-{
-    PingPongPipe*  ppipe = opaque;
-
-    D("%s: hwpipe=%p (pos=%d count=%d size=%d)", __FUNCTION__,
-      ppipe->hwpipe, ppipe->pos, ppipe->count, ppipe->size);
-    free(ppipe->buffer);
-    AFREE(ppipe);
-}
-
-static int
-pingPongPipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
-{
-    PingPongPipe*  pipe = opaque;
-    int  ret = 0;
-    int  count;
-    const GoldfishPipeBuffer* buff = buffers;
-    const GoldfishPipeBuffer* buffEnd = buff + numBuffers;
-
-    count = 0;
-    for ( ; buff < buffEnd; buff++ )
-        count += buff->size;
-
-    /* Do we need to grow the pingpong buffer? */
-    while (count > pipe->size - pipe->count) {
-        size_t    newsize = pipe->size*2;
-        uint8_t*  newbuff = realloc(pipe->buffer, newsize);
-        int       wpos    = pipe->pos + pipe->count;
-        if (newbuff == NULL) {
-            break;
-        }
-        if (wpos > pipe->size) {
-            wpos -= pipe->size;
-            memcpy(newbuff + pipe->size, newbuff, wpos);
-        }
-        pipe->buffer = newbuff;
-        pipe->size   = newsize;
-        D("pingpong buffer is now %d bytes", newsize);
-    }
-
-    for ( buff = buffers; buff < buffEnd; buff++ ) {
-        int avail = pipe->size - pipe->count;
-        if (avail <= 0) {
-            if (ret == 0)
-                ret = PIPE_ERROR_AGAIN;
-            break;
-        }
-        if (avail > buff->size) {
-            avail = buff->size;
-        }
-
-        int wpos = pipe->pos + pipe->count;
-        if (wpos >= pipe->size) {
-            wpos -= pipe->size;
-        }
-        if (wpos + avail <= pipe->size) {
-            memcpy(pipe->buffer + wpos, buff->data, avail);
-        } else {
-            int  avail2 = pipe->size - wpos;
-            memcpy(pipe->buffer + wpos, buff->data, avail2);
-            memcpy(pipe->buffer, buff->data + avail2, avail - avail2);
-        }
-        pipe->count += avail;
-        ret += avail;
-    }
-
-    /* Wake up any waiting readers if we wrote something */
-    if (pipe->count > 0 && (pipe->flags & PIPE_WAKE_READ)) {
-        goldfish_pipe_wake(pipe->hwpipe, PIPE_WAKE_READ);
-    }
-
-    return ret;
-}
-
-static int
-pingPongPipe_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers )
-{
-    PingPongPipe*  pipe = opaque;
-    int  ret = 0;
-
-    while (numBuffers > 0) {
-        int avail = pipe->count;
-        if (avail <= 0) {
-            if (ret == 0)
-                ret = PIPE_ERROR_AGAIN;
-            break;
-        }
-        if (avail > buffers[0].size) {
-            avail = buffers[0].size;
-        }
-
-        int rpos = pipe->pos;
-
-        if (rpos + avail <= pipe->size) {
-            memcpy(buffers[0].data, pipe->buffer + rpos, avail);
-        } else {
-            int  avail2 = pipe->size - rpos;
-            memcpy(buffers[0].data, pipe->buffer + rpos, avail2);
-            memcpy(buffers[0].data + avail2, pipe->buffer, avail - avail2);
-        }
-        pipe->count -= avail;
-        pipe->pos   += avail;
-        if (pipe->pos >= pipe->size) {
-            pipe->pos -= pipe->size;
-        }
-        ret += avail;
-        numBuffers--;
-        buffers++;
-    }
-
-    /* Wake up any waiting readers if we wrote something */
-    if (pipe->count < PINGPONG_SIZE && (pipe->flags & PIPE_WAKE_WRITE)) {
-        goldfish_pipe_wake(pipe->hwpipe, PIPE_WAKE_WRITE);
-    }
-
-    return ret;
-}
-
-static unsigned
-pingPongPipe_poll( void* opaque )
-{
-    PingPongPipe*  pipe = opaque;
-    unsigned       ret = 0;
-
-    if (pipe->count < pipe->size)
-        ret |= PIPE_POLL_OUT;
-
-    if (pipe->count > 0)
-        ret |= PIPE_POLL_IN;
-
-    return ret;
-}
-
-static void
-pingPongPipe_wakeOn( void* opaque, int flags )
-{
-    PingPongPipe* pipe = opaque;
-    pipe->flags |= (unsigned)flags;
-}
-
-static const GoldfishPipeFuncs  pingPongPipe_funcs = {
-    pingPongPipe_init,
-    pingPongPipe_close,
-    pingPongPipe_sendBuffers,
-    pingPongPipe_recvBuffers,
-    pingPongPipe_poll,
-    pingPongPipe_wakeOn,
-};
-
-#endif /* DEBUG_PINGPONG_PIPE */
-
-/***********************************************************************
- ***********************************************************************
- *****
- *****    T H R O T T L E   P I P E S
- *****
- *****/
-
-/* Similar to PingPongPipe, but will throttle the bandwidth to test
- * blocking I/O.
- */
-
-#ifdef DEBUG_THROTTLE_PIPE
-
-typedef struct {
-    PingPongPipe  pingpong;
-    double        sendRate;
-    int64_t       sendExpiration;
-    double        recvRate;
-    int64_t       recvExpiration;
-    QEMUTimer*    timer;
-} ThrottlePipe;
-
-/* forward declaration */
-static void throttlePipe_timerFunc( void* opaque );
-
-static void*
-throttlePipe_init( void* hwpipe, void* svcOpaque, const char* args )
-{
-    ThrottlePipe* pipe;
-
-    ANEW0(pipe);
-    pingPongPipe_init0(&pipe->pingpong, hwpipe, svcOpaque);
-    pipe->timer = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, throttlePipe_timerFunc, pipe);
-    /* For now, limit to 500 KB/s in both directions */
-    pipe->sendRate = 1e9 / (500*1024*8);
-    pipe->recvRate = pipe->sendRate;
-    return pipe;
-}
-
-static void
-throttlePipe_close( void* opaque )
-{
-    ThrottlePipe* pipe = opaque;
-
-    timer_del(pipe->timer);
-    timer_free(pipe->timer);
-    pingPongPipe_close(&pipe->pingpong);
-}
-
-static void
-throttlePipe_rearm( ThrottlePipe* pipe )
-{
-    int64_t  minExpiration = 0;
-
-    DD("%s: sendExpiration=%lld recvExpiration=%lld\n", __FUNCTION__, pipe->sendExpiration, pipe->recvExpiration);
-
-    if (pipe->sendExpiration) {
-        if (minExpiration == 0 || pipe->sendExpiration < minExpiration)
-            minExpiration = pipe->sendExpiration;
-    }
-
-    if (pipe->recvExpiration) {
-        if (minExpiration == 0 || pipe->recvExpiration < minExpiration)
-            minExpiration = pipe->recvExpiration;
-    }
-
-    if (minExpiration != 0) {
-        DD("%s: Arming for %lld\n", __FUNCTION__, minExpiration);
-        timer_mod(pipe->timer, minExpiration);
-    }
-}
-
-static void
-throttlePipe_timerFunc( void* opaque )
-{
-    ThrottlePipe* pipe = opaque;
-    int64_t  now = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
-
-    DD("%s: TICK! now=%lld sendExpiration=%lld recvExpiration=%lld\n",
-       __FUNCTION__, now, pipe->sendExpiration, pipe->recvExpiration);
-
-    /* Timer has expired, signal wake up if needed */
-    int      flags = 0;
-
-    if (pipe->sendExpiration && now > pipe->sendExpiration) {
-        flags |= PIPE_WAKE_WRITE;
-        pipe->sendExpiration = 0;
-    }
-    if (pipe->recvExpiration && now > pipe->recvExpiration) {
-        flags |= PIPE_WAKE_READ;
-        pipe->recvExpiration = 0;
-    }
-    flags &= pipe->pingpong.flags;
-    if (flags != 0) {
-        DD("%s: WAKE %d\n", __FUNCTION__, flags);
-        goldfish_pipe_wake(pipe->pingpong.hwpipe, flags);
-    }
-
-    throttlePipe_rearm(pipe);
-}
-
-static int
-throttlePipe_sendBuffers( void* opaque, const GoldfishPipeBuffer* buffers, int numBuffers )
-{
-    ThrottlePipe*  pipe = opaque;
-    int            ret;
-
-    if (pipe->sendExpiration > 0) {
-        return PIPE_ERROR_AGAIN;
-    }
-
-    ret = pingPongPipe_sendBuffers(&pipe->pingpong, buffers, numBuffers);
-    if (ret > 0) {
-        /* Compute next send expiration time */
-        pipe->sendExpiration = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + ret*pipe->sendRate;
-        throttlePipe_rearm(pipe);
-    }
-    return ret;
-}
-
-static int
-throttlePipe_recvBuffers( void* opaque, GoldfishPipeBuffer* buffers, int numBuffers )
-{
-    ThrottlePipe* pipe = opaque;
-    int           ret;
-
-    if (pipe->recvExpiration > 0) {
-        return PIPE_ERROR_AGAIN;
-    }
-
-    ret = pingPongPipe_recvBuffers(&pipe->pingpong, buffers, numBuffers);
-    if (ret > 0) {
-        pipe->recvExpiration = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + ret*pipe->recvRate;
-        throttlePipe_rearm(pipe);
-    }
-    return ret;
-}
-
-static unsigned
-throttlePipe_poll( void* opaque )
-{
-    ThrottlePipe*  pipe = opaque;
-    unsigned       ret  = pingPongPipe_poll(&pipe->pingpong);
-
-    if (pipe->sendExpiration > 0)
-        ret &= ~PIPE_POLL_OUT;
-
-    if (pipe->recvExpiration > 0)
-        ret &= ~PIPE_POLL_IN;
-
-    return ret;
-}
-
-static void
-throttlePipe_wakeOn( void* opaque, int flags )
-{
-    ThrottlePipe* pipe = opaque;
-    pingPongPipe_wakeOn(&pipe->pingpong, flags);
-}
-
-static const GoldfishPipeFuncs  throttlePipe_funcs = {
-    throttlePipe_init,
-    throttlePipe_close,
-    throttlePipe_sendBuffers,
-    throttlePipe_recvBuffers,
-    throttlePipe_poll,
-    throttlePipe_wakeOn,
-};
-
-#endif /* DEBUG_THROTTLE_PIPE */
-
-/***********************************************************************
- ***********************************************************************
- *****
- *****    G O L D F I S H   P I P E   D E V I C E
- *****
- *****/
 
 struct PipeDevice {
     struct goldfish_device dev;
 
     /* the list of all pipes */
-    Pipe*  pipes;
+    HwPipe*  pipes;
 
     /* the list of signalled pipes */
-    Pipe*  signaled_pipes;
+    HwPipe*  signaled_pipes;
 
     /* i/o registers */
     uint64_t  address;
@@ -1034,8 +260,8 @@ static void *map_guest_buffer(target_ulong xaddr, size_t size, int is_write)
 static void
 pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
 {
-    Pipe** lookup = pipe_list_findp_channel(&dev->pipes, dev->channel);
-    Pipe*  pipe   = *lookup;
+    HwPipe** lookup = hwpipe_findp_by_channel(&dev->pipes, dev->channel);
+    HwPipe*  pipe = *lookup;
 
     /* Check that we're referring a known pipe channel */
     if (command != PIPE_CMD_OPEN && pipe == NULL) {
@@ -1056,7 +282,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
             dev->status = PIPE_ERROR_INVAL;
             break;
         }
-        pipe = pipe_new(dev->channel, dev);
+        pipe = hwpipe_new(dev->channel, dev);
         pipe->next = dev->pipes;
         dev->pipes = pipe;
         dev->status = 0;
@@ -1067,12 +293,12 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         /* Remove from device's lists */
         *lookup = pipe->next;
         pipe->next = NULL;
-        pipe_list_remove_waked(&dev->signaled_pipes, pipe);
-        pipe_free(pipe);
+        hwpipe_remove_signaled(&dev->signaled_pipes, pipe);
+        hwpipe_free(pipe);
         break;
 
     case PIPE_CMD_POLL:
-        dev->status = pipe->funcs->poll(pipe->opaque);
+        dev->status = android_pipe_poll(pipe->pipe);
         DD("%s: CMD_POLL > status=%d", __FUNCTION__, dev->status);
         break;
 
@@ -1081,15 +307,15 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
          * (guest PA or VA depending on the driver version)
          * into host memory.
          */
-        GoldfishPipeBuffer  buffer;
+        AndroidPipeBuffer  buffer;
         buffer.data = map_guest_buffer(dev->address, dev->size, 1);
         if (!buffer.data) {
             dev->status = PIPE_ERROR_INVAL;
             break;
         }
         buffer.size = dev->size;
-        dev->status = pipe->funcs->recvBuffers(pipe->opaque, &buffer, 1);
-        DD("%s: CMD_READ_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
+        dev->status = android_pipe_recv(pipe->pipe, &buffer, 1);
+        DD("%s: CMD_READ_BUFFER channel=0x%llx address=0x%llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
            dev->size, dev->status);
         cpu_physical_memory_unmap(buffer.data, dev->size, 1, dev->size);
@@ -1101,35 +327,38 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
          * (guest PA or VA depending on the driver version)
          * into host memory.
          */
-        GoldfishPipeBuffer  buffer;
+        AndroidPipeBuffer  buffer;
         buffer.data = map_guest_buffer(dev->address, dev->size, 0);
         if (!buffer.data) {
             dev->status = PIPE_ERROR_INVAL;
             break;
         }
         buffer.size = dev->size;
-        dev->status = pipe->funcs->sendBuffers(pipe->opaque, &buffer, 1);
-        DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
-           __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
+        dev->status = android_pipe_send(pipe->pipe, &buffer, 1);
+        DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%llx size=%d > status=%d",
+           __FUNCTION__, (unsigned long long)dev->channel,
+           (unsigned long long)dev->address,
            dev->size, dev->status);
         cpu_physical_memory_unmap(buffer.data, dev->size, 0, dev->size);
         break;
     }
 
     case PIPE_CMD_WAKE_ON_READ:
-        DD("%s: CMD_WAKE_ON_READ channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
-        if ((pipe->wanted & PIPE_WAKE_READ) == 0) {
-            pipe->wanted |= PIPE_WAKE_READ;
-            pipe->funcs->wakeOn(pipe->opaque, pipe->wanted);
+        DD("%s: CMD_WAKE_ON_READ channel=0x%llx", __FUNCTION__,
+           (unsigned long long)dev->channel);
+        if ((pipe->wakes & PIPE_WAKE_READ) == 0) {
+            pipe->wakes |= PIPE_WAKE_READ;
+            android_pipe_wake_on(pipe->pipe, pipe->wakes);
         }
         dev->status = 0;
         break;
 
     case PIPE_CMD_WAKE_ON_WRITE:
-        DD("%s: CMD_WAKE_ON_WRITE channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
-        if ((pipe->wanted & PIPE_WAKE_WRITE) == 0) {
-            pipe->wanted |= PIPE_WAKE_WRITE;
-            pipe->funcs->wakeOn(pipe->opaque, pipe->wanted);
+        DD("%s: CMD_WAKE_ON_WRITE channel=0x%llx", __FUNCTION__,
+           (unsigned long long)dev->channel);
+        if ((pipe->wakes & PIPE_WAKE_WRITE) == 0) {
+            pipe->wakes |= PIPE_WAKE_WRITE;
+            android_pipe_wake_on(pipe->pipe, pipe->wakes);
         }
         dev->status = 0;
         break;
@@ -1229,8 +458,9 @@ static void pipe_dev_write(void *opaque, hwaddr offset, uint32_t value)
     break;
 
     default:
-        D("%s: offset=%d (0x%x) value=%d (0x%x)\n", __FUNCTION__, offset,
-            offset, value, value);
+        D("%s: offset=%lld (0x%llx) value=%lld (0x%llx)\n", __FUNCTION__,
+          (long long)offset, (long long)offset, (long long)value,
+          (long long)value);
         break;
     }
 }
@@ -1247,11 +477,11 @@ static uint32_t pipe_dev_read(void *opaque, hwaddr offset)
 
     case PIPE_REG_CHANNEL:
         if (dev->signaled_pipes != NULL) {
-            Pipe* pipe = dev->signaled_pipes;
-            DR("%s: channel=0x%llx wanted=%d", __FUNCTION__,
-               (unsigned long long)pipe->channel, pipe->wanted);
-            dev->wakes = pipe->wanted;
-            pipe->wanted = 0;
+            HwPipe* pipe = dev->signaled_pipes;
+            DR("%s: channel=0x%llx wakes=%d", __FUNCTION__,
+               (unsigned long long)pipe->channel, pipe->wakes);
+            dev->wakes = pipe->wakes;
+            pipe->wakes = 0;
             dev->signaled_pipes = pipe->next_waked;
             pipe->next_waked = NULL;
             if (dev->signaled_pipes == NULL) {
@@ -1265,9 +495,9 @@ static uint32_t pipe_dev_read(void *opaque, hwaddr offset)
 
     case PIPE_REG_CHANNEL_HIGH:
         if (dev->signaled_pipes != NULL) {
-            Pipe* pipe = dev->signaled_pipes;
-            DR("%s: channel_high=0x%llx wanted=%d", __FUNCTION__,
-               (unsigned long long)pipe->channel, pipe->wanted);
+            HwPipe* pipe = dev->signaled_pipes;
+            DR("%s: channel_high=0x%llx wakes=%d", __FUNCTION__,
+               (unsigned long long)pipe->channel, pipe->wakes);
             return (uint32_t)(pipe->channel >> 32);
         }
         DR("%s: no signaled channels", __FUNCTION__);
@@ -1288,7 +518,8 @@ static uint32_t pipe_dev_read(void *opaque, hwaddr offset)
         return PIPE_DEVICE_VERSION;
 
     default:
-        D("%s: offset=%d (0x%x)\n", __FUNCTION__, offset, offset);
+        D("%s: offset=%lld (0x%llx)\n", __FUNCTION__, (long long)offset,
+          (long long)offset);
     }
     return 0;
 }
@@ -1309,60 +540,60 @@ static void
 goldfish_pipe_save( QEMUFile* file, void* opaque )
 {
     PipeDevice* dev = opaque;
-    Pipe* pipe;
 
-    qemu_put_be64(file, dev->address);
-    qemu_put_be32(file, dev->size);
-    qemu_put_be32(file, dev->status);
-    qemu_put_be64(file, dev->channel);
-    qemu_put_be32(file, dev->wakes);
-    qemu_put_be64(file, dev->params_addr);
+    Stream* stream = stream_from_qemufile(file);
+
+    stream_put_be64(stream, dev->address);
+    stream_put_be32(stream, dev->size);
+    stream_put_be32(stream, dev->status);
+    stream_put_be64(stream, dev->channel);
+    stream_put_be32(stream, dev->wakes);
+    stream_put_be64(stream, dev->params_addr);
 
     /* Count the number of pipe connections */
+    HwPipe* pipe;
     int count = 0;
-    for ( pipe = dev->pipes; pipe; pipe = pipe->next )
+    for (pipe = dev->pipes; pipe; pipe = pipe->next) {
         count++;
-
-    qemu_put_sbe32(file, count);
+    }
+    stream_put_be32(stream, count);
 
     /* Now save each pipe one after the other */
-    for ( pipe = dev->pipes; pipe; pipe = pipe->next ) {
-        pipe_save(pipe, file);
+    for (pipe = dev->pipes; pipe; pipe = pipe->next) {
+        hwpipe_save(pipe, stream);
     }
+    stream_free(stream);
 }
 
 static int
 goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
 {
     PipeDevice* dev = opaque;
-    Pipe*       pipe;
 
     if ((version_id != GOLDFISH_PIPE_SAVE_VERSION) &&
-        (version_id != GOLDFISH_PIPE_SAVE_VERSION_LEGACY)) {
+        (version_id != GOLDFISH_PIPE_SAVE_LEGACY_VERSION)) {
         return -EINVAL;
     }
-    if (version_id == GOLDFISH_PIPE_SAVE_VERSION_LEGACY) {
-        dev->address = (uint64_t)qemu_get_be32(file);
-    } else {
-        dev->address = qemu_get_be64(file);
-    }
-    dev->size    = qemu_get_be32(file);
-    dev->status  = qemu_get_be32(file);
-    if (version_id == GOLDFISH_PIPE_SAVE_VERSION_LEGACY) {
-        dev->channel = (uint64_t)qemu_get_be32(file);
-    } else {
-        dev->channel = qemu_get_be64(file);
-    }
-    dev->wakes   = qemu_get_be32(file);
-    dev->params_addr   = qemu_get_be64(file);
+
+    Stream* stream = stream_from_qemufile(file);
+
+    dev->address = stream_get_be64(stream);
+    dev->size    = stream_get_be32(stream);
+    dev->status  = stream_get_be32(stream);
+    dev->channel = stream_get_be64(stream);
+
+    dev->wakes = stream_get_be32(stream);
+    dev->params_addr = stream_get_be64(stream);
 
     /* Count the number of pipe connections */
-    int count = qemu_get_sbe32(file);
+    HwPipe* pipe;
+    int count = stream_get_be32(stream);
 
     /* Load all pipe connections */
-    for ( ; count > 0; count-- ) {
-        pipe = pipe_load(dev, file, version_id);
+    for (; count > 0; count--) {
+        pipe = hwpipe_load(dev, stream, version_id);
         if (pipe == NULL) {
+            stream_free(stream);
             return -EIO;
         }
         pipe->next = dev->pipes;
@@ -1370,14 +601,56 @@ goldfish_pipe_load( QEMUFile* file, void* opaque, int version_id )
     }
 
     /* Now we need to wake/close all relevant pipes */
-    for ( pipe = dev->pipes; pipe; pipe = pipe->next ) {
-        if (pipe->wanted != 0)
-            goldfish_pipe_wake(pipe, pipe->wanted);
-        if (pipe->closed != 0)
-            goldfish_pipe_close(pipe);
+    for (pipe = dev->pipes; pipe; pipe = pipe->next) {
+        if (pipe->wakes != 0) {
+            android_pipe_wake(pipe, pipe->wakes);
+        }
+        if (pipe->closed != 0) {
+            android_pipe_close(pipe);
+        }
     }
+
+    stream_free(stream);
     return 0;
 }
+
+static void goldfish_pipe_wake(void* hwpipe, unsigned flags) {
+    HwPipe*  pipe = hwpipe;
+    HwPipe** lookup;
+    PipeDevice*  dev = pipe->device;
+
+    DD("%s: channel=0x%llx flags=%d", __FUNCTION__,
+       (unsigned long long)pipe->channel, flags);
+
+    /* If not already there, add to the list of signaled pipes */
+    lookup = hwpipe_findp_signaled(&dev->signaled_pipes, pipe);
+    if (!*lookup) {
+        pipe->next_waked = dev->signaled_pipes;
+        dev->signaled_pipes = pipe;
+    }
+    pipe->wakes |= (unsigned)flags;
+
+    /* Raise IRQ to indicate there are items on our list ! */
+    goldfish_device_set_irq(&dev->dev, 0, 1);
+    DD("%s: raising IRQ", __FUNCTION__);
+}
+
+static void goldfish_pipe_close(void* hwpipe) {
+    HwPipe* pipe = hwpipe;
+
+    D("%s: channel=0x%llx (closed=%d)", __FUNCTION__,
+      (unsigned long long)pipe->channel, pipe->closed);
+
+    if (!pipe->closed) {
+        pipe->closed = 1;
+        goldfish_pipe_wake(hwpipe, PIPE_WAKE_CLOSED);
+    }
+}
+
+static const AndroidPipeHwFuncs goldfish_pipe_hw_funcs = {
+    .closeFromHost = goldfish_pipe_close,
+    .signalWake = goldfish_pipe_wake,
+};
 
 /* initialize the trace device */
 void pipe_dev_init(bool newDeviceNaming)
@@ -1403,48 +676,15 @@ void pipe_dev_init(bool newDeviceNaming)
                     goldfish_pipe_load,
                     s);
 
+    android_pipe_set_hw_funcs(&goldfish_pipe_hw_funcs);
+
 #if DEBUG_ZERO_PIPE
-    goldfish_pipe_add_type("zero", NULL, &zeroPipe_funcs);
+    android_pipe_add_type_zero();
 #endif
 #if DEBUG_PINGPONG_PIPE
-    goldfish_pipe_add_type("pingpong", NULL, &pingPongPipe_funcs);
+    android_pipe_add_type_pingpong();
 #endif
 #if DEBUG_THROTTLE_PIPE
-    goldfish_pipe_add_type("throttle", NULL, &throttlePipe_funcs);
+    android_pipe_add_type_pingpong();
 #endif
-}
-
-void
-goldfish_pipe_wake( void* hwpipe, unsigned flags )
-{
-    Pipe*  pipe = hwpipe;
-    Pipe** lookup;
-    PipeDevice*  dev = pipe->device;
-
-    DD("%s: channel=0x%llx flags=%d", __FUNCTION__, (unsigned long long)pipe->channel, flags);
-
-    /* If not already there, add to the list of signaled pipes */
-    lookup = pipe_list_findp_waked(&dev->signaled_pipes, pipe);
-    if (!*lookup) {
-        pipe->next_waked = dev->signaled_pipes;
-        dev->signaled_pipes = pipe;
-    }
-    pipe->wanted |= (unsigned)flags;
-
-    /* Raise IRQ to indicate there are items on our list ! */
-    goldfish_device_set_irq(&dev->dev, 0, 1);
-    DD("%s: raising IRQ", __FUNCTION__);
-}
-
-void
-goldfish_pipe_close( void* hwpipe )
-{
-    Pipe* pipe = hwpipe;
-
-    D("%s: channel=0x%llx (closed=%d)", __FUNCTION__, (unsigned long long)pipe->channel, pipe->closed);
-
-    if (!pipe->closed) {
-        pipe->closed = 1;
-        goldfish_pipe_wake( hwpipe, PIPE_WAKE_CLOSED );
-    }
 }
