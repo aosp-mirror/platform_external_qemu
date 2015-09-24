@@ -20,7 +20,8 @@
 ANDROID_BEGIN_HEADER
 
 // The function that actually formats the given data into post query data.
-// Formatted url is retrurned in |ptr|, caller must free the returned URL.
+// On success, formatted url is retrurned in |ptr|, and number of bytes
+// allocated is returned. Caller must free the returned URL.
 extern int formatToolbarGetUrl(char** ptr,
                                const char* url,
                                const AndroidMetrics* metrics);
