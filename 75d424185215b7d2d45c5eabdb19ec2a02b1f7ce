@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e4d7d85_54b7fa55",
+        "filename": "android/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 900,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T23:46:01Z",
+      "side": 1,
+      "message": "I can be convined either way about bailing here vs. degraded performance (1 cpu) with a warning.",
+      "range": {
+        "startLine": 900,
+        "startChar": 8,
+        "endLine": 900,
+        "endChar": 16
+      },
+      "revId": "75d424185215b7d2d45c5eabdb19ec2a02b1f7ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce582944_d7164681",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T23:46:01Z",
+      "side": 1,
+      "message": "This include was leaking here from main-common.h\n\nAs this file is not named main-common.c, this should be explicitly included.",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 34
+      },
+      "revId": "75d424185215b7d2d45c5eabdb19ec2a02b1f7ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
