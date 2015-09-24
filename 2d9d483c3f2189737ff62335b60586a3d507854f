@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4ec27958_14ad14c1",
+        "filename": "hw/android/goldfish/pipe_throttle.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T06:46:17Z",
+      "side": 1,
+      "message": "Ah ah, you\u0027re right, we switched from nano-seconds to milli-seconds, and we need a double division now :) Good catch.",
+      "parentUuid": "ee86cdd4_01202a61",
+      "range": {
+        "startLine": 84,
+        "startChar": 21,
+        "endLine": 84,
+        "endChar": 52
+      },
+      "revId": "2d9d483c3f2189737ff62335b60586a3d507854f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "699c97d8_8d37e117",
         "filename": "hw/android/goldfish/pipe_throttle.c",
         "patchSetId": 1
@@ -84,6 +108,30 @@
       "side": 1,
       "message": ":)\nDidn\u0027t think about it\nCan you comment out or remove the parameter name to show that it\u0027s not used intentionally?",
       "parentUuid": "69ee5738_fd058751",
+      "range": {
+        "startLine": 126,
+        "startChar": 36,
+        "endLine": 126,
+        "endChar": 53
+      },
+      "revId": "2d9d483c3f2189737ff62335b60586a3d507854f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eececd75_41b2721e",
+        "filename": "hw/android/goldfish/pipe_throttle.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T06:46:17Z",
+      "side": 1,
+      "message": "Sure, will do.",
+      "parentUuid": "ce582944_887d57f2",
       "range": {
         "startLine": 126,
         "startChar": 36,
