@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_GPS_H
-#define ANDROID_GPS_H
+
+#pragma once
 
 #include "qemu-common.h"
 
@@ -31,5 +31,3 @@ extern void  android_gps_send_nmea( const char*  sentence );
 extern void  android_gps_send_location(double latitude, double longitude,
                                        double metersElevation, int nSatellites,
                                        const struct timeval *time);
-
-#endif // ANDROID_GPS_H

@@ -10,8 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#ifndef _ANDROID_UTILS_STRALLOC_H
-#define _ANDROID_UTILS_STRALLOC_H
+#pragma once
 
 #include <stddef.h>
 #include <stdarg.h>
@@ -67,5 +66,3 @@ extern void   stralloc_tabular( stralloc_t*  s, const char** strings, int  count
 extern char*  stralloc_to_tempstr( stralloc_t*  s );
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_UTILS_STRALLOC_H */

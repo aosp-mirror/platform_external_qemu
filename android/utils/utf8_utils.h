@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_UTILS_UTF8_UTILS_H
-#define ANDROID_UTILS_UTF8_UTILS_H
+#pragma once
 
 // Simple C wrapper for android/base/misc/Utf8Utils.h
 
@@ -40,5 +39,3 @@ int android_utf8_encode(uint32_t codepoint,
                         size_t buffer_len);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_UTILS_UTF8_UTILS_H

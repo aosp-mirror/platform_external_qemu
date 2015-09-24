@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef QEMU_ANDROID_KEYCODE_BUFFER_H
-#define QEMU_ANDROID_KEYCODE_BUFFER_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -47,5 +47,3 @@ void skin_keycode_buffer_add(SkinKeycodeBuffer* buffer,
 void skin_keycode_buffer_flush(SkinKeycodeBuffer* buffer);
 
 ANDROID_END_HEADER
-
-#endif /* QEMU_ANDROID_KEYCODE_BUFFER_H */

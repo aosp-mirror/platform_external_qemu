@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_COMPILER_H
-#define ANDROID_BASE_COMPILER_H
+#pragma once
 
 // Use this in the private section of a class declaration to ensure
 // that the corresponding objects cannot be copy-constructed or
@@ -27,5 +26,3 @@
 #define DISALLOW_COPY_AND_ASSIGN(T)  \
     T(const T& other); \
     T& operator=(const T& other)
-
-#endif  // ANDROID_BASE_COMPILER_H

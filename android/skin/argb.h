@@ -13,7 +13,6 @@
 
 #ifndef ARGB_T_DEFINED
 #define ARGB_T_DEFINED
-
 #if USE_MMX
 #include <mmintrin.h>
 

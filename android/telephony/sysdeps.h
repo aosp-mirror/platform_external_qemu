@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef __sysdeps_h__
-#define __sysdeps_h__
+
+#pragma once
 
 #include <stdint.h>
 
@@ -98,5 +98,3 @@ extern int   sys_main_loop( void );
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* __sysdeps_h__ */

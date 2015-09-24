@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_SKIN_CHARMAP_H
-#define ANDROID_SKIN_CHARMAP_H
+
+#pragma once
 
 #include "android/skin/keycode.h"
 #include "android/skin/keycode-buffer.h"
@@ -100,5 +100,3 @@ const SkinCharmap* skin_charmap_get(void);
 /* Return the name of the charmap to be used. Same as
  * skin_charmap_get()->name */
 const char* skin_charmap_get_name(void);
-
-#endif  // ANDROID_SKIN_CHARMAP_H

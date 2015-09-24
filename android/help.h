@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_HELP_H
-#define _ANDROID_HELP_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 #include "android/utils/stralloc.h"
@@ -45,5 +45,3 @@ extern int  android_help_for_option( const char*  option, stralloc_t*  out );
 extern int  android_help_for_topic( const char*  topic, stralloc_t*  out );
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_HELP_H */

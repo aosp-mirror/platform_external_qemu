@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_REFSET_H
-#define _ANDROID_UTILS_REFSET_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 #include <android/utils/vector.h>
@@ -77,5 +77,3 @@ extern void   _arefSet_removeDeferred( ARefSet* s );
     } while (0)
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_REFSET_H */

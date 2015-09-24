@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef  _qemu_android_h
-#define  _qemu_android_h
+
+#pragma once
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -99,5 +99,3 @@ extern char android_gl_version[ANDROID_GLSTRING_BUF_SIZE];
 
 extern void  android_emulation_setup( void );
 extern void  android_emulation_teardown( void );
-
-#endif /* _qemu_android_h */

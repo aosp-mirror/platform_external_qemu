@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_SOCKETS_SOCKET_UTILS_H
-#define ANDROID_BASE_SOCKETS_SOCKET_UTILS_H
+#pragma once
 
 #include <sys/types.h>
 
@@ -74,5 +73,3 @@ int socketGetPort(int socket);
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_SOCKETS_SOCKET_UTILS_H

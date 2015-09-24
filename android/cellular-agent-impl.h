@@ -10,8 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_CELLULAR_AGENT_IMPL_H
-#define ANDROID_CELLULAR_AGENT_IMPL_H
+#pragma once
 
 #include "android/cellular-agent.h"
 
@@ -22,5 +21,3 @@ void cellular_setDataStatus(enum CellularStatus);
 void cellular_setSignalStrength(int zeroTo31);
 void cellular_setStandard(enum CellularStandard);
 void cellular_setVoiceStatus(enum CellularStatus);
-
-#endif // ANDROID_CELLULAR_AGENT_IMPL_H

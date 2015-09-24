@@ -10,8 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#ifndef _ANDROID_UTILS_TEMPFILE_H
-#define _ANDROID_UTILS_TEMPFILE_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -54,5 +53,3 @@ extern void          atexit_close_fd(int  fd);
 extern void          atexit_close_fd_remove(int  fd);
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_TEMPFILE_H */

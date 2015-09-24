@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_PROXY_PROXY_COMMON_H
-#define ANDROID_PROXY_PROXY_COMMON_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 #include "android/utils/sockets.h"
@@ -129,5 +129,3 @@ extern int   proxy_check_connection( const char* proxyname,
                                      int         timeout_ms );
 
 ANDROID_END_HEADER
-
-#endif /* END */

@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_LOOPER_QEMU_H
-#define ANDROID_LOOPER_QEMU_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 #include "android/utils/looper.h"
@@ -24,5 +24,3 @@ ANDROID_BEGIN_HEADER
 void  qemu_looper_setForThread(void);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_LOOPER_QEMU_H

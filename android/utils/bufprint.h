@@ -10,8 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#ifndef ANDROID_UTILS_BUFPRINT_H
-#define ANDROID_UTILS_BUFPRINT_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -66,5 +65,3 @@ extern char*  bufprint_temp_dir   (char*  buffer, char*  buffend);
 extern char*  bufprint_temp_file  (char*  buffer, char*  buffend, const char*  suffix);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_UTILS_BUFPRINT_H

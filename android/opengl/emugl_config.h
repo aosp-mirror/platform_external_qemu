@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_OPENGL_EMUGL_CONFIG_H
-#define ANDROID_OPENGL_EMUGL_CONFIG_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -58,5 +57,3 @@ bool emuglConfig_init(EmuglConfig* config,
 void emuglConfig_setupEnv(const EmuglConfig* config);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_OPENGL_EMUGL_CONFIG_H

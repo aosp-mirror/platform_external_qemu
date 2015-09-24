@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_SKIN_IMAGE_H
-#define _ANDROID_SKIN_IMAGE_H
+
+#pragma once
 
 #include "android/skin/rect.h"
 #include "android/skin/surface.h"
@@ -80,5 +80,3 @@ extern SkinImage*    skin_image_clone( SkinImage*  source );
 extern SkinImage*    skin_image_clone_full( SkinImage*       source,
                                             SkinRotation     rotation,
                                             int              blend );
-
-#endif /* _ANDROID_SKIN_IMAGE_H */

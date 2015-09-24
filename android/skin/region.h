@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_SKIN_REGION_H
-#define _ANDROID_SKIN_REGION_H
+
+#pragma once
 
 #include "android/skin/rect.h"
 
@@ -107,5 +107,3 @@ struct SkinRegionIterator
 };
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_SKIN_REGION_H */

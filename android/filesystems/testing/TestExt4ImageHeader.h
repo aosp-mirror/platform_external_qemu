@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_FILESYSTEMS_TESTING_TEST_EXT4_IMAGE_HEADER_H
-#define ANDROID_FILESYSTEMS_TESTING_TEST_EXT4_IMAGE_HEADER_H
+#pragma once
 
 // These are the first 1082 bytes of an EXT4 system.img file
 // It was generated with:
@@ -118,5 +117,3 @@ static const unsigned char kTestExt4ImageHeader[] = {
 };
 
 static const size_t kTestExt4ImageHeaderSize = sizeof(kTestExt4ImageHeader);
-
-#endif  // ANDROID_FILESYSTEMS_TESTING_TEST_EXT4_IMAGE_HEADER_H

@@ -6,8 +6,7 @@
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef UI_TOOL_2D_WINDOW_H
-#define UI_TOOL_2D_WINDOW_H
+#pragma once
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QAction>
@@ -78,5 +77,3 @@ namespace Ui {
 } // namespace Ui
 
 QT_END_NAMESPACE
-
-#endif // UI_TOOL_2D_WINDOW_H

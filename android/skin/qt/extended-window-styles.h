@@ -10,11 +10,10 @@
  ** GNU General Public License for more details.
  */
 
+#pragma once
+
 // This file contains the colors and other styles that determine
 // how the extended window appears
-
-#ifndef ANDROID_SKIN_QT_EXTENDED_WINDOW_STYLES_H
-#define ANDROID_SKIN_QT_EXTENDED_WINDOW_STYLES_H
 
 // This gives the order of the tabbed panes on the extended window.
 // This must correspond to the ordering that is set from within
@@ -122,5 +121,3 @@ enum { PANE_IDX_LOCATION = 0,
     "QSlider::handle:horizontal {" \
             "background:" DARK_TOOL_COLOR ";" \
             "border: 1px solid " DARK_TOOL_COLOR "; border-radius: 7px }"
-
-#endif // ANDROID_SKIN_QT_EXTENDED_WINDOW_STYLES_H

@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_QT_QT_PATH_H
-#define ANDROID_QT_QT_PATH_H
+#pragma once
 
 #include "android/base/String.h"
 
@@ -24,5 +23,3 @@ android::base::String androidQtGetLibraryDir();
 // which holds Qt's plugins. It should be added to the
 // QT_QPA_PLATFORM_PLUGIN_PATH environment variable.
 android::base::String androidQtGetPluginsDir();
-
-#endif  // ANDROID_QT_QT_PATH_H

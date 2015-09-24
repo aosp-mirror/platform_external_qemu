@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_CAMERA_CAMERA_SERVICE_H_
-#define ANDROID_CAMERA_CAMERA_SERVICE_H_
+#pragma once
 
 /*
  * Contains public camera service API.
@@ -26,5 +25,3 @@ extern void android_camera_service_init(void);
 
 /* Lists available web cameras. */
 extern void android_list_web_cameras(void);
-
-#endif  /* ANDROID_CAMERA_CAMERA_SERVICE_H_ */

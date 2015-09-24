@@ -10,10 +10,9 @@
  ** GNU General Public License for more details.
  */
 
-// Agent iterfaces for sending commands from the UI to the emulator
+#pragma once
 
-#ifndef ANDROID_UI_EMU_AGENT_H
-#define ANDROID_UI_EMU_AGENT_H
+// Agent iterfaces for sending commands from the UI to the emulator
 
 typedef struct UiEmuAgent {
     const struct BatteryAgent    *battery;
@@ -23,5 +22,3 @@ typedef struct UiEmuAgent {
     const struct SettingsAgent   *settings;
     const struct TelephonyAgent  *telephony;
 } UiEmuAgent;
-
-#endif // ANDROID_UI_EMU_AGENT_H

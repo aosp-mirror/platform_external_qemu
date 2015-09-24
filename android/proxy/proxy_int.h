@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_PROXY_PROXY_INT_H
-#define ANDROID_PROXY_PROXY_INT_H
+
+#pragma once
 
 #include "android/proxy/proxy_common.h"
 
@@ -163,6 +163,3 @@ struct ProxyService {
 
 extern int
 proxy_manager_add_service( ProxyService*  service );
-
-
-#endif /* ANDROID_PROXY_PROXY_INT_H */

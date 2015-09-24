@@ -10,8 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#ifndef ANDROID_METRICS_INTERNAL_METRICS_REPORTER_INTERNAL_H
-#define ANDROID_METRICS_INTERNAL_METRICS_REPORTER_INTERNAL_H
+#pragma once
 
 #include "android/metrics/metrics_reporter.h"
 #include "android/utils/system.h"
@@ -34,5 +33,3 @@ void androidMetrics_injectUploader(
         androidMetricsUploaderFunction uploaderFunction);
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_METRICS_INTERNAL_METRICS_REPORTER_INTERNAL_H */

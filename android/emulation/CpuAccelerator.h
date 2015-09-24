@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_EMULATION_CPU_EMULATOR_H
-#define ANDROID_EMULATION_CPU_EMULATOR_H
+#pragma once
 
 #include "android/base/String.h"
 
@@ -54,5 +53,3 @@ void SetCurrentCpuAcceleratorForTesting(CpuAccelerator accel,
                                         const char* status);
 
 }  // namespace android
-
-#endif  // ANDROID_EMULATION_CPU_EMULATOR_H

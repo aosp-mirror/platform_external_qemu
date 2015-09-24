@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_GPS_GPS_FIX_H
-#define ANDROID_GPS_GPS_FIX_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -30,5 +29,3 @@ struct GpsFix {
 };
 
 typedef std::vector<GpsFix> GpsFixArray;
-
-#endif // ANDROID_GPS_GPS_FIX_H

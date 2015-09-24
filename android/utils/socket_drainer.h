@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_UTILS_SOCKET_DRAINER_H
-#define ANDROID_UTILS_SOCKET_DRAINER_H
+#pragma once
 
 #include "android/utils/compiler.h"
 #include "android/utils/looper.h"
@@ -47,5 +46,3 @@ void socket_drainer_drain_and_close(int socket_fd);
 void socket_drainer_stop();
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_UTILS_SOCKET_DRAINER_H

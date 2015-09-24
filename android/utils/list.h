@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_LIST_H
-#define _ANDROID_UTILS_LIST_H
+
+#pragma once
 
 #include <inttypes.h>
 
@@ -114,5 +114,3 @@ alist_remove_tail(ACList* list)
 }
 
 ANDROID_END_HEADER
-
-#endif  /* _ANDROID_UTILS_LIST_H */

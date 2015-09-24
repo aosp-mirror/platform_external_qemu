@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_LINEINPUT_H
-#define _ANDROID_UTILS_LINEINPUT_H
+
+#pragma once
 
 #include <stdio.h>
 
@@ -58,5 +58,3 @@ int lineInput_getError( LineInput* input );
 void lineInput_free( LineInput* input );
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_LINEINPUT_H */

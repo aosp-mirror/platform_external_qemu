@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_SKIN_FILE_H
-#define _ANDROID_SKIN_FILE_H
+
+#pragma once
 
 #include "android/skin/image.h"
 #include "android/utils/aconfig-file.h"
@@ -152,5 +152,3 @@ extern SkinFile* skin_file_create_from_aconfig(
         const SkinFramebufferFuncs* fb_funcs);
 
 extern void       skin_file_free( SkinFile*  file );
-
-#endif /* _ANDROID_SKIN_FILE_H */

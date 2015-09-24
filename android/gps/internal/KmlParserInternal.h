@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_GPS_INTERNAL_KML_PARSER_INTERNAL_H
-#define ANDROID_GPS_INTERNAL_KML_PARSER_INTERNAL_H
+#pragma once
 
 #include <libxml/parser.h>
 
@@ -39,5 +38,3 @@ public:
     // Placemarks are found to be malformed, true otherwise.
     static bool traverseSubtree(xmlNode * current, GpsFixArray * fixes, std::string * error);
 };
-
-#endif // ANDROID_GPS_INTERNAL_KML_PARSER_INTERNAL_H

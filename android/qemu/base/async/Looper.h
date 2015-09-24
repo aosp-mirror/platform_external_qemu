@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_QEMU_BASE_ASYNC_LOOPER_H
-#define ANDROID_QEMU_BASE_ASYNC_LOOPER_H
+#pragma once
 
 #include "android/base/async/Looper.h"
 
@@ -26,5 +25,3 @@ android::base::Looper* createLooper();
 
 }  // namespace qemu
 }  // namespace android
-
-#endif  // ANDROID_QEMU_BASE_ASYNC_LOOPER_H

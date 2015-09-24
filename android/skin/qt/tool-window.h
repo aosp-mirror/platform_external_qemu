@@ -10,8 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_SKIN_QT_TOOLWINDOW_H
-#define ANDROID_SKIN_QT_TOOLWINDOW_H
+#pragma once
 
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/utils/compiler.h"
@@ -87,5 +86,3 @@ private slots:
 };
 
 typedef void(ToolWindow::*ToolWindowSlot)();
-
-#endif // ANDROID_SKIN_QT_TOOLWINDOW_H

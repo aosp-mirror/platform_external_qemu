@@ -10,8 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_LOCATION_AGENT_H
-#define ANDROID_LOCATION_AGENT_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -31,5 +30,3 @@ typedef struct LocationAgent {
 } LocationAgent;
 
 ANDROID_END_HEADER
-
-#endif // ANDROID_LOCATION_AGENT_H

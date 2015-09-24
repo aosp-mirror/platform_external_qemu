@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_UTILS_ACONFIG_FILE_H
-#define ANDROID_UTILS_ACONFIG_FILE_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -62,5 +62,3 @@ extern const char*  aconfig_str     (AConfig *root, const char *name, const char
 extern void aconfig_node_free(AConfig *root);
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_UTILS_ACONFIG_FILE_H */

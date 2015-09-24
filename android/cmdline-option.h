@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_OPTION_H
-#define _ANDROID_OPTION_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -48,5 +48,3 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt );
 #define  DEFAULT_DEVICE_DPI  165
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_OPTION_H */

@@ -10,8 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#ifndef ANDROID_BATTERY_AGENT_H
-#define ANDROID_BATTERY_AGENT_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -48,5 +47,3 @@ typedef struct BatteryAgent {
 } BatteryAgent;
 
 ANDROID_END_HEADER
-
-#endif // ANDROID_BATTERY_AGENT_H

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_EXT4_RESIZE_H
-#define ANDROID_EXT4_RESIZE_H
+#pragma once
 
 #include <android/base/Limits.h>
 #include <android/utils/compiler.h>
@@ -47,5 +46,3 @@ int resizeExt4Partition(const char * partitionPath, int64_t newByteSize);
 bool checkExt4PartitionSize (int64_t byteSize);
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_EXT4_RESIZE_H */

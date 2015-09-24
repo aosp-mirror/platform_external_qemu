@@ -10,8 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#ifndef ANDROID_SKIN_USER_INTERFACE_H
-#define ANDROID_SKIN_USER_INTERFACE_H
+#pragma once
 
 #include "android/skin/rect.h"
 #include "android/skin/keyboard.h"
@@ -127,5 +126,3 @@ struct SkinLayout* skin_ui_get_current_layout(SkinUI* ui);
 bool skin_ui_process_events(SkinUI* ui);
 
 void skin_ui_reset_title(SkinUI* ui);
-
-#endif  // ANDROID_SKIN_USER_INTERFACE_H

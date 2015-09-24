@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_QEMU_BASE_FILES_QEMU_FILE_STREAM_H
-#define ANDROID_QEMU_BASE_FILES_QEMU_FILE_STREAM_H
+#pragma once
 
 #include "android/base/Compiler.h"
 #include "android/base/files/Stream.h"
@@ -39,5 +38,3 @@ private:
 
 }  // namespace qemu
 }  // namespace android
-
-#endif  // ANDROID_QEMU_BASE_FILES_QEMU_FILE_STREAM_H

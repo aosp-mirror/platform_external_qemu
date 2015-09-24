@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_MAIN_COMMON_H
-#define ANDROID_MAIN_COMMON_H
+
+#pragma once
 
 #include <stdint.h>
 #include "android/avd/hw-config.h"
@@ -137,5 +137,3 @@ bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,
                            CpuAccelMode* accel_mode, char* accel_status);
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_MAIN_COMMON_H */

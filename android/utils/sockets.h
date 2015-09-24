@@ -10,8 +10,8 @@
 ** GNU General Public License for more details.
 */
 /* headers to use the BSD sockets */
-#ifndef ANDROID_UTILS_SOCKETS_H
-#define ANDROID_UTILS_SOCKETS_H
+
+#pragma once
 
 #include <android/utils/compiler.h>
 
@@ -425,5 +425,3 @@ int  socket_mcast_inet_set_loop( int  s, int  enabled );
 int  socket_mcast_inet_set_ttl( int  s, int  ttl );
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_UTILS_SOCKETS_H */

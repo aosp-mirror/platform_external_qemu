@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_MISC_HTTP_UTILS_H
-#define ANDROID_BASE_MISC_HTTP_UTILS_H
+#pragma once
 
 #include <stddef.h>
 
@@ -23,5 +22,3 @@ bool httpIsRequestLine(const char* line, size_t lineLen);
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_MISC_HTTP_UTILS_H

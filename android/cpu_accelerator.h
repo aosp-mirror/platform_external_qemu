@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_CPU_ACCELERATOR_H
-#define ANDROID_CPU_ACCELERATOR_H
+#pragma once
 
 #include <stdbool.h>
 
@@ -25,6 +24,3 @@ ANDROID_BEGIN_HEADER
 bool android_hasCpuAcceleration(char** status);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_CPU_ACCELERATOR_H
-
