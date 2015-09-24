@@ -34,6 +34,7 @@
      <file alias="check_yes">images/dark/ic_check_box_0BA_24dp.svg</file>
      <file alias="check_no">images/dark/ic_check_box_outline_blank_0BA_24dp.svg</file>
      <file alias="dpad">images/dark/Remote_678.svg</file>
+     <file alias="drop_down">images/dark/ic_arrow_drop_down_ccc_48dp.svg</file>
      <file alias="file_download">images/dark/ic_file_download_678_48dp.svg</file>
      <file alias="file_upload">images/dark/ic_file_upload_678_48dp.svg</file>
      <file alias="fingerprint">images/dark/ic_fingerprint_678_48dp.svg</file>
@@ -88,9 +89,10 @@
      <file alias="call_end">images/light/ic_call_end_0BA_48dp.svg</file>
      <file alias="call_end_disabled">images/light/ic_call_end_grey600_48dp.svg</file>
      <file alias="camera_iris">images/light/ic_camera_677_48dp.svg</file>
-     <file alias="check_yes">images/light/ic_check_box_677_24dp.svg</file>
-     <file alias="check_no">images/light/ic_check_box_outline_blank_677_24dp.svg</file>
+     <file alias="check_yes">images/light/ic_check_box_0BA_24dp.svg</file>
+     <file alias="check_no">images/light/ic_check_box_outline_blank_0BA_24dp.svg</file>
      <file alias="dpad">images/light/Remote_677.svg</file>
+     <file alias="drop_down">images/light/ic_arrow_drop_down_ccc_48dp.svg</file>
      <file alias="file_download">images/light/ic_file_download_677_48dp.svg</file>
      <file alias="file_upload">images/light/ic_file_upload_677_48dp.svg</file>
      <file alias="fingerprint">images/light/ic_fingerprint_677_48dp.svg</file>
