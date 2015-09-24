@@ -1623,6 +1623,268 @@ font-family: &quot;Roboto&quot;</string>
       <string>Keyboard shortcuts</string>
      </property>
     </widget>
+    <widget class="QTableWidget" name="shortcutsTableWidget">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>651</width>
+       <height>661</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>651</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+     <property name="sortingEnabled">
+      <bool>false</bool>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="cornerButtonEnabled">
+      <bool>false</bool>
+     </property>
+     <property name="rowCount">
+      <number>15</number>
+     </property>
+     <attribute name="horizontalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="horizontalHeaderCascadingSectionResizes">
+      <bool>true</bool>
+     </attribute>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>350</number>
+     </attribute>
+     <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <row/>
+     <column>
+      <property name="text">
+       <string>Shortcut key</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Description</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+     </column>
+     <item row="0" column="0">
+      <property name="text">
+       <string>HOME</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignLeft|AlignVCenter</set>
+      </property>
+      <property name="flags">
+       <set>NoItemFlags</set>
+      </property>
+     </item>
+     <item row="0" column="1">
+      <property name="text">
+       <string>Home</string>
+      </property>
+     </item>
+     <item row="1" column="0">
+      <property name="text">
+       <string>F9 (only with -trace startup option)</string>
+      </property>
+     </item>
+     <item row="1" column="1">
+      <property name="text">
+       <string>Toggle code profiling</string>
+      </property>
+     </item>
+     <item row="2" column="0">
+      <property name="text">
+       <string>F6</string>
+      </property>
+     </item>
+     <item row="2" column="1">
+      <property name="text">
+       <string>Toggle trackball mode</string>
+      </property>
+     </item>
+     <item row="3" column="0">
+      <property name="text">
+       <string>F8</string>
+      </property>
+     </item>
+     <item row="3" column="1">
+      <property name="text">
+       <string>Toggle cell networking on/off</string>
+      </property>
+     </item>
+     <item row="4" column="0">
+      <property name="text">
+       <string>Ctrl-F5</string>
+      </property>
+     </item>
+     <item row="4" column="1">
+      <property name="text">
+       <string>Audio volume up button</string>
+      </property>
+     </item>
+     <item row="5" column="0">
+      <property name="text">
+       <string>F7</string>
+      </property>
+     </item>
+     <item row="5" column="1">
+      <property name="text">
+       <string>Power button</string>
+      </property>
+     </item>
+     <item row="6" column="0">
+      <property name="text">
+       <string>ESC</string>
+      </property>
+     </item>
+     <item row="6" column="1">
+      <property name="text">
+       <string>Back</string>
+      </property>
+     </item>
+     <item row="7" column="0">
+      <property name="text">
+       <string>Ctrl-F6</string>
+      </property>
+     </item>
+     <item row="7" column="1">
+      <property name="text">
+       <string>Audio volume down button</string>
+      </property>
+     </item>
+     <item row="8" column="0">
+      <property name="text">
+       <string>F5</string>
+      </property>
+     </item>
+     <item row="8" column="1">
+      <property name="text">
+       <string>Search</string>
+      </property>
+     </item>
+     <item row="9" column="0">
+      <property name="text">
+       <string>F2</string>
+      </property>
+     </item>
+     <item row="9" column="1">
+      <property name="text">
+       <string>Menu (left softkey)</string>
+      </property>
+     </item>
+     <item row="10" column="0">
+      <property name="text">
+       <string>Ctrl-F12</string>
+      </property>
+     </item>
+     <item row="10" column="1">
+      <property name="text">
+       <string>Switch to next layout orientation (for example, portrait, landscape)</string>
+      </property>
+     </item>
+     <item row="11" column="0">
+      <property name="text">
+       <string>F4</string>
+      </property>
+     </item>
+     <item row="11" column="1">
+      <property name="text">
+       <string>Hangup/end call button</string>
+      </property>
+     </item>
+     <item row="12" column="0">
+      <property name="text">
+       <string>F3</string>
+      </property>
+     </item>
+     <item row="12" column="1">
+      <property name="text">
+       <string>Call/dial button</string>
+      </property>
+     </item>
+     <item row="13" column="0">
+      <property name="text">
+       <string>KEYPAD_4/8/6/2</string>
+      </property>
+     </item>
+     <item row="13" column="1">
+      <property name="text">
+       <string>DPad left/up/right/down</string>
+      </property>
+     </item>
+     <item row="14" column="0">
+      <property name="text">
+       <string>Ctrl-F11</string>
+      </property>
+     </item>
+     <item row="14" column="1">
+      <property name="text">
+       <string>Switch to previous layout orientation (for example, portrait, landscape)</string>
+      </property>
+     </item>
+    </widget>
    </widget>
    <widget class="QWidget" name="page_5">
     <widget class="QGroupBox" name="sd_group_2">

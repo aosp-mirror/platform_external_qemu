@@ -87,7 +87,7 @@ enum { PANE_IDX_LOCATION = 0,
     "*[ColorGroup=\"Tool\"]          { color:" LIGHT_TOOL_COLOR "}" \
     "*                               { color:" LIGHT_TEXT_COLOR ";" \
                                       "background-color: "LIGHT_BKG_COLOR "}" \
-    "QTextEdit, QPlainTextEdit, QTreeView {" \
+    "QPlainTextEdit, QTableWidget, QTextEdit, QTreeView {" \
             "border: 1px solid " LIGHT_TEXT_COLOR "} "\
     "QCheckBox::indicator:checked {" \
             "image: url(:/dark/check_yes); " \
@@ -109,7 +109,7 @@ enum { PANE_IDX_LOCATION = 0,
     "*[ColorGroup=\"Tool\"]          { color:" DARK_TOOL_COLOR "}" \
     "*                               { color:" DARK_TEXT_COLOR ";" \
                                       "background-color: "DARK_BKG_COLOR "}" \
-    "QTextEdit, QPlainTextEdit, QTreeView {" \
+    "QPlainTextEdit, QTableWidget, QTextEdit, QTreeView {" \
             "border: 1px solid " DARK_TEXT_COLOR "} "\
     "QCheckBox::indicator:checked {" \
             "image: url(:/dark/check_yes); " \

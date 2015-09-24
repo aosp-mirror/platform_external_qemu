@@ -93,6 +93,7 @@ private:
     void initBattery();
     void initCellular();
     void initFinger();
+    void initKbdShorts();
     void initLocation();
     void initSd();
     void initSettings();
