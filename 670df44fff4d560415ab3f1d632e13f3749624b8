@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "4ec27958_947be486",
+        "filename": "hw/android/goldfish/pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1428,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T16:41:01Z",
+      "side": 1,
+      "message": "This is valid C code in a C source file, and there is very little chance that this code will be compiled with MSVC in the future (the QEMU JIT uses a different parameter passing convention for function calls, so this would require much more work than adjusting a few initializers, as far as I understand).",
+      "parentUuid": "0e5fa128_5004a456",
+      "range": {
+        "startLine": 1427,
+        "startChar": 1,
+        "endLine": 1428,
+        "endChar": 37
+      },
+      "revId": "670df44fff4d560415ab3f1d632e13f3749624b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6e249dad_4dd9b95c",
         "filename": "include/hw/android/goldfish/pipe.h",
         "patchSetId": 1
