@@ -70,6 +70,30 @@
       "revId": "a6462a4ff6ff2c6cce77e7c0d3383ea2c5515678",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ec27958_54b78c0c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-24T07:12:32Z",
+      "side": 1,
+      "message": "it\u0027s only \u0027generic\u0027 in the sense where the hardware doesn\u0027t know about it. They\u0027re not really part of a base class or anything like that. What I mean is that if, in OOP, you have something like:\n\n   class BaseFoo {\n   ...\n       void save(Stream* stream);\n   ...\n   };\n\n   class Foo : public BaseFoo {\n   ...\n       void save(Stream* stream) {\n           BaseFoo::save(stream);\n           ... save other fields here.\n       }\n   };\n\nWhere it makes sense to write the fields of the base class before those of the derived one. However, I don\u0027t think this really applies here, because the Pipe state isn\u0027t really a \u0027base class\u0027 for HwPipe anymore. On the other hand, every Pipe instance has an associated HwPipe, even if it isn\u0027t associated with a service yet.\n\nWe could say that HwPipe is a \u0027base class\u0027 for Pipe, except that we don\u0027t want to tie the layout/implementation of HwPipe into the Pipe one. What do you think ?",
+      "parentUuid": "ee86cdd4_a1113e19",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 6
+      },
+      "revId": "a6462a4ff6ff2c6cce77e7c0d3383ea2c5515678",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
