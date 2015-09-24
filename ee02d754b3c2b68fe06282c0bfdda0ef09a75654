@@ -46,6 +46,30 @@
       "revId": "ee02d754b3c2b68fe06282c0bfdda0ef09a75654",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e470569_63600298",
+        "filename": "android/qemu/utils/stream.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-24T00:04:54Z",
+      "side": 1,
+      "message": "Re-reading, my request sounds very unreasonable and cranky :)\n\nWhat I meant is that it\u0027s easy to make things worse by changing things halfway.\n\nIn any case, by way of an apology: https://android-review.googlesource.com/#/c/172731\n:P",
+      "parentUuid": "2e470569_836c1eff",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 12
+      },
+      "revId": "ee02d754b3c2b68fe06282c0bfdda0ef09a75654",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
