@@ -10,13 +10,12 @@
 ** GNU General Public License for more details.
 */
 
+#pragma once
+
 /*
  * Contains declarations of routines and that are used in the course
  * of the emulator's core initialization.
  */
-
-#ifndef QEMU_ANDROID_CORE_INIT_UI_UTILS_H_
-#define QEMU_ANDROID_CORE_INIT_UI_UTILS_H_
 
 /* Formats and sends back to the UI message indicating successful completion
  * of the core initialization.
@@ -37,5 +36,3 @@ void android_core_init_failure(const char* fmt, ...);
  *  exit_status Exit status, that will be passed to the "exit" routine.
  */
 void android_core_init_exit(int exit_status);
-
-#endif  // QEMU_ANDROID_CORE_INIT_UI_UTILS_H_

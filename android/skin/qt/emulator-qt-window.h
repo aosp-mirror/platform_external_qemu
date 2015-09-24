@@ -9,8 +9,8 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU General Public License for more details.
  */
-#ifndef SKIN_QT_EMULATOR_QT_WINDOW_H
-#define SKIN_QT_EMULATOR_QT_WINDOW_H
+
+#pragma once
 
 #include <QtCore>
 #include <QApplication>
@@ -177,5 +177,3 @@ struct SkinSurface {
     int w, h, original_w, original_h;
     EmulatorQtWindow *window;
 };
-
-#endif // SKIN_QT_EMULATOR_QT_WINDOW_H

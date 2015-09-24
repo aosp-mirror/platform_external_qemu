@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_BASE_CONDITION_VARIABLE_H
-#define ANDROID_BASE_CONDITION_VARIABLE_H
+#pragma once
 
 #include "android/base/synchronization/Lock.h"
 #include "android/base/containers/PodVector.h"
@@ -89,5 +88,3 @@ private:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_CONDITION_VARIABLE_H

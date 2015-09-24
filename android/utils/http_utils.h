@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_UTILS_HTTP_UTILS_H
-#define ANDROID_UTILS_HTTP_UTILS_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -24,5 +23,3 @@ bool android_http_is_request_line(const char* line,
                                   size_t line_len);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_UTILS_HTTP_UTILS_H

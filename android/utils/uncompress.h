@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_UTILS_UNCOMPRESS_H
-#define ANDROID_UTILS_UNCOMPRESS_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -27,7 +27,7 @@ ANDROID_BEGIN_HEADER
 // dst - pointer that receives the decompressed bytes
 // dstLen - number of bytes available for decompressed data
 //
-// return values 
+// return values
 // true - all data decompressed correctly
 // false - dst buffer too small or corrupt zstream or out of memory
 // |dstLen| hold the number of bytes written to dst
@@ -35,5 +35,3 @@ bool uncompress_gzipStream(uint8_t* dst, size_t* dstLen, const uint8_t* src,
                            size_t srcLen);
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_UTILS_UNCOMPRESS_H */

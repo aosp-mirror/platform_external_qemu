@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_SNAPSHOT_H
-#define ANDROID_SNAPSHOT_H
+#pragma once
 
 #include "config/config.h"
 
@@ -27,5 +26,3 @@ void snapshot_print_and_exit( const char *snapstorage );
 
 extern int android_snapshot_update_time;
 extern int android_snapshot_update_time_request;
-
-#endif /* ANDROID_SNAPSHOT_H */

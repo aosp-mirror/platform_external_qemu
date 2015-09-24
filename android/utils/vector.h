@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_VECTOR_H
-#define _ANDROID_UTILS_VECTOR_H
+
+#pragma once
 
 #include "android/utils/assert.h"
 #include "android/utils/compiler.h"
@@ -84,5 +84,3 @@ extern void  _avector_ensure( void**  items, size_t  itemSize,
     } while (0);
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_VECTOR_H */

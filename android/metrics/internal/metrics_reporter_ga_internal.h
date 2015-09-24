@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_METRICS_INTERNAL_ANDROID_METRICS_REPORTER_GA_INTERNAL_H
-#define ANDROID_METRICS_INTERNAL_ANDROID_METRICS_REPORTER_GA_INTERNAL_H
+#pragma once
 
 #include "android/metrics/metrics_reporter.h"
 #include "android/utils/compiler.h"
@@ -24,5 +23,3 @@ ANDROID_BEGIN_HEADER
 int formatGAPostData(char** ptr, const AndroidMetrics* metrics);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_METRICS_INTERNAL_ANDROID_METRICS_REPORTER_GA_INTERNAL_H

@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_SCOPED_STDIO_FILE_H
-#define ANDROID_BASE_SCOPED_STDIO_FILE_H
+#pragma once
 
 #include <stdio.h>
 
@@ -63,5 +62,3 @@ private:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_SCOPED_STDIO_FILE_H

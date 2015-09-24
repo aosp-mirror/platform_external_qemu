@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_AVD_UTIL_H
-#define _ANDROID_AVD_UTIL_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 #include "android/utils/file_data.h"
@@ -130,5 +130,3 @@ const char* emulator_getBackendSuffix(const char* targetArch);
 #define  ANDROID_AVD_DIR    "avd"
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_AVD_UTIL_H */

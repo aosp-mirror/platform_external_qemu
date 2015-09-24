@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_FILESYSTEMS_RAMDISK_EXTRACTOR_H
-#define ANDROID_FILESYSTEMS_RAMDISK_EXTRACTOR_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -31,5 +30,3 @@ bool android_extractRamdiskFile(const char* ramdisk_path,
                                 size_t* out_size);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_FILESYSTEMS_RAMDISK_EXTRACTOR_H

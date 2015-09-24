@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_CAMERA_CAMERA_COMMON_H_
-#define ANDROID_CAMERA_CAMERA_COMMON_H_
+#pragma once
 
 /*
  * Contains declarations of platform-independent the stuff that is used in
@@ -208,5 +207,3 @@ _camera_sleep(int millisec)
         t.tv_usec = (wake_at - stamp) - (uint64_t)t.tv_sec * 1000000;
     } while (select(0, NULL, NULL, NULL, &t) < 0 && errno == EINTR);
 }
-
-#endif  /* ANDROID_CAMERA_CAMERA_COMMON_H_ */

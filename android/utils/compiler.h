@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_UTILS_COMPILER_H
-#define ANDROID_UTILS_COMPILER_H
+#pragma once
 
 #ifdef __cplusplus
 #define ANDROID_BEGIN_HEADER extern "C" {
@@ -28,5 +27,3 @@
 #else
 # define ANDROID_GCC_PREREQ(maj, min) 0
 #endif
-
-#endif  // ANDROID_UTILS_COMPILER_H

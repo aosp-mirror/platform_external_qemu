@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_MISC_H
-#define _ANDROID_UTILS_MISC_H
+
+#pragma once
 
 #include <stdint.h>
 
@@ -126,5 +126,3 @@ extern int get_token_value_alloc(const char* params, const char* name, char** va
 extern int get_token_value_int(const char* params, const char* name, int* value);
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_MISC_H */

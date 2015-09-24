@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_STRING_VIEW_H
-#define ANDROID_BASE_STRING_VIEW_H
+#pragma once
 
 #include <string.h>
 
@@ -151,5 +150,3 @@ inline bool operator<=(const StringView& x, const StringView& y) {
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_STRING_VIEW_H

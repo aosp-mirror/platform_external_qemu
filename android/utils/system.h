@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_SYSTEM_H
-#define _ANDROID_UTILS_SYSTEM_H
+
+#pragma once
 
 #include <string.h>
 #include <stdint.h>
@@ -178,5 +178,3 @@ extern int64_t get_system_time_ms();
 /* */
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_SYSTEM_H */

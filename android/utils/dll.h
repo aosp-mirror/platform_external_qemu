@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_UTILS_DLL_H
-#define ANDROID_UTILS_DLL_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -46,5 +46,3 @@ void* adynamicLibrary_findSymbol( ADynamicLibrary*  lib,
 void  adynamicLibrary_close( ADynamicLibrary*  lib );
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_UTILS_DLL_H */

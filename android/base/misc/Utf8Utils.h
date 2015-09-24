@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_UTF8_UTILS_H
-#define ANDROID_BASE_UTF8_UTILS_H
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
@@ -37,5 +36,3 @@ int utf8Encode(uint32_t codepoint, uint8_t* buffer, size_t buffer_len);
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_UTF8_UTILS_H

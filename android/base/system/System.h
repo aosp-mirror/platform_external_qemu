@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_BASE_SYSTEM_SYSTEM_H
-#define ANDROID_BASE_SYSTEM_SYSTEM_H
+#pragma once
 
 #include "android/base/Compiler.h"
 
@@ -182,5 +181,3 @@ private:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_SYSTEM_SYSTEM_H

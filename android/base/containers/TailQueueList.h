@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_CONTAINERS_TAIL_QUEUE_LIST_H
-#define ANDROID_BASE_CONTAINERS_TAIL_QUEUE_LIST_H
+#pragma once
 
 #include "android/base/Compiler.h"
 #include "android/base/Log.h"
@@ -329,5 +328,3 @@ private:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_CONTAINERS_TAIL_QUEUE_LIST_H

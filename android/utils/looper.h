@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_UTILS_LOOPER_H
-#define ANDROID_UTILS_LOOPER_H
+
+#pragma once
 
 #include "android/utils/compiler.h"
 #include "android/utils/system.h"
@@ -249,5 +249,3 @@ void looper_free(Looper* looper);
 /* */
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_UTILS_LOOPER_H */

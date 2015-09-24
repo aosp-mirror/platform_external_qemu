@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_UTILS_PROPERTY_FILE_H
-#define ANDROID_UTILS_PROPERTY_FILE_H
+#pragma once
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -74,5 +73,3 @@ void propertyFileIterator_init(PropertyFileIterator* iter,
 bool propertyFileIterator_next(PropertyFileIterator* iter);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_UTILS_PROPERTY_FILE_H

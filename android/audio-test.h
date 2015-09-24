@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_AUDIO_TEST_H
-#define ANDROID_AUDIO_TEST_H
+
+#pragma once
 
 /* Start the audio test output, this will register a virtual sound
  * device that sends a saw signal to the audio sub-system. This is
@@ -18,5 +18,3 @@
  * a full system and launch a music application.
  */
 extern int android_audio_test_start_out(void);
-
-#endif /* ANDROID_AUDIO_TEST_H */

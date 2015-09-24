@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_OPENGL_EMUGL_BACKEND_LIST_H
-#define ANDROID_OPENGL_EMUGL_BACKEND_LIST_H
+#pragma once
 
 #include "android/base/containers/StringVector.h"
 #include "android/base/String.h"
@@ -66,5 +65,3 @@ private:
 
 }  // namespace opengl
 }  // namespace android
-
-#endif  // ANDROID_OPENGL_EMUGL_BACKEND_LIST_H

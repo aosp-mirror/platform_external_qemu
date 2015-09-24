@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_KERNEL_KERNEL_UTILS_H
-#define ANDROID_KERNEL_KERNEL_UTILS_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -47,12 +46,10 @@ bool android_pathProbeKernelVersionString(const char* kernelPath,
                                           char* dst,
                                           size_t dstLen);
 
-// Return the serial device name prefix matching a given kernel type 
-// |kernelVersion|.  I.e. this should be "/dev/ttyS" for before 3.10.0 and 
+// Return the serial device name prefix matching a given kernel type
+// |kernelVersion|.  I.e. this should be "/dev/ttyS" for before 3.10.0 and
 // "/dev/ttyGF" for 3.10.0 and later.
 const char* android_kernelSerialDevicePrefix(KernelVersion kernelVersion);
 
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_KERNEL_KERNEL_UTILS_H

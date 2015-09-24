@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_QT_QT_SETUP_H
-#define ANDROID_QT_QT_SETUP_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -26,6 +25,3 @@ ANDROID_BEGIN_HEADER
 bool androidQtSetupEnv();
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_QT_QT_SETUP_H
-

@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_MEMORY_MALLOC_USABLE_SIZE_H
-#define ANDROID_BASE_MEMORY_MALLOC_USABLE_SIZE_H
+#pragma once
 
 // Define HAVE_MALLOC_USABLE_SIZE to 1 to indicate that the current
 // system has malloc_usable_size(). Which takes the address of a malloc-ed
@@ -33,5 +32,3 @@
 #else
 #  define USE_MALLOC_USABLE_SIZE  0
 #endif
-
-#endif  // ANDROID_BASE_MEMORY_MALLOC_USABLE_SIZE_H

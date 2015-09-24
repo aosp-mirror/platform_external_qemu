@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_UTILS_PANIC_H
-#define ANDROID_UTILS_PANIC_H
+
+#pragma once
 
 #include <stdarg.h>
 
@@ -33,5 +33,3 @@ typedef void (*APanicHandlerFunc)(const char*, va_list) __attribute__((noreturn)
 void android_panic_registerHandler( APanicHandlerFunc  handler );
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_UTILS_PANIC_H */

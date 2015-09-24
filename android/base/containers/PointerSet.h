@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_BASE_CONTAINERS_POINTER_SET_H
-#define ANDROID_BASE_CONTAINERS_POINTER_SET_H
+#pragma once
 
 #include "android/base/Compiler.h"
 #include "android/base/containers/HashUtils.h"
@@ -189,5 +188,3 @@ public:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_CONTAINERS_POINTER_SET_H

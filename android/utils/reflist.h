@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_GRAPHICS_REFLIST_H
-#define _ANDROID_GRAPHICS_REFLIST_H
+
+#pragma once
 
 #include <inttypes.h>
 
@@ -210,5 +210,3 @@ void**  _areflist_at(const ARefList*  l, int  n);
 void  areflist_copy(ARefList*  dst, const ARefList*  src);
 
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_GRAPHICS_REFLIST_H */

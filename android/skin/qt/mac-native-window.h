@@ -9,12 +9,10 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU General Public License for more details.
  */
-#ifndef __MAC_NATIVE_WINDOW_C_INTF_H__
-#define __MAC_NATIVE_WINDOW_C_INTF_H__
+
+#pragma once
 
 #ifdef __cplusplus
 extern "C"
 #endif
 void* getNSWindow(void* ns_view);
-
-#endif

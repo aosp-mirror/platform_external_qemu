@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_BASE_THREADS_THREAD_H
-#define ANDROID_BASE_THREADS_THREAD_H
+#pragma once
 
 #ifdef _WIN32
 #include <windows.h>
@@ -105,6 +104,3 @@ private:
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_THREADS_THREAD_H
-

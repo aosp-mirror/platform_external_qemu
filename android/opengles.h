@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_OPENGLES_H
-#define ANDROID_OPENGLES_H
+
+#pragma once
 
 #include <stddef.h>
 
@@ -68,5 +68,3 @@ extern int  android_gles_fast_pipes;
 void android_gles_server_path(char* buff, size_t buffsize);
 
 ANDROID_END_HEADER
-
-#endif /* ANDROID_OPENGLES_H */

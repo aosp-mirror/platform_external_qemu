@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_FILESYSTEMS_EXT4_UTILS_H
-#define ANDROID_FILESYSTEMS_EXT4_UTILS_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -32,5 +31,3 @@ bool android_pathIsExt4PartitionImage(const char* filePath);
 
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_FILESYSTEMS_EXT4_UTILS_H

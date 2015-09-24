@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_WEAR_AGENT_PAIR_UP_WEAR_PHONE_H
-#define ANDROID_WEAR_AGENT_PAIR_UP_WEAR_PHONE_H
+#pragma once
 
 #include "android/base/Compiler.h"
 
@@ -58,5 +57,3 @@ private:
 
 } // namespace wear
 } // namespace android
-
-#endif

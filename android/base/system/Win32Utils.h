@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_BASE_SYSTEM_WIN32UTILS_H
-#define ANDROID_BASE_SYSTEM_WIN32UTILS_H
+#pragma once
 
 #include "android/base/String.h"
 
@@ -52,5 +51,3 @@ static String quoteCommandLine(const char* commandLine);
 
 }  // namespace base
 }  // namespace android
-
-#endif  // ANDROID_BASE_SYSTEM_WIN32UTILS_H

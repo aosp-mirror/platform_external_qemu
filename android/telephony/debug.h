@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef ANDROID_TELEPHONY_DEBUG_H
-#define ANDROID_TELEPHONE_DEBUG_H
+
+#pragma once
 
 #include <stdbool.h>
 
@@ -40,5 +40,3 @@ extern void android_telephony_log(const char* fmt, ...);
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // ANDROID_TELEPHONE_DEBUG_H

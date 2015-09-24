@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_UTILS_PATH_H
-#define _ANDROID_UTILS_PATH_H
+
+#pragma once
 
 #include <android/utils/compiler.h>
 #include <android/utils/system.h>
@@ -190,5 +190,3 @@ extern void           path_unescape_path( char* str );
 
 /* */
 ANDROID_END_HEADER
-
-#endif /* _ANDROID_UTILS_PATH_H */

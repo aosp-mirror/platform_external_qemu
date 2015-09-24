@@ -9,8 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#ifndef ANDROID_UTILS_STREAM_H
-#define ANDROID_UTILS_STREAM_H
+#pragma once
 
 #include "android/utils/compiler.h"
 
@@ -43,5 +42,3 @@ void stream_put_string(Stream* stream, const char* str);
 char* stream_get_string(Stream* stream);
 
 ANDROID_END_HEADER
-
-#endif  // ANDROID_UTILS_STREAM_H

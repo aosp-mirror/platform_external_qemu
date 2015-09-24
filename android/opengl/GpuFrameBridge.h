@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ANDROID_OPENGL_GPU_FRAME_BRIDGE_H
-#define ANDROID_OPENGL_GPU_FRAME_BRIDGE_H
+#pragma once
 
 namespace android {
 
@@ -70,5 +69,3 @@ protected:
 
 }  // namespace opengl
 }  // namespace android
-
-#endif  // ANDROID_OPENGL_GPU_FRAME_BRIDGE_H

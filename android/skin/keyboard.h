@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _ANDROID_SKIN_KEYBOARD_H
-#define _ANDROID_SKIN_KEYBOARD_H
+
+#pragma once
 
 #include "android/skin/charmap.h"
 #include "android/skin/event.h"
@@ -58,6 +58,3 @@ extern int            skin_keyboard_process_unicode_event( SkinKeyboard*  kb,  u
 
 extern void           skin_keyboard_add_key_event( SkinKeyboard*  k, unsigned code, unsigned  down );
 extern void           skin_keyboard_flush( SkinKeyboard*  kb );
-
-#endif /* _ANDROID_SKIN_KEYBOARD_H */
-

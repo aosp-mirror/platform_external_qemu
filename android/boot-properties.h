@@ -10,8 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#ifndef _ANDROID_BOOT_PROPERTIES_H
-#define _ANDROID_BOOT_PROPERTIES_H
+#pragma once
 
 /* Manage the set of boot system properties.
  * See the documentation for the 'boot-properties' service
@@ -48,5 +47,3 @@ void  boot_property_init_service( void );
 /* parse the parameter of -prop options passed on the command line
  */
 void  boot_property_parse_option( const char*  param );
-
-#endif /* _ANDROID_BOOT_PROPERTIES_H */
