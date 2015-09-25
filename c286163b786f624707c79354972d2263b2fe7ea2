@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "6e7bbdad_55158cd0",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 1039299
+      },
+      "writtenOn": "2015-09-25T05:05:12Z",
+      "side": 1,
+      "message": "I would suggest to use \u0027cores\u003d%ld\" here, because it actually means one n-core CPU, as opposed to, n one-core CPU.",
+      "revId": "c286163b786f624707c79354972d2263b2fe7ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e2e2591_1f3993b7",
         "filename": "android/qemu-launcher/emulator-qemu.cpp",
         "patchSetId": 2
