@@ -20,23 +20,25 @@
 void ExtendedWindow::initFinger()
 { }
 
-void ExtendedWindow::on_finger_touchCkBox_toggled(bool checked)
+void ExtendedWindow::on_finger_touchButton_pressed()
 {
     bool OK = false;
     int  id = mExtendedUi->finger_IdBox->toPlainText().toInt(&OK);
 
-    if (checked && !OK) {
+    if ( !OK || id <= 0 ) {
         mToolWindow->showErrorDialog(tr("The \"Fingerprint ID\" number is invalid."),
                                      tr("Finger ID"));
-        mExtendedUi->finger_IdBox->setEnabled(true);
-        mExtendedUi->finger_touchCkBox->setChecked(false);
         return;
     }
 
     if (mFingerAgent && mFingerAgent->setTouch) {
-        mFingerAgent->setTouch(checked, id);
+        mFingerAgent->setTouch(true, id);
     }
+}
 
-    // Don't allow changing the ID while a touch is active
-    mExtendedUi->finger_IdBox->setEnabled( !checked );
+void ExtendedWindow::on_finger_touchButton_released()
+{
+    if (mFingerAgent && mFingerAgent->setTouch) {
+        mFingerAgent->setTouch(false, 0);
+    }
 }
