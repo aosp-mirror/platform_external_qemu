@@ -73,13 +73,28 @@ void ExtendedWindow::setButtonEnabled(QPushButton *theButton, bool isEnabled)
     // image.
     QString enabledPropStr  = theButton->property("themeIconName"         ).toString();
     QString disabledPropStr = theButton->property("themeIconName_disabled").toString();
-    if ( !enabledPropStr.isNull() ) {
-        // It has at least an 'enabled' icon name.
-        // Select light/dark and enabled/disabled
-        QString resName = ":/";
-        resName += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
-                          "dark/" : "light/";
-        resName += (isEnabled || disabledPropStr.isNull()) ? enabledPropStr : disabledPropStr;
-        theButton->setIcon(QIcon(resName));
+
+    // Get the resource name based on the light/dark theme
+    QString resName = ":/";
+    resName += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
+                      DARK_PATH : LIGHT_PATH;
+    resName += "/";
+
+    if (!isEnabled  &&  !disabledPropStr.isNull()) {
+        // The button is disabled and has a specific
+        // icon for when it is disabled.
+        // Apply this icon and tell Qt to use it
+        // directly (don't gray it out) even though
+        // it is disabled.
+        resName += disabledPropStr;
+        QIcon theIcon(resName);
+        theIcon.addPixmap(QPixmap(resName), QIcon::Disabled);
+        theButton->setIcon(theIcon);
+    } else if ( !enabledPropStr.isNull() ) {
+        // Use the 'enabled' version of the icon
+        // (Let Qt grey the icon if it wants to)
+        resName += enabledPropStr;
+        QIcon theIcon(resName);
+        theButton->setIcon(theIcon);
     }
 }
