@@ -799,7 +799,15 @@ int main(int argc, char **argv) {
             exit(1);
         }
         hw->hw_gpu_enabled = config.enabled;
-        reassign_string(&hw->hw_gpu_mode, config.backend);
+        if (config.enabled)
+        {
+            /* Only update hw_gpu_mode if emuglConfig_init determined that gpu
+             * is enabled. Leave the default untouched otherwise, because there
+             * is no canonical value to return from emulConfig_init function in
+             * that case.
+             */
+            reassign_string(&hw->hw_gpu_mode, config.backend);
+        }
         D("%s", config.status);
     }
 
