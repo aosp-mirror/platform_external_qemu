@@ -28,7 +28,6 @@
 
 #include <stdio.h>
 #include <GLcommon/gldefs.h>
-#include <GLcommon/GLDispatch.h>
 #include <GLcommon/GLconversion_macros.h>
 #include <GLcommon/TranslatorIfaces.h>
 #include <GLcommon/FramebufferData.h>
