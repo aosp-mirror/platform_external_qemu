@@ -60,8 +60,10 @@ enum { PANE_IDX_LOCATION = 0,
 
 #define LIGHT_BKG_COLOR            "#f9f9f9"  // Main page background
 #define LIGHT_DISABLED_TOOL_COLOR  "#a0a0a0"  // Grayed-out button text
+#define LIGHT_DIVIDER_COLOR        "#e0e0e0"  // Line between items
 #define LIGHT_MAJOR_TAB_COLOR      "#91a4ad"  // Text of major tabs
 #define LIGHT_MAJOR_TITLE_COLOR    "#617d8a"  // Text of major tab separators
+#define LIGHT_PATH                 "dark"     // Icon directory under images/
 #define LIGHT_TAB_BKG_COLOR        "#ffffff"  // Background of major tabs
 #define LIGHT_TEXT_COLOR           "#212121"  // Main page text
 #define LIGHT_TITLE_COLOR          "#757575"  // Main page titles
@@ -69,55 +71,55 @@ enum { PANE_IDX_LOCATION = 0,
 
 #define DARK_BKG_COLOR             "#273238"
 #define DARK_DISABLED_TOOL_COLOR   "#a0a0a0"
+#define DARK_DIVIDER_COLOR         "#e0e0e0"
 #define DARK_MAJOR_TAB_COLOR       "#bdc0c3"
 #define DARK_MAJOR_TITLE_COLOR     "#e5e6e7"
+#define DARK_PATH                  "light"
 #define DARK_TAB_BKG_COLOR         "#394249"
 #define DARK_TEXT_COLOR            "#eeeeee"
 #define DARK_TITLE_COLOR           "#ffffff"
 #define DARK_TOOL_COLOR            "#00bea4"
 
-// These are the styles. One for each theme.
-
-#define QT_STYLE_LIGHT_THEME \
-    "*[ColorGroup=\"MajorTab\"]      { color:" LIGHT_MAJOR_TAB_COLOR "}" \
-    "*[ColorGroup=\"MajorTabTitle\"] { color:" LIGHT_MAJOR_TITLE_COLOR ";" \
-                                      "background-color:" LIGHT_TAB_BKG_COLOR "}" \
-    "*[ColorGroup=\"Title\"]         { color:" LIGHT_TITLE_COLOR "}" \
-    "*::disabled[ColorGroup=\"Tool\"]{ color:" LIGHT_DISABLED_TOOL_COLOR "}" \
-    "*[ColorGroup=\"Tool\"]          { color:" LIGHT_TOOL_COLOR "}" \
-    "*                               { color:" LIGHT_TEXT_COLOR ";" \
-                                      "background-color: "LIGHT_BKG_COLOR "}" \
-    "QPlainTextEdit, QTableWidget, QTextEdit, QTreeView {" \
-            "border: 1px solid " LIGHT_TEXT_COLOR "} "\
+// This is the style, based on either the LIGHT or DARK theme
+#define QT_STYLE(THEME) \
+    "*[ColorGroup=\"MajorTab\"]      { color:" THEME##_MAJOR_TAB_COLOR "}" \
+    "*[ColorGroup=\"MajorTabTitle\"] { color:" THEME##_MAJOR_TITLE_COLOR ";" \
+            "background-color:" THEME##_TAB_BKG_COLOR "}" \
+    "*[ColorGroup=\"Title\"]         { color:" THEME##_TITLE_COLOR "}" \
+    "*::disabled[ColorGroup=\"Tool\"]{ color:" THEME##_DISABLED_TOOL_COLOR "}" \
+    "*[ColorGroup=\"Tool\"]          { color:" THEME##_TOOL_COLOR "}" \
+    "*                               { color:" THEME##_TEXT_COLOR ";" \
+                                      "background-color: "THEME##_BKG_COLOR "}" \
+    "QPlainTextEdit, QTextEdit, QTreeView {" \
+            "border-top: 0px; "\
+            "border-bottom: 2px solid " THEME##_DIVIDER_COLOR "}" \
     "QCheckBox::indicator:checked {" \
-            "image: url(:/dark/check_yes); " \
+            "image: url(:/" THEME##_PATH "/check_yes); " \
             "icon-size: 24px; height: 24 px; width: 24 px }" \
     "QCheckBox::indicator:unchecked {" \
-            "image: url(:/dark/check_no); " \
+            "image: url(:/" THEME##_PATH "/check_no); " \
             "icon-size: 24px; height: 24 px; width: 24 px }" \
-    "QSlider::sub-page:horizontal {background: " LIGHT_TOOL_COLOR "}" \
-    "QSlider::handle:horizontal {" \
-            "background:" LIGHT_TOOL_COLOR ";" \
-            "border: 1px solid " LIGHT_TOOL_COLOR "; border-radius: 7px }"
-
-#define QT_STYLE_DARK_THEME \
-    "*[ColorGroup=\"MajorTab\"]      { color:" DARK_MAJOR_TAB_COLOR "}" \
-    "*[ColorGroup=\"MajorTabTitle\"] { color:" DARK_MAJOR_TITLE_COLOR ";" \
-                                      "background-color:" DARK_TAB_BKG_COLOR "}" \
-    "*[ColorGroup=\"Title\"]         { color:" DARK_TITLE_COLOR "}" \
-    "*::disabled[ColorGroup=\"Tool\"]{ color:" DARK_DISABLED_TOOL_COLOR "}" \
-    "*[ColorGroup=\"Tool\"]          { color:" DARK_TOOL_COLOR "}" \
-    "*                               { color:" DARK_TEXT_COLOR ";" \
-                                      "background-color: "DARK_BKG_COLOR "}" \
-    "QPlainTextEdit, QTableWidget, QTextEdit, QTreeView {" \
-            "border: 1px solid " DARK_TEXT_COLOR "} "\
-    "QCheckBox::indicator:checked {" \
-            "image: url(:/dark/check_yes); " \
-            "icon-size: 24px; height: 24 px; width: 24 px }" \
-    "QCheckBox::indicator:unchecked {" \
-            "image: url(:/dark/check_no); " \
-            "icon-size: 24px; height: 24 px; width: 24 px }" \
-    "QSlider::sub-page:horizontal {background: " DARK_TOOL_COLOR "}" \
-    "QSlider::handle:horizontal {" \
-            "background:" DARK_TOOL_COLOR ";" \
-            "border: 1px solid " DARK_TOOL_COLOR "; border-radius: 7px }"
+    "QSlider::groove {border: 1px ;height: 2px}" \
+    "QSlider::handle {background: solid " THEME##_TOOL_COLOR ";" \
+        "border: 1px solid " THEME##_TOOL_COLOR ";width: 12px;" \
+        "margin: -6px 0; border-radius: 7px}" \
+    "QSlider::sub-page:horizontal {background:" THEME##_TOOL_COLOR \
+        "; border-radius: 1px}" \
+    "QSlider::add-page:horizontal {background:" THEME##_DIVIDER_COLOR \
+        "; border-radius: 1px}" \
+    "QTableWidget { gridline-color:" THEME##_TAB_BKG_COLOR ";" \
+        "background:" THEME##_TAB_BKG_COLOR "; border: 0px }" \
+    "QTableView::item { border-top: 1px solid " THEME##_DIVIDER_COLOR "}" \
+    "QHeaderView::section { color:" THEME##_TITLE_COLOR "; background:" \
+        THEME##_TAB_BKG_COLOR "; border: 0px }" \
+    "QScrollBar::vertical { background:" THEME##_TAB_BKG_COLOR \
+        "; margin 21px 0 21 px 0 }" \
+    "QScrollBar::handle:vertical { background:" THEME##_DIVIDER_COLOR \
+        "; min-height: 25px }" \
+    "QScrollBar::add-line:vertical { border: none; background: none }" \
+    "QScrollBar::sub-line:vertical { border: none; background: none }" \
+    "QComboBox { border-top: 0px; border-bottom: 2px solid " \
+        THEME##_DIVIDER_COLOR "}" \
+    "QComboBox::drop-down { border-left-style: solid; }" \
+    "QComboBox::down-arrow { image:url(:/" THEME##_PATH "/drop_down); " \
+        "border: none; width: 24px; height: 24px; }"

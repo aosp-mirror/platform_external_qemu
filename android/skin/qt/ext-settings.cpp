@@ -48,11 +48,11 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
     // Set the style for this theme
     switch (theme) {
         case SETTINGS_THEME_DARK:
-            this->setStyleSheet(QT_STYLE_DARK_THEME);
+            this->setStyleSheet(QT_STYLE(DARK));
             break;
         case SETTINGS_THEME_LIGHT:
         default:
-            this->setStyleSheet(QT_STYLE_LIGHT_THEME);
+            this->setStyleSheet(QT_STYLE(LIGHT));
             break;
     }
 
