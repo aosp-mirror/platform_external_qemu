@@ -156,10 +156,6 @@ void EglDisplay::initConfigurations(int renderableType) {
         config->getConfAttrib(EGL_STENCIL_SIZE, &stencil);
         config->getConfAttrib(EGL_RENDERABLE_TYPE, &renderable);
         config->getConfAttrib(EGL_SURFACE_TYPE, &surface);
-        fprintf(stderr,
-                "%s: Config address=%p id=%d r/g/b/a/d/s=%d/%d/%d/%d/%d/%d renderable=%d surface=%d\n",
-                __FUNCTION__, config, config->id(), red, green, blue, alpha,
-                depth, stencil, renderable, surface);
     }
 #endif  // EMUGL_DEBUG
 }
