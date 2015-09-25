@@ -78,7 +78,7 @@ void ExtendedWindow::setButtonEnabled(QPushButton *theButton, bool isEnabled)
         // Select light/dark and enabled/disabled
         QString resName = ":/";
         resName += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
-                          "light/" : "dark/"; // Theme is dark ==> icon is light
+                          "dark/" : "light/";
         resName += (isEnabled || disabledPropStr.isNull()) ? enabledPropStr : disabledPropStr;
         theButton->setIcon(QIcon(resName));
     }
