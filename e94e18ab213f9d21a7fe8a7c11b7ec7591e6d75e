@@ -46,6 +46,40 @@
       "revId": "e94e18ab213f9d21a7fe8a7c11b7ec7591e6d75e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ec27958_7403a8d5",
+        "filename": "android/utils/uri.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-25T09:22:55Z",
+      "side": 1,
+      "message": "nit: probably no need to mention StringView here I think :)",
+      "revId": "e94e18ab213f9d21a7fe8a7c11b7ec7591e6d75e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ec27958_9417640e",
+        "filename": "android/utils/uri.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-25T09:22:55Z",
+      "side": 1,
+      "message": "I\u0027m surprised this compiles at all, shouldn\u0027t you at least inclide \u003cstring.h\u003e or \u003cstdlib.h\u003e to get strdup() properly declared?",
+      "revId": "e94e18ab213f9d21a7fe8a7c11b7ec7591e6d75e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
