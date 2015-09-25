@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ee86cdd4_901322d5",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 462,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-25T17:27:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ee86cdd4_10a8725a",
+      "revId": "f7803dfc86ffde6c6b09f91fbc40396852adf223",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4e4c398b_396233df",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-25T14:31:52Z",
       "side": 1,
       "message": "(No action required)\nWeird that this would actually cause it to fail.\nI wonder if the save function relies on an extension to know what file format to use.",
+      "revId": "f7803dfc86ffde6c6b09f91fbc40396852adf223",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e4c398b_cb13468f",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 514,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-09-25T17:27:39Z",
+      "side": 1,
+      "message": "It\u0027s also OS dependent it seems - seems like Linux automatically appends the file extension, but Windows doesn\u0027t.",
+      "parentUuid": "4e4c398b_396233df",
       "revId": "f7803dfc86ffde6c6b09f91fbc40396852adf223",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
