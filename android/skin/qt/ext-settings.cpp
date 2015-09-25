@@ -48,11 +48,11 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
     // Set the style for this theme
     switch (theme) {
         case SETTINGS_THEME_DARK:
-            this->setStyleSheet(QT_STYLE_DARK_THEME);
+            this->setStyleSheet(QT_STYLE(DARK));
             break;
         case SETTINGS_THEME_LIGHT:
         default:
-            this->setStyleSheet(QT_STYLE_LIGHT_THEME);
+            this->setStyleSheet(QT_STYLE(LIGHT));
             break;
     }
 
@@ -78,7 +78,7 @@ void ExtendedWindow::setButtonEnabled(QPushButton *theButton, bool isEnabled)
         // Select light/dark and enabled/disabled
         QString resName = ":/";
         resName += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
-                          "light/" : "dark/"; // Theme is dark ==> icon is light
+                          "dark/" : "light/";
         resName += (isEnabled || disabledPropStr.isNull()) ? enabledPropStr : disabledPropStr;
         theButton->setIcon(QIcon(resName));
     }

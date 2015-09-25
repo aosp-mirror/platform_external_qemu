@@ -578,7 +578,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>70</y>
+       <y>80</y>
        <width>121</width>
        <height>31</height>
       </rect>
@@ -1462,6 +1462,9 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="horizontalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="plainText">
+      <string>12345</string>
      </property>
     </widget>
     <widget class="QCheckBox" name="finger_touchCkBox">
