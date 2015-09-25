@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ec3bd5a_b5a2a011",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1072780
+      },
+      "writtenOn": "2015-09-25T14:53:29Z",
+      "side": 1,
+      "message": "nit: This include is not needed now because we don\u0027t export any env variables yet.",
+      "revId": "2f27f3d205853202374c30417257eeae9147705d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
