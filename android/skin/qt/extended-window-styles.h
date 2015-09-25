@@ -63,7 +63,7 @@ enum { PANE_IDX_LOCATION = 0,
 #define LIGHT_DIVIDER_COLOR        "#e0e0e0"  // Line between items
 #define LIGHT_MAJOR_TAB_COLOR      "#91a4ad"  // Text of major tabs
 #define LIGHT_MAJOR_TITLE_COLOR    "#617d8a"  // Text of major tab separators
-#define LIGHT_PATH                 "dark"     // Icon directory under images/
+#define LIGHT_PATH                 "light"    // Icon directory under images/
 #define LIGHT_TAB_BKG_COLOR        "#ffffff"  // Background of major tabs
 #define LIGHT_TEXT_COLOR           "#212121"  // Main page text
 #define LIGHT_TITLE_COLOR          "#757575"  // Main page titles
@@ -74,7 +74,7 @@ enum { PANE_IDX_LOCATION = 0,
 #define DARK_DIVIDER_COLOR         "#e0e0e0"
 #define DARK_MAJOR_TAB_COLOR       "#bdc0c3"
 #define DARK_MAJOR_TITLE_COLOR     "#e5e6e7"
-#define DARK_PATH                  "light"
+#define DARK_PATH                  "dark"
 #define DARK_TAB_BKG_COLOR         "#394249"
 #define DARK_TEXT_COLOR            "#eeeeee"
 #define DARK_TITLE_COLOR           "#ffffff"
