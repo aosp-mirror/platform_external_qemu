@@ -24,6 +24,9 @@
 #include <QToolButton>
 #include <QUrl>
 
+#define REMOTE_TMP_DIR "/data/local/tmp/"
+#define TMP_SCREENSHOT_FILE "screen.png"
+
 namespace Ui {
     class ToolControls;
 }
@@ -47,6 +50,9 @@ public:
         { uiEmuAgent = agPtr; }
 
     void showErrorDialog(const QString &message, const QString &title);
+
+    QString getAndroidSdkRoot();
+    QString getAdbFullPath();
 
     void runAdbInstall(const QString &path);
     void runAdbPush(const QList<QUrl> &paths);
