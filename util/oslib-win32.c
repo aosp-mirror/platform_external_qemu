@@ -470,3 +470,30 @@ void os_mem_prealloc(int fd, char *area, size_t memory)
         memset(area + pagesize * i, 0, 1);
     }
 }
+
+#ifdef CONFIG_ANDROID
+// Required by the debug Android build.
+int ffs(int x) {
+    int result = 0;
+    unsigned ux = (unsigned)x;
+    while (ux) {
+        if (ux & 1)
+            return result + 1;
+        ux >>= 1;
+        ++result;
+    }
+    return 0;
+}
+
+int ffsl(long x) {
+    int result = 0;
+    unsigned long ux = (unsigned long)x;
+    while (ux) {
+        if (ux & 1)
+            return result + 1;
+        ux >>= 1;
+        ++result;
+    }
+    return 0;
+}
+#endif
