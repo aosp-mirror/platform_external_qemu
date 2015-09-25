@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "8e52b121_3b622bdf",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-25T22:50:19Z",
+      "side": 1,
+      "message": "Agreed that phones out there are multi-core rather than multi-processor.",
+      "parentUuid": "6e7bbdad_55158cd0",
+      "revId": "c286163b786f624707c79354972d2263b2fe7ea2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e2e2591_1f3993b7",
         "filename": "android/qemu-launcher/emulator-qemu.cpp",
         "patchSetId": 2
