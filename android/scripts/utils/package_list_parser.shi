@@ -44,6 +44,10 @@
 #          GIT branch name, only needed when GIT=<url> is also used, ignored
 #          otherwise.
 #
+#      REVISION=<name>
+#          GIT revision / commit, only needed when GIT=<url> is also used,
+#          ignored otherwise.
+#
 #      SHA1=<sha1>
 #          Optional SHA-1 hash for the source package. If URL=<url> is used,
 #          this is optional, and if present, the content of the downloaded
@@ -185,7 +189,7 @@ package_list_parse_file () {
     fi
 
     local PKG_BASENAME PKG_URL PKG_SHA1 PKG_PATCHES PKG_FILE PKG_VERSION
-    local PKG_LIST PKG_SRC_DIR PKG_GIT PKG_BRANCH
+    local PKG_LIST PKG_SRC_DIR PKG_GIT PKG_BRANCH PKG_REVISION
     local OLD_IFS="$IFS"
     local IFS="$OLD_IFS"
     local COUNT=0
@@ -201,6 +205,7 @@ package_list_parse_file () {
         PKG_GIT=
         PKG_SVN=
         PKG_BRANCH=
+        PKG_REVISION=
         PKG_BASENAME=
         PKG_SHA1=
         PKG_FILE=
@@ -229,6 +234,9 @@ package_list_parse_file () {
                     ;;
                 BRANCH=*)
                     PKG_BRANCH=${FIELD#BRANCH=}
+                    ;;
+                REVISION=*)
+                    PKG_REVISION=${FIELD#REVISION=}
                     ;;
                 GIT=*)
                     PKG_GIT=${FIELD#GIT=}
@@ -275,8 +283,12 @@ package_list_parse_file () {
             if [ -z "$PKG_BASENAME" ]; then
                 PKG_BASENAME=$PKG_FILE
             fi
-            PKG_FILE=$PKG_BASENAME-$PKG_BRANCH.tar.xz
-            PKG_VERSION=$PKG_BRANCH
+            if [ -z "$PKG_REVISION" ]; then
+                PKG_VERSION="$PKG_BRANCH"
+            else
+                PKG_VERSION="$PKG_BRANCH@$PKG_REVISION"
+            fi
+            PKG_FILE=$PKG_BASENAME-$PKG_VERSION.tar.xz
         elif [ "$PKG_SVN" ]; then
             if [ -z "$PKG_BRANCH" ]; then
                 panic "Missing BRANCH=<name> on line $LINE_NUMBER: $1"
