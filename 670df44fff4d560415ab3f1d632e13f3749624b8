@@ -188,6 +188,29 @@
       "revId": "670df44fff4d560415ab3f1d632e13f3749624b8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e4c398b_ff7238d8",
+        "filename": "include/hw/android/goldfish/pipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-26T01:08:51Z",
+      "side": 1,
+      "message": "Ugh. Didn\u0027t notice this earlier.\nThis function signature lies. |hw_funcs| is taken as const argument, but the function stashes away a copy that gets used long after the return of this function.\n\nSeems wrong: Looking at the function signature, nothing stops me from allocating an AndroidPipeHwFuncs on the stack and passing it here.\n\nBoom!\n\nPerhaps we should have \nAndroidPipeHwFuns android_pipe_get_global_hw_funcs_ref(void);\n\nto get a reference to the allocated object. Then, the caller can populate it.",
+      "range": {
+        "startLine": 166,
+        "startChar": 0,
+        "endLine": 166,
+        "endChar": 74
+      },
+      "revId": "670df44fff4d560415ab3f1d632e13f3749624b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
