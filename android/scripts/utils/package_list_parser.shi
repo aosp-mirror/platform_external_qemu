@@ -275,8 +275,8 @@ package_list_parse_file () {
             if [ -z "$PKG_BASENAME" ]; then
                 PKG_BASENAME=$PKG_FILE
             fi
-            PKG_FILE=$PKG_BASENAME-$PKG_BRANCH.tar.xz
-            PKG_VERSION=$PKG_BRANCH
+            PKG_VERSION="$PKG_BRANCH"
+            PKG_FILE=$PKG_BASENAME-$PKG_VERSION.tar.xz
         elif [ "$PKG_SVN" ]; then
             if [ -z "$PKG_BRANCH" ]; then
                 panic "Missing BRANCH=<name> on line $LINE_NUMBER: $1"

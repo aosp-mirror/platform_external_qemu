@@ -129,6 +129,32 @@ git_clone_depth1 () {
             panic "Could not clone git repository: $GIT_URL"
 }
 
+# Clone a git repository, and checkout a specific branch & commit.
+# $1: Source git URL.
+# $2: Destination directory.
+# $3: Branch / Commit
+git_clone () {
+    local GIT_URL DST_DIR BRANCH CHECK_REV
+    GIT_URL=$1
+    DST_DIR=$2
+    BRANCH=$3
+
+    if [ -d "$DST_DIR" ]; then
+        panic "Git destination directory already exists: $DST_DIR"
+    fi
+    run git clone "$GIT_URL" "$DST_DIR" ||
+            panic "Could not clone git repository: $GIT_URL"
+    run git -C "$DST_DIR" checkout $BRANCH ||
+            panic "Could not checkout $GIT_URL - $BRANCH"
+}
+
+# Check if git branch exists in remote repository
+# $1: Source git URL.
+# $2: Branch Name
+git_remote_branch_exists () {
+    git ls-remote --exit-code "$1" "$2" > /dev/null
+}
+
 # Check out a SVN repository
 # $1: Source SVN URL
 # $2: Destination directory
@@ -274,12 +300,16 @@ for PACKAGE in $(package_list_get_packages); do
         elif [ "$PKG_GIT" ]; then
             PKG_FILE=$(package_list_get_full_name $PACKAGE)
             PKG_BRANCH=$(package_list_get_version $PACKAGE)
-            dump "Cloning $PKG_GIT"
+            dump "Cloning $PKG_GIT - $PKG_BRANCH"
             TEMP_DIR=$(temp_dir)
             if [ -d "$TEMP_DIR/$PKG_FILE" ]; then
                 run rm -rf "$TEMP_DIR/$PKG_FILE"
             fi
-            git_clone_depth1 "$PKG_GIT" "$TEMP_DIR/$PKG_FILE" "$PKG_BRANCH"
+            if git_remote_branch_exists "$PKG_GIT" "$PKG_BRANCH" ; then
+                git_clone_depth1 "$PKG_GIT" "$TEMP_DIR/$PKG_FILE" "$PKG_BRANCH"
+            else
+                git_clone "$PKG_GIT" "$TEMP_DIR/$PKG_FILE" "$PKG_BRANCH"
+            fi
             run rm -rf "$TEMP_DIR/$PKG_FILE"/.git*
             create_sorted_tar_archive "$ARCHIVE_DIR"/$PKG_FILE.tar.xz \
                     "$TEMP_DIR/$PKG_FILE"
