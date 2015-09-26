@@ -40,3 +40,10 @@ SHA1=f46a37ea6d869f702e03f393c376760f3cbee673    URL=ftp://xmlsoft.org/libxml2/l
 SHA1=879a186944e7b06e619a2eb07cef729b5702345c    URL=http://curl.haxx.se/download/curl-7.44.0.tar.bz2 BASENAME=curl
 SHA1=9d1977cc89242cd11471269ece2ed4650947c046    URL=https://www.openssl.org/source/openssl-1.0.1p.tar.gz BASENAME=openssl
 # libz is covered by qemu-android dependencies
+
+# breakpad, DSTDIR on linux-syscall-support is used to position it in breakpad repo
+# 0001 patch is for including missing headers https://code.google.com/p/google-breakpad/issues/detail?id=622
+# 0001 patch is also for adding client builds for mingw and mac
+# 0002 patch is for building all necessary dump_syms.  Used patch from https://breakpad.appspot.com/1144002/
+SHA1=c29e498a295b90c3d4fc4b2c20104ae78627ab34    GIT=https://chromium.googlesource.com/breakpad/breakpad BRANCH=1be03d4 PATCHES=breakpad-1be03d4-patches.tar.xz
+SHA1=5b1eea89bf9da9165817f10813518143648cab7d    GIT=https://chromium.googlesource.com/linux-syscall-support BRANCH=9292030 DSTDIR=breakpad-1be03d4/src/third_party/lss
