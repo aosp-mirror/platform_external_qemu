@@ -129,6 +129,42 @@ git_clone_depth1 () {
             panic "Could not clone git repository: $GIT_URL"
 }
 
+# Get the short SHA of a cloned repository
+# $1: Cloned git repo
+git_revision () {
+    local REPO_DIR
+    REPO_DIR=${1}
+    echo $(git -C $REPO_DIR rev-parse --short HEAD)
+}
+
+# Clone a git repository, and checkout a specific branch & commit.
+# $1: Source git URL.
+# $2: Destination directory.
+# $3: Branch
+# $4: Commit to checkout.
+git_clone () {
+    local GIT_URL DST_DIR BRANCH CHECK_REV
+    GIT_URL=$1
+    DST_DIR=$2
+    BRANCH=${3}
+    REVISION=${4}
+
+    if [ -d "$DST_DIR" ]; then
+        panic "Git destination directory already exists: $DST_DIR"
+    fi
+    run git clone --branch "$BRANCH" "$GIT_URL" "$DST_DIR" ||
+            panic "Could not clone git repository: $GIT_URL - $BRANCH"
+    run git -C $DST_DIR reset --hard $REVISION ||
+            panic "Could not checkout revision $REVISION"
+    CHECK_REV=$(git_revision $DST_DIR)
+    if [ -z $CHECK_REV ]; then
+        panic "Couldn't get revision of $DST_DIR"
+    fi
+    if [ "$CHECK_REV" != "$REVISION" ]; then
+        panic "Revision '$CHECK_REV' does not match expected '$REVISION'"
+    fi
+}
+
 # Check out a SVN repository
 # $1: Source SVN URL
 # $2: Destination directory
@@ -273,13 +309,18 @@ for PACKAGE in $(package_list_get_packages); do
             download_package "$PKG_URL" "$ARCHIVE_DIR" "$PKG_SHA1"
         elif [ "$PKG_GIT" ]; then
             PKG_FILE=$(package_list_get_full_name $PACKAGE)
-            PKG_BRANCH=$(package_list_get_version $PACKAGE)
+            PKG_VERSION=$(package_list_get_version $PACKAGE)
+            IFS="@" read PKG_BRANCH PKG_REVISION <<< $PKG_VERSION
             dump "Cloning $PKG_GIT"
             TEMP_DIR=$(temp_dir)
             if [ -d "$TEMP_DIR/$PKG_FILE" ]; then
                 run rm -rf "$TEMP_DIR/$PKG_FILE"
             fi
-            git_clone_depth1 "$PKG_GIT" "$TEMP_DIR/$PKG_FILE" "$PKG_BRANCH"
+            if [ -z $PKG_REVISION ]; then
+              git_clone_depth1 "$PKG_GIT" "$TEMP_DIR/$PKG_FILE" "$PKG_BRANCH"
+            else
+              git_clone "$PKG_GIT" "$TEMP_DIR/$PKG_FILE" "$PKG_BRANCH" "$PKG_REVISION"
+            fi
             run rm -rf "$TEMP_DIR/$PKG_FILE"/.git*
             create_sorted_tar_archive "$ARCHIVE_DIR"/$PKG_FILE.tar.xz \
                     "$TEMP_DIR/$PKG_FILE"
