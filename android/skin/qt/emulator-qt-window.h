@@ -106,6 +106,7 @@ signals:
     void showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore = NULL);
 
 public:
+    void screenshot();
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateQuit();
     void simulateSetScale(double scale);
@@ -137,19 +138,6 @@ private slots:
      from UI elements or called independently.
      */
 public slots:
-    void slot_back();
-    void slot_down();
-    void slot_home();
-    void slot_left();
-    void slot_menu();
-    void slot_recents();
-    void slot_right();
-    void slot_screenrecord();
-    void slot_screenshot();
-    void slot_up();
-    void slot_voice();
-    void slot_zoom();
-
     void slot_screencapFinished(int exitStatus);
     void slot_screencapPullFinished(int exitStatus);
 

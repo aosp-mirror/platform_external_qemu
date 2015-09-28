@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>94</width>
-    <height>490</height>
+    <height>590</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -197,7 +197,7 @@ color: #f0f0f0</string>
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="zoom_button">
+  <widget class="QPushButton" name="back_button">
    <property name="geometry">
     <rect>
      <x>18</x>
@@ -207,14 +207,14 @@ color: #f0f0f0</string>
     </rect>
    </property>
    <property name="toolTip">
-    <string>Zoom</string>
+    <string>Back</string>
    </property>
    <property name="text">
     <string notr="true"/>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/dark/zoom</normaloff>:/dark/zoom</iconset>
+     <normaloff>:/dark/back</normaloff>:/dark/back</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -230,7 +230,7 @@ color: #f0f0f0</string>
    <property name="geometry">
     <rect>
      <x>18</x>
-     <y>384</y>
+     <y>484</y>
      <width>34</width>
      <height>34</height>
     </rect>
@@ -259,7 +259,7 @@ color: #f0f0f0</string>
    <property name="geometry">
     <rect>
      <x>18</x>
-     <y>434</y>
+     <y>534</y>
      <width>34</width>
      <height>34</height>
     </rect>
@@ -342,6 +342,64 @@ color: #f0f0f0</string>
     <bool>true</bool>
    </property>
   </widget>
+  <widget class="QPushButton" name="home_button">
+   <property name="geometry">
+    <rect>
+     <x>18</x>
+     <y>384</y>
+     <width>34</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Home</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/dark/home</normaloff>:/dark/home</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="recents_button">
+   <property name="geometry">
+    <rect>
+     <x>18</x>
+     <y>434</y>
+     <width>34</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Recents</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/dark/recents</normaloff>:/dark/recents</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
  </widget>
  <tabstops>
   <tabstop>close_button</tabstop>
@@ -352,7 +410,9 @@ color: #f0f0f0</string>
   <tabstop>rotate_CCW_button</tabstop>
   <tabstop>rotate_CW_button</tabstop>
   <tabstop>scrShot_button</tabstop>
-  <tabstop>zoom_button</tabstop>
+  <tabstop>back_button</tabstop>
+  <tabstop>home_button</tabstop>
+  <tabstop>recents_button</tabstop>
   <tabstop>fullscreen_button</tabstop>
   <tabstop>more_button</tabstop>
  </tabstops>
