@@ -211,6 +211,30 @@
       "revId": "670df44fff4d560415ab3f1d632e13f3749624b8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0eb5e1d9_fdc88337",
+        "filename": "include/hw/android/goldfish/pipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-28T11:26:12Z",
+      "side": 1,
+      "message": "Oh, I don\u0027t really like that, we can either provide better documentation, or simply copy the struct into the internal global variable (instead of copying a single pointer).",
+      "parentUuid": "4e4c398b_ff7238d8",
+      "range": {
+        "startLine": 166,
+        "startChar": 0,
+        "endLine": 166,
+        "endChar": 74
+      },
+      "revId": "670df44fff4d560415ab3f1d632e13f3749624b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
