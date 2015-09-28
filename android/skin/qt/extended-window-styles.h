@@ -88,7 +88,7 @@ enum { PANE_IDX_LOCATION = 0,
     "*::disabled[ColorGroup=\"Tool\"]{ color:" THEME##_DISABLED_TOOL_COLOR "}" \
     "*[ColorGroup=\"Tool\"]          { color:" THEME##_TOOL_COLOR "}" \
     "*                               { color:" THEME##_TEXT_COLOR ";" \
-                                      "background-color: "THEME##_BKG_COLOR "}" \
+                                      "background-color: " THEME##_BKG_COLOR "}" \
     "QPlainTextEdit, QTextEdit, QTreeView {" \
             "border-top: 0px; "\
             "border-bottom: 2px solid " THEME##_DIVIDER_COLOR "}" \

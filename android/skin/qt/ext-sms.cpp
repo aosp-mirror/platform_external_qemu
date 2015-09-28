@@ -39,7 +39,7 @@ void ExtendedWindow::on_sms_sendButton_clicked()
                               currentText().length());
     if (retVal < 0  ||  sender.len <= 0) {
         mToolWindow->showErrorDialog(tr("The \"From\" number is invalid."),
-                                     tr("SMS"));
+                                     tr("Telephony"));
         return;
     }
 
@@ -55,13 +55,13 @@ void ExtendedWindow::on_sms_sendButton_clicked()
                                            MAX_SMS_MSG_SIZE);
     if (nUtf8Chars == 0) {
         mToolWindow->showErrorDialog(tr("The message is empty.<br>Please enter a message."),
-                                     tr("SMS"));
+                                     tr("Telephony"));
         return;
     }
 
     if (nUtf8Chars < 0) {
         mToolWindow->showErrorDialog(tr("The message contains invalid characters."),
-                                     tr("SMS"));
+                                     tr("Telephony"));
         return;
     }
 
@@ -70,7 +70,7 @@ void ExtendedWindow::on_sms_sendButton_clicked()
                                               &sender, NULL);
     if (pdus == NULL) {
         mToolWindow->showErrorDialog(tr("The message contains invalid characters."),
-                                     tr("SMS"));
+                                     tr("Telephony"));
         return;
     }
 
