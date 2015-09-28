@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ebd45ca_1630ba1c",
+        "filename": "android/CharSerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-28T07:59:50Z",
+      "side": 1,
+      "message": "nit: Might as well add a small comment explaining that this is the QEMU1-specific implementation of the SerialLine abstract interface.",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eeb7ade1_7c58f56f",
+        "filename": "android/CharSerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-28T07:59:50Z",
+      "side": 1,
+      "message": "nit: I think it would be more explicit to call this QemuSerialLine instead. And put the source under android/qemu/base/ipc//QemuSerialLine.cpp or android/qemu/emulation/QemuSerialLine.cpp (see other comments)",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ec3bd5a_98c07969",
+        "filename": "android/CharSerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-28T07:59:50Z",
+      "side": 1,
+      "message": "nit: Please avoid mutable references in our source code. Also document what |cs| is and if ownership is transferred or not.",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ec8f176_965dac89",
+        "filename": "android/CharSerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-28T07:59:50Z",
+      "side": 1,
+      "message": "nit: should be named |mCs| or something similar :)",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eeb7ade1_5c533154",
+        "filename": "android/base/ipc/SerialLine.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-28T07:59:50Z",
+      "side": 1,
+      "message": "If these are C functions, they should probably be implemented in android/utils/serial_line.cpp instead (or better android/emulation/serial_line.cpp)",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eeb7ade1_1c49b9a8",
+        "filename": "android/base/ipc/SerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-28T07:59:50Z",
+      "side": 1,
+      "message": "There is a small layering violation here: android/base/ should only depend on system interfaces and itself (on the other hand android/utils/ can depend on android/base, system interfaces and itself).\n\nAnother point is that android/base/ is supposed to be a generic platform wrapper / helper base, while the SerialLine concept presented here is pretty much specific to Android emulation (really QEMU), so it might be better to put these definitions under android/emulation/ instead.",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eececd75_a48eec23",
+        "filename": "android/base/ipc/SerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-28T07:59:50Z",
+      "side": 1,
+      "message": "It would be better if the documentation gave a usage example for this interface, and if the types / methods below were documented.",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce074951_73fe5a2b",
+        "filename": "android/base/ipc/SerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-28T07:59:50Z",
+      "side": 1,
+      "message": "nit: I don\u0027t think the \u0027ipc\u0027 here adds any value, android::SerialLine seems to be specific enough to me, but I\u0027ll let you decide on this one.",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ec3bd5a_78bc7df0",
+        "filename": "android/base/ipc/SerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-28T07:59:50Z",
+      "side": 1,
+      "message": "IIUC, the only reason to derive from CSerialLine is to use a static_cast\u003c\u003e instead of a reinterpret_cast\u003c\u003e in asClass() implementations. In that case, I would prefer if you would avoid it, since this requires a base -\u003e utils dependency :(",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0eb5e1d9_3deafbb0",
+        "filename": "android/base/ipc/SerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-28T07:59:50Z",
+      "side": 1,
+      "message": "Interesting, is there any reason why read() and canRead() cannot be virtual abstract methods of the interface? I\u0027m thinking that in the future, we will want a mock implementation that will be used to unit-test qemud, so the simpler the better.",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eececd75_e498f466",
+        "filename": "android/utils/serial_line.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-28T07:59:50Z",
+      "side": 1,
+      "message": "This _really_ needs some documentation :)",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
