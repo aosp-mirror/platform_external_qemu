@@ -378,46 +378,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorQtWindow::slot_back()
-{
-    simulateKeyPress(KEY_ESC, 0);
-}
-
-void EmulatorQtWindow::slot_down()
-{
-    simulateKeyPress(KEY_KP8, 0);
-}
-
-void EmulatorQtWindow::slot_home()
-{
-    simulateKeyPress(KEY_HOME, 0);
-}
-
-void EmulatorQtWindow::slot_left()
-{
-    simulateKeyPress(KEY_KP4, 0);
-}
-
-void EmulatorQtWindow::slot_menu()
-{
-    simulateKeyPress(KEY_F2, 0);
-}
-
-void EmulatorQtWindow::slot_recents()
-{
-    simulateKeyPress(KEY_F2, kKeyModLShift);
-}
-
-void EmulatorQtWindow::slot_right()
-{
-    simulateKeyPress(KEY_KP6, 0);
-}
-
-void EmulatorQtWindow::slot_screenrecord()
-{
-}
-
-void EmulatorQtWindow::slot_screenshot()
+void EmulatorQtWindow::screenshot()
 {
     if (mScreencapProcess.state() != QProcess::NotRunning) {
         // Modal dialogs should prevent this
@@ -438,18 +399,6 @@ void EmulatorQtWindow::slot_screenshot()
     mScreencapProcess.waitForStarted();
 }
 
-void EmulatorQtWindow::slot_up()
-{
-    simulateKeyPress(KEY_KP2, 0);
-}
-
-void EmulatorQtWindow::slot_voice()
-{
-}
-
-void EmulatorQtWindow::slot_zoom()
-{
-}
 
 void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
 {
@@ -658,7 +607,7 @@ bool EmulatorQtWindow::handleQtKeyEvent(SkinEventType type, QKeyEvent *event)
     // TODO: add more Qt-specific keyboard shortcuts
 
     if (key == Qt::Key_F10 && (modifiers & Qt::ControlModifier)) {
-        slot_screenshot();
+        screenshot();
         usedEvent = true;
     }
 

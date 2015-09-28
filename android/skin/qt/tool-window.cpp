@@ -137,9 +137,17 @@ void ToolWindow::dockMainWindow()
     move(emulator_window->geometry().right() + 10, emulator_window->geometry().top() + 10);
 }
 
+void ToolWindow::on_back_button_clicked()
+{
+    emulator_window->simulateKeyPress(KEY_ESC, 0);
+}
 void ToolWindow::on_close_button_clicked()
 {
     emulator_window->close();
+}
+void ToolWindow::on_home_button_clicked()
+{
+    emulator_window->simulateKeyPress(KEY_HOME, 0);
 }
 void ToolWindow::on_power_button_clicked()
 {
@@ -153,6 +161,12 @@ void ToolWindow::on_volume_down_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_F6, kKeyModLCtrl);
 }
+void ToolWindow::on_recents_button_clicked()
+{
+    // TODO: This key simulation does not perform "Recents."
+    //       (It seems to have no effect.)
+    emulator_window->simulateKeyPress(KEY_F2, kKeyModLShift);
+}
 void ToolWindow::on_rotate_CW_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_F12, kKeyModLCtrl);
@@ -163,27 +177,13 @@ void ToolWindow::on_rotate_CCW_button_clicked()
 }
 void ToolWindow::on_scrShot_button_clicked()
 {
-    emulator_window->slot_screenshot();
-}
-void ToolWindow::on_zoom_button_clicked()
-{
-    // TODO
-    // Need either a scale factor in [0.1 .. 3.0] or a 'DPI' value
-    // If DPI_value is specified, scale = (DPI_value / device_dpi)
-    // See android_emulator_set_window_scale() in emulator-window.c
-
-    // How should this be done?
-    //   o A modal dialog tied to the button
-    //   o A pane on the extended window
-    //   o Implicit from resizing the device window itself
-    // Obviously the last is the best
-
-    scale = 1.0 - scale;
-    emulator_window->simulateSetScale(scale);
+    emulator_window->screenshot();
 }
 void ToolWindow::on_fullscreen_button_clicked()
 {
-    emulator_window->simulateKeyPress(KEY_F9, 0);
+    // TODO: Re-enable this when we know what it's
+    //       supposed to do.
+//    emulator_window->simulateKeyPress(KEY_F9, 0);
 }
 
 void ToolWindow::on_more_button_clicked()
