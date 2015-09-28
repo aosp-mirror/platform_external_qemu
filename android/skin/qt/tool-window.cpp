@@ -41,7 +41,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window) :
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
     toolsUi->setupUi(this);
     // Make this more narrow than QtDesigner likes
-    this->resize(54, this->height());
+    this->resize(70, this->height());
 
     mErrorMessage.setWindowModality(Qt::ApplicationModal);
 

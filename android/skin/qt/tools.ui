@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>94</width>
-    <height>410</height>
+    <height>490</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,10 +26,10 @@ color: #f0f0f0</string>
   <widget class="QPushButton" name="close_button">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>32</width>
-     <height>32</height>
+     <x>16</x>
+     <y>6</y>
+     <width>16</width>
+     <height>16</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -42,6 +42,12 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/dark/close</normaloff>:/dark/close</iconset>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>12</width>
+     <height>12</height>
+    </size>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -49,10 +55,10 @@ color: #f0f0f0</string>
   <widget class="QPushButton" name="power_button">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>50</y>
-     <width>32</width>
-     <height>32</height>
+     <x>18</x>
+     <y>34</y>
+     <width>34</width>
+     <height>34</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -65,6 +71,12 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/dark/power_settings</normaloff>:/dark/power_settings</iconset>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -72,10 +84,10 @@ color: #f0f0f0</string>
   <widget class="QPushButton" name="volume_up_button">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>90</y>
-     <width>32</width>
-     <height>32</height>
+     <x>18</x>
+     <y>84</y>
+     <width>34</width>
+     <height>34</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -88,6 +100,12 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/dark/volume_up</normaloff>:/dark/volume_up</iconset>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -95,10 +113,10 @@ color: #f0f0f0</string>
   <widget class="QPushButton" name="volume_down_button">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>130</y>
-     <width>32</width>
-     <height>32</height>
+     <x>18</x>
+     <y>134</y>
+     <width>34</width>
+     <height>34</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -111,17 +129,23 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/dark/volume_down</normaloff>:/dark/volume_down</iconset>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="rotate_CW_button">
+  <widget class="QPushButton" name="rotate_CCW_button">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>170</y>
-     <width>32</width>
-     <height>32</height>
+     <x>18</x>
+     <y>184</y>
+     <width>34</width>
+     <height>34</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -132,19 +156,25 @@ color: #f0f0f0</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/dark/screen_rotation_right</normaloff>:/dark/screen_rotation_right</iconset>
+     <normaloff>:/dark/screen_rotation_left</normaloff>:/dark/screen_rotation_left</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
    </property>
    <property name="flat">
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="rotate_CCW_button">
+  <widget class="QPushButton" name="rotate_CW_button">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>210</y>
-     <width>32</width>
-     <height>32</height>
+     <x>18</x>
+     <y>234</y>
+     <width>34</width>
+     <height>34</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -155,7 +185,13 @@ color: #f0f0f0</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/dark/screen_rotation_left</normaloff>:/dark/screen_rotation_left</iconset>
+     <normaloff>:/dark/screen_rotation_right</normaloff>:/dark/screen_rotation_right</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -164,10 +200,10 @@ color: #f0f0f0</string>
   <widget class="QPushButton" name="zoom_button">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>290</y>
-     <width>32</width>
-     <height>32</height>
+     <x>18</x>
+     <y>334</y>
+     <width>34</width>
+     <height>34</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -180,6 +216,12 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/dark/zoom</normaloff>:/dark/zoom</iconset>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -187,10 +229,10 @@ color: #f0f0f0</string>
   <widget class="QPushButton" name="fullscreen_button">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>330</y>
-     <width>32</width>
-     <height>32</height>
+     <x>18</x>
+     <y>384</y>
+     <width>34</width>
+     <height>34</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -203,6 +245,12 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/dark/fullscreen</normaloff>:/dark/fullscreen</iconset>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -210,10 +258,10 @@ color: #f0f0f0</string>
   <widget class="QPushButton" name="more_button">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>370</y>
-     <width>32</width>
-     <height>32</height>
+     <x>18</x>
+     <y>434</y>
+     <width>34</width>
+     <height>34</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -226,6 +274,12 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/dark/more</normaloff>:/dark/more</iconset>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -233,10 +287,10 @@ color: #f0f0f0</string>
   <widget class="QPushButton" name="scrShot_button">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>250</y>
-     <width>32</width>
-     <height>32</height>
+     <x>18</x>
+     <y>284</y>
+     <width>34</width>
+     <height>34</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -249,6 +303,41 @@ color: #f0f0f0</string>
     <iconset resource="resources.qrc">
      <normaloff>:/dark/screen_shot</normaloff>:/dark/screen_shot</iconset>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>30</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="unfold_button">
+   <property name="geometry">
+    <rect>
+     <x>38</x>
+     <y>6</y>
+     <width>16</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Minimize</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/dark/unfold</normaloff>:/dark/unfold</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>21</width>
+     <height>12</height>
+    </size>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -256,11 +345,12 @@ color: #f0f0f0</string>
  </widget>
  <tabstops>
   <tabstop>close_button</tabstop>
+  <tabstop>unfold_button</tabstop>
   <tabstop>power_button</tabstop>
   <tabstop>volume_up_button</tabstop>
   <tabstop>volume_down_button</tabstop>
-  <tabstop>rotate_CW_button</tabstop>
   <tabstop>rotate_CCW_button</tabstop>
+  <tabstop>rotate_CW_button</tabstop>
   <tabstop>scrShot_button</tabstop>
   <tabstop>zoom_button</tabstop>
   <tabstop>fullscreen_button</tabstop>
