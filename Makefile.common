@@ -199,6 +199,7 @@ common_LOCAL_SRC_FILES += \
 	android/emulation/bufprint_config_dirs.cpp \
 	android/emulation/ConfigDirs.cpp \
 	android/emulation/CpuAccelerator.cpp \
+	android/emulation/serial_line.cpp \
 	android/filesystems/ext4_utils.cpp \
 	android/filesystems/fstab_parser.cpp \
 	android/filesystems/partition_types.cpp \
@@ -568,6 +569,7 @@ CORE_MISC_SOURCES = \
     savevm.c \
     android/boot-properties.c \
     android/charpipe.c \
+    android/CharSerialLine.cpp \
     android/core-init-utils.c   \
     android/ext4_resize.cpp   \
     android/gps.c \
