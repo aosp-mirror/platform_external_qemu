@@ -23,11 +23,9 @@
 // When there's some data to read, the callbacks supplied in
 // android_serialline_addhandlers() will be called in this order:
 //    SLCanReadHandler(opaque)
-// it returns a number of bytes read handler can consume now.
 //    SLReadHandler(opaque, data, len)
-// here is the data to read - |len| bytes from memory at |data|
 // |opaque| is the value passed in second argument of
-// |android_serialline_addhandlers| - some user state for the callbacks
+// android_serialline_addhandlers() - some user state for the callbacks
 
 ANDROID_BEGIN_HEADER
 
@@ -35,7 +33,11 @@ ANDROID_BEGIN_HEADER
 typedef struct CSerialLine {} CSerialLine;
 
 // Read callbacks for the serial line
+
+// returns a number of bytes read handler can consume now.
 typedef int SLCanReadHandler(void* opaque);
+
+// read the data - |size| bytes from memory at |buf|
 typedef void SLReadHandler(void* opaque, const uint8_t* buf, int size);
 
 // sets read callbacks on a specific serial line object.

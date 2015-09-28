@@ -19,14 +19,17 @@
 // based on CharDriverState
 
 namespace android {
+namespace qemu1 {
 
 class CharSerialLine : public android::SerialLine {
 public:
     // takes ownership for |cs|, deletes it in destructor
     CharSerialLine(CharDriverState* cs);
+
     ~CharSerialLine();
 
     virtual void addHandlers(void* opaque, CanReadFunc canReadFunc, ReadFunc readFunc);
+
     virtual int write(const uint8_t* data, int len);
 
 private:
@@ -36,4 +39,5 @@ private:
     CharDriverState* mCs;
 };
 
+}  // namespace qemu1
 }  // namespace android

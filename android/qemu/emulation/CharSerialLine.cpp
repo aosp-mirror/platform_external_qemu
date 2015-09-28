@@ -9,15 +9,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/CharSerialLine.h"
+#include "android/qemu/emulation/CharSerialLine.h"
 
 extern "C" {
 #include "sysemu/char.h"
 }
 
 namespace android {
+namespace qemu1 {
 
-CharSerialLine::CharSerialLine(CharDriverState* cs) : mCs(cs) {}
+CharSerialLine::CharSerialLine(CharDriverState* cs) : mCs(cs) { }
 
 CharSerialLine::~CharSerialLine() {
     qemu_chr_close(mCs);
@@ -31,4 +32,5 @@ int CharSerialLine::write(const uint8_t* data, int len) {
     return qemu_chr_write(mCs, data, len);
 }
 
+}  // namespace qemu1
 }  // namespace android
