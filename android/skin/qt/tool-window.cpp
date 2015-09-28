@@ -18,6 +18,7 @@
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-window.h"
+#include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/tool-window.h"
 
 #include "ui_tools.h"
@@ -40,6 +41,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window) :
 
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
     toolsUi->setupUi(this);
+    // Initialize to the light theme
+    this->setStyleSheet(QT_STYLE(LIGHT));
     // Make this more narrow than QtDesigner likes
     this->resize(70, this->height());
 
