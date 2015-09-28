@@ -138,7 +138,6 @@ private slots:
     void on_hwSensorsButton_clicked();
     void on_kbdShortsButton_clicked();
     void on_locationButton_clicked();
-    void on_messageButton_clicked();
     void on_recordScrButton_clicked();
     void on_sdButton_clicked();
     void on_settingsButton_clicked();
