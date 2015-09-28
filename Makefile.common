@@ -199,6 +199,7 @@ common_LOCAL_SRC_FILES += \
 	android/emulation/bufprint_config_dirs.cpp \
 	android/emulation/ConfigDirs.cpp \
 	android/emulation/CpuAccelerator.cpp \
+	android/emulation/serial_line.cpp \
 	android/filesystems/ext4_utils.cpp \
 	android/filesystems/fstab_parser.cpp \
 	android/filesystems/partition_types.cpp \
@@ -581,6 +582,7 @@ CORE_MISC_SOURCES = \
     android/looper-qemu.cpp \
     android/hw-pipe-net.c \
     android/qemu/base/async/Looper.cpp \
+    android/qemu/emulation/CharSerialLine.cpp \
     android/qemu-setup.c \
     android/qemu-tcpdump.c \
     android/shaper.c \
