@@ -112,11 +112,8 @@ boot_property_add2( const char*  name, int  namelen,
             return -3;
     }
 
-    /* init service if needed */
-    if (!_inited) {
-        boot_property_init_service();
-        _inited = 1;
-    }
+    /* init the service */
+    boot_property_init_service();
 
     D("Adding boot property: '%.*s' = '%.*s'",
       namelen, name, valuelen, value);
@@ -338,6 +335,8 @@ boot_property_init_service( void )
             return;
         }
         D("registered '%s' qemud service", SERVICE_NAME);
+
+        _inited = 1;
     }
 }
 

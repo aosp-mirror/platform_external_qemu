@@ -196,6 +196,12 @@ common_LOCAL_SRC_FILES += \
 	android/emulation/android_pipe_pingpong.c \
 	android/emulation/android_pipe_throttle.c \
 	android/emulation/android_pipe_zero.c \
+	android/emulation/android_qemud.cpp \
+	android/emulation/qemud/android_qemud_sink.cpp \
+	android/emulation/qemud/android_qemud_serial.cpp \
+	android/emulation/qemud/android_qemud_client.cpp \
+	android/emulation/qemud/android_qemud_service.cpp \
+	android/emulation/qemud/android_qemud_multiplexer.cpp \
 	android/emulation/bufprint_config_dirs.cpp \
 	android/emulation/ConfigDirs.cpp \
 	android/emulation/CpuAccelerator.cpp \
@@ -578,7 +584,7 @@ CORE_MISC_SOURCES = \
     android/hw-control.c \
     android/hw-fingerprint.c \
     android/hw-sensors.c \
-    android/hw-qemud.c \
+    android/hw-qemud.cpp \
     android/looper-qemu.cpp \
     android/hw-pipe-net.c \
     android/qemu/base/async/Looper.cpp \
