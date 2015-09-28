@@ -1103,9 +1103,6 @@ font-family: &quot;Roboto&quot;</string>
      <property name="themeIconName" stdset="0">
       <string>phone_button</string>
      </property>
-     <property name="themeIconName_disabled" stdset="0">
-      <string>phone_disabled</string>
-     </property>
      <property name="ColorGroup" stdset="0">
       <string>Tool</string>
      </property>
@@ -1199,6 +1196,53 @@ font-family: &quot;Roboto&quot;</string>
       </property>
      </item>
     </widget>
+    <widget class="QPlainTextEdit" name="sms_messageBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>200</y>
+       <width>381</width>
+       <height>140</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="sms_sendButton">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>350</y>
+       <width>141</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Start call</string>
+     </property>
+     <property name="text">
+      <string>SEND MESSAGE</string>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/dark/send</normaloff>:/dark/send</iconset>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>send</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Tool</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="page_2">
     <widget class="QGroupBox" name="virtualSensorsBox">
@@ -1276,110 +1320,6 @@ font-family: &quot;Roboto&quot;</string>
      <property name="title">
       <string>Directional pad</string>
      </property>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="smsPage">
-    <widget class="QGroupBox" name="smsGroup">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>121</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Messaging</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="sms_fromGroup">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>40</y>
-       <width>61</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>From</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string notr="true">Title</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="sms_sendButton">
-     <property name="geometry">
-      <rect>
-       <x>420</x>
-       <y>214</y>
-       <width>36</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Send</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/send</normaloff>:/light/send</iconset>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>send</string>
-     </property>
-    </widget>
-    <widget class="QPlainTextEdit" name="sms_messageBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>110</y>
-       <width>381</width>
-       <height>140</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="sms_phoneNumberBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>60</y>
-       <width>221</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="editable">
-      <bool>true</bool>
-     </property>
-     <property name="insertPolicy">
-      <enum>QComboBox::InsertAtTop</enum>
-     </property>
-     <item>
-      <property name="text">
-       <string>(650) 555-1212</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>+1.650.555-6789</string>
-      </property>
-     </item>
     </widget>
    </widget>
    <widget class="QWidget" name="finger_page">
@@ -2180,6 +2120,36 @@ font-family: &quot;Roboto&quot;</string>
       <string>Title</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="set_updateButton">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>320</y>
+       <width>111</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">text-align: left;</string>
+     </property>
+     <property name="text">
+      <string>UPDATE TO 1.5</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Tool</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QPushButton" name="telephoneButton">
@@ -2265,50 +2235,6 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="themeIconName" stdset="0">
     <string>battery</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>MajorTab</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="messageButton">
-   <property name="geometry">
-    <rect>
-     <x>16</x>
-     <y>372</y>
-     <width>204</width>
-     <height>44</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
-   </property>
-   <property name="text">
-    <string>  Message</string>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/message</normaloff>:/light/message</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>20</width>
-     <height>20</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string>message</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>MajorTab</string>
@@ -2406,7 +2332,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>16</x>
-     <y>416</y>
+     <y>372</y>
      <width>204</width>
      <height>44</height>
     </rect>
@@ -2450,7 +2376,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>16</x>
-     <y>460</y>
+     <y>416</y>
      <width>204</width>
      <height>44</height>
     </rect>
@@ -2692,7 +2618,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>16</x>
-     <y>636</y>
+     <y>592</y>
      <width>204</width>
      <height>44</height>
     </rect>
@@ -2739,9 +2665,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>16</x>
-     <y>680</y>
+     <y>636</y>
      <width>204</width>
-     <height>61</height>
+     <height>105</height>
     </rect>
    </property>
    <property name="autoFillBackground">
@@ -2773,7 +2699,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>16</x>
-     <y>504</y>
+     <y>460</y>
      <width>204</width>
      <height>44</height>
     </rect>
@@ -2810,7 +2736,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>16</x>
-     <y>592</y>
+     <y>548</y>
      <width>204</width>
      <height>44</height>
     </rect>
@@ -2854,7 +2780,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>16</x>
-     <y>548</y>
+     <y>504</y>
      <width>204</width>
      <height>44</height>
     </rect>
@@ -2904,7 +2830,6 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>virtSensorsButton</tabstop>
   <tabstop>hwSensorsButton</tabstop>
   <tabstop>dpadButton</tabstop>
-  <tabstop>messageButton</tabstop>
   <tabstop>fingerButton</tabstop>
   <tabstop>sdButton</tabstop>
   <tabstop>recordScrButton</tabstop>
@@ -2915,9 +2840,6 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>tel_numberBox</tabstop>
   <tabstop>tel_endCallButton</tabstop>
   <tabstop>tel_holdCallButton</tabstop>
-  <tabstop>sms_phoneNumberBox</tabstop>
-  <tabstop>sms_messageBox</tabstop>
-  <tabstop>sms_sendButton</tabstop>
   <tabstop>loc_addRowButton</tabstop>
   <tabstop>loc_removeRowButton</tabstop>
   <tabstop>loc_GpxButton</tabstop>

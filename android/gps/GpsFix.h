@@ -25,7 +25,7 @@ struct GpsFix {
 
     GpsFix(void)
         : name(""), description(""), latitude(""),
-          longitude(""), elevation(""), time("10") {}
+          longitude(""), elevation(""), time("2") {}
 };
 
 typedef std::vector<GpsFix> GpsFixArray;

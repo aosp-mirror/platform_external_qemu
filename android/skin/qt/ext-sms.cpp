@@ -27,8 +27,6 @@
 
 void ExtendedWindow::initSms()
 {
-    // Set a function to validate the phone-number input
-    mExtendedUi->sms_phoneNumberBox->setValidator(new phoneNumberValidator);
 }
 
 void ExtendedWindow::on_sms_sendButton_clicked()
@@ -36,13 +34,13 @@ void ExtendedWindow::on_sms_sendButton_clicked()
     // Get the "from" number
     SmsAddressRec sender;
     int retVal = sms_address_from_str(&sender,
-                     mExtendedUi->sms_phoneNumberBox->
+                     mExtendedUi->tel_numberBox->
                               currentText().toStdString().c_str(),
-                     mExtendedUi->sms_phoneNumberBox->
+                     mExtendedUi->tel_numberBox->
                               currentText().length());
     if (retVal < 0  ||  sender.len <= 0) {
         mToolWindow->showErrorDialog(tr("The \"From\" number is invalid."),
-                                     tr("SMS"));
+                                     tr("Telephony"));
         return;
     }
 
@@ -58,13 +56,13 @@ void ExtendedWindow::on_sms_sendButton_clicked()
                                            MAX_SMS_MSG_SIZE);
     if (nUtf8Chars == 0) {
         mToolWindow->showErrorDialog(tr("The message is empty.<br>Please enter a message."),
-                                     tr("SMS"));
+                                     tr("Telephony"));
         return;
     }
 
     if (nUtf8Chars < 0) {
         mToolWindow->showErrorDialog(tr("The message contains invalid characters."),
-                                     tr("SMS"));
+                                     tr("Telephony"));
         return;
     }
 
@@ -73,7 +71,7 @@ void ExtendedWindow::on_sms_sendButton_clicked()
                                               &sender, NULL);
     if (pdus == NULL) {
         mToolWindow->showErrorDialog(tr("The message contains invalid characters."),
-                                     tr("SMS"));
+                                     tr("Telephony"));
         return;
     }
 
