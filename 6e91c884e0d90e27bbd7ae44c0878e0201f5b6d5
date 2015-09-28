@@ -317,6 +317,24 @@
     },
     {
       "key": {
+        "uuid": "2e470569_5476c3cf",
+        "filename": "android/base/ipc/SerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-28T21:57:50Z",
+      "side": 1,
+      "message": "Well, now I recalled it. It\u0027s also to make SerialLine-derived classes to be convertible to CSerialLine*, so one could easily pass them into the C functions if needed.",
+      "parentUuid": "ee86cdd4_e04df75e",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0eb5e1d9_3deafbb0",
         "filename": "android/base/ipc/SerialLine.h",
         "patchSetId": 1
