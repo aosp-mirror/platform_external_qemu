@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0e5fa128_01036e1b",
+        "filename": "android/dependencies/PACKAGES.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Missed that.",
+      "parentUuid": "0eb5e1d9_8058fa70",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ceae6993_215654cf",
         "filename": "android/scripts/build-breakpad.sh",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-29T15:52:00Z",
       "side": 1,
       "message": "nit: I think that\u0027s already the definition of DEFAULT_HOST_SYSTEMS for linux :-)",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e52b121_b74d0760",
+        "filename": "android/scripts/build-breakpad.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Got it.  Used this while I was debugging.",
+      "parentUuid": "ceae6993_215654cf",
       "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "4e4c398b_6520f2dd",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Ok",
+      "parentUuid": "2ebd45ca_f96c0f00",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ec8f176_5cb7b50c",
         "filename": "android/scripts/download-sources.sh",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2015-09-29T15:52:00Z",
       "side": 1,
       "message": "nit: $1 is perfectly ok here :)",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e4c398b_251afaa7",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Ok",
+      "parentUuid": "8ec8f176_5cb7b50c",
       "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "4e4c398b_c5632624",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Ok",
+      "parentUuid": "6ec3bd5a_1898e9b1",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0e9a4178_d8a585eb",
         "filename": "android/scripts/download-sources.sh",
         "patchSetId": 2
@@ -115,6 +205,24 @@
       "writtenOn": "2015-09-29T15:52:00Z",
       "side": 1,
       "message": "nit: Please escape directory with \"$DST_DIR\"",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f86a1765_2dc61984",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Replaced cloning procedure",
+      "parentUuid": "0e9a4178_d8a585eb",
       "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -138,6 +246,24 @@
     },
     {
       "key": {
+        "uuid": "f86a1765_4de6ed1b",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Replaced cloning procedure",
+      "parentUuid": "6ec3bd5a_389da5a2",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eeb7ade1_9c76a915",
         "filename": "android/scripts/download-sources.sh",
         "patchSetId": 2
@@ -149,6 +275,24 @@
       "writtenOn": "2015-09-29T15:52:00Z",
       "side": 1,
       "message": "bug: escape \"$CHECK_REV\" here",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e5fa128_e1c85a37",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Replaced cloning procedure",
+      "parentUuid": "eeb7ade1_9c76a915",
       "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -172,6 +316,24 @@
     },
     {
       "key": {
+        "uuid": "ee616dea_460e1a78",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Replaced cloning procedure",
+      "parentUuid": "0e9a4178_f8a249e0",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0e9a4178_18838d41",
         "filename": "android/scripts/download-sources.sh",
         "patchSetId": 2
@@ -183,6 +345,24 @@
       "writtenOn": "2015-09-29T15:52:00Z",
       "side": 1,
       "message": "I believe \u003c\u003c\u003c is a bash-ism that should not be used in this script. Can you find a simple alternative (preferably that doesn\u0027t involve IFS?)",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e4d7d85_27d200e7",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Removed due to new cloning procedure.",
+      "parentUuid": "0e9a4178_18838d41",
       "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -206,6 +386,24 @@
     },
     {
       "key": {
+        "uuid": "ce582944_23cf9a42",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Ok",
+      "parentUuid": "0e9a4178_3888515b",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ebd45ca_99f87b84",
         "filename": "android/scripts/utils/package_list_parser.shi",
         "patchSetId": 2
@@ -223,6 +421,24 @@
     },
     {
       "key": {
+        "uuid": "0e5fa128_2117927f",
+        "filename": "android/scripts/utils/package_list_parser.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Yea I didn\u0027t realize going detached would work.  I\u0027ll make the changes for this.  Cleans up most of the other comments as well.",
+      "parentUuid": "2ebd45ca_99f87b84",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ce074951_76d5a877",
         "filename": "android/scripts/utils/package_list_parser.shi",
         "patchSetId": 2
@@ -234,6 +450,24 @@
       "writtenOn": "2015-09-29T15:52:00Z",
       "side": 1,
       "message": "argh, I\u0027d really prefer to avoid this. It\u0027s better to create a PKG_REVISION field instead.",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ee616dea_66d59e77",
+        "filename": "android/scripts/utils/package_list_parser.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-09-29T21:17:17Z",
+      "side": 1,
+      "message": "Removed due to change to branch variable",
+      "parentUuid": "ce074951_76d5a877",
       "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
