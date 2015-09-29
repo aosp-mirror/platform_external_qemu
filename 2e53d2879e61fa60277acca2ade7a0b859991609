@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ceae6993_2179f45a",
+        "filename": "android/emulation/serial_line.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:58:27Z",
+      "side": 1,
+      "message": "nit: we use |name| only for parameters and expressions that use them. You can use android_serialline_addhandlers() instead :) not really important here though :)",
+      "revId": "2e53d2879e61fa60277acca2ade7a0b859991609",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ec27958_1a829df4",
+        "filename": "android/emulation/serial_line.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:58:27Z",
+      "side": 1,
+      "message": "nit: \"Try to send |len| bytes of |data| through the serial line, returns the number of bytes that went through, or -errno in case of error.\" (or -1, I don\u0027t remember).",
+      "revId": "2e53d2879e61fa60277acca2ade7a0b859991609",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
