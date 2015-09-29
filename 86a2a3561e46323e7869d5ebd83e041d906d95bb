@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0eb5e1d9_c0403271",
+        "filename": "android/emulation/serial_line_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T16:00:40Z",
+      "side": 1,
+      "message": "nit: an anonymous namespace would be ok here.",
+      "revId": "86a2a3561e46323e7869d5ebd83e041d906d95bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce074951_d6c574c6",
+        "filename": "android/emulation/serial_line_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T16:00:40Z",
+      "side": 1,
+      "message": "super-nit: use mAddHandlersCount, mWriteCallCount, etc.\nor at a minimum addHandlersCount, writeCallCount, etc.",
+      "revId": "86a2a3561e46323e7869d5ebd83e041d906d95bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
