@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "2e2e2591_1929a620",
+        "filename": "android/CharSerialLine.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-29T16:19:11Z",
+      "side": 1,
+      "message": "Just a note about a problem I hit when doing something similar. :(\n\ndigit@\u0027s pipe refactor CL created a C interface to be implemented in the QEMU glue code.\nThis one creates a C++ interface for the same reason.\n\nLiking C++, I went down the path of a C++ interface for the console refactor, but hit a snag -- it\u0027s not always safe to include C headers from C++.\nSo far, I\u0027ve seen at least two problems:\n- Some qemu headers under include/* that declare a global without \u0027extern\u0027. This works fine as long as they\u0027re only included from C files.\n- Some target specific headers use typeof. That\u0027s a strict no-no for C++.\n\nSo, if you get lucky the C++ strategy will work...",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 1
+      },
+      "revId": "2e53d2879e61fa60277acca2ade7a0b859991609",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ceae6993_2179f45a",
         "filename": "android/emulation/serial_line.h",
         "patchSetId": 2
