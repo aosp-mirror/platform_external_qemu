@@ -34,43 +34,58 @@ namespace base {
 //     ScopedPtr<Foo> ptr(new Foo());         // object owned by |ptr|
 //     ScopedPtr<Foo> ptr2(ptr.release());    // object owned by |ptr2|
 //
-template <class T>
-class ScopedPtr {
+// ScopedPtr also supports custom deleter classes. The default one just
+// calls 'delete ptr'.
+
+struct DefaultDelete {
+    template <class T>
+    void operator()(T ptr) const {
+        delete ptr;
+    }
+};
+
+template <class T, class Deleter = DefaultDelete>
+class ScopedPtr : private Deleter {
 public:
     // Default constructor.
-    ScopedPtr() : mPtr(NULL) {}
+    ScopedPtr() : mPtr(nullptr) {}
 
     // Normal constructor, takes ownership of |ptr|.
     explicit ScopedPtr(T* ptr) : mPtr(ptr) {}
 
     // Destructor will call reset() automatically.
-    ~ScopedPtr() { reset(NULL); }
+    ~ScopedPtr() { reset(nullptr); }
 
     // Release the pointer object from the instance and return it.
     // Caller should assume ownership of the object.
     T* release() {
         T* ptr = mPtr;
-        mPtr = NULL;
+        mPtr = nullptr;
         return ptr;
     }
 
     // Reset the managed object to a new value.
     void reset(T* ptr) {
-        delete mPtr;
+        static_cast<Deleter&>(*this)(mPtr);
         mPtr = ptr;
+    }
+
+    // Check if pointer is not null
+    explicit operator bool() const {
+        return mPtr != nullptr;
     }
 
     // Return pointer of scoped object. Owernship is _not_
     // transferred to the caller.
-    T* get() { return mPtr; }
+    T* get() const { return mPtr; }
 
     // Return a reference to the scoped object. Allows one to
     // write (*foo).DoStuff().
-    T& operator*() { return *mPtr; }
+    T& operator*() const { return *mPtr; }
 
     // Return a pointer to the scoped object. Allows one to write
     // foo->DoStuff().
-    T* operator->() { return mPtr; }
+    T* operator->() const { return mPtr; }
 
 private:
     DISALLOW_COPY_AND_ASSIGN(ScopedPtr);
