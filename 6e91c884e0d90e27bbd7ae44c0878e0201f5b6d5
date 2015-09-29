@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "ee86cdd4_0f17e34c",
+        "filename": "android/CharSerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-29T22:38:11Z",
+      "side": 1,
+      "message": "I was expecting to see namespace |qemu1| for the glue code, so this class would become qemu1::CharSerialLine, which is quite ok. As opposed to qemu1::QemuSerialLine, which says nothing about what is the implementation but insists it is qemu so much so much",
+      "parentUuid": "0eb5e1d9_4035020c",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ec3bd5a_98c07969",
         "filename": "android/CharSerialLine.h",
         "patchSetId": 1
