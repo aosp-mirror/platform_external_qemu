@@ -125,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "6e4d7d85_5883a48e",
+        "filename": "android/CharSerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-29T16:19:11Z",
+      "side": 1,
+      "message": "I\u0027m planning on implementing move semantics for the console refactoring I have in mind.\n\nThen, just pass by value and use move. wdyt?",
+      "parentUuid": "8e52b121_b04635e8",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ec8f176_965dac89",
         "filename": "android/CharSerialLine.h",
         "patchSetId": 1
