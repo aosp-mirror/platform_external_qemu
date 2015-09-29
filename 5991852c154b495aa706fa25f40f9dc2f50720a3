@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0eb5e1d9_8058fa70",
+        "filename": "android/dependencies/PACKAGES.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "nit: no fixed revision here?",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ceae6993_215654cf",
+        "filename": "android/scripts/build-breakpad.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "nit: I think that\u0027s already the definition of DEFAULT_HOST_SYSTEMS for linux :-)",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ebd45ca_f96c0f00",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "nit: that name is too confusion, please use something like \u0027git_get_repo_head\u0027 which better explains what this does.",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ec8f176_5cb7b50c",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "nit: $1 is perfectly ok here :)",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce074951_16d09c87",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "nit: don\u0027t use \u0027echo\u0027, because it doesn\u0027t deal with parameters which begin with a dash cleanly. A better alternative is to use \u0027printf %s \"....\"\u0027 instead.\n\nHowever, in this case, there is no reason to use echo or printf at all, just call the command, and redirect stderr just in case, as in:\n\n  git_repo_get_head () {\n    git -C \"$1\" rev-parse --short HEAD 2\u003e/dev/null\n  }\n\nNote that directory paths should be escaped, in case they contain spaces. As a special exception, mandated by Posix, you don\u0027t need to escape the value in simple assignments, as in:\n\n    BAR\u003d\"hello world\"\n    FOO\u003d$BAR                  # sets \u0027FOO\u0027 to \"hello world\"\n\nHowever, this doesn\u0027t apply if there is anything before the assignment, including an \u0027eval\u0027. Yes, shell scripting is weird.",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ec3bd5a_1898e9b1",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "nit: just $3 and $4 here, no need to be inconsistent :)",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e9a4178_d8a585eb",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "nit: Please escape directory with \"$DST_DIR\"",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ec3bd5a_389da5a2",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "nit: escape directory here too.",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eeb7ade1_9c76a915",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "bug: escape \"$CHECK_REV\" here",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e9a4178_f8a249e0",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "nit: I recommend printing $GIT_URL to help users understand where the problem comes from.",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e9a4178_18838d41",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "I believe \u003c\u003c\u003c is a bash-ism that should not be used in this script. Can you find a simple alternative (preferably that doesn\u0027t involve IFS?)",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e9a4178_3888515b",
+        "filename": "android/scripts/download-sources.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "nit: indentation level",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ebd45ca_99f87b84",
+        "filename": "android/scripts/utils/package_list_parser.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "just curious, can\u0027t use just put a revision number into BRANCH\u003d instead? Just clone the repository, then do the checkout with it? Given that we don\u0027t keep the git history, only a tarball of the checkout, even if patched, this should not matter, and will make things simpler.",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce074951_76d5a877",
+        "filename": "android/scripts/utils/package_list_parser.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:52:00Z",
+      "side": 1,
+      "message": "argh, I\u0027d really prefer to avoid this. It\u0027s better to create a PKG_REVISION field instead.",
+      "revId": "5991852c154b495aa706fa25f40f9dc2f50720a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
