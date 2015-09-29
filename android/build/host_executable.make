@@ -34,6 +34,9 @@ $(LOCAL_BUILT_MODULE): $(LOCAL_OBJECTS) $(LOCAL_LIBRARIES)
 	@ echo "Executable: $@"
 	$(hide) $(PRIVATE_LD) $(PRIVATE_LDFLAGS) -o $@ $(PRIVATE_LIBRARY) $(PRIVATE_OBJS) $(PRIVATE_LDLIBS)
 
+
+include $(BUILD_SYSTEM)/symbols.make
+
 EXECUTABLES += $(LOCAL_BUILT_MODULE)
 $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call local-library-path,$(lib)))
 $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_SHARED_LIBRARIES),$(call local-shared-library-path,$(lib)))

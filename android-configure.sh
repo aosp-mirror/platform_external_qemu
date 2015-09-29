@@ -102,6 +102,7 @@ esac
 
 HOST_ARCH=$BUILD_ARCH
 HOST_TAG=$HOST_OS-$HOST_ARCH
+BUILD_TAG=$HOST_TAG
 
 #### Toolchain support
 ####
@@ -589,6 +590,22 @@ mkdir -p $OUT_DIR/lib
 cp -f "$CACERTS_FILE" "$OUT_DIR/lib/"
 
 ###
+###  Breakpad probe
+###
+BREAKPAD_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/breakpad
+if [ -d "$BREAKPAD_PREBUILTS_DIR" ]; then
+    log "BREAKPAD prebuilts dir: $BREAKPAD_PREBUILTS_DIR"
+    if [ "$OPTION_MINGW" = "yes" ] ; then
+        DUMPSYMS=$BREAKPAD_PREBUILTS_DIR/$BUILD_TAG/bin/dump_syms_dwarf
+    else
+        ##Mac and Linux builds
+        DUMPSYMS=$BREAKPAD_PREBUILTS_DIR/$BUILD_TAG/bin/dump_syms
+    fi
+else
+    panic "Missing prebuilts directory (please run build-breakpad.sh): $BREAKPAD_PREBUILTS_DIR"
+fi
+
+###
 ###  Qt probe
 ###
 QT_PREBUILTS_DIR=
@@ -711,6 +728,7 @@ echo "HOST_CXX    := $CXX" >> $config_mk
 echo "HOST_LD     := $LD" >> $config_mk
 echo "HOST_AR     := $AR" >> $config_mk
 echo "HOST_WINDRES:= $WINDRES" >> $config_mk
+echo "HOST_DUMPSYMS:= $DUMPSYMS" >> $config_mk
 echo "OBJS_DIR    := $OUT_DIR" >> $config_mk
 echo "" >> $config_mk
 echo "HOST_PREBUILT_TAG := $HOST_TAG" >> $config_mk
@@ -728,6 +746,7 @@ echo "BUILD_CXX         := $BUILD_CXX" >> $config_mk
 echo "BUILD_LD          := $BUILD_LD" >> $config_mk
 echo "BUILD_CFLAGS      := $BUILD_CFLAGS" >> $config_mk
 echo "BUILD_LDFLAGS     := $BUILD_LDFLAGS" >> $config_mk
+echo "BUILD_DUMPSYMS    := $DUMPSYMS" >> $config_mk
 
 PWD=`pwd`
 echo "SRC_PATH          := $PWD" >> $config_mk
@@ -748,6 +767,7 @@ fi
 
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
+echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 
 if [ $OPTION_DEBUG = yes ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
