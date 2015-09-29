@@ -158,7 +158,8 @@ private slots:
     void on_cell_dataStatusBox_currentIndexChanged(int index);
 
     // Fingerprint
-    void on_finger_touchCkBox_toggled(bool checked);
+    void on_finger_touchButton_pressed();
+    void on_finger_touchButton_released();
 
     // Location
     void on_loc_addRowButton_clicked();
