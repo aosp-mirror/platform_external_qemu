@@ -38,16 +38,14 @@ void android_setPostCallback(OnPostFunc onPost, void* onPostContext);
 /* Retrieve the Vendor/Renderer/Version strings describing the underlying GL
  * implementation. The call only works while the renderer is started.
  *
- * Expects |*vendor|, |*renderer| and |*version| to be NULL.
- *
- * On exit, sets |*vendor|, |*renderer| and |*version| to point to new
- * heap-allocated strings (that must be freed by the caller) which represent the
- * OpenGL hardware vendor name, driver name and version, respectively.
- * In case of error, |*vendor| etc. are set to NULL.
+ * Each string is copied into the corresponding buffer. If the original string
+ * (including NUL terminator) is more than xxBufSize bytes, it will be
+ * truncated. In all cases, including failure, the buffer will be NUL-
+ * terminated when this function returns.
  */
-void android_getOpenglesHardwareStrings(char** vendor,
-                                        char** renderer,
-                                        char** version);
+void android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
+                                        char* renderer, size_t rendererBufSize,
+                                        char* version, size_t versionBufSize);
 
 int android_showOpenglesWindow(void* window, int x, int y, int width, int height, float rotation);
 
