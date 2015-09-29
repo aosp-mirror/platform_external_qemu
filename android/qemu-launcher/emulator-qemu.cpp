@@ -526,8 +526,13 @@ extern "C" int main(int argc, char **argv, char **envp) {
     // Command-line
     args[n++] = "-append";
 
-    String kernelCommandLine = StringFormat("console=%s0,38400",
-                                            kTarget.ttyPrefix);
+    String kernelCommandLine = "qemu=1";
+
+    if (opts->show_kernel) {
+        kernelCommandLine += StringFormat(" console=%s0,38400",
+                                          kTarget.ttyPrefix);
+    }
+
     if (kTarget.kernelExtraArgs) {
         kernelCommandLine += kTarget.kernelExtraArgs;
     }
@@ -535,8 +540,6 @@ extern "C" int main(int argc, char **argv, char **envp) {
         kernelCommandLine += StringFormat(
                 " androidboot.selinux=%s", opts->selinux);
     }
-
-    kernelCommandLine += " qemu=1";
 
     if (hw->hw_gpu_enabled) {
         kernelCommandLine += " qemu.gles=1";
@@ -572,7 +575,8 @@ extern "C" int main(int argc, char **argv, char **envp) {
     int s;
     int drvIndex = 0;
     for (s = 0; s < kMaxPartitions; s++) {
-        makePartitionCmd(args, &n, &drvIndex, hw, kTarget.imagePartitionTypes[s]);
+        makePartitionCmd(args, &n, &drvIndex, hw,
+                         kTarget.imagePartitionTypes[s]);
     }
 
     // Network
