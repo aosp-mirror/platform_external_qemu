@@ -143,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "2ebd45ca_79c63f37",
+        "filename": "android/CharSerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T16:28:30Z",
+      "side": 1,
+      "message": "Hmmm. Let\u0027s avoid introducing C++11 stuff during the refactor, if possible. I prefer to push the envelope in one direction at a time. Let\u0027s get time refactored quickly, get a working AndroidEmu, and later do our cleanups.",
+      "parentUuid": "6e4d7d85_5883a48e",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ec8f176_965dac89",
         "filename": "android/CharSerialLine.h",
         "patchSetId": 1
