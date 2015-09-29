@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2e2e2591_c00e82b1",
+        "filename": "android/CharSerialLine.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-29T22:38:11Z",
+      "side": 1,
+      "message": "We can modify C headers from QEMU if we need.",
+      "parentUuid": "2e2e2591_1929a620",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 1
+      },
+      "revId": "2e53d2879e61fa60277acca2ade7a0b859991609",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ceae6993_2179f45a",
         "filename": "android/emulation/serial_line.h",
         "patchSetId": 2
