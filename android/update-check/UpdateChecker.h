@@ -26,6 +26,7 @@ namespace update_check {
 //  IDataLoader - download the xml manifest from the Web
 //  ITimeStorage - lock the file to store last update checking time,
 //                 save/load time from the file
+//  INewerVersionReporter - report to the user about available newer version
 
 class IVersionExtractor {
 public:
@@ -78,7 +79,7 @@ public:
     bool runAsyncCheck();
 
 protected:
-    // contructor for tests
+    // constructor for tests
     UpdateChecker(IVersionExtractor*,
                   IDataLoader*,
                   ITimeStorage*,
