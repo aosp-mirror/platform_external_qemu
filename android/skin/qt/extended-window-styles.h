@@ -59,7 +59,7 @@ enum { PANE_IDX_LOCATION = 0,
 // These are the colors used in the two themes
 
 #define LIGHT_BKG_COLOR            "#f9f9f9"  // Main page background
-#define LIGHT_DISABLED_TOOL_COLOR  "#a0a0a0"  // Grayed-out button text
+#define LIGHT_DISABLED_TOOL_COLOR  "#baeae4"  // Grayed-out button text
 #define LIGHT_DIVIDER_COLOR        "#e0e0e0"  // Line between items
 #define LIGHT_MAJOR_TAB_COLOR      "#91a4ad"  // Text of major tabs
 #define LIGHT_MAJOR_TITLE_COLOR    "#617d8a"  // Text of major tab separators
@@ -70,7 +70,7 @@ enum { PANE_IDX_LOCATION = 0,
 #define LIGHT_TOOL_COLOR           "#00bea4"  // Checkboxes, sliders, etc.
 
 #define DARK_BKG_COLOR             "#273238"
-#define DARK_DISABLED_TOOL_COLOR   "#a0a0a0"
+#define DARK_DISABLED_TOOL_COLOR   "#1b5c58"
 #define DARK_DIVIDER_COLOR         "#e0e0e0"
 #define DARK_MAJOR_TAB_COLOR       "#bdc0c3"
 #define DARK_MAJOR_TITLE_COLOR     "#e5e6e7"
