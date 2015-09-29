@@ -152,6 +152,22 @@ LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
 # references to '_imp__xmlFree'.
 LIBXML2_CFLAGS := -DLIBXML_STATIC
 
+##############################################################################
+# breakpad  definitions
+#
+BREAKPAD_TOP32_DIR := $(BREAKPAD_PREBUILTS_DIR)/$(HOST_OS)-x86
+BREAKPAD_TOP64_DIR := $(BREAKPAD_PREBUILTS_DIR)/$(HOST_OS)-x86_64
+
+BREAKPAD_INCLUDES := $(BREAKPAD_TOP32_DIR)/include/breakpad
+BREAKPAD_INCLUDES_64 := $(BREAKPAD_TOP64_DIR)/include/breakpad
+BREAKPAD_LDLIBS := $(BREAKPAD_TOP32_DIR)/lib/libbreakpad_client.a
+BREAKPAD_LDLIBS_64 := $(BREAKPAD_TOP64_DIR)/lib/libbreakpad_client.a
+
+ifeq ($(HOST_OS),windows)
+  BREAKPAD_LDLIBS += -lstdc++
+  BREAKPAD_LDLIBS_64 += -lstdc++
+endif
+
 ###########################################################
 # Android utility functions
 #
@@ -295,6 +311,7 @@ include $(LOCAL_PATH)/android/wear-agent/sources.mk
 $(call start-emulator-library, emulator-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES)
 LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES)
+LOCAL_CFLAGS += -I$(BREAKPAD_INCLUDES)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
     LOCAL_IGNORE_BITNESS := true
@@ -305,6 +322,7 @@ $(call end-emulator-library)
 $(call start-emulator64-library, emulator64-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES_64)
 LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES)
+LOCAL_CFLAGS += -I$(BREAKPAD_INCLUDES_64)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
