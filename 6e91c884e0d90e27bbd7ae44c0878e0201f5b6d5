@@ -161,6 +161,24 @@
     },
     {
       "key": {
+        "uuid": "f86a1765_2ac35f1d",
+        "filename": "android/CharSerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-29T16:50:36Z",
+      "side": 1,
+      "message": "Yep.\nStale comment. I\u0027ve pushed off my re-write.\nYou\u0027ll see the simplest refactors starting today. :)",
+      "parentUuid": "2ebd45ca_79c63f37",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ec8f176_965dac89",
         "filename": "android/CharSerialLine.h",
         "patchSetId": 1
