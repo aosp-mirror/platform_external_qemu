@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "0eb5e1d9_4035020c",
+        "filename": "android/CharSerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:55:04Z",
+      "side": 1,
+      "message": "Well the goal is to only have implementation of the abstraction per glue code :) Anyway, QemuSerialLine is slightly better when debugging, and also when reading the code, it makes it very explicit that this is glue code. CharSerialLine is a tad too generic for me.",
+      "parentUuid": "ee86cdd4_e0f7374e",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ec3bd5a_98c07969",
         "filename": "android/CharSerialLine.h",
         "patchSetId": 1
@@ -206,6 +224,24 @@
       "side": 1,
       "message": "I just looked at the pipes implementation (Stream is in base and utils), and tried to mimic it :)\nwill change",
       "parentUuid": "eeb7ade1_1c49b9a8",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce074951_56da24a9",
+        "filename": "android/base/ipc/SerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:55:04Z",
+      "side": 1,
+      "message": "thanks",
+      "parentUuid": "0e5fa128_e0fbbbe3",
       "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -364,6 +400,24 @@
       "side": 1,
       "message": "Well, I tried to do it that way first, but here are two issues I found:\n1. There\u0027s no good way to wrap it under C interface which allows later handler changes. And current char device works this way\n2. If I understand it correctly, add_handlers() is called when everything is set up and ready, which is quite often much later than the original object creation. It\u0027s like a \u0027on-off switch\u0027 for the communication channel.\n\nAnd there\u0027s a non-issue but small annoyance - every single custom set of handlers would require its own subclass, with constructor and everything - it feels like an overkill to me",
       "parentUuid": "0eb5e1d9_3deafbb0",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ec3bd5a_98ab19c1",
+        "filename": "android/base/ipc/SerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-29T15:55:04Z",
+      "side": 1,
+      "message": "Ok, let\u0027s not sweat it then. I think it\u0027s possible to do both, but I\u0027m much more interested in having a working AndroidEmu right now, so let\u0027s allow it :) Thanks for the clarification.",
+      "parentUuid": "ee86cdd4_606247d7",
       "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
