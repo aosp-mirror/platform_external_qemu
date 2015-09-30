@@ -10,15 +10,16 @@
  ** GNU General Public License for more details.
  */
 
-#include "android/telephony-agent-impl.h"
+#include "android/qemu-control-impl.h"
 
-#include "android/telephony-agent.h"
+#include "android/emulation/control/telephony_agent.h"
 #include "android/telephony/modem.h"
 #include "telephony/modem_driver.h"
 
 static int gsm_number_is_bad(const char*);
 
-TelephonyResponse telephony_telephonyCmd(TelephonyOperation op, const char *phoneNumber)
+static TelephonyResponse telephony_telephonyCmd(TelephonyOperation op,
+                                                const char *phoneNumber)
 {
     int resp;
     int holdCommand;
@@ -98,3 +99,9 @@ gsm_number_is_bad(const char* numStr)
 
     return (nDigits <= 0);
 }
+
+static const QAndroidTelephonyAgent sQAndroidTelephonyAgent = {
+    .telephonyCmd = telephony_telephonyCmd
+};
+const QAndroidTelephonyAgent* const gQAndroidTelephonyAgent =
+        &sQAndroidTelephonyAgent;
