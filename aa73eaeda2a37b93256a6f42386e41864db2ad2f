@@ -120,6 +120,30 @@
       "revId": "aa73eaeda2a37b93256a6f42386e41864db2ad2f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f5586271_1d53975d",
+        "filename": "android/ui-emu-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-09-30T16:43:21Z",
+      "side": 1,
+      "message": "I believe that it works because it is only allocating a pointer. The compiler could require a forward declaration that \"BatteryAgent\" is a structure name, but it already knows that.",
+      "parentUuid": "f86a1765_99d187ec",
+      "range": {
+        "startLine": 15,
+        "startChar": 9,
+        "endLine": 15,
+        "endChar": 44
+      },
+      "revId": "aa73eaeda2a37b93256a6f42386e41864db2ad2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
