@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1548969f_04adfccb",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 4
+      },
+      "lineNbr": 550,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-30T22:55:41Z",
+      "side": 1,
+      "message": "Please remove per David\u0027s earlier comments\n\nWhen you have a specific use case that should use lambdas, let\u0027s discuss in weekly meeting.",
+      "revId": "d49fbedacc756eafe978023e52c98993d0526683",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "953c86f3_b3e8d0dd",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 4
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-30T22:55:41Z",
+      "side": 1,
+      "message": "Okay if they are supported by MSVC2015",
+      "revId": "d49fbedacc756eafe978023e52c98993d0526683",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b5526a4f_5edb45b1",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 4
+      },
+      "lineNbr": 639,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-30T22:55:41Z",
+      "side": 1,
+      "message": "Please remove constexpr.  Only \"partially\" supported in MSVC2015.  I want to keep the option of trying MSVC open.",
+      "revId": "d49fbedacc756eafe978023e52c98993d0526683",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
