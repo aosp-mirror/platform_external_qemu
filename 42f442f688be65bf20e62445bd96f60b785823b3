@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "75ab929e_fed2e140",
+        "filename": "android/CharSerialLine.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-30T07:45:15Z",
+      "side": 1,
+      "message": "nit: put inside android::qemu or android::qemu1 namespace, and move this file and its implementation to android/qemu/emulation/CharSerialLine.h\n\nThe goal is to use android/qemu/ as a temporary placeholder for QEMU1 glue code, androi android/qemu/\u003csubdir\u003e/\u003cfile\u003e.{c,cpp} should ideally contain the implementation of abstract interfaces declared in android/\u003csubdir\u003e/\u003cfile\u003e.h\n\nLater, we\u0027re going to move android/qemu/ to android-qemu1-glue/ but keep the same sub-directory structure.",
+      "revId": "42f442f688be65bf20e62445bd96f60b785823b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75ab929e_3ec8498f",
+        "filename": "android/emulation/serial_line.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-30T07:45:15Z",
+      "side": 1,
+      "message": "nit: Move this comment just above the declaration for SLCanReadHanler()",
+      "revId": "42f442f688be65bf20e62445bd96f60b785823b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75ab929e_1ec58d77",
+        "filename": "android/emulation/serial_line.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-30T07:45:15Z",
+      "side": 1,
+      "message": "nit: same here, please move it just above the SLReadHandler() declaration.",
+      "revId": "42f442f688be65bf20e62445bd96f60b785823b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
