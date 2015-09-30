@@ -519,4 +519,162 @@ This ensures that git will pass '-style=file' to clang-format each time you
 call 'git clang-format' (which itself calls git-clang-format).
 
 
+V. C++11 and beyond
+
+  As of now, C++11 is enabled for all platforms, and here's the allowed
+  features:
+
+0. First of all, be consistent.
+
+  If you're editing some older file which has a bunch of 'typedef's, don't just
+  throw 'using' in the middle of them. Either follow the existing pattern, or
+  upgrade the around your change. Consistency helps the reader much more than
+  some single fancy feature.
+
+1. auto
+
+  Use auto when type is obvious, not important or hard to spell:
+
+  good:
+     auto i = 0;
+     auto foo = new Foo();
+     auto it = map.begin();
+
+  bad:
+     auto f = doSomeStuff();
+     otherStuff(f->bar());
+
+  Don't forget about "auto&" and "const auto&" to make sure the value is not
+  copied or accidentally modified.
+     
+2. lambdas
+
+  Use small lambdas instead of separate functors when the logic is simple and
+  needed in one place
+
+   auto it = find_if(v.begin(), v.end(),
+                     [&val](const T& t) { return t == val; });
+
+  Consider converting existing lambda to a functor if it grows too complicated
+  or becomes needed elsewhere.
+  Dont use implicit capture-all captures ([&] and [=]).
+
+3. foreach loop
+
+  Use the foreach loop to for iteration over everything you can
+
+   int values[] = {1,2,3};
+   for (int i : values) {
+       ...
+   }
+
+  Use the correct reference form for the auto (& or const &).
+  Don't just throw &&
+
+3. Uniform initialization and initializer lists
+
+  Prefer uniform initialization syntax {} to disambugate variables from
+  functions and suppress implicit type conversions.
+
+    int i = 1.0; // bad, precision loss
+    int i = {1.0}; // good, compiler error
+
+    Foo f(); // bad, function f returning foo instead of a variable
+    Foo f{}; // good, default-initialized variable f
+
+4. type aliases
+
+  Prefer "using" over "typedef"
+
+   using f = foo::bar::baz;
+   using func = char (*)(blah)[10];
+   template <class T>
+   using vec<T> = std::vector<T, our_super_duper_allocator<T>>;
+
+5. override and final
+
+  Use these new keywords as much as possible to make sure your derived class
+  actually overrides someting from a base class.
+
+6. Defaulted and deleted members
+
+  Prefer "= default" and "= delete" syntax over the empty braces and private
+  declaration. It both improves readability and compiler messages/generated
+  code.
+  Note: you can use this syntax in the implementation file:
+
+  foo.h:
+    struct Foo {
+        Foo();
+    };
+
+  foo.cpp:
+    Foo::Foo() = default;
+
+7. Class member initializers
+
+  Use member initializers instead of a standalone constructor if that's the
+  only thing it is needed for, or if there are many constructors all requiring
+  the same member values
+
+   class Meow {
+   public:
+       Meow() = default;
+           Meow(int i) : i(i) {
+       }
+
+   private:
+       int i = 0;
+       int j = 2;
+       std::string meow = "meow";
+   };
+
+8. constexpr
+
+  Use when appropriate to enforce compile-time initialization
+
+   constexpr int calcMoonPhase() {
+       return 1;
+   }
+   constexpr int i = calcMoonPhase();
+
+9. Strongly-typed enums
+
+  Prefer "enum class" over the old unscoped enums.
+  Note: for flags enum class is very inconvenient, one may fall back
+  to the old enumerations.
+
+10. STL updates
+
+  Feel free to use all new features from the STL, but make sure they
+  actually compile and work on all platforms: Linux, Mac and Windows.
+  Something may not compile, others could be implemented a little differently.
+  Do your due diligence before actually submitting the change.
+
+  Prefer STL implementations over a handwritten code, e.g. std::thread,
+  std smart pointers, regexes, etc
+
+99. noexcept, rvalue references, move semantics, perfect forwarding
+
+  Do not use the features listed here.
+  
+  ...unless:
+    a. You really know what it is and how it works. You can explain the
+     difference between std::forward and std::move. You know what forwarding
+     reference is and why is it different from a regular rvalue reference. Yo
+     know what happens when noexcept function throws.
+    b. The feature is needed to substantially improve the code or just to be
+     able to write it.
+     E.g. performance profiler shows that 97.5% of the time is spent copying
+     String argurments of some function right before the local copy is deleted
+    c. Always add a comment on why the feature is used in this particular place
+   and how it works there.
+
+   There should be almost no places where all these are true together
+
+MAX_INT. Other features not mentioned here
+
+  If there's some missing feature, just add it to the list and send a code
+  review to the team.
+
 [1] https://www.chromium.org/developers/coding-style
