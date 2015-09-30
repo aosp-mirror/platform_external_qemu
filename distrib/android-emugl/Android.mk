@@ -76,6 +76,18 @@ include $(EMUGL_PATH)/host/tools/emugen/Android.mk
 include $(EMUGL_PATH)/shared/emugl/common/Android.mk
 include $(EMUGL_PATH)/shared/OpenglCodecCommon/Android.mk
 
+ifeq (true,$(EMULATOR_USE_ANGLE))
+# Alternative graphics translation (gt) implementation, stripped off
+# and adjusted from the equivalent mod in the ARC project.
+# This gt acts as a thin wrapper + GLESv1-to-v2 translator
+# and forwards GLES calls to underlying GLES API (e.g. ANGLE)
+# Currently all code under following paths is WIP and does
+# not live on the master tree
+include $(EMUGL_PATH)/host/libs/graphics_translation/common/Android.mk
+include $(EMUGL_PATH)/host/libs/graphics_translation/gles/Android.mk
+# include $(EMUGL_PATH)/host/libs/graphics_translation/egl/Android.mk
+endif
+
 # Host static libraries
 include $(EMUGL_PATH)/host/libs/GLESv1_dec/Android.mk
 include $(EMUGL_PATH)/host/libs/GLESv2_dec/Android.mk
