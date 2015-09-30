@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/vm_operations.h"
 
 ANDROID_BEGIN_HEADER
@@ -23,5 +24,8 @@ ANDROID_BEGIN_HEADER
 
 // Defined in .../emulation/control/vm_operations.h
 extern const QAndroidVmOperations* const gQAndroidVmOperations;
+
+// Defined in .../emulation/control/batter_agent.h
+extern const QAndroidBatteryAgent* const gQAndroidBatteryAgent;
 
 ANDROID_END_HEADER

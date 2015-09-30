@@ -12,7 +12,7 @@
 
 #include <QtWidgets>
 
-#include "android/battery-agent.h"
+#include "android/emulation/control/battery_agent.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "extended-window.h"
 #include "ui_extended.h"

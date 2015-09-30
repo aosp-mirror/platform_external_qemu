@@ -13,8 +13,6 @@
 #include "android/emulator-window.h"
 
 #include "android/android.h"
-#include "android/battery-agent.h"
-#include "android/battery-agent-impl.h"
 #include "android/cellular-agent.h"
 #include "android/cellular-agent-impl.h"
 #include "android/finger-agent.h"
@@ -27,6 +25,7 @@
 #include "android/location-agent.h"
 #include "android/location-agent-impl.h"
 #include "android/opengles.h"
+#include "android/qemu-control-impl.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
 #include "android/telephony-agent.h"
@@ -248,13 +247,6 @@ emulator_window_setup( EmulatorWindow*  emulator )
     }
 
 #if CONFIG_QT
-    static const BatteryAgent myBatteryAgent = {
-        .setIsCharging  = battery_setIsCharging,
-        .setChargeLevel = battery_setChargeLevel,
-        .setHealth      = battery_setHealth,
-        .setStatus      = battery_setStatus
-    };
-
     static const CellularAgent myCellularAgent = {
         .setSignalStrength = cellular_setSignalStrength,
         .setVoiceStatus    = cellular_setVoiceStatus,
@@ -274,14 +266,12 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .telephonyCmd   = telephony_telephonyCmd
     };
 
-    static const UiEmuAgent myUiEmuAgent = {
-        .battery   = &myBatteryAgent,
-        .cellular  = &myCellularAgent,
-        .finger    = &myFingerAgent,
-        .location  = &myLocationAgent,
-        .telephony = &myTelephonyAgent
-    };
-
+    static UiEmuAgent myUiEmuAgent;
+    myUiEmuAgent.battery = gQAndroidBatteryAgent;
+    myUiEmuAgent.cellular = &myCellularAgent;
+    myUiEmuAgent.finger = &myFingerAgent;
+    myUiEmuAgent.location = &myLocationAgent;
+    myUiEmuAgent.telephony = &myTelephonyAgent;
     setUiEmuAgent(&myUiEmuAgent);
 #endif
 
