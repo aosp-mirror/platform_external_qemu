@@ -163,6 +163,30 @@
     },
     {
       "key": {
+        "uuid": "9555663b_ddc3db1a",
+        "filename": "android/qemu-vm-operations-impl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T20:53:44Z",
+      "side": 1,
+      "message": "No.\nI started with C++.\nThis code is qemu glue code and would like to (and does) include arbitrary qemu headers.\n\nSome qemu headers don\u0027t like being included from C++ code (even with extern) because they use sizeof, use tentative declarations etc.",
+      "parentUuid": "b5398a03_c3fca8de",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 38
+      },
+      "revId": "c0c3418e0e09e751ba5e162b47a4a8dbecdb6880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9555663b_7d028f4e",
         "filename": "android/qemu-vm-operations-impl.c",
         "patchSetId": 2
