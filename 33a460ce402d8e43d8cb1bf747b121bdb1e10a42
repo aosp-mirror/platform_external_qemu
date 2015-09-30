@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "2ebd45ca_f62fbe20",
+        "filename": "android/update-check/VersionExtractor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-30T06:56:07Z",
+      "side": 1,
+      "message": "nit: config-host.h is a QEMU-specific thing, and we should try to get rid of it.",
+      "revId": "33a460ce402d8e43d8cb1bf747b121bdb1e10a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e2e2591_0603821b",
         "filename": "android/update-check/VersionExtractor.cpp",
         "patchSetId": 1
