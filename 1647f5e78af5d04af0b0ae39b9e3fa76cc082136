@@ -195,6 +195,24 @@
     },
     {
       "key": {
+        "uuid": "953c86f3_28af2fb3",
+        "filename": "android/emulation/vm_operations.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-30T20:38:30Z",
+      "side": 1,
+      "message": "It actually doesn\u0027t stop anyone from doing anything\nTop-level const in declaration doesn\u0027t require one to use it in definition:\n\nextern void foo(const int i);\n\nvoid foo(int i) {\n   ///...\n}\n\nis a perfectly valid code",
+      "parentUuid": "f5586271_c0f5b28a",
+      "revId": "1647f5e78af5d04af0b0ae39b9e3fa76cc082136",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6e4d7d85_883f819e",
         "filename": "android/qemu-vm-operations-impl.c",
         "patchSetId": 1
