@@ -283,6 +283,9 @@ find_program () {
 # Default value of --ui option.
 UI_DEFAULT=sdl2
 
+# Default value of --gles option.
+GLES_DEFAULT=dgl
+
 # Parse options
 OPTION_DEBUG=no
 OPTION_IGNORE_AUDIO=no
@@ -292,6 +295,7 @@ OPTION_HELP=no
 OPTION_STRIP=no
 OPTION_MINGW=no
 OPTION_UI=
+OPTION_GLES=
 OPTION_SDK_REV=
 
 GLES_SUPPORT=no
@@ -359,10 +363,16 @@ for opt do
   ;;
   --ui=qt) OPTION_UI=qt
   ;;
+  --gles=dgl) OPTION_GLES=dgl
+  ;;
+  --gles=angle) OPTION_GLES=angle
+  ;;
   --ui=*) echo "Unknown --ui value, try one of: sdl2 qt"
   ;;
+  --gles=*) echo "Unknown --gles value, try one of: dgl angle"
+  ;;
   --sdk-revision=*) ANDROID_SDK_TOOLS_REVISION=$optarg
-  ;;    
+  ;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -386,6 +396,8 @@ EOF
     echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --ui=sdl2                   Use SDL2-based UI backend (default)."
     echo "  --ui=qt                     Use Qt-based UI backend."
+    echo "  --gles=dgl                  Build the OpenGLES to Desktop OpenGL Translator (default)"
+    echo "  --gles=angle                Build the OpenGLES to ANGLE wrapper"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
     echo "  --mingw                     Build Windows executable on Linux"
@@ -412,6 +424,11 @@ fi
 if [ -z "$OPTION_UI" ]; then
     OPTION_UI=$UI_DEFAULT
     log "Auto-config: --ui=$OPTION_UI"
+fi
+
+if [ -z "$OPTION_GLES" ]; then
+    OPTION_GLES=$GLES_DEFAULT
+    log "Auto-config: --gles=$OPTION_GLES"
 fi
 
 if [ "$OPTION_OUT_DIR" ]; then
@@ -759,6 +776,11 @@ if [ "$QT_PREBUILTS_DIR" ]; then
 else
     echo "EMULATOR_USE_SDL2 := true" >> $config_mk
     echo "EMULATOR_USE_QT   := false" >> $config_mk
+fi
+if [ "$OPTION_GLES" = "angle" ] ; then
+    echo "EMULATOR_USE_ANGLE := true" >> $config_mk
+else
+    echo "EMULATOR_USE_ANGLE := false" >> $config_mk
 fi
 
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
