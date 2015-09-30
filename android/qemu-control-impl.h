@@ -15,6 +15,10 @@
 #pragma once
 
 #include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/cellular_agent.h"
+#include "android/emulation/control/finger_agent.h"
+#include "android/emulation/control/location_agent.h"
+#include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/vm_operations.h"
 
 ANDROID_BEGIN_HEADER
@@ -22,10 +26,22 @@ ANDROID_BEGIN_HEADER
 // This file contains handles to globally allocated objects implementing various
 // interfaces required by AndroidEmu library in emulation/control/*.
 
-// Defined in .../emulation/control/vm_operations.h
-extern const QAndroidVmOperations* gQAndroidVmOperations;
-
-// Defined in .../emulation/control/batter_agent.h
+// Defined in android/qemu-battery-agent.c
 extern const QAndroidBatteryAgent* gQAndroidBatteryAgent;
+
+// Defined in android/qemu-cellular-agent.c
+extern const QAndroidCellularAgent* gQAndroidCellularAgent;
+
+// Defined in android/qemu-finger-agent.c
+extern const QAndroidFingerAgent* gQAndroidFingerAgent;
+
+// Defined in android/qemu-location-agent.c
+extern const QAndroidLocationAgent* gQAndroidLocationAgent;
+
+// Defined in android/qemu-telephony-agent.c
+extern const QAndroidTelephonyAgent* gQAndroidTelephonyAgent;
+
+// Defined in android/qemu-android-vm-operations.c
+extern const QAndroidVmOperations* gQAndroidVmOperations;
 
 ANDROID_END_HEADER

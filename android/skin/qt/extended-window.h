@@ -22,13 +22,6 @@
 #include <QTimer>
 #include <QValidator>
 
-#include "android/emulation/control/battery_agent.h"
-#include "android/cellular-agent.h"
-#include "android/finger-agent.h"
-#include "android/location-agent.h"
-#include "android/settings-agent.h"
-#include "android/telephony-agent.h"
-
 class EmulatorQtWindow;
 class ToolWindow;
 
@@ -105,11 +98,11 @@ private:
     TelephonyState  mTelephonyState;
 
     const QAndroidBatteryAgent* mBatteryAgent;
-    const CellularAgent* mCellularAgent;
-    const FingerAgent* mFingerAgent;
-    const LocationAgent* mLocationAgent;
+    const QAndroidCellularAgent* mCellularAgent;
+    const QAndroidFingerAgent* mFingerAgent;
+    const QAndroidLocationAgent* mLocationAgent;
+    const QAndroidTelephonyAgent* mTelephonyAgent;
     const SettingsAgent* mSettingsAgent;
-    const TelephonyAgent* mTelephonyAgent;
 
     int      mLoc_mSecRemaining;
     bool     mLoc_nowPaused;
