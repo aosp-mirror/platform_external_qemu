@@ -81,7 +81,8 @@ enum { PANE_IDX_LOCATION = 0,
 
 // This is the style, based on either the LIGHT or DARK theme
 #define QT_STYLE(THEME) \
-    "*[ColorGroup=\"MajorTab\"]      { color:" THEME##_MAJOR_TAB_COLOR "}" \
+    "*[ColorGroup=\"MajorTab\"]      { color:" THEME##_MAJOR_TAB_COLOR ";" \
+                                      "padding: 0px 0px 0px 16px }" \
     "*[ColorGroup=\"MajorTabTitle\"] { color:" THEME##_MAJOR_TITLE_COLOR ";" \
             "background-color:" THEME##_TAB_BKG_COLOR "}" \
     "*[ColorGroup=\"Title\"]         { color:" THEME##_TITLE_COLOR "}" \
