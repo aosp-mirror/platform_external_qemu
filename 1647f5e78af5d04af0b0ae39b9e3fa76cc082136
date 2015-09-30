@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e4d7d85_883f819e",
+        "filename": "android/qemu-vm-operations-impl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:27:52Z",
+      "side": 1,
+      "message": "I should make this a static const object.",
+      "range": {
+        "startLine": 96,
+        "startChar": 4,
+        "endLine": 96,
+        "endChar": 66
+      },
+      "revId": "1647f5e78af5d04af0b0ae39b9e3fa76cc082136",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
