@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8e52b121_f4493afb",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:54:15Z",
+      "side": 1,
+      "message": "nit: delete",
+      "range": {
+        "startLine": 531,
+        "startChar": 10,
+        "endLine": 531,
+        "endChar": 13
+      },
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e52b121_d4463ee9",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 549,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:54:15Z",
+      "side": 1,
+      "message": "nit: bad whitespace.",
+      "range": {
+        "startLine": 549,
+        "startChar": 0,
+        "endLine": 549,
+        "endChar": 5
+      },
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15a33681_63afc2b2",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 664,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:54:15Z",
+      "side": 1,
+      "message": "nit: You",
+      "range": {
+        "startLine": 664,
+        "startChar": 75,
+        "endLine": 664,
+        "endChar": 77
+      },
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
