@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "15a33681_4c4e73b4",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-30T23:16:14Z",
+      "side": 1,
+      "message": "it\u0027s for the use of auto in foreach loops",
+      "parentUuid": "75439281_27de38fc",
+      "revId": "13991adfbfe2ee6760bdaecd856b402654f73b98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b5526a4f_3e5491f4",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 3
