@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1548969f_cf1b2d37",
+        "filename": "android/utils/ini.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T23:58:56Z",
+      "side": 1,
+      "message": "nit: sort.",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 35
+      },
+      "revId": "61b011320a2b0b5f964f31c71d197b8f07c913b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
