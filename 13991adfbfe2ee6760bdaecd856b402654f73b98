@@ -33,6 +33,23 @@
       "revId": "13991adfbfe2ee6760bdaecd856b402654f73b98",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "953c86f3_73d2c83f",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 639,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-09-30T22:47:08Z",
+      "side": 1,
+      "message": "support for constexpr is still \"partial\" in MSVC2015, I don\u0027t want to make it more difficult to experiment with MSVC",
+      "revId": "13991adfbfe2ee6760bdaecd856b402654f73b98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
