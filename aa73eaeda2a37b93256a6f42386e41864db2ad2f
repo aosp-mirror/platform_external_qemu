@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1548969f_015b2e97",
+        "filename": "android/emulation/battery_agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T22:43:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "156b3632_43b44607",
+      "revId": "aa73eaeda2a37b93256a6f42386e41864db2ad2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75ab929e_7ebed1e5",
         "filename": "android/emulator-window.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-30T07:37:24Z",
       "side": 1,
       "message": "nit: should be lower in this list.",
+      "revId": "aa73eaeda2a37b93256a6f42386e41864db2ad2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d55b5e6b_e2fc3c73",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T22:43:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "75ab929e_7ebed1e5",
       "revId": "aa73eaeda2a37b93256a6f42386e41864db2ad2f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -83,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "953c86f3_e80b8759",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T22:43:45Z",
+      "side": 1,
+      "message": "Nope. In C, const pointers are not constexprs.\nSo exposing a pointer isn\u0027t enough, I still get the same error.\n\nC++ semantics are better, and allow you to put a const pointer in there.",
+      "parentUuid": "75763214_e6c45e7e",
+      "range": {
+        "startLine": 273,
+        "startChar": 4,
+        "endLine": 273,
+        "endChar": 33
+      },
+      "revId": "aa73eaeda2a37b93256a6f42386e41864db2ad2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "55eccecd_2d210ddf",
         "filename": "android/qemu-battery-agent-impl.h",
         "patchSetId": 1
@@ -94,6 +154,24 @@
       "writtenOn": "2015-09-30T07:37:24Z",
       "side": 1,
       "message": "Why not just expose a pointer instead?\n\n  extern const QAndroidBatteryAgent* const qemu_android_battery_agent;",
+      "revId": "aa73eaeda2a37b93256a6f42386e41864db2ad2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "354d9aaf_e20d6200",
+        "filename": "android/qemu-battery-agent-impl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T22:43:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "55eccecd_2d210ddf",
       "revId": "aa73eaeda2a37b93256a6f42386e41864db2ad2f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
