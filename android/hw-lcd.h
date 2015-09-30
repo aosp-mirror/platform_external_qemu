@@ -21,6 +21,7 @@
 #define  LCD_DENSITY_360DPI    360
 #define  LCD_DENSITY_400DPI    400
 #define  LCD_DENSITY_XXHDPI    480
+#define  LCD_DENSITY_560DPI    560
 #define  LCD_DENSITY_XXXHDPI   640
 
 /* Sets the boot property corresponding to the emulated abstract LCD density */
