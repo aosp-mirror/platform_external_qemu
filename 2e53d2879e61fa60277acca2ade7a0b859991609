@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "d55b5e6b_2d6c658c",
+        "filename": "android/CharSerialLine.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T23:28:03Z",
+      "side": 1,
+      "message": "To some extent.\nI think it\u0027s cleaner and easier to just let the QEMU glue provide C-interfaces that AndroidEmu can use in C++ code.\n\nThe header that declares the interface is part of AndroidEmu.\nAnd we can add one / few headers in QEMU{1,2} that merely make objects for those interfaces available, without pulling in any other QEMU headers.\n\nThis lets us cleanly separate out arbitrary QEMU C headers from C++ code.",
+      "parentUuid": "2e2e2591_c00e82b1",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 1
+      },
+      "revId": "2e53d2879e61fa60277acca2ade7a0b859991609",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ceae6993_2179f45a",
         "filename": "android/emulation/serial_line.h",
         "patchSetId": 2
