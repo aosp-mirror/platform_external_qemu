@@ -28,8 +28,8 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     mCellularAgent (agentPtr ? agentPtr->cellular  : NULL),
     mFingerAgent   (agentPtr ? agentPtr->finger    : NULL),
     mLocationAgent (agentPtr ? agentPtr->location  : NULL),
-    mSettingsAgent (agentPtr ? agentPtr->settings  : NULL),
     mTelephonyAgent(agentPtr ? agentPtr->telephony : NULL),
+    mSettingsAgent (agentPtr ? agentPtr->settings  : NULL),
     mLoc_mSecRemaining(-1),
     mLoc_nowPaused(false),
     mLoc_rowToSend(-1),
@@ -49,9 +49,9 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     initKbdShorts();
     initLocation();
     initSd();
-    initSettings();
     initSms();
     initTelephony();
+    initSettings();
 
     move(mParentWindow->geometry().right() + 40,
          mParentWindow->geometry().top()   + 40 );

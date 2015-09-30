@@ -13,14 +13,19 @@
 #pragma once
 
 #include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/cellular_agent.h"
+#include "android/emulation/control/finger_agent.h"
+#include "android/emulation/control/location_agent.h"
+#include "android/emulation/control/telephony_agent.h"
+#include "android/settings-agent.h"
 
 // Agent iterfaces for sending commands from the UI to the emulator
 
 typedef struct UiEmuAgent {
     const struct QAndroidBatteryAgent* battery;
-    const struct CellularAgent* cellular;
-    const struct FingerAgent* finger;
-    const struct LocationAgent* location;
+    const struct QAndroidCellularAgent* cellular;
+    const struct QAndroidFingerAgent* finger;
+    const struct QAndroidLocationAgent* location;
+    const struct QAndroidTelephonyAgent* telephony;
     const struct SettingsAgent* settings;
-    const struct TelephonyAgent* telephony;
 } UiEmuAgent;

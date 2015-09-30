@@ -22,7 +22,7 @@ enum CellularStatus { Cellular_Stat_Home,   Cellular_Stat_Roaming, Cellular_Stat
 enum CellularStandard { Cellular_Std_GSM,  Cellular_Std_HSCSD, Cellular_Std_GPRS, Cellular_Std_EDGE,
                         Cellular_Std_UMTS, Cellular_Std_HSDPA, Cellular_Std_full };
 
-typedef struct CellularAgent {
+typedef struct QAndroidCellularAgent {
     // Sets the cellular signal strength
     // Input: 0(none) .. 31(very strong)
     void (*setSignalStrength)(int zeroTo31);
@@ -38,6 +38,6 @@ typedef struct CellularAgent {
     // Sets the cellular data standard in use
     // Input: enum CellularStandard, above
     void (*setStandard)(enum CellularStandard);
-} CellularAgent;
+} QAndroidCellularAgent;
 
 ANDROID_END_HEADER

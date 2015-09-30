@@ -13,23 +13,15 @@
 #include "android/emulator-window.h"
 
 #include "android/android.h"
-#include "android/cellular-agent.h"
-#include "android/cellular-agent-impl.h"
-#include "android/finger-agent.h"
-#include "android/finger-agent-impl.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
 #include "android/hw-control.h"
 #include "android/hw-sensors.h"
-#include "android/location-agent.h"
-#include "android/location-agent-impl.h"
 #include "android/opengles.h"
 #include "android/qemu-control-impl.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
-#include "android/telephony-agent.h"
-#include "android/telephony-agent-impl.h"
 #include "android/ui-emu-agent.h"
 #include "android/user-events.h"
 #include "android/utils/debug.h"
@@ -247,31 +239,12 @@ emulator_window_setup( EmulatorWindow*  emulator )
     }
 
 #if CONFIG_QT
-    static const CellularAgent myCellularAgent = {
-        .setSignalStrength = cellular_setSignalStrength,
-        .setVoiceStatus    = cellular_setVoiceStatus,
-        .setDataStatus     = cellular_setDataStatus,
-        .setStandard       = cellular_setStandard
-    };
-
-    static const FingerAgent myFingerAgent = {
-        .setTouch       = finger_setTouch
-    };
-
-    static const LocationAgent myLocationAgent = {
-        .gpsCmd         = location_gpsCmd
-    };
-
-    static const TelephonyAgent myTelephonyAgent = {
-        .telephonyCmd   = telephony_telephonyCmd
-    };
-
     static UiEmuAgent myUiEmuAgent;
     myUiEmuAgent.battery = gQAndroidBatteryAgent;
-    myUiEmuAgent.cellular = &myCellularAgent;
-    myUiEmuAgent.finger = &myFingerAgent;
-    myUiEmuAgent.location = &myLocationAgent;
-    myUiEmuAgent.telephony = &myTelephonyAgent;
+    myUiEmuAgent.cellular = gQAndroidCellularAgent;
+    myUiEmuAgent.finger = gQAndroidFingerAgent;
+    myUiEmuAgent.location = gQAndroidLocationAgent;
+    myUiEmuAgent.telephony = gQAndroidTelephonyAgent;
     setUiEmuAgent(&myUiEmuAgent);
 #endif
 
