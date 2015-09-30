@@ -14,22 +14,30 @@
 
 #include "android/utils/compiler.h"
 
+#include <stdbool.h>
+
 ANDROID_BEGIN_HEADER
 
-#include "stdbool.h"
+enum BatteryHealth {
+    BATTERY_HEALTH_GOOD,
+    BATTERY_HEALTH_FAILED,
+    BATTERY_HEALTH_DEAD,
+    BATTERY_HEALTH_OVERVOLTAGE,
+    BATTERY_HEALTH_OVERHEATED,
+    BATTERY_HEALTH_UNKNOWN,
+    BATTERY_HEALTH_NUM_ENTRIES
+};
 
+enum BatteryStatus {
+    BATTERY_STATUS_UNKNOWN,
+    BATTERY_STATUS_CHARGING,
+    BATTERY_STATUS_DISCHARGING,
+    BATTERY_STATUS_NOT_CHARGING,
+    BATTERY_STATUS_FULL,
+    BATTERY_STATUS_NUM_ENTRIES
+};
 
-enum BatteryHealth { BATTERY_HEALTH_GOOD, BATTERY_HEALTH_FAILED, BATTERY_HEALTH_DEAD,
-                     BATTERY_HEALTH_OVERVOLTAGE, BATTERY_HEALTH_OVERHEATED,
-                     BATTERY_HEALTH_UNKNOWN,
-                     BATTERY_HEALTH_NUM_ENTRIES };
-
-enum BatteryStatus { BATTERY_STATUS_UNKNOWN, BATTERY_STATUS_CHARGING,
-                     BATTERY_STATUS_DISCHARGING, BATTERY_STATUS_NOT_CHARGING,
-                     BATTERY_STATUS_FULL,
-                     BATTERY_STATUS_NUM_ENTRIES };
-
-typedef struct BatteryAgent {
+typedef struct QAndroidBatteryAgent {
     // Sets whether the battery is charging or not
     void (*setIsCharging)(bool isCharging);
 
@@ -44,6 +52,6 @@ typedef struct BatteryAgent {
     // Sets the battery status
     // Input: |status| one of the BatteryStatus enum values, above
     void (*setStatus)(enum BatteryStatus status);
-} BatteryAgent;
+} QAndroidBatteryAgent;
 
 ANDROID_END_HEADER
