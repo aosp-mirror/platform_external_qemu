@@ -10,12 +10,12 @@
  ** GNU General Public License for more details.
  */
 
-#include "android/location-agent-impl.h"
+#include "android/qemu-control-impl.h"
 
+#include "android/emulation/control/location_agent.h"
 #include "android/gps.h"
-#include "android/location-agent.h"
 
-void location_gpsCmd(double latitude, double longitude,
+static void location_gpsCmd(double latitude, double longitude,
                      double metersElevation, int nSatellites,
                      const struct timeval *time)
 {
@@ -23,3 +23,9 @@ void location_gpsCmd(double latitude, double longitude,
                               metersElevation, nSatellites,
                               time);
 }
+
+static const QAndroidLocationAgent sQAndroidLocationAgent = {
+    .gpsCmd = location_gpsCmd
+};
+const QAndroidLocationAgent* const gQAndroidLocationAgent =
+        &sQAndroidLocationAgent;
