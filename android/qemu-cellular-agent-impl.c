@@ -10,14 +10,14 @@
  ** GNU General Public License for more details.
  */
 
-#include "android/cellular-agent-impl.h"
+#include "android/qemu-control-impl.h"
 
 #include "android/android.h"
-#include "android/cellular-agent.h"
+#include "android/emulation/control/cellular_agent.h"
 #include "android/shaper.h"
 #include "telephony/modem_driver.h"
 
-void cellular_setSignalStrength(int zeroTo31)
+static void cellular_setSignalStrength(int zeroTo31)
 {
     // (See do_gsm_signal() in android/console.c)
 
@@ -29,7 +29,7 @@ void cellular_setSignalStrength(int zeroTo31)
     }
 }
 
-void cellular_setVoiceStatus(enum CellularStatus voiceStatus)
+static void cellular_setVoiceStatus(enum CellularStatus voiceStatus)
 {
     // (See do_gsm_voice() in android/console.c)
     ARegistrationState  state = A_REGISTRATION_UNKNOWN;
@@ -47,7 +47,7 @@ void cellular_setVoiceStatus(enum CellularStatus voiceStatus)
     }
 }
 
-void cellular_setDataStatus(enum CellularStatus dataStatus)
+static void cellular_setDataStatus(enum CellularStatus dataStatus)
 {
     // (See do_gsm_data() in android/console.c)
     ARegistrationState  state = A_REGISTRATION_UNKNOWN;
@@ -68,7 +68,7 @@ void cellular_setDataStatus(enum CellularStatus dataStatus)
                         state != A_REGISTRATION_ROAMING );
 }
 
-void cellular_setStandard(enum CellularStandard cStandard)
+static void cellular_setStandard(enum CellularStandard cStandard)
 {
     // (See do_network_speed() in android/console.c)
     char *speedName;
@@ -99,3 +99,11 @@ void cellular_setStandard(enum CellularStandard cStandard)
                                      android_parse_network_type(speedName));
     }
 }
+
+static const QAndroidCellularAgent sQAndroidCellularAgent = {
+    .setSignalStrength = cellular_setSignalStrength,
+    .setVoiceStatus = cellular_setVoiceStatus,
+    .setDataStatus = cellular_setDataStatus,
+    .setStandard = cellular_setStandard};
+const QAndroidCellularAgent* const gQAndroidCellularAgent =
+        &sQAndroidCellularAgent;

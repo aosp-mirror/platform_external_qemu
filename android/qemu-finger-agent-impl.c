@@ -10,12 +10,12 @@
  ** GNU General Public License for more details.
  */
 
-#include "android/finger-agent-impl.h"
+#include "android/qemu-control-impl.h"
 
-#include "android/finger-agent.h"
+#include "android/emulation/control/finger_agent.h"
 #include "android/hw-fingerprint.h"
 
-void finger_setTouch(bool isTouching, int touchId)
+static void finger_setTouch(bool isTouching, int touchId)
 {
     if (isTouching) {
         android_hw_fingerprint_touch(touchId);
@@ -23,3 +23,8 @@ void finger_setTouch(bool isTouching, int touchId)
         android_hw_fingerprint_remove();
     }
 }
+
+static const QAndroidFingerAgent sQAndroidFingerAgent = {
+    .setTouch = finger_setTouch
+};
+const QAndroidFingerAgent* const gQAndroidFingerAgent = &sQAndroidFingerAgent;

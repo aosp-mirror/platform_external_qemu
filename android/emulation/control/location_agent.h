@@ -14,12 +14,19 @@
 
 #include "android/utils/compiler.h"
 
+#include <sys/time.h>
+
 ANDROID_BEGIN_HEADER
 
-#include <stdbool.h>
-
-typedef struct FingerAgent {
-    void (*setTouch)(bool isTouching, int touchId);
-} FingerAgent;
+typedef struct QAndroidLocationAgent {
+    // Send a GPS location to the AVD using an NMEA sentence
+    //   |latitude| and |longitude| are in degrees
+    //   |metersElevation| is meters above sea level
+    //   |nSatellites| is the number of satellites used
+    //   |time| is UTC, in the format provided by gettimeofday()
+    void (*gpsCmd)(double latitude, double longitude,
+                   double metersElevation, int nSatellites,
+                   const struct timeval *time);
+} QAndroidLocationAgent;
 
 ANDROID_END_HEADER
