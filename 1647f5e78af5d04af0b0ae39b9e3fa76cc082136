@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "55eccecd_0d26d1f6",
+        "filename": "android/emulation/vm_operations.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-30T07:38:42Z",
+      "side": 1,
+      "message": "Actually, forget about this the /console/ sub-directory, since thie can also be used from the UI in the end. Still I think a specific directory would be nice to group all agent/interface declarations, maybe android/emulation/control/vm-operations.h instead. What do you think?",
+      "parentUuid": "75763214_a6ba66ed",
+      "revId": "1647f5e78af5d04af0b0ae39b9e3fa76cc082136",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f597825c_c2b3c21e",
         "filename": "android/emulation/vm_operations.h",
         "patchSetId": 1
