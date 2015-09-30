@@ -118,6 +118,24 @@
     },
     {
       "key": {
+        "uuid": "75ab929e_5e97950c",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-30T16:09:56Z",
+      "side": 1,
+      "message": "Thanks for the clarification. I agree that it\u0027d be nice to have this in the document too :)",
+      "parentUuid": "1548969f_5e07d15c",
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "35703a18_44b44e07",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -147,6 +165,24 @@
       "side": 1,
       "message": "Ok :(\nAnyway, there are places where one has to use it: e.g. std::move() for unique_ptr. But let it be case-by-case decision on the review",
       "parentUuid": "35703a18_44b44e07",
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "156b3632_c3c6762d",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 661,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-30T16:09:56Z",
+      "side": 1,
+      "message": "Ok, make it a single exception here then to explain what\u0027s the scope/purpose of it. We will probably add them gradually over time after that.",
+      "parentUuid": "15a33681_a33b7a88",
       "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
