@@ -48,6 +48,57 @@
     },
     {
       "key": {
+        "uuid": "75763214_46b45207",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 560,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-30T06:53:01Z",
+      "side": 1,
+      "message": "Most of the team has no experience with C++11, and I think lambdas should fall in the \"do not do it\" category for now. \n\nIMHO, the C++ syntax makes them hard to read and understand for a novice. Maybe introduce them later (in a few months) when we\u0027re all confident with other C++11 features.",
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "156b3632_23af4ab3",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-30T06:53:01Z",
+      "side": 1,
+      "message": "just curious, why is that? Aren\u0027t these things equivalent? Are compiler error messages better with one or the other?",
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "35703a18_44b44e07",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 661,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-30T06:53:01Z",
+      "side": 1,
+      "message": "Let\u0027s keep it simple for now, just \"do not use these features\". Anything else is an invitation for chaos for now :)",
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "15a33681_63afc2b2",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
