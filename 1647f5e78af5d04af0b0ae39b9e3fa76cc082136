@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b5398a03_c3994841",
+        "filename": "android/console.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T19:48:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "75ab929e_deae05b5",
+      "revId": "1647f5e78af5d04af0b0ae39b9e3fa76cc082136",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75763214_a6ba66ed",
         "filename": "android/emulation/vm_operations.h",
         "patchSetId": 1
@@ -54,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "b5526a4f_7b057b1c",
+        "filename": "android/emulation/vm_operations.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T19:48:49Z",
+      "side": 1,
+      "message": "Moved to android/emulation/control/vm_operations.h\n\nSome thoughts:\n\n- The name-with-hyphens-style is qemu1 style really, so I\u0027ll keep that for qemu-vm-operations-etc. In AndroidEmu, c_files_use_underscore. Let\u0027s stick to that.\n\n- I like the idea of simply exposing a pointer for the qemu1 implementation. In fact, I\u0027ll add android/qemu-control-impl.h to expose _all_ control related pointers. \n\nI was unhappy adding a qemu-variant of all the interface headers I drop under android/emulation/control/ since they all just expose one pointer / function. They will still be implemented in separate qemu-specific-impl.c files since they have lots of static functions for the actual impl.",
+      "parentUuid": "55eccecd_0d26d1f6",
+      "revId": "1647f5e78af5d04af0b0ae39b9e3fa76cc082136",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f597825c_c2b3c21e",
         "filename": "android/emulation/vm_operations.h",
         "patchSetId": 1
@@ -65,6 +101,24 @@
       "writtenOn": "2015-09-30T07:31:20Z",
       "side": 1,
       "message": "nit: For acronyms, only use a capital for the first letter, i.e. \"QAndroidVmOperations\" instead of \"QAndroidVMOperations\". Alternatively, use \"QAndroidMachineOperations\" / machineStop() / machineStart() / machineIsRunning(), your call :)",
+      "revId": "1647f5e78af5d04af0b0ae39b9e3fa76cc082136",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75439281_c1d30478",
+        "filename": "android/emulation/vm_operations.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T19:48:49Z",
+      "side": 1,
+      "message": "Done.\n\n*Machine* is longer.",
+      "parentUuid": "f597825c_c2b3c21e",
       "revId": "1647f5e78af5d04af0b0ae39b9e3fa76cc082136",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -88,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "9555663b_3a7e5d41",
+        "filename": "android/emulation/vm_operations.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T19:48:49Z",
+      "side": 1,
+      "message": "There is the fact that the qemu1 implementation gives a hardware interrupt as the reason for stopping the vm.\n\nI thought that was significant. Just an implementation detail?",
+      "parentUuid": "35703a18_64b94afc",
+      "revId": "1647f5e78af5d04af0b0ae39b9e3fa76cc082136",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "55712e1a_45b44a07",
         "filename": "android/emulation/vm_operations.h",
         "patchSetId": 1
@@ -99,6 +171,24 @@
       "writtenOn": "2015-09-30T07:31:20Z",
       "side": 1,
       "message": "This is not very clear, and the \u0027const\u0027 is pretty meaningless here. A better message would be:\n\n  // Snapshot-related VM operations.\n  // On exit, set |*outMessage| and |*errMessage| to heap-allocated strings\n  // corresponding to the command\u0027s output and error message\n  // that must be freed by the caller.\n  // Return true on success, false on failure.",
+      "revId": "1647f5e78af5d04af0b0ae39b9e3fa76cc082136",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f5586271_c0f5b28a",
+        "filename": "android/emulation/vm_operations.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T19:48:49Z",
+      "side": 1,
+      "message": "Done.\n\nI like const here because it stops the implementation from making the programming error:\n\noutMessage \u003d malloc(...).\n\nThis won\u0027t flag any compiler warnings, but does not do anything sensible.",
+      "parentUuid": "55712e1a_45b44a07",
       "revId": "1647f5e78af5d04af0b0ae39b9e3fa76cc082136",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
