@@ -108,6 +108,24 @@
     },
     {
       "key": {
+        "uuid": "f597825c_62bbd6f4",
+        "filename": "android/CharSerialLine.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-09-30T07:39:48Z",
+      "side": 1,
+      "message": "Yes, qemu1::SerialLine or qemu1::CharSerialLine would be perfectly ok too :)",
+      "parentUuid": "ee86cdd4_0f17e34c",
+      "revId": "6e91c884e0d90e27bbd7ae44c0878e0201f5b6d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ec3bd5a_98c07969",
         "filename": "android/CharSerialLine.h",
         "patchSetId": 1
