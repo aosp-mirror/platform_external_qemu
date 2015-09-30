@@ -12,10 +12,12 @@
 
 #pragma once
 
+#include "android/emulation/battery_agent.h"
+
 // Agent iterfaces for sending commands from the UI to the emulator
 
 typedef struct UiEmuAgent {
-    const struct BatteryAgent    *battery;
+    const struct QAndroidBatteryAgent* battery;
     const struct CellularAgent   *cellular;
     const struct FingerAgent     *finger;
     const struct LocationAgent   *location;

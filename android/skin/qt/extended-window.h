@@ -22,7 +22,7 @@
 #include <QTimer>
 #include <QValidator>
 
-#include "android/battery-agent.h"
+#include "android/emulation/battery_agent.h"
 #include "android/cellular-agent.h"
 #include "android/finger-agent.h"
 #include "android/location-agent.h"
@@ -104,7 +104,7 @@ private:
     SettingsState   mSettingsState;
     TelephonyState  mTelephonyState;
 
-    const BatteryAgent    *mBatteryAgent;
+    const QAndroidBatteryAgent* mBatteryAgent;
     const CellularAgent   *mCellularAgent;
     const FingerAgent     *mFingerAgent;
     const LocationAgent   *mLocationAgent;

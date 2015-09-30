@@ -12,9 +12,14 @@
 
 #pragma once
 
-#include "android/battery-agent.h"
+#include "android/emulation/battery_agent.h"
 
-void battery_setIsCharging(bool isCharging);
-void battery_setChargeLevel(int percentFull);
-void battery_setHealth(enum BatteryHealth health);
-void battery_setStatus(enum BatteryStatus status);
+ANDROID_BEGIN_HEADER
+
+// Main entry point for populating a new QAndroidVMOperations for QEMU1.
+// Caller takes ownership of returned object.
+// See android/emulation/batter_agent.h to learn how to use this.
+// Multiple calls return the same global instance.
+const QAndroidBatteryAgent* qemu_get_android_battery_agent(void);
+
+ANDROID_END_HEADER
