@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "75439281_27de38fc",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-09-30T22:23:14Z",
+      "side": 1,
+      "message": "Are the two lines for \"foreach loop\" or \"auto\"?",
+      "revId": "13991adfbfe2ee6760bdaecd856b402654f73b98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b5526a4f_3e5491f4",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 3
+      },
+      "lineNbr": 629,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-09-30T22:23:14Z",
+      "side": 1,
+      "message": "Nit: trailing spaces. Please fix other trailing spaces in this file.",
+      "revId": "13991adfbfe2ee6760bdaecd856b402654f73b98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
