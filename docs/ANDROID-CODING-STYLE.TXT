@@ -519,4 +519,158 @@ This ensures that git will pass '-style=file' to clang-format each time you
 call 'git clang-format' (which itself calls git-clang-format).
 
 
+V. C++11 and beyond
+
+  As of now, C++11 is enabled for all platforms, and here's the allowed
+  features (list is also based on Chromium style [1], but a little more
+  relaxed):
+
+0. First of all, be consistent.
+
+  If you're editing some older file which has a bunch of 'typedef's, don't just
+  throw 'using' in the middle of them. Either follow the existing pattern, or
+  upgrade around your change. Consistency helps the reader much more than some
+  single fancy feature.
+
+1. auto
+
+  Use auto when type is obvious, not important or hard to spell:
+
+  good:
+     auto i = 0;
+     auto foo = new Foo();
+     auto it = map.begin();
+
+  bad:
+     auto f = doSomeStuff();
+     otherStuff(f->bar());
+
+  Don't forget about "auto&" and "const auto&" to make sure the value is not
+  copied or accidentally modified.
+
+2. foreach loop
+
+  Use the foreach loop for iteration over everything you can
+
+   int values[] = {1,2,3};
+   for (int i : values) {
+       ...
+   }
+
+  Use the correct reference form for the variable (& or const &); don't
+  just throw &&
+
+3. Uniform initialization and initializer lists
+
+  Prefer uniform initialization syntax {} to disambugate variables from
+  functions and suppress implicit type conversions.
+
+    int i = 1.0; // bad, precision loss
+    int i = {1.0}; // good, compiler error
+
+    Foo f(); // bad, function f returning foo instead of a variable
+    Foo f{}; // good, default-initialized variable f
+
+4. type aliases
+
+  Prefer "using" over "typedef"
+
+   // easier to understand - "=" splits alias and the actual type
+   using f = foo::bar::baz;
+
+   // much simpler for functions than typedefed version -
+   // typedef char (*func)(blah)[10];
+   using func = char (*)(blah)[10];
+
+   // typedef cannot into templates :)
+   template <class T>
+   using vec<T> = std::vector<T, our_super_duper_allocator<T>>;
+
+5. override and final
+
+  Use these new keywords as much as possible to make sure your derived class
+  actually overrides someting from a base class.
+
+6. Defaulted and deleted members
+
+  Prefer "= default" and "= delete" syntax over the empty braces and private
+  declaration. It both improves readability and compiler messages/generated
+  code.
+  Note: you can use this syntax in the implementation file:
+
+  foo.h:
+    struct Foo {
+        Foo();
+    };
+
+  foo.cpp:
+    Foo::Foo() = default;
+
+7. Class member initializers
+
+  Use member initializers instead of a standalone constructor if that's the
+  only thing it is needed for, or if there are many constructors all requiring
+  the same member values
+
+   class Meow {
+   public:
+       Meow() = default;
+
+       Meow(int i) : i(i) {
+       }
+
+   private:
+       int i = 0;
+       int j = 2;
+       std::string meow = "meow";
+   };
+
+8. Strongly-typed enums
+
+  Prefer "enum class" over the old unscoped enums.
+  Note: for flags enum class is very inconvenient, one may fall back
+  to the old enumerations.
+
+9. static_assert
+
+  Use where possible over the runtime assert() calls
+
+10. Raw string literals
+
+  Use raw string literals for the things which otherwise look horrible
+
+    auto s = R"(text with lots of "bad" characters\xml\etc
+even
+ many
+  newlines)";
+
+11. STL updates
+
+  TEMPORARY: no C++11 STL features work on Mac with its default library
+  until we switch to libc++, STL is limited to C++03
+
+  DISABLED: Feel free to use all new features from the STL, but make sure they
+  DISABLED: actually compile and work on all platforms: Linux, Mac and Windows.
+  DISABLED: Take extra care with the Windows MinGW - it tends to lag for quite a lot
+  DISABLED: compare to others, e.g. std::thread is still unavaliable out of the box
+  DISABLED: Something may not compile, others could be implemented a little differently.
+  DISABLED: Do your due diligence before actually submitting the change.
+
+  DISABLED: Prefer STL implementations over a handwritten code, e.g. std::atomic,
+  DISABLED: std smart pointers, regexes, etc
+
+99. lambdas, noexcept, rvalue references, move semantics, perfect forwarding,
+    constexpr
+
+  Do not use the features listed here.
+
+  ...unless:
+    - You need to return a move-only type, e.g. std::unique_ptr<>. Use
+      std::move(var) for this case.
+
+MAX_INT. Other features not mentioned here
+
+  If there's some missing feature you need, just add it to the list and send a
+  code review to the team.
+
 [1] https://www.chromium.org/developers/coding-style
