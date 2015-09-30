@@ -136,6 +136,29 @@
     },
     {
       "key": {
+        "uuid": "1548969f_01004e0f",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 654,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-09-30T18:53:46Z",
+      "side": 1,
+      "message": "What\u0027s the status here wrt to cross-platform functionality?",
+      "range": {
+        "startLine": 654,
+        "startChar": 59,
+        "endLine": 654,
+        "endChar": 70
+      },
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "35703a18_44b44e07",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
