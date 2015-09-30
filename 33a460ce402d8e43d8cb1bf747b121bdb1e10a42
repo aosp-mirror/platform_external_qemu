@@ -177,6 +177,29 @@
       "revId": "33a460ce402d8e43d8cb1bf747b121bdb1e10a42",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15a33681_037feea3",
+        "filename": "android/update-check/VersionExtractor_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T04:22:53Z",
+      "side": 1,
+      "message": "Looks like raw strings didnt work in msvs2013\nplease confirm that mingw is happy with it.",
+      "range": {
+        "startLine": 28,
+        "startChar": 12,
+        "endLine": 28,
+        "endChar": 13
+      },
+      "revId": "33a460ce402d8e43d8cb1bf747b121bdb1e10a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
