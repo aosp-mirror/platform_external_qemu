@@ -1,0 +1,182 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ee86cdd4_72d53877",
+        "filename": "android/update-check/VersionExtractor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:47:53Z",
+      "side": 1,
+      "message": "Copyright notice here.",
+      "revId": "33a460ce402d8e43d8cb1bf747b121bdb1e10a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e2e2591_0603821b",
+        "filename": "android/update-check/VersionExtractor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:47:53Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 34,
+        "startChar": 24,
+        "endLine": 34,
+        "endChar": 25
+      },
+      "revId": "33a460ce402d8e43d8cb1bf747b121bdb1e10a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e4c398b_9dd5827a",
+        "filename": "android/update-check/VersionExtractor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:47:53Z",
+      "side": 1,
+      "message": "perhaps say name\u003d\"a\" to help with the code below as well.",
+      "range": {
+        "startLine": 76,
+        "startChar": 19,
+        "endLine": 76,
+        "endChar": 22
+      },
+      "revId": "33a460ce402d8e43d8cb1bf747b121bdb1e10a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e2e2591_c60c5a4b",
+        "filename": "android/update-check/VersionExtractor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:47:53Z",
+      "side": 1,
+      "message": "Please demystify this magic.",
+      "range": {
+        "startLine": 101,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 23
+      },
+      "revId": "33a460ce402d8e43d8cb1bf747b121bdb1e10a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce582944_d46cf2ff",
+        "filename": "android/update-check/VersionExtractor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:47:53Z",
+      "side": 1,
+      "message": "I was expecting xmlDocPtr here...",
+      "range": {
+        "startLine": 103,
+        "startChar": 21,
+        "endLine": 103,
+        "endChar": 27
+      },
+      "revId": "33a460ce402d8e43d8cb1bf747b121bdb1e10a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce582944_74a546a5",
+        "filename": "android/update-check/VersionExtractor.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:47:53Z",
+      "side": 1,
+      "message": "Copyright notice here.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "33a460ce402d8e43d8cb1bf747b121bdb1e10a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f86a1765_b93a4ba9",
+        "filename": "android/update-check/VersionExtractor.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:47:53Z",
+      "side": 1,
+      "message": "This is also a const function.\nAny reason that the interface doesn\u0027t require this to be const?",
+      "range": {
+        "startLine": 12,
+        "startChar": 74,
+        "endLine": 12,
+        "endChar": 75
+      },
+      "revId": "33a460ce402d8e43d8cb1bf747b121bdb1e10a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15197672_19076b5e",
+        "filename": "android/update-check/VersionExtractor.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:47:53Z",
+      "side": 1,
+      "message": "Is the jury out on std::string vs android::base::String?",
+      "range": {
+        "startLine": 12,
+        "startChar": 56,
+        "endLine": 12,
+        "endChar": 67
+      },
+      "revId": "33a460ce402d8e43d8cb1bf747b121bdb1e10a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
