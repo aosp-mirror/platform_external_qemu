@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0e5fa128_92bc4ea3",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:26:29Z",
+      "side": 1,
+      "message": "This is an unavoidable consequence.\nSince i\u0027m proposing breaking apart the definitions, this can\u0027t be a static const while containing a non-constexpr object.",
+      "range": {
+        "startLine": 273,
+        "startChar": 4,
+        "endLine": 273,
+        "endChar": 33
+      },
+      "revId": "aa73eaeda2a37b93256a6f42386e41864db2ad2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f86a1765_99d187ec",
+        "filename": "android/ui-emu-agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-09-30T01:26:29Z",
+      "side": 1,
+      "message": "Doesn\u0027t this header give warnings right now?\nThis is included as the first header in extended-window.cpp\n\nAll the structs down here are undefined. I\u0027d expect gcc warnings...",
+      "range": {
+        "startLine": 15,
+        "startChar": 9,
+        "endLine": 15,
+        "endChar": 44
+      },
+      "revId": "aa73eaeda2a37b93256a6f42386e41864db2ad2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
