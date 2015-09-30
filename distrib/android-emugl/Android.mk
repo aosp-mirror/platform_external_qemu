@@ -14,8 +14,8 @@ EMUGL_PATH := $(call my-dir)
 # See the definition of emugl-begin-module in common.mk
 #
 EMUGL_COMMON_INCLUDES := \
-    $(EMUGL_PATH)/host/include/libOpenglRender \
-    $(EMUGL_PATH)/shared
+	$(EMUGL_PATH)/host/include/libOpenglRender \
+	$(EMUGL_PATH)/shared
 
 EMUGL_COMMON_INCLUDES := $(EMUGL_PATH)/host/libs/Translator/include
 
@@ -75,6 +75,16 @@ include $(EMUGL_PATH)/host/tools/emugen/Android.mk
 
 include $(EMUGL_PATH)/shared/emugl/common/Android.mk
 include $(EMUGL_PATH)/shared/OpenglCodecCommon/Android.mk
+
+ifeq (true,$(EMULATOR_USE_ANGLE))
+# Alternative graphics translation (gt) implementation, stripped off
+# and adjust from the equivalent mod in the ARC project.
+# This gt acts as a thin wrapper + GLESv1-to-v2 translator
+# and forwards GLES calls to underlying GLES API (e.g. ANGLE)
+include $(EMUGL_PATH)/host/libs/graphics_translation/common/Android.mk
+include $(EMUGL_PATH)/host/libs/graphics_translation/gles/Android.mk
+# include $(EMUGL_PATH)/host/libs/graphics_translation/egl/Android.mk
+endif
 
 # Host static libraries
 include $(EMUGL_PATH)/host/libs/GLESv1_dec/Android.mk

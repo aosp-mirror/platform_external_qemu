@@ -282,6 +282,9 @@ find_program () {
 # Default value of --ui option.
 UI_DEFAULT=sdl2
 
+# Default value of --gt option.
+GT_DEFAULT=dgl
+
 # Parse options
 OPTION_DEBUG=no
 OPTION_IGNORE_AUDIO=no
@@ -291,6 +294,7 @@ OPTION_HELP=no
 OPTION_STRIP=no
 OPTION_MINGW=no
 OPTION_UI=
+OPTION_GT=
 OPTION_SDK_REV=
 
 GLES_SUPPORT=no
@@ -353,10 +357,16 @@ for opt do
   ;;
   --ui=qt) OPTION_UI=qt
   ;;
+  --gt=dgl) OPTION_GT=dgl
+  ;;
+  --gt=angle) OPTION_GT=angle
+  ;;
   --ui=*) echo "Unknown --ui value, try one of: sdl2 qt"
   ;;
+  --gt=*) echo "Unknown --gt value, try one of: dgl angle"
+  ;;
   --sdk-revision=*) ANDROID_SDK_TOOLS_REVISION=$optarg
-  ;;    
+  ;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -379,6 +389,8 @@ EOF
     echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --ui=sdl2                   Use SDL2-based UI backend (default)."
     echo "  --ui=qt                     Use Qt-based UI backend."
+    echo "  --gt=dgl                    Build the OpenGLES to Desktop OpenGL Translator (default)"
+    echo "  --gt=angle                  Build the OpenGLES to ANGLE wrapper"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
     echo "  --mingw                     Build Windows executable on Linux"
@@ -405,6 +417,11 @@ fi
 if [ -z "$OPTION_UI" ]; then
     OPTION_UI=$UI_DEFAULT
     log "Auto-config: --ui=$OPTION_UI"
+fi
+
+if [ -z "$OPTION_GT" ]; then
+    OPTION_GT=$GT_DEFAULT
+    log "Auto-config: --gt=$OPTION_GT"
 fi
 
 if [ "$OPTION_OUT_DIR" ]; then
@@ -744,6 +761,11 @@ if [ "$QT_PREBUILTS_DIR" ]; then
 else
     echo "EMULATOR_USE_SDL2 := true" >> $config_mk
     echo "EMULATOR_USE_QT   := false" >> $config_mk
+fi
+if [ "$OPTION_GT" = "angle" ] ; then
+    echo "EMULATOR_USE_ANGLE := true" >> $config_mk
+else
+    echo "EMULATOR_USE_ANGLE := false" >> $config_mk
 fi
 
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
