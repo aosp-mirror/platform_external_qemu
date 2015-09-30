@@ -21,6 +21,8 @@
  *
  */
 
+#include "android/console.h"
+
 #include "android/android.h"
 #include "android/display-core.h"
 #include "android/gps.h"
@@ -42,17 +44,13 @@
 #include "android/utils/utf8_utils.h"
 
 #include "config-host.h"
-#include "cpu.h"
 #include "hw/android/goldfish/device.h"
 #include "hw/power_supply.h"
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"
 #endif
-#include "monitor/monitor.h"
 #include "net/net.h"
 #include "telephony/modem_driver.h"
-#include "sysemu/char.h"
-#include "sysemu/sysemu.h"
 
 #include <fcntl.h>
 #include <stdarg.h>
@@ -105,6 +103,9 @@ typedef struct ControlClientRec_
 
 typedef struct ControlGlobalRec_
 {
+    // Interfaces to call into QEMU specific code.
+    QAndroidVmOperations* vm_operations;
+
     /* listening socket */
     Socket    listen_fd;
 
@@ -117,6 +118,10 @@ typedef struct ControlGlobalRec_
     int       max_redirs;
 
 } ControlGlobalRec;
+
+static inline QAndroidVmOperations* vmopers(ControlClient client) {
+    return client->global->vm_operations;
+}
 
 static int
 control_global_add_redir( ControlGlobal  global,
@@ -578,16 +583,18 @@ control_global_accept( void*  _global )
     }
 }
 
-
-static int
-control_global_init( ControlGlobal  global,
-                     int            control_port )
-{
+static int control_global_init(ControlGlobal global,
+                               int control_port,
+                               const QAndroidVmOperations* vm_operations) {
     Socket  fd;
     int     ret;
     SockAddress  sockaddr;
 
     memset( global, 0, sizeof(*global) );
+    // Copy the QEMU specific interfaces passed in to make lifetime management
+    // simpler.
+    global->vm_operations = malloc(sizeof(*vm_operations));
+    *(global->vm_operations) =  *vm_operations;
 
     fd = socket_create_inet( SOCKET_STREAM );
     if (fd < 0) {
@@ -2014,17 +2021,13 @@ static const CommandDefRec  event_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 
-static int
-control_write_out_cb(void* opaque, const char* str, int strsize)
-{
+static int control_write_out_cb(void* opaque, const char* str, int strsize) {
     ControlClient client = opaque;
     control_control_write(client, str, strsize);
     return strsize;
 }
 
-static int
-control_write_err_cb(void* opaque, const char* str, int strsize)
-{
+static int control_write_err_cb(void* opaque, const char* str, int strsize) {
     int ret = 0;
     ControlClient client = opaque;
     ret += control_write(client, "KO: ");
@@ -2032,72 +2035,49 @@ control_write_err_cb(void* opaque, const char* str, int strsize)
     return ret + strsize;
 }
 
-static int
-do_snapshot_list( ControlClient  client, char*  args )
-{
-    int64_t ret;
-    Monitor *out = monitor_fake_new(client, control_write_out_cb);
-    Monitor *err = monitor_fake_new(client, control_write_err_cb);
-    do_info_snapshots(out, err);
-    ret = monitor_fake_get_bytes(err);
-    monitor_fake_free(err);
-    monitor_fake_free(out);
-
-    return ret > 0;
+static int do_snapshot_list(ControlClient client, char* args) {
+    bool success = vmopers(client)->snapshotList(client, control_write_out_cb,
+                                                 control_write_err_cb);
+    return success ? 0 : -1;
 }
 
-static int
-do_snapshot_save( ControlClient  client, char*  args )
-{
-    int64_t ret;
-
+static int do_snapshot_save(ControlClient client, char* args) {
     if (args == NULL) {
-        control_write(client, "KO: argument missing, try 'avd snapshot save <name>'\r\n");
+        control_write(
+                client,
+                "KO: Argument missing, try 'avd snapshot save <name>'\r\n");
         return -1;
     }
 
-    Monitor *err = monitor_fake_new(client, control_write_err_cb);
-    do_savevm(err, args);
-    ret = monitor_fake_get_bytes(err);
-    monitor_fake_free(err);
-
-    return ret > 0; // no output on error channel indicates success
+    bool success =
+            vmopers(client)->snapshotSave(args, client, control_write_out_cb);
+    return success ? 0 : -1;
 }
 
-static int
-do_snapshot_load( ControlClient  client, char*  args )
-{
-    int64_t ret;
-
+static int do_snapshot_load(ControlClient client, char* args) {
     if (args == NULL) {
-        control_write(client, "KO: argument missing, try 'avd snapshot load <name>'\r\n");
+        control_write(
+                client,
+                "KO: Argument missing, try 'avd snapshot load <name>'\r\n");
         return -1;
     }
 
-    Monitor *err = monitor_fake_new(client, control_write_err_cb);
-    do_loadvm(err, args);
-    ret = monitor_fake_get_bytes(err);
-    monitor_fake_free(err);
-
-    return ret > 0;
+    bool success =
+            vmopers(client)->snapshotLoad(args, client, control_write_out_cb);
+    return success ? 0 : -1;
 }
 
-static int
-do_snapshot_del( ControlClient  client, char*  args )
-{
-    int64_t ret;
-
+static int do_snapshot_del(ControlClient client, char* args) {
     if (args == NULL) {
-        control_write(client, "KO: argument missing, try 'avd snapshot del <name>'\r\n");
+        control_write(
+                client,
+                "KO: Argument missing, try 'avd snapshot list <name>'\r\n");
         return -1;
     }
 
-    Monitor *err = monitor_fake_new(client, control_write_err_cb);
-    do_delvm(err, args);
-    ret = monitor_fake_get_bytes(err);
-    monitor_fake_free(err);
-
-    return ret > 0;
+    bool success =
+            vmopers(client)->snapshotDelete(args, client, control_write_out_cb);
+    return success ? 0 : -1;
 }
 
 static const CommandDefRec  snapshot_commands[] =
@@ -2134,29 +2114,28 @@ static const CommandDefRec  snapshot_commands[] =
 static int
 do_avd_stop( ControlClient  client, char*  args )
 {
-    if (!vm_running) {
+    if (!(vmopers(client)->vmIsRunning())) {
         control_write( client, "KO: virtual device already stopped\r\n" );
         return -1;
     }
-    vm_stop(EXCP_INTERRUPT);
-    return 0;
+    return vmopers(client)->vmStop() ? 0 : -1;
 }
 
 static int
 do_avd_start( ControlClient  client, char*  args )
 {
-    if (vm_running) {
+    if (vmopers(client)->vmIsRunning()) {
         control_write( client, "KO: virtual device already running\r\n" );
         return -1;
     }
-    vm_start();
-    return 0;
+    return vmopers(client)->vmStart() ? 0 : -1;
 }
 
 static int
 do_avd_status( ControlClient  client, char*  args )
 {
-    control_write( client, "virtual device is %s\r\n", vm_running ? "running" : "stopped" );
+    control_write(client, "virtual device is %s\r\n",
+                  vmopers(client)->vmIsRunning() ? "running" : "stopped");
     return 0;
 }
 
@@ -2698,8 +2677,6 @@ static const CommandDefRec   main_commands[] =
 
 static ControlGlobalRec  _g_global;
 
-int
-control_console_start( int  port )
-{
-    return control_global_init( &_g_global, port );
+int control_console_start(int port, const QAndroidVmOperations* vm_operations) {
+    return control_global_init(&_g_global, port, vm_operations);
 }
