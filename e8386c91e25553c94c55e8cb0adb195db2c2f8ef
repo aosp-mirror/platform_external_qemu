@@ -83,6 +83,24 @@
     },
     {
       "key": {
+        "uuid": "d55b5e6b_6db93dfc",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 560,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-09-30T22:23:14Z",
+      "side": 1,
+      "message": "I personally understand the lambda example and I support allowing one-line lambdas. However, I agree that we should not make any team members uncomfortable reading and changing the code base because of certain language features. Therefore, I\u0027m fine if lambda is not among the first set of C++11 features that are allowed, but if that\u0027s the case, we should take action so that we can allow one-line lambdas in near future.",
+      "parentUuid": "f5586271_1a727d1c",
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "156b3632_23af4ab3",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
