@@ -65,6 +65,24 @@
     },
     {
       "key": {
+        "uuid": "f5586271_1a727d1c",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 560,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-30T16:05:26Z",
+      "side": 1,
+      "message": "I\u0027m calling for the team opinions here\nDo you understand the example? What about allowing only one-liners for lambdas?",
+      "parentUuid": "75763214_46b45207",
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "156b3632_23af4ab3",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -82,6 +100,24 @@
     },
     {
       "key": {
+        "uuid": "1548969f_5e07d15c",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-30T16:05:26Z",
+      "side": 1,
+      "message": "I think I need to expand it. using is just more powerful: it allows templated aliases, it provides much better syntax for complicated types, like functions, it\u0027s just easier to parse because of the \u0027\u003d\u0027 in the middle",
+      "parentUuid": "156b3632_23af4ab3",
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "35703a18_44b44e07",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 1
@@ -93,6 +129,24 @@
       "writtenOn": "2015-09-30T06:53:01Z",
       "side": 1,
       "message": "Let\u0027s keep it simple for now, just \"do not use these features\". Anything else is an invitation for chaos for now :)",
+      "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15a33681_a33b7a88",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 661,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-30T16:05:26Z",
+      "side": 1,
+      "message": "Ok :(\nAnyway, there are places where one has to use it: e.g. std::move() for unique_ptr. But let it be case-by-case decision on the review",
+      "parentUuid": "35703a18_44b44e07",
       "revId": "e8386c91e25553c94c55e8cb0adb195db2c2f8ef",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
