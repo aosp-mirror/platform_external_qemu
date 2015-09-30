@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "953c86f3_1319bc85",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 4
+      },
+      "lineNbr": 550,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-30T23:16:14Z",
+      "side": 1,
+      "message": "ok, I will give a talk on C++11 soon where I will cover it.\nAnyway, lambdas are just a convenience feature, like auto/foreach/etc, there\u0027s no use case specifically for them",
+      "parentUuid": "1548969f_04adfccb",
+      "revId": "d49fbedacc756eafe978023e52c98993d0526683",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "953c86f3_b3e8d0dd",
         "filename": "docs/ANDROID-CODING-STYLE.TXT",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-30T22:55:41Z",
       "side": 1,
       "message": "Okay if they are supported by MSVC2015",
+      "revId": "d49fbedacc756eafe978023e52c98993d0526683",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b5398a03_a9ba25ed",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 4
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-09-30T23:16:14Z",
+      "side": 1,
+      "message": "they are",
+      "parentUuid": "953c86f3_b3e8d0dd",
       "revId": "d49fbedacc756eafe978023e52c98993d0526683",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
