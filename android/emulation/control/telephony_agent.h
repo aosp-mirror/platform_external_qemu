@@ -34,8 +34,8 @@ typedef enum {
     Tel_Resp_Action_Failed   // Internal error
 } TelephonyResponse;
 
-typedef struct TelephonyAgent {
+typedef struct QAndroidTelephonyAgent {
     TelephonyResponse (*telephonyCmd)(TelephonyOperation op, const char *phoneNumber);
-} TelephonyAgent;
+} QAndroidTelephonyAgent;
 
 ANDROID_END_HEADER
