@@ -13,7 +13,7 @@ commonSources := \
 
 host_commonSources := $(commonSources)
 
-host_commonLdLibs := -lstdc++
+host_commonLdLibs := $(CXX_STD_LIB)
 
 ifeq ($(HOST_OS),windows)
     host_commonSources += Win32PipeStream.cpp

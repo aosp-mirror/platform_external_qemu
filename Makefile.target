@@ -334,7 +334,7 @@ common_LOCAL_CFLAGS    += $(HW_OBJ_CFLAGS)
 common_LOCAL_SRC_FILES += $(BLOCK_SOURCES)
 common_LOCAL_CFLAGS    += $(BLOCK_CFLAGS)
 
-common_LOCAL_LDLIBS += -lstdc++
+common_LOCAL_LDLIBS += $(CXX_STD_LIB)
 
 ## one for 32-bit
 $(call start-emulator-program, emulator-$(EMULATOR_TARGET_ARCH))

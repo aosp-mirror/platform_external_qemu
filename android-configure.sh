@@ -300,6 +300,9 @@ PCBIOS_PROBE=yes
 HOST_CC=${CC:-gcc}
 OPTION_CC=
 
+HOST_CXX=${CXX:-g++}
+OPTION_CXX=
+
 AOSP_PREBUILTS_DIR=$(dirname "$0")/../../prebuilts
 if [ -d "$AOSP_PREBUILTS_DIR" ]; then
     AOSP_PREBUILTS_DIR=$(cd "$AOSP_PREBUILTS_DIR" && pwd -P 2>/dev/null)
@@ -333,6 +336,8 @@ for opt do
   --mingw) OPTION_MINGW=yes
   ;;
   --cc=*) OPTION_CC="$optarg"
+  ;;
+  --cxx=*) OPTION_CXX="$optarg"
   ;;
   --strip) OPTION_STRIP=yes
   ;;
@@ -374,6 +379,7 @@ EOF
     echo "Standard options:"
     echo "  --help                      Print this message"
     echo "  --cc=PATH                   Specify C compiler [$HOST_CC]"
+    echo "  --cxx=PATH                  Specify C++ compiler [$HOST_CXX]"
     echo "  --strip                     Strip emulator executables."
     echo "  --no-strip                  Do not strip emulator executables (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
@@ -436,9 +442,9 @@ fi
 
 # Use gen-android-sdk-toolchain.sh to generate a toolchain that will
 # build binaries compatible with the SDK deployement systems.
-if [ -z "$OPTION_CC" ] ; then
+if [ -z "$OPTION_CC" -a -z "$OPTION_CXX" ] ; then
     GEN_SDK=$PROGDIR/android/scripts/gen-android-sdk-toolchain.sh
-    GEN_SDK_FLAGS=
+    GEN_SDK_FLAGS=--cxx11
     if [ "$CCACHE" ]; then
         GEN_SDK_FLAGS="$GEN_SDK_FLAGS --ccache=$CCACHE"
     else
@@ -448,6 +454,7 @@ if [ -z "$OPTION_CC" ] ; then
     $GEN_SDK $GEN_SDK_FLAGS $OUT_DIR/toolchain || panic "Cannot generate SDK toolchain!"
     BINPREFIX=$($GEN_SDK $GEN_SDK_FLAGS --print=binprefix $OUT_DIR/toolchain)
     CC="$OUT_DIR/toolchain/${BINPREFIX}gcc"
+    CXX="$OUT_DIR/toolchain/${BINPREFIX}g++"
     AR="$OUT_DIR/toolchain/${BINPREFIX}ar"
     LD=$CC
 fi
@@ -457,8 +464,17 @@ if [ -n "$OPTION_CC" ]; then
     CC="$OPTION_CC"
 fi
 
+if [ -n "$OPTION_CXX" ]; then
+    echo "Using specified C++ compiler: $OPTION_CXX"
+    CC="$OPTION_CXX"
+fi
+
 if [ -z "$CC" ]; then
   CC=$HOST_CC
+fi
+
+if [ -z "$CXX" ]; then
+  CXX=$HOST_CXX
 fi
 
 # By default, generate 32-bit binaries, the Makefile have targets that
@@ -469,7 +485,7 @@ setup_toolchain
 
 BUILD_AR=$AR
 BUILD_CC=$CC
-BUILD_CXX=$CC
+BUILD_CXX=$CXX
 BUILD_LD=$LD
 BUILD_CFLAGS=$CFLAGS
 BUILD_CXXFLAGS=$CXXFLAGS
