@@ -33,7 +33,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "qemu/bswap.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/system.h"
@@ -57,6 +56,44 @@ read_or_die(int fd, void *buf, size_t nbyte)
         exit(1);
     }
     return ret;
+}
+
+static inline uint16_t bswap16(uint16_t x)
+{
+    return (((x & 0x00ff) << 8) |
+            ((x & 0xff00) >> 8));
+}
+
+static inline uint32_t bswap32(uint32_t x)
+{
+    return (((x & 0x000000ffU) << 24) |
+            ((x & 0x0000ff00U) <<  8) |
+            ((x & 0x00ff0000U) >>  8) |
+            ((x & 0xff000000U) >> 24));
+}
+
+static inline uint64_t bswap64(uint64_t x)
+{
+    return (((x & 0x00000000000000ffULL) << 56) |
+            ((x & 0x000000000000ff00ULL) << 40) |
+            ((x & 0x0000000000ff0000ULL) << 24) |
+            ((x & 0x00000000ff000000ULL) <<  8) |
+            ((x & 0x000000ff00000000ULL) >>  8) |
+            ((x & 0x0000ff0000000000ULL) >> 24) |
+            ((x & 0x00ff000000000000ULL) >> 40) |
+            ((x & 0xff00000000000000ULL) >> 56));
+}
+
+static void be16_to_cpus(uint16_t* p) {
+    *p = bswap16(*p);
+}
+
+static void be32_to_cpus(uint32_t* p) {
+    *p = bswap32(*p);
+}
+
+static void be64_to_cpus(uint64_t* p) {
+    *p = bswap64(*p);
 }
 
 /* Wrapper around lseek(), exit()s on error.

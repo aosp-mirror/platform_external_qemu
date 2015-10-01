@@ -51,5 +51,4 @@
 
 #if SUPPORT_LEGACY_QEMUD
 #include "android/telephony/modem.h"
-#include "telephony/modem_driver.h"
 #endif

@@ -134,7 +134,7 @@ To achieve this, a series of programming techniques will be used, for example
       android/base/async/Looper.h
       android/base/async/Looper.cpp
       android/base/async/ThreadLooper.h
-      android/qemu/base/async/Looper.cpp
+      android-qemu1-glue/base/async/Looper.cpp
 
     Technically, only the last source file is part of the QEMU1-specific glue.
 
@@ -192,7 +192,7 @@ the following groups :
         To build it, one must use the --ui=qt flag when calling
         android-configure.sh, android-rebuild.sh or package-release.sh
 
-  android/emulator-window.c:
+  android-qemu1-glue/emulator-window.c:
         The main glue code between the generic skin UI code and the QEMU1
         specific portions of the emulator. Provides appropriate callbacks.
 

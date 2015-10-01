@@ -12,13 +12,9 @@
 
 #pragma once
 
-#include "qemu-common.h"
+#include <sys/time.h>
 
-/* this is the internal character driver used to communicate with the
- * emulated GPS unit. see qemu_chr_open() in vl.c */
-extern CharDriverState*  android_gps_cs;
-
-extern void  android_gps_send_nmea( const char*  sentence );
+extern void  android_gps_send_nmea(const char*  sentence);
 
 // Send a GPS location to the AVD using an NMEA sentence
 //

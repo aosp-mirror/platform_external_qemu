@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/looper-qemu.h"
-#include "android/qemu/base/async/Looper.h"
+#include "android-qemu1-glue/base/async/Looper.h"
 #include "android/utils/looper.h"
 
 typedef ::Looper CLooper;

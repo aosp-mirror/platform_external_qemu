@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/qemu/utils/stream.h"
+#include "android-qemu1-glue/utils/stream.h"
 #include "android/utils/panic.h"
 #include "android/utils/stream.h"
 #include "android/utils/system.h"
