@@ -60,7 +60,6 @@ EMULATOR_USE_QT := $(strip $(filter true,$(EMULATOR_USE_QT)))
 common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
 
-GLOBAL_CXXFLAGS := -std=c++11 -Werror=c++11-compat
 EMULATOR_COMMON_CFLAGS := -Werror=implicit-function-declaration
 
 # Needed by everything about the host
@@ -89,6 +88,12 @@ ifeq (true,$(BUILD_DEBUG_EMULATOR))
     EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=1
 else
     EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=0
+endif
+
+ifeq ($(HOST_OS),darwin)
+    CXX_STD_LIB := -lc++
+else
+    CXX_STD_LIB := -lstdc++
 endif
 
 ###########################################################

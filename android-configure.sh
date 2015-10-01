@@ -301,6 +301,9 @@ PCBIOS_PROBE=yes
 HOST_CC=${CC:-gcc}
 OPTION_CC=
 
+HOST_CXX=${CXX:-g++}
+OPTION_CXX=
+
 AOSP_PREBUILTS_DIR=$(dirname "$0")/../../prebuilts
 if [ -d "$AOSP_PREBUILTS_DIR" ]; then
     AOSP_PREBUILTS_DIR=$(cd "$AOSP_PREBUILTS_DIR" && pwd -P 2>/dev/null)
@@ -334,6 +337,8 @@ for opt do
   --mingw) OPTION_MINGW=yes
   ;;
   --cc=*) OPTION_CC="$optarg"
+  ;;
+  --cxx=*) OPTION_CXX="$optarg"
   ;;
   --strip) OPTION_STRIP=yes
   ;;
@@ -375,6 +380,7 @@ EOF
     echo "Standard options:"
     echo "  --help                      Print this message"
     echo "  --cc=PATH                   Specify C compiler [$HOST_CC]"
+    echo "  --cxx=PATH                  Specify C++ compiler [$HOST_CXX]"
     echo "  --strip                     Strip emulator executables."
     echo "  --no-strip                  Do not strip emulator executables (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
@@ -437,9 +443,9 @@ fi
 
 # Use gen-android-sdk-toolchain.sh to generate a toolchain that will
 # build binaries compatible with the SDK deployement systems.
-if [ -z "$OPTION_CC" ] ; then
+if [ -z "$OPTION_CC" -a -z "$OPTION_CXX" ] ; then
     GEN_SDK=$PROGDIR/android/scripts/gen-android-sdk-toolchain.sh
-    GEN_SDK_FLAGS=
+    GEN_SDK_FLAGS=--cxx11
     if [ "$CCACHE" ]; then
         GEN_SDK_FLAGS="$GEN_SDK_FLAGS --ccache=$CCACHE"
     else
@@ -449,6 +455,7 @@ if [ -z "$OPTION_CC" ] ; then
     $GEN_SDK $GEN_SDK_FLAGS $OUT_DIR/toolchain || panic "Cannot generate SDK toolchain!"
     BINPREFIX=$($GEN_SDK $GEN_SDK_FLAGS --print=binprefix $OUT_DIR/toolchain)
     CC="$OUT_DIR/toolchain/${BINPREFIX}gcc"
+    CXX="$OUT_DIR/toolchain/${BINPREFIX}g++"
     AR="$OUT_DIR/toolchain/${BINPREFIX}ar"
     LD=$CC
 fi
@@ -458,8 +465,17 @@ if [ -n "$OPTION_CC" ]; then
     CC="$OPTION_CC"
 fi
 
+if [ -n "$OPTION_CXX" ]; then
+    echo "Using specified C++ compiler: $OPTION_CXX"
+    CC="$OPTION_CXX"
+fi
+
 if [ -z "$CC" ]; then
   CC=$HOST_CC
+fi
+
+if [ -z "$CXX" ]; then
+  CXX=$HOST_CXX
 fi
 
 # By default, generate 32-bit binaries, the Makefile have targets that
@@ -470,7 +486,7 @@ setup_toolchain
 
 BUILD_AR=$AR
 BUILD_CC=$CC
-BUILD_CXX=$CC
+BUILD_CXX=$CXX
 BUILD_LD=$LD
 BUILD_CFLAGS=$CFLAGS
 BUILD_CXXFLAGS=$CXXFLAGS
@@ -487,14 +503,17 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     log "Mingw      : Looking for prebuilt mingw64 toolchain."
     MINGW_DIR=$PROGDIR/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8
     MINGW_CC=
+    MINGW_CXX=
     if [ -d "$MINGW_DIR" ]; then
         MINGW_PREFIX=$MINGW_DIR/bin/x86_64-w64-mingw32
         find_program MINGW_CC "$MINGW_PREFIX-gcc"
+        find_program MINGW_CXX "$MINGW_PREFIX-g++"
     fi
     if [ -z "$MINGW_CC" ]; then
         log "Mingw      : Looking for mingw64 toolchain."
         MINGW_PREFIX=x86_64-w64-mingw32
         find_program MINGW_CC $MINGW_PREFIX-gcc
+        find_program MINGW_CXX $MINGW_PREFIX-g++
     fi
     if [ -z "$MINGW_CC" ]; then
         echo "ERROR: It looks like no Mingw64 toolchain is available!"
@@ -503,9 +522,12 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     fi
     log2 "Mingw      : Found $MINGW_CC"
     CC=$MINGW_CC
+    CXX=$MINGW_CXX
     if [ "$CCACHE" ]; then
         CC="$CCACHE $CC"
+        CXX="$CCACHE $CXX"
     fi
+    CXX="$CXX -std=c++11 -Werror=c++11-compat"
     LD=$MINGW_CC
     WINDRES=$MINGW_PREFIX-windres
     AR=$MINGW_PREFIX-ar

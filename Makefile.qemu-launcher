@@ -30,7 +30,7 @@ qemu_launcher_CFLAGS := \
     -D$(TARGET_VARNAME_$(EMULATOR_TARGET_CPU))=1 \
     -I$(OBJS_DIR)
 
-qemu_launcher_LDLIBS := -lstdc++
+qemu_launcher_LDLIBS := $(CXX_STD_LIB)
 
 $(call start-emulator-program, emulator-ranchu-$(EMULATOR_TARGET_CPU))
 LOCAL_SRC_FILES := $(qemu_launcher_SOURCES)
