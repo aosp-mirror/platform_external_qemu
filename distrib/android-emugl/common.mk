@@ -41,7 +41,7 @@ emugl-begin-module = \
     $(eval LOCAL_IS_HOST_MODULE := $(if $3,true,))\
     $(eval LOCAL_C_INCLUDES += $(EMUGL_COMMON_INCLUDES)) \
     $(eval LOCAL_CFLAGS += $(EMUGL_COMMON_CFLAGS)) \
-    $(eval LOCAL_LDLIBS += -lstdc++) \
+    $(eval LOCAL_LDLIBS += $(CXX_STD_LIB)) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_$2)) \
     $(eval LOCAL_MODULE_BITS := 32) \
     $(call _emugl-init-module,$1,$2,$3)

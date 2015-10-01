@@ -17,7 +17,7 @@ commonSources := \
 
 host_commonSources := $(commonSources)
 
-host_commonLdLibs := -lstdc++
+host_commonLdLibs := $(CXX_STD_LIB)
 
 ifneq (windows,$(HOST_OS))
     host_commonSources += \
