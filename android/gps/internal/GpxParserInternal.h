@@ -27,7 +27,7 @@ public:
      *
      * Returns true on success, false otherwise.
      */
-    static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result);
+    static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, std::string *error);
 
     /* Parses |doc| according to the GPX format, storing the GpsFixes in the input array |fixes|.
      *
