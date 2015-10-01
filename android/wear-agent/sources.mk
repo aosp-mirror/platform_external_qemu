@@ -34,12 +34,12 @@ $(call start-emulator-program, wear-agent)
 LOCAL_SRC_FILES := $(WEAR_AGENT_SOURCES)
 LOCAL_C_INCLUDES := $(LIBWEAR_AGENT_INCLUDES)
 LOCAL_STATIC_LIBRARIES := $(WEAR_AGENT_LIBS32)
-LOCAL_LDLIBS += -lstdc++
+LOCAL_LDLIBS += $(CXX_STD_LIB)
 $(call end-emulator-program)
 
 $(call start-emulator64-program, wear-agent64)
 LOCAL_SRC_FILES := $(WEAR_AGENT_SOURCES)
 LOCAL_C_INCLUDES := $(LIBWEAR_AGENT_INCLUDES)
 LOCAL_STATIC_LIBRARIES := $(WEAR_AGENT_LIBS64)
-LOCAL_LDLIBS += -lstdc++
+LOCAL_LDLIBS += $(CXX_STD_LIB)
 $(call end-emulator-program)
