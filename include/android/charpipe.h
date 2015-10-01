@@ -9,10 +9,12 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _CHARPIPE_H
-#define _CHARPIPE_H
+#pragma once
 
 #include "qemu-common.h"
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /* open two connected character drivers that can be used to communicate by internal
  * QEMU components. For Android, this is used to connect an emulated serial port
@@ -30,4 +32,4 @@ extern CharDriverState*  qemu_chr_open_buffer( CharDriverState*  endpoint );
 /* must be called from the main event loop to poll all charpipes */
 extern void charpipe_poll( void );
 
-#endif /* _CHARPIPE_H */
+ANDROID_END_HEADER

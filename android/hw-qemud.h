@@ -22,7 +22,17 @@ ANDROID_BEGIN_HEADER
 /* return the character driver state object that needs to be connected to the
  * emulated serial port where all multiplexed channels go through.
  */
-extern CharDriverState*  android_qemud_get_cs( void );
+extern CharDriverState* android_qemud_get_cs(void);
+
+/* Register a new qemud service.
+ * 'serv_opaque' is the first parameter to 'serv_connect'
+ */
+extern QemudService* qemud_service_register(const char* serviceName,
+                                            int max_clients,
+                                            void* serv_opaque,
+                                            QemudServiceConnect serv_connect,
+                                            QemudServiceSave serv_save,
+                                            QemudServiceLoad serv_load);
 
 /* returns in '*pcs' a CharDriverState object that will be connected to
  * a single client in the emulated system for a given named service.
@@ -33,7 +43,7 @@ extern CharDriverState*  android_qemud_get_cs( void );
  *
  * returns 0 on success, or -1 in case of error
  */
-extern int  android_qemud_get_channel( const char*  name, CharDriverState* *pcs );
+extern int android_qemud_get_channel(const char* name, CharDriverState** pcs);
 
 /* set an explicit CharDriverState object for a given qemud communication channel. this
  * is used to attach the channel to an external char driver device (e.g. one
@@ -41,7 +51,7 @@ extern int  android_qemud_get_channel( const char*  name, CharDriverState* *pcs 
  *
  * returns 0 on success, -1 on error
  */
-extern int  android_qemud_set_channel( const char*  name, CharDriverState*  peer_cs );
+extern int android_qemud_set_channel(const char* name, CharDriverState* peer_cs);
 
 /* list of known qemud channel names */
 #define  ANDROID_QEMUD_GSM      "gsm"
