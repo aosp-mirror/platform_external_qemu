@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "15a33681_b86f1deb",
+        "filename": "android/skin/qt/ext-sms.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-01T22:25:03Z",
+      "side": 1,
+      "message": "Remove this?",
+      "revId": "600c7405f1e38cdeabe28132b57625c9cfc91283",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
