@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "75439281_f857d168",
+        "filename": "android/skin/qt/ext-sms.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-01T19:16:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9555663b_cbfcb5de",
+      "range": {
+        "startLine": 43,
+        "startChar": 41,
+        "endLine": 43,
+        "endChar": 50
+      },
+      "revId": "d384bed5758e5ebf177c9eb5e086c53d490990e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9555663b_514e94b3",
         "filename": "android/skin/qt/extended.ui",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2015-10-01T16:48:58Z",
       "side": 1,
       "message": "It would be best to add the border around this box in this change rather than another (see the mocks, slide 9).",
+      "revId": "d384bed5758e5ebf177c9eb5e086c53d490990e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "953c86f3_94313221",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 1199,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-01T19:16:48Z",
+      "side": 1,
+      "message": "I\u0027m talking with J and Gerard about this.\nI think this widget looks better with the box around it, but we don\u0027t have boxes around any other widgets.\nSo I\u0027ll leave it until I get a final call.",
+      "parentUuid": "9555663b_514e94b3",
       "revId": "d384bed5758e5ebf177c9eb5e086c53d490990e6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
