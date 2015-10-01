@@ -2023,19 +2023,23 @@ static const CommandDefRec  event_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 
-static int do_snapshot_list(ControlClient client, char* args) {
-    char* outMessage = NULL;
-    char* errMessage = NULL;
-    bool success = vmopers(client)->snapshotList(&outMessage, &errMessage);
+static int control_write_out_cb(void* opaque, const char* str, int strsize) {
+    ControlClient client = opaque;
+    control_control_write(client, str, strsize);
+    return strsize;
+}
 
-    if (outMessage) {
-        control_control_write(client, outMessage, strlen(outMessage));
-        free(outMessage);
-    }
-    if (errMessage) {
-        control_control_write(client, errMessage, strlen(errMessage));
-        free(errMessage);
-    }
+static int control_write_err_cb(void* opaque, const char* str, int strsize) {
+    int ret = 0;
+    ControlClient client = opaque;
+    ret += control_write(client, "KO: ");
+    control_control_write(client, str, strsize);
+    return ret + strsize;
+}
+
+static int do_snapshot_list(ControlClient client, char* args) {
+    bool success = vmopers(client)->snapshotList(client, control_write_out_cb,
+                                                 control_write_err_cb);
     return success ? 0 : -1;
 }
 
@@ -2047,12 +2051,8 @@ static int do_snapshot_save(ControlClient client, char* args) {
         return -1;
     }
 
-    char* errMessage = NULL;
-    bool success = vmopers(client)->snapshotSave(args, &errMessage);
-    if (errMessage) {
-        control_control_write(client, errMessage, strlen(errMessage));
-        free(errMessage);
-    }
+    bool success =
+            vmopers(client)->snapshotSave(args, client, control_write_out_cb);
     return success ? 0 : -1;
 }
 
@@ -2064,12 +2064,8 @@ static int do_snapshot_load(ControlClient client, char* args) {
         return -1;
     }
 
-    char* errMessage = NULL;
-    bool success = vmopers(client)->snapshotLoad(args, &errMessage);
-    if (errMessage) {
-        control_control_write(client, errMessage, strlen(errMessage));
-        free(errMessage);
-    }
+    bool success =
+            vmopers(client)->snapshotLoad(args, client, control_write_out_cb);
     return success ? 0 : -1;
 }
 
@@ -2081,12 +2077,8 @@ static int do_snapshot_del(ControlClient client, char* args) {
         return -1;
     }
 
-    char* errMessage = NULL;
-    bool success = vmopers(client)->snapshotDelete(args, &errMessage);
-    if (errMessage) {
-        control_control_write(client, errMessage, strlen(errMessage));
-        free(errMessage);
-    }
+    bool success =
+            vmopers(client)->snapshotDelete(args, client, control_write_out_cb);
     return success ? 0 : -1;
 }
 
