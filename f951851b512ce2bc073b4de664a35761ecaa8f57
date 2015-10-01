@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b5398a03_b47558c2",
+        "filename": "android/emulation/control/callbacks.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-01T06:46:28Z",
+      "side": 1,
+      "message": "Should be LineConsumerCallback",
+      "range": {
+        "startLine": 25,
+        "startChar": 14,
+        "endLine": 25,
+        "endChar": 34
+      },
+      "revId": "f951851b512ce2bc073b4de664a35761ecaa8f57",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
