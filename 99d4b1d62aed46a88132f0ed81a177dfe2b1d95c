@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "156b3632_a3bc1a3c",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-01T11:09:45Z",
+      "side": 1,
+      "message": "nit: This header file should be called LineConsumer.h to match the class definition.",
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "55712e1a_85b2c22f",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-01T11:09:45Z",
+      "side": 1,
+      "message": "nit: space before \u003c here, please.",
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "156b3632_83bf1e30",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-01T11:09:45Z",
+      "side": 1,
+      "message": "nit: indentation is a bit off, please use git clang-format",
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b57c2af2_686683ae",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-01T11:09:45Z",
+      "side": 1,
+      "message": "shouldn\u0027t this return a const reference instead?",
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b57c2af2_4861bf93",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-01T11:09:45Z",
+      "side": 1,
+      "message": "nit: per the Google/Chromium style guide, should appear before the member declarations.",
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
