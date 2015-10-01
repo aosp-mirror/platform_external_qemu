@@ -109,6 +109,30 @@
       "revId": "d49fbedacc756eafe978023e52c98993d0526683",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9555663b_2c2d8759",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 4
+      },
+      "lineNbr": 670,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-01T19:59:34Z",
+      "side": 1,
+      "message": "wow, thanks! I wasn\u0027t aware of it - I thought that they implemented it already",
+      "parentUuid": "b5526a4f_c7cca850",
+      "range": {
+        "startLine": 670,
+        "startChar": 61,
+        "endLine": 670,
+        "endChar": 68
+      },
+      "revId": "d49fbedacc756eafe978023e52c98993d0526683",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
