@@ -11,7 +11,6 @@
 
 #include "android/base/sockets/SocketDrainer.h"
 
-#include <android/base/Limits.h>
 #include "android/base/containers/ScopedPointerSet.h"
 #include "android/base/EintrWrapper.h"
 #include "android/base/sockets/SocketErrors.h"

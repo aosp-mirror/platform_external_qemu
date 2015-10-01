@@ -9,8 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/Limits.h"
-
 #include "android/wear-agent/android_wear_agent.h"
 
 #include "android/base/Log.h"

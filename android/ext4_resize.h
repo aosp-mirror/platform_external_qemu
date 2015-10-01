@@ -14,8 +14,7 @@
 
 #pragma once
 
-#include <android/base/Limits.h>
-#include <android/utils/compiler.h>
+#include "android/utils/compiler.h"
 #include <stdint.h>
 
 ANDROID_BEGIN_HEADER
@@ -30,10 +29,10 @@ ANDROID_BEGIN_HEADER
 // still fail and the error code will be returned to the user
 //
 // Returns:
-// 		 0 - indicating the resize was successful
-//		-1 - indicating that formatting the arguments failed
-//		-2 - indicating a system call went wrong
-//		Otherwise the exit code of the resize2fs process is returned.
+//     0 - indicating the resize was successful
+//    -1 - indicating that formatting the arguments failed
+//    -2 - indicating a system call went wrong
+//    Otherwise the exit code of the resize2fs process is returned.
 int resizeExt4Partition(const char * partitionPath, int64_t newByteSize);
 
 // Returns true if |byteSize| is a valid ext4 partition size; i.e. within the

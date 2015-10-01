@@ -11,7 +11,6 @@
 
 #include "android/base/String.h"
 
-#include "android/base/Limits.h"
 #include "android/base/Log.h"
 #include "android/base/memory/MallocUsableSize.h"
 #include "android/base/StringView.h"
@@ -28,7 +27,8 @@ namespace base {
 static void *memmem(const void *haystack,
                     size_t haystack_len,
                     const void *needle,
-                    size_t needle_len){
+                    size_t needle_len)
+{
     const char *begin = static_cast<const char*>(haystack);
     const char *last_possible = begin + haystack_len - needle_len;
 

@@ -15,7 +15,6 @@
 
 #include "android/base/Uri.h"
 
-#include "android/base/Limits.h"
 #include "android/base/StringFormat.h"
 
 #include <stdlib.h>

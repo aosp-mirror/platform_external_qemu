@@ -9,7 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#define __STDC_LIMIT_MACROS
 #include "android/base/Log.h"
 
 #include <limits.h>

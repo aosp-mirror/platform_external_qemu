@@ -9,8 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-// special-case: include before SocketWaiter.h.
-#include "android/base/Limits.h"
 #include "android/base/sockets/SocketWaiter.h"
 
 #include "android/base/Log.h"

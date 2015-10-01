@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include <android/base/Limits.h>
 #include <android/base/Log.h>
 
 #include <stddef.h>

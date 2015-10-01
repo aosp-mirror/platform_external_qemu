@@ -11,7 +11,6 @@
 
 #include "android/wear-agent/WearAgent.h"
 
-#include "android/base/Limits.h"
 #include "android/base/Log.h"
 #include "android/base/async/AsyncReader.h"
 #include "android/base/async/AsyncWriter.h"

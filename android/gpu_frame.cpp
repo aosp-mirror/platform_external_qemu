@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/Limits.h"
-
 #include "android/opengl/GpuFrameBridge.h"
 #include "android/gpu_frame.h"
 

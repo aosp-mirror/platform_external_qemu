@@ -12,7 +12,6 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/base/Limits.h"
 #include "android/base/async/Looper.h"
 
 // The following functions are used to manage graceful close of sockets

@@ -15,7 +15,6 @@
 
 #include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
-#include "android/base/Limits.h"
 #include "android/base/Log.h"
 #include "android/base/String.h"
 #include "android/base/StringFormat.h"

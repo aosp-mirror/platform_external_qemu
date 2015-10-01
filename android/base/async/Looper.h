@@ -12,8 +12,8 @@
 #pragma once
 
 #include <android/base/Compiler.h>
-#include <android/base/Limits.h>
 
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 

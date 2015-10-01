@@ -10,7 +10,6 @@
 // GNU General Public License for more details.
 
 #include "android/base/containers/PodVector.h"
-#include "android/base/Limits.h"
 #include "android/base/Log.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/kernel/kernel_utils_testing.h"

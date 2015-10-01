@@ -9,9 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-// Include this before socket_drainer.h to avoid compiler warning.
-#include "android/base/Limits.h"
-
 #include "android/utils/socket_drainer.h"
 
 #include "android/base/Log.h"

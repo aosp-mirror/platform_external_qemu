@@ -10,7 +10,6 @@
 // GNU General Public License for more details.
 
 #include "android/base/async/Looper.h"
-#include "android/base/Limits.h"
 #include "android/base/Log.h"
 #include "android/base/sockets/SocketDrainer.h"
 #include "android/base/sockets/SocketUtils.h"
