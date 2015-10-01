@@ -76,7 +76,7 @@
      <file alias="right">images/dark/ic_keyboard_arrow_right_677_48px.svg</file>
      <file alias="screen_rotation_left">images/dark/Rotate_Left_white.svg</file>
      <file alias="screen_rotation_right">images/dark/Rotate_Right_white.svg</file>
-     <file alias="screen_shot">images/dark/ic_photo_camera_677_48px.svg</file>
+     <file alias="screen_shot">images/dark/ic_photo_camera_white_48dp.svg</file>
      <file alias="up">images/dark/ic_keyboard_arrow_up_677_48px.svg</file>
      <file alias="volume_down">images/dark/ic_volume_down_48px.svg</file>
      <file alias="volume_up">images/dark/ic_volume_up_48px.svg</file>

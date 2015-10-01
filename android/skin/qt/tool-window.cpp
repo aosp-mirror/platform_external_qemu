@@ -161,6 +161,10 @@ void ToolWindow::on_rotate_CCW_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_F11, kKeyModLCtrl);
 }
+void ToolWindow::on_scrShot_button_clicked()
+{
+    emulator_window->slot_screenshot();
+}
 void ToolWindow::on_zoom_button_clicked()
 {
     // TODO
