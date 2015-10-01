@@ -16,6 +16,24 @@
       "revId": "807807e5583d24195aa89a17c6f936b977580509",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "354d9aaf_25747497",
+        "filename": "android/ui-emu-agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-01T00:12:36Z",
+      "side": 1,
+      "message": "Good point. Removed.",
+      "parentUuid": "953c86f3_f3c6d8d3",
+      "revId": "807807e5583d24195aa89a17c6f936b977580509",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
