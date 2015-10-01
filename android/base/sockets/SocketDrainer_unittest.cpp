@@ -9,7 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/Limits.h"
 #include "android/base/sockets/SocketDrainer.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/utils/looper.h"

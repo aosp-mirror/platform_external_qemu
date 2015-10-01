@@ -11,7 +11,6 @@
 
 #include "android/emulation/android_qemud.h"
 
-#include "android/base/Limits.h"
 #include "android/qemu/utils/stream.h"
 #include "android/utils/looper.h"
 #include "android/utils/misc.h"

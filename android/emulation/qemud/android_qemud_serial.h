@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "android/base/Limits.h"
 #include "android/emulation/qemud/android_qemud_common.h"
 #include "android/emulation/qemud/android_qemud_sink.h"
 #include "android/emulation/serial_line.h"

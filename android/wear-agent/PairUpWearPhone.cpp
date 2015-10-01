@@ -17,7 +17,6 @@
 #include "android/base/async/AsyncWriter.h"
 #include "android/base/async/Looper.h"
 #include "android/base/containers/StringVector.h"
-#include <android/base/Limits.h>
 #include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/sockets/SocketErrors.h"

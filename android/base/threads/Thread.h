@@ -20,7 +20,7 @@
 #include <pthread.h>
 #endif
 
-#include "android/base/Limits.h"
+#include <inttypes.h>
 
 namespace android {
 namespace base {

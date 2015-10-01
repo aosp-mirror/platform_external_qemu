@@ -9,8 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include <android/base/Limits.h>
-
 #include "android/base/async/Looper.h"
 #include "android/base/containers/StringVector.h"
 #include "android/base/Log.h"
