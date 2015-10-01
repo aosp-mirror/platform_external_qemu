@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-/** in telephony/modem_driver.c */
+/** in android-qemu1-glue/telephony/modem_driver.c */
 /* this is the internal character driver used to communicate with the
  * emulated GSM modem. see qemu_chr_open() in vl.c */
 extern CharDriverState*  android_modem_cs;

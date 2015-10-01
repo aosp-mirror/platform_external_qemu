@@ -10,16 +10,16 @@
  ** GNU General Public License for more details.
  */
 
-#include "android/finger-agent-impl.h"
+#include "android/location-agent-impl.h"
 
-#include "android/finger-agent.h"
-#include "android/hw-fingerprint.h"
+#include "android-qemu1-glue/gps.h"
+#include "android/location-agent.h"
 
-void finger_setTouch(bool isTouching, int touchId)
+void location_gpsCmd(double latitude, double longitude,
+                     double metersElevation, int nSatellites,
+                     const struct timeval *time)
 {
-    if (isTouching) {
-        android_hw_fingerprint_touch(touchId);
-    } else {
-        android_hw_fingerprint_remove();
-    }
+    android_gps_send_location(latitude, longitude,
+                              metersElevation, nSatellites,
+                              time);
 }

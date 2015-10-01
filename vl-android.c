@@ -58,11 +58,11 @@
 #include "android/filesystems/partition_types.h"
 #include "android/filesystems/ramdisk_extractor.h"
 #include "android/globals.h"
-#include "android/gps.h"
-#include "android/hw-kmsg.h"
+#include "android-qemu1-glue/gps.h"
+#include "android-qemu1-glue/hw-kmsg.h"
 #include "android/hw-pipe-net.h"
-#include "android/hw-qemud.h"
-#include "android/hw-sensors.h"
+#include "android-qemu1-glue/hw-qemud.h"
+#include "android-qemu1-glue/hw-sensors.h"
 #include "android/log-rotate.h"
 #include "android/looper-qemu.h"
 #include "android/metrics/metrics_reporter.h"
@@ -86,7 +86,7 @@
 #include "android/wear-agent/android_wear_agent.h"
 #include "exec/hwaddr.h"
 #include "migration/qemu-file.h"
-#include "telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_driver.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -214,7 +214,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "sysemu/balloon.h"
 #include "android/hw-lcd.h"
 #include "android/boot-properties.h"
-#include "android/hw-control.h"
+#include "android-qemu1-glue/hw-control.h"
 #include "android/core-init-utils.h"
 #include "android/audio-test.h"
 

@@ -14,7 +14,7 @@
 
 #include "android/telephony-agent.h"
 #include "android/telephony/modem.h"
-#include "telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_driver.h"
 
 static int gsm_number_is_bad(const char*);
 
@@ -77,7 +77,7 @@ TelephonyResponse telephony_telephonyCmd(TelephonyOperation op, const char *phon
 }
 
 
-// TODO: This is very similar to 'gsm_check_number' in android/console.c
+// TODO: This is very similar to 'gsm_check_number' in android-qemu1-glue/console.c
 //       I should probably instead use sms_address_from_str() in telephony/sms.c
 static int
 gsm_number_is_bad(const char* numStr)

@@ -20,8 +20,8 @@
  *   - vibrator
  *   - flashlight
  */
-#include "android/hw-control.h"
-#include "android/hw-qemud.h"
+#include "android-qemu1-glue/hw-control.h"
+#include "android-qemu1-glue/hw-qemud.h"
 #include "android/globals.h"
 #include "android/utils/cbuffer.h"
 #include "android/utils/misc.h"

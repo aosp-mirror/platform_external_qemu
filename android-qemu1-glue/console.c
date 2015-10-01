@@ -23,11 +23,11 @@
 
 #include "android/android.h"
 #include "android/display-core.h"
-#include "android/gps.h"
+#include "android-qemu1-glue/gps.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
-#include "android/hw-fingerprint.h"
-#include "android/hw-sensors.h"
+#include "android-qemu1-glue/hw-fingerprint.h"
+#include "android-qemu1-glue/hw-sensors.h"
 #include "android/shaper.h"
 #include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"
@@ -50,7 +50,7 @@
 #endif
 #include "monitor/monitor.h"
 #include "net/net.h"
-#include "telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_driver.h"
 #include "sysemu/char.h"
 #include "sysemu/sysemu.h"
 

@@ -10,12 +10,12 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/hw-fingerprint.h"
+#include "android-qemu1-glue/hw-fingerprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/stream.h"
 #include "android/utils/system.h"
-#include "android/hw-qemud.h"
+#include "android-qemu1-glue/hw-qemud.h"
 #include "android/globals.h"
 
 #include <stdlib.h>

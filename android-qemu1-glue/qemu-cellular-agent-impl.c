@@ -15,11 +15,11 @@
 #include "android/android.h"
 #include "android/cellular-agent.h"
 #include "android/shaper.h"
-#include "telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_driver.h"
 
 void cellular_setSignalStrength(int zeroTo31)
 {
-    // (See do_gsm_signal() in android/console.c)
+    // (See do_gsm_signal() in android-qemu1-glue/console.c)
 
     if (android_modem) {
         if (zeroTo31 <  0) zeroTo31 =  0;
@@ -31,7 +31,7 @@ void cellular_setSignalStrength(int zeroTo31)
 
 void cellular_setVoiceStatus(enum CellularStatus voiceStatus)
 {
-    // (See do_gsm_voice() in android/console.c)
+    // (See do_gsm_voice() in android-qemu1-glue/console.c)
     ARegistrationState  state = A_REGISTRATION_UNKNOWN;
 
     if (android_modem) {
@@ -49,7 +49,7 @@ void cellular_setVoiceStatus(enum CellularStatus voiceStatus)
 
 void cellular_setDataStatus(enum CellularStatus dataStatus)
 {
-    // (See do_gsm_data() in android/console.c)
+    // (See do_gsm_data() in android-qemu1-glue/console.c)
     ARegistrationState  state = A_REGISTRATION_UNKNOWN;
 
     switch (dataStatus) {
@@ -70,7 +70,7 @@ void cellular_setDataStatus(enum CellularStatus dataStatus)
 
 void cellular_setStandard(enum CellularStandard cStandard)
 {
-    // (See do_network_speed() in android/console.c)
+    // (See do_network_speed() in android-qemu1-glue/console.c)
     char *speedName;
 
     switch (cStandard) {

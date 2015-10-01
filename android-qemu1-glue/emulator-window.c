@@ -22,8 +22,8 @@
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
-#include "android/hw-control.h"
-#include "android/hw-sensors.h"
+#include "android-qemu1-glue/hw-control.h"
+#include "android-qemu1-glue/hw-sensors.h"
 #include "android/location-agent.h"
 #include "android/location-agent-impl.h"
 #include "android/opengles.h"
@@ -37,7 +37,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/looper.h"
 
-#include "telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_driver.h"
 
 #if CONFIG_QT
 #include "android/skin/qt/set-ui-emu-agent.h"
@@ -529,7 +529,7 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
 }
 
 /*
- * android/console.c helper routines.
+ * android-qemu1-glue/console.c helper routines.
  */
 
 void

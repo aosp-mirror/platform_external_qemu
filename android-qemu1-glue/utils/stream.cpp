@@ -9,10 +9,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/qemu/utils/stream.h"
+#include "android-qemu1-glue/utils/stream.h"
 
 #include "android/base/files/Stream.h"
-#include "android/qemu/base/files/QemuFileStream.h"
+#include "android-qemu1-glue/base/files/QemuFileStream.h"
 
 struct QEMUFile;
 struct QEMUTimer;

@@ -10,11 +10,11 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/hw-sensors.h"
+#include "android-qemu1-glue/hw-sensors.h"
 
 #include "android/globals.h"
-#include "android/hw-qemud.h"
-#include "android/qemu/utils/stream.h"
+#include "android-qemu1-glue/hw-qemud.h"
+#include "android-qemu1-glue/utils/stream.h"
 #include "android/sensors-port.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"

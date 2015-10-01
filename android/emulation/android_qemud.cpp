@@ -11,7 +11,7 @@
 
 #include "android/emulation/android_qemud.h"
 
-#include "android/qemu/utils/stream.h"
+#include "android-qemu1-glue/utils/stream.h"
 #include "android/utils/looper.h"
 #include "android/utils/misc.h"
 #include "android/utils/panic.h"

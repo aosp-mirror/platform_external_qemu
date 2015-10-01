@@ -10,14 +10,15 @@
  ** GNU General Public License for more details.
  */
 
-#define __STDC_LIMIT_MACROS
+//#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/telephony/modem.h"
 #include "android/telephony/sms.h"
 #include "extended-window.h"
-#include "telephony/modem_driver.h"
+// TODO: Remove this dependency!!
+#include "android-qemu1-glue/telephony/modem_driver.h"
 #include "ui_extended.h"
 
 #include <QtWidgets>

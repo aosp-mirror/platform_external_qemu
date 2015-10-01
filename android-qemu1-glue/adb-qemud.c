@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "android/adb-qemud.h"
+#include "android-qemu1-glue/adb-qemud.h"
 
 #include "android/adb-server.h"
 #include "android/globals.h"  /* for android_hw */
-#include "android/hw-qemud.h"
+#include "android-qemu1-glue/hw-qemud.h"
 #include "android/utils/debug.h"
 #include "android/utils/format.h"
 #include "android/utils/misc.h"

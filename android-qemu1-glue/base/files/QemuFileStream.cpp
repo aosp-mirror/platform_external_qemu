@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/qemu/base/files/QemuFileStream.h"
+#include "android-qemu1-glue/base/files/QemuFileStream.h"
 
 #include "android/base/Log.h"
 

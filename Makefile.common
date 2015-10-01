@@ -215,9 +215,9 @@ common_LOCAL_SRC_FILES += \
 	android/metrics/metrics_reporter_ga.c \
 	android/metrics/metrics_reporter_toolbar.c \
 	android/metrics/StudioHelper.cpp \
-	android/qemu/base/async/Looper.cpp \
-	android/qemu/base/files/QemuFileStream.cpp \
-	android/qemu/utils/stream.cpp \
+	android-qemu1-glue/base/async/Looper.cpp \
+	android-qemu1-glue/base/files/QemuFileStream.cpp \
+	android-qemu1-glue/utils/stream.cpp \
 	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
 	android/opengl/emugl_config.cpp \
@@ -422,7 +422,7 @@ common_LOCAL_SRC_FILES += $(ANDROID_SKIN_SOURCES)
 
 common_LOCAL_SRC_FILES += \
              android/gpu_frame.cpp \
-             android/emulator-window.c \
+             android-qemu1-glue/emulator-window.c \
              android/resource.c \
              android/user-config.c \
 
@@ -573,35 +573,35 @@ CORE_MISC_SOURCES = \
     qemu-char.c \
     qemu-log.c \
     savevm.c \
-    android/boot-properties.c \
-    android/charpipe.c \
+    android-qemu1-glue/boot-properties.c \
+    android-qemu1-glue/charpipe.c \
     android/core-init-utils.c   \
     android/ext4_resize.cpp   \
-    android/gps.c \
-    android/hw-kmsg.c \
+    android-qemu1-glue/gps.c \
+    android-qemu1-glue/hw-kmsg.c \
     android/hw-lcd.c \
     android/hw-events.c \
-    android/hw-control.c \
-    android/hw-fingerprint.c \
-    android/hw-sensors.c \
-    android/hw-qemud.cpp \
+    android-qemu1-glue/hw-control.c \
+    android-qemu1-glue/hw-fingerprint.c \
+    android-qemu1-glue/hw-sensors.c \
+    android-qemu1-glue/hw-qemud.cpp \
     android/looper-qemu.cpp \
     android/hw-pipe-net.c \
-    android/qemu/base/async/Looper.cpp \
-    android/qemu/emulation/CharSerialLine.cpp \
-    android/qemu-setup.c \
-    android/qemu-tcpdump.c \
-    android/shaper.c \
+    android-qemu1-glue/base/async/Looper.cpp \
+    android-qemu1-glue/emulation/CharSerialLine.cpp \
+    android-qemu1-glue/qemu-setup.c \
+    android-qemu1-glue/qemu-tcpdump.c \
+    android-qemu1-glue/shaper.c \
     android/snapshot.c \
     android/async-socket-connector.c \
     android/async-socket.c \
     android/sdk-controller-socket.c \
-    android/sensors-port.c \
+    android-qemu1-glue/sensors-port.c \
     android/utils/timezone.c \
     android/camera/camera-format-converters.c \
-    android/camera/camera-service.c \
+    android-qemu1-glue/camera/camera-service.c \
     android/adb-server.c \
-    android/adb-qemud.c \
+    android-qemu1-glue/adb-qemud.c \
     android/snaphost-android.c \
     android/multitouch-screen.c \
     android/multitouch-port.c \
@@ -700,8 +700,8 @@ common_LOCAL_SRC_FILES += \
     android/telephony/remote_call.c \
     android/telephony/sim_card.c \
     android/telephony/sms.c \
-    telephony/modem_driver.c \
-    telephony/sysdeps_qemu.c
+    android-qemu1-glue/telephony/modem_driver.c \
+    android-qemu1-glue/telephony/sysdeps_qemu.c
 
 # sources inherited from upstream, but not fully
 # integrated into android emulator

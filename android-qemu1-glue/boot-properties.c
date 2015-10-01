@@ -13,7 +13,7 @@
 #include "android/boot-properties.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
-#include "android/hw-qemud.h"
+#include "android-qemu1-glue/hw-qemud.h"
 #include "android/globals.h"
 
 #include "hw/hw.h"

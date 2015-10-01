@@ -132,7 +132,7 @@
 #endif
 
 #include "android/android.h"
-#include "telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_driver.h"
 
 static VLANState *first_vlan;
 
