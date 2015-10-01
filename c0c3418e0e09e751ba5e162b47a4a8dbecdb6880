@@ -94,6 +94,30 @@
     },
     {
       "key": {
+        "uuid": "15a33681_d7cc2c50",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2072,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-01T00:57:40Z",
+      "side": 1,
+      "message": "There\u0027s some marshalling and back happening here.\n\n- QEMU1 functions that return output are written to call a callback that consumes a line of output.\n- The use in console.c actually has such a callback.\n- The interface that I wrote QAndroidVmOperations returns a char* instead.\n\nSo, I actually had to marshal on both sides of the interface.\n\nI think that QEMU1 functions that are called here were actually written for the express purpose of this module :)\n\nSo, I could simplify things by defining and using lineConsumerCallbacks in the interface. By themselves, that interface feels weird (you have to use these very specific callbacks to get any results back), but this is the only user atm, and it fits the use case for console very well (since the callbacks just send the data over the socket without any copies etc).\n\nI\u0027m leaning towards defining callbacks.\nIf someone wants a non-callback API, we can define an object that will provide you the callback, and you can pull out the results from that object.\n\nwdyt?",
+      "parentUuid": "75439281_24a11696",
+      "range": {
+        "startLine": 2069,
+        "startChar": 0,
+        "endLine": 2072,
+        "endChar": 5
+      },
+      "revId": "c0c3418e0e09e751ba5e162b47a4a8dbecdb6880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "953c86f3_05d4d64d",
         "filename": "android/emulation/control/vm_operations.h",
         "patchSetId": 2
