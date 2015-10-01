@@ -68,6 +68,9 @@ ifneq (windows,$(HOST_OS))
   MY_CFLAGS += -fPIC
 endif
 
+# Ensure that <inttypes.h> always defines all interesting macros.
+MY_CFLAGS += -D__STDC_LIMIT_MACROS=1 -D__STDC_FORMAT_MACROS=1
+
 MY_CFLAGS32 :=
 MY_CFLAGS64 :=
 

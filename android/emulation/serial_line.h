@@ -12,7 +12,8 @@
 #pragma once
 
 #include "android/utils/compiler.h"
-#include "android/base/Limits.h"
+
+#include <stdint.h>
 
 // This is a C wrapper for a SerialLine abstraction, based
 // on QEMU's character device (char.h)

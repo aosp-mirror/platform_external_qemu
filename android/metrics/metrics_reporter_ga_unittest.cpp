@@ -9,9 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-// Must be included before anything that might include stdint.
-#include "android/base/Limits.h"
-
 #include "android/metrics/metrics_reporter_ga.h"
 #include "android/metrics/internal/metrics_reporter_ga_internal.h"
 
