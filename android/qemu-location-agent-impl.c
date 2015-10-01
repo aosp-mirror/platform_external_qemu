@@ -15,17 +15,15 @@
 #include "android/emulation/control/location_agent.h"
 #include "android/gps.h"
 
-static void location_gpsCmd(double latitude, double longitude,
-                     double metersElevation, int nSatellites,
-                     const struct timeval *time)
-{
-    android_gps_send_location(latitude, longitude,
-                              metersElevation, nSatellites,
-                              time);
+#include <stdbool.h>
+
+static bool location_gpsIsSupported() {
+    return android_gps_cs != NULL;
 }
 
 static const QAndroidLocationAgent sQAndroidLocationAgent = {
-    .gpsCmd = location_gpsCmd
-};
+        .gpsIsSupported = location_gpsIsSupported,
+        .gpsCmd = android_gps_send_location,
+        .gpsSendNmea = android_gps_send_nmea};
 const QAndroidLocationAgent* const gQAndroidLocationAgent =
         &sQAndroidLocationAgent;

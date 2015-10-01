@@ -25,10 +25,8 @@
 
 #include "android/android.h"
 #include "android/display-core.h"
-#include "android/gps.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
-#include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
 #include "android/shaper.h"
 #include "android/skin/charmap.h"
@@ -44,8 +42,6 @@
 #include "android/utils/utf8_utils.h"
 
 #include "config-host.h"
-#include "hw/android/goldfish/device.h"
-#include "hw/power_supply.h"
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"
 #endif
@@ -104,6 +100,9 @@ typedef struct ControlClientRec_
 typedef struct ControlGlobalRec_
 {
     // Interfaces to call into QEMU specific code.
+    QAndroidBatteryAgent* battery_agent;
+    QAndroidFingerAgent* finger_agent;
+    QAndroidLocationAgent* location_agent;
     QAndroidVmOperations* vm_operations;
 
     /* listening socket */
@@ -229,7 +228,8 @@ control_client_destroy( ControlClient  client )
     free( client );
 }
 
-
+// /////////////////////////////////////////////////////////////////////////////
+// Different write callbacks used to report back to the client.
 
 static void  control_control_write( ControlClient  client, const char*  buff, int  len )
 {
@@ -271,6 +271,19 @@ static int  control_write( ControlClient  client, const char*  format, ... )
     return ret;
 }
 
+static int control_write_out_cb(void* opaque, const char* str, int strsize) {
+    ControlClient client = opaque;
+    control_control_write(client, str, strsize);
+    return strsize;
+}
+
+static int control_write_err_cb(void* opaque, const char* str, int strsize) {
+    int ret = 0;
+    ControlClient client = opaque;
+    ret += control_write(client, "KO: ");
+    control_control_write(client, str, strsize);
+    return ret + strsize;
+}
 
 static ControlClient
 control_client_create( Socket         socket,
@@ -583,8 +596,17 @@ control_global_accept( void*  _global )
     }
 }
 
+#define COPY_AGENT(to, from)        \
+    do {                            \
+        to = malloc(sizeof(*from)); \
+        *(to) = *(from);            \
+    } while (0);
+
 static int control_global_init(ControlGlobal global,
                                int control_port,
+                               const QAndroidBatteryAgent* battery_agent,
+                               const QAndroidFingerAgent* finger_agent,
+                               const QAndroidLocationAgent* location_agent,
                                const QAndroidVmOperations* vm_operations) {
     Socket  fd;
     int     ret;
@@ -593,8 +615,10 @@ static int control_global_init(ControlGlobal global,
     memset( global, 0, sizeof(*global) );
     // Copy the QEMU specific interfaces passed in to make lifetime management
     // simpler.
-    global->vm_operations = malloc(sizeof(*vm_operations));
-    *(global->vm_operations) =  *vm_operations;
+    COPY_AGENT(global->battery_agent, battery_agent);
+    COPY_AGENT(global->finger_agent, finger_agent);
+    COPY_AGENT(global->location_agent, location_agent);
+    COPY_AGENT(global->vm_operations, vm_operations);
 
     fd = socket_create_inet( SOCKET_STREAM );
     if (fd < 0) {
@@ -1637,16 +1661,22 @@ static const CommandDefRec  sms_commands[] =
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
-static void
-do_control_write(void* data, const char* string)
-{
-    control_write((ControlClient)data, string);
+/********************************************************************************************/
+/********************************************************************************************/
+/***** ******/
+/*****                         P O W E R   C O M M A N D ******/
+/***** ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+void do_control_write(void* opaque, const char* args) {
+    control_write((ControlClient)opaque, args);
 }
 
 static int
 do_power_display( ControlClient client, char*  args )
 {
-    goldfish_battery_display(do_control_write, client);
+    client->global->battery_agent->batteryDisplay(client, control_write_out_cb);
     return 0;
 }
 
@@ -1655,11 +1685,11 @@ do_ac_state( ControlClient  client, char*  args )
 {
     if (args) {
         if (strcasecmp(args, "on") == 0) {
-            goldfish_battery_set_prop(1, POWER_SUPPLY_PROP_ONLINE, 1);
+            client->global->battery_agent->setIsCharging(true);
             return 0;
         }
         if (strcasecmp(args, "off") == 0) {
-            goldfish_battery_set_prop(1, POWER_SUPPLY_PROP_ONLINE, 0);
+            client->global->battery_agent->setIsCharging(false);
             return 0;
         }
     }
@@ -1673,23 +1703,25 @@ do_battery_status( ControlClient  client, char*  args )
 {
     if (args) {
         if (strcasecmp(args, "unknown") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, POWER_SUPPLY_STATUS_UNKNOWN);
+            client->global->battery_agent->setStatus(BATTERY_STATUS_UNKNOWN);
             return 0;
         }
         if (strcasecmp(args, "charging") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, POWER_SUPPLY_STATUS_CHARGING);
+            client->global->battery_agent->setStatus(BATTERY_STATUS_CHARGING);
             return 0;
         }
         if (strcasecmp(args, "discharging") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, POWER_SUPPLY_STATUS_DISCHARGING);
+            client->global->battery_agent->setStatus(
+                    BATTERY_STATUS_DISCHARGING);
             return 0;
         }
         if (strcasecmp(args, "not-charging") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, POWER_SUPPLY_STATUS_NOT_CHARGING);
+            client->global->battery_agent->setStatus(
+                    BATTERY_STATUS_NOT_CHARGING);
             return 0;
         }
         if (strcasecmp(args, "full") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, POWER_SUPPLY_STATUS_FULL);
+            client->global->battery_agent->setStatus(BATTERY_STATUS_FULL);
             return 0;
         }
     }
@@ -1703,11 +1735,11 @@ do_battery_present( ControlClient  client, char*  args )
 {
     if (args) {
         if (strcasecmp(args, "true") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_PRESENT, 1);
+            client->global->battery_agent->setIsBatteryPresent(true);
             return 0;
         }
         if (strcasecmp(args, "false") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_PRESENT, 0);
+            client->global->battery_agent->setIsBatteryPresent(true);
             return 0;
         }
     }
@@ -1721,27 +1753,28 @@ do_battery_health( ControlClient  client, char*  args )
 {
     if (args) {
         if (strcasecmp(args, "unknown") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, POWER_SUPPLY_HEALTH_UNKNOWN);
+            client->global->battery_agent->setHealth(BATTERY_HEALTH_UNKNOWN);
             return 0;
         }
         if (strcasecmp(args, "good") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, POWER_SUPPLY_HEALTH_GOOD);
+            client->global->battery_agent->setHealth(BATTERY_HEALTH_GOOD);
             return 0;
         }
         if (strcasecmp(args, "overheat") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, POWER_SUPPLY_HEALTH_OVERHEAT);
+            client->global->battery_agent->setHealth(BATTERY_HEALTH_OVERHEATED);
             return 0;
         }
         if (strcasecmp(args, "dead") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, POWER_SUPPLY_HEALTH_DEAD);
+            client->global->battery_agent->setHealth(BATTERY_HEALTH_DEAD);
             return 0;
         }
         if (strcasecmp(args, "overvoltage") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, POWER_SUPPLY_HEALTH_OVERVOLTAGE);
+            client->global->battery_agent->setHealth(
+                    BATTERY_HEALTH_OVERVOLTAGE);
             return 0;
         }
         if (strcasecmp(args, "failure") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, POWER_SUPPLY_HEALTH_UNSPEC_FAILURE);
+            client->global->battery_agent->setHealth(BATTERY_HEALTH_FAILED);
             return 0;
         }
     }
@@ -1757,7 +1790,7 @@ do_battery_capacity( ControlClient  client, char*  args )
         int capacity;
 
         if (sscanf(args, "%d", &capacity) == 1 && capacity >= 0 && capacity <= 100) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_CAPACITY, capacity);
+            client->global->battery_agent->setChargeLevel(capacity);
             return 0;
         }
     }
@@ -2021,20 +2054,6 @@ static const CommandDefRec  event_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 
-static int control_write_out_cb(void* opaque, const char* str, int strsize) {
-    ControlClient client = opaque;
-    control_control_write(client, str, strsize);
-    return strsize;
-}
-
-static int control_write_err_cb(void* opaque, const char* str, int strsize) {
-    int ret = 0;
-    ControlClient client = opaque;
-    ret += control_write(client, "KO: ");
-    control_control_write(client, str, strsize);
-    return ret + strsize;
-}
-
 static int do_snapshot_list(ControlClient client, char* args) {
     bool success = vmopers(client)->snapshotList(client, control_write_out_cb,
                                                  control_write_err_cb);
@@ -2186,11 +2205,11 @@ do_geo_nmea( ControlClient  client, char*  args )
         control_write( client, "KO: NMEA sentence missing, try 'help geo nmea'\r\n" );
         return -1;
     }
-    if (!android_gps_cs) {
+    if (!client->global->location_agent->gpsIsSupported()) {
         control_write( client, "KO: no GPS emulation in this virtual device\r\n" );
         return -1;
     }
-    android_gps_send_nmea( args );
+    client->global->location_agent->gpsSendNmea(args);
     return 0;
 }
 
@@ -2254,8 +2273,8 @@ do_geo_fix( ControlClient  client, char*  args )
     memset(&tVal, 0, sizeof(tVal));
     gettimeofday(&tVal, NULL);
 
-    android_gps_send_location(params[GEO_LAT], params[GEO_LONG],
-                              altitude, n_satellites, &tVal);
+    client->global->location_agent->gpsCmd(params[GEO_LAT], params[GEO_LONG],
+                                           altitude, n_satellites, &tVal);
     return 0;
 }
 
@@ -2491,7 +2510,7 @@ do_fingerprint_touch(ControlClient client, char* args )
         char *endptr;
         int fingerid = strtol(args, &endptr, 0);
         if (endptr != args) {
-            android_hw_fingerprint_touch(fingerid);
+            client->global->finger_agent->setTouch(true, fingerid);
             return 0;
         }
         control_write(client, "KO: invalid fingerid\r\n");
@@ -2504,7 +2523,7 @@ do_fingerprint_touch(ControlClient client, char* args )
 static int
 do_fingerprint_remove(ControlClient client, char* args )
 {
-    android_hw_fingerprint_remove();
+    client->global->finger_agent->setTouch(false, -1);
     return 0;
 }
 
@@ -2677,6 +2696,11 @@ static const CommandDefRec   main_commands[] =
 
 static ControlGlobalRec  _g_global;
 
-int control_console_start(int port, const QAndroidVmOperations* vm_operations) {
-    return control_global_init(&_g_global, port, vm_operations);
+extern int control_console_start(int port,
+                                 const QAndroidBatteryAgent* battery_agent,
+                                 const QAndroidFingerAgent* finger_agent,
+                                 const QAndroidLocationAgent* location_agent,
+                                 const QAndroidVmOperations* vm_operations) {
+    return control_global_init(&_g_global, port, battery_agent, finger_agent,
+                               location_agent, vm_operations);
 }

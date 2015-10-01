@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "android/emulation/control/callbacks.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
@@ -38,6 +39,9 @@ enum BatteryStatus {
 };
 
 typedef struct QAndroidBatteryAgent {
+    // Sets whether the battery is present or not
+    void (*setIsBatteryPresent)(bool isPresent);
+
     // Sets whether the battery is charging or not
     void (*setIsCharging)(bool isCharging);
 
@@ -52,6 +56,9 @@ typedef struct QAndroidBatteryAgent {
     // Sets the battery status
     // Input: |status| one of the BatteryStatus enum values, above
     void (*setStatus)(enum BatteryStatus status);
+
+    // Query the battery state
+    void (*batteryDisplay)(void* opaque, LineConsumerCallback outputCallback);
 } QAndroidBatteryAgent;
 
 ANDROID_END_HEADER

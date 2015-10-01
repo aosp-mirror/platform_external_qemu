@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/finger_agent.h"
+#include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/utils/compiler.h"
 
@@ -24,6 +27,9 @@ ANDROID_BEGIN_HEADER
 // functions.
 // Takes ownership of |vm_operations|.
 extern int control_console_start(int port,
+                                 const QAndroidBatteryAgent* battery_agent,
+                                 const QAndroidFingerAgent* finger_agent,
+                                 const QAndroidLocationAgent* location_agent,
                                  const QAndroidVmOperations* vm_operations);
 
 ANDROID_END_HEADER

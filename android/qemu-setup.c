@@ -223,6 +223,12 @@ report_console( const char*  proto_port, int  console_port )
     restore_sigalrm (&sigstate);
 }
 
+static int qemu_control_console_start(int port) {
+    return control_console_start(port, gQAndroidBatteryAgent,
+                                 gQAndroidFingerAgent, gQAndroidLocationAgent,
+                                 gQAndroidVmOperations);
+}
+
 /* this function is called from qemu_main() once all arguments have been parsed
  * it should be used to setup any Android-specific items in the emulation before the
  * main loop runs
@@ -294,7 +300,7 @@ void  android_emulation_setup( void )
             adb_server_init(adb_port);
             android_adb_service_init();
         }
-        if (control_console_start(console_port, gQAndroidVmOperations) < 0) {
+        if (qemu_control_console_start(console_port) < 0) {
             if (legacy_adb) {
                 slirp_unredir( 0, adb_port );
             }
@@ -334,7 +340,7 @@ void  android_emulation_setup( void )
             }
 
             /* setup second redirection for the emulator console */
-            if (control_console_start(base_port, gQAndroidVmOperations) < 0) {
+            if (qemu_control_console_start(base_port) < 0) {
                 if (legacy_adb) {
                     slirp_unredir( 0, adb_port );
                 }
