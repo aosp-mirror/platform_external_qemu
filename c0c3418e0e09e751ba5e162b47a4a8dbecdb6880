@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "953c86f3_59f883b3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-01T20:13:57Z",
+      "side": 1,
+      "message": "This is really just creating an interface definition and writing glue code for qemu.\n\nHard to test, because everything is hard to test for qemu :(\n\nAfter I\u0027m done tearing apart the qemu glue, I plan to rewrite console in C++ and add unittests to that.",
+      "parentUuid": "1548969f_41cc16fa",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 40
+      },
+      "revId": "c0c3418e0e09e751ba5e162b47a4a8dbecdb6880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b5398a03_0330507d",
         "filename": "android/console.c",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "75439281_ed9f11c8",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-01T20:13:57Z",
+      "side": 1,
+      "message": "- API returns the same pointer back, I will assign it :P (Removed)\n- No. *(global-\u003evm_operations) could be 0. Then, you\u0027re trying to assign something to address 0.\n\nThis segfaults:\n    typedef struct A { int a; } A; \n    ...\n    A *a1, *a2;                                                                  \n    a1 \u003d malloc(sizeof(*a1));                                                    \n    a1-\u003ea \u003d 5;                                                                   \n    printf(\"a1-\u003ea: %d\\n\", a1-\u003ea);                                                \n                                                                                 \n    *a2 \u003d *a1;                                                                   \n    a2-\u003ea \u003d 6;                                                                   \n    printf(\"Assigned.\\n\");                                                       \n    printf(\"a1-\u003ea: %d\\n\", a1-\u003ea);                                                \n    printf(\"a2-\u003ea: %d\\n\", a2-\u003ea);",
+      "parentUuid": "b5398a03_0330507d",
+      "range": {
+        "startLine": 597,
+        "startChar": 4,
+        "endLine": 597,
+        "endChar": 28
+      },
+      "revId": "c0c3418e0e09e751ba5e162b47a4a8dbecdb6880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "15a33681_e674200e",
         "filename": "android/console.c",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2015-09-30T20:12:51Z",
       "side": 1,
       "message": "why \\r?",
+      "range": {
+        "startLine": 2046,
+        "startChar": 69,
+        "endLine": 2046,
+        "endChar": 71
+      },
+      "revId": "c0c3418e0e09e751ba5e162b47a4a8dbecdb6880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "953c86f3_b911cf91",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2046,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-01T20:13:57Z",
+      "side": 1,
+      "message": "Because it was always there. I don\u0027t want to make a functional change like that in this CL.",
+      "parentUuid": "15a33681_e674200e",
       "range": {
         "startLine": 2046,
         "startChar": 69,
@@ -166,6 +238,30 @@
     },
     {
       "key": {
+        "uuid": "953c86f3_190f1b6a",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2072,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-01T20:13:57Z",
+      "side": 1,
+      "message": "Yeah, I hit the same in more interfaces I\u0027m writing for console.c.\nAnd after I\u0027d written the callback, I realized that it\u0027s actually easier to use from both C/C++ because you don\u0027t have to deal with callee allocated char* objects in the caller.\n\n:)",
+      "parentUuid": "b5398a03_34de68fc",
+      "range": {
+        "startLine": 2069,
+        "startChar": 0,
+        "endLine": 2072,
+        "endChar": 5
+      },
+      "revId": "c0c3418e0e09e751ba5e162b47a4a8dbecdb6880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "953c86f3_05d4d64d",
         "filename": "android/emulation/control/vm_operations.h",
         "patchSetId": 2
@@ -189,6 +285,30 @@
     },
     {
       "key": {
+        "uuid": "1548969f_706c763b",
+        "filename": "android/emulation/control/vm_operations.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-01T20:13:57Z",
+      "side": 1,
+      "message": "Obsolete.\nMerged the callbacks CL in this one.",
+      "parentUuid": "953c86f3_05d4d64d",
+      "range": {
+        "startLine": 34,
+        "startChar": 32,
+        "endLine": 34,
+        "endChar": 37
+      },
+      "revId": "c0c3418e0e09e751ba5e162b47a4a8dbecdb6880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f5586271_c025b240",
         "filename": "android/qemu-control-impl.h",
         "patchSetId": 2
@@ -200,6 +320,30 @@
       "writtenOn": "2015-09-30T20:12:51Z",
       "side": 1,
       "message": "const * const?",
+      "range": {
+        "startLine": 25,
+        "startChar": 7,
+        "endLine": 25,
+        "endChar": 35
+      },
+      "revId": "c0c3418e0e09e751ba5e162b47a4a8dbecdb6880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b5526a4f_a7ea5463",
+        "filename": "android/qemu-control-impl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-01T20:13:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f5586271_c025b240",
       "range": {
         "startLine": 25,
         "startChar": 7,
@@ -306,6 +450,30 @@
     },
     {
       "key": {
+        "uuid": "1548969f_f057e668",
+        "filename": "android/qemu-vm-operations-impl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-01T20:13:57Z",
+      "side": 1,
+      "message": "Obsolete. Merged the callback CL.",
+      "parentUuid": "9555663b_7d028f4e",
+      "range": {
+        "startLine": 45,
+        "startChar": 14,
+        "endLine": 45,
+        "endChar": 20
+      },
+      "revId": "c0c3418e0e09e751ba5e162b47a4a8dbecdb6880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f5586271_20174ee2",
         "filename": "android/qemu-vm-operations-impl.c",
         "patchSetId": 2
@@ -317,6 +485,30 @@
       "writtenOn": "2015-09-30T20:12:51Z",
       "side": 1,
       "message": "* const?",
+      "range": {
+        "startLine": 118,
+        "startChar": 26,
+        "endLine": 118,
+        "endChar": 28
+      },
+      "revId": "c0c3418e0e09e751ba5e162b47a4a8dbecdb6880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b5398a03_0f30717d",
+        "filename": "android/qemu-vm-operations-impl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-01T20:13:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f5586271_20174ee2",
       "range": {
         "startLine": 118,
         "startChar": 26,
