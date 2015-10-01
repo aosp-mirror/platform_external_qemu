@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9555663b_cbfcb5de",
+        "filename": "android/skin/qt/ext-sms.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-01T16:48:58Z",
+      "side": 1,
+      "message": "While the tab is called Telephony, it might make more sense to still have the error dialog show \"SMS\" as it\u0027s title to make it clear it was an SMS-based error? Same goes for the below error messages.",
+      "range": {
+        "startLine": 43,
+        "startChar": 41,
+        "endLine": 43,
+        "endChar": 50
+      },
+      "revId": "d384bed5758e5ebf177c9eb5e086c53d490990e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9555663b_514e94b3",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 1199,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-01T16:48:58Z",
+      "side": 1,
+      "message": "It would be best to add the border around this box in this change rather than another (see the mocks, slide 9).",
+      "revId": "d384bed5758e5ebf177c9eb5e086c53d490990e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
