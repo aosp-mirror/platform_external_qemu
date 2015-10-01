@@ -86,6 +86,29 @@
       "revId": "d49fbedacc756eafe978023e52c98993d0526683",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b5526a4f_c7cca850",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 4
+      },
+      "lineNbr": 670,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-10-01T19:16:01Z",
+      "side": 1,
+      "message": "Please note that there might extra work involved to ensure any functionality assumed standard is actually implemented in MinGW. For example (this is one year old but still applies):\n\nhttp://stackoverflow.com/questions/24009821/mingw-4-8-1-c11-thread-support\n\nIt appears that there are workarounds, but we \u0027ll have to proceed in caution. Maybe put an extra note here that whatever you use should already be supported in MinGW or you will have to find and add a stable fix.",
+      "range": {
+        "startLine": 670,
+        "startChar": 61,
+        "endLine": 670,
+        "endChar": 68
+      },
+      "revId": "d49fbedacc756eafe978023e52c98993d0526683",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
