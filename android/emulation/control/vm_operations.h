@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/emulation/control/callbacks.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
@@ -31,10 +32,18 @@ typedef struct QAndroidVmOperations {
     // corresponding to the command's output and error message that must be
     // freed by the caller.
     // Returns true on success, false on failure.
-    bool (*snapshotList)(char** const outMessage, char** const errMessage);
-    bool (*snapshotSave)(const char* name, char** const errMessage);
-    bool (*snapshotLoad)(const char* name, char** const errMessage);
-    bool (*snapshotDelete)(const char* name, char** const errMessage);
+    bool (*snapshotList)(void* opaque,
+                         LineConsumerCallback outConsumer,
+                         LineConsumerCallback errConsumer);
+    bool (*snapshotSave)(const char* name,
+                         void* opaque,
+                         LineConsumerCallback errConsumer);
+    bool (*snapshotLoad)(const char* name,
+                         void* opaque,
+                         LineConsumerCallback errConsumer);
+    bool (*snapshotDelete)(const char* name,
+                           void* opaque,
+                           LineConsumerCallback errConsumer);
 } QAndroidVmOperations;
 
 ANDROID_END_HEADER

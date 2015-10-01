@@ -14,6 +14,8 @@
 
 #include "android/qemu-control-impl.h"
 
+#include "android/emulation/control/callbacks.h"
+#include "android/emulation/control/vm_operations.h"
 #include "cpu.h"
 #include "monitor/monitor.h"
 #include "sysemu/sysemu.h"
@@ -35,75 +37,46 @@ static bool qemu_vm_is_running() {
     return vm_running;
 }
 
-static int write_line_cb(char** buf,
-                         const char* prefix,
-                         const char* payload,
-                         int payloadlen) {
-    const int buflen = (*buf != NULL) ? strlen(*buf) : 0;
-    const int prefixlen = (prefix != NULL) ? strlen(prefix) : 0;
-    // Extra space for '\0'
-    const int strlen = buflen + prefixlen + payloadlen + 1;
-    *buf = realloc(*buf, strlen);
-
-    char* str = *buf + buflen;
-    if (prefix != NULL) {
-        strncpy(str, prefix, prefixlen);
-        str += prefixlen;
-    }
-    if (payload != NULL) {
-        strncpy(str, payload, payloadlen);
-        str += payloadlen;
-    }
-    str[0] = 0;
-    // We want to return the lenght of string, so don't count '\0'.
-    return (strlen - 1);
-}
-
-static int write_out_cb(void* opaque, const char* str, int strsize) {
-    char** buf = opaque;
-    return write_line_cb(buf, NULL, str, strsize);
-}
-
-static int write_err_cb(void* opaque, const char* str, int strsize) {
-    static const char ko_prefix[] = "KO: ";
-    char** buf = opaque;
-    return write_line_cb(buf, ko_prefix, str, strsize);
-}
-
-static bool qemu_snapshot_list(char** const outMessage,
-                               char** const errMessage) {
-    assert(outMessage != NULL && *outMessage == NULL);
-    assert(errMessage != NULL && *errMessage == NULL);
-    Monitor* out = monitor_fake_new(outMessage, write_out_cb);
-    Monitor* err = monitor_fake_new(errMessage, write_err_cb);
+static bool qemu_snapshot_list(void* opaque,
+                               LineConsumerCallback outConsumer,
+                               LineConsumerCallback errConsumer) {
+    Monitor* out = monitor_fake_new(opaque, outConsumer);
+    Monitor* err = monitor_fake_new(opaque, errConsumer);
     do_info_snapshots(out, err);
+    int ret = monitor_fake_get_bytes(err);
     monitor_fake_free(err);
     monitor_fake_free(out);
-    return (*errMessage == NULL);
+    return !ret;
 }
 
-static bool qemu_snapshot_save(const char* name, char** const errMessage) {
-    assert(errMessage != NULL && *errMessage == NULL);
-    Monitor* err = monitor_fake_new(errMessage, write_err_cb);
+static bool qemu_snapshot_save(const char* name,
+                               void* opaque,
+                               LineConsumerCallback errConsumer) {
+    Monitor* err = monitor_fake_new(opaque, errConsumer);
     do_savevm(err, name);
+    int ret = monitor_fake_get_bytes(err);
     monitor_fake_free(err);
-    return (*errMessage == NULL);
+    return !ret;
 }
 
-static bool qemu_snapshot_load(const char* name, char** const errMessage) {
-    assert(errMessage != NULL && *errMessage == NULL);
-    Monitor* err = monitor_fake_new(errMessage, write_err_cb);
+static bool qemu_snapshot_load(const char* name,
+                               void* opaque,
+                               LineConsumerCallback errConsumer) {
+    Monitor* err = monitor_fake_new(opaque, errConsumer);
     do_loadvm(err, name);
+    int ret = monitor_fake_get_bytes(err);
     monitor_fake_free(err);
-    return (*errMessage == NULL);
+    return !ret;
 }
 
-static bool qemu_snapshot_delete(const char* name, char** const errMessage) {
-    assert(errMessage != NULL && *errMessage == NULL);
-    Monitor* err = monitor_fake_new(errMessage, write_err_cb);
+static bool qemu_snapshot_delete(const char* name,
+                                 void* opaque,
+                                 LineConsumerCallback errConsumer) {
+    Monitor* err = monitor_fake_new(opaque, errConsumer);
     do_delvm(err, name);
+    int ret = monitor_fake_get_bytes(err);
     monitor_fake_free(err);
-    return (*errMessage != NULL);
+    return !ret;
 }
 
 static const QAndroidVmOperations sQAndroidVmOperations = {
