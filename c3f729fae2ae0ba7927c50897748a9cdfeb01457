@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "156b3632_e398d2fa",
+        "filename": "android/emulation/control/vm_operations.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-01T09:47:51Z",
+      "side": 1,
+      "message": "Please update the comment, it is now outdated :)",
+      "revId": "c3f729fae2ae0ba7927c50897748a9cdfeb01457",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
