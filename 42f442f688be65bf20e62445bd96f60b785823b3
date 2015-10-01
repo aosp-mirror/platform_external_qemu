@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "953c86f3_a5afeac4",
+        "filename": "android/CharSerialLine.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-01T14:33:18Z",
+      "side": 1,
+      "message": "yup",
+      "parentUuid": "75ab929e_fed2e140",
+      "revId": "42f442f688be65bf20e62445bd96f60b785823b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75ab929e_3ec8498f",
         "filename": "android/emulation/serial_line.h",
         "patchSetId": 3
