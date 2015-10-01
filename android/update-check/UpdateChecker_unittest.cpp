@@ -29,7 +29,7 @@ public:
           mGetCurrentVersionResult(0, 0, 0),
           mGetCurrentVersionCallCount(0) {}
 
-    virtual Version extractVersion(const std::string& data) {
+    virtual Version extractVersion(const std::string& data) const {
         ++mExtractVersionCallCount;
         EXPECT_EQ(mExtractVersionDataParam, data);
         return mExtractVersionResult;
@@ -42,7 +42,7 @@ public:
 
     std::string mExtractVersionDataParam;
     Version mExtractVersionResult;
-    int mExtractVersionCallCount;
+    mutable int mExtractVersionCallCount;
     Version mGetCurrentVersionResult;
     mutable int mGetCurrentVersionCallCount;
 };
