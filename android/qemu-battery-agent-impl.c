@@ -16,6 +16,10 @@
 #include "hw/power_supply.h"
 #include "hw/android/goldfish/device.h"
 
+static void battery_setIsBatteryPresent(bool isPresent) {
+    goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_PRESENT, isPresent);
+}
+
 static void battery_setIsCharging(bool isCharging) {
     goldfish_battery_set_prop(1, POWER_SUPPLY_PROP_ONLINE, isCharging);
 }
@@ -58,9 +62,11 @@ static void battery_setStatus(enum BatteryStatus status) {
 }
 
 static const QAndroidBatteryAgent sQAndroidBatteryAgent = {
+        .setIsBatteryPresent = battery_setIsBatteryPresent,
         .setIsCharging = battery_setIsCharging,
         .setChargeLevel = battery_setChargeLevel,
         .setHealth = battery_setHealth,
-        .setStatus = battery_setStatus};
+        .setStatus = battery_setStatus,
+        .batteryDisplay = goldfish_battery_display};
 const QAndroidBatteryAgent* const gQAndroidBatteryAgent =
         &sQAndroidBatteryAgent;

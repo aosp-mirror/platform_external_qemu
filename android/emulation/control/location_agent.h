@@ -14,11 +14,15 @@
 
 #include "android/utils/compiler.h"
 
+#include <stdbool.h>
 #include <sys/time.h>
 
 ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidLocationAgent {
+    // Query whether the device implementation supports GPS.
+    bool (*gpsIsSupported)(void);
+
     // Send a GPS location to the AVD using an NMEA sentence
     //   |latitude| and |longitude| are in degrees
     //   |metersElevation| is meters above sea level
@@ -27,6 +31,9 @@ typedef struct QAndroidLocationAgent {
     void (*gpsCmd)(double latitude, double longitude,
                    double metersElevation, int nSatellites,
                    const struct timeval *time);
+
+    // Send an NMEA fix sentence to the device.
+    void (*gpsSendNmea)(const char* sentence);
 } QAndroidLocationAgent;
 
 ANDROID_END_HEADER
