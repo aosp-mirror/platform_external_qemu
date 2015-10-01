@@ -118,6 +118,30 @@
     },
     {
       "key": {
+        "uuid": "d55b5e6b_88d3dff2",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2072,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-01T01:32:58Z",
+      "side": 1,
+      "message": "I uploaded an RFC CL with callbacks in the interface: https://android-review.googlesource.com/#/c/173769\n\nIf we like that better, I\u0027ll squash into this CL.\n\nNote that it makes the glue code thinner on both sides.\nAlso, I\u0027ll be able to use the same callback in other places I\u0027ve found with similar interfaces (hw/android/goldfish/device.h)",
+      "parentUuid": "15a33681_d7cc2c50",
+      "range": {
+        "startLine": 2069,
+        "startChar": 0,
+        "endLine": 2072,
+        "endChar": 5
+      },
+      "revId": "c0c3418e0e09e751ba5e162b47a4a8dbecdb6880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "953c86f3_05d4d64d",
         "filename": "android/emulation/control/vm_operations.h",
         "patchSetId": 2
