@@ -17,7 +17,6 @@
 #include "extended-window.h"
 #include "android/location-agent.h"
 #include "android/gps.h"
-#include "android/gps/GpsFix.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -77,12 +76,6 @@ void ExtendedWindow::on_loc_removeRowButton_clicked()
 void ExtendedWindow::on_loc_pathTable_cellChanged(int row, int col)
 {
     // If the cell's contents are bad, turn the cell red
-
-    // Special case: The first row's time value must be 0
-    if (row == 0 && col == 0) {
-        mExtendedUi->loc_pathTable->item(0,0)->setText(QString("0"));
-    }
-
     bool cellOK = loc_cellIsValid(mExtendedUi->loc_pathTable, row, col);
     QColor newColor = (cellOK ? Qt::white : Qt::red);
 
@@ -281,15 +274,7 @@ void ExtendedWindow::on_loc_GpxButton_clicked()
         mToolWindow->showErrorDialog(tr(errStr.c_str()),
                                      tr("GPX Parser"));
     } else {
-        // Put the data into 'loc_pathTable'
-        for (unsigned int idx = 0; idx < gpxFixes.size(); idx++) {
-            loc_appendToTable(gpxFixes[idx].latitude,
-                              gpxFixes[idx].longitude,
-                              gpxFixes[idx].elevation,
-                              gpxFixes[idx].name,
-                              gpxFixes[idx].description,
-                              gpxFixes[idx].time);
-        }
+        loc_populateTable(&gpxFixes);
     }
 
     // Ensure that we have at least one row
@@ -329,15 +314,7 @@ void ExtendedWindow::on_loc_KmlButton_clicked()
         mToolWindow->showErrorDialog(tr(errStr.c_str()),
                                      tr("KML Parser"));
     } else {
-        // Put the data into 'loc_pathTable'
-        for (unsigned int idx = 0; idx < kmlFixes.size(); idx++) {
-            loc_appendToTable(kmlFixes[idx].latitude,
-                              kmlFixes[idx].longitude,
-                              kmlFixes[idx].elevation,
-                              kmlFixes[idx].name,
-                              kmlFixes[idx].description,
-                              kmlFixes[idx].time);
-        }
+        loc_populateTable(&kmlFixes);
     }
 
     // Ensure that we have at least one row
@@ -356,6 +333,30 @@ void ExtendedWindow::on_loc_KmlButton_clicked()
                      mExtendedUi->loc_pathTable->rowCount() > 1 );
 }
 
+void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
+{
+    // Special case, the first row will have delay 0
+    time_t previousTime = fixes->at(0).time;
+    for (unsigned i = 0; i < fixes->size(); i++) {
+        GpsFix &fix = fixes->at(i);
+        time_t delay = fix.time - previousTime; // In seconds
+
+        // Ensure all other delays are > 0, even if multiple points have the same timestamp
+        if (delay == 0 && i != 0) {
+            delay = 2;
+        }
+
+        loc_appendToTable(fix.latitude,
+                          fix.longitude,
+                          fix.elevation,
+                          fix.name,
+                          fix.description,
+                          delay);
+
+        previousTime = fix.time;
+    }
+}
+
 ////////////////////////////////////////////////////////////
 //
 //  loc_appendToTable
@@ -367,12 +368,12 @@ void ExtendedWindow::loc_appendToTable(std::string lat,
                                        std::string elev,
                                        std::string name,
                                        std::string description,
-                                       std::string time)
+                                       time_t time)
 {
     int newRow = mExtendedUi->loc_pathTable->rowCount();
 
     mExtendedUi->loc_pathTable->insertRow(newRow);
-    mExtendedUi->loc_pathTable->setItem(newRow, 0, new QTableWidgetItem(time.c_str()));
+    mExtendedUi->loc_pathTable->setItem(newRow, 0, new QTableWidgetItem(QString::number(time)));
     mExtendedUi->loc_pathTable->setItem(newRow, 1, new QTableWidgetItem(lat.c_str()));
     mExtendedUi->loc_pathTable->setItem(newRow, 2, new QTableWidgetItem(lon.c_str()));
     mExtendedUi->loc_pathTable->setItem(newRow, 3, new QTableWidgetItem(elev.c_str()));

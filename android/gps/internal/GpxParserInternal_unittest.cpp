@@ -23,7 +23,6 @@ TEST(GpxParserInternal, ParseLocationMissingLatitude) {
             "<ele>6.02</ele>"
             "<name>Name</name>"
             "<desc>Desc</desc>"
-            "<time>Time</time>"
             "</wpt>"
             "</gpx>";
 
@@ -37,7 +36,8 @@ TEST(GpxParserInternal, ParseLocationMissingLatitude) {
     ASSERT_NE(wptNode, (void *) NULL);
 
     GpsFix wpt;
-    bool isOk = GpxParserInternal::parseLocation(wptNode, doc, &wpt);
+    std::string error;
+    bool isOk = GpxParserInternal::parseLocation(wptNode, doc, &wpt, &error);
     EXPECT_FALSE(isOk);
     GpxParserInternal::cleanupXmlDoc(doc);
 }
@@ -50,7 +50,6 @@ TEST(GpxParserInternal, ParseLocationMissingLongitude) {
             "<ele>6.02</ele>"
             "<name>Name</name>"
             "<desc>Desc</desc>"
-            "<time>Time</time>"
             "</wpt>"
             "</gpx>";
 
@@ -64,7 +63,8 @@ TEST(GpxParserInternal, ParseLocationMissingLongitude) {
     ASSERT_NE(wptNode, (void *) NULL);
 
     GpsFix wpt;
-    bool isOk = GpxParserInternal::parseLocation(wptNode, doc, &wpt);
+    std::string error;
+    bool isOk = GpxParserInternal::parseLocation(wptNode, doc, &wpt, &error);
     EXPECT_FALSE(isOk);
     GpxParserInternal::cleanupXmlDoc(doc);
 }
@@ -77,7 +77,6 @@ TEST(GpxParserInternal, ParseValidLocation) {
             "<ele>6.02</ele>"
             "<name>Name</name>"
             "<desc>Desc</desc>"
-            "<time>Time</time>"
             "</wpt>"
             "</gpx>";
 
@@ -91,7 +90,8 @@ TEST(GpxParserInternal, ParseValidLocation) {
     ASSERT_NE(wptNode, (void *) NULL);
 
     GpsFix wpt;
-    bool isOk = GpxParserInternal::parseLocation(wptNode, doc, &wpt);
+    std::string error;
+    bool isOk = GpxParserInternal::parseLocation(wptNode, doc, &wpt, &error);
     EXPECT_TRUE(isOk);
 
     EXPECT_EQ("Desc", wpt.description);
@@ -99,7 +99,6 @@ TEST(GpxParserInternal, ParseValidLocation) {
     EXPECT_EQ("3.1415", wpt.latitude);
     EXPECT_EQ("9.81", wpt.longitude);
     EXPECT_EQ("Name", wpt.name);
-    EXPECT_EQ("Time", wpt.time);
 
     GpxParserInternal::cleanupXmlDoc(doc);
 }
