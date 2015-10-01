@@ -10,15 +10,17 @@
 ** GNU General Public License for more details.
 */
 #include "android/utils/ini.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <limits.h>
-#include <errno.h>
+
+#include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h" /* for ASTRDUP */
-#include "android/utils/bufprint.h"
-#include "qemu/osdep.h"
+
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 
 /* W() is used to print warnings, D() to print debugging info */
 #define  W(...)   dwarning(__VA_ARGS__)
