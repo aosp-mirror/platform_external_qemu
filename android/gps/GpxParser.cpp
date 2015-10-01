@@ -12,7 +12,9 @@
 #include "android/gps/GpxParser.h"
 #include "android/gps/internal/GpxParserInternal.h"
 
+#include <algorithm>
 #include <string.h>
+#include <time.h>
 
 using std::string;
 
@@ -22,7 +24,7 @@ void GpxParserInternal::cleanupXmlDoc(xmlDoc *doc)
     xmlCleanupParser();
 }
 
-bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result)
+bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *error)
 {
     string latitude;
     string longitude;
@@ -33,6 +35,9 @@ bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *resu
     // Check for and get the latitude attribute
     attr = xmlHasProp(ptNode, (const xmlChar *) "lat");
     if (attr == NULL) {
+        char buf[100];
+        sprintf(buf, "Point missing a latitude on line %d.", ptNode->line);
+        *error = string(buf);
         return false; // Return error since a point *must* have a latitude
     } else {
         tmpStr = xmlGetProp(ptNode, (const xmlChar *) "lat");
@@ -43,6 +48,9 @@ bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *resu
     // Check for and get the longitude attribute
     attr = xmlHasProp(ptNode, (const xmlChar *) "lon");
     if (attr == NULL) {
+        char buf[100];
+        sprintf(buf, "Point missing a longitude on line %d.", ptNode->line);
+        *error = string(buf);
         return false; // Return error since a point *must* have a longitude
     } else {
         tmpStr = xmlGetProp(ptNode, (const xmlChar *) "lon");
@@ -62,7 +70,19 @@ bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *resu
 
         if ( !strcmp((const char *) field->name, "time") ) {
             tmpStr = xmlNodeListGetString(doc, field->children, 1);
-            result->time = string((const char *) tmpStr);
+
+            // Convert to a number
+            struct tm time;
+            if (!strptime((const char *)tmpStr, "%FT%T%Z", &time)) {
+                char buf[100];
+                sprintf(buf,
+                        "Improperly formatted time on line %d.<br/>Times must be in UTC format.",
+                        ptNode->line);
+                *error = string(buf);
+                return false;
+            }
+            result->time = mktime(&time);
+
             xmlFree(tmpStr); // Caller-freed
             childCount++;
         }
@@ -107,13 +127,9 @@ bool GpxParserInternal::parse(xmlDoc *doc, GpsFixArray *fixes, string *error)
 
         // Individual <wpt> elements are parsed on their own
         if ( !strcmp((const char *) child->name, "wpt") ) {
-            isOk = parseLocation(child, doc, &location);
+            isOk = parseLocation(child, doc, &location, error);
             if (!isOk) {
                 cleanupXmlDoc(doc);
-
-                char buf[100];
-                sprintf(buf, "Wpt missing a lat or lon on line %d.", child->line);
-                *error = string(buf);
                 return false;
             }
             fixes->push_back(location);
@@ -125,13 +141,9 @@ bool GpxParserInternal::parse(xmlDoc *doc, GpsFixArray *fixes, string *error)
 
                 // <rtept> elements are parsed just like <wpt> elements
                 if ( !strcmp((const char *) rtept->name, "rtept") ) {
-                    isOk = parseLocation(rtept, doc, &location);
+                    isOk = parseLocation(rtept, doc, &location, error);
                     if (!isOk) {
                         cleanupXmlDoc(doc);
-
-                        char buf[100];
-                        sprintf(buf, "Rtept missing a lat or lon on line %d.", rtept->line);
-                        *error = string(buf);
                         return false;
                     }
                     fixes->push_back(location);
@@ -151,13 +163,9 @@ bool GpxParserInternal::parse(xmlDoc *doc, GpsFixArray *fixes, string *error)
 
                         // <trkpt> elements are parsed just like <wpt> elements
                         if ( !strcmp((const char *) trkpt->name, "trkpt") ) {
-                            isOk = parseLocation(trkpt, doc, &location);
+                            isOk = parseLocation(trkpt, doc, &location, error);
                             if (!isOk) {
                                 cleanupXmlDoc(doc);
-
-                                char buf[100];
-                                sprintf(buf, "Trkpt missing a lat or lon on line %d.", trkpt->line);
-                                *error = string(buf);
                                 return false;
                             }
                             fixes->push_back(location);
@@ -167,6 +175,9 @@ bool GpxParserInternal::parse(xmlDoc *doc, GpsFixArray *fixes, string *error)
             }
         }
     }
+
+    // Sort the values by timestamp
+    std::sort(fixes->begin(), fixes->end());
 
     cleanupXmlDoc(doc);
     return true;
