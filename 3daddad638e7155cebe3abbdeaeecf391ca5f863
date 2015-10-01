@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f5586271_549cc463",
+        "filename": "android-configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-10-01T16:46:54Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "55eccecd_50bfd291",
+      "revId": "3daddad638e7155cebe3abbdeaeecf391ca5f863",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "35e91ad0_3f3ca3f6",
         "filename": "distrib/android-emugl/Android.mk",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "b5398a03_948814ad",
+        "filename": "distrib/android-emugl/Android.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-10-01T16:46:54Z",
+      "side": 1,
+      "message": "OK. Got to fix my editor, it replaces 4 spaces with tabs.",
+      "parentUuid": "35e91ad0_3f3ca3f6",
+      "revId": "3daddad638e7155cebe3abbdeaeecf391ca5f863",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "55eccecd_90a01a6f",
         "filename": "distrib/android-emugl/Android.mk",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2015-10-01T14:44:14Z",
       "side": 1,
       "message": "why are these commented? Add a TODO that explains why, or just remove the lines.",
+      "revId": "3daddad638e7155cebe3abbdeaeecf391ca5f863",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1548969f_15e1a400",
+        "filename": "distrib/android-emugl/Android.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-10-01T16:46:54Z",
+      "side": 1,
+      "message": "I will simply remove them and restore them when ready.",
+      "parentUuid": "55eccecd_90a01a6f",
       "revId": "3daddad638e7155cebe3abbdeaeecf391ca5f863",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
