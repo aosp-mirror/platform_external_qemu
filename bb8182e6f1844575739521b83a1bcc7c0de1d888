@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b5526a4f_ec27138b",
+        "filename": "android/skin/qt/tools.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-01T16:51:33Z",
+      "side": 1,
+      "message": "Replace this with something more appropriate?\n\nOn a different note, if no \"minimize\" button exists in the tools UI and the user has a skinned (and thus frameless) emulator, how do they minimize the UI?",
+      "revId": "bb8182e6f1844575739521b83a1bcc7c0de1d888",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
