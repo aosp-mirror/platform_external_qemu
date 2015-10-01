@@ -13,6 +13,7 @@
 #include "android/hw-qemud.h"
 
 #include "android/charpipe.h"
+#include "android/emulation/android_qemud.h"
 #include "android/qemu/emulation/CharSerialLine.h"
 #include "android/utils/debug.h"
 
@@ -74,39 +75,9 @@ CharDriverState* android_qemud_get_cs(void) {
     return android_qemud_cs;
 }
 
-/* this function is used to register a new named qemud-based
- * service. You must provide 'serv_opaque' and 'serv_connect'
- * which will be called whenever a new client tries to connect
- * to the services.
- *
- * 'serv_connect' shall return NULL if the connection is refused,
- * or a handle to a new QemudClient otherwise. The latter can be
- * created through qemud_client_new() defined above.
- *
- * 'max_clients' is the maximum number of clients accepted by
- * the service concurrently. If this value is 0, then any number
- * of clients can connect.
- */
-QemudService* qemud_service_register(const char* service_name,
-                                     int max_clients,
-                                     void* serv_opaque,
-                                     QemudServiceConnect serv_connect,
-                                     QemudServiceSave serv_save,
-                                     QemudServiceLoad serv_load) {
-    QemudService* sv;
-    QemudMultiplexer* m = qemud_multiplexer;
 
+void android_qemu1_qemud_init(void) {
     (void) android_qemud_get_cs();
-
-    sv = qemud_service_new(service_name,
-                           max_clients,
-                           serv_opaque,
-                           serv_connect,
-                           serv_save,
-                           serv_load,
-                           qemud_multiplexer_get_services(m));
-    D("Registered QEMUD service %s", service_name);
-    return sv;
 }
 
 /*

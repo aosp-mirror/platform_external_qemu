@@ -2264,6 +2264,9 @@ int main(int argc, char **argv, char **envp)
 
     register_watchdogs();
 
+    /* make sure qemud is initialized before any calls to it */
+    android_qemu1_qemud_init();
+
     /* Initialize boot properties. */
     boot_property_init_service();
     android_hw_control_init();

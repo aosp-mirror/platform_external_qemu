@@ -127,6 +127,29 @@ typedef void (*QemudServiceSave)(Stream* f,
  */
 typedef int (*QemudServiceLoad)(Stream* f, QemudService* service, void* opaque);
 
+/* Register a new qemud service.
+ * this function is used to register a new named qemud-based
+ * service. You must provide 'serv_opaque' and 'serv_connect'
+ * which will be called whenever a new client tries to connect
+ * to the services.
+ *
+ * 'serv_opaque' is the first parameter to 'serv_connect'
+ *
+ * 'serv_connect' shall return NULL if the connection is refused,
+ * or a handle to a new QemudClient otherwise. The latter can be
+ * created through qemud_client_new() defined above.
+ *
+ * 'max_clients' is the maximum number of clients accepted by
+ * the service concurrently. If this value is 0, then any number
+ * of clients can connect.
+ */
+extern QemudService* qemud_service_register(const char* serviceName,
+                                            int max_clients,
+                                            void* serv_opaque,
+                                            QemudServiceConnect serv_connect,
+                                            QemudServiceSave serv_save,
+                                            QemudServiceLoad serv_load);
+
 /* Create a new QemudService object */
 extern QemudService* qemud_service_new(const char* name,
                                        int max_clients,

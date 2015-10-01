@@ -22,6 +22,7 @@
 
 #include "android/camera/camera-format-converters.h"
 #include "android/camera/camera-capture.h"
+#include "android/emulation/android_qemud.h"
 #include "android/globals.h"  /* for android_hw */
 #include "android/hw-qemud.h"
 #include "android/utils/debug.h"

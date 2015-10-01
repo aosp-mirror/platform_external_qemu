@@ -20,11 +20,13 @@
 #include "android/emulation/qemud/android_qemud_client.h"
 #include "android/emulation/qemud/android_qemud_common.h"
 #include "android/emulation/qemud/android_qemud_multiplexer.h"
+#include "android/emulation/qemud/android_qemud_service.h"
 
 extern "C" {
     #include "migration/vmstate.h"
 }
 
+#include <assert.h>
 #include <stdlib.h>
 
 
@@ -446,6 +448,7 @@ static void _android_qemud_pipe_init(void) {
     }
 }
 
+static bool isInited = false;
 
 void android_qemud_init(CSerialLine* sl) {
     D("%s", __FUNCTION__);
@@ -455,4 +458,25 @@ void android_qemud_init(CSerialLine* sl) {
      * via one, or the other. */
     _android_qemud_serial_init(sl);
     _android_qemud_pipe_init();
+    isInited = true;
+}
+
+QemudService* qemud_service_register(const char* service_name,
+                                     int max_clients,
+                                     void* serv_opaque,
+                                     QemudServiceConnect serv_connect,
+                                     QemudServiceSave serv_save,
+                                     QemudServiceLoad serv_load) {
+    assert(isInited);
+
+    QemudService* const sv =
+            qemud_service_new(service_name,
+                              max_clients,
+                              serv_opaque,
+                              serv_connect,
+                              serv_save,
+                              serv_load,
+                              &qemud_multiplexer->services);
+    D("Registered QEMUD service %s", service_name);
+    return sv;
 }
