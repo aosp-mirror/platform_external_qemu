@@ -73,14 +73,23 @@ bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *resu
 
             // Convert to a number
             struct tm time;
-            if (!strptime((const char *)tmpStr, "%FT%T%Z", &time)) {
+            int results = sscanf((const char *)tmpStr,
+                                 "%u-%u-%uT%u:%u:%u",
+                                 &time.tm_year, &time.tm_mon, &time.tm_mday,
+                                 &time.tm_hour, &time.tm_min, &time.tm_sec);
+            if (results != 6) {
                 char buf[100];
                 sprintf(buf,
-                        "Improperly formatted time on line %d.<br/>Times must be in UTC format.",
+                        "Improperly formatted time on line %d.<br/>Times must be in ISO format.",
                         ptNode->line);
                 *error = string(buf);
                 return false;
             }
+
+            // Correct according to the struct tm specification
+            time.tm_year -= 1900; // Years since 1900
+            time.tm_mon -= 1; // Months since January, 0-11
+
             result->time = mktime(&time);
 
             xmlFree(tmpStr); // Caller-freed
