@@ -51,6 +51,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(asconnector,  "Asynchronous socket connector") \
     _VERBOSE_TAG(asyncsocket,  "Asynchronous socket") \
     _VERBOSE_TAG(sdkctlsocket, "Socket tethering to SdkControl server") \
+    _VERBOSE_TAG(updater,      "Update checker")  \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
@@ -62,13 +63,13 @@ typedef enum {
 extern unsigned long  android_verbose;
 
 #define  VERBOSE_ENABLE(tag)    \
-    android_verbose |= (1 << VERBOSE_##tag)
+    android_verbose |= (1UL << VERBOSE_##tag)
 
 #define  VERBOSE_DISABLE(tag)   \
-    android_verbose &= (1 << VERBOSE_##tag)
+    android_verbose &= (1UL << VERBOSE_##tag)
 
 #define  VERBOSE_CHECK(tag)    \
-    ((android_verbose & (1 << VERBOSE_##tag)) != 0)
+    ((android_verbose & (1UL << VERBOSE_##tag)) != 0)
 
 #define  VERBOSE_CHECK_ANY()    \
     (android_verbose != 0)
