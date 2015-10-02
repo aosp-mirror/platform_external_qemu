@@ -1386,6 +1386,13 @@ skin_window_set_title( SkinWindow*  window, const char*  title )
     }
 }
 
+void
+skin_window_position_changed( SkinWindow* window, int x, int y )
+{
+    window->x_pos = x;
+    window->y_pos = y;
+}
+
 static void
 skin_window_resize( SkinWindow*  window )
 {

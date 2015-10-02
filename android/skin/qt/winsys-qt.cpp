@@ -232,7 +232,9 @@ extern void skin_winsys_set_window_pos(int x, int y)
         D("%s: Could not get window handle", __FUNCTION__);
         return;
     }
-    window->setWindowPos(x, y);
+    QSemaphore semaphore;
+    window->setWindowPos(x, y, &semaphore);
+    semaphore.acquire();
 }
 
 extern void skin_winsys_set_window_title(const char *title)

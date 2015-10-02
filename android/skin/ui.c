@@ -439,13 +439,18 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
 
         case kEventSetScale:
-            skin_window_set_scale(ui->window, ev.u.resize.scale);
+            skin_window_position_changed(ui->window, ev.u.window.x, ev.u.window.y);
+            skin_window_set_scale(ui->window, ev.u.window.scale);
             break;
 
         case kEventQuit:
             DE("EVENT: kEventQuit\n");
             /* only save emulator config through clean exit */
             return true;
+
+        case kEventWindowMoved:
+            skin_window_position_changed(ui->window, ev.u.window.x, ev.u.window.y);
+            break;
         }
     }
 
