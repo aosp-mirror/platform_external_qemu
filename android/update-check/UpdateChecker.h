@@ -26,12 +26,11 @@ namespace update_check {
 //  IDataLoader - download the xml manifest from the Web
 //  ITimeStorage - lock the file to store last update checking time,
 //                 save/load time from the file
-//  INewerVersionReporter - report to the user about available newer version
 
 class IVersionExtractor {
 public:
     virtual ~IVersionExtractor() {}
-    virtual android::base::Version extractVersion(const std::string& data) const = 0;
+    virtual android::base::Version extractVersion(const std::string& data) = 0;
     virtual android::base::Version getCurrentVersion() const = 0;
 };
 
@@ -79,7 +78,7 @@ public:
     bool runAsyncCheck();
 
 protected:
-    // constructor for tests
+    // contructor for tests
     UpdateChecker(IVersionExtractor*,
                   IDataLoader*,
                   ITimeStorage*,

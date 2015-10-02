@@ -64,7 +64,6 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/telephony/sms.c \
   android/telephony/sms_unittest.cpp \
   android/update-check/UpdateChecker_unittest.cpp \
-  android/update-check/VersionExtractor_unittest.cpp \
   android/utils/aconfig-file_unittest.cpp \
   android/utils/bufprint_unittest.cpp \
   android/utils/dirscanner_unittest.cpp \

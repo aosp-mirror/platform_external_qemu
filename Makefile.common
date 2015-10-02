@@ -227,7 +227,6 @@ common_LOCAL_SRC_FILES += \
 	android/proxy/proxy_http_connector.c \
 	android/proxy/proxy_http_rewriter.c \
 	android/update-check/UpdateChecker.cpp \
-	android/update-check/VersionExtractor.cpp \
 	android/utils/aconfig-file.c \
 	android/utils/assert.c \
 	android/utils/bufprint.c \
