@@ -23,6 +23,7 @@
 #include "android/hw-control.h"
 #include "android/hw-qemud.h"
 #include "android/globals.h"
+#include "android/emulation/android_qemud.h"
 #include "android/utils/cbuffer.h"
 #include "android/utils/misc.h"
 #include "android/utils/debug.h"

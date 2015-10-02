@@ -11,10 +11,13 @@
 */
 
 #include "android/boot-properties.h"
-#include "android/utils/debug.h"
-#include "android/utils/system.h"
-#include "android/hw-qemud.h"
+
+#include "android/emulation/android_qemud.h"
 #include "android/globals.h"
+#include "android/hw-qemud.h"
+#include "android/utils/debug.h"
+#include "android/utils/stream.h"
+#include "android/utils/system.h"
 
 #include "hw/hw.h"
 

@@ -12,27 +12,20 @@
 
 #pragma once
 
-#include "android/emulation/android_qemud.h"
 #include "android/utils/compiler.h"
 
 #include "qemu-common.h"
 
 ANDROID_BEGIN_HEADER
 
+/* Initialize the qemud service for use in QEMU1
+ */
+extern void android_qemu1_qemud_init(void);
+
 /* return the character driver state object that needs to be connected to the
  * emulated serial port where all multiplexed channels go through.
  */
 extern CharDriverState* android_qemud_get_cs(void);
-
-/* Register a new qemud service.
- * 'serv_opaque' is the first parameter to 'serv_connect'
- */
-extern QemudService* qemud_service_register(const char* serviceName,
-                                            int max_clients,
-                                            void* serv_opaque,
-                                            QemudServiceConnect serv_connect,
-                                            QemudServiceSave serv_save,
-                                            QemudServiceLoad serv_load);
 
 /* returns in '*pcs' a CharDriverState object that will be connected to
  * a single client in the emulated system for a given named service.

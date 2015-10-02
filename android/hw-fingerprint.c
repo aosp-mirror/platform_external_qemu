@@ -11,6 +11,7 @@
 */
 
 #include "android/hw-fingerprint.h"
+#include "android/emulation/android_qemud.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/stream.h"

@@ -12,6 +12,7 @@
 
 #include "android/hw-sensors.h"
 
+#include "android/emulation/android_qemud.h"
 #include "android/globals.h"
 #include "android/hw-qemud.h"
 #include "android/qemu/utils/stream.h"

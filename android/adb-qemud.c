@@ -17,6 +17,7 @@
 #include "android/adb-qemud.h"
 
 #include "android/adb-server.h"
+#include "android/emulation/android_qemud.h"
 #include "android/globals.h"  /* for android_hw */
 #include "android/hw-qemud.h"
 #include "android/utils/debug.h"
