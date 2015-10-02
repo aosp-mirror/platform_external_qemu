@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d5cefe75_47d1a292",
+        "filename": "android/emulation/control/CannedCallbacks.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-02T05:21:40Z",
+      "side": 1,
+      "message": "Yes!\nBad habits die hard.",
+      "parentUuid": "953c86f3_cebfab2f",
+      "range": {
+        "startLine": 24,
+        "startChar": 4,
+        "endLine": 24,
+        "endChar": 16
+      },
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "156b3632_a3bc1a3c",
         "filename": "android/emulation/control/CannedCallbacks.h",
         "patchSetId": 2
@@ -36,6 +60,24 @@
       "writtenOn": "2015-10-01T11:09:45Z",
       "side": 1,
       "message": "nit: This header file should be called LineConsumer.h to match the class definition.",
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75df1224_0d46ddec",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-02T05:21:40Z",
+      "side": 1,
+      "message": "I\u0027d rather not.\nI intend that file to contain typedefs for any and all callbacks needed by the emulation/control/ interfaces.",
+      "parentUuid": "156b3632_a3bc1a3c",
       "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "75df1224_2de0f939",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-02T05:21:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "55712e1a_85b2c22f",
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "156b3632_83bf1e30",
         "filename": "android/emulation/control/CannedCallbacks.h",
         "patchSetId": 2
@@ -76,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "b5d50a02_23b5744d",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-02T05:21:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "156b3632_83bf1e30",
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9555663b_0630647d",
         "filename": "android/emulation/control/CannedCallbacks.h",
         "patchSetId": 2
@@ -87,6 +165,30 @@
       "writtenOn": "2015-10-01T14:49:24Z",
       "side": 1,
       "message": "it\u0027s pretty much the same as not writing it at all (if you remove DISALLOW_COPY_AND_ASSIGN)",
+      "range": {
+        "startLine": 39,
+        "startChar": 2,
+        "endLine": 39,
+        "endChar": 27
+      },
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "751ab2b5_6935c16a",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-02T05:21:40Z",
+      "side": 1,
+      "message": "I\u0027m keeping DISALLOW_COPY_AND_ASSIGN.",
+      "parentUuid": "9555663b_0630647d",
       "range": {
         "startLine": 39,
         "startChar": 2,
@@ -122,6 +224,30 @@
     },
     {
       "key": {
+        "uuid": "55da0e36_40a430ee",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-02T05:21:40Z",
+      "side": 1,
+      "message": "Can\u0027t be.\nA const function can\u0027t return |this|.",
+      "parentUuid": "75439281_cd8215c3",
+      "range": {
+        "startLine": 42,
+        "startChar": 16,
+        "endLine": 42,
+        "endChar": 18
+      },
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "354d9aaf_f04ec85a",
         "filename": "android/emulation/control/CannedCallbacks.h",
         "patchSetId": 2
@@ -145,6 +271,30 @@
     },
     {
       "key": {
+        "uuid": "15117609_3931c7cd",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-02T05:21:40Z",
+      "side": 1,
+      "message": "Done. Duh!",
+      "parentUuid": "354d9aaf_f04ec85a",
+      "range": {
+        "startLine": 43,
+        "startChar": 13,
+        "endLine": 43,
+        "endChar": 31
+      },
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b57c2af2_686683ae",
         "filename": "android/emulation/control/CannedCallbacks.h",
         "patchSetId": 2
@@ -156,6 +306,24 @@
       "writtenOn": "2015-10-01T11:09:45Z",
       "side": 1,
       "message": "shouldn\u0027t this return a const reference instead?",
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75df1224_6dea011a",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-02T05:21:40Z",
+      "side": 1,
+      "message": "Yes. Thanks.\nThat was the expectation, as the class level comment says.",
+      "parentUuid": "b57c2af2_686683ae",
       "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -202,6 +370,24 @@
     },
     {
       "key": {
+        "uuid": "d5b7dee1_226d743a",
+        "filename": "android/emulation/control/CannedCallbacks.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-02T05:21:40Z",
+      "side": 1,
+      "message": "I\u0027m used to putting it last.\nA quick cs search gives a split jury.",
+      "parentUuid": "b57c2af2_4861bf93",
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "354d9aaf_503dfca2",
         "filename": "android/emulation/control/CannedCallbacks_unittest.cpp",
         "patchSetId": 2
@@ -213,6 +399,30 @@
       "writtenOn": "2015-10-01T14:49:24Z",
       "side": 1,
       "message": "what\u0027s the difference from the previous test?",
+      "range": {
+        "startLine": 46,
+        "startChar": 22,
+        "endLine": 46,
+        "endChar": 44
+      },
+      "revId": "99d4b1d62aed46a88132f0ed81a177dfe2b1d95c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d5b7dee1_62676c5a",
+        "filename": "android/emulation/control/CannedCallbacks_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-02T05:21:40Z",
+      "side": 1,
+      "message": "The buffers are longer / shorter than the claimed length.\nAdded comment.",
+      "parentUuid": "354d9aaf_503dfca2",
       "range": {
         "startLine": 46,
         "startChar": 22,
