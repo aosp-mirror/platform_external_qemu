@@ -16,6 +16,24 @@
       "revId": "c70213f1ee707214c9f0cf287bee6e19055233e7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15a33681_cf4570e1",
+        "filename": "android/gps/GpxParser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-02T21:19:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "354d9aaf_460ee3b2",
+      "revId": "c70213f1ee707214c9f0cf287bee6e19055233e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
