@@ -36,6 +36,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/http_utils.h"
+#include "android/utils/looper.h"
 #include "android/utils/sockets.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/utf8_utils.h"
@@ -88,6 +89,9 @@ typedef struct ControlClientRec_
 {
     struct ControlClientRec_*  next;       /* next client in list           */
     Socket                     sock;       /* socket used for communication */
+    // The loopIo currently communicating over |sock|. May change over the
+    // lifetime of a ControlClient.
+    LoopIo* loopIo;
     ControlGlobal              global;
     char                       finished;
     char                       buff[ 4096 ];
@@ -105,8 +109,9 @@ typedef struct ControlGlobalRec_
     QAndroidUserEventAgent* user_event_agent;
     QAndroidVmOperations* vm_operations;
 
-    /* listening socket */
-    Socket    listen_fd;
+    /* IO */
+    Looper* looper;
+    LoopIo* listen_loopio;
 
     /* the list of current clients */
     ControlClient   clients;
@@ -121,6 +126,9 @@ typedef struct ControlGlobalRec_
 static inline QAndroidVmOperations* vmopers(ControlClient client) {
     return client->global->vm_operations;
 }
+
+//////////// Module level globals //////////////////////////
+static ControlGlobalRec _g_global;
 
 static int
 control_global_add_redir( ControlGlobal  global,
@@ -191,14 +199,13 @@ control_client_detach( ControlClient  client )
     if (client->sock < 0)
         return -1;
 
-    qemu_set_fd_handler( client->sock, NULL, NULL, NULL );
+    loopIo_free(client->loopIo);
+    client->loopIo = NULL;
     result = client->sock;
     client->sock = -1;
 
     return result;
 }
-
-static void  control_client_read( void*  _client );  /* forward */
 
 static void
 control_client_destroy( ControlClient  client )
@@ -285,6 +292,9 @@ static int control_write_err_cb(void* opaque, const char* str, int strsize) {
     return ret + strsize;
 }
 
+// forward declaration
+static void control_client_read(void* opaque, int fd, unsigned events);
+
 static ControlClient
 control_client_create( Socket         socket,
                        ControlGlobal  global )
@@ -297,10 +307,13 @@ control_client_create( Socket         socket,
         client->finished = 0;
         client->global  = global;
         client->sock    = socket;
+        client->loopIo =
+                loopIo_new(global->looper, socket, control_client_read, client);
         client->next    = global->clients;
         global->clients = client;
 
-        qemu_set_fd_handler( socket, control_client_read, NULL, client );
+        loopIo_wantRead(client->loopIo);
+        loopIo_dontWantWrite(client->loopIo);
     }
     return client;
 }
@@ -515,12 +528,13 @@ control_client_read_byte( ControlClient  client, unsigned char  ch )
     }
 }
 
-static void
-control_client_read( void*  _client )
-{
-    ControlClient  client = _client;
-    unsigned char  buf[4096];
-    int            size;
+static void control_client_read(void* opaque, int fd, unsigned events) {
+    ControlClient client = opaque;
+    unsigned char buf[4096];
+    int size;
+
+    assert(fd == client->sock);
+    assert((events & LOOP_IO_READ) != 0);
 
     D(( "in control_client read: " ));
     size = socket_recv( client->sock, buf, sizeof(buf) );
@@ -569,16 +583,23 @@ control_client_read( void*  _client )
 
 
 /* this function is called on each new client connection */
-static void
-control_global_accept( void*  _global )
-{
-    ControlGlobal       global = _global;
+static void control_global_accept(void* opaque,
+                                  int listen_fd,
+                                  unsigned events) {
+    ControlGlobal global = opaque;
     ControlClient       client;
     Socket              fd;
 
-    D(( "control_global_accept: just in (fd=%d)\n", global->listen_fd ));
+    assert(listen_fd == loopIo_fd(global->listen_loopio));
+    // accept()s are mapped to LOOP_IO_READ
+    assert(events & LOOP_IO_READ);
 
-    fd = HANDLE_EINTR(socket_accept(global->listen_fd, NULL));
+    D(( "control_global_accept: just in (fd=%d)\n", listen_fd ));
+    assert(listen_fd == loopIo_fd(global->listen_loopio));
+    // connect()s are mapped to LOOP_IO_READ
+    assert(events & LOOP_IO_READ);
+
+    fd = HANDLE_EINTR(socket_accept(listen_fd, NULL));
     if (fd < 0) {
         D(( "problem in accept: %d: %s\n", errno, errno_str ));
         perror("accept");
@@ -602,13 +623,13 @@ control_global_accept( void*  _global )
         *(to) = *(from);            \
     } while (0);
 
-static int control_global_init(ControlGlobal global,
-                               int control_port,
-                               const QAndroidBatteryAgent* battery_agent,
-                               const QAndroidFingerAgent* finger_agent,
-                               const QAndroidLocationAgent* location_agent,
-                               const QAndroidUserEventAgent* user_event_agent,
-                               const QAndroidVmOperations* vm_operations) {
+int control_console_start(int control_port,
+                          const QAndroidBatteryAgent* battery_agent,
+                          const QAndroidFingerAgent* finger_agent,
+                          const QAndroidLocationAgent* location_agent,
+                          const QAndroidUserEventAgent* user_event_agent,
+                          const QAndroidVmOperations* vm_operations) {
+    ControlGlobal global = &_g_global;
     Socket  fd;
     int     ret;
     SockAddress  sockaddr;
@@ -648,9 +669,11 @@ static int control_global_init(ControlGlobal global,
 
     socket_set_nonblock(fd);
 
-    global->listen_fd = fd;
-
-    qemu_set_fd_handler( fd, control_global_accept, NULL, global );
+    global->looper = looper_getForThread();
+    global->listen_loopio =
+            loopIo_new(global->looper, fd, control_global_accept, global);
+    loopIo_wantRead(global->listen_loopio);
+    loopIo_dontWantWrite(global->listen_loopio);
     return 0;
 }
 
@@ -2695,16 +2718,3 @@ static const CommandDefRec   main_commands[] =
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
-
-
-static ControlGlobalRec  _g_global;
-
-extern int control_console_start(int port,
-                                 const QAndroidBatteryAgent* battery_agent,
-                                 const QAndroidFingerAgent* finger_agent,
-                                 const QAndroidLocationAgent* location_agent,
-                                 const QAndroidUserEventAgent* user_event_agent,
-                                 const QAndroidVmOperations* vm_operations) {
-    return control_global_init(&_g_global, port, battery_agent, finger_agent,
-                               location_agent, user_event_agent, vm_operations);
-}
