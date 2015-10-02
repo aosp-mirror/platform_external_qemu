@@ -12,7 +12,9 @@
 
 #pragma once
 
+#include "android/base/looper_clock_type.h"
 #include "android/utils/compiler.h"
+#include "android/utils/stream.h"
 #include "android/utils/system.h"
 
 #include <stddef.h>
@@ -115,6 +117,10 @@ typedef void (*LoopIoFunc)(void* opaque, int fd, unsigned events);
 LoopTimer* loopTimer_new(Looper*        looper,
                          LoopTimerFunc  callback,
                          void*          opaque);
+LoopTimer* loopTimer_newEx(Looper*         looper,
+                           LoopTimerFunc   callback,
+                           void*           opaque,
+                           LooperClockType clock);
 
 /* Finalize a LoopTimer */
 void loopTimer_free(LoopTimer* timer);
@@ -193,6 +199,7 @@ unsigned loopIo_poll(LoopIo* io);
 /* Return the current looper time in milliseconds. This can be used to
  * compute deadlines for looper_runWithDeadline(). */
 Duration looper_now(Looper* looper);
+Duration looper_nowEx(Looper* looper, LooperClockType clock);
 
 /* Run the event loop, until looper_forceQuit() is called, or there is no
  * more registered watchers for events/timers in the looper, or a certain
@@ -245,6 +252,10 @@ void looper_forceQuit(Looper* looper);
  *        timers and ios properly
  */
 void looper_free(Looper* looper);
+
+// Serialization/deserialization support
+void stream_put_timer(Stream* stream, LoopTimer* timer);
+void stream_get_timer(Stream* stream, LoopTimer* timer);
 
 /* */
 

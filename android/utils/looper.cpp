@@ -13,9 +13,9 @@
 
 #include "android/base/async/Looper.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/files/Stream.h"
 #include "android/base/sockets/SocketUtils.h"
 
-//using ::android::internal::GLooper;
 
 typedef ::Looper CLooper;
 typedef android::base::Looper BaseLooper;
@@ -25,7 +25,11 @@ static BaseLooper* asBaseLooper(CLooper* looper) {
 }
 
 Duration looper_now(Looper* looper) {
-    return asBaseLooper(looper)->nowMs();
+    return looper_nowEx(looper, LOOPER_CLOCK_HOST);
+}
+
+Duration looper_nowEx(Looper* looper, LooperClockType clock) {
+    return asBaseLooper(looper)->nowMs(clock);
 }
 
 int looper_runWithDeadline(Looper* looper, Duration deadline) {
@@ -74,15 +78,21 @@ void loopTimer_free(LoopTimer* timer) {
     delete asBaseTimer(timer);
 }
 
-LoopTimer* loopTimer_new(CLooper*       looper,
-                         LoopTimerFunc  callback,
-                         void*          opaque) {
+LoopTimer* loopTimer_new(CLooper* looper,
+                         LoopTimerFunc callback,
+                         void* opaque) {
+    return loopTimer_newEx(looper, callback, opaque, LOOPER_CLOCK_HOST);
+}
+
+LoopTimer* loopTimer_newEx(CLooper* looper,
+                           LoopTimerFunc callback,
+                           void* opaque,
+                           LooperClockType clockType) {
     return reinterpret_cast<LoopTimer*>(
             asBaseLooper(looper)->createTimer(
                     reinterpret_cast<BaseLooper::Timer::Callback>(callback),
-                    opaque));
+                    opaque, clockType));
 }
-
 
 /**********************************************************************
  **********************************************************************
@@ -149,4 +159,12 @@ void looper_setForThread(Looper* looper) {
 CLooper* looper_newGeneric(void) {
     return reinterpret_cast<CLooper*>(
             ::android::base::Looper::create());
+}
+
+void stream_put_timer(::Stream* stream, LoopTimer* timer) {
+    asBaseTimer(timer)->save(reinterpret_cast<android::base::Stream*>(stream));
+}
+
+void stream_get_timer(::Stream* stream, LoopTimer* timer) {
+    asBaseTimer(timer)->load(reinterpret_cast<android::base::Stream*>(stream));
 }

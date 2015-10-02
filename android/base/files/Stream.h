@@ -81,7 +81,7 @@ public:
     // Ignore errors.
     virtual void putString(const char* str, size_t strlen);
 
-    // Read a string from the string. Return a new String instance,
+    // Read a string from the stream. Return a new String instance,
     // which will be empty on error. Note that this can only be used
     // to read strings that were written with putString().
     virtual String getString();
