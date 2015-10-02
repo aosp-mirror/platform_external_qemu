@@ -29,6 +29,7 @@ typedef enum {
     kEventQuit,
     kEventSetScale,
     kEventVideoExpose,
+    kEventWindowMoved,
 } SkinEventType;
 
 typedef enum {
@@ -59,8 +60,10 @@ typedef struct {
 } SkinEventMouseData;
 
 typedef struct {
+    int x; // Send current window coordinates to maintain window location
+    int y;
     double scale;
-} SkinEventResizeData;
+} SkinEventWindowData;
 
 typedef struct {
     SkinEventType type;
@@ -68,7 +71,7 @@ typedef struct {
         SkinEventKeyData key;
         SkinEventMouseData mouse;
         SkinEventTextInputData text;
-        SkinEventResizeData resize;
+        SkinEventWindowData window;
     } u;
 } SkinEvent;
 

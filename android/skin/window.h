@@ -63,6 +63,9 @@ extern void             skin_window_set_onion( SkinWindow*   window,
 extern void             skin_window_set_scale( SkinWindow*  window,
                                                double       scale );
 
+extern void             skin_window_position_changed( SkinWindow*   window,
+                                                      int x, int y );
+
 extern void             skin_window_set_title( SkinWindow*  window,
                                                const char*  title );
 
