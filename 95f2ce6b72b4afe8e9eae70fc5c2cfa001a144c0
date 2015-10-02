@@ -127,6 +127,30 @@
     },
     {
       "key": {
+        "uuid": "354d9aaf_638671e5",
+        "filename": "android/hw-qemud.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-02T16:42:17Z",
+      "side": 1,
+      "message": "well, there\u0027s already android_qemud_init(), and I need to somehow point out that it\u0027s the qemu1\u0027s initialization\nIt is called exactly once :)",
+      "parentUuid": "751ab2b5_69eae119",
+      "range": {
+        "startLine": 23,
+        "startChar": 12,
+        "endLine": 23,
+        "endChar": 36
+      },
+      "revId": "95f2ce6b72b4afe8e9eae70fc5c2cfa001a144c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "55712e1a_286c838c",
         "filename": "android/hw-sensors.c",
         "patchSetId": 1
