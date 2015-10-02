@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "android/emulation/control/user_event_agent.h"
 #include "android/sdk-controller-socket.h"
 #include "android/multitouch-port.h"
 
@@ -42,8 +43,10 @@ typedef enum MTESource {
 /* Initializes MTSState instance.
  * Param:
  *  mtsp - Instance of the multi-touch port connected to the device.
+ *  user_event_agent - Instance of QAndroidUserEventAgent to pipe events to VM.
  */
-extern void multitouch_init(AndroidMTSPort* mtsp);
+extern void multitouch_init(AndroidMTSPort* mtsp,
+                            const QAndroidUserEventAgent* user_event_agent);
 
 /* Handles a MT pointer event.
  * Param:

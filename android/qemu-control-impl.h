@@ -19,6 +19,7 @@
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/telephony_agent.h"
+#include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
 
 ANDROID_BEGIN_HEADER
@@ -40,6 +41,14 @@ extern const QAndroidLocationAgent* const gQAndroidLocationAgent;
 
 // Defined in android/qemu-telephony-agent.c
 extern const QAndroidTelephonyAgent* const gQAndroidTelephonyAgent;
+
+// Defined in android/qemu-user-event-agent-impl.c
+extern const QAndroidUserEventAgent* const gQAndroidUserEventAgent;
+// Called by hw/android/goldfish/events_device.c to initialize generic event
+// handling.
+// In this QEMU1 specific implementation, we stash away an |opaque| handle the
+// and call a function on the device directly.
+extern void qemu_control_setEventDevice(void* opaque);
 
 // Defined in android/qemu-android-vm-operations.c
 extern const QAndroidVmOperations* const gQAndroidVmOperations;
