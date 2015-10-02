@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f597825c_8562641e",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 674,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T14:22:53Z",
+      "side": 1,
+      "message": "Actually looper_getForThread() always creates a new Looper instance for the current thread if one doesn\u0027t exist, so I\u0027m unsure this assert is needed at all.",
+      "revId": "3129c4e4c37201ecfedabe7d66e8a79ad0ec8ddc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
