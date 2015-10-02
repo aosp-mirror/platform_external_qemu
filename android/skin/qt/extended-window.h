@@ -25,6 +25,7 @@
 #include "android/battery-agent.h"
 #include "android/cellular-agent.h"
 #include "android/finger-agent.h"
+#include "android/gps/GpsFix.h"
 #include "android/location-agent.h"
 #include "android/settings-agent.h"
 #include "android/telephony-agent.h"
@@ -124,7 +125,7 @@ private:
                               std::string elev,
                               std::string name,
                               std::string description,
-                              std::string time);
+                              time_t time);
 
     void    setButtonEnabled(QPushButton *theButton, bool isEnabled);
 
@@ -171,6 +172,7 @@ private slots:
     void on_loc_stopButton_clicked();
 
     bool loc_cellIsValid(QTableWidget *table, int row, int col);
+    void loc_populateTable(GpsFixArray *fixes);
     void loc_slot_timeout();
 
     // Settings

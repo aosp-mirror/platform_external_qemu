@@ -21,11 +21,15 @@ struct GpsFix {
     std::string latitude;
     std::string longitude;
     std::string elevation;
-    std::string time;
+    time_t time;
 
     GpsFix(void)
         : name(""), description(""), latitude(""),
-          longitude(""), elevation(""), time("2") {}
+          longitude(""), elevation(""), time(0) {}
+
+    bool operator <(const GpsFix &other) const {
+        return time < other.time;
+    }
 };
 
 typedef std::vector<GpsFix> GpsFixArray;
