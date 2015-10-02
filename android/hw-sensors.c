@@ -234,9 +234,9 @@ _hwSensorClient_new( HwSensors*  sensors )
     cl->sensors     = sensors;
     cl->enabledMask = 0;
     cl->delay_ms    = 800;
-    cl->timer       = loopTimer_newEx(looper_getForThread(),
-                                      _hwSensorClient_tick,
-                                      cl, LOOPER_CLOCK_VIRTUAL);
+    cl->timer       = loopTimer_newWithClock(looper_getForThread(),
+                                             _hwSensorClient_tick,
+                                             cl, LOOPER_CLOCK_VIRTUAL);
 
     cl->next         = sensors->clients;
     sensors->clients = cl;
@@ -341,7 +341,7 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
         _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
     }
 
-    now_ms = looper_nowEx(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
+    now_ms = looper_nowWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
 
     snprintf(buffer, sizeof buffer, "sync:%" PRId64, now_ms);
     _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));

@@ -42,8 +42,8 @@ public:
 
     virtual ~GenLooper() {}
 
-    virtual Duration nowMs(LooperClockType clockType = LOOPER_CLOCK_HOST) {
-        DCHECK(clockType == LOOPER_CLOCK_HOST);
+    virtual Duration nowMs(ClockType clockType = ClockType::kHostClock) {
+        DCHECK(clockType == ClockType::kHostClock);
 
         struct timeval time_now;
         return gettimeofday(&time_now, NULL)
@@ -181,13 +181,13 @@ public:
     class Timer : public Looper::Timer {
     public:
         Timer(GenLooper* looper, Callback callback, void* opaque,
-                LooperClockType clock) :
+              ClockType clock) :
                 Looper::Timer(looper, callback, opaque, clock),
                 mDeadline(kDurationInfinite),
                 mPending(false),
                 mPendingLink() {
             // this implementation only supports a host clock
-            DCHECK(clock == LOOPER_CLOCK_HOST);
+            DCHECK(clock == ClockType::kHostClock);
             DCHECK(mCallback);
             looper->addTimer(this);
         }
@@ -301,7 +301,7 @@ public:
     }
 
     virtual Looper::Timer* createTimer(Looper::Timer::Callback callback,
-                                       void* opaque, LooperClockType clock) {
+                                       void* opaque, ClockType clock) {
         return new GenLooper::Timer(this, callback, opaque, clock);
     }
 

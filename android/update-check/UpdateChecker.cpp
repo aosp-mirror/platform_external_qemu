@@ -56,7 +56,7 @@ void android_checkForUpdates(const char* homePath) {
         // checker will delete itself after the check in the worker thread
         checker.release();
     } else {
-        dprint("UpdateChecker: skipped version check");
+        VERBOSE_PRINT(updater, "UpdateChecker: skipped version check");
     }
 }
 
@@ -255,7 +255,7 @@ void UpdateChecker::asyncWorker() {
         return;
     }
 
-    dprint("UpdateCheck: current version '%s', last version '%s'",
+    VERBOSE_PRINT(updater, "UpdateCheck: current version '%s', last version '%s'",
            current.toString().c_str(), last.toString().c_str());
 
     if (current < last) {

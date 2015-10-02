@@ -66,11 +66,12 @@ public:
         qemu_bh_delete(mQemuBh);
     }
 
-    static QEMUClockType toQemuClockType(LooperClockType clock) {
-        static_assert((int) QEMU_CLOCK_HOST == (int) LOOPER_CLOCK_HOST &&
-                      (int) QEMU_CLOCK_VIRTUAL == (int) LOOPER_CLOCK_VIRTUAL &&
-                      (int) QEMU_CLOCK_REALTIME == (int) LOOPER_CLOCK_REALTIME,
-                      "Bad values in the LooperClockType enumeration");
+    static QEMUClockType toQemuClockType(ClockType clock) {
+        static_assert((int) QEMU_CLOCK_HOST == (int) BaseLooper::ClockType::kHostClock &&
+                      (int) QEMU_CLOCK_VIRTUAL == (int) BaseLooper::ClockType::kVirualClock &&
+                      (int) QEMU_CLOCK_REALTIME == (int) BaseLooper::ClockType::kRealtimeClock,
+                      "Values in the Looper::ClockType enumeration are out of sync with "
+                              "QEMUClockType");
 
         return static_cast<QEMUClockType>(clock);
     }
@@ -183,7 +184,7 @@ public:
     public:
         Timer(QemuLooper* looper,
               BaseTimer::Callback callback,
-              void* opaque, LooperClockType clock) :
+              void* opaque, ClockType clock) :
                     BaseTimer(looper, callback, opaque, clock),
                     mTimer(NULL) {
             mTimer = ::timer_new(QemuLooper::toQemuClockType(mClockType),
@@ -244,7 +245,7 @@ public:
     };
 
     virtual BaseTimer* createTimer(BaseTimer::Callback callback,
-                                   void* opaque, LooperClockType clock) {
+                                   void* opaque, ClockType clock) {
         return new QemuLooper::Timer(this, callback, opaque, clock);
     }
 
@@ -252,7 +253,7 @@ public:
     //  L O O P E R
     //
 
-    virtual Duration nowMs(LooperClockType clockType) {
+    virtual Duration nowMs(ClockType clockType) {
         return qemu_clock_get_ms(toQemuClockType(clockType));
     }
 

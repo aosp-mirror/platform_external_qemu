@@ -13,7 +13,6 @@
 
 #include <android/base/Compiler.h>
 #include <android/base/files/Stream.h>
-#include <android/base/looper_clock_type.h>
 
 #include <inttypes.h>
 #include <stddef.h>
@@ -40,6 +39,13 @@ public:
         kDurationInfinite = INT64_MAX,
     };
 
+    // ClockTypes have to mimic the LooperClockType enum from utils/
+    enum class ClockType {
+        kRealtimeClock,
+        kVirualClock,
+        kHostClock
+    };
+
     // Create a new generic Looper instance.
     static Looper* create();
 
@@ -47,7 +53,7 @@ public:
 
     // Return the current time as seen by this looper instance in
     // milliseconds.
-    virtual Duration nowMs(LooperClockType clockType = LOOPER_CLOCK_HOST) = 0;
+    virtual Duration nowMs(ClockType clockType = ClockType::kHostClock) = 0;
 
     // Run the event loop until forceQuit() is called or there is no
     // more registered watchers or timers in the looper.
@@ -117,7 +123,7 @@ public:
 
     protected:
         Timer(Looper* looper, Callback callback, void* opaque,
-              LooperClockType clock) :
+              ClockType clock) :
             mLooper(looper),
             mCallback(callback),
             mOpaque(opaque),
@@ -126,12 +132,12 @@ public:
         Looper* mLooper;
         Callback mCallback;
         void* mOpaque;
-        LooperClockType mClockType;
+        ClockType mClockType;
     };
 
     // Create a new timer for this Looper instance.
     virtual Timer* createTimer(Timer::Callback callback, void* opaque,
-                               LooperClockType clock = LOOPER_CLOCK_HOST) = 0;
+                               ClockType clock = ClockType::kHostClock) = 0;
 
     // Interface class for I/O event watchers on a given file descriptor
     // implemented by this Looper instance.
