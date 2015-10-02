@@ -14,15 +14,13 @@
 
 #include "android/emulation/android_qemud.h"
 #include "android/globals.h"
-#include "android/hw-qemud.h"
-#include "android/qemu/utils/stream.h"
 #include "android/sensors-port.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/stream.h"
 #include "android/utils/system.h"
+#include "android/utils/looper.h"
 
-#include "qemu/timer.h"
 
 #include <math.h>
 
@@ -183,7 +181,7 @@ struct HwSensorClient {
     HwSensorClient*  next;
     HwSensors*       sensors;
     QemudClient*     client;
-    QEMUTimer*       timer;
+    LoopTimer*       timer;
     uint32_t         enabledMask;
     int32_t          delay_ms;
 };
@@ -215,15 +213,15 @@ _hwSensorClient_free( HwSensorClient*  cl )
     }
     /* remove timer, if any */
     if (cl->timer) {
-        timer_del(cl->timer);
-        timer_free(cl->timer);
+        loopTimer_stop(cl->timer);
+        loopTimer_free(cl->timer);
         cl->timer = NULL;
     }
     AFREE(cl);
 }
 
 /* forward */
-static void  _hwSensorClient_tick(void*  opaque);
+static void  _hwSensorClient_tick(void* opaque, LoopTimer* timer);
 
 
 static HwSensorClient*
@@ -236,7 +234,9 @@ _hwSensorClient_new( HwSensors*  sensors )
     cl->sensors     = sensors;
     cl->enabledMask = 0;
     cl->delay_ms    = 800;
-    cl->timer       = timer_new(QEMU_CLOCK_VIRTUAL, SCALE_NS, _hwSensorClient_tick, cl);
+    cl->timer       = loopTimer_newWithClock(looper_getForThread(),
+                                             _hwSensorClient_tick,
+                                             cl, LOOPER_CLOCK_VIRTUAL);
 
     cl->next         = sensors->clients;
     sensors->clients = cl;
@@ -289,12 +289,12 @@ _hwSensorClient_enabled( HwSensorClient*  cl, int  sensorId )
  * to the HAL module, and re-arm the timer if necessary
  */
 static void
-_hwSensorClient_tick( void*  opaque )
+_hwSensorClient_tick(void* opaque, LoopTimer* unused)
 {
     HwSensorClient*  cl = opaque;
     HwSensors*       hw  = cl->sensors;
     int64_t          delay = cl->delay_ms;
-    int64_t          now_ns;
+    int64_t          now_ms;
     uint32_t         mask  = cl->enabledMask;
     Sensor*          sensor;
     char             buffer[128];
@@ -341,9 +341,9 @@ _hwSensorClient_tick( void*  opaque )
         _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
     }
 
-    now_ns = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
+    now_ms = looper_nowWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
 
-    snprintf(buffer, sizeof buffer, "sync:%" PRId64, now_ns/1000);
+    snprintf(buffer, sizeof buffer, "sync:%" PRId64, now_ms);
     _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
 
     /* rearm timer, use a minimum delay of 20 ms, just to
@@ -355,8 +355,7 @@ _hwSensorClient_tick( void*  opaque )
     if (delay < 20)
         delay = 20;
 
-    delay *= 1000000LL;  /* convert to nanoseconds */
-    timer_mod(cl->timer, now_ns + delay);
+    loopTimer_startRelative(cl->timer, delay);
 }
 
 /* handle incoming messages from the HAL module */
@@ -400,7 +399,7 @@ _hwSensorClient_receive( HwSensorClient*  cl, uint8_t*  msg, int  msglen )
     if (msglen > 10 && !memcmp(msg, "set-delay:", 10)) {
         cl->delay_ms = atoi((const char*)msg+10);
         if (cl->enabledMask != 0)
-            _hwSensorClient_tick(cl);
+            _hwSensorClient_tick(cl, cl->timer);
 
         return;
     }
@@ -450,7 +449,7 @@ _hwSensorClient_receive( HwSensorClient*  cl, uint8_t*  msg, int  msglen )
             }
         }
 
-        _hwSensorClient_tick(cl);
+        _hwSensorClient_tick(cl, cl->timer);
         return;
     }
 
@@ -463,7 +462,7 @@ static void _hwSensorClient_save(Stream* f, QemudClient* client, void* opaque) {
 
     stream_put_be32(f, sc->delay_ms);
     stream_put_be32(f, sc->enabledMask);
-    stream_put_qemu_timer(f, sc->timer);
+    stream_put_timer(f, sc->timer);
 }
 
 /* Loads sensor-specific client data from snapshot */
@@ -472,7 +471,7 @@ static int _hwSensorClient_load(Stream* f, QemudClient* client, void* opaque) {
 
     sc->delay_ms = stream_get_be32(f);
     sc->enabledMask = stream_get_be32(f);
-    stream_get_qemu_timer(f, sc->timer);
+    stream_get_timer(f, sc->timer);
 
     return 0;
 }

@@ -12,6 +12,7 @@
 #pragma once
 
 #include <android/base/Compiler.h>
+#include <android/base/files/Stream.h>
 
 #include <inttypes.h>
 #include <stddef.h>
@@ -38,6 +39,13 @@ public:
         kDurationInfinite = INT64_MAX,
     };
 
+    // ClockTypes have to mimic the LooperClockType enum from utils/
+    enum class ClockType {
+        kRealtime,
+        kVirtual,
+        kHost
+    };
+
     // Create a new generic Looper instance.
     static Looper* create();
 
@@ -45,7 +53,7 @@ public:
 
     // Return the current time as seen by this looper instance in
     // milliseconds.
-    virtual Duration nowMs() = 0;
+    virtual Duration nowMs(ClockType clockType = ClockType::kHost) = 0;
 
     // Run the event loop until forceQuit() is called or there is no
     // more registered watchers or timers in the looper.
@@ -90,6 +98,11 @@ public:
 
         virtual ~Timer() {}
 
+        // Get the parent looper object
+        Looper* parentLooper() const {
+            return mLooper;
+        }
+
         // Start, or restart the timer to expire after |timeout_ms|
         // milliseconds.
         virtual void startRelative(Duration timeout_ms) = 0;
@@ -104,17 +117,27 @@ public:
         // Returns true iff this timer is active.
         virtual bool isActive() const = 0;
 
+        // Serialization to/from streams
+        virtual void save(android::base::Stream* stream) const = 0;
+        virtual void load(android::base::Stream* stream) = 0;
+
     protected:
-        Timer(Looper* looper, Callback callback, void* opaque) :
-            mLooper(looper), mCallback(callback), mOpaque(opaque) {}
+        Timer(Looper* looper, Callback callback, void* opaque,
+              ClockType clock) :
+            mLooper(looper),
+            mCallback(callback),
+            mOpaque(opaque),
+            mClockType(clock) {}
 
         Looper* mLooper;
         Callback mCallback;
         void* mOpaque;
+        ClockType mClockType;
     };
 
     // Create a new timer for this Looper instance.
-    virtual Timer* createTimer(Timer::Callback callback, void* opaque) = 0;
+    virtual Timer* createTimer(Timer::Callback callback, void* opaque,
+                               ClockType clock = ClockType::kHost) = 0;
 
     // Interface class for I/O event watchers on a given file descriptor
     // implemented by this Looper instance.
