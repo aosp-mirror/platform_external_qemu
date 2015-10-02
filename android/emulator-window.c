@@ -13,6 +13,7 @@
 #include "android/emulator-window.h"
 
 #include "android/android.h"
+#include "android/emulation/control/user_event_agent.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
@@ -23,7 +24,6 @@
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
-#include "android/user-events.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/looper.h"
@@ -40,6 +40,9 @@ static double get_default_scale( AndroidOptions*  opts );
 
 /* EmulatorWindow structure instance. */
 static EmulatorWindow   qemulator[1];
+
+// Our very own stash of a pointer to a device that handles user events.
+const QAndroidUserEventAgent* user_event_agent;
 
 // Set to 1 to use an EmuGL sub-window to display GpU content, or 0 to use
 // the frame post callback to retrieve every frame from the GPU, which will
@@ -71,11 +74,15 @@ emulator_window_light_brightness(void* opaque, const char*  light, int  value)
 }
 
 static void emulator_window_trackball_event(int dx, int dy) {
-    user_event_mouse(dx, dy, 1, 0);
+    user_event_agent->sendMouseEvent(dx, dy, 1, 0);
 }
 
 static void emulator_window_window_key_event(unsigned keycode, int down) {
-    user_event_key(keycode, down);
+    user_event_agent->sendKey(keycode, down);
+}
+
+static void emulator_window_keycodes_event(int* keycodes, int count) {
+    user_event_agent->sendKeyCodes(keycodes, count);
 }
 
 static void emulator_window_window_mouse_event(unsigned x,
@@ -84,13 +91,13 @@ static void emulator_window_window_mouse_event(unsigned x,
     /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
      * differentiate between a touch-screen and a trackball event
      */
-    user_event_mouse(x, y, 0, state);
+    user_event_agent->sendMouseEvent(x, y, 0, state);
 }
 
 static void emulator_window_window_generic_event(int event_type,
                                            int event_code,
                                            int event_value) {
-    user_event_generic(event_type, event_code, event_value);
+    user_event_agent->sendGenericEvent(event_type, event_code, event_value);
     /* XXX: hack, replace by better code here */
     if (event_value != 0)
         android_sensors_set_coarse_orientation(ANDROID_COARSE_PORTRAIT);
@@ -116,7 +123,7 @@ static void emulator_window_framebuffer_invalidate(void) {
 
 static void emulator_window_keyboard_event(void* opaque, SkinKeyCode keycode, int down) {
     (void)opaque;
-    user_event_key(keycode, down);
+    user_event_agent->sendKey(keycode, down);
 }
 
 static int emulator_window_opengles_show_window(
@@ -157,6 +164,10 @@ static void _emulator_window_on_gpu_frame(void* context,
 static void
 emulator_window_setup( EmulatorWindow*  emulator )
 {
+    // TODO(pprabhu) All aQAndroid*Agents need to be set externally to decouple
+    // emulator-window from QEMU.
+    user_event_agent = gQAndroidUserEventAgent;
+
     static const SkinWindowFuncs my_window_funcs = {
         .key_event = &emulator_window_window_key_event,
         .mouse_event = &emulator_window_window_mouse_event,
@@ -205,12 +216,12 @@ emulator_window_setup( EmulatorWindow*  emulator )
                       avdInfo_getName(android_avdInfo));
 
     static const SkinUIFuncs my_ui_funcs = {
-        .window_funcs = &my_window_funcs,
-        .trackball_params = &my_trackball_params,
-        .keyboard_event = &emulator_window_keyboard_event, //user_event_key,
-        .keyboard_flush = &user_event_keycodes,
-        .network_toggle = &emulator_window_network_toggle,
-        .framebuffer_invalidate = &emulator_window_framebuffer_invalidate,
+            .window_funcs = &my_window_funcs,
+            .trackball_params = &my_trackball_params,
+            .keyboard_event = &emulator_window_keyboard_event,
+            .keyboard_flush = &emulator_window_keycodes_event,
+            .network_toggle = &emulator_window_network_toggle,
+            .framebuffer_invalidate = &emulator_window_framebuffer_invalidate,
     };
 
     // Determine whether to use an EmuGL sub-window or not.

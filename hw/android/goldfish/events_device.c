@@ -14,8 +14,8 @@
 #include "android/globals.h"  /* for android_hw */
 #include "android/hw-events.h"
 #include "android/multitouch-screen.h"
+#include "android/qemu-control-impl.h"
 #include "android/skin/charmap.h"
-#include "android/user-events.h"
 #include "exec/cpu-common.h"
 #include "exec/hwaddr.h"
 #include "hw/hw.h"
@@ -294,10 +294,8 @@ static void events_put_mouse(void *opaque, int dx, int dy, int dz, int buttons_s
     }
 }
 
-static void  events_put_generic(void*  opaque, int  type, int  code, int  value)
-{
+void  events_put_generic(void*  opaque, int  type, int  code, int  value) {
     events_state *s = (events_state *) opaque;
-
     enqueue_event(s, type, code, value);
 }
 
@@ -533,10 +531,9 @@ void events_dev_init(uint32_t base, qemu_irq irq)
     s->state = STATE_INIT;
     s->name = g_strdup(config->hw_keyboard_charmap);
 
-    /* This function migh fire buffered events to the device, so
-     * ensure that it is called after initialization is complete
-     */
-    user_event_register_generic(s, events_put_generic);
+    // The android control agent might fire buffered events to the device, so
+    // ensure that it is enabled after the initialization is complete.
+    qemu_control_setEventDevice(s);
 
     register_savevm(NULL,
                     "events_state",

@@ -226,6 +226,7 @@ report_console( const char*  proto_port, int  console_port )
 static int qemu_control_console_start(int port) {
     return control_console_start(port, gQAndroidBatteryAgent,
                                  gQAndroidFingerAgent, gQAndroidLocationAgent,
+                                 gQAndroidUserEventAgent,
                                  gQAndroidVmOperations);
 }
 

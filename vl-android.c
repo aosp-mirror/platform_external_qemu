@@ -71,6 +71,7 @@
 #include "android/multitouch-screen.h"
 #include "android/opengles.h"
 #include "android/opengl/emugl_config.h"
+#include "android/qemu-control-impl.h"
 #include "android/skin/charmap.h"
 #include "android/snapshot.h"
 #include "android/tcpdump.h"
@@ -3927,7 +3928,7 @@ int main(int argc, char **argv, char **envp)
 
         /* Initialize multi-touch emulation. */
         if (androidHwConfig_isScreenMultiTouch(android_hw)) {
-            mts_port_create(NULL);
+            mts_port_create(NULL, gQAndroidUserEventAgent);
         }
 
         stralloc_reset(kernel_params);

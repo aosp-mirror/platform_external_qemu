@@ -17,7 +17,7 @@
 #include <stdio.h>
 
 void skin_keycode_buffer_init(SkinKeycodeBuffer* buffer,
-                               SkinKeyCodeFlushFunc flush_func) {
+                              SkinKeyCodeFlushFunc flush_func) {
     buffer->keycode_flush = flush_func;
     buffer->keycode_count = 0;
 }

@@ -20,7 +20,6 @@
 #include "android/globals.h"  /* for android_hw */
 #include "android/hw-events.h"
 #include "android/skin/charmap.h"
-#include "android/user-events.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 
@@ -89,11 +88,14 @@ typedef struct MTSState {
 /* Default multi-touch screen descriptor */
 static MTSState _MTSState = { 0 };
 
+/* Our very own stash of a pointer to the device that handles user events. */
+static const QAndroidUserEventAgent* _UserEventAgent;
+
 /* Pushes event to the event device. */
 static void
 _push_event(int type, int code, int value)
 {
-    user_event_generic(type, code, value);
+    _UserEventAgent->sendGenericEvent(type, code, value);
 }
 
 /* Gets an index in the MTS's tracking pointers array MTS for the given
@@ -413,14 +415,16 @@ multitouch_fb_updated(void)
     }
 }
 
-void
-multitouch_init(AndroidMTSPort* mtsp)
-{
+void multitouch_init(AndroidMTSPort* mtsp,
+                     const QAndroidUserEventAgent* user_event_agent) {
     if (!_is_mt_initialized) {
         MTSState* const mts_state = &_MTSState;
         DisplayState* const ds = get_displaystate();
         DisplayUpdateListener* dul;
         int index;
+
+        /* Stash away interface objects. */
+        _UserEventAgent = user_event_agent;
 
         /*
          * Initialize the descriptor.

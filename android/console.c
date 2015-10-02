@@ -32,7 +32,6 @@
 #include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"
 #include "android/tcpdump.h"
-#include "android/user-events.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
@@ -103,6 +102,7 @@ typedef struct ControlGlobalRec_
     QAndroidBatteryAgent* battery_agent;
     QAndroidFingerAgent* finger_agent;
     QAndroidLocationAgent* location_agent;
+    QAndroidUserEventAgent* user_event_agent;
     QAndroidVmOperations* vm_operations;
 
     /* listening socket */
@@ -607,6 +607,7 @@ static int control_global_init(ControlGlobal global,
                                const QAndroidBatteryAgent* battery_agent,
                                const QAndroidFingerAgent* finger_agent,
                                const QAndroidLocationAgent* location_agent,
+                               const QAndroidUserEventAgent* user_event_agent,
                                const QAndroidVmOperations* vm_operations) {
     Socket  fd;
     int     ret;
@@ -618,6 +619,7 @@ static int control_global_init(ControlGlobal global,
     COPY_AGENT(global->battery_agent, battery_agent);
     COPY_AGENT(global->finger_agent, finger_agent);
     COPY_AGENT(global->location_agent, location_agent);
+    COPY_AGENT(global->user_event_agent, user_event_agent);
     COPY_AGENT(global->vm_operations, vm_operations);
 
     fd = socket_create_inet( SOCKET_STREAM );
@@ -1882,7 +1884,7 @@ do_event_send( ControlClient  client, char*  args )
             return -1;
         }
 
-        user_event_generic( type, code, value );
+        client->global->user_event_agent->sendGenericEvent(type, code, value);
         p = q;
     }
     return 0;
@@ -1991,7 +1993,8 @@ do_event_text( ControlClient  client, char*  args )
         return -1;
     }
 
-    skin_keycode_buffer_init(&keycodes, &user_event_keycodes);
+    skin_keycode_buffer_init(&keycodes,
+                             client->global->user_event_agent->sendKeyCodes);
 
     /* un-secape message text into proper utf-8 (conversion happens in-site) */
     textlen = strlen((char*)p);
@@ -2700,7 +2703,8 @@ extern int control_console_start(int port,
                                  const QAndroidBatteryAgent* battery_agent,
                                  const QAndroidFingerAgent* finger_agent,
                                  const QAndroidLocationAgent* location_agent,
+                                 const QAndroidUserEventAgent* user_event_agent,
                                  const QAndroidVmOperations* vm_operations) {
     return control_global_init(&_g_global, port, battery_agent, finger_agent,
-                               location_agent, vm_operations);
+                               location_agent, user_event_agent, vm_operations);
 }
