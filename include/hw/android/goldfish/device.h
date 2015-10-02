@@ -87,4 +87,8 @@ static inline void uint64_set_high(uint64_t *addr, uint32 value)
     *addr = (*addr & 0xFFFFFFFFULL) | ((uint64_t)value << 32);
 }
 
+// Allows android glue code to forward generic events directly to the events
+// device. |opaque| is a handle the device.
+void events_put_generic(void* opaque, int type, int code, int value);
+
 #endif  /* GOLDFISH_DEVICE_H */
