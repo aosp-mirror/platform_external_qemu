@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "35e91ad0_e2c6222d",
+        "filename": "android/base/looper_clock_type.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T21:52:58Z",
+      "side": 1,
+      "message": "ok, I prefer if we don\u0027t put C headers into android/base/, i.e. I recommend doing the following:\n\n1) Define Looper::ClockType enum inside android/base/async/Looper.h, use C++ constants as kClockRealTime, kClockVirtual kClockHost\n\n2) Define LooperClockType in android/utils/looper.h as a C enum with the same values as LOOPER_CLOCK_REALTIME, LOOPER_CLOCK_VIRTUAL, LOOPER_CLOCK_HOST\n\n3) Add a unit-test in android/utils/looper_unittest.cpp that uses ASSERT_EQ() to compare kClockRealTime and LOOPER_CLOCK_REALTIME, etc...",
+      "revId": "8045dd9debd403e7398ebce7bd5ae5231de616be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75ab929e_e1dec0d2",
+        "filename": "android/utils/looper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T21:52:58Z",
+      "side": 1,
+      "message": "nit: I generally dislike the Ex suffix (because it leads to Ex2, Ex3, etc). What about loopTimer_newWithClock() instead? Longer, but it\u0027s not a function we want clients encouraged to use anyway.",
+      "revId": "8045dd9debd403e7398ebce7bd5ae5231de616be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75763214_69c5a19b",
+        "filename": "android/utils/looper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T21:52:58Z",
+      "side": 1,
+      "message": "similarly looper_nowWithClock() ?",
+      "revId": "8045dd9debd403e7398ebce7bd5ae5231de616be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "35703a18_4737f0c3",
+        "filename": "android/utils/looper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T21:52:58Z",
+      "side": 1,
+      "message": "nice :)",
+      "revId": "8045dd9debd403e7398ebce7bd5ae5231de616be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
