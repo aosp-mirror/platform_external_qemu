@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "953c86f3_cb779857",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-02T16:24:29Z",
+      "side": 1,
+      "message": "Perhaps add a comment that this is in units of seconds",
+      "revId": "63d2b2a83cfb272ba3f0054b22e0b59423846744",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b5526a4f_cd25e940",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-02T16:24:29Z",
+      "side": 1,
+      "message": "In demos, 2 seconds seemed to be a good minimum.",
+      "revId": "63d2b2a83cfb272ba3f0054b22e0b59423846744",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
