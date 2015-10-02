@@ -95,6 +95,7 @@ private:
 
     void initBattery();
     void initCellular();
+    void initDPad();
     void initFinger();
     void initKbdShorts();
     void initLocation();
@@ -133,6 +134,8 @@ private:
                                  SettingsTheme theme,
                                  bool          isEnabled);
 
+    void    dpad_setPressed(QPushButton* button);
+    void    dpad_setReleased(QPushButton* button);
 
 private slots:
     // Master tabs
@@ -161,6 +164,21 @@ private slots:
     void on_cell_standardBox_currentIndexChanged(int index);
     void on_cell_voiceStatusBox_currentIndexChanged(int index);
     void on_cell_dataStatusBox_currentIndexChanged(int index);
+
+    // DPad
+#define ON_PRESS_RELEASE_CLICK(button) \
+    void on_dpad_ ## button ## Button_pressed(); \
+    void on_dpad_ ## button ## Button_released(); \
+    void on_dpad_ ## button ## Button_clicked();
+
+    ON_PRESS_RELEASE_CLICK(back);
+    ON_PRESS_RELEASE_CLICK(down);
+    ON_PRESS_RELEASE_CLICK(forward);
+    ON_PRESS_RELEASE_CLICK(left);
+    ON_PRESS_RELEASE_CLICK(play);
+    ON_PRESS_RELEASE_CLICK(right);
+    ON_PRESS_RELEASE_CLICK(select);
+    ON_PRESS_RELEASE_CLICK(up);
 
     // Fingerprint
     void on_finger_touchButton_pressed();
