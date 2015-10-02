@@ -2,6 +2,108 @@
   "comments": [
     {
       "key": {
+        "uuid": "b57c2af2_2b10055f",
+        "filename": "android/adb-qemud.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T14:13:52Z",
+      "side": 1,
+      "message": "nit: you can remove this include (and add \u003cstdio.h\u003e + \u003cstdlib.h\u003e) to make this source file part of AndroidEmu !",
+      "revId": "95f2ce6b72b4afe8e9eae70fc5c2cfa001a144c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f597825c_65e9a0e0",
+        "filename": "android/boot-properties.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T14:13:52Z",
+      "side": 1,
+      "message": "same here: remove this includes and the code doesn\u0027t depend on QEMU-specific code anymore :)",
+      "revId": "95f2ce6b72b4afe8e9eae70fc5c2cfa001a144c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b57c2af2_4b05391c",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T14:13:52Z",
+      "side": 1,
+      "message": "remove include above (and add \u003cstdio.h\u003e)",
+      "revId": "95f2ce6b72b4afe8e9eae70fc5c2cfa001a144c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "156b3632_666eb0c5",
+        "filename": "android/hw-control.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T14:13:52Z",
+      "side": 1,
+      "message": "remove include here, add \u003cstdlib.h\u003e",
+      "revId": "95f2ce6b72b4afe8e9eae70fc5c2cfa001a144c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "156b3632_8682ccc1",
+        "filename": "android/hw-control.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T14:13:52Z",
+      "side": 1,
+      "message": "remove this include, which is no longer necessary!\n\nYou can also remove the #include \"qemu-common.h\" from hw-control.h after this!!",
+      "revId": "95f2ce6b72b4afe8e9eae70fc5c2cfa001a144c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "156b3632_a67fc86e",
+        "filename": "android/hw-fingerprint.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T14:13:52Z",
+      "side": 1,
+      "message": "remove include",
+      "revId": "95f2ce6b72b4afe8e9eae70fc5c2cfa001a144c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "751ab2b5_69eae119",
         "filename": "android/hw-qemud.h",
         "patchSetId": 1
@@ -19,6 +121,40 @@
         "endLine": 23,
         "endChar": 36
       },
+      "revId": "95f2ce6b72b4afe8e9eae70fc5c2cfa001a144c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "55712e1a_286c838c",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T14:13:52Z",
+      "side": 1,
+      "message": "remove include",
+      "revId": "95f2ce6b72b4afe8e9eae70fc5c2cfa001a144c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b57c2af2_2bb565b4",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-02T14:13:52Z",
+      "side": 1,
+      "message": "note: this will need to be replaced by a LoopTimer in the future",
       "revId": "95f2ce6b72b4afe8e9eae70fc5c2cfa001a144c0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
