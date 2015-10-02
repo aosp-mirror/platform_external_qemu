@@ -93,6 +93,7 @@ private:
 
     void initBattery();
     void initCellular();
+    void initDPad();
     void initFinger();
     void initKbdShorts();
     void initLocation();
@@ -128,6 +129,8 @@ private:
                               time_t time);
 
     void    setButtonEnabled(QPushButton *theButton, bool isEnabled);
+    void    setPressed(QPushButton* button);
+    void    setReleased(QPushButton* button);
 
 private slots:
     // Master tabs
@@ -156,6 +159,32 @@ private slots:
     void on_cell_standardBox_currentIndexChanged(int index);
     void on_cell_voiceStatusBox_currentIndexChanged(int index);
     void on_cell_dataStatusBox_currentIndexChanged(int index);
+
+    // DPad
+    void on_dpad_backButton_pressed();
+    void on_dpad_backButton_released();
+    void on_dpad_backButton_clicked();
+    void on_dpad_downButton_pressed();
+    void on_dpad_downButton_released();
+    void on_dpad_downButton_clicked();
+    void on_dpad_forwardButton_pressed();
+    void on_dpad_forwardButton_released();
+    void on_dpad_forwardButton_clicked();
+    void on_dpad_leftButton_pressed();
+    void on_dpad_leftButton_released();
+    void on_dpad_leftButton_clicked();
+    void on_dpad_playButton_pressed();
+    void on_dpad_playButton_released();
+    void on_dpad_playButton_clicked();
+    void on_dpad_rightButton_pressed();
+    void on_dpad_rightButton_released();
+    void on_dpad_rightButton_clicked();
+    void on_dpad_selectButton_pressed();
+    void on_dpad_selectButton_released();
+    void on_dpad_selectButton_clicked();
+    void on_dpad_upButton_pressed();
+    void on_dpad_upButton_released();
+    void on_dpad_upButton_clicked();
 
     // Fingerprint
     void on_finger_touchButton_pressed();

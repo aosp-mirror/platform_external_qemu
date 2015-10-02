@@ -1324,6 +1324,271 @@ font-family: &quot;Roboto&quot;</string>
       <string>Directional pad</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="dpad_upButton">
+     <property name="geometry">
+      <rect>
+       <x>275</x>
+       <y>221</y>
+       <width>141</width>
+       <height>100</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/dark/dpad_up</normaloff>:/dark/dpad_up</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>141</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>dpad_up</string>
+     </property>
+     <property name="themeIconNamePressed" stdset="0">
+      <string>dpad_up_pressed</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="dpad_downButton">
+     <property name="geometry">
+      <rect>
+       <x>275</x>
+       <y>324</y>
+       <width>141</width>
+       <height>100</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/dark/dpad_down</normaloff>:/dark/dpad_down</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>141</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>dpad_down</string>
+     </property>
+     <property name="themeIconNamePressed" stdset="0">
+      <string>dpad_down_pressed</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="dpad_leftButton">
+     <property name="geometry">
+      <rect>
+       <x>244</x>
+       <y>252</y>
+       <width>100</width>
+       <height>141</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/dark/dpad_left</normaloff>:/dark/dpad_left</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>100</width>
+       <height>141</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>dpad_left</string>
+     </property>
+     <property name="themeIconNamePressed" stdset="0">
+      <string>dpad_left_pressed</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="dpad_rightButton">
+     <property name="geometry">
+      <rect>
+       <x>347</x>
+       <y>252</y>
+       <width>100</width>
+       <height>141</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/dark/dpad_right</normaloff>:/dark/dpad_right</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>100</width>
+       <height>141</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>dpad_right</string>
+     </property>
+     <property name="themeIconNamePressed" stdset="0">
+      <string>dpad_right_pressed</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="dpad_selectButton">
+     <property name="geometry">
+      <rect>
+       <x>302</x>
+       <y>280</y>
+       <width>85</width>
+       <height>85</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/dark/dpad_select</normaloff>:/dark/dpad_select</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>85</width>
+       <height>85</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>dpad_select</string>
+     </property>
+     <property name="themeIconNamePressed" stdset="0">
+      <string>dpad_select_pressed</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="dpad_playButton">
+     <property name="geometry">
+      <rect>
+       <x>320</x>
+       <y>459</y>
+       <width>50</width>
+       <height>50</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/dark/dpad_play</normaloff>:/dark/dpad_play</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>50</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>dpad_play</string>
+     </property>
+     <property name="themeIconNamePressed" stdset="0">
+      <string>dpad_play_pressed</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="dpad_backButton">
+     <property name="geometry">
+      <rect>
+       <x>242</x>
+       <y>459</y>
+       <width>50</width>
+       <height>50</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/dark/dpad_back</normaloff>:/dark/dpad_back</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>50</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string notr="true">dpad_back</string>
+     </property>
+     <property name="themeIconNamePressed" stdset="0">
+      <string>dpad_back_pressed</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="dpad_forwardButton">
+     <property name="geometry">
+      <rect>
+       <x>398</x>
+       <y>459</y>
+       <width>50</width>
+       <height>50</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/dark/dpad_forward</normaloff>:/dark/dpad_forward</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>50</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>dpad_forward</string>
+     </property>
+     <property name="themeIconNamePressed" stdset="0">
+      <string>dpad_forward_pressed</string>
+     </property>
+    </widget>
+    <zorder>hardwareSensorsBox_2</zorder>
+    <zorder>dpad_upButton</zorder>
+    <zorder>dpad_downButton</zorder>
+    <zorder>dpad_leftButton</zorder>
+    <zorder>dpad_rightButton</zorder>
+    <zorder>dpad_playButton</zorder>
+    <zorder>dpad_backButton</zorder>
+    <zorder>dpad_forwardButton</zorder>
+    <zorder>dpad_selectButton</zorder>
    </widget>
    <widget class="QWidget" name="finger_page">
     <widget class="QGroupBox" name="finger_group">
@@ -2905,6 +3170,21 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>bat_chargeCkBox</tabstop>
   <tabstop>cell_sigStrengthText</tabstop>
   <tabstop>bat_chargeLevelText</tabstop>
+  <tabstop>spacer1Button</tabstop>
+  <tabstop>tel_startCallButton</tabstop>
+  <tabstop>sms_messageBox</tabstop>
+  <tabstop>sms_sendButton</tabstop>
+  <tabstop>finger_touchButton</tabstop>
+  <tabstop>shortcutsTableWidget</tabstop>
+  <tabstop>set_updateButton</tabstop>
+  <tabstop>dpad_upButton</tabstop>
+  <tabstop>dpad_leftButton</tabstop>
+  <tabstop>dpad_selectButton</tabstop>
+  <tabstop>dpad_rightButton</tabstop>
+  <tabstop>dpad_downButton</tabstop>
+  <tabstop>dpad_backButton</tabstop>
+  <tabstop>dpad_playButton</tabstop>
+  <tabstop>dpad_forwardButton</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>
