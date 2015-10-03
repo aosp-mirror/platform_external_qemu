@@ -298,17 +298,25 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             darwin*)
                 var_append EXTRA_CONFIGURE_FLAGS \
                     -no-framework \
-                    -sdk macosx10.8
+                    -sdk macosx10.9
+                var_append CFLAGS -mmacosx-version-min=10.8
+                var_append CXXFLAGS -mmacosx-version-min=10.8
+                var_append LDFLAGS -mmacosx-version-min=10.8
                 ;;
         esac
 
         QT_BUILD_DIR=$(builder_build_dir)
 
+        var_append LDFLAGS "-L$_SHU_BUILDER_PREFIX/lib"
+        var_append CPPFLAGS "-I$_SHU_BUILDER_PREFIX/include"
+
         (
             run mkdir -p "$QT_BUILD_DIR" &&
             run cd "$QT_BUILD_DIR" &&
-            export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
-            export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
+            export CFLAGS &&
+            export CXXFLAGS &&
+            export LDFLAGS &&
+            export CPPFLAGS &&
             export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
             export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
             run "$BUILD_SRC_DIR"/$QT_SRC_NAME/configure \
