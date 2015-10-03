@@ -12,8 +12,6 @@
 
 #pragma once
 
-#include "qemu-common.h"
-
 /* initialize */
 extern void  android_hw_fingerprint_init( void );
 

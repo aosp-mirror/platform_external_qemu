@@ -11,14 +11,15 @@
 */
 
 #include "android/hw-fingerprint.h"
+
 #include "android/emulation/android_qemud.h"
+#include "android/globals.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/stream.h"
 #include "android/utils/system.h"
-#include "android/hw-qemud.h"
-#include "android/globals.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 

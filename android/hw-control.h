@@ -12,8 +12,6 @@
 
 #pragma once
 
-#include "qemu-common.h"
-
 /* a callback function called when the system wants to change the brightness
  * of a given light. 'light' is a string which can be one of:
  * 'lcd_backlight', 'button_backlight' or 'Keyboard_backlight'
