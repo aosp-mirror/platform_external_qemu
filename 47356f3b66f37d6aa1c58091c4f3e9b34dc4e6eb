@@ -16,6 +16,24 @@
       "revId": "47356f3b66f37d6aa1c58091c4f3e9b34dc4e6eb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f5586271_4617efe0",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-03T04:53:10Z",
+      "side": 1,
+      "message": "If you mean const -\u003e static const: gQAndroidBatteryAgent is a const pointer, but C-98 doesn\u0027t interpret that as a constexpr. In C++ this would have been fine, but in C a constexpr is strictly a literal or a function pointer (not even a const int).\n\nSee http://stackoverflow.com/questions/3025050/error-initializer-element-is-not-constant-when-trying-to-initialize-variable-w",
+      "parentUuid": "354d9aaf_2626377a",
+      "revId": "47356f3b66f37d6aa1c58091c4f3e9b34dc4e6eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
