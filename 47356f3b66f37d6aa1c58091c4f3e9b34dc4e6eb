@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "cb6900e6_57402c19",
+        "filename": "android/emulation/control/battery_agent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-05T17:33:27Z",
+      "side": 1,
+      "message": "I\u0027m just moving this header. Would rather not make such changes in this CL.",
+      "parentUuid": "eb66c411_b8e73947",
+      "revId": "47356f3b66f37d6aa1c58091c4f3e9b34dc4e6eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "354d9aaf_2626377a",
         "filename": "android/emulator-window.c",
         "patchSetId": 4
