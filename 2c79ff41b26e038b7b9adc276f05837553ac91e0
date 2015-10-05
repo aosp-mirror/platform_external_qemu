@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "55eccecd_b3b2802f",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-05T10:32:22Z",
+      "side": 1,
+      "message": "nit: I\u0027d recommend calling this BUILD_TAG instead, since it corresponds to the build machine\u0027s system description.",
+      "revId": "2c79ff41b26e038b7b9adc276f05837553ac91e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f597825c_257a787e",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-05T10:32:22Z",
+      "side": 1,
+      "message": "nit: indentation",
+      "revId": "2c79ff41b26e038b7b9adc276f05837553ac91e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75ab929e_4175744d",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 549,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-05T10:32:22Z",
+      "side": 1,
+      "message": "nit: you should also get rid of all .sym files under /lib/... and lib64/...",
+      "revId": "2c79ff41b26e038b7b9adc276f05837553ac91e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
