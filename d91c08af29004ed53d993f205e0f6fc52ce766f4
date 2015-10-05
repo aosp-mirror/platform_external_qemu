@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b9c302a_e4ce70b3",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-05T22:33:31Z",
+      "side": 1,
+      "message": "Is append() identical to \u003c\u003c ?\nThis code seems to use \u003c\u003c more; should we lean that way?",
+      "revId": "d91c08af29004ed53d993f205e0f6fc52ce766f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
