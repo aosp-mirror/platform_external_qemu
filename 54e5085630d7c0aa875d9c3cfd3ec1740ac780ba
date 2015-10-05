@@ -33,6 +33,24 @@
       "revId": "54e5085630d7c0aa875d9c3cfd3ec1740ac780ba",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab976c01_fe6a8169",
+        "filename": "android/update-check/VersionExtractor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-05T17:22:17Z",
+      "side": 1,
+      "message": "auto_ptr doesn\u0027t support custom deleters - so it can\u0027t here at all.\nThis class is just for the time while we have to stick with the default libstdc++ on Darwin. I will replace it with libc++ as soon as we finish the refactoring and I have some free cycles.\nThat\u0027s why I don\u0027t want to make this custom smart pointer accessible to everyone - if people start using it, it\u0027s harder to replace it with std:: version",
+      "parentUuid": "6ba1f45d_7cc2f91a",
+      "revId": "54e5085630d7c0aa875d9c3cfd3ec1740ac780ba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
