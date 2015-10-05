@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2b6d3ced_bad8914e",
+        "filename": "android/skin/qt/ext-sms.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-05T16:10:37Z",
+      "side": 1,
+      "message": "I did it on purpose, but I think you\u0027re right--it\u0027s better\nthe original way.\nDone.",
+      "parentUuid": "1548969f_4eaf16b2",
+      "range": {
+        "startLine": 42,
+        "startChar": 41,
+        "endLine": 42,
+        "endChar": 50
+      },
+      "revId": "4d97b7b3544c58d9963915c2617641ac77bcd002",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d55b5e6b_f1eb63d8",
         "filename": "android/skin/qt/extended-window-styles.h",
         "patchSetId": 1
