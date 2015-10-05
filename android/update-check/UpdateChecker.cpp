@@ -15,6 +15,7 @@
 #include "android/base/system/System.h"
 #include "android/curl-support.h"
 #include "android/update-check/update_check.h"
+#include "android/update-check/VersionExtractor.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
 #include "android/utils/misc.h"
@@ -24,18 +25,8 @@
 #include <time.h>
 
 #include <fstream>
-#include <memory>
 #include <new>
 #include <string>
-
-#define STRINGIFY(x) _STRINGIFY(x)
-#define _STRINGIFY(x) #x
-
-#ifdef ANDROID_SDK_TOOLS_REVISION
-#define SDK_VERSION_STRING STRINGIFY(ANDROID_SDK_TOOLS_REVISION)
-#else
-#define SDK_VERSION_STRING "standalone"
-#endif
 
 static const char kDataFileName[] = ".emu-update-last-check";
 static const char kVersionUrl[] =
@@ -62,52 +53,6 @@ void android_checkForUpdates(const char* homePath) {
 
 namespace android {
 namespace update_check {
-
-static int parseXmlValue(const char* name,
-                         const std::string& xml,
-                         size_t offset) {
-    const size_t pos = xml.find(name, offset);
-    if (pos == std::string::npos) {
-        dwarning("UpdateCheck: can't find version attribute '%s'", name);
-        return -1;
-    }
-    char* end;
-    const int value = strtoi(xml.c_str() + pos + strlen(name), &end, 10);
-    if (errno || *end != '<') {
-        dwarning("UpdateCheck: invalid value of a version attribute '%s'",
-                 name);
-        return -1;
-    }
-    return value;
-}
-
-class VersionExtractor : public IVersionExtractor {
-public:
-    virtual android::base::Version extractVersion(const std::string& data) {
-        // quick and dirty
-        // TODO: use libxml2 to properly parse XML and extract node value
-
-        // find the last tool item in the xml
-        const size_t toolPos = data.rfind("<sdk:tool>");
-        if (toolPos == std::string::npos) {
-            return Version::Invalid();
-        }
-
-        const int major = parseXmlValue("<sdk:major>", data, toolPos);
-        const int minor = parseXmlValue("<sdk:minor>", data, toolPos);
-        const int micro = parseXmlValue("<sdk:micro>", data, toolPos);
-        if (major < 0 || minor < 0 || micro < 0) {
-            return Version::Invalid();
-        }
-
-        return Version(major, minor, micro);
-    }
-
-    virtual android::base::Version getCurrentVersion() const {
-        static const Version currentVersion = Version(SDK_VERSION_STRING);
-        return currentVersion;
-    }
-};
 
 static size_t curlWriteCallback(void* contents,
                                 size_t size,
