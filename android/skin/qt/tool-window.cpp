@@ -45,14 +45,20 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window) :
 
     mErrorMessage.setWindowModality(Qt::ApplicationModal);
 
-    QObject::connect(&mInstallProcess, SIGNAL(finished(int)), this, SLOT(slot_installFinished(int)));
-
     // TODO: make this affected by themes and changes
     mInstallDialog.setWindowTitle(tr("APK Installer"));
     mInstallDialog.setLabelText(tr("Installing APK..."));
     mInstallDialog.setRange(0, 0); // Makes it a "busy" dialog
     mInstallDialog.close();
     QObject::connect(&mInstallDialog, SIGNAL(canceled()), this, SLOT(slot_installCanceled()));
+    QObject::connect(&mInstallProcess, SIGNAL(finished(int)), this, SLOT(slot_installFinished(int)));
+
+    mPushDialog.setWindowTitle(tr("File Copy"));
+    mPushDialog.setLabelText(tr("Copying files..."));
+    mPushDialog.setRange(0, 0); // Makes it a "busy" dialog
+    mPushDialog.close();
+    QObject::connect(&mPushDialog, SIGNAL(canceled()), this, SLOT(slot_pushCanceled()));
+    QObject::connect(&mPushProcess, SIGNAL(finished(int)), this, SLOT(slot_pushFinished(int)));
 }
 
 void ToolWindow::show()
@@ -80,7 +86,7 @@ QString ToolWindow::getAndroidSdkRoot()
     return environment.value("ANDROID_SDK_ROOT");
 }
 
-QString ToolWindow::getAdbFullPath()
+QString ToolWindow::getAdbFullPath(QStringList *args)
 {
     // Find adb first
     QString sdkRoot = getAndroidSdkRoot();
@@ -95,9 +101,9 @@ QString ToolWindow::getAdbFullPath()
     String adbPath = PathUtils::recompose(adbVector);
 
     // TODO: is this safe cross-platform?
-    QString command = QString(adbPath.c_str());
-    command += " -s emulator-" + QString::number(android_base_port);
-    return command;
+    args->append("-s");
+    args->append("emulator-" + QString::number(android_base_port));
+    return adbPath.c_str();
 }
 
 void ToolWindow::runAdbInstall(const QString &path)
@@ -111,25 +117,137 @@ void ToolWindow::runAdbInstall(const QString &path)
     // Default the -r flag to replace the current version
     // TODO: is replace the desired default behavior?
     // TODO: enable other flags? -lrstdg available
-    QString command = getAdbFullPath();
+    QStringList args;
+    QString command = getAdbFullPath(&args);
     if (command.isNull()) {
         return;
     }
 
+    args << "install";  // The desired command
+    args << "-r";       // The flags for adb install
+    args << path;       // The path to the APK to install
+
     // Show a dialog so the user knows something is happening
     mInstallDialog.show();
 
-    command += " install -r "; // The desired command is install -r
-    command += path; // The absolute path to the desired .apk file
-
     // Keep track of this process
-    mInstallProcess.start(command);
+    mInstallProcess.start(command, args);
     mInstallProcess.waitForStarted();
 }
 
-void ToolWindow::runAdbPush(const QList<QUrl> &paths)
+void ToolWindow::runAdbPush(const QList<QUrl> &urls)
 {
-    // TODO: implement me!
+    if (mPushProcess.state() != QProcess::NotRunning) {
+        showErrorDialog(tr("Another copy is currently pending.<br>Try again when it completes."),
+                        tr("File Copy"));
+        return;
+    }
+
+    // Prepare the base command
+    QStringList args;
+    QString command = getAdbFullPath(&args);
+    if (command.isNull()) {
+        return;
+    }
+    args << "push";
+
+    // If it's just one file, copying it is simple
+    if (urls.length() == 1) {
+        args << urls[0].toLocalFile();
+    } else {
+
+        // Create a temporary directory under the designated system temp directory
+        QDir tempDir = QDir::temp();
+
+        // If said directory exists, remove it (this is the easiest way to ensure it is empty
+        if (tempDir.cd(LOCAL_TMP_COPY_DIRECTORY)) {
+            if (!tempDir.removeRecursively()) {
+                QString errMsg = "Could not remove the temporary directory at " +
+                                        tempDir.absolutePath() + ".";
+                showErrorDialog(tr(errMsg.toStdString().data()),
+                                tr("File Copy"));
+                return;
+            }
+        }
+
+        // TODO: is it necessary to explain what is wrong if these fail?
+        // Make (or remake) the directory and move into it
+        tempDir = QDir::temp();
+        if (!tempDir.mkdir(LOCAL_TMP_COPY_DIRECTORY)) {
+            showErrorDialog(tr("Failed to make temporary directory before copying files."),
+                            tr("File Copy"));
+            return;
+        }
+        if (!tempDir.cd(LOCAL_TMP_COPY_DIRECTORY)) {
+            showErrorDialog(tr("Failed to make temporary directory before copying files."),
+                            tr("File Copy"));
+            return;
+        }
+
+        // Copy each file to the temp directory
+        bool isOk = true;
+        for (unsigned i = 0; i < urls.length(); i++) {
+            isOk &= copyToTempDirectory(tempDir, urls[i].toLocalFile());
+        }
+
+        // If any files failed, still push what was copied, but pop up an error message as well
+        if (!isOk) {
+            showErrorDialog(tr("Some files could not be copied."),
+                            tr("File Copy"));
+        }
+
+        // Finally, push the entire temp directory
+        args << tempDir.absolutePath();
+    }
+
+    // If we get here, everything should be set up
+    args << REMOTE_DOWNLOADS_DIR;
+
+    // Show a dialog so the user knows something is happening
+    mPushDialog.show();
+
+    // Keep track of this process
+    mPushProcess.start(command, args);
+    mPushProcess.waitForStarted();
+}
+
+bool ToolWindow::copyToTempDirectory(const QDir &tempDir, const QString &path)
+{
+    QFile file(path);
+    QFileInfo info(file);
+
+    // Files are simply copied to the temp directory
+    if (info.isFile()) {
+        StringVector pathVector;
+        pathVector.push_back(String(tempDir.absolutePath().toStdString().data()));
+        pathVector.push_back(String(info.fileName().toStdString().data()));
+
+        return file.copy(PathUtils::recompose(pathVector).c_str());
+    }
+
+    // Directories must be recursively copied
+    else if (info.isDir()) {
+
+        // Create and go into the nested subdir, then recur on each subfile
+        QDir tempSubDir(tempDir);
+        if (!tempSubDir.mkdir(info.fileName())) {
+            return false;
+        }
+        if (!tempSubDir.cd(info.fileName())) {
+            return false;
+        }
+
+        // Attempt to copy all children
+        bool isOk = true;
+        QFileInfoList subfiles = QDir(path).entryInfoList(
+                    QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+
+        for (unsigned i = 0; i < subfiles.length(); i++) {
+            isOk &= copyToTempDirectory(tempSubDir, subfiles[i].filePath());
+        }
+
+        return isOk;
+    }
 }
 
 void ToolWindow::dockMainWindow()
@@ -214,6 +332,31 @@ void ToolWindow::slot_installFinished(int exitStatus)
     if (exitStatus) {
         showErrorDialog(tr("The installation failed."),
                         tr("APK Installer"));
+    }
+}
+
+void ToolWindow::slot_pushCanceled()
+{
+    if (mPushProcess.state() != QProcess::NotRunning) {
+        mPushProcess.kill();
+    }
+}
+
+void ToolWindow::slot_pushFinished(int exitStatus)
+{
+    // Regardless of success, remove the temporary dir so it isn't eating up space
+    QDir tempDir = QDir::temp();
+    if (tempDir.cd(LOCAL_TMP_COPY_DIRECTORY)) {
+        if (!tempDir.removeRecursively()) {
+            // TODO: this isn't a problem until their next push, so is an error popup here
+            // appropriate? This "rm -rf" just a courtesy to not take up file space anyway...
+        }
+    }
+
+    mPushDialog.close();
+    if (exitStatus) {
+        showErrorDialog(tr("The file copy failed."),
+                        tr("File Copy"));
     }
 }
 
