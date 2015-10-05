@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ba1f45d_7f1bcb88",
+        "filename": "android/emulation/android_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-05T20:16:10Z",
+      "side": 1,
+      "message": "can the load() function handle NULL in |opaque| ?",
+      "range": {
+        "startLine": 232,
+        "startChar": 36,
+        "endLine": 232,
+        "endChar": 41
+      },
+      "revId": "d5670a0612b536442f3ebbd2b231a412152913c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
