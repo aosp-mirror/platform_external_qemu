@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f597825c_65452039",
+        "filename": "android/console.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-05T10:36:24Z",
+      "side": 1,
+      "message": "nit: the line above seems to be obsolete since you copy |*vm_operations| now.",
+      "revId": "ad75a385451c1d50417e4c52cf6708dc44a76c91",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75ab929e_e1d00092",
+        "filename": "android/emulation/control/vm_operations.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-05T10:36:24Z",
+      "side": 1,
+      "message": "typo: should be |outConsumer|",
+      "revId": "ad75a385451c1d50417e4c52cf6708dc44a76c91",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
