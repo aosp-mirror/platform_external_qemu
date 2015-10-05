@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ba1f45d_9cea6510",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-05T18:50:51Z",
+      "side": 1,
+      "message": "with android/base/ScopedPtr\n\nMore importantly, please note in the commit message that ScopedPtr was updated to allow Deleters (+ minor cleanups).",
+      "range": {
+        "startLine": 14,
+        "startChar": 45,
+        "endLine": 15,
+        "endChar": 5
+      },
+      "revId": "85a8927d6cea438f31d41196fdac1b1534465ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b7078c2_bc2acd5e",
+        "filename": "android/base/memory/ScopedPtr.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-05T18:50:51Z",
+      "side": 1,
+      "message": "Since you\u0027re inheriting as private anyway, hide this in an anonymous namespace?",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 2
+      },
+      "revId": "85a8927d6cea438f31d41196fdac1b1534465ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
