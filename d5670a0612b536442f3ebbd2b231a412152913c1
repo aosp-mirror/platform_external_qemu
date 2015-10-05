@@ -22,6 +22,30 @@
       "revId": "d5670a0612b536442f3ebbd2b231a412152913c1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b9c302a_013d8e8b",
+        "filename": "android/emulation/android_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-05T20:31:30Z",
+      "side": 1,
+      "message": "I haven\u0027t seen any issues in the current context.\n\nMore generally, many pipe implementations actually set this argument to NULL in android_pipe_add_type, so that their init/load functions will _always_ receive NULL for this argument.\n\nThere seems to be an implicit assumption that this argument may-be-null for all pipe implementations.\n\nI\u0027ll update the documentation in the header to this effect.",
+      "parentUuid": "6ba1f45d_7f1bcb88",
+      "range": {
+        "startLine": 232,
+        "startChar": 36,
+        "endLine": 232,
+        "endChar": 41
+      },
+      "revId": "d5670a0612b536442f3ebbd2b231a412152913c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
