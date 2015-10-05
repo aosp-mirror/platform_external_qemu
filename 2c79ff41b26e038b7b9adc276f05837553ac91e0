@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "2b6d3ced_9aea6d10",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-10-05T18:06:27Z",
+      "side": 1,
+      "message": "Okay",
+      "parentUuid": "55eccecd_b3b2802f",
+      "revId": "2c79ff41b26e038b7b9adc276f05837553ac91e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f597825c_257a787e",
         "filename": "android-configure.sh",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "0b7078c2_7cd3d537",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-10-05T18:06:27Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "f597825c_257a787e",
+      "revId": "2c79ff41b26e038b7b9adc276f05837553ac91e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75ab929e_4175744d",
         "filename": "android/scripts/package-release.sh",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-10-05T10:32:22Z",
       "side": 1,
       "message": "nit: you should also get rid of all .sym files under /lib/... and lib64/...",
+      "revId": "2c79ff41b26e038b7b9adc276f05837553ac91e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb90200c_9f5333a2",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 549,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-10-05T18:06:27Z",
+      "side": 1,
+      "message": "Missed those.",
+      "parentUuid": "75ab929e_4175744d",
       "revId": "2c79ff41b26e038b7b9adc276f05837553ac91e0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
