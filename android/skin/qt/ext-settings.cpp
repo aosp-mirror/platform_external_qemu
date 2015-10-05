@@ -49,10 +49,12 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
     switch (theme) {
         case SETTINGS_THEME_DARK:
             this->setStyleSheet(QT_STYLE(DARK));
+            mToolWindow->setStyleSheet(QT_STYLE(DARK));
             break;
         case SETTINGS_THEME_LIGHT:
         default:
             this->setStyleSheet(QT_STYLE(LIGHT));
+            mToolWindow->setStyleSheet(QT_STYLE(LIGHT));
             break;
     }
 
