@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb90200c_3fe307b9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-05T17:16:45Z",
+      "side": 1,
+      "message": "Please say [reland] somewhere.",
+      "revId": "54e5085630d7c0aa875d9c3cfd3ec1740ac780ba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba1f45d_7cc2f91a",
+        "filename": "android/update-check/VersionExtractor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-05T17:16:45Z",
+      "side": 1,
+      "message": "1. I don\u0027t see any use below that preclues auto_ptr instead.\n2. If you disallow copy and assign, you can\u0027t use UniquePtr with STL containers anyway. Again, use auto_ptr.\n3. If you must use a custom implementation, cf android/base/memory/ScopedPtr.h Consider extending that with a custom Deleter.\n\nAdding a custom UniquePtr in a non-base implementation file is a strict no-no, imo.",
+      "revId": "54e5085630d7c0aa875d9c3cfd3ec1740ac780ba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
