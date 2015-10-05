@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "55eccecd_d3458ce1",
+        "filename": "android/base/async/Looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-05T10:11:40Z",
+      "side": 1,
+      "message": "An enum class, cool :) In this case, maybe drop the Clock suffix in the enumeration values, since I believe you need to always use the ClockType:: prefix anyway, i.e.:\n\n  enum class ClockType {\n    kRealtime,\n    kVirtual,\n    kHost,\n  };",
+      "revId": "93b3182842dad74d59ecbc5d96b4c999f46f3231",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f597825c_25c4b822",
+        "filename": "android/base/async/Looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-05T10:11:40Z",
+      "side": 1,
+      "message": "nit: s/kVirual/kVirtual/",
+      "revId": "93b3182842dad74d59ecbc5d96b4c999f46f3231",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f597825c_658080ba",
+        "filename": "android/base/async/Looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-05T10:11:40Z",
+      "side": 1,
+      "message": "nit: you\u0027re already within the android::base namespace here.",
+      "revId": "93b3182842dad74d59ecbc5d96b4c999f46f3231",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75ab929e_61787047",
+        "filename": "android/qemu/base/async/Looper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-05T10:11:40Z",
+      "side": 1,
+      "message": "very nice, thanks you :)",
+      "revId": "93b3182842dad74d59ecbc5d96b4c999f46f3231",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "156b3632_46ea9419",
+        "filename": "android/utils/looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-05T10:11:40Z",
+      "side": 1,
+      "message": "nit: s/monotinic/monotonic/",
+      "revId": "93b3182842dad74d59ecbc5d96b4c999f46f3231",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
