@@ -15,6 +15,7 @@
 #include "hw/hw.h"
 #include "hw/power_supply.h"
 
+#include <string.h>
 
 enum {
 	/* status register */
@@ -227,15 +228,16 @@ void goldfish_battery_set_prop(int ac, int property, int value)
     }
 }
 
-void goldfish_battery_display(void (* callback)(void *data, const char* string), void *data)
-{
+void goldfish_battery_display(void *data,
+                              int (*callback)(void *data, const char *string,
+                                              int len)) {
     char          buffer[100];
     const char*   value;
 
     // Note: obviously, if there is no battery, the AC must always be on.
     snprintf(buffer, sizeof buffer, "AC: %s\r\n",
              (battery_state->ac_online) ? "online" : "offline");
-    callback(data, buffer);
+    callback(data, buffer, strlen(buffer));
 
     switch (battery_state->status) {
         case POWER_SUPPLY_STATUS_CHARGING:
@@ -254,7 +256,7 @@ void goldfish_battery_display(void (* callback)(void *data, const char* string),
             value = "Unknown";
     }
     snprintf(buffer, sizeof buffer, "status: %s\r\n", value);
-    callback(data, buffer);
+    callback(data, buffer, strlen(buffer));
 
     switch (battery_state->health) {
         case POWER_SUPPLY_HEALTH_GOOD:
@@ -276,12 +278,12 @@ void goldfish_battery_display(void (* callback)(void *data, const char* string),
             value = "Unknown";
     }
     snprintf(buffer, sizeof buffer, "health: %s\r\n", value);
-    callback(data, buffer);
+    callback(data, buffer, strlen(buffer));
 
     snprintf(buffer, sizeof buffer, "present: %s\r\n",
              (battery_state->present) ? "true" : "false");
-    callback(data, buffer);
+    callback(data, buffer, strlen(buffer));
 
     snprintf(buffer, sizeof buffer, "capacity: %d\r\n", battery_state->capacity);
-    callback(data, buffer);
+    callback(data, buffer, strlen(buffer));
 }

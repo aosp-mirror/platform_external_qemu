@@ -48,9 +48,13 @@ void goldfish_fb_init(int id);
 void goldfish_audio_init(uint32_t base, int id, const char* input_source);
 void goldfish_battery_init(int has_battery);
 void goldfish_battery_set_prop(int ac, int property, int value);
-void goldfish_battery_display(void (* callback)(void *data, const char* string), void *data);
 void goldfish_mmc_init(uint32_t base, int id, BlockDriverState* bs);
+
+// Query functions:
 int goldfish_guest_is_64bit();
+void goldfish_battery_display(void *data,
+                              int (*callback)(void *data, const char *string,
+                                              int len));
 
 // these do not add a device
 void trace_dev_init();
@@ -82,5 +86,9 @@ static inline void uint64_set_high(uint64_t *addr, uint32 value)
 {
     *addr = (*addr & 0xFFFFFFFFULL) | ((uint64_t)value << 32);
 }
+
+// Allows android glue code to forward generic events directly to the events
+// device. |opaque| is a handle the device.
+void events_put_generic(void* opaque, int type, int code, int value);
 
 #endif  /* GOLDFISH_DEVICE_H */

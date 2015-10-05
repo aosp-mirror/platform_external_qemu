@@ -10,7 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#include "android/cellular-agent.h"
+#include "android/emulation/control/cellular_agent.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "extended-window.h"
 #include "ui_extended.h"

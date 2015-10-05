@@ -10,20 +10,25 @@
  ** GNU General Public License for more details.
  */
 
-#include "android/battery-agent.h"
-#include "android/battery-agent-impl.h"
+#include "android/qemu-control-impl.h"
+
+#include "android/emulation/control/battery_agent.h"
 #include "hw/power_supply.h"
 #include "hw/android/goldfish/device.h"
 
-void battery_setIsCharging(bool isCharging) {
+static void battery_setIsBatteryPresent(bool isPresent) {
+    goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_PRESENT, isPresent);
+}
+
+static void battery_setIsCharging(bool isCharging) {
     goldfish_battery_set_prop(1, POWER_SUPPLY_PROP_ONLINE, isCharging);
 }
 
-void battery_setChargeLevel(int percentFull) {
+static void battery_setChargeLevel(int percentFull) {
     goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_CAPACITY, percentFull);
 }
 
-void battery_setHealth(enum BatteryHealth health) {
+static void battery_setHealth(enum BatteryHealth health) {
     int value;
 
     switch (health) {
@@ -40,7 +45,7 @@ void battery_setHealth(enum BatteryHealth health) {
     goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, value);
 }
 
-void battery_setStatus(enum BatteryStatus status) {
+static void battery_setStatus(enum BatteryStatus status) {
     int value;
 
     switch (status) {
@@ -55,3 +60,13 @@ void battery_setStatus(enum BatteryStatus status) {
 
     goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, value);
 }
+
+static const QAndroidBatteryAgent sQAndroidBatteryAgent = {
+        .setIsBatteryPresent = battery_setIsBatteryPresent,
+        .setIsCharging = battery_setIsCharging,
+        .setChargeLevel = battery_setChargeLevel,
+        .setHealth = battery_setHealth,
+        .setStatus = battery_setStatus,
+        .batteryDisplay = goldfish_battery_display};
+const QAndroidBatteryAgent* const gQAndroidBatteryAgent =
+        &sQAndroidBatteryAgent;

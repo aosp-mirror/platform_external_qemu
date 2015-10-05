@@ -34,7 +34,6 @@
 #include "qemu-common.h"
 #include "sysemu/sysemu.h"
 #include "ui/console.h"
-#include "android/user-events.h"
 
 #include "math.h"
 

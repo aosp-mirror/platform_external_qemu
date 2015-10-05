@@ -21,38 +21,32 @@
  *
  */
 
+#include "android/console.h"
+
 #include "android/android.h"
 #include "android/display-core.h"
-#include "android/gps.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
-#include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
 #include "android/shaper.h"
 #include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"
 #include "android/tcpdump.h"
-#include "android/user-events.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/http_utils.h"
+#include "android/utils/looper.h"
 #include "android/utils/sockets.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/utf8_utils.h"
 
 #include "config-host.h"
-#include "cpu.h"
-#include "hw/android/goldfish/device.h"
-#include "hw/power_supply.h"
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"
 #endif
-#include "monitor/monitor.h"
 #include "net/net.h"
 #include "telephony/modem_driver.h"
-#include "sysemu/char.h"
-#include "sysemu/sysemu.h"
 
 #include <fcntl.h>
 #include <stdarg.h>
@@ -95,6 +89,9 @@ typedef struct ControlClientRec_
 {
     struct ControlClientRec_*  next;       /* next client in list           */
     Socket                     sock;       /* socket used for communication */
+    // The loopIo currently communicating over |sock|. May change over the
+    // lifetime of a ControlClient.
+    LoopIo* loopIo;
     ControlGlobal              global;
     char                       finished;
     char                       buff[ 4096 ];
@@ -105,8 +102,16 @@ typedef struct ControlClientRec_
 
 typedef struct ControlGlobalRec_
 {
-    /* listening socket */
-    Socket    listen_fd;
+    // Interfaces to call into QEMU specific code.
+    QAndroidBatteryAgent* battery_agent;
+    QAndroidFingerAgent* finger_agent;
+    QAndroidLocationAgent* location_agent;
+    QAndroidUserEventAgent* user_event_agent;
+    QAndroidVmOperations* vm_operations;
+
+    /* IO */
+    Looper* looper;
+    LoopIo* listen_loopio;
 
     /* the list of current clients */
     ControlClient   clients;
@@ -117,6 +122,13 @@ typedef struct ControlGlobalRec_
     int       max_redirs;
 
 } ControlGlobalRec;
+
+static inline QAndroidVmOperations* vmopers(ControlClient client) {
+    return client->global->vm_operations;
+}
+
+//////////// Module level globals //////////////////////////
+static ControlGlobalRec _g_global;
 
 static int
 control_global_add_redir( ControlGlobal  global,
@@ -187,14 +199,13 @@ control_client_detach( ControlClient  client )
     if (client->sock < 0)
         return -1;
 
-    qemu_set_fd_handler( client->sock, NULL, NULL, NULL );
+    loopIo_free(client->loopIo);
+    client->loopIo = NULL;
     result = client->sock;
     client->sock = -1;
 
     return result;
 }
-
-static void  control_client_read( void*  _client );  /* forward */
 
 static void
 control_client_destroy( ControlClient  client )
@@ -224,7 +235,8 @@ control_client_destroy( ControlClient  client )
     free( client );
 }
 
-
+// /////////////////////////////////////////////////////////////////////////////
+// Different write callbacks used to report back to the client.
 
 static void  control_control_write( ControlClient  client, const char*  buff, int  len )
 {
@@ -266,6 +278,22 @@ static int  control_write( ControlClient  client, const char*  format, ... )
     return ret;
 }
 
+static int control_write_out_cb(void* opaque, const char* str, int strsize) {
+    ControlClient client = opaque;
+    control_control_write(client, str, strsize);
+    return strsize;
+}
+
+static int control_write_err_cb(void* opaque, const char* str, int strsize) {
+    int ret = 0;
+    ControlClient client = opaque;
+    ret += control_write(client, "KO: ");
+    control_control_write(client, str, strsize);
+    return ret + strsize;
+}
+
+// forward declaration
+static void control_client_read(void* opaque, int fd, unsigned events);
 
 static ControlClient
 control_client_create( Socket         socket,
@@ -279,10 +307,13 @@ control_client_create( Socket         socket,
         client->finished = 0;
         client->global  = global;
         client->sock    = socket;
+        client->loopIo =
+                loopIo_new(global->looper, socket, control_client_read, client);
         client->next    = global->clients;
         global->clients = client;
 
-        qemu_set_fd_handler( socket, control_client_read, NULL, client );
+        loopIo_wantRead(client->loopIo);
+        loopIo_dontWantWrite(client->loopIo);
     }
     return client;
 }
@@ -497,12 +528,13 @@ control_client_read_byte( ControlClient  client, unsigned char  ch )
     }
 }
 
-static void
-control_client_read( void*  _client )
-{
-    ControlClient  client = _client;
-    unsigned char  buf[4096];
-    int            size;
+static void control_client_read(void* opaque, int fd, unsigned events) {
+    ControlClient client = opaque;
+    unsigned char buf[4096];
+    int size;
+
+    assert(fd == client->sock);
+    assert((events & LOOP_IO_READ) != 0);
 
     D(( "in control_client read: " ));
     size = socket_recv( client->sock, buf, sizeof(buf) );
@@ -551,16 +583,23 @@ control_client_read( void*  _client )
 
 
 /* this function is called on each new client connection */
-static void
-control_global_accept( void*  _global )
-{
-    ControlGlobal       global = _global;
+static void control_global_accept(void* opaque,
+                                  int listen_fd,
+                                  unsigned events) {
+    ControlGlobal global = opaque;
     ControlClient       client;
     Socket              fd;
 
-    D(( "control_global_accept: just in (fd=%d)\n", global->listen_fd ));
+    assert(listen_fd == loopIo_fd(global->listen_loopio));
+    // accept()s are mapped to LOOP_IO_READ
+    assert(events & LOOP_IO_READ);
 
-    fd = HANDLE_EINTR(socket_accept(global->listen_fd, NULL));
+    D(( "control_global_accept: just in (fd=%d)\n", listen_fd ));
+    assert(listen_fd == loopIo_fd(global->listen_loopio));
+    // connect()s are mapped to LOOP_IO_READ
+    assert(events & LOOP_IO_READ);
+
+    fd = HANDLE_EINTR(socket_accept(listen_fd, NULL));
     if (fd < 0) {
         D(( "problem in accept: %d: %s\n", errno, errno_str ));
         perror("accept");
@@ -578,16 +617,31 @@ control_global_accept( void*  _global )
     }
 }
 
+#define COPY_AGENT(to, from)        \
+    do {                            \
+        to = malloc(sizeof(*from)); \
+        *(to) = *(from);            \
+    } while (0);
 
-static int
-control_global_init( ControlGlobal  global,
-                     int            control_port )
-{
+int control_console_start(int control_port,
+                          const QAndroidBatteryAgent* battery_agent,
+                          const QAndroidFingerAgent* finger_agent,
+                          const QAndroidLocationAgent* location_agent,
+                          const QAndroidUserEventAgent* user_event_agent,
+                          const QAndroidVmOperations* vm_operations) {
+    ControlGlobal global = &_g_global;
     Socket  fd;
     int     ret;
     SockAddress  sockaddr;
 
     memset( global, 0, sizeof(*global) );
+    // Copy the QEMU specific interfaces passed in to make lifetime management
+    // simpler.
+    COPY_AGENT(global->battery_agent, battery_agent);
+    COPY_AGENT(global->finger_agent, finger_agent);
+    COPY_AGENT(global->location_agent, location_agent);
+    COPY_AGENT(global->user_event_agent, user_event_agent);
+    COPY_AGENT(global->vm_operations, vm_operations);
 
     fd = socket_create_inet( SOCKET_STREAM );
     if (fd < 0) {
@@ -615,9 +669,11 @@ control_global_init( ControlGlobal  global,
 
     socket_set_nonblock(fd);
 
-    global->listen_fd = fd;
-
-    qemu_set_fd_handler( fd, control_global_accept, NULL, global );
+    global->looper = looper_getForThread();
+    global->listen_loopio =
+            loopIo_new(global->looper, fd, control_global_accept, global);
+    loopIo_wantRead(global->listen_loopio);
+    loopIo_dontWantWrite(global->listen_loopio);
     return 0;
 }
 
@@ -1630,16 +1686,22 @@ static const CommandDefRec  sms_commands[] =
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
-static void
-do_control_write(void* data, const char* string)
-{
-    control_write((ControlClient)data, string);
+/********************************************************************************************/
+/********************************************************************************************/
+/***** ******/
+/*****                         P O W E R   C O M M A N D ******/
+/***** ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+void do_control_write(void* opaque, const char* args) {
+    control_write((ControlClient)opaque, args);
 }
 
 static int
 do_power_display( ControlClient client, char*  args )
 {
-    goldfish_battery_display(do_control_write, client);
+    client->global->battery_agent->batteryDisplay(client, control_write_out_cb);
     return 0;
 }
 
@@ -1648,11 +1710,11 @@ do_ac_state( ControlClient  client, char*  args )
 {
     if (args) {
         if (strcasecmp(args, "on") == 0) {
-            goldfish_battery_set_prop(1, POWER_SUPPLY_PROP_ONLINE, 1);
+            client->global->battery_agent->setIsCharging(true);
             return 0;
         }
         if (strcasecmp(args, "off") == 0) {
-            goldfish_battery_set_prop(1, POWER_SUPPLY_PROP_ONLINE, 0);
+            client->global->battery_agent->setIsCharging(false);
             return 0;
         }
     }
@@ -1666,23 +1728,25 @@ do_battery_status( ControlClient  client, char*  args )
 {
     if (args) {
         if (strcasecmp(args, "unknown") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, POWER_SUPPLY_STATUS_UNKNOWN);
+            client->global->battery_agent->setStatus(BATTERY_STATUS_UNKNOWN);
             return 0;
         }
         if (strcasecmp(args, "charging") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, POWER_SUPPLY_STATUS_CHARGING);
+            client->global->battery_agent->setStatus(BATTERY_STATUS_CHARGING);
             return 0;
         }
         if (strcasecmp(args, "discharging") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, POWER_SUPPLY_STATUS_DISCHARGING);
+            client->global->battery_agent->setStatus(
+                    BATTERY_STATUS_DISCHARGING);
             return 0;
         }
         if (strcasecmp(args, "not-charging") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, POWER_SUPPLY_STATUS_NOT_CHARGING);
+            client->global->battery_agent->setStatus(
+                    BATTERY_STATUS_NOT_CHARGING);
             return 0;
         }
         if (strcasecmp(args, "full") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, POWER_SUPPLY_STATUS_FULL);
+            client->global->battery_agent->setStatus(BATTERY_STATUS_FULL);
             return 0;
         }
     }
@@ -1696,11 +1760,11 @@ do_battery_present( ControlClient  client, char*  args )
 {
     if (args) {
         if (strcasecmp(args, "true") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_PRESENT, 1);
+            client->global->battery_agent->setIsBatteryPresent(true);
             return 0;
         }
         if (strcasecmp(args, "false") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_PRESENT, 0);
+            client->global->battery_agent->setIsBatteryPresent(true);
             return 0;
         }
     }
@@ -1714,27 +1778,28 @@ do_battery_health( ControlClient  client, char*  args )
 {
     if (args) {
         if (strcasecmp(args, "unknown") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, POWER_SUPPLY_HEALTH_UNKNOWN);
+            client->global->battery_agent->setHealth(BATTERY_HEALTH_UNKNOWN);
             return 0;
         }
         if (strcasecmp(args, "good") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, POWER_SUPPLY_HEALTH_GOOD);
+            client->global->battery_agent->setHealth(BATTERY_HEALTH_GOOD);
             return 0;
         }
         if (strcasecmp(args, "overheat") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, POWER_SUPPLY_HEALTH_OVERHEAT);
+            client->global->battery_agent->setHealth(BATTERY_HEALTH_OVERHEATED);
             return 0;
         }
         if (strcasecmp(args, "dead") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, POWER_SUPPLY_HEALTH_DEAD);
+            client->global->battery_agent->setHealth(BATTERY_HEALTH_DEAD);
             return 0;
         }
         if (strcasecmp(args, "overvoltage") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, POWER_SUPPLY_HEALTH_OVERVOLTAGE);
+            client->global->battery_agent->setHealth(
+                    BATTERY_HEALTH_OVERVOLTAGE);
             return 0;
         }
         if (strcasecmp(args, "failure") == 0) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, POWER_SUPPLY_HEALTH_UNSPEC_FAILURE);
+            client->global->battery_agent->setHealth(BATTERY_HEALTH_FAILED);
             return 0;
         }
     }
@@ -1750,7 +1815,7 @@ do_battery_capacity( ControlClient  client, char*  args )
         int capacity;
 
         if (sscanf(args, "%d", &capacity) == 1 && capacity >= 0 && capacity <= 100) {
-            goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_CAPACITY, capacity);
+            client->global->battery_agent->setChargeLevel(capacity);
             return 0;
         }
     }
@@ -1842,7 +1907,7 @@ do_event_send( ControlClient  client, char*  args )
             return -1;
         }
 
-        user_event_generic( type, code, value );
+        client->global->user_event_agent->sendGenericEvent(type, code, value);
         p = q;
     }
     return 0;
@@ -1951,7 +2016,8 @@ do_event_text( ControlClient  client, char*  args )
         return -1;
     }
 
-    skin_keycode_buffer_init(&keycodes, &user_event_keycodes);
+    skin_keycode_buffer_init(&keycodes,
+                             client->global->user_event_agent->sendKeyCodes);
 
     /* un-secape message text into proper utf-8 (conversion happens in-site) */
     textlen = strlen((char*)p);
@@ -2014,90 +2080,49 @@ static const CommandDefRec  event_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 
-static int
-control_write_out_cb(void* opaque, const char* str, int strsize)
-{
-    ControlClient client = opaque;
-    control_control_write(client, str, strsize);
-    return strsize;
+static int do_snapshot_list(ControlClient client, char* args) {
+    bool success = vmopers(client)->snapshotList(client, control_write_out_cb,
+                                                 control_write_err_cb);
+    return success ? 0 : -1;
 }
 
-static int
-control_write_err_cb(void* opaque, const char* str, int strsize)
-{
-    int ret = 0;
-    ControlClient client = opaque;
-    ret += control_write(client, "KO: ");
-    control_control_write(client, str, strsize);
-    return ret + strsize;
-}
-
-static int
-do_snapshot_list( ControlClient  client, char*  args )
-{
-    int64_t ret;
-    Monitor *out = monitor_fake_new(client, control_write_out_cb);
-    Monitor *err = monitor_fake_new(client, control_write_err_cb);
-    do_info_snapshots(out, err);
-    ret = monitor_fake_get_bytes(err);
-    monitor_fake_free(err);
-    monitor_fake_free(out);
-
-    return ret > 0;
-}
-
-static int
-do_snapshot_save( ControlClient  client, char*  args )
-{
-    int64_t ret;
-
+static int do_snapshot_save(ControlClient client, char* args) {
     if (args == NULL) {
-        control_write(client, "KO: argument missing, try 'avd snapshot save <name>'\r\n");
+        control_write(
+                client,
+                "KO: Argument missing, try 'avd snapshot save <name>'\r\n");
         return -1;
     }
 
-    Monitor *err = monitor_fake_new(client, control_write_err_cb);
-    do_savevm(err, args);
-    ret = monitor_fake_get_bytes(err);
-    monitor_fake_free(err);
-
-    return ret > 0; // no output on error channel indicates success
+    bool success =
+            vmopers(client)->snapshotSave(args, client, control_write_out_cb);
+    return success ? 0 : -1;
 }
 
-static int
-do_snapshot_load( ControlClient  client, char*  args )
-{
-    int64_t ret;
-
+static int do_snapshot_load(ControlClient client, char* args) {
     if (args == NULL) {
-        control_write(client, "KO: argument missing, try 'avd snapshot load <name>'\r\n");
+        control_write(
+                client,
+                "KO: Argument missing, try 'avd snapshot load <name>'\r\n");
         return -1;
     }
 
-    Monitor *err = monitor_fake_new(client, control_write_err_cb);
-    do_loadvm(err, args);
-    ret = monitor_fake_get_bytes(err);
-    monitor_fake_free(err);
-
-    return ret > 0;
+    bool success =
+            vmopers(client)->snapshotLoad(args, client, control_write_out_cb);
+    return success ? 0 : -1;
 }
 
-static int
-do_snapshot_del( ControlClient  client, char*  args )
-{
-    int64_t ret;
-
+static int do_snapshot_del(ControlClient client, char* args) {
     if (args == NULL) {
-        control_write(client, "KO: argument missing, try 'avd snapshot del <name>'\r\n");
+        control_write(
+                client,
+                "KO: Argument missing, try 'avd snapshot list <name>'\r\n");
         return -1;
     }
 
-    Monitor *err = monitor_fake_new(client, control_write_err_cb);
-    do_delvm(err, args);
-    ret = monitor_fake_get_bytes(err);
-    monitor_fake_free(err);
-
-    return ret > 0;
+    bool success =
+            vmopers(client)->snapshotDelete(args, client, control_write_out_cb);
+    return success ? 0 : -1;
 }
 
 static const CommandDefRec  snapshot_commands[] =
@@ -2134,29 +2159,28 @@ static const CommandDefRec  snapshot_commands[] =
 static int
 do_avd_stop( ControlClient  client, char*  args )
 {
-    if (!vm_running) {
+    if (!(vmopers(client)->vmIsRunning())) {
         control_write( client, "KO: virtual device already stopped\r\n" );
         return -1;
     }
-    vm_stop(EXCP_INTERRUPT);
-    return 0;
+    return vmopers(client)->vmStop() ? 0 : -1;
 }
 
 static int
 do_avd_start( ControlClient  client, char*  args )
 {
-    if (vm_running) {
+    if (vmopers(client)->vmIsRunning()) {
         control_write( client, "KO: virtual device already running\r\n" );
         return -1;
     }
-    vm_start();
-    return 0;
+    return vmopers(client)->vmStart() ? 0 : -1;
 }
 
 static int
 do_avd_status( ControlClient  client, char*  args )
 {
-    control_write( client, "virtual device is %s\r\n", vm_running ? "running" : "stopped" );
+    control_write(client, "virtual device is %s\r\n",
+                  vmopers(client)->vmIsRunning() ? "running" : "stopped");
     return 0;
 }
 
@@ -2207,11 +2231,11 @@ do_geo_nmea( ControlClient  client, char*  args )
         control_write( client, "KO: NMEA sentence missing, try 'help geo nmea'\r\n" );
         return -1;
     }
-    if (!android_gps_cs) {
+    if (!client->global->location_agent->gpsIsSupported()) {
         control_write( client, "KO: no GPS emulation in this virtual device\r\n" );
         return -1;
     }
-    android_gps_send_nmea( args );
+    client->global->location_agent->gpsSendNmea(args);
     return 0;
 }
 
@@ -2275,8 +2299,8 @@ do_geo_fix( ControlClient  client, char*  args )
     memset(&tVal, 0, sizeof(tVal));
     gettimeofday(&tVal, NULL);
 
-    android_gps_send_location(params[GEO_LAT], params[GEO_LONG],
-                              altitude, n_satellites, &tVal);
+    client->global->location_agent->gpsCmd(params[GEO_LAT], params[GEO_LONG],
+                                           altitude, n_satellites, &tVal);
     return 0;
 }
 
@@ -2512,7 +2536,7 @@ do_fingerprint_touch(ControlClient client, char* args )
         char *endptr;
         int fingerid = strtol(args, &endptr, 0);
         if (endptr != args) {
-            android_hw_fingerprint_touch(fingerid);
+            client->global->finger_agent->setTouch(true, fingerid);
             return 0;
         }
         control_write(client, "KO: invalid fingerid\r\n");
@@ -2525,7 +2549,7 @@ do_fingerprint_touch(ControlClient client, char* args )
 static int
 do_fingerprint_remove(ControlClient client, char* args )
 {
-    android_hw_fingerprint_remove();
+    client->global->finger_agent->setTouch(false, -1);
     return 0;
 }
 
@@ -2694,12 +2718,3 @@ static const CommandDefRec   main_commands[] =
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
-
-
-static ControlGlobalRec  _g_global;
-
-int
-control_console_start( int  port )
-{
-    return control_global_init( &_g_global, port );
-}

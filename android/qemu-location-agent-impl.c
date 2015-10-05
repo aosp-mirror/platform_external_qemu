@@ -10,16 +10,20 @@
  ** GNU General Public License for more details.
  */
 
-#include "android/location-agent-impl.h"
+#include "android/qemu-control-impl.h"
 
+#include "android/emulation/control/location_agent.h"
 #include "android/gps.h"
-#include "android/location-agent.h"
 
-void location_gpsCmd(double latitude, double longitude,
-                     double metersElevation, int nSatellites,
-                     const struct timeval *time)
-{
-    android_gps_send_location(latitude, longitude,
-                              metersElevation, nSatellites,
-                              time);
+#include <stdbool.h>
+
+static bool location_gpsIsSupported() {
+    return android_gps_cs != NULL;
 }
+
+static const QAndroidLocationAgent sQAndroidLocationAgent = {
+        .gpsIsSupported = location_gpsIsSupported,
+        .gpsCmd = android_gps_send_location,
+        .gpsSendNmea = android_gps_send_nmea};
+const QAndroidLocationAgent* const gQAndroidLocationAgent =
+        &sQAndroidLocationAgent;

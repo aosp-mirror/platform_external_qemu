@@ -15,7 +15,7 @@
 #define __STDC_LIMIT_MACROS
 
 #include "extended-window.h"
-#include "android/location-agent.h"
+#include "android/emulation/control/location_agent.h"
 #include "android/gps.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"

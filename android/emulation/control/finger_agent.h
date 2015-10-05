@@ -12,6 +12,14 @@
 
 #pragma once
 
-#include "finger-agent.h"
+#include "android/utils/compiler.h"
 
-void finger_setTouch(bool isTouching, int touchId);
+#include <stdbool.h>
+
+ANDROID_BEGIN_HEADER
+
+typedef struct QAndroidFingerAgent {
+    void (*setTouch)(bool isTouching, int touchId);
+} QAndroidFingerAgent;
+
+ANDROID_END_HEADER
