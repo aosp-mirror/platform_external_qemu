@@ -16,6 +16,24 @@
       "revId": "3129c4e4c37201ecfedabe7d66e8a79ad0ec8ddc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b6d3ced_1dff3799",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 674,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-05T18:32:17Z",
+      "side": 1,
+      "message": "Hmm.\nWhat I really want is to make sure this doesn\u0027t get called before QEMU\u0027s loop is set via looper_setForThread, but that\u0027s harder to ensure.\n\nI\u0027ll drop the assert.",
+      "parentUuid": "f597825c_8562641e",
+      "revId": "3129c4e4c37201ecfedabe7d66e8a79ad0ec8ddc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
