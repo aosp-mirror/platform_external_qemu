@@ -45,6 +45,30 @@
       "revId": "85a8927d6cea438f31d41196fdac1b1534465ebd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b7078c2_7cdc35d0",
+        "filename": "android/base/memory/ScopedPtr.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-05T18:52:38Z",
+      "side": 1,
+      "message": "It\u0027s a generic helper class - someone else might want it later. It\u0027s already under android::base.\nI\u0027m inheriting to make sure empty base optimization kicks in and ScopedPtr doesn\u0027t get +1 size because of the DefaultDelete member",
+      "parentUuid": "0b7078c2_bc2acd5e",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 2
+      },
+      "revId": "85a8927d6cea438f31d41196fdac1b1534465ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
