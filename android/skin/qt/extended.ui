@@ -1106,6 +1106,9 @@ font-family: &quot;Roboto&quot;</string>
      <property name="ColorGroup" stdset="0">
       <string>Tool</string>
      </property>
+     <property name="themeIconName_disabled" stdset="0">
+      <string>phone_disabled</string>
+     </property>
     </widget>
     <widget class="QGroupBox" name="tel_fromGroup">
      <property name="geometry">
@@ -2155,9 +2158,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="telephoneButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>196</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2171,7 +2174,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  Phone</string>
@@ -2199,9 +2202,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="batteryButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>108</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2215,7 +2218,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  Battery</string>
@@ -2243,9 +2246,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="locationButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>20</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2259,7 +2262,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  Location</string>
@@ -2287,9 +2290,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="cellularButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>64</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2303,7 +2306,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  Cellular</string>
@@ -2331,9 +2334,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="fingerButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>372</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2347,7 +2350,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  Fingerprint</string>
@@ -2375,9 +2378,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="sdButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>416</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2391,7 +2394,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  SD card</string>
@@ -2419,9 +2422,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="cameraButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>152</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2435,7 +2438,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  Camera</string>
@@ -2463,9 +2466,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="virtSensorsButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>240</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2479,7 +2482,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  Virtual sensors</string>
@@ -2507,9 +2510,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="hwSensorsButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>284</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2523,7 +2526,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  Hardware sensors</string>
@@ -2551,9 +2554,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="dpadButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>328</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2567,7 +2570,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  Directional pad</string>
@@ -2596,9 +2599,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>20</y>
+     <y>0</y>
      <width>2</width>
-     <height>721</height>
+     <height>790</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -2617,9 +2620,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="settingsButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>592</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2633,7 +2636,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  Settings</string>
@@ -2658,23 +2661,23 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTab</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="spacerButton">
+  <widget class="QPushButton" name="spacer2Button">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>636</y>
-     <width>204</width>
-     <height>105</height>
+     <width>220</width>
+     <height>151</height>
     </rect>
    </property>
    <property name="autoFillBackground">
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string/>
@@ -2698,9 +2701,9 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>460</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2714,7 +2717,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>Additional options</string>
@@ -2735,9 +2738,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="kbdShortsButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>548</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2751,7 +2754,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  Keyboard shortcuts</string>
@@ -2779,9 +2782,9 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QPushButton" name="recordScrButton">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>0</x>
      <y>504</y>
-     <width>204</width>
+     <width>220</width>
      <height>44</height>
     </rect>
    </property>
@@ -2795,7 +2798,7 @@ font-family: &quot;Roboto&quot;</string>
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">text-align: left;</string>
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
    </property>
    <property name="text">
     <string>  Record screen</string>
@@ -2820,6 +2823,40 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTab</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="spacer1Button">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>220</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>32</width>
+     <height>32</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTabTitle</string>
+   </property>
+  </widget>
  </widget>
  <tabstops>
   <tabstop>locationButton</tabstop>
@@ -2835,7 +2872,7 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>recordScrButton</tabstop>
   <tabstop>kbdShortsButton</tabstop>
   <tabstop>settingsButton</tabstop>
-  <tabstop>spacerButton</tabstop>
+  <tabstop>spacer2Button</tabstop>
   <tabstop>bat_statusBox</tabstop>
   <tabstop>tel_numberBox</tabstop>
   <tabstop>tel_endCallButton</tabstop>

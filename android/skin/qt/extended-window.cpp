@@ -117,7 +117,7 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
     mExtendedUi->recordScrButton  ->setStyleSheet(colorStyle);
     mExtendedUi->sdButton         ->setStyleSheet(colorStyle);
     mExtendedUi->settingsButton   ->setStyleSheet(colorStyle);
-    // Omit "spacerButton" -- The main style sheet handles it
+    // Omit "spacer buttons" -- The main style sheet handles them
     mExtendedUi->telephoneButton  ->setStyleSheet(colorStyle);
     mExtendedUi->virtSensorsButton->setStyleSheet(colorStyle);
 
@@ -141,7 +141,8 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
     mExtendedUi->recordScrButton  ->setAutoFillBackground(true);
     mExtendedUi->sdButton         ->setAutoFillBackground(true);
     mExtendedUi->settingsButton   ->setAutoFillBackground(true);
-    mExtendedUi->spacerButton     ->setAutoFillBackground(true);
+    mExtendedUi->spacer1Button    ->setAutoFillBackground(true);
+    mExtendedUi->spacer2Button    ->setAutoFillBackground(true);
     mExtendedUi->telephoneButton  ->setAutoFillBackground(true);
     mExtendedUi->virtSensorsButton->setAutoFillBackground(true);
 
