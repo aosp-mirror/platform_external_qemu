@@ -16,6 +16,24 @@
       "revId": "d91c08af29004ed53d993f205e0f6fc52ce766f4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba1f45d_222f6a5f",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-05T23:07:13Z",
+      "side": 1,
+      "message": "Yes, they work the same with Qt lists. Might as well use the appropriate operator since it exists.",
+      "parentUuid": "4b9c302a_e4ce70b3",
+      "revId": "d91c08af29004ed53d993f205e0f6fc52ce766f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
