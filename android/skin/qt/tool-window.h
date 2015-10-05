@@ -15,6 +15,7 @@
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/utils/compiler.h"
 
+#include <QDir>
 #include <QErrorMessage>
 #include <QFrame>
 #include <QGridLayout>
@@ -23,9 +24,12 @@
 #include <QProgressDialog>
 #include <QToolButton>
 #include <QUrl>
+#include <QQueue>
 
-#define REMOTE_TMP_DIR "/data/local/tmp/"
-#define TMP_SCREENSHOT_FILE "screen.png"
+#define REMOTE_DOWNLOADS_DIR "/sdcard/Download"
+
+#define LOCAL_SCREENSHOT_FILE "screen.png"
+#define REMOTE_SCREENSHOT_FILE "/data/local/tmp/screen.png"
 
 namespace Ui {
     class ToolControls;
@@ -52,10 +56,10 @@ public:
     void showErrorDialog(const QString &message, const QString &title);
 
     QString getAndroidSdkRoot();
-    QString getAdbFullPath();
+    QString getAdbFullPath(QStringList *args);
 
     void runAdbInstall(const QString &path);
-    void runAdbPush(const QList<QUrl> &paths);
+    void runAdbPush(const QList<QUrl> &urls);
 
 private:
     QToolButton *addButton(QGridLayout *layout, int row, int col,
@@ -76,6 +80,10 @@ private:
     QProcess mInstallProcess;
     QProgressDialog mInstallDialog;
 
+    QProcess mPushProcess;
+    QProgressDialog mPushDialog;
+    QQueue<QUrl> mFilesToPush;
+
 private slots:
     void on_back_button_clicked();
     void on_close_button_clicked();
@@ -92,6 +100,9 @@ private slots:
 
     void slot_installCanceled();
     void slot_installFinished(int exitStatus);
+
+    void slot_pushCanceled();
+    void slot_pushFinished(int exitStatus);
 };
 
 typedef void(ToolWindow::*ToolWindowSlot)();

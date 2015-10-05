@@ -385,17 +385,20 @@ void EmulatorQtWindow::screenshot()
         return;
     }
 
-    QString command = tool_window->getAdbFullPath();
+    QStringList args;
+    QString command = tool_window->getAdbFullPath(&args);
     if (command.isNull()) {
         return;
     }
 
-    command += " shell screencap -p ";
-    command += REMOTE_TMP_DIR;
-    command += TMP_SCREENSHOT_FILE;
+    // Add the arguments
+    args << "shell";                // Running a shell command
+    args << "screencap";            // Take a screen capture
+    args << "-p";                   // Print it to a file
+    args << REMOTE_SCREENSHOT_FILE; // The temporary screenshot file
 
     // Keep track of this process
-    mScreencapProcess.start(command);
+    mScreencapProcess.start(command, args);
     mScreencapProcess.waitForStarted();
 }
 
@@ -406,21 +409,21 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
         tool_window->showErrorDialog(tr("The screenshot could not be captured."),
                                      tr("Screenshot"));
     } else {
-        QString imagePath = getTmpImagePath();
 
         // Pull the image from its remote location to the designated tmp directory
-        QString fullCommand = tool_window->getAdbFullPath();
-        if (fullCommand.isNull()) {
+        QStringList args;
+        QString command = tool_window->getAdbFullPath(&args);
+        if (command.isNull()) {
             return;
         }
 
-        fullCommand += " pull ";
-        fullCommand += REMOTE_TMP_DIR;
-        fullCommand += TMP_SCREENSHOT_FILE;
-        fullCommand += " " + imagePath;
+        // Add the arguments
+        args << "pull";                 // Pulling a file
+        args << REMOTE_SCREENSHOT_FILE; // Which file to pull
+        args << getTmpImagePath();      // Where to place the temp file
 
         // Use a different process to avoid infinite looping when pulling the file
-        mScreencapPullProcess.start(fullCommand);
+        mScreencapPullProcess.start(command, args);
         mScreencapPullProcess.waitForStarted();
     }
 }
@@ -472,7 +475,7 @@ QString EmulatorQtWindow::getTmpImagePath()
 {
     StringVector imageVector;
     imageVector.push_back(String(QDir::tempPath().toStdString().data()));
-    imageVector.push_back(String(TMP_SCREENSHOT_FILE));
+    imageVector.push_back(String(LOCAL_SCREENSHOT_FILE));
     return QString(PathUtils::recompose(imageVector).c_str());
 }
 
