@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "0b7078c2_1910ab60",
+        "filename": "android/base/async/Looper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-05T17:22:42Z",
+      "side": 1,
+      "message": "I am, but there\u0027s a ::Stream type. I just want to make it explicit that I\u0027m using the C++ one",
+      "parentUuid": "f597825c_658080ba",
+      "revId": "93b3182842dad74d59ecbc5d96b4c999f46f3231",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75ab929e_61787047",
         "filename": "android/qemu/base/async/Looper.cpp",
         "patchSetId": 2
