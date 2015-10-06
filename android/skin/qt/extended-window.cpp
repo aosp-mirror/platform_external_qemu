@@ -46,6 +46,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     // Do any sub-window-specific initialization
     initBattery();
     initCellular();
+    initDPad();
     initFinger();
     initKbdShorts();
     initLocation();
