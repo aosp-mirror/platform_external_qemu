@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0435d80_be3419ca",
+        "filename": "android/skin/qt/ext-dpad.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-06T22:02:14Z",
+      "side": 1,
+      "message": "Nit: include order",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 33
+      },
+      "revId": "e5ad5ff4736d6198e838d6a9f1872644ce5a7b23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "704d65ae_df211fb5",
+        "filename": "android/skin/qt/ext-dpad.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-06T22:02:14Z",
+      "side": 1,
+      "message": "Will there ever be a time when these are not simulated by key presses? Otherwise, I\u0027m fine with doing things this way since it cuts down on cluttered, repetitive code with very little substance.",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 16
+      },
+      "revId": "e5ad5ff4736d6198e838d6a9f1872644ce5a7b23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90673931_b8e27501",
+        "filename": "android/skin/qt/ext-dpad.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-06T22:02:14Z",
+      "side": 1,
+      "message": "Should this be updated to use the saved settings?",
+      "revId": "e5ad5ff4736d6198e838d6a9f1872644ce5a7b23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1001893d_719db8a9",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-06T22:02:14Z",
+      "side": 1,
+      "message": "Should these be strictly under the DPad functionality? If so, name them dpad_*, and if not, move their implementations from ext-dpad.cpp.",
+      "range": {
+        "startLine": 133,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 45
+      },
+      "revId": "e5ad5ff4736d6198e838d6a9f1872644ce5a7b23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "504861a0_fedcdd43",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-06T22:02:14Z",
+      "side": 1,
+      "message": "Why not do the macro magic here as well? I think it makes sense for the two places to be consistent.",
+      "range": {
+        "startLine": 164,
+        "startChar": 0,
+        "endLine": 187,
+        "endChar": 36
+      },
+      "revId": "e5ad5ff4736d6198e838d6a9f1872644ce5a7b23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
