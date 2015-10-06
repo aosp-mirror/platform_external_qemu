@@ -47,7 +47,9 @@ void ExtendedWindow::on_loc_addRowButton_clicked()
     }
 
     // We must have more than one row. Allow deletion.
-    setButtonEnabled(mExtendedUi->loc_removeRowButton, true);
+    setButtonEnabled(mExtendedUi->loc_removeRowButton,
+                     mSettingsState.mTheme,
+                     true);
 }
 
 void ExtendedWindow::on_loc_removeRowButton_clicked()
@@ -69,7 +71,9 @@ void ExtendedWindow::on_loc_removeRowButton_clicked()
 
     if (mExtendedUi->loc_pathTable->rowCount() <= 1) {
         // Only one row left. Disable the Delete button
-        setButtonEnabled(mExtendedUi->loc_removeRowButton, false);
+        setButtonEnabled(mExtendedUi->loc_removeRowButton,
+                         mSettingsState.mTheme,
+                         false);
     }
 }
 
@@ -98,9 +102,10 @@ void ExtendedWindow::on_loc_playButton_clicked()
     mLoc_rowToSend = 0;
     mLoc_timer.setInterval(0); // Fire when I return
     mLoc_timer.start();
-    setButtonEnabled(mExtendedUi->loc_playButton,  false);
-    setButtonEnabled(mExtendedUi->loc_pauseButton, true);
-    setButtonEnabled(mExtendedUi->loc_stopButton,  true);
+    SettingsTheme theme = mSettingsState.mTheme;
+    setButtonEnabled(mExtendedUi->loc_playButton,  theme, false);
+    setButtonEnabled(mExtendedUi->loc_pauseButton, theme, true);
+    setButtonEnabled(mExtendedUi->loc_stopButton,  theme, true);
 }
 
 
@@ -205,9 +210,10 @@ void ExtendedWindow::on_loc_stopButton_clicked()
     mLoc_nowPaused = false;
     mLoc_rowToSend = -1;
 
-    setButtonEnabled(mExtendedUi->loc_playButton,  true);
-    setButtonEnabled(mExtendedUi->loc_pauseButton, false);
-    setButtonEnabled(mExtendedUi->loc_stopButton,  false);
+    SettingsTheme theme = mSettingsState.mTheme;
+    setButtonEnabled(mExtendedUi->loc_playButton,  theme, true);
+    setButtonEnabled(mExtendedUi->loc_pauseButton, theme, false);
+    setButtonEnabled(mExtendedUi->loc_stopButton,  theme, false);
 }
 
 bool ExtendedWindow::loc_cellIsValid(QTableWidget *table, int row, int col)
@@ -290,6 +296,7 @@ void ExtendedWindow::on_loc_GpxButton_clicked()
     }
 
     setButtonEnabled(mExtendedUi->loc_removeRowButton,
+                     mSettingsState.mTheme,
                      mExtendedUi->loc_pathTable->rowCount() > 1 );
 }
 
@@ -330,6 +337,7 @@ void ExtendedWindow::on_loc_KmlButton_clicked()
     }
 
     setButtonEnabled(mExtendedUi->loc_removeRowButton,
+                     mSettingsState.mTheme,
                      mExtendedUi->loc_pathTable->rowCount() > 1 );
 }
 

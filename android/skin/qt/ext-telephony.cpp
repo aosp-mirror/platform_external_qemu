@@ -15,7 +15,6 @@
 // TODO: Spawn a task to listen for call actions from the device: outgoing
 //       call, answer, hang up, reject, ...
 
-#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
 #include "android/skin/qt/emulator-qt-window.h"
@@ -57,9 +56,10 @@ void ExtendedWindow::on_tel_startCallButton_clicked()
 
     mExtendedUi->tel_numberBox->setEnabled(false);
 
-    setButtonEnabled(mExtendedUi->tel_startCallButton, false);
-    setButtonEnabled(mExtendedUi->tel_endCallButton,   true);
-    setButtonEnabled(mExtendedUi->tel_holdCallButton,  true);
+    SettingsTheme theme = mSettingsState.mTheme;
+    setButtonEnabled(mExtendedUi->tel_startCallButton, theme, false);
+    setButtonEnabled(mExtendedUi->tel_endCallButton,   theme, true);
+    setButtonEnabled(mExtendedUi->tel_holdCallButton,  theme, true);
 }
 
 void ExtendedWindow::on_tel_endCallButton_clicked()
@@ -71,9 +71,10 @@ void ExtendedWindow::on_tel_endCallButton_clicked()
 
     mExtendedUi->tel_holdCallButton->setProperty("themeIconName", "phone_paused");
 
-    setButtonEnabled(mExtendedUi->tel_startCallButton, true);
-    setButtonEnabled(mExtendedUi->tel_endCallButton,   false);
-    setButtonEnabled(mExtendedUi->tel_holdCallButton,  false);
+    SettingsTheme theme = mSettingsState.mTheme;
+    setButtonEnabled(mExtendedUi->tel_startCallButton, theme, true);
+    setButtonEnabled(mExtendedUi->tel_endCallButton,   theme, false);
+    setButtonEnabled(mExtendedUi->tel_holdCallButton,  theme, false);
 
     if (mTelephonyAgent && mTelephonyAgent->telephonyCmd) {
         // Command the emulator
@@ -92,6 +93,7 @@ void ExtendedWindow::on_tel_endCallButton_clicked()
 
 void ExtendedWindow::on_tel_holdCallButton_clicked()
 {
+    SettingsTheme theme = mSettingsState.mTheme;
     switch (mTelephonyState.mActivity) {
         case Call_Active:
             // Active --> On hold
@@ -100,9 +102,9 @@ void ExtendedWindow::on_tel_holdCallButton_clicked()
             mExtendedUi->tel_holdCallButton->
                 setProperty("themeIconName", "phone_in_talk");
 
-            setButtonEnabled(mExtendedUi->tel_startCallButton, false);
-            setButtonEnabled(mExtendedUi->tel_endCallButton,   true);
-            setButtonEnabled(mExtendedUi->tel_holdCallButton,  true);
+            setButtonEnabled(mExtendedUi->tel_startCallButton, theme, false);
+            setButtonEnabled(mExtendedUi->tel_endCallButton,   theme, true);
+            setButtonEnabled(mExtendedUi->tel_holdCallButton,  theme, true);
             break;
         case Call_Held:
             // On hold --> Active
@@ -113,9 +115,9 @@ void ExtendedWindow::on_tel_holdCallButton_clicked()
             mExtendedUi->tel_holdCallButton->
                 setProperty("themeIconName_disabled", "phone_paused_disabled");
 
-            setButtonEnabled(mExtendedUi->tel_startCallButton, false);
-            setButtonEnabled(mExtendedUi->tel_endCallButton,   true);
-            setButtonEnabled(mExtendedUi->tel_holdCallButton,  true);
+            setButtonEnabled(mExtendedUi->tel_startCallButton, theme, false);
+            setButtonEnabled(mExtendedUi->tel_endCallButton,   theme, true);
+            setButtonEnabled(mExtendedUi->tel_holdCallButton,  theme, true);
             break;
         default:
             ;

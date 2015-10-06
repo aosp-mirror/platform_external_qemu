@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 The Android Open Source Project
+/* Copyright (C) 2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -34,6 +34,9 @@ void user_config_init( void );
 void user_config_done( void );
 
 void user_config_get_window_pos( int *window_x, int *window_y );
+
+int  user_config_get_ui_theme();
+void user_config_set_ui_theme(int theme);
 
 #define  ONE_MB  (1024*1024)
 

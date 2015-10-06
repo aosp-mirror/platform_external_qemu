@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 The Android Open Source Project
+/* Copyright (C) 2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -71,6 +71,23 @@ user_config_get_window_pos( int *window_x, int *window_y )
 
     if (userConfig)
         auserConfig_getWindowPos(userConfig, window_x, window_y);
+}
+
+void
+user_config_set_ui_theme( int theme )
+{
+    if (userConfig) {
+        auserConfig_setUiTheme(userConfig, theme);
+    }
+}
+
+int
+user_config_get_ui_theme( )
+{
+    if (userConfig) {
+        return auserConfig_getUiTheme(userConfig);
+    }
+    return 0;
 }
 
 /***********************************************************************/
@@ -190,7 +207,7 @@ static void android_ui_at_exit(void)
 void sdl_display_init(DisplayState *ds, int full_screen, int  no_frame)
 {
     EmulatorWindow*    emulator = emulator_window_get();
-    SkinDisplay*  disp = 
+    SkinDisplay*  disp =
             skin_layout_get_display(emulator_window_get_layout(emulator));
     int           width, height;
     char          buf[128];

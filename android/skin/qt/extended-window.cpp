@@ -13,6 +13,7 @@
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
 
+#include "android/main-common.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/tool-window.h"
 
@@ -49,6 +50,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     initKbdShorts();
     initLocation();
     initSd();
+    initSettings();
     initSms();
     initTelephony();
     initSettings();
@@ -59,10 +61,16 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
 
 void ExtendedWindow::completeInitialization()
 {
-    // TODO: Remember the theme setting from before
+    // Get the latest user selections from the
+    // user-config code.
+    SettingsTheme theme = (SettingsTheme)user_config_get_ui_theme();
+    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
+        theme = (SettingsTheme)0;
+    }
+    mSettingsState.mTheme = theme;
     // Set the theme to the initial selection
     // (by pretending the theme setting got changed)
-    on_set_themeBox_currentIndexChanged(mSettingsState.mTheme);
+    on_set_themeBox_currentIndexChanged(theme);
 
     // Set the first tab active
     on_locationButton_clicked();
