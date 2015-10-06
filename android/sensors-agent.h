@@ -12,14 +12,16 @@
 
 #pragma once
 
-// Agent iterfaces for sending commands from the UI to the emulator
+#include "android/utils/compiler.h"
 
-typedef struct UiEmuAgent {
-    const struct BatteryAgent    *battery;
-    const struct CellularAgent   *cellular;
-    const struct FingerAgent     *finger;
-    const struct LocationAgent   *location;
-    const struct SettingsAgent   *settings;
-    const struct SensorsAgent    *sensors;
-    const struct TelephonyAgent  *telephony;
-} UiEmuAgent;
+ANDROID_BEGIN_HEADER
+
+typedef struct SensorsAgent {
+    // Sets the values on a given sensor.
+    int (*setSensor)(int sensorId, float a, float b, float c);
+
+    // Reads the values from a given sensor.
+    int (*getSensor)(int sensorId, float *a, float *b, float *c);
+} SensorsAgent;
+
+ANDROID_END_HEADER

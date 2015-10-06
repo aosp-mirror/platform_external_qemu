@@ -81,15 +81,19 @@ enum { PANE_IDX_LOCATION = 0,
 
 // This is the style, based on either the LIGHT or DARK theme
 #define QT_STYLE(THEME) \
-    "*[ColorGroup=\"MajorTab\"]      { color:" THEME##_MAJOR_TAB_COLOR "}" \
+    "*[ColorGroup=\"MajorTab\"]      { color:" THEME##_MAJOR_TAB_COLOR ";" \
+                                      "padding: 0px 0px 0px 16px }" \
     "*[ColorGroup=\"MajorTabTitle\"] { color:" THEME##_MAJOR_TITLE_COLOR ";" \
             "background-color:" THEME##_TAB_BKG_COLOR "}" \
     "*[ColorGroup=\"Title\"]         { color:" THEME##_TITLE_COLOR "}" \
     "*::disabled[ColorGroup=\"Tool\"]{ color:" THEME##_DISABLED_TOOL_COLOR "}" \
     "*[ColorGroup=\"Tool\"]          { color:" THEME##_TOOL_COLOR "}" \
-    "*                               { color:" THEME##_TEXT_COLOR ";" \
-                                      "background-color: "THEME##_BKG_COLOR "}" \
-    "QPlainTextEdit, QTextEdit, QTreeView {" \
+    "*[class=\"EditableValue\"]  { color:" THEME##_TEXT_COLOR "; font-size: 11pt }" \
+    "*[ColorGroup=\"SliderLabel\"]  { color:" THEME##_DIVIDER_COLOR "; font-size: 9pt }" \
+    "*                               { font-family: \"Roboto\";" \
+                                      "color:" THEME##_TEXT_COLOR ";" \
+                                      "background-color: " THEME##_BKG_COLOR "}" \
+    "QPlainTextEdit, QTextEdit, QLineEdit, QTreeView {" \
             "border-top: 0px; "\
             "border-bottom: 2px solid " THEME##_DIVIDER_COLOR "}" \
     "QCheckBox::indicator:checked {" \
@@ -121,4 +125,13 @@ enum { PANE_IDX_LOCATION = 0,
         THEME##_DIVIDER_COLOR "}" \
     "QComboBox::drop-down { border-left-style: solid; }" \
     "QComboBox::down-arrow { image:url(:/" THEME##_PATH "/drop_down); " \
-        "border: none; width: 24px; height: 24px; }"
+        "border: none; width: 24px; height: 24px; }" \
+    "QTabWidget::pane {border: none;}" \
+    "QTabWidget::tab-bar {left: 0px;}" \
+    "QTabBar::tab {background:" THEME##_BKG_COLOR "; padding-bottom:8px; }" \
+    "QTabBar::tab:selected {color:" THEME##_TEXT_COLOR ";" \
+        "border-bottom: 4px solid " THEME##_TOOL_COLOR "}" \
+    "QTabBar::tab:!selected{color:" THEME##_TITLE_COLOR ";" \
+        "border-bottom: 4px solid " THEME##_BKG_COLOR "}" \
+    "QTabBar::tab:disabled {color: transparent;" \
+        "border-bottom: 4px solid transparent}"

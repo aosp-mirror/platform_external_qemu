@@ -28,12 +28,14 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     mCellularAgent (agentPtr ? agentPtr->cellular  : NULL),
     mFingerAgent   (agentPtr ? agentPtr->finger    : NULL),
     mLocationAgent (agentPtr ? agentPtr->location  : NULL),
+    mSensorsAgent  (agentPtr ? agentPtr->sensors    : NULL),
     mSettingsAgent (agentPtr ? agentPtr->settings  : NULL),
     mTelephonyAgent(agentPtr ? agentPtr->telephony : NULL),
     mLoc_mSecRemaining(-1),
     mLoc_nowPaused(false),
     mLoc_rowToSend(-1),
-    mExtendedUi(new Ui::ExtendedControls)
+    mExtendedUi(new Ui::ExtendedControls),
+    mSelectedSensorId(-1)
 {
     Q_INIT_RESOURCE(resources);
 
@@ -52,6 +54,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     initSettings();
     initSms();
     initTelephony();
+    initVirtualSensors();
 
     move(mParentWindow->geometry().right() + 40,
          mParentWindow->geometry().top()   + 40 );

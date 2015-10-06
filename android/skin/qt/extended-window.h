@@ -26,9 +26,14 @@
 #include "android/cellular-agent.h"
 #include "android/finger-agent.h"
 #include "android/gps/GpsFix.h"
+#include "android/hw-sensors.h"
 #include "android/location-agent.h"
+#include "android/sensors-agent.h"
 #include "android/settings-agent.h"
 #include "android/telephony-agent.h"
+
+#include <vector>
+#include <map>
 
 class EmulatorQtWindow;
 class ToolWindow;
@@ -91,6 +96,16 @@ private:
         { }
     };
 
+    struct VirtualSensorValueInfo {
+        QString name;
+        QString units;
+    };
+
+    struct VirtualSensorInfo {
+        QString name;
+        std::vector<VirtualSensorValueInfo> value_infos;
+    };
+
     void initBattery();
     void initCellular();
     void initFinger();
@@ -100,6 +115,7 @@ private:
     void initSettings();
     void initSms();
     void initTelephony();
+    void initVirtualSensors();
 
     BatteryState    mBatteryState;
     SettingsState   mSettingsState;
@@ -109,6 +125,7 @@ private:
     const CellularAgent   *mCellularAgent;
     const FingerAgent     *mFingerAgent;
     const LocationAgent   *mLocationAgent;
+    const SensorsAgent    *mSensorsAgent;
     const SettingsAgent   *mSettingsAgent;
     const TelephonyAgent  *mTelephonyAgent;
 
@@ -118,6 +135,8 @@ private:
     QTimer   mLoc_timer;
 
     Ui::ExtendedControls *mExtendedUi;
+    VirtualSensorInfo mVirtualSensors[MAX_SENSORS];
+    int mSelectedSensorId;
 
     void    adjustTabs(QPushButton *thisButton, int thisIndex);
     void    loc_appendToTable(std::string lat,
@@ -128,6 +147,8 @@ private:
                               time_t time);
 
     void    setButtonEnabled(QPushButton *theButton, bool isEnabled);
+    void    adjustUiForVirtualSensor(int sensor_id);
+    void    updateSensorValues();
 
 private slots:
     // Master tabs
@@ -185,6 +206,12 @@ private slots:
     void on_tel_startCallButton_clicked();
     void on_tel_endCallButton_clicked();
     void on_tel_holdCallButton_clicked();
+
+    // Virtual sensors
+    void on_virtsensors_sensorType_currentIndexChanged(int);
+    void on_virtsensors_valueASpinBox_valueChanged(double);
+    void on_virtsensors_valueBSpinBox_valueChanged(double);
+    void on_virtsensors_valueCSpinBox_valueChanged(double);
 };
 
 class phoneNumberValidator : public QValidator
