@@ -12,14 +12,16 @@
 
 #pragma once
 
-// Agent iterfaces for sending commands from the UI to the emulator
+#include "android/utils/compiler.h"
 
-typedef struct UiEmuAgent {
-    const struct QAndroidBatteryAgent* battery;
-    const struct QAndroidCellularAgent* cellular;
-    const struct QAndroidFingerAgent* finger;
-    const struct QAndroidLocationAgent* location;
-    const struct QAndroidSensorsAgent    *sensors;
-    const struct QAndroidTelephonyAgent* telephony;
-    const struct SettingsAgent* settings;
-} UiEmuAgent;
+ANDROID_BEGIN_HEADER
+
+typedef struct QAndroidSensorsAgent {
+    // Sets the values on a given sensor.
+    int (*setSensor)(int sensorId, float a, float b, float c);
+
+    // Reads the values from a given sensor.
+    int (*getSensor)(int sensorId, float *a, float *b, float *c);
+} QAndroidSensorsAgent;
+
+ANDROID_END_HEADER

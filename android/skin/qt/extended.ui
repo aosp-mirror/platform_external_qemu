@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>960</width>
-    <height>790</height>
+    <width>922</width>
+    <height>745</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="font">
    <font>
@@ -39,8 +45,11 @@ font-family: &quot;Roboto&quot;</string>
      <height>721</height>
     </rect>
    </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>5</number>
    </property>
    <widget class="QWidget" name="location_page">
     <widget class="QGroupBox" name="locationGroup">
@@ -1247,7 +1256,7 @@ font-family: &quot;Roboto&quot;</string>
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="page_2">
+   <widget class="QWidget" name="virtualSensorsPage">
     <widget class="QGroupBox" name="virtualSensorsBox">
      <property name="geometry">
       <rect>
@@ -1271,6 +1280,170 @@ font-family: &quot;Roboto&quot;</string>
      <property name="title">
       <string>Virtual sensors</string>
      </property>
+    </widget>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="geometry">
+      <rect>
+       <x>-1</x>
+       <y>40</y>
+       <width>681</width>
+       <height>471</height>
+      </rect>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Accelerometer</string>
+      </attribute>
+      <widget class="EditableSliderWidget" name="yawAngleWidget" native="true">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>50</y>
+         <width>331</width>
+         <height>80</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>59</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Yaw</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>140</y>
+         <width>59</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Pitch</string>
+       </property>
+      </widget>
+      <widget class="EditableSliderWidget" name="pitchAngleWidget" native="true">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>160</y>
+         <width>331</width>
+         <height>80</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>260</y>
+         <width>59</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Roll</string>
+       </property>
+      </widget>
+      <widget class="EditableSliderWidget" name="rollAngleWidget" native="true">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>280</y>
+         <width>331</width>
+         <height>80</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>390</y>
+         <width>250</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Resulting Accelerometer Values (m/s^2):</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="accelerometerValuesLabel">
+       <property name="geometry">
+        <rect>
+         <x>260</x>
+         <y>390</y>
+         <width>380</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Additional Sensors</string>
+      </attribute>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>170</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Ambient Temperature (°C)</string>
+       </property>
+      </widget>
+      <widget class="EditableSliderWidget" name="temperatureSensorValueWidget" native="true">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>50</y>
+         <width>320</width>
+         <height>80</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>140</y>
+         <width>90</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Proximity (cm)</string>
+       </property>
+      </widget>
+      <widget class="EditableSliderWidget" name="proximitySensorValueWidget" native="true">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>160</y>
+         <width>320</width>
+         <height>80</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="page_3">
@@ -1933,7 +2106,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignLeading|AlignVCenter</set>
       </property>
       <property name="flags">
        <set>NoItemFlags</set>
@@ -3123,6 +3296,14 @@ font-family: &quot;Roboto&quot;</string>
    </property>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>EditableSliderWidget</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/editable-slider-widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>locationButton</tabstop>
   <tabstop>cellularButton</tabstop>

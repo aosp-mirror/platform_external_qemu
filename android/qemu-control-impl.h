@@ -18,6 +18,7 @@
 #include "android/emulation/control/cellular_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/location_agent.h"
+#include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
@@ -38,6 +39,9 @@ extern const QAndroidFingerAgent* const gQAndroidFingerAgent;
 
 // Defined in android/qemu-location-agent.c
 extern const QAndroidLocationAgent* const gQAndroidLocationAgent;
+
+// Defined in android/qemu-sensors-agent.c
+extern const QAndroidSensorsAgent* const gQAndroidSensorsAgent;
 
 // Defined in android/qemu-telephony-agent.c
 extern const QAndroidTelephonyAgent* const gQAndroidTelephonyAgent;
