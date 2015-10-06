@@ -250,6 +250,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     myUiEmuAgent.cellular = gQAndroidCellularAgent;
     myUiEmuAgent.finger = gQAndroidFingerAgent;
     myUiEmuAgent.location = gQAndroidLocationAgent;
+    myUiEmuAgent.sensors = gQAndroidSensorsAgent;
     myUiEmuAgent.telephony = gQAndroidTelephonyAgent;
     setUiEmuAgent(&myUiEmuAgent);
 #endif
