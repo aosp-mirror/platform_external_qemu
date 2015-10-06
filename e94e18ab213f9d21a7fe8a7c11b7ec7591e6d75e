@@ -66,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "4b9c302a_6429fbbe",
+        "filename": "android/utils/uri.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T18:28:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4ec27958_7403a8d5",
+      "revId": "e94e18ab213f9d21a7fe8a7c11b7ec7591e6d75e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4ec27958_9417640e",
         "filename": "android/utils/uri.cpp",
         "patchSetId": 5
@@ -77,6 +95,24 @@
       "writtenOn": "2015-09-25T09:22:55Z",
       "side": 1,
       "message": "I\u0027m surprised this compiles at all, shouldn\u0027t you at least inclide \u003cstring.h\u003e or \u003cstdlib.h\u003e to get strdup() properly declared?",
+      "revId": "e94e18ab213f9d21a7fe8a7c11b7ec7591e6d75e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b6d3ced_0eccdbb8",
+        "filename": "android/utils/uri.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T18:28:00Z",
+      "side": 1,
+      "message": "Had leaked in from android/base/StringView.h\n\nThanks for the catch. Fixed in aosp:174517",
+      "parentUuid": "4ec27958_9417640e",
       "revId": "e94e18ab213f9d21a7fe8a7c11b7ec7591e6d75e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
