@@ -1,4 +1,4 @@
-/* Copyright (C) 2009 The Android Open Source Project
+/* Copyright (C) 2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -28,16 +28,23 @@
 #  define  DD(...)  ((void)0)
 #endif
 
+struct ui_s {
+    int          theme;
+};
+
 struct AUserConfig {
-    ABool      changed;
-    int        windowX;
-    int        windowY;
-    uint64_t   uuid;
-    char*      iniPath;
+    ABool        changed;
+    int          windowX;
+    int          windowY;
+    uint64_t     uuid;
+    char*        iniPath;
+    struct ui_s  ui;
 };
 
 /* Name of the user-config file */
 #define  USER_CONFIG_FILE  "emulator-user.ini"
+
+#define  KEY_UI_THEME  "ui.theme"
 
 #define  KEY_WINDOW_X  "window.x"
 #define  KEY_WINDOW_Y  "window.y"
@@ -45,6 +52,8 @@ struct AUserConfig {
 
 #define  DEFAULT_X  100
 #define  DEFAULT_Y  100
+
+#define  DEFAULT_UI_THEME 0
 
 /* Create a new AUserConfig object from a given AvdInfo */
 AUserConfig*
@@ -122,6 +131,9 @@ auserConfig_new( AvdInfo*  info )
         uc->windowY = iniFile_getInteger(ini, KEY_WINDOW_Y, DEFAULT_Y);
         DD("    found %s = %d", KEY_WINDOW_Y, uc->windowY);
 
+        uc->ui.theme = iniFile_getInteger(ini, KEY_UI_THEME, DEFAULT_UI_THEME);
+        DD("    found %s = %d", KEY_UI_THEME, uc->ui.theme);
+
         if (iniFile_getValue(ini, KEY_UUID) != NULL) {
             uc->uuid = (uint64_t) iniFile_getInt64(ini, KEY_UUID, 0LL);
             needUUID = 0;
@@ -131,9 +143,10 @@ auserConfig_new( AvdInfo*  info )
         iniFile_free(ini);
     }
     else {
-        uc->windowX = DEFAULT_X;
-        uc->windowY = DEFAULT_Y;
-        uc->changed = 1;
+        uc->windowX  = DEFAULT_X;
+        uc->windowY  = DEFAULT_Y;
+        uc->ui.theme = DEFAULT_UI_THEME;
+        uc->changed  = 1;
     }
 
     /* Generate a 64-bit UUID if necessary. We simply take the
@@ -176,6 +189,21 @@ auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y )
     }
 }
 
+int
+auserConfig_getUiTheme( AUserConfig*  uconfig)
+{
+    return uconfig->ui.theme;
+}
+
+void
+auserConfig_setUiTheme( AUserConfig*  uconfig, int theme )
+{
+    if (theme != uconfig->ui.theme) {
+        uconfig->ui.theme = theme;
+        uconfig->changed = 1;
+    }
+}
+
 /* Save the user configuration back to the content directory.
  * Should be used in an atexit() handler */
 void
@@ -192,10 +220,12 @@ auserConfig_save( AUserConfig*  uconfig )
     bufprint(temp, temp+sizeof(temp),
              "%s = %d\n"
              "%s = %d\n"
-             "%s = %lld\n",
-             KEY_WINDOW_X, uconfig->windowX,
-             KEY_WINDOW_Y, uconfig->windowY,
-             KEY_UUID,     uconfig->uuid );
+             "%s = %lld\n"
+             "%s = %d\n",
+             KEY_WINDOW_X,      uconfig->windowX,
+             KEY_WINDOW_Y,      uconfig->windowY,
+             KEY_UUID,          uconfig->uuid,
+             KEY_UI_THEME,      uconfig->ui.theme);
 
     DD("Generated user-config file:\n%s", temp);
 

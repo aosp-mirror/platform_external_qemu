@@ -46,6 +46,8 @@ public:
 
     void     completeInitialization();
 
+    static void switchAllIconsForTheme(SettingsTheme theme);
+
 private:
 
     ~ExtendedWindow();
@@ -127,7 +129,10 @@ private:
                               std::string description,
                               time_t time);
 
-    void    setButtonEnabled(QPushButton *theButton, bool isEnabled);
+    static void setButtonEnabled(QPushButton*  theButton,
+                                 SettingsTheme theme,
+                                 bool          isEnabled);
+
 
 private slots:
     // Master tabs

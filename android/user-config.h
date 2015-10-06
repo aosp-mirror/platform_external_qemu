@@ -1,4 +1,4 @@
-/* Copyright (C) 2009 The Android Open Source Project
+/* Copyright (C) 2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -38,6 +38,9 @@ void           auserConfig_getWindowPos( AUserConfig*  uconfig, int  *pX, int  *
 
 /* Change the stored window position for this AVD */
 void           auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y );
+
+int            auserConfig_getUiTheme( AUserConfig*  uconfig);
+void           auserConfig_setUiTheme( AUserConfig*  uconfig, int theme );
 
 /* Save the user configuration back to the content directory.
  * Should be used in an atexit() handler. This will effectively

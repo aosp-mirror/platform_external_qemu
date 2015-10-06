@@ -12,6 +12,7 @@
 
 #include "ui_extended.h"
 
+#include "android/main-common.h"
 #include "android/settings-agent.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "extended-window.h"
@@ -32,18 +33,16 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
         return;
     }
 
+    // Set the UI widget state in case this function
+    // was called artificially.
+    mExtendedUi->set_themeBox->setCurrentIndex(index);
+
     // Save a valid selection
     mSettingsState.mTheme = theme;
+    user_config_set_ui_theme(theme);
 
     // Switch to the icon images that are appropriate for this theme.
-    // Examine every widget.
-    QWidgetList wList = QApplication::allWidgets();
-    for (int idx = 0; idx < wList.size(); idx++) {
-        QPushButton *pB = dynamic_cast<QPushButton*>(wList[idx]);
-        if (pB && !pB->icon().isNull()) {
-            setButtonEnabled(pB, pB->isEnabled());
-        }
-    }
+    switchAllIconsForTheme(theme);
 
     // Set the style for this theme
     switch (theme) {
@@ -67,8 +66,24 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
     adjustTabs(mExtendedUi->settingsButton, PANE_IDX_SETTINGS);
 }
 
+// static member function
+void ExtendedWindow::switchAllIconsForTheme(SettingsTheme theme)
+{
+    // Switch to the icon images that are appropriate for this theme.
+    // Examine every widget.
+    QWidgetList wList = QApplication::allWidgets();
+    for (int idx = 0; idx < wList.size(); idx++) {
+        QPushButton *pB = dynamic_cast<QPushButton*>(wList[idx]);
+        if (pB && !pB->icon().isNull()) {
+            setButtonEnabled(pB, theme, pB->isEnabled());
+        }
+    }
+}
 
-void ExtendedWindow::setButtonEnabled(QPushButton *theButton, bool isEnabled)
+// static member function
+void ExtendedWindow::setButtonEnabled(QPushButton*  theButton,
+                                      SettingsTheme theme,
+                                      bool          isEnabled)
 {
     theButton->setEnabled(isEnabled);
     // If this button has icon image properties, reset its
@@ -78,8 +93,7 @@ void ExtendedWindow::setButtonEnabled(QPushButton *theButton, bool isEnabled)
 
     // Get the resource name based on the light/dark theme
     QString resName = ":/";
-    resName += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
-                      DARK_PATH : LIGHT_PATH;
+    resName += (theme == SETTINGS_THEME_DARK) ? DARK_PATH : LIGHT_PATH;
     resName += "/";
 
     if (!isEnabled  &&  !disabledPropStr.isNull()) {

@@ -11,10 +11,12 @@
  */
 
 #include <QPushButton>
+#include <QtWidgets>
 
 #include "android/android.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
+#include "android/main-common.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-window.h"
@@ -33,7 +35,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window) :
     extendedWindow(NULL),
     uiEmuAgent(NULL),
     toolsUi(new Ui::ToolControls),
-    scale(.4) // TODO: add specific UI for scaling
+    scale(.4)
 {
     Q_INIT_RESOURCE(resources);
 
@@ -41,8 +43,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window) :
 
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
     toolsUi->setupUi(this);
-    // Initialize to the light theme
-    this->setStyleSheet(QT_STYLE(LIGHT));
     // Make this more narrow than QtDesigner likes
     this->resize(70, this->height());
 
@@ -62,6 +62,22 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window) :
     mPushDialog.close();
     QObject::connect(&mPushDialog, SIGNAL(canceled()), this, SLOT(slot_pushCanceled()));
     QObject::connect(&mPushProcess, SIGNAL(finished(int)), this, SLOT(slot_pushFinished(int)));
+
+    // Get the latest user selections from the
+    // user-config code.
+    SettingsTheme theme = (SettingsTheme)user_config_get_ui_theme();
+    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
+        theme = (SettingsTheme)0;
+        user_config_set_ui_theme(theme);
+    }
+
+    ExtendedWindow::switchAllIconsForTheme(theme);
+
+    if (theme == SETTINGS_THEME_DARK) {
+        this->setStyleSheet(QT_STYLE(DARK));
+    } else {
+        this->setStyleSheet(QT_STYLE(LIGHT));
+    }
 }
 
 void ToolWindow::show()
