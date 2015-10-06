@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1001893d_311df0ac",
+        "filename": "vl-android.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3498,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T20:06:35Z",
+      "side": 1,
+      "message": "This got deleted by mistake. As a result, we never told the guest kernel that we\u0027re running gles emulation.\n\nOops!",
+      "range": {
+        "startLine": 3498,
+        "startChar": 8,
+        "endLine": 3498,
+        "endChar": 22
+      },
+      "revId": "a472bc171122f511d696906a70cb809497eb61f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
