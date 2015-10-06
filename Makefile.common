@@ -204,6 +204,7 @@ common_LOCAL_SRC_FILES += \
 	android/emulation/qemud/android_qemud_multiplexer.cpp \
 	android/emulation/bufprint_config_dirs.cpp \
 	android/emulation/ConfigDirs.cpp \
+	android/emulation/control/LineConsumer.cpp \
 	android/emulation/CpuAccelerator.cpp \
 	android/emulation/serial_line.cpp \
 	android/filesystems/ext4_utils.cpp \
