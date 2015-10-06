@@ -14,12 +14,11 @@
 
 #include "android/emulation/android_qemud.h"
 #include "android/globals.h"
-#include "android/hw-qemud.h"
 #include "android/utils/debug.h"
 #include "android/utils/stream.h"
 #include "android/utils/system.h"
 
-#include "hw/hw.h"
+#include <errno.h>
 
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 
