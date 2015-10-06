@@ -48,14 +48,20 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window) :
 
     mErrorMessage.setWindowModality(Qt::ApplicationModal);
 
-    QObject::connect(&mInstallProcess, SIGNAL(finished(int)), this, SLOT(slot_installFinished(int)));
-
     // TODO: make this affected by themes and changes
     mInstallDialog.setWindowTitle(tr("APK Installer"));
     mInstallDialog.setLabelText(tr("Installing APK..."));
     mInstallDialog.setRange(0, 0); // Makes it a "busy" dialog
     mInstallDialog.close();
     QObject::connect(&mInstallDialog, SIGNAL(canceled()), this, SLOT(slot_installCanceled()));
+    QObject::connect(&mInstallProcess, SIGNAL(finished(int)), this, SLOT(slot_installFinished(int)));
+
+    mPushDialog.setWindowTitle(tr("File Copy"));
+    mPushDialog.setLabelText(tr("Copying files..."));
+    mPushDialog.setRange(0, 0); // Makes it a "busy" dialog
+    mPushDialog.close();
+    QObject::connect(&mPushDialog, SIGNAL(canceled()), this, SLOT(slot_pushCanceled()));
+    QObject::connect(&mPushProcess, SIGNAL(finished(int)), this, SLOT(slot_pushFinished(int)));
 }
 
 void ToolWindow::show()
@@ -83,7 +89,7 @@ QString ToolWindow::getAndroidSdkRoot()
     return environment.value("ANDROID_SDK_ROOT");
 }
 
-QString ToolWindow::getAdbFullPath()
+QString ToolWindow::getAdbFullPath(QStringList *args)
 {
     // Find adb first
     QString sdkRoot = getAndroidSdkRoot();
@@ -98,9 +104,9 @@ QString ToolWindow::getAdbFullPath()
     String adbPath = PathUtils::recompose(adbVector);
 
     // TODO: is this safe cross-platform?
-    QString command = QString(adbPath.c_str());
-    command += " -s emulator-" + QString::number(android_base_port);
-    return command;
+    *args << "-s";
+    *args << "emulator-" + QString::number(android_base_port);
+    return adbPath.c_str();
 }
 
 void ToolWindow::runAdbInstall(const QString &path)
@@ -114,25 +120,39 @@ void ToolWindow::runAdbInstall(const QString &path)
     // Default the -r flag to replace the current version
     // TODO: is replace the desired default behavior?
     // TODO: enable other flags? -lrstdg available
-    QString command = getAdbFullPath();
+    QStringList args;
+    QString command = getAdbFullPath(&args);
     if (command.isNull()) {
         return;
     }
 
+    args << "install";  // The desired command
+    args << "-r";       // The flags for adb install
+    args << path;       // The path to the APK to install
+
     // Show a dialog so the user knows something is happening
     mInstallDialog.show();
 
-    command += " install -r "; // The desired command is install -r
-    command += path; // The absolute path to the desired .apk file
-
     // Keep track of this process
-    mInstallProcess.start(command);
+    mInstallProcess.start(command, args);
     mInstallProcess.waitForStarted();
 }
 
-void ToolWindow::runAdbPush(const QList<QUrl> &paths)
+void ToolWindow::runAdbPush(const QList<QUrl> &urls)
 {
-    // TODO: implement me!
+    // Queue up the next set of files
+    for (unsigned i = 0; i < urls.length(); i++) {
+        mFilesToPush.enqueue(urls[i]);
+    }
+
+    if (mPushProcess.state() == QProcess::NotRunning) {
+
+        // Show a dialog so the user knows something is happening
+        mPushDialog.show();
+
+        // Begin the cascading push
+        slot_pushFinished(0);
+    }
 }
 
 void ToolWindow::dockMainWindow()
@@ -217,6 +237,41 @@ void ToolWindow::slot_installFinished(int exitStatus)
     if (exitStatus) {
         showErrorDialog(tr("The installation failed."),
                         tr("APK Installer"));
+    }
+}
+
+void ToolWindow::slot_pushCanceled()
+{
+    if (mPushProcess.state() != QProcess::NotRunning) {
+        mPushProcess.kill();
+    }
+    mFilesToPush.clear();
+}
+
+void ToolWindow::slot_pushFinished(int exitStatus)
+{
+    if (exitStatus) {
+        showErrorDialog(tr("The file copy failed."),
+                        tr("File Copy"));
+    }
+
+    if (mFilesToPush.isEmpty()) {
+        mPushDialog.close();
+    } else {
+
+        // Prepare the base command
+        QStringList args;
+        QString command = getAdbFullPath(&args);
+        if (command.isNull()) {
+            return;
+        }
+        args << "push";
+        args << mFilesToPush.dequeue().toLocalFile();
+        args << REMOTE_DOWNLOADS_DIR;
+
+        // Keep track of this process
+        mPushProcess.start(command, args);
+        mPushProcess.waitForStarted();
     }
 }
 
