@@ -1,0 +1,291 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b6d3ced_ee33a7de",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "[1]\nThis is one-time-only script, but otherwise, let\u0027s stick to PeP8 or Google pystyle.\n\nBoth of them have better linting and auto-formatting support than the style used here.\n\n[2]\nI\u0027ve found that python files look cleaner if you stick to one variant of quotes (\u0027I like single quotes, actually. Regexes are a little easier that way\u0027) everywhere you can.",
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b92a812_2ca2fb1c",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "return any(name.endswith(ext) for ext in [\u0027.cpp\u0027, \u0027.h\u0027, \u0027.c\u0027, \u0027.m\u0027, \u0027.mm\u0027])",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 45,
+        "endChar": 78
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b7078c2_a8012381",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "Please don\u0027t hide the |filename| method argument.",
+      "range": {
+        "startLine": 69,
+        "startChar": 12,
+        "endLine": 69,
+        "endChar": 20
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb66c411_ed0f2d6e",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "This should be impossible with your regex.\n\nSince the first group is _inside_ the \u003c...\u003e\n\nSo \n\n  # include \u003candroid/scripts/nonexistent.h\u003e\n\nwill match the the first re, and the first group will contain just\n\n  android/scripts/nonexistent.h",
+      "range": {
+        "startLine": 73,
+        "startChar": 19,
+        "endLine": 73,
+        "endChar": 51
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab804cc5_c5b7a4c0",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "suggest:\n\n  return sorted(result)",
+      "range": {
+        "startLine": 83,
+        "startChar": 11,
+        "endLine": 83,
+        "endChar": 17
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b7078c2_68a22bf0",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "Hygiene: Hide all this in main() and guard the script with:\n\n  if __name__ \u003d\u003d \u0027__main__\u0027:\n    main()",
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b6d3ced_6efeb727",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "nit: no space inside parens / brackets. Here and everywhere else.\nIt\u0027s extraneous, and most linters/formatter won\u0027t like it by default.",
+      "range": {
+        "startLine": 93,
+        "startChar": 23,
+        "endLine": 93,
+        "endChar": 24
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba1f45d_108394ca",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "You should really be using logging.info/logging.debug for this :)\n\nBut, meh! :D",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 95,
+        "endChar": 8
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b6d3ced_0e0ffbff",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "Sort these too? (See suggestion above instead)",
+      "range": {
+        "startLine": 96,
+        "startChar": 32,
+        "endLine": 96,
+        "endChar": 49
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb66c411_ed3dedfd",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "should be called |filepath| instead.",
+      "range": {
+        "startLine": 105,
+        "startChar": 20,
+        "endLine": 105,
+        "endChar": 28
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50478167_c3d576c9",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "endswith?",
+      "range": {
+        "startLine": 107,
+        "startChar": 7,
+        "endLine": 107,
+        "endChar": 31
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba1f45d_303a50b8",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "return any(x.startswith(x + \u0027/\u0027) for x in qemu_subdirs)",
+      "range": {
+        "startLine": 109,
+        "startChar": 4,
+        "endLine": 111,
+        "endChar": 23
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab976c01_d836b5ad",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-06T17:47:50Z",
+      "side": 1,
+      "message": "use |os.path.join|",
+      "range": {
+        "startLine": 157,
+        "startChar": 15,
+        "endLine": 157,
+        "endChar": 45
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
