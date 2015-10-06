@@ -27,6 +27,8 @@
 #include "android/location-agent.h"
 #include "android/location-agent-impl.h"
 #include "android/opengles.h"
+#include "android/sensors-agent.h"
+#include "android/sensors-agent-impl.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
 #include "android/telephony-agent.h"
@@ -270,6 +272,11 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .gpsCmd         = location_gpsCmd
     };
 
+    static const SensorsAgent mySensorsAgent = {
+        .setSensor      = sensor_set,
+        .getSensor      = sensor_get
+    };
+
     static const TelephonyAgent myTelephonyAgent = {
         .telephonyCmd   = telephony_telephonyCmd
     };
@@ -279,6 +286,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .cellular  = &myCellularAgent,
         .finger    = &myFingerAgent,
         .location  = &myLocationAgent,
+        .sensors   = &mySensorsAgent,
         .telephony = &myTelephonyAgent
     };
 
