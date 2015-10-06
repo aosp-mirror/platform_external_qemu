@@ -135,6 +135,10 @@ void* android_pipe_new(void* hwpipe) {
 }
 
 void android_pipe_free(void* pipe_) {
+    if (!pipe_) {
+        return;
+    }
+
     Pipe* pipe = pipe_;
     /* Call close callback */
     if (pipe->funcs->close) {
@@ -225,10 +229,8 @@ static Pipe* pipe_load_state(Stream* file,
     }
 
     if (pipe->funcs->load) {
-        pipe->opaque = service->funcs.load(hwpipe,
-                                        service->opaque,
-                                        pipe->args,
-                                        file);
+        pipe->opaque = pipe->funcs->load(
+                hwpipe, service ? service->opaque : NULL, pipe->args, file);
         if (!pipe->opaque) {
             android_pipe_free(pipe);
             return NULL;
