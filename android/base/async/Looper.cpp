@@ -42,7 +42,9 @@ public:
 
     virtual ~GenLooper() {}
 
-    virtual Duration nowMs() {
+    virtual Duration nowMs(ClockType clockType = ClockType::kHost) {
+        DCHECK(clockType == ClockType::kHost);
+
         struct timeval time_now;
         return gettimeofday(&time_now, NULL)
                 ? -1
@@ -178,11 +180,14 @@ public:
 
     class Timer : public Looper::Timer {
     public:
-        Timer(GenLooper* looper, Callback callback, void* opaque) :
-                Looper::Timer(looper, callback, opaque),
+        Timer(GenLooper* looper, Callback callback, void* opaque,
+              ClockType clock) :
+                Looper::Timer(looper, callback, opaque, clock),
                 mDeadline(kDurationInfinite),
                 mPending(false),
                 mPendingLink() {
+            // this implementation only supports a host clock
+            DCHECK(clock == ClockType::kHost);
             DCHECK(mCallback);
             looper->addTimer(this);
         }
@@ -202,7 +207,7 @@ public:
 
         virtual void startRelative(Duration deadlineMs) {
             if (deadlineMs != kDurationInfinite) {
-                deadlineMs += mLooper->nowMs();
+                deadlineMs += mLooper->nowMs(mClockType);
             }
             startAbsolute(deadlineMs);
         }
@@ -242,6 +247,15 @@ public:
 
         void fire() {
             mCallback(mOpaque, this);
+        }
+
+        void save(Stream* stream) const {
+            stream->putBe64(static_cast<uint64_t>(mDeadline));
+        }
+
+        void load(Stream* stream) {
+            const Duration deadline = static_cast<Duration>(stream->getBe64());
+            startAbsolute(deadline);
         }
 
         TAIL_QUEUE_LIST_TRAITS(Traits, Timer, mPendingLink);
@@ -287,8 +301,8 @@ public:
     }
 
     virtual Looper::Timer* createTimer(Looper::Timer::Callback callback,
-                                       void* opaque) {
-        return new GenLooper::Timer(this, callback, opaque);
+                                       void* opaque, ClockType clock) {
+        return new GenLooper::Timer(this, callback, opaque, clock);
     }
 
     //

@@ -15,6 +15,8 @@
 #include "android/base/containers/TailQueueList.h"
 #include "android/base/containers/ScopedPointerSet.h"
 #include "android/base/sockets/SocketUtils.h"
+#include "android/qemu/base/files/QemuFileStream.h"
+#include "android/utils/stream.h"
 
 extern "C" {
 #include "qemu-common.h"
@@ -62,6 +64,16 @@ public:
 
     virtual ~QemuLooper() {
         qemu_bh_delete(mQemuBh);
+    }
+
+    static QEMUClockType toQemuClockType(ClockType clock) {
+        static_assert((int) QEMU_CLOCK_HOST == (int) BaseLooper::ClockType::kHost &&
+                      (int) QEMU_CLOCK_VIRTUAL == (int) BaseLooper::ClockType::kVirtual &&
+                      (int) QEMU_CLOCK_REALTIME == (int) BaseLooper::ClockType::kRealtime,
+                      "Values in the Looper::ClockType enumeration are out of sync with "
+                              "QEMUClockType");
+
+        return static_cast<QEMUClockType>(clock);
     }
 
     //
@@ -172,10 +184,10 @@ public:
     public:
         Timer(QemuLooper* looper,
               BaseTimer::Callback callback,
-              void* opaque) :
-                    BaseTimer(looper, callback, opaque),
+              void* opaque, ClockType clock) :
+                    BaseTimer(looper, callback, opaque, clock),
                     mTimer(NULL) {
-            mTimer = ::timer_new(QEMU_CLOCK_HOST,
+            mTimer = ::timer_new(QemuLooper::toQemuClockType(mClockType),
                                  SCALE_MS,
                                  qemuTimerCallbackAdapter,
                                  this);
@@ -189,7 +201,8 @@ public:
             if (timeout_ms == kDurationInfinite) {
                 timer_del(mTimer);
             } else {
-                timeout_ms += qemu_clock_get_ms(QEMU_CLOCK_HOST);
+                timeout_ms += qemu_clock_get_ms(
+                        QemuLooper::toQemuClockType(mClockType));
                 timer_mod(mTimer, timeout_ms);
             }
         }
@@ -210,6 +223,18 @@ public:
             return timer_pending(mTimer);
         }
 
+        void save(android::base::Stream* stream) const {
+            timer_put(
+                reinterpret_cast<android::qemu::QemuFileStream*>(stream)->file(),
+                mTimer);
+        }
+
+        void load(android::base::Stream* stream) {
+            timer_get(
+                reinterpret_cast<android::qemu::QemuFileStream*>(stream)->file(),
+                mTimer);
+        }
+
     private:
         static void qemuTimerCallbackAdapter(void* opaque) {
             Timer* timer = static_cast<Timer*>(opaque);
@@ -220,16 +245,16 @@ public:
     };
 
     virtual BaseTimer* createTimer(BaseTimer::Callback callback,
-                                   void* opaque) {
-        return new QemuLooper::Timer(this, callback, opaque);
+                                   void* opaque, ClockType clock) {
+        return new QemuLooper::Timer(this, callback, opaque, clock);
     }
 
     //
     //  L O O P E R
     //
 
-    virtual Duration nowMs() {
-        return qemu_clock_get_ms(QEMU_CLOCK_HOST);
+    virtual Duration nowMs(ClockType clockType) {
+        return qemu_clock_get_ms(toQemuClockType(clockType));
     }
 
     virtual int runWithDeadlineMs(Duration deadline_ms) {

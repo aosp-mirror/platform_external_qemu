@@ -13,19 +13,32 @@
 
 #include "android/base/async/Looper.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/files/Stream.h"
 #include "android/base/sockets/SocketUtils.h"
-
-//using ::android::internal::GLooper;
 
 typedef ::Looper CLooper;
 typedef android::base::Looper BaseLooper;
+
+static BaseLooper::ClockType toBaseLooperClockType(LooperClockType clock) {
+    static_assert((int) LOOPER_CLOCK_HOST == (int) BaseLooper::ClockType::kHost &&
+                  (int) LOOPER_CLOCK_VIRTUAL == (int) BaseLooper::ClockType::kVirtual &&
+                  (int) LOOPER_CLOCK_REALTIME == (int) BaseLooper::ClockType::kRealtime,
+                  "Values in the Looper::ClockType enumeration are out of sync with "
+                          "LooperClockType");
+
+    return static_cast<BaseLooper::ClockType>(clock);
+}
 
 static BaseLooper* asBaseLooper(CLooper* looper) {
     return reinterpret_cast<BaseLooper*>(looper);
 }
 
 Duration looper_now(Looper* looper) {
-    return asBaseLooper(looper)->nowMs();
+    return looper_nowWithClock(looper, LOOPER_CLOCK_HOST);
+}
+
+Duration looper_nowWithClock(Looper* looper, LooperClockType clock) {
+    return asBaseLooper(looper)->nowMs(toBaseLooperClockType(clock));
 }
 
 int looper_runWithDeadline(Looper* looper, Duration deadline) {
@@ -74,15 +87,21 @@ void loopTimer_free(LoopTimer* timer) {
     delete asBaseTimer(timer);
 }
 
-LoopTimer* loopTimer_new(CLooper*       looper,
-                         LoopTimerFunc  callback,
-                         void*          opaque) {
+LoopTimer* loopTimer_new(CLooper* looper,
+                         LoopTimerFunc callback,
+                         void* opaque) {
+    return loopTimer_newWithClock(looper, callback, opaque, LOOPER_CLOCK_HOST);
+}
+
+LoopTimer* loopTimer_newWithClock(CLooper* looper,
+                                  LoopTimerFunc callback,
+                                  void* opaque,
+                                  LooperClockType clockType) {
     return reinterpret_cast<LoopTimer*>(
             asBaseLooper(looper)->createTimer(
                     reinterpret_cast<BaseLooper::Timer::Callback>(callback),
-                    opaque));
+                    opaque, toBaseLooperClockType(clockType)));
 }
-
 
 /**********************************************************************
  **********************************************************************
@@ -149,4 +168,12 @@ void looper_setForThread(Looper* looper) {
 CLooper* looper_newGeneric(void) {
     return reinterpret_cast<CLooper*>(
             ::android::base::Looper::create());
+}
+
+void stream_put_timer(::Stream* stream, LoopTimer* timer) {
+    asBaseTimer(timer)->save(reinterpret_cast<android::base::Stream*>(stream));
+}
+
+void stream_get_timer(::Stream* stream, LoopTimer* timer) {
+    asBaseTimer(timer)->load(reinterpret_cast<android::base::Stream*>(stream));
 }

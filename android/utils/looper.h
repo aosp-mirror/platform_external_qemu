@@ -13,6 +13,7 @@
 #pragma once
 
 #include "android/utils/compiler.h"
+#include "android/utils/stream.h"
 #include "android/utils/system.h"
 
 #include <stddef.h>
@@ -41,6 +42,23 @@ typedef int64_t   Duration;
 
 /* A special Duration value used to mean "infinite" */
 #define  DURATION_INFINITE       ((Duration)INT64_MAX)
+
+// Type of the clock used in a Looper object
+//  LOOPER_CLOCK_REALTIME - realtime monotonic host clock
+//  LOOPER_CLOCK_VIRTUAL - virtual machine guest time, stops when guest is
+//      suspended
+//  LOOPER_CLOCK_HOST - host time, mimics the current time set in the OS, so
+//      is may go back when OS time is set back
+//
+//  Note: the only time which is always supported is LOOPER_CLOCK_HOST;
+//        other types may be not implemented by different times and fall back
+//        to LOOPER_CLOCK_HOST
+
+typedef enum {
+    LOOPER_CLOCK_REALTIME,
+    LOOPER_CLOCK_VIRTUAL,
+    LOOPER_CLOCK_HOST
+} LooperClockType;
 
 /**********************************************************************
  **********************************************************************
@@ -115,6 +133,10 @@ typedef void (*LoopIoFunc)(void* opaque, int fd, unsigned events);
 LoopTimer* loopTimer_new(Looper*        looper,
                          LoopTimerFunc  callback,
                          void*          opaque);
+LoopTimer* loopTimer_newWithClock(Looper* looper,
+                                  LoopTimerFunc callback,
+                                  void* opaque,
+                                  LooperClockType clock);
 
 /* Finalize a LoopTimer */
 void loopTimer_free(LoopTimer* timer);
@@ -193,6 +215,7 @@ unsigned loopIo_poll(LoopIo* io);
 /* Return the current looper time in milliseconds. This can be used to
  * compute deadlines for looper_runWithDeadline(). */
 Duration looper_now(Looper* looper);
+Duration looper_nowWithClock(Looper* looper, LooperClockType clock);
 
 /* Run the event loop, until looper_forceQuit() is called, or there is no
  * more registered watchers for events/timers in the looper, or a certain
@@ -245,6 +268,10 @@ void looper_forceQuit(Looper* looper);
  *        timers and ios properly
  */
 void looper_free(Looper* looper);
+
+// Serialization/deserialization support
+void stream_put_timer(Stream* stream, LoopTimer* timer);
+void stream_get_timer(Stream* stream, LoopTimer* timer);
 
 /* */
 
