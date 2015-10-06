@@ -16,6 +16,24 @@
       "revId": "ff5c398dcd7744900b1c06070da7034e09710b8d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b9c302a_2431b3d6",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-10-06T19:14:04Z",
+      "side": 1,
+      "message": "Is there a way to use the pipe with the run function?\n\nI am changing to use the -delete functionality in find.",
+      "parentUuid": "35e91ad0_45b520b3",
+      "revId": "ff5c398dcd7744900b1c06070da7034e09710b8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
