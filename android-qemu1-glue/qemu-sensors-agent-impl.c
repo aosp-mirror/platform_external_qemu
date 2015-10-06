@@ -10,16 +10,20 @@
  ** GNU General Public License for more details.
  */
 
-#pragma once
+#include "android/emulation/control/sensors_agent.h"
 
-// Agent iterfaces for sending commands from the UI to the emulator
+#include "android/hw-sensors.h"
 
-typedef struct UiEmuAgent {
-    const struct QAndroidBatteryAgent* battery;
-    const struct QAndroidCellularAgent* cellular;
-    const struct QAndroidFingerAgent* finger;
-    const struct QAndroidLocationAgent* location;
-    const struct QAndroidSensorsAgent* sensors;
-    const struct QAndroidTelephonyAgent* telephony;
-    const struct SettingsAgent* settings;
-} UiEmuAgent;
+int sensor_set(int sensorId, float a, float b, float c) {
+    return android_sensors_set(sensorId, a, b, c);
+}
+
+int sensor_get(int sensorId, float *a, float *b, float *c) {
+    return android_sensors_get(sensorId, a, b, c);
+}
+
+static const QAndroidSensorsAgent sQAndroidSensorsAgent = {
+    .setSensor = sensor_set,
+    .getSensor = sensor_get};
+const QAndroidSensorsAgent* const gQAndroidSensorsAgent =
+    &sQAndroidSensorsAgent;
