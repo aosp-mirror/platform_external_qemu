@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90673931_9e731cdb",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-07T23:28:12Z",
+      "side": 1,
+      "message": "Use LOG(FATAL) from android/base/Log.h\nThis will blow up in debug builds but log a severe message and continue in production builds.",
+      "range": {
+        "startLine": 216,
+        "startChar": 12,
+        "endLine": 216,
+        "endChar": 26
+      },
+      "revId": "f7844890708d0437d3032ef36a64bf6c62956fd8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
