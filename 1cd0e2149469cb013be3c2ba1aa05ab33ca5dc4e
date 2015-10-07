@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3065adc4_ba46918c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-07T15:49:19Z",
+      "side": 1,
+      "message": "This doesn\u0027t make sense at all. Please be more specific about why this is needed at all.",
+      "revId": "1cd0e2149469cb013be3c2ba1aa05ab33ca5dc4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
