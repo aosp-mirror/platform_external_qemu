@@ -25,13 +25,17 @@
 #endif
 
 METRICS_STRING(emulator_version, "emulator_version", "unknown")
+
 METRICS_STRING(guest_arch, "guest_arch", "unknown")
+
 METRICS_INT(guest_gpu_enabled, "guest_gpu_enabled", -99)
-METRICS_STRING(guest_gl_vendor, "guest_gl_vendor", "NotApplicable")
-METRICS_STRING(guest_gl_renderer, "guest_gl_renderer", "NotApplicable")
-METRICS_STRING(guest_gl_version, "guest_gl_version", "NotApplicable")
+
 METRICS_INT(tick, "tick", 0)
+
 METRICS_DURATION(system_time, "system_time", 0)
+
 METRICS_DURATION(user_time, "user_time", 0)
+
 METRICS_INT(is_dirty, "is_dirty", 1)
+
 METRICS_INT(num_failed_reports, "num_failed_reports", 0)
