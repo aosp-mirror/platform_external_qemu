@@ -9,8 +9,6 @@
  // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  // GNU General Public License for more details.
 
-#define __STDC_LIMIT_MACROS
-
 
 #include "android/gps/KmlParser.h"
 #include "android/gps/internal/KmlParserInternal.h"
@@ -61,8 +59,8 @@ bool KmlParserInternal::parseCoordinates(xmlNode * current, GpsFixArray * fixes)
     while (split != NULL) {
 
         string triple = string(split);
-        int first = triple.find(",");
-        int second = triple.find(",", first + 1);
+        size_t first = triple.find(",");
+        size_t second = triple.find(",", first + 1);
         if (first != string::npos && second != string::npos) {
             int ind = fixes->size();
             fixes->push_back(GpsFix());
@@ -87,7 +85,7 @@ bool KmlParserInternal::parseCoordinates(xmlNode * current, GpsFixArray * fixes)
 bool KmlParserInternal::parsePlacemark(xmlNode * current, GpsFixArray * fixes) {
     string description = "";
     string name = "";
-    int ind = -1;
+    size_t ind = -1;
 
     // not worried about case-sensitivity since .kml files
     // are expected to be machine-generated
@@ -108,12 +106,12 @@ bool KmlParserInternal::parsePlacemark(xmlNode * current, GpsFixArray * fixes) {
 
     // only assign name and description to the first of the
     // points to avoid needless repitition
-    if (ind > -1 && ind < fixes->size()) {
+    if (ind != string::npos && ind < fixes->size()) {
         (*fixes)[ind].description = description;
         (*fixes)[ind].name = name;
     }
 
-    return ind > -1 && ind < fixes->size();
+    return ind != string::npos && ind < fixes->size();
 }
 
 // Placemarks (aka locations) can be nested arbitrarily deep

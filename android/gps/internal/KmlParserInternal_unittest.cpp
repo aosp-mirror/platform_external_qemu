@@ -211,7 +211,7 @@ TEST(KmlParserInternal, ParseLocationNormal) {
     EXPECT_EQ("", error);
     EXPECT_EQ(1, locations.size());
 
-    for (int i = 0; i < locations.size(); ++i) {
+    for (unsigned i = 0; i < locations.size(); ++i) {
         EXPECT_EQ("Simple placemark", locations[i].name);
         EXPECT_EQ("Attached to the ground.", locations[i].description);
         EXPECT_EQ("-122.0822035425683", locations[i].longitude);
@@ -243,7 +243,7 @@ TEST(KmlParserInternal, ParseLocationNormalMissingOptionalFields) {
     EXPECT_EQ("", error);
     EXPECT_EQ(1, locations.size());
 
-    for (int i = 0; i < locations.size(); ++i) {
+    for (unsigned i = 0; i < locations.size(); ++i) {
         EXPECT_EQ("", locations[i].name);
         EXPECT_EQ("", locations[i].description);
         EXPECT_EQ("-122.0822035425683", locations[i].longitude);
@@ -306,7 +306,7 @@ TEST(KmlParserInternal, ParseLocationNameOnlyFirst) {
     EXPECT_EQ("", locations[1].name);
     EXPECT_EQ("", locations[1].description);
 
-    for (int i = 0; i < locations.size(); ++i) {
+    for (unsigned i = 0; i < locations.size(); ++i) {
         EXPECT_EQ("-122.0822035425683", locations[i].longitude);
         EXPECT_EQ("37.42228990140251", locations[i].latitude);
         EXPECT_EQ("0", locations[i].elevation);
@@ -353,7 +353,7 @@ TEST(KmlParserInternal, ParseMultipleLocations) {
     EXPECT_EQ("", error);
     EXPECT_EQ(4, locations.size());
 
-    for (int i = 0; i < locations.size(); ++i) {
+    for (unsigned i = 0; i < locations.size(); ++i) {
         if (i != 2) {
             EXPECT_EQ("Simple placemark", locations[i].name);
             EXPECT_EQ("Attached to the ground.", locations[i].description);

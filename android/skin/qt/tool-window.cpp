@@ -157,7 +157,7 @@ void ToolWindow::runAdbInstall(const QString &path)
 void ToolWindow::runAdbPush(const QList<QUrl> &urls)
 {
     // Queue up the next set of files
-    for (unsigned i = 0; i < urls.length(); i++) {
+    for (int i = 0; i < urls.length(); i++) {
         mFilesToPush.enqueue(urls[i]);
     }
 
