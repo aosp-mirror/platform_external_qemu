@@ -210,8 +210,14 @@ public:
             int host_runs_64bit_OS = (uname(&u) == 0 &&
                                      strcmp(u.machine, "x86_64") == 0);
     */
-        return system("file -L \"$SHELL\" | grep -q \"x86[_-]64\"") == 0 ?
-                64 : 32;
+        if (system("file -L \"$SHELL\" | grep -q \"x86[_-]64\"") == 0) {
+                return 64;
+        } else if (system("file -L \"$SHELL\" > /dev/null")) {
+            fprintf(stderr, "WARNING: Cannot decide host bitness because "
+                    "$SHELL is not properly defined; 32 bits assumed.\n");
+        }
+        return 32;
+
 #endif // !_WIN32
     }
 
