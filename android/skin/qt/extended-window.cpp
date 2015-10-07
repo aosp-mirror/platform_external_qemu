@@ -18,7 +18,17 @@
 
 #include "ui_extended.h"
 
+#include <QByteArray>
+#include <QList>
+#include <QMetaMethod>
+#include <QMetaObject>
+#include <QPushButton>
+#include <QtGlobal>
 #include <QtWidgets>
+
+#include <assert.h>
+#include <iostream>
+using namespace std;
 
 ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmuAgent *agentPtr) :
     QFrame(eW),
@@ -35,12 +45,14 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     mLoc_rowToSend(-1),
     mExtendedUi(new Ui::ExtendedControls)
 {
+    qWarning("[xkcd] #################################################\n");
     Q_INIT_RESOURCE(resources);
 
     setWindowFlags(Qt::Tool | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
     setAttribute(Qt::WA_DeleteOnClose);
 
     mExtendedUi->setupUi(this);
+    SetupMetricsConnectionsForObject(this);
 
     // Do any sub-window-specific initialization
     initBattery();
@@ -55,6 +67,43 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
 
     move(mParentWindow->geometry().right() + 40,
          mParentWindow->geometry().top()   + 40 );
+}
+
+void ExtendedWindow::SetupMetricsConnectionsForObject(QObject* obj) {
+    const QMetaObject* m = obj->metaObject();
+    QStringList methods;
+    QList<QByteArray> propNames = obj->dynamicPropertyNames();
+    qWarning("[xkcd] Processing: %s[%d]", obj->objectName().toStdString().c_str(),
+             propNames.size());
+    for (const auto prop : propNames) {
+        qWarning("%s", prop.toStdString().c_str());
+    }
+
+    QVariant prop = obj->property("sendMetrics");
+    if (prop.isValid() && prop.toBool()) {
+        // For each supported signal.
+        // TODO: This will check all super-classes.
+
+        cout << "[xkcd] processing " << m->className() << ":"
+             << obj->objectName().toStdString() << endl;
+        if (m->className() == QPushButton::staticMetaObject.className()) {
+            cout << "[xkcd] Connecting " << m->className() << ":"
+                 << obj->objectName().toStdString() << endl;
+            QPushButton* qpb = static_cast<QPushButton*>(obj);
+            QObject::connect(qpb, &QPushButton::clicked,
+                             this, &ExtendedWindow::clicked_metrics);
+        }
+    }
+
+    for (const auto& child : obj->children()) {
+        SetupMetricsConnectionsForObject(child);
+    }
+}
+
+void ExtendedWindow::clicked_metrics() {
+    QObject* sentby = sender();
+    // |sentby| may be NULL here.
+    cout << "[xkcd] You clicked " << sentby->objectName().toStdString() << "!" << endl;
 }
 
 void ExtendedWindow::completeInitialization()

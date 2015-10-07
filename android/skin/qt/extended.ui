@@ -2198,6 +2198,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="ColorGroup" stdset="0">
     <string>MajorTab</string>
    </property>
+   <property name="sendMetrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="batteryButton">
    <property name="geometry">
@@ -2285,6 +2288,9 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>MajorTab</string>
+   </property>
+   <property name="sendMetrics" stdset="0">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="cellularButton">

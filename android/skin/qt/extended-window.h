@@ -54,6 +54,8 @@ private:
     EmulatorQtWindow   *mParentWindow;
     ToolWindow         *mToolWindow;
 
+    void SetupMetricsConnectionsForObject(QObject* obj);
+
     class BatteryState {
     public:
         bool          mIsCharging;
@@ -185,6 +187,9 @@ private slots:
     void on_tel_startCallButton_clicked();
     void on_tel_endCallButton_clicked();
     void on_tel_holdCallButton_clicked();
+
+    // Metrics
+    void clicked_metrics();
 };
 
 class phoneNumberValidator : public QValidator
