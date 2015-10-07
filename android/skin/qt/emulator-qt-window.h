@@ -57,6 +57,7 @@ public:
     virtual ~EmulatorQtWindow();
 
     static EmulatorQtWindow *getInstance();
+    bool event(QEvent *e);
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
     void keyPressEvent(QKeyEvent *event);
@@ -66,7 +67,6 @@ public:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-    void resizeEvent(QResizeEvent *event);
     void show();
     void startThread(StartFunction f, int argc, char **argv);
     void wheelEvent(QWheelEvent *event);
@@ -112,8 +112,8 @@ signals:
 public:
     void screenshot();
     void simulateKeyPress(int keyCode, int modifiers);
-    void simulateQuit();
     void simulateSetScale(double scale);
+    void simulateWindowMoved(const QPoint &pos);
 
 private slots:
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
@@ -131,7 +131,6 @@ private slots:
     void slot_releaseBitmap(SkinSurface *s, QSemaphore *sempahore = NULL);
     void slot_requestClose(QSemaphore *semaphore = NULL);
     void slot_requestUpdate(const QRect *rect, QSemaphore *semaphore = NULL);
-    void slot_resizeDone();
     void slot_setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore = NULL);
     void slot_setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void slot_setWindowTitle(const QString *title, QSemaphore *semaphore = NULL);
@@ -147,6 +146,8 @@ public slots:
     void slot_screencapPullFinished(int exitStatus);
 
 private:
+    void doResize();
+
     void handleEvent(SkinEventType type, QMouseEvent *event);
     SkinEvent *createSkinEvent(SkinEventType type);
     void handleKeyEvent(SkinEventType type, QKeyEvent *pEvent);
@@ -161,7 +162,8 @@ private:
     SkinSurface *backing_surface;
     QQueue<SkinEvent*> event_queue;
     ToolWindow *tool_window;
-    QTimer resize_timer;
+
+    QList<QEvent::Type> mEventBuffer;
 
     QProcess mScreencapProcess;
     QProcess mScreencapPullProcess;
