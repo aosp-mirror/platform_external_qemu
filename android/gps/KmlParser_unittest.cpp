@@ -151,7 +151,7 @@ TEST(KmlParser, ParseValidComplexFile) {
         EXPECT_EQ("Fruity", locations[2].name);
         EXPECT_EQ("If the <tessellate> tag has a value of n", locations[2].description);
 
-        for (int i = 0; i < locations.size(); ++i) {
+        for (unsigned i = 0; i < locations.size(); ++i) {
             EXPECT_EQ("-122.084075", locations[i].longitude);
             EXPECT_EQ("37.4220033612141", locations[i].latitude);
             EXPECT_EQ("50", locations[i].elevation);

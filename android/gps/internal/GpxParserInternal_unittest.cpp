@@ -16,7 +16,7 @@
 namespace android_gps_internal {
 
 TEST(GpxParserInternal, ParseLocationMissingLatitude) {
-    char *text =
+    char text[] =
             "<?xml version=\"1.0\"?>"
             "<gpx>"
             "<wpt lon=\"9.81\">"
@@ -43,7 +43,7 @@ TEST(GpxParserInternal, ParseLocationMissingLatitude) {
 }
 
 TEST(GpxParserInternal, ParseLocationMissingLongitude) {
-    char *text =
+    char text[] =
             "<?xml version=\"1.0\"?>"
             "<gpx>"
             "<wpt lat=\"3.1415\">"
@@ -70,7 +70,7 @@ TEST(GpxParserInternal, ParseLocationMissingLongitude) {
 }
 
 TEST(GpxParserInternal, ParseValidLocation) {
-    char *text =
+    char text[] =
             "<?xml version=\"1.0\"?>"
             "<gpx>"
             "<wpt lon=\"9.81\" lat=\"3.1415\">"
@@ -104,7 +104,7 @@ TEST(GpxParserInternal, ParseValidLocation) {
 }
 
 TEST(GpxParserInternal, ParseValidDocument) {
-    char *text =
+    char text[] =
             "<?xml version=\"1.0\"?>"
             "<gpx>"
                 "<wpt lon=\"\" lat=\"\">"

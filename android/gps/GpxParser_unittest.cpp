@@ -28,7 +28,7 @@ TEST(GpxParser, ParseFileNotFound) {
 }
 
 TEST(GpxParser, ParseFileEmpty) {
-    char *text =
+    char text[] =
             "<?xml version=\"1.0\"?>"
             "<gpx>"
             "</gpx>";
@@ -50,7 +50,7 @@ TEST(GpxParser, ParseFileEmpty) {
 }
 
 TEST(GpxParser, ParseFileEmptyRteTrk) {
-    char *text =
+    char text[] =
             "<?xml version=\"1.0\"?>"
             "<gpx>"
             "<rte>"
@@ -78,7 +78,7 @@ TEST(GpxParser, ParseFileEmptyRteTrk) {
 }
 
 TEST(GpxParser, ParseFileValid) {
-    char *text =
+    char text[] =
             "<?xml version=\"1.0\"?>"
             "<gpx>"
                 "<wpt lon=\"\" lat=\"\">"
