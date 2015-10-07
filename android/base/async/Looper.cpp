@@ -45,11 +45,19 @@ public:
     virtual Duration nowMs(ClockType clockType = ClockType::kHost) {
         DCHECK(clockType == ClockType::kHost);
 
+        const DurationNs nsTime = nowNs(clockType);
+        return nsTime == static_cast<DurationNs>(-1)
+               ? -1
+               : static_cast<Duration>(nowNs(clockType) / 1000000);
+    }
+
+    virtual DurationNs nowNs(ClockType clockType = ClockType::kHost) {
+        DCHECK(clockType == ClockType::kHost);
+
         struct timeval time_now;
         return gettimeofday(&time_now, NULL)
-                ? -1
-                : (Duration)time_now.tv_sec * 1000LL +
-                        time_now.tv_usec / 1000;
+               ? static_cast<DurationNs>(-1)
+               : (DurationNs)time_now.tv_sec * 1000000000ULL + time_now.tv_usec * 1000;
     }
 
     virtual void forceQuit() {

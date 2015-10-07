@@ -40,6 +40,9 @@ ANDROID_BEGIN_HEADER
 /* A Duration represents a duration in milliseconds */
 typedef int64_t   Duration;
 
+/* High-precision duration, in nanoseconds */
+typedef uint64_t  DurationNs;
+
 /* A special Duration value used to mean "infinite" */
 #define  DURATION_INFINITE       ((Duration)INT64_MAX)
 
@@ -216,6 +219,10 @@ unsigned loopIo_poll(LoopIo* io);
  * compute deadlines for looper_runWithDeadline(). */
 Duration looper_now(Looper* looper);
 Duration looper_nowWithClock(Looper* looper, LooperClockType clock);
+
+/* Current time in nanoseconds */
+DurationNs looper_nowNs(Looper* looper);
+DurationNs looper_nowNsWithClock(Looper* looper, LooperClockType clock);
 
 /* Run the event loop, until looper_forceQuit() is called, or there is no
  * more registered watchers for events/timers in the looper, or a certain

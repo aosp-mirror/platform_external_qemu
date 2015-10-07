@@ -294,7 +294,6 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
     HwSensorClient*  cl = opaque;
     HwSensors*       hw  = cl->sensors;
     int64_t          delay = cl->delay_ms;
-    int64_t          now_ms;
     uint32_t         mask  = cl->enabledMask;
     Sensor*          sensor;
     char             buffer[128];
@@ -341,9 +340,10 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
         _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
     }
 
-    now_ms = looper_nowWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
+    const DurationNs now_ns =
+            looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
 
-    snprintf(buffer, sizeof buffer, "sync:%" PRId64, now_ms);
+    snprintf(buffer, sizeof buffer, "sync:%" PRId64, now_ns / 1000);
     _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
 
     /* rearm timer, use a minimum delay of 20 ms, just to

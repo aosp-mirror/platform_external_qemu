@@ -257,6 +257,10 @@ public:
         return qemu_clock_get_ms(toQemuClockType(clockType));
     }
 
+    virtual DurationNs nowNs(ClockType clockType) {
+        return qemu_clock_get_ns(toQemuClockType(clockType));
+    }
+
     virtual int runWithDeadlineMs(Duration deadline_ms) {
         CHECK(false) << "User cannot call looper_run on a QEMU event loop";
         errno = ENOSYS;
