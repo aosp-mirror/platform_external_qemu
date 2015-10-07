@@ -16,30 +16,24 @@
 #include "NativeSubWindow.h"
 #include <stdio.h>
 
-LRESULT CALLBACK myWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
-{
-    return DefWindowProc(hwnd, uMsg, wParam, lParam);
-}
-
 EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                     int x, int y,int width, int height){
-    WNDCLASS wc;
-    wc.style =  CS_OWNDC |CS_HREDRAW |CS_VREDRAW;  // redraw if size changes
-    wc.lpfnWndProc = myWndProc;                 // points to window procedure
-    wc.cbClsExtra = 0;                             // no extra class memory
-    wc.cbWndExtra = sizeof(void*);                 // save extra window memory, to store VasWindow instance
-    wc.hInstance = NULL;                           // handle to instance
-    wc.hIcon = NULL;                               // predefined app. icon
-    wc.hCursor = NULL;
-    wc.hbrBackground = NULL;                       // no background brush
-    wc.lpszMenuName =  NULL;                       // name of menu resource
-    wc.lpszClassName = "subWin";                 // name of window class
+    static const char className[] = "subWin";
 
-    RegisterClass(&wc);
+    WNDCLASS wc = {};
+    if (!GetClassInfo(GetModuleHandle(NULL), className, &wc)) {
+        wc.style =  CS_OWNDC | CS_HREDRAW | CS_VREDRAW;// redraw if size changes
+        wc.lpfnWndProc = &DefWindowProc;               // points to window procedure
+        wc.cbWndExtra = sizeof(void*);                 // save extra window memory, to store VasWindow instance
+        wc.lpszClassName = className;                  // name of window class
+
+        RegisterClass(&wc);
+    }
+
     printf("creating window %d %d %d %d\n",x,y,width,height);
     EGLNativeWindowType ret = CreateWindowEx(
                         WS_EX_NOPARENTNOTIFY,  // do not bother our parent window
-                        "subWin",
+                        className,
                         "sub",
                         WS_CHILD|WS_DISABLED,
                         x,y,width,height,
@@ -47,7 +41,7 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                         NULL,
                         NULL,
                         NULL);
-    ShowWindow(ret,SW_SHOW);
+    ShowWindow(ret, SW_SHOW);
     return ret;
 }
 
