@@ -73,6 +73,12 @@ void skin_winsys_spawn_thread(StartFunction f, int argc, char** argv);
 // Enter the main event handling loop for the UI subsystem.
 void skin_winsys_enter_main_loop(int argc, char** argv);
 
+// Run some UI update in a way that UI subsystem needs
+// E.g. for Qt UI, it makes sure the function runs on the main Qt UI thread,
+//   as Qt requires any UI interaction to come from there.
+typedef void (*SkinGenericFunction)(void* data);
+void skin_winsys_run_ui_update(SkinGenericFunction f, void* data);
+
 #ifdef __cplusplus
 }
 #endif

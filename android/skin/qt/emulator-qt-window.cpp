@@ -77,6 +77,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(this, &EmulatorQtWindow::setWindowPos, this, &EmulatorQtWindow::slot_setWindowPos);
     QObject::connect(this, &EmulatorQtWindow::setTitle, this, &EmulatorQtWindow::slot_setWindowTitle);
     QObject::connect(this, &EmulatorQtWindow::showWindow, this, &EmulatorQtWindow::slot_showWindow);
+    QObject::connect(this, &EmulatorQtWindow::runOnUiThread, this, &EmulatorQtWindow::slot_runOnUiThread);
     QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit, this, &EmulatorQtWindow::slot_clearInstance);
 
     resize_timer.setSingleShot(true);
@@ -641,4 +642,9 @@ void EmulatorQtWindow::simulateSetScale(double scale)
     SkinEvent *event = createSkinEvent(kEventSetScale);
     event->u.resize.scale = scale;
     slot_queueEvent(event);
+}
+
+void EmulatorQtWindow::slot_runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore) {
+    (*f)(data);
+    if (semaphore) semaphore->release();
 }

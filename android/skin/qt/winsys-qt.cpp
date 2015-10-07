@@ -267,6 +267,18 @@ extern void skin_winsys_start(bool, bool)
     new EmulatorQtWindow(NULL);
 }
 
+extern void skin_winsys_run_ui_update(SkinGenericFunction f, void* data) {
+    D(__FUNCTION__);
+    QSemaphore semaphore;
+    EmulatorQtWindow* const window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return;
+    }
+    window->runOnUiThread(&f, data, &semaphore);
+    semaphore.acquire();
+}
+
 #ifdef _WIN32
 extern "C" int qt_main(int, char**);
 
