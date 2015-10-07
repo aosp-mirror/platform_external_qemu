@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30fe8d70_12c1cc15",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-07T15:48:43Z",
+      "side": 1,
+      "message": "This commit message doesn\u0027t make sense. What are you trying to do here, and why?",
+      "revId": "2ade1bdba9d396d7ef8179fead1406f477efe233",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
