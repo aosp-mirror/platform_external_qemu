@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5061411e_288d6f71",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-07T22:23:28Z",
+      "side": 1,
+      "message": "I\u0027ve removed it, though I feel like the event buffer being 8 is still very arbitrary. But, considering this is a hack anyway, that might be our best bet.",
+      "parentUuid": "b5526a4f_18ca7ad8",
+      "range": {
+        "startLine": 106,
+        "startChar": 20,
+        "endLine": 106,
+        "endChar": 21
+      },
+      "revId": "566e35d509760f64ebbac0ceafff43a7959912a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75439281_8fef5a27",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 2
@@ -36,6 +60,24 @@
       "writtenOn": "2015-10-05T14:36:22Z",
       "side": 1,
       "message": "Maybe increment i here to avoid revisiting it below?",
+      "revId": "566e35d509760f64ebbac0ceafff43a7959912a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "504861a0_551decaa",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-07T22:23:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "75439281_8fef5a27",
       "revId": "566e35d509760f64ebbac0ceafff43a7959912a6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
