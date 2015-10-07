@@ -293,3 +293,8 @@ void skin_winsys_start(bool no_window, bool raw_keys) {
 void skin_winsys_quit(void) {
     SDL_Quit();
 }
+
+void skin_winsys_run_ui_update(SkinGenericFunction f, void* data) {
+    // for SDL it doesn't really matter which thread updates the UI
+    f(data);
+}

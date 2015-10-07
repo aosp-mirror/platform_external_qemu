@@ -203,11 +203,6 @@ emulator_window_setup( EmulatorWindow*  emulator )
 
         .keyboard_charmap = emulator->opts->charmap,
         .keyboard_raw_keys = emulator->opts->raw_keys != 0,
-#if CONFIG_QT
-        .win32_ignore_events = true,
-#else
-        .win32_ignore_events = false,
-#endif
     };
 
     write_window_name(my_ui_params.window_name,

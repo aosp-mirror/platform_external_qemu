@@ -105,6 +105,10 @@ signals:
     void setTitle(const QString *title, QSemaphore *semaphore = NULL);
     void showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore = NULL);
 
+    // Qt doesn't support function pointers in signals/slots natively, but
+    // pointer to function pointer works fine
+    void runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore = NULL);
+
 public:
     void screenshot();
     void simulateKeyPress(int keyCode, int modifiers);
@@ -132,6 +136,7 @@ private slots:
     void slot_setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void slot_setWindowTitle(const QString *title, QSemaphore *semaphore = NULL);
     void slot_showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore = NULL);
+    void slot_runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore = NULL);
 
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals

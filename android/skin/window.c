@@ -1199,24 +1199,46 @@ skin_window_hide_opengles( SkinWindow* window )
     //android_hideOpenglesWindow();
 }
 
+typedef struct {
+    SkinWindow* window;
+    void* handle;
+    int x;
+    int y;
+    int w;
+    int h;
+    float rot;
+} gles_show_data;
+
+static void skin_window_run_opengles_show(void* p) {
+    const gles_show_data* data = (const gles_show_data*)p;
+    data->window->win_funcs->opengles_show(data->handle,
+                                           data->x,
+                                           data->y,
+                                           data->w,
+                                           data->h,
+                                           data->rot);
+}
+
 /* Show the OpenGL ES framebuffer window */
 static void
 skin_window_show_opengles( SkinWindow* window )
 {
-    {
-        ADisplay* disp = window->layout.displays;
-        SkinRect drect = disp->rect;
-        void* winhandle = skin_winsys_get_window_handle();
+    ADisplay* disp = window->layout.displays;
+    SkinRect drect = disp->rect;
+    void* winhandle = skin_winsys_get_window_handle();
 
-        skin_surface_get_scaled_rect(window->surface, &drect, &drect);
+    skin_surface_get_scaled_rect(window->surface, &drect, &drect);
 
-        window->win_funcs->opengles_show(winhandle,
-                                         drect.pos.x,
-                                         drect.pos.y,
-                                         drect.size.w,
-                                         drect.size.h,
-                                         disp->rotation * -90.);
-    }
+    gles_show_data data;
+    data.window = window;
+    data.handle = winhandle;
+    data.x = drect.pos.x;
+    data.y = drect.pos.y;
+    data.w = drect.size.w;
+    data.h = drect.size.h;
+    data.rot = disp->rotation * -90.;
+
+    skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
 }
 
 static void
