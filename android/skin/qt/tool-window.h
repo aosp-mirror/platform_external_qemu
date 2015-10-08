@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "android/skin/qt/QMetricsCollector.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/utils/compiler.h"
 
@@ -25,6 +26,8 @@
 #include <QToolButton>
 #include <QUrl>
 #include <QQueue>
+
+#include <memory>
 
 #define REMOTE_DOWNLOADS_DIR "/sdcard/Download"
 
@@ -83,6 +86,8 @@ private:
     QProcess mPushProcess;
     QProgressDialog mPushDialog;
     QQueue<QUrl> mFilesToPush;
+
+    std::unique_ptr<android::metrics::QMetricsCollector> mMetricsCollector;
 
 private slots:
     void on_back_button_clicked();

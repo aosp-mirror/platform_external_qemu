@@ -13,7 +13,9 @@
 #include <QPushButton>
 
 #include "android/android.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -23,7 +25,10 @@
 
 #include "ui_tools.h"
 
+#include <string>
+
 using namespace android::base;
+using android::metrics::QMetricsCollector;
 
 static ToolWindow *twInstance = NULL;
 
@@ -62,6 +67,14 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window) :
     mPushDialog.close();
     QObject::connect(&mPushDialog, SIGNAL(canceled()), this, SLOT(slot_pushCanceled()));
     QObject::connect(&mPushProcess, SIGNAL(finished(int)), this, SLOT(slot_pushFinished(int)));
+
+    // TODO(pprabhu) Do opt-in check here.
+    // TODO(pprabhu) Use the real path.
+    mMetricsCollector.reset(new QMetricsCollector(ThreadLooper::get(), this,
+                                                  "/tmp/blah.metrics"));
+    if (!mMetricsCollector->Init()) {
+        LOG(VERBOSE) << "Could not initialize metrics reporting for UI.";
+    }
 }
 
 void ToolWindow::show()
