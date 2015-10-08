@@ -29,6 +29,7 @@
 
 BUILD_SYSTEM := android/build
 OBJS_DIR     := objs
+SYMBOLS_DIR  := $(OBJS_DIR)/symbols
 LIBS_DIR     := $(OBJS_DIR)/libs
 CONFIG_MAKE  := $(OBJS_DIR)/config.make
 CONFIG_H     := $(OBJS_DIR)/config-host.h
@@ -54,8 +55,9 @@ PREBUILT_STATIC_LIBRARY := $(BUILD_SYSTEM)/prebuilt_static_library.make
 
 DEPENDENCY_DIRS :=
 
-all: libraries executables
+all: libraries executables symbols
 EXECUTABLES :=
+SYMBOLS :=
 LIBRARIES   :=
 
 clean: clean-intermediates
@@ -67,9 +69,10 @@ include Makefile.android
 
 libraries: $(LIBRARIES)
 executables: $(EXECUTABLES)
+symbols: $(SYMBOLS)
 
 clean-intermediates:
-	rm -rf $(OBJS_DIR)/intermediates $(EXECUTABLES) $(LIBRARIES)
+	rm -rf $(OBJS_DIR)/intermediates $(EXECUTABLES) $(LIBRARIES) $(SYMBOLS) $(SYMBOLS_DIR)
 
 clean-config:
 	rm -f $(CONFIG_MAKE) $(CONFIG_H)

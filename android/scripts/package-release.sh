@@ -510,7 +510,6 @@ create_binaries_package () {
     copy_file_into objs/$FILE "$TEMP_PKG_DIR"/tools/
     EMULATOR_BINARIES=$(list_files_under objs "emulator-*$EXEEXT" "emulator64-*$EXEEXT")
     copy_directory_files objs "$TEMP_PKG_DIR"/tools/ $EMULATOR_BINARIES
-
     if [ -d "objs/bin" ]; then
         dump "[$PKG_NAME] Copying 32-bit executables."
         copy_directory objs/bin "$TEMP_PKG_DIR"/tools/bin
@@ -538,9 +537,18 @@ create_binaries_package () {
             done
         fi
     fi
+    if [ -d "objs/symbols" ]; then
+        dump "[$PKG_NAME] Copying Symbols."
+        copy_directory objs/symbols "$TEMP_PKG_DIR"/symbols
+    fi
 
     # Get rid of some extra files we don't really want
     run rm -f "$TEMP_PKG_DIR"/tools/lib*/lib*emugl_test_shared_library*
+
+    # Get rid of extra symbol files in tools directory
+    run rm -f "$TEMP_PKG_DIR"/tools/*.sym
+    run find "$TEMP_PKG_DIR"/tools/lib -name "*.sym" -delete
+    run find "$TEMP_PKG_DIR"/tools/lib64 -name "*.sym" -delete
 
     dump "[$PKG_NAME] Creating README file."
     cat > $TEMP_PKG_DIR/README <<EOF
@@ -606,6 +614,12 @@ build_darwin_binaries_on () {
     fi
     copy_directory "$AOSP_BUILD_PREBUILTS"/common/libxml2/darwin-x86_64 \
             "$DARWIN_BUILD_PREBUILTS"/common/libxml2/darwin-x86_64
+
+    if [ ! -d "$AOSP_BUILD_PREBUILTS/common/breakpad/darwin-x86_64" ]; then
+        panic "Missing Darwin breakpad prebuilts!"
+    fi
+    copy_directory "$AOSP_BUILD_PREBUILTS"/common/breakpad/darwin-x86_64 \
+            "$DARWIN_BUILD_PREBUILTS"/common/breakpad/darwin-x86_64
 
     if [ "$OPT_UI" = "qt" ]; then
         if [ ! -d "$AOSP_BUILD_PREBUILTS"/qt/darwin-x86_64 ]; then
