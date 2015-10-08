@@ -34,6 +34,7 @@ namespace base {
 class Looper {
 public:
     typedef int64_t Duration;
+    typedef uint64_t DurationNs;
 
     enum {
         kDurationInfinite = INT64_MAX,
@@ -52,8 +53,9 @@ public:
     virtual ~Looper() {}
 
     // Return the current time as seen by this looper instance in
-    // milliseconds.
+    // milliseconds and nanoseconds.
     virtual Duration nowMs(ClockType clockType = ClockType::kHost) = 0;
+    virtual DurationNs nowNs(ClockType clockType = ClockType::kHost) = 0;
 
     // Run the event loop until forceQuit() is called or there is no
     // more registered watchers or timers in the looper.

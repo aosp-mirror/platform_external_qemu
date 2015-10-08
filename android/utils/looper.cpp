@@ -41,6 +41,14 @@ Duration looper_nowWithClock(Looper* looper, LooperClockType clock) {
     return asBaseLooper(looper)->nowMs(toBaseLooperClockType(clock));
 }
 
+DurationNs looper_nowNs(Looper* looper) {
+    return looper_nowNsWithClock(looper, LOOPER_CLOCK_HOST);
+}
+
+DurationNs looper_nowNsWithClock(Looper* looper, LooperClockType clock) {
+    return asBaseLooper(looper)->nowNs(toBaseLooperClockType(clock));
+}
+
 int looper_runWithDeadline(Looper* looper, Duration deadline) {
     return asBaseLooper(looper)->runWithDeadlineMs(deadline);
 }
