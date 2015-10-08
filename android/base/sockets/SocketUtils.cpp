@@ -375,9 +375,6 @@ int socketTcpLoopbackClient(int port) {
     addr.initLoopback(port);
 
     if (::connect(s.get(), &addr.generic, sizeof(addr.inet)) < 0) {
-        DPLOG(ERROR) << "Could not connect to TCP loopback port "
-                     << port
-                     << "\n";
         return -1;
     }
 
