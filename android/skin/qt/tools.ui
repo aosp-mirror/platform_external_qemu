@@ -343,7 +343,7 @@ color: #f0f0f0</string>
     <string notr="true">screen_shot</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="unfold_button">
+  <widget class="QPushButton" name="minimize_button">
    <property name="geometry">
     <rect>
      <x>38</x>
@@ -360,7 +360,7 @@ color: #f0f0f0</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/light/unfold</normaloff>:/light/unfold</iconset>
+     <normaloff>:/light/minimize</normaloff>:/light/minimize</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -372,7 +372,7 @@ color: #f0f0f0</string>
     <bool>true</bool>
    </property>
    <property name="themeIconName" stdset="0">
-    <string notr="true">unfold</string>
+    <string notr="true">minimize</string>
    </property>
   </widget>
   <widget class="QPushButton" name="home_button">
@@ -453,7 +453,7 @@ color: #f0f0f0</string>
   <tabstop>fullscreen_button</tabstop>
   <tabstop>more_button</tabstop>
   <tabstop>close_button</tabstop>
-  <tabstop>unfold_button</tabstop>
+  <tabstop>minimize_button</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

@@ -188,6 +188,10 @@ void ToolWindow::on_home_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_HOME, 0);
 }
+void ToolWindow::on_minimize_button_clicked()
+{
+    emulator_window->showMinimized();
+}
 void ToolWindow::on_power_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_F7, 0);
