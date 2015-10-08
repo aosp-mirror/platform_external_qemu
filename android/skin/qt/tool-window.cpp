@@ -12,21 +12,29 @@
 
 #include <QPushButton>
 #include <QtWidgets>
+#include <QtGlobal>
 
 #include "android/android.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/globals.h"
 #include "android/main-common.h"
+#include "android/metrics/studio-helper.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/QtLooper.h"
 #include "android/skin/qt/tool-window.h"
 
 #include "ui_tools.h"
 
+#include <string>
+
 using namespace android::base;
+using android::metrics::QMetricsCollector;
 
 static ToolWindow *twInstance = NULL;
 
@@ -92,6 +100,20 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
         "Ctrl+Z       ENTER_ZOOM\n";
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream);
+
+    if (android_studio_get_optins()) {
+        // TODO(pprabhu) This is not the right place to set looper.
+        ThreadLooper::setLooper(android::qt::createLooper());
+
+        // TODO(pprabhu) Use the real path.
+        mMetricsCollector.reset(new QMetricsCollector(ThreadLooper::get(), this,
+                                                    "/tmp/blah.metrics"));
+        if (!mMetricsCollector->Init()) {
+            qDebug("Could not initialize metrics reporting for UI.");
+        }
+    } else {
+        qDebug("Not reporting Qt metrics. No user opt-in.");
+    }
 }
 
 void ToolWindow::show()

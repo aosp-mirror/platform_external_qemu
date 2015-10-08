@@ -13,6 +13,7 @@
 #pragma once
 
 #include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/QMetricsCollector.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/qt/shortcut-key-store.h"
@@ -32,6 +33,8 @@
 #include <QUrl>
 #include <QWidget>
 #include <QQueue>
+
+#include <memory>
 
 #define REMOTE_DOWNLOADS_DIR "/sdcard/Download"
 
@@ -96,6 +99,8 @@ private:
     QProgressDialog mPushDialog;
     QQueue<QUrl> mFilesToPush;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
+
+    std::unique_ptr<android::metrics::QMetricsCollector> mMetricsCollector;
 
 private slots:
     void on_back_button_clicked();
