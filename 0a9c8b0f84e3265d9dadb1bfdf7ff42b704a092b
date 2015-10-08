@@ -22,6 +22,30 @@
       "revId": "0a9c8b0f84e3265d9dadb1bfdf7ff42b704a092b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5061411e_5fba1e21",
+        "filename": "android-configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-10-08T01:39:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "105c2963_a8ca239b",
+      "range": {
+        "startLine": 504,
+        "startChar": 4,
+        "endLine": 504,
+        "endChar": 12
+      },
+      "revId": "0a9c8b0f84e3265d9dadb1bfdf7ff42b704a092b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
