@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d03c51f4_085d0655",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-08T18:51:03Z",
+      "side": 1,
+      "message": "what if we didn\u0027t go inside here and GEN_SDK is undefined? At least good error message would be fine in case we\u0027re trying to build with mingw",
+      "range": {
+        "startLine": 446,
+        "startChar": 0,
+        "endLine": 447,
+        "endChar": 65
+      },
+      "revId": "c7cf4d038b428274ed8014df20e217cfcec5c43c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
