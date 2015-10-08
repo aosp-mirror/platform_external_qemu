@@ -452,6 +452,20 @@ if [ -z "$OPTION_CC" -a -z "$OPTION_CXX" ] ; then
         GEN_SDK_FLAGS="$GEN_SDK_FLAGS --no-ccache"
     fi
     GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
+
+    if [ "$OPTION_MINGW" = "yes" ] ; then
+        # Are we on Linux ?
+        log "Mingw      : Checking for Linux host"
+        if [ "$HOST_OS" != "linux" ] ; then
+            echo "Sorry, but mingw compilation is only supported on Linux !"
+            exit 1
+        fi
+        GEN_SDK_FLAGS="$GEN_SDK_FLAGS --host=windows-x86_64"
+        WINDRES=$MINGW_PREFIX-windres
+        HOST_OS=windows
+        HOST_TAG=$HOST_OS-$HOST_ARCH
+    fi
+
     $GEN_SDK $GEN_SDK_FLAGS $OUT_DIR/toolchain || panic "Cannot generate SDK toolchain!"
     BINPREFIX=$($GEN_SDK $GEN_SDK_FLAGS --print=binprefix $OUT_DIR/toolchain)
     CC="$OUT_DIR/toolchain/${BINPREFIX}gcc"
@@ -491,49 +505,6 @@ BUILD_LD=$LD
 BUILD_CFLAGS=$CFLAGS
 BUILD_CXXFLAGS=$CXXFLAGS
 BUILD_LDFLAGS=$LDFLAGS
-
-if [ "$OPTION_MINGW" = "yes" ] ; then
-    # Are we on Linux ?
-    log "Mingw      : Checking for Linux host"
-    if [ "$HOST_OS" != "linux" ] ; then
-        echo "Sorry, but mingw compilation is only supported on Linux !"
-        exit 1
-    fi
-    # Do we have our prebuilt mingw64 toolchain?
-    log "Mingw      : Looking for prebuilt mingw64 toolchain."
-    MINGW_DIR=$PROGDIR/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8
-    MINGW_CC=
-    MINGW_CXX=
-    if [ -d "$MINGW_DIR" ]; then
-        MINGW_PREFIX=$MINGW_DIR/bin/x86_64-w64-mingw32
-        find_program MINGW_CC "$MINGW_PREFIX-gcc"
-        find_program MINGW_CXX "$MINGW_PREFIX-g++"
-    fi
-    if [ -z "$MINGW_CC" ]; then
-        log "Mingw      : Looking for mingw64 toolchain."
-        MINGW_PREFIX=x86_64-w64-mingw32
-        find_program MINGW_CC $MINGW_PREFIX-gcc
-        find_program MINGW_CXX $MINGW_PREFIX-g++
-    fi
-    if [ -z "$MINGW_CC" ]; then
-        echo "ERROR: It looks like no Mingw64 toolchain is available!"
-        echo "Please install x86_64-w64-mingw32 package !"
-        exit 1
-    fi
-    log2 "Mingw      : Found $MINGW_CC"
-    CC=$MINGW_CC
-    CXX=$MINGW_CXX
-    if [ "$CCACHE" ]; then
-        CC="$CCACHE $CC"
-        CXX="$CCACHE $CXX"
-    fi
-    CXX="$CXX -std=c++11 -Werror=c++11-compat"
-    LD=$MINGW_CC
-    WINDRES=$MINGW_PREFIX-windres
-    AR=$MINGW_PREFIX-ar
-    HOST_OS=windows
-    HOST_TAG=$HOST_OS-$HOST_ARCH
-fi
 
 # Try to find the GLES emulation headers and libraries automatically
 GLES_DIR=distrib/android-emugl
