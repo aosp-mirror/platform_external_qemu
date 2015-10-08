@@ -16,6 +16,24 @@
       "revId": "4405c402f4c555d820f4b6587972b95f9cf93dd3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90673931_54d685b2",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-08T15:38:03Z",
+      "side": 1,
+      "message": "it is :(\nthe other way would be to have a separate GLOBAL_CXX_FLAGS variable, just like I had before. It would also help one to quickly add some switches for debugging - from one place",
+      "parentUuid": "d03c51f4_f9387772",
+      "revId": "4405c402f4c555d820f4b6587972b95f9cf93dd3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
