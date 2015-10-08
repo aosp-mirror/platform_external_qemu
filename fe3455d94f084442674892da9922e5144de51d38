@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "105c2963_4e4d4f31",
+        "filename": "android-configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-10-08T19:09:51Z",
+      "side": 1,
+      "message": "I\u0027m starting to doubt if we even need this condition. This still sets LD and AR. And does anyone even use --cc or --cxx?",
+      "range": {
+        "startLine": 446,
+        "startChar": 0,
+        "endLine": 446,
+        "endChar": 76
+      },
+      "revId": "fe3455d94f084442674892da9922e5144de51d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
