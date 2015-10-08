@@ -14,6 +14,7 @@
 
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/QMetricsCollector.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/qt/shortcut-key-store.h"
@@ -33,6 +34,8 @@
 #include <QUrl>
 #include <QWidget>
 #include <QQueue>
+
+#include <memory>
 
 #define REMOTE_DOWNLOADS_DIR "/sdcard/Download"
 #define REMOTE_SCREENSHOT_FILE "/data/local/tmp/screen.png"
@@ -104,6 +107,8 @@ private:
     QProgressDialog mInstallDialog;
     QQueue<QUrl> mFilesToPush;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
+
+    std::unique_ptr<android::metrics::QMetricsCollector> mMetricsCollector;
 
 private slots:
     void on_back_button_clicked();

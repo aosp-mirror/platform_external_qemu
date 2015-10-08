@@ -15,25 +15,35 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QtWidgets>
+#include <QtGlobal>
 
 #include "android/android.h"
 #include "android/avd/util.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/globals.h"
 #include "android/main-common.h"
+#include "android/metrics/MetricsUploader.h"
+#include "android/metrics/studio-helper.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/QtLooper.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/tool-window.h"
 
 #include "ui_tools.h"
 
+#include <string>
+
 using namespace android::base;
+using android::metrics::QMetricsCollector;
 
 static ToolWindow *twInstance = NULL;
 
@@ -128,7 +138,29 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     mShortcutKeyStore.add(
             QKeySequence(Qt::Key_Alt | Qt::AltModifier | Qt::ControlModifier),
             QtUICommand::UNGRAB_KEYBOARD);
+
+    if (android_studio_get_optins()) {
+        // TODO(pprabhu) This is not the right place to set looper.
+        ThreadLooper::setLooper(android::qt::createLooper());
+        android::metrics::MetricsUploader qtToolUploader(
+                android::metrics::MetricsType::kQtToolWindow,
+                android::ConfigDirs::getAvdRootDirectory().c_str());
+
+        mMetricsCollector.reset(new QMetricsCollector(
+                    ThreadLooper::get(),
+                    qtToolUploader.generateUniquePath()));
+        if (!mMetricsCollector->Init()) {
+            qDebug("Could not initialize metrics reporting for UI.");
+        }
+        mMetricsCollector->addTarget(this);
+
+        // Blgrgrufg
+        qtToolUploader.uploadCompletedMetrics(android::metrics::DefaultMetricsFileProcessor());
+    } else {
+        qDebug("Not reporting Qt metrics. No user opt-in.");
+    }
 }
+
 
 void ToolWindow::hide()
 {
@@ -477,6 +509,9 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
     }
 
     extendedWindow = new ExtendedWindow(emulator_window, this, uiEmuAgent, &mShortcutKeyStore);
+
+    mMetricsCollector->addTarget(extendedWindow);
+
     extendedWindow->show();
     extendedWindow->showPane(pane);
     // completeInitialization() must be called AFTER show()
