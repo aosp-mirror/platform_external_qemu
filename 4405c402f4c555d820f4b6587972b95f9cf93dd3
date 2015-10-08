@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d03c51f4_f9387772",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-10-08T01:39:34Z",
+      "side": 1,
+      "message": "This is disgusting, but I don\u0027t see a nicer way. :/",
+      "revId": "4405c402f4c555d820f4b6587972b95f9cf93dd3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
