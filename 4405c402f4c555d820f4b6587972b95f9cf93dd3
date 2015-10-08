@@ -34,6 +34,24 @@
       "revId": "4405c402f4c555d820f4b6587972b95f9cf93dd3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "704d65ae_a36239cb",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-10-08T17:36:31Z",
+      "side": 1,
+      "message": "Ideally, gen-android-sdk-toolchain.sh should barf out mingw wrappers, and we should be using that directly. I\u0027m not opposed to *having* GLOBAL_CXX_FLAGS, but I don\u0027t think the cxx11 flag belongs there, because 1) it\u0027s redundant for other toolchains (theoretically, a local flag should be able to override it), 2) it\u0027s not obvious that it\u0027s only there because mingw lacks a wrapper.",
+      "parentUuid": "90673931_54d685b2",
+      "revId": "4405c402f4c555d820f4b6587972b95f9cf93dd3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
