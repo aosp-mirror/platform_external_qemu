@@ -100,8 +100,13 @@ gsm_number_is_bad(const char* numStr)
     return (nDigits <= 0);
 }
 
+static AModem telephony_getModem() {
+    return android_modem;
+}
+
 static const QAndroidTelephonyAgent sQAndroidTelephonyAgent = {
-    .telephonyCmd = telephony_telephonyCmd
+    .telephonyCmd = telephony_telephonyCmd,
+    .getModem = telephony_getModem
 };
 const QAndroidTelephonyAgent* const gQAndroidTelephonyAgent =
         &sQAndroidTelephonyAgent;
