@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "eaba42ed_1b5b5f61",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-09T18:49:16Z",
+      "side": 1,
+      "message": "This is to ensure the whole window (including the exterior QScrollArea) stays in the same location when a zoom is made since zoom uses a similar mechanism as set-scale (meaning the inner window actually gets recreated).\n\nWhat stays on screen after a zoom appears to be buried in the QScrollArea implementation. I imagine this is changeable, but that depends on how often a person is switching zoom levels?\n\nNot to mention, do we even want to allow custom zoom levels, and if so, is a dialog the proper way?",
+      "parentUuid": "a526bd9a_afc719ca",
+      "revId": "80de864cc8499a961d1c3a7d29c3d55c4d333d2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "054dc959_f76e58c1",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "054dc959_b7469035",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 619,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-09T18:49:16Z",
+      "side": 1,
+      "message": "Yep! Perhaps even remove the fullscreen button as well, since fullscreen-ing totally clobbers our current resizing spec.",
+      "parentUuid": "054dc959_f76e58c1",
+      "revId": "80de864cc8499a961d1c3a7d29c3d55c4d333d2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a526bd9a_8fa97d07",
         "filename": "android/skin/window.c",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2015-10-09T18:36:51Z",
       "side": 1,
       "message": "I believe there could be problems if we do not reset the\nzoom, but sometimes it would be nice not to reset.\nLet\u0027s talk about this.",
+      "revId": "80de864cc8499a961d1c3a7d29c3d55c4d333d2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8538d9b1_f6e3b68f",
+        "filename": "android/skin/window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1550,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-09T18:49:16Z",
+      "side": 1,
+      "message": "There actually shouldn\u0027t be any issues since zoom and scale are kept track of separately, so I can easily remove this.",
+      "parentUuid": "a526bd9a_8fa97d07",
       "revId": "80de864cc8499a961d1c3a7d29c3d55c4d333d2c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
