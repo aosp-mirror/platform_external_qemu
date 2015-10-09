@@ -136,7 +136,7 @@ bool EmulatorQtWindow::event(QEvent *e)
 
 #else // !_WIN32
 
-        for (; i < mEventBuffer.size() - 2; i++) {
+        for (; i + 2 < mEventBuffer.size(); i++) {
             if (mEventBuffer[i] == QEvent::WindowActivate &&
                 mEventBuffer[i+1] == QEvent::ActivationChange &&
                 mEventBuffer[i+2] == QEvent::InputMethodQuery) {
