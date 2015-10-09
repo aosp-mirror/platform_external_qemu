@@ -110,7 +110,7 @@ RENDERER_FUNCTIONS_LIST
 }
 
 
-/* Defined in android-qemu1-glue/hw-pipe-net.c */
+/* Defined in android/hw-pipe-net.c */
 extern int android_init_opengles_pipes(void);
 
 static ADynamicLibrary*  rendererLib;

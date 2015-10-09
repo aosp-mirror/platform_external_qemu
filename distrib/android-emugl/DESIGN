@@ -227,7 +227,7 @@ The emulator sources related to this projects are:
 
    $QEMU/hw/android/goldfish/pipe.c -> implements QEMU pipe virtual hardware.
    $QEMU/android/opengles.c         -> implements GLES initialization.
-   $QEMU/android-qemu1-glue/hw-pipe-net.c      -> implements the communication channel
+   $QEMU/android/hw-pipe-net.c      -> implements the communication channel
             between the QEMU Pipe and the renderer library
 
 The other sources are:
@@ -595,7 +595,7 @@ The code under $QEMU/android/opengles.c is in charge of dynamically loading
 the rendering library and initializing / constructing it properly.
 
 QEMU pipe connections to the 'opengles' service are piped through the code
-in $QEMU/android-qemu1-glue/hw-pipe-net.c. Look for the openglesPipe_init() function,
+in $QEMU/android/hw-pipe-net.c. Look for the openglesPipe_init() function,
 which is in charge of creating a connection to the renderer library
 (either through a TCP socket, or a Unix pipe depending on configuration.
 support for Win32 named pipes hasn't been implemented yet in the emulator)

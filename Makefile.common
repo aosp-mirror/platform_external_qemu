@@ -611,7 +611,7 @@ CORE_MISC_SOURCES = \
     android-qemu1-glue/hw-sensors.c \
     android-qemu1-glue/hw-qemud.cpp \
     android/looper-qemu.cpp \
-    android-qemu1-glue/hw-pipe-net.c \
+    android/hw-pipe-net.c \
     android-qemu1-glue/qemu/base/async/Looper.cpp \
     android-qemu1-glue/qemu/emulation/CharSerialLine.cpp \
     android-qemu1-glue/qemu-setup.c \
