@@ -1,0 +1,9 @@
+Code-Review+2: Prathmesh Prabhu <pprabhu@google.com>
+Code-Review+1: Yurii Zubrytskyi <zyy@google.com>
+Code-Review+1: Ying Chen <chying@google.com>
+Verified+1: Bo Hu <bohu@google.com>
+Submitted-by: Bo Hu <bohu@google.com>
+Submitted-at: Fri, 09 Oct 2015 17:43:51 +0000
+Reviewed-on: https://android-review.googlesource.com/174765
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
