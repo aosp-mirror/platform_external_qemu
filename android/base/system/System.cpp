@@ -179,6 +179,16 @@ public:
 
     virtual int getHostBitness() const {
 #ifdef _WIN32
+
+#if 1 // 32-bit limitation for Windows
+        // We do not support 64-bit execution on Windows due to a
+        // limitation of 'e2fsprogs'.
+        // (See android/scripts/build-e2fsprogs.sh)
+        //
+        // While this limitation is in place, always indicate 32-bit
+        // operation for Windows.
+        return 32;
+#else // If we didn't have a 32-bit limitation for Windows...
         char directory[900];
 
         // Retrieves the path of the WOW64 system directory, which doesn't
@@ -189,6 +199,8 @@ public:
         } else {
             return 64;
         }
+#endif
+
 #else // !_WIN32
     /*
         This function returns 64 if host is running 64-bit OS, or 32 otherwise.
