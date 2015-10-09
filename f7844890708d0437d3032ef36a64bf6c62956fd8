@@ -46,6 +46,30 @@
       "revId": "f7844890708d0437d3032ef36a64bf6c62956fd8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "054dc959_77c0a85d",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-09T17:25:11Z",
+      "side": 1,
+      "message": "At least the intention was to not blow up in non debug builds:\n\n// DFATAL will be ERROR in release builds, and FATAL in debug ones.                 \n#ifdef NDEBUG                                                                       \n    LOG_DFATAL \u003d LOG_ERROR,                                                         \n#else                                                                               \n    LOG_DFATAL \u003d LOG_FATAL,                                                         \n#endif \n\nBut I think our NDEBUG macros don\u0027t work (That\u0027s also stylistically incorrect: NDEBUG is supposed to be a very restrictive macro for |assert|).",
+      "parentUuid": "451b415b_460bf43b",
+      "range": {
+        "startLine": 216,
+        "startChar": 12,
+        "endLine": 216,
+        "endChar": 26
+      },
+      "revId": "f7844890708d0437d3032ef36a64bf6c62956fd8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
