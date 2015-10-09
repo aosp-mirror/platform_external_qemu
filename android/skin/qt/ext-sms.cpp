@@ -47,13 +47,14 @@ void ExtendedWindow::on_sms_sendButton_clicked()
     }
 
     // Get the text of the message
-    QString theMessage = mExtendedUi->sms_messageBox->toPlainText();
+    const std::string theMessage =
+            mExtendedUi->sms_messageBox->toPlainText().toStdString();
 
     // Convert the message text to UTF-8
     unsigned char utf8Message[MAX_SMS_MSG_SIZE+1];
     int           nUtf8Chars;
-    nUtf8Chars = sms_utf8_from_message_str(theMessage.toStdString().c_str(),
-                                           theMessage.length(),
+    nUtf8Chars = sms_utf8_from_message_str(theMessage.c_str(),
+                                           theMessage.size(),
                                            utf8Message,
                                            MAX_SMS_MSG_SIZE);
     if (nUtf8Chars == 0) {
