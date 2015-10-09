@@ -16,7 +16,6 @@
 #include "android/telephony/modem.h"
 #include "android/telephony/sms.h"
 #include "extended-window.h"
-#include "telephony/modem_driver.h"
 #include "ui_extended.h"
 
 #include <QtWidgets>
@@ -30,6 +29,10 @@ void ExtendedWindow::initSms()
 
 void ExtendedWindow::on_sms_sendButton_clicked()
 {
+    if (!mTelephonyAgent || !mTelephonyAgent->getModem) {
+        return;
+    }
+
     // Get the "from" number
     SmsAddressRec sender;
     int retVal = sms_address_from_str(&sender,
@@ -74,8 +77,9 @@ void ExtendedWindow::on_sms_sendButton_clicked()
         return;
     }
 
-    for (int idx = 0; pdus[idx] != NULL; idx++)
-        amodem_receive_sms( android_modem, pdus[idx] );
+    for (int idx = 0; pdus[idx] != NULL; idx++) {
+        amodem_receive_sms(mTelephonyAgent->getModem(), pdus[idx]);
+    }
 
     smspdu_free_list( pdus );
 }
