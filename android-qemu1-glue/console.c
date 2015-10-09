@@ -26,7 +26,7 @@
 #include "android/android.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
-#include "android/hw-sensors.h"
+#include "android-qemu1-glue/hw-sensors.h"
 #include "android/shaper.h"
 #include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"

@@ -11,7 +11,7 @@
 */
 
 #include "android/avd/util.h"
-#include "android/display.h"
+#include "android-qemu1-glue/display.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/emulator-window.h"
 #include "android/framebuffer.h"
