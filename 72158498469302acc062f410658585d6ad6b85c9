@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a526bd9a_4925c578",
+        "filename": "android-configure.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-09T00:51:44Z",
+      "side": 1,
+      "message": "nit: quote $GEN_SDK and $OUT_DIR since they may contain spaces in theory.",
+      "revId": "72158498469302acc062f410658585d6ad6b85c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ae8da64_05b81400",
+        "filename": "android-configure.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-09T00:51:44Z",
+      "side": 1,
+      "message": "nit: same here. There is no need to quote the result of the $() expansion though because Posix states that a mere statement like\n\n  BAR\u003d\"hello world\"\n  FOO\u003d$BAR\n\nwill ensure that FOO is defined to \"hello world\" as well. Doesn\u0027t work with \u0027local\u0027 though, as in:\n\n  FOO\u003d$BAR            # Good\n  local FOO\u003d$BAR    # Bad, \u0027local\u0027 is a command, not a built-in for some shells :-/",
+      "revId": "72158498469302acc062f410658585d6ad6b85c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0536a9c7_49aea1d8",
+        "filename": "android-configure.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-09T00:51:44Z",
+      "side": 1,
+      "message": "consequently the quotes above are not necessary, but let\u0027s allow them.",
+      "revId": "72158498469302acc062f410658585d6ad6b85c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a526bd9a_293fa983",
+        "filename": "android-configure.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-09T00:51:44Z",
+      "side": 1,
+      "message": "same nits here.",
+      "revId": "72158498469302acc062f410658585d6ad6b85c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
