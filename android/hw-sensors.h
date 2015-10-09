@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "qemu-common.h"
+#include <stdint.h>
 
 /* initialize sensor emulation */
 extern void  android_hw_sensors_init( void );
