@@ -11,7 +11,6 @@
 */
 
 #include "android/avd/util.h"
-#include "android/display.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/emulator-window.h"
 #include "android/framebuffer.h"
@@ -31,9 +30,12 @@
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 
-#include "ui/console.h"
-
+#include <ctype.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -203,26 +205,6 @@ static void android_ui_at_exit(void)
     skin_winsys_quit();
 }
 
-
-void sdl_display_init(DisplayState *ds, int full_screen, int  no_frame)
-{
-    EmulatorWindow*    emulator = emulator_window_get();
-    SkinDisplay*  disp =
-            skin_layout_get_display(emulator_window_get_layout(emulator));
-    int           width, height;
-    char          buf[128];
-
-    if (disp->rotation & 1) {
-        width  = disp->rect.size.h;
-        height = disp->rect.size.w;
-    } else {
-        width  = disp->rect.size.w;
-        height = disp->rect.size.h;
-    }
-
-    snprintf(buf, sizeof buf, "width=%d,height=%d", width, height);
-    android_display_init(ds, qframebuffer_fifo_get());
-}
 
 typedef struct part_properties part_properties;
 struct part_properties {

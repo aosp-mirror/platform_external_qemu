@@ -21,7 +21,9 @@
 #include "android/utils/system.h"
 #include "android/utils/looper.h"
 
-
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 #define  E(...)    derror(__VA_ARGS__)

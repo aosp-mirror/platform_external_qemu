@@ -498,7 +498,7 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
 }
 
 /*
- * android/console.c helper routines.
+ * android-qemu1-glue/console.c helper routines.
  */
 
 void

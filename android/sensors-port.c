@@ -19,6 +19,8 @@
 #include "android/hw-sensors.h"
 #include "android/utils/debug.h"
 
+#include <stdlib.h>
+
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)    VERBOSE_PRINT(sensors_port,__VA_ARGS__)

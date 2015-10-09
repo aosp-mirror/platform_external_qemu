@@ -302,21 +302,21 @@ common_LOCAL_SRC_FILES := \
     log-rotate-android.c \
     vl-android.c \
     android/cmdline-option.c \
-    android/console.c \
+    android-qemu1-glue/console.c \
     android/cpu_accelerator.cpp \
-    android/display.c \
+    android-qemu1-glue/display.c \
     android/help.c \
     android/main-common.c \
     android/main-common-ui.c \
-    android/main.c \
+    android-qemu1-glue/main.c \
     android/opengles.c \
-    android/qemu-battery-agent-impl.c \
+    android-qemu1-glue/qemu-battery-agent-impl.c \
     android/qemu-cellular-agent-impl.c \
     android/qemu-finger-agent-impl.c \
-    android/qemu-location-agent-impl.c \
+    android-qemu1-glue/qemu-location-agent-impl.c \
     android/qemu-telephony-agent-impl.c \
-    android/qemu-user-event-agent-impl.c \
-    android/qemu-vm-operations-impl.c \
+    android-qemu1-glue/qemu-user-event-agent-impl.c \
+    android-qemu1-glue/qemu-vm-operations-impl.c \
     android/qt/qt_path.cpp \
     hw/core/loader.c \
     ui/keymaps.c \

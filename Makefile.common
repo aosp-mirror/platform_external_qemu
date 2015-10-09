@@ -217,7 +217,7 @@ common_LOCAL_SRC_FILES += \
 	android/emulation/android_pipe_pingpong.c \
 	android/emulation/android_pipe_throttle.c \
 	android/emulation/android_pipe_zero.c \
-	android/emulation/android_qemud.cpp \
+	android-qemu1-glue/emulation/android_qemud.cpp \
 	android/emulation/qemud/android_qemud_sink.cpp \
 	android/emulation/qemud/android_qemud_serial.cpp \
 	android/emulation/qemud/android_qemud_client.cpp \
@@ -237,8 +237,8 @@ common_LOCAL_SRC_FILES += \
 	android/metrics/metrics_reporter_ga.c \
 	android/metrics/metrics_reporter_toolbar.c \
 	android/metrics/StudioHelper.cpp \
-	android/qemu/base/async/Looper.cpp \
-	android/qemu/base/files/QemuFileStream.cpp \
+	android-qemu1-glue/qemu/base/async/Looper.cpp \
+	android-qemu1-glue/qemu/base/files/QemuFileStream.cpp \
 	android/qemu/utils/stream.cpp \
 	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
@@ -599,25 +599,25 @@ CORE_MISC_SOURCES = \
     qemu-log.c \
     savevm.c \
     android/boot-properties.c \
-    android/charpipe.c \
+    android-qemu1-glue/charpipe.c \
     android/core-init-utils.c   \
     android/ext4_resize.cpp   \
-    android/gps.c \
-    android/hw-kmsg.c \
+    android-qemu1-glue/gps.c \
+    android-qemu1-glue/hw-kmsg.c \
     android/hw-lcd.c \
     android/hw-events.c \
     android/hw-control.c \
     android/hw-fingerprint.c \
     android/hw-sensors.c \
-    android/hw-qemud.cpp \
+    android-qemu1-glue/hw-qemud.cpp \
     android/looper-qemu.cpp \
     android/hw-pipe-net.c \
-    android/qemu/base/async/Looper.cpp \
-    android/qemu/emulation/CharSerialLine.cpp \
-    android/qemu-setup.c \
+    android-qemu1-glue/qemu/base/async/Looper.cpp \
+    android-qemu1-glue/qemu/emulation/CharSerialLine.cpp \
+    android-qemu1-glue/qemu-setup.c \
     android/qemu-tcpdump.c \
-    android/shaper.c \
-    android/snapshot.c \
+    android-qemu1-glue/shaper.c \
+    android-qemu1-glue/snapshot.c \
     android/async-socket-connector.c \
     android/async-socket.c \
     android/sdk-controller-socket.c \
@@ -628,7 +628,7 @@ CORE_MISC_SOURCES = \
     android/adb-server.c \
     android/adb-qemud.c \
     android/snaphost-android.c \
-    android/multitouch-screen.c \
+    android-qemu1-glue/multitouch-screen.c \
     android/multitouch-port.c \
     android/utils/jpeg-compress.c \
     net/net-android.c \

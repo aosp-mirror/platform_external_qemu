@@ -12,7 +12,7 @@
 #include "android/cpu_accelerator.h"
 
 // This source acts as a small C++ -> C bridge between android/emulation/
-// and android/main.c
+// and android-qemu1-glue/main.c
 
 #include "android/base/String.h"
 #include "android/emulation/CpuAccelerator.h"

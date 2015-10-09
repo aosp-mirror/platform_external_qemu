@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "qemu-common.h"
+#include <stdint.h>
 
 /* initialize sensor emulation */
 extern void  android_hw_sensors_init( void );
@@ -22,7 +22,7 @@ extern void  android_hw_sensors_init( void );
 extern void android_hw_sensors_init_remote_controller( void );
 
 /* NOTE: Sensor status Error definition, It will be used in the Sensors Command
- *       part in android/console.c. Details:
+ *       part in android-qemu1-glue/console.c. Details:
  *       SENSOR_STATUS_NO_SERVICE: "sensors" qemud service is not available/initiated.
  *       SENSOR_STATUS_DISABLED: sensor is disabled.
  *       SENSOR_STATUS_UNKNOWN: wrong sensor name.

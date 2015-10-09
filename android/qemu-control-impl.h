@@ -42,7 +42,7 @@ extern const QAndroidLocationAgent* const gQAndroidLocationAgent;
 // Defined in android/qemu-telephony-agent.c
 extern const QAndroidTelephonyAgent* const gQAndroidTelephonyAgent;
 
-// Defined in android/qemu-user-event-agent-impl.c
+// Defined in android-qemu1-glue/qemu-user-event-agent-impl.c
 extern const QAndroidUserEventAgent* const gQAndroidUserEventAgent;
 // Called by hw/android/goldfish/events_device.c to initialize generic event
 // handling.
