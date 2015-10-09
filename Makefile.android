@@ -299,6 +299,9 @@ include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
 
 include $(LOCAL_PATH)/Makefile.common
 
+# QEMU2 build
+include $(LOCAL_PATH)/Makefile.qemu2
+
 ifeq ($(HOST_OS),windows)
   # on Windows, link the icon file as well into the executable
   # unfortunately, our build system doesn't help us much, so we need

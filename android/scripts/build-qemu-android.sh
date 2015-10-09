@@ -76,6 +76,10 @@ OPT_DEBUG=
 option_register_var "--debug" OPT_DEBUG \
         "Generate debuggable binaries."
 
+OPT_CONFIG_ONLY=
+option_register_var "--config-only" OPT_CONFIG_ONLY \
+        "Only run the configure script, do not build."
+
 prebuilts_dir_register_option
 aosp_dir_register_option
 install_dir_register_option qemu-android
@@ -341,38 +345,43 @@ EOF
                     ;;
             esac
 
-            # Now build everything else in parallel.
-            run make -j$NUM_JOBS $BUILD_FLAGS
+            if [ -z "$OPT_CONFIG_ONLY" ]; then
+                # Now build everything else in parallel.
+                run make -j$NUM_JOBS $BUILD_FLAGS ||
+                        panic "$(builder_text) Cannot build qemu-android"
 
-            for QEMU_EXE in $QEMU_TARGET_BUILDS; do
-                if [ ! -f "$QEMU_EXE" ]; then
-                    panic "$(builder_text) Could not build $QEMU_EXE!!"
-                fi
-            done
+                for QEMU_EXE in $QEMU_TARGET_BUILDS; do
+                    if [ ! -f "$QEMU_EXE" ]; then
+                        panic "$(builder_text) Could not build $QEMU_EXE!!"
+                    fi
+                done
+            fi
 
     ) || panic "Build failed!!"
 
-    BINARY_DIR=$INSTALL_DIR/$1
-    run mkdir -p "$BINARY_DIR" ||
-    panic "Could not create final directory: $BINARY_DIR"
+    if [ -z "$OPT_CONFIG_ONLY" ]; then
+        BINARY_DIR=$INSTALL_DIR/$1
+        run mkdir -p "$BINARY_DIR" ||
+        panic "Could not create final directory: $BINARY_DIR"
 
-    for QEMU_TARGET in $QEMU_TARGETS; do
-        QEMU_EXE=qemu-system-${QEMU_TARGET}$(builder_host_exe_extension)
-        dump "$(builder_text) Copying $QEMU_EXE to $BINARY_DIR/"
+        for QEMU_TARGET in $QEMU_TARGETS; do
+            QEMU_EXE=qemu-system-${QEMU_TARGET}$(builder_host_exe_extension)
+            dump "$(builder_text) Copying $QEMU_EXE to $BINARY_DIR/"
 
-        run cp -p \
-            "$BUILD_DIR"/$QEMU_TARGET-softmmu/$QEMU_EXE \
-            "$BINARY_DIR"/$QEMU_EXE
+            run cp -p \
+                "$BUILD_DIR"/$QEMU_TARGET-softmmu/$QEMU_EXE \
+                "$BINARY_DIR"/$QEMU_EXE
 
-        if [ -z "$OPT_DEBUG" ]; then
-            run ${GNU_CONFIG_HOST_PREFIX}strip "$BINARY_DIR"/$QEMU_EXE
-        fi
-    done
+            if [ -z "$OPT_DEBUG" ]; then
+                run ${GNU_CONFIG_HOST_PREFIX}strip "$BINARY_DIR"/$QEMU_EXE
+            fi
+        done
+
+        timestamp_set "$INSTALL_DIR/$1" qemu-android
+    fi
 
     unset PKG_CONFIG PKG_CONFIG_PATH PKG_CONFIG_LIBDIR SDL_CONFIG
     unset LIBFFI_CFLAGS LIBFFI_LIBS GLIB_CFLAGS GLIB_LIBS
-
-    timestamp_set "$INSTALL_DIR/$1" qemu-android
 }
 
 # Perform a Darwin build through ssh to a remote machine.

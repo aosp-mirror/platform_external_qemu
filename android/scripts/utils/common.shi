@@ -510,3 +510,18 @@ timestamp_clear () {
 find_program () {
     which "$1" 2>/dev/null || true
 }
+
+# Transform $1 in something that can be used in a regex for exact matching.
+# $1: input text (e.g. 'foo.bar')
+# Out: escaped text (e.g. 'foo\.bar')
+regex_escape () {
+    printf %s "$1" | sed -e 's|\.|\\.|g' -e 's|\*|\\*|g' -e 's|\-|\\-|g' \
+        -e 's|\^|\\^|g' -e 's|\$|\\$|g' -e 's|\[|\\[|g'
+}
+
+# Simple line filter to substitute $1 into $2
+# $1: input pattern (unescaped)
+# $2: output pattern
+subst () {
+    sed -e 's|'$(regex_escape "$1")'|'"$2"'|g'
+}

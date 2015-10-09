@@ -1,0 +1,26 @@
+ifeq (,$(strip $(wildcard $(QEMU2_BUILD_DIR))))
+    $(info WARNING: Missing QEMU2 build directory: $(QEMU2_BUILD_DIR))
+else  # QEMU2_BUILD_DIR exists
+
+define build-qemu2-for
+
+QEMU2_TARGETS += qemu2-$1
+
+qemu2-$1:
+	PATH=$(OBJS_DIR)/toolchain:$$$$PATH make -C \
+	$(QEMU2_BUILD_DIR)/build-$1/qemu-android
+endef
+
+ifeq (darwin,$(HOST_OS))
+$(eval $(call build-qemu2-for,darwin-x86_64))
+endif
+ifeq (linux,$(HOST_OS))
+$(eval $(call build-qemu2-for,linux-x86))
+$(eval $(call build-qemu2-for,linux-x86_64))
+endif
+ifeq (windows,$(HOST_OS))
+$(eval $(call build-qemu2-for,windows-x86))
+$(eval $(call build-qemu2-for,windows-x86_64))
+endif
+
+endif  # QEMU2_BUILD_DIR exists

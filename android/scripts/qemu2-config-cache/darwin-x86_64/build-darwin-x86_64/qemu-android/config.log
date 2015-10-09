@@ -1,0 +1,719 @@
+# QEMU configure log Mon Oct 12 15:22:23 PDT 2015
+# Configured with: '@SRC_DIR@/configure' '--target-list=aarch64-softmmu mips64el-softmmu i386-softmmu x86_64-softmmu' '--prefix=@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64' '--extra-cflags=-I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8' '--extra-ldflags=-L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm' '--disable-attr' '--disable-blobs' '--disable-cap-ng' '--disable-curl' '--disable-curses' '--disable-docs' '--disable-glusterfs' '--disable-gtk' '--disable-guest-agent' '--disable-libnfs' '--disable-libiscsi' '--disable-libssh2' '--disable-libusb' '--disable-quorum' '--disable-seccomp' '--disable-spice' '--disable-smartcard-nss' '--disable-usb-redir' '--disable-user' '--disable-vde' '--disable-vhdx' '--disable-vhost-net' '--disable-werror' '--enable-android' '--with-sdlabi=2.0'
+#
+cc -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -c -o config-temp/qemu-conf.o config-temp/qemu-conf.c
+config-temp/qemu-conf.c:2:2: error: __linux__ not defined
+#error __linux__ not defined
+ ^
+1 error generated.
+cc -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -c -o config-temp/qemu-conf.o config-temp/qemu-conf.c
+config-temp/qemu-conf.c:2:2: error: _WIN32 not defined
+#error _WIN32 not defined
+ ^
+1 error generated.
+cc -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -c -o config-temp/qemu-conf.o config-temp/qemu-conf.c
+config-temp/qemu-conf.c:2:2: error: __OpenBSD__ not defined
+#error __OpenBSD__ not defined
+ ^
+1 error generated.
+cc -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -c -o config-temp/qemu-conf.o config-temp/qemu-conf.c
+config-temp/qemu-conf.c:2:2: error: __sun__ not defined
+#error __sun__ not defined
+ ^
+1 error generated.
+cc -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -c -o config-temp/qemu-conf.o config-temp/qemu-conf.c
+config-temp/qemu-conf.c:2:2: error: __HAIKU__ not defined
+#error __HAIKU__ not defined
+ ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -c -o config-temp/qemu-conf.o config-temp/qemu-conf.c
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -c -o config-temp/qemu-conf.o config-temp/qemu-conf.c
+c++ -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wall -Wundef -Wwrite-strings -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -o config-temp/qemu-conf.exe config-temp/qemu-conf.cxx config-temp/qemu-conf.o -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Werror -Wstring-plus-int -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Werror -Winitializer-overrides -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Werror -Wendif-labels -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Werror -Wmissing-include-dirs -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Werror -Wempty-body -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Werror -Wnested-externs -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Werror -Wformat-security -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Werror -Wformat-y2k -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Werror -Winit-self -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Werror -Wignored-qualifiers -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Werror -Wold-style-declaration -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+error: unknown warning option '-Wold-style-declaration'; did you mean '-Wout-of-line-declaration'? [-Werror,-Wunknown-warning-option]
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Werror -Wold-style-definition -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Werror -Wtype-limits -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -Werror -fstack-protector-strong -c -o config-temp/qemu-conf.o config-temp/qemu-conf.c
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -Werror -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -Werror -fno-gcse -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+clang: error: optimization flag '-fno-gcse' is not supported
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -c -o config-temp/qemu-conf.o config-temp/qemu-conf.c
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:2:10: fatal error: 'linux/ip.h' file not found
+#include <linux/ip.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lz
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -llzo2
+config-temp/qemu-conf.c:1:10: fatal error: 'lzo/lzo1x.h' file not found
+#include <lzo/lzo1x.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lsnappy
+config-temp/qemu-conf.c:1:10: fatal error: 'snappy-c.h' file not found
+#include <snappy-c.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lxenstore -lxenctrl -lxenguest
+config-temp/qemu-conf.c:1:10: fatal error: 'xenctrl.h' file not found
+#include <xenctrl.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -D_THREAD_SAFE -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include/SDL2 -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -lSDL2
+Undefined symbols for architecture x86_64:
+  "_AudioObjectGetPropertyData", referenced from:
+      _COREAUDIO_OpenDevice in libSDL2.a(SDL_coreaudio.o)
+      _build_device_list in libSDL2.a(SDL_coreaudio.o)
+  "_AudioObjectGetPropertyDataSize", referenced from:
+      _build_device_list in libSDL2.a(SDL_coreaudio.o)
+  "_AudioOutputUnitStart", referenced from:
+      _COREAUDIO_OpenDevice in libSDL2.a(SDL_coreaudio.o)
+  "_AudioOutputUnitStop", referenced from:
+      _COREAUDIO_CloseDevice in libSDL2.a(SDL_coreaudio.o)
+  "_AudioUnitInitialize", referenced from:
+      _COREAUDIO_OpenDevice in libSDL2.a(SDL_coreaudio.o)
+  "_AudioUnitSetProperty", referenced from:
+      _COREAUDIO_OpenDevice in libSDL2.a(SDL_coreaudio.o)
+      _COREAUDIO_CloseDevice in libSDL2.a(SDL_coreaudio.o)
+  "_FFCreateDevice", referenced from:
+      _SDL_SYS_HapticOpenFromService in libSDL2.a(SDL_syshaptic.o)
+  "_FFDeviceCreateEffect", referenced from:
+      _SDL_SYS_HapticNewEffect in libSDL2.a(SDL_syshaptic.o)
+  "_FFDeviceGetForceFeedbackCapabilities", referenced from:
+      _SDL_SYS_HapticOpenFromService in libSDL2.a(SDL_syshaptic.o)
+  "_FFDeviceGetForceFeedbackProperty", referenced from:
+      _SDL_SYS_HapticOpenFromService in libSDL2.a(SDL_syshaptic.o)
+  "_FFDeviceReleaseEffect", referenced from:
+      _SDL_SYS_HapticDestroyEffect in libSDL2.a(SDL_syshaptic.o)
+  "_FFDeviceSendForceFeedbackCommand", referenced from:
+      _SDL_SYS_HapticOpenFromService in libSDL2.a(SDL_syshaptic.o)
+      _SDL_SYS_HapticPause in libSDL2.a(SDL_syshaptic.o)
+      _SDL_SYS_HapticUnpause in libSDL2.a(SDL_syshaptic.o)
+      _SDL_SYS_HapticStopAll in libSDL2.a(SDL_syshaptic.o)
+  "_FFDeviceSetForceFeedbackProperty", referenced from:
+      _SDL_SYS_HapticSetGain in libSDL2.a(SDL_syshaptic.o)
+      _SDL_SYS_HapticSetAutocenter in libSDL2.a(SDL_syshaptic.o)
+  "_FFEffectGetEffectStatus", referenced from:
+      _SDL_SYS_HapticGetEffectStatus in libSDL2.a(SDL_syshaptic.o)
+  "_FFEffectSetParameters", referenced from:
+      _SDL_SYS_HapticUpdateEffect in libSDL2.a(SDL_syshaptic.o)
+  "_FFEffectStart", referenced from:
+      _SDL_SYS_HapticRunEffect in libSDL2.a(SDL_syshaptic.o)
+  "_FFEffectStop", referenced from:
+      _SDL_SYS_HapticStopEffect in libSDL2.a(SDL_syshaptic.o)
+  "_FFIsForceFeedback", referenced from:
+      _JoystickDeviceWasAddedCallback in libSDL2.a(SDL_sysjoystick.o)
+      _MacHaptic_MaybeAddDevice in libSDL2.a(SDL_syshaptic.o)
+  "_FFReleaseDevice", referenced from:
+      _SDL_SYS_HapticOpenFromService in libSDL2.a(SDL_syshaptic.o)
+      _SDL_SYS_HapticClose in libSDL2.a(SDL_syshaptic.o)
+  "_NSApp", referenced from:
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+      _Cocoa_SetWindowIcon in libSDL2.a(SDL_cocoawindow.o)
+      _Cocoa_RegisterApp in libSDL2.a(SDL_cocoaevents.o)
+      _Cocoa_PumpEvents in libSDL2.a(SDL_cocoaevents.o)
+  "_NSApplicationDidBecomeActiveNotification", referenced from:
+      -[SDLAppDelegate init] in libSDL2.a(SDL_cocoaevents.o)
+  "_NSDeviceRGBColorSpace", referenced from:
+      _Cocoa_CreateImage in libSDL2.a(SDL_cocoavideo.o)
+  "_NSLog", referenced from:
+      _SDL_NSLog in libSDL2.a(SDL_cocoavideo.o)
+     (maybe you meant: _SDL_NSLog)
+  "_NSPasteboardTypeString", referenced from:
+      _Cocoa_SetClipboardText in libSDL2.a(SDL_cocoaclipboard.o)
+      _Cocoa_GetClipboardText in libSDL2.a(SDL_cocoaclipboard.o)
+  "_NSPointInRect", referenced from:
+      _Cocoa_HandleMouseEvent in libSDL2.a(SDL_cocoamouse.o)
+  "_NSRectFill", referenced from:
+      _Cocoa_SetWindowShape in libSDL2.a(SDL_cocoashape.o)
+  "_NSSearchPathForDirectoriesInDomains", referenced from:
+      _SDL_GetPrefPath_REAL in libSDL2.a(SDL_sysfilesystem.o)
+  "_NSStringPboardType", referenced from:
+      _Cocoa_SetClipboardText in libSDL2.a(SDL_cocoaclipboard.o)
+      _Cocoa_GetClipboardText in libSDL2.a(SDL_cocoaclipboard.o)
+  "_NSWindowDidBecomeKeyNotification", referenced from:
+      -[Cocoa_WindowListener listen:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+  "_NSWindowDidDeminiaturizeNotification", referenced from:
+      -[Cocoa_WindowListener listen:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+  "_NSWindowDidEnterFullScreenNotification", referenced from:
+      -[Cocoa_WindowListener listen:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+  "_NSWindowDidExitFullScreenNotification", referenced from:
+      -[Cocoa_WindowListener listen:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+  "_NSWindowDidExposeNotification", referenced from:
+      -[Cocoa_WindowListener listen:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+  "_NSWindowDidMiniaturizeNotification", referenced from:
+      -[Cocoa_WindowListener listen:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+  "_NSWindowDidMoveNotification", referenced from:
+      -[Cocoa_WindowListener listen:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+  "_NSWindowDidResignKeyNotification", referenced from:
+      -[Cocoa_WindowListener listen:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+  "_NSWindowDidResizeNotification", referenced from:
+      -[Cocoa_WindowListener listen:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+  "_NSWindowWillEnterFullScreenNotification", referenced from:
+      -[Cocoa_WindowListener listen:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+  "_NSWindowWillExitFullScreenNotification", referenced from:
+      -[Cocoa_WindowListener listen:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+  "_NSZeroPoint", referenced from:
+      +[NSCursor(InvisibleCursor) invisibleCursor] in libSDL2.a(SDL_cocoamouse.o)
+  "_OBJC_CLASS_$_NSAlert", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoamessagebox.o)
+  "_OBJC_CLASS_$_NSApplication", referenced from:
+      _OBJC_CLASS_$_SDLApplication in libSDL2.a(SDL_cocoaevents.o)
+  "_OBJC_CLASS_$_NSAttributedString", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoakeyboard.o)
+  "_OBJC_CLASS_$_NSAutoreleasePool", referenced from:
+      objc-class-ref in libSDL2.a(SDL_sysfilesystem.o)
+      objc-class-ref in libSDL2.a(SDL_cocoawindow.o)
+      objc-class-ref in libSDL2.a(SDL_cocoamessagebox.o)
+      objc-class-ref in libSDL2.a(SDL_rwopsbundlesupport.o)
+      objc-class-ref in libSDL2.a(SDL_cocoaclipboard.o)
+      objc-class-ref in libSDL2.a(SDL_cocoashape.o)
+      objc-class-ref in libSDL2.a(SDL_cocoaopengl.o)
+      ...
+  "_OBJC_CLASS_$_NSBezierPath", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoashape.o)
+  "_OBJC_CLASS_$_NSBitmapImageRep", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoavideo.o)
+  "_OBJC_CLASS_$_NSBundle", referenced from:
+      objc-class-ref in libSDL2.a(SDL_sysfilesystem.o)
+      objc-class-ref in libSDL2.a(SDL_rwopsbundlesupport.o)
+      objc-class-ref in libSDL2.a(SDL_cocoaevents.o)
+  "_OBJC_CLASS_$_NSColor", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoawindow.o)
+      objc-class-ref in libSDL2.a(SDL_cocoashape.o)
+  "_OBJC_CLASS_$_NSCursor", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoawindow.o)
+      objc-class-ref in libSDL2.a(SDL_cocoamouse.o)
+      l_OBJC_$_CATEGORY_NSCursor_$_InvisibleCursor in libSDL2.a(SDL_cocoamouse.o)
+  "_OBJC_CLASS_$_NSEvent", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoamouse.o)
+  "_OBJC_CLASS_$_NSFileManager", referenced from:
+      objc-class-ref in libSDL2.a(SDL_rwopsbundlesupport.o)
+  "_OBJC_CLASS_$_NSGraphicsContext", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoashape.o)
+  "_OBJC_CLASS_$_NSImage", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoavideo.o)
+      objc-class-ref in libSDL2.a(SDL_cocoamouse.o)
+  "_OBJC_CLASS_$_NSMenu", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoawindow.o)
+      objc-class-ref in libSDL2.a(SDL_cocoaevents.o)
+  "_OBJC_CLASS_$_NSMenuItem", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoaevents.o)
+  "_OBJC_CLASS_$_NSNotificationCenter", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoawindow.o)
+      objc-class-ref in libSDL2.a(SDL_cocoaevents.o)
+  "_OBJC_CLASS_$_NSNumber", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoaevents.o)
+  "_OBJC_CLASS_$_NSOpenGLContext", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_CLASS_$_SDLOpenGLContext in libSDL2.a(SDL_cocoaopengl.o)
+      objc-class-ref in libSDL2.a(SDL_cocoaopengl.o)
+  "_OBJC_CLASS_$_NSOpenGLPixelFormat", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoaopengl.o)
+  "_OBJC_CLASS_$_NSPasteboard", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoaclipboard.o)
+  "_OBJC_CLASS_$_NSProcessInfo", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoaevents.o)
+  "_OBJC_CLASS_$_NSResponder", referenced from:
+      _OBJC_CLASS_$_Cocoa_WindowListener in libSDL2.a(SDL_cocoawindow.o)
+  "_OBJC_CLASS_$_NSScreen", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoawindow.o)
+  "_OBJC_CLASS_$_NSString", referenced from:
+      objc-class-ref in libSDL2.a(SDL_cocoawindow.o)
+      objc-class-ref in libSDL2.a(SDL_cocoamessagebox.o)
+      objc-class-ref in libSDL2.a(SDL_cocoaclipboard.o)
+      objc-class-ref in libSDL2.a(SDL_cocoamodes.o)
+  "_OBJC_CLASS_$_NSView", referenced from:
+      _OBJC_CLASS_$_SDLView in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_CLASS_$_SDLTranslatorResponder in libSDL2.a(SDL_cocoakeyboard.o)
+  "_OBJC_CLASS_$_NSWindow", referenced from:
+      _OBJC_CLASS_$_SDLWindow in libSDL2.a(SDL_cocoawindow.o)
+  "_OBJC_METACLASS_$_NSApplication", referenced from:
+      _OBJC_METACLASS_$_SDLApplication in libSDL2.a(SDL_cocoaevents.o)
+  "_OBJC_METACLASS_$_NSOpenGLContext", referenced from:
+      _OBJC_METACLASS_$_SDLOpenGLContext in libSDL2.a(SDL_cocoaopengl.o)
+  "_OBJC_METACLASS_$_NSResponder", referenced from:
+      _OBJC_METACLASS_$_Cocoa_WindowListener in libSDL2.a(SDL_cocoawindow.o)
+  "_OBJC_METACLASS_$_NSView", referenced from:
+      _OBJC_METACLASS_$_SDLView in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_METACLASS_$_SDLTranslatorResponder in libSDL2.a(SDL_cocoakeyboard.o)
+  "_OBJC_METACLASS_$_NSWindow", referenced from:
+      _OBJC_METACLASS_$_SDLWindow in libSDL2.a(SDL_cocoawindow.o)
+  "___objc_personality_v0", referenced from:
+      _ScheduleContextUpdates in libSDL2.a(SDL_cocoawindow.o)
+      _Cocoa_CreateWindow in libSDL2.a(SDL_cocoawindow.o)
+      Dwarf Exception Unwind Info (__eh_frame) in libSDL2.a(SDL_cocoawindow.o)
+      -[SDLOpenGLContext setWindow:] in libSDL2.a(SDL_cocoaopengl.o)
+      Dwarf Exception Unwind Info (__eh_frame) in libSDL2.a(SDL_cocoaopengl.o)
+  "__objc_empty_cache", referenced from:
+      _OBJC_CLASS_$_SDLWindow in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_CLASS_$_Cocoa_WindowListener in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_METACLASS_$_SDLWindow in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_METACLASS_$_Cocoa_WindowListener in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_CLASS_$_SDLView in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_METACLASS_$_SDLView in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_CLASS_$_SDLMessageBoxPresenter in libSDL2.a(SDL_cocoamessagebox.o)
+      ...
+  "__objc_empty_vtable", referenced from:
+      _OBJC_CLASS_$_SDLWindow in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_CLASS_$_Cocoa_WindowListener in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_METACLASS_$_SDLWindow in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_METACLASS_$_Cocoa_WindowListener in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_CLASS_$_SDLView in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_METACLASS_$_SDLView in libSDL2.a(SDL_cocoawindow.o)
+      _OBJC_CLASS_$_SDLMessageBoxPresenter in libSDL2.a(SDL_cocoamessagebox.o)
+      ...
+  "_objc_begin_catch", referenced from:
+      _Cocoa_CreateWindow in libSDL2.a(SDL_cocoawindow.o)
+  "_objc_end_catch", referenced from:
+      _Cocoa_CreateWindow in libSDL2.a(SDL_cocoawindow.o)
+  "_objc_enumerationMutation", referenced from:
+      -[Cocoa_WindowListener close] in libSDL2.a(SDL_cocoawindow.o)
+      _ScheduleContextUpdates in libSDL2.a(SDL_cocoawindow.o)
+      _Cocoa_DestroyWindow in libSDL2.a(SDL_cocoawindow.o)
+  "_objc_msgSend", referenced from:
+      _SDL_GetBasePath_REAL in libSDL2.a(SDL_sysfilesystem.o)
+      _SDL_GetPrefPath_REAL in libSDL2.a(SDL_sysfilesystem.o)
+      _Cocoa_CreateImage in libSDL2.a(SDL_cocoavideo.o)
+      -[SDLWindow sendEvent:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener listen:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener observeValueForKeyPath:ofObject:change:context:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener pauseVisibleObservation] in libSDL2.a(SDL_cocoawindow.o)
+      ...
+  "_objc_msgSendSuper2", referenced from:
+      -[SDLWindow sendEvent:] in libSDL2.a(SDL_cocoawindow.o)
+      -[SDLView resetCursorRects] in libSDL2.a(SDL_cocoawindow.o)
+      -[SDLMessageBoxPresenter initWithParentWindow:] in libSDL2.a(SDL_cocoamessagebox.o)
+      -[SDLOpenGLContext initWithFormat:shareContext:] in libSDL2.a(SDL_cocoaopengl.o)
+      -[SDLOpenGLContext updateIfNeeded] in libSDL2.a(SDL_cocoaopengl.o)
+      -[SDLAppDelegate init] in libSDL2.a(SDL_cocoaevents.o)
+      -[SDLAppDelegate dealloc] in libSDL2.a(SDL_cocoaevents.o)
+      ...
+  "_objc_msgSend_stret", referenced from:
+      -[Cocoa_WindowListener windowDidMove:] in libSDL2.a(SDL_cocoawindow.o)
+      -[Cocoa_WindowListener windowDidResize:] in libSDL2.a(SDL_cocoawindow.o)
+      -[SDLView resetCursorRects] in libSDL2.a(SDL_cocoawindow.o)
+      _Cocoa_CreateWindow in libSDL2.a(SDL_cocoawindow.o)
+      _SetupWindowData in libSDL2.a(SDL_cocoawindow.o)
+      _Cocoa_SetWindowFullscreen in libSDL2.a(SDL_cocoawindow.o)
+      _Cocoa_RebuildWindow in libSDL2.a(SDL_cocoawindow.o)
+      ...
+  "_objc_sync_enter", referenced from:
+      _ScheduleContextUpdates in libSDL2.a(SDL_cocoawindow.o)
+      -[SDLOpenGLContext setWindow:] in libSDL2.a(SDL_cocoaopengl.o)
+  "_objc_sync_exit", referenced from:
+      _ScheduleContextUpdates in libSDL2.a(SDL_cocoawindow.o)
+      -[SDLOpenGLContext setWindow:] in libSDL2.a(SDL_cocoaopengl.o)
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lrdmacm -libverbs
+config-temp/qemu-conf.c:1:10: fatal error: 'rdma/rdma_cma.h' file not found
+#include <rdma/rdma_cma.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'gnutls/gnutls.h' file not found
+#include <gnutls/gnutls.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lsasl2
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -ljpeg
+config-temp/qemu-conf.c:2:10: fatal error: 'jpeglib.h' file not found
+#include <jpeglib.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include/libpng16 -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -lpng16
+Undefined symbols for architecture x86_64:
+  "_adler32", referenced from:
+      _png_icc_set_sRGB in libpng16.a(png.o)
+  "_crc32", referenced from:
+      _png_reset_crc in libpng16.a(png.o)
+      _png_calculate_crc in libpng16.a(png.o)
+      _png_icc_set_sRGB in libpng16.a(png.o)
+  "_deflate", referenced from:
+      _png_compress_IDAT in libpng16.a(pngwutil.o)
+      _png_text_compress in libpng16.a(pngwutil.o)
+  "_deflateEnd", referenced from:
+      _png_destroy_write_struct in libpng16.a(pngwrite.o)
+      _png_deflate_claim in libpng16.a(pngwutil.o)
+  "_deflateInit2_", referenced from:
+      _png_deflate_claim in libpng16.a(pngwutil.o)
+  "_deflateReset", referenced from:
+      _png_deflate_claim in libpng16.a(pngwutil.o)
+  "_inflate", referenced from:
+      _png_inflate_read in libpng16.a(pngrutil.o)
+      _png_read_IDAT_data in libpng16.a(pngrutil.o)
+      _png_inflate in libpng16.a(pngrutil.o)
+  "_inflateEnd", referenced from:
+      _png_destroy_read_struct in libpng16.a(pngread.o)
+  "_inflateInit2_", referenced from:
+      _png_inflate_claim in libpng16.a(pngrutil.o)
+  "_inflateReset", referenced from:
+      _png_reset_zstream in libpng16.a(png.o)
+      _png_decompress_chunk in libpng16.a(pngrutil.o)
+  "_inflateReset2", referenced from:
+      _png_inflate_claim in libpng16.a(pngrutil.o)
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:2:10: fatal error: 'xfs/xfs.h' file not found
+#include <xfs/xfs.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lbrlapi
+config-temp/qemu-conf.c:1:10: fatal error: 'brlapi.h' file not found
+#include <brlapi.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'bluetooth/bluetooth.h' file not found
+#include <bluetooth/bluetooth.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lcap
+config-temp/qemu-conf.c:2:10: fatal error: 'sys/capability.h' file not found
+#include <sys/capability.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:8:32: error: too many arguments to function call, expected 1, have 2
+    pthread_setname_np(thread, "QEMU");
+    ~~~~~~~~~~~~~~~~~~         ^~~~~~
+/usr/include/pthread.h:474:1: note: 'pthread_setname_np' declared here
+__OSX_AVAILABLE_STARTING(__MAC_10_6, __IPHONE_3_2)
+^
+/usr/include/Availability.h:163:50: note: expanded from macro '__OSX_AVAILABLE_STARTING'
+    #define __OSX_AVAILABLE_STARTING(_osx, _ios) __AVAILABILITY_INTERNAL##_osx
+                                                 ^
+<scratch space>:4:1: note: expanded from here
+__AVAILABILITY_INTERNAL__MAC_10_6
+^
+/usr/include/AvailabilityInternal.h:5369:72: note: expanded from macro '__AVAILABILITY_INTERNAL__MAC_10_6'
+            #define __AVAILABILITY_INTERNAL__MAC_10_6                  __attribute__((availability(macosx,introduced=10.6)))
+                                                                       ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lrbd -lrados
+config-temp/qemu-conf.c:2:10: fatal error: 'rbd/librbd.h' file not found
+#include <rbd/librbd.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -laio
+config-temp/qemu-conf.c:1:10: fatal error: 'libaio.h' file not found
+#include <libaio.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:4:25: warning: implicit declaration of function 'preadv' is invalid in C99 [-Wimplicit-function-declaration]
+int main(void) { return preadv(0, 0, 0, 0); }
+                        ^
+1 warning generated.
+Undefined symbols for architecture x86_64:
+  "_preadv", referenced from:
+      _main in qemu-conf-9b896a.o
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lfdt
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lGL -lX11
+config-temp/qemu-conf.c:1:10: fatal error: 'X11/Xlib.h' file not found
+#include <X11/Xlib.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lxseg
+config-temp/qemu-conf.c:2:10: fatal error: 'xseg/xseg.h' file not found
+#include <xseg/xseg.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'sys/inotify.h' file not found
+#include <sys/inotify.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'sys/inotify.h' file not found
+#include <sys/inotify.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:8:5: warning: implicit declaration of function 'utimensat' is invalid in C99 [-Wimplicit-function-declaration]
+    utimensat(AT_FDCWD, "foo", NULL, 0);
+    ^
+config-temp/qemu-conf.c:9:5: warning: implicit declaration of function 'futimens' is invalid in C99 [-Wimplicit-function-declaration]
+    futimens(0, NULL);
+    ^
+2 warnings generated.
+Undefined symbols for architecture x86_64:
+  "_futimens", referenced from:
+      _main in qemu-conf-64edb9.o
+  "_utimensat", referenced from:
+      _main in qemu-conf-64edb9.o
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:7:12: warning: implicit declaration of function 'pipe2' is invalid in C99 [-Wimplicit-function-declaration]
+    return pipe2(pipefd, O_CLOEXEC);
+           ^
+1 warning generated.
+Undefined symbols for architecture x86_64:
+  "_pipe2", referenced from:
+      _main in qemu-conf-43733c.o
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:6:5: warning: implicit declaration of function 'accept4' is invalid in C99 [-Wimplicit-function-declaration]
+    accept4(0, NULL, NULL, SOCK_CLOEXEC);
+    ^
+config-temp/qemu-conf.c:6:28: error: use of undeclared identifier 'SOCK_CLOEXEC'
+    accept4(0, NULL, NULL, SOCK_CLOEXEC);
+                           ^
+1 warning and 1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:8:11: warning: implicit declaration of function 'tee' is invalid in C99 [-Wimplicit-function-declaration]
+    len = tee(STDIN_FILENO, STDOUT_FILENO, INT_MAX, SPLICE_F_NONBLOCK);
+          ^
+config-temp/qemu-conf.c:8:53: error: use of undeclared identifier 'SPLICE_F_NONBLOCK'
+    len = tee(STDIN_FILENO, STDOUT_FILENO, INT_MAX, SPLICE_F_NONBLOCK);
+                                                    ^
+config-temp/qemu-conf.c:9:5: warning: implicit declaration of function 'splice' is invalid in C99 [-Wimplicit-function-declaration]
+    splice(STDIN_FILENO, NULL, fd, NULL, len, SPLICE_F_MOVE);
+    ^
+config-temp/qemu-conf.c:9:47: error: use of undeclared identifier 'SPLICE_F_MOVE'
+    splice(STDIN_FILENO, NULL, fd, NULL, len, SPLICE_F_MOVE);
+                                              ^
+2 warnings and 2 errors generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lnuma
+config-temp/qemu-conf.c:1:10: fatal error: 'numa.h' file not found
+#include <numa.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:4:33: error: use of undeclared identifier 'SYS_signalfd'
+int main(void) { return syscall(SYS_signalfd, -1, NULL, _NSIG / 8); }
+                                ^
+config-temp/qemu-conf.c:4:57: error: use of undeclared identifier '_NSIG'
+int main(void) { return syscall(SYS_signalfd, -1, NULL, _NSIG / 8); }
+                                                        ^
+2 errors generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'sys/eventfd.h' file not found
+#include <sys/eventfd.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:5:5: warning: implicit declaration of function 'fallocate' is invalid in C99 [-Wimplicit-function-declaration]
+    fallocate(0, 0, 0, 0);
+    ^
+1 warning generated.
+Undefined symbols for architecture x86_64:
+  "_fallocate", referenced from:
+      _main in qemu-conf-a067ce.o
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:2:10: fatal error: 'linux/falloc.h' file not found
+#include <linux/falloc.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:5:5: warning: implicit declaration of function 'posix_fallocate' is invalid in C99 [-Wimplicit-function-declaration]
+    posix_fallocate(0, 0, 0);
+    ^
+1 warning generated.
+Undefined symbols for architecture x86_64:
+  "_posix_fallocate", referenced from:
+      _main in qemu-conf-147ceb.o
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:5:5: warning: implicit declaration of function 'sync_file_range' is invalid in C99 [-Wimplicit-function-declaration]
+    sync_file_range(0, 0, 0, 0);
+    ^
+1 warning generated.
+Undefined symbols for architecture x86_64:
+  "_sync_file_range", referenced from:
+      _main in qemu-conf-317992.o
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:2:10: fatal error: 'linux/fs.h' file not found
+#include <linux/fs.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:5:5: warning: implicit declaration of function 'dup3' is invalid in C99 [-Wimplicit-function-declaration]
+    dup3(0, 0, 0);
+    ^
+1 warning generated.
+Undefined symbols for architecture x86_64:
+  "_dup3", referenced from:
+      _main in qemu-conf-5f4bca.o
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:6:5: warning: implicit declaration of function 'ppoll' is invalid in C99 [-Wimplicit-function-declaration]
+    ppoll(&pfd, 1, 0, 0);
+    ^
+1 warning generated.
+Undefined symbols for architecture x86_64:
+  "_ppoll", referenced from:
+      _main in qemu-conf-2398e0.o
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'sys/prctl.h' file not found
+#include <sys/prctl.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'sys/epoll.h' file not found
+#include <sys/epoll.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'sys/epoll.h' file not found
+#include <sys/epoll.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'sys/epoll.h' file not found
+#include <sys/epoll.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'sys/sendfile.h' file not found
+#include <sys/sendfile.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'sys/timerfd.h' file not found
+#include <sys/timerfd.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:6:11: warning: implicit declaration of function 'setns' is invalid in C99 [-Wimplicit-function-declaration]
+    ret = setns(0, 0);
+          ^
+config-temp/qemu-conf.c:7:11: warning: implicit declaration of function 'unshare' is invalid in C99 [-Wimplicit-function-declaration]
+    ret = unshare(0);
+          ^
+2 warnings generated.
+Undefined symbols for architecture x86_64:
+  "_setns", referenced from:
+      _main in qemu-conf-070253.o
+  "_unshare", referenced from:
+      _main in qemu-conf-070253.o
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'byteswap.h' file not found
+#include <byteswap.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'sys/endian.h' file not found
+#include <sys/endian.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:4:3: warning: implicit declaration of function 'timer_create' is invalid in C99 [-Wimplicit-function-declaration]
+  timer_create(CLOCK_REALTIME, NULL, NULL);
+  ^
+config-temp/qemu-conf.c:4:16: error: use of undeclared identifier 'CLOCK_REALTIME'
+  timer_create(CLOCK_REALTIME, NULL, NULL);
+               ^
+config-temp/qemu-conf.c:5:10: warning: implicit declaration of function 'clock_gettime' is invalid in C99 [-Wimplicit-function-declaration]
+  return clock_gettime(CLOCK_REALTIME, NULL);
+         ^
+config-temp/qemu-conf.c:5:24: error: use of undeclared identifier 'CLOCK_REALTIME'
+  return clock_gettime(CLOCK_REALTIME, NULL);
+                       ^
+2 warnings and 2 errors generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -lrt
+config-temp/qemu-conf.c:4:3: warning: implicit declaration of function 'timer_create' is invalid in C99 [-Wimplicit-function-declaration]
+  timer_create(CLOCK_REALTIME, NULL, NULL);
+  ^
+config-temp/qemu-conf.c:4:16: error: use of undeclared identifier 'CLOCK_REALTIME'
+  timer_create(CLOCK_REALTIME, NULL, NULL);
+               ^
+config-temp/qemu-conf.c:5:10: warning: implicit declaration of function 'clock_gettime' is invalid in C99 [-Wimplicit-function-declaration]
+  return clock_gettime(CLOCK_REALTIME, NULL);
+         ^
+config-temp/qemu-conf.c:5:24: error: use of undeclared identifier 'CLOCK_REALTIME'
+  return clock_gettime(CLOCK_REALTIME, NULL);
+                       ^
+2 warnings and 2 errors generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:6:2: error: Not supported
+#error Not supported
+ ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:4:21: error: use of undeclared identifier 'SIGEV_THREAD_ID'
+  ev.sigev_notify = SIGEV_THREAD_ID;
+                    ^
+config-temp/qemu-conf.c:5:6: error: no member named '_sigev_un' in 'struct sigevent'
+  ev._sigev_un._tid = 0;
+  ~~ ^
+2 errors generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:3:3: error: missing definition
+# error missing definition
+  ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'linux/magic.h' file not found
+#include <linux/magic.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -Werror -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:2:32: error: unknown warning group '-Wunused-but-set-variable', ignored [-Werror,-Wunknown-pragmas]
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+                               ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'valgrind/valgrind.h' file not found
+#include <valgrind/valgrind.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:3:5: error: use of undeclared identifier 'environ'
+    environ = 0;
+    ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm
+config-temp/qemu-conf.c:1:10: fatal error: 'sys/auxv.h' file not found
+#include <sys/auxv.h>
+         ^
+1 error generated.
+cc -m64 -DOS_OBJECT_USE_OBJC=0 -arch x86_64 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing -fno-common -I@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/include -mmacosx-version-min=10.8 -Wno-string-plus-int -Wno-initializer-overrides -Wendif-labels -Wmissing-include-dirs -Wempty-body -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wignored-qualifiers -Wold-style-definition -Wtype-limits -fstack-protector-strong -o config-temp/qemu-conf.exe config-temp/qemu-conf.c -m64 -framework CoreFoundation -framework IOKit -arch x86_64 -g -L@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/lib -Wl,-framework,Carbon -ldl -lm -Wl,-Ttext-segment=0x60000000
+ld: unknown option: -Ttext-segment=0x60000000
+clang: error: linker command failed with exit code 1 (use -v to see invocation)

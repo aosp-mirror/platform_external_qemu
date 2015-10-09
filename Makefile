@@ -55,10 +55,11 @@ PREBUILT_STATIC_LIBRARY := $(BUILD_SYSTEM)/prebuilt_static_library.make
 
 DEPENDENCY_DIRS :=
 
-all: libraries executables symbols
+all: libraries executables symbols qemu2
 EXECUTABLES :=
 SYMBOLS :=
-LIBRARIES   :=
+LIBRARIES :=
+QEMU2_TARGETS :=
 
 clean: clean-intermediates
 
@@ -70,9 +71,12 @@ include Makefile.android
 libraries: $(LIBRARIES)
 executables: $(EXECUTABLES)
 symbols: $(SYMBOLS)
-
+qemu2: $(QEMU2_TARGETS)
+	
 clean-intermediates:
-	rm -rf $(OBJS_DIR)/intermediates $(EXECUTABLES) $(LIBRARIES) $(SYMBOLS) $(SYMBOLS_DIR)
+	rm -rf $(OBJS_DIR)/intermediates $(EXECUTABLES) $(LIBRARIES) \
+	    $(SYMBOLS) $(SYMBOLS_DIR)
+	rm -rf $(OBJS_DIR)/build-qemu2
 
 clean-config:
 	rm -f $(CONFIG_MAKE) $(CONFIG_H)

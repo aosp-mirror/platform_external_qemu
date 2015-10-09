@@ -1,0 +1,2 @@
+#!/bin/sh
+@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64/bin/pkg-config --define-variable=prefix=@PREBUILTS_DIR@/qemu-android-deps/darwin-x86_64 "$@"

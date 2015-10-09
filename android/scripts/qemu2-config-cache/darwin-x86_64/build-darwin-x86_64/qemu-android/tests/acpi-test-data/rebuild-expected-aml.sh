@@ -1,0 +1,1 @@
+@SRC_DIR@/tests/acpi-test-data/rebuild-expected-aml.sh

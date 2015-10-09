@@ -1,0 +1,1 @@
+@SRC_DIR@/Makefile.target

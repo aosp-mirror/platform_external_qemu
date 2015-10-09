@@ -1,0 +1,1 @@
+@SRC_DIR@/tests/tcg/xtensa/Makefile
