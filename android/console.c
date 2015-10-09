@@ -24,7 +24,6 @@
 #include "android/console.h"
 
 #include "android/android.h"
-#include "android/display-core.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
@@ -47,6 +46,7 @@
 #endif
 #include "net/net.h"
 #include "telephony/modem_driver.h"
+#include "ui/console.h"
 
 #include <fcntl.h>
 #include <stdarg.h>

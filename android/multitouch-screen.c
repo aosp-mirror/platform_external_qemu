@@ -16,12 +16,13 @@
 
 #include "android/multitouch-screen.h"
 
-#include "android/display-core.h"
 #include "android/globals.h"  /* for android_hw */
 #include "android/hw-events.h"
 #include "android/skin/charmap.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
+
+#include "ui/console.h"
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
