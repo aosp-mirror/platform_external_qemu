@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a526bd9a_afc719ca",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-09T18:36:51Z",
+      "side": 1,
+      "message": "Does this show the top-left corner on a zoom?\nIf I zoom, scroll, and zoom more, can the emulator\nkeep showing me the general area I was looking at before?",
+      "revId": "80de864cc8499a961d1c3a7d29c3d55c4d333d2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "054dc959_f76e58c1",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 619,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-09T18:36:51Z",
+      "side": 1,
+      "message": "This is good for now.\nWe\u0027ll probably want to resurrect the magnifying glass\non the tool bar.",
+      "revId": "80de864cc8499a961d1c3a7d29c3d55c4d333d2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a526bd9a_8fa97d07",
+        "filename": "android/skin/window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1550,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-09T18:36:51Z",
+      "side": 1,
+      "message": "I believe there could be problems if we do not reset the\nzoom, but sometimes it would be nice not to reset.\nLet\u0027s talk about this.",
+      "revId": "80de864cc8499a961d1c3a7d29c3d55c4d333d2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
