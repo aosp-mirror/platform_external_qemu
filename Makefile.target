@@ -305,7 +305,6 @@ common_LOCAL_SRC_FILES := \
     android/console.c \
     android/cpu_accelerator.cpp \
     android/display.c \
-    android/display-core.c \
     android/help.c \
     android/main-common.c \
     android/main-common-ui.c \
