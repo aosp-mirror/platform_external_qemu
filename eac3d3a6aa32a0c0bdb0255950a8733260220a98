@@ -65,6 +65,30 @@
     },
     {
       "key": {
+        "uuid": "f00235ba_f810f164",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-09T21:37:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0b7078c2_a8012381",
+      "range": {
+        "startLine": 69,
+        "startChar": 12,
+        "endLine": 69,
+        "endChar": 20
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb66c411_ed0f2d6e",
         "filename": "android/scripts/migrate-glue-code.py",
         "patchSetId": 1
@@ -88,6 +112,30 @@
     },
     {
       "key": {
+        "uuid": "70664538_f4bd1843",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-09T21:37:33Z",
+      "side": 1,
+      "message": "you\u0027re right, this is a left-over from a previous version of the regex. This function can be considerably simplified now :) Thanks.",
+      "parentUuid": "eb66c411_ed0f2d6e",
+      "range": {
+        "startLine": 73,
+        "startChar": 19,
+        "endLine": 73,
+        "endChar": 51
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ab804cc5_c5b7a4c0",
         "filename": "android/scripts/migrate-glue-code.py",
         "patchSetId": 1
@@ -99,6 +147,30 @@
       "writtenOn": "2015-10-06T17:47:50Z",
       "side": 1,
       "message": "suggest:\n\n  return sorted(result)",
+      "range": {
+        "startLine": 83,
+        "startChar": 11,
+        "endLine": 83,
+        "endChar": 17
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70664538_d4ba9c48",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-09T21:37:33Z",
+      "side": 1,
+      "message": "Good idea :)",
+      "parentUuid": "ab804cc5_c5b7a4c0",
       "range": {
         "startLine": 83,
         "startChar": 11,
@@ -197,6 +269,30 @@
     },
     {
       "key": {
+        "uuid": "3065adc4_3a53614e",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-09T21:37:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2b6d3ced_0e0ffbff",
+      "range": {
+        "startLine": 96,
+        "startChar": 32,
+        "endLine": 96,
+        "endChar": 49
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb66c411_ed3dedfd",
         "filename": "android/scripts/migrate-glue-code.py",
         "patchSetId": 1
@@ -243,6 +339,30 @@
     },
     {
       "key": {
+        "uuid": "b06c3d16_76df50eb",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-09T21:37:33Z",
+      "side": 1,
+      "message": "not sure about what you mean here?",
+      "parentUuid": "50478167_c3d576c9",
+      "range": {
+        "startLine": 107,
+        "startChar": 7,
+        "endLine": 107,
+        "endChar": 31
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ba1f45d_303a50b8",
         "filename": "android/scripts/migrate-glue-code.py",
         "patchSetId": 1
@@ -254,6 +374,30 @@
       "writtenOn": "2015-10-06T17:47:50Z",
       "side": 1,
       "message": "return any(x.startswith(x + \u0027/\u0027) for x in qemu_subdirs)",
+      "range": {
+        "startLine": 109,
+        "startChar": 4,
+        "endLine": 111,
+        "endChar": 23
+      },
+      "revId": "eac3d3a6aa32a0c0bdb0255950a8733260220a98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70700519_245d920b",
+        "filename": "android/scripts/migrate-glue-code.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-09T21:37:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ba1f45d_303a50b8",
       "range": {
         "startLine": 109,
         "startChar": 4,
