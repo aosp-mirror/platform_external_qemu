@@ -443,22 +443,20 @@ fi
 
 # Use gen-android-sdk-toolchain.sh to generate a toolchain that will
 # build binaries compatible with the SDK deployement systems.
-if [ -z "$OPTION_CC" -a -z "$OPTION_CXX" ] ; then
-    GEN_SDK=$PROGDIR/android/scripts/gen-android-sdk-toolchain.sh
-    GEN_SDK_FLAGS=--cxx11
-    if [ "$CCACHE" ]; then
-        GEN_SDK_FLAGS="$GEN_SDK_FLAGS --ccache=$CCACHE"
-    else
-        GEN_SDK_FLAGS="$GEN_SDK_FLAGS --no-ccache"
-    fi
-    GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
-    $GEN_SDK $GEN_SDK_FLAGS $OUT_DIR/toolchain || panic "Cannot generate SDK toolchain!"
-    BINPREFIX=$($GEN_SDK $GEN_SDK_FLAGS --print=binprefix $OUT_DIR/toolchain)
-    CC="$OUT_DIR/toolchain/${BINPREFIX}gcc"
-    CXX="$OUT_DIR/toolchain/${BINPREFIX}g++"
-    AR="$OUT_DIR/toolchain/${BINPREFIX}ar"
-    LD=$CC
+GEN_SDK=$PROGDIR/android/scripts/gen-android-sdk-toolchain.sh
+GEN_SDK_FLAGS=--cxx11
+if [ "$CCACHE" ]; then
+    GEN_SDK_FLAGS="$GEN_SDK_FLAGS --ccache=$CCACHE"
+else
+    GEN_SDK_FLAGS="$GEN_SDK_FLAGS --no-ccache"
 fi
+GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
+"$GEN_SDK" $GEN_SDK_FLAGS "$OUT_DIR/toolchain" || panic "Cannot generate SDK toolchain!"
+BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$OUT_DIR/toolchain")
+CC="$OUT_DIR/toolchain/${BINPREFIX}gcc"
+CXX="$OUT_DIR/toolchain/${BINPREFIX}g++"
+AR="$OUT_DIR/toolchain/${BINPREFIX}ar"
+LD=$CC
 
 if [ -n "$OPTION_CC" ]; then
     echo "Using specified C compiler: $OPTION_CC"
@@ -499,38 +497,14 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
         echo "Sorry, but mingw compilation is only supported on Linux !"
         exit 1
     fi
-    # Do we have our prebuilt mingw64 toolchain?
-    log "Mingw      : Looking for prebuilt mingw64 toolchain."
-    MINGW_DIR=$PROGDIR/../../prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8
-    MINGW_CC=
-    MINGW_CXX=
-    if [ -d "$MINGW_DIR" ]; then
-        MINGW_PREFIX=$MINGW_DIR/bin/x86_64-w64-mingw32
-        find_program MINGW_CC "$MINGW_PREFIX-gcc"
-        find_program MINGW_CXX "$MINGW_PREFIX-g++"
-    fi
-    if [ -z "$MINGW_CC" ]; then
-        log "Mingw      : Looking for mingw64 toolchain."
-        MINGW_PREFIX=x86_64-w64-mingw32
-        find_program MINGW_CC $MINGW_PREFIX-gcc
-        find_program MINGW_CXX $MINGW_PREFIX-g++
-    fi
-    if [ -z "$MINGW_CC" ]; then
-        echo "ERROR: It looks like no Mingw64 toolchain is available!"
-        echo "Please install x86_64-w64-mingw32 package !"
-        exit 1
-    fi
-    log2 "Mingw      : Found $MINGW_CC"
-    CC=$MINGW_CC
-    CXX=$MINGW_CXX
-    if [ "$CCACHE" ]; then
-        CC="$CCACHE $CC"
-        CXX="$CCACHE $CXX"
-    fi
-    CXX="$CXX -std=c++11 -Werror=c++11-compat"
-    LD=$MINGW_CC
+    GEN_SDK_FLAGS="$GEN_SDK_FLAGS --host=windows-x86_64"
+    "$GEN_SDK" $GEN_SDK_FLAGS "$OUT_DIR/toolchain" || panic "Cannot generate SDK toolchain!"
+    BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$OUT_DIR/toolchain")
+    CC="$OUT_DIR/toolchain/${BINPREFIX}gcc"
+    CXX="$OUT_DIR/toolchain/${BINPREFIX}g++"
+    LD=$CC
     WINDRES=$MINGW_PREFIX-windres
-    AR=$MINGW_PREFIX-ar
+    AR="$OUT_DIR/toolchain/${BINPREFIX}ar"
     HOST_OS=windows
     HOST_TAG=$HOST_OS-$HOST_ARCH
 fi
