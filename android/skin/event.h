@@ -28,6 +28,7 @@ typedef enum {
     kEventMouseMotion,
     kEventQuit,
     kEventSetScale,
+    kEventSetZoom,
     kEventVideoExpose,
     kEventWindowMoved,
 } SkinEventType;

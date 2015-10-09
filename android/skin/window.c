@@ -1006,6 +1006,7 @@ struct SkinWindow {
     int           y_pos;
 
     double        scale;
+    double        zoom;
 };
 
 static void
@@ -1294,6 +1295,7 @@ skin_window_create(SkinLayout* slayout,
 
     window->win_funcs    = win_funcs;
     window->scale = scale;
+    window->zoom = 1.0;
     window->no_display   = no_display;
 
     /* enable everything by default */
@@ -1411,6 +1413,10 @@ skin_window_resize( SkinWindow*  window )
         int           window_y = window->y_pos;
         double        scale = window->scale;
         int           fullscreen = window->fullscreen;
+
+        if (window->zoom != 1.0) {
+            scale *= window->zoom;
+        }
 
         if (scale != 1.0) {
             window_w = (int) ceil(layout_w * scale);
@@ -1541,6 +1547,16 @@ void
 skin_window_set_scale(SkinWindow* window, double scale)
 {
     window->scale = scale;
+    window->zoom = 1.0; // Scaling the window should reset zoom
+
+    skin_window_resize( window );
+    skin_window_redraw( window, NULL );
+}
+
+void
+skin_window_set_zoom(SkinWindow* window, double zoom)
+{
+    window->zoom = zoom;
 
     skin_window_resize( window );
     skin_window_redraw( window, NULL );
