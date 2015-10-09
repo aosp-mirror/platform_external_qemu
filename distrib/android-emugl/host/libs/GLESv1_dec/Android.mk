@@ -18,7 +18,7 @@ $(call emugl-gen-decoder,$(LOCAL_PATH),gles1)
 LOCAL_SRC_FILES := GLESv1Decoder.cpp
 
 $(call emugl-export,CFLAGS,$(host_common_debug_CFLAGS))
-$(call emugl-export,LDLIBS,-lstdc++)
+$(call emugl-export,LDLIBS,$(CXX_STD_LIB))
 
 $(call emugl-end-module)
 
@@ -34,6 +34,6 @@ $(call emugl-gen-decoder,$(LOCAL_PATH),gles1)
 LOCAL_SRC_FILES := GLESv1Decoder.cpp
 
 $(call emugl-export,CFLAGS,$(host_common_debug_CFLAGS))
-$(call emugl-export,LDLIBS,-lstdc++)
+$(call emugl-export,LDLIBS,$(CXX_STD_LIB))
 
 $(call emugl-end-module)
