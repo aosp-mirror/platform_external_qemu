@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/hw-sensors.h"
+#include "android-qemu1-glue/hw-sensors.h"
 
 #include "android/emulation/android_qemud.h"
 #include "android/globals.h"

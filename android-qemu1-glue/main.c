@@ -59,7 +59,7 @@
 
 #include "android/globals.h"
 
-#include "android/display.h"
+#include "android-qemu1-glue/display.h"
 
 #include "android/snapshot.h"
 

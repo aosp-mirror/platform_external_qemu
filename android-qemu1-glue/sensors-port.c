@@ -16,7 +16,7 @@
 
 #include "android/sdk-controller-socket.h"
 #include "android/sensors-port.h"
-#include "android/hw-sensors.h"
+#include "android-qemu1-glue/hw-sensors.h"
 #include "android/utils/debug.h"
 
 #define  E(...)    derror(__VA_ARGS__)

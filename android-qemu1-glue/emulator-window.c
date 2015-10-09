@@ -18,7 +18,7 @@
 #include "android/globals.h"
 #include "android/gpu_frame.h"
 #include "android/hw-control.h"
-#include "android/hw-sensors.h"
+#include "android-qemu1-glue/hw-sensors.h"
 #include "android/opengles.h"
 #include "android/qemu-control-impl.h"
 #include "android/skin/keycode.h"
@@ -498,7 +498,7 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
 }
 
 /*
- * android/console.c helper routines.
+ * android-qemu1-glue/console.c helper routines.
  */
 
 void

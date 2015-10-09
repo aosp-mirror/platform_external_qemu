@@ -44,7 +44,7 @@ In the emulator source tree:
     ./hw/android/goldfish/pipe.h provides the interface that must be
     implemented by any emulator pipe service.
 
-    ./android/hw-pipe-net.c contains the implementation of the network pipe
+    ./android-qemu1-glue/hw-pipe-net.c contains the implementation of the network pipe
     services (i.e. 'tcp' and 'unix'). See below for details.
 
 In the kernel source tree:

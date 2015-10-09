@@ -56,7 +56,7 @@ Android emulator.
                         cl.update(cl.opaque, up.x, up.y. up.w, up.h)
 
   hw/android/goldfish/fb.c implements a producer
-  the QEmulator type in android/main.c implements a client.
+  the QEmulator type in android-qemu1-glue/main.c implements a client.
 
 
 3 - DisplayState (console.h):
@@ -68,9 +68,9 @@ Android emulator.
   displays instead of pixel framebuffers, and incorporates input state
   as well.
 
-  See sdl_display_init() in android/main.c which is called from vl-android.c
+  See sdl_display_init() in android-qemu1-glue/main.c which is called from vl-android.c
   on startup to initialize the display. This really registers a function,
-  sdl_refresh() (in android/main.c), that will get called every 1/60th of
+  sdl_refresh() (in android-qemu1-glue/main.c), that will get called every 1/60th of
   a second to handle pending inputs.
 
   sdl_refresh() also calls qframebuffer_check_updates(), ensuring that
@@ -84,7 +84,7 @@ Android emulator.
 4 - QEmulator object:
 ---------------------
 
-  Currently defined and implemented in android/main.c (we may want to move
+  Currently defined and implemented in android-qemu1-glue/main.c (we may want to move
   it to a different location). The QEmulator object bridges provides a
   framebuffer client that uses the "generic" skin code under android/skin
   to display the main UI window.
