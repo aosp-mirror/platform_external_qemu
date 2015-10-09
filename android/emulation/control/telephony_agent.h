@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "android/telephony/modem.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
@@ -36,6 +37,7 @@ typedef enum {
 
 typedef struct QAndroidTelephonyAgent {
     TelephonyResponse (*telephonyCmd)(TelephonyOperation op, const char *phoneNumber);
+    AModem (*getModem)(void);
 } QAndroidTelephonyAgent;
 
 ANDROID_END_HEADER
