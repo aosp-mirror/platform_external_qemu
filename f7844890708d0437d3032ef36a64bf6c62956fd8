@@ -22,6 +22,30 @@
       "revId": "f7844890708d0437d3032ef36a64bf6c62956fd8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "451b415b_460bf43b",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-09T00:19:44Z",
+      "side": 1,
+      "message": "Actually LOG(FATAL) will always blow up in production builds. Use LOG(WARNING) for this special case.  Generally speaking, using LOG(XXX) is preferred to fprintf(stderr,...) because it allows one to redirect the output during unit-testing (to check the output), though this will never be the case here.",
+      "parentUuid": "90673931_9e731cdb",
+      "range": {
+        "startLine": 216,
+        "startChar": 12,
+        "endLine": 216,
+        "endChar": 26
+      },
+      "revId": "f7844890708d0437d3032ef36a64bf6c62956fd8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
