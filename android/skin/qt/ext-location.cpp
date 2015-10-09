@@ -16,7 +16,6 @@
 
 #include "extended-window.h"
 #include "android/emulation/control/location_agent.h"
-#include "android/gps.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
 #include "android/skin/qt/emulator-qt-window.h"
