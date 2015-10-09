@@ -134,7 +134,7 @@ To achieve this, a series of programming techniques will be used, for example
       android/base/async/Looper.h
       android/base/async/Looper.cpp
       android/base/async/ThreadLooper.h
-      android/qemu/base/async/Looper.cpp
+      android-qemu1-glue/qemu/base/async/Looper.cpp
 
     Technically, only the last source file is part of the QEMU1-specific glue.
 
@@ -166,7 +166,7 @@ the following groups :
         (e.g. the VNC DisplayChangeListener can be used to send the
         DisplayState to a remote client using the VNC protocol.
 
-  android/display.c:
+  android-qemu1-glue/display.c:
         The DisplayChangeListener implementation used to send
         the DisplayState to the emulator's UI code.
 

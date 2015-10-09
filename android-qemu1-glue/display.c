@@ -14,7 +14,7 @@
  * Read docs/DISPLAY-STATE.TXT to understand what this
  * is supposed to do.
  */
-#include "android/display.h"
+#include "android-qemu1-glue/display.h"
 
 #include "android/emulator-window.h"
 #include "android/utils/system.h"

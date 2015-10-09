@@ -21,7 +21,7 @@
 
 ANDROID_BEGIN_HEADER
 
-/* Common routines used by both android/main.c and android/main-ui.c */
+/* Common routines used by both android-qemu1-glue/main.c and android/main-ui.c */
 
 // Reset the value of |*string| to a copy of |new_value|. This
 // will free() the previous value of |*string| first.

@@ -13,7 +13,7 @@
 #include "android/qemu-control-impl.h"
 
 #include "android/emulation/control/location_agent.h"
-#include "android/gps.h"
+#include "android-qemu1-glue/gps.h"
 
 #include <stdbool.h>
 

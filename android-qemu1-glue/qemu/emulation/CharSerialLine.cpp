@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/qemu/emulation/CharSerialLine.h"
+#include "android-qemu1-glue/qemu/emulation/CharSerialLine.h"
 
 extern "C" {
 #include "sysemu/char.h"
