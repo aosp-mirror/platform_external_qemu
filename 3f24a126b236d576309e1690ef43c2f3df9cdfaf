@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ae8da64_b6e88019",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1011,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-10-10T01:20:42Z",
+      "side": 0,
+      "message": "TBH, I\u0027m not sure why this was added just for the Qt part. But the emulator starts up just fine if I remove this. Is it important for Linux?",
+      "range": {
+        "startLine": 1009,
+        "startChar": 4,
+        "endLine": 1011,
+        "endChar": 45
+      },
+      "revId": "3f24a126b236d576309e1690ef43c2f3df9cdfaf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
