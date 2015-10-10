@@ -1001,16 +1001,10 @@ int main(int argc, char **argv) {
     }
 
     /* Setup SDL UI just before calling the code */
-#if defined(CONFIG_SDL)
     init_sdl_ui(skinConfig, skinPath, opts);
+#if defined(CONFIG_SDL)
     enter_qemu_main_loop(n, args);
 #elif defined(CONFIG_QT)
-#ifndef _WIN32
-    sigset_t set;
-    sigfillset(&set);
-    pthread_sigmask(SIG_SETMASK, &set, NULL);
-#endif
-    init_sdl_ui(skinConfig, skinPath, opts);
     skin_winsys_spawn_thread(enter_qemu_main_loop, n, args);
     skin_winsys_enter_main_loop(argc, argv);
 #endif
