@@ -50,6 +50,7 @@
 #include "android/android.h"
 #include "android/camera/camera-service.h"
 #include "android/curl-support.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
@@ -2212,6 +2213,12 @@ int main(int argc, char **argv, char **envp)
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;
 
+    if (!android_studio_get_optins()) {
+        VERBOSE_PRINT(init, "Skipping crashhandler init: No user opt-in.");
+    } else {
+        crashhandler_init();
+    }
+
     // libcurl initialization is thread-unsafe, so let's call it first
     // to make sure no other thread could be doing the same
     curl_init(qemu_find_file_with_subdir(find_datadir(argv[0]),
@@ -4114,7 +4121,6 @@ int main(int argc, char **argv, char **envp)
      */
     android_init_metrics();
     android_check_for_updates();
-
     main_loop();
     quit_timers();
     net_cleanup();

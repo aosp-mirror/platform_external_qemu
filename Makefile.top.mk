@@ -77,6 +77,7 @@ ifeq ($(HOST_OS),windows)
   MY_CFLAGS += -DWINVER=0x501
   # LARGEADDRESSAWARE gives more address space to 32-bit process
   MY_LDFLAGS32 += -Xlinker --large-address-aware
+  MY_LDFLAGS32 += -Xlinker --build-id
 endif
 
 ifeq ($(HOST_OS),darwin)

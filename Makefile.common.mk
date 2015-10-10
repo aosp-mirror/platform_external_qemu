@@ -61,6 +61,8 @@ ifeq ($(HOST_BITS),$(EMULATOR_PROGRAM_BITNESS))
 $(call start-emulator-program, emulator)
 LOCAL_SRC_FILES := \
     android/main-emulator.c \
+    android/crashreport/BreakpadUtils.cpp \
+    android/crashreport/BreakpadProcessor.cpp
 
 ifdef EMULATOR_USE_QT
     LOCAL_SRC_FILES += \
@@ -72,6 +74,14 @@ ifdef EMULATOR_USE_QT
 endif
 
 LOCAL_STATIC_LIBRARIES := emulator-common
+
+LOCAL_LDLIBS += $(BREAKPAD_LDLIBS) $(LIBCURL_LDLIBS)
+LOCAL_CFLAGS += -I$(BREAKPAD_INCLUDES) -I$(LIBCURL_INCLUDES)
+LOCAL_CFLAGS += -DCURL_STATICLIB
+
+ifdef EMULATOR_CRASHUPLOAD
+	LOCAL_CFLAGS += -DCRASHUPLOAD=$(EMULATOR_CRASHUPLOAD)
+endif
 # Ensure this is always built, even if 32-bit binaries are disabled.
 LOCAL_IGNORE_BITNESS := true
 

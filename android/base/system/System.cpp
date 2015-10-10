@@ -345,6 +345,9 @@ public:
     }
 
     bool runSilentCommand(const StringVector& commandLine) {
+        return runCommand(commandLine, true);
+    }
+    bool runCommand(const StringVector& commandLine, bool silent) {
         // Sanity check.
         if (commandLine.empty()) {
             return false;
@@ -356,7 +359,10 @@ public:
         startup.cb = sizeof(startup);
         startup.dwFlags = STARTF_USESHOWWINDOW;
         startup.wShowWindow = SW_SHOWMINIMIZED;
-
+        int PROCESS_FLAGS = 0;
+        if (silent) {
+            PROCESS_FLAGS |= DETACHED_PROCESS;
+        }
         PROCESS_INFORMATION pinfo;
         ZeroMemory(&pinfo, sizeof(pinfo));
 
@@ -364,6 +370,7 @@ public:
         if (!comspec) {
             comspec = "cmd.exe";
         }
+        fprintf(stderr, "%s\n", comspec);
 
         // Run the command.
         String command = "/C";
@@ -378,7 +385,7 @@ public:
                             NULL,             /* process handle is not inheritable */
                             NULL,             /* thread handle is not inheritable */
                             FALSE,            /* no, don't inherit any handles */
-                            DETACHED_PROCESS, /* the new process doesn't have a console */
+                            PROCESS_FLAGS,    /* the new process doesn't have a console */
                             NULL,             /* use parent's environment block */
                             NULL,             /* use parent's starting directory */
                             &startup,         /* startup info, i.e. std handles */
@@ -407,9 +414,11 @@ public:
         }
 
         // In the child process.
-        int fd = open("/dev/null", O_WRONLY);
-        dup2(fd, 1);
-        dup2(fd, 2);
+        if (silent) {
+            int fd = open("/dev/null", O_WRONLY);
+            dup2(fd, 1);
+            dup2(fd, 2);
+        }
         execvp(commandLine[0].c_str(), params);
         // Should not happen.
         exit(1);

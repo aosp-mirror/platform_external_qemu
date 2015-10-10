@@ -188,6 +188,10 @@ public:
     }
 
     virtual bool runSilentCommand(const StringVector& commandLine) {
+        return runCommand(commandLine, true);
+    }
+
+    virtual bool runCommand(const StringVector& commandLine, bool silent) {
         if (!commandLine.size()) {
             return false;
         }
@@ -199,6 +203,7 @@ public:
             return true;
         }
     }
+
 
     virtual String getTempDir() const { return String("/tmp"); }
 
