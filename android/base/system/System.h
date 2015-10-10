@@ -160,6 +160,8 @@ public:
     // succeeded).
     virtual bool runSilentCommand(const StringVector& commandLine) = 0;
 
+    virtual bool runCommand(const StringVector& commandLine, bool silent) = 0;
+
     // Return the path of a temporary directory appropriate for the system.
     virtual String getTempDir() const = 0;
 

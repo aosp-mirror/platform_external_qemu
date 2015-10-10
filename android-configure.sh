@@ -237,6 +237,8 @@ OPTION_AOSP_PREBUILTS_DIR=
 OPTION_OUT_DIR=
 OPTION_HELP=no
 OPTION_STRIP=yes
+OPTION_CRASHUPLOAD=no
+OPTION_CRASHSERVER=staging
 OPTION_MINGW=no
 OPTION_UI=
 OPTION_GLES=
@@ -293,6 +295,14 @@ for opt do
   ;;
   --no-strip) OPTION_STRIP=no
   ;;
+  --crash-noupload) OPTION_CRASHUPLOAD=no
+  ;;
+  --crash-upload) OPTION_CRASHUPLOAD=yes
+  ;;
+  --crash-staging) OPTION_CRASHSERVER=staging
+  ;;
+  --crash-prod) OPTION_CRASHSERVER=prod
+  ;;
   --out-dir=*) OPTION_OUT_DIR=$optarg
   ;;
   --aosp-prebuilts-dir=*) OPTION_AOSP_PREBUILTS_DIR=$optarg
@@ -344,6 +354,9 @@ EOF
     echo "  --strip                     Strip emulator executables (default)."
     echo "  --symbols                   Generating Breakpad symbol files."
     echo "  --no-symbols                Do not generate Breakpad symbol files (default)."
+    echo "  --crash-upload              Crash upload automatically after dump."
+    echo "  --crash-no-upload           Do not upload crash automatically after dump (default)."
+    echo "  --crash-[staging,prod]      Send crashes to specific server (staging default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --ui=sdl2                   Use SDL2-based UI backend."
     echo "  --ui=qt                     Use Qt-based UI backend (default)."
@@ -741,7 +754,15 @@ fi
 if [ "$OPTION_SYMBOLS" = "yes" ]; then
     echo "EMULATOR_GENERATE_SYMBOLS := true" >> $config_mk
 fi
-
+if [ "$OPTION_CRASHUPLOAD" = "yes" ]; then
+    echo "EMULATOR_CRASHUPLOAD := true" >> $config_mk
+fi
+if [ "$OPTION_CRASHSERVER" = "prod" ]; then
+    echo "EMULATOR_CRASHSERVER := PROD" >> $config_mk
+fi
+if [ "$OPTION_CRASHSERVER" = "staging" ]; then
+    echo "EMULATOR_CRASHSERVER := STAGING" >> $config_mk
+fi
 ANDROID_SDK_TOOLS_REVSION=
 if [ "$ANDROID_SDK_TOOLS_REVISION" ] ; then
   echo "ANDROID_SDK_TOOLS_REVISION := $ANDROID_SDK_TOOLS_REVISION" >> $config_mk
