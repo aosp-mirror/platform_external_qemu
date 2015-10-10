@@ -1005,7 +1005,7 @@ int main(int argc, char **argv) {
     init_sdl_ui(skinConfig, skinPath, opts);
     enter_qemu_main_loop(n, args);
 #elif defined(CONFIG_QT)
-#ifndef _WIN32
+#ifdef __linux__
     sigset_t set;
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
