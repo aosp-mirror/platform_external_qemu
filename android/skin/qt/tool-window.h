@@ -89,6 +89,7 @@ private slots:
     void on_close_button_clicked();
     void on_fullscreen_button_clicked();
     void on_home_button_clicked();
+    void on_minimize_button_clicked();
     void on_more_button_clicked();
     void on_power_button_clicked();
     void on_recents_button_clicked();

@@ -112,7 +112,7 @@ bool EmulatorQtWindow::event(QEvent *e)
 
     // Scan to see if a resize event happened recently
     bool foundResize = false;
-    unsigned i = 0;
+    int i = 0;
     for (; i < mEventBuffer.size(); i++) {
         if (mEventBuffer[i] == QEvent::Resize) {
             foundResize = true;

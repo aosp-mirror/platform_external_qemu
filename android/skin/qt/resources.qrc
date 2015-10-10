@@ -29,13 +29,13 @@
      <file alias="close">images/light/ic_close_678_48px.svg</file>
      <file alias="fullscreen">images/light/ic_fullscreen_678_48px.svg</file>
      <file alias="home">images/light/System_Home_678.svg</file>
+     <file alias="minimize">images/light/ic_remove_678_48dp.svg</file>
      <file alias="more">images/light/ic_more_horiz_678_48dp.svg</file>
      <file alias="power_settings">images/light/ic_power_settings_new_678_48px.svg</file>
      <file alias="recents">images/light/System_Recents_678.svg</file>
      <file alias="screen_rotation_left">images/light/Rotate_Left_678.svg</file>
      <file alias="screen_rotation_right">images/light/Rotate_Right_678.svg</file>
      <file alias="screen_shot">images/light/ic_photo_camera_678_48dp.svg</file>
-     <file alias="unfold">images/light/ic_unfold_more_678_48dp.svg</file>
      <file alias="volume_down">images/light/ic_volume_down_678_48px.svg</file>
      <file alias="volume_up">images/light/ic_volume_up_678_48px.svg</file>
 
@@ -102,13 +102,13 @@
      <file alias="close">images/dark/ic_close_48px.svg</file>
      <file alias="fullscreen">images/dark/ic_fullscreen_48px.svg</file>
      <file alias="home">images/dark/System_Home_white.svg</file>
+     <file alias="minimize">images/dark/ic_remove_white_48dp.svg</file>
      <file alias="more">images/dark/ic_more_horiz_white_48dp.svg</file>
      <file alias="power_settings">images/dark/ic_power_settings_new_48px.svg</file>
      <file alias="recents">images/dark/System_Recents_white.svg</file>
      <file alias="screen_rotation_left">images/dark/Rotate_Left_white.svg</file>
      <file alias="screen_rotation_right">images/dark/Rotate_Right_white.svg</file>
      <file alias="screen_shot">images/dark/ic_photo_camera_white_48dp.svg</file>
-     <file alias="unfold">images/dark/ic_unfold_more_white_48dp.svg</file>
      <file alias="volume_down">images/dark/ic_volume_down_48px.svg</file>
      <file alias="volume_up">images/dark/ic_volume_up_48px.svg</file>
 
